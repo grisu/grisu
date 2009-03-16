@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
+
+	<JobDescription>
+	
+		<JobIdentification>
+
+			<JobName 	template="JobName" 
+						name="Jobname"
+						description="The name of the job." 
+						defaultValue="cat_job" 
+						other="autosuggest,nosuggestbutton" />
+
+		</JobIdentification>
+		
+		<Application>
+
+			<ApplicationName >cat</ApplicationName>
+			<POSIXApplication
+				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
+
+				<Executable>/bin/cat</Executable>
+
+				<Argument substitute="INPUT_FILE1[basename]"></Argument>
+
+				<WorkingDirectory
+					postprocess="FillWithJobDirectoryRelativeToExecutionFileSystem"
+					filesystemName="userExecutionHostFs" />
+
+				<Output>stdout.txt</Output>
+				<Error>stderr.txt</Error>
+				
+				<Email>markus@vpac.org</Email>
+
+			</POSIXApplication>
+
+			<TotalCPUTime>100</TotalCPUTime>
+
+			<TotalCPUCount>1</TotalCPUCount>
+
+		</Application>
+		<Resources>
+			<CandidateHosts>
+				<HostName>sque@edda-m:ng2.vpac.org#Fork</HostName>	
+			</CandidateHosts>
+
+			<FileSystem name="userExecutionHostFs">
+				<MountSource>gsiftp://ngdata.vpac.org/home/markus</MountSource>
+				<FileSystemType>normal</FileSystemType>
+			</FileSystem>
+		</Resources>
+		<DataStaging>
+			<FileName />
+			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<Source>
+				<URI template="InputFile" name="InputFile1"
+					description="Provide at least one input file here."
+					multiplicity="1" postprocess="FillDataStagingFileNameElement,Substitute[name=INPUT_FILE1]"
+					validator="InputFile" />
+			</Source>
+		</DataStaging>
+	</JobDescription>
+</JobDefinition>

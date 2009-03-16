@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
+
+	<JobDescription grisu_modules="CommonMDS">
+
+		<JobIdentification>
+
+			<!-- JobName is part of the "Common" module. Documented here:
+				http://projects.gridaus.org.au/trac/grisu/wiki/InputTags#JobName
+			-->
+			<JobName template="JobName" name="Jobname"
+				description="The name of the job." defaultValue="generic_mds_job"
+				other="autosuggest,nosuggestbutton" />
+
+		</JobIdentification>
+
+		<Application>
+
+			<ApplicationName template="InputString"
+				name="Application"
+				description="Please choose the application you want to use.">
+			</ApplicationName>
+
+			<POSIXApplication
+				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
+
+				<Executable    template="MDSCommandLine"
+                               name="Command"
+                               title="Command to run"
+                               description="Please select/enter the name of the executable in the left combobox and your arguments in the right one."
+                               other="useHistory"
+                />
+				<!-- 	Handled by the "Common" module.   -->
+				<WorkingDirectory
+					postprocess="FillWithJobDirectoryRelativeToExecutionFileSystem"
+					filesystemName="userExecutionHostFs" />
+				<!-- 	The name of the standard output file. -->
+				<Output>stdout.txt</Output>
+				<!--  	The name of the standard error file. -->
+				<Error>stderr.txt</Error>
+				
+				<Module   template="InputString"
+				          name="Module"
+				          multiplicity="?"
+				/>
+				
+				<!-- 	Handled by the "Common" module   -->
+				<Email template="Email" name="EmailAddress"
+					description="The email address to send an email to if the job status changes."
+					multiplicity="?" other="useLastValue" />
+
+			</POSIXApplication>
+
+			<!--   Handled by the "Common" module.    -->
+			<TotalCPUTime template="InputInteger" name="Walltime"
+				description="The total cpu time in seconds." multiplicity="1"
+				defaultValue="600" postprocess="TimesNoCPUs" />
+
+			<!--   Handled by the "Common" module.    -->
+			<TotalCPUCount template="InputInteger" name="CPUs"
+				description="How many CPUs do you want to use to run this job."
+				multiplicity="1" defaultValue="1" prefills="1,2,4,8" />
+
+		</Application>
+		<Resources>
+			<!--   CandidateHosts and FileSystem are handled by the "Common" module   -->
+			<CandidateHosts>
+				<HostName template="InputString" name="HostName"
+					description="Where do you want to submit the job to?"
+					multiplicity="1" other="hideAllQueuesCheckbox,allQueues" />
+
+			</CandidateHosts>
+			<FileSystem name="userExecutionHostFs">
+				<MountSource template="InputString"
+					name="ExecutionFileSystem" multiplicity="1" />
+
+				<FileSystemType>normal</FileSystemType>
+			</FileSystem>
+		</Resources>
+		<DataStaging>
+			<FileName />
+			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<Source>
+				<!--    This one gives the user a file input panel in which he can select
+					files to upload to the server. Documented here:
+					http://projects.gridaus.org.au/trac/grisu/wiki/InputTags#MultipleInputFiles
+				-->
+				<URI template="MultipleInputFiles" name="The files"
+					description="Provide input files here (if needed)."
+					multiplicity="*" postprocess="FillDataStagingFileNameElement"
+					validator="InputFile" />
+
+			</Source>
+		</DataStaging>
+	</JobDescription>
+</JobDefinition>

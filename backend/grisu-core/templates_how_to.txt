@@ -1,0 +1,145 @@
+How to write a template (draft)
+-------------------------------
+
+This part of nw is not finished yet so it is possible that some of the following tags may change. If you have ideas or requirements for new
+or changed tags, now would be a good time to suggest them for inclusion.
+
+A nw web service can deliver prepared jsdl templates to the nw-client. By default it uses all xml files in the directory <home_of_tomcat_user>/.nw/templates_available.
+
+If a user wants to create his/her own template, he just has to put it into $HOME/.nw/templates on the local machine and restart nw-client.
+
+This is the current template for a simple ls job:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
+
+     <JobDescription>
+     	<JobIdentification>
+     		<JobName template="JobName" title="Jobname" description="The name of the job." default="ls_job"></JobName>
+   		</JobIdentification>
+         <Application>
+                <ApplicationName nw_modules="Common">ls</ApplicationName>
+             <POSIXApplication xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
+                 <Executable>/bin/ls</Executable>
+                 <WorkingDirectory filesystemName="executionHostFs">${GRISU_JOB_DIRECTORY}</WorkingDirectory>
+                 <Argument>-lah</Argument>
+				<Argument substituteType="basename">${INPUT_FILE1}</Argument>
+				<Output>stdout.txt</Output>
+				<Error>stderr.txt</Error>
+             </POSIXApplication>
+             <TotalCPUTime template="WallTime"/>
+             <TotalCPUCount template="ProcessorCount"/>
+         </Application>
+		<Resources>
+         	<CandidateHosts>
+         		<HostName template="HostName"></HostName>
+       		</CandidateHosts>
+			<FileSystem name="executionHostFs">
+				<MountSource template="ExecutionFileSystem"></MountSource>
+				<FileSystemType>normal</FileSystemType>
+			</FileSystem>
+		</Resources>
+        <DataStaging>
+			<FileName substituteType="basename">${GRISU_JOB_NAME}/${INPUT_FILE1}</FileName>
+			<FileSystemName>executionHostFs</FileSystemName>
+			<Source>
+				<URI template="InputFile" title="The file/directory to list." substitute="INPUT_FILE1" validator="InputFile"></URI>
+			</Source>
+		</DataStaging>
+     </JobDescription>
+ </JobDefinition>
+ 
+ "template"-tags
+ ---------------
+  
+ The templating systems works in a way that you take a plain jsdl file (http://forge.ogf.org/sf/projects/jsdl-wg/) and insert tags where user input
+ is required.
+ For example, the above template needs to know the these generic parameters (which every jobs needs):
+ 
+ * JobName - the name of the job
+ * WallTime - the walltime in seconds (i think seconds, have to double check, though. Also, I think it is walltime for all cpu's so the walltime 
+ globus gets is this walltime/no. of cpus - but you don't have to worry about that because the nw-client handles that)
+ * ProcessorCount - no. of cpus
+ * HostName - where to submit the job to (in the format: [queue:]submissionHost, e.g. sque@edda:ng2.vpac.org
+ * ExecutionFileSystem - the filesystem that is used when the job is executed by the cluster. You can use a format like 
+ 	gsiftp://ngdata.vpac.org/home/san04/markus or you use the "mounted" url (/home.vpac.no_vo). The latter is recommended since you can be more certain
+ 	that you are allowed to write on that filesystem. This filesystem has to be mounted on the cluster as well and it has to be the home-directory
+ 	of the local user the job gets executed for.
+ 
+ And this is the (only) non-generic user input tag for a "ls" job:
+ 
+ * InputFile - The file to use as argument for the "ls" command. The nw-client renders a File-Chooser input panel which allows the user to browse
+ 	both local and remote (grid-space) filesystems. At the moment it is not possible to upload directories, so you should not choose a folder if you want
+ 	a local input. Remote folders work, though.
+ 	
+ At the moment there are only one other template tag availible for use in jsdl templates:
+
+ * DummyString (I know, stupid name, I'll change it later) - This renders a textfield that lets the user input text. That is used for example
+ 	in the template for the "echo" command.
+ 	
+ Every template tag should have a title attribute as well which gets displayed in the input field that is rendered. A description field is optional
+ but recommended as well, if only to make the template easier to read.
+
+ Input substitution
+ ------------------
+ 
+ Since sometimes you need the user input in other places in the jsdl file as well (and sometimes the user input has to be processed in some way), there
+ is a mechanism for that as well.
+ 
+ Normally, you would stage in a file directly to the directory in which the job is running, which would be something like: 
+ 
+ $VO_HOME/<dn_of_the_user>/<name_of_the_job>/inputfile.extension
+ 
+ The "InputFile" template tag along with the staging mechanism of the nw web service (which parses the finished jsdl file and searches for 
+ DataStaging elements) take care of that. Now you want the relative part of the input file as argument for your command.
+ The WorkingDirectory tag makes sure that the right working directory is used ($VO_HOME/<dn_of_the_user>/<name_of_the_job>). To execute the 
+ command properly you would point the appropriate (in our case, second) Argument tag to the only input file. For that to work, you have to 
+ mark the input file first by adding a "substitute" attribute: substitute="INPUT_FILE1".
+ Because the Argument element has got a "substituteType" Attribute, nw-client searches for the name of the specified replacement (${INPUT_FILE1} without the ${}-part)
+ and uses the value of the substituteType attribute ("basename") as method to process the value.
+ At the moment there are two other possible substituteType values:
+ * default - which does not process the input at all, and
+ * basename_without_extension - which cuts the part, starting from the last "." character, from the basename.
+ 		/home.vpac.no_vo/ls_job_1/inputfile.ext would result in "inputfile"
+ 		
+ Exceptions for the substituion of strings are:
+ ${GRISU_JOB_NAME} and ${GRISU_JOB_DIRECTORY}
+ These two variables don't need substituteType attributes because they are always processed the same way by nw-client.
+ 		
+ I know, this is not really an easy way to create the template but I could not find a better solution...
+ 
+ If you need other methods to process the input, just tell me and I'll implement them.
+ 
+ Input validation
+ ----------------
+ 
+ To validate user input before the job is actually submitted, you can add a "validator" attribute to the element. This makes the nw-client to 
+ execute the specified validator method on the user input.
+ At the moment there are 4 possible validators:
+ 
+ * InputFile - checks whether the file exists (but only if it's local - if it's a remote file the check always passes)
+ * DummyString - checks whether there is user input and fails when there is an empty string
+ * DummyInteger - first checks whether there is user input and then whether the input can be converted to an integer. If one of the conditions
+ 	fails, the check fails
+ * org.vpac.nw.plugins.underworld.input.UnderworldInputFile - proof-of-concept implementation which is based on InputFile. Checks whether a local
+ 	or remote file exists and has got a tag in it which specifies the name of the output directory of the underworld job. That is needed later
+ 	to show underworld output with the special underworld viewer module.
+ 	
+ The "module" tag
+ ----------------
+ 
+ This is used when developers want to have more control over how the input panel for a certain application looks like.
+ You can write a (java) module that takes care of a number of template tags and displays them in a special way. So it's possible to create 
+ config files for jobs/applications within the nw-client on the fly like a web portal would do. Instructions on how to write such a module
+ will be written soon, I hope.
+ 
+ Nw-client first goes through all the specified modules, and takes away all template tags that these modules claim to be responsible for. 
+ Every module gets it's own tab on the "Job submission" page. If there are any template tags left, nw-client displays a tab with the name
+ "Input" and puts them in there.
+ 
+ One module you should always use is: "Common". This is actually a good example for how modules work. The Common module fetches the 
+ JobName, WallTime, ProcessorCount, HostName and ExecutionFileSystem template tags and displays them in an easier to use way than they would
+ be displayed with simple DummyString template tags. Also the input can be checked within the module so you don't need validators.
+ 
+ I'm sure I forgot something, so if you've got questions, just contact markus@vpac.org (or for jabber: markus.binsteiner@jabber.org.au)
+ 

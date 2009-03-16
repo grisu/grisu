@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
+
+
+	<JobDescription grisu_modules="Common">
+
+		<JobIdentification>
+
+			<JobName defaultValue="BEAST" description="The name of the job." name="Jobname" other="autosuggest,nosuggestbutton" template="JobName"/>
+
+		</JobIdentification>
+
+		<Application>
+
+			<ApplicationName>BEAST</ApplicationName>
+			<Description>
+				BEAST is a cross-platform program for Bayesian MCMC analysis of molecular sequences.  Find more about BEAST at http://beast.bio.ed.ac.uk/Main_Page
+			</Description>
+			<POSIXApplication xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
+
+
+				<Executable>beast</Executable>
+
+				<Argument substitute="INPUT_FILE[basename]"/>
+
+				<WorkingDirectory filesystemName="userExecutionHostFs" postprocess="FillWithJobDirectoryRelativeToExecutionFileSystem"/>
+				<!-- 	The name of the standard output file. -->
+				<Output>stdout.txt</Output>
+				<!--  	The name of the standard error file. -->
+				<Error>stderr.txt</Error>
+				<!-- 	loads the module needed for a BEAST job -->
+				<Module defaultValue="beast" description="The module to load" multiplicity="?" name="Module" template="InputString"/>
+
+				<Email description="The email address to send an email to if the job status changes." multiplicity="?" name="EmailAddress" other="useLastValue" template="Email"/>
+
+			</POSIXApplication>
+
+
+			<TotalCPUTime defaultValue="600" description="The total cpu time in seconds." multiplicity="1" name="Walltime" postprocess="TimesNoCPUs" template="InputInteger"/>
+
+			<TotalCPUCount defaultValue="1" description="How many CPUs do you want to use to run this job." multiplicity="1" name="CPUs" prefills="1,2,4,8" template="InputInteger"/>
+
+		</Application>
+		<Resources>
+			<CandidateHosts>
+	
+				<HostName description="Where do you want to submit the job to?" multiplicity="1" name="HostName" template="InputString"/>
+
+			</CandidateHosts>
+
+			<FileSystem name="userExecutionHostFs">
+				<MountSource multiplicity="1" name="ExecutionFileSystem" template="InputString"/>
+
+				<FileSystemType>normal</FileSystemType>
+			</FileSystem>
+		</Resources>
+		<!--  The following DataStaging element -->
+		<DataStaging>
+			<FileName/>
+			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<Source>
+
+				<URI description="Please provide your BEAST XML command file here." multiplicity="1" name="BEASTInputFile" other="render=combobox,useHistory=6,directoryKey=BEAST" postprocess="FillDataStagingFileNameElement,Substitute[name=INPUT_FILE]" template="InputFile" title="BEAST XML command file" validator="InputFile"/>
+
+			</Source>
+		</DataStaging>
+
+	</JobDescription>
+</JobDefinition>

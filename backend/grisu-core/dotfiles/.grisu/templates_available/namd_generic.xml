@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
+
+
+	<!-- 	Only the "Common" module is used here. It is recommended that you always
+		use the "Common" module because it is very unintuitive if the parameters 
+		it encapsulates have to be put in by hand. These parameters are:
+		* Jobname
+		* Walltime
+		* CPUs
+		* HostName
+		* ExecutionFileSystem
+		* EmailAddress 
+		
+		When using a module, you have to use which so called template nodes are used 
+		by it. And you have to know what names the module expects for these nodes.
+		If one or more of these names are not available in the template, the module is 
+		not used at all and all the template nodes that it normally would use are
+		given to the "Rest" module, which is automatically created everytime one or
+		more template nodes of a template are not claimed by a module.
+	-->
+	<JobDescription grisu_modules="Common">
+
+		<JobIdentification>
+
+			<!-- The JobName template type renders a panel that is kind of 
+				smart about which jobnames already exist and can suggest or automatically
+				fill in appropriate jobnames according to the user-input/defaultValue that
+				is set.
+			-->
+			<JobName template="JobName" name="Jobname"
+				description="The name of the job." defaultValue="namd_generic"
+				other="autosuggest,nosuggestbutton" />
+
+		</JobIdentification>
+
+		<Application>
+			<!-- 	The ApplicationName is a generic name for an application. It does not
+				contain the path or anything else. This name could be used by mds to figure
+				out where the application is supported.
+				It is also used by Grisu to determine whether an application-specific viewer 
+				panel for this application exists so if you want to use one of these then you
+				need to know what the name is that Grisu expects.
+			-->
+			<ApplicationName>namd</ApplicationName>
+			<Description>
+				NAMD is a parallel molecular dynamics simulation program
+				used to model large biomolecular systems.
+			</Description>
+			<POSIXApplication
+				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
+
+				<!-- 	The path to the executable. If you load a module you may not need the
+					path and the name of the executable is enough.
+				-->
+				<Executable>namd2</Executable>
+				<!-- 	The substitute attribute tags the enclosing element so that Grisu knows when 
+					it gets a "Substitute" postprocessor instruction to replace the value of this
+					element with the value of the postprocessors parent element. It is possible
+					to further postprocess this value, which can be specified between the [ ] after the
+					substitute variable name. basename, for example, shortens the whole path with
+					the basename. -->
+				<Argument substitute="CONFIG_FILE[basename]"></Argument>
+				<!-- 	This element contains the working directory of the job relative to the
+					mountpoint root folder of the user for this job. The grisu core element
+					converts it to be relative to the cluster home directory later.
+					In most cases you would leave that as it is.
+				-->
+				<WorkingDirectory
+					postprocess="FillWithJobDirectoryRelativeToExecutionFileSystem"
+					filesystemName="userExecutionHostFs" />
+				<!-- 	The name of the standard output file. -->
+				<Output>stdout.txt</Output>
+				<!--  	The name of the standard error file. -->
+				<Error>stderr.txt</Error>
+				<!-- 	loads the module needed for a namd job -->
+				<Module description="The module to load" multiplicity="?" name="Module" template="InputString"/>
+				
+				<!-- 	This element renders a checkbox and a textfield and lets the user 
+					choose whether he wants to get notification when the job is finished 
+					or not. 
+					If no defaultValue is provided and the other attribute contains "useLastValue"
+					then the last state of the checkbox & email address is used.
+				-->
+				<Email template="Email" name="EmailAddress"
+					description="The email address to send an email to if the job status changes."
+					multiplicity="?" other="useLastValue" />
+
+			</POSIXApplication>
+
+			<!-- The total cpu time in seconds. Since the jsdl standard uses this instead
+				of the concept of walltime we know we need to multiply this value with
+				the amount of cpus (which the postprocess instruction does). 
+			-->
+			<TotalCPUTime template="InputInteger" name="Walltime"
+				description="The total cpu time in seconds." multiplicity="1"
+				defaultValue="600" postprocess="TimesNoCPUs" />
+
+			<TotalCPUCount template="InputInteger" name="CPUs"
+				description="How many CPUs do you want to use to run this job."
+				multiplicity="1" defaultValue="1" prefills="1,2,4,8" />
+
+		</Application>
+		<Resources>
+			<CandidateHosts>
+				<!-- The following two nodes depend on each other. You can't submit a job to the host specified
+					by "HostName" and stage the files into a filesystem "userExecutionHostFs" that is at a 
+					different site. The module "Common" should take care of that so just leave the following
+					two nodes as they are. If you are not using the "Common" module, you need to make sure that
+					the input is correct.
+				-->
+				<HostName template="InputString" name="HostName"
+					description="Where do you want to submit the job to?"
+					multiplicity="1" />
+
+			</CandidateHosts>
+			<!--  It is recommended to always use "userExecutionHostFs" as the filesystem alias for the filesystem you
+				are actually using to stage the input files. The value of this node is the root url of a mountpoing, 
+				for example: gsiftp://ngdata.vpac.org/home/grid-admin/<USER_DN>.
+				The grisu backend does all calculating of where that directory actually is relative to the cluster
+				home directory of the user the job gets run as locally. -->
+			<FileSystem name="userExecutionHostFs">
+				<MountSource template="InputString"
+					name="ExecutionFileSystem" multiplicity="1" />
+
+				<FileSystemType>normal</FileSystemType>
+			</FileSystem>
+		</Resources>
+		<!--  The following DataStaging element -->
+		<DataStaging>
+			<FileName />
+			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<Source>
+				<!-- InputFile renders a textfield with a browse button to the left. When the user clicks the 
+					browse button a file chooser dialog with all of the users' mounted filesystems is opened 
+					which enables the user to select an input file.
+					
+					The postprocess instructions tell Grisu to first fill the above "FileName" field with the
+					location/name of the staged file and then fill all elements that have got a 
+					'substitute="INPUT_FILE1"' tag.
+					
+					For a more detailed description or for description on other TemplateNodes that can be used have a look 
+					at "http://www.grid.apac.edu.au/repository/trac/grisu/wiki/GrisuTemplates".
+				-->
+				<URI template="InputFile" name="NamdConfigInputFile"
+					title="Namd config file"
+					description="Please provide the main namd config file here."
+					multiplicity="1"
+					postprocess="FillDataStagingFileNameElement,Substitute[name=CONFIG_FILE]"
+					other="render=combobox,useHistory=6,directoryKey=NAMD" validator="InputFile" />
+
+			</Source>
+		</DataStaging>
+		
+		<DataStaging>
+			<FileName></FileName>
+			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<Source>
+				<URI template="MultipleInputFiles" name="OptionalFiles"
+					 title="Optional files"
+					description="All the other files you want to stage into the job directory." multiplicity="*"
+					postprocess="FillDataStagingFileNameElement"
+					validator="InputFile"
+					other="directoryKey=NAMD">
+				</URI>
+			</Source>
+		</DataStaging>
+
+	</JobDescription>
+</JobDefinition>

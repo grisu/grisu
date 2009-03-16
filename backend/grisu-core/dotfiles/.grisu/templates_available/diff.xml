@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
+	<JobDescription grisu_modules="Common">
+
+		<JobIdentification>
+			<JobName template="JobName" name="Jobname" title="Jobname"
+				description="The name of the job." defaultValue="diff_job"
+				other="autosuggest,nosuggestbutton" />
+		</JobIdentification>
+
+		<Application>
+			<ApplicationName>diff</ApplicationName>
+			<POSIXApplication
+				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
+
+				<Executable>/usr/bin/diff</Executable>
+				<Argument template="MultipleInputString" name="A_Parameters"
+				    title="Commandline parameters"
+					description="Optional commandline parameters for the diff command."
+					multiplicity="?"
+					other="render=combobox,useHistory=8" />
+				<Argument substitute="INPUT_FILE1[basename]"></Argument>
+				<Argument substitute="INPUT_FILE2[basename]"></Argument>
+				<WorkingDirectory
+					postprocess="FillWithJobDirectoryRelativeToExecutionFileSystem"
+					filesystemName="userExecutionHostFs" />
+				<Output>stdout.txt</Output>
+				<Error>stderr.txt</Error>
+				<Module    template="InputString"
+						   name="Module"
+						   description="The module to load"
+						   multiplicity="?"
+				></Module>
+				<Email template="Email" name="EmailAddress"
+					description="The email address to send an email to if the job status changes."
+					multiplicity="?" other="useLastValue" />
+				<!-- this is actually not in the jsdl specification -->
+
+			</POSIXApplication>
+			<TotalCPUTime template="WallTime" name="Walltime"
+				description="The walltime for your job." defaultValue="60"
+				postprocess="TimesNoCPUs" /><!-- 60 seconds on, use this value and devide with no. of cpus to get actual walltime -->
+			<TotalCPUCount template="CPUs" name="CPUs"
+				description="How many CPUs do you want to use to run this job."
+				multiplicity="1" defaultValue="1" />
+		</Application>
+		<Resources>
+			<CandidateHosts>
+				<HostName template="InputString" name="HostName"
+					description="Where do you want to submit the job to?"
+					other="hideAllQueuesCheckbox,allQueues" />
+			</CandidateHosts>
+			<FileSystem name="userExecutionHostFs">
+				<MountSource template="InputString"
+					name="ExecutionFileSystem" />
+				<FileSystemType>normal</FileSystemType>
+			</FileSystem>
+		</Resources>
+
+		<!-- The first file to stage in. It will be staged in from my homedirectory. For that, Grisu uses a different proxy than the one above. -->
+		<DataStaging>
+			<FileName />
+			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<Source>
+				<URI template="InputFile" name="DiffInputFile"
+					title="First input file" description="Provide one input file here."
+					multiplicity="1" other="render=combobox,useHistory,lastDirectory"
+					postprocess="FillDataStagingFileNameElement,Substitute[name=INPUT_FILE1]" />
+			</Source>
+		</DataStaging>
+
+		<!-- The second textfile. It will be staged in form the same directory where the job will be running. -->
+		<DataStaging>
+			<FileName />
+			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<Source>
+				<URI template="InputFile" name="DiffInputFile2"
+					title="Second input file"
+					description="Provide the second input file here." multiplicity="1"
+					other="render=combobox,useHistory,lastDirectory"
+					postprocess="FillDataStagingFileNameElement,Substitute[name=INPUT_FILE2]" />
+			</Source>
+		</DataStaging>
+	</JobDescription>
+</JobDefinition>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
+
+
+	<!-- 	We use the common module here for things like number of cpus, jobname, walltime etc. 
+		To learn more about it, have a look at:
+		http://projects.gridaus.org.au/trac/grisu/wiki/CommonModule
+	-->
+	<JobDescription grisu_modules="Common">
+
+		<JobIdentification>
+
+			<!-- JobName is part of the "Common" module. Documented here:
+				http://projects.gridaus.org.au/trac/grisu/wiki/InputTags#JobName
+			-->
+			<JobName template="JobName" name="Jobname"
+				description="The name of the job." defaultValue="generic_mds_job"
+				other="autosuggest,nosuggestbutton" />
+
+		</JobIdentification>
+
+		<Application>
+			<!--   We don't know the type of application yet. The user has to choose it from the combobox
+				that displays all available applications. So, why not render the combobox here?
+				Ok. Let's do that. But wait. There is no Grisu panel yet that can display all available
+				applications. We'll have to write one. Read part II of this tutorial to find out how:
+				http://projects.gridaus.org.au/trac/grisu/wiki/GenericMdsCombobox
+				To fill in this information here we'll need to insert our newly created InputTag (called MDSApplicationList).
+			-->
+			<ApplicationName template="MDSApplicationList"
+				name="Application"
+				description="Please choose the application you want to use.">
+			</ApplicationName>
+
+			<POSIXApplication
+				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
+
+				<!-- 	The path to the executable. We don't know that yet because we
+					don't know which application the user will choose. We'll have to write
+					a postprocessor which fills in this information before the job is actually
+					submitted. Here's documented how that works:
+					http://projects.gridaus.org.au/trac/grisu/wiki/GenericMdsPostProcessor
+				-->
+				<Executable postprocess="CalculateExecutable" />
+
+				<!--    Of course, we need arguments for the command to run the way we want it to run.
+					The "MultipleInputString" input tag takes a whitespace separated list of strings,
+					splits them up and creates an "Argument" tag for each of them. For more info look here:
+					http://projects.gridaus.org.au/trac/grisu/wiki/InputTags#MultipleInputString
+				-->
+				<Argument template="MultipleInputString"
+					name="Arguments" description="The arguments for your command."
+					other="render=combobox,useHistory=6" />
+
+				<!-- 	Handled by the "Common" module.   -->
+				<WorkingDirectory
+					postprocess="FillWithJobDirectoryRelativeToExecutionFileSystem"
+					filesystemName="userExecutionHostFs" />
+				<!-- 	The name of the standard output file. -->
+				<Output>stdout.txt</Output>
+				<!--  	The name of the standard error file. -->
+				<Error>stderr.txt</Error>
+				
+				<!--    Most likely, we also need to load a module for the application we want
+						to run. We'll do that here. Be aware, the <module> tag isn't in the jsdl
+						specification so it might be that this part will change within grisu later 
+						on.
+				-->
+				<Module postprocess="CalculateModule"/>
+				
+				<!-- 	Handled by the "Common" module   -->
+				<Email template="Email" name="EmailAddress"
+					description="The email address to send an email to if the job status changes."
+					multiplicity="?" other="useLastValue" />
+
+			</POSIXApplication>
+
+			<!--   Handled by the "Common" module.    -->
+			<TotalCPUTime template="InputInteger" name="Walltime"
+				description="The total cpu time in seconds." multiplicity="1"
+				defaultValue="600" postprocess="TimesNoCPUs" />
+
+			<!--   Handled by the "Common" module.    -->
+			<TotalCPUCount template="InputInteger" name="CPUs"
+				description="How many CPUs do you want to use to run this job."
+				multiplicity="1" defaultValue="1" prefills="1,2,4,8" />
+
+		</Application>
+		<Resources>
+			<!--   CandidateHosts and FileSystem are handled by the "Common" module   -->
+			<CandidateHosts>
+				<HostName template="InputString" name="HostName"
+					description="Where do you want to submit the job to?"
+					multiplicity="1" other="hideAllQueuesCheckbox,allQueues" />
+
+			</CandidateHosts>
+			<FileSystem name="userExecutionHostFs">
+				<MountSource template="InputString"
+					name="ExecutionFileSystem" multiplicity="1" />
+
+				<FileSystemType>normal</FileSystemType>
+			</FileSystem>
+		</Resources>
+		<DataStaging>
+			<FileName />
+			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<Source>
+				<!--    This one gives the user a file input panel in which he can select
+					files to upload to the server. Documented here:
+					http://projects.gridaus.org.au/trac/grisu/wiki/InputTags#MultipleInputFiles
+				-->
+				<URI template="MultipleInputFiles" name="The files"
+					description="Provide at least one input file here."
+					multiplicity="*" postprocess="FillDataStagingFileNameElement"
+					validator="InputFile" />
+
+			</Source>
+		</DataStaging>
+	</JobDescription>
+</JobDefinition>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+	<url>http://projects.arcs.org.au/trac/grisu/wiki/GrisuWs</url>
+  <parent>
+    <artifactId>backend</artifactId>
+    <groupId>org.vpac.grisu</groupId>
+    <version>0.2-beta-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.vpac.grisu</groupId>
+  <artifactId>grisu-ws</artifactId>
+  <packaging>war</packaging>
+  <name>grisu webserivce interface</name>
+  <version>0.2-beta-SNAPSHOT</version>
+  <description>grisu-ws publishes the ServiceInterface interface via web services and it 
+		uses the xfire ws libraries for that. The grisu-client library has got builtin
+		support to access this web service.</description>
+  <repositories>
+  	<repository>
+  		<id>vpac</id>
+  		<url>http://hudson.vpac.org/maven_repository</url>
+  	</repository>
+  </repositories>
+  <dependencies>
+		<dependency>
+			<groupId>org.codehaus.xfire</groupId>
+			<artifactId>xfire-spring</artifactId>
+			<version>1.2.6</version>
+                        <exclusions>
+                        <exclusion>
+                                <groupId>xmlbeans</groupId>
+                                <artifactId>xbean</artifactId>
+                        </exclusion>
+                        </exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.codehaus.xfire</groupId>
+			<artifactId>xfire-java5</artifactId>
+			<version>1.2.6</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.codehaus.xfire</groupId>
+			<artifactId>xfire-annotations</artifactId>
+			<version>1.2.6</version>
+		</dependency>
+
+		<!--    <dependency>
+			<groupId>org.codehaus.xfire</groupId>
+			<artifactId>xfire-ws-security</artifactId>
+			<version>1.2.6</version>
+			</dependency>
+		-->
+
+		<dependency>
+			<groupId>org.vpac.grisu</groupId>
+			<artifactId>grisu-core</artifactId>
+			<version>0.2-beta-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>au.org.arcs.auth</groupId>
+			<artifactId>simpleProxyLib</artifactId>
+			<version>0.3-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>external.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15</artifactId>
+			<version>140</version>
+		</dependency>
+		
+<!--		<dependency>-->
+<!--			<groupId>mysql</groupId>-->
+<!--			<artifactId>mysql-connector-java</artifactId>-->
+<!--			<version>5.0.5</version>-->
+<!--		</dependency>-->
+
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.6</version>
+		</dependency>
+
+  </dependencies>
+      	<build>
+            <finalName>grisu-ws</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

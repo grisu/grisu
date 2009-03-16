@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
+
+
+	<JobDescription grisu_modules="Common">
+
+		<JobIdentification>
+
+			<JobName defaultValue="PAUP" description="The name of the job." name="Jobname" other="autosuggest,nosuggestbutton" template="JobName"/>
+
+		</JobIdentification>
+
+		<Application>
+
+			<ApplicationName>PAUP*</ApplicationName>
+			<Description>
+				PAUP* infers phylogenetic trees from sequences.  Find more about PAUP* at http://paup.csit.fsu.edu/
+			</Description>
+			<POSIXApplication xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
+
+
+				<Executable description="Please select/enter the name of the executable in the left combobox and your arguments in the right one." name="Command" other="useHistory" template="MDSCommandLine" title="Command to run"/>
+
+				<!-- <Executable>mb</Executable> -->
+
+                                <Argument>-n</Argument>
+				<Argument substitute="INPUT_FILE[basename]"/>
+
+				<WorkingDirectory filesystemName="userExecutionHostFs" postprocess="FillWithJobDirectoryRelativeToExecutionFileSystem"/>
+				<!-- 	The name of the standard output file. -->
+				<Output>stdout.txt</Output>
+				<!--  	The name of the standard error file. -->
+				<Error>stderr.txt</Error>
+				<!-- 	loads the module needed for a MrBayes job -->
+				<Module description="The module to load" multiplicity="?" name="Module" template="InputString"/>
+
+				<Email description="The email address to send an email to if the job status changes." multiplicity="?" name="EmailAddress" other="useLastValue" template="Email"/>
+
+			</POSIXApplication>
+
+
+			<TotalCPUTime defaultValue="600" description="The total cpu time in seconds." multiplicity="1" name="Walltime" postprocess="TimesNoCPUs" template="InputInteger"/>
+
+			<TotalCPUCount defaultValue="1" description="How many CPUs do you want to use to run this job." multiplicity="1" name="CPUs" prefills="1,2,4,8" template="InputInteger"/>
+
+		</Application>
+		<Resources>
+			<CandidateHosts>
+	
+				<HostName description="Where do you want to submit the job to?" multiplicity="1" name="HostName" template="InputString"/>
+
+			</CandidateHosts>
+
+			<FileSystem name="userExecutionHostFs">
+				<MountSource multiplicity="1" name="ExecutionFileSystem" template="InputString"/>
+
+				<FileSystemType>normal</FileSystemType>
+			</FileSystem>
+		</Resources>
+		<!--  The following DataStaging element -->
+		<DataStaging>
+			<FileName/>
+			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<Source>
+
+				<URI description="Please provide your PAUP* NEXUS file here." multiplicity="1" name="PAUPInputFile" other="render=combobox,useHistory=6,directoryKey=PAUP" postprocess="FillDataStagingFileNameElement,Substitute[name=INPUT_FILE]" template="InputFile" title="PAUP* NEXUS file" validator="InputFile"/>
+
+			</Source>
+		</DataStaging>
+
+	</JobDescription>
+</JobDefinition>

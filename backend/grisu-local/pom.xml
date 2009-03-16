@@ -1,0 +1,56 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <artifactId>backend</artifactId>
+    <groupId>org.vpac.grisu</groupId>
+    <version>0.2-beta-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.vpac.grisu</groupId>
+  <artifactId>grisu-local</artifactId>
+  <version>0.2-beta-SNAPSHOT</version>
+  <dependencies>
+  		<dependency>
+			<groupId>org.vpac.grisu</groupId>
+			<artifactId>grisu-core</artifactId>
+			<version>0.2-beta-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>au.org.arcs.auth</groupId>
+			<artifactId>simpleProxyLib</artifactId>
+			<version>0.3-SNAPSHOT</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.14</version>
+		</dependency>
+		<dependency>
+			<groupId>hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>1.8.0.7</version>
+		</dependency>
+		</dependencies>
+
+        <build>
+                <plugins>
+                        <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>
+                                <artifactId>maven-compiler-plugin</artifactId>
+                                <configuration>
+                                        <source>1.5</source>
+                                        <target>1.5</target>
+                                </configuration>
+                        </plugin>
+                </plugins>
+        </build>
+
+
+</project>
