@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+	<url>http://projects.arcs.org.au/trac/grisu/wiki/GrisuCommons</url>
+  <parent>
+    <artifactId>grisu</artifactId>
+    <groupId>org.vpac.grisu</groupId>
+    <version>0.2-beta-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.vpac.grisu</groupId>
+  <artifactId>grisu-commons</artifactId>
+  <name>grisu-commons</name>
+  <version>0.2-beta-SNAPSHOT</version>
+  <description>The most important thing about the grisu-commons is that it holds the ServiceInterface interface
+	 	which is used by both backend and frontend modules. It also holds a few other globally used
+	 	classes and interfaces.</description>
+  <dependencies>
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+			<version>1.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>1.3.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.collections</groupId>
+			<artifactId>google-collections</artifactId>
+			<version>0.8</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>xfire</groupId>
+			<artifactId>xfire-jsr181-api</artifactId>
+			<version>1.0-M1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-configuration</groupId>
+			<artifactId>commons-configuration</artifactId>
+			<version>1.5</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.maven</groupId>
+					<artifactId>maven-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-jxpath</groupId>
+					<artifactId>commons-jxpath</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xerces</groupId>
+					<artifactId>xerces</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xalan</groupId>
+					<artifactId>xalan</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.3</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+  </dependencies>
+  	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

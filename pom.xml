@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.vpac.grisu</groupId>
+	<artifactId>grisu</artifactId>
+	<packaging>pom</packaging>
+	<version>0.2-beta-SNAPSHOT</version>
+	<name>grisu Maven Multi Project</name>
+	<url>http://maven.apache.org</url>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+
+					<descriptors>
+						<descriptor>grisu-client-swing.assembly.xml</descriptor>
+						<descriptor>grisu-client-commandline.assembly.xml</descriptor>
+					</descriptors>
+
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+	<modules>
+		<module>backend</module>
+		<module>grisu-commons</module>
+		<module>frontend</module>
+	</modules>
+</project>

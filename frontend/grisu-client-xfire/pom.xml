@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <parent>
+    <artifactId>frontend</artifactId>
+    <groupId>org.vpac.grisu</groupId>
+    <version>0.2-beta-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.vpac.grisu</groupId>
+  <artifactId>grisu-client-xfire</artifactId>
+  <name>grisu-client-xfire</name>
+  <version>0.2-beta-SNAPSHOT</version>
+  <url>http://maven.apache.org</url>
+  <repositories>
+  	<repository>
+  		<id>vpac</id>
+  		<url>http://hudson.vpac.org/maven_repository</url>
+  	</repository>
+  </repositories>
+  	<dependencies>
+
+
+		<dependency>
+			<groupId>org.codehaus.xfire</groupId>
+			<artifactId>xfire-spring</artifactId>
+			<version>1.2.6</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.xbean</groupId>
+					<artifactId>xbean-spring</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.codehaus.xfire</groupId>
+					<artifactId>xfire-xmlbeans</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.xfire</groupId>
+			<artifactId>xfire-java5</artifactId>
+			<version>1.2.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.xfire</groupId>
+			<artifactId>xfire-annotations</artifactId>
+			<version>1.2.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>not-yet-commons-ssl</artifactId>
+			<version>0.3.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.vpac.grisu</groupId>
+			<artifactId>grisu-client</artifactId>
+			<version>0.2-beta-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+
+	</dependencies>
+	
+	    	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	
+</project>
