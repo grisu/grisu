@@ -9,7 +9,7 @@ import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 
 public class Rest extends AbstractModule {
 	
-	public static final String NAME = "Other input parameters";
+	public static final String NAME = "Job parameters";
 	
 	public Rest(JsdlTemplate template) {
 		super(template);

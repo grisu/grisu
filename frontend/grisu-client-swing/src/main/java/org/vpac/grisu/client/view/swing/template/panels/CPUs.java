@@ -95,7 +95,7 @@ public class CPUs extends JPanel implements TemplateNodePanel {
 			});
 			checkBox.setHorizontalAlignment(SwingConstants.RIGHT);
 			checkBox.setHorizontalTextPosition(SwingConstants.LEADING);
-			checkBox.setText("MPI job");
+			checkBox.setText("Parallel");
 		}
 		return checkBox;
 	}

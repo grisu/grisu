@@ -43,6 +43,8 @@ public class MDSCommandLine extends JPanel implements TemplateNodePanel, Submiss
 	
 	public static final String DEFAULT_HELP_ATTRIBUTE_NAME = "help";
 	
+	public static final String EXECUTABLE_HISTORY_PREFIX = "exe_";
+	
 	private JLabel argumentsLabel;
 	private JLabel executableLabel;
 	private JLabel errorLabel;
@@ -79,7 +81,7 @@ public class MDSCommandLine extends JPanel implements TemplateNodePanel, Submiss
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("42dlu"),
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("default:grow(1.0)"),
+				ColumnSpec.decode("38dlu:grow(1.0)"),
 				FormFactory.RELATED_GAP_COLSPEC,
 				FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC},
@@ -122,6 +124,18 @@ public class MDSCommandLine extends JPanel implements TemplateNodePanel, Submiss
 				prefillStrings.addFirst(entry);
 			}
 		}
+		
+		if (useHistory
+				&& historyManager != null
+				&& historyManager.getEntries(EXECUTABLE_HISTORY_PREFIX+historyManagerKeyForThisNode).size() > 0 ) {
+					String exeValue = historyManager.getEntries(EXECUTABLE_HISTORY_PREFIX+historyManagerKeyForThisNode).get(0);
+					for ( int i=0; i<executableModel.getSize(); i++ ) {
+						if ( ((String)executableModel.getElementAt(i)).equals(exeValue) ) {
+							executableModel.setSelectedItem(exeValue);
+							break;
+						}
+					}
+				}
 
 		if (templateNode.getPrefills() != null) {
 			for (String prefill : templateNode.getPrefills()) {
@@ -139,10 +153,13 @@ public class MDSCommandLine extends JPanel implements TemplateNodePanel, Submiss
 	public void reset() {
 		
 		String value = (String)getArgumentsCombobox().getSelectedItem();
+		String exeValue = (String)getExecutableCombobox().getSelectedItem();
 		
-		if (useHistory && value != null && !"".equals(value))
-			historyManager.addHistoryEntry(this.templateNode.getName(), value,
+		if (useHistory && value != null && !"".equals(value)) {
+			historyManager.addHistoryEntry(historyManagerKeyForThisNode, value,
 					new Date());
+			historyManager.addHistoryEntry(EXECUTABLE_HISTORY_PREFIX+historyManagerKeyForThisNode, exeValue);
+		}
 
 
 		fillArgumentsCombobox();
@@ -255,6 +272,8 @@ public class MDSCommandLine extends JPanel implements TemplateNodePanel, Submiss
 			errorLabel.setVisible(false);
 			layout.setRowSpec(4, new RowSpec("4dlu"));
 			getRequiredLabel().setForeground(Color.BLACK);
+		} else if ( event.getEventType() == TemplateNodeEvent.RESET ) {
+			reset();
 		}
 	}
 	
