@@ -2,23 +2,35 @@
 
 cd target
 
-mv grisu-0.2-beta-SNAPSHOT-grisu-local-backend.jar grisu-local-backend.jar
+# fix local backend
+mkdir local
+cd local
+unzip -o ../grisu-0.2-beta-SNAPSHOT-grisu-local-backend.jar
+rm ../grisu-0.2-beta-SNAPSHOT-grisu-local-backend.jar
+rm -f META-INF/INDEX.LIST
+jar cmf ../../backend/grisu-local/MANIFEST.MF ../grisu-local-backend.jar
+cd ..
+
+# copy web service backend into this folder for convenience
 cp ../backend/grisu-ws/target/grisu-ws.war .
 
+# fix swing frontend
 mkdir swing
 cd swing
 unzip -o ../grisu-0.2-beta-SNAPSHOT-grisu-client-swing.jar
 rm ../grisu-0.2-beta-SNAPSHOT-grisu-client-swing.jar
-rm META-INF/INDEX.LIST
+rm -f META-INF/INDEX.LIST
 jar cmf ../../frontend/grisu-client-swing/MANIFEST.MF ../grisu.jar .
-
 cd ..
+
+# fix commandline frontend
 mkdir cmdline
 cd cmdline
 unzip -o ../grisu-0.2-beta-SNAPSHOT-grisu-client-commandline.jar
 rm ../grisu-0.2-beta-SNAPSHOT-grisu-client-commandline.jar
-rm META-INF/INDEX.LIST
+rm -f META-INF/INDEX.LIST
 jar cmf ../../frontend/grisu-client-commandline/MANIFEST.MF ../grisu-client.jar .
+cd ../..
 
 
 
