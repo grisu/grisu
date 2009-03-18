@@ -11,9 +11,12 @@ import org.ietf.jgss.GSSException;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.ServiceTemplateManagement;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
+import org.vpac.grisu.control.utils.LocalTemplatesHelper;
 import org.vpac.grisu.control.utils.ServerPropertiesManager;
 import org.vpac.grisu.credential.model.ProxyCredential;
 import org.w3c.dom.Document;
+import org.vpac.security.light.control.CertificateFiles;
+import org.vpac.security.light.control.VomsesFiles;
 
 /**
  * This class implements a {@link ServiceInterface} to use for a web service. 
@@ -28,6 +31,8 @@ public class WsServiceInterface extends AbstractServiceInterface implements
 		ServiceInterface {
 	
 	private ProxyCredential credential = null;
+	
+	private static boolean triedToCopySetupFiles = false;
 	
 	/**
 	 * Gets the credential from memory or the session context if the one from memory is already expired or about to expire.
@@ -75,6 +80,20 @@ public class WsServiceInterface extends AbstractServiceInterface implements
 	// not needed here because username and password is already in the http header
 	public void login(String username, char[] password)
 			throws NoValidCredentialException {
+		
+		// try to copy setupfiles
+		if ( ! triedToCopySetupFiles ) {
+			triedToCopySetupFiles = true;
+			
+			try {
+				LocalTemplatesHelper.copyTemplatesAndMaybeGlobusFolder();
+				VomsesFiles.copyVomses();
+				CertificateFiles.copyCACerts();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		
 		// nothing to do here anymore because all the myproxy stuff is now
 		// in the inhandler of the web service

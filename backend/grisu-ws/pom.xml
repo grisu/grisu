@@ -59,21 +59,24 @@
 		</dependency>
 
 		<dependency>
-			<groupId>au.org.arcs.auth</groupId>
-			<artifactId>simpleProxyLib</artifactId>
-			<version>0.3-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
 			<version>2.3</version>
 		</dependency>
-
 		<dependency>
 			<groupId>external.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15</artifactId>
 			<version>140</version>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.6</version>
+		</dependency>
+		<dependency>
+			<groupId>au.org.arcs.auth</groupId>
+			<artifactId>simpleProxyLib</artifactId>
+			<version>0.3-SNAPSHOT</version>
 		</dependency>
 		
 <!--		<dependency>-->
@@ -81,12 +84,6 @@
 <!--			<artifactId>mysql-connector-java</artifactId>-->
 <!--			<version>5.0.5</version>-->
 <!--		</dependency>-->
-
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.6</version>
-		</dependency>
 
   </dependencies>
       	<build>
