@@ -45,6 +45,7 @@ import org.vpac.helpDesk.control.HelpDeskManager;
 import org.vpac.helpDesk.model.HelpDesk;
 import org.vpac.helpDesk.model.HelpDeskNotAvailableException;
 import org.vpac.helpDesk.view.TicketSubmissionDialogMultipleHelpdesks;
+import org.vpac.security.light.control.CertificateFiles;
 
 
 public class Grisu {
@@ -492,6 +493,12 @@ public class Grisu {
 					myLogger.debug("Could not set OS look & feel.");
 				}
 
+				try {
+					CertificateFiles.copyCACerts();
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				myLogger.debug("Starting login dialog.");
 				LoginDialog ld = new LoginDialog();
 				ld.addWindowListener(new WindowAdapter() {

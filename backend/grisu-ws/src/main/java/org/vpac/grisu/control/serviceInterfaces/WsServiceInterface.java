@@ -15,6 +15,8 @@ import org.vpac.grisu.control.utils.LocalTemplatesHelper;
 import org.vpac.grisu.control.utils.ServerPropertiesManager;
 import org.vpac.grisu.credential.model.ProxyCredential;
 import org.w3c.dom.Document;
+import org.vpac.security.light.control.CertificateFiles;
+import org.vpac.security.light.control.VomsesFiles;
 
 
 /**
