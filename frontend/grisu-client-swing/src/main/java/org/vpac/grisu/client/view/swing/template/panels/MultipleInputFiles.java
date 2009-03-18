@@ -137,6 +137,8 @@ public class MultipleInputFiles extends JPanel implements TemplateNodePanel,
 			lastDirectoryKey = this.templateNode
 					.getOtherProperty(InputFile.LAST_DIRECTORY_KEY)
 					+ "_dirKey";
+		} else {
+			lastDirectoryKey = System.getProperty("user.home");
 		}
 
 		// try to change to the last used directory
