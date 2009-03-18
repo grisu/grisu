@@ -138,7 +138,7 @@ public class MultipleInputFiles extends JPanel implements TemplateNodePanel,
 					.getOtherProperty(InputFile.LAST_DIRECTORY_KEY)
 					+ "_dirKey";
 		} else {
-			lastDirectoryKey = System.getProperty("user.home");
+			lastDirectoryKey = null;
 		}
 
 		// try to change to the last used directory
@@ -146,8 +146,12 @@ public class MultipleInputFiles extends JPanel implements TemplateNodePanel,
 
 		// change to appropriate directory
 		try {
+			if ( lastDirectoryKey == null ) {
+				changeToDirectory = System.getProperty("user.home");
+			} else {
 			changeToDirectory = historyManager.getEntries(lastDirectoryKey)
 					.get(0);
+			}
 			URI uri = null;
 			try {
 				uri = new URI(changeToDirectory);
@@ -164,6 +168,7 @@ public class MultipleInputFiles extends JPanel implements TemplateNodePanel,
 					.getEnvironmentManager().getFileManager()
 					.getFileObject(uri);
 			getSiteFileChooserPanel().changeCurrentDirectory(dir);
+			
 		} catch (Exception e) {
 			// try to change to users home dir again...
 			try {
