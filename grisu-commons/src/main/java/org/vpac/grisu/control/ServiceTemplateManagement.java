@@ -93,6 +93,7 @@ public class ServiceTemplateManagement {
 			jsdl_template = SeveralXMLHelpers.fromString(FileHelpers.readFromFile(new File(Environment.AVAILABLE_TEMPLATES_DIRECTORY+File.separator+name+".xml")));
 		} catch (Exception e) {
 			myLogger.error("Could not find/load jsdl template for application: "+name+": "+e.getMessage());
+			return null;
 		}
 		return jsdl_template;
 	}

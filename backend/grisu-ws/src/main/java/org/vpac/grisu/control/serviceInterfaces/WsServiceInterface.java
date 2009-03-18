@@ -10,6 +10,7 @@ import org.codehaus.xfire.service.invoker.AbstractInvoker;
 import org.ietf.jgss.GSSException;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.ServiceTemplateManagement;
+import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.utils.LocalTemplatesHelper;
 import org.vpac.grisu.control.utils.ServerPropertiesManager;
@@ -17,7 +18,6 @@ import org.vpac.grisu.credential.model.ProxyCredential;
 import org.w3c.dom.Document;
 import org.vpac.security.light.control.CertificateFiles;
 import org.vpac.security.light.control.VomsesFiles;
-
 
 /**
  * This class implements a {@link ServiceInterface} to use for a web service. 
@@ -116,8 +116,15 @@ public class WsServiceInterface extends AbstractServiceInterface implements
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#getTemplate(java.lang.String)
 	 */
-	public Document getTemplate(String application) {
-		return ServiceTemplateManagement.getAvailableTemplate(application);
+	public Document getTemplate(String application) throws NoSuchTemplateException {
+		Document doc = ServiceTemplateManagement.getAvailableTemplate(application);
+		
+		if ( doc == null ) {
+			throw new NoSuchTemplateException("Could not find template for application: "+application+".");
+		}
+		
+		return doc;
+		
 	}
 
 	/*
@@ -126,9 +133,16 @@ public class WsServiceInterface extends AbstractServiceInterface implements
 	 * @see org.vpac.grisu.control.ServiceInterface#getTemplate(java.lang.String,
 	 *      java.lang.String)
 	 */
-	public Document getTemplate(String application, String version) {
-		// not properly implemented yet
-		return ServiceTemplateManagement.getAvailableTemplate(application);
+	public Document getTemplate(String application, String version) throws NoSuchTemplateException {
+
+		Document doc = ServiceTemplateManagement.getAvailableTemplate(application);
+		
+		if ( doc == null ) {
+			throw new NoSuchTemplateException("Could not find template for application: "+application+", version "+version);
+		}
+		
+		return doc;
+		
 	}
 
 	/*

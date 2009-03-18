@@ -71,7 +71,9 @@ public class FileHelpers {
 			reader = new BufferedReader(new FileReader(file));
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+//			e1.printStackTrace();
+			myLogger.error("Could not read from file: "+file.toString()+". "+e1.getLocalizedMessage());
+			return null;
 		}
 
 		try {
@@ -85,7 +87,9 @@ public class FileHelpers {
 			reader.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			myLogger.error("Could not read lines from file: "+file.toString()+". "+e.getLocalizedMessage());
+			return null;
 		}
 
 		return sb.toString();

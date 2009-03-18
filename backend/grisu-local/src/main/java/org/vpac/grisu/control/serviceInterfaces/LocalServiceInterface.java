@@ -99,12 +99,25 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 
 	public Document getTemplate(String application)
 			throws NoSuchTemplateException {
-		return ServiceTemplateManagement.getAvailableTemplate(application);
+		Document doc = ServiceTemplateManagement.getAvailableTemplate(application);
+		
+		if ( doc == null ) {
+			throw new NoSuchTemplateException("Could not find template for application: "+application+".");
+		}
+		
+		return doc;
 	}
 
 	public Document getTemplate(String application, String version)
 			throws NoSuchTemplateException {
-		return ServiceTemplateManagement.getAvailableTemplate(application);
+		Document doc = ServiceTemplateManagement.getAvailableTemplate(application);
+		
+		if ( doc == null ) {
+			throw new NoSuchTemplateException("Could not find template for application: "+application+", version "+version);
+		}
+		
+		return doc;
+		
 	}
 
 	public String[] listHostedApplicationTemplates() {
