@@ -82,6 +82,7 @@ public class HelpDialog extends JDialog {
 	protected JTextArea getTextArea() {
 		if (textArea == null) {
 			textArea = new JTextArea();
+			textArea.setEditable(false);
 			textArea.setLineWrap(true);
 		}
 		return textArea;

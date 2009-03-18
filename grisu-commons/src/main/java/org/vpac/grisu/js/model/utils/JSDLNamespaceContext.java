@@ -28,6 +28,9 @@ public class JSDLNamespaceContext implements NamespaceContext {
 	    else if ( prefix.equals("jsdl-posix")) {
 	    	return "http://schemas.ggf.org/jsdl/2005/11/jsdl-posix";
 	    }
+	    else if ( prefix.equals("jsdl-arcs") ) {
+	    	return "http://arcs.org.au/jsdl/jsdl-grisu";
+	    }
 	    else if (prefix.equals(XMLConstants.XML_NS_PREFIX)) {
 	      return XMLConstants.XML_NS_URI;
 	    }
@@ -45,6 +48,8 @@ public class JSDLNamespaceContext implements NamespaceContext {
 	    }
 	    else if (namespaceURI.equals("http://schemas.ggf.org/jsdl/2005/11/jsdl-posix")) {
 	    	return "jsdl-posix";
+	    } else if (namespaceURI.equals("http://arcs.org.au/jsdl/jsdl-grisu")) {
+	    	return "jsdl-arcs";
 	    }
 	    else if (namespaceURI.equals(XMLConstants.XML_NS_URI)) {
 	      return XMLConstants.XML_NS_PREFIX;

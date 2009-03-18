@@ -3,6 +3,7 @@
 package org.vpac.grisu.client.model.template.nodes;
 
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -17,6 +18,7 @@ import org.vpac.grisu.client.model.template.validators.TemplateValidateException
 import org.vpac.grisu.client.model.template.validators.ValidatorFactory;
 import org.vpac.grisu.client.model.template.validators.ValidatorNotCreatedException;
 import org.vpac.grisu.control.JobConstants;
+import org.vpac.grisu.js.model.utils.JsdlHelpers;
 import org.w3c.dom.Element;
 
 public class TemplateNode {
@@ -31,6 +33,8 @@ public class TemplateNode {
 	public static final String HISTORY_KEY = "historyKey";
 	public static final String LOCKED_KEY = "locked";
 	
+	public static final String DEFAULT_HELP_ATTRIBUTE_NAME = "default";
+	
 	private JsdlTemplate template = null;
 
 	private String name = null;
@@ -44,6 +48,9 @@ public class TemplateNode {
 	private String multiplicity = null;
 	// these are mostly to tell renderers how to render stuff. They shouldn't contain important information.
 	private Map<String, String> otherProperties = new LinkedHashMap<String, String>();
+	
+	private Map<String, String> infoMap = null;
+
 
 	private String value = null;
 
@@ -251,6 +258,21 @@ public class TemplateNode {
 
 	public String getName() {
 		return name;
+	}
+	
+	public Map<String, String> getInfoMap() {
+
+		if ( infoMap == null ) {
+			infoMap = JsdlHelpers.getTemplateTagInfoItems(getTemplate().getTemplateDocument(), getName());
+			
+				if ( infoMap == null ) {
+					// so we don't do that everytime
+					infoMap = new HashMap<String, String>();
+				}
+				
+			}
+		return infoMap;
+
 	}
 
 	public void setName(String name) {

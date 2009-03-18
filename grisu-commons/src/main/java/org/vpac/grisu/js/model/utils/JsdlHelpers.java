@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.OutputKeys;
@@ -28,10 +30,8 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.JobConstants;
-import org.vpac.grisu.control.SeveralXMLHelpers;
 import org.vpac.grisu.control.exceptions.JsdlException;
 import org.w3c.dom.Attr;
-import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -44,6 +44,14 @@ import org.xml.sax.SAXException;
  * 
  * @author Markus Binsteiner
  * 
+ */
+/**
+ * @author markus
+ *
+ */
+/**
+ * @author markus
+ *
  */
 public class JsdlHelpers {
 
@@ -209,7 +217,38 @@ public class JsdlHelpers {
 	 * @return the number of cpus used in this job
 	 */
 	public static int getProcessorCount(Document jsdl) {
+		
+		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl:TotalCPUCount/jsdl:exact";
+		NodeList resultNodes = null;
+		try {
+			resultNodes = (NodeList) xpath.evaluate(expression, jsdl,
+					XPathConstants.NODESET);
+		} catch (XPathExpressionException e) {
+			myLogger.warn("No jobname in jsdl file.");
+			return -1;
+		}
 
+		if (resultNodes.getLength() != 1) {
+			myLogger.warn("This template doesn't specify a (correct) TotalCPUCount element. Please have a look at your template and replace a possible <TotalCPUCount>2</TotalCPUCount> elemnt with something like: <TotalCPUCount><exact>2</exact></TotalCPUCount> Trying old, incorrect implementation...");
+			// this is just for backwards compatibility because I got the TotalCPUCount element wrong before...
+			return -1;
+		}
+
+		int processorCount;
+		try {
+			processorCount = new Integer(resultNodes.item(0).getTextContent());
+		} catch (NumberFormatException e) {
+			myLogger.error("No valid number entry in the walltime element.");
+			return -1;
+		}
+
+		
+		return processorCount;
+
+	}
+	
+	// don't use that anymore -- this will be deleted soon.
+	private static int getProcessorCount_OLD(Document jsdl) {
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl:TotalCPUCount";
 		NodeList resultNodes = null;
 		try {
@@ -222,6 +261,8 @@ public class JsdlHelpers {
 
 		if (resultNodes.getLength() != 1) {
 			return -1;
+		} else {
+			myLogger.error("Template uses incorrect specification of TotalCPUCount element. Please replace <TotalCPUCount>2</TotalCPUCount> elemnt with something like: <TotalCPUCount><exact>2</exact></TotalCPUCount>.");
 		}
 
 		int processorCount;
@@ -953,6 +994,29 @@ public class JsdlHelpers {
 	}
 	
 	private static Element getEmailElement(Document jsdl) {
+		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl-arcs:GrisuTemplate/jsdl-arcs:Email";
+		NodeList resultNodes = null;
+		try {
+			resultNodes = (NodeList) xpath.evaluate(expression, jsdl,
+					XPathConstants.NODESET);
+		} catch (XPathExpressionException e) {
+			myLogger.warn("No application in jsdl file.");
+			return null;
+		}
+
+		if (resultNodes.getLength() == 0 ) {
+			// try old version
+			myLogger.debug("Couldn't find email element. Trying old email element...");
+			return getEmailElement_OLD(jsdl);
+		}
+		if (resultNodes.getLength() != 1) {
+			return null;
+		}
+		return (Element)resultNodes.item(0);
+	}
+	
+	// don't use that anymore, this is wrong!
+	private static Element getEmailElement_OLD(Document jsdl) {
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl-posix:POSIXApplication/jsdl-posix:Email";
 		NodeList resultNodes = null;
 		try {
@@ -965,6 +1029,8 @@ public class JsdlHelpers {
 
 		if (resultNodes.getLength() != 1) {
 			return null;
+		} else {
+			myLogger.error("Found email, but it is in the wrong spot. Please change your template so the \"Email\" element is now under: \"/JobDescription/jsdl-arcs:GrisuTemplate/\"");
 		}
 		return (Element)resultNodes.item(0);
 	}
@@ -1248,6 +1314,65 @@ public class JsdlHelpers {
 
 		Element resources = (Element) resultNodes.item(0);
 		return resources;
+	}
+	
+	public static Element getTemplateTagInfoElement(Document jsdl, String templateTagName) {
+		
+		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl-arcs:GrisuTemplate/jsdl-arcs:Info/jsdl-arcs:TemplateTag[@name='"
+				+ templateTagName + "']";
+		NodeList resultNodes = null;
+		try {
+			resultNodes = (NodeList) xpath.evaluate(expression, jsdl,
+					XPathConstants.NODESET);
+		} catch (XPathExpressionException e) {
+			myLogger.warn("No application in jsdl file. Good.");
+		}
+
+		if (resultNodes == null || resultNodes.getLength() == 0
+				|| resultNodes.getLength() > 1) {
+			myLogger
+					.info("No or more than one Resource elements found. That's not possible");
+			return null;
+		}
+
+		Element resources = (Element) resultNodes.item(0);
+		return resources;
+		
+	}
+	
+	/**
+	 * Returns a map of all infoitems for this template or null, if no infoItem exists
+	 * @param jsdl the jsdl
+	 * @return the map or null
+	 */
+	public static Map<String, String> getTemplateTagInfoItems(Document jsdl, String templateTagName) {
+		
+		Element info = getTemplateTagInfoElement(jsdl, templateTagName);
+		if ( info == null ) {
+			return null;
+		}
+		
+		NodeList infoItems = info.getElementsByTagName("InfoItem");
+		
+		int l = infoItems.getLength();
+		if ( infoItems == null || infoItems.getLength() == 0 ) {
+			return null;
+		}
+		
+		Map<String, String> result = new TreeMap<String, String>();
+		for ( int i=0; i<infoItems.getLength(); i++ ) {
+			String key = ((Element)(infoItems.item(i))).getAttribute("id");
+			if ( key != null && !"".equals(key) ) {
+				String value = ((Element)(infoItems.item(i))).getTextContent();
+				result.put(key, value);
+			}
+		}
+		if ( result.size() == 0 ) {
+			return null;
+		}
+		
+		return result;
+		
 	}
 
 }

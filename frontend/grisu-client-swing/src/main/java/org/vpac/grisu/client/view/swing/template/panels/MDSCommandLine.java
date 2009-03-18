@@ -6,6 +6,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Vector;
@@ -27,6 +28,7 @@ import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.TemplateNodeEvent;
 import org.vpac.grisu.client.view.swing.utils.HelpDialog;
 import org.vpac.grisu.control.JobCreationException;
+import org.vpac.grisu.js.model.utils.JsdlHelpers;
 import org.vpac.historyRepeater.HistoryManager;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -41,7 +43,7 @@ public class MDSCommandLine extends JPanel implements TemplateNodePanel, Submiss
 	static final Logger myLogger = Logger.getLogger(MDSCommandLine.class
 			.getName());
 	
-	public static final String DEFAULT_HELP_ATTRIBUTE_NAME = "help";
+	
 	
 	public static final String EXECUTABLE_HISTORY_PREFIX = "exe_";
 	
@@ -249,8 +251,8 @@ public class MDSCommandLine extends JPanel implements TemplateNodePanel, Submiss
 		add(getArgumentsLabel(), new CellConstraints(6, 8, 3, 1, CellConstraints.RIGHT, CellConstraints.DEFAULT));
 		
 		fillArgumentsCombobox();
-		if ( this.templateNode.getElement().getAttribute(DEFAULT_HELP_ATTRIBUTE_NAME) != null 
-			&& ! "".equals(this.templateNode.getElement().getAttribute(DEFAULT_HELP_ATTRIBUTE_NAME)) ) {
+		
+		if ( this.templateNode.getInfoMap().size() > 0 ) {
 			add(getLabel(), new CellConstraints(4, 8, CellConstraints.RIGHT, CellConstraints.DEFAULT));
 		}
 	}
@@ -477,23 +479,15 @@ public class MDSCommandLine extends JPanel implements TemplateNodePanel, Submiss
 
 	private String getHelpText(String key) {
 		
-		String helpText = null;
+		String help = this.templateNode.getInfoMap().get(key);
 		
-		try {
-		if (key == null|| DEFAULT_HELP_ATTRIBUTE_NAME.equals(key) ) {
-			helpText = this.templateNode.getElement().getAttribute(DEFAULT_HELP_ATTRIBUTE_NAME);
-		} else {
-			helpText = this.templateNode.getElement().getAttribute(DEFAULT_HELP_ATTRIBUTE_NAME+"_"+key);
-			if ( helpText == null || "".equals(helpText) ) {
-				helpText = this.templateNode.getElement().getAttribute(DEFAULT_HELP_ATTRIBUTE_NAME);
+		if (help == null || "".equals(help)) {
+			help = this.templateNode.getInfoMap().get(TemplateNode.DEFAULT_HELP_ATTRIBUTE_NAME);
+			if (help == null || "".equals(help)) {
+				help = "No help available for this command.";
 			}
-		}
-		helpText = helpText.replaceAll("\\\\n", "\n");
-		helpText = helpText.replaceAll("\\\\t", "\t");
-		return helpText;
-		} catch (Exception e) {
-			return "No help available for this command.";
-		}
+		} 
+		return help;
 	}
 
 
