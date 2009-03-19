@@ -57,7 +57,7 @@ public class UnderworldHelpers
             return null;
         }
         String output_path = resultNodes.item(0).getTextContent();
-        
+        output_path = output_path.trim();
         if ( output_path.endsWith("/") ) {
         	return output_path.substring(0, output_path.length()-1);
         } else {
