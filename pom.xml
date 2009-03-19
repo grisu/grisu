@@ -25,6 +25,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <aggregate>true</aggregate>
+                    <linksource>true</linksource>
+                </configuration>
 			</plugin>
 		</plugins>
 	</build>
@@ -33,4 +37,6 @@
 		<module>grisu-commons</module>
 		<module>frontend</module>
 	</modules>
+
+
 </project>
