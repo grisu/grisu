@@ -36,21 +36,21 @@ public class CommonMDS extends AbstractModulePanel {
 		setLayout(new FormLayout(
 			new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
-				new ColumnSpec("149dlu:grow(1.0)"),
+				ColumnSpec.decode("149dlu:grow(1.0)"),
 				FormFactory.RELATED_GAP_COLSPEC,
-				new ColumnSpec("67dlu"),
+				ColumnSpec.decode("67dlu"),
 				FormFactory.RELATED_GAP_COLSPEC,
-				new ColumnSpec("54dlu"),
+				ColumnSpec.decode("54dlu"),
 				FormFactory.RELATED_GAP_COLSPEC},
 			new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
-				new RowSpec("60dlu"),
+				RowSpec.decode("60dlu"),
 				FormFactory.RELATED_GAP_ROWSPEC,
-				new RowSpec("60dlu"),
+				RowSpec.decode("60dlu"),
 				FormFactory.RELATED_GAP_ROWSPEC,
-				new RowSpec("106dlu:grow(1.0)"),
+				RowSpec.decode("106dlu:grow(1.0)"),
 				FormFactory.RELATED_GAP_ROWSPEC,
-				new RowSpec("57dlu"),
+				RowSpec.decode("57dlu"),
 				FormFactory.RELATED_GAP_ROWSPEC}));
 		add(getApplicationChooserPanel(), new CellConstraints(2, 6, 5, 1, CellConstraints.FILL, CellConstraints.FILL));
 		add(getJobName(), new CellConstraints(2, 2, 3, 1, CellConstraints.DEFAULT, CellConstraints.FILL));

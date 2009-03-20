@@ -75,7 +75,8 @@ public class EnvironmentManager implements MountPointsListener {
 	private Map<String, SubmissionLocation> allSubmissionLocations = null;
 	private Map<String, Set<SubmissionLocation>> allAvailableSubmissionLocationsPerFqan = new HashMap<String, Set<SubmissionLocation>>();
 	private Map<String, Set<SubmissionLocation>> allAvailableSubmissionLocationsForApplication = new TreeMap<String, Set<SubmissionLocation>>();
-
+	private Map<String, Set<SubmissionLocation>> allAvailableSubmissionLocationsForApplicationAndVersion = new TreeMap<String, Set<SubmissionLocation>>();
+	
 	// if this is not initialized nothing is gonna be displayed
 //	public static ProgressDisplay progressDisplay = new DummyDisplay();
 
@@ -727,6 +728,40 @@ public class EnvironmentManager implements MountPointsListener {
 		return allAvailableSubmissionLocationsForApplication
 				.get(applicationName);
 	}
+	
+	public Set<SubmissionLocation> getAllAvailableSubmissionLocationsForApplicationAndVersion(String applicationName, String version) {
+		
+		if ( allAvailableSubmissionLocationsForApplicationAndVersion.get(applicationName+"_"+version) == null ) {
+			myLogger
+			.debug("Getting all available submission locations for application "
+					+ applicationName + " and version "+version);
+
+			Date start = new Date();
+
+			String[] subLocs = serviceInterface.getSubmissionLocationsForApplication(applicationName, version);
+			Set<SubmissionLocation> result = new HashSet<SubmissionLocation>();
+			
+			for (String subLoc : subLocs) {
+				SubmissionLocation tempLoc = getSubmissionLocation(subLoc);
+				
+				if ( getAllSubmissionLocations().values().contains(tempLoc) ) {
+//				if (tempLoc.getStagingFileSystems() != null
+//						&& tempLoc.getStagingFileSystems().length > 0) {
+					result.add(tempLoc);
+				}
+			}
+			Date end = new Date();
+			myLogger.debug("[BENCHMARK] Getting all submission locations for "
+					+ applicationName + " duration: "
+					+ (end.getTime() - start.getTime()));
+			allAvailableSubmissionLocationsForApplicationAndVersion.put(applicationName+"_"+version,
+					result);
+			
+			
+		}
+		
+		return allAvailableSubmissionLocationsForApplicationAndVersion.get(applicationName+"_"+version);
+	}
 
 	/**
 	 * Returns the {@link SubmissionLocation} object for this submission location string
@@ -1334,6 +1369,7 @@ public class EnvironmentManager implements MountPointsListener {
 		alreadyQueriedMountPointsPerFqan = new HashMap<String, Set<MountPoint>>();
 		allAvailableSubmissionLocationsPerFqan = new HashMap<String, Set<SubmissionLocation>>();
 		allAvailableSubmissionLocationsForApplication = new HashMap<String, Set<SubmissionLocation>>();
+		allAvailableSubmissionLocationsForApplicationAndVersion = new HashMap<String, Set<SubmissionLocation>>();
 		buildInfoCache();
 	}
 

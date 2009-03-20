@@ -16,7 +16,7 @@ public class GenericMDS extends AbstractModule implements SubmissionObjectHolder
 	static final Logger myLogger = Logger.getLogger(GenericMDS.class.getName());
 	
 	public static final String[] MODULES_USED = new String[]{
-		"Jobname", "Application", "Version", "Walltime", "CPUs", "HostName", "MinMem", "ExecutionFileSystem", "EmailAddress" };
+		"Jobname", "Version", "Walltime", "CPUs", "HostName", "MinMem", "ExecutionFileSystem", "EmailAddress" };
 	
 	private SubmissionObject currentlySelecteSubmissionObject = null;
 	
@@ -104,21 +104,7 @@ public class GenericMDS extends AbstractModule implements SubmissionObjectHolder
 		
 		myLogger.debug(("Using staging filesystem: "+stagingFS+" for submissionQueue: "+so.getLocation().getLocation()));
 		templateNodes.get("ExecutionFileSystem").getTemplateNodeValueSetter().setExternalSetValue(stagingFS);
-		
-		String[] modules = so.getModules();
-		
-		if ( modules == null ) {
-			myLogger.error("Not setting anything. There seems to be an error somewhere.");
-			return;
-		}
-		
-		if ( modules.length == 0 ) {
-			templateNodes.get("Module").getTemplateNodeValueSetter().setExternalSetValue("");
-		} else {
-			//TODO change that later for more modules
-			templateNodes.get("Module").getTemplateNodeValueSetter().setExternalSetValue(modules[0]);
-		}
-		
+				
 		// if we have no submissionObjectListeners, do nothing...
 		if (submissionObjectListener != null && !submissionObjectListener.isEmpty()) {
 			// create the event object to send
