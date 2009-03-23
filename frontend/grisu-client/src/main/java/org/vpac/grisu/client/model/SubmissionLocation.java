@@ -24,6 +24,8 @@ public class SubmissionLocation implements Comparable<SubmissionLocation>{
 	private final EnvironmentManager em;
 	private String site = null;
 	private String[] stagingFileSystems = null;
+	private String hostname = null;
+	private String queue = null;
 	
 	private Map<String, Set<MountPoint>> mountpointsPerFqan = new TreeMap<String, Set<MountPoint>>();
 	
@@ -34,7 +36,7 @@ public class SubmissionLocation implements Comparable<SubmissionLocation>{
 	
 
 	public String toString() {
-		return location.substring(0, location.indexOf(":"));
+		return getQueue();
 	}
 	
 	public boolean equals(Object other) {
@@ -62,6 +64,35 @@ public class SubmissionLocation implements Comparable<SubmissionLocation>{
 			site = em.lookupSite(EnvironmentManager.QUEUE_TYPE, location);
 		}
 		return site;
+	}
+	
+	public String getHostname() {
+		
+		if ( hostname == null ) {
+			int startIndex = location.indexOf(":") + 1;
+			if (startIndex == -1)
+				startIndex = 0;
+
+			int endIndex = location.indexOf("#");
+			if (endIndex == -1)
+				endIndex = location.length();
+
+			hostname = location.substring(startIndex, endIndex);
+		}
+		return hostname;
+	}
+	
+	public String getQueue() {
+		
+		if ( queue == null ) {
+			int endIndex = location.indexOf(":");
+			if ( endIndex <= 0 ) {
+				return null;
+			}
+			
+			queue = location.substring(0, endIndex);
+		}
+		return queue;
 	}
 	
 	public String[] getStagingFileSystems() {

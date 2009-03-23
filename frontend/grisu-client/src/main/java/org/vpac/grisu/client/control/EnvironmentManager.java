@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -76,6 +77,7 @@ public class EnvironmentManager implements MountPointsListener {
 	private Map<String, Set<SubmissionLocation>> allAvailableSubmissionLocationsPerFqan = new HashMap<String, Set<SubmissionLocation>>();
 	private Map<String, Set<SubmissionLocation>> allAvailableSubmissionLocationsForApplication = new TreeMap<String, Set<SubmissionLocation>>();
 	private Map<String, Set<SubmissionLocation>> allAvailableSubmissionLocationsForApplicationAndVersion = new TreeMap<String, Set<SubmissionLocation>>();
+	private Map<String, Set<String>> allAvailableVersionsForApplication = new HashMap<String, Set<String>>();
 	
 	// if this is not initialized nothing is gonna be displayed
 //	public static ProgressDisplay progressDisplay = new DummyDisplay();
@@ -688,6 +690,31 @@ public class EnvironmentManager implements MountPointsListener {
 							+ (end.getTime() - start.getTime()));
 		}
 		return allSubmissionLocations;
+	}
+	
+	/**
+	 * Returns all available versions for the application on sites the user has access to
+	 * @param applicationName the name of the application
+	 * @return all version strings
+	 */
+	public Set<String> getAllAvailableVersionsForApplication(String applicationName) {
+		
+		if ( allAvailableVersionsForApplication.get(applicationName) == null ) {
+			
+			myLogger.debug("Getting all available versions for application "+applicationName);
+			
+			Date start = new Date();
+			Set<String> result = new TreeSet<String>();
+			for ( String site : getAllOfTheUsersSites() ) {
+				result.addAll(Arrays.asList(serviceInterface.getVersionsOfApplicationOnSite(applicationName, site)));
+			}
+			Date end = new Date();
+			myLogger.debug("[BENCHMARK] Getting all version locations for "
+					+ applicationName + " duration: "
+					+ (end.getTime() - start.getTime()));
+			allAvailableVersionsForApplication.put(applicationName, result);
+		}
+		return allAvailableVersionsForApplication.get(applicationName);
 	}
 
 	/**
@@ -1370,6 +1397,7 @@ public class EnvironmentManager implements MountPointsListener {
 		allAvailableSubmissionLocationsPerFqan = new HashMap<String, Set<SubmissionLocation>>();
 		allAvailableSubmissionLocationsForApplication = new HashMap<String, Set<SubmissionLocation>>();
 		allAvailableSubmissionLocationsForApplicationAndVersion = new HashMap<String, Set<SubmissionLocation>>();
+		allAvailableVersionsForApplication = new HashMap<String, Set<String>>();
 		buildInfoCache();
 	}
 

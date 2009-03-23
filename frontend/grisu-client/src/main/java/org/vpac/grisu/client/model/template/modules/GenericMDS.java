@@ -15,8 +15,11 @@ public class GenericMDS extends AbstractModule implements SubmissionObjectHolder
 	
 	static final Logger myLogger = Logger.getLogger(GenericMDS.class.getName());
 	
+	public static final String VERSION_TEMPLATE_TAG_NAME = "Version";
+	public static final String HOSTNAME_TEMPLATE_TAG_NAME = "HostName";
+	
 	public static final String[] MODULES_USED = new String[]{
-		"Jobname", "Version", "Walltime", "CPUs", "HostName", "MinMem", "ExecutionFileSystem", "EmailAddress" };
+		"Jobname", VERSION_TEMPLATE_TAG_NAME, "Walltime", "CPUs", HOSTNAME_TEMPLATE_TAG_NAME, "MinMem", "ExecutionFileSystem", "EmailAddress" };
 	
 	private SubmissionObject currentlySelecteSubmissionObject = null;
 	

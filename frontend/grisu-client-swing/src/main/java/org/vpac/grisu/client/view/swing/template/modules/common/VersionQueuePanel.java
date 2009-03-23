@@ -2,7 +2,11 @@ package org.vpac.grisu.client.view.swing.template.modules.common;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -16,7 +20,9 @@ import javax.swing.border.TitledBorder;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.model.ApplicationInfoObject;
+import org.vpac.grisu.client.model.ModeNotSupportedException;
 import org.vpac.grisu.client.model.SubmissionLocation;
+import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -29,16 +35,24 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 	static final Logger myLogger = Logger.getLogger(VersionQueuePanel.class
 			.getName());
 	
+	
+	
 	public static final String ANY_MODE_STRING = "Any";
 	public static final String DEFAULT_MODE_STRING = "Default";
 	public static final String EXACT_MODE_STRING = "Exact";
+	
+	public static final String ANY_MODE_TEMPLATETAG_KEY = "useAny";
+	public static final String DEFAULT_MODE_TEMPLATETAG_KEY = "useDefault";
+	public static final String EXACT_MODE_TEMPLATETAG_KEY = "useExact";
+	
+	public static final String STARTUP_MODE_KEY = "startMode";
 
 	private JComboBox queueComboBox;
 	private JComboBox siteComboBox;
 	private JLabel queueLabel;
 	private JLabel siteLabel;
 	private JPanel subLocPanel;
-	private JComboBox versionCOmboBox;
+	private JComboBox versionComboBox;
 	private JRadioButton exactRadioButton;
 	private JRadioButton anyRadioButton;
 	private JRadioButton defaultRadioButton;
@@ -62,18 +76,23 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 
 	private ButtonGroup modeGroup = new ButtonGroup();
 	
+	private TemplateNode versionNode = null;
+	private TemplateNode hostnameNode = null;
+	
 	/**
 	 * Create the panel
 	 */
-	public VersionQueuePanel(EnvironmentManager em, String application, boolean anyModeSupported, boolean defaultModeSupported, boolean exactModeSupported) {
+	public VersionQueuePanel(EnvironmentManager em, TemplateNode versionNode, TemplateNode hostnameNode, String application) {
 		
 		super();
 		this.em = em;
+		this.versionNode = versionNode;
+		this.hostnameNode = hostnameNode;
 		this.application = application;
 		
-		this.anyModeSupported = anyModeSupported;
-		this.defaultModeSupported = defaultModeSupported;
-		this.exactModeSupported = exactModeSupported;
+		this.anyModeSupported = versionNode.getOtherProperties().containsKey(ANY_MODE_TEMPLATETAG_KEY);
+		this.defaultModeSupported = versionNode.getOtherProperties().containsKey(DEFAULT_MODE_TEMPLATETAG_KEY);
+		this.exactModeSupported = versionNode.getOtherProperties().containsKey(EXACT_MODE_TEMPLATETAG_KEY);
 		
 		setLayout(new FormLayout(
 			new ColumnSpec[] {
@@ -94,6 +113,53 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 		//
 		this.infoObject = new ApplicationInfoObject(em, application, this.currentMode);
 		
+		for ( String version : em.getAllAvailableVersionsForApplication(application) ) {
+			versionModel.addElement(version);
+		}
+
+		// set startup mode
+		String startUpMode = versionNode.getOtherProperties().get(STARTUP_MODE_KEY);
+		
+		if ( startUpMode == null || startUpMode.equals("") ) {
+			startUpMode = ANY_MODE_STRING;
+		}
+		
+		if ( startUpMode.equals(ANY_MODE_STRING) ) {
+			if ( ! anyModeSupported ) {
+				// do nothing
+				myLogger.error("useAny not specified. Using any.");
+				getAnyRadioButton().setSelected(true);
+				return;
+			} else {
+				// select any mode
+				getAnyRadioButton().setSelected(true);
+			}
+		} else if ( startUpMode.equals(DEFAULT_MODE_STRING) ) {
+			if ( ! defaultModeSupported ) {
+				// do nothing
+				myLogger.error("useDefault not specified. Using any.");
+				getAnyRadioButton().setSelected(true);
+				return;
+			} else {
+				// select default mode
+				getDefaultRadioButton().setSelected(true);
+			}
+		} else if ( startUpMode.equals(EXACT_MODE_STRING) ) {
+			if ( ! defaultModeSupported ) {
+				// do nothing
+				myLogger.error("useExact not specified. Using any.");
+				getAnyRadioButton().setSelected(true);
+				return;
+			} else {
+				// select exact mode
+				getExactRadioButton().setSelected(true);
+			}
+		} else {
+			// do nothing
+			myLogger.error("Mode "+startUpMode+" not supported. Using any.");
+			getAnyRadioButton().setSelected(true);
+		}
+					
 	}
 	/**
 	 * @return
@@ -123,7 +189,7 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 					this.currentMode = ApplicationInfoObject.EXACT_VERSION_MODE;
 				}
 			}
-			versionPanel.add(getVersionCOmboBox());
+			versionPanel.add(getVersionComboBox());
 		}
 		return versionPanel;
 	}
@@ -166,11 +232,21 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 	/**
 	 * @return
 	 */
-	protected JComboBox getVersionCOmboBox() {
-		if (versionCOmboBox == null) {
-			versionCOmboBox = new JComboBox(versionModel);
+	protected JComboBox getVersionComboBox() {
+		if (versionComboBox == null) {
+			versionComboBox = new JComboBox(versionModel);
+			versionComboBox.addItemListener(new ItemListener() {
+				public void itemStateChanged(final ItemEvent e) {
+					
+					infoObject.setVersion((String)versionModel.getSelectedItem());
+					if ( versionModel.getSize() > 0 ) {
+						fillSiteCombobox();
+					}
+					
+				}
+			});
 		}
-		return versionCOmboBox;
+		return versionComboBox;
 	}
 	/**
 	 * @return
@@ -221,9 +297,25 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 	protected JComboBox getSiteComboBox() {
 		if (siteComboBox == null) {
 			siteComboBox = new JComboBox(siteModel);
+			siteComboBox.addItemListener(new ItemListener() {
+				public void itemStateChanged(final ItemEvent e) {
+					
+					changeSelectionOfQueues(((String)(siteModel.getSelectedItem())));
+				}
+			});
 		}
 		return siteComboBox;
 	}
+	
+	private void changeSelectionOfQueues(String site) {
+
+		queueModel.removeAllElements();
+		for ( SubmissionLocation subLoc : infoObject.getCurrentSubmissionLocationsForSite(site) ) {
+				queueModel.addElement(subLoc);
+		}
+	}
+	
+	
 	/**
 	 * @return
 	 */
@@ -248,32 +340,60 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 	}
 	
 	private void switchMode(int mode) {
-		switch (mode) {
-		case ApplicationInfoObject.ANY_VERSION_MODE:
-			switchToAnyVersionMode(); break;
-		case ApplicationInfoObject.DEFAULT_VERSION_MODE:
-			switchToDefaultVersionMode(); break;
-		case ApplicationInfoObject.EXACT_VERSION_MODE:
-			switchToExactVersionMode(); break;
-			default:
-				myLogger.error("Can't switch to mode: "+mode+". Not supported.");
+		try {
+			
+			switch (mode) {
+			case ApplicationInfoObject.ANY_VERSION_MODE:
+				switchToAnyVersionMode(); break;
+			case ApplicationInfoObject.DEFAULT_VERSION_MODE:
+				switchToDefaultVersionMode(); break;
+			case ApplicationInfoObject.EXACT_VERSION_MODE:
+				switchToExactVersionMode(); break;
+				default:
+					myLogger.error("Can't switch to mode: "+mode+". Not supported.");
+			}
+			
+			fillSiteCombobox();
 				
+		} catch (ModeNotSupportedException e) {
+			myLogger.error("Can't switch to mode: "+mode+". Not supported.");
 		}
 	}
 	
-	private void switchToAnyVersionMode() {
+	private void fillSiteCombobox() {
 		
-		versionModel.removeAllElements();
-		for ( SubmissionLocation subLoc : infoObject.getCurrentSubmissionLocations() ) {
-		
+		if ( infoObject != null && infoObject.getCurrentSubmissionLocations() != null ) {
+			siteModel.removeAllElements();
+			for ( String site : infoObject.getCurrentSites() ) {
+			
+				siteModel.addElement(site);
+			
+			}
+		}
 	}
 	
-	private void switchToDefaultVersionMode() {
+	private void switchToAnyVersionMode() throws ModeNotSupportedException {
 		
+		siteModel.removeAllElements();
+		queueModel.removeAllElements();
+		infoObject.setMode(ApplicationInfoObject.ANY_VERSION_MODE, null);
+		
+
 	}
 	
-	private void switchToExactVersionMode() {
-		
+	private void switchToDefaultVersionMode() throws ModeNotSupportedException {
+
+		siteModel.removeAllElements();
+		queueModel.removeAllElements();
+		infoObject.setMode(ApplicationInfoObject.DEFAULT_VERSION_MODE, null);
+	}
+	
+	private void switchToExactVersionMode() throws ModeNotSupportedException {
+
+		siteModel.removeAllElements();
+		queueModel.removeAllElements();
+		infoObject.setMode(ApplicationInfoObject.EXACT_VERSION_MODE, ((String)(versionModel.getSelectedItem())));
+
 	}
 	
 	

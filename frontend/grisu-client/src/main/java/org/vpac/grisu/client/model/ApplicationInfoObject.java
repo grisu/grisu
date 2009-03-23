@@ -6,6 +6,12 @@ import java.util.TreeSet;
 
 import org.vpac.grisu.client.control.EnvironmentManager;
 
+/**
+ * Just a wrapper object to make info handling easier for an applications and it's versions.
+ * 
+ * @author Markus Binsteiner
+ *
+ */
 public class ApplicationInfoObject {
 	
 	public final static String DEFAULT_VERSION_STRING = "default";
@@ -33,10 +39,7 @@ public class ApplicationInfoObject {
 		
 	}
 	
-	public Set<String> getCurrentlyAvailableVersions() {
-		
-	}
-	
+
 	/**
 	 * Sets the mode for this info object. Set it to either: {@link #DEFAULT_VERSION_MODE}, {@link #ANY_VERSION_MODE}, {@link #EXACT_VERSION_MODE}.
 	 * @param mode the mode
@@ -55,7 +58,7 @@ public class ApplicationInfoObject {
 			break;
 		case ANY_VERSION_MODE: 
 			tempSubLocs = getSubmissionLocationsForAnyVersion();
-			currentlyAvailableVersions = em.getServiceInterface().get
+			currentlyAvailableVersions = new HashSet<String>();
 			break;
 		case EXACT_VERSION_MODE: 
 			tempSubLocs = getSubmissionLocationsForExactVersion(version);
@@ -65,7 +68,7 @@ public class ApplicationInfoObject {
 		default: throw new ModeNotSupportedException(mode);
 		}
 		
-		if ( currentSubLocs.size() == 0 ) {
+		if ( tempSubLocs.size() == 0 ) {
 			throw new ModeNotSupportedException(mode);
 		}
 		
@@ -75,8 +78,38 @@ public class ApplicationInfoObject {
 		
 	}
 	
+	public void setVersion(String version) {
+		
+		this.currentVersion = version;
+		
+		if ( this.mode == EXACT_VERSION_MODE ) {
+			currentSubLocs = getSubmissionLocationsForExactVersion(version);
+		}
+	}
+	
 	public Set<SubmissionLocation> getCurrentSubmissionLocations() {
 		return currentSubLocs;
+	}
+	
+	public Set<String> getCurrentSites() {
+		
+		Set<String> result = new HashSet<String>();
+		for ( SubmissionLocation subLoc: getCurrentSubmissionLocations() ) {
+			result.add(subLoc.getSite());
+		}
+		return result;
+		
+	}
+	
+	public Set<SubmissionLocation> getCurrentSubmissionLocationsForSite(String site) {
+		Set<SubmissionLocation> result = new HashSet<SubmissionLocation>();
+		for ( SubmissionLocation subLoc : getCurrentSubmissionLocations() ) {
+			
+			if ( subLoc.getSite().equals(site) ) {
+				result.add(subLoc);
+			}
+		}
+		return result;
 	}
 	
 	private Set<SubmissionLocation> getSubmissionLocationsForAnyVersion() {
@@ -90,8 +123,11 @@ public class ApplicationInfoObject {
 	}
 	
 	private Set<SubmissionLocation> getSubmissionLocationsForExactVersion(String version) {
-		return em.getAllAvailableSubmissionLocationsForApplicationAndVersion(application, DEFAULT_VERSION_STRING); 
+		return em.getAllAvailableSubmissionLocationsForApplicationAndVersion(application, version); 
 	}
 	
+	private Set<String> getAllAvailableVersions() {
+		return em.getAllAvailableVersionsForApplication(application);
+	}
 
 }
