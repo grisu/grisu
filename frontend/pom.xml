@@ -16,5 +16,6 @@
   	<module>grisu-client-swing</module>
   	<module>grisu-client-xfire</module>
   	<module>grisu-client-commandline</module>
+  	<module>grisu-examples</module>
   </modules>
 </project>
