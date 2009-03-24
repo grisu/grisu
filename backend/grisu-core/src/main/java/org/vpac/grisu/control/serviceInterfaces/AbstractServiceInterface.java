@@ -6,6 +6,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -63,8 +64,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import com.sun.org.apache.xerces.internal.util.URI;
-import com.sun.org.apache.xerces.internal.util.URI.MalformedURIException;
 
 /**
  * This abstract class implements most of the methods of the
@@ -641,7 +640,7 @@ abstract class AbstractServiceInterface implements ServiceInterface {
 		try {
 			uri = new URI(server);
 			hostname = uri.getHost();
-		} catch (MalformedURIException e) {
+		} catch (Exception e) {
 			hostname = server;
 		}
 		String name = hostname + " ("
