@@ -81,9 +81,9 @@ public class ApplicationInfoObject {
 		default: throw new ModeNotSupportedException(mode);
 		}
 		
-		if ( tempSubLocs.size() == 0 ) {
-			throw new ModeNotSupportedException(mode);
-		}
+//		if ( tempSubLocs.size() == 0 ) {
+//			throw new ModeNotSupportedException(mode);
+//		}
 		
 		this.currentSubLocs = tempSubLocs;
 		this.mode = mode;

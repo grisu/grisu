@@ -341,11 +341,14 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 				public void itemStateChanged(final ItemEvent e) {
 					
 					// if mode = any then change the version to the recommended one
-					if ( currentMode == ApplicationInfoObject.ANY_VERSION_MODE ) {
+					if ( currentMode == ApplicationInfoObject.ANY_VERSION_MODE && ((SubmissionLocation)(queueModel.getSelectedItem()) != null) ) {
 						ignoreVersionComboboxItemChanged = true;
 						versionModel.setSelectedItem(infoObject.getRecommendedVersionForSubmissionLocation(((SubmissionLocation)(queueModel.getSelectedItem())), em.getDefaultFqan()));
-						ignoreVersionComboboxItemChanged = false;					}
+						ignoreVersionComboboxItemChanged = false;					
+					}
 
+					// TODO add exact version here
+					
 				}
 			});
 		}
@@ -392,6 +395,9 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 	private void fillSiteCombobox() {
 		
 		if ( infoObject != null && infoObject.getCurrentSubmissionLocations() != null ) {
+			
+			SubmissionLocation oldSubLoc = ((SubmissionLocation)(queueModel.getSelectedItem()));
+			
 			siteModel.removeAllElements();
 			
 			if ( infoObject.getCurrentSites().size() == 0 ) {
@@ -406,6 +412,14 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 			
 				siteModel.addElement(site);
 			
+			}
+			
+			if ( infoObject.getCurrentSites().contains(oldSubLoc.getSite()) ) {
+				siteModel.setSelectedItem(oldSubLoc.getSite());
+			}
+			
+			if ( queueModel.getIndexOf(oldSubLoc) >= 0 ) {
+				queueModel.setSelectedItem(oldSubLoc);
 			}
 		}
 	}
@@ -460,10 +474,12 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 			if ( ! infoObject.getAllAvailableVersions().contains(exactModeVersion) ) {
 				versionModel.removeAllElements();
 				versionModel.addElement("Version "+exactModeVersion+" not available.");
+				ignoreVersionComboboxItemChanged = false;
 			} else {
+				ignoreVersionComboboxItemChanged = false;
 				versionModel.setSelectedItem(exactModeVersion);
 			}
-			ignoreVersionComboboxItemChanged = false;
+
 		}
 		this.currentMode = ApplicationInfoObject.EXACT_VERSION_MODE;
 	}
