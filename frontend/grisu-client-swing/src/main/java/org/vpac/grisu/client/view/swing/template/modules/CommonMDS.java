@@ -63,10 +63,10 @@ public class CommonMDS extends AbstractModulePanel {
 	public JPanel getPanel() {
 		return this;
 	}
-	protected void initialize(TemplateModule module) throws ModuleException {
+	protected void initialize() throws ModuleException {
 		
 		try {
-			getApplicationChooserPanel().initialize((org.vpac.grisu.client.model.template.modules.CommonMDS)module);		
+			getApplicationChooserPanel().initialize((org.vpac.grisu.client.model.template.modules.CommonMDS)templateModule);		
 		
 			getJobName().setTemplateNode(this.templateModule.getTemplateNodes().get("Jobname"));
 			getEmail().setTemplateNode(this.templateModule.getTemplateNodes().get("EmailAddress"));

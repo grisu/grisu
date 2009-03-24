@@ -28,17 +28,27 @@ public class ApplicationInfoObject {
 	private Set<String> currentlyAvailableVersions = null;
 	private Set<SubmissionLocation> currentSubLocs = null;
 	
-	public ApplicationInfoObject(EnvironmentManager em, String app) {
-		this(em, app, ANY_VERSION_MODE);
-	}
+//	public ApplicationInfoObject(EnvironmentManager em, String app) {
+//		this(em, app, ANY_VERSION_MODE);
+//	}
 	
 	public ApplicationInfoObject(EnvironmentManager em, String app, int initial_mode) {
 		
 		this.em = em;
 		this.application = app;
+		this.mode = initial_mode;
 		
+		// fetching all available versions in the background
+		new Thread() {
+			public void run() {
+				getAllAvailableVersions();
+			}
+		}.start();
 	}
 	
+//	public Set<String> getCurrentlyAvailableVersions() {
+//		return currentlyAvailableVersions;
+//	}
 
 	/**
 	 * Sets the mode for this info object. Set it to either: {@link #DEFAULT_VERSION_MODE}, {@link #ANY_VERSION_MODE}, {@link #EXACT_VERSION_MODE}.
@@ -53,17 +63,20 @@ public class ApplicationInfoObject {
 		switch (mode) {
 		case DEFAULT_VERSION_MODE: 
 			tempSubLocs = getSubmissionLocationsForDefaultVersion(); 
-			currentlyAvailableVersions = new HashSet<String>();
+			currentlyAvailableVersions = new TreeSet<String>();
 			currentlyAvailableVersions.add(DEFAULT_VERSION_STRING);
+			setVersion(DEFAULT_VERSION_STRING);
 			break;
 		case ANY_VERSION_MODE: 
 			tempSubLocs = getSubmissionLocationsForAnyVersion();
-			currentlyAvailableVersions = new HashSet<String>();
+			currentlyAvailableVersions = new TreeSet<String>();
+			setVersion(null);
 			break;
 		case EXACT_VERSION_MODE: 
 			tempSubLocs = getSubmissionLocationsForExactVersion(version);
-			currentlyAvailableVersions = new HashSet<String>();
+			currentlyAvailableVersions = new TreeSet<String>();
 			currentlyAvailableVersions.add(version);
+			setVersion(version);
 			break;
 		default: throw new ModeNotSupportedException(mode);
 		}
@@ -72,18 +85,29 @@ public class ApplicationInfoObject {
 			throw new ModeNotSupportedException(mode);
 		}
 		
-		this.currentVersion = version;
 		this.currentSubLocs = tempSubLocs;
 		this.mode = mode;
 		
+	}
+	
+	public String getRecommendedVersionForSubmissionLocation(SubmissionLocation subLoc, String fqan) {
+		
+		String[] allVersions = em.getAllVersionsForApplicationAtSubmissionLocation(application, subLoc, fqan);
+		
+		String recommendedVersion = allVersions[0];
+		// TODO here comes the matchmaker
+		
+		return recommendedVersion;
 	}
 	
 	public void setVersion(String version) {
 		
 		this.currentVersion = version;
 		
-		if ( this.mode == EXACT_VERSION_MODE ) {
+		if ( this.mode == EXACT_VERSION_MODE || this.mode == DEFAULT_VERSION_MODE ) {
 			currentSubLocs = getSubmissionLocationsForExactVersion(version);
+		} else if ( this.mode == ANY_VERSION_MODE ) {
+			currentVersion = null;
 		}
 	}
 	
@@ -93,7 +117,7 @@ public class ApplicationInfoObject {
 	
 	public Set<String> getCurrentSites() {
 		
-		Set<String> result = new HashSet<String>();
+		Set<String> result = new TreeSet<String>();
 		for ( SubmissionLocation subLoc: getCurrentSubmissionLocations() ) {
 			result.add(subLoc.getSite());
 		}
@@ -102,7 +126,7 @@ public class ApplicationInfoObject {
 	}
 	
 	public Set<SubmissionLocation> getCurrentSubmissionLocationsForSite(String site) {
-		Set<SubmissionLocation> result = new HashSet<SubmissionLocation>();
+		Set<SubmissionLocation> result = new TreeSet<SubmissionLocation>();
 		for ( SubmissionLocation subLoc : getCurrentSubmissionLocations() ) {
 			
 			if ( subLoc.getSite().equals(site) ) {
@@ -114,20 +138,20 @@ public class ApplicationInfoObject {
 	
 	private Set<SubmissionLocation> getSubmissionLocationsForAnyVersion() {
 		
-		return em.getAllAvailableSubmissionLocationsForApplication(application);
+		return em.getAllAvailableSubmissionLocationsForApplication(application, em.getDefaultFqan());
 	}
 	
 	private Set<SubmissionLocation> getSubmissionLocationsForDefaultVersion() {
 		
-		return em.getAllAvailableSubmissionLocationsForApplicationAndVersion(application, DEFAULT_VERSION_STRING);
+		return em.getAllAvailableSubmissionLocationsForApplicationAndVersion(application, DEFAULT_VERSION_STRING, em.getDefaultFqan());
 	}
 	
 	private Set<SubmissionLocation> getSubmissionLocationsForExactVersion(String version) {
-		return em.getAllAvailableSubmissionLocationsForApplicationAndVersion(application, version); 
+		return em.getAllAvailableSubmissionLocationsForApplicationAndVersion(application, version, em.getDefaultFqan()); 
 	}
 	
-	private Set<String> getAllAvailableVersions() {
-		return em.getAllAvailableVersionsForApplication(application);
+	public synchronized Set<String> getAllAvailableVersions() {
+		return em.getAllAvailableVersionsForApplication(application, em.getDefaultFqan());
 	}
 
 }

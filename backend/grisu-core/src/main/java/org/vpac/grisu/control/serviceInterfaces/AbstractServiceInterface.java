@@ -2060,6 +2060,10 @@ abstract class AbstractServiceInterface implements ServiceInterface {
 				site);
 
 	}
+	
+	public String[] getVersionsOfApplicationsOnSubmissionLocation(String application, String submissionLocation) {
+		return informationManager.getVersionsOfApplicationOnSubmissionLocation(application, submissionLocation);
+	}
 
 	/* (non-Javadoc)
 	 * @see org.vpac.grisu.control.ServiceInterface#getSubmissionLocationsPerVersionOfApplication(java.lang.String)

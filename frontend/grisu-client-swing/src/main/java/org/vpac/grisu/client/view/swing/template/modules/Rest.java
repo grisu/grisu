@@ -53,7 +53,7 @@ public class Rest extends AbstractModulePanel {
 		return this;
 	}
 
-	protected void initialize(TemplateModule module) throws ModuleException {
+	protected void initialize() throws ModuleException {
 		
 		myLogger.debug("Initializing rest swing module panel...");
 		for ( String name : this.templateModule.getTemplateNodes().keySet() ) {

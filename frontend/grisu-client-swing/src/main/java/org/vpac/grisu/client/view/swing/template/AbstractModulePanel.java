@@ -36,7 +36,7 @@ abstract public class AbstractModulePanel extends JPanel implements ModulePanel 
 	public void setTemplateModule(TemplateModule templateModule) throws ModuleException {
 		this.templateModule = templateModule;
 		this.template = templateModule.getTemplate();
-		initialize(this.templateModule);
+		initialize();
 	}
 	
 //	public AbstractModulePanel(TemplateModule templateModule) {
@@ -79,6 +79,6 @@ abstract public class AbstractModulePanel extends JPanel implements ModulePanel 
 		this.templateModule.initializeTemplateNodes(this.templateNodes);
 	}
 	
-	abstract protected void initialize(TemplateModule module) throws ModuleException;
+	abstract protected void initialize() throws ModuleException;
 
 }

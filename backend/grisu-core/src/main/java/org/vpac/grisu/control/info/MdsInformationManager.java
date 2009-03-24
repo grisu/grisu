@@ -448,4 +448,10 @@ public class MdsInformationManager implements InformationManager {
 		return allHosts;
 	}
 
+	public String[] getVersionsOfApplicationOnSubmissionLocation(
+			String application, String submissionLocation) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

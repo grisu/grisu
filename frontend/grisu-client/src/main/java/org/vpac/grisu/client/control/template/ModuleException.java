@@ -8,7 +8,7 @@ public class ModuleException extends Exception {
 	
 	private TemplateModule module = null;
 	
-	public ModuleException(TemplateModule module, Throwable e) {
+	public ModuleException(TemplateModule module, Exception e) {
 		super(e);
 		this.module = module;
 	}

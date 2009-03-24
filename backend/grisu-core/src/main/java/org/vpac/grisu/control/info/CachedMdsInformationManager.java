@@ -302,6 +302,14 @@ public class CachedMdsInformationManager implements InformationManager {
 		// TODO cache this as well?
 		return client.getVersionsOfCodeAtSite(site, application);
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.vpac.grisu.control.info.InformationManager#getVersionsOfApplicationOnSubmissionLocation(java.lang.String, java.lang.String)
+	 */
+	public String[] getVersionsOfApplicationOnSubmissionLocation(
+			String application, String submissionLocation) {
+		return client.getVersionsOfCodeAtSite(submissionLocation, application);
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -635,6 +643,8 @@ public class CachedMdsInformationManager implements InformationManager {
 		myLogger.debug("Finished getting all hosts from mds");
 		return tempHosts;
 	}
+
+
 
 //	public void informationChanged(Date dateTheInfoChanged) {
 //		myLogger.info("Resetting cached mds information.");

@@ -86,6 +86,17 @@ public interface InformationManager {
 			String site);
 
 	/**
+	 * Returns the list of available versions of the software application at a
+	 * given submissionlocation.
+	 * 
+	 * @param application name of the software application
+	 * @param submissionLocation name of the submissionlocation
+	 * @return an array of string representing the available versions of the
+	 * software application at the submissionlocation
+	 */
+	public String[] getVersionsOfApplicationOnSubmissionLocation(String application, String submissionLocation);
+	
+	/**
 	 * Returns all the available applications on the Grid
 	 * 
 	 * @return all the applications on the Grid

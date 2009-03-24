@@ -52,7 +52,8 @@ public class SubmissionLocation implements Comparable<SubmissionLocation>{
 	}
 
 	public int compareTo(SubmissionLocation o) {
-		return location.compareTo(o.getLocation());
+//		return location.compareTo(o.getLocation());
+		return getQueue().compareTo(o.getQueue());
 	}
 
 	public String getLocation() {

@@ -70,7 +70,7 @@ public class Common extends AbstractModulePanel implements ValueListener {
 	
 
 
-	protected void initialize(TemplateModule templateModule) throws ModuleException {
+	protected void initialize() throws ModuleException {
 		
 		if ( this.templateModule == null ) {
 			throw new RuntimeException("Template not set for this module. This is a programming error.");

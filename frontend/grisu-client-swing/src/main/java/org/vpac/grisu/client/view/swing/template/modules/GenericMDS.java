@@ -13,6 +13,8 @@ import org.vpac.grisu.client.view.swing.template.AbstractModulePanel;
 import org.vpac.grisu.client.view.swing.template.modules.common.VersionQueuePanel;
 import org.vpac.grisu.client.view.swing.template.panels.CPUs;
 import org.vpac.grisu.client.view.swing.template.panels.JobName;
+import org.vpac.grisu.client.view.swing.template.panels.TemplateNodePanelException;
+
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -22,7 +24,7 @@ import com.jgoodies.forms.layout.RowSpec;
 public class GenericMDS extends AbstractModulePanel {
 
 	private VersionQueuePanel versionQueuePanel;
-	private CPUs us;
+	private CPUs cpus;
 	private JobName jobName;
 	/**
 	 * 
@@ -52,11 +54,18 @@ public class GenericMDS extends AbstractModulePanel {
 	}
 
 	@Override
-	protected void initialize(TemplateModule module) throws ModuleException {
+	protected void initialize() throws ModuleException {
 		add(getJobName(), new CellConstraints("2, 2, 1, 1, fill, fill"));
 		add(getCPUs(), new CellConstraints("4, 2, 1, 3, fill, fill"));
-		add(getVersionQueuePanel(module.getTemplate().getEnvironmentManager(), module.getTemplateNodes().get(org.vpac.grisu.client.model.template.modules.GenericMDS.VERSION_TEMPLATE_TAG_NAME), module.getTemplateNodes().get(org.vpac.grisu.client.model.template.modules.GenericMDS.HOSTNAME_TEMPLATE_TAG_NAME), module.getTemplate().getApplicationName()), new CellConstraints("2, 4, 1, 3, fill, fill"));
+		add(getVersionQueuePanel(templateModule.getTemplate().getEnvironmentManager(), templateModule.getTemplateNodes().get(org.vpac.grisu.client.model.template.modules.GenericMDS.VERSION_TEMPLATE_TAG_NAME), templateModule.getTemplateNodes().get(org.vpac.grisu.client.model.template.modules.GenericMDS.HOSTNAME_TEMPLATE_TAG_NAME), templateModule.getTemplate().getApplicationName()), new CellConstraints("2, 4, 1, 3, fill, fill"));
 		
+		try {
+			getJobName().setTemplateNode(this.templateModule.getTemplateNodes().get("Jobname"));
+			getCPUs().setTemplateNode(this.templateModule.getTemplateNodes().get("CPUs"));
+		} catch (TemplateNodePanelException e) {
+
+			throw new ModuleException(this.templateModule, e);
+		}
 	}
 
 	public JPanel getPanel() {
@@ -75,10 +84,10 @@ public class GenericMDS extends AbstractModulePanel {
 	 * @return
 	 */
 	protected CPUs getCPUs() {
-		if (us == null) {
-			us = new CPUs();
+		if (cpus == null) {
+			cpus = new CPUs();
 		}
-		return us;
+		return cpus;
 	}
 	/**
 	 * @return
