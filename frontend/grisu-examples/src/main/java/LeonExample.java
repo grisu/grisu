@@ -1,8 +1,4 @@
 import java.io.File;
-import java.util.Arrays;
-
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
 
 import org.vpac.grisu.client.control.ServiceInterfaceFactory;
 import org.vpac.grisu.control.JobConstants;
@@ -14,23 +10,15 @@ import org.vpac.grisu.js.model.utils.JsdlHelpers;
 import org.w3c.dom.Document;
 
 
-public class BasicJobSubmission {
-
-	/**
-	 * First arg: myproxy username
-	 * Second arg: myproxy passphrase
-	 * Third arg: the vo to use to submit the job
-	 * Forth arg: the path to the jsdl file (template) which will be parsed & submitted
-	 * 
-	 * @param args the commandline arguments
-	 */
-	public static void main(String[] args) {
+public class LeonExample {
+	
+	public static void main (String[] args) {
 		
 		String myproxy_username = args[0];
 		char[] myproxy_password = args[1].toCharArray();
-		String vo = args[2];
-		String path_to_jsdl_file = args[3];
-
+		String vo = "/ARCS/StartUp";
+		String path_to_jsdl_file = args[2];
+		
 		// load the xml document
 		Document jsdl = SeveralXMLHelpers.loadXMLFile(new File(path_to_jsdl_file));
 		// load the jobname from the jsdl document
@@ -40,7 +28,8 @@ public class BasicJobSubmission {
 		ServiceInterface serviceInterface = null;
 		try {
 			serviceInterface = ServiceInterfaceFactory.createInterface(
-					"https://ngportaldev.vpac.org/grisu-ws/services/grisu", 
+					"Local", 
+//					"https://ngportaldev.vpac.org/grisu-ws/services/grisu",
 					myproxy_username, myproxy_password, 
 					"myproxy.arcs.org.au", "443", 
 					null, -1, null, null);
@@ -49,64 +38,14 @@ public class BasicJobSubmission {
 			System.exit(1);
 		}
 		
+		serviceInterface.login(null, null);
+		
+		// kill possibly existing job
 		try {
 			serviceInterface.kill(jobname, true);
 		} catch (Exception e0) {
 			System.err.println("Couln't delete partially created job from db: "+e0.getLocalizedMessage());
 		}
-		
-		// get a list of all current jobnames to be able to decide on an unused one
-		String[] currentJobnames = serviceInterface.getAllJobnames();
-		
-		// test whether jobname already taken
-		if ( Arrays.asList(currentJobnames).contains(jobname) ) {
-			System.err.println("Jobname already taken.");
-			try {
-				serviceInterface.kill(jobname, true);
-			} catch (Exception e1) {
-				System.err.println("Couln't delete partially created job from db: "+e1.getLocalizedMessage());
-			}
-			System.exit(1);
-		}
-		
-		// get a list of all available VOs 
-		String[] allAvailableVOs = serviceInterface.getFqans();
-		if ( ! Arrays.asList(allAvailableVOs).contains(vo) ) {
-			System.err.println("The VO you specified is not available.");
-			try {
-				serviceInterface.kill(jobname, true);
-			} catch (Exception e2) {
-				System.err.println("Couln't delete partially created job from db: "+e2.getLocalizedMessage());
-			}
-			System.exit(1);
-		}
-		
-		// get a list of all available submission locations
-		String[] allAvailableSubmissionLocations = serviceInterface.getAllSubmissionLocations(vo);
-		
-		if ( ! Arrays.asList(allAvailableSubmissionLocations).contains(submissionLocation) ) {
-			System.err.println("The submission location you specified is not available (at least for this VO).");
-			try {
-				serviceInterface.kill(jobname, true);
-			} catch (Exception e3) {
-				System.err.println("Couln't delete partially created job from db: "+e3.getLocalizedMessage());
-			}
-			System.exit(1);
-		}
-		
-
-		// now create the job on the server.
-		// for the integer argument you can choose between these values (can be found in the 
-		// org.vpac.grisu.control.JobConstants class in the grisu-commons module):
-		//  DONT_ACCEPT_NEW_JOB_WITH_EXISTING_JOBNAME = 0;
-		// ALWAYS_INCREMENT_JOB_NAME = 1;
-		// ONLY_INCREMENT_JOB_NAME_IF_JOB_EXISTS_WITH_SAME_NAME = 2;
-		// ALWAYS_TIMESTAMP_JOB_NAME = 3;
-		// ONLY_TIMESTAMP_JOB_NAME_IF_JOB_EXISTS_WITH_SAME_NAME = 3;
-		// OVERWRITE_EXISTING_JOB = 10; // not recommended
-		// 
-		// at the moment, only DONT_ACCEPT_NEW_JOB_WITH_EXISTING_JOBNAME & ALWAYS_INCREMENT_JOB_NAME are implemented.
-		// I would recommend DONT_ACCEPT_NEW_JOB_WITH_EXISTING_JOBNAME
 		
 		String finalJobname = null;
 		try {
@@ -132,28 +71,6 @@ public class BasicJobSubmission {
 		String executionFileSystem = absoluteJobDirectory.substring(0, absoluteJobDirectory.length()-(workingDirectory.length()+1));
 		System.out.println("Execution file system: "+executionFileSystem);
 		
-		// uploading a local file in addition to the one that is specified in the jsdl which gets
-		// cross-stage by the grisu web service automatically.
-		File localInputFile = new File("/home/markus/test.txt");
-		DataSource source = new FileDataSource(localInputFile);
-		String filename = localInputFile.getName();
-		
-		try {
-			System.out.println("Uploading local file: "+localInputFile.toString()+"...");
-			serviceInterface.upload(source, absoluteJobDirectory+"/"+filename, false);
-			System.out.println("Uploading successful.");
-		} catch (Exception e1) {
-			System.err.println("Couldn't upload file: "+localInputFile.toString()+": "+e1.getLocalizedMessage());
-			try {
-				serviceInterface.kill(jobname, true);
-			} catch (Exception e5) {
-				System.err.println("Couln't delete partially created job from db: "+e5.getLocalizedMessage());
-			}
-			System.exit(1);
-		}
-		
-		// now, we convert the jsdl to a String and just replace the placeholders with the actual values.
-		// of course, there are other ways to do this...
 		String jsdl_string = null;
 		try {
 			jsdl_string = SeveralXMLHelpers.toString(jsdl);
@@ -167,10 +84,9 @@ public class BasicJobSubmission {
 			System.exit(1);
 		}
 		
-		jsdl_string = jsdl_string.replaceAll("WORKING_DIRECTORY", workingDirectory);
-		jsdl_string = jsdl_string.replaceAll("EXECUTION_HOST_FS", executionFileSystem);
-		jsdl_string = jsdl_string.replaceAll("LOCALINPUTFILENAME", filename);
-		
+		jsdl_string = jsdl_string.replaceAll("XXX_WORKINGDIRECTORY_XXX", workingDirectory);
+		jsdl_string = jsdl_string.replaceAll("XXX_USEREXECUTIONHOSTFS_XXX", executionFileSystem);
+
 		System.out.println("Finished jsdl document:\n\n");
 		System.out.println(jsdl_string);
 		
@@ -212,7 +128,7 @@ public class BasicJobSubmission {
 			System.exit(1);
 		}
 		
-
 	}
+	
 
 }

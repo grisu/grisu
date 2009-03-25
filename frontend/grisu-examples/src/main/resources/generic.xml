@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
+	<JobDescription grisu_modules="Common">
+
+		<JobIdentification>
+			<JobName>Leon_example</JobName>
+		</JobIdentification>
+
+		<Application>
+			<ApplicationName>echo</ApplicationName>
+			<POSIXApplication
+				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
+
+				<Executable>echo</Executable>
+				<Argument>hello world</Argument>
+				<WorkingDirectory filesystemName="userExecutionHostFs">XXX_WORKINGDIRECTORY_XXX</WorkingDirectory>
+				<Output>stdout.txt</Output>
+				<Error>stderr.txt</Error>
+
+			</POSIXApplication>
+			<TotalCPUTime>60</TotalCPUTime><!-- use this value and divide with no. of cpus to get actual walltime -->
+			<TotalCPUCount>1</TotalCPUCount>
+		</Application>
+		<Resources>
+			<CandidateHosts>
+				<HostName>dque@brecca-m:ng2.vpac.monash.edu.au</HostName>
+			</CandidateHosts>
+			<FileSystem name="userExecutionHostFs">
+				<MountSource>XXX_USEREXECUTIONHOSTFS_XXX</MountSource>
+				<FileSystemType>normal</FileSystemType>
+			</FileSystem>
+		</Resources>
+
+	</JobDescription>
+</JobDefinition>
