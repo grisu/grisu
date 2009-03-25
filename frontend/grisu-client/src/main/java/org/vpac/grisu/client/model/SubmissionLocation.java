@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.fs.model.MountPoint;
+import org.vpac.grisu.js.model.utils.SubmissionLocationHelpers;
 
 /**
  * Just a wrapper object around a String.
@@ -86,12 +87,7 @@ public class SubmissionLocation implements Comparable<SubmissionLocation>{
 	public String getQueue() {
 		
 		if ( queue == null ) {
-			int endIndex = location.indexOf(":");
-			if ( endIndex <= 0 ) {
-				return null;
-			}
-			
-			queue = location.substring(0, endIndex);
+			queue = SubmissionLocationHelpers.extractQueue(location);
 		}
 		return queue;
 	}

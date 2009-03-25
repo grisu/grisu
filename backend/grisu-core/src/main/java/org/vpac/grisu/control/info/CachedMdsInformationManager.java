@@ -13,6 +13,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.Environment;
+import org.vpac.grisu.js.model.utils.SubmissionLocationHelpers;
 
 import au.edu.sapac.grid.mds.QueryClient;
 
@@ -308,7 +309,9 @@ public class CachedMdsInformationManager implements InformationManager {
 	 */
 	public String[] getVersionsOfApplicationOnSubmissionLocation(
 			String application, String submissionLocation) {
-		return client.getVersionsOfCodeAtSite(submissionLocation, application);
+		
+		return client.getVersionsOfCodeForQueueAndContactString(
+				SubmissionLocationHelpers.extractQueue(submissionLocation), SubmissionLocationHelpers.extractHost(submissionLocation), application);
 	}
 
 	/*

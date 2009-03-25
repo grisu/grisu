@@ -38,7 +38,7 @@ public class LeonExample {
 			System.exit(1);
 		}
 		
-		serviceInterface.login(null, null);
+		serviceInterface.login(myproxy_username, myproxy_password);
 		
 		// kill possibly existing job
 		try {
