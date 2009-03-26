@@ -343,7 +343,11 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 					// if mode = any then change the version to the recommended one
 					if ( currentMode == ApplicationInfoObject.ANY_VERSION_MODE && ((SubmissionLocation)(queueModel.getSelectedItem()) != null) ) {
 						ignoreVersionComboboxItemChanged = true;
-						versionModel.setSelectedItem(infoObject.getRecommendedVersionForSubmissionLocation(((SubmissionLocation)(queueModel.getSelectedItem())), em.getDefaultFqan()));
+						String temp = infoObject.getRecommendedVersionForSubmissionLocation(((SubmissionLocation)(queueModel.getSelectedItem())), em.getDefaultFqan());
+						if ( temp == null || "".equals(temp) ) {
+							temp = "n/a";
+						}
+						versionModel.setSelectedItem(temp);
 						ignoreVersionComboboxItemChanged = false;					
 					}
 
@@ -414,12 +418,14 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 			
 			}
 			
-			if ( infoObject.getCurrentSites().contains(oldSubLoc.getSite()) ) {
-				siteModel.setSelectedItem(oldSubLoc.getSite());
-			}
+			if ( oldSubLoc != null ) {
+				if ( infoObject.getCurrentSites().contains(oldSubLoc.getSite()) ) {
+					siteModel.setSelectedItem(oldSubLoc.getSite());
+				}
 			
-			if ( queueModel.getIndexOf(oldSubLoc) >= 0 ) {
-				queueModel.setSelectedItem(oldSubLoc);
+				if ( queueModel.getIndexOf(oldSubLoc) >= 0 ) {
+					queueModel.setSelectedItem(oldSubLoc);
+				}
 			}
 		}
 	}

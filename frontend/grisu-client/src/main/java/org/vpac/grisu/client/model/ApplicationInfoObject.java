@@ -94,10 +94,13 @@ public class ApplicationInfoObject {
 		
 		String[] allVersions = em.getAllVersionsForApplicationAtSubmissionLocation(application, subLoc, fqan);
 		
-		String recommendedVersion = allVersions[0];
-		// TODO here comes the matchmaker
-		
-		return recommendedVersion;
+		if ( allVersions == null || allVersions.length == 0 ) {
+			return null;
+		} else {
+			String recommendedVersion = allVersions[0];
+			// TODO here comes the matchmaker
+			return recommendedVersion;
+		}
 	}
 	
 	public void setVersion(String version) {

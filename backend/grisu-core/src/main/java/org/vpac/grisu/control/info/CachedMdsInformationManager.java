@@ -310,8 +310,11 @@ public class CachedMdsInformationManager implements InformationManager {
 	public String[] getVersionsOfApplicationOnSubmissionLocation(
 			String application, String submissionLocation) {
 		
-		return client.getVersionsOfCodeForQueueAndContactString(
-				SubmissionLocationHelpers.extractQueue(submissionLocation), SubmissionLocationHelpers.extractHost(submissionLocation), application);
+		String queue = SubmissionLocationHelpers.extractQueue(submissionLocation);
+		String host = SubmissionLocationHelpers.extractHost(submissionLocation);
+		
+		String[] temp = client.getVersionsOfCodeForQueueAndContactString(queue, host, application);
+		return temp;
 	}
 
 	/*

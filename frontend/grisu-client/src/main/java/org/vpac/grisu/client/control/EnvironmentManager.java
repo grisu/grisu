@@ -712,7 +712,7 @@ public class EnvironmentManager implements MountPointsListener {
 		
 		if ( allAvailableVersionsForApplicationPerSubmissionLocation.get(fqan+"_"+subLoc.getLocation()+"_"+application) == null ) {
 			
-			String [] allVersions = getServiceInterface().getVersionsOfApplicationsOnSubmissionLocation(application, subLoc.getSite());
+			String [] allVersions = getServiceInterface().getVersionsOfApplicationsOnSubmissionLocation(application, subLoc.getLocation());
 			
 			allAvailableVersionsForApplicationPerSubmissionLocation.put(fqan+"_"+subLoc.getLocation()+"_"+application, allVersions);
 		}
