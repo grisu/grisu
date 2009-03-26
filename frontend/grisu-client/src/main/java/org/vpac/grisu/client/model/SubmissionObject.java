@@ -24,16 +24,16 @@ public interface SubmissionObject {
 	 */
 	public void setCurrentSubmissionLocation(SubmissionLocation location) throws SubmissionLocationException;
 	
-	public SubmissionLocation getLocation();
+	public SubmissionLocation getCurrentSubmissionLocation();
 
 //	public ApplicationObject getApplication();
-	public String getApplicationName();
+	public String getCurrentApplicationName();
 	
-	public String[] getExecutables();
+	public String[] getCurrentExecutables();
 	
-	public String[] getModules();
+	public String[] getCurrentModules();
 	
-	public String getVersion();
+	public String getCurrentVersion();
 	
 	public int getPreferredExecutableType();
 	

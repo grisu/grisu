@@ -38,7 +38,7 @@ public class ApplicationObject implements SubmissionObject, FqanListener,
 
 	private int preferredExecutableType = EXECUTABLE_TYPE_UNDEFINED;
 	
-	private String[] submissionLocations = null;
+//	private String[] submissionLocations = null;
 
 	private SubmissionLocation currentSubmissionLocation = null;
 	// private String currentVersion = null;
@@ -209,7 +209,7 @@ public class ApplicationObject implements SubmissionObject, FqanListener,
 	// return sites;
 	// }
 
-	public String getApplicationName() {
+	public String getCurrentApplicationName() {
 		return applicationName;
 	}
 
@@ -353,7 +353,7 @@ public class ApplicationObject implements SubmissionObject, FqanListener,
 		return em;
 	}
 
-	public SubmissionLocation getLocation() {
+	public SubmissionLocation getCurrentSubmissionLocation() {
 		return currentSubmissionLocation;
 	}
 
@@ -390,7 +390,7 @@ public class ApplicationObject implements SubmissionObject, FqanListener,
 	// this.currentVersion = version;
 	// }
 
-	public String getVersion() {
+	public String getCurrentVersion() {
 
 		if (versions == null) {
 			calculateVersions();
@@ -414,9 +414,9 @@ public class ApplicationObject implements SubmissionObject, FqanListener,
 		}
 
 		myLogger.debug("Calculated version to use: "
-				+ resultSet.iterator().next().getVersion());
-
-		return resultSet.iterator().next().getVersion();
+				+ resultSet.iterator().next().getCurrentVersion());
+	
+		return resultSet.iterator().next().getCurrentVersion();
 	}
 
 	public Map<String, String> getDetails(SubmissionLocation loc, String version) {
@@ -439,17 +439,17 @@ public class ApplicationObject implements SubmissionObject, FqanListener,
 
 		if (this.currentSubmissionLocation == null)
 			return null;
-		return getDetails(this.currentSubmissionLocation, this.getVersion());
+		return getDetails(this.currentSubmissionLocation, this.getCurrentVersion());
 	}
 
-	public String[] getExecutables() {
+	public String[] getCurrentExecutables() {
 
 		if (this.currentSubmissionLocation == null) {
 			myLogger.error("No submission location selected. Returning null.");
 			return null;
 		}
 
-		String version = getVersion();
+		String version = getCurrentVersion();
 		if (version == null) {
 			myLogger.error("No version found. Returning null.");
 			return null;
@@ -463,14 +463,14 @@ public class ApplicationObject implements SubmissionObject, FqanListener,
 	// return this;
 	// }
 
-	public String[] getModules() {
+	public String[] getCurrentModules() {
 
 		if (this.currentSubmissionLocation == null) {
 			myLogger.error("No submission location selected. Returning null.");
 			return null;
 		}
 
-		String version = getVersion();
+		String version = getCurrentVersion();
 		if (version == null) {
 			myLogger.error("No version found. Returning null.");
 			return null;

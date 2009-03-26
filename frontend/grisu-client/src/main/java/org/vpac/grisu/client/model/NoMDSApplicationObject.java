@@ -35,19 +35,19 @@ public class NoMDSApplicationObject implements SubmissionObject {
 		this.em = em;
 	}
 
-	public String getApplicationName() {
+	public String getCurrentApplicationName() {
 		return application;
 	}
 
-	public String[] getExecutables() {
+	public String[] getCurrentExecutables() {
 		return executables;
 	}
 
-	public SubmissionLocation getLocation() {
+	public SubmissionLocation getCurrentSubmissionLocation() {
 		return currentSubmissionLocation;
 	}
 
-	public String[] getModules() {
+	public String[] getCurrentModules() {
 		return modules;
 	}
 	
@@ -59,7 +59,7 @@ public class NoMDSApplicationObject implements SubmissionObject {
 		this.executables = executables;
 	}
 
-	public String getVersion() {
+	public String getCurrentVersion() {
 		return null;
 	}
 

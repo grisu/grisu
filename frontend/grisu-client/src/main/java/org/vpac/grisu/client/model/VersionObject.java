@@ -31,12 +31,12 @@ public class VersionObject implements Comparable<VersionObject>, SubmissionObjec
 		return version;
 	}
 
-	public String getVersion() {
+	public String getCurrentVersion() {
 		return version;
 	}
 	
-	public String getApplicationName() {
-		return application.getApplicationName();
+	public String getCurrentApplicationName() {
+		return application.getCurrentApplicationName();
 	}
 
 	private ApplicationObject getApplication() {
@@ -47,7 +47,7 @@ public class VersionObject implements Comparable<VersionObject>, SubmissionObjec
 		if (otherObject instanceof VersionObject) {
 			VersionObject other = (VersionObject) otherObject;
 			if (this.getApplication().equals(other.getApplication())
-					&& this.getVersion().equals(other.getVersion())) {
+					&& this.getCurrentVersion().equals(other.getCurrentVersion())) {
 				return true;
 			} else {
 				return false;
@@ -58,12 +58,12 @@ public class VersionObject implements Comparable<VersionObject>, SubmissionObjec
 	}
 
 	public int hashCode() {
-		return version.hashCode() + application.getApplicationName().hashCode();
+		return version.hashCode() + application.getCurrentApplicationName().hashCode();
 	}
 
 	public int compareTo(VersionObject o) {
 
-		return this.getVersion().compareTo(o.getVersion());
+		return this.getCurrentVersion().compareTo(o.getCurrentVersion());
 	}
 
 	// public Set<SubmissionLocation> getActualAvailableSubmissionLocations() {
@@ -85,7 +85,7 @@ public class VersionObject implements Comparable<VersionObject>, SubmissionObjec
 		if (submissionLocationStrings == null) {
 			submissionLocationStrings = application.getServiceInterface()
 					.getSubmissionLocationsForApplication(
-							application.getApplicationName(), version);
+							application.getCurrentApplicationName(), version);
 		}
 		return submissionLocationStrings;
 	}
@@ -149,7 +149,7 @@ public class VersionObject implements Comparable<VersionObject>, SubmissionObjec
 		Map<String, String> details = applicationDetails.get(site);
 		if (details == null) {
 			details = application.getServiceInterface().getApplicationDetails(
-					application.getApplicationName(), version, site);
+					application.getCurrentApplicationName(), version, site);
 			applicationDetails.put(site, details);
 		}
 
@@ -161,7 +161,7 @@ public class VersionObject implements Comparable<VersionObject>, SubmissionObjec
 		Map<String, String> details = applicationDetails.get(site);
 		if (details == null) {
 			details = application.getServiceInterface().getApplicationDetails(
-					application.getApplicationName(), version, site);
+					application.getCurrentApplicationName(), version, site);
 			applicationDetails.put(site, details);
 		}
 
@@ -172,7 +172,7 @@ public class VersionObject implements Comparable<VersionObject>, SubmissionObjec
 		return details.get("Module").split(",");
 	}
 
-	public String[] getExecutables() {
+	public String[] getCurrentExecutables() {
 		
 		return application.getDetails(this.currentSubmissionLocation, version).get(JobConstants.MDS_EXECUTABLES_KEY).split(",");
 		
@@ -183,15 +183,15 @@ public class VersionObject implements Comparable<VersionObject>, SubmissionObjec
 		if ( getAllSubmissionLocations().contains(currentSubmissionLocation) ) {
 			this.currentSubmissionLocation = currentSubmissionLocation;
 		} else {
-			throw new SubmissionLocationException("Version object \""+version+" for application \""+application.getApplicationName()+" is not supported at submission location: "+currentSubmissionLocation);
+			throw new SubmissionLocationException("Version object \""+version+" for application \""+application.getCurrentApplicationName()+" is not supported at submission location: "+currentSubmissionLocation);
 		}
 	}
 	
-	public SubmissionLocation getLocation() {
+	public SubmissionLocation getCurrentSubmissionLocation() {
 		return this.currentSubmissionLocation;
 	}
 	
-	public String[] getModules() {
+	public String[] getCurrentModules() {
 		return application.getDetails(this.currentSubmissionLocation, version).get(JobConstants.MDS_MODULES_KEY).split(",");
 	}
 

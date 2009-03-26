@@ -67,10 +67,10 @@ public class CommonMDS extends AbstractModule implements SubmissionObjectHolder 
 			return;
 		}
 		
-		templateNodes.get("Application").getTemplateNodeValueSetter().setExternalSetValue(so.getApplicationName());
-		templateNodes.get("HostName").getTemplateNodeValueSetter().setExternalSetValue(so.getLocation().getLocation());
+		templateNodes.get("Application").getTemplateNodeValueSetter().setExternalSetValue(so.getCurrentApplicationName());
+		templateNodes.get("HostName").getTemplateNodeValueSetter().setExternalSetValue(so.getCurrentSubmissionLocation().getLocation());
 		
-		String site = template.getEnvironmentManager().lookupSite(EnvironmentManager.QUEUE_TYPE, so.getLocation().getLocation());
+		String site = template.getEnvironmentManager().lookupSite(EnvironmentManager.QUEUE_TYPE, so.getCurrentSubmissionLocation().getLocation());
 		String fqan = template.getEnvironmentManager().getDefaultFqan();
 		
 //		String[] stagingFS = environmentManager.lookupStagingFileSystemsForQueue(so.getLocation().getLocation());
@@ -96,17 +96,17 @@ public class CommonMDS extends AbstractModule implements SubmissionObjectHolder 
 //		myLogger.debug(("Setting mountpoing: "+mp.getMountpoint()+" for submissionQueue: "+so.getLocation().getLocation()));
 //		executionFileSystemSetter.setExternalSetValue(mp.getRootUrl());
 		
-		String stagingFS = so.getLocation().getFirstStagingFileSystem(fqan);
+		String stagingFS = so.getCurrentSubmissionLocation().getFirstStagingFileSystem(fqan);
 		
 		if ( stagingFS == null ) {
-			myLogger.warn("Couldn't find staging filesystem for submission queue: "+so.getLocation().getLocation()+". Not setting anything.");
+			myLogger.warn("Couldn't find staging filesystem for submission queue: "+so.getCurrentSubmissionLocation().getLocation()+". Not setting anything.");
 			return;
 		}
 		
-		myLogger.debug(("Using staging filesystem: "+stagingFS+" for submissionQueue: "+so.getLocation().getLocation()));
+		myLogger.debug(("Using staging filesystem: "+stagingFS+" for submissionQueue: "+so.getCurrentSubmissionLocation().getLocation()));
 		templateNodes.get("ExecutionFileSystem").getTemplateNodeValueSetter().setExternalSetValue(stagingFS);
 		
-		String[] modules = so.getModules();
+		String[] modules = so.getCurrentModules();
 		
 		if ( modules == null ) {
 			myLogger.error("Not setting anything. There seems to be an error somewhere.");

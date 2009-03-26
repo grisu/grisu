@@ -450,7 +450,7 @@ public class ApplicationChooserPanel extends JPanel implements
 				e.printStackTrace();
 				return null;
 			}
-			myLogger.debug("Selected VersionObject "+application.getName()+", Version: "+currentVersionObject.getVersion()+" and submission location: "+location.getLocation());
+			myLogger.debug("Selected VersionObject "+application.getName()+", Version: "+currentVersionObject.getCurrentVersion()+" and submission location: "+location.getLocation());
 			return currentVersionObject;
 		}
 

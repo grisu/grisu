@@ -270,7 +270,7 @@ public class Common extends AbstractModule implements FqanListener, MountPointsL
 
 		if (useMDS) {
 			if (currentSubmissionLocation == null
-					|| getCurrentApplication().getLocation() == null) {
+					|| getCurrentApplication().getCurrentSubmissionLocation() == null) {
 				throw new SubmissionLocationException(
 						"No submissionLocation set.");
 			}
@@ -394,7 +394,7 @@ public class Common extends AbstractModule implements FqanListener, MountPointsL
 			Set<String> result = new TreeSet<String>();
 
 			for (VersionObject version : versions) {
-				result.add(version.getVersion());
+				result.add(version.getCurrentVersion());
 			}
 			return result;
 		} else {
@@ -423,12 +423,12 @@ public class Common extends AbstractModule implements FqanListener, MountPointsL
 					.getVersionsForSubmissionLocation(currentSubmissionLocation);
 
 			for (VersionObject versionObject : versions) {
-				if (versionObject.getVersion().equals(version)) {
+				if (versionObject.getCurrentVersion().equals(version)) {
 					currentSubmissionObject = versionObject;
 					try {
 						currentSubmissionObject
 								.setCurrentSubmissionLocation(currentSubmissionLocation);
-						String[] modules = currentSubmissionObject.getModules();
+						String[] modules = currentSubmissionObject.getCurrentModules();
 						if ( modules != null && modules.length > 0 ) {
 							moduleSetter.setExternalSetValue(modules[0]);
 						}
@@ -539,11 +539,11 @@ public class Common extends AbstractModule implements FqanListener, MountPointsL
 		currentSubmissionObject.setPreferredExecutableType(preferredExecutableType);
 		
 		hostnameSetter.setExternalSetValue(currentSubmissionObject
-				.getLocation().getLocation());
+				.getCurrentSubmissionLocation().getLocation());
 		executionFsSetter.setExternalSetValue(currentStagingFS);
 
 		if (useMDS) {
-			String[] modules = currentSubmissionObject.getModules();
+			String[] modules = currentSubmissionObject.getCurrentModules();
 			if (modules != null && modules.length >= 1) {
 				moduleSetter.setExternalSetValue(modules[0]);
 			}
@@ -575,9 +575,9 @@ public class Common extends AbstractModule implements FqanListener, MountPointsL
 	private void fireNewValidSubmissionObjectEvent(SubmissionObject newSO) {
 
 		myLogger.debug("Fire submissionPanel event: new site("
-				+ newSO.getLocation().getSite() + "), ("
-				+ newSO.getLocation().getLocation() + ")"
-				+ "\n"+newSO.getApplicationName()+" (Version: "+newSO.getVersion()+").");
+				+ newSO.getCurrentSubmissionLocation().getSite() + "), ("
+				+ newSO.getCurrentSubmissionLocation().getLocation() + ")"
+				+ "\n"+newSO.getCurrentApplicationName()+" (Version: "+newSO.getCurrentVersion()+").");
 		// if we have no mountPointsListeners, do nothing...
 		if (submissionObjectListeners != null
 				&& !submissionObjectListeners.isEmpty()) {

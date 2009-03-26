@@ -325,7 +325,7 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 	private void changeSelectionOfQueues(String site) {
 
 		queueModel.removeAllElements();
-		for ( SubmissionLocation subLoc : infoObject.getCurrentSubmissionLocationsForSite(site) ) {
+		for ( SubmissionLocation subLoc : infoObject.getCurrentlyPossibleSubmissionLocationsForSite(site) ) {
 				queueModel.addElement(subLoc);
 		}
 	}
@@ -398,13 +398,13 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 	
 	private void fillSiteCombobox() {
 		
-		if ( infoObject != null && infoObject.getCurrentSubmissionLocations() != null ) {
+		if ( infoObject != null && infoObject.getCurrentlyPossibleSubmissionLocations() != null ) {
 			
 			SubmissionLocation oldSubLoc = ((SubmissionLocation)(queueModel.getSelectedItem()));
 			
 			siteModel.removeAllElements();
 			
-			if ( infoObject.getCurrentSites().size() == 0 ) {
+			if ( infoObject.getCurrentlyPossibleSites().size() == 0 ) {
 				getSiteComboBox().setEnabled(false);
 				getQueueComboBox().setEnabled(false);
 			} else {
@@ -412,14 +412,14 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 				getQueueComboBox().setEnabled(true);
 			}
 			
-			for ( String site : infoObject.getCurrentSites() ) {
+			for ( String site : infoObject.getCurrentlyPossibleSites() ) {
 			
 				siteModel.addElement(site);
 			
 			}
 			
 			if ( oldSubLoc != null ) {
-				if ( infoObject.getCurrentSites().contains(oldSubLoc.getSite()) ) {
+				if ( infoObject.getCurrentlyPossibleSites().contains(oldSubLoc.getSite()) ) {
 					siteModel.setSelectedItem(oldSubLoc.getSite());
 				}
 			

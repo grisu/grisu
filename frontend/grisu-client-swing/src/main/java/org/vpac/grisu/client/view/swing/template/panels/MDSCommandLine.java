@@ -313,10 +313,10 @@ public class MDSCommandLine extends JPanel implements TemplateNodePanel, Submiss
 		Map<String, String> details = so.getCurrentApplicationDetails();
 		
 		
-		if ( so.getExecutables() == null ) {
+		if ( so.getCurrentExecutables() == null ) {
 			return;
 		}
-		for ( String exe : so.getExecutables() ) {
+		for ( String exe : so.getCurrentExecutables() ) {
 			executableModel.addElement(exe);
 		}
 		

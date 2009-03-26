@@ -426,7 +426,7 @@ public class GenericJobWrapper {
 	 * @throws JobCreationException if the internal state of this object is inconclusive
 	 */
 	public String[] getExecutablesForCurrentState() throws JobCreationException {
-		return getCommonGenericModule().getCurrentSubmissionObject().getExecutables();
+		return getCommonGenericModule().getCurrentSubmissionObject().getCurrentExecutables();
 	}
 	
 	/**
