@@ -8,6 +8,7 @@ import java.util.TreeSet;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
+import org.vpac.grisu.client.TemplateTagConstants;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.eventStuff.SubmissionObjectListener;
 import org.vpac.grisu.client.control.exceptions.SubmissionLocationException;
@@ -38,17 +39,10 @@ public class Common extends AbstractModule implements FqanListener, MountPointsL
 
 	public static final String TEMPLATE_MODULE_NAME = "Basic job properties";
 	
-	public static final String JOBNAME_NAME = "Jobname";
-	public static final String WALLTIME_NAME = "Walltime";
-	public static final String CPUS_NAME = "CPUs";
-	public static final String HOSTNAME_NAME = "HostName";
-	public static final String EXECUTIONFILESYSTEM_NAME = "ExecutionFileSystem";
-	public static final String EMAIL_ADDRESS_NAME = "EmailAddress";
-	public static final String MODULE_NAME = "Module";
 
-	public static final String[] MODULES_USED = new String[] { JOBNAME_NAME,
-			WALLTIME_NAME, CPUS_NAME, HOSTNAME_NAME, EXECUTIONFILESYSTEM_NAME,
-			EMAIL_ADDRESS_NAME, MODULE_NAME };
+	public static final String[] MODULES_USED = new String[] { TemplateTagConstants.JOBNAME_TAG_NAME,
+			TemplateTagConstants.WALLTIME_TAG_NAME, TemplateTagConstants.CPUS_TAG_NAME, TemplateTagConstants.HOSTNAME_TAG_NAME, TemplateTagConstants.EXECUTIONFILESYSTEM_TAG_NAME,
+			TemplateTagConstants.EMAIL_ADDRESS_TAG_NAME, TemplateTagConstants.MODULE_TAG_NAME };
 
 	private DefaultTemplateNodeValueSetter hostnameSetter = new DefaultTemplateNodeValueSetter();
 	private DefaultTemplateNodeValueSetter executionFsSetter = new DefaultTemplateNodeValueSetter();
@@ -72,24 +66,24 @@ public class Common extends AbstractModule implements FqanListener, MountPointsL
 	private Map<String, Set<SubmissionLocation>> currentSitesMDS = null;
 
 	public void setJobname(String jobname) {
-		templateNodes.get(JOBNAME_NAME).getTemplateNodeValueSetter()
+		templateNodes.get(TemplateTagConstants.JOBNAME_TAG_NAME).getTemplateNodeValueSetter()
 				.setExternalSetValue(jobname);
 	}
 
 	public void setWalltime(long walltimeInSeconds) {
 		String walltime = new Long(walltimeInSeconds).toString();
-		templateNodes.get(WALLTIME_NAME).getTemplateNodeValueSetter()
+		templateNodes.get(TemplateTagConstants.WALLTIME_TAG_NAME).getTemplateNodeValueSetter()
 				.setExternalSetValue(walltime);
 	}
 
 	public void setCPUs(int no_of_cpus) {
 		String cpus = new Integer(no_of_cpus).toString();
-		templateNodes.get(CPUS_NAME).getTemplateNodeValueSetter()
+		templateNodes.get(TemplateTagConstants.CPUS_TAG_NAME).getTemplateNodeValueSetter()
 				.setExternalSetValue(cpus);
 	}
 
 	public void setEmailAddress(String email) {
-		templateNodes.get(EMAIL_ADDRESS_NAME).getTemplateNodeValueSetter()
+		templateNodes.get(TemplateTagConstants.EMAIL_ADDRESS_TAG_NAME).getTemplateNodeValueSetter()
 				.setExternalSetValue(email);
 	}
 
@@ -164,27 +158,27 @@ public class Common extends AbstractModule implements FqanListener, MountPointsL
 		
 		// initialize email just in case because it's optional
 		TemplateNodeValueSetter tempSetter = templateNodes.get(
-				EMAIL_ADDRESS_NAME).getTemplateNodeValueSetter();
+				TemplateTagConstants.EMAIL_ADDRESS_TAG_NAME).getTemplateNodeValueSetter();
 		if (tempSetter == null) {
-			templateNodes.get(EMAIL_ADDRESS_NAME).setTemplateNodeValueSetter(
+			templateNodes.get(TemplateTagConstants.EMAIL_ADDRESS_TAG_NAME).setTemplateNodeValueSetter(
 					new DefaultTemplateNodeValueSetter());
 		}
 
-		templateNodes.get(HOSTNAME_NAME).setTemplateNodeValueSetter(
+		templateNodes.get(TemplateTagConstants.HOSTNAME_TAG_NAME).setTemplateNodeValueSetter(
 				hostnameSetter);
-		templateNodes.get(EXECUTIONFILESYSTEM_NAME).setTemplateNodeValueSetter(
+		templateNodes.get(TemplateTagConstants.EXECUTIONFILESYSTEM_TAG_NAME).setTemplateNodeValueSetter(
 				executionFsSetter);
-		templateNodes.get(MODULE_NAME).setTemplateNodeValueSetter(moduleSetter);
+		templateNodes.get(TemplateTagConstants.MODULE_TAG_NAME).setTemplateNodeValueSetter(moduleSetter);
 		
 
 		// we connect these ones just in case they are not connected to later on
-		templateNodes.get(JOBNAME_NAME).setTemplateNodeValueSetter(
+		templateNodes.get(TemplateTagConstants.JOBNAME_TAG_NAME).setTemplateNodeValueSetter(
 				new DefaultTemplateNodeValueSetter());
-		templateNodes.get(WALLTIME_NAME).setTemplateNodeValueSetter(
+		templateNodes.get(TemplateTagConstants.WALLTIME_TAG_NAME).setTemplateNodeValueSetter(
 				new DefaultTemplateNodeValueSetter());
-		templateNodes.get(CPUS_NAME).setTemplateNodeValueSetter(
+		templateNodes.get(TemplateTagConstants.CPUS_TAG_NAME).setTemplateNodeValueSetter(
 				new DefaultTemplateNodeValueSetter());
-		templateNodes.get(EMAIL_ADDRESS_NAME).setTemplateNodeValueSetter(
+		templateNodes.get(TemplateTagConstants.EMAIL_ADDRESS_TAG_NAME).setTemplateNodeValueSetter(
 				new DefaultTemplateNodeValueSetter());
 		
 	}

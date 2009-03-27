@@ -1,15 +1,14 @@
 package org.vpac.grisu.client.view.swing.template.modules;
 
+import java.util.Enumeration;
 import java.util.Vector;
 
 import javax.swing.JPanel;
 
-import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.eventStuff.SubmissionObjectListener;
 import org.vpac.grisu.client.control.template.ModuleException;
 import org.vpac.grisu.client.model.SubmissionObject;
 import org.vpac.grisu.client.model.template.modules.SubmissionObjectHolder;
-import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.view.swing.template.AbstractModulePanel;
 import org.vpac.grisu.client.view.swing.template.modules.common.VersionQueuePanel;
 import org.vpac.grisu.client.view.swing.template.panels.CPUs;
@@ -26,7 +25,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class GenericMDS extends AbstractModulePanel implements SubmissionObjectHolder {
+public class GenericMDS extends AbstractModulePanel {
 
 	private WallTime wallTime;
 	private MemoryInputPanel memoryInputPanel;
@@ -34,6 +33,7 @@ public class GenericMDS extends AbstractModulePanel implements SubmissionObjectH
 	private VersionQueuePanel versionQueuePanel;
 	private CPUs cpus;
 	private JobName jobName;
+	
 	/**
 	 * 
 	 */
@@ -49,16 +49,15 @@ public class GenericMDS extends AbstractModulePanel implements SubmissionObjectH
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("140px:grow(1.0)"),
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("75dlu"),
+				ColumnSpec.decode("88dlu"),
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("152px")},
+				ColumnSpec.decode("113px"),
+				FormFactory.RELATED_GAP_COLSPEC},
 			new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("86px"),
+				RowSpec.decode("127px"),
 				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("90px"),
-				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("75dlu:grow(1.0)"),
+				RowSpec.decode("121dlu"),
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC}));
@@ -67,20 +66,23 @@ public class GenericMDS extends AbstractModulePanel implements SubmissionObjectH
 
 	@Override
 	protected void initialize() throws ModuleException {
-		add(getJobName(), new CellConstraints("2, 2, 3, 1, fill, fill"));
-		add(getCPUs(), new CellConstraints("6, 2, 1, 3, fill, fill"));
-		add(getVersionQueuePanel(templateModule.getTemplate().getEnvironmentManager(), templateModule.getTemplateNodes().get(org.vpac.grisu.client.model.template.modules.GenericMDS.VERSION_TEMPLATE_TAG_NAME), templateModule.getTemplateNodes().get(org.vpac.grisu.client.model.template.modules.GenericMDS.HOSTNAME_TEMPLATE_TAG_NAME), templateModule.getTemplate().getApplicationName()), new CellConstraints("2, 6, 3, 1, fill, fill"));
+		add(getJobName(), new CellConstraints("2, 2, fill, fill"));
+		add(getCPUs(), new CellConstraints("6, 4, fill, fill"));
+		add(getVersionQueuePanel(), new CellConstraints("2, 4, 3, 1, fill, fill"));
+		add(getEmail(), new CellConstraints(2, 6, 5, 1));
+		add(getMemoryInputPanel(), new CellConstraints(6, 2, CellConstraints.DEFAULT, CellConstraints.TOP));
+		add(getWallTime(), new CellConstraints(4, 2, CellConstraints.DEFAULT, CellConstraints.TOP));
 		
 		try {
 			getJobName().setTemplateNode(this.templateModule.getTemplateNodes().get("Jobname"));
 			getCPUs().setTemplateNode(this.templateModule.getTemplateNodes().get("CPUs"));
+			getEmail().setTemplateNode(this.templateModule.getTemplateNodes().get("EmailAddress"));
+			getWallTime().setTemplateNode(this.templateModule.getTemplateNodes().get("Walltime"));
+			getMemoryInputPanel().setTemplateNode(this.templateModule.getTemplateNodes().get("MinMem"));
 		} catch (TemplateNodePanelException e) {
 
 			throw new ModuleException(this.templateModule, e);
 		}
-		add(getEmail(), new CellConstraints(2, 8, 5, 1));
-		add(getMemoryInputPanel(), new CellConstraints(4, 4, CellConstraints.DEFAULT, CellConstraints.TOP));
-		add(getWallTime(), new CellConstraints(2, 4));
 	}
 
 	public JPanel getPanel() {
@@ -107,9 +109,9 @@ public class GenericMDS extends AbstractModulePanel implements SubmissionObjectH
 	/**
 	 * @return
 	 */
-	protected VersionQueuePanel getVersionQueuePanel(EnvironmentManager em, TemplateNode versionNode, TemplateNode hostNameNode, String appName) {
+	protected VersionQueuePanel getVersionQueuePanel() {
 		if (versionQueuePanel == null) {
-			versionQueuePanel = new VersionQueuePanel(em, versionNode, hostNameNode, appName);
+			versionQueuePanel = new VersionQueuePanel(this.templateModule);
 		}
 		return versionQueuePanel;
 	}
@@ -141,28 +143,4 @@ public class GenericMDS extends AbstractModulePanel implements SubmissionObjectH
 		return wallTime;
 	}
 	
-	// event stuff
-
-	private Vector<SubmissionObjectListener> submissionObjectListener;
-	
-	public void addSubmissionObjectListener(SubmissionObjectListener l) {
-		if (submissionObjectListener == null)
-			submissionObjectListener = new Vector();
-		submissionObjectListener.addElement(l);
-	}
-
-	public SubmissionObject getCurrentSubmissionObject()
-			throws JobCreationException {
-
-		return getV
-		
-	}
-
-	public void removeSubmissionObjectListener(SubmissionObjectListener l) {
-		if (submissionObjectListener == null) {
-			submissionObjectListener = new Vector<SubmissionObjectListener>();
-		}
-		submissionObjectListener.removeElement(l);
-	}
-
 }

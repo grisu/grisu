@@ -21,6 +21,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
 import org.apache.log4j.Logger;
+import org.vpac.grisu.client.TemplateTagConstants;
 import org.vpac.grisu.client.control.eventStuff.SubmissionObjectListener;
 import org.vpac.grisu.client.control.utils.FqanEvent;
 import org.vpac.grisu.client.control.utils.FqanListener;
@@ -125,11 +126,11 @@ public class QueuePanel extends JPanel implements FqanListener, MountPointsListe
 		this.commonGenericModule.getTemplate().getEnvironmentManager().addMountPointListener(this);
 
 		hostName = this.commonGenericModule.getTemplateNodes().get(
-				Common.HOSTNAME_NAME);
+				TemplateTagConstants.HOSTNAME_TAG_NAME);
 		executionFileSystem = this.commonGenericModule.getTemplateNodes().get(
-				Common.EXECUTIONFILESYSTEM_NAME);
+				TemplateTagConstants.EXECUTIONFILESYSTEM_TAG_NAME);
 		module = this.commonGenericModule.getTemplateNodes().get(
-				Common.MODULE_NAME);
+				TemplateTagConstants.MODULE_TAG_NAME);
 
 		getTextField().setText(module.getDefaultValue());
 		commonGenericModule.setModule(getTextField().getText());

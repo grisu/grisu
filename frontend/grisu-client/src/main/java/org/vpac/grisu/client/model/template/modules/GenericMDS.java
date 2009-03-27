@@ -5,13 +5,25 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
+import org.vpac.grisu.client.TemplateTagConstants;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.eventStuff.SubmissionObjectListener;
 import org.vpac.grisu.client.model.SubmissionObject;
 import org.vpac.grisu.client.model.template.JsdlTemplate;
+import org.vpac.grisu.client.model.template.nodes.DefaultTemplateNodeValueSetter;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 
-public class GenericMDS extends AbstractModule implements SubmissionObjectHolder {
+/**
+ * This is a generic job properties module that focuses on the version of the application instead of where
+ * you want to submit your job. So you select the version of the application first (or tell Grisu you don't care about
+ * the version) and then you decide where to submit the job to.
+ * 
+ * It implements the SubmissionObjectHolder interface so panels like the MDSCommandLine one can connect to it.
+ * 
+ * @author Markus Binsteiner
+ *
+ */
+public class GenericMDS extends AbstractModule implements SubmissionObjectHolder, SubmissionObjectListener {
 	
 	static final Logger myLogger = Logger.getLogger(GenericMDS.class.getName());
 	
@@ -23,8 +35,16 @@ public class GenericMDS extends AbstractModule implements SubmissionObjectHolder
 	
 	private SubmissionObject currentlySelecteSubmissionObject = null;
 	
+	private DefaultTemplateNodeValueSetter executionFileSystemSetter = new DefaultTemplateNodeValueSetter();
+	private DefaultTemplateNodeValueSetter hostnameSetter = new DefaultTemplateNodeValueSetter();
+	private DefaultTemplateNodeValueSetter versionSetter = new DefaultTemplateNodeValueSetter();
+	
 	public GenericMDS(JsdlTemplate template) {
 		super(template);
+		
+		template.getTemplateNodes().get(TemplateTagConstants.EXECUTIONFILESYSTEM_TAG_NAME).setTemplateNodeValueSetter(executionFileSystemSetter);
+		template.getTemplateNodes().get(TemplateTagConstants.HOSTNAME_TAG_NAME).setTemplateNodeValueSetter(hostnameSetter);
+		template.getTemplateNodes().get(TemplateTagConstants.VERSION_TAG_NAME).setTemplateNodeValueSetter(versionSetter);
 	}
 
 	@Override
@@ -62,41 +82,11 @@ public class GenericMDS extends AbstractModule implements SubmissionObjectHolder
 	// EventStuff
 	private Vector<SubmissionObjectListener> submissionObjectListener;
 
+	// change the template and forward this to possible other listeners
 	public void submissionObjectChanged(SubmissionObject so) {
-		
-		if ( so == null ) {
-			myLogger.error("SubmissionObject is null. Not firing the event.");
-			return;
-		}
-		
-		templateNodes.get("Application").getTemplateNodeValueSetter().setExternalSetValue(so.getCurrentApplicationName());
-		templateNodes.get("HostName").getTemplateNodeValueSetter().setExternalSetValue(so.getCurrentSubmissionLocation().getLocation());
 		
 		String site = template.getEnvironmentManager().lookupSite(EnvironmentManager.QUEUE_TYPE, so.getCurrentSubmissionLocation().getLocation());
 		String fqan = template.getEnvironmentManager().getDefaultFqan();
-		
-//		String[] stagingFS = environmentManager.lookupStagingFileSystemsForQueue(so.getLocation().getLocation());
-		
-//		MountPoint mp = null;
-		
-//		for ( String fs : stagingFS ) {
-//			mp = environmentManager.getDefaultMountPointForSiteAndFqan(environmentManager.lookupSite(EnvironmentManager.FILE_URL_TYPE, fs), fqan);
-//			mp = environmentManager.getMountPointsForSubmissionLocationAndFqan(so.getLocation().getLocation(), fqan).iterator().next();
-//			if ( mp != null )
-//				break;
-//		}
-		
-		
-//		MountPoint mp = environmentManager.getDefaultMountPointForSiteAndFqan(site, fqan);
-//		MountPoint mp = null;
-//		if ( mp == null ) {
-			// means no mountpoint available
-////			myLogger.debug("No mountpoint available. Not firing event.");
-//			return;
-//		}
-		
-//		myLogger.debug(("Setting mountpoing: "+mp.getMountpoint()+" for submissionQueue: "+so.getLocation().getLocation()));
-//		executionFileSystemSetter.setExternalSetValue(mp.getRootUrl());
 		
 		String stagingFS = so.getCurrentSubmissionLocation().getFirstStagingFileSystem(fqan);
 		
@@ -106,8 +96,13 @@ public class GenericMDS extends AbstractModule implements SubmissionObjectHolder
 		}
 		
 		myLogger.debug(("Using staging filesystem: "+stagingFS+" for submissionQueue: "+so.getCurrentSubmissionLocation().getLocation()));
-		templateNodes.get("ExecutionFileSystem").getTemplateNodeValueSetter().setExternalSetValue(stagingFS);
-				
+		
+		executionFileSystemSetter.setExternalSetValue(stagingFS);
+		
+		versionSetter.setExternalSetValue(so.getCurrentVersion());
+		hostnameSetter.setExternalSetValue(so.getCurrentSubmissionLocation().getLocation());
+		
+		myLogger.debug("New submissionLocation: "+so.getCurrentSubmissionLocation().getLocation()+". Staging filesystem: "+stagingFS+". Version to use: "+so.getCurrentVersion());
 		// if we have no submissionObjectListeners, do nothing...
 		if (submissionObjectListener != null && !submissionObjectListener.isEmpty()) {
 			// create the event object to send
@@ -127,7 +122,7 @@ public class GenericMDS extends AbstractModule implements SubmissionObjectHolder
 				l.submissionObjectChanged(so);
 			}
 			}
-		}
+	}
 	
 
 	// register a listener

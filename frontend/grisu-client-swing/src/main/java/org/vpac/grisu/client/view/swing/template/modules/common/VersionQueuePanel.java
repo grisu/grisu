@@ -4,8 +4,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -18,10 +20,16 @@ import javax.swing.border.TitledBorder;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
+import org.vpac.grisu.client.control.eventStuff.SubmissionObjectListener;
+import org.vpac.grisu.client.control.exceptions.SubmissionLocationException;
 import org.vpac.grisu.client.model.ApplicationInfoObject;
 import org.vpac.grisu.client.model.ModeNotSupportedException;
 import org.vpac.grisu.client.model.SubmissionLocation;
+import org.vpac.grisu.client.model.SubmissionObject;
+import org.vpac.grisu.client.model.template.modules.SubmissionObjectHolder;
+import org.vpac.grisu.client.model.template.modules.TemplateModule;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
+import org.vpac.grisu.control.JobCreationException;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -29,7 +37,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class VersionQueuePanel extends JPanel implements ActionListener {
+public class VersionQueuePanel extends JPanel implements ActionListener, SubmissionObjectHolder {
 	
 	static final Logger myLogger = Logger.getLogger(VersionQueuePanel.class
 			.getName());
@@ -67,6 +75,11 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 	private DefaultComboBoxModel siteModel = new DefaultComboBoxModel();
 	private DefaultComboBoxModel queueModel = new DefaultComboBoxModel();
 	
+	private TemplateNode version = null;
+	private TemplateNode hostname = null;
+	private TemplateNode executionFileSystem = null;
+	
+	
 	private boolean anyModeSupported = true;
 	private boolean defaultModeSupported = true;
 	private boolean exactModeSupported = true;
@@ -84,13 +97,24 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 	/**
 	 * Create the panel
 	 */
-	public VersionQueuePanel(EnvironmentManager em, TemplateNode versionNode, TemplateNode hostnameNode, String application) {
+	public VersionQueuePanel(TemplateModule templateModule) {
 		
 		super();
-		this.em = em;
-		this.versionNode = versionNode;
-		this.hostnameNode = hostnameNode;
-		this.application = application;
+		try {
+			this.addSubmissionObjectListener((SubmissionObjectListener)templateModule);
+		} catch (Exception e) {
+			throw new RuntimeException("Can't create VersionQueuePanel because the templateModule this is connected to ("+templateModule.getModuleName()+") is not implementing the SubmissionObjectListener interface.");
+		}
+		this.em = templateModule.getTemplate().getEnvironmentManager();
+		
+		this.version = templateModule.getTemplateNodes().get("Application");
+		this.hostname = templateModule.getTemplateNodes().get("HostName");
+		this.executionFileSystem = templateModule.getTemplateNodes().get("ExecutionFileSystem");
+		
+		
+		this.versionNode = templateModule.getTemplateNodes().get(org.vpac.grisu.client.model.template.modules.GenericMDS.VERSION_TEMPLATE_TAG_NAME);
+		this.hostnameNode = templateModule.getTemplateNodes().get(org.vpac.grisu.client.model.template.modules.GenericMDS.HOSTNAME_TEMPLATE_TAG_NAME);
+		this.application = templateModule.getTemplate().getApplicationName();
 		
 		this.anyModeSupported = versionNode.getOtherProperties().containsKey(ANY_MODE_TEMPLATETAG_KEY);
 		this.defaultModeSupported = versionNode.getOtherProperties().containsKey(DEFAULT_MODE_TEMPLATETAG_KEY);
@@ -339,20 +363,27 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 			queueComboBox = new JComboBox(queueModel);
 			queueComboBox.addItemListener(new ItemListener() {
 				public void itemStateChanged(final ItemEvent e) {
-					
+					SubmissionLocation tempLoc = (SubmissionLocation)(queueModel.getSelectedItem());
+					try {
+						infoObject.setCurrentSubmissionLocation(tempLoc);
+					} catch (SubmissionLocationException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 					// if mode = any then change the version to the recommended one
-					if ( currentMode == ApplicationInfoObject.ANY_VERSION_MODE && ((SubmissionLocation)(queueModel.getSelectedItem()) != null) ) {
+					if ( currentMode == ApplicationInfoObject.ANY_VERSION_MODE && tempLoc != null ) {
 						ignoreVersionComboboxItemChanged = true;
-						String temp = infoObject.getRecommendedVersionForSubmissionLocation(((SubmissionLocation)(queueModel.getSelectedItem())), em.getDefaultFqan());
-						if ( temp == null || "".equals(temp) ) {
-							temp = "n/a";
-						}
+//						String temp = infoObject.getRecommendedVersionForSubmissionLocation(tempLoc, em.getDefaultFqan());
+//						if ( temp == null || "".equals(temp) ) {
+//							temp = "n/a";
+//						}
+						String temp = infoObject.getCurrentVersion();
 						versionModel.setSelectedItem(temp);
 						ignoreVersionComboboxItemChanged = false;					
 					}
 
 					// TODO add exact version here
-					
+					fireNewValidSubmissionObjectEvent(infoObject);
 				}
 			});
 		}
@@ -496,8 +527,64 @@ public class VersionQueuePanel extends JPanel implements ActionListener {
 
 		switchMode(e.getActionCommand());
 		
+		
 	}
 	
 	
+	// event stuff
+
+	private Vector<SubmissionObjectListener> submissionObjectListeners;
+	
+	
+	private void fireNewValidSubmissionObjectEvent(SubmissionObject newSO) {
+
+		myLogger.debug("Fire submissionPanel event: new site("
+				+ newSO.getCurrentSubmissionLocation().getSite() + "), ("
+				+ newSO.getCurrentSubmissionLocation().getLocation() + ")"
+				+ "\n"+newSO.getCurrentApplicationName()+" (Version: "+newSO.getCurrentVersion()+").");
+		// if we have no mountPointsListeners, do nothing...
+		if (submissionObjectListeners != null
+				&& !submissionObjectListeners.isEmpty()) {
+			// create the event object to send
+
+			// make a copy of the listener list in case
+			// anyone adds/removes mountPointsListeners
+			Vector<SubmissionObjectListener> sitePanelTargets;
+			synchronized (this) {
+				sitePanelTargets = (Vector<SubmissionObjectListener>) submissionObjectListeners
+						.clone();
+			}
+
+			// walk through the listener list and
+			// call the gridproxychanged method in each
+			Enumeration<SubmissionObjectListener> e = sitePanelTargets
+					.elements();
+			while (e.hasMoreElements()) {
+				SubmissionObjectListener l = e.nextElement();
+				l.submissionObjectChanged(newSO);
+			}
+		}
+	}
+	
+	public void addSubmissionObjectListener(SubmissionObjectListener l) {
+		if (submissionObjectListeners == null)
+			submissionObjectListeners = new Vector();
+		submissionObjectListeners.addElement(l);
+	}
+	public SubmissionObject getCurrentSubmissionObject()
+			throws JobCreationException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	public void removeSubmissionObjectListener(SubmissionObjectListener l) {
+		if (submissionObjectListeners == null) {
+			submissionObjectListeners = new Vector<SubmissionObjectListener>();
+		}
+		submissionObjectListeners.removeElement(l);
+	}
+	
+	public void reset() {
+
+	}
 
 }

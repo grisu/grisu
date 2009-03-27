@@ -91,15 +91,15 @@ public class ApplicationChooserPanel extends JPanel implements
 		setLayout(new FormLayout(
 			new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
-				new ColumnSpec("64dlu:grow(1.0)"),
+				ColumnSpec.decode("64dlu:grow(1.0)"),
 				FormFactory.RELATED_GAP_COLSPEC,
-				new ColumnSpec("50dlu:grow(1.0)"),
+				ColumnSpec.decode("50dlu:grow(1.0)"),
 				FormFactory.RELATED_GAP_COLSPEC,
-				new ColumnSpec("66dlu:grow(1.0)"),
+				ColumnSpec.decode("66dlu:grow(1.0)"),
 				FormFactory.RELATED_GAP_COLSPEC},
 			new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
-				new RowSpec("34dlu:grow(1.0)"),
+				RowSpec.decode("34dlu:grow(1.0)"),
 				FormFactory.RELATED_GAP_ROWSPEC}));
 		add(getSplitPane(), new CellConstraints(2, 2, 5, 1));
 		//

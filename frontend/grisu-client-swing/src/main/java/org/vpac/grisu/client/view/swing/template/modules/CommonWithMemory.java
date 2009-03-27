@@ -3,6 +3,7 @@ package org.vpac.grisu.client.view.swing.template.modules;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
+import org.vpac.grisu.client.TemplateTagConstants;
 import org.vpac.grisu.client.control.template.ModuleException;
 import org.vpac.grisu.client.model.template.TemplateHelperUtils;
 import org.vpac.grisu.client.model.template.modules.TemplateModule;
@@ -93,11 +94,11 @@ public class CommonWithMemory extends AbstractModulePanel implements ValueListen
 		((org.vpac.grisu.client.model.template.modules.CommonWithMemory)templateModule).setApplication(template.getApplicationName());
 		((org.vpac.grisu.client.model.template.modules.CommonWithMemory)templateModule).setDefaultVO();
 		try {
-			getWallTimePanel().setTemplateNode(this.templateModule.getTemplateNodes().get("Walltime"));
-			getJobNamePanel().setTemplateNode(this.templateModule.getTemplateNodes().get("Jobname"));
-			getCpus().setTemplateNode(this.templateModule.getTemplateNodes().get("CPUs"));
-			getEmail().setTemplateNode(this.templateModule.getTemplateNodes().get("EmailAddress"));
-			getMemoryInputPanel().setTemplateNode(this.templateModule.getTemplateNodes().get("MinMem"));
+			getWallTimePanel().setTemplateNode(this.templateModule.getTemplateNodes().get(TemplateTagConstants.WALLTIME_TAG_NAME));
+			getJobNamePanel().setTemplateNode(this.templateModule.getTemplateNodes().get(TemplateTagConstants.JOBNAME_TAG_NAME));
+			getCpus().setTemplateNode(this.templateModule.getTemplateNodes().get(TemplateTagConstants.CPUS_TAG_NAME));
+			getEmail().setTemplateNode(this.templateModule.getTemplateNodes().get(TemplateTagConstants.EMAIL_ADDRESS_TAG_NAME));
+			getMemoryInputPanel().setTemplateNode(this.templateModule.getTemplateNodes().get(TemplateTagConstants.MIN_MEM_TAG_NAME));
 		} catch (TemplateNodePanelException e) {
 			myLogger.error("Could not initialize common panel: "+e.getLocalizedMessage());
 		}

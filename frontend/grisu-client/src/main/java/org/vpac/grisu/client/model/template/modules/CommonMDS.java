@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
+import org.vpac.grisu.client.TemplateTagConstants;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.eventStuff.SubmissionObjectListener;
 import org.vpac.grisu.client.model.SubmissionObject;
@@ -16,7 +17,9 @@ public class CommonMDS extends AbstractModule implements SubmissionObjectHolder 
 	static final Logger myLogger = Logger.getLogger(CommonMDS.class.getName());
 	
 	public static final String[] MODULES_USED = new String[]{
-		"Jobname", "Application", "Walltime", "CPUs", "HostName", "ExecutionFileSystem", "EmailAddress", "Module"
+		TemplateTagConstants.JOBNAME_TAG_NAME, TemplateTagConstants.APPLICATION_TAG_NAME,
+		TemplateTagConstants.WALLTIME_TAG_NAME, TemplateTagConstants.CPUS_TAG_NAME, TemplateTagConstants.HOSTNAME_TAG_NAME,
+		TemplateTagConstants.EXECUTIONFILESYSTEM_TAG_NAME, TemplateTagConstants.EMAIL_ADDRESS_TAG_NAME, TemplateTagConstants.MODULE_TAG_NAME
 	};
 	
 	private SubmissionObject currentlySelecteSubmissionObject = null;

@@ -8,6 +8,7 @@ import java.util.TreeSet;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
+import org.vpac.grisu.client.TemplateTagConstants;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.eventStuff.SubmissionObjectListener;
 import org.vpac.grisu.client.control.exceptions.SubmissionLocationException;
@@ -36,11 +37,11 @@ public class CommonWithMemory extends Common implements FqanListener, MountPoint
 
 	static final Logger myLogger = Logger.getLogger(Common.class.getName());
 	
-	public static final String MEMORY_NAME = "MinMem";
 	
-	public static final String[] MODULES_USED_MEMORY = new String[] { JOBNAME_NAME,
-		WALLTIME_NAME, CPUS_NAME, HOSTNAME_NAME, EXECUTIONFILESYSTEM_NAME,
-		EMAIL_ADDRESS_NAME, MODULE_NAME, MEMORY_NAME };
+	public static final String[] MODULES_USED_MEMORY = new String[] { TemplateTagConstants.JOBNAME_TAG_NAME,
+		TemplateTagConstants.WALLTIME_TAG_NAME, TemplateTagConstants.CPUS_TAG_NAME, TemplateTagConstants.HOSTNAME_TAG_NAME,
+		TemplateTagConstants.EXECUTIONFILESYSTEM_TAG_NAME, TemplateTagConstants.EMAIL_ADDRESS_TAG_NAME,
+		TemplateTagConstants.MODULE_TAG_NAME, TemplateTagConstants.MIN_MEM_TAG_NAME };
 	
 	private DefaultTemplateNodeValueSetter memorySetter = new DefaultTemplateNodeValueSetter();
 
@@ -52,13 +53,13 @@ public class CommonWithMemory extends Common implements FqanListener, MountPoint
 		
 		initValueSetters(templateNodes);
 		
-		templateNodes.get(MEMORY_NAME).setTemplateNodeValueSetter(memorySetter);
+		templateNodes.get(TemplateTagConstants.MIN_MEM_TAG_NAME).setTemplateNodeValueSetter(memorySetter);
 		
 	}
 	
 	public void setMemory(long memoryinbytes) {
 		String memory = new Long(memoryinbytes).toString();
-		templateNodes.get(MEMORY_NAME).getTemplateNodeValueSetter()
+		templateNodes.get(TemplateTagConstants.MIN_MEM_TAG_NAME).getTemplateNodeValueSetter()
 				.setExternalSetValue(memory);
 	}
 	
