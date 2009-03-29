@@ -57,8 +57,8 @@ public class UserDAO extends BaseHibernateDAO {
         	String dn = getDN(transientInstance);
             getSession(dn).save(transientInstance);
             myLogger.debug("save successful");
-            getSession(dn).flush();
-//            getSession(dn).close();
+//            getSession(dn).flush();
+            getSession(dn).close();
         } catch (RuntimeException re) {
             myLogger.error("save failed", re);
             throw re;
@@ -71,8 +71,8 @@ public class UserDAO extends BaseHibernateDAO {
         	String dn = getDN(persistentInstance);
             getSession(dn).delete(persistentInstance);
             myLogger.debug("delete successful");
-            getSession(dn).flush();
-//            getSession(dn).close();
+//            getSession(dn).flush();
+            getSession(dn).close();
         } catch (RuntimeException re) {
             myLogger.error("delete failed", re);
             throw re;
@@ -86,8 +86,8 @@ public class UserDAO extends BaseHibernateDAO {
             User result = (User) getSession(dn)
                     .merge(detachedInstance);
             myLogger.debug("merge successful");
-            getSession(dn).flush();
-//            getSession(dn).close();
+//            getSession(dn).flush();
+            getSession(dn).close();
             return result;
         } catch (RuntimeException re) {
             myLogger.error("merge failed", re);
@@ -101,8 +101,8 @@ public class UserDAO extends BaseHibernateDAO {
         	String dn = getDN(instance);
             getSession(dn).saveOrUpdate(instance);
             myLogger.debug("attach successful");
-            getSession(dn).flush();
-//            getSession(dn).close();
+//            getSession(dn).flush();
+            getSession(dn).close();
         } catch (RuntimeException re) {
             myLogger.error("attach failed", re);
             throw re;
@@ -116,8 +116,8 @@ public class UserDAO extends BaseHibernateDAO {
         	String dn = getDN(instance);
             getSession(dn).lock(instance, LockMode.NONE);
             myLogger.debug("attach successful");
-            getSession(dn).flush();
-//            getSession(dn).close();
+//            getSession(dn).flush();
+            getSession(dn).close();
         } catch (RuntimeException re) {
             myLogger.error("attach failed", re);
             throw re;
