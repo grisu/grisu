@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.border.TitledBorder;
 
+import org.apache.commons.configuration.Configuration;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.eventStuff.SubmissionObjectListener;
@@ -93,6 +94,7 @@ public class VersionQueuePanel extends JPanel implements ActionListener, Submiss
 	private TemplateNode hostnameNode = null;
 	
 	private boolean ignoreVersionComboboxItemChanged = true;
+	private boolean ignoreQueueChanges = false;
 	
 	/**
 	 * Create the panel
@@ -148,6 +150,10 @@ public class VersionQueuePanel extends JPanel implements ActionListener, Submiss
 		
 		try {
 			this.exactModeVersion = versionNode.getOtherProperties().get(EXACT_MODE_TEMPLATETAG_KEY);
+
+			if ( "NON_VALUE".equals(this.exactModeVersion) ) {
+				this.exactModeVersion = null;
+			}
 		} catch (Exception e) {
 			myLogger.debug("No exact mode locked version specified...");
 		}
@@ -175,10 +181,11 @@ public class VersionQueuePanel extends JPanel implements ActionListener, Submiss
 			versionModel.addElement(version);
 		}
 		
-		if ( em.getAllAvailableVersionsForApplication(application, em.getDefaultFqan()).contains(this.exactModeVersion) ) {
+		if ( this.exactModeVersion != null && em.getAllAvailableVersionsForApplication(application, em.getDefaultFqan()).contains(this.exactModeVersion) ) {
 			versionModel.setSelectedItem(this.exactModeVersion);
 		}
 
+		this.exactModeVersion = infoObject.getCurrentVersion();
 		ignoreVersionComboboxItemChanged = false;
 		
 		switch (currentMode) {
@@ -273,20 +280,25 @@ public class VersionQueuePanel extends JPanel implements ActionListener, Submiss
 			versionComboBox = new JComboBox(versionModel);
 			versionComboBox.addItemListener(new ItemListener() {
 				public void itemStateChanged(final ItemEvent e) {
-					
-					if ( ! ignoreVersionComboboxItemChanged ) {
-					
-						infoObject.setVersion((String)versionModel.getSelectedItem());
-						if ( versionModel.getSize() > 0 ) {
-							fillSiteCombobox();
-						}
-					}
-					
+					recalculateVersionAndSubsequentSubmissionLocationDefaults();
 				}
 			});
 		}
 		return versionComboBox;
 	}
+	
+	private void recalculateVersionAndSubsequentSubmissionLocationDefaults() {
+		if ( ! ignoreVersionComboboxItemChanged ) {
+			
+			infoObject.setVersion((String)versionModel.getSelectedItem());
+			if ( versionModel.getSize() > 0 ) {
+				fillSiteCombobox();
+			}
+		}
+		
+		
+	}
+	
 	/**
 	 * @return
 	 */
@@ -338,7 +350,7 @@ public class VersionQueuePanel extends JPanel implements ActionListener, Submiss
 			siteComboBox = new JComboBox(siteModel);
 			siteComboBox.addItemListener(new ItemListener() {
 				public void itemStateChanged(final ItemEvent e) {
-					
+
 					changeSelectionOfQueues(((String)(siteModel.getSelectedItem())));
 				}
 			});
@@ -348,10 +360,27 @@ public class VersionQueuePanel extends JPanel implements ActionListener, Submiss
 	
 	private void changeSelectionOfQueues(String site) {
 
+		if ( site != null && !"".equals(site) ) {
+		SubmissionLocation oldSubLoc = ((SubmissionLocation)(queueModel.getSelectedItem()));
+				
+		ignoreQueueChanges = true;
 		queueModel.removeAllElements();
 		for ( SubmissionLocation subLoc : infoObject.getCurrentlyPossibleSubmissionLocationsForSite(site) ) {
 				queueModel.addElement(subLoc);
 		}
+		
+				if ( oldSubLoc != null && queueModel.getIndexOf(oldSubLoc) >= 0 ) {
+			queueModel.setSelectedItem(oldSubLoc);
+		} else if ( queueModel.getSize() > 0 ) {
+			queueModel.setSelectedItem(queueComboBox.getItemAt(0));
+		} else {
+			myLogger.warn("No queues available...");
+		}
+		ignoreQueueChanges = false;
+		recalculateApplicationInfoObject();
+		}
+		
+		
 	}
 	
 	
@@ -363,31 +392,45 @@ public class VersionQueuePanel extends JPanel implements ActionListener, Submiss
 			queueComboBox = new JComboBox(queueModel);
 			queueComboBox.addItemListener(new ItemListener() {
 				public void itemStateChanged(final ItemEvent e) {
-					SubmissionLocation tempLoc = (SubmissionLocation)(queueModel.getSelectedItem());
-					try {
-						infoObject.setCurrentSubmissionLocation(tempLoc);
-					} catch (SubmissionLocationException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					// if mode = any then change the version to the recommended one
-					if ( currentMode == ApplicationInfoObject.ANY_VERSION_MODE && tempLoc != null ) {
-						ignoreVersionComboboxItemChanged = true;
-//						String temp = infoObject.getRecommendedVersionForSubmissionLocation(tempLoc, em.getDefaultFqan());
-//						if ( temp == null || "".equals(temp) ) {
-//							temp = "n/a";
-//						}
-						String temp = infoObject.getCurrentVersion();
-						versionModel.setSelectedItem(temp);
-						ignoreVersionComboboxItemChanged = false;					
-					}
-
-					// TODO add exact version here
-					fireNewValidSubmissionObjectEvent(infoObject);
+					recalculateApplicationInfoObject();
 				}
 			});
 		}
 		return queueComboBox;
+	}
+	
+	private void recalculateApplicationInfoObject() {
+		if ( ! ignoreQueueChanges ) {
+			SubmissionLocation tempLoc = (SubmissionLocation)(queueModel.getSelectedItem());
+			if ( tempLoc != null ) {
+			try {
+				// check any mode, if, then set the currect version first
+				if ( currentMode == ApplicationInfoObject.ANY_VERSION_MODE ) {
+					String tempVersion = infoObject.getRecommendedVersionForSubmissionLocation(tempLoc, em.getDefaultFqan());
+					infoObject.setVersion(tempVersion);
+				}
+				
+				infoObject.setCurrentSubmissionLocation(tempLoc);
+			} catch (SubmissionLocationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			// if mode = any then change the version to the recommended one
+			if ( currentMode == ApplicationInfoObject.ANY_VERSION_MODE && tempLoc != null ) {
+				ignoreVersionComboboxItemChanged = true;
+//				String temp = infoObject.getRecommendedVersionForSubmissionLocation(tempLoc, em.getDefaultFqan());
+//				if ( temp == null || "".equals(temp) ) {
+//					temp = "n/a";
+//				}
+				String temp = infoObject.getCurrentVersion();
+				versionModel.setSelectedItem(temp);
+				ignoreVersionComboboxItemChanged = false;					
+			}
+
+			// TODO add exact version here
+			fireNewValidSubmissionObjectEvent(infoObject);
+			}
+			}
 	}
 	
 	private void switchMode(String mode) {
@@ -464,6 +507,7 @@ public class VersionQueuePanel extends JPanel implements ActionListener, Submiss
 	private void switchToAnyVersionMode() throws ModeNotSupportedException {
 		
 		String lastVersion = (String)(versionModel.getSelectedItem());
+		SubmissionLocation tempSubmissionLocation = ((SubmissionLocation)queueModel.getSelectedItem());
 		siteModel.removeAllElements();
 		queueModel.removeAllElements();
 		getVersionComboBox().setEnabled(false);
@@ -474,7 +518,6 @@ public class VersionQueuePanel extends JPanel implements ActionListener, Submiss
 		for ( String version : allVersions ) {
 			versionModel.addElement(version);
 		}
-		ignoreVersionComboboxItemChanged = false;
 		
 		if ( allVersions.contains(lastVersion) ) {
 			versionModel.setSelectedItem(lastVersion);
@@ -482,6 +525,21 @@ public class VersionQueuePanel extends JPanel implements ActionListener, Submiss
 			if ( versionModel.getSize() > 0 ) {
 				versionModel.setSelectedItem(versionModel.getElementAt(0));
 			}
+		}
+
+		ignoreVersionComboboxItemChanged = false;
+		// recalculate sites
+		recalculateVersionAndSubsequentSubmissionLocationDefaults();
+		
+		if ( tempSubmissionLocation != null ) {
+				
+				if ( siteModel.getIndexOf(tempSubmissionLocation.getSite()) >= 0 ) {
+					siteModel.setSelectedItem(tempSubmissionLocation.getSite());
+				}
+				
+				if ( queueModel.getIndexOf(tempSubmissionLocation) >= 0 ) {
+					queueModel.setSelectedItem(tempSubmissionLocation);
+				}
 		}
 		
 	}

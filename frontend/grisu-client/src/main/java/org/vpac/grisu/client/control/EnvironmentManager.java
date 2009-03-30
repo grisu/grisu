@@ -712,7 +712,7 @@ public class EnvironmentManager implements MountPointsListener {
 		
 		if ( allAvailableVersionsForApplicationPerSubmissionLocation.get(fqan+"_"+subLoc.getLocation()+"_"+application) == null ) {
 			
-			String [] allVersions = getServiceInterface().getVersionsOfApplicationsOnSubmissionLocation(application, subLoc.getLocation());
+			String [] allVersions = getServiceInterface().getVersionsOfApplicationOnSubmissionLocation(application, subLoc.getLocation());
 			
 			allAvailableVersionsForApplicationPerSubmissionLocation.put(fqan+"_"+subLoc.getLocation()+"_"+application, allVersions);
 		}
@@ -733,7 +733,7 @@ public class EnvironmentManager implements MountPointsListener {
 	public Set<String> getAllAvailableVersionsForApplication(
 			String applicationName, String fqan) {
 
-		if (allAvailableVersionsForApplication.get(applicationName) == null) {
+		if (allAvailableVersionsForApplication.get(applicationName+"_"+fqan) == null) {
 
 			myLogger.debug("Getting all available versions for application "
 					+ applicationName);
@@ -750,9 +750,9 @@ public class EnvironmentManager implements MountPointsListener {
 			myLogger.debug("[BENCHMARK] Getting all version locations for "
 					+ applicationName + " duration: "
 					+ (end.getTime() - start.getTime()));
-			allAvailableVersionsForApplication.put(applicationName, result);
+			allAvailableVersionsForApplication.put(applicationName+"_"+fqan, result);
 		}
-		return allAvailableVersionsForApplication.get(applicationName);
+		return allAvailableVersionsForApplication.get(applicationName+"_"+fqan);
 	}
 	
 	public Set<SubmissionLocation> getAllAvailableSubmissionLocationsForApplicationAndVersion(String appname, String version, String fqan) {

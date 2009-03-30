@@ -55,9 +55,11 @@ public class GenericMDS extends AbstractModulePanel {
 				FormFactory.RELATED_GAP_COLSPEC},
 			new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("127px"),
+				RowSpec.decode("91px"),
 				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("121dlu"),
+				RowSpec.decode("84dlu"),
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC}));
@@ -68,10 +70,10 @@ public class GenericMDS extends AbstractModulePanel {
 	protected void initialize() throws ModuleException {
 		add(getJobName(), new CellConstraints("2, 2, fill, fill"));
 		add(getCPUs(), new CellConstraints("6, 4, fill, fill"));
-		add(getVersionQueuePanel(), new CellConstraints("2, 4, 3, 1, fill, fill"));
-		add(getEmail(), new CellConstraints(2, 6, 5, 1));
-		add(getMemoryInputPanel(), new CellConstraints(6, 2, CellConstraints.DEFAULT, CellConstraints.TOP));
-		add(getWallTime(), new CellConstraints(4, 2, CellConstraints.DEFAULT, CellConstraints.TOP));
+		add(getVersionQueuePanel(), new CellConstraints("2, 4, 3, 3, fill, fill"));
+		add(getEmail(), new CellConstraints(2, 8, 5, 1));
+		add(getMemoryInputPanel(), new CellConstraints(6, 6, CellConstraints.DEFAULT, CellConstraints.TOP));
+		add(getWallTime(), new CellConstraints(4, 2, 3, 1, CellConstraints.DEFAULT, CellConstraints.TOP));
 		
 		try {
 			getJobName().setTemplateNode(this.templateModule.getTemplateNodes().get("Jobname"));

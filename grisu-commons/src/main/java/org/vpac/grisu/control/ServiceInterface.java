@@ -29,7 +29,7 @@ import org.w3c.dom.Document;
 @WebService
 public interface ServiceInterface {
 	
-	public static final double INTERFACE_VERSION = 2;
+	public static final double INTERFACE_VERSION = 3;
 	
 	//---------------------------------------------------------------------------------------------------
 	// 
@@ -262,7 +262,11 @@ public interface ServiceInterface {
 	@WebMethod
 	public String[] getVersionsOfApplicationOnSite(String application, String site);
 	
-	public String[] getVersionsOfApplicationsOnSubmissionLocation(String application, String submissionLocation);
+	@WebMethod
+	public String[] getVersionsOfApplicationOnSubmissionLocation(String application, String submissionLocation);
+	
+//	@WebMethod
+//	public String[] getVersionsOfApplicationOnSubmissionLocation(String application, String submissionLocation, String fqan);
 	
 	/**
 	 * Returns an array of the gridftp servers for the specified submission locations.

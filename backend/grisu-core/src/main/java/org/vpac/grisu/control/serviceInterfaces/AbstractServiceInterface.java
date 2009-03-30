@@ -2060,7 +2060,7 @@ abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 	
-	public String[] getVersionsOfApplicationsOnSubmissionLocation(String application, String submissionLocation) {
+	public String[] getVersionsOfApplicationOnSubmissionLocation(String application, String submissionLocation) {
 		return informationManager.getVersionsOfApplicationOnSubmissionLocation(application, submissionLocation);
 	}
 
