@@ -1,12 +1,10 @@
-package org.vpac.grisu.client.model;
+package org.vpac.grisu.js.model;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.fs.model.InformationObject;
 
 public class ApplicationInformationObject implements InformationObject {
 	

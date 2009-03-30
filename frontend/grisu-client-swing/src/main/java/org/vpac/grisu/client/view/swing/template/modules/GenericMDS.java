@@ -1,24 +1,14 @@
 package org.vpac.grisu.client.view.swing.template.modules;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import javax.swing.JPanel;
 
-import org.vpac.grisu.client.control.eventStuff.SubmissionObjectListener;
 import org.vpac.grisu.client.control.template.ModuleException;
-import org.vpac.grisu.client.model.SubmissionObject;
-import org.vpac.grisu.client.model.template.modules.SubmissionObjectHolder;
 import org.vpac.grisu.client.view.swing.template.AbstractModulePanel;
-import org.vpac.grisu.client.view.swing.template.modules.common.VersionQueuePanel;
 import org.vpac.grisu.client.view.swing.template.panels.CPUs;
 import org.vpac.grisu.client.view.swing.template.panels.Email;
 import org.vpac.grisu.client.view.swing.template.panels.JobName;
 import org.vpac.grisu.client.view.swing.template.panels.MemoryInputPanel;
-import org.vpac.grisu.client.view.swing.template.panels.TemplateNodePanelException;
 import org.vpac.grisu.client.view.swing.template.panels.WallTime;
-import org.vpac.grisu.control.JobCreationException;
-
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -27,18 +17,11 @@ import com.jgoodies.forms.layout.RowSpec;
 
 public class GenericMDS extends AbstractModulePanel {
 
-	private WallTime wallTime;
-	private MemoryInputPanel memoryInputPanel;
 	private Email email;
-	private VersionQueuePanel versionQueuePanel;
-	private CPUs cpus;
+	private MemoryInputPanel memoryInputPanel;
+	private CPUs us;
+	private WallTime wallTime;
 	private JobName jobName;
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -3195321397180648037L;
-
 	/**
 	 * Create the panel
 	 */
@@ -47,44 +30,30 @@ public class GenericMDS extends AbstractModulePanel {
 		setLayout(new FormLayout(
 			new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("140px:grow(1.0)"),
+				ColumnSpec.decode("126dlu"),
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("88dlu"),
-				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("113px"),
-				FormFactory.RELATED_GAP_COLSPEC},
+				ColumnSpec.decode("113dlu")},
 			new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("91px"),
+				RowSpec.decode("56dlu"),
 				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("84dlu"),
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
+				RowSpec.decode("73dlu"),
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC}));
+				FormFactory.RELATED_GAP_ROWSPEC,
+				RowSpec.decode("default")}));
+		add(getJobName(), new CellConstraints(2, 2, CellConstraints.FILL, CellConstraints.FILL));
+		add(getWallTime(), new CellConstraints(4, 2));
+		add(getUs(), new CellConstraints(4, 4));
+		add(getMemoryInputPanel(), new CellConstraints(4, 6));
+		add(getEmail(), new CellConstraints(2, 8, 3, 1));
 		//
 	}
 
 	@Override
 	protected void initialize() throws ModuleException {
-		add(getJobName(), new CellConstraints("2, 2, fill, fill"));
-		add(getCPUs(), new CellConstraints("6, 4, fill, fill"));
-		add(getVersionQueuePanel(), new CellConstraints("2, 4, 3, 3, fill, fill"));
-		add(getEmail(), new CellConstraints(2, 8, 5, 1));
-		add(getMemoryInputPanel(), new CellConstraints(6, 6, CellConstraints.DEFAULT, CellConstraints.TOP));
-		add(getWallTime(), new CellConstraints(4, 2, 3, 1, CellConstraints.DEFAULT, CellConstraints.TOP));
+		// TODO Auto-generated method stub
 		
-		try {
-			getJobName().setTemplateNode(this.templateModule.getTemplateNodes().get("Jobname"));
-			getCPUs().setTemplateNode(this.templateModule.getTemplateNodes().get("CPUs"));
-			getEmail().setTemplateNode(this.templateModule.getTemplateNodes().get("EmailAddress"));
-			getWallTime().setTemplateNode(this.templateModule.getTemplateNodes().get("Walltime"));
-			getMemoryInputPanel().setTemplateNode(this.templateModule.getTemplateNodes().get("MinMem"));
-		} catch (TemplateNodePanelException e) {
-
-			throw new ModuleException(this.templateModule, e);
-		}
 	}
 
 	public JPanel getPanel() {
@@ -102,29 +71,20 @@ public class GenericMDS extends AbstractModulePanel {
 	/**
 	 * @return
 	 */
-	protected CPUs getCPUs() {
-		if (cpus == null) {
-			cpus = new CPUs();
+	protected WallTime getWallTime() {
+		if (wallTime == null) {
+			wallTime = new WallTime();
 		}
-		return cpus;
+		return wallTime;
 	}
 	/**
 	 * @return
 	 */
-	protected VersionQueuePanel getVersionQueuePanel() {
-		if (versionQueuePanel == null) {
-			versionQueuePanel = new VersionQueuePanel(this.templateModule);
+	protected CPUs getUs() {
+		if (us == null) {
+			us = new CPUs();
 		}
-		return versionQueuePanel;
-	}
-	/**
-	 * @return
-	 */
-	protected Email getEmail() {
-		if (email == null) {
-			email = new Email();
-		}
-		return email;
+		return us;
 	}
 	/**
 	 * @return
@@ -138,11 +98,11 @@ public class GenericMDS extends AbstractModulePanel {
 	/**
 	 * @return
 	 */
-	protected WallTime getWallTime() {
-		if (wallTime == null) {
-			wallTime = new WallTime();
+	protected Email getEmail() {
+		if (email == null) {
+			email = new Email();
 		}
-		return wallTime;
+		return email;
 	}
-	
+
 }

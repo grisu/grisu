@@ -38,9 +38,9 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class VersionQueuePanel extends JPanel implements ActionListener, SubmissionObjectHolder {
+public class VersionQueuePanel_NotSoGood extends JPanel implements ActionListener, SubmissionObjectHolder {
 	
-	static final Logger myLogger = Logger.getLogger(VersionQueuePanel.class
+	static final Logger myLogger = Logger.getLogger(VersionQueuePanel_NotSoGood.class
 			.getName());
 	
 	
@@ -99,7 +99,7 @@ public class VersionQueuePanel extends JPanel implements ActionListener, Submiss
 	/**
 	 * Create the panel
 	 */
-	public VersionQueuePanel(TemplateModule templateModule) {
+	public VersionQueuePanel_NotSoGood(TemplateModule templateModule) {
 		
 		super();
 		try {

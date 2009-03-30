@@ -1,4 +1,4 @@
-package org.vpac.grisu.fs.model;
+package org.vpac.grisu.js.model;
 
 import java.util.Map;
 
@@ -10,6 +10,10 @@ import java.util.Map;
  *
  */
 public interface InformationObject {
+	
+	public final static int DEFAULT_VERSION_MODE = 0;
+	public final static int ANY_VERSION_MODE = 1;
+	public final static int EXACT_VERSION_MODE = 2;
 	
 	public String getApplicationName();
 	
