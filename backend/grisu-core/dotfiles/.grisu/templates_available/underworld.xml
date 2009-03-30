@@ -46,9 +46,7 @@
 			-->
 			<ApplicationName>underworld</ApplicationName>
 			<Description>
-				UnderWorld is a StGermain parallel modelling framework Geoscience research code, 
-				which utilises a Lagrangian particle-in-cell finite element scheme 
-				(the prototype of which is the Ellipsis code), visualised using gLucifer.
+				Underworld (http://www.underworldproject.org/) is a 3D-parallel geodynamic modelling framework capable of deriving viscous / viscoplastic thermal, chemical and thermochemical models consistent with tectonic processes, such as mantle convection and lithospheric deformation over long time scales. Underworld utilises a Lagrangian particle-in-cell finite element scheme (the prototype of which is the Ellipsis code), and is visualised using gLucifer. The Underworld source code is written in C in an Object Oriented style, following the methodology of design for change applied to computational codes implemented in StGermain (http://www.stgermainproject.org/). It uses PETSc (http://www-unix.mcs.anl.gov/petsc) (optimised numerical solvers) and MPI (parallelism) libraries. The Underworld to StGermain software stack is released under a mixture of BSD and LGPL licenses. Underworld is under collaborative development by Monash University (http://www.monash.edu.au/) and the VPAC (http://www.vpac.org/), as part of the NCRIS AuScope capabilty in the Simulation and Modelling Victoria (http://www.auscope.monash.edu.au/) program. 
 			</Description>
 			<POSIXApplication
 				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
