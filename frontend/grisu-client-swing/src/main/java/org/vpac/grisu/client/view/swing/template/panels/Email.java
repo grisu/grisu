@@ -1,5 +1,3 @@
-
-
 package org.vpac.grisu.client.view.swing.template.panels;
 
 import java.awt.Color;
@@ -305,7 +303,7 @@ public class Email extends JPanel implements TemplateNodePanel {
 
 	public String getExternalSetValue() {
 
-		if (getNotifyMeWhenCheckBox().isSelected()) {
+		if (getNotifyMeWhenCheckBox().isSelected() || getNotifyWhenJobStartsCheckBox().isSelected()) {
 			return getTextField().getText();
 		} else {
 			return null;

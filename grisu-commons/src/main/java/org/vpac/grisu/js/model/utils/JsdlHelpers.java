@@ -218,33 +218,32 @@ public class JsdlHelpers {
 	 */
 	public static int getProcessorCount(Document jsdl) {
 		
-//		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl:TotalCPUCount/jsdl:exact";
-//		NodeList resultNodes = null;
-//		try {
-//			resultNodes = (NodeList) xpath.evaluate(expression, jsdl,
-//					XPathConstants.NODESET);
-//		} catch (XPathExpressionException e) {
-//			myLogger.warn("No jobname in jsdl file.");
-//			return -1;
-//		}
-//
-//		if (resultNodes.getLength() != 1) {
-//			myLogger.warn("This template doesn't specify a (correct) TotalCPUCount element. Please have a look at your template and replace a possible <TotalCPUCount>2</TotalCPUCount> elemnt with something like: <TotalCPUCount><exact>2</exact></TotalCPUCount> Trying old, incorrect implementation...");
-//			// this is just for backwards compatibility because I got the TotalCPUCount element wrong before...
-//			return -1;
-//		}
-//
-//		int processorCount;
-//		try {
-//			processorCount = new Integer(resultNodes.item(0).getTextContent());
-//		} catch (NumberFormatException e) {
-//			myLogger.error("No valid number entry in the walltime element.");
-//			return -1;
-//		}
-//
-//		
-//		return processorCount;
-		return getProcessorCount_OLD(jsdl);
+		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl:TotalCPUCount/jsdl:exact";
+		NodeList resultNodes = null;
+		try {
+			resultNodes = (NodeList) xpath.evaluate(expression, jsdl,
+					XPathConstants.NODESET);
+		} catch (XPathExpressionException e) {
+			myLogger.warn("No jobname in jsdl file.");
+			return -1;
+		}
+
+		if (resultNodes.getLength() != 1) {
+			myLogger.warn("This template doesn't specify a (correct) TotalCPUCount element. Please have a look at your template and replace a possible <TotalCPUCount>2</TotalCPUCount> elemnt with something like: <TotalCPUCount><exact>2</exact></TotalCPUCount> Trying old, incorrect implementation...");
+			// this is just for backwards compatibility because I got the TotalCPUCount element wrong before...
+			return getProcessorCount_OLD(jsdl);
+		}
+
+		int processorCount;
+		try {
+			processorCount = new Integer(resultNodes.item(0).getTextContent());
+		} catch (NumberFormatException e) {
+			myLogger.error("No valid number entry in the walltime element.");
+			return -1;
+		}
+
+		
+		return processorCount;
 
 	}
 	
