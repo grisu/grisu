@@ -37,6 +37,7 @@ import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.fs.control.MountPointHelpers;
 import org.vpac.grisu.fs.model.MountPoint;
+import org.vpac.grisu.model.EnvironmentSnapshotValues;
 import org.vpac.helpDesk.model.Person;
 import org.vpac.helpDesk.model.PersonException;
 import org.vpac.historyRepeater.DummyHistoryManager;
@@ -54,7 +55,15 @@ import org.vpac.historyRepeater.SimpleHistoryManager;
  * @author Markus Binsteiner
  * 
  */
-public class EnvironmentManager implements MountPointsListener {
+public class EnvironmentManager implements MountPointsListener, EnvironmentSnapshotValues {
+	
+	public String getCurrentFqan() {
+		return getDefaultFqan();
+	}
+
+	public void setCurrentFqan(String currentFqan) {
+		setDefaultFqan(currentFqan);
+	}
 
 	static final Logger myLogger = Logger.getLogger(EnvironmentManager.class
 			.getName());
@@ -1563,5 +1572,7 @@ public class EnvironmentManager implements MountPointsListener {
 	public String[] getAllSitesOfTheGrid() {
 		return getServiceInterface().getAllSites();
 	}
+
+
 
 }

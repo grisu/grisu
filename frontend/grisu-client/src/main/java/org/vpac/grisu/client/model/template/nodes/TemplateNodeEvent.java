@@ -12,6 +12,7 @@ public class TemplateNodeEvent extends EventObject {
 	public static final int TEMPLATE_FILLED_INVALID = 1;
 	public static final int TEMPLATE_PROCESSED_VALID = 2;
 	public static final int TEMPLATE_PROCESSED_INVALID = 3;
+	public static final int TEMPLATE_VALUE_UPDATED = 4;
 	
 	public static final String DEFAULT_FILLED_MESSAGE = "Input filled.";
 	public static final String DEFAULT_PROCESSED_VALID_MESSAGE = "Input successfully processed.";

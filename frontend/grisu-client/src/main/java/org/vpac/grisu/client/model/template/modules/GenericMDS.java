@@ -23,7 +23,7 @@ import org.vpac.grisu.client.model.template.nodes.TemplateNode;
  * @author Markus Binsteiner
  *
  */
-public class GenericMDS extends AbstractModule implements SubmissionObjectHolder, SubmissionObjectListener {
+public class GenericMDS extends AbstractModule {
 	
 	static final Logger myLogger = Logger.getLogger(GenericMDS.class.getName());
 	
@@ -78,66 +78,66 @@ public class GenericMDS extends AbstractModule implements SubmissionObjectHolder
 		this.currentlySelecteSubmissionObject = so;
 	}
 	
-	// -------------------------------------------------------------------
-	// EventStuff
-	private Vector<SubmissionObjectListener> submissionObjectListener;
-
-	// change the template and forward this to possible other listeners
-	public void submissionObjectChanged(SubmissionObject so) {
-		
-		String site = template.getEnvironmentManager().lookupSite(EnvironmentManager.QUEUE_TYPE, so.getCurrentSubmissionLocation().getLocation());
-		String fqan = template.getEnvironmentManager().getDefaultFqan();
-		
-		String stagingFS = so.getCurrentSubmissionLocation().getFirstStagingFileSystem(fqan);
-		
-		if ( stagingFS == null ) {
-			myLogger.warn("Couldn't find staging filesystem for submission queue: "+so.getCurrentSubmissionLocation().getLocation()+". Not setting anything.");
-			return;
-		}
-		
-		myLogger.debug(("Using staging filesystem: "+stagingFS+" for submissionQueue: "+so.getCurrentSubmissionLocation().getLocation()));
-		
-		executionFileSystemSetter.setExternalSetValue(stagingFS);
-		
-		versionSetter.setExternalSetValue(so.getCurrentVersion());
-		hostnameSetter.setExternalSetValue(so.getCurrentSubmissionLocation().getLocation());
-		
-		myLogger.debug("New submissionLocation: "+so.getCurrentSubmissionLocation().getLocation()+". Staging filesystem: "+stagingFS+". Version to use: "+so.getCurrentVersion());
-		// if we have no submissionObjectListeners, do nothing...
-		if (submissionObjectListener != null && !submissionObjectListener.isEmpty()) {
-			// create the event object to send
-
-			// make a copy of the listener list in case
-			// anyone adds/removes mountPointsListeners
-			Vector targets;
-			synchronized (this) {
-				targets = (Vector) submissionObjectListener.clone();
-			}
-
-			// walk through the listener list and
-			// call the gridproxychanged method in each
-			Enumeration e = targets.elements();
-			while (e.hasMoreElements()) {
-				SubmissionObjectListener l = (SubmissionObjectListener) e.nextElement();
-				l.submissionObjectChanged(so);
-			}
-			}
-	}
-	
-
-	// register a listener
-	synchronized public void addSubmissionObjectListener(SubmissionObjectListener l) {
-		if (submissionObjectListener == null)
-			submissionObjectListener = new Vector();
-		submissionObjectListener.addElement(l);
-	}
-
-	// remove a listener
-	synchronized public void removeSubmissionObjectListener(SubmissionObjectListener l) {
-		if (submissionObjectListener == null) {
-			submissionObjectListener = new Vector<SubmissionObjectListener>();
-		}
-		submissionObjectListener.removeElement(l);
-	}
+//	// -------------------------------------------------------------------
+//	// EventStuff
+//	private Vector<SubmissionObjectListener> submissionObjectListener;
+//
+//	// change the template and forward this to possible other listeners
+//	public void submissionObjectChanged(SubmissionObject so) {
+//		
+//		String site = template.getEnvironmentManager().lookupSite(EnvironmentManager.QUEUE_TYPE, so.getCurrentSubmissionLocation().getLocation());
+//		String fqan = template.getEnvironmentManager().getDefaultFqan();
+//		
+//		String stagingFS = so.getCurrentSubmissionLocation().getFirstStagingFileSystem(fqan);
+//		
+//		if ( stagingFS == null ) {
+//			myLogger.warn("Couldn't find staging filesystem for submission queue: "+so.getCurrentSubmissionLocation().getLocation()+". Not setting anything.");
+//			return;
+//		}
+//		
+//		myLogger.debug(("Using staging filesystem: "+stagingFS+" for submissionQueue: "+so.getCurrentSubmissionLocation().getLocation()));
+//		
+//		executionFileSystemSetter.setExternalSetValue(stagingFS);
+//		
+//		versionSetter.setExternalSetValue(so.getCurrentVersion());
+//		hostnameSetter.setExternalSetValue(so.getCurrentSubmissionLocation().getLocation());
+//		
+//		myLogger.debug("New submissionLocation: "+so.getCurrentSubmissionLocation().getLocation()+". Staging filesystem: "+stagingFS+". Version to use: "+so.getCurrentVersion());
+//		// if we have no submissionObjectListeners, do nothing...
+//		if (submissionObjectListener != null && !submissionObjectListener.isEmpty()) {
+//			// create the event object to send
+//
+//			// make a copy of the listener list in case
+//			// anyone adds/removes mountPointsListeners
+//			Vector targets;
+//			synchronized (this) {
+//				targets = (Vector) submissionObjectListener.clone();
+//			}
+//
+//			// walk through the listener list and
+//			// call the gridproxychanged method in each
+//			Enumeration e = targets.elements();
+//			while (e.hasMoreElements()) {
+//				SubmissionObjectListener l = (SubmissionObjectListener) e.nextElement();
+//				l.submissionObjectChanged(so);
+//			}
+//			}
+//	}
+//	
+//
+//	// register a listener
+//	synchronized public void addSubmissionObjectListener(SubmissionObjectListener l) {
+//		if (submissionObjectListener == null)
+//			submissionObjectListener = new Vector();
+//		submissionObjectListener.addElement(l);
+//	}
+//
+//	// remove a listener
+//	synchronized public void removeSubmissionObjectListener(SubmissionObjectListener l) {
+//		if (submissionObjectListener == null) {
+//			submissionObjectListener = new Vector<SubmissionObjectListener>();
+//		}
+//		submissionObjectListener.removeElement(l);
+//	}
 
 }

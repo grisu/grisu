@@ -3,8 +3,13 @@ package org.vpac.grisu.control;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.vpac.grisu.js.model.ApplicationInformationObject;
-import org.vpac.grisu.js.model.InformationObject;
+import org.vpac.grisu.model.ApplicationInformation;
+import org.vpac.grisu.model.ApplicationInformationImpl;
+import org.vpac.grisu.model.EnvironmentSnapshotValues;
+import org.vpac.grisu.model.UserApplicationInformation;
+import org.vpac.grisu.model.UserApplicationInformationImpl;
+import org.vpac.grisu.model.UserInformation;
+import org.vpac.grisu.model.UserInformationImpl;
 
 public class GrisuRegistry {
 	
@@ -17,11 +22,12 @@ public class GrisuRegistry {
 		}
 		
 		if ( REGISTRY == null) {
-			REGISTRY = new GrisuRegistry(singletonServiceInterface);
+			REGISTRY = new GrisuRegistry(singletonServiceInterface, singletonEsv);
 		}
 		return REGISTRY;
 	}
 	private static ServiceInterface singletonServiceInterface;
+	private static EnvironmentSnapshotValues singletonEsv;
 	
 	private final ServiceInterface serviceInterface;
 	
@@ -33,19 +39,52 @@ public class GrisuRegistry {
 		singletonServiceInterface = serviceInterfaceTemp;
 	}
 	
-	private Map<String, InformationObject> cachedInformationObjects = new HashMap<String, InformationObject>();
-	
-	public GrisuRegistry(ServiceInterface serviceInterface) {
-		this.serviceInterface = serviceInterface;
+	public static void setEnvironmentSnapshotValues(EnvironmentSnapshotValues esv) {
+		singletonEsv = esv;
 	}
 	
-	public InformationObject getInformationObject(String applicationName) {
+	private EnvironmentSnapshotValues esv = null;
+	
+	
+	// here starts the real class...
+	
+	private Map<String, ApplicationInformation> cachedApplicationInformationObjects = new HashMap<String, ApplicationInformation>();
+	private Map<String, UserApplicationInformation> cachedUserInformationObjects = new HashMap<String, UserApplicationInformation>();
+	private UserInformation cachedUserInformation;
+	
+	public GrisuRegistry(ServiceInterface serviceInterface, EnvironmentSnapshotValues esv) {
+		this.serviceInterface = serviceInterface;
+		this.esv = esv;
+	}
+	
+	public UserApplicationInformation getUserApplicationInformation(String applicationName) {
 		
-		if ( cachedInformationObjects.get(applicationName) == null ) {
-			InformationObject temp = new ApplicationInformationObject(serviceInterface, applicationName);
-			cachedInformationObjects.put(applicationName, temp);
+		if ( cachedUserInformationObjects.get(applicationName) == null ) {
+			UserApplicationInformation temp = new UserApplicationInformationImpl(serviceInterface, getUserInformation(), applicationName);
+			cachedUserInformationObjects.put(applicationName, temp);
 		}
-		return cachedInformationObjects.get(applicationName);
+		return cachedUserInformationObjects.get(applicationName);
+	}
+	
+	public ApplicationInformation getApplicationInformationObject(String applicationName) {
+		
+		if ( cachedApplicationInformationObjects.get(applicationName) == null ) {
+			ApplicationInformation temp = new ApplicationInformationImpl(serviceInterface, applicationName);
+			cachedApplicationInformationObjects.put(applicationName, temp);
+		}
+		return cachedApplicationInformationObjects.get(applicationName);
+	}
+	
+	public UserInformation getUserInformation() {
+		
+		if ( cachedUserInformation == null ) {
+			this.cachedUserInformation = new UserInformationImpl(serviceInterface);
+		}
+		return cachedUserInformation;
+	}
+
+	public EnvironmentSnapshotValues getEnvironmentSnapshotValues() {
+		return esv;
 	}
 
 }

@@ -3,7 +3,10 @@ package org.vpac.grisu.client.view.swing.template.panels;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.Enumeration;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.BoxLayout;
@@ -15,15 +18,20 @@ import javax.swing.JRadioButton;
 import javax.swing.border.TitledBorder;
 
 import org.apache.log4j.Logger;
+import org.vpac.grisu.client.TemplateTagConstants;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.TemplateNodeEvent;
 import org.vpac.grisu.control.GrisuRegistry;
-import org.vpac.grisu.js.model.InformationObject;
+import org.vpac.grisu.model.UserApplicationInformation;
 
 public class Version extends JPanel implements TemplateNodePanel,
-		ActionListener {
+		ActionListener, ValueListener {
 
 	static final Logger myLogger = Logger.getLogger(Version.class.getName());
+
+	public final static int DEFAULT_VERSION_MODE = 0;
+	public final static int ANY_VERSION_MODE = 1;
+	public final static int EXACT_VERSION_MODE = 2;
 
 	public static final String ANY_MODE_TEMPLATETAG_KEY = "useAny";
 	public static final String DEFAULT_MODE_TEMPLATETAG_KEY = "useDefault";
@@ -42,7 +50,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 	private JRadioButton exactRadioButton;
 
 	private TemplateNode templateNode;
-	private InformationObject infoObject = null;
+	private UserApplicationInformation infoObject = null;
 	private String applicationName = null;
 	private boolean useAny = true;
 	private boolean useDefault = true;
@@ -50,8 +58,11 @@ public class Version extends JPanel implements TemplateNodePanel,
 	private boolean useExact = true;
 
 	private String startMode = ANY_MODE_STRING;
-
+	private short currentMode = -1;
+	
 	private ButtonGroup modeGroup = new ButtonGroup();
+	
+	private TemplateNodePanel submissionLocationPanel = null;
 
 	/**
 	 * Create the panel
@@ -70,6 +81,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 			throws TemplateNodePanelException {
 
 		this.templateNode = node;
+		this.templateNode.setTemplateNodeValueSetter(this);
 		
 		this.applicationName = this.templateNode.getTemplate().getApplicationName();
 		
@@ -108,6 +120,14 @@ public class Version extends JPanel implements TemplateNodePanel,
 				startMode = ANY_MODE_STRING;
 			}
 		}
+		
+		if ( ANY_MODE_STRING.equals(startMode) ) {
+			currentMode = DEFAULT_VERSION_MODE;
+		} else if ( EXACT_MODE_STRING.equals(startMode) ) {
+			currentMode = EXACT_VERSION_MODE;
+		} else {
+			currentMode = ANY_VERSION_MODE;
+		}
 
 		if (useAny) {
 			add(getAnyRadioButton());
@@ -122,24 +142,40 @@ public class Version extends JPanel implements TemplateNodePanel,
 		// add combobox as last item
 		add(getVersionComboBox());
 
-		infoObject = GrisuRegistry.getDefault().getInformationObject(applicationName);
+		infoObject = GrisuRegistry.getDefault().getUserApplicationInformation(applicationName);
 		
-//		for ( String version : infoObject.getAvailableVersions(subLoc) ) {
-//			versionModel.addElement(anObject)
-//		}
+		for ( String version : infoObject.getAllAvailableVersionsForUser() ) {
+			versionModel.addElement(version);
+		}
+		
+		switch (currentMode) {
+		case ANY_VERSION_MODE:
+			getAnyRadioButton().doClick();
+			break;
+		case DEFAULT_VERSION_MODE:
+			getDefaultRadioButton().doClick();
+			break;
+		case EXACT_VERSION_MODE:
+			getExactRadioButton().doClick();
+			break;
+		}
+		
+		// this might be slightly dodgy. But it should always work if a Version template tag is present.
+		submissionLocationPanel = (TemplateNodePanel)(this.templateNode.getTemplate().getTemplateNodes().get(TemplateTagConstants.VERSION_TAG_NAME).getTemplateNodeValueSetter());
+		submissionLocationPanel.addValueListener(this);
 		
 	}
 
 	private void switchMode(String mode) {
 
 		if (ANY_MODE_STRING.equals(mode)) {
-			switchMode(InformationObject.ANY_VERSION_MODE);
+			switchMode(ANY_VERSION_MODE);
 			return;
 		} else if (DEFAULT_MODE_STRING.equals(mode)) {
-			switchMode(InformationObject.DEFAULT_VERSION_MODE);
+			switchMode(DEFAULT_VERSION_MODE);
 			return;
 		} else if (EXACT_MODE_STRING.equals(mode)) {
-			switchMode(InformationObject.EXACT_VERSION_MODE);
+			switchMode(EXACT_VERSION_MODE);
 			return;
 		}
 
@@ -149,13 +185,13 @@ public class Version extends JPanel implements TemplateNodePanel,
 	private void switchMode(int mode) {
 
 		switch (mode) {
-		case InformationObject.ANY_VERSION_MODE:
+		case ANY_VERSION_MODE:
 			switchToAnyVersionMode();
 			break;
-		case InformationObject.DEFAULT_VERSION_MODE:
+		case DEFAULT_VERSION_MODE:
 			switchToDefaultVersionMode();
 			break;
-		case InformationObject.EXACT_VERSION_MODE:
+		case EXACT_VERSION_MODE:
 			switchToExactVersionMode();
 			break;
 		default:
@@ -172,12 +208,14 @@ public class Version extends JPanel implements TemplateNodePanel,
 	}
 
 	private void switchToDefaultVersionMode() {
-		// TODO Auto-generated method stub
+
+		getVersionComboBox().setEnabled(false);
 
 	}
 
 	private void switchToAnyVersionMode() {
-		// TODO Auto-generated method stub
+
+		getVersionComboBox().setEnabled(false);
 
 	}
 
@@ -187,13 +225,40 @@ public class Version extends JPanel implements TemplateNodePanel,
 	}
 
 	public String getExternalSetValue() {
-		// TODO Auto-generated method stub
-		return null;
+
+		return (String)(versionModel.getSelectedItem());
+		
 	}
 
-	public void setExternalSetValue(String value) {
-		// TODO Auto-generated method stub
+	public void setExternalSetValue(String version) {
+		
+		if ( infoObject.getAllAvailableVersionsForUser(GrisuRegistry.getDefault().getEnvironmentSnapshotValues().getCurrentFqan()).contains(version) ) {
+			//TODO set mode
+			versionModel.setSelectedItem(version);
+		}
+	}
+	
 
+	public void valueChanged(TemplateNodePanel panel, String newValue) {
+
+		// submissionlocation has changed (only relevant if ANY-MODE is selected. Otherwise version won't change
+		if ( this.currentMode == ANY_VERSION_MODE ) {
+			versionModel.setSelectedItem(chooseBestVersion(newValue));
+		}
+		
+		
+	}
+	
+	private String chooseBestVersion(String subLoc) {
+		// this would be a job for the metascheduler
+		Set<String> temp = infoObject.getAvailableVersions(subLoc);
+		
+		if ( temp != null && temp.size() > 0 ) {
+			return temp.iterator().next();
+		} else {
+			myLogger.error("No version found for this submissionLocation. This shouldn't happen.");
+			return null;
+		}
 	}
 
 	/**
@@ -204,6 +269,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 			exactRadioButton = new JRadioButton();
 			exactRadioButton.setText("Exact");
 			modeGroup.add(exactRadioButton);
+			exactRadioButton.setActionCommand(EXACT_MODE_STRING);
 		}
 		return exactRadioButton;
 	}
@@ -216,6 +282,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 			defaultRadioButton = new JRadioButton();
 			defaultRadioButton.setText("Default");
 			modeGroup.add(defaultRadioButton);
+			defaultRadioButton.setActionCommand(DEFAULT_MODE_STRING);
 		}
 		return defaultRadioButton;
 	}
@@ -228,6 +295,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 			anyRadioButton = new JRadioButton();
 			anyRadioButton.setText("Any");
 			modeGroup.add(anyRadioButton);
+			anyRadioButton.setActionCommand(ANY_MODE_STRING);
 		}
 		return anyRadioButton;
 	}
@@ -238,6 +306,11 @@ public class Version extends JPanel implements TemplateNodePanel,
 	protected JComboBox getVersionComboBox() {
 		if (versionComboBox == null) {
 			versionComboBox = new JComboBox(versionModel);
+			versionComboBox.addItemListener(new ItemListener() {
+				public void itemStateChanged(final ItemEvent e) {
+					fireVersionChanged((String)(versionModel.getSelectedItem()));
+				}
+			});
 			versionComboBox.setMaximumSize(new Dimension(300, 24));
 			versionComboBox.setEditable(false);
 		}
@@ -300,5 +373,6 @@ public class Version extends JPanel implements TemplateNodePanel,
 	public void actionPerformed(ActionEvent e) {
 		switchMode(e.getActionCommand());
 	}
+
 
 }

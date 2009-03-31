@@ -40,6 +40,7 @@ import org.vpac.grisu.client.view.swing.login.LoginSplashScreen;
 import org.vpac.grisu.client.view.swing.mountpoints.MountPointsManagementDialog;
 import org.vpac.grisu.client.view.swing.template.SubmissionPanel;
 import org.vpac.grisu.client.view.swing.utils.Utils;
+import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.helpDesk.control.HelpDeskManager;
 import org.vpac.helpDesk.model.HelpDesk;
@@ -534,6 +535,8 @@ public class Grisu {
 
 				try {
 					application.em = new EnvironmentManager(application.serviceInterface);
+					GrisuRegistry.setServiceInterface(application.serviceInterface);
+					GrisuRegistry.setEnvironmentSnapshotValues(application.em);
 					application.em.initializeHistoryManager();
 					if ( application.serviceInterface == null ) {
 						myLogger.debug("Could not create/find service interface. Exiting.");
