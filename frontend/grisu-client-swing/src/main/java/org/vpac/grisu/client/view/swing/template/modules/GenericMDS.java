@@ -8,6 +8,7 @@ import org.vpac.grisu.client.view.swing.template.panels.CPUs;
 import org.vpac.grisu.client.view.swing.template.panels.Email;
 import org.vpac.grisu.client.view.swing.template.panels.JobName;
 import org.vpac.grisu.client.view.swing.template.panels.MemoryInputPanel;
+import org.vpac.grisu.client.view.swing.template.panels.Version;
 import org.vpac.grisu.client.view.swing.template.panels.WallTime;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -17,6 +18,7 @@ import com.jgoodies.forms.layout.RowSpec;
 
 public class GenericMDS extends AbstractModulePanel {
 
+	private Version version;
 	private Email email;
 	private MemoryInputPanel memoryInputPanel;
 	private CPUs us;
@@ -41,12 +43,14 @@ public class GenericMDS extends AbstractModulePanel {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("default")}));
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC}));
 		add(getJobName(), new CellConstraints(2, 2, CellConstraints.FILL, CellConstraints.FILL));
 		add(getWallTime(), new CellConstraints(4, 2));
 		add(getUs(), new CellConstraints(4, 4));
 		add(getMemoryInputPanel(), new CellConstraints(4, 6));
 		add(getEmail(), new CellConstraints(2, 8, 3, 1));
+		add(getVersion(), new CellConstraints(2, 4, CellConstraints.FILL, CellConstraints.FILL));
 		//
 	}
 
@@ -103,6 +107,15 @@ public class GenericMDS extends AbstractModulePanel {
 			email = new Email();
 		}
 		return email;
+	}
+	/**
+	 * @return
+	 */
+	protected Version getVersion() {
+		if (version == null) {
+			version = new Version();
+		}
+		return version;
 	}
 
 }

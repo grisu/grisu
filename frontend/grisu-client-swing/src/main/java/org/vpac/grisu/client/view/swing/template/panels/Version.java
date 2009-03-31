@@ -8,6 +8,7 @@ import java.util.Vector;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -16,6 +17,7 @@ import javax.swing.border.TitledBorder;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.TemplateNodeEvent;
+import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.js.model.InformationObject;
 
 public class Version extends JPanel implements TemplateNodePanel,
@@ -33,12 +35,15 @@ public class Version extends JPanel implements TemplateNodePanel,
 
 	public static final String STARTUP_MODE_KEY = "startMode";
 
-	private JComboBox comboBox;
+	private JComboBox versionComboBox;
+	private DefaultComboBoxModel versionModel = new DefaultComboBoxModel();
 	private JRadioButton anyRadioButton;
 	private JRadioButton defaultRadioButton;
 	private JRadioButton exactRadioButton;
 
 	private TemplateNode templateNode;
+	private InformationObject infoObject = null;
+	private String applicationName = null;
 	private boolean useAny = true;
 	private boolean useDefault = true;
 	private String defaultVersion;
@@ -65,6 +70,9 @@ public class Version extends JPanel implements TemplateNodePanel,
 			throws TemplateNodePanelException {
 
 		this.templateNode = node;
+		
+		this.applicationName = this.templateNode.getTemplate().getApplicationName();
+		
 		this.useAny = node.getOtherProperties().containsKey(
 				ANY_MODE_TEMPLATETAG_KEY);
 		this.useDefault = node.getOtherProperties().containsKey(
@@ -112,8 +120,14 @@ public class Version extends JPanel implements TemplateNodePanel,
 		}
 
 		// add combobox as last item
-		add(getComboBox());
+		add(getVersionComboBox());
 
+		infoObject = GrisuRegistry.getDefault().getInformationObject(applicationName);
+		
+//		for ( String version : infoObject.getAvailableVersions(subLoc) ) {
+//			versionModel.addElement(anObject)
+//		}
+		
 	}
 
 	private void switchMode(String mode) {
@@ -152,7 +166,8 @@ public class Version extends JPanel implements TemplateNodePanel,
 	}
 
 	private void switchToExactVersionMode() {
-		// TODO Auto-generated method stub
+
+		getVersionComboBox().setEnabled(true);
 
 	}
 
@@ -220,12 +235,13 @@ public class Version extends JPanel implements TemplateNodePanel,
 	/**
 	 * @return
 	 */
-	protected JComboBox getComboBox() {
-		if (comboBox == null) {
-			comboBox = new JComboBox();
-			comboBox.setMaximumSize(new Dimension(300, 24));
+	protected JComboBox getVersionComboBox() {
+		if (versionComboBox == null) {
+			versionComboBox = new JComboBox(versionModel);
+			versionComboBox.setMaximumSize(new Dimension(300, 24));
+			versionComboBox.setEditable(false);
 		}
-		return comboBox;
+		return versionComboBox;
 	}
 
 	public JPanel getTemplateNodePanel() {
