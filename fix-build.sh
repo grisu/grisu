@@ -38,8 +38,6 @@ jar cmf ../../frontend/grisu-client-commandline/MANIFEST.MF ../grisu-client.jar 
 cd ..
 #jar -i grisu-client.jar
 
-cd ..
-
 # fix batch client
 mkdir batch
 cd batch
