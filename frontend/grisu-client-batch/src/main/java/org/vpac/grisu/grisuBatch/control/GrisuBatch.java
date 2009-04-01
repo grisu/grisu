@@ -196,7 +196,13 @@ public class GrisuBatch {
 		if (baseInputFilePath != null & !"".equals(baseInputFilePath)) {
 			String filePath = baseInputFilePath
 					.replaceAll(PARAMETER, parameter);
-			job.setInputFile(filePath);
+			
+			String[] files = filePath.split(",");
+			for ( String file : files ) {
+			
+				job.addInputFile(file);
+			}
+			//job.setInputFile(filePath);
 		}
 
 		String commandline = baseCommand.replaceAll(PARAMETER, parameter);
