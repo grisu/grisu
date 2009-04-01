@@ -475,6 +475,10 @@ abstract class AbstractInputPanel extends JPanel implements TemplateNodePanel {
 		return textArea;
 	}
 	
+	public String toString() {
+		return getName();
+	}
+	
 	// event stuff
 	// ========================================================
 	

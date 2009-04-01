@@ -432,4 +432,7 @@ public class TemplateNode {
 	// getJobProperties().remove(key);
 	// }
 
+	public String toString() {
+		return getName();
+	}
 }

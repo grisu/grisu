@@ -50,7 +50,7 @@
 			<version>0.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>org.cogkit</groupId>
+			<groupId>external.jglobus</groupId>
 			<artifactId>puretls</artifactId>
 			<version>0.1</version>
 		</dependency>

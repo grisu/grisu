@@ -54,7 +54,7 @@ public class InputString extends AbstractInputPanel {
 		String value = getExternalSetValue();
 
 		if (useHistory)
-			historyManager.addHistoryEntry(this.templateNode.getName(), value,
+			historyManager.addHistoryEntry(this.historyManagerKeyForThisNode, value,
 					new Date());
 
 		if (COMBOBOX_PANEL.equals(renderMode)) {
