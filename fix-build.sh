@@ -40,7 +40,15 @@ cd ..
 
 cd ..
 
-
+# fix batch client
+mkdir batch
+cd batch
+unzip -o ../grisu-0.2-beta-SNAPSHOT-grisu-client-batch.jar
+rm ../grisu-0.2-beta-SNAPSHOT-grisu-client-batch.jar
+rm -f META-INF/INDEX.LIST
+cp ../../frontend/grisu-client-batch/src/main/resources/log4j.properties .
+jar cmf ../../frontend/grisu-client-batch/MANIFEST.MF ../grisu-client-batch.jar .
+cd ..
 
 
 

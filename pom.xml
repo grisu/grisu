@@ -18,6 +18,7 @@
 						<descriptor>grisu-client-swing.assembly.xml</descriptor>
 						<descriptor>grisu-client-commandline.assembly.xml</descriptor>
 						<descriptor>grisu-local-backend.assembly.xml</descriptor>
+						<descriptor>grisu-client-batch.assembly.xml</descriptor>
 					</descriptors>
 
 				</configuration>
