@@ -180,7 +180,7 @@ public class GrisuBatch {
 		System.out.println("Filling job " + parameter);
 		job.setJobname(jobname + parameter);
 		job.setVO(vo);
-
+		job.removeAllInputFiles();
 		SubmissionLocation subLoc = em.getSubmissionLocation(submissionLocation);
 		
 		if ( subLoc == null  ) {

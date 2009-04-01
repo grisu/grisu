@@ -259,6 +259,12 @@ public class GenericJobWrapper {
 		}
 	}
 	
+	public void removeAllInputFiles() {
+		
+		inputFilesSetter.setExternalSetValue(null);
+		
+	}
+	
 	/**
 	 * Much like {@link #addInputFile(String)}. Only files that were previously added are overwritten.
 	 * Useful, for example if you called {@link #reset()} and don't want to use the files from the 
