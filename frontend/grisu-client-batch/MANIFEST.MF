@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Created-By: Markus Binsteiner
+Main-Class: org.vpac.grisu.grisuBatch.control.GrisuBatch
+Class-Path: bcprov-jdk15-140.jar grisu-local-backend.jar
+
