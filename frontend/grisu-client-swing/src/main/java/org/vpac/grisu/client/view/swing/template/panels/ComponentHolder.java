@@ -26,4 +26,10 @@ public interface ComponentHolder {
 	 */
 	public void setComponentField(String value);
 	
+	/**
+	 * Returns how much space is needed for this component
+	 * @return the space in dlu (formlayout)
+	 */
+	public int getRowSpec();
+	
 }

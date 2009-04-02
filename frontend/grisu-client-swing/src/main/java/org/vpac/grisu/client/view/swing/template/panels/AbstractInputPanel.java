@@ -114,8 +114,8 @@ abstract class AbstractInputPanel extends JPanel implements TemplateNodePanel {
 			add(getScrollPane(), new CellConstraints(2, 2, 5, 1, CellConstraints.FILL, CellConstraints.FILL));
 		} else {
 			// don't know
-			layout.setRowSpec(1, new RowSpec("0dlu"));
-			layout.setRowSpec(2, new RowSpec("0dlu"));
+			layout.setRowSpec(1, RowSpec.decode("0dlu"));
+			layout.setRowSpec(2, RowSpec.decode("0dlu"));
 			heightDelta = -40;
 		}
 		
@@ -190,6 +190,9 @@ abstract class AbstractInputPanel extends JPanel implements TemplateNodePanel {
 		this.holder = holder;
 		getInputField().add(holder.getComponent(), BorderLayout.CENTER);
 
+		String heightComponentHolderRow = holder.getRowSpec()+"dlu";
+		layout.setRowSpec(6, RowSpec.decode(heightComponentHolderRow));
+		
 		if ( buttonText != null ) {
 			getGenericButton().setText(buttonText);
 			add(getGenericButton(), new CellConstraints(4, 6, 3, 1, CellConstraints.DEFAULT, CellConstraints.TOP));

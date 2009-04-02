@@ -14,6 +14,5 @@ public class TemplateTagConstants {
 	public static final String VERSION_TAG_NAME = "Version"; 
 //	public static final String
 	
-	
 
 }

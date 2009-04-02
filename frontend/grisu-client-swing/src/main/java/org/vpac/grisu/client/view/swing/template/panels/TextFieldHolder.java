@@ -29,6 +29,11 @@ public class TextFieldHolder implements ComponentHolder {
 	public void setComponentField(String value) {
 		getComponent().setText(value);
 	}
+
+
+	public int getRowSpec() {
+		return 17;
+	}
 	
 
 

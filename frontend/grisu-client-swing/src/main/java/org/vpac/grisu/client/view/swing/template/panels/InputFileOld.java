@@ -1,5 +1,3 @@
-
-
 package org.vpac.grisu.client.view.swing.template.panels;
 
 import java.awt.Color;
@@ -66,16 +64,21 @@ public class InputFileOld extends JPanel {
 	 */
 	public InputFileOld() {
 		super();
-		setLayout(new FormLayout(new ColumnSpec[] {
+		setLayout(new FormLayout(
+			new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
-				new ColumnSpec("106dlu:grow(1.0)"),
-				FormFactory.RELATED_GAP_COLSPEC, new ColumnSpec("30dlu"),
-				FormFactory.RELATED_GAP_COLSPEC, new ColumnSpec("9dlu"),
-				FormFactory.RELATED_GAP_COLSPEC }, new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				ColumnSpec.decode("106dlu:grow(1.0)"),
+				FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("30dlu"),
+				FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("9dlu"),
+				FormFactory.RELATED_GAP_COLSPEC},
+			new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
-				new RowSpec("default:grow(1.0)"),
-				FormFactory.RELATED_GAP_ROWSPEC }));
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				RowSpec.decode("default:grow(1.0)"),
+				FormFactory.RELATED_GAP_ROWSPEC}));
 
 		add(getErrorLabel(), new CellConstraints(2, 2, 3, 1,
 				CellConstraints.FILL, CellConstraints.DEFAULT));

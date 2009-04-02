@@ -29,6 +29,10 @@ public class ComboBoxHolder implements ComponentHolder {
 	public void setComponentField(String value) {
 		getComponent().setSelectedItem(value);
 	}
+
+	public int getRowSpec() {
+		return 17;
+	}
 	
 
 }
