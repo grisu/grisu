@@ -6,6 +6,8 @@ import java.util.Map;
 import org.vpac.grisu.model.ApplicationInformation;
 import org.vpac.grisu.model.ApplicationInformationImpl;
 import org.vpac.grisu.model.EnvironmentSnapshotValues;
+import org.vpac.grisu.model.ResourceInformation;
+import org.vpac.grisu.model.ResourceInformationImpl;
 import org.vpac.grisu.model.UserApplicationInformation;
 import org.vpac.grisu.model.UserApplicationInformationImpl;
 import org.vpac.grisu.model.UserInformation;
@@ -51,6 +53,7 @@ public class GrisuRegistry {
 	private Map<String, ApplicationInformation> cachedApplicationInformationObjects = new HashMap<String, ApplicationInformation>();
 	private Map<String, UserApplicationInformation> cachedUserInformationObjects = new HashMap<String, UserApplicationInformation>();
 	private UserInformation cachedUserInformation;
+	private ResourceInformation cachedResourceInformation;
 	
 	public GrisuRegistry(ServiceInterface serviceInterface, EnvironmentSnapshotValues esv) {
 		this.serviceInterface = serviceInterface;
@@ -85,6 +88,13 @@ public class GrisuRegistry {
 
 	public EnvironmentSnapshotValues getEnvironmentSnapshotValues() {
 		return esv;
+	}
+	
+	public ResourceInformation getResourceInformation() {
+		if ( cachedResourceInformation == null ) {
+			cachedResourceInformation = new ResourceInformationImpl(serviceInterface);
+		}
+		return cachedResourceInformation;
 	}
 
 }

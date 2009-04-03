@@ -22,11 +22,6 @@ public interface UserInformation {
 	 */
 	public Set<String> getAllAvailableSubmissionLocations();
 	
-	/**
-	 * All the submissionLocations the user has got access to with this fqan.
-	 * @param fqan the fqan
-	 * @return all submissionLocations
-	 */
-	public String[] getAllAvailableSubmissionLocations(String fqan);
+
 	
 }

@@ -1,8 +1,13 @@
 package org.vpac.grisu.client.view.swing.template.panels;
 
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -12,7 +17,10 @@ import org.apache.log4j.Logger;
 import org.vpac.grisu.client.TemplateTagConstants;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.TemplateNodeEvent;
+import org.vpac.grisu.client.view.swing.utils.QueueRenderer;
 import org.vpac.grisu.control.GrisuRegistry;
+import org.vpac.grisu.model.EnvironmentSnapshotValues;
+import org.vpac.grisu.model.ResourceInformation;
 import org.vpac.grisu.model.UserApplicationInformation;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -23,17 +31,26 @@ import com.jgoodies.forms.layout.RowSpec;
 
 public class SubmissionLocation extends JPanel implements TemplateNodePanel, ValueListener {
 	
-	private JComboBox comboBox_1;
-	private JComboBox comboBox;
+	private JComboBox queueComboBox;
+	private JComboBox siteComboBox;
 	private JLabel label_1;
 	private JLabel label;
 	static final Logger myLogger = Logger.getLogger(SubmissionLocation.class.getName());
+	
+	private DefaultComboBoxModel siteModel = new DefaultComboBoxModel();
+	private DefaultComboBoxModel queueModel = new DefaultComboBoxModel();
 	
 	private TemplateNode templateNode;
 	private String applicationName;
 	
 	private UserApplicationInformation infoObject = null;
-	private TemplateNodePanel versionPanel = null;
+	private Version versionPanel = null;
+	
+	Set<String> allSites = null;
+	Set<String> allQueues = null;
+	
+	private final ResourceInformation resourceInfo = GrisuRegistry.getDefault().getResourceInformation();
+	private EnvironmentSnapshotValues esv = GrisuRegistry.getDefault().getEnvironmentSnapshotValues();
 
 	/**
 	 * Create the panel
@@ -56,8 +73,8 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 		setBorder(new TitledBorder(null, "Submission location", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
 		add(getLabel(), new CellConstraints(2, 2, CellConstraints.RIGHT, CellConstraints.DEFAULT));
 		add(getLabel_1(), new CellConstraints(2, 4, CellConstraints.RIGHT, CellConstraints.DEFAULT));
-		add(getComboBox(), new CellConstraints(4, 2));
-		add(getComboBox_1(), new CellConstraints(4, 4));
+		add(getSiteComboBox(), new CellConstraints(4, 2));
+		add(getQueueComboBox(), new CellConstraints(4, 4));
 		//
 	}
 
@@ -88,11 +105,63 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 
 	public void valueChanged(TemplateNodePanel panel, String newValue) {
 		// version changed...
-		System.out.println("Hi. Here's submissionlocationpanel. Version changed to: "+newValue);
+		myLogger.debug("SubmissionLocationPanel: Version changed to: "+newValue);
 		
+		
+		String oldSite = (String)siteModel.getSelectedItem();
+		siteModel.removeAllElements();		
 
+		if ( versionPanel.getMode() == Version.DEFAULT_VERSION_MODE ) {
+			allQueues = new HashSet<String>();
+			allQueues.add("Mode not supported yet.");
+			allSites = new HashSet<String>();
+			allSites.add("Mode not supported yet");
+		} else if ( versionPanel.getMode() == Version.ANY_VERSION_MODE ) {
+			allQueues = infoObject.getAvailableSubmissionLocationsForFqan(esv.getCurrentFqan());
+		} else {
+			allQueues = infoObject.getAvailableSubmissionLocationsForVersionAndFqan(newValue, esv.getCurrentFqan());
+		}
+		
+		if ( versionPanel.getMode() != Version.DEFAULT_VERSION_MODE ) {
+			allSites = resourceInfo.distillSitesFromSubmissionLocations(allQueues);
+		}
+		
+		
+		
+		for ( String tempsite : allSites ) {
+			siteModel.addElement(tempsite);
+		}
+		
+		if ( oldSite != null && siteModel.getIndexOf(oldSite) >= 0 ) {
+			changeToSite(oldSite);
+		}
+		
 	}
+	
+	private void changeToSite(String site) {
 
+		siteModel.setSelectedItem(site);
+		
+	}
+	
+	private void repopulateQueueCombobox() {
+		
+		String oldQueue = (String)queueModel.getSelectedItem();
+		queueModel.removeAllElements();
+
+		String newSite = (String)siteModel.getSelectedItem();
+		
+		for ( String queue: resourceInfo.filterSubmissionLocationsForSite(newSite, allQueues) ) {
+			queueModel.addElement(queue);
+		}
+		
+		if ( oldQueue != null && queueModel.getIndexOf(oldQueue) >= 0 ) {
+			queueModel.setSelectedItem(oldQueue);
+		}
+		
+		
+	}
+	
 	public void templateNodeUpdated(TemplateNodeEvent event) {
 		
 	}
@@ -106,6 +175,8 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 		// TODO Auto-generated method stub
 		
 	}
+	
+
 	
 	
 	// event stuff
@@ -174,20 +245,29 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 	/**
 	 * @return
 	 */
-	protected JComboBox getComboBox() {
-		if (comboBox == null) {
-			comboBox = new JComboBox();
+	protected JComboBox getSiteComboBox() {
+		if (siteComboBox == null) {
+			siteComboBox = new JComboBox(siteModel);
+			siteComboBox.addItemListener(new ItemListener() {
+				public void itemStateChanged(final ItemEvent e) {
+					
+					repopulateQueueCombobox();
+					
+				}
+			});
 		}
-		return comboBox;
+		return siteComboBox;
 	}
 	/**
 	 * @return
 	 */
-	protected JComboBox getComboBox_1() {
-		if (comboBox_1 == null) {
-			comboBox_1 = new JComboBox();
+	protected JComboBox getQueueComboBox() {
+		if (queueComboBox == null) {
+			queueComboBox = new JComboBox(queueModel);
+//			ListCellRenderer renderer = queueComboBox.getRenderer();
+			queueComboBox.setRenderer(new QueueRenderer(queueComboBox.getRenderer()));
 		}
-		return comboBox_1;
+		return queueComboBox;
 	}
 
 }

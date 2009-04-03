@@ -6,7 +6,8 @@ public class SubmissionLocationHelpers {
 		
 		int endIndex = subLoc.indexOf(":");
 		if ( endIndex <= 0 ) {
-			return null;
+//			return null;
+			return "no queuename";
 		}
 		
 		return subLoc.substring(0, endIndex);
@@ -25,5 +26,6 @@ public class SubmissionLocationHelpers {
 		return subLoc.substring(startIndex, endIndex);
 		
 	}
+	
 
 }

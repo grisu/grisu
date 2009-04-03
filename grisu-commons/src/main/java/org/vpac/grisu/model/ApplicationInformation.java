@@ -48,7 +48,7 @@ public interface ApplicationInformation {
 	 * Returns a set of all available submissionLocations for this application grid-wide.
 	 * @return the submissionLocations
 	 */
-	public Set<String> getAllSubmissionLocations();
+	public Set<String> getAvailableAllSubmissionLocations();
 	
 	/**
 	 * Returns a set of all available submissionLocations for one version of this 
@@ -56,7 +56,33 @@ public interface ApplicationInformation {
 	 * @param version the version in question
 	 * @return the submissionLocations
 	 */
-	public Set<String> getSubmissionLocationsForVersion(String version);
+	public Set<String> getAvailableSubmissionLocationsForVersion(String version);
 	
+	/**
+	 * Calculates all the submissionlocations that are available to the user
+	 * for the provided fqan and application. It returns all submissionlocations, regardless
+	 * of the version of the application.
+	 * 
+	 * @param fqan the fqan
+	 * @return the submissionlocations
+	 */
+	public Set<String> getAvailableSubmissionLocationsForFqan(String fqan);
+		
+	/**
+	 * This calculates all the submissionlocations that are available to the user
+	 * on the grid for this fqan and application and version.
+	 * 
+	 * @param version the version
+	 * @param fqan the fqan
+	 * @return the submissionLocations
+	 */
+	public Set<String> getAvailableSubmissionLocationsForVersionAndFqan(String version, String fqan);
+	
+	/**
+	 * Calculates all versions for this application that are availabe for this fqan, regardless of submissionLocation. 
+	 * @param fqan the fqan
+	 * @return all available versions
+	 */
+	public Set<String> getAllAvailableVersionsForFqan(String fqan);
 	
 }

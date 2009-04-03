@@ -27,6 +27,8 @@ import org.vpac.grisu.model.UserApplicationInformation;
 public class Version extends JPanel implements TemplateNodePanel,
 		ActionListener, ValueListener {
 
+	private static final long serialVersionUID = -4614286850190629566L;
+
 	static final Logger myLogger = Logger.getLogger(Version.class.getName());
 
 	public final static int DEFAULT_VERSION_MODE = 0;
@@ -203,18 +205,21 @@ public class Version extends JPanel implements TemplateNodePanel,
 
 	private void switchToExactVersionMode() {
 
+		this.currentMode = EXACT_VERSION_MODE;
 		getVersionComboBox().setEnabled(true);
 
 	}
 
 	private void switchToDefaultVersionMode() {
-
+		
+		this.currentMode = DEFAULT_VERSION_MODE;
 		getVersionComboBox().setEnabled(false);
 
 	}
 
 	private void switchToAnyVersionMode() {
 
+		this.currentMode = ANY_VERSION_MODE;
 		getVersionComboBox().setEnabled(false);
 
 	}
@@ -232,7 +237,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 
 	public void setExternalSetValue(String version) {
 		
-		if ( infoObject.getAllAvailableVersionsForUser(GrisuRegistry.getDefault().getEnvironmentSnapshotValues().getCurrentFqan()).contains(version) ) {
+		if ( infoObject.getAllAvailableVersionsForFqan(GrisuRegistry.getDefault().getEnvironmentSnapshotValues().getCurrentFqan()).contains(version) ) {
 			//TODO set mode
 			versionModel.setSelectedItem(version);
 		}
@@ -243,7 +248,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 
 		// submissionlocation has changed (only relevant if ANY-MODE is selected. Otherwise version won't change
 		if ( this.currentMode == ANY_VERSION_MODE ) {
-			versionModel.setSelectedItem(chooseBestVersion(newValue));
+//			versionModel.setSelectedItem(chooseBestVersion(newValue));
 		}
 		
 		
@@ -260,6 +265,10 @@ public class Version extends JPanel implements TemplateNodePanel,
 			return null;
 		}
 	}
+	
+	public int getMode() {
+		return currentMode;
+	}
 
 	/**
 	 * @return
@@ -270,6 +279,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 			exactRadioButton.setText("Exact");
 			modeGroup.add(exactRadioButton);
 			exactRadioButton.setActionCommand(EXACT_MODE_STRING);
+			exactRadioButton.addActionListener(this);
 		}
 		return exactRadioButton;
 	}
@@ -283,6 +293,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 			defaultRadioButton.setText("Default");
 			modeGroup.add(defaultRadioButton);
 			defaultRadioButton.setActionCommand(DEFAULT_MODE_STRING);
+			defaultRadioButton.addActionListener(this);
 		}
 		return defaultRadioButton;
 	}
@@ -296,6 +307,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 			anyRadioButton.setText("Any");
 			modeGroup.add(anyRadioButton);
 			anyRadioButton.setActionCommand(ANY_MODE_STRING);
+			anyRadioButton.addActionListener(this);
 		}
 		return anyRadioButton;
 	}
@@ -372,6 +384,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 
 	public void actionPerformed(ActionEvent e) {
 		switchMode(e.getActionCommand());
+		fireVersionChanged((String)(versionModel.getSelectedItem()));
 	}
 
 

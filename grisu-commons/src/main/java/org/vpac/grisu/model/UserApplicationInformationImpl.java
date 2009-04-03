@@ -6,8 +6,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.ServiceInterface;
 
 
@@ -15,9 +17,7 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 		implements UserApplicationInformation {
 
 	private Set<String> cachedSubmissionLocationsForUser = null;
-	private Map<String, Set<String>> cachedSubmissionLocationsForUserPerFqan = new HashMap<String, Set<String>>();
-	private Map<String, Set<String>> cachedSubmissionLocationsForUserPerVersionAndFqan = new HashMap<String, Set<String>>();
-	private Map<String, Set<String>> cachedVersionsForUserPerFqan = new HashMap<String, Set<String>>();
+	private Set<String> cachedAllSitesForUser = null;
 	private Set<String> cachedAllVersionsForUser = null;
 	private UserInformation userInfo = null;
 	
@@ -31,65 +31,39 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 		if ( cachedSubmissionLocationsForUser == null ) {
 			cachedSubmissionLocationsForUser = new HashSet<String>();
 			for ( String fqan : userInfo.getAllAvailableFqans() ) {
-				cachedSubmissionLocationsForUser.addAll(getAvailableSubmissionLocationsForUser(fqan));
+				cachedSubmissionLocationsForUser.addAll(getAvailableSubmissionLocationsForFqan(fqan));
 			}
 		}
 		return cachedSubmissionLocationsForUser;
 	}
-
-	public Set<String> getAvailableSubmissionLocationsForUser(String fqan) {
-
-		if ( cachedSubmissionLocationsForUserPerFqan.get(fqan) == null ) {
-			Set<String> temp = new HashSet<String>();
-			for ( String subLoc : userInfo.getAllAvailableSubmissionLocations(fqan)) {
-				if ( getAllSubmissionLocations().contains(subLoc) ) {
-					temp.add(subLoc);
-				}
-			}
-			cachedSubmissionLocationsForUserPerFqan.put(fqan, temp);
-		}
-		return cachedSubmissionLocationsForUserPerFqan.get(fqan);
-	}
-
-	public Set<String> getAvailableSubmissionLocationsPerVersionForUser(String version, String fqan) {
-
-		String KEY = version + "_" + fqan;
+	
+	public Set<String> getAllAvailableSitesForUser() {
 		
-		if ( cachedSubmissionLocationsForUserPerVersionAndFqan.get(KEY) == null ) {
-			Set<String> temp = new HashSet<String>();
-			for ( String subLoc : userInfo.getAllAvailableSubmissionLocations(fqan) ) {
-				if ( getAllSubmissionLocations().contains(subLoc) ) {
-					temp.add(subLoc);
-				}
+		if ( cachedAllSitesForUser == null ) {
+			cachedAllSitesForUser = new TreeSet<String>();
+			for ( String subLoc : getAllAvailableSubmissionLocationsForUser() ) {
+				cachedAllSitesForUser.add(resourceInfo.getSite(subLoc));
 			}
-			cachedSubmissionLocationsForUserPerVersionAndFqan.put(KEY, temp);
 		}
-		return cachedSubmissionLocationsForUserPerVersionAndFqan.get(KEY);
+		return cachedAllSitesForUser;
 	}
+
+
 
 	public Set<String> getAllAvailableVersionsForUser() {
 		
 		if ( cachedAllVersionsForUser == null ) {
 			cachedAllVersionsForUser = new TreeSet<String>();
 			for ( String fqan : userInfo.getAllAvailableFqans() ) {
-				cachedAllVersionsForUser.addAll(getAllAvailableVersionsForUser(fqan));
+				cachedAllVersionsForUser.addAll(getAllAvailableVersionsForFqan(fqan));
 			}
 		}
 		return cachedAllVersionsForUser;
 	}
 	
-	public Set<String> getAllAvailableVersionsForUser(String fqan) {
 
-		if ( cachedVersionsForUserPerFqan.get(fqan) == null ) {
-			Set<String> result = new TreeSet<String>();
-			for ( String subLoc : getAvailableSubmissionLocationsForUser(fqan) ) {
-				List<String> temp = Arrays.asList(serviceInterface.getVersionsOfApplicationOnSubmissionLocation(getApplicationName(), subLoc));
-				result.addAll(temp);
-			}
-			cachedVersionsForUserPerFqan.put(fqan, result);
-		}
-		return cachedVersionsForUserPerFqan.get(fqan);
-	}
+
+
 
 
 }
