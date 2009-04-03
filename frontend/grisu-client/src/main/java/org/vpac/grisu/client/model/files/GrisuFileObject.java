@@ -73,6 +73,10 @@ public class GrisuFileObject implements Comparable {
 		return size;
 	}
 	
+	public boolean exists() {
+		return fileSystemBackend.exists(this);
+	}
+	
 	public void setSize(long size) {
 		this.size = size;
 	}

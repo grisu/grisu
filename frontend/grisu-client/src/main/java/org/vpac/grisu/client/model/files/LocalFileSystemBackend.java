@@ -226,6 +226,20 @@ public class LocalFileSystemBackend implements FileSystemBackend {
 		return em;
 	}
 
+	public boolean exists(GrisuFileObject file) {
+		
+		if ( ! isInFileSystem(file) ) {
+			return false;
+		}
+		
+		File temp = new File(file.getURI());
+		if ( temp.exists() ) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 
 
 }

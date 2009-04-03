@@ -153,5 +153,11 @@ public interface FileSystemBackend {
 	 */
 	public GrisuFileObject getChild(GrisuFileObject grisuFileObject, String filename, boolean refresh);
 
+	
+	/**
+	 * Returns whether the file exists or not.
+	 * @return true if the file exists. False if it doesn't exist or is not in this filesystem.
+	 */
+	public boolean exists(GrisuFileObject file);
 
 }

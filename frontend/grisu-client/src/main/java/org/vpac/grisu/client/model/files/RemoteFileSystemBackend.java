@@ -771,5 +771,21 @@ public class RemoteFileSystemBackend implements FileSystemBackend {
 		return em;
 	}
 
+	public boolean exists(GrisuFileObject file) {
+		
+		if ( ! isInFileSystem(file) )
+			return false;
+		
+		
+		try {
+			serviceInterface.getFileSize(file.getURI().toString());
+		} catch (Exception e) {
+			myLogger.error("Could not retrieve filesize for file to establish whether it exists or not: "+file.getURI().toString());
+			return false;
+		}
+		
+		return true;
+	}
+
 
 }
