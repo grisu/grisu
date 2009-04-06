@@ -13,6 +13,24 @@ public class TemplateTagConstants {
 	public static final String APPLICATION_TAG_NAME = "Application";
 	public static final String VERSION_TAG_NAME = "Version"; 
 //	public static final String
+
 	
+
+	
+	public static final String GLOBAL_LAST_VERSION_KEY = "GlobalLastVersion";
+	public static final String GLOBAL_LAST_VERSION_MODE_KEY = "GlobalLastVersionMode";
+	public static final String GLOBAL_LAST_QUEUE_KEY = "GlobalLastQueue";
+	
+	public static String getGlobalLastVersionKey(String application) {
+		return GLOBAL_LAST_VERSION_KEY+"_"+application;
+	}
+
+	public static String getGlobalLastVersionModeKey(String application) {
+		return GLOBAL_LAST_VERSION_MODE_KEY+"_"+application;
+	}
+
+	public static String getGlobalLastQueueKey(String application) {
+		return GLOBAL_LAST_QUEUE_KEY+"_"+application;
+	}
 
 }

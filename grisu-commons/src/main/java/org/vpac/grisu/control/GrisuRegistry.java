@@ -1,5 +1,7 @@
 package org.vpac.grisu.control;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +14,9 @@ import org.vpac.grisu.model.UserApplicationInformation;
 import org.vpac.grisu.model.UserApplicationInformationImpl;
 import org.vpac.grisu.model.UserInformation;
 import org.vpac.grisu.model.UserInformationImpl;
+import org.vpac.historyRepeater.DummyHistoryManager;
+import org.vpac.historyRepeater.HistoryManager;
+import org.vpac.historyRepeater.SimpleHistoryManager;
 
 public class GrisuRegistry {
 	
@@ -50,6 +55,9 @@ public class GrisuRegistry {
 	
 	// here starts the real class...
 	
+	public static final String GRISU_HISTORY_FILENAME = "grisu.history";
+	
+	private HistoryManager historyManager = null;
 	private Map<String, ApplicationInformation> cachedApplicationInformationObjects = new HashMap<String, ApplicationInformation>();
 	private Map<String, UserApplicationInformation> cachedUserInformationObjects = new HashMap<String, UserApplicationInformation>();
 	private UserInformation cachedUserInformation;
@@ -95,6 +103,27 @@ public class GrisuRegistry {
 			cachedResourceInformation = new ResourceInformationImpl(serviceInterface);
 		}
 		return cachedResourceInformation;
+	}
+	
+	public HistoryManager getHistoryManager() {
+		if ( historyManager == null ) {
+			File historyFile = new File(Environment.GRISU_DIRECTORY,
+					GRISU_HISTORY_FILENAME);
+			if (!historyFile.exists()) {
+				try {
+					historyFile.createNewFile();
+
+				} catch (IOException e) {
+					// well
+				}
+			}
+			if (!historyFile.exists()) {
+				historyManager = new DummyHistoryManager();
+			} else {
+				historyManager = new SimpleHistoryManager(historyFile);
+			}
+		}
+		return historyManager;
 	}
 
 }

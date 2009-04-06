@@ -73,6 +73,11 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.vpac.historyRepeater</groupId>
+			<artifactId>historyRepeater</artifactId>
+			<version>0.1</version>
+		</dependency>
   </dependencies>
   	<build>
 		<plugins>

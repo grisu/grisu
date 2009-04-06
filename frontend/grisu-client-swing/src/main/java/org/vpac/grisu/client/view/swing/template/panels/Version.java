@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Set;
 import java.util.Vector;
@@ -31,9 +32,6 @@ public class Version extends JPanel implements TemplateNodePanel,
 
 	static final Logger myLogger = Logger.getLogger(Version.class.getName());
 
-	public final static int DEFAULT_VERSION_MODE = 0;
-	public final static int ANY_VERSION_MODE = 1;
-	public final static int EXACT_VERSION_MODE = 2;
 
 	public static final String ANY_MODE_TEMPLATETAG_KEY = "useAny";
 	public static final String DEFAULT_MODE_TEMPLATETAG_KEY = "useDefault";
@@ -42,6 +40,11 @@ public class Version extends JPanel implements TemplateNodePanel,
 	public static final String ANY_MODE_STRING = "Any";
 	public static final String DEFAULT_MODE_STRING = "Default";
 	public static final String EXACT_MODE_STRING = "Exact";
+	
+	// Version
+	public final static int DEFAULT_VERSION_MODE = 0;
+	public final static int ANY_VERSION_MODE = 1;
+	public final static int EXACT_VERSION_MODE = 2;
 
 	public static final String STARTUP_MODE_KEY = "startMode";
 
@@ -65,6 +68,8 @@ public class Version extends JPanel implements TemplateNodePanel,
 	private ButtonGroup modeGroup = new ButtonGroup();
 	
 	private TemplateNodePanel submissionLocationPanel = null;
+	
+	private String lastVersion;
 
 	/**
 	 * Create the panel
@@ -83,10 +88,20 @@ public class Version extends JPanel implements TemplateNodePanel,
 			throws TemplateNodePanelException {
 
 		this.templateNode = node;
-		this.templateNode.setTemplateNodeValueSetter(this);
-		
+
 		this.applicationName = this.templateNode.getTemplate().getApplicationName();
 		
+		
+		GrisuRegistry.getDefault().getHistoryManager().setMaxNumberOfEntries(TemplateTagConstants.getGlobalLastVersionModeKey(applicationName), 1);
+		GrisuRegistry.getDefault().getHistoryManager().setMaxNumberOfEntries(TemplateTagConstants.getGlobalLastVersionKey(applicationName), 1);
+		infoObject = GrisuRegistry.getDefault().getUserApplicationInformation(applicationName);
+				
+		try {
+			lastVersion = GrisuRegistry.getDefault().getHistoryManager().getEntries(TemplateTagConstants.getGlobalLastVersionKey(infoObject.getApplicationName())).get(0);
+		} catch (Exception e) {
+			lastVersion = null;
+		}
+
 		this.useAny = node.getOtherProperties().containsKey(
 				ANY_MODE_TEMPLATETAG_KEY);
 		this.useDefault = node.getOtherProperties().containsKey(
@@ -111,19 +126,30 @@ public class Version extends JPanel implements TemplateNodePanel,
 				}
 			}
 		} else {
-			if (useAny) {
-				startMode = ANY_MODE_STRING;
-			} else if (useExact) {
-				startMode = EXACT_MODE_STRING;
-			} else if (useDefault) {
-				startMode = DEFAULT_MODE_STRING;
-			} else {
-				useAny = true;
-				startMode = ANY_MODE_STRING;
+			try {
+				startMode = GrisuRegistry.getDefault().getHistoryManager().getEntries(TemplateTagConstants.getGlobalLastVersionModeKey(infoObject.getApplicationName())).get(0);
+			} catch (Exception e) {
+				myLogger.debug("Can't get last used parameter for version mode.");
+			}
+
+			if ( startMode == null ) {
+			
+				if (useAny) {
+					startMode = ANY_MODE_STRING;
+				} else if (useExact) {
+					startMode = EXACT_MODE_STRING;
+				} else if (useDefault) {
+					startMode = DEFAULT_MODE_STRING;
+				} else {
+					useAny = true;
+					startMode = ANY_MODE_STRING;
+				}
+				
 			}
 		}
 		
-		if ( ANY_MODE_STRING.equals(startMode) ) {
+		
+		if ( DEFAULT_MODE_STRING.equals(startMode) ) {
 			currentMode = DEFAULT_VERSION_MODE;
 		} else if ( EXACT_MODE_STRING.equals(startMode) ) {
 			currentMode = EXACT_VERSION_MODE;
@@ -144,12 +170,16 @@ public class Version extends JPanel implements TemplateNodePanel,
 		// add combobox as last item
 		add(getVersionComboBox());
 
-		infoObject = GrisuRegistry.getDefault().getUserApplicationInformation(applicationName);
-		
-		for ( String version : infoObject.getAllAvailableVersionsForUser() ) {
+		// this might be slightly dodgy. But it should always work if a SubmissionLocation template tag is present.
+		submissionLocationPanel = (TemplateNodePanel)(this.templateNode.getTemplate().getTemplateNodes().get(TemplateTagConstants.HOSTNAME_TAG_NAME).getTemplateNodeValueSetter());
+		submissionLocationPanel.addValueListener(this);
+
+
+		for ( String version : infoObject.getAllAvailableVersionsForFqan(GrisuRegistry.getDefault().getEnvironmentSnapshotValues().getCurrentFqan()) ) {
 			versionModel.addElement(version);
 		}
 		
+
 		switch (currentMode) {
 		case ANY_VERSION_MODE:
 			getAnyRadioButton().doClick();
@@ -162,10 +192,19 @@ public class Version extends JPanel implements TemplateNodePanel,
 			break;
 		}
 		
-		// this might be slightly dodgy. But it should always work if a Version template tag is present.
-		submissionLocationPanel = (TemplateNodePanel)(this.templateNode.getTemplate().getTemplateNodes().get(TemplateTagConstants.VERSION_TAG_NAME).getTemplateNodeValueSetter());
-		submissionLocationPanel.addValueListener(this);
+		if ( versionModel.getIndexOf(lastVersion) >= 0 ) {
+			versionModel.setSelectedItem(lastVersion);
+		} else {
+			if ( versionModel.getSize() > 0 ) {
+				versionModel.setSelectedItem(versionModel.getElementAt(0));
+			}
+		}
+
 		
+	}
+	
+	public String getCurrentValue() {
+		return (String)versionModel.getSelectedItem();
 	}
 
 	private void switchMode(String mode) {
@@ -189,18 +228,21 @@ public class Version extends JPanel implements TemplateNodePanel,
 		switch (mode) {
 		case ANY_VERSION_MODE:
 			switchToAnyVersionMode();
+			GrisuRegistry.getDefault().getHistoryManager().addHistoryEntry(TemplateTagConstants.getGlobalLastVersionModeKey(infoObject.getApplicationName()), ANY_MODE_STRING, new Date());
 			break;
 		case DEFAULT_VERSION_MODE:
 			switchToDefaultVersionMode();
+			GrisuRegistry.getDefault().getHistoryManager().addHistoryEntry(TemplateTagConstants.getGlobalLastVersionModeKey(infoObject.getApplicationName()), DEFAULT_MODE_STRING, new Date());
 			break;
 		case EXACT_VERSION_MODE:
 			switchToExactVersionMode();
+			GrisuRegistry.getDefault().getHistoryManager().addHistoryEntry(TemplateTagConstants.getGlobalLastVersionModeKey(infoObject.getApplicationName()), EXACT_MODE_STRING, new Date());
 			break;
 		default:
 			myLogger
 					.error("Can't switch to mode: " + mode + ". Not supported.");
 		}
-
+		fireVersionChanged((String)(versionModel.getSelectedItem()));
 	}
 
 	private void switchToExactVersionMode() {
@@ -248,7 +290,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 
 		// submissionlocation has changed (only relevant if ANY-MODE is selected. Otherwise version won't change
 		if ( this.currentMode == ANY_VERSION_MODE ) {
-//			versionModel.setSelectedItem(chooseBestVersion(newValue));
+			versionModel.setSelectedItem(chooseBestVersion(newValue));
 		}
 		
 		
@@ -320,7 +362,16 @@ public class Version extends JPanel implements TemplateNodePanel,
 			versionComboBox = new JComboBox(versionModel);
 			versionComboBox.addItemListener(new ItemListener() {
 				public void itemStateChanged(final ItemEvent e) {
-					fireVersionChanged((String)(versionModel.getSelectedItem()));
+					if ( e.getStateChange() == ItemEvent.SELECTED ) {
+
+						if ( currentMode != ANY_VERSION_MODE ) {
+							String temp = (String)(versionModel.getSelectedItem());
+							fireVersionChanged(temp);
+						}
+
+						GrisuRegistry.getDefault().getHistoryManager().addHistoryEntry(TemplateTagConstants.getGlobalLastVersionKey(infoObject.getApplicationName()), (String)(versionModel.getSelectedItem()));
+						
+					}
 				}
 			});
 			versionComboBox.setMaximumSize(new Dimension(300, 24));
@@ -384,7 +435,6 @@ public class Version extends JPanel implements TemplateNodePanel,
 
 	public void actionPerformed(ActionEvent e) {
 		switchMode(e.getActionCommand());
-		fireVersionChanged((String)(versionModel.getSelectedItem()));
 	}
 
 

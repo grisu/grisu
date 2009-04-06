@@ -4,6 +4,7 @@ import javax.swing.JPanel;
 
 import org.vpac.grisu.client.TemplateTagConstants;
 import org.vpac.grisu.client.control.template.ModuleException;
+import org.vpac.grisu.client.model.template.nodes.DefaultTemplateNodeValueSetter;
 import org.vpac.grisu.client.view.swing.template.AbstractModulePanel;
 import org.vpac.grisu.client.view.swing.template.panels.CPUs;
 import org.vpac.grisu.client.view.swing.template.panels.Email;
@@ -70,6 +71,11 @@ public class GenericMDS extends AbstractModulePanel {
 	@Override
 	protected void initialize() throws ModuleException {
 		try {
+			
+			// needs to be done before template node is set...
+			this.template.getTemplateNodes().get(TemplateTagConstants.HOSTNAME_TAG_NAME).setTemplateNodeValueSetter(getSubmissionLocation());
+			this.template.getTemplateNodes().get(TemplateTagConstants.VERSION_TAG_NAME).setTemplateNodeValueSetter(getVersion());
+			
 			getJobName().setTemplateNode(this.templateModule.getTemplateNodes().get(TemplateTagConstants.JOBNAME_TAG_NAME));
 			getCPUs().setTemplateNode(this.templateModule.getTemplateNodes().get(TemplateTagConstants.CPUS_TAG_NAME));
 			getEmail().setTemplateNode(this.templateModule.getTemplateNodes().get(TemplateTagConstants.EMAIL_ADDRESS_TAG_NAME));

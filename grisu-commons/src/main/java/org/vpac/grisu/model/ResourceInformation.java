@@ -1,5 +1,6 @@
 package org.vpac.grisu.model;
 
+import java.util.List;
 import java.util.Set;
 
 public interface ResourceInformation {
@@ -33,4 +34,11 @@ public interface ResourceInformation {
 	 */
 	public Set<String> filterSubmissionLocationsForSite(String site, Set<String> submissionlocations);
 
+	/**
+	 * A list of all available staging filesystems for this submissionlocation. In order of relevance.
+	 * @param subLoc the submissionLocation
+	 * @return the staging filesystems
+	 */
+	public List<String> getStagingFilesystemForSubmissionLocation(String subLoc);
+	
 }

@@ -43,41 +43,25 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.vpac.historyRepeater</groupId>
-			<artifactId>historyRepeater</artifactId>
-			<version>0.1</version>
-		</dependency>
-
-
-
-
-
-		<dependency>
 			<groupId>net.java.dev.glazedlists</groupId>
 			<artifactId>glazedlists_java15</artifactId>
 			<version>1.7.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>javax.activation</groupId>
 			<artifactId>activation</artifactId>
 			<version>1.1</version>
 		</dependency>
-
-
-
 		<dependency>
 			<groupId>external.jfreechart</groupId>
 			<artifactId>orson</artifactId>
 			<version>0.5.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>external.jfreechart</groupId>
 			<artifactId>jfreechart</artifactId>
 			<version>1.0.11</version>
 		</dependency>
-
 		<dependency>
 			<groupId>external.jfreechart</groupId>
 			<artifactId>jcommon</artifactId>

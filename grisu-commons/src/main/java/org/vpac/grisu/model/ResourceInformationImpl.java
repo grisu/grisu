@@ -1,8 +1,10 @@
 package org.vpac.grisu.model;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -10,7 +12,6 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.js.model.utils.SubmissionLocationHelpers;
 
 public class ResourceInformationImpl implements ResourceInformation {
 
@@ -25,6 +26,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 	private Map<String, String> cachedHosts = new HashMap<String, String>();
 	private Map<String, String[]> cachedAllSubmissionLocationsPerFqan = new HashMap<String, String[]>();
 	private Map<String, Set<String>> cachedAllSitesPerFqan = new HashMap<String, Set<String>>();
+	private Map<String, List<String>> cachedStagingFilesystemsPerSubLoc = new HashMap<String, List<String>>();
 
 	public ResourceInformationImpl(ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
@@ -162,6 +164,15 @@ public class ResourceInformationImpl implements ResourceInformation {
 			}
 		}
 		return cachedAllSitesPerFqan.get(fqan);
+	}
+
+	public List<String> getStagingFilesystemForSubmissionLocation(String subLoc) {
+
+		if ( cachedStagingFilesystemsPerSubLoc.get(subLoc) == null ) {
+			List<String> temp = Arrays.asList(serviceInterface.getStagingFileSystemForSubmissionLocation(subLoc));
+			cachedStagingFilesystemsPerSubLoc.put(subLoc, temp);
+		} 
+		return cachedStagingFilesystemsPerSubLoc.get(subLoc);
 	}
 
 }

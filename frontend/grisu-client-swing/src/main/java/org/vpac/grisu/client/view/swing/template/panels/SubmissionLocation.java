@@ -15,6 +15,7 @@ import javax.swing.border.TitledBorder;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.TemplateTagConstants;
+import org.vpac.grisu.client.model.template.nodes.DefaultTemplateNodeValueSetter;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.TemplateNodeEvent;
 import org.vpac.grisu.client.view.swing.utils.QueueRenderer;
@@ -52,6 +53,10 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 	private final ResourceInformation resourceInfo = GrisuRegistry.getDefault().getResourceInformation();
 	private EnvironmentSnapshotValues esv = GrisuRegistry.getDefault().getEnvironmentSnapshotValues();
 
+	private String lastSubmissionLocation = null;
+	
+	private DefaultTemplateNodeValueSetter stagingFsSetter = new DefaultTemplateNodeValueSetter();
+	
 	/**
 	 * Create the panel
 	 */
@@ -79,8 +84,7 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 	}
 
 	public JPanel getTemplateNodePanel() {
-		// TODO Auto-generated method stub
-		return null;
+		return this;
 	}
 
 	public void reset() {
@@ -92,14 +96,37 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 			throws TemplateNodePanelException {
 
 		this.templateNode = node;
-		this.templateNode.setTemplateNodeValueSetter(this);
-		
+
 		this.applicationName = this.templateNode.getTemplate().getApplicationName();
 		this.infoObject = GrisuRegistry.getDefault().getUserApplicationInformation(applicationName);
 		
+		try {
+			GrisuRegistry.getDefault().getHistoryManager().setMaxNumberOfEntries(TemplateTagConstants.getGlobalLastQueueKey(infoObject.getApplicationName()),1);
+			lastSubmissionLocation = GrisuRegistry.getDefault().getHistoryManager().getEntries(TemplateTagConstants.getGlobalLastQueueKey(infoObject.getApplicationName())).get(0);
+		} catch (Exception e) {
+			lastSubmissionLocation = null;
+		}
+
 		// this might be slightly dodgy. But it should always work if a Version template tag is present.
 		versionPanel = (Version)(this.templateNode.getTemplate().getTemplateNodes().get(TemplateTagConstants.VERSION_TAG_NAME).getTemplateNodeValueSetter());
 		versionPanel.addValueListener(this);
+
+		this.templateNode.getTemplate().getTemplateNodes().get(TemplateTagConstants.EXECUTIONFILESYSTEM_TAG_NAME).setTemplateNodeValueSetter(stagingFsSetter);
+
+		
+		if ( versionPanel.getCurrentValue() != null ) {
+			valueChanged(versionPanel, versionPanel.getCurrentValue());
+		}
+		
+		if ( lastSubmissionLocation != null ) {
+			String lastSite = GrisuRegistry.getDefault().getResourceInformation().getSite(lastSubmissionLocation);
+			if ( siteModel.getIndexOf(lastSite) >= 0 ) {
+				siteModel.setSelectedItem(lastSite);
+				if ( queueModel.getIndexOf(lastSubmissionLocation) >= 0 ) {
+					queueModel.setSelectedItem(lastSubmissionLocation);
+				}
+			}
+		}
 		
 	}
 
@@ -110,6 +137,8 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 		
 		String oldSite = (String)siteModel.getSelectedItem();
 		siteModel.removeAllElements();		
+		
+		String oldQueue = (String)queueModel.getSelectedItem();
 
 		if ( versionPanel.getMode() == Version.DEFAULT_VERSION_MODE ) {
 			allQueues = new HashSet<String>();
@@ -123,6 +152,7 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 		}
 		
 		if ( versionPanel.getMode() != Version.DEFAULT_VERSION_MODE ) {
+			// until the mode is supported
 			allSites = resourceInfo.distillSitesFromSubmissionLocations(allQueues);
 		}
 		
@@ -134,6 +164,10 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 		
 		if ( oldSite != null && siteModel.getIndexOf(oldSite) >= 0 ) {
 			changeToSite(oldSite);
+		}
+		
+		if ( queueModel.getIndexOf(oldQueue) >= 0 ) {
+			queueModel.setSelectedItem(oldQueue);
 		}
 		
 	}
@@ -150,7 +184,7 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 		queueModel.removeAllElements();
 
 		String newSite = (String)siteModel.getSelectedItem();
-		
+		if ( newSite != null && !"".equals(newSite) ) {
 		for ( String queue: resourceInfo.filterSubmissionLocationsForSite(newSite, allQueues) ) {
 			queueModel.addElement(queue);
 		}
@@ -158,7 +192,7 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 		if ( oldQueue != null && queueModel.getIndexOf(oldQueue) >= 0 ) {
 			queueModel.setSelectedItem(oldQueue);
 		}
-		
+		}
 		
 	}
 	
@@ -167,8 +201,7 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 	}
 
 	public String getExternalSetValue() {
-		// TODO Auto-generated method stub
-		return null;
+		return (String)queueModel.getSelectedItem();
 	}
 
 	public void setExternalSetValue(String value) {
@@ -250,8 +283,9 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 			siteComboBox = new JComboBox(siteModel);
 			siteComboBox.addItemListener(new ItemListener() {
 				public void itemStateChanged(final ItemEvent e) {
-					
-					repopulateQueueCombobox();
+					if ( e.getStateChange() == ItemEvent.SELECTED ) {
+						repopulateQueueCombobox();
+					}
 					
 				}
 			});
@@ -264,7 +298,17 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 	protected JComboBox getQueueComboBox() {
 		if (queueComboBox == null) {
 			queueComboBox = new JComboBox(queueModel);
-//			ListCellRenderer renderer = queueComboBox.getRenderer();
+			queueComboBox.addItemListener(new ItemListener() {
+				public void itemStateChanged(final ItemEvent e) {
+					
+					String temp = ((String)queueModel.getSelectedItem());
+					if ( e.getStateChange() == ItemEvent.SELECTED ) {
+						fireSubmissionLocationChanged(temp);
+					}
+					stagingFsSetter.setExternalSetValue(resourceInfo.getStagingFilesystemForSubmissionLocation(temp).get(0));
+					GrisuRegistry.getDefault().getHistoryManager().addHistoryEntry(TemplateTagConstants.getGlobalLastQueueKey(infoObject.getApplicationName()), (String)queueModel.getSelectedItem());
+				}
+			});
 			queueComboBox.setRenderer(new QueueRenderer(queueComboBox.getRenderer()));
 		}
 		return queueComboBox;
