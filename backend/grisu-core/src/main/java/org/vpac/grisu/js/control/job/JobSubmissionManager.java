@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.globus.exec.utils.ManagedJobFactoryConstants;
 import org.vpac.grisu.control.JobConstants;
+import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.ServerJobSubmissionException;
 import org.vpac.grisu.js.model.Job;
 import org.vpac.grisu.js.model.utils.JsdlHelpers;
@@ -25,12 +26,14 @@ public class JobSubmissionManager {
 			.getName());
 
 	private Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
-
+	private ServiceInterface serviceInterface = null;
+	
 	/**
 	 * Initializes the JobSubmissionManager with all supported {@link JobSubmitter}s.
 	 * @param submitters the supported JobSubmitters
 	 */
-	public JobSubmissionManager(Map<String, JobSubmitter> submitters) {
+	public JobSubmissionManager(ServiceInterface serviceInterface, Map<String, JobSubmitter> submitters) {
+		this.serviceInterface = serviceInterface;
 		this.submitters = submitters;
 	}
 
@@ -82,7 +85,7 @@ public class JobSubmissionManager {
 		myLogger.debug("FactoryType is: "+ factoryType);
 		String submitHostEndpoint = submitter.getServerEndpoint(host);
 
-		String handle = submitter.submit(submitHostEndpoint, factoryType, job);
+		String handle = submitter.submit(serviceInterface, submitHostEndpoint, factoryType, job);
 
 		job.setJobhandle(handle);
 		job.setSubmissionHost(host);

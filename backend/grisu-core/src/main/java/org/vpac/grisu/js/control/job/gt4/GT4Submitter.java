@@ -31,6 +31,7 @@ import org.globus.wsrf.impl.security.authorization.Authorization;
 import org.globus.wsrf.impl.security.authorization.HostAuthorization;
 import org.ietf.jgss.GSSCredential;
 import org.vpac.grisu.control.JobConstants;
+import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.SeveralXMLHelpers;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.info.CachedMdsInformationManager;
@@ -57,28 +58,32 @@ public class GT4Submitter extends JobSubmitter {
 
 	static final Logger myLogger = Logger.getLogger(GT4Submitter.class
 			.getName());
-	
-	protected InformationManager informationManager = CachedMdsInformationManager.getDefaultCachedMdsInformationManager();
+
+	protected InformationManager informationManager = CachedMdsInformationManager
+			.getDefaultCachedMdsInformationManager();
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.vpac.grisu.js.control.job.JobSubmitter#createJobSubmissionDescription(org.w3c.dom.Document)
+	 * @see
+	 * org.vpac.grisu.js.control.job.JobSubmitter#createJobSubmissionDescription
+	 * (org.w3c.dom.Document)
 	 */
-	private String createJobSubmissionDescription(Document jsdl, String site) {
-		
+	private String createJobSubmissionDescription(ServiceInterface serviceInterface, Document jsdl) {
+
 		DebugUtils.jsdlDebugOutput("Before translating into rsl: ", jsdl);
-		
+
 		Document output = null;
 		try {
-			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilderFactory docFactory = DocumentBuilderFactory
+					.newInstance();
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 			output = docBuilder.newDocument();
 		} catch (ParserConfigurationException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+
 		// Add root element
 		Element job = output.createElement("job");
 		output.appendChild(job);
@@ -87,72 +92,72 @@ public class GT4Submitter extends JobSubmitter {
 		Element executable = output.createElement("executable");
 		executable.setTextContent(JsdlHelpers.getPosixApplication(jsdl));
 		job.appendChild(executable);
-		
+
 		// Add "argument"s
 		String[] arguments = JsdlHelpers.getPosixApplicationArguments(jsdl);
-		for ( String argument : arguments ){
-			if ( argument != null && !"".equals(argument.trim())) {
+		for (String argument : arguments) {
+			if (argument != null && !"".equals(argument.trim())) {
 				Element argument_node = output.createElement("argument");
 				argument_node.setTextContent(argument);
 				job.appendChild(argument_node);
 			}
 		}
-		
+
 		// Add "directory"
 		Element directory = output.createElement("directory");
 		directory.setTextContent(JsdlHelpers.getWorkingDirectory(jsdl));
 		job.appendChild(directory);
-		
+
 		// "stdin" element if available
 		String stdinValue = JsdlHelpers.getPosixStandardInput(jsdl);
-		if ( stdinValue != null && ! "".equals(stdinValue) ) {
+		if (stdinValue != null && !"".equals(stdinValue)) {
 			Element stdin = output.createElement("stdin");
 			stdin.setTextContent(stdinValue);
 			job.appendChild(stdin);
 		}
-		
+
 		// Add "stdout"
 		Element stdout = output.createElement("stdout");
 		stdout.setTextContent(JsdlHelpers.getPosixStandardOutput(jsdl));
 		job.appendChild(stdout);
-		
+
 		// Add "stderr"
 		Element stderr = output.createElement("stderr");
 		stderr.setTextContent(JsdlHelpers.getPosixStandardError(jsdl));
 		job.appendChild(stderr);
-		
+
 		// Add "queue" node
 		// TODO change that once I know how to specify queues in jsdl
 		String queue = JsdlHelpers.getCandidateHosts(jsdl)[0]; // TODO this
-																// always uses
-																// the first
-																// candidate
-																// host - not
-																// good
-		if ( queue.indexOf(":") != -1 ) {
-			queue = queue.substring(0, queue.indexOf(":") );
+		// always uses
+		// the first
+		// candidate
+		// host - not
+		// good
+		if (queue.indexOf(":") != -1) {
+			queue = queue.substring(0, queue.indexOf(":"));
 			Element queue_node = output.createElement("queue");
 			queue_node.setTextContent(queue);
 			job.appendChild(queue_node);
 		}
-		
+
 		// Add "jobtype" if mpi
 		int processorCount = JsdlHelpers.getProcessorCount(jsdl);
-		
+
 		Element jobType = output.createElement("jobType");
 		String jobTypeString = JsdlHelpers.getJobType(jsdl);
-		
-		if ( processorCount > 1 ) {
+
+		if (processorCount > 1) {
 			Element count = output.createElement("count");
 			count.setTextContent(new Integer(processorCount).toString());
 			job.appendChild(count);
-			if ( jobTypeString == null ) {
+			if (jobTypeString == null) {
 				jobType.setTextContent("mpi");
 			} else {
 				jobType.setTextContent(jobTypeString);
 			}
 		} else {
-			if ( jobTypeString == null ) {
+			if (jobTypeString == null) {
 				jobType.setTextContent("single");
 			} else {
 				jobType.setTextContent(jobTypeString);
@@ -160,132 +165,148 @@ public class GT4Submitter extends JobSubmitter {
 
 		}
 		job.appendChild(jobType);
-		
+
 		// total memory
 		Long memory = JsdlHelpers.getTotalMemoryRequirement(jsdl);
-		
-		if ( memory != null && memory >= 0 ) {
+
+		if (memory != null && memory >= 0) {
 			Element totalMemory = output.createElement("maxMemory");
 			// convert from bytes to mb
 			memory = memory / 1024;
 			totalMemory.setTextContent(memory.toString());
 			job.appendChild(totalMemory);
 		}
-		
+
 		// Add "maxWallTime" node
 		int walltime = JsdlHelpers.getWalltime(jsdl);
-		if ( walltime > 0 ) {
+		if (walltime > 0) {
 			Element maxWallTime = output.createElement("maxWallTime");
 			int wt = new Integer(JsdlHelpers.getWalltime(jsdl));
 			// convert to minutes
 			wt = wt / 60;
 			maxWallTime.setTextContent(new Integer(wt).toString());
 			job.appendChild(maxWallTime);
-		}			
+		}
 
 		Element fileStageIn = output.createElement("fileStageIn");
 		// stage ins
-// Map<String, String> stageIns = JsdlHelpers.getStageIns(jsdl);
-// // only append stageIns element if not 0 because globus will reject the job
-// if there is an empyt <stageIns> tag
-// if ( stageIns.size() > 0 ) {
-// for ( String source : stageIns.keySet() ) {
-// Element stageIn = output.createElement("transfer");
-// Element sourceURL = output.createElement("sourceUrl");
-// sourceURL.setTextContent(source);
-// stageIn.appendChild(sourceURL);
-// Element targetURL = output.createElement("destinationUrl");
-// targetURL.setTextContent(stageIns.get(source));
-// stageIn.appendChild(targetURL);
-//			
-// fileStageIn.appendChild(stageIn);
-// }
-// job.appendChild(fileStageIn);
-// }
+		// Map<String, String> stageIns = JsdlHelpers.getStageIns(jsdl);
+		// // only append stageIns element if not 0 because globus will reject
+		// the job
+		// if there is an empyt <stageIns> tag
+		// if ( stageIns.size() > 0 ) {
+		// for ( String source : stageIns.keySet() ) {
+		// Element stageIn = output.createElement("transfer");
+		// Element sourceURL = output.createElement("sourceUrl");
+		// sourceURL.setTextContent(source);
+		// stageIn.appendChild(sourceURL);
+		// Element targetURL = output.createElement("destinationUrl");
+		// targetURL.setTextContent(stageIns.get(source));
+		// stageIn.appendChild(targetURL);
+		//			
+		// fileStageIn.appendChild(stageIn);
+		// }
+		// job.appendChild(fileStageIn);
+		// }
 		// Extensions
 		Element extensions = output.createElement("extensions");
-		
+
 		// jobname
 		Element jobname = output.createElement("jobname");
 		String jobname_string = JsdlHelpers.getJobname(jsdl);
 		// because of some pbs restrictions we have to keep the jobname to 6
 		// chars
-		if ( jobname_string.length() > 6 ) {
-			jobname.setTextContent(jobname_string.substring(jobname_string.length()-6));
+		if (jobname_string.length() > 6) {
+			jobname.setTextContent(jobname_string.substring(jobname_string
+					.length() - 6));
 		}
-// jobname.setTextContent(jobname_string);
+		// jobname.setTextContent(jobname_string);
 		extensions.appendChild(jobname);
-		
-		// module
-		String[] modules_string = JsdlHelpers.getModules(jsdl);
-		if ( modules_string != null || modules_string.length == 0 ) {
-			for ( String module_string : modules_string ) {
-				if ( !"".equals(module_string) ) {
-						Element module = output.createElement("module");
-						module.setTextContent(module_string);
-						extensions.appendChild(module);
+
+		// module -- old style
+		String[] modules_string = null;
+		try {
+			modules_string = JsdlHelpers.getModules(jsdl);
+		} catch (Exception e) {
+			// doesn't matter
+		}
+		if (modules_string != null && modules_string.length == 0) {
+			for (String module_string : modules_string) {
+				if (!"".equals(module_string)) {
+					Element module = output.createElement("module");
+					module.setTextContent(module_string);
+					extensions.appendChild(module);
 				}
 			}
 		} else {
-			
-			// try to determine module to load from mds -- this will be the default way of doing it later on and the module element will disappear
+
+			// try to determine module to load from mds -- this will be the
+			// default way of doing it later on and the module element will
+			// disappear
 			// it was stupid in the first place to have it...
-			
+
 			String application = JsdlHelpers.getApplicationName(jsdl);
 			String version = JsdlHelpers.getApplicationVersion(jsdl);
-
-			Map<String, String> appDetails = informationManager.getApplicationDetails(application, version, site);
+			String subLoc = JsdlHelpers.getCandidateHosts(jsdl)[0];
 			
-			modules_string = appDetails.get(JobConstants.MDS_MODULES_KEY).split(",");
+			Map<String, String> appDetails = serviceInterface.getApplicationDetails(application, version, subLoc);
 
-			for ( String module_string : modules_string ) {
-				if ( !"".equals(module_string) ) {
+			String modulesString = appDetails.get(JobConstants.MDS_MODULES_KEY);
+
+			if (modulesString != null && modulesString.length() > 0) {
+				modules_string = appDetails.get(JobConstants.MDS_MODULES_KEY)
+						.split(",");
+
+				for (String module_string : modules_string) {
+					if (!"".equals(module_string)) {
 						Element module = output.createElement("module");
 						module.setTextContent(module_string);
 						extensions.appendChild(module);
+					}
 				}
 			}
 		}
-		
-		
+
 		// email
 		String email = JsdlHelpers.getEmail(jsdl);
-		
-		if ( email != null && ! "".equals(email) ) {
+
+		if (email != null && !"".equals(email)) {
 			Element email_address = output.createElement("email_address");
 			email_address.setTextContent(email);
 			extensions.appendChild(email_address);
 
-			if ( JsdlHelpers.sendEmailOnJobStart(jsdl) ) {
-				Element emailonexecution = output.createElement("emailonexecution");
+			if (JsdlHelpers.sendEmailOnJobStart(jsdl)) {
+				Element emailonexecution = output
+						.createElement("emailonexecution");
 				emailonexecution.setTextContent("yes");
 				extensions.appendChild(emailonexecution);
 			}
-			
-			if ( JsdlHelpers.sendEmailOnJobFinish(jsdl) ) {
+
+			if (JsdlHelpers.sendEmailOnJobFinish(jsdl)) {
 				Element emailonabort = output.createElement("emailonabort");
 				emailonabort.setTextContent("yes");
-				Element emailontermination = output.createElement("emailontermination");
+				Element emailontermination = output
+						.createElement("emailontermination");
 				emailontermination.setTextContent("yes");
 				extensions.appendChild(emailonabort);
-				extensions.appendChild(emailontermination);				
+				extensions.appendChild(emailontermination);
 			}
 
 		}
-		
+
 		job.appendChild(extensions);
-		
-		
+
 		// initialize StreamResult with InputFile object to save to file
 		StreamResult result = null;
 		try {
-			Transformer transformer = TransformerFactory.newInstance().newTransformer();
+			Transformer transformer = TransformerFactory.newInstance()
+					.newTransformer();
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
 			result = new StreamResult(new StringWriter());
 			DOMSource source = new DOMSource(output);
 
-				transformer.transform(source, result);
+			transformer.transform(source, result);
 		} catch (TransformerConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -377,16 +398,16 @@ public class GT4Submitter extends JobSubmitter {
 	 * (non-Javadoc)
 	 * 
 	 * @see org.vpac.grisu.js.control.job.JobSubmitter#submit(java.lang.String,
-	 *      org.vpac.grisu.js.model.Job)
+	 * org.vpac.grisu.js.model.Job)
 	 */
-	protected String submit(String host, String factoryType, Job job) {
+	protected String submit(ServiceInterface serviceInterface, String host, String factoryType, Job job) {
 
 		JobDescriptionType jobDesc = null;
 		String submittedJobDesc = null;
 		try {
-			String site = informationManager.getSiteForHostOrUrl(host);
-			submittedJobDesc = createJobSubmissionDescription(job
-					.getJobDescription(), site);
+//			String site = informationManager.getSiteForHostOrUrl(host);
+			submittedJobDesc = createJobSubmissionDescription(serviceInterface, job
+					.getJobDescription());
 			jobDesc = RSLHelper.readRSL(submittedJobDesc);
 
 		} catch (RSLParseException e) {
@@ -450,7 +471,6 @@ public class GT4Submitter extends JobSubmitter {
 		// for debug purposes
 
 		if (ServerPropertiesManager.getDebugModeOn()) {
-			
 
 			String uid = handle.substring(handle.indexOf("?") + 1);
 			String hostname = host.substring(0, host
@@ -487,13 +507,14 @@ public class GT4Submitter extends JobSubmitter {
 				buffWriter = new BufferedWriter(fileWriter2);
 				buffWriter.write(submittedJobDesc);
 				buffWriter.close();
-				
+
 				FileWriter fileWriter3 = new FileWriter(uFileName + ".jsdl");
 				buffWriter = new BufferedWriter(fileWriter3);
-				buffWriter.write(SeveralXMLHelpers.toStringWithoutAnnoyingExceptions(job.getJobDescription()));
+				buffWriter.write(SeveralXMLHelpers
+						.toStringWithoutAnnoyingExceptions(job
+								.getJobDescription()));
 				buffWriter.close();
-				
-				
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -557,8 +578,9 @@ public class GT4Submitter extends JobSubmitter {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.vpac.grisu.js.control.job.JobSubmitter#getJobStatus(java.lang.String,
-	 *      org.vpac.grisu.credential.model.ProxyCredential)
+	 * @see
+	 * org.vpac.grisu.js.control.job.JobSubmitter#getJobStatus(java.lang.String,
+	 * org.vpac.grisu.credential.model.ProxyCredential)
 	 */
 	public int getJobStatus(String endPointReference, ProxyCredential cred) {
 
@@ -576,7 +598,7 @@ public class GT4Submitter extends JobSubmitter {
 	 * (non-Javadoc)
 	 * 
 	 * @see org.vpac.grisu.js.control.job.JobSubmitter#killJob(java.lang.String,
-	 *      org.vpac.grisu.credential.model.ProxyCredential)
+	 * org.vpac.grisu.credential.model.ProxyCredential)
 	 */
 	public int killJob(String endPointReference, ProxyCredential cred) {
 

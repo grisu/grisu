@@ -1,8 +1,8 @@
 package org.vpac.grisu.js.control.job;
 
+import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.credential.model.ProxyCredential;
 import org.vpac.grisu.js.model.Job;
-import org.w3c.dom.Document;
 
 /**
  * Extend this abstract class if you want to write a connector to a new middleware.
@@ -23,11 +23,12 @@ public abstract class JobSubmitter {
 	/**
 	 * Used to submit the job to the specified host
 	 * 
+	 * @param serviceInterface the serviceInterface
 	 * @param host the host (something like ng2.vpac.org)
 	 * @param job the job
 	 * @return the (JobSubmitter-specific) handle to the job
 	 */
-	abstract protected String submit(String host, String factoryType, Job job);
+	abstract protected String submit(ServiceInterface serviceInterface, String host, String factoryType, Job job);
 	
 //	public String convertJobDescription(Job job) {
 //		

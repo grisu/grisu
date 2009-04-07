@@ -39,6 +39,13 @@ public interface ResourceInformation {
 	 * @param subLoc the submissionLocation
 	 * @return the staging filesystems
 	 */
-	public List<String> getStagingFilesystemForSubmissionLocation(String subLoc);
+	public List<String> getStagingFilesystemsForSubmissionLocation(String subLoc);
+	
+	/**
+	 * Calculates the best staging filesystem for this submissionLocation
+	 * @param subLoc the submissionLocation
+	 * @return the staging filesystem
+	 */
+	public String getRecommendedStagingFileSystemForSubmissionLocation(String subLoc);
 	
 }

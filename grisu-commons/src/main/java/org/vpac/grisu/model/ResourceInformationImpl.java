@@ -166,13 +166,29 @@ public class ResourceInformationImpl implements ResourceInformation {
 		return cachedAllSitesPerFqan.get(fqan);
 	}
 
-	public List<String> getStagingFilesystemForSubmissionLocation(String subLoc) {
+	public List<String> getStagingFilesystemsForSubmissionLocation(String subLoc) {
 
+		if ( subLoc == null || "".equals(subLoc) ) {
+			return null;
+		}
 		if ( cachedStagingFilesystemsPerSubLoc.get(subLoc) == null ) {
 			List<String> temp = Arrays.asList(serviceInterface.getStagingFileSystemForSubmissionLocation(subLoc));
 			cachedStagingFilesystemsPerSubLoc.put(subLoc, temp);
 		} 
 		return cachedStagingFilesystemsPerSubLoc.get(subLoc);
 	}
+
+	public String getRecommendedStagingFileSystemForSubmissionLocation(
+			String subLoc) {
+		
+		List<String> temp = getStagingFilesystemsForSubmissionLocation(subLoc);
+		if ( temp != null && temp.size() > 0 ) {
+			return temp.get(0);
+		} else {
+			return null;
+		}
+	}
+	
+
 
 }

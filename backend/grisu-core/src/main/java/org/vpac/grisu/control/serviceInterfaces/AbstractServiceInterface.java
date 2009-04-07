@@ -188,7 +188,7 @@ abstract class AbstractServiceInterface implements ServiceInterface {
 		if (manager == null) {
 			Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
 			submitters.put("GT4", new GT4Submitter());
-			manager = new JobSubmissionManager(submitters);
+			manager = new JobSubmissionManager(this, submitters);
 		}
 		return manager;
 	}

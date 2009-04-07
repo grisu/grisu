@@ -20,9 +20,11 @@ import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.TemplateNodeEvent;
 import org.vpac.grisu.client.view.swing.utils.QueueRenderer;
 import org.vpac.grisu.control.GrisuRegistry;
+import org.vpac.grisu.fs.model.MountPoint;
 import org.vpac.grisu.model.EnvironmentSnapshotValues;
 import org.vpac.grisu.model.ResourceInformation;
 import org.vpac.grisu.model.UserApplicationInformation;
+import org.vpac.grisu.model.UserInformation;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -52,6 +54,7 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 	
 	private final ResourceInformation resourceInfo = GrisuRegistry.getDefault().getResourceInformation();
 	private EnvironmentSnapshotValues esv = GrisuRegistry.getDefault().getEnvironmentSnapshotValues();
+	private final UserInformation userInformation = GrisuRegistry.getDefault().getUserInformation();
 
 	private String lastSubmissionLocation = null;
 	
@@ -302,11 +305,15 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 				public void itemStateChanged(final ItemEvent e) {
 					
 					String temp = ((String)queueModel.getSelectedItem());
+					if ( temp != null && ! "".equals(temp) ) {
 					if ( e.getStateChange() == ItemEvent.SELECTED ) {
 						fireSubmissionLocationChanged(temp);
 					}
-					stagingFsSetter.setExternalSetValue(resourceInfo.getStagingFilesystemForSubmissionLocation(temp).get(0));
+					MountPoint fs = userInformation.getRecommendedMountPoint(temp, esv.getCurrentFqan());
+					stagingFsSetter.setExternalSetValue(fs.getRootUrl());
+					myLogger.debug("Set staging fs to: "+fs);
 					GrisuRegistry.getDefault().getHistoryManager().addHistoryEntry(TemplateTagConstants.getGlobalLastQueueKey(infoObject.getApplicationName()), (String)queueModel.getSelectedItem());
+					}
 				}
 			});
 			queueComboBox.setRenderer(new QueueRenderer(queueComboBox.getRenderer()));
