@@ -23,6 +23,7 @@ import org.vpac.grisu.client.TemplateTagConstants;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.TemplateNodeEvent;
 import org.vpac.grisu.control.GrisuRegistry;
+import org.vpac.grisu.model.EnvironmentSnapshotValues;
 import org.vpac.grisu.model.UserApplicationInformation;
 
 public class Version extends JPanel implements TemplateNodePanel,
@@ -32,6 +33,8 @@ public class Version extends JPanel implements TemplateNodePanel,
 
 	static final Logger myLogger = Logger.getLogger(Version.class.getName());
 
+	public static final String DEFAULT_VERSION_NOT_AVAILABLE_STRING = "Default version not available.";
+	
 
 	public static final String ANY_MODE_TEMPLATETAG_KEY = "useAny";
 	public static final String DEFAULT_MODE_TEMPLATETAG_KEY = "useDefault";
@@ -56,6 +59,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 
 	private TemplateNode templateNode;
 	private UserApplicationInformation infoObject = null;
+	private EnvironmentSnapshotValues esv = GrisuRegistry.getDefault().getEnvironmentSnapshotValues();
 	private String applicationName = null;
 	private boolean useAny = true;
 	private boolean useDefault = true;
@@ -90,6 +94,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 		this.templateNode = node;
 
 		this.applicationName = this.templateNode.getTemplate().getApplicationName();
+		defaultVersion = node.getDefaultValue();
 		
 		
 		GrisuRegistry.getDefault().getHistoryManager().setMaxNumberOfEntries(TemplateTagConstants.getGlobalLastVersionModeKey(applicationName), 1);
@@ -115,13 +120,14 @@ public class Version extends JPanel implements TemplateNodePanel,
 				useAny = true;
 			} else if (EXACT_MODE_STRING.equals(startMode)) {
 				useExact = true;
-			} else if (DEFAULT_MODE_STRING.endsWith(startMode)) {
-				defaultVersion = node.getOtherProperty(DEFAULT_MODE_STRING);
+			} else if (DEFAULT_MODE_STRING.equals(startMode)) {
+				
 				if (defaultVersion == null || "".equals(defaultVersion)) {
 					useDefault = false;
 					myLogger
 							.warn("Not using default mode because no default version value is specified in template.");
 				} else {
+					lastVersion = null;
 					useDefault = true;
 				}
 			}
@@ -248,13 +254,34 @@ public class Version extends JPanel implements TemplateNodePanel,
 	private void switchToExactVersionMode() {
 
 		this.currentMode = EXACT_VERSION_MODE;
+		
 		getVersionComboBox().setEnabled(true);
+		
+		if ( DEFAULT_VERSION_NOT_AVAILABLE_STRING.equals(versionModel.getSelectedItem()) ) {
+			try {
+				String temp = (String)versionModel.getElementAt(0);
+				versionModel.setSelectedItem(temp);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		versionModel.removeElement(DEFAULT_VERSION_NOT_AVAILABLE_STRING);
 
 	}
 
 	private void switchToDefaultVersionMode() {
 		
 		this.currentMode = DEFAULT_VERSION_MODE;
+		
+		Set<String> temp = infoObject.getAvailableSubmissionLocationsForVersionAndFqan(defaultVersion, esv.getCurrentFqan());
+		
+		if ( temp.size() > 0 ) {
+			versionModel.setSelectedItem(defaultVersion);
+		} else {
+			versionModel.addElement(DEFAULT_VERSION_NOT_AVAILABLE_STRING);
+			versionModel.setSelectedItem(DEFAULT_VERSION_NOT_AVAILABLE_STRING);
+		}
+		
 		getVersionComboBox().setEnabled(false);
 
 	}
@@ -264,6 +291,15 @@ public class Version extends JPanel implements TemplateNodePanel,
 		this.currentMode = ANY_VERSION_MODE;
 		getVersionComboBox().setEnabled(false);
 
+		if ( DEFAULT_VERSION_NOT_AVAILABLE_STRING.equals(versionModel.getSelectedItem()) ) {
+			try {
+				String temp = (String)versionModel.getElementAt(0);
+				versionModel.setSelectedItem(temp);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		versionModel.removeElement(DEFAULT_VERSION_NOT_AVAILABLE_STRING);
 	}
 
 	public void templateNodeUpdated(TemplateNodeEvent event) {

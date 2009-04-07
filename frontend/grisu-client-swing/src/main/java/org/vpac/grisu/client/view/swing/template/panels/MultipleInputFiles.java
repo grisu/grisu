@@ -138,7 +138,7 @@ public class MultipleInputFiles extends JPanel implements TemplateNodePanel,
 					.getOtherProperty(InputFile.LAST_DIRECTORY_KEY)
 					+ "_dirKey";
 		} else {
-			lastDirectoryKey = null;
+			lastDirectoryKey = InputFile.DEFAULT_LAST_DIRECTORY_VALUE;
 		}
 
 		// try to change to the last used directory
@@ -231,11 +231,11 @@ public class MultipleInputFiles extends JPanel implements TemplateNodePanel,
 					.get(i);
 
 			String fileURI = file.getURI().toString();
-			if (fileURI.startsWith("file:")) {
-				result.append(fileURI.substring(5) + ";");
-			} else {
+//			if (fileURI.startsWith("file:")) {
+//				result.append(fileURI.substring(5) + ";");
+//			} else {
 				result.append(fileURI + ";");
-			}
+//			}
 		}
 
 		return result.substring(0, result.length() - 1);

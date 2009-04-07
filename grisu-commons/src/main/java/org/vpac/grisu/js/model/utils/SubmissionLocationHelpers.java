@@ -7,7 +7,7 @@ public class SubmissionLocationHelpers {
 		int endIndex = subLoc.indexOf(":");
 		if ( endIndex <= 0 ) {
 //			return null;
-			return "no queuename";
+			return "Not available";
 		}
 		
 		return subLoc.substring(0, endIndex);

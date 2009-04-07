@@ -69,7 +69,8 @@ public class GT4Submitter extends JobSubmitter {
 	 * org.vpac.grisu.js.control.job.JobSubmitter#createJobSubmissionDescription
 	 * (org.w3c.dom.Document)
 	 */
-	private String createJobSubmissionDescription(ServiceInterface serviceInterface, Document jsdl) {
+	private String createJobSubmissionDescription(
+			ServiceInterface serviceInterface, Document jsdl) {
 
 		DebugUtils.jsdlDebugOutput("Before translating into rsl: ", jsdl);
 
@@ -248,20 +249,24 @@ public class GT4Submitter extends JobSubmitter {
 			String application = JsdlHelpers.getApplicationName(jsdl);
 			String version = JsdlHelpers.getApplicationVersion(jsdl);
 			String subLoc = JsdlHelpers.getCandidateHosts(jsdl)[0];
-			
-			Map<String, String> appDetails = serviceInterface.getApplicationDetails(application, version, subLoc);
 
-			String modulesString = appDetails.get(JobConstants.MDS_MODULES_KEY);
+			if (application != null || version != null || subLoc != null) {
+				Map<String, String> appDetails = serviceInterface
+						.getApplicationDetails(application, version, subLoc);
 
-			if (modulesString != null && modulesString.length() > 0) {
-				modules_string = appDetails.get(JobConstants.MDS_MODULES_KEY)
-						.split(",");
+				String modulesString = appDetails
+						.get(JobConstants.MDS_MODULES_KEY);
 
-				for (String module_string : modules_string) {
-					if (!"".equals(module_string)) {
-						Element module = output.createElement("module");
-						module.setTextContent(module_string);
-						extensions.appendChild(module);
+				if (modulesString != null && modulesString.length() > 0) {
+					modules_string = appDetails.get(
+							JobConstants.MDS_MODULES_KEY).split(",");
+
+					for (String module_string : modules_string) {
+						if (!"".equals(module_string)) {
+							Element module = output.createElement("module");
+							module.setTextContent(module_string);
+							extensions.appendChild(module);
+						}
 					}
 				}
 			}
@@ -400,14 +405,15 @@ public class GT4Submitter extends JobSubmitter {
 	 * @see org.vpac.grisu.js.control.job.JobSubmitter#submit(java.lang.String,
 	 * org.vpac.grisu.js.model.Job)
 	 */
-	protected String submit(ServiceInterface serviceInterface, String host, String factoryType, Job job) {
+	protected String submit(ServiceInterface serviceInterface, String host,
+			String factoryType, Job job) {
 
 		JobDescriptionType jobDesc = null;
 		String submittedJobDesc = null;
 		try {
-//			String site = informationManager.getSiteForHostOrUrl(host);
-			submittedJobDesc = createJobSubmissionDescription(serviceInterface, job
-					.getJobDescription());
+			// String site = informationManager.getSiteForHostOrUrl(host);
+			submittedJobDesc = createJobSubmissionDescription(serviceInterface,
+					job.getJobDescription());
 			jobDesc = RSLHelper.readRSL(submittedJobDesc);
 
 		} catch (RSLParseException e) {

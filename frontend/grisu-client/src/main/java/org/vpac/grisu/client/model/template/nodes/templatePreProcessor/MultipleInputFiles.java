@@ -43,8 +43,9 @@ public class MultipleInputFiles extends TemplatePreProcessor {
 		if ( fileUrls[0].equals(JobConstants.DUMMY_STAGE_FILE)) {
 			node.getElement().setTextContent(JobConstants.DUMMY_STAGE_FILE);
 			return;
-		} else if ( ! fileUrls[0].startsWith("gsiftp:") ) {
-			fileUrls[0] = "file:"+fileUrls[0]; 
+//		} else if ( ! fileUrls[0].startsWith("gsiftp:") ) {
+//			fileUrls[0] = "file:"+fileUrls[0]; 
+//			fileUrls[0] = fileUrls[0]; 
 		}
 		node.getElement().setTextContent(fileUrls[0]);
 		InputFile.calculatePostProcessUploadAttribute(node.getElement().getTextContent(), node.getElement());
@@ -59,8 +60,8 @@ public class MultipleInputFiles extends TemplatePreProcessor {
 			
 			Element uriElement = ((Element)((Element)newElement.getElementsByTagName("Source").item(0)).getElementsByTagName("URI").item(0));
 			
-			if ( ! fileUrls[i].startsWith("gsiftp:") )
-				fileUrls[i] = "file:"+fileUrls[i];
+//			if ( ! fileUrls[i].startsWith("gsiftp:") )
+//				fileUrls[i] = "file:"+fileUrls[i];
 			uriElement.setTextContent(fileUrls[i]);
 			InputFile.calculatePostProcessUploadAttribute(uriElement.getTextContent(), uriElement);
 

@@ -1,5 +1,7 @@
 package org.vpac.grisu.client.model.template.validators;
 
+import java.io.File;
+import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.vpac.grisu.client.model.files.GrisuFileObject;
@@ -25,19 +27,31 @@ public class InputFile extends TemplateNodeValidator {
 					return;
 				}
 			}
-
 			
-			GrisuFileObject file = templateNode.getTemplate().getEnvironmentManager().getFileManager().getFileObject(templateNode.getValue());
+			String temp = templateNode.getValue();
+			String[] files = null;
+			
+			if ( temp.indexOf(";") >= 0 ) {
+				files = temp.split(";");
+			} else { 
+				files = new String[]{temp};
+			}
+			
+			for ( String ifile : files ) {
+				
+			GrisuFileObject file = templateNode.getTemplate().getEnvironmentManager().getFileManager().getFileObject(new URI(ifile));
 			if ( file == null ) {
-				throw new TemplateValidateException("Input file does not exist."); 
+				throw new TemplateValidateException("Input file does not exist: "+ifile); 
 			}
 			if ( file.exists() ) {
 				return;
 			} else {
-				throw new TemplateValidateException("Input file does not exist."); 
+				throw new TemplateValidateException("Input file does not exist: "+ifile); 
+			}
+			
 			}
 		} catch (URISyntaxException e) {
-			throw new TemplateValidateException("Problem retrieving file object: "+e);
+			throw new TemplateValidateException("Problem retrieving file object(s): "+e);
 		}
 
 		

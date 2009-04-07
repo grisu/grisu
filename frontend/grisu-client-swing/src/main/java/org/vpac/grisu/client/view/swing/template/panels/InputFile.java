@@ -129,8 +129,8 @@ public class InputFile extends AbstractInputPanel implements FileChooserParent {
 						.getFileObject(uri);
 				getSiteFileChooserDialog().setCurrentDirectory(dir);
 			} catch (Exception e) {
-				e.printStackTrace();
-
+//				e.printStackTrace();
+				myLogger.error("Could not change to directory: "+e.getLocalizedMessage());
 			}
 
 			getSiteFileChooserDialog().addUserInputListener(InputFile.this);

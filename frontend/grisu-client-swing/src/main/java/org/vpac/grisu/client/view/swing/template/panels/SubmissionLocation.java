@@ -144,22 +144,19 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 		String oldQueue = (String)queueModel.getSelectedItem();
 
 		if ( versionPanel.getMode() == Version.DEFAULT_VERSION_MODE ) {
-			allQueues = new HashSet<String>();
-			allQueues.add("Mode not supported yet.");
-			allSites = new HashSet<String>();
-			allSites.add("Mode not supported yet");
+			allQueues = infoObject.getAvailableSubmissionLocationsForVersionAndFqan(newValue, esv.getCurrentFqan());
+			if ( allQueues.size() == 0 ) {
+				siteModel.setSelectedItem("Not available.");
+				queueModel.setSelectedItem("Not available.");
+				return;
+			}
 		} else if ( versionPanel.getMode() == Version.ANY_VERSION_MODE ) {
 			allQueues = infoObject.getAvailableSubmissionLocationsForFqan(esv.getCurrentFqan());
 		} else {
 			allQueues = infoObject.getAvailableSubmissionLocationsForVersionAndFqan(newValue, esv.getCurrentFqan());
 		}
 		
-		if ( versionPanel.getMode() != Version.DEFAULT_VERSION_MODE ) {
-			// until the mode is supported
-			allSites = resourceInfo.distillSitesFromSubmissionLocations(allQueues);
-		}
-		
-		
+		allSites = resourceInfo.distillSitesFromSubmissionLocations(allQueues);
 		
 		for ( String tempsite : allSites ) {
 			siteModel.addElement(tempsite);
