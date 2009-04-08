@@ -147,7 +147,7 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 		return null;
 	}
 
-	public long getRemainingCredentialLifetime() {
+	public long getCrededntialEndTime() {
 		
 		String myProxyServer = MyProxyServerParams.getMyProxyServer();
 		int myProxyPort = MyProxyServerParams.getMyProxyPort();

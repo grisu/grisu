@@ -256,7 +256,7 @@ public class Grisu {
 					new Thread() {
 						public void run() {
 					JOptionPane.showMessageDialog(null,
-						    "Proxy endtime: "+new Date(serviceInterface.getRemainingCredentialLifetime()), 
+						    "Proxy endtime: "+new Date(serviceInterface.getCrededntialEndTime()), 
 						    "Proxy endtime", JOptionPane.INFORMATION_MESSAGE);
 						}
 					}.start();
