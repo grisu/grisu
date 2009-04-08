@@ -1,6 +1,7 @@
 package org.vpac.grisu.js.control.job;
 
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.ServerJobSubmissionException;
 import org.vpac.grisu.credential.model.ProxyCredential;
 import org.vpac.grisu.js.model.Job;
 
@@ -27,8 +28,9 @@ public abstract class JobSubmitter {
 	 * @param host the host (something like ng2.vpac.org)
 	 * @param job the job
 	 * @return the (JobSubmitter-specific) handle to the job
+	 * @throws ServerJobSubmissionException 
 	 */
-	abstract protected String submit(ServiceInterface serviceInterface, String host, String factoryType, Job job);
+	abstract protected String submit(ServiceInterface serviceInterface, String host, String factoryType, Job job) throws ServerJobSubmissionException;
 	
 //	public String convertJobDescription(Job job) {
 //		

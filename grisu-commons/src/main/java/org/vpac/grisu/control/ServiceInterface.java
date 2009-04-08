@@ -29,7 +29,7 @@ import org.w3c.dom.Document;
 @WebService
 public interface ServiceInterface {
 	
-	public static final double INTERFACE_VERSION = 3;
+	public static final double INTERFACE_VERSION = 4;
 	
 	//---------------------------------------------------------------------------------------------------
 	// 
@@ -112,6 +112,13 @@ public interface ServiceInterface {
 	 */
 	@WebMethod
 	public Document getMessagesSince(Date date);
+	
+	/**
+	 * Returns the end time of the credential used.
+	 * @return the end time
+	 */
+	@WebMethod
+	public long getRemainingCredentialLifetime();
 	
 	
 	//---------------------------------------------------------------------------------------------------

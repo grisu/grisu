@@ -7,7 +7,9 @@ import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.fault.XFireFault;
 import org.codehaus.xfire.handler.AbstractHandler;
 import org.codehaus.xfire.soap.SoapVersion;
+import org.globus.myproxy.CredentialInfo;
 import org.globus.myproxy.MyProxy;
+import org.globus.myproxy.MyProxyException;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.jdom.Element;
@@ -71,6 +73,75 @@ public class MyProxyAuthHandler extends AbstractHandler {
 
 	}
 
+
+
+	private void setAuth(String username, String password,
+			String myProxyServer, String myProxyPort,
+			MessageContext handlerContext) throws XFireFault {
+
+		// MessageContext context = MessageContextHelper.getContext();
+		// if ( context == null ) {
+		// context = handlerContext;
+		// MessageContextHelper.setContext(context);
+		// }
+
+		ProxyCredential credential = (ProxyCredential) handlerContext
+				.getSession().get("credential");
+		// ProxyCredential credential =
+		// (ProxyCredential)context.getProperty("credential");
+		int port = Integer.parseInt(myProxyPort);
+
+		if (credential == null || !credential.isValid()) {
+
+			credential = createProxyCredential(username, password,
+					myProxyServer, port, ServerPropertiesManager
+							.getMyProxyLifetime());
+
+			if (credential == null || !credential.isValid())
+				throw new XFireFault(
+						"No valid authentication information in header: Could not create valid credential.",
+						XFireFault.SENDER);
+
+			// put the credential into the session
+			handlerContext.getSession().put("credential", credential);
+			
+		} else {
+
+			long oldLifetime = -2;
+			try {
+				oldLifetime = credential.getGssCredential()
+						.getRemainingLifetime();
+			} catch (GSSException e) {
+				oldLifetime = -2;
+			}
+			if (oldLifetime < ServerPropertiesManager
+					.getMinProxyLifetimeBeforeGettingNewProxy()) {
+				myLogger
+						.debug("Credential reached minimum lifetime. Creating new one. Old lifetime: "
+								+ oldLifetime);
+
+
+				credential = createProxyCredential(username, password,
+						myProxyServer, port, ServerPropertiesManager
+								.getMyProxyLifetime());
+				if (credential == null || !credential.isValid())
+					throw new XFireFault(
+							"No valid authentication information in header: Could not create valid credential.",
+							XFireFault.SENDER);
+
+				// put the credential into the session
+				handlerContext.getSession().put("credential", credential);
+
+				
+			}
+			
+			long endTime = proxyEndtime(credential.getGssCredential(), username, password, myProxyServer, port);
+			handlerContext.getSession().put("credentialEndTime", endTime);
+			// put the credential endtime into the session
+			
+		}
+	}
+	
 	private ProxyCredential createProxyCredential(String username,
 			String password, String myProxyServer, int port, int lifetime) {
 		MyProxy myproxy = new MyProxy(myProxyServer, port);
@@ -92,65 +163,18 @@ public class MyProxyAuthHandler extends AbstractHandler {
 
 	}
 
-	private void setAuth(String username, String password,
-			String myProxyServer, String myProxyPort,
-			MessageContext handlerContext) throws XFireFault {
+	private long proxyEndtime(GSSCredential credential, String username, String password, String myProxyServer, int port) {
 
-		// MessageContext context = MessageContextHelper.getContext();
-		// if ( context == null ) {
-		// context = handlerContext;
-		// MessageContextHelper.setContext(context);
-		// }
-
-		ProxyCredential credential = (ProxyCredential) handlerContext
-				.getSession().get("credential");
-		// ProxyCredential credential =
-		// (ProxyCredential)context.getProperty("credential");
-
-		if (credential == null || !credential.isValid()) {
-			int port = Integer.parseInt(myProxyPort);
-
-			credential = createProxyCredential(username, password,
-					myProxyServer, port, ServerPropertiesManager
-							.getMyProxyLifetime());
-
-			if (credential == null || !credential.isValid())
-				throw new XFireFault(
-						"No valid authentication information in header: Could not create valid credential.",
-						XFireFault.SENDER);
-
-			// put the credential into the session
-			handlerContext.getSession().put("credential", credential);
-		} else {
-
-			long oldLifetime = -2;
-			try {
-				oldLifetime = credential.getGssCredential()
-						.getRemainingLifetime();
-			} catch (GSSException e) {
-				oldLifetime = -2;
-			}
-			if (oldLifetime < ServerPropertiesManager
-					.getMinProxyLifetimeBeforeGettingNewProxy()) {
-				myLogger
-						.debug("Credential reached minimum lifetime. Creating new one. Old lifetime: "
-								+ oldLifetime);
-
-				int port = Integer.parseInt(myProxyPort);
-
-				credential = createProxyCredential(username, password,
-						myProxyServer, port, ServerPropertiesManager
-								.getMyProxyLifetime());
-				if (credential == null || !credential.isValid())
-					throw new XFireFault(
-							"No valid authentication information in header: Could not create valid credential.",
-							XFireFault.SENDER);
-
-				// put the credential into the session
-				handlerContext.getSession().put("credential", credential);
-
-			}
+		MyProxy myproxy = new MyProxy(myProxyServer, port);
+		CredentialInfo info = null;
+		try {
+			info = myproxy.info(credential, username, password);
+		} catch (MyProxyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		
+		return info.getEndTime();
 	}
-
+	
 }

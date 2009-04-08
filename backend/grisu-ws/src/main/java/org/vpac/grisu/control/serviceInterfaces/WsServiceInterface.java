@@ -153,5 +153,12 @@ public class WsServiceInterface extends AbstractServiceInterface implements
 	public String[] listHostedApplicationTemplates() {
 		return ServiceTemplateManagement.getAllAvailableApplications();
 	}
+
+	public long getRemainingCredentialLifetime() {
+		
+		MessageContext context = AbstractInvoker.getContext();
+		long endTime = (Long)(context.getSession().get("credentialEndTime")); 
+		return endTime;
+	}
 	
 }

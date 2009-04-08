@@ -1,5 +1,3 @@
-
-
 package org.vpac.grisu.client.view.swing.mainPanel;
 
 import java.awt.BorderLayout;
@@ -8,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Date;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -75,7 +74,8 @@ public class Grisu {
 	private JMenuItem aboutMenuItem = null;
 
 	private JMenuItem requestHelpMenuItem = null;
-
+	
+	private JMenuItem proxyEndTimeMenuItem = null;
 
 	private JMenuItem mountsMenuItem = null;
 
@@ -186,6 +186,7 @@ public class Grisu {
 		}
 		return toolsMenu;
 	}
+	
 
 	/**
 	 * This method initializes jMenu
@@ -197,10 +198,12 @@ public class Grisu {
 			helpMenu = new JMenu();
 			helpMenu.setText("Help");
 			helpMenu.add(getRequestSupportMenuItem());
+			helpMenu.add(getProxyEndTimeMenuItem());
 			helpMenu.add(getAboutMenuItem());
 		}
 		return helpMenu;
 	}
+
 
 	/**
 	 * This method initializes jMenuItem
@@ -242,6 +245,26 @@ public class Grisu {
 			});
 		}
 		return aboutMenuItem;
+	}
+	
+	private JMenuItem getProxyEndTimeMenuItem() {
+		if ( proxyEndTimeMenuItem == null ) {
+			proxyEndTimeMenuItem = new JMenuItem();
+			proxyEndTimeMenuItem.setText("Proxy time left");
+			proxyEndTimeMenuItem.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					new Thread() {
+						public void run() {
+					JOptionPane.showMessageDialog(null,
+						    "Proxy endtime: "+new Date(serviceInterface.getRemainingCredentialLifetime()), 
+						    "Proxy endtime", JOptionPane.INFORMATION_MESSAGE);
+						}
+					}.start();
+
+				}
+			});
+		}
+		return proxyEndTimeMenuItem;
 	}
 	
 	

@@ -4,6 +4,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
+import org.globus.myproxy.CredentialInfo;
+import org.globus.myproxy.MyProxy;
+import org.globus.myproxy.MyProxyException;
 import org.ietf.jgss.GSSException;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.ServiceTemplateManagement;
@@ -142,6 +145,34 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 	public String logout() {
 		Arrays.fill(passphrase, 'x');
 		return null;
+	}
+
+	public long getRemainingCredentialLifetime() {
+		
+		String myProxyServer = MyProxyServerParams.getMyProxyServer();
+		int myProxyPort = MyProxyServerParams.getMyProxyPort();
+
+		try {
+			// this is needed because of a possible round-robin myproxy server
+			myProxyServer = InetAddress.getByName(myProxyServer).getHostAddress();
+		} catch (UnknownHostException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			throw new NoValidCredentialException("Could not download myproxy credential: "+e1.getLocalizedMessage());
+		}
+		
+		MyProxy myproxy = new MyProxy(myProxyServer, myProxyPort);
+		CredentialInfo info = null;
+		try {
+			info = myproxy.info(getCredential().getGssCredential(), myproxy_username, new String(passphrase));
+		} catch (MyProxyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return info.getEndTime();
+
+		
 	}
 
 }

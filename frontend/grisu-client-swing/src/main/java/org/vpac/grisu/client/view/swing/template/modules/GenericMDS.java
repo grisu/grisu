@@ -38,11 +38,11 @@ public class GenericMDS extends AbstractModulePanel {
 		setLayout(new FormLayout(
 			new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("126dlu:grow(1.0)"),
+				ColumnSpec.decode("63dlu:grow(1.0)"),
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("54dlu"),
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("75dlu"),
+				ColumnSpec.decode("84dlu"),
 				FormFactory.RELATED_GAP_COLSPEC},
 			new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,

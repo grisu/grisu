@@ -66,7 +66,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 	private String defaultVersion;
 	private boolean useExact = true;
 
-	private String startMode = ANY_MODE_STRING;
+	private String startMode = null;
 	private short currentMode = -1;
 	
 	private ButtonGroup modeGroup = new ButtonGroup();
@@ -134,6 +134,15 @@ public class Version extends JPanel implements TemplateNodePanel,
 		} else {
 			try {
 				startMode = GrisuRegistry.getDefault().getHistoryManager().getEntries(TemplateTagConstants.getGlobalLastVersionModeKey(infoObject.getApplicationName())).get(0);
+
+				if ( ANY_MODE_STRING.equals(startMode) && ! useAny ) {
+					startMode = null;
+				} else if ( DEFAULT_MODE_STRING.equals(startMode) && ! useDefault ) {
+					startMode = null;
+				} else if ( EXACT_MODE_STRING.equals(startMode) ) {
+					startMode = null;
+				}
+				
 			} catch (Exception e) {
 				myLogger.debug("Can't get last used parameter for version mode.");
 			}
@@ -210,7 +219,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 	}
 	
 	public String getCurrentValue() {
-		return (String)versionModel.getSelectedItem();
+		return getExternalSetValue();
 	}
 
 	private void switchMode(String mode) {
@@ -275,14 +284,18 @@ public class Version extends JPanel implements TemplateNodePanel,
 		
 		Set<String> temp = infoObject.getAvailableSubmissionLocationsForVersionAndFqan(defaultVersion, esv.getCurrentFqan());
 		
+		try {
 		if ( temp.size() > 0 ) {
+			getVersionComboBox().setEnabled(true);
 			versionModel.setSelectedItem(defaultVersion);
 		} else {
 			versionModel.addElement(DEFAULT_VERSION_NOT_AVAILABLE_STRING);
 			versionModel.setSelectedItem(DEFAULT_VERSION_NOT_AVAILABLE_STRING);
 		}
+		} finally {
 		
-		getVersionComboBox().setEnabled(false);
+			getVersionComboBox().setEnabled(false);
+		}
 
 	}
 
@@ -315,10 +328,12 @@ public class Version extends JPanel implements TemplateNodePanel,
 
 	public void setExternalSetValue(String version) {
 		
-		if ( infoObject.getAllAvailableVersionsForFqan(GrisuRegistry.getDefault().getEnvironmentSnapshotValues().getCurrentFqan()).contains(version) ) {
-			//TODO set mode
-			versionModel.setSelectedItem(version);
-		}
+		myLogger.warn("Not supported yet.");
+		throw new RuntimeException("Setting value not supported yet.");
+//		if ( infoObject.getAllAvailableVersionsForFqan(GrisuRegistry.getDefault().getEnvironmentSnapshotValues().getCurrentFqan()).contains(version) ) {
+//			//TODO set mode
+//			versionModel.setSelectedItem(version);
+//		}
 	}
 	
 

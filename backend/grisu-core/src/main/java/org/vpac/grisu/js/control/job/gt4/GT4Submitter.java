@@ -34,6 +34,7 @@ import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.SeveralXMLHelpers;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
+import org.vpac.grisu.control.exceptions.ServerJobSubmissionException;
 import org.vpac.grisu.control.info.CachedMdsInformationManager;
 import org.vpac.grisu.control.info.InformationManager;
 import org.vpac.grisu.control.utils.DebugUtils;
@@ -70,7 +71,7 @@ public class GT4Submitter extends JobSubmitter {
 	 * (org.w3c.dom.Document)
 	 */
 	private String createJobSubmissionDescription(
-			ServiceInterface serviceInterface, Document jsdl) {
+			ServiceInterface serviceInterface, Document jsdl) throws ServerJobSubmissionException {
 
 		DebugUtils.jsdlDebugOutput("Before translating into rsl: ", jsdl);
 
@@ -257,10 +258,15 @@ public class GT4Submitter extends JobSubmitter {
 				String modulesString = appDetails
 						.get(JobConstants.MDS_MODULES_KEY);
 
+				if ( modules_string == null || "".equals(modules_string) ) {
+					myLogger.warn("No module for this application/version/submissionLocation found. Submitting nonetheless...");
+				}
+
 				if (modulesString != null && modulesString.length() > 0) {
 					modules_string = appDetails.get(
 							JobConstants.MDS_MODULES_KEY).split(",");
 
+					
 					for (String module_string : modules_string) {
 						if (!"".equals(module_string)) {
 							Element module = output.createElement("module");
@@ -269,6 +275,8 @@ public class GT4Submitter extends JobSubmitter {
 						}
 					}
 				}
+			} else {
+				throw new ServerJobSubmissionException("Can't determine either application, version or submissionLocation.");
 			}
 		}
 
@@ -406,7 +414,7 @@ public class GT4Submitter extends JobSubmitter {
 	 * org.vpac.grisu.js.model.Job)
 	 */
 	protected String submit(ServiceInterface serviceInterface, String host,
-			String factoryType, Job job) {
+			String factoryType, Job job) throws ServerJobSubmissionException {
 
 		JobDescriptionType jobDesc = null;
 		String submittedJobDesc = null;
