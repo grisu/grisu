@@ -118,7 +118,7 @@ public interface ServiceInterface {
 	 * @return the end time
 	 */
 	@WebMethod
-	public long getRemainingCredentialLifetime();
+	public long getCrededntialEndTime();
 	
 	
 	//---------------------------------------------------------------------------------------------------
