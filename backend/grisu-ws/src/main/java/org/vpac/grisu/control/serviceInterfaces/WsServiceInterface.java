@@ -154,7 +154,7 @@ public class WsServiceInterface extends AbstractServiceInterface implements
 		return ServiceTemplateManagement.getAllAvailableApplications();
 	}
 
-	public long getCrededntialEndTime() {
+	public long getCredentialEndTime() {
 		
 		MessageContext context = AbstractInvoker.getContext();
 		long endTime = (Long)(context.getSession().get("credentialEndTime")); 
