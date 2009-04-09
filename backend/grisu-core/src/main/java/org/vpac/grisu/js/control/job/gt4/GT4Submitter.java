@@ -232,7 +232,7 @@ public class GT4Submitter extends JobSubmitter {
 		} catch (Exception e) {
 			// doesn't matter
 		}
-		if (modules_string != null && modules_string.length == 0) {
+		if (modules_string != null && modules_string.length > 0) {
 			for (String module_string : modules_string) {
 				if (!"".equals(module_string)) {
 					Element module = output.createElement("module");
