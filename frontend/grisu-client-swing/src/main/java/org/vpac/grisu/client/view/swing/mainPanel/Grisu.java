@@ -70,6 +70,8 @@ public class Grisu {
 	private JMenu helpMenu = null;
 
 	private JMenuItem exitMenuItem = null;
+	
+	private JMenuItem addLocalTemplateItem = null;
 
 	private JMenuItem aboutMenuItem = null;
 
@@ -165,6 +167,7 @@ public class Grisu {
 		if (fileMenu == null) {
 			fileMenu = new JMenu();
 			fileMenu.setText("File");
+			fileMenu.add(getAddLocalMenuItem());
 			fileMenu.add(getExitMenuItem());
 		}
 		return fileMenu;
@@ -222,6 +225,24 @@ public class Grisu {
 			});
 		}
 		return exitMenuItem;
+	}
+	
+	/**
+	 * This method initializes jMenuItem
+	 * 
+	 * @return javax.swing.JMenuItem
+	 */
+	private JMenuItem getAddLocalMenuItem() {
+		if (addLocalTemplateItem == null) {
+			addLocalTemplateItem = new JMenuItem();
+			addLocalTemplateItem.setText("Add template to local template store");
+			addLocalTemplateItem.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					getSubmissionPanel().addLocalTemplate();
+				}
+			});
+		}
+		return addLocalTemplateItem;
 	}
 
 	/**

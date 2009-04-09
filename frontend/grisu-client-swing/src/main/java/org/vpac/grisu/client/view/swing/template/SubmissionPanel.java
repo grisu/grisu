@@ -676,63 +676,8 @@ public class SubmissionPanel extends JPanel implements JobCreationInterface,
 			addButtonLocal = new JButton();
 			addButtonLocal.addActionListener(new ActionListener() {
 				public void actionPerformed(final ActionEvent e) {
-					//In response to a button click:
-					int returnVal = fc.showOpenDialog(SubmissionPanel.this);
-					
-					File file = null;
-			        if (returnVal == JFileChooser.APPROVE_OPTION) {
-			            file = fc.getSelectedFile();
-			            //This is where a real application would open the file.
-			            myLogger.debug("Opening: " + file.getName() + ".");
-			        } else {
-			            myLogger.debug("Open command cancelled by user.");
-			        }
-			        
-			        if ( file.exists() ) {
-			        	try {
-			        		
-			        		File newFile = new File(LocalTemplateManagement.TEMPLATE_DIRECTORY, file.getName());
-			        		
-			        		if ( newFile.exists() ) {
-			        			int value = JOptionPane.showConfirmDialog(
-			        					SubmissionPanel.this,
-			        				    "A file with the name: \""+newFile.getName()+"\"\n"
-			        				    + "already exists in the local template store.\n"
-			        				    + "Do you want to overwrite it?",
-			        				    "File exists",
-			        				    JOptionPane.YES_NO_OPTION);
-			        			
 
-			        			if (value == JOptionPane.NO_OPTION) {
-			        				return;
-			        			} 
-
-			        		}
-							String localTemplateName = templateManager
-							.addLocalTemplate(file, true);
-							
-							localListModel.addElement(localTemplateName);
-
-							calculateLocalTemplateVisibility();
-			        		
-							SubmissionPanel.this.templateManager.addLocalTemplate(file, true);
-						} catch (IOException e1) {
-				        	JOptionPane.showMessageDialog(SubmissionPanel.this,
-				        		    "Can't copy file "+file.toString()+" to local template store: "+e1.getLocalizedMessage(),
-				        		    "File error",
-				        		    JOptionPane.ERROR_MESSAGE);
-
-						}
-			        } else {
-			        	
-			        	JOptionPane.showMessageDialog(SubmissionPanel.this,
-			        		    "File "+file.toString()+" doesn't exist. Can't copy it...",
-			        		    "File error",
-			        		    JOptionPane.ERROR_MESSAGE);
-
-			        	
-			        }
-
+					addLocalTemplate();
 
 				}
 			});
@@ -740,6 +685,65 @@ public class SubmissionPanel extends JPanel implements JobCreationInterface,
 			addButtonLocal.setToolTipText("Add a template file to the local template store.");
 		}
 		return addButtonLocal;
+	}
+	
+	public void addLocalTemplate() {
+		//In response to a button click:
+		int returnVal = fc.showOpenDialog(SubmissionPanel.this);
+		
+		File file = null;
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            file = fc.getSelectedFile();
+            //This is where a real application would open the file.
+            myLogger.debug("Opening: " + file.getName() + ".");
+        } else {
+            myLogger.debug("Open command cancelled by user.");
+        }
+        
+        if ( file.exists() ) {
+        	try {
+        		
+        		File newFile = new File(LocalTemplateManagement.TEMPLATE_DIRECTORY, file.getName());
+        		
+        		if ( newFile.exists() ) {
+        			int value = JOptionPane.showConfirmDialog(
+        					SubmissionPanel.this,
+        				    "A file with the name: \""+newFile.getName()+"\"\n"
+        				    + "already exists in the local template store.\n"
+        				    + "Do you want to overwrite it?",
+        				    "File exists",
+        				    JOptionPane.YES_NO_OPTION);
+        			
+
+        			if (value == JOptionPane.NO_OPTION) {
+        				return;
+        			} 
+
+        		}
+				String localTemplateName = templateManager
+				.addLocalTemplate(file, true);
+				
+				localListModel.addElement(localTemplateName);
+
+				calculateLocalTemplateVisibility();
+        		
+				SubmissionPanel.this.templateManager.addLocalTemplate(file, true);
+			} catch (IOException e1) {
+	        	JOptionPane.showMessageDialog(SubmissionPanel.this,
+	        		    "Can't copy file "+file.toString()+" to local template store: "+e1.getLocalizedMessage(),
+	        		    "File error",
+	        		    JOptionPane.ERROR_MESSAGE);
+
+			}
+        } else {
+        	
+        	JOptionPane.showMessageDialog(SubmissionPanel.this,
+        		    "File "+file.toString()+" doesn't exist. Can't copy it...",
+        		    "File error",
+        		    JOptionPane.ERROR_MESSAGE);
+
+        	
+        }
 	}
 
 	/**
