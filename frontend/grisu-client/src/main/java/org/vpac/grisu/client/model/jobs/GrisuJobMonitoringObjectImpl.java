@@ -286,17 +286,24 @@ public class GrisuJobMonitoringObjectImpl implements GrisuJobMonitoringObject {
 		if ( submissionTime == null || NOT_AVAILABLE_STRING.equals(name) )
 			fillJobDetails();
 		
-		Date convertedSubmissionTime = null;
+		Date date = null;
 		try {
-			convertedSubmissionTime = new SimpleDateFormat().parse(submissionTime);
-		} catch (ParseException e) {
-			myLogger.error("Could not parse submission time. Returning the String without conversion.");
-			return submissionTime;
+			
+			date = new Date(Long.parseLong(submissionTime));
+			
+		} catch (Exception e) {
+			myLogger.warn("Job seems to be in old time format. Trying other method of parsing it...");
+			try {
+				date = new SimpleDateFormat().parse(submissionTime);
+			} catch (ParseException e1) {
+				myLogger.error("Could not parse submission time. Returning the String without conversion.");
+				return submissionTime;
+			}
 		}
 		
 		JobManager.inputDateFormat.setTimeZone(TimeZone.getDefault());
 		
-		return JobManager.inputDateFormat.format(convertedSubmissionTime);
+		return JobManager.inputDateFormat.format(date);
 	}
 
 	/*

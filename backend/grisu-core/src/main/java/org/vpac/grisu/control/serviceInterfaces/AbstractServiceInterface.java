@@ -1916,7 +1916,7 @@ abstract class AbstractServiceInterface implements ServiceInterface {
 							+ jobname);
 		}
 
-		job.addJobProperty("submissionTime", new Date().toString());
+		job.addJobProperty("submissionTime", Long.toString(new Date().getTime()));
 		job.addJobProperty("submissionSite", submissionSite);
 		// we don't want the credential to be stored with the job in this case
 		// TODO or do we want it to be stored?
