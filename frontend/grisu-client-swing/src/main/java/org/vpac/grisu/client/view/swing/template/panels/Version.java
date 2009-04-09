@@ -73,8 +73,10 @@ public class Version extends JPanel implements TemplateNodePanel,
 	
 	private TemplateNodePanel submissionLocationPanel = null;
 	
+	private boolean versionLocked = false;
 	private String lastVersion;
-
+	
+	
 	/**
 	 * Create the panel
 	 */
@@ -127,7 +129,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 					myLogger
 							.warn("Not using default mode because no default version value is specified in template.");
 				} else {
-					lastVersion = null;
+					lastVersion = defaultVersion;
 					useDefault = true;
 				}
 			}
@@ -194,6 +196,17 @@ public class Version extends JPanel implements TemplateNodePanel,
 			versionModel.addElement(version);
 		}
 		
+		versionLocked = true;
+
+		if ( versionModel.getIndexOf(lastVersion) >= 0 ) {
+			versionModel.setSelectedItem(lastVersion);
+		} else {
+			if ( versionModel.getSize() > 0 ) {
+				versionModel.setSelectedItem(versionModel.getElementAt(0));
+			}
+		}
+		
+		versionLocked = false;
 
 		switch (currentMode) {
 		case ANY_VERSION_MODE:
@@ -207,15 +220,8 @@ public class Version extends JPanel implements TemplateNodePanel,
 			break;
 		}
 		
-		if ( versionModel.getIndexOf(lastVersion) >= 0 ) {
-			versionModel.setSelectedItem(lastVersion);
-		} else {
-			if ( versionModel.getSize() > 0 ) {
-				versionModel.setSelectedItem(versionModel.getElementAt(0));
-			}
-		}
+				
 
-		
 	}
 	
 	public String getCurrentValue() {
@@ -413,15 +419,16 @@ public class Version extends JPanel implements TemplateNodePanel,
 			versionComboBox = new JComboBox(versionModel);
 			versionComboBox.addItemListener(new ItemListener() {
 				public void itemStateChanged(final ItemEvent e) {
+					if ( !versionLocked ) {
 					if ( e.getStateChange() == ItemEvent.SELECTED ) {
 
 						if ( currentMode != ANY_VERSION_MODE ) {
 							String temp = (String)(versionModel.getSelectedItem());
 							fireVersionChanged(temp);
 						}
-
 						GrisuRegistry.getDefault().getHistoryManager().addHistoryEntry(TemplateTagConstants.getGlobalLastVersionKey(infoObject.getApplicationName()), (String)(versionModel.getSelectedItem()));
-						
+
+					}						
 					}
 				}
 			});

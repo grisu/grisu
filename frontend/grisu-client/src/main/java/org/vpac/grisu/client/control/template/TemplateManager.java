@@ -3,10 +3,12 @@
 package org.vpac.grisu.client.control.template;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.ServiceInterfaceFactory;
@@ -200,6 +202,30 @@ public class TemplateManager {
 		LocalTemplateManagement.writeJsdlTemplate(template.getTemplateDocument(), newTemp.getName());
 		localTemplates = null;
 		return newTemp.getName().substring(0, newTemp.getName().length()-4);
+	}
+	
+	/**
+	 * Copies a local xml file into the template directory and updates the list of local templates
+	 * @param templateFile the local templates. Has to end with ".xml".
+	 * @param overwrite whether to overwrite a possibly existing file.
+	 * @return the name of the new template (without extension)
+	 * @throws IOException if the file can't be copied for some reason
+	 */
+	public String addLocalTemplate(File templateFile, boolean overwrite) throws IOException {
+		File newFile = new File(LocalTemplateManagement.TEMPLATE_DIRECTORY, templateFile.getName());
+		
+		if ( ! newFile.toString().endsWith(".xml") ) {
+			throw new IOException("File doesn't end with \".xml\". Won't copy it into local template store...");
+		}
+		
+		if ( newFile.exists() && ! overwrite ) {
+			throw new IOException("File "+newFile.toString()+" exists. Won't overwrite.");
+		}
+		
+		FileUtils.copyFile(templateFile, newFile);
+		
+		localTemplates = null;
+		return newFile.getName().substring(0, newFile.getName().length()-4);
 	}
 
 	public EnvironmentManager getEnvironmentManager() {

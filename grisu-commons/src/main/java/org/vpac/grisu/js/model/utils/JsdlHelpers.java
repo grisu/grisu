@@ -369,7 +369,7 @@ public class JsdlHelpers {
 	 */
 	public static String getApplicationVersion(Document jsdl) {
 		
-		Node appNode = getApplicationNode(jsdl);
+		Node appNode = getApplicationVersionNode(jsdl);
 		
 		if ( appNode != null ) {
 			return appNode.getTextContent();

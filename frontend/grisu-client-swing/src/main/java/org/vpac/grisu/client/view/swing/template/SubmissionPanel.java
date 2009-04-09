@@ -1,5 +1,7 @@
 package org.vpac.grisu.client.view.swing.template;
 
+
+
 import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -7,12 +9,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
@@ -25,11 +30,13 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileFilter;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.client.control.exceptions.TemplateException;
+import org.vpac.grisu.client.control.template.LocalTemplateManagement;
 import org.vpac.grisu.client.control.template.TemplateManager;
 import org.vpac.grisu.client.control.utils.FqanEvent;
 import org.vpac.grisu.client.control.utils.FqanListener;
@@ -88,13 +95,16 @@ public class SubmissionPanel extends JPanel implements JobCreationInterface,
 
 	private TemplateManager templateManager = null;
 	private DefaultListModel remoteListModel = new DefaultListModel();
-	private DefaultListModel localListModel = new DefaultListModel();
+	private LocalTemplateListModel localListModel = new LocalTemplateListModel();
 	private String currentTemplate = null;
 	private Map<String, JobPanel> allJobPanels = new HashMap<String, JobPanel>();
 
 	private FormLayout layout = null;
 	
 	private EnvironmentManager em = null;
+	
+	//Create a file chooser
+	final JFileChooser fc = new JFileChooser();
 
 	// private String currentFqan = null;
 
@@ -103,28 +113,46 @@ public class SubmissionPanel extends JPanel implements JobCreationInterface,
 	 */
 	public SubmissionPanel(EnvironmentManager em) {
 		super();
+		
+	    FileFilter filter1 = new ExtensionFileFilter("XML", new String[] { "xml", "XML" });
+	    fc.setFileFilter(filter1);
+	    
 		this.em = em;
-		layout = new FormLayout(new ColumnSpec[] {
-				FormFactory.RELATED_GAP_COLSPEC, new ColumnSpec("30dlu"),
-				FormFactory.RELATED_GAP_COLSPEC, new ColumnSpec("28dlu"),
-				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
+		layout = new FormLayout(
+			new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
-				new ColumnSpec("default:grow(1.0)"),
-				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC }, new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				ColumnSpec.decode("30dlu"),
+				FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("28dlu"),
+				FormFactory.RELATED_GAP_COLSPEC,
+				FormFactory.DEFAULT_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("default:grow(1.0)"),
+				FormFactory.RELATED_GAP_COLSPEC,
+				FormFactory.DEFAULT_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC},
+			new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
-				new RowSpec("default:grow(1.0)"),
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
-				new RowSpec("default:grow(1.0)"),
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC });
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				RowSpec.decode("default:grow(1.0)"),
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				RowSpec.decode("default:grow(1.0)"),
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC});
 		setLayout(layout);
 		add(getScrollPane(), new CellConstraints(2, 12, 3, 1,
 				CellConstraints.FILL, CellConstraints.FILL));
@@ -646,9 +674,70 @@ public class SubmissionPanel extends JPanel implements JobCreationInterface,
 	protected JButton getAddButtonLocal() {
 		if (addButtonLocal == null) {
 			addButtonLocal = new JButton();
+			addButtonLocal.addActionListener(new ActionListener() {
+				public void actionPerformed(final ActionEvent e) {
+					//In response to a button click:
+					int returnVal = fc.showOpenDialog(SubmissionPanel.this);
+					
+					File file = null;
+			        if (returnVal == JFileChooser.APPROVE_OPTION) {
+			            file = fc.getSelectedFile();
+			            //This is where a real application would open the file.
+			            myLogger.debug("Opening: " + file.getName() + ".");
+			        } else {
+			            myLogger.debug("Open command cancelled by user.");
+			        }
+			        
+			        if ( file.exists() ) {
+			        	try {
+			        		
+			        		File newFile = new File(LocalTemplateManagement.TEMPLATE_DIRECTORY, file.getName());
+			        		
+			        		if ( newFile.exists() ) {
+			        			int value = JOptionPane.showConfirmDialog(
+			        					SubmissionPanel.this,
+			        				    "A file with the name: \""+newFile.getName()+"\"\n"
+			        				    + "already exists in the local template store.\n"
+			        				    + "Do you want to overwrite it?",
+			        				    "File exists",
+			        				    JOptionPane.YES_NO_OPTION);
+			        			
+
+			        			if (value == JOptionPane.NO_OPTION) {
+			        				return;
+			        			} 
+
+			        		}
+							String localTemplateName = templateManager
+							.addLocalTemplate(file, true);
+							
+							localListModel.addElement(localTemplateName);
+
+							calculateLocalTemplateVisibility();
+			        		
+							SubmissionPanel.this.templateManager.addLocalTemplate(file, true);
+						} catch (IOException e1) {
+				        	JOptionPane.showMessageDialog(SubmissionPanel.this,
+				        		    "Can't copy file "+file.toString()+" to local template store: "+e1.getLocalizedMessage(),
+				        		    "File error",
+				        		    JOptionPane.ERROR_MESSAGE);
+
+						}
+			        } else {
+			        	
+			        	JOptionPane.showMessageDialog(SubmissionPanel.this,
+			        		    "File "+file.toString()+" doesn't exist. Can't copy it...",
+			        		    "File error",
+			        		    JOptionPane.ERROR_MESSAGE);
+
+			        	
+			        }
+
+
+				}
+			});
 			addButtonLocal.setText("+");
-			addButtonLocal.setToolTipText("Not implemented yet.");
-			addButtonLocal.setEnabled(false);
+			addButtonLocal.setToolTipText("Add a template file to the local template store.");
 		}
 		return addButtonLocal;
 	}
@@ -758,6 +847,7 @@ public class SubmissionPanel extends JPanel implements JobCreationInterface,
 		}
 		return copyToLocalItem;
 	}
+	
 
 	/**
 	 * @return

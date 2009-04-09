@@ -302,7 +302,7 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 				public void itemStateChanged(final ItemEvent e) {
 					
 					String temp = ((String)queueModel.getSelectedItem());
-					if ( temp != null && ! "".equals(temp) ) {
+					if ( temp != null && ! "".equals(temp) && ! temp.startsWith("Not available.") ) {
 					if ( e.getStateChange() == ItemEvent.SELECTED ) {
 						fireSubmissionLocationChanged(temp);
 					}

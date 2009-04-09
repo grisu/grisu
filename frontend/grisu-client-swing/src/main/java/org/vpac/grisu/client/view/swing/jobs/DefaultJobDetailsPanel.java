@@ -1,7 +1,10 @@
 package org.vpac.grisu.client.view.swing.jobs;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Map;
+import javax.swing.JButton;
 
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
@@ -16,9 +19,11 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import com.swtdesigner.SwingResourceManager;
 
 public class DefaultJobDetailsPanel extends JPanel {
 	
+	private JButton button;
 	private JScrollPane scrollPane;
 	private GrisuJobMonitoringObject job = null;
 
@@ -50,7 +55,9 @@ public class DefaultJobDetailsPanel extends JPanel {
 				FormFactory.RELATED_GAP_COLSPEC,
 				FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,
-				new ColumnSpec("default:grow(1.0)"),
+				ColumnSpec.decode("default:grow(1.0)"),
+				FormFactory.RELATED_GAP_COLSPEC,
+				FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC},
 			new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
@@ -68,9 +75,9 @@ public class DefaultJobDetailsPanel extends JPanel {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
-				new RowSpec("default"),
+				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
-				new RowSpec("default:grow(1.0)"),
+				RowSpec.decode("default:grow(1.0)"),
 				FormFactory.RELATED_GAP_ROWSPEC}));
 		add(getDetailsForJobLabel(), new CellConstraints(2, 2, CellConstraints.RIGHT, CellConstraints.DEFAULT));
 		add(getStatusLabel(), new CellConstraints(2, 4, CellConstraints.RIGHT, CellConstraints.DEFAULT));
@@ -81,15 +88,16 @@ public class DefaultJobDetailsPanel extends JPanel {
 		add(getSubmissionDateLabel(), new CellConstraints(2, 14, CellConstraints.RIGHT, CellConstraints.DEFAULT));
 		add(getNoCpusLabel(), new CellConstraints(2, 16, CellConstraints.RIGHT, CellConstraints.DEFAULT));
 		add(getOtherPropertiesLabel(), new CellConstraints(2, 18, CellConstraints.RIGHT, CellConstraints.TOP));
-		add(getJobnameTextField(), new CellConstraints(4, 2));
+		add(getJobnameTextField(), new CellConstraints(4, 2, 3, 1));
 		add(getStatusTextField(), new CellConstraints(4, 4));
-		add(getApplicationTextField(), new CellConstraints(4, 6));
-		add(getFqanTextField(), new CellConstraints(4, 8));
-		add(getHostTextField(), new CellConstraints(4, 10));
-		add(getDateTextField(), new CellConstraints(4, 14));
-		add(getQueueTextField(), new CellConstraints(4, 12));
-		add(getCpusTextField(), new CellConstraints(4, 16));
-		add(getScrollPane(), new CellConstraints("4, 18, 1, 1, default, fill"));
+		add(getApplicationTextField(), new CellConstraints(4, 6, 3, 1));
+		add(getFqanTextField(), new CellConstraints(4, 8, 3, 1));
+		add(getHostTextField(), new CellConstraints(4, 10, 3, 1));
+		add(getDateTextField(), new CellConstraints(4, 14, 3, 1));
+		add(getQueueTextField(), new CellConstraints(4, 12, 3, 1));
+		add(getCpusTextField(), new CellConstraints(4, 16, 3, 1));
+		add(getScrollPane(), new CellConstraints("4, 18, 3, 1, default, fill"));
+		add(getButton(), new CellConstraints(6, 4));
 		//
 	}
 	protected JLabel getDetailsForJobLabel() {
@@ -253,6 +261,21 @@ public class DefaultJobDetailsPanel extends JPanel {
 			scrollPane.setViewportView(getOtherPropertiesPane());
 		}
 		return scrollPane;
+	}
+	/**
+	 * @return
+	 */
+	protected JButton getButton() {
+		if (button == null) {
+			button = new JButton();
+			button.addActionListener(new ActionListener() {
+				public void actionPerformed(final ActionEvent e) {
+					getStatusTextField().setText(job.getStatus(true));
+				}
+			});
+			button.setIcon(SwingResourceManager.getIcon(DefaultJobDetailsPanel.class, "/images/refresh.png"));
+		}
+		return button;
 	}
 
 }

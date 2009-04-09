@@ -420,7 +420,7 @@ public class CachedMdsInformationManager implements InformationManager {
 		// subLoc = queuename@cluster:contactstring#JobManager
 		int queSepIndex = subLoc.indexOf(":");
 		if ( queSepIndex < 1 ) {
-			throw new RuntimeException("Wrong submission location format. Queue missing.");
+			throw new RuntimeException("Wrong submission location format. Queue missing in subLoc: "+subLoc);
 		}
 		String queueName = subLoc.substring(0, queSepIndex);
 		String contactString = "";
