@@ -40,7 +40,8 @@ public class BasicJobSubmission {
 		ServiceInterface serviceInterface = null;
 		try {
 			serviceInterface = ServiceInterfaceFactory.createInterface(
-					"https://ngportaldev.vpac.org/grisu-ws/services/grisu", 
+//					"https://ngportaldev.vpac.org/grisu-ws/services/grisu", 
+					"http://localhost:8080/grisu-ws/services/grisu",
 					myproxy_username, myproxy_password, 
 					"myproxy.arcs.org.au", "443", 
 					null, -1, null, null);
