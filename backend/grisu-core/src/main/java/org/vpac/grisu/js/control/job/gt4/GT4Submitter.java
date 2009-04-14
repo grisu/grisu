@@ -71,7 +71,8 @@ public class GT4Submitter extends JobSubmitter {
 	 * (org.w3c.dom.Document)
 	 */
 	private String createJobSubmissionDescription(
-			ServiceInterface serviceInterface, Document jsdl) throws ServerJobSubmissionException {
+			ServiceInterface serviceInterface, Document jsdl)
+			throws ServerJobSubmissionException {
 
 		DebugUtils.jsdlDebugOutput("Before translating into rsl: ", jsdl);
 
@@ -251,33 +252,65 @@ public class GT4Submitter extends JobSubmitter {
 			String version = JsdlHelpers.getApplicationVersion(jsdl);
 			String subLoc = JsdlHelpers.getCandidateHosts(jsdl)[0];
 
-			if (application != null || version != null || subLoc != null) {
+			// if we know application, version and submissionLocation
+			if (application != null && version != null & subLoc != null) {
 				Map<String, String> appDetails = serviceInterface
 						.getApplicationDetails(application, version, subLoc);
 
-				String modulesString = appDetails
-						.get(JobConstants.MDS_MODULES_KEY);
-
-				if ( modules_string == null || "".equals(modules_string) ) {
-					myLogger.warn("No module for this application/version/submissionLocation found. Submitting nonetheless...");
-				}
-
-				if (modulesString != null && modulesString.length() > 0) {
+				try {
 					modules_string = appDetails.get(
 							JobConstants.MDS_MODULES_KEY).split(",");
 
-					
-					for (String module_string : modules_string) {
-						if (!"".equals(module_string)) {
-							Element module = output.createElement("module");
-							module.setTextContent(module_string);
-							extensions.appendChild(module);
-						}
+					if (modules_string == null || "".equals(modules_string)) {
+						myLogger
+								.warn("No module for this application/version/submissionLocation found. Submitting nonetheless...");
+					}
+
+				} catch (Exception e) {
+					myLogger
+							.warn("Could not get module for this application/version/submissionLocation: "
+									+ e.getLocalizedMessage()
+									+ ". Submitting nonetheless...");
+				}
+
+				// if we know application and submissionlocation but version
+				// doesn't matter
+			} else if (application != null && version == null && subLoc != null) {
+
+				Map<String, String> appDetails = serviceInterface.getApplicationDetails(application, subLoc);
+
+				try {
+					modules_string = appDetails.get(
+							JobConstants.MDS_MODULES_KEY).split(",");
+
+					if (modules_string == null || "".equals(modules_string)) {
+						myLogger
+								.warn("No module for this application/submissionLocation found. Submitting nonetheless...");
+					}
+
+				} catch (Exception e) {
+					myLogger
+							.warn("Could not get module for this application/submissionLocation: "
+									+ e.getLocalizedMessage()
+									+ ". Submitting nonetheless...");
+				}
+
+			} else {
+				throw new ServerJobSubmissionException(
+						"Can't determine module because either/or application, version submissionLocation are missing.");
+			}
+
+			if (modules_string != null && modules_string.length > 0) {
+
+				for (String module_string : modules_string) {
+					if (!"".equals(module_string)) {
+						Element module = output.createElement("module");
+						module.setTextContent(module_string);
+						extensions.appendChild(module);
 					}
 				}
-			} else {
-				throw new ServerJobSubmissionException("Can't determine either application, version or submissionLocation.");
 			}
+
 		}
 
 		// email

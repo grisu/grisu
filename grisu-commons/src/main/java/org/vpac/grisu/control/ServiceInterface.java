@@ -120,6 +120,13 @@ public interface ServiceInterface {
 	@WebMethod
 	public long getCredentialEndTime();
 	
+	/**
+	 * Can be used to inform the frontend what the backend is doing at the moment and what the bloody hell is taking so long... (like file-cross-staging...)
+	 * @return the current status of any backend activity
+	 */
+	@WebMethod
+	public String getCurrentStatusMessage();
+	
 	
 	//---------------------------------------------------------------------------------------------------
 	// 

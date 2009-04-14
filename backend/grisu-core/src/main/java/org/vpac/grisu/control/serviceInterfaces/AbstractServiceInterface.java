@@ -2281,6 +2281,10 @@ abstract class AbstractServiceInterface implements ServiceInterface {
 		
 		return getSite(contactString);
 	}
+	
+	public String getCurrentStatusMessage() {
+		return "Backend status report not implemented yet.";
+	}
 
 	/**
 	 * This method has to be implemented by the endpoint specific ServiceInterface. Since there are a few different ways to 
