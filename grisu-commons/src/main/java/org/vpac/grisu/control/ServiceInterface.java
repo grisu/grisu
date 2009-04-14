@@ -29,7 +29,7 @@ import org.w3c.dom.Document;
 @WebService
 public interface ServiceInterface {
 	
-	public static final double INTERFACE_VERSION = 4;
+	public static final double INTERFACE_VERSION = 5;
 	
 	//---------------------------------------------------------------------------------------------------
 	// 
