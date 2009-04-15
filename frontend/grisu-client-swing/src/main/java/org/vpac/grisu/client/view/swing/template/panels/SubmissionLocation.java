@@ -58,7 +58,9 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 
 	private String lastSubmissionLocation = null;
 	
-	private DefaultTemplateNodeValueSetter stagingFsSetter = new DefaultTemplateNodeValueSetter();
+	private ExecutionFileSystem executionFileSystemPanel = null;
+	
+	private String currentStagingFilesystem = null;
 	
 	/**
 	 * Create the panel
@@ -99,6 +101,8 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 			throws TemplateNodePanelException {
 
 		this.templateNode = node;
+		this.templateNode.setTemplateNodeValueSetter(this);
+
 
 		this.applicationName = this.templateNode.getTemplate().getApplicationName();
 		this.infoObject = GrisuRegistry.getDefault().getUserApplicationInformation(applicationName);
@@ -111,14 +115,8 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 		}
 
 		// this might be slightly dodgy. But it should always work if a Version template tag is present.
-		versionPanel = (Version)(this.templateNode.getTemplate().getTemplateNodes().get(TemplateTagConstants.VERSION_TAG_NAME).getTemplateNodeValueSetter());
-		versionPanel.addValueListener(this);
-
-		this.templateNode.getTemplate().getTemplateNodes().get(TemplateTagConstants.EXECUTIONFILESYSTEM_TAG_NAME).setTemplateNodeValueSetter(stagingFsSetter);
-
-		
-		if ( versionPanel.getCurrentValue() != null ) {
-			valueChanged(versionPanel, versionPanel.getCurrentValue());
+		if ( getVersionPanel() != null && getVersionPanel().getCurrentValue() != null ) {
+			valueChanged(getVersionPanel(), getVersionPanel().getCurrentValue());
 		}
 		
 		if ( lastSubmissionLocation != null ) {
@@ -132,25 +130,77 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 		}
 		
 	}
+	
+	private ExecutionFileSystem getExecutionFileSystemPanel() {
+		
+		if ( executionFileSystemPanel == null ) {
+			try {
+				// try to find a templateNodevalueSetter that is a SubmissionLocationPanel
+				for ( TemplateNode node : this.templateNode.getTemplate().getTemplateNodes().values() ) {
+					if ( node.getTemplateNodeValueSetter() instanceof ExecutionFileSystem ) {
+						executionFileSystemPanel = (ExecutionFileSystem)node.getTemplateNodeValueSetter();
+						setStagingFS(getExternalSetValue());
+						break;
+					}
+				
+				}
+			} catch (Exception e) {
+				myLogger.warn("Couldn't retrieve executionFileSystemPanel yet...");
+				executionFileSystemPanel = null;
+				return null;
+			}
+			
+		}
+		return executionFileSystemPanel;
+	}
+	
+	private Version getVersionPanel() {
+		
+		if ( versionPanel == null ) {
+			try {
+				// try to find a templateNodevalueSetter that is a Version panel
+				for ( TemplateNode node : this.templateNode.getTemplate().getTemplateNodes().values() ) {
+					if ( node.getTemplateNodeValueSetter() instanceof Version ) {
+						versionPanel = (Version)node.getTemplateNodeValueSetter();
+						break;
+					}
+				
+				}
+			} catch (Exception e) {
+				myLogger.warn("Couldn't initialize version panel yet...");
+				versionPanel = null;
+				return null;
+			}
+			if ( versionPanel != null ) {
+				versionPanel.addValueListener(this);
+				// remove version panel just in case it's already there...
+				removeValueListener(versionPanel);
+				addValueListener(versionPanel);
+			}
+		}
+		return versionPanel;
+	}
+
 
 	public void valueChanged(TemplateNodePanel panel, String newValue) {
 		// version changed...
 		myLogger.debug("SubmissionLocationPanel: Version changed to: "+newValue);
 		
+		if ( infoObject != null ) {
 		
 		String oldSite = (String)siteModel.getSelectedItem();
 		siteModel.removeAllElements();		
 		
 		String oldQueue = (String)queueModel.getSelectedItem();
 
-		if ( versionPanel.getMode() == Version.DEFAULT_VERSION_MODE ) {
+		if ( getVersionPanel() != null && getVersionPanel().getMode() == Version.DEFAULT_VERSION_MODE ) {
 			allQueues = infoObject.getAvailableSubmissionLocationsForVersionAndFqan(newValue, esv.getCurrentFqan());
 			if ( allQueues.size() == 0 ) {
 				siteModel.setSelectedItem("Not available.");
 				queueModel.setSelectedItem("Not available.");
 				return;
 			}
-		} else if ( versionPanel.getMode() == Version.ANY_VERSION_MODE ) {
+		} else if ( getVersionPanel() != null && getVersionPanel().getMode() == Version.ANY_VERSION_MODE ) {
 			allQueues = infoObject.getAvailableSubmissionLocationsForFqan(esv.getCurrentFqan());
 		} else {
 			allQueues = infoObject.getAvailableSubmissionLocationsForVersionAndFqan(newValue, esv.getCurrentFqan());
@@ -168,6 +218,7 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 		
 		if ( queueModel.getIndexOf(oldQueue) >= 0 ) {
 			queueModel.setSelectedItem(oldQueue);
+		}
 		}
 		
 	}
@@ -292,6 +343,18 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 		}
 		return siteComboBox;
 	}
+	
+	private void setStagingFS(String submissionLocation) {
+		
+		MountPoint fs = userInformation.getRecommendedMountPoint(submissionLocation, esv.getCurrentFqan());
+		if ( getExecutionFileSystemPanel() != null ) {
+			getExecutionFileSystemPanel().setExternalSetValue(fs.getRootUrl());
+		}
+		
+		currentStagingFilesystem = fs.getRootUrl();
+		myLogger.debug("Set staging fs to: "+fs);		
+		
+	}
 	/**
 	 * @return
 	 */
@@ -307,9 +370,7 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 					if ( e.getStateChange() == ItemEvent.SELECTED ) {
 						fireSubmissionLocationChanged(temp);
 					}
-					MountPoint fs = userInformation.getRecommendedMountPoint(temp, esv.getCurrentFqan());
-					stagingFsSetter.setExternalSetValue(fs.getRootUrl());
-					myLogger.debug("Set staging fs to: "+fs);
+					setStagingFS(temp);
 					GrisuRegistry.getDefault().getHistoryManager().addHistoryEntry(TemplateTagConstants.getGlobalLastQueueKey(infoObject.getApplicationName()), (String)queueModel.getSelectedItem());
 					}
 					}
@@ -318,6 +379,10 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 			queueComboBox.setRenderer(new QueueRenderer(queueComboBox.getRenderer()));
 		}
 		return queueComboBox;
+	}
+
+	public String getCurrentExecutionFileSystem() {
+		return currentStagingFilesystem;
 	}
 
 }

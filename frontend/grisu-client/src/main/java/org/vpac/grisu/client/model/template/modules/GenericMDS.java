@@ -35,16 +35,16 @@ public class GenericMDS extends AbstractModule {
 	
 	private SubmissionObject currentlySelecteSubmissionObject = null;
 	
-	private DefaultTemplateNodeValueSetter executionFileSystemSetter = new DefaultTemplateNodeValueSetter();
-	private DefaultTemplateNodeValueSetter hostnameSetter = new DefaultTemplateNodeValueSetter();
-	private DefaultTemplateNodeValueSetter versionSetter = new DefaultTemplateNodeValueSetter();
+//	private DefaultTemplateNodeValueSetter executionFileSystemSetter = new DefaultTemplateNodeValueSetter();
+//	private DefaultTemplateNodeValueSetter hostnameSetter = new DefaultTemplateNodeValueSetter();
+//	private DefaultTemplateNodeValueSetter versionSetter = new DefaultTemplateNodeValueSetter();
 	
 	public GenericMDS(JsdlTemplate template) {
 		super(template);
 		
-		template.getTemplateNodes().get(TemplateTagConstants.EXECUTIONFILESYSTEM_TAG_NAME).setTemplateNodeValueSetter(executionFileSystemSetter);
-		template.getTemplateNodes().get(TemplateTagConstants.HOSTNAME_TAG_NAME).setTemplateNodeValueSetter(hostnameSetter);
-		template.getTemplateNodes().get(TemplateTagConstants.VERSION_TAG_NAME).setTemplateNodeValueSetter(versionSetter);
+//		template.getTemplateNodes().get(TemplateTagConstants.EXECUTIONFILESYSTEM_TAG_NAME).setTemplateNodeValueSetter(executionFileSystemSetter);
+//		template.getTemplateNodes().get(TemplateTagConstants.HOSTNAME_TAG_NAME).setTemplateNodeValueSetter(hostnameSetter);
+//		template.getTemplateNodes().get(TemplateTagConstants.VERSION_TAG_NAME).setTemplateNodeValueSetter(versionSetter);
 	}
 
 	@Override

@@ -2,6 +2,7 @@
 
 package org.vpac.grisu.client.model.template.postprocessor;
 
+import org.vpac.grisu.client.TemplateTagConstants;
 import org.vpac.grisu.client.model.template.JsdlTemplate;
 import org.w3c.dom.Element;
 
@@ -14,7 +15,7 @@ public class TimesNoCPUs extends ElementPostprocessor {
 	@Override
 	public void process(String fqan) throws PostProcessException {
 		
-		String cpus = template.getTemplateNodes().get("CPUs").getValue();
+		String cpus = template.getTemplateNodes().get(TemplateTagConstants.CPUS_TAG_NAME).getValue();
 		
 		try {
 			Integer noCpus = Integer.parseInt(cpus);

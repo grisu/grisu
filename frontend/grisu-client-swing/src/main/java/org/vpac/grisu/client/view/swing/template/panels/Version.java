@@ -71,7 +71,8 @@ public class Version extends JPanel implements TemplateNodePanel,
 	
 	private ButtonGroup modeGroup = new ButtonGroup();
 	
-	private TemplateNodePanel submissionLocationPanel = null;
+	private SubmissionLocation submissionLocationPanel = null;
+	
 	
 	private boolean versionLocked = false;
 	private String lastVersion;
@@ -94,6 +95,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 			throws TemplateNodePanelException {
 
 		this.templateNode = node;
+		this.templateNode.setTemplateNodeValueSetter(this);
 
 		this.applicationName = this.templateNode.getTemplate().getApplicationName();
 		defaultVersion = node.getDefaultValue();
@@ -188,9 +190,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 		add(getVersionComboBox());
 
 		// this might be slightly dodgy. But it should always work if a SubmissionLocation template tag is present.
-		submissionLocationPanel = (TemplateNodePanel)(this.templateNode.getTemplate().getTemplateNodes().get(TemplateTagConstants.HOSTNAME_TAG_NAME).getTemplateNodeValueSetter());
-		submissionLocationPanel.addValueListener(this);
-
+		getSubmissionLocationPanel();
 
 		for ( String version : infoObject.getAllAvailableVersionsForFqan(GrisuRegistry.getDefault().getEnvironmentSnapshotValues().getCurrentFqan()) ) {
 			versionModel.addElement(version);
@@ -222,6 +222,33 @@ public class Version extends JPanel implements TemplateNodePanel,
 		
 				
 
+	}
+	
+	private SubmissionLocation getSubmissionLocationPanel() {
+		if ( submissionLocationPanel == null ) {
+			try {
+				
+				// try to find a templateNodevalueSetter that is a SubmissionLocationPanel
+				for ( TemplateNode node : this.templateNode.getTemplate().getTemplateNodes().values() ) {
+					if ( node.getTemplateNodeValueSetter() instanceof SubmissionLocation ) {
+						submissionLocationPanel = (SubmissionLocation)node.getTemplateNodeValueSetter();
+						break;
+					}
+				
+				}
+			} catch (Exception e) {
+				myLogger.warn("Could not get submissionLocationPanel yet...");
+				submissionLocationPanel = null;
+				return null;
+			}
+			if ( submissionLocationPanel != null ) {
+				submissionLocationPanel.addValueListener(this);
+				// remove value listener just in case it's already there...
+				removeValueListener(submissionLocationPanel);
+				addValueListener(submissionLocationPanel);
+			}
+		}
+		return submissionLocationPanel;
 	}
 	
 	public String getCurrentValue() {
@@ -345,11 +372,12 @@ public class Version extends JPanel implements TemplateNodePanel,
 
 	public void valueChanged(TemplateNodePanel panel, String newValue) {
 
+		if ( infoObject != null ) {
 		// submissionlocation has changed (only relevant if ANY-MODE is selected. Otherwise version won't change
 		if ( this.currentMode == ANY_VERSION_MODE ) {
 			versionModel.setSelectedItem(chooseBestVersion(newValue));
 		}
-		
+		}
 		
 	}
 	
@@ -453,6 +481,9 @@ public class Version extends JPanel implements TemplateNodePanel,
 	private Vector<ValueListener> valueChangedListeners;
 
 	private void fireVersionChanged(String newValue) {
+		
+		// just in case the listener wasn't added yet...
+		getSubmissionLocationPanel();
 
 		myLogger.debug("Fire value changed event from Version: new value: " + newValue);
 		// if we have no mountPointsListeners, do nothing...

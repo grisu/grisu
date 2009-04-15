@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
 
-	<JobDescription grisu_modules="GenericMDS">
+	<JobDescription >
 	<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
 			<Email 	template="Email" 
 					   	name="EmailAddress"
+					   	title="EmailAddress"
 						description="The email address to send an email to if the job status changes."
 						multiplicity="?" 
 						other="useLastValue" />
@@ -13,6 +14,7 @@
 
 			<JobName 	template="JobName" 
 						name="Jobname"
+						title="Jobname"
 						description="The name of the job." 
 						defaultValue="java_job" 
 						other="autosuggest,nosuggestbutton" />
@@ -22,13 +24,14 @@
 		<Application>
 
 			<ApplicationName >java</ApplicationName>
-			<ApplicationVersion template="Version" name="Version" description="The version of java" defaultValue="1.5.0" other="useAny,useDefault,useExact"></ApplicationVersion>
+			<ApplicationVersion template="Version" name="Version" title="Version" description="The version of java" defaultValue="1.5.0" other="useAny,useDefault,useExact"></ApplicationVersion>
 			<POSIXApplication
 				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
 				
 
 				<Executable template="CommandLine"
-						    name="Commandline"
+						    name="I_Commandline"
+						    title="Commandline"
 						    description="The command you want to run"
 							other="useHistory"
 				/>
@@ -44,25 +47,25 @@
 
 			</POSIXApplication>
 			
-			<TotalCPUTime template="InputInteger" name="Walltime"
+			<TotalCPUTime template="WallTime" name="Walltime" title="Walltime"
 				description="The total cpu time in seconds."
 				multiplicity="1" defaultValue="600" 
 				postprocess="TimesNoCPUs"
 			/>
 
-			<TotalCPUCount><exact template="InputInteger" name="CPUs"
+			<TotalCPUCount><exact template="CPUs" name="CPUs" title="CPUs"
 				description="How many CPUs do you want to use to run this job."
 				multiplicity="1" defaultValue="1" prefills="1,2,4,8" /></TotalCPUCount>
 				
 			<TotalPhysicalMemory> 
-				<LowerBoundedRange postprocess="ConvertToBytes" defaultValue="0" description="The minimum amount of memory in mb for this job." multiplicity="1" name="MinMem" prefills="0,1024,2048,4096" template="InputInteger"> </LowerBoundedRange>
+				<LowerBoundedRange postprocess="ConvertToBytes" defaultValue="0" description="The minimum amount of memory in mb for this job." multiplicity="1" name="MinMem" title="MinMem" prefills="0,1024,2048,4096" template="InputInteger"> </LowerBoundedRange>
 			</TotalPhysicalMemory>
 
 		</Application>
 		<Resources>
 			<CandidateHosts>
 
-				<HostName template="InputString" name="HostName"
+				<HostName template="SubmissionLocation" name="HostName" title="HostName"
 					description="Where do you want to submit the job to?"
 					multiplicity="1" 			
 				/>
