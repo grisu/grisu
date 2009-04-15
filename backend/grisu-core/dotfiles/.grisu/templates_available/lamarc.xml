@@ -40,7 +40,7 @@
 
 			<TotalCPUTime defaultValue="600" description="The total cpu time in seconds." multiplicity="1" name="Walltime" postprocess="TimesNoCPUs" template="InputInteger"/>
 
-			<TotalCPUCount><exact defaultValue="1" description="How many CPUs do you want to use to run this job." multiplicity="1" name="CPUs" prefills="1,2,4,8" template="InputInteger"/></TotalCPUCount>
+			<TotalCPUCount><exact defaultValue="1" description="How many CPUs do you want to use to run this job." multiplicity="1" name="CPUs" other="force=single" template="InputInteger"/></TotalCPUCount>
 
 		</Application>
 		<Resources>
