@@ -18,5 +18,6 @@
   	<module>grisu-client-commandline</module>
   	<module>grisu-examples</module>
   	<module>grisu-client-batch</module>
+  	<module>grisu-client-cmd</module>
   </modules>
 </project>
