@@ -19,7 +19,11 @@
 		given to the "Rest" module, which is automatically created everytime one or
 		more template nodes of a template are not claimed by a module.
 	-->
-	<JobDescription grisu_modules="Common">
+	<JobDescription grisu_modules="GenericMDS">
+	
+		<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
+			<Email description="The email address to send an email to if the job status changes." multiplicity="?" name="EmailAddress" other="useLastValue" template="Email"/>
+	    </GrisuTemplate>
 
 		<JobIdentification>
 
@@ -43,6 +47,7 @@
 				need to know what the name is that Grisu expects.
 			-->
 			<ApplicationName>namd</ApplicationName>
+			<ApplicationVersion template="Version" name="Version" description="The version of namd" other="useAny,useExact"></ApplicationVersion>
 			<Description>
 				NAMD is a parallel molecular dynamics simulation program
 				used to model large biomolecular systems.
@@ -73,21 +78,7 @@
 				<Output>stdout.txt</Output>
 				<!--  	The name of the standard error file. -->
 				<Error>stderr.txt</Error>
-				<!-- 	loads the module needed for a namd job -->
-				<Module    template="InputString"
-						   name="Module"
-						   description="The module to load"
-						   multiplicity="?"
-				></Module>
-				<!-- 	This element renders a checkbox and a textfield and lets the user 
-					choose whether he wants to get notification when the job is finished 
-					or not. 
-					If no defaultValue is provided and the other attribute contains "useLastValue"
-					then the last state of the checkbox & email address is used.
-				-->
-				<Email template="Email" name="EmailAddress"
-					description="The email address to send an email to if the job status changes."
-					multiplicity="?" other="useLastValue" />
+
 
 			</POSIXApplication>
 
@@ -99,9 +90,13 @@
 				description="The total cpu time in seconds." multiplicity="1"
 				defaultValue="600" postprocess="TimesNoCPUs" />
 
-			<TotalCPUCount template="InputInteger" name="CPUs"
+			<TotalCPUCount><exact template="InputInteger" name="CPUs"
 				description="How many CPUs do you want to use to run this job."
-				multiplicity="1" defaultValue="1" prefills="1,2,4,8" />
+				multiplicity="1" other="force=parallel" /></TotalCPUCount>
+				
+			<TotalPhysicalMemory> 
+				<LowerBoundedRange postprocess="ConvertToBytes" defaultValue="0" description="The minimum amount of memory in mb for this job." multiplicity="1" name="MinMem" prefills="0,1024,2048,4096" template="InputInteger"> </LowerBoundedRange>
+			</TotalPhysicalMemory>
 
 		</Application>
 		<Resources>

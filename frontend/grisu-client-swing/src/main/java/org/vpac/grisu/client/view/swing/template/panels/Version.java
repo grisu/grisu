@@ -454,7 +454,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 
 	private void fireVersionChanged(String newValue) {
 
-		myLogger.debug("Fire value changed event: new value: " + newValue);
+		myLogger.debug("Fire value changed event from Version: new value: " + newValue);
 		// if we have no mountPointsListeners, do nothing...
 		if (valueChangedListeners != null && !valueChangedListeners.isEmpty()) {
 

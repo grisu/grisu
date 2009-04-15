@@ -21,6 +21,10 @@
 	-->
 	<JobDescription grisu_modules="Common">
 
+		<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
+			<Email description="The email address to send an email to if the job status changes." multiplicity="?" name="EmailAddress" other="useLastValue" template="Email"/>
+	    </GrisuTemplate>
+	    
 		<JobIdentification>
 
 			<!-- The JobName template type renders a panel that is kind of 
@@ -76,16 +80,7 @@
 				<!-- 	loads the module needed for a namd job -->
 				<Module description="The module to load" multiplicity="?" name="Module" template="InputString"/>
 				
-				<!-- 	This element renders a checkbox and a textfield and lets the user 
-					choose whether he wants to get notification when the job is finished 
-					or not. 
-					If no defaultValue is provided and the other attribute contains "useLastValue"
-					then the last state of the checkbox & email address is used.
-				-->
-				<Email template="Email" name="EmailAddress"
-					description="The email address to send an email to if the job status changes."
-					multiplicity="?" other="useLastValue" />
-
+	
 			</POSIXApplication>
 
 			<!-- The total cpu time in seconds. Since the jsdl standard uses this instead
@@ -96,9 +91,9 @@
 				description="The total cpu time in seconds." multiplicity="1"
 				defaultValue="600" postprocess="TimesNoCPUs" />
 
-			<TotalCPUCount template="InputInteger" name="CPUs"
+			<TotalCPUCount><exact template="InputInteger" name="CPUs"
 				description="How many CPUs do you want to use to run this job."
-				multiplicity="1" defaultValue="1" prefills="1,2,4,8" />
+				multiplicity="1" defaultValue="1" prefills="1,2,4,8" /></TotalCPUCount>
 
 		</Application>
 		<Resources>

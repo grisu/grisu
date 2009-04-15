@@ -2,7 +2,13 @@
 <JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
 
 	<JobDescription grisu_modules="Common">
-	
+	<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
+		<Email 	template="Email" 
+					   	name="EmailAddress"
+						description="The email address to send an email to if the job status changes."
+						multiplicity="?" 
+						other="useLastValue" />
+	</GrisuTemplate>
 		<JobIdentification>
 
 			<JobName 	template="JobName" 
@@ -38,11 +44,7 @@
 						   description="The module to load"
 						   multiplicity="?"
 				></Module>
-				<Email 	template="Email" 
-					   	name="EmailAddress"
-						description="The email address to send an email to if the job status changes."
-						multiplicity="?" 
-						other="useLastValue" />
+
 
 			</POSIXApplication>
 			
@@ -52,9 +54,9 @@
 				postprocess="TimesNoCPUs"
 			/>
 
-			<TotalCPUCount template="InputInteger" name="CPUs"
+			<TotalCPUCount><exact template="InputInteger" name="CPUs"
 				description="How many CPUs do you want to use to run this job."
-				multiplicity="1" defaultValue="1" prefills="1,2,4,8" />
+				multiplicity="1" defaultValue="1" prefills="1,2,4,8" /></TotalCPUCount>
 
 		</Application>
 		<Resources>

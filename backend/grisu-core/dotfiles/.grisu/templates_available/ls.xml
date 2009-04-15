@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
 
-
 	<!-- 	Only the "Common" module is used here. It is recommended that you always
 	   		use the "Common" module because it is very unintuitive if the parameters 
 	   		it encapsulates have to be put in by hand. These parameters are:
@@ -20,6 +19,10 @@
 			more template nodes of a template are not claimed by a module.
 	-->
 	<JobDescription grisu_modules="Common">
+	
+		<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
+			<Email description="The email address to send an email to if the job status changes." multiplicity="?" name="EmailAddress" other="useLastValue" template="Email"/>
+	</GrisuTemplate>
 	
 		<JobIdentification>
 	
@@ -66,18 +69,6 @@
 				<!--  	The name of the standard error file. -->
 				<Error>stderr.txt</Error>
 				<Module description="The module to load" multiplicity="?" name="Module" template="InputString"/>
-				
-				<!-- 	This element renders a checkbox and a textfield and lets the user 
-						choose whether he wants to get notification when the job is finished 
-						or not. 
-						If no defaultValue is provided and the other attribute contains "useLastValue"
-						then the last state of the checkbox & email address is used.
-						-->
-				<Email 	template="Email" 
-					   	name="EmailAddress"
-						description="The email address to send an email to if the job status changes."
-						multiplicity="?" 
-						other="useLastValue" />
 
 			</POSIXApplication>
 			
@@ -91,9 +82,9 @@
 				postprocess="TimesNoCPUs"
 			/>
 
-			<TotalCPUCount template="InputInteger" name="CPUs"
+			<TotalCPUCount><exact template="InputInteger" name="CPUs"
 				description="How many CPUs do you want to use to run this job."
-				multiplicity="1" defaultValue="1" prefills="1,2,4,8" />
+				multiplicity="1" other="force=single" /></TotalCPUCount>
 
 		</Application>
 		<Resources>

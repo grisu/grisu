@@ -19,7 +19,11 @@
 			given to the "Rest" module, which is automatically created everytime one or
 			more template nodes of a template are not claimed by a module.
 	-->
-	<JobDescription grisu_modules="Common[useMds=false]">
+	<JobDescription grisu_modules="GenericMDS">
+	
+		<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
+			<Email description="The email address to send an email to if the job status changes." multiplicity="?" name="EmailAddress" other="useLastValue" template="Email"/>
+	    </GrisuTemplate>
 	
 		<JobIdentification>
 	
@@ -44,11 +48,28 @@
 				 	panel for this application exists so if you want to use one of these then you
 				 	need to know what the name is that Grisu expects.
 			-->
-			<ApplicationName>underworld</ApplicationName>
+			<ApplicationName>Underworld</ApplicationName>
+			<ApplicationVersion template="Version" name="Version" description="The version of underworld"  defaultValue="1.2.0" other="useAny,useDefault,startMode=Default"></ApplicationVersion>
+			
 			<Description>
-				UnderWorld is a StGermain parallel modelling framework Geoscience research code, 
-				which utilises a Lagrangian particle-in-cell finite element scheme 
-				(the prototype of which is the Ellipsis code), visualised using gLucifer.
+				Underworld (http://www.underworldproject.org/) is a 3D-parallel geodynamic
+				modelling framework capable of deriving viscous / viscoplastic
+				thermal, chemical and thermochemical models consistent with tectonic
+				processes, such as mantle convection and lithospheric deformation
+				over long time scales. Underworld utilises a Lagrangian
+				particle-in-cell finite element scheme (the prototype of which is
+				the Ellipsis code), and is visualised using gLucifer. The Underworld
+				source code is written in C in an Object Oriented style, following
+				the methodology of design for change applied to computational codes
+				implemented in StGermain (http://www.stgermainproject.org/). It uses
+				PETSc (http://www-unix.mcs.anl.gov/petsc) (optimised numerical
+				solvers) and MPI (parallelism) libraries. The Underworld to
+				StGermain software stack is released under a mixture of BSD and LGPL
+				licenses. Underworld is under collaborative development by Monash
+				University (http://www.monash.edu.au/) and the VPAC
+				(http://www.vpac.org/), as part of the NCRIS AuScope capabilty in
+				the Simulation and Modelling Victoria
+				(http://www.auscope.monash.edu.au/) program.
 			</Description>
 			<POSIXApplication
 				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
@@ -77,23 +98,7 @@
 				<!--  	The name of the standard error file. -->
 				<Error>stderr.txt</Error>
 				<!--	The name of the module. -->
-				<Module    template="InputString"
-						   name="Module"
-						   description="The module to load"
-						   multiplicity="1"
-						   defaultValue="underworld"
-				></Module>
-				<!-- 	This element renders a checkbox and a textfield and lets the user 
-						choose whether he wants to get notification when the job is finished 
-						or not. 
-						If no defaultValue is provided and the other attribute contains "useLastValue"
-						then the last state of the checkbox & email address is used.
-					-->
-				<Email 	template="Email" 
-					   	name="EmailAddress"
-						description="The email address to send an email to if the job status changes."
-						multiplicity="?" 
-						other="useLastValue" />
+
 
 			</POSIXApplication>
 			
@@ -107,9 +112,13 @@
 				postprocess="TimesNoCPUs"
 			/>
 
-			<TotalCPUCount template="InputInteger" name="CPUs"
+			<TotalCPUCount><exact template="InputInteger" name="CPUs"
 				description="How many CPUs do you want to use to run this job."
-				multiplicity="1" defaultValue="1" prefills="1,2,4,8" />
+				multiplicity="1" defaultValue="2" other="force=parallel" /></TotalCPUCount>
+				
+			<TotalPhysicalMemory> 
+				<LowerBoundedRange postprocess="ConvertToBytes" defaultValue="0" description="The minimum amount of memory in mb for this job." multiplicity="1" name="MinMem" prefills="0,1024,2048,4096" template="InputInteger"> </LowerBoundedRange>
+			</TotalPhysicalMemory>
 
 		</Application>
 		<Resources>

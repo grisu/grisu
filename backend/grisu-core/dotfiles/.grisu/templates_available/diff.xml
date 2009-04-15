@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
 	<JobDescription grisu_modules="Common">
-
+	<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
+		<Email 	template="Email" 
+					   	name="EmailAddress"
+						description="The email address to send an email to if the job status changes."
+						multiplicity="?" 
+						other="useLastValue" />
+	</GrisuTemplate>
 		<JobIdentification>
 			<JobName template="JobName" name="Jobname" title="Jobname"
 				description="The name of the job." defaultValue="diff_job"
@@ -31,18 +37,14 @@
 						   description="The module to load"
 						   multiplicity="?"
 				></Module>
-				<Email template="Email" name="EmailAddress"
-					description="The email address to send an email to if the job status changes."
-					multiplicity="?" other="useLastValue" />
-				<!-- this is actually not in the jsdl specification -->
 
 			</POSIXApplication>
 			<TotalCPUTime template="WallTime" name="Walltime"
 				description="The walltime for your job." defaultValue="60"
 				postprocess="TimesNoCPUs" /><!-- 60 seconds on, use this value and devide with no. of cpus to get actual walltime -->
-			<TotalCPUCount template="CPUs" name="CPUs"
+			<TotalCPUCount><exact template="CPUs" name="CPUs"
 				description="How many CPUs do you want to use to run this job."
-				multiplicity="1" defaultValue="1" />
+				multiplicity="1" other="force=single" /></TotalCPUCount>
 		</Application>
 		<Resources>
 			<CandidateHosts>

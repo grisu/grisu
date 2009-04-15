@@ -20,6 +20,13 @@
 			more template nodes of a template are not claimed by a module.
 	-->
 	<JobDescription grisu_modules="Common">
+		<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
+		<Email 	template="Email" 
+					   	name="EmailAddress"
+						description="The email address to send an email to if the job status changes."
+						multiplicity="?" 
+						other="useLastValue" />
+		</GrisuTemplate>
 	
 		<JobIdentification>
 	
@@ -70,17 +77,6 @@
 				<!--  	The name of the standard error file. -->
 				<Error>stderr.txt</Error>
 				
-				<!-- 	This element renders a checkbox and a textfield and lets the user 
-						choose whether he wants to get notification when the job is finished 
-						or not. 
-						If no defaultValue is provided and the other attribute contains "useLastValue"
-						then the last state of the checkbox & email address is used.
-						-->
-				<Email 	template="Email" 
-					   	name="EmailAddress"
-						description="The email address to send an email to if the job status changes."
-						multiplicity="?" 
-						other="useLastValue" />
 						
 				<Module template="InputString"
 				        name="Module"
@@ -101,9 +97,9 @@
 				postprocess="TimesNoCPUs"
 			/>
 
-			<TotalCPUCount template="InputInteger" name="CPUs"
+			<TotalCPUCount><exact template="InputInteger" name="CPUs"
 				description="How many CPUs do you want to use to run this job."
-				multiplicity="1" defaultValue="1" prefills="1,2,4,8" />
+				multiplicity="1" defaultValue="1" prefills="1,2,4,8" /></TotalCPUCount>
 
 		</Application>
 		<Resources>

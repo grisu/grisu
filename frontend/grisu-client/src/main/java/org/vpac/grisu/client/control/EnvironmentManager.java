@@ -31,6 +31,7 @@ import org.vpac.grisu.client.control.utils.MountPointsListener;
 import org.vpac.grisu.client.model.SubmissionLocation;
 import org.vpac.grisu.client.model.files.FileConstants;
 import org.vpac.grisu.control.Environment;
+import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -155,21 +156,23 @@ public class EnvironmentManager implements MountPointsListener, EnvironmentSnaps
 	// }
 	public void initializeHistoryManager() {
 
-		File historyFile = new File(Environment.GRISU_DIRECTORY,
-				GRISU_HISTORY_FILENAME);
-		if (!historyFile.exists()) {
-			try {
-				historyFile.createNewFile();
-
-			} catch (IOException e) {
-				// well
-			}
-		}
-		if (!historyFile.exists()) {
-			setHistoryManager(new DummyHistoryManager());
-		} else {
-			setHistoryManager(new SimpleHistoryManager(historyFile));
-		}
+//		File historyFile = new File(Environment.GRISU_DIRECTORY,
+//				GRISU_HISTORY_FILENAME);
+//		if (!historyFile.exists()) {
+//			try {
+//				historyFile.createNewFile();
+//
+//			} catch (IOException e) {
+//				// well
+//			}
+//		}
+//		if (!historyFile.exists()) {
+//			setHistoryManager(new DummyHistoryManager());
+//		} else {
+//			setHistoryManager(new SimpleHistoryManager(historyFile));
+//		}
+		
+		setHistoryManager(GrisuRegistry.getDefault().getHistoryManager());
 	}
 
 	/**

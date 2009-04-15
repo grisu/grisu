@@ -2,8 +2,8 @@ package org.vpac.grisu.client.view.swing.template.panels;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
@@ -219,7 +219,7 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 
 	private void fireSubmissionLocationChanged(String newValue) {
 
-		myLogger.debug("Fire value changed event: new value: " + newValue);
+		myLogger.debug("Fire value changed event from SubmissionLocation: new value: " + newValue);
 		// if we have no mountPointsListeners, do nothing...
 		if (valueChangedListeners != null && !valueChangedListeners.isEmpty()) {
 
@@ -301,6 +301,7 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 			queueComboBox.addItemListener(new ItemListener() {
 				public void itemStateChanged(final ItemEvent e) {
 					
+					if ( e.getStateChange() == ItemEvent.SELECTED ) {
 					String temp = ((String)queueModel.getSelectedItem());
 					if ( temp != null && ! "".equals(temp) && ! temp.startsWith("Not available.") ) {
 					if ( e.getStateChange() == ItemEvent.SELECTED ) {
@@ -310,6 +311,7 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 					stagingFsSetter.setExternalSetValue(fs.getRootUrl());
 					myLogger.debug("Set staging fs to: "+fs);
 					GrisuRegistry.getDefault().getHistoryManager().addHistoryEntry(TemplateTagConstants.getGlobalLastQueueKey(infoObject.getApplicationName()), (String)queueModel.getSelectedItem());
+					}
 					}
 				}
 			});

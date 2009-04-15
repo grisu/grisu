@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
 
-	<JobDescription grisu_modules="Common">
-	
+	<JobDescription grisu_modules="GenericMDS">
+	<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
+			<Email 	template="Email" 
+					   	name="EmailAddress"
+						description="The email address to send an email to if the job status changes."
+						multiplicity="?" 
+						other="useLastValue" />
+		</GrisuTemplate>
 		<JobIdentification>
 
 			<JobName 	template="JobName" 
@@ -16,6 +22,7 @@
 		<Application>
 
 			<ApplicationName >java</ApplicationName>
+			<ApplicationVersion template="Version" name="Version" description="The version of java" defaultValue="1.5.0" other="useAny,useDefault,useExact"></ApplicationVersion>
 			<POSIXApplication
 				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
 				
@@ -33,16 +40,7 @@
 				<Output>stdout.txt</Output>
 				<!--  	The name of the standard error file. -->
 				<Error>stderr.txt</Error>
-				<Module    template="InputString"
-						   name="Module"
-						   description="The module to load"
-						   multiplicity="?"
-				></Module>
-				<Email 	template="Email" 
-					   	name="EmailAddress"
-						description="The email address to send an email to if the job status changes."
-						multiplicity="?" 
-						other="useLastValue" />
+
 
 			</POSIXApplication>
 			
@@ -52,9 +50,13 @@
 				postprocess="TimesNoCPUs"
 			/>
 
-			<TotalCPUCount template="InputInteger" name="CPUs"
+			<TotalCPUCount><exact template="InputInteger" name="CPUs"
 				description="How many CPUs do you want to use to run this job."
-				multiplicity="1" defaultValue="1" prefills="1,2,4,8" />
+				multiplicity="1" defaultValue="1" prefills="1,2,4,8" /></TotalCPUCount>
+				
+			<TotalPhysicalMemory> 
+				<LowerBoundedRange postprocess="ConvertToBytes" defaultValue="0" description="The minimum amount of memory in mb for this job." multiplicity="1" name="MinMem" prefills="0,1024,2048,4096" template="InputInteger"> </LowerBoundedRange>
+			</TotalPhysicalMemory>
 
 		</Application>
 		<Resources>

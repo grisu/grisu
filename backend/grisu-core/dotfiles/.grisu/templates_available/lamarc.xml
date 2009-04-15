@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
-
-
+	
 	<JobDescription grisu_modules="Common">
+	
+		<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
+			<Email description="The email address to send an email to if the job status changes." multiplicity="?" name="EmailAddress" other="useLastValue" template="Email"/>
+	</GrisuTemplate>
 
 		<JobIdentification>
 
@@ -32,14 +35,12 @@
 				<!-- 	loads the module needed for a LAMARC job -->
 				<Module description="The module to load" multiplicity="?" name="Module" template="InputString"/>
 
-				<Email description="The email address to send an email to if the job status changes." multiplicity="?" name="EmailAddress" other="useLastValue" template="Email"/>
-
 			</POSIXApplication>
 
 
 			<TotalCPUTime defaultValue="600" description="The total cpu time in seconds." multiplicity="1" name="Walltime" postprocess="TimesNoCPUs" template="InputInteger"/>
 
-			<TotalCPUCount defaultValue="1" description="How many CPUs do you want to use to run this job." multiplicity="1" name="CPUs" prefills="1,2,4,8" template="InputInteger"/>
+			<TotalCPUCount><exact defaultValue="1" description="How many CPUs do you want to use to run this job." multiplicity="1" name="CPUs" prefills="1,2,4,8" template="InputInteger"/></TotalCPUCount>
 
 		</Application>
 		<Resources>

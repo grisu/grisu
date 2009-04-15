@@ -24,7 +24,6 @@ public class LocalTemplatesHelper {
 			GRISU_DIRECTORY, "templates_available");
 	public static final File GLITE_DIRECTORY = new File(System
 			.getProperty("user.home"), ".glite");
-	
 
 	public static final File GLOBUS_CONFIG_DIR = new File(GRISU_DIRECTORY,
 			"globus");
@@ -71,61 +70,69 @@ public class LocalTemplatesHelper {
 			createGrisuDirectories();
 		}
 
-		int BUFFER_SIZE = 8192;
-		int count;
-		byte data[] = new byte[BUFFER_SIZE];
+		if (TEMPLATES_AVAILABLE_DIR.list().length == 0) {
 
-		InputStream in = Init.class
-				.getResourceAsStream("/templates_available.zip");
-		ZipInputStream zipStream = new ZipInputStream(in);
+			myLogger.debug("Filling templates_available folder with a set of base templates...");
+			int BUFFER_SIZE = 8192;
+			int count;
+			byte data[] = new byte[BUFFER_SIZE];
 
-		BufferedOutputStream dest = null;
+			InputStream in = Init.class
+					.getResourceAsStream("/templates_available.zip");
+			ZipInputStream zipStream = new ZipInputStream(in);
 
-		try {
+			BufferedOutputStream dest = null;
 
-			ZipEntry entry = null;
+			try {
 
-			while ((entry = zipStream.getNextEntry()) != null) {
-				
-				if (!entry.isDirectory()) {
+				ZipEntry entry = null;
 
-					myLogger.debug("Template name: " + entry.getName());
-					File vomses_file = new File(TEMPLATES_AVAILABLE_DIR,
-							entry.getName());
+				while ((entry = zipStream.getNextEntry()) != null) {
 
-					// Write the file to the file system and overwrite possible
-					// old files with the same name
-					FileOutputStream fos = new FileOutputStream(vomses_file);
-					dest = new BufferedOutputStream(fos, BUFFER_SIZE);
-					while ((count = zipStream.read(data, 0, BUFFER_SIZE)) != -1) {
-						dest.write(data, 0, count);
+					if (!entry.isDirectory()) {
+
+						myLogger.debug("Template name: " + entry.getName());
+						File vomses_file = new File(TEMPLATES_AVAILABLE_DIR,
+								entry.getName());
+
+						// Write the file to the file system and overwrite
+						// possible
+						// old files with the same name
+						FileOutputStream fos = new FileOutputStream(vomses_file);
+						dest = new BufferedOutputStream(fos, BUFFER_SIZE);
+						while ((count = zipStream.read(data, 0, BUFFER_SIZE)) != -1) {
+							dest.write(data, 0, count);
+						}
+						dest.flush();
+						dest.close();
 					}
-					dest.flush();
-					dest.close();
 				}
+			} catch (Exception e) {
+				myLogger.error(e);
 			}
+		} else {
+			myLogger.debug("Templates folder already contains files. Not copying any into it...");
+		}
 
-			// copy globus floder if not already there
-
+		// copy globus floder if not already there
+		try {
 			if (!GLOBUS_CONFIG_DIR.exists()) {
 				unzipFileToDir("/globus.zip", GRISU_DIRECTORY);
 			}
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
+		} catch (Exception e) {
 			myLogger.error(e);
 		}
+
 	}
 
-	private static void unzipFileToDir(String zipFileResourcePath, File targetDir) {
+	private static void unzipFileToDir(String zipFileResourcePath,
+			File targetDir) {
 
 		int BUFFER_SIZE = 8192;
 		int count;
 		byte data[] = new byte[BUFFER_SIZE];
 
-		InputStream in = Init.class
-				.getResourceAsStream(zipFileResourcePath);
+		InputStream in = Init.class.getResourceAsStream(zipFileResourcePath);
 		ZipInputStream zipstream = new ZipInputStream(in);
 
 		BufferedOutputStream dest = null;
@@ -135,12 +142,14 @@ public class LocalTemplatesHelper {
 			ZipEntry entry = null;
 
 			while ((entry = zipstream.getNextEntry()) != null) {
-				myLogger.debug("Entry: "+entry.getName());
-				String filePath = GRISU_DIRECTORY.getAbsolutePath()+File.separator+entry.getName();
+				myLogger.debug("Entry: " + entry.getName());
+				String filePath = GRISU_DIRECTORY.getAbsolutePath()
+						+ File.separator + entry.getName();
 
 				if (!entry.isDirectory()) {
 
-//					File vomses_file = new File(TEMPLATES_AVAILABLE_DIR, entry.getName());
+					// File vomses_file = new File(TEMPLATES_AVAILABLE_DIR,
+					// entry.getName());
 					File vomses_file = new File(filePath);
 
 					// Write the file to the file system and overwrite possible
@@ -153,7 +162,7 @@ public class LocalTemplatesHelper {
 					dest.flush();
 					dest.close();
 				} else {
-//					new File(GRISU_DIRECTORY,entry.getName()).mkdirs();
+					// new File(GRISU_DIRECTORY,entry.getName()).mkdirs();
 					new File(filePath).mkdirs();
 				}
 			}
@@ -162,7 +171,7 @@ public class LocalTemplatesHelper {
 			// e.printStackTrace();
 			myLogger.error(e);
 		}
-		
+
 	}
 
 	public static void copyFile(File in, File out) throws IOException {

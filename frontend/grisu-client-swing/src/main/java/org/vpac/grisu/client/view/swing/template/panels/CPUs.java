@@ -138,7 +138,7 @@ public class CPUs extends JPanel implements TemplateNodePanel {
 			comboBox = new JComboBox(cpuComboBoxModel);
 			comboBox.addItemListener(new ItemListener() {
 				public void itemStateChanged(final ItemEvent e) {
-					if (e.getStateChange() == ItemEvent.SELECTED) {
+					if (e.getStateChange() == ItemEvent.SELECTED && ! getExternalSetValue().equals(comboBox.getSelectedItem())) {
 
 						setExternalSetValue((String)(comboBox.getSelectedItem()));
 
@@ -333,7 +333,7 @@ public class CPUs extends JPanel implements TemplateNodePanel {
 
 	private void fireSitePanelEvent(String newValue) {
 
-		myLogger.debug("Fire value changed event: new value: " + newValue);
+		myLogger.debug("Fire value changed event from CPUs: new value: " + newValue);
 		// if we have no mountPointsListeners, do nothing...
 		if (valueChangedListeners != null && !valueChangedListeners.isEmpty()) {
 
