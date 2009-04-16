@@ -1,4 +1,4 @@
-package org.vpac.grisu.client.view.grisuclient;
+package org.vpac.grisu.client.gricli;
 
 import java.net.URISyntaxException;
 

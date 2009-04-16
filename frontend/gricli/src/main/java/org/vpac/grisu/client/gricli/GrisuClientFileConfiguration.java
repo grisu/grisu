@@ -1,8 +1,10 @@
-package org.vpac.grisu.client.view.grisuclient;
+package org.vpac.grisu.client.gricli;
 
 import org.apache.commons.configuration.HierarchicalINIConfiguration;
 import org.apache.commons.configuration.ConfigurationException;
+import org.vpac.grisu.control.Environment;
 
+import java.io.File;
 import java.util.HashMap;
 
 /**
@@ -10,7 +12,7 @@ import java.util.HashMap;
  */
 public class GrisuClientFileConfiguration {
 
-	public final static String CONFIG_FILE_PATH = System.getProperty("user.home")+ "/.grisu/grisu.commandline";
+	public final static String CONFIG_FILE_PATH = Environment.GRISU_DIRECTORY+ File.separator + "gricli.config";
 	private static HashMap<String,GrisuClientFileConfiguration> instances = new HashMap<String,GrisuClientFileConfiguration>();
 
 	private HierarchicalINIConfiguration configuration  = null;

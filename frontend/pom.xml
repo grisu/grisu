@@ -19,5 +19,6 @@
   	<module>grisu-examples</module>
   	<module>grisu-client-batch</module>
   	<module>grisu-client-cmd</module>
+  	<module>gricli</module>
   </modules>
 </project>

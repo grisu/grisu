@@ -1,4 +1,4 @@
-package org.vpac.grisu.client.view.grisuclient;
+package org.vpac.grisu.client.gricli;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -128,7 +128,7 @@ public class TestClient {
 				JobProperties jobProperties = new TestJobProperties(
 						serviceInterface, subLoc, vo);
 				System.out.println("Starting job submission for job: "+jobProperties.getJobname());
-				GrisuClient client = new GrisuClient(serviceInterface,
+				Gricli client = new Gricli(serviceInterface,
 						clientProperties, jobProperties);
 
 				try {

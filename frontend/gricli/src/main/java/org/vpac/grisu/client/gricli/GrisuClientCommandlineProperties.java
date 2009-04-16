@@ -1,4 +1,4 @@
-package org.vpac.grisu.client.view.grisuclient;
+package org.vpac.grisu.client.gricli;
 
 import java.io.File;
 import java.net.URI;
@@ -19,7 +19,7 @@ import org.apache.log4j.Logger;
 public class GrisuClientCommandlineProperties implements GrisuClientProperties {
 
 	static final Logger myLogger = Logger
-			.getLogger(GrisuClient.class.getName());
+			.getLogger(Gricli.class.getName());
 
 //	private final static String PARAMETER = "PARAMETER";
 

@@ -1,4 +1,4 @@
-package org.vpac.grisu.client.view.grisuclient;
+package org.vpac.grisu.client.gricli;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +36,7 @@ import org.vpac.security.light.plainProxy.LocalProxy;
 import org.globus.gsi.GlobusCredentialException;
 
 
-public class GrisuClient implements FileTransferListener {
+public class Gricli implements FileTransferListener {
 
 	public static final int DEFAULT_SLEEP_TIME_IN_SECONDS = 600;
 
@@ -75,7 +75,7 @@ public class GrisuClient implements FileTransferListener {
 	 * @throws ServiceInterfaceException if the client can't create a valid serviceInterface
 	 * @throws LoginException if there is a problem with the login (e.g. wrong username/password)
 	 */
-	public GrisuClient(String[] args) throws LoginException, ServiceInterfaceException, IOException {
+	public Gricli(String[] args) throws LoginException, ServiceInterfaceException, IOException {
 
 		clientProperties = new GrisuClientCommandlineProperties(args);
 
@@ -102,7 +102,7 @@ public class GrisuClient implements FileTransferListener {
 	 * @param serviceInterface the serviceinterface
 	 * @param args the commandlineArguments
 	 */
-	public GrisuClient(ServiceInterface serviceInterface, String[] args) {
+	public Gricli(ServiceInterface serviceInterface, String[] args) {
 		
 		this.serviceInterface = serviceInterface;
 		
@@ -122,7 +122,7 @@ public class GrisuClient implements FileTransferListener {
 	 * @param clientProperties the clientProperties
 	 * @param jobProperties the jobProperties
 	 */
-	public GrisuClient(ServiceInterface serviceInterface, GrisuClientProperties clientProperties, JobProperties jobProperties) {
+	public Gricli(ServiceInterface serviceInterface, GrisuClientProperties clientProperties, JobProperties jobProperties) {
 		
 		this.serviceInterface = serviceInterface;
 		this.clientProperties = clientProperties;
@@ -381,7 +381,7 @@ public class GrisuClient implements FileTransferListener {
 			JobDescriptionNotValidException, NoSuchJobException,
 			JobSubmissionException, JobStagingException {
 
-		InputStream in = GrisuClient.class
+		InputStream in = Gricli.class
 				.getResourceAsStream("/templates/generic.xml");
 		String jsdlTemplateString = SeveralStringHelpers.fromInputStream(in);
 
@@ -609,10 +609,10 @@ public class GrisuClient implements FileTransferListener {
 	 */
 	public static void main(String[] args) {
 
-		GrisuClient client = null;
+		Gricli client = null;
 
 		try {
-			client = new GrisuClient(args);
+			client = new Gricli(args);
 		} catch (LoginException e) {
 			System.err.println("Can't login to grisu backend: "
 					+ e.getLocalizedMessage());
