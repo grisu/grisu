@@ -52,7 +52,7 @@ public class Grisu {
 
 	static final Logger myLogger = Logger.getLogger(Grisu.class.getName());
 	
-    public static final String GRISU_VERSION = "v0.2-beta10";
+    public static final String GRISU_VERSION = "v0.2-rc";
     
     public static final String[] DEFAULT_HELPDESK_CLASSES = new String[]{"org.vpac.helpDesk.model.anonymousRT.AnonymousRTHelpDesk", "org.vpac.helpDesk.model.trac.TracHelpDesk"};
     public static final String HELPDESK_CONFIG = "support.properties";
