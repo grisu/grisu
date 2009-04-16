@@ -2,7 +2,6 @@ package org.vpac.grisu.client.view.swing.template.panels;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.Set;
 import java.util.Vector;
@@ -15,10 +14,11 @@ import javax.swing.border.TitledBorder;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.TemplateTagConstants;
-import org.vpac.grisu.client.model.template.nodes.DefaultTemplateNodeValueSetter;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.TemplateNodeEvent;
 import org.vpac.grisu.client.view.swing.utils.QueueRenderer;
+import org.vpac.grisu.control.FqanEvent;
+import org.vpac.grisu.control.FqanListener;
 import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.fs.model.MountPoint;
 import org.vpac.grisu.model.EnvironmentSnapshotValues;
@@ -32,7 +32,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class SubmissionLocation extends JPanel implements TemplateNodePanel, ValueListener {
+public class SubmissionLocation extends JPanel implements TemplateNodePanel, ValueListener, FqanListener {
 	
 	private JComboBox queueComboBox;
 	private JComboBox siteComboBox;
@@ -103,6 +103,7 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 		this.templateNode = node;
 		this.templateNode.setTemplateNodeValueSetter(this);
 
+		esv.addFqanListener(this);
 
 		this.applicationName = this.templateNode.getTemplate().getApplicationName();
 		this.infoObject = GrisuRegistry.getDefault().getUserApplicationInformation(applicationName);
@@ -383,6 +384,13 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel, Val
 
 	public String getCurrentExecutionFileSystem() {
 		return currentStagingFilesystem;
+	}
+
+	public void fqansChanged(FqanEvent event) {
+
+		// not necessary, because Version will fire an event
+		valueChanged(this, versionPanel.getCurrentValue());
+		
 	}
 
 }

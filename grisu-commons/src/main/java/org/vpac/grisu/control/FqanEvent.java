@@ -1,6 +1,6 @@
 
 
-package org.vpac.grisu.client.control.utils;
+package org.vpac.grisu.control;
 
 import java.util.EventObject;
 

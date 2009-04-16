@@ -38,13 +38,13 @@ import org.vpac.grisu.client.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.client.control.exceptions.TemplateException;
 import org.vpac.grisu.client.control.template.LocalTemplateManagement;
 import org.vpac.grisu.client.control.template.TemplateManager;
-import org.vpac.grisu.client.control.utils.FqanEvent;
-import org.vpac.grisu.client.control.utils.FqanListener;
 import org.vpac.grisu.client.model.template.JobCreationInterface;
 import org.vpac.grisu.client.model.template.JsdlTemplate;
 import org.vpac.grisu.client.view.swing.environment.FQANSelectorDialog;
 import org.vpac.grisu.client.view.swing.mainPanel.AddApplicationDialog;
 import org.vpac.grisu.client.view.swing.utils.Utils;
+import org.vpac.grisu.control.FqanEvent;
+import org.vpac.grisu.control.FqanListener;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 

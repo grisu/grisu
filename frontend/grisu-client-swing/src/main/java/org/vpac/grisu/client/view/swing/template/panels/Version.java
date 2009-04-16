@@ -22,12 +22,14 @@ import org.apache.log4j.Logger;
 import org.vpac.grisu.client.TemplateTagConstants;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.TemplateNodeEvent;
+import org.vpac.grisu.control.FqanEvent;
+import org.vpac.grisu.control.FqanListener;
 import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.model.EnvironmentSnapshotValues;
 import org.vpac.grisu.model.UserApplicationInformation;
 
 public class Version extends JPanel implements TemplateNodePanel,
-		ActionListener, ValueListener {
+		ActionListener, ValueListener, FqanListener {
 
 	private static final long serialVersionUID = -4614286850190629566L;
 
@@ -96,10 +98,11 @@ public class Version extends JPanel implements TemplateNodePanel,
 
 		this.templateNode = node;
 		this.templateNode.setTemplateNodeValueSetter(this);
-
+		
 		this.applicationName = this.templateNode.getTemplate().getApplicationName();
 		defaultVersion = node.getDefaultValue();
 		
+		esv.addFqanListener(this);
 		
 		GrisuRegistry.getDefault().getHistoryManager().setMaxNumberOfEntries(TemplateTagConstants.getGlobalLastVersionModeKey(applicationName), 1);
 		GrisuRegistry.getDefault().getHistoryManager().setMaxNumberOfEntries(TemplateTagConstants.getGlobalLastVersionKey(applicationName), 1);
@@ -192,22 +195,9 @@ public class Version extends JPanel implements TemplateNodePanel,
 		// this might be slightly dodgy. But it should always work if a SubmissionLocation template tag is present.
 		getSubmissionLocationPanel();
 
-		for ( String version : infoObject.getAllAvailableVersionsForFqan(GrisuRegistry.getDefault().getEnvironmentSnapshotValues().getCurrentFqan()) ) {
-			versionModel.addElement(version);
-		}
-		
-		versionLocked = true;
 
-		if ( versionModel.getIndexOf(lastVersion) >= 0 ) {
-			versionModel.setSelectedItem(lastVersion);
-		} else {
-			if ( versionModel.getSize() > 0 ) {
-				versionModel.setSelectedItem(versionModel.getElementAt(0));
-			}
-		}
+		fillVersions(lastVersion);
 		
-		versionLocked = false;
-
 		switch (currentMode) {
 		case ANY_VERSION_MODE:
 			getAnyRadioButton().doClick();
@@ -222,6 +212,28 @@ public class Version extends JPanel implements TemplateNodePanel,
 		
 				
 
+	}
+	
+	private void fillVersions(String prefferedVersion) {
+		
+		versionLocked = true;
+
+		versionModel.removeAllElements();
+		for ( String version : infoObject.getAllAvailableVersionsForFqan(GrisuRegistry.getDefault().getEnvironmentSnapshotValues().getCurrentFqan()) ) {
+			versionModel.addElement(version);
+		}
+
+		if ( versionModel.getIndexOf(prefferedVersion) >= 0 ) {
+			versionModel.setSelectedItem(prefferedVersion);
+		} else {
+			if ( versionModel.getSize() > 0 ) {
+				versionModel.setSelectedItem(versionModel.getElementAt(0));
+			}
+		}
+		
+		versionLocked = false;
+
+		
 	}
 	
 	private SubmissionLocation getSubmissionLocationPanel() {
@@ -524,6 +536,14 @@ public class Version extends JPanel implements TemplateNodePanel,
 
 	public void actionPerformed(ActionEvent e) {
 		switchMode(e.getActionCommand());
+	}
+
+	public void fqansChanged(FqanEvent event) {
+
+		String currentVersion = (String)versionModel.getSelectedItem();
+		
+		fillVersions(currentVersion);
+		fireVersionChanged((String)(versionModel.getSelectedItem()));
 	}
 
 

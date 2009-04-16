@@ -23,8 +23,6 @@ import javax.swing.border.TitledBorder;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.TemplateTagConstants;
 import org.vpac.grisu.client.control.eventStuff.SubmissionObjectListener;
-import org.vpac.grisu.client.control.utils.FqanEvent;
-import org.vpac.grisu.client.control.utils.FqanListener;
 import org.vpac.grisu.client.control.utils.MountPointEvent;
 import org.vpac.grisu.client.control.utils.MountPointsListener;
 import org.vpac.grisu.client.model.SubmissionLocation;
@@ -33,6 +31,8 @@ import org.vpac.grisu.client.model.VersionObject;
 import org.vpac.grisu.client.model.template.modules.Common;
 import org.vpac.grisu.client.model.template.nodes.DefaultTemplateNodeValueSetter;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
+import org.vpac.grisu.control.FqanEvent;
+import org.vpac.grisu.control.FqanListener;
 import org.vpac.grisu.control.JobCreationException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 
