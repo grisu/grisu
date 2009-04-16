@@ -18,7 +18,7 @@
 				<unpack>true</unpack>
 							<excludes>
 				<exclude>junit:junit</exclude>
-				<exclude>bouncycastle:bcprov-jdk15</exclude>
+				<!-- <exclude>bouncycastle:bcprov-jdk15</exclude> -->
 				<exclude>external.bouncycastle:bcprov-jdk15</exclude>
 			</excludes>
 			</binaries>

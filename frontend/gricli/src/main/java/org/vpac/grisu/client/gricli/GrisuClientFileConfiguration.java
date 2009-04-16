@@ -19,6 +19,11 @@ public class GrisuClientFileConfiguration {
 
 	public static GrisuClientFileConfiguration getConfiguration(String path) throws ConfigurationException{
 		path = (path == null)?CONFIG_FILE_PATH:path;
+
+		File f = new File(path);
+		if (!f.exists()){
+			return new DefaultConfiguration();
+		}
 		GrisuClientFileConfiguration instance = instances.get(path);
 		if (instance == null) {
 			instance = new GrisuClientFileConfiguration(path);
@@ -29,6 +34,8 @@ public class GrisuClientFileConfiguration {
 			return instance;
 		}
 	}
+
+	protected GrisuClientFileConfiguration(){	}
 
 	private GrisuClientFileConfiguration(String path) throws ConfigurationException{
 		this.configuration = new HierarchicalINIConfiguration(path);
@@ -49,5 +56,26 @@ public class GrisuClientFileConfiguration {
 		} catch (NullPointerException e) {
 			return null;
 		}
+	}
+}
+
+/** 
+    some sensible defaults.
+**/
+class DefaultConfiguration extends GrisuClientFileConfiguration{
+	private HashMap<String,String> commonProperties = new HashMap<String,String>();
+	private HashMap<String,String> jobProperties    = new HashMap<String,String>();
+	
+
+	public DefaultConfiguration(){
+		commonProperties.put("serviceInterfaceUrl","https://ngportal.vpac.org/grisu-ws/services/grisu");
+	}
+
+	public String getCommonOption(String key){
+		return commonProperties.get(key);
+	}
+
+	public String getJobOption(String key){
+		return jobProperties.get(key);
 	}
 }

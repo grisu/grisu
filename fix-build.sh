@@ -31,10 +31,11 @@ cd ..
 mkdir cmdline
 cd cmdline
 unzip -o ../grisu-0.2-beta-SNAPSHOT-gricli.jar
-rm ../grisu-0.2-beta-SNAPSHOT-gricli.jar
-rm -f META-INF/INDEX.LIST
+#rm ../grisu-0.2-beta-SNAPSHOT-gricli.jar
+#rm -f META-INF/INDEX.LIST
 cp ../../frontend/gricli/src/main/resources/log4j.properties .
-jar cmf ../../frontend/gricli/MANIFEST.MF ../gricli.jar .
+cp ../../frontend/gricli/MANIFEST.MF META-INF/
+jar -cf  ../gricli.jar .
 cd ..
 #jar -i grisu-client.jar
 
