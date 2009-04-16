@@ -1,5 +1,5 @@
 <assembly>
-	<id>grisu-client-commandline</id>
+	<id>gricli</id>
 	<formats>
 <!--				<format>dir</format>-->
 		<!--		<format>zip</format>-->
