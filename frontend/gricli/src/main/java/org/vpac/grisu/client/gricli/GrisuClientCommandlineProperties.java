@@ -316,11 +316,11 @@ public class GrisuClientCommandlineProperties implements GrisuClientProperties {
 			System.exit(1);
 		}*/
 
-		if (!line.hasOption(CommandlineProperties.CPUS_OPTION)) {
+		/* if (!line.hasOption(CommandlineProperties.CPUS_OPTION)) {
 			System.err.println("Please specify the number of cpus.");
 			formatter.printHelp("grisu-client", this.options);
 			System.exit(1);
-		}
+		} */
 
 		if (!line.hasOption(CommandlineProperties.INPUTFILEPATH_OPTION)) {
 			myLogger.debug("No input files to stage for this job.");
