@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Arrays;
 import java.util.Date;
 
 import javax.swing.JDialog;
@@ -24,6 +25,7 @@ import javax.swing.UIManager;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.files.FileManagerDeleteHelpers;
@@ -528,6 +530,11 @@ public class Grisu {
 	 * Launches this application
 	 */
 	public static void main(String[] args) {
+		
+		if ( args.length > 0 && Arrays.binarySearch(args, "--debug") >= 0 ) {
+			Level lvl = Level.toLevel("debug");
+			Logger.getRootLogger().setLevel(lvl);
+		} 
 
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
