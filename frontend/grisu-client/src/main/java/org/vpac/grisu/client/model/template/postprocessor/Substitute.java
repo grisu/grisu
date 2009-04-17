@@ -41,7 +41,7 @@ public class Substitute extends ElementPostprocessor {
 	public static final String BASENAME_RELATIVE_TO_EXECUTION_HOST_FS_KEY = "basenameRelativeToExecutionHostFs";
 	public static final String PREFIX_KEY = "prefix";
 	public static final String BASENAMEPREFIX_KEY = "basenameprefix";
-	public static final String FILEEXTENSION_KEY = "changeextension";
+	public static final String FILEEXTENSION_KEY = "basenamechangeextension";
 	public static final String NAME_KEY = "name";
 
 	public static final String SUBSTITUTE_VARIABLE_ATTRIBUTE_NAME = "substitute"; 

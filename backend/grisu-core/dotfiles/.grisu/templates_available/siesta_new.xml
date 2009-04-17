@@ -62,7 +62,7 @@
 				<!-- 	The name of the standard input file. -->
 				<Input substitute="STDINPUTFILE[basename]"> </Input>
 				<!-- 	The name of the standard output file. -->
-				<Output title="Please enter the name of your SIESTA output file (.sot)" name="B_Outputfile" other="hideDescription,combobox,useHistory" template="InputString"> </Output>
+				<Output substitute="STDINPUTFILE[basenamechangeextension:(sot)]"> </Output>
 				<!--  	The name of the standard error file. -->
 				<Error>stderr.txt</Error>
 				<!-- 	loads the module needed for a namd job -->
@@ -116,7 +116,7 @@
 				<URI template="InputFile" name="A_Siesta_StdInputFile"
 					title="Please select your SIESTA input file (.fdf)"
 					multiplicity="1"
-					other="render=combobox,useHistory,lastDirectory"
+					other="render=combobox,useHistory"
 					postprocess="FillDataStagingFileNameElement,Substitute[name=STDINPUTFILE]" />
 			</Source>
 			</DataStaging>
@@ -124,7 +124,7 @@
 			<FileName></FileName>
 			<FileSystemName>userExecutionHostFs</FileSystemName>
 			<Source>
-				<URI title="Files to upload for SIESTA job - eg. fdf, psf, vsp, DM, CG, XV etc." multiplicity="*" name="OptionalFiles" postprocess="FillDataStagingFileNameElement" template="MultipleInputFiles"  validator="InputFile" other="hideDescription" ></URI>
+				<URI title="Files to include with SIESTA input file - eg. psf, vsp, DM, CG, XV etc." multiplicity="*" name="OptionalFiles" postprocess="FillDataStagingFileNameElement" template="MultipleInputFiles"  validator="InputFile" other="hideDescription" ></URI>
 				<!--<URI title="Files to upload for SIESTA job - include fdf, psf, vsp, DM, CG, XV etc." multiplicity="*" name="OptionalFiles" other="directoryKey=NAMD" postprocess="FillDataStagingFileNameElement" template="MultipleInputFiles"  validator="InputFile"></URI>-->
 			</Source>
 		</DataStaging>

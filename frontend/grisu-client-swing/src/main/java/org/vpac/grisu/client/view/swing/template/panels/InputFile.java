@@ -21,7 +21,8 @@ public class InputFile extends AbstractInputPanel implements FileChooserParent {
 	 */
 	private static final long serialVersionUID = 3419432754281441114L;
 	public static final String DEFAULT_LAST_DIRECTORY_VALUE = "globalLastDirectory";
-	public static final String LAST_DIRECTORY_KEY = "directoryKey";
+	public static final String LAST_DIRECTORY_KEY = null;
+	private static final String GLOBAL_TEMP_DIRECTORY_KEY = "globalTempLastDirectory";
 
 	private String renderMode = null;
 
@@ -55,10 +56,12 @@ public class InputFile extends AbstractInputPanel implements FileChooserParent {
 			if ( TemplateNode.NON_MAP_PARAMETER.equals(this.templateNode.getOtherProperty(LAST_DIRECTORY_KEY)) ) {
 				lastDirectoryKey = DEFAULT_LAST_DIRECTORY_VALUE;
 			} else {
-			lastDirectoryKey = this.templateNode
+				lastDirectoryKey = this.templateNode
 					.getOtherProperty(LAST_DIRECTORY_KEY)
 					+ "_dirKey";
 			}
+		} else {
+			lastDirectoryKey = null;
 		}
 
 		try {
@@ -110,9 +113,15 @@ public class InputFile extends AbstractInputPanel implements FileChooserParent {
 
 			// change to appropriate directory
 			try {
-				changeToDirectory = historyManager.getEntries(lastDirectoryKey)
-						.get(0);
+				
 				URI uri = null;
+				if ( lastDirectoryKey == null ) {
+					uri = new File(System.getProperty("user.home")).toURI();
+				} else {
+				
+					changeToDirectory = historyManager.getEntries(lastDirectoryKey)
+						.get(0);
+				
 				try {
 					uri = new URI(changeToDirectory);
 				
@@ -122,6 +131,7 @@ public class InputFile extends AbstractInputPanel implements FileChooserParent {
 
 				} catch (Exception uriE) {
 					uri = new File(System.getProperty("user.home")).toURI();
+				}
 				}
 
 				GrisuFileObject dir = templateNode.getTemplate()
@@ -140,6 +150,10 @@ public class InputFile extends AbstractInputPanel implements FileChooserParent {
 			try {
 				GrisuFileObject dir = getSiteFileChooserDialog()
 						.getCurrentDirectory();
+				if ( lastDirectoryKey == null ) {
+					// to store until button gets pressed again
+					lastDirectoryKey = GLOBAL_TEMP_DIRECTORY_KEY;
+				}
 				historyManager.addHistoryEntry(lastDirectoryKey, dir.getURI()
 						.toString(), new Date(), 1);
 			} catch (Exception e) {

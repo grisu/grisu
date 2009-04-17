@@ -74,7 +74,7 @@ public class MultipleInputFiles extends JPanel implements TemplateNodePanel,
 	 */
 	public MultipleInputFiles() {
 		super();
-		setPreferredSize(new Dimension(400, 400));
+		setPreferredSize(new Dimension(400, 320));
 		setMinimumSize(new Dimension(0, 700));
 		layout = new FormLayout(
 			new ColumnSpec[] {
@@ -138,7 +138,7 @@ public class MultipleInputFiles extends JPanel implements TemplateNodePanel,
 					.getOtherProperty(InputFile.LAST_DIRECTORY_KEY)
 					+ "_dirKey";
 		} else {
-			lastDirectoryKey = InputFile.DEFAULT_LAST_DIRECTORY_VALUE;
+			lastDirectoryKey = null;
 		}
 
 		// try to change to the last used directory

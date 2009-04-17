@@ -70,7 +70,7 @@
 				<!-- 	The name of the standard input file. -->
 				<Input substitute="STDINPUTFILE[basename]"> </Input>
 				<!-- 	The name of the standard output file. -->
-				<Output substitute="STDINPUTFILE[changeextension:(got)]" > </Output>
+				<Output substitute="STDINPUTFILE[basenamechangeextension:(got)]" > </Output>
 				<!--  	The name of the standard error file. -->
 				<Error>stderr.txt</Error>
 				<!-- 	loads the module needed for a namd job -->
@@ -124,7 +124,7 @@
 				<URI template="InputFile" name="A_Gulp_StdInputFile"
 					title="Please select your GULP input file (.gin)"
 					multiplicity="1"
-					other="render=combobox,useHistory,lastDirectory"
+					other="render=combobox,useHistory"
 					postprocess="FillDataStagingFileNameElement,Substitute[name=STDINPUTFILE]" />
 			</Source>
 			</DataStaging>
@@ -132,7 +132,7 @@
 			<FileName></FileName>
 			<FileSystemName>userExecutionHostFs</FileSystemName>
 			<Source>
-				<URI description="All the other files you want to stage into the job directory." multiplicity="*" name="OptionalFiles" other="hideDescription" postprocess="FillDataStagingFileNameElement" template="MultipleInputFiles" title="Add here any additonal files for the GULP calculation - eg. restart files" validator="InputFile"></URI>
+				<URI description="All the other files you want to stage into the job directory." multiplicity="*" name="OptionalFiles" other="hideDescription" postprocess="FillDataStagingFileNameElement" template="MultipleInputFiles" title="Files to include with GULP input file - eg. restart files" validator="InputFile"></URI>
 			</Source>
 		</DataStaging>
 
