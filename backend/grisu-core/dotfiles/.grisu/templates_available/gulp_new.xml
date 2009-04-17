@@ -70,7 +70,7 @@
 				<!-- 	The name of the standard input file. -->
 				<Input substitute="STDINPUTFILE[basename]"> </Input>
 				<!-- 	The name of the standard output file. -->
-				<Output title="Please enter the name of your GULP output file (.got)" name="B_Gulp_outputfile" other="hideDescription,combobox,useHistory" template="InputString"> </Output>
+				<Output substitute="STDINPUTFILE[changeextension:(got)]" > </Output>
 				<!--  	The name of the standard error file. -->
 				<Error>stderr.txt</Error>
 				<!-- 	loads the module needed for a namd job -->

@@ -41,6 +41,7 @@ public class Substitute extends ElementPostprocessor {
 	public static final String BASENAME_RELATIVE_TO_EXECUTION_HOST_FS_KEY = "basenameRelativeToExecutionHostFs";
 	public static final String PREFIX_KEY = "prefix";
 	public static final String BASENAMEPREFIX_KEY = "basenameprefix";
+	public static final String FILEEXTENSION_KEY = "changeextension";
 	public static final String NAME_KEY = "name";
 
 	public static final String SUBSTITUTE_VARIABLE_ATTRIBUTE_NAME = "substitute"; 
@@ -168,7 +169,18 @@ public class Substitute extends ElementPostprocessor {
 			String prefixed = prefix+basename;
 			return prefixed;
 			
-		} else {
+		} if ( config.startsWith(FILEEXTENSION_KEY) ) {
+			
+			String basename = basename(replacement);
+			
+			int start = config.indexOf("(");
+			int end = config.lastIndexOf(")");
+			String extension = config.substring(start+1, end);
+			
+			String base_basename = basename.substring(0, basename.lastIndexOf("."));
+			return base_basename+"."+extension;
+			
+		}else {
 			// do nothing
 			myLogger.debug("Could not find config for replacement. Not replaceing anything.");
 			return replacement;
