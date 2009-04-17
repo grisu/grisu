@@ -6,9 +6,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
+import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -27,6 +31,8 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.jfree.ui.about.AboutDialog;
+import org.jfree.ui.about.ProjectInfo;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.files.FileManagerDeleteHelpers;
 import org.vpac.grisu.client.control.files.FileManagerTransferHelpers;
@@ -54,6 +60,8 @@ public class Grisu {
 
 	static final Logger myLogger = Logger.getLogger(Grisu.class.getName());
 	
+	public static final String apache2License = "http://www.apache.org/licenses/LICENSE-2.0";
+
     public static final String GRISU_VERSION = "v0.2-rc";
     
     public static final String[] DEFAULT_HELPDESK_CLASSES = new String[]{"org.vpac.helpDesk.model.anonymousRT.AnonymousRTHelpDesk", "org.vpac.helpDesk.model.trac.TracHelpDesk"};
@@ -83,7 +91,7 @@ public class Grisu {
 
 	private JMenuItem mountsMenuItem = null;
 
-	private JDialog aboutDialog = null; // @jve:decl-index=0:visual-constraint="739,169"
+	private AboutDialog aboutDialog = null; // @jve:decl-index=0:visual-constraint="739,169"
 
 	private MountPointsManagementDialog mountsDialog = null;
 
@@ -388,9 +396,19 @@ public class Grisu {
 	 */
 	private JDialog getAboutDialog() {
 		if (aboutDialog == null) {
-			aboutDialog = new JDialog(getJFrame(), true);
-			aboutDialog.setTitle("About");
-			aboutDialog.setContentPane(getAboutContentPane());
+
+			List<String> contributors = new LinkedList<String>();
+			contributors.add("Markus Binsteiner");
+
+			URL picURL = getClass().getResource("/images/ARCS_LogoTag_even_smaller.jpg");
+			ImageIcon grisu = new ImageIcon(picURL);
+
+			ProjectInfo info = new ProjectInfo("Grisu", GRISU_VERSION, "The Grisu Swing client.",
+					grisu.getImage(), "ARCS", "Apache2", apache2License);
+
+			
+			aboutDialog = new AboutDialog(getJFrame(), "Grisu", info);
+			
 		}
 		return aboutDialog;
 	}
@@ -645,4 +663,6 @@ public class Grisu {
 		});
 	}
 
+	
+	
 }

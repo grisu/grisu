@@ -1,5 +1,3 @@
-
-
 package org.vpac.grisu.client.view.swing.login;
 
 import java.awt.BorderLayout;
