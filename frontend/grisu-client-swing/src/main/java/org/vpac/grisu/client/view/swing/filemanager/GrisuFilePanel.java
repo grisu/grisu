@@ -1,5 +1,3 @@
-
-
 package org.vpac.grisu.client.view.swing.filemanager;
 
 import java.awt.BorderLayout;
@@ -10,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -19,8 +18,8 @@ import javax.swing.JSplitPane;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.files.FileTransfer;
-import org.vpac.grisu.client.model.files.GrisuFileObject;
 import org.vpac.grisu.client.model.files.FileConstants;
+import org.vpac.grisu.client.model.files.GrisuFileObject;
 import org.vpac.grisu.client.view.swing.files.FileChooserEvent;
 import org.vpac.grisu.client.view.swing.files.FileChooserParent;
 import org.vpac.grisu.client.view.swing.files.SiteFileChooserPanel;
@@ -63,6 +62,9 @@ public class GrisuFilePanel extends JPanel implements FileChooserParent {
 		setLayout(new BorderLayout());
 		add(getSplitPane());
 		//
+		GrisuFileObject defaultFile = em.getFileManager().getFileObject(new File(System.getProperty("user.home")).toURI());
+		getLeftSiteFileChooserPanel().changeCurrentDirectory(defaultFile);
+		getRightSiteFileChooserPanel().changeCurrentDirectory(defaultFile);
 	}
 	protected JSplitPane getSplitPane() {
 		if (splitPane == null) {
@@ -79,13 +81,13 @@ public class GrisuFilePanel extends JPanel implements FileChooserParent {
 			leftPanel.setLayout(new FormLayout(
 				new ColumnSpec[] {
 					FormFactory.RELATED_GAP_COLSPEC,
-					new ColumnSpec("18dlu"),
+					ColumnSpec.decode("18dlu"),
 					FormFactory.RELATED_GAP_COLSPEC,
-					new ColumnSpec("94dlu:grow(1.0)"),
+					ColumnSpec.decode("94dlu:grow(1.0)"),
 					FormFactory.RELATED_GAP_COLSPEC},
 				new RowSpec[] {
 					FormFactory.RELATED_GAP_ROWSPEC,
-					new RowSpec("default:grow(1.0)"),
+					RowSpec.decode("default:grow(1.0)"),
 					FormFactory.RELATED_GAP_ROWSPEC,
 					FormFactory.DEFAULT_ROWSPEC,
 					FormFactory.RELATED_GAP_ROWSPEC}));
@@ -100,13 +102,13 @@ public class GrisuFilePanel extends JPanel implements FileChooserParent {
 			righPanel.setLayout(new FormLayout(
 				new ColumnSpec[] {
 					FormFactory.RELATED_GAP_COLSPEC,
-					new ColumnSpec("40dlu:grow(1.0)"),
+					ColumnSpec.decode("40dlu:grow(1.0)"),
 					FormFactory.RELATED_GAP_COLSPEC,
-					new ColumnSpec("75dlu"),
+					ColumnSpec.decode("75dlu"),
 					FormFactory.RELATED_GAP_COLSPEC},
 				new RowSpec[] {
 					FormFactory.RELATED_GAP_ROWSPEC,
-					new RowSpec("default:grow(1.0)"),
+					RowSpec.decode("default:grow(1.0)"),
 					FormFactory.RELATED_GAP_ROWSPEC,
 					FormFactory.DEFAULT_ROWSPEC,
 					FormFactory.RELATED_GAP_ROWSPEC}));
