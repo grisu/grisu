@@ -1,7 +1,9 @@
 package org.vpac.grisu.client.view.swing.mainPanel;
 
+import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -120,6 +122,7 @@ public class Grisu {
 	private JFrame getJFrame() {
 		if (jFrame == null) {
 			jFrame = new JFrame();
+			jFrame.setName("GrisuMainWindow");
 			jFrame.setSize(740, 640);
 			jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			jFrame.setJMenuBar(getJJMenuBar());
@@ -230,6 +233,7 @@ public class Grisu {
 			exitMenuItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					serviceInterface.logout();
+					WindowSaver.saveSettings();
 					System.exit(0);
 				}
 			});
@@ -556,6 +560,11 @@ public class Grisu {
 
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
+				
+				 Toolkit tk = Toolkit.getDefaultToolkit( );
+			      tk.addAWTEventListener(WindowSaver.getInstance( ),
+			          AWTEvent.WINDOW_EVENT_MASK);
+
 				try {
 					UIManager.setLookAndFeel(UIManager
 							.getSystemLookAndFeelClassName());

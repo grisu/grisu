@@ -44,6 +44,8 @@ public class MultipleInputFiles extends JPanel implements TemplateNodePanel,
 	static final Logger myLogger = Logger.getLogger(MultipleInputFiles.class
 			.getName());
 	
+	private static final String NON_DIRECTORY_KEY="non-directory";
+	
 	private JTextArea textArea;
 	private JScrollPane scrollPane_1;
 	private JLabel errorLabel;
@@ -138,7 +140,7 @@ public class MultipleInputFiles extends JPanel implements TemplateNodePanel,
 					.getOtherProperty(InputFile.LAST_DIRECTORY_KEY)
 					+ "_dirKey";
 		} else {
-			lastDirectoryKey = null;
+			lastDirectoryKey = NON_DIRECTORY_KEY;
 		}
 
 		// try to change to the last used directory
@@ -146,7 +148,7 @@ public class MultipleInputFiles extends JPanel implements TemplateNodePanel,
 
 		// change to appropriate directory
 		try {
-			if ( lastDirectoryKey == null ) {
+			if ( lastDirectoryKey == null || NON_DIRECTORY_KEY.equals(lastDirectoryKey)) {
 				changeToDirectory = System.getProperty("user.home");
 			} else {
 			changeToDirectory = historyManager.getEntries(lastDirectoryKey)
