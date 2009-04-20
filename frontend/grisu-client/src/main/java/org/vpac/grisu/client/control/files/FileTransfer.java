@@ -152,12 +152,13 @@ public class FileTransfer {
 		transferThread.start();
 		
 		if ( join ) {
-			try {
-				transferThread.join();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+
+				try {
+					transferThread.join();
+				} catch (InterruptedException e) {
+					throw new FileTransferException("Transfer interrupted...");
+				}
+
 		}
 	}
 	
