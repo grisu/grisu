@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Date;
@@ -58,7 +59,7 @@ import org.vpac.helpDesk.view.TicketSubmissionDialogMultipleHelpdesks;
 import org.vpac.security.light.control.CertificateFiles;
 
 
-public class Grisu {
+public class Grisu implements WindowListener {
 
 	static final Logger myLogger = Logger.getLogger(Grisu.class.getName());
 	
@@ -129,9 +130,11 @@ public class Grisu {
 			jFrame.setContentPane(getJContentPane());
 			jFrame.setTitle("Grisu client");
 			jFrame.setLocationByPlatform(true);
+			jFrame.addWindowListener(this);
 		}
 		return jFrame;
 	}
+	
 
 	/**
 	 * This method initializes jContentPane
@@ -232,13 +235,17 @@ public class Grisu {
 			exitMenuItem.setText("Exit");
 			exitMenuItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					serviceInterface.logout();
-					WindowSaver.saveSettings();
-					System.exit(0);
+					exit();
 				}
 			});
 		}
 		return exitMenuItem;
+	}
+	
+	private void exit() {
+		serviceInterface.logout();
+		WindowSaver.saveSettings();
+		System.exit(0);
 	}
 	
 	/**
@@ -670,6 +677,45 @@ public class Grisu {
 
 			}
 		});
+	}
+
+
+	public void windowActivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public void windowClosed(WindowEvent e) {
+	}
+
+
+	public void windowClosing(WindowEvent e) {
+		exit();
+	}
+
+
+	public void windowDeactivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public void windowDeiconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public void windowIconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public void windowOpened(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	
