@@ -21,6 +21,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.MatteBorder;
 import javax.swing.border.TitledBorder;
 
 import org.apache.log4j.Logger;
@@ -457,7 +459,8 @@ abstract class AbstractInputPanel extends JPanel implements TemplateNodePanel {
 	protected JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
-			scrollPane.setBorder(new BevelBorder(BevelBorder.LOWERED));
+			scrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
+			scrollPane.setBackground(UIManager.getColor("Panel.background"));
 			scrollPane.setViewportView(getTextArea());
 		}
 		return scrollPane;
@@ -468,9 +471,11 @@ abstract class AbstractInputPanel extends JPanel implements TemplateNodePanel {
 	protected JTextArea getTextArea() {
 		if (textArea == null) {
 			textArea = new JTextArea();
+			textArea.setBorder(new EmptyBorder(0, 0, 0, 0));
+			textArea.setOpaque(false);
 			textArea.setMinimumSize(new Dimension(100, 0));
 			textArea.setWrapStyleWord(true);
-			textArea.setBackground(UIManager.getColor("Label.background"));
+			textArea.setBackground(UIManager.getColor("Panel.background"));
 			textArea.setMargin(new Insets(5,7,5,7));
 			textArea.setLineWrap(true);
 			textArea.setEditable(false);

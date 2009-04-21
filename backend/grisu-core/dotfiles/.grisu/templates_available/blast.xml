@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
+
+	<JobDescription grisu_modules="GenericMDS">
+	
+		<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
+			<Email 	template="Email" 
+					   	name="EmailAddress"
+						description="The email address to send an email to if the job status changes."
+						multiplicity="?" 
+						other="useLastValue" />
+		</GrisuTemplate>
+	
+		<JobIdentification>
+
+			<JobName 	template="JobName" 
+						name="Jobname"
+						description="The name of the job." 
+						defaultValue="blast_job" 
+						other="autosuggest,nosuggestbutton" />
+
+		</JobIdentification>
+		
+		<Application>
+
+			<ApplicationName>blast</ApplicationName>
+			<ApplicationVersion template="Version" name="Version" description="The version of blast" other="useAny,useExact"></ApplicationVersion>
+			<POSIXApplication
+				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
+				
+
+				<Executable template="CommandLine"
+						    name="Commandline"
+						    description="The command you want to run"
+							other="useHistory,historyKey=blast_exe"
+				/>
+
+				<WorkingDirectory
+					postprocess="FillWithJobDirectoryRelativeToExecutionFileSystem"
+					filesystemName="userExecutionHostFs" />
+					
+				<!-- 	The name of the standard output file. -->
+				<Output>stdout.txt</Output>
+				<!--  	The name of the standard error file. -->
+				<Error>stderr.txt</Error>
+
+			</POSIXApplication>
+			
+			<TotalCPUTime template="InputInteger" name="Walltime"
+				description="The total cpu time in seconds."
+				multiplicity="1" defaultValue="600" 
+				postprocess="TimesNoCPUs"
+			/>
+
+			<TotalCPUCount template="InputInteger" name="CPUs"
+				description="How many CPUs do you want to use to run this job."
+				multiplicity="1" defaultValue="1" prefills="1,2,4,8" />
+				
+			<TotalPhysicalMemory> 
+				<LowerBoundedRange postprocess="ConvertToBytes" defaultValue="0" description="The minimum amount of memory in mb for this job." multiplicity="1" name="MinMem" prefills="0,1024,2048,4096" template="InputInteger"> </LowerBoundedRange>
+			</TotalPhysicalMemory>
+
+		</Application>
+		<Resources>
+			<CandidateHosts>
+
+				<HostName template="InputString" name="HostName"
+					description="Where do you want to submit the job to?"
+					multiplicity="1" 
+					other="allQueues"				
+				/>
+
+			</CandidateHosts>
+
+			<FileSystem name="userExecutionHostFs">
+				<MountSource template="InputString"
+					name="ExecutionFileSystem" multiplicity="1" />
+
+				<FileSystemType>normal</FileSystemType>
+			</FileSystem>
+		</Resources>
+		<!--  The following DataStaging element -->
+		<DataStaging>
+			<FileName />
+			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<Source>
+
+				<URI template="MultipleInputFiles" name="InputFiles"
+					title="Input files"
+					description="Provide at least one input file here."
+					multiplicity="?" postprocess="FillDataStagingFileNameElement"
+					validator="InputFile" />
+
+			</Source>
+		</DataStaging>
+	</JobDescription>
+</JobDefinition>
