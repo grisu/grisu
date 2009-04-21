@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
+
+	<!-- 	Only the "Common" module is used here. It is recommended that you always
+	   		use the "Common" module because it is very unintuitive if the parameters 
+	   		it encapsulates have to be put in by hand. These parameters are:
+	   			* Jobname
+				* Walltime
+				* CPUs
+				* HostName
+				* ExecutionFileSystem
+				* EmailAddress 
+						
+			When using a module, you have to use which so called template nodes are used 
+			by it. And you have to know what names the module expects for these nodes.
+			If one or more of these names are not available in the template, the module is 
+			not used at all and all the template nodes that it normally would use are
+			given to the "Rest" module, which is automatically created everytime one or
+			more template nodes of a template are not claimed by a module.
+	-->
+	<JobDescription grisu_modules="Common">
+		<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
+			<!-- 	This element renders a checkbox and a textfield and lets the user 
+				choose whether he wants to get notification when the job is finished 
+				or not.If no defaultValue is provided and the other attribute contains "useLastValue"
+				then the last state of the checkbox & email address is used.
+			-->
+			<Email description="The email address to send an email to if the job status changes." multiplicity="?" name="EmailAddress" other="useLastValue" sendOnJobFinish="true" sendOnJobStart="true" template="Email"/>
+		</GrisuTemplate>
+	
+		<JobIdentification>
+			<!-- The JobName template type renders a panel that is kind of 
+				 smart about which jobnames already exist and can suggest or automatically
+				 fill in appropriate jobnames according to the user-input/defaultValue that
+				 is set.
+		    -->
+			<JobName defaultValue="underworld_job" description="The name of the job." name="Jobname" other="autosuggest,nosuggestbutton" template="JobName"/>
+		</JobIdentification>
+		
+		<Application>
+			<!-- 	The ApplicationName is a generic name for an application. It does not
+				 	contain the path or anything else. This name could be used by mds to figure
+				 	out where the application is supported.
+				 	It is also used by Grisu to determine whether an application-specific viewer 
+				 	panel for this application exists so if you want to use one of these then you
+				 	need to know what the name is that Grisu expects.
+			-->
+			<ApplicationName>underworld</ApplicationName>
+			<Description>
+				Underworld (http://www.underworldproject.org/) is a 3D-parallel geodynamic modelling framework
+				capable of deriving viscous / viscoplastic thermal, chemical and thermochemical models consistent
+				with tectonic processes, such as mantle convection and lithospheric deformation over long time scales.
+				Underworld utilises a Lagrangian particle-in-cell finite element scheme (the prototype of which is 
+				the Ellipsis code), and is visualised using gLucifer. The Underworld source code is written in C in 
+				an Object Oriented style, following the methodology of design for change applied to computational 
+				codes implemented in StGermain (http://www.stgermainproject.org/). It uses PETSc 
+				(http://www-unix.mcs.anl.gov/petsc) (optimised numerical solvers) and MPI (parallelism) libraries. 
+				The Underworld to StGermain software stack is released under a mixture of BSD and LGPL licenses. 
+				Underworld is under collaborative development by Monash University (http://www.monash.edu.au/) and 
+				the VPAC (http://www.vpac.org/), as part of the NCRIS AuScope capabilty in the Simulation and 
+				Modelling Victoria (http://www.auscope.monash.edu.au/) program. 
+			</Description>
+			<POSIXApplication xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
+				
+				<!-- 	The path to the executable. If you load a module you may not need the
+						path and the name of the executable is enough.
+				-->
+				<Executable>Underworld</Executable>
+				<!--    Optional additional commandline arguments -->
+				<Argument template="MultipleInputString" multiplicity="*" name="Additional Command(s) (optional)" description="Enter any additional commands in this field (otherwise leave blank)" other="render=combobox,useHistory"/>
+				<!-- 	The substitute attribute tags the enclosing element so that Grisu knows when 
+						it gets a "Substitute" postprocessor instruction to replace the value of this
+						element with the value of the postprocessors parent element. It is possible
+						to further postprocess this value, which can be specified between the [ ] after the
+						substitute variable name. basename, for example, shortens the whole path with
+						the basename. -->
+				<Argument substitute="INPUT_FILE1[basename]"/>
+				<!-- 	This element contains the working directory of the job relative to the
+						mountpoint root folder of the user for this job. The grisu core element
+						converts it to be relative to the cluster home directory later.
+						In most cases you would leave that as it is.
+				-->
+				<WorkingDirectory filesystemName="userExecutionHostFs" postprocess="FillWithJobDirectoryRelativeToExecutionFileSystem"/>
+				<!-- 	The name of the standard output file. -->
+				<Output>stdout.txt</Output>
+				<!--  	The name of the standard error file. -->
+				<Error>stderr.txt</Error>
+				<!--	The name of the module. -->
+				<Module description="The module to load" multiplicity="?" name="Module" template="InputString"/>
+			</POSIXApplication>
+			<!-- The total cpu time in seconds. Since the jsdl standard uses this instead
+				 of the concept of walltime we know we need to multiply this value with
+				 the amount of cpus (which the postprocess instruction does). 
+		  	-->
+			<TotalCPUTime defaultValue="600" description="The total cpu time in seconds." multiplicity="1" name="Walltime" postprocess="TimesNoCPUs" template="InputInteger"/>
+			<TotalCPUCount>
+				<exact defaultValue="1" description="How many CPUs do you want to use to run this job." multiplicity="1" name="CPUs" prefills="1,2,4,8" template="InputInteger"/>
+			</TotalCPUCount>
+		</Application>
+
+		<Resources>
+			<CandidateHosts>
+				<!-- The following two nodes depend on each other. You can't submit a job to the host specified
+					 by "HostName" and stage the files into a filesystem "userExecutionHostFs" that is at a 
+					 different site. The module "Common" should take care of that so just leave the following
+					 two nodes as they are. If you are not using the "Common" module, you need to make sure that
+					 the input is correct.
+				-->
+				<HostName description="Where do you want to submit the job to?" multiplicity="1" name="HostName" template="InputString"/>
+			</CandidateHosts>
+			<!--  It is recommended to always use "userExecutionHostFs" as the filesystem alias for the filesystem you
+				  are actually using to stage the input files. The value of this node is the root url of a mountpoing, 
+				  for example: gsiftp://ngdata.vpac.org/home/grid-admin/<USER_DN>.
+				  The grisu backend does all calculating of where that directory actually is relative to the cluster
+				  home directory of the user the job gets run as locally. -->
+			<FileSystem name="userExecutionHostFs">
+				<MountSource multiplicity="1" name="ExecutionFileSystem" template="InputString"/>
+				<FileSystemType>normal</FileSystemType>
+			</FileSystem>
+		</Resources>
+
+		<!--  The following DataStaging element -->
+		<!-- InputFile renders a textfield with a browse button to the left. When the user clicks the
+			browse button a file chooser dialog with all of the users' mounted filesystems is opened
+			which enables the user to select an input file.
+			
+			The postprocess instructions tell Grisu to first fill the above "FileName" field with the
+			location/name of the staged file and then fill all elements that have got a
+			'substitute="INPUT_FILE1"' tag.
+
+			For a more detailed description or for description on other TemplateNodes that can be used have a look
+			at "http://www.grid.apac.edu.au/repository/trac/grisu/wiki/GrisuTemplates".
+		-->
+		<DataStaging>
+			<FileName/>
+			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<Source>
+				<URI multiplicity="1" name="InputFile1" other="render=combobox,useHistory,hideDescription,directoryKey=underworld" postprocess="FillDataStagingFileNameElement,Substitute[name=INPUT_FILE1]" template="UnderworldInputFile" title="InputFile" validator="InputFile"/>
+			</Source>
+		</DataStaging>
+		<DataStaging>
+			<FileName/>
+			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<Source>
+				<URI description="Select files one-by-one or by whole subdirectory" multiplicity="*" name="OptionalFiles" other="directoryKey=underworld" postprocess="FillDataStagingFileNameElement" template="MultipleInputFiles" title="Additional File(s) (optional)" validator="InputFile">
+				</URI>
+
+			</Source>
+		</DataStaging>
+	</JobDescription>
+</JobDefinition>

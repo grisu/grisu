@@ -186,7 +186,7 @@ public class TemplateNode {
 		return possibleProcessingException;
 	}
 	
-	public void reset() throws TemplatePreProcessorException {
+	public void reset() {
 		
 		fireTemplateNodeEvent(null, TemplateNodeEvent.RESET);
 		if (preprocessor == null) {
@@ -195,14 +195,14 @@ public class TemplateNode {
 		} else {
 			myLogger.debug("Preprocessor found for type " + this.getType()
 					+ ". Starting to cleanup.");
-			try {
+//			try {
 				preprocessor.reset();
-			} catch (TemplatePreProcessorException tpe) {
-				fireTemplateNodeEvent("Error processing input: "
-						+ tpe.getLocalizedMessage(),
-						TemplateNodeEvent.TEMPLATE_PROCESSED_INVALID);
-				throw tpe;
-			}
+//			} catch (TemplatePreProcessorException tpe) {
+//				fireTemplateNodeEvent("Error processing input: "
+//						+ tpe.getLocalizedMessage(),
+//						TemplateNodeEvent.TEMPLATE_PROCESSED_INVALID);
+//				throw tpe;
+//			}
 			myLogger.debug("Cleaning up successful.");
 		}
 	}

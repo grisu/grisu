@@ -78,7 +78,7 @@ public class InputFile extends TemplatePreProcessor {
 	}
 
 	@Override
-	protected void resetTemplateNode() throws TemplatePreProcessorException {
+	protected void resetTemplateNode() {
 		// nothing to do here
 	}
 

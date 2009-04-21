@@ -247,57 +247,57 @@ abstract class AbstractServiceInterface implements ServiceInterface {
 //				createJobNameMethod);
 //	}
 	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.vpac.grisu.control.ServiceInterface#createJob(org.w3c.dom.Document,
-	 *      int)
-	 */
-	public String createJob(Document jsdl, int createJobNameMethod)
-			throws JobDescriptionNotValidException, JobCreationException {
-
-		Job job = null;
-		String jobname = JsdlHelpers.getJobname(jsdl);
-
-		// this throws a JobCreationException if necessary
-		String newJobname = JobNameManager.getJobname(getUser().getDn(),
-				jobname, createJobNameMethod);
-
-		if (!jobname.equals(newJobname)) {
-			try {
-				JsdlHelpers.setJobname(jsdl, newJobname);
-			} catch (XPathExpressionException e) {
-				throw new JobCreationException("Could not create job: "
-						+ e.getLocalizedMessage());
-			}
-		}
-
-		try {
-			job = new Job(getCredential().getDn(), jsdl);
-		} catch (XPathExpressionException e) {
-			throw new JobDescriptionNotValidException(
-					"Could not calculate the jobname for the job: "
-							+ e.getMessage());
-		} catch (SAXException e1) {
-			throw new JobDescriptionNotValidException(
-					"Job description is not valid: " + e1.getMessage());
-		}
-
-		// check again whether there is not a job with this jobname in the
-		// database
-		try {
-			Job testJob = getJob(job.getJobname());
-			throw new JobCreationException(
-					"Could not save job in database: jobname already taken.");
-		} catch (NoSuchJobException e) {
-			// good.
-		}
-
-		job.setStatus(JobConstants.JOB_CREATED);
-		jobdao.save(job);
-
-		return job.getJobname();
-	}
+//	/*
+//	 * (non-Javadoc)
+//	 * 
+//	 * @see org.vpac.grisu.control.ServiceInterface#createJob(org.w3c.dom.Document,
+//	 *      int)
+//	 */
+//	public String createJob(Document jsdl, int createJobNameMethod)
+//			throws JobDescriptionNotValidException, JobCreationException {
+//
+//		Job job = null;
+//		String jobname = JsdlHelpers.getJobname(jsdl);
+//
+//		// this throws a JobCreationException if necessary
+//		String newJobname = JobNameManager.getJobname(getUser().getDn(),
+//				jobname, createJobNameMethod);
+//
+//		if (!jobname.equals(newJobname)) {
+//			try {
+//				JsdlHelpers.setJobname(jsdl, newJobname);
+//			} catch (XPathExpressionException e) {
+//				throw new JobCreationException("Could not create job: "
+//						+ e.getLocalizedMessage());
+//			}
+//		}
+//
+//		try {
+//			job = new Job(getCredential().getDn(), jsdl);
+//		} catch (XPathExpressionException e) {
+//			throw new JobDescriptionNotValidException(
+//					"Could not calculate the jobname for the job: "
+//							+ e.getMessage());
+//		} catch (SAXException e1) {
+//			throw new JobDescriptionNotValidException(
+//					"Job description is not valid: " + e1.getMessage());
+//		}
+//
+//		// check again whether there is not a job with this jobname in the
+//		// database
+//		try {
+//			Job testJob = getJob(job.getJobname());
+//			throw new JobCreationException(
+//					"Could not save job in database: jobname already taken.");
+//		} catch (NoSuchJobException e) {
+//			// good.
+//		}
+//
+//		job.setStatus(JobConstants.JOB_CREATED);
+//		jobdao.save(job);
+//
+//		return job.getJobname();
+//	}
 
 	/*
 	 * (non-Javadoc)
@@ -1451,6 +1451,22 @@ abstract class AbstractServiceInterface implements ServiceInterface {
 
 		return isFolder;
 
+	}
+	
+	public boolean fileExists(String file) throws RemoteFileSystemException, VomsException {
+		
+		boolean exists;
+		
+		try {
+			exists = getUser().aquireFile(file).exists();
+			return exists;
+		} catch (FileSystemException e) {
+
+			throw new RemoteFileSystemException("Could not connect to filesystem to aquire file: "+ file);
+			
+		}
+		
+		
 	}
 
 	/* (non-Javadoc)

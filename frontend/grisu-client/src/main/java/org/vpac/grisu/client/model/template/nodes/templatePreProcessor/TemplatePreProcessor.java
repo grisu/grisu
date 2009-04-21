@@ -54,7 +54,7 @@ abstract public class TemplatePreProcessor {
 	 * 
 	 * @throws TemplatePreProcessorException
 	 */
-	abstract protected void resetTemplateNode() throws TemplatePreProcessorException;
+	abstract protected void resetTemplateNode();
 	
 
 	/**
@@ -63,7 +63,7 @@ abstract public class TemplatePreProcessor {
 	 * 
 	 * @throws TemplatePreProcessorException
 	 */
-	public void reset() throws TemplatePreProcessorException {
+	public void reset()  {
 		
 		resetTemplateNode();
 		

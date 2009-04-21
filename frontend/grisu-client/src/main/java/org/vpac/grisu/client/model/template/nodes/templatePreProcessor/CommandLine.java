@@ -79,7 +79,7 @@ public class CommandLine extends TemplatePreProcessor {
 	}
 
 	@Override
-	protected void resetTemplateNode() throws TemplatePreProcessorException {
+	protected void resetTemplateNode() {
 
 		DebugUtils.jsdlDebugOutput("before resetting node: " + node.getName(), node
 				.getTemplate().getTemplateDocument());
