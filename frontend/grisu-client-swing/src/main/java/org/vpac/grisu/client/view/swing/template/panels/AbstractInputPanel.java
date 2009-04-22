@@ -269,8 +269,8 @@ abstract class AbstractInputPanel extends JPanel implements TemplateNodePanel {
 		if (defaultValue != null) {
 
 			holder.setComponentField(defaultValue);
-//		} else {
-//			holder.setComponentField(null);
+		} else {
+			holder.setComponentField(null);
 		}
 	}
 	
