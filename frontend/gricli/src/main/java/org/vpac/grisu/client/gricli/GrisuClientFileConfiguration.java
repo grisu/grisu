@@ -68,7 +68,7 @@ class DefaultConfiguration extends GrisuClientFileConfiguration{
 	
 
 	public DefaultConfiguration(){
-		commonProperties.put("serviceInterfaceUrl","https://ngportal.vpac.org/grisu-ws/services/grisu");
+		commonProperties.put("serviceInterfaceUrl","https://grisu.vpac.org/grisu-ws/services/grisu");
 	}
 
 	public String getCommonOption(String key){

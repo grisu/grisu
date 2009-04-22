@@ -19,7 +19,7 @@ public class CaCertManager {
 		urls.put("https://ngportaldev.vpac.org/grisu-ws/services/grisu", "cacert.pem");
 		urls.put("http://localhost:8080/grisu-ws/services/grisu", "cacert.pem");
 		urls.put("https://www.sapac.edu.au/grisu-ws/services/grisu", "ersaca.pem");
-		
+		urls.put("http://grisu.vpac.org/grisu-ws/services/grisu", "cacert.pem");
 	}
 
 	/**

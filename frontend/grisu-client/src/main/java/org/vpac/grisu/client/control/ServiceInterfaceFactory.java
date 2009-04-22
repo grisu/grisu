@@ -24,7 +24,8 @@ public class ServiceInterfaceFactory {
 			.getLogger(ServiceInterfaceFactory.class.getName());
 
 
-	public static String DEFAULT_SERVICE_INTERFACE = "https://ngportal.vpac.org/grisu-ws/services/grisu";
+//	public static String DEFAULT_SERVICE_INTERFACE = "https://ngportal.vpac.org/grisu-ws/services/grisu";
+	public static String DEFAULT_SERVICE_INTERFACE = "https://grisu.vpac.org/grisu-ws/services/grisu";
 	
 	public static String[] KNOWN_SERVICE_INTERFACE_CREATORS = new String[] {
 		"LocalServiceInterfaceCreator",

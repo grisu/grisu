@@ -24,7 +24,7 @@ public class ServiceInterfaceUrlsPanel extends JPanel {
 	private JComboBox jComboBox = null;
 	private DefaultComboBoxModel comboBoxModel = null;
 	
-	public static final String DEFAULT_GRISU_WS_SERVICEINTERFACEURL = "https://ngportal.vpac.org/grisu-ws/services/grisu";
+	public static final String DEFAULT_GRISU_WS_SERVICEINTERFACEURL = "https://grisu.vpac.org/grisu-ws/services/grisu";
 
 	/**
 	 * This is the default constructor

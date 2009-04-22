@@ -29,7 +29,7 @@ public class XFireServiceInterfaceCreator implements ServiceInterfaceCreator {
 	static final Logger myLogger = Logger
 			.getLogger(XFireServiceInterfaceCreator.class.getName());
 
-	public static String DEFAULT_SERVICE_INTERFACE = "https://ngportal.vpac.org/grisu-ws/services/grisu";
+	public static String DEFAULT_SERVICE_INTERFACE = "https://grisu.vpac.org/grisu-ws/services/grisu";
 
 	public ServiceInterface create(String interfaceUrl, String username,
 			char[] password, String myProxyServer, String myProxyPort,

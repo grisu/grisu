@@ -137,7 +137,7 @@
 					For a more detailed description or for description on other TemplateNodes that can be used have a look 
 					at "http://www.grid.apac.edu.au/repository/trac/grisu/wiki/GrisuTemplates".
 				-->
-				<URI template="InputFile" name="NamdConfigInputFile"
+				<URI template="InputFile" name="ConfigInputFile"
 					title="Namd config file"
 					description="Please provide the main namd config file here."
 					multiplicity="1"
