@@ -18,7 +18,7 @@ import org.vpac.grisu.control.Environment;
  */
 public class ServerPropertiesManager {
 	
-	public static final String DEFAULT_MYPROXY_SERVER = "myproxy.arcs.org.au";
+	public static final String DEFAULT_MYPROXY_SERVER = "myproxy2.arcs.org.au";
 	public static final int DEFAULT_MYPROXY_PORT = 443;
 	public static final int DEFAULT_MYPROXY_LIFETIME_IN_SECONDS = 3600;
 	public static final int DEFAULT_MIN_PROXY_LIFETIME_BEFORE_REFRESH = 600;

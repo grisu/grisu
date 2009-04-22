@@ -14,7 +14,7 @@ public class MyProxyServerParams {
 	static final Logger myLogger = Logger.getLogger(MyProxyServerParams.class
 			.getName());
 	
-	public static final String DEFAULT_MYPROXY_SERVER = "myproxy.arcs.org.au";
+	public static final String DEFAULT_MYPROXY_SERVER = "myproxy2.arcs.org.au";
 	public static final int DEFAULT_MYPROXY_PORT = 443;
 	
 	/**

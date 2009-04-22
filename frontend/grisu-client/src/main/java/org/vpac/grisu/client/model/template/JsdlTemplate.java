@@ -741,7 +741,7 @@ public class JsdlTemplate implements TemplateNodeListener {
 
 		LoginParams params = new LoginParams(
 				"http://localhost:8080/grisu-ws/services/grisu", "markus",
-				"nixenixe25".toCharArray(), "myproxy.arcs.org.au", "443");
+				"xxx".toCharArray(), "myproxy.arcs.org.au", "443");
 
 		ServiceInterface serviceInterface = ServiceInterfaceFactory
 				.createInterface(params);
