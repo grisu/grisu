@@ -48,9 +48,8 @@ public class CommandLine extends InputString {
 		if (defaultValue != null) {
 
 			holder.setComponentField(defaultValue);
-// 		we don't want to delte the line after an error or a successful job submission
-//		} else {
-//			holder.setComponentField(null);
+		} else {
+			holder.setComponentField(null);
 		}
 	}
 
