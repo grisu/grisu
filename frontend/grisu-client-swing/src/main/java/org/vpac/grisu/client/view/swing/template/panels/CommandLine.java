@@ -24,7 +24,7 @@ public class CommandLine extends InputString {
 		String value = getExternalSetValue();
 
 		if (useHistory)
-			historyManager.addHistoryEntry(this.templateNode.getName(), value,
+			historyManager.addHistoryEntry(historyManagerKeyForThisNode, value,
 					new Date());
 
 		if (COMBOBOX_PANEL.equals(renderMode)) {
@@ -49,7 +49,7 @@ public class CommandLine extends InputString {
 
 			holder.setComponentField(defaultValue);
 		} else {
-			holder.setComponentField(null);
+			holder.setComponentField("");
 		}
 	}
 
