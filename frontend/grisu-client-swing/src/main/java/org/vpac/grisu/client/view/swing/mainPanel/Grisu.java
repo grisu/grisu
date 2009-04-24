@@ -65,7 +65,7 @@ public class Grisu implements WindowListener {
 	
 	public static final String apache2License = "http://www.apache.org/licenses/LICENSE-2.0";
 
-    public static final String GRISU_VERSION = "v0.2-rc";
+    public static final String GRISU_VERSION = "v0.2";
     
     public static final String[] DEFAULT_HELPDESK_CLASSES = new String[]{"org.vpac.helpDesk.model.anonymousRT.AnonymousRTHelpDesk", "org.vpac.helpDesk.model.trac.TracHelpDesk"};
     public static final String HELPDESK_CONFIG = "support.properties";
@@ -94,7 +94,7 @@ public class Grisu implements WindowListener {
 
 	private JMenuItem mountsMenuItem = null;
 
-	private AboutDialog aboutDialog = null; // @jve:decl-index=0:visual-constraint="739,169"
+	private JDialog aboutDialog = null; // @jve:decl-index=0:visual-constraint="739,169"
 
 	private MountPointsManagementDialog mountsDialog = null;
 
@@ -408,17 +408,18 @@ public class Grisu implements WindowListener {
 	private JDialog getAboutDialog() {
 		if (aboutDialog == null) {
 
-			List<String> contributors = new LinkedList<String>();
-			contributors.add("Markus Binsteiner");
-
-			URL picURL = getClass().getResource("/images/ARCS_LogoTag_even_smaller.jpg");
-			ImageIcon grisu = new ImageIcon(picURL);
-
-			ProjectInfo info = new ProjectInfo("Grisu", GRISU_VERSION, "The Grisu Swing client.",
-					grisu.getImage(), "ARCS", "Apache2", apache2License);
+//			List<String> contributors = new LinkedList<String>();
+//			contributors.add("Markus Binsteiner");
+//
+//			URL picURL = getClass().getResource("/images/ARCS_LogoTag_even_smaller.jpg");
+//			ImageIcon grisu = new ImageIcon(picURL);
+//
+//			ProjectInfo info = new ProjectInfo("Grisu", GRISU_VERSION, "The Grisu Swing client.",
+//					grisu.getImage(), "ARCS", "Apache2", apache2License);
 
 			
-			aboutDialog = new AboutDialog(getJFrame(), "Grisu", info);
+//			aboutDialog = new AboutDialog(getJFrame(), "Grisu", info);
+			aboutDialog = new GrisuAboutDialog();
 			
 		}
 		return aboutDialog;
