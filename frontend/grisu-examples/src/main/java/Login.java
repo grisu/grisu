@@ -34,7 +34,7 @@ public class Login {
 	
 	public static ServiceInterface getServiceInterfaceForProductionServer(String username, char[] password) throws LoginException, ServiceInterfaceException {
 
-		LoginParams params = new LoginParams("https://ngportal.vpac.org/grisu-ws/services/grisu", username, password, "myproxy2.arcs.org.au", "443");
+		LoginParams params = new LoginParams("https://grisu.vpac.org/grisu-ws/services/grisu", username, password, "myproxy2.arcs.org.au", "443");
 		
 		return ServiceInterfaceFactory.createInterface(params);
 	}
@@ -73,7 +73,7 @@ public class Login {
 
 		   // creating an object which holds all the login information. For this example we assume we always use the specified grisu service url and 
 		   // myproxy server/port. It's possible to also set a httproxy here.
-		   LoginParams loginparams = new LoginParams("https://ngportal.vpac.org/grisu-ws/services/grisu", username, password, "myproxy2.arcs.org.au", "443");
+		   LoginParams loginparams = new LoginParams("https://grisu.vpac.org/grisu-ws/services/grisu", username, password, "myproxy2.arcs.org.au", "443");
 					
 	     // do the login
 	     em = ServiceInterfaceFactory.login(loginparams);

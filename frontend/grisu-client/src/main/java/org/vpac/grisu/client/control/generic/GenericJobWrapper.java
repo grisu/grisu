@@ -519,7 +519,7 @@ public class GenericJobWrapper {
 
 		
 		try {
-			LoginParams loginparams = new LoginParams("https://ngportal.vpac.org/grisu-ws/services/grisu", "markus", "xxx".toCharArray(), "myproxy.arcs.org.au", "443");
+			LoginParams loginparams = new LoginParams("https://grisu.vpac.org/grisu-ws/services/grisu", "markus", "xxx".toCharArray(), "myproxy.arcs.org.au", "443");
 			
 			EnvironmentManager em = null;
 			try {

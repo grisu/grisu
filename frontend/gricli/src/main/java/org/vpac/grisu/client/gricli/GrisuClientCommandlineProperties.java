@@ -55,7 +55,7 @@ public class GrisuClientCommandlineProperties implements GrisuClientProperties {
 //	public final static String OUTPUTFILENAMES_OPTION = "outputFileNames";
 	public final static String STAGEOUTDIRECTORY_OPTION = "stageoutDirectory";
 
-	private String serviceInterfaceUrl = "https://ngportal.vpac.org/grisu-ws/services/grisu";
+	private String serviceInterfaceUrl = "https://grisu.vpac.org/grisu-ws/services/grisu";
 
 	private Set<String> failedParameters = null;
 
@@ -480,7 +480,7 @@ public class GrisuClientCommandlineProperties implements GrisuClientProperties {
 		Option config = createOptionWithArg(CONFIG_FILE_PATH_OPTION,"F",				    
 				"configuration file location (optional, default: " + GrisuClientFileConfiguration.CONFIG_FILE_PATH +")");
 		Option serviceInterfaceUrl = createOptionWithArg(SERVICE_INTERFACE_URL_OPTION,"i",
-					     "the serviceinterface to connect to (optional, default: https://ngportal.vpac.org/grisu-ws/services/grisu)");
+					     "the serviceinterface to connect to (optional, default: https://grisu.vpac.org/grisu-ws/services/grisu)");
 		Option mode = createOptionWithArg(MODE_OPTION,"m",
 			      "the mode you want to use: all|submit|check|join|force-clean (optional, default: all)");
 		Option baseName = createOptionWithArg(CommandlineProperties.JOBNAME,"n",

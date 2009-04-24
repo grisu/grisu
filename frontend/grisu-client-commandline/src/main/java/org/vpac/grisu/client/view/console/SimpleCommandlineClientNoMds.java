@@ -156,7 +156,7 @@ public class SimpleCommandlineClientNoMds implements JsdlTemplateListener {
 			}
 			char[] password = readPasswordInput("Please enter your myproxy password");
 			LoginParams loginparams = new LoginParams(
-					"https://ngportal.vpac.org/grisu-ws/services/grisu",
+					"https://grisu.vpac.org/grisu-ws/services/grisu",
 					username, password, "myproxy.arcs.org.au", "443");
 
 			try {

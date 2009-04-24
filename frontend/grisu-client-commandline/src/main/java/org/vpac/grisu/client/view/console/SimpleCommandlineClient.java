@@ -163,7 +163,7 @@ public class SimpleCommandlineClient implements JsdlTemplateListener {
 			char[] certPassphrase = readPasswordInput("Please enter your certificate passphrase");
 
 			LoginParams loginparams = new LoginParams(
-					"https://ngportal.vpac.org/grisu-ws/services/grisu", null,
+					"https://grisu.vpac.org/grisu-ws/services/grisu", null,
 					null, "myproxy.apac.edu.au", "443");
 
 			ServiceInterface serviceInterface = null;
@@ -190,7 +190,7 @@ public class SimpleCommandlineClient implements JsdlTemplateListener {
 				}
 				char[] password = readPasswordInput("Please enter your myproxy password");
 				LoginParams loginparams = new LoginParams(
-						"https://ngportal.vpac.org/grisu-ws/services/grisu",
+						"https://grisu.vpac.org/grisu-ws/services/grisu",
 						username, password, "myproxy.arcs.org.au", "443");
 
 				try {

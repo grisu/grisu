@@ -67,7 +67,7 @@ public class GrisuBatch {
 	public final static String STAGEOUTDIRECTORY_OPTION = "stageOutDirectory";
 
 	private EnvironmentManager em = null;
-	private String serviceInterfaceUrl = "https://ngportal.vpac.org/grisu-ws/services/grisu";
+	private String serviceInterfaceUrl = "https://grisu.vpac.org/grisu-ws/services/grisu";
 
 	private Map<String, Exception> failedJobCreations = null;
 	private Map<String, JobSubmissionException> failedJobSubmissions = null;
