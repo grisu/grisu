@@ -3,13 +3,13 @@
   <parent>
     <artifactId>grisu</artifactId>
     <groupId>org.vpac.grisu</groupId>
-    <version>0.2-beta-SNAPSHOT</version>
+    <version>0.2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.vpac.grisu</groupId>
   <artifactId>grisu-commons</artifactId>
   <name>grisu-commons</name>
-  <version>0.2-beta-SNAPSHOT</version>
+  <version>0.2</version>
   <description>The most important thing about the grisu-commons is that it holds the ServiceInterface interface
 	 	which is used by both backend and frontend modules. It also holds a few other globally used
 	 	classes and interfaces.</description>
@@ -76,7 +76,7 @@
 		<dependency>
 			<groupId>org.vpac.historyRepeater</groupId>
 			<artifactId>historyRepeater</artifactId>
-			<version>0.1</version>
+			<version>0.2</version>
 		</dependency>
   </dependencies>
   	<build>

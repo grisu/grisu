@@ -5,9 +5,65 @@
 	<groupId>org.vpac.grisu</groupId>
 	<artifactId>grisu</artifactId>
 	<packaging>pom</packaging>
-	<version>0.2-beta-SNAPSHOT</version>
-	<name>grisu Maven Multi Project</name>
+	<version>0.2</version>
+	<name>Grisu</name>
+	<description>Grisu is an open source framework to help grid admins and developers to support end users in a grid environment. Grisu publishes an easy-to-use service interface which by default sits behind a web service. This service interface contains a set of methods that are usually needed to submit jobs to the grid, including providing information about the grid and the staging of input/output files from/to the users desktop. </description>
 	<url>http://maven.apache.org</url>
+
+	<repositories>
+		<repository>
+			<id>vpac</id>
+			<url>http://hudson.vpac.org/maven_repository</url>
+		</repository>
+	</repositories>
+	<issueManagement>
+		<system>Trac</system>
+		<url>http://projects.arcs.org.au/trac/grisu/</url>
+	</issueManagement>
+	<ciManagement>
+		<system>Hudson</system>
+		<url>http://hudson.vpac.org:8080/</url>
+	</ciManagement>
+	<developers>
+		<developer>
+			<id>markus</id>
+			<name>Markus Binsteiner</name>
+			<email>markus.binsteiner@arcs.org.au</email>
+			<organization>ARCS</organization>
+			<organizationUrl>http://www.arcs.org.au</organizationUrl>
+			<timezone>Australia/Melbourne</timezone>
+			<roles>
+			</roles>
+		</developer>
+		<developer>
+			<id>gerson</id>
+			<name>Gerson Galang</name>
+			<email>gerson.galang@arcs.org.au</email>
+			<organization>VPAC</organization>
+			<organizationUrl>http://www.vpac.org</organizationUrl>
+			<timezone>Australia/Melbourne</timezone>
+		</developer>
+		<developer>
+			<id>yuriy</id>
+			<name>Yuriy Halytskyy</name>
+			<email>y.halytskyy@auckland.ac.nz</email>
+		</developer>
+	</developers>
+	<contributors>
+		<contributor>
+			<name>Vladimir Mencl</name>
+			<email>vladimir.mencl@canterbury.ac.nz</email>
+		</contributor>
+	</contributors>
+	<scm>
+		<developerConnection>https://projects.arcs.org.au/svn/grisu/trunk/grisu</developerConnection>
+		<url>https://projects.arcs.org.au/svn/grisu/trunk/grisu</url>
+	</scm>
+	<organization>
+		<name>ARCS</name>
+		<url>http://www.arcs.org.au</url>
+	</organization>
+	
 	<build>
 		<plugins>
 			<plugin>
@@ -26,10 +82,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <aggregate>true</aggregate>
-                    <linksource>true</linksource>
-                </configuration>
+				<configuration>
+					<aggregate>true</aggregate>
+					<linksource>true</linksource>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

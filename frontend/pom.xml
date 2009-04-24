@@ -1,24 +1,32 @@
-<?xml version="1.0" encoding="UTF-8"?><project>
-  <parent>
-    <artifactId>grisu</artifactId>
-    <groupId>org.vpac.grisu</groupId>
-    <version>0.2-beta-SNAPSHOT</version>
-  </parent>
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.vpac.grisu</groupId>
-  <artifactId>frontend</artifactId>
-  <packaging>pom</packaging>
-  <name>frontend Maven Multi Project</name>
-  <version>0.2-beta-SNAPSHOT</version>
-  <url>http://maven.apache.org</url>
-  <modules>
-  	<module>grisu-client</module>
-  	<module>grisu-client-swing</module>
-  	<module>grisu-client-xfire</module>
-  	<module>grisu-client-commandline</module>
-  	<module>grisu-examples</module>
-  	<module>grisu-client-batch</module>
-  	<module>gricli</module>
-  	<module>grisu-client-swing-plugins</module>
-  </modules>
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+	<parent>
+		<artifactId>grisu</artifactId>
+		<groupId>org.vpac.grisu</groupId>
+		<version>0.2</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.vpac.grisu</groupId>
+	<artifactId>frontend</artifactId>
+	<packaging>pom</packaging>
+	<name>frontend Maven Multi Project</name>
+	<version>0.2</version>
+	<url>http://maven.apache.org</url>
+	<repositories>
+		<repository>
+			<id>vpac</id>
+			<url>http://hudson.vpac.org/maven_repository
+			</url>
+		</repository>
+	</repositories>
+	<modules>
+		<module>grisu-client</module>
+		<module>grisu-client-swing</module>
+		<module>grisu-client-xfire</module>
+		<module>grisu-client-commandline</module>
+		<module>grisu-examples</module>
+		<module>grisu-client-batch</module>
+		<module>gricli</module>
+		<module>grisu-client-swing-plugins</module>
+	</modules>
 </project>

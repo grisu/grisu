@@ -2,17 +2,17 @@
   <parent>
     <artifactId>backend</artifactId>
     <groupId>org.vpac.grisu</groupId>
-    <version>0.2-beta-SNAPSHOT</version>
+    <version>0.2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.vpac.grisu</groupId>
   <artifactId>grisu-local</artifactId>
-  <version>0.2-beta-SNAPSHOT</version>
+  <version>0.2</version>
   <dependencies>
   		<dependency>
 			<groupId>org.vpac.grisu</groupId>
 			<artifactId>grisu-core</artifactId>
-			<version>0.2-beta-SNAPSHOT</version>
+			<version>0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>au.org.arcs.auth</groupId>
