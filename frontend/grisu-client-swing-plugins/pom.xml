@@ -3,12 +3,12 @@
 	<parent>
 		<artifactId>frontend</artifactId>
 		<groupId>org.vpac.grisu</groupId>
-		<version>0.2-beta-SNAPSHOT</version>
+		<version>0.3-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.vpac.grisu</groupId>
 	<artifactId>grisu-client-swing-plugins</artifactId>
-	<version>0.2-beta-SNAPSHOT</version>
+	<version>0.3-SNAPSHOT</version>
 
 	<repositories>
 		<repository>
@@ -21,7 +21,7 @@
 		<dependency>
 			<groupId>org.vpac.grisu</groupId>
 			<artifactId>grisu-client-swing</artifactId>
-			<version>0.2-beta-SNAPSHOT</version>
+			<version>0.3-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>

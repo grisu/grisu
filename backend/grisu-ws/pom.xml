@@ -5,14 +5,14 @@
 	<parent>
 		<artifactId>backend</artifactId>
 		<groupId>org.vpac.grisu</groupId>
-		<version>0.2</version>
+		<version>0.3-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.vpac.grisu</groupId>
 	<artifactId>grisu-ws</artifactId>
 	<packaging>war</packaging>
 	<name>grisu webserivce interface</name>
-	<version>0.2</version>
+	<version>0.3-SNAPSHOT</version>
 	
 	<description>grisu-ws publishes the ServiceInterface interface
 		via web services and it
@@ -62,7 +62,7 @@
 		<dependency>
 			<groupId>org.vpac.grisu</groupId>
 			<artifactId>grisu-core</artifactId>
-			<version>0.2</version>
+			<version>0.3-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
