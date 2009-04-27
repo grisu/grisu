@@ -20,7 +20,7 @@ jar -i grisu-ws.war
 mkdir swing
 cd swing
 unzip -o ../grisu-0.3-SNAPSHOT-grisu-client-swing.jar
-rm ../grisu-0.3-SNAPSHOT--grisu-client-swing.jar
+rm ../grisu-0.3-SNAPSHOT-grisu-client-swing.jar
 rm -f META-INF/INDEX.LIST
 cp ../../frontend/grisu-client-swing/src/main/resources/log4j.properties .
 jar cmf ../../frontend/grisu-client-swing/MANIFEST.MF ../grisu.jar .
@@ -32,7 +32,7 @@ mkdir cmdline
 cd cmdline
 unzip -o ../grisu-0.3-SNAPSHOT-gricli.jar
 #rm ../grisu-0.3-SNAPSHOT-gricli.jar
-#rm -f META-INF/INDEX.LIST
+rm -f META-INF/INDEX.LIST
 cp ../../frontend/gricli/src/main/resources/log4j.properties .
 cp ../../frontend/gricli/MANIFEST.MF META-INF/
 jar -cf  ../gricli.jar .
