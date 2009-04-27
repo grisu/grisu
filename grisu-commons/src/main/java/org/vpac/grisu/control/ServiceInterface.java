@@ -4,8 +4,6 @@ import java.util.Date;
 import java.util.Map;
 
 import javax.activation.DataSource;
-import javax.jws.WebMethod;
-import javax.jws.WebService;
 
 import org.vpac.grisu.control.exceptions.JobDescriptionNotValidException;
 import org.vpac.grisu.control.exceptions.JobNotCreatedException;
@@ -26,7 +24,6 @@ import org.w3c.dom.Document;
  * @author Markus Binsteiner
  *
  */
-@WebService
 public interface ServiceInterface {
 	
 	public static final double INTERFACE_VERSION = 6;
@@ -36,7 +33,6 @@ public interface ServiceInterface {
 	// General grisu specific methods
 	//
 	//---------------------------------------------------------------------------------------------------
-	@WebMethod
 	public double getInterfaceVersion();
 	
 	/**
@@ -45,7 +41,6 @@ public interface ServiceInterface {
 	 * @param password the password (probably for myproxy credential)
 	 * @throws NoValidCredentialException if the login was not successful
 	 */
-	@WebMethod
 	public void login(String username, char[] password) throws NoValidCredentialException;
 	
 	/**
@@ -53,7 +48,6 @@ public interface ServiceInterface {
 	 * 
 	 * @return a logout message
 	 */
-	@WebMethod
 	public String logout();
 
 	/**
@@ -61,7 +55,6 @@ public interface ServiceInterface {
 	 * list of all the application where the service interface has got a template jsdl.
 	 * @return a list of all applications 
 	 */
-	@WebMethod
 	public String[] listHostedApplicationTemplates();
 	
 	/**
@@ -70,7 +63,6 @@ public interface ServiceInterface {
 	 * @return a jsdl template document
 	 * @throws NoSuchTemplateException if a template for that particular application does not exist
 	 */
-	@WebMethod
 	public Document getTemplate(String application) throws NoSuchTemplateException;
 	
 	/**
@@ -80,7 +72,6 @@ public interface ServiceInterface {
 	 * @return a jsdl template document
 	 * @throws NoSuchTemplateException if a template for that particular application/version combination does not exist
 	 */
-	@WebMethod
 	public Document getTemplate(String application, String version) throws NoSuchTemplateException;
 	
 	/**
@@ -89,7 +80,6 @@ public interface ServiceInterface {
 	 * @param subject a short summary of the problem
 	 * @param description the description of the problem
 	 */
-	@WebMethod
 	public void submitSupportRequest(String subject, String description);
 		
 	/**
@@ -102,7 +92,6 @@ public interface ServiceInterface {
 	 * @param key the key
 	 * @return the values
 	 */
-	@WebMethod
 	public String[] getUserProperty(String key);
 	
 	/**
@@ -110,21 +99,18 @@ public interface ServiceInterface {
 	 * @param date the date from which to show messages or null for unread messages
 	 * @return a xml document which contains the messages
 	 */
-	@WebMethod
 	public Document getMessagesSince(Date date);
 	
 	/**
 	 * Returns the end time of the credential used.
 	 * @return the end time
 	 */
-	@WebMethod
 	public long getCredentialEndTime();
 	
 	/**
 	 * Can be used to inform the frontend what the backend is doing at the moment and what the bloody hell is taking so long... (like file-cross-staging...)
 	 * @return the current status of any backend activity
 	 */
-	@WebMethod
 	public String getCurrentStatusMessage();
 	
 	
@@ -139,7 +125,7 @@ public interface ServiceInterface {
 	 * @param url the host
 	 * @return the site
 	 */
-	@WebMethod
+	
 	public String getSite(String host);
 	
 	/**
@@ -150,7 +136,7 @@ public interface ServiceInterface {
 	 * 
 	 * @return a map with all possible hostnames and the respective sites they belong to
 	 */
-	@WebMethod
+	
 	public Map<String, String> getAllHosts();
 	
 	/**
@@ -161,7 +147,7 @@ public interface ServiceInterface {
 	 * @param site the site
 	 * @return the root folder of the filesystem that is both accessible via gridftp and the cluster
 	 */
-//	@WebMethod
+//	
 //	public String getExecutionFileSystem(String site);
 	
 	/**
@@ -171,7 +157,7 @@ public interface ServiceInterface {
 	 * @param fqan the vo for which the job shall run (or null for a non-vo job)
 	 * @return the absolute working directory of the job if it is possible to create it with the specified name
 	 */
-	@WebMethod
+	
 	public String calculateAbsoluteJobDirectory(String jobname, String submissionLocation, String fqan);
 	
 	/**
@@ -184,7 +170,8 @@ public interface ServiceInterface {
 	 * @return the directory where all job related files are located. the return path is relative to the execution file system. That's why it's 
 	 * possible to call that method before the job is actually submitted.
 	 */
-	@WebMethod
+
+	
 	public String calculateRelativeJobDirectory(String jobname);
 	
 	/**
@@ -192,7 +179,7 @@ public interface ServiceInterface {
 	 * format: <queuename>:<submissionHost>[#porttype] (porttype can be ommitted if it's pbs.
 	 * @return all queues grid-wide
 	 */
-	@WebMethod
+	
 	public String[] getAllSubmissionLocations();
 	
 	/**
@@ -200,7 +187,7 @@ public interface ServiceInterface {
 	 * @param fqan the VO
 	 * @return all submission locations
 	 */
-	@WebMethod
+	
 	public String[] getAllSubmissionLocations(String fqan);
 	
 	/**
@@ -213,7 +200,7 @@ public interface ServiceInterface {
 	 * @param application the application.
 	 * @return all sites that support this application.
 	 */
-	@WebMethod
+	
 	public String[] getSubmissionLocationsForApplication(String application);
 	
 	/**
@@ -226,7 +213,7 @@ public interface ServiceInterface {
 	 * @param application the version
 	 * @return all sites that support this application.
 	 */
-	@WebMethod
+	
 	public String[] getSubmissionLocationsForApplication(String application, String version);
 	
 	/**
@@ -241,7 +228,8 @@ public interface ServiceInterface {
 	 * @param fqan the fqan
 	 * @return all sites that support this application.
 	 */
-	@WebMethod
+
+	
 	public String[] getSubmissionLocationsForApplication(String application, String version, String fqan);
 	
 	/**
@@ -252,7 +240,7 @@ public interface ServiceInterface {
 	 * @param application
 	 * @return a map with all versions of the application as key and the submissionLocations as comma
 	 */
-	@WebMethod
+	
 	public Map<String, String> getSubmissionLocationsPerVersionOfApplication(String application);
 	
 	
@@ -263,7 +251,7 @@ public interface ServiceInterface {
 	 * @return a map of datalocations for this vo with the root url of the location as key (e.g. gsiftp://brecca.vpac.monash.edu.au:2811 and the paths that are accessible 
 	 * for this VO there as values (e.g. /home/grid-admin)
 	 */
-	@WebMethod
+	
 	public Map<String, String[]> getDataLocationsForVO(String fqan);
 	
 	/**
@@ -273,13 +261,13 @@ public interface ServiceInterface {
 	 * @param site the site
 	 * @return the supported versions 
 	 */
-	@WebMethod
+	
 	public String[] getVersionsOfApplicationOnSite(String application, String site);
 	
-	@WebMethod
+	
 	public String[] getVersionsOfApplicationOnSubmissionLocation(String application, String submissionLocation);
 	
-//	@WebMethod
+//	
 //	public String[] getVersionsOfApplicationOnSubmissionLocation(String application, String submissionLocation, String fqan);
 	
 	/**
@@ -288,7 +276,7 @@ public interface ServiceInterface {
 	 * @param subLoc the submission location (queuename@cluster:contactstring#jobmanager)
 	 * @return the gridftp servers 
 	 */
-	@WebMethod
+	
 	public String[] getStagingFileSystemForSubmissionLocation(String subLoc);
 	
 	/**
@@ -296,14 +284,14 @@ public interface ServiceInterface {
 	 * serviceinterface is hosted.
 	 * @return all fqans of the user
 	 */
-	@WebMethod
+	
 	public String[] getFqans();
 	
 	/**
 	 * Checks the current certificate and returns its' dn
 	 * @return the dn of the users' certificate
 	 */
-	@WebMethod
+	
 	public String getDN();
 	
 	/**
@@ -311,7 +299,7 @@ public interface ServiceInterface {
 	 * It tells the client all sites a job can be submitted to.
 	 * @return all sites
 	 */
-	@WebMethod
+	
 	public String[] getAllSites();
 
 	/**
@@ -320,7 +308,7 @@ public interface ServiceInterface {
 	 * @param site the site you are interested in
 	 * @return the filesystem
 	 */
-//	@WebMethod
+//	
 //	public String getStagingFileSystem(String site);
 	
 	/**
@@ -328,7 +316,7 @@ public interface ServiceInterface {
 	 * @param sites all the sites you want to query or null for a grid-wide search
 	 * @return all applications
 	 */
-	@WebMethod
+	
 	public String[] getAllAvailableApplications(String[] sites);
 	
 	/**
@@ -342,7 +330,7 @@ public interface ServiceInterface {
 	 * @param site the site where you want to run the application
 	 * @return details about the applications
 	 */
-	@WebMethod
+	
 	public Map<String, String> getApplicationDetails(String application, String version, String site);
 	
 	/**
@@ -355,7 +343,7 @@ public interface ServiceInterface {
 	 * @param site_or_submissionlocation the site where you want to run the application, you can also specify a submissionlocation (but this will be slower possibly)
 	 * @return details about the applications
 	 */
-	@WebMethod
+	
 	public Map<String, String> getApplicationDetails(String application, String site_or_submissionLocation);
 	
 	
@@ -380,7 +368,7 @@ public interface ServiceInterface {
 	 * @throws RemoteFileSystemException if the remote filesystem could not be mounted/connected to
 	 * @throws VomsException if the required voms proxy for this mountpoint could not be obtained
 	 */
-	@WebMethod
+	
 	public MountPoint mount(String url, String mountpoint, boolean useHomeDirectoryOnThisFileSystemIfPossible) throws RemoteFileSystemException, VomsException;
 
 	/**
@@ -399,7 +387,8 @@ public interface ServiceInterface {
 	 * @return the new MountPoint
 	 * @throws RemoteFileSystemException if the remote filesystem could not be mounted/connected to
 	 */
-	@WebMethod
+
+	
 	public MountPoint mount(String url, String mountpoint, String fqan, boolean useHomeDirectoryOnThisFileSystemIfPossible) throws RemoteFileSystemException, VomsException;
 	
 	/**
@@ -410,14 +399,14 @@ public interface ServiceInterface {
 	 * @return whether it worked or not
 	 * @throws NoSuchMountPointException if the mountpoint does not exist
 	 */
-	@WebMethod
+	
 	public void umount(String mountpoint);
 
 	/**
 	 * Lists all the mountpoints of the user's virtual filesystem
 	 * @return all the MountPoints
 	 */
-	@WebMethod
+	
 	public MountPoint[] df();
 	
 	/**
@@ -425,7 +414,7 @@ public interface ServiceInterface {
 	 * @param uri the uri
 	 * @return the mountpoint or null if no mountpoint can be found
 	 */
-	@WebMethod
+	
 	public MountPoint getMountPointForUri(String uri);
 
 	/**
@@ -437,13 +426,13 @@ public interface ServiceInterface {
 	 * @throws RemoteFileSystemException if the remote (target) filesystem could not be connected / mounted / is not writeable
 	 * @throws VomsException if the (possibly required) voms credential could not be created
 	 */
-	@WebMethod
+	
 	public String upload(DataSource file, String filename, boolean return_absolute_url) throws RemoteFileSystemException, VomsException;
 	
-//	@WebMethod
+//	
 //	public String uploadByteArray(byte[] file, String filename, boolean return_absolute_url) throws RemoteFileSystemException, VomsException;
 	
-//	@WebMethod
+//	
 //	public String uploadByteArray(byte[] source, String filename,
 //			boolean return_absolute_url, int offset, int length) throws RemoteFileSystemException,
 //			VomsException;
@@ -455,13 +444,13 @@ public interface ServiceInterface {
 	 * @throws RemoteFileSystemException if the remote (source) file system could not be conntacted /mounted / is not readable
 	 * @throws VomsException if the (possibly required) voms credential could not be created
 	 */
-	@WebMethod
+	
 	public DataSource download(String filename) throws RemoteFileSystemException, VomsException;
 	
-//	@WebMethod
+//	
 //	public byte[] downloadByteArray(String filename) throws RemoteFileSystemException, VomsException;
 	
-//	@WebMethod
+//	
 //	public byte[] downloadByteArray(String filename, int offset, int length) throws RemoteFileSystemException, VomsException;
 	
 	/**
@@ -475,10 +464,10 @@ public interface ServiceInterface {
 	 * @return the content of the directory or null if the directory is empty. If the specified directory is a file, only information about this one file is returned.
 	 * @throws RemoteFileSystemException if the remote directory could not be read/mounted
 	 */
-	@WebMethod
+	
 	public Document ls(String directory, int recursion_level, boolean absolute_url) throws RemoteFileSystemException;
 	
-	@WebMethod
+	
 	public String ls_string(String directory, int recursion_level, boolean absolute_url) throws RemoteFileSystemException;
 	
 	
@@ -493,7 +482,7 @@ public interface ServiceInterface {
 	 * remote target file system could not be written to 
  	 * @throws VomsException if the (possibly required) voms credential could not be created
 	 */
-	@WebMethod
+	
 	public String cp(String source, String target, boolean overwrite, boolean return_absolute_url) throws RemoteFileSystemException, VomsException;
 	
 	/**
@@ -503,18 +492,19 @@ public interface ServiceInterface {
 	 * @throws RemoteFileSystemException if the files can't be accessed
 	 * @throws VomsException if the (possibly required) voms credential could not be created
 	 */
-	@WebMethod
-	public boolean isFolder(String file) throws RemoteFileSystemException, VomsException;
-	
+
 	/**
-	 * Checks whether the specified file/folder exists
-	 * @param file the file or folder
-	 * @return true - exists, false - doesn't exist
-	 * @throws RemoteFileSystemException if the file system can't be accessed to determine whether the file exists
-	 * @throws VomsException if the (possibly required) voms credential could not be created
-	 */
-	@WebMethod
-	public boolean fileExists(String file) throws RemoteFileSystemException, VomsException;
+         * Checks whether the specified file/folder exists
+         * @param file the file or folder
+         * @return true - exists, false - doesn't exist
+         * @throws RemoteFileSystemException if the file system can't be accessed to determine whether the file exists
+         * @throws VomsException if the (possibly required) voms credential could not be created
+        */
+       public boolean fileExists(String file) throws RemoteFileSystemException, VomsException;
+       
+
+	
+	public boolean isFolder(String file) throws RemoteFileSystemException, VomsException;
 	
 	/**
 	 * Finds all children files for the specified folder. Useful if you want to download a whole foldertree. Use with caution because 
@@ -525,7 +515,7 @@ public interface ServiceInterface {
 	 * @throws RemoteFileSystemException if the folder can't be accessed/read
 	 * @throws VomsException if the (possibly required) voms credential could not be created
 	 */
-	@WebMethod
+	
 	public String[] getChildrenFiles(String folder, boolean onlyFiles) throws RemoteFileSystemException, VomsException;
 	
 	/**
@@ -537,7 +527,7 @@ public interface ServiceInterface {
 	 * @throws RemoteFileSystemException if the file can't be accessed
 	 * @throws VomsException if the (possibly required) voms credential could not be created
 	 */
-	@WebMethod
+	
 	public long getFileSize(String file) throws RemoteFileSystemException, VomsException;
 	
 	// for testing
@@ -548,7 +538,7 @@ public interface ServiceInterface {
 	 * @param remoteFile the file to check
 	 * @return the last modified date
 	 */
-	@WebMethod
+	
 	public long lastModified(String remoteFile) throws RemoteFileSystemException, VomsException;
 
 	/**
@@ -558,7 +548,7 @@ public interface ServiceInterface {
 	 * @throws RemoteFileSystemException if the filesystem could not be accessed
 	 * @throws VomsException if there was a problem with the voms credential
 	 */
-	@WebMethod
+	
 	public boolean mkdir(String folder) throws  RemoteFileSystemException, VomsException; 
 	
 	/**
@@ -567,7 +557,7 @@ public interface ServiceInterface {
 	 * @throws RemoteFileException if the filesystem could not be accessed
 	 * @throws VomsException if there was a problem with the voms credential
 	 */
-	@WebMethod
+	
 	public void deleteFile(String file) throws RemoteFileSystemException, VomsException;
 	
 	/**
@@ -576,7 +566,7 @@ public interface ServiceInterface {
 	 * @throws RemoteFileException if the filesystem could not be accessed
 	 * @throws VomsException if there was a problem with the voms credential
 	 */
-	@WebMethod
+	
 	public void deleteFiles(String[] files) throws RemoteFileSystemException, VomsException;
 	
 	
@@ -590,13 +580,13 @@ public interface ServiceInterface {
 	 * Returns a xml document that contains all the jobs of the user with information about the jobs.
 	 * @return xml formated information about all the users jobs
 	 */
-	@WebMethod
+	
 	public Document ps();
 	
-	@WebMethod 
+	
 	public String ps_string();
 	
-	@WebMethod
+	
 	public String[] getAllJobnames();
 	
 	/**
@@ -612,29 +602,8 @@ public interface ServiceInterface {
 	 * @return the (autogenerated) jobname
 	 * @throws JobNotCreatedException if the job could not be created
 	 */
-	@WebMethod
+	
 	public String createJob(String jobname, int createJobNameMethod) throws JobCreationException;
-
-//	/**
-//	 * Another way to create a job. Submit the jsdl and this method figures out
-//	 * the jobname, connects the jsdl with the job and saves the job in the db.
-//	 * You don't need to call setJobDescription if you use this method.
-//	 * 
-//	 * Be careful when you are using this method to create a job because you really have to 
-//	 * know in advance where to stage possible input files and what urls to write in your
-//	 * job description. It is recommended to use {@link #createJob(String, int)} to be able
-//	 * to use the {@link #calculateRelativeJobDirectory(String, String)} method and stage the files before the
-//	 * setting of the job description (@link {@link #setJobDescription(String, Document)}).
-//	 * 
-//	 * @param jsdl
-//	 *            the job description
-//	 * @param createJobNameMethod
-//	 *            the method how to autogenerete the name of the job
-//	 * @return the (autogenerated) jobname
-//	 * @throws JobDescriptionNotValidException if the job could not be created
-//	 */
-//	@WebMethod
-//	public String createJob(Document jsdl, int createJobNameMethod) throws JobDescriptionNotValidException, JobCreationException;
 
 	/**
 	 * Sets the jobdescription for the job. It's only needed if you used
@@ -648,10 +617,11 @@ public interface ServiceInterface {
 	 * @throws JobDescriptionNotValidException if the jsdl is not valid
 	 * @throws NoSuchJobException 
 	 */
-	@WebMethod
+
+	
 	public void setJobDescription(String jobname, Document jsdl) throws JobDescriptionNotValidException, NoSuchJobException;
 	
-	@WebMethod
+	
 	public void setJobDescription_string(String jobname, String jsdl) throws JobDescriptionNotValidException, NoSuchJobException;
 
 //	/**
@@ -662,7 +632,7 @@ public interface ServiceInterface {
 //	 * @throws JobDescriptionNotValidException on of the job descriptions is not vailid
 //	 * @throws NoSuchJobException no job with this jobname is created in the database
 //	 */
-//	@WebMethod
+//	
 //	public void setJobDescription(String jobname, Document[] jsdl) throws JobDescriptionNotValidException, NoSuchJobException;
 	/**
 	 * Submits the job but does not use a credential that is stored in the
@@ -676,7 +646,7 @@ public interface ServiceInterface {
 	 * @throws VomsException if the (possibly required) voms credential could not be created
 	 * @throws NoSuchJobException 
 	 */
-	@WebMethod
+	
 	public void submitJob(String jobname, String fqan) throws ServerJobSubmissionException, NoValidCredentialException, RemoteFileSystemException, VomsException, NoSuchJobException;
 
 	/**
@@ -685,7 +655,7 @@ public interface ServiceInterface {
 	 * @return the (absolute) job directory
 	 * @throws NoSuchJobException 
 	 */
-	@WebMethod
+	
 	public String getJobDirectory(String jobname) throws NoSuchJobException;
 	
 	/**
@@ -697,7 +667,7 @@ public interface ServiceInterface {
 	 * @return the status of the job
 	 * @throws NoSuchJobException if no job with the specified jobname exists
 	 */
-	@WebMethod
+	
 	public int getJobStatus(String jobname);
 	
 	/**
@@ -705,10 +675,10 @@ public interface ServiceInterface {
 	 * @param jobname the name of the job
 	 * @return detailed information about the job
 	 */
-	@WebMethod
+	
 	public Document getJobDetails(String jobname) throws NoSuchJobException;
 	
-	@WebMethod
+	
 	public String getJobDetails_string(String jobname) throws NoSuchJobException;
 
 	/**
@@ -719,7 +689,7 @@ public interface ServiceInterface {
 	 * @throws VomsException if the (possibly required) voms credential could not be created
 	 * @throws NoSuchJobException 
 	 */
-	@WebMethod
+	
 	public void kill(String jobname, boolean clean) throws RemoteFileSystemException, VomsException, NoSuchJobException;
 	
 	/**
@@ -730,7 +700,7 @@ public interface ServiceInterface {
 	 * @param value the value
 	 * @throws NoSuchJobException if there is no job with this jobname in the database
 	 */
-	@WebMethod
+	
 	public void addJobProperty(String jobname, String key, String value) throws NoSuchJobException;
 	
 	/**
@@ -739,7 +709,7 @@ public interface ServiceInterface {
 	 * @param properties the properties you want to connect to the job
 	 * @throws NoSuchJobException if there is no job with this jobname in the database
 	 */
-	@WebMethod
+	
 	public void addJobProperties(String jobname, Map<String, String> properties) throws NoSuchJobException;
 	
 	/**
@@ -749,7 +719,7 @@ public interface ServiceInterface {
 	 * @return the value
 	 * @throws NoSuchJobException 
 	 */
-	@WebMethod
+	
 	public String getJobProperty(String jobname, String key) throws NoSuchJobException;
 	
 	/**
@@ -758,7 +728,7 @@ public interface ServiceInterface {
 	 * @return the job properties
 	 * @throws NoSuchJobException 
 	 */
-	@WebMethod
+	
 	public Map<String, String> getAllJobProperties(String jobname) throws NoSuchJobException;
 	
 	
@@ -768,7 +738,7 @@ public interface ServiceInterface {
 	 * @return the fqan
 	 * @throws NoSuchJobException 
 	 */
-	@WebMethod
+	
 	public String getJobFqan(String jobname) throws NoSuchJobException;
 	
 	
@@ -796,7 +766,7 @@ public interface ServiceInterface {
 //	 * @return the id of the credential or null if it did not work
 //	 * @throws NoValidCredentialException if the credential is not valid (anymore)
 //	 */
-//	@WebMethod
+//	
 //	public Long saveDefaultCredentialToDatabase() throws NoValidCredentialException;
 	
 //	/**
@@ -805,7 +775,7 @@ public interface ServiceInterface {
 //	 * @return a list of all versions of this application (default version is on index 0) or null if no version is available
 //	 * @throws NoSuchTemplateException if a template for that particular application does not exist
 //	 */
-//	@WebMethod
+//	
 //	public String[] getVersions(String application) throws NoSuchTemplateException;
 	
 //	/**

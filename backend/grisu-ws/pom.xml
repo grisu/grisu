@@ -33,12 +33,12 @@
 			<groupId>org.codehaus.xfire</groupId>
 			<artifactId>xfire-spring</artifactId>
 			<version>1.2.6</version>
-			<exclusions>
-				<exclusion>
-					<groupId>xmlbeans</groupId>
-					<artifactId>xbean</artifactId>
-				</exclusion>
-			</exclusions>
+                        <exclusions>
+                        <exclusion>
+                                <groupId>xmlbeans</groupId>
+                                <artifactId>xbean</artifactId>
+                        </exclusion>
+                        </exclusions>
 		</dependency>
 
 		<dependency>
@@ -53,15 +53,22 @@
 			<version>1.2.6</version>
 		</dependency>
 
-		<!--
-			<dependency> <groupId>org.codehaus.xfire</groupId>
-			<artifactId>xfire-ws-security</artifactId> <version>1.2.6</version>
+		<!--    <dependency>
+			<groupId>org.codehaus.xfire</groupId>
+			<artifactId>xfire-ws-security</artifactId>
+			<version>1.2.6</version>
 			</dependency>
 		-->
 
 		<dependency>
 			<groupId>org.vpac.grisu</groupId>
 			<artifactId>grisu-core</artifactId>
+			<version>0.3-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.vpac.grisu</groupId>
+			<artifactId>grisu-xfire-interface</artifactId>
 			<version>0.3-SNAPSHOT</version>
 		</dependency>
 
@@ -83,13 +90,18 @@
 		<dependency>
 			<groupId>au.org.arcs.auth</groupId>
 			<artifactId>simpleProxyLib</artifactId>
-			<version>0.3</version>
+			<version>0.3-SNAPSHOT</version>
 		</dependency>
+		
+<!--		<dependency>-->
+<!--			<groupId>mysql</groupId>-->
+<!--			<artifactId>mysql-connector-java</artifactId>-->
+<!--			<version>5.0.5</version>-->
+<!--		</dependency>-->
 
-	</dependencies>
-	
-	<build>
-		<finalName>grisu-ws</finalName>
+  </dependencies>
+      	<build>
+            <finalName>grisu-ws</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

@@ -8,7 +8,7 @@ import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.annotations.EnableMTOM;
 import org.codehaus.xfire.service.invoker.AbstractInvoker;
 import org.ietf.jgss.GSSException;
-import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.XFireServiceInterface;
 import org.vpac.grisu.control.ServiceTemplateManagement;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
@@ -29,7 +29,7 @@ import org.vpac.security.light.control.VomsesFiles;
 @EnableMTOM
 @WebService(endpointInterface = "org.vpac.grisu.control.ServiceInterface", targetNamespace = "http://grisu.vpac.org/grisu-ws" )
 public class WsServiceInterface extends AbstractServiceInterface implements
-		ServiceInterface {
+		XFireServiceInterface {
 	
 	private ProxyCredential credential = null;
 	

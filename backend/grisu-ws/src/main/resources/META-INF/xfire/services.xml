@@ -3,7 +3,7 @@
 	<service>
 		<name>grisu</name>
 		<serviceClass>
-			org.vpac.grisu.control.ServiceInterface
+			org.vpac.grisu.control.XFireServiceInterface
 		</serviceClass>
 		<implementationClass>
 			org.vpac.grisu.control.serviceInterfaces.WsServiceInterface

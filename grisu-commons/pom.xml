@@ -33,11 +33,11 @@
 		</dependency>
 
 
-		<dependency>
+<!-- 		<dependency>
 			<groupId>xfire</groupId>
 			<artifactId>xfire-jsr181-api</artifactId>
 			<version>1.0-M1</version>
-		</dependency>
+		</dependency> -->
 
 		<dependency>
 			<groupId>commons-configuration</groupId>
@@ -76,7 +76,7 @@
 		<dependency>
 			<groupId>org.vpac.historyRepeater</groupId>
 			<artifactId>historyRepeater</artifactId>
-			<version>0.2</version>
+			<version>0.1</version>
 		</dependency>
   </dependencies>
   	<build>
