@@ -20,8 +20,8 @@ import org.apache.commons.vfs.FileSystem;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemOptions;
 import org.apache.commons.vfs.impl.DefaultFileSystemManager;
-import org.apache.commons.vfs.provider.gsiftp.GsiFtpFileProvider;
-import org.apache.commons.vfs.provider.gsiftp.GsiFtpFileSystemConfigBuilder;
+import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileProvider;
+import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileSystemConfigBuilder;
 import org.apache.commons.vfs.provider.local.DefaultLocalFileProvider;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
@@ -414,9 +414,9 @@ public class User {
 		FileSystemOptions opts = new FileSystemOptions();
 
 		if (mp.getRootUrl().startsWith("gsiftp")) {
-			GsiFtpFileSystemConfigBuilder builder = GsiFtpFileSystemConfigBuilder
-					.getInstance();
-			builder.setCredential(opts, credToUse.getGssCredential());
+			GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
+			.getInstance();
+			builder.setGSSCredential(opts, credToUse.getGssCredential());
 			// builder.setUserDirIsRoot(opts, true);
 		}
 
@@ -500,7 +500,7 @@ public class User {
 			// FileSystemManager fsmanager = VFS.getManager();
 			DefaultLocalFileProvider fileProvider = new DefaultLocalFileProvider();
 			getFsManager().addProvider("file", fileProvider);
-			GsiFtpFileProvider provider = new GsiFtpFileProvider();
+			GridFtpFileProvider provider = new GridFtpFileProvider();
 			getFsManager().addProvider("gsiftp", provider);
 			// fsmanager.setCacheStrategy(CacheStrategycred.ON_RESOLVE);
 			getFsManager().setCacheStrategy(CacheStrategy.ON_RESOLVE);
