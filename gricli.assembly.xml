@@ -7,11 +7,18 @@
 		<format>jar</format>
 	</formats>
 	<includeBaseDirectory>false</includeBaseDirectory>
+	<dependencySets>
+		<dependencySet>
+			<unpack>true</unpack>
+			<scope>runtime</scope>
+		</dependencySet>
+	</dependencySets>
+
 	<moduleSets>
 		<moduleSet>
 			<includes>
 				<include>org.vpac.grisu:gricli</include>
-				<include>org.vpac.grisu:grisu-client-xfire</include>
+				<include>org.vpac.grisu:grisu-client-cxf</include>
 			</includes>
 			<binaries>
 <!--				<outputDirectory>modules/${artifactId}</outputDirectory>-->

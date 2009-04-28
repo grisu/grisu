@@ -23,6 +23,7 @@
 		<module>grisu-client</module>
 		<module>grisu-client-swing</module>
 		<module>grisu-client-xfire</module>
+		<module>grisu-client-cxf</module>
 		<module>grisu-client-commandline</module>
 		<module>grisu-examples</module>
 		<module>grisu-client-batch</module>

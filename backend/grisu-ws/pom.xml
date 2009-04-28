@@ -14,7 +14,7 @@
 	<name>grisu webserivce interface</name>
 	<version>0.3-SNAPSHOT</version>
 	
-	<description>grisu-ws publishes the ServiceInterface interface
+	<description>grisu-ws publishes the XFireServiceInterface interface
 		via web services and it
 		uses the xfire ws libraries for that. The grisu-client library has got
 		builtin
