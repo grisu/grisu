@@ -20,11 +20,6 @@
    <dependencies>
 	   
 	   <dependency>
-		   <groupId>xerces</groupId>
-		   <artifactId>xerces</artifactId>
-		   <version>2.4.0</version>
-	   </dependency> 
-	   <dependency>
 		   <groupId>org.apache.cxf</groupId>
 		   <artifactId>cxf-rt-core</artifactId>
 		   <version>${cxf.version}</version>
@@ -79,7 +74,6 @@
 		   <artifactId>jetty</artifactId>
 		   <version>6.1.6</version>
 	   </dependency>
-	   
 	   <dependency>
 		   <groupId>org.vpac.grisu</groupId>
 		   <artifactId>grisu-commons</artifactId>

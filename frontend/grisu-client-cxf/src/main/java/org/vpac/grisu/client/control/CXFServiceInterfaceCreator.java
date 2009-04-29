@@ -1,35 +1,30 @@
 package org.vpac.grisu.client.control;
 
-import java.util.Map;
-import java.util.HashSet;
-import java.util.HashMap;
-import org.vpac.grisu.control.serviceInterfaces.*;
-import org.vpac.grisu.client.control.cxf.*;
-import org.vpac.grisu.cxf.*;
-import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
-import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.CXFServiceInterface;
-import org.vpac.grisu.control.ServiceInterfaceCreator;
-import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
-import org.vpac.grisu.control.Environment;
-
-import org.apache.cxf.interceptor.LoggingInInterceptor;
-import org.apache.cxf.interceptor.LoggingOutInterceptor;
-
-import org.apache.cxf.aegis.databinding.AegisDatabinding;
-import org.apache.cxf.aegis.type.TypeCreationOptions;
-import org.apache.cxf.aegis.AegisContext;
-import org.apache.cxf.frontend.ServerFactoryBean;
-import javax.xml.namespace.QName; 
-import org.apache.xerces.dom.DocumentImpl;
-
 import java.io.File;
-import java.io.InputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import org.apache.commons.io.IOUtils;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.HashSet;
 
-import org.w3c.dom.Document;
+import javax.xml.namespace.QName;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.cxf.aegis.AegisContext;
+import org.apache.cxf.aegis.databinding.AegisDatabinding;
+import org.apache.cxf.interceptor.LoggingInInterceptor;
+import org.apache.cxf.interceptor.LoggingOutInterceptor;
+import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
+import org.vpac.grisu.client.control.cxf.ClientAuthInterceptor;
+import org.vpac.grisu.control.CXFServiceInterface;
+import org.vpac.grisu.control.Environment;
+import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.ServiceInterfaceCreator;
+import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+
+import com.sun.org.apache.xerces.internal.dom.DocumentImpl;
+
+
 
 public class CXFServiceInterfaceCreator implements ServiceInterfaceCreator{
 
