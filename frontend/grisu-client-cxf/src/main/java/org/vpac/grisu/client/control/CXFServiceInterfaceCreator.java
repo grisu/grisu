@@ -11,22 +11,29 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.CXFServiceInterface;
 import org.vpac.grisu.control.ServiceInterfaceCreator;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.control.Environment;
 
 import org.apache.cxf.interceptor.LoggingInInterceptor;
 import org.apache.cxf.interceptor.LoggingOutInterceptor;
 
 import org.apache.cxf.aegis.databinding.AegisDatabinding;
-import org.apache.cxf.service.Service;
 import org.apache.cxf.aegis.type.TypeCreationOptions;
 import org.apache.cxf.aegis.AegisContext;
 import org.apache.cxf.frontend.ServerFactoryBean;
 import javax.xml.namespace.QName; 
-
 import org.apache.xerces.dom.DocumentImpl;
+
+import java.io.File;
+import java.io.InputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import org.apache.commons.io.IOUtils;
 
 import org.w3c.dom.Document;
 
 public class CXFServiceInterfaceCreator implements ServiceInterfaceCreator{
+
+	public static String TRUST_FILE_NAME = Environment.GRISU_DIRECTORY + File.separator + "truststore.jks";
 
 	public ServiceInterface create(String interfaceUrl,
 				       String username, char[] password, String myProxyServer, String myProxyPort, Object[] otherOptions) throws ServiceInterfaceException{
@@ -34,8 +41,22 @@ public class CXFServiceInterfaceCreator implements ServiceInterfaceCreator{
 		
 	}
 
-	// default constructor for reflection
-	public CXFServiceInterfaceCreator(){}
+	/** 
+	    configures secure connection parameters.
+	 **/
+	public CXFServiceInterfaceCreator() throws ServiceInterfaceException{
+		try {
+			if (!(new File(Environment.GRISU_DIRECTORY, "truststore.jks").exists())){
+				InputStream ts = CXFServiceInterfaceCreator.class.getResourceAsStream("/truststore.jks");
+				IOUtils.copy(ts, new FileOutputStream(TRUST_FILE_NAME));
+			}
+		}
+		catch (IOException ex){
+			throw new ServiceInterfaceException("cannot copy SSL certificate store into grisu home directory. Does "+
+							    Environment.GRISU_DIRECTORY+ " exist?",ex);
+		}
+		System.setProperty("javax.net.ssl.trustStore", TRUST_FILE_NAME);
+	}
 
 	public  ServiceInterface create(String serviceInterfaceUrl,
 						String username, String password, 
@@ -59,8 +80,6 @@ public class CXFServiceInterfaceCreator implements ServiceInterfaceCreator{
 		factory.setAddress(serviceInterfaceUrl);
 		factory.getServiceFactory().setDataBinding(aDB);
 
-		System.out.println("the location of WSDL is " + factory.getWsdlLocation());
-		//System.out.println(factory.getServiceName());
 		factory.setServiceName(new QName("http://serviceInterfaces.control.grisu.vpac.org/","grisu"));
 		factory.setWsdlLocation(serviceInterfaceUrl +"?wsdl");
 
@@ -69,9 +88,9 @@ public class CXFServiceInterfaceCreator implements ServiceInterfaceCreator{
 		factory.getOutInterceptors().add(new ClientAuthInterceptor(username,password,
 								      myproxyServer,myproxyPort));
 		ServiceInterface service = (ServiceInterface)factory.create();
-		Service s = aDB.getService();
+		/* Service s = aDB.getService();
 		
-		s.put("org.w3c.dom.Document.implementation", "org.apache.xerces.dom.DocumentImpl");
+		   s.put("org.w3c.dom.Document.implementation", "org.apache.xerces.dom.DocumentImpl"); */
 		return service;
 	} 
 

@@ -77,6 +77,13 @@
 						<descriptor>grisu-client-batch.assembly.xml</descriptor>
 					</descriptors>
 
+					<archive>
+						<index>true</index>
+						<manifest>
+							<addClasspath>true</addClasspath>
+						</manifest>
+					</archive> 
+
 				</configuration>
 			</plugin>
 			<plugin>

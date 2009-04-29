@@ -36,6 +36,8 @@ rm -f META-INF/INDEX.LIST
 cp ../../frontend/gricli/src/main/resources/log4j.properties .
 cp ../../frontend/gricli/MANIFEST.MF META-INF/
 jar -cf  ../gricli.jar .
+cp ../../frontend/grisu-client-cxf/src/main/resources/META-INF/spring.handlers META-INF
+jar -uf ../gricli.jar META-INF/spring.handlers
 cd ..
 #jar -i grisu-client.jar
 

@@ -21,9 +21,9 @@
 				<include>org.vpac.grisu:grisu-client-cxf</include>
 			</includes>
 			<binaries>
-<!--				<outputDirectory>modules/${artifactId}</outputDirectory>-->
+				<!-- <outputDirectory>lib</outputDirectory> -->
 				<unpack>true</unpack>
-							<excludes>
+			<excludes>
 				<exclude>junit:junit</exclude>
 				<!-- <exclude>bouncycastle:bcprov-jdk15</exclude> -->
 				<exclude>external.bouncycastle:bcprov-jdk15</exclude>
