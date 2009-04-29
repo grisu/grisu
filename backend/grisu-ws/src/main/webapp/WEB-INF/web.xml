@@ -25,9 +25,5 @@
     <servlet-name>XFire</servlet-name>
     <url-pattern>/services/*</url-pattern>
   </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>XFireServlet</servlet-name>
-    <url-pattern>/services/*</url-pattern>
-  </servlet-mapping>
 </web-app>
 

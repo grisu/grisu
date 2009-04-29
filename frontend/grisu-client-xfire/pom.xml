@@ -22,21 +22,6 @@
 		
 		<dependency>
 			<groupId>org.codehaus.xfire</groupId>
-			<artifactId>xfire-spring</artifactId>
-			<version>1.2.6</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.xbean</groupId>
-					<artifactId>xbean-spring</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.codehaus.xfire</groupId>
-					<artifactId>xfire-xmlbeans</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.xfire</groupId>
 			<artifactId>xfire-java5</artifactId>
 			<version>1.2.6</version>
 		</dependency>

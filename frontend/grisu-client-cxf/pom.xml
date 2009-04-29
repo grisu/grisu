@@ -31,32 +31,6 @@
 			<version>1.3.2</version>
 		</dependency>
 		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jetty</artifactId>
-			<version>6.1.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.vpac.grisu</groupId>
-			<artifactId>grisu-core</artifactId>
-			<version>0.3-SNAPSHOT</version>
-                        <exclusions>
-                                <exclusion>
-                                        <groupId>external.globus</groupId>
-                                        <artifactId>wsdl4j</artifactId>
-                                </exclusion>
-                        </exclusions>
-		</dependency>
-		<dependency>
-			<groupId>au.org.arcs.auth</groupId>
-			<artifactId>simpleProxyLib</artifactId>
-			<version>0.3-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.6</version>
-		</dependency>
-		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
 			<version>2.3</version>

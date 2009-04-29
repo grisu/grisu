@@ -32,11 +32,6 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jetty</artifactId>
-			<version>6.1.6</version>
-		</dependency>
-		<dependency>
 			<groupId>org.vpac.grisu</groupId>
 			<artifactId>grisu-core</artifactId>
 			<version>0.3-SNAPSHOT</version>
@@ -60,7 +55,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.6</version>
+			<version>5.1.7</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>
