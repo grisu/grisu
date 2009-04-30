@@ -84,7 +84,7 @@ import org.xml.sax.SAXException;
  * @author Markus Binsteiner
  * 
  */
-abstract class AbstractServiceInterface implements ServiceInterface {
+public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	static final Logger myLogger = Logger
 			.getLogger(AbstractServiceInterface.class.getName());
