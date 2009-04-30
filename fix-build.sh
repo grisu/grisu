@@ -24,6 +24,8 @@ rm ../grisu-0.3-SNAPSHOT-grisu-client-swing.jar
 rm -f META-INF/INDEX.LIST
 cp ../../frontend/grisu-client-swing/src/main/resources/log4j.properties .
 jar cmf ../../frontend/grisu-client-swing/MANIFEST.MF ../grisu.jar .
+cp ../../frontend/grisu-client-cxf/src/main/resources/META-INF/spring.handlers META-INF
+jar -uf ../gricli.jar META-INF/spring.handlers
 cd ..
 #jar -i grisu.jar
 
