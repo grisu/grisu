@@ -87,11 +87,6 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.7</version>
 		</dependency>
-		<dependency>
-			<groupId>au.org.arcs.auth</groupId>
-			<artifactId>simpleProxyLib</artifactId>
-			<version>0.3-SNAPSHOT</version>
-		</dependency>
 		
 <!--		<dependency>-->
 <!--			<groupId>mysql</groupId>-->
