@@ -30,13 +30,13 @@
     	<dependency>
 			<groupId>au.edu.sapac.grid</groupId>
 			<artifactId>glue-xmlbeans</artifactId>
-			<version>0.0.1</version>
+			<version>0.0.2</version>
 		</dependency>
 
 		<dependency>
 			<groupId>au.edu.sapac.grid</groupId>
 			<artifactId>mds4-client</artifactId>
-			<version>0.0.1</version>
+			<version>0.0.2</version>
 		</dependency>
 
 		<dependency>
@@ -52,7 +52,7 @@
 		<dependency>
 			<groupId>external.jglobus</groupId>
 			<artifactId>puretls</artifactId>
-			<version>0.1</version>
+			<version>1.6.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
@@ -100,9 +100,9 @@
 			<version>0.1</version>
 		</dependency>
 		<dependency>
-			<groupId>external.globus</groupId>
+			<groupId>external.jglobus</groupId>
 			<artifactId>cog-url</artifactId>
-			<version>0.1</version>
+			<version>1.6.0</version>
 		</dependency>
 		<dependency>
 			<groupId>external.globus</groupId>
