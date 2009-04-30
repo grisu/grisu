@@ -81,8 +81,8 @@ public class Utils {
 			if ( em == null || "".equals(em) ) {
 				message_new = e.getLocalizedMessage();
 			} else {
-				message_new = em + "\n\n"
-				+ e.getLocalizedMessage();
+				message_new = em + "\n"
+				+ e.getLocalizedMessage()+"\n\n";
 			}
 		}
 		
