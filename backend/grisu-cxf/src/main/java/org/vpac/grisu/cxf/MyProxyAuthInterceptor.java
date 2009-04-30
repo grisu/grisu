@@ -37,21 +37,34 @@ public class MyProxyAuthInterceptor extends AbstractSoapInterceptor{
 		Header header = message.getHeader(new QName("","myProxyCredentials"));
 		
 		try {
-			Unmarshaller u = JAXBContext.newInstance(MyProxyCredentials.class).createUnmarshaller();
-			Object o = u.unmarshal((org.w3c.dom.Node)(header.getObject()));
-			MyProxyCredentials cred = (MyProxyCredentials)o;
-			ProxyCredential proxyCredential = createProxyCredential(cred.username, cred.password,cred.myproxyServer, Integer.parseInt(cred.myproxyPort), 99999);
-
+			MyProxyCredentials cred = null;
+			ProxyCredential proxyCredential = (ProxyCredential)message.getExchange().getSession().get("credential");
+			System.out.println("the credential is " + proxyCredential);
+			if (proxyCredential == null || !proxyCredential.isValid()){
+				
+				myLogger.debug("creating new credential...");
+				cred = retrieveProxyFromHeader(header);
+				proxyCredential = createProxyCredential(cred.username, cred.password,cred.myproxyServer, Integer.parseInt(cred.myproxyPort), 99999);
+				message.getExchange().getSession().put("credential",proxyCredential);
+			}
 			if (proxyCredential == null || !proxyCredential.isValid()){
 				throw new Fault(new LoginException(cred.username, cred.password));
 			}
 			message.put("credential",proxyCredential);
+			
 		}
 		catch (JAXBException ex){
 			// should not happen...
 			throw new Fault(ex);
 		}
 		
+	}
+
+	private MyProxyCredentials retrieveProxyFromHeader(Header h) throws JAXBException {
+		Unmarshaller u = JAXBContext.newInstance(MyProxyCredentials.class).createUnmarshaller();
+		Object o = u.unmarshal((org.w3c.dom.Node)(h.getObject()));
+		MyProxyCredentials cred = (MyProxyCredentials)o;
+		return cred;		
 	}
 
 	private ProxyCredential createProxyCredential(String username,

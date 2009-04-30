@@ -15,12 +15,12 @@
   <import resource="classpath:META-INF/cxf/cxf-extension-soap.xml"/>
   <import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
 
-<bean id="aegisBean" class="org.apache.cxf.aegis.databinding.AegisDatabinding" scope="prototype"/> 
- <bean id="jaxws-and-aegis-service-factory"
+<!-- <bean id="aegisBean" class="org.apache.cxf.aegis.databinding.AegisDatabinding" scope="prototype"/>  -->
+<!-- <bean id="jaxws-and-aegis-service-factory"
     class="org.apache.cxf.jaxws.support.JaxWsServiceFactoryBean"
     scope="prototype"> 
         <property name="dataBinding" ref="aegisBean"/>
- </bean>
+ </bean> -->
 
  <http:conduit name="*">
 

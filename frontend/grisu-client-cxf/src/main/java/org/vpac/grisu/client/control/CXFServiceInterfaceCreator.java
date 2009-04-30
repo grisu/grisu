@@ -22,8 +22,15 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.ServiceInterfaceCreator;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 
+import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.frontend.ClientProxy;
 import com.sun.org.apache.xerces.internal.dom.DocumentImpl;
 
+import org.apache.cxf.common.util.XMLSchemaQNames;
+
+import javax.activation.*;
+import org.apache.cxf.aegis.type.mtom.DataSourceType;
+import org.apache.cxf.aegis.type.mtom.DataHandlerType;
 
 
 public class CXFServiceInterfaceCreator implements ServiceInterfaceCreator{
@@ -64,9 +71,14 @@ public class CXFServiceInterfaceCreator implements ServiceInterfaceCreator{
 		acontext.setRootClasses(classes);
 		HashMap<Class<?>, String> classMap = new HashMap<Class<?>, String>();
 		classMap.put(DocumentImpl.class,"org.w3c.dom.Document");
-		acontext.setBeanImplementationMap(classMap);
+		/*acontext.setBeanImplementationMap(classMap);
 		acontext.setReadXsiTypes(true);
-		acontext.setWriteXsiTypes(true);
+		acontext.setWriteXsiTypes(true); */
+		acontext.setMtomEnabled(true);
+
+		/** System.out.println(acontext.getTypeMapping().getType(FileDataSource.class));
+		acontext.getTypeMapping().register(FileDataSource.class, XMLSchemaQNames.XSD_BASE64,
+		new DataSourceType(false, null)); **/
 
 		aDB.setAegisContext(acontext);
 
@@ -76,13 +88,30 @@ public class CXFServiceInterfaceCreator implements ServiceInterfaceCreator{
 		factory.getServiceFactory().setDataBinding(aDB);
 
 		factory.setServiceName(new QName("http://serviceInterfaces.control.grisu.vpac.org/","grisu"));
-		factory.setWsdlLocation(serviceInterfaceUrl +"?wsdl");
+		/* factory.setWsdlLocation(serviceInterfaceUrl +"?wsdl"); */
 
 		factory.getInInterceptors().add(new LoggingInInterceptor());
 		factory.getOutInterceptors().add(new LoggingOutInterceptor());
 		factory.getOutInterceptors().add(new ClientAuthInterceptor(username,password,
 								      myproxyServer,myproxyPort));
 		ServiceInterface service = (ServiceInterface)factory.create();
+		Client client = ClientProxy.getClient( service );  
+		client.getEndpoint().put( "mtom-enabled", "true" );
+
+
+		/** org.apache.cxf.aegis.type.basic.BeanType: [class=javax.activation.FileDataSource,
+QName={http://activation.javax}FileDataSource,
+info=org.apache.cxf.aegis.type.java5.AnnotatedTypeInfo@171b4ca]
+org.apache.cxf.aegis.type.mtom.DataSourceType[class=javax.activation.DataSource,
+QName={http://www.w3.org/2001/XMLSchema}base64Binary]
+org.apache.cxf.aegis.type.mtom.DataHandlerType[class=javax.activation.DataHandler,
+QName={http://www.w3.org/2001/XMLSchema}base64Binary] **/
+
+
+		System.out.println(acontext.getTypeMapping().getType(FileDataSource.class));
+		System.out.println(acontext.getTypeMapping().getTypeCreator().createType(DataSource.class));
+		System.out.println(acontext.getTypeMapping().getTypeCreator().createType(DataHandler.class));
+
 		/* Service s = aDB.getService();
 		
 		   s.put("org.w3c.dom.Document.implementation", "org.apache.xerces.dom.DocumentImpl"); */

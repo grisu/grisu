@@ -6,6 +6,8 @@ import java.util.Map;
 import javax.activation.DataSource;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
+import javax.xml.bind.annotation.XmlMimeType; 
+import org.apache.cxf.aegis.type.java5.XmlParamType; 
 
 import org.vpac.grisu.control.exceptions.JobDescriptionNotValidException;
 import org.vpac.grisu.control.exceptions.JobNotCreatedException;
