@@ -33,6 +33,8 @@ import org.vpac.grisu.js.model.Job;
 import org.vpac.security.light.voms.VO;
 import org.vpac.security.light.voms.VOManagement.VOManagement;
 
+import uk.ac.dl.escience.vfs.util.VFSUtil;
+
 /**
  * The User class holds all the relevant data a job could want to know from the
  * user it is running under. This class belongs to the three central classes of grisu (the other two are {@link ServiceInterface} and
@@ -496,14 +498,17 @@ public class User {
 	 */
 	private DefaultFileSystemManager getFsManager() throws FileSystemException {
 		if (fsmanager == null) {
-			fsmanager = new DefaultFileSystemManager();
+			
+			fsmanager = VFSUtil.createNewFsManager(false, false, true, true, true, true, null);
+//			fsmanager = new DefaultFileSystemManager();
 			// FileSystemManager fsmanager = VFS.getManager();
-			DefaultLocalFileProvider fileProvider = new DefaultLocalFileProvider();
-			getFsManager().addProvider("file", fileProvider);
-			GridFtpFileProvider provider = new GridFtpFileProvider();
-			getFsManager().addProvider("gsiftp", provider);
+//			DefaultLocalFileProvider fileProvider = new DefaultLocalFileProvider();
+//			getFsManager().addProvider("file", fileProvider);
+//			GridFtpFileProvider provider = new GridFtpFileProvider();
+//			getFsManager().addProvider("gsiftp", provider);
 			// fsmanager.setCacheStrategy(CacheStrategycred.ON_RESOLVE);
-			getFsManager().setCacheStrategy(CacheStrategy.ON_RESOLVE);
+						
+			fsmanager.setCacheStrategy(CacheStrategy.ON_RESOLVE);
 //			getFsManager().setCacheStrategy(CacheStrategy.MANUAL);
 
 			getFsManager().init();

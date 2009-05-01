@@ -21,6 +21,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.apache.bcel.classfile.SourceFile;
 import org.apache.commons.vfs.AllFileSelector;
 import org.apache.commons.vfs.FileContent;
 import org.apache.commons.vfs.FileObject;
@@ -28,6 +29,7 @@ import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileType;
 import org.apache.commons.vfs.FileTypeSelector;
 import org.apache.log4j.Logger;
+import org.globus.ftp.MarkerListener;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.JobCreationException;
 import org.vpac.grisu.control.ServiceInterface;
@@ -63,6 +65,9 @@ import org.vpac.security.light.voms.VOManagement.VOManagement;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+
+import uk.ac.dl.escience.vfs.util.MarkerListenerImpl;
+import uk.ac.dl.escience.vfs.util.VFSUtil;
 
 
 /**
@@ -108,6 +113,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	protected String[] currentFqans = null;
 
 	protected FileSystemStructureToXMLConverter fsconverter = null;
+	
+	protected MarkerListener dummyMarker = new MarkerListenerImpl();
 	
 	public double getInterfaceVersion() {
 		return ServiceInterface.INTERFACE_VERSION;
@@ -2007,6 +2014,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						+ source + ": " + "InputFile does not exist.");
 			}
 
+			//TODO check whether target is folder, if so, continue, also don't worry about deleting the file because the VFSUtil method takes care of that
 			if (!overwrite && target_file.exists()) {
 				throw new RemoteFileSystemException("Could not copy to file: "
 						+ target + ": " + "InputFile exists.");
@@ -2019,13 +2027,21 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 			myLogger.debug("Copying: " + source_file.getName().toString()
 					+ " to: " + target_file.getName().toString());
-			target_file.copyFrom(source_file, new AllFileSelector());
-
-			if (!target_file.exists()) {
-				throw new RemoteFileSystemException("Could not copy file: "
-						+ source + " to: " + target
-						+ ": target file does not exist after copying.");
+//			target_file.copyFrom(source_file, new AllFileSelector());
+//
+//			if (!target_file.exists()) {
+//				throw new RemoteFileSystemException("Could not copy file: "
+//						+ source + " to: " + target
+//						+ ": target file does not exist after copying.");
+//			}
+			
+			try {
+				VFSUtil.copy(source_file, target_file, dummyMarker, true);
+			} catch (IOException e) {
+				throw new RemoteFileSystemException("Could not copy \"" + source
+						+ "\" to \"" + target + "\": " + e.getMessage());
 			}
+			
 		} catch (FileSystemException e) {
 			throw new RemoteFileSystemException("Could not copy \"" + source
 					+ "\" to \"" + target + "\": " + e.getMessage());
