@@ -1,5 +1,3 @@
-
-
 package org.vpac.grisu.client.view.swing.files;
 
 import java.awt.Component;
@@ -36,6 +34,8 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
@@ -75,7 +75,7 @@ public class SiteFileChooserPanel extends JPanel implements FileManagerListener 
 			.getName());
 
 	private JList list;
-	private JTextField pathTextField;
+	private JLabel pathTextField;
 	private JComboBox fileSystemComboBox;
 	private JComboBox siteComboBox;
 
@@ -174,8 +174,8 @@ public class SiteFileChooserPanel extends JPanel implements FileManagerListener 
 			add(pathLabel, new CellConstraints(6, 2));
 		}
 		{
-			pathTextField = new JTextField();
-			pathTextField.setEditable(false);
+			pathTextField = new JLabel();
+			pathTextField.setBorder(new EmptyBorder(0, 0, 0, 0));
 			add(pathTextField, new CellConstraints(8, 2, 3, 1,
 					CellConstraints.FILL, CellConstraints.DEFAULT));
 		}
@@ -540,6 +540,7 @@ public class SiteFileChooserPanel extends JPanel implements FileManagerListener 
 			});
 
 			// $hide>>$
+
 			list.setCellRenderer(new BackendFileObjectCellRenderer());
 			// $hide<<$
 			list.addMouseListener(new MouseAdapter() {

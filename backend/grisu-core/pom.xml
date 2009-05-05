@@ -266,6 +266,12 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>au.org.arcs.grid</groupId>
+			<artifactId>matchmaker</artifactId>
+			<version>0.0.2-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>au.edu.apac.genericgridclient</groupId>-->
 <!--			<artifactId>commons-vfs-grid</artifactId>-->

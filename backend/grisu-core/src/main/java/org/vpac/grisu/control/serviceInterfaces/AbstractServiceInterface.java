@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,9 +20,7 @@ import java.util.TreeSet;
 import javax.activation.DataSource;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.xpath.XPathExpressionException;
 
-import org.apache.bcel.classfile.SourceFile;
 import org.apache.commons.vfs.AllFileSelector;
 import org.apache.commons.vfs.FileContent;
 import org.apache.commons.vfs.FileObject;
@@ -60,14 +59,15 @@ import org.vpac.grisu.js.control.job.gt4.GT4Submitter;
 import org.vpac.grisu.js.model.Job;
 import org.vpac.grisu.js.model.JobDAO;
 import org.vpac.grisu.js.model.utils.JsdlHelpers;
+import org.vpac.grisu.model.GridResource;
 import org.vpac.security.light.voms.VO;
 import org.vpac.security.light.voms.VOManagement.VOManagement;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
-import uk.ac.dl.escience.vfs.util.MarkerListenerImpl;
 import uk.ac.dl.escience.vfs.util.VFSUtil;
+import au.org.arcs.grid.grisu.matchmaker.MatchMakerImpl;
+import au.org.arcs.grid.sched.MatchMaker;
 
 
 /**
@@ -114,7 +114,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	protected FileSystemStructureToXMLConverter fsconverter = null;
 	
-	protected MarkerListener dummyMarker = new MarkerListenerImpl();
+	protected MarkerListener dummyMarker = new DummyMarkerImpl();
+	
+	protected MatchMaker matchmaker = new MatchMakerImpl();
 	
 	public double getInterfaceVersion() {
 		return ServiceInterface.INTERFACE_VERSION;
@@ -2221,6 +2223,22 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return getApplicationDetails(application,
 				getDefaultVersionForApplicationAtSite(application, site), site);
 
+	}
+	
+	public List<GridResource> findMatchingSubmissionLocations(Document jsdl, String fqan) {
+		
+		LinkedList<String> result = new LinkedList<String>();
+		
+		List<GridResource> resources = matchmaker.findMatchingResources(jsdl, fqan);
+
+		return resources;
+//
+//		for ( GridResource gr : resources ) {
+//			result.add(gr.getQueueName()+":"+gr.getContactString());
+//		}
+//		
+//		
+//		return result;
 	}
 
 	/* (non-Javadoc)

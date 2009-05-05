@@ -59,6 +59,9 @@ public class CachedMdsInformationManager implements InformationManager {
 
 	private Map<String, String[]> allVersionsOfApplication = new HashMap<String, String[]>();
 	private Map<String, String[]> submissionLocationsPerStagingFileSystem = new HashMap<String, String[]>();
+	
+	private Map<String, String> cachedJobManagers = new HashMap<String, String>();
+	private Map<String, String> cachedCreatedSubmissionLocations = new HashMap<String, String>();
 
 //	private Map<String, String> defaultStorageElementForSubmissionLocation = new HashMap<String, String>();
 	
@@ -90,6 +93,10 @@ public class CachedMdsInformationManager implements InformationManager {
 
 			allVersionsOfApplication = new HashMap<String, String[]>();
 			submissionLocationsPerStagingFileSystem = new HashMap<String, String[]>();
+			
+			cachedJobManagers = new HashMap<String, String>();
+			cachedCreatedSubmissionLocations = new HashMap<String, String>();
+			
 			lastUpdated = new Date();
 		}
 	}
@@ -461,7 +468,7 @@ public class CachedMdsInformationManager implements InformationManager {
 				// all the queues
 				String[] contactStrings = client.getContactStringOfQueueAtSite(
 						sites[i], queues[j]);
-				String jobManager = client.getJobManagerOfQueueAtSite(sites[i],
+				String jobManager = getJobmanagerOfQueueAtSite(sites[i],
 						queues[j]);
 
 				for (int k = 0; contactStrings != null
@@ -482,7 +489,43 @@ public class CachedMdsInformationManager implements InformationManager {
 		}
 		return list.toArray(new String[list.size()]);
 	}
+	
+	public String createSubmissionLocationString(String contactString, String queue) {
+		
+		
+		
+		String hostname = contactString.substring(
+				contactString.indexOf("https://") != 0 ? 0 : 8,
+				contactString.indexOf(":8443"));
+		
+		String site = getSiteForHostOrUrl(hostname);
+		
+		String jobmanager = getJobmanagerOfQueueAtSite(site, queue);
+		
+		StringBuffer result = new StringBuffer(queue);
+		result.append(":");
+		result.append(hostname);
+		if ( jobmanager != null ) {
+			if (jobmanager.toLowerCase().indexOf("pbs") < 0) {
+				result.append("#");
+				result.append(jobmanager);
+			} 
+		}
+		return result.toString();
+	}
+	
 
+	private String getJobmanagerOfQueueAtSite(String site, String queue) {
+		
+		String key = site+queue;
+		
+		if ( cachedJobManagers.get(key) == null ) {
+			String jobManager = client.getJobManagerOfQueueAtSite(site, queue);
+			cachedJobManagers.put(key, jobManager);
+		}
+		return cachedJobManagers.get(key);
+	}
+	
 	private String[] getContactStringsForSitesWithApplication(String[] sites,
 			String application, String version) {
 		List<String> list = new ArrayList<String>();

@@ -454,4 +454,10 @@ public class MdsInformationManager implements InformationManager {
 		return null;
 	}
 
+	public String createSubmissionLocationString(String contactString,
+			String queue) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

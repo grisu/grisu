@@ -1,24 +1,22 @@
 package org.vpac.grisu.control;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import javax.activation.DataSource;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
-import javax.xml.bind.annotation.XmlMimeType; 
-import org.apache.cxf.aegis.type.java5.XmlParamType; 
 
 import org.vpac.grisu.control.exceptions.JobDescriptionNotValidException;
-import org.vpac.grisu.control.exceptions.JobNotCreatedException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
-import org.vpac.grisu.control.exceptions.NoSuchMountPointException;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.exceptions.ServerJobSubmissionException;
 import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.fs.model.MountPoint;
+import org.vpac.grisu.model.GridResource;
 import org.w3c.dom.Document;
 
 /**
@@ -89,6 +87,8 @@ public interface CXFServiceInterface extends ServiceInterface{
 	public Map<String, String> getApplicationDetails(String application, String version, String site);
 	@WebMethod(operationName="getApplicationDetails2")
 	public Map<String, String> getApplicationDetails(String application, String site_or_submissionLocation);
+	@WebMethod
+	public List<GridResource> findMatchingSubmissionLocations(Document jsdl, String fqan);
 	@WebMethod(operationName="mount1")
 	public MountPoint mount(String url, String mountpoint, boolean useHomeDirectoryOnThisFileSystemIfPossible) throws RemoteFileSystemException, VomsException;
 	@WebMethod(operationName="mount2")

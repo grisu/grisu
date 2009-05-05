@@ -157,4 +157,12 @@ public interface InformationManager {
 	 * @return the submission locations
 	 */
 	public String[] getAllSubmissionLocationsForVO(String fqan);
+	
+	/**
+	 * More of a helper method for other classes to create a submission location string as used with Grisu
+	 * @param contactString the contact string (ala https://ng2.vpac.org:8443/wsrf/services/ManagedJobFactoryService)
+	 * @param queue the queue (needs to be accessible via above contact string)
+	 * @return the submission location string as used with Grisu
+	 */
+	public String createSubmissionLocationString(String contactString, String queue);
 }
