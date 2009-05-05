@@ -1,6 +1,7 @@
 package org.vpac.grisu.control;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import javax.activation.DataSource;
@@ -15,6 +16,7 @@ import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.exceptions.ServerJobSubmissionException;
 import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.fs.model.MountPoint;
+import org.vpac.grisu.model.GridResource;
 import org.w3c.dom.Document;
 
 /**
@@ -26,7 +28,7 @@ import org.w3c.dom.Document;
  */
 public interface ServiceInterface {
 	
-	public static final double INTERFACE_VERSION = 6;
+	public static final double INTERFACE_VERSION = 7;
 	
 	//---------------------------------------------------------------------------------------------------
 	// 
@@ -345,6 +347,14 @@ public interface ServiceInterface {
 	 */
 	
 	public Map<String, String> getApplicationDetails(String application, String site_or_submissionLocation);
+	
+	/**
+	 * Takes a jsdl template and returns a list of submission locations that match the requirements. The order of the list is determined by the underlying ranking algorithm.
+	 * @param jsdl the jdsl file
+	 * @param fqan the fqan to use to submit the job
+	 * @return a list of matching submissionLoctations
+	 */
+	public List<GridResource> findMatchingSubmissionLocations(Document jsdl, String fqan);
 	
 	
 	//---------------------------------------------------------------------------------------------------
