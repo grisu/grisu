@@ -1,4 +1,4 @@
-package org.vpac.grisu.js.model.utils;
+package org.vpac.grisu.control.utils;
 
 import java.io.File;
 import java.io.IOException;
