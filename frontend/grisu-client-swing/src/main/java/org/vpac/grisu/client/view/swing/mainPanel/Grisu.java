@@ -11,8 +11,6 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -51,8 +49,8 @@ import org.vpac.grisu.client.view.swing.utils.Utils;
 import org.vpac.grisu.control.Environment;
 import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.utils.ClasspathHacker;
 import org.vpac.grisu.control.utils.GrisuPluginFilenameFilter;
-import org.vpac.grisu.js.model.utils.ClasspathHacker;
 import org.vpac.helpDesk.control.HelpDeskManager;
 import org.vpac.helpDesk.model.HelpDesk;
 import org.vpac.helpDesk.model.HelpDeskNotAvailableException;
@@ -744,20 +742,7 @@ public class Grisu implements WindowListener {
 			}
 			
 		}
-	
-//		
-        //Get the System Classloader
-        ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader();
-
-        //Get the URLs
-        URL[] urls2 = ((URLClassLoader)sysClassLoader).getURLs();
-
-        for(int i=0; i< urls2.length; i++)
-        {
-//        	if ( urls2[i].toString().contains("plugins") ) {
-        		System.out.println(urls2[i].getFile());
-//        	}
-        }    
+ 
 	}
 	
 	
