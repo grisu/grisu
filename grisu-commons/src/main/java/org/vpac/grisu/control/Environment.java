@@ -25,6 +25,8 @@ public class Environment {
 	
 	final public static String AXIS_CLIENT_CONFIG = GLOBUS_HOME+File.separator+"client-config.wsdd";
 
+	public static final String GRISU_PLUGIN_DIRECTORY = GRISU_DIRECTORY+File.separator+"plugins";
+
 	/**
 	 * For some jobs/applications it is useful to cache output files locally so they don't have to be transferred 
 	 * over and over again
