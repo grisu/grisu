@@ -490,32 +490,10 @@ public class CachedMdsInformationManager implements InformationManager {
 		return list.toArray(new String[list.size()]);
 	}
 	
-	public String createSubmissionLocationString(String contactString, String queue) {
-		
-		
-		
-		String hostname = contactString.substring(
-				contactString.indexOf("https://") != 0 ? 0 : 8,
-				contactString.indexOf(":8443"));
-		
-		String site = getSiteForHostOrUrl(hostname);
-		
-		String jobmanager = getJobmanagerOfQueueAtSite(site, queue);
-		
-		StringBuffer result = new StringBuffer(queue);
-		result.append(":");
-		result.append(hostname);
-		if ( jobmanager != null ) {
-			if (jobmanager.toLowerCase().indexOf("pbs") < 0) {
-				result.append("#");
-				result.append(jobmanager);
-			} 
-		}
-		return result.toString();
-	}
+
 	
 
-	private String getJobmanagerOfQueueAtSite(String site, String queue) {
+	public String getJobmanagerOfQueueAtSite(String site, String queue) {
 		
 		String key = site+queue;
 		

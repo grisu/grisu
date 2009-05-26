@@ -146,5 +146,10 @@ public class JobConstants {
 	public static final String JOBPROPERTYKEY_HOSTNAME = "hostname";
 	public static final String JOBPROPERTYKEY_STATUS = "status";
 	
+	public static final String WALLTIME_REQUIREMENT_KEY = "walltime";
+	public static final String TOTALCPUREQUIREMENT_KEY = "totalCpu";
+	public static final String APPLICATIONNAME_KEY = "applicationName";
+	public static final String APPLICATIONVERSION_KEY = "applicationVersion";
+	
 	
 }

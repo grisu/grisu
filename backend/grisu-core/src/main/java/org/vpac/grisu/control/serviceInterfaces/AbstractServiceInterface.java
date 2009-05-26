@@ -18,8 +18,10 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.activation.DataSource;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.vfs.AllFileSelector;
 import org.apache.commons.vfs.FileContent;
@@ -34,6 +36,7 @@ import org.vpac.grisu.control.JobCreationException;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.SeveralXMLHelpers;
 import org.vpac.grisu.control.exceptions.JobDescriptionNotValidException;
+import org.vpac.grisu.control.exceptions.NoSubmissionLocationException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -59,6 +62,7 @@ import org.vpac.grisu.js.control.job.gt4.GT4Submitter;
 import org.vpac.grisu.js.model.Job;
 import org.vpac.grisu.js.model.JobDAO;
 import org.vpac.grisu.js.model.utils.JsdlHelpers;
+import org.vpac.grisu.js.model.utils.SubmissionLocationHelpers;
 import org.vpac.grisu.model.GridResource;
 import org.vpac.security.light.voms.VO;
 import org.vpac.security.light.voms.VOManagement.VOManagement;
@@ -1848,6 +1852,23 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			RemoteFileSystemException, VomsException, NoSuchJobException {
 
 		Job job = getJob(jobname);
+		
+		
+		// check whether submission location is there... if not fill it automatically using the matchmaker
+//		Document jsdl_new;
+//		try {
+//			jsdl_new = checkSubmissionLocation(job.getJobDescription(), fqan);
+//		} catch (NoSubmissionLocationException e1) {
+//			throw new ServerJobSubmissionException("No possible submission locations found.");
+//		}
+//		
+//		if ( jsdl_new != job.getJobDescription() ) {
+//			// means a submission location was set automatically 
+//			job.setJobDescription(jsdl_new);
+//			String subLoc = JsdlHelpers.getCandidateHosts(jsdl_new)[0];
+//			informationManager.getStagingFileSystemForSubmissionLocation(subLoc);
+//			JsdlHelpers.set
+//		}
 
 		// change paths within the job description to adapt to site's
 		// environment
@@ -1948,6 +1969,43 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		job.setCredential(null);
 		jobdao.attachDirty(job);
 	}
+	
+//	/**
+//	 * Checks whether submission location is present. If so, it returns the same Document, if not it auto-fills it and returns the new Document...
+//	 * @param jsdl_orig the jsdl document
+//	 * @return a ready-to-go jsdl document 
+//	 * @throws NoSubmissionLocationException 
+//	 */
+//	private Document checkSubmissionLocation(Document jsdl_orig, String fqan) throws NoSubmissionLocationException {
+//		
+//		String[] subLocs = JsdlHelpers.getCandidateHosts(jsdl_orig);
+//		
+//		if ( subLocs != null && subLocs.length > 0 ) {
+//			return jsdl_orig;
+//		}
+//		
+//		// start processing
+//		List<GridResource> resources = matchmaker.findMatchingResources(jsdl_orig, fqan);
+//		
+//		if ( resources == null || resources.size() == 0 ) {
+//			throw new NoSubmissionLocationException("Could not find submissionlocation for this jsdl and the "+fqan+" vo.");
+//		}
+//		
+//		Document jsdl_new = null;
+//		try {
+//			jsdl_new = SeveralXMLHelpers.fromString(SeveralXMLHelpers.toString(jsdl_orig));
+//		} catch (Exception e) {
+//			throw new RuntimeException("Could not create new jsdl document...");
+//		}
+//		
+//		try {
+//			JsdlHelpers.addCandidateHosts(jsdl_new, new String[]{SubmissionLocationHelpers.createSubmissionLocationString(resources.get(0))});
+//		} catch (XPathExpressionException e) {
+//			throw new RuntimeException("Could not add submission locations to jsdl file: "+e.getLocalizedMessage());
+//		}
+//		
+//		return jsdl_new;
+//	}
 
 	/* (non-Javadoc)
 	 * @see org.vpac.grisu.control.ServiceInterface#kill(java.lang.String, boolean)
@@ -2223,6 +2281,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return getApplicationDetails(application,
 				getDefaultVersionForApplicationAtSite(application, site), site);
 
+	}
+	
+	public List<GridResource> findMatchingSubmissionLocations(Map<String, String> jobProperties, String fqan) {
+		
+		LinkedList<String> result = new LinkedList<String>();
+		
+		List<GridResource> resources = matchmaker.findMatchingResources(jobProperties, fqan);
+
+		return resources;
 	}
 	
 	public List<GridResource> findMatchingSubmissionLocations(Document jsdl, String fqan) {

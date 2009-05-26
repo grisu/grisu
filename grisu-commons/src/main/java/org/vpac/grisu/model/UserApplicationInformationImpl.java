@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.vpac.grisu.control.GrisuRegistry;
+import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 
 
@@ -59,6 +60,17 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 			}
 		}
 		return cachedAllVersionsForUser;
+	}
+
+	public List<GridResource> getBestSubmissionLocations(
+			Map<String, String> additionalJobProperties, String fqan) {
+
+		Map<String, String> basicJobProperties = new HashMap<String, String>();
+		basicJobProperties.put(JobConstants.APPLICATIONNAME_KEY, getApplicationName());
+		
+		basicJobProperties.putAll(additionalJobProperties);
+		
+		return serviceInterface.findMatchingSubmissionLocations(basicJobProperties, fqan);
 	}
 	
 

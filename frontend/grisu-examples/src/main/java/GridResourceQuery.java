@@ -3,6 +3,7 @@ import java.util.List;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.SeveralXMLHelpers;
+import org.vpac.grisu.js.model.utils.SubmissionLocationHelpers;
 import org.vpac.grisu.model.GridResource;
 import org.w3c.dom.Document;
 
@@ -18,7 +19,7 @@ public class GridResourceQuery {
 		List<GridResource> result = si.findMatchingSubmissionLocations(jsdl, "/ARCS/StartUp");
 		
 		for ( GridResource temp : result ) {
-			System.out.println("SubmissionLocation: "+temp.getQueueName()+":"+temp.getContactString());
+			System.out.println("SubmissionLocation: "+SubmissionLocationHelpers.createSubmissionLocationString(temp));
 		}
 		
 		

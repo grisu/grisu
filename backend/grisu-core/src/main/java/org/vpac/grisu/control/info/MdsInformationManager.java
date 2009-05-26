@@ -460,4 +460,9 @@ public class MdsInformationManager implements InformationManager {
 		return null;
 	}
 
+	public String getJobmanagerOfQueueAtSite(String site, String queue) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

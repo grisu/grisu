@@ -356,6 +356,14 @@ public interface ServiceInterface {
 	 */
 	public List<GridResource> findMatchingSubmissionLocations(Document jsdl, String fqan);
 	
+	/**
+	 * Takes a jsdl template and returns a list of submission locations that match the requirements. The order of the list is determined by the underlying ranking algorithm.
+	 * @param jobProperties the job Properties (have alook at the {@link ServiceInterface} interface for supported keys)
+	 * @param fqan the fqan to use to submit the job
+	 * @return a list of matching submissionLoctations
+	 */
+	public List<GridResource> findMatchingSubmissionLocations(Map<String, String> jobProperties, String fqan);
+	
 	
 	//---------------------------------------------------------------------------------------------------
 	// 

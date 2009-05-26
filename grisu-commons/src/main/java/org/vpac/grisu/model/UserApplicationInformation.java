@@ -1,5 +1,7 @@
 package org.vpac.grisu.model;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -36,6 +38,14 @@ public interface UserApplicationInformation extends ApplicationInformation {
 	 * @return all available versions
 	 */
 	public Set<String> getAllAvailableVersionsForUser();
+	
+	/**
+	 * Calculates the best {@link GridResource}s to submit this job to.
+	 * @param additionalJobProperties additional job properties (e.g. walltime). Have a look at the MatchMaker interface for supported keys.
+	 * @param fqan the fqan to submit the job with
+	 * @return a sorted list of the best resources to submit this job to.
+	 */
+	public List<GridResource> getBestSubmissionLocations(Map<String, String> additionalJobProperties, String fqan);
 	
 
 
