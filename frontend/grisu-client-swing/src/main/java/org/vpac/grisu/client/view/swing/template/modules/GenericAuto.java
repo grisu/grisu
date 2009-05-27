@@ -5,9 +5,10 @@ import javax.swing.JPanel;
 import org.vpac.grisu.client.TemplateTagConstants;
 import org.vpac.grisu.client.control.template.ModuleException;
 import org.vpac.grisu.client.view.swing.template.AbstractModulePanel;
-import org.vpac.grisu.client.view.swing.template.modules.genericAuto.GridResourceSuggestionPanel;
 import org.vpac.grisu.client.view.swing.template.panels.CPUs;
 import org.vpac.grisu.client.view.swing.template.panels.Email;
+import org.vpac.grisu.client.view.swing.template.panels.ExecutionFileSystem;
+import org.vpac.grisu.client.view.swing.template.panels.GridResourceSuggestionPanel;
 import org.vpac.grisu.client.view.swing.template.panels.JobName;
 import org.vpac.grisu.client.view.swing.template.panels.MemoryInputPanel;
 import org.vpac.grisu.client.view.swing.template.panels.TemplateNodePanelException;
@@ -29,6 +30,9 @@ public class GenericAuto extends AbstractModulePanel {
 	private MemoryInputPanel memoryInputPanel;
 	private CPUs cpus;
 	private JobName jobName;
+	
+	private ExecutionFileSystem executionFileSystem = new ExecutionFileSystem();
+	
 	public GenericAuto() {
 		super();
 		setLayout(new FormLayout(
@@ -65,11 +69,11 @@ public class GenericAuto extends AbstractModulePanel {
 		
 		// needs to be done before template node is set...
 		this.template.getTemplateNodes().get(TemplateTagConstants.VERSION_TAG_NAME).setTemplateNodeValueSetter(getVersion());
-		getGridResourceSuggestionPanel().setTemplateNode(this.templateModule.getTemplateNodes().get(TemplateTagConstants.HOSTNAME_TAG_NAME));
-			
+		this.template.getTemplateNodes().get(TemplateTagConstants.HOSTNAME_TAG_NAME).setTemplateNodeValueSetter(getGridResourceSuggestionPanel());
+		this.template.getTemplateNodes().get(TemplateTagConstants.EXECUTIONFILESYSTEM_TAG_NAME).setTemplateNodeValueSetter(executionFileSystem);
 		
 		try {
-			
+			getGridResourceSuggestionPanel().setTemplateNode(this.templateModule.getTemplateNodes().get(TemplateTagConstants.HOSTNAME_TAG_NAME));
 			getJobName().setTemplateNode(this.templateModule.getTemplateNodes().get(TemplateTagConstants.JOBNAME_TAG_NAME));
 			getCpus().setTemplateNode(this.templateModule.getTemplateNodes().get(TemplateTagConstants.CPUS_TAG_NAME));
 			getEmail().setTemplateNode(this.templateModule.getTemplateNodes().get(TemplateTagConstants.EMAIL_ADDRESS_TAG_NAME));
@@ -80,6 +84,7 @@ public class GenericAuto extends AbstractModulePanel {
 		} catch (TemplateNodePanelException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			throw new ModuleException(this.getTemplateModule(), e);
 		}
 		
 	}

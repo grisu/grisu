@@ -1,4 +1,4 @@
-package org.vpac.grisu.client.view.swing.template.modules.genericAuto;
+package org.vpac.grisu.client.view.swing.template.panels;
 
 import java.util.HashMap;
 import java.util.List;
@@ -8,19 +8,16 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
-import org.vpac.grisu.client.model.template.JsdlTemplate;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.TemplateNodeEvent;
-import org.vpac.grisu.client.view.swing.template.panels.TemplateNodePanel;
-import org.vpac.grisu.client.view.swing.template.panels.TemplateNodePanelException;
-import org.vpac.grisu.client.view.swing.template.panels.ValueListener;
-import org.vpac.grisu.client.view.swing.template.panels.Version;
 import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.JobConstants;
+import org.vpac.grisu.fs.model.MountPoint;
 import org.vpac.grisu.js.model.utils.SubmissionLocationHelpers;
 import org.vpac.grisu.model.EnvironmentSnapshotValues;
 import org.vpac.grisu.model.GridResource;
 import org.vpac.grisu.model.UserApplicationInformation;
+import org.vpac.grisu.model.UserInformation;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -42,6 +39,13 @@ public class GridResourceSuggestionPanel extends JPanel implements TemplateNodeP
 	
 	private Version versionPanel = null;
 	private TemplateNode templateNode = null;
+	private ExecutionFileSystem executionFileSystemPanel = null;
+	private String currentStagingFilesystem = null;
+	
+	private final UserInformation userInformation = GrisuRegistry.getDefault()
+	.getUserInformation();
+	
+	private List<GridResource> currentBestGridResources = null;
 	
 	/**
 	 * Create the panel
@@ -108,12 +112,15 @@ public class GridResourceSuggestionPanel extends JPanel implements TemplateNodeP
 		System.out.println("Value changed: "+newValue);
 		Map<String, String> tempJobProperties = new HashMap<String, String>();
 		tempJobProperties.put(JobConstants.APPLICATIONVERSION_KEY, newValue);
-		List<GridResource> resources = infoObject.getBestSubmissionLocations(tempJobProperties, esv.getCurrentFqan());
+		currentBestGridResources = infoObject.getBestSubmissionLocations(tempJobProperties, esv.getCurrentFqan());
 		
 		try {
-			getLabel().setText(SubmissionLocationHelpers.createSubmissionLocationString(resources.get(0))+" "+resources.get(0).getRank());
-			getLabel2().setText(SubmissionLocationHelpers.createSubmissionLocationString(resources.get(1))+" "+resources.get(1).getRank());
-			getLabel3().setText(SubmissionLocationHelpers.createSubmissionLocationString(resources.get(2))+" "+resources.get(2).getRank());
+			String bestSubLoc = SubmissionLocationHelpers.createSubmissionLocationString(currentBestGridResources.get(0));
+			getLabel().setText(bestSubLoc+" "+currentBestGridResources.get(0).getRank());
+//			getLabel2().setText(SubmissionLocationHelpers.createSubmissionLocationString(currentBestGridResources.get(1))+" "+currentBestGridResources.get(1).getRank());
+//			getLabel3().setText(SubmissionLocationHelpers.createSubmissionLocationString(currentBestGridResources.get(2))+" "+currentBestGridResources.get(2).getRank());
+			
+			setStagingFS(bestSubLoc);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -163,6 +170,7 @@ public class GridResourceSuggestionPanel extends JPanel implements TemplateNodeP
 	public void setTemplateNode(TemplateNode node)
 			throws TemplateNodePanelException {
 		this.templateNode = node;
+		this.templateNode.setTemplateNodeValueSetter(this);
 		this.infoObject = GrisuRegistry.getDefault()
 		.getUserApplicationInformation(templateNode.getTemplate().getApplicationName());
 		getVersionPanel();
@@ -175,13 +183,59 @@ public class GridResourceSuggestionPanel extends JPanel implements TemplateNodeP
 	}
 
 	public String getExternalSetValue() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		if ( currentBestGridResources == null || currentBestGridResources.size() == 0 ) {
+			return null;
+		} else {
+			return SubmissionLocationHelpers.createSubmissionLocationString(currentBestGridResources.get(0));
+		}
+		
 	}
 
 	public void setExternalSetValue(String value) {
-		// TODO Auto-generated method stub
-		
+
+		// not supported
+		throw new RuntimeException("Setting the value is not supported for the GridResourceSuggestionPanel.");
+	}
+	
+	private void setStagingFS(String submissionLocation) {
+
+		MountPoint fs = userInformation.getRecommendedMountPoint(
+				submissionLocation, esv.getCurrentFqan());
+		if (getExecutionFileSystemPanel() != null) {
+			getExecutionFileSystemPanel().setExternalSetValue(fs.getRootUrl());
+		}
+
+		currentStagingFilesystem = fs.getRootUrl();
+		myLogger.debug("Set staging fs to: " + fs);
+
+	}
+	
+	private ExecutionFileSystem getExecutionFileSystemPanel() {
+
+		if (executionFileSystemPanel == null) {
+			try {
+				// try to find a templateNodevalueSetter that is a
+				// SubmissionLocationPanel
+				for (TemplateNode node : this.templateNode.getTemplate()
+						.getTemplateNodes().values()) {
+					if (node.getTemplateNodeValueSetter() instanceof ExecutionFileSystem) {
+						executionFileSystemPanel = (ExecutionFileSystem) node
+								.getTemplateNodeValueSetter();
+						setStagingFS(getExternalSetValue());
+						break;
+					}
+
+				}
+			} catch (Exception e) {
+				myLogger
+						.warn("Couldn't retrieve executionFileSystemPanel yet...");
+				executionFileSystemPanel = null;
+				return null;
+			}
+
+		}
+		return executionFileSystemPanel;
 	}
 	
 
