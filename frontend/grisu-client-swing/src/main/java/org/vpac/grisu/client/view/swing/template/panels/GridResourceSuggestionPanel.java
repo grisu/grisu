@@ -1,15 +1,22 @@
 package org.vpac.grisu.client.view.swing.template.panels;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.JLabel;
+import javax.swing.BoxLayout;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.TemplateNodeEvent;
+import org.vpac.grisu.client.view.swing.template.modules.genericAuto.GridResourceDisplayPanel;
 import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.fs.model.MountPoint;
@@ -27,15 +34,17 @@ import com.jgoodies.forms.layout.RowSpec;
 
 public class GridResourceSuggestionPanel extends JPanel implements TemplateNodePanel, ValueListener {
 	
-	private JLabel label3;
-	private JLabel label2;
+	private LineBorder selectedBorder = new LineBorder(Color.black, 5, false);
+	private LineBorder deselectedBorder = new LineBorder(Color.black, 1, false);
+	
+	private JScrollPane scrollPane;
+	private JPanel containerPanel;
 	static final Logger myLogger = Logger.getLogger(GridResourceSuggestionPanel.class.getName());
 	
 	private UserApplicationInformation infoObject = null;
 	private EnvironmentSnapshotValues esv = GrisuRegistry.getDefault()
 	.getEnvironmentSnapshotValues();
 
-	private JLabel label;
 	
 	private Version versionPanel = null;
 	private TemplateNode templateNode = null;
@@ -46,12 +55,14 @@ public class GridResourceSuggestionPanel extends JPanel implements TemplateNodeP
 	.getUserInformation();
 	
 	private List<GridResource> currentBestGridResources = null;
+	private GridResource selectedResource = null;
 	
 	/**
 	 * Create the panel
 	 */
 	public GridResourceSuggestionPanel() {
 		super();
+		setBorder(new TitledBorder(null, "Available submission locations", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
 		setLayout(new FormLayout(
 			new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
@@ -59,28 +70,12 @@ public class GridResourceSuggestionPanel extends JPanel implements TemplateNodeP
 				FormFactory.RELATED_GAP_COLSPEC},
 			new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("15px"),
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("default")}));
-		add(getLabel(), new CellConstraints("2, 2, 1, 1, fill, fill"));
-		add(getLabel2(), new CellConstraints(2, 4));
-		add(getLabel3(), new CellConstraints(2, 6));
+				RowSpec.decode("79dlu:grow(1.0)"),
+				FormFactory.RELATED_GAP_ROWSPEC}));
 		//
 	}
 	
 	
-	/**
-	 * @return
-	 */
-	protected JLabel getLabel() {
-		if (label == null) {
-			label = new JLabel();
-			label.setText("label1");
-		}
-		return label;
-	}
 	
 	private Version getVersionPanel() {
 
@@ -110,41 +105,47 @@ public class GridResourceSuggestionPanel extends JPanel implements TemplateNodeP
 	public void valueChanged(TemplateNodePanel panel, String newValue) {
 
 		System.out.println("Value changed: "+newValue);
+		
+		containerPanel.removeAll();
+		selectedResource = null;
+//		containerPanel.repaint();
+		
 		Map<String, String> tempJobProperties = new HashMap<String, String>();
 		tempJobProperties.put(JobConstants.APPLICATIONVERSION_KEY, newValue);
 		currentBestGridResources = infoObject.getBestSubmissionLocations(tempJobProperties, esv.getCurrentFqan());
 		
 		try {
-			String bestSubLoc = SubmissionLocationHelpers.createSubmissionLocationString(currentBestGridResources.get(0));
-			getLabel().setText(bestSubLoc+" "+currentBestGridResources.get(0).getRank());
-//			getLabel2().setText(SubmissionLocationHelpers.createSubmissionLocationString(currentBestGridResources.get(1))+" "+currentBestGridResources.get(1).getRank());
-//			getLabel3().setText(SubmissionLocationHelpers.createSubmissionLocationString(currentBestGridResources.get(2))+" "+currentBestGridResources.get(2).getRank());
 			
+			if ( currentBestGridResources.size() == 0 ) {
+				myLogger.warn("No grid resources. This should not happen...");
+				return;
+			}
+			
+			String bestSubLoc = SubmissionLocationHelpers.createSubmissionLocationString(currentBestGridResources.get(0));
 			setStagingFS(bestSubLoc);
+			
+			int max = 5;
+			
+			if ( currentBestGridResources.size() < 5 ) {
+				max = currentBestGridResources.size();
+			}
+			
+			for ( int i=0; i<max; i++ ) {
+				
+				GridResourceDisplayPanel resdisplaypanel = new GridResourceDisplayPanel(this, currentBestGridResources.get(i));
+				containerPanel.add(resdisplaypanel);
+				if ( i == 0 ) {
+					setCurrentlySelectedResourcePanel(resdisplaypanel);
+				}
+			}
+			containerPanel.repaint();
+			
+
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-	}
-	/**
-	 * @return
-	 */
-	protected JLabel getLabel2() {
-		if (label2 == null) {
-			label2 = new JLabel();
-			label2.setText("label2");
-		}
-		return label2;
-	}
-	/**
-	 * @return
-	 */
-	protected JLabel getLabel3() {
-		if (label3 == null) {
-			label3 = new JLabel();
-			label3.setText("New JLabel");
-		}
-		return label3;
 	}
 
 	public void addValueListener(ValueListener v) {
@@ -174,6 +175,7 @@ public class GridResourceSuggestionPanel extends JPanel implements TemplateNodeP
 		this.infoObject = GrisuRegistry.getDefault()
 		.getUserApplicationInformation(templateNode.getTemplate().getApplicationName());
 		getVersionPanel();
+		add(getScrollPane(), new CellConstraints(2, 2, CellConstraints.FILL, CellConstraints.FILL));
 		
 	}
 
@@ -183,6 +185,10 @@ public class GridResourceSuggestionPanel extends JPanel implements TemplateNodeP
 	}
 
 	public String getExternalSetValue() {
+		
+		if ( selectedResource != null ) {
+			return SubmissionLocationHelpers.createSubmissionLocationString(selectedResource);
+		}
 		
 		if ( currentBestGridResources == null || currentBestGridResources.size() == 0 ) {
 			return null;
@@ -236,6 +242,45 @@ public class GridResourceSuggestionPanel extends JPanel implements TemplateNodeP
 
 		}
 		return executionFileSystemPanel;
+	}
+	/**
+	 * @return
+	 */
+	protected JPanel getContainerPanel() {
+		if (containerPanel == null) {
+			containerPanel = new JPanel();
+			containerPanel.setLayout(new BoxLayout(containerPanel, BoxLayout.X_AXIS));
+			final FlowLayout flowLayout = new FlowLayout();
+			flowLayout.setAlignment(FlowLayout.LEFT);
+			containerPanel.setLayout(flowLayout);
+		}
+		return containerPanel;
+	}
+	/**
+	 * @return
+	 */
+	protected JScrollPane getScrollPane() {
+		if (scrollPane == null) {
+			scrollPane = new JScrollPane();
+			scrollPane.setViewportView(getContainerPanel());
+		}
+		return scrollPane;
+	}
+	
+	public void setCurrentlySelectedResourcePanel(GridResourceDisplayPanel selectedDisplayPanel) {
+	
+		for ( Component child : containerPanel.getComponents() ) {
+			GridResourceDisplayPanel displaypanel = (GridResourceDisplayPanel)child;
+			
+			// comparing references is ok in this case
+			if ( displaypanel == selectedDisplayPanel ) {
+				displaypanel.setBorder(selectedBorder);
+				selectedResource = displaypanel.getResource();
+			} else {
+				displaypanel.setBorder(deselectedBorder);
+			}
+		}
+		
 	}
 	
 

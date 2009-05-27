@@ -50,11 +50,12 @@ public class GenericAuto extends AbstractModulePanel {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("48dlu"),
 				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("51dlu"),
+				RowSpec.decode("78dlu:grow(1.0)"),
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("60dlu"),
 				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC}));
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC}));
 		add(getJobName(), new CellConstraints(2, 2, 5, 1, CellConstraints.FILL, CellConstraints.FILL));
 		add(getCpus(), new CellConstraints(8, 2, 1, 3, CellConstraints.FILL, CellConstraints.FILL));
 		add(getMemoryInputPanel(), new CellConstraints(8, 8, CellConstraints.FILL, CellConstraints.FILL));
