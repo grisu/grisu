@@ -732,6 +732,10 @@ public class Grisu implements WindowListener {
 		
 		File[] plugins = pluginFolder.listFiles(new GrisuPluginFilenameFilter());
 
+		if ( plugins == null ) {
+			return;
+		}
+		
 		for ( File plugin : plugins ) {
 			
 			try {
