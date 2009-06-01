@@ -420,7 +420,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		ProxyCredential cred = job.getCredential();
 		boolean changedCred = false;
-		// TODO check whether cred is stored in the database in that case?
+		// TODO check whether cred is stored in the database in that case? also, is a voms credential needed? -- apparently not - only dn must match
 		if (cred == null || !cred.isValid()) {
 			job.setCredential(getCredential());
 			changedCred = true;
