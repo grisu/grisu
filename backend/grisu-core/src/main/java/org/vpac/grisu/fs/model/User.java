@@ -499,7 +499,8 @@ public class User {
 	private DefaultFileSystemManager getFsManager() throws FileSystemException {
 		if (fsmanager == null) {
 			
-			fsmanager = VFSUtil.createNewFsManager(false, false, true, true, true, true, true, null);
+//			fsmanager = VFSUtil.createNewFsManager(false, false, true, true, true, true, true, null);
+			fsmanager = VFSUtil.createNewFsManager(false, false, true, true, true, true, null);
 //			fsmanager = new DefaultFileSystemManager();
 			// FileSystemManager fsmanager = VFS.getManager();
 //			DefaultLocalFileProvider fileProvider = new DefaultLocalFileProvider();
