@@ -7,13 +7,10 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import org.vpac.grisu.control.SeveralXMLHelpers;
 import org.vpac.grisu.js.model.Job;
 import org.w3c.dom.Attr;
-import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -56,10 +53,47 @@ public class JobsToXMLConverter {
 		output.appendChild(root);
 
 		for (Job job : jobs) {
-			root.appendChild(createJobElement(output, job));
-		}
+			root.appendChild(createJobElementNew(output, job));
+		} 
 
 		return output;
+	}
+	
+	public static Element createJobElementNew(Document doc, Job job) {
+		
+		Element jobElement = doc.createElement("job");
+		
+		Element jobname = doc.createElement("jobname");
+		jobname.setTextContent(job.getJobname());
+		jobElement.appendChild(jobname);
+		
+		Element status = doc.createElement("status");
+		status.setTextContent(new Integer(job.getStatus()).toString());
+		jobElement.appendChild(status);
+		
+		String host = job.getSubmissionHost();
+		if (host != null && !"".equals(host)) {
+		Element hostElement = doc.createElement("host");
+		hostElement.setTextContent(job.getSubmissionHost());
+		jobElement.appendChild(hostElement);
+		}
+		
+		String fqan = job.getFqan();
+		if (fqan != null && !"".equals(fqan)) {
+			Element fqanElement = doc.createElement("fqan");
+			fqanElement.setTextContent(fqan);
+			jobElement.appendChild(fqanElement);
+		}
+		
+		String submissionTime = job.getJobProperty("submissionTime");
+		if (submissionTime != null && !"".equals(submissionTime)) {
+			Element submissionTimeElement = doc.createElement("submissionTime");
+			submissionTimeElement.setTextContent(submissionTime);
+			jobElement.appendChild(submissionTimeElement);
+		}
+		
+		return jobElement;
+		
 	}
 
 	public static Element createJobElement(Document doc, Job job) {
