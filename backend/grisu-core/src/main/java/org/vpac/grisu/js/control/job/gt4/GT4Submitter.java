@@ -148,8 +148,9 @@ public class GT4Submitter extends JobSubmitter {
 		int processorCount = JsdlHelpers.getProcessorCount(jsdl);
 
 		Element jobType = output.createElement("jobType");
-		String jobTypeString = JsdlHelpers.getJobType(jsdl);
+		String jobTypeString = JsdlHelpers.getArcsJobType(jsdl);
 
+		
 		if (processorCount > 1) {
 			Element count = output.createElement("count");
 			count.setTextContent(new Integer(processorCount).toString());

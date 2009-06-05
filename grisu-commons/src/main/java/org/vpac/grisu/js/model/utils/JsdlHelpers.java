@@ -1137,33 +1137,33 @@ public class JsdlHelpers {
 
 	}
 
-	/**
-	 * Parses a jsdl document and returns the jsdl-posix:JobType element
-	 * within.private
-	 * 
-	 * @param jsdl
-	 *            the jsdl document
-	 * @return the jobType for this job
-	 */
-	public static String getJobType(Document jsdl) {
-
-		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl-posix:POSIXApplication/jsdl-posix:JobType";
-		NodeList resultNodes = null;
-		try {
-			resultNodes = (NodeList) xpath.evaluate(expression, jsdl,
-					XPathConstants.NODESET);
-		} catch (XPathExpressionException e) {
-			myLogger.warn("No jobtype in jsdl file.");
-			return null;
-		}
-
-		if (resultNodes.getLength() != 1) {
-			return null;
-		}
-
-		return resultNodes.item(0).getTextContent();
-
-	}
+//	/**
+//	 * Parses a jsdl document and returns the jsdl-posix:JobType element
+//	 * within.private
+//	 * 
+//	 * @param jsdl
+//	 *            the jsdl document
+//	 * @return the jobType for this job
+//	 */
+//	public static String getJobType(Document jsdl) {
+//
+//		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl-posix:POSIXApplication/jsdl-posix:JobType";
+//		NodeList resultNodes = null;
+//		try {
+//			resultNodes = (NodeList) xpath.evaluate(expression, jsdl,
+//					XPathConstants.NODESET);
+//		} catch (XPathExpressionException e) {
+//			myLogger.warn("No jobtype in jsdl file.");
+//			return null;
+//		}
+//
+//		if (resultNodes.getLength() != 1) {
+//			return null;
+//		}
+//
+//		return resultNodes.item(0).getTextContent();
+//
+//	}
 
 	/**
 	 * Parses the jsdl document and returns the url of filesystem on which the
@@ -1406,6 +1406,25 @@ public class JsdlHelpers {
 		Element resources = (Element) resultNodes.item(0);
 		return resources;
 
+	}
+	
+	public static String getArcsJobType(Document jsdl) {
+		
+		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl-arcs:JobType";
+		NodeList resultNodes = null;
+		try {
+			resultNodes = (NodeList) xpath.evaluate(expression, jsdl,
+					XPathConstants.NODESET);
+		} catch (XPathExpressionException e) {
+			myLogger.warn("No output in jsdl file.");
+			return null;
+		}
+
+		if (resultNodes.getLength() != 1) {
+			return null;
+		}
+
+		return resultNodes.item(0).getTextContent();
 	}
 
 	/**
