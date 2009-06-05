@@ -83,7 +83,7 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 					if ( getUser() != null ) {
 						getUser().cleanCache();
 					}
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					throw new NoValidCredentialException("Could not get myproxy credential: "+e.getLocalizedMessage());
@@ -137,9 +137,17 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			throw new RuntimeException("Could not initiate local backend: "+e.getLocalizedMessage());
 		}
+		
 		this.myproxy_username = username;
 		this.passphrase = password;
+		
+		try {
+			getCredential();
+		} catch (Exception e) {
+			throw new NoValidCredentialException("No valid credential: "+e.getLocalizedMessage());
+		}
 	}
 
 	public String logout() {
