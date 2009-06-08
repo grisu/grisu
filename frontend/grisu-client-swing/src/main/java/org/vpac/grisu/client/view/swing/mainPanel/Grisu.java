@@ -246,9 +246,14 @@ public class Grisu implements WindowListener {
 	}
 	
 	private void exit() {
+		try {
 		serviceInterface.logout();
-		WindowSaver.saveSettings();
-		System.exit(0);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			WindowSaver.saveSettings();
+			System.exit(0);
+		}
 	}
 	
 	/**
