@@ -512,7 +512,7 @@ public class User {
 			fsmanager.setCacheStrategy(CacheStrategy.ON_RESOLVE);
 //			getFsManager().setCacheStrategy(CacheStrategy.MANUAL);
 
-			getFsManager().init();
+//			getFsManager().init();
 
 		}
 		return fsmanager;
