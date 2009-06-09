@@ -509,7 +509,7 @@ public class User {
 //			getFsManager().addProvider("gsiftp", provider);
 			// fsmanager.setCacheStrategy(CacheStrategycred.ON_RESOLVE);
 						
-			fsmanager.setCacheStrategy(CacheStrategy.ON_RESOLVE);
+//			fsmanager.setCacheStrategy(CacheStrategy.ON_RESOLVE);
 //			getFsManager().setCacheStrategy(CacheStrategy.MANUAL);
 
 //			getFsManager().init();
