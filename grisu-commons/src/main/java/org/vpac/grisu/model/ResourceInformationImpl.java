@@ -109,13 +109,17 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 		if (urlOrSubmissionLocation.contains("://")) {
 
-			int firstIndex = urlOrSubmissionLocation.indexOf("://")+3;
-			int lastIndex = urlOrSubmissionLocation.indexOf("/", firstIndex);
+//			int firstIndex = urlOrSubmissionLocation.indexOf("://")+3;
+//			int lastIndex = urlOrSubmissionLocation.indexOf("/", firstIndex);
+			
+//			int firstIndex = 0;
+//			int lastIndex = urlOrSubmissionLocation.length();
 			
 			URI address;
 			try {
-				// dodgy, I know
-				address = new URI(urlOrSubmissionLocation.substring(firstIndex, lastIndex));
+//				 dodgy, I know
+				address = new URI(urlOrSubmissionLocation);
+//				address = new URI(urlOrSubmissionLocation.substring(firstIndex, lastIndex));
 			} catch (Exception e) {
 				myLogger.error("Couldn't create url from: "
 						+ urlOrSubmissionLocation);
