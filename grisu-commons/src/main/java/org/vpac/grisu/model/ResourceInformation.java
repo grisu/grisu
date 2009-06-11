@@ -47,5 +47,6 @@ public interface ResourceInformation {
 	 * @return the staging filesystem
 	 */
 	public String getRecommendedStagingFileSystemForSubmissionLocation(String subLoc);
+
 	
 }

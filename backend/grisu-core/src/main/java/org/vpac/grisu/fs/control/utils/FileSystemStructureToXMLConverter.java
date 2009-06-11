@@ -195,6 +195,12 @@ public class FileSystemStructureToXMLConverter {
 			}
 		} else {
 			element = output.createElement("File");
+			if ( absolute_path )
+				element.setAttribute("path", fo.getName().getURI());
+			else {
+				myLogger.debug("Setting user-space path to: "+mp.replaceAbsoluteRootUrlWithMountPoint(fo.getName().getURI()));
+				element.setAttribute("path", mp.replaceAbsoluteRootUrlWithMountPoint(fo.getName().getURI()));
+			}
 		}
 		
 		element.setAttribute("name", fo.getName().getBaseName());
