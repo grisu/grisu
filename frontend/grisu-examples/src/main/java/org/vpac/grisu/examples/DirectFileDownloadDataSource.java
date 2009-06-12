@@ -1,3 +1,4 @@
+package org.vpac.grisu.examples;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;

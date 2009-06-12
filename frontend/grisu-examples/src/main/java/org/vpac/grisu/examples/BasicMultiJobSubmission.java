@@ -1,3 +1,4 @@
+package org.vpac.grisu.examples;
 import java.io.File;
 import java.util.Arrays;
 
@@ -14,7 +15,7 @@ import org.vpac.grisu.js.model.utils.JsdlHelpers;
 import org.w3c.dom.Document;
 
 
-public class BasicJobSubmission {
+public class BasicMultiJobSubmission {
 
 	/**
 	 * First arg: myproxy username
@@ -40,8 +41,7 @@ public class BasicJobSubmission {
 		ServiceInterface serviceInterface = null;
 		try {
 			serviceInterface = ServiceInterfaceFactory.createInterface(
-//					"https://ngportaldev.vpac.org/grisu-ws/services/grisu", 
-					"http://localhost:8080/grisu-ws/services/grisu",
+					"http://localhost:8080/grisu-ws/services/grisu", 
 					myproxy_username, myproxy_password, 
 					"myproxy.arcs.org.au", "443", 
 					null, -1, null, null);
@@ -187,10 +187,18 @@ public class BasicJobSubmission {
 			System.exit(1);
 		}
 		
+		Document[] multiJobs = new Document[3];
+		multiJobs[0] = jsdl;
+		multiJobs[1] = jsdl;
+		multiJobs[2] = jsdl;
 		// now we're setting the job description on the remote grisu backend and connect it to the already
 		// create job
 		try {
-			serviceInterface.setJobDescription(jobname, jsdl);
+//			serviceInterface.setJobDescription(jobname, multiJobs);
+//			serviceInterface.addJobDescription(jobname, jsdl);
+//			serviceInterface.addJobDescription(jobname, jsdl);
+//			serviceInterface.addJobDescription(jobname, jsdl);
+//			serviceInterface.addJobDescription(jobname, jsdl);
 		} catch (Exception e1) {
 			System.err.println("Couldn't set job description: "+e1.getLocalizedMessage());
 			try {

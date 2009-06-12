@@ -1,3 +1,4 @@
+package org.vpac.grisu.examples;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.ServiceInterfaceFactory;
 import org.vpac.grisu.client.control.login.LoginException;
