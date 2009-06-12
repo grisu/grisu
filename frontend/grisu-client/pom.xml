@@ -27,7 +27,7 @@
 		<dependency>
 			<groupId>au.org.arcs.shibboleth</groupId>
 			<artifactId>slcs-client</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.2-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 
