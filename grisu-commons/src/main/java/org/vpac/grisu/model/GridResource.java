@@ -1,6 +1,7 @@
 package org.vpac.grisu.model;
 
 import java.util.List;
+import java.util.Set;
 
 public interface GridResource extends Comparable {
 
@@ -37,5 +38,7 @@ public interface GridResource extends Comparable {
 	public abstract int getRank();
 
 	public abstract String getQueueName();
+	
+	public abstract Set<String> getAllExecutables();
 
 }
