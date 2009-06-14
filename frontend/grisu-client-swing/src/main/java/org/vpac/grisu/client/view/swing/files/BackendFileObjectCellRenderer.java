@@ -72,7 +72,7 @@ public class BackendFileObjectCellRenderer implements ListCellRenderer {
 			long size = file.getSize(false);
 			String sizeString = size+" B";
 			if ( size > 1024*1024 ) 
-				sizeString = size/(1024*1024) + "MB";
+				sizeString = size/(1024*1024) + " MB";
 			else if ( size > 1024 )
 				sizeString = size/1024 + " KB";
 			
