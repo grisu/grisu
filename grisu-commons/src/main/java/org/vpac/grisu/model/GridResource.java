@@ -40,5 +40,5 @@ public interface GridResource extends Comparable {
 	public abstract String getQueueName();
 	
 	public abstract Set<String> getAllExecutables();
-
+	
 }

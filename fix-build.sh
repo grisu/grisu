@@ -8,7 +8,7 @@ cd local
 unzip -o ../grisu-0.3-SNAPSHOT-grisu-local-backend.jar
 rm ../grisu-0.3-SNAPSHOT-grisu-local-backend.jar
 rm -f META-INF/INDEX.LIST
-jar cmf ../../backend/grisu-local/MANIFEST.MF ../grisu-local-backend.jar
+jar cmf ../../backend/grisu-local/MANIFEST.MF ../grisu-local-backend.jar .
 cd ..
 #jar -i grisu-local-backend.jar
 
