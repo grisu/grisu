@@ -137,7 +137,7 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			throw new RuntimeException("Could not initiate local backend: "+e.getLocalizedMessage());
+//			throw new RuntimeException("Could not initiate local backend: "+e.getLocalizedMessage());
 		}
 		
 		this.myproxy_username = username;
