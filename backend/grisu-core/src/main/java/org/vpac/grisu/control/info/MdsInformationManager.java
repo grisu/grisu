@@ -465,4 +465,9 @@ public class MdsInformationManager implements InformationManager {
 		return null;
 	}
 
+	public String[] getApplicationsThatProvideExecutable(String executable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
