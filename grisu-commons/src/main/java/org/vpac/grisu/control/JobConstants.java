@@ -10,6 +10,12 @@ package org.vpac.grisu.control;
  */
 public class JobConstants {
 	
+	final public static String REMOTE_FILE_TAGNAME = "File";
+	final public static String REMOTE_FOLDER_TAGNAME = "Directory";
+	final public static String LOCAL_FILE_TAGNAME = "File";
+	final public static String LOCAL_FOLDER_TAGNAME = "Folder";
+	final public static String LOCAL_DOCUMENTROOT_TAGNAME = "FileSystem";
+	
 	// the DUMMY_START_STRING indicates to grisu that the element is not really filled, 
 	// even when there is a value in the template elements text field
 	public static final String DUMMY_START_STRING = "dummy";
@@ -150,6 +156,19 @@ public class JobConstants {
 	public static final String TOTALCPUREQUIREMENT_KEY = "totalCpu";
 	public static final String APPLICATIONNAME_KEY = "applicationName";
 	public static final String APPLICATIONVERSION_KEY = "applicationVersion";
+	
+	// job template property keys
+	public static final String JOBNAME_KEY = "jobname";
+	public static final String APPLICATION_KEY = "application";
+	public static final String VERSION_KEY = "version";
+	public static final String WALLTIME_IN_MINUTES_KEY = "walltime";
+	public static final String EMAIL_ON_START_KEY = "email_on_start";
+	public static final String EMAIL_ON_FINISH_KEY = "email_on_finish";
+	public static final String EMAIL_ADDRESS_KEY = "email_address";
+	public static final String FORCE_MPI_KEY = "force-mpi";
+	public static final String FORCE_SINGLE_KEY = "force-single";
+	public static final String MEMORY_KEY = "memory";
+	public static final String CPUS_KEY = "cpus";
 	
 	
 }

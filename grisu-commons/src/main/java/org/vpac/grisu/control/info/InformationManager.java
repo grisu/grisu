@@ -160,6 +160,8 @@ public interface InformationManager {
 	
 	public String getJobmanagerOfQueueAtSite(String site, String queue);
 	
+	public String[] getApplicationsThatProvideExecutable(String executable);
+	
 //	/**
 //	 * More of a helper method for other classes to create a submission location string as used with Grisu
 //	 * @param contactString the contact string (ala https://ng2.vpac.org:8443/wsrf/services/ManagedJobFactoryService)
