@@ -267,7 +267,7 @@
     	<dependency>
 			<groupId>au.org.arcs.grid</groupId>
 			<artifactId>matchmaker</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.0.3-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 <!--		<dependency>-->
