@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.xml.XMLConstants;
@@ -429,7 +431,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return the (path to the) application
 	 */
-	public static String getPosixApplication(Document jsdl) {
+	public static String getPosixApplicationExecutable(Document jsdl) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl-posix:POSIXApplication/jsdl-posix:Executable";
 		NodeList resultNodes = null;
@@ -862,6 +864,23 @@ public class JsdlHelpers {
 		}
 		return stageIns;
 	}
+	
+	public static String[] getInputFileUrls(Document jsdl) {
+		
+		List<Element> stageInElements = getStageInElements(jsdl);
+		
+		if ( stageInElements == null || stageInElements.size() == 0 ) {
+			return null;
+		}
+		
+		Set<String> result = new HashSet<String>();
+		for ( Element stageInElement : stageInElements ) {
+			String temp = getStageInSource(stageInElement);
+			result.add(temp);
+		}
+		
+		return result.toArray(new String[]{});
+	}
 
 	public static String getStageInSource(Element stageInElement) {
 
@@ -1097,7 +1116,7 @@ public class JsdlHelpers {
 		return (Element) resultNodes.item(0);
 	}
 
-	public static boolean sendEmailOnJobStart(Document jsdl) {
+	public static boolean getSendEmailOnJobStart(Document jsdl) {
 
 		Element emailElement = getEmailElement(jsdl);
 
@@ -1110,8 +1129,9 @@ public class JsdlHelpers {
 			return false;
 		}
 	}
+	
 
-	public static boolean sendEmailOnJobFinish(Document jsdl) {
+	public static boolean getSendEmailOnJobFinish(Document jsdl) {
 
 		Element emailElement = getEmailElement(jsdl);
 

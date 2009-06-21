@@ -93,7 +93,7 @@ public class GT4Submitter extends JobSubmitter {
 
 		// Add "executable" node
 		Element executable = output.createElement("executable");
-		executable.setTextContent(JsdlHelpers.getPosixApplication(jsdl));
+		executable.setTextContent(JsdlHelpers.getPosixApplicationExecutable(jsdl));
 		job.appendChild(executable);
 
 		// Add "argument"s
@@ -322,14 +322,14 @@ public class GT4Submitter extends JobSubmitter {
 			email_address.setTextContent(email);
 			extensions.appendChild(email_address);
 
-			if (JsdlHelpers.sendEmailOnJobStart(jsdl)) {
+			if (JsdlHelpers.getSendEmailOnJobStart(jsdl)) {
 				Element emailonexecution = output
 						.createElement("emailonexecution");
 				emailonexecution.setTextContent("yes");
 				extensions.appendChild(emailonexecution);
 			}
 
-			if (JsdlHelpers.sendEmailOnJobFinish(jsdl)) {
+			if (JsdlHelpers.getSendEmailOnJobFinish(jsdl)) {
 				Element emailonabort = output.createElement("emailonabort");
 				emailonabort.setTextContent("yes");
 				Element emailontermination = output

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.print.attribute.standard.JobPriority;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -20,6 +21,7 @@ import org.vpac.grisu.client.view.swing.template.modules.genericAuto.GridResourc
 import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.fs.model.MountPoint;
+import org.vpac.grisu.js.model.JobProperty;
 import org.vpac.grisu.js.model.utils.SubmissionLocationHelpers;
 import org.vpac.grisu.model.EnvironmentSnapshotValues;
 import org.vpac.grisu.model.GridResource;
@@ -110,8 +112,8 @@ public class GridResourceSuggestionPanel extends JPanel implements TemplateNodeP
 		selectedResource = null;
 //		containerPanel.repaint();
 		
-		Map<String, String> tempJobProperties = new HashMap<String, String>();
-		tempJobProperties.put(JobConstants.APPLICATIONVERSION_KEY, newValue);
+		Map<JobProperty, String> tempJobProperties = new HashMap<JobProperty, String>();
+		tempJobProperties.put(JobProperty.APPLICATIONNAME, newValue);
 		currentBestGridResources = infoObject.getBestSubmissionLocations(tempJobProperties, esv.getCurrentFqan());
 		
 		try {

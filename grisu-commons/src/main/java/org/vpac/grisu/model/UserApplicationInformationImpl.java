@@ -1,17 +1,14 @@
 package org.vpac.grisu.model;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.vpac.grisu.control.GrisuRegistry;
-import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.js.model.JobProperty;
 
 
 public class UserApplicationInformationImpl extends ApplicationInformationImpl
@@ -63,10 +60,10 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 	}
 
 	public List<GridResource> getBestSubmissionLocations(
-			Map<String, String> additionalJobProperties, String fqan) {
+			Map<JobProperty, String> additionalJobProperties, String fqan) {
 
-		Map<String, String> basicJobProperties = new HashMap<String, String>();
-		basicJobProperties.put(JobConstants.APPLICATIONNAME_KEY, getApplicationName());
+		Map<JobProperty, String> basicJobProperties = new HashMap<JobProperty, String>();
+		basicJobProperties.put(JobProperty.APPLICATIONNAME, getApplicationName());
 		
 		basicJobProperties.putAll(additionalJobProperties);
 		

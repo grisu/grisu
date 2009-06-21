@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.vpac.grisu.js.model.JobProperty;
+
 
 /**
  * This class contains information from {@link ApplicationInformation} and {@link UserInformation} 
@@ -45,7 +47,7 @@ public interface UserApplicationInformation extends ApplicationInformation {
 	 * @param fqan the fqan to submit the job with
 	 * @return a sorted list of the best resources to submit this job to.
 	 */
-	public List<GridResource> getBestSubmissionLocations(Map<String, String> additionalJobProperties, String fqan);
+	public List<GridResource> getBestSubmissionLocations(Map<JobProperty, String> additionalJobProperties, String fqan);
 	
 
 

@@ -18,10 +18,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.activation.DataSource;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.vfs.AllFileSelector;
 import org.apache.commons.vfs.FileContent;
@@ -36,7 +34,6 @@ import org.vpac.grisu.control.JobCreationException;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.SeveralXMLHelpers;
 import org.vpac.grisu.control.exceptions.JobDescriptionNotValidException;
-import org.vpac.grisu.control.exceptions.NoSubmissionLocationException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -61,6 +58,9 @@ import org.vpac.grisu.js.control.job.JobSubmitter;
 import org.vpac.grisu.js.control.job.gt4.GT4Submitter;
 import org.vpac.grisu.js.model.Job;
 import org.vpac.grisu.js.model.JobDAO;
+import org.vpac.grisu.js.model.JobPropertiesException;
+import org.vpac.grisu.js.model.JobProperty;
+import org.vpac.grisu.js.model.JobSubmissionObjectImpl;
 import org.vpac.grisu.js.model.utils.JsdlHelpers;
 import org.vpac.grisu.js.model.utils.SubmissionLocationHelpers;
 import org.vpac.grisu.model.GridResource;
@@ -328,6 +328,62 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		job.setJobDescription(jsdl);
 		jobdao.attachDirty(job);
+	}
+	
+	public void setVo(String jobname, String fqan) throws NoSuchJobException {
+
+		Job job = getJob(jobname);
+		job.setFqan(fqan);
+		
+	}
+	
+	public void processJobDescription(String jobname) throws NoSuchJobException, JobPropertiesException  {
+		
+		Job job = getJob(jobname);
+
+		//TODO check whether fqan is set
+		String jobFqan = job.getFqan();
+		Document jsdl = job.getJobDescription();
+		
+		JobSubmissionObjectImpl jobSubmissionObject = new JobSubmissionObjectImpl(jsdl);
+		
+		List<GridResource> matchingResources = matchmaker.findMatchingResources(jobSubmissionObject.getJobPropertyMap(), job.getFqan());
+		
+		String submissionLocation = jobSubmissionObject.getSubmissionLocation();
+		GridResource selectedSubmissionResource = null;
+		
+		if ( submissionLocation != null & submissionLocation.length() > 0 ) {
+
+			// check whether submission location is specified. If so, check whether it is in the list of matching resources
+			boolean submissionLocationIsValid = false;
+			for ( GridResource resource : matchingResources ) {
+				if ( submissionLocation.equals(SubmissionLocationHelpers.createSubmissionLocationString(resource)) ) {
+					submissionLocationIsValid = true;
+					selectedSubmissionResource = resource;
+					break;
+				} 
+			}
+			
+			if ( ! submissionLocationIsValid ) {
+				throw new JobPropertiesException(JobProperty.SUBMISSIONLOCATION, "Submissionlocation "+submissionLocation+" not available for this kind of job");
+			}
+		} else {
+			if ( matchingResources == null || matchingResources.size() == 0 ) {
+				throw new JobPropertiesException(JobProperty.SUBMISSIONLOCATION, "Could not find any matching resource to run this kind of job on");
+			}
+			// find the best submissionlocation and set it.
+			submissionLocation = SubmissionLocationHelpers.createSubmissionLocationString(matchingResources.get(0));
+			selectedSubmissionResource = matchingResources.get(0);
+			jobSubmissionObject.setSubmissionLocation(submissionLocation);
+		}
+
+		
+		String[] stagingFileSystems = informationManager.getStagingFileSystemForSubmissionLocation(submissionLocation);
+
+		
+		// now calculate and set the proper paths
+		String workingDirectory;
+		
 	}
 	
 	/* (non-Javadoc)
@@ -2283,7 +2339,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 	
-	public List<GridResource> findMatchingSubmissionLocations(Map<String, String> jobProperties, String fqan) {
+	public List<GridResource> findMatchingSubmissionLocations(Map<JobProperty, String> jobProperties, String fqan) {
 		
 		LinkedList<String> result = new LinkedList<String>();
 		

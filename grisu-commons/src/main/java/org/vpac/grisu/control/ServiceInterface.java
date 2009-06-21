@@ -16,6 +16,7 @@ import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.exceptions.ServerJobSubmissionException;
 import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.fs.model.MountPoint;
+import org.vpac.grisu.js.model.JobProperty;
 import org.vpac.grisu.model.GridResource;
 import org.w3c.dom.Document;
 
@@ -362,7 +363,7 @@ public interface ServiceInterface {
 	 * @param fqan the fqan to use to submit the job
 	 * @return a list of matching submissionLoctations
 	 */
-	public List<GridResource> findMatchingSubmissionLocations(Map<String, String> jobProperties, String fqan);
+	public List<GridResource> findMatchingSubmissionLocations(Map<JobProperty, String> jobProperties, String fqan);
 	
 	
 	//---------------------------------------------------------------------------------------------------
