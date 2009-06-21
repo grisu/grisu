@@ -67,7 +67,12 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 		
 		basicJobProperties.putAll(additionalJobProperties);
 		
-		return serviceInterface.findMatchingSubmissionLocations(basicJobProperties, fqan);
+		Map<String, String> converterMap = new HashMap<String, String>();
+		for ( JobProperty key : basicJobProperties.keySet() ) {
+			converterMap.put(key.toString(), basicJobProperties.get(key));
+		}
+		
+		return serviceInterface.findMatchingSubmissionLocations(converterMap, fqan);
 	}
 	
 

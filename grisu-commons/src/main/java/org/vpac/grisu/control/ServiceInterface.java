@@ -363,7 +363,7 @@ public interface ServiceInterface {
 	 * @param fqan the fqan to use to submit the job
 	 * @return a list of matching submissionLoctations
 	 */
-	public List<GridResource> findMatchingSubmissionLocations(Map<JobProperty, String> jobProperties, String fqan);
+	public List<GridResource> findMatchingSubmissionLocations(Map<String, String> jobProperties, String fqan);
 	
 	
 	//---------------------------------------------------------------------------------------------------

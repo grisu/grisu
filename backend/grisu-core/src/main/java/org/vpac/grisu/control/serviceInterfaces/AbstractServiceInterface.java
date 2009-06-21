@@ -2339,11 +2339,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 	
-	public List<GridResource> findMatchingSubmissionLocations(Map<JobProperty, String> jobProperties, String fqan) {
+	public List<GridResource> findMatchingSubmissionLocations(Map<String, String> jobProperties, String fqan) {
 		
 		LinkedList<String> result = new LinkedList<String>();
 		
-		List<GridResource> resources = matchmaker.findMatchingResources(jobProperties, fqan);
+		Map<JobProperty, String> converterMap = new HashMap<JobProperty, String>();
+		for ( String key : jobProperties.keySet() ) {
+			converterMap.put(JobProperty.fromString(key), jobProperties.get(key));
+		}
+		
+		List<GridResource> resources = matchmaker.findMatchingResources(converterMap, fqan);
 
 		return resources;
 	}
