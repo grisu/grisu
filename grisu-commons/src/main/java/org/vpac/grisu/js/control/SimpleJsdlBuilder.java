@@ -27,7 +27,15 @@ public class SimpleJsdlBuilder {
 		
 		for (JobProperty jp : JobProperty.values()) {
 			
-			if ( jp.equals(JobProperty.COMMANDLINE) ) {
+			if ( jp.equals(JobProperty.SUBMISSIONLOCATION) ) {
+				
+				if ( jobProperties.get(jp) == null || jobProperties.get(jp).length() == 0 ) {
+					jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"+jp.toString()+"_XXX", "");
+				} else {
+					jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"+jp.toString()+"_XXX", "<HostName>"+jobProperties.get(jp)+"</HostName>");
+				}
+				
+			} else if ( jp.equals(JobProperty.COMMANDLINE) ) {
 				
 				String executable = CommandlineHelpers.extractExecutable(jobProperties.get(jp));
 				StringBuffer exeAndArgsElements = new StringBuffer();

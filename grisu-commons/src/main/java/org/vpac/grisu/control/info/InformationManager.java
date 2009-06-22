@@ -110,6 +110,14 @@ public interface InformationManager {
 	 * @return names of the applications at the site
 	 */
 	public String[] getAllApplicationsAtSite(String site);
+	
+	/**
+	 * Calculates all the applications that are available for the specified VO grid-wide.
+	 * 
+	 * @param fqan the vo
+	 * @return all available applications
+	 */
+	public String[] getAllApplicationsOnGridForVO(String fqan);
 
 	/**
 	 * Returns the list of available versions of the software application on the

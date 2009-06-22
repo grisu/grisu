@@ -326,6 +326,8 @@ public class RemoteFileSystemBackend implements FileSystemBackend {
 			
 		} catch (RemoteFileSystemException e) {
 			throw new FileSystemException("Could not list directory: "+uri.toString(), e);
+//		} catch (Exception e2) {
+//			throw new FileSystemException("Could not list directory: "+uri.toString(), e2);
 		}
 
 		putInRemoteFileStructureInXml(node, remoteChildren);

@@ -470,4 +470,9 @@ public class MdsInformationManager implements InformationManager {
 		return null;
 	}
 
+	public String[] getAllApplicationsOnGridForVO(String fqan) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

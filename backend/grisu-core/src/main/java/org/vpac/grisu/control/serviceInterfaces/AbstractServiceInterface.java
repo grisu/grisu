@@ -20,6 +20,7 @@ import java.util.TreeSet;
 import javax.activation.DataSource;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.vfs.AllFileSelector;
 import org.apache.commons.vfs.FileContent;
@@ -125,6 +126,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public double getInterfaceVersion() {
 		return ServiceInterface.INTERFACE_VERSION;
 	}
+	
+	private String currentStatus = null;
 
 	/**
 	 * Gets the user of the current session. Also connects the default
@@ -330,14 +333,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		jobdao.attachDirty(job);
 	}
 	
-	public void setVo(String jobname, String fqan) throws NoSuchJobException {
+	public void setVO(String jobname, String fqan) throws NoSuchJobException, JobPropertiesException {
 
 		Job job = getJob(jobname);
+		
 		job.setFqan(fqan);
+		processJobDescription(jobname);
 		
 	}
 	
-	public void processJobDescription(String jobname) throws NoSuchJobException, JobPropertiesException  {
+	private void processJobDescription(String jobname) throws NoSuchJobException, JobPropertiesException  {
 		
 		Job job = getJob(jobname);
 
@@ -350,16 +355,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		List<GridResource> matchingResources = matchmaker.findMatchingResources(jobSubmissionObject.getJobPropertyMap(), job.getFqan());
 		
 		String submissionLocation = jobSubmissionObject.getSubmissionLocation();
-		GridResource selectedSubmissionResource = null;
+//		GridResource selectedSubmissionResource = null;
 		
-		if ( submissionLocation != null & submissionLocation.length() > 0 ) {
+		if ( submissionLocation != null && submissionLocation.length() > 0 ) {
 
 			// check whether submission location is specified. If so, check whether it is in the list of matching resources
 			boolean submissionLocationIsValid = false;
 			for ( GridResource resource : matchingResources ) {
 				if ( submissionLocation.equals(SubmissionLocationHelpers.createSubmissionLocationString(resource)) ) {
 					submissionLocationIsValid = true;
-					selectedSubmissionResource = resource;
+//					selectedSubmissionResource = resource;
 					break;
 				} 
 			}
@@ -373,18 +378,108 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 			// find the best submissionlocation and set it.
 			submissionLocation = SubmissionLocationHelpers.createSubmissionLocationString(matchingResources.get(0));
-			selectedSubmissionResource = matchingResources.get(0);
-			jobSubmissionObject.setSubmissionLocation(submissionLocation);
+//			selectedSubmissionResource = matchingResources.get(0);
+//			jobSubmissionObject.setSubmissionLocation(submissionLocation);
+			try {
+				JsdlHelpers.addCandidateHosts(jsdl, new String[]{submissionLocation});
+			} catch (XPathExpressionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new JobPropertiesException(JobProperty.SUBMISSIONLOCATION, "Jsdl document malformed. No candidate hosts element.");
+			}
 		}
 
-		
 		String[] stagingFileSystems = informationManager.getStagingFileSystemForSubmissionLocation(submissionLocation);
 
+		MountPoint mountPointToUse = null;
+		String stagingFilesystemToUse = null;
+		for ( String stagingFs : stagingFileSystems ) {
+			
+			for ( MountPoint mp : df() ) {
+				if ( mp.getRootUrl().startsWith(stagingFs.replace(":2811", "")) && jobFqan.equals(mp.getFqan() )) {
+					mountPointToUse = mp;
+					stagingFilesystemToUse = stagingFs.replace(":2811", "");
+					break;
+				}
+			}
+			
+		}
+		
+		if ( mountPointToUse == null ) {
+			throw new JobPropertiesException(JobProperty.SUBMISSIONLOCATION, "Could not find stagingfilesystem for submission location: "+submissionLocation);
+		}
+		
+		JsdlHelpers.addOrRetrieveExistingFileSystemElement(jsdl, JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM, stagingFilesystemToUse);
 		
 		// now calculate and set the proper paths
-		String workingDirectory;
+		String workingDirectory = mountPointToUse.getRootUrl().substring(stagingFilesystemToUse.length()) + "/" + ServerPropertiesManager.getGrisuJobDirectoryName() + "/" + jobname;
+		
+		JsdlHelpers.setWorkingDirectory(jsdl, JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM, workingDirectory);
+		
+		String submissionSite = informationManager.getSiteForHostOrUrl(stagingFilesystemToUse);
+		job.addJobProperty("submissionSite", submissionSite);
+		job.setJob_directory(stagingFilesystemToUse+workingDirectory);
+		job.getJobProperties().put("jobDirectory", stagingFilesystemToUse+workingDirectory);
+		
+		// fix stage in target filesystems...
+		List<Element> stageInElements = JsdlHelpers.getStageInElements(jsdl);
+		for ( Element stageInElement : stageInElements ) {
+			
+			String filePath = JsdlHelpers.getStageInSource(stageInElement);
+			String filename = filePath.substring(filePath.lastIndexOf("/"));
+			
+			JsdlHelpers.getStageInTarget_filesystemPart(stageInElement).setTextContent(JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM);
+			JsdlHelpers.getStageInTarget_relativePart(stageInElement).setTextContent(workingDirectory+filename);
+			
+		}
+		
+		System.out.println(SeveralXMLHelpers.toStringWithoutAnnoyingExceptions(jsdl));
+		job.setJobDescription(jsdl);
+		jobdao.attachDirty(job);
+	}
+	
+	public void submitJob(String jobname) throws NoSuchJobException, ServerJobSubmissionException, RemoteFileSystemException, NoValidCredentialException, VomsException {
+
+		Job job = getJob(jobname);
+		
+		try {
+			prepareJobEnvironment(job);
+			stageFiles(jobname);
+		} catch (Exception e) {
+			throw new RemoteFileSystemException(e.getLocalizedMessage());
+		}
+
+		// fill necessary info about the job into the database
+		parseJobDescription(job);
+
+		if (job.getFqan() != null) {
+			VO vo = VOManagement.getVO(getUser().getFqans().get(job.getFqan()));
+			job.setCredential(CertHelpers.getVOProxyCredential(vo,
+					job.getFqan(), getCredential()));
+		} else {
+			job.setCredential(getCredential());
+		}
+
+		String handle = null;
+		handle = getSubmissionManager().submit("GT4", job);
+
+		if (handle == null) {
+			throw new ServerJobSubmissionException(
+					"Job apparently submitted but jobhandle is null for job: "
+							+ jobname);
+		}
+
+		job.addJobProperty("submissionTime", Long.toString(new Date().getTime()));
+		
+		// we don't want the credential to be stored with the job in this case
+		// TODO or do we want it to be stored?
+		job.setCredential(null);
+		jobdao.attachDirty(job);
+		
 		
 	}
+	
+	
 	
 	/* (non-Javadoc)
 	 * @see org.vpac.grisu.control.ServiceInterface#setJobDescription_string(java.lang.String, java.lang.String)
@@ -1465,7 +1560,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		Job job = getJob(jobname);
 
 		job.getJobProperties().put(JobConstants.JOBPROPERTYKEY_VO, job.getFqan());
-		job.getJobProperties().put(JobConstants.JOBPROPERTYKEY_JOBDIRECTORY, getJobDirectory(jobname));
+//		job.getJobProperties().put(JobConstants.JOBPROPERTYKEY_JOBDIRECTORY, getJobDirectory(jobname));
 		job.getJobProperties().put(JobConstants.JOBPROPERTYKEY_HOSTNAME, job.getSubmissionHost());
 
 		job.getJobProperties().put(JobConstants.JOBPROPERTYKEY_STATUS,
@@ -1913,7 +2008,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// check whether submission location is there... if not fill it automatically using the matchmaker
 //		Document jsdl_new;
 //		try {
-//			jsdl_new = checkSubmissionLocation(job.getJobDescription(), fqan);
+//			jsdl_new = checkSubmissionLocation (job.getJobDescription(), fqan);
 //		} catch (NoSubmissionLocationException e1) {
 //			throw new ServerJobSubmissionException("No possible submission locations found.");
 //		}
@@ -2461,7 +2556,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	}
 	
 	public String getCurrentStatusMessage() {
-		return "Backend status report not implemented yet.";
+		return this.currentStatus;
+	}
+	
+	private void setCurrentStatus(String status) {
+		this.currentStatus = status;
 	}
 
 	/**

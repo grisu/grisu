@@ -16,7 +16,7 @@ import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.exceptions.ServerJobSubmissionException;
 import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.fs.model.MountPoint;
-import org.vpac.grisu.js.model.JobProperty;
+import org.vpac.grisu.js.model.JobPropertiesException;
 import org.vpac.grisu.model.GridResource;
 import org.w3c.dom.Document;
 
@@ -643,6 +643,15 @@ public interface ServiceInterface {
 	
 	public void setJobDescription_string(String jobname, String jsdl) throws JobDescriptionNotValidException, NoSuchJobException;
 
+	/**
+	 * Sets the VO to use to submit this job.
+	 * 
+	 * @param jobname the name of the job
+	 * @param vo the VO to use
+	 * @throws NoSuchJobException if no job with the specified jobname could be found
+	 */
+	public void setVO(String jobname, String vo) throws NoSuchJobException, JobPropertiesException;
+	
 //	/**
 //	 * Sets the jobdescription if you want to submit a globus-style multijob. That only works if the 
 //	 * submission backend supports multijobs.
@@ -664,10 +673,14 @@ public interface ServiceInterface {
 	 * @throws RemoteFileSystemException if the job folder could not be created on the remote filesystem
 	 * @throws VomsException if the (possibly required) voms credential could not be created
 	 * @throws NoSuchJobException 
+	 * @Deprecated Don't use that anymore. Use {@link #submitJob(String)} from now on.
 	 */
 	
 	public void submitJob(String jobname, String fqan) throws ServerJobSubmissionException, NoValidCredentialException, RemoteFileSystemException, VomsException, NoSuchJobException;
 
+	
+	public void submitJob(String jobname) throws NoSuchJobException, ServerJobSubmissionException, RemoteFileSystemException, NoValidCredentialException, VomsException;
+	
 	/**
 	 * Returns the job directory. This one only works if the job was submitted already. Otherwise it'll return null;
 	 * @param jobname the name of the submitted job

@@ -465,6 +465,15 @@ public class JsdlHelpers {
 		return getWorkingDirectoryElement(jsdl).getTextContent();
 
 	}
+	
+	public static void setWorkingDirectory(Document jsdl, String fileSystemName, String path) {
+		
+		Element workingDirectoryElement = getWorkingDirectoryElement(jsdl);
+		
+		workingDirectoryElement.setAttribute("filesystemName", fileSystemName);
+		workingDirectoryElement.setTextContent(path);
+		
+	}
 
 	public static String getAbsoluteWorkingDirectoryUrl(Document jsdl) {
 
@@ -752,8 +761,9 @@ public class JsdlHelpers {
 					"No or more than one JobIdentification nodes in jsdl document.");
 		}
 
+		String nsURL = new JSDLNamespaceContext().getNamespaceURI("jsdl");
 		for (String subLoc : subLocs) {
-			hostName = jsdl.createElement("jsdl:HostName");
+			hostName = jsdl.createElementNS(nsURL, "HostName");
 			hostName.setTextContent(subLoc);
 			resultNodes.item(0).appendChild(hostName);
 		}

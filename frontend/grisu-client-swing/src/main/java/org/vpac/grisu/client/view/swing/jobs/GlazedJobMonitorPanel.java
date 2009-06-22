@@ -378,10 +378,10 @@ public class GlazedJobMonitorPanel extends JPanel {
 				try {
 					em.getJobManager().cleanJobs(
 							selectionModel.getSelected());
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					e.printStackTrace();
 					setPanelBusy(false);
-					Utils.showErrorMessage(em, GlazedJobMonitorPanel.this, "unspecifiedJobCleanError", e);
+					Utils.showErrorMessage(em, GlazedJobMonitorPanel.this, "unspecifiedJobCleanError", null);
 				} finally {
 					setPanelBusy(false);
 				}
