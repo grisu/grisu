@@ -31,6 +31,40 @@ public interface ServiceInterface {
 	
 	public static final double INTERFACE_VERSION = 7;
 	
+	
+//	// a few static strings that are used as keys in some of the maps in this interface
+//	public static final String APPLICATION_KEY = "applicationType";
+//	public static final String VERSION_KEY = "version";
+//	public static final String COMMANDLINE_KEY = "commandline";
+//	public static final String EXECUTABLE_KEY = "executable";
+//	public static final String ARGUMENTS_KEY = "arguments";
+//	public static final String STDOUT_KEY = "stdout";
+//	public static final String STDERR_KEY = "stderr";
+//	public static final String STDIN_KEY = "stdin";
+//	public static final String SUBMISSION_LOCATION_KEY = "submissionlocation";
+	public static final String QUEUE_KEY = "queue";
+	public static final String SUBMISSION_HOST_KEY = "submissionHost";
+	public static final String SUBMISSION_TYPE_KEY = "submissionType";
+	public static final String FACTORY_TYPE_KEY = "factoryType";
+//	public static final String NO_CPUS_KEY = "cpus";
+//	public static final String FORCE_SINGLE_JOBTYPE_KEY = "force_single";
+//	public static final String FORCE_MPI_JOBTYPE_KEY = "force_mpi";
+//	public static final String MEMORY_IN_BYTES_KEY = "memory_in_b";
+//	public static final String WALLTIME_IN_S_KEY = "walltime";
+//	public static final String OTHER_PROPERTIES_KEY = "other_properties";
+//	public static final String EMAIL_ADDRESS_KEY = "email_address";
+//	public static final String SEND_EMAIL_ON_START_KEY = "send_email_on_start";
+//	public static final String SEND_EMAIL_ON_FINISH_KEY = "send_email_on_finish";
+	public static final String INPUT_FILES_KEY = "inputfiles";
+	public static final String JOBDIRECTORY_KEY = "jobDirectory";
+//	public static final String WORKINGDIRECTORY_KEY = "workingDirectory";
+//	public static final String STAGING_FILESYSTEM_KEY = "stagingFilesystem";
+	public static final String FQAN_KEY = "fqan";
+	public static final String JOB_STATUS_KEY = "status";
+	
+	
+	
+	
 	//---------------------------------------------------------------------------------------------------
 	// 
 	// General grisu specific methods

@@ -127,6 +127,15 @@ public interface InformationManager {
 	 * @return a string array of versions of the software application on the Grid
 	 */
 	public String[] getAllVersionsOfApplicationOnGrid(String application);
+	
+	/**
+	 * Calculates all version of an application for a certain VO.
+	 * 
+	 * @param application the application
+	 * @param vo the vo
+	 * @return all versions
+	 */
+	public String[] getAllVersionsOfApplicationOnGridForVO(String application, String vo);
 
 	/**
 	 * Returns a map of the attribute details of the given application at the site.

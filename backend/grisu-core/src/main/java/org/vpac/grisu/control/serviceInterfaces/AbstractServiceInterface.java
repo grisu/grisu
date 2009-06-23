@@ -338,10 +338,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		Job job = getJob(jobname);
 		
 		job.setFqan(fqan);
+		job.getJobProperties().put(FQAN_KEY, fqan);
 		processJobDescription(jobname);
 		
 	}
 	
+	/**
+	 * This method tries to auto-fill in missing values like which submissionlocation to submit to, which version to use (if not specified) and so on.
+	 * @param jobname
+	 * @throws NoSuchJobException
+	 * @throws JobPropertiesException
+	 */
 	private void processJobDescription(String jobname) throws NoSuchJobException, JobPropertiesException  {
 		
 		Job job = getJob(jobname);
@@ -363,6 +370,22 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			boolean submissionLocationIsValid = false;
 			for ( GridResource resource : matchingResources ) {
 				if ( submissionLocation.equals(SubmissionLocationHelpers.createSubmissionLocationString(resource)) ) {
+					
+					// now check whether a possible selected version is available on this resource
+					if ( ! resource.isDesiredSoftwareVersionInstalled() ) {
+						throw new JobPropertiesException(JobProperty.APPLICATIONVERSION, "Version: "+jobSubmissionObject.getApplicationVersion()+" not installed on "+submissionLocation);
+					}
+					
+					// if no application version is specified, auto-set one
+					if ( jobSubmissionObject.getApplicationVersion() == null || jobSubmissionObject.getApplicationVersion().length() == 0 ) {
+						if ( resource.getAvailableApplicationVersion() != null && resource.getAvailableApplicationVersion().size() > 0 ) {
+							JsdlHelpers.setApplicationVersion(jsdl, resource.getAvailableApplicationVersion().get(0));
+//							jobSubmissionObject.setApplicationVersion(resource.getAvailableApplicationVersion().get(0));
+						} else {
+							throw new JobPropertiesException(JobProperty.APPLICATIONVERSION, "Could not find any installed version for application "+jobSubmissionObject.getApplication()+" on "+submissionLocation);
+						}
+					}
+					
 					submissionLocationIsValid = true;
 //					selectedSubmissionResource = resource;
 					break;
@@ -377,7 +400,31 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				throw new JobPropertiesException(JobProperty.SUBMISSIONLOCATION, "Could not find any matching resource to run this kind of job on");
 			}
 			// find the best submissionlocation and set it.
-			submissionLocation = SubmissionLocationHelpers.createSubmissionLocationString(matchingResources.get(0));
+
+			// check for the version of the application to run
+			if ( jobSubmissionObject.getApplicationVersion() == null || jobSubmissionObject.getApplicationVersion().length() == 0 ) {
+				for ( GridResource resource : matchingResources ) {
+					if ( resource.getAvailableApplicationVersion() != null && resource.getAvailableApplicationVersion().size() > 0 ) {
+						JsdlHelpers.setApplicationVersion(jsdl, resource.getAvailableApplicationVersion().get(0));
+//						jobSubmissionObject.setApplicationVersion(resource.getAvailableApplicationVersion().get(0));
+						submissionLocation = SubmissionLocationHelpers.createSubmissionLocationString(resource);
+						break;
+					}
+				}
+				if ( submissionLocation == null ) {
+					throw new JobPropertiesException(JobProperty.APPLICATIONVERSION, "Could not find any version for this application grid-wide. That is probably an error in the mds info.");
+				}
+			} else {
+				for ( GridResource resource : matchingResources ) {
+					if ( resource.isDesiredSoftwareVersionInstalled() ) {
+						submissionLocation = SubmissionLocationHelpers.createSubmissionLocationString(resource);
+					}
+				}
+				if ( submissionLocation == null ) {
+					throw new JobPropertiesException(JobProperty.APPLICATIONVERSION, "Could not find desired version: "+jobSubmissionObject.getApplicationVersion()+" for application "+jobSubmissionObject.getApplication()+" grid-wide.");
+				}
+			}
+			
 //			selectedSubmissionResource = matchingResources.get(0);
 //			jobSubmissionObject.setSubmissionLocation(submissionLocation);
 			try {
@@ -388,6 +435,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				throw new JobPropertiesException(JobProperty.SUBMISSIONLOCATION, "Jsdl document malformed. No candidate hosts element.");
 			}
 		}
+		
+		
 
 		String[] stagingFileSystems = informationManager.getStagingFileSystemForSubmissionLocation(submissionLocation);
 
@@ -419,7 +468,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		String submissionSite = informationManager.getSiteForHostOrUrl(stagingFilesystemToUse);
 		job.addJobProperty("submissionSite", submissionSite);
 		job.setJob_directory(stagingFilesystemToUse+workingDirectory);
-		job.getJobProperties().put("jobDirectory", stagingFilesystemToUse+workingDirectory);
+		job.getJobProperties().put(JOBDIRECTORY_KEY, stagingFilesystemToUse+workingDirectory);
 		
 		// fix stage in target filesystems...
 		List<Element> stageInElements = JsdlHelpers.getStageInElements(jsdl);
@@ -683,21 +732,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	protected void parseJobDescription(Job job) {
 
 		Document jsdl = job.getJobDescription();
-
-		Map<String, String> jobProperties = job.getJobProperties();
-
-		jobProperties.put("applicationType", JsdlHelpers
-				.getApplicationName(jsdl));
-		// // TODO jobname as workindirectory
-		// jobProperties.put("jobDirectory", job.getJobname());
-		jobProperties.put("stdout", JsdlHelpers.getPosixStandardOutput(jsdl));
-		jobProperties.put("stderr", JsdlHelpers.getPosixStandardError(jsdl));
-		jobProperties.put("fqan", null);
-		jobProperties.put("executionHostFileSystem", getUser()
-				.returnAbsoluteUrl(JsdlHelpers.getUserExecutionHostFs(jsdl)));
+		
+		JobSubmissionObjectImpl jobSubmImpl = new JobSubmissionObjectImpl(jsdl);
+		
+		for ( JobProperty key : jobSubmImpl.getJobPropertyMap().keySet() ) {
+			job.addJobProperty(key.toString(), jobSubmImpl.getJobPropertyMap().get(key));
+		}
 
 		// fill info
 		// this will disapear later and only jobProperties will be used.
+		
+		//TODO remove that later on when I'm sure that nobody is using this anymore
 		String app = JsdlHelpers.getApplicationName(job.getJobDescription());
 		job.setApplication(app);
 
@@ -1559,11 +1604,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		Job job = getJob(jobname);
 
-		job.getJobProperties().put(JobConstants.JOBPROPERTYKEY_VO, job.getFqan());
+//		job.getJobProperties().put(JobConstants.JOBPROPERTYKEY_VO, job.getFqan());
 //		job.getJobProperties().put(JobConstants.JOBPROPERTYKEY_JOBDIRECTORY, getJobDirectory(jobname));
-		job.getJobProperties().put(JobConstants.JOBPROPERTYKEY_HOSTNAME, job.getSubmissionHost());
+//		job.getJobProperties().put(JobConstants.JOBPROPERTYKEY_HOSTNAME, job.getSubmissionHost());
 
-		job.getJobProperties().put(JobConstants.JOBPROPERTYKEY_STATUS,
+		job.getJobProperties().put(JOB_STATUS_KEY,
 				JobConstants.translateStatus(getJobStatus(jobname)));
 
 		return job.getJobProperties();
@@ -2082,7 +2127,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		String workingDirRelativeToUserFS = JsdlHelpers.getWorkingDirectory(job
 				.getJobDescription());
 		job.setJob_directory(submissionFS + "/" + workingDirRelativeToUserFS);
-		job.getJobProperties().put("jobDirectory", workingDirRelativeToUserFS);
+		job.getJobProperties().put(JOBDIRECTORY_KEY, workingDirRelativeToUserFS);
 
 		Document newJsdl = recalculateWorkingDirectory(job, clusterRootUrl,
 				absolutePath);

@@ -475,4 +475,10 @@ public class MdsInformationManager implements InformationManager {
 		return null;
 	}
 
+	public String[] getAllVersionsOfApplicationOnGridForVO(String application,
+			String vo) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

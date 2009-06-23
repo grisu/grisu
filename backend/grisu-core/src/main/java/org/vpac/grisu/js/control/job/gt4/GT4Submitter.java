@@ -564,6 +564,7 @@ public class GT4Submitter extends JobSubmitter {
 				buffWriter.close();
 
 			} catch (Exception e) {
+				myLogger.error("Gt4 job submission error: "+e.getLocalizedMessage());
 				e.printStackTrace();
 			}
 

@@ -146,11 +146,11 @@ public class JobConstants {
 	public static final String SEND_EMAIL_ON_JOB_START_ATTRIBUTE_KEY = "sendOnJobStart";
 	public static final String SEND_EMAIL_ON_JOB_END_ATTRIBUTE_KEY = "sendOnJobFinish";
 	
-	public static final String JOBPROPERTYKEY_INPUTFILES = "inputfiles";
-	public static final String JOBPROPERTYKEY_VO = "fqan";
-	public static final String JOBPROPERTYKEY_JOBDIRECTORY = "jobDirectory";
-	public static final String JOBPROPERTYKEY_HOSTNAME = "hostname";
-	public static final String JOBPROPERTYKEY_STATUS = "status";
+//	public static final String JOBPROPERTYKEY_INPUTFILES = "inputfiles";
+//	public static final String JOBPROPERTYKEY_VO = "fqan";
+//	public static final String JOBPROPERTYKEY_JOBDIRECTORY = "jobDirectory";
+//	public static final String JOBPROPERTYKEY_HOSTNAME = "hostname";
+//	public static final String JOBPROPERTYKEY_STATUS = "status";
 	
 //	public static final String WALLTIME_REQUIREMENT_KEY = "walltime";
 //	public static final String TOTALCPUREQUIREMENT_KEY = "totalCpu";

@@ -81,6 +81,7 @@ public class JobSubmissionManager {
 		} else {
 			factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
 		}
+		job.addJobProperty(ServiceInterface.FACTORY_TYPE_KEY, factoryType);
 		
 		myLogger.debug("FactoryType is: "+ factoryType);
 		String submitHostEndpoint = submitter.getServerEndpoint(host);
@@ -88,11 +89,14 @@ public class JobSubmissionManager {
 		String handle = submitter.submit(serviceInterface, submitHostEndpoint, factoryType, job);
 
 		job.setJobhandle(handle);
+		//TODO remove that once I'm sure nobody is using it anymore
 		job.setSubmissionHost(host);
+		job.addJobProperty(ServiceInterface.SUBMISSION_HOST_KEY, host);
 		job.setSubmissionType(submitter_name);
+		job.addJobProperty(ServiceInterface.SUBMISSION_TYPE_KEY, submitter_name);
 		job.getJobProperties().put("factoryType", factoryType);
 		if ( queue != null && ! "".equals(queue) ) 
-			job.getJobProperties().put("submissionQueue", queue);
+			job.getJobProperties().put(ServiceInterface.QUEUE_KEY, queue);
 		job.setStatus(JobConstants.EXTERNAL_HANDLE_READY);
 
 		return handle;
