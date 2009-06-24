@@ -359,33 +359,40 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		
 		JobSubmissionObjectImpl jobSubmissionObject = new JobSubmissionObjectImpl(jsdl);
 		
+		myLogger.debug("Trying to find matching grid resources...");
 		List<GridResource> matchingResources = matchmaker.findMatchingResources(jobSubmissionObject.getJobPropertyMap(), job.getFqan());
+		if ( matchingResources != null ) {
+			myLogger.debug("Found: "+matchingResources.size()+" of them...");
+		}
 		
 		String submissionLocation = jobSubmissionObject.getSubmissionLocation();
 //		GridResource selectedSubmissionResource = null;
 		
 		if ( submissionLocation != null && submissionLocation.length() > 0 ) {
-
+			myLogger.debug("Submission location specified in jsdl: "+submissionLocation+". Checking whether this is valid using mds information.");
 			// check whether submission location is specified. If so, check whether it is in the list of matching resources
 			boolean submissionLocationIsValid = false;
 			for ( GridResource resource : matchingResources ) {
 				if ( submissionLocation.equals(SubmissionLocationHelpers.createSubmissionLocationString(resource)) ) {
-					
+					myLogger.debug("Found gridResource object for submission location. Now checking whether version is specified and if it is whether it is available on this resource.");
 					// now check whether a possible selected version is available on this resource
-					if ( ! resource.isDesiredSoftwareVersionInstalled() ) {
+					if ( jobSubmissionObject.getApplicationVersion() != null && jobSubmissionObject.getApplicationVersion().length() > 0 && ! resource.getAvailableApplicationVersion().contains(jobSubmissionObject.getApplicationVersion()) ) {
+						myLogger.debug("Specified version is not available on this grid resource: "+submissionLocation);
 						throw new JobPropertiesException(JobProperty.APPLICATIONVERSION, "Version: "+jobSubmissionObject.getApplicationVersion()+" not installed on "+submissionLocation);
 					}
-					
+					myLogger.debug("Version available or not specified.");
 					// if no application version is specified, auto-set one
 					if ( jobSubmissionObject.getApplicationVersion() == null || jobSubmissionObject.getApplicationVersion().length() == 0 ) {
+						myLogger.debug("version was not specified. Auto setting the first one for the selected resource.");
 						if ( resource.getAvailableApplicationVersion() != null && resource.getAvailableApplicationVersion().size() > 0 ) {
 							JsdlHelpers.setApplicationVersion(jsdl, resource.getAvailableApplicationVersion().get(0));
-//							jobSubmissionObject.setApplicationVersion(resource.getAvailableApplicationVersion().get(0));
+							myLogger.debug("Set version to be: "+resource.getAvailableApplicationVersion().get(0));
+							//	jobSubmissionObject.setApplicationVersion(resource.getAvailableApplicationVersion().get(0));
 						} else {
 							throw new JobPropertiesException(JobProperty.APPLICATIONVERSION, "Could not find any installed version for application "+jobSubmissionObject.getApplication()+" on "+submissionLocation);
 						}
 					}
-					
+					myLogger.debug("Successfully validated submissionlocation "+submissionLocation);
 					submissionLocationIsValid = true;
 //					selectedSubmissionResource = resource;
 					break;
@@ -393,34 +400,44 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 			
 			if ( ! submissionLocationIsValid ) {
+				myLogger.error("Could not find a matching grid resource object for submissionlocation: "+submissionLocation);
 				throw new JobPropertiesException(JobProperty.SUBMISSIONLOCATION, "Submissionlocation "+submissionLocation+" not available for this kind of job");
 			}
 		} else {
+			myLogger.debug("No submission location specified in jsdl document. Trying to auto-find one...");
 			if ( matchingResources == null || matchingResources.size() == 0 ) {
+				myLogger.error("No matching grid resources found.");
 				throw new JobPropertiesException(JobProperty.SUBMISSIONLOCATION, "Could not find any matching resource to run this kind of job on");
 			}
 			// find the best submissionlocation and set it.
 
 			// check for the version of the application to run
 			if ( jobSubmissionObject.getApplicationVersion() == null || jobSubmissionObject.getApplicationVersion().length() == 0 ) {
+				myLogger.debug("No version specified in jsdl document. Will use the first one for the best grid resource.");
 				for ( GridResource resource : matchingResources ) {
 					if ( resource.getAvailableApplicationVersion() != null && resource.getAvailableApplicationVersion().size() > 0 ) {
 						JsdlHelpers.setApplicationVersion(jsdl, resource.getAvailableApplicationVersion().get(0));
 //						jobSubmissionObject.setApplicationVersion(resource.getAvailableApplicationVersion().get(0));
 						submissionLocation = SubmissionLocationHelpers.createSubmissionLocationString(resource);
+						myLogger.debug("Using submissionlocation: "+submissionLocation+" and application version: "+resource.getAvailableApplicationVersion().get(0));
 						break;
 					}
 				}
 				if ( submissionLocation == null ) {
+					myLogger.error("Could not find any version of the specified application grid-wide.");
 					throw new JobPropertiesException(JobProperty.APPLICATIONVERSION, "Could not find any version for this application grid-wide. That is probably an error in the mds info.");
 				}
 			} else {
+				myLogger.debug("Version: "+jobSubmissionObject.getApplicationVersion()+" specified. Trying to find a matching grid resource...");
 				for ( GridResource resource : matchingResources ) {
-					if ( resource.isDesiredSoftwareVersionInstalled() ) {
+					if ( resource.getAvailableApplicationVersion().contains(jobSubmissionObject.getApplicationVersion()) ) {
 						submissionLocation = SubmissionLocationHelpers.createSubmissionLocationString(resource);
+						myLogger.debug("Found grid resource with specified application version. Using submissionLocation: "+submissionLocation);
+						break;
 					}
 				}
 				if ( submissionLocation == null ) {
+					myLogger.error("Could not find a grid resource with the specified version...");
 					throw new JobPropertiesException(JobProperty.APPLICATIONVERSION, "Could not find desired version: "+jobSubmissionObject.getApplicationVersion()+" for application "+jobSubmissionObject.getApplication()+" grid-wide.");
 				}
 			}
@@ -437,9 +454,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		
 		
-
+		myLogger.debug("Trying to find staging filesystem for subissionlocation: "+submissionLocation);
 		String[] stagingFileSystems = informationManager.getStagingFileSystemForSubmissionLocation(submissionLocation);
 
+		if ( stagingFileSystems == null || stagingFileSystems.length == 0 ) {
+			myLogger.error("No staging filesystem found for submissionlocation: "+submissionLocation);
+			throw new JobPropertiesException(JobProperty.SUBMISSIONLOCATION, "Could not find staging filesystem for submissionlocation "+submissionLocation);
+		}
+		
+		myLogger.debug("Trying to find mountpoint for stagingfilesystem...");
+		
 		MountPoint mountPointToUse = null;
 		String stagingFilesystemToUse = null;
 		for ( String stagingFs : stagingFileSystems ) {
@@ -448,6 +472,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				if ( mp.getRootUrl().startsWith(stagingFs.replace(":2811", "")) && jobFqan.equals(mp.getFqan() )) {
 					mountPointToUse = mp;
 					stagingFilesystemToUse = stagingFs.replace(":2811", "");
+					myLogger.debug("Found mountpoint "+mp.getMountpoint()+" for stagingfilesystem "+stagingFilesystemToUse);
 					break;
 				}
 			}
@@ -455,6 +480,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		
 		if ( mountPointToUse == null ) {
+			myLogger.error("Could not find a staging filesystem that is accessible for the user for submissionlocation "+submissionLocation);
 			throw new JobPropertiesException(JobProperty.SUBMISSIONLOCATION, "Could not find stagingfilesystem for submission location: "+submissionLocation);
 		}
 		
@@ -462,14 +488,18 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		
 		// now calculate and set the proper paths
 		String workingDirectory = mountPointToUse.getRootUrl().substring(stagingFilesystemToUse.length()) + "/" + ServerPropertiesManager.getGrisuJobDirectoryName() + "/" + jobname;
+		myLogger.debug("Calculated workingdirectory: "+workingDirectory);
 		
 		JsdlHelpers.setWorkingDirectory(jsdl, JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM, workingDirectory);
 		
 		String submissionSite = informationManager.getSiteForHostOrUrl(stagingFilesystemToUse);
+		myLogger.debug("Calculated submissionSite: "+submissionSite);
 		job.addJobProperty("submissionSite", submissionSite);
 		job.setJob_directory(stagingFilesystemToUse+workingDirectory);
 		job.getJobProperties().put(JOBDIRECTORY_KEY, stagingFilesystemToUse+workingDirectory);
-		
+		myLogger.debug("Calculated jobdirectory: "+job.getJob_directory());
+
+		myLogger.debug("Fixing urls in datastaging elements...");
 		// fix stage in target filesystems...
 		List<Element> stageInElements = JsdlHelpers.getStageInElements(jsdl);
 		for ( Element stageInElement : stageInElements ) {
@@ -482,23 +512,27 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			
 		}
 		
-		System.out.println(SeveralXMLHelpers.toStringWithoutAnnoyingExceptions(jsdl));
 		job.setJobDescription(jsdl);
 		jobdao.attachDirty(job);
+		myLogger.debug("Preparing job done.");
 	}
 	
 	public void submitJob(String jobname) throws NoSuchJobException, ServerJobSubmissionException, RemoteFileSystemException, NoValidCredentialException, VomsException {
 
+		myLogger.debug("Submitting job: "+jobname);
 		Job job = getJob(jobname);
 		
 		try {
+			myLogger.debug("Preparing job environment...");
 			prepareJobEnvironment(job);
+			myLogger.debug("Staging files...");
 			stageFiles(jobname);
 		} catch (Exception e) {
 			throw new RemoteFileSystemException(e.getLocalizedMessage());
 		}
 
 		// fill necessary info about the job into the database
+		myLogger.debug("Parsing job description...");
 		parseJobDescription(job);
 
 		if (job.getFqan() != null) {
@@ -510,6 +544,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		String handle = null;
+		myLogger.debug("Submitting job to endpoint...");
 		handle = getSubmissionManager().submit("GT4", job);
 
 		if (handle == null) {
@@ -524,7 +559,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// TODO or do we want it to be stored?
 		job.setCredential(null);
 		jobdao.attachDirty(job);
-		
+		myLogger.debug("Jobsubmission for job "+jobname+" successful.");
 		
 	}
 	

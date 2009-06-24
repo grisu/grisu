@@ -961,7 +961,11 @@ public class JsdlHelpers {
 		if (fsRoot.endsWith("/")) {
 			return fsRoot + relPart;
 		} else {
-			return fsRoot + "/" + relPart;
+			if ( relPart.startsWith("/") ) {
+				return fsRoot + relPart;
+			} else {
+				return fsRoot + "/" + relPart;
+			}
 		}
 
 	}

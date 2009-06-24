@@ -68,6 +68,11 @@ public class GrisuRegistry {
 		this.esv = esv;
 	}
 	
+	public GrisuRegistry(ServiceInterface serviceInterface) {
+		this.serviceInterface = serviceInterface;
+		this.esv = null;
+	}
+	
 	public UserApplicationInformation getUserApplicationInformation(String applicationName) {
 		
 		if ( cachedUserInformationObjects.get(applicationName) == null ) {
