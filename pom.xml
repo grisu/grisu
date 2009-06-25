@@ -93,16 +93,16 @@
 				<configuration>
 					<aggregate>true</aggregate>
 					<linksource>true</linksource>
-					<groups>
-						<group>
-							<title>Core Packages</title>
-							<packages>org.vpac.grisu</packages>
-						</group>
-						<group>
-							<title>Swing Packages</title>
-							<packages>org.vpac.grisu.client.view.swing</packages>
-						</group>
-					</groups>
+<!--					<groups>-->
+<!--						<group>-->
+<!--							<title>Core Packages</title>-->
+<!--							<packages>org.vpac.grisu</packages>-->
+<!--						</group>-->
+<!--						<group>-->
+<!--							<title>Swing Packages</title>-->
+<!--							<packages>org.vpac.grisu.client.view.swing</packages>-->
+<!--						</group>-->
+<!--					</groups>-->
 					<breakiterator>true</breakiterator>
 					<source>1.5</source>
 					<links>

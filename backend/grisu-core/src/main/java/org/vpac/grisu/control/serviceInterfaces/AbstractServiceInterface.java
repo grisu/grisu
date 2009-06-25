@@ -257,6 +257,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		job.setStatus(JobConstants.JOB_CREATED);
 		jobdao.save(job);
 		
+		jobdao.attachDirty(job);
 		return jobname;
 		
 		
@@ -845,8 +846,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		JobSubmissionObjectImpl jobSubmImpl = new JobSubmissionObjectImpl(jsdl);
 		
 		for ( JobProperty key : jobSubmImpl.getJobPropertyMap().keySet() ) {
-			job.addJobProperty(key.toString(), jobSubmImpl.getJobPropertyMap().get(key));
+			job.getJobProperties().put(key.toString(), jobSubmImpl.getJobPropertyMap().get(key));
 		}
+		
+//		TODO urgent! find out why job properties are not persisted after first safe!
+//		job.getJobProperties().put("jobDirectory", JsdlHelpers.getAbsoluteWorkingDirectoryUrl(jsdl));
 
 		// fill info
 		// this will disapear later and only jobProperties will be used.
