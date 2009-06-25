@@ -7,6 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.vpac.grisu</groupId>
   <artifactId>grisu-client-slim</artifactId>
+  <name>grisu-client-slim</name>
   <version>0.3-SNAPSHOT</version>
   <description>Slimmed down version of the grisu-client library. This only contains very vew classes and helper methods that are needed to implement a (java) grisu client.</description>
  

@@ -7,6 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.vpac.grisu</groupId>
   <artifactId>grisu-client</artifactId>
+  <name>grisu-client-lib</name>
   <version>0.3-SNAPSHOT</version>
   
   <repositories>
@@ -84,7 +85,8 @@
 	</properties>
 
 
-	<build>
+		<description>A library that is used by the grisu-client-swing module. It bundles all the client functionality needed for client implementations (in Java).</description>
+		<build>
 
 		<resources>
 			<resource>

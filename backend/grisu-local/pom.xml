@@ -7,6 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.vpac.grisu</groupId>
   <artifactId>grisu-local</artifactId>
+  <name>grisu-local</name>
   <version>0.3-SNAPSHOT</version>
   <dependencies>
   		<dependency>
@@ -39,7 +40,8 @@
 		</dependency>
 		</dependencies>
 
-        <build>
+  <description>A local backend for the Grisu framework. It can be used to access the grid from a desktop machine or a webservice that incorporates a web-client.</description>
+  <build>
                 <plugins>
                         <plugin>
                                 <groupId>org.apache.maven.plugins</groupId>

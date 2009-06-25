@@ -14,6 +14,7 @@
 	<groupId>org.vpac.grisu</groupId>
 	<artifactId>grisu-cxf</artifactId>
 	<packaging>war</packaging>
+	<name>grisu-cxf</name>
 	<version>0.3-SNAPSHOT</version>
 
 	<description>grisu-cxf publishes the CXFServiceInterface interface
