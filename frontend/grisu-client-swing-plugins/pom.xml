@@ -8,6 +8,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.vpac.grisu</groupId>
 	<artifactId>grisu-client-swing-plugins</artifactId>
+	<name>grisu-client-swing-plugins</name>
 	<version>0.3-SNAPSHOT</version>
 
 	<repositories>
@@ -24,6 +25,7 @@
 			<version>0.3-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
+	<description>Application specific plugins for the swing client.</description>
 	<build>
 		<plugins>
 			<plugin>
