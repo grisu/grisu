@@ -180,7 +180,60 @@ public class JobSubmissionObjectImpl {
 	public JobSubmissionObjectImpl() {
 
 	}
+	
+	private boolean checkForBoolean(String booleanString) {
+		if ( booleanString == null ) {
+			return false;
+		}
 
+	
+		if ( "true".equals(booleanString.toLowerCase()) || "on".equals(booleanString.toLowerCase()) ) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public JobSubmissionObjectImpl(Map<String, String> jobProperties) {
+		
+		this.jobname = jobProperties.get(JobProperty.JOBNAME.toString());
+		this.application = jobProperties.get(JobProperty.APPLICATIONNAME.toString());
+		this.applicationVersion = jobProperties.get(JobProperty.APPLICATIONVERSION.toString());
+		this.email_address = jobProperties.get(JobProperty.EMAIL_ADDRESS.toString());
+		this.email_on_job_start = checkForBoolean(jobProperties.get(JobProperty.EMAIL_ON_START.toString()));
+		this.email_on_job_finish = checkForBoolean(jobProperties.get(JobProperty.EMAIL_ON_FINISH.toString()));
+		try {
+			this.cpus = Integer.parseInt(jobProperties.get(JobProperty.NO_CPUS.toString()));
+		} catch (NumberFormatException e) {
+			this.cpus = 1;
+		}
+		this.force_single = checkForBoolean(jobProperties.get(JobProperty.FORCE_SINGLE.toString()));
+		this.force_mpi = checkForBoolean(jobProperties.get(JobProperty.FORCE_MPI.toString()));
+		try {
+			this.memory_in_bytes = Integer.parseInt(jobProperties.get(JobProperty.MEMORY_IN_B.toString()));
+		} catch (NumberFormatException e) {
+			this.memory_in_bytes = 0;
+		}
+		try {
+			this.walltime = Integer.parseInt(jobProperties.get(JobProperty.WALLTIME_IN_MINUTES.toString()));
+		} catch (NumberFormatException e) {
+			this.walltime = 0;
+		}
+		
+		String temp = jobProperties.get(JobProperty.INPUT_FILE_URLS.toString());
+		if ( temp != null && temp.length() > 0 ) {
+			this.inputFileUrls = temp.split(",");
+		}
+		
+		this.submissionLocation = jobProperties.get(JobProperty.SUBMISSIONLOCATION.toString());
+		this.commandline = jobProperties.get(jobProperties.get(JobProperty.COMMANDLINE.toString()));
+		this.stderr = jobProperties.get(jobProperties.get(JobProperty.STDERR.toString()));
+		this.stdout = jobProperties.get(jobProperties.get(JobProperty.STDOUT.toString()));
+		this.stdin = jobProperties.get(jobProperties.get(JobProperty.STDIN.toString()));
+		
+	}
+	
+	
 	public JobSubmissionObjectImpl(Document jsdl) {
 
 		jobname = JsdlHelpers.getJobname(jsdl);
@@ -268,7 +321,9 @@ public class JobSubmissionObjectImpl {
 		return jobProperties;
 	}
 
-	public Document getJobDescriptionDocument() {
+	public Document getJobDescriptionDocument() throws JobPropertiesException {
+		
+		checkValidity();
 
 		Map<JobProperty, String> jobProperties = getJobPropertyMap();
 
@@ -277,8 +332,16 @@ public class JobSubmissionObjectImpl {
 		return jsdl;
 
 	}
+	
+	private void checkValidity() throws JobPropertiesException {
+		
+		if ( commandline == null || commandline.length() == 0 ) {
+			throw new JobPropertiesException(JobProperty.COMMANDLINE, "Commandline not specified.");
+		}
+		
+	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws JobPropertiesException {
 
 		JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl();
 

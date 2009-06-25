@@ -32,6 +32,7 @@ import org.apache.log4j.Logger;
 import org.globus.ftp.MarkerListener;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.JobCreationException;
+import org.vpac.grisu.control.JobSubmissionException;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.SeveralXMLHelpers;
 import org.vpac.grisu.control.exceptions.JobDescriptionNotValidException;
@@ -208,7 +209,66 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		return manager;
 	}
+	
+	public String createJob(Document jsdl, String fqan, String jobCreationMethod) throws JobPropertiesException {
+		
 
+		String jobname = JsdlHelpers.getJobname(jsdl);
+		
+		if ( jobname == null ) {
+			jobname = "grisu_job";
+		}
+		
+		
+		Job job;
+		try {
+			job = getJob(jobname);
+			throw new JobPropertiesException(JobProperty.JOBNAME, "Jobname already taken. Could not create job.");
+		} catch (NoSuchJobException e1) {
+			// that's ok
+			myLogger.debug("Checked jobname. Not yet in database. Good.");
+		}
+		
+		// creating job
+		getCredential(); // just to be sure that nothing stale get's created in the db unnecessary
+		job = new Job(getCredential().getDn(), jobname);
+		
+		job.setJobDescription(jsdl);
+		
+		try {
+			setVO(job, fqan);
+			processJobDescription(job);
+		} catch (NoSuchJobException e) {
+			// that should never happen
+			myLogger.error("Somehow the job was not created although it certainly should have. Must be a bug..");
+			throw new RuntimeException("Job was not created. Internal error.");
+		}
+
+		// test again whether a job was created in the db in the meantime
+		try {
+			Job jobTest = getJob(job.getJobname());
+			throw new JobPropertiesException(JobProperty.JOBNAME, "Jobname already taken. Apparently a job was created with the same name while this one was calculated.");
+		} catch (NoSuchJobException e1) {
+			// that's ok
+			myLogger.debug("Checked jobname. Not yet in database. Good.");
+		}
+		
+		
+		job.setStatus(JobConstants.JOB_CREATED);
+		jobdao.save(job);
+		
+		return jobname;
+		
+		
+		
+	}
+	public String createJob(Map<String, String> jobProperties, String fqan, String jobCreationMethod) throws JobPropertiesException {
+	
+		JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl(jobProperties);
+		
+		return createJob(jso.getJobDescriptionDocument(), fqan, jobCreationMethod);
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -333,13 +393,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		jobdao.attachDirty(job);
 	}
 	
-	public void setVO(String jobname, String fqan) throws NoSuchJobException, JobPropertiesException {
+	private void setVO(Job job, String fqan) throws NoSuchJobException, JobPropertiesException {
 
-		Job job = getJob(jobname);
-		
 		job.setFqan(fqan);
 		job.getJobProperties().put(FQAN_KEY, fqan);
-		processJobDescription(jobname);
 		
 	}
 	
@@ -349,10 +406,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @throws NoSuchJobException
 	 * @throws JobPropertiesException
 	 */
-	private void processJobDescription(String jobname) throws NoSuchJobException, JobPropertiesException  {
+	private void processJobDescription(Job job) throws NoSuchJobException, JobPropertiesException  {
 		
-		Job job = getJob(jobname);
-
 		//TODO check whether fqan is set
 		String jobFqan = job.getFqan();
 		Document jsdl = job.getJobDescription();
@@ -477,6 +532,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				}
 			}
 			
+			if ( mountPointToUse != null ) {
+				myLogger.debug("Mountpoint set to be: "+mountPointToUse.getMountpoint()+". Not looking any further...");
+				break;
+			}
+			
 		}
 		
 		if ( mountPointToUse == null ) {
@@ -487,7 +547,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		JsdlHelpers.addOrRetrieveExistingFileSystemElement(jsdl, JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM, stagingFilesystemToUse);
 		
 		// now calculate and set the proper paths
-		String workingDirectory = mountPointToUse.getRootUrl().substring(stagingFilesystemToUse.length()) + "/" + ServerPropertiesManager.getGrisuJobDirectoryName() + "/" + jobname;
+		String workingDirectory = mountPointToUse.getRootUrl().substring(stagingFilesystemToUse.length()) + "/" + ServerPropertiesManager.getGrisuJobDirectoryName() + "/" + job.getJobname();
 		myLogger.debug("Calculated workingdirectory: "+workingDirectory);
 		
 		JsdlHelpers.setWorkingDirectory(jsdl, JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM, workingDirectory);
@@ -513,14 +573,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		
 		job.setJobDescription(jsdl);
-		jobdao.attachDirty(job);
+//		jobdao.attachDirty(job);
 		myLogger.debug("Preparing job done.");
 	}
 	
-	public void submitJob(String jobname) throws NoSuchJobException, ServerJobSubmissionException, RemoteFileSystemException, NoValidCredentialException, VomsException {
+	public void submitJob(String jobname) throws JobSubmissionException {
 
 		myLogger.debug("Submitting job: "+jobname);
-		Job job = getJob(jobname);
+		Job job;
+		try {
+			job = getJob(jobname);
+		} catch (NoSuchJobException e1) {
+			throw new JobSubmissionException("Job: "+jobname+" could not be found in the grisu job database.");
+		}
 		
 		try {
 			myLogger.debug("Preparing job environment...");
@@ -528,7 +593,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			myLogger.debug("Staging files...");
 			stageFiles(jobname);
 		} catch (Exception e) {
-			throw new RemoteFileSystemException(e.getLocalizedMessage());
+			throw new JobSubmissionException("Could not access remote filesystem: "+e.getLocalizedMessage());
 		}
 
 		// fill necessary info about the job into the database
@@ -537,18 +602,27 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		if (job.getFqan() != null) {
 			VO vo = VOManagement.getVO(getUser().getFqans().get(job.getFqan()));
-			job.setCredential(CertHelpers.getVOProxyCredential(vo,
-					job.getFqan(), getCredential()));
+			try {
+				job.setCredential(CertHelpers.getVOProxyCredential(vo,
+						job.getFqan(), getCredential()));
+			} catch (Exception e) {
+				throw new JobSubmissionException("Could not create credential to use to submit the job: "+e.getLocalizedMessage());
+			}
 		} else {
 			job.setCredential(getCredential());
 		}
 
 		String handle = null;
 		myLogger.debug("Submitting job to endpoint...");
-		handle = getSubmissionManager().submit("GT4", job);
+		try {
+			handle = getSubmissionManager().submit("GT4", job);
+		} catch (ServerJobSubmissionException e) {
+			e.printStackTrace();
+			throw new JobSubmissionException("Job submission to endpoint failed: "+e.getLocalizedMessage());
+		}
 
 		if (handle == null) {
-			throw new ServerJobSubmissionException(
+			throw new JobSubmissionException(
 					"Job apparently submitted but jobhandle is null for job: "
 							+ jobname);
 		}
