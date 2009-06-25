@@ -30,5 +30,6 @@
 		<module>gricli</module>
 		<module>grisu-client-swing-plugins</module>
 		<module>grisu-client-slim</module>
+		<module>grisu-client-web</module>
 	</modules>
 </project>
