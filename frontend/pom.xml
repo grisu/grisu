@@ -29,5 +29,6 @@
 		<module>grisu-client-batch</module>
 		<module>gricli</module>
 		<module>grisu-client-swing-plugins</module>
+		<module>grisu-client-slim</module>
 	</modules>
 </project>
