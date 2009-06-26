@@ -30,11 +30,11 @@ public class JobSubmissionNew {
 		JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl();
 		
 		jso.setApplication("java");
-		jso.setCommandline("java -version");
+		jso.setCommandline("java -version");  
 		
-		String jobname = si.createJob(jso.getStringJobPropertyMap(), "/APAC/VPAC", "force-name");
+//		String jobname = si.createJob(jso.getStringJobPropertyMap(), "/APAC/VPAC", "force-name");
 		
-		si.submitJob(jobname);
+//		si.submitJob(jobname);
 		
 		
 	}
