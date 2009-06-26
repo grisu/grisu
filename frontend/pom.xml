@@ -31,5 +31,6 @@
 		<module>grisu-client-swing-plugins</module>
 		<module>grisu-client-slim</module>
 		<module>grisu-client-web</module>
-	</modules>
+    <module>grisu-client-web-login</module>
+  </modules>
 </project>
