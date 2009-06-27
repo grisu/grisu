@@ -416,12 +416,39 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		String jobFqan = job.getFqan();
 		Document jsdl = job.getJobDescription();
 		
+		boolean applicationCalculated = false;
+		
 		JobSubmissionObjectImpl jobSubmissionObject = new JobSubmissionObjectImpl(jsdl);
 		
-		myLogger.debug("Trying to find matching grid resources...");
-		List<GridResource> matchingResources = matchmaker.findMatchingResources(jobSubmissionObject.getJobPropertyMap(), job.getFqan());
-		if ( matchingResources != null ) {
-			myLogger.debug("Found: "+matchingResources.size()+" of them...");
+		List<GridResource> matchingResources = null;
+		
+		// checking whether application is specified. If not, try to figure out from the executable
+		if ( jobSubmissionObject.getApplication() == null || jobSubmissionObject.getApplication().length() == 0 ) {
+			myLogger.debug("No application specified. Trying to calculate it...");
+			
+			String[] calculatedApps = informationManager.getApplicationsThatProvideExecutable(JsdlHelpers.getPosixApplicationExecutable(jsdl));
+			for ( String app : calculatedApps ) { 
+				jobSubmissionObject.setApplication(app);
+				matchingResources = matchmaker.findMatchingResources(jobSubmissionObject.getJobPropertyMap(), job.getFqan());
+				if ( matchingResources != null && matchingResources.size() > 0 ) {
+					JsdlHelpers.setApplicationType(jsdl, app);
+					myLogger.debug("Calculated app: "+app);
+					break;
+				}
+			}
+			
+			if ( jobSubmissionObject.getApplication() == null || jobSubmissionObject.getApplication().length() == 0 ) {
+				throw new JobPropertiesException(JobProperty.APPLICATIONNAME, "No application specified and could not find one in the grid that matches the executable.");
+			}
+			
+			applicationCalculated = true;
+		} else {
+		
+			myLogger.debug("Trying to find matching grid resources...");
+			matchingResources = matchmaker.findMatchingResources(jobSubmissionObject.getJobPropertyMap(), job.getFqan());
+			if ( matchingResources != null ) {
+				myLogger.debug("Found: "+matchingResources.size()+" of them...");
+			}
 		}
 		
 		String submissionLocation = jobSubmissionObject.getSubmissionLocation();
