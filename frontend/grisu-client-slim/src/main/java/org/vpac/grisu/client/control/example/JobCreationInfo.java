@@ -2,12 +2,14 @@ package org.vpac.grisu.client.control.example;
 
 import org.vpac.grisu.client.control.login.LoginParams;
 import org.vpac.grisu.client.control.login.ServiceInterfaceFactory;
+import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.js.model.JobSubmissionObjectImpl;
+import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.model.ApplicationInformation;
 
-public class JobSubmissionNew {
+public class JobCreationInfo {
 	
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws ServiceInterfaceException {
 		
 		String username = args[0];
 		char[] password = args[1].toCharArray();
@@ -20,14 +22,13 @@ public class JobSubmissionNew {
 		ServiceInterface si = null;
 		si = ServiceInterfaceFactory.createInterface(loginParams);
 		
-		JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl();
-		jso.setJobname("javaMarsssss");
-		jso.setApplication("java");
-		jso.setCommandline("java -version");  
 		
-		String jobname = si.createJob(jso.getStringJobPropertyMap(), "/ARCS/VPAC", "force-name");
+		GrisuRegistry registry = GrisuRegistry.getDefault(si);
 		
-		si.submitJob(jobname);
+		ApplicationInformation appInfo = registry.getApplicationInformationObject("java");
+		for ( String version : appInfo.getAllAvailableVersionsForFqan("/ARCS/NGAdmin") ) {
+			System.out.println(version);
+		}
 		
 		
 	}

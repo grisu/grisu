@@ -25,7 +25,7 @@ import org.vpac.grisu.client.model.template.nodes.TemplateNodeEvent;
 import org.vpac.grisu.control.FqanEvent;
 import org.vpac.grisu.control.FqanListener;
 import org.vpac.grisu.control.GrisuRegistry;
-import org.vpac.grisu.model.EnvironmentSnapshotValues;
+import org.vpac.grisu.model.UserProperties;
 import org.vpac.grisu.model.UserApplicationInformation;
 
 public class Version extends JPanel implements TemplateNodePanel,
@@ -60,8 +60,9 @@ public class Version extends JPanel implements TemplateNodePanel,
 	private JRadioButton exactRadioButton;
 
 	private TemplateNode templateNode;
+	private GrisuRegistry registry = null;
 	private UserApplicationInformation infoObject = null;
-	private EnvironmentSnapshotValues esv = GrisuRegistry.getDefault().getEnvironmentSnapshotValues();
+//	private UserProperties esv = GrisuRegistry.getDefault().getUserProperties();
 	private String applicationName = null;
 	private boolean useAny = true;
 	private boolean useDefault = true;
@@ -102,14 +103,16 @@ public class Version extends JPanel implements TemplateNodePanel,
 		this.applicationName = this.templateNode.getTemplate().getApplicationName();
 		defaultVersion = node.getDefaultValue();
 		
-		esv.addFqanListener(this);
+		registry = GrisuRegistry.getDefault(node.getTemplate().getEnvironmentManager().getServiceInterface());
 		
-		GrisuRegistry.getDefault().getHistoryManager().setMaxNumberOfEntries(TemplateTagConstants.getGlobalLastVersionModeKey(applicationName), 1);
-		GrisuRegistry.getDefault().getHistoryManager().setMaxNumberOfEntries(TemplateTagConstants.getGlobalLastVersionKey(applicationName), 1);
-		infoObject = GrisuRegistry.getDefault().getUserApplicationInformation(applicationName);
+		registry.getUserProperties().addFqanListener(this);
+		
+		registry.getHistoryManager().setMaxNumberOfEntries(TemplateTagConstants.getGlobalLastVersionModeKey(applicationName), 1);
+		registry.getHistoryManager().setMaxNumberOfEntries(TemplateTagConstants.getGlobalLastVersionKey(applicationName), 1);
+		infoObject = registry.getUserApplicationInformation(applicationName);
 				
 		try {
-			lastVersion = GrisuRegistry.getDefault().getHistoryManager().getEntries(TemplateTagConstants.getGlobalLastVersionKey(infoObject.getApplicationName())).get(0);
+			lastVersion = registry.getHistoryManager().getEntries(TemplateTagConstants.getGlobalLastVersionKey(infoObject.getApplicationName())).get(0);
 		} catch (Exception e) {
 			lastVersion = null;
 		}
@@ -140,7 +143,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 			}
 		} else {
 			try {
-				startMode = GrisuRegistry.getDefault().getHistoryManager().getEntries(TemplateTagConstants.getGlobalLastVersionModeKey(infoObject.getApplicationName())).get(0);
+				startMode = registry.getHistoryManager().getEntries(TemplateTagConstants.getGlobalLastVersionModeKey(infoObject.getApplicationName())).get(0);
 
 				if ( ANY_MODE_STRING.equals(startMode) && ! useAny ) {
 					startMode = null;
@@ -219,7 +222,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 		versionLocked = true;
 
 		versionModel.removeAllElements();
-		for ( String version : infoObject.getAllAvailableVersionsForFqan(GrisuRegistry.getDefault().getEnvironmentSnapshotValues().getCurrentFqan()) ) {
+		for ( String version : infoObject.getAllAvailableVersionsForFqan(registry.getUserProperties().getCurrentFqan()) ) {
 			versionModel.addElement(version);
 		}
 
@@ -288,15 +291,15 @@ public class Version extends JPanel implements TemplateNodePanel,
 		switch (mode) {
 		case ANY_VERSION_MODE:
 			switchToAnyVersionMode();
-			GrisuRegistry.getDefault().getHistoryManager().addHistoryEntry(TemplateTagConstants.getGlobalLastVersionModeKey(infoObject.getApplicationName()), ANY_MODE_STRING, new Date());
+			registry.getHistoryManager().addHistoryEntry(TemplateTagConstants.getGlobalLastVersionModeKey(infoObject.getApplicationName()), ANY_MODE_STRING, new Date());
 			break;
 		case DEFAULT_VERSION_MODE:
 			switchToDefaultVersionMode();
-			GrisuRegistry.getDefault().getHistoryManager().addHistoryEntry(TemplateTagConstants.getGlobalLastVersionModeKey(infoObject.getApplicationName()), DEFAULT_MODE_STRING, new Date());
+			registry.getHistoryManager().addHistoryEntry(TemplateTagConstants.getGlobalLastVersionModeKey(infoObject.getApplicationName()), DEFAULT_MODE_STRING, new Date());
 			break;
 		case EXACT_VERSION_MODE:
 			switchToExactVersionMode();
-			GrisuRegistry.getDefault().getHistoryManager().addHistoryEntry(TemplateTagConstants.getGlobalLastVersionModeKey(infoObject.getApplicationName()), EXACT_MODE_STRING, new Date());
+			registry.getHistoryManager().addHistoryEntry(TemplateTagConstants.getGlobalLastVersionModeKey(infoObject.getApplicationName()), EXACT_MODE_STRING, new Date());
 			break;
 		default:
 			myLogger
@@ -327,7 +330,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 		
 		this.currentMode = DEFAULT_VERSION_MODE;
 		
-		Set<String> temp = infoObject.getAvailableSubmissionLocationsForVersionAndFqan(defaultVersion, esv.getCurrentFqan());
+		Set<String> temp = infoObject.getAvailableSubmissionLocationsForVersionAndFqan(defaultVersion, registry.getUserProperties().getCurrentFqan());
 		
 		try {
 		if ( temp.size() > 0 ) {
@@ -466,7 +469,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 							String temp = (String)(versionModel.getSelectedItem());
 							fireVersionChanged(temp);
 						}
-						GrisuRegistry.getDefault().getHistoryManager().addHistoryEntry(TemplateTagConstants.getGlobalLastVersionKey(infoObject.getApplicationName()), (String)(versionModel.getSelectedItem()));
+						registry.getHistoryManager().addHistoryEntry(TemplateTagConstants.getGlobalLastVersionKey(infoObject.getApplicationName()), (String)(versionModel.getSelectedItem()));
 
 					}						
 					}

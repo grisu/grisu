@@ -19,7 +19,7 @@ public class UserInformationImpl implements UserInformation {
 	
 	private final ServiceInterface serviceInterface;
 	
-	private ResourceInformation resourceInfo = GrisuRegistry.getDefault().getResourceInformation();
+	private ResourceInformation resourceInfo;
 	
 	private String[] cachedFqans = null;
 	private Set<String> cachedAllSubmissionLocations = null;
@@ -32,6 +32,7 @@ public class UserInformationImpl implements UserInformation {
 	
 	public UserInformationImpl(ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
+		resourceInfo = GrisuRegistry.getDefault(serviceInterface).getResourceInformation();
 	}
 
 	public String[] getAllAvailableFqans() {

@@ -4,6 +4,9 @@ package org.vpac.grisu.client.control.login;
 
 import java.util.Arrays;
 
+import org.vpac.grisu.control.JobConstants;
+import org.vpac.grisu.control.utils.MyProxyServerParams;
+
 /**
  * A class that holds all information that is needed to login to a Grisu web service.
  * 
@@ -23,6 +26,10 @@ public class LoginParams {
 	private int httpProxyPort = -1;
 	private String httpProxyUsername = null;
 	private char[] httpProxyPassphrase = null;
+	
+	public LoginParams(String serviceInterfaceUrl, String myProxyUsername, char[] myProxyPassphrase) {
+		this(serviceInterfaceUrl, myProxyUsername, myProxyPassphrase, MyProxyServerParams.DEFAULT_MYPROXY_SERVER, new Integer(MyProxyServerParams.DEFAULT_MYPROXY_PORT).toString());
+	}
 	
 	public LoginParams(String serviceInterfaceUrl, String myProxyUsername, char[] myProxyPassphrase, String myProxyServer, String myProxyPort) { this.serviceInterfaceUrl = serviceInterfaceUrl;
 		this.myProxyUsername = myProxyUsername;

@@ -7,13 +7,14 @@ import java.util.Map;
 
 import org.vpac.grisu.model.ApplicationInformation;
 import org.vpac.grisu.model.ApplicationInformationImpl;
-import org.vpac.grisu.model.EnvironmentSnapshotValues;
+import org.vpac.grisu.model.UserProperties;
 import org.vpac.grisu.model.ResourceInformation;
 import org.vpac.grisu.model.ResourceInformationImpl;
 import org.vpac.grisu.model.UserApplicationInformation;
 import org.vpac.grisu.model.UserApplicationInformationImpl;
 import org.vpac.grisu.model.UserInformation;
 import org.vpac.grisu.model.UserInformationImpl;
+import org.vpac.grisu.model.UserPropertiesImpl;
 import org.vpac.historyRepeater.DummyHistoryManager;
 import org.vpac.historyRepeater.HistoryManager;
 import org.vpac.historyRepeater.SimpleHistoryManager;
@@ -23,34 +24,40 @@ public class GrisuRegistry {
 	// singleton stuff
 	private static GrisuRegistry REGISTRY;
 	
-	public static GrisuRegistry getDefault() {
-		if ( singletonServiceInterface == null ) {
-			throw new RuntimeException("ServiceInterface not initialized yet. Can't get default registry...");
+	private static Map<ServiceInterface, GrisuRegistry> cachedRegistries = new HashMap<ServiceInterface, GrisuRegistry>();
+	
+	public static GrisuRegistry getDefault(ServiceInterface serviceInterface) {
+		
+		if ( serviceInterface == null ) {
+			throw new RuntimeException("ServiceInterface not initialized yet. Can't get default registry...");	
 		}
 		
-		if ( REGISTRY == null) {
-			REGISTRY = new GrisuRegistry(singletonServiceInterface, singletonEsv);
+		if ( cachedRegistries.get(serviceInterface) == null ) {
+			GrisuRegistry temp = new GrisuRegistry(serviceInterface);
+			cachedRegistries.put(serviceInterface, temp);
 		}
-		return REGISTRY;
+		
+		return cachedRegistries.get(serviceInterface);
 	}
-	private static ServiceInterface singletonServiceInterface;
-	private static EnvironmentSnapshotValues singletonEsv;
+	
+//	private static ServiceInterface singletonServiceInterface;
+	private static UserProperties singletonEsv;
 	
 	private final ServiceInterface serviceInterface;
 	
-	/**
-	 * This needs to be called before calling {@link #getDefault()} for the first time...
-	 * @param serviceInterface
-	 */
-	public static void setServiceInterface(ServiceInterface serviceInterfaceTemp) {
-		singletonServiceInterface = serviceInterfaceTemp;
-	}
+//	/**
+//	 * This needs to be called before calling {@link #getDefault()} for the first time...
+//	 * @param serviceInterface
+//	 */
+//	public static void setServiceInterface(ServiceInterface serviceInterfaceTemp) {
+//		singletonServiceInterface = serviceInterfaceTemp;
+//	}
+//	
+//	public static void setEnvironmentSnapshotValues(EnvironmentSnapshotValues esv) {
+//		singletonEsv = esv;
+//	}
 	
-	public static void setEnvironmentSnapshotValues(EnvironmentSnapshotValues esv) {
-		singletonEsv = esv;
-	}
-	
-	private EnvironmentSnapshotValues esv = null;
+	private UserProperties userProperties = null;
 	
 	
 	// here starts the real class...
@@ -63,14 +70,14 @@ public class GrisuRegistry {
 	private UserInformation cachedUserInformation;
 	private ResourceInformation cachedResourceInformation;
 	
-	public GrisuRegistry(ServiceInterface serviceInterface, EnvironmentSnapshotValues esv) {
+	public GrisuRegistry(ServiceInterface serviceInterface, UserProperties esv) {
 		this.serviceInterface = serviceInterface;
-		this.esv = esv;
+		this.userProperties = esv;
 	}
 	
 	public GrisuRegistry(ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
-		this.esv = null;
+		this.userProperties = new UserPropertiesImpl();
 	}
 	
 	public UserApplicationInformation getUserApplicationInformation(String applicationName) {
@@ -99,8 +106,12 @@ public class GrisuRegistry {
 		return cachedUserInformation;
 	}
 
-	public EnvironmentSnapshotValues getEnvironmentSnapshotValues() {
-		return esv;
+	public UserProperties getUserProperties() {
+		return userProperties;
+	}
+	
+	public void setUserProperties(UserProperties up) {
+		this.userProperties = up;
 	}
 	
 	public ResourceInformation getResourceInformation() {

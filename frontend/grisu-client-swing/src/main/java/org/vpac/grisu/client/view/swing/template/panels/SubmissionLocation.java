@@ -27,7 +27,7 @@ import org.vpac.grisu.control.FqanListener;
 import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.fs.model.MountPoint;
-import org.vpac.grisu.model.EnvironmentSnapshotValues;
+import org.vpac.grisu.model.UserProperties;
 import org.vpac.grisu.model.GridResource;
 import org.vpac.grisu.model.ResourceInformation;
 import org.vpac.grisu.model.UserApplicationInformation;
@@ -61,12 +61,14 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel,
 	Set<String> allSites = null;
 	Set<String> allQueues = null;
 
-	private final ResourceInformation resourceInfo = GrisuRegistry.getDefault()
-			.getResourceInformation();
-	private EnvironmentSnapshotValues esv = GrisuRegistry.getDefault()
-			.getEnvironmentSnapshotValues();
-	private final UserInformation userInformation = GrisuRegistry.getDefault()
-			.getUserInformation();
+//	private final ResourceInformation resourceInfo = GrisuRegistry.getDefault()
+//			.getResourceInformation();
+//	private UserProperties esv = GrisuRegistry.getDefault()
+//			.getUserProperties();
+//	private final UserInformation userInformation = GrisuRegistry.getDefault()
+//			.getUserInformation();
+	
+	private GrisuRegistry registry;
 
 	private String lastSubmissionLocation = null;
 
@@ -120,21 +122,22 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel,
 
 		this.templateNode = node;
 		this.templateNode.setTemplateNodeValueSetter(this);
+		
+		registry = GrisuRegistry.getDefault(node.getTemplate().getEnvironmentManager().getServiceInterface());
 
-		esv.addFqanListener(this);
+		registry.getUserProperties().addFqanListener(this);
 
 		this.applicationName = this.templateNode.getTemplate()
 				.getApplicationName();
-		this.infoObject = GrisuRegistry.getDefault()
-				.getUserApplicationInformation(applicationName);
+		this.infoObject = registry.getUserApplicationInformation(applicationName);
 
 		try {
-			GrisuRegistry.getDefault().getHistoryManager()
+			registry.getHistoryManager()
 					.setMaxNumberOfEntries(
 							TemplateTagConstants
 									.getGlobalLastQueueKey(infoObject
 											.getApplicationName()), 1);
-			lastSubmissionLocation = GrisuRegistry.getDefault()
+			lastSubmissionLocation = registry
 					.getHistoryManager().getEntries(
 							TemplateTagConstants
 									.getGlobalLastQueueKey(infoObject
@@ -151,7 +154,7 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel,
 		}
 
 		if (lastSubmissionLocation != null) {
-			String lastSite = GrisuRegistry.getDefault()
+			String lastSite = registry
 					.getResourceInformation().getSite(lastSubmissionLocation);
 			if (siteModel.getIndexOf(lastSite) >= 0) {
 				siteModel.setSelectedItem(lastSite);
@@ -235,7 +238,7 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel,
 					&& getVersionPanel().getMode() == Version.DEFAULT_VERSION_MODE) {
 				allQueues = infoObject
 						.getAvailableSubmissionLocationsForVersionAndFqan(
-								newValue, esv.getCurrentFqan());
+								newValue, registry.getUserProperties().getCurrentFqan());
 				if (allQueues.size() == 0) {
 					siteModel.setSelectedItem("Not available.");
 					queueModel.setSelectedItem("Not available.");
@@ -244,15 +247,15 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel,
 			} else if (getVersionPanel() != null
 					&& getVersionPanel().getMode() == Version.ANY_VERSION_MODE) {
 				allQueues = infoObject
-						.getAvailableSubmissionLocationsForFqan(esv
+						.getAvailableSubmissionLocationsForFqan(registry.getUserProperties()
 								.getCurrentFqan());
 			} else {
 				allQueues = infoObject
 						.getAvailableSubmissionLocationsForVersionAndFqan(
-								newValue, esv.getCurrentFqan());
+								newValue, registry.getUserProperties().getCurrentFqan());
 			}
 
-			allSites = resourceInfo
+			allSites = registry.getResourceInformation()
 					.distillSitesFromSubmissionLocations(allQueues);
 
 			for (String tempsite : allSites) {
@@ -283,7 +286,7 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel,
 
 		String newSite = (String) siteModel.getSelectedItem();
 		if (newSite != null && !"".equals(newSite)) {
-			for (String queue : resourceInfo.filterSubmissionLocationsForSite(
+			for (String queue : registry.getResourceInformation().filterSubmissionLocationsForSite(
 					newSite, allQueues)) {
 				queueModel.addElement(queue);
 			}
@@ -393,8 +396,8 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel,
 
 	private void setStagingFS(String submissionLocation) {
 
-		MountPoint fs = userInformation.getRecommendedMountPoint(
-				submissionLocation, esv.getCurrentFqan());
+		MountPoint fs = registry.getUserInformation().getRecommendedMountPoint(
+				submissionLocation, registry.getUserProperties().getCurrentFqan());
 		if (getExecutionFileSystemPanel() != null) {
 			getExecutionFileSystemPanel().setExternalSetValue(fs.getRootUrl());
 		}
@@ -421,8 +424,7 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel,
 								fireSubmissionLocationChanged(temp);
 							}
 							setStagingFS(temp);
-							GrisuRegistry
-									.getDefault()
+							registry
 									.getHistoryManager()
 									.addHistoryEntry(
 											TemplateTagConstants

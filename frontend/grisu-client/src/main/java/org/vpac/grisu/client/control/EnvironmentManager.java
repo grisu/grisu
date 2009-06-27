@@ -38,7 +38,7 @@ import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.fs.control.MountPointHelpers;
 import org.vpac.grisu.fs.model.MountPoint;
-import org.vpac.grisu.model.EnvironmentSnapshotValues;
+import org.vpac.grisu.model.UserProperties;
 import org.vpac.helpDesk.model.Person;
 import org.vpac.helpDesk.model.PersonException;
 import org.vpac.historyRepeater.DummyHistoryManager;
@@ -56,7 +56,7 @@ import org.vpac.historyRepeater.SimpleHistoryManager;
  * @author Markus Binsteiner
  * 
  */
-public class EnvironmentManager implements MountPointsListener, EnvironmentSnapshotValues {
+public class EnvironmentManager implements MountPointsListener, UserProperties {
 	
 	public String getCurrentFqan() {
 		return getDefaultFqan();
@@ -172,7 +172,7 @@ public class EnvironmentManager implements MountPointsListener, EnvironmentSnaps
 //			setHistoryManager(new SimpleHistoryManager(historyFile));
 //		}
 		
-		setHistoryManager(GrisuRegistry.getDefault().getHistoryManager());
+		setHistoryManager(GrisuRegistry.getDefault(serviceInterface).getHistoryManager());
 	}
 
 	/**

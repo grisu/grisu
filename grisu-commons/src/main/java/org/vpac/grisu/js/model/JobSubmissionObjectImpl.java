@@ -226,10 +226,10 @@ public class JobSubmissionObjectImpl {
 		}
 		
 		this.submissionLocation = jobProperties.get(JobProperty.SUBMISSIONLOCATION.toString());
-		this.commandline = jobProperties.get(jobProperties.get(JobProperty.COMMANDLINE.toString()));
-		this.stderr = jobProperties.get(jobProperties.get(JobProperty.STDERR.toString()));
-		this.stdout = jobProperties.get(jobProperties.get(JobProperty.STDOUT.toString()));
-		this.stdin = jobProperties.get(jobProperties.get(JobProperty.STDIN.toString()));
+		this.commandline = jobProperties.get(JobProperty.COMMANDLINE.toString());
+		this.stderr = jobProperties.get(JobProperty.STDERR.toString());
+		this.stdout = jobProperties.get(JobProperty.STDOUT.toString());
+		this.stdin = jobProperties.get(JobProperty.STDIN.toString());
 		
 	}
 	
@@ -320,6 +320,20 @@ public class JobSubmissionObjectImpl {
 
 		return jobProperties;
 	}
+	
+	public Map<String, String> getStringJobPropertyMap() {
+
+		Map<String, String> stringPropertyMap = new HashMap<String, String>();
+		Map<JobProperty, String> jobPropertyMap = getJobPropertyMap();
+		
+		for ( JobProperty jp : jobPropertyMap.keySet() ) {
+			String value = jobPropertyMap.get(jp);
+			stringPropertyMap.put(jp.toString(), value);
+			
+		}
+		return stringPropertyMap;
+	}
+
 
 	public Document getJobDescriptionDocument() throws JobPropertiesException {
 		
@@ -363,5 +377,6 @@ public class JobSubmissionObjectImpl {
 		jso.getJobDescriptionDocument();
 
 	}
+
 
 }

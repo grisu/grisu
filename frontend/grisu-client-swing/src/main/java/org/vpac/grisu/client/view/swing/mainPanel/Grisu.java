@@ -629,8 +629,8 @@ public class Grisu implements WindowListener {
 
 				try {
 					application.em = new EnvironmentManager(application.serviceInterface);
-					GrisuRegistry.setServiceInterface(application.serviceInterface);
-					GrisuRegistry.setEnvironmentSnapshotValues(application.em);
+					GrisuRegistry temp = GrisuRegistry.getDefault(application.serviceInterface);
+					temp.setUserProperties(application.em);
 					application.em.initializeHistoryManager();
 					if ( application.serviceInterface == null ) {
 						myLogger.debug("Could not create/find service interface. Exiting.");

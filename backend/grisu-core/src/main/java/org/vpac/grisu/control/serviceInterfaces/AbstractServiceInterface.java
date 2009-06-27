@@ -223,7 +223,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		Job job;
 		try {
 			job = getJob(jobname);
-			throw new JobPropertiesException(JobProperty.JOBNAME, "Jobname already taken. Could not create job.");
+			throw new JobPropertiesException(JobProperty.JOBNAME, "Jobname \""+jobname+"\" already taken. Could not create job.");
 		} catch (NoSuchJobException e1) {
 			// that's ok
 			myLogger.debug("Checked jobname. Not yet in database. Good.");
@@ -232,8 +232,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// creating job
 		getCredential(); // just to be sure that nothing stale get's created in the db unnecessary
 		job = new Job(getCredential().getDn(), jobname);
+
+		job.setStatus(JobConstants.JOB_CREATED);
+		jobdao.save(job);
 		
 		job.setJobDescription(jsdl);
+		
+
 		
 		try {
 			setVO(job, fqan);
@@ -244,18 +249,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throw new RuntimeException("Job was not created. Internal error.");
 		}
 
-		// test again whether a job was created in the db in the meantime
-		try {
-			Job jobTest = getJob(job.getJobname());
-			throw new JobPropertiesException(JobProperty.JOBNAME, "Jobname already taken. Apparently a job was created with the same name while this one was calculated.");
-		} catch (NoSuchJobException e1) {
-			// that's ok
-			myLogger.debug("Checked jobname. Not yet in database. Good.");
-		}
+//		// test again whether a job was created in the db in the meantime
+//		try {
+//			Job jobTest = getJob(job.getJobname());
+//			throw new JobPropertiesException(JobProperty.JOBNAME, "Jobname already taken. Apparently a job was created with the same name while this one was calculated.");
+//		} catch (NoSuchJobException e1) {
+//			// that's ok
+//			myLogger.debug("Checked jobname. Not yet in database. Good.");
+//		}
+//		
 		
-		
-		job.setStatus(JobConstants.JOB_CREATED);
-		jobdao.save(job);
 		
 		jobdao.attachDirty(job);
 		return jobname;

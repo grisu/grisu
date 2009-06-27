@@ -4,7 +4,7 @@ import org.vpac.grisu.control.FqanListener;
 
 
 
-public interface EnvironmentSnapshotValues {
+public interface UserProperties {
 	
 	public String getCurrentFqan();
 

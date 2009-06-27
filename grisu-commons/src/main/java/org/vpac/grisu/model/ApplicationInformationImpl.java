@@ -17,7 +17,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	protected final ServiceInterface serviceInterface;
 	private final String application; 
 	
-	protected final ResourceInformation resourceInfo = GrisuRegistry.getDefault().getResourceInformation();
+	protected final ResourceInformation resourceInfo;
 	
 	private Map<String, Map<String, String>> cachedApplicationDetails = new HashMap<String, Map<String, String>>();
 	private Set<String> cachedAllSubmissionLocations = null;
@@ -32,6 +32,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	
 	public ApplicationInformationImpl(ServiceInterface serviceInterface, String application) {
 		this.serviceInterface = serviceInterface;
+		this.resourceInfo = GrisuRegistry.getDefault(serviceInterface).getResourceInformation();
 		this.application = application;
 	}
 	
