@@ -25,7 +25,7 @@ public class JobCreationInfo {
 		
 		GrisuRegistry registry = GrisuRegistry.getDefault(si);
 		
-		ApplicationInformation appInfo = registry.getApplicationInformationObject("java");
+		ApplicationInformation appInfo = registry.getApplicationInformation("java");
 		for ( String version : appInfo.getAllAvailableVersionsForFqan("/ARCS/NGAdmin") ) {
 			System.out.println(version);
 		}

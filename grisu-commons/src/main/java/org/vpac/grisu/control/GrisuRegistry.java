@@ -89,7 +89,7 @@ public class GrisuRegistry {
 		return cachedUserInformationObjects.get(applicationName);
 	}
 	
-	public ApplicationInformation getApplicationInformationObject(String applicationName) {
+	public ApplicationInformation getApplicationInformation(String applicationName) {
 		
 		if ( cachedApplicationInformationObjects.get(applicationName) == null ) {
 			ApplicationInformation temp = new ApplicationInformationImpl(serviceInterface, applicationName);

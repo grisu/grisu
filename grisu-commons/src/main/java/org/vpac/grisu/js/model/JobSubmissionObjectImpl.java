@@ -1,7 +1,10 @@
 package org.vpac.grisu.js.model;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.vpac.grisu.js.control.SimpleJsdlBuilder;
 import org.vpac.grisu.js.model.utils.JsdlHelpers;
@@ -100,15 +103,21 @@ public class JobSubmissionObjectImpl {
 	}
 
 	public String[] getInputFileUrls() {
-		return inputFileUrls;
+		return inputFileUrls.toArray(new String[]{});
 	}
 
 	public void setInputFileUrls(String[] inputFileUrls) {
-		this.inputFileUrls = inputFileUrls;
+		if ( inputFileUrls != null ) {
+			this.inputFileUrls = new HashSet<String>(Arrays.asList(inputFileUrls));
+		}
+	}
+	
+	public void addInputFileUrl(String url) {
+		this.inputFileUrls.add(url);
 	}
 
 	public String getInputFileUrlsAsString() {
-		if (inputFileUrls != null) {
+		if (inputFileUrls != null && inputFileUrls.size() != 0) {
 			StringBuffer temp = new StringBuffer();
 			for (String inputFileUrl : inputFileUrls) {
 				temp.append(inputFileUrl + ",");
@@ -170,15 +179,15 @@ public class JobSubmissionObjectImpl {
 	private boolean force_mpi = false;
 	private long memory_in_bytes = 0;;
 	private int walltime = 0;
-	private String[] inputFileUrls;
+	private Set<String> inputFileUrls = new HashSet<String>();
 	private String submissionLocation;
 	private String commandline;
 	private String stderr;
 	private String stdout;
 	private String stdin;
 
-	public JobSubmissionObjectImpl() {
 
+	public JobSubmissionObjectImpl() {
 	}
 	
 	private boolean checkForBoolean(String booleanString) {
@@ -222,7 +231,7 @@ public class JobSubmissionObjectImpl {
 		
 		String temp = jobProperties.get(JobProperty.INPUT_FILE_URLS.toString());
 		if ( temp != null && temp.length() > 0 ) {
-			this.inputFileUrls = temp.split(",");
+			setInputFileUrls(temp.split(","));
 		}
 		
 		this.submissionLocation = jobProperties.get(JobProperty.SUBMISSIONLOCATION.toString());
@@ -263,7 +272,7 @@ public class JobSubmissionObjectImpl {
 		}
 		memory_in_bytes = JsdlHelpers.getTotalMemoryRequirement(jsdl);
 		walltime = JsdlHelpers.getWalltime(jsdl);
-		inputFileUrls = JsdlHelpers.getInputFileUrls(jsdl);
+		setInputFileUrls(JsdlHelpers.getInputFileUrls(jsdl));
 		String[] candidateHosts = JsdlHelpers.getCandidateHosts(jsdl);
 		if (candidateHosts != null && candidateHosts.length > 0) {
 			submissionLocation = candidateHosts[0];

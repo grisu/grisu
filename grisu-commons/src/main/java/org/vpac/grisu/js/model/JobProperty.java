@@ -6,7 +6,7 @@ import java.util.Map;
 public enum JobProperty {
 	
 	JOBNAME("jobname", "grisu_default_job_name"),
-	APPLICATIONNAME("application", "generic"),
+	APPLICATIONNAME("application", ""),
 	APPLICATIONVERSION("version", ""),
 	NO_CPUS("cpus", "1"),
 	FORCE_SINGLE("force_single", "false"),

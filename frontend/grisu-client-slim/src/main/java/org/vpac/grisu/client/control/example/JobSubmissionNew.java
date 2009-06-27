@@ -2,8 +2,8 @@ package org.vpac.grisu.client.control.example;
 
 import org.vpac.grisu.client.control.login.LoginParams;
 import org.vpac.grisu.client.control.login.ServiceInterfaceFactory;
+import org.vpac.grisu.client.model.JobObject;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.js.model.JobSubmissionObjectImpl;
 
 public class JobSubmissionNew {
 	
@@ -17,18 +17,34 @@ public class JobSubmissionNew {
 				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
 				"Local", username, password);
 
-		ServiceInterface si = null;
-		si = ServiceInterfaceFactory.createInterface(loginParams);
+		final ServiceInterface si = ServiceInterfaceFactory.createInterface(loginParams);
 		
-		JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl();
-		jso.setJobname("javaMarsssss");
-		jso.setApplication("java");
-		jso.setCommandline("java -version");  
+//		GrisuRegistry registry = GrisuRegistry.getDefault(si);
+//		
+//		ApplicationInformation javaInfo = registry.getApplicationInformation("java");
+//		
+//		Set<String> submissionLocations = javaInfo.getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin");
 		
-		String jobname = si.createJob(jso.getStringJobPropertyMap(), "/ARCS/VPAC", "force-name");
+		JobObject job = new JobObject(si);
+		job.setCommandline("java -version");
 		
-		si.submitJob(jobname);
+		job.createJob("/ARCS/VPAC");
 		
+		job.submitJob();
+	
+//		for ( final String subLoc : submissionLocations ) {
+//		
+//				JobObject jo = new JobObject(si);
+//				jo.setJobname("java_"+UUID.randomUUID());
+////				jo.setApplication("java");
+//				jo.setCommandline("java -version");  
+//				jo.setSubmissionLocation(subLoc);
+//				jo.addInputFileUrl("/home/markus/test.txt");
+//			
+//				jo.createJob("/ARCS/NGAdmin");
+//				
+//				jo.submitJob();
+//		}
 		
 	}
 
