@@ -96,7 +96,7 @@ public class User {
 	private boolean fqansFilled = false;
 //	private Map<String, String> fqans = null;
 	
-	private Map<String, List<String>> userProperties = new HashMap<String, List<String>>();
+	private Map<String, String> userProperties = new HashMap<String, String>();
 	
 	private Map<String, JobSubmissionObjectImpl> jobTemplates = new HashMap<String, JobSubmissionObjectImpl>();
 
@@ -809,13 +809,13 @@ public class User {
 		this.fqans = fqans;
 	}
 	
-	public void addProperty(String key, String value) {
-		List<String> list = userProperties.get(key);
-		if ( list == null ) {
-			list = new LinkedList<String>();
-		}
-		list.add(value);
-	}
+//	public void addProperty(String key, String value) {
+//		List<String> list = userProperties.get(key);
+//		if ( list == null ) {
+//			list = new LinkedList<String>();
+//		}
+//		list.add(value);
+//	}
 	
 	public void removeProperty(String key) {
 		userProperties.remove(key);
@@ -826,14 +826,22 @@ public class User {
 	 * anything you can think of. Usful for history and such.
 	 * @return the users' properties
 	 */
-	@Transient
 	@CollectionOfElements
-	public Map<String, List<String>> getUserProperties() {
+	public Map<String, String> getUserProperties() {
 		return userProperties;
 	}
 
-	private void setUserProperties(Map<String, List<String>> userProperties) {
+	private void setUserProperties(Map<String, String> userProperties) {
 		this.userProperties = userProperties;
 	}
 
+	@CollectionOfElements
+	public Map<String, JobSubmissionObjectImpl> getJobTemplates() {
+		return jobTemplates;
+	}
+	
+	public void setJobTemplates(Map<String, JobSubmissionObjectImpl> jobTemplates) {
+		this.jobTemplates = jobTemplates;
+	}
+	
 }

@@ -40,7 +40,7 @@ public interface XFireServiceInterface extends ServiceInterface{
 	@WebMethod
 	public void submitSupportRequest(String subject, String description);
 	@WebMethod
-	public String[] getUserProperty(String key);
+	public String getUserProperty(String key);
 	@WebMethod
 	public Document getMessagesSince(Date date);
 	@WebMethod

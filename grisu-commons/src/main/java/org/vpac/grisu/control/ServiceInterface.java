@@ -128,9 +128,9 @@ public interface ServiceInterface {
 	 * Not yet implemented though.
 	 * 
 	 * @param key the key
-	 * @return the values
+	 * @return the value
 	 */
-	public String[] getUserProperty(String key);
+	public String getUserProperty(String key);
 	
 	/**
 	 * Returns system or user specific information messages since a specific date

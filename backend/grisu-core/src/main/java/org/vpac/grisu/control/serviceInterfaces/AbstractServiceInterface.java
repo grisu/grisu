@@ -2065,15 +2065,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/* (non-Javadoc)
 	 * @see org.vpac.grisu.control.ServiceInterface#getUserProperty(java.lang.String)
 	 */
-	public String[] getUserProperty(String key) {
+	public String getUserProperty(String key) {
 
-		List<String> values = getUser().getUserProperties().get(key);
+		String value = getUser().getUserProperties().get(key);
 
-		if (values == null || values.size() == 0) {
-			return null;
-		} else {
-			return values.toArray(new String[] {});
-		}
+		return value;
 	}
 
 	/* (non-Javadoc)
