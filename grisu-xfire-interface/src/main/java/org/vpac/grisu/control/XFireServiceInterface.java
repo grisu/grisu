@@ -46,7 +46,7 @@ public interface XFireServiceInterface extends ServiceInterface{
 	@WebMethod
 	public long getCredentialEndTime();
 	@WebMethod
-	public String getCurrentStatusMessage();
+	public String getCurrentStatusMessage(String handle);
 	@WebMethod
 	public String getSite(String host);
 	@WebMethod

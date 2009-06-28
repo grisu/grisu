@@ -27,7 +27,7 @@ public class WsServiceInterface extends AbstractServiceInterface
 
 	private ProxyCredential credential = null;
 	
-	protected ProxyCredential getCredential() throws NoValidCredentialException {
+	protected synchronized ProxyCredential getCredential() throws NoValidCredentialException {
 		MessageContext context = ctx.getMessageContext();
 
 		if ( this.credential == null || ! this.credential.isValid() ) {

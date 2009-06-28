@@ -41,7 +41,7 @@ public class WsServiceInterface extends AbstractServiceInterface implements
 	 * @return the credential
 	 * @throws NoValidCredentialException
 	 */
-	protected ProxyCredential getCredential() throws NoValidCredentialException {
+	protected synchronized ProxyCredential getCredential() throws NoValidCredentialException {
 
 		MessageContext context = AbstractInvoker.getContext();
 //		MessageContext context = MessageContextHelper.getContext();

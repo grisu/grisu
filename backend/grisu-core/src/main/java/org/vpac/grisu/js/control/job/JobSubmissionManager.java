@@ -94,7 +94,6 @@ public class JobSubmissionManager {
 		job.addJobProperty(ServiceInterface.SUBMISSION_HOST_KEY, host);
 		job.setSubmissionType(submitter_name);
 		job.addJobProperty(ServiceInterface.SUBMISSION_TYPE_KEY, submitter_name);
-		job.getJobProperties().put("factoryType", factoryType);
 		if ( queue != null && ! "".equals(queue) ) 
 			job.getJobProperties().put(ServiceInterface.QUEUE_KEY, queue);
 		job.setStatus(JobConstants.EXTERNAL_HANDLE_READY);
