@@ -135,8 +135,8 @@ public class FileManager implements MountPointsListener {
 		for (MountPoint mp : mps) {
 			try {
 				statusManager.setCurrentStatus("Adding filesystem: "
-						+ mp.getMountpoint());
-				addFileSystem(mp.getMountpoint(), mp.getRootUrl(),
+						+ mp.getMountpointName());
+				addFileSystem(mp.getMountpointName(), mp.getRootUrl(),
 						serviceInterface);
 				myLogger.debug("Successfully added filesytem: "
 						+ mp.getRootUrl() + " for fqan: " + mp.getFqan());
@@ -156,8 +156,8 @@ public class FileManager implements MountPointsListener {
 			try {
 				URI rootUri = new URI(mpe.getMountPoint().getRootUrl());
 				FileSystemBackend fsbe = createFileSystemBackend(mpe
-						.getMountPoint().getMountpoint(), rootUri, em);
-				addFileSystem(mpe.getMountPoint().getMountpoint(), fsbe);
+						.getMountPoint().getMountpointName(), rootUri, em);
+				addFileSystem(mpe.getMountPoint().getMountpointName(), fsbe);
 			} catch (Exception e) {
 				// hm. not much I can't do here...
 				myLogger.error("Could not add filesystem for root url: "
@@ -166,7 +166,7 @@ public class FileManager implements MountPointsListener {
 			}
 		} else if (mpe.getEventType() == MountPointEvent.MOUNTPOINT_REMOVED) {
 			try {
-				removeFileSystem(mpe.getMountPoint().getMountpoint());
+				removeFileSystem(mpe.getMountPoint().getMountpointName());
 			} catch (InformationError e) {
 				e.printStackTrace();
 				myLogger.error(e.getLocalizedMessage());
@@ -178,8 +178,8 @@ public class FileManager implements MountPointsListener {
 				try {
 					URI rootUri = new URI(mp.getRootUrl());
 					FileSystemBackend fsbe = createFileSystemBackend(mp
-							.getMountpoint(), rootUri, em);
-					addFileSystem(mp.getMountpoint(), fsbe);
+							.getMountpointName(), rootUri, em);
+					addFileSystem(mp.getMountpointName(), fsbe);
 				} catch (Exception e) {
 					// hm. not much I can't do here...
 					myLogger.error("Could not add filesystem for root url: "

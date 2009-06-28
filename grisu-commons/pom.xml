@@ -89,6 +89,11 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>ejb3-persistence</artifactId>
+			<version>1.0.1.GA</version>
+		</dependency>
   </dependencies>
   	<build>
 		<plugins>

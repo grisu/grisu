@@ -26,6 +26,7 @@ import org.hibernate.Session;
  * @author MyEclipse - Hibernate Tools
  */
 public interface IBaseHibernateDAO {
-	public Session getSession(String dn);
+	public Session getSession();
+	public Session getCurrentSession();
 	
 }

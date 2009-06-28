@@ -1,9 +1,14 @@
 package org.vpac.grisu.client.control.example;
 
+import java.util.Set;
+import java.util.UUID;
+
 import org.vpac.grisu.client.control.login.LoginParams;
 import org.vpac.grisu.client.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.client.model.JobObject;
+import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.model.ApplicationInformation;
 
 public class JobSubmissionNew {
 	
@@ -34,16 +39,24 @@ public class JobSubmissionNew {
 	
 //		for ( final String subLoc : submissionLocations ) {
 //		
-//				JobObject jo = new JobObject(si);
+//			new Thread() {
+//				public void run() {
+//
+//					JobObject jo = new JobObject(si);
 //				jo.setJobname("java_"+UUID.randomUUID());
 ////				jo.setApplication("java");
 //				jo.setCommandline("java -version");  
 //				jo.setSubmissionLocation(subLoc);
 //				jo.addInputFileUrl("/home/markus/test.txt");
 //			
-//				jo.createJob("/ARCS/NGAdmin");
-//				
-//				jo.submitJob();
+//				try {
+//					jo.createJob("/ARCS/NGAdmin");
+//					jo.submitJob();
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//				}
+//			}.start();
 //		}
 		
 	}

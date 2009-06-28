@@ -99,8 +99,8 @@ public class FileSystemStructureToXMLConverter {
 					mp_element.setAttribute("path", mp.getRootUrl());
 					mp_element.setAttribute("name", mp.getRootUrl());
 				} else {
-					mp_element.setAttribute("path", mp.getMountpoint());
-					mp_element.setAttribute("name", mp.getMountpoint().substring(1));
+					mp_element.setAttribute("path", mp.getMountpointName());
+					mp_element.setAttribute("name", mp.getMountpointName().substring(1));
 				}
 				if ( recursion_level > 1 ) 
 					buildDirectoryStructure(mp_element, mp, absolutePath, 1, recursion_level);

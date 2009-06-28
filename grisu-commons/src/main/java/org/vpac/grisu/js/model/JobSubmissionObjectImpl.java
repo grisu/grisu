@@ -6,11 +6,29 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Transient;
+
 import org.vpac.grisu.js.control.SimpleJsdlBuilder;
 import org.vpac.grisu.js.model.utils.JsdlHelpers;
 import org.w3c.dom.Document;
 
+@Entity
 public class JobSubmissionObjectImpl {
+	
+	private Long id;
+	
+	@Id
+	@GeneratedValue
+	private Long getId() {
+		return this.id;
+	}
+	private void setId(Long id) {
+		this.id = id;
+	}
 
 	public String getJobname() {
 		return jobname;
@@ -116,6 +134,7 @@ public class JobSubmissionObjectImpl {
 		this.inputFileUrls.add(url);
 	}
 
+	@Transient
 	public String getInputFileUrlsAsString() {
 		if (inputFileUrls != null && inputFileUrls.size() != 0) {
 			StringBuffer temp = new StringBuffer();
@@ -136,6 +155,7 @@ public class JobSubmissionObjectImpl {
 		this.submissionLocation = submissionLocation;
 	}
 
+	@Column(nullable=false)
 	public String getCommandline() {
 		return commandline;
 	}
@@ -291,6 +311,7 @@ public class JobSubmissionObjectImpl {
 		stdin = JsdlHelpers.getPosixStandardInput(jsdl);
 	}
 	
+	@Transient
 	public Map<JobProperty, String> getJobPropertyMap() {
 
 		Map<JobProperty, String> jobProperties = new HashMap<JobProperty, String>();
@@ -330,6 +351,7 @@ public class JobSubmissionObjectImpl {
 		return jobProperties;
 	}
 	
+	@Transient
 	public Map<String, String> getStringJobPropertyMap() {
 
 		Map<String, String> stringPropertyMap = new HashMap<String, String>();
@@ -344,6 +366,7 @@ public class JobSubmissionObjectImpl {
 	}
 
 
+	@Transient
 	public Document getJobDescriptionDocument() throws JobPropertiesException {
 		
 		checkValidity();

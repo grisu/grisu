@@ -2,8 +2,12 @@
 
 package org.vpac.grisu.fs.model;
 
-import org.apache.log4j.Logger;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
+import org.apache.log4j.Logger;
 
 /**
  * The concept of MountPoints is pretty important within grisu. A MountPoint is basically a mapping of a "logical name" to an url.
@@ -13,17 +17,17 @@ import org.apache.log4j.Logger;
  * @author Markus Binsteiner
  *
  */
-public class MountPoint implements Comparable {
+@Entity
+public class MountPoint implements Comparable<MountPoint> {
 	
 	static final Logger myLogger = Logger.getLogger(MountPoint.class
 			.getName());
 	
-	// for hibernate
 	private Long mountPointId = null;
-	
+
 	private String dn = null;
 	private String fqan = null;
-	private String mountpoint = null;
+	private String mountpointName = null;
 	private String rootUrl = null;
 	
 	private boolean automaticallyMounted = false;
@@ -43,7 +47,7 @@ public class MountPoint implements Comparable {
 		this.dn = dn;
 		this.fqan = fqan;
 		this.rootUrl = url;
-		this.mountpoint = mountpoint;
+		this.mountpointName = mountpoint;
 	}
 	
 	public MountPoint(String dn, String fqan, String url, String mountpoint, boolean automaticallyMounted) {
@@ -58,9 +62,10 @@ public class MountPoint implements Comparable {
 	 */
 	public MountPoint(String dn, String mountpoint) {
 		this.dn = dn;
-		this.mountpoint = mountpoint;
+		this.mountpointName = mountpoint;
 	}
 
+	@Column(nullable=false)
 	public String getDn() {
 		return dn;
 	}
@@ -76,15 +81,17 @@ public class MountPoint implements Comparable {
 	public void setFqan(String fqan) {
 		this.fqan = fqan;
 	}
-
-	public String getMountpoint() {
-		return mountpoint;
+	
+	@Column(nullable=false)
+	public String getMountpointName() {
+		return mountpointName;
 	}
 	
-	public void setMountpoint(String mountpoint) {
-		this.mountpoint = mountpoint;
+	public void setMountpointName(String mountpoint) {
+		this.mountpointName = mountpoint;
 	}
 
+	@Column(nullable=false)
 	public String getRootUrl() {
 		return rootUrl;
 	}
@@ -97,6 +104,8 @@ public class MountPoint implements Comparable {
 		this.rootUrl = url;
 	}
 
+	@Id
+	@GeneratedValue
 	public Long getMountPointId() {
 		return mountPointId;
 	}
@@ -119,7 +128,7 @@ public class MountPoint implements Comparable {
 		if (otherMountPoint instanceof MountPoint) {
 			MountPoint other = (MountPoint) otherMountPoint;
 				
-			return other.getMountpoint().equals(this.getMountpoint());
+			return other.getMountpointName().equals(this.getMountpointName());
 			
 //			if ( other.getDn().equals(this.getDn()) &&
 //							other.getRootUrl().equals(this.getRootUrl()) ) {
@@ -148,7 +157,7 @@ public class MountPoint implements Comparable {
 	
 	public int hashCode() {
 //		return dn.hashCode() + mountpoint.hashCode();
-		return mountpoint.hashCode();
+		return mountpointName.hashCode();
 	}
 	
 	/**
@@ -159,8 +168,8 @@ public class MountPoint implements Comparable {
 	 */
 	public String replaceMountpointWithAbsoluteUrl(String file) {
 
-		if ( file.startsWith(getMountpoint()) ) {
-			return file.replaceFirst(getMountpoint(), getRootUrl());
+		if ( file.startsWith(getMountpointName()) ) {
+			return file.replaceFirst(getMountpointName(), getRootUrl());
 		} else return null;
 	}
 	
@@ -172,7 +181,7 @@ public class MountPoint implements Comparable {
 	public String replaceAbsoluteRootUrlWithMountPoint(String file) {
 
 		if ( file.startsWith(getRootUrl()) ) {
-			return file.replaceFirst(getRootUrl(), getMountpoint());
+			return file.replaceFirst(getRootUrl(), getMountpointName());
 			
 		} else return null;
 	}
@@ -191,7 +200,7 @@ public class MountPoint implements Comparable {
 				return false;
 		}
 		
-		if ( file.startsWith(getMountpoint()) ) 
+		if ( file.startsWith(getMountpointName()) ) 
 			return true;
 		else 
 			return false;
@@ -218,7 +227,7 @@ public class MountPoint implements Comparable {
 	}
 	
 	public String toString() {
-		return getMountpoint();
+		return getMountpointName();
 	}
 	
 	/**
@@ -229,10 +238,10 @@ public class MountPoint implements Comparable {
 	public String getRelativePathToRoot(String url) {
 		
 		if ( url.startsWith("/") ) {
-			if ( ! url.startsWith(getMountpoint()) ) 
+			if ( ! url.startsWith(getMountpointName()) ) 
 				return null;
 			else {
-				String path = url.substring(getMountpoint().length());
+				String path = url.substring(getMountpointName().length());
 				if ( path.startsWith("/") ) 
 					return path.substring(1);
 				else 
@@ -252,11 +261,16 @@ public class MountPoint implements Comparable {
 		
 	}
 
-	public int compareTo(Object o) {
-//		return ((MountPoint)o).getMountpoint().compareTo(getMountpoint());
-		return getRootUrl().compareTo(((MountPoint)o).getRootUrl());
+//	public int compareTo(Object o) {
+////		return ((MountPoint)o).getMountpoint().compareTo(getMountpoint());
+//		return getRootUrl().compareTo(((MountPoint)o).getRootUrl());
+//	}
+	
+	public int compareTo(MountPoint mp) {
+		return getRootUrl().compareTo(mp.getRootUrl());
 	}
-
+	
+	@Column(nullable=false)
 	public boolean isAutomaticallyMounted() {
 		return automaticallyMounted;
 	}
@@ -264,7 +278,8 @@ public class MountPoint implements Comparable {
 	public void setAutomaticallyMounted(boolean automaticallyMounted) {
 		this.automaticallyMounted = automaticallyMounted;
 	}
-
+	
+	@Column(nullable=false)
 	public boolean isDisabled() {
 		return disabled;
 	}
@@ -272,5 +287,6 @@ public class MountPoint implements Comparable {
 	public void setDisabled(boolean disabled) {
 		this.disabled = disabled;
 	}
+
 	
 }

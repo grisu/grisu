@@ -82,11 +82,6 @@
 			<artifactId>bcprov-jdk15</artifactId>
 			<version>140</version>
 		</dependency>
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.7</version>
-		</dependency>
 		
 <!--		<dependency>-->
 <!--			<groupId>mysql</groupId>-->

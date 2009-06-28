@@ -175,6 +175,64 @@ public class ServerPropertiesManager {
 			return DEFAULT_MIN_PROXY_LIFETIME_BEFORE_REFRESH;
 		
 		return lifetime_in_seconds;
+	} 
+	
+	public static boolean useDefaultDatabase() {
+		
+		try {
+			String dbtype = getServerConfiguration().getString("databaseType");
+			
+			if ( dbtype == null || dbtype.length() == 0 ) {
+				return true;
+			} else { 
+				return false;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return true;
+		}
+		
+	}
+	
+	public static String getDatabaseType() {
+		
+		String dbType;
+		try {
+			dbType = getServerConfiguration().getString("databaseType");
+			return dbType;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	public static String getDatabaseConnectionUrl() {
+		String dbUrl;
+		try {
+			dbUrl = getServerConfiguration().getString("databaseConnectionUrl");
+			return dbUrl;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	public static String getDatabaseUsername() {
+		String dbUsername;
+		try {
+			dbUsername = getServerConfiguration().getString("databaseUsername");
+			return dbUsername;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	public static String getDatabasePassword() {
+		String dbPassword;
+		try {
+			dbPassword = getServerConfiguration().getString("databasePassword");
+			return dbPassword;
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 }

@@ -6,12 +6,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.CollectionOfElements;
 import org.vpac.grisu.control.SeveralXMLHelpers;
 import org.vpac.grisu.credential.model.ProxyCredential;
 import org.vpac.grisu.js.control.job.JobSubmitter;
@@ -25,6 +32,7 @@ import org.xml.sax.SAXException;
  * @author Markus Binsteiner
  *
  */
+@Entity
 public class Job {
 	
 	static final Logger myLogger = Logger.getLogger(Job.class
@@ -116,6 +124,7 @@ public class Job {
 	 * The dn of the user who created/submits this job.
 	 * @return the dn
 	 */
+	@Column(nullable=false)
 	public String getDn() {
 		return dn;
 	}
@@ -157,6 +166,7 @@ public class Job {
 	 * Gets the credential for this job which is used to submit it to the endpoint.
 	 * @return the credential
 	 */
+	@Transient
 	public ProxyCredential getCredential() {
 		return this.credential;
 	}
@@ -182,6 +192,7 @@ public class Job {
 	 * 
 	 * @return the jsdl document
 	 */
+	@Transient
 	public Document getJobDescription() {
 		//TODO return jobDescription;
 		return this.jobDescription;
@@ -218,6 +229,7 @@ public class Job {
 	 * Gets the (along with the users' dn unique) name of the job.
 	 * @return the jobname
 	 */
+	@Column(nullable=false)
 	public String getJobname() {
 		return jobname;
 	}
@@ -235,6 +247,7 @@ public class Job {
 	 * to refresh the job status before using this.
 	 * @return the status of the job
 	 */
+	@Column(nullable=false)
 	public int getStatus() {
 		return status;
 	}
@@ -248,6 +261,8 @@ public class Job {
 	}
 	
 	// hibernate
+	@Id
+	@GeneratedValue
 	private Long getId() {
 		return id;
 	}
@@ -262,6 +277,7 @@ public class Job {
 	 * Returns the (JobSubmitter-specific) job description (like rsl for gt4).
 	 * @return the job description or null if the job was not submitted yet
 	 */
+	@Column(length=2550)
 	public String getSubmittedJobDescription() {
 		return submittedJobDescription;
 	}
@@ -298,6 +314,7 @@ public class Job {
 	 * @throws TransformerFactoryConfigurationError 
 	 * @throws TransformerException 
 	 */
+	@Column(length=2550)
 	private String getJsdl() throws TransformerFactoryConfigurationError, TransformerException {
 		
 		return SeveralXMLHelpers.toString(jobDescription);
@@ -345,7 +362,7 @@ public class Job {
 	// job information
 	// most of this will be removed once only the jobproperties map is used
 	// ---------------------
-
+	@CollectionOfElements(fetch = FetchType.EAGER)
 	public List<String> getInputFiles() {
 		return inputFiles;
 	}
@@ -393,7 +410,8 @@ public class Job {
 	public void setApplication(String application) {
 		this.application = application;
 	}
-
+	
+	@CollectionOfElements(fetch = FetchType.EAGER)
 	public Map<String, String> getJobProperties() {
 		return jobProperties;
 	}
@@ -409,7 +427,7 @@ public class Job {
 	public void addJobProperties(Map<String, String> properties) {
 		this.jobProperties.putAll(properties);
 	}
-	
+	@Transient
 	public String getJobProperty(String key) {
 		return this.jobProperties.get(key);
 	}

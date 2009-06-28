@@ -5,7 +5,6 @@ package org.vpac.grisu.fs.model;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -14,22 +13,31 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.commons.vfs.CacheStrategy;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystem;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemOptions;
 import org.apache.commons.vfs.impl.DefaultFileSystemManager;
-import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileProvider;
 import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileSystemConfigBuilder;
-import org.apache.commons.vfs.provider.local.DefaultLocalFileProvider;
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.CollectionOfElements;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.control.utils.CertHelpers;
 import org.vpac.grisu.credential.model.ProxyCredential;
 import org.vpac.grisu.js.model.Job;
+import org.vpac.grisu.js.model.JobSubmissionObjectImpl;
 import org.vpac.security.light.voms.VO;
 import org.vpac.security.light.voms.VOManagement.VOManagement;
 
@@ -46,16 +54,15 @@ import uk.ac.dl.escience.vfs.util.VFSUtil;
  * @author Markus Binsteiner
  * 
  */
+@Entity
 public class User {
 
 	private static Logger myLogger = Logger.getLogger(User.class.getName());
 	
 	public static String GET_VO_DN_PATH(String dn) {
 		return dn.replace("=", "_").replace(",","_").replace(" ", "_");
-//		return "MarkusBinsteiner";
 	}
 
-	// for hibernate
 	private Long id = null;
 
 	// the (default) credential to contact gridftp file shares
@@ -67,12 +74,12 @@ public class User {
 	// the (default) credentials dn
 	private String dn = null;
 
-	// persistent properties
-	// not used yet
-	private List<FileTransfer> fileTransfers = new ArrayList<FileTransfer>();
+//	// persistent properties
+//	// not used yet
+//	private List<FileTransfer> fileTransfers = new ArrayList<FileTransfer>();
 
-	// not used yet
-	private List<FileReservation> fileReservations = new ArrayList<FileReservation>();
+//	// not used yet
+//	private List<FileReservation> fileReservations = new ArrayList<FileReservation>();
 
 	// the mountpoints of a user
 	private Set<MountPoint> mountPoints = new HashSet<MountPoint>();
@@ -89,8 +96,9 @@ public class User {
 	private boolean fqansFilled = false;
 //	private Map<String, String> fqans = null;
 	
-	// not used yet
 	private Map<String, List<String>> userProperties = new HashMap<String, List<String>>();
+	
+	private Map<String, JobSubmissionObjectImpl> jobTemplates = new HashMap<String, JobSubmissionObjectImpl>();
 
 	// for hibernate
 	public User() {
@@ -132,47 +140,13 @@ public class User {
 		fqansFilled = true;
 	}
 
-	/**
-	 * Not used yet.
-	 * 
-	 * @param transfer
-	 */
-	public void addFileTransfer(FileTransfer transfer) {
-		fileTransfers.add(transfer);
-	}
-
-	/**
-	 * Not used yet.
-	 * 
-	 * @param transfer
-	 */
-	public void removeFileTransfer(FileTransfer transfer) {
-		fileTransfers.remove(transfer);
-	}
-
-	/**
-	 * Not used yet.
-	 * 
-	 * @param reservation
-	 */
-	public void addFileReservation(FileReservation reservation) {
-		fileReservations.add(reservation);
-	}
-
-	/**
-	 * Not used yet.
-	 * 
-	 * @param reservation
-	 */
-	public void removeFileReservation(FileReservation reservation) {
-		fileReservations.remove(reservation);
-	}
 
 	/**
 	 * Returns the users dn
 	 * 
 	 * @return the dn
 	 */
+	@Column(nullable=false)
 	public String getDn() {
 		return dn;
 	}
@@ -212,25 +186,27 @@ public class User {
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
-		return dn.hashCode();
+		return 29 * dn.hashCode();
 	}
 
-	private List<FileReservation> getFileReservations() {
-		return fileReservations;
-	}
+//	private List<FileReservation> getFileReservations() {
+//		return fileReservations;
+//	}
+//
+//	private void setFileReservations(List<FileReservation> fileReservations) {
+//		this.fileReservations = fileReservations;
+//	}
+//
+//	private List<FileTransfer> getFileTransfers() {
+//		return fileTransfers;
+//	}
+//
+//	private void setFileTransfers(List<FileTransfer> fileTransfers) {
+//		this.fileTransfers = fileTransfers;
+//	}
 
-	private void setFileReservations(List<FileReservation> fileReservations) {
-		this.fileReservations = fileReservations;
-	}
-
-	private List<FileTransfer> getFileTransfers() {
-		return fileTransfers;
-	}
-
-	private void setFileTransfers(List<FileTransfer> fileTransfers) {
-		this.fileTransfers = fileTransfers;
-	}
-
+	@Id
+	@GeneratedValue
 	private Long getId() {
 		return id;
 	}
@@ -238,33 +214,6 @@ public class User {
 	private void setId(Long id) {
 		this.id = id;
 	}
-	
-//	public void removeAutoMountedMountpoints() {
-//		
-//		Set<MountPoint> toRemove = new TreeSet<MountPoint>();
-//		for ( MountPoint mp : mountPoints ) {
-//			if ( mp.isAutomaticallyMounted() ) {
-//				toRemove.add(mp);
-//			}
-//		}
-//		
-//		for ( MountPoint mp : toRemove ) {
-//			unmountFileSystem(mp.getMountpoint());
-//		}
-//		
-//	}
-	
-//	public Set<MountPoint> getMountPointsWithoutAutomountedOnes() {
-//		if ( mountPointsWithoutAutoMounted == null ) {
-//			mountPointsWithoutAutoMounted = new TreeSet<MountPoint>();
-//			for ( MountPoint mp : mountPoints ) {
-//				if ( ! mp.isAutomaticallyMounted() ) {
-//					mountPointsWithoutAutoMounted.add(mp);
-//				}
-//			}
-//		}
-//		return mountPointsWithoutAutoMounted;
-//	}
 
 	/**
 	 * Set's additional mountpoints that the user did not explicitly mount manually
@@ -279,17 +228,20 @@ public class User {
 	 * Returns all mountpoints (including automounted ones for this session
 	 * @return all mountpoints for this session
 	 */
+	@Transient
 	public Set<MountPoint> getAllMountPoints() {
 		if ( allMountPoints == null ) {
 			allMountPoints = new TreeSet<MountPoint>();
 			//first the automounted ones because the manually ones are more important
 			allMountPoints.addAll(mountPointsAutoMounted);
-			allMountPoints.addAll(mountPoints);
+			allMountPoints.addAll(getMountPoints());
 		}
 		return allMountPoints;
 	}
 	
 	// for hibernate
+	@OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+	@JoinTable
 	private Set<MountPoint> getMountPoints() {
 		return mountPoints;
 	}
@@ -331,7 +283,7 @@ public class User {
 		
 		myLogger.debug("Checking mountpoints for duplicates.");
 		for (MountPoint mp : getAllMountPoints()) {
-			if (mountPointName.equals(mp.getMountpoint())) {
+			if (mountPointName.equals(mp.getMountpointName())) {
 				throw new RemoteFileSystemException(
 						"There is already a filesystem mounted on:"
 								+ mountPointName);
@@ -386,7 +338,7 @@ public class User {
 		
 		// check whether a filesystem for this mountpoint is already cached
 		if (cachedFilesystemConnections.containsKey(mp)) {
-			myLogger.debug("Using already cached filesystem for mountpoint: "+mp.getMountpoint());
+			myLogger.debug("Using already cached filesystem for mountpoint: "+mp.getMountpointName());
 			return this.cachedFilesystemConnections.get(mp);
 		}
 		
@@ -481,7 +433,7 @@ public class User {
 	public void unmountFileSystem(String mountPointName) {
 
 		for ( MountPoint mp : mountPoints ) {
-			if ( mp.getMountpoint().equals(mountPointName) ) {
+			if ( mp.getMountpointName().equals(mountPointName) ) {
 				mountPoints.remove(mp);
 				allMountPoints = null;
 				return;
@@ -496,6 +448,7 @@ public class User {
 	 * @throws FileSystemException
 	 *             if something goes wrong
 	 */
+	@Transient
 	private DefaultFileSystemManager getFsManager() throws FileSystemException {
 		if (fsmanager == null) {
 			
@@ -677,7 +630,7 @@ public class User {
 //		return null;
 //		
 //	}
-	
+	@Transient
 	public MountPoint getFirstResponsibleMountPointForHostAndFqan(String host_or_url, String fqan) {
 		
 		myLogger.debug("Looking for mountpoint for site: "+host_or_url+" and fqan: "+fqan);
@@ -790,6 +743,7 @@ public class User {
 	 * 
 	 * @return the default credential or null if there is none
 	 */
+	@Transient
 	public ProxyCredential getCred() {
 		return cred;
 	}
@@ -838,6 +792,7 @@ public class User {
 	 * Getter for the users' fqans.
 	 * @return all fqans as map with the fqan as key and the vo as value
 	 */
+	@Transient
 	public Map<String, String> getFqans() {
 		if ( fqans == null || ! fqansFilled ) {
 			fillFqans();
@@ -871,6 +826,8 @@ public class User {
 	 * anything you can think of. Usful for history and such.
 	 * @return the users' properties
 	 */
+	@Transient
+	@CollectionOfElements
 	public Map<String, List<String>> getUserProperties() {
 		return userProperties;
 	}

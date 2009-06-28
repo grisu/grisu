@@ -47,7 +47,6 @@ import org.vpac.grisu.control.utils.CertHelpers;
 import org.vpac.grisu.control.utils.JsdlModifier;
 import org.vpac.grisu.control.utils.ServerPropertiesManager;
 import org.vpac.grisu.credential.model.ProxyCredential;
-import org.vpac.grisu.credential.model.ProxyCredentialDAO;
 import org.vpac.grisu.fs.control.FileContentDataSourceConnector;
 import org.vpac.grisu.fs.control.utils.FileSystemStructureToXMLConverter;
 import org.vpac.grisu.fs.model.MountPoint;
@@ -102,13 +101,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	protected InformationManager informationManager = CachedMdsInformationManager.getDefaultCachedMdsInformationManager();
 
-	protected ProxyCredentialDAO credentialdao = new ProxyCredentialDAO();
-
 	protected UserDAO userdao = new UserDAO();
 
 	protected JobDAO jobdao = new JobDAO();
-
-	protected ProxyCredentialDAO creddao = new ProxyCredentialDAO();
 
 	protected MountPoint[] mountPointsForThisSession = null;
 
@@ -154,7 +149,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			if (user == null) {
 				user = new User(getCredential());
-				userdao.save(user);
+				userdao.saveOrUpdate(user);
 			} else {
 				user.setCred(getCredential());
 			}
@@ -234,7 +229,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		job = new Job(getCredential().getDn(), jobname);
 
 		job.setStatus(JobConstants.JOB_CREATED);
-		jobdao.save(job);
+//		jobdao.saveOrUpdate(job);
 		
 		job.setJobDescription(jsdl);
 		
@@ -260,7 +255,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 //		
 		
 		
-		jobdao.attachDirty(job);
+		jobdao.saveOrUpdate(job);
 		return jobname;
 		
 		
@@ -301,7 +296,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		job.setStatus(JobConstants.JOB_CREATED);
-		jobdao.save(job);
+		jobdao.saveOrUpdate(job);
 
 		myLogger.debug("Job \""+job.getJobname()+"\" successfully created in database.");
 		
@@ -394,7 +389,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		myLogger.debug(SeveralXMLHelpers.toStringWithoutAnnoyingExceptions(jsdl));
 
 		job.setJobDescription(jsdl);
-		jobdao.attachDirty(job);
+		jobdao.saveOrUpdate(job);
 	}
 	
 	private void setVO(Job job, String fqan) throws NoSuchJobException, JobPropertiesException {
@@ -558,13 +553,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				if ( mp.getRootUrl().startsWith(stagingFs.replace(":2811", "")) && jobFqan.equals(mp.getFqan() )) {
 					mountPointToUse = mp;
 					stagingFilesystemToUse = stagingFs.replace(":2811", "");
-					myLogger.debug("Found mountpoint "+mp.getMountpoint()+" for stagingfilesystem "+stagingFilesystemToUse);
+					myLogger.debug("Found mountpoint "+mp.getMountpointName()+" for stagingfilesystem "+stagingFilesystemToUse);
 					break;
 				}
 			}
 			
 			if ( mountPointToUse != null ) {
-				myLogger.debug("Mountpoint set to be: "+mountPointToUse.getMountpoint()+". Not looking any further...");
+				myLogger.debug("Mountpoint set to be: "+mountPointToUse.getMountpointName()+". Not looking any further...");
 				break;
 			}
 			
@@ -663,7 +658,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// we don't want the credential to be stored with the job in this case
 		// TODO or do we want it to be stored?
 		job.setCredential(null);
-		jobdao.attachDirty(job);
+		jobdao.saveOrUpdate(job);
 		myLogger.debug("Jobsubmission for job "+jobname+" successful.");
 		
 	}
@@ -725,7 +720,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			job.setCredential(null);
 		if (old_status != new_status) {
 			job.setStatus(new_status);
-			jobdao.attachDirty(job);
+			jobdao.saveOrUpdate(job);
 		}
 		myLogger.debug("Status of job: " + job.getJobname() + " is: "
 				+ new_status);
@@ -771,7 +766,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			job.setCredential(null);
 		if (old_status != status) {
 			job.setStatus(status);
-			jobdao.attachDirty(job);
+			jobdao.saveOrUpdate(job);
 		}
 		myLogger.debug("Status of job: " + job.getJobname() + " is: " + status);
 		return status;
@@ -896,7 +891,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				.getJobDescription());
 		job.setStderr(job.getJob_directory() + File.separator + stderr);
 
-		jobdao.attachDirty(job);
+		jobdao.saveOrUpdate(job);
 	}
 
 	/*
@@ -911,7 +906,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		MountPoint mp = getUser().mountFileSystem(url, mountpoint,
 				useHomeDirectory);
-		userdao.attachDirty(getUser());
+		userdao.saveOrUpdate(getUser());
 		mountPointsForThisSession = null;
 		return mp;
 	}
@@ -923,7 +918,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				+ " with fqan: " + fqan);
 		MountPoint mp = getUser().mountFileSystem(url, mountpoint, fqan,
 				useHomeDirectory);
-		userdao.attachDirty(getUser());
+		userdao.saveOrUpdate(getUser());
 		mountPointsForThisSession = null;
 		return mp;
 	}
@@ -936,7 +931,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void umount(String mountpoint) {
 
 		getUser().unmountFileSystem(mountpoint);
-		userdao.attachDirty(getUser());
+		userdao.saveOrUpdate(getUser());
 		mountPointsForThisSession = null;
 	}
 
@@ -1719,7 +1714,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		Job job = getJob(jobname);
 
 		job.addJobProperty(key, value);
-		jobdao.attachDirty(job);
+		jobdao.saveOrUpdate(job);
 
 		myLogger.debug("Added job property: " + key);
 	}
@@ -1733,7 +1728,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		Job job = getJob(jobname);
 
 		job.addJobProperties(properties);
-		jobdao.attachDirty(job);
+		jobdao.saveOrUpdate(job);
 
 		myLogger.debug("Added " + properties.size() + " job properties.");
 
@@ -1902,7 +1897,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		if (mountpoint == null) {
 			return null;
 		}
-		myLogger.debug("Responsible mountpoint: " + mountpoint.getMountpoint());
+		myLogger.debug("Responsible mountpoint: " + mountpoint.getMountpointName());
 		String jobDir = getWorkingDirectoryRelativeToMountPoint(jobname);
 		myLogger.debug("Jobdirectory: " + jobDir);
 		return mountpoint.getRootUrl() + "/" + jobDir;
@@ -2270,7 +2265,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		String workingDirRelativeToUserFS = JsdlHelpers.getWorkingDirectory(job
 				.getJobDescription());
 		job.setJob_directory(submissionFS + "/" + workingDirRelativeToUserFS);
-		job.getJobProperties().put(JOBDIRECTORY_KEY, workingDirRelativeToUserFS);
+		job.getJobProperties().put(JOBDIRECTORY_KEY, submissionFS + "/" + workingDirRelativeToUserFS);
 
 		Document newJsdl = recalculateWorkingDirectory(job, clusterRootUrl,
 				absolutePath);
@@ -2284,6 +2279,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		parseJobDescription(job);
 
 		job.setFqan(fqan);
+		job.addJobProperty(FQAN_KEY, fqan);
 		if (fqan != null) {
 			VO vo = VOManagement.getVO(getUser().getFqans().get(fqan));
 			job.setCredential(CertHelpers.getVOProxyCredential(vo,
@@ -2306,7 +2302,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// we don't want the credential to be stored with the job in this case
 		// TODO or do we want it to be stored?
 		job.setCredential(null);
-		jobdao.attachDirty(job);
+		jobdao.saveOrUpdate(job);
 	}
 	
 //	/**

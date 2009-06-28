@@ -5,7 +5,6 @@ package org.vpac.grisu.js.model;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.hibernate.LockMode;
 import org.hibernate.Query;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.fs.model.User;
@@ -22,13 +21,7 @@ public class JobDAO extends BaseHibernateDAO {
 	
 	private static Logger myLogger = Logger.getLogger(JobDAO.class.getName());
 
-	//TODO improve this (check: http://www.hibernate.org/hib_docs/v3/reference/en/html/objectstate.html#objectstate-modifying)
-	
-	private static String getDN(Job job) {
-		return job.getDn();
-	}
-	
-	/**
+		/**
 	 * Looks up the database whether a user with the specified dn is already 
 	 * persisted
 	 * 
@@ -36,26 +29,53 @@ public class JobDAO extends BaseHibernateDAO {
 	 * @return the {@link User} or null if not found
 	 */
 	public List<Job> findJobByDN(String dn){
+
 		myLogger.debug("Loading jobs with dn: "+dn+" from db.");
 		String queryString = "from org.vpac.grisu.js.model.Job as job where job.dn = ?";
-		Query queryObject = getSession(dn).createQuery(queryString);
-		queryObject.setParameter(0, dn);
 		
-		List<Job> jobs = queryObject.list();
-		
-		return jobs;
+		try {
+		    getCurrentSession().beginTransaction();
+
+		    Query queryObject = getCurrentSession().createQuery(queryString);
+			queryObject.setParameter(0, dn);
+
+			List<Job> jobs = (List<Job>)(queryObject.list());
+			
+			getCurrentSession().getTransaction().commit();
+			
+			return jobs;
+	        
+		} catch (RuntimeException e) {
+		    getCurrentSession().getTransaction().rollback();
+		    throw e; // or display error message
+		} finally {
+			getCurrentSession().close();
+		}
 	}
 	
 	public List<String> findJobNamesByDn(String dn) {
 		
 		myLogger.debug("Loading jobs with dn: "+dn+" from db.");
 		String queryString = "select jobname from org.vpac.grisu.js.model.Job as job where job.dn = ?";
-		Query queryObject = getSession(dn).createQuery(queryString);
-		queryObject.setParameter(0, dn);
 		
-		List<String> jobNames = queryObject.list();
-		
-		return jobNames;
+		try {
+		    getCurrentSession().beginTransaction();
+
+			Query queryObject = getCurrentSession().createQuery(queryString);
+			queryObject.setParameter(0, dn);
+
+			List<String> jobnames = (List<String>)(queryObject.list());
+			
+			getCurrentSession().getTransaction().commit();
+			
+			return jobnames;
+	        
+		} catch (RuntimeException e) {
+		    getCurrentSession().getTransaction().rollback();
+		    throw e; // or display error message
+		} finally {
+			getCurrentSession().close();
+		}
 		
 	}
 	
@@ -71,23 +91,30 @@ public class JobDAO extends BaseHibernateDAO {
 	public Job findJobByDN(String dn, String jobname) throws NoSuchJobException {
 		myLogger.debug("Loading job with dn: "+dn+" and jobname: "+jobname+" from dn.");
 		String queryString = "from org.vpac.grisu.js.model.Job as job where job.dn = ? and job.jobname = ?";
-		Query queryObject = getSession(dn).createQuery(queryString);
-		queryObject.setParameter(0, dn);
-		queryObject.setParameter(1, jobname);
 		
-		Job job = (Job)queryObject.uniqueResult();
-		
-		/*
-		if ( jobs.size() == 0 )
-			throw new NoSuchJobException("Could not find a job for the dn: "+dn+" and the jobname: "+jobname+".");
-		
-		if ( jobs.size() > 1 )
-			throw new DatabaseInconsitencyException(jobs.size()+" job objects found in database for the dn: "+dn+" and the jobname: "+jobname+".");
-		*/
-		if ( job == null ) {
-			throw new NoSuchJobException("Could not find a job for the dn: "+dn+" and the jobname: "+jobname+".");
+		try {
+		    getCurrentSession().beginTransaction();
+
+			Query queryObject = getCurrentSession().createQuery(queryString);
+			queryObject.setParameter(0, dn);
+			queryObject.setParameter(1, jobname);
+
+			Job job = (Job)(queryObject.uniqueResult());
+			
+			getCurrentSession().getTransaction().commit();
+			
+			if ( job == null ) {
+				throw new NoSuchJobException("Could not find a job for the dn: "+dn+" and the jobname: "+jobname);
+			}
+			return job;
+	        
+		} catch (RuntimeException e) {
+		    getCurrentSession().getTransaction().rollback();
+		    throw e; // or display error message
+		} finally {
+			getCurrentSession().close();
 		}
-		return job;
+		
 	}
 	
 	/**
@@ -100,91 +127,76 @@ public class JobDAO extends BaseHibernateDAO {
 	public List<Job> getSimilarJobNamesByDN(String dn, String jobname) throws NoSuchJobException {
 		myLogger.debug("Loading job with dn: "+dn+" and jobname: "+jobname+" from dn.");
 		String queryString = "from org.vpac.grisu.js.model.Job as job where job.dn = ? and job.jobname like ?";
-		Query queryObject = getSession(dn).createQuery(queryString);
-		queryObject.setParameter(0, dn);
-		queryObject.setParameter(1, jobname+"%");
 		
-		List<Job> jobs = queryObject.list();
-		
-		if ( jobs.size() == 0 )
-			throw new NoSuchJobException("Could not find a job for the dn: "+dn+" and the jobname: "+jobname+".");
-		
-		return jobs;		  
-		
+		try {
+		    getCurrentSession().beginTransaction();
+
+			Query queryObject = getCurrentSession().createQuery(queryString);
+			queryObject.setParameter(0, dn);
+			queryObject.setParameter(1, jobname+"%");
+
+			List<Job> jobs = (List<Job>)(queryObject.list());
+			
+			getCurrentSession().getTransaction().commit();
+			
+			if ( jobs.size() == 0 ) {
+				throw new NoSuchJobException("Could not find a job for the dn: "+dn+" and the jobname: "+jobname);
+			}
+			return jobs;
+	        
+		} catch (RuntimeException e) {
+		    getCurrentSession().getTransaction().rollback();
+		    throw e; // or display error message
+		} finally {
+			getCurrentSession().close();
+		}
+
 	}
-	
-    public String save(Job transientInstance) {
-        myLogger.debug("saving Job instance");
-        try {
-        	String dn = getDN(transientInstance);
-            getSession(dn).save(transientInstance);
-            myLogger.debug("save successful");
-//            getSession(dn).flush();
-            getSession(dn).close();
-        } catch (RuntimeException re) {
-            myLogger.error("save failed", re);
-            throw re;
-        }
-        return transientInstance.getJobname();
-    }
     
 	public void delete(Job persistentInstance) {
         myLogger.debug("deleting Job instance");
-        try {
-        	String dn = getDN(persistentInstance);
-            getSession(dn).delete(persistentInstance);
-            myLogger.debug("delete successful");
-            getSession(dn).flush();
-//            getSession(dn).close();
-        } catch (RuntimeException re) {
-            myLogger.error("delete failed", re);
-            throw re;
-        }
-    }
-	
-    public Job merge(Job detachedInstance) {
-        myLogger.debug("merging Job instance");
-        try {
-        	String dn = getDN(detachedInstance);
-            Job result = (Job) getSession(dn)
-                    .merge(detachedInstance);
-            myLogger.debug("merge successful");
-            getSession(dn).flush();
-//            getSession(dn).close();
-            return result;
-        } catch (RuntimeException re) {
-            myLogger.error("merge failed", re);
-            throw re;
-        }
+
+        
+		try {
+		    getCurrentSession().beginTransaction();
+
+		    getCurrentSession().delete(persistentInstance);
+		    
+			getCurrentSession().getTransaction().commit();
+
+			myLogger.debug("delete successful");
+			
+	        
+		} catch (RuntimeException e) {
+            myLogger.error("delete failed", e);
+		    getCurrentSession().getTransaction().rollback();
+		    throw e; // or display error message
+		} finally {
+			getCurrentSession().close();
+		}
     }
 
-    public void attachDirty(Job instance) {
-        myLogger.debug("attaching dirty Job instance");
-        try {
-        	String dn = getDN(instance);
-            getSession(dn).saveOrUpdate(instance);
-            myLogger.debug("attach successful");
-            getSession(dn).flush();
-//            getSession(dn).close();
-        } catch (RuntimeException re) {
-            myLogger.error("attach failed", re);
-            throw re;
-        }
+    public void saveOrUpdate(Job instance) {
+
+		try {
+		    getCurrentSession().beginTransaction();
+
+		    getCurrentSession().saveOrUpdate(instance);
+		    
+			getCurrentSession().getTransaction().commit();
+
+			myLogger.debug("saveOrUpdate of job successful");
+			
+	        
+		} catch (RuntimeException e) {
+            myLogger.error("saveOrUpdate failed", e);
+		    getCurrentSession().getTransaction().rollback();
+		    throw e; // or display error message
+		} finally {
+			getCurrentSession().close();
+		}
     }
     
-    public void attachClean(Job instance) {
-        myLogger.debug("attaching clean Job instance");
-        try {
-        	String dn = getDN(instance);
-            getSession(dn).lock(instance, LockMode.NONE);
-            myLogger.debug("attach successful");
-            getSession(dn).flush();
-//            getSession(dn).close();
-        } catch (RuntimeException re) {
-            myLogger.error("attach failed", re);
-            throw re;
-        }
-    }
 
 
 	

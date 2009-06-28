@@ -29,11 +29,15 @@ public class BaseHibernateDAO implements IBaseHibernateDAO {
 	
 //	private static Session session = null;
 	
-	public Session getSession(String dn) {
+	public Session getSession() {
 //		if ( session == null ) 
 //			session = HibernateSessionFactory.getSession();
 //		return session;
-		return HibernateSessionFactory.getSession(dn);
+		return HibernateSessionFactoryNew.getSessionFactory().openSession();
+	}
+	
+	public Session getCurrentSession() {
+		return HibernateSessionFactoryNew.getSessionFactory().getCurrentSession();
 	}
 	
 	
