@@ -22,7 +22,6 @@
 	<modules>
 		<module>grisu-core</module>
 		<module>grisu-ws</module>
-		<module>grisu-local</module>
 		<module>grisu-cxf</module>
 	</modules>
 </project>
