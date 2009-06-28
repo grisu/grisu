@@ -30,7 +30,7 @@ import org.w3c.dom.Document;
  */
 public interface ServiceInterface {
 	
-	public static final double INTERFACE_VERSION = 7;
+	public static final double INTERFACE_VERSION = 8;
 	
 	
 //	// a few static strings that are used as keys in some of the maps in this interface
@@ -134,6 +134,9 @@ public interface ServiceInterface {
 	
 	/**
 	 * Returns system or user specific information messages since a specific date
+	 * 
+	 * This isn't used yet...
+	 * 
 	 * @param date the date from which to show messages or null for unread messages
 	 * @return a xml document which contains the messages
 	 */
@@ -147,9 +150,11 @@ public interface ServiceInterface {
 	
 	/**
 	 * Can be used to inform the frontend what the backend is doing at the moment and what the bloody hell is taking so long... (like file-cross-staging...)
+	 * 
+	 * @param action the name of the action to monitor. This can be either a jobname or a filetransfer handle
 	 * @return the current status of any backend activity
 	 */
-	public String getCurrentStatusMessage();
+	public String getCurrentStatusMessage(String action);
 	
 	
 	//---------------------------------------------------------------------------------------------------
@@ -531,7 +536,7 @@ public interface ServiceInterface {
 	 * @param target the target file
 	 * @param overwrite whether to overwrite a possible target file
 	 * @param return_absolute_url whether the resulting url should be "user-space"-like (/ngdata.vpac.org/test.txt) or absolute (gsiftp://ngdata.vpac.org/home/san04/markus)
-	 * @return the resolved path of the target file
+	 * @return the filetransfer handle
 	 * @throws RemoteFileSystemException if the remote source file system could not be read/mounted or the
 	 * remote target file system could not be written to 
  	 * @throws VomsException if the (possibly required) voms credential could not be created
