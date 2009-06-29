@@ -5,12 +5,12 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-import org.vpac.grisu.client.control.files.FileHelper;
-import org.vpac.grisu.client.control.files.FileTransferException;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.JobSubmissionException;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
+import org.vpac.grisu.control.files.FileHelper;
+import org.vpac.grisu.control.files.FileTransferException;
 import org.vpac.grisu.js.model.JobPropertiesException;
 import org.vpac.grisu.js.model.JobSubmissionObjectImpl;
 import org.w3c.dom.Document;
@@ -23,12 +23,9 @@ public class JobObject extends JobSubmissionObjectImpl {
 	private final FileHelper fileHelper;
 
 	private int status = JobConstants.UNDEFINED;
-	private int sleepTimeInSeconds = 600;
-	
 	
 	private String jobDirectory;
 
-	private Thread joinThread;
 
 	public JobObject(ServiceInterface si) {
 		super();
@@ -68,11 +65,14 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 		// stage in local files
 		for (String inputFile : getInputFileUrls()) {
+			
+			if ( FileHelper.isLocal(inputFile) ) {
 			try {
 				fileHelper.uploadFile(inputFile, jobDirectory);
 			} catch (FileTransferException e) {
 				throw new JobSubmissionException("Could not stage-in file: "
 						+ inputFile, e);
+			}
 			}
 		}
 
@@ -94,64 +94,6 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 	public String getStatusString(boolean forceRefresh) {
 		return JobConstants.translateStatus(getStatus(forceRefresh));
-	}
-	
-	public void adjustSleepTime(int sleepTimeInSeconds) {
-		this.sleepTimeInSeconds = sleepTimeInSeconds;
-	}
-
-	/**
-	 * Waits for the job to finish.
-	 * 
-	 * @param sleepTimeInSeconds
-	 *            how long to wait inbetween 2 status checks. Please don't check
-	 *            every second, that might overload the server.
-	 * @return whether the job actually finished (true) or whether the waiting
-	 *         thread was interrupted (false)
-	 */
-	public boolean waitForJobToFinish() {
-
-		if (getStatus(true) >= JobConstants.FINISHED_EITHER_WAY) {
-			return true;
-		}
-
-		if (joinThread == null) {
-
-			joinThread = new Thread() {
-				public void run() {
-
-					while ( getStatus(true) < JobConstants.FINISHED_EITHER_WAY || getStatus(false) == JobConstants.NO_SUCH_JOB ) {
-
-						try {
-							sleep(sleepTimeInSeconds * 1000);
-							myLogger.debug("Join thread for job "
-									+ getJobname() + "still alive...");
-						} catch (InterruptedException e) {
-							myLogger.debug("Join thread for job "
-									+ getJobname() + " interrupted...");
-						}
-
-					}
-
-				}
-			};
-			joinThread.start();
-		}
-
-		if (joinThread.isAlive()) {
-			try {
-				joinThread.join();
-				joinThread = null;
-				return true;
-			} catch (InterruptedException e) {
-				myLogger.debug("Join thread for job " + getJobname()
-						+ " interrupted...");
-				joinThread = null;
-				return false;
-			}
-		} else {
-			throw new RuntimeException("JobWaitThread not alive anymore.");
-		}
 	}
 
 	

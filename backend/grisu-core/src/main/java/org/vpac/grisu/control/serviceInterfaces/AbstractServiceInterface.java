@@ -112,7 +112,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	protected FileSystemStructureToXMLConverter fsconverter = null;
 
-	
+//	protected ExecutorService executor = Executors.newFixedThreadPool(2);
 
 	protected MatchMaker matchmaker = new MatchMakerImpl();
 
@@ -730,7 +730,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public void submitJob(String jobname) throws JobSubmissionException {
 
-		myLogger.debug("Submitting job: " + jobname);
+		myLogger.info("Submitting job: " + jobname + " for user "+getDN());
 		Job job;
 		try {
 			job = getJob(jobname);
@@ -792,7 +792,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// TODO or do we want it to be stored?
 		job.setCredential(null);
 		jobdao.saveOrUpdate(job);
-		myLogger.debug("Jobsubmission for job " + jobname + " successful.");
+		myLogger.info("Jobsubmission for job " + jobname + " and user "+getDN()+" successful.");
 
 	}
 
@@ -2687,6 +2687,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		try {
 			targetFileString = target_file.getURL().toString();
 		} catch (FileSystemException e1) {
+			myLogger.error("Could not retrieve targetfile url: "+e1.getLocalizedMessage());
 			throw new RemoteFileSystemException("Could not retrive targetfile url: "+e1.getLocalizedMessage());
 		}
 
@@ -2699,11 +2700,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		
 		RemoteFileTransferObject fileTransfer = new RemoteFileTransferObject(source_file, target_file, overwrite);
+		myLogger.info("Creating fileTransfer object for source: "+source_file.getName()+" and target: "+target_file.toString());
+//		fileTransfers.put(targetFileString, fileTransfer);
 
-		fileTransfers.put(targetFileString, fileTransfer);
+		fileTransfer.startTransfer();
 		
-		fileTransfer.startFileTransfer(waitForFileTransferToFinish);
+//		if ( waitForFileTransferToFinish ) {
+//			myLogger.info("Waiting for filetransfer with target "+targetFileString+" to finish.");
+//			fileTransfer.joinFileTransfer();
+//		}
 		
+		myLogger.info("Filtransfer with target "+targetFileString+" finished.");
 
 
 		return targetFileString;

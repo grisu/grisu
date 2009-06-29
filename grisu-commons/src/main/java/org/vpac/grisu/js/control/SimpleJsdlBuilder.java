@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.vpac.grisu.control.SeveralStringHelpers;
 import org.vpac.grisu.control.SeveralXMLHelpers;
+import org.vpac.grisu.control.files.FileHelper;
 import org.vpac.grisu.js.model.JobProperty;
 import org.vpac.grisu.js.model.utils.CommandlineHelpers;
 import org.w3c.dom.Document;
@@ -73,8 +74,7 @@ public class SimpleJsdlBuilder {
 
 				StringBuffer dataStagingElements = new StringBuffer();
 				for (String inputFileUrl : inputFileUrls.split(",")) {
-					if (!inputFileUrl.startsWith("/")
-							&& inputFileUrl.startsWith("file:")) {
+					if ( !FileHelper.isLocal(inputFileUrl) ) {
 						dataStagingElements
 								.append("<DataStaging>\n<FileName />\n<FileSystemName>userExecutionHostFs</FileSystemName>\n"
 										+ "<Source>\n<URI>");

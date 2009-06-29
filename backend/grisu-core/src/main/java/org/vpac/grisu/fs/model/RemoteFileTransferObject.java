@@ -22,7 +22,7 @@ public class RemoteFileTransferObject {
 	
 	protected MarkerListener dummyMarker = new DummyMarkerImpl();
 	
-	private Thread fileTransferThread;
+	private final Thread fileTransferThread;
 	
 	private final FileObject source;
 	private final FileObject target;
@@ -31,18 +31,16 @@ public class RemoteFileTransferObject {
 	
 	private Map<Date, String> messages = new TreeMap<Date, String>();
 	
-	public RemoteFileTransferObject(FileObject source, FileObject target, boolean overwrite) {
-		this.source = source;
-		this.target = target;
+	public RemoteFileTransferObject(FileObject sourceF, FileObject targetF, boolean overwriteB) {
+		this.source = sourceF;
+		this.target = targetF;
 		
-		this.overwrite = overwrite;
-	}
-	
-	public void startFileTransfer(boolean join) {
-		
+		this.overwrite = overwriteB;
+
 		fileTransferThread = new Thread() {
 			public void run() {
 				try {
+					myLogger.info("Copy thread started for target: "+target.getName());
 					transferFile(source, target, overwrite);
 				} catch (RemoteFileSystemException e) {
 					// TODO Auto-generated catch block
@@ -51,11 +49,11 @@ public class RemoteFileTransferObject {
 			}
 		};
 		
-		fileTransferThread.start();
+	}
+	
+	public Thread getFileTransferThread() {
 		
-		if ( join ) {
-			joinFileTransfer();
-		}
+		return this.fileTransferThread;
 		
 	}
 	
@@ -66,6 +64,12 @@ public class RemoteFileTransferObject {
 		} catch (InterruptedException e) {
 			messages.put(new Date(), "File transfer thread interrupted.");
 		}
+		
+	}
+	
+	public void startTransfer() throws RemoteFileSystemException {
+		
+		transferFile(source, target, overwrite);
 		
 	}
 	

@@ -1,4 +1,4 @@
-package org.vpac.grisu.client.control.files;
+package org.vpac.grisu.control.files;
 
 public class FileTransferException extends Exception {
 

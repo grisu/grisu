@@ -1,4 +1,4 @@
-package org.vpac.grisu.client.control.files;
+package org.vpac.grisu.control.files;
 
 import java.io.File;
 
@@ -24,9 +24,22 @@ public class FileHelper {
 		
 	}
 	
+	public static boolean isLocal(String file) {
+		
+		if ( file.startsWith("gsiftp") ) {
+			return false;
+		} else if ( file.startsWith("file:") ) {
+			return true;
+		} else if ( file.startsWith("http:") ) {
+			return false;
+		} else {
+			return true;
+		}
+		
+	}
+	
 	public void uploadFile(File file, String targetDirectory) throws FileTransferException {
 		
-
 		if ( ! file.exists() ) {
 			throw new FileTransferException("File does not exist: "+file.toString(), null);
 		}
@@ -83,8 +96,11 @@ public class FileHelper {
 			DataSource source = new FileDataSource(file);
 					
 			try {
-				String absoluteNewUrl = serviceInterface.upload(source, targetDirectory+"/"+file.getName(), true);
+				myLogger.info("Uploading file "+file.getName()+"...");
+				String filetransferHandle = serviceInterface.upload(source, targetDirectory+"/"+file.getName(), true);
+				myLogger.info("Upload of file "+file.getName()+" successful.");
 			} catch (Exception e1) {
+				myLogger.info("Upload of file "+file.getName()+" failed: "+e1.getLocalizedMessage());
 				myLogger.error("File upload failed: "+e1.getLocalizedMessage());
 				throw new FileTransferException("Could not upload file \""+file.getName() + "\": "
 						+ e1.getLocalizedMessage(), e1);

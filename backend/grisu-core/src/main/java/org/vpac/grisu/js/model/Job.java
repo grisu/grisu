@@ -335,7 +335,7 @@ public class Job {
 		try {
 			jobDescription = SeveralXMLHelpers.fromString(jsdl_string);
 		} catch (Exception e) {
-			myLogger.error("Error saving jsdl for job. That's most probably ok. "+e.getMessage());
+			myLogger.debug("Error saving jsdl for job. That's most probably ok. "+e.getMessage());
 //			e.printStackTrace();
 			//TODO check what happens here
 		}
