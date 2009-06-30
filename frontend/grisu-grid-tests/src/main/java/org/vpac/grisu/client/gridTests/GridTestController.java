@@ -171,8 +171,10 @@ public class GridTestController {
 		System.out.println("Total jobs:\t"+finishedElements.size());
 		System.out.println("Successful jobs:\t"+countSuccess);
 		System.out.println("Failed jobs\t: "+countFailed);
-		System.out.println("Failed submission locations: ");
-		System.out.println(failedSubLocs.toString());
+		if ( countFailed > 0 ) {
+			System.out.println("Failed submission locations: ");
+			System.out.println(failedSubLocs.toString());
+		}
 	}
 
 	public void waitForJobsToFinishAndCheckAndKillThem() {
@@ -194,6 +196,11 @@ public class GridTestController {
 				processJobExecutor.execute(checkAndKillJobThreads.get(gte
 						.getId()));
 			}
+			
+			if ( gridTestElements.size() == 0 ) {
+				break;
+			}
+			
 			System.out.println("Still " + gridTestElements.size()
 					+ " jobs not finished... Sleeping for 30 seconds...");
 
