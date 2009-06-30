@@ -33,7 +33,10 @@ public class JobConstants {
 	public static final int NOT_AVAILABLE = -1001;
 	public static final int UNDEFINED = -1000;
 	public static final int NO_SUCH_JOB = -999;
+	public static final int JOB_OBJECT_CREATED = -200;
 	public static final int JOB_CREATED = -100;
+	public static final int INPUT_FILES_UPLOADING = -99;
+	public static final int INPUT_FILES_UPLOADED = -98;
 	public static final int READY_TO_SUBMIT = -4;
 	public static final int EXTERNAL_HANDLE_READY = -3;
 	public static final int STAGE_IN = -2;
@@ -62,7 +65,9 @@ public class JobConstants {
 	public static final String KILLED_STRING = "Job killed";
 	public static final String FAILED_STRING = "Failed";
 	public static final String DONE_STRING = "Done";
-	
+	public static final String JOB_OBJECT_CREATED_STRING = "Job object created";
+	public static final String INPUT_FILES_UPLOADING_STRING = "Uploading input files";
+	public static final String INPUT_FILES_UPLOADED_STRING = "Input files uploaded";
 	
 	public static final String NO_DESCRIPTION_AVAILABLE = "No description available.";
 	
@@ -84,6 +89,9 @@ public class JobConstants {
 		case CLEAN_UP: return CLEAN_UP_STRING;
 		case KILLED: return KILLED_STRING;
 		case FAILED: return FAILED_STRING;
+		case JOB_OBJECT_CREATED: return JOB_OBJECT_CREATED_STRING;
+		case INPUT_FILES_UPLOADING: return INPUT_FILES_UPLOADING_STRING;
+		case INPUT_FILES_UPLOADED: return INPUT_FILES_UPLOADED_STRING;
 		}
 		
 		if ( status_no > DONE ) {
@@ -131,7 +139,12 @@ public class JobConstants {
 			return KILLED;
 		else if ( FAILED_STRING.equals(status) )
 			return FAILED;
-
+		else if ( JOB_OBJECT_CREATED_STRING.equals(status) ) 
+			return JOB_OBJECT_CREATED;
+		else if ( INPUT_FILES_UPLOADING_STRING.equals(status) ) 
+			return INPUT_FILES_UPLOADING;
+		else if ( INPUT_FILES_UPLOADED_STRING.equals(status) ) 
+			return INPUT_FILES_UPLOADED;
 		
 		return UNDEFINED;
 		

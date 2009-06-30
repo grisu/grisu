@@ -1,5 +1,7 @@
 package org.vpac.grisu.client.gridTests;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,6 +11,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import jline.ConsoleReader;
+
+import org.vpac.grisu.client.control.login.LoginHelpers;
 import org.vpac.grisu.client.control.login.LoginParams;
 import org.vpac.grisu.client.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.control.GrisuRegistry;
@@ -17,6 +22,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.model.ApplicationInformation;
+import org.vpac.security.light.plainProxy.LocalProxy;
 
 public class GridTestController {
 
@@ -29,11 +35,66 @@ public class GridTestController {
 	private Map<String, GridTestElement> gridTestElements = new HashMap<String, GridTestElement>();
 	private List<GridTestElement> finishedElements = new LinkedList<GridTestElement>();
 
-	private final ServiceInterface serviceInterface;
+	private ServiceInterface serviceInterface;
 	private final GrisuRegistry registry;
 
 	private final ApplicationInformation[] appInfos;
 	private final String fqan;
+	private String output = "gridtestResults.txt";
+
+	public GridTestController(String[] args) {
+
+		GridTestCommandlineOptions options = new GridTestCommandlineOptions(
+				args);
+
+		if (options.getMyproxyUsername() != null
+				&& options.getMyproxyUsername().length() != 0) {
+			try {
+				ConsoleReader consoleReader = new ConsoleReader();
+				char[] password = consoleReader.readLine(
+						"Please enter your myproxy password: ",
+						new Character('*')).toCharArray();
+
+				LoginParams loginParams = new LoginParams(
+				// "http://localhost:8080/grisu-ws/services/grisu",
+						// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
+						"Local", options.getMyproxyUsername(), "".toCharArray());
+
+				serviceInterface = ServiceInterfaceFactory
+						.createInterface(loginParams);
+			} catch (Exception e) {
+				System.out.println("Could not login: "
+						+ e.getLocalizedMessage());
+				System.exit(1);
+			}
+		} else {
+			// trying to get local proxy
+
+			LoginParams loginParams = new LoginParams("Local", null, null,
+					"myproxy2.arcs.org.au", "443");
+			try {
+				serviceInterface = LoginHelpers.login(loginParams, LocalProxy
+						.loadGSSCredential());
+			} catch (Exception e) {
+				System.out.println("Could not login: "
+						+ e.getLocalizedMessage());
+				System.exit(1);
+			}
+		}
+
+		registry = GrisuRegistry.getDefault(this.serviceInterface);
+
+		fqan = options.getFqan();
+		if ( options.getOutput() != null && options.getOutput().length() > 0 ) {
+			output = options.getOutput();
+		}
+		appInfos = new ApplicationInformation[options.getApplications().length];
+		for (int i = 0; i < options.getApplications().length; i++) {
+			appInfos[i] = registry.getApplicationInformation(options
+					.getApplications()[i]);
+		}
+
+	}
 
 	public GridTestController(ServiceInterface si, String[] applications,
 			String fqan) {
@@ -49,45 +110,34 @@ public class GridTestController {
 	/**
 	 * @param args
 	 * @throws ServiceInterfaceException
-	 * @throws MdsInformationException 
+	 * @throws MdsInformationException
 	 */
-	public static void main(String[] args) throws ServiceInterfaceException, MdsInformationException {
+	public static void main(String[] args) throws ServiceInterfaceException,
+			MdsInformationException {
 
-		String username = args[0];
-		char[] password = args[1].toCharArray();
-
-		String fqan = args[2];
-
-		LoginParams loginParams = new LoginParams(
-		// "http://localhost:8080/grisu-ws/services/grisu",
-				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-				"Local", username, password);
-
-		final ServiceInterface si = ServiceInterfaceFactory
-				.createInterface(loginParams);
-
-		GridTestController gtc = new GridTestController(si, new String[]{"BLAST"}, fqan);
+		GridTestController gtc = new GridTestController(args);
 
 		gtc.start();
 
 	}
-	
+
 	public void start() {
 
 		try {
 			createJobThreads();
 		} catch (MdsInformationException e) {
 
-			System.out.println("Could not create all necessary jobs: "+e.getLocalizedMessage()+". Exiting...");
+			System.out.println("Could not create all necessary jobs: "
+					+ e.getLocalizedMessage() + ". Exiting...");
 			System.exit(1);
-			
+
 		}
 
 		createAndSubmitAllJobs();
 
 		waitForJobsToFinishAndCheckAndKillThem();
-		
-		displayStatistics();
+
+		writeStatistics();
 	}
 
 	public void waitForJobsToFinishAndCheckAndKillThem() {
@@ -131,19 +181,32 @@ public class GridTestController {
 
 	}
 
-	public void displayStatistics() {
+	public void writeStatistics() {
 
+		StringBuffer outputString = new StringBuffer();
+		
 		for (GridTestElement gte : finishedElements) {
 
-			System.out.println("SubmissionLocation: "
-					+ gte.getSubmissionLocation());
-			System.out
-					.println("-------------------------------------------------");
-			gte.printTestResults();
-			System.out
-					.println("-------------------------------------------------");
+			outputString.append("SubmissionLocation: "
+					+ gte.getSubmissionLocation()+"\n");
+			outputString.append("-------------------------------------------------"+"\n");
+			outputString.append(gte.getResultString()+"\n");
+			outputString.append("-------------------------------------------------"+"\n");
 
 		}
+
+		try {
+
+		String uFileName = output;
+		FileWriter fileWriter = new FileWriter(uFileName);
+		BufferedWriter buffWriter = new BufferedWriter(fileWriter);
+		buffWriter.write(outputString.toString());
+
+		buffWriter.close();
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+		}				
 
 	}
 
@@ -178,7 +241,10 @@ public class GridTestController {
 								version, fqan);
 				for (String subLoc : subLocsForVersion) {
 
-					GridTestElement gte = GridTestElement.createGridTestElement(appInfo.getApplicationName(), serviceInterface, version, subLoc);
+					GridTestElement gte = GridTestElement
+							.createGridTestElement(
+									appInfo.getApplicationName(),
+									serviceInterface, version, subLoc);
 
 					gridTestElements.put(gte.getId(), gte);
 

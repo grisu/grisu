@@ -1,0 +1,204 @@
+SubmissionLocation: small:ng2.canterbury.ac.nz
+-------------------------------------------------
+Stage: Initializing test element...
+Started: Tue Jun 30 17:04:15 EST 2009
+Tue Jun 30 17:04:15 EST 2009: Creating JobObject...
+Tue Jun 30 17:04:15 EST 2009: JobObject created.
+
+Ended: Tue Jun 30 17:04:15 EST 2009
+Status: FINISHED_SUCCESS
+
+Stage: Creating job on backend...
+Started: Tue Jun 30 17:04:15 EST 2009
+Tue Jun 30 17:04:20 EST 2009: New job status: Ready to submit
+
+Ended: Tue Jun 30 17:04:20 EST 2009
+Status: FINISHED_SUCCESS
+
+Stage: Submitting job to backend...
+Started: Tue Jun 30 17:04:20 EST 2009
+Tue Jun 30 17:04:30 EST 2009: New job status: Unsubmitted
+Tue Jun 30 17:04:38 EST 2009: New job status: Done
+Tue Jun 30 17:04:39 EST 2009: Status checked. Equals "Done". Good
+
+Ended: Tue Jun 30 17:04:30 EST 2009
+Status: FINISHED_SUCCESS
+
+Stage: Killing and cleaning job...
+Started: Tue Jun 30 17:04:39 EST 2009
+
+Ended: Tue Jun 30 17:04:48 EST 2009
+Status: FINISHED_SUCCESS
+
+
+-------------------------------------------------
+SubmissionLocation: default:ng2hpc.ceres.auckland.ac.nz
+-------------------------------------------------
+Stage: Initializing test element...
+Started: Tue Jun 30 17:04:15 EST 2009
+Tue Jun 30 17:04:15 EST 2009: Creating JobObject...
+Tue Jun 30 17:04:15 EST 2009: JobObject created.
+
+Ended: Tue Jun 30 17:04:15 EST 2009
+Status: FINISHED_SUCCESS
+
+Stage: Creating job on backend...
+Started: Tue Jun 30 17:04:15 EST 2009
+Tue Jun 30 17:04:20 EST 2009: New job status: Ready to submit
+
+Ended: Tue Jun 30 17:04:20 EST 2009
+Status: FINISHED_SUCCESS
+
+Stage: Submitting job to backend...
+Started: Tue Jun 30 17:04:20 EST 2009
+Tue Jun 30 17:04:28 EST 2009: New job status: Unsubmitted
+Tue Jun 30 17:04:39 EST 2009: New job status: Done
+Tue Jun 30 17:04:39 EST 2009: Status checked. Equals "Done". Good
+
+Ended: Tue Jun 30 17:04:28 EST 2009
+Status: FINISHED_SUCCESS
+
+Stage: Killing and cleaning job...
+Started: Tue Jun 30 17:04:39 EST 2009
+
+Ended: Tue Jun 30 17:04:44 EST 2009
+Status: FINISHED_SUCCESS
+
+
+-------------------------------------------------
+SubmissionLocation: batch:ng2maggie.otago.ac.nz
+-------------------------------------------------
+Stage: Initializing test element...
+Started: Tue Jun 30 17:04:15 EST 2009
+Tue Jun 30 17:04:15 EST 2009: Creating JobObject...
+Tue Jun 30 17:04:15 EST 2009: JobObject created.
+
+Ended: Tue Jun 30 17:04:15 EST 2009
+Status: FINISHED_SUCCESS
+
+Stage: Creating job on backend...
+Started: Tue Jun 30 17:04:28 EST 2009
+Tue Jun 30 17:04:28 EST 2009: New job status: Ready to submit
+
+Ended: Tue Jun 30 17:04:28 EST 2009
+Status: FINISHED_SUCCESS
+
+Stage: Submitting job to backend...
+Started: Tue Jun 30 17:04:28 EST 2009
+Tue Jun 30 17:04:36 EST 2009: New job status: Unsubmitted
+Tue Jun 30 17:04:39 EST 2009: New job status: Done
+Tue Jun 30 17:04:40 EST 2009: Status checked. Equals "Done". Good
+
+Ended: Tue Jun 30 17:04:36 EST 2009
+Status: FINISHED_SUCCESS
+
+Stage: Killing and cleaning job...
+Started: Tue Jun 30 17:04:40 EST 2009
+
+Ended: Tue Jun 30 17:04:45 EST 2009
+Status: FINISHED_SUCCESS
+
+
+-------------------------------------------------
+SubmissionLocation: par64_30:ng2hpc.canterbury.ac.nz#Loadleveler
+-------------------------------------------------
+Stage: Initializing test element...
+Started: Tue Jun 30 17:04:15 EST 2009
+Tue Jun 30 17:04:15 EST 2009: Creating JobObject...
+Tue Jun 30 17:04:15 EST 2009: JobObject created.
+
+Ended: Tue Jun 30 17:04:15 EST 2009
+Status: FINISHED_SUCCESS
+
+Stage: Creating job on backend...
+Started: Tue Jun 30 17:04:15 EST 2009
+Tue Jun 30 17:04:20 EST 2009: New job status: Ready to submit
+
+Ended: Tue Jun 30 17:04:20 EST 2009
+Status: FINISHED_SUCCESS
+
+Stage: Submitting job to backend...
+Started: Tue Jun 30 17:04:20 EST 2009
+Tue Jun 30 17:04:31 EST 2009: New job status: Unsubmitted
+Tue Jun 30 17:05:01 EST 2009: New job status: Done
+Tue Jun 30 17:05:02 EST 2009: Status checked. Equals "Done". Good
+
+Ended: Tue Jun 30 17:04:31 EST 2009
+Status: FINISHED_SUCCESS
+
+Stage: Killing and cleaning job...
+Started: Tue Jun 30 17:05:02 EST 2009
+
+Ended: Tue Jun 30 17:05:06 EST 2009
+Status: FINISHED_SUCCESS
+
+
+-------------------------------------------------
+SubmissionLocation: serial_6:ng2hpc.canterbury.ac.nz#Loadleveler
+-------------------------------------------------
+Stage: Initializing test element...
+Started: Tue Jun 30 17:04:15 EST 2009
+Tue Jun 30 17:04:15 EST 2009: Creating JobObject...
+Tue Jun 30 17:04:15 EST 2009: JobObject created.
+
+Ended: Tue Jun 30 17:04:15 EST 2009
+Status: FINISHED_SUCCESS
+
+Stage: Creating job on backend...
+Started: Tue Jun 30 17:04:15 EST 2009
+Tue Jun 30 17:04:20 EST 2009: New job status: Ready to submit
+
+Ended: Tue Jun 30 17:04:20 EST 2009
+Status: FINISHED_SUCCESS
+
+Stage: Submitting job to backend...
+Started: Tue Jun 30 17:04:20 EST 2009
+Tue Jun 30 17:04:30 EST 2009: New job status: Unsubmitted
+Tue Jun 30 17:05:01 EST 2009: New job status: Done
+Tue Jun 30 17:05:02 EST 2009: Status checked. Equals "Done". Good
+
+Ended: Tue Jun 30 17:04:30 EST 2009
+Status: FINISHED_SUCCESS
+
+Stage: Killing and cleaning job...
+Started: Tue Jun 30 17:05:02 EST 2009
+
+Ended: Tue Jun 30 17:05:10 EST 2009
+Status: FINISHED_SUCCESS
+
+
+-------------------------------------------------
+SubmissionLocation: linux16_30:ng2hpc.canterbury.ac.nz#Loadleveler
+-------------------------------------------------
+Stage: Initializing test element...
+Started: Tue Jun 30 17:04:15 EST 2009
+Tue Jun 30 17:04:15 EST 2009: Creating JobObject...
+Tue Jun 30 17:04:15 EST 2009: JobObject created.
+
+Ended: Tue Jun 30 17:04:15 EST 2009
+Status: FINISHED_SUCCESS
+
+Stage: Creating job on backend...
+Started: Tue Jun 30 17:04:15 EST 2009
+Tue Jun 30 17:04:20 EST 2009: New job status: Ready to submit
+
+Ended: Tue Jun 30 17:04:20 EST 2009
+Status: FINISHED_SUCCESS
+
+Stage: Submitting job to backend...
+Started: Tue Jun 30 17:04:20 EST 2009
+Tue Jun 30 17:04:29 EST 2009: New job status: Unsubmitted
+Tue Jun 30 17:05:02 EST 2009: New job status: Done
+Tue Jun 30 17:05:02 EST 2009: Status checked. Equals "Done". Good
+
+Ended: Tue Jun 30 17:04:29 EST 2009
+Status: FINISHED_SUCCESS
+
+Stage: Killing and cleaning job...
+Started: Tue Jun 30 17:05:02 EST 2009
+
+Ended: Tue Jun 30 17:05:12 EST 2009
+Status: FINISHED_SUCCESS
+
+
+-------------------------------------------------

@@ -96,5 +96,13 @@ public class GridTestStage {
 		}
 	}
 	
+	public String getMessagesString() {
+		StringBuffer result = new StringBuffer();
+		for (Date date : messages.keySet() ) {
+			result.append(date.toString()+": "+messages.get(date)+"\n");
+		}
+		return result.toString();
+	}
+	
 
 }

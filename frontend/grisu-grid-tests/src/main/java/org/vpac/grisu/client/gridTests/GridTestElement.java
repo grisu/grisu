@@ -193,6 +193,23 @@ abstract class GridTestElement implements JobStatusChangeListener {
 			System.out.println();
 		}
 	}
+	
+	public String getResultString() {
+		StringBuffer result = new StringBuffer();
+		for (GridTestStage stage : getTestStages()) {
+			result.append("Stage: " + stage.getName()+"\n");
+			result.append("Started: " + stage.getBeginDate()+"\n");
+			result.append(stage.getMessagesString()+"\n");
+			result.append("Ended: " + stage.getEndDate()+"\n");
+			result.append("Status: " + stage.getStatus()+"\n");
+			if (stage.getStatus().equals(GridTestStageStatus.FINISHED_ERROR)) {
+				result.append("Error: "
+						+ stage.getPossibleException().getLocalizedMessage()+"\n");
+			}
+			result.append("\n");
+		}
+		return result.toString();
+	}
 
 	abstract protected JobObject createJobObject() throws MdsInformationException;
 

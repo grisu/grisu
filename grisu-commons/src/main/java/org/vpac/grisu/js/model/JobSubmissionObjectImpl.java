@@ -188,7 +188,7 @@ public class JobSubmissionObjectImpl {
 		return this.stdin;
 	}
 
-	private String jobname;
+	protected String jobname;
 	private String application;
 	private String applicationVersion;
 	private String email_address;
@@ -222,6 +222,7 @@ public class JobSubmissionObjectImpl {
 			return false;
 		}
 	}
+	
 	
 	public JobSubmissionObjectImpl(Map<String, String> jobProperties) {
 		

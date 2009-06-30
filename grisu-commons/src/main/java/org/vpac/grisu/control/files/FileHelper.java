@@ -94,7 +94,6 @@ public class FileHelper {
 			throw new FileTransferException("Transfer of folders not supported yet.");
 		} else {
 			DataSource source = new FileDataSource(file);
-					
 			try {
 				myLogger.info("Uploading file "+file.getName()+"...");
 				String filetransferHandle = serviceInterface.upload(source, targetDirectory+"/"+file.getName(), true);
