@@ -160,10 +160,10 @@ public class GridTestController {
 						.getId()));
 			}
 			System.out.println("Still " + gridTestElements.size()
-					+ " jobs not finished... Sleeping for 4 seconds...");
+					+ " jobs not finished... Sleeping for 30 seconds...");
 
 			try {
-				Thread.sleep(4000);
+				Thread.sleep(30000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
