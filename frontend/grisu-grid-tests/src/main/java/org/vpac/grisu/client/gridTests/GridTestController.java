@@ -154,7 +154,25 @@ public class GridTestController {
 
 		waitForJobsToFinishAndCheckAndKillThem();
 
-		writeStatistics();
+		writeStatistics(); 
+		
+		System.out.println("\nSummary:\n-------------\n");
+		int countFailed = 0;
+		int countSuccess = 0;
+		StringBuffer failedSubLocs = new StringBuffer();
+		for ( GridTestElement gte : finishedElements ) {
+			if ( gte.failed() ) {
+				countFailed = countFailed +1;
+				failedSubLocs.append("\t"+gte.getSubmissionLocation()+"\n");
+			} else {
+				countSuccess = countSuccess +1;
+			}
+		}
+		System.out.println("Total jobs:\t"+finishedElements.size());
+		System.out.println("Successful jobs:\t"+countSuccess);
+		System.out.println("Failed jobs\t: "+countFailed);
+		System.out.println("Failed submission locations: ");
+		System.out.println(failedSubLocs.toString());
 	}
 
 	public void waitForJobsToFinishAndCheckAndKillThem() {
