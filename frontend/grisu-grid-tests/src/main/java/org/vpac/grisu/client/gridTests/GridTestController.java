@@ -58,7 +58,7 @@ public class GridTestController {
 				LoginParams loginParams = new LoginParams(
 				// "http://localhost:8080/grisu-ws/services/grisu",
 						// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-						"Local", options.getMyproxyUsername(), "".toCharArray());
+						"Local", options.getMyproxyUsername(), password);
 
 				serviceInterface = ServiceInterfaceFactory
 						.createInterface(loginParams);
@@ -134,6 +134,19 @@ public class GridTestController {
 		}
 
 		createAndSubmitAllJobs();
+		
+		for ( GridTestElement gte : gridTestElements.values() ) {
+			
+			if ( gte.failed() ) {
+				finishedElements.add(gte);
+			} else {
+				checkAndKillJobThreads.put(gte.getId(), createCreateAndSubmitJobThread(gte, fqan));
+			}
+		}
+		// remove failed gtes from map
+		for ( GridTestElement gte : finishedElements ) {
+			gridTestElements.remove(gte.getId());
+		}
 
 		waitForJobsToFinishAndCheckAndKillThem();
 
@@ -251,8 +264,6 @@ public class GridTestController {
 					Thread createJobThread = createCreateAndSubmitJobThread(
 							gte, fqan);
 					createAndSubmitJobThreads.put(gte.getId(), createJobThread);
-					Thread checkJobThread = createCheckAndKillJobThread(gte);
-					checkAndKillJobThreads.put(gte.getId(), checkJobThread);
 
 				}
 			}

@@ -28,6 +28,8 @@ abstract class GridTestElement implements JobStatusChangeListener {
 	protected final JobObject jobObject;
 
 	private GridTestStage currentStage;
+	
+	private boolean failed = true;
 
 	protected GridTestElement(ServiceInterface si, String version,
 			String submissionLocation) throws MdsInformationException {
@@ -96,6 +98,7 @@ abstract class GridTestElement implements JobStatusChangeListener {
 		} catch (JobPropertiesException e) {
 			currentStage.setPossibleException(e);
 			currentStage.setStatus(GridTestStageStatus.FINISHED_ERROR);
+			failed = true;
 		}
 
 	}
@@ -110,6 +113,7 @@ abstract class GridTestElement implements JobStatusChangeListener {
 		} catch (JobSubmissionException e) {
 			currentStage.setPossibleException(e);
 			currentStage.setStatus(GridTestStageStatus.FINISHED_ERROR);
+			failed = true;
 		}
 	}
 
@@ -121,6 +125,7 @@ abstract class GridTestElement implements JobStatusChangeListener {
 			if (this.jobObject.getStatus(false) == JobConstants.NO_SUCH_JOB) {
 				addMessage("Could not find job anymore. Probably a problem with the container...");
 				currentStage.setStatus(GridTestStageStatus.FINISHED_ERROR);
+				failed = true;
 				return;
 			}
 
@@ -132,6 +137,7 @@ abstract class GridTestElement implements JobStatusChangeListener {
 			} catch (InterruptedException e) {
 				currentStage.setPossibleException(e);
 				currentStage.setStatus(GridTestStageStatus.FINISHED_ERROR);
+				failed = true;
 				return;
 			}
 		}
@@ -151,6 +157,7 @@ abstract class GridTestElement implements JobStatusChangeListener {
 			currentStage.setStatus(GridTestStageStatus.FINISHED_SUCCESS);
 		} else {
 			currentStage.setStatus(GridTestStageStatus.FINISHED_ERROR);
+			failed = true;
 		}
 
 	}
@@ -164,9 +171,11 @@ abstract class GridTestElement implements JobStatusChangeListener {
 		} catch (NoSuchJobException e) {
 			currentStage.setPossibleException(e);
 			currentStage.setStatus(GridTestStageStatus.FINISHED_ERROR);
+			failed = true;
 		} catch (JobException e) {
 			currentStage.setPossibleException(e);
 			currentStage.setStatus(GridTestStageStatus.FINISHED_ERROR);
+			failed = true;
 		}
 
 		currentStage.setStatus(GridTestStageStatus.FINISHED_SUCCESS);
@@ -192,6 +201,10 @@ abstract class GridTestElement implements JobStatusChangeListener {
 			}
 			System.out.println();
 		}
+	}
+	
+	public boolean failed() {
+		return failed;
 	}
 	
 	public String getResultString() {
