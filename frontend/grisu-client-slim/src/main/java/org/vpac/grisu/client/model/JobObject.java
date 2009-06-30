@@ -9,6 +9,8 @@ import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.JobSubmissionException;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
+import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
+import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.control.files.FileHelper;
 import org.vpac.grisu.control.files.FileTransferException;
 import org.vpac.grisu.js.model.JobPropertiesException;
@@ -27,6 +29,17 @@ public class JobObject extends JobSubmissionObjectImpl {
 	private String jobDirectory;
 
 
+	public JobObject(ServiceInterface si, String jobname) throws NoSuchJobException {
+		
+		super(si.getAllJobProperties(jobname));
+		this.serviceInterface = si;
+		this.jobname = jobname;
+		this.fileHelper = new FileHelper(serviceInterface);
+		
+		getStatus(true);
+		
+	}
+	
 	public JobObject(ServiceInterface si) {
 		super();
 		this.serviceInterface = si;
@@ -47,6 +60,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 	public void createJob(String fqan) throws JobPropertiesException {
 
+		
 		setJobname(serviceInterface.createJob(getJobDescriptionDocument(),
 				fqan, "force-name"));
 
@@ -55,17 +69,19 @@ public class JobObject extends JobSubmissionObjectImpl {
 					ServiceInterface.JOBDIRECTORY_KEY);
 			getStatus(true);
 		} catch (NoSuchJobException e) {
-			// TODO that should never happen
-			e.printStackTrace();
+			fireJobStatusChange(this.status, JobConstants.NO_SUCH_JOB);
 		}
 
 	}
 
 	public void submitJob() throws JobSubmissionException {
 
+		if ( getInputFileUrls() != null && getInputFileUrls().length > 0 ) {
+			setStatus(JobConstants.INPUT_FILES_UPLOADING);
+		}
+		
 		// stage in local files
 		for (String inputFile : getInputFileUrls()) {
-			
 			if ( FileHelper.isLocal(inputFile) ) {
 			try {
 				fileHelper.uploadFile(inputFile, jobDirectory);
@@ -76,15 +92,29 @@ public class JobObject extends JobSubmissionObjectImpl {
 			}
 		}
 
+		if ( getInputFileUrls() != null && getInputFileUrls().length > 0 ) {
+			setStatus(JobConstants.INPUT_FILES_UPLOADED);
+		}
+		
 		serviceInterface.submitJob(getJobname());
 		getStatus(true);
+	}
+	
+	private void setStatus(int newStatus) {
+		
+		int oldstatus = this.status;
+		this.status = newStatus;
+		
+		if ( oldstatus != this.status ) {
+			fireJobStatusChange(oldstatus, this.status);
+		}
+		
 	}
 
 	public int getStatus(boolean forceRefresh) {
 		if (forceRefresh) {
 			int oldStatus = this.status;
 			this.status = serviceInterface.getJobStatus(getJobname());
-			
 			if ( this.status != oldStatus ) {
 				fireJobStatusChange(oldStatus, this.status);
 			}
@@ -95,12 +125,21 @@ public class JobObject extends JobSubmissionObjectImpl {
 	public String getStatusString(boolean forceRefresh) {
 		return JobConstants.translateStatus(getStatus(forceRefresh));
 	}
+	
+	public void kill(boolean clean) throws NoSuchJobException, JobException {
+		
+		try {
+			this.serviceInterface.kill(this.jobname, clean);
+		} catch (Exception e) {
+			throw new JobException(this, "Could not kill/clean job: "+e.getLocalizedMessage());
+		} 
+		
+	}
 
 	
 	
 	// event stuff
 	// ========================================================
-	
 	private Vector<JobStatusChangeListener> jobStatusChangeListeners;
 
 	private void fireJobStatusChange(int oldStatus, int newStatus) {
@@ -127,18 +166,18 @@ public class JobObject extends JobSubmissionObjectImpl {
 	}
 
 	// register a listener
-	synchronized public void addValueListener(JobStatusChangeListener l) {
+	synchronized public void addJobStatusChangeListener(JobStatusChangeListener l) {
 		if (jobStatusChangeListeners == null)
 			jobStatusChangeListeners = new Vector<JobStatusChangeListener>();
 		jobStatusChangeListeners.addElement(l);
 	}
 
 	// remove a listener
-	synchronized public void removeValueListener(JobStatusChangeListener l) {
+	synchronized public void removeJobStatusChangeListener(JobStatusChangeListener l) {
 		if (jobStatusChangeListeners == null) {
 			jobStatusChangeListeners = new Vector<JobStatusChangeListener>();
 		}
 		jobStatusChangeListeners.removeElement(l);
 	}
-	
+
 }

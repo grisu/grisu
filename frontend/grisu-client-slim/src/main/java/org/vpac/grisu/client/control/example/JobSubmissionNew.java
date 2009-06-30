@@ -76,7 +76,7 @@ public class JobSubmissionNew implements JobStatusChangeListener {
 					jo.setSubmissionLocation(subLoc);
 					jo.addInputFileUrl("/home/markus/test.txt");
 					jo.addInputFileUrl("gsiftp://ng2.vpac.org/home/grid-admin/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner/grisu-local-job-dir/java_job_new/test.jsdl");
-					jo.addValueListener(jsl);
+					jo.addJobStatusChangeListener(jsl);
 					
 					String site = registry.getResourceInformation().getSite(subLoc);
 					System.out.println("Site is: "+site);
