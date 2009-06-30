@@ -29,7 +29,7 @@ abstract class GridTestElement implements JobStatusChangeListener {
 
 	private GridTestStage currentStage;
 	
-	private boolean failed = true;
+	private boolean failed = false;
 
 	protected GridTestElement(ServiceInterface si, String version,
 			String submissionLocation) throws MdsInformationException {
@@ -45,6 +45,14 @@ abstract class GridTestElement implements JobStatusChangeListener {
 		addMessage("JobObject created.");
 		this.jobObject.addJobStatusChangeListener(this);
 		currentStage.setStatus(GridTestStageStatus.FINISHED_SUCCESS);
+	}
+	
+	public void addJobStatusChangeListener(JobStatusChangeListener jscl) {
+		this.jobObject.addJobStatusChangeListener(jscl);
+	}
+	
+	public void removeJobStatusChangeListener(JobStatusChangeListener jscl) {
+		this.jobObject.removeJobStatusChangeListener(jscl);
 	}
 	
 	public static GridTestElement createGridTestElement(String application, ServiceInterface serviceInterface, String version, String subLoc) throws MdsInformationException {

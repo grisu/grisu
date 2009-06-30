@@ -2,11 +2,13 @@ package org.vpac.grisu.client.gridTests;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +18,8 @@ import jline.ConsoleReader;
 import org.vpac.grisu.client.control.login.LoginHelpers;
 import org.vpac.grisu.client.control.login.LoginParams;
 import org.vpac.grisu.client.control.login.ServiceInterfaceFactory;
+import org.vpac.grisu.client.model.JobObject;
+import org.vpac.grisu.client.model.JobStatusChangeListener;
 import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
@@ -41,7 +45,7 @@ public class GridTestController {
 	private final ApplicationInformation[] appInfos;
 	private final String fqan;
 	private String output = "gridtestResults.txt";
-
+	
 	public GridTestController(String[] args) {
 
 		GridTestCommandlineOptions options = new GridTestCommandlineOptions(
@@ -124,7 +128,7 @@ public class GridTestController {
 	public void start() {
 
 		try {
-			createJobThreads();
+			createJobs();
 		} catch (MdsInformationException e) {
 
 			System.out.println("Could not create all necessary jobs: "
@@ -140,7 +144,7 @@ public class GridTestController {
 			if ( gte.failed() ) {
 				finishedElements.add(gte);
 			} else {
-				checkAndKillJobThreads.put(gte.getId(), createCreateAndSubmitJobThread(gte, fqan));
+				checkAndKillJobThreads.put(gte.getId(), createCheckAndKillJobThread(gte));
 			}
 		}
 		// remove failed gtes from map
@@ -240,7 +244,7 @@ public class GridTestController {
 
 	}
 
-	public void createJobThreads() throws MdsInformationException {
+	public void createJobs() throws MdsInformationException {
 
 		for (ApplicationInformation appInfo : appInfos) {
 
@@ -261,8 +265,7 @@ public class GridTestController {
 
 					gridTestElements.put(gte.getId(), gte);
 
-					Thread createJobThread = createCreateAndSubmitJobThread(
-							gte, fqan);
+					Thread createJobThread = createCreateAndSubmitJobThread(gte, fqan);
 					createAndSubmitJobThreads.put(gte.getId(), createJobThread);
 
 				}
@@ -281,8 +284,13 @@ public class GridTestController {
 				System.out.println("Submitting job for subLoc: "
 						+ gte.getSubmissionLocation());
 				gte.submitJob();
-				System.out.println("Submission to "
-						+ gte.getSubmissionLocation() + " finished.");
+				if ( gte.failed() ) {
+					System.out.println("Submission to "
+							+ gte.getSubmissionLocation() + " finished: Failed");
+				} else {
+					System.out.println("Submission to "
+							+ gte.getSubmissionLocation() + " finished: Success");
+				}
 			}
 		};
 
@@ -298,11 +306,20 @@ public class GridTestController {
 						.println("Checking job success for job submitted to: "
 								+ gte.getSubmissionLocation());
 				gte.checkJobSuccess();
-				System.out.println("Killing job submitted to: "
+				if ( gte.failed() ) {
+					System.out.println("Job submitted to "+gte.getSubmissionLocation()+" failed on resource.");
+				} else {
+					System.out.println("Job submitted to "+gte.getSubmissionLocation()+" completed successfully.");
+				}
+				System.out.println("Killing and cleaning job submitted to: "
 						+ gte.getSubmissionLocation());
 				gte.killAndClean();
-				System.out.println("Job to " + gte.getSubmissionLocation()
-						+ " killed.");
+				if ( gte.failed() ) {
+					System.out.println("Killing and cleaning of job submitted to "+gte.getSubmissionLocation()+" failed.");
+				} else {
+					System.out.println("Killing and cleaning of job submitted to "+gte.getSubmissionLocation()+" was successful.");
+				}
+
 			}
 		};
 
