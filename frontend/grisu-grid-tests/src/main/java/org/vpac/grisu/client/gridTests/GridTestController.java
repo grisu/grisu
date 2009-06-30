@@ -148,7 +148,7 @@ public class GridTestController {
 
 			for (GridTestElement gte : gridTestElements.values()) {
 
-				if (gte.getJobStatus(true) >= JobConstants.FINISHED_EITHER_WAY) {
+				if (gte.getJobStatus(true) >= JobConstants.FINISHED_EITHER_WAY || gte.getJobStatus(false) <= JobConstants.READY_TO_SUBMIT ) {
 					batchOfRecentlyFinishedJobs.add(gte);
 				}
 			}
