@@ -1,5 +1,5 @@
 <assembly>
-	<id>grisu-client-swing</id>
+	<id>grisu-grid-tests</id>
 	<formats>
 <!--				<format>dir</format>-->
 		<!--		<format>zip</format>-->
