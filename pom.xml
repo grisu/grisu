@@ -76,7 +76,7 @@
 						<descriptor>gricli.assembly.xml</descriptor>
 						<descriptor>grisu-local-backend.assembly.xml</descriptor>
 						<descriptor>grisu-client-batch.assembly.xml</descriptor>
-						<descriptor>grisu-grid-test.assembly.xml</descriptor>
+<!--						<descriptor>grisu-grid-test.assembly.xml</descriptor>-->
 					</descriptors>
 
 					<archive>

@@ -30,6 +30,14 @@
 			<artifactId>slcs-client</artifactId>
 			<version>0.0.2-SNAPSHOT</version>
 			<scope>compile</scope>
+			<exclusions>
+			<exclusion>
+			<groupId>external.bouncycastle</groupId>
+          <artifactId>bcprov-jdk15</artifactId>
+			
+			</exclusion>
+			</exclusions>
+
 		</dependency>
 
 		<dependency>
