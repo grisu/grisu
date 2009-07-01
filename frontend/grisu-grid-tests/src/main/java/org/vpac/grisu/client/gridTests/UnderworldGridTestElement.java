@@ -4,13 +4,9 @@ import java.io.File;
 import java.util.Arrays;
 
 import org.vpac.grisu.client.model.JobObject;
-import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
-import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.control.exceptions.VomsException;
-import org.vpac.grisu.control.files.FileHelper;
 
 public class UnderworldGridTestElement extends GridTestElement {
 
@@ -44,11 +40,11 @@ public class UnderworldGridTestElement extends GridTestElement {
 		try {
 			children = serviceInterface.getChildrenFiles(jobDir+"/output", false);
 			addMessage("Listing output directory: ");
-			StringBuffer listing = new StringBuffer();
-			for ( String child : children ) {
-				listing.append(child+"\n");
-			}
-			addMessage(listing.toString());
+//			StringBuffer listing = new StringBuffer();
+//			for ( String child : children ) {
+//				listing.append(child+"\n");
+//			}
+//			addMessage(listing.toString());
 		} catch (Exception e) {
 			addMessage("Could not get children of output directory.");
 			setPossibleExceptionForCurrentStage(e);
