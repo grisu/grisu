@@ -112,12 +112,12 @@ public class JobSubmissionObjectImpl {
 		this.memory_in_bytes = memory;
 	}
 
-	public int getWalltime() {
-		return walltime;
+	public int getWalltimeInSeconds() {
+		return walltime_in_seconds;
 	}
 
-	public void setWalltime(int walltime) {
-		this.walltime = walltime;
+	public void setWalltimeInSeconds(int walltime) {
+		this.walltime_in_seconds = walltime;
 	}
 
 	public String[] getInputFileUrls() {
@@ -198,7 +198,7 @@ public class JobSubmissionObjectImpl {
 	private boolean force_single = false;
 	private boolean force_mpi = false;
 	private long memory_in_bytes = 0;;
-	private int walltime = 0;
+	private int walltime_in_seconds = 0;
 	private Set<String> inputFileUrls = new HashSet<String>();
 	private String submissionLocation;
 	private String commandline;
@@ -245,9 +245,9 @@ public class JobSubmissionObjectImpl {
 			this.memory_in_bytes = 0;
 		}
 		try {
-			this.walltime = Integer.parseInt(jobProperties.get(JobProperty.WALLTIME_IN_MINUTES.toString()));
+			this.walltime_in_seconds = Integer.parseInt(jobProperties.get(JobProperty.WALLTIME_IN_MINUTES.toString()));
 		} catch (NumberFormatException e) {
-			this.walltime = 0;
+			this.walltime_in_seconds = 0;
 		}
 		
 		String temp = jobProperties.get(JobProperty.INPUT_FILE_URLS.toString());
@@ -292,7 +292,7 @@ public class JobSubmissionObjectImpl {
 			force_mpi = false;
 		}
 		memory_in_bytes = JsdlHelpers.getTotalMemoryRequirement(jsdl);
-		walltime = JsdlHelpers.getWalltime(jsdl);
+		walltime_in_seconds = JsdlHelpers.getWalltime(jsdl);
 		setInputFileUrls(JsdlHelpers.getInputFileUrls(jsdl));
 		String[] candidateHosts = JsdlHelpers.getCandidateHosts(jsdl);
 		if (candidateHosts != null && candidateHosts.length > 0) {
@@ -347,7 +347,7 @@ public class JobSubmissionObjectImpl {
 		jobProperties.put(JobProperty.STDOUT, stdout);
 		jobProperties.put(JobProperty.SUBMISSIONLOCATION, submissionLocation);
 		jobProperties.put(JobProperty.WALLTIME_IN_MINUTES,
-				new Integer(walltime).toString());
+				new Integer(walltime_in_seconds).toString());
 
 		return jobProperties;
 	}
@@ -397,7 +397,7 @@ public class JobSubmissionObjectImpl {
 		jso.setApplicationVersion("testVersion");
 		jso.setCommandline("java -testcommandline -argument2");
 		jso.setCpus(1);
-		jso.setWalltime(400);
+		jso.setWalltimeInSeconds(400);
 		jso.setEmail_address("testEmailAddress");
 		jso.setEmail_on_job_start(true);
 		jso.setEmail_on_job_finish(true);

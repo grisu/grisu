@@ -59,7 +59,7 @@ public class GridTestStage {
 	public void setStatus(GridTestStageStatus status) {
 		this.status = status;
 		
-		if ( this.status.equals(GridTestStageStatus.FINISHED_ERROR) || this.status.equals(GridTestStageStatus.FINISHED_SUCCESS) ) {
+		if ( this.status.equals(GridTestStageStatus.FINISHED_ERROR) || this.status.equals(GridTestStageStatus.FINISHED_SUCCESS) || this.status.equals(GridTestStageStatus.NOT_EXECUTED)) {
 			setStageFinished();
 		}
 	}

@@ -43,7 +43,18 @@ public class SimpleJsdlBuilder {
 							+ jobProperties.get(jp) + "</HostName>");
 				}
 
-			} else if (jp.equals(JobProperty.COMMANDLINE)) {
+			} else if (jp.equals(JobProperty.WALLTIME_IN_MINUTES) ) {
+				
+				String walltime = jobProperties.get(jp);
+				int wallTimeInSeconds = Integer.parseInt(walltime);
+				int cpus = Integer.parseInt(jobProperties.get(JobProperty.NO_CPUS));
+				
+				int totalCpuTime = wallTimeInSeconds * cpus;
+				jsdlTemplateString = jsdlTemplateString
+				.replaceAll("XXX_" + jp.toString() + "_XXX",
+						new Integer(totalCpuTime).toString());
+				
+			}else if (jp.equals(JobProperty.COMMANDLINE)) {
 
 				String executable = CommandlineHelpers
 						.extractExecutable(jobProperties.get(jp));

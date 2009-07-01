@@ -1,6 +1,7 @@
 package org.vpac.grisu.client.gridTests;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -25,6 +26,8 @@ import org.vpac.grisu.model.ApplicationInformation;
 import org.vpac.security.light.plainProxy.LocalProxy;
 
 public class GridTestController {
+	
+	public static final File GridTestDirectory = new File(System.getProperty("user.home"), "grid-tests");
 
 	ExecutorService submitJobExecutor = Executors.newFixedThreadPool(5);
 	ExecutorService processJobExecutor = Executors.newFixedThreadPool(5);
@@ -159,7 +162,10 @@ public class GridTestController {
 		for ( GridTestElement gte : finishedElements ) {
 			if ( gte.failed() ) {
 				countFailed = countFailed +1;
-				failedSubLocs.append("\t"+gte.getSubmissionLocation()+"\n");
+				failedSubLocs.append("\t"+gte.getSubmissionLocation()+":\n");
+				for ( Exception e : gte.getExceptions() ) {
+					failedSubLocs.append(Utils.fromException(e)+"\n");
+				}
 			} else {
 				countSuccess = countSuccess +1;
 			}
@@ -326,7 +332,7 @@ public class GridTestController {
 				System.out
 						.println("Checking job success for job submitted to: "
 								+ gte.getSubmissionLocation());
-				gte.checkJobSuccess();
+				gte.checkWhetherJobDidWhatItWasSupposedToDo();
 				if ( gte.failed() ) {
 					System.out.println("Job submitted to "+gte.getSubmissionLocation()+" failed on resource.");
 				} else {

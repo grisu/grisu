@@ -30,6 +30,10 @@ abstract class GridTestElement implements JobStatusChangeListener {
 	private GridTestStage currentStage;
 	
 	private boolean failed = false;
+	
+	private List<Exception> exceptions = new LinkedList<Exception>();
+	
+	private final static String END_STAGE = "endStage";
 
 	protected GridTestElement(ServiceInterface si, String version,
 			String submissionLocation) throws MdsInformationException {
@@ -58,10 +62,12 @@ abstract class GridTestElement implements JobStatusChangeListener {
 	public static GridTestElement createGridTestElement(String application, ServiceInterface serviceInterface, String version, String subLoc) throws MdsInformationException {
 		
 		GridTestElement gte = null;
-		if ( "java".equals(application) ) {
+		if ( "java".equals(application.toLowerCase()) ) {
 			gte = new JavaGridTestElement(serviceInterface, version, subLoc);
-		} else if ( "UnixCommands".equals(application) ) {
+		} else if ( "unixcommands".equals(application.toLowerCase()) ) {
 			gte = new UnixCommandsGridTestElement(serviceInterface, version, subLoc);
+		} else if ( "underworld".equals(application.toLowerCase()) ){
+			gte = new UnderworldGridTestElement(serviceInterface, version, subLoc);
 		} else {
 			gte = new GenericGridTestElement(serviceInterface, version, subLoc);
 		}
@@ -71,6 +77,10 @@ abstract class GridTestElement implements JobStatusChangeListener {
 
 	public String getId() {
 		return this.id;
+	}
+	
+	public List<Exception> getExceptions() {
+		return exceptions;
 	}
 	
 	public String getSubmissionLocation() {
@@ -85,11 +95,26 @@ abstract class GridTestElement implements JobStatusChangeListener {
 		currentStage.addMessage(message);
 	}
 
-	private void beginNewStage(String stageName) {
+	private boolean beginNewStage(String stageName) {
 
+		boolean lastStageSuccess = true;
+		if ( currentStage != null && !currentStage.wasSuccessful() ) {
+			lastStageSuccess = false;
+			if ( currentStage.getPossibleException() != null ) {
+				exceptions.add(currentStage.getPossibleException());
+			}
+		}
+		
+		if ( END_STAGE.equals(stageName) ) {
+			currentStage = null;
+			return lastStageSuccess;
+		}
+		
 		currentStage = new GridTestStage(stageName);
 		testStages.add(currentStage);
 		currentStage.setStatus(GridTestStageStatus.RUNNING);
+		
+		return lastStageSuccess;
 	}
 
 	public List<GridTestStage> getTestStages() {
@@ -113,21 +138,25 @@ abstract class GridTestElement implements JobStatusChangeListener {
 
 	public void submitJob() {
 
-		beginNewStage("Submitting job to backend...");
+		if ( beginNewStage("Submitting job to backend...") ) {
 
 		try {
 			jobObject.submitJob();
 			currentStage.setStatus(GridTestStageStatus.FINISHED_SUCCESS);
 		} catch (JobSubmissionException e) {
+			e.printStackTrace();
 			currentStage.setPossibleException(e);
 			currentStage.setStatus(GridTestStageStatus.FINISHED_ERROR);
 			failed = true;
+		}
+		} else {
+			currentStage.setStatus(GridTestStageStatus.NOT_EXECUTED);
 		}
 	}
 
 	public void waitForJobToFinish() {
 
-		beginNewStage("Waiting for job to finish...");
+		if ( beginNewStage("Waiting for job to finish...") ) {
 
 		while (this.jobObject.getStatus(true) < JobConstants.FINISHED_EITHER_WAY) {
 			if (this.jobObject.getStatus(false) == JobConstants.NO_SUCH_JOB) {
@@ -152,12 +181,21 @@ abstract class GridTestElement implements JobStatusChangeListener {
 
 		addMessage("Job finished one way or another.");
 		currentStage.setStatus(GridTestStageStatus.FINISHED_SUCCESS);
+		} else {
+			currentStage.setStatus(GridTestStageStatus.NOT_EXECUTED);
+		}
 
+	}
+	
+	protected void setPossibleExceptionForCurrentStage(Exception e) {
+		if ( currentStage != null ) {
+			currentStage.setPossibleException(e);
+		}
 	}
 
 	public void checkWhetherJobDidWhatItWasSupposedToDo() {
 
-		beginNewStage("Checking job status and output...");
+		if ( beginNewStage("Checking job status and output...") ) {
 
 		boolean success = checkJobSuccess();
 
@@ -167,11 +205,15 @@ abstract class GridTestElement implements JobStatusChangeListener {
 			currentStage.setStatus(GridTestStageStatus.FINISHED_ERROR);
 			failed = true;
 		}
+		} else {
+			currentStage.setStatus(GridTestStageStatus.NOT_EXECUTED);
+		}
 
 	}
 
 	public void killAndClean() {
 
+		// execute that anyway
 		beginNewStage("Killing and cleaning job...");
 
 		try {
@@ -187,6 +229,8 @@ abstract class GridTestElement implements JobStatusChangeListener {
 		}
 
 		currentStage.setStatus(GridTestStageStatus.FINISHED_SUCCESS);
+		
+		beginNewStage(END_STAGE);
 
 	}
 
@@ -223,9 +267,12 @@ abstract class GridTestElement implements JobStatusChangeListener {
 			result.append(stage.getMessagesString()+"\n");
 			result.append("Ended: " + stage.getEndDate()+"\n");
 			result.append("Status: " + stage.getStatus()+"\n");
-			if (stage.getStatus().equals(GridTestStageStatus.FINISHED_ERROR)) {
+			if (stage.getStatus().equals(GridTestStageStatus.FINISHED_ERROR) && stage.getPossibleException() != null ) {
 				result.append("Error: "
 						+ stage.getPossibleException().getLocalizedMessage()+"\n");
+				if ( stage.getPossibleException().getCause() != null ) {
+					result.append("Cause: "+Utils.fromException(stage.getPossibleException().getCause()));
+				}
 			}
 			result.append("\n");
 		}
