@@ -146,6 +146,7 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 		try {
 			getCredential();
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new NoValidCredentialException("No valid credential: "+e.getLocalizedMessage());
 		}
 	}
