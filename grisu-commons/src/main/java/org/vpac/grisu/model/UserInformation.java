@@ -51,4 +51,6 @@ public interface UserInformation {
 	
 	public MountPoint getRecommendedMountPoint(String submissionLocation, String fqan);
 	
+	public MountPoint getMountPointForUrl(String url);
+	
 }

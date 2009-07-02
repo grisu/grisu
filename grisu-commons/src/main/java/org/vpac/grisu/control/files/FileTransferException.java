@@ -1,24 +1,39 @@
 package org.vpac.grisu.control.files;
 
 public class FileTransferException extends Exception {
-
-	public FileTransferException() {
-		// TODO Auto-generated constructor stub
+	
+	private final String sourceFileUrl;
+	public String getSourceFileUrl() {
+		return sourceFileUrl;
 	}
 
-	public FileTransferException(String arg0) {
+	public String getTargetFileUrl() {
+		return targetFileUrl;
+	}
+
+	private final String targetFileUrl;
+
+	public FileTransferException(String sourceFileUrl, String targetFileUrl) {
+		this.sourceFileUrl = sourceFileUrl;
+		this.targetFileUrl = targetFileUrl;
+	}
+
+	public FileTransferException(String sourceFileUrl, String targetFileUrl, String arg0) {
 		super(arg0);
-		// TODO Auto-generated constructor stub
+		this.sourceFileUrl = sourceFileUrl;
+		this.targetFileUrl = targetFileUrl;
 	}
 
-	public FileTransferException(Throwable arg0) {
+	public FileTransferException(String sourceFileUrl, String targetFileUrl, Throwable arg0) {
 		super(arg0);
-		// TODO Auto-generated constructor stub
+		this.sourceFileUrl = sourceFileUrl;
+		this.targetFileUrl = targetFileUrl;
 	}
 
-	public FileTransferException(String arg0, Throwable arg1) {
+	public FileTransferException(String sourceFileUrl, String targetFileUrl, String arg0, Throwable arg1) {
 		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
+		this.sourceFileUrl = sourceFileUrl;
+		this.targetFileUrl = targetFileUrl;
 	}
 
 }

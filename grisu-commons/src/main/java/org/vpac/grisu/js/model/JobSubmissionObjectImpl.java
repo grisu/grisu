@@ -12,6 +12,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.js.control.SimpleJsdlBuilder;
 import org.vpac.grisu.js.model.utils.JsdlHelpers;
 import org.w3c.dom.Document;
@@ -127,21 +128,43 @@ public class JobSubmissionObjectImpl {
 	public void setInputFileUrls(String[] inputFileUrls) {
 		if ( inputFileUrls != null ) {
 			this.inputFileUrls = new HashSet<String>(Arrays.asList(inputFileUrls));
+		} else {
+			this.inputFileUrls = new HashSet<String>();
 		}
 	}
 	
 	public void addInputFileUrl(String url) {
 		this.inputFileUrls.add(url);
 	}
+	
+	public void addModule(String module) {
+		this.modules.add(module);
+	}
 
 	@Transient
 	public String getInputFileUrlsAsString() {
 		if (inputFileUrls != null && inputFileUrls.size() != 0) {
-			StringBuffer temp = new StringBuffer();
-			for (String inputFileUrl : inputFileUrls) {
-				temp.append(inputFileUrl + ",");
-			}
-			return temp.substring(0, temp.length() - 1);
+			return StringUtils.join(inputFileUrls, ",");
+		} else {
+			return new String();
+		}
+	}
+	
+	public String[] getModules() {
+		return modules.toArray(new String[]{});
+	}
+	
+	public void setModules(String[] modules) {
+		if ( modules != null ) {
+			this.modules = new HashSet<String>(Arrays.asList(modules));
+		} else {
+			this.modules = new HashSet<String>();
+		}
+	}
+	@Transient
+	public String getModulesAsString() {
+		if ( modules != null && modules.size() != 0 ) {
+			return StringUtils.join(modules, ",");
 		} else {
 			return new String();
 		}
@@ -200,6 +223,7 @@ public class JobSubmissionObjectImpl {
 	private long memory_in_bytes = 0;;
 	private int walltime_in_seconds = 0;
 	private Set<String> inputFileUrls = new HashSet<String>();
+	private Set<String> modules = new HashSet<String>();
 	private String submissionLocation;
 	private String commandline;
 	private String stderr;
@@ -255,6 +279,11 @@ public class JobSubmissionObjectImpl {
 			setInputFileUrls(temp.split(","));
 		}
 		
+		temp = jobProperties.get(JobProperty.MODULES.toString());
+		if ( temp != null && temp.length() > 0 ) {
+			setModules(temp.split(","));
+		}
+		
 		this.submissionLocation = jobProperties.get(JobProperty.SUBMISSIONLOCATION.toString());
 		this.commandline = jobProperties.get(JobProperty.COMMANDLINE.toString());
 		this.stderr = jobProperties.get(JobProperty.STDERR.toString());
@@ -294,6 +323,7 @@ public class JobSubmissionObjectImpl {
 		memory_in_bytes = JsdlHelpers.getTotalMemoryRequirement(jsdl);
 		walltime_in_seconds = JsdlHelpers.getWalltime(jsdl);
 		setInputFileUrls(JsdlHelpers.getInputFileUrls(jsdl));
+		setModules(JsdlHelpers.getModules(jsdl));
 		String[] candidateHosts = JsdlHelpers.getCandidateHosts(jsdl);
 		if (candidateHosts != null && candidateHosts.length > 0) {
 			submissionLocation = candidateHosts[0];
@@ -340,6 +370,7 @@ public class JobSubmissionObjectImpl {
 		}
 		jobProperties.put(JobProperty.INPUT_FILE_URLS,
 				getInputFileUrlsAsString());
+		jobProperties.put(JobProperty.MODULES, getModulesAsString());
 		jobProperties.put(JobProperty.MEMORY_IN_B, new Long(memory_in_bytes)
 				.toString());
 		jobProperties.put(JobProperty.NO_CPUS, new Integer(cpus).toString());

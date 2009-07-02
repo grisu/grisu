@@ -1,5 +1,6 @@
 package org.vpac.grisu.client.gridTests;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -34,9 +35,21 @@ abstract class GridTestElement implements JobStatusChangeListener {
 	private List<Exception> exceptions = new LinkedList<Exception>();
 	
 	private final static String END_STAGE = "endStage";
+	
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	private final Date startDate;
+	private Date endDate = null;
 
 	protected GridTestElement(ServiceInterface si, String version,
 			String submissionLocation) throws MdsInformationException {
+		startDate = new Date();
 		beginNewStage("Initializing test element...");
 		this.serviceInterface = si;
 		this.version = version;
@@ -45,10 +58,16 @@ abstract class GridTestElement implements JobStatusChangeListener {
 		addMessage("Creating JobObject...");
 		this.jobObject = createJobObject();
 		this.id = UUID.randomUUID().toString();
-		this.jobObject.setJobname(this.id);
+		this.jobObject.setJobname(this.application+"_"+this.version+"_"+this.id);
+		this.jobObject.setSubmissionLocation(submissionLocation);
 		addMessage("JobObject created.");
 		this.jobObject.addJobStatusChangeListener(this);
 		currentStage.setStatus(GridTestStageStatus.FINISHED_SUCCESS);
+	}
+	
+	@Override
+	public String toString() {
+		return this.getId()+": "+this.getSubmissionLocation();
 	}
 	
 	public void addJobStatusChangeListener(JobStatusChangeListener jscl) {
@@ -68,8 +87,10 @@ abstract class GridTestElement implements JobStatusChangeListener {
 			gte = new UnixCommandsGridTestElement(serviceInterface, version, subLoc);
 		} else if ( "underworld".equals(application.toLowerCase()) ){
 			gte = new UnderworldGridTestElement(serviceInterface, version, subLoc);
-		} else {
+		} else if ( "generic".equals(application.toLowerCase()) ){
 			gte = new GenericGridTestElement(serviceInterface, version, subLoc);
+		} else {
+			throw new RuntimeException("Application \""+application+" not supported yet.");
 		}
 		
 		return gte;
@@ -107,6 +128,7 @@ abstract class GridTestElement implements JobStatusChangeListener {
 		
 		if ( END_STAGE.equals(stageName) ) {
 			currentStage = null;
+			endDate = new Date();
 			return lastStageSuccess;
 		}
 		

@@ -3,6 +3,7 @@ package org.vpac.grisu.js.control;
 import java.io.InputStream;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.SeveralStringHelpers;
 import org.vpac.grisu.control.SeveralXMLHelpers;
 import org.vpac.grisu.control.files.FileHelper;
@@ -74,7 +75,22 @@ public class SimpleJsdlBuilder {
 						.replaceAll("XXX_" + jp.toString() + "_XXX",
 								exeAndArgsElements.toString());
 
-			} else if (jp.equals(JobProperty.INPUT_FILE_URLS)) {
+			} else if (jp.equals(JobProperty.MODULES)) {
+				
+				String modulesString = jobProperties.get(jp);
+				if ( StringUtils.isBlank(modulesString) ) {
+					jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"+ jp.toString() + "_XXX", 
+							"");
+					continue;
+				}
+				StringBuffer modulesElements = new StringBuffer();
+				for ( String module : modulesString.split(",") ) {
+					modulesElements.append("<Module xmlns=\"http://arcs.org.au/jsdl/jsdl-grisu\">"+module+"</Module>");
+				}
+				jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"+ jp.toString() + "_XXX", 
+				modulesElements.toString());
+				
+			}else if (jp.equals(JobProperty.INPUT_FILE_URLS)) {
 
 				String inputFileUrls = jobProperties.get(jp);
 				if (inputFileUrls == null || "".equals(inputFileUrls)) {

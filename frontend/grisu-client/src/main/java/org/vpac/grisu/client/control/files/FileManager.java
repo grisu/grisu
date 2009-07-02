@@ -51,8 +51,6 @@ public class FileManager implements MountPointsListener {
 	static final Logger myLogger = Logger
 			.getLogger(FileManager.class.getName());
 
-	public static final File LOCAL_CACHE_ROOT = Environment
-			.getGrisuLocalCacheRoot();
 
 	ApplicationStatusManager statusManager = null;
 

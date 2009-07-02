@@ -43,7 +43,10 @@ public interface ServiceInterface {
 	public static final String WORKINGDIRECTORY_KEY = "workingDirectory";
 	public static final String FQAN_KEY = "fqan";
 	public static final String JOB_STATUS_KEY = "status";
-	public static final String STAGING_FILE_SYSTEM = "stagingFileSystem";
+	public static final String STAGING_FILE_SYSTEM_KEY = "stagingFileSystem";
+	public static final String MODULES_KEY = "modules";
+	
+	public static final String GENERIC_APPLICATION_NAME = "generic";
 	
 	
 	

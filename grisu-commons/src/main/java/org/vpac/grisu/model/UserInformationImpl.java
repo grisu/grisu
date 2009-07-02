@@ -202,5 +202,16 @@ public class UserInformationImpl implements UserInformation {
 			return alreadyQueriedMountPointsPerFqan.get(fqan);
 		}
 	}
+
+	public MountPoint getMountPointForUrl(String url) {
+
+		for ( MountPoint mp : getMountPoints() ) {
+			if ( mp.isResponsibleForAbsoluteFile(url) ) {
+				return mp;
+			}
+		}
+		
+		return null;
+	}
 	
 }

@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.files.FileManager;
 import org.vpac.grisu.client.control.files.FileManagerTransferHelpers;
+import org.vpac.grisu.control.Environment;
 import org.vpac.grisu.control.FileHelpers;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.SeveralXMLHelpers;
@@ -686,7 +687,7 @@ public class RemoteFileSystemBackend implements FileSystemBackend {
 
 	public File getLocalCacheRoot() {
 		if ( localCacheRoot == null ) {
-			localCacheRoot = new File(FileManager.LOCAL_CACHE_ROOT, alias); 
+			localCacheRoot = new File(Environment.LOCAL_CACHE_ROOT, alias); 
 		}
 		return localCacheRoot;
 	}

@@ -16,7 +16,7 @@ public class Utils {
         ArrayList<String> result = new ArrayList<String>();
         String[] stacktrace = sw.toString().split("\n");
         for ( String st : stacktrace ) {
-        	result.add(st);
+        	result.add(st+"\n");
         }
         return result;
 	}
@@ -31,7 +31,7 @@ public class Utils {
         sw.flush();
         String[] stacktrace = sw.toString().split("\n");
         for ( String st : stacktrace ) {
-        	result.append(st);
+        	result.append(st+"\n");
         }
         return result.toString();
 	}

@@ -26,6 +26,9 @@ public class Environment {
 	final public static String AXIS_CLIENT_CONFIG = GLOBUS_HOME+File.separator+"client-config.wsdd";
 
 	public static final String GRISU_PLUGIN_DIRECTORY = GRISU_DIRECTORY+File.separator+"plugins";
+	
+	public static final File LOCAL_CACHE_ROOT = getGrisuLocalCacheRoot();
+	
 
 	/**
 	 * For some jobs/applications it is useful to cache output files locally so they don't have to be transferred 
@@ -59,7 +62,11 @@ public class Environment {
 	public static File getGrisuLocalCacheRoot() {
 		File root = new File(getGrisuDirectory(), CACHE_DIR_NAME);
 		if ( ! root.exists() ) {
-			root.mkdirs();
+			if ( ! root.mkdirs() ) {
+				if ( ! root.exists() ) {
+					throw new RuntimeException("Could not create local cache root directory: "+root.getAbsolutePath()+". Please check the permissions.");
+				}
+			}
 		}
 		return root;
 	}

@@ -21,7 +21,8 @@ public enum JobProperty {
 	STDERR("stderr", "stderr.txt"),
 	STDIN("stdin", ""),
 	SUBMISSIONLOCATION("submissionlocation", ""),
-	INPUT_FILE_URLS("input_files", "");
+	INPUT_FILE_URLS("input_files", ""),
+	MODULES("modules", "");
 
 	private static final Map<String, JobProperty> stringToJobPropertyMap = new HashMap<String, JobProperty>();
 	static {
