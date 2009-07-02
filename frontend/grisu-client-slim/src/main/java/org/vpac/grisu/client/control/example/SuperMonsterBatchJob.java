@@ -26,11 +26,14 @@ public class SuperMonsterBatchJob {
 		char[] password = args[1].toCharArray();
 		
 		int simultaniousJobs = 50;
-		if ( args.length == 3 ) {
+		if ( args.length >= 3 ) {
 			simultaniousJobs = Integer.parseInt(args[2]);
 		}
 		
 		int totalNumberOfJobs = 1000;
+		if ( args.length == 4 ) {
+			totalNumberOfJobs = Integer.parseInt(args[3]);
+		}
 		
 		ExecutorService submissionExecutor = Executors.newFixedThreadPool(simultaniousJobs);
 		ExecutorService killingExecutor = Executors.newFixedThreadPool(simultaniousJobs);
