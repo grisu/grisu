@@ -50,6 +50,7 @@ abstract class GridTestElement implements JobStatusChangeListener {
 	protected GridTestElement(ServiceInterface si, String version,
 			String submissionLocation) throws MdsInformationException {
 		startDate = new Date();
+		endDate = new Date();
 		beginNewStage("Initializing test element...");
 		this.serviceInterface = si;
 		this.version = version;
@@ -113,7 +114,9 @@ abstract class GridTestElement implements JobStatusChangeListener {
 	}
 
 	protected void addMessage(String message) {
-		currentStage.addMessage(message);
+		if ( currentStage != null ) {
+			currentStage.addMessage(message);
+		}
 	}
 
 	private boolean beginNewStage(String stageName) {
@@ -127,6 +130,7 @@ abstract class GridTestElement implements JobStatusChangeListener {
 		}
 		
 		if ( END_STAGE.equals(stageName) ) {
+			addMessage("Finished test.");
 			currentStage = null;
 			endDate = new Date();
 			return lastStageSuccess;

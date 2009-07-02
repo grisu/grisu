@@ -283,7 +283,7 @@ public class GridTestController {
 		submitJobExecutor.shutdown();
 
 		try {
-			submitJobExecutor.awaitTermination(600, TimeUnit.SECONDS);
+			submitJobExecutor.awaitTermination(3600, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

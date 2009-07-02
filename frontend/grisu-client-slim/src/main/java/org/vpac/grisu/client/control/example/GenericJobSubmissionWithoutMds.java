@@ -1,6 +1,7 @@
 package org.vpac.grisu.client.control.example;
 
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.vpac.grisu.client.control.login.LoginParams;
 import org.vpac.grisu.client.control.login.ServiceInterfaceFactory;
