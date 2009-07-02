@@ -1063,13 +1063,36 @@ public class JsdlHelpers {
 	 */
 	public static String[] getModules(Document jsdl) {
 
-		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl-posix:POSIXApplication/jsdl-posix:Module";
+		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl-arcs:Module";
 		NodeList resultNodes = null;
 		try {
 			resultNodes = (NodeList) xpath.evaluate(expression, jsdl,
 					XPathConstants.NODESET);
 		} catch (XPathExpressionException e) {
-			myLogger.warn("No application in jsdl file.");
+			myLogger.warn("No module in jsdl file.");
+			return null;
+		}
+
+		if (resultNodes.getLength() > 0) {
+			String[] modules = new String[resultNodes.getLength()];
+			for (int i = 0; i < resultNodes.getLength(); i++) {
+				modules[i] = resultNodes.item(i).getTextContent();
+			}
+
+			return modules;
+			
+			
+		} else {
+			// try old module path. This will be removed soonish.
+			myLogger.warn("No module found. Trying old module location...");
+		
+		expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl-posix:POSIXApplication/jsdl-posix:Module";
+		resultNodes = null;
+		try {
+			resultNodes = (NodeList) xpath.evaluate(expression, jsdl,
+					XPathConstants.NODESET);
+		} catch (XPathExpressionException e) {
+			myLogger.warn("No module in old location in jsdl file.");
 			return null;
 		}
 
@@ -1081,8 +1104,9 @@ public class JsdlHelpers {
 		for (int i = 0; i < resultNodes.getLength(); i++) {
 			modules[i] = resultNodes.item(i).getTextContent();
 		}
-
+		myLogger.warn("Found modules but they are specified in the wrong (old) location within the jsdl document. Please change your template/jsdl file according to https://projects.arcs.org.au/trac/grisu/wiki/GlobusToolkitSubmitter");
 		return modules;
+		}
 
 	}
 

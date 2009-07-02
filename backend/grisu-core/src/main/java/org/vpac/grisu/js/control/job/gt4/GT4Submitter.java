@@ -20,6 +20,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.axis.message.addressing.EndpointReferenceType;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.globus.exec.client.GramJob;
 import org.globus.exec.generated.JobDescriptionType;
@@ -253,8 +254,11 @@ public class GT4Submitter extends JobSubmitter {
 			String version = JsdlHelpers.getApplicationVersion(jsdl);
 			String subLoc = JsdlHelpers.getCandidateHosts(jsdl)[0];
 
-			// if we know application, version and submissionLocation
-			if (application != null && version != null & subLoc != null) {
+			if ( ServiceInterface.GENERIC_APPLICATION_NAME.equals(application) ) {
+				myLogger.debug("\"generic\" application. Not trying to calculate modules...");
+				
+			} else if (StringUtils.isNotBlank(application) && StringUtils.isNotBlank(version) && StringUtils.isNotBlank(subLoc) ) {
+				// if we know application, version and submissionLocation
 				Map<String, String> appDetails = serviceInterface
 						.getApplicationDetails(application, version, subLoc);
 

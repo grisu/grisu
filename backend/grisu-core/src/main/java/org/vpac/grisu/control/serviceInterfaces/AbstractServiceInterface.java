@@ -20,6 +20,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.AllFileSelector;
 import org.apache.commons.vfs.FileContent;
 import org.apache.commons.vfs.FileObject;
@@ -251,6 +252,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				myLogger.error("Could not delete job from database: "
 						+ e2.getLocalizedMessage());
 			}
+			if ( e instanceof JobPropertiesException ) {
+				throw (JobPropertiesException)e;
+			} else {
+				throw new RuntimeException("Unknown error while trying to create job: "+ e.getLocalizedMessage(), e);
+			}
 		}
 
 		job.setStatus(JobConstants.READY_TO_SUBMIT);
@@ -426,14 +432,42 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		boolean applicationCalculated = false;
 
-		JobSubmissionObjectImpl jobSubmissionObject = new JobSubmissionObjectImpl(
-				jsdl);
+		JobSubmissionObjectImpl jobSubmissionObject = new JobSubmissionObjectImpl(jsdl);
 
 		List<GridResource> matchingResources = null;
+		
+		String submissionLocation = null;
+		
+		// check whether application is "generic". If that is the case, just check
+		// if all the necessary fields are specified and then continue without any
+		// auto-settings
+		
+		if ( jobSubmissionObject.getApplication() != null && GENERIC_APPLICATION_NAME.equals(jobSubmissionObject.getApplication()) ) {
+			
+			submissionLocation = jobSubmissionObject.getSubmissionLocation();
+			if ( StringUtils.isBlank(submissionLocation) ) {
+				throw new JobPropertiesException(JobProperty.SUBMISSIONLOCATION, "No submission location specified. Since application is of type \"generic\" Grisu can't auto-calculate one.");
+			}
+			
+			// check whether submissionlocation is valid
+			String[] allSubLocs = informationManager.getAllSubmissionLocationsForVO(job.getFqan());
+			Arrays.sort(allSubLocs);
+			int i = Arrays.binarySearch(allSubLocs, submissionLocation);
+			if ( i < 0 ) {
+				throw new JobPropertiesException(JobProperty.SUBMISSIONLOCATION, "Specified submissionlocation "+submissionLocation+" not valid for VO "+job.getFqan());
+			}
+			
+			String[] modules = JsdlHelpers.getModules(jsdl);
+			if ( modules == null || modules.length == 0 ) {
+				myLogger.warn("No modules specified for generic application. That might be ok but probably not...");
+			} else {
+				job.addJobProperty(MODULES_KEY, StringUtils.join(modules, ","));
+			}
 
 		// checking whether application is specified. If not, try to figure out
 		// from the executable
-		if (jobSubmissionObject.getApplication() == null
+		} else {
+			if (jobSubmissionObject.getApplication() == null
 				|| jobSubmissionObject.getApplication().length() == 0) {
 			myLogger
 					.debug("No application specified. Trying to calculate it...");
@@ -471,10 +505,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 		}
 
-		String submissionLocation = jobSubmissionObject.getSubmissionLocation();
+		submissionLocation = jobSubmissionObject.getSubmissionLocation();
 		// GridResource selectedSubmissionResource = null;
 
-		if (submissionLocation != null && submissionLocation.length() > 0) {
+		if (StringUtils.isNotBlank(submissionLocation)) {
 			myLogger
 					.debug("Submission location specified in jsdl: "
 							+ submissionLocation
@@ -630,6 +664,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						"Jsdl document malformed. No candidate hosts element.");
 			}
 		}
+		}
 
 		myLogger
 				.debug("Trying to find staging filesystem for subissionlocation: "
@@ -696,7 +731,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		JsdlHelpers.setWorkingDirectory(jsdl,
 				JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM, workingDirectory);
-		job.addJobProperty(STAGING_FILE_SYSTEM, stagingFilesystemToUse);
+		job.addJobProperty(STAGING_FILE_SYSTEM_KEY, stagingFilesystemToUse);
 		job.addJobProperty(WORKINGDIRECTORY_KEY, workingDirectory);
 		String submissionSite = informationManager
 				.getSiteForHostOrUrl(stagingFilesystemToUse);
