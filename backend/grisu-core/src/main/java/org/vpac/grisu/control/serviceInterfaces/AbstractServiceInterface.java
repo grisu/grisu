@@ -523,9 +523,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							.debug("Found gridResource object for submission location. Now checking whether version is specified and if it is whether it is available on this resource.");
 					// now check whether a possible selected version is
 					// available on this resource
-					if (jobSubmissionObject.getApplicationVersion() != null
-							&& jobSubmissionObject.getApplicationVersion()
-									.length() > 0
+					if (StringUtils.isNotBlank(jobSubmissionObject.getApplicationVersion()) && ! NO_VERSION_INDICATOR_STRING.equals(jobSubmissionObject.getApplicationVersion()) 
 							&& !resource.getAvailableApplicationVersion()
 									.contains(
 											jobSubmissionObject
@@ -542,9 +540,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					}
 					myLogger.debug("Version available or not specified.");
 					// if no application version is specified, auto-set one
-					if (jobSubmissionObject.getApplicationVersion() == null
-							|| jobSubmissionObject.getApplicationVersion()
-									.length() == 0) {
+					if (StringUtils.isBlank(jobSubmissionObject.getApplicationVersion()) || NO_VERSION_INDICATOR_STRING.equals(jobSubmissionObject.getApplicationVersion())) {
 						myLogger
 								.debug("version was not specified. Auto setting the first one for the selected resource.");
 						if (resource.getAvailableApplicationVersion() != null
@@ -594,8 +590,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			// find the best submissionlocation and set it.
 
 			// check for the version of the application to run
-			if (jobSubmissionObject.getApplicationVersion() == null
-					|| jobSubmissionObject.getApplicationVersion().length() == 0) {
+			if (StringUtils.isBlank(jobSubmissionObject.getApplicationVersion()) || ServiceInterface.NO_VERSION_INDICATOR_STRING.equals(jobSubmissionObject.getApplicationVersion()) ) {
 				myLogger
 						.debug("No version specified in jsdl document. Will use the first one for the best grid resource.");
 				for (GridResource resource : matchingResources) {

@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang.StringUtils;
+import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.js.control.SimpleJsdlBuilder;
 import org.vpac.grisu.js.model.utils.JsdlHelpers;
 import org.w3c.dom.Document;
@@ -48,6 +49,9 @@ public class JobSubmissionObjectImpl {
 	}
 
 	public String getApplicationVersion() {
+		if ( StringUtils.isBlank(applicationVersion) ) {
+			return ServiceInterface.NO_VERSION_INDICATOR_STRING;
+		}
 		return applicationVersion;
 	}
 

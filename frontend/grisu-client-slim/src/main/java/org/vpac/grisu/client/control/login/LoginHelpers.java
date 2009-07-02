@@ -10,11 +10,13 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.globus.gsi.GlobusCredential;
+import org.globus.gsi.GlobusCredentialException;
 import org.ietf.jgss.GSSCredential;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.control.utils.MyProxyServerParams;
+import org.vpac.security.light.plainProxy.LocalProxy;
 
 /**
  * Some easy-to-use methods to login to a Grisu web service.
@@ -50,6 +52,13 @@ public class LoginHelpers {
 		loginParams.clearPasswords();
 		
 		return si;
+	}
+	
+	public static ServiceInterface login() throws LoginException, ServiceInterfaceException, GlobusCredentialException {
+		
+		LoginParams defaultLoginParams = new LoginParams("Local", null, null, MyProxyServerParams.DEFAULT_MYPROXY_SERVER, new Integer(MyProxyServerParams.DEFAULT_MYPROXY_PORT).toString());
+		return login(defaultLoginParams, LocalProxy.loadGSSCredential());
+		
 	}
 	
 	public static ServiceInterface login(LoginParams loginParams, GlobusCredential proxy) throws LoginException, ServiceInterfaceException {

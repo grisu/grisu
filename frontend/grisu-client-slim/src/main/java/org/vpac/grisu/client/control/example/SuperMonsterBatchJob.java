@@ -11,6 +11,8 @@ import org.vpac.grisu.client.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.client.model.JobObject;
 import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.SeveralXMLHelpers;
+import org.w3c.dom.Document;
 
 public class SuperMonsterBatchJob {
 
@@ -23,18 +25,21 @@ public class SuperMonsterBatchJob {
 		String username = args[0];
 		char[] password = args[1].toCharArray();
 		
-		int simultaniousJobs = 10;
+		int simultaniousJobs = 100;
 		if ( args.length == 3 ) {
 			simultaniousJobs = Integer.parseInt(args[2]);
 		}
+		
+		int totalNumberOfJobs = 200;
 		
 		ExecutorService submissionExecutor = Executors.newFixedThreadPool(simultaniousJobs);
 		ExecutorService killingExecutor = Executors.newFixedThreadPool(simultaniousJobs);
 
 		LoginParams loginParams = new LoginParams(
-		// "http://localhost:8080/grisu-ws/services/grisu",
+		 "http://localhost:8080/grisu-ws/services/grisu",
 				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-				"Local", username, password);
+//				"Local", 
+				username, password);
 
 		final ServiceInterface si = ServiceInterfaceFactory
 				.createInterface(loginParams);
@@ -48,7 +53,7 @@ public class SuperMonsterBatchJob {
 		
 		final Date startDate = new Date();
 
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < totalNumberOfJobs; i++) {
 
 			final int index = new Integer(i);
 			Thread temp = new Thread() {
@@ -88,13 +93,17 @@ public class SuperMonsterBatchJob {
 		}
 		
 		submissionExecutor.shutdown();
-		submissionExecutor.awaitTermination(3600, TimeUnit.SECONDS);
+		submissionExecutor.awaitTermination(36000, TimeUnit.SECONDS);
 		final Date allSubmissionFinishedDate = new Date();
+		
+		Document ps = si.ps();
+		final Date psDate = new Date();
+		System.out.println(SeveralXMLHelpers.toStringWithoutAnnoyingExceptions(ps));
 		
 		System.out.println("All submission finished.");
 		System.out.println("Start date: "+startDate.toString());
 		System.out.println("Submission finished date: "+allSubmissionFinishedDate.toString());
-		
+		System.out.println("Fetched ps document date: "+psDate.toString());
 		System.out.println("Successfully submitted jobs: "+jobObjects.size());
 		System.out.println("Unsuccessfully submitted jobs: "+failedJobObjects.size());
 		
@@ -116,14 +125,21 @@ public class SuperMonsterBatchJob {
 		}
 		
 		killingExecutor.shutdown();
-		killingExecutor.awaitTermination(3600, TimeUnit.SECONDS);
+		killingExecutor.awaitTermination(36000, TimeUnit.SECONDS);
 		
 		final Date endDate = new Date();
+		System.out.println(SeveralXMLHelpers.toStringWithoutAnnoyingExceptions(ps));
+		Document ps2 = si.ps();
+		System.out.println("---------------------------------------------------------------------------");
+		final Date psDate2 = new Date();
+		System.out.println(SeveralXMLHelpers.toStringWithoutAnnoyingExceptions(ps2));
 		
 		System.out.println("All submission finished.");
 		System.out.println("Start date: "+startDate.toString());
 		System.out.println("Submission finished date: "+allSubmissionFinishedDate.toString());
+		System.out.println("Fetched ps document date: "+psDate.toString());
 		System.out.println("End date: "+endDate.toString());
+		System.out.println("Fetched ps2 document date: "+psDate2.toString());
 		
 		System.out.println("Successfully submitted jobs: "+jobObjects.size());
 		System.out.println("Unsuccessfully submitted jobs: "+failedJobObjects.size());
