@@ -6,13 +6,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.omg.PortableInterceptor.SUCCESSFUL;
 import org.vpac.grisu.client.control.login.LoginParams;
 import org.vpac.grisu.client.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.client.model.JobObject;
 import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.js.model.Job;
 
 public class SuperMonsterBatchJob {
 
