@@ -46,6 +46,7 @@ public class GridTestController {
 	private String[] applications;
 	private final String fqan;
 	private String output = "gridtestResults.txt";
+	private String[] filters;
 
 	public GridTestController(String[] args) {
 
@@ -94,6 +95,8 @@ public class GridTestController {
 			output = options.getOutput();
 		}
 		applications = options.getApplications();
+		
+		filters = options.getFilters();
 
 	}
 
@@ -150,7 +153,7 @@ public class GridTestController {
 		}
 
 		waitForJobsToFinishAndCheckAndKillThem();
-
+		
 		writeStatistics();
 
 		System.out.println("\nSummary:\n-------------\n");
@@ -177,7 +180,7 @@ public class GridTestController {
 			System.out.println(failedSubLocs.toString());
 		}
 	}
-
+	
 	public void waitForJobsToFinishAndCheckAndKillThem() {
 
 		while (gridTestElements.size() > 0) {
@@ -194,6 +197,7 @@ public class GridTestController {
 
 			for (GridTestElement gte : batchOfRecentlyFinishedJobs) {
 				gridTestElements.remove(gte.getId());
+				gte.finishTest();
 				finishedElements.add(gte);
 				processJobExecutor.execute(checkAndKillJobThreads.get(gte
 						.getId()));
@@ -207,7 +211,7 @@ public class GridTestController {
 			for ( GridTestElement gte : gridTestElements.values() ) {
 				remainingSubLocs.append("\t"+gte.getApplicationSupported()+", "+gte.version+" at "+gte.getSubmissionLocation()+"\n");
 			}
-			System.out.println("Still " + gridTestElements.size()
+			System.out.println("\nStill " + gridTestElements.size()
 					+ " jobs not finished:"); 
 			System.out.println(remainingSubLocs.toString());
 			
@@ -243,8 +247,8 @@ public class GridTestController {
 			outputString
 			.append("-------------------------------------------------"
 					+ "\n");
-			outputString.append("Started: "+gte.getStartDate().toString());
-			outputString.append("Ended: "+gte.getEndDate().toString());
+			outputString.append("Started: "+gte.getStartDate().toString()+"\n");
+			outputString.append("Ended: "+gte.getEndDate().toString()+"\n");
 			outputString
 			.append("-------------------------------------------------"
 					+ "\n");
@@ -297,7 +301,19 @@ public class GridTestController {
 				
 				for ( String subLoc : subLocs ) {
 
-					GridTestElement gte = GridTestElement.createGridTestElement(application, serviceInterface, null, subLoc);
+					boolean skipSubLoc = false;
+					for ( String filter : filters ) {
+						if ( subLoc.indexOf(filter) >= 0 ) {
+							skipSubLoc = true;
+							break;
+						}
+					}
+					
+					if ( skipSubLoc ) {
+						continue;
+					}
+					
+					GridTestElement gte = GridTestElement.createGridTestElement(application, serviceInterface, ServiceInterface.NO_VERSION_INDICATOR_STRING, subLoc);
 					gridTestElements.put(gte.getId(), gte);
 					
 					Thread createJobThread = createCreateAndSubmitJobThread(
@@ -317,6 +333,18 @@ public class GridTestController {
 							.getAvailableSubmissionLocationsForVersionAndFqan(
 									version, fqan);
 					for (String subLoc : subLocsForVersion) {
+						
+						boolean skipSubLoc = false;
+						for ( String filter : filters ) {
+							if ( subLoc.indexOf(filter) >= 0 ) {
+								skipSubLoc = true;
+								break;
+							}
+						}
+						
+						if ( skipSubLoc ) {
+							continue;
+						}
 
 						GridTestElement gte = GridTestElement
 								.createGridTestElement(appInfo

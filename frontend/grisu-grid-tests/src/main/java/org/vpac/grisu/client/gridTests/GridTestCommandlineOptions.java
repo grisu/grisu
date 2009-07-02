@@ -15,6 +15,13 @@ public class GridTestCommandlineOptions {
 	private HelpFormatter formatter = new HelpFormatter();
 	private Options options = null;
 	
+	private String fqan;
+	private String[] applications;
+	private String[] filters = new String[]{};
+	private String myproxyUsername;
+	private String url;
+	private String output;
+	
 	public String getFqan() {
 		return fqan;
 	}
@@ -34,13 +41,12 @@ public class GridTestCommandlineOptions {
 	public String getOutput() {
 		return output;
 	}
-
-	private String fqan;
-	private String[] applications;
-	private String myproxyUsername;
-	private String url;
-	private String output;
 	
+	public String[] getFilters() {
+		return filters;
+	}
+
+
 	public GridTestCommandlineOptions(String[] args) {
 		this.formatter.setLongOptPrefix("--");
 		this.formatter.setOptPrefix("-");
@@ -102,6 +108,10 @@ public class GridTestCommandlineOptions {
 			output = line.getOptionValue("output");
 		}
 		
+		if (line.hasOption("filter")) {
+			filters = line.getOptionValue("filter").split(","); 
+		}
+		
 	}
 	
 
@@ -136,12 +146,14 @@ public class GridTestCommandlineOptions {
 		Option myProxyUsername = createOptionWithArg("username", "u", "the myproxy username to use");
 		Option fqan = createOptionWithArg("vo", "v", "the vo to use");
 		Option outputFile = createOptionWithArg("output", "o", "the output file");
+		Option filter = createOptionWithArg("filter", "f", "(comma-seperated) filters to exclude certain queues");
 		
 		options = new Options();
 		options.addOption(apps);
 		options.addOption(myProxyUsername);
 		options.addOption(fqan);
 		options.addOption(outputFile);
+		options.addOption(filter);
 		
 		return options;
 	}

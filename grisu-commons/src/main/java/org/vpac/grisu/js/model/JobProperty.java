@@ -3,11 +3,13 @@ package org.vpac.grisu.js.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.vpac.grisu.control.ServiceInterface;
+
 public enum JobProperty {
 	
 	JOBNAME("jobname", "grisu_default_job_name"),
 	APPLICATIONNAME("application", ""),
-	APPLICATIONVERSION("version", ""),
+	APPLICATIONVERSION("version", ServiceInterface.NO_VERSION_INDICATOR_STRING),
 	NO_CPUS("cpus", "1"),
 	FORCE_SINGLE("force_single", "false"),
 	FORCE_MPI("force_mpi", "false"),

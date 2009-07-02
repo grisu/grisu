@@ -139,6 +139,10 @@ abstract class GridTestElement implements JobStatusChangeListener {
 		return lastStageSuccess;
 	}
 
+	public void finishTest() {
+		beginNewStage(END_STAGE);
+	}
+	
 	public List<GridTestStage> getTestStages() {
 		return testStages;
 	}
@@ -252,8 +256,6 @@ abstract class GridTestElement implements JobStatusChangeListener {
 
 		currentStage.setStatus(GridTestStageStatus.FINISHED_SUCCESS);
 		
-		beginNewStage(END_STAGE);
-
 	}
 
 	public void jobStatusChanged(JobObject job, int oldStatus, int newStatus) {

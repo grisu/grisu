@@ -47,6 +47,7 @@ public interface ServiceInterface {
 	public static final String MODULES_KEY = "modules";
 	
 	public static final String GENERIC_APPLICATION_NAME = "generic";
+	public static final String NO_VERSION_INDICATOR_STRING = "no_version";
 	
 	
 	
