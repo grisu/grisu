@@ -25,20 +25,20 @@ public class SuperMonsterBatchJob {
 		String username = args[0];
 		char[] password = args[1].toCharArray();
 		
-		int simultaniousJobs = 100;
+		int simultaniousJobs = 50;
 		if ( args.length == 3 ) {
 			simultaniousJobs = Integer.parseInt(args[2]);
 		}
 		
-		int totalNumberOfJobs = 200;
+		int totalNumberOfJobs = 1000;
 		
 		ExecutorService submissionExecutor = Executors.newFixedThreadPool(simultaniousJobs);
 		ExecutorService killingExecutor = Executors.newFixedThreadPool(simultaniousJobs);
 
 		LoginParams loginParams = new LoginParams(
-		 "http://localhost:8080/grisu-ws/services/grisu",
+//		 "http://localhost:8080/grisu-ws/services/grisu",
 				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-//				"Local", 
+				"Local", 
 				username, password);
 
 		final ServiceInterface si = ServiceInterfaceFactory
