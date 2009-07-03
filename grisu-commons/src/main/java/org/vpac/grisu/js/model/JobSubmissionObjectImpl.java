@@ -347,7 +347,7 @@ public class JobSubmissionObjectImpl {
 	}
 	
 	@Transient
-	public Map<JobSubmissionProperty, String> getJobPropertyMap() {
+	public Map<JobSubmissionProperty, String> getJobSubmissionPropertyMap() {
 
 		Map<JobSubmissionProperty, String> jobProperties = new HashMap<JobSubmissionProperty, String>();
 		jobProperties.put(JobSubmissionProperty.JOBNAME, jobname);
@@ -388,10 +388,10 @@ public class JobSubmissionObjectImpl {
 	}
 	
 	@Transient
-	public Map<String, String> getStringJobPropertyMap() {
+	public Map<String, String> getStringJobSubmissionPropertyMap() {
 
 		Map<String, String> stringPropertyMap = new HashMap<String, String>();
-		Map<JobSubmissionProperty, String> jobPropertyMap = getJobPropertyMap();
+		Map<JobSubmissionProperty, String> jobPropertyMap = getJobSubmissionPropertyMap();
 		
 		for ( JobSubmissionProperty jp : jobPropertyMap.keySet() ) {
 			String value = jobPropertyMap.get(jp);
@@ -407,7 +407,7 @@ public class JobSubmissionObjectImpl {
 		
 		checkValidity();
 
-		Map<JobSubmissionProperty, String> jobProperties = getJobPropertyMap();
+		Map<JobSubmissionProperty, String> jobProperties = getJobSubmissionPropertyMap();
 
 		Document jsdl = SimpleJsdlBuilder.buildJsdl(jobProperties);
 

@@ -248,15 +248,11 @@ abstract class GridTestElement implements JobStatusChangeListener {
 
 		try {
 			jobObject.kill(true);
-		} catch (NoSuchJobException e) {
+		} catch (Exception e) {
 			currentStage.setPossibleException(e);
 			currentStage.setStatus(GridTestStageStatus.FINISHED_ERROR);
 			failed = true;
-		} catch (JobException e) {
-			currentStage.setPossibleException(e);
-			currentStage.setStatus(GridTestStageStatus.FINISHED_ERROR);
-			failed = true;
-		}
+		} 
 
 		currentStage.setStatus(GridTestStageStatus.FINISHED_SUCCESS);
 		

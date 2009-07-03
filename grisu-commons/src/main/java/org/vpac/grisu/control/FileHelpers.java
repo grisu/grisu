@@ -94,6 +94,24 @@ public class FileHelpers {
 
 		return sb.toString();
 	}
+	
+	public static String readFromFileWithException(File file) throws Exception {
+		
+		StringBuffer sb = new StringBuffer(1024);
+		BufferedReader reader = null;
+
+		reader = new BufferedReader(new FileReader(file));
+
+		// char[] chars = new char[1024];
+		String line = null;
+		int numRead = 0;
+		while ((line = reader.readLine()) != null) {
+			sb.append(String.valueOf(line) + "\n");
+		}
+		reader.close();
+
+		return sb.toString();
+	}
 
 	public static void copyFileIntoDirectory(File[] sources, File dest) {
 

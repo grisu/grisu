@@ -1186,6 +1186,10 @@ public class JsdlHelpers {
 	public static boolean getSendEmailOnJobStart(Document jsdl) {
 
 		Element emailElement = getEmailElement(jsdl);
+		
+		if ( emailElement == null ) {
+			return false;
+		}
 
 		String value = emailElement
 				.getAttribute(JobConstants.SEND_EMAIL_ON_JOB_START_ATTRIBUTE_KEY);
@@ -1201,6 +1205,10 @@ public class JsdlHelpers {
 	public static boolean getSendEmailOnJobFinish(Document jsdl) {
 
 		Element emailElement = getEmailElement(jsdl);
+		
+		if ( emailElement == null ) {
+			return false;
+		}
 
 		String value = emailElement
 				.getAttribute(JobConstants.SEND_EMAIL_ON_JOB_END_ATTRIBUTE_KEY);

@@ -33,6 +33,8 @@ public class CreateJobAndSubmitJobAndCheckJobInDifferentStages {
 		
 		System.out.println("Status: "+checkJobObject.getStatus(true));
 		
+		System.out.println("Stdout: "+checkJobObject.getStdOutContent());
+		
 		
 		
 		

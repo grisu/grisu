@@ -522,7 +522,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			for (String app : calculatedApps) {
 				jobSubmissionObject.setApplication(app);
 				matchingResources = matchmaker.findMatchingResources(
-						jobSubmissionObject.getJobPropertyMap(), job.getFqan());
+						jobSubmissionObject.getJobSubmissionPropertyMap(), job.getFqan());
 				if (matchingResources != null && matchingResources.size() > 0) {
 					JsdlHelpers.setApplicationType(jsdl, app);
 					myLogger.debug("Calculated app: " + app);
@@ -542,7 +542,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			myLogger.debug("Trying to find matching grid resources...");
 			matchingResources = matchmaker.findMatchingResources(
-					jobSubmissionObject.getJobPropertyMap(), job.getFqan());
+					jobSubmissionObject.getJobSubmissionPropertyMap(), job.getFqan());
 			if (matchingResources != null) {
 				myLogger.debug("Found: " + matchingResources.size()
 						+ " of them...");
@@ -1090,9 +1090,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		JobSubmissionObjectImpl jobSubmImpl = new JobSubmissionObjectImpl(jsdl);
 
-		for (JobSubmissionProperty key : jobSubmImpl.getJobPropertyMap().keySet()) {
+		for (JobSubmissionProperty key : jobSubmImpl.getJobSubmissionPropertyMap().keySet()) {
 			job.getJobProperties().put(key.toString(),
-					jobSubmImpl.getJobPropertyMap().get(key));
+					jobSubmImpl.getJobSubmissionPropertyMap().get(key));
 		}
 
 		// TODO urgent! find out why job properties are not persisted after

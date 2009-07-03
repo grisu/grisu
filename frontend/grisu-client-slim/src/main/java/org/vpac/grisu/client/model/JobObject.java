@@ -1,20 +1,22 @@
 package org.vpac.grisu.client.model;
 
+import java.io.File;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
+import org.vpac.grisu.control.FileHelpers;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.JobSubmissionException;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
-import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.control.files.FileHelper;
 import org.vpac.grisu.control.files.FileTransferException;
+import org.vpac.grisu.js.model.JobCreatedProperty;
 import org.vpac.grisu.js.model.JobPropertiesException;
 import org.vpac.grisu.js.model.JobSubmissionObjectImpl;
+import org.vpac.grisu.js.model.JobSubmissionProperty;
 import org.w3c.dom.Document;
 
 public class JobObject extends JobSubmissionObjectImpl {
@@ -25,6 +27,8 @@ public class JobObject extends JobSubmissionObjectImpl {
 	private final FileHelper fileHelper;
 
 	private int status = JobConstants.UNDEFINED;
+	
+	private Map<String, String> allJobProperties;
 	
 	private String jobDirectory;
 
@@ -80,6 +84,10 @@ public class JobObject extends JobSubmissionObjectImpl {
 	}
 
 	public void submitJob() throws JobSubmissionException {
+		
+		if ( status == JobConstants.UNDEFINED ) {
+			throw new IllegalStateException("Job state "+JobConstants.translateStatus(JobConstants.UNDEFINED)+". Can't submit job.");
+		}
 
 		if ( getInputFileUrls() != null && getInputFileUrls().length > 0 ) {
 			setStatus(JobConstants.INPUT_FILES_UPLOADING);
@@ -131,16 +139,128 @@ public class JobObject extends JobSubmissionObjectImpl {
 		return JobConstants.translateStatus(getStatus(forceRefresh));
 	}
 	
-	public void kill(boolean clean) throws NoSuchJobException, JobException {
+	public void kill(boolean clean) throws JobException {
+		
+		if ( getStatus(false) == JobConstants.UNDEFINED ) {
+			throw new IllegalStateException("Job status "+JobConstants.translateStatus(JobConstants.UNDEFINED)+". Can't kill job yet.");
+		}
 		
 		try {
 			this.serviceInterface.kill(this.jobname, clean);
 		} catch (Exception e) {
-			throw new JobException(this, "Could not kill/clean job: "+e.getLocalizedMessage());
+			throw new JobException(this, "Could not kill/clean job.", e);
 		} 
 		
 	}
-
+	
+	public Map<String, String> getAllJobProperties() {
+		
+		if ( getStatus(false) == JobConstants.UNDEFINED ) {
+			throw new IllegalStateException("Job status "+JobConstants.translateStatus(JobConstants.UNDEFINED)+". Can't access job properties yet.");
+		}
+		
+		if ( allJobProperties == null ) {
+			try {
+				allJobProperties = serviceInterface.getAllJobProperties(getJobname());
+			} catch (Exception e) {
+				throw new JobException(this, "Could not get jobproperties.", e);
+			}
+		}
+		return allJobProperties;
+		
+	}
+	
+	public String getJobDirectoryUrl() {
+		
+		if ( this.getStatus(false) == JobConstants.UNDEFINED ) {
+			throw new IllegalStateException("Job status "+JobConstants.translateStatus(JobConstants.UNDEFINED)+". Can't get jobdirectory yet.");
+		}
+		
+		if ( jobDirectory == null ) {
+			String url = getAllJobProperties().get(JobCreatedProperty.JOBDIRECTORY.toString());
+			jobDirectory = url;
+		}
+		
+		return jobDirectory;
+	}
+	
+	public File getStdOutFile() {
+		
+		if ( getStatus(false) <= JobConstants.ACTIVE ) {
+			if ( getStatus(true) < JobConstants.ACTIVE ) {
+				throw new IllegalStateException("Job not started yet. No stdout file exists.");
+			}
+		}
+//		
+		String url;
+		try {
+			url = getJobDirectoryUrl() + "/" + serviceInterface.getJobProperty(getJobname(), JobSubmissionProperty.STDOUT.toString());
+		} catch (NoSuchJobException e) {
+			throw new JobException(this, "Could not get stdout url.", e);
+		}
+		
+		File stdoutFile = null;
+		try {
+			stdoutFile = fileHelper.downloadFile(url);
+		} catch (Exception e) {
+			throw new JobException(this, "Could not download stdout file.", e);
+		}
+		
+		return stdoutFile;
+	}
+	
+	public String getStdOutContent() {
+		
+		String result;
+		try {
+			result = FileHelpers.readFromFileWithException(getStdOutFile());
+		} catch (Exception e) {
+			throw new JobException(this, "Could not read stdout file.", e);
+		}
+		
+		return result;
+		
+	}
+	
+	public String getStdErrContent() {
+		
+		String result;
+		try {
+			result = FileHelpers.readFromFileWithException(getStdErrFile());
+		} catch (Exception e) {
+			throw new JobException(this, "Could not read stdout file.", e);
+		}
+		
+		return result;
+		
+	}
+	
+	public File getStdErrFile() {
+		
+		if ( getStatus(false) <= JobConstants.ACTIVE ) {
+			if ( getStatus(true) < JobConstants.ACTIVE ) {
+				throw new IllegalStateException("Job not started yet. No stderr file exists.");
+			}
+		}
+//		
+		String url;
+		try {
+			url = getJobDirectoryUrl() + "/" + serviceInterface.getJobProperty(getJobname(), JobSubmissionProperty.STDERR.toString());
+		} catch (NoSuchJobException e) {
+			throw new JobException(this, "Could not get stdout url.", e);
+		}
+		
+		File stderrFile = null;
+		try {
+			fileHelper.downloadFile(url);
+		} catch (Exception e) {
+			throw new JobException(this, "Could not download stderr file.", e);
+		}
+		
+		return stderrFile;
+	}
+	
+	
 	
 	
 	// event stuff
