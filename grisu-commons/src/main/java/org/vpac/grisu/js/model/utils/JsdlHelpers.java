@@ -1109,6 +1109,35 @@ public class JsdlHelpers {
 		}
 
 	}
+	
+	public static String getPbsDebugElement(Document jsdl) {
+		
+		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl-arcs:PbsDebug";
+		NodeList resultNodes = null;
+		try {
+			resultNodes = (NodeList) xpath.evaluate(expression, jsdl,
+					XPathConstants.NODESET);
+		} catch (XPathExpressionException e) {
+			myLogger.warn("No application in jsdl file.");
+			return null;
+		}
+
+		if (resultNodes.getLength() == 0) {
+			// try old version
+			myLogger
+			.debug("Couldn't find pbs debug element.");
+			return null;
+		}
+		if (resultNodes.getLength() != 1) {
+			myLogger
+			.debug("Found more than one pbs debug element. Not returning anything.");
+			return null;
+		}
+		String value = ((Element) resultNodes.item(0)).getTextContent();
+		
+		return value;
+		
+	}
 
 	private static Element getEmailElement(Document jsdl) {
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl-arcs:GrisuTemplate/jsdl-arcs:Email";

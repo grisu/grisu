@@ -344,6 +344,13 @@ public class GT4Submitter extends JobSubmitter {
 			}
 
 		}
+		
+		String pbsDebug = JsdlHelpers.getPbsDebugElement(jsdl);
+		if ( StringUtils.isNotBlank(pbsDebug) ) {
+			Element pbsDebugElement = output.createElement("pbsDebug");
+			pbsDebugElement.setTextContent(pbsDebug);
+			extensions.appendChild(pbsDebugElement);
+		}
 
 		job.appendChild(extensions);
 
