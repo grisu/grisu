@@ -60,7 +60,7 @@ import org.vpac.grisu.js.control.job.gt4.GT4Submitter;
 import org.vpac.grisu.js.model.Job;
 import org.vpac.grisu.js.model.JobDAO;
 import org.vpac.grisu.js.model.JobPropertiesException;
-import org.vpac.grisu.js.model.JobProperty;
+import org.vpac.grisu.js.model.JobSubmissionProperty;
 import org.vpac.grisu.js.model.JobSubmissionObjectImpl;
 import org.vpac.grisu.js.model.utils.JsdlHelpers;
 import org.vpac.grisu.js.model.utils.SubmissionLocationHelpers;
@@ -213,13 +213,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		if ( jobnameCreationMethod == null || FORCE_NAME_METHOD.equals(jobnameCreationMethod) ) {
 			
 			if ( jobname == null ) {
-				throw new JobPropertiesException(JobProperty.JOBNAME, "Jobname not specified and job creation method is force-name.");
+				throw new JobPropertiesException(JobSubmissionProperty.JOBNAME, "Jobname not specified and job creation method is force-name.");
 			}
 			
 			String[] allJobnames = getAllJobnames();
 			Arrays.sort(allJobnames);
 			if ( Arrays.binarySearch(allJobnames, jobname) >= 0 ) {
-				throw new JobPropertiesException(JobProperty.JOBNAME, "Jobname "+jobname+" already exists and job creation method is force-name.");
+				throw new JobPropertiesException(JobSubmissionProperty.JOBNAME, "Jobname "+jobname+" already exists and job creation method is force-name.");
 			}
 		} else if ( UUID_NAME_METHOD.equals(jobnameCreationMethod) ) {
 			if ( jobname != null ) {
@@ -251,7 +251,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			jobname = temp;
 			
 		} else {
-			throw new JobPropertiesException(JobProperty.JOBNAME, "Jobname creation method "+jobnameCreationMethod+" not supported.");
+			throw new JobPropertiesException(JobSubmissionProperty.JOBNAME, "Jobname creation method "+jobnameCreationMethod+" not supported.");
 		}
 
 		if (jobname == null) {
@@ -261,7 +261,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		Job job;
 		try {
 			job = getJob(jobname);
-			throw new JobPropertiesException(JobProperty.JOBNAME, "Jobname \""
+			throw new JobPropertiesException(JobSubmissionProperty.JOBNAME, "Jobname \""
 					+ jobname + "\" already taken. Could not create job.");
 		} catch (NoSuchJobException e1) {
 			// that's ok
@@ -491,7 +491,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			
 			submissionLocation = jobSubmissionObject.getSubmissionLocation();
 			if ( StringUtils.isBlank(submissionLocation) ) {
-				throw new JobPropertiesException(JobProperty.SUBMISSIONLOCATION, "No submission location specified. Since application is of type \"generic\" Grisu can't auto-calculate one.");
+				throw new JobPropertiesException(JobSubmissionProperty.SUBMISSIONLOCATION, "No submission location specified. Since application is of type \"generic\" Grisu can't auto-calculate one.");
 			}
 			
 			// check whether submissionlocation is valid
@@ -499,7 +499,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			Arrays.sort(allSubLocs);
 			int i = Arrays.binarySearch(allSubLocs, submissionLocation);
 			if ( i < 0 ) {
-				throw new JobPropertiesException(JobProperty.SUBMISSIONLOCATION, "Specified submissionlocation "+submissionLocation+" not valid for VO "+job.getFqan());
+				throw new JobPropertiesException(JobSubmissionProperty.SUBMISSIONLOCATION, "Specified submissionlocation "+submissionLocation+" not valid for VO "+job.getFqan());
 			}
 			
 			String[] modules = JsdlHelpers.getModules(jsdl);
@@ -533,7 +533,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			if (jobSubmissionObject.getApplication() == null
 					|| jobSubmissionObject.getApplication().length() == 0) {
 				throw new JobPropertiesException(
-						JobProperty.APPLICATIONNAME,
+						JobSubmissionProperty.APPLICATIONNAME,
 						"No application specified and could not find one in the grid that matches the executable.");
 			}
 
@@ -576,7 +576,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								.debug("Specified version is not available on this grid resource: "
 										+ submissionLocation);
 						throw new JobPropertiesException(
-								JobProperty.APPLICATIONVERSION, "Version: "
+								JobSubmissionProperty.APPLICATIONVERSION, "Version: "
 										+ jobSubmissionObject
 												.getApplicationVersion()
 										+ " not installed on "
@@ -598,7 +598,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							// jobSubmissionObject.setApplicationVersion(resource.getAvailableApplicationVersion().get(0));
 						} else {
 							throw new JobPropertiesException(
-									JobProperty.APPLICATIONVERSION,
+									JobSubmissionProperty.APPLICATIONVERSION,
 									"Could not find any installed version for application "
 											+ jobSubmissionObject
 													.getApplication() + " on "
@@ -618,7 +618,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						.error("Could not find a matching grid resource object for submissionlocation: "
 								+ submissionLocation);
 				throw new JobPropertiesException(
-						JobProperty.SUBMISSIONLOCATION, "Submissionlocation "
+						JobSubmissionProperty.SUBMISSIONLOCATION, "Submissionlocation "
 								+ submissionLocation
 								+ " not available for this kind of job");
 			}
@@ -628,7 +628,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			if (matchingResources == null || matchingResources.size() == 0) {
 				myLogger.error("No matching grid resources found.");
 				throw new JobPropertiesException(
-						JobProperty.SUBMISSIONLOCATION,
+						JobSubmissionProperty.SUBMISSIONLOCATION,
 						"Could not find any matching resource to run this kind of job on");
 			}
 			// find the best submissionlocation and set it.
@@ -657,7 +657,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					myLogger
 							.error("Could not find any version of the specified application grid-wide.");
 					throw new JobPropertiesException(
-							JobProperty.APPLICATIONVERSION,
+							JobSubmissionProperty.APPLICATIONVERSION,
 							"Could not find any version for this application grid-wide. That is probably an error in the mds info.");
 				}
 			} else {
@@ -680,7 +680,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					myLogger
 							.error("Could not find a grid resource with the specified version...");
 					throw new JobPropertiesException(
-							JobProperty.APPLICATIONVERSION,
+							JobSubmissionProperty.APPLICATIONVERSION,
 							"Could not find desired version: "
 									+ jobSubmissionObject
 											.getApplicationVersion()
@@ -699,7 +699,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				throw new JobPropertiesException(
-						JobProperty.SUBMISSIONLOCATION,
+						JobSubmissionProperty.SUBMISSIONLOCATION,
 						"Jsdl document malformed. No candidate hosts element.");
 			}
 		}
@@ -715,7 +715,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			myLogger
 					.error("No staging filesystem found for submissionlocation: "
 							+ submissionLocation);
-			throw new JobPropertiesException(JobProperty.SUBMISSIONLOCATION,
+			throw new JobPropertiesException(JobSubmissionProperty.SUBMISSIONLOCATION,
 					"Could not find staging filesystem for submissionlocation "
 							+ submissionLocation);
 		}
@@ -751,7 +751,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			myLogger
 					.error("Could not find a staging filesystem that is accessible for the user for submissionlocation "
 							+ submissionLocation);
-			throw new JobPropertiesException(JobProperty.SUBMISSIONLOCATION,
+			throw new JobPropertiesException(JobSubmissionProperty.SUBMISSIONLOCATION,
 					"Could not find stagingfilesystem for submission location: "
 							+ submissionLocation);
 		}
@@ -1090,7 +1090,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		JobSubmissionObjectImpl jobSubmImpl = new JobSubmissionObjectImpl(jsdl);
 
-		for (JobProperty key : jobSubmImpl.getJobPropertyMap().keySet()) {
+		for (JobSubmissionProperty key : jobSubmImpl.getJobPropertyMap().keySet()) {
 			job.getJobProperties().put(key.toString(),
 					jobSubmImpl.getJobPropertyMap().get(key));
 		}
@@ -3018,9 +3018,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		LinkedList<String> result = new LinkedList<String>();
 
-		Map<JobProperty, String> converterMap = new HashMap<JobProperty, String>();
+		Map<JobSubmissionProperty, String> converterMap = new HashMap<JobSubmissionProperty, String>();
 		for (String key : jobProperties.keySet()) {
-			converterMap.put(JobProperty.fromString(key), jobProperties
+			converterMap.put(JobSubmissionProperty.fromString(key), jobProperties
 					.get(key));
 		}
 

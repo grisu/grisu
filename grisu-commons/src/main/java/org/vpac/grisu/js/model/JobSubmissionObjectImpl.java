@@ -254,45 +254,45 @@ public class JobSubmissionObjectImpl {
 	
 	public JobSubmissionObjectImpl(Map<String, String> jobProperties) {
 		
-		this.jobname = jobProperties.get(JobProperty.JOBNAME.toString());
-		this.application = jobProperties.get(JobProperty.APPLICATIONNAME.toString());
-		this.applicationVersion = jobProperties.get(JobProperty.APPLICATIONVERSION.toString());
-		this.email_address = jobProperties.get(JobProperty.EMAIL_ADDRESS.toString());
-		this.email_on_job_start = checkForBoolean(jobProperties.get(JobProperty.EMAIL_ON_START.toString()));
-		this.email_on_job_finish = checkForBoolean(jobProperties.get(JobProperty.EMAIL_ON_FINISH.toString()));
+		this.jobname = jobProperties.get(JobSubmissionProperty.JOBNAME.toString());
+		this.application = jobProperties.get(JobSubmissionProperty.APPLICATIONNAME.toString());
+		this.applicationVersion = jobProperties.get(JobSubmissionProperty.APPLICATIONVERSION.toString());
+		this.email_address = jobProperties.get(JobSubmissionProperty.EMAIL_ADDRESS.toString());
+		this.email_on_job_start = checkForBoolean(jobProperties.get(JobSubmissionProperty.EMAIL_ON_START.toString()));
+		this.email_on_job_finish = checkForBoolean(jobProperties.get(JobSubmissionProperty.EMAIL_ON_FINISH.toString()));
 		try {
-			this.cpus = Integer.parseInt(jobProperties.get(JobProperty.NO_CPUS.toString()));
+			this.cpus = Integer.parseInt(jobProperties.get(JobSubmissionProperty.NO_CPUS.toString()));
 		} catch (NumberFormatException e) {
 			this.cpus = 1;
 		}
-		this.force_single = checkForBoolean(jobProperties.get(JobProperty.FORCE_SINGLE.toString()));
-		this.force_mpi = checkForBoolean(jobProperties.get(JobProperty.FORCE_MPI.toString()));
+		this.force_single = checkForBoolean(jobProperties.get(JobSubmissionProperty.FORCE_SINGLE.toString()));
+		this.force_mpi = checkForBoolean(jobProperties.get(JobSubmissionProperty.FORCE_MPI.toString()));
 		try {
-			this.memory_in_bytes = Integer.parseInt(jobProperties.get(JobProperty.MEMORY_IN_B.toString()));
+			this.memory_in_bytes = Integer.parseInt(jobProperties.get(JobSubmissionProperty.MEMORY_IN_B.toString()));
 		} catch (NumberFormatException e) {
 			this.memory_in_bytes = 0;
 		}
 		try {
-			this.walltime_in_seconds = Integer.parseInt(jobProperties.get(JobProperty.WALLTIME_IN_MINUTES.toString()));
+			this.walltime_in_seconds = Integer.parseInt(jobProperties.get(JobSubmissionProperty.WALLTIME_IN_MINUTES.toString()));
 		} catch (NumberFormatException e) {
 			this.walltime_in_seconds = 0;
 		}
 		
-		String temp = jobProperties.get(JobProperty.INPUT_FILE_URLS.toString());
+		String temp = jobProperties.get(JobSubmissionProperty.INPUT_FILE_URLS.toString());
 		if ( temp != null && temp.length() > 0 ) {
 			setInputFileUrls(temp.split(","));
 		}
 		
-		temp = jobProperties.get(JobProperty.MODULES.toString());
+		temp = jobProperties.get(JobSubmissionProperty.MODULES.toString());
 		if ( temp != null && temp.length() > 0 ) {
 			setModules(temp.split(","));
 		}
 		
-		this.submissionLocation = jobProperties.get(JobProperty.SUBMISSIONLOCATION.toString());
-		this.commandline = jobProperties.get(JobProperty.COMMANDLINE.toString());
-		this.stderr = jobProperties.get(JobProperty.STDERR.toString());
-		this.stdout = jobProperties.get(JobProperty.STDOUT.toString());
-		this.stdin = jobProperties.get(JobProperty.STDIN.toString());
+		this.submissionLocation = jobProperties.get(JobSubmissionProperty.SUBMISSIONLOCATION.toString());
+		this.commandline = jobProperties.get(JobSubmissionProperty.COMMANDLINE.toString());
+		this.stderr = jobProperties.get(JobSubmissionProperty.STDERR.toString());
+		this.stdout = jobProperties.get(JobSubmissionProperty.STDOUT.toString());
+		this.stdin = jobProperties.get(JobSubmissionProperty.STDIN.toString());
 		
 	}
 	
@@ -309,11 +309,11 @@ public class JobSubmissionObjectImpl {
 		String jobTypeString = JsdlHelpers.getArcsJobType(jsdl);
 		if (jobTypeString != null) {
 			if (jobTypeString.toLowerCase().equals(
-					JobProperty.FORCE_SINGLE.defaultValue())) {
+					JobSubmissionProperty.FORCE_SINGLE.defaultValue())) {
 				force_single = true;
 				force_mpi = false;
 			} else if (jobTypeString.toLowerCase().equals(
-					JobProperty.FORCE_SINGLE.defaultValue())) {
+					JobSubmissionProperty.FORCE_SINGLE.defaultValue())) {
 				force_single = false;
 				force_mpi = true;
 			} else {
@@ -347,41 +347,41 @@ public class JobSubmissionObjectImpl {
 	}
 	
 	@Transient
-	public Map<JobProperty, String> getJobPropertyMap() {
+	public Map<JobSubmissionProperty, String> getJobPropertyMap() {
 
-		Map<JobProperty, String> jobProperties = new HashMap<JobProperty, String>();
-		jobProperties.put(JobProperty.JOBNAME, jobname);
-		jobProperties.put(JobProperty.APPLICATIONNAME, application);
-		jobProperties.put(JobProperty.APPLICATIONVERSION, applicationVersion);
-		jobProperties.put(JobProperty.COMMANDLINE, commandline);
-		jobProperties.put(JobProperty.EMAIL_ADDRESS, email_address);
+		Map<JobSubmissionProperty, String> jobProperties = new HashMap<JobSubmissionProperty, String>();
+		jobProperties.put(JobSubmissionProperty.JOBNAME, jobname);
+		jobProperties.put(JobSubmissionProperty.APPLICATIONNAME, application);
+		jobProperties.put(JobSubmissionProperty.APPLICATIONVERSION, applicationVersion);
+		jobProperties.put(JobSubmissionProperty.COMMANDLINE, commandline);
+		jobProperties.put(JobSubmissionProperty.EMAIL_ADDRESS, email_address);
 		if (email_on_job_start) {
-			jobProperties.put(JobProperty.EMAIL_ON_START, "true");
+			jobProperties.put(JobSubmissionProperty.EMAIL_ON_START, "true");
 		} else {
-			jobProperties.put(JobProperty.EMAIL_ON_START, "false");
+			jobProperties.put(JobSubmissionProperty.EMAIL_ON_START, "false");
 		}
 		if (email_on_job_finish) {
-			jobProperties.put(JobProperty.EMAIL_ON_FINISH, "true");
+			jobProperties.put(JobSubmissionProperty.EMAIL_ON_FINISH, "true");
 		} else {
-			jobProperties.put(JobProperty.EMAIL_ON_FINISH, "false");
+			jobProperties.put(JobSubmissionProperty.EMAIL_ON_FINISH, "false");
 		}
 		if (force_single) {
-			jobProperties.put(JobProperty.FORCE_SINGLE, "true");
-			jobProperties.put(JobProperty.FORCE_MPI, "false");
+			jobProperties.put(JobSubmissionProperty.FORCE_SINGLE, "true");
+			jobProperties.put(JobSubmissionProperty.FORCE_MPI, "false");
 		} else if (force_mpi) {
-			jobProperties.put(JobProperty.FORCE_SINGLE, "false");
-			jobProperties.put(JobProperty.FORCE_MPI, "true");
+			jobProperties.put(JobSubmissionProperty.FORCE_SINGLE, "false");
+			jobProperties.put(JobSubmissionProperty.FORCE_MPI, "true");
 		}
-		jobProperties.put(JobProperty.INPUT_FILE_URLS,
+		jobProperties.put(JobSubmissionProperty.INPUT_FILE_URLS,
 				getInputFileUrlsAsString());
-		jobProperties.put(JobProperty.MODULES, getModulesAsString());
-		jobProperties.put(JobProperty.MEMORY_IN_B, new Long(memory_in_bytes)
+		jobProperties.put(JobSubmissionProperty.MODULES, getModulesAsString());
+		jobProperties.put(JobSubmissionProperty.MEMORY_IN_B, new Long(memory_in_bytes)
 				.toString());
-		jobProperties.put(JobProperty.NO_CPUS, new Integer(cpus).toString());
-		jobProperties.put(JobProperty.STDERR, stderr);
-		jobProperties.put(JobProperty.STDOUT, stdout);
-		jobProperties.put(JobProperty.SUBMISSIONLOCATION, submissionLocation);
-		jobProperties.put(JobProperty.WALLTIME_IN_MINUTES,
+		jobProperties.put(JobSubmissionProperty.NO_CPUS, new Integer(cpus).toString());
+		jobProperties.put(JobSubmissionProperty.STDERR, stderr);
+		jobProperties.put(JobSubmissionProperty.STDOUT, stdout);
+		jobProperties.put(JobSubmissionProperty.SUBMISSIONLOCATION, submissionLocation);
+		jobProperties.put(JobSubmissionProperty.WALLTIME_IN_MINUTES,
 				new Integer(walltime_in_seconds).toString());
 
 		return jobProperties;
@@ -391,9 +391,9 @@ public class JobSubmissionObjectImpl {
 	public Map<String, String> getStringJobPropertyMap() {
 
 		Map<String, String> stringPropertyMap = new HashMap<String, String>();
-		Map<JobProperty, String> jobPropertyMap = getJobPropertyMap();
+		Map<JobSubmissionProperty, String> jobPropertyMap = getJobPropertyMap();
 		
-		for ( JobProperty jp : jobPropertyMap.keySet() ) {
+		for ( JobSubmissionProperty jp : jobPropertyMap.keySet() ) {
 			String value = jobPropertyMap.get(jp);
 			stringPropertyMap.put(jp.toString(), value);
 			
@@ -407,7 +407,7 @@ public class JobSubmissionObjectImpl {
 		
 		checkValidity();
 
-		Map<JobProperty, String> jobProperties = getJobPropertyMap();
+		Map<JobSubmissionProperty, String> jobProperties = getJobPropertyMap();
 
 		Document jsdl = SimpleJsdlBuilder.buildJsdl(jobProperties);
 
@@ -418,7 +418,7 @@ public class JobSubmissionObjectImpl {
 	private void checkValidity() throws JobPropertiesException {
 		
 		if ( commandline == null || commandline.length() == 0 ) {
-			throw new JobPropertiesException(JobProperty.COMMANDLINE, "Commandline not specified.");
+			throw new JobPropertiesException(JobSubmissionProperty.COMMANDLINE, "Commandline not specified.");
 		}
 		
 	}

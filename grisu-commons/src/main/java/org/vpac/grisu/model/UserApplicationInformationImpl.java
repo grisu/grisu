@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.js.model.JobProperty;
+import org.vpac.grisu.js.model.JobSubmissionProperty;
 
 
 public class UserApplicationInformationImpl extends ApplicationInformationImpl
@@ -60,15 +60,15 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 	}
 
 	public List<GridResource> getBestSubmissionLocations(
-			Map<JobProperty, String> additionalJobProperties, String fqan) {
+			Map<JobSubmissionProperty, String> additionalJobProperties, String fqan) {
 
-		Map<JobProperty, String> basicJobProperties = new HashMap<JobProperty, String>();
-		basicJobProperties.put(JobProperty.APPLICATIONNAME, getApplicationName());
+		Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
+		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME, getApplicationName());
 		
 		basicJobProperties.putAll(additionalJobProperties);
 		
 		Map<String, String> converterMap = new HashMap<String, String>();
-		for ( JobProperty key : basicJobProperties.keySet() ) {
+		for ( JobSubmissionProperty key : basicJobProperties.keySet() ) {
 			converterMap.put(key.toString(), basicJobProperties.get(key));
 		}
 		

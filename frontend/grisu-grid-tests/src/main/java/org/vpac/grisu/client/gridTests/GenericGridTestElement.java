@@ -7,7 +7,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.files.FileHelper;
-import org.vpac.grisu.js.model.JobProperty;
+import org.vpac.grisu.js.model.JobSubmissionProperty;
 
 public class GenericGridTestElement extends GridTestElement {
 	
@@ -29,7 +29,7 @@ public class GenericGridTestElement extends GridTestElement {
 		
 		String stdout = null;
 		try {
-			stdout = serviceInterface.getJobProperty(jobObject.getJobname(), JobProperty.STDOUT.toString());
+			stdout = serviceInterface.getJobProperty(jobObject.getJobname(), JobSubmissionProperty.STDOUT.toString());
 			addMessage("url of stdout is: "+jobDir+"/"+stdout);
 			
 			FileHelper fileHelper = new FileHelper(serviceInterface);

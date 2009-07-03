@@ -502,7 +502,7 @@ public class Gricli implements FileTransferListener {
 		// TODO not sure what to do here, this is because the jobproperties
 		// value in the db is a varchar(2000)
 		if (!StringUtils.isEmpty(inputFiles) && inputFiles.length() <= 253) {
-			serviceInterface.addJobProperty(jobname, ServiceInterface.INPUT_FILES_KEY
+			serviceInterface.addJobProperty(jobname, ServiceInterface.INPUT_FILE_URLS_KEY
 					, inputFiles);
 		}
 

@@ -21,7 +21,7 @@ import org.vpac.grisu.client.view.swing.template.modules.genericAuto.GridResourc
 import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.fs.model.MountPoint;
-import org.vpac.grisu.js.model.JobProperty;
+import org.vpac.grisu.js.model.JobSubmissionProperty;
 import org.vpac.grisu.js.model.utils.SubmissionLocationHelpers;
 import org.vpac.grisu.model.UserProperties;
 import org.vpac.grisu.model.GridResource;
@@ -111,8 +111,8 @@ public class GridResourceSuggestionPanel extends JPanel implements TemplateNodeP
 		selectedResource = null;
 //		containerPanel.repaint();
 		
-		Map<JobProperty, String> tempJobProperties = new HashMap<JobProperty, String>();
-		tempJobProperties.put(JobProperty.APPLICATIONNAME, newValue);
+		Map<JobSubmissionProperty, String> tempJobProperties = new HashMap<JobSubmissionProperty, String>();
+		tempJobProperties.put(JobSubmissionProperty.APPLICATIONNAME, newValue);
 		currentBestGridResources = infoObject.getBestSubmissionLocations(tempJobProperties, registry.getUserProperties().getCurrentFqan());
 		 
 		try {

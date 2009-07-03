@@ -7,7 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.SeveralStringHelpers;
 import org.vpac.grisu.control.SeveralXMLHelpers;
 import org.vpac.grisu.control.files.FileHelper;
-import org.vpac.grisu.js.model.JobProperty;
+import org.vpac.grisu.js.model.JobSubmissionProperty;
 import org.vpac.grisu.js.model.utils.CommandlineHelpers;
 import org.w3c.dom.Document;
 
@@ -23,16 +23,16 @@ import org.w3c.dom.Document;
  */
 public class SimpleJsdlBuilder {
 
-	public static Document buildJsdl(Map<JobProperty, String> jobProperties) {
+	public static Document buildJsdl(Map<JobSubmissionProperty, String> jobProperties) {
 
 		InputStream in = SimpleJsdlBuilder.class
 				.getResourceAsStream("/generic.xml");
 
 		String jsdlTemplateString = SeveralStringHelpers.fromInputStream(in);
 
-		for (JobProperty jp : JobProperty.values()) {
+		for (JobSubmissionProperty jp : JobSubmissionProperty.values()) {
 
-			if (jp.equals(JobProperty.SUBMISSIONLOCATION)) {
+			if (jp.equals(JobSubmissionProperty.SUBMISSIONLOCATION)) {
 
 				if (jobProperties.get(jp) == null
 						|| jobProperties.get(jp).length() == 0) {
@@ -44,18 +44,18 @@ public class SimpleJsdlBuilder {
 							+ jobProperties.get(jp) + "</HostName>");
 				}
 
-			} else if (jp.equals(JobProperty.WALLTIME_IN_MINUTES) ) {
+			} else if (jp.equals(JobSubmissionProperty.WALLTIME_IN_MINUTES) ) {
 				
 				String walltime = jobProperties.get(jp);
 				int wallTimeInSeconds = Integer.parseInt(walltime);
-				int cpus = Integer.parseInt(jobProperties.get(JobProperty.NO_CPUS));
+				int cpus = Integer.parseInt(jobProperties.get(JobSubmissionProperty.NO_CPUS));
 				
 				int totalCpuTime = wallTimeInSeconds * cpus;
 				jsdlTemplateString = jsdlTemplateString
 				.replaceAll("XXX_" + jp.toString() + "_XXX",
 						new Integer(totalCpuTime).toString());
 				
-			}else if (jp.equals(JobProperty.COMMANDLINE)) {
+			}else if (jp.equals(JobSubmissionProperty.COMMANDLINE)) {
 
 				String executable = CommandlineHelpers
 						.extractExecutable(jobProperties.get(jp));
@@ -75,7 +75,7 @@ public class SimpleJsdlBuilder {
 						.replaceAll("XXX_" + jp.toString() + "_XXX",
 								exeAndArgsElements.toString());
 
-			} else if (jp.equals(JobProperty.MODULES)) {
+			} else if (jp.equals(JobSubmissionProperty.MODULES)) {
 				
 				String modulesString = jobProperties.get(jp);
 				if ( StringUtils.isBlank(modulesString) ) {
@@ -90,7 +90,7 @@ public class SimpleJsdlBuilder {
 				jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"+ jp.toString() + "_XXX", 
 				modulesElements.toString());
 				
-			}else if (jp.equals(JobProperty.INPUT_FILE_URLS)) {
+			}else if (jp.equals(JobSubmissionProperty.INPUT_FILE_URLS)) {
 
 				String inputFileUrls = jobProperties.get(jp);
 				if (inputFileUrls == null || "".equals(inputFileUrls)) {

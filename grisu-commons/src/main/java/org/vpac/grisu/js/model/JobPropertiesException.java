@@ -4,9 +4,9 @@ package org.vpac.grisu.js.model;
 public class JobPropertiesException extends Exception {
 	
 	
-	private JobProperty reason = null;
+	private JobSubmissionProperty reason = null;
 	
-	public JobPropertiesException(JobProperty reason, String message) {
+	public JobPropertiesException(JobSubmissionProperty reason, String message) {
 		super(message);
 		this.reason = reason;
 	}
