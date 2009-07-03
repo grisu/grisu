@@ -49,7 +49,10 @@ public interface ServiceInterface {
 	public static final String GENERIC_APPLICATION_NAME = "generic";
 	public static final String NO_VERSION_INDICATOR_STRING = "no_version";
 	
-	
+	// job creation method names
+	public static final String FORCE_NAME_METHOD = "force-name";
+	public static final String UUID_NAME_METHOD = "uuid";
+	public static final String TIMESTAMP_METHOD = "timestamp";
 	
 	//---------------------------------------------------------------------------------------------------
 	// 
@@ -657,7 +660,7 @@ public interface ServiceInterface {
 	 * 
 	 * @param jobProperties a map of all job properties
 	 * @param fqan the vo to use to submit the job
-	 * @param jobnameCreationMethod the method to use to (possibly) auto-calculate the jobname (if one with the specfied jobname in the jobProperties already exists). This defaults to "force-jobname" if you specify null.
+	 * @param jobnameCreationMethod the method to use to (possibly) auto-calculate the jobname (if one with the specfied jobname in the jobProperties already exists). This defaults to "force-name" if you specify null.
 	 * @return the name of the job (auto-calculated or not) which is used as a handle
 	 * @throws JobPropertiesException if the job could not be created (maybe because the jobname already exists and force-jobname is specified as jobname creation method).
 	 */
@@ -668,7 +671,7 @@ public interface ServiceInterface {
 	 * 
 	 * @param jsdl a jsdl document
 	 * @param fqan the vo tu use to submit the job
-	 * @param jobnameCreationMethod the method to use to (possibly) auto-calculate the jobname (if one with the specfied jobname in the jobProperties already exists). This defaults to "force-jobname" if you specify null.
+	 * @param jobnameCreationMethod the method to use to (possibly) auto-calculate the jobname (if one with the specfied jobname in the jobProperties already exists). This defaults to "force-name" if you specify null.
 	 * @return the name of the job (auto-calculated or not) which is used as a handle
 	 * @throws JobPropertiesException if the job could not be created (maybe because the jobname already exists and force-jobname is specified as jobname creation method).
 	 */
@@ -826,6 +829,8 @@ public interface ServiceInterface {
 	 */
 	
 	public String getJobFqan(String jobname) throws NoSuchJobException;
+	
+	public Document getJsldDocument(String jobname) throws NoSuchJobException;
 	
 	
 

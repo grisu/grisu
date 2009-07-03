@@ -31,7 +31,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 	public JobObject(ServiceInterface si, String jobname) throws NoSuchJobException {
 		
-		super(si.getAllJobProperties(jobname));
+		super(si.getJsldDocument(jobname));
 		this.serviceInterface = si;
 		this.jobname = jobname;
 		this.fileHelper = new FileHelper(serviceInterface);
@@ -58,11 +58,15 @@ public class JobObject extends JobSubmissionObjectImpl {
 		this.fileHelper = new FileHelper(serviceInterface);
 	}
 
-	public void createJob(String fqan) throws JobPropertiesException {
+	public String createJob(String fqan) throws JobPropertiesException {
 
+		return createJob(fqan, ServiceInterface.FORCE_NAME_METHOD);
+	}
+	
+	public String createJob(String fqan, String jobnameCreationMethod) throws JobPropertiesException {
 		
 		setJobname(serviceInterface.createJob(getJobDescriptionDocument(),
-				fqan, "force-name"));
+				fqan, jobnameCreationMethod));
 
 		try {
 			jobDirectory = serviceInterface.getJobProperty(getJobname(),
@@ -72,6 +76,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 			fireJobStatusChange(this.status, JobConstants.NO_SUCH_JOB);
 		}
 
+		return this.jobname;
 	}
 
 	public void submitJob() throws JobSubmissionException {

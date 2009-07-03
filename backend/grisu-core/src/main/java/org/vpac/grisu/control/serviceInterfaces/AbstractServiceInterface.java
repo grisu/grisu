@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 
 import javax.activation.DataSource;
 import javax.xml.transform.TransformerException;
@@ -204,13 +205,57 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return manager;
 	}
 
-	public String createJob(Document jsdl, String fqan, String jobCreationMethod)
+	public String createJob(Document jsdl, String fqan, String jobnameCreationMethod)
 			throws JobPropertiesException {
-
+		
 		String jobname = JsdlHelpers.getJobname(jsdl);
+		
+		if ( jobnameCreationMethod == null || FORCE_NAME_METHOD.equals(jobnameCreationMethod) ) {
+			
+			if ( jobname == null ) {
+				throw new JobPropertiesException(JobProperty.JOBNAME, "Jobname not specified and job creation method is force-name.");
+			}
+			
+			String[] allJobnames = getAllJobnames();
+			Arrays.sort(allJobnames);
+			if ( Arrays.binarySearch(allJobnames, jobname) >= 0 ) {
+				throw new JobPropertiesException(JobProperty.JOBNAME, "Jobname "+jobname+" already exists and job creation method is force-name.");
+			}
+		} else if ( UUID_NAME_METHOD.equals(jobnameCreationMethod) ) {
+			if ( jobname != null ) {
+				jobname = jobname +"_"+UUID.randomUUID().toString();
+			} else {
+				jobname = UUID.randomUUID().toString();
+			}
+		} else if ( TIMESTAMP_METHOD.equals(jobnameCreationMethod) ) {
+			
+			String[] allJobnames = getAllJobnames();
+			Arrays.sort(allJobnames);
+			
+			String temp;
+			do {
+				String timestamp = new Long(new Date().getTime()).toString();
+				try {
+					Thread.sleep(1);
+				} catch (InterruptedException e) {
+				}
+				
+				temp = jobname;
+				if ( temp == null ) {
+					temp = timestamp;
+				} else { 
+					temp = temp + "_" + timestamp;
+				}
+			} while ( Arrays.binarySearch(allJobnames, temp) >= 0 );
+			
+			jobname = temp;
+			
+		} else {
+			throw new JobPropertiesException(JobProperty.JOBNAME, "Jobname creation method "+jobnameCreationMethod+" not supported.");
+		}
 
 		if (jobname == null) {
-			jobname = "grisu_job";
+			throw new RuntimeException("Jobname is null. This should never happen. Please report to markus.binsteiner@arcs.org.au");
 		}
 
 		Job job;
@@ -467,8 +512,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// checking whether application is specified. If not, try to figure out
 		// from the executable
 		} else {
-			if (jobSubmissionObject.getApplication() == null
-				|| jobSubmissionObject.getApplication().length() == 0) {
+			if ( StringUtils.isBlank(jobSubmissionObject.getApplication()) ) {
 			myLogger
 					.debug("No application specified. Trying to calculate it...");
 
@@ -1994,6 +2038,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				JobConstants.translateStatus(getJobStatus(jobname)));
 
 		return job.getJobProperties();
+	}
+	
+	public Document getJsldDocument(String jobname) throws NoSuchJobException {
+		
+		Job job = getJob(jobname);
+		
+		return job.getJobDescription();
+		
 	}
 
 	/*
