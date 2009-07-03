@@ -32,7 +32,6 @@ public class JobConstants {
 	public static final int LOADING = -1002;
 	public static final int NOT_AVAILABLE = -1001;
 	public static final int UNDEFINED = -1000;
-	public static final int NO_SUCH_JOB = -999;
 	public static final int JOB_OBJECT_CREATED = -200;
 	public static final int JOB_CREATED = -100;
 	public static final int INPUT_FILES_UPLOADING = -99;
@@ -45,6 +44,7 @@ public class JobConstants {
 	public static final int ACTIVE = 1;
 	public static final int CLEAN_UP = 101;
 	public static final int FINISHED_EITHER_WAY = 900;
+	public static final int NO_SUCH_JOB = 997;
 	public static final int KILLED = 998;
 	public static final int FAILED = 999;
 	public static final int DONE = 1000;

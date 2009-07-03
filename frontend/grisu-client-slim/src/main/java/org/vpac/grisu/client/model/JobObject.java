@@ -31,6 +31,8 @@ public class JobObject extends JobSubmissionObjectImpl {
 	private Map<String, String> allJobProperties;
 	
 	private String jobDirectory;
+	
+	private boolean isFinished = false;
 
 
 	public JobObject(ServiceInterface si, String jobname) throws NoSuchJobException {
@@ -209,6 +211,26 @@ public class JobObject extends JobSubmissionObjectImpl {
 		return stdoutFile;
 	}
 	
+	public boolean isFinished() {
+		
+		if ( isFinished ) {
+			return true;
+		}
+		
+		if ( getStatus(false) <= JobConstants.JOB_CREATED ) {
+			throw new IllegalStateException("Job not submitted yet.");
+		}
+		
+		if ( getStatus(true) >= JobConstants.FINISHED_EITHER_WAY ) {
+			isFinished = true;
+			return true;
+		} else {
+			return false;
+		}
+		
+		
+	}
+	
 	public String getStdOutContent() {
 		
 		String result;
@@ -247,12 +269,12 @@ public class JobObject extends JobSubmissionObjectImpl {
 		try {
 			url = getJobDirectoryUrl() + "/" + serviceInterface.getJobProperty(getJobname(), JobSubmissionProperty.STDERR.toString());
 		} catch (NoSuchJobException e) {
-			throw new JobException(this, "Could not get stdout url.", e);
+			throw new JobException(this, "Could not get stderr url.", e);
 		}
 		
 		File stderrFile = null;
 		try {
-			fileHelper.downloadFile(url);
+			stderrFile = fileHelper.downloadFile(url);
 		} catch (Exception e) {
 			throw new JobException(this, "Could not download stderr file.", e);
 		}
