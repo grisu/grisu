@@ -33,6 +33,8 @@ public class JobObject extends JobSubmissionObjectImpl {
 	private String jobDirectory;
 	
 	private boolean isFinished = false;
+	
+	private Thread waitThread;
 
 
 	public JobObject(ServiceInterface si, String jobname) throws NoSuchJobException {
@@ -280,9 +282,77 @@ public class JobObject extends JobSubmissionObjectImpl {
 		}
 		
 		return stderrFile;
+	} 
+	
+	public boolean waitForJobToFinish(final int checkIntervallInSeconds) {
+		
+		if ( waitThread != null ) {
+			if ( waitThread.isAlive() ) {
+				try {
+					waitThread.join();
+					return isFinished();
+				} catch (InterruptedException e) {
+					myLogger.debug("Job status wait thread interrupted.");
+					return isFinished();
+				}
+			} 
+		}
+		
+		createWaitThread(checkIntervallInSeconds);
+					
+		try {
+			waitThread.start();
+			waitThread.join();
+			waitThread = null;
+		} catch (InterruptedException e) {
+			myLogger.debug("Job status wait thread interrupted.");
+			waitThread = null;
+			return isFinished();
+		}
+
+		return isFinished();
 	}
 	
+	public void stopWaitingForJobToFinish() {
+		
+		if ( waitThread == null || ! waitThread.isAlive() ) {
+			return;
+		}
+		
+		waitThread.interrupt();
+		myLogger.debug("Wait thread interrupted.");
+		
+	}
 	
+	private void createWaitThread(final int checkIntervallInSeconds) {
+		
+		try {
+			// just to make sure we don't create 2 or more threads. Should never happen.
+			waitThread.interrupt();
+		} catch (Exception e) {
+		}
+		
+		waitThread = new Thread() {
+			public void run() {
+				while ( ! isFinished() ) {
+					
+					if ( isInterrupted() ) {
+						return;
+					}
+					System.out.println("Status: "+getStatusString(false));
+					try {
+						Thread.sleep(checkIntervallInSeconds * 1000);
+					} catch (InterruptedException e) {
+						myLogger.debug("Wait thread for job "+getJobname()+" interrupted.");
+						return;
+					}
+				}
+			}
+		};
+		
+	}
+	
+
 	
 	
 	// event stuff
