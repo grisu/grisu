@@ -16,7 +16,6 @@ import jline.ConsoleReader;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.ServiceInterfaceFactory;
-import org.vpac.grisu.client.control.utils.ClientPropertiesManager;
 import org.vpac.grisu.client.model.login.LoginParams;
 import org.vpac.grisu.client.model.template.Command;
 import org.vpac.grisu.client.model.template.CommandLineParseException;
@@ -24,6 +23,7 @@ import org.vpac.grisu.client.model.template.GrisuTemplateCommand;
 import org.vpac.grisu.client.model.template.JsdlTemplate;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.control.utils.ClientPropertiesManager;
 import org.vpac.grisu.control.utils.MyProxyServerParams;
 
 public class Grish implements CommandHolder {
@@ -67,8 +67,8 @@ public class Grish implements CommandHolder {
 		}
 		
 		if ( i == 1 ) {
-			printMessage("[1] "+ ServiceInterfaceFactory.DEFAULT_SERVICE_INTERFACE);
-			urlMap.put(1, ServiceInterfaceFactory.DEFAULT_SERVICE_INTERFACE);
+			printMessage("[1] "+ ClientPropertiesManager.DEFAULT_SERVICE_INTERFACE);
+			urlMap.put(1, ClientPropertiesManager.DEFAULT_SERVICE_INTERFACE);
 		}
 		
 		newLine();

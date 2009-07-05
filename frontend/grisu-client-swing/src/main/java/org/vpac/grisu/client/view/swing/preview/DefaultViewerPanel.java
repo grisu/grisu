@@ -18,9 +18,9 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.text.html.HTMLEditorKit;
 
-import org.vpac.grisu.client.control.utils.ClientPropertiesManager;
 import org.vpac.grisu.client.model.files.GrisuFileObject;
 import org.vpac.grisu.client.view.swing.utils.Messages;
+import org.vpac.grisu.control.utils.ClientPropertiesManager;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;

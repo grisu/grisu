@@ -16,12 +16,12 @@ import javax.swing.JTextField;
 
 import org.vpac.grisu.client.control.login.LoginException;
 import org.vpac.grisu.client.control.login.LoginHelpers;
-import org.vpac.grisu.client.control.utils.ClientPropertiesManager;
 import org.vpac.grisu.client.model.login.LoginPanelsHolder;
 import org.vpac.grisu.client.model.login.LoginParams;
 import org.vpac.grisu.client.view.swing.utils.Utils;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.control.utils.ClientPropertiesManager;
 import org.vpac.grisu.control.utils.MyProxyServerParams;
 import org.vpac.helpDesk.model.Person;
 import org.vpac.helpDesk.model.PersonException;

@@ -1,13 +1,12 @@
 
 
-package org.vpac.grisu.client.control.utils;
+package org.vpac.grisu.control.utils;
 
 import java.io.File;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.Logger;
-import org.vpac.grisu.client.control.ServiceInterfaceFactory;
 import org.vpac.grisu.control.Environment;
 
 /**
@@ -19,6 +18,8 @@ import org.vpac.grisu.control.Environment;
 public class ClientPropertiesManager {
 	
 	public static final int DEFAULT_TIMEOUT = 0;
+	
+	public static String DEFAULT_SERVICE_INTERFACE = "https://ngportal.vpac.org/grisu-ws/services/grisu";
 
 	public static PropertiesConfiguration config = null;
 
@@ -53,19 +54,19 @@ public class ClientPropertiesManager {
 					"serviceInterfaceUrl");
 		} catch (ConfigurationException e1) {
 //			myLogger.debug("Problem with config file: " + e1.getMessage());
-			return new String[] { ServiceInterfaceFactory.DEFAULT_SERVICE_INTERFACE };
+			return new String[] { DEFAULT_SERVICE_INTERFACE };
 		}
 
 		if (urls.length == 0) {
 			config.setProperty("serviceInterfaceUrl",
-					ServiceInterfaceFactory.DEFAULT_SERVICE_INTERFACE);
+					DEFAULT_SERVICE_INTERFACE);
 			try {
 				config.save();
 			} catch (ConfigurationException e) {
 				ClientPropertiesManager.myLogger
 						.debug("Could not write config file: " + e.getMessage());
 			}
-			return new String[] { ServiceInterfaceFactory.DEFAULT_SERVICE_INTERFACE };
+			return new String[] { DEFAULT_SERVICE_INTERFACE };
 		}
 
 		return urls;
@@ -336,7 +337,6 @@ public class ClientPropertiesManager {
 		return defaultUrl;
 	}
 	
-
 
 	public static long getConnectionTimeoutInMS() {
 		long timeout = -1;

@@ -22,7 +22,7 @@ import javax.swing.border.EtchedBorder;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.globus.gsi.GlobusCredential;
-import org.vpac.grisu.client.control.utils.ClientPropertiesManager;
+import org.vpac.grisu.control.utils.ClientPropertiesManager;
 
 import au.org.mams.slcs.client.view.swing.SlcsPanelListener;
 

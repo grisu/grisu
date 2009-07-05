@@ -17,12 +17,12 @@ import org.codehaus.xfire.service.binding.ObjectServiceFactory;
 import org.codehaus.xfire.transport.http.CommonsHttpMessageSender;
 import org.codehaus.xfire.transport.http.HttpTransport;
 import org.vpac.grisu.client.control.utils.CaCertManager;
-import org.vpac.grisu.client.control.utils.ClientPropertiesManager;
 import org.vpac.grisu.client.control.xfire.ClientAuthenticationHandler;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.ServiceInterfaceCreator;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.control.utils.ClientPropertiesManager;
 
 public class XFireServiceInterfaceCreator implements ServiceInterfaceCreator {
 
