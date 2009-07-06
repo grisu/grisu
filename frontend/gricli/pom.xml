@@ -12,13 +12,6 @@
 	<version>0.3-SNAPSHOT</version>
 	<description>Grisu commandline client</description>
 	
-	<repositories>
-		<repository>
-			<id>vpac</id>
-			<url>http://hudson.vpac.org/maven_repository</url>
-		</repository>
-	</repositories>
-	
 	<dependencies>
 		<dependency>
 			<groupId>commons-cli</groupId>

@@ -26,11 +26,11 @@
 			<version>1.4</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.google.collections</groupId>
-			<artifactId>google-collections</artifactId>
-			<version>0.8</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>com.google.collections</groupId>-->
+<!--			<artifactId>google-collections</artifactId>-->
+<!--			<version>0.8</version>-->
+<!--		</dependency>-->
 
 
 <!-- 		<dependency>
@@ -80,7 +80,7 @@
 		<dependency>
 			<groupId>org.vpac.historyRepeater</groupId>
 			<artifactId>historyRepeater</artifactId>
-			<version>0.1</version>
+			<version>0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-beanutils</groupId>

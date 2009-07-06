@@ -12,10 +12,16 @@
 
 	<repositories>
 		<repository>
-			<id>vpac</id>
-			<url>http://hudson.vpac.org/maven_repository</url>
+			<id>ARCS</id>
+			<url>http://code.arcs.org.au/nexus/content/groups/public</url>
+		</repository>
+		<repository>
+			<id>ARCS Snapshots</id>
+			<url>http://code.arcs.org.au/nexus/content/groups/public-snapshots</url>
 		</repository>
 	</repositories>
+	
+	
 	<issueManagement>
 		<system>Trac</system>
 		<url>http://projects.arcs.org.au/trac/grisu/</url>

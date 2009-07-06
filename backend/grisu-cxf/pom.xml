@@ -24,12 +24,7 @@
 	<properties>
 		<cxf.version>2.2</cxf.version>
 	</properties>
-	<repositories>
-	  <repository>
-	    <id>vpac</id>
-	    <url>http://hudson.vpac.org/maven_repository</url>
-	  </repository>
-	</repositories>
+
 	<dependencies>
 
 		<dependency>

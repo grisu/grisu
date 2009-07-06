@@ -11,15 +11,7 @@
 	<name>grisu-client-xfire</name>
 	<version>0.3-SNAPSHOT</version>
 	<url>http://maven.apache.org</url>
-	
-	<repositories>
-		<repository>
-			<id>vpac</id>
-			<url>http://hudson.vpac.org/maven_repository</url>
-		</repository>
-	</repositories>
 	<dependencies>
-		
 		<dependency>
 			<groupId>org.codehaus.xfire</groupId>
 			<artifactId>xfire-java5</artifactId>
@@ -31,7 +23,7 @@
 			<version>1.2.6</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons</groupId>
+			<groupId>external.grisu-client-xfire</groupId>
 			<artifactId>not-yet-commons-ssl</artifactId>
 			<version>0.3.9</version>
 		</dependency>

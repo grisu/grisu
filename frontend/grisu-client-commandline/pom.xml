@@ -14,13 +14,6 @@
 	<name>grisu-client-commandline</name>
 	<version>0.3-SNAPSHOT</version>
 
-	<repositories>
-		<repository>
-			<id>vpac</id>
-			<url>http://hudson.vpac.org/maven_repository</url>
-		</repository>
-	</repositories>
-
 	<dependencies>
 		<dependency>
 			<groupId>jline</groupId>
