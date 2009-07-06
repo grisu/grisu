@@ -19,12 +19,12 @@
 		backend that publishes the cores' ServiceInterface (in this
 		case over a web-service) in order for the grisu-client to
 		connect to it.</description>
-<!--  <repositories>-->
-<!--  	<repository>-->
-<!--  		<id>vpac</id>-->
-<!--  		<url>http://hudson.vpac.org/maven_repository</url>-->
-<!--  	</repository>-->
-<!--  </repositories>-->
+  <repositories>
+  	<repository>
+  		<id>vpac</id>
+  		<url>http://hudson.vpac.org/maven_repository</url>
+  	</repository>
+  </repositories>
   <dependencies>
 
     	<dependency>
