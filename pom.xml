@@ -24,7 +24,7 @@
   		<url>http://hudson.vpac.org/maven_repository</url>
   	</repository>
   </repositories>
-	</repositories>
+
 	
 	
 	<issueManagement>
