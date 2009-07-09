@@ -19,19 +19,10 @@
 		backend that publishes the cores' ServiceInterface (in this
 		case over a web-service) in order for the grisu-client to
 		connect to it.</description>
-  <repositories>
-  	<repository>
-  		<id>vpac</id>
-  		<url>http://hudson.vpac.org/maven_repository</url>
-  	</repository>
-  </repositories>
+
   <dependencies>
 
-    	<dependency>
-			<groupId>au.edu.sapac.grid</groupId>
-			<artifactId>mds4-client</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
-		</dependency>
+
     	<dependency>
 			<groupId>org.vpac.grisu</groupId>
 			<artifactId>grisu-commons</artifactId>
@@ -258,9 +249,9 @@
 			<version>0.1</version>
 		</dependency>
     	<dependency>
-			<groupId>commons-vfs-grid</groupId>
+			<groupId>external.grisu-core</groupId>
 			<artifactId>commons-vfs-grid</artifactId>
-			<version>1.4.3-SNAPSHOT</version>
+			<version>1.4.3-TEMP</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
