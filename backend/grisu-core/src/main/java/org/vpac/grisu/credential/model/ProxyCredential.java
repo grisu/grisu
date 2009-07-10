@@ -325,6 +325,7 @@ public class ProxyCredential {
 			if ( getGssCredential().getRemainingLifetime() <= 0 ) return false;
 			else return true;
 		} catch (GSSException e) {
+			e.printStackTrace();
 			return false;
 		}
 	}

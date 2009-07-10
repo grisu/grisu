@@ -209,7 +209,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throws JobPropertiesException {
 		
 		// workaround for cxf xml wrapping bug
-		jsdl = SeveralXMLHelpers.cxfWorkaround(jsdl);
+		jsdl = SeveralXMLHelpers.cxfWorkaround(jsdl, "JobDefinition");
+
+		System.out.println(SeveralXMLHelpers.toStringWithoutAnnoyingExceptions(jsdl));
 		
 		String jobname = JsdlHelpers.getJobname(jsdl);
 		
@@ -444,7 +446,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void setJobDescription(String jobname, Document jsdl)
 			throws JobDescriptionNotValidException, NoSuchJobException {
 
-		jsdl = SeveralXMLHelpers.cxfWorkaround(jsdl);
+		jsdl = SeveralXMLHelpers.cxfWorkaround(jsdl, "JobDefinition");
 		
 		Job job = getJob(jobname);
 
@@ -1019,7 +1021,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 			Document ps = ps();
-			ps = SeveralXMLHelpers.cxfWorkaround(ps);
+			ps = SeveralXMLHelpers.cxfWorkaround(ps, "jobs");
 			result = SeveralXMLHelpers.toString(ps);
 		} catch (TransformerFactoryConfigurationError e) {
 			// TODO Auto-generated catch block
@@ -1595,7 +1597,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		String result = null;
 		try {
 			Document temp = ls(directory, recursion_level, return_absolute_url);
-			temp = SeveralXMLHelpers.cxfWorkaround(temp);
+			temp = SeveralXMLHelpers.cxfWorkaround(temp, "Files");
 			result = SeveralXMLHelpers.toString(temp);
 		} catch (TransformerFactoryConfigurationError e) {
 			// TODO Auto-generated catch block
@@ -1887,7 +1889,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 			Document temp = getJobDetails(jobname);
-			temp = SeveralXMLHelpers.cxfWorkaround(temp);
+			temp = SeveralXMLHelpers.cxfWorkaround(temp, "jobs");
 			result = SeveralXMLHelpers.toString(temp);
 		} catch (TransformerFactoryConfigurationError e) {
 			// TODO Auto-generated catch block
@@ -3043,7 +3045,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public List<GridResource> findMatchingSubmissionLocations(Document jsdl,
 			String fqan) {
 
-		jsdl = SeveralXMLHelpers.cxfWorkaround(jsdl);
+		jsdl = SeveralXMLHelpers.cxfWorkaround(jsdl, "JobDefinition");
 		
 		LinkedList<String> result = new LinkedList<String>();
 

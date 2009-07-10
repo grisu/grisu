@@ -143,13 +143,13 @@ public class TemplateManager {
 	
 	private void putIntoServerTemplatesMap(String templateName) throws NoSuchTemplateException {
 		Document jsdlDoc = em.getServiceInterface().getTemplate(templateName);
-		jsdlDoc = SeveralXMLHelpers.cxfWorkaround(jsdlDoc);
+		jsdlDoc = SeveralXMLHelpers.cxfWorkaround(jsdlDoc, "JobDefinition");
 		serverTemplates.put(templateName, new JsdlTemplate(em, jsdlDoc));
 	}
 	
 	public void refreshServerTemplate(String templateName) throws NoSuchTemplateException {
 		Document jsdlDoc = em.getServiceInterface().getTemplate(templateName);
-		jsdlDoc = SeveralXMLHelpers.cxfWorkaround(jsdlDoc);
+		jsdlDoc = SeveralXMLHelpers.cxfWorkaround(jsdlDoc, "JobDefinition"); 
 		serverTemplates.put(templateName, new JsdlTemplate(em, jsdlDoc));
 	}
 

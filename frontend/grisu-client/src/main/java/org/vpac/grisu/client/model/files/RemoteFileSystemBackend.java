@@ -324,7 +324,7 @@ public class RemoteFileSystemBackend implements FileSystemBackend {
 		Document remoteChildren;
 		try {
 			remoteChildren = serviceInterface.ls(uri.toString(), 1, true);
-			remoteChildren = SeveralXMLHelpers.cxfWorkaround(remoteChildren);
+			remoteChildren = SeveralXMLHelpers.cxfWorkaround(remoteChildren, "Files");
 		} catch (RemoteFileSystemException e) {
 			throw new FileSystemException("Could not list directory: "+uri.toString(), e);
 //		} catch (Exception e2) {

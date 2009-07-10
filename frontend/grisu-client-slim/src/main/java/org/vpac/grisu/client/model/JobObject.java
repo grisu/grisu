@@ -40,7 +40,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 	public JobObject(ServiceInterface si, String jobname) throws NoSuchJobException {
 		
-		super(SeveralXMLHelpers.cxfWorkaround(si.getJsldDocument(jobname)));
+		super(SeveralXMLHelpers.cxfWorkaround(si.getJsldDocument(jobname), "JobDefinition"));
 		this.serviceInterface = si;
 		this.jobname = jobname;
 		this.fileHelper = new FileHelper(serviceInterface);

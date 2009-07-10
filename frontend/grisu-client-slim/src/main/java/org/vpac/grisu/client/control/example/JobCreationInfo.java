@@ -15,12 +15,16 @@ public class JobCreationInfo {
 		char[] password = args[1].toCharArray();
 
 		LoginParams loginParams = new LoginParams(
-		// "http://localhost:8080/grisu-ws/services/grisu",
+		 "http://localhost:8080/grisu-ws/services/grisu",
 				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-				"Local", username, password);
+//				"Local", 
+				username, password);
 
 		ServiceInterface si = null;
 		si = ServiceInterfaceFactory.createInterface(loginParams);
+		
+		String test = si.ps_string();
+		
 		
 		
 		GrisuRegistry registry = GrisuRegistry.getDefault(si);

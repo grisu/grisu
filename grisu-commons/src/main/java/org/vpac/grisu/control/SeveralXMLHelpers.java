@@ -147,9 +147,9 @@ public class SeveralXMLHelpers {
 
 	}
 	
-	public static Document cxfWorkaround(Document doc) {
+	public static Document cxfWorkaround(Document doc, String expectedElementName) {
 		Element element = (Element)doc.getFirstChild();
-		if ( ! element.getTagName().equals("JobDefinition") ) {
+		if ( ! element.getTagName().equals(expectedElementName) ) {
 			try {
 				doc = createDocumentFromElement((Element)element.getFirstChild());
 			} catch (Exception e) {
