@@ -60,8 +60,8 @@ import org.vpac.grisu.js.control.job.gt4.GT4Submitter;
 import org.vpac.grisu.js.model.Job;
 import org.vpac.grisu.js.model.JobDAO;
 import org.vpac.grisu.js.model.JobPropertiesException;
-import org.vpac.grisu.js.model.JobSubmissionProperty;
 import org.vpac.grisu.js.model.JobSubmissionObjectImpl;
+import org.vpac.grisu.js.model.JobSubmissionProperty;
 import org.vpac.grisu.js.model.utils.JsdlHelpers;
 import org.vpac.grisu.js.model.utils.SubmissionLocationHelpers;
 import org.vpac.grisu.model.GridResource;
@@ -207,6 +207,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public String createJob(Document jsdl, String fqan, String jobnameCreationMethod)
 			throws JobPropertiesException {
+		
+		// workaround for cxf xml wrapping bug
+		jsdl = SeveralXMLHelpers.cxfWorkaround(jsdl);
 		
 		String jobname = JsdlHelpers.getJobname(jsdl);
 		
@@ -441,6 +444,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void setJobDescription(String jobname, Document jsdl)
 			throws JobDescriptionNotValidException, NoSuchJobException {
 
+		jsdl = SeveralXMLHelpers.cxfWorkaround(jsdl);
+		
 		Job job = getJob(jobname);
 
 		myLogger.debug("Adding job description to job: " + jobname);
@@ -1013,7 +1018,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		String result = null;
 
 		try {
-			result = SeveralXMLHelpers.toString(ps());
+			Document ps = ps();
+			ps = SeveralXMLHelpers.cxfWorkaround(ps);
+			result = SeveralXMLHelpers.toString(ps);
 		} catch (TransformerFactoryConfigurationError e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1587,8 +1594,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		String result = null;
 		try {
-			result = SeveralXMLHelpers.toString(ls(directory, recursion_level,
-					return_absolute_url));
+			Document temp = ls(directory, recursion_level, return_absolute_url);
+			temp = SeveralXMLHelpers.cxfWorkaround(temp);
+			result = SeveralXMLHelpers.toString(temp);
 		} catch (TransformerFactoryConfigurationError e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1878,7 +1886,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		String result = null;
 
 		try {
-			result = SeveralXMLHelpers.toString(getJobDetails(jobname));
+			Document temp = getJobDetails(jobname);
+			temp = SeveralXMLHelpers.cxfWorkaround(temp);
+			result = SeveralXMLHelpers.toString(temp);
 		} catch (TransformerFactoryConfigurationError e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -3033,6 +3043,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public List<GridResource> findMatchingSubmissionLocations(Document jsdl,
 			String fqan) {
 
+		jsdl = SeveralXMLHelpers.cxfWorkaround(jsdl);
+		
 		LinkedList<String> result = new LinkedList<String>();
 
 		List<GridResource> resources = matchmaker.findMatchingResources(jsdl,

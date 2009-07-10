@@ -24,9 +24,9 @@ public class JobSubmissionNew implements JobStatusChangeListener {
 		char[] password = args[1].toCharArray();
 
 		LoginParams loginParams = new LoginParams(
-//				"http://localhost:8080/grisu-ws/services/grisu",
+				"http://localhost:8080/grisu-cxf/services/grisu",
 				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-				 "Local",
+//				 "Local",
 				username, password);
 
 		final ServiceInterface si = ServiceInterfaceFactory

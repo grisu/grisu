@@ -100,6 +100,7 @@ public class SuperMonsterBatchJob {
 		final Date allSubmissionFinishedDate = new Date();
 		
 		Document ps = si.ps();
+		ps = SeveralXMLHelpers.cxfWorkaround(ps);
 		final Date psDate = new Date();
 		System.out.println(SeveralXMLHelpers.toStringWithoutAnnoyingExceptions(ps));
 		

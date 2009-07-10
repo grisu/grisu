@@ -15,6 +15,7 @@ import org.vpac.grisu.client.control.ServiceInterfaceFactory;
 import org.vpac.grisu.client.model.login.LoginParams;
 import org.vpac.grisu.client.model.template.JsdlTemplate;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.SeveralXMLHelpers;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.control.utils.ClientPropertiesManager;
@@ -142,11 +143,13 @@ public class TemplateManager {
 	
 	private void putIntoServerTemplatesMap(String templateName) throws NoSuchTemplateException {
 		Document jsdlDoc = em.getServiceInterface().getTemplate(templateName);
+		jsdlDoc = SeveralXMLHelpers.cxfWorkaround(jsdlDoc);
 		serverTemplates.put(templateName, new JsdlTemplate(em, jsdlDoc));
 	}
 	
 	public void refreshServerTemplate(String templateName) throws NoSuchTemplateException {
 		Document jsdlDoc = em.getServiceInterface().getTemplate(templateName);
+		jsdlDoc = SeveralXMLHelpers.cxfWorkaround(jsdlDoc);
 		serverTemplates.put(templateName, new JsdlTemplate(em, jsdlDoc));
 	}
 

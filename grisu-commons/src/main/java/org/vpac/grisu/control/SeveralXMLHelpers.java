@@ -20,6 +20,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Attr;
+import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -106,6 +107,57 @@ public class SeveralXMLHelpers {
 //		
 //		return result;
 //	}
+	
+	public static Document createDocumentFromElement(Element element) throws Exception {
+		try {
+			final String JAXP_SCHEMA_SOURCE
+			= "http://java.sun.com/xml/jaxp/properties/schemaSource";
+			final String JAXP_SCHEMA_LANGUAGE
+			= "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
+			final String W3C_XML_SCHEMA
+			= "http://www.w3.org/2001/XMLSchema";
+			
+//			File schemaFile = new File("/home/markus/workspace/nw-core/jsdl.xsd");
+		
+			DocumentBuilderFactory docBuildFactory = DocumentBuilderFactory.newInstance();
+			docBuildFactory.setAttribute("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+			docBuildFactory.setNamespaceAware(true);
+			docBuildFactory.setValidating(false);
+		
+			docBuildFactory.setAttribute(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA); // use LANGUAGE here instead of SOURCE
+//			docBuildFactory.setAttribute(JAXP_SCHEMA_SOURCE, schemaFile);
+		
+			DocumentBuilder docBuilder = docBuildFactory.newDocumentBuilder();
+			
+			DOMImplementation impl = docBuilder.getDOMImplementation();
+
+	        Document doc = impl.createDocument(null,null,null);
+	        
+	        Node tempNode = doc.importNode(element,true);
+	        
+	        doc.appendChild(tempNode);
+	        
+	        return doc;
+	        
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+
+
+	}
+	
+	public static Document cxfWorkaround(Document doc) {
+		Element element = (Element)doc.getFirstChild();
+		if ( ! element.getTagName().equals("JobDefinition") ) {
+			try {
+				doc = createDocumentFromElement((Element)element.getFirstChild());
+			} catch (Exception e) {
+				throw new RuntimeException("Could not parse jsdl document.", e);
+			}
+		}
+		return doc;
+	}
 	
 	private static String convertElementToString(Element element) {
 		

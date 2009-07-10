@@ -10,6 +10,7 @@ import org.vpac.grisu.control.FileHelpers;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.JobSubmissionException;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.SeveralXMLHelpers;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.files.FileHelper;
 import org.vpac.grisu.control.files.FileTransferException;
@@ -39,7 +40,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 	public JobObject(ServiceInterface si, String jobname) throws NoSuchJobException {
 		
-		super(si.getJsldDocument(jobname));
+		super(SeveralXMLHelpers.cxfWorkaround(si.getJsldDocument(jobname)));
 		this.serviceInterface = si;
 		this.jobname = jobname;
 		this.fileHelper = new FileHelper(serviceInterface);
