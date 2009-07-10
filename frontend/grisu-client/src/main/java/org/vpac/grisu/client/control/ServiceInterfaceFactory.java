@@ -107,6 +107,7 @@ public class ServiceInterfaceFactory {
 			try {
 				serviceInterface = serviceInterfaceCreator.create(interfaceUrl, username, password, myProxyServer, myProxyPort, otherOptions);
 			} catch (ServiceInterfaceException e) {
+				e.printStackTrace();
 				myLogger.debug("Couldn't connect to url "+interfaceUrl+" using serviceInterfaceCreator "+className+": "+e.getLocalizedMessage());
 				failedCreators.put(className, e);
 				continue;
@@ -115,6 +116,7 @@ public class ServiceInterfaceFactory {
 			try {
 				serviceInterface.login(username, password);
 			} catch (Exception e) {
+				e.printStackTrace();
 				myLogger.debug("Couldn't login to grisu service on: "+interfaceUrl+": "+e.getLocalizedMessage());
 				failedCreators.put(className, e);
 				continue;
