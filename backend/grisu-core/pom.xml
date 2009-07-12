@@ -253,13 +253,11 @@
 			<artifactId>commons-vfs-grid</artifactId>
 			<version>1.4.3-TEMP</version>
 			<type>jar</type>
-			<scope>compile</scope>
 		</dependency>
     	<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>matchmaker</artifactId>
 			<version>0.4-SNAPSHOT</version>
-			<scope>compile</scope>
 		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>au.edu.apac.genericgridclient</groupId>-->
