@@ -156,6 +156,7 @@ public class MyProxyAuthHandler extends AbstractHandler {
 
 			return new ProxyCredential(proxy);
 		} catch (Exception e) {
+			e.printStackTrace();
 			myLogger.error("Could not create myproxy credential: "
 					+ e.getLocalizedMessage());
 			return null;

@@ -18,9 +18,6 @@
 		<property name="c3p0.timeout">1800</property>
 		<property name="c3p0.max_statements">50</property>
 		<property name="connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
-		
-		
-		
 	</session-factory>
 
 </hibernate-configuration>
