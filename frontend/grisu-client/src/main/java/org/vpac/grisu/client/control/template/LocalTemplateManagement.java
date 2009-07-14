@@ -22,7 +22,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.model.template.JsdlTemplate;
 import org.vpac.grisu.client.model.template.JsdlTemplateException;
-import org.vpac.grisu.control.Environment;
+import org.vpac.grisu.settings.Environment;
 import org.w3c.dom.Document;
 
 /**

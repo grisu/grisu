@@ -7,11 +7,11 @@ import javax.activation.FileDataSource;
 
 import org.vpac.grisu.client.control.ServiceInterfaceFactory;
 import org.vpac.grisu.control.JobConstants;
-import org.vpac.grisu.control.JobCreationException;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.JobCreationException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
-import org.vpac.grisu.control.utils.SeveralXMLHelpers;
-import org.vpac.grisu.js.model.utils.JsdlHelpers;
+import org.vpac.grisu.utils.JsdlHelpers;
+import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 
 

@@ -10,7 +10,7 @@ import org.vpac.grisu.client.model.files.FileConstants;
 import org.vpac.grisu.client.model.files.FileSystemException;
 import org.vpac.grisu.client.model.files.GrisuFileObject;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.utils.FileHelpers;
+import org.vpac.grisu.utils.FileHelpers;
 
 public class FileManagerDeleteHelpers {
 

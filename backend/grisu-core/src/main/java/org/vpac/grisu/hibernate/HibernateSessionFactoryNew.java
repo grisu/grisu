@@ -5,12 +5,12 @@ import java.io.File;
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
-import org.vpac.grisu.control.Environment;
-import org.vpac.grisu.control.utils.ServerPropertiesManager;
-import org.vpac.grisu.fs.model.MountPoint;
 import org.vpac.grisu.fs.model.User;
 import org.vpac.grisu.js.model.Job;
-import org.vpac.grisu.js.model.JobSubmissionObjectImpl;
+import org.vpac.grisu.model.MountPoint;
+import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
+import org.vpac.grisu.settings.Environment;
+import org.vpac.grisu.settings.ServerPropertiesManager;
 
 public class HibernateSessionFactoryNew {
 

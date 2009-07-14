@@ -27,8 +27,8 @@ import org.vpac.grisu.client.model.template.modules.TemplateModule;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.TemplateNodeEvent;
 import org.vpac.grisu.client.view.swing.utils.HelpDialog;
-import org.vpac.grisu.control.JobCreationException;
-import org.vpac.grisu.js.model.utils.JsdlHelpers;
+import org.vpac.grisu.control.exceptions.JobCreationException;
+import org.vpac.grisu.utils.JsdlHelpers;
 import org.vpac.historyRepeater.HistoryManager;
 
 import com.jgoodies.forms.factories.FormFactory;

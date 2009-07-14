@@ -17,7 +17,7 @@ import org.vpac.grisu.client.view.swing.template.panels.JobName;
 import org.vpac.grisu.client.view.swing.template.panels.MemoryInputPanel;
 import org.vpac.grisu.client.view.swing.template.panels.TemplateNodePanelException;
 import org.vpac.grisu.client.view.swing.template.panels.WallTime;
-import org.vpac.grisu.control.JobCreationException;
+import org.vpac.grisu.control.exceptions.JobCreationException;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;

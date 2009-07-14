@@ -2,7 +2,6 @@ package org.vpac.grisu.model;
 
 import java.util.Set;
 
-import org.vpac.grisu.fs.model.MountPoint;
 
 /**
  * Wrapps information about the user and the available resources to him grid-wide.

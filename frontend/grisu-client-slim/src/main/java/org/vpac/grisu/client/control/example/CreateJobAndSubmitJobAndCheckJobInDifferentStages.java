@@ -3,10 +3,10 @@ package org.vpac.grisu.client.control.example;
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.client.control.login.LoginHelpers;
 import org.vpac.grisu.client.model.JobObject;
-import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.utils.SeveralXMLHelpers;
+import org.vpac.grisu.model.GrisuRegistry;
+import org.vpac.grisu.utils.SeveralXMLHelpers;
 
 public class CreateJobAndSubmitJobAndCheckJobInDifferentStages {
 

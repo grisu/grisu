@@ -3,9 +3,9 @@ import java.io.File;
 import java.util.List;
 
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.utils.SeveralXMLHelpers;
-import org.vpac.grisu.js.model.utils.SubmissionLocationHelpers;
-import org.vpac.grisu.model.GridResource;
+import org.vpac.grisu.model.info.GridResource;
+import org.vpac.grisu.utils.SeveralXMLHelpers;
+import org.vpac.grisu.utils.SubmissionLocationHelpers;
 import org.w3c.dom.Document;
 
 

@@ -15,7 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.vpac.grisu.control.utils.ClientPropertiesManager;
+import org.vpac.grisu.settings.ClientPropertiesManager;
 
 public class ServiceInterfaceUrlsPanel extends JPanel {
 

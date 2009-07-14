@@ -17,10 +17,10 @@ import org.vpac.grisu.client.model.template.JsdlTemplate;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
-import org.vpac.grisu.control.utils.ClientPropertiesManager;
-import org.vpac.grisu.control.utils.MyProxyServerParams;
-import org.vpac.grisu.control.utils.SeveralXMLHelpers;
-import org.vpac.grisu.js.model.utils.JsdlHelpers;
+import org.vpac.grisu.settings.ClientPropertiesManager;
+import org.vpac.grisu.settings.MyProxyServerParams;
+import org.vpac.grisu.utils.JsdlHelpers;
+import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 
 /**

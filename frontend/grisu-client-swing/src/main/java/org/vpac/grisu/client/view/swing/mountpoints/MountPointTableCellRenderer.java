@@ -9,7 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
-import org.vpac.grisu.fs.model.MountPoint;
+import org.vpac.grisu.model.MountPoint;
 
 public class MountPointTableCellRenderer implements TableCellRenderer {
 	

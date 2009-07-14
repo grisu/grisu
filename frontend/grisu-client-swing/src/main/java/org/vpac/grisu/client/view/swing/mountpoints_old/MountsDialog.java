@@ -22,7 +22,7 @@ import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.utils.MountPointEvent;
 import org.vpac.grisu.client.control.utils.MountPointsListener;
 import org.vpac.grisu.client.view.swing.utils.Utils;
-import org.vpac.grisu.fs.model.MountPoint;
+import org.vpac.grisu.model.MountPoint;
 
 public class MountsDialog extends JDialog implements MountPointsListener{
 	

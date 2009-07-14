@@ -8,8 +8,8 @@ import java.util.TreeMap;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.control.JobConstants;
-import org.vpac.grisu.fs.model.MountPoint;
-import org.vpac.grisu.js.model.utils.SubmissionLocationHelpers;
+import org.vpac.grisu.model.MountPoint;
+import org.vpac.grisu.utils.SubmissionLocationHelpers;
 
 /**
  * Just a wrapper object around a String.

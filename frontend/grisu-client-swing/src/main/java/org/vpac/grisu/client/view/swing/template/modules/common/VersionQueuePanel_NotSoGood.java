@@ -30,7 +30,7 @@ import org.vpac.grisu.client.model.SubmissionObject;
 import org.vpac.grisu.client.model.template.modules.SubmissionObjectHolder;
 import org.vpac.grisu.client.model.template.modules.TemplateModule;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
-import org.vpac.grisu.control.JobCreationException;
+import org.vpac.grisu.control.exceptions.JobCreationException;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;

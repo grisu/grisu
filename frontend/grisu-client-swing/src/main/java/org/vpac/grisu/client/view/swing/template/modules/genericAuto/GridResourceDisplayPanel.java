@@ -11,7 +11,8 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
 
 import org.vpac.grisu.client.view.swing.template.panels.GridResourceSuggestionPanel;
-import org.vpac.grisu.model.GridResource;
+import org.vpac.grisu.model.info.GridResource;
+
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.ColumnSpec;

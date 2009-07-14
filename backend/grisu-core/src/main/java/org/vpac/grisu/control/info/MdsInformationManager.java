@@ -13,8 +13,9 @@ import org.apache.log4j.Logger;
 
 import au.edu.sapac.grid.mds.QueryClient;
 import au.org.arcs.mds.GridInfoInterface;
-import org.vpac.grisu.control.Environment;
-import org.vpac.grisu.control.InformationManager;
+
+import org.vpac.grisu.model.info.InformationManager;
+import org.vpac.grisu.settings.Environment;
 
 /**
  * Mds information manager that can uses Gersons mds infosystems library (http://projects.arcs.org.au/trac/infosystems/) to

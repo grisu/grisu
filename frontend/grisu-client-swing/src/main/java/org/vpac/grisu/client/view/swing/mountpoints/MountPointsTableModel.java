@@ -8,7 +8,7 @@ import javax.swing.table.AbstractTableModel;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.control.JobConstants;
-import org.vpac.grisu.fs.model.MountPoint;
+import org.vpac.grisu.model.MountPoint;
 
 public class MountPointsTableModel extends AbstractTableModel {
 	

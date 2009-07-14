@@ -8,7 +8,7 @@ import org.globus.exec.utils.ManagedJobFactoryConstants;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.js.model.Job;
-import org.vpac.grisu.js.model.utils.JsdlHelpers;
+import org.vpac.grisu.utils.JsdlHelpers;
 import org.w3c.dom.Document;
 
 /**

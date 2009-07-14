@@ -18,7 +18,7 @@ import org.vpac.grisu.client.model.template.validators.TemplateValidateException
 import org.vpac.grisu.client.model.template.validators.ValidatorFactory;
 import org.vpac.grisu.client.model.template.validators.ValidatorNotCreatedException;
 import org.vpac.grisu.control.JobConstants;
-import org.vpac.grisu.js.model.utils.JsdlHelpers;
+import org.vpac.grisu.utils.JsdlHelpers;
 import org.w3c.dom.Element;
 
 public class TemplateNode {

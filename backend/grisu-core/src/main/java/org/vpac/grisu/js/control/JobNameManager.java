@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.vpac.grisu.control.JobConstants;
-import org.vpac.grisu.control.JobCreationException;
+import org.vpac.grisu.control.exceptions.JobCreationException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.js.model.Job;
 import org.vpac.grisu.js.model.JobDAO;

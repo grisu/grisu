@@ -16,7 +16,7 @@ import org.vpac.grisu.client.model.SubmissionLocation;
 import org.vpac.grisu.client.model.login.LoginParams;
 import org.vpac.grisu.client.model.template.JsdlTemplateEvent;
 import org.vpac.grisu.client.model.template.JsdlTemplateListener;
-import org.vpac.grisu.control.JobCreationException;
+import org.vpac.grisu.control.exceptions.JobCreationException;
 
 public class SimpleCommandlineClientNoMds implements JsdlTemplateListener {
 

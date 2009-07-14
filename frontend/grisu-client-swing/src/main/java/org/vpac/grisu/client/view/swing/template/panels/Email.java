@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.TemplateNodeEvent;
 import org.vpac.grisu.control.JobConstants;
-import org.vpac.grisu.control.utils.EmailUtils;
+import org.vpac.grisu.utils.EmailUtils;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;

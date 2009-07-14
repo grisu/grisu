@@ -14,8 +14,8 @@ import org.vpac.grisu.client.control.login.LoginException;
 import org.vpac.grisu.client.control.login.LoginHelpers;
 import org.vpac.grisu.client.model.login.LoginParams;
 import org.vpac.grisu.control.JobConstants;
-import org.vpac.grisu.control.JobCreationException;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.JobCreationException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 
 public class TestClient {

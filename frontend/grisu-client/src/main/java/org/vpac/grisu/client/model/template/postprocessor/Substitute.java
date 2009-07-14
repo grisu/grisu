@@ -11,7 +11,7 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.model.template.JsdlTemplate;
-import org.vpac.grisu.js.model.utils.JSDLNamespaceContext;
+import org.vpac.grisu.utils.JSDLNamespaceContext;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

@@ -16,7 +16,7 @@ import org.vpac.grisu.client.model.login.LoginParams;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
-import org.vpac.grisu.control.utils.MyProxyServerParams;
+import org.vpac.grisu.settings.MyProxyServerParams;
 
 /**
  * Some easy-to-use methods to login to a Grisu web service.

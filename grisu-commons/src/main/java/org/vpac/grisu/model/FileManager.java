@@ -7,10 +7,10 @@ import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 
 import org.apache.log4j.Logger;
-import org.vpac.grisu.control.Environment;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.FileTransferException;
-import org.vpac.grisu.control.utils.FileHelpers;
+import org.vpac.grisu.settings.Environment;
+import org.vpac.grisu.utils.FileHelpers;
 
 /**
  * A class to make file-related stuff like transfers from/to the backend easier.

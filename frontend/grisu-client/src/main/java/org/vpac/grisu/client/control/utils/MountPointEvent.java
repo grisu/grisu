@@ -5,7 +5,7 @@ package org.vpac.grisu.client.control.utils;
 import java.util.EventObject;
 
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.fs.model.MountPoint;
+import org.vpac.grisu.model.MountPoint;
 
 public class MountPointEvent extends EventObject {
 

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.control.JobConstants;
-import org.vpac.grisu.control.utils.DebugUtils;
+import org.vpac.grisu.utils.DebugUtils;
 import org.w3c.dom.Element;
 
 public class MultipleInputFiles extends TemplatePreProcessor {

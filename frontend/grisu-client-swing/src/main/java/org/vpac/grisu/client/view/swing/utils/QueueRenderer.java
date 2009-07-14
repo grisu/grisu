@@ -10,7 +10,7 @@ import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.BevelBorder;
 
-import org.vpac.grisu.js.model.utils.SubmissionLocationHelpers;
+import org.vpac.grisu.utils.SubmissionLocationHelpers;
 
 public class QueueRenderer implements ListCellRenderer {
 	

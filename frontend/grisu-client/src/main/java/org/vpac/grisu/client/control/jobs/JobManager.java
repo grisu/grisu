@@ -17,7 +17,7 @@ import org.vpac.grisu.client.model.jobs.GrisuJobMonitoringObjectImpl;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.exceptions.VomsException;
-import org.vpac.grisu.fs.model.MountPoint;
+import org.vpac.grisu.model.MountPoint;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;

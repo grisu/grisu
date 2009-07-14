@@ -19,11 +19,11 @@ import org.vpac.grisu.client.TemplateTagConstants;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.TemplateNodeEvent;
 import org.vpac.grisu.client.view.swing.utils.QueueRenderer;
-import org.vpac.grisu.control.GrisuRegistry;
-import org.vpac.grisu.fs.model.MountPoint;
 import org.vpac.grisu.model.FqanEvent;
 import org.vpac.grisu.model.FqanListener;
-import org.vpac.grisu.model.UserApplicationInformation;
+import org.vpac.grisu.model.GrisuRegistry;
+import org.vpac.grisu.model.MountPoint;
+import org.vpac.grisu.model.info.UserApplicationInformation;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;

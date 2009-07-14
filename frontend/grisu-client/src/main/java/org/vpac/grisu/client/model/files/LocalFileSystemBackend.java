@@ -8,7 +8,7 @@ import java.net.URISyntaxException;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
-import org.vpac.grisu.control.utils.FileHelpers;
+import org.vpac.grisu.utils.FileHelpers;
 
 public class LocalFileSystemBackend implements FileSystemBackend {
 	

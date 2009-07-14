@@ -10,10 +10,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.fs.model.MountPoint;
+import org.vpac.grisu.model.info.ResourceInformation;
 
 /**
  * The implemenation of {@link UserEnvironmentManager}.

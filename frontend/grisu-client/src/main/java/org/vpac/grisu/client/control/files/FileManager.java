@@ -28,9 +28,9 @@ import org.vpac.grisu.client.model.files.GrisuFileObject;
 import org.vpac.grisu.client.model.files.LocalFileSystemBackend;
 import org.vpac.grisu.client.model.files.RemoteFileSystemBackend;
 import org.vpac.grisu.client.model.files.events.FileSystemBackendEvent;
-import org.vpac.grisu.control.Environment;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.fs.model.MountPoint;
+import org.vpac.grisu.model.MountPoint;
+import org.vpac.grisu.settings.Environment;
 
 // TODO try to include the mountpoint management in here?
 

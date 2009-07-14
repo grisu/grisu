@@ -9,10 +9,10 @@ import org.vpac.grisu.client.control.login.LoginParams;
 import org.vpac.grisu.client.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.client.model.JobObject;
 import org.vpac.grisu.client.model.JobStatusChangeListener;
-import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.model.ApplicationInformation;
+import org.vpac.grisu.model.GrisuRegistry;
+import org.vpac.grisu.model.info.ApplicationInformation;
 
 public class JobSubmissionNew implements JobStatusChangeListener {
 

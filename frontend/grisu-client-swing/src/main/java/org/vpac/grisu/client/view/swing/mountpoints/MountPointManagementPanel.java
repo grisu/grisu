@@ -19,7 +19,7 @@ import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.utils.MountPointEvent;
 import org.vpac.grisu.client.control.utils.MountPointsListener;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.fs.model.MountPoint;
+import org.vpac.grisu.model.MountPoint;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;

@@ -9,9 +9,9 @@ import org.vpac.grisu.client.model.JobException;
 import org.vpac.grisu.client.model.JobObject;
 import org.vpac.grisu.client.model.JobStatusChangeListener;
 import org.vpac.grisu.control.JobConstants;
-import org.vpac.grisu.control.JobSubmissionException;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
+import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 

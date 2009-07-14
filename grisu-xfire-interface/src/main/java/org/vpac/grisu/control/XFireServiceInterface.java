@@ -9,13 +9,14 @@ import javax.jws.WebMethod;
 import javax.jws.WebService;
 
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
+import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.exceptions.VomsException;
-import org.vpac.grisu.fs.model.MountPoint;
-import org.vpac.grisu.model.GridResource;
+import org.vpac.grisu.model.MountPoint;
+import org.vpac.grisu.model.info.GridResource;
 import org.w3c.dom.Document;
 
 /**

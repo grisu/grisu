@@ -14,8 +14,8 @@ import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.jdom.Element;
 import org.jdom.Namespace;
-import org.vpac.grisu.control.utils.ServerPropertiesManager;
 import org.vpac.grisu.credential.model.ProxyCredential;
+import org.vpac.grisu.settings.ServerPropertiesManager;
 
 /**
  * This one gets the username & password out of the http header and uses it to

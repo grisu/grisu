@@ -2,7 +2,7 @@
 
 package org.vpac.grisu.client.control.files;
 
-import org.vpac.grisu.fs.model.MountPoint;
+import org.vpac.grisu.model.MountPoint;
 
 /**
  * Methods to help with {@link MountPoint}s.

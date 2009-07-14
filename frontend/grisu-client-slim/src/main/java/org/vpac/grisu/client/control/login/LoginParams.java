@@ -5,7 +5,7 @@ package org.vpac.grisu.client.control.login;
 import java.util.Arrays;
 
 import org.vpac.grisu.control.JobConstants;
-import org.vpac.grisu.control.utils.MyProxyServerParams;
+import org.vpac.grisu.settings.MyProxyServerParams;
 
 /**
  * A class that holds all information that is needed to login to a Grisu web service.

@@ -5,7 +5,7 @@ package org.vpac.grisu.control.utils;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.vpac.grisu.js.model.utils.JsdlHelpers;
+import org.vpac.grisu.utils.JsdlHelpers;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

@@ -22,9 +22,9 @@ import org.vpac.grisu.client.model.template.modules.Common;
 import org.vpac.grisu.client.model.template.nodes.DefaultTemplateNodeValueSetter;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.templatePreProcessor.TemplatePreProcessorException;
-import org.vpac.grisu.control.JobCreationException;
-import org.vpac.grisu.control.utils.SeveralXMLHelpers;
-import org.vpac.grisu.js.model.utils.JsdlHelpers;
+import org.vpac.grisu.control.exceptions.JobCreationException;
+import org.vpac.grisu.utils.JsdlHelpers;
+import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 
 

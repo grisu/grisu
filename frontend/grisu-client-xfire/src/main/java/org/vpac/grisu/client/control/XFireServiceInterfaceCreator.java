@@ -21,8 +21,8 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.ServiceInterfaceCreator;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
-import org.vpac.grisu.control.utils.CaCertManager;
-import org.vpac.grisu.control.utils.ClientPropertiesManager;
+import org.vpac.grisu.settings.CaCertManager;
+import org.vpac.grisu.settings.ClientPropertiesManager;
 
 public class XFireServiceInterfaceCreator implements ServiceInterfaceCreator {
 

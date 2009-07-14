@@ -8,7 +8,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.client.control.utils.CommandlineHelpers;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.fs.model.MountPoint;
+import org.vpac.grisu.model.MountPoint;
 
 import org.apache.commons.configuration.HierarchicalINIConfiguration;
 import org.apache.commons.configuration.ConfigurationException;

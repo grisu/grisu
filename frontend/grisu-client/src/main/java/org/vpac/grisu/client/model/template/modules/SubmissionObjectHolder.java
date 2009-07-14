@@ -2,7 +2,7 @@ package org.vpac.grisu.client.model.template.modules;
 
 import org.vpac.grisu.client.control.eventStuff.SubmissionObjectListener;
 import org.vpac.grisu.client.model.SubmissionObject;
-import org.vpac.grisu.control.JobCreationException;
+import org.vpac.grisu.control.exceptions.JobCreationException;
 
 public interface SubmissionObjectHolder {
 	

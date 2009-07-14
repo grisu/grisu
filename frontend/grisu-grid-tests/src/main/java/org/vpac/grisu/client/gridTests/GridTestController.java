@@ -18,12 +18,12 @@ import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.client.control.login.LoginHelpers;
 import org.vpac.grisu.client.control.login.LoginParams;
 import org.vpac.grisu.client.control.login.ServiceInterfaceFactory;
-import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
-import org.vpac.grisu.model.ApplicationInformation;
+import org.vpac.grisu.model.GrisuRegistry;
+import org.vpac.grisu.model.info.ApplicationInformation;
 import org.vpac.security.light.plainProxy.LocalProxy;
 
 public class GridTestController {

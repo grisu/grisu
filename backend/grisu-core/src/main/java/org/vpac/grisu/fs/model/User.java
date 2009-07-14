@@ -37,7 +37,8 @@ import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.control.utils.CertHelpers;
 import org.vpac.grisu.credential.model.ProxyCredential;
 import org.vpac.grisu.js.model.Job;
-import org.vpac.grisu.js.model.JobSubmissionObjectImpl;
+import org.vpac.grisu.model.MountPoint;
+import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.security.light.voms.VO;
 import org.vpac.security.light.voms.VOManagement.VOManagement;
 

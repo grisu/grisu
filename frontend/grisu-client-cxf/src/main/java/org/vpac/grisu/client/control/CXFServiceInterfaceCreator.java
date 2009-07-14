@@ -22,10 +22,10 @@ import org.apache.cxf.interceptor.LoggingOutInterceptor;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.vpac.grisu.client.control.cxf.ClientAuthInterceptor;
 import org.vpac.grisu.control.CXFServiceInterface;
-import org.vpac.grisu.control.Environment;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.ServiceInterfaceCreator;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.settings.Environment;
 
 import com.sun.org.apache.xerces.internal.dom.DocumentImpl;
 

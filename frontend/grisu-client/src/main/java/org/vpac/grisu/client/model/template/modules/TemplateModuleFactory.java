@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
 import org.vpac.grisu.client.model.template.JsdlTemplate;
 import org.vpac.grisu.client.model.template.TemplateHelperUtils;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
-import org.vpac.grisu.js.model.utils.JSDLNamespaceContext;
+import org.vpac.grisu.utils.JSDLNamespaceContext;
 import org.w3c.dom.NodeList;
 
 

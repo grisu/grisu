@@ -2,7 +2,7 @@ package org.vpac.grisu.client.gricli;
 
 import org.apache.commons.configuration.HierarchicalINIConfiguration;
 import org.apache.commons.configuration.ConfigurationException;
-import org.vpac.grisu.control.Environment;
+import org.vpac.grisu.settings.Environment;
 
 import java.io.File;
 import java.util.HashMap;

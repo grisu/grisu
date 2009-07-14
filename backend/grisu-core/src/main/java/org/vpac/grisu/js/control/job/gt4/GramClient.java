@@ -27,8 +27,8 @@ import org.globus.wsrf.impl.security.authorization.HostAuthorization;
 import org.ietf.jgss.GSSCredential;
 import org.oasis.wsrf.faults.BaseFaultType;
 import org.oasis.wsrf.faults.BaseFaultTypeDescription;
-import org.vpac.grisu.control.Environment;
 import org.vpac.grisu.control.JobConstants;
+import org.vpac.grisu.settings.Environment;
 import org.vpac.security.light.plainProxy.LocalProxy;
 
 /**

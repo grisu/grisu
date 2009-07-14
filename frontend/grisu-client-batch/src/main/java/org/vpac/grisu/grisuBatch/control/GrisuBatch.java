@@ -29,11 +29,11 @@ import org.vpac.grisu.client.model.SubmissionLocation;
 import org.vpac.grisu.client.model.files.GrisuFileObject;
 import org.vpac.grisu.client.model.jobs.GrisuJobMonitoringObject;
 import org.vpac.grisu.client.model.login.LoginParams;
-import org.vpac.grisu.control.JobCreationException;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.JobCreationException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
-import org.vpac.grisu.control.utils.FileHelpers;
+import org.vpac.grisu.utils.FileHelpers;
 
 public class GrisuBatch {
 

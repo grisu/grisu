@@ -6,19 +6,19 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.JobConstants;
-import org.vpac.grisu.control.JobSubmissionException;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.FileTransferException;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
+import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
-import org.vpac.grisu.control.utils.FileHelpers;
-import org.vpac.grisu.control.utils.SeveralXMLHelpers;
-import org.vpac.grisu.js.model.JobCreatedProperty;
-import org.vpac.grisu.js.model.JobSubmissionObjectImpl;
-import org.vpac.grisu.js.model.JobSubmissionProperty;
 import org.vpac.grisu.model.FileManager;
+import org.vpac.grisu.model.GrisuRegistry;
+import org.vpac.grisu.model.job.JobCreatedProperty;
+import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
+import org.vpac.grisu.model.job.JobSubmissionProperty;
+import org.vpac.grisu.utils.FileHelpers;
+import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 
 public class JobObject extends JobSubmissionObjectImpl {

@@ -3,7 +3,7 @@ package org.vpac.grisu.client.gricli;
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
-import org.vpac.grisu.fs.model.MountPoint;
+import org.vpac.grisu.model.MountPoint;
 
 public abstract class AbstractJobProperties implements JobProperties {
 	

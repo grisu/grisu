@@ -31,8 +31,8 @@ import org.vpac.grisu.client.model.files.GrisuFileObject;
 import org.vpac.grisu.client.model.jobs.JobStatusEvent;
 import org.vpac.grisu.client.model.jobs.JobStatusListener;
 import org.vpac.grisu.client.view.swing.utils.Utils;
-import org.vpac.grisu.control.utils.ClientPropertiesManager;
 import org.vpac.grisu.plugins.ApplicationPathDialog;
+import org.vpac.grisu.settings.ClientPropertiesManager;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;

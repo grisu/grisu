@@ -7,6 +7,7 @@ import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.credential.model.ProxyCredential;
+import org.vpac.grisu.utils.FqanHelpers;
 import org.vpac.security.light.CredentialHelpers;
 import org.vpac.security.light.voms.VO;
 import org.vpac.security.light.vomsProxy.VomsProxyCredential;

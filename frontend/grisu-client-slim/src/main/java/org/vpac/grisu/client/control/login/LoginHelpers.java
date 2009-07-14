@@ -15,7 +15,7 @@ import org.ietf.jgss.GSSCredential;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
-import org.vpac.grisu.control.utils.MyProxyServerParams;
+import org.vpac.grisu.settings.MyProxyServerParams;
 import org.vpac.security.light.plainProxy.LocalProxy;
 
 /**
