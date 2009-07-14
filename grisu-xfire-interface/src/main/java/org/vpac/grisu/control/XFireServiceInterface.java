@@ -16,6 +16,7 @@ import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.exceptions.ServerJobSubmissionException;
 import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.fs.model.MountPoint;
+import org.vpac.grisu.js.model.JobPropertiesException;
 import org.vpac.grisu.model.GridResource;
 import org.w3c.dom.Document;
 
@@ -132,12 +133,18 @@ public interface XFireServiceInterface extends ServiceInterface{
 	@WebMethod
 	public String[] getAllJobnames();
 	@WebMethod
+	public String createJob(Map<String, String> jobProperties, String fqan, String jobnameCreationMethod) throws JobPropertiesException;
+	@WebMethod(operationName = "createJobUsingPropertiesMap")
+	public String createJob(Document jsdl, String fqan, String jobnameCreationMethod) throws JobPropertiesException;
+	@WebMethod(operationName = "createJobOld")
 	public String createJob(String jobname, int createJobNameMethod) throws JobCreationException;
 	@WebMethod
 	public void setJobDescription(String jobname, Document jsdl) throws JobDescriptionNotValidException, NoSuchJobException;
 	@WebMethod
 	public void setJobDescription_string(String jobname, String jsdl) throws JobDescriptionNotValidException, NoSuchJobException;
 	@WebMethod
+	public void submitJob(String jobname) throws JobSubmissionException;
+	@WebMethod(operationName = "submitJobOld")
 	public void submitJob(String jobname, String fqan) throws ServerJobSubmissionException, NoValidCredentialException, RemoteFileSystemException, VomsException, NoSuchJobException;
 	@WebMethod
 	public String getJobDirectory(String jobname) throws NoSuchJobException;
@@ -159,4 +166,7 @@ public interface XFireServiceInterface extends ServiceInterface{
 	public Map<String, String> getAllJobProperties(String jobname) throws NoSuchJobException;
 	@WebMethod
 	public String getJobFqan(String jobname) throws NoSuchJobException;
+	@WebMethod
+	public Document getJsldDocument(String jobname) throws NoSuchJobException;
+	
 }

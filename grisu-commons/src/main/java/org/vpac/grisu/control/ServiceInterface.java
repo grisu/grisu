@@ -207,7 +207,7 @@ public interface ServiceInterface {
 	 * @param fqan the vo for which the job shall run (or null for a non-vo job)
 	 * @return the absolute working directory of the job if it is possible to create it with the specified name
 	 */
-	
+	@Deprecated
 	public String calculateAbsoluteJobDirectory(String jobname, String submissionLocation, String fqan);
 	
 	/**
@@ -220,8 +220,7 @@ public interface ServiceInterface {
 	 * @return the directory where all job related files are located. the return path is relative to the execution file system. That's why it's 
 	 * possible to call that method before the job is actually submitted.
 	 */
-
-	
+	@Deprecated
 	public String calculateRelativeJobDirectory(String jobname);
 	
 	/**
@@ -237,7 +236,6 @@ public interface ServiceInterface {
 	 * @param fqan the VO
 	 * @return all submission locations
 	 */
-	
 	public String[] getAllSubmissionLocations(String fqan);
 	
 	/**
@@ -250,7 +248,6 @@ public interface ServiceInterface {
 	 * @param application the application.
 	 * @return all sites that support this application.
 	 */
-	
 	public String[] getSubmissionLocationsForApplication(String application);
 	
 	/**
@@ -709,6 +706,7 @@ public interface ServiceInterface {
 	 * @throws NoSuchJobException 
 	 * @Deprecated don't use that anymore. Use {@link #createJob(Map, String, String)} or {@link #createJob(Document, String, String)} to create jobs from now on.
 	 */
+	@Deprecated
 	public void setJobDescription(String jobname, Document jsdl) throws JobDescriptionNotValidException, NoSuchJobException;
 	
 	
@@ -745,7 +743,7 @@ public interface ServiceInterface {
 	 * @throws NoSuchJobException 
 	 * @Deprecated Don't use that anymore. Use {@link #submitJob(String)} from now on.
 	 */
-	
+	@Deprecated
 	public void submitJob(String jobname, String fqan) throws ServerJobSubmissionException, NoValidCredentialException, RemoteFileSystemException, VomsException, NoSuchJobException;
 
 	
@@ -762,8 +760,9 @@ public interface ServiceInterface {
 	 * @param jobname the name of the submitted job
 	 * @return the (absolute) job directory
 	 * @throws NoSuchJobException 
+	 * @Deprecated don't use that anymore. Use {{@link #getJobProperty(String, String)} instead.
 	 */
-	
+	@Deprecated
 	public String getJobDirectory(String jobname) throws NoSuchJobException;
 	
 	/**
@@ -845,8 +844,9 @@ public interface ServiceInterface {
 	 * @param jobname the name of the job
 	 * @return the fqan
 	 * @throws NoSuchJobException 
+	 * @Deprecated don't use that anymore. Use {{@link #getJobProperty(String, String)} instead.
 	 */
-	
+	@Deprecated
 	public String getJobFqan(String jobname) throws NoSuchJobException;
 	
 	public Document getJsldDocument(String jobname) throws NoSuchJobException;
