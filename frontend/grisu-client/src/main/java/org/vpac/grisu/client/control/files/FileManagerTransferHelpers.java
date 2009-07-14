@@ -195,6 +195,7 @@ public class FileManagerTransferHelpers {
 						.toString()
 						+ "/" + filename, true);
 			} catch (Exception e1) {
+				e1.printStackTrace();
 				throw new FileSystemException("Could not upload file \""
 						+ sourceFile.getName() + "\": "
 						+ e1.getLocalizedMessage());

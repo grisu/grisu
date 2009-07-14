@@ -133,9 +133,9 @@ public interface XFireServiceInterface extends ServiceInterface{
 	public String[] getAllJobnames();
 	@WebMethod
 	public String createJob(Map<String, String> jobProperties, String fqan, String jobnameCreationMethod) throws JobPropertiesException;
-	@WebMethod(operationName = "createJobUsingPropertiesMap")
+	@WebMethod
 	public String createJob(Document jsdl, String fqan, String jobnameCreationMethod) throws JobPropertiesException;
-	@WebMethod(operationName = "createJobOld")
+	@WebMethod
 	public String createJob(String jobname, int createJobNameMethod);
 	@WebMethod
 	public void setJobDescription(String jobname, Document jsdl) throws NoSuchJobException;
@@ -143,7 +143,7 @@ public interface XFireServiceInterface extends ServiceInterface{
 	public void setJobDescription_string(String jobname, String jsdl) throws NoSuchJobException;
 	@WebMethod
 	public void submitJob(String jobname) throws JobSubmissionException;
-	@WebMethod(operationName = "submitJobOld")
+	@WebMethod
 	public void submitJob(String jobname, String fqan) throws NoValidCredentialException, RemoteFileSystemException, VomsException, NoSuchJobException;
 	@WebMethod
 	public String getJobDirectory(String jobname) throws NoSuchJobException;
