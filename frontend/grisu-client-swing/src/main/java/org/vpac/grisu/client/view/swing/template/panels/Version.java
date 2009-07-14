@@ -22,10 +22,9 @@ import org.apache.log4j.Logger;
 import org.vpac.grisu.client.TemplateTagConstants;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.TemplateNodeEvent;
-import org.vpac.grisu.control.FqanEvent;
-import org.vpac.grisu.control.FqanListener;
 import org.vpac.grisu.control.GrisuRegistry;
-import org.vpac.grisu.model.UserProperties;
+import org.vpac.grisu.model.FqanEvent;
+import org.vpac.grisu.model.FqanListener;
 import org.vpac.grisu.model.UserApplicationInformation;
 
 public class Version extends JPanel implements TemplateNodePanel,
@@ -105,7 +104,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 		
 		registry = GrisuRegistry.getDefault(node.getTemplate().getEnvironmentManager().getServiceInterface());
 		
-		registry.getUserProperties().addFqanListener(this);
+		registry.getUserEnvironmentManager().addFqanListener(this);
 		
 		registry.getHistoryManager().setMaxNumberOfEntries(TemplateTagConstants.getGlobalLastVersionModeKey(applicationName), 1);
 		registry.getHistoryManager().setMaxNumberOfEntries(TemplateTagConstants.getGlobalLastVersionKey(applicationName), 1);
@@ -222,7 +221,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 		versionLocked = true;
 
 		versionModel.removeAllElements();
-		for ( String version : infoObject.getAllAvailableVersionsForFqan(registry.getUserProperties().getCurrentFqan()) ) {
+		for ( String version : infoObject.getAllAvailableVersionsForFqan(registry.getUserEnvironmentManager().getCurrentFqan()) ) {
 			versionModel.addElement(version);
 		}
 
@@ -330,7 +329,7 @@ public class Version extends JPanel implements TemplateNodePanel,
 		
 		this.currentMode = DEFAULT_VERSION_MODE;
 		
-		Set<String> temp = infoObject.getAvailableSubmissionLocationsForVersionAndFqan(defaultVersion, registry.getUserProperties().getCurrentFqan());
+		Set<String> temp = infoObject.getAvailableSubmissionLocationsForVersionAndFqan(defaultVersion, registry.getUserEnvironmentManager().getCurrentFqan());
 		
 		try {
 		if ( temp.size() > 0 ) {

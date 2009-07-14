@@ -1,6 +1,6 @@
 
 
-package org.vpac.grisu.control;
+package org.vpac.grisu.control.utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -36,78 +36,13 @@ import org.xml.sax.SAXException;
  */
 public class SeveralXMLHelpers {
 	
-//	public static String[] extractMountPoints(Document mps) {
-//		
-//		NodeList mountPoints = mps.getFirstChild().getChildNodes();
-//		String[] result = new String[mountPoints.getLength()];
-//		
-//		for ( int i=0; i<result.length; i++ ) {
-//			result[i] = mountPoints.item(i).getAttributes().getNamedItem("mountpoint").getNodeValue();
-//		}
-//		
-//		return result;
-//	}
-	
-//	public static String[] extractMountURLs(Document mps) {
-//		NodeList mountPoints = mps.getFirstChild().getChildNodes();
-//		String[] result = new String[mountPoints.getLength()];
-//		
-//		for ( int i=0; i<result.length; i++ ) {
-//			result[i] = mountPoints.item(i).getAttributes().getNamedItem("url").getNodeValue();
-//		}
-//		
-//		return result;
-//	}
-	
-//	public static Map<String, String> extractMounts(Document mps) {
-//		NodeList mountPoints = mps.getFirstChild().getChildNodes();
-//		Map<String, String> result = new HashMap<String, String>();
-//		
-//		for ( int i=0; i<mountPoints.getLength(); i++ ) {
-//			result.put(mountPoints.item(i).getAttributes().getNamedItem("mountpoint").getNodeValue(),
-//					mountPoints.item(i).getAttributes().getNamedItem("url").getNodeValue());
-//		}
-//		
-//		return result;
-//	}
-	
-//	public static Map<String, Map<String, String>> extractJobsInformation(Document jobs) {
-//		NodeList allJobNodes = jobs.getFirstChild().getChildNodes();
-//		Map<String, Map<String,String>> result = new HashMap<String, Map<String,String>>();
-//		
-//		for ( int i=0; i<allJobNodes.getLength(); i++ ) {
-//			String jobname = allJobNodes.item(i).getAttributes().getNamedItem("jobname").getNodeValue();
-//			String status = null;
-//			try {
-//				status = allJobNodes.item(i).getAttributes().getNamedItem("status").getNodeValue();
-//			} catch (NullPointerException e) {
-//			}
-//			String host = null;
-//			try {
-//				host = allJobNodes.item(i).getAttributes().getNamedItem("host").getNodeValue();
-//			} catch (NullPointerException e) {
-//			}
-//			String fqan = null;
-//			try {
-//				fqan = allJobNodes.item(i).getAttributes().getNamedItem("fqan").getNodeValue();
-//			} catch (NullPointerException e) {
-//			}
-//			
-//			if ( status == null ) status = "n/a";
-//			if ( host == null ) host = "n/a";
-//			if ( fqan == null ) fqan = "n/a";
-//			
-//			Map<String,String> jobMap = new HashMap<String,String>();
-//			jobMap.put("status",status);
-//			jobMap.put("host", host);
-//			jobMap.put("fqan", fqan);
-//			
-//			result.put(jobname, jobMap);
-//		}
-//		
-//		return result;
-//	}
-	
+	/**
+	 * Creates a new xml document from an xml element.
+	 * 
+	 * @param element the element 
+	 * @return the new document 
+	 * @throws Exception if the document can't be created
+	 */
 	public static Document createDocumentFromElement(Element element) throws Exception {
 		try {
 			final String JAXP_SCHEMA_SOURCE
@@ -147,6 +82,13 @@ public class SeveralXMLHelpers {
 
 	}
 	
+	/**
+	 * This needs to be called if the cxf backend is used. It's a workaround for the bug where
+	 * cxf wraps a document parameter into return or arg0 elements.
+	 * @param doc the xml document
+	 * @param expectedElementName the element name that you would expect for the first child
+	 * @return either a new xml document or the unchanged old one
+	 */
 	public static Document cxfWorkaround(Document doc, String expectedElementName) {
 		Element element = (Element)doc.getFirstChild();
 		if ( ! element.getTagName().equals(expectedElementName) ) {
@@ -159,6 +101,11 @@ public class SeveralXMLHelpers {
 		return doc;
 	}
 	
+	/**
+	 * Converts a xml element to a string
+	 * @param element the element 
+	 * @return the string
+	 */
 	private static String convertElementToString(Element element) {
 		
 		StringBuffer result = new StringBuffer();
@@ -183,20 +130,32 @@ public class SeveralXMLHelpers {
 		result.append("</"+tagName+">\n");
 		return result.toString();
 	}
-
+	
+	/**
+	 * Converts a xml element to a string
+	 * @param element the element 
+	 * @return the string
+	 */
 	public static String convertToString(Element element) {
 		
 		return convertElementToString(element);		
 	}
 	
-	public static String toString(Document jsdl) throws TransformerFactoryConfigurationError, TransformerException {
+	/**
+	 * Converts a xml document to a string
+	 * @param xml the xml document
+	 * @return the string
+	 * @throws TransformerFactoryConfigurationError
+	 * @throws TransformerException
+	 */
+	public static String toString(Document xml) throws TransformerFactoryConfigurationError, TransformerException {
 			//TODO use static transformer to reduce overhead?
 			Transformer transformer = TransformerFactory.newInstance().newTransformer();
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 	
 	//		initialize StreamResult with InputFile object to save to file
 			StreamResult result = new StreamResult(new StringWriter());
-			DOMSource source = new DOMSource(jsdl);
+			DOMSource source = new DOMSource(xml);
 			transformer.transform(source, result);
 	
 			String jsdl_string = result.getWriter().toString();
@@ -204,11 +163,16 @@ public class SeveralXMLHelpers {
 			return jsdl_string;
 		}
 	
-	public static String toStringWithoutAnnoyingExceptions(Document jsdl) {
+	/**
+	 * Converts a xml document to a string. Surpresses exceptions.
+	 * @param xml the xml document
+	 * @return the string
+	 */
+	public static String toStringWithoutAnnoyingExceptions(Document xml) {
 		
 		String result;
 		try {
-			result = toString(jsdl);
+			result = toString(xml);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -219,6 +183,12 @@ public class SeveralXMLHelpers {
 		
 	}
 	
+	/**
+	 * Creates a xml document from an input stream
+	 * @param input the input stream
+	 * @return the xml document
+	 * @throws Exception if the conversion fails
+	 */
 	public static Document fromInputStream(InputStream input) throws Exception {
 		try {
 			final String JAXP_SCHEMA_SOURCE
@@ -246,6 +216,13 @@ public class SeveralXMLHelpers {
 			}
 	}
 
+	/**
+	 * Parses a string into a xml document.
+	 * 
+	 * @param jsdl_string the string
+	 * @return the xml document
+	 * @throws Exception if the conversion fails
+	 */
 	public static Document fromString(String jsdl_string) throws Exception {
 		
 		try {
@@ -274,6 +251,12 @@ public class SeveralXMLHelpers {
 		}
 	}
 	
+	/**
+	 * Loads xml data from a file.
+	 * 
+	 * @param file the (xml-)file
+	 * @return the xml document
+	 */
 	public static Document loadXMLFile(File file) {
 		
 		Document jsdl = null;

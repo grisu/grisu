@@ -1,7 +1,5 @@
 package org.vpac.grisu.client.control;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -20,6 +18,7 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.files.FileManager;
 import org.vpac.grisu.client.control.files.FileTransferManager;
+import org.vpac.grisu.client.control.files.MountPointHelpers;
 import org.vpac.grisu.client.control.jobs.JobManager;
 import org.vpac.grisu.client.control.status.ApplicationStatusManager;
 import org.vpac.grisu.client.control.template.TemplateManager;
@@ -27,23 +26,20 @@ import org.vpac.grisu.client.control.utils.MountPointEvent;
 import org.vpac.grisu.client.control.utils.MountPointsListener;
 import org.vpac.grisu.client.model.SubmissionLocation;
 import org.vpac.grisu.client.model.files.FileConstants;
-import org.vpac.grisu.control.Environment;
-import org.vpac.grisu.control.FqanEvent;
-import org.vpac.grisu.control.FqanListener;
 import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.control.utils.ClientPropertiesManager;
-import org.vpac.grisu.fs.control.MountPointHelpers;
 import org.vpac.grisu.fs.model.MountPoint;
-import org.vpac.grisu.model.UserProperties;
+import org.vpac.grisu.model.FqanEvent;
+import org.vpac.grisu.model.FqanListener;
+import org.vpac.grisu.model.UserEnvironmentManager;
 import org.vpac.helpDesk.model.Person;
 import org.vpac.helpDesk.model.PersonException;
 import org.vpac.historyRepeater.DummyHistoryManager;
 import org.vpac.historyRepeater.HistoryManager;
-import org.vpac.historyRepeater.SimpleHistoryManager;
 
 /**
  * This class manages the important properties of the user like MountPoints &
@@ -56,7 +52,7 @@ import org.vpac.historyRepeater.SimpleHistoryManager;
  * @author Markus Binsteiner
  * 
  */
-public class EnvironmentManager implements MountPointsListener, UserProperties {
+public class EnvironmentManager implements MountPointsListener, UserEnvironmentManager {
 	
 	public String getCurrentFqan() {
 		return getDefaultFqan();
@@ -1574,6 +1570,34 @@ public class EnvironmentManager implements MountPointsListener, UserProperties {
 	 */
 	public String[] getAllSitesOfTheGrid() {
 		return getServiceInterface().getAllSites();
+	}
+
+	public String[] getAllAvailableFqans() {
+		return getFqans();
+	}
+
+	public Set<String> getAllAvailableSites() {
+
+		return getAllOfTheUsersSites();
+	}
+
+	public Set<String> getAllAvailableSubmissionLocations() {
+		return new HashSet(getAllSubmissionLocations().values());
+	}
+
+	public MountPoint getMountPointForUrl(String url) {
+		return getResponsibleMountpointForFile(url);
+	}
+
+	public MountPoint getRecommendedMountPoint(String submissionLocation,
+			String fqan) {
+		
+		Set<MountPoint> mps = getMountPointsForSubmissionLocationAndFqan(submissionLocation, fqan);
+		if ( mps.size() > 0 ) {
+			return mps.iterator().next();
+		} else {
+			return null;
+		}
 	}
 
 

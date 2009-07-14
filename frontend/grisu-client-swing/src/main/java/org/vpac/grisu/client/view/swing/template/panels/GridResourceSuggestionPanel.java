@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.print.attribute.standard.JobPriority;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -19,14 +18,12 @@ import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.TemplateNodeEvent;
 import org.vpac.grisu.client.view.swing.template.modules.genericAuto.GridResourceDisplayPanel;
 import org.vpac.grisu.control.GrisuRegistry;
-import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.fs.model.MountPoint;
 import org.vpac.grisu.js.model.JobSubmissionProperty;
 import org.vpac.grisu.js.model.utils.SubmissionLocationHelpers;
-import org.vpac.grisu.model.UserProperties;
 import org.vpac.grisu.model.GridResource;
 import org.vpac.grisu.model.UserApplicationInformation;
-import org.vpac.grisu.model.UserInformation;
+import org.vpac.grisu.model.UserEnvironmentManager;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -53,7 +50,7 @@ public class GridResourceSuggestionPanel extends JPanel implements TemplateNodeP
 	private ExecutionFileSystem executionFileSystemPanel = null;
 	private String currentStagingFilesystem = null;
 	
-	private UserInformation userInformation;
+	private UserEnvironmentManager userInformation;
 	
 	private List<GridResource> currentBestGridResources = null;
 	private GridResource selectedResource = null;
@@ -113,7 +110,7 @@ public class GridResourceSuggestionPanel extends JPanel implements TemplateNodeP
 		
 		Map<JobSubmissionProperty, String> tempJobProperties = new HashMap<JobSubmissionProperty, String>();
 		tempJobProperties.put(JobSubmissionProperty.APPLICATIONNAME, newValue);
-		currentBestGridResources = infoObject.getBestSubmissionLocations(tempJobProperties, registry.getUserProperties().getCurrentFqan());
+		currentBestGridResources = infoObject.getBestSubmissionLocations(tempJobProperties, registry.getUserEnvironmentManager().getCurrentFqan());
 		 
 		try {
 			
@@ -175,7 +172,7 @@ public class GridResourceSuggestionPanel extends JPanel implements TemplateNodeP
 		this.templateNode.setTemplateNodeValueSetter(this);
 		registry = GrisuRegistry.getDefault(node.getTemplate().getEnvironmentManager().getServiceInterface());
 		
-		this.userInformation = GrisuRegistry.getDefault(node.getTemplate().getEnvironmentManager().getServiceInterface()).getUserInformation();
+		this.userInformation = GrisuRegistry.getDefault(node.getTemplate().getEnvironmentManager().getServiceInterface()).getUserEnvironmentManager();
 		this.infoObject = GrisuRegistry.getDefault(node.getTemplate().getEnvironmentManager().getServiceInterface())
 		.getUserApplicationInformation(templateNode.getTemplate().getApplicationName());
 		getVersionPanel();
@@ -211,7 +208,7 @@ public class GridResourceSuggestionPanel extends JPanel implements TemplateNodeP
 	private void setStagingFS(String submissionLocation) {
 
 		MountPoint fs = userInformation.getRecommendedMountPoint(
-				submissionLocation, registry.getUserProperties().getCurrentFqan());
+				submissionLocation, registry.getUserEnvironmentManager().getCurrentFqan());
 		if (getExecutionFileSystemPanel() != null) {
 			getExecutionFileSystemPanel().setExternalSetValue(fs.getRootUrl());
 		}

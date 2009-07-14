@@ -5,7 +5,7 @@ import java.net.URI;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.model.files.GrisuFileObject;
 import org.vpac.grisu.client.model.jobs.GrisuJobMonitoringObject;
-import org.vpac.grisu.control.FileHelpers;
+import org.vpac.grisu.control.utils.FileHelpers;
 
 
 public class JobStatusQuery {

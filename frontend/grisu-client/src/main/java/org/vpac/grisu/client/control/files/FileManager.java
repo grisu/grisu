@@ -18,6 +18,7 @@ import javax.swing.filechooser.FileSystemView;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
+import org.vpac.grisu.client.control.exceptions.InformationError;
 import org.vpac.grisu.client.control.status.ApplicationStatusManager;
 import org.vpac.grisu.client.control.utils.MountPointEvent;
 import org.vpac.grisu.client.control.utils.MountPointsListener;
@@ -29,7 +30,6 @@ import org.vpac.grisu.client.model.files.RemoteFileSystemBackend;
 import org.vpac.grisu.client.model.files.events.FileSystemBackendEvent;
 import org.vpac.grisu.control.Environment;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.exceptions.InformationError;
 import org.vpac.grisu.fs.model.MountPoint;
 
 // TODO try to include the mountpoint management in here?

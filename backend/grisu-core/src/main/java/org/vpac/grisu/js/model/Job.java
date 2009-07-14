@@ -19,7 +19,7 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.CollectionOfElements;
-import org.vpac.grisu.control.SeveralXMLHelpers;
+import org.vpac.grisu.control.utils.SeveralXMLHelpers;
 import org.vpac.grisu.credential.model.ProxyCredential;
 import org.vpac.grisu.js.control.job.JobSubmitter;
 import org.vpac.grisu.js.model.utils.JsdlHelpers;

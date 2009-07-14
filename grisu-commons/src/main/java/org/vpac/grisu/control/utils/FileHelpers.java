@@ -1,6 +1,6 @@
 
 
-package org.vpac.grisu.control;
+package org.vpac.grisu.control.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -95,6 +95,13 @@ public class FileHelpers {
 		return sb.toString();
 	}
 	
+	/**
+	 * Tries to read a file. If the file isn't a text file, an exception is thrown.
+	 * 
+	 * @param file the file
+	 * @return the content of the (text-)file
+	 * @throws Exception if the file could not be read
+	 */
 	public static String readFromFileWithException(File file) throws Exception {
 		
 		StringBuffer sb = new StringBuffer(1024);
@@ -113,6 +120,12 @@ public class FileHelpers {
 		return sb.toString();
 	}
 
+	/**
+	 * Copies a bunch of files into a target directory.
+	 * 
+	 * @param sources the source files
+	 * @param dest the target directory
+	 */
 	public static void copyFileIntoDirectory(File[] sources, File dest) {
 
 		for (File source : sources) {

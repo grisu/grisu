@@ -1,12 +1,24 @@
-package org.vpac.grisu.control;
+package org.vpac.grisu.control.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+/**
+ * Helper methods for String handling.
+ * 
+ * @author markus
+ *
+ */
 public class SeveralStringHelpers {
 
+	/**
+	 * Converts an inputstream to a string.
+	 * 
+	 * @param is the input stream
+	 * @return the string
+	 */
 	public static String fromInputStream(InputStream is) {
 		
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));

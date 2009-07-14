@@ -49,8 +49,8 @@ import org.vpac.grisu.client.view.swing.utils.Utils;
 import org.vpac.grisu.control.Environment;
 import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.utils.ClasspathHacker;
-import org.vpac.grisu.control.utils.GrisuPluginFilenameFilter;
+import org.vpac.grisu.plugins.ClasspathHacker;
+import org.vpac.grisu.plugins.GrisuPluginFilenameFilter;
 import org.vpac.helpDesk.control.HelpDeskManager;
 import org.vpac.helpDesk.model.HelpDesk;
 import org.vpac.helpDesk.model.HelpDeskNotAvailableException;
@@ -630,7 +630,7 @@ public class Grisu implements WindowListener {
 				try {
 					application.em = new EnvironmentManager(application.serviceInterface);
 					GrisuRegistry temp = GrisuRegistry.getDefault(application.serviceInterface);
-					temp.setUserProperties(application.em);
+					temp.setUserEnvironmentManager(application.em);
 					application.em.initializeHistoryManager();
 					if ( application.serviceInterface == null ) {
 						myLogger.debug("Could not create/find service interface. Exiting.");

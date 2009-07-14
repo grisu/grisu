@@ -30,7 +30,6 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.JobConstants;
-import org.vpac.grisu.control.exceptions.JsdlException;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -38,21 +37,15 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-/**
+
+
+/*
  * This is a pretty important helper class as it has got all the helper methods
  * to access/alter a jsdl document.
  * 
  * @author Markus Binsteiner
- * 
  */
-/**
- * @author markus
- *
- */
-/**
- * @author markus
- * 
- */
+
 public class JsdlHelpers {
 
 	static final Logger myLogger = Logger
@@ -279,6 +272,13 @@ public class JsdlHelpers {
 		return processorCount;
 	}
 
+	/**
+	 * Returns the total memory requirement for this job. This is the memory that is required for each cpu
+	 * multiplied with the number of cpus.
+	 * 
+	 * @param jsdl the jsdl document
+	 * @return the total memory requirment
+	 */
 	public static long getTotalMemoryRequirement(Document jsdl) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl:TotalPhysicalMemory/jsdl:LowerBoundedRange";
@@ -339,6 +339,12 @@ public class JsdlHelpers {
 
 	}
 
+	/**
+	 * Sets the name of the application to use for this job.
+	 * 
+	 * @param xmlTemplateDoc the jsdl document
+	 * @param application the name of the application
+	 */
 	public static void setApplicationType(Document xmlTemplateDoc,
 			String application) {
 
@@ -366,8 +372,10 @@ public class JsdlHelpers {
 	}
 
 	/**
-	 * @param jsdl
-	 * @return
+	 * Returns the version of the application for this job.
+	 * 
+	 * @param jsdl the jsdl document
+	 * @return the version 
 	 */
 	public static String getApplicationVersion(Document jsdl) {
 
@@ -391,36 +399,6 @@ public class JsdlHelpers {
 	public static void setApplicationVersion(Document jsdl, String version) {
 		getApplicationVersionNode(jsdl).setTextContent(version);
 	}
-
-	// /**
-	// * Parses the jsdl document and returns the value of the
-	// ApplicationVersion
-	// * element
-	// *
-	// * @param jsdl
-	// * the jsdl document
-	// * @return the version of the application to run
-	// */
-	// public static String getApplicationVersion(Document jsdl) {
-	//
-	// String expression =
-	// "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl:ApplicationVersion";
-	// NodeList resultNodes = null;
-	// try {
-	// resultNodes = (NodeList) xpath.evaluate(expression, jsdl,
-	// XPathConstants.NODESET);
-	// } catch (XPathExpressionException e) {
-	// myLogger.warn("No application in jsdl file.");
-	// return null;
-	// }
-	//
-	// if (resultNodes.getLength() != 1) {
-	// return null;
-	// }
-	//
-	// return resultNodes.item(0).getTextContent();
-	//
-	// }
 
 	/**
 	 * Parses the jsdl document and returns the value of the
@@ -466,6 +444,13 @@ public class JsdlHelpers {
 
 	}
 	
+	/**
+	 * Sets the falue of the workingdirectory element.
+	 * 
+	 * @param jsdl the jsdl document
+	 * @param fileSystemName the name of the filesystem where the workingdirectory sits
+	 * @param path the path to the workingdirectory
+	 */
 	public static void setWorkingDirectory(Document jsdl, String fileSystemName, String path) {
 		
 		Element workingDirectoryElement = getWorkingDirectoryElement(jsdl);
@@ -475,6 +460,12 @@ public class JsdlHelpers {
 		
 	}
 
+	/**
+	 * Returns an absolute url to the working directory of this job.
+	 * 
+	 * @param jsdl the jsdl document
+	 * @return the absolute url
+	 */
 	public static String getAbsoluteWorkingDirectoryUrl(Document jsdl) {
 
 		Element wd = getWorkingDirectoryElement(jsdl);
@@ -489,7 +480,7 @@ public class JsdlHelpers {
 
 	}
 
-	public static Element getWorkingDirectoryElement(Document jsdl) {
+	private static Element getWorkingDirectoryElement(Document jsdl) {
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl-posix:POSIXApplication/jsdl-posix:WorkingDirectory";
 		NodeList resultNodes = null;
 		try {
@@ -591,27 +582,6 @@ public class JsdlHelpers {
 
 	}
 
-	// public static String getError(Document jsdl) {
-	//		
-	// String expression =
-	// "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl-posix:POSIXApplication/jsdl-posix:Error";
-	// NodeList resultNodes = null;
-	// try {
-	// resultNodes = (NodeList)xpath.evaluate(expression, jsdl,
-	// XPathConstants.NODESET);
-	// } catch (XPathExpressionException e) {
-	// myLogger.warn("No error in jsdl file.");
-	// return null;
-	// }
-	//
-	// if ( resultNodes.getLength() != 1 ) {
-	// return null;
-	// }
-	//
-	//		
-	// return resultNodes.item(0).getTextContent();
-	//		
-	// }
 
 	/**
 	 * Parses the jsdl document and returns an array of all the arguments that
@@ -783,17 +753,6 @@ public class JsdlHelpers {
 
 		String hosts[] = null;
 
-		// try {
-		// String jsdl_string = SeveralXMLHelpers.toString(jsdl);
-		// System.out.println(jsdl_string);
-		// } catch (TransformerFactoryConfigurationError e1) {
-		// // TODO Auto-generated catch block
-		// e1.printStackTrace();
-		// } catch (TransformerException e1) {
-		// // TODO Auto-generated catch block
-		// e1.printStackTrace();
-		// }
-
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Resources/jsdl:CandidateHosts/jsdl:HostName";
 		NodeList resultNodes = null;
 		try {
@@ -854,6 +813,12 @@ public class JsdlHelpers {
 
 	}
 
+	/**
+	 * Returns a list of all stage-in elements for this job.
+	 * 
+	 * @param jsdl the jsdl document
+	 * @return the stage-in elements
+	 */
 	public static List<Element> getStageInElements(Document jsdl) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:DataStaging";
@@ -875,6 +840,12 @@ public class JsdlHelpers {
 		return stageIns;
 	}
 	
+	/**
+	 * Returns a list of all inputfile urls for this job.
+	 * 
+	 * @param jsdl the jsdl document
+	 * @return the input files
+	 */
 	public static String[] getInputFileUrls(Document jsdl) {
 		
 		List<Element> stageInElements = getStageInElements(jsdl);
@@ -892,6 +863,12 @@ public class JsdlHelpers {
 		return result.toArray(new String[]{});
 	}
 
+	/**
+	 * Returns the source-file-url for this stage-in-element.
+	 * 
+	 * @param stageInElement the stage-in element
+	 * @return the source-file-url
+	 */
 	public static String getStageInSource(Element stageInElement) {
 
 		NodeList sources = stageInElement.getElementsByTagName("Source");
@@ -899,7 +876,7 @@ public class JsdlHelpers {
 			// not implemented/possible?
 			myLogger
 					.error("More than one/no source element in stageIn element.");
-			throw new JsdlException(
+			throw new RuntimeException(
 					"More than one/no source element in stageIn element.");
 		}
 
@@ -908,7 +885,7 @@ public class JsdlHelpers {
 		if (sources.getLength() != 1) {
 			// not implemented/possible?
 			myLogger.error("More than one/no URI element in sources element.");
-			throw new JsdlException(
+			throw new RuntimeException(
 					"More than one/no URI element in source element.");
 		}
 		Element uri = (Element) sources.item(0);
@@ -916,6 +893,12 @@ public class JsdlHelpers {
 		return uri.getTextContent();
 	}
 
+	/**
+	 * Returns the relative part of the target url for this stage-in element.
+	 * 
+	 * @param stageInElement the stage-in element
+	 * @return the relative part of the target url.
+	 */
 	public static Element getStageInTarget_relativePart(Element stageInElement) {
 
 		NodeList filenames = stageInElement.getElementsByTagName("FileName");
@@ -923,7 +906,7 @@ public class JsdlHelpers {
 			// not implemented/possible?
 			myLogger
 					.error("More than one/no FileName element in stageIn element.");
-			throw new JsdlException(
+			throw new RuntimeException(
 					"More than one/no FileName element in stageIn element.");
 		}
 
@@ -931,6 +914,12 @@ public class JsdlHelpers {
 		return filename;
 	}
 
+	/**
+	 * Returns the filesystem part of the target url for this stage-in element.
+	 * 
+	 * @param stageInElement the stage-in element
+	 * @return the filesystem part of the target url.
+	 */
 	public static Element getStageInTarget_filesystemPart(Element stageInElement) {
 
 		NodeList filesystems = stageInElement
@@ -940,7 +929,7 @@ public class JsdlHelpers {
 			// not implemented/possible?
 			myLogger
 					.error("More than one/no FileSystemName element in target element.");
-			throw new JsdlException(
+			throw new RuntimeException(
 					"More than one/no FileSystemName element in target element.");
 		}
 
@@ -948,6 +937,12 @@ public class JsdlHelpers {
 		return filesystem;
 	}
 
+	/**
+	 * Calculates the full url of this stage-in-elements' target file.
+	 * 
+	 * @param stageInElement the stage-in element
+	 * @return the url of the target file
+	 */
 	public static String getStageInTarget(Element stageInElement) {
 
 		String fsNamePart = getStageInTarget_filesystemPart(stageInElement)
@@ -970,84 +965,7 @@ public class JsdlHelpers {
 
 	}
 
-	/**
-	 * Extracts all data staging elements and puts them in a map that has got
-	 * the source as key and the target as value.
-	 * 
-	 * @param jsdl
-	 *            the jsdl template document
-	 * @param fqan
-	 *            the fqan with which the job gets submitted or null if non-vo
-	 *            job
-	 * @return a map with all data stagings for this job
-	 */
-	// public static Map<String, String> getStageIns(Document jsdl) {
-	//
-	// String expression =
-	// "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:DataStaging/jsdl:Source/jsdl:URI";
-	// NodeList resultNodes = null;
-	// try {
-	// resultNodes = (NodeList) xpath.evaluate(expression, jsdl,
-	// XPathConstants.NODESET);
-	// } catch (XPathExpressionException e) {
-	// myLogger.warn("No StageIn elements in jsdl file.");
-	// return null;
-	// }
-	// String executionHostFileSystem = getUserExecutionHostFs(jsdl);
-	//
-	// Map<String, String> stageIns = new HashMap<String, String>();
-	// // for every file staging element
-	// for (int i = 0; i < resultNodes.getLength(); i++) {
-	// String source = resultNodes.item(i).getTextContent();
-	// String target = null;
-	//
-	// NodeList dataStagingNode = resultNodes.item(i).getParentNode()
-	// .getParentNode().getChildNodes();
-	// // if ( dataStagingNode.getLength() != 1 ) {
-	// // myLogger.warn("Did not found unique parent node for source node:
-	// // "+source);
-	// // return null;
-	// // }
-	// for (int j = 0; j < dataStagingNode.getLength(); j++) {
-	// if ("FileName".equals(dataStagingNode.item(j).getNodeName())) {
-	// // found target node
-	// target = executionHostFileSystem + File.separator
-	// + dataStagingNode.item(j).getTextContent();
-	// break;
-	// }
-	// }
-	//
-	// // now that we have got source and target:
-	// stageIns.put(source, target);
-	// }
-	// return stageIns;
-	//
-	// }
-	// public static Map<String, Element> extractStageIns(Document jsdl) {
-	//		
-	// String expression =
-	// "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:DataStaging";
-	// NodeList resultNodes = null;
-	// try {
-	// resultNodes = (NodeList)xpath.evaluate(expression, jsdl,
-	// XPathConstants.NODESET);
-	// } catch (XPathExpressionException e) {
-	// myLogger.warn("No StageIn elements in jsdl file.");
-	// return null;
-	// }
-	// Map<String, Element> stageIns = new HashMap<String, Element>();
-	//		
-	// for ( int i=0; i<resultNodes.getLength(); i++ ){
-	// Element stageIn = (Element)resultNodes.item(i);
-	// Element source_uri =
-	// ((Element)((Element)stageIn.getElementsByTagName("Source").item(0)).getElementsByTagName("URI").item(0));
-	//			
-	// stageIns.put(source_uri.getTextContent(), stageIn);
-	// }
-	//		
-	//		
-	// return stageIns;
-	// }
+
 	/**
 	 * This one does not really follow the jsdl syntax. But we use something
 	 * called "modules" within the APACGrid so here it is. I suppose I should
@@ -1110,6 +1028,14 @@ public class JsdlHelpers {
 
 	}
 	
+	/**
+	 * Returns whether pbs-debugging should be enabled for this job or not.
+	 * 
+	 * This is an ARCS-specific extension to jsdl/rsl.
+	 * 
+	 * @param jsdl the jsdl file
+	 * @return whether to enable pbs-debugging or not
+	 */
 	public static String getPbsDebugElement(Document jsdl) {
 		
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl-arcs:PbsDebug";
@@ -1183,6 +1109,12 @@ public class JsdlHelpers {
 		return (Element) resultNodes.item(0);
 	}
 
+	/**
+	 * Whether to send an email when this job starts or not.
+	 * 
+	 * @param jsdl the jsdl document
+	 * @return whether to send an email or not
+	 */
 	public static boolean getSendEmailOnJobStart(Document jsdl) {
 
 		Element emailElement = getEmailElement(jsdl);
@@ -1201,7 +1133,12 @@ public class JsdlHelpers {
 		}
 	}
 	
-
+	/**
+	 * Whether to send an email when this job finishes or not.
+	 * 
+	 * @param jsdl the jsdl document
+	 * @return whether to send an email or not
+	 */
 	public static boolean getSendEmailOnJobFinish(Document jsdl) {
 
 		Element emailElement = getEmailElement(jsdl);
@@ -1220,6 +1157,12 @@ public class JsdlHelpers {
 		}
 	}
 
+	/**
+	 * The email address to send emails regarding this job.
+	 * 
+	 * @param jsdl the jsld document
+	 * @return the email address of the user
+	 */
 	public static String getEmail(Document jsdl) {
 
 		Element emailElement = getEmailElement(jsdl);
@@ -1232,33 +1175,7 @@ public class JsdlHelpers {
 
 	}
 
-//	/**
-//	 * Parses a jsdl document and returns the jsdl-posix:JobType element
-//	 * within.private
-//	 * 
-//	 * @param jsdl
-//	 *            the jsdl document
-//	 * @return the jobType for this job
-//	 */
-//	public static String getJobType(Document jsdl) {
-//
-//		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl-posix:POSIXApplication/jsdl-posix:JobType";
-//		NodeList resultNodes = null;
-//		try {
-//			resultNodes = (NodeList) xpath.evaluate(expression, jsdl,
-//					XPathConstants.NODESET);
-//		} catch (XPathExpressionException e) {
-//			myLogger.warn("No jobtype in jsdl file.");
-//			return null;
-//		}
-//
-//		if (resultNodes.getLength() != 1) {
-//			return null;
-//		}
-//
-//		return resultNodes.item(0).getTextContent();
-//
-//	}
+
 
 	/**
 	 * Parses the jsdl document and returns the url of filesystem on which the
@@ -1298,6 +1215,13 @@ public class JsdlHelpers {
 		return ms.getTextContent();
 	}
 
+	/**
+	 * Returns a list of all elements that use the filesystem with the specified alias.
+	 * 
+	 * @param jsdl the jsdl document
+	 * @param fileSystemName the name of the filesystem
+	 * @return a list of all elements
+	 */
 	public static List<Element> getElementsWithFileSystemNameAttribute(
 			Document jsdl, String fileSystemName) {
 		String expression = "//@filesystemName";
@@ -1322,6 +1246,13 @@ public class JsdlHelpers {
 		return result;
 	}
 
+	/**
+	 * Returns the element that is connected to this filesystem alias.
+	 * 
+	 * @param jsdl the jsdl document
+	 * @param fileSystemName the name of the filesystem
+	 * @return the MountSourceElement
+	 */
 	public static Element getMountSourceElement(Document jsdl,
 			String fileSystemName) {
 
@@ -1336,39 +1267,6 @@ public class JsdlHelpers {
 					.warn("No mountsource element with that name in jsdl file.");
 			return null;
 		}
-		// String expression =
-		// "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Resources/jsdl:FileSystem";
-		// NodeList resultNodes = null;
-		// try {
-		// resultNodes = (NodeList) xpath.evaluate(expression, jsdl,
-		// XPathConstants.NODESET);
-		// } catch (XPathExpressionException e) {
-		// myLogger
-		// .warn("No mountsource element with that name in jsdl file.");
-		// return null;
-		// }
-		//		
-		// ArrayList<Element> fs = new ArrayList<Element>();
-		// for ( int i=0; i<resultNodes.getLength(); i++ ) {
-		// fs.add((Element)resultNodes.item(i));
-		// }
-		//		
-		//
-		// for ( Element el : fs ) {
-		// if ( fileSystemName.equals(el.getAttribute("name")) ) {
-		// NodeList ms = el.getElementsByTagName("MountSource");
-		// if ( ms.getLength() != 1 ) {
-		// myLogger
-		// .error("More than one or no matching filesystems found. That is not possible.");
-		// throw new
-		// JsdlException("More than one or no matching filesystems found. That is not possible.");
-		// }
-		// return (Element)ms;
-		// }
-		// }
-
-		// myLogger.debug("Jsdl:");
-		// myLogger.debug(SeveralXMLHelpers.toStringWithoutAnnoyingExceptions(jsdl));
 
 		if (resultNodes.getLength() == 0) {
 			myLogger.error("No matching file system found in jsdl:");
@@ -1456,6 +1354,12 @@ public class JsdlHelpers {
 		return filesystem;
 	}
 
+	/**
+	 * Get the resources element.
+	 * 
+	 * @param jsdl the jsdl document
+	 * @return the resources element
+	 */
 	public static Element getResourcesElement(Document jsdl) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Resources";
@@ -1478,6 +1382,14 @@ public class JsdlHelpers {
 		return resources;
 	}
 
+	/**
+	 * Gets the (ARCS-specific) templateTag info element which is used to display information 
+	 * about the application/executable that is used for this job.
+	 * 
+	 * @param jsdl the jsdl document
+	 * @param templateTagName the name of the template tag
+	 * @return the element
+	 */
 	public static Element getTemplateTagInfoElement(Document jsdl,
 			String templateTagName) {
 
@@ -1503,6 +1415,15 @@ public class JsdlHelpers {
 
 	}
 	
+	/**
+	 * Whether this is a forced-single or forced-mpi job.
+	 * 
+	 * This is an ARCS-extension to jsdl and is used for usecases where users want to run
+	 * 1 cpu mpi jobs or multiple cpu single jobs.
+	 * 
+	 * @param jsdl the jsdl document
+	 * @return the job type (single/mpi)
+	 */
 	public static String getArcsJobType(Document jsdl) {
 		
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl-arcs:JobType";

@@ -3,7 +3,6 @@
 package org.vpac.grisu.client.model.template;
 
 import java.io.File;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -35,11 +34,10 @@ import org.vpac.grisu.client.model.template.postprocessor.PostprocessorFactory;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.JobCreationException;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.SeveralXMLHelpers;
-import org.vpac.grisu.control.exceptions.JobDescriptionNotValidException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.control.utils.DebugUtils;
+import org.vpac.grisu.control.utils.SeveralXMLHelpers;
 import org.vpac.grisu.js.model.utils.JSDLNamespaceContext;
 import org.vpac.grisu.js.model.utils.JsdlHelpers;
 import org.w3c.dom.Attr;
@@ -401,7 +399,7 @@ public class JsdlTemplate implements TemplateNodeListener {
 		try {
 			currentJobname = em.getServiceInterface().createJob(currentJobname,
 					this.jobCreationMethod);
-		} catch (JobCreationException e1) {
+		} catch (RuntimeException e1) {
 
 			throw new JobSubmissionException("Could not create job: "
 					+ e1.getLocalizedMessage(), e1);
@@ -470,7 +468,7 @@ public class JsdlTemplate implements TemplateNodeListener {
 
 		try {
 			em.getServiceInterface().setJobDescription(currentJobname, template);
-		} catch (JobDescriptionNotValidException e) {
+		} catch (RuntimeException e) {
 
 			throw new JobSubmissionException(
 					"Could not submit job because job description is invalid.",

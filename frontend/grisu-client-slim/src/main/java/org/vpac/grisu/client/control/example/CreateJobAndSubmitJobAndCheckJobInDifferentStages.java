@@ -6,7 +6,7 @@ import org.vpac.grisu.client.model.JobObject;
 import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.SeveralXMLHelpers;
+import org.vpac.grisu.control.utils.SeveralXMLHelpers;
 
 public class CreateJobAndSubmitJobAndCheckJobInDifferentStages {
 

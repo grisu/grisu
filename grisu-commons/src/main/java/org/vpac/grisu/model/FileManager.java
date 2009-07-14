@@ -1,4 +1,4 @@
-package org.vpac.grisu.control.files;
+package org.vpac.grisu.model;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,23 +8,41 @@ import javax.activation.FileDataSource;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.Environment;
-import org.vpac.grisu.control.FileHelpers;
-import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.FileTransferException;
+import org.vpac.grisu.control.utils.FileHelpers;
 
-public class FileHelper {
+/**
+ * A class to make file-related stuff like transfers from/to the backend easier.
+ * 
+ * It also manages an internal cache.
+ * 
+ * @author Markus Binsteiner
+ *
+ */
+public class FileManager{
 
 	public static final String NON_MOUNTPOINT_CACHE_DIRECTORYNAME = "non-grisu-user-space";
 
 	private final ServiceInterface serviceInterface;
-	static final Logger myLogger = Logger.getLogger(FileHelper.class.getName());
-//	private final GrisuRegistry registry;
+	static final Logger myLogger = Logger.getLogger(FileManager.class.getName());
 
-	public FileHelper(ServiceInterface si) {
+	/**
+	 * Default constructor.
+	 * 
+	 * @param si the serviceInterface
+	 */
+	public FileManager(ServiceInterface si) {
 		this.serviceInterface = si;
-//		this.registry = GrisuRegistry.getDefault(serviceInterface);
 	}
 
+	/**
+	 * Uploads a file to the backend which forwards it to it's target destination.
+	 * 
+	 * @param sourcePath the path to the local file
+	 * @param targetDirectory the target url
+	 * @throws FileTransferException if the transfer fails
+	 */
 	public void uploadFile(String sourcePath, String targetDirectory)
 			throws FileTransferException {
 
@@ -33,6 +51,12 @@ public class FileHelper {
 
 	}
 
+	/**
+	 * Helper method to check whether the provided url is for a local file or not.
+	 * 
+	 * @param file the url of the file
+	 * @return whether the file is local or not.
+	 */
 	public static boolean isLocal(String file) {
 
 		if (file.startsWith("gsiftp")) {
@@ -47,7 +71,7 @@ public class FileHelper {
 
 	}
 
-	public static String GET_URL_STRING_PATH(String url) {
+	private static String GET_URL_STRING_PATH(String url) {
 		return url.replace("=", "_").replace(",", "_").replace(" ", "_")
 				.replace(":", "").replace("//", File.separator).replace("/",
 						File.separator);
@@ -63,6 +87,13 @@ public class FileHelper {
 
 	}
 
+	/**
+	 * Downloads the file with the specified url into the local cache and returns a file object for it.
+	 * 
+	 * @param url the source url
+	 * @return the file object for the cached file
+	 * @throws FileTransferException if the transfer fails
+	 */
 	public File downloadFile(String url) throws FileTransferException {
 
 		File cacheTargetFile = getLocalCacheFile(url);
@@ -118,6 +149,13 @@ public class FileHelper {
 		return cacheTargetFile;
 	}
 
+	/**
+	 * Uploads a file to the backend which forwards it to it's target destination.
+	 * 
+	 * @param sourcePath the local file
+	 * @param targetDirectory the target url
+	 * @throws FileTransferException if the transfer fails
+	 */
 	public void uploadFile(File file, String targetDirectory)
 			throws FileTransferException {
 

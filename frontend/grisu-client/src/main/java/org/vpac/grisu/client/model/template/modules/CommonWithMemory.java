@@ -23,11 +23,11 @@ import org.vpac.grisu.client.model.template.JsdlTemplate;
 import org.vpac.grisu.client.model.template.nodes.DefaultTemplateNodeValueSetter;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.TemplateNodeValueSetter;
-import org.vpac.grisu.control.FqanEvent;
-import org.vpac.grisu.control.FqanListener;
 import org.vpac.grisu.control.JobCreationException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.js.model.utils.JsdlHelpers;
+import org.vpac.grisu.model.FqanEvent;
+import org.vpac.grisu.model.FqanListener;
 
 /**
  * @author Markus Binsteiner

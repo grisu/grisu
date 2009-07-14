@@ -29,22 +29,20 @@ import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileType;
 import org.apache.commons.vfs.FileTypeSelector;
 import org.apache.log4j.Logger;
+import org.vpac.grisu.control.InformationManager;
 import org.vpac.grisu.control.JobConstants;
-import org.vpac.grisu.control.JobCreationException;
 import org.vpac.grisu.control.JobSubmissionException;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.SeveralXMLHelpers;
-import org.vpac.grisu.control.exceptions.JobDescriptionNotValidException;
+import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.control.exceptions.ServerJobSubmissionException;
 import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.control.info.CachedMdsInformationManager;
-import org.vpac.grisu.control.info.InformationManager;
 import org.vpac.grisu.control.utils.CertHelpers;
 import org.vpac.grisu.control.utils.JsdlModifier;
 import org.vpac.grisu.control.utils.ServerPropertiesManager;
+import org.vpac.grisu.control.utils.SeveralXMLHelpers;
 import org.vpac.grisu.credential.model.ProxyCredential;
 import org.vpac.grisu.fs.control.FileContentDataSourceConnector;
 import org.vpac.grisu.fs.control.utils.FileSystemStructureToXMLConverter;
@@ -59,7 +57,6 @@ import org.vpac.grisu.js.control.job.JobSubmitter;
 import org.vpac.grisu.js.control.job.gt4.GT4Submitter;
 import org.vpac.grisu.js.model.Job;
 import org.vpac.grisu.js.model.JobDAO;
-import org.vpac.grisu.js.model.JobPropertiesException;
 import org.vpac.grisu.js.model.JobSubmissionObjectImpl;
 import org.vpac.grisu.js.model.JobSubmissionProperty;
 import org.vpac.grisu.js.model.utils.JsdlHelpers;
@@ -332,7 +329,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * int)
 	 */
 	public String createJob(String jobname, int createJobNameMethod)
-			throws JobCreationException {
+			 {
 
 		Job job = null;
 		getCredential();
@@ -346,7 +343,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// database
 		try {
 			Job testJob = getJob(job.getJobname());
-			throw new JobCreationException(
+			throw new RuntimeException(
 					"Could not save job in database: jobname already taken.");
 		} catch (NoSuchJobException e) {
 			// good.
@@ -444,7 +441,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	@Deprecated
 	public void setJobDescription(String jobname, Document jsdl)
-			throws JobDescriptionNotValidException, NoSuchJobException {
+			throws NoSuchJobException {
 
 		jsdl = SeveralXMLHelpers.cxfWorkaround(jsdl, "JobDefinition");
 		
@@ -853,7 +850,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		myLogger.debug("Submitting job to endpoint...");
 		try {
 			handle = getSubmissionManager().submit("GT4", job);
-		} catch (ServerJobSubmissionException e) {
+		} catch (RuntimeException e) {
 			e.printStackTrace();
 			throw new JobSubmissionException(
 					"Job submission to endpoint failed: "
@@ -885,7 +882,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * .lang.String, java.lang.String)
 	 */
 	public void setJobDescription_string(String jobname, String jsdl)
-			throws JobDescriptionNotValidException, NoSuchJobException {
+			throws NoSuchJobException {
 
 		try {
 			Document jsdl_doc = SeveralXMLHelpers.fromString(jsdl);
@@ -893,7 +890,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			throw new JobDescriptionNotValidException(
+			throw new RuntimeException(
 					"Could not parse string into xml document: "
 							+ e.getLocalizedMessage());
 		}
@@ -1950,7 +1947,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	protected Document recalculateWorkingDirectory(Job job,
 			String clusterRootUrl, boolean absolutePath)
-			throws ServerJobSubmissionException {
+			throws RuntimeException {
 
 		// set working directory
 		try {
@@ -1963,7 +1960,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return new_jsdl;
 		} catch (Exception e) {
 			// e.printStackTrace();
-			throw new ServerJobSubmissionException(
+			throw new RuntimeException(
 					"Could not recalculate directory.");
 		}
 	}
@@ -2550,7 +2547,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see org.vpac.grisu.control.ServiceInterface#submitJob(java.lang.String)
 	 */
 	public void submitJob(String jobname, String fqan)
-			throws ServerJobSubmissionException, NoValidCredentialException,
+			throws RuntimeException, NoValidCredentialException,
 			RemoteFileSystemException, VomsException, NoSuchJobException {
 
 		Job job = getJob(jobname);
@@ -2600,7 +2597,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								(String) submissionFsFileObject.getFileSystem()
 										.getAttribute("HOME_DIRECTORY"));
 			} catch (FileSystemException e) {
-				throw new ServerJobSubmissionException(
+				throw new RuntimeException(
 						"Could not find any root directory/filesystem for this job submission.");
 			}
 			clusterRootUrl = clusterRootFileObject.getName().toString();
@@ -2618,7 +2615,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		}
 		if (clusterRootUrl == null) {
-			throw new ServerJobSubmissionException(
+			throw new RuntimeException(
 					"Could not calculate cluster root directory/filesystem.");
 		}
 
@@ -2662,7 +2659,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		handle = getSubmissionManager().submit("GT4", job);
 
 		if (handle == null) {
-			throw new ServerJobSubmissionException(
+			throw new RuntimeException(
 					"Job apparently submitted but jobhandle is null for job: "
 							+ jobname);
 		}

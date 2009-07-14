@@ -1,11 +1,21 @@
 package org.vpac.grisu.js.model.utils;
 
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.IllegalFormatException;
 
+/**
+ * Helper methods to parse a commandline and split it up into executable and arguments. 
+ * 
+ * @author Markus Binsteiner
+ *
+ */
 public class CommandlineHelpers {
 	
+	/**
+	 * Returns the list of arguments for the specified commandline.
+	 * 
+	 * @param string the commandline
+	 * @return the parsed arguments
+	 */
 	public static ArrayList<String> extractArgumentsFromCommandline(String string) {
 		
 		ArrayList<String> args = parseString(string);
@@ -13,11 +23,25 @@ public class CommandlineHelpers {
 		return args;
 	}
 	
+	/**
+	 * Returns the executable (first string) for this commandline.
+	 * 
+	 * @param string the commandline
+	 * @return the executable
+	 */
 	public static String extractExecutable(String string) {
 		ArrayList<String> strings = parseString(string);
 		return strings.get(0);
 	}
 	
+	/**
+	 * Parses the specified string and returns a list of tokens. 
+	 * 
+	 * The tokens are either seperated by whitespaces or surrounded by double quotation marks.
+	 * 
+	 * @param string the commandline
+	 * @return all tokens for this commandline
+	 */
 	public static ArrayList<String> parseString(String string) {
 		ArrayList<String> strings = new ArrayList<String>();
 

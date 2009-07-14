@@ -1,4 +1,4 @@
-package org.vpac.grisu.client.control.utils;
+package org.vpac.grisu.control.utils;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -69,6 +69,12 @@ public enum JobCreatedProperty {
 	}
 	
 	
+	/**
+	 * Returns the enum for this keyname.
+	 * 
+	 * @param key the keyname
+	 * @return the enum
+	 */
 	public static JobCreatedProperty fromString(String key) {
 		return stringToJobPropertyMap.get(key);
 	}

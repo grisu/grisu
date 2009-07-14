@@ -4,13 +4,14 @@ import javax.annotation.Resource;
 import javax.jws.WebService;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
+
 import org.ietf.jgss.GSSException;
 import org.vpac.grisu.control.CXFServiceInterface;
-import org.vpac.grisu.control.ServiceTemplateManagement;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.utils.LocalTemplatesHelper;
 import org.vpac.grisu.control.utils.ServerPropertiesManager;
+import org.vpac.grisu.control.utils.ServiceTemplateManagement;
 import org.vpac.grisu.credential.model.ProxyCredential;
 import org.vpac.security.light.control.CertificateFiles;
 import org.vpac.security.light.control.VomsesFiles;

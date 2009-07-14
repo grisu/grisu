@@ -4,6 +4,12 @@ package org.vpac.grisu.control.utils;
 
 import java.util.regex.Pattern;
 
+/**
+ * Helper class to determine whether a string is a valid email address.
+ * 
+ * @author markus
+ *
+ */
 public class EmailUtils {
 
 	// RFC 2822 token definitions for valid email - only used together to form a

@@ -9,7 +9,7 @@ import javax.swing.JScrollPane;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.model.files.GrisuFileObject;
-import org.vpac.grisu.control.FileHelpers;
+import org.vpac.grisu.control.utils.FileHelpers;
 
 public class TextViewerPanel extends PreviewPanelInsert{
 	

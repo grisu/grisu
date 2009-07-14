@@ -1,4 +1,4 @@
-package org.vpac.grisu.control.utils;
+package org.vpac.grisu.plugins;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,6 +6,12 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+/**
+ * Used to add application specific plugins to the swing client.
+ * 
+ * @author markus
+ *
+ */
 public class ClasspathHacker {
 	
 	private static final Class[] parameters = new Class[]{URL.class};

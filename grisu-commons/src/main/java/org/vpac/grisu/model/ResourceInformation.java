@@ -3,10 +3,27 @@ package org.vpac.grisu.model;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Classes that implement this interface provide general information about the grid.
+ * 
+ * @author markus
+ *
+ */
 public interface ResourceInformation {
 	
+	/**
+	 * Returns a list of all available submission locations, regardless of VO.
+	 * 
+	 * @return all submission locations
+	 */
 	public String[] getAllSubmissionLocations();
 	
+	/**
+	 * Returns the name of the site the specified submission location or ulr belongs to.
+	 * 
+	 * @param urlOrSubmissionLocation the submission location or url
+	 * @return the name of the site
+	 */
 	public String getSite(String urlOrSubmissionLocation);
 	
 	/**
@@ -16,6 +33,12 @@ public interface ResourceInformation {
 	 */
 	public String[] getAllAvailableSubmissionLocations(String fqan);
 	
+	/**
+	 * Returns a list of all sites a user that is member of the specified fqan can access.
+	 * 
+	 * @param fqan the fqan
+	 * @return the list of sites
+	 */
 	public Set<String> getAllAvailableSites(String fqan);
 	
 	

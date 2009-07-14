@@ -1,4 +1,4 @@
-package org.vpac.grisu.control.info;
+package org.vpac.grisu.control;
 
 import java.util.Map;
 
@@ -11,7 +11,7 @@ import java.util.Map;
  *
  */
 public interface InformationManager {
-	
+
 
 	/**
 	 * Return all the names of all the sites from MDS
@@ -175,15 +175,21 @@ public interface InformationManager {
 	 */
 	public String[] getAllSubmissionLocationsForVO(String fqan);
 	
+	/**
+	 * Returns the jobmanager that submits to the specified queue/site.
+	 * 
+	 * @param site the site
+	 * @param queue the queue
+	 * @return the jobmanager
+	 */
 	public String getJobmanagerOfQueueAtSite(String site, String queue);
 	
+	/**
+	 * Returns an array of Strings with codes that provide the specified executable.
+	 * 
+	 * @param executable the executable
+	 * @return the codes
+	 */
 	public String[] getApplicationsThatProvideExecutable(String executable);
-	
-//	/**
-//	 * More of a helper method for other classes to create a submission location string as used with Grisu
-//	 * @param contactString the contact string (ala https://ng2.vpac.org:8443/wsrf/services/ManagedJobFactoryService)
-//	 * @param queue the queue (needs to be accessible via above contact string)
-//	 * @return the submission location string as used with Grisu
-//	 */
-//	public String createSubmissionLocationString(String contactString, String queue);
+
 }

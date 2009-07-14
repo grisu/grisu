@@ -7,6 +7,12 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.Environment;
 
+/**
+ * Class to help with the myproxy server parameters.
+ * 
+ * @author Markus Binsteiner
+ *
+ */
 public class MyProxyServerParams {
 	
 	public static PropertiesConfiguration config = null;
@@ -14,7 +20,13 @@ public class MyProxyServerParams {
 	static final Logger myLogger = Logger.getLogger(MyProxyServerParams.class
 			.getName());
 	
+	/**
+	 * Default myproxy server url. Points to myproxy2.arcs.org.au.
+	 */
 	public static final String DEFAULT_MYPROXY_SERVER = "myproxy2.arcs.org.au";
+	/**
+	 * Default myproxy server port. Default is 443.
+	 */
 	public static final int DEFAULT_MYPROXY_PORT = 443;
 	
 	/**
@@ -32,6 +44,11 @@ public class MyProxyServerParams {
 		return config;
 	}
 	
+	/**
+	 * Get the myproxy server hostname to use.
+	 * 
+	 * @return the myproxy server hostname
+	 */
 	public static String getMyProxyServer() {
 		String myProxyServer = "";
 		try {
@@ -47,6 +64,11 @@ public class MyProxyServerParams {
 		return myProxyServer;
 	}
 	
+	/**
+	 * Get the myproxy server port to use.
+	 * 
+	 * @return the myproxy server port.
+	 */
 	public static int getMyProxyPort() {
 		int myProxyPort = -1;
 		try {

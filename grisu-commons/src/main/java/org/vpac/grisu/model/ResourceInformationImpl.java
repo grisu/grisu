@@ -13,6 +13,12 @@ import java.util.TreeSet;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
 
+/**
+ * Implementation of {@link ResourceInformation}
+ * 
+ * @author markus
+ *
+ */
 public class ResourceInformationImpl implements ResourceInformation {
 
 	static final Logger myLogger = Logger.getLogger(ResourceInformation.class

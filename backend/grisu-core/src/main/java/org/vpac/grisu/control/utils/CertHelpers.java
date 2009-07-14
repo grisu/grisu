@@ -5,7 +5,6 @@ import org.globus.gsi.GlobusCredential;
 import org.globus.gsi.ptls.PureTLSUtil;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
-import org.vpac.grisu.control.FqanHelpers;
 import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.credential.model.ProxyCredential;
 import org.vpac.security.light.CredentialHelpers;

@@ -14,10 +14,19 @@ import javax.persistence.Transient;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.js.control.SimpleJsdlBuilder;
 import org.vpac.grisu.js.model.utils.JsdlHelpers;
 import org.w3c.dom.Document;
 
+/**
+ * A class that helps creating a job. 
+ * 
+ * This class is extended by the JobObject class in the grisu-client-slim
+ * package which includes methods to create the job on the serviceinterface, submit and monitor/control it.
+ * 
+ * @author Markus Binsteiner
+ */
 @Entity
 public class JobSubmissionObjectImpl {
 	

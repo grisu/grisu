@@ -1,4 +1,6 @@
-package org.vpac.grisu.js.model;
+package org.vpac.grisu.control.exceptions;
+
+import org.vpac.grisu.js.model.JobSubmissionProperty;
 
 
 public class JobPropertiesException extends Exception {

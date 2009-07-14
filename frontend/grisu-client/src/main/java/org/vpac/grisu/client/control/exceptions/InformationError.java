@@ -1,4 +1,4 @@
-package org.vpac.grisu.control.exceptions;
+package org.vpac.grisu.client.control.exceptions;
 
 public class InformationError extends Exception {
 	

@@ -35,7 +35,7 @@ public class JobNameManager {
 	 * {@link Job#ONLY_INCREMENT_JOB_NAME_IF_JOB_EXISTS_WITH_SAME_NAME} and {@link Job#ONLY_TIMESTAMP_JOB_NAME_IF_JOB_EXISTS_WITH_SAME_NAME}.
 	 * @return the new (suggested) jobname
 	 */
-	public static String getJobname(String dn, String proposedJobname, int createJobNameMethod) throws JobCreationException {
+	public static String getJobname(String dn, String proposedJobname, int createJobNameMethod) {
 		
 		proposedJobname = proposedJobname.replaceAll("\\s|;|'|\"|,|\\$|\\?|#", "_");
 		
@@ -55,7 +55,7 @@ public class JobNameManager {
 		case JobConstants.DONT_ACCEPT_NEW_JOB_WITH_EXISTING_JOBNAME:
 			
 			if ( proposedJobname == null || "".equals(proposedJobname) || "null".equals(proposedJobname) ) {
-				throw new JobCreationException("Could not create job: no valid jobname specified.");
+				throw new RuntimeException("Could not create job: no valid jobname specified.");
 			}
 			
 			Job job = null;
@@ -63,7 +63,7 @@ public class JobNameManager {
 			if ( createJobNameMethod == JobConstants.DONT_ACCEPT_NEW_JOB_WITH_EXISTING_JOBNAME ) {
 				try {
 					job = jobdao.findJobByDN(dn, proposedJobname);
-					throw new JobCreationException("Could not create job: job with the same jobname already exists.");
+					throw new RuntimeException("Could not create job: job with the same jobname already exists.");
 				} catch (NoSuchJobException e) {
 					// that's actually good. No job  with this jobname exists jet/anymore.
 					//TODO look whether there's a job directory in one of the grisu-job directory with this name

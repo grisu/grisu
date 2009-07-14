@@ -18,11 +18,18 @@ import org.vpac.grisu.control.Environment;
  */
 public class ServerPropertiesManager {
 	
-	public static final String DEFAULT_MYPROXY_SERVER = "myproxy2.arcs.org.au";
-	public static final int DEFAULT_MYPROXY_PORT = 443;
+	/**
+	 * Default myproxy lifetime: 3600 seconds.
+	 */
 	public static final int DEFAULT_MYPROXY_LIFETIME_IN_SECONDS = 3600;
+	/**
+	 * Default minimum myproxy lifetime before it gets refreshed: 600 seconds.
+	 */
 	public static final int DEFAULT_MIN_PROXY_LIFETIME_BEFORE_REFRESH = 600;
-	public static final String DEFAULT_JOB_DIR_NAME = "grisu-local-job-dir";
+	/**
+	 * Default directory name used as parent for the jobdirectories.
+	 */
+	public static final String DEFAULT_JOB_DIR_NAME = "grisu-dir";
 
 	public static PropertiesConfiguration config = null;
 
@@ -44,25 +51,21 @@ public class ServerPropertiesManager {
 		return config;
 	}
 	
+	/**
+	 * Returns the path to the directory where the debug information for this backend is stored.
+	 * 
+	 * @return the path to the debug directory.
+	 */
 	public static String getDebugDirectory() {
 		return new File(Environment.getGrisuDirectory(), "debug").getAbsolutePath();
 	}
 	
-	public static boolean getMDSenabled() {
-		boolean mdsenabled = false;
-		
-		try {
-			try {
-				mdsenabled = getServerConfiguration().getBoolean("mds-enabled");
-			} catch (NoSuchElementException e) {
-				// doesn't matter
-			}
-		} catch (ConfigurationException e) {
-//			myLogger.error("Problem with config file: " + e.getMessage());
-		}
-		return mdsenabled;
-	}
 	
+	/**
+	 * Checks whether the debug mode is enabled or not.
+	 * 
+	 * @return true if debug is enabled, false if not
+	 */
 	public static boolean getDebugModeOn() {
 		boolean debug = false;
 		
@@ -115,38 +118,12 @@ public class ServerPropertiesManager {
 			
 		return jobDirName;
 	}
-
-
-	public static String getMyProxyServer() {
-		String myProxyServer = "";
-		try {
-			myProxyServer = getServerConfiguration().getString("myProxyServer");
-			
-		} catch (ConfigurationException e) {
-//			myLogger.error("Problem with config file: " + e.getMessage());
-		}
-		if ( myProxyServer == null || "".equals(myProxyServer) ) {
-			myProxyServer = DEFAULT_MYPROXY_SERVER; 
-		}
-		
-		return myProxyServer;
-	}
 	
-	public static int getMyProxyPort() {
-		int myProxyPort = -1;
-		try {
-			myProxyPort = Integer.parseInt(getServerConfiguration().getString("myProxyPort"));
-			
-		} catch (Exception e) {
-//			myLogger.error("Problem with config file: " + e.getMessage());
-			return DEFAULT_MYPROXY_PORT;
-		}
-		if ( myProxyPort == -1 ) 
-			return DEFAULT_MYPROXY_PORT;
-		
-		return myProxyPort;
-	}
-	
+	/**
+	 * Returns the lifetime of a delegated proxy that is retrieved from myproxy.
+	 * 
+	 * @return the lifetime in seconds
+	 */
 	public static int getMyProxyLifetime() {
 		int lifetime_in_seconds = -1;
 		try {
@@ -162,6 +139,11 @@ public class ServerPropertiesManager {
 		return lifetime_in_seconds;
 	}
 	
+	/**
+	 * Returns the minimum lifetime of a proxy before the backend tries to retrieve a fresh one.
+	 * 
+	 * @return the minimum lifetime in seconds
+	 */
 	public static int getMinProxyLifetimeBeforeGettingNewProxy() {
 		int lifetime_in_seconds = -1;
 		try {
@@ -177,6 +159,11 @@ public class ServerPropertiesManager {
 		return lifetime_in_seconds;
 	} 
 	
+	/**
+	 * Checks whether the default (hsqldb) database configuration should be used.
+	 * 
+	 * @return true if default, false if not.
+	 */
 	public static boolean useDefaultDatabase() {
 		
 		try {
@@ -194,6 +181,11 @@ public class ServerPropertiesManager {
 		
 	}
 	
+	/**
+	 * Returns the type of database that should be used. At the moment hsqldb and mysql are supported.
+	 * 
+	 * @return the db type
+	 */
 	public static String getDatabaseType() {
 		
 		String dbType;
@@ -205,6 +197,11 @@ public class ServerPropertiesManager {
 		}
 	}
 	
+	/**
+	 * The url to connect to the database.
+	 * 
+	 * @return the url
+	 */
 	public static String getDatabaseConnectionUrl() {
 		String dbUrl;
 		try {
@@ -215,6 +212,11 @@ public class ServerPropertiesManager {
 		}
 	}
 	
+	/**
+	 * Returns the database username.
+	 * 
+	 * @return the db username
+	 */
 	public static String getDatabaseUsername() {
 		String dbUsername;
 		try {
@@ -225,6 +227,11 @@ public class ServerPropertiesManager {
 		}
 	}
 	
+	/**
+	 * The database password.
+	 * 
+	 * @return the password
+	 */
 	public static String getDatabasePassword() {
 		String dbPassword;
 		try {

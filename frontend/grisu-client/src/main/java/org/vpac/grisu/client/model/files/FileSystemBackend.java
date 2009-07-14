@@ -6,7 +6,7 @@ import java.io.File;
 import java.net.URI;
 
 import org.vpac.grisu.client.control.EnvironmentManager;
-import org.vpac.grisu.control.exceptions.InformationError;
+import org.vpac.grisu.client.control.exceptions.InformationError;
 
 /**
  * @author markus

@@ -15,7 +15,13 @@ import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.fs.model.MountPoint;
 
-public class UserInformationImpl implements UserInformation {
+/**
+ * The implemenation of {@link UserEnvironmentManager}.
+ * 
+ * @author markus
+ *
+ */
+public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	
 	private final ServiceInterface serviceInterface;
 	
@@ -27,10 +33,13 @@ public class UserInformationImpl implements UserInformation {
 	private Map<String, Set<MountPoint>> alreadyQueriedMountPointsPerSubmissionLocation = new TreeMap<String, Set<MountPoint>>();
 	private Map<String, Set<MountPoint>> alreadyQueriedMountPointsPerFqan = new TreeMap<String, Set<MountPoint>>();
 	private MountPoint[] cachedMountPoints = null;
+	
+	private String currentFqan;
+
 
 
 	
-	public UserInformationImpl(ServiceInterface serviceInterface) {
+	public UserEnvironmentManagerImpl(ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
 		resourceInfo = GrisuRegistry.getDefault(serviceInterface).getResourceInformation();
 	}
@@ -212,6 +221,25 @@ public class UserInformationImpl implements UserInformation {
 		}
 		
 		return null;
+	}
+	
+
+	public void addFqanListener(FqanListener listener) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public String getCurrentFqan() {
+		return currentFqan;
+	}
+
+	public void removeFqanListener(FqanListener listener) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void setCurrentFqan(String currentFqan) {
+		this.currentFqan = currentFqan;
 	}
 	
 }

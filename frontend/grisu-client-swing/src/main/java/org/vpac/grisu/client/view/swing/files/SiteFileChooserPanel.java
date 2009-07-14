@@ -39,6 +39,7 @@ import javax.swing.border.EmptyBorder;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
+import org.vpac.grisu.client.control.exceptions.InformationError;
 import org.vpac.grisu.client.control.files.FileManagerDeleteHelpers;
 import org.vpac.grisu.client.control.files.FileManagerListener;
 import org.vpac.grisu.client.control.files.FileTransfer;
@@ -51,7 +52,6 @@ import org.vpac.grisu.client.model.files.FileSystemListFrontend;
 import org.vpac.grisu.client.model.files.events.FileSystemBackendEvent;
 import org.vpac.grisu.client.view.swing.preview.PreviewDialog;
 import org.vpac.grisu.client.view.swing.utils.Utils;
-import org.vpac.grisu.control.exceptions.InformationError;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;

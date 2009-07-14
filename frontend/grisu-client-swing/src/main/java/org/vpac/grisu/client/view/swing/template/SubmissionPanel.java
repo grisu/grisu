@@ -43,10 +43,10 @@ import org.vpac.grisu.client.model.template.JsdlTemplate;
 import org.vpac.grisu.client.view.swing.environment.FQANSelectorDialog;
 import org.vpac.grisu.client.view.swing.mainPanel.AddApplicationDialog;
 import org.vpac.grisu.client.view.swing.utils.Utils;
-import org.vpac.grisu.control.FqanEvent;
-import org.vpac.grisu.control.FqanListener;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
+import org.vpac.grisu.model.FqanEvent;
+import org.vpac.grisu.model.FqanListener;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;

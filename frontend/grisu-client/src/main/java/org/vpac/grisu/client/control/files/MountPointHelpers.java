@@ -1,6 +1,6 @@
 
 
-package org.vpac.grisu.fs.control;
+package org.vpac.grisu.client.control.files;
 
 import org.vpac.grisu.fs.model.MountPoint;
 

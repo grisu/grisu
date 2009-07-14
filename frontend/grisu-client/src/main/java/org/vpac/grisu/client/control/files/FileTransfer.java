@@ -17,12 +17,12 @@ import javax.activation.FileDataSource;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.exceptions.FailedDownloadsException;
+import org.vpac.grisu.client.control.exceptions.InformationError;
 import org.vpac.grisu.client.control.utils.progress.ProgressDisplay;
 import org.vpac.grisu.client.model.files.FileConstants;
 import org.vpac.grisu.client.model.files.FileSystemException;
 import org.vpac.grisu.client.model.files.GrisuFileObject;
-import org.vpac.grisu.control.FileHelpers;
-import org.vpac.grisu.control.exceptions.InformationError;
+import org.vpac.grisu.control.utils.FileHelpers;
 
 public class FileTransfer {
 	

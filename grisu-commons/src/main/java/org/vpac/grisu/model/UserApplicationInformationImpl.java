@@ -11,15 +11,20 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.js.model.JobSubmissionProperty;
 
 
+/**
+ * Implementation of {@link UserApplicationInformation}.
+ * 
+ * @author markus
+  */
 public class UserApplicationInformationImpl extends ApplicationInformationImpl
 		implements UserApplicationInformation {
 
 	private Set<String> cachedSubmissionLocationsForUser = null;
 	private Set<String> cachedAllSitesForUser = null;
 	private Set<String> cachedAllVersionsForUser = null;
-	private UserInformation userInfo = null;
+	private UserEnvironmentManager userInfo = null;
 	
-	public UserApplicationInformationImpl(ServiceInterface serviceInterface, UserInformation userInfo, String application) {
+	public UserApplicationInformationImpl(ServiceInterface serviceInterface, UserEnvironmentManager userInfo, String application) {
 		super(serviceInterface, application);
 		this.userInfo = userInfo;
 	}

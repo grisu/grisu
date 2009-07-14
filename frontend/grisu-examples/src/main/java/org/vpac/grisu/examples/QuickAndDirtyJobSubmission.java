@@ -3,7 +3,7 @@ import java.io.File;
 
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.SeveralXMLHelpers;
+import org.vpac.grisu.control.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 
 

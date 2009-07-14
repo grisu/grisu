@@ -11,7 +11,7 @@ import javax.swing.SwingConstants;
 
 import org.vpac.grisu.client.model.template.JsdlTemplate;
 import org.vpac.grisu.client.model.template.modules.TemplateModule;
-import org.vpac.grisu.control.SeveralXMLHelpers;
+import org.vpac.grisu.control.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 
 public class TemplateParentPanel extends JPanel {

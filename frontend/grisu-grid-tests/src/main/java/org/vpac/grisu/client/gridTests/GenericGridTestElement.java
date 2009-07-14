@@ -3,11 +3,12 @@ package org.vpac.grisu.client.gridTests;
 import java.io.File;
 
 import org.vpac.grisu.client.model.JobObject;
+import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
-import org.vpac.grisu.control.files.FileHelper;
 import org.vpac.grisu.js.model.JobSubmissionProperty;
+import org.vpac.grisu.model.FileManager;
 
 public class GenericGridTestElement extends GridTestElement {
 	
@@ -32,7 +33,7 @@ public class GenericGridTestElement extends GridTestElement {
 			stdout = serviceInterface.getJobProperty(jobObject.getJobname(), JobSubmissionProperty.STDOUT.toString());
 			addMessage("url of stdout is: "+jobDir+"/"+stdout);
 			
-			FileHelper fileHelper = new FileHelper(serviceInterface);
+			FileManager fileHelper = GrisuRegistry.getDefault(serviceInterface).getFileManager();
 			File stdoutFile = fileHelper.downloadFile(jobDir+"/"+stdout);
 			
 			if ( stdoutFile.length() > 0 ) {

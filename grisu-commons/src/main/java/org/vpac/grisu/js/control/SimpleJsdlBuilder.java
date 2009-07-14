@@ -4,11 +4,11 @@ import java.io.InputStream;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.vpac.grisu.control.SeveralStringHelpers;
-import org.vpac.grisu.control.SeveralXMLHelpers;
-import org.vpac.grisu.control.files.FileHelper;
+import org.vpac.grisu.control.utils.SeveralStringHelpers;
+import org.vpac.grisu.control.utils.SeveralXMLHelpers;
 import org.vpac.grisu.js.model.JobSubmissionProperty;
 import org.vpac.grisu.js.model.utils.CommandlineHelpers;
+import org.vpac.grisu.model.FileManager;
 import org.w3c.dom.Document;
 
 /**
@@ -23,6 +23,16 @@ import org.w3c.dom.Document;
  */
 public class SimpleJsdlBuilder {
 
+	/**
+	 * Builds a jsdl file using the provided job properties.
+	 * 
+	 * For a list of key names, have a look at the JobSubmissionProperty enum class.
+	 * 
+	 * You need at least the {@link JobSubmissionProperty#COMMANDLINE} property to be set.
+	 * 
+	 * @param jobProperties the job properties
+	 * @return the jsdl document
+	 */
 	public static Document buildJsdl(Map<JobSubmissionProperty, String> jobProperties) {
 
 		InputStream in = SimpleJsdlBuilder.class
@@ -101,7 +111,7 @@ public class SimpleJsdlBuilder {
 
 				StringBuffer dataStagingElements = new StringBuffer();
 				for (String inputFileUrl : inputFileUrls.split(",")) {
-					if ( !FileHelper.isLocal(inputFileUrl) ) {
+					if ( !FileManager.isLocal(inputFileUrl) ) {
 						dataStagingElements
 								.append("<DataStaging>\n<FileName />\n<FileSystemName></FileSystemName>\n"
 										+ "<Source>\n<URI>");

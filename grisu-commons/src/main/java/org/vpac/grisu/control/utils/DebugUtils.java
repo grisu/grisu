@@ -1,9 +1,14 @@
 package org.vpac.grisu.control.utils;
 
 import org.apache.log4j.Logger;
-import org.vpac.grisu.control.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 
+/**
+ * Helper class to turn on jsdl debug output application wide.
+ * 
+ * @author markus
+ *
+ */
 public class DebugUtils {
 	
 	static final Logger myLogger = Logger.getLogger(DebugUtils.class

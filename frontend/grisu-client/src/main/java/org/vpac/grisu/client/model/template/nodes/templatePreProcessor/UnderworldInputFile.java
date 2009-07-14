@@ -6,8 +6,8 @@ import java.net.URISyntaxException;
 
 import org.vpac.grisu.client.model.files.GrisuFileObject;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
-import org.vpac.grisu.control.FileHelpers;
-import org.vpac.grisu.control.SeveralXMLHelpers;
+import org.vpac.grisu.control.utils.FileHelpers;
+import org.vpac.grisu.control.utils.SeveralXMLHelpers;
 import org.vpac.grisu.plugins.underworld.UnderworldHelpers;
 import org.w3c.dom.Element;
 

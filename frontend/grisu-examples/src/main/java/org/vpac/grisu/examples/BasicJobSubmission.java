@@ -9,8 +9,8 @@ import org.vpac.grisu.client.control.ServiceInterfaceFactory;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.JobCreationException;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.SeveralXMLHelpers;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.control.utils.SeveralXMLHelpers;
 import org.vpac.grisu.js.model.utils.JsdlHelpers;
 import org.w3c.dom.Document;
 
@@ -113,7 +113,7 @@ public class BasicJobSubmission {
 		String finalJobname = null;
 		try {
 			finalJobname = serviceInterface.createJob(jobname, JobConstants.DONT_ACCEPT_NEW_JOB_WITH_EXISTING_JOBNAME);
-		} catch (JobCreationException e) {
+		} catch (RuntimeException e) {
 			System.err.println("Could not create job on grisu server: "+e.getLocalizedMessage());
 			try {
 				serviceInterface.kill(jobname, true);

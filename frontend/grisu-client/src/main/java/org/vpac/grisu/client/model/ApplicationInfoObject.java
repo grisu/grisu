@@ -11,10 +11,10 @@ import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.exceptions.SubmissionLocationException;
 import org.vpac.grisu.client.control.utils.MountPointEvent;
 import org.vpac.grisu.client.control.utils.MountPointsListener;
-import org.vpac.grisu.control.FqanEvent;
-import org.vpac.grisu.control.FqanListener;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
+import org.vpac.grisu.model.FqanEvent;
+import org.vpac.grisu.model.FqanListener;
 
 /**
  * Just a wrapper object to make info handling easier for an applications and

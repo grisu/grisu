@@ -31,10 +31,10 @@ import org.vpac.grisu.client.model.VersionObject;
 import org.vpac.grisu.client.model.template.modules.Common;
 import org.vpac.grisu.client.model.template.nodes.DefaultTemplateNodeValueSetter;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
-import org.vpac.grisu.control.FqanEvent;
-import org.vpac.grisu.control.FqanListener;
 import org.vpac.grisu.control.JobCreationException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
+import org.vpac.grisu.model.FqanEvent;
+import org.vpac.grisu.model.FqanListener;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;

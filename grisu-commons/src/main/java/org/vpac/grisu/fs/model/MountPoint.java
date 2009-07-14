@@ -38,10 +38,12 @@ public class MountPoint implements Comparable<MountPoint> {
 	}
 	
 	/**
-	 * Creates a MountPoint.
-	 * @param user
-	 * @param rootUrl
-	 * @param mountpoint
+	 * Creates a MountPoint. Sets automount property to false.
+	 * 
+	 * @param dn the dn of the user
+	 * @param fqan the fqan that is used to access this filesystem
+	 * @param rootUrl the root url 
+	 * @param mountpoint the name of the mountpoint
 	 */
 	public MountPoint(String dn, String fqan, String url, String mountpoint) {
 		this.dn = dn;
@@ -50,6 +52,14 @@ public class MountPoint implements Comparable<MountPoint> {
 		this.mountpointName = mountpoint;
 	}
 	
+	/**
+	 * Creates a Mountpoint.
+	 * @param dn the dn of the user
+	 * @param fqan the fqan that is used to access this filesystem
+	 * @param url the root url
+	 * @param mountpoint the name of the mountpoint
+	 * @param automaticallyMounted whether this mountpoint was mounted automatically using mds information or manually by the user
+	 */
 	public MountPoint(String dn, String fqan, String url, String mountpoint, boolean automaticallyMounted) {
 		this(dn,fqan,url,mountpoint);
 		this.automaticallyMounted = automaticallyMounted;
@@ -57,8 +67,8 @@ public class MountPoint implements Comparable<MountPoint> {
 	
 	/**
 	 * This is used primarily to create a "dummy" mountpoint to be able to use the {@link User#unmountFileSystem(String)} method.
-	 * @param dn
-	 * @param mountpoint
+	 * @param dn the dn of the user
+	 * @param mountpoint the name of the mountpoint
 	 */
 	public MountPoint(String dn, String mountpoint) {
 		this.dn = dn;
@@ -226,6 +236,9 @@ public class MountPoint implements Comparable<MountPoint> {
 		return false;
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	public String toString() {
 		return getMountpointName();
 	}

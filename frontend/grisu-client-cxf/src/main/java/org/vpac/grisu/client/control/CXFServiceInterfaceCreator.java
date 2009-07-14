@@ -7,11 +7,16 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.cxf.aegis.AegisContext;
 import org.apache.cxf.aegis.databinding.AegisDatabinding;
+import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.frontend.ClientProxy;
 import org.apache.cxf.interceptor.LoggingInInterceptor;
 import org.apache.cxf.interceptor.LoggingOutInterceptor;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
@@ -22,15 +27,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.ServiceInterfaceCreator;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 
-import org.apache.cxf.endpoint.Client;
-import org.apache.cxf.frontend.ClientProxy;
 import com.sun.org.apache.xerces.internal.dom.DocumentImpl;
-
-import org.apache.cxf.common.util.XMLSchemaQNames;
-
-import javax.activation.*;
-import org.apache.cxf.aegis.type.mtom.DataSourceType;
-import org.apache.cxf.aegis.type.mtom.DataHandlerType;
 
 
 public class CXFServiceInterfaceCreator implements ServiceInterfaceCreator{

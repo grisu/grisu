@@ -6,18 +6,19 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-import org.vpac.grisu.control.FileHelpers;
+import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.JobSubmissionException;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.SeveralXMLHelpers;
+import org.vpac.grisu.control.exceptions.FileTransferException;
+import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
-import org.vpac.grisu.control.files.FileHelper;
-import org.vpac.grisu.control.files.FileTransferException;
+import org.vpac.grisu.control.utils.FileHelpers;
+import org.vpac.grisu.control.utils.SeveralXMLHelpers;
 import org.vpac.grisu.js.model.JobCreatedProperty;
-import org.vpac.grisu.js.model.JobPropertiesException;
 import org.vpac.grisu.js.model.JobSubmissionObjectImpl;
 import org.vpac.grisu.js.model.JobSubmissionProperty;
+import org.vpac.grisu.model.FileManager;
 import org.w3c.dom.Document;
 
 public class JobObject extends JobSubmissionObjectImpl {
@@ -25,7 +26,6 @@ public class JobObject extends JobSubmissionObjectImpl {
 	static final Logger myLogger = Logger.getLogger(JobObject.class.getName());
 
 	private final ServiceInterface serviceInterface;
-	private final FileHelper fileHelper;
 
 	private int status = JobConstants.UNDEFINED;
 	
@@ -43,7 +43,6 @@ public class JobObject extends JobSubmissionObjectImpl {
 		super(SeveralXMLHelpers.cxfWorkaround(si.getJsldDocument(jobname), "JobDefinition"));
 		this.serviceInterface = si;
 		this.jobname = jobname;
-		this.fileHelper = new FileHelper(serviceInterface);
 		
 		getStatus(true);
 		
@@ -52,19 +51,16 @@ public class JobObject extends JobSubmissionObjectImpl {
 	public JobObject(ServiceInterface si) {
 		super();
 		this.serviceInterface = si;
-		this.fileHelper = new FileHelper(serviceInterface);
 	}
 
 	public JobObject(ServiceInterface si, Map<String, String> jobProperties) {
 		super(jobProperties);
 		this.serviceInterface = si;
-		this.fileHelper = new FileHelper(serviceInterface);
 	}
 
 	public JobObject(ServiceInterface si, Document jsdl) {
 		super(jsdl);
 		this.serviceInterface = si;
-		this.fileHelper = new FileHelper(serviceInterface);
 	}
 
 	public String createJob(String fqan) throws JobPropertiesException {
@@ -100,9 +96,9 @@ public class JobObject extends JobSubmissionObjectImpl {
 		
 		// stage in local files
 		for (String inputFile : getInputFileUrls()) {
-			if ( FileHelper.isLocal(inputFile) ) {
+			if ( FileManager.isLocal(inputFile) ) {
 			try {
-				fileHelper.uploadFile(inputFile, jobDirectory);
+				GrisuRegistry.getDefault(serviceInterface).getFileManager().uploadFile(inputFile, jobDirectory);
 			} catch (FileTransferException e) {
 				throw new JobSubmissionException("Could not stage-in file: "
 						+ inputFile, e);
@@ -206,7 +202,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 		
 		File stdoutFile = null;
 		try {
-			stdoutFile = fileHelper.downloadFile(url);
+			stdoutFile = GrisuRegistry.getDefault(serviceInterface).getFileManager().downloadFile(url);
 		} catch (Exception e) {
 			throw new JobException(this, "Could not download stdout file.", e);
 		}
@@ -277,7 +273,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 		
 		File stderrFile = null;
 		try {
-			stderrFile = fileHelper.downloadFile(url);
+			stderrFile = GrisuRegistry.getDefault(serviceInterface).getFileManager().downloadFile(url);
 		} catch (Exception e) {
 			throw new JobException(this, "Could not download stderr file.", e);
 		}

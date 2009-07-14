@@ -15,6 +15,7 @@ import jline.ConsoleReader;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.globus.gsi.GlobusCredentialException;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.client.control.files.FileTransfer;
@@ -28,12 +29,10 @@ import org.vpac.grisu.client.model.login.LoginParams;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.JobCreationException;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.SeveralStringHelpers;
-import org.vpac.grisu.control.exceptions.JobDescriptionNotValidException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.control.utils.SeveralStringHelpers;
 import org.vpac.security.light.plainProxy.LocalProxy;
-import org.globus.gsi.GlobusCredentialException;
 
 
 public class Gricli implements FileTransferListener {
@@ -378,7 +377,7 @@ public class Gricli implements FileTransferListener {
 	}
 
 	private void executeSubmission() throws JobCreationException,
-			JobDescriptionNotValidException, NoSuchJobException,
+			NoSuchJobException,
 			JobSubmissionException, JobStagingException {
 
 		InputStream in = Gricli.class

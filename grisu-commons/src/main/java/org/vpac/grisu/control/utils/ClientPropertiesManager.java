@@ -72,6 +72,11 @@ public class ClientPropertiesManager {
 		return urls;
 	}
 	
+	/**
+	 * Returns all the (server-side) templates this users added to his personal templates.
+	 * 
+	 * @return the templates
+	 */
 	public static String[] getServerTemplates() {
 		
 		String[] templates = null;
@@ -90,6 +95,11 @@ public class ClientPropertiesManager {
 		return templates;
 	}
 	
+	/**
+	 * Call this if the user wants a new (server-side) template to his personal templates.
+	 * 
+	 * @param templateName the name of the template
+	 */
 	public static void addServerTemplate(String templateName) {
 
 		boolean alreadyThere = false;
@@ -112,6 +122,11 @@ public class ClientPropertiesManager {
 		}
 	}
 	
+	/**
+	 * Call this if a user wants to remove a (server-side) template from his personal templates.
+	 * 
+	 * @param templateName the name of the template
+	 */
 	public static void removeServerTemplate(String templateName) {
 		
 		String[] templates = config.getStringArray("serverTemplates");
@@ -132,6 +147,7 @@ public class ClientPropertiesManager {
 
 	/**
 	 * Use this if you want to add the url to the list of previously used
+	 * 
 	 * @param serviceInterfaceUrl the url of the ServiceInterface
 	 */
 	public static void addServiceInterfaceUrl(String serviceInterfaceUrl) {
@@ -157,6 +173,11 @@ public class ClientPropertiesManager {
 	}
 
 
+	/**
+	 * Saves the last used shib username.
+	 * 
+	 * @param username the username
+	 */
 	public static void saveShibbolethUsername(String username) {
 		try {
 			getClientConfiguration().setProperty("shibbolethUsername", username);
@@ -166,6 +187,11 @@ public class ClientPropertiesManager {
 		}
 	}
 
+	/**
+	 * Returns the last used shib username.
+	 * 
+	 * @return the username
+	 */
 	public static String getSavedShibbolethUsername() {
 		String username = null;
 		try {
@@ -177,6 +203,11 @@ public class ClientPropertiesManager {
 		return username;
 	}
 	
+	/**
+	 * Call this to store the name of the last used shib idp.
+	 * 
+	 * @param idpName the name of the idp
+	 */
 	public static void saveShibbolethIdp(String idpName) {
 		try {
 			getClientConfiguration().setProperty("shibbolethIdp", idpName);
@@ -186,6 +217,11 @@ public class ClientPropertiesManager {
 		}
 	}
 	
+	/**
+	 * Returns the name of the last used shib idp.
+	 * 
+	 * @return the idp name.
+	 */
 	public static String getSavedShibbolethIdp() {
 		String idp = null;
 		try {
@@ -253,6 +289,11 @@ public class ClientPropertiesManager {
 
 	}
 	
+	/**
+	 * Stores the last used fqan for this user.
+	 * 
+	 * @param fqan the fqan
+	 */
 	public static void saveLastUsedFqan(String fqan) {
 		try {
 			getClientConfiguration().setProperty("lastUsedFqan", fqan);
@@ -262,6 +303,11 @@ public class ClientPropertiesManager {
 		}
 	}
 
+	/**
+	 * Returns the last used fqan for this user.
+	 * 
+	 * @return the fqan
+	 */
 	public static String getLastUsedFqan() { 
 		String fqan = null;
 		try {
@@ -323,6 +369,11 @@ public class ClientPropertiesManager {
 		}
 	}
 	
+	/**
+	 * Returns the default (most likely: last used) serviceinterfaceurl for this user.
+	 * 
+	 * @return the serviceInterfaceurl
+	 */
 	public static String getDefaultServiceInterfaceUrl() {
 		String defaultUrl = null;
 		try {
@@ -338,6 +389,11 @@ public class ClientPropertiesManager {
 	}
 	
 
+	/**
+	 * Gets the connection timeout for the connection to a backend.
+	 * 
+	 * @return the timeout 
+	 */
 	public static long getConnectionTimeoutInMS() {
 		long timeout = -1;
 		try {
@@ -353,6 +409,12 @@ public class ClientPropertiesManager {
 		return timeout;
 	}
 	
+	/**
+	 * Sets the path to the executable for the default external application to handle this kind of file extension.
+	 * 
+	 * @param extension the file extension (e.g. pdf)
+	 * @param path the path to the executable (e.g. /opt/acroread/bin/acroread)
+	 */
 	public static void setDefaultExternalApplication(String extension,
 			String path) {
 		try {
@@ -364,6 +426,13 @@ public class ClientPropertiesManager {
 		
 	}
 	
+	/**
+	 * Returns the full path to the executable that is used as a default to handle files with
+	 * the specified extension.
+	 * 
+	 * @param extension the file extension
+	 * @return the full path to the executable
+	 */
 	public static String getDefaultExternalApplication(String extension) {
 		String path = null;
 		try {

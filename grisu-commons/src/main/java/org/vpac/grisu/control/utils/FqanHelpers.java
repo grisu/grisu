@@ -1,6 +1,6 @@
 
 
-package org.vpac.grisu.control;
+package org.vpac.grisu.control.utils;
 
 /**
  * Helps with the handling of FQANs. 

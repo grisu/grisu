@@ -1,9 +1,15 @@
 
 
-package org.vpac.grisu.control;
+package org.vpac.grisu.model;
 
 import java.util.EventObject;
 
+/**
+ * Event that is sent when something VO related changes in the users' environment.
+ *  
+ * @author markus
+ *
+ */
 public class FqanEvent extends EventObject {
 	
 	public static final int FQAN_ADDED = 0;

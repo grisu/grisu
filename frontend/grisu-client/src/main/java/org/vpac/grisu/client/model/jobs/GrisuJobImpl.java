@@ -5,7 +5,7 @@ import java.net.URISyntaxException;
 
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.model.template.JsdlTemplate;
-import org.vpac.grisu.control.SeveralXMLHelpers;
+import org.vpac.grisu.control.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 
 public class GrisuJobImpl {

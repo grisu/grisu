@@ -4,17 +4,14 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
 import org.apache.log4j.Logger;
@@ -22,16 +19,11 @@ import org.vpac.grisu.client.TemplateTagConstants;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.TemplateNodeEvent;
 import org.vpac.grisu.client.view.swing.utils.QueueRenderer;
-import org.vpac.grisu.control.FqanEvent;
-import org.vpac.grisu.control.FqanListener;
 import org.vpac.grisu.control.GrisuRegistry;
-import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.fs.model.MountPoint;
-import org.vpac.grisu.model.UserProperties;
-import org.vpac.grisu.model.GridResource;
-import org.vpac.grisu.model.ResourceInformation;
+import org.vpac.grisu.model.FqanEvent;
+import org.vpac.grisu.model.FqanListener;
 import org.vpac.grisu.model.UserApplicationInformation;
-import org.vpac.grisu.model.UserInformation;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -125,7 +117,7 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel,
 		
 		registry = GrisuRegistry.getDefault(node.getTemplate().getEnvironmentManager().getServiceInterface());
 
-		registry.getUserProperties().addFqanListener(this);
+		registry.getUserEnvironmentManager().addFqanListener(this);
 
 		this.applicationName = this.templateNode.getTemplate()
 				.getApplicationName();
@@ -238,7 +230,7 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel,
 					&& getVersionPanel().getMode() == Version.DEFAULT_VERSION_MODE) {
 				allQueues = infoObject
 						.getAvailableSubmissionLocationsForVersionAndFqan(
-								newValue, registry.getUserProperties().getCurrentFqan());
+								newValue, registry.getUserEnvironmentManager().getCurrentFqan());
 				if (allQueues.size() == 0) {
 					siteModel.setSelectedItem("Not available.");
 					queueModel.setSelectedItem("Not available.");
@@ -247,12 +239,12 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel,
 			} else if (getVersionPanel() != null
 					&& getVersionPanel().getMode() == Version.ANY_VERSION_MODE) {
 				allQueues = infoObject
-						.getAvailableSubmissionLocationsForFqan(registry.getUserProperties()
+						.getAvailableSubmissionLocationsForFqan(registry.getUserEnvironmentManager()
 								.getCurrentFqan());
 			} else {
 				allQueues = infoObject
 						.getAvailableSubmissionLocationsForVersionAndFqan(
-								newValue, registry.getUserProperties().getCurrentFqan());
+								newValue, registry.getUserEnvironmentManager().getCurrentFqan());
 			}
 
 			allSites = registry.getResourceInformation()
@@ -396,8 +388,8 @@ public class SubmissionLocation extends JPanel implements TemplateNodePanel,
 
 	private void setStagingFS(String submissionLocation) {
 
-		MountPoint fs = registry.getUserInformation().getRecommendedMountPoint(
-				submissionLocation, registry.getUserProperties().getCurrentFqan());
+		MountPoint fs = registry.getUserEnvironmentManager().getRecommendedMountPoint(
+				submissionLocation, registry.getUserEnvironmentManager().getCurrentFqan());
 		if (getExecutionFileSystemPanel() != null) {
 			getExecutionFileSystemPanel().setExternalSetValue(fs.getRootUrl());
 		}

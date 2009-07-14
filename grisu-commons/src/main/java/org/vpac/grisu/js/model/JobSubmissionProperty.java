@@ -6,6 +6,11 @@ import java.util.Map;
 import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.ServiceInterface;
 
+/**
+ * Basic properties for a job that are needed to create a job.
+ * 
+ * @author markus
+ */
 public enum JobSubmissionProperty {
 	
 	/**

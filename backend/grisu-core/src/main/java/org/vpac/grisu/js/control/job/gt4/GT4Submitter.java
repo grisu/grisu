@@ -31,15 +31,14 @@ import org.globus.wsrf.impl.security.authentication.Constants;
 import org.globus.wsrf.impl.security.authorization.Authorization;
 import org.globus.wsrf.impl.security.authorization.HostAuthorization;
 import org.ietf.jgss.GSSCredential;
+import org.vpac.grisu.control.InformationManager;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.SeveralXMLHelpers;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
-import org.vpac.grisu.control.exceptions.ServerJobSubmissionException;
 import org.vpac.grisu.control.info.CachedMdsInformationManager;
-import org.vpac.grisu.control.info.InformationManager;
 import org.vpac.grisu.control.utils.DebugUtils;
 import org.vpac.grisu.control.utils.ServerPropertiesManager;
+import org.vpac.grisu.control.utils.SeveralXMLHelpers;
 import org.vpac.grisu.credential.model.ProxyCredential;
 import org.vpac.grisu.js.control.job.JobSubmitter;
 import org.vpac.grisu.js.model.Job;
@@ -73,7 +72,7 @@ public class GT4Submitter extends JobSubmitter {
 	 */
 	private String createJobSubmissionDescription(
 			ServiceInterface serviceInterface, Document jsdl)
-			throws ServerJobSubmissionException {
+			{
 
 		DebugUtils.jsdlDebugOutput("Before translating into rsl: ", jsdl);
 
@@ -301,7 +300,7 @@ public class GT4Submitter extends JobSubmitter {
 				}
 
 			} else {
-				throw new ServerJobSubmissionException(
+				throw new RuntimeException(
 						"Can't determine module because either/or application, version submissionLocation are missing.");
 			}
 
@@ -459,7 +458,7 @@ public class GT4Submitter extends JobSubmitter {
 	 * org.vpac.grisu.js.model.Job)
 	 */
 	protected String submit(ServiceInterface serviceInterface, String host,
-			String factoryType, Job job) throws ServerJobSubmissionException {
+			String factoryType, Job job) {
 
 		JobDescriptionType jobDesc = null;
 		String submittedJobDesc = null;

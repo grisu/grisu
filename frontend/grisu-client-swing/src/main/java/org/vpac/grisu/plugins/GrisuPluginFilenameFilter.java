@@ -1,8 +1,14 @@
-package org.vpac.grisu.control.utils;
+package org.vpac.grisu.plugins;
 
 import java.io.File;
 import java.io.FileFilter;
 
+/**
+ * Helper class for the swing client plugin system.
+ * 
+ * @author markus
+ *
+ */
 public class GrisuPluginFilenameFilter implements FileFilter {
 
 	public boolean accept(File arg0, String arg1) {

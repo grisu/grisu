@@ -11,7 +11,7 @@ import org.vpac.grisu.client.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.client.model.JobObject;
 import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.SeveralXMLHelpers;
+import org.vpac.grisu.control.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 
 public class SuperMonsterBatchJob {
