@@ -103,7 +103,7 @@ public class SimpleJsdlBuilder {
 				for (String inputFileUrl : inputFileUrls.split(",")) {
 					if ( !FileHelper.isLocal(inputFileUrl) ) {
 						dataStagingElements
-								.append("<DataStaging>\n<FileName />\n<FileSystemName>userExecutionHostFs</FileSystemName>\n"
+								.append("<DataStaging>\n<FileName />\n<FileSystemName></FileSystemName>\n"
 										+ "<Source>\n<URI>");
 						dataStagingElements.append(inputFileUrl);
 						dataStagingElements

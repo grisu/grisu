@@ -6,6 +6,7 @@ import org.vpac.grisu.client.model.JobObject;
 import org.vpac.grisu.control.GrisuRegistry;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.SeveralXMLHelpers;
 
 public class CreateJobAndSubmitJobAndCheckJobInDifferentStages {
 
@@ -18,14 +19,17 @@ public class CreateJobAndSubmitJobAndCheckJobInDifferentStages {
 		
 		JobObject createJobObject = new JobObject(si);
 		
+		createJobObject.setApplication("Java");
 		createJobObject.setCommandline("java -version");
 		createJobObject.setWalltimeInSeconds(3600*24*40);
-		createJobObject.setSubmissionLocation("dque@tango-m:ng2.vpac.org");
-		createJobObject.setCpus(8);
+		createJobObject.setCpus(1);
+		createJobObject.addInputFileUrl("/home/markus/test.txt");
+		createJobObject.addInputFileUrl("gsiftp://ng2.canterbury.ac.nz/home/grid-admin/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner/grix_splash_v1.1.jpg");
 		
+//		GrisuRegistry registry = GrisuRegistry.getDefault(si);
+//		System.out.println(StringUtils.join(registry.getApplicationInformation("java").getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin"),"\n"));
 		
-		GrisuRegistry registry = GrisuRegistry.getDefault(si);
-		System.out.println(StringUtils.join(registry.getApplicationInformation("java").getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin"),"\n"));
+		System.out.println(SeveralXMLHelpers.toStringWithoutAnnoyingExceptions(createJobObject.getJobDescriptionDocument()));
 		
 		String newJobname = createJobObject.createJob("/ARCS/NGAdmin", ServiceInterface.TIMESTAMP_METHOD);
 		

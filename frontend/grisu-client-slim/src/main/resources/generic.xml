@@ -15,7 +15,7 @@
 			<POSIXApplication
 				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
 				XXX_commandline_XXX
-				<WorkingDirectory filesystemName="userExecutionHostFs"></WorkingDirectory>
+				<WorkingDirectory ></WorkingDirectory>
 				<Output>XXX_stdout_XXX</Output>
 				<Input>XXX_stdin_XXX</Input>
 				<Error>XXX_stderr_XXX</Error>
@@ -27,10 +27,7 @@
 			<CandidateHosts>
 				XXX_submissionlocation_XXX
 			</CandidateHosts>
-			<FileSystem name="userExecutionHostFs">
-				<MountSource></MountSource>
-				<FileSystemType>normal</FileSystemType>
-			</FileSystem>
+
 		</Resources>
 		XXX_input_files_XXX
 	</JobDescription>
