@@ -20,7 +20,7 @@ import org.globus.myproxy.MyProxy;
 import org.globus.myproxy.MyProxyException;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
-import org.vpac.grisu.credential.model.ProxyCredential;
+import org.vpac.grisu.backend.model.ProxyCredential;
 
 
 public class MyProxyAuthInterceptor extends AbstractSoapInterceptor{

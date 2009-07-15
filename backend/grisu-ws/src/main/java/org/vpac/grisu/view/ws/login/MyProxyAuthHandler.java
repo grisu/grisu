@@ -14,7 +14,7 @@ import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.jdom.Element;
 import org.jdom.Namespace;
-import org.vpac.grisu.credential.model.ProxyCredential;
+import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 
 /**

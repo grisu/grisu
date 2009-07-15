@@ -102,7 +102,7 @@
 				<configuration>
 					<aggregate>true</aggregate>
 					<linksource>true</linksource>
-					<excludePackageNames>cct.*:com.swtdesigner.*:org.vpac.grisu.client.*:org.vpac.grisu.backend.*</excludePackageNames>
+					<excludePackageNames>cct.*:org.vpac.grisu.plugins.*:com.swtdesigner.*:org.vpac.grisu.client.*:org.vpac.grisu.backend.*</excludePackageNames>
 					<breakiterator>true</breakiterator>
 					<source>1.5</source>
 					<links>
