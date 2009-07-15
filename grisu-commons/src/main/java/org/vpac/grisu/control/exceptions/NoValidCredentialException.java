@@ -1,11 +1,10 @@
-
-
 package org.vpac.grisu.control.exceptions;
 
 import java.io.Serializable;
 
-public class NoValidCredentialException extends RuntimeException implements Serializable {
-	
+public class NoValidCredentialException extends RuntimeException implements
+		Serializable {
+
 	private static final long serialVersionUID = 1L;
 
 	private String message;
@@ -14,9 +13,9 @@ public class NoValidCredentialException extends RuntimeException implements Seri
 		super(message);
 		this.message = message;
 	}
-	
-	public String getMessage() {
+
+	public final String getMessage() {
 		return message;
-		}
+	}
 
 }

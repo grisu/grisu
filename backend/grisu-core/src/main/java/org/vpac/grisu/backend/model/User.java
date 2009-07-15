@@ -7,8 +7,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -35,11 +33,11 @@ import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.backend.utils.CertHelpers;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.security.light.voms.VO;
 import org.vpac.security.light.voms.VOManagement.VOManagement;
+import org.vpac.security.light.vomsProxy.VomsException;
 
 import uk.ac.dl.escience.vfs.util.VFSUtil;
 
@@ -275,7 +273,7 @@ public class User {
 	 */
 	public MountPoint mountFileSystem(String uri, String mountPointName,
 			ProxyCredential cred, boolean useHomeDirectory)
-			throws RemoteFileSystemException, VomsException {
+			throws RemoteFileSystemException {
 
 //		if (!mountPointName.startsWith("/")) {
 //			mountPointName = "/" + mountPointName;
@@ -334,7 +332,7 @@ public class User {
 	 * @throws VomsException 
 	 */
 	private FileSystem connectToFileSystem(MountPoint mp)
-			throws FileSystemException, VomsException {
+			throws FileSystemException {
 		
 		// check whether a filesystem for this mountpoint is already cached
 		if (cachedFilesystemConnections.containsKey(mp)) {
@@ -398,14 +396,13 @@ public class User {
 	 * @throws VomsException 
 	 */
 	public MountPoint mountFileSystem(String root, String name,
-			boolean useHomeDirectory) throws RemoteFileSystemException, VomsException {
+			boolean useHomeDirectory) throws RemoteFileSystemException {
 
 		return mountFileSystem(root, name, getCred(), useHomeDirectory);
 	}
 
 	public MountPoint mountFileSystem(String root, String name, String fqan,
-			boolean useHomeDirectory) throws RemoteFileSystemException,
-			VomsException {
+			boolean useHomeDirectory) throws RemoteFileSystemException {
 
 		if ( fqan == null ) {
 			return mountFileSystem(root, name, useHomeDirectory);
@@ -486,8 +483,7 @@ public class User {
 	 *             if the (possible) required voms credential could not be
 	 *             created
 	 */
-	public FileObject aquireFile(String file) throws RemoteFileSystemException,
-			VomsException {
+	public FileObject aquireFile(String file) throws RemoteFileSystemException {
 		return aquireFile(file, getCred());
 	}
 
@@ -509,7 +505,7 @@ public class User {
 	 *             created
 	 */
 	public FileObject aquireFile(String file, ProxyCredential plainCred)
-			throws RemoteFileSystemException, VomsException {
+			throws RemoteFileSystemException {
 
 		String file_to_aquire = null;
 //		ProxyCredential credToUse = null;

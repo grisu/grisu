@@ -9,7 +9,6 @@ import org.vpac.grisu.client.model.files.GrisuFileObject;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.control.exceptions.VomsException;
 
 public interface GrisuJobMonitoringObject {
 
@@ -73,14 +72,14 @@ public interface GrisuJobMonitoringObject {
 	 * @throws VomsException if the vo to access this job is not available
 	 * @throws NoSuchJobException if the job is already killed
 	 */
-	public abstract void kill() throws VomsException, NoSuchJobException;
+	public abstract void kill() throws NoSuchJobException;
 	/**
 	 * Kills the current job and deletes the whole jobdirectory on the server.
 	 * @throws RemoteFileSystemException if the jobdirectory could not be accessed/deleted.
 	 * @throws VomsException if the vo to access this job is not available
 	 * @throws NoSuchJobException if the job is already killed
 	 */
-	public abstract void killAndClean() throws RemoteFileSystemException, VomsException, NoSuchJobException;
+	public abstract void killAndClean() throws RemoteFileSystemException, NoSuchJobException;
 
 	
 	

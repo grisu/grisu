@@ -14,7 +14,6 @@ import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.info.GridResource;
 import org.w3c.dom.Document;
@@ -90,9 +89,9 @@ public interface CXFServiceInterface extends ServiceInterface{
 	@WebMethod
 	public List<GridResource> findMatchingSubmissionLocations(Document jsdl, String fqan);
 	@WebMethod(operationName="mount1")
-	public MountPoint mount(String url, String mountpoint, boolean useHomeDirectoryOnThisFileSystemIfPossible) throws RemoteFileSystemException, VomsException;
+	public MountPoint mount(String url, String mountpoint, boolean useHomeDirectoryOnThisFileSystemIfPossible) throws RemoteFileSystemException;
 	@WebMethod(operationName="mount2")
-	public MountPoint mount(String url, String mountpoint, String fqan, boolean useHomeDirectoryOnThisFileSystemIfPossible) throws RemoteFileSystemException, VomsException;
+	public MountPoint mount(String url, String mountpoint, String fqan, boolean useHomeDirectoryOnThisFileSystemIfPossible) throws RemoteFileSystemException;
 	@WebMethod
 	public void umount(String mountpoint);
 	@WebMethod
@@ -100,31 +99,31 @@ public interface CXFServiceInterface extends ServiceInterface{
 	@WebMethod
 	public MountPoint getMountPointForUri(String uri);
 	@WebMethod
-	public String upload(DataSource file, String filename, boolean return_absolute_url) throws RemoteFileSystemException, VomsException;
+	public String upload(DataSource file, String filename, boolean return_absolute_url) throws RemoteFileSystemException;
 	@WebMethod
-	public DataSource download(String filename) throws RemoteFileSystemException, VomsException;
+	public DataSource download(String filename) throws RemoteFileSystemException;
 	@WebMethod
 	public Document ls(String directory, int recursion_level, boolean absolute_url) throws RemoteFileSystemException;
 	@WebMethod
 	public String ls_string(String directory, int recursion_level, boolean absolute_url) throws RemoteFileSystemException;
 	@WebMethod
-	public String cp(String source, String target, boolean overwrite, boolean return_absolute_url) throws RemoteFileSystemException, VomsException;
+	public String cp(String source, String target, boolean overwrite, boolean return_absolute_url) throws RemoteFileSystemException;
 	@WebMethod
-	public boolean fileExists(String file) throws RemoteFileSystemException, VomsException;
+	public boolean fileExists(String file) throws RemoteFileSystemException;
 	@WebMethod
-	public boolean isFolder(String file) throws RemoteFileSystemException, VomsException;
+	public boolean isFolder(String file) throws RemoteFileSystemException;
 	@WebMethod
-	public String[] getChildrenFiles(String folder, boolean onlyFiles) throws RemoteFileSystemException, VomsException;
+	public String[] getChildrenFiles(String folder, boolean onlyFiles) throws RemoteFileSystemException;
 	@WebMethod
-	public long getFileSize(String file) throws RemoteFileSystemException, VomsException;
+	public long getFileSize(String file) throws RemoteFileSystemException;
 	@WebMethod
-	public long lastModified(String remoteFile) throws RemoteFileSystemException, VomsException;
+	public long lastModified(String remoteFile) throws RemoteFileSystemException;
 	@WebMethod
-	public boolean mkdir(String folder) throws  RemoteFileSystemException, VomsException; 
+	public boolean mkdir(String folder) throws  RemoteFileSystemException; 
 	@WebMethod
-	public void deleteFile(String file) throws RemoteFileSystemException, VomsException;
+	public void deleteFile(String file) throws RemoteFileSystemException;
 	@WebMethod
-	public void deleteFiles(String[] files) throws RemoteFileSystemException, VomsException;
+	public void deleteFiles(String[] files) throws RemoteFileSystemException;
 	@WebMethod
 	public Document ps();
 	@WebMethod 
@@ -142,7 +141,7 @@ public interface CXFServiceInterface extends ServiceInterface{
 	@WebMethod
 	public void setJobDescription_string(String jobname, String jsdl) throws NoSuchJobException;
 	@WebMethod(operationName="submitJobOld")
-	public void submitJob(String jobname, String fqan) throws NoValidCredentialException, RemoteFileSystemException, VomsException, NoSuchJobException;
+	public void submitJob(String jobname, String fqan) throws NoValidCredentialException, RemoteFileSystemException, NoSuchJobException;
 	@WebMethod
 	public void submitJob(String jobname) throws JobSubmissionException;
 	@WebMethod
@@ -154,7 +153,7 @@ public interface CXFServiceInterface extends ServiceInterface{
 	@WebMethod
 	public String getJobDetails_string(String jobname) throws NoSuchJobException;
 	@WebMethod
-	public void kill(String jobname, boolean clean) throws RemoteFileSystemException, VomsException, NoSuchJobException;
+	public void kill(String jobname, boolean clean) throws RemoteFileSystemException, NoSuchJobException;
 	@WebMethod
 	public void addJobProperty(String jobname, String key, String value) throws NoSuchJobException;
 	@WebMethod

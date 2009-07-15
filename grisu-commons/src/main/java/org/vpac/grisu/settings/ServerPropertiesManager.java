@@ -1,5 +1,3 @@
-
-
 package org.vpac.grisu.settings;
 
 import java.io.File;
@@ -13,10 +11,10 @@ import org.apache.log4j.Logger;
  * Manages the $HOME/.grisu/grisu-server.config file.
  * 
  * @author Markus Binsteiner
- *
+ * 
  */
 public class ServerPropertiesManager {
-	
+
 	/**
 	 * Default myproxy lifetime: 3600 seconds.
 	 */
@@ -32,13 +30,15 @@ public class ServerPropertiesManager {
 
 	public static PropertiesConfiguration config = null;
 
-	static final Logger myLogger = Logger.getLogger(ServerPropertiesManager.class
-			.getName());
+	static final Logger myLogger = Logger
+			.getLogger(ServerPropertiesManager.class.getName());
 
 	/**
-	 * Retrieves the configuration parameters from the properties file
+	 * Retrieves the configuration parameters from the properties file.
+	 * 
 	 * @return the configuration
-	 * @throws ConfigurationException if the file could not be read/parsed
+	 * @throws ConfigurationException
+	 *             if the file could not be read/parsed
 	 */
 	public static PropertiesConfiguration getServerConfiguration()
 			throws ConfigurationException {
@@ -49,17 +49,18 @@ public class ServerPropertiesManager {
 		}
 		return config;
 	}
-	
+
 	/**
-	 * Returns the path to the directory where the debug information for this backend is stored.
+	 * Returns the path to the directory where the debug information for this
+	 * backend is stored.
 	 * 
 	 * @return the path to the debug directory.
 	 */
 	public static String getDebugDirectory() {
-		return new File(Environment.getGrisuDirectory(), "debug").getAbsolutePath();
+		return new File(Environment.getGrisuDirectory(), "debug")
+				.getAbsolutePath();
 	}
-	
-	
+
 	/**
 	 * Checks whether the debug mode is enabled or not.
 	 * 
@@ -67,57 +68,60 @@ public class ServerPropertiesManager {
 	 */
 	public static boolean getDebugModeOn() {
 		boolean debug = false;
-		
+
 		try {
 			try {
 				debug = getServerConfiguration().getBoolean("debug");
 			} catch (NoSuchElementException e) {
 				// doesn't matter
 			}
-			if ( debug ) {
+			if (debug) {
 				// try to create debug directory
 				File debugDir = new File(getDebugDirectory());
-				if ( ! debugDir.exists() ) {
+				if (!debugDir.exists()) {
 					debugDir.mkdir();
 				}
-				
-				if ( ! debugDir.exists() ) {
-					myLogger.error("Can't create debug directory. Turning debug mode off.");
+
+				if (!debugDir.exists()) {
+					myLogger
+							.error("Can't create debug directory. Turning debug mode off.");
 					debug = false;
 				}
 			}
 		} catch (ConfigurationException e) {
-//			myLogger.error("Problem with config file: " + e.getMessage());
+			// myLogger.error("Problem with config file: " + e.getMessage());
 		}
 		return debug;
 	}
-	
+
 	/**
-	 * Returns the name of the directory in which grisu jobs are located remotely. 
-	 * @return the name of the direcotory in which grisu stores jobs or null if the jobs should be stored in the root
-	 * home directory.
+	 * Returns the name of the directory in which grisu jobs are located
+	 * remotely.
+	 * 
+	 * @return the name of the direcotory in which grisu stores jobs or null if
+	 *         the jobs should be stored in the root home directory.
 	 */
 	public static String getGrisuJobDirectoryName() {
-		
+
 		String jobDirName = null;
 		try {
 			jobDirName = getServerConfiguration().getString("jobDirName");
 
-				if ( "none".equals(jobDirName.toLowerCase()) ) {
-					jobDirName = null;
-				}
+			if ("none".equals(jobDirName.toLowerCase())) {
+				jobDirName = null;
+			}
 
 		} catch (Exception e) {
 			jobDirName = null;
 		}
-		
-		if ( jobDirName == null ) { 
+
+		if (jobDirName == null) {
 			jobDirName = DEFAULT_JOB_DIR_NAME;
-		} 
-			
+		}
+
 		return jobDirName;
 	}
-	
+
 	/**
 	 * Returns the lifetime of a delegated proxy that is retrieved from myproxy.
 	 * 
@@ -126,67 +130,72 @@ public class ServerPropertiesManager {
 	public static int getMyProxyLifetime() {
 		int lifetime_in_seconds = -1;
 		try {
-			lifetime_in_seconds = Integer.parseInt(getServerConfiguration().getString("myProxyLifetime"));
-			
+			lifetime_in_seconds = Integer.parseInt(getServerConfiguration()
+					.getString("myProxyLifetime"));
+
 		} catch (Exception e) {
-//			myLogger.error("Problem with config file: " + e.getMessage());
+			// myLogger.error("Problem with config file: " + e.getMessage());
 			return DEFAULT_MYPROXY_LIFETIME_IN_SECONDS;
 		}
-		if ( lifetime_in_seconds == -1 ) 
+		if (lifetime_in_seconds == -1) {
 			return DEFAULT_MYPROXY_LIFETIME_IN_SECONDS;
-		
+		}
 		return lifetime_in_seconds;
 	}
-	
+
 	/**
-	 * Returns the minimum lifetime of a proxy before the backend tries to retrieve a fresh one.
+	 * Returns the minimum lifetime of a proxy before the backend tries to
+	 * retrieve a fresh one.
 	 * 
 	 * @return the minimum lifetime in seconds
 	 */
 	public static int getMinProxyLifetimeBeforeGettingNewProxy() {
 		int lifetime_in_seconds = -1;
 		try {
-			lifetime_in_seconds = Integer.parseInt(getServerConfiguration().getString("minProxyLifetimeBeforeRefresh"));
-			
+			lifetime_in_seconds = Integer.parseInt(getServerConfiguration()
+					.getString("minProxyLifetimeBeforeRefresh"));
+
 		} catch (Exception e) {
-//			myLogger.error("Problem with config file: " + e.getMessage());
+			// myLogger.error("Problem with config file: " + e.getMessage());
 			return DEFAULT_MIN_PROXY_LIFETIME_BEFORE_REFRESH;
 		}
-		if ( lifetime_in_seconds == -1 ) 
+		if (lifetime_in_seconds == -1) {
 			return DEFAULT_MIN_PROXY_LIFETIME_BEFORE_REFRESH;
-		
+		}
 		return lifetime_in_seconds;
-	} 
-	
+	}
+
 	/**
-	 * Checks whether the default (hsqldb) database configuration should be used.
+	 * Checks whether the default (hsqldb) database configuration should be
+	 * used.
 	 * 
 	 * @return true if default, false if not.
 	 */
 	public static boolean useDefaultDatabase() {
-		
+
 		try {
 			String dbtype = getServerConfiguration().getString("databaseType");
-			
-			if ( dbtype == null || dbtype.length() == 0 ) {
+
+			if (dbtype == null || dbtype.length() == 0) {
 				return true;
-			} else { 
+			} else {
 				return false;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return true;
 		}
-		
+
 	}
-	
+
 	/**
-	 * Returns the type of database that should be used. At the moment hsqldb and mysql are supported.
+	 * Returns the type of database that should be used. At the moment hsqldb
+	 * and mysql are supported.
 	 * 
 	 * @return the db type
 	 */
 	public static String getDatabaseType() {
-		
+
 		String dbType;
 		try {
 			dbType = getServerConfiguration().getString("databaseType");
@@ -195,7 +204,7 @@ public class ServerPropertiesManager {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * The url to connect to the database.
 	 * 
@@ -210,7 +219,7 @@ public class ServerPropertiesManager {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Returns the database username.
 	 * 
@@ -225,7 +234,7 @@ public class ServerPropertiesManager {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * The database password.
 	 * 

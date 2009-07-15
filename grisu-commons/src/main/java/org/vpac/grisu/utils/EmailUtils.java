@@ -1,5 +1,3 @@
-
-
 package org.vpac.grisu.utils;
 
 import java.util.regex.Pattern;
@@ -8,7 +6,7 @@ import java.util.regex.Pattern;
  * Helper class to determine whether a string is a valid email address.
  * 
  * @author markus
- *
+ * 
  */
 public class EmailUtils {
 

@@ -37,8 +37,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-
-
 /*
  * This is a pretty important helper class as it has got all the helper methods
  * to access/alter a jsdl document.
@@ -55,9 +53,9 @@ public class JsdlHelpers {
 	public static final String LOCAL_EXECUTION_HOST_FILESYSTEM = "localExecutionHostFs";
 
 	// TODO check whether access to this has to be synchronized
-	private final static XPath xpath = getXPath();
+	private static final XPath xpath = getXPath();
 
-	private final static XPath getXPath() {
+	private static final XPath getXPath() {
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		xpath.setNamespaceContext(new JSDLNamespaceContext());
 		return xpath;
@@ -65,7 +63,7 @@ public class JsdlHelpers {
 
 	/**
 	 * Checks whether the jsdl jobDescription against jsdl.xsd to see whether
-	 * it's valid xml
+	 * it's valid xml.
 	 * 
 	 * @param jobDescription
 	 *            the jsdl xml document
@@ -107,7 +105,7 @@ public class JsdlHelpers {
 	}
 
 	/**
-	 * Parses the jsdl document and returns the value of the JobName element
+	 * Parses the jsdl document and returns the value of the JobName element.
 	 * 
 	 * @param jsdl
 	 *            the jsdl document
@@ -133,7 +131,7 @@ public class JsdlHelpers {
 	}
 
 	/**
-	 * Parses the jsdl document and returns the value of the Description element
+	 * Parses the jsdl document and returns the value of the Description element.
 	 * 
 	 * @param jsdl
 	 *            the jsdl document
@@ -196,15 +194,16 @@ public class JsdlHelpers {
 			return -1;
 		}
 
-		if (cpus > 1)
+		if (cpus > 1) {
 			return walltimeInSecs / cpus;
-		else
+		} else {
 			return walltimeInSecs;
+		}
 	}
 
 	/**
 	 * Parses the jsdl document and returns the value of the TotalCPUCount
-	 * element
+	 * element.
 	 * 
 	 * @param jsdl
 	 *            the jsdl document
@@ -273,10 +272,11 @@ public class JsdlHelpers {
 	}
 
 	/**
-	 * Returns the total memory requirement for this job. This is the memory that is required for each cpu
-	 * multiplied with the number of cpus.
+	 * Returns the total memory requirement for this job. This is the memory
+	 * that is required for each cpu multiplied with the number of cpus.
 	 * 
-	 * @param jsdl the jsdl document
+	 * @param jsdl
+	 *            the jsdl document
 	 * @return the total memory requirment
 	 */
 	public static long getTotalMemoryRequirement(Document jsdl) {
@@ -342,8 +342,10 @@ public class JsdlHelpers {
 	/**
 	 * Sets the name of the application to use for this job.
 	 * 
-	 * @param xmlTemplateDoc the jsdl document
-	 * @param application the name of the application
+	 * @param xmlTemplateDoc
+	 *            the jsdl document
+	 * @param application
+	 *            the name of the application
 	 */
 	public static void setApplicationType(Document xmlTemplateDoc,
 			String application) {
@@ -374,8 +376,9 @@ public class JsdlHelpers {
 	/**
 	 * Returns the version of the application for this job.
 	 * 
-	 * @param jsdl the jsdl document
-	 * @return the version 
+	 * @param jsdl
+	 *            the jsdl document
+	 * @return the version
 	 */
 	public static String getApplicationVersion(Document jsdl) {
 
@@ -390,10 +393,11 @@ public class JsdlHelpers {
 
 	/**
 	 * Parses the jsdl document and returns the value of the ApplicationVersion
-	 * element
+	 * element.
 	 * 
 	 * @param jsdl
 	 *            the jsdl document
+	 * @param version the version of the application
 	 * @return the version of the application to run
 	 */
 	public static void setApplicationVersion(Document jsdl, String version) {
@@ -443,27 +447,32 @@ public class JsdlHelpers {
 		return getWorkingDirectoryElement(jsdl).getTextContent();
 
 	}
-	
+
 	/**
 	 * Sets the falue of the workingdirectory element.
 	 * 
-	 * @param jsdl the jsdl document
-	 * @param fileSystemName the name of the filesystem where the workingdirectory sits
-	 * @param path the path to the workingdirectory
+	 * @param jsdl
+	 *            the jsdl document
+	 * @param fileSystemName
+	 *            the name of the filesystem where the workingdirectory sits
+	 * @param path
+	 *            the path to the workingdirectory
 	 */
-	public static void setWorkingDirectory(Document jsdl, String fileSystemName, String path) {
-		
+	public static void setWorkingDirectory(Document jsdl,
+			String fileSystemName, String path) {
+
 		Element workingDirectoryElement = getWorkingDirectoryElement(jsdl);
-		
+
 		workingDirectoryElement.setAttribute("filesystemName", fileSystemName);
 		workingDirectoryElement.setTextContent(path);
-		
+
 	}
 
 	/**
 	 * Returns an absolute url to the working directory of this job.
 	 * 
-	 * @param jsdl the jsdl document
+	 * @param jsdl
+	 *            the jsdl document
 	 * @return the absolute url
 	 */
 	public static String getAbsoluteWorkingDirectoryUrl(Document jsdl) {
@@ -582,7 +591,6 @@ public class JsdlHelpers {
 
 	}
 
-
 	/**
 	 * Parses the jsdl document and returns an array of all the arguments that
 	 * are used on the jsdl-posix:Executable.
@@ -612,7 +620,7 @@ public class JsdlHelpers {
 	}
 
 	/**
-	 * Converts the jsdl xml document into string format
+	 * Converts the jsdl xml document into string format.
 	 * 
 	 * @param jsdl
 	 *            the jsdl document as a {@link Document}
@@ -751,7 +759,7 @@ public class JsdlHelpers {
 	 */
 	public static String[] getCandidateHosts(Document jsdl) {
 
-		String hosts[] = null;
+		String[] hosts = null;
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Resources/jsdl:CandidateHosts/jsdl:HostName";
 		NodeList resultNodes = null;
@@ -764,8 +772,9 @@ public class JsdlHelpers {
 		}
 
 		int number_hosts = resultNodes.getLength();
-		if (number_hosts == 0)
+		if (number_hosts == 0) {
 			return null;
+		}
 		hosts = new String[number_hosts];
 		for (int i = 0; i < number_hosts; i++) {
 			String host_line = resultNodes.item(i).getTextContent();
@@ -796,7 +805,7 @@ public class JsdlHelpers {
 	}
 
 	/**
-	 * Sets the name of the source file that gets staged into the job directory
+	 * Sets the name of the source file that gets staged into the job directory.
 	 * 
 	 * @param stageIn
 	 *            the DataStaging element
@@ -816,7 +825,8 @@ public class JsdlHelpers {
 	/**
 	 * Returns a list of all stage-in elements for this job.
 	 * 
-	 * @param jsdl the jsdl document
+	 * @param jsdl
+	 *            the jsdl document
 	 * @return the stage-in elements
 	 */
 	public static List<Element> getStageInElements(Document jsdl) {
@@ -839,34 +849,36 @@ public class JsdlHelpers {
 		}
 		return stageIns;
 	}
-	
+
 	/**
 	 * Returns a list of all inputfile urls for this job.
 	 * 
-	 * @param jsdl the jsdl document
+	 * @param jsdl
+	 *            the jsdl document
 	 * @return the input files
 	 */
 	public static String[] getInputFileUrls(Document jsdl) {
-		
+
 		List<Element> stageInElements = getStageInElements(jsdl);
-		
-		if ( stageInElements == null || stageInElements.size() == 0 ) {
+
+		if (stageInElements == null || stageInElements.size() == 0) {
 			return null;
 		}
-		
+
 		Set<String> result = new HashSet<String>();
-		for ( Element stageInElement : stageInElements ) {
+		for (Element stageInElement : stageInElements) {
 			String temp = getStageInSource(stageInElement);
 			result.add(temp);
 		}
-		
-		return result.toArray(new String[]{});
+
+		return result.toArray(new String[] {});
 	}
 
 	/**
 	 * Returns the source-file-url for this stage-in-element.
 	 * 
-	 * @param stageInElement the stage-in element
+	 * @param stageInElement
+	 *            the stage-in element
 	 * @return the source-file-url
 	 */
 	public static String getStageInSource(Element stageInElement) {
@@ -896,7 +908,8 @@ public class JsdlHelpers {
 	/**
 	 * Returns the relative part of the target url for this stage-in element.
 	 * 
-	 * @param stageInElement the stage-in element
+	 * @param stageInElement
+	 *            the stage-in element
 	 * @return the relative part of the target url.
 	 */
 	public static Element getStageInTarget_relativePart(Element stageInElement) {
@@ -917,7 +930,8 @@ public class JsdlHelpers {
 	/**
 	 * Returns the filesystem part of the target url for this stage-in element.
 	 * 
-	 * @param stageInElement the stage-in element
+	 * @param stageInElement
+	 *            the stage-in element
 	 * @return the filesystem part of the target url.
 	 */
 	public static Element getStageInTarget_filesystemPart(Element stageInElement) {
@@ -940,7 +954,8 @@ public class JsdlHelpers {
 	/**
 	 * Calculates the full url of this stage-in-elements' target file.
 	 * 
-	 * @param stageInElement the stage-in element
+	 * @param stageInElement
+	 *            the stage-in element
 	 * @return the url of the target file
 	 */
 	public static String getStageInTarget(Element stageInElement) {
@@ -956,7 +971,7 @@ public class JsdlHelpers {
 		if (fsRoot.endsWith("/")) {
 			return fsRoot + relPart;
 		} else {
-			if ( relPart.startsWith("/") ) {
+			if (relPart.startsWith("/")) {
 				return fsRoot + relPart;
 			} else {
 				return fsRoot + "/" + relPart;
@@ -964,7 +979,6 @@ public class JsdlHelpers {
 		}
 
 	}
-
 
 	/**
 	 * This one does not really follow the jsdl syntax. But we use something
@@ -998,46 +1012,47 @@ public class JsdlHelpers {
 			}
 
 			return modules;
-			
-			
+
 		} else {
 			// try old module path. This will be removed soonish.
 			myLogger.warn("No module found. Trying old module location...");
-		
-		expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl-posix:POSIXApplication/jsdl-posix:Module";
-		resultNodes = null;
-		try {
-			resultNodes = (NodeList) xpath.evaluate(expression, jsdl,
-					XPathConstants.NODESET);
-		} catch (XPathExpressionException e) {
-			myLogger.warn("No module in old location in jsdl file.");
-			return null;
-		}
 
-		if (resultNodes.getLength() < 1) {
-			return null;
-		}
+			expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl-posix:POSIXApplication/jsdl-posix:Module";
+			resultNodes = null;
+			try {
+				resultNodes = (NodeList) xpath.evaluate(expression, jsdl,
+						XPathConstants.NODESET);
+			} catch (XPathExpressionException e) {
+				myLogger.warn("No module in old location in jsdl file.");
+				return null;
+			}
 
-		String[] modules = new String[resultNodes.getLength()];
-		for (int i = 0; i < resultNodes.getLength(); i++) {
-			modules[i] = resultNodes.item(i).getTextContent();
-		}
-		myLogger.warn("Found modules but they are specified in the wrong (old) location within the jsdl document. Please change your template/jsdl file according to https://projects.arcs.org.au/trac/grisu/wiki/GlobusToolkitSubmitter");
-		return modules;
+			if (resultNodes.getLength() < 1) {
+				return null;
+			}
+
+			String[] modules = new String[resultNodes.getLength()];
+			for (int i = 0; i < resultNodes.getLength(); i++) {
+				modules[i] = resultNodes.item(i).getTextContent();
+			}
+			myLogger
+					.warn("Found modules but they are specified in the wrong (old) location within the jsdl document. Please change your template/jsdl file according to https://projects.arcs.org.au/trac/grisu/wiki/GlobusToolkitSubmitter");
+			return modules;
 		}
 
 	}
-	
+
 	/**
 	 * Returns whether pbs-debugging should be enabled for this job or not.
 	 * 
 	 * This is an ARCS-specific extension to jsdl/rsl.
 	 * 
-	 * @param jsdl the jsdl file
+	 * @param jsdl
+	 *            the jsdl file
 	 * @return whether to enable pbs-debugging or not
 	 */
 	public static String getPbsDebugElement(Document jsdl) {
-		
+
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl-arcs:PbsDebug";
 		NodeList resultNodes = null;
 		try {
@@ -1050,19 +1065,18 @@ public class JsdlHelpers {
 
 		if (resultNodes.getLength() == 0) {
 			// try old version
-			myLogger
-			.debug("Couldn't find pbs debug element.");
+			myLogger.debug("Couldn't find pbs debug element.");
 			return null;
 		}
 		if (resultNodes.getLength() != 1) {
 			myLogger
-			.debug("Found more than one pbs debug element. Not returning anything.");
+					.debug("Found more than one pbs debug element. Not returning anything.");
 			return null;
 		}
 		String value = ((Element) resultNodes.item(0)).getTextContent();
-		
+
 		return value;
-		
+
 	}
 
 	private static Element getEmailElement(Document jsdl) {
@@ -1112,14 +1126,15 @@ public class JsdlHelpers {
 	/**
 	 * Whether to send an email when this job starts or not.
 	 * 
-	 * @param jsdl the jsdl document
+	 * @param jsdl
+	 *            the jsdl document
 	 * @return whether to send an email or not
 	 */
 	public static boolean getSendEmailOnJobStart(Document jsdl) {
 
 		Element emailElement = getEmailElement(jsdl);
-		
-		if ( emailElement == null ) {
+
+		if (emailElement == null) {
 			return false;
 		}
 
@@ -1132,18 +1147,19 @@ public class JsdlHelpers {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Whether to send an email when this job finishes or not.
 	 * 
-	 * @param jsdl the jsdl document
+	 * @param jsdl
+	 *            the jsdl document
 	 * @return whether to send an email or not
 	 */
 	public static boolean getSendEmailOnJobFinish(Document jsdl) {
 
 		Element emailElement = getEmailElement(jsdl);
-		
-		if ( emailElement == null ) {
+
+		if (emailElement == null) {
 			return false;
 		}
 
@@ -1160,7 +1176,8 @@ public class JsdlHelpers {
 	/**
 	 * The email address to send emails regarding this job.
 	 * 
-	 * @param jsdl the jsld document
+	 * @param jsdl
+	 *            the jsld document
 	 * @return the email address of the user
 	 */
 	public static String getEmail(Document jsdl) {
@@ -1174,8 +1191,6 @@ public class JsdlHelpers {
 		return email;
 
 	}
-
-
 
 	/**
 	 * Parses the jsdl document and returns the url of filesystem on which the
@@ -1199,7 +1214,7 @@ public class JsdlHelpers {
 
 	/**
 	 * Parses a jsdl document and returns the urn of the filesystem that has
-	 * been requested
+	 * been requested.
 	 * 
 	 * @param jsdl
 	 *            the jsdl document
@@ -1216,10 +1231,13 @@ public class JsdlHelpers {
 	}
 
 	/**
-	 * Returns a list of all elements that use the filesystem with the specified alias.
+	 * Returns a list of all elements that use the filesystem with the specified
+	 * alias.
 	 * 
-	 * @param jsdl the jsdl document
-	 * @param fileSystemName the name of the filesystem
+	 * @param jsdl
+	 *            the jsdl document
+	 * @param fileSystemName
+	 *            the name of the filesystem
 	 * @return a list of all elements
 	 */
 	public static List<Element> getElementsWithFileSystemNameAttribute(
@@ -1249,8 +1267,10 @@ public class JsdlHelpers {
 	/**
 	 * Returns the element that is connected to this filesystem alias.
 	 * 
-	 * @param jsdl the jsdl document
-	 * @param fileSystemName the name of the filesystem
+	 * @param jsdl
+	 *            the jsdl document
+	 * @param fileSystemName
+	 *            the name of the filesystem
 	 * @return the MountSourceElement
 	 */
 	public static Element getMountSourceElement(Document jsdl,
@@ -1295,6 +1315,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @param fileSystemName
 	 *            the name of the (possibly new) filesystem
+	 * @param fileSystemRoot the root url for the filesystem
 	 * @return the filesystem element
 	 */
 	public static Element addOrRetrieveExistingFileSystemElement(Document jsdl,
@@ -1357,7 +1378,8 @@ public class JsdlHelpers {
 	/**
 	 * Get the resources element.
 	 * 
-	 * @param jsdl the jsdl document
+	 * @param jsdl
+	 *            the jsdl document
 	 * @return the resources element
 	 */
 	public static Element getResourcesElement(Document jsdl) {
@@ -1383,11 +1405,14 @@ public class JsdlHelpers {
 	}
 
 	/**
-	 * Gets the (ARCS-specific) templateTag info element which is used to display information 
-	 * about the application/executable that is used for this job.
+	 * Gets the (ARCS-specific) templateTag info element which is used to
+	 * display information about the application/executable that is used for
+	 * this job.
 	 * 
-	 * @param jsdl the jsdl document
-	 * @param templateTagName the name of the template tag
+	 * @param jsdl
+	 *            the jsdl document
+	 * @param templateTagName
+	 *            the name of the template tag
 	 * @return the element
 	 */
 	public static Element getTemplateTagInfoElement(Document jsdl,
@@ -1414,18 +1439,19 @@ public class JsdlHelpers {
 		return resources;
 
 	}
-	
+
 	/**
 	 * Whether this is a forced-single or forced-mpi job.
 	 * 
-	 * This is an ARCS-extension to jsdl and is used for usecases where users want to run
-	 * 1 cpu mpi jobs or multiple cpu single jobs.
+	 * This is an ARCS-extension to jsdl and is used for usecases where users
+	 * want to run 1 cpu mpi jobs or multiple cpu single jobs.
 	 * 
-	 * @param jsdl the jsdl document
+	 * @param jsdl
+	 *            the jsdl document
 	 * @return the job type (single/mpi)
 	 */
 	public static String getArcsJobType(Document jsdl) {
-		
+
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl-arcs:JobType";
 		NodeList resultNodes = null;
 		try {
@@ -1445,10 +1471,11 @@ public class JsdlHelpers {
 
 	/**
 	 * Returns a map of all infoitems for this template or null, if no infoItem
-	 * exists
+	 * exists.
 	 * 
 	 * @param jsdl
 	 *            the jsdl
+	 * @param templateTagName the name of the template tag
 	 * @return the map or null
 	 */
 	public static Map<String, String> getTemplateTagInfoItems(Document jsdl,

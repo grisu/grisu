@@ -10,14 +10,15 @@ import org.codehaus.xfire.service.invoker.AbstractInvoker;
 import org.ietf.jgss.GSSException;
 import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.backend.utils.LocalTemplatesHelper;
+import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.XFireServiceInterface;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.settings.ServiceTemplateManagement;
-import org.w3c.dom.Document;
 import org.vpac.security.light.control.CertificateFiles;
 import org.vpac.security.light.control.VomsesFiles;
+import org.w3c.dom.Document;
 
 /**
  * This class implements a {@link ServiceInterface} to use for a web service. 

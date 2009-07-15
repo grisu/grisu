@@ -20,7 +20,6 @@ import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.control.exceptions.VomsException;
 
 /**
  * This is a wrapper class for easy access to the properties of a job.
@@ -430,7 +429,7 @@ public class GrisuJobMonitoringObjectImpl implements GrisuJobMonitoringObject {
 		return jobDirectoryObject;
 	}
 
-	public void kill() throws VomsException, NoSuchJobException {
+	public void kill() throws NoSuchJobException {
 		try {
 			getServiceInterface().kill(getName(), false);
 		} catch (RemoteFileSystemException e) {
@@ -439,7 +438,7 @@ public class GrisuJobMonitoringObjectImpl implements GrisuJobMonitoringObject {
 		}
 	}
 
-	public void killAndClean() throws RemoteFileSystemException, VomsException,
+	public void killAndClean() throws RemoteFileSystemException,
 			NoSuchJobException {
 		// getServiceInterface().kill(getName(), true);
 

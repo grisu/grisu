@@ -29,7 +29,6 @@ import org.vpac.grisu.client.model.files.FileConstants;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.model.FqanEvent;
 import org.vpac.grisu.model.FqanListener;
 import org.vpac.grisu.model.GrisuRegistry;
@@ -341,7 +340,7 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 	 */
 	public synchronized void mount(String url, String mountPoint,
 			boolean useHomeDirectoryOnThisFileSystemIfPossible)
-			throws RemoteFileSystemException, VomsException {
+			throws RemoteFileSystemException {
 
 		MountPoint mp = serviceInterface.mount(url, mountPoint,
 				useHomeDirectoryOnThisFileSystemIfPossible);
@@ -352,7 +351,7 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 
 	public synchronized void mount(String url, String mountPoint, String fqan,
 			boolean useHomeDirectoryOnThisFileSystemIfPossible)
-			throws RemoteFileSystemException, VomsException {
+			throws RemoteFileSystemException {
 		if (JobConstants.NON_VO_FQAN.equals(fqan)) {
 			fqan = null;
 		}

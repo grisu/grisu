@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A GridResource contains information about an application on a certain grid-resource
- * with up-to-date information about the grid-resource.
+ * A GridResource contains information about an application on a certain
+ * grid-resource with up-to-date information about the grid-resource.
  * 
  * @author Markus Binsteiner
  */
@@ -47,35 +47,39 @@ public interface GridResource extends Comparable {
 	public abstract List<String> getAvailableApplicationVersion();
 
 	/**
-	 * The number of free job slots on this resource for the fqan that was specified earlier.
+	 * The number of free job slots on this resource for the fqan that was
+	 * specified earlier.
 	 * 
 	 * @return the free job slots
 	 */
 	public abstract int getFreeJobSlots();
 
 	/**
-	 * The number of running jobs on this resource for the fqan that was specified earlier.
-	 *  
+	 * The number of running jobs on this resource for the fqan that was
+	 * specified earlier.
+	 * 
 	 * @return the number of running jobs
 	 */
 	public abstract int getRunningJobs();
 
 	/**
-	 * The number of waiting jobs on this resource for the fqan that was spefified earlier.
+	 * The number of waiting jobs on this resource for the fqan that was
+	 * spefified earlier.
 	 * 
 	 * @return the number of waiting jobs
 	 */
 	public abstract int getWaitingJobs();
 
 	/**
-	 * The number of total jobs for this resource for the fqan that was spefified earlier.
+	 * The number of total jobs for this resource for the fqan that was
+	 * spefified earlier.
 	 * 
 	 * @return the total jobs
 	 */
 	public abstract int getTotalJobs();
 
 	/**
-	 * The main memory ram size on this resource. 
+	 * The main memory ram size on this resource.
 	 * 
 	 * @return the memory
 	 */
@@ -110,7 +114,8 @@ public interface GridResource extends Comparable {
 	public abstract String getJobManager();
 
 	/**
-	 * Whether the version of the application that was requested earlier is available on this resource.
+	 * Whether the version of the application that was requested earlier is
+	 * available on this resource.
 	 * 
 	 * Don't use that. I think it doesn't work.
 	 * 
@@ -119,7 +124,8 @@ public interface GridResource extends Comparable {
 	public abstract boolean isDesiredSoftwareVersionInstalled();
 
 	/**
-	 * The rank that was calculated by the specified ranking algorithm of the matchmaker.
+	 * The rank that was calculated by the specified ranking algorithm of the
+	 * matchmaker.
 	 * 
 	 * @return the rank
 	 */
@@ -131,12 +137,12 @@ public interface GridResource extends Comparable {
 	 * @return the queue name
 	 */
 	public abstract String getQueueName();
-	
+
 	/**
 	 * All executables that are available for the application on this resource.
 	 * 
 	 * @return all executables
 	 */
 	public abstract Set<String> getAllExecutables();
-	
+
 }

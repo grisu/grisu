@@ -18,32 +18,38 @@ import org.vpac.grisu.utils.FileHelpers;
  * It also manages an internal cache.
  * 
  * @author Markus Binsteiner
- *
+ * 
  */
-public class FileManager{
+public class FileManager {
 
 	public static final String NON_MOUNTPOINT_CACHE_DIRECTORYNAME = "non-grisu-user-space";
 
 	private final ServiceInterface serviceInterface;
-	static final Logger myLogger = Logger.getLogger(FileManager.class.getName());
+	static final Logger myLogger = Logger
+			.getLogger(FileManager.class.getName());
 
 	/**
 	 * Default constructor.
 	 * 
-	 * @param si the serviceInterface
+	 * @param si
+	 *            the serviceInterface
 	 */
 	public FileManager(ServiceInterface si) {
 		this.serviceInterface = si;
 	}
 
 	/**
-	 * Uploads a file to the backend which forwards it to it's target destination.
+	 * Uploads a file to the backend which forwards it to it's target
+	 * destination.
 	 * 
-	 * @param sourcePath the path to the local file
-	 * @param targetDirectory the target url
-	 * @throws FileTransferException if the transfer fails
+	 * @param sourcePath
+	 *            the path to the local file
+	 * @param targetDirectory
+	 *            the target url
+	 * @throws FileTransferException
+	 *             if the transfer fails
 	 */
-	public void uploadFile(String sourcePath, String targetDirectory)
+	public final void uploadFile(String sourcePath, String targetDirectory)
 			throws FileTransferException {
 
 		File file = new File(sourcePath);
@@ -52,9 +58,11 @@ public class FileManager{
 	}
 
 	/**
-	 * Helper method to check whether the provided url is for a local file or not.
+	 * Helper method to check whether the provided url is for a local file or
+	 * not.
 	 * 
-	 * @param file the url of the file
+	 * @param file
+	 *            the url of the file
 	 * @return whether the file is local or not.
 	 */
 	public static boolean isLocal(String file) {
@@ -80,7 +88,8 @@ public class FileManager{
 	private File getLocalCacheFile(String url) {
 
 		String rootPath = null;
-		rootPath = Environment.GRISU_DIRECTORY+File.separator+Environment.CACHE_DIR_NAME + File.separator
+		rootPath = Environment.GRISU_DIRECTORY + File.separator
+				+ Environment.CACHE_DIR_NAME + File.separator
 				+ GET_URL_STRING_PATH(url);
 
 		return new File(rootPath);
@@ -88,25 +97,30 @@ public class FileManager{
 	}
 
 	/**
-	 * Downloads the file with the specified url into the local cache and returns a file object for it.
+	 * Downloads the file with the specified url into the local cache and
+	 * returns a file object for it.
 	 * 
-	 * @param url the source url
+	 * @param url
+	 *            the source url
 	 * @return the file object for the cached file
-	 * @throws FileTransferException if the transfer fails
+	 * @throws FileTransferException
+	 *             if the transfer fails
 	 */
-	public File downloadFile(String url) throws FileTransferException {
+	final public File downloadFile(String url) throws FileTransferException {
 
 		File cacheTargetFile = getLocalCacheFile(url);
 		File cacheTargetParentFile = cacheTargetFile.getParentFile();
-		
-		if ( ! cacheTargetParentFile.exists() ) {
-			if ( !cacheTargetParentFile.mkdirs() ) {
-				if ( ! cacheTargetParentFile.exists() ) {
-					throw new FileTransferException(url, cacheTargetFile.toString(), "Could not create parent folder for cache file.");
+
+		if (!cacheTargetParentFile.exists()) {
+			if (!cacheTargetParentFile.mkdirs()) {
+				if (!cacheTargetParentFile.exists()) {
+					throw new FileTransferException(url, cacheTargetFile
+							.toString(),
+							"Could not create parent folder for cache file.");
 				}
 			}
 		}
-		
+
 		long lastModified = -1;
 		try {
 			lastModified = serviceInterface.lastModified(url);
@@ -135,7 +149,8 @@ public class FileManager{
 			source = serviceInterface.download(url);
 		} catch (Exception e) {
 			myLogger.error("Could not download file: " + url);
-			throw new FileTransferException(url, cacheTargetFile.toString(), "Could not download file.", e);
+			throw new FileTransferException(url, cacheTargetFile.toString(),
+					"Could not download file.", e);
 		}
 
 		try {
@@ -143,20 +158,26 @@ public class FileManager{
 			cacheTargetFile.setLastModified(lastModified);
 		} catch (IOException e) {
 			myLogger.error("Could not save file: " + url.lastIndexOf("/") + 1);
-			throw new FileTransferException(url, cacheTargetFile.toString(), "Could not save file.", e);
+			throw new FileTransferException(url, cacheTargetFile.toString(),
+					"Could not save file.", e);
 		}
-		
+
 		return cacheTargetFile;
 	}
 
 	/**
-	 * Uploads a file to the backend which forwards it to it's target destination.
+	 * Uploads a file to the backend which forwards it to it's target
+	 * destination.
 	 * 
-	 * @param sourcePath the local file
-	 * @param targetDirectory the target url
-	 * @throws FileTransferException if the transfer fails
+	 * @param file the source file
+	 * @param sourcePath
+	 *            the local file
+	 * @param targetDirectory
+	 *            the target url
+	 * @throws FileTransferException
+	 *             if the transfer fails
 	 */
-	public void uploadFile(File file, String targetDirectory)
+	public final void uploadFile(File file, String targetDirectory)
 			throws FileTransferException {
 
 		if (!file.exists()) {

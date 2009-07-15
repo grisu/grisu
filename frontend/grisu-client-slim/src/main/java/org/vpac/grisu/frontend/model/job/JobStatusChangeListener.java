@@ -6,13 +6,16 @@ package org.vpac.grisu.frontend.model.job;
  * @author Markus Binsteiner
  */
 public interface JobStatusChangeListener {
-	
+
 	/**
 	 * Called if the status of the {@link JobObject} changed.
 	 * 
-	 * @param job the job
-	 * @param oldStatus the old status
-	 * @param newStatus the new status
+	 * @param job
+	 *            the job
+	 * @param oldStatus
+	 *            the old status
+	 * @param newStatus
+	 *            the new status
 	 */
 	public void jobStatusChanged(JobObject job, int oldStatus, int newStatus);
 

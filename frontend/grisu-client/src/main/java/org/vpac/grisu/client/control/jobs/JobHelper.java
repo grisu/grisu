@@ -11,7 +11,6 @@ import org.vpac.grisu.client.model.files.GrisuFileObject;
 import org.vpac.grisu.client.model.jobs.GrisuJobMonitoringObject;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.control.exceptions.VomsException;
 
 /**
  * Helper methods for dealing with jobs.
@@ -47,7 +46,7 @@ public class JobHelper {
 //		
 //	}
 	
-	public static void cleanJobs(String[] jobnames, EnvironmentManager em) throws RemoteFileSystemException, VomsException, NoSuchJobException {
+	public static void cleanJobs(String[] jobnames, EnvironmentManager em) throws RemoteFileSystemException, NoSuchJobException {
 		
 		Set<GrisuFileObject> directoriesToInvalidate = new HashSet<GrisuFileObject>();
 		for ( String jobname : jobnames ) {
@@ -75,7 +74,7 @@ public class JobHelper {
 	}
 	
 	
-	public static void killJobs(String[] jobnames, EnvironmentManager em) throws VomsException, NoSuchJobException {
+	public static void killJobs(String[] jobnames, EnvironmentManager em) throws NoSuchJobException {
 		
 		for ( String jobname : jobnames ) {
 			GrisuJobMonitoringObject job = em.getJobManager().getJob(jobname);

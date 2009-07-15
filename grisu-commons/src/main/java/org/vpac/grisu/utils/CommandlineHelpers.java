@@ -3,43 +3,49 @@ package org.vpac.grisu.utils;
 import java.util.ArrayList;
 
 /**
- * Helper methods to parse a commandline and split it up into executable and arguments. 
+ * Helper methods to parse a commandline and split it up into executable and
+ * arguments.
  * 
  * @author Markus Binsteiner
- *
+ * 
  */
 public class CommandlineHelpers {
-	
+
 	/**
 	 * Returns the list of arguments for the specified commandline.
 	 * 
-	 * @param string the commandline
+	 * @param string
+	 *            the commandline
 	 * @return the parsed arguments
 	 */
-	public static ArrayList<String> extractArgumentsFromCommandline(String string) {
-		
+	public static ArrayList<String> extractArgumentsFromCommandline(
+			String string) {
+
 		ArrayList<String> args = parseString(string);
 		args.remove(0);
 		return args;
 	}
-	
+
 	/**
 	 * Returns the executable (first string) for this commandline.
 	 * 
-	 * @param string the commandline
+	 * @param string
+	 *            the commandline
 	 * @return the executable
 	 */
 	public static String extractExecutable(String string) {
 		ArrayList<String> strings = parseString(string);
 		return strings.get(0);
 	}
-	
+
 	/**
-	 * Parses the specified string and returns a list of tokens. 
+	 * Parses the specified string and returns a list of tokens.
 	 * 
-	 * The tokens are either seperated by whitespaces or surrounded by double quotation marks.
+	 * The tokens are either seperated by whitespaces or surrounded by double
+	 * quotation marks.
 	 * 
-	 * @param string the commandline
+	 * @param string
+	 *            the commandline
 	 * @return all tokens for this commandline
 	 */
 	public static ArrayList<String> parseString(String string) {
@@ -60,8 +66,8 @@ public class CommandlineHelpers {
 					part.append(character);
 				} else {
 					lastCharacterIsWhitespace = true;
-//					strings.add(part.toString());
-//					part = new StringBuffer();
+					// strings.add(part.toString());
+					// part = new StringBuffer();
 					continue;
 				}
 			} else {
@@ -83,11 +89,13 @@ public class CommandlineHelpers {
 			}
 
 		}
-		if ( inbetweenQuotationMarks ) {
-			throw new RuntimeException("No end quotations marks when parsing commandline.");
+		if (inbetweenQuotationMarks) {
+			throw new RuntimeException(
+					"No end quotations marks when parsing commandline.");
 		} else {
-			if ( part.length() > 0 ) 
+			if (part.length() > 0) {
 				strings.add(part.toString());
+			}
 		}
 		return strings;
 	}

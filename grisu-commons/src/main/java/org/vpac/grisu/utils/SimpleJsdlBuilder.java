@@ -23,14 +23,18 @@ public class SimpleJsdlBuilder {
 	/**
 	 * Builds a jsdl file using the provided job properties.
 	 * 
-	 * For a list of key names, have a look at the JobSubmissionProperty enum class.
+	 * For a list of key names, have a look at the JobSubmissionProperty enum
+	 * class.
 	 * 
-	 * You need at least the {@link JobSubmissionProperty#COMMANDLINE} property to be set.
+	 * You need at least the {@link JobSubmissionProperty#COMMANDLINE} property
+	 * to be set.
 	 * 
-	 * @param jobProperties the job properties
+	 * @param jobProperties
+	 *            the job properties
 	 * @return the jsdl document
 	 */
-	public static Document buildJsdl(Map<JobSubmissionProperty, String> jobProperties) {
+	public static Document buildJsdl(
+			Map<JobSubmissionProperty, String> jobProperties) {
 
 		InputStream in = SimpleJsdlBuilder.class
 				.getResourceAsStream("/generic.xml");
@@ -51,18 +55,19 @@ public class SimpleJsdlBuilder {
 							+ jobProperties.get(jp) + "</HostName>");
 				}
 
-			} else if (jp.equals(JobSubmissionProperty.WALLTIME_IN_MINUTES) ) {
-				
+			} else if (jp.equals(JobSubmissionProperty.WALLTIME_IN_MINUTES)) {
+
 				String walltime = jobProperties.get(jp);
 				int wallTimeInSeconds = Integer.parseInt(walltime);
-				int cpus = Integer.parseInt(jobProperties.get(JobSubmissionProperty.NO_CPUS));
-				
+				int cpus = Integer.parseInt(jobProperties
+						.get(JobSubmissionProperty.NO_CPUS));
+
 				int totalCpuTime = wallTimeInSeconds * cpus;
-				jsdlTemplateString = jsdlTemplateString
-				.replaceAll("XXX_" + jp.toString() + "_XXX",
-						new Integer(totalCpuTime).toString());
-				
-			}else if (jp.equals(JobSubmissionProperty.COMMANDLINE)) {
+				jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"
+						+ jp.toString() + "_XXX", new Integer(totalCpuTime)
+						.toString());
+
+			} else if (jp.equals(JobSubmissionProperty.COMMANDLINE)) {
 
 				String executable = CommandlineHelpers
 						.extractExecutable(jobProperties.get(jp));
@@ -83,21 +88,23 @@ public class SimpleJsdlBuilder {
 								exeAndArgsElements.toString());
 
 			} else if (jp.equals(JobSubmissionProperty.MODULES)) {
-				
+
 				String modulesString = jobProperties.get(jp);
-				if ( StringUtils.isBlank(modulesString) ) {
-					jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"+ jp.toString() + "_XXX", 
-							"");
+				if (StringUtils.isBlank(modulesString)) {
+					jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"
+							+ jp.toString() + "_XXX", "");
 					continue;
 				}
 				StringBuffer modulesElements = new StringBuffer();
-				for ( String module : modulesString.split(",") ) {
-					modulesElements.append("<Module xmlns=\"http://arcs.org.au/jsdl/jsdl-grisu\">"+module+"</Module>");
+				for (String module : modulesString.split(",")) {
+					modulesElements
+							.append("<Module xmlns=\"http://arcs.org.au/jsdl/jsdl-grisu\">"
+									+ module + "</Module>");
 				}
-				jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"+ jp.toString() + "_XXX", 
-				modulesElements.toString());
-				
-			}else if (jp.equals(JobSubmissionProperty.INPUT_FILE_URLS)) {
+				jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"
+						+ jp.toString() + "_XXX", modulesElements.toString());
+
+			} else if (jp.equals(JobSubmissionProperty.INPUT_FILE_URLS)) {
 
 				String inputFileUrls = jobProperties.get(jp);
 				if (inputFileUrls == null || "".equals(inputFileUrls)) {
@@ -108,7 +115,7 @@ public class SimpleJsdlBuilder {
 
 				StringBuffer dataStagingElements = new StringBuffer();
 				for (String inputFileUrl : inputFileUrls.split(",")) {
-					if ( !FileManager.isLocal(inputFileUrl) ) {
+					if (!FileManager.isLocal(inputFileUrl)) {
 						dataStagingElements
 								.append("<DataStaging>\n<FileName />\n<FileSystemName></FileSystemName>\n"
 										+ "<Source>\n<URI>");

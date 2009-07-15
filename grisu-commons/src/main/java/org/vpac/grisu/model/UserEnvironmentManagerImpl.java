@@ -18,80 +18,82 @@ import org.vpac.grisu.model.info.ResourceInformation;
  * The implemenation of {@link UserEnvironmentManager}.
  * 
  * @author markus
- *
+ * 
  */
 public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
-	
+
 	private final ServiceInterface serviceInterface;
-	
+
 	private ResourceInformation resourceInfo;
-	
+
 	private String[] cachedFqans = null;
 	private Set<String> cachedAllSubmissionLocations = null;
 	private Set<String> cachedAllSites = null;
 	private Map<String, Set<MountPoint>> alreadyQueriedMountPointsPerSubmissionLocation = new TreeMap<String, Set<MountPoint>>();
 	private Map<String, Set<MountPoint>> alreadyQueriedMountPointsPerFqan = new TreeMap<String, Set<MountPoint>>();
 	private MountPoint[] cachedMountPoints = null;
-	
+
 	private String currentFqan;
 
-
-
-	
 	public UserEnvironmentManagerImpl(ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
-		resourceInfo = GrisuRegistry.getDefault(serviceInterface).getResourceInformation();
+		resourceInfo = GrisuRegistry.getDefault(serviceInterface)
+				.getResourceInformation();
 	}
 
-	public String[] getAllAvailableFqans() {
-		
-		if ( cachedFqans == null ) {
+	public final String[] getAllAvailableFqans() {
+
+		if (cachedFqans == null) {
 			this.cachedFqans = serviceInterface.getFqans();
 		}
 		return cachedFqans;
 	}
 
-	public Set<String> getAllAvailableSubmissionLocations() {
+	public final Set<String> getAllAvailableSubmissionLocations() {
 
-		if ( cachedAllSubmissionLocations == null ) {
+		if (cachedAllSubmissionLocations == null) {
 			cachedAllSubmissionLocations = new HashSet<String>();
 			cachedAllSites = new TreeSet<String>();
-			for ( String fqan : getAllAvailableFqans() ) {
-				cachedAllSubmissionLocations.addAll(Arrays.asList(resourceInfo.getAllAvailableSubmissionLocations(fqan)));
+			for (String fqan : getAllAvailableFqans()) {
+				cachedAllSubmissionLocations.addAll(Arrays.asList(resourceInfo
+						.getAllAvailableSubmissionLocations(fqan)));
 			}
 
 		}
 		return cachedAllSubmissionLocations;
 	}
 
-	public Set<String> getAllAvailableSites() {
-		
-		if ( cachedAllSites == null ) {
+	public final Set<String> getAllAvailableSites() {
+
+		if (cachedAllSites == null) {
 			Set<String> temp = new TreeSet<String>();
-			for ( String subLoc : getAllAvailableSubmissionLocations() ) {
+			for (String subLoc : getAllAvailableSubmissionLocations()) {
 				temp.add(resourceInfo.getSite(subLoc));
 			}
 		}
 		return cachedAllSites;
 	}
-	
-	public MountPoint getRecommendedMountPoint(String submissionLocation, String fqan) {
-		
-		Set<MountPoint> temp = getMountPointsForSubmissionLocationAndFqan(submissionLocation, fqan);
-		
+
+	public final MountPoint getRecommendedMountPoint(String submissionLocation,
+			String fqan) {
+
+		Set<MountPoint> temp = getMountPointsForSubmissionLocationAndFqan(
+				submissionLocation, fqan);
+
 		return temp.iterator().next();
-		
+
 	}
 
-	public synchronized Set<MountPoint> getMountPointsForSubmissionLocation(
+	public final synchronized Set<MountPoint> getMountPointsForSubmissionLocation(
 			String submissionLocation) {
 
 		if (alreadyQueriedMountPointsPerSubmissionLocation
 				.get(submissionLocation) == null) {
 
-//			String[] urls = serviceInterface
-//					.getStagingFileSystemForSubmissionLocation(submissionLocation);
-			List<String> urls = resourceInfo.getStagingFilesystemsForSubmissionLocation(submissionLocation);
+			// String[] urls = serviceInterface
+			// .getStagingFileSystemForSubmissionLocation(submissionLocation);
+			List<String> urls = resourceInfo
+					.getStagingFilesystemsForSubmissionLocation(submissionLocation);
 
 			Set<MountPoint> result = new TreeSet<MountPoint>();
 			for (String url : urls) {
@@ -123,12 +125,13 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 				.get(submissionLocation);
 	}
 
-	public Set<MountPoint> getMountPointsForSubmissionLocationAndFqan(
+	public final Set<MountPoint> getMountPointsForSubmissionLocationAndFqan(
 			String submissionLocation, String fqan) {
 
-//		String[] urls = serviceInterface
-//				.getStagingFileSystemForSubmissionLocation(submissionLocation);
-		List<String> urls = resourceInfo.getStagingFilesystemsForSubmissionLocation(submissionLocation);
+		// String[] urls = serviceInterface
+		// .getStagingFileSystemForSubmissionLocation(submissionLocation);
+		List<String> urls = resourceInfo
+				.getStagingFilesystemsForSubmissionLocation(submissionLocation);
 
 		Set<MountPoint> result = new TreeSet<MountPoint>();
 
@@ -157,27 +160,27 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		return result;
 
 	}
-	
+
 	/**
 	 * Get all the users' mountpoints.
 	 * 
 	 * @return all mountpoints
 	 */
-	public synchronized MountPoint[] getMountPoints() {
+	public final synchronized MountPoint[] getMountPoints() {
 		if (cachedMountPoints == null) {
 			cachedMountPoints = serviceInterface.df();
 		}
 		return cachedMountPoints;
 	}
-	
+
 	/**
-	 * Gets all the mountpoints for this particular VO
+	 * Gets all the mountpoints for this particular VO.
 	 * 
 	 * @param fqan
 	 *            the fqan
 	 * @return the mountpoints
 	 */
-	public Set<MountPoint> getMountPoints(String fqan) {
+	public final Set<MountPoint> getMountPoints(String fqan) {
 
 		if (fqan == null) {
 			fqan = JobConstants.NON_VO_FQAN;
@@ -211,24 +214,23 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		}
 	}
 
-	public MountPoint getMountPointForUrl(String url) {
+	public final MountPoint getMountPointForUrl(String url) {
 
-		for ( MountPoint mp : getMountPoints() ) {
-			if ( mp.isResponsibleForAbsoluteFile(url) ) {
+		for (MountPoint mp : getMountPoints()) {
+			if (mp.isResponsibleForAbsoluteFile(url)) {
 				return mp;
 			}
 		}
-		
+
 		return null;
 	}
-	
 
 	public void addFqanListener(FqanListener listener) {
 		// TODO Auto-generated method stub
 
 	}
 
-	public String getCurrentFqan() {
+	public final String getCurrentFqan() {
 		return currentFqan;
 	}
 
@@ -237,8 +239,8 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 
 	}
 
-	public void setCurrentFqan(String currentFqan) {
+	public final void setCurrentFqan(String currentFqan) {
 		this.currentFqan = currentFqan;
 	}
-	
+
 }

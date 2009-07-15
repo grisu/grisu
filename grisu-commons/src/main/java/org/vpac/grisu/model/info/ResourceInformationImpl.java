@@ -14,10 +14,10 @@ import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
 
 /**
- * Implementation of {@link ResourceInformation}
+ * Implementation of {@link ResourceInformation}.
  * 
  * @author markus
- *
+ * 
  */
 public class ResourceInformationImpl implements ResourceInformation {
 
@@ -38,7 +38,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 		this.serviceInterface = serviceInterface;
 	}
 
-	public String[] getAllSubmissionLocations() {
+	public final String[] getAllSubmissionLocations() {
 
 		if (cachedAllSubmissionLocations == null) {
 			cachedAllSubmissionLocations = serviceInterface
@@ -47,7 +47,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 		return cachedAllSubmissionLocations;
 	}
 
-	public String[] getAllSites() {
+	public final String[] getAllSites() {
 
 		if (cachedAllSites == null) {
 
@@ -58,14 +58,15 @@ public class ResourceInformationImpl implements ResourceInformation {
 		return cachedAllSites;
 	}
 
-	public Set<String> getAllSubmissionLocationsForSite(String site) {
+	public final Set<String> getAllSubmissionLocationsForSite(String site) {
 
 		if (cachedSiteAllSubmissionLocationsMap.get(site) == null) {
 			// now we are building the complete map, not only for this one site
 			for (String subLoc : getAllSubmissionLocations()) {
 				String sitetemp = getSite(subLoc);
-				if ( cachedSiteAllSubmissionLocationsMap.get(sitetemp) == null) {
-					cachedSiteAllSubmissionLocationsMap.put(sitetemp, new HashSet<String>());
+				if (cachedSiteAllSubmissionLocationsMap.get(sitetemp) == null) {
+					cachedSiteAllSubmissionLocationsMap.put(sitetemp,
+							new HashSet<String>());
 				}
 				cachedSiteAllSubmissionLocationsMap.get(sitetemp).add(subLoc);
 			}
@@ -73,38 +74,42 @@ public class ResourceInformationImpl implements ResourceInformation {
 		return cachedSiteAllSubmissionLocationsMap.get(site);
 
 	}
-	
-	public String getSite(String urlOrSubmissionLocation) {
-		
+
+	public final String getSite(String urlOrSubmissionLocation) {
+
 		String host = getHost(urlOrSubmissionLocation);
-		
-		if ( cachedHosts.get(host) == null ) {
+
+		if (cachedHosts.get(host) == null) {
 			cachedHosts.put(host, serviceInterface.getSite(host));
 		}
 		return cachedHosts.get(host);
 	}
-	
-	public Set<String> filterSubmissionLocationsForSite(String site, Set<String> submissionlocations) {
-		
+
+	public final Set<String> filterSubmissionLocationsForSite(String site,
+			Set<String> submissionlocations) {
+
 		Set<String> temp = new TreeSet<String>();
-		for ( String subLoc : submissionlocations ) {
-			if ( site.equals(getSite(subLoc)) ) {
+		for (String subLoc : submissionlocations) {
+			if (site.equals(getSite(subLoc))) {
 				temp.add(subLoc);
 			}
 		}
 		return temp;
 	}
-	
-	public Set<String> distillSitesFromSubmissionLocations(Set<String> submissionLocations) {
-		
+
+	public final Set<String> distillSitesFromSubmissionLocations(
+			Set<String> submissionLocations) {
+
 		Set<String> temp = new TreeSet<String>();
-		for ( String subLoc : submissionLocations ) {
+		for (String subLoc : submissionLocations) {
 			String site = null;
 			try {
 				site = getSite(subLoc);
 				temp.add(site);
 			} catch (Exception e) {
-				myLogger.error("Could not get site for submissionlocation: "+subLoc+", ignoring it. Error: "+e.getLocalizedMessage());
+				myLogger.error("Could not get site for submissionlocation: "
+						+ subLoc + ", ignoring it. Error: "
+						+ e.getLocalizedMessage());
 			}
 		}
 		return temp;
@@ -115,17 +120,19 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 		if (urlOrSubmissionLocation.contains("://")) {
 
-//			int firstIndex = urlOrSubmissionLocation.indexOf("://")+3;
-//			int lastIndex = urlOrSubmissionLocation.indexOf("/", firstIndex);
-			
-//			int firstIndex = 0;
-//			int lastIndex = urlOrSubmissionLocation.length();
-			
+			// int firstIndex = urlOrSubmissionLocation.indexOf("://")+3;
+			// int lastIndex = urlOrSubmissionLocation.indexOf("/", firstIndex);
+
+			// int firstIndex = 0;
+			// int lastIndex = urlOrSubmissionLocation.length();
+
 			URI address;
 			try {
-//				 dodgy, I know
+				// dodgy, I know
 				address = new URI(urlOrSubmissionLocation);
-//				address = new URI(urlOrSubmissionLocation.substring(firstIndex, lastIndex));
+				// address = new
+				// URI(urlOrSubmissionLocation.substring(firstIndex,
+				// lastIndex));
 			} catch (Exception e) {
 				myLogger.error("Couldn't create url from: "
 						+ urlOrSubmissionLocation);
@@ -137,68 +144,70 @@ public class ResourceInformationImpl implements ResourceInformation {
 			} else {
 				hostname = address.getHost();
 			}
-		} else if (urlOrSubmissionLocation.contains(":") && ! urlOrSubmissionLocation.contains("/") ) {
+		} else if (urlOrSubmissionLocation.contains(":")
+				&& !urlOrSubmissionLocation.contains("/")) {
 
 			int startIndex = urlOrSubmissionLocation.indexOf(":") + 1;
-			if (startIndex == -1)
+			if (startIndex == -1) {
 				startIndex = 0;
-
+			}
 			int endIndex = urlOrSubmissionLocation.indexOf("#");
-			if (endIndex == -1)
+			if (endIndex == -1) {
 				endIndex = urlOrSubmissionLocation.length();
-
+			}
 			hostname = urlOrSubmissionLocation.substring(startIndex, endIndex);
 		} else {
-			myLogger.error("Could not parse url or submissionLocation for String: "+urlOrSubmissionLocation);
+			myLogger
+					.error("Could not parse url or submissionLocation for String: "
+							+ urlOrSubmissionLocation);
 			// TODO throw exception maybe?
 			return null;
 		}
 		return hostname;
 	}
-	
-	public String[] getAllAvailableSubmissionLocations(String fqan) {
 
-		if ( cachedAllSubmissionLocationsPerFqan.get(fqan) == null ) {
+	public final String[] getAllAvailableSubmissionLocations(String fqan) {
+
+		if (cachedAllSubmissionLocationsPerFqan.get(fqan) == null) {
 			String[] temp = serviceInterface.getAllSubmissionLocations(fqan);
 			cachedAllSubmissionLocationsPerFqan.put(fqan, temp);
 		}
 		return cachedAllSubmissionLocationsPerFqan.get(fqan);
 	}
-	
-	public Set<String> getAllAvailableSites(String fqan) {
-		
-		if ( cachedAllSitesPerFqan.get(fqan) == null ) {
+
+	public final Set<String> getAllAvailableSites(String fqan) {
+
+		if (cachedAllSitesPerFqan.get(fqan) == null) {
 			Set<String> temp = new TreeSet<String>();
-			for (String subLoc : getAllAvailableSubmissionLocations(fqan) ) {
+			for (String subLoc : getAllAvailableSubmissionLocations(fqan)) {
 				temp.add(getSite(subLoc));
 			}
 		}
 		return cachedAllSitesPerFqan.get(fqan);
 	}
 
-	public List<String> getStagingFilesystemsForSubmissionLocation(String subLoc) {
+	public final List<String> getStagingFilesystemsForSubmissionLocation(String subLoc) {
 
-		if ( subLoc == null || "".equals(subLoc) ) {
+		if (subLoc == null || "".equals(subLoc)) {
 			return null;
 		}
-		if ( cachedStagingFilesystemsPerSubLoc.get(subLoc) == null ) {
-			List<String> temp = Arrays.asList(serviceInterface.getStagingFileSystemForSubmissionLocation(subLoc));
+		if (cachedStagingFilesystemsPerSubLoc.get(subLoc) == null) {
+			List<String> temp = Arrays.asList(serviceInterface
+					.getStagingFileSystemForSubmissionLocation(subLoc));
 			cachedStagingFilesystemsPerSubLoc.put(subLoc, temp);
-		} 
+		}
 		return cachedStagingFilesystemsPerSubLoc.get(subLoc);
 	}
 
-	public String getRecommendedStagingFileSystemForSubmissionLocation(
+	public final String getRecommendedStagingFileSystemForSubmissionLocation(
 			String subLoc) {
-		
+
 		List<String> temp = getStagingFilesystemsForSubmissionLocation(subLoc);
-		if ( temp != null && temp.size() > 0 ) {
+		if (temp != null && temp.size() > 0) {
 			return temp.get(0);
 		} else {
 			return null;
 		}
 	}
-	
-
 
 }

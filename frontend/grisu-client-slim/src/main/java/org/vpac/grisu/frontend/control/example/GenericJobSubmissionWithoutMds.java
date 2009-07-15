@@ -19,33 +19,30 @@ public class GenericJobSubmissionWithoutMds {
 		char[] password = args[1].toCharArray();
 
 		LoginParams loginParams = new LoginParams(
-//				"http://localhost:8080/grisu-cxf/services/grisu",
+		// "http://localhost:8080/grisu-cxf/services/grisu",
 				"http://localhost:8080/grisu-ws/services/grisu",
 				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-//				 "Local",
+				// "Local",
 				username, password);
 
 		final ServiceInterface si = ServiceInterfaceFactory
 				.createInterface(loginParams);
 
-
 		final GrisuRegistry registry = GrisuRegistry.getDefault(si);
 
+		JobObject job = new JobObject(si);
+		// job.setApplication(ServiceInterface.GENERIC_APPLICATION_NAME);
+		// job.setApplication("java");
+		job.setJobname("generic" + UUID.randomUUID());
+		job.setCommandline("echo hello");
+		job.addInputFileUrl("/home/markus/test.txt");
+		// job.setSubmissionLocation("dque@brecca-m:ng2.vpac.monash.edu.au");
+		// job.addModule("java");
+		job.createJob("/ARCS/StartUp");
 
-		 JobObject job = new JobObject(si);
-//		 job.setApplication(ServiceInterface.GENERIC_APPLICATION_NAME);
-//		 job.setApplication("java");
-		 job.setJobname("generic"+UUID.randomUUID());
-		 job.setCommandline("echo hello");
-		 job.addInputFileUrl("/home/markus/test.txt");
-//		 job.setSubmissionLocation("dque@brecca-m:ng2.vpac.monash.edu.au");
-//		 job.addModule("java");
-		 job.createJob("/ARCS/StartUp");
-				
-		 job.submitJob();
-				
+		job.submitJob();
 
-		 System.out.println("Main thread finished.");
+		System.out.println("Main thread finished.");
 	}
 
 }

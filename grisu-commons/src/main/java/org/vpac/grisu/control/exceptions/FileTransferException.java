@@ -1,13 +1,14 @@
 package org.vpac.grisu.control.exceptions;
 
 public class FileTransferException extends Exception {
-	
+
 	private final String sourceFileUrl;
-	public String getSourceFileUrl() {
+
+	public final String getSourceFileUrl() {
 		return sourceFileUrl;
 	}
 
-	public String getTargetFileUrl() {
+	public final String getTargetFileUrl() {
 		return targetFileUrl;
 	}
 
@@ -18,19 +19,22 @@ public class FileTransferException extends Exception {
 		this.targetFileUrl = targetFileUrl;
 	}
 
-	public FileTransferException(String sourceFileUrl, String targetFileUrl, String arg0) {
+	public FileTransferException(String sourceFileUrl, String targetFileUrl,
+			String arg0) {
 		super(arg0);
 		this.sourceFileUrl = sourceFileUrl;
 		this.targetFileUrl = targetFileUrl;
 	}
 
-	public FileTransferException(String sourceFileUrl, String targetFileUrl, Throwable arg0) {
+	public FileTransferException(String sourceFileUrl, String targetFileUrl,
+			Throwable arg0) {
 		super(arg0);
 		this.sourceFileUrl = sourceFileUrl;
 		this.targetFileUrl = targetFileUrl;
 	}
 
-	public FileTransferException(String sourceFileUrl, String targetFileUrl, String arg0, Throwable arg1) {
+	public FileTransferException(String sourceFileUrl, String targetFileUrl,
+			String arg0, Throwable arg1) {
 		super(arg0, arg1);
 		this.sourceFileUrl = sourceFileUrl;
 		this.targetFileUrl = targetFileUrl;

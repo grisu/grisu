@@ -1,5 +1,3 @@
-
-
 package org.vpac.grisu.utils;
 
 import java.io.BufferedReader;
@@ -28,6 +26,8 @@ public class FileHelpers {
 	static final Logger myLogger = Logger
 			.getLogger(FileHelpers.class.getName());
 
+	public static final int BUFFER_SIZE = 1024;
+
 	/**
 	 * Saves a {@link DataSource} to a file on disk.
 	 * 
@@ -45,9 +45,10 @@ public class FileHelpers {
 		InputStream inputStream = source.getInputStream();
 
 		try {
-			byte[] buffer = new byte[4096];
-			for (int n; (n = inputStream.read(buffer)) != -1;)
+			byte[] buffer = new byte[BUFFER_SIZE * 4];
+			for (int n; (n = inputStream.read(buffer)) != -1;) {
 				outputStream.write(buffer, 0, n);
+			}
 		} finally {
 			outputStream.close();
 			inputStream.close();
@@ -65,14 +66,15 @@ public class FileHelpers {
 	 */
 	public static String readFromFile(File file) {
 
-		StringBuffer sb = new StringBuffer(1024);
+		StringBuffer sb = new StringBuffer(BUFFER_SIZE);
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new FileReader(file));
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-			myLogger.error("Could not read from file: "+file.toString()+". "+e1.getLocalizedMessage());
+			// e1.printStackTrace();
+			myLogger.error("Could not read from file: " + file.toString()
+					+ ". " + e1.getLocalizedMessage());
 			return null;
 		}
 
@@ -87,24 +89,28 @@ public class FileHelpers {
 			reader.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			//e.printStackTrace();
-			myLogger.error("Could not read lines from file: "+file.toString()+". "+e.getLocalizedMessage());
+			// e.printStackTrace();
+			myLogger.error("Could not read lines from file: " + file.toString()
+					+ ". " + e.getLocalizedMessage());
 			return null;
 		}
 
 		return sb.toString();
 	}
-	
+
 	/**
-	 * Tries to read a file. If the file isn't a text file, an exception is thrown.
+	 * Tries to read a file. If the file isn't a text file, an exception is
+	 * thrown.
 	 * 
-	 * @param file the file
+	 * @param file
+	 *            the file
 	 * @return the content of the (text-)file
-	 * @throws Exception if the file could not be read
+	 * @throws Exception
+	 *             if the file could not be read
 	 */
 	public static String readFromFileWithException(File file) throws Exception {
-		
-		StringBuffer sb = new StringBuffer(1024);
+
+		StringBuffer sb = new StringBuffer(BUFFER_SIZE);
 		BufferedReader reader = null;
 
 		reader = new BufferedReader(new FileReader(file));
@@ -123,8 +129,10 @@ public class FileHelpers {
 	/**
 	 * Copies a bunch of files into a target directory.
 	 * 
-	 * @param sources the source files
-	 * @param dest the target directory
+	 * @param sources
+	 *            the source files
+	 * @param dest
+	 *            the target directory
 	 */
 	public static void copyFileIntoDirectory(File[] sources, File dest) {
 
@@ -150,10 +158,12 @@ public class FileHelpers {
 
 				} finally {
 					try {
-						if (in != null)
+						if (in != null) {
 							in.close();
-						if (out != null)
+						}
+						if (out != null) {
 							out.close();
+						}
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -171,7 +181,7 @@ public class FileHelpers {
 	 * @return whether the directory could be deleted entirely or not
 	 */
 	public static boolean deleteDirectory(File path) {
-		if ( ! path.isDirectory() ) {
+		if (!path.isDirectory()) {
 			path.delete();
 		}
 		if (path.exists()) {

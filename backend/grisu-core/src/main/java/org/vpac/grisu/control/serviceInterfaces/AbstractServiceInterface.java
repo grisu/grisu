@@ -51,7 +51,6 @@ import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.control.info.CachedMdsInformationManager;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.info.GridResource;
@@ -1131,8 +1130,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * java.lang.String)
 	 */
 	public MountPoint mount(String url, String mountpoint,
-			boolean useHomeDirectory) throws RemoteFileSystemException,
-			VomsException {
+			boolean useHomeDirectory) throws RemoteFileSystemException {
 
 		MountPoint mp = getUser().mountFileSystem(url, mountpoint,
 				useHomeDirectory);
@@ -1142,8 +1140,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	}
 
 	public MountPoint mount(String url, String mountpoint, String fqan,
-			boolean useHomeDirectory) throws RemoteFileSystemException,
-			VomsException {
+			boolean useHomeDirectory) throws RemoteFileSystemException {
 		myLogger.debug("Mounting: " + url + " to: " + mountpoint
 				+ " with fqan: " + fqan);
 		MountPoint mp = getUser().mountFileSystem(url, mountpoint, fqan,
@@ -1286,11 +1283,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @return the DataSources of the requested files
 	 * @throws RemoteFileSystemException
 	 *             if one of the files doesn't exist
-	 * @throws VomsException
-	 *             if one of the files can't be accessed
 	 */
 	private DataSource[] download(String[] filenames)
-			throws RemoteFileSystemException, VomsException {
+			throws RemoteFileSystemException {
 
 		final DataSource[] datasources = new DataSource[filenames.length];
 
@@ -1370,7 +1365,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see org.vpac.grisu.control.ServiceInterface#download(java.lang.String)
 	 */
 	public DataSource download(String filename)
-			throws RemoteFileSystemException, VomsException {
+			throws RemoteFileSystemException {
 
 		myLogger.debug("Downloading: " + filename);
 
@@ -1633,8 +1628,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * , java.lang.String)
 	 */
 	public String upload(DataSource source, String filename,
-			boolean return_absolute_url) throws RemoteFileSystemException,
-			VomsException {
+			boolean return_absolute_url) throws RemoteFileSystemException {
 
 		myLogger.debug("Receiving file: " + filename);
 		FileObject target = null;
@@ -2088,8 +2082,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#isFolder(java.lang.String)
 	 */
-	public boolean isFolder(String file) throws RemoteFileSystemException,
-			VomsException {
+	public boolean isFolder(String file) throws RemoteFileSystemException {
 
 		boolean isFolder;
 		try {
@@ -2117,8 +2110,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	public boolean fileExists(String file) throws RemoteFileSystemException,
-			VomsException {
+	public boolean fileExists(String file) throws RemoteFileSystemException {
 
 		boolean exists;
 
@@ -2142,7 +2134,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * , boolean)
 	 */
 	public String[] getChildrenFiles(String folder, boolean onlyFiles)
-			throws RemoteFileSystemException, VomsException {
+			throws RemoteFileSystemException {
 
 		String[] result = null;
 		try {
@@ -2174,8 +2166,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see
 	 * org.vpac.grisu.control.ServiceInterface#getFileSize(java.lang.String)
 	 */
-	public long getFileSize(String file) throws RemoteFileSystemException,
-			VomsException {
+	public long getFileSize(String file) throws RemoteFileSystemException {
 
 		FileObject file_object = getUser().aquireFile(file);
 		long size;
@@ -2328,8 +2319,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see
 	 * org.vpac.grisu.control.ServiceInterface#lastModified(java.lang.String)
 	 */
-	public long lastModified(String url) throws RemoteFileSystemException,
-			VomsException {
+	public long lastModified(String url) throws RemoteFileSystemException {
 
 		try {
 			FileObject file = getUser().aquireFile(url);
@@ -2352,8 +2342,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#mkdir(java.lang.String)
 	 */
-	public boolean mkdir(String url) throws RemoteFileSystemException,
-			VomsException {
+	public boolean mkdir(String url) throws RemoteFileSystemException {
+
 		myLogger.debug("Creating folder: " + url + "...");
 		try {
 			FileObject dir = getUser().aquireFile(url);
@@ -2378,8 +2368,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#deleteFile(java.lang.String)
 	 */
-	public void deleteFile(String file) throws RemoteFileSystemException,
-			VomsException {
+	public void deleteFile(String file) throws RemoteFileSystemException {
 
 		FileObject fileObject = getUser().aquireFile(file);
 		try {
@@ -2401,8 +2390,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see
 	 * org.vpac.grisu.control.ServiceInterface#deleteFiles(java.lang.String[])
 	 */
-	public void deleteFiles(String[] files) throws RemoteFileSystemException,
-			VomsException {
+	public void deleteFiles(String[] files) throws RemoteFileSystemException {
 
 		// ArrayList<String> filesNotDeleted = new ArrayList<String>();
 		for (String file : files) {
@@ -2460,7 +2448,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see org.vpac.grisu.control.ServiceInterface#stageFiles(java.lang.String)
 	 */
 	public void stageFiles(String jobname) throws RemoteFileSystemException,
-			VomsException, NoSuchJobException {
+			NoSuchJobException {
 
 		Job job;
 		job = jobdao.findJobByDN(getUser().getDn(), jobname);
@@ -2508,11 +2496,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 *            the name of the job
 	 * @throws RemoteFileSystemException
 	 *             if the job directory couldn't be created
-	 * @throws VomsException
-	 *             if there was a permission problem with the job directory
 	 */
 	protected void prepareJobEnvironment(Job job)
-			throws RemoteFileSystemException, VomsException {
+			throws RemoteFileSystemException {
 
 		String jobDir = JsdlHelpers.getAbsoluteWorkingDirectoryUrl(job
 				.getJobDescription());
@@ -2548,7 +2534,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public void submitJob(String jobname, String fqan)
 			throws RuntimeException, NoValidCredentialException,
-			RemoteFileSystemException, VomsException, NoSuchJobException {
+			RemoteFileSystemException, NoSuchJobException {
 
 		Job job = getJob(jobname);
 
@@ -2724,7 +2710,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * boolean)
 	 */
 	public void kill(String jobname, boolean clear)
-			throws RemoteFileSystemException, VomsException, NoSuchJobException {
+			throws RemoteFileSystemException, NoSuchJobException {
 
 		Job job;
 
@@ -2765,7 +2751,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public String cp(String source, String target, final boolean overwrite,
 			boolean waitForFileTransferToFinish)
-			throws RemoteFileSystemException, VomsException {
+			throws RemoteFileSystemException {
 
 		final FileObject source_file;
 		final FileObject target_file;

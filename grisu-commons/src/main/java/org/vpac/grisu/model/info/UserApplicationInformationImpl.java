@@ -11,12 +11,11 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.UserEnvironmentManager;
 import org.vpac.grisu.model.job.JobSubmissionProperty;
 
-
 /**
  * Implementation of {@link UserApplicationInformation}.
  * 
  * @author markus
-  */
+ */
 public class UserApplicationInformationImpl extends ApplicationInformationImpl
 		implements UserApplicationInformation {
 
@@ -24,66 +23,65 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 	private Set<String> cachedAllSitesForUser = null;
 	private Set<String> cachedAllVersionsForUser = null;
 	private UserEnvironmentManager userInfo = null;
-	
-	public UserApplicationInformationImpl(ServiceInterface serviceInterface, UserEnvironmentManager userInfo, String application) {
+
+	public UserApplicationInformationImpl(ServiceInterface serviceInterface,
+			UserEnvironmentManager userInfo, String application) {
 		super(serviceInterface, application);
 		this.userInfo = userInfo;
 	}
-	
-	public Set<String> getAllAvailableSubmissionLocationsForUser() {
-		
-		if ( cachedSubmissionLocationsForUser == null ) {
+
+	public final Set<String> getAllAvailableSubmissionLocationsForUser() {
+
+		if (cachedSubmissionLocationsForUser == null) {
 			cachedSubmissionLocationsForUser = new HashSet<String>();
-			for ( String fqan : userInfo.getAllAvailableFqans() ) {
-				cachedSubmissionLocationsForUser.addAll(getAvailableSubmissionLocationsForFqan(fqan));
+			for (String fqan : userInfo.getAllAvailableFqans()) {
+				cachedSubmissionLocationsForUser
+						.addAll(getAvailableSubmissionLocationsForFqan(fqan));
 			}
 		}
 		return cachedSubmissionLocationsForUser;
 	}
-	
-	public Set<String> getAllAvailableSitesForUser() {
-		
-		if ( cachedAllSitesForUser == null ) {
+
+	public final Set<String> getAllAvailableSitesForUser() {
+
+		if (cachedAllSitesForUser == null) {
 			cachedAllSitesForUser = new TreeSet<String>();
-			for ( String subLoc : getAllAvailableSubmissionLocationsForUser() ) {
+			for (String subLoc : getAllAvailableSubmissionLocationsForUser()) {
 				cachedAllSitesForUser.add(resourceInfo.getSite(subLoc));
 			}
 		}
 		return cachedAllSitesForUser;
 	}
 
+	public final Set<String> getAllAvailableVersionsForUser() {
 
-
-	public Set<String> getAllAvailableVersionsForUser() {
-		
-		if ( cachedAllVersionsForUser == null ) {
+		if (cachedAllVersionsForUser == null) {
 			cachedAllVersionsForUser = new TreeSet<String>();
-			for ( String fqan : userInfo.getAllAvailableFqans() ) {
-				cachedAllVersionsForUser.addAll(getAllAvailableVersionsForFqan(fqan));
+			for (String fqan : userInfo.getAllAvailableFqans()) {
+				cachedAllVersionsForUser
+						.addAll(getAllAvailableVersionsForFqan(fqan));
 			}
 		}
 		return cachedAllVersionsForUser;
 	}
 
-	public List<GridResource> getBestSubmissionLocations(
-			Map<JobSubmissionProperty, String> additionalJobProperties, String fqan) {
+	public final List<GridResource> getBestSubmissionLocations(
+			Map<JobSubmissionProperty, String> additionalJobProperties,
+			String fqan) {
 
 		Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
-		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME, getApplicationName());
-		
+		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
+				getApplicationName());
+
 		basicJobProperties.putAll(additionalJobProperties);
-		
+
 		Map<String, String> converterMap = new HashMap<String, String>();
-		for ( JobSubmissionProperty key : basicJobProperties.keySet() ) {
+		for (JobSubmissionProperty key : basicJobProperties.keySet()) {
 			converterMap.put(key.toString(), basicJobProperties.get(key));
 		}
-		
-		return serviceInterface.findMatchingSubmissionLocations(converterMap, fqan);
+
+		return serviceInterface.findMatchingSubmissionLocations(converterMap,
+				fqan);
 	}
-	
-
-
-
-
 
 }

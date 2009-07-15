@@ -14,8 +14,8 @@ import org.apache.commons.vfs.FileType;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.model.MountPoint;
+import org.vpac.security.light.vomsProxy.VomsException;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -141,7 +141,7 @@ public class FileSystemStructureToXMLConverter {
 		return output;
 	}
 
-	private void buildDirectoryStructure(Element parentElement, MountPoint mp, boolean absolutePath, int currentRecursion, int maxRecursion) throws RemoteFileSystemException, VomsException  {
+	private void buildDirectoryStructure(Element parentElement, MountPoint mp, boolean absolutePath, int currentRecursion, int maxRecursion) throws RemoteFileSystemException  {
 		
 		FileObject[] filesAndDirs;
 		String parentFolder = parentElement.getAttribute("path");

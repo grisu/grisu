@@ -2,7 +2,6 @@ package org.vpac.grisu.client.view.swing.mountpoints;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -17,7 +16,6 @@ import javax.swing.border.TitledBorder;
 import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.control.exceptions.VomsException;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -142,11 +140,7 @@ public class AddMountPointPanel extends JPanel {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 						return;
-					} catch (VomsException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-						return;
-					}
+					} 
 					
 				}
 			});

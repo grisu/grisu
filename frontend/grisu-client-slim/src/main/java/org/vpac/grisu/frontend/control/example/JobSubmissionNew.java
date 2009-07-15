@@ -19,14 +19,14 @@ public class JobSubmissionNew implements JobStatusChangeListener {
 	public static void main(String[] args) throws Exception {
 
 		ExecutorService executor = Executors.newFixedThreadPool(10);
-		
+
 		String username = args[0];
 		char[] password = args[1].toCharArray();
 
 		LoginParams loginParams = new LoginParams(
 				"http://localhost:8080/grisu-cxf/services/grisu",
 				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-//				 "Local",
+				// "Local",
 				username, password);
 
 		final ServiceInterface si = ServiceInterfaceFactory
@@ -48,19 +48,19 @@ public class JobSubmissionNew implements JobStatusChangeListener {
 		Set<String> submissionLocations = javaInfo
 				.getAvailableSubmissionLocationsForFqan("/ARCS/StartUp");
 
-//		 JobObject job = new JobObject(si);
-//		 job.setJobname("marksssdduss2"+UUID.randomUUID());
-//		 job.setCommandline("java -version");
-//		 job.addInputFileUrl("/home/markus/test.txt");
-//		 job.addInputFileUrl("gsiftp://ng2.vpac.org/home/grid-admin/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner/grisu-local-job-dir/java_job_new/test.jsdl");
-//		 job.createJob("/ARCS/VPAC");
-//				
-//		 job.submitJob();
-//				
-//		 job.adjustSleepTime(2);
-//				
-//		 job.addValueListener(new JobSubmissionNew());
-//		 job.waitForJobToFinish();
+		// JobObject job = new JobObject(si);
+		// job.setJobname("marksssdduss2"+UUID.randomUUID());
+		// job.setCommandline("java -version");
+		// job.addInputFileUrl("/home/markus/test.txt");
+		// job.addInputFileUrl("gsiftp://ng2.vpac.org/home/grid-admin/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner/grisu-local-job-dir/java_job_new/test.jsdl");
+		// job.createJob("/ARCS/VPAC");
+		//				
+		// job.submitJob();
+		//				
+		// job.adjustSleepTime(2);
+		//				
+		// job.addValueListener(new JobSubmissionNew());
+		// job.waitForJobToFinish();
 		//		
 		// System.out.println("Status for job "+job.getJobname()+": "+job.getStatusString(false));
 		final JobStatusChangeListener jsl = new JobSubmissionNew();
@@ -75,27 +75,33 @@ public class JobSubmissionNew implements JobStatusChangeListener {
 					jo.setCommandline("java -version");
 					jo.setSubmissionLocation(subLoc);
 					jo.addInputFileUrl("/home/markus/test.txt");
-					jo.addInputFileUrl("gsiftp://ng2.vpac.org/home/grid-admin/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner/grisu-local-job-dir/java_job_new/test.jsdl");
+					jo
+							.addInputFileUrl("gsiftp://ng2.vpac.org/home/grid-admin/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner/grisu-local-job-dir/java_job_new/test.jsdl");
 					jo.addJobStatusChangeListener(jsl);
-					
-					String site = registry.getResourceInformation().getSite(subLoc);
-					System.out.println("Site is: "+site);
-					if ( "tpac".equals(site.toLowerCase()) || "ac3".equals(site.toLowerCase()) || site.toLowerCase().contains("rses") ) {
+
+					String site = registry.getResourceInformation().getSite(
+							subLoc);
+					System.out.println("Site is: " + site);
+					if ("tpac".equals(site.toLowerCase())
+							|| "ac3".equals(site.toLowerCase())
+							|| site.toLowerCase().contains("rses")) {
 						return;
 					}
 					try {
 						jo.createJob("/ARCS/StartUp");
 						jo.submitJob();
 					} catch (Exception e) {
-						System.err.println("Job to "+jo.getSubmissionLocation()+": "+e.getLocalizedMessage());
+						System.err.println("Job to "
+								+ jo.getSubmissionLocation() + ": "
+								+ e.getLocalizedMessage());
 					}
 				}
 
 			};
-			
+
 			executor.execute(subThread);
 		}
-		
+
 		executor.shutdown();
 		System.out.println("Main thread finished.");
 
@@ -103,7 +109,8 @@ public class JobSubmissionNew implements JobStatusChangeListener {
 
 	public void jobStatusChanged(JobObject job, int oldStatus, int newStatus) {
 		System.out.println("JobSubmissionNew got job statusEvent: "
-				+ job.getJobname() + " submitted to " + job.getSubmissionLocation() + ": "
+				+ job.getJobname() + " submitted to "
+				+ job.getSubmissionLocation() + ": "
 				+ JobConstants.translateStatus(newStatus));
 	}
 

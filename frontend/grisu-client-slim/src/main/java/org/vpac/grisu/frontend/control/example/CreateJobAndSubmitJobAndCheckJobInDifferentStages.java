@@ -13,32 +13,35 @@ public class CreateJobAndSubmitJobAndCheckJobInDifferentStages {
 	public static void main(String[] args) throws Exception {
 
 		ServiceInterface si = LoginHelpers.login();
-		
+
 		JobObject createJobObject = new JobObject(si);
-		
+
 		createJobObject.setApplication("Java");
 		createJobObject.setCommandline("java -version");
-		createJobObject.setWalltimeInSeconds(3600*24*40);
+		createJobObject.setWalltimeInSeconds(3600 * 24 * 40);
 		createJobObject.setCpus(1);
 		createJobObject.addInputFileUrl("/home/markus/test.txt");
-		createJobObject.addInputFileUrl("gsiftp://ng2.canterbury.ac.nz/home/grid-admin/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner/grix_splash_v1.1.jpg");
-		
-//		GrisuRegistry registry = GrisuRegistry.getDefault(si);
-//		System.out.println(StringUtils.join(registry.getApplicationInformation("java").getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin"),"\n"));
-		
-		System.out.println(SeveralXMLHelpers.toStringWithoutAnnoyingExceptions(createJobObject.getJobDescriptionDocument()));
-		
-		String newJobname = createJobObject.createJob("/ARCS/NGAdmin", ServiceInterface.TIMESTAMP_METHOD);
-		
+		createJobObject
+				.addInputFileUrl("gsiftp://ng2.canterbury.ac.nz/home/grid-admin/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner/grix_splash_v1.1.jpg");
+
+		// GrisuRegistry registry = GrisuRegistry.getDefault(si);
+		// System.out.println(StringUtils.join(registry.getApplicationInformation("java").getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin"),"\n"));
+
+		System.out.println(SeveralXMLHelpers
+				.toStringWithoutAnnoyingExceptions(createJobObject
+						.getJobDescriptionDocument()));
+
+		String newJobname = createJobObject.createJob("/ARCS/NGAdmin",
+				ServiceInterface.TIMESTAMP_METHOD);
+
 		JobObject submitJobObject = new JobObject(si, newJobname);
-		
-		System.out.println("Application: "+submitJobObject.getApplication());
-		
+
+		System.out.println("Application: " + submitJobObject.getApplication());
+
 		submitJobObject.submitJob();
-		
-		
+
 		final JobObject checkJobObject = new JobObject(si, newJobname);
-		
+
 		new Thread() {
 			public void run() {
 				try {
@@ -51,20 +54,18 @@ public class CreateJobAndSubmitJobAndCheckJobInDifferentStages {
 				}
 			}
 		}.start();
-		
-		
+
 		boolean finished = checkJobObject.waitForJobToFinish(3);
-		
-		if ( ! finished ) {
+
+		if (!finished) {
 			System.out.println("not finished yet.");
 			checkJobObject.kill(true);
 		} else {
-			System.out.println("Stdout: "+checkJobObject.getStdOutContent());
-			System.out.println("Stderr: "+checkJobObject.getStdErrContent());
+			System.out.println("Stdout: " + checkJobObject.getStdOutContent());
+			System.out.println("Stderr: " + checkJobObject.getStdErrContent());
 			checkJobObject.kill(true);
-		}		
-		
-		
+		}
+
 	}
 
 }

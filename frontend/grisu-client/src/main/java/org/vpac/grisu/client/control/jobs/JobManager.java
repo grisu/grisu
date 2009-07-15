@@ -16,7 +16,6 @@ import org.vpac.grisu.client.model.jobs.GrisuJobMonitoringObject;
 import org.vpac.grisu.client.model.jobs.GrisuJobMonitoringObjectImpl;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.control.exceptions.VomsException;
 import org.vpac.grisu.model.MountPoint;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -154,7 +153,7 @@ public class JobManager {
 		
 	}
 	
-	public void killJobs(List<GrisuJobMonitoringObject> jobs) throws VomsException, NoSuchJobException {
+	public void killJobs(List<GrisuJobMonitoringObject> jobs) throws NoSuchJobException {
 		
 		String[] jobnames = new String[jobs.size()];
 		
@@ -166,13 +165,13 @@ public class JobManager {
 		refreshJobs(jobnames);
 	}
 	
-	public void cleanJob(GrisuJobMonitoringObjectImpl job) throws RemoteFileSystemException, VomsException, NoSuchJobException {
+	public void cleanJob(GrisuJobMonitoringObjectImpl job) throws RemoteFileSystemException, NoSuchJobException {
 		List<GrisuJobMonitoringObject> tempList = new LinkedList<GrisuJobMonitoringObject>();
 		tempList.add(job);
 		cleanJobs(tempList);
 	}
 	
-	public void cleanJobs(List<GrisuJobMonitoringObject> jobs) throws RemoteFileSystemException, VomsException, NoSuchJobException {
+	public void cleanJobs(List<GrisuJobMonitoringObject> jobs) throws RemoteFileSystemException, NoSuchJobException {
 		
 		String[] jobnames = new String[jobs.size()];
 		

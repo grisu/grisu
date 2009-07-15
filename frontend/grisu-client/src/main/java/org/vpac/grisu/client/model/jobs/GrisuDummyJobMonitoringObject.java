@@ -10,7 +10,6 @@ import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.control.exceptions.VomsException;
 
 public class GrisuDummyJobMonitoringObject implements GrisuJobMonitoringObject {
 
@@ -103,13 +102,12 @@ public class GrisuDummyJobMonitoringObject implements GrisuJobMonitoringObject {
 		return null;
 	}
 
-	public void kill() throws VomsException, NoSuchJobException {
+	public void kill() throws NoSuchJobException {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void killAndClean() throws RemoteFileSystemException, VomsException,
-			NoSuchJobException {
+	public void killAndClean() throws RemoteFileSystemException, NoSuchJobException {
 		// TODO Auto-generated method stub
 		
 	}
