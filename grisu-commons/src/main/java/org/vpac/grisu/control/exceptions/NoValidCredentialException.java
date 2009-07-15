@@ -9,7 +9,7 @@ public class NoValidCredentialException extends RuntimeException implements
 
 	private String message;
 
-	public NoValidCredentialException(String message) {
+	public NoValidCredentialException(final String message) {
 		super(message);
 		this.message = message;
 	}

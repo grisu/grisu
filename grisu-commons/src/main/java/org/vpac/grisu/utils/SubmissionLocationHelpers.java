@@ -10,7 +10,10 @@ import org.vpac.grisu.model.info.InformationManager;
  * @author markus
  * 
  */
-public class SubmissionLocationHelpers {
+public final class SubmissionLocationHelpers {
+	
+	private SubmissionLocationHelpers() {
+	}
 
 	/**
 	 * Extract the queuename from the submission location.
@@ -19,7 +22,7 @@ public class SubmissionLocationHelpers {
 	 *            the submission location
 	 * @return the queue name
 	 */
-	public static String extractQueue(String subLoc) {
+	public static String extractQueue(final String subLoc) {
 
 		int endIndex = subLoc.indexOf(":");
 		if (endIndex <= 0) {
@@ -37,7 +40,7 @@ public class SubmissionLocationHelpers {
 	 *            the submission location
 	 * @return the host name
 	 */
-	public static String extractHost(String subLoc) {
+	public static String extractHost(final String subLoc) {
 
 		int startIndex = subLoc.indexOf(":") + 1;
 		if (startIndex == -1) {
@@ -61,7 +64,7 @@ public class SubmissionLocationHelpers {
 	 * @return the submission location string
 	 */
 	public static String createSubmissionLocationString(
-			GridResource gridResource) {
+			final GridResource gridResource) {
 
 		String hostname = gridResource.getContactString().substring(
 				gridResource.getContactString().indexOf("https://") != 0 ? 0
@@ -82,8 +85,8 @@ public class SubmissionLocationHelpers {
 	 *            the queue name for this submission location
 	 * @return the submission location string
 	 */
-	public static String createSubmissionLocationString(InformationManager im,
-			String contactString, String queue) {
+	public static String createSubmissionLocationString(final InformationManager im,
+			final String contactString, final String queue) {
 
 		String hostname = contactString.substring(contactString
 				.indexOf("https://") != 0 ? 0 : 8, contactString
@@ -107,8 +110,8 @@ public class SubmissionLocationHelpers {
 	 *            the jobmanager for this submission location
 	 * @return the submission location string
 	 */
-	public static String createSubmissionLocationString(String hostname,
-			String queue, String jobManager) {
+	public static String createSubmissionLocationString(final String hostname,
+			final String queue, final String jobManager) {
 
 		StringBuffer result = new StringBuffer(queue);
 		result.append(":");

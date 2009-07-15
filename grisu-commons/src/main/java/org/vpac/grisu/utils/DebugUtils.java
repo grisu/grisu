@@ -9,11 +9,14 @@ import org.w3c.dom.Document;
  * @author markus
  * 
  */
-public class DebugUtils {
+public final class DebugUtils {
+
+	private DebugUtils() {
+	}
 
 	static final Logger myLogger = Logger.getLogger(DebugUtils.class.getName());
 
-	public static void jsdlDebugOutput(String stage, Document jsdl) {
+	public static void jsdlDebugOutput(final String stage, final Document jsdl) {
 
 		if (false) {
 

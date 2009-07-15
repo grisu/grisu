@@ -66,7 +66,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 		super(SeveralXMLHelpers.cxfWorkaround(si.getJsldDocument(jobname),
 				"JobDefinition"));
 		this.serviceInterface = si;
-		this.jobname = jobname;
+		this.setJobname(jobname);
 
 		getStatus(true);
 
@@ -173,7 +173,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 			fireJobStatusChange(this.status, JobConstants.NO_SUCH_JOB);
 		}
 
-		return this.jobname;
+		return this.getJobname();
 	}
 
 	/**
@@ -283,7 +283,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 		}
 
 		try {
-			this.serviceInterface.kill(this.jobname, clean);
+			this.serviceInterface.kill(this.getJobname(), clean);
 		} catch (Exception e) {
 			throw new JobException(this, "Could not kill/clean job.", e);
 		}

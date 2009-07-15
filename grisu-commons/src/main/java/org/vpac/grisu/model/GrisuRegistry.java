@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.info.ApplicationInformation;
 import org.vpac.grisu.model.info.ApplicationInformationImpl;
@@ -36,6 +37,8 @@ import org.vpac.historyRepeater.SimpleHistoryManager;
  * 
  */
 public class GrisuRegistry {
+	
+	static final Logger myLogger = Logger.getLogger(GrisuRegistry.class.getName());
 
 	// caching the registries for different serviceinterfaces. for a desktop
 	// application this most
@@ -46,7 +49,7 @@ public class GrisuRegistry {
 	// but can have (or must have) seperate UserApplicationInformation objects
 	private static Map<ServiceInterface, GrisuRegistry> cachedRegistries = new HashMap<ServiceInterface, GrisuRegistry>();
 
-	public static GrisuRegistry getDefault(ServiceInterface serviceInterface) {
+	public static GrisuRegistry getDefault(final ServiceInterface serviceInterface) {
 
 		if (serviceInterface == null) {
 			throw new RuntimeException(
@@ -72,7 +75,7 @@ public class GrisuRegistry {
 	private ResourceInformation cachedResourceInformation;
 	private FileManager cachedFileHelper;
 
-	public GrisuRegistry(ServiceInterface serviceInterface) {
+	public GrisuRegistry(final ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
 	}
 
@@ -82,7 +85,7 @@ public class GrisuRegistry {
 	 * @param ui
 	 *            the UserEnvironmentManager
 	 */
-	public final void setUserEnvironmentManager(UserEnvironmentManager ui) {
+	public final void setUserEnvironmentManager(final UserEnvironmentManager ui) {
 		this.cachedUserInformation = ui;
 	}
 
@@ -97,7 +100,7 @@ public class GrisuRegistry {
 	 * @return the information object for this application and user
 	 */
 	public final UserApplicationInformation getUserApplicationInformation(
-			String applicationName) {
+			final String applicationName) {
 
 		if (cachedUserInformationObjects.get(applicationName) == null) {
 			UserApplicationInformation temp = new UserApplicationInformationImpl(
@@ -119,7 +122,7 @@ public class GrisuRegistry {
 	 * @return the information object for this application
 	 */
 	public final ApplicationInformation getApplicationInformation(
-			String applicationName) {
+			final String applicationName) {
 
 		if (cachedApplicationInformationObjects.get(applicationName) == null) {
 			ApplicationInformation temp = new ApplicationInformationImpl(
@@ -173,7 +176,7 @@ public class GrisuRegistry {
 					historyFile.createNewFile();
 
 				} catch (IOException e) {
-					// well
+					myLogger.debug(e);
 				}
 			}
 			if (!historyFile.exists()) {

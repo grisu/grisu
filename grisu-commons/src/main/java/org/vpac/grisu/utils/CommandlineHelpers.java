@@ -9,7 +9,10 @@ import java.util.ArrayList;
  * @author Markus Binsteiner
  * 
  */
-public class CommandlineHelpers {
+public final class CommandlineHelpers {
+
+	private CommandlineHelpers() {
+	}
 
 	/**
 	 * Returns the list of arguments for the specified commandline.
@@ -19,7 +22,7 @@ public class CommandlineHelpers {
 	 * @return the parsed arguments
 	 */
 	public static ArrayList<String> extractArgumentsFromCommandline(
-			String string) {
+			final String string) {
 
 		ArrayList<String> args = parseString(string);
 		args.remove(0);
@@ -33,7 +36,7 @@ public class CommandlineHelpers {
 	 *            the commandline
 	 * @return the executable
 	 */
-	public static String extractExecutable(String string) {
+	public static String extractExecutable(final String string) {
 		ArrayList<String> strings = parseString(string);
 		return strings.get(0);
 	}
@@ -48,7 +51,7 @@ public class CommandlineHelpers {
 	 *            the commandline
 	 * @return all tokens for this commandline
 	 */
-	public static ArrayList<String> parseString(String string) {
+	public static ArrayList<String> parseString(final String string) {
 		ArrayList<String> strings = new ArrayList<String>();
 
 		boolean lastCharacterIsWhitespace = false;

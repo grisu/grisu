@@ -36,7 +36,7 @@ public interface ServiceInterfaceCreator {
 	 * @throws ServiceInterfaceException
 	 *             if the serviceInterface couldn't be created
 	 */
-	public ServiceInterface create(String interfaceUrl, String username,
+	ServiceInterface create(String interfaceUrl, String username,
 			char[] password, String myProxyServer, String myProxyPort,
 			Object[] otherOptions) throws ServiceInterfaceException;
 
@@ -49,6 +49,6 @@ public interface ServiceInterfaceCreator {
 	 *            or "Local")
 	 * @return true if the url is supported - false if not
 	 */
-	public boolean canHandleUrl(String url);
+	boolean canHandleUrl(String url);
 
 }

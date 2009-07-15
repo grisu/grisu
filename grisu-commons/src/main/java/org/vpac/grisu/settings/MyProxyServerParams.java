@@ -12,9 +12,12 @@ import org.apache.log4j.Logger;
  * @author Markus Binsteiner
  * 
  */
-public class MyProxyServerParams {
+public final class MyProxyServerParams {
+	
+	private MyProxyServerParams() {
+	}
 
-	public static PropertiesConfiguration config = null;
+	private static PropertiesConfiguration config = null;
 
 	static final Logger myLogger = Logger.getLogger(MyProxyServerParams.class
 			.getName());
@@ -93,7 +96,7 @@ public class MyProxyServerParams {
 	 * @param username
 	 *            the username
 	 */
-	public static void saveDefaultMyProxyUsername(String username) {
+	public static void saveDefaultMyProxyUsername(final String username) {
 		try {
 			getClientConfiguration().setProperty("myProxyUsername", username);
 			getClientConfiguration().save();

@@ -17,7 +17,7 @@ public class JSDLNamespaceContext implements NamespaceContext {
 
 	}
 
-	public final String getNamespaceURI(String prefix) {
+	public final String getNamespaceURI(final String prefix) {
 		if (prefix.equals("jsdl")) {
 			return "http://schemas.ggf.org/jsdl/2005/11/jsdl";
 		} else if (prefix.equals("jsdl-posix")) {
@@ -33,7 +33,7 @@ public class JSDLNamespaceContext implements NamespaceContext {
 		}
 	}
 
-	public final String getPrefix(String namespaceURI) {
+	public final String getPrefix(final String namespaceURI) {
 		if (namespaceURI.equals("http://schemas.ggf.org/jsdl/2005/11/jsdl")) {
 			return "jsdl";
 		} else if (namespaceURI
@@ -50,7 +50,7 @@ public class JSDLNamespaceContext implements NamespaceContext {
 		}
 	}
 
-	public final Iterator getPrefixes(String namespaceURI) {
+	public final Iterator getPrefixes(final String namespaceURI) {
 		// not implemented for the example
 		return null;
 	}

@@ -13,7 +13,10 @@ import org.apache.log4j.Logger;
  * @author Markus Binsteiner
  * 
  */
-public class ServerPropertiesManager {
+public final class ServerPropertiesManager {
+	
+	private ServerPropertiesManager() {
+	}
 
 	/**
 	 * Default myproxy lifetime: 3600 seconds.
@@ -28,7 +31,7 @@ public class ServerPropertiesManager {
 	 */
 	public static final String DEFAULT_JOB_DIR_NAME = "grisu-dir";
 
-	public static PropertiesConfiguration config = null;
+	private static PropertiesConfiguration config = null;
 
 	static final Logger myLogger = Logger
 			.getLogger(ServerPropertiesManager.class.getName());
@@ -74,6 +77,7 @@ public class ServerPropertiesManager {
 				debug = getServerConfiguration().getBoolean("debug");
 			} catch (NoSuchElementException e) {
 				// doesn't matter
+				myLogger.debug(e);
 			}
 			if (debug) {
 				// try to create debug directory
@@ -90,6 +94,7 @@ public class ServerPropertiesManager {
 			}
 		} catch (ConfigurationException e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
+			myLogger.debug(e);
 		}
 		return debug;
 	}

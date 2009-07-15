@@ -13,7 +13,6 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -32,7 +31,10 @@ import org.xml.sax.SAXException;
  * @author Markus Binsteiner
  * 
  */
-public class SeveralXMLHelpers {
+public final class SeveralXMLHelpers {
+	
+	private SeveralXMLHelpers() {
+	}
 
 	/**
 	 * Creates a new xml document from an xml element.
@@ -43,7 +45,7 @@ public class SeveralXMLHelpers {
 	 * @throws Exception
 	 *             if the document can't be created
 	 */
-	public static Document createDocumentFromElement(Element element)
+	public static Document createDocumentFromElement(final Element element)
 			throws Exception {
 		try {
 			final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
@@ -101,7 +103,7 @@ public class SeveralXMLHelpers {
 	 * @return either a new xml document or the unchanged old one
 	 */
 	public static Document cxfWorkaround(Document doc,
-			String expectedElementName) {
+			final String expectedElementName) {
 		Element element = (Element) doc.getFirstChild();
 		if (!element.getTagName().equals(expectedElementName)) {
 			try {
@@ -121,7 +123,7 @@ public class SeveralXMLHelpers {
 	 *            the element
 	 * @return the string
 	 */
-	private static String convertElementToString(Element element) {
+	private static String convertElementToString(final Element element) {
 
 		StringBuffer result = new StringBuffer();
 		String tagName = element.getTagName();
@@ -153,7 +155,7 @@ public class SeveralXMLHelpers {
 	 *            the element
 	 * @return the string
 	 */
-	public static String convertToString(Element element) {
+	public static String convertToString(final Element element) {
 
 		return convertElementToString(element);
 	}
@@ -167,8 +169,8 @@ public class SeveralXMLHelpers {
 	 * @throws TransformerFactoryConfigurationError xml error
 	 * @throws TransformerException xml error
 	 */
-	public static String toString(Document xml)
-			throws TransformerFactoryConfigurationError, TransformerException {
+	public static String toString(final Document xml)
+			throws TransformerException {
 		// TODO use static transformer to reduce overhead?
 		Transformer transformer = TransformerFactory.newInstance()
 				.newTransformer();
@@ -191,7 +193,7 @@ public class SeveralXMLHelpers {
 	 *            the xml document
 	 * @return the string
 	 */
-	public static String toStringWithoutAnnoyingExceptions(Document xml) {
+	public static String toStringWithoutAnnoyingExceptions(final Document xml) {
 
 		String result;
 		try {
@@ -215,7 +217,7 @@ public class SeveralXMLHelpers {
 	 * @throws Exception
 	 *             if the conversion fails
 	 */
-	public static Document fromInputStream(InputStream input) throws Exception {
+	public static Document fromInputStream(final InputStream input) throws Exception {
 		try {
 			final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
 			final String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
@@ -258,7 +260,7 @@ public class SeveralXMLHelpers {
 	 * @throws Exception
 	 *             if the conversion fails
 	 */
-	public static Document fromString(String jsdl_string) throws Exception {
+	public static Document fromString(final String jsdl_string) throws Exception {
 
 		try {
 			final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
@@ -301,7 +303,7 @@ public class SeveralXMLHelpers {
 	 *            the (xml-)file
 	 * @return the xml document
 	 */
-	public static Document loadXMLFile(File file) {
+	public static Document loadXMLFile(final File file) {
 
 		Document jsdl = null;
 

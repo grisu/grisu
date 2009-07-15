@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.vpac.grisu.model.UserEnvironmentManager;
 import org.vpac.grisu.model.job.JobSubmissionProperty;
 
 /**
@@ -28,14 +27,14 @@ public interface UserApplicationInformation extends ApplicationInformation {
 	 * 
 	 * @return all submissionlocations
 	 */
-	public Set<String> getAllAvailableSubmissionLocationsForUser();
+	Set<String> getAllAvailableSubmissionLocationsForUser();
 
 	/**
 	 * Calculates all the sites where this application is available to the user.
 	 * 
 	 * @return all sites
 	 */
-	public Set<String> getAllAvailableSitesForUser();
+	Set<String> getAllAvailableSitesForUser();
 
 	/**
 	 * Calculates all versions for this application that are availabe for the
@@ -43,7 +42,7 @@ public interface UserApplicationInformation extends ApplicationInformation {
 	 * 
 	 * @return all available versions
 	 */
-	public Set<String> getAllAvailableVersionsForUser();
+	Set<String> getAllAvailableVersionsForUser();
 
 	/**
 	 * Calculates the best {@link GridResource}s to submit this job to.
@@ -55,7 +54,7 @@ public interface UserApplicationInformation extends ApplicationInformation {
 	 *            the fqan to submit the job with
 	 * @return a sorted list of the best resources to submit this job to.
 	 */
-	public List<GridResource> getBestSubmissionLocations(
+	List<GridResource> getBestSubmissionLocations(
 			Map<JobSubmissionProperty, String> additionalJobProperties,
 			String fqan);
 

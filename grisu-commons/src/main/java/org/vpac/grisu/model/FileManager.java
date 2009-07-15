@@ -34,7 +34,7 @@ public class FileManager {
 	 * @param si
 	 *            the serviceInterface
 	 */
-	public FileManager(ServiceInterface si) {
+	public FileManager(final ServiceInterface si) {
 		this.serviceInterface = si;
 	}
 
@@ -49,7 +49,7 @@ public class FileManager {
 	 * @throws FileTransferException
 	 *             if the transfer fails
 	 */
-	public final void uploadFile(String sourcePath, String targetDirectory)
+	public final void uploadFile(final String sourcePath, final String targetDirectory)
 			throws FileTransferException {
 
 		File file = new File(sourcePath);
@@ -65,7 +65,7 @@ public class FileManager {
 	 *            the url of the file
 	 * @return whether the file is local or not.
 	 */
-	public static boolean isLocal(String file) {
+	public static boolean isLocal(final String file) {
 
 		if (file.startsWith("gsiftp")) {
 			return false;
@@ -79,18 +79,18 @@ public class FileManager {
 
 	}
 
-	private static String GET_URL_STRING_PATH(String url) {
+	private static String get_url_strin_path(final String url) {
 		return url.replace("=", "_").replace(",", "_").replace(" ", "_")
 				.replace(":", "").replace("//", File.separator).replace("/",
 						File.separator);
 	}
 
-	private File getLocalCacheFile(String url) {
+	private File getLocalCacheFile(final String url) {
 
 		String rootPath = null;
 		rootPath = Environment.GRISU_DIRECTORY + File.separator
 				+ Environment.CACHE_DIR_NAME + File.separator
-				+ GET_URL_STRING_PATH(url);
+				+ get_url_strin_path(url);
 
 		return new File(rootPath);
 
@@ -106,7 +106,7 @@ public class FileManager {
 	 * @throws FileTransferException
 	 *             if the transfer fails
 	 */
-	final public File downloadFile(String url) throws FileTransferException {
+	public final File downloadFile(final String url) throws FileTransferException {
 
 		File cacheTargetFile = getLocalCacheFile(url);
 		File cacheTargetParentFile = cacheTargetFile.getParentFile();
@@ -177,7 +177,7 @@ public class FileManager {
 	 * @throws FileTransferException
 	 *             if the transfer fails
 	 */
-	public final void uploadFile(File file, String targetDirectory)
+	public final void uploadFile(final File file, final String targetDirectory)
 			throws FileTransferException {
 
 		if (!file.exists()) {

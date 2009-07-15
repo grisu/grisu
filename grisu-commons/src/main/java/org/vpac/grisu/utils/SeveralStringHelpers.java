@@ -11,7 +11,10 @@ import java.io.InputStreamReader;
  * @author markus
  * 
  */
-public class SeveralStringHelpers {
+public final class SeveralStringHelpers {
+	
+	private SeveralStringHelpers() {
+	}
 
 	/**
 	 * Converts an inputstream to a string.
@@ -20,7 +23,7 @@ public class SeveralStringHelpers {
 	 *            the input stream
 	 * @return the string
 	 */
-	public static String fromInputStream(InputStream is) {
+	public static String fromInputStream(final InputStream is) {
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 		StringBuilder sb = new StringBuilder();

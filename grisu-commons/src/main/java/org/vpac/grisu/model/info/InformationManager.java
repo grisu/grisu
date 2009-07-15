@@ -17,7 +17,7 @@ public interface InformationManager {
 	 * 
 	 * @return names of all the sites from MDS
 	 */
-	public String[] getAllSites();
+	String[] getAllSites();
 
 	/**
 	 * Returns the name of the site where this host or URL belongs.
@@ -26,7 +26,7 @@ public interface InformationManager {
 	 *            the host or the service's URI
 	 * @return the name of the site where this host or URL belongs
 	 */
-	public String getSiteForHostOrUrl(String host_or_url);
+	String getSiteForHostOrUrl(String host_or_url);
 
 	/**
 	 * Returns all the submissionlocations for the given application. The entry
@@ -43,7 +43,7 @@ public interface InformationManager {
 	 *            name of the application
 	 * @return all the submission queues for the given application.
 	 */
-	public String[] getAllSubmissionLocationsForApplication(String application);
+	String[] getAllSubmissionLocationsForApplication(String application);
 
 	/**
 	 * Returns all the data locations (mount points) on the grid available for
@@ -53,14 +53,14 @@ public interface InformationManager {
 	 *            fully qualified attribute name of the VO
 	 * @return all the data locations for the VO
 	 */
-	public Map<String, String[]> getDataLocationsForVO(String fqan);
+	Map<String, String[]> getDataLocationsForVO(String fqan);
 
 	/**
 	 * Returns all submission locations on all the sites from MDS.
 	 * 
 	 * @return all the available submissionlocations on the Grid
 	 */
-	public String[] getAllSubmissionLocations();
+	String[] getAllSubmissionLocations();
 
 	/**
 	 * Returns all the submission locations of all the sites that have the given
@@ -73,7 +73,7 @@ public interface InformationManager {
 	 * @return submission locations of sites which have the software application
 	 *         installed
 	 */
-	public String[] getAllSubmissionLocations(String application, String version);
+	String[] getAllSubmissionLocations(String application, String version);
 
 	/**
 	 * Returns the list of available versions of the software application at a
@@ -86,7 +86,7 @@ public interface InformationManager {
 	 * @return an array of string representing the available versions of the
 	 *         software application at the site
 	 */
-	public String[] getVersionsOfApplicationOnSite(String application,
+	String[] getVersionsOfApplicationOnSite(String application,
 			String site);
 
 	/**
@@ -100,7 +100,7 @@ public interface InformationManager {
 	 * @return an array of string representing the available versions of the
 	 *         software application at the submissionlocation
 	 */
-	public String[] getVersionsOfApplicationOnSubmissionLocation(
+	String[] getVersionsOfApplicationOnSubmissionLocation(
 			String application, String submissionLocation);
 
 	/**
@@ -108,7 +108,7 @@ public interface InformationManager {
 	 * 
 	 * @return all the applications on the Grid
 	 */
-	public String[] getAllApplicationsOnGrid();
+	String[] getAllApplicationsOnGrid();
 
 	/**
 	 * Returns the names of all the applications at the site.
@@ -117,7 +117,7 @@ public interface InformationManager {
 	 *            name of the site
 	 * @return names of the applications at the site
 	 */
-	public String[] getAllApplicationsAtSite(String site);
+	String[] getAllApplicationsAtSite(String site);
 
 	/**
 	 * Calculates all the applications that are available for the specified VO
@@ -127,7 +127,7 @@ public interface InformationManager {
 	 *            the vo
 	 * @return all available applications
 	 */
-	public String[] getAllApplicationsOnGridForVO(String fqan);
+	String[] getAllApplicationsOnGridForVO(String fqan);
 
 	/**
 	 * Returns the list of available versions of the software application on the
@@ -138,7 +138,7 @@ public interface InformationManager {
 	 * @return a string array of versions of the software application on the
 	 *         Grid
 	 */
-	public String[] getAllVersionsOfApplicationOnGrid(String application);
+	String[] getAllVersionsOfApplicationOnGrid(String application);
 
 	/**
 	 * Calculates all version of an application for a certain VO.
@@ -149,7 +149,7 @@ public interface InformationManager {
 	 *            the vo
 	 * @return all versions
 	 */
-	public String[] getAllVersionsOfApplicationOnGridForVO(String application,
+	String[] getAllVersionsOfApplicationOnGridForVO(String application,
 			String vo);
 
 	/**
@@ -167,10 +167,10 @@ public interface InformationManager {
 	 * @return a map of the attribute details of the given application at the
 	 *         site.
 	 */
-	public Map<String, String> getApplicationDetails(String application,
+	Map<String, String> getApplicationDetails(String application,
 			String version, String site);
 
-	public String[] getStagingFileSystemForSubmissionLocation(String subLoc);
+	String[] getStagingFileSystemForSubmissionLocation(String subLoc);
 
 	/**
 	 * Returns a map of all hostnames gridwide and the sites they belong to as
@@ -183,7 +183,7 @@ public interface InformationManager {
 	 * 
 	 * @return all hostnames/sites
 	 */
-	public Map<String, String> getAllHosts();
+	Map<String, String> getAllHosts();
 
 	/**
 	 * Returns all submission locations or a specific VO.
@@ -192,7 +192,7 @@ public interface InformationManager {
 	 *            the vo
 	 * @return the submission locations
 	 */
-	public String[] getAllSubmissionLocationsForVO(String fqan);
+	String[] getAllSubmissionLocationsForVO(String fqan);
 
 	/**
 	 * Returns the jobmanager that submits to the specified queue/site.
@@ -203,7 +203,7 @@ public interface InformationManager {
 	 *            the queue
 	 * @return the jobmanager
 	 */
-	public String getJobmanagerOfQueueAtSite(String site, String queue);
+	String getJobmanagerOfQueueAtSite(String site, String queue);
 
 	/**
 	 * Returns an array of Strings with codes that provide the specified
@@ -213,6 +213,6 @@ public interface InformationManager {
 	 *            the executable
 	 * @return the codes
 	 */
-	public String[] getApplicationsThatProvideExecutable(String executable);
+	String[] getApplicationsThatProvideExecutable(String executable);
 
 }

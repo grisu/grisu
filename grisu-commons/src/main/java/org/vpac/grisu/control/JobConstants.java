@@ -7,7 +7,10 @@ package org.vpac.grisu.control;
  * @author Markus Binsteiner
  * 
  */
-public class JobConstants {
+public final class JobConstants {
+	
+	private JobConstants() {
+	}
 
 	public static final String REMOTE_FILE_TAGNAME = "File";
 	public static final String REMOTE_FOLDER_TAGNAME = "Directory";
@@ -71,7 +74,7 @@ public class JobConstants {
 
 	public static final String NO_DESCRIPTION_AVAILABLE = "No description available.";
 
-	public static String translateStatus(int status_no) {
+	public static String translateStatus(final int status_no) {
 
 		switch (status_no) {
 		case DONE:
@@ -110,6 +113,8 @@ public class JobConstants {
 			return INPUT_FILES_UPLOADING_STRING;
 		case INPUT_FILES_UPLOADED:
 			return INPUT_FILES_UPLOADED_STRING;
+		default:
+			break;
 		}
 
 		if (status_no > DONE) {
@@ -119,7 +124,7 @@ public class JobConstants {
 		return UNDEFINED_STRING;
 	}
 
-	public static int translateStatusBack(String status) {
+	public static int translateStatusBack(final String status) {
 
 		if (DONE_STRING.equals(status)) {
 			return DONE;

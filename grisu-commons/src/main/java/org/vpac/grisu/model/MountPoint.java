@@ -48,7 +48,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	 * @param mountpoint
 	 *            the name of the mountpoint
 	 */
-	public MountPoint(String dn, String fqan, String url, String mountpoint) {
+	public MountPoint(final String dn, final String fqan, final String url, final String mountpoint) {
 		this.dn = dn;
 		this.fqan = fqan;
 		this.rootUrl = url;
@@ -70,8 +70,8 @@ public class MountPoint implements Comparable<MountPoint> {
 	 *            whether this mountpoint was mounted automatically using mds
 	 *            information or manually by the user
 	 */
-	public MountPoint(String dn, String fqan, String url, String mountpoint,
-			boolean automaticallyMounted) {
+	public MountPoint(final String dn, final String fqan, final String url, final String mountpoint,
+			final boolean automaticallyMounted) {
 		this(dn, fqan, url, mountpoint);
 		this.automaticallyMounted = automaticallyMounted;
 	}
@@ -85,7 +85,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	 * @param mountpoint
 	 *            the name of the mountpoint
 	 */
-	public MountPoint(String dn, String mountpoint) {
+	public MountPoint(final String dn, final String mountpoint) {
 		this.dn = dn;
 		this.mountpointName = mountpoint;
 	}
@@ -95,7 +95,7 @@ public class MountPoint implements Comparable<MountPoint> {
 		return dn;
 	}
 
-	public final void setDn(String dn) {
+	public final void setDn(final String dn) {
 		this.dn = dn;
 	}
 
@@ -103,7 +103,7 @@ public class MountPoint implements Comparable<MountPoint> {
 		return fqan;
 	}
 
-	public final void setFqan(String fqan) {
+	public final void setFqan(final String fqan) {
 		this.fqan = fqan;
 	}
 
@@ -112,7 +112,7 @@ public class MountPoint implements Comparable<MountPoint> {
 		return mountpointName;
 	}
 
-	public final void setMountpointName(String mountpoint) {
+	public final void setMountpointName(final String mountpoint) {
 		this.mountpointName = mountpoint;
 	}
 
@@ -121,11 +121,11 @@ public class MountPoint implements Comparable<MountPoint> {
 		return rootUrl;
 	}
 
-	public final void setRootUrl(String rootUrl) {
+	public final void setRootUrl(final String rootUrl) {
 		this.rootUrl = rootUrl;
 	}
 
-	public final void setUrl(String url) {
+	public final void setUrl(final String url) {
 		this.rootUrl = url;
 	}
 
@@ -135,7 +135,7 @@ public class MountPoint implements Comparable<MountPoint> {
 		return mountPointId;
 	}
 
-	public final void setMountPointId(Long id) {
+	public final void setMountPointId(final Long id) {
 		this.mountPointId = id;
 	}
 
@@ -149,7 +149,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	// else return false;
 	// }
 
-	public final boolean equals(Object otherMountPoint) {
+	public final boolean equals(final Object otherMountPoint) {
 
 		if (otherMountPoint instanceof MountPoint) {
 			MountPoint other = (MountPoint) otherMountPoint;
@@ -196,7 +196,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	 *         mounted filesystem or is not a "mounted" file (starts with
 	 *         something like /home.sapac.ngadmin)
 	 */
-	public final String replaceMountpointWithAbsoluteUrl(String file) {
+	public final String replaceMountpointWithAbsoluteUrl(final String file) {
 
 		if (file.startsWith(getMountpointName())) {
 			return file.replaceFirst(getMountpointName(), getRootUrl());
@@ -213,7 +213,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	 *            (gsiftp://ngdata.vpac.org/home/sano4/markus/test.txt)
 	 * @return /ngdata.vpac.org/test.txt
 	 */
-	public final String replaceAbsoluteRootUrlWithMountPoint(String file) {
+	public final String replaceAbsoluteRootUrlWithMountPoint(final String file) {
 
 		if (file.startsWith(getRootUrl())) {
 			return file.replaceFirst(getRootUrl(), getMountpointName());
@@ -231,7 +231,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	 *            the file
 	 * @return true - if it contains it; false - if not.
 	 */
-	public final boolean isResponsibleForUserSpaceFile(String file) {
+	public final boolean isResponsibleForUserSpaceFile(final String file) {
 
 		if (file.startsWith("gsiftp")) {
 			if (file.startsWith(getRootUrl())) {
@@ -256,7 +256,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	 *            the file
 	 * @return true - if it contains it; false - if not.
 	 */
-	public final boolean isResponsibleForAbsoluteFile(String file) {
+	public final boolean isResponsibleForAbsoluteFile(final String file) {
 
 		if (file.startsWith(getRootUrl())) {
 			return true;
@@ -289,7 +289,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	 * @return the relative path or null if the file is not within the
 	 *         filesystem of the mountpoint
 	 */
-	public final String getRelativePathToRoot(String url) {
+	public final String getRelativePathToRoot(final String url) {
 
 		if (url.startsWith("/")) {
 			if (!url.startsWith(getMountpointName())) {
@@ -322,7 +322,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	// return getRootUrl().compareTo(((MountPoint)o).getRootUrl());
 	// }
 
-	public final int compareTo(MountPoint mp) {
+	public final int compareTo(final MountPoint mp) {
 		return getRootUrl().compareTo(mp.getRootUrl());
 	}
 
@@ -331,7 +331,7 @@ public class MountPoint implements Comparable<MountPoint> {
 		return automaticallyMounted;
 	}
 
-	public final void setAutomaticallyMounted(boolean am) {
+	public final void setAutomaticallyMounted(final boolean am) {
 		this.automaticallyMounted = am;
 	}
 
@@ -340,7 +340,7 @@ public class MountPoint implements Comparable<MountPoint> {
 		return disabled;
 	}
 
-	public final void setDisabled(boolean disabled) {
+	public final void setDisabled(final boolean disabled) {
 		this.disabled = disabled;
 	}
 

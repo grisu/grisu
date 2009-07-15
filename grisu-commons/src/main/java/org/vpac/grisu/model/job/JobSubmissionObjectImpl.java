@@ -39,7 +39,7 @@ public class JobSubmissionObjectImpl {
 		return this.id;
 	}
 
-	private void setId(Long id) {
+	private void setId(final Long id) {
 		this.id = id;
 	}
 
@@ -47,7 +47,7 @@ public class JobSubmissionObjectImpl {
 		return jobname;
 	}
 
-	public final void setJobname(String jobname) {
+	public final void setJobname(final String jobname) {
 		this.jobname = jobname;
 	}
 
@@ -55,7 +55,7 @@ public class JobSubmissionObjectImpl {
 		return application;
 	}
 
-	public final void setApplication(String app) {
+	public final void setApplication(final String app) {
 		this.application = app;
 	}
 
@@ -66,7 +66,7 @@ public class JobSubmissionObjectImpl {
 		return applicationVersion;
 	}
 
-	public final void setApplicationVersion(String appVersion) {
+	public final void setApplicationVersion(final String appVersion) {
 		this.applicationVersion = appVersion;
 	}
 
@@ -74,7 +74,7 @@ public class JobSubmissionObjectImpl {
 		return email_address;
 	}
 
-	public final void setEmail_address(String email_address) {
+	public final void setEmail_address(final String email_address) {
 		this.email_address = email_address;
 	}
 
@@ -82,7 +82,7 @@ public class JobSubmissionObjectImpl {
 		return email_on_job_start;
 	}
 
-	public final void setEmail_on_job_start(boolean email_on_job_start) {
+	public final void setEmail_on_job_start(final boolean email_on_job_start) {
 		this.email_on_job_start = email_on_job_start;
 	}
 
@@ -90,7 +90,7 @@ public class JobSubmissionObjectImpl {
 		return email_on_job_finish;
 	}
 
-	public final void setEmail_on_job_finish(boolean email_on_job_finish) {
+	public final void setEmail_on_job_finish(final boolean email_on_job_finish) {
 		this.email_on_job_finish = email_on_job_finish;
 	}
 
@@ -98,7 +98,7 @@ public class JobSubmissionObjectImpl {
 		return cpus;
 	}
 
-	public final void setCpus(int cpus) {
+	public final void setCpus(final int cpus) {
 		this.cpus = cpus;
 	}
 
@@ -106,7 +106,7 @@ public class JobSubmissionObjectImpl {
 		return force_single;
 	}
 
-	public final void setForce_single(boolean force_single) {
+	public final void setForce_single(final boolean force_single) {
 		this.force_single = force_single;
 		this.force_mpi = !force_mpi;
 	}
@@ -115,7 +115,7 @@ public class JobSubmissionObjectImpl {
 		return force_mpi;
 	}
 
-	public final void setForce_mpi(boolean force_mpi) {
+	public final void setForce_mpi(final boolean force_mpi) {
 		this.force_mpi = force_mpi;
 		this.force_single = !force_mpi;
 	}
@@ -124,7 +124,7 @@ public class JobSubmissionObjectImpl {
 		return memory_in_bytes;
 	}
 
-	public final void setMemory(long memory) {
+	public final void setMemory(final long memory) {
 		this.memory_in_bytes = memory;
 	}
 
@@ -132,7 +132,7 @@ public class JobSubmissionObjectImpl {
 		return walltime_in_seconds;
 	}
 
-	public final void setWalltimeInSeconds(int walltime) {
+	public final void setWalltimeInSeconds(final int walltime) {
 		this.walltime_in_seconds = walltime;
 	}
 
@@ -140,7 +140,7 @@ public class JobSubmissionObjectImpl {
 		return inputFileUrls.toArray(new String[] {});
 	}
 
-	public final void setInputFileUrls(String[] inputFileUrls) {
+	public final void setInputFileUrls(final String[] inputFileUrls) {
 		if (inputFileUrls != null) {
 			this.inputFileUrls = new HashSet<String>(Arrays
 					.asList(inputFileUrls));
@@ -149,11 +149,11 @@ public class JobSubmissionObjectImpl {
 		}
 	}
 
-	public final void addInputFileUrl(String url) {
+	public final void addInputFileUrl(final String url) {
 		this.inputFileUrls.add(url);
 	}
 
-	public final void addModule(String module) {
+	public final void addModule(final String module) {
 		this.modules.add(module);
 	}
 
@@ -170,7 +170,7 @@ public class JobSubmissionObjectImpl {
 		return modules.toArray(new String[] {});
 	}
 
-	public final void setModules(String[] modules) {
+	public final void setModules(final String[] modules) {
 		if (modules != null) {
 			this.modules = new HashSet<String>(Arrays.asList(modules));
 		} else {
@@ -191,7 +191,7 @@ public class JobSubmissionObjectImpl {
 		return submissionLocation;
 	}
 
-	public final void setSubmissionLocation(String submissionLocation) {
+	public final void setSubmissionLocation(final String submissionLocation) {
 		this.submissionLocation = submissionLocation;
 	}
 
@@ -200,7 +200,7 @@ public class JobSubmissionObjectImpl {
 		return commandline;
 	}
 
-	public final void setCommandline(String commandline) {
+	public final void setCommandline(final String commandline) {
 		this.commandline = commandline;
 	}
 
@@ -208,7 +208,7 @@ public class JobSubmissionObjectImpl {
 		return stderr;
 	}
 
-	public final void setStderr(String stderr) {
+	public final void setStderr(final String stderr) {
 		this.stderr = stderr;
 	}
 
@@ -216,11 +216,11 @@ public class JobSubmissionObjectImpl {
 		return stdout;
 	}
 
-	public final void setStdout(String stdout) {
+	public final void setStdout(final String stdout) {
 		this.stdout = stdout;
 	}
 
-	public final void setStdin(String stdin) {
+	public final void setStdin(final String stdin) {
 		this.stdin = stdin;
 	}
 
@@ -228,7 +228,7 @@ public class JobSubmissionObjectImpl {
 		return this.stdin;
 	}
 
-	protected String jobname;
+	private String jobname;
 	private String application;
 	private String applicationVersion;
 	private String email_address;
@@ -250,7 +250,7 @@ public class JobSubmissionObjectImpl {
 	public JobSubmissionObjectImpl() {
 	}
 
-	private boolean checkForBoolean(String booleanString) {
+	private boolean checkForBoolean(final String booleanString) {
 		if (booleanString == null) {
 			return false;
 		}
@@ -263,7 +263,7 @@ public class JobSubmissionObjectImpl {
 		}
 	}
 
-	public JobSubmissionObjectImpl(Map<String, String> jobProperties) {
+	public JobSubmissionObjectImpl(final Map<String, String> jobProperties) {
 
 		this.jobname = jobProperties.get(JobSubmissionProperty.JOBNAME
 				.toString());
@@ -323,7 +323,7 @@ public class JobSubmissionObjectImpl {
 
 	}
 
-	public JobSubmissionObjectImpl(Document jsdl) {
+	public JobSubmissionObjectImpl(final Document jsdl) {
 
 		jobname = JsdlHelpers.getJobname(jsdl);
 		application = JsdlHelpers.getApplicationName(jsdl);
@@ -452,7 +452,7 @@ public class JobSubmissionObjectImpl {
 
 	}
 
-	public static void main(String[] args) throws JobPropertiesException {
+	public static void main(final String[] args) throws JobPropertiesException {
 
 		JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl();
 

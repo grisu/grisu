@@ -9,7 +9,10 @@ import java.io.File;
  * @author Markus Binsteiner
  * 
  */
-public class Environment {
+public final class Environment {
+	
+	private Environment() {
+	}
 
 	public static final String GRISU_DIRECTORY = System
 			.getProperty("user.home")

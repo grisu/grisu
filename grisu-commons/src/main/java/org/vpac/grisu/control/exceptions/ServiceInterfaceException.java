@@ -2,7 +2,7 @@ package org.vpac.grisu.control.exceptions;
 
 public class ServiceInterfaceException extends Exception {
 
-	public ServiceInterfaceException(String string, Exception e) {
+	public ServiceInterfaceException(final String string, final Exception e) {
 		super(string, e);
 	}
 

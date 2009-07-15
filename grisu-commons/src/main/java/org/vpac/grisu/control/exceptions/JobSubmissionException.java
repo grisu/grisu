@@ -2,11 +2,11 @@ package org.vpac.grisu.control.exceptions;
 
 public class JobSubmissionException extends Exception {
 
-	public JobSubmissionException(String message) {
+	public JobSubmissionException(final String message) {
 		super(message);
 	}
 
-	public JobSubmissionException(String message, Exception e) {
+	public JobSubmissionException(final String message, final Exception e) {
 		super(message, e);
 	}
 

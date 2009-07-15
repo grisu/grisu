@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.model.GrisuRegistry;
 
 /**
  * Basic properties for a job that are needed to create a job.
@@ -115,7 +114,7 @@ public enum JobSubmissionProperty {
 	private final String keyName;
 	private final String defaultValue;
 
-	JobSubmissionProperty(String keyName, String defaultValue) {
+	JobSubmissionProperty(final String keyName, final String defaultValue) {
 		this.keyName = keyName;
 		this.defaultValue = defaultValue;
 	}
@@ -129,7 +128,7 @@ public enum JobSubmissionProperty {
 		return this.defaultValue;
 	}
 
-	public static JobSubmissionProperty fromString(String key) {
+	public static JobSubmissionProperty fromString(final String key) {
 		return stringToJobPropertyMap.get(key);
 	}
 }

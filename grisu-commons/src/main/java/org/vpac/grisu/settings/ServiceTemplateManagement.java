@@ -17,7 +17,10 @@ import org.w3c.dom.Document;
  * @author Markus Binsteiner
  * 
  */
-public class ServiceTemplateManagement {
+public final class ServiceTemplateManagement {
+	
+	private ServiceTemplateManagement() {
+	}
 
 	static final Logger myLogger = Logger
 			.getLogger(ServiceTemplateManagement.class.getName());
@@ -31,7 +34,7 @@ public class ServiceTemplateManagement {
 	 * @return the template as xml Document or null if it could not be
 	 *         found/loaded
 	 */
-	public static Document getAvailableTemplate(String name) {
+	public static Document getAvailableTemplate(final String name) {
 
 		Document jsdl_template = null;
 		try {

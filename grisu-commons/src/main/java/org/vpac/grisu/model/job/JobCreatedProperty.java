@@ -62,7 +62,7 @@ public enum JobCreatedProperty {
 
 	private final String keyName;
 
-	JobCreatedProperty(String keyName) {
+	JobCreatedProperty(final String keyName) {
 		this.keyName = keyName;
 	}
 
@@ -78,7 +78,7 @@ public enum JobCreatedProperty {
 	 *            the keyname
 	 * @return the enum
 	 */
-	public static JobCreatedProperty fromString(String key) {
+	public static JobCreatedProperty fromString(final String key) {
 		return stringToJobPropertyMap.get(key);
 	}
 

@@ -20,13 +20,13 @@ public class FqanEvent extends EventObject {
 	private String fqan = null;
 	private String[] fqans = null;
 
-	public FqanEvent(Object source, int event_type, String fqan) {
+	public FqanEvent(final Object source, final int event_type, final String fqan) {
 		super(source);
 		this.event_type = event_type;
 		this.fqan = fqan;
 	}
 
-	public FqanEvent(Object source, String[] fqans) {
+	public FqanEvent(final Object source, final String[] fqans) {
 		super(source);
 		this.event_type = FQANS_REFRESHED;
 		this.fqans = fqans;

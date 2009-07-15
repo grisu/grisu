@@ -2,7 +2,7 @@ package org.vpac.grisu.control.exceptions;
 
 public class NoSuchJobException extends Exception {
 
-	public NoSuchJobException(String message) {
+	public NoSuchJobException(final String message) {
 		super(message);
 	}
 

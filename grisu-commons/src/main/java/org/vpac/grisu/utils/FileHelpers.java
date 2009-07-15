@@ -21,7 +21,10 @@ import org.apache.log4j.Logger;
  * @author Markus Binsteiner
  * 
  */
-public class FileHelpers {
+public final class FileHelpers {
+	
+	private FileHelpers() {
+	}
 
 	static final Logger myLogger = Logger
 			.getLogger(FileHelpers.class.getName());
@@ -38,7 +41,7 @@ public class FileHelpers {
 	 * @throws IOException
 	 *             if the file can't be written for some reason
 	 */
-	public static void saveToDisk(DataSource source, File file)
+	public static void saveToDisk(final DataSource source, final File file)
 			throws IOException {
 
 		FileOutputStream outputStream = new FileOutputStream(file);
@@ -64,7 +67,7 @@ public class FileHelpers {
 	 *            the file
 	 * @return the content of the file as String.
 	 */
-	public static String readFromFile(File file) {
+	public static String readFromFile(final File file) {
 
 		StringBuffer sb = new StringBuffer(BUFFER_SIZE);
 		BufferedReader reader = null;
@@ -108,7 +111,7 @@ public class FileHelpers {
 	 * @throws Exception
 	 *             if the file could not be read
 	 */
-	public static String readFromFileWithException(File file) throws Exception {
+	public static String readFromFileWithException(final File file) throws Exception {
 
 		StringBuffer sb = new StringBuffer(BUFFER_SIZE);
 		BufferedReader reader = null;
@@ -134,7 +137,7 @@ public class FileHelpers {
 	 * @param dest
 	 *            the target directory
 	 */
-	public static void copyFileIntoDirectory(File[] sources, File dest) {
+	public static void copyFileIntoDirectory(final File[] sources, final File dest) {
 
 		for (File source : sources) {
 
@@ -155,7 +158,7 @@ public class FileHelpers {
 					out.write(buf);
 
 				} catch (Exception e) {
-
+					myLogger.debug(e);
 				} finally {
 					try {
 						if (in != null) {
@@ -180,7 +183,7 @@ public class FileHelpers {
 	 *            the directory to delete
 	 * @return whether the directory could be deleted entirely or not
 	 */
-	public static boolean deleteDirectory(File path) {
+	public static boolean deleteDirectory(final File path) {
 		if (!path.isDirectory()) {
 			path.delete();
 		}

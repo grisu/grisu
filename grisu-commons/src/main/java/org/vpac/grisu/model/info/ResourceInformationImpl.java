@@ -34,7 +34,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 	private Map<String, Set<String>> cachedAllSitesPerFqan = new HashMap<String, Set<String>>();
 	private Map<String, List<String>> cachedStagingFilesystemsPerSubLoc = new HashMap<String, List<String>>();
 
-	public ResourceInformationImpl(ServiceInterface serviceInterface) {
+	public ResourceInformationImpl(final ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
 	}
 
@@ -58,7 +58,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 		return cachedAllSites;
 	}
 
-	public final Set<String> getAllSubmissionLocationsForSite(String site) {
+	public final Set<String> getAllSubmissionLocationsForSite(final String site) {
 
 		if (cachedSiteAllSubmissionLocationsMap.get(site) == null) {
 			// now we are building the complete map, not only for this one site
@@ -75,7 +75,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 	}
 
-	public final String getSite(String urlOrSubmissionLocation) {
+	public final String getSite(final String urlOrSubmissionLocation) {
 
 		String host = getHost(urlOrSubmissionLocation);
 
@@ -85,8 +85,8 @@ public class ResourceInformationImpl implements ResourceInformation {
 		return cachedHosts.get(host);
 	}
 
-	public final Set<String> filterSubmissionLocationsForSite(String site,
-			Set<String> submissionlocations) {
+	public final Set<String> filterSubmissionLocationsForSite(final String site,
+			final Set<String> submissionlocations) {
 
 		Set<String> temp = new TreeSet<String>();
 		for (String subLoc : submissionlocations) {
@@ -98,7 +98,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 	}
 
 	public final Set<String> distillSitesFromSubmissionLocations(
-			Set<String> submissionLocations) {
+			final Set<String> submissionLocations) {
 
 		Set<String> temp = new TreeSet<String>();
 		for (String subLoc : submissionLocations) {
@@ -115,7 +115,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 		return temp;
 	}
 
-	public static String getHost(String urlOrSubmissionLocation) {
+	public static String getHost(final String urlOrSubmissionLocation) {
 		String hostname = null;
 
 		if (urlOrSubmissionLocation.contains("://")) {
@@ -166,7 +166,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 		return hostname;
 	}
 
-	public final String[] getAllAvailableSubmissionLocations(String fqan) {
+	public final String[] getAllAvailableSubmissionLocations(final String fqan) {
 
 		if (cachedAllSubmissionLocationsPerFqan.get(fqan) == null) {
 			String[] temp = serviceInterface.getAllSubmissionLocations(fqan);
@@ -175,7 +175,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 		return cachedAllSubmissionLocationsPerFqan.get(fqan);
 	}
 
-	public final Set<String> getAllAvailableSites(String fqan) {
+	public final Set<String> getAllAvailableSites(final String fqan) {
 
 		if (cachedAllSitesPerFqan.get(fqan) == null) {
 			Set<String> temp = new TreeSet<String>();
@@ -186,7 +186,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 		return cachedAllSitesPerFqan.get(fqan);
 	}
 
-	public final List<String> getStagingFilesystemsForSubmissionLocation(String subLoc) {
+	public final List<String> getStagingFilesystemsForSubmissionLocation(final String subLoc) {
 
 		if (subLoc == null || "".equals(subLoc)) {
 			return null;
@@ -200,7 +200,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 	}
 
 	public final String getRecommendedStagingFileSystemForSubmissionLocation(
-			String subLoc) {
+			final String subLoc) {
 
 		List<String> temp = getStagingFilesystemsForSubmissionLocation(subLoc);
 		if (temp != null && temp.size() > 0) {

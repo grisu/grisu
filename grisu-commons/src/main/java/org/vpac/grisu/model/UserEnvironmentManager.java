@@ -16,7 +16,7 @@ public interface UserEnvironmentManager {
 	 * 
 	 * @return the fqans
 	 */
-	public String[] getAllAvailableFqans();
+	String[] getAllAvailableFqans();
 
 	/**
 	 * All the submissionLocations the user has got access to with all his
@@ -24,7 +24,7 @@ public interface UserEnvironmentManager {
 	 * 
 	 * @return all submissionLocations
 	 */
-	public Set<String> getAllAvailableSubmissionLocations();
+	Set<String> getAllAvailableSubmissionLocations();
 
 	/**
 	 * Gets all the mountpoints for this particular VO.
@@ -33,14 +33,14 @@ public interface UserEnvironmentManager {
 	 *            the fqan
 	 * @return the mountpoints
 	 */
-	public Set<MountPoint> getMountPoints(String fqan);
+	Set<MountPoint> getMountPoints(String fqan);
 
 	/**
 	 * Get all the users' mountpoints.
 	 * 
 	 * @return all mountpoints
 	 */
-	public MountPoint[] getMountPoints();
+	MountPoint[] getMountPoints();
 
 	/**
 	 * Calculates all mountpoints for the combination of submission location and
@@ -52,7 +52,7 @@ public interface UserEnvironmentManager {
 	 *            the fqan
 	 * @return a list of all mountpoints
 	 */
-	public Set<MountPoint> getMountPointsForSubmissionLocationAndFqan(
+	Set<MountPoint> getMountPointsForSubmissionLocationAndFqan(
 			String submissionLocation, String fqan);
 
 	/**
@@ -63,7 +63,7 @@ public interface UserEnvironmentManager {
 	 *            the submission location
 	 * @return the list of mountpoints
 	 */
-	public Set<MountPoint> getMountPointsForSubmissionLocation(
+	Set<MountPoint> getMountPointsForSubmissionLocation(
 			String submissionLocation);
 
 	/**
@@ -71,7 +71,7 @@ public interface UserEnvironmentManager {
 	 * 
 	 * @return all sites
 	 */
-	public Set<String> getAllAvailableSites();
+	Set<String> getAllAvailableSites();
 
 	/**
 	 * Returns a recommended mountpoint for the specified combination of
@@ -83,7 +83,7 @@ public interface UserEnvironmentManager {
 	 *            the fqan
 	 * @return the mountpoint or mull if no mountpoint could be found
 	 */
-	public MountPoint getRecommendedMountPoint(String submissionLocation,
+	MountPoint getRecommendedMountPoint(String submissionLocation,
 			String fqan);
 
 	/**
@@ -93,14 +93,14 @@ public interface UserEnvironmentManager {
 	 *            the url
 	 * @return the mountpoint or null if no mountpoint could be found
 	 */
-	public MountPoint getMountPointForUrl(String url);
+	MountPoint getMountPointForUrl(String url);
 
 	/**
 	 * Returns the currently set fqan.
 	 * 
 	 * @return the fqan
 	 */
-	public String getCurrentFqan();
+	String getCurrentFqan();
 
 	/**
 	 * Sets the currently used fqan.
@@ -108,7 +108,7 @@ public interface UserEnvironmentManager {
 	 * @param currentFqan
 	 *            the fqan
 	 */
-	public void setCurrentFqan(String currentFqan);
+	void setCurrentFqan(String currentFqan);
 
 	/**
 	 * Adds a fqan listener to this environment manager.
@@ -116,7 +116,7 @@ public interface UserEnvironmentManager {
 	 * @param listener
 	 *            the listener
 	 */
-	public void addFqanListener(FqanListener listener);
+	void addFqanListener(FqanListener listener);
 
 	/**
 	 * Removes a fqan listener from this environment manager.
@@ -124,6 +124,6 @@ public interface UserEnvironmentManager {
 	 * @param listener
 	 *            the listener
 	 */
-	public void removeFqanListener(FqanListener listener);
+	void removeFqanListener(FqanListener listener);
 
 }

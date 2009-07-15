@@ -16,7 +16,6 @@ import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
@@ -44,8 +43,11 @@ import org.xml.sax.SAXException;
  * @author Markus Binsteiner
  */
 
-public class JsdlHelpers {
+public final class JsdlHelpers {
 
+	private JsdlHelpers() {
+	}
+	
 	static final Logger myLogger = Logger
 			.getLogger(JsdlHelpers.class.getName());
 
@@ -55,7 +57,7 @@ public class JsdlHelpers {
 	// TODO check whether access to this has to be synchronized
 	private static final XPath xpath = getXPath();
 
-	private static final XPath getXPath() {
+	private static XPath getXPath() {
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		xpath.setNamespaceContext(new JSDLNamespaceContext());
 		return xpath;
@@ -69,7 +71,7 @@ public class JsdlHelpers {
 	 *            the jsdl xml document
 	 * @return true if valid - false if not
 	 */
-	public static boolean validateJSDL(Document jobDescription) {
+	public static boolean validateJSDL(final Document jobDescription) {
 
 		// TODO use static Schema for better performance
 		// create a SchemaFactory capable of understanding WXS schemas
@@ -111,7 +113,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return the name of the job
 	 */
-	public static String getJobname(Document jsdl) {
+	public static String getJobname(final Document jsdl) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:JobIdentification/jsdl:JobName";
 		NodeList resultNodes = null;
@@ -137,7 +139,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return the description of the type of job
 	 */
-	public static String getDescription(Document jsdl) {
+	public static String getDescription(final Document jsdl) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl:Description";
 		NodeList resultNodes = null;
@@ -168,7 +170,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return the walltime in seconds or -1 if there is no (or no valid) entry
 	 */
-	public static int getWalltime(Document jsdl) {
+	public static int getWalltime(final Document jsdl) {
 
 		int cpus = getProcessorCount(jsdl);
 
@@ -209,7 +211,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return the number of cpus used in this job
 	 */
-	public static int getProcessorCount(Document jsdl) {
+	public static int getProcessorCount(final Document jsdl) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl:TotalCPUCount/jsdl:exact";
 		NodeList resultNodes = null;
@@ -242,7 +244,7 @@ public class JsdlHelpers {
 	}
 
 	// don't use that anymore -- this will be deleted soon.
-	private static int getProcessorCount_OLD(Document jsdl) {
+	private static int getProcessorCount_OLD(final Document jsdl) {
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl:TotalCPUCount";
 		NodeList resultNodes = null;
 		try {
@@ -279,7 +281,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return the total memory requirment
 	 */
-	public static long getTotalMemoryRequirement(Document jsdl) {
+	public static long getTotalMemoryRequirement(final Document jsdl) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl:TotalPhysicalMemory/jsdl:LowerBoundedRange";
 		NodeList resultNodes = null;
@@ -308,7 +310,7 @@ public class JsdlHelpers {
 
 	}
 
-	private static Node getApplicationNode(Document jsdl) {
+	private static Node getApplicationNode(final Document jsdl) {
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl:ApplicationName";
 		NodeList resultNodes = null;
 		try {
@@ -333,7 +335,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return the name of the applications
 	 */
-	public static String getApplicationName(Document jsdl) {
+	public static String getApplicationName(final Document jsdl) {
 
 		return getApplicationNode(jsdl).getTextContent();
 
@@ -347,14 +349,14 @@ public class JsdlHelpers {
 	 * @param application
 	 *            the name of the application
 	 */
-	public static void setApplicationType(Document xmlTemplateDoc,
-			String application) {
+	public static void setApplicationType(final Document xmlTemplateDoc,
+			final String application) {
 
 		getApplicationNode(xmlTemplateDoc).setTextContent(application);
 
 	}
 
-	private static Node getApplicationVersionNode(Document jsdl) {
+	private static Node getApplicationVersionNode(final Document jsdl) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl:ApplicationVersion";
 		NodeList resultNodes = null;
@@ -380,7 +382,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return the version
 	 */
-	public static String getApplicationVersion(Document jsdl) {
+	public static String getApplicationVersion(final Document jsdl) {
 
 		Node appNode = getApplicationVersionNode(jsdl);
 
@@ -400,7 +402,7 @@ public class JsdlHelpers {
 	 * @param version the version of the application
 	 * @return the version of the application to run
 	 */
-	public static void setApplicationVersion(Document jsdl, String version) {
+	public static void setApplicationVersion(final Document jsdl, final String version) {
 		getApplicationVersionNode(jsdl).setTextContent(version);
 	}
 
@@ -413,7 +415,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return the (path to the) application
 	 */
-	public static String getPosixApplicationExecutable(Document jsdl) {
+	public static String getPosixApplicationExecutable(final Document jsdl) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl-posix:POSIXApplication/jsdl-posix:Executable";
 		NodeList resultNodes = null;
@@ -442,7 +444,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return the working directory (relative to $GLOBUS_HOME in our case)
 	 */
-	public static String getWorkingDirectory(Document jsdl) {
+	public static String getWorkingDirectory(final Document jsdl) {
 
 		return getWorkingDirectoryElement(jsdl).getTextContent();
 
@@ -458,8 +460,8 @@ public class JsdlHelpers {
 	 * @param path
 	 *            the path to the workingdirectory
 	 */
-	public static void setWorkingDirectory(Document jsdl,
-			String fileSystemName, String path) {
+	public static void setWorkingDirectory(final Document jsdl,
+			final String fileSystemName, final String path) {
 
 		Element workingDirectoryElement = getWorkingDirectoryElement(jsdl);
 
@@ -475,7 +477,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return the absolute url
 	 */
-	public static String getAbsoluteWorkingDirectoryUrl(Document jsdl) {
+	public static String getAbsoluteWorkingDirectoryUrl(final Document jsdl) {
 
 		Element wd = getWorkingDirectoryElement(jsdl);
 		String fsName = wd.getAttribute("filesystemName");
@@ -489,7 +491,7 @@ public class JsdlHelpers {
 
 	}
 
-	private static Element getWorkingDirectoryElement(Document jsdl) {
+	private static Element getWorkingDirectoryElement(final Document jsdl) {
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl-posix:POSIXApplication/jsdl-posix:WorkingDirectory";
 		NodeList resultNodes = null;
 		try {
@@ -515,7 +517,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return the path to the stdout file (relative to the working directory)
 	 */
-	public static String getPosixStandardOutput(Document jsdl) {
+	public static String getPosixStandardOutput(final Document jsdl) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl-posix:POSIXApplication/jsdl-posix:Output";
 		NodeList resultNodes = null;
@@ -543,7 +545,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return the path to the stdout file (relative to the working directory)
 	 */
-	public static String getPosixStandardInput(Document jsdl) {
+	public static String getPosixStandardInput(final Document jsdl) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl-posix:POSIXApplication/jsdl-posix:Input";
 		NodeList resultNodes = null;
@@ -571,7 +573,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return the path to the stderr file (relative to the working directory)
 	 */
-	public static String getPosixStandardError(Document jsdl) {
+	public static String getPosixStandardError(final Document jsdl) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl-posix:POSIXApplication/jsdl-posix:Error";
 		NodeList resultNodes = null;
@@ -599,7 +601,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return a list of all arguments
 	 */
-	public static String[] getPosixApplicationArguments(Document jsdl) {
+	public static String[] getPosixApplicationArguments(final Document jsdl) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl-posix:POSIXApplication/jsdl-posix:Argument";
 		NodeList resultNodes = null;
@@ -631,8 +633,8 @@ public class JsdlHelpers {
 	 *             if the {@link Transformer} throws an error while transforming
 	 *             the xml document
 	 */
-	public static String getJsdl(Document jsdl)
-			throws TransformerFactoryConfigurationError, TransformerException {
+	public static String getJsdl(final Document jsdl)
+			throws TransformerException {
 
 		// TODO use static transformer to reduce overhead?
 		Transformer transformer = TransformerFactory.newInstance()
@@ -660,7 +662,7 @@ public class JsdlHelpers {
 	 * @throws XPathExpressionException
 	 *             if the JobName element could not be found
 	 */
-	public static void setJobname(Document jsdl, String new_jobname)
+	public static void setJobname(final Document jsdl, final String new_jobname)
 			throws XPathExpressionException {
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:JobIdentification/jsdl:JobName";
 		NodeList resultNodes = null;
@@ -713,7 +715,7 @@ public class JsdlHelpers {
 	 * @throws XPathExpressionException
 	 *             if the candidatehosts element could not be found
 	 */
-	public static void addCandidateHosts(Document jsdl, String[] subLocs)
+	public static void addCandidateHosts(final Document jsdl, final String[] subLocs)
 			throws XPathExpressionException {
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Resources/jsdl:CandidateHosts";
 		NodeList resultNodes = null;
@@ -757,7 +759,7 @@ public class JsdlHelpers {
 	 *            the jsdl docuemnt the jsdl Document
 	 * @return a list of hostnames
 	 */
-	public static String[] getCandidateHosts(Document jsdl) {
+	public static String[] getCandidateHosts(final Document jsdl) {
 
 		String[] hosts = null;
 
@@ -791,7 +793,7 @@ public class JsdlHelpers {
 	 *            a DataStaging element from a jsdl file
 	 * @return the url of the file to stage in
 	 */
-	public static String extractTargetFromStageInElement(Element stageIn) {
+	public static String extractTargetFromStageInElement(final Element stageIn) {
 		String fileSystemName = ((Element) stageIn.getElementsByTagName(
 				"FileSystemName").item(0)).getTextContent();
 		String fileSystemUrl = getFileSystemRootUrl(stageIn.getOwnerDocument(),
@@ -812,8 +814,8 @@ public class JsdlHelpers {
 	 * @param source_url
 	 *            the url of the source file
 	 */
-	public static void setSourceForStageInElement(Element stageIn,
-			String source_url) {
+	public static void setSourceForStageInElement(final Element stageIn,
+			final String source_url) {
 
 		Element source_uri = ((Element) ((Element) stageIn
 				.getElementsByTagName("Source").item(0)).getElementsByTagName(
@@ -829,7 +831,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return the stage-in elements
 	 */
-	public static List<Element> getStageInElements(Document jsdl) {
+	public static List<Element> getStageInElements(final Document jsdl) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:DataStaging";
 		NodeList resultNodes = null;
@@ -857,7 +859,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return the input files
 	 */
-	public static String[] getInputFileUrls(Document jsdl) {
+	public static String[] getInputFileUrls(final Document jsdl) {
 
 		List<Element> stageInElements = getStageInElements(jsdl);
 
@@ -881,7 +883,7 @@ public class JsdlHelpers {
 	 *            the stage-in element
 	 * @return the source-file-url
 	 */
-	public static String getStageInSource(Element stageInElement) {
+	public static String getStageInSource(final Element stageInElement) {
 
 		NodeList sources = stageInElement.getElementsByTagName("Source");
 		if (sources.getLength() != 1) {
@@ -912,7 +914,7 @@ public class JsdlHelpers {
 	 *            the stage-in element
 	 * @return the relative part of the target url.
 	 */
-	public static Element getStageInTarget_relativePart(Element stageInElement) {
+	public static Element getStageInTarget_relativePart(final Element stageInElement) {
 
 		NodeList filenames = stageInElement.getElementsByTagName("FileName");
 		if (filenames.getLength() != 1) {
@@ -934,7 +936,7 @@ public class JsdlHelpers {
 	 *            the stage-in element
 	 * @return the filesystem part of the target url.
 	 */
-	public static Element getStageInTarget_filesystemPart(Element stageInElement) {
+	public static Element getStageInTarget_filesystemPart(final Element stageInElement) {
 
 		NodeList filesystems = stageInElement
 				.getElementsByTagName("FileSystemName");
@@ -958,7 +960,7 @@ public class JsdlHelpers {
 	 *            the stage-in element
 	 * @return the url of the target file
 	 */
-	public static String getStageInTarget(Element stageInElement) {
+	public static String getStageInTarget(final Element stageInElement) {
 
 		String fsNamePart = getStageInTarget_filesystemPart(stageInElement)
 				.getTextContent();
@@ -993,7 +995,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return all modules that have to be loaded for running this job
 	 */
-	public static String[] getModules(Document jsdl) {
+	public static String[] getModules(final Document jsdl) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl-arcs:Module";
 		NodeList resultNodes = null;
@@ -1051,7 +1053,7 @@ public class JsdlHelpers {
 	 *            the jsdl file
 	 * @return whether to enable pbs-debugging or not
 	 */
-	public static String getPbsDebugElement(Document jsdl) {
+	public static String getPbsDebugElement(final Document jsdl) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl-arcs:PbsDebug";
 		NodeList resultNodes = null;
@@ -1079,7 +1081,7 @@ public class JsdlHelpers {
 
 	}
 
-	private static Element getEmailElement(Document jsdl) {
+	private static Element getEmailElement(final Document jsdl) {
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl-arcs:GrisuTemplate/jsdl-arcs:Email";
 		NodeList resultNodes = null;
 		try {
@@ -1103,7 +1105,7 @@ public class JsdlHelpers {
 	}
 
 	// don't use that anymore, this is wrong!
-	private static Element getEmailElement_OLD(Document jsdl) {
+	private static Element getEmailElement_OLD(final Document jsdl) {
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Application/jsdl-posix:POSIXApplication/jsdl-posix:Email";
 		NodeList resultNodes = null;
 		try {
@@ -1130,7 +1132,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return whether to send an email or not
 	 */
-	public static boolean getSendEmailOnJobStart(Document jsdl) {
+	public static boolean getSendEmailOnJobStart(final Document jsdl) {
 
 		Element emailElement = getEmailElement(jsdl);
 
@@ -1155,7 +1157,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return whether to send an email or not
 	 */
-	public static boolean getSendEmailOnJobFinish(Document jsdl) {
+	public static boolean getSendEmailOnJobFinish(final Document jsdl) {
 
 		Element emailElement = getEmailElement(jsdl);
 
@@ -1180,7 +1182,7 @@ public class JsdlHelpers {
 	 *            the jsld document
 	 * @return the email address of the user
 	 */
-	public static String getEmail(Document jsdl) {
+	public static String getEmail(final Document jsdl) {
 
 		Element emailElement = getEmailElement(jsdl);
 		if (emailElement == null) {
@@ -1201,13 +1203,13 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return the url of filesystem where all the files are staged in
 	 */
-	public static String getUserExecutionHostFs(Document jsdl) {
+	public static String getUserExecutionHostFs(final Document jsdl) {
 
 		return getFileSystemRootUrl(jsdl, USER_EXECUTION_HOST_FILESYSTEM);
 
 	}
 
-	public static Element getUserExecutionHostFSElement(Document jsdl) {
+	public static Element getUserExecutionHostFSElement(final Document jsdl) {
 		return (Element) getMountSourceElement(jsdl,
 				USER_EXECUTION_HOST_FILESYSTEM).getParentNode();
 	}
@@ -1222,8 +1224,8 @@ public class JsdlHelpers {
 	 *            the name of the filesystem
 	 * @return the url of the filesystem
 	 */
-	public static String getFileSystemRootUrl(Document jsdl,
-			String fileSystemName) {
+	public static String getFileSystemRootUrl(final Document jsdl,
+			final String fileSystemName) {
 
 		myLogger.debug("Getting root url for filesystem: " + fileSystemName);
 		Element ms = getMountSourceElement(jsdl, fileSystemName);
@@ -1241,7 +1243,7 @@ public class JsdlHelpers {
 	 * @return a list of all elements
 	 */
 	public static List<Element> getElementsWithFileSystemNameAttribute(
-			Document jsdl, String fileSystemName) {
+			final Document jsdl, final String fileSystemName) {
 		String expression = "//@filesystemName";
 		NodeList resultNodes = null;
 		try {
@@ -1273,8 +1275,8 @@ public class JsdlHelpers {
 	 *            the name of the filesystem
 	 * @return the MountSourceElement
 	 */
-	public static Element getMountSourceElement(Document jsdl,
-			String fileSystemName) {
+	public static Element getMountSourceElement(final Document jsdl,
+			final String fileSystemName) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Resources/jsdl:FileSystem[@name='"
 				+ fileSystemName + "']/jsdl:MountSource";
@@ -1318,8 +1320,8 @@ public class JsdlHelpers {
 	 * @param fileSystemRoot the root url for the filesystem
 	 * @return the filesystem element
 	 */
-	public static Element addOrRetrieveExistingFileSystemElement(Document jsdl,
-			String fileSystemName, String fileSystemRoot) {
+	public static Element addOrRetrieveExistingFileSystemElement(final Document jsdl,
+			final String fileSystemName, final String fileSystemRoot) {
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Resources/jsdl:FileSystem[@name='"
 				+ fileSystemName + "']";
 		NodeList resultNodes = null;
@@ -1382,7 +1384,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return the resources element
 	 */
-	public static Element getResourcesElement(Document jsdl) {
+	public static Element getResourcesElement(final Document jsdl) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl:Resources";
 		NodeList resultNodes = null;
@@ -1415,8 +1417,8 @@ public class JsdlHelpers {
 	 *            the name of the template tag
 	 * @return the element
 	 */
-	public static Element getTemplateTagInfoElement(Document jsdl,
-			String templateTagName) {
+	public static Element getTemplateTagInfoElement(final Document jsdl,
+			final String templateTagName) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl-arcs:GrisuTemplate/jsdl-arcs:Info/jsdl-arcs:TemplateTag[@name='"
 				+ templateTagName + "']";
@@ -1450,7 +1452,7 @@ public class JsdlHelpers {
 	 *            the jsdl document
 	 * @return the job type (single/mpi)
 	 */
-	public static String getArcsJobType(Document jsdl) {
+	public static String getArcsJobType(final Document jsdl) {
 
 		String expression = "/jsdl:JobDefinition/jsdl:JobDescription/jsdl-arcs:JobType";
 		NodeList resultNodes = null;
@@ -1478,8 +1480,8 @@ public class JsdlHelpers {
 	 * @param templateTagName the name of the template tag
 	 * @return the map or null
 	 */
-	public static Map<String, String> getTemplateTagInfoItems(Document jsdl,
-			String templateTagName) {
+	public static Map<String, String> getTemplateTagInfoItems(final Document jsdl,
+			final String templateTagName) {
 
 		Element info = getTemplateTagInfoElement(jsdl, templateTagName);
 		if (info == null) {

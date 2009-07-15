@@ -35,7 +35,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 
 	private String currentFqan;
 
-	public UserEnvironmentManagerImpl(ServiceInterface serviceInterface) {
+	public UserEnvironmentManagerImpl(final ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
 		resourceInfo = GrisuRegistry.getDefault(serviceInterface)
 				.getResourceInformation();
@@ -74,8 +74,8 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		return cachedAllSites;
 	}
 
-	public final MountPoint getRecommendedMountPoint(String submissionLocation,
-			String fqan) {
+	public final MountPoint getRecommendedMountPoint(final String submissionLocation,
+			final String fqan) {
 
 		Set<MountPoint> temp = getMountPointsForSubmissionLocationAndFqan(
 				submissionLocation, fqan);
@@ -85,7 +85,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	}
 
 	public final synchronized Set<MountPoint> getMountPointsForSubmissionLocation(
-			String submissionLocation) {
+			final String submissionLocation) {
 
 		if (alreadyQueriedMountPointsPerSubmissionLocation
 				.get(submissionLocation) == null) {
@@ -126,7 +126,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	}
 
 	public final Set<MountPoint> getMountPointsForSubmissionLocationAndFqan(
-			String submissionLocation, String fqan) {
+			final String submissionLocation, final String fqan) {
 
 		// String[] urls = serviceInterface
 		// .getStagingFileSystemForSubmissionLocation(submissionLocation);
@@ -214,7 +214,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		}
 	}
 
-	public final MountPoint getMountPointForUrl(String url) {
+	public final MountPoint getMountPointForUrl(final String url) {
 
 		for (MountPoint mp : getMountPoints()) {
 			if (mp.isResponsibleForAbsoluteFile(url)) {
@@ -225,7 +225,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		return null;
 	}
 
-	public void addFqanListener(FqanListener listener) {
+	public void addFqanListener(final FqanListener listener) {
 		// TODO Auto-generated method stub
 
 	}
@@ -234,12 +234,12 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		return currentFqan;
 	}
 
-	public void removeFqanListener(FqanListener listener) {
+	public void removeFqanListener(final FqanListener listener) {
 		// TODO Auto-generated method stub
 
 	}
 
-	public final void setCurrentFqan(String currentFqan) {
+	public final void setCurrentFqan(final String currentFqan) {
 		this.currentFqan = currentFqan;
 	}
 

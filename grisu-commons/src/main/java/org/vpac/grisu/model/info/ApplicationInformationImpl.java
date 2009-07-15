@@ -19,10 +19,18 @@ import org.vpac.grisu.model.GrisuRegistry;
   */
 public class ApplicationInformationImpl implements ApplicationInformation {
 
-	protected final ServiceInterface serviceInterface;
+	private final ServiceInterface serviceInterface;
 	private final String application;
 
-	protected final ResourceInformation resourceInfo;
+	private final ResourceInformation resourceInfo;
+
+	public final ServiceInterface getServiceInterface() {
+		return serviceInterface;
+	}
+
+	public final ResourceInformation getResourceInfo() {
+		return resourceInfo;
+	}
 
 	private Map<String, Map<String, String>> cachedApplicationDetails = new HashMap<String, Map<String, String>>();
 	private Set<String> cachedAllSubmissionLocations = null;
@@ -41,8 +49,8 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	 * @param serviceInterface the serviceinterface
 	 * @param app the name of the application
 	 */
-	public ApplicationInformationImpl(ServiceInterface serviceInterface,
-			String app) {
+	public ApplicationInformationImpl(final ServiceInterface serviceInterface,
+			final String app) {
 		this.serviceInterface = serviceInterface;
 		this.resourceInfo = GrisuRegistry.getDefault(serviceInterface)
 				.getResourceInformation();
@@ -52,9 +60,9 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	/* (non-Javadoc)
 	 * @see org.vpac.grisu.model.info.ApplicationInformation#getApplicationDetails(java.lang.String, java.lang.String)
 	 */
-	public final Map<String, String> getApplicationDetails(String subLoc,
-			String version) {
-		String KEY = version + "_" + subLoc;
+	public final Map<String, String> getApplicationDetails(final String subLoc,
+			final String version) {
+		final String KEY = version + "_" + subLoc;
 
 		if (cachedApplicationDetails.get(KEY) == null) {
 			Map<String, String> details = serviceInterface
@@ -74,9 +82,9 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	/* (non-Javadoc)
 	 * @see org.vpac.grisu.model.info.ApplicationInformation#getAvailableVersions(java.lang.String)
 	 */
-	public final Set<String> getAvailableVersions(String subLoc) {
+	public final Set<String> getAvailableVersions(final String subLoc) {
 
-		String KEY = subLoc;
+		final String KEY = subLoc;
 
 		if (cachedVersionsPerSubmissionLocations.get(KEY) == null) {
 			List<String> temp = Arrays.asList(serviceInterface
@@ -92,7 +100,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	/* (non-Javadoc)
 	 * @see org.vpac.grisu.model.info.ApplicationInformation#getExecutables(java.lang.String, java.lang.String)
 	 */
-	public final String[] getExecutables(String subLoc, String version) {
+	public final String[] getExecutables(final String subLoc, final String version) {
 
 		return getApplicationDetails(subLoc, version).get(
 				JobConstants.MDS_EXECUTABLES_KEY).split(",");
@@ -116,7 +124,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	/* (non-Javadoc)
 	 * @see org.vpac.grisu.model.info.ApplicationInformation#getAvailableSubmissionLocationsForVersion(java.lang.String)
 	 */
-	public final Set<String> getAvailableSubmissionLocationsForVersion(String version) {
+	public final Set<String> getAvailableSubmissionLocationsForVersion(final String version) {
 
 		if (cachedSubmissionLocationsPerVersion.get(version) == null) {
 			List<String> temp = Arrays
@@ -131,7 +139,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	/* (non-Javadoc)
 	 * @see org.vpac.grisu.model.info.ApplicationInformation#getAllAvailableVersionsForFqan(java.lang.String)
 	 */
-	public final Set<String> getAllAvailableVersionsForFqan(String fqan) {
+	public final Set<String> getAllAvailableVersionsForFqan(final String fqan) {
 
 		if (cachedVersionsForUserPerFqan.get(fqan) == null) {
 			Set<String> result = new TreeSet<String>();
@@ -149,7 +157,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	/* (non-Javadoc)
 	 * @see org.vpac.grisu.model.info.ApplicationInformation#getAvailableSubmissionLocationsForFqan(java.lang.String)
 	 */
-	public final Set<String> getAvailableSubmissionLocationsForFqan(String fqan) {
+	public final Set<String> getAvailableSubmissionLocationsForFqan(final String fqan) {
 
 		if (cachedSubmissionLocationsForUserPerFqan.get(fqan) == null) {
 			Set<String> temp = new HashSet<String>();
@@ -168,9 +176,9 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	 * @see org.vpac.grisu.model.info.ApplicationInformation#getAvailableSubmissionLocationsForVersionAndFqan(java.lang.String, java.lang.String)
 	 */
 	public final Set<String> getAvailableSubmissionLocationsForVersionAndFqan(
-			String version, String fqan) {
+			final String version, final String fqan) {
 
-		String KEY = version + "_" + fqan;
+		final String KEY = version + "_" + fqan;
 
 		if (cachedSubmissionLocationsForUserPerVersionAndFqan.get(KEY) == null) {
 			Set<String> temp = new HashSet<String>();

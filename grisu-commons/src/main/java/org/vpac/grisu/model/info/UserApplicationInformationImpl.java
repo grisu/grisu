@@ -24,8 +24,8 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 	private Set<String> cachedAllVersionsForUser = null;
 	private UserEnvironmentManager userInfo = null;
 
-	public UserApplicationInformationImpl(ServiceInterface serviceInterface,
-			UserEnvironmentManager userInfo, String application) {
+	public UserApplicationInformationImpl(final ServiceInterface serviceInterface,
+			final UserEnvironmentManager userInfo, final String application) {
 		super(serviceInterface, application);
 		this.userInfo = userInfo;
 	}
@@ -47,7 +47,7 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 		if (cachedAllSitesForUser == null) {
 			cachedAllSitesForUser = new TreeSet<String>();
 			for (String subLoc : getAllAvailableSubmissionLocationsForUser()) {
-				cachedAllSitesForUser.add(resourceInfo.getSite(subLoc));
+				cachedAllSitesForUser.add(getResourceInfo().getSite(subLoc));
 			}
 		}
 		return cachedAllSitesForUser;
@@ -66,8 +66,8 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 	}
 
 	public final List<GridResource> getBestSubmissionLocations(
-			Map<JobSubmissionProperty, String> additionalJobProperties,
-			String fqan) {
+			final Map<JobSubmissionProperty, String> additionalJobProperties,
+			final String fqan) {
 
 		Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
 		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
@@ -80,7 +80,7 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 			converterMap.put(key.toString(), basicJobProperties.get(key));
 		}
 
-		return serviceInterface.findMatchingSubmissionLocations(converterMap,
+		return getServiceInterface().findMatchingSubmissionLocations(converterMap,
 				fqan);
 	}
 

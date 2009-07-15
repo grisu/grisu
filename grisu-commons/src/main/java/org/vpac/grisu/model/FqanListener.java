@@ -7,6 +7,6 @@ package org.vpac.grisu.model;
  */
 public interface FqanListener {
 
-	public void fqansChanged(FqanEvent event);
+	void fqansChanged(FqanEvent event);
 
 }

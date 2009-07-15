@@ -6,7 +6,7 @@ public class JobPropertiesException extends Exception {
 
 	private JobSubmissionProperty reason = null;
 
-	public JobPropertiesException(JobSubmissionProperty reason, String message) {
+	public JobPropertiesException(final JobSubmissionProperty reason, final String message) {
 		super(message);
 		this.reason = reason;
 	}

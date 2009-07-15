@@ -18,7 +18,10 @@ import org.w3c.dom.Document;
  * @author markus
  * 
  */
-public class SimpleJsdlBuilder {
+public final class SimpleJsdlBuilder {
+	
+	private SimpleJsdlBuilder() {
+	}
 
 	/**
 	 * Builds a jsdl file using the provided job properties.
@@ -34,7 +37,7 @@ public class SimpleJsdlBuilder {
 	 * @return the jsdl document
 	 */
 	public static Document buildJsdl(
-			Map<JobSubmissionProperty, String> jobProperties) {
+			final Map<JobSubmissionProperty, String> jobProperties) {
 
 		InputStream in = SimpleJsdlBuilder.class
 				.getResourceAsStream("/generic.xml");

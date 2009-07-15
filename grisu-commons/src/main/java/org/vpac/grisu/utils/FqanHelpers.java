@@ -6,7 +6,10 @@ package org.vpac.grisu.utils;
  * @author Markus Binsteiner
  * 
  */
-public class FqanHelpers {
+public final class FqanHelpers {
+	
+	private FqanHelpers() {
+	}
 
 	/**
 	 * Parses a fqan for the last part of the group (/APACGrid/NGAdmin would
@@ -16,7 +19,7 @@ public class FqanHelpers {
 	 *            the fqan
 	 * @return the name of the last subgroup
 	 */
-	public static String getLastGroupPart(String fqan) {
+	public static String getLastGroupPart(final String fqan) {
 		String group = getGroupPart(fqan);
 		return group.substring(group.lastIndexOf("/") + 1);
 	}
@@ -28,7 +31,7 @@ public class FqanHelpers {
 	 *            the fqan
 	 * @return the group (something like /APACGrid/NGAdmin)
 	 */
-	public static String getGroupPart(String fqan) {
+	public static String getGroupPart(final String fqan) {
 		String groupPart = null;
 		try {
 			int index = fqan.indexOf("/Role=");
@@ -50,7 +53,7 @@ public class FqanHelpers {
 	 *            the fqan
 	 * @return the role (something like Member)
 	 */
-	public static String getRolePart(String fqan) {
+	public static String getRolePart(final String fqan) {
 
 		String role = null;
 		try {

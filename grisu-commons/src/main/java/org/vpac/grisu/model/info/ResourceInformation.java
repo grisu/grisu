@@ -17,7 +17,7 @@ public interface ResourceInformation {
 	 * 
 	 * @return all submission locations
 	 */
-	public String[] getAllSubmissionLocations();
+	String[] getAllSubmissionLocations();
 
 	/**
 	 * Returns the name of the site the specified submission location or ulr
@@ -27,7 +27,7 @@ public interface ResourceInformation {
 	 *            the submission location or url
 	 * @return the name of the site
 	 */
-	public String getSite(String urlOrSubmissionLocation);
+	String getSite(String urlOrSubmissionLocation);
 
 	/**
 	 * All the submissionLocations the user has got access to with this fqan.
@@ -36,7 +36,7 @@ public interface ResourceInformation {
 	 *            the fqan
 	 * @return all submissionLocations
 	 */
-	public String[] getAllAvailableSubmissionLocations(String fqan);
+	String[] getAllAvailableSubmissionLocations(String fqan);
 
 	/**
 	 * Returns a list of all sites a user that is member of the specified fqan
@@ -46,7 +46,7 @@ public interface ResourceInformation {
 	 *            the fqan
 	 * @return the list of sites
 	 */
-	public Set<String> getAllAvailableSites(String fqan);
+	Set<String> getAllAvailableSites(String fqan);
 
 	/**
 	 * Convenience method to get a list of sites out of a set of
@@ -56,7 +56,7 @@ public interface ResourceInformation {
 	 *            the submissionLocations
 	 * @return the sites
 	 */
-	public Set<String> distillSitesFromSubmissionLocations(
+	Set<String> distillSitesFromSubmissionLocations(
 			Set<String> submissionLocations);
 
 	/**
@@ -69,7 +69,7 @@ public interface ResourceInformation {
 	 *            all submissionlocations
 	 * @return the submissionlocations that are located on the site
 	 */
-	public Set<String> filterSubmissionLocationsForSite(String site,
+	Set<String> filterSubmissionLocationsForSite(String site,
 			Set<String> submissionlocations);
 
 	/**
@@ -80,7 +80,7 @@ public interface ResourceInformation {
 	 *            the submissionLocation
 	 * @return the staging filesystems
 	 */
-	public List<String> getStagingFilesystemsForSubmissionLocation(String subLoc);
+	List<String> getStagingFilesystemsForSubmissionLocation(String subLoc);
 
 	/**
 	 * Calculates the best staging filesystem for this submissionLocation.
@@ -89,7 +89,7 @@ public interface ResourceInformation {
 	 *            the submissionLocation
 	 * @return the staging filesystem
 	 */
-	public String getRecommendedStagingFileSystemForSubmissionLocation(
+	String getRecommendedStagingFileSystemForSubmissionLocation(
 			String subLoc);
 
 }

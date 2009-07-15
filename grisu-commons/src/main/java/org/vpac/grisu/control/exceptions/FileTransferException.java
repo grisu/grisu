@@ -14,27 +14,27 @@ public class FileTransferException extends Exception {
 
 	private final String targetFileUrl;
 
-	public FileTransferException(String sourceFileUrl, String targetFileUrl) {
+	public FileTransferException(final String sourceFileUrl, final String targetFileUrl) {
 		this.sourceFileUrl = sourceFileUrl;
 		this.targetFileUrl = targetFileUrl;
 	}
 
-	public FileTransferException(String sourceFileUrl, String targetFileUrl,
-			String arg0) {
+	public FileTransferException(final String sourceFileUrl, final String targetFileUrl,
+			final String arg0) {
 		super(arg0);
 		this.sourceFileUrl = sourceFileUrl;
 		this.targetFileUrl = targetFileUrl;
 	}
 
-	public FileTransferException(String sourceFileUrl, String targetFileUrl,
-			Throwable arg0) {
+	public FileTransferException(final String sourceFileUrl, final String targetFileUrl,
+			final Throwable arg0) {
 		super(arg0);
 		this.sourceFileUrl = sourceFileUrl;
 		this.targetFileUrl = targetFileUrl;
 	}
 
-	public FileTransferException(String sourceFileUrl, String targetFileUrl,
-			String arg0, Throwable arg1) {
+	public FileTransferException(final String sourceFileUrl, final String targetFileUrl,
+			final String arg0, final Throwable arg1) {
 		super(arg0, arg1);
 		this.sourceFileUrl = sourceFileUrl;
 		this.targetFileUrl = targetFileUrl;

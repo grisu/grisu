@@ -18,7 +18,7 @@ public interface ApplicationInformation {
 	 * 
 	 * @return the name of the application
 	 */
-	public String getApplicationName();
+	String getApplicationName();
 
 	/**
 	 * The available executables for this application on this submissionlocation.
@@ -29,7 +29,7 @@ public interface ApplicationInformation {
 	 *            the version of the application
 	 * @return a list of all executables
 	 */
-	public String[] getExecutables(String subLoc, String version);
+	String[] getExecutables(String subLoc, String version);
 
 	/**
 	 * Calculates all available versions of the application on this
@@ -39,7 +39,7 @@ public interface ApplicationInformation {
 	 *            the submissionLocation
 	 * @return a set of all available versions
 	 */
-	public Set<String> getAvailableVersions(String subLoc);
+	Set<String> getAvailableVersions(String subLoc);
 
 	/**
 	 * Retrieves a map of all available details (executables, modules, ...)
@@ -52,7 +52,7 @@ public interface ApplicationInformation {
 	 *            the version
 	 * @return the details
 	 */
-	public Map<String, String> getApplicationDetails(String subLoc,
+	Map<String, String> getApplicationDetails(String subLoc,
 			String version);
 
 	/**
@@ -61,7 +61,7 @@ public interface ApplicationInformation {
 	 * 
 	 * @return the submissionLocations
 	 */
-	public Set<String> getAvailableAllSubmissionLocations();
+	Set<String> getAvailableAllSubmissionLocations();
 
 	/**
 	 * Returns a set of all available submissionLocations for one version of
@@ -71,7 +71,7 @@ public interface ApplicationInformation {
 	 *            the version in question
 	 * @return the submissionLocations
 	 */
-	public Set<String> getAvailableSubmissionLocationsForVersion(String version);
+	Set<String> getAvailableSubmissionLocationsForVersion(String version);
 
 	/**
 	 * Calculates all the submissionlocations that are available to the user for
@@ -82,7 +82,7 @@ public interface ApplicationInformation {
 	 *            the fqan
 	 * @return the submissionlocations
 	 */
-	public Set<String> getAvailableSubmissionLocationsForFqan(String fqan);
+	Set<String> getAvailableSubmissionLocationsForFqan(String fqan);
 
 	/**
 	 * This calculates all the submissionlocations that are available to the
@@ -94,7 +94,7 @@ public interface ApplicationInformation {
 	 *            the fqan
 	 * @return the submissionLocations
 	 */
-	public Set<String> getAvailableSubmissionLocationsForVersionAndFqan(
+	Set<String> getAvailableSubmissionLocationsForVersionAndFqan(
 			String version, String fqan);
 
 	/**
@@ -105,6 +105,6 @@ public interface ApplicationInformation {
 	 *            the fqan
 	 * @return all available versions
 	 */
-	public Set<String> getAllAvailableVersionsForFqan(String fqan);
+	Set<String> getAllAvailableVersionsForFqan(String fqan);
 
 }

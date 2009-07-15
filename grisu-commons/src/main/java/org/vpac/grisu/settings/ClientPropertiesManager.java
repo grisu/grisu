@@ -12,13 +12,16 @@ import org.apache.log4j.Logger;
  * @author Markus Binsteiner
  * 
  */
-public class ClientPropertiesManager {
+public final class ClientPropertiesManager {
+	
+	private ClientPropertiesManager() {
+	}
 
 	public static final int DEFAULT_TIMEOUT = 0;
 
-	public static String DEFAULT_SERVICE_INTERFACE = "https://ngportal.vpac.org/grisu-ws/services/grisu";
+	public static final String DEFAULT_SERVICE_INTERFACE = "https://ngportal.vpac.org/grisu-ws/services/grisu";
 
-	public static PropertiesConfiguration config = null;
+	private static PropertiesConfiguration config = null;
 
 	static final Logger myLogger = Logger
 			.getLogger(ClientPropertiesManager.class.getName());
@@ -106,7 +109,7 @@ public class ClientPropertiesManager {
 	 * @param templateName
 	 *            the name of the template
 	 */
-	public static void addServerTemplate(String templateName) {
+	public static void addServerTemplate(final String templateName) {
 
 		boolean alreadyThere = false;
 		for (String url : config.getStringArray("serverTemplates")) {
@@ -135,7 +138,7 @@ public class ClientPropertiesManager {
 	 * @param templateName
 	 *            the name of the template
 	 */
-	public static void removeServerTemplate(String templateName) {
+	public static void removeServerTemplate(final String templateName) {
 
 		String[] templates = config.getStringArray("serverTemplates");
 
@@ -159,7 +162,7 @@ public class ClientPropertiesManager {
 	 * @param serviceInterfaceUrl
 	 *            the url of the ServiceInterface
 	 */
-	public static void addServiceInterfaceUrl(String serviceInterfaceUrl) {
+	public static void addServiceInterfaceUrl(final String serviceInterfaceUrl) {
 
 		boolean alreadyThere = false;
 		for (String url : config.getStringArray("serviceInterfaceUrl")) {
@@ -187,13 +190,13 @@ public class ClientPropertiesManager {
 	 * @param username
 	 *            the username
 	 */
-	public static void saveShibbolethUsername(String username) {
+	public static void saveShibbolethUsername(final String username) {
 		try {
 			getClientConfiguration()
 					.setProperty("shibbolethUsername", username);
 			getClientConfiguration().save();
 		} catch (ConfigurationException e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
+			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 	}
 
@@ -208,7 +211,7 @@ public class ClientPropertiesManager {
 			username = (String) (getClientConfiguration()
 					.getProperty("shibbolethUsername"));
 		} catch (ConfigurationException e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
+			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 		return username;
 	}
@@ -219,12 +222,12 @@ public class ClientPropertiesManager {
 	 * @param idpName
 	 *            the name of the idp
 	 */
-	public static void saveShibbolethIdp(String idpName) {
+	public static void saveShibbolethIdp(final String idpName) {
 		try {
 			getClientConfiguration().setProperty("shibbolethIdp", idpName);
 			getClientConfiguration().save();
 		} catch (ConfigurationException e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
+			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 	}
 
@@ -239,7 +242,7 @@ public class ClientPropertiesManager {
 			idp = (String) (getClientConfiguration()
 					.getProperty("shibbolethIdp"));
 		} catch (ConfigurationException e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
+			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 		return idp;
 	}
@@ -250,12 +253,12 @@ public class ClientPropertiesManager {
 	 * @param username
 	 *            the username to auththenticate against the httpproxy
 	 */
-	public static void saveDefaultHttpProxyUsername(String username) {
+	public static void saveDefaultHttpProxyUsername(final String username) {
 		try {
 			getClientConfiguration().setProperty("httpProxyUsername", username);
 			getClientConfiguration().save();
 		} catch (ConfigurationException e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
+			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
 	}
@@ -266,12 +269,12 @@ public class ClientPropertiesManager {
 	 * @param server
 	 *            the hostname of the proxy server (e.g. "proxy.vpac.org")
 	 */
-	public static void saveDefaultHttpProxyServer(String server) {
+	public static void saveDefaultHttpProxyServer(final String server) {
 		try {
 			getClientConfiguration().setProperty("httpProxyServer", server);
 			getClientConfiguration().save();
 		} catch (ConfigurationException e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
+			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
 	}
@@ -283,12 +286,12 @@ public class ClientPropertiesManager {
 	 * @param useHttpProxy
 	 *            whether to check checkbox next time
 	 */
-	public static void saveDefaultHttpProxy(String useHttpProxy) {
+	public static void saveDefaultHttpProxy(final String useHttpProxy) {
 		try {
 			getClientConfiguration().setProperty("httpProxy", useHttpProxy);
 			getClientConfiguration().save();
 		} catch (ConfigurationException e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
+			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
 	}
@@ -299,12 +302,12 @@ public class ClientPropertiesManager {
 	 * @param port
 	 *            the port of the http proxy server (e.g. 3128)
 	 */
-	public static void saveDefaultHttpProxyPort(String port) {
+	public static void saveDefaultHttpProxyPort(final String port) {
 		try {
 			getClientConfiguration().setProperty("httpProxyPort", port);
 			getClientConfiguration().save();
 		} catch (ConfigurationException e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
+			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
 	}
@@ -315,12 +318,12 @@ public class ClientPropertiesManager {
 	 * @param fqan
 	 *            the fqan
 	 */
-	public static void saveLastUsedFqan(String fqan) {
+	public static void saveLastUsedFqan(final String fqan) {
 		try {
 			getClientConfiguration().setProperty("lastUsedFqan", fqan);
 			getClientConfiguration().save();
 		} catch (ConfigurationException e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
+			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 	}
 
@@ -335,7 +338,7 @@ public class ClientPropertiesManager {
 			fqan = (String) (getClientConfiguration()
 					.getProperty("lastUsedFqan"));
 		} catch (ConfigurationException e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
+			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 		return fqan;
 	}
@@ -346,13 +349,13 @@ public class ClientPropertiesManager {
 	 * @param selectedLoginPanel
 	 *            the tab to display on startup
 	 */
-	public static void saveSelectedTab(int selectedLoginPanel) {
+	public static void saveSelectedTab(final int selectedLoginPanel) {
 		try {
 			getClientConfiguration().setProperty("selectedTab",
 					selectedLoginPanel);
 			getClientConfiguration().save();
 		} catch (ConfigurationException e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
+			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 	}
 
@@ -371,7 +374,7 @@ public class ClientPropertiesManager {
 			// myLogger.debug("Problem with config file: " + e.getMessage());
 			return 0;
 		}
-		if (tab == -1) { 
+		if (tab == -1) {
 			return 0;
 		}
 
@@ -385,14 +388,14 @@ public class ClientPropertiesManager {
 	 * @param serviceInterfaceUrl
 	 *            the url of the ServiceInterface
 	 */
-	public static void setDefaultServiceInterfaceUrl(String serviceInterfaceUrl) {
+	public static void setDefaultServiceInterfaceUrl(final String serviceInterfaceUrl) {
 		try {
 			getClientConfiguration().setProperty("defaultServiceInterfaceUrl",
 					serviceInterfaceUrl);
 			addServiceInterfaceUrl(serviceInterfaceUrl);
 			getClientConfiguration().save();
 		} catch (ConfigurationException e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
+			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 	}
 
@@ -408,7 +411,7 @@ public class ClientPropertiesManager {
 			defaultUrl = getClientConfiguration().getString(
 					"defaultServiceInterfaceUrl");
 		} catch (ConfigurationException e) {
-			// myLogger.debug("Problem with config file: "+e.getMessage());
+			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
 		if (defaultUrl == null || "".equals(defaultUrl)) {
@@ -429,7 +432,7 @@ public class ClientPropertiesManager {
 					"connectionTimeout"));
 
 		} catch (Exception e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
+			myLogger.debug("Problem with config file: " + e.getMessage());
 			return DEFAULT_TIMEOUT;
 		}
 		if (timeout == -1) {
@@ -448,13 +451,13 @@ public class ClientPropertiesManager {
 	 * @param path
 	 *            the path to the executable (e.g. /opt/acroread/bin/acroread)
 	 */
-	public static void setDefaultExternalApplication(String extension,
-			String path) {
+	public static void setDefaultExternalApplication(final String extension,
+			final String path) {
 		try {
 			getClientConfiguration().setProperty(extension, path);
 			getClientConfiguration().save();
 		} catch (ConfigurationException e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
+			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
 	}
@@ -467,12 +470,12 @@ public class ClientPropertiesManager {
 	 *            the file extension
 	 * @return the full path to the executable
 	 */
-	public static String getDefaultExternalApplication(String extension) {
+	public static String getDefaultExternalApplication(final String extension) {
 		String path = null;
 		try {
 			path = getClientConfiguration().getString(extension);
 		} catch (ConfigurationException ce) {
-			// myLogger.debug("Problem with config file: " + ce.getMessage());
+			myLogger.debug("Problem with config file: " + ce.getMessage());
 		}
 		if (path == null || "".equals(path) || !new File(path).exists()) {
 			return null;
