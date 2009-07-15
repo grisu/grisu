@@ -119,7 +119,9 @@
 						<link>http://jakarta.apache.org/commons/collections/apidocs</link>
 						<link>http://jakarta.apache.org/commons/logging/apidocs/</link>
 						<link>http://www.junit.org/junit/javadoc/</link>
-
+						<link>http://www-unix.globus.org/cog/distribution/1.7.0/api/</link>
+						<link>http://jline.sourceforge.net/apidocs/</link>
+						<link>http://commons.apache.org/vfs/apidocs/</link>
 						<link>http://logging.apache.org/log4j/docs/api/</link>
 						<link>http://jakarta.apache.org/regexp/apidocs/</link>
 						<link>http://jakarta.apache.org/velocity/api/</link>

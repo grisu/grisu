@@ -26,8 +26,8 @@ import org.vpac.historyRepeater.SimpleHistoryManager;
  * {@link UserApplicationInformation}: information about the applications/versions of applications this user has got access to<br/>
  * {@link ApplicationInformation}: information about the applications that are provided grid-wide<br/>
  * {@link ResourceInformation}: general information about the available resources like queues, submissionlocations, stagingfilesystems<br/>
- * {@link HistoryManager}: can be used to store / retrieve data that the user used in past jobs
- * {@link FileManager}: to do file transfer and such
+ * {@link HistoryManager}: can be used to store / retrieve data that the user used in past jobs<br/>
+ * {@link FileManager}: to do file transfer and such<br/>
  *  
  * @author Markus Binsteiner
  *
