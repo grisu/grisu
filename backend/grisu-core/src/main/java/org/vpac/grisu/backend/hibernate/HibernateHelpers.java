@@ -24,34 +24,40 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
-public class HibernateHelpers {
+public final class HibernateHelpers {
 	
-	public static String getUniqueName(String jobname, String dn){
-		
+	private HibernateHelpers() {
+	}
+
+	public static String getUniqueName(final String jobname, final String dn) {
+
 		String name = jobname;
-		
-        SessionFactory sf = HibernateSessionFactory.getSessionFactory();
-        
-        Session session = sf.getCurrentSession();
 
-        Query q = session.createQuery("select job.jobname from org.vpac.grisu.js.model.job.Job as job where job.dn=? and job.jobname like ?");
-        q.setString(0, dn);
-        q.setString(1, jobname+"%");
+		SessionFactory sf = HibernateSessionFactory.getSessionFactory();
 
-        List jobs = q.list();
-        int i = 0;
-        boolean taken = false;
-        do {
-        	taken = false;
-        	if ( i != 0 ) name = jobname+"_"+(jobs.size()+i);
-        	for ( Object job : jobs ){
-        		if ( ((String)job).equals(name) ) {
-        			taken = true;
-        			break;
-        		}
-        	}
-        	i++;
-        } while ( taken );
+		Session session = sf.getCurrentSession();
+
+		Query q = session
+				.createQuery("select job.jobname from org.vpac.grisu.js.model.job.Job as job where job.dn=? and job.jobname like ?");
+		q.setString(0, dn);
+		q.setString(1, jobname + "%");
+
+		List jobs = q.list();
+		int i = 0;
+		boolean taken = false;
+		do {
+			taken = false;
+			if (i != 0) {
+				name = jobname + "_" + (jobs.size() + i);
+			}
+			for (Object job : jobs) {
+				if (((String) job).equals(name)) {
+					taken = true;
+					break;
+				}
+			}
+			i++;
+		} while (taken);
 		return name;
 	}
 

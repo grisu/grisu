@@ -1,5 +1,3 @@
-
-
 package org.vpac.grisu.backend.hibernate;
 
 import org.apache.log4j.Logger;
@@ -8,98 +6,99 @@ import org.hibernate.QueryException;
 import org.vpac.grisu.backend.model.User;
 
 /**
- * This class takes care of storing users and their properties into the a database using hibernate.
+ * This class takes care of storing users and their properties into the a
+ * database using hibernate.
  * 
  * @author Markus Binsteiner
- *
+ * 
  */
 public class UserDAO extends BaseHibernateDAO {
-	
+
 	private static Logger myLogger = Logger.getLogger(UserDAO.class.getName());
 
-	//TODO improve this (check: http://www.hibernate.org/hib_docs/v3/reference/en/html/objectstate.html#objectstate-modifying)
-	
-//	private static String getDN(User user) {
-//		return user.getDn();
-//	}
-	
+	// TODO improve this (check:
+	// http://www.hibernate.org/hib_docs/v3/reference/en/html/objectstate.html#objectstate-modifying)
+
+	// private static String getDN(User user) {
+	// return user.getDn();
+	// }
+
 	/**
-	 * Looks up the database whether a user with the specified dn is already 
-	 * persisted
+	 * Looks up the database whether a user with the specified dn is already
+	 * persisted.
 	 * 
-	 * @param dn the dn of the user
+	 * @param dn
+	 *            the dn of the user
 	 * @return the {@link User} or null if not found
 	 */
-	public User findUserByDN(String dn){
-		myLogger.debug("Loading user with dn: "+dn+" from db.");
+	public final User findUserByDN(final String dn) {
+		myLogger.debug("Loading user with dn: " + dn + " from db.");
 		String queryString = "from org.vpac.grisu.backend.model.User as user where user.dn = ?";
-		
+
 		try {
-		    getCurrentSession().beginTransaction();
+			getCurrentSession().beginTransaction();
 
-		    Query queryObject = getCurrentSession().createQuery(queryString);
+			Query queryObject = getCurrentSession().createQuery(queryString);
 
-		    try {
-		    	User user = (User)queryObject.uniqueResult();
+			try {
+				User user = (User) queryObject.uniqueResult();
 				getCurrentSession().getTransaction().commit();
 				return user;
-		        
-		    } catch (QueryException qe) {
-		    	// means user not in db yet.
-		    	myLogger.debug("User "+dn+" not found in database...");
-		    	return null;
-		    }
-			
+
+			} catch (QueryException qe) {
+				// means user not in db yet.
+				myLogger.debug("User " + dn + " not found in database...");
+				return null;
+			}
+
 		} catch (RuntimeException e) {
 			e.printStackTrace();
-		    getCurrentSession().getTransaction().rollback();
-		    throw e; // or display error message
+			getCurrentSession().getTransaction().rollback();
+			throw e; // or display error message
 		} finally {
 			getCurrentSession().close();
 		}
 
 	}
-	
-	
-    
-	public void delete(User persistentInstance) {
-        myLogger.debug("deleting Job instance");
-        
-		try {
-		    getCurrentSession().beginTransaction();
 
-		    getCurrentSession().delete(persistentInstance);
-		    
+	public final void delete(final User persistentInstance) {
+		myLogger.debug("deleting Job instance");
+
+		try {
+			getCurrentSession().beginTransaction();
+
+			getCurrentSession().delete(persistentInstance);
+
 			getCurrentSession().getTransaction().commit();
-			
+
 			myLogger.debug("delete successful");
 		} catch (RuntimeException e) {
-			 myLogger.error("delete failed", e);
-		    getCurrentSession().getTransaction().rollback();
-		    throw e; // or display error message
+			myLogger.error("delete failed", e);
+			getCurrentSession().getTransaction().rollback();
+			throw e; // or display error message
 		} finally {
 			getCurrentSession().close();
 		}
-    }
+	}
 
-    public void saveOrUpdate(User instance) {
-        myLogger.debug("attaching dirty Job instance");
-        
+	public final void saveOrUpdate(final User instance) {
+		myLogger.debug("attaching dirty Job instance");
+
 		try {
-		    getCurrentSession().beginTransaction();
+			getCurrentSession().beginTransaction();
 
-		    getCurrentSession().saveOrUpdate(instance);
-		    
+			getCurrentSession().saveOrUpdate(instance);
+
 			getCurrentSession().getTransaction().commit();
-			
+
 			myLogger.debug("saveOrUpdate successful");
 		} catch (RuntimeException e) {
-			 myLogger.error("saveOrUpdate failed", e);
-		    getCurrentSession().getTransaction().rollback();
-		    throw e; // or display error message
+			myLogger.error("saveOrUpdate failed", e);
+			getCurrentSession().getTransaction().rollback();
+			throw e; // or display error message
 		} finally {
 			getCurrentSession().close();
 		}
-    }
-	
+	}
+
 }

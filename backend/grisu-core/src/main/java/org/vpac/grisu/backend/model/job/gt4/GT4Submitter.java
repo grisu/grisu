@@ -60,7 +60,7 @@ public class GT4Submitter extends JobSubmitter {
 	static final Logger myLogger = Logger.getLogger(GT4Submitter.class
 			.getName());
 
-	protected InformationManager informationManager = CachedMdsInformationManager
+	private InformationManager informationManager = CachedMdsInformationManager
 			.getDefaultCachedMdsInformationManager();
 
 	/*
@@ -71,8 +71,7 @@ public class GT4Submitter extends JobSubmitter {
 	 * (org.w3c.dom.Document)
 	 */
 	private String createJobSubmissionDescription(
-			ServiceInterface serviceInterface, Document jsdl)
-			{
+			final ServiceInterface serviceInterface, final Document jsdl) {
 
 		DebugUtils.jsdlDebugOutput("Before translating into rsl: ", jsdl);
 
@@ -93,7 +92,8 @@ public class GT4Submitter extends JobSubmitter {
 
 		// Add "executable" node
 		Element executable = output.createElement("executable");
-		executable.setTextContent(JsdlHelpers.getPosixApplicationExecutable(jsdl));
+		executable.setTextContent(JsdlHelpers
+				.getPosixApplicationExecutable(jsdl));
 		job.appendChild(executable);
 
 		// Add "argument"s
@@ -150,7 +150,6 @@ public class GT4Submitter extends JobSubmitter {
 		Element jobType = output.createElement("jobType");
 		String jobTypeString = JsdlHelpers.getArcsJobType(jsdl);
 
-		
 		if (processorCount > 1) {
 			Element count = output.createElement("count");
 			count.setTextContent(new Integer(processorCount).toString());
@@ -233,6 +232,7 @@ public class GT4Submitter extends JobSubmitter {
 			modules_string = JsdlHelpers.getModules(jsdl);
 		} catch (Exception e) {
 			// doesn't matter
+			myLogger.debug(e);
 		}
 		if (modules_string != null && modules_string.length > 0) {
 			for (String module_string : modules_string) {
@@ -253,10 +253,13 @@ public class GT4Submitter extends JobSubmitter {
 			String version = JsdlHelpers.getApplicationVersion(jsdl);
 			String subLoc = JsdlHelpers.getCandidateHosts(jsdl)[0];
 
-			if ( ServiceInterface.GENERIC_APPLICATION_NAME.equals(application) ) {
-				myLogger.debug("\"generic\" application. Not trying to calculate modules...");
-				
-			} else if (StringUtils.isNotBlank(application) && StringUtils.isNotBlank(version) && StringUtils.isNotBlank(subLoc) ) {
+			if (ServiceInterface.GENERIC_APPLICATION_NAME.equals(application)) {
+				myLogger
+						.debug("\"generic\" application. Not trying to calculate modules...");
+
+			} else if (StringUtils.isNotBlank(application)
+					&& StringUtils.isNotBlank(version)
+					&& StringUtils.isNotBlank(subLoc)) {
 				// if we know application, version and submissionLocation
 				Map<String, String> appDetails = serviceInterface
 						.getApplicationDetails(application, version, subLoc);
@@ -281,7 +284,8 @@ public class GT4Submitter extends JobSubmitter {
 				// doesn't matter
 			} else if (application != null && version == null && subLoc != null) {
 
-				Map<String, String> appDetails = serviceInterface.getApplicationDetails(application, subLoc);
+				Map<String, String> appDetails = serviceInterface
+						.getApplicationDetails(application, subLoc);
 
 				try {
 					modules_string = appDetails.get(
@@ -343,9 +347,9 @@ public class GT4Submitter extends JobSubmitter {
 			}
 
 		}
-		
+
 		String pbsDebug = JsdlHelpers.getPbsDebugElement(jsdl);
-		if ( StringUtils.isNotBlank(pbsDebug) ) {
+		if (StringUtils.isNotBlank(pbsDebug)) {
 			Element pbsDebugElement = output.createElement("pbsDebug");
 			pbsDebugElement.setTextContent(pbsDebug);
 			extensions.appendChild(pbsDebugElement);
@@ -457,8 +461,8 @@ public class GT4Submitter extends JobSubmitter {
 	 * @see org.vpac.grisu.js.control.job.JobSubmitter#submit(java.lang.String,
 	 * org.vpac.grisu.js.model.Job)
 	 */
-	protected String submit(ServiceInterface serviceInterface, String host,
-			String factoryType, Job job) {
+	protected final String submit(final ServiceInterface serviceInterface, final String host,
+			final String factoryType, final Job job) {
 
 		JobDescriptionType jobDesc = null;
 		String submittedJobDesc = null;
@@ -521,6 +525,7 @@ public class GT4Submitter extends JobSubmitter {
 			// TODO handle that
 			e.printStackTrace();
 			if (handle == null) {
+				myLogger.error("Jobhandle is null....");
 				// TODO
 			}
 		}
@@ -545,10 +550,11 @@ public class GT4Submitter extends JobSubmitter {
 			try {
 				myLogger.debug("Writing out epr file.");
 				String vo = job.getFqan();
-				if (vo == null || "".equals(vo))
+				if (vo == null || "".equals(vo)) {
 					vo = "non_vo";
-				else
+				} else {
 					vo = vo.replace("/", "_");
+				}
 
 				String uFileName = ServerPropertiesManager.getDebugDirectory()
 						+ "/"
@@ -574,7 +580,8 @@ public class GT4Submitter extends JobSubmitter {
 				buffWriter.close();
 
 			} catch (Exception e) {
-				myLogger.error("Gt4 job submission error: "+e.getLocalizedMessage());
+				myLogger.error("Gt4 job submission error: "
+						+ e.getLocalizedMessage());
 				e.printStackTrace();
 			}
 
@@ -588,8 +595,8 @@ public class GT4Submitter extends JobSubmitter {
 
 	}
 
-	static private EndpointReferenceType getFactoryEPR(String contact,
-			String factoryType) throws Exception {
+	private static EndpointReferenceType getFactoryEPR(final String contact,
+			final String factoryType) throws Exception {
 		URL factoryUrl = ManagedJobFactoryClientHelper.getServiceURL(contact)
 				.getURL();
 
@@ -599,13 +606,13 @@ public class GT4Submitter extends JobSubmitter {
 	}
 
 	@Override
-	public String getServerEndpoint(String server) {
+	public final String getServerEndpoint(final String server) {
 		return "https://" + server
 				+ ":8443/wsrf/services/ManagedJobFactoryService";
 
 	}
 
-	private int translateToGrisuStatus(String status) {
+	private int translateToGrisuStatus(final String status) {
 
 		int grisu_status = Integer.MIN_VALUE;
 		if ("Done".equals(status)) {
@@ -641,7 +648,7 @@ public class GT4Submitter extends JobSubmitter {
 	 * org.vpac.grisu.js.control.job.JobSubmitter#getJobStatus(java.lang.String,
 	 * org.vpac.grisu.credential.model.ProxyCredential)
 	 */
-	public int getJobStatus(String endPointReference, ProxyCredential cred) {
+	public final int getJobStatus(final String endPointReference, final ProxyCredential cred) {
 
 		String status = null;
 		int grisu_status = Integer.MIN_VALUE;
@@ -659,7 +666,7 @@ public class GT4Submitter extends JobSubmitter {
 	 * @see org.vpac.grisu.js.control.job.JobSubmitter#killJob(java.lang.String,
 	 * org.vpac.grisu.credential.model.ProxyCredential)
 	 */
-	public int killJob(String endPointReference, ProxyCredential cred) {
+	public final int killJob(final String endPointReference, final ProxyCredential cred) {
 
 		String status = null;
 		int grisu_status = Integer.MIN_VALUE;
@@ -668,8 +675,9 @@ public class GT4Submitter extends JobSubmitter {
 
 		grisu_status = translateToGrisuStatus(status);
 
-		if (grisu_status == JobConstants.NO_SUCH_JOB)
+		if (grisu_status == JobConstants.NO_SUCH_JOB) {
 			return JobConstants.KILLED;
+		}
 
 		return grisu_status;
 

@@ -15,32 +15,32 @@ import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import uk.ac.dl.escience.vfs.util.VFSUtil;
 
 public class RemoteFileTransferObject {
-	
+
 	static final Logger myLogger = Logger
-	.getLogger(RemoteFileTransferObject.class.getName());
-	
-	
-	protected MarkerListener dummyMarker = new DummyMarkerImpl();
-	
+			.getLogger(RemoteFileTransferObject.class.getName());
+
+	private MarkerListener dummyMarker = new DummyMarkerImpl();
+
 	private final Thread fileTransferThread;
-	
+
 	private final FileObject source;
 	private final FileObject target;
 	private final boolean overwrite;
-	
-	
+
 	private Map<Date, String> messages = new TreeMap<Date, String>();
-	
-	public RemoteFileTransferObject(FileObject sourceF, FileObject targetF, boolean overwriteB) {
+
+	public RemoteFileTransferObject(final FileObject sourceF, final FileObject targetF,
+			final boolean overwriteB) {
 		this.source = sourceF;
 		this.target = targetF;
-		
+
 		this.overwrite = overwriteB;
 
 		fileTransferThread = new Thread() {
 			public void run() {
 				try {
-					myLogger.info("Copy thread started for target: "+target.getName());
+					myLogger.info("Copy thread started for target: "
+							+ target.getName());
 					transferFile(source, target, overwrite);
 				} catch (RemoteFileSystemException e) {
 					// TODO Auto-generated catch block
@@ -48,33 +48,33 @@ public class RemoteFileTransferObject {
 				}
 			}
 		};
-		
+
 	}
-	
-	public Thread getFileTransferThread() {
-		
+
+	public final Thread getFileTransferThread() {
+
 		return this.fileTransferThread;
-		
+
 	}
-	
-	public void joinFileTransfer() {
+
+	public final void joinFileTransfer() {
 
 		try {
 			fileTransferThread.join();
 		} catch (InterruptedException e) {
 			messages.put(new Date(), "File transfer thread interrupted.");
 		}
-		
+
 	}
-	
-	public void startTransfer() throws RemoteFileSystemException {
-		
+
+	public final void startTransfer() throws RemoteFileSystemException {
+
 		transferFile(source, target, overwrite);
-		
+
 	}
-	
-	private void transferFile(FileObject source_file, FileObject target_file,
-			boolean overwrite) throws RemoteFileSystemException {
+
+	private void transferFile(final FileObject source_file, final FileObject target_file,
+			final boolean overwrite) throws RemoteFileSystemException {
 
 		try {
 			messages.put(new Date(), "Checking source file...");
@@ -89,13 +89,17 @@ public class RemoteFileTransferObject {
 			// worry about deleting the file because the VFSUtil method takes
 			// care of that
 			if (!overwrite && target_file.exists()) {
-				messages.put(new Date(), "Target file exists and overwrite mode not enabled. Cancelling transfer...");
+				messages
+						.put(new Date(),
+								"Target file exists and overwrite mode not enabled. Cancelling transfer...");
 				throw new RemoteFileSystemException("Could not copy to file: "
 						+ target_file.getURL().toString() + ": "
 						+ "InputFile exists.");
 			} else if (target_file.exists()) {
 				if (!target_file.delete()) {
-					messages.put(new Date(), "Target file exists and can not be deleted. Cancelling transfer");
+					messages
+							.put(new Date(),
+									"Target file exists and can not be deleted. Cancelling transfer");
 					throw new RemoteFileSystemException(
 							"Could not copy to file: "
 									+ target_file.getURL().toString() + ": "
@@ -116,7 +120,8 @@ public class RemoteFileTransferObject {
 				messages.put(new Date(), "Starting file transfer...");
 				VFSUtil.copy(source_file, target_file, dummyMarker, true);
 			} catch (IOException e) {
-				messages.put(new Date(), "File transfer failed (io problem): "+e.getLocalizedMessage());
+				messages.put(new Date(), "File transfer failed (io problem): "
+						+ e.getLocalizedMessage());
 				throw new RemoteFileSystemException("Could not copy \""
 						+ source_file.getURL().toString() + "\" to \""
 						+ target_file.getURL().toString() + "\": "
@@ -124,7 +129,8 @@ public class RemoteFileTransferObject {
 			}
 
 		} catch (FileSystemException e) {
-			messages.put(new Date(), "File transfer failed: "+e.getLocalizedMessage());
+			messages.put(new Date(), "File transfer failed: "
+					+ e.getLocalizedMessage());
 			try {
 				throw new RemoteFileSystemException("Could not copy \""
 						+ source_file.getURL().toString() + "\" to \""

@@ -18,7 +18,10 @@ import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
  * @author Markus Binsteiner
  * 
  */
-public class ServiceInterfaceFactory {
+public final class ServiceInterfaceFactory {
+	
+	private ServiceInterfaceFactory() {
+	}
 
 	static final Logger myLogger = Logger
 			.getLogger(ServiceInterfaceFactory.class.getName());

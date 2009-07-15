@@ -9,38 +9,34 @@ import javax.activation.DataSource;
 import org.apache.commons.vfs.FileContent;
 
 /**
- * Connector class to get convert {@link FileContent} to a {@link DataSource} so we are able
- * to get streams out of it.
+ * Connector class to get convert {@link FileContent} to a {@link DataSource} so
+ * we are able to get streams out of it.
  * 
  * @author Markus Binsteiner
- *
+ * 
  */
 public class FileContentDataSourceConnector implements DataSource {
-	
+
 	private FileContent content = null;
-	
-	public FileContentDataSourceConnector(FileContent content) {
+
+	public FileContentDataSourceConnector(final FileContent content) {
 		this.content = content;
 	}
 
-	public String getContentType() {
+	public final String getContentType() {
 		return "application/octet-stream";
 	}
 
-	public InputStream getInputStream() throws IOException {
+	public final InputStream getInputStream() throws IOException {
 		return content.getInputStream();
 	}
 
-	public String getName() {
+	public final String getName() {
 		return content.getFile().getName().getBaseName();
 	}
 
-	public OutputStream getOutputStream() throws IOException {
+	public final OutputStream getOutputStream() throws IOException {
 		return content.getOutputStream();
 	}
-
-
-
-
 
 }

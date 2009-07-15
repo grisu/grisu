@@ -20,25 +20,20 @@ package org.vpac.grisu.backend.hibernate;
 
 import org.hibernate.Session;
 
-
 /**
- * Data access object (DAO) for domain model
+ * Data access object (DAO) for domain model.
+ * 
  * @author MyEclipse - Hibernate Tools
  */
 public class BaseHibernateDAO implements IBaseHibernateDAO {
-	
-//	private static Session session = null;
-	
-	public Session getSession() {
-//		if ( session == null ) 
-//			session = HibernateSessionFactory.getSession();
-//		return session;
+
+	public final Session getSession() {
 		return HibernateSessionFactoryNew.getSessionFactory().openSession();
 	}
-	
-	public Session getCurrentSession() {
-		return HibernateSessionFactoryNew.getSessionFactory().getCurrentSession();
+
+	public final Session getCurrentSession() {
+		return HibernateSessionFactoryNew.getSessionFactory()
+				.getCurrentSession();
 	}
-	
-	
+
 }

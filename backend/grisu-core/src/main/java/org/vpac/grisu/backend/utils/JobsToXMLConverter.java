@@ -1,5 +1,3 @@
-
-
 package org.vpac.grisu.backend.utils;
 
 import java.util.List;
@@ -15,14 +13,18 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * This one gathers all information of a job and converts it into a xml document.
+ * This one gathers all information of a job and converts it into a xml
+ * document.
  * 
  * It will be replaced soonish with a plain Map based job information converter.
  * 
  * @author Markus Binsteiner
- *
+ * 
  */
-public class JobsToXMLConverter {
+public final class JobsToXMLConverter {
+	
+	private JobsToXMLConverter() {
+	}
 
 	private static DocumentBuilder docBuilder = null;
 
@@ -43,60 +45,60 @@ public class JobsToXMLConverter {
 
 	}
 
-	public static Document getJobsInformation(List<Job> jobs) {
+	public static Document getJobsInformation(final List<Job> jobs) {
 
 		Document output = null;
 
 		output = getDocumentBuilder().newDocument();
-		
+
 		Element root = output.createElement("jobs");
 		output.appendChild(root);
 
 		for (Job job : jobs) {
 			root.appendChild(createJobElementNew(output, job));
-		} 
+		}
 
 		return output;
 	}
-	
-	public static Element createJobElementNew(Document doc, Job job) {
-		
+
+	public static Element createJobElementNew(final Document doc, final Job job) {
+
 		Element jobElement = doc.createElement("job");
-		
+
 		Element jobname = doc.createElement("jobname");
 		jobname.setTextContent(job.getJobname());
 		jobElement.appendChild(jobname);
-		
+
 		Element status = doc.createElement("status");
 		status.setTextContent(new Integer(job.getStatus()).toString());
 		jobElement.appendChild(status);
-		
+
 		String host = job.getSubmissionHost();
 		if (host != null && !"".equals(host)) {
-		Element hostElement = doc.createElement("host");
-		hostElement.setTextContent(job.getSubmissionHost());
-		jobElement.appendChild(hostElement);
+			Element hostElement = doc.createElement("host");
+			hostElement.setTextContent(job.getSubmissionHost());
+			jobElement.appendChild(hostElement);
 		}
-		
+
 		String fqan = job.getFqan();
 		if (fqan != null && !"".equals(fqan)) {
 			Element fqanElement = doc.createElement("fqan");
 			fqanElement.setTextContent(fqan);
 			jobElement.appendChild(fqanElement);
 		}
-		
+
 		String submissionTime = job.getJobProperty("submissionTime");
 		if (submissionTime != null && !"".equals(submissionTime)) {
 			Element submissionTimeElement = doc.createElement("submissionTime");
 			submissionTimeElement.setTextContent(submissionTime);
 			jobElement.appendChild(submissionTimeElement);
 		}
-		
+
 		return jobElement;
-		
+
 	}
 
-	public static Element createJobElement(Document doc, Job job) {
+	public static Element createJobElement(final Document doc, final Job job) {
 
 		Element jobElement = doc.createElement("job");
 
@@ -121,7 +123,7 @@ public class JobsToXMLConverter {
 			fqan_attr.setValue(fqan);
 			jobElement.setAttributeNode(fqan_attr);
 		}
-		
+
 		String submissionTime = job.getJobProperty("submissionTime");
 		if (submissionTime != null && !"".equals(submissionTime)) {
 			Attr submissionTime_attr = doc.createAttribute("submissionTime");
@@ -132,7 +134,7 @@ public class JobsToXMLConverter {
 		return jobElement;
 	}
 
-	public static Document getDetailedJobInformation(Job job) {
+	public static Document getDetailedJobInformation(final Job job) {
 
 		Document doc = null;
 
@@ -157,7 +159,7 @@ public class JobsToXMLConverter {
 		Attr jobname = doc.createAttribute("jobname");
 		jobname.setValue(job.getJobname());
 		jobElement.setAttributeNode(jobname);
-		
+
 		Attr app = doc.createAttribute("application");
 		app.setValue(job.getApplication());
 		jobElement.setAttributeNode(app);
@@ -179,42 +181,39 @@ public class JobsToXMLConverter {
 			fqan_attr.setValue(fqan);
 			jobElement.setAttributeNode(fqan_attr);
 		}
-		
+
 		Element files = doc.createElement("files");
 		files.setAttribute("job_directory", job.getJob_directory());
 		root.appendChild(files);
-		
+
 		Element stdout = doc.createElement("file");
 		stdout.setAttribute("name", "stdout");
 		stdout.setTextContent(job.getStdout());
 		files.appendChild(stdout);
-		
+
 		Element stderr = doc.createElement("file");
 		stderr.setAttribute("name", "stderr");
 		stderr.setTextContent(job.getStderr());
 		files.appendChild(stderr);
-		
+
 		Element descriptions = doc.createElement("descriptions");
 		root.appendChild(descriptions);
-		
+
 		Element jsdl = doc.createElement("description");
 		jsdl.setAttribute("type", "jsdl");
 		try {
-			jsdl.setTextContent(SeveralXMLHelpers.toString(job.getJobDescription()));
+			jsdl.setTextContent(SeveralXMLHelpers.toString(job
+					.getJobDescription()));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		descriptions.appendChild(jsdl);
-		
+
 		Element rsl = doc.createElement("description");
 		rsl.setAttribute("type", "rsl");
 		rsl.setTextContent(job.getSubmittedJobDescription());
 		descriptions.appendChild(rsl);
-		
-		
-		
-		
 
 		return doc;
 	}

@@ -64,7 +64,7 @@ public class WsServiceInterface extends AbstractServiceInterface implements
 					if ( this.credential == null || ! this.credential.isValid() ) {
 						throw new NoValidCredentialException("Could not get credential from session context.");
 					}
-					user.cleanCache();
+					getUser().cleanCache();
 					myLogger.debug("Success. New lifetime: "+this.credential.getGssCredential().getRemainingLifetime());
 				}
 			} catch (GSSException e) {
@@ -73,7 +73,7 @@ public class WsServiceInterface extends AbstractServiceInterface implements
 					throw new NoValidCredentialException("Could not get credential from session context.");
 				}
 				this.credential = (ProxyCredential)(context.getSession().get("credential")); 
-				user.cleanCache();
+				getUser().cleanCache();
 			}
 		
 		return this.credential;

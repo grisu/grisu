@@ -5,7 +5,7 @@ import org.globus.ftp.MarkerListener;
 
 public class DummyMarkerImpl implements MarkerListener {
 
-	public void markerArrived(Marker arg0) {
+	public void markerArrived(final Marker arg0) {
 		// TODO Auto-generated method stub
 
 	}

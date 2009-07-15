@@ -11,12 +11,13 @@ import org.vpac.grisu.utils.JsdlHelpers;
 import org.w3c.dom.Document;
 
 /**
- * The JobSubmissionManager class provides an interface between grisu and the several grid middlewares. It takes a jsdl document
- * as input, converts it into the proper format and then submits the job to the proper endpoint. At the moment only gt4 job submission
- * is supported.
+ * The JobSubmissionManager class provides an interface between grisu and the
+ * several grid middlewares. It takes a jsdl document as input, converts it into
+ * the proper format and then submits the job to the proper endpoint. At the
+ * moment only gt4 job submission is supported.
  * 
  * @author Markus Binsteiner
- *
+ * 
  */
 public class JobSubmissionManager {
 
@@ -25,12 +26,16 @@ public class JobSubmissionManager {
 
 	private Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
 	private ServiceInterface serviceInterface = null;
-	
+
 	/**
-	 * Initializes the JobSubmissionManager with all supported {@link JobSubmitter}s.
-	 * @param submitters the supported JobSubmitters
+	 * Initializes the JobSubmissionManager with all supported
+	 * {@link JobSubmitter}s.
+	 * 
+	 * @param submitters
+	 *            the supported JobSubmitters
 	 */
-	public JobSubmissionManager(ServiceInterface serviceInterface, Map<String, JobSubmitter> submitters) {
+	public JobSubmissionManager(final ServiceInterface serviceInterface,
+			final Map<String, JobSubmitter> submitters) {
 		this.serviceInterface = serviceInterface;
 		this.submitters = submitters;
 	}
@@ -38,13 +43,15 @@ public class JobSubmissionManager {
 	/**
 	 * Submits the job to the specified {@link JobSubmitter}.
 	 * 
-	 * @param submitter_name the JobSubmitter
-	 * @param job the Job
+	 * @param submitter_name
+	 *            the JobSubmitter
+	 * @param job
+	 *            the Job
 	 * @return the (JobSubmitter-specific) handle to reconnect to the job later
-	 * @throws ServerJobSubmissionException if the job could not be submitted successful
+	 * @throws ServerJobSubmissionException
+	 *             if the job could not be submitted successful
 	 */
-	public String submit(String submitter_name, Job job)
-			{
+	public final String submit(final String submitter_name, final Job job) {
 
 		Document jsdl = null;
 		jsdl = job.getJobDescription();
@@ -65,14 +72,15 @@ public class JobSubmissionManager {
 		if (host.indexOf(":") != -1) {
 			queue = host.substring(0, host.indexOf(":"));
 			host = host.substring(host.indexOf(":") + 1);
-		} 
+		}
 		myLogger.debug("Submission host is: " + host);
-		
-		// don't know whether factory type should be in here or in the GT4Submitter (more likely the latter)
+
+		// don't know whether factory type should be in here or in the
+		// GT4Submitter (more likely the latter)
 		String factoryType = null;
 		if (host.indexOf("#") != -1) {
-			factoryType = host.substring(host.indexOf("#")+1);
-			if ( factoryType == null || factoryType.length() == 0 ) {
+			factoryType = host.substring(host.indexOf("#") + 1);
+			if (factoryType == null || factoryType.length() == 0) {
 				factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
 			}
 			host = host.substring(0, host.indexOf("#"));
@@ -80,20 +88,24 @@ public class JobSubmissionManager {
 			factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
 		}
 		job.addJobProperty(ServiceInterface.FACTORY_TYPE_KEY, factoryType);
-		
-		myLogger.debug("FactoryType is: "+ factoryType);
+
+		myLogger.debug("FactoryType is: " + factoryType);
 		String submitHostEndpoint = submitter.getServerEndpoint(host);
 
-		String handle = submitter.submit(serviceInterface, submitHostEndpoint, factoryType, job);
+		String handle = submitter.submit(serviceInterface, submitHostEndpoint,
+				factoryType, job);
 
 		job.setJobhandle(handle);
-		//TODO remove that once I'm sure nobody is using it anymore
+		// TODO remove that once I'm sure nobody is using it anymore
 		job.setSubmissionHost(host);
 		job.addJobProperty(ServiceInterface.SUBMISSION_HOST_KEY, host);
 		job.setSubmissionType(submitter_name);
-		job.addJobProperty(ServiceInterface.SUBMISSION_TYPE_KEY, submitter_name);
-		if ( queue != null && ! "".equals(queue) ) 
+		job
+				.addJobProperty(ServiceInterface.SUBMISSION_TYPE_KEY,
+						submitter_name);
+		if (queue != null && !"".equals(queue)) {
 			job.getJobProperties().put(ServiceInterface.QUEUE_KEY, queue);
+		}
 		job.setStatus(JobConstants.EXTERNAL_HANDLE_READY);
 
 		return handle;
@@ -101,19 +113,25 @@ public class JobSubmissionManager {
 	}
 
 	/**
-	 * Monitors the status of a job. Since the {@link JobSubmitter} that was used to submit the job is stored in the {@link Job#getSubmissionType()} 
+	 * Monitors the status of a job. Since the {@link JobSubmitter} that was
+	 * used to submit the job is stored in the {@link Job#getSubmissionType()}
 	 * property it does not have to be specified here again.
 	 * 
-	 * @param job the job
-	 * @return the status of the job (have a look at {@link JobConstants#translateStatus(int)} for a human-readable version of the status)
+	 * @param job
+	 *            the job
+	 * @return the status of the job (have a look at
+	 *         {@link JobConstants#translateStatus(int)} for a human-readable
+	 *         version of the status)
 	 */
-	public int getJobStatus(Job job) {
+	public final int getJobStatus(final Job job) {
 
 		JobSubmitter submitter = null;
-//		if ( (//job.getStatus() >= JobConstants.EXTERNAL_HANDLE_READY &&
-//				job.getStatus() < JobConstants.FINISHED_EITHER_WAY) //|| job.getStatus() == JobConstants.NO_SUCH_JOB 
-//				|| job.getStatus() == Integer.MIN_VALUE || job.getStatus() == Integer.MAX_VALUE ) {
-		if ( job.getStatus() < JobConstants.FINISHED_EITHER_WAY ) {
+		// if ( (//job.getStatus() >= JobConstants.EXTERNAL_HANDLE_READY &&
+		// job.getStatus() < JobConstants.FINISHED_EITHER_WAY) //||
+		// job.getStatus() == JobConstants.NO_SUCH_JOB
+		// || job.getStatus() == Integer.MIN_VALUE || job.getStatus() ==
+		// Integer.MAX_VALUE ) {
+		if (job.getStatus() < JobConstants.FINISHED_EITHER_WAY) {
 			submitter = submitters.get(job.getSubmissionType());
 
 			if (submitter == null) {
@@ -123,30 +141,34 @@ public class JobSubmissionManager {
 		} else {
 			return job.getStatus();
 		}
-		
+
 		return submitter.getJobStatus(job.getJobhandle(), job.getCredential());
 
 	}
-	
+
 	/**
-	 * Kills the job. Since the {@link JobSubmitter} that was used to submit the job is stored in the {@link Job#getSubmissionType()} 
-	 * property it does not have to be specified here again.
+	 * Kills the job. Since the {@link JobSubmitter} that was used to submit the
+	 * job is stored in the {@link Job#getSubmissionType()} property it does not
+	 * have to be specified here again.
 	 * 
-	 * @param job the job to kill 
-	 * @return the new status of the job. It may be worth checking whether the job really was killed or not
+	 * @param job
+	 *            the job to kill
+	 * @return the new status of the job. It may be worth checking whether the
+	 *         job really was killed or not
 	 */
-	public int killJob(Job job) {
-		
+	public final int killJob(final Job job) {
+
 		JobSubmitter submitter = null;
 		submitter = submitters.get(job.getSubmissionType());
-		
+
 		if (submitter == null) {
-//			throw new NoSuchJobSubmitterException(
-//					"Can't find JobSubmitter: " + job.getSubmissionType());
-			myLogger.error("Can't find jobsubitter: "+job.getSubmissionType());
+			// throw new NoSuchJobSubmitterException(
+			// "Can't find JobSubmitter: " + job.getSubmissionType());
+			myLogger
+					.error("Can't find jobsubitter: " + job.getSubmissionType());
 			return JobConstants.KILLED;
 		}
-		
+
 		return submitter.killJob(job.getJobhandle(), job.getCredential());
 	}
 

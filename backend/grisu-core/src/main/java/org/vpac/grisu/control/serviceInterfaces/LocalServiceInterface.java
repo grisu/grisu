@@ -30,24 +30,29 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 	private char[] passphrase = null;
 
 	@Override
-	protected ProxyCredential getCredential() throws NoValidCredentialException {
-		
+	protected final ProxyCredential getCredential() {
+
 		long oldLifetime = -1;
 		try {
-			if ( credential != null ) {
-				oldLifetime = credential.getGssCredential().getRemainingLifetime();
+			if (credential != null) {
+				oldLifetime = credential.getGssCredential()
+						.getRemainingLifetime();
 			}
 		} catch (GSSException e2) {
-			myLogger.debug("Problem getting lifetime of old certificate: "+e2);
+			myLogger
+					.debug("Problem getting lifetime of old certificate: " + e2);
 			credential = null;
 		}
-		if ( oldLifetime < ServerPropertiesManager.getMinProxyLifetimeBeforeGettingNewProxy() ) {
-			myLogger.debug("Credential reached minimum lifetime. Getting new one from myproxy. Old lifetime: "+oldLifetime);
+		if (oldLifetime < ServerPropertiesManager
+				.getMinProxyLifetimeBeforeGettingNewProxy()) {
+			myLogger
+					.debug("Credential reached minimum lifetime. Getting new one from myproxy. Old lifetime: "
+							+ oldLifetime);
 			this.credential = null;
-//			user.cleanCache();
+			// user.cleanCache();
 		}
 
-		if (credential == null || ! credential.isValid() ) {
+		if (credential == null || !credential.isValid()) {
 
 			if (myproxy_username == null || myproxy_username.length() == 0) {
 				if (passphrase == null || passphrase.length == 0) {
@@ -63,30 +68,38 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 						throw new NoValidCredentialException(
 								"Local proxy is not valid anymore.");
 					}
-				} 
+				}
 			} else {
 				// get credential from myproxy
 				String myProxyServer = MyProxyServerParams.getMyProxyServer();
 				int myProxyPort = MyProxyServerParams.getMyProxyPort();
-				
+
 				try {
-					// this is needed because of a possible round-robin myproxy server
-					myProxyServer = InetAddress.getByName(myProxyServer).getHostAddress();
+					// this is needed because of a possible round-robin myproxy
+					// server
+					myProxyServer = InetAddress.getByName(myProxyServer)
+							.getHostAddress();
 				} catch (UnknownHostException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
-					throw new NoValidCredentialException("Could not download myproxy credential: "+e1.getLocalizedMessage());
+					throw new NoValidCredentialException(
+							"Could not download myproxy credential: "
+									+ e1.getLocalizedMessage());
 				}
 
 				try {
-					credential = new ProxyCredential(MyProxy_light.getDelegation(myProxyServer, myProxyPort, myproxy_username, passphrase, 3600));
-					if ( getUser() != null ) {
+					credential = new ProxyCredential(MyProxy_light
+							.getDelegation(myProxyServer, myProxyPort,
+									myproxy_username, passphrase, 3600));
+					if (getUser() != null) {
 						getUser().cleanCache();
 					}
 				} catch (Throwable e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-					throw new NoValidCredentialException("Could not get myproxy credential: "+e.getLocalizedMessage());
+					throw new NoValidCredentialException(
+							"Could not get myproxy credential: "
+									+ e.getLocalizedMessage());
 				}
 				if (!credential.isValid()) {
 					throw new NoValidCredentialException(
@@ -94,41 +107,45 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 				}
 			}
 		}
-		
-		
+
 		return credential;
 
 	}
 
-	public Document getTemplate(String application)
+	public final Document getTemplate(final String application)
 			throws NoSuchTemplateException {
-		Document doc = ServiceTemplateManagement.getAvailableTemplate(application);
-		
-		if ( doc == null ) {
-			throw new NoSuchTemplateException("Could not find template for application: "+application+".");
+		Document doc = ServiceTemplateManagement
+				.getAvailableTemplate(application);
+
+		if (doc == null) {
+			throw new NoSuchTemplateException(
+					"Could not find template for application: " + application
+							+ ".");
 		}
-		
+
 		return doc;
 	}
 
-	public Document getTemplate(String application, String version)
+	public final Document getTemplate(final String application, final String version)
 			throws NoSuchTemplateException {
-		Document doc = ServiceTemplateManagement.getAvailableTemplate(application);
-		
-		if ( doc == null ) {
-			throw new NoSuchTemplateException("Could not find template for application: "+application+", version "+version);
+		Document doc = ServiceTemplateManagement
+				.getAvailableTemplate(application);
+
+		if (doc == null) {
+			throw new NoSuchTemplateException(
+					"Could not find template for application: " + application
+							+ ", version " + version);
 		}
-		
+
 		return doc;
-		
+
 	}
 
-	public String[] listHostedApplicationTemplates() {
+	public final String[] listHostedApplicationTemplates() {
 		return ServiceTemplateManagement.getAllAvailableApplications();
 	}
 
-	public void login(String username, char[] password)
-			throws NoValidCredentialException {
+	public final void login(final String username, final char[] password) {
 
 		try {
 			LocalTemplatesHelper.copyTemplatesAndMaybeGlobusFolder();
@@ -137,51 +154,56 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-//			throw new RuntimeException("Could not initiate local backend: "+e.getLocalizedMessage());
+			// throw new
+			// RuntimeException("Could not initiate local backend: "+e.getLocalizedMessage());
 		}
-		
+
 		this.myproxy_username = username;
 		this.passphrase = password;
-		
+
 		try {
 			getCredential();
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new NoValidCredentialException("No valid credential: "+e.getLocalizedMessage());
+			throw new NoValidCredentialException("No valid credential: "
+					+ e.getLocalizedMessage());
 		}
 	}
 
-	public String logout() {
+	public final String logout() {
 		Arrays.fill(passphrase, 'x');
 		return null;
 	}
 
-	public long getCredentialEndTime() {
-		
+	public final long getCredentialEndTime() {
+
 		String myProxyServer = MyProxyServerParams.getMyProxyServer();
 		int myProxyPort = MyProxyServerParams.getMyProxyPort();
 
 		try {
 			// this is needed because of a possible round-robin myproxy server
-			myProxyServer = InetAddress.getByName(myProxyServer).getHostAddress();
+			myProxyServer = InetAddress.getByName(myProxyServer)
+					.getHostAddress();
 		} catch (UnknownHostException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-			throw new NoValidCredentialException("Could not download myproxy credential: "+e1.getLocalizedMessage());
+			throw new NoValidCredentialException(
+					"Could not download myproxy credential: "
+							+ e1.getLocalizedMessage());
 		}
-		
+
 		MyProxy myproxy = new MyProxy(myProxyServer, myProxyPort);
 		CredentialInfo info = null;
 		try {
-			info = myproxy.info(getCredential().getGssCredential(), myproxy_username, new String(passphrase));
+			info = myproxy.info(getCredential().getGssCredential(),
+					myproxy_username, new String(passphrase));
 		} catch (MyProxyException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return info.getEndTime();
 
-		
 	}
 
 }

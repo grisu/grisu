@@ -13,7 +13,10 @@ import java.util.zip.ZipInputStream;
 import org.apache.log4j.Logger;
 import org.vpac.security.light.Init;
 
-public class LocalTemplatesHelper {
+public final class LocalTemplatesHelper {
+	
+	private LocalTemplatesHelper() {
+	}
 
 	static final Logger myLogger = Logger.getLogger(LocalTemplatesHelper.class
 			.getName());
@@ -72,10 +75,11 @@ public class LocalTemplatesHelper {
 
 		if (TEMPLATES_AVAILABLE_DIR.list().length == 0) {
 
-			myLogger.debug("Filling templates_available folder with a set of base templates...");
-			int BUFFER_SIZE = 8192;
+			myLogger
+					.debug("Filling templates_available folder with a set of base templates...");
+			final int BUFFER_SIZE = 8192;
 			int count;
-			byte data[] = new byte[BUFFER_SIZE];
+			byte[] data = new byte[BUFFER_SIZE];
 
 			InputStream in = Init.class
 					.getResourceAsStream("/templates_available.zip");
@@ -111,7 +115,8 @@ public class LocalTemplatesHelper {
 				myLogger.error(e);
 			}
 		} else {
-			myLogger.debug("Templates folder already contains files. Not copying any into it...");
+			myLogger
+					.debug("Templates folder already contains files. Not copying any into it...");
 		}
 
 		// copy globus floder if not already there
@@ -125,12 +130,12 @@ public class LocalTemplatesHelper {
 
 	}
 
-	private static void unzipFileToDir(String zipFileResourcePath,
-			File targetDir) {
+	private static void unzipFileToDir(final String zipFileResourcePath,
+			final File targetDir) {
 
-		int BUFFER_SIZE = 8192;
+		final int BUFFER_SIZE = 8192;
 		int count;
-		byte data[] = new byte[BUFFER_SIZE];
+		byte[] data = new byte[BUFFER_SIZE];
 
 		InputStream in = Init.class.getResourceAsStream(zipFileResourcePath);
 		ZipInputStream zipstream = new ZipInputStream(in);
@@ -174,7 +179,7 @@ public class LocalTemplatesHelper {
 
 	}
 
-	public static void copyFile(File in, File out) throws IOException {
+	public static void copyFile(final File in, final File out) throws IOException {
 		FileChannel inChannel = new FileInputStream(in).getChannel();
 		FileChannel outChannel = new FileOutputStream(out).getChannel();
 		try {
@@ -182,10 +187,12 @@ public class LocalTemplatesHelper {
 		} catch (IOException e) {
 			throw e;
 		} finally {
-			if (inChannel != null)
+			if (inChannel != null) {
 				inChannel.close();
-			if (outChannel != null)
+			}
+			if (outChannel != null) {
 				outChannel.close();
+			}
 		}
 	}
 

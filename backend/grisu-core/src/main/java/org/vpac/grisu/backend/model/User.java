@@ -1,5 +1,3 @@
-
-
 package org.vpac.grisu.backend.model;
 
 import java.io.File;
@@ -29,25 +27,23 @@ import org.apache.commons.vfs.impl.DefaultFileSystemManager;
 import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileSystemConfigBuilder;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.CollectionOfElements;
-import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.backend.utils.CertHelpers;
-import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.security.light.voms.VO;
 import org.vpac.security.light.voms.VOManagement.VOManagement;
-import org.vpac.security.light.vomsProxy.VomsException;
 
 import uk.ac.dl.escience.vfs.util.VFSUtil;
 
 /**
  * The User class holds all the relevant data a job could want to know from the
- * user it is running under. This class belongs to the three central classes of grisu (the other two are {@link ServiceInterface} and
- * {@link Job}.
+ * user it is running under. This class belongs to the three central classes of
+ * grisu (the other two are {@link ServiceInterface} and {@link Job}.
  * 
  * At the moment it holds filesystem information which can be used to stage
- * files from the desktop. Also it has got information about vo memberships of the user.
+ * files from the desktop. Also it has got information about vo memberships of
+ * the user.
  * 
  * @author Markus Binsteiner
  * 
@@ -56,9 +52,9 @@ import uk.ac.dl.escience.vfs.util.VFSUtil;
 public class User {
 
 	private static Logger myLogger = Logger.getLogger(User.class.getName());
-	
-	public static String GET_VO_DN_PATH(String dn) {
-		return dn.replace("=", "_").replace(",","_").replace(" ", "_");
+
+	public static String get_vo_dn_path(final String dn) {
+		return dn.replace("=", "_").replace(",", "_").replace(" ", "_");
 	}
 
 	private Long id = null;
@@ -72,30 +68,33 @@ public class User {
 	// the (default) credentials dn
 	private String dn = null;
 
-//	// persistent properties
-//	// not used yet
-//	private List<FileTransfer> fileTransfers = new ArrayList<FileTransfer>();
+	// // persistent properties
+	// // not used yet
+	// private List<FileTransfer> fileTransfers = new ArrayList<FileTransfer>();
 
-//	// not used yet
-//	private List<FileReservation> fileReservations = new ArrayList<FileReservation>();
+	// // not used yet
+	// private List<FileReservation> fileReservations = new
+	// ArrayList<FileReservation>();
 
 	// the mountpoints of a user
 	private Set<MountPoint> mountPoints = new HashSet<MountPoint>();
 	private Set<MountPoint> mountPointsAutoMounted = new HashSet<MountPoint>();
 	private Set<MountPoint> allMountPoints = null;
 
-	// filesystem connections are cached so that we don't need to connect again everytime we access one
+	// filesystem connections are cached so that we don't need to connect again
+	// everytime we access one
 	private Map<MountPoint, FileSystem> cachedFilesystemConnections = new HashMap<MountPoint, FileSystem>();
-	// credentials are chache so we don't have to contact myproxy/voms anytime we want to make a transaction
+	// credentials are chache so we don't have to contact myproxy/voms anytime
+	// we want to make a transaction
 	private Map<String, ProxyCredential> cachedCredentials = new HashMap<String, ProxyCredential>();
 
 	// All fqans of the user
 	private Map<String, String> fqans = new HashMap<String, String>();
 	private boolean fqansFilled = false;
-//	private Map<String, String> fqans = null;
-	
+	// private Map<String, String> fqans = null;
+
 	private Map<String, String> userProperties = new HashMap<String, String>();
-	
+
 	private Map<String, JobSubmissionObjectImpl> jobTemplates = new HashMap<String, JobSubmissionObjectImpl>();
 
 	// for hibernate
@@ -103,12 +102,12 @@ public class User {
 	}
 
 	/**
-	 * Constructs a User object not using an associated credential
+	 * Constructs a User object not using an associated credential.
 	 * 
 	 * @param dn
 	 *            the dn of the user
 	 */
-	public User(String dn) {
+	public User(final String dn) {
 		this.dn = dn;
 	}
 
@@ -120,7 +119,7 @@ public class User {
 	 * @throws FileSystemException
 	 *             if the users default filesystems can't be mounted
 	 */
-	public User(ProxyCredential cred) {
+	public User(final ProxyCredential cred) {
 		this.dn = cred.getDn();
 		this.cred = cred;
 	}
@@ -129,23 +128,23 @@ public class User {
 	 * Contacts every configured VOMS server and gets (and sets) the user's
 	 * fqans for this server.
 	 */
-	public void fillFqans() {
+	public final void fillFqans() {
 
 		myLogger.debug("Checking credential");
-		if (cred.isValid())
+		if (cred.isValid()) {
 			fqans = VOManagement.getAllFqans(cred.getGssCredential());
-		
+		}
+
 		fqansFilled = true;
 	}
 
-
 	/**
-	 * Returns the users dn
+	 * Returns the users dn.
 	 * 
 	 * @return the dn
 	 */
-	@Column(nullable=false)
-	public String getDn() {
+	@Column(nullable = false)
+	public final String getDn() {
 		return dn;
 	}
 
@@ -155,7 +154,7 @@ public class User {
 	 * @param dn
 	 *            the dn of the user
 	 */
-	private void setDn(String dn) {
+	private void setDn(final String dn) {
 		this.dn = dn;
 	}
 
@@ -164,18 +163,21 @@ public class User {
 	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
-	public boolean equals(Object other) {
-		if (this == other)
+	public final boolean equals(final Object other) {
+		if (this == other) {
 			return true;
-		if (!(other instanceof User))
+		}
+		if (!(other instanceof User)) {
 			return false;
+		}
 
 		final User user = (User) other;
 
-		if (!dn.equals(user.dn))
+		if (!dn.equals(user.dn)) {
 			return false;
-		else
+		} else {
 			return true;
+		}
 	}
 
 	/*
@@ -183,25 +185,26 @@ public class User {
 	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
-	public int hashCode() {
+	public final int hashCode() {
 		return 29 * dn.hashCode();
 	}
 
-//	private List<FileReservation> getFileReservations() {
-//		return fileReservations;
-//	}
-//
-//	private void setFileReservations(List<FileReservation> fileReservations) {
-//		this.fileReservations = fileReservations;
-//	}
-//
-//	private List<FileTransfer> getFileTransfers() {
-//		return fileTransfers;
-//	}
-//
-//	private void setFileTransfers(List<FileTransfer> fileTransfers) {
-//		this.fileTransfers = fileTransfers;
-//	}
+	// private List<FileReservation> getFileReservations() {
+	// return fileReservations;
+	// }
+	//
+	// private void setFileReservations(List<FileReservation> fileReservations)
+	// {
+	// this.fileReservations = fileReservations;
+	// }
+	//
+	// private List<FileTransfer> getFileTransfers() {
+	// return fileTransfers;
+	// }
+	//
+	// private void setFileTransfers(List<FileTransfer> fileTransfers) {
+	// this.fileTransfers = fileTransfers;
+	// }
 
 	@Id
 	@GeneratedValue
@@ -209,50 +212,56 @@ public class User {
 		return id;
 	}
 
-	private void setId(Long id) {
+	private void setId(final Long id) {
 		this.id = id;
 	}
 
 	/**
-	 * Set's additional mountpoints that the user did not explicitly mount manually
-	 * @param amps the mountpoints to add (for this session)
+	 * Set's additional mountpoints that the user did not explicitly mount
+	 * manually.
+	 * 
+	 * @param amps
+	 *            the mountpoints to add (for this session)
 	 */
-	public void setAutoMountedMountPoints(Set<MountPoint> amps) {
+	public final void setAutoMountedMountPoints(final Set<MountPoint> amps) {
 		allMountPoints = null;
 		this.mountPointsAutoMounted = amps;
 	}
-	
+
 	/**
-	 * Returns all mountpoints (including automounted ones for this session
+	 * Returns all mountpoints (including automounted ones for this session.
+	 * 
 	 * @return all mountpoints for this session
 	 */
 	@Transient
-	public Set<MountPoint> getAllMountPoints() {
-		if ( allMountPoints == null ) {
+	public final Set<MountPoint> getAllMountPoints() {
+		if (allMountPoints == null) {
 			allMountPoints = new TreeSet<MountPoint>();
-			//first the automounted ones because the manually ones are more important
+			// first the automounted ones because the manually ones are more
+			// important
 			allMountPoints.addAll(mountPointsAutoMounted);
 			allMountPoints.addAll(getMountPoints());
 		}
 		return allMountPoints;
 	}
-	
+
 	// for hibernate
-	@OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinTable
 	private Set<MountPoint> getMountPoints() {
 		return mountPoints;
 	}
 
 	// for hibernate
-	private void setMountPoints(Set<MountPoint> mountPoints) {
+	private void setMountPoints(final Set<MountPoint> mountPoints) {
 		this.mountPoints = mountPoints;
 	}
 
 	/**
-	 * Adds a filesystem to the mountpoints of this user. The mountpoint is just an alias
-	 * to make the urls shorter and easier to read/remember. You only need to mount a filesystem once. After
-	 * you persisted the user (with hibernate) the alias and rootUrl of the filesystem are persisted as well.
+	 * Adds a filesystem to the mountpoints of this user. The mountpoint is just
+	 * an alias to make the urls shorter and easier to read/remember. You only
+	 * need to mount a filesystem once. After you persisted the user (with
+	 * hibernate) the alias and rootUrl of the filesystem are persisted as well.
 	 * 
 	 * A mountpoint always has to be in the root directory (for example: /local
 	 * or /remote -- never /remote/ng2.vpac.org )
@@ -267,18 +276,18 @@ public class User {
 	 *            the credential that is used to contact the filesystem (can be
 	 *            null for local filesystems)
 	 * @return the root FileObject of the newly mounted FileSystem
-	 * @throws VomsException 
+	 * @throws VomsException
 	 * @throws FileSystemException
 	 *             if the filesystem could not be mounted
 	 */
-	public MountPoint mountFileSystem(String uri, String mountPointName,
-			ProxyCredential cred, boolean useHomeDirectory)
+	public final MountPoint mountFileSystem(String uri, final String mountPointName,
+			final ProxyCredential cred, final boolean useHomeDirectory)
 			throws RemoteFileSystemException {
 
-//		if (!mountPointName.startsWith("/")) {
-//			mountPointName = "/" + mountPointName;
-//		}
-		
+		// if (!mountPointName.startsWith("/")) {
+		// mountPointName = "/" + mountPointName;
+		// }
+
 		myLogger.debug("Checking mountpoints for duplicates.");
 		for (MountPoint mp : getAllMountPoints()) {
 			if (mountPointName.equals(mp.getMountpointName())) {
@@ -287,9 +296,9 @@ public class User {
 								+ mountPointName);
 			}
 		}
-		
-		MountPoint new_mp = new MountPoint(cred.getDn(), cred.getFqan(),
-				uri, mountPointName);
+
+		MountPoint new_mp = new MountPoint(cred.getDn(), cred.getFqan(), uri,
+				mountPointName);
 		try {
 			FileSystem fileSystem = connectToFileSystem(new_mp);
 			myLogger.debug("Connected to file system.");
@@ -302,11 +311,15 @@ public class User {
 								.substring(1);
 				// if vo user, use $VOHOME/<DN> as homedirectory
 				if (cred.getFqan() != null) {
-					uri = uri + File.separator + GET_VO_DN_PATH(cred.getDn());
-					fileSystem.resolveFile(((String) fileSystem.getAttribute("HOME_DIRECTORY")+File.separator+cred.getDn().replace("=", "_").replace(",","_").replace(" ", "_"))).createFolder();
+					uri = uri + File.separator + get_vo_dn_path(cred.getDn());
+					fileSystem.resolveFile(
+							((String) fileSystem.getAttribute("HOME_DIRECTORY")
+									+ File.separator + cred.getDn().replace(
+									"=", "_").replace(",", "_").replace(" ",
+									"_"))).createFolder();
 				}
-				new_mp = new MountPoint(cred.getDn(), cred.getFqan(),
-						uri, mountPointName);
+				new_mp = new MountPoint(cred.getDn(), cred.getFqan(), uri,
+						mountPointName);
 			}
 
 			if (!mountPoints.contains(new_mp)) {
@@ -329,45 +342,44 @@ public class User {
 	 * @param cred
 	 * @return
 	 * @throws FileSystemException
-	 * @throws VomsException 
+	 * @throws VomsException
 	 */
-	private FileSystem connectToFileSystem(MountPoint mp)
+	private FileSystem connectToFileSystem(final MountPoint mp)
 			throws FileSystemException {
-		
+
 		// check whether a filesystem for this mountpoint is already cached
 		if (cachedFilesystemConnections.containsKey(mp)) {
-			myLogger.debug("Using already cached filesystem for mountpoint: "+mp.getMountpointName());
+			myLogger.debug("Using already cached filesystem for mountpoint: "
+					+ mp.getMountpointName());
 			return this.cachedFilesystemConnections.get(mp);
 		}
-		
+
 		ProxyCredential credToUse = null;
 
 		// get the right credential for this mountpoint
 		if (mp.getFqan() != null) {
 
+			credToUse = cachedCredentials.get(mp.getFqan());
+			if (credToUse == null || !credToUse.isValid()) {
+
+				// put a new credential in the cache
+				VO vo = VOManagement.getVO(getFqans().get(mp.getFqan()));
+				credToUse = CertHelpers.getVOProxyCredential(vo, mp.getFqan(),
+						getCred());
+				cachedCredentials.put(mp.getFqan(), credToUse);
+			} else {
 				credToUse = cachedCredentials.get(mp.getFqan());
-				if ( credToUse == null
-						|| ! credToUse.isValid() ) {
-					
-					// put a new credential in the cache
-					VO vo = VOManagement.getVO(getFqans().get(mp.getFqan()));
-					credToUse = CertHelpers.getVOProxyCredential(vo, mp
-							.getFqan(), getCred());
-					cachedCredentials.put(mp.getFqan(), credToUse);
-				} else {
-					credToUse = cachedCredentials.get(mp.getFqan());
-				}
+			}
 
 		} else {
 			credToUse = getCred();
 		}
-		
-		
+
 		FileSystemOptions opts = new FileSystemOptions();
 
 		if (mp.getRootUrl().startsWith("gsiftp")) {
 			GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
-			.getInstance();
+					.getInstance();
 			builder.setGSSCredential(opts, credToUse.getGssCredential());
 			// builder.setUserDirIsRoot(opts, true);
 		}
@@ -393,28 +405,28 @@ public class User {
 	 * @throws FileSystemException
 	 *             if the filesystem could not be mounted
 	 * @throws RemoteFileSystemException
-	 * @throws VomsException 
+	 * @throws VomsException
 	 */
-	public MountPoint mountFileSystem(String root, String name,
-			boolean useHomeDirectory) throws RemoteFileSystemException {
+	public final MountPoint mountFileSystem(final String root, final String name,
+			final boolean useHomeDirectory) throws RemoteFileSystemException {
 
 		return mountFileSystem(root, name, getCred(), useHomeDirectory);
 	}
 
-	public MountPoint mountFileSystem(String root, String name, String fqan,
-			boolean useHomeDirectory) throws RemoteFileSystemException {
+	public final MountPoint mountFileSystem(final String root, final String name, final String fqan,
+			final boolean useHomeDirectory) throws RemoteFileSystemException {
 
-		if ( fqan == null ) {
+		if (fqan == null) {
 			return mountFileSystem(root, name, useHomeDirectory);
 		} else {
-		
-		Map<String, String> temp = getFqans();
-		VO vo = VOManagement.getVO(temp.get(fqan)); 
 
-		ProxyCredential vomsProxyCred = CertHelpers
-				.getVOProxyCredential(vo, fqan, getCred());
+			Map<String, String> temp = getFqans();
+			VO vo = VOManagement.getVO(temp.get(fqan));
 
-		return mountFileSystem(root, name, vomsProxyCred, useHomeDirectory);
+			ProxyCredential vomsProxyCred = CertHelpers.getVOProxyCredential(
+					vo, fqan, getCred());
+
+			return mountFileSystem(root, name, vomsProxyCred, useHomeDirectory);
 		}
 	}
 
@@ -427,10 +439,10 @@ public class User {
 	 *             if the filesystem could not be unmounted or something else
 	 *             went wrong
 	 */
-	public void unmountFileSystem(String mountPointName) {
+	public final void unmountFileSystem(final String mountPointName) {
 
-		for ( MountPoint mp : mountPoints ) {
-			if ( mp.getMountpointName().equals(mountPointName) ) {
+		for (MountPoint mp : mountPoints) {
+			if (mp.getMountpointName().equals(mountPointName)) {
 				mountPoints.remove(mp);
 				allMountPoints = null;
 				return;
@@ -439,7 +451,7 @@ public class User {
 	}
 
 	/**
-	 * Used internally to mount filesystems
+	 * Used internally to mount filesystems.
 	 * 
 	 * @return the filesystem manager of the user
 	 * @throws FileSystemException
@@ -448,26 +460,28 @@ public class User {
 	@Transient
 	private DefaultFileSystemManager getFsManager() throws FileSystemException {
 		if (fsmanager == null) {
-			
-			fsmanager = VFSUtil.createNewFsManager(false, false, true, true, true, true, true, null);
-//			fsmanager = VFSUtil.createNewFsManager(false, false, true, true, true, true, null);
-//			fsmanager = new DefaultFileSystemManager();
-			// FileSystemManager fsmanager = VFS.getManager();
-//			DefaultLocalFileProvider fileProvider = new DefaultLocalFileProvider();
-//			getFsManager().addProvider("file", fileProvider);
-//			GridFtpFileProvider provider = new GridFtpFileProvider();
-//			getFsManager().addProvider("gsiftp", provider);
-			// fsmanager.setCacheStrategy(CacheStrategycred.ON_RESOLVE);
-						
-//			fsmanager.setCacheStrategy(CacheStrategy.ON_RESOLVE);
-//			getFsManager().setCacheStrategy(CacheStrategy.MANUAL);
 
-//			getFsManager().init();
+			fsmanager = VFSUtil.createNewFsManager(false, false, true, true,
+					true, true, true, null);
+			// fsmanager = VFSUtil.createNewFsManager(false, false, true, true,
+			// true, true, null);
+			// fsmanager = new DefaultFileSystemManager();
+			// FileSystemManager fsmanager = VFS.getManager();
+			// DefaultLocalFileProvider fileProvider = new
+			// DefaultLocalFileProvider();
+			// getFsManager().addProvider("file", fileProvider);
+			// GridFtpFileProvider provider = new GridFtpFileProvider();
+			// getFsManager().addProvider("gsiftp", provider);
+			// fsmanager.setCacheStrategy(CacheStrategycred.ON_RESOLVE);
+
+			// fsmanager.setCacheStrategy(CacheStrategy.ON_RESOLVE);
+			// getFsManager().setCacheStrategy(CacheStrategy.MANUAL);
+
+			// getFsManager().init();
 
 		}
 		return fsmanager;
 	}
-
 
 	/**
 	 * Resolves the provided filename into a FileObject. If the filename starts
@@ -483,7 +497,7 @@ public class User {
 	 *             if the (possible) required voms credential could not be
 	 *             created
 	 */
-	public FileObject aquireFile(String file) throws RemoteFileSystemException {
+	public final FileObject aquireFile(final String file) throws RemoteFileSystemException {
 		return aquireFile(file, getCred());
 	}
 
@@ -504,13 +518,13 @@ public class User {
 	 *             if the (possible) required voms credential could not be
 	 *             created
 	 */
-	public FileObject aquireFile(String file, ProxyCredential plainCred)
+	public final FileObject aquireFile(final String file, final ProxyCredential plainCred)
 			throws RemoteFileSystemException {
 
 		String file_to_aquire = null;
-//		ProxyCredential credToUse = null;
+		// ProxyCredential credToUse = null;
 		MountPoint mp = null;
-		
+
 		if (file.startsWith("/")) {
 			// means file on "mounted" filesystem
 
@@ -518,48 +532,52 @@ public class User {
 
 			file_to_aquire = mp.replaceMountpointWithAbsoluteUrl(file);
 
-			if (file_to_aquire == null)
+			if (file_to_aquire == null) {
 				throw new RemoteFileSystemException(
 						"File path is not on any of the mountpoints for file: "
 								+ file);
+			}
 		} else {
 			// means absolute url
 			file_to_aquire = file;
 			mp = getResponsibleMountpointForAbsoluteFile(file_to_aquire);
 		}
 
-		if ( mp == null )
-			throw new RemoteFileSystemException("Could not find mountpoint for file with url: "+file_to_aquire);
-		
-//		// get the right credential for this mountpoint
-//		if (mp.getFqan() != null) {
-//
-//			try {
-//				ProxyCredential credential = cachedCredentials.get(mp.getFqan());
-//				if ( credential == null
-//						|| ! credential.isValid() 
-//						|| credential.getGssCredential().getRemainingLifetime() < 120 ) {
-//					
-//					// put a new credential in the cache
-//					VO vo = VOManagement.getVO(getFqans().get(mp.getFqan()));
-//					credToUse = ProxyCredentialHelpers.getVOProxyCredential(vo, mp
-//							.getFqan(), plainCred);
-//					cachedCredentials.put(mp.getFqan(), credToUse);
-//				} else {
-//					credToUse = cachedCredentials.get(mp.getFqan());
-//				}
-//				
-//			} catch (GSSException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//				VO vo = VOManagement.getVO(getFqans().get(mp.getFqan()));
-//				credToUse = ProxyCredentialHelpers.getVOProxyCredential(vo, mp
-//						.getFqan(), plainCred);
-//				cachedCredentials.put(mp.getFqan(), credToUse);
-//			}
-//		} else {
-//			credToUse = plainCred;
-//		}
+		if (mp == null) {
+			throw new RemoteFileSystemException(
+					"Could not find mountpoint for file with url: "
+							+ file_to_aquire);
+		}
+
+		// // get the right credential for this mountpoint
+		// if (mp.getFqan() != null) {
+		//
+		// try {
+		// ProxyCredential credential = cachedCredentials.get(mp.getFqan());
+		// if ( credential == null
+		// || ! credential.isValid()
+		// || credential.getGssCredential().getRemainingLifetime() < 120 ) {
+		//					
+		// // put a new credential in the cache
+		// VO vo = VOManagement.getVO(getFqans().get(mp.getFqan()));
+		// credToUse = ProxyCredentialHelpers.getVOProxyCredential(vo, mp
+		// .getFqan(), plainCred);
+		// cachedCredentials.put(mp.getFqan(), credToUse);
+		// } else {
+		// credToUse = cachedCredentials.get(mp.getFqan());
+		// }
+		//				
+		// } catch (GSSException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// VO vo = VOManagement.getVO(getFqans().get(mp.getFqan()));
+		// credToUse = ProxyCredentialHelpers.getVOProxyCredential(vo, mp
+		// .getFqan(), plainCred);
+		// cachedCredentials.put(mp.getFqan(), credToUse);
+		// }
+		// } else {
+		// credToUse = plainCred;
+		// }
 
 		FileObject fileObject = null;
 		try {
@@ -567,30 +585,29 @@ public class User {
 			// check whether the file root is in the cache so we don't have to
 			// connect again.
 			// TODO check whether vfs does that already
-			//markus
-//			if (!cachedFilesystemConnections.containsKey(mp.getRootUrl())) {
-				root = this.connectToFileSystem(mp);
-//			} else {
-//				root = this.cachedFilesystemConnections.get(mp.getRootUrl());
-//			}
+			// markus
+			// if (!cachedFilesystemConnections.containsKey(mp.getRootUrl())) {
+			root = this.connectToFileSystem(mp);
+			// } else {
+			// root = this.cachedFilesystemConnections.get(mp.getRootUrl());
+			// }
 			// String actualFile =
 			// file_to_aquire.substring(root.getName().getURI().length());
 
-				String fileUri = root.getRootName().getURI();
-				
-				try {
-					URI uri = new URI(file_to_aquire);
-					file_to_aquire = uri.toString();
-				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				String tempUriString = file_to_aquire.replace(":2811", "").substring(fileUri.length());
-				fileObject = root.resolveFile(tempUriString);
-//				fileObject = root.resolveFile(file_to_aquire);
+			String fileUri = root.getRootName().getURI();
 
-				
+			try {
+				URI uri = new URI(file_to_aquire);
+				file_to_aquire = uri.toString();
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			String tempUriString = file_to_aquire.replace(":2811", "")
+					.substring(fileUri.length());
+			fileObject = root.resolveFile(tempUriString);
+			// fileObject = root.resolveFile(file_to_aquire);
 
 		} catch (FileSystemException e) {
 			throw new RemoteFileSystemException("Could not access file: "
@@ -600,42 +617,48 @@ public class User {
 		return fileObject;
 
 	}
-	
-//	/**
-//	 * @deprecated
-//	 * @param site
-//	 * @param fqan
-//	 * @return
-//	 */
-//	public MountPoint getFirstResponsibleMountPointForSiteAndFqan(String site, String fqan) {
-//		
-//		myLogger.debug("Looking for mountpoint for site: "+site+" and fqan: "+fqan);
-//		
-//		if ( site == null ) return null;
-//		
-//		for (MountPoint mp : getAllMountPoints() ) {
-//			String mpSite = MountPointManager.getSite(mp.getRootUrl());
-//			if ( mpSite == null )
-//				continue;
-//			
-//			if ( site.equals(mpSite) && ((fqan == null && mp.getFqan() == null) || (fqan != null && fqan.equals(mp.getFqan()))) ) {
-//				myLogger.debug("Found mountpoint: "+mp.getMountpoint());
-//				return mp;
-//			}
-//		}
-//		return null;
-//		
-//	}
+
+	// /**
+	// * @deprecated
+	// * @param site
+	// * @param fqan
+	// * @return
+	// */
+	// public MountPoint getFirstResponsibleMountPointForSiteAndFqan(String
+	// site, String fqan) {
+	//		
+	// myLogger.debug("Looking for mountpoint for site: "+site+" and fqan: "+fqan);
+	//		
+	// if ( site == null ) return null;
+	//		
+	// for (MountPoint mp : getAllMountPoints() ) {
+	// String mpSite = MountPointManager.getSite(mp.getRootUrl());
+	// if ( mpSite == null )
+	// continue;
+	//			
+	// if ( site.equals(mpSite) && ((fqan == null && mp.getFqan() == null) ||
+	// (fqan != null && fqan.equals(mp.getFqan()))) ) {
+	// myLogger.debug("Found mountpoint: "+mp.getMountpoint());
+	// return mp;
+	// }
+	// }
+	// return null;
+	//		
+	// }
 	@Transient
-	public MountPoint getFirstResponsibleMountPointForHostAndFqan(String host_or_url, String fqan) {
-		
-		myLogger.debug("Looking for mountpoint for site: "+host_or_url+" and fqan: "+fqan);
-		
-		if ( host_or_url == null ) return null;
+	public final MountPoint getFirstResponsibleMountPointForHostAndFqan(
+			final String host_or_url, final String fqan) {
+
+		myLogger.debug("Looking for mountpoint for site: " + host_or_url
+				+ " and fqan: " + fqan);
+
+		if (host_or_url == null) {
+			return null;
+		}
 
 		String protocol = null;
 		String hostname = null;
-		try {		
+		try {
 			URI uri = new URI(host_or_url);
 			protocol = uri.getScheme();
 			hostname = uri.getHost();
@@ -644,16 +667,17 @@ public class User {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 
-		for ( MountPoint mp : getAllMountPoints() ) {
-			if ( ( mp.getFqan() == null && fqan == null ) || (mp.getFqan() != null && mp.getFqan().equals(fqan) ) ) { 
-				if ( protocol != null && hostname != null ) {
-					if ( mp.getRootUrl().indexOf(protocol) != -1 && mp.getRootUrl().indexOf(hostname) != -1 ) {
+		for (MountPoint mp : getAllMountPoints()) {
+			if ((mp.getFqan() == null && fqan == null)
+					|| (mp.getFqan() != null && mp.getFqan().equals(fqan))) {
+				if (protocol != null && hostname != null) {
+					if (mp.getRootUrl().indexOf(protocol) != -1
+							&& mp.getRootUrl().indexOf(hostname) != -1) {
 						return mp;
 					}
 				} else {
-					if ( mp.getRootUrl().indexOf(host_or_url) != -1 ) {
+					if (mp.getRootUrl().indexOf(host_or_url) != -1) {
 						return mp;
 					}
 				}
@@ -670,9 +694,8 @@ public class User {
 	 * @return the mountpoint or null if the file is not on any of the
 	 *         mountpoints
 	 */
-	public MountPoint getResponsibleMountpointForUserSpaceFile(String file) {
+	public final MountPoint getResponsibleMountpointForUserSpaceFile(final String file) {
 
-		
 		for (MountPoint mountpoint : getAllMountPoints()) {
 			if (mountpoint.isResponsibleForUserSpaceFile(file)) {
 				return mountpoint;
@@ -689,10 +712,10 @@ public class User {
 	 *            the file
 	 * @return the mountpoint of null if no filesystem contains this file
 	 */
-	public MountPoint getResponsibleMountpointForAbsoluteFile(String file) {
+	public final MountPoint getResponsibleMountpointForAbsoluteFile(final String file) {
 
 		String new_file = null;
-		myLogger.debug("Finding mountpoint for file: "+file);
+		myLogger.debug("Finding mountpoint for file: " + file);
 
 		for (MountPoint mountpoint : getAllMountPoints()) {
 			if (mountpoint.isResponsibleForAbsoluteFile(file)) {
@@ -708,13 +731,14 @@ public class User {
 	 * @param file
 	 *            an "user-space" file url (/ngdata.vpac.org/test.txt)
 	 * @return the absolute file url
-	 *         (gsiftp://ngdata.vpac.org/home/san04/markus/test.txt) or null if the file is not within the user's filespace
+	 *         (gsiftp://ngdata.vpac.org/home/san04/markus/test.txt) or null if
+	 *         the file is not within the user's filespace
 	 */
-	public String returnAbsoluteUrl(String file) {
+	public final String returnAbsoluteUrl(final String file) {
 		MountPoint mp = getResponsibleMountpointForUserSpaceFile(file);
-		if ( mp == null ) {
+		if (mp == null) {
 			return null;
-		} else if ( file.startsWith("gsiftp:") ) {
+		} else if (file.startsWith("gsiftp:")) {
 			return file;
 		} else {
 			return mp.replaceMountpointWithAbsoluteUrl(file);
@@ -729,18 +753,18 @@ public class User {
 	 *            (gsiftp://ngdata.vpac.org/home/san04/markus/test.txt)
 	 * @return the "user-space" file url (/ngdata.vpac.org/test.txt)
 	 */
-	public String returnUserSpaceUrl(String file) {
+	public final String returnUserSpaceUrl(final String file) {
 		MountPoint mp = getResponsibleMountpointForAbsoluteFile(file);
 		return mp.replaceAbsoluteRootUrlWithMountPoint(file);
 	}
 
 	/**
-	 * Returns the default credential of the user (if any)
+	 * Returns the default credential of the user (if any).
 	 * 
 	 * @return the default credential or null if there is none
 	 */
 	@Transient
-	public ProxyCredential getCred() {
+	public final ProxyCredential getCred() {
 		return cred;
 	}
 
@@ -751,18 +775,18 @@ public class User {
 	 * @param cred
 	 *            the credential to use as default
 	 */
-	public void setCred(ProxyCredential cred) {
+	public final void setCred(final ProxyCredential cred) {
 
 		this.cred = cred;
 	}
-	
-	public void cleanCache() {
-		//TODO disconnect filesystems somehow?
+
+	public final void cleanCache() {
+		// TODO disconnect filesystems somehow?
 		cachedFilesystemConnections = new HashMap<MountPoint, FileSystem>();
-//		// does this affect existing filesystem connection		
-//		for ( ProxyCredential proxy : cachedCredentials.values() ) {
-//			proxy.destroy();
-//		}
+		// // does this affect existing filesystem connection
+		// for ( ProxyCredential proxy : cachedCredentials.values() ) {
+		// proxy.destroy();
+		// }
 		cachedCredentials = new HashMap<String, ProxyCredential>();
 	}
 
@@ -771,7 +795,7 @@ public class User {
 	 * 
 	 * @param vo
 	 */
-	public void addFqan(String fqan, String vo) {
+	public final void addFqan(final String fqan, final String vo) {
 		fqans.put(fqan, vo);
 	}
 
@@ -780,17 +804,18 @@ public class User {
 	 * 
 	 * @param vo
 	 */
-	public void removeFqan(String fqan) {
+	public final void removeFqan(final String fqan) {
 		fqans.remove(fqan);
 	}
 
 	/**
 	 * Getter for the users' fqans.
+	 * 
 	 * @return all fqans as map with the fqan as key and the vo as value
 	 */
 	@Transient
-	public Map<String, String> getFqans() {
-		if ( fqans == null || ! fqansFilled ) {
+	public final Map<String, String> getFqans() {
+		if (fqans == null || !fqansFilled) {
 			fillFqans();
 
 		}
@@ -799,45 +824,49 @@ public class User {
 
 	/**
 	 * Setter for the users' fqans.
-	 * @param fqans all fqans as map with the fqan as key and the vo as value
+	 * 
+	 * @param fqans
+	 *            all fqans as map with the fqan as key and the vo as value
 	 */
-	private void setFqans(Map<String, String> fqans) {
+	private void setFqans(final Map<String, String> fqans) {
 		this.fqans = fqans;
 	}
-	
-//	public void addProperty(String key, String value) {
-//		List<String> list = userProperties.get(key);
-//		if ( list == null ) {
-//			list = new LinkedList<String>();
-//		}
-//		list.add(value);
-//	}
-	
-	public void removeProperty(String key) {
+
+	// public void addProperty(String key, String value) {
+	// List<String> list = userProperties.get(key);
+	// if ( list == null ) {
+	// list = new LinkedList<String>();
+	// }
+	// list.add(value);
+	// }
+
+	public final void removeProperty(final String key) {
 		userProperties.remove(key);
 	}
 
 	/**
-	 * Gets a map of this users properties. These properties can be used to store
-	 * anything you can think of. Usful for history and such.
+	 * Gets a map of this users properties. These properties can be used to
+	 * store anything you can think of. Usful for history and such.
+	 * 
 	 * @return the users' properties
 	 */
 	@CollectionOfElements
-	public Map<String, String> getUserProperties() {
+	public final Map<String, String> getUserProperties() {
 		return userProperties;
 	}
 
-	private void setUserProperties(Map<String, String> userProperties) {
+	private void setUserProperties(final Map<String, String> userProperties) {
 		this.userProperties = userProperties;
 	}
 
 	@CollectionOfElements
-	public Map<String, JobSubmissionObjectImpl> getJobTemplates() {
+	public final Map<String, JobSubmissionObjectImpl> getJobTemplates() {
 		return jobTemplates;
 	}
-	
-	public void setJobTemplates(Map<String, JobSubmissionObjectImpl> jobTemplates) {
+
+	public final void setJobTemplates(
+			final Map<String, JobSubmissionObjectImpl> jobTemplates) {
 		this.jobTemplates = jobTemplates;
 	}
-	
+
 }
