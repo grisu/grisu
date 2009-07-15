@@ -10,9 +10,8 @@ import javax.swing.JTabbedPane;
 
 import org.vpac.grisu.client.control.login.LoginInterface;
 import org.vpac.grisu.client.model.login.LoginPanelsHolder;
-import org.vpac.grisu.client.model.login.LoginParams;
-import org.vpac.grisu.client.view.swing.login.GrisuSlcsLoginPanel;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.settings.ClientPropertiesManager;
 import org.vpac.grisu.settings.MyProxyServerParams;
 import org.vpac.security.light.utils.ProxyLightLibraryManager;

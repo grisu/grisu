@@ -11,12 +11,12 @@ import java.util.TreeMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
-import org.vpac.grisu.client.control.ServiceInterfaceFactory;
-import org.vpac.grisu.client.model.login.LoginParams;
+import org.vpac.grisu.client.control.ServiceInterfaceFactoryOld;
 import org.vpac.grisu.client.model.template.JsdlTemplate;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.settings.ClientPropertiesManager;
 import org.vpac.grisu.settings.MyProxyServerParams;
 import org.vpac.grisu.utils.JsdlHelpers;
@@ -112,7 +112,7 @@ public class TemplateManager {
 			MyProxyServerParams.getMyProxyServer(), new Integer(MyProxyServerParams.getMyProxyPort()).toString() 
 		);
 		
-		ServiceInterface serviceInterface = ServiceInterfaceFactory.createInterface(params);
+		ServiceInterface serviceInterface = ServiceInterfaceFactoryOld.createInterface(params);
 		
 		EnvironmentManager em = new EnvironmentManager(serviceInterface);
 //		EnvironmentManager.setDefaultServiceInterface(serviceInterface);

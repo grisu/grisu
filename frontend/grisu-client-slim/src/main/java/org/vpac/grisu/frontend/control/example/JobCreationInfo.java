@@ -1,9 +1,9 @@
-package org.vpac.grisu.client.control.example;
+package org.vpac.grisu.frontend.control.example;
 
-import org.vpac.grisu.client.control.login.LoginParams;
-import org.vpac.grisu.client.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.frontend.control.login.LoginParams;
+import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.info.ApplicationInformation;
 

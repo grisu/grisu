@@ -3,10 +3,10 @@ package org.vpac.grisu.client.gridTests;
 import java.io.File;
 import java.util.Arrays;
 
-import org.vpac.grisu.client.model.JobObject;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
+import org.vpac.grisu.frontend.model.job.JobObject;
 
 public class UnderworldGridTestElement extends GridTestElement {
 

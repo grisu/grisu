@@ -5,6 +5,13 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.ServiceInterfaceCreator;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 
+/**
+ * A serviceInterfaceCreator that creates a serviceinterface that uses a plain java object (LocalServiceInterface).
+ * This is the most simple grisu backend one can imagine. All you need is to have the grisu-core module in your classpath
+ * and you need to use the string "Local" as serviceinterfaceUrl.
+ * 
+ * @author Markus Binsteiner
+  */
 public class LocalServiceInterfaceCreator implements ServiceInterfaceCreator {
 	
 	static final Logger myLogger = Logger

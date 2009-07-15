@@ -1,6 +1,6 @@
 
 
-package org.vpac.grisu.client.control.login;
+package org.vpac.grisu.frontend.control.login;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -45,22 +45,40 @@ public class LoginHelpers {
 		} catch (NoValidCredentialException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			throw new LoginException("Could not create & upload proxy to the myproxy server. Probably because of a wrong private key passphrase or network problems.");
+			throw new LoginException("Could not create & upload proxy to the myproxy server. Probably because of a wrong private key passphrase or network problems.", e);
 		} catch (Exception e1) {
-			throw new LoginException("Could not login. Unspecified error: "+e1.getLocalizedMessage());
+			throw new LoginException("Could not login. Unspecified error: "+e1.getLocalizedMessage(), e1);
 		}
 		loginParams.clearPasswords();
 		
 		return si;
 	}
 	
-	public static ServiceInterface login() throws LoginException, ServiceInterfaceException, GlobusCredentialException {
+	/**
+	 * The easiest way to create a serviceInterface. This uses the a local grisu backend. You need to have a local proxy
+	 * in place in order to use this method. Also, the grisu-core module needs to be in your classpath.
+	 * 
+	 * @return the serviceInterface
+	 * @throws LoginException if the login fails
+	 * @throws ServiceInterfaceException if the serviceInterface can't be created 
+	 * @throws GlobusCredentialException if there is no valid globus proxy on your machine
+	 */
+	public static ServiceInterface login() throws LoginException, GlobusCredentialException, ServiceInterfaceException {
 		
 		LoginParams defaultLoginParams = new LoginParams("Local", null, null, MyProxyServerParams.DEFAULT_MYPROXY_SERVER, new Integer(MyProxyServerParams.DEFAULT_MYPROXY_PORT).toString());
 		return login(defaultLoginParams, LocalProxy.loadGSSCredential());
 		
 	}
 	
+	/**
+	 * Another easy way to create a serviceInterface. You need to create a {@link GlobusCredential} before you use that one.
+	 * 
+	 * @param loginParams the login parameters
+	 * @param proxy a (valid) globus credential
+	 * @return the serviceInterface
+	 * @throws LoginException if the login fails
+	 * @throws ServiceInterfaceException if the serviceInterface can't be created
+	 */
 	public static ServiceInterface login(LoginParams loginParams, GlobusCredential proxy) throws LoginException, ServiceInterfaceException {
 		ServiceInterface serviceInterface = null;
 		
@@ -104,12 +122,12 @@ public class LoginHelpers {
 		serviceInterface.login(myproxyusername, myproxyDetails.get(myproxyusername));
 	} catch (InvocationTargetException re) {
 		re.printStackTrace();
-		throw new LoginException("Could not create & upload proxy to the myproxy server. Probably because of a wrong private key passphrase or network problems.");
+		throw new LoginException("Could not create & upload proxy to the myproxy server. Probably because of a wrong private key passphrase or network problems.", re);
 	} catch (ServiceInterfaceException e) {
 		throw e;
 	} catch (Exception e) {
 		e.printStackTrace();
-		throw new LoginException("Can't login to web service: "+e.getMessage());
+		throw new LoginException("Can't login to web service: "+e.getMessage(), e);
 	}
 	
 	return serviceInterface;
@@ -121,7 +139,7 @@ public class LoginHelpers {
 	 * @param loginParams the login parameters
 	 * @return the serviceInterface
 	 * @throws LoginException if somethings gone wrong (i.e. wrong private key passphrase)
-	 * @throws ServiceInterfaceException 
+	 * @throws ServiceInterfaceException if the serviceInterface can't be created
 	 */
 	public static ServiceInterface login(LoginParams loginParams, GSSCredential cred) throws LoginException, ServiceInterfaceException {
 		ServiceInterface serviceInterface = null;
@@ -166,12 +184,12 @@ public class LoginHelpers {
 		serviceInterface.login(myproxyusername, myproxyDetails.get(myproxyusername));
 	} catch (InvocationTargetException re) {
 		re.printStackTrace();
-		throw new LoginException("Could not create & upload proxy to the myproxy server. Probably because of a wrong private key passphrase or network problems.");
+		throw new LoginException("Could not create & upload proxy to the myproxy server. Probably because of a wrong private key passphrase or network problems.", re);
 	} catch (ServiceInterfaceException e) {
 		throw e;
 	} catch (Exception e) {
 		e.printStackTrace();
-		throw new LoginException("Can't login to web service: "+e.getMessage());
+		throw new LoginException("Can't login to web service: "+e.getMessage(), e);
 	}
 	
 	return serviceInterface;
@@ -231,12 +249,12 @@ public class LoginHelpers {
 		} catch (InvocationTargetException re) {
 			Throwable t = re.getCause();
 //			re.printStackTrace();
-			throw new LoginException(t.getLocalizedMessage());
+			throw new LoginException(t.getLocalizedMessage(), re);
 		} catch (ServiceInterfaceException e) {
 			throw e;
 		} catch (Exception e) {
 //			e.printStackTrace();
-			throw new LoginException("Can't login to web service: "+e.getMessage());
+			throw new LoginException("Can't login to web service: "+e.getMessage(), e);
 		}
 		
 		return serviceInterface;

@@ -15,14 +15,14 @@ import jline.ConsoleReader;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
-import org.vpac.grisu.client.control.ServiceInterfaceFactory;
-import org.vpac.grisu.client.model.login.LoginParams;
+import org.vpac.grisu.client.control.ServiceInterfaceFactoryOld;
 import org.vpac.grisu.client.model.template.Command;
 import org.vpac.grisu.client.model.template.CommandLineParseException;
 import org.vpac.grisu.client.model.template.GrisuTemplateCommand;
 import org.vpac.grisu.client.model.template.JsdlTemplate;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.settings.ClientPropertiesManager;
 import org.vpac.grisu.settings.MyProxyServerParams;
 
@@ -129,7 +129,7 @@ public class Grish implements CommandHolder {
 				password, "myproxy.arcs.org.au", "443");
 		
 		try {
-			serviceInterface = ServiceInterfaceFactory.createInterface(params);
+			serviceInterface = ServiceInterfaceFactoryOld.createInterface(params);
 		} catch (ServiceInterfaceException e1) {
 			printErrorMessage(e1.getLocalizedMessage());
 			printErrorMessage("exiting");

@@ -1,4 +1,4 @@
-package org.vpac.grisu.client.control.example;
+package org.vpac.grisu.frontend.control.example;
 
 import java.util.Date;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -6,10 +6,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.vpac.grisu.client.control.login.LoginParams;
-import org.vpac.grisu.client.control.login.ServiceInterfaceFactory;
-import org.vpac.grisu.client.model.JobObject;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.control.login.LoginParams;
+import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
+import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;

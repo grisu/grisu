@@ -8,14 +8,13 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
-import org.vpac.grisu.client.control.ServiceInterfaceFactory;
+import org.vpac.grisu.client.control.ServiceInterfaceFactoryOld;
 import org.vpac.grisu.client.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.client.control.exceptions.SubmissionLocationException;
 import org.vpac.grisu.client.control.exceptions.TemplateException;
 import org.vpac.grisu.client.control.login.LoginException;
 import org.vpac.grisu.client.model.SubmissionLocation;
 import org.vpac.grisu.client.model.jobs.GrisuJobMonitoringObject;
-import org.vpac.grisu.client.model.login.LoginParams;
 import org.vpac.grisu.client.model.template.JsdlTemplate;
 import org.vpac.grisu.client.model.template.JsdlTemplateListener;
 import org.vpac.grisu.client.model.template.modules.Common;
@@ -23,6 +22,7 @@ import org.vpac.grisu.client.model.template.nodes.DefaultTemplateNodeValueSetter
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.templatePreProcessor.TemplatePreProcessorException;
 import org.vpac.grisu.control.exceptions.JobCreationException;
+import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.utils.JsdlHelpers;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
@@ -523,7 +523,7 @@ public class GenericJobWrapper {
 			
 			EnvironmentManager em = null;
 			try {
-				em = ServiceInterfaceFactory.login(loginparams);
+				em = ServiceInterfaceFactoryOld.login(loginparams);
 			} catch (LoginException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

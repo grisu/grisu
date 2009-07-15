@@ -1,9 +1,9 @@
 package org.vpac.grisu.client.gridTests;
 
-import org.vpac.grisu.client.model.JobObject;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
+import org.vpac.grisu.frontend.model.job.JobObject;
 
 public class JavaGridTestElement extends GridTestElement {
 

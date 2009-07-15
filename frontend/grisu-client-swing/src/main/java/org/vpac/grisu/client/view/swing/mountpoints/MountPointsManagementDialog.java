@@ -7,10 +7,10 @@ import java.awt.event.WindowEvent;
 import javax.swing.JDialog;
 
 import org.vpac.grisu.client.control.EnvironmentManager;
-import org.vpac.grisu.client.control.ServiceInterfaceFactory;
+import org.vpac.grisu.client.control.ServiceInterfaceFactoryOld;
 import org.vpac.grisu.client.control.login.LoginException;
-import org.vpac.grisu.client.model.login.LoginParams;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.frontend.control.login.LoginParams;
 
 public class MountPointsManagementDialog extends JDialog {
 
@@ -25,7 +25,7 @@ public class MountPointsManagementDialog extends JDialog {
 		   LoginParams loginparams = new LoginParams("http://localhost:8080/grisu-ws/services/grisu", username, password, "myproxy.arcs.org.au", "443");
 					
 	     // do the login
-	     em = ServiceInterfaceFactory.login(loginparams);
+	     em = ServiceInterfaceFactoryOld.login(loginparams);
 
 	     return em;
 	}

@@ -1,7 +1,7 @@
 package org.vpac.grisu.examples;
 import java.io.File;
 
-import org.vpac.grisu.client.control.ServiceInterfaceFactory;
+import org.vpac.grisu.client.control.ServiceInterfaceFactoryOld;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobCreationException;
@@ -28,7 +28,7 @@ public class LeonExample {
 		
 		ServiceInterface serviceInterface = null;
 		try {
-			serviceInterface = ServiceInterfaceFactory.createInterface(
+			serviceInterface = ServiceInterfaceFactoryOld.createInterface(
 					"Local", 
 //					"https://ngportaldev.vpac.org/grisu-ws/services/grisu",
 					myproxy_username, myproxy_password, 

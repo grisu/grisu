@@ -11,11 +11,11 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.globus.gsi.GlobusCredential;
 import org.ietf.jgss.GSSCredential;
-import org.vpac.grisu.client.control.ServiceInterfaceFactory;
-import org.vpac.grisu.client.model.login.LoginParams;
+import org.vpac.grisu.client.control.ServiceInterfaceFactoryOld;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.settings.MyProxyServerParams;
 
 /**
@@ -39,7 +39,7 @@ public class LoginHelpers {
 	 */
 	public static ServiceInterface login(LoginParams loginParams) throws LoginException, ServiceInterfaceException {
 		
-		ServiceInterface si = ServiceInterfaceFactory.createInterface(loginParams.getServiceInterfaceUrl(), loginParams.getMyProxyUsername(), loginParams.getMyProxyPassphrase(), loginParams.getMyProxyServer(), loginParams.getMyProxyPort(), loginParams.getHttpProxy(), loginParams.getHttpProxyPort(), loginParams.getHttpProxyUsername(), loginParams.getHttpProxyPassphrase());
+		ServiceInterface si = ServiceInterfaceFactoryOld.createInterface(loginParams.getServiceInterfaceUrl(), loginParams.getMyProxyUsername(), loginParams.getMyProxyPassphrase(), loginParams.getMyProxyServer(), loginParams.getMyProxyPort(), loginParams.getHttpProxy(), loginParams.getHttpProxyPort(), loginParams.getHttpProxyUsername(), loginParams.getHttpProxyPassphrase());
 		try {
 			si.login(loginParams.getMyProxyUsername(), loginParams.getMyProxyPassphrase());
 		} catch (NoValidCredentialException e) {

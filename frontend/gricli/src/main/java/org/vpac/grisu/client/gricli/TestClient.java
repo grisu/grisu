@@ -1,7 +1,6 @@
 package org.vpac.grisu.client.gricli;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -12,11 +11,11 @@ import jline.ConsoleReader;
 import org.vpac.grisu.client.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.client.control.login.LoginException;
 import org.vpac.grisu.client.control.login.LoginHelpers;
-import org.vpac.grisu.client.model.login.LoginParams;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobCreationException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.frontend.control.login.LoginParams;
 
 public class TestClient {
 

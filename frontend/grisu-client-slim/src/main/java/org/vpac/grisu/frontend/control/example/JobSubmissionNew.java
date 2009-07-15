@@ -1,16 +1,16 @@
-package org.vpac.grisu.client.control.example;
+package org.vpac.grisu.frontend.control.example;
 
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.vpac.grisu.client.control.login.LoginParams;
-import org.vpac.grisu.client.control.login.ServiceInterfaceFactory;
-import org.vpac.grisu.client.model.JobObject;
-import org.vpac.grisu.client.model.JobStatusChangeListener;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.control.login.LoginParams;
+import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
+import org.vpac.grisu.frontend.model.job.JobObject;
+import org.vpac.grisu.frontend.model.job.JobStatusChangeListener;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.info.ApplicationInformation;
 

@@ -1,10 +1,10 @@
 package org.vpac.grisu.examples;
 import org.vpac.grisu.client.control.EnvironmentManager;
-import org.vpac.grisu.client.control.ServiceInterfaceFactory;
+import org.vpac.grisu.client.control.ServiceInterfaceFactoryOld;
 import org.vpac.grisu.client.control.login.LoginException;
-import org.vpac.grisu.client.model.login.LoginParams;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.frontend.control.login.LoginParams;
 
 
 public class Login {
@@ -13,7 +13,7 @@ public class Login {
 
 		LoginParams params = new LoginParams(url, username, password, "myproxy2.arcs.org.au", "443");
 		
-		return ServiceInterfaceFactory.createInterface(params);
+		return ServiceInterfaceFactoryOld.createInterface(params);
 		
 	}
 	
@@ -21,7 +21,7 @@ public class Login {
 
 		LoginParams params = new LoginParams("https://ngportaldev.vpac.org/grisu-ws/services/grisu", username, password, "myproxy2.arcs.org.au", "443");
 		
-		return ServiceInterfaceFactory.createInterface(params);
+		return ServiceInterfaceFactoryOld.createInterface(params);
 	}
 
 	
@@ -29,7 +29,7 @@ public class Login {
 
 		LoginParams params = new LoginParams("http://localhost:8080/grisu-ws/services/grisu", username, password, "myproxy2.arcs.org.au", "443");
 		
-		return ServiceInterfaceFactory.createInterface(params);
+		return ServiceInterfaceFactoryOld.createInterface(params);
 	}
 
 	
@@ -37,7 +37,7 @@ public class Login {
 
 		LoginParams params = new LoginParams("https://grisu.vpac.org/grisu-ws/services/grisu", username, password, "myproxy2.arcs.org.au", "443");
 		
-		return ServiceInterfaceFactory.createInterface(params);
+		return ServiceInterfaceFactoryOld.createInterface(params);
 	}
 
 	public static EnvironmentManager loginDevelopmentServer2(String username, char[] password) throws LoginException, ServiceInterfaceException {
@@ -49,7 +49,7 @@ public class Login {
 		   LoginParams loginparams = new LoginParams("http://localhost:8080/grisu-ws/services/grisu", username, password, "myproxy2.arcs.org.au", "443");
 					
 	     // do the login
-	     em = ServiceInterfaceFactory.login(loginparams);
+	     em = ServiceInterfaceFactoryOld.login(loginparams);
 
 	     return em;
 	}
@@ -63,7 +63,7 @@ public class Login {
 		   LoginParams loginparams = new LoginParams("https://ngportaldev.vpac.org/grisu-ws/services/grisu", username, password, "myproxy2.arcs.org.au", "443");
 					
 	     // do the login
-	     em = ServiceInterfaceFactory.login(loginparams);
+	     em = ServiceInterfaceFactoryOld.login(loginparams);
 
 	     return em;
 	}
@@ -77,7 +77,7 @@ public class Login {
 		   LoginParams loginparams = new LoginParams("https://grisu.vpac.org/grisu-ws/services/grisu", username, password, "myproxy2.arcs.org.au", "443");
 					
 	     // do the login
-	     em = ServiceInterfaceFactory.login(loginparams);
+	     em = ServiceInterfaceFactoryOld.login(loginparams);
 
 	     return em;
 	}
@@ -91,7 +91,7 @@ public class Login {
 		   LoginParams loginparams = new LoginParams("http://localhost:8080/grisu-ws/services/grisu", username, password, "myproxy2.arcs.org.au", "443");
 					
 	     // do the login
-	     em = ServiceInterfaceFactory.login(loginparams);
+	     em = ServiceInterfaceFactoryOld.login(loginparams);
 
 	     return em;
 	}

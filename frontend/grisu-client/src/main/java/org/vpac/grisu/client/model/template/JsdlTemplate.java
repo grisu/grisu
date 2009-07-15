@@ -17,9 +17,8 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
-import org.vpac.grisu.client.control.ServiceInterfaceFactory;
+import org.vpac.grisu.client.control.ServiceInterfaceFactoryOld;
 import org.vpac.grisu.client.control.exceptions.JobSubmissionException;
-import org.vpac.grisu.client.model.login.LoginParams;
 import org.vpac.grisu.client.model.template.modules.TemplateModule;
 import org.vpac.grisu.client.model.template.modules.TemplateModuleFactory;
 import org.vpac.grisu.client.model.template.modules.TemplateModuleProcessingException;
@@ -33,9 +32,9 @@ import org.vpac.grisu.client.model.template.postprocessor.PostProcessException;
 import org.vpac.grisu.client.model.template.postprocessor.PostprocessorFactory;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.exceptions.JobCreationException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.utils.DebugUtils;
 import org.vpac.grisu.utils.JSDLNamespaceContext;
 import org.vpac.grisu.utils.JsdlHelpers;
@@ -741,7 +740,7 @@ public class JsdlTemplate implements TemplateNodeListener {
 				"http://localhost:8080/grisu-ws/services/grisu", "markus",
 				"xxx".toCharArray(), "myproxy.arcs.org.au", "443");
 
-		ServiceInterface serviceInterface = ServiceInterfaceFactory
+		ServiceInterface serviceInterface = ServiceInterfaceFactoryOld
 				.createInterface(params);
 
 		

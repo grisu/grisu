@@ -1,6 +1,12 @@
-package org.vpac.grisu.client.model;
+package org.vpac.grisu.frontend.model.job;
 
 
+/**
+ * An exception that is thrown if something goes wrong with a job.
+ * 
+ * @author Markus Binsteiner
+ *
+ */
 public class JobException extends RuntimeException {
 	
 	private JobObject jo;

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 
-import org.vpac.grisu.client.control.ServiceInterfaceFactory;
+import org.vpac.grisu.client.control.ServiceInterfaceFactoryOld;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobCreationException;
@@ -40,7 +40,7 @@ public class BasicJobSubmission {
 		
 		ServiceInterface serviceInterface = null;
 		try {
-			serviceInterface = ServiceInterfaceFactory.createInterface(
+			serviceInterface = ServiceInterfaceFactoryOld.createInterface(
 //					"https://ngportaldev.vpac.org/grisu-ws/services/grisu", 
 					"http://localhost:8080/grisu-ws/services/grisu",
 					myproxy_username, myproxy_password, 

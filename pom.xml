@@ -102,16 +102,7 @@
 				<configuration>
 					<aggregate>true</aggregate>
 					<linksource>true</linksource>
-<!--					<groups>-->
-<!--						<group>-->
-<!--							<title>Core Packages</title>-->
-<!--							<packages>org.vpac.grisu</packages>-->
-<!--						</group>-->
-<!--						<group>-->
-<!--							<title>Swing Packages</title>-->
-<!--							<packages>org.vpac.grisu.client.view.swing</packages>-->
-<!--						</group>-->
-<!--					</groups>-->
+					<excludePackageNames>org.vpac.grisu.client.*:org.vpac.grisu.backend.*</excludePackageNames>
 					<breakiterator>true</breakiterator>
 					<source>1.5</source>
 					<links>

@@ -1,6 +1,6 @@
 
 
-package org.vpac.grisu.client.control.login;
+package org.vpac.grisu.frontend.control.login;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +12,10 @@ import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 
 /**
  * Creates {@link ServiceInterface}s using the url of a ServiceInterface.
+ * 
+ * At the moment it supports: Local, xfire & cxf serviceInterfaces.
+ * 
+ * The serviceInterface you want to create needs to be in the classpath.
  * 
  * @author Markus Binsteiner
  *

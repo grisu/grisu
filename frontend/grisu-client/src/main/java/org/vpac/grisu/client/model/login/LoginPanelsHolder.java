@@ -3,6 +3,7 @@
 package org.vpac.grisu.client.model.login;
 
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.control.login.LoginParams;
 
 
 /**

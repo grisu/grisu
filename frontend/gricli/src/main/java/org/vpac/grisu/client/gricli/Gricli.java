@@ -25,12 +25,12 @@ import org.vpac.grisu.client.control.files.FileTransferListener;
 import org.vpac.grisu.client.control.login.LoginException;
 import org.vpac.grisu.client.control.login.LoginHelpers;
 import org.vpac.grisu.client.model.files.GrisuFileObject;
-import org.vpac.grisu.client.model.login.LoginParams;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobCreationException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.utils.SeveralStringHelpers;
 import org.vpac.security.light.plainProxy.LocalProxy;
 

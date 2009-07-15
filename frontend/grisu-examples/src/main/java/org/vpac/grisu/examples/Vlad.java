@@ -1,15 +1,4 @@
 package org.vpac.grisu.examples;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Set;
-
-import org.vpac.grisu.client.control.EnvironmentManager;
-import org.vpac.grisu.client.control.exceptions.JobSubmissionException;
-import org.vpac.grisu.client.control.exceptions.SubmissionLocationException;
-import org.vpac.grisu.client.control.generic.GenericJobWrapper;
-import org.vpac.grisu.client.control.login.LoginHelpers;
-import org.vpac.grisu.client.model.SubmissionLocation;
-import org.vpac.grisu.client.model.login.LoginParams;
 
 public class Vlad {
 

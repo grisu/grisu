@@ -9,8 +9,8 @@ import java.awt.event.WindowEvent;
 import javax.swing.JDialog;
 
 import org.vpac.grisu.client.control.login.LoginInterface;
-import org.vpac.grisu.client.model.login.LoginParams;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.settings.ClientPropertiesManager;
 
 public class LoginDialog extends JDialog implements LoginInterface {

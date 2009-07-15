@@ -7,10 +7,10 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.login.LoginException;
-import org.vpac.grisu.client.model.login.LoginParams;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.ServiceInterfaceCreator;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.frontend.control.login.LoginParams;
 
 /**
  * Creates {@link ServiceInterface}s using the url of a ServiceInterface.
@@ -18,10 +18,10 @@ import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
  * @author Markus Binsteiner
  *
  */
-public class ServiceInterfaceFactory {
+public class ServiceInterfaceFactoryOld {
 
 	static final Logger myLogger = Logger
-			.getLogger(ServiceInterfaceFactory.class.getName());
+			.getLogger(ServiceInterfaceFactoryOld.class.getName());
 
 
 		

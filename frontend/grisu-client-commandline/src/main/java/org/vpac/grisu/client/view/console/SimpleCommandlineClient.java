@@ -7,17 +7,17 @@ import jline.ConsoleReader;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
-import org.vpac.grisu.client.control.ServiceInterfaceFactory;
+import org.vpac.grisu.client.control.ServiceInterfaceFactoryOld;
 import org.vpac.grisu.client.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.client.control.exceptions.SubmissionLocationException;
 import org.vpac.grisu.client.control.generic.GenericJobWrapper;
 import org.vpac.grisu.client.control.login.LoginHelpers;
 import org.vpac.grisu.client.model.SubmissionLocation;
-import org.vpac.grisu.client.model.login.LoginParams;
 import org.vpac.grisu.client.model.template.JsdlTemplateEvent;
 import org.vpac.grisu.client.model.template.JsdlTemplateListener;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobCreationException;
+import org.vpac.grisu.frontend.control.login.LoginParams;
 
 public class SimpleCommandlineClient implements JsdlTemplateListener {
 
@@ -194,7 +194,7 @@ public class SimpleCommandlineClient implements JsdlTemplateListener {
 						username, password, "myproxy.arcs.org.au", "443");
 
 				try {
-					em = ServiceInterfaceFactory.login(loginparams);
+					em = ServiceInterfaceFactoryOld.login(loginparams);
 				} catch (Exception e) {
 					print("Could not login: " + e.getLocalizedMessage());
 					print("Please try again.");
