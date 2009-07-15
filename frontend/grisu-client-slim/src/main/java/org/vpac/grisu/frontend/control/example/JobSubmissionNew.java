@@ -16,7 +16,7 @@ import org.vpac.grisu.model.info.ApplicationInformation;
 
 public class JobSubmissionNew implements JobStatusChangeListener {
 
-	public static void main(String[] args) throws Exception {
+	public static void main(final String[] args) throws Exception {
 
 		ExecutorService executor = Executors.newFixedThreadPool(10);
 
@@ -107,7 +107,7 @@ public class JobSubmissionNew implements JobStatusChangeListener {
 
 	}
 
-	public void jobStatusChanged(JobObject job, int oldStatus, int newStatus) {
+	public final void jobStatusChanged(final JobObject job, final int oldStatus, final int newStatus) {
 		System.out.println("JobSubmissionNew got job statusEvent: "
 				+ job.getJobname() + " submitted to "
 				+ job.getSubmissionLocation() + ": "

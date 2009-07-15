@@ -17,6 +17,6 @@ public interface JobStatusChangeListener {
 	 * @param newStatus
 	 *            the new status
 	 */
-	public void jobStatusChanged(JobObject job, int oldStatus, int newStatus);
+	void jobStatusChanged(JobObject job, int oldStatus, int newStatus);
 
 }

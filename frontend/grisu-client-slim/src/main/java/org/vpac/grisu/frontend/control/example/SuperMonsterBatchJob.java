@@ -14,13 +14,16 @@ import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 
-public class SuperMonsterBatchJob {
+public final class SuperMonsterBatchJob {
+	
+	private SuperMonsterBatchJob() {
+	}
 
 	/**
 	 * @param args
 	 * @throws Exception
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(final String[] args) throws Exception {
 
 		String username = args[0];
 		char[] password = args[1].toCharArray();

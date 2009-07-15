@@ -23,9 +23,9 @@ public class ServiceInterfaceFactory {
 	static final Logger myLogger = Logger
 			.getLogger(ServiceInterfaceFactory.class.getName());
 
-	public static String DEFAULT_SERVICE_INTERFACE = "https://ngportal.vpac.org/grisu-ws/services/grisu";
+	public static final String DEFAULT_SERVICE_INTERFACE = "https://ngportal.vpac.org/grisu-ws/services/grisu";
 
-	public static String[] KNOWN_SERVICE_INTERFACE_CREATORS = new String[] {
+	public static final String[] KNOWN_SERVICE_INTERFACE_CREATORS = new String[] {
 			"LocalServiceInterfaceCreator", "XFireServiceInterfaceCreator",
 			"CXFServiceInterfaceCreator" };
 
@@ -38,7 +38,7 @@ public class ServiceInterfaceFactory {
 	 * @throws ServiceInterfaceException
 	 *             if the serviceInterface couldn't be created
 	 */
-	public static ServiceInterface createInterface(LoginParams params)
+	public static ServiceInterface createInterface(final LoginParams params)
 			throws ServiceInterfaceException {
 		return createInterface(params.getServiceInterfaceUrl(), params
 				.getMyProxyUsername(), params.getMyProxyPassphrase(), params
@@ -79,10 +79,10 @@ public class ServiceInterfaceFactory {
 	 * @return the ServiceInterface to use to stage files/submit jobs
 	 * @throws ServiceInterfaceException
 	 */
-	public static ServiceInterface createInterface(String interfaceUrl,
-			String username, char[] password, String myProxyServer,
-			String myProxyPort, String httpProxy, int httpProxyPort,
-			String httpProxyUsername, char[] httpProxyPassword)
+	public static ServiceInterface createInterface(final String interfaceUrl,
+			final String username, final char[] password, final String myProxyServer,
+			final String myProxyPort, final String httpProxy, final int httpProxyPort,
+			final String httpProxyUsername, final char[] httpProxyPassword)
 			throws ServiceInterfaceException {
 
 		Object[] otherOptions = new Object[4];

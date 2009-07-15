@@ -2,7 +2,6 @@ package org.vpac.grisu.frontend.control.login;
 
 import java.util.Arrays;
 
-import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.settings.MyProxyServerParams;
 
 /**
@@ -36,8 +35,8 @@ public class LoginParams {
 	 * @param myProxyPassphrase
 	 *            your myproxy password
 	 */
-	public LoginParams(String serviceInterfaceUrl, String myProxyUsername,
-			char[] myProxyPassphrase) {
+	public LoginParams(final String serviceInterfaceUrl, final String myProxyUsername,
+			final char[] myProxyPassphrase) {
 		this(serviceInterfaceUrl, myProxyUsername, myProxyPassphrase,
 				MyProxyServerParams.DEFAULT_MYPROXY_SERVER, new Integer(
 						MyProxyServerParams.DEFAULT_MYPROXY_PORT).toString());
@@ -58,8 +57,8 @@ public class LoginParams {
 	 * @param myProxyPort
 	 *            the port of the myproxy server
 	 */
-	public LoginParams(String serviceInterfaceUrl, String myProxyUsername,
-			char[] myProxyPassphrase, String myProxyServer, String myProxyPort) {
+	public LoginParams(final String serviceInterfaceUrl, final String myProxyUsername,
+			final char[] myProxyPassphrase, final String myProxyServer, final String myProxyPort) {
 		this.serviceInterfaceUrl = serviceInterfaceUrl;
 		this.myProxyUsername = myProxyUsername;
 		this.myProxyPassphrase = myProxyPassphrase;
@@ -86,9 +85,9 @@ public class LoginParams {
 	 * @param httpProxyPort
 	 *            the http proxy server port
 	 */
-	public LoginParams(String serviceInterfaceUrl, String myProxyUsername,
-			char[] myProxyPassphrase, String myProxyServer, String myProxyPort,
-			String httpProxy, int httpProxyPort) {
+	public LoginParams(final String serviceInterfaceUrl, final String myProxyUsername,
+			final char[] myProxyPassphrase, final String myProxyServer, final String myProxyPort,
+			final String httpProxy, final int httpProxyPort) {
 		this.serviceInterfaceUrl = serviceInterfaceUrl;
 		this.myProxyUsername = myProxyUsername;
 		this.myProxyPassphrase = myProxyPassphrase;
@@ -121,10 +120,10 @@ public class LoginParams {
 	 * @param httpProxyPassphrase
 	 *            the http proxy server password
 	 */
-	public LoginParams(String serviceInterfaceUrl, String myProxyUsername,
-			char[] myProxyPassphrase, String myProxyServer, String myProxyPort,
-			String httpProxy, int httpProxyPort, String httpProxyUsername,
-			char[] httpProxyPassphrase) {
+	public LoginParams(final String serviceInterfaceUrl, final String myProxyUsername,
+			final char[] myProxyPassphrase, final String myProxyServer, final String myProxyPort,
+			final String httpProxy, final int httpProxyPort, final String httpProxyUsername,
+			final char[] httpProxyPassphrase) {
 		this.serviceInterfaceUrl = serviceInterfaceUrl;
 		this.myProxyUsername = myProxyUsername;
 		this.myProxyPassphrase = myProxyPassphrase;
@@ -141,7 +140,7 @@ public class LoginParams {
 	 * 
 	 * @return the serviceInterface url
 	 */
-	public String getServiceInterfaceUrl() {
+	public final String getServiceInterfaceUrl() {
 		return serviceInterfaceUrl;
 	}
 
@@ -151,7 +150,7 @@ public class LoginParams {
 	 * @param serviceInterfaceUrl
 	 *            the serviceInterface url
 	 */
-	public void setServiceInterfaceUrl(String serviceInterfaceUrl) {
+	public final void setServiceInterfaceUrl(final String serviceInterfaceUrl) {
 		this.serviceInterfaceUrl = serviceInterfaceUrl;
 	}
 
@@ -160,7 +159,7 @@ public class LoginParams {
 	 * 
 	 * @return the myproxy username
 	 */
-	public String getMyProxyUsername() {
+	public final String getMyProxyUsername() {
 		return myProxyUsername;
 	}
 
@@ -170,7 +169,7 @@ public class LoginParams {
 	 * @param myProxyUsername
 	 *            the myproxy username
 	 */
-	public void setMyProxyUsername(String myProxyUsername) {
+	public final void setMyProxyUsername(final String myProxyUsername) {
 		this.myProxyUsername = myProxyUsername;
 	}
 
@@ -179,7 +178,7 @@ public class LoginParams {
 	 * 
 	 * @return the myproxy password
 	 */
-	public char[] getMyProxyPassphrase() {
+	public final char[] getMyProxyPassphrase() {
 		return myProxyPassphrase;
 	}
 
@@ -189,7 +188,7 @@ public class LoginParams {
 	 * @param myProxyPassphrase
 	 *            the myproxy password
 	 */
-	public void setMyProxyPassphrase(char[] myProxyPassphrase) {
+	public final void setMyProxyPassphrase(final char[] myProxyPassphrase) {
 		this.myProxyPassphrase = myProxyPassphrase;
 	}
 
@@ -198,7 +197,7 @@ public class LoginParams {
 	 * 
 	 * @return the http proxy server hostname
 	 */
-	public String getHttpProxy() {
+	public final String getHttpProxy() {
 		return httpProxy;
 	}
 
@@ -208,7 +207,7 @@ public class LoginParams {
 	 * @param httpProxy
 	 *            the http proxy server port
 	 */
-	public void setHttpProxy(String httpProxy) {
+	public final void setHttpProxy(final String httpProxy) {
 		this.httpProxy = httpProxy;
 	}
 
@@ -217,7 +216,7 @@ public class LoginParams {
 	 * 
 	 * @return the http proxy server port
 	 */
-	public int getHttpProxyPort() {
+	public final int getHttpProxyPort() {
 		return httpProxyPort;
 	}
 
@@ -227,7 +226,7 @@ public class LoginParams {
 	 * @param httpProxyPort
 	 *            the http proxy server port
 	 */
-	public void setHttpProxyPort(int httpProxyPort) {
+	public final void setHttpProxyPort(final int httpProxyPort) {
 		this.httpProxyPort = httpProxyPort;
 	}
 
@@ -236,7 +235,7 @@ public class LoginParams {
 	 * 
 	 * @return the http proxy server username
 	 */
-	public String getHttpProxyUsername() {
+	public final String getHttpProxyUsername() {
 		return httpProxyUsername;
 	}
 
@@ -246,7 +245,7 @@ public class LoginParams {
 	 * @param httpProxyUsername
 	 *            the username for the http proxy server
 	 */
-	public void setHttpProxyUsername(String httpProxyUsername) {
+	public final void setHttpProxyUsername(final String httpProxyUsername) {
 		this.httpProxyUsername = httpProxyUsername;
 	}
 
@@ -255,7 +254,7 @@ public class LoginParams {
 	 * 
 	 * @return the http proxy server password
 	 */
-	public char[] getHttpProxyPassphrase() {
+	public final char[] getHttpProxyPassphrase() {
 		return httpProxyPassphrase;
 	}
 
@@ -265,7 +264,7 @@ public class LoginParams {
 	 * @param httpProxyPassphrase
 	 *            the http proxy server password
 	 */
-	public void setHttpProxyPassphrase(char[] httpProxyPassphrase) {
+	public final void setHttpProxyPassphrase(final char[] httpProxyPassphrase) {
 		this.httpProxyPassphrase = httpProxyPassphrase;
 	}
 
@@ -273,7 +272,7 @@ public class LoginParams {
 	 * Clears the password for the http proxy server in memory. Not the myproxy
 	 * one, though, since this is still needed after login.
 	 */
-	public void clearPasswords() {
+	public final void clearPasswords() {
 		// if ( this.myProxyPassphrase != null ) {
 		// Arrays.fill(this.myProxyPassphrase, 'x');
 		// }
@@ -288,7 +287,7 @@ public class LoginParams {
 	 * 
 	 * @return the myproxy server hostname
 	 */
-	public String getMyProxyServer() {
+	public final String getMyProxyServer() {
 		return myProxyServer;
 	}
 
@@ -298,7 +297,7 @@ public class LoginParams {
 	 * @param myProxyServer
 	 *            the myproxy server hostname
 	 */
-	public void setMyProxyServer(String myProxyServer) {
+	public final void setMyProxyServer(final String myProxyServer) {
 		this.myProxyServer = myProxyServer;
 	}
 
@@ -307,7 +306,7 @@ public class LoginParams {
 	 * 
 	 * @return the myproxy server port
 	 */
-	public String getMyProxyPort() {
+	public final String getMyProxyPort() {
 		return myProxyPort;
 	}
 
@@ -317,7 +316,7 @@ public class LoginParams {
 	 * @param myProxyPort
 	 *            the myproxy server port to use
 	 */
-	public void setMyProxyPort(String myProxyPort) {
+	public final void setMyProxyPort(final String myProxyPort) {
 		this.myProxyPort = myProxyPort;
 	}
 

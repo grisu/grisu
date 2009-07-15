@@ -10,17 +10,17 @@ public class JobException extends RuntimeException {
 
 	private JobObject jo;
 
-	public JobException(JobObject jo, String message) {
+	public JobException(final JobObject jo, final String message) {
 		super(message);
 		this.jo = jo;
 	}
 
-	public JobException(JobObject jobObject, String string, Exception e) {
+	public JobException(final JobObject jobObject, final String string, final Exception e) {
 		super(string, e);
 		this.jo = jobObject;
 	}
 
-	public JobObject getJobObject() {
+	public final JobObject getJobObject() {
 		return this.jo;
 	}
 

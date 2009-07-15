@@ -8,12 +8,15 @@ import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.model.GrisuRegistry;
 
-public class GenericJobSubmissionWithoutMds {
+public final class GenericJobSubmissionWithoutMds {
+	
+	private GenericJobSubmissionWithoutMds() {
+	}
 
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(final String[] args) throws Exception {
 
 		String username = args[0];
 		char[] password = args[1].toCharArray();

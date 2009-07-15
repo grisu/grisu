@@ -5,12 +5,15 @@ import org.vpac.grisu.frontend.control.login.LoginHelpers;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 
-public class CreateJobAndSubmitJobAndCheckJobInDifferentStages {
+public final class CreateJobAndSubmitJobAndCheckJobInDifferentStages {
 
+	private CreateJobAndSubmitJobAndCheckJobInDifferentStages() {
+	}
+	
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(final String[] args) throws Exception {
 
 		ServiceInterface si = LoginHelpers.login();
 

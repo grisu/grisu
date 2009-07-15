@@ -7,9 +7,12 @@ import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.info.ApplicationInformation;
 
-public class JobCreationInfo {
+public final class JobCreationInfo {
+	
+	private JobCreationInfo() {
+	}
 
-	public static void main(String[] args) throws ServiceInterfaceException {
+	public static void main(final String[] args) throws ServiceInterfaceException {
 
 		String username = args[0];
 		char[] password = args[1].toCharArray();

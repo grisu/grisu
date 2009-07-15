@@ -22,7 +22,10 @@ import org.vpac.security.light.plainProxy.LocalProxy;
  * @author Markus Binsteiner
  * 
  */
-public class LoginHelpers {
+public final class LoginHelpers {
+	
+	private LoginHelpers() {
+	}
 
 	static final Logger myLogger = Logger.getLogger(LoginHelpers.class
 			.getName());
@@ -37,7 +40,7 @@ public class LoginHelpers {
 	 * @throws LoginException
 	 * @throws ServiceInterfaceException
 	 */
-	public static ServiceInterface login(LoginParams loginParams)
+	public static ServiceInterface login(final LoginParams loginParams)
 			throws LoginException, ServiceInterfaceException {
 
 		ServiceInterface si = ServiceInterfaceFactory.createInterface(
@@ -103,8 +106,8 @@ public class LoginHelpers {
 	 * @throws ServiceInterfaceException
 	 *             if the serviceInterface can't be created
 	 */
-	public static ServiceInterface login(LoginParams loginParams,
-			GlobusCredential proxy) throws LoginException,
+	public static ServiceInterface login(final LoginParams loginParams,
+			final GlobusCredential proxy) throws LoginException,
 			ServiceInterfaceException {
 		ServiceInterface serviceInterface = null;
 
@@ -184,8 +187,8 @@ public class LoginHelpers {
 	 * @throws ServiceInterfaceException
 	 *             if the serviceInterface can't be created
 	 */
-	public static ServiceInterface login(LoginParams loginParams,
-			GSSCredential cred) throws LoginException,
+	public static ServiceInterface login(final LoginParams loginParams,
+			final GSSCredential cred) throws LoginException,
 			ServiceInterfaceException {
 		ServiceInterface serviceInterface = null;
 
@@ -268,8 +271,8 @@ public class LoginHelpers {
 	 *             if somethings gone wrong (i.e. wrong private key passphrase)
 	 * @throws ServiceInterfaceException
 	 */
-	public static ServiceInterface login(char[] privateKeyPassphrase,
-			LoginParams loginParams) throws LoginException,
+	public static ServiceInterface login(final char[] privateKeyPassphrase,
+			final LoginParams loginParams) throws LoginException,
 			ServiceInterfaceException {
 
 		ServiceInterface serviceInterface = null;

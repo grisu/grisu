@@ -12,7 +12,6 @@ import org.vpac.grisu.control.exceptions.FileTransferException;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
-import org.vpac.grisu.frontend.model.job.JobException;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.job.JobCreatedProperty;
@@ -60,7 +59,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 *             if there is no job with the specified name on the backend
 	 *             connected to the specified serviceInterface
 	 */
-	public JobObject(ServiceInterface si, String jobname)
+	public JobObject(final ServiceInterface si, final String jobname)
 			throws NoSuchJobException {
 
 		super(SeveralXMLHelpers.cxfWorkaround(si.getJsldDocument(jobname),
@@ -78,7 +77,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 * @param si
 	 *            the serviceInterface
 	 */
-	public JobObject(ServiceInterface si) {
+	public JobObject(final ServiceInterface si) {
 		super();
 		this.serviceInterface = si;
 	}
@@ -95,7 +94,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 *            the basic properties of the job (no. of cpus, application to
 	 *            use, ...)
 	 */
-	public JobObject(ServiceInterface si, Map<String, String> jobProperties) {
+	public JobObject(final ServiceInterface si, final Map<String, String> jobProperties) {
 		super(jobProperties);
 		this.serviceInterface = si;
 	}
@@ -112,7 +111,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 * @param jsdl
 	 *            the jsdl document
 	 */
-	public JobObject(ServiceInterface si, Document jsdl) {
+	public JobObject(final ServiceInterface si, final Document jsdl) {
 		super(jsdl);
 		this.serviceInterface = si;
 	}
@@ -137,7 +136,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 *             if one of the properties is invalid and the job could not be
 	 *             created on the backend
 	 */
-	public String createJob(String fqan) throws JobPropertiesException {
+	public final String createJob(final String fqan) throws JobPropertiesException {
 
 		return createJob(fqan, ServiceInterface.FORCE_NAME_METHOD);
 	}
@@ -159,7 +158,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 *         jobproperties like the status or jobdirectory
 	 * @throws JobPropertiesException
 	 */
-	public String createJob(String fqan, String jobnameCreationMethod)
+	public final String createJob(final String fqan, final String jobnameCreationMethod)
 			throws JobPropertiesException {
 
 		setJobname(serviceInterface.createJob(getJobDescriptionDocument(),
@@ -186,7 +185,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 * @throws JobSubmissionException
 	 *             if the job could not be submitted
 	 */
-	public void submitJob() throws JobSubmissionException {
+	public final void submitJob() throws JobSubmissionException {
 
 		if (status == JobConstants.UNDEFINED) {
 			throw new IllegalStateException("Job state "
@@ -219,7 +218,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 		getStatus(true);
 	}
 
-	private void setStatus(int newStatus) {
+	private void setStatus(final int newStatus) {
 
 		int oldstatus = this.status;
 		this.status = newStatus;
@@ -240,7 +239,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 *            refresh (true)
 	 * @return the job status
 	 */
-	public int getStatus(boolean forceRefresh) {
+	public final int getStatus(final boolean forceRefresh) {
 		if (forceRefresh) {
 			int oldStatus = this.status;
 			this.status = serviceInterface.getJobStatus(getJobname());
@@ -260,7 +259,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 *            refresh (true)
 	 * @return the job status string
 	 */
-	public String getStatusString(boolean forceRefresh) {
+	public final String getStatusString(final boolean forceRefresh) {
 		return JobConstants.translateStatus(getStatus(forceRefresh));
 	}
 
@@ -274,7 +273,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 * @throws JobException
 	 *             if the job could not be killed/cleaned
 	 */
-	public void kill(boolean clean) throws JobException {
+	public final void kill(final boolean clean) {
 
 		if (getStatus(false) == JobConstants.UNDEFINED) {
 			throw new IllegalStateException("Job status "
@@ -299,7 +298,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 * 
 	 * @return the job properties
 	 */
-	public Map<String, String> getAllJobProperties() {
+	public final Map<String, String> getAllJobProperties() {
 
 		if (getStatus(false) == JobConstants.UNDEFINED) {
 			throw new IllegalStateException("Job status "
@@ -327,7 +326,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 * 
 	 * @return the url to the job (working-) directory
 	 */
-	public String getJobDirectoryUrl() {
+	public final String getJobDirectoryUrl() {
 
 		if (this.getStatus(false) == JobConstants.UNDEFINED) {
 			throw new IllegalStateException("Job status "
@@ -354,7 +353,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 * 
 	 * @return the locally cached stdout file
 	 */
-	public File getStdOutFile() {
+	public final File getStdOutFile() {
 
 		if (getStatus(false) <= JobConstants.ACTIVE) {
 			if (getStatus(true) < JobConstants.ACTIVE) {
@@ -389,7 +388,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 * 
 	 * @return finished: true / still running/not started: false
 	 */
-	public boolean isFinished() {
+	public final boolean isFinished() {
 
 		if (isFinished) {
 			return true;
@@ -416,7 +415,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 * 
 	 * @return the current content of the stdout file for this job
 	 */
-	public String getStdOutContent() {
+	public final String getStdOutContent() {
 
 		String result;
 		try {
@@ -437,7 +436,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 * 
 	 * @return the current content of the stderr file for this job
 	 */
-	public String getStdErrContent() {
+	public final String getStdErrContent() {
 
 		String result;
 		try {
@@ -460,7 +459,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 * 
 	 * @return the locally cached stderr file
 	 */
-	public File getStdErrFile() {
+	public final File getStdErrFile() {
 
 		if (getStatus(false) <= JobConstants.ACTIVE) {
 			if (getStatus(true) < JobConstants.ACTIVE) {
@@ -503,7 +502,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 * @return whether the job is actually finished (true) or the this
 	 *         wait-thread was interrupted otherwise
 	 */
-	public boolean waitForJobToFinish(final int checkIntervallInSeconds) {
+	public final boolean waitForJobToFinish(final int checkIntervallInSeconds) {
 
 		if (waitThread != null) {
 			if (waitThread.isAlive()) {
@@ -535,7 +534,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	/**
 	 * Interrupts the {@link #waitForJobToFinish(int)} method.
 	 */
-	public void stopWaitingForJobToFinish() {
+	public final void stopWaitingForJobToFinish() {
 
 		if (waitThread == null || !waitThread.isAlive()) {
 			return;
@@ -553,6 +552,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 			// happen.
 			waitThread.interrupt();
 		} catch (Exception e) {
+			myLogger.debug(e);
 		}
 
 		waitThread = new Thread() {
@@ -580,7 +580,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	// ========================================================
 	private Vector<JobStatusChangeListener> jobStatusChangeListeners;
 
-	private void fireJobStatusChange(int oldStatus, int newStatus) {
+	private void fireJobStatusChange(final int oldStatus, final int newStatus) {
 
 		myLogger.debug("Fire job status change event.");
 		// if we have no mountPointsListeners, do nothing...
@@ -612,10 +612,11 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 * @param l
 	 *            the listener
 	 */
-	synchronized public void addJobStatusChangeListener(
-			JobStatusChangeListener l) {
-		if (jobStatusChangeListeners == null)
+	public final synchronized void addJobStatusChangeListener(
+			final JobStatusChangeListener l) {
+		if (jobStatusChangeListeners == null) {
 			jobStatusChangeListeners = new Vector<JobStatusChangeListener>();
+		}
 		jobStatusChangeListeners.addElement(l);
 	}
 
@@ -625,8 +626,8 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 * @param l
 	 *            the listener
 	 */
-	synchronized public void removeJobStatusChangeListener(
-			JobStatusChangeListener l) {
+	public final synchronized void removeJobStatusChangeListener(
+			final JobStatusChangeListener l) {
 		if (jobStatusChangeListeners == null) {
 			jobStatusChangeListeners = new Vector<JobStatusChangeListener>();
 		}
