@@ -8,9 +8,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.GrisuRegistry;
+
+import au.org.arcs.mds.Constants;
 
 /**
  * Default implementation for {@link ApplicationInformation}.
@@ -103,7 +104,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	public final String[] getExecutables(final String subLoc, final String version) {
 
 		return getApplicationDetails(subLoc, version).get(
-				JobConstants.MDS_EXECUTABLES_KEY).split(",");
+				Constants.MDS_EXECUTABLES_KEY).split(",");
 
 	}
 

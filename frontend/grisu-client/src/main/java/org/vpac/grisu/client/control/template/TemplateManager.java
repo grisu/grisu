@@ -19,9 +19,10 @@ import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.settings.ClientPropertiesManager;
 import org.vpac.grisu.settings.MyProxyServerParams;
-import org.vpac.grisu.utils.JsdlHelpers;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
+
+import au.org.arcs.mds.JsdlHelpers;
 
 /**
  * This class manages all templates a user choose to use. There are 2 different kinds of 

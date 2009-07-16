@@ -17,6 +17,8 @@ import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 
+import au.org.arcs.mds.Constants;
+
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -71,7 +73,7 @@ public class AddMountPointPanel extends JPanel {
 	public void initialize(EnvironmentManager em) {
 		this.em = em;
 		fqanModel.removeAllElements();
-		fqanModel.addElement(JobConstants.NON_VO_FQAN);
+		fqanModel.addElement(Constants.NON_VO_FQAN);
 		for ( String fqan : em.getFqans() ) {
 			fqanModel.addElement(fqan);
 		}

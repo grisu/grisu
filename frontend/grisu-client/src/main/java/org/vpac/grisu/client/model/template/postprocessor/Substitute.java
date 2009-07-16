@@ -11,11 +11,12 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.model.template.JsdlTemplate;
-import org.vpac.grisu.utils.JSDLNamespaceContext;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import au.org.arcs.mds.JSDLNamespaceContext;
 
 /**
  * Substitutes a specified string with the template with the value of this element.

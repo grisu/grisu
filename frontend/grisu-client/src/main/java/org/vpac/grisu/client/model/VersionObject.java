@@ -9,6 +9,8 @@ import java.util.TreeSet;
 import org.vpac.grisu.client.control.exceptions.SubmissionLocationException;
 import org.vpac.grisu.control.JobConstants;
 
+import au.org.arcs.mds.Constants;
+
 public class VersionObject implements Comparable<VersionObject>, SubmissionObject {
 
 	private String version = null;
@@ -174,7 +176,7 @@ public class VersionObject implements Comparable<VersionObject>, SubmissionObjec
 
 	public String[] getCurrentExecutables() {
 		
-		return application.getDetails(this.currentSubmissionLocation, version).get(JobConstants.MDS_EXECUTABLES_KEY).split(",");
+		return application.getDetails(this.currentSubmissionLocation, version).get(Constants.MDS_EXECUTABLES_KEY).split(",");
 		
 	}
 
@@ -192,7 +194,7 @@ public class VersionObject implements Comparable<VersionObject>, SubmissionObjec
 	}
 	
 	public String[] getCurrentModules() {
-		return application.getDetails(this.currentSubmissionLocation, version).get(JobConstants.MDS_MODULES_KEY).split(",");
+		return application.getDetails(this.currentSubmissionLocation, version).get(Constants.MDS_MODULES_KEY).split(",");
 	}
 
 	public int getPreferredExecutableType() {

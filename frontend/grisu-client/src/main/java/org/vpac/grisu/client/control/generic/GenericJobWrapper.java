@@ -23,9 +23,10 @@ import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.templatePreProcessor.TemplatePreProcessorException;
 import org.vpac.grisu.control.exceptions.JobCreationException;
 import org.vpac.grisu.frontend.control.login.LoginParams;
-import org.vpac.grisu.utils.JsdlHelpers;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
+
+import au.org.arcs.mds.JsdlHelpers;
 
 
 /**

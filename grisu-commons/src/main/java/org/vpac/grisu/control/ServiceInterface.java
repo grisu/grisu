@@ -10,10 +10,13 @@ import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
+import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.MountPoint;
-import org.vpac.grisu.model.info.GridResource;
 import org.w3c.dom.Document;
+
+import au.org.arcs.mds.GridResource;
+import au.org.arcs.mds.JobSubmissionProperty;
 
 /**
  * This is the central interface of grisu. These are the methods the web service
@@ -26,41 +29,6 @@ import org.w3c.dom.Document;
 public interface ServiceInterface {
 
 	double INTERFACE_VERSION = 8;
-
-	// Static strings for JobProperty objects
-	String JOBNAME_KEY = "jobname";
-	String APPLICATIONNAME_KEY = "application";
-	String APPLICATIONVERSION_KEY = "version";
-	String NO_CPUS_KEY = "cpus";
-	String FORCE_SINGLE_KEY = "force_single";
-	String FORCE_MPI_KEY = "force_mpi";
-	String MEMORY_IN_B_KEY = "memory";
-	String EMAIL_ADDRESS_KEY = "email_address";
-	String EMAIL_ON_START_KEY = "email_on_start";
-	String EMAIL_ON_FINISH_KEY = "email_on_finish";
-	String WALLTIME_IN_MINUTES_KEY = "walltime";
-	String COMMANDLINE_KEY = "commandline";
-	String STDOUT_KEY = "stdout";
-	String STDERR_KEY = "stderr";
-	String STDIN_KEY = "stdin";
-	String SUBMISSIONLOCATION_KEY = "submissionlocation";
-	String INPUT_FILE_URLS_KEY = "input_files";
-	String MODULES_KEY = "modules";
-	String SUBMISSION_TYPE_KEY = "submissionType";
-
-	// Other job property strings
-	String QUEUE_KEY = "queue";
-	String SUBMISSION_HOST_KEY = "submissionHost";
-	String SUBMISSION_SITE_KEY = "submissionSite";
-	String JOBDIRECTORY_KEY = "jobDirectory";
-	String FACTORY_TYPE_KEY = "factoryType";
-	String WORKINGDIRECTORY_KEY = "workingDirectory";
-	String FQAN_KEY = "fqan";
-	String JOB_STATUS_KEY = "status";
-	String STAGING_FILE_SYSTEM_KEY = "stagingFileSystem";
-
-	String GENERIC_APPLICATION_NAME = "generic";
-	String NO_VERSION_INDICATOR_STRING = "no_version";
 
 	// job creation method names
 	String FORCE_NAME_METHOD = "force-name";

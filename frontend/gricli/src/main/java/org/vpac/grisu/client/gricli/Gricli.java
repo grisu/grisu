@@ -34,6 +34,8 @@ import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.utils.SeveralStringHelpers;
 import org.vpac.security.light.plainProxy.LocalProxy;
 
+import au.org.arcs.mds.Constants;
+
 
 public class Gricli implements FileTransferListener {
 
@@ -501,7 +503,7 @@ public class Gricli implements FileTransferListener {
 		// TODO not sure what to do here, this is because the jobproperties
 		// value in the db is a varchar(2000)
 		if (!StringUtils.isEmpty(inputFiles) && inputFiles.length() <= 253) {
-			serviceInterface.addJobProperty(jobname, ServiceInterface.INPUT_FILE_URLS_KEY
+			serviceInterface.addJobProperty(jobname, Constants.INPUT_FILE_URLS_KEY
 					, inputFiles);
 		}
 
@@ -571,7 +573,7 @@ public class Gricli implements FileTransferListener {
 				.getAllJobProperties(jobProperties.getJobname());
 
 		String jobDirectory = jobDetails
-				.get(ServiceInterface.JOBDIRECTORY_KEY);
+				.get(Constants.JOBDIRECTORY_KEY);
 
 		GrisuFileObject source = null;
 		try {

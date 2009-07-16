@@ -3,9 +3,10 @@ package org.vpac.grisu.backend.utils;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.vpac.grisu.utils.JsdlHelpers;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import au.org.arcs.mds.JsdlHelpers;
 
 /**
  * Just some helper methods to calculate/modify jsdl files.

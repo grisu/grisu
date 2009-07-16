@@ -26,6 +26,8 @@ import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.info.ApplicationInformation;
 import org.vpac.security.light.plainProxy.LocalProxy;
 
+import au.org.arcs.mds.Constants;
+
 public class GridTestController {
 
 	public static final File GridTestDirectory = new File(System
@@ -295,7 +297,7 @@ public class GridTestController {
 
 		for (String application : applications) {
 
-			if (ServiceInterface.GENERIC_APPLICATION_NAME.equals(application)) {
+			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
 				
 				String[] subLocs = registry.getResourceInformation().getAllAvailableSubmissionLocations(fqan);
 				
@@ -313,7 +315,7 @@ public class GridTestController {
 						continue;
 					}
 					
-					GridTestElement gte = GridTestElement.createGridTestElement(application, serviceInterface, ServiceInterface.NO_VERSION_INDICATOR_STRING, subLoc);
+					GridTestElement gte = GridTestElement.createGridTestElement(application, serviceInterface, Constants.NO_VERSION_INDICATOR_STRING, subLoc);
 					gridTestElements.put(gte.getId(), gte);
 					
 					Thread createJobThread = createCreateAndSubmitJobThread(

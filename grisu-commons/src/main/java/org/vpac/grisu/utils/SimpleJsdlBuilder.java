@@ -5,8 +5,9 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.model.FileManager;
-import org.vpac.grisu.model.job.JobSubmissionProperty;
 import org.w3c.dom.Document;
+
+import au.org.arcs.mds.JobSubmissionProperty;
 
 /**
  * This class creats a job description document out of the job properties using

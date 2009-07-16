@@ -3,7 +3,10 @@ package org.vpac.grisu.model.job;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
+
+import au.org.arcs.mds.Constants;
 
 /**
  * Job properties that are available after a job is created on the backend.
@@ -16,42 +19,42 @@ public enum JobCreatedProperty {
 	/**
 	 * The name of the queue.
 	 */
-	QUEUE(ServiceInterface.QUEUE_KEY),
+	QUEUE(Constants.QUEUE_KEY),
 	/**
 	 * The hostname the job is (or is going to be) submitted to (e.g.
 	 * ng2.vpac.org).
 	 */
-	SUBMISSION_HOST(ServiceInterface.SUBMISSION_HOST_KEY),
+	SUBMISSION_HOST(Constants.SUBMISSION_HOST_KEY),
 	/**
 	 * The full url of the jobdirectory where the job is (or will be) running.
 	 */
-	JOBDIRECTORY(ServiceInterface.JOBDIRECTORY_KEY),
+	JOBDIRECTORY(Constants.JOBDIRECTORY_KEY),
 	/**
 	 * The factory type of the endpoint where the job is (or will be) running.
 	 */
-	FACTORY_TYPE(ServiceInterface.FACTORY_TYPE_KEY),
+	FACTORY_TYPE(Constants.FACTORY_TYPE_KEY),
 	/**
 	 * The full path of the local workingdirectory on the cluster where the job
 	 * is (or will be) running.
 	 */
-	WORKINGDIRECTORY(ServiceInterface.WORKINGDIRECTORY_KEY),
+	WORKINGDIRECTORY(Constants.WORKINGDIRECTORY_KEY),
 	/**
 	 * The fqan that is used to submit this job.
 	 */
-	FQAN(ServiceInterface.FQAN_KEY),
+	FQAN(Constants.FQAN_KEY),
 	/**
 	 * The current status of the job. Have a look at {@link JobConstants} for
 	 * values for this key.
 	 */
-	JOB_STATUS_KEY(ServiceInterface.JOB_STATUS_KEY),
+	JOB_STATUS_KEY(Constants.JOB_STATUS_KEY),
 	/**
 	 * The staging filesystem that is used to stage-in files for this job.
 	 */
-	STAGING_FILE_SYSTEM(ServiceInterface.STAGING_FILE_SYSTEM_KEY),
+	STAGING_FILE_SYSTEM(Constants.STAGING_FILE_SYSTEM_KEY),
 	/**
 	 * The name of the site where the job is (or will be) running.
 	 */
-	SUBMISSION_SITE(ServiceInterface.SUBMISSION_SITE_KEY);
+	SUBMISSION_SITE(Constants.SUBMISSION_SITE_KEY);
 
 	private static final Map<String, JobCreatedProperty> stringToJobPropertyMap = new HashMap<String, JobCreatedProperty>();
 	static {

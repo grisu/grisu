@@ -48,6 +48,8 @@ import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.model.FqanEvent;
 import org.vpac.grisu.model.FqanListener;
 
+import au.org.arcs.mds.Constants;
+
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -515,8 +517,8 @@ public class SubmissionPanel extends JPanel implements JobCreationInterface,
 
 	private void setFqanLabelText(String fqan) {
 		String fqan_short = null;
-		if (fqan == null || JobConstants.NON_VO_FQAN.equals(fqan)) {
-			fqan_short = JobConstants.NON_VO_FQAN;
+		if (fqan == null || Constants.NON_VO_FQAN.equals(fqan)) {
+			fqan_short = Constants.NON_VO_FQAN;
 		} else {
 			fqan_short = fqan.substring(fqan.lastIndexOf("/") + 1);
 		}

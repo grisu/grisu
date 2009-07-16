@@ -13,11 +13,13 @@ import javax.persistence.Id;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang.StringUtils;
-import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
-import org.vpac.grisu.utils.JsdlHelpers;
 import org.vpac.grisu.utils.SimpleJsdlBuilder;
 import org.w3c.dom.Document;
+
+import au.org.arcs.mds.Constants;
+import au.org.arcs.mds.JobSubmissionProperty;
+import au.org.arcs.mds.JsdlHelpers;
 
 /**
  * A class that helps creating a job.
@@ -61,7 +63,7 @@ public class JobSubmissionObjectImpl {
 
 	public final String getApplicationVersion() {
 		if (StringUtils.isBlank(applicationVersion)) {
-			return ServiceInterface.NO_VERSION_INDICATOR_STRING;
+			return Constants.NO_VERSION_INDICATOR_STRING;
 		}
 		return applicationVersion;
 	}

@@ -7,8 +7,10 @@ import org.apache.log4j.Logger;
 import org.globus.exec.utils.ManagedJobFactoryConstants;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.utils.JsdlHelpers;
 import org.w3c.dom.Document;
+
+import au.org.arcs.mds.Constants;
+import au.org.arcs.mds.JsdlHelpers;
 
 /**
  * The JobSubmissionManager class provides an interface between grisu and the
@@ -87,7 +89,7 @@ public class JobSubmissionManager {
 		} else {
 			factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
 		}
-		job.addJobProperty(ServiceInterface.FACTORY_TYPE_KEY, factoryType);
+		job.addJobProperty(Constants.FACTORY_TYPE_KEY, factoryType);
 
 		myLogger.debug("FactoryType is: " + factoryType);
 		String submitHostEndpoint = submitter.getServerEndpoint(host);
@@ -98,13 +100,13 @@ public class JobSubmissionManager {
 		job.setJobhandle(handle);
 		// TODO remove that once I'm sure nobody is using it anymore
 		job.setSubmissionHost(host);
-		job.addJobProperty(ServiceInterface.SUBMISSION_HOST_KEY, host);
+		job.addJobProperty(Constants.SUBMISSION_HOST_KEY, host);
 		job.setSubmissionType(submitter_name);
 		job
-				.addJobProperty(ServiceInterface.SUBMISSION_TYPE_KEY,
+				.addJobProperty(Constants.SUBMISSION_TYPE_KEY,
 						submitter_name);
 		if (queue != null && !"".equals(queue)) {
-			job.getJobProperties().put(ServiceInterface.QUEUE_KEY, queue);
+			job.getJobProperties().put(Constants.QUEUE_KEY, queue);
 		}
 		job.setStatus(JobConstants.EXTERNAL_HANDLE_READY);
 

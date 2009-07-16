@@ -10,9 +10,10 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.info.ResourceInformation;
+
+import au.org.arcs.mds.Constants;
 
 /**
  * The implemenation of {@link UserEnvironmentManager}.
@@ -183,7 +184,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	public final Set<MountPoint> getMountPoints(String fqan) {
 
 		if (fqan == null) {
-			fqan = JobConstants.NON_VO_FQAN;
+			fqan = Constants.NON_VO_FQAN;
 		}
 
 		synchronized (fqan) {
@@ -193,9 +194,9 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 				Set<MountPoint> mps = new HashSet<MountPoint>();
 				for (MountPoint mp : getMountPoints()) {
 					if (mp.getFqan() == null
-							|| mp.getFqan().equals(JobConstants.NON_VO_FQAN)) {
+							|| mp.getFqan().equals(Constants.NON_VO_FQAN)) {
 						if (fqan == null
-								|| fqan.equals(JobConstants.NON_VO_FQAN)) {
+								|| fqan.equals(Constants.NON_VO_FQAN)) {
 							mps.add(mp);
 							continue;
 						} else {

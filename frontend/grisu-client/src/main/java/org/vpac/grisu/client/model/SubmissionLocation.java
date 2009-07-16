@@ -7,9 +7,10 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.EnvironmentManager;
-import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.model.MountPoint;
-import org.vpac.grisu.utils.SubmissionLocationHelpers;
+
+import au.org.arcs.mds.Constants;
+import au.org.arcs.mds.SubmissionLocationHelpers;
 
 /**
  * Just a wrapper object around a String.
@@ -103,7 +104,7 @@ public class SubmissionLocation implements Comparable<SubmissionLocation>{
 	public Set<MountPoint> getAssiciatedMountPointsForFqan(String fqan) {
 		
 		if ( fqan == null ) {
-			fqan = JobConstants.NON_VO_FQAN;
+			fqan = Constants.NON_VO_FQAN;
 		}
 		
 		if ( mountpointsPerFqan.get(fqan) == null ) {

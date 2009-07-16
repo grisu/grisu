@@ -18,6 +18,8 @@ import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.FqanEvent;
 import org.vpac.grisu.model.FqanListener;
 
+import au.org.arcs.mds.Constants;
+
 public class ApplicationObject implements SubmissionObject, FqanListener,
 		MountPointsListener {
 
@@ -308,7 +310,7 @@ public class ApplicationObject implements SubmissionObject, FqanListener,
 		}
 		
 		if ( fqan == null ) {
-			fqan = JobConstants.NON_VO_FQAN;
+			fqan = Constants.NON_VO_FQAN;
 		}
 
 		if (actualAvailableSubmissionLocations.get(fqan) == null) {
@@ -456,7 +458,7 @@ public class ApplicationObject implements SubmissionObject, FqanListener,
 		}
 
 		return getDetails(this.currentSubmissionLocation, version).get(
-				JobConstants.MDS_EXECUTABLES_KEY).split(",");
+				Constants.MDS_EXECUTABLES_KEY).split(",");
 	}
 
 	// public ApplicationObject getApplication() {
@@ -477,7 +479,7 @@ public class ApplicationObject implements SubmissionObject, FqanListener,
 		}
 
 		return getDetails(this.currentSubmissionLocation, version).get(
-				JobConstants.MDS_MODULES_KEY).split(",");
+				Constants.MDS_MODULES_KEY).split(",");
 	}
 
 	public void fqansChanged(FqanEvent event) {

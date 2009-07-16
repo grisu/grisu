@@ -53,14 +53,10 @@ import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.info.CachedMdsInformationManager;
 import org.vpac.grisu.model.MountPoint;
-import org.vpac.grisu.model.info.GridResource;
-import org.vpac.grisu.model.info.InformationManager;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
-import org.vpac.grisu.model.job.JobSubmissionProperty;
+import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.settings.ServerPropertiesManager;
-import org.vpac.grisu.utils.JsdlHelpers;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
-import org.vpac.grisu.utils.SubmissionLocationHelpers;
 import org.vpac.security.light.voms.VO;
 import org.vpac.security.light.voms.VOManagement.VOManagement;
 import org.w3c.dom.Document;
@@ -68,6 +64,12 @@ import org.w3c.dom.Element;
 
 import au.org.arcs.grid.grisu.matchmaker.MatchMakerImpl;
 import au.org.arcs.grid.sched.MatchMaker;
+import au.org.arcs.mds.Constants;
+import au.org.arcs.mds.GridResource;
+import au.org.arcs.mds.InformationManager;
+import au.org.arcs.mds.JobSubmissionProperty;
+import au.org.arcs.mds.JsdlHelpers;
+import au.org.arcs.mds.SubmissionLocationHelpers;
 
 /**
  * This abstract class implements most of the methods of the
@@ -94,7 +96,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			.getLogger(AbstractServiceInterface.class.getName());
 
 	private InformationManager informationManager = CachedMdsInformationManager
-			.getDefaultCachedMdsInformationManager();
+			.getDefaultCachedMdsInformationManager(Environment.getGrisuDirectory().toString());
 
 	private UserDAO userdao = new UserDAO();
 
@@ -112,7 +114,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	// protected ExecutorService executor = Executors.newFixedThreadPool(2);
 
-	private MatchMaker matchmaker = new MatchMakerImpl();
+	private MatchMaker matchmaker = new MatchMakerImpl(Environment.getGrisuDirectory().toString());
 
 	public final double getInterfaceVersion() {
 		return ServiceInterface.INTERFACE_VERSION;
@@ -475,7 +477,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throws NoSuchJobException, JobPropertiesException {
 
 		job.setFqan(fqan);
-		job.getJobProperties().put(FQAN_KEY, fqan);
+		job.getJobProperties().put(Constants.FQAN_KEY, fqan);
 
 	}
 
@@ -511,7 +513,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// auto-settings
 
 		if (jobSubmissionObject.getApplication() != null
-				&& GENERIC_APPLICATION_NAME.equals(jobSubmissionObject
+				&& Constants.GENERIC_APPLICATION_NAME.equals(jobSubmissionObject
 						.getApplication())) {
 
 			submissionLocation = jobSubmissionObject.getSubmissionLocation();
@@ -538,7 +540,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				myLogger
 						.warn("No modules specified for generic application. That might be ok but probably not...");
 			} else {
-				job.addJobProperty(MODULES_KEY, StringUtils.join(modules, ","));
+				job.addJobProperty(Constants.MODULES_KEY, StringUtils.join(modules, ","));
 			}
 
 			// checking whether application is specified. If not, try to figure
@@ -605,7 +607,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						// available on this resource
 						if (StringUtils.isNotBlank(jobSubmissionObject
 								.getApplicationVersion())
-								&& !NO_VERSION_INDICATOR_STRING
+								&& !Constants.NO_VERSION_INDICATOR_STRING
 										.equals(jobSubmissionObject
 												.getApplicationVersion())
 								&& !resource
@@ -628,7 +630,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						// if no application version is specified, auto-set one
 						if (StringUtils.isBlank(jobSubmissionObject
 								.getApplicationVersion())
-								|| NO_VERSION_INDICATOR_STRING
+								|| Constants.NO_VERSION_INDICATOR_STRING
 										.equals(jobSubmissionObject
 												.getApplicationVersion())) {
 							myLogger
@@ -690,7 +692,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				// check for the version of the application to run
 				if (StringUtils.isBlank(jobSubmissionObject
 						.getApplicationVersion())
-						|| ServiceInterface.NO_VERSION_INDICATOR_STRING
+						|| Constants.NO_VERSION_INDICATOR_STRING
 								.equals(jobSubmissionObject
 										.getApplicationVersion())) {
 					myLogger
@@ -832,14 +834,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		JsdlHelpers.setWorkingDirectory(jsdl,
 				JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM, workingDirectory);
-		job.addJobProperty(STAGING_FILE_SYSTEM_KEY, stagingFilesystemToUse);
-		job.addJobProperty(WORKINGDIRECTORY_KEY, workingDirectory);
+		job.addJobProperty(Constants.STAGING_FILE_SYSTEM_KEY, stagingFilesystemToUse);
+		job.addJobProperty(Constants.WORKINGDIRECTORY_KEY, workingDirectory);
 		String submissionSite = informationManager
 				.getSiteForHostOrUrl(stagingFilesystemToUse);
 		myLogger.debug("Calculated submissionSite: " + submissionSite);
 		job.addJobProperty("submissionSite", submissionSite);
 		job.setJob_directory(stagingFilesystemToUse + workingDirectory);
-		job.getJobProperties().put(JOBDIRECTORY_KEY,
+		job.getJobProperties().put(Constants.JOBDIRECTORY_KEY,
 				stagingFilesystemToUse + workingDirectory);
 		myLogger.debug("Calculated jobdirectory: " + job.getJob_directory());
 
@@ -2097,7 +2099,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// job.getJobProperties().put(JobConstants.JOBPROPERTYKEY_HOSTNAME,
 		// job.getSubmissionHost());
 
-		job.getJobProperties().put(JOB_STATUS_KEY,
+		job.getJobProperties().put(Constants.JOB_STATUS_KEY,
 				JobConstants.translateStatus(getJobStatus(jobname)));
 
 		return job.getJobProperties();
@@ -2691,7 +2693,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		String workingDirRelativeToUserFS = JsdlHelpers.getWorkingDirectory(job
 				.getJobDescription());
 		job.setJob_directory(submissionFS + "/" + workingDirRelativeToUserFS);
-		job.getJobProperties().put(JOBDIRECTORY_KEY,
+		job.getJobProperties().put(Constants.JOBDIRECTORY_KEY,
 				submissionFS + "/" + workingDirRelativeToUserFS);
 
 		Document newJsdl = recalculateWorkingDirectory(job, clusterRootUrl,
@@ -2706,7 +2708,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		parseJobDescription(job);
 
 		job.setFqan(fqan);
-		job.addJobProperty(FQAN_KEY, fqan);
+		job.addJobProperty(Constants.FQAN_KEY, fqan);
 		if (fqan != null) {
 			VO vo = VOManagement.getVO(getUser().getFqans().get(fqan));
 			job.setCredential(CertHelpers.getVOProxyCredential(vo, fqan,
@@ -2795,7 +2797,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		if (clear) {
 
 			if (job.getJob_directory() != null
-					|| job.getJobProperty(ServiceInterface.JOBDIRECTORY_KEY) != null) {
+					|| job.getJobProperty(Constants.JOBDIRECTORY_KEY) != null) {
 
 				try {
 					FileObject jobDir = getUser().aquireFile(

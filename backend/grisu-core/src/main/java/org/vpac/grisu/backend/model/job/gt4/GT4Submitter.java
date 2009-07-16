@@ -27,7 +27,6 @@ import org.globus.exec.generated.JobDescriptionType;
 import org.globus.exec.utils.client.ManagedJobFactoryClientHelper;
 import org.globus.exec.utils.rsl.RSLHelper;
 import org.globus.exec.utils.rsl.RSLParseException;
-import org.globus.wsrf.impl.security.authentication.Constants;
 import org.globus.wsrf.impl.security.authorization.Authorization;
 import org.globus.wsrf.impl.security.authorization.HostAuthorization;
 import org.ietf.jgss.GSSCredential;
@@ -38,14 +37,17 @@ import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.info.CachedMdsInformationManager;
-import org.vpac.grisu.model.info.InformationManager;
+import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.utils.DebugUtils;
-import org.vpac.grisu.utils.JsdlHelpers;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.vpac.security.light.CredentialHelpers;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import au.org.arcs.mds.Constants;
+import au.org.arcs.mds.InformationManager;
+import au.org.arcs.mds.JsdlHelpers;
 
 /**
  * This class is the connector class between grisu and our GT4 gateways. It
@@ -61,7 +63,7 @@ public class GT4Submitter extends JobSubmitter {
 			.getName());
 
 	private InformationManager informationManager = CachedMdsInformationManager
-			.getDefaultCachedMdsInformationManager();
+			.getDefaultCachedMdsInformationManager(Environment.getGrisuDirectory().toString());
 
 	/*
 	 * (non-Javadoc)
@@ -253,7 +255,7 @@ public class GT4Submitter extends JobSubmitter {
 			String version = JsdlHelpers.getApplicationVersion(jsdl);
 			String subLoc = JsdlHelpers.getCandidateHosts(jsdl)[0];
 
-			if (ServiceInterface.GENERIC_APPLICATION_NAME.equals(application)) {
+			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
 				myLogger
 						.debug("\"generic\" application. Not trying to calculate modules...");
 
@@ -266,7 +268,7 @@ public class GT4Submitter extends JobSubmitter {
 
 				try {
 					modules_string = appDetails.get(
-							JobConstants.MDS_MODULES_KEY).split(",");
+							Constants.MDS_MODULES_KEY).split(",");
 
 					if (modules_string == null || "".equals(modules_string)) {
 						myLogger
@@ -289,7 +291,7 @@ public class GT4Submitter extends JobSubmitter {
 
 				try {
 					modules_string = appDetails.get(
-							JobConstants.MDS_MODULES_KEY).split(",");
+							Constants.MDS_MODULES_KEY).split(",");
 
 					if (modules_string == null || "".equals(modules_string)) {
 						myLogger
@@ -488,7 +490,7 @@ public class GT4Submitter extends JobSubmitter {
 		// String factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
 		// Deafult Security: Host authorization + XML encryption
 		Authorization authz = HostAuthorization.getInstance();
-		Integer xmlSecurity = Constants.ENCRYPTION;
+		Integer xmlSecurity = org.globus.wsrf.impl.security.authentication.Constants.ENCRYPTION;
 
 		// Submission mode: batch = will not wait
 		boolean batchMode = true;

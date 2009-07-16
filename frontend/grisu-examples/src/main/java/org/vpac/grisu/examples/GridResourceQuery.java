@@ -3,10 +3,11 @@ import java.io.File;
 import java.util.List;
 
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.model.info.GridResource;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
-import org.vpac.grisu.utils.SubmissionLocationHelpers;
 import org.w3c.dom.Document;
+
+import au.org.arcs.mds.GridResource;
+import au.org.arcs.mds.SubmissionLocationHelpers;
 
 
 public class GridResourceQuery {

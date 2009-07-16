@@ -13,8 +13,9 @@ import org.vpac.grisu.client.model.files.GrisuFileObject;
 import org.vpac.grisu.client.model.template.JsdlTemplate;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.utils.JsdlHelpers;
 import org.w3c.dom.Element;
+
+import au.org.arcs.mds.JsdlHelpers;
 
 /**
  * Uploads the file specified by the element value into the jobdirectory. At the moment there is no configuration option.

@@ -36,13 +36,15 @@ import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.utils.DebugUtils;
-import org.vpac.grisu.utils.JSDLNamespaceContext;
-import org.vpac.grisu.utils.JsdlHelpers;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import au.org.arcs.mds.Constants;
+import au.org.arcs.mds.JSDLNamespaceContext;
+import au.org.arcs.mds.JsdlHelpers;
 
 /**
  * A JsdlTemplate represents the logic that is behind a template file that can
@@ -487,7 +489,7 @@ public class JsdlTemplate implements TemplateNodeListener {
 
 		try {
 			String tempFqan = this.currentFqan;
-			if (JobConstants.NON_VO_FQAN.equals(tempFqan) )
+			if (Constants.NON_VO_FQAN.equals(tempFqan) )
 				tempFqan = null;
 			
 			em.getServiceInterface().submitJob(currentJobname, tempFqan);
@@ -627,7 +629,7 @@ public class JsdlTemplate implements TemplateNodeListener {
 		currentSubmissionLocation = JsdlHelpers.getCandidateHosts(getTemplateDocument())[0];
 		// because the backend doesn't know about NON_VO_FQAN, it uses null for non-vo
 		String tempFqan = null;
-		if ( JobConstants.NON_VO_FQAN.equals(fqan) ) 
+		if ( Constants.NON_VO_FQAN.equals(fqan) ) 
 			tempFqan = null;
 		else 
 			tempFqan = fqan;

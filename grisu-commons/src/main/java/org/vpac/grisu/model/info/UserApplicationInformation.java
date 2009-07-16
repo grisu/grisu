@@ -4,7 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.vpac.grisu.model.job.JobSubmissionProperty;
+import au.org.arcs.mds.GridResource;
+import au.org.arcs.mds.JobSubmissionProperty;
 
 /**
  * This class contains information from {@link ApplicationInformation} and

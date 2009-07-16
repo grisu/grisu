@@ -14,6 +14,8 @@ import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 
+import au.org.arcs.mds.Constants;
+
 public final class SuperMonsterBatchJob {
 	
 	private SuperMonsterBatchJob() {
@@ -70,7 +72,7 @@ public final class SuperMonsterBatchJob {
 					try {
 						job = new JobObject(si);
 						job
-								.setApplication(ServiceInterface.GENERIC_APPLICATION_NAME);
+								.setApplication(Constants.GENERIC_APPLICATION_NAME);
 						job.setJobname("monsterBatchJob_" + index + "_"
 								+ startDate.getTime());
 						job.setCommandline("echo \"Hello Brecca!\"");

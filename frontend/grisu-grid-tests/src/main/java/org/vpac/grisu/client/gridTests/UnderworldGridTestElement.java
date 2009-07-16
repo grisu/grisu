@@ -8,6 +8,8 @@ import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.frontend.model.job.JobObject;
 
+import au.org.arcs.mds.Constants;
+
 public class UnderworldGridTestElement extends GridTestElement {
 
 	public UnderworldGridTestElement(ServiceInterface si, String version,
@@ -29,7 +31,7 @@ public class UnderworldGridTestElement extends GridTestElement {
 		
 		String jobDir = null;
 		try {
-			jobDir = serviceInterface.getJobProperty(jobObject.getJobname(), ServiceInterface.JOBDIRECTORY_KEY);
+			jobDir = serviceInterface.getJobProperty(jobObject.getJobname(), Constants.JOBDIRECTORY_KEY);
 		} catch (NoSuchJobException e) {
 			addMessage("Could not find job. This is most likely a globus/grisu problem...");
 			setPossibleExceptionForCurrentStage(e);

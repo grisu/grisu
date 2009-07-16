@@ -26,7 +26,6 @@ import org.vpac.grisu.client.control.utils.MountPointEvent;
 import org.vpac.grisu.client.control.utils.MountPointsListener;
 import org.vpac.grisu.client.model.SubmissionLocation;
 import org.vpac.grisu.client.model.files.FileConstants;
-import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.FqanEvent;
@@ -39,6 +38,8 @@ import org.vpac.helpDesk.model.Person;
 import org.vpac.helpDesk.model.PersonException;
 import org.vpac.historyRepeater.DummyHistoryManager;
 import org.vpac.historyRepeater.HistoryManager;
+
+import au.org.arcs.mds.Constants;
 
 /**
  * This class manages the important properties of the user like MountPoints &
@@ -352,7 +353,7 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 	public synchronized void mount(String url, String mountPoint, String fqan,
 			boolean useHomeDirectoryOnThisFileSystemIfPossible)
 			throws RemoteFileSystemException {
-		if (JobConstants.NON_VO_FQAN.equals(fqan)) {
+		if (Constants.NON_VO_FQAN.equals(fqan)) {
 			fqan = null;
 		}
 		MountPoint mp = serviceInterface.mount(url, mountPoint, fqan,
@@ -489,7 +490,7 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 	public Set<MountPoint> getMountPoints(String fqan) {
 
 		if (fqan == null) {
-			fqan = JobConstants.NON_VO_FQAN;
+			fqan = Constants.NON_VO_FQAN;
 		}
 
 		synchronized (fqan) {
@@ -499,9 +500,9 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 				Set<MountPoint> mps = new HashSet<MountPoint>();
 				for (MountPoint mp : getMountPoints()) {
 					if (mp.getFqan() == null
-							|| mp.getFqan().equals(JobConstants.NON_VO_FQAN)) {
+							|| mp.getFqan().equals(Constants.NON_VO_FQAN)) {
 						if (fqan == null
-								|| fqan.equals(JobConstants.NON_VO_FQAN)) {
+								|| fqan.equals(Constants.NON_VO_FQAN)) {
 							mps.add(mp);
 							continue;
 						} else {
@@ -568,7 +569,7 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 					temp.append(site + " ");
 					String fqan = mp.getFqan();
 					if (fqan == null) {
-						fqan = JobConstants.NON_VO_FQAN;
+						fqan = Constants.NON_VO_FQAN;
 					}
 					allUsedFqans.add(fqan);
 				}
@@ -600,7 +601,7 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 			String fqan) {
 
 		if (fqan == null) {
-			fqan = JobConstants.NON_VO_FQAN;
+			fqan = Constants.NON_VO_FQAN;
 		}
 
 		synchronized (fqan) {
@@ -963,7 +964,7 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 				if (mp.getRootUrl().startsWith(fs)) {
 					String fqan = mp.getFqan();
 					if (fqan == null) {
-						fqan = JobConstants.NON_VO_FQAN;
+						fqan = Constants.NON_VO_FQAN;
 					}
 					myLogger.debug("Adding possible fqan: " + fqan
 							+ " for current submission location.");
@@ -996,8 +997,8 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 			String mpSite = lookupSite(FILE_URL_TYPE, mp.getRootUrl());
 			if (site.equals(mpSite)) {
 				if (mp.getFqan() == null
-						|| mp.getFqan().equals(JobConstants.NON_VO_FQAN)) {
-					if (fqan == null || fqan.equals(JobConstants.NON_VO_FQAN)) {
+						|| mp.getFqan().equals(Constants.NON_VO_FQAN)) {
+					if (fqan == null || fqan.equals(Constants.NON_VO_FQAN)) {
 						result.add(mp);
 					}
 				} else {
@@ -1239,12 +1240,12 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 	public synchronized void setDefaultFqan(String defaultFqan) {
 
 		if (defaultFqan == null) {
-			defaultFqan = JobConstants.NON_VO_FQAN;
+			defaultFqan = Constants.NON_VO_FQAN;
 		}
 		Set<String> allFqansNew = getAllUsedFqans();
 
 		if (allFqansNew == null || allFqansNew.size() == 0) {
-			defaultFqan = JobConstants.NON_VO_FQAN;
+			defaultFqan = Constants.NON_VO_FQAN;
 			return;
 		}
 

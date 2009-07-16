@@ -10,6 +10,8 @@ import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.model.MountPoint;
 
+import au.org.arcs.mds.Constants;
+
 public class MountPointsTableModel extends AbstractTableModel {
 	
 	static final Logger myLogger = Logger.getLogger(MountPointsTableModel.class
@@ -74,7 +76,7 @@ public class MountPointsTableModel extends AbstractTableModel {
 		switch (columnIndex) {
 		case MOUNTPOINT_NAME_INDEX: return mp;
 		case MOUNTPOINT_ROOT_INDEX: return mp.getRootUrl();
-		case FQAN_INDEX: String fqan = mp.getFqan(); if ( fqan == null ) return JobConstants.NON_VO_FQAN; else return fqan;
+		case FQAN_INDEX: String fqan = mp.getFqan(); if ( fqan == null ) return Constants.NON_VO_FQAN; else return fqan;
 		case AUTOMOUNT_INDEX: return mp.isAutomaticallyMounted();
 		}
 		

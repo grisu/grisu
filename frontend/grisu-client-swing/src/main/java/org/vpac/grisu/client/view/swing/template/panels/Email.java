@@ -16,8 +16,9 @@ import javax.swing.border.TitledBorder;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
 import org.vpac.grisu.client.model.template.nodes.TemplateNodeEvent;
-import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.utils.EmailUtils;
+
+import au.org.arcs.mds.Constants;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -374,15 +375,15 @@ public class Email extends JPanel implements TemplateNodePanel {
 	protected void setTemplateAttributes() {
 		
 		if ( getNotifyWhenJobStartsCheckBox().isSelected() ) {
-			this.templateNode.getElement().setAttribute(JobConstants.SEND_EMAIL_ON_JOB_START_ATTRIBUTE_KEY, "true");
+			this.templateNode.getElement().setAttribute(Constants.SEND_EMAIL_ON_JOB_START_ATTRIBUTE_KEY, "true");
 		} else {
-			this.templateNode.getElement().setAttribute(JobConstants.SEND_EMAIL_ON_JOB_START_ATTRIBUTE_KEY, "false");
+			this.templateNode.getElement().setAttribute(Constants.SEND_EMAIL_ON_JOB_START_ATTRIBUTE_KEY, "false");
 		}
 		
 		if ( getNotifyMeWhenCheckBox().isSelected() ) {
-			this.templateNode.getElement().setAttribute(JobConstants.SEND_EMAIL_ON_JOB_END_ATTRIBUTE_KEY, "true");
+			this.templateNode.getElement().setAttribute(Constants.SEND_EMAIL_ON_JOB_END_ATTRIBUTE_KEY, "true");
 		} else {
-			this.templateNode.getElement().setAttribute(JobConstants.SEND_EMAIL_ON_JOB_END_ATTRIBUTE_KEY, "false");
+			this.templateNode.getElement().setAttribute(Constants.SEND_EMAIL_ON_JOB_END_ATTRIBUTE_KEY, "false");
 		}
 		
 	}

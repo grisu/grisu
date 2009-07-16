@@ -173,13 +173,4 @@ public final class JobConstants {
 
 	}
 
-	public static final String MDS_EXECUTABLES_KEY = "Executables";
-	public static final String MDS_MODULES_KEY = "Module";
-	public static final String MDS_PARALLEL_AVAIL_KEY = "parallelAvail";
-	public static final String MDS_SERIAL_AVAIL_KEY = "serialAvail";
-	public static final String NON_VO_FQAN = "None";
-
-	public static final String SEND_EMAIL_ON_JOB_START_ATTRIBUTE_KEY = "sendOnJobStart";
-	public static final String SEND_EMAIL_ON_JOB_END_ATTRIBUTE_KEY = "sendOnJobFinish";
-
 }

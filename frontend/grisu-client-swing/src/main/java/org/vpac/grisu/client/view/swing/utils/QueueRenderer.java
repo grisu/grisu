@@ -1,16 +1,11 @@
 package org.vpac.grisu.client.view.swing.utils;
 
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
-import javax.swing.border.BevelBorder;
 
-import org.vpac.grisu.utils.SubmissionLocationHelpers;
+import au.org.arcs.mds.SubmissionLocationHelpers;
 
 public class QueueRenderer implements ListCellRenderer {
 	

@@ -9,7 +9,9 @@ import java.util.TreeSet;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.UserEnvironmentManager;
-import org.vpac.grisu.model.job.JobSubmissionProperty;
+
+import au.org.arcs.mds.GridResource;
+import au.org.arcs.mds.JobSubmissionProperty;
 
 /**
  * Implementation of {@link UserApplicationInformation}.

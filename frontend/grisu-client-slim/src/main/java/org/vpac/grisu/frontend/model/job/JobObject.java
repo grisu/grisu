@@ -16,10 +16,12 @@ import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.job.JobCreatedProperty;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
-import org.vpac.grisu.model.job.JobSubmissionProperty;
 import org.vpac.grisu.utils.FileHelpers;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
+
+import au.org.arcs.mds.Constants;
+import au.org.arcs.mds.JobSubmissionProperty;
 
 /**
  * A model class that hides all the complexity of creating and submitting a job.
@@ -166,7 +168,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 		try {
 			jobDirectory = serviceInterface.getJobProperty(getJobname(),
-					ServiceInterface.JOBDIRECTORY_KEY);
+					Constants.JOBDIRECTORY_KEY);
 			getStatus(true);
 		} catch (NoSuchJobException e) {
 			fireJobStatusChange(this.status, JobConstants.NO_SUCH_JOB);

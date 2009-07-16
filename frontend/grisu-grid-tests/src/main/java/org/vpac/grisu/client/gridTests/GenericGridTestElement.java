@@ -8,7 +8,9 @@ import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistry;
-import org.vpac.grisu.model.job.JobSubmissionProperty;
+
+import au.org.arcs.mds.Constants;
+import au.org.arcs.mds.JobSubmissionProperty;
 
 public class GenericGridTestElement extends GridTestElement {
 	
@@ -21,7 +23,7 @@ public class GenericGridTestElement extends GridTestElement {
 		
 		String jobDir = null;
 		try {
-			jobDir = serviceInterface.getJobProperty(jobObject.getJobname(), ServiceInterface.JOBDIRECTORY_KEY);
+			jobDir = serviceInterface.getJobProperty(jobObject.getJobname(), Constants.JOBDIRECTORY_KEY);
 		} catch (NoSuchJobException e) {
 			addMessage("Could not find job. This is most likely a globus/grisu problem...");
 			setPossibleExceptionForCurrentStage(e);
@@ -59,7 +61,7 @@ public class GenericGridTestElement extends GridTestElement {
 
 		JobObject jo = new JobObject(serviceInterface);
 		
-		jo.setApplication(ServiceInterface.GENERIC_APPLICATION_NAME);
+		jo.setApplication(Constants.GENERIC_APPLICATION_NAME);
 		
 		jo.setCommandline("cat genericTest.txt");
 		jo.addInputFileUrl(GridTestController.GridTestDirectory+File.separator+"genericTest.txt");

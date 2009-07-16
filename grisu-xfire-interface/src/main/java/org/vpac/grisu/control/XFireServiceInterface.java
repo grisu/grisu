@@ -15,8 +15,9 @@ import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.MountPoint;
-import org.vpac.grisu.model.info.GridResource;
 import org.w3c.dom.Document;
+
+import au.org.arcs.mds.GridResource;
 
 /**
    XFire version of ServiceInterface

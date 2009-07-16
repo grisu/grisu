@@ -11,10 +11,11 @@ import org.vpac.grisu.client.control.EnvironmentManager;
 import org.vpac.grisu.client.control.exceptions.SubmissionLocationException;
 import org.vpac.grisu.client.control.utils.MountPointEvent;
 import org.vpac.grisu.client.control.utils.MountPointsListener;
-import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.FqanEvent;
 import org.vpac.grisu.model.FqanListener;
+
+import au.org.arcs.mds.Constants;
 
 /**
  * Just a wrapper object to make info handling easier for an applications and
@@ -292,7 +293,7 @@ public class ApplicationInfoObject implements SubmissionObject, FqanListener,
 
 	public String[] getCurrentExecutables() {
 		return getCurrentApplicationDetails().get(
-				JobConstants.MDS_EXECUTABLES_KEY).split(",");
+				Constants.MDS_EXECUTABLES_KEY).split(",");
 	}
 
 	public SubmissionLocation getCurrentSubmissionLocation() {
@@ -312,7 +313,7 @@ public class ApplicationInfoObject implements SubmissionObject, FqanListener,
 	}
 
 	public String[] getCurrentModules() {
-		return getCurrentApplicationDetails().get(JobConstants.MDS_MODULES_KEY)
+		return getCurrentApplicationDetails().get(Constants.MDS_MODULES_KEY)
 				.split(",");
 	}
 

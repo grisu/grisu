@@ -1,6 +1,6 @@
 package org.vpac.grisu.control.exceptions;
 
-import org.vpac.grisu.model.job.JobSubmissionProperty;
+import au.org.arcs.mds.JobSubmissionProperty;
 
 public class JobPropertiesException extends Exception {
 

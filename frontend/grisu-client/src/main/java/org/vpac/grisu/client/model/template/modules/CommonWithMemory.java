@@ -1,33 +1,14 @@
 package org.vpac.grisu.client.model.template.modules;
 
-import java.util.Enumeration;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.Vector;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.TemplateTagConstants;
-import org.vpac.grisu.client.control.EnvironmentManager;
-import org.vpac.grisu.client.control.eventStuff.SubmissionObjectListener;
-import org.vpac.grisu.client.control.exceptions.SubmissionLocationException;
-import org.vpac.grisu.client.control.utils.MountPointEvent;
 import org.vpac.grisu.client.control.utils.MountPointsListener;
-import org.vpac.grisu.client.model.ApplicationObject;
-import org.vpac.grisu.client.model.NoMDSApplicationObject;
-import org.vpac.grisu.client.model.SubmissionLocation;
-import org.vpac.grisu.client.model.SubmissionObject;
-import org.vpac.grisu.client.model.VersionObject;
 import org.vpac.grisu.client.model.template.JsdlTemplate;
 import org.vpac.grisu.client.model.template.nodes.DefaultTemplateNodeValueSetter;
 import org.vpac.grisu.client.model.template.nodes.TemplateNode;
-import org.vpac.grisu.client.model.template.nodes.TemplateNodeValueSetter;
-import org.vpac.grisu.control.exceptions.JobCreationException;
-import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.model.FqanEvent;
 import org.vpac.grisu.model.FqanListener;
-import org.vpac.grisu.utils.JsdlHelpers;
 
 /**
  * @author Markus Binsteiner

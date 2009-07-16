@@ -20,10 +20,11 @@ import org.vpac.grisu.client.view.swing.template.modules.genericAuto.GridResourc
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.UserEnvironmentManager;
-import org.vpac.grisu.model.info.GridResource;
 import org.vpac.grisu.model.info.UserApplicationInformation;
-import org.vpac.grisu.model.job.JobSubmissionProperty;
-import org.vpac.grisu.utils.SubmissionLocationHelpers;
+
+import au.org.arcs.mds.GridResource;
+import au.org.arcs.mds.JobSubmissionProperty;
+import au.org.arcs.mds.SubmissionLocationHelpers;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;
