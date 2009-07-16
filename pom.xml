@@ -127,6 +127,8 @@
 						<link>http://jakarta.apache.org/velocity/api/</link>
 
 						<link>http://google-web-toolkit.googlecode.com/svn/javadoc/1.6/</link>
+						
+						<link>http://code.arcs.org.au/builds/job/Infosystems-SNAPSHOT/javadoc</link>
 					</links>
 				</configuration>
 			</plugin>
