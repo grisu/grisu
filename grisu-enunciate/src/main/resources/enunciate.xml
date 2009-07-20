@@ -9,15 +9,13 @@
   </namespaces>
   <modules>
 
-	<jaxws-ri disabled="false"/>
-	<jaxws disabled="false"></jaxws>
 	<jaxws-client disabled="false"></jaxws-client>
-<!--	<csharp disabled="true"></csharp>-->
-<!--	<xfire-client disabled="true"></xfire-client>-->
+	<csharp disabled="true"></csharp>
+	<xfire-client disabled="true"></xfire-client>
 <!--	<cxf disabled="true"/>-->
 	<spring-app enableSecurity="true">
       <security>
-        <userDetailsService className="org.vpac.grsiu.control.GrisuUserDetailsImpl"/>
+        <userDetailsService className="org.vpac.grisu.control.GrisuUserDetailsImpl"/>
       </security>
     </spring-app>
 

@@ -50,7 +50,7 @@ public interface EnunciateServiceInterface {
 
 	/**
 	 * Starts a session. For some service interfaces this could be just a dummy
-	 * method.
+	 * method. Ideally a char[] would be used for the password, but jax-ws doesn't support this.
 	 * 
 	 * @param username
 	 *            the username (probably for myproxy credential)
@@ -59,8 +59,7 @@ public interface EnunciateServiceInterface {
 	 * @throws NoValidCredentialException
 	 *             if the login was not successful
 	 */
-	@WebMethod(exclude=true)
-	boolean login(String username, char[] password);
+	void login(String username, String password);
 
 	/**
 	 * Logout of the service. Performs housekeeping tasks and usually deletes
@@ -149,7 +148,6 @@ public interface EnunciateServiceInterface {
 	 *            the host
 	 * @return the site
 	 */
-
 	String getSite(String host);
 
 	/**

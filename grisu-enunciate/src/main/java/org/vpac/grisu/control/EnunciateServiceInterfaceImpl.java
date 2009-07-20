@@ -2290,9 +2290,13 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		return null;
 	}
 
-	public boolean login(String username, char[] password) {
+	public void login(String username, String password) {
 		// TODO Auto-generated method stub
-		return true;
+		
+	}
+	
+	public void login() {
+		
 	}
 
 	public String logout() {
