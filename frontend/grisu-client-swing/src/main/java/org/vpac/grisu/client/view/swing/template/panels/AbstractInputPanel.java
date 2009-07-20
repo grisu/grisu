@@ -71,15 +71,14 @@ abstract class AbstractInputPanel extends JPanel implements TemplateNodePanel {
 	 */
 	public AbstractInputPanel() {
 		super();
-		layout = new FormLayout(
-			new ColumnSpec[] {
+		layout = new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("44dlu:grow(1.0)"),
+				ColumnSpec.decode("44dlu:grow"),
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("41dlu"),
 				FormFactory.RELATED_GAP_COLSPEC,
 				FormFactory.DEFAULT_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC},
+				FormFactory.RELATED_GAP_COLSPEC,},
 			new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,
@@ -87,7 +86,7 @@ abstract class AbstractInputPanel extends JPanel implements TemplateNodePanel {
 				RowSpec.decode("5dlu"),
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("17dlu"),
-				FormFactory.RELATED_GAP_ROWSPEC});
+				FormFactory.RELATED_GAP_ROWSPEC,});
 		setLayout(layout);
 		add(getErrorLabel(), new CellConstraints(2, 4));
 		add(getRequiredLabel(), new CellConstraints(6, 4));
