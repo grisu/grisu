@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<enunciate label="ifyouwannabecool"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.13.xsd">
+<!--  <deployment host="www.ifyouwannabecool.com" context="api"/>-->
+  <namespaces>
+    <namespace id="api" uri="http://api.grisu.arcs.org.au/"/>
+    <namespace id="link" uri="http://api.grisu.arcs.org.au/link"/>
+  </namespaces>
+  <modules>
+
+	<jaxws-ri disabled="false"/>
+	<jaxws disabled="false"></jaxws>
+	<jaxws-client disabled="false"></jaxws-client>
+<!--	<csharp disabled="true"></csharp>-->
+<!--	<xfire-client disabled="true"></xfire-client>-->
+<!--	<cxf disabled="true"/>-->
+	<spring-app enableSecurity="true">
+      <security>
+        <userDetailsService className="org.vpac.grsiu.control.GrisuUserDetailsImpl"/>
+      </security>
+    </spring-app>
+
+  </modules>
+</enunciate>
