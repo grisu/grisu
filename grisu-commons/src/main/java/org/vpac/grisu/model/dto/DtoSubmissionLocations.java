@@ -1,0 +1,46 @@
+package org.vpac.grisu.model.dto;
+
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name="submissionlocations")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class DtoSubmissionLocations {
+	
+	public static DtoSubmissionLocations createSubmissionLocationsInfo(String[] submissionLocations) {
+		
+		DtoSubmissionLocations result = new DtoSubmissionLocations();
+		
+		List<DtoSubmissionLocationInfo> subLocs = new LinkedList<DtoSubmissionLocationInfo>();
+		for ( String subLoc : submissionLocations ) {
+			DtoSubmissionLocationInfo temp = new DtoSubmissionLocationInfo();
+			temp.setSubmissionLocation(subLoc);
+			subLocs.add(temp);
+		}
+		
+		result.setAllSubmissionLocations(subLocs);
+		
+		return result;
+		
+	}
+
+	@XmlElement(name="submissionlocation")
+	private List<DtoSubmissionLocationInfo> allSubmissionLocations = new LinkedList<DtoSubmissionLocationInfo>();
+
+	public List<DtoSubmissionLocationInfo> getAllSubmissionLocations() {
+		return allSubmissionLocations;
+	}
+
+	public void setAllSubmissionLocations(
+			List<DtoSubmissionLocationInfo> allSubmissionLocations) {
+		this.allSubmissionLocations = allSubmissionLocations;
+	}
+	
+	
+	
+}

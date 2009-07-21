@@ -4,6 +4,11 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.log4j.Logger;
 
@@ -18,18 +23,26 @@ import org.apache.log4j.Logger;
  * 
  */
 @Entity
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class MountPoint implements Comparable<MountPoint> {
 
 	static final Logger myLogger = Logger.getLogger(MountPoint.class.getName());
 
 	private Long mountPointId = null;
 
+	@XmlElement
 	private String dn = null;
+	@XmlElement
 	private String fqan = null;
+	@XmlAttribute
 	private String mountpointName = null;
+	@XmlAttribute
 	private String rootUrl = null;
 
+	@XmlElement
 	private boolean automaticallyMounted = false;
+	@XmlElement
 	private boolean disabled = false;
 
 	// for hibernate

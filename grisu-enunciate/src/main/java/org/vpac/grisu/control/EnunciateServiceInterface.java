@@ -1,7 +1,6 @@
 package org.vpac.grisu.control;
 
 
-import java.util.List;
 import java.util.Map;
 
 import javax.activation.DataHandler;
@@ -9,6 +8,9 @@ import javax.activation.DataSource;
 import javax.annotation.security.RolesAllowed;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
@@ -17,9 +19,17 @@ import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.MountPoint;
+import org.vpac.grisu.model.dto.DtoApplicationDetails;
+import org.vpac.grisu.model.dto.DtoApplicationInfo;
+import org.vpac.grisu.model.dto.DtoDataLocations;
+import org.vpac.grisu.model.dto.DtoFolder;
+import org.vpac.grisu.model.dto.DtoGridResources;
+import org.vpac.grisu.model.dto.DtoJobProperties;
+import org.vpac.grisu.model.dto.DtoMountPoints;
+import org.vpac.grisu.model.dto.DtoSubmissionLocations;
+import org.vpac.grisu.model.dto.HostsInfo;
 import org.w3c.dom.Document;
 
-import au.org.arcs.mds.GridResource;
 import au.org.arcs.mds.JobSubmissionProperty;
 
 /**
@@ -31,10 +41,9 @@ import au.org.arcs.mds.JobSubmissionProperty;
  * 
  */
 @WebService
-@RolesAllowed("User")
 public interface EnunciateServiceInterface {
 
-	double INTERFACE_VERSION = 9;
+	double INTERFACE_VERSION = 10;
 
 	// job creation method names
 	String FORCE_NAME_METHOD = "force-name";
@@ -46,7 +55,14 @@ public interface EnunciateServiceInterface {
 	// General grisu specific methods
 	//
 	// ---------------------------------------------------------------------------------------------------
-	double getInterfaceVersion();
+	/**
+	 * The version of the serviceInterface for this backend.
+	 * 
+	 * @return the version
+	 */
+	@GET
+	@Path("interfaceVersion")
+	String getInterfaceVersion();
 
 	/**
 	 * Starts a session. For some service interfaces this could be just a dummy
@@ -87,8 +103,7 @@ public interface EnunciateServiceInterface {
 	 * @throws NoSuchTemplateException
 	 *             if a template for that particular application does not exist
 	 */
-	@WebMethod(exclude=true)
-	Document getTemplate(String application)
+	String getTemplate(String application)
 			throws NoSuchTemplateException;
 
 
@@ -100,7 +115,6 @@ public interface EnunciateServiceInterface {
 	 * @param description
 	 *            the description of the problem
 	 */
-//	@WebMethod(exclude=true)
 	void submitSupportRequest(String subject, String description);
 
 	/**
@@ -119,7 +133,7 @@ public interface EnunciateServiceInterface {
 	/**
 	 * Returns the end time of the credential used.
 	 * 
-	 * @return the end time
+	 * @return the end time or -1 if the endtime couldn't be determined
 	 */
 	long getCredentialEndTime();
 
@@ -159,7 +173,9 @@ public interface EnunciateServiceInterface {
 	 * @return a map with all possible hostnames and the respective sites they
 	 *         belong to
 	 */
-//	Map<String, String> getAllHosts();
+	@GET
+	@Path("info/allHosts")
+	HostsInfo getAllHosts();
 
 	/**
 	 * Queries for all submission locations on the grid. Returns an array of
@@ -168,7 +184,9 @@ public interface EnunciateServiceInterface {
 	 * 
 	 * @return all queues grid-wide
 	 */
-	String[] getAllSubmissionLocations();
+	@GET
+	@Path("info/submissionlocations")
+	DtoSubmissionLocations getAllSubmissionLocations();
 
 	/**
 	 * Returns all submission locations for this VO. Needed for better
@@ -178,7 +196,9 @@ public interface EnunciateServiceInterface {
 	 *            the VO
 	 * @return all submission locations
 	 */
-	String[] getAllSubmissionLocationsForFqan(String fqan);
+	@GET
+	@Path("vo/{fqan}/submissionlocations")
+	DtoSubmissionLocations getAllSubmissionLocationsForFqan(@PathParam("fqan") String fqan);
 
 	/**
 	 * Returns all sites/queues that support this application. If "null" is
@@ -192,7 +212,9 @@ public interface EnunciateServiceInterface {
 	 *            the application.
 	 * @return all sites that support this application.
 	 */
-	String[] getSubmissionLocationsForApplication(String application);
+	@GET
+	@Path("info/{application}/allversions/submissionlocations")
+	DtoSubmissionLocations getSubmissionLocationsForApplication(@PathParam("application") String application);
 
 	/**
 	 * Returns all sites/queues that support this version of this application.
@@ -207,8 +229,10 @@ public interface EnunciateServiceInterface {
 	 *            the version
 	 * @return all sites that support this application.
 	 */
-	String[] getSubmissionLocationsForApplicationAndVersion(String application,
-			String version);
+	@GET
+	@Path("info/{application}/version/{version}/submissionlocations")
+	DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersion(@PathParam("application") String application,
+			@PathParam("version") String version);
 
 	/**
 	 * Returns all sites/queues that support this version of this application if
@@ -226,8 +250,10 @@ public interface EnunciateServiceInterface {
 	 *            the fqan
 	 * @return all sites that support this application.
 	 */
-	String[] getSubmissionLocationsForApplicationAndVersionAndFqan(String application,
-			String version, String fqan);
+	@GET
+	@Path("info/{application}/version/{version}/fqan/{fqan}/submissionlocations")
+	DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersionAndFqan(@PathParam("application") String application,
+			@PathParam("version") String version, @PathParam("fqan") String fqan);
 
 	/**
 	 * Returns a map of all versions and all submission locations of this
@@ -239,9 +265,10 @@ public interface EnunciateServiceInterface {
 	 * @return a map with all versions of the application as key and the
 	 *         submissionLocations as comma
 	 */
-	@WebMethod(exclude=true)
-	Map<String, String> getSubmissionLocationsPerVersionOfApplication(
-			String application);
+	@GET
+	@Path("info/{application}/submissionlocations")
+	DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
+			@PathParam("application") String application);
 
 	/**
 	 * Checks the available data locations for the specified site and VO.
@@ -253,8 +280,7 @@ public interface EnunciateServiceInterface {
 	 *         the paths that are accessible for this VO there as values (e.g.
 	 *         /home/grid-admin)
 	 */
-	@WebMethod(exclude=true)
-	Map<String, String[]> getDataLocationsForVO(String fqan);
+	DtoDataLocations getDataLocationsForVO(String fqan);
 
 	/**
 	 * Returns an array of the versions of the specified application that a submissionlocation
@@ -282,7 +308,6 @@ public interface EnunciateServiceInterface {
 	 *            (queuename@cluster:contactstring#jobmanager)
 	 * @return the gridftp servers
 	 */
-
 	String[] getStagingFileSystemForSubmissionLocation(String subLoc);
 
 	/**
@@ -291,7 +316,6 @@ public interface EnunciateServiceInterface {
 	 * 
 	 * @return all fqans of the user
 	 */
-
 	String[] getFqans();
 
 	/**
@@ -299,7 +323,6 @@ public interface EnunciateServiceInterface {
 	 * 
 	 * @return the dn of the users' certificate
 	 */
-	@WebMethod(exclude=true)
 	String getDN();
 
 	/**
@@ -309,7 +332,6 @@ public interface EnunciateServiceInterface {
 	 * 
 	 * @return all sites
 	 */
-
 	String[] getAllSites();
 
 	/**
@@ -320,7 +342,6 @@ public interface EnunciateServiceInterface {
 	 *            all the sites you want to query or null for a grid-wide search
 	 * @return all applications
 	 */
-
 	String[] getAllAvailableApplications(String[] sites);
 
 	/**
@@ -336,9 +357,10 @@ public interface EnunciateServiceInterface {
 	 *            the site where you want to run the application
 	 * @return details about the applications
 	 */
-	@WebMethod(exclude=true)
-	Map<String, String> getApplicationDetailsForVersionAndSite(String application,
-			String version, String site);
+	@GET
+	@Path("info/application/{application}/{version}/{site}")
+	DtoApplicationDetails getApplicationDetailsForVersionAndSite(@PathParam("application") String application,
+			@PathParam("version") String version, @PathParam("site") String site);
 
 	/**
 	 * Returns all the details that are know about the default version of the
@@ -353,9 +375,10 @@ public interface EnunciateServiceInterface {
 	 *            possibly)
 	 * @return details about the applications
 	 */
-	@WebMethod(exclude=true)
-	Map<String, String> getApplicationDetailsForSite(String application,
-			String site_or_submissionLocation);
+	@GET
+	@Path("info/application/{application}/{site}")
+	DtoApplicationDetails getApplicationDetailsForSite(@PathParam("application") String application,
+			@PathParam("site") String site_or_submissionLocation);
 
 	/**
 	 * Takes a jsdl template and returns a list of submission locations that
@@ -368,8 +391,7 @@ public interface EnunciateServiceInterface {
 	 *            the fqan to use to submit the job
 	 * @return a list of matching submissionLoctations
 	 */
-	@WebMethod(exclude=true)
-	List<GridResource> findMatchingSubmissionLocationsUsingJsdl(Document jsdl,
+	DtoGridResources findMatchingSubmissionLocationsUsingJsdl(String jsdl,
 			String fqan);
 
 	/**
@@ -384,9 +406,8 @@ public interface EnunciateServiceInterface {
 	 *            the fqan to use to submit the job
 	 * @return a list of matching submissionLoctations
 	 */
-	@WebMethod(exclude=true)
-	List<GridResource> findMatchingSubmissionLocationsUsingMap(
-			Map<String, String> jobProperties, String fqan);
+	DtoGridResources findMatchingSubmissionLocationsUsingMap(
+			DtoJobProperties jobProperties, String fqan);
 
 	// ---------------------------------------------------------------------------------------------------
 	// 
@@ -444,7 +465,6 @@ public interface EnunciateServiceInterface {
 	 *            the mountpoint
 	 * @return whether it worked or not
 	 */
-
 	void umount(String mountpoint);
 
 	/**
@@ -452,8 +472,10 @@ public interface EnunciateServiceInterface {
 	 * 
 	 * @return all the MountPoints
 	 */
-
-	MountPoint[] df();
+	@GET
+	@Path("user/df")
+	@RolesAllowed("User")
+	DtoMountPoints df();
 
 	/**
 	 * Returns the mountpoint that is used to acccess this uri.
@@ -462,7 +484,6 @@ public interface EnunciateServiceInterface {
 	 *            the uri
 	 * @return the mountpoint or null if no mountpoint can be found
 	 */
-
 	MountPoint getMountPointForUri(String uri);
 
 	/**
@@ -480,7 +501,6 @@ public interface EnunciateServiceInterface {
 	 *             if the remote (target) filesystem could not be connected /
 	 *             mounted / is not writeable
 	 */
-
 	String upload(DataHandler file, String filename,
 			boolean return_absolute_url) throws RemoteFileSystemException;
 
@@ -494,7 +514,6 @@ public interface EnunciateServiceInterface {
 	 *             if the remote (source) file system could not be conntacted
 	 *             /mounted / is not readable
 	 */
-
 	DataHandler download(String filename)
 			throws RemoteFileSystemException;
 
@@ -519,9 +538,7 @@ public interface EnunciateServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the remote directory could not be read/mounted
 	 */
-	@WebMethod(exclude=true)
-	Document ls(String directory, int recursion_level,
-			boolean absolute_url) throws RemoteFileSystemException;
+	DtoFolder ls(String directory, int recursion_level) throws RemoteFileSystemException;
 
 	/**
 	 * Copies one file to another location (recursively if it's a directory).
@@ -540,7 +557,6 @@ public interface EnunciateServiceInterface {
 	 *             if the remote source file system could not be read/mounted or
 	 *             the remote target file system could not be written to
 	 */
-
 	String cp(String source, String target, boolean overwrite,
 			boolean waitForFileTransferToFinish)
 			throws RemoteFileSystemException;
@@ -583,8 +599,7 @@ public interface EnunciateServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the folder can't be accessed/read
 	 */
-
-	String[] getChildrenFiles(String folder, boolean onlyFiles)
+	String[] getChildrenFileNames(String folder, boolean onlyFiles)
 			throws RemoteFileSystemException;
 
 	/**
@@ -599,7 +614,6 @@ public interface EnunciateServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the file can't be accessed
 	 */
-
 	long getFileSize(String file) throws RemoteFileSystemException;
 
 

@@ -2,6 +2,9 @@ package org.vpac.grisu.control.exceptions;
 
 import java.io.Serializable;
 
+import javax.xml.ws.WebFault;
+
+@WebFault(faultBean="org.vpac.grisu.control.jaxws.exceptions.NoValidCredentialException")
 public class NoValidCredentialException extends RuntimeException implements
 		Serializable {
 

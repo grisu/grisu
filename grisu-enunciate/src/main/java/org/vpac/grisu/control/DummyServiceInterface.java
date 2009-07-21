@@ -6,13 +6,13 @@ import java.util.Map;
 
 import javax.activation.DataSource;
 
-import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.MountPoint;
+import org.vpac.grisu.model.dto.DtoApplicationDetails;
 import org.w3c.dom.Document;
 
 import au.org.arcs.mds.GridResource;
@@ -148,12 +148,17 @@ public class DummyServiceInterface implements ServiceInterface {
 
 	public Map<String, String> getApplicationDetails(String application,
 			String version, String site) {
-		return esi.getApplicationDetailsForVersionAndSite(application, version, site);
+		DtoApplicationDetails appDetails = esi.getApplicationDetailsForVersionAndSite(application, version, site);
+		
+		return appDetails.getDetailsAsMap();
+		
 	}
 
 	public Map<String, String> getApplicationDetails(String application,
 			String siteOrSubmissionLocation) {
-		return esi.getApplicationDetailsForSite(application, siteOrSubmissionLocation);
+		DtoApplicationDetails appDetails = esi.getApplicationDetailsForSite(application, siteOrSubmissionLocation);
+		
+		return appDetails.getDetailsAsMap();
 	}
 
 	public String[] getChildrenFiles(String folder, boolean onlyFiles)

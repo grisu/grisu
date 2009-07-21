@@ -20,6 +20,7 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.jws.WebService;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Path;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.xpath.XPathExpressionException;
@@ -33,6 +34,10 @@ import org.apache.commons.vfs.FileType;
 import org.apache.commons.vfs.FileTypeSelector;
 import org.apache.log4j.Logger;
 import org.codehaus.enunciate.modules.spring_app.HTTPRequestContext;
+import org.globus.myproxy.CredentialInfo;
+import org.globus.myproxy.MyProxy;
+import org.globus.myproxy.MyProxyException;
+import org.ietf.jgss.GSSCredential;
 import org.vpac.grisu.backend.hibernate.JobDAO;
 import org.vpac.grisu.backend.hibernate.UserDAO;
 import org.vpac.grisu.backend.model.ProxyCredential;
@@ -55,9 +60,22 @@ import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.info.CachedMdsInformationManager;
 import org.vpac.grisu.control.serviceInterfaces.LocalServiceInterface;
 import org.vpac.grisu.model.MountPoint;
+import org.vpac.grisu.model.dto.DtoApplicationDetails;
+import org.vpac.grisu.model.dto.DtoApplicationInfo;
+import org.vpac.grisu.model.dto.DtoDataLocations;
+import org.vpac.grisu.model.dto.DtoFile;
+import org.vpac.grisu.model.dto.DtoFolder;
+import org.vpac.grisu.model.dto.DtoGridResources;
+import org.vpac.grisu.model.dto.DtoJobProperties;
+import org.vpac.grisu.model.dto.DtoJobProperty;
+import org.vpac.grisu.model.dto.DtoMountPoints;
+import org.vpac.grisu.model.dto.DtoSubmissionLocations;
+import org.vpac.grisu.model.dto.HostsInfo;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.settings.Environment;
+import org.vpac.grisu.settings.MyProxyServerParams;
 import org.vpac.grisu.settings.ServerPropertiesManager;
+import org.vpac.grisu.settings.ServiceTemplateManagement;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.vpac.security.light.voms.VO;
 import org.vpac.security.light.voms.VOManagement.VOManagement;
@@ -92,16 +110,16 @@ import au.org.arcs.mds.SubmissionLocationHelpers;
  * @author Markus Binsteiner
  * 
  */
-@WebService (
-	endpointInterface = "org.vpac.grisu.control.EnunciateServiceInterface"
-)
+@Path("/grisu")
+@WebService(endpointInterface = "org.vpac.grisu.control.EnunciateServiceInterface")
 public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface {
 
 	static final Logger myLogger = Logger
 			.getLogger(EnunciateServiceInterfaceImpl.class.getName());
 
 	private InformationManager informationManager = CachedMdsInformationManager
-			.getDefaultCachedMdsInformationManager(Environment.getGrisuDirectory().toString());
+			.getDefaultCachedMdsInformationManager(Environment
+					.getGrisuDirectory().toString());
 
 	private UserDAO userdao = new UserDAO();
 
@@ -119,10 +137,11 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 
 	// protected ExecutorService executor = Executors.newFixedThreadPool(2);
 
-	private MatchMaker matchmaker = new MatchMakerImpl(Environment.getGrisuDirectory().toString());
+	private MatchMaker matchmaker = new MatchMakerImpl(Environment
+			.getGrisuDirectory().toString());
 
-	public final double getInterfaceVersion() {
-		return EnunciateServiceInterface.INTERFACE_VERSION;
+	public final String getInterfaceVersion() {
+		return "<grisuVersion>"+EnunciateServiceInterface.INTERFACE_VERSION+"</grisuVersion>";
 	}
 
 	private Map<String, RemoteFileTransferObject> fileTransfers = new HashMap<String, RemoteFileTransferObject>();
@@ -204,7 +223,8 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		if (manager == null) {
 			Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
 			submitters.put("GT4", new GT4Submitter());
-			manager = new JobSubmissionManager(new DummyServiceInterface(this), submitters);
+			manager = new JobSubmissionManager(new DummyServiceInterface(this),
+					submitters);
 		}
 		return manager;
 	}
@@ -334,16 +354,15 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 
 	}
 
-	public final String createJobUsingMap(final Map<String, String> jobProperties,
-			final String fqan, final String jobCreationMethod)
-			throws JobPropertiesException {
+	public final String createJobUsingMap(
+			final Map<String, String> jobProperties, final String fqan,
+			final String jobCreationMethod) throws JobPropertiesException {
 
 		JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl(jobProperties);
 
 		return createJob(jso.getJobDescriptionDocument(), fqan,
 				jobCreationMethod);
 	}
-
 
 	private void setVO(final Job job, final String fqan)
 			throws NoSuchJobException, JobPropertiesException {
@@ -385,8 +404,8 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		// auto-settings
 
 		if (jobSubmissionObject.getApplication() != null
-				&& Constants.GENERIC_APPLICATION_NAME.equals(jobSubmissionObject
-						.getApplication())) {
+				&& Constants.GENERIC_APPLICATION_NAME
+						.equals(jobSubmissionObject.getApplication())) {
 
 			submissionLocation = jobSubmissionObject.getSubmissionLocation();
 			if (StringUtils.isBlank(submissionLocation)) {
@@ -412,7 +431,8 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 				myLogger
 						.warn("No modules specified for generic application. That might be ok but probably not...");
 			} else {
-				job.addJobProperty(Constants.MODULES_KEY, StringUtils.join(modules, ","));
+				job.addJobProperty(Constants.MODULES_KEY, StringUtils.join(
+						modules, ","));
 			}
 
 			// checking whether application is specified. If not, try to figure
@@ -661,7 +681,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		String stagingFilesystemToUse = null;
 		for (String stagingFs : stagingFileSystems) {
 
-			for (MountPoint mp : df()) {
+			for (MountPoint mp : df_internal()) {
 				if (mp.getRootUrl().startsWith(stagingFs.replace(":2811", ""))
 						&& jobFqan.equals(mp.getFqan())) {
 					mountPointToUse = mp;
@@ -706,7 +726,8 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 
 		JsdlHelpers.setWorkingDirectory(jsdl,
 				JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM, workingDirectory);
-		job.addJobProperty(Constants.STAGING_FILE_SYSTEM_KEY, stagingFilesystemToUse);
+		job.addJobProperty(Constants.STAGING_FILE_SYSTEM_KEY,
+				stagingFilesystemToUse);
 		job.addJobProperty(Constants.WORKINGDIRECTORY_KEY, workingDirectory);
 		String submissionSite = informationManager
 				.getSiteForHostOrUrl(stagingFilesystemToUse);
@@ -727,8 +748,8 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 
 			Element el = JsdlHelpers
 					.getStageInTarget_filesystemPart(stageInElement);
-			
-					el.setTextContent(JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM);
+
+			el.setTextContent(JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM);
 			JsdlHelpers.getStageInTarget_relativePart(stageInElement)
 					.setTextContent(workingDirectory + filename);
 
@@ -808,7 +829,6 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 				+ getDN() + " successful.");
 
 	}
-
 
 	/**
 	 * Kills the job with the specified jobname. Before it does that it checks
@@ -922,8 +942,6 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		return info;
 	}
 
-
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1012,8 +1030,9 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * @see org.vpac.grisu.control.ServiceInterface#mount(java.lang.String,
 	 * java.lang.String)
 	 */
-	public final MountPoint mountWithoutFqan(final String url, final String mountpoint,
-			final boolean useHomeDirectory) throws RemoteFileSystemException {
+	public final MountPoint mountWithoutFqan(final String url,
+			final String mountpoint, final boolean useHomeDirectory)
+			throws RemoteFileSystemException {
 
 		MountPoint mp = getUser().mountFileSystem(url, mountpoint,
 				useHomeDirectory);
@@ -1044,16 +1063,11 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		getUser().unmountFileSystem(mountpoint);
 		userdao.saveOrUpdate(getUser());
 		mountPointsForThisSession = null;
-		
+
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.vpac.grisu.control.ServiceInterface#df()
-	 */
-	public final synchronized MountPoint[] df() {
-
+	
+	private final synchronized MountPoint[] df_internal() {
+		
 		if (mountPointsForThisSession == null) {
 
 			// getUser().removeAutoMountedMountpoints();
@@ -1073,6 +1087,17 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 			mountPointsForThisSession = mps.toArray(new MountPoint[mps.size()]);
 		}
 		return mountPointsForThisSession;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.vpac.grisu.control.ServiceInterface#df()
+	 */
+	public final synchronized DtoMountPoints df() {
+
+
+		return DtoMountPoints.createMountpoints(df_internal());
 	}
 
 	/*
@@ -1134,7 +1159,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 
 		for (String fqan : getFqans()) {
 			Date start = new Date();
-			Map<String, String[]> mpUrl = getDataLocationsForVO(fqan);
+			Map<String, String[]> mpUrl = informationManager.getDataLocationsForVO(fqan);
 			Date end = new Date();
 			myLogger.debug("Querying for data locations for all sites and+ "
 					+ fqan + " took: " + (end.getTime() - start.getTime())
@@ -1206,7 +1231,6 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 
 	}
 
-
 	public final DataHandler download(final String filename)
 			throws RemoteFileSystemException {
 
@@ -1214,46 +1238,84 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 
 		return download(new String[] { filename })[0];
 	}
+	
+	private DtoFolder getFolderListing(String url) throws RemoteFileSystemException, FileSystemException {
+		
+		DtoFolder folder = new DtoFolder();
+		
+		FileObject fo = getUser().aquireFile(url);
+		
+		if ( ! FileType.FOLDER.equals(fo.getType()) ) {
+			throw new RemoteFileSystemException("Url: "+url+" not a folder.");
+		}
+		
+		folder.setUrl(url);
+		folder.setName(fo.getName().getBaseName());
+		
+		for ( FileObject child : fo.getChildren() ) {
+			if ( FileType.FOLDER.equals(child.getType()) ) {
+				DtoFolder childfolder = new DtoFolder();
+				childfolder.setName(child.getName().getBaseName());
+				childfolder.setUrl(child.getURL().toString());
+				folder.addChildFolder(childfolder);
+			} else if ( FileType.FILE.equals(child.getType()) ) {
+				DtoFile childFile = new DtoFile();
+				childFile.setName(child.getName().getBaseName());
+				childFile.setUrl(child.getURL().toString());
+				
+				childFile.setLastModified(child.getContent().getLastModifiedTime());
+				childFile.setSize(child.getContent().getSize());
+				
+				folder.addChildFile(childFile);
+			}
+		}
+		
+		return folder;
+	}
 
-
-	public final Document ls(final String directory, final int recursion_level,
-			final boolean return_absolute_url) throws RemoteFileSystemException {
+	public final DtoFolder ls(final String directory, final int recursion_level) throws RemoteFileSystemException {
 
 		// check whether credential still valid
 		getCredential();
 
-		Document result = null;
-		// FileObject dir = null;
-		// dir = getUser().aquireFile(directory);
-
-		myLogger.debug("Listing directory: " + directory
-				+ " with recursion level: " + recursion_level);
-
 		try {
-			result = getFsConverter().getDirectoryStructure(directory,
-					recursion_level, return_absolute_url);
+			return getFolderListing(directory);
 		} catch (Exception e) {
-			myLogger.error("Could not list directory: "
-					+ e.getLocalizedMessage());
-			// e.printStackTrace();
-			throw new RemoteFileSystemException("Could not read directory "
-					+ directory + " for ls command: " + e.getMessage());
+			throw new RemoteFileSystemException("Could not list directory "+directory+": "+e.getLocalizedMessage());
 		}
-
-		try {
-			myLogger.debug(SeveralXMLHelpers.toString(result));
-		} catch (TransformerFactoryConfigurationError e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return result;
+		
+		
+//		Document result = null;
+//		
+//		// FileObject dir = null;
+//		// dir = getUser().aquireFile(directory);
+//
+//		myLogger.debug("Listing directory: " + directory
+//				+ " with recursion level: " + recursion_level);
+//
+//		try {
+//			result = getFsConverter().getDirectoryStructure(directory,
+//					recursion_level, return_absolute_url);
+//		} catch (Exception e) {
+//			myLogger.error("Could not list directory: "
+//					+ e.getLocalizedMessage());
+//			// e.printStackTrace();
+//			throw new RemoteFileSystemException("Could not read directory "
+//					+ directory + " for ls command: " + e.getMessage());
+//		}
+//
+//		try {
+//			myLogger.debug(SeveralXMLHelpers.toString(result));
+//		} catch (TransformerFactoryConfigurationError e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (TransformerException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//
+//		return result;
 	}
-
-
 
 	/**
 	 * This, well, creates a folder, as one might expect.
@@ -1349,8 +1411,6 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		}
 	}
 
-
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1378,7 +1438,6 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	public final String getDN() {
 		return getUser().getDn();
 	}
-
 
 	public final String[] getAllSites() {
 
@@ -1476,7 +1535,6 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		return job.getJobProperty(key);
 	}
 
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1535,7 +1593,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#getChildrenFiles(java.lang.String
 	 * , boolean)
 	 */
-	public final String[] getChildrenFiles(final String folder,
+	public final String[] getChildrenFileNames(final String folder,
 			final boolean onlyFiles) throws RemoteFileSystemException {
 
 		String[] result = null;
@@ -1584,20 +1642,11 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		return size;
 	}
 
+	public final DtoDataLocations getDataLocationsForVO(final String fqan) {
 
-
-	public final Map<String, String[]> getDataLocationsForVO(final String fqan) {
-
-		return informationManager.getDataLocationsForVO(fqan);
-
-		// if ( ServerPropertiesManager.getMDSenabled() ) {
-		// return MountPointManager.getDataLocationsForSiteAndVO(site, fqan);
-		// } else {
-		// return null;
-		// }
+		return DtoDataLocations.createDataLocations(fqan, informationManager.getDataLocationsForVO(fqan));
 
 	}
-
 
 	/*
 	 * (non-Javadoc)
@@ -1817,7 +1866,6 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		// into the database
 	}
 
-
 	public final void kill(final String jobname, final boolean clear)
 			throws RemoteFileSystemException, NoSuchJobException {
 
@@ -1914,9 +1962,9 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#getAllSubmissionLocations()
 	 */
-	public final synchronized String[] getAllSubmissionLocations() {
+	public final synchronized DtoSubmissionLocations getAllSubmissionLocations() {
 
-		return informationManager.getAllSubmissionLocations();
+		return DtoSubmissionLocations.createSubmissionLocationsInfo(informationManager.getAllSubmissionLocations());
 	}
 
 	/*
@@ -1926,11 +1974,11 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#getSubmissionLocationsForApplication
 	 * (java.lang.String)
 	 */
-	public final String[] getSubmissionLocationsForApplication(
+	public final DtoSubmissionLocations getSubmissionLocationsForApplication(
 			final String application) {
 
-		return informationManager
-				.getAllSubmissionLocationsForApplication(application);
+		return DtoSubmissionLocations.createSubmissionLocationsInfo(informationManager
+				.getAllSubmissionLocationsForApplication(application));
 	}
 
 	/*
@@ -1940,11 +1988,13 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#getSubmissionLocationsForApplication
 	 * (java.lang.String, java.lang.String)
 	 */
-	public final String[] getSubmissionLocationsForApplicationAndVersion(
+	public final DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersion(
 			final String application, final String version) {
 
-		return informationManager.getAllSubmissionLocations(application,
+		String[] sls = informationManager.getAllSubmissionLocations(application,
 				version);
+		
+		return DtoSubmissionLocations.createSubmissionLocationsInfo(sls);
 	}
 
 	/*
@@ -1968,7 +2018,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 				application, submissionLocation);
 	}
 
-	public final Map<String, String> getSubmissionLocationsPerVersionOfApplication(
+	public final DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
 			final String application) {
 		// if (ServerPropertiesManager.getMDSenabled()) {
 		myLogger
@@ -1980,7 +2030,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		for (int i = 0; versions != null && i < versions.length; i++) {
 			String[] submitLocations = null;
 			try {
-				submitLocations = getSubmissionLocationsForApplicationAndVersion(
+				submitLocations = informationManager.getAllSubmissionLocations(
 						application, versions[i]);
 				if (submitLocations == null) {
 					myLogger
@@ -2014,23 +2064,15 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 			}
 			appVersionMap.put(versions[i], submitLoc.toString());
 		}
-		return appVersionMap;
+		return DtoApplicationInfo.createApplicationInfo(application, appVersionMap);
 	}
 
-
-	public final String[] getSubmissionLocationsForApplicationAndVersionAndFqan(
+	public final DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersionAndFqan(
 			final String application, final String version, final String fqan) {
 		// TODO implement a method which takes in fqan later on
 
-		return informationManager.getAllSubmissionLocations(application,
-				version);
-
-		// if ( ServerPropertiesManager.getMDSenabled() ) {
-		// return QueueManager.getAllSubmissionQueuesFromMDS(application,
-		// version);
-		// } else {
-		// return null;
-		// }
+		return DtoSubmissionLocations.createSubmissionLocationsInfo(informationManager.getAllSubmissionLocations(application,
+				version));
 	}
 
 	/*
@@ -2049,9 +2091,11 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#getAllHosts()
 	 */
-	public final synchronized Map<String, String> getAllHosts() {
+	public final synchronized HostsInfo getAllHosts() {
 
-		return informationManager.getAllHosts();
+		HostsInfo info = HostsInfo.createHostsInfo(informationManager.getAllHosts());
+		
+		return info;
 	}
 
 	/*
@@ -2061,9 +2105,9 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#getAllSubmissionLocations(java
 	 * .lang.String)
 	 */
-	public final String[] getAllSubmissionLocationsForFqan(final String fqan) {
+	public final DtoSubmissionLocations getAllSubmissionLocationsForFqan(final String fqan) {
 
-		return informationManager.getAllSubmissionLocationsForVO(fqan);
+		return DtoSubmissionLocations.createSubmissionLocationsInfo(informationManager.getAllSubmissionLocationsForVO(fqan));
 
 	}
 
@@ -2074,7 +2118,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#getApplicationDetails(java.lang
 	 * .String, java.lang.String, java.lang.String)
 	 */
-	public final Map<String, String> getApplicationDetailsForVersionAndSite(
+	public final DtoApplicationDetails getApplicationDetailsForVersionAndSite(
 			final String application, final String version,
 			final String site_or_submissionLocation) {
 
@@ -2086,8 +2130,8 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 			myLogger.debug("Site is: " + site);
 		}
 
-		return informationManager.getApplicationDetails(application, version,
-				site);
+		return DtoApplicationDetails.createDetails(application, informationManager.getApplicationDetails(application, version,
+				site));
 	}
 
 	/*
@@ -2097,7 +2141,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#getApplicationDetails(java.lang
 	 * .String, java.lang.String)
 	 */
-	public final Map<String, String> getApplicationDetailsForSite(
+	public final DtoApplicationDetails getApplicationDetailsForSite(
 			final String application, final String site_or_submissionLocation) {
 
 		String site = site_or_submissionLocation;
@@ -2113,26 +2157,33 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 
 	}
 
-	public final List<GridResource> findMatchingSubmissionLocationsUsingMap(
-			final Map<String, String> jobProperties, final String fqan) {
+	public final DtoGridResources findMatchingSubmissionLocationsUsingMap(
+			final DtoJobProperties jobProperties, final String fqan) {
 
 		LinkedList<String> result = new LinkedList<String>();
 
 		Map<JobSubmissionProperty, String> converterMap = new HashMap<JobSubmissionProperty, String>();
-		for (String key : jobProperties.keySet()) {
-			converterMap.put(JobSubmissionProperty.fromString(key),
-					jobProperties.get(key));
+		for ( DtoJobProperty jp : jobProperties.getProperties() ) {
+			converterMap.put(JobSubmissionProperty.fromString(jp.key),
+					jp.value);
 		}
 
 		List<GridResource> resources = matchmaker.findMatchingResources(
 				converterMap, fqan);
 
-		return resources;
+		return DtoGridResources.createGridResources(resources);
 	}
 
-	public final List<GridResource> findMatchingSubmissionLocationsUsingJsdl(
-			Document jsdl, final String fqan) {
+	public final DtoGridResources findMatchingSubmissionLocationsUsingJsdl(
+			String jsdlString, final String fqan) {
 
+		Document jsdl;
+		try {
+			jsdl = SeveralXMLHelpers.fromString(jsdlString);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		
 		jsdl = SeveralXMLHelpers.cxfWorkaround(jsdl, "JobDefinition");
 
 		LinkedList<String> result = new LinkedList<String>();
@@ -2140,7 +2191,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		List<GridResource> resources = matchmaker.findMatchingResources(jsdl,
 				fqan);
 
-		return resources;
+		return DtoGridResources.createGridResources(resources);
 
 	}
 
@@ -2267,42 +2318,147 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * @return the proxy credential that is used to contact the grid
 	 */
 	protected ProxyCredential getCredential() {
-		
+
+		System.out.println("AUTH!!!!!!!!!!!!!!!!!!!!!!!!!");
+
 		HttpServletRequest req = HTTPRequestContext.get().getRequest();
-		ProxyCredential proxy = (ProxyCredential)req.getAttribute("credential");
-		
-		return proxy;
+
+		ProxyCredential sessionProxy = (ProxyCredential) (req.getSession()
+				.getAttribute("credential"));
+
+		if (sessionProxy != null && sessionProxy.isValid()) {
+
+			System.out.println("Using old proxy!!");
+			return sessionProxy;
+
+		} else {
+
+			System.out.println("No Proxy in session. Creating new one.");
+			String auth_head = req.getHeader("authorization");
+
+			if (auth_head != null && auth_head.startsWith("Basic")) {
+				String usernpass = new String(
+						org.apache.commons.codec.binary.Base64
+								.decodeBase64((auth_head.substring(6)
+										.getBytes())));
+				String user = usernpass.substring(0, usernpass.indexOf(":"));
+				String password = usernpass
+						.substring(usernpass.indexOf(":") + 1);
+
+				ProxyCredential proxy = createProxyCredential(user, password,
+						MyProxyServerParams.getMyProxyServer(),
+						MyProxyServerParams.getMyProxyPort(),
+						ServerPropertiesManager.getMyProxyLifetime());
+
+				boolean success = true;
+
+				if (proxy == null || !proxy.isValid()) {
+					success = false;
+					System.out.println("AUTH not successful!!!!!!!!!!!!!!!!!1");
+					return null;
+				}
+
+				req.getSession().setAttribute("credential", proxy);
+
+				System.out.println("AUTH successful!!!!!!!!!!!!!!!!!!!!!");
+
+				return proxy;
+			} else {
+				return null;
+			}
+		}
+
+	}
+
+	private ProxyCredential createProxyCredential(String username,
+			String password, String myProxyServer, int port, int lifetime) {
+		MyProxy myproxy = new MyProxy(myProxyServer, port);
+		GSSCredential proxy = null;
+		try {
+			proxy = myproxy.get(username, password, lifetime);
+
+			int remaining = proxy.getRemainingLifetime();
+
+			if (remaining <= 0)
+				throw new RuntimeException("Proxy not valid anymore.");
+
+			return new ProxyCredential(proxy);
+		} catch (Exception e) {
+			e.printStackTrace();
+			myLogger.error("Could not create myproxy credential: "
+					+ e.getLocalizedMessage());
+			return null;
+		}
+
 	}
 
 	public long getCredentialEndTime() {
-		return 100000;
+
+		MyProxy myproxy = new MyProxy(MyProxyServerParams.getMyProxyServer(),
+				MyProxyServerParams.getMyProxyPort());
+		CredentialInfo info = null;
+		try {
+			HttpServletRequest req = HTTPRequestContext.get().getRequest();
+			String auth_head = req.getHeader("authorization");
+			String usernpass = new String(
+					org.apache.commons.codec.binary.Base64
+							.decodeBase64((auth_head.substring(6).getBytes())));
+			String user = usernpass.substring(0, usernpass.indexOf(":"));
+			String password = usernpass.substring(usernpass.indexOf(":") + 1);
+			info = myproxy.info(getCredential().getGssCredential(), user,
+					password);
+		} catch (MyProxyException e) {
+			myLogger.error(e);
+			return -1;
+		}
+
+		return info.getEndTime();
 	}
 
-	public Document getTemplate(String application)
+	public String getTemplate(String application)
 			throws NoSuchTemplateException {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
+		Document doc = ServiceTemplateManagement
+				.getAvailableTemplate(application);
+
+		String result;
+		if (doc == null) {
+			throw new NoSuchTemplateException(
+					"Could not find template for application: " + application
+							+ ".");
+		} else {
+			try {
+				result = SeveralXMLHelpers.toString(doc);
+			} catch (Exception e) {
+				throw new NoSuchTemplateException(
+						"Could not find valid xml template for application: "
+								+ application + ".");
+			}
+		}
+
+		return result;
+
+	}
 
 	public String[] listHostedApplicationTemplates() {
-		// TODO Auto-generated method stub
-		return null;
+		return ServiceTemplateManagement.getAllAvailableApplications();
 	}
 
 	public void login(String username, String password) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	public void login() {
-		
+
+		getCredential();
+
 	}
 
 	public String logout() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		myLogger.debug("Logging out user: "+getDN());
+		
+		HttpServletRequest req = HTTPRequestContext.get().getRequest();
+		req.getSession().setAttribute("credential", null);
+		
+		return "Logged out.";
+		
 	}
-
 
 }
