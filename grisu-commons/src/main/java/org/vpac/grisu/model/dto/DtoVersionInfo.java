@@ -9,6 +9,11 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+/**
+ * This one contains a list of submission locations (that are available for a certain VO) of a specific version of an application.
+ * @author Markus Binsteiner
+ *
+ */
 @XmlRootElement(name="version")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class DtoVersionInfo {
@@ -25,9 +30,15 @@ public class DtoVersionInfo {
 		
 	}
 	
+	/**
+	 * The version name.
+	 */
 	@XmlAttribute(name="name")
 	private String name;
 	
+	/**
+	 * The list of available submission locations.
+	 */
 	@XmlElement(name="submissionlocation")
 	private DtoSubmissionLocations allSubmissionLocations;
 

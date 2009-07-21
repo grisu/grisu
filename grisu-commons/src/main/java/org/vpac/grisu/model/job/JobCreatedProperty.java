@@ -43,11 +43,6 @@ public enum JobCreatedProperty {
 	 */
 	FQAN(Constants.FQAN_KEY),
 	/**
-	 * The current status of the job. Have a look at {@link JobConstants} for
-	 * values for this key.
-	 */
-	JOB_STATUS_KEY(Constants.JOB_STATUS_KEY),
-	/**
 	 * The staging filesystem that is used to stage-in files for this job.
 	 */
 	STAGING_FILE_SYSTEM(Constants.STAGING_FILE_SYSTEM_KEY),

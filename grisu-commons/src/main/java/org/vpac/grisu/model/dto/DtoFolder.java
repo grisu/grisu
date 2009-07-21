@@ -9,16 +9,36 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
+/**
+ * A wrapper that contains information about one remote folder.
+ * 
+ * It has the absolute url to this folder, the basename and two lists of children folders and children files.
+ * 
+ * @author Markus Binsteiner
+ *
+ */
+@XmlRootElement(name="folder")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class DtoFolder implements DtoRemoteObject {
 
+	/**
+	 * The absolute url to this folder.
+	 */
 	@XmlAttribute(name="url")
 	private String rootUrl;
+	/**
+	 * The basename of this folder.
+	 */
 	@XmlAttribute(name="name")
 	private String name;
+	/**
+	 * A list of children folders of this folder.
+	 */
 	@XmlElement(name="folder")
 	private List<DtoFolder> childrenFolders = new LinkedList<DtoFolder>();
+	/**
+	 * A list of children files of this folder.
+	 */
 	@XmlElement(name="file")
 	private List<DtoFile> childrenFiles = new LinkedList<DtoFile>();
 	

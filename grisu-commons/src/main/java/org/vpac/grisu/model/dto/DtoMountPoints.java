@@ -11,7 +11,15 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.vpac.grisu.model.MountPoint;
 
-@XmlRootElement
+/**
+ * A wrapper that holds a list of mountpoints.
+ * 
+ * These are all the mountpoints a user has access to.
+ * 
+ * @author Markus Binsteiner
+ *
+ */
+@XmlRootElement(name="mountpoints")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class DtoMountPoints {
 	
@@ -24,6 +32,9 @@ public class DtoMountPoints {
 		return result;
 	}
 	
+	/**
+	 * All mountpoints that are available for the user.
+	 */
 	@XmlElement(name="mountpoint")
 	private List<MountPoint> mountpoints = new LinkedList<MountPoint>();
 

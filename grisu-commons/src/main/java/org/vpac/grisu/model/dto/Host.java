@@ -5,7 +5,13 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
 
-@XmlRootElement
+/**
+ * A wrapper object that contains a hostname and the site to which this hostname belongs.
+ * 
+ * @author Markus Binsteiner
+ *
+ */
+@XmlRootElement(name="host")
 public class Host {
 	
 	public Host() {
@@ -17,9 +23,15 @@ public class Host {
 		this.siteNameString = site;
 	}
 	
+    /**
+     * The hostname.
+     */
     @XmlElement(name="hostname")
     public String hostNameString; 
 
+    /**
+     * The name of the site where this host is located.
+     */
     @XmlElement(name="sitename")
     public String siteNameString;
 

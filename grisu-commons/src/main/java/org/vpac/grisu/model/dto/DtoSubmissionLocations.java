@@ -8,6 +8,12 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+/**
+ * A wrapper that holds a list of {@link DtoSubmissionLocationInfo} objects.
+ * 
+ * @author Markus Binsteiner
+ *
+ */
 @XmlRootElement(name="submissionlocations")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class DtoSubmissionLocations {
@@ -29,6 +35,9 @@ public class DtoSubmissionLocations {
 		
 	}
 
+	/**
+	 * The list of submission location objects.
+	 */
 	@XmlElement(name="submissionlocation")
 	private List<DtoSubmissionLocationInfo> allSubmissionLocations = new LinkedList<DtoSubmissionLocationInfo>();
 

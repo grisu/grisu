@@ -24,6 +24,7 @@ import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import au.org.arcs.mds.Constants;
 import au.org.arcs.mds.JsdlHelpers;
 
 /**
@@ -70,13 +71,13 @@ public class Job {
 
 	// ---------------------------------------------------------------
 	// not important infos but useful
-	private String application = null;
-	private String job_directory = null;
-	private List<String> inputFiles = new ArrayList<String>();
+//	private String application = null;
+//	private String job_directory = null;
+//	private List<String> inputFiles = new ArrayList<String>();
 	private Map<String, String> jobProperties = new HashMap<String, String>();
-	private String stdout = null;
-	private String stderr = null;
-
+//	private String stdout = null;
+//	private String stderr = null;
+//
 	// TODO later add requirements
 	// private ArrayList<Requirement> requirements = null;
 
@@ -414,54 +415,54 @@ public class Job {
 	// job information
 	// most of this will be removed once only the jobproperties map is used
 	// ---------------------
-	@CollectionOfElements(fetch = FetchType.EAGER)
-	public final List<String> getInputFiles() {
-		return inputFiles;
-	}
-
-	private void setInputFiles(final List<String> inputFiles) {
-		this.inputFiles = inputFiles;
-	}
-
-	public final void addInputFile(final String inputFile) {
-		this.inputFiles.add(inputFile);
-	}
-
-	public final void removeInputFile(final String inputFile) {
-		this.inputFiles.remove(inputFile);
-	}
-
-	public final String getJob_directory() {
-		return job_directory;
-	}
-
-	public final void setJob_directory(final String job_directory) {
-		this.job_directory = job_directory;
-	}
-
-	public final String getStderr() {
-		return stderr;
-	}
-
-	public final void setStderr(final String stderr) {
-		this.stderr = stderr;
-	}
-
-	public final String getStdout() {
-		return stdout;
-	}
-
-	public final void setStdout(final String stdout) {
-		this.stdout = stdout;
-	}
-
-	public final String getApplication() {
-		return application;
-	}
-
-	public final void setApplication(final String application) {
-		this.application = application;
-	}
+//	@CollectionOfElements(fetch = FetchType.EAGER)
+//	public final List<String> getInputFiles() {
+//		return inputFiles;
+//	}
+//
+//	private void setInputFiles(final List<String> inputFiles) {
+//		this.inputFiles = inputFiles;
+//	}
+//
+//	public final void addInputFile(final String inputFile) {
+//		this.inputFiles.add(inputFile);
+//	}
+//
+//	public final void removeInputFile(final String inputFile) {
+//		this.inputFiles.remove(inputFile);
+//	}
+//
+//	public final String getJob_directory() {
+//		return job_directory;
+//	}
+//
+//	public final void setJob_directory(final String job_directory) {
+//		this.job_directory = job_directory;
+//	}
+//
+//	public final String getStderr() {
+//		return stderr;
+//	}
+//
+//	public final void setStderr(final String stderr) {
+//		this.stderr = stderr;
+//	}
+//
+//	public final String getStdout() {
+//		return stdout;
+//	}
+//
+//	public final void setStdout(final String stdout) {
+//		this.stdout = stdout;
+//	}
+//
+//	public final String getApplication() {
+//		return application;
+//	}
+//
+//	public final void setApplication(final String application) {
+//		this.application = application;
+//	}
 
 	@CollectionOfElements(fetch = FetchType.EAGER)
 	public final Map<String, String> getJobProperties() {

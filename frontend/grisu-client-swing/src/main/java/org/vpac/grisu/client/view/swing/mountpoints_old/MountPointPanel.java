@@ -102,7 +102,7 @@ public class MountPointPanel extends JPanel {
 			jButton.setText("Unmount");
 			jButton.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
-					myLogger.debug("Unmounting: "+mountpoint.getMountpointName());
+					myLogger.debug("Unmounting: "+mountpoint.getAlias());
 					em.umount(mountpoint);
 					MountPointPanel.this.setVisible(false);
 				}
@@ -131,7 +131,7 @@ public class MountPointPanel extends JPanel {
 	 */
 	private JTextField getMountPointField() {
 		if (mountPointField == null) {
-			mountPointField = new JTextField(mountpoint.getMountpointName());
+			mountPointField = new JTextField(mountpoint.getAlias());
 			mountPointField.setEditable(false);
 		}
 		return mountPointField;

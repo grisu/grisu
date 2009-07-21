@@ -11,7 +11,13 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
+/**
+ * A wrapper that contains a list of {@link DtoApplicationDetail} objects.
+ * 
+ * @author Markus Binsteiner
+ *
+ */
+@XmlRootElement(name="applicationdetails")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class DtoApplicationDetails {
 	
@@ -32,9 +38,15 @@ public class DtoApplicationDetails {
 	}
 	
 	
+	/**
+	 * A list of all the application details.
+	 */
 	@XmlElement(name="detail")
 	private List<DtoApplicationDetail> details = new LinkedList<DtoApplicationDetail>();
 	
+	/**
+	 * The name of the application.
+	 */
 	@XmlAttribute
 	private String applicationName;
 

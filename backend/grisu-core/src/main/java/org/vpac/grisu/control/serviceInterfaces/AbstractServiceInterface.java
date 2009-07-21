@@ -794,7 +794,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						&& jobFqan.equals(mp.getFqan())) {
 					mountPointToUse = mp;
 					stagingFilesystemToUse = stagingFs.replace(":2811", "");
-					myLogger.debug("Found mountpoint " + mp.getMountpointName()
+					myLogger.debug("Found mountpoint " + mp.getAlias()
 							+ " for stagingfilesystem "
 							+ stagingFilesystemToUse);
 					break;
@@ -803,7 +803,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			if (mountPointToUse != null) {
 				myLogger.debug("Mountpoint set to be: "
-						+ mountPointToUse.getMountpointName()
+						+ mountPointToUse.getAlias()
 						+ ". Not looking any further...");
 				break;
 			}
@@ -840,10 +840,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				.getSiteForHostOrUrl(stagingFilesystemToUse);
 		myLogger.debug("Calculated submissionSite: " + submissionSite);
 		job.addJobProperty("submissionSite", submissionSite);
-		job.setJob_directory(stagingFilesystemToUse + workingDirectory);
+//		job.setJob_directory(stagingFilesystemToUse + workingDirectory);
 		job.getJobProperties().put(Constants.JOBDIRECTORY_KEY,
 				stagingFilesystemToUse + workingDirectory);
-		myLogger.debug("Calculated jobdirectory: " + job.getJob_directory());
+		myLogger.debug("Calculated jobdirectory: " + stagingFilesystemToUse + workingDirectory);
 
 		myLogger.debug("Fixing urls in datastaging elements...");
 		// fix stage in target filesystems...
@@ -1165,15 +1165,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		// TODO remove that later on when I'm sure that nobody is using this
 		// anymore
-		String app = JsdlHelpers.getApplicationName(job.getJobDescription());
-		job.setApplication(app);
-
-		String stdout = JsdlHelpers.getPosixStandardOutput(job
-				.getJobDescription());
-		job.setStdout(job.getJob_directory() + File.separator + stdout);
-		String stderr = JsdlHelpers.getPosixStandardError(job
-				.getJobDescription());
-		job.setStderr(job.getJob_directory() + File.separator + stderr);
+//		String app = JsdlHelpers.getApplicationName(job.getJobDescription());
+//		job.setApplication(app);
+//
+//		String stdout = JsdlHelpers.getPosixStandardOutput(job
+//				.getJobDescription());
+//		job.setStdout(job.getJob_directory() + File.separator + stdout);
+//		String stderr = JsdlHelpers.getPosixStandardError(job
+//				.getJobDescription());
+//		job.setStderr(job.getJob_directory() + File.separator + stderr);
 
 		jobdao.saveOrUpdate(job);
 	}
@@ -2099,8 +2099,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// job.getJobProperties().put(JobConstants.JOBPROPERTYKEY_HOSTNAME,
 		// job.getSubmissionHost());
 
-		job.getJobProperties().put(Constants.JOB_STATUS_KEY,
-				JobConstants.translateStatus(getJobStatus(jobname)));
+//		job.getJobProperties().put(Constants.JOB_STATUS_KEY,
+//				JobConstants.translateStatus(getJobStatus(jobname)));
 
 		return job.getJobProperties();
 	}
@@ -2287,7 +2287,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return null;
 		}
 		myLogger.debug("Responsible mountpoint: "
-				+ mountpoint.getMountpointName());
+				+ mountpoint.getAlias());
 		String jobDir = getWorkingDirectoryRelativeToMountPoint(jobname);
 		myLogger.debug("Jobdirectory: " + jobDir);
 		return mountpoint.getRootUrl() + "/" + jobDir;
@@ -2559,7 +2559,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				myLogger.debug("Staging file: " + sourceUrl + " to: "
 						+ targetUrl);
 				cp(sourceUrl, targetUrl, true, true);
-				job.addInputFile(targetUrl);
+//				job.addInputFile(targetUrl);
 			}
 			// }
 		}
@@ -2582,7 +2582,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		myLogger.debug("Using calculated jobdirectory: " + jobDir);
 
-		job.setJob_directory(jobDir);
+//		job.setJob_directory(jobDir);
 
 		try {
 			FileObject jobDirObject = getUser().aquireFile(jobDir);
@@ -2598,7 +2598,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} catch (FileSystemException e) {
 			throw new RemoteFileSystemException(
 					"Could not create job output folder: "
-							+ job.getJob_directory());
+							+ jobDir);
 		}
 		// now after the jsdl is ready, don't forget to fill the required fields
 		// into the database
@@ -2692,7 +2692,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		String workingDirRelativeToUserFS = JsdlHelpers.getWorkingDirectory(job
 				.getJobDescription());
-		job.setJob_directory(submissionFS + "/" + workingDirRelativeToUserFS);
+//		job.setJob_directory(submissionFS + "/" + workingDirRelativeToUserFS);
 		job.getJobProperties().put(Constants.JOBDIRECTORY_KEY,
 				submissionFS + "/" + workingDirRelativeToUserFS);
 
@@ -2796,12 +2796,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		if (clear) {
 
-			if (job.getJob_directory() != null
-					|| job.getJobProperty(Constants.JOBDIRECTORY_KEY) != null) {
+			if (job.getJobProperty(Constants.JOBDIRECTORY_KEY) != null) {
 
 				try {
 					FileObject jobDir = getUser().aquireFile(
-							job.getJob_directory());
+							job.getJobProperty(Constants.JOBDIRECTORY_KEY));
 					jobDir.delete(new AllFileSelector());
 					jobDir.delete();
 				} catch (Exception e) {

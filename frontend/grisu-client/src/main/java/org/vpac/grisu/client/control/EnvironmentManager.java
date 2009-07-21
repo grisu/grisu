@@ -320,7 +320,7 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 	 *            the mountpoint
 	 */
 	public synchronized void umount(MountPoint mp) {
-		serviceInterface.umount(mp.getMountpointName());
+		serviceInterface.umount(mp.getAlias());
 
 		fireMountPointsEvent(MountPointEvent.MOUNTPOINT_REMOVED,
 				new MountPoint[] { mp });

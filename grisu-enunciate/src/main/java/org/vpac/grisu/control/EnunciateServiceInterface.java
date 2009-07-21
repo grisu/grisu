@@ -24,7 +24,8 @@ import org.vpac.grisu.model.dto.DtoApplicationInfo;
 import org.vpac.grisu.model.dto.DtoDataLocations;
 import org.vpac.grisu.model.dto.DtoFolder;
 import org.vpac.grisu.model.dto.DtoGridResources;
-import org.vpac.grisu.model.dto.DtoJobProperties;
+import org.vpac.grisu.model.dto.DtoJob;
+import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 import org.vpac.grisu.model.dto.HostsInfo;
@@ -407,7 +408,7 @@ public interface EnunciateServiceInterface {
 	 * @return a list of matching submissionLoctations
 	 */
 	DtoGridResources findMatchingSubmissionLocationsUsingMap(
-			DtoJobProperties jobProperties, String fqan);
+			DtoJob jobProperties, String fqan);
 
 	// ---------------------------------------------------------------------------------------------------
 	// 
@@ -671,10 +672,11 @@ public interface EnunciateServiceInterface {
 	 * Returns a xml document that contains all the jobs of the user with
 	 * information about the jobs.
 	 * 
+	 * @param refreshJobStatus whether to refresh the status of all the jobs. This can take quite some time.
+	 *  
 	 * @return xml formated information about all the users jobs
 	 */
-	@WebMethod(exclude=true)
-	Document ps();
+	DtoJobs ps(boolean refreshJobStatus);
 
 	/**
 	 * Returns a list of all jobnames that are currently stored on this backend.
@@ -708,8 +710,7 @@ public interface EnunciateServiceInterface {
 	 *             already exists and force-jobname is specified as jobname
 	 *             creation method).
 	 */
-	@WebMethod(exclude=true)
-	String createJobUsingMap(Map<String, String> jobProperties, String fqan,
+	String createJobUsingMap(DtoJob job, String fqan,
 			String jobnameCreationMethod) throws JobPropertiesException;
 
 	/**
@@ -731,14 +732,13 @@ public interface EnunciateServiceInterface {
 	 *             already exists and force-jobname is specified as jobname
 	 *             creation method).
 	 */
-	@WebMethod(exclude=true)
-	String createJob(Document jsdl, String fqan,
+	String createJobUsingJsdl(String jsdl, String fqan,
 			String jobnameCreationMethod) throws JobPropertiesException;
 
 	/**
 	 * Submits the job that was prepared before using
 	 * {@link #createJobUsingMap(Map, String, String)} or
-	 * {@link #createJob(Document, String, String)} to the specified submission
+	 * {@link #createJobUsingJsdl(String, String, String)} to the specified submission
 	 * location.
 	 * 
 	 * @param jobname
@@ -804,8 +804,7 @@ public interface EnunciateServiceInterface {
 	 * @throws NoSuchJobException
 	 *             if there is no job with this jobname in the database
 	 */
-	@WebMethod(exclude=true)
-	void addJobProperties(String jobname, Map<String, String> properties)
+	void addJobProperties(String jobname, DtoJob properties)
 			throws NoSuchJobException;
 
 	/**
@@ -830,8 +829,7 @@ public interface EnunciateServiceInterface {
 	 * @return the job properties
 	 * @throws NoSuchJobException if no such job exists
 	 */
-	@WebMethod(exclude=true)
-	Map<String, String> getAllJobProperties(String jobname)
+	DtoJob getAllJobProperties(String jobname)
 			throws NoSuchJobException;
 
 
@@ -842,7 +840,6 @@ public interface EnunciateServiceInterface {
 	 * @return the jsdl document
 	 * @throws NoSuchJobException if no such job exists
 	 */
-	@WebMethod(exclude=true)
-	Document getJsldDocument(String jobname) throws NoSuchJobException;
+	String getJsldDocument(String jobname) throws NoSuchJobException;
 
 }

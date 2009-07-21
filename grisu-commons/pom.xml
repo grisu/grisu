@@ -1,19 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?><project>
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
 	<url>http://projects.arcs.org.au/trac/grisu/wiki/GrisuCommons</url>
-  <parent>
-    <artifactId>grisu</artifactId>
-    <groupId>org.vpac.grisu</groupId>
-    <version>0.3-SNAPSHOT</version>
-  </parent>
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.vpac.grisu</groupId>
-  <artifactId>grisu-commons</artifactId>
-  <name>grisu-commons</name>
-  <version>0.3-SNAPSHOT</version>
-  <description>The most important thing about the grisu-commons is that it holds the ServiceInterface interface
-	 	which is used by both backend and frontend modules. It also holds a few other globally used
-	 	classes and interfaces.</description>
-  <dependencies>
+	<parent>
+		<artifactId>grisu</artifactId>
+		<groupId>org.vpac.grisu</groupId>
+		<version>0.3-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.vpac.grisu</groupId>
+	<artifactId>grisu-commons</artifactId>
+	<name>grisu-commons</name>
+	<version>0.3-SNAPSHOT</version>
+	<description>The most important thing about the grisu-commons is that
+		it holds the ServiceInterface interface
+		which is used by both backend and frontend modules. It also holds a few
+		other globally used
+		classes and interfaces.</description>
+	<dependencies>
 
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -21,18 +24,18 @@
 			<version>1.4</version>
 		</dependency>
 
-<!--		<dependency>-->
-<!--			<groupId>com.google.collections</groupId>-->
-<!--			<artifactId>google-collections</artifactId>-->
-<!--			<version>0.8</version>-->
-<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>com.google.collections</groupId>-->
+		<!--			<artifactId>google-collections</artifactId>-->
+		<!--			<version>0.8</version>-->
+		<!--		</dependency>-->
 
 
-<!-- 		<dependency>
-			<groupId>xfire</groupId>
-			<artifactId>xfire-jsr181-api</artifactId>
-			<version>1.0-M1</version>
-		</dependency> -->
+		<!--
+			<dependency> <groupId>xfire</groupId>
+			<artifactId>xfire-jsr181-api</artifactId> <version>1.0-M1</version>
+			</dependency>
+		-->
 
 		<dependency>
 			<groupId>commons-configuration</groupId>
@@ -98,7 +101,7 @@
 		<dependency>
 			<groupId>javax.xml.ws</groupId>
 			<artifactId>jaxws-api</artifactId>
-			<version>2.1</version>
+			<version>2.1-1</version>
 			<type>jar</type>
 			<scope>compile</scope>
 			<exclusions>
@@ -106,10 +109,18 @@
 					<artifactId>jsr181-api</artifactId>
 					<groupId>javax.jws</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>jsr181</artifactId>
+					<groupId>javax.jws</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>activation</artifactId>
+					<groupId>activation</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
-  </dependencies>
-  	<build>
+	</dependencies>
+	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -118,6 +129,19 @@
 					<source>1.5</source>
 					<target>1.5</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

@@ -11,45 +11,111 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import au.org.arcs.mds.GridResource;
 
-@XmlRootElement
+/**
+ * A wrapper object that is created when the grid is queried for resources that are able to 
+ * run a certain type of job.
+ * 
+ * This contains a snapshot of values for a single grid resource that can be of importance when deciding where to run a job.
+ * 
+ * @author Markus Binsteiner
+ *
+ */
+@XmlRootElement(name="gridresource")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class DtoGridResource implements GridResource {
 
+	/**
+	 * All the a executables that are available for the selected application on this grid resource.
+	 */
 	@XmlElement(name="executable")
 	private Set<String> allExecutables;
+	/**
+	 * The application name of the job that was used to find this grid resource.
+	 */
 	@XmlAttribute(name="applicationName")
 	private String applicationName;
+	/**
+	 * A list of versions of the application that are available on this grid resource.
+	 */
 	@XmlElement(name="version")
 	private List<String> availableApplicationVersion;
-	@XmlElement
+	/**
+	 * The contact string for this grid resource.
+	 */
+	@XmlElement(name="contactstring")
 	private String contactString;
-	@XmlElement
+	/**
+	 * The number of free job slots for the VO that was used to find this grid resource.
+	 */
+	@XmlElement(name="freejobslots")
 	private int freeJobSlots;
-	@XmlElement
+	/**
+	 * The job manager that is used on this grid resource.
+	 */
+	@XmlElement(name="jobmanager")
 	private String jobManager;
-	@XmlElement
+	/**
+	 * The main memory ram size that is available on this grid resource.
+	 */
+	@XmlElement(name="mainmemoryramsize")
 	private int mainMemoryRAMSize;
-	@XmlElement
+	/**
+	 * The main memory virtual size that is available on this grid resource.
+	 */
+	@XmlElement(name="mainmemoryvirtualsize")
 	private int mainMemoryVirtualSize;
-	@XmlAttribute
+	/**
+	 * The queue name for this grid resource.
+	 */
+	@XmlAttribute(name="queuename")
 	private String queueName;
-	@XmlElement
+	/**
+	 * The rank for this grid resource. This is a value that was calculated by the ranking algorithm
+	 * that is used in the matchmaker library.
+	 */
+	@XmlElement(name="rank")
 	private int rank;
-	@XmlElement
+	/**
+	 * The total of running jobs for the VO that was used to find this grid resource.
+	 */
+	@XmlElement(name="runningjobs")
 	private int runningJobs;
-	@XmlAttribute
+	/**
+	 * The latitude for the site where this grid resource is located.
+	 */
+	@XmlAttribute(name="latitude")
 	private double siteLatitude;
-	@XmlAttribute
+	/**
+	 * The longitude for the site where this grid resource is located.
+	 */
+	@XmlAttribute(name="longitude")
 	private double siteLongitude;
-	@XmlAttribute
+	/**
+	 * The name of the site where this grid resource is located.
+	 */
+	@XmlAttribute(name="sitename")
 	private String siteName;
-	@XmlElement
+	/**
+	 * The smp size on this grid resource.
+	 */
+	@XmlElement(name="smpsize")
 	private int smpSize;
-	@XmlElement
+	/**
+	 * The total number of jobs on this grid resource for the VO that was used to find this grid resource.
+	 */
+	@XmlElement(name="totaljobs")
 	private int totalJobs;
-	@XmlElement
+	/**
+	 * The number of jobs that wait in the queue on this grid resource for the VO that was used to find this grid resource.
+	 */
+	@XmlElement(name="waitingjobs")
 	private int waitingJobs;
-	@XmlAttribute
+	/**
+	 * Whether the version that was specified in the initial query is available on this resource.
+	 * 
+	 *  Don't use that, I think it doesn't work. Use the list of versions instead.
+	 */
+	@XmlAttribute(name="isdesiredversioninstalled")
 	private boolean isDesiredVersionInstalled;
 	
 	public DtoGridResource() {

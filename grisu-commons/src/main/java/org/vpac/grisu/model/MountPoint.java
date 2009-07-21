@@ -23,26 +23,38 @@ import org.apache.log4j.Logger;
  * 
  */
 @Entity
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name="mountpoint")
+@XmlAccessorType(XmlAccessType.NONE)
 public class MountPoint implements Comparable<MountPoint> {
 
 	static final Logger myLogger = Logger.getLogger(MountPoint.class.getName());
 
 	private Long mountPointId = null;
 
-	@XmlElement
+	/**
+	 * The dn of the user.
+	 */
+	@XmlElement(name="dn")
 	private String dn = null;
-	@XmlElement
+	/**
+	 * The fqan that is used to create a voms credential to access this mountpoint.
+	 */
+	@XmlElement(name="fqan")
 	private String fqan = null;
-	@XmlAttribute
-	private String mountpointName = null;
-	@XmlAttribute
+	/**
+	 * The alias of this mountpoint.
+	 */
+	@XmlAttribute(name="alias")
+	private String alias = null;
+	/**
+	 * The url of the root of this mountpoint.
+	 */
+	@XmlAttribute(name="url")
 	private String rootUrl = null;
 
-	@XmlElement
+	@XmlElement(name="automounted")
 	private boolean automaticallyMounted = false;
-	@XmlElement
+	@XmlElement(name="disabled")
 	private boolean disabled = false;
 
 	// for hibernate
@@ -65,7 +77,7 @@ public class MountPoint implements Comparable<MountPoint> {
 		this.dn = dn;
 		this.fqan = fqan;
 		this.rootUrl = url;
-		this.mountpointName = mountpoint;
+		this.alias = mountpoint;
 	}
 
 	/**
@@ -100,7 +112,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	 */
 	public MountPoint(final String dn, final String mountpoint) {
 		this.dn = dn;
-		this.mountpointName = mountpoint;
+		this.alias = mountpoint;
 	}
 
 	@Column(nullable = false)
@@ -112,6 +124,11 @@ public class MountPoint implements Comparable<MountPoint> {
 		this.dn = dn;
 	}
 
+	/**
+	 * The fqan that is used to create a voms proxy to access this mountpoint.
+	 * 
+	 * @return the fqan
+	 */
 	public final String getFqan() {
 		return fqan;
 	}
@@ -121,12 +138,12 @@ public class MountPoint implements Comparable<MountPoint> {
 	}
 
 	@Column(nullable = false)
-	public final String getMountpointName() {
-		return mountpointName;
+	public final String getAlias() {
+		return alias;
 	}
 
-	public final void setMountpointName(final String mountpoint) {
-		this.mountpointName = mountpoint;
+	public final void setAlias(final String mountpoint) {
+		this.alias = mountpoint;
 	}
 
 	@Column(nullable = false)
@@ -167,7 +184,7 @@ public class MountPoint implements Comparable<MountPoint> {
 		if (otherMountPoint instanceof MountPoint) {
 			MountPoint other = (MountPoint) otherMountPoint;
 
-			return other.getMountpointName().equals(this.getMountpointName());
+			return other.getAlias().equals(this.getAlias());
 
 			// if ( other.getDn().equals(this.getDn()) &&
 			// other.getRootUrl().equals(this.getRootUrl()) ) {
@@ -196,7 +213,7 @@ public class MountPoint implements Comparable<MountPoint> {
 
 	public final int hashCode() {
 		// return dn.hashCode() + mountpoint.hashCode();
-		return mountpointName.hashCode();
+		return alias.hashCode();
 	}
 
 	/**
@@ -211,8 +228,8 @@ public class MountPoint implements Comparable<MountPoint> {
 	 */
 	public final String replaceMountpointWithAbsoluteUrl(final String file) {
 
-		if (file.startsWith(getMountpointName())) {
-			return file.replaceFirst(getMountpointName(), getRootUrl());
+		if (file.startsWith(getAlias())) {
+			return file.replaceFirst(getAlias(), getRootUrl());
 		} else {
 			return null;
 		}
@@ -229,7 +246,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	public final String replaceAbsoluteRootUrlWithMountPoint(final String file) {
 
 		if (file.startsWith(getRootUrl())) {
-			return file.replaceFirst(getRootUrl(), getMountpointName());
+			return file.replaceFirst(getRootUrl(), getAlias());
 
 		} else {
 			return null;
@@ -254,7 +271,7 @@ public class MountPoint implements Comparable<MountPoint> {
 			}
 		}
 
-		if (file.startsWith(getMountpointName())) {
+		if (file.startsWith(getAlias())) {
 			return true;
 		} else {
 			return false;
@@ -290,7 +307,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	 * @see java.lang.Object#toString()
 	 */
 	public final String toString() {
-		return getMountpointName();
+		return getAlias();
 	}
 
 	/**
@@ -305,10 +322,10 @@ public class MountPoint implements Comparable<MountPoint> {
 	public final String getRelativePathToRoot(final String url) {
 
 		if (url.startsWith("/")) {
-			if (!url.startsWith(getMountpointName())) {
+			if (!url.startsWith(getAlias())) {
 				return null;
 			} else {
-				String path = url.substring(getMountpointName().length());
+				String path = url.substring(getAlias().length());
 				if (path.startsWith("/")) {
 					return path.substring(1);
 				} else {

@@ -10,6 +10,13 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+/**
+ * A class that contains information about which submission locations are available for
+ * a certain application, sorted by version.
+ * 
+ * @author Markus Binsteiner
+ *
+ */
 @XmlRootElement(name="application")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class DtoApplicationInfo {
@@ -39,9 +46,15 @@ public class DtoApplicationInfo {
 		return appInfo;
 	}
 	
+	/**
+	 * The name of the application.
+	 */
 	@XmlAttribute(name="applicationName")
 	private String name;
 	
+	/**
+	 * All the versions of this application grid-wide, for all VOs.
+	 */
 	@XmlElement(name="version")
 	private List<DtoVersionInfo> allVersions = new LinkedList<DtoVersionInfo>();
 

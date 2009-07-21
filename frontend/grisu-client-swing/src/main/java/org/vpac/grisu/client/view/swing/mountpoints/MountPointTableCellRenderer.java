@@ -29,7 +29,7 @@ public class MountPointTableCellRenderer implements TableCellRenderer {
         } else {
         	JLabel result = new JLabel();
         	switch (column) {
-        	case MOUNTPOINT_NAME_INDEX: result.setText(mp.getMountpointName()); break;
+        	case MOUNTPOINT_NAME_INDEX: result.setText(mp.getAlias()); break;
         	case MOUNTPOINT_ROOT_INDEX: result.setText(mp.getRootUrl()); break;
         	case FQAN_INDEX: result.setText(mp.getFqan()); break;
         	}

@@ -10,7 +10,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import au.org.arcs.mds.GridResource;
 
-@XmlRootElement
+/**
+ * A wrapper that holds a list of {@link DtoGridResource} objects.
+ * 
+ * @author Markus Binsteiner
+ *
+ */
+@XmlRootElement(name="gridresources")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class DtoGridResources {
 
@@ -32,6 +38,9 @@ public class DtoGridResources {
 	}
 	
 	
+	/**
+	 * The list of grid resources.
+	 */
 	@XmlElement(name="gridresource")
 	List<DtoGridResource> gridResources = new LinkedList<DtoGridResource>();
 

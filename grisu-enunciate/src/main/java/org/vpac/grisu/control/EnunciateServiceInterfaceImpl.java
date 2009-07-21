@@ -22,7 +22,6 @@ import javax.jws.WebService;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.lang.StringUtils;
@@ -50,7 +49,6 @@ import org.vpac.grisu.backend.model.job.gt4.GT4Submitter;
 import org.vpac.grisu.backend.utils.CertHelpers;
 import org.vpac.grisu.backend.utils.FileContentDataSourceConnector;
 import org.vpac.grisu.backend.utils.FileSystemStructureToXMLConverter;
-import org.vpac.grisu.backend.utils.JobsToXMLConverter;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
@@ -66,8 +64,9 @@ import org.vpac.grisu.model.dto.DtoDataLocations;
 import org.vpac.grisu.model.dto.DtoFile;
 import org.vpac.grisu.model.dto.DtoFolder;
 import org.vpac.grisu.model.dto.DtoGridResources;
-import org.vpac.grisu.model.dto.DtoJobProperties;
+import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoJobProperty;
+import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 import org.vpac.grisu.model.dto.HostsInfo;
@@ -228,15 +227,24 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		}
 		return manager;
 	}
+	
+	public final String createJobUsingJsdl(String jsdlString, final String fqan, final String jobnameCreationMethod) throws JobPropertiesException {
 
-	public final String createJob(Document jsdl, final String fqan,
+		Document jsdl;
+		
+		try {
+			jsdl = SeveralXMLHelpers.fromString(jsdlString);
+		} catch (Exception e3) {
+
+			myLogger.error(e3);
+			throw new RuntimeException("Invalid jsdl/xml format.", e3);
+		}
+
+		return createJob(jsdl, fqan, jobnameCreationMethod);
+	}
+
+	private final String createJob(Document jsdl, final String fqan,
 			final String jobnameCreationMethod) throws JobPropertiesException {
-
-		// workaround for cxf xml wrapping bug
-		jsdl = SeveralXMLHelpers.cxfWorkaround(jsdl, "JobDefinition");
-
-		System.out.println(SeveralXMLHelpers
-				.toStringWithoutAnnoyingExceptions(jsdl));
 
 		String jobname = JsdlHelpers.getJobname(jsdl);
 
@@ -355,10 +363,10 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	}
 
 	public final String createJobUsingMap(
-			final Map<String, String> jobProperties, final String fqan,
+			final DtoJob jobProperties, final String fqan,
 			final String jobCreationMethod) throws JobPropertiesException {
 
-		JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl(jobProperties);
+		JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl(jobProperties.getPropertiesAsMap());
 
 		return createJob(jso.getJobDescriptionDocument(), fqan,
 				jobCreationMethod);
@@ -392,6 +400,12 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 
 		JobSubmissionObjectImpl jobSubmissionObject = new JobSubmissionObjectImpl(
 				jsdl);
+		
+		for (JobSubmissionProperty key : jobSubmissionObject
+				.getJobSubmissionPropertyMap().keySet()) {
+			job.getJobProperties().put(key.toString(),
+					jobSubmissionObject.getJobSubmissionPropertyMap().get(key));
+		}
 
 		List<GridResource> matchingResources = null;
 
@@ -686,7 +700,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 						&& jobFqan.equals(mp.getFqan())) {
 					mountPointToUse = mp;
 					stagingFilesystemToUse = stagingFs.replace(":2811", "");
-					myLogger.debug("Found mountpoint " + mp.getMountpointName()
+					myLogger.debug("Found mountpoint " + mp.getAlias()
 							+ " for stagingfilesystem "
 							+ stagingFilesystemToUse);
 					break;
@@ -695,7 +709,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 
 			if (mountPointToUse != null) {
 				myLogger.debug("Mountpoint set to be: "
-						+ mountPointToUse.getMountpointName()
+						+ mountPointToUse.getAlias()
 						+ ". Not looking any further...");
 				break;
 			}
@@ -733,10 +747,10 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 				.getSiteForHostOrUrl(stagingFilesystemToUse);
 		myLogger.debug("Calculated submissionSite: " + submissionSite);
 		job.addJobProperty("submissionSite", submissionSite);
-		job.setJob_directory(stagingFilesystemToUse + workingDirectory);
+//		job.setJob_directory(stagingFilesystemToUse + workingDirectory);
 		job.getJobProperties().put(Constants.JOBDIRECTORY_KEY,
 				stagingFilesystemToUse + workingDirectory);
-		myLogger.debug("Calculated jobdirectory: " + job.getJob_directory());
+		myLogger.debug("Calculated jobdirectory: " + stagingFilesystemToUse + workingDirectory);
 
 		myLogger.debug("Fixing urls in datastaging elements...");
 		// fix stage in target filesystems...
@@ -782,10 +796,6 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 					"Could not access remote filesystem: "
 							+ e.getLocalizedMessage());
 		}
-
-		// fill necessary info about the job into the database
-		myLogger.debug("Parsing job description...");
-		parseJobDescription(job);
 
 		if (job.getFqan() != null) {
 			VO vo = VOManagement.getVO(getUser().getFqans().get(job.getFqan()));
@@ -931,22 +941,22 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#ps()
 	 */
-	public final Document ps() {
+	public final DtoJobs ps(boolean refresh) {
 
 		List<Job> jobs = jobdao.findJobByDN(getUser().getDn());
 
-		refreshJobStatus(jobs);
+		if ( refresh ) {
+			refreshJobStatus(jobs);
+		}
 
-		Document info = JobsToXMLConverter.getJobsInformation(jobs);
+		DtoJobs dtoJobs = new DtoJobs();
+		for ( Job job : jobs ) {
+			DtoJob.createJob(job.getStatus(), job.getJobProperties());
+		}
 
-		return info;
+		return dtoJobs;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.vpac.grisu.control.ServiceInterface#getAllJobnames()
-	 */
 	public final String[] getAllJobnames() {
 
 		List<String> jobnames = jobdao.findJobNamesByDn(getUser().getDn());
@@ -965,63 +975,6 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		for (Job job : jobs) {
 			getJobStatus(job.getJobname());
 		}
-	}
-
-	// /*
-	// * (non-Javadoc)
-	// *
-	// * @see
-	// org.vpac.grisu.control.ServiceInterface#saveDefaultCredentialToDatabase()
-	// */
-	// public Long saveDefaultCredentialToDatabase() {
-	//
-	// Long credID = null;
-	// credID = credentialdao.save(getCredential());
-	//
-	// return credID;
-	// }
-
-	/**
-	 * This one parses the job description and fills in necessary fields into
-	 * the database. It's not really necessary because all the information is in
-	 * the jsdl document but that way the database is much easier to search.
-	 * 
-	 * @param job
-	 *            the jobname of the job you want to parse
-	 */
-	protected final void parseJobDescription(final Job job) {
-
-		Document jsdl = job.getJobDescription();
-
-		JobSubmissionObjectImpl jobSubmImpl = new JobSubmissionObjectImpl(jsdl);
-
-		for (JobSubmissionProperty key : jobSubmImpl
-				.getJobSubmissionPropertyMap().keySet()) {
-			job.getJobProperties().put(key.toString(),
-					jobSubmImpl.getJobSubmissionPropertyMap().get(key));
-		}
-
-		// TODO urgent! find out why job properties are not persisted after
-		// first safe!
-		// job.getJobProperties().put("jobDirectory",
-		// JsdlHelpers.getAbsoluteWorkingDirectoryUrl(jsdl));
-
-		// fill info
-		// this will disapear later and only jobProperties will be used.
-
-		// TODO remove that later on when I'm sure that nobody is using this
-		// anymore
-		String app = JsdlHelpers.getApplicationName(job.getJobDescription());
-		job.setApplication(app);
-
-		String stdout = JsdlHelpers.getPosixStandardOutput(job
-				.getJobDescription());
-		job.setStdout(job.getJob_directory() + File.separator + stdout);
-		String stderr = JsdlHelpers.getPosixStandardError(job
-				.getJobDescription());
-		job.setStderr(job.getJob_directory() + File.separator + stderr);
-
-		jobdao.saveOrUpdate(job);
 	}
 
 	/*
@@ -1482,14 +1435,14 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * , java.util.Map)
 	 */
 	public final void addJobProperties(final String jobname,
-			final Map<String, String> properties) throws NoSuchJobException {
+			final DtoJob properties) throws NoSuchJobException {
 
 		Job job = getJob(jobname);
 
-		job.addJobProperties(properties);
+		job.addJobProperties(properties.getPropertiesAsMap());
 		jobdao.saveOrUpdate(job);
 
-		myLogger.debug("Added " + properties.size() + " job properties.");
+		myLogger.debug("Added " + properties.getProperties().size() + " job properties.");
 
 	}
 
@@ -1500,23 +1453,30 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#getAllJobProperties(java.lang
 	 * .String)
 	 */
-	public final Map<String, String> getAllJobProperties(final String jobname)
+	public final DtoJob getAllJobProperties(final String jobname)
 			throws NoSuchJobException {
 
 		Job job = getJob(jobname);
 
-		job.getJobProperties().put(Constants.JOB_STATUS_KEY,
-				JobConstants.translateStatus(getJobStatus(jobname)));
+//		job.getJobProperties().put(Constants.JOB_STATUS_KEY,
+//				JobConstants.translateStatus(getJobStatus(jobname)));
 
-		return job.getJobProperties();
+		return DtoJob.createJob(job.getStatus(), job.getJobProperties());
 	}
 
-	public final Document getJsldDocument(final String jobname)
+	public final String getJsldDocument(final String jobname)
 			throws NoSuchJobException {
 
 		Job job = getJob(jobname);
 
-		return job.getJobDescription();
+		String jsdlString;
+		try {
+			jsdlString = SeveralXMLHelpers.toString(job.getJobDescription());
+		} catch (TransformerException e) {
+			throw new RuntimeException("Could not convert jsdl into string.");
+		}
+		
+		return jsdlString;
 
 	}
 
@@ -1821,7 +1781,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 				myLogger.debug("Staging file: " + sourceUrl + " to: "
 						+ targetUrl);
 				cp(sourceUrl, targetUrl, true, true);
-				job.addInputFile(targetUrl);
+//				job.addInputFile(targetUrl);
 			}
 			// }
 		}
@@ -1844,7 +1804,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 
 		myLogger.debug("Using calculated jobdirectory: " + jobDir);
 
-		job.setJob_directory(jobDir);
+//		job.setJob_directory(jobDir);
 
 		try {
 			FileObject jobDirObject = getUser().aquireFile(jobDir);
@@ -1860,7 +1820,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		} catch (FileSystemException e) {
 			throw new RemoteFileSystemException(
 					"Could not create job output folder: "
-							+ job.getJob_directory());
+							+ jobDir);
 		}
 		// now after the jsdl is ready, don't forget to fill the required fields
 		// into the database
@@ -1877,12 +1837,11 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 
 		if (clear) {
 
-			if (job.getJob_directory() != null
-					|| job.getJobProperty(Constants.JOBDIRECTORY_KEY) != null) {
+			if ( job.getJobProperty(Constants.JOBDIRECTORY_KEY) != null ) {
 
 				try {
 					FileObject jobDir = getUser().aquireFile(
-							job.getJob_directory());
+							job.getJobProperty(Constants.JOBDIRECTORY_KEY));
 					jobDir.delete(new AllFileSelector());
 					jobDir.delete();
 				} catch (Exception e) {
@@ -2158,7 +2117,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	}
 
 	public final DtoGridResources findMatchingSubmissionLocationsUsingMap(
-			final DtoJobProperties jobProperties, final String fqan) {
+			final DtoJob jobProperties, final String fqan) {
 
 		LinkedList<String> result = new LinkedList<String>();
 

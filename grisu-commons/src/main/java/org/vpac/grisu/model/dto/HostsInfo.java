@@ -9,7 +9,16 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
+/**
+ * A map object that contains all hostnames gridwide. These hostnames are all mapped to the name of the 
+ * site where they are located.
+ * 
+ * This can be useful for displaying structured information about the grid to the user.
+ * 
+ * @author Markus Binsteiner
+ *
+ */
+@XmlRootElement(name="hostsinfo")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class HostsInfo {
 	
@@ -27,6 +36,9 @@ public class HostsInfo {
 		return result;
 	}
 	
+	/**
+	 * The list of hosts with the sitenames mapped to them.
+	 */
 	@XmlElement(name="host")
 	private List<Host> allHosts = new LinkedList<Host>();
 
@@ -38,6 +50,12 @@ public class HostsInfo {
 		this.allHosts = allHosts;
 	}
 	
+	/**
+	 * A convenience method to find a sitename that is connected to the specified host.
+	 * 
+	 * @param host the hostname
+	 * @return the sitename
+	 */
 	public String getSiteForHost(String host) {
 		
 		for ( Host serchhost : allHosts ) {
@@ -48,6 +66,12 @@ public class HostsInfo {
 		return null;
 	}
 	
+	/**
+	 * A convenience method to find a list of hostnames that are connected to the specified sitename.
+	 * 
+	 * @param site the name of the site
+	 * @return the list of hostnames
+	 */
 	public List<String> getHostsForSite(String site) {
 		
 		List<String> result = new LinkedList<String>();

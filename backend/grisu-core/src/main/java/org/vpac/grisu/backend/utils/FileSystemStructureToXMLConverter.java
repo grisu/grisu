@@ -112,8 +112,8 @@ public class FileSystemStructureToXMLConverter {
 					mp_element.setAttribute("path", mp.getRootUrl());
 					mp_element.setAttribute("name", mp.getRootUrl());
 				} else {
-					mp_element.setAttribute("path", mp.getMountpointName());
-					mp_element.setAttribute("name", mp.getMountpointName()
+					mp_element.setAttribute("path", mp.getAlias());
+					mp_element.setAttribute("name", mp.getAlias()
 							.substring(1));
 				}
 				if (recursion_level > 1) {

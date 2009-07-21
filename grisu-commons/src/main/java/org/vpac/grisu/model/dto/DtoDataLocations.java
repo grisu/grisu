@@ -10,7 +10,13 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
+/**
+ * A wrapper that contains a list of {@link DtoDataLocation} objects.
+ * 
+ * @author Markus Binsteiner
+ *
+ */
+@XmlRootElement(name="datalocations")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class DtoDataLocations {
 	
@@ -33,6 +39,9 @@ public class DtoDataLocations {
 		return result;
 	}
 	
+	/**
+	 * The list of datalocations.
+	 */
 	@XmlElement(name="datalocation")
 	private List<DtoDataLocation> dataLocations = new LinkedList<DtoDataLocation>();
 

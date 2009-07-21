@@ -242,7 +242,7 @@ public class JobManager {
 				MountPoint mp = em.getResponsibleMountpointForFile(uri
 						.toString());
 				// build the root tree for this filesystem
-				em.getFileManager().getFileSystemBackend(mp.getMountpointName())
+				em.getFileManager().getFileSystemBackend(mp.getAlias())
 						.getRoot().getChildren();
 				file = em.getFileManager().getFileObject(uri);
 			} catch (Exception e) {

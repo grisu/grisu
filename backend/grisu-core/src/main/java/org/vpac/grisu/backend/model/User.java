@@ -290,7 +290,7 @@ public class User {
 
 		myLogger.debug("Checking mountpoints for duplicates.");
 		for (MountPoint mp : getAllMountPoints()) {
-			if (mountPointName.equals(mp.getMountpointName())) {
+			if (mountPointName.equals(mp.getAlias())) {
 				throw new RemoteFileSystemException(
 						"There is already a filesystem mounted on:"
 								+ mountPointName);
@@ -350,7 +350,7 @@ public class User {
 		// check whether a filesystem for this mountpoint is already cached
 		if (cachedFilesystemConnections.containsKey(mp)) {
 			myLogger.debug("Using already cached filesystem for mountpoint: "
-					+ mp.getMountpointName());
+					+ mp.getAlias());
 			return this.cachedFilesystemConnections.get(mp);
 		}
 
@@ -442,7 +442,7 @@ public class User {
 	public final void unmountFileSystem(final String mountPointName) {
 
 		for (MountPoint mp : mountPoints) {
-			if (mp.getMountpointName().equals(mountPointName)) {
+			if (mp.getAlias().equals(mountPointName)) {
 				mountPoints.remove(mp);
 				allMountPoints = null;
 				return;

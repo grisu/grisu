@@ -12,6 +12,8 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import au.org.arcs.mds.Constants;
+
 /**
  * This one gathers all information of a job and converts it into a xml
  * document.
@@ -161,7 +163,7 @@ public final class JobsToXMLConverter {
 		jobElement.setAttributeNode(jobname);
 
 		Attr app = doc.createAttribute("application");
-		app.setValue(job.getApplication());
+		app.setValue(job.getJobProperty(Constants.APPLICATIONNAME_KEY));
 		jobElement.setAttributeNode(app);
 
 		Attr status = doc.createAttribute("status");
@@ -183,17 +185,17 @@ public final class JobsToXMLConverter {
 		}
 
 		Element files = doc.createElement("files");
-		files.setAttribute("job_directory", job.getJob_directory());
+		files.setAttribute("job_directory", job.getJobProperty(Constants.JOBDIRECTORY_KEY));
 		root.appendChild(files);
 
 		Element stdout = doc.createElement("file");
 		stdout.setAttribute("name", "stdout");
-		stdout.setTextContent(job.getStdout());
+		stdout.setTextContent(job.getJobProperty(Constants.STDOUT_KEY));
 		files.appendChild(stdout);
 
 		Element stderr = doc.createElement("file");
 		stderr.setAttribute("name", "stderr");
-		stderr.setTextContent(job.getStderr());
+		stderr.setTextContent(job.getJobProperty(Constants.STDERR_KEY));
 		files.appendChild(stderr);
 
 		Element descriptions = doc.createElement("descriptions");
