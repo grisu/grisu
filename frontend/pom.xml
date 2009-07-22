@@ -14,7 +14,6 @@
 	<url>http://maven.apache.org</url>
 
 	<modules>
-		<module>grisu-client</module>
 		<module>grisu-client-swing</module>
 		<module>grisu-client-xfire</module>
 		<module>grisu-client-cxf</module>
