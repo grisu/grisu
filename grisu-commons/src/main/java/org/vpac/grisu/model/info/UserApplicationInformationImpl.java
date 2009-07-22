@@ -85,7 +85,7 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 		}
 
 		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(DtoJob.createJob(JobConstants.UNDEFINED, converterMap),
-				fqan).getGridResources();
+				fqan).wrapGridResourcesIntoInterfaceType();
 	}
 
 }
