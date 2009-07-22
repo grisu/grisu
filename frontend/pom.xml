@@ -9,21 +9,12 @@
 	<groupId>org.vpac.grisu</groupId>
 	<artifactId>frontend</artifactId>
 	<packaging>pom</packaging>
-	<name>frontend Maven Multi Project</name>
+	<name>frontend module</name>
 	<version>0.3-SNAPSHOT</version>
 	<url>http://maven.apache.org</url>
 
 	<modules>
-		<module>grisu-client-swing</module>
-		<module>grisu-client-xfire</module>
-		<module>grisu-client-cxf</module>
-		<module>grisu-client-commandline</module>
-		<module>grisu-examples</module>
-		<module>grisu-client-batch</module>
-		<module>gricli</module>
-		<module>grisu-client-swing-plugins</module>
 		<module>grisu-client-slim</module>
-		<module>grisu-client-web</module>
 		<module>grisu-grid-tests</module>
   </modules>
 </project>
