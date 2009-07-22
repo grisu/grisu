@@ -23,10 +23,18 @@
 
 	<distributionManagement>
 		<repository>
-			<id>arcs.nexus</id>
-			<name>ARCS maven Repository</name>
-			<url>http://code.arcs.org.au/nexus/content/repositories/snapshots</url>
+			<id>arcs.release</id>
+			<name>ARCS Release Repository</name>
+			<url>http://code.arcs.org.au/nexus/content/repositories/releases</url>
+			<uniqueVersion>false</uniqueVersion>
 		</repository>
+		<snapshotRepository>
+			<id>arcs.snapshot</id>
+			<name>ARCS SNAPSHOT Repository</name>
+			<url>http://code.arcs.org.au/nexus/content/repositories/snapshots</url>
+			<uniqueVersion>false</uniqueVersion>
+		</snapshotRepository>
+
 	</distributionManagement>
 
 	<issueManagement>
@@ -35,7 +43,7 @@
 	</issueManagement>
 	<ciManagement>
 		<system>Hudson</system>
-		<url>http://hudson.vpac.org:8080/</url>
+		<url>https://code.arcs.org.au/hudson</url>
 	</ciManagement>
 	<developers>
 		<developer>
