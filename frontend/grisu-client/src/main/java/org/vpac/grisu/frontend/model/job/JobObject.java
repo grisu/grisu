@@ -64,7 +64,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	public JobObject(final ServiceInterface si, final String jobname)
 			throws NoSuchJobException {
 
-		super(SeveralXMLHelpers.fromString(si.getJsldDocument(jobname)));
+		super(SeveralXMLHelpers.fromString(si.getJsdlDocument(jobname)));
 		this.serviceInterface = si;
 		this.setJobname(jobname);
 
@@ -104,7 +104,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 * This constructor creates a new JobObject and initializes the basic job
 	 * parameters using the provided jsdl document. This could be used for
 	 * example if you want to use an already submitted job by calling the
-	 * {@link ServiceInterface#getJsldDocument(String)} and using its return
+	 * {@link ServiceInterface#getJsdlDocument(String)} and using its return
 	 * value in this constructor.
 	 * 
 	 * @param si

@@ -139,7 +139,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	private MatchMaker matchmaker = new MatchMakerImpl(Environment
 			.getGrisuDirectory().toString());
 
-	public final String getInterfaceVersion() {
+	public String getInterfaceVersion() {
 		return "<grisuVersion>"+EnunciateServiceInterface.INTERFACE_VERSION+"</grisuVersion>";
 	}
 
@@ -228,7 +228,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		return manager;
 	}
 	
-	public final String createJobUsingJsdl(String jsdlString, final String fqan, final String jobnameCreationMethod) throws JobPropertiesException {
+	public String createJobUsingJsdl(String jsdlString, final String fqan, final String jobnameCreationMethod) throws JobPropertiesException {
 
 		Document jsdl;
 		
@@ -243,7 +243,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		return createJob(jsdl, fqan, jobnameCreationMethod);
 	}
 
-	private final String createJob(Document jsdl, final String fqan,
+	private String createJob(Document jsdl, final String fqan,
 			final String jobnameCreationMethod) throws JobPropertiesException {
 
 		String jobname = JsdlHelpers.getJobname(jsdl);
@@ -362,7 +362,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 
 	}
 
-	public final String createJobUsingMap(
+	public String createJobUsingMap(
 			final DtoJob jobProperties, final String fqan,
 			final String jobCreationMethod) throws JobPropertiesException {
 
@@ -774,7 +774,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		myLogger.debug("Preparing job done.");
 	}
 
-	public final void submitJob(final String jobname)
+	public void submitJob(final String jobname)
 			throws JobSubmissionException {
 
 		myLogger.info("Submitting job: " + jobname + " for user " + getDN());
@@ -895,7 +895,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * @see
 	 * org.vpac.grisu.control.ServiceInterface#getJobStatus(java.lang.String)
 	 */
-	public final int getJobStatus(final String jobname) {
+	public int getJobStatus(final String jobname) {
 
 		Job job;
 		try {
@@ -941,7 +941,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#ps()
 	 */
-	public final DtoJobs ps(boolean refresh) {
+	public DtoJobs ps(boolean refresh) {
 
 		List<Job> jobs = jobdao.findJobByDN(getUser().getDn());
 
@@ -957,7 +957,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		return dtoJobs;
 	}
 
-	public final String[] getAllJobnames() {
+	public String[] getAllJobnames() {
 
 		List<String> jobnames = jobdao.findJobNamesByDn(getUser().getDn());
 
@@ -983,7 +983,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * @see org.vpac.grisu.control.ServiceInterface#mount(java.lang.String,
 	 * java.lang.String)
 	 */
-	public final MountPoint mountWithoutFqan(final String url,
+	public MountPoint mountWithoutFqan(final String url,
 			final String mountpoint, final boolean useHomeDirectory)
 			throws RemoteFileSystemException {
 
@@ -994,7 +994,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		return mp;
 	}
 
-	public final MountPoint mount(final String url, final String mountpoint,
+	public MountPoint mount(final String url, final String mountpoint,
 			final String fqan, final boolean useHomeDirectory)
 			throws RemoteFileSystemException {
 		myLogger.debug("Mounting: " + url + " to: " + mountpoint
@@ -1011,7 +1011,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#umount(java.lang.String)
 	 */
-	public final void umount(final String mountpoint) {
+	public void umount(final String mountpoint) {
 
 		getUser().unmountFileSystem(mountpoint);
 		userdao.saveOrUpdate(getUser());
@@ -1047,7 +1047,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#df()
 	 */
-	public final synchronized DtoMountPoints df() {
+	public synchronized DtoMountPoints df() {
 
 
 		return DtoMountPoints.createMountpoints(df_internal());
@@ -1060,7 +1060,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#getMountPointForUri(java.lang
 	 * .String)
 	 */
-	public final MountPoint getMountPointForUri(final String uri) {
+	public MountPoint getMountPointForUri(final String uri) {
 
 		return getUser().getResponsibleMountpointForAbsoluteFile(uri);
 	}
@@ -1184,7 +1184,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 
 	}
 
-	public final DataHandler download(final String filename)
+	public DataHandler download(final String filename)
 			throws RemoteFileSystemException {
 
 		myLogger.debug("Downloading: " + filename);
@@ -1226,7 +1226,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		return folder;
 	}
 
-	public final DtoFolder ls(final String directory, final int recursion_level) throws RemoteFileSystemException {
+	public DtoFolder ls(final String directory, final int recursion_level) throws RemoteFileSystemException {
 
 		// check whether credential still valid
 		getCredential();
@@ -1295,7 +1295,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#upload(javax.activation.DataSource
 	 * , java.lang.String)
 	 */
-	public final String upload(final DataHandler source, final String filename,
+	public String upload(final DataHandler source, final String filename,
 			final boolean return_absolute_url) throws RemoteFileSystemException {
 
 		myLogger.debug("Receiving file: " + filename);
@@ -1369,7 +1369,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#getFqans()
 	 */
-	public final String[] getFqans() {
+	public String[] getFqans() {
 
 		if (currentFqans == null) {
 
@@ -1388,11 +1388,11 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#getDN()
 	 */
-	public final String getDN() {
+	public String getDN() {
 		return getUser().getDn();
 	}
 
-	public final String[] getAllSites() {
+	public String[] getAllSites() {
 
 		// if ( ServerPropertiesManager.getMDSenabled() ) {
 		return informationManager.getAllSites();
@@ -1416,7 +1416,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#addJobProperty(java.lang.String,
 	 * java.lang.String, java.lang.String)
 	 */
-	public final void addJobProperty(final String jobname, final String key,
+	public void addJobProperty(final String jobname, final String key,
 			final String value) throws NoSuchJobException {
 
 		Job job = getJob(jobname);
@@ -1434,7 +1434,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#addJobProperties(java.lang.String
 	 * , java.util.Map)
 	 */
-	public final void addJobProperties(final String jobname,
+	public void addJobProperties(final String jobname,
 			final DtoJob properties) throws NoSuchJobException {
 
 		Job job = getJob(jobname);
@@ -1453,7 +1453,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#getAllJobProperties(java.lang
 	 * .String)
 	 */
-	public final DtoJob getAllJobProperties(final String jobname)
+	public DtoJob getAllJobProperties(final String jobname)
 			throws NoSuchJobException {
 
 		Job job = getJob(jobname);
@@ -1464,7 +1464,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		return DtoJob.createJob(job.getStatus(), job.getJobProperties());
 	}
 
-	public final String getJsldDocument(final String jobname)
+	public String getJsdlDocument(final String jobname)
 			throws NoSuchJobException {
 
 		Job job = getJob(jobname);
@@ -1483,7 +1483,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#getJobProperty(java.lang.String,
 	 * java.lang.String)
 	 */
-	public final String getJobProperty(final String jobname, final String key)
+	public String getJobProperty(final String jobname, final String key)
 			throws NoSuchJobException {
 
 		Job job = getJob(jobname);
@@ -1496,7 +1496,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#isFolder(java.lang.String)
 	 */
-	public final boolean isFolder(final String file)
+	public boolean isFolder(final String file)
 			throws RemoteFileSystemException {
 
 		boolean isFolder;
@@ -1525,7 +1525,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 
 	}
 
-	public final boolean fileExists(final String file)
+	public boolean fileExists(final String file)
 			throws RemoteFileSystemException {
 
 		boolean exists;
@@ -1549,7 +1549,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#getChildrenFiles(java.lang.String
 	 * , boolean)
 	 */
-	public final String[] getChildrenFileNames(final String folder,
+	public String[] getChildrenFileNames(final String folder,
 			final boolean onlyFiles) throws RemoteFileSystemException {
 
 		String[] result = null;
@@ -1583,7 +1583,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * @see
 	 * org.vpac.grisu.control.ServiceInterface#getFileSize(java.lang.String)
 	 */
-	public final long getFileSize(final String file)
+	public long getFileSize(final String file)
 			throws RemoteFileSystemException {
 
 		FileObject file_object = getUser().aquireFile(file);
@@ -1598,7 +1598,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		return size;
 	}
 
-	public final DtoDataLocations getDataLocationsForVO(final String fqan) {
+	public DtoDataLocations getDataLocationsForVO(final String fqan) {
 
 		return DtoDataLocations.createDataLocations(fqan, informationManager.getDataLocationsForVO(fqan));
 
@@ -1610,7 +1610,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * @see
 	 * org.vpac.grisu.control.ServiceInterface#lastModified(java.lang.String)
 	 */
-	public final long lastModified(final String url)
+	public long lastModified(final String url)
 			throws RemoteFileSystemException {
 
 		try {
@@ -1634,7 +1634,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#mkdir(java.lang.String)
 	 */
-	public final boolean mkdir(final String url)
+	public boolean mkdir(final String url)
 			throws RemoteFileSystemException {
 
 		myLogger.debug("Creating folder: " + url + "...");
@@ -1661,7 +1661,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#deleteFile(java.lang.String)
 	 */
-	public final void deleteFile(final String file)
+	public void deleteFile(final String file)
 			throws RemoteFileSystemException {
 
 		FileObject fileObject = getUser().aquireFile(file);
@@ -1684,7 +1684,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * @see
 	 * org.vpac.grisu.control.ServiceInterface#deleteFiles(java.lang.String[])
 	 */
-	public final void deleteFiles(final String[] files)
+	public void deleteFiles(final String[] files)
 			throws RemoteFileSystemException {
 
 		// ArrayList<String> filesNotDeleted = new ArrayList<String>();
@@ -1705,7 +1705,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * @see
 	 * org.vpac.grisu.control.ServiceInterface#getUserProperty(java.lang.String)
 	 */
-	public final String getUserProperty(final String key) {
+	public String getUserProperty(final String key) {
 
 		String value = getUser().getUserProperties().get(key);
 
@@ -1731,7 +1731,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * @see
 	 * org.vpac.grisu.control.ServiceInterface#getMessagesSince(java.util.Date)
 	 */
-	public final Document getMessagesSince(final Date date) {
+	public Document getMessagesSince(final Date date) {
 
 		// TODO
 		return null;
@@ -1742,7 +1742,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#stageFiles(java.lang.String)
 	 */
-	public final void stageFiles(final String jobname)
+	private final void stageFiles(final String jobname)
 			throws RemoteFileSystemException, NoSuchJobException {
 
 		Job job;
@@ -1822,7 +1822,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		// into the database
 	}
 
-	public final void kill(final String jobname, final boolean clear)
+	public void kill(final String jobname, final boolean clear)
 			throws RemoteFileSystemException, NoSuchJobException {
 
 		Job job;
@@ -1863,7 +1863,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * @see org.vpac.grisu.control.ServiceInterface#cp(java.lang.String,
 	 * java.lang.String, boolean, boolean)
 	 */
-	public final String cp(final String source, final String target,
+	public String cp(final String source, final String target,
 			final boolean overwrite, final boolean waitForFileTransferToFinish)
 			throws RemoteFileSystemException {
 
@@ -1917,7 +1917,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#getAllSubmissionLocations()
 	 */
-	public final synchronized DtoSubmissionLocations getAllSubmissionLocations() {
+	public synchronized DtoSubmissionLocations getAllSubmissionLocations() {
 
 		return DtoSubmissionLocations.createSubmissionLocationsInfo(informationManager.getAllSubmissionLocations());
 	}
@@ -1929,7 +1929,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#getSubmissionLocationsForApplication
 	 * (java.lang.String)
 	 */
-	public final DtoSubmissionLocations getSubmissionLocationsForApplication(
+	public DtoSubmissionLocations getSubmissionLocationsForApplication(
 			final String application) {
 
 		return DtoSubmissionLocations.createSubmissionLocationsInfo(informationManager
@@ -1943,7 +1943,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#getSubmissionLocationsForApplication
 	 * (java.lang.String, java.lang.String)
 	 */
-	public final DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersion(
+	public DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersion(
 			final String application, final String version) {
 
 		String[] sls = informationManager.getAllSubmissionLocations(application,
@@ -1959,7 +1959,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#getVersionsOfApplicationOnSite
 	 * (java.lang.String, java.lang.String)
 	 */
-	public final String[] getVersionsOfApplicationOnSite(
+	public String[] getVersionsOfApplicationOnSite(
 			final String application, final String site) {
 
 		return informationManager.getVersionsOfApplicationOnSite(application,
@@ -1967,13 +1967,13 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 
 	}
 
-	public final String[] getVersionsOfApplicationOnSubmissionLocation(
+	public String[] getVersionsOfApplicationOnSubmissionLocation(
 			final String application, final String submissionLocation) {
 		return informationManager.getVersionsOfApplicationOnSubmissionLocation(
 				application, submissionLocation);
 	}
 
-	public final DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
+	public DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
 			final String application) {
 		// if (ServerPropertiesManager.getMDSenabled()) {
 		myLogger
@@ -2022,7 +2022,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		return DtoApplicationInfo.createApplicationInfo(application, appVersionMap);
 	}
 
-	public final DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersionAndFqan(
+	public DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersionAndFqan(
 			final String application, final String version, final String fqan) {
 		// TODO implement a method which takes in fqan later on
 
@@ -2035,7 +2035,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#getSite(java.lang.String)
 	 */
-	public final String getSite(final String host_or_url) {
+	public String getSite(final String host_or_url) {
 
 		return informationManager.getSiteForHostOrUrl(host_or_url);
 
@@ -2046,7 +2046,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#getAllHosts()
 	 */
-	public final synchronized DtoHostsInfo getAllHosts() {
+	public synchronized DtoHostsInfo getAllHosts() {
 
 		DtoHostsInfo info = DtoHostsInfo.createHostsInfo(informationManager.getAllHosts());
 		
@@ -2060,7 +2060,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#getAllSubmissionLocations(java
 	 * .lang.String)
 	 */
-	public final DtoSubmissionLocations getAllSubmissionLocationsForFqan(final String fqan) {
+	public DtoSubmissionLocations getAllSubmissionLocationsForFqan(final String fqan) {
 
 		return DtoSubmissionLocations.createSubmissionLocationsInfo(informationManager.getAllSubmissionLocationsForVO(fqan));
 
@@ -2073,7 +2073,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#getApplicationDetails(java.lang
 	 * .String, java.lang.String, java.lang.String)
 	 */
-	public final DtoApplicationDetails getApplicationDetailsForVersionAndSite(
+	public DtoApplicationDetails getApplicationDetailsForVersionAndSite(
 			final String application, final String version,
 			final String site_or_submissionLocation) {
 
@@ -2096,7 +2096,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#getApplicationDetails(java.lang
 	 * .String, java.lang.String)
 	 */
-	public final DtoApplicationDetails getApplicationDetailsForSite(
+	public DtoApplicationDetails getApplicationDetailsForSite(
 			final String application, final String site_or_submissionLocation) {
 
 		String site = site_or_submissionLocation;
@@ -2112,7 +2112,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 
 	}
 
-	public final DtoGridResources findMatchingSubmissionLocationsUsingMap(
+	public DtoGridResources findMatchingSubmissionLocationsUsingMap(
 			final DtoJob jobProperties, final String fqan) {
 
 		LinkedList<String> result = new LinkedList<String>();
@@ -2129,7 +2129,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		return DtoGridResources.createGridResources(resources);
 	}
 
-	public final DtoGridResources findMatchingSubmissionLocationsUsingJsdl(
+	public DtoGridResources findMatchingSubmissionLocationsUsingJsdl(
 			String jsdlString, final String fqan) {
 
 		Document jsdl;
@@ -2155,7 +2155,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * org.vpac.grisu.control.ServiceInterface#getAllAvailableApplications(java
 	 * .lang.String[])
 	 */
-	public final String[] getAllAvailableApplications(final String[] sites) {
+	public String[] getAllAvailableApplications(final String[] sites) {
 		Set<String> siteList = new TreeSet<String>();
 
 		if (sites == null) {
@@ -2175,7 +2175,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * @seeorg.vpac.grisu.control.ServiceInterface#
 	 * getStagingFileSystemForSubmissionLocation(java.lang.String)
 	 */
-	public final String[] getStagingFileSystemForSubmissionLocation(
+	public String[] getStagingFileSystemForSubmissionLocation(
 			final String subLoc) {
 		return informationManager
 				.getStagingFileSystemForSubmissionLocation(subLoc);
@@ -2221,7 +2221,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 *            the submission location
 	 * @return whether the string is a submission location or not
 	 */
-	public final boolean isSubmissionLocation(final String submissionLocation) {
+	public boolean isSubmissionLocation(final String submissionLocation) {
 
 		if (submissionLocation.indexOf(":") >= 0) {
 			return true;
@@ -2239,7 +2239,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * @return the name of the site for the submissionLocation or null, if the
 	 *         site can't be found
 	 */
-	public final String getSiteForSubmissionLocation(final String subLoc) {
+	public String getSiteForSubmissionLocation(final String subLoc) {
 
 		// subLoc = queuename@cluster:contactstring#JobManager
 		// String queueName = subLoc.substring(0, subLoc.indexOf(":"));
@@ -2254,7 +2254,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		return getSite(contactString);
 	}
 
-	public final String getCurrentStatusMessage(final String handle) {
+	public String getCurrentStatusMessage(final String handle) {
 		return this.currentStatus;
 	}
 

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.vpac.grisu</groupId>
 	<artifactId>grisu</artifactId>
@@ -18,10 +19,16 @@
 			<id>ARCS Snapshots</id>
 			<url>http://code.arcs.org.au/nexus/content/groups/public-snapshots</url>
 		</repository>
-  </repositories>
+	</repositories>
 
-	
-	
+	<distributionManagement>
+		<repository>
+			<id>arcs.nexus</id>
+			<name>ARCS maven Repository</name>
+			<url>http://code.arcs.org.au/nexus/content/repositories/snapshots</url>
+		</repository>
+	</distributionManagement>
+
 	<issueManagement>
 		<system>Trac</system>
 		<url>http://projects.arcs.org.au/trac/grisu/</url>
@@ -126,7 +133,7 @@
 						<link>http://jakarta.apache.org/velocity/api/</link>
 
 						<link>http://google-web-toolkit.googlecode.com/svn/javadoc/1.6/</link>
-						
+
 						<link>http://code.arcs.org.au/builds/job/Infosystems-SNAPSHOT/javadoc</link>
 					</links>
 				</configuration>

@@ -165,6 +165,92 @@
 					<target>1.5</target>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>deploy-client-classes</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy-file</goal>
+						</goals>
+						<configuration>
+							<!--
+								the enunciate-generated client jar can be "exported" to a known
+								place on the filesystem.
+							-->
+							<file>target/enunciate/build/jaxws-client/grisu-client-jaxws.jar
+							</file>
+							<!-- use this project's repository url -->
+							<url>http://code.arcs.org.au/nexus/content/repositories/snapshots
+							</url>
+							<!-- use this project's repository id -->
+							<repositoryId>arcs.nexus</repositoryId>
+
+							<groupId>org.vpac.grisu</groupId>
+							<artifactId>grisu-client-jaxws</artifactId>
+							<!-- use this project's version -->
+							<version>${project.version}</version>
+							<packaging>jar</packaging>
+							<description>The client-side classes for our api.</description>
+
+							<!--
+								we can't use a unique version for the case of snapshots else the
+								(generated, unique) versions won't match between the classes jar
+								and the sources jar.
+							-->
+							<uniqueVersion>false</uniqueVersion>
+							<pomFile>client.pom</pomFile>
+						</configuration>
+					</execution>
+					<execution>
+						<id>deploy-client-sources</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy-file</goal>
+						</goals>
+						<configuration>
+							<!--
+								the enunciate-generated client jar can be "exported" to a known
+								place on the filesystem.
+							-->
+							<file>target/enunciate/build/jaxws-client/grisu-client-jaxws-src.jar
+							</file>
+							<!-- use this project's repository url -->
+							<url>http://code.arcs.org.au/nexus/content/repositories/snapshots
+							</url>
+							<!-- use this project's repository id -->
+							<repositoryId>arcs.nexus</repositoryId>
+
+							<groupId>org.vpac.grisu</groupId>
+							<artifactId>grisu-client-jaxws</artifactId>
+							<!-- use this project's version -->
+							<version>${project.version}</version>
+							<packaging>jar</packaging>
+							<description>The client-side classes for our api.</description>
+							<classifier>sources</classifier>
+							<!--
+								we can't use a unique version for the case of snapshots else the
+								(generated, unique) versions won't match between the classes jar
+								and the sources jar.
+							-->
+							<uniqueVersion>false</uniqueVersion>
+						</configuration>
+					</execution>
+				</executions>
+				<configuration>
+					<!--
+						BE CAREFUL when using the global configuration because any
+						configuration elements in here will be applied to the "deploy" of
+						this project's artifact(s) IN ADDITION TO the client-side
+						artifacts. Prefer the execution-specific configuration elements.
+					-->
+				</configuration>
+			</plugin>
+
+
 		</plugins>
 	</build>
 

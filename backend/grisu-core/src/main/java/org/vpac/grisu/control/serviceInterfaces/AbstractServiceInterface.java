@@ -1463,7 +1463,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return DtoJob.createJob(job.getStatus(), job.getJobProperties());
 	}
 
-	public final String getJsldDocument(final String jobname)
+	public final String getJsdlDocument(final String jobname)
 			throws NoSuchJobException {
 
 		Job job = getJob(jobname);

@@ -808,7 +808,7 @@ public interface ServiceInterface {
 	 * @return the jsdl document
 	 * @throws NoSuchJobException if no such job exists
 	 */
-	String getJsldDocument(String jobname) throws NoSuchJobException;
+	String getJsdlDocument(String jobname) throws NoSuchJobException;
 
 
 }
