@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
+	<JobDescription>
+		<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
+			<Email sendOnJobFinish="false" sendOnJobStart="false" />
+		</GrisuTemplate>
+
+		<JobIdentification>
+			<JobName>grisu_job</JobName>
+		</JobIdentification>
+
+		<Application>
+			<ApplicationName>Java</ApplicationName>
+			<ApplicationVersion>no_version</ApplicationVersion>
+			<POSIXApplication xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
+				<Executable>java</Executable>
+				<Argument>-version</Argument>
+				<WorkingDirectory />
+				<Output>stdout.txt</Output>
+				<Input />
+				<Error>stderr.txt</Error>
+			</POSIXApplication>
+			<TotalCPUTime>3456000</TotalCPUTime>
+			<!--
+				use this value and divide with no. of cpus to get actual walltime
+			-->
+			<TotalCPUCount>
+				<exact>1</exact>
+			</TotalCPUCount>
+		</Application>
+		<Resources>
+			<CandidateHosts>
+			</CandidateHosts>
+		</Resources>
+		<DataStaging>
+			<FileName />
+			<FileSystemName />
+			<Source>
+				<URI>gsiftp://ng2.canterbury.ac.nz/home/grid-admin/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner/grix_splash_v1.1.jpg</URI>
+			</Source>
+		</DataStaging>
+
+	</JobDescription>
+</JobDefinition>
