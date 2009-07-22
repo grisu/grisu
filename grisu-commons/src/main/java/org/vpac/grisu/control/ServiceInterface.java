@@ -1,9 +1,8 @@
 package org.vpac.grisu.control;
 
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
+import javax.activation.DataHandler;
 import javax.activation.DataSource;
 
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
@@ -13,9 +12,17 @@ import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.MountPoint;
-import org.w3c.dom.Document;
+import org.vpac.grisu.model.dto.DtoApplicationDetails;
+import org.vpac.grisu.model.dto.DtoApplicationInfo;
+import org.vpac.grisu.model.dto.DtoDataLocations;
+import org.vpac.grisu.model.dto.DtoFolder;
+import org.vpac.grisu.model.dto.DtoGridResources;
+import org.vpac.grisu.model.dto.DtoHostsInfo;
+import org.vpac.grisu.model.dto.DtoJob;
+import org.vpac.grisu.model.dto.DtoJobs;
+import org.vpac.grisu.model.dto.DtoMountPoints;
+import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 
-import au.org.arcs.mds.GridResource;
 import au.org.arcs.mds.JobSubmissionProperty;
 
 /**
@@ -28,7 +35,7 @@ import au.org.arcs.mds.JobSubmissionProperty;
  */
 public interface ServiceInterface {
 
-	double INTERFACE_VERSION = 8;
+	double INTERFACE_VERSION = 10;
 
 	// job creation method names
 	String FORCE_NAME_METHOD = "force-name";
@@ -40,11 +47,16 @@ public interface ServiceInterface {
 	// General grisu specific methods
 	//
 	// ---------------------------------------------------------------------------------------------------
-	double getInterfaceVersion();
+	/**
+	 * The version of the serviceInterface for this backend.
+	 * 
+	 * @return the version
+	 */
+	String getInterfaceVersion();
 
 	/**
 	 * Starts a session. For some service interfaces this could be just a dummy
-	 * method.
+	 * method. Ideally a char[] would be used for the password, but jax-ws doesn't support this.
 	 * 
 	 * @param username
 	 *            the username (probably for myproxy credential)
@@ -53,7 +65,7 @@ public interface ServiceInterface {
 	 * @throws NoValidCredentialException
 	 *             if the login was not successful
 	 */
-	void login(String username, char[] password);
+	void login(String username, String password);
 
 	/**
 	 * Logout of the service. Performs housekeeping tasks and usually deletes
@@ -81,23 +93,9 @@ public interface ServiceInterface {
 	 * @throws NoSuchTemplateException
 	 *             if a template for that particular application does not exist
 	 */
-	Document getTemplate(String application)
+	String getTemplate(String application)
 			throws NoSuchTemplateException;
 
-	/**
-	 * Gets a template Document for a particular version of an application.
-	 * 
-	 * @param application
-	 *            the name of the application
-	 * @param version
-	 *            the version of the application
-	 * @return a jsdl template document
-	 * @throws NoSuchTemplateException
-	 *             if a template for that particular application/version
-	 *             combination does not exist
-	 */
-	Document getTemplate(String application, String version)
-			throws NoSuchTemplateException;
 
 	/**
 	 * Submit a support request to the default person.
@@ -123,22 +121,9 @@ public interface ServiceInterface {
 	String getUserProperty(String key);
 
 	/**
-	 * Returns system or user specific information messages since a specific
-	 * date
-	 * 
-	 * This isn't used yet...
-	 * 
-	 * @param date
-	 *            the date from which to show messages or null for unread
-	 *            messages
-	 * @return a xml document which contains the messages
-	 */
-	Document getMessagesSince(Date date);
-
-	/**
 	 * Returns the end time of the credential used.
 	 * 
-	 * @return the end time
+	 * @return the end time or -1 if the endtime couldn't be determined
 	 */
 	long getCredentialEndTime();
 
@@ -167,7 +152,6 @@ public interface ServiceInterface {
 	 *            the host
 	 * @return the site
 	 */
-
 	String getSite(String host);
 
 	/**
@@ -179,55 +163,7 @@ public interface ServiceInterface {
 	 * @return a map with all possible hostnames and the respective sites they
 	 *         belong to
 	 */
-
-	Map<String, String> getAllHosts();
-
-	/**
-	 * Calculates the executionfilesystem for this user at the specified site if
-	 * the user submits a job. Something like gsiftp://ngdata.vpac.org/markus/
-	 * (without the fqan part). This is one of the filesystems that are
-	 * specified by the MountPoints a user has.
-	 * 
-	 * @param site
-	 *            the site
-	 * @return the root folder of the filesystem that is both accessible via
-	 *         gridftp and the cluster
-	 */
-	//	
-	// public String getExecutionFileSystem(String site);
-
-	/**
-	 * Calculates the job directory using the grisu-server.properties file, the
-	 * vo information and the submissionlocation the job is supposed to run.
-	 * 
-	 * @param jobname
-	 *            the name you want for your job
-	 * @param submissionLocation
-	 *            the submissionLocation for this site in the format
-	 *            queue:host[#porttype]
-	 * @param fqan
-	 *            the vo for which the job shall run (or null for a non-vo job)
-	 * @return the absolute working directory of the job if it is possible to
-	 *         create it with the specified name
-	 */
-	@Deprecated String calculateAbsoluteJobDirectory(String jobname,
-			String submissionLocation, String fqan);
-
-	/**
-	 * Calculates the job directory using the grisu-server.properties file and
-	 * the information whether this is a vo or non-vo job. Useful if you want to
-	 * know where to stage your files.
-	 * 
-	 * This is always something like grisu-jobs/whatever_job/
-	 * 
-	 * @param jobname
-	 *            the name of the job
-	 * @return the directory where all job related files are located. the return
-	 *         path is relative to the execution file system. That's why it's
-	 *         possible to call that method before the job is actually
-	 *         submitted.
-	 */
-	@Deprecated String calculateRelativeJobDirectory(String jobname);
+	DtoHostsInfo getAllHosts();
 
 	/**
 	 * Queries for all submission locations on the grid. Returns an array of
@@ -236,8 +172,7 @@ public interface ServiceInterface {
 	 * 
 	 * @return all queues grid-wide
 	 */
-
-	String[] getAllSubmissionLocations();
+	DtoSubmissionLocations getAllSubmissionLocations();
 
 	/**
 	 * Returns all submission locations for this VO. Needed for better
@@ -247,7 +182,7 @@ public interface ServiceInterface {
 	 *            the VO
 	 * @return all submission locations
 	 */
-	String[] getAllSubmissionLocations(String fqan);
+	DtoSubmissionLocations getAllSubmissionLocationsForFqan(String fqan);
 
 	/**
 	 * Returns all sites/queues that support this application. If "null" is
@@ -261,7 +196,7 @@ public interface ServiceInterface {
 	 *            the application.
 	 * @return all sites that support this application.
 	 */
-	String[] getSubmissionLocationsForApplication(String application);
+	DtoSubmissionLocations getSubmissionLocationsForApplication(String application);
 
 	/**
 	 * Returns all sites/queues that support this version of this application.
@@ -276,8 +211,7 @@ public interface ServiceInterface {
 	 *            the version
 	 * @return all sites that support this application.
 	 */
-
-	String[] getSubmissionLocationsForApplication(String application,
+	DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersion(String application,
 			String version);
 
 	/**
@@ -296,9 +230,8 @@ public interface ServiceInterface {
 	 *            the fqan
 	 * @return all sites that support this application.
 	 */
-
-	String[] getSubmissionLocationsForApplication(String application,
-			String version, String fqan);
+	DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersionAndFqan(String application,
+			String version,String fqan);
 
 	/**
 	 * Returns a map of all versions and all submission locations of this
@@ -310,7 +243,7 @@ public interface ServiceInterface {
 	 * @return a map with all versions of the application as key and the
 	 *         submissionLocations as comma
 	 */
-	Map<String, String> getSubmissionLocationsPerVersionOfApplication(
+	DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
 			String application);
 
 	/**
@@ -323,11 +256,10 @@ public interface ServiceInterface {
 	 *         the paths that are accessible for this VO there as values (e.g.
 	 *         /home/grid-admin)
 	 */
-
-	Map<String, String[]> getDataLocationsForVO(String fqan);
+	DtoDataLocations getDataLocationsForVO(String fqan);
 
 	/**
-	 * Returns an array of the versions of the specified application that a site
+	 * Returns an array of the versions of the specified application that a submissionlocation
 	 * supports.
 	 * 
 	 * @param application
@@ -336,10 +268,6 @@ public interface ServiceInterface {
 	 *            the site
 	 * @return the supported versions
 	 */
-
-	String[] getVersionsOfApplicationOnSite(String application,
-			String site);
-
 	String[] getVersionsOfApplicationOnSubmissionLocation(
 			String application, String submissionLocation);
 
@@ -356,7 +284,6 @@ public interface ServiceInterface {
 	 *            (queuename@cluster:contactstring#jobmanager)
 	 * @return the gridftp servers
 	 */
-
 	String[] getStagingFileSystemForSubmissionLocation(String subLoc);
 
 	/**
@@ -365,7 +292,6 @@ public interface ServiceInterface {
 	 * 
 	 * @return all fqans of the user
 	 */
-
 	String[] getFqans();
 
 	/**
@@ -373,7 +299,6 @@ public interface ServiceInterface {
 	 * 
 	 * @return the dn of the users' certificate
 	 */
-
 	String getDN();
 
 	/**
@@ -383,20 +308,7 @@ public interface ServiceInterface {
 	 * 
 	 * @return all sites
 	 */
-
 	String[] getAllSites();
-
-	/**
-	 * Returns information about the staging filesystem for the specified site
-	 * (would return something like: gsiftp://ngdata.vpac.org). Used for
-	 * mounting MountPoints in the first place.
-	 * 
-	 * @param site
-	 *            the site you are interested in
-	 * @return the filesystem
-	 */
-	//	
-	// public String getStagingFileSystem(String site);
 
 	/**
 	 * Returns all applications that are available grid-wide or at certain
@@ -406,7 +318,6 @@ public interface ServiceInterface {
 	 *            all the sites you want to query or null for a grid-wide search
 	 * @return all applications
 	 */
-
 	String[] getAllAvailableApplications(String[] sites);
 
 	/**
@@ -422,8 +333,7 @@ public interface ServiceInterface {
 	 *            the site where you want to run the application
 	 * @return details about the applications
 	 */
-
-	Map<String, String> getApplicationDetails(String application,
+	DtoApplicationDetails getApplicationDetailsForVersionAndSite(String application,
 			String version, String site);
 
 	/**
@@ -439,8 +349,7 @@ public interface ServiceInterface {
 	 *            possibly)
 	 * @return details about the applications
 	 */
-
-	Map<String, String> getApplicationDetails(String application,
+	DtoApplicationDetails getApplicationDetailsForSite(String application,
 			String site_or_submissionLocation);
 
 	/**
@@ -454,7 +363,7 @@ public interface ServiceInterface {
 	 *            the fqan to use to submit the job
 	 * @return a list of matching submissionLoctations
 	 */
-	List<GridResource> findMatchingSubmissionLocations(Document jsdl,
+	DtoGridResources findMatchingSubmissionLocationsUsingJsdl(String jsdl,
 			String fqan);
 
 	/**
@@ -463,14 +372,14 @@ public interface ServiceInterface {
 	 * underlying ranking algorithm.
 	 * 
 	 * @param jobProperties
-	 *            the job Properties (have alook at the {@link ServiceInterface}
+	 *            the job Properties (have alook at the {@link EnunciateServiceInterface}
 	 *            interface for supported keys)
 	 * @param fqan
 	 *            the fqan to use to submit the job
 	 * @return a list of matching submissionLoctations
 	 */
-	List<GridResource> findMatchingSubmissionLocations(
-			Map<String, String> jobProperties, String fqan);
+	DtoGridResources findMatchingSubmissionLocationsUsingMap(
+			DtoJob jobProperties, String fqan);
 
 	// ---------------------------------------------------------------------------------------------------
 	// 
@@ -494,8 +403,7 @@ public interface ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the remote filesystem could not be mounted/connected to
 	 */
-
-	MountPoint mount(String url, String mountpoint,
+	MountPoint mountWithoutFqan(String url, String mountpoint,
 			boolean useHomeDirectoryOnThisFileSystemIfPossible)
 			throws RemoteFileSystemException;
 
@@ -518,7 +426,6 @@ public interface ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the remote filesystem could not be mounted/connected to
 	 */
-
 	MountPoint mount(String url, String mountpoint, String fqan,
 			boolean useHomeDirectoryOnThisFileSystemIfPossible)
 			throws RemoteFileSystemException;
@@ -530,7 +437,6 @@ public interface ServiceInterface {
 	 *            the mountpoint
 	 * @return whether it worked or not
 	 */
-
 	void umount(String mountpoint);
 
 	/**
@@ -538,8 +444,7 @@ public interface ServiceInterface {
 	 * 
 	 * @return all the MountPoints
 	 */
-
-	MountPoint[] df();
+	DtoMountPoints df();
 
 	/**
 	 * Returns the mountpoint that is used to acccess this uri.
@@ -548,7 +453,6 @@ public interface ServiceInterface {
 	 *            the uri
 	 * @return the mountpoint or null if no mountpoint can be found
 	 */
-
 	MountPoint getMountPointForUri(String uri);
 
 	/**
@@ -566,18 +470,8 @@ public interface ServiceInterface {
 	 *             if the remote (target) filesystem could not be connected /
 	 *             mounted / is not writeable
 	 */
-
-	String upload(DataSource file, String filename,
+	String upload(DataHandler file, String filename,
 			boolean return_absolute_url) throws RemoteFileSystemException;
-	//	
-	// public String uploadByteArray(byte[] file, String filename, boolean
-	// return_absolute_url) throws RemoteFileSystemException, VomsException;
-
-	//	
-	// public String uploadByteArray(byte[] source, String filename,
-	// boolean return_absolute_url, int offset, int length) throws
-	// RemoteFileSystemException,
-	// VomsException;
 
 	/**
 	 * Download a file to the client.
@@ -589,17 +483,8 @@ public interface ServiceInterface {
 	 *             if the remote (source) file system could not be conntacted
 	 *             /mounted / is not readable
 	 */
-
-	DataSource download(String filename)
+	DataHandler download(String filename)
 			throws RemoteFileSystemException;
-
-	//	
-	// public byte[] downloadByteArray(String filename) throws
-	// RemoteFileSystemException, VomsException;
-
-	//	
-	// public byte[] downloadByteArray(String filename, int offset, int length)
-	// throws RemoteFileSystemException, VomsException;
 
 	/**
 	 * Lists the content of the specified directory.
@@ -622,12 +507,7 @@ public interface ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the remote directory could not be read/mounted
 	 */
-
-	Document ls(String directory, int recursion_level,
-			boolean absolute_url) throws RemoteFileSystemException;
-
-	String ls_string(String directory, int recursion_level,
-			boolean absolute_url) throws RemoteFileSystemException;
+	DtoFolder ls(String directory, int recursion_level) throws RemoteFileSystemException;
 
 	/**
 	 * Copies one file to another location (recursively if it's a directory).
@@ -646,20 +526,10 @@ public interface ServiceInterface {
 	 *             if the remote source file system could not be read/mounted or
 	 *             the remote target file system could not be written to
 	 */
-
 	String cp(String source, String target, boolean overwrite,
 			boolean waitForFileTransferToFinish)
 			throws RemoteFileSystemException;
 
-	/**
-	 * Checks whether the specified file is a folder or not.
-	 * 
-	 * @param file
-	 *            the file
-	 * @return true - if folder; false - if not
-	 * @throws RemoteFileSystemException
-	 *             if the files can't be accessed
-	 */
 
 	/**
 	 * Checks whether the specified file/folder exists.
@@ -672,7 +542,16 @@ public interface ServiceInterface {
 	 *             file exists
 	 */
 	boolean fileExists(String file) throws RemoteFileSystemException;
-
+	
+	/**
+	 * Checks whether the specified file is a folder or not.
+	 * 
+	 * @param file
+	 *            the file
+	 * @return true - if folder; false - if not
+	 * @throws RemoteFileSystemException
+	 *             if the files can't be accessed
+	 */
 	boolean isFolder(String file) throws RemoteFileSystemException;
 
 	/**
@@ -689,8 +568,7 @@ public interface ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the folder can't be accessed/read
 	 */
-
-	String[] getChildrenFiles(String folder, boolean onlyFiles)
+	String[] getChildrenFileNames(String folder, boolean onlyFiles)
 			throws RemoteFileSystemException;
 
 	/**
@@ -705,12 +583,8 @@ public interface ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the file can't be accessed
 	 */
-
 	long getFileSize(String file) throws RemoteFileSystemException;
 
-	// for testing
-	// public void downloadFolder(String folder) throws
-	// RemoteFileSystemException, VomsException;
 
 	/**
 	 * Returns the date when the file was last modified.
@@ -766,31 +640,18 @@ public interface ServiceInterface {
 	 * Returns a xml document that contains all the jobs of the user with
 	 * information about the jobs.
 	 * 
+	 * @param refreshJobStatus whether to refresh the status of all the jobs. This can take quite some time.
+	 *  
 	 * @return xml formated information about all the users jobs
 	 */
-
-	Document ps();
-
-	String ps_string();
-
-	String[] getAllJobnames();
+	DtoJobs ps(boolean refreshJobStatus);
 
 	/**
-	 * Creates a job with an autogenerated jobname that uses the selected
-	 * createJobNameMethod and the provided jobname. After figuring out a free
-	 * jobname, the job is saved in the db. You need to call setJobDescription
-	 * explicitly if you use this method to create a job.
+	 * Returns a list of all jobnames that are currently stored on this backend.
 	 * 
-	 * @param jobname
-	 *            the name of the job
-	 * @param createJobNameMethod
-	 *            the method how to autogenerete the name of the job
-	 * @return the (autogenerated) jobname
-	 * @deprecated don't use that anymore for your client, use
-	 *             {@link #createJob(Map, String, String)} or
-	 *             {@link #createJob(Document, String, String)} instead.
+	 * @return all jobnames
 	 */
-	String createJob(String jobname, int createJobNameMethod);
+	String[] getAllJobnames();
 
 	/**
 	 * Creates a job using the jobProperties that are specified in the map and
@@ -817,11 +678,11 @@ public interface ServiceInterface {
 	 *             already exists and force-jobname is specified as jobname
 	 *             creation method).
 	 */
-	String createJob(Map<String, String> jobProperties, String fqan,
+	String createJobUsingMap(DtoJob job, String fqan,
 			String jobnameCreationMethod) throws JobPropertiesException;
 
 	/**
-	 * This method calls {@link #createJob(Map, String, String)} internally with
+	 * This method calls {@link #createJobUsingMap(Map, String, String)} internally with
 	 * a map of job properties that are extracted from the jsdl document.
 	 * 
 	 * @param jsdl
@@ -839,77 +700,13 @@ public interface ServiceInterface {
 	 *             already exists and force-jobname is specified as jobname
 	 *             creation method).
 	 */
-	String createJob(Document jsdl, String fqan,
+	String createJobUsingJsdl(String jsdl, String fqan,
 			String jobnameCreationMethod) throws JobPropertiesException;
 
 	/**
-	 * Sets the jobdescription for the job. It's only needed if you used
-	 * {@link #createJob(String, int)} to create a job. If there is a jobname
-	 * specified in the jobdescription it will be replaced with the actual
-	 * jobname.
-	 * 
-	 * @param jobname
-	 *            the name of the job
-	 * @param jsdl
-	 *            the job description
-	 * @throws NoSuchJobException if no such job exists
-	 * @Deprecated don't use that anymore. Use
-	 *             {@link #createJob(Map, String, String)} or
-	 *             {@link #createJob(Document, String, String)} to create jobs
-	 *             from now on.
-	 */
-	@Deprecated void setJobDescription(String jobname, Document jsdl)
-			throws NoSuchJobException;
-
-	/**
-	 * @param jobname the name of the job
-	 * @param jsdl the job description
-	 * @throws NoSuchJobException if no such job exists
-	 * @deprecated
-	 */
-	void setJobDescription_string(String jobname, String jsdl)
-			throws NoSuchJobException;
-
-	// /**
-	// * Sets the jobdescription if you want to submit a globus-style multijob.
-	// That only works if the
-	// * submission backend supports multijobs.
-	// * @param jobname the name of the job
-	// * @param jsdl the job description
-	// * @throws JobDescriptionNotValidException on of the job descriptions is
-	// not vailid
-	// * @throws NoSuchJobException no job with this jobname is created in the
-	// database
-	// */
-	//	
-	// public void setJobDescription(String jobname, Document[] jsdl) throws
-	// JobDescriptionNotValidException, NoSuchJobException;
-	/**
-	 * Submits the job but does not use a credential that is stored in the
-	 * database but the users default one.
-	 * 
-	 * @param jobname
-	 *            the name of the job to submit
-	 * @param fqan the fqan
-	 * @throws ServerJobSubmissionException
-	 *             if the job could not be submitted
-	 * @throws NoValidCredentialException
-	 *             if the specified credential is not valid (anymore)
-	 * @throws RemoteFileSystemException
-	 *             if the job folder could not be created on the remote
-	 *             filesystem
-	 * @throws NoSuchJobException if no such job exists 
-	 * @Deprecated Don't use that anymore. Use {@link #submitJob(String)} from
-	 *             now on.
-	 */
-	@Deprecated void submitJob(String jobname, String fqan)
-			throws RemoteFileSystemException,
-			NoSuchJobException;
-
-	/**
 	 * Submits the job that was prepared before using
-	 * {@link #createJob(Map, String, String)} or
-	 * {@link #createJob(Document, String, String)} to the specified submission
+	 * {@link #createJobUsingMap(Map, String, String)} or
+	 * {@link #createJobUsingJsdl(String, String, String)} to the specified submission
 	 * location.
 	 * 
 	 * @param jobname
@@ -918,19 +715,6 @@ public interface ServiceInterface {
 	 *             if the job could not submitted
 	 */
 	void submitJob(String jobname) throws JobSubmissionException;
-
-	/**
-	 * Returns the job directory. This one only works if the job was submitted
-	 * already. Otherwise it'll return null;
-	 * 
-	 * @param jobname
-	 *            the name of the submitted job
-	 * @return the (absolute) job directory
-	 * @throws NoSuchJobException if no such job exists 
-	 * @Deprecated don't use that anymore. Use {
-	 *             {@link #getJobProperty(String, String)} instead.
-	 */
-	@Deprecated String getJobDirectory(String jobname) throws NoSuchJobException;
 
 	/**
 	 * Method to query the status of a job. The String representation of the
@@ -943,28 +727,7 @@ public interface ServiceInterface {
 	 * @throws NoSuchJobException
 	 *             if no job with the specified jobname exists
 	 */
-
 	int getJobStatus(String jobname);
-
-	/**
-	 * Gets detailed information about the job with the specified jobname.
-	 * 
-	 * @param jobname
-	 *            the name of the job
-	 * @return detailed information about the job
-	 * @throws NoSuchJobException if no such job exists
-	 */
-	Document getJobDetails(String jobname) throws NoSuchJobException;
-
-	/**
-	 * Gets detailed information about the job with the specified jobname.
-	 * 
-	 * @param jobname the name of the job
-	 * @return detailed information about the job
-	 * @throws NoSuchJobException if no such job exists
-	 */
-	String getJobDetails_string(String jobname)
-			throws NoSuchJobException;
 
 	/**
 	 * Deletes the whole jobdirectory and if successful, the job from the
@@ -978,7 +741,6 @@ public interface ServiceInterface {
 	 *             if the files can't be deleted
 	 * @throws NoSuchJobException if no such job exists
 	 */
-
 	void kill(String jobname, boolean clean)
 			throws RemoteFileSystemException, NoSuchJobException;
 
@@ -997,7 +759,6 @@ public interface ServiceInterface {
 	 * @throws NoSuchJobException
 	 *             if there is no job with this jobname in the database
 	 */
-
 	void addJobProperty(String jobname, String key, String value)
 			throws NoSuchJobException;
 
@@ -1011,8 +772,7 @@ public interface ServiceInterface {
 	 * @throws NoSuchJobException
 	 *             if there is no job with this jobname in the database
 	 */
-
-	void addJobProperties(String jobname, Map<String, String> properties)
+	void addJobProperties(String jobname, DtoJob properties)
 			throws NoSuchJobException;
 
 	/**
@@ -1037,77 +797,18 @@ public interface ServiceInterface {
 	 * @return the job properties
 	 * @throws NoSuchJobException if no such job exists
 	 */
-
-	Map<String, String> getAllJobProperties(String jobname)
+	DtoJob getAllJobProperties(String jobname)
 			throws NoSuchJobException;
 
+
 	/**
-	 * Returns the fqan that was used to submit the job.
+	 * Returns the jsdl document that was used to create this job.
 	 * 
-	 * @param jobname
-	 *            the name of the job
-	 * @return the fqan
+	 * @param jobname the name of the job
+	 * @return the jsdl document
 	 * @throws NoSuchJobException if no such job exists
-	 * @Deprecated don't use that anymore. Use {
-	 *             {@link #getJobProperty(String, String)} instead.
 	 */
-	@Deprecated String getJobFqan(String jobname) throws NoSuchJobException;
+	String getJsldDocument(String jobname) throws NoSuchJobException;
 
-	Document getJsldDocument(String jobname) throws NoSuchJobException;
-
-	// ---------------------------------------------------------------------------------------------------
-	// 
-	// Possible additional methods
-	//
-	// ---------------------------------------------------------------------------------------------------
-
-	// /**
-	// * This is not used at the moment. Use on your own risk.
-	// *
-	// * Saves the ServiceInterfaces default credential (which can be a local
-	// * proxy or a myproxy credential or whatever...) to the database so the
-	// * ServiceInterface can use it to submit jobs. It's mainly intended for
-	// use if
-	// * we later decide to implement workflows and something has to be done
-	// * after the job finishes. For a normal job we are ok with a credential
-	// that only is valid until
-	// * the job is submitted to the queuing system. If the user wants to
-	// retrieve the data
-	// * afterwards he just has to create a new credential.
-	// *
-	// * Usually it's the credential that is used to log on to the service or a
-	// * local grid proxy.
-	// *
-	// * @return the id of the credential or null if it did not work
-	// * @throws NoValidCredentialException if the credential is not valid
-	// (anymore)
-	// */
-	//	
-	// public Long saveDefaultCredentialToDatabase() throws
-	// NoValidCredentialException;
-
-	// /**
-	// * Gets all available versions of a particular application
-	// * @param application the name of the application
-	// * @return a list of all versions of this application (default version is
-	// on index 0) or null if no version is available
-	// * @throws NoSuchTemplateException if a template for that particular
-	// application does not exist
-	// */
-	//	
-	// public String[] getVersions(String application) throws
-	// NoSuchTemplateException;
-
-	// /**
-	// * Returns the default version of the specified application (I reckon this
-	// would usually be the
-	// * latest version).
-	// *
-	// * @param application the application
-	// * @param site the site
-	// * @return the version
-	// */
-	// public String getDefaultVersionOfApplicationOnSite(String application,
-	// String site);
 
 }

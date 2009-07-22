@@ -24,7 +24,7 @@ public class DtoGridResources {
 		
 		DtoGridResources result = new DtoGridResources();
 		
-		List<DtoGridResource> list = new LinkedList<DtoGridResource>();
+		List<GridResource> list = new LinkedList<GridResource>();
 		
 		for ( GridResource r : resources ) {
 			DtoGridResource dtor= new DtoGridResource(r);
@@ -42,13 +42,13 @@ public class DtoGridResources {
 	 * The list of grid resources.
 	 */
 	@XmlElement(name="gridresource")
-	List<DtoGridResource> gridResources = new LinkedList<DtoGridResource>();
+	List<GridResource> gridResources = new LinkedList<GridResource>();
 
-	public List<DtoGridResource> getGridResources() {
+	public List<GridResource> getGridResources() {
 		return gridResources;
 	}
 
-	public void setGridResources(List<DtoGridResource> gridResources) {
+	public void setGridResources(List<GridResource> gridResources) {
 		this.gridResources = gridResources;
 	}
 	

@@ -16,9 +16,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import javax.activation.DataHandler;
 import javax.activation.DataSource;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.lang.StringUtils;
@@ -41,9 +40,6 @@ import org.vpac.grisu.backend.model.job.gt4.GT4Submitter;
 import org.vpac.grisu.backend.utils.CertHelpers;
 import org.vpac.grisu.backend.utils.FileContentDataSourceConnector;
 import org.vpac.grisu.backend.utils.FileSystemStructureToXMLConverter;
-import org.vpac.grisu.backend.utils.JobNameManager;
-import org.vpac.grisu.backend.utils.JobsToXMLConverter;
-import org.vpac.grisu.backend.utils.JsdlModifier;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
@@ -53,6 +49,18 @@ import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.info.CachedMdsInformationManager;
 import org.vpac.grisu.model.MountPoint;
+import org.vpac.grisu.model.dto.DtoApplicationDetails;
+import org.vpac.grisu.model.dto.DtoApplicationInfo;
+import org.vpac.grisu.model.dto.DtoDataLocations;
+import org.vpac.grisu.model.dto.DtoFile;
+import org.vpac.grisu.model.dto.DtoFolder;
+import org.vpac.grisu.model.dto.DtoGridResources;
+import org.vpac.grisu.model.dto.DtoHostsInfo;
+import org.vpac.grisu.model.dto.DtoJob;
+import org.vpac.grisu.model.dto.DtoJobProperty;
+import org.vpac.grisu.model.dto.DtoJobs;
+import org.vpac.grisu.model.dto.DtoMountPoints;
+import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.settings.ServerPropertiesManager;
@@ -96,7 +104,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			.getLogger(AbstractServiceInterface.class.getName());
 
 	private InformationManager informationManager = CachedMdsInformationManager
-			.getDefaultCachedMdsInformationManager(Environment.getGrisuDirectory().toString());
+			.getDefaultCachedMdsInformationManager(Environment
+					.getGrisuDirectory().toString());
 
 	private UserDAO userdao = new UserDAO();
 
@@ -114,10 +123,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	// protected ExecutorService executor = Executors.newFixedThreadPool(2);
 
-	private MatchMaker matchmaker = new MatchMakerImpl(Environment.getGrisuDirectory().toString());
+	private MatchMaker matchmaker = new MatchMakerImpl(Environment
+			.getGrisuDirectory().toString());
 
-	public final double getInterfaceVersion() {
-		return ServiceInterface.INTERFACE_VERSION;
+	public final String getInterfaceVersion() {
+		return "<grisuVersion>" + ServiceInterface.INTERFACE_VERSION
+				+ "</grisuVersion>";
 	}
 
 	private Map<String, RemoteFileTransferObject> fileTransfers = new HashMap<String, RemoteFileTransferObject>();
@@ -204,14 +215,25 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return manager;
 	}
 
-	public final String createJob(Document jsdl, final String fqan,
+	public final String createJobUsingJsdl(String jsdlString,
+			final String fqan, final String jobnameCreationMethod)
+			throws JobPropertiesException {
+
+		Document jsdl;
+
+		try {
+			jsdl = SeveralXMLHelpers.fromString(jsdlString);
+		} catch (Exception e3) {
+
+			myLogger.error(e3);
+			throw new RuntimeException("Invalid jsdl/xml format.", e3);
+		}
+
+		return createJob(jsdl, fqan, jobnameCreationMethod);
+	}
+
+	private final String createJob(Document jsdl, final String fqan,
 			final String jobnameCreationMethod) throws JobPropertiesException {
-
-		// workaround for cxf xml wrapping bug
-		jsdl = SeveralXMLHelpers.cxfWorkaround(jsdl, "JobDefinition");
-
-		System.out.println(SeveralXMLHelpers
-				.toStringWithoutAnnoyingExceptions(jsdl));
 
 		String jobname = JsdlHelpers.getJobname(jsdl);
 
@@ -329,148 +351,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	public final String createJob(final Map<String, String> jobProperties,
+	public final String createJobUsingMap(final DtoJob jobProperties,
 			final String fqan, final String jobCreationMethod)
 			throws JobPropertiesException {
 
-		JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl(jobProperties);
+		JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl(jobProperties
+				.getPropertiesAsMap());
 
 		return createJob(jso.getJobDescriptionDocument(), fqan,
 				jobCreationMethod);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.vpac.grisu.control.ServiceInterface#createJob(java.lang.String,
-	 * int)
-	 */
-	public final String createJob(final String jobname,
-			final int createJobNameMethod) {
-
-		Job job = null;
-		getCredential();
-
-		String newJobname = JobNameManager.getJobname(getUser().getDn(),
-				jobname, createJobNameMethod);
-
-		job = new Job(getCredential().getDn(), newJobname);
-
-		// check again whether there is not a job with this jobname in the
-		// database
-		try {
-			Job testJob = getJob(job.getJobname());
-			throw new RuntimeException(
-					"Could not save job in database: jobname already taken.");
-		} catch (NoSuchJobException e) {
-			// good.
-			myLogger.debug("Still no job. Good.");
-		}
-
-		job.setStatus(JobConstants.JOB_CREATED);
-		jobdao.saveOrUpdate(job);
-
-		myLogger.debug("Job \"" + job.getJobname()
-				+ "\" successfully created in database.");
-
-		return job.getJobname();
-	}
-
-	// /**
-	// * Helper method to figure out a free jobname for the above
-	// * {@link #createJob(String, int) method.
-	// *
-	// * @param proposedJobname
-	// * the jobname you would like to have
-	// * @param createJobNameMethod
-	// * the method on how to create the jobname
-	// * @return the new jobname that is unique
-	// * @throws JobCreationException
-	// * if it's not possible to create a jobname
-	// */
-	// protected String calculateJobname(String proposedJobname,
-	// int createJobNameMethod) throws JobCreationException {
-	//
-	// return JobNameManager.getJobname(getUser().getDn(), proposedJobname,
-	// createJobNameMethod);
-	// }
-
-	// /*
-	// * (non-Javadoc)
-	// *
-	// * @see
-	// org.vpac.grisu.control.ServiceInterface#createJob(org.w3c.dom.Document,
-	// * int)
-	// */
-	// public String createJob(Document jsdl, int createJobNameMethod)
-	// throws JobDescriptionNotValidException, JobCreationException {
-	//
-	// Job job = null;
-	// String jobname = JsdlHelpers.getJobname(jsdl);
-	//
-	// // this throws a JobCreationException if necessary
-	// String newJobname = JobNameManager.getJobname(getUser().getDn(),
-	// jobname, createJobNameMethod);
-	//
-	// if (!jobname.equals(newJobname)) {
-	// try {
-	// JsdlHelpers.setJobname(jsdl, newJobname);
-	// } catch (XPathExpressionException e) {
-	// throw new JobCreationException("Could not create job: "
-	// + e.getLocalizedMessage());
-	// }
-	// }
-	//
-	// try {
-	// job = new Job(getCredential().getDn(), jsdl);
-	// } catch (XPathExpressionException e) {
-	// throw new JobDescriptionNotValidException(
-	// "Could not calculate the jobname for the job: "
-	// + e.getMessage());
-	// } catch (SAXException e1) {
-	// throw new JobDescriptionNotValidException(
-	// "Job description is not valid: " + e1.getMessage());
-	// }
-	//
-	// // check again whether there is not a job with this jobname in the
-	// // database
-	// try {
-	// Job testJob = getJob(job.getJobname());
-	// throw new JobCreationException(
-	// "Could not save job in database: jobname already taken.");
-	// } catch (NoSuchJobException e) {
-	// // good.
-	// }
-	//
-	// job.setStatus(JobConstants.JOB_CREATED);
-	// jobdao.save(job);
-	//
-	// return job.getJobname();
-	// }
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.vpac.grisu.control.ServiceInterface#setJobDescription(java.lang.String
-	 * , org.w3c.dom.Document)
-	 * 
-	 * @Deprecated Don't use that method anymore
-	 */
-	@Deprecated
-	public final void setJobDescription(final String jobname, Document jsdl)
-			throws NoSuchJobException {
-
-		jsdl = SeveralXMLHelpers.cxfWorkaround(jsdl, "JobDefinition");
-
-		Job job = getJob(jobname);
-
-		myLogger.debug("Adding job description to job: " + jobname);
-		myLogger.debug(SeveralXMLHelpers
-				.toStringWithoutAnnoyingExceptions(jsdl));
-
-		job.setJobDescription(jsdl);
-		jobdao.saveOrUpdate(job);
 	}
 
 	private void setVO(final Job job, final String fqan)
@@ -502,6 +391,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		JobSubmissionObjectImpl jobSubmissionObject = new JobSubmissionObjectImpl(
 				jsdl);
 
+		for (JobSubmissionProperty key : jobSubmissionObject
+				.getJobSubmissionPropertyMap().keySet()) {
+			job.getJobProperties().put(key.toString(),
+					jobSubmissionObject.getJobSubmissionPropertyMap().get(key));
+		}
+
 		List<GridResource> matchingResources = null;
 
 		String submissionLocation = null;
@@ -513,8 +408,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// auto-settings
 
 		if (jobSubmissionObject.getApplication() != null
-				&& Constants.GENERIC_APPLICATION_NAME.equals(jobSubmissionObject
-						.getApplication())) {
+				&& Constants.GENERIC_APPLICATION_NAME
+						.equals(jobSubmissionObject.getApplication())) {
 
 			submissionLocation = jobSubmissionObject.getSubmissionLocation();
 			if (StringUtils.isBlank(submissionLocation)) {
@@ -540,7 +435,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				myLogger
 						.warn("No modules specified for generic application. That might be ok but probably not...");
 			} else {
-				job.addJobProperty(Constants.MODULES_KEY, StringUtils.join(modules, ","));
+				job.addJobProperty(Constants.MODULES_KEY, StringUtils.join(
+						modules, ","));
 			}
 
 			// checking whether application is specified. If not, try to figure
@@ -789,7 +685,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		String stagingFilesystemToUse = null;
 		for (String stagingFs : stagingFileSystems) {
 
-			for (MountPoint mp : df()) {
+			for (MountPoint mp : df_internal()) {
 				if (mp.getRootUrl().startsWith(stagingFs.replace(":2811", ""))
 						&& jobFqan.equals(mp.getFqan())) {
 					mountPointToUse = mp;
@@ -834,16 +730,18 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		JsdlHelpers.setWorkingDirectory(jsdl,
 				JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM, workingDirectory);
-		job.addJobProperty(Constants.STAGING_FILE_SYSTEM_KEY, stagingFilesystemToUse);
+		job.addJobProperty(Constants.STAGING_FILE_SYSTEM_KEY,
+				stagingFilesystemToUse);
 		job.addJobProperty(Constants.WORKINGDIRECTORY_KEY, workingDirectory);
 		String submissionSite = informationManager
 				.getSiteForHostOrUrl(stagingFilesystemToUse);
 		myLogger.debug("Calculated submissionSite: " + submissionSite);
 		job.addJobProperty("submissionSite", submissionSite);
-//		job.setJob_directory(stagingFilesystemToUse + workingDirectory);
+		// job.setJob_directory(stagingFilesystemToUse + workingDirectory);
 		job.getJobProperties().put(Constants.JOBDIRECTORY_KEY,
 				stagingFilesystemToUse + workingDirectory);
-		myLogger.debug("Calculated jobdirectory: " + stagingFilesystemToUse + workingDirectory);
+		myLogger.debug("Calculated jobdirectory: " + stagingFilesystemToUse
+				+ workingDirectory);
 
 		myLogger.debug("Fixing urls in datastaging elements...");
 		// fix stage in target filesystems...
@@ -853,9 +751,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			String filePath = JsdlHelpers.getStageInSource(stageInElement);
 			String filename = filePath.substring(filePath.lastIndexOf("/"));
 
-			JsdlHelpers
-					.getStageInTarget_filesystemPart(stageInElement)
-					.setTextContent(JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM);
+			Element el = JsdlHelpers
+					.getStageInTarget_filesystemPart(stageInElement);
+
+			el.setTextContent(JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM);
 			JsdlHelpers.getStageInTarget_relativePart(stageInElement)
 					.setTextContent(workingDirectory + filename);
 
@@ -888,10 +787,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					"Could not access remote filesystem: "
 							+ e.getLocalizedMessage());
 		}
-
-		// fill necessary info about the job into the database
-		myLogger.debug("Parsing job description...");
-		parseJobDescription(job);
 
 		if (job.getFqan() != null) {
 			VO vo = VOManagement.getVO(getUser().getFqans().get(job.getFqan()));
@@ -933,29 +828,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		jobdao.saveOrUpdate(job);
 		myLogger.info("Jobsubmission for job " + jobname + " and user "
 				+ getDN() + " successful.");
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.vpac.grisu.control.ServiceInterface#setJobDescription_string(java
-	 * .lang.String, java.lang.String)
-	 */
-	public final void setJobDescription_string(final String jobname,
-			final String jsdl) throws NoSuchJobException {
-
-		try {
-			Document jsdl_doc = SeveralXMLHelpers.fromString(jsdl);
-			setJobDescription(jobname, jsdl_doc);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw new RuntimeException(
-					"Could not parse string into xml document: "
-							+ e.getLocalizedMessage());
-		}
 
 	}
 
@@ -1060,47 +932,22 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#ps()
 	 */
-	public final Document ps() {
+	public final DtoJobs ps(boolean refresh) {
 
 		List<Job> jobs = jobdao.findJobByDN(getUser().getDn());
 
-		refreshJobStatus(jobs);
-
-		Document info = JobsToXMLConverter.getJobsInformation(jobs);
-
-		return info;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.vpac.grisu.control.ServiceInterface#ps_string()
-	 */
-	public final String ps_string() {
-
-		String result = null;
-
-		try {
-			Document ps = ps();
-			ps = SeveralXMLHelpers.cxfWorkaround(ps, "jobs");
-			result = SeveralXMLHelpers.toString(ps);
-		} catch (TransformerFactoryConfigurationError e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (refresh) {
+			refreshJobStatus(jobs);
 		}
 
-		return result;
+		DtoJobs dtoJobs = new DtoJobs();
+		for (Job job : jobs) {
+			DtoJob.createJob(job.getStatus(), job.getJobProperties());
+		}
 
+		return dtoJobs;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.vpac.grisu.control.ServiceInterface#getAllJobnames()
-	 */
 	public final String[] getAllJobnames() {
 
 		List<String> jobnames = jobdao.findJobNamesByDn(getUser().getDn());
@@ -1121,71 +968,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 	}
 
-	// /*
-	// * (non-Javadoc)
-	// *
-	// * @see
-	// org.vpac.grisu.control.ServiceInterface#saveDefaultCredentialToDatabase()
-	// */
-	// public Long saveDefaultCredentialToDatabase() {
-	//
-	// Long credID = null;
-	// credID = credentialdao.save(getCredential());
-	//
-	// return credID;
-	// }
-
-	/**
-	 * This one parses the job description and fills in necessary fields into
-	 * the database. It's not really necessary because all the information is in
-	 * the jsdl document but that way the database is much easier to search.
-	 * 
-	 * @param job
-	 *            the jobname of the job you want to parse
-	 */
-	protected final void parseJobDescription(final Job job) {
-
-		Document jsdl = job.getJobDescription();
-
-		JobSubmissionObjectImpl jobSubmImpl = new JobSubmissionObjectImpl(jsdl);
-
-		for (JobSubmissionProperty key : jobSubmImpl
-				.getJobSubmissionPropertyMap().keySet()) {
-			job.getJobProperties().put(key.toString(),
-					jobSubmImpl.getJobSubmissionPropertyMap().get(key));
-		}
-
-		// TODO urgent! find out why job properties are not persisted after
-		// first safe!
-		// job.getJobProperties().put("jobDirectory",
-		// JsdlHelpers.getAbsoluteWorkingDirectoryUrl(jsdl));
-
-		// fill info
-		// this will disapear later and only jobProperties will be used.
-
-		// TODO remove that later on when I'm sure that nobody is using this
-		// anymore
-//		String app = JsdlHelpers.getApplicationName(job.getJobDescription());
-//		job.setApplication(app);
-//
-//		String stdout = JsdlHelpers.getPosixStandardOutput(job
-//				.getJobDescription());
-//		job.setStdout(job.getJob_directory() + File.separator + stdout);
-//		String stderr = JsdlHelpers.getPosixStandardError(job
-//				.getJobDescription());
-//		job.setStderr(job.getJob_directory() + File.separator + stderr);
-
-		jobdao.saveOrUpdate(job);
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#mount(java.lang.String,
 	 * java.lang.String)
 	 */
-	public final MountPoint mount(final String url, final String mountpoint,
-			final boolean useHomeDirectory) throws RemoteFileSystemException {
+	public final MountPoint mountWithoutFqan(final String url,
+			final String mountpoint, final boolean useHomeDirectory)
+			throws RemoteFileSystemException {
 
 		MountPoint mp = getUser().mountFileSystem(url, mountpoint,
 				useHomeDirectory);
@@ -1216,14 +1007,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		getUser().unmountFileSystem(mountpoint);
 		userdao.saveOrUpdate(getUser());
 		mountPointsForThisSession = null;
+
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.vpac.grisu.control.ServiceInterface#df()
-	 */
-	public final synchronized MountPoint[] df() {
+	private final synchronized MountPoint[] df_internal() {
 
 		if (mountPointsForThisSession == null) {
 
@@ -1244,6 +1031,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			mountPointsForThisSession = mps.toArray(new MountPoint[mps.size()]);
 		}
 		return mountPointsForThisSession;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.vpac.grisu.control.ServiceInterface#df()
+	 */
+	public final synchronized DtoMountPoints df() {
+
+		return DtoMountPoints.createMountpoints(df_internal());
 	}
 
 	/*
@@ -1305,7 +1102,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		for (String fqan : getFqans()) {
 			Date start = new Date();
-			Map<String, String[]> mpUrl = getDataLocationsForVO(fqan);
+			Map<String, String[]> mpUrl = informationManager
+					.getDataLocationsForVO(fqan);
 			Date end = new Date();
 			myLogger.debug("Querying for data locations for all sites and+ "
 					+ fqan + " took: " + (end.getTime() - start.getTime())
@@ -1341,10 +1139,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if one of the files doesn't exist
 	 */
-	private DataSource[] download(final String[] filenames)
+	private DataHandler[] download(final String[] filenames)
 			throws RemoteFileSystemException {
 
 		final DataSource[] datasources = new DataSource[filenames.length];
+		final DataHandler[] datahandlers = new DataHandler[filenames.length];
 
 		for (int i = 0; i < filenames.length; i++) {
 
@@ -1369,59 +1168,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								+ e.getMessage());
 			}
 			datasources[i] = datasource;
+			datahandlers[i] = new DataHandler(datasources[i]);
 		}
 
-		return datasources;
+		return datahandlers;
 
 	}
 
-	// public void downloadFolder(String folder) throws
-	// RemoteFileSystemException,
-	// VomsException {
-	//
-	// try {
-	// final FileObject source = getUser().aquireFile(folder);
-	// final FileObject[] targets = source.findFiles(new FileTypeSelector(
-	// FileType.FILE));
-	//
-	// FileObject target = null;
-	//
-	// // for ( int i = 0; i<targets.length; i++ ) {
-	// //
-	// // new Thread() {
-	// // public void run() {
-	// //
-	// // FileObject target = null;
-	// // target.copyFrom(source[i]);
-	// //
-	// //
-	// // }
-	// // }.start();
-	// // }
-	// //
-	// FileSystemManager fsManager = VFS.getManager();
-	// target = fsManager.resolveFile("file://tmp/test");
-	// Date startDate = new Date();
-	// myLogger.debug("Starting download...");
-	// target.copyFrom(source, new AllFileSelector());
-	// myLogger.debug("Finished download.");
-	// Date endDate = new Date();
-	// long difference = endDate.getTime() - startDate.getTime();
-	// System.out.println("Time to copy using folder copy: " + difference
-	// / 1000 + " seconds.");
-	// } catch (Exception e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	//
-	// }
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.vpac.grisu.control.ServiceInterface#download(java.lang.String)
-	 */
-	public final DataSource download(final String filename)
+	public final DataHandler download(final String filename)
 			throws RemoteFileSystemException {
 
 		myLogger.debug("Downloading: " + filename);
@@ -1429,236 +1183,86 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return download(new String[] { filename })[0];
 	}
 
-	// public byte[] downloadByteArray(String filename) throws
-	// RemoteFileSystemException, VomsException {
-	//		
-	// myLogger.debug("Downloading: " + filename);
-	// byte[] result = null;
-	// FileObject source = null;
-	// // DataSource datasource = null;
-	// source = getUser().aquireFile(filename);
-	//
-	// try {
-	// if (!source.exists()) {
-	// throw new RemoteFileSystemException(
-	// "Could not provide file: "
-	// + filename
-	// + " for download: InputFile does not exist.");
-	// }
-	//
-	// byte[] buffer = new byte[1024];
-	//
-	// InputStream inputStream = source.getContent().getInputStream();
-	// ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-	//			
-	// try {
-	// while (true) {
-	// int amountRead;
-	// try {
-	// amountRead = inputStream.read(buffer);
-	// } catch (IOException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// throw new
-	// RemoteFileSystemException("Can't read file "+filename+": "+e.getLocalizedMessage());
-	// }
-	// if(amountRead == -1) {
-	// break;
-	// }
-	// outputStream.write(buffer, 0, amountRead);
-	// }
-	// } finally {
-	// try {
-	// inputStream.close();
-	// } catch(Exception ex) {
-	// ex.printStackTrace();
-	// }
-	// try {
-	// outputStream.close();
-	// } catch(Exception ex) {
-	// ex.printStackTrace();
-	// }
-	// }
-	//
-	// result = outputStream.toByteArray();
-	// // datasource = new FileContentDataSourceConnector(source
-	// // .getContent());
-	// } catch (FileSystemException e) {
-	// throw new RemoteFileSystemException(
-	// "Could not find or read file: " + filename + ": "
-	// + e.getMessage());
-	// }
-	//
-	// return result;
-	// }
+	private DtoFolder getFolderListing(String url)
+			throws RemoteFileSystemException, FileSystemException {
 
-	// /**
-	// * Sean's C client calls this..
-	// * <pre>
-	// * int offset = 0;
-	// * int length = 16kb
-	// * byte[] bytes = downloadByteArray(file, offset, length);
-	// * while (bytes.length > 0) { // or same as saying until EOF is not
-	// reached
-	// * //process bytes
-	// * offset += length;
-	// * bytes = downloadByteArray(file, offset, length);
-	// * }
-	// * </pre>
-	// * @param filename
-	// * @param offset in bytes
-	// * @param length in bytes
-	// * @return
-	// * @throws RemoteFileSystemException
-	// * @throws VomsException
-	// */
-	// public byte[] downloadByteArray(String filename, int offset, int length)
-	// throws RemoteFileSystemException, VomsException {
-	//		
-	// // for the meantime, let's set a limit to length to be 1MB (1048576
-	// bytes)
-	// // it should also be greater than 1kb
-	// // we should throw an exception if length exceeds the limit or just
-	// // return null. let's do the latter for now..
-	//		
-	// int DOWNLOAD_LIMIT = 1048576; // put this in the correct place later on
-	// int BYTE_ARRAY_SIZE_LIMIT = 1024;
-	//		
-	// if (length < BYTE_ARRAY_SIZE_LIMIT || length > DOWNLOAD_LIMIT) {
-	// return null;
-	// }
-	//		
-	// myLogger.debug("Downloading: " + filename);
-	// byte[] result = null;
-	// FileObject source = null;
-	// source = getUser().aquireFile(filename);
-	//
-	// try {
-	// if (!source.exists()) {
-	// throw new RemoteFileSystemException(
-	// "Could not provide file: "
-	// + filename
-	// + " for download: InputFile does not exist.");
-	// }
-	//			
-	// byte[] buffer = new byte[BYTE_ARRAY_SIZE_LIMIT];
-	//
-	// InputStream inputStream = source.getContent().getInputStream();
-	// ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-	//			
-	// try {
-	// // assuming that a file is 35kb
-	//		    	
-	// inputStream.skip(offset);
-	//		    	
-	// for (int i = offset; i < offset + length; i+=BYTE_ARRAY_SIZE_LIMIT) {
-	// int amountRead;
-	// try {
-	// amountRead = inputStream.read(buffer);
-	// } catch (IOException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// throw new
-	// RemoteFileSystemException("Can't read file "+filename+": "+e.getLocalizedMessage());
-	// }
-	// if(amountRead == -1) {
-	// break;
-	// }
-	// outputStream.write(buffer, 0, amountRead);
-	// }
-	// } catch (IOException e ) {
-	// e.printStackTrace();
-	// } finally {
-	// try {
-	// inputStream.close();
-	// } catch(Exception ex) {
-	// ex.printStackTrace();
-	// }
-	// try {
-	// outputStream.close();
-	// } catch(Exception ex) {
-	// ex.printStackTrace();
-	// }
-	// }
-	//
-	// result = outputStream.toByteArray();
-	// } catch (FileSystemException e) {
-	// throw new RemoteFileSystemException(
-	// "Could not find or read file: " + filename + ": "
-	// + e.getMessage());
-	// }
-	//
-	// return result;
-	// }
+		DtoFolder folder = new DtoFolder();
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.vpac.grisu.control.ServiceInterface#ls(java.lang.String, int,
-	 * boolean)
-	 */
-	public final Document ls(final String directory, final int recursion_level,
-			final boolean return_absolute_url) throws RemoteFileSystemException {
+		FileObject fo = getUser().aquireFile(url);
+
+		if (!FileType.FOLDER.equals(fo.getType())) {
+			throw new RemoteFileSystemException("Url: " + url
+					+ " not a folder.");
+		}
+
+		folder.setUrl(url);
+		folder.setName(fo.getName().getBaseName());
+
+		for (FileObject child : fo.getChildren()) {
+			if (FileType.FOLDER.equals(child.getType())) {
+				DtoFolder childfolder = new DtoFolder();
+				childfolder.setName(child.getName().getBaseName());
+				childfolder.setUrl(child.getURL().toString());
+				folder.addChildFolder(childfolder);
+			} else if (FileType.FILE.equals(child.getType())) {
+				DtoFile childFile = new DtoFile();
+				childFile.setName(child.getName().getBaseName());
+				childFile.setUrl(child.getURL().toString());
+
+				childFile.setLastModified(child.getContent()
+						.getLastModifiedTime());
+				childFile.setSize(child.getContent().getSize());
+
+				folder.addChildFile(childFile);
+			}
+		}
+
+		return folder;
+	}
+
+	public final DtoFolder ls(final String directory, final int recursion_level)
+			throws RemoteFileSystemException {
 
 		// check whether credential still valid
 		getCredential();
 
-		Document result = null;
-		// FileObject dir = null;
-		// dir = getUser().aquireFile(directory);
-
-		myLogger.debug("Listing directory: " + directory
-				+ " with recursion level: " + recursion_level);
-
 		try {
-			result = getFsConverter().getDirectoryStructure(directory,
-					recursion_level, return_absolute_url);
+			return getFolderListing(directory);
 		} catch (Exception e) {
-			myLogger.error("Could not list directory: "
-					+ e.getLocalizedMessage());
-			// e.printStackTrace();
-			throw new RemoteFileSystemException("Could not read directory "
-					+ directory + " for ls command: " + e.getMessage());
+			throw new RemoteFileSystemException("Could not list directory "
+					+ directory + ": " + e.getLocalizedMessage());
 		}
 
-		try {
-			myLogger.debug(SeveralXMLHelpers.toString(result));
-		} catch (TransformerFactoryConfigurationError e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return result;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.vpac.grisu.control.ServiceInterface#ls_string(java.lang.String,
-	 * int, boolean)
-	 */
-	public final String ls_string(final String directory,
-			final int recursion_level, final boolean return_absolute_url)
-			throws RemoteFileSystemException {
-
-		String result = null;
-		try {
-			Document temp = ls(directory, recursion_level, return_absolute_url);
-			temp = SeveralXMLHelpers.cxfWorkaround(temp, "Files");
-			result = SeveralXMLHelpers.toString(temp);
-		} catch (TransformerFactoryConfigurationError e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return result;
-
+		// Document result = null;
+		//
+		// // FileObject dir = null;
+		// // dir = getUser().aquireFile(directory);
+		//
+		// myLogger.debug("Listing directory: " + directory
+		// + " with recursion level: " + recursion_level);
+		//
+		// try {
+		// result = getFsConverter().getDirectoryStructure(directory,
+		// recursion_level, return_absolute_url);
+		// } catch (Exception e) {
+		// myLogger.error("Could not list directory: "
+		// + e.getLocalizedMessage());
+		// // e.printStackTrace();
+		// throw new RemoteFileSystemException("Could not read directory "
+		// + directory + " for ls command: " + e.getMessage());
+		// }
+		//
+		// try {
+		// myLogger.debug(SeveralXMLHelpers.toString(result));
+		// } catch (TransformerFactoryConfigurationError e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } catch (TransformerException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		//
+		// return result;
 	}
 
 	/**
@@ -1686,7 +1290,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * org.vpac.grisu.control.ServiceInterface#upload(javax.activation.DataSource
 	 * , java.lang.String)
 	 */
-	public final String upload(final DataSource source, final String filename,
+	public final String upload(final DataHandler source, final String filename,
 			final boolean return_absolute_url) throws RemoteFileSystemException {
 
 		myLogger.debug("Receiving file: " + filename);
@@ -1755,209 +1359,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 	}
 
-	// public String uploadByteArray(byte[] source, String filename,
-	// boolean return_absolute_url) throws RemoteFileSystemException,
-	// VomsException {
-	//		
-	// // TODO: for the meantime we'll allow files to be uploaded directly
-	// without
-	// // breaking them up into pieces as long as they're less than 2MB
-	// int BYTE_ARRAY_SIZE_LIMIT = 2097152;
-	// if (source.length > BYTE_ARRAY_SIZE_LIMIT) {
-	// throw new
-	// RemoteFileSystemException("Source file too big to upload! Try uploading a file less than "
-	// + BYTE_ARRAY_SIZE_LIMIT + " bytes.");
-	// }
-	//
-	// FileObject target = null;
-	//
-	// OutputStream fout = null;
-	// try {
-	// String parent = filename.substring(0, filename
-	// .lastIndexOf(File.separator));
-	// FileObject parentObject = getUser().aquireFile(parent);
-	// // FileObject tempObject = parentObject;
-	//
-	// createFolder(parentObject);
-	// // parentObject.createFolder();
-	//
-	// target = getUser().aquireFile(filename);
-	// // just to be sure that the folder exists.
-	//
-	// FileContent content = target.getContent();
-	// fout = content.getOutputStream();
-	// } catch (FileSystemException e) {
-	// e.printStackTrace();
-	// throw new RemoteFileSystemException("Could not open file: "
-	// + filename + ":" + e.getMessage());
-	// }
-	//
-	// myLogger.debug("Receiving data for file: " + filename);
-	//
-	// BufferedInputStream buf;
-	// try {
-	// buf = new BufferedInputStream(new ByteArrayInputStream(source));
-	//
-	// byte[] buffer = new byte[1024];// byte buffer
-	// int bytesRead = 0;
-	// while (true) {
-	// bytesRead = buf.read(buffer, 0, 1024);
-	// // bytesRead returns the actual number of bytes read from
-	// // the stream. returns -1 when end of stream is detected
-	// if (bytesRead == -1)
-	// break;
-	// fout.write(buffer, 0, bytesRead);
-	// }
-	//
-	// if (buf != null)
-	// buf.close();
-	// if (fout != null)
-	// fout.close();
-	// } catch (IOException e) {
-	// throw new RemoteFileSystemException("Could not write to file: "
-	// + filename + ": " + e.getMessage());
-	// }
-	//
-	// buf = null;
-	// fout = null;
-	// if (!return_absolute_url)
-	// return filename;
-	// else
-	// return target.getName().getURI();
-	// }
-
-	// /**
-	// *
-	// *
-	// *
-	// * @param source
-	// * @param filename
-	// * @param return_absolute_url
-	// * @param n
-	// * @return
-	// * @throws RemoteFileSystemException
-	// * @throws VomsException
-	// */
-	// public String uploadByteArray(byte[] source, String filename,
-	// boolean return_absolute_url, int offset, int length) throws
-	// RemoteFileSystemException,
-	// VomsException {
-	//
-	// int UPLOAD_LIMIT = 1048576; // put this in the correct place later on
-	// int BYTE_ARRAY_SIZE_LIMIT = 1024;
-	//		
-	// // make sure the user is not transferring a very big byte[]
-	// if (length > UPLOAD_LIMIT) {
-	// return null;
-	// }
-	//		
-	// FileObject target = null;
-	//
-	// //OutputStream fout = null;
-	// RandomAccessContent fout = null;
-	//		
-	// try {
-	// String parent = filename.substring(0, filename
-	// .lastIndexOf(File.separator));
-	// FileObject parentObject = getUser().aquireFile(parent);
-	// // FileObject tempObject = parentObject;
-	//
-	// createFolder(parentObject);
-	// // parentObject.createFolder();
-	//
-	// target = getUser().aquireFile(filename);
-	// // just to be sure that the folder exists.
-	//
-	// FileContent content = target.getContent();
-	// //fout = content.getOutputStream();
-	// fout = content.getRandomAccessContent(RandomAccessMode.READWRITE);
-	//			
-	// } catch (FileSystemException e) {
-	// e.printStackTrace();
-	// throw new RemoteFileSystemException("Could not open file: "
-	// + filename + ":" + e.getMessage());
-	// }
-	//
-	// myLogger.debug("Receiving data for file: " + filename);
-	//
-	// ByteArrayInputStream buf;
-	// try {
-	// buf = new ByteArrayInputStream(source, 0, length);
-	//
-	// byte[] buffer = new byte[BYTE_ARRAY_SIZE_LIMIT];// byte buffer
-	// int bytesRead = 0;
-	// fout.seek(offset);
-	// while (true) {
-	// bytesRead = buf.read(buffer);
-	// if (bytesRead == -1)
-	// break;
-	// fout.write(buffer, 0, bytesRead);
-	//	    		
-	// }
-	//
-	// if (buf != null)
-	// buf.close();
-	// if (fout != null)
-	// fout.close();
-	// } catch (IOException e) {
-	// throw new RemoteFileSystemException("Could not write to file: "
-	// + filename + ": " + e.getMessage());
-	// }
-	//
-	// buf = null;
-	// fout = null;
-	// if (!return_absolute_url)
-	// return filename;
-	// else
-	// return target.getName().getURI();
-	// }
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.vpac.grisu.control.ServiceInterface#getJobDetails(java.lang.String)
-	 */
-	public final Document getJobDetails(final String jobname)
-			throws NoSuchJobException {
-
-		getJobStatus(jobname);
-
-		Job job;
-		job = jobdao.findJobByDN(getUser().getDn(), jobname);
-
-		Document info = JobsToXMLConverter.getDetailedJobInformation(job);
-		return info;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.vpac.grisu.control.ServiceInterface#getJobDetails_string(java.lang
-	 * .String)
-	 */
-	public final String getJobDetails_string(final String jobname)
-			throws NoSuchJobException {
-
-		String result = null;
-
-		try {
-			Document temp = getJobDetails(jobname);
-			temp = SeveralXMLHelpers.cxfWorkaround(temp, "jobs");
-			result = SeveralXMLHelpers.toString(temp);
-		} catch (TransformerFactoryConfigurationError e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return result;
-
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1986,46 +1387,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return getUser().getDn();
 	}
 
-	/**
-	 * Fixes the path to the working directory. A user (or grisu-client) would
-	 * set something like grisu-jobs/diff-job as working directory. The real
-	 * working directory on the cluster would probably be something like
-	 * <dn_of_the_user>/grisu-jobs/diff-job, depending on the fqan the job is
-	 * submitted with
-	 * 
-	 * @param job
-	 *            the job
-	 * @param dn
-	 *            the dn which is used to submit the job.
-	 * @param absoluteUrl
-	 *            whether the path of the working directory is absolute or
-	 *            relative
-	 * @throws ServerJobSubmissionException
-	 *             if something goes wrong
-	 */
-	protected final Document recalculateWorkingDirectory(final Job job,
-			final String clusterRootUrl, final boolean absolutePath) {
-
-		// set working directory
-		try {
-			myLogger
-					.debug("Recalculating work directory for cluster root url: "
-							+ clusterRootUrl);
-			Document new_jsdl = JsdlModifier.recalculateFileSystems(job
-					.getJobDescription(), clusterRootUrl.replace(":2811", ""),
-					absolutePath);
-			return new_jsdl;
-		} catch (Exception e) {
-			// e.printStackTrace();
-			throw new RuntimeException("Could not recalculate directory.");
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.vpac.grisu.control.ServiceInterface#getAllSites()
-	 */
 	public final String[] getAllSites() {
 
 		// if ( ServerPropertiesManager.getMDSenabled() ) {
@@ -2069,14 +1430,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * , java.util.Map)
 	 */
 	public final void addJobProperties(final String jobname,
-			final Map<String, String> properties) throws NoSuchJobException {
+			final DtoJob properties) throws NoSuchJobException {
 
 		Job job = getJob(jobname);
 
-		job.addJobProperties(properties);
+		job.addJobProperties(properties.getPropertiesAsMap());
 		jobdao.saveOrUpdate(job);
 
-		myLogger.debug("Added " + properties.size() + " job properties.");
+		myLogger.debug("Added " + properties.getProperties().size()
+				+ " job properties.");
 
 	}
 
@@ -2087,30 +1449,26 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * org.vpac.grisu.control.ServiceInterface#getAllJobProperties(java.lang
 	 * .String)
 	 */
-	public final Map<String, String> getAllJobProperties(final String jobname)
+	public final DtoJob getAllJobProperties(final String jobname)
 			throws NoSuchJobException {
 
 		Job job = getJob(jobname);
 
-		// job.getJobProperties().put(JobConstants.JOBPROPERTYKEY_VO,
-		// job.getFqan());
-		// job.getJobProperties().put(JobConstants.JOBPROPERTYKEY_JOBDIRECTORY,
-		// getJobDirectory(jobname));
-		// job.getJobProperties().put(JobConstants.JOBPROPERTYKEY_HOSTNAME,
-		// job.getSubmissionHost());
+		// job.getJobProperties().put(Constants.JOB_STATUS_KEY,
+		// JobConstants.translateStatus(getJobStatus(jobname)));
 
-//		job.getJobProperties().put(Constants.JOB_STATUS_KEY,
-//				JobConstants.translateStatus(getJobStatus(jobname)));
-
-		return job.getJobProperties();
+		return DtoJob.createJob(job.getStatus(), job.getJobProperties());
 	}
 
-	public final Document getJsldDocument(final String jobname)
+	public final String getJsldDocument(final String jobname)
 			throws NoSuchJobException {
 
 		Job job = getJob(jobname);
 
-		return job.getJobDescription();
+		String jsdlString;
+		jsdlString = SeveralXMLHelpers.toString(job.getJobDescription());
+
+		return jsdlString;
 
 	}
 
@@ -2127,18 +1485,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		Job job = getJob(jobname);
 
 		return job.getJobProperty(key);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.vpac.grisu.control.ServiceInterface#getJobFqan(java.lang.String)
-	 */
-	public final String getJobFqan(final String jobname)
-			throws NoSuchJobException {
-		Job job = getJob(jobname);
-
-		return job.getFqan();
 	}
 
 	/*
@@ -2199,7 +1545,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * org.vpac.grisu.control.ServiceInterface#getChildrenFiles(java.lang.String
 	 * , boolean)
 	 */
-	public final String[] getChildrenFiles(final String folder,
+	public final String[] getChildrenFileNames(final String folder,
 			final boolean onlyFiles) throws RemoteFileSystemException {
 
 		String[] result = null;
@@ -2248,141 +1594,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return size;
 	}
 
-	// public String getExecutionFileSystem(String site) {
-	//		
-	// String basePath = MountPointManager.getDefaultFileSystem(site);
-	//		
-	// // String
-	//		
-	// return null;
-	// }
+	public final DtoDataLocations getDataLocationsForVO(final String fqan) {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.vpac.grisu.control.ServiceInterface#calculateAbsoluteJobDirectory
-	 * (java.lang.String, java.lang.String, java.lang.String)
-	 */
-	public final String calculateAbsoluteJobDirectory(final String jobname,
-			final String subLoc, final String fqan) {
+		return DtoDataLocations.createDataLocations(fqan, informationManager
+				.getDataLocationsForVO(fqan));
 
-		myLogger.debug("Calculating jobdirectory of jobname: " + jobname
-				+ ", submissionLocation: " + subLoc + " and fqan: " + fqan);
-		// gsiftp://ngdata.vpac.org/markus
-		// String executionHostFs =
-		// MountPointManager.getDefaultFileSystem(site);
-		String[] stagingFilesystems = getStagingFileSystemForSubmissionLocation(subLoc);
-
-		MountPoint mountpoint = null;
-		for (String fs : stagingFilesystems) {
-			mountpoint = getUser().getFirstResponsibleMountPointForHostAndFqan(
-					fs, fqan);
-			if (mountpoint != null) {
-				break;
-			}
-		}
-
-		if (mountpoint == null) {
-			return null;
-		}
-		myLogger.debug("Responsible mountpoint: "
-				+ mountpoint.getAlias());
-		String jobDir = getWorkingDirectoryRelativeToMountPoint(jobname);
-		myLogger.debug("Jobdirectory: " + jobDir);
-		return mountpoint.getRootUrl() + "/" + jobDir;
-
-	}
-
-	/**
-	 * Calculates the working directory relative to a MountPoint. Since
-	 * grisu-backends can be configured (and in fact should) to have an extra
-	 * directory for all the grisu jobs (so the users directory doesn't get
-	 * cluttered with jobdirectories) this is needed. It would, for instance,
-	 * return something like: "grisu-job-dir/testjob"
-	 * 
-	 * @param jobname
-	 *            the name of the job
-	 * @return the directory relative to a mountpoint root
-	 */
-	protected final String getWorkingDirectoryRelativeToMountPoint(
-			final String jobname) {
-
-		String jobSubDir = ServerPropertiesManager.getGrisuJobDirectoryName();
-		String replacement = null;
-		if (jobSubDir == null) {
-			replacement = jobname;
-		} else {
-			// don't use File.seperator here because this could run on a windows
-			// machine
-			replacement = jobSubDir + "/" + jobname;
-		}
-		return replacement;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.vpac.grisu.control.ServiceInterface#getJobDirectory(java.lang.String)
-	 */
-	public final String getJobDirectory(final String jobname)
-			throws NoSuchJobException {
-
-		Job job = getJob(jobname);
-
-		// test whether job exists
-		if (job == null) {
-			return null;
-		}
-		// if (job.getStatus() < 0)
-		// return null;
-
-		// String fqan = job.getFqan();
-
-		String relativeDir = calculateRelativeJobDirectory(jobname);
-		String jobfs = job.getJobProperty("executionHostFileSystem");
-		if (jobfs == null) {
-			return null;
-		}
-
-		return jobfs + "/" + relativeDir;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.vpac.grisu.control.ServiceInterface#getDataLocationsForVO(java.lang
-	 * .String)
-	 */
-	public final Map<String, String[]> getDataLocationsForVO(final String fqan) {
-
-		return informationManager.getDataLocationsForVO(fqan);
-
-		// if ( ServerPropertiesManager.getMDSenabled() ) {
-		// return MountPointManager.getDataLocationsForSiteAndVO(site, fqan);
-		// } else {
-		// return null;
-		// }
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.vpac.grisu.control.ServiceInterface#calculateRelativeJobDirectory
-	 * (java.lang.String)
-	 */
-	public final String calculateRelativeJobDirectory(final String jobname) {
-
-		// Job job = getJob(jobname);
-		String jobDir = null;
-
-		jobDir = getWorkingDirectoryRelativeToMountPoint(jobname);
-
-		return jobDir;
 	}
 
 	/*
@@ -2504,7 +1720,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			final String description) {
 
 		// TODO
-
 	}
 
 	/*
@@ -2559,7 +1774,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				myLogger.debug("Staging file: " + sourceUrl + " to: "
 						+ targetUrl);
 				cp(sourceUrl, targetUrl, true, true);
-//				job.addInputFile(targetUrl);
+				// job.addInputFile(targetUrl);
 			}
 			// }
 		}
@@ -2582,7 +1797,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		myLogger.debug("Using calculated jobdirectory: " + jobDir);
 
-//		job.setJob_directory(jobDir);
+		// job.setJob_directory(jobDir);
 
 		try {
 			FileObject jobDirObject = getUser().aquireFile(jobDir);
@@ -2597,194 +1812,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			jobDirObject.createFolder();
 		} catch (FileSystemException e) {
 			throw new RemoteFileSystemException(
-					"Could not create job output folder: "
-							+ jobDir);
+					"Could not create job output folder: " + jobDir);
 		}
 		// now after the jsdl is ready, don't forget to fill the required fields
 		// into the database
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.vpac.grisu.control.ServiceInterface#submitJob(java.lang.String)
-	 */
-	public final void submitJob(final String jobname, final String fqan)
-			throws RemoteFileSystemException, NoSuchJobException {
-
-		Job job = getJob(jobname);
-
-		// check whether submission location is there... if not fill it
-		// automatically using the matchmaker
-		// Document jsdl_new;
-		// try {
-		// jsdl_new = checkSubmissionLocation (job.getJobDescription(), fqan);
-		// } catch (NoSubmissionLocationException e1) {
-		// throw new
-		// ServerJobSubmissionException("No possible submission locations found.");
-		// }
-		//		
-		// if ( jsdl_new != job.getJobDescription() ) {
-		// // means a submission location was set automatically
-		// job.setJobDescription(jsdl_new);
-		// String subLoc = JsdlHelpers.getCandidateHosts(jsdl_new)[0];
-		// informationManager.getStagingFileSystemForSubmissionLocation(subLoc);
-		// JsdlHelpers.set
-		// }
-
-		// change paths within the job description to adapt to site's
-		// environment
-		String submissionFS = JsdlHelpers.getUserExecutionHostFs(job
-				.getJobDescription());
-		// // String submissionSite = MountPointManager.getSite(submissionFS);
-		String submissionSite = informationManager
-				.getSiteForHostOrUrl(submissionFS);
-		String clusterRootUrl = null;
-
-		// try {
-		Map<String, String[]> fileSystems = getDataLocationsForVO(fqan);
-
-		boolean absolutePath;
-		// String[] fileSystems =
-		// getStagingFileSystemForSubmissionLocation(JsdlHelpers.getCandidateHosts(job.getJobDescription())[0]);
-		if (fileSystems == null || fileSystems.keySet().size() == 0) {
-			absolutePath = false;
-			// this is a fallback if mds doesn't contain the staging filesystem
-			FileObject submissionFsFileObject = getUser().aquireFile(
-					submissionFS);
-			FileObject clusterRootFileObject;
-			try {
-				clusterRootFileObject = submissionFsFileObject.getFileSystem()
-						.resolveFile(
-								(String) submissionFsFileObject.getFileSystem()
-										.getAttribute("HOME_DIRECTORY"));
-			} catch (FileSystemException e) {
-				throw new RuntimeException(
-						"Could not find any root directory/filesystem for this job submission.");
-			}
-			clusterRootUrl = clusterRootFileObject.getName().toString();
-		} else {
-			absolutePath = true;
-			for (String fs : fileSystems.keySet()) {
-				// for ( String fsHome : fileSystems.get(fs) ) {
-				// String compare = (fs+fsHome).replace(":2811", "");
-				if (submissionFS.startsWith(fs.replace(":2811", ""))) {
-					clusterRootUrl = fs.replace(":2811", "");
-					break;
-				}
-				// }
-			}
-
-		}
-		if (clusterRootUrl == null) {
-			throw new RuntimeException(
-					"Could not calculate cluster root directory/filesystem.");
-		}
-
-		// FileObject clusterRootFileObject =
-		// submissionFsFileObject.getFileSystem().resolveFile((String)
-		// submissionFsFileObject.getFileSystem().getAttribute("HOME_DIRECTORY"));
-		// clusterRootUrl = clusterRootFileObject.getName().toString();
-		// } catch (FileSystemException e) {
-		// throw new JobSubmissionException("Could not determine cluster root
-		// url.");
-		// }
-
-		String workingDirRelativeToUserFS = JsdlHelpers.getWorkingDirectory(job
-				.getJobDescription());
-//		job.setJob_directory(submissionFS + "/" + workingDirRelativeToUserFS);
-		job.getJobProperties().put(Constants.JOBDIRECTORY_KEY,
-				submissionFS + "/" + workingDirRelativeToUserFS);
-
-		Document newJsdl = recalculateWorkingDirectory(job, clusterRootUrl,
-				absolutePath);
-		job.setJobDescription(newJsdl);
-
-		// create job folder
-		prepareJobEnvironment(job);
-		// stage files
-		stageFiles(jobname);
-		// fill necessary info about the job into the database
-		parseJobDescription(job);
-
-		job.setFqan(fqan);
-		job.addJobProperty(Constants.FQAN_KEY, fqan);
-		if (fqan != null) {
-			VO vo = VOManagement.getVO(getUser().getFqans().get(fqan));
-			job.setCredential(CertHelpers.getVOProxyCredential(vo, fqan,
-					getCredential()));
-		} else {
-			job.setCredential(getCredential());
-		}
-
-		String handle = null;
-		handle = getSubmissionManager().submit("GT4", job);
-
-		if (handle == null) {
-			throw new RuntimeException(
-					"Job apparently submitted but jobhandle is null for job: "
-							+ jobname);
-		}
-
-		job.addJobProperty("submissionTime", Long
-				.toString(new Date().getTime()));
-		job.addJobProperty("submissionSite", submissionSite);
-		// we don't want the credential to be stored with the job in this case
-		// TODO or do we want it to be stored?
-		job.setCredential(null);
-		jobdao.saveOrUpdate(job);
-	}
-
-	// /**
-	// * Checks whether submission location is present. If so, it returns the
-	// same Document, if not it auto-fills it and returns the new Document...
-	// * @param jsdl_orig the jsdl document
-	// * @return a ready-to-go jsdl document
-	// * @throws NoSubmissionLocationException
-	// */
-	// private Document checkSubmissionLocation(Document jsdl_orig, String fqan)
-	// throws NoSubmissionLocationException {
-	//		
-	// String[] subLocs = JsdlHelpers.getCandidateHosts(jsdl_orig);
-	//		
-	// if ( subLocs != null && subLocs.length > 0 ) {
-	// return jsdl_orig;
-	// }
-	//		
-	// // start processing
-	// List<GridResource> resources =
-	// matchmaker.findMatchingResources(jsdl_orig, fqan);
-	//		
-	// if ( resources == null || resources.size() == 0 ) {
-	// throw new
-	// NoSubmissionLocationException("Could not find submissionlocation for this jsdl and the "+fqan+" vo.");
-	// }
-	//		
-	// Document jsdl_new = null;
-	// try {
-	// jsdl_new =
-	// SeveralXMLHelpers.fromString(SeveralXMLHelpers.toString(jsdl_orig));
-	// } catch (Exception e) {
-	// throw new RuntimeException("Could not create new jsdl document...");
-	// }
-	//		
-	// try {
-	// JsdlHelpers.addCandidateHosts(jsdl_new, new
-	// String[]{SubmissionLocationHelpers.createSubmissionLocationString(resources.get(0))});
-	// } catch (XPathExpressionException e) {
-	// throw new
-	// RuntimeException("Could not add submission locations to jsdl file: "+e.getLocalizedMessage());
-	// }
-	//		
-	// return jsdl_new;
-	// }
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.vpac.grisu.control.ServiceInterface#kill(java.lang.String,
-	 * boolean)
-	 */
 	public final void kill(final String jobname, final boolean clear)
 			throws RemoteFileSystemException, NoSuchJobException {
 
@@ -2880,9 +1913,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#getAllSubmissionLocations()
 	 */
-	public final synchronized String[] getAllSubmissionLocations() {
+	public final synchronized DtoSubmissionLocations getAllSubmissionLocations() {
 
-		return informationManager.getAllSubmissionLocations();
+		return DtoSubmissionLocations
+				.createSubmissionLocationsInfo(informationManager
+						.getAllSubmissionLocations());
 	}
 
 	/*
@@ -2892,11 +1927,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * org.vpac.grisu.control.ServiceInterface#getSubmissionLocationsForApplication
 	 * (java.lang.String)
 	 */
-	public final String[] getSubmissionLocationsForApplication(
+	public final DtoSubmissionLocations getSubmissionLocationsForApplication(
 			final String application) {
 
-		return informationManager
-				.getAllSubmissionLocationsForApplication(application);
+		return DtoSubmissionLocations
+				.createSubmissionLocationsInfo(informationManager
+						.getAllSubmissionLocationsForApplication(application));
 	}
 
 	/*
@@ -2906,11 +1942,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * org.vpac.grisu.control.ServiceInterface#getSubmissionLocationsForApplication
 	 * (java.lang.String, java.lang.String)
 	 */
-	public final String[] getSubmissionLocationsForApplication(
+	public final DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersion(
 			final String application, final String version) {
 
-		return informationManager.getAllSubmissionLocations(application,
-				version);
+		String[] sls = informationManager.getAllSubmissionLocations(
+				application, version);
+
+		return DtoSubmissionLocations.createSubmissionLocationsInfo(sls);
 	}
 
 	/*
@@ -2934,13 +1972,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				application, submissionLocation);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.vpac.grisu.control.ServiceInterface#
-	 * getSubmissionLocationsPerVersionOfApplication(java.lang.String)
-	 */
-	public final Map<String, String> getSubmissionLocationsPerVersionOfApplication(
+	public final DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
 			final String application) {
 		// if (ServerPropertiesManager.getMDSenabled()) {
 		myLogger
@@ -2952,7 +1984,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		for (int i = 0; versions != null && i < versions.length; i++) {
 			String[] submitLocations = null;
 			try {
-				submitLocations = getSubmissionLocationsForApplication(
+				submitLocations = informationManager.getAllSubmissionLocations(
 						application, versions[i]);
 				if (submitLocations == null) {
 					myLogger
@@ -2986,29 +2018,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 			appVersionMap.put(versions[i], submitLoc.toString());
 		}
-		return appVersionMap;
+		return DtoApplicationInfo.createApplicationInfo(application,
+				appVersionMap);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.vpac.grisu.control.ServiceInterface#getSubmissionLocationsForApplication
-	 * (java.lang.String, java.lang.String, java.lang.String)
-	 */
-	public final String[] getSubmissionLocationsForApplication(
+	public final DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersionAndFqan(
 			final String application, final String version, final String fqan) {
 		// TODO implement a method which takes in fqan later on
 
-		return informationManager.getAllSubmissionLocations(application,
-				version);
-
-		// if ( ServerPropertiesManager.getMDSenabled() ) {
-		// return QueueManager.getAllSubmissionQueuesFromMDS(application,
-		// version);
-		// } else {
-		// return null;
-		// }
+		return DtoSubmissionLocations
+				.createSubmissionLocationsInfo(informationManager
+						.getAllSubmissionLocations(application, version));
 	}
 
 	/*
@@ -3027,9 +2047,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#getAllHosts()
 	 */
-	public final synchronized Map<String, String> getAllHosts() {
+	public final synchronized DtoHostsInfo getAllHosts() {
 
-		return informationManager.getAllHosts();
+		DtoHostsInfo info = DtoHostsInfo.createHostsInfo(informationManager
+				.getAllHosts());
+
+		return info;
 	}
 
 	/*
@@ -3039,9 +2062,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * org.vpac.grisu.control.ServiceInterface#getAllSubmissionLocations(java
 	 * .lang.String)
 	 */
-	public final String[] getAllSubmissionLocations(final String fqan) {
+	public final DtoSubmissionLocations getAllSubmissionLocationsForFqan(
+			final String fqan) {
 
-		return informationManager.getAllSubmissionLocationsForVO(fqan);
+		return DtoSubmissionLocations
+				.createSubmissionLocationsInfo(informationManager
+						.getAllSubmissionLocationsForVO(fqan));
 
 	}
 
@@ -3052,7 +2078,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * org.vpac.grisu.control.ServiceInterface#getApplicationDetails(java.lang
 	 * .String, java.lang.String, java.lang.String)
 	 */
-	public final Map<String, String> getApplicationDetails(
+	public final DtoApplicationDetails getApplicationDetailsForVersionAndSite(
 			final String application, final String version,
 			final String site_or_submissionLocation) {
 
@@ -3064,8 +2090,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			myLogger.debug("Site is: " + site);
 		}
 
-		return informationManager.getApplicationDetails(application, version,
-				site);
+		return DtoApplicationDetails.createDetails(application,
+				informationManager.getApplicationDetails(application, version,
+						site));
 	}
 
 	/*
@@ -3075,7 +2102,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * org.vpac.grisu.control.ServiceInterface#getApplicationDetails(java.lang
 	 * .String, java.lang.String)
 	 */
-	public final Map<String, String> getApplicationDetails(
+	public final DtoApplicationDetails getApplicationDetailsForSite(
 			final String application, final String site_or_submissionLocation) {
 
 		String site = site_or_submissionLocation;
@@ -3086,46 +2113,45 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			myLogger.debug("Site is: " + site);
 		}
 
-		return getApplicationDetails(application,
+		return getApplicationDetailsForVersionAndSite(application,
 				getDefaultVersionForApplicationAtSite(application, site), site);
 
 	}
 
-	public final List<GridResource> findMatchingSubmissionLocations(
-			final Map<String, String> jobProperties, final String fqan) {
+	public final DtoGridResources findMatchingSubmissionLocationsUsingMap(
+			final DtoJob jobProperties, final String fqan) {
 
 		LinkedList<String> result = new LinkedList<String>();
 
 		Map<JobSubmissionProperty, String> converterMap = new HashMap<JobSubmissionProperty, String>();
-		for (String key : jobProperties.keySet()) {
-			converterMap.put(JobSubmissionProperty.fromString(key),
-					jobProperties.get(key));
+		for (DtoJobProperty jp : jobProperties.getProperties()) {
+			converterMap
+					.put(JobSubmissionProperty.fromString(jp.key), jp.value);
 		}
 
 		List<GridResource> resources = matchmaker.findMatchingResources(
 				converterMap, fqan);
 
-		return resources;
+		return DtoGridResources.createGridResources(resources);
 	}
 
-	public final List<GridResource> findMatchingSubmissionLocations(
-			Document jsdl, final String fqan) {
+	public final DtoGridResources findMatchingSubmissionLocationsUsingJsdl(
+			String jsdlString, final String fqan) {
 
-		jsdl = SeveralXMLHelpers.cxfWorkaround(jsdl, "JobDefinition");
+		Document jsdl;
+		try {
+			jsdl = SeveralXMLHelpers.fromString(jsdlString);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 
 		LinkedList<String> result = new LinkedList<String>();
 
 		List<GridResource> resources = matchmaker.findMatchingResources(jsdl,
 				fqan);
 
-		return resources;
-		//
-		// for ( GridResource gr : resources ) {
-		// result.add(gr.getQueueName()+":"+gr.getContactString());
-		// }
-		//		
-		//		
-		// return result;
+		return DtoGridResources.createGridResources(resources);
+
 	}
 
 	/*

@@ -143,7 +143,7 @@ public final class ServiceInterfaceFactory {
 			}
 
 			try {
-				serviceInterface.login(username, password);
+				serviceInterface.login(username, new String(password));
 			} catch (Exception e) {
 				e.printStackTrace();
 				myLogger.debug("Couldn't login to grisu service on: "

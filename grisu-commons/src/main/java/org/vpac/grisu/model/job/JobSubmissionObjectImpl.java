@@ -11,9 +11,12 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Transient;
+import javax.xml.transform.TransformerException;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
+import org.vpac.grisu.utils.SeveralStringHelpers;
+import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.vpac.grisu.utils.SimpleJsdlBuilder;
 import org.w3c.dom.Document;
 
@@ -443,6 +446,15 @@ public class JobSubmissionObjectImpl {
 
 		return jsdl;
 
+	}
+	
+	@Transient
+	protected final String getJobDescriptionDocumentAsString() throws JobPropertiesException {
+		
+		String jsdlString = null;
+		jsdlString = SeveralXMLHelpers.toString(getJobDescriptionDocument());
+
+		return jsdlString;
 	}
 
 	private void checkValidity() throws JobPropertiesException {

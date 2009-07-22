@@ -5,6 +5,7 @@ import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.model.GrisuRegistry;
+import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.info.ApplicationInformation;
 
 public final class JobCreationInfo {
@@ -25,7 +26,7 @@ public final class JobCreationInfo {
 		ServiceInterface si = null;
 		si = ServiceInterfaceFactory.createInterface(loginParams);
 
-		String test = si.ps_string();
+		DtoJobs test = si.ps(true);
 
 		GrisuRegistry registry = GrisuRegistry.getDefault(si);
 

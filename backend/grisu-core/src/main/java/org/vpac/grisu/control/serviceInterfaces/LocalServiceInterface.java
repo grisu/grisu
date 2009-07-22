@@ -16,6 +16,7 @@ import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.settings.MyProxyServerParams;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.settings.ServiceTemplateManagement;
+import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.vpac.security.light.control.CertificateFiles;
 import org.vpac.security.light.control.VomsesFiles;
 import org.vpac.security.light.myProxy.MyProxy_light;
@@ -112,7 +113,7 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 
 	}
 
-	public final Document getTemplate(final String application)
+	public final String getTemplate(final String application)
 			throws NoSuchTemplateException {
 		Document doc = ServiceTemplateManagement
 				.getAvailableTemplate(application);
@@ -123,7 +124,7 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 							+ ".");
 		}
 
-		return doc;
+		return SeveralXMLHelpers.toString(doc);
 	}
 
 	public final Document getTemplate(final String application, final String version)
@@ -145,7 +146,7 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 		return ServiceTemplateManagement.getAllAvailableApplications();
 	}
 
-	public final void login(final String username, final char[] password) {
+	public final void login(final String username, final String password) {
 
 		try {
 			LocalTemplatesHelper.copyTemplatesAndMaybeGlobusFolder();
@@ -159,7 +160,7 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 		}
 
 		this.myproxy_username = username;
-		this.passphrase = password;
+		this.passphrase = password.toCharArray();
 
 		try {
 			getCredential();

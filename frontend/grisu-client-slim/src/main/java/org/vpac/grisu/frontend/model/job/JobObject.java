@@ -64,8 +64,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	public JobObject(final ServiceInterface si, final String jobname)
 			throws NoSuchJobException {
 
-		super(SeveralXMLHelpers.cxfWorkaround(si.getJsldDocument(jobname),
-				"JobDefinition"));
+		super(SeveralXMLHelpers.fromString(si.getJsldDocument(jobname)));
 		this.serviceInterface = si;
 		this.setJobname(jobname);
 
@@ -163,7 +162,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	public final String createJob(final String fqan, final String jobnameCreationMethod)
 			throws JobPropertiesException {
 
-		setJobname(serviceInterface.createJob(getJobDescriptionDocument(),
+		setJobname(serviceInterface.createJobUsingJsdl(getJobDescriptionDocumentAsString(),
 				fqan, jobnameCreationMethod));
 
 		try {
@@ -311,7 +310,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 		if (allJobProperties == null) {
 			try {
 				allJobProperties = serviceInterface
-						.getAllJobProperties(getJobname());
+						.getAllJobProperties(getJobname()).getPropertiesAsMap();
 			} catch (Exception e) {
 				throw new JobException(this, "Could not get jobproperties.", e);
 			}

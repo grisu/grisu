@@ -11,6 +11,7 @@ import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.model.GrisuRegistry;
+import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 
@@ -106,11 +107,9 @@ public final class SuperMonsterBatchJob {
 		submissionExecutor.awaitTermination(36000, TimeUnit.SECONDS);
 		final Date allSubmissionFinishedDate = new Date();
 
-		Document ps = si.ps();
-		ps = SeveralXMLHelpers.cxfWorkaround(ps, "jobs");
+		DtoJobs ps = si.ps(true);
+
 		final Date psDate = new Date();
-		System.out.println(SeveralXMLHelpers
-				.toStringWithoutAnnoyingExceptions(ps));
 
 		System.out.println("All submission finished.");
 		System.out.println("Start date: " + startDate.toString());
@@ -142,14 +141,11 @@ public final class SuperMonsterBatchJob {
 		killingExecutor.awaitTermination(36000, TimeUnit.SECONDS);
 
 		final Date endDate = new Date();
-		System.out.println(SeveralXMLHelpers
-				.toStringWithoutAnnoyingExceptions(ps));
-		Document ps2 = si.ps();
+
 		System.out
 				.println("---------------------------------------------------------------------------");
 		final Date psDate2 = new Date();
-		System.out.println(SeveralXMLHelpers
-				.toStringWithoutAnnoyingExceptions(ps2));
+
 
 		System.out.println("All submission finished.");
 		System.out.println("Start date: " + startDate.toString());

@@ -7,8 +7,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.UserEnvironmentManager;
+import org.vpac.grisu.model.dto.DtoJob;
 
 import au.org.arcs.mds.GridResource;
 import au.org.arcs.mds.JobSubmissionProperty;
@@ -82,8 +84,8 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 			converterMap.put(key.toString(), basicJobProperties.get(key));
 		}
 
-		return getServiceInterface().findMatchingSubmissionLocations(converterMap,
-				fqan);
+		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(DtoJob.createJob(JobConstants.UNDEFINED, converterMap),
+				fqan).getGridResources();
 	}
 
 }

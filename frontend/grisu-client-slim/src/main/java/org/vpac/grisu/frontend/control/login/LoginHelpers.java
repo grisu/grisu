@@ -52,8 +52,8 @@ public final class LoginHelpers {
 				loginParams.getHttpProxyUsername(), loginParams
 						.getHttpProxyPassphrase());
 		try {
-			si.login(loginParams.getMyProxyUsername(), loginParams
-					.getMyProxyPassphrase());
+			si.login(loginParams.getMyProxyUsername(), new String(loginParams
+					.getMyProxyPassphrase()));
 		} catch (NoValidCredentialException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -155,8 +155,8 @@ public final class LoginHelpers {
 			loginParams.setMyProxyPort(new Integer(myProxyPort).toString());
 
 			serviceInterface = login(loginParams);
-			serviceInterface.login(myproxyusername, myproxyDetails
-					.get(myproxyusername));
+			serviceInterface.login(myproxyusername, new String(myproxyDetails
+					.get(myproxyusername)));
 		} catch (InvocationTargetException re) {
 			re.printStackTrace();
 			throw new LoginException(
@@ -236,8 +236,8 @@ public final class LoginHelpers {
 			loginParams.setMyProxyPort(new Integer(myProxyPort).toString());
 
 			serviceInterface = login(loginParams);
-			serviceInterface.login(myproxyusername, myproxyDetails
-					.get(myproxyusername));
+			serviceInterface.login(myproxyusername, new String(myproxyDetails
+					.get(myproxyusername)));
 		} catch (InvocationTargetException re) {
 			re.printStackTrace();
 			throw new LoginException(
@@ -321,8 +321,8 @@ public final class LoginHelpers {
 			loginParams.setMyProxyPort(new Integer(myProxyPort).toString());
 
 			serviceInterface = login(loginParams);
-			serviceInterface.login(myproxyusername, myproxyDetails
-					.get(myproxyusername));
+			serviceInterface.login(myproxyusername, new String(myproxyDetails
+					.get(myproxyusername)));
 		} catch (InvocationTargetException re) {
 			Throwable t = re.getCause();
 			// re.printStackTrace();

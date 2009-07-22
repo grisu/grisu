@@ -3,6 +3,7 @@ package org.vpac.grisu.model;
 import java.io.File;
 import java.io.IOException;
 
+import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 
@@ -144,9 +145,10 @@ public class FileManager {
 		myLogger
 				.debug("Remote file newer than local cache file or not cached yet, downloading new copy.");
 		DataSource source = null;
+		DataHandler handler = null;
 		try {
 
-			source = serviceInterface.download(url);
+			handler = serviceInterface.download(url);
 		} catch (Exception e) {
 			myLogger.error("Could not download file: " + url);
 			throw new FileTransferException(url, cacheTargetFile.toString(),
@@ -154,7 +156,7 @@ public class FileManager {
 		}
 
 		try {
-			FileHelpers.saveToDisk(source, cacheTargetFile);
+			FileHelpers.saveToDisk(handler.getDataSource(), cacheTargetFile);
 			cacheTargetFile.setLastModified(lastModified);
 		} catch (IOException e) {
 			myLogger.error("Could not save file: " + url.lastIndexOf("/") + 1);
@@ -247,9 +249,10 @@ public class FileManager {
 					"Transfer of folders not supported yet.");
 		} else {
 			DataSource source = new FileDataSource(file);
+			DataHandler handler = new DataHandler(source);
 			try {
 				myLogger.info("Uploading file " + file.getName() + "...");
-				String filetransferHandle = serviceInterface.upload(source,
+				String filetransferHandle = serviceInterface.upload(handler,
 						targetDirectory + "/" + file.getName(), true);
 				myLogger.info("Upload of file " + file.getName()
 						+ " successful.");

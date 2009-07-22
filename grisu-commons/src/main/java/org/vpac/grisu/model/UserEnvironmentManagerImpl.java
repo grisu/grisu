@@ -169,7 +169,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	 */
 	public final synchronized MountPoint[] getMountPoints() {
 		if (cachedMountPoints == null) {
-			cachedMountPoints = serviceInterface.df();
+			cachedMountPoints = serviceInterface.df().getMountpoints().toArray(new MountPoint[]{});
 		}
 		return cachedMountPoints;
 	}

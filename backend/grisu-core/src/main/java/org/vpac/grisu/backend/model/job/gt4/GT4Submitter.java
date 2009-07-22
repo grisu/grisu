@@ -264,7 +264,7 @@ public class GT4Submitter extends JobSubmitter {
 					&& StringUtils.isNotBlank(subLoc)) {
 				// if we know application, version and submissionLocation
 				Map<String, String> appDetails = serviceInterface
-						.getApplicationDetails(application, version, subLoc);
+						.getApplicationDetailsForVersionAndSite(application, version, subLoc).getDetailsAsMap();
 
 				try {
 					modules_string = appDetails.get(
@@ -287,7 +287,7 @@ public class GT4Submitter extends JobSubmitter {
 			} else if (application != null && version == null && subLoc != null) {
 
 				Map<String, String> appDetails = serviceInterface
-						.getApplicationDetails(application, subLoc);
+						.getApplicationDetailsForSite(application, subLoc).getDetailsAsMap();
 
 				try {
 					modules_string = appDetails.get(

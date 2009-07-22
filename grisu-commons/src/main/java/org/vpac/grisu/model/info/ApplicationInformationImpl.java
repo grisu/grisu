@@ -67,7 +67,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 		if (cachedApplicationDetails.get(KEY) == null) {
 			Map<String, String> details = serviceInterface
-					.getApplicationDetails(application, version, subLoc);
+					.getApplicationDetailsForVersionAndSite(application, version, subLoc).getDetailsAsMap();
 			cachedApplicationDetails.put(KEY, details);
 		}
 		return cachedApplicationDetails.get(KEY);
@@ -130,8 +130,8 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		if (cachedSubmissionLocationsPerVersion.get(version) == null) {
 			List<String> temp = Arrays
 					.asList(serviceInterface
-							.getSubmissionLocationsForApplication(application,
-									version));
+							.getSubmissionLocationsForApplicationAndVersion(application,
+									version).getSubmissionLocationStrings());
 			cachedSubmissionLocationsPerVersion.put(version, new HashSet(temp));
 		}
 		return cachedSubmissionLocationsPerVersion.get(version);

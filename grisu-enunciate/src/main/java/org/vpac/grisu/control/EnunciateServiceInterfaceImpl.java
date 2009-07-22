@@ -222,7 +222,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		if (manager == null) {
 			Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
 			submitters.put("GT4", new GT4Submitter());
-			manager = new JobSubmissionManager(new DummyServiceInterface(this),
+			manager = new JobSubmissionManager(this,
 					submitters);
 		}
 		return manager;
@@ -1470,11 +1470,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		Job job = getJob(jobname);
 
 		String jsdlString;
-		try {
-			jsdlString = SeveralXMLHelpers.toString(job.getJobDescription());
-		} catch (TransformerException e) {
-			throw new RuntimeException("Could not convert jsdl into string.");
-		}
+		jsdlString = SeveralXMLHelpers.toString(job.getJobDescription());
 		
 		return jsdlString;
 
@@ -2143,8 +2139,6 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 			throw new RuntimeException(e);
 		}
 		
-		jsdl = SeveralXMLHelpers.cxfWorkaround(jsdl, "JobDefinition");
-
 		LinkedList<String> result = new LinkedList<String>();
 
 		List<GridResource> resources = matchmaker.findMatchingResources(jsdl,

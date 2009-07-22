@@ -91,30 +91,30 @@ public final class SeveralXMLHelpers {
 
 	}
 
-	/**
-	 * This needs to be called if the cxf backend is used. It's a workaround for
-	 * the bug where cxf wraps a document parameter into return or arg0
-	 * elements.
-	 * 
-	 * @param doc
-	 *            the xml document
-	 * @param expectedElementName
-	 *            the element name that you would expect for the first child
-	 * @return either a new xml document or the unchanged old one
-	 */
-	public static Document cxfWorkaround(Document doc,
-			final String expectedElementName) {
-		Element element = (Element) doc.getFirstChild();
-		if (!element.getTagName().equals(expectedElementName)) {
-			try {
-				doc = createDocumentFromElement((Element) element
-						.getFirstChild());
-			} catch (Exception e) {
-				throw new RuntimeException("Could not parse jsdl document.", e);
-			}
-		}
-		return doc;
-	}
+//	/**
+//	 * This needs to be called if the cxf backend is used. It's a workaround for
+//	 * the bug where cxf wraps a document parameter into return or arg0
+//	 * elements.
+//	 * 
+//	 * @param doc
+//	 *            the xml document
+//	 * @param expectedElementName
+//	 *            the element name that you would expect for the first child
+//	 * @return either a new xml document or the unchanged old one
+//	 */
+//	public static Document cxfWorkaround(Document doc,
+//			final String expectedElementName) {
+//		Element element = (Element) doc.getFirstChild();
+//		if (!element.getTagName().equals(expectedElementName)) {
+//			try {
+//				doc = createDocumentFromElement((Element) element
+//						.getFirstChild());
+//			} catch (Exception e) {
+//				throw new RuntimeException("Could not parse jsdl document.", e);
+//			}
+//		}
+//		return doc;
+//	}
 
 	/**
 	 * Converts a xml element to a string.
@@ -169,8 +169,9 @@ public final class SeveralXMLHelpers {
 	 * @throws TransformerFactoryConfigurationError xml error
 	 * @throws TransformerException xml error
 	 */
-	public static String toString(final Document xml)
-			throws TransformerException {
+	public static String toString(final Document xml){
+		
+		try {
 		// TODO use static transformer to reduce overhead?
 		Transformer transformer = TransformerFactory.newInstance()
 				.newTransformer();
@@ -182,8 +183,10 @@ public final class SeveralXMLHelpers {
 		transformer.transform(source, result);
 
 		String jsdl_string = result.getWriter().toString();
-
 		return jsdl_string;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
@@ -260,7 +263,7 @@ public final class SeveralXMLHelpers {
 	 * @throws Exception
 	 *             if the conversion fails
 	 */
-	public static Document fromString(final String jsdl_string) throws Exception {
+	public static Document fromString(final String jsdl_string) {
 
 		try {
 			final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
@@ -292,7 +295,7 @@ public final class SeveralXMLHelpers {
 					.getBytes()));
 		} catch (Exception e) {
 			// e.printStackTrace();
-			throw e;
+			throw new RuntimeException(e);
 		}
 	}
 
