@@ -17,7 +17,7 @@
 			<server-side-type pattern="org.vpac.grisu.frontend.**" />
 			<server-side-type pattern="org.vpac.grisu.model.MountPoint" />
 		</jaxws-client>
-		<csharp disabled="false" compileExecutable="gmcs"></csharp>
+		<csharp disabled="false" compileExecutable="gmcs2"></csharp>
 		<xfire-client disabled="false" disable14Client="false"
 			jarName="grisu-client-xfire.jar">
 		</xfire-client>

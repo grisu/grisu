@@ -137,7 +137,6 @@
 		<module>backend</module>
 		<module>grisu-commons</module>
 		<module>frontend</module>
-		<module>grisu-enunciate</module>
 	</modules>
 	<reporting>
 		<plugins>
