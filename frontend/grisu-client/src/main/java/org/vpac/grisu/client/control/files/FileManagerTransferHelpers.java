@@ -8,6 +8,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 
@@ -191,7 +192,7 @@ public class FileManagerTransferHelpers {
 					new File(sourceFile.getURI()));
 			String filename = sourceFile.getName();
 			try {
-				serviceInterface.upload(source, targetDirectory.getURI()
+				serviceInterface.upload(new DataHandler(source), targetDirectory.getURI()
 						.toString()
 						+ "/" + filename, true);
 			} catch (Exception e1) {
@@ -237,7 +238,7 @@ public class FileManagerTransferHelpers {
 		for (GrisuFileObject remoteFile : source_files) {
 			String[] childs = null;
 			try {
-				childs = serviceInterface.getChildrenFiles(remoteFile.getURI()
+				childs = serviceInterface.getChildrenFileNames(remoteFile.getURI()
 						.toString(), false);
 			} catch (Exception e) {
 				failed_downloads.put(remoteFile.getURI().toString(), e);
@@ -420,7 +421,7 @@ public class FileManagerTransferHelpers {
 		DataSource source = null;
 		try {
 
-			source = serviceInterface.download(remoteFile);
+			source = serviceInterface.download(remoteFile).getDataSource();
 		} catch (Exception e) {
 			myLogger.error("Could not download file: " + remoteFile);
 			throw e;
@@ -469,7 +470,7 @@ public class FileManagerTransferHelpers {
 		long lastModified = -1;
 		try {
 			lastModified = serviceInterface.lastModified(remoteFile);
-			source = serviceInterface.download(remoteFile);
+			source = serviceInterface.download(remoteFile).getDataSource();
 		} catch (Exception e) {
 			myLogger.error("Could not download file: " + remoteFile);
 			throw e;
@@ -507,7 +508,7 @@ public class FileManagerTransferHelpers {
 		if (!newFile.exists()) {
 			try {
 				long lastModified = serviceInterface.lastModified(remoteFile);
-				source = serviceInterface.download(remoteFile);
+				source = serviceInterface.download(remoteFile).getDataSource();
 				FileHelpers.saveToDisk(source, newFile);
 				newFile.setLastModified(lastModified);
 			} catch (IOException e) {

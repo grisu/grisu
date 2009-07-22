@@ -107,7 +107,7 @@ public class MountsDialog extends JDialog implements MountPointsListener{
 		if (mountPointsPanel == null) {
 			mountPointsPanel = new JPanel();
 			mountPointsPanel.setLayout(new BoxLayout(mountPointsPanel, BoxLayout.PAGE_AXIS));
-			MountPoint[] mps = em.getServiceInterface().df();
+			MountPoint[] mps = em.getServiceInterface().df().getMountpoints().toArray(new MountPoint[]{});
 			
 			for ( MountPoint mp : mps ) {
 				mountPointsPanel.add(new MountPointPanel(em, mp));

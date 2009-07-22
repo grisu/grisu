@@ -74,6 +74,23 @@ public class DtoFolder implements DtoRemoteObject {
 	public void addChildFile(DtoFile child) {
 		childrenFiles.add(child);
 	}
+
+	public boolean isFolder() {
+		return true;
+	}
+
+	public List<DtoRemoteObject> getChildren() {
+		
+		List<DtoRemoteObject> result = new LinkedList<DtoRemoteObject>();
+		
+		for ( DtoFolder folder : getChildrenFolder() ) {
+			result.add(folder);
+		}
+		for ( DtoFile file : getChildrenFiles() ) {
+			result.add(file);
+		}
+		return result;
+	}
 	
 	
 }

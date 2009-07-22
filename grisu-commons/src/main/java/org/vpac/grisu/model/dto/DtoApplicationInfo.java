@@ -3,6 +3,7 @@ package org.vpac.grisu.model.dto;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -72,6 +73,23 @@ public class DtoApplicationInfo {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public Map<String, String> getSubmissionLocationsPerVersionMap() {
+		Map<String, String> result = new TreeMap<String, String>();
+		
+		for ( DtoVersionInfo version : getAllVersions() ) {
+			String versionString = version.getName();
+			List<DtoSubmissionLocationInfo> subLocs = version.getAllSubmissionLocations().getAllSubmissionLocations();
+			StringBuffer subLocNames = new StringBuffer();
+			for ( DtoSubmissionLocationInfo subLoc : subLocs ) {
+				subLocNames.append(subLoc.getSubmissionLocation()+",");
+			}
+			String subLocString = subLocNames.substring(0, subLocNames.length()-1).toString();
+			result.put(versionString, subLocString);
+		}
+		
+		return result;
 	}
 
 

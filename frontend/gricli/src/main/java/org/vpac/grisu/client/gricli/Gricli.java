@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
+import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 
@@ -28,6 +29,7 @@ import org.vpac.grisu.client.model.files.GrisuFileObject;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobCreationException;
+import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.frontend.control.login.LoginParams;
@@ -432,8 +434,8 @@ public class Gricli implements FileTransferListener {
 			argElements.append("<Argument>" + arg + "</Argument>\n");
 		}
 		jsdl = jsdl.replaceAll(ARGUMENTS_PLACEHOLDER, argElements.toString());
-		jsdl = jsdl.replaceAll(WORKINGDIRECTORY_PLACEHOLDER, jobProperties
-				.getWorkingDirectory());
+		//this will be calculated on the backend now.
+		jsdl = jsdl.replaceAll(WORKINGDIRECTORY_PLACEHOLDER, "");
 		jsdl = jsdl.replaceAll(STDOUT_PLACEHOLDER, jobProperties.getStdout());
 		jsdl = jsdl.replaceAll(STDERR_PLACEHOLDER, jobProperties.getStderr());
 		jsdl = jsdl.replaceAll(MODULE_PLACEHOLDER, jobProperties.getModule());
@@ -447,8 +449,8 @@ public class Gricli implements FileTransferListener {
 				.toString());
 		jsdl = jsdl.replaceAll(SUBMISSIONLOCATION_PLACEHOLDER, jobProperties
 				.getSubmissionLocation());
-		jsdl = jsdl.replaceAll(USEREXECUTIONHOSTFS_PLACEHOLDER, jobProperties
-				.getUserExecutionHostFs());
+		// this will be calculated on the backend now
+		jsdl = jsdl.replaceAll(USEREXECUTIONHOSTFS_PLACEHOLDER, "");
 
 		if (verbose) {
 			System.out.println("Job description prepared:");
@@ -456,13 +458,19 @@ public class Gricli implements FileTransferListener {
 			System.out.println("\nCreating job on grisu backend...");
 		}
 
-		String jobname = serviceInterface.createJob(jobProperties.getJobname(),
-				JobConstants.DONT_ACCEPT_NEW_JOB_WITH_EXISTING_JOBNAME);
+		String jobname;
+		try {
+			jobname = serviceInterface.createJobUsingJsdl(jsdl,
+					jobProperties.getVO(), ServiceInterface.FORCE_NAME_METHOD);
+		} catch (JobPropertiesException e1) {
+			throw new JobCreationException(
+					"Can't create job on backend: "+e1.getLocalizedMessage());
+
+		}
 		if (verbose) {
 			System.out.println("Job created.");
 			System.out.println("Setting job description...");
 		}
-		serviceInterface.setJobDescription_string(jobname, jsdl);
 
 		if (verbose) {
 			System.out.println("Job description set.");
@@ -489,7 +497,7 @@ public class Gricli implements FileTransferListener {
 			System.out.println("Submitting job...");
 		}
 		try {
-			serviceInterface.submitJob(jobname, jobProperties.getVO());
+			serviceInterface.submitJob(jobname);
 		} catch (Exception e) {
 			throw new JobSubmissionException("Job submission failed: "
 					+ e.getLocalizedMessage(), e);
@@ -549,7 +557,7 @@ public class Gricli implements FileTransferListener {
 					System.out.println("Uploading file " + fileName + " to "
 							+ targetDirectory);
 				}
-				String targetFile = serviceInterface.upload(dataSource,
+				String targetFile = serviceInterface.upload(new DataHandler(dataSource),
 						targetDirectory + "/" + fileName, true);
 				inputFiles.append(targetFile + ",");
 			} catch (Exception e) {
@@ -570,7 +578,7 @@ public class Gricli implements FileTransferListener {
 		}
 
 		Map<String, String> jobDetails = serviceInterface
-				.getAllJobProperties(jobProperties.getJobname());
+				.getAllJobProperties(jobProperties.getJobname()).getPropertiesAsMap();
 
 		String jobDirectory = jobDetails
 				.get(Constants.JOBDIRECTORY_KEY);

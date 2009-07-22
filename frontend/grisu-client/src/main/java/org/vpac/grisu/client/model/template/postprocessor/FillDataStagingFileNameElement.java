@@ -48,4 +48,9 @@ public class FillDataStagingFileNameElement extends ElementPostprocessor {
 
 	}
 
+	@Override
+	public boolean processBeforeJobCreation() {
+		return true;
+	}
+
 }

@@ -465,6 +465,7 @@ public class Job {
 //	}
 
 	@CollectionOfElements(fetch = FetchType.EAGER)
+	@Column(length = 3000)
 	public final Map<String, String> getJobProperties() {
 		return jobProperties;
 	}

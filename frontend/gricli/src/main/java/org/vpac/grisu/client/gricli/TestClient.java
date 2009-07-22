@@ -59,7 +59,7 @@ public class TestClient {
 
 	public void startJobSubmissions() {
 
-		String[] sublocs = serviceInterface.getAllSubmissionLocations(vo);
+		String[] sublocs = serviceInterface.getAllSubmissionLocationsForFqan(vo).getSubmissionLocationStrings();
 		noJobs = sublocs.length;
 		
 		for (String subLoc : sublocs) {

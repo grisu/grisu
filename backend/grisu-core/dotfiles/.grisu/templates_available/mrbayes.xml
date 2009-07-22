@@ -17,6 +17,7 @@
 		<Application>
 
 			<ApplicationName>MrBayes</ApplicationName>
+			<ApplicationVersion></ApplicationVersion>
 			<Description>
 				MrBayes is a program for the Bayesian estimation of phylogeny.  Find more about MrBayes at http://mrbayes.csit.fsu.edu/
 			</Description>

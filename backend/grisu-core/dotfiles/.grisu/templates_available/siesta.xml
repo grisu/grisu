@@ -47,6 +47,7 @@
 				need to know what the name is that Grisu expects.
 			-->
 			<ApplicationName>siesta</ApplicationName>
+			<ApplicationVersion></ApplicationVersion>
 			<Description>
 				SIESTA description
 			</Description>

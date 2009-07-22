@@ -233,7 +233,7 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 
 		statusManager
 				.setCurrentStatus("Getting all hostnames within the grid to build info cache...");
-		alreadyQueriedHosts = serviceInterface.getAllHosts();
+		alreadyQueriedHosts = serviceInterface.getAllHosts().getAsMap();
 
 		statusManager.setCurrentStatus("Connecting service interface...");
 		this.serviceInterface = serviceInterface;
@@ -343,7 +343,7 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 			boolean useHomeDirectoryOnThisFileSystemIfPossible)
 			throws RemoteFileSystemException {
 
-		MountPoint mp = serviceInterface.mount(url, mountPoint,
+		MountPoint mp = serviceInterface.mountWithoutFqan(url, mountPoint,
 				useHomeDirectoryOnThisFileSystemIfPossible);
 
 		fireMountPointsEvent(MountPointEvent.MOUNTPOINT_ADDED,
@@ -475,7 +475,7 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 	 */
 	public synchronized MountPoint[] getMountPoints() {
 		if (mountPoints == null) {
-			mountPoints = serviceInterface.df();
+			mountPoints = serviceInterface.df().getMountpoints().toArray(new MountPoint[]{});
 		}
 		return mountPoints;
 	}
@@ -617,7 +617,7 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 				Date start = new Date();
 
 				String[] tempSubLocsString = serviceInterface
-						.getAllSubmissionLocations(fqan);
+						.getAllSubmissionLocationsForFqan(fqan).getSubmissionLocationStrings();
 
 				// SubmissionLocation[] tempSubLocs = new
 				// SubmissionLocation[tempSubLocsString.length];
@@ -696,7 +696,7 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 			allSubmissionLocations = new TreeMap<String, SubmissionLocation>();
 
 			for (String subLoc : getServiceInterface()
-					.getAllSubmissionLocations()) {
+					.getAllSubmissionLocations().getSubmissionLocationStrings()) {
 				Date start2 = new Date();
 				myLogger.debug("Testing: " + subLoc);
 				SubmissionLocation temp = new SubmissionLocation(subLoc, this);
@@ -748,11 +748,11 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 
 			Date start = new Date();
 			Set<String> result = new TreeSet<String>();
-			for (String site : getAllOfTheUsersSites(fqan) ) {
+			for (SubmissionLocation subLoc : getAllAvailableSubmissionLocationsForFqan(fqan) ) {
 				result
 						.addAll(Arrays.asList(serviceInterface
-								.getVersionsOfApplicationOnSite(
-										applicationName, site)));
+								.getVersionsOfApplicationOnSubmissionLocation(
+										applicationName, subLoc.getLocation())));
 			}
 			Date end = new Date();
 			myLogger.debug("[BENCHMARK] Getting all version locations for "
@@ -774,8 +774,8 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 			Date start = new Date();
 
 			String[] subLocs = serviceInterface
-					.getSubmissionLocationsForApplication(appname,
-							version);
+					.getSubmissionLocationsForApplicationAndVersion(appname,
+							version).getSubmissionLocationStrings();
 			Set<SubmissionLocation> result = new TreeSet<SubmissionLocation>();
 
 			for (String subLoc : subLocs) {
@@ -818,7 +818,7 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 			Date start = new Date();
 			Set<SubmissionLocation> result = new TreeSet<SubmissionLocation>();
 			String[] subLocs = serviceInterface
-					.getSubmissionLocationsForApplication(applicationName);
+					.getSubmissionLocationsForApplication(applicationName).getSubmissionLocationStrings();
 			for (String subLoc : subLocs) {
 				SubmissionLocation tempLoc = getSubmissionLocation(subLoc);
 
@@ -858,7 +858,7 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 			Date start = new Date();
 			Set<SubmissionLocation> result = new HashSet<SubmissionLocation>();
 			String[] subLocs = serviceInterface
-					.getSubmissionLocationsForApplication(applicationName);
+					.getSubmissionLocationsForApplication(applicationName).getSubmissionLocationStrings();
 			for (String subLoc : subLocs) {
 				SubmissionLocation tempLoc = getSubmissionLocation(subLoc);
 
@@ -897,8 +897,8 @@ public class EnvironmentManager implements MountPointsListener, UserEnvironmentM
 			Date start = new Date();
 
 			String[] subLocs = serviceInterface
-					.getSubmissionLocationsForApplication(applicationName,
-							version);
+					.getSubmissionLocationsForApplicationAndVersion(applicationName,
+							version).getSubmissionLocationStrings();
 			Set<SubmissionLocation> result = new HashSet<SubmissionLocation>();
 
 			for (String subLoc : subLocs) {

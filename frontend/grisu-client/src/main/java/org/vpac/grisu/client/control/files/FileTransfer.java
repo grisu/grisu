@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 
@@ -439,7 +440,7 @@ public class FileTransfer {
 					new File(sourceFile.getURI()));
 			String filename = sourceFile.getName();
 			try {
-				em.getServiceInterface().upload(source, targetDirectory.getURI()
+				em.getServiceInterface().upload(new DataHandler(source), targetDirectory.getURI()
 						.toString()
 						+ "/" + filename, true);
 			} catch (Exception e1) {
@@ -484,7 +485,7 @@ public class FileTransfer {
 		for (GrisuFileObject remoteFile : downloadSources) {
 			String[] childs = null;
 			try {
-				childs = em.getServiceInterface().getChildrenFiles(remoteFile.getURI()
+				childs = em.getServiceInterface().getChildrenFileNames(remoteFile.getURI()
 						.toString(), false);
 			} catch (Exception e) {
 				failed_downloads.put(remoteFile.getURI().toString(), e);
@@ -675,7 +676,7 @@ public class FileTransfer {
 		DataSource source = null;
 		try {
 
-			source = em.getServiceInterface().download(remoteFile);
+			source = em.getServiceInterface().download(remoteFile).getDataSource();
 		} catch (Exception e) {
 			myLogger.error("Could not download file: " + remoteFile);
 			throw e;
@@ -724,7 +725,7 @@ public class FileTransfer {
 		long lastModified = -1;
 		try {
 			lastModified = em.getServiceInterface().lastModified(remoteFile);
-			source = em.getServiceInterface().download(remoteFile);
+			source = em.getServiceInterface().download(remoteFile).getDataSource();
 		} catch (Exception e) {
 			myLogger.error("Could not download file: " + remoteFile);
 			throw e;
@@ -762,7 +763,7 @@ public class FileTransfer {
 		if (!newFile.exists()) {
 			try {
 				long lastModified = em.getServiceInterface().lastModified(remoteFile);
-				source = em.getServiceInterface().download(remoteFile);
+				source = em.getServiceInterface().download(remoteFile).getDataSource();
 				FileHelpers.saveToDisk(source, newFile);
 				newFile.setLastModified(lastModified);
 			} catch (IOException e) {

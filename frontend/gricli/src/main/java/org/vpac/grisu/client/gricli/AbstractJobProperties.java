@@ -5,6 +5,8 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.model.MountPoint;
 
+import au.org.arcs.mds.Constants;
+
 public abstract class AbstractJobProperties implements JobProperties {
 	
 	protected ServiceInterface serviceInterface = null;
@@ -30,16 +32,13 @@ public abstract class AbstractJobProperties implements JobProperties {
 		
 		if ( absoluteJobDir == null ) {
 			
-			if ( !StringUtils.isEmpty(getSubmissionLocation()) && !StringUtils.isEmpty(getVO()) ) {
-				absoluteJobDir = serviceInterface.calculateAbsoluteJobDirectory(getJobname(), getSubmissionLocation(), getVO());
-			} else {
 				try {
-					absoluteJobDir = serviceInterface.getJobDirectory(getJobname());
+					absoluteJobDir = serviceInterface.getJobProperty(getJobname(), Constants.JOBDIRECTORY_KEY);
 				} catch (NoSuchJobException e) {
 					//TODO log output?
+					e.printStackTrace();
 					return null;
 				}
-			}
 		}
 		return absoluteJobDir;
 	}

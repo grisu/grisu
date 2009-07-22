@@ -40,7 +40,7 @@ public class UnderworldGridTestElement extends GridTestElement {
 		
 		String[] children = null;
 		try {
-			children = serviceInterface.getChildrenFiles(jobDir+"/output", false);
+			children = serviceInterface.getChildrenFileNames(jobDir+"/output", false);
 			addMessage("Listing output directory: ");
 //			StringBuffer listing = new StringBuffer();
 //			for ( String child : children ) {

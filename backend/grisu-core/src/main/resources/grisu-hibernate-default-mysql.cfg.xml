@@ -12,6 +12,7 @@
 		<property name="connection.driver_class">com.mysql.jdbc.Driver</property>
 		<property name="dialect">org.hibernate.dialect.MySQLDialect</property>
 		<property name="hbm2ddl.auto">update</property>
+<!--		<property name="hbm2ddl.auto">create</property>-->
 		
 		<property name="c3p0.min_size">5</property>
 		<property name="c3p0.max_size">20</property>

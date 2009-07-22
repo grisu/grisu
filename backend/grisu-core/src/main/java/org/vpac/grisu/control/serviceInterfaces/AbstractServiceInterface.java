@@ -749,6 +749,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		for (Element stageInElement : stageInElements) {
 
 			String filePath = JsdlHelpers.getStageInSource(stageInElement);
+			if ("dummyfile".equals(filePath) || filePath.startsWith("file:")) {
+				continue;
+			}
 			String filename = filePath.substring(filePath.lastIndexOf("/"));
 
 			Element el = JsdlHelpers
@@ -1751,6 +1754,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		for (Element stageIn : stageIns) {
 
 			String sourceUrl = JsdlHelpers.getStageInSource(stageIn);
+			//TODO remove that after swing client is fixed.
+			if ( sourceUrl.startsWith("file") ) {
+				continue;
+			}
 			String targetUrl = JsdlHelpers.getStageInTarget(stageIn);
 
 			if (JobConstants.DUMMY_STAGE_FILE.equals(sourceUrl)

@@ -16,7 +16,7 @@ public class CalculateExecutable extends ElementPostprocessor {
 		
 		String application = template.getApplicationName();
 		String site = template.getCurrentSubmissionSite();
-		Map<String, String> appDetails = template.getEnvironmentManager().getServiceInterface().getApplicationDetails(application, site);
+		Map<String, String> appDetails = template.getEnvironmentManager().getServiceInterface().getApplicationDetailsForSite(application, site).getDetailsAsMap();
 		
 		if ( appDetails.get("Executables") == null || "".equals(appDetails.get("Executables")) ) {
 			// not a great solution, but maybe it'll work
@@ -28,5 +28,10 @@ public class CalculateExecutable extends ElementPostprocessor {
 			element.setTextContent(exe);
 		}
 		
+	}
+
+	@Override
+	public boolean processBeforeJobCreation() {
+		return true;
 	}
 }

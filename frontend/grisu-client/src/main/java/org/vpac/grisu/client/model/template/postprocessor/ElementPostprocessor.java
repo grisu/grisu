@@ -37,5 +37,7 @@ public abstract class ElementPostprocessor {
 	}
 	
 	abstract public void process(String fqan) throws PostProcessException;
+	
+	abstract public boolean processBeforeJobCreation();
 
 }

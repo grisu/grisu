@@ -32,9 +32,11 @@ import org.vpac.grisu.client.model.template.postprocessor.PostProcessException;
 import org.vpac.grisu.client.model.template.postprocessor.PostprocessorFactory;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.frontend.control.login.LoginParams;
+import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.utils.DebugUtils;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Attr;
@@ -216,11 +218,11 @@ public class JsdlTemplate implements TemplateNodeListener {
 	private List<ElementPostprocessor> getPostprocessors() throws JobSubmissionException {
 
 		// we only allow postprocessors to be created when they are needed
-		if (status < STATUS_JOB_CREATED ) {
-			myLogger.warn("Job not yet created on the server. Why do you need postprocessors? Canceling job submission.");
-			elementPostprocessors = null;
-			throw new JobSubmissionException("Postprocessors created before job is created on the server. Cancelling job sumbission.", null);
-		}
+//		if (status < STATUS_JOB_CREATED ) {
+//			myLogger.warn("Job not yet created on the server. Why do you need postprocessors? Canceling job submission.");
+//			elementPostprocessors = null;
+//			throw new JobSubmissionException("Postprocessors created before job is created on the server. Cancelling job sumbission.", null);
+//		}
 		
 		if ( elementPostprocessors == null ) {
 
@@ -393,17 +395,37 @@ public class JsdlTemplate implements TemplateNodeListener {
 		if ( Thread.interrupted() ) {
 			throw new JobSubmissionException("Job cancelled.", null);
 		}
+		
+		myLogger.info("Processing postprocessor, part 1.");
+		for (ElementPostprocessor postprocessor : getPostprocessors()) {
+			if ( Thread.interrupted() ) {
+				throw new JobSubmissionException("Job cancelled.", null);
+			}
+			
+			if ( postprocessor.processBeforeJobCreation() ) {
+			try {
+				postprocessor.process(this.currentFqan);
+			} catch (PostProcessException e) {
+
+				throw new JobSubmissionException(
+						"Could not submit job because postprocessing of the template failed.",
+						e);
+			}
+			}
+		}
 
 		// create job on server
 		myLogger.info("Creating job on server backend...");
 		currentJobname = JsdlHelpers.getJobname(template);
 		try {
-			currentJobname = em.getServiceInterface().createJob(currentJobname,
-					this.jobCreationMethod);
+			currentJobname = em.getServiceInterface().createJobUsingJsdl(SeveralXMLHelpers.toString(getTemplateDocument()),
+					this.currentFqan, ServiceInterface.FORCE_NAME_METHOD);
 		} catch (RuntimeException e1) {
 
 			throw new JobSubmissionException("Could not create job: "
 					+ e1.getLocalizedMessage(), e1);
+		} catch (JobPropertiesException e) {
+			throw new JobSubmissionException("Could not create job on backend: "+e.getLocalizedMessage(), e);
 		}
 
 		try {
@@ -443,7 +465,7 @@ public class JsdlTemplate implements TemplateNodeListener {
 			if ( Thread.interrupted() ) {
 				throw new JobSubmissionException("Job cancelled.", null);
 			}
-			
+			if ( ! postprocessor.processBeforeJobCreation() ) {
 			try {
 				postprocessor.process(this.currentFqan);
 			} catch (PostProcessException e) {
@@ -451,6 +473,7 @@ public class JsdlTemplate implements TemplateNodeListener {
 				throw new JobSubmissionException(
 						"Could not submit job because postprocessing of the template failed.",
 						e);
+			}
 			}
 		}
 		
@@ -468,31 +491,11 @@ public class JsdlTemplate implements TemplateNodeListener {
 		setStatus(STATUS_POSTPROCESSORS_EXECUTED);
 
 		try {
-			em.getServiceInterface().setJobDescription(currentJobname, template);
-		} catch (RuntimeException e) {
-
-			throw new JobSubmissionException(
-					"Could not submit job because job description is invalid.",
-					e);
-		} catch (NoSuchJobException e) {
-
-			throw new JobSubmissionException(
-					"Could not submit job newly created job wasn't found on remote service. That really shouldn't happen.",
-					e);
-		}
-
-		if ( Thread.interrupted() ) {
-			throw new JobSubmissionException("Job cancelled.", null);
-		}
-		
-		setStatus(STATUS_JOB_JSDL_DESCRIPTION_STORED);
-
-		try {
 			String tempFqan = this.currentFqan;
 			if (Constants.NON_VO_FQAN.equals(tempFqan) )
 				tempFqan = null;
 			
-			em.getServiceInterface().submitJob(currentJobname, tempFqan);
+			em.getServiceInterface().submitJob(currentJobname);
 		} catch (Exception e) {
 
 			throw new JobSubmissionException(
@@ -507,7 +510,7 @@ public class JsdlTemplate implements TemplateNodeListener {
 
 		try {
 			em.getServiceInterface().addJobProperties(currentJobname,
-					getJobProperties());
+					DtoJob.createJob(getStatus(), getJobProperties()));
 		} catch (NoSuchJobException e) {
 
 			// throwing an exception. The job will still run.
@@ -634,10 +637,20 @@ public class JsdlTemplate implements TemplateNodeListener {
 		else 
 			tempFqan = fqan;
 		
-		currentRemoteJobDirectory = em.getServiceInterface()
-				.calculateAbsoluteJobDirectory(
-						JsdlHelpers.getJobname(getTemplateDocument()),
-						currentSubmissionLocation, tempFqan);
+//		currentRemoteJobDirectory = em.getServiceInterface()
+//				.calculateAbsoluteJobDirectory(
+//						JsdlHelpers.getJobname(getTemplateDocument()),
+//						currentSubmissionLocation, tempFqan);
+		
+		try {
+			currentRemoteJobDirectory = em.getServiceInterface().getJobProperty(
+					JsdlHelpers.getJobname(getTemplateDocument()),
+					Constants.JOBDIRECTORY_KEY);
+		} catch (NoSuchJobException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new JobSubmissionException("Could not get jobdirectory for job.", e);
+		}
 
 		if (currentRemoteJobDirectory == null) 
 			throw new JobSubmissionException("Could not calculate remote job directory. Cancelling Job submission.", null);

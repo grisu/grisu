@@ -46,6 +46,7 @@
 				 	need to know what the name is that Grisu expects.
 			-->
 			<ApplicationName>underworld</ApplicationName>
+			<ApplicationVersion></ApplicationVersion>
 			<Description>
 				Underworld (http://www.underworldproject.org/) is a 3D-parallel geodynamic modelling framework
 				capable of deriving viscous / viscoplastic thermal, chemical and thermochemical models consistent

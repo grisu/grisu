@@ -143,7 +143,7 @@ public class Grish implements CommandHolder {
 		}
 		
 		try {
-			serviceInterface.login(username, password);
+			serviceInterface.login(username, new String(password));
 			printMessage("connected");
 			
 			MyProxyServerParams.saveDefaultMyProxyUsername(username);

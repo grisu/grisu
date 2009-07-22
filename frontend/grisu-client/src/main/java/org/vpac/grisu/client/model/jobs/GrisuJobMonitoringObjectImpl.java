@@ -73,7 +73,7 @@ public class GrisuJobMonitoringObjectImpl implements GrisuJobMonitoringObject {
 
 		try {
 			myLogger.debug("Filling job details for job: "+this.name);
-			this.jobProperties = serviceInterface.getAllJobProperties(this.name);
+			this.jobProperties = serviceInterface.getAllJobProperties(this.name).getPropertiesAsMap();
 		} catch (NoSuchJobException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

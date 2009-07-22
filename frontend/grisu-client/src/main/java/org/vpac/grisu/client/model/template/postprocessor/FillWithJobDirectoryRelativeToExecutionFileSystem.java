@@ -19,4 +19,9 @@ public class FillWithJobDirectoryRelativeToExecutionFileSystem extends
 		
 	}
 
+	@Override
+	public boolean processBeforeJobCreation() {
+		return true;
+	}
+
 }

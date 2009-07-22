@@ -17,6 +17,7 @@
 		<Application>
 
 			<ApplicationName>PAUP*</ApplicationName>
+			<ApplicationVersion></ApplicationVersion>
 			<Description>
 				PAUP* infers phylogenetic trees from sequences.  Find more about PAUP* at http://paup.csit.fsu.edu/
 			</Description>

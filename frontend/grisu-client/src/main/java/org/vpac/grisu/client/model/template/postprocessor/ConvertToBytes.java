@@ -25,4 +25,9 @@ public class ConvertToBytes extends ElementPostprocessor {
 
 	}
 
+	@Override
+	public boolean processBeforeJobCreation() {
+		return true;
+	}
+
 }

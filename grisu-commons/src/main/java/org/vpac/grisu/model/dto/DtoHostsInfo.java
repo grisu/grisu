@@ -3,6 +3,7 @@ package org.vpac.grisu.model.dto;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -82,6 +83,15 @@ public class DtoHostsInfo {
 			}
 		}
 		
+		return result;
+	}
+	
+	public Map<String, String> getAsMap() {
+		Map<String, String> result = new TreeMap<String, String>();
+		
+		for ( DtoHost host : getAllHosts() ) {
+			result.put(host.hostNameString, host.siteNameString);
+		}
 		return result;
 	}
 	

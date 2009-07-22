@@ -116,7 +116,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		if (cachedAllSubmissionLocations == null) {
 			cachedAllSubmissionLocations = new HashSet(Arrays
 					.asList(serviceInterface
-							.getSubmissionLocationsForApplication(application)));
+							.getSubmissionLocationsForApplication(application).getSubmissionLocationStrings()));
 		}
 		return cachedAllSubmissionLocations;
 

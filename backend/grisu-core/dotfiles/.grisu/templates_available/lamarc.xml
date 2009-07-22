@@ -16,6 +16,7 @@
 		<Application>
 
 			<ApplicationName>LAMARC</ApplicationName>
+			<ApplicationVersion></ApplicationVersion>
 			<Description>
 				LAMARC is a program which estimates population-genetic parameters such as population size, population growth rate, recombination rate, and migration rates.  Find more about LAMARC at http://evolution.genetics.washington.edu/lamarc/
 			</Description>

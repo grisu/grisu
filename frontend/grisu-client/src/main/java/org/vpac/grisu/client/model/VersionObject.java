@@ -86,8 +86,8 @@ public class VersionObject implements Comparable<VersionObject>, SubmissionObjec
 	public String[] getSubmissionLocationStrings() {
 		if (submissionLocationStrings == null) {
 			submissionLocationStrings = application.getServiceInterface()
-					.getSubmissionLocationsForApplication(
-							application.getCurrentApplicationName(), version);
+					.getSubmissionLocationsForApplicationAndVersion(
+							application.getCurrentApplicationName(), version).getSubmissionLocationStrings();
 		}
 		return submissionLocationStrings;
 	}
@@ -150,8 +150,8 @@ public class VersionObject implements Comparable<VersionObject>, SubmissionObjec
 
 		Map<String, String> details = applicationDetails.get(site);
 		if (details == null) {
-			details = application.getServiceInterface().getApplicationDetails(
-					application.getCurrentApplicationName(), version, site);
+			details = application.getServiceInterface().getApplicationDetailsForVersionAndSite(
+					application.getCurrentApplicationName(), version, site).getDetailsAsMap();
 			applicationDetails.put(site, details);
 		}
 
@@ -162,8 +162,8 @@ public class VersionObject implements Comparable<VersionObject>, SubmissionObjec
 
 		Map<String, String> details = applicationDetails.get(site);
 		if (details == null) {
-			details = application.getServiceInterface().getApplicationDetails(
-					application.getCurrentApplicationName(), version, site);
+			details = application.getServiceInterface().getApplicationDetailsForVersionAndSite(
+					application.getCurrentApplicationName(), version, site).getDetailsAsMap();
 			applicationDetails.put(site, details);
 		}
 

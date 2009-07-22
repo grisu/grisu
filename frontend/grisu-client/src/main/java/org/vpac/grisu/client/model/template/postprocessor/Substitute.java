@@ -196,4 +196,9 @@ public class Substitute extends ElementPostprocessor {
 		return basename;
 	}
 
+	@Override
+	public boolean processBeforeJobCreation() {
+		return true;
+	}
+
 }

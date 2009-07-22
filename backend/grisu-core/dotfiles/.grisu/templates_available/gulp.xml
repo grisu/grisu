@@ -49,6 +49,7 @@
 				need to know what the name is that Grisu expects.
 			-->
 			<ApplicationName>gulp</ApplicationName>
+			<ApplicationVersion></ApplicationVersion>
 			<Description>
 				GULP description
 			</Description>

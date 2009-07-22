@@ -114,7 +114,7 @@ public class ServiceInterfaceFactoryOld {
 			}
 			
 			try {
-				serviceInterface.login(username, password);
+				serviceInterface.login(username, new String(password));
 			} catch (Exception e) {
 				e.printStackTrace();
 				myLogger.debug("Couldn't login to grisu service on: "+interfaceUrl+": "+e.getLocalizedMessage());

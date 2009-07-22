@@ -143,7 +143,7 @@ public class ApplicationObject implements SubmissionObject, FqanListener,
 		actualAvailableSites = new TreeSet<String>();
 
 		locationsPerVersion = serviceInterface
-				.getSubmissionLocationsPerVersionOfApplication(applicationName);
+				.getSubmissionLocationsPerVersionOfApplication(applicationName).getSubmissionLocationsPerVersionMap();
 
 		for (String ver : locationsPerVersion.keySet()) {
 
@@ -425,8 +425,8 @@ public class ApplicationObject implements SubmissionObject, FqanListener,
 		if (detailsCache.get(version + loc.getLocation()) == null) {
 			// lookup executables
 			Map<String, String> tempDetails = serviceInterface
-					.getApplicationDetails(applicationName, version, loc
-							.getSite());
+					.getApplicationDetailsForVersionAndSite(applicationName, version, loc
+							.getSite()).getDetailsAsMap();
 			detailsCache.put(version + loc.getLocation(), tempDetails);
 		}
 

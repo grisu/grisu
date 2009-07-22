@@ -8,6 +8,7 @@
 
 		<Application>
 			<ApplicationName>XXX_APPLICATION_NAME_XXX</ApplicationName>
+			<ApplicationVersion></ApplicationVersion>
 			<POSIXApplication
 				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
 

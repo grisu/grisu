@@ -41,7 +41,7 @@ public class LoginHelpers {
 		
 		ServiceInterface si = ServiceInterfaceFactoryOld.createInterface(loginParams.getServiceInterfaceUrl(), loginParams.getMyProxyUsername(), loginParams.getMyProxyPassphrase(), loginParams.getMyProxyServer(), loginParams.getMyProxyPort(), loginParams.getHttpProxy(), loginParams.getHttpProxyPort(), loginParams.getHttpProxyUsername(), loginParams.getHttpProxyPassphrase());
 		try {
-			si.login(loginParams.getMyProxyUsername(), loginParams.getMyProxyPassphrase());
+			si.login(loginParams.getMyProxyUsername(), new String(loginParams.getMyProxyPassphrase()));
 		} catch (NoValidCredentialException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -94,7 +94,7 @@ public class LoginHelpers {
 		loginParams.setMyProxyPort(new Integer(myProxyPort).toString());
 
 		serviceInterface = login(loginParams);
-		serviceInterface.login(myproxyusername, myproxyDetails.get(myproxyusername));
+		serviceInterface.login(myproxyusername, new String(myproxyDetails.get(myproxyusername)));
 	} catch (InvocationTargetException re) {
 		re.printStackTrace();
 		throw new LoginException("Could not create & upload proxy to the myproxy server. Probably because of a wrong private key passphrase or network problems.");
@@ -156,7 +156,7 @@ public class LoginHelpers {
 		loginParams.setMyProxyPort(new Integer(myProxyPort).toString());
 
 		serviceInterface = login(loginParams);
-		serviceInterface.login(myproxyusername, myproxyDetails.get(myproxyusername));
+		serviceInterface.login(myproxyusername, new String(myproxyDetails.get(myproxyusername)));
 	} catch (InvocationTargetException re) {
 		re.printStackTrace();
 		throw new LoginException("Could not create & upload proxy to the myproxy server. Probably because of a wrong private key passphrase or network problems.");
@@ -220,7 +220,7 @@ public class LoginHelpers {
 			loginParams.setMyProxyPort(new Integer(myProxyPort).toString());
 
 			serviceInterface = login(loginParams);
-			serviceInterface.login(myproxyusername, myproxyDetails.get(myproxyusername));
+			serviceInterface.login(myproxyusername, new String(myproxyDetails.get(myproxyusername)));
 		} catch (InvocationTargetException re) {
 			Throwable t = re.getCause();
 //			re.printStackTrace();

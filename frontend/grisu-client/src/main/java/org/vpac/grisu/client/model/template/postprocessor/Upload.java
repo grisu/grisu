@@ -105,6 +105,11 @@ public class Upload extends ElementPostprocessor {
 		}
 		
 	}
+
+	@Override
+	public boolean processBeforeJobCreation() {
+		return false;
+	}
 	
 //	private void fillFileNameElement(Element uri) {
 //		

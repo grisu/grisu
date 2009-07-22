@@ -47,6 +47,7 @@
 				need to know what the name is that Grisu expects.
 			-->
 			<ApplicationName>namd</ApplicationName>
+			<ApplicationVersion></ApplicationVersion>
 			<Description>
 				NAMD is a parallel molecular dynamics simulation program
 				used to model large biomolecular systems.

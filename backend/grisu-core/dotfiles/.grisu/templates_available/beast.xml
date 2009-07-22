@@ -19,6 +19,7 @@
 		<Application>
 
 			<ApplicationName>BEAST</ApplicationName>
+			<ApplicationVersion></ApplicationVersion>
 			<Description>
 				BEAST is a cross-platform program for Bayesian MCMC analysis of molecular sequences.  Find more about BEAST at http://beast.bio.ed.ac.uk/Main_Page
 			</Description>

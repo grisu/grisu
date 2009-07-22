@@ -16,11 +16,16 @@ public class CalculateModule extends ElementPostprocessor {
 		
 		String application = template.getApplicationName();
 		String site = template.getCurrentSubmissionSite();
-		Map<String, String> appDetails = template.getEnvironmentManager().getServiceInterface().getApplicationDetails(application, site);
+		Map<String, String> appDetails = template.getEnvironmentManager().getServiceInterface().getApplicationDetailsForSite(application, site).getDetailsAsMap();
 		
 		if ( appDetails.get("Module") != null && !"".equals(appDetails.get("Module")) ) {
 			element.setTextContent(appDetails.get("Module"));
 		}
+	}
+
+	@Override
+	public boolean processBeforeJobCreation() {
+		return true;
 	}
 
 }

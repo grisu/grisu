@@ -1,5 +1,8 @@
 package org.vpac.grisu.model.dto;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -76,6 +79,14 @@ public class DtoFile implements DtoRemoteObject {
 	
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public boolean isFolder() {
+		return false;
+	}
+
+	public List<DtoRemoteObject> getChildren() {
+		return new LinkedList<DtoRemoteObject>();
 	}
 
 }

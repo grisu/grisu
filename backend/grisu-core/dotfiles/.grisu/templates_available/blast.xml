@@ -24,6 +24,7 @@
 		<Application>
 
 			<ApplicationName>blast</ApplicationName>
+			
 			<ApplicationVersion template="Version" name="Version" description="The version of blast" other="useAny,useExact"></ApplicationVersion>
 			<POSIXApplication
 				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">

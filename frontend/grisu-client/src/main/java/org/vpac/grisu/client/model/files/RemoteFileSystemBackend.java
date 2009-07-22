@@ -26,6 +26,7 @@ import org.vpac.grisu.client.control.files.FileManagerTransferHelpers;
 import org.vpac.grisu.client.control.files.MountPointHelpers;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
+import org.vpac.grisu.model.dto.DtoFolder;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.utils.FileHelpers;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
@@ -321,17 +322,14 @@ public class RemoteFileSystemBackend implements FileSystemBackend {
 		Element node = findElementInCache(stripTrailingFileSeperator(uri));
 		myLogger
 				.debug("Now getting a list of the childs of: " + uri.toString());
-		Document remoteChildren;
+		DtoFolder remoteChildren;
 		try {
-			remoteChildren = serviceInterface.ls(uri.toString(), 1, true);
-			remoteChildren = SeveralXMLHelpers.cxfWorkaround(remoteChildren, "Files");
+			remoteChildren = serviceInterface.ls(uri.toString(), 1);
 		} catch (RemoteFileSystemException e) {
 			throw new FileSystemException("Could not list directory: "+uri.toString(), e);
-//		} catch (Exception e2) {
-//			throw new FileSystemException("Could not list directory: "+uri.toString(), e2);
-		}
-
-		putInRemoteFileStructureInXml(node, remoteChildren);
+		}	
+		Document xml = DtoFolderToXmlConverter.convert(remoteChildren, 1);
+		putInRemoteFileStructureInXml(node, xml);
 
 		return node;
 	}
@@ -357,9 +355,6 @@ public class RemoteFileSystemBackend implements FileSystemBackend {
 					myLogger.error("Element is of wrong type. Returning null");					
 					throw new FileSystemException("Gridftp server returned wrong format. Exiting.");
 				} catch (TransformerFactoryConfigurationError e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (TransformerException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}

@@ -53,6 +53,7 @@
 				 	need to know what the name is that Grisu expects.
 			-->
 			<ApplicationName >echo</ApplicationName>
+			<ApplicationVersion></ApplicationVersion>
 			<POSIXApplication
 				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
 				
