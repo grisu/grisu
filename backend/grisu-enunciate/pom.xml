@@ -237,6 +237,7 @@
 								and the sources jar.
 							-->
 							<uniqueVersion>false</uniqueVersion>
+							<pomFile>client.pom</pomFile>
 						</configuration>
 					</execution>
 				</executions>
