@@ -69,7 +69,7 @@ import org.vpac.grisu.model.dto.DtoJobProperty;
 import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
-import org.vpac.grisu.model.dto.HostsInfo;
+import org.vpac.grisu.model.dto.DtoHostsInfo;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.settings.MyProxyServerParams;
@@ -2050,9 +2050,9 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#getAllHosts()
 	 */
-	public final synchronized HostsInfo getAllHosts() {
+	public final synchronized DtoHostsInfo getAllHosts() {
 
-		HostsInfo info = HostsInfo.createHostsInfo(informationManager.getAllHosts());
+		DtoHostsInfo info = DtoHostsInfo.createHostsInfo(informationManager.getAllHosts());
 		
 		return info;
 	}

@@ -6,7 +6,6 @@ import java.util.Map;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.annotation.security.RolesAllowed;
-import javax.jws.WebMethod;
 import javax.jws.WebService;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -28,8 +27,7 @@ import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
-import org.vpac.grisu.model.dto.HostsInfo;
-import org.w3c.dom.Document;
+import org.vpac.grisu.model.dto.DtoHostsInfo;
 
 import au.org.arcs.mds.JobSubmissionProperty;
 
@@ -41,7 +39,9 @@ import au.org.arcs.mds.JobSubmissionProperty;
  * @author Markus Binsteiner
  * 
  */
-@WebService
+@WebService (
+		targetNamespace = "http://api.grisu.arcs.org.au/"
+)
 public interface EnunciateServiceInterface {
 
 	double INTERFACE_VERSION = 10;
@@ -176,7 +176,7 @@ public interface EnunciateServiceInterface {
 	 */
 	@GET
 	@Path("info/allHosts")
-	HostsInfo getAllHosts();
+	DtoHostsInfo getAllHosts();
 
 	/**
 	 * Queries for all submission locations on the grid. Returns an array of

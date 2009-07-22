@@ -9,8 +9,11 @@
 	<groupId>org.vpac.grisu</groupId>
 	<artifactId>grisu-enunciate</artifactId>
 	<packaging>war</packaging>
-	<name>grisu-enunciate</name>
+	<name>Grisu-API</name>
 	<version>0.3-SNAPSHOT</version>
+	<description>A module that takes care of creating SOAP, REst &amp;
+		GWT-RPC endpoints for a Grisu backend. It also automatically creates
+		Java, C# and Ruby client stubs.</description>
 	<url>http://maven.apache.org</url>
 
 
@@ -116,8 +119,26 @@
 			<version>1.0.2</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.vpac.grisu</groupId>
+			<artifactId>grisu-client-slim</artifactId>
+			<version>0.3-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.vpac.grisu</groupId>
+			<artifactId>grisu-client-slim</artifactId>
+			<version>0.3-SNAPSHOT</version>
+			<classifier>sources</classifier>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 
+	<inceptionYear>2009</inceptionYear>
+	<organization>
+		<name>ARCS</name>
+		<url>http://www.arcs.org.au</url>
+	</organization>
 	<build>
 		<plugins>
 			<plugin>

@@ -12,13 +12,13 @@ import javax.xml.bind.annotation.XmlValue;
  *
  */
 @XmlRootElement(name="host")
-public class Host {
+public class DtoHost {
 	
-	public Host() {
+	public DtoHost() {
 		
 	}
 	
-	public Host(String host, String site) {
+	public DtoHost(String host, String site) {
 		this.hostNameString = host;
 		this.siteNameString = site;
 	}
