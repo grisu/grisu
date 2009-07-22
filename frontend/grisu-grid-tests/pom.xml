@@ -26,6 +26,13 @@
     	<artifactId>jline</artifactId>
     	<version>0.9.94</version>
     </dependency>
+    <dependency>
+    	<groupId>org.apache.xmlrpc</groupId>
+    	<artifactId>xmlrpc-client</artifactId>
+    	<version>3.1.2</version>
+    	<type>jar</type>
+    	<scope>compile</scope>
+    </dependency>
   </dependencies>
     	<build>
 		<plugins>

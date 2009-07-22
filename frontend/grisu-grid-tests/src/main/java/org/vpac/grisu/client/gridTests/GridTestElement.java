@@ -300,11 +300,15 @@ abstract class GridTestElement implements JobStatusChangeListener {
 		}
 		return result.toString();
 	}
+	
+	public String getVersion() {
+		return this.version;
+	}
 
 	abstract protected JobObject createJobObject() throws MdsInformationException;
 
 	abstract protected String getApplicationSupported();
-
+	
 	abstract protected boolean checkJobSuccess();
 
 }

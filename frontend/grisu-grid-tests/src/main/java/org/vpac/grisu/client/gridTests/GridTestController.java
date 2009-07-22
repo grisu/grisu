@@ -49,11 +49,14 @@ public class GridTestController {
 	private final String fqan;
 	private String output = "gridtestResults.txt";
 	private String[] filters;
+	
+	private List<OutputModule> outputModules = new LinkedList<OutputModule>();
 
 	public GridTestController(String[] args) {
 
 		GridTestCommandlineOptions options = new GridTestCommandlineOptions(
 				args);
+		
 
 		if (options.getMyproxyUsername() != null
 				&& options.getMyproxyUsername().length() != 0) {
@@ -99,6 +102,9 @@ public class GridTestController {
 		applications = options.getApplications();
 		
 		filters = options.getFilters();
+		
+		outputModules.add(new LogFileOutputModule(output));
+		outputModules.add(new XmlRpcOutputModule());
 
 	}
 
@@ -240,38 +246,9 @@ public class GridTestController {
 
 	public void writeStatistics() {
 
-		StringBuffer outputString = new StringBuffer();
-
-		for (GridTestElement gte : finishedElements) {
-
-			outputString.append("SubmissionLocation: "
-					+ gte.getSubmissionLocation() + "\n");
-			outputString
-			.append("-------------------------------------------------"
-					+ "\n");
-			outputString.append("Started: "+gte.getStartDate().toString()+"\n");
-			outputString.append("Ended: "+gte.getEndDate().toString()+"\n");
-			outputString
-			.append("-------------------------------------------------"
-					+ "\n");
-			outputString.append(gte.getResultString() + "\n");
-			outputString
-					.append("-------------------------------------------------"
-							+ "\n");
-
-		}
-
-		try {
-
-			String uFileName = output;
-			FileWriter fileWriter = new FileWriter(uFileName);
-			BufferedWriter buffWriter = new BufferedWriter(fileWriter);
-			buffWriter.write(outputString.toString());
-
-			buffWriter.close();
-
-		} catch (Exception e) {
-			e.printStackTrace();
+		for ( OutputModule module : outputModules ) {
+			System.out.println("Writing output using: "+module.getClass().getName());
+			module.outputResult(finishedElements);
 		}
 
 	}
