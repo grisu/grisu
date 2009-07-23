@@ -65,17 +65,11 @@ public class DtoFile implements DtoRemoteObject {
 		this.lastModified = lastModified;
 	}
 
-	public String getUrl() {
-		return rootUrl;
-	}
 	
 	public String getName() {
 		return name;
 	}
-	
-	public void setUrl(String url) {
-		this.rootUrl = url;
-	}
+
 	
 	public void setName(String name) {
 		this.name = name;

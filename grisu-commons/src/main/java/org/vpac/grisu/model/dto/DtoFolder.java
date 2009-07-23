@@ -47,7 +47,7 @@ public class DtoFolder implements DtoRemoteObject {
 		return name;
 	}
 	
-	public String getUrl() {
+	public String getRootUrl() {
 		return rootUrl;
 	}
 	
@@ -55,11 +55,19 @@ public class DtoFolder implements DtoRemoteObject {
 		return childrenFiles;
 	}
 	
-	public List<DtoFolder> getChildrenFolder() {
+	public List<DtoFolder> getChildrenFolders() {
 		return childrenFolders;
 	}
 	
-	public void setUrl(String url) {
+	public void setChildrenFolders(List<DtoFolder> childrenFolders) {
+		this.childrenFolders = childrenFolders;
+	}
+
+	public void setChildrenFiles(List<DtoFile> childrenFiles) {
+		this.childrenFiles = childrenFiles;
+	}
+
+	public void setRootUrl(String url) {
 		this.rootUrl = url;
 	}
 	
@@ -83,7 +91,7 @@ public class DtoFolder implements DtoRemoteObject {
 		
 		List<DtoRemoteObject> result = new LinkedList<DtoRemoteObject>();
 		
-		for ( DtoFolder folder : getChildrenFolder() ) {
+		for ( DtoFolder folder : getChildrenFolders() ) {
 			result.add(folder);
 		}
 		for ( DtoFile file : getChildrenFiles() ) {

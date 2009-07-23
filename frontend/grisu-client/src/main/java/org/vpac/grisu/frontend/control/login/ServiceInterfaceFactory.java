@@ -29,8 +29,10 @@ public final class ServiceInterfaceFactory {
 	public static final String DEFAULT_SERVICE_INTERFACE = "https://ngportal.vpac.org/grisu-ws/services/grisu";
 
 	public static final String[] KNOWN_SERVICE_INTERFACE_CREATORS = new String[] {
-			"LocalServiceInterfaceCreator", "XFireServiceInterfaceCreator",
-			"CXFServiceInterfaceCreator" };
+		"LocalServiceInterfaceCreator", 
+		"JaxWsServiceInterfaceCreator",
+		"XfireServiceInterfaceCreator"
+	};
 
 	/**
 	 * Creates a serviceInterface from a {@link LoginParams} object.

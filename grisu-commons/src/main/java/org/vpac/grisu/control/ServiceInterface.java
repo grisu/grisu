@@ -231,7 +231,7 @@ public interface ServiceInterface {
 	 * @return all sites that support this application.
 	 */
 	DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersionAndFqan(String application,
-			String version,String fqan);
+			String version, String fqan);
 
 	/**
 	 * Returns a map of all versions and all submission locations of this
@@ -809,6 +809,5 @@ public interface ServiceInterface {
 	 * @throws NoSuchJobException if no such job exists
 	 */
 	String getJsdlDocument(String jobname) throws NoSuchJobException;
-
 
 }
