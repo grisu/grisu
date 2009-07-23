@@ -23,6 +23,11 @@
     	<artifactId>simpleProxyLib</artifactId>
     	<version>0.4-SNAPSHOT</version>
     </dependency>
+<!--    <dependency>-->
+<!--    	<groupId>com.sun.xml.ws</groupId>-->
+<!--    	<artifactId>jaxws-rt</artifactId>-->
+<!--    	<version>2.1.4</version>-->
+<!--    </dependency>-->
   </dependencies>
   
   	<build>

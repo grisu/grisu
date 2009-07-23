@@ -25,6 +25,8 @@ import org.w3c.dom.Document;
 
 import au.org.arcs.mds.InformationManager;
 
+import com.sun.xml.ws.developer.StreamingAttachment;
+
 /**
  * This abstract class implements most of the methods of the
  * {@link ServiceInterface} interface. This way developers don't have to waste
@@ -47,6 +49,7 @@ import au.org.arcs.mds.InformationManager;
 @Path("/grisu")
 @WebService(endpointInterface = "org.vpac.grisu.control.EnunciateServiceInterface")
 @MTOM(enabled=true)
+@StreamingAttachment(parseEagerly=true, memoryThreshold=40000L)
 public class EnunciateServiceInterfaceImpl extends AbstractServiceInterface implements EnunciateServiceInterface, ServiceInterface {
 
 	static final Logger myLogger = Logger

@@ -12,6 +12,8 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.ServiceInterfaceCreator;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 
+import com.sun.xml.internal.ws.developer.JAXWSProperties;
+
 public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 	
 	static final Logger myLogger = Logger
@@ -63,11 +65,11 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			
 			bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY, username);
 			bp.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, new String(password));
-			
+			bp.getRequestContext().put(JAXWSProperties.HTTP_CLIENT_STREAMING_CHUNK_SIZE, 4096);
 			SOAPBinding binding = (SOAPBinding)bp.getBinding();
 			binding.setMTOMEnabled(true);
 
-
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

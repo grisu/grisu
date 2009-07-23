@@ -10,6 +10,7 @@ import javax.jws.WebService;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.xml.bind.annotation.XmlMimeType;
 
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
@@ -23,11 +24,11 @@ import org.vpac.grisu.model.dto.DtoApplicationInfo;
 import org.vpac.grisu.model.dto.DtoDataLocations;
 import org.vpac.grisu.model.dto.DtoFolder;
 import org.vpac.grisu.model.dto.DtoGridResources;
+import org.vpac.grisu.model.dto.DtoHostsInfo;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
-import org.vpac.grisu.model.dto.DtoHostsInfo;
 
 import au.org.arcs.mds.JobSubmissionProperty;
 
@@ -502,7 +503,7 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 *             if the remote (target) filesystem could not be connected /
 	 *             mounted / is not writeable
 	 */
-	String upload(DataHandler file, String filename,
+	String upload(@XmlMimeType("application/octet-stream") DataHandler file, String filename,
 			boolean return_absolute_url) throws RemoteFileSystemException;
 
 	/**
@@ -515,6 +516,7 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 *             if the remote (source) file system could not be conntacted
 	 *             /mounted / is not readable
 	 */
+	@XmlMimeType("application/octet-stream")
 	DataHandler download(String filename)
 			throws RemoteFileSystemException;
 
