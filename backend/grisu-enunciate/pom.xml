@@ -171,7 +171,7 @@
 				<artifactId>maven-deploy-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>deploy-client-classes</id>
+						<id>deploy-client-classes-jaxws</id>
 						<phase>deploy</phase>
 						<goals>
 							<goal>deploy-file</goal>
@@ -184,17 +184,15 @@
 							<file>target/enunciate/build/jaxws-client/grisu-client-jaxws.jar
 							</file>
 							<!-- use this project's repository url -->
-							<url>http://code.arcs.org.au/nexus/content/repositories/snapshots
-							</url>
+							<url>${project.distributionManagementArtifactRepository.url}</url>
 							<!-- use this project's repository id -->
-							<repositoryId>arcs.nexus</repositoryId>
+							<repositoryId>${project.distributionManagementArtifactRepository.id}</repositoryId>
 
 							<groupId>org.vpac.grisu</groupId>
 							<artifactId>grisu-client-jaxws</artifactId>
 							<!-- use this project's version -->
 							<version>${project.version}</version>
 							<packaging>jar</packaging>
-							<description>The client-side classes for our api.</description>
 
 							<!--
 								we can't use a unique version for the case of snapshots else the
@@ -202,11 +200,11 @@
 								and the sources jar.
 							-->
 							<uniqueVersion>false</uniqueVersion>
-							<pomFile>client.pom</pomFile>
+							<pomFile>client-jaxws.pom</pomFile>
 						</configuration>
 					</execution>
 					<execution>
-						<id>deploy-client-sources</id>
+						<id>deploy-client-sources-jaxws</id>
 						<phase>deploy</phase>
 						<goals>
 							<goal>deploy-file</goal>
@@ -219,13 +217,78 @@
 							<file>target/enunciate/build/jaxws-client/grisu-client-jaxws-src.jar
 							</file>
 							<!-- use this project's repository url -->
-							<url>http://code.arcs.org.au/nexus/content/repositories/snapshots
-							</url>
+							<url>${project.distributionManagementArtifactRepository.url}</url>
 							<!-- use this project's repository id -->
-							<repositoryId>arcs.nexus</repositoryId>
+							<repositoryId>${project.distributionManagementArtifactRepository.id}</repositoryId>
 
 							<groupId>org.vpac.grisu</groupId>
 							<artifactId>grisu-client-jaxws</artifactId>
+							<!-- use this project's version -->
+							<version>${project.version}</version>
+							<packaging>jar</packaging>
+							<classifier>sources</classifier>
+							<!--
+								we can't use a unique version for the case of snapshots else the
+								(generated, unique) versions won't match between the classes jar
+								and the sources jar.
+							-->
+							<uniqueVersion>false</uniqueVersion>
+							<pomFile>client-jaxws.pom</pomFile>
+						</configuration>
+					</execution>
+					<execution>
+						<id>deploy-client-classes-xfire</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy-file</goal>
+						</goals>
+						<configuration>
+							<!--
+								the enunciate-generated client jar can be "exported" to a known
+								place on the filesystem.
+							-->
+							<file>target/enunciate/build/xfire-client/grisu-client-xfire-1.4.jar
+							</file>
+							<!-- use this project's repository url -->
+							<url>${project.distributionManagementArtifactRepository.url}</url>
+							<!-- use this project's repository id -->
+							<repositoryId>${project.distributionManagementArtifactRepository.id}</repositoryId>
+
+							<groupId>org.vpac.grisu</groupId>
+							<artifactId>grisu-client-xfire</artifactId>
+							<!-- use this project's version -->
+							<version>${project.version}</version>
+							<packaging>jar</packaging>
+
+							<!--
+								we can't use a unique version for the case of snapshots else the
+								(generated, unique) versions won't match between the classes jar
+								and the sources jar.
+							-->
+							<uniqueVersion>false</uniqueVersion>
+							<pomFile>client-xfire.pom</pomFile>
+						</configuration>
+					</execution>
+					<execution>
+						<id>deploy-client-sources-xfire</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy-file</goal>
+						</goals>
+						<configuration>
+							<!--
+								the enunciate-generated client jar can be "exported" to a known
+								place on the filesystem.
+							-->
+							<file>target/enunciate/build/xfire-client/grisu-client-xfire-1.4-src.jar
+							</file>
+							<!-- use this project's repository url -->
+							<url>${project.distributionManagementArtifactRepository.url}</url>
+							<!-- use this project's repository id -->
+							<repositoryId>${project.distributionManagementArtifactRepository.id}</repositoryId>
+
+							<groupId>org.vpac.grisu</groupId>
+							<artifactId>grisu-client-xfire</artifactId>
 							<!-- use this project's version -->
 							<version>${project.version}</version>
 							<packaging>jar</packaging>
@@ -237,7 +300,7 @@
 								and the sources jar.
 							-->
 							<uniqueVersion>false</uniqueVersion>
-							<pomFile>client.pom</pomFile>
+							<pomFile>client-xfire.pom</pomFile>
 						</configuration>
 					</execution>
 				</executions>

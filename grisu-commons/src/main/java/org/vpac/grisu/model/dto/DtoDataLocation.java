@@ -29,11 +29,31 @@ public class DtoDataLocation {
 	 */
 	@XmlElement(name="path")
 	public List<String> paths;
+	
 	/**
 	 * The fqan of the VO that is used to create a voms proxy to access this datalocation.
 	 */
 	@XmlElement
 	public String fqan;
 	
+	public String getRooturl() {
+		return rooturl;
+	}
+	public void setRooturl(String rooturl) {
+		this.rooturl = rooturl;
+	}
+	public List<String> getPaths() {
+		return paths;
+	}
+	public void setPaths(List<String> paths) {
+		this.paths = paths;
+	}
+	public String getFqan() {
+		return fqan;
+	}
+	public void setFqan(String fqan) {
+		this.fqan = fqan;
+	}
+
 
 }

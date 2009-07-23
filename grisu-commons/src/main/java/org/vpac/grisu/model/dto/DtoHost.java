@@ -29,11 +29,29 @@ public class DtoHost {
     @XmlElement(name="hostname")
     public String hostNameString; 
 
-    /**
+	/**
      * The name of the site where this host is located.
      */
     @XmlElement(name="sitename")
     public String siteNameString;
+
+    
+    public String getHostNameString() {
+		return hostNameString;
+	}
+
+	public void setHostNameString(String hostNameString) {
+		this.hostNameString = hostNameString;
+	}
+
+	public String getSiteNameString() {
+		return siteNameString;
+	}
+
+	public void setSiteNameString(String siteNameString) {
+		this.siteNameString = siteNameString;
+	}
+
 
 
 }
