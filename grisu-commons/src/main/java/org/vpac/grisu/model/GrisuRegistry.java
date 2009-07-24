@@ -169,7 +169,7 @@ public class GrisuRegistry {
 	 */
 	public final HistoryManager getHistoryManager() {
 		if (historyManager == null) {
-			File historyFile = new File(Environment.GRISU_DIRECTORY,
+			File historyFile = new File(Environment.getGrisuDirectory().getPath(),
 					GRISU_HISTORY_FILENAME);
 			if (!historyFile.exists()) {
 				try {

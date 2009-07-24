@@ -1,8 +1,8 @@
 package org.vpac.grisu.client.gridTests;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.net.URL;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import jline.ConsoleReader;
 
 import org.apache.commons.lang.StringUtils;
+import org.vpac.grisu.backend.hibernate.HibernateSessionFactory;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
@@ -24,14 +25,16 @@ import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.info.ApplicationInformation;
+import org.vpac.grisu.settings.Environment;
 import org.vpac.security.light.plainProxy.LocalProxy;
 
 import au.org.arcs.mds.Constants;
 
 public class GridTestController {
 
-	public static final File GridTestDirectory = new File(System
-			.getProperty("user.home"), "grid-tests");
+	private final String grisu_base_directory;
+	
+	private final File grid_tests_directory;
 
 	ExecutorService submitJobExecutor = Executors.newFixedThreadPool(5);
 	ExecutorService processJobExecutor = Executors.newFixedThreadPool(5);
@@ -47,12 +50,25 @@ public class GridTestController {
 
 	private String[] applications;
 	private final String fqan;
-	private String output = "gridtestResults.txt";
+	private String output = null;
 	private String[] filters;
 	
 	private List<OutputModule> outputModules = new LinkedList<OutputModule>();
 
-	public GridTestController(String[] args) {
+	public GridTestController(String[] args, String grisu_base_directory_param) {
+		
+		if ( StringUtils.isBlank(grisu_base_directory_param) ) {
+			this.grisu_base_directory = System.getProperty("user.home")+File.separator+"grisu-grid-tests";
+		}  else {
+			this.grisu_base_directory = grisu_base_directory_param;
+		}
+		
+		Environment.setGrisuDirectory(this.grisu_base_directory);
+		HibernateSessionFactory.setCustomHibernateConfigFile(this.grisu_base_directory+File.separator+"grid-tests-hibernate-file.cfg.xml");
+
+		grid_tests_directory = new File(this.grisu_base_directory, "tests");
+		
+		output = grid_tests_directory + File.separator + "testResults_"+new Date().getTime()+".log";
 
 		GridTestCommandlineOptions options = new GridTestCommandlineOptions(
 				args);
@@ -108,12 +124,17 @@ public class GridTestController {
 
 	}
 
-	public GridTestController(ServiceInterface si, String[] applications,
-			String fqan) {
-		this.serviceInterface = si;
-		registry = GrisuRegistry.getDefault(this.serviceInterface);
-		this.fqan = fqan;
+//	public GridTestController(ServiceInterface si, String[] applications,
+//			String fqan) {
+//		this.serviceInterface = si;
+//		registry = GrisuRegistry.getDefault(this.serviceInterface);
+//		this.fqan = fqan;
+//	}
+	
+	public File getGridTestDirectory() {
+		return grid_tests_directory;
 	}
+	
 
 	/**
 	 * @param args
@@ -123,7 +144,27 @@ public class GridTestController {
 	public static void main(String[] args) throws ServiceInterfaceException,
 			MdsInformationException {
 
-		GridTestController gtc = new GridTestController(args);
+    	String name = GridTestController.class.getName();
+    	name = name.replace('.','/')+".class";
+    	URL url = GridTestController.class.getClassLoader().getResource(name);
+    	String path = url.getPath();
+//    	System.out.println("Executable path: "+path);
+    	String baseDir = null;
+    	if ( url.toString().startsWith("jar:") ) {
+    		baseDir = path.toString().substring(path.indexOf(":")+1, path.indexOf(".jar!"));
+    		baseDir = baseDir.substring(0, baseDir.lastIndexOf("/"));
+    	} else {
+    		baseDir = null;
+    	}
+
+    	System.out.println("Using directory: "+baseDir);
+
+
+		
+		
+		
+		
+		GridTestController gtc = new GridTestController(args, baseDir);
 
 		gtc.start();
 
@@ -274,7 +315,7 @@ public class GridTestController {
 
 		for (String application : applications) {
 
-			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
+			if ( ! GridTestElement.useMds(application) ) {
 				
 				String[] subLocs = registry.getResourceInformation().getAllAvailableSubmissionLocations(fqan);
 				
@@ -292,7 +333,7 @@ public class GridTestController {
 						continue;
 					}
 					
-					GridTestElement gte = GridTestElement.createGridTestElement(application, serviceInterface, Constants.NO_VERSION_INDICATOR_STRING, subLoc);
+					GridTestElement gte = GridTestElement.createGridTestElement(this, application, serviceInterface, Constants.NO_VERSION_INDICATOR_STRING, subLoc);
 					gridTestElements.put(gte.getId(), gte);
 					
 					Thread createJobThread = createCreateAndSubmitJobThread(
@@ -326,7 +367,7 @@ public class GridTestController {
 						}
 
 						GridTestElement gte = GridTestElement
-								.createGridTestElement(appInfo
+								.createGridTestElement(this, appInfo
 										.getApplicationName(),
 										serviceInterface, version, subLoc);
 

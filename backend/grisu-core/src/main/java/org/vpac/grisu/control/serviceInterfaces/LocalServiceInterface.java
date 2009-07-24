@@ -154,7 +154,7 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 			CertificateFiles.copyCACerts();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.debug(e.getLocalizedMessage());
 			// throw new
 			// RuntimeException("Could not initiate local backend: "+e.getLocalizedMessage());
 		}
@@ -165,7 +165,7 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 		try {
 			getCredential();
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			throw new NoValidCredentialException("No valid credential: "
 					+ e.getLocalizedMessage());
 		}

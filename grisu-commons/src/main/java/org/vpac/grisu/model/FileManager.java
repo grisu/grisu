@@ -89,8 +89,7 @@ public class FileManager {
 	private File getLocalCacheFile(final String url) {
 
 		String rootPath = null;
-		rootPath = Environment.GRISU_DIRECTORY + File.separator
-				+ Environment.CACHE_DIR_NAME + File.separator
+		rootPath = Environment.getGrisuLocalCacheRoot() + File.separator
 				+ get_url_strin_path(url);
 
 		return new File(rootPath);

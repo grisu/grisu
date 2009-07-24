@@ -51,9 +51,9 @@ public class GramClient
 	public GramClient(final GSSCredential credential) {
 		this.credential = credential;
 
-		System.setProperty("GLOBUS_LOCATION", Environment.GLOBUS_HOME);
+		System.setProperty("GLOBUS_LOCATION", Environment.getGlobusHome());
 		System.setProperty("axis.ClientConfigFile",
-				Environment.AXIS_CLIENT_CONFIG);
+				Environment.getAxisClientConfig());
 
 	}
 
@@ -163,9 +163,9 @@ public class GramClient
 			final Authorization authorization, final Integer xmlSecurity,
 			final boolean batchMode, final boolean dryRunMode, final boolean quiet,
 			final Date duration, final Date terminationDate, final int timeout) throws Exception {
-		System.setProperty("GLOBUS_LOCATION", Environment.GLOBUS_HOME);
+		System.setProperty("GLOBUS_LOCATION", Environment.getGlobusHome());
 		System.setProperty("axis.ClientConfigFile",
-				Environment.AXIS_CLIENT_CONFIG);
+				Environment.getAxisClientConfig());
 
 		this.quiet = quiet;
 		this.batch = batchMode || dryRunMode; // in single job only.
@@ -481,9 +481,9 @@ public class GramClient
 
 		try {
 
-			System.setProperty("GLOBUS_LOCATION", Environment.GLOBUS_HOME);
+			System.setProperty("GLOBUS_LOCATION", Environment.getGlobusHome());
 			System.setProperty("axis.ClientConfigFile",
-					Environment.AXIS_CLIENT_CONFIG);
+					Environment.getAxisClientConfig());
 
 			// Find our job, and refresh its status.
 			job.setHandle(gramJobHandle);

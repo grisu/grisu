@@ -2,6 +2,8 @@ package org.vpac.grisu.settings;
 
 import java.io.File;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * This class manages the location/values of some required files/environment
  * variables.
@@ -10,32 +12,48 @@ import java.io.File;
  * 
  */
 public final class Environment {
-	
+
 	private Environment() {
 	}
 
-	public static final String GRISU_DIRECTORY = System
+	private static final String GRISU_DEFAULT_DIRECTORY = System
 			.getProperty("user.home")
 			+ File.separator + ".grisu";
 
-	public static final String TEMPLATE_DIRECTORY = GRISU_DIRECTORY
-			+ File.separator + "templates";
+	private static String USER_SET_GRISU_DIRECTORY = null;
 
-	public static final String CACHE_DIR_NAME = "cache";
+	private static String GLOBUS_HOME;
+	private static File GRISU_DIRECTORY;
 
-	public static final String AVAILABLE_TEMPLATES_DIRECTORY = GRISU_DIRECTORY
-			+ File.separator + "templates_available";
+	public static String getTemplateDirectory() {
+		return getGrisuDirectory() + File.separator + "templates";
+	}
 
-	public static final String GLOBUS_HOME = GRISU_DIRECTORY + File.separator
-			+ "globus";
+	public static String getCacheDirName() {
+		return "cache";
+	}
 
-	public static final String AXIS_CLIENT_CONFIG = GLOBUS_HOME
-			+ File.separator + "client-config.wsdd";
+	public static String getAvailableTemplatesDirectory() {
+		return getGrisuDirectory() + File.separator + "templates_available";
+	}
 
-	public static final String GRISU_PLUGIN_DIRECTORY = GRISU_DIRECTORY
-			+ File.separator + "plugins";
+	public static String getGlobusHome() {
+		
+		if (StringUtils.isBlank(GLOBUS_HOME)) {
+			
+			GLOBUS_HOME = getGrisuDirectory() + File.separator + "globus";
+			
+		}
+		return GLOBUS_HOME;
+	}
 
-	public static final File LOCAL_CACHE_ROOT = getGrisuLocalCacheRoot();
+	public static String getGrisuPluginDirectory() {
+		return getGrisuDirectory() + File.separator + "plugins";
+	}
+
+	public static String getAxisClientConfig() {
+		return getGlobusHome() + File.separator + "client-config.wsdd";
+	}
 
 	/**
 	 * For some jobs/applications it is useful to cache output files locally so
@@ -51,6 +69,16 @@ public final class Environment {
 		return dir;
 	}
 
+	public static void setGrisuDirectory(String path) {
+
+		if (GRISU_DIRECTORY != null) {
+			throw new RuntimeException(
+					"Can't set grisu directory because it was already accessed once after the start of this application...");
+		}
+
+		USER_SET_GRISU_DIRECTORY = path;
+	}
+
 	/**
 	 * This one returns the location where grisu specific config/cache files are
 	 * stored. If it does not exist it gets created.
@@ -59,11 +87,22 @@ public final class Environment {
 	 */
 	public static File getGrisuDirectory() {
 
-		File grisuDir = new File(GRISU_DIRECTORY);
-		if (!grisuDir.exists()) {
-			grisuDir.mkdirs();
+		if (GRISU_DIRECTORY == null) {
+
+
+			File grisuDir = null;
+			if (StringUtils.isNotBlank(USER_SET_GRISU_DIRECTORY)) {
+				grisuDir = new File(USER_SET_GRISU_DIRECTORY);
+			} else {
+				grisuDir = new File(GRISU_DEFAULT_DIRECTORY);
+			}
+
+			if (!grisuDir.exists()) {
+				grisuDir.mkdirs();
+			}
+			GRISU_DIRECTORY = grisuDir;
 		}
-		return grisuDir;
+		return GRISU_DIRECTORY;
 	}
 
 	/**
@@ -72,7 +111,7 @@ public final class Environment {
 	 * @return the root of the local cache
 	 */
 	public static File getGrisuLocalCacheRoot() {
-		File root = new File(getGrisuDirectory(), CACHE_DIR_NAME);
+		File root = new File(getGrisuDirectory(), getCacheDirName());
 		if (!root.exists()) {
 			if (!root.mkdirs()) {
 				if (!root.exists()) {

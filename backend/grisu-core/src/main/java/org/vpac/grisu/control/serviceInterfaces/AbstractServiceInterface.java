@@ -126,7 +126,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private MatchMaker matchmaker = new MatchMakerImpl(Environment
 			.getGrisuDirectory().toString());
 
-	public final String getInterfaceVersion() {
+	public String getInterfaceVersion() {
 		return "<grisuVersion>" + ServiceInterface.INTERFACE_VERSION
 				+ "</grisuVersion>";
 	}

@@ -34,6 +34,13 @@ abstract class GridTestElement implements JobStatusChangeListener {
 	
 	private final static String END_STAGE = "endStage";
 	
+	protected final GridTestController controller;
+	
+	
+	public GridTestController getController() {
+		return this.controller;
+	}
+	
 	public Date getStartDate() {
 		return startDate;
 	}
@@ -45,8 +52,9 @@ abstract class GridTestElement implements JobStatusChangeListener {
 	private final Date startDate;
 	private Date endDate = null;
 
-	protected GridTestElement(ServiceInterface si, String version,
+	protected GridTestElement(GridTestController controller, ServiceInterface si, String version,
 			String submissionLocation) throws MdsInformationException {
+		this.controller = controller;
 		startDate = new Date();
 		endDate = new Date();
 		beginNewStage("Initializing test element...");
@@ -77,24 +85,40 @@ abstract class GridTestElement implements JobStatusChangeListener {
 		this.jobObject.removeJobStatusChangeListener(jscl);
 	}
 	
-	public static GridTestElement createGridTestElement(String application, ServiceInterface serviceInterface, String version, String subLoc) throws MdsInformationException {
+	public static GridTestElement createGridTestElement(GridTestController controller, String application, ServiceInterface serviceInterface, String version, String subLoc) throws MdsInformationException {
 		
 		GridTestElement gte = null;
 		if ( "java".equals(application.toLowerCase()) ) {
-			gte = new JavaGridTestElement(serviceInterface, version, subLoc);
+			gte = new JavaGridTestElement(controller, serviceInterface, version, subLoc);
 		} else if ( "unixcommands".equals(application.toLowerCase()) ) {
-			gte = new UnixCommandsGridTestElement(serviceInterface, version, subLoc);
+			gte = new UnixCommandsGridTestElement(controller, serviceInterface, version, subLoc);
 		} else if ( "underworld".equals(application.toLowerCase()) ){
-			gte = new UnderworldGridTestElement(serviceInterface, version, subLoc);
+			gte = new UnderworldGridTestElement(controller, serviceInterface, version, subLoc);
 		} else if ( "generic".equals(application.toLowerCase()) ){
-			gte = new GenericGridTestElement(serviceInterface, version, subLoc);
+			gte = new GenericGridTestElement(controller, serviceInterface, version, subLoc);
+		} else if ( "pbstest".equals(application.toLowerCase()) ){
+			gte = new PbsGridTestElement(controller, serviceInterface, version, subLoc);
 		} else {
-			throw new RuntimeException("Application \""+application+" not supported yet.");
+			throw new RuntimeException("Application \""+application+"\" not supported yet.");
 		}
 		
 		return gte;
 	}
-
+	
+	public static boolean useMds(String application) {
+		
+		if ( "java".equals(application) ) {
+			return true;
+		} else if ( "unixcommands".equals(application) ) {
+			return true;
+		} else if ( "underworld".equals(application) ) {
+			return true;
+		} else {
+			return false;
+		}
+		
+	}
+	
 	public String getId() {
 		return this.id;
 	}
@@ -310,5 +334,7 @@ abstract class GridTestElement implements JobStatusChangeListener {
 	abstract protected String getApplicationSupported();
 	
 	abstract protected boolean checkJobSuccess();
+	
+	abstract protected boolean useMDS();
 
 }

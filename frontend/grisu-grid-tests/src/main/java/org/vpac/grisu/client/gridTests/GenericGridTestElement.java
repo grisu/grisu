@@ -14,8 +14,8 @@ import au.org.arcs.mds.JobSubmissionProperty;
 
 public class GenericGridTestElement extends GridTestElement {
 	
-	public GenericGridTestElement(ServiceInterface si, String version, String subLoc) throws MdsInformationException {
-		super(si, version, subLoc);
+	public GenericGridTestElement(GridTestController c, ServiceInterface si, String version, String subLoc) throws MdsInformationException {
+		super(c, si, version, subLoc);
 	}
 
 	@Override
@@ -64,9 +64,9 @@ public class GenericGridTestElement extends GridTestElement {
 		jo.setApplication(Constants.GENERIC_APPLICATION_NAME);
 		
 		jo.setCommandline("cat genericTest.txt");
-		jo.addInputFileUrl(GridTestController.GridTestDirectory+File.separator+"genericTest.txt");
+		jo.addInputFileUrl(controller.getGridTestDirectory().getPath()+File.separator+"genericTest.txt");
 		jo.setSubmissionLocation(submissionLocation);
-		jo.addInputFileUrl(GridTestController.GridTestDirectory.toString()+File.separator+"genericTest.txt");
+//		jo.addInputFileUrl(controller.getGridTestDirectory().getPath()+File.separator+"genericTest.txt");
 		
 		return jo;
 		
@@ -75,6 +75,11 @@ public class GenericGridTestElement extends GridTestElement {
 	@Override
 	protected String getApplicationSupported() {
 		return "generic";
+	}
+
+	@Override
+	protected boolean useMDS() {
+		return false;
 	}
 
 }

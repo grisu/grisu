@@ -12,9 +12,9 @@ import au.org.arcs.mds.Constants;
 
 public class UnderworldGridTestElement extends GridTestElement {
 
-	public UnderworldGridTestElement(ServiceInterface si, String version,
+	public UnderworldGridTestElement(GridTestController c, ServiceInterface si, String version,
 			String submissionLocation) throws MdsInformationException {
-		super(si, version, submissionLocation);
+		super(c, si, version, submissionLocation);
 	}
 
 	
@@ -74,7 +74,7 @@ public class UnderworldGridTestElement extends GridTestElement {
 		jo.setWalltimeInSeconds(60);
 		
 		jo.setCommandline("Underworld ./RayleighTaylorBenchmark_1.2.0.xml");
-		jo.addInputFileUrl(GridTestController.GridTestDirectory+File.separator+"RayleighTaylorBenchmark_1.2.0.xml");
+		jo.addInputFileUrl(controller.getGridTestDirectory().getPath()+File.separator+"RayleighTaylorBenchmark_1.2.0.xml");
 		
 		return jo;
 		
@@ -83,6 +83,12 @@ public class UnderworldGridTestElement extends GridTestElement {
 	@Override
 	protected String getApplicationSupported() {
 		return "Underworld";
+	}
+
+
+	@Override
+	protected boolean useMDS() {
+		return true;
 	}
 
 }

@@ -11,6 +11,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.log4j.Logger;
+import org.vpac.grisu.settings.Environment;
 import org.vpac.security.light.Init;
 
 public final class LocalTemplatesHelper {
@@ -21,15 +22,10 @@ public final class LocalTemplatesHelper {
 	static final Logger myLogger = Logger.getLogger(LocalTemplatesHelper.class
 			.getName());
 
-	public static final File GRISU_DIRECTORY = new File(System
-			.getProperty("user.home"), ".grisu");
-	public static final File TEMPLATES_AVAILABLE_DIR = new File(
-			GRISU_DIRECTORY, "templates_available");
+
 	public static final File GLITE_DIRECTORY = new File(System
 			.getProperty("user.home"), ".glite");
 
-	public static final File GLOBUS_CONFIG_DIR = new File(GRISU_DIRECTORY,
-			"globus");
 
 	/**
 	 * Creates the grisu directory if it doesn't exist yet.
@@ -39,22 +35,22 @@ public final class LocalTemplatesHelper {
 	 */
 	public static void createGrisuDirectories() throws Exception {
 
-		if (!GRISU_DIRECTORY.exists()) {
-			if (!GRISU_DIRECTORY.mkdirs()) {
-				myLogger.error("Could not create vomses directory.");
+		if (!Environment.getGrisuDirectory().exists()) {
+			if (!Environment.getGrisuDirectory().mkdirs()) {
+				myLogger.error("Could not create grisu directory.");
 				throw new Exception(
 						"Could not create grisu directory. Please set permissions for "
-								+ GRISU_DIRECTORY.toString()
+								+ Environment.getGrisuDirectory().toString()
 								+ " to be created.");
 			}
 		}
 
-		if (!TEMPLATES_AVAILABLE_DIR.exists()) {
-			if (!TEMPLATES_AVAILABLE_DIR.mkdirs()) {
+		if (!new File(Environment.getAvailableTemplatesDirectory()).exists()) {
+			if (!new File(Environment.getAvailableTemplatesDirectory()).mkdirs()) {
 				myLogger.error("Could not create available_vomses directory.");
 				throw new Exception(
 						"Could not create templates_available directory. Please set permissions for "
-								+ TEMPLATES_AVAILABLE_DIR.toString()
+								+ Environment.getAvailableTemplatesDirectory()
 								+ " to be created.");
 			}
 		}
@@ -69,12 +65,17 @@ public final class LocalTemplatesHelper {
 	 */
 	public static void copyTemplatesAndMaybeGlobusFolder() throws Exception {
 
-		if (!TEMPLATES_AVAILABLE_DIR.exists() || !GRISU_DIRECTORY.exists()) {
+		if (!new File(Environment.getAvailableTemplatesDirectory()).exists() || !Environment.getGrisuDirectory().exists()) {
 			createGrisuDirectories();
 		}
 
-		if (TEMPLATES_AVAILABLE_DIR.list().length == 0) {
+		File templatesDir = new File(Environment.getTemplateDirectory());
+		
+		if ( ! templatesDir.exists() || templatesDir.list().length == 0) {
 
+			if ( !templatesDir.mkdirs() ) {
+				myLogger.error("Could not create Templates directory...");
+			}
 			myLogger
 					.debug("Filling templates_available folder with a set of base templates...");
 			final int BUFFER_SIZE = 8192;
@@ -96,7 +97,7 @@ public final class LocalTemplatesHelper {
 					if (!entry.isDirectory()) {
 
 						myLogger.debug("Template name: " + entry.getName());
-						File vomses_file = new File(TEMPLATES_AVAILABLE_DIR,
+						File vomses_file = new File(Environment.getAvailableTemplatesDirectory(),
 								entry.getName());
 
 						// Write the file to the file system and overwrite
@@ -119,15 +120,19 @@ public final class LocalTemplatesHelper {
 					.debug("Templates folder already contains files. Not copying any into it...");
 		}
 
+		copyGlobusFolder();
+
+	}
+	
+	public static void copyGlobusFolder() {
 		// copy globus floder if not already there
 		try {
-			if (!GLOBUS_CONFIG_DIR.exists()) {
-				unzipFileToDir("/globus.zip", GRISU_DIRECTORY);
+			if (!new File(Environment.getGlobusHome()).exists()) {
+				unzipFileToDir("/globus.zip", Environment.getGrisuDirectory());
 			}
 		} catch (Exception e) {
 			myLogger.error(e);
 		}
-
 	}
 
 	private static void unzipFileToDir(final String zipFileResourcePath,
@@ -148,7 +153,7 @@ public final class LocalTemplatesHelper {
 
 			while ((entry = zipstream.getNextEntry()) != null) {
 				myLogger.debug("Entry: " + entry.getName());
-				String filePath = GRISU_DIRECTORY.getAbsolutePath()
+				String filePath = Environment.getGrisuDirectory().getAbsolutePath()
 						+ File.separator + entry.getName();
 
 				if (!entry.isDirectory()) {

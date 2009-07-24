@@ -7,8 +7,8 @@ import org.vpac.grisu.frontend.model.job.JobObject;
 
 public class UnixCommandsGridTestElement extends GridTestElement {
 
-	public UnixCommandsGridTestElement(ServiceInterface si, String version, String submissionLocation) throws MdsInformationException {
-		super(si, version, submissionLocation);
+	public UnixCommandsGridTestElement(GridTestController c,ServiceInterface si, String version, String submissionLocation) throws MdsInformationException {
+		super(c, si, version, submissionLocation);
 	}
 	
 	@Override
@@ -40,6 +40,11 @@ public class UnixCommandsGridTestElement extends GridTestElement {
 		}
 		
 		
+	}
+
+	@Override
+	protected boolean useMDS() {
+		return true;
 	}
 
 }

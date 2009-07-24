@@ -40,7 +40,7 @@ public final class ServiceTemplateManagement {
 		try {
 			jsdl_template = SeveralXMLHelpers.fromString(FileHelpers
 					.readFromFile(new File(
-							Environment.AVAILABLE_TEMPLATES_DIRECTORY
+							Environment.getAvailableTemplatesDirectory()
 									+ File.separator + name + ".xml")));
 		} catch (Exception e) {
 			myLogger
@@ -60,7 +60,7 @@ public final class ServiceTemplateManagement {
 	 */
 	public static String[] getAllAvailableApplications() {
 
-		File[] templates = new File(Environment.AVAILABLE_TEMPLATES_DIRECTORY)
+		File[] templates = new File(Environment.getAvailableTemplatesDirectory())
 				.listFiles();
 		Set<String> allAvalableTemplates = new TreeSet<String>();
 

@@ -243,7 +243,7 @@ public class JobSubmissionObjectImpl {
 	private boolean force_single = false;
 	private boolean force_mpi = false;
 	private long memory_in_bytes = 0;;
-	private int walltime_in_seconds = 0;
+	private int walltime_in_seconds = 300;
 	private Set<String> inputFileUrls = new HashSet<String>();
 	private Set<String> modules = new HashSet<String>();
 	private String submissionLocation;
