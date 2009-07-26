@@ -30,7 +30,7 @@ public class XmlRpcOutputModule implements OutputModule {
 		
 	}
 	
-	public void writeTestElement(GridTestElement element) {
+	public void writeTestElement(GridTestElementFactory element) {
 
 		String username = "grisu_test_client";
 		String password = "kaiJaej9ieSh"; 

@@ -12,7 +12,7 @@ import org.vpac.grisu.model.GrisuRegistry;
 import au.org.arcs.mds.Constants;
 import au.org.arcs.mds.JobSubmissionProperty;
 
-public class GenericGridTestElement extends GridTestElement {
+public class GenericGridTestElement extends GridTestElementFactory {
 	
 	public GenericGridTestElement(GridTestController c, ServiceInterface si, String version, String subLoc) throws MdsInformationException {
 		super(c, si, version, subLoc);

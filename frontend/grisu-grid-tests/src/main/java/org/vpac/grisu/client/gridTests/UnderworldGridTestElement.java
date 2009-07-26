@@ -10,7 +10,7 @@ import org.vpac.grisu.frontend.model.job.JobObject;
 
 import au.org.arcs.mds.Constants;
 
-public class UnderworldGridTestElement extends GridTestElement {
+public class UnderworldGridTestElement extends GridTestElementFactory {
 
 	public UnderworldGridTestElement(GridTestController c, ServiceInterface si, String version,
 			String submissionLocation) throws MdsInformationException {

@@ -5,7 +5,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.frontend.model.job.JobObject;
 
-public class UnixCommandsGridTestElement extends GridTestElement {
+public class UnixCommandsGridTestElement extends GridTestElementFactory {
 
 	public UnixCommandsGridTestElement(GridTestController c,ServiceInterface si, String version, String submissionLocation) throws MdsInformationException {
 		super(c, si, version, submissionLocation);

@@ -12,7 +12,7 @@ import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 
-public class PbsGridTestElement extends GridTestElement {
+public class PbsGridTestElement extends GridTestElementFactory {
 	
 	private File jsdlFile;
 	private File pbsFile;

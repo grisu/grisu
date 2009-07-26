@@ -13,7 +13,7 @@ import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.model.job.JobStatusChangeListener;
 
-abstract class GridTestElement implements JobStatusChangeListener, Comparable<GridTestElement> {
+abstract class GridTestElementFactory implements JobStatusChangeListener, Comparable<GridTestElementFactory> {
 
 	protected final ServiceInterface serviceInterface;
 	protected final String application;
@@ -57,7 +57,7 @@ abstract class GridTestElement implements JobStatusChangeListener, Comparable<Gr
 	private final Date startDate;
 	private Date endDate = null;
 
-	protected GridTestElement(GridTestController controller, ServiceInterface si, String version,
+	protected GridTestElementFactory(GridTestController controller, ServiceInterface si, String version,
 			String submissionLocation) throws MdsInformationException {
 		this.controller = controller;
 		startDate = new Date();
@@ -85,9 +85,9 @@ abstract class GridTestElement implements JobStatusChangeListener, Comparable<Gr
 		this.jobObject.removeJobStatusChangeListener(jscl);
 	}
 	
-	public static GridTestElement createGridTestElement(GridTestController controller, String application, ServiceInterface serviceInterface, String version, String subLoc) throws MdsInformationException {
+	public static GridTestElementFactory createGridTestElement(GridTestController controller, String application, ServiceInterface serviceInterface, String version, String subLoc) throws MdsInformationException {
 		
-		GridTestElement gte = null;
+		GridTestElementFactory gte = null;
 		if ( "java".equals(application.toLowerCase()) ) {
 			gte = new JavaGridTestElement(controller, serviceInterface, version, subLoc);
 		} else if ( "unixcommands".equals(application.toLowerCase()) ) {
@@ -369,7 +369,7 @@ abstract class GridTestElement implements JobStatusChangeListener, Comparable<Gr
 		return "Application: "+getApplicationSupported()+",  version: "+version+", submissionlocation: "+submissionLocation;
 	}
 	
-	public int compareTo(GridTestElement o) {
+	public int compareTo(GridTestElementFactory o) {
 		int testname = this.getTestName().compareTo(o.getTestName());
 		if ( testname != 0 ) {
 			return testname;

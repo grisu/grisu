@@ -11,7 +11,7 @@ public class LogFileOutputModule implements OutputModule {
 		this.output = output;
 	}
 	
-	public void writeTestElement(GridTestElement element) {
+	public void writeTestElement(GridTestElementFactory element) {
 
 		StringBuffer outputString = new StringBuffer();
 

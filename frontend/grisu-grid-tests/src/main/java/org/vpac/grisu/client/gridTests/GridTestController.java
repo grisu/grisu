@@ -43,13 +43,13 @@ public class GridTestController {
 	private Map<String, Thread> createAndSubmitJobThreads = new HashMap<String, Thread>();
 	private Map<String, Thread> checkAndKillJobThreads = new HashMap<String, Thread>();
 
-	private Map<String, GridTestElement> gridTestElements = new HashMap<String, GridTestElement>();
-	private List<GridTestElement> finishedElements = new LinkedList<GridTestElement>();
+	private Map<String, GridTestElementFactory> gridTestElements = new HashMap<String, GridTestElementFactory>();
+	private List<GridTestElementFactory> finishedElements = new LinkedList<GridTestElementFactory>();
 
 	private ServiceInterface serviceInterface;
 	private final GrisuRegistry registry;
 
-	private String[] applications;
+	private String[] gridtestNames;
 	private final String fqan;
 	private String output = null;
 	private String[] excludes;
@@ -122,7 +122,7 @@ public class GridTestController {
 		if (options.getOutput() != null && options.getOutput().length() > 0) {
 			output = options.getOutput();
 		}
-		applications = options.getApplications();
+		gridtestNames = options.getGridTestNames();
 
 		excludes = options.getExcludes();
 		includes = options.getIncludes();
@@ -201,7 +201,7 @@ public class GridTestController {
 
 		createAndSubmitAllJobs();
 
-		for (GridTestElement gte : gridTestElements.values()) {
+		for (GridTestElementFactory gte : gridTestElements.values()) {
 			//
 			// if (gte.failed()) {
 			// finishedElements.add(gte);
@@ -228,7 +228,7 @@ public class GridTestController {
 
 			if (new Date().after(timeoutDate)) {
 
-				for (GridTestElement gte : gridTestElements.values()) {
+				for (GridTestElementFactory gte : gridTestElements.values()) {
 					System.out.println("Interrupting not finished job: "
 							+ gte.getApplicationSupported() + ", "
 							+ gte.version + " at "
@@ -240,9 +240,9 @@ public class GridTestController {
 				}
 			}
 
-			List<GridTestElement> batchOfRecentlyFinishedJobs = new LinkedList<GridTestElement>();
+			List<GridTestElementFactory> batchOfRecentlyFinishedJobs = new LinkedList<GridTestElementFactory>();
 
-			for (GridTestElement gte : gridTestElements.values()) {
+			for (GridTestElementFactory gte : gridTestElements.values()) {
 
 				if (gte.getJobStatus(true) >= JobConstants.FINISHED_EITHER_WAY
 						|| gte.getJobStatus(false) <= JobConstants.READY_TO_SUBMIT
@@ -251,7 +251,7 @@ public class GridTestController {
 				}
 			}
 
-			for (GridTestElement gte : batchOfRecentlyFinishedJobs) {
+			for (GridTestElementFactory gte : batchOfRecentlyFinishedJobs) {
 				gridTestElements.remove(gte.getTestId());
 				// gte.finishTest();
 				finishedElements.add(gte);
@@ -264,7 +264,7 @@ public class GridTestController {
 			}
 
 			StringBuffer remainingSubLocs = new StringBuffer();
-			for (GridTestElement gte : gridTestElements.values()) {
+			for (GridTestElementFactory gte : gridTestElements.values()) {
 				remainingSubLocs.append("\t" + gte.getApplicationSupported()
 						+ ", " + gte.version + " at "
 						+ gte.getSubmissionLocation() + "\n");
@@ -295,7 +295,7 @@ public class GridTestController {
 
 	}
 
-	public synchronized void writeGridTestElementLog(GridTestElement gte) {
+	public synchronized void writeGridTestElementLog(GridTestElementFactory gte) {
 
 		for (OutputModule module : outputModules) {
 			System.out.println("Writing output using: "
@@ -337,9 +337,12 @@ public class GridTestController {
 
 	public void createJobsJobThreads() throws MdsInformationException {
 
-		for (String application : applications) {
+		
+		
+		for (String gridtestName : gridtestNames) {
 
-			if (!GridTestElement.useMds(application)) {
+
+			if (!GridTestElementFactory.useMds(gridtestName)) {
 
 				String[] subLocs = registry.getResourceInformation()
 						.getAllAvailableSubmissionLocations(fqan);
@@ -367,8 +370,8 @@ public class GridTestController {
 						continue;
 					}
 
-					GridTestElement gte = GridTestElement
-							.createGridTestElement(this, application,
+					GridTestElementFactory gte = GridTestElementFactory
+							.createGridTestElement(this, gridtestName,
 									serviceInterface,
 									Constants.NO_VERSION_INDICATOR_STRING,
 									subLoc);
@@ -382,7 +385,7 @@ public class GridTestController {
 
 			} else {
 				ApplicationInformation appInfo = registry
-						.getApplicationInformation(application);
+						.getApplicationInformation(gridtestName);
 				Set<String> allVersions = appInfo
 						.getAllAvailableVersionsForFqan(fqan);
 
@@ -415,7 +418,7 @@ public class GridTestController {
 							continue;
 						}
 
-						GridTestElement gte = GridTestElement
+						GridTestElementFactory gte = GridTestElementFactory
 								.createGridTestElement(this, appInfo
 										.getApplicationName(),
 										serviceInterface, version, subLoc);
@@ -433,7 +436,7 @@ public class GridTestController {
 		}
 	}
 
-	private Thread createCreateAndSubmitJobThread(final GridTestElement gte,
+	private Thread createCreateAndSubmitJobThread(final GridTestElementFactory gte,
 			final String fqan) {
 
 		Thread thread = new Thread() {
@@ -461,7 +464,7 @@ public class GridTestController {
 
 	}
 
-	private Thread createCheckAndKillJobThread(final GridTestElement gte) {
+	private Thread createCheckAndKillJobThread(final GridTestElementFactory gte) {
 
 		Thread thread = new Thread() {
 			public void run() {

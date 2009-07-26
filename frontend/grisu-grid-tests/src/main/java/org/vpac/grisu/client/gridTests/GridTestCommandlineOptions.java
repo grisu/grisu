@@ -16,7 +16,7 @@ public class GridTestCommandlineOptions {
 	private Options options = null;
 	
 	private String fqan;
-	private String[] applications;
+	private String[] gridTestNames = new String[]{};
 	private String[] excludes = new String[]{};
 	private String[] includes = new String[]{};
 	private String myproxyUsername;
@@ -28,8 +28,8 @@ public class GridTestCommandlineOptions {
 		return fqan;
 	}
 
-	public String[] getApplications() {
-		return applications;
+	public String[] getGridTestNames() {
+		return gridTestNames;
 	}
 
 	public String getMyproxyUsername() {
@@ -94,12 +94,8 @@ public class GridTestCommandlineOptions {
 			System.exit(1);
 		}
 		
-		if (!line.hasOption("applications")) {
-			System.err.println("No applications specified.");
-			formatter.printHelp("grisu-grid-test", this.options);
-			System.exit(1);
-		} else {
-			applications = line.getOptionValue("applications").split(",");
+		if (line.hasOption("applications")) {
+			gridTestNames = line.getOptionValue("applications").split(",");
 		}
 		
 		if (!line.hasOption("vo")) {
@@ -165,7 +161,7 @@ public class GridTestCommandlineOptions {
 		Options options = null;
 		
 		// common options
-		Option apps = createOptionWithArg("applications", "a", "all applications to test, seperated using commas");				    
+		Option apps = createOptionWithArg("tests", "t", "the names of the tests to run. If not specified, all tests will run.");				    
 		Option myProxyUsername = createOptionWithArg("username", "u", "the myproxy username to use");
 		Option fqan = createOptionWithArg("vo", "v", "the vo to use");
 		Option outputFile = createOptionWithArg("output", "o", "the output file");
