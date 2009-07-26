@@ -82,4 +82,17 @@ public class GenericGridTestElement extends GridTestElement {
 		return false;
 	}
 
+	@Override
+	public String getTestDescription() {
+		return "A simple cat job (including the staging of a small input file. The resulting stdout file is downloaded and checked for a non-zero filesize.";
+	}
+
+	@Override
+	public String getTestName() {
+		return "Simple_Cat_Test";
+	}
+
+	
+
+
 }

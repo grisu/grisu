@@ -3,7 +3,6 @@ package org.vpac.grisu.client.gridTests;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
@@ -31,13 +30,11 @@ public class XmlRpcOutputModule implements OutputModule {
 		
 	}
 	
-	public void outputResult(List<GridTestElement> elements) {
+	public void writeTestElement(GridTestElement element) {
 
 		String username = "grisu_test_client";
 		String password = "kaiJaej9ieSh"; 
 		
-		for ( GridTestElement element : elements ) {
-
 			String application = element.getApplicationSupported();
 			String version = element.getVersion();
 			Date startDate = element.getStartDate();
@@ -71,11 +68,18 @@ public class XmlRpcOutputModule implements OutputModule {
 			}
 			
 			
-		}
 	    
 	    
 
 		
+	}
+
+	public void writeTestsSetup(String setup) {
+		// not necessary
+	}
+
+	public void writeTestsStatistic(String statistic) {
+		// not necessary
 	}
 
 }

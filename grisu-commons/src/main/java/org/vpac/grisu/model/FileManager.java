@@ -116,7 +116,7 @@ public class FileManager {
 				if (!cacheTargetParentFile.exists()) {
 					throw new FileTransferException(url, cacheTargetFile
 							.toString(),
-							"Could not create parent folder for cache file.");
+							"Could not create parent folder for cache file.", null);
 				}
 			}
 		}
@@ -126,7 +126,7 @@ public class FileManager {
 			lastModified = serviceInterface.lastModified(url);
 		} catch (Exception e) {
 			throw new FileTransferException(url, cacheTargetFile.toString(),
-					"Could not get last modified time of source file.");
+					"Could not get last modified time of source file.", null);
 		}
 
 		if (cacheTargetFile.exists()) {
@@ -182,12 +182,12 @@ public class FileManager {
 			throws FileTransferException {
 
 		if (!file.exists()) {
-			throw new FileTransferException("File does not exist: "
+			throw new FileTransferException(file.toString(), targetDirectory, "File does not exist: "
 					+ file.toString(), null);
 		}
 
 		if (!file.canRead()) {
-			throw new FileTransferException("Can't read file: "
+			throw new FileTransferException(file.toString(), targetDirectory, "Can't read file: "
 					+ file.toString(), null);
 		}
 
@@ -198,21 +198,18 @@ public class FileManager {
 					boolean success = serviceInterface.mkdir(targetDirectory);
 
 					if (!success) {
-						throw new FileTransferException(file.toString(),
-								targetDirectory,
-								"Could not create target directory.");
+						throw new FileTransferException(file.toURL().toString(), targetDirectory,
+								"Could not create target directory.", null);
 					}
 				} catch (Exception e) {
-					throw new FileTransferException(file.toString(),
-							targetDirectory,
+					throw new FileTransferException(file.toURL().toString(), targetDirectory,
 							"Could not create target directory.", e);
 				}
 			} else {
 				try {
 					if (!serviceInterface.isFolder(targetDirectory)) {
-						throw new FileTransferException(file.toString(),
-								targetDirectory,
-								"Can't upload file. Target is a file.");
+						throw new FileTransferException(file.toURL().toString(), targetDirectory,
+								"Can't upload file. Target is a file.", null);
 					}
 				} catch (Exception e2) {
 					myLogger
@@ -223,13 +220,11 @@ public class FileManager {
 								.mkdir(targetDirectory);
 
 						if (!success) {
-							throw new FileTransferException(file.toString(),
-									targetDirectory,
-									"Could not create target directory.");
+							throw new FileTransferException(file.toURL().toString(), targetDirectory,
+									"Could not create target directory.", null);
 						}
 					} catch (Exception e) {
-						throw new FileTransferException(file.toString(),
-								targetDirectory,
+						throw new FileTransferException(file.toURL().toString(), targetDirectory,
 								"Could not create target directory.", e);
 					}
 				}
@@ -245,7 +240,7 @@ public class FileManager {
 
 		if (file.isDirectory()) {
 			throw new FileTransferException(file.toString(), targetDirectory,
-					"Transfer of folders not supported yet.");
+					"Transfer of folders not supported yet.", null);
 		} else {
 			DataSource source = new FileDataSource(file);
 			DataHandler handler = new DataHandler(source);

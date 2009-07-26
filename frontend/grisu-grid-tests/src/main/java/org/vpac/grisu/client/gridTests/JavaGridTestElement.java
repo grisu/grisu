@@ -19,7 +19,7 @@ public class JavaGridTestElement extends GridTestElement {
 		jo.setApplicationVersion(this.version);
 		
 		jo.setCommandline("java -version");
-		jo.addInputFileUrl("/home/markus/test.txt");
+//		jo.addInputFileUrl("/home/markus/test.txt");
 		
 		return jo;
 	}
@@ -46,5 +46,18 @@ public class JavaGridTestElement extends GridTestElement {
 	protected boolean useMDS() {
 		return true;
 	}
+
+	@Override
+	public String getTestDescription() {
+		return "Simple test that checks whether the module on the resource is loaded correctly. It runs the java" +
+		" command to print out the java version and checks whether the job ran with error code 0";
+		
+	}
+
+	@Override
+	public String getTestName() {
+		return "Java_Version_Test";
+	}
+
 
 }

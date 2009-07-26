@@ -2,7 +2,6 @@ package org.vpac.grisu.client.gridTests;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.util.List;
 
 public class LogFileOutputModule implements OutputModule {
 
@@ -12,23 +11,49 @@ public class LogFileOutputModule implements OutputModule {
 		this.output = output;
 	}
 	
-	public void outputResult(List<GridTestElement> elements) {
+	public void writeTestElement(GridTestElement element) {
 
 		StringBuffer outputString = new StringBuffer();
 
 		
-		for (GridTestElement gte : elements) {
-			
-			outputString.append(OutputModuleHelpers.createStringReport(gte));
-
-		}
+		outputString.append(OutputModuleHelpers.createStringReport(element));
 
 		try {
 
 			String uFileName = output;
-			FileWriter fileWriter = new FileWriter(uFileName);
+			FileWriter fileWriter = new FileWriter(uFileName, true);
 			BufferedWriter buffWriter = new BufferedWriter(fileWriter);
 			buffWriter.write(outputString.toString());
+
+			buffWriter.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void writeTestsSetup(String setup) {
+		try {
+
+			String uFileName = output;
+			FileWriter fileWriter = new FileWriter(uFileName, true);
+			BufferedWriter buffWriter = new BufferedWriter(fileWriter);
+			buffWriter.write(setup);
+
+			buffWriter.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void writeTestsStatistic(String statistic) {
+		try {
+
+			String uFileName = output;
+			FileWriter fileWriter = new FileWriter(uFileName, true);
+			BufferedWriter buffWriter = new BufferedWriter(fileWriter);
+			buffWriter.write(statistic);
 
 			buffWriter.close();
 

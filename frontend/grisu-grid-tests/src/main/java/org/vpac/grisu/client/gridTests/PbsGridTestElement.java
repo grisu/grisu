@@ -2,7 +2,6 @@ package org.vpac.grisu.client.gridTests;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.vpac.grisu.control.ServiceInterface;
@@ -10,15 +9,13 @@ import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.frontend.model.job.JobObject;
-import org.vpac.grisu.utils.SeveralStringHelpers;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
-
-import com.Ostermiller.util.StringHelper;
 
 public class PbsGridTestElement extends GridTestElement {
 	
 	private File jsdlFile;
+	private File pbsFile;
 	
 	public PbsGridTestElement(GridTestController c, ServiceInterface si, String version,
 			String submissionLocation) throws MdsInformationException {
@@ -28,7 +25,6 @@ public class PbsGridTestElement extends GridTestElement {
 	@Override
 	protected boolean checkJobSuccess() {
 
-		
 		StringBuffer output = new StringBuffer();
 		int out = runPerlScript(this.jobObject.getStdOutFile(), output);
 		
@@ -40,17 +36,18 @@ public class PbsGridTestElement extends GridTestElement {
 			return false;
 		}
 
-		
 	}
 
 	@Override
 	protected JobObject createJobObject() throws MdsInformationException {
 
+		pbsFile = new File(controller.getGridTestDirectory(), "pbs.result");
+		
 		jsdlFile = new File(controller.getGridTestDirectory(), "pbsTest.jsdl");
 		Document jsdl = SeveralXMLHelpers.loadXMLFile(jsdlFile);
 		
 		JobObject job = new JobObject(serviceInterface, jsdl);
-		job.addInputFileUrl(jsdlFile.getPath());
+		job.addInputFileUrl(pbsFile.getPath());
 		
 		return job;
 		
@@ -168,6 +165,18 @@ public class PbsGridTestElement extends GridTestElement {
 //			System.out.println("Failed!");
 //		}
 		
+	}
+
+	@Override
+	public String getTestDescription() {
+		return "Runs a simple cat job and loads the ARCS-jsdl extension to print out the pbs.pm generated pbs script"+
+		" into the jobdirectoy. The test downloads this script and uses a perl script to compare it with the initial "+
+		"jsdl script to check whether basic job properties are translated correctly from jsdl to rsl to pbs.";
+	}
+
+	@Override
+	public String getTestName() {
+		return "PBS_Script_Test";
 	}
 	
 }

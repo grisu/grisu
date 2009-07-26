@@ -13,7 +13,7 @@ import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.model.job.JobStatusChangeListener;
 
-abstract class GridTestElement implements JobStatusChangeListener {
+abstract class GridTestElement implements JobStatusChangeListener, Comparable<GridTestElement> {
 
 	protected final ServiceInterface serviceInterface;
 	protected final String application;
@@ -29,6 +29,7 @@ abstract class GridTestElement implements JobStatusChangeListener {
 	private GridTestStage currentStage;
 	
 	private boolean failed = false;
+	private boolean interrupted = false;
 	
 	private List<Exception> exceptions = new LinkedList<Exception>();
 	
@@ -49,6 +50,10 @@ abstract class GridTestElement implements JobStatusChangeListener {
 		return endDate;
 	}
 
+	public boolean wasInterrupted() {
+		return interrupted;
+	}
+	
 	private final Date startDate;
 	private Date endDate = null;
 
@@ -70,11 +75,6 @@ abstract class GridTestElement implements JobStatusChangeListener {
 		addMessage("JobObject created.");
 		this.jobObject.addJobStatusChangeListener(this);
 		currentStage.setStatus(GridTestStageStatus.FINISHED_SUCCESS);
-	}
-	
-	@Override
-	public String toString() {
-		return this.getId()+": "+this.getSubmissionLocation();
 	}
 	
 	public void addJobStatusChangeListener(JobStatusChangeListener jscl) {
@@ -119,7 +119,7 @@ abstract class GridTestElement implements JobStatusChangeListener {
 		
 	}
 	
-	public String getId() {
+	public String getTestId() {
 		return this.id;
 	}
 	
@@ -166,7 +166,15 @@ abstract class GridTestElement implements JobStatusChangeListener {
 	}
 
 	public void finishTest() {
+		
 		beginNewStage(END_STAGE);
+		
+		// housekeeping 
+		try {
+			jobObject.kill(true);
+		} catch (Exception e) {
+			// doesn't matter
+		}
 	}
 	
 	public List<GridTestStage> getTestStages() {
@@ -189,6 +197,8 @@ abstract class GridTestElement implements JobStatusChangeListener {
 	}
 
 	public void submitJob() {
+		
+		if ( ! failed ) {
 
 		if ( beginNewStage("Submitting job to backend...") ) {
 
@@ -204,40 +214,41 @@ abstract class GridTestElement implements JobStatusChangeListener {
 		} else {
 			currentStage.setStatus(GridTestStageStatus.NOT_EXECUTED);
 		}
+		}
 	}
 
-	public void waitForJobToFinish() {
-
-		if ( beginNewStage("Waiting for job to finish...") ) {
-
-		while (this.jobObject.getStatus(true) < JobConstants.FINISHED_EITHER_WAY) {
-			if (this.jobObject.getStatus(false) == JobConstants.NO_SUCH_JOB) {
-				addMessage("Could not find job anymore. Probably a problem with the container...");
-				currentStage.setStatus(GridTestStageStatus.FINISHED_ERROR);
-				failed = true;
-				return;
-			}
-
-			try {
-				addMessage("Waiting 2 seconds before new check. Current Status: "
-						+ JobConstants.translateStatus(this.jobObject
-								.getStatus(false)));
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				currentStage.setPossibleException(e);
-				currentStage.setStatus(GridTestStageStatus.FINISHED_ERROR);
-				failed = true;
-				return;
-			}
-		}
-
-		addMessage("Job finished one way or another.");
-		currentStage.setStatus(GridTestStageStatus.FINISHED_SUCCESS);
-		} else {
-			currentStage.setStatus(GridTestStageStatus.NOT_EXECUTED);
-		}
-
-	}
+//	public void waitForJobToFinish() {
+//
+//		if ( beginNewStage("Waiting for job to finish...") ) {
+//
+//		while (this.jobObject.getStatus(true) < JobConstants.FINISHED_EITHER_WAY) {
+//			if (this.jobObject.getStatus(false) == JobConstants.NO_SUCH_JOB) {
+//				addMessage("Could not find job anymore. Probably a problem with the container...");
+//				currentStage.setStatus(GridTestStageStatus.FINISHED_ERROR);
+//				failed = true;
+//				return;
+//			}
+//
+//			try {
+//				addMessage("Waiting 2 seconds before new check. Current Status: "
+//						+ JobConstants.translateStatus(this.jobObject
+//								.getStatus(false)));
+//				Thread.sleep(2000);
+//			} catch (InterruptedException e) {
+//				currentStage.setPossibleException(e);
+//				currentStage.setStatus(GridTestStageStatus.FINISHED_ERROR);
+//				failed = true;
+//				return;
+//			}
+//		}
+//
+//		addMessage("Job finished one way or another.");
+//		currentStage.setStatus(GridTestStageStatus.FINISHED_SUCCESS);
+//		} else {
+//			currentStage.setStatus(GridTestStageStatus.NOT_EXECUTED);
+//		}
+//
+//	}
 	
 	protected void setPossibleExceptionForCurrentStage(Exception e) {
 		if ( currentStage != null ) {
@@ -246,10 +257,19 @@ abstract class GridTestElement implements JobStatusChangeListener {
 	}
 
 	public void checkWhetherJobDidWhatItWasSupposedToDo() {
+		
+		if ( ! failed ) {
 
 		if ( beginNewStage("Checking job status and output...") ) {
 
-		boolean success = checkJobSuccess();
+			boolean success = true;
+			try {
+				success = checkJobSuccess();
+			} catch (Exception e) {
+				System.out.println("Error checking job "+toString()+": "+e.getLocalizedMessage());
+				this.setPossibleExceptionForCurrentStage(e);
+				success = false;
+			}
 
 		if (success) {
 			currentStage.setStatus(GridTestStageStatus.FINISHED_SUCCESS);
@@ -260,10 +280,14 @@ abstract class GridTestElement implements JobStatusChangeListener {
 		} else {
 			currentStage.setStatus(GridTestStageStatus.NOT_EXECUTED);
 		}
+		
+		}
 
 	}
 
 	public void killAndClean() {
+		
+		if ( ! failed ) {
 
 		// execute that anyway
 		beginNewStage("Killing and cleaning job...");
@@ -277,6 +301,7 @@ abstract class GridTestElement implements JobStatusChangeListener {
 		} 
 
 		currentStage.setStatus(GridTestStageStatus.FINISHED_SUCCESS);
+		}
 		
 	}
 
@@ -328,7 +353,39 @@ abstract class GridTestElement implements JobStatusChangeListener {
 	public String getVersion() {
 		return this.version;
 	}
+	
+	public void interruptRunningJob() {
+		try {
+			jobObject.kill(false);
+		} catch (Exception e) {
+			// doesn't matter
+		}
+		this.interrupted = true;
+		this.failed = true;
+	}
 
+	@Override
+	public String toString() {
+		return "Application: "+getApplicationSupported()+",  version: "+version+", submissionlocation: "+submissionLocation;
+	}
+	
+	public int compareTo(GridTestElement o) {
+		int testname = this.getTestName().compareTo(o.getTestName());
+		if ( testname != 0 ) {
+			return testname;
+		} 
+		int application = this.getApplicationSupported().compareTo(o.getApplicationSupported());
+		if ( application != 0 ) {
+			return application;
+		}
+		int version = this.getVersion().compareTo(o.getVersion());
+		if ( version != 0 ) {
+			return version;
+		}
+		int subLoc = this.getSubmissionLocation().compareTo(o.getSubmissionLocation());
+		return subLoc;
+	}
+	
 	abstract protected JobObject createJobObject() throws MdsInformationException;
 
 	abstract protected String getApplicationSupported();
@@ -336,5 +393,9 @@ abstract class GridTestElement implements JobStatusChangeListener {
 	abstract protected boolean checkJobSuccess();
 	
 	abstract protected boolean useMDS();
+	
+	abstract public String getTestName();
+	
+	abstract public String getTestDescription();
 
 }

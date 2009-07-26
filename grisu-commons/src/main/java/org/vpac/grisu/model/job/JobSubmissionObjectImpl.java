@@ -48,104 +48,104 @@ public class JobSubmissionObjectImpl {
 		this.id = id;
 	}
 
-	public final String getJobname() {
+	public String getJobname() {
 		return jobname;
 	}
 
-	public final void setJobname(final String jobname) {
+	public void setJobname(final String jobname) {
 		this.jobname = jobname;
 	}
 
-	public final String getApplication() {
+	public String getApplication() {
 		return application;
 	}
 
-	public final void setApplication(final String app) {
+	public void setApplication(final String app) {
 		this.application = app;
 	}
 
-	public final String getApplicationVersion() {
+	public String getApplicationVersion() {
 		if (StringUtils.isBlank(applicationVersion)) {
 			return Constants.NO_VERSION_INDICATOR_STRING;
 		}
 		return applicationVersion;
 	}
 
-	public final void setApplicationVersion(final String appVersion) {
+	public void setApplicationVersion(final String appVersion) {
 		this.applicationVersion = appVersion;
 	}
 
-	public final String getEmail_address() {
+	public String getEmail_address() {
 		return email_address;
 	}
 
-	public final void setEmail_address(final String email_address) {
+	public void setEmail_address(final String email_address) {
 		this.email_address = email_address;
 	}
 
-	public final boolean isEmail_on_job_start() {
+	public boolean isEmail_on_job_start() {
 		return email_on_job_start;
 	}
 
-	public final void setEmail_on_job_start(final boolean email_on_job_start) {
+	public void setEmail_on_job_start(final boolean email_on_job_start) {
 		this.email_on_job_start = email_on_job_start;
 	}
 
-	public final boolean isEmail_on_job_finish() {
+	public boolean isEmail_on_job_finish() {
 		return email_on_job_finish;
 	}
 
-	public final void setEmail_on_job_finish(final boolean email_on_job_finish) {
+	public void setEmail_on_job_finish(final boolean email_on_job_finish) {
 		this.email_on_job_finish = email_on_job_finish;
 	}
 
-	public final int getCpus() {
+	public int getCpus() {
 		return cpus;
 	}
 
-	public final void setCpus(final int cpus) {
+	public void setCpus(final int cpus) {
 		this.cpus = cpus;
 	}
 
-	public final boolean isForce_single() {
+	public boolean isForce_single() {
 		return force_single;
 	}
 
-	public final void setForce_single(final boolean force_single) {
+	public void setForce_single(final boolean force_single) {
 		this.force_single = force_single;
 		this.force_mpi = !force_mpi;
 	}
 
-	public final boolean isForce_mpi() {
+	public boolean isForce_mpi() {
 		return force_mpi;
 	}
 
-	public final void setForce_mpi(final boolean force_mpi) {
+	public void setForce_mpi(final boolean force_mpi) {
 		this.force_mpi = force_mpi;
 		this.force_single = !force_mpi;
 	}
 
-	public final long getMemory() {
+	public long getMemory() {
 		return memory_in_bytes;
 	}
 
-	public final void setMemory(final long memory) {
+	public void setMemory(final long memory) {
 		this.memory_in_bytes = memory;
 	}
 
-	public final int getWalltimeInSeconds() {
+	public int getWalltimeInSeconds() {
 		return walltime_in_seconds;
 	}
 
-	public final void setWalltimeInSeconds(final int walltime) {
+	public void setWalltimeInSeconds(final int walltime) {
 		this.walltime_in_seconds = walltime;
 	}
 
-	public final String[] getInputFileUrls() {
+	public String[] getInputFileUrls() {
 		return inputFileUrls.toArray(new String[] {});
 	}
 
-	public final void setInputFileUrls(final String[] inputFileUrls) {
+	public void setInputFileUrls(final String[] inputFileUrls) {
 		if (inputFileUrls != null) {
 			this.inputFileUrls = new HashSet<String>(Arrays
 					.asList(inputFileUrls));
@@ -154,16 +154,16 @@ public class JobSubmissionObjectImpl {
 		}
 	}
 
-	public final void addInputFileUrl(final String url) {
+	public void addInputFileUrl(final String url) {
 		this.inputFileUrls.add(url);
 	}
 
-	public final void addModule(final String module) {
+	public void addModule(final String module) {
 		this.modules.add(module);
 	}
 
 	@Transient
-	public final String getInputFileUrlsAsString() {
+	public String getInputFileUrlsAsString() {
 		if (inputFileUrls != null && inputFileUrls.size() != 0) {
 			return StringUtils.join(inputFileUrls, ",");
 		} else {
@@ -171,11 +171,11 @@ public class JobSubmissionObjectImpl {
 		}
 	}
 
-	public final String[] getModules() {
+	public String[] getModules() {
 		return modules.toArray(new String[] {});
 	}
 
-	public final void setModules(final String[] modules) {
+	public void setModules(final String[] modules) {
 		if (modules != null) {
 			this.modules = new HashSet<String>(Arrays.asList(modules));
 		} else {
@@ -184,7 +184,7 @@ public class JobSubmissionObjectImpl {
 	}
 
 	@Transient
-	public final String getModulesAsString() {
+	public String getModulesAsString() {
 		if (modules != null && modules.size() != 0) {
 			return StringUtils.join(modules, ",");
 		} else {
@@ -192,44 +192,44 @@ public class JobSubmissionObjectImpl {
 		}
 	}
 
-	public final String getSubmissionLocation() {
+	public String getSubmissionLocation() {
 		return submissionLocation;
 	}
 
-	public final void setSubmissionLocation(final String submissionLocation) {
+	public void setSubmissionLocation(final String submissionLocation) {
 		this.submissionLocation = submissionLocation;
 	}
 
 	@Column(nullable = false)
-	public final String getCommandline() {
+	public String getCommandline() {
 		return commandline;
 	}
 
-	public final void setCommandline(final String commandline) {
+	public void setCommandline(final String commandline) {
 		this.commandline = commandline;
 	}
 
-	public final String getStderr() {
+	public String getStderr() {
 		return stderr;
 	}
 
-	public final void setStderr(final String stderr) {
+	public void setStderr(final String stderr) {
 		this.stderr = stderr;
 	}
 
-	public final String getStdout() {
+	public String getStdout() {
 		return stdout;
 	}
 
-	public final void setStdout(final String stdout) {
+	public void setStdout(final String stdout) {
 		this.stdout = stdout;
 	}
 
-	public final void setStdin(final String stdin) {
+	public void setStdin(final String stdin) {
 		this.stdin = stdin;
 	}
 
-	public final String getStdin() {
+	public String getStdin() {
 		return this.stdin;
 	}
 

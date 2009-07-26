@@ -116,11 +116,11 @@ public class MountPoint implements Comparable<MountPoint> {
 	}
 
 	@Column(nullable = false)
-	public final String getDn() {
+	public String getDn() {
 		return dn;
 	}
 
-	public final void setDn(final String dn) {
+	public void setDn(final String dn) {
 		this.dn = dn;
 	}
 
@@ -129,43 +129,43 @@ public class MountPoint implements Comparable<MountPoint> {
 	 * 
 	 * @return the fqan
 	 */
-	public final String getFqan() {
+	public String getFqan() {
 		return fqan;
 	}
 
-	public final void setFqan(final String fqan) {
+	public void setFqan(final String fqan) {
 		this.fqan = fqan;
 	}
 
 	@Column(nullable = false)
-	public final String getAlias() {
+	public String getAlias() {
 		return alias;
 	}
 
-	public final void setAlias(final String mountpoint) {
+	public void setAlias(final String mountpoint) {
 		this.alias = mountpoint;
 	}
 
 	@Column(nullable = false)
-	public final String getRootUrl() {
+	public String getRootUrl() {
 		return rootUrl;
 	}
 
-	public final void setRootUrl(final String rootUrl) {
+	public void setRootUrl(final String rootUrl) {
 		this.rootUrl = rootUrl;
 	}
 
-	public final void setUrl(final String url) {
+	public void setUrl(final String url) {
 		this.rootUrl = url;
 	}
 
 	@Id
 	@GeneratedValue
-	public final Long getMountPointId() {
+	public Long getMountPointId() {
 		return mountPointId;
 	}
 
-	public final void setMountPointId(final Long id) {
+	public void setMountPointId(final Long id) {
 		this.mountPointId = id;
 	}
 
@@ -179,7 +179,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	// else return false;
 	// }
 
-	public final boolean equals(final Object otherMountPoint) {
+	public boolean equals(final Object otherMountPoint) {
 
 		if (otherMountPoint instanceof MountPoint) {
 			MountPoint other = (MountPoint) otherMountPoint;
@@ -211,7 +211,7 @@ public class MountPoint implements Comparable<MountPoint> {
 
 	}
 
-	public final int hashCode() {
+	public int hashCode() {
 		// return dn.hashCode() + mountpoint.hashCode();
 		return alias.hashCode();
 	}
@@ -226,7 +226,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	 *         mounted filesystem or is not a "mounted" file (starts with
 	 *         something like /home.sapac.ngadmin)
 	 */
-	public final String replaceMountpointWithAbsoluteUrl(final String file) {
+	public String replaceMountpointWithAbsoluteUrl(final String file) {
 
 		if (file.startsWith(getAlias())) {
 			return file.replaceFirst(getAlias(), getRootUrl());
@@ -243,7 +243,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	 *            (gsiftp://ngdata.vpac.org/home/sano4/markus/test.txt)
 	 * @return /ngdata.vpac.org/test.txt
 	 */
-	public final String replaceAbsoluteRootUrlWithMountPoint(final String file) {
+	public String replaceAbsoluteRootUrlWithMountPoint(final String file) {
 
 		if (file.startsWith(getRootUrl())) {
 			return file.replaceFirst(getRootUrl(), getAlias());
@@ -261,7 +261,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	 *            the file
 	 * @return true - if it contains it; false - if not.
 	 */
-	public final boolean isResponsibleForUserSpaceFile(final String file) {
+	public boolean isResponsibleForUserSpaceFile(final String file) {
 
 		if (file.startsWith("gsiftp")) {
 			if (file.startsWith(getRootUrl())) {
@@ -286,7 +286,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	 *            the file
 	 * @return true - if it contains it; false - if not.
 	 */
-	public final boolean isResponsibleForAbsoluteFile(final String file) {
+	public boolean isResponsibleForAbsoluteFile(final String file) {
 
 		if (file.startsWith(getRootUrl())) {
 			return true;
@@ -306,7 +306,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	 * 
 	 * @see java.lang.Object#toString()
 	 */
-	public final String toString() {
+	public String toString() {
 		return getAlias();
 	}
 
@@ -319,7 +319,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	 * @return the relative path or null if the file is not within the
 	 *         filesystem of the mountpoint
 	 */
-	public final String getRelativePathToRoot(final String url) {
+	public String getRelativePathToRoot(final String url) {
 
 		if (url.startsWith("/")) {
 			if (!url.startsWith(getAlias())) {
@@ -352,25 +352,25 @@ public class MountPoint implements Comparable<MountPoint> {
 	// return getRootUrl().compareTo(((MountPoint)o).getRootUrl());
 	// }
 
-	public final int compareTo(final MountPoint mp) {
+	public int compareTo(final MountPoint mp) {
 		return getRootUrl().compareTo(mp.getRootUrl());
 	}
 
 	@Column(nullable = false)
-	public final boolean isAutomaticallyMounted() {
+	public boolean isAutomaticallyMounted() {
 		return automaticallyMounted;
 	}
 
-	public final void setAutomaticallyMounted(final boolean am) {
+	public void setAutomaticallyMounted(final boolean am) {
 		this.automaticallyMounted = am;
 	}
 
 	@Column(nullable = false)
-	public final boolean isDisabled() {
+	public boolean isDisabled() {
 		return disabled;
 	}
 
-	public final void setDisabled(final boolean disabled) {
+	public void setDisabled(final boolean disabled) {
 		this.disabled = disabled;
 	}
 

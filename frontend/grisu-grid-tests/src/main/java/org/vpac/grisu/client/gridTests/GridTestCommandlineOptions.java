@@ -21,6 +21,7 @@ public class GridTestCommandlineOptions {
 	private String myproxyUsername;
 	private String url;
 	private String output;
+	private int timeout = 240;
 	
 	public String getFqan() {
 		return fqan;
@@ -44,6 +45,10 @@ public class GridTestCommandlineOptions {
 	
 	public String[] getFilters() {
 		return filters;
+	}
+	
+	public int getTimeout() {
+		return timeout;
 	}
 
 
@@ -112,6 +117,16 @@ public class GridTestCommandlineOptions {
 			filters = line.getOptionValue("filter").split(","); 
 		}
 		
+		if (line.hasOption("timeout")) {
+			try {
+				timeout = Integer.parseInt(line.getOptionValue("timeout"));
+			} catch (Exception e) {
+				System.err.println("Timeout not an integer.");
+				formatter.printHelp("grisu-grid-test", this.options);
+				System.exit(1);
+			}
+		}
+		
 	}
 	
 
@@ -147,6 +162,7 @@ public class GridTestCommandlineOptions {
 		Option fqan = createOptionWithArg("vo", "v", "the vo to use");
 		Option outputFile = createOptionWithArg("output", "o", "the output file");
 		Option filter = createOptionWithArg("filter", "f", "(comma-seperated) filters to exclude certain queues");
+		Option timeoutInMinutes = createOptionWithArg("timeout", "t", "timeout in minutes after which all jobs that aren't finished are getting killed (default: 240)");
 		
 		options = new Options();
 		options.addOption(apps);
@@ -154,6 +170,7 @@ public class GridTestCommandlineOptions {
 		options.addOption(fqan);
 		options.addOption(outputFile);
 		options.addOption(filter);
+		options.addOption(timeoutInMinutes);
 		
 		return options;
 	}

@@ -18,7 +18,7 @@ public class UnixCommandsGridTestElement extends GridTestElement {
 		jo.setApplication(this.application);
 		jo.setApplicationVersion(this.version);
 		
-		jo.setCommandline("echo hello");
+		jo.setCommandline("echo hello world");
 //		jo.addInputFileUrl("/home/markus/test.txt");
 		
 		return jo;
@@ -26,7 +26,7 @@ public class UnixCommandsGridTestElement extends GridTestElement {
 
 	@Override
 	protected String getApplicationSupported() {
-		return "UnixCommands";
+		return "unixcommands";
 	}
 	
 	protected boolean checkJobSuccess() {
@@ -45,6 +45,16 @@ public class UnixCommandsGridTestElement extends GridTestElement {
 	@Override
 	protected boolean useMDS() {
 		return true;
+	}
+
+	@Override
+	public String getTestDescription() {
+		return "A simple \"echo hello world\" is run. The tests checks whether the job status equals \"Done\" after the job finished.";
+	}
+
+	@Override
+	public String getTestName() {
+		return "Simple_Echo_Test";
 	}
 
 }

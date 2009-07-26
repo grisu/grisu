@@ -144,7 +144,7 @@ public class User {
 	 * @return the dn
 	 */
 	@Column(nullable = false)
-	public final String getDn() {
+	public String getDn() {
 		return dn;
 	}
 
@@ -163,7 +163,7 @@ public class User {
 	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
-	public final boolean equals(final Object other) {
+	public boolean equals(final Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -185,7 +185,7 @@ public class User {
 	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
-	public final int hashCode() {
+	public int hashCode() {
 		return 29 * dn.hashCode();
 	}
 
@@ -223,7 +223,7 @@ public class User {
 	 * @param amps
 	 *            the mountpoints to add (for this session)
 	 */
-	public final void setAutoMountedMountPoints(final Set<MountPoint> amps) {
+	public void setAutoMountedMountPoints(final Set<MountPoint> amps) {
 		allMountPoints = null;
 		this.mountPointsAutoMounted = amps;
 	}
@@ -234,7 +234,7 @@ public class User {
 	 * @return all mountpoints for this session
 	 */
 	@Transient
-	public final Set<MountPoint> getAllMountPoints() {
+	public Set<MountPoint> getAllMountPoints() {
 		if (allMountPoints == null) {
 			allMountPoints = new TreeSet<MountPoint>();
 			// first the automounted ones because the manually ones are more
@@ -280,7 +280,7 @@ public class User {
 	 * @throws FileSystemException
 	 *             if the filesystem could not be mounted
 	 */
-	public final MountPoint mountFileSystem(String uri, final String mountPointName,
+	public MountPoint mountFileSystem(String uri, final String mountPointName,
 			final ProxyCredential cred, final boolean useHomeDirectory)
 			throws RemoteFileSystemException {
 
@@ -407,13 +407,13 @@ public class User {
 	 * @throws RemoteFileSystemException
 	 * @throws VomsException
 	 */
-	public final MountPoint mountFileSystem(final String root, final String name,
+	public MountPoint mountFileSystem(final String root, final String name,
 			final boolean useHomeDirectory) throws RemoteFileSystemException {
 
 		return mountFileSystem(root, name, getCred(), useHomeDirectory);
 	}
 
-	public final MountPoint mountFileSystem(final String root, final String name, final String fqan,
+	public MountPoint mountFileSystem(final String root, final String name, final String fqan,
 			final boolean useHomeDirectory) throws RemoteFileSystemException {
 
 		if (fqan == null) {
@@ -439,7 +439,7 @@ public class User {
 	 *             if the filesystem could not be unmounted or something else
 	 *             went wrong
 	 */
-	public final void unmountFileSystem(final String mountPointName) {
+	public void unmountFileSystem(final String mountPointName) {
 
 		for (MountPoint mp : mountPoints) {
 			if (mp.getAlias().equals(mountPointName)) {
@@ -497,7 +497,7 @@ public class User {
 	 *             if the (possible) required voms credential could not be
 	 *             created
 	 */
-	public final FileObject aquireFile(final String file) throws RemoteFileSystemException {
+	public FileObject aquireFile(final String file) throws RemoteFileSystemException {
 		return aquireFile(file, getCred());
 	}
 
@@ -518,7 +518,7 @@ public class User {
 	 *             if the (possible) required voms credential could not be
 	 *             created
 	 */
-	public final FileObject aquireFile(final String file, final ProxyCredential plainCred)
+	public FileObject aquireFile(final String file, final ProxyCredential plainCred)
 			throws RemoteFileSystemException {
 
 		String file_to_aquire = null;
@@ -646,7 +646,7 @@ public class User {
 	//		
 	// }
 	@Transient
-	public final MountPoint getFirstResponsibleMountPointForHostAndFqan(
+	public MountPoint getFirstResponsibleMountPointForHostAndFqan(
 			final String host_or_url, final String fqan) {
 
 		myLogger.debug("Looking for mountpoint for site: " + host_or_url
@@ -694,7 +694,7 @@ public class User {
 	 * @return the mountpoint or null if the file is not on any of the
 	 *         mountpoints
 	 */
-	public final MountPoint getResponsibleMountpointForUserSpaceFile(final String file) {
+	public MountPoint getResponsibleMountpointForUserSpaceFile(final String file) {
 
 		for (MountPoint mountpoint : getAllMountPoints()) {
 			if (mountpoint.isResponsibleForUserSpaceFile(file)) {
@@ -712,7 +712,7 @@ public class User {
 	 *            the file
 	 * @return the mountpoint of null if no filesystem contains this file
 	 */
-	public final MountPoint getResponsibleMountpointForAbsoluteFile(final String file) {
+	public MountPoint getResponsibleMountpointForAbsoluteFile(final String file) {
 
 		String new_file = null;
 		myLogger.debug("Finding mountpoint for file: " + file);
@@ -734,7 +734,7 @@ public class User {
 	 *         (gsiftp://ngdata.vpac.org/home/san04/markus/test.txt) or null if
 	 *         the file is not within the user's filespace
 	 */
-	public final String returnAbsoluteUrl(final String file) {
+	public String returnAbsoluteUrl(final String file) {
 		MountPoint mp = getResponsibleMountpointForUserSpaceFile(file);
 		if (mp == null) {
 			return null;
@@ -753,7 +753,7 @@ public class User {
 	 *            (gsiftp://ngdata.vpac.org/home/san04/markus/test.txt)
 	 * @return the "user-space" file url (/ngdata.vpac.org/test.txt)
 	 */
-	public final String returnUserSpaceUrl(final String file) {
+	public String returnUserSpaceUrl(final String file) {
 		MountPoint mp = getResponsibleMountpointForAbsoluteFile(file);
 		return mp.replaceAbsoluteRootUrlWithMountPoint(file);
 	}
@@ -764,7 +764,7 @@ public class User {
 	 * @return the default credential or null if there is none
 	 */
 	@Transient
-	public final ProxyCredential getCred() {
+	public ProxyCredential getCred() {
 		return cred;
 	}
 
@@ -775,12 +775,12 @@ public class User {
 	 * @param cred
 	 *            the credential to use as default
 	 */
-	public final void setCred(final ProxyCredential cred) {
+	public void setCred(final ProxyCredential cred) {
 
 		this.cred = cred;
 	}
 
-	public final void cleanCache() {
+	public void cleanCache() {
 		// TODO disconnect filesystems somehow?
 		cachedFilesystemConnections = new HashMap<MountPoint, FileSystem>();
 		// // does this affect existing filesystem connection
@@ -795,7 +795,7 @@ public class User {
 	 * 
 	 * @param vo
 	 */
-	public final void addFqan(final String fqan, final String vo) {
+	public void addFqan(final String fqan, final String vo) {
 		fqans.put(fqan, vo);
 	}
 
@@ -804,7 +804,7 @@ public class User {
 	 * 
 	 * @param vo
 	 */
-	public final void removeFqan(final String fqan) {
+	public void removeFqan(final String fqan) {
 		fqans.remove(fqan);
 	}
 
@@ -814,7 +814,7 @@ public class User {
 	 * @return all fqans as map with the fqan as key and the vo as value
 	 */
 	@Transient
-	public final Map<String, String> getFqans() {
+	public Map<String, String> getFqans() {
 		if (fqans == null || !fqansFilled) {
 			fillFqans();
 
@@ -840,7 +840,7 @@ public class User {
 	// list.add(value);
 	// }
 
-	public final void removeProperty(final String key) {
+	public void removeProperty(final String key) {
 		userProperties.remove(key);
 	}
 
@@ -851,7 +851,7 @@ public class User {
 	 * @return the users' properties
 	 */
 	@CollectionOfElements
-	public final Map<String, String> getUserProperties() {
+	public Map<String, String> getUserProperties() {
 		return userProperties;
 	}
 
@@ -860,11 +860,11 @@ public class User {
 	}
 
 	@CollectionOfElements
-	public final Map<String, JobSubmissionObjectImpl> getJobTemplates() {
+	public Map<String, JobSubmissionObjectImpl> getJobTemplates() {
 		return jobTemplates;
 	}
 
-	public final void setJobTemplates(
+	public void setJobTemplates(
 			final Map<String, JobSubmissionObjectImpl> jobTemplates) {
 		this.jobTemplates = jobTemplates;
 	}

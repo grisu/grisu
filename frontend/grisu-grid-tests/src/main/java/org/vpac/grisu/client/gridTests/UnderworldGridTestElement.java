@@ -91,4 +91,16 @@ public class UnderworldGridTestElement extends GridTestElement {
 		return true;
 	}
 
+
+	@Override
+	public String getTestDescription() {
+		return "A simple underworld job is run and the output directory is checked whether it contains the file \"FrequentOutput.dat\"";
+	}
+
+
+	@Override
+	public String getTestName() {
+		return "Simple_Underworld_Test";
+	}
+
 }

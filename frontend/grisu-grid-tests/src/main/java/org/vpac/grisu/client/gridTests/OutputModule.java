@@ -1,9 +1,12 @@
 package org.vpac.grisu.client.gridTests;
 
-import java.util.List;
 
 public interface OutputModule {
 	
-	public void outputResult(List<GridTestElement> elements);
+	public void writeTestsSetup(String setup);
+	
+	public void writeTestElement(GridTestElement element);
 
+	public void writeTestsStatistic(String statistic);
+	
 }

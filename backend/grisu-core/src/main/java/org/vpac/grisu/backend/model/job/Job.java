@@ -138,7 +138,7 @@ public class Job {
 	 * @return the dn
 	 */
 	@Column(nullable = false)
-	public final String getDn() {
+	public String getDn() {
 		return dn;
 	}
 
@@ -149,7 +149,7 @@ public class Job {
 	 * @param dn
 	 *            the dn
 	 */
-	protected final void setDn(final String dn) {
+	protected void setDn(final String dn) {
 		this.dn = dn;
 	}
 
@@ -158,7 +158,7 @@ public class Job {
 	 * 
 	 * @return the fqan
 	 */
-	public final String getFqan() {
+	public String getFqan() {
 		return fqan;
 	}
 
@@ -168,7 +168,7 @@ public class Job {
 	 * 
 	 * @param fqan
 	 */
-	public final void setFqan(final String fqan) {
+	public void setFqan(final String fqan) {
 		this.fqan = fqan;
 	}
 
@@ -178,7 +178,7 @@ public class Job {
 	 * @param credential
 	 *            the credential
 	 */
-	public final void setCredential(final ProxyCredential credential) {
+	public void setCredential(final ProxyCredential credential) {
 		this.credential = credential;
 	}
 
@@ -189,7 +189,7 @@ public class Job {
 	 * @return the credential
 	 */
 	@Transient
-	public final ProxyCredential getCredential() {
+	public ProxyCredential getCredential() {
 		return this.credential;
 	}
 
@@ -198,7 +198,7 @@ public class Job {
 	 * 
 	 * @return the hostname
 	 */
-	public final String getSubmissionHost() {
+	public String getSubmissionHost() {
 		return submissionHost;
 	}
 
@@ -208,7 +208,7 @@ public class Job {
 	 * @param host
 	 *            the hostname (like ng2.vpac.org)
 	 */
-	public final void setSubmissionHost(final String host) {
+	public void setSubmissionHost(final String host) {
 		this.submissionHost = host;
 	}
 
@@ -218,7 +218,7 @@ public class Job {
 	 * @return the jsdl document
 	 */
 	@Transient
-	public final Document getJobDescription() {
+	public Document getJobDescription() {
 		// TODO return jobDescription;
 		return this.jobDescription;
 	}
@@ -230,7 +230,7 @@ public class Job {
 	 * @param jobDescription
 	 *            the job description as jsdl xml document
 	 */
-	public final void setJobDescription(final Document jobDescription) {
+	public void setJobDescription(final Document jobDescription) {
 		this.jobDescription = jobDescription;
 	}
 
@@ -240,7 +240,7 @@ public class Job {
 	 * 
 	 * @return the jobhandle or null if the job was not submitted
 	 */
-	public final String getJobhandle() {
+	public String getJobhandle() {
 		return jobhandle;
 	}
 
@@ -250,7 +250,7 @@ public class Job {
 	 * @param jobhandle
 	 *            the (JobSubmitter-specific) job handle
 	 */
-	public final void setJobhandle(final String jobhandle) {
+	public void setJobhandle(final String jobhandle) {
 		this.jobhandle = jobhandle;
 	}
 
@@ -260,7 +260,7 @@ public class Job {
 	 * @return the jobname
 	 */
 	@Column(nullable = false)
-	public final String getJobname() {
+	public String getJobname() {
 		return jobname;
 	}
 
@@ -283,7 +283,7 @@ public class Job {
 	 * @return the status of the job
 	 */
 	@Column(nullable = false)
-	public final int getStatus() {
+	public int getStatus() {
 		return status;
 	}
 
@@ -293,7 +293,7 @@ public class Job {
 	 * 
 	 * @param status
 	 */
-	public final void setStatus(final int status) {
+	public void setStatus(final int status) {
 		this.status = status;
 	}
 
@@ -315,7 +315,7 @@ public class Job {
 	 * @return the job description or null if the job was not submitted yet
 	 */
 	@Column(length = 2550)
-	public final String getSubmittedJobDescription() {
+	public String getSubmittedJobDescription() {
 		return submittedJobDescription;
 	}
 
@@ -326,7 +326,7 @@ public class Job {
 	 * @param desc
 	 *            the job description in the JobSubmitter-specific format
 	 */
-	public final void setSubmittedJobDescription(final String desc) {
+	public void setSubmittedJobDescription(final String desc) {
 		this.submittedJobDescription = desc;
 	}
 
@@ -336,7 +336,7 @@ public class Job {
 	 * 
 	 * @return the type of the submitter (like "GT4")
 	 */
-	public final String getSubmissionType() {
+	public String getSubmissionType() {
 		return submissionType;
 	}
 
@@ -347,7 +347,7 @@ public class Job {
 	 * @param submissionType
 	 *            the type of the job submitter
 	 */
-	public final void setSubmissionType(final String submissionType) {
+	public void setSubmissionType(final String submissionType) {
 		this.submissionType = submissionType;
 	}
 
@@ -392,7 +392,7 @@ public class Job {
 
 	}
 
-	public final boolean equals(final Object other) {
+	public boolean equals(final Object other) {
 		if (!(other instanceof Job)) {
 			return false;
 		}
@@ -407,7 +407,7 @@ public class Job {
 		}
 	}
 
-	public final int hashCode() {
+	public int hashCode() {
 		return this.dn.hashCode() + this.jobname.hashCode();
 	}
 
@@ -466,7 +466,7 @@ public class Job {
 
 	@CollectionOfElements(fetch = FetchType.EAGER)
 	@Column(length = 3000)
-	public final Map<String, String> getJobProperties() {
+	public Map<String, String> getJobProperties() {
 		return jobProperties;
 	}
 
@@ -474,16 +474,16 @@ public class Job {
 		this.jobProperties = jobProperties;
 	}
 
-	public final void addJobProperty(final String key, final String value) {
+	public void addJobProperty(final String key, final String value) {
 		this.jobProperties.put(key, value);
 	}
 
-	public final void addJobProperties(final Map<String, String> properties) {
+	public void addJobProperties(final Map<String, String> properties) {
 		this.jobProperties.putAll(properties);
 	}
 
 	@Transient
-	public final String getJobProperty(final String key) {
+	public String getJobProperty(final String key) {
 		return this.jobProperties.get(key);
 	}
 
