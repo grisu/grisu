@@ -17,7 +17,8 @@ public class GridTestCommandlineOptions {
 	
 	private String fqan;
 	private String[] applications;
-	private String[] filters = new String[]{};
+	private String[] excludes = new String[]{};
+	private String[] includes = new String[]{};
 	private String myproxyUsername;
 	private String url;
 	private String output;
@@ -43,8 +44,12 @@ public class GridTestCommandlineOptions {
 		return output;
 	}
 	
-	public String[] getFilters() {
-		return filters;
+	public String[] getExcludes() {
+		return excludes;
+	}
+	
+	public String[] getIncludes() {
+		return includes;
 	}
 	
 	public int getTimeout() {
@@ -113,8 +118,11 @@ public class GridTestCommandlineOptions {
 			output = line.getOptionValue("output");
 		}
 		
-		if (line.hasOption("filter")) {
-			filters = line.getOptionValue("filter").split(","); 
+		if (line.hasOption("exclude")) {
+			excludes = line.getOptionValue("exclude").split(","); 
+		}
+		if (line.hasOption("include")) {
+			includes = line.getOptionValue("include").split(","); 
 		}
 		
 		if (line.hasOption("timeout")) {
@@ -161,7 +169,8 @@ public class GridTestCommandlineOptions {
 		Option myProxyUsername = createOptionWithArg("username", "u", "the myproxy username to use");
 		Option fqan = createOptionWithArg("vo", "v", "the vo to use");
 		Option outputFile = createOptionWithArg("output", "o", "the output file");
-		Option filter = createOptionWithArg("filter", "f", "(comma-seperated) filters to exclude certain queues");
+		Option exclude = createOptionWithArg("exclude", "e", "(comma-seperated) filters to exclude certain hostnames/queues. Only used if the \"include\" option wasn't specified");
+		Option include = createOptionWithArg("include", "i", "(comma-seperated) filters to only include certain hostnames");
 		Option timeoutInMinutes = createOptionWithArg("timeout", "t", "timeout in minutes after which all jobs that aren't finished are getting killed (default: 240)");
 		
 		options = new Options();
@@ -169,7 +178,8 @@ public class GridTestCommandlineOptions {
 		options.addOption(myProxyUsername);
 		options.addOption(fqan);
 		options.addOption(outputFile);
-		options.addOption(filter);
+		options.addOption(include);
+		options.addOption(exclude);
 		options.addOption(timeoutInMinutes);
 		
 		return options;
