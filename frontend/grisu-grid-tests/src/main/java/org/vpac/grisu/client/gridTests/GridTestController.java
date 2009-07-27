@@ -39,8 +39,8 @@ public class GridTestController {
 
 	private final File grid_tests_directory;
 
-	ExecutorService submitJobExecutor = Executors.newFixedThreadPool(5);
-	ExecutorService processJobExecutor = Executors.newFixedThreadPool(5);
+	private final ExecutorService submitJobExecutor;
+	private final ExecutorService processJobExecutor;
 
 	private Map<String, Thread> createAndSubmitJobThreads = new HashMap<String, Thread>();
 	private Map<String, Thread> checkAndKillJobThreads = new HashMap<String, Thread>();
@@ -86,6 +86,10 @@ public class GridTestController {
 
 		GridTestCommandlineOptions options = new GridTestCommandlineOptions(
 				args);
+		
+		int threads = options.getSimultaneousThreads();
+		submitJobExecutor = Executors.newFixedThreadPool(threads);
+		processJobExecutor = Executors.newFixedThreadPool(threads);
 		
 		if (options.getMyproxyUsername() != null
 				&& options.getMyproxyUsername().length() != 0) {

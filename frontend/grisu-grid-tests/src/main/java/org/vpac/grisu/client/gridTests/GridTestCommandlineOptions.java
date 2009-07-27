@@ -24,9 +24,14 @@ public class GridTestCommandlineOptions {
 	private String output;
 	private int timeout = 240;
 	private boolean list = false;
+	private int threads = 5;
 	
 	public String[] getFqans() {
 		return fqans;
+	}
+	
+	public int getSimultaneousThreads() {
+		return threads;
 	}
 
 	public String[] getGridTestNames() {
@@ -137,6 +142,15 @@ public class GridTestCommandlineOptions {
 				System.exit(1);
 			}
 		}
+		if (line.hasOption("simultaneousThreads")) {
+			try {
+				threads = Integer.parseInt(line.getOptionValue("simultaneousThreads"));
+			} catch (Exception e) {
+				System.err.println("SimultaneousThreads value is not an integer.");
+				formatter.printHelp("grisu-grid-test", this.options);
+				System.exit(1);
+			}
+		}
 		
 	}
 	
@@ -176,6 +190,7 @@ public class GridTestCommandlineOptions {
 		Option include = createOptionWithArg("include", "i", "(comma-seperated) filters to only include certain hostnames");
 		Option timeoutInMinutes = createOptionWithArg("cancel", "c", "timeout in minutes after which all jobs that aren't finished are getting killed (default: 240)");
 		Option list = createOption("list", "l", "list all available tests");
+		Option threads = createOptionWithArg("simultaneousThreads", "s", "how many jobs to support at once. Default is 5 (which is recommended)");
 		
 		options = new Options();
 		options.addOption(apps);
@@ -186,6 +201,7 @@ public class GridTestCommandlineOptions {
 		options.addOption(exclude);
 		options.addOption(timeoutInMinutes);
 		options.addOption(list);
+		options.addOption(threads);
 		
 		return options;
 	}
