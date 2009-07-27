@@ -1,8 +1,10 @@
-package org.vpac.grisu.client.gridTests;
+package org.vpac.grisu.client.gridTests.testElements;
 
 import java.io.File;
 import java.util.Arrays;
 
+import org.vpac.grisu.client.gridTests.GridTestController;
+import org.vpac.grisu.client.gridTests.GridTestInfo;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
@@ -10,11 +12,11 @@ import org.vpac.grisu.frontend.model.job.JobObject;
 
 import au.org.arcs.mds.Constants;
 
-public class UnderworldGridTestElement extends GridTestElementFactory {
+public class UnderworldGridTestElement extends GridTestElement {
 
-	public UnderworldGridTestElement(GridTestController c, ServiceInterface si, String version,
+	public UnderworldGridTestElement(GridTestInfo info, String version,
 			String submissionLocation) throws MdsInformationException {
-		super(c, si, version, submissionLocation);
+		super(info, version, submissionLocation);
 	}
 
 	
@@ -69,38 +71,33 @@ public class UnderworldGridTestElement extends GridTestElementFactory {
 
 		JobObject jo = new JobObject(serviceInterface);
 		
-		jo.setApplication(this.application);
+		jo.setApplication(this.getTestInfo().getApplicationName());
 		jo.setApplicationVersion(this.version);
 		jo.setWalltimeInSeconds(60);
 		
 		jo.setCommandline("Underworld ./RayleighTaylorBenchmark_1.2.0.xml");
-		jo.addInputFileUrl(controller.getGridTestDirectory().getPath()+File.separator+"RayleighTaylorBenchmark_1.2.0.xml");
+		jo.addInputFileUrl(getTestInfo().getTestBaseDir().getPath()+File.separator+"RayleighTaylorBenchmark_1.2.0.xml");
 		
 		return jo;
 		
 	}
+	
+	public static String getFixedVersion() {
+		return Constants.NO_VERSION_INDICATOR_STRING;
+		
+	}
 
-	@Override
-	protected String getApplicationSupported() {
+	public static String getApplicationName() {
 		return "Underworld";
 	}
 
-
-	@Override
-	protected boolean useMDS() {
+	public static boolean useMDS() {
 		return true;
 	}
 
 
-	@Override
-	public String getTestDescription() {
+	public static String getTestDescription() {
 		return "A simple underworld job is run and the output directory is checked whether it contains the file \"FrequentOutput.dat\"";
-	}
-
-
-	@Override
-	public String getTestName() {
-		return "Simple_Underworld_Test";
 	}
 
 }

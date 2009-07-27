@@ -2,6 +2,7 @@ package org.vpac.grisu.client.gridTests;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import jline.ConsoleReader;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.backend.hibernate.HibernateSessionFactory;
+import org.vpac.grisu.client.gridTests.testElements.GridTestElement;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
@@ -43,10 +45,14 @@ public class GridTestController {
 	private Map<String, Thread> createAndSubmitJobThreads = new HashMap<String, Thread>();
 	private Map<String, Thread> checkAndKillJobThreads = new HashMap<String, Thread>();
 
-	private Map<String, GridTestElementFactory> gridTestElements = new HashMap<String, GridTestElementFactory>();
-	private List<GridTestElementFactory> finishedElements = new LinkedList<GridTestElementFactory>();
+	private Map<String, GridTestElement> gridTestElements = new HashMap<String, GridTestElement>();
+	private List<GridTestElement> finishedElements = new LinkedList<GridTestElement>();
 
 	private ServiceInterface serviceInterface;
+	public ServiceInterface getServiceInterface() {
+		return serviceInterface;
+	}
+
 	private final GrisuRegistry registry;
 
 	private String[] gridtestNames;
@@ -80,7 +86,7 @@ public class GridTestController {
 
 		GridTestCommandlineOptions options = new GridTestCommandlineOptions(
 				args);
-
+		
 		if (options.getMyproxyUsername() != null
 				&& options.getMyproxyUsername().length() != 0) {
 			try {
@@ -117,12 +123,42 @@ public class GridTestController {
 		}
 
 		registry = GrisuRegistry.getDefault(this.serviceInterface);
+		
+		
+		if ( options.listTests() ) {
+			
+			List<GridTestInfo> externalinfos = GridExternalTestInfoImpl.generateGridTestInfos(this, new String[]{});
+			List<GridTestInfo> internalinfos = GridInternalTestInfoImpl.generateGridTestInfos(this, new String[]{});
+			
+			List<GridTestInfo> infos = new LinkedList<GridTestInfo>();
+			infos.addAll(externalinfos);
+			infos.addAll(internalinfos);
+			
+			System.out.println("Available tests: ");
+			for ( GridTestInfo info : infos ) {
+				System.out.println("Testname: "+info.getTestname());
+				System.out.println("\tApplication: "+info.getApplicationName());
+				System.out.println("\tDescription: "+info.getDescription());
+				System.out.println("\tSubmissionlocations to test:");
+				for ( String version : info.getSubmissionLocationsPerVersion().keySet() ) {
+					System.out.println("\t\t"+version+":");
+					for ( String subLoc : info.getSubmissionLocationsPerVersion().get(version) ) {
+						System.out.println("\t\t\t"+subLoc);
+					}
+				}
+				System.out.println();
+			}
+			
+			System.exit(0);
+		}
+		
+		gridtestNames = options.getGridTestNames();
+		Arrays.sort(gridtestNames);
 
 		fqan = options.getFqan();
 		if (options.getOutput() != null && options.getOutput().length() > 0) {
 			output = options.getOutput();
 		}
-		gridtestNames = options.getGridTestNames();
 
 		excludes = options.getExcludes();
 		includes = options.getIncludes();
@@ -147,6 +183,10 @@ public class GridTestController {
 
 	public File getGridTestDirectory() {
 		return grid_tests_directory;
+	}
+	
+	public String getFqan() {
+		return this.fqan;
 	}
 
 	/**
@@ -201,7 +241,7 @@ public class GridTestController {
 
 		createAndSubmitAllJobs();
 
-		for (GridTestElementFactory gte : gridTestElements.values()) {
+		for (GridTestElement gte : gridTestElements.values()) {
 			//
 			// if (gte.failed()) {
 			// finishedElements.add(gte);
@@ -228,11 +268,9 @@ public class GridTestController {
 
 			if (new Date().after(timeoutDate)) {
 
-				for (GridTestElementFactory gte : gridTestElements.values()) {
+				for (GridTestElement gte : gridTestElements.values()) {
 					System.out.println("Interrupting not finished job: "
-							+ gte.getApplicationSupported() + ", "
-							+ gte.version + " at "
-							+ gte.getSubmissionLocation());
+							+ gte.toString());
 					if (!gte.failed()
 							&& gte.getJobStatus(true) < JobConstants.FINISHED_EITHER_WAY) {
 						gte.interruptRunningJob();
@@ -240,9 +278,9 @@ public class GridTestController {
 				}
 			}
 
-			List<GridTestElementFactory> batchOfRecentlyFinishedJobs = new LinkedList<GridTestElementFactory>();
+			List<GridTestElement> batchOfRecentlyFinishedJobs = new LinkedList<GridTestElement>();
 
-			for (GridTestElementFactory gte : gridTestElements.values()) {
+			for (GridTestElement gte : gridTestElements.values()) {
 
 				if (gte.getJobStatus(true) >= JobConstants.FINISHED_EITHER_WAY
 						|| gte.getJobStatus(false) <= JobConstants.READY_TO_SUBMIT
@@ -251,7 +289,7 @@ public class GridTestController {
 				}
 			}
 
-			for (GridTestElementFactory gte : batchOfRecentlyFinishedJobs) {
+			for (GridTestElement gte : batchOfRecentlyFinishedJobs) {
 				gridTestElements.remove(gte.getTestId());
 				// gte.finishTest();
 				finishedElements.add(gte);
@@ -264,10 +302,8 @@ public class GridTestController {
 			}
 
 			StringBuffer remainingSubLocs = new StringBuffer();
-			for (GridTestElementFactory gte : gridTestElements.values()) {
-				remainingSubLocs.append("\t" + gte.getApplicationSupported()
-						+ ", " + gte.version + " at "
-						+ gte.getSubmissionLocation() + "\n");
+			for (GridTestElement gte : gridTestElements.values()) {
+				remainingSubLocs.append("\t" + gte.toString() + "\n");
 			}
 			System.out.println("\nStill " + gridTestElements.size()
 					+ " jobs not finished:");
@@ -295,7 +331,7 @@ public class GridTestController {
 
 	}
 
-	public synchronized void writeGridTestElementLog(GridTestElementFactory gte) {
+	public synchronized void writeGridTestElementLog(GridTestElement gte) {
 
 		for (OutputModule module : outputModules) {
 			System.out.println("Writing output using: "
@@ -337,106 +373,55 @@ public class GridTestController {
 
 	public void createJobsJobThreads() throws MdsInformationException {
 
+		List<GridTestInfo> externalinfos = GridExternalTestInfoImpl.generateGridTestInfos(this, gridtestNames);
+		List<GridTestInfo> internalinfos = GridInternalTestInfoImpl.generateGridTestInfos(this, gridtestNames);
 		
+		List<GridTestInfo> infos = new LinkedList<GridTestInfo>();
+		infos.addAll(externalinfos);
+		infos.addAll(internalinfos);
 		
-		for (String gridtestName : gridtestNames) {
+		for ( GridTestInfo info : infos ) {
+			
 
-
-			if (!GridTestElementFactory.useMds(gridtestName)) {
-
-				String[] subLocs = registry.getResourceInformation()
-						.getAllAvailableSubmissionLocations(fqan);
-
-				for (String subLoc : subLocs) {
-
-					boolean skipSubLoc = false;
-					if (includes.length == 0) {
-						for (String filter : excludes) {
-							if (subLoc.indexOf(filter) >= 0) {
-								skipSubLoc = true;
-								break;
-							}
-						}
-					} else {
-						for (String filter : includes) {
-							if (subLoc.indexOf(filter) < 0) {
-								skipSubLoc = true;
-								break;
-							}
+			for ( GridTestElement el : info.generateAllGridTestElements() ) {
+				
+				boolean ignoreThisElement = false;
+				if (includes.length == 0) {
+					for (String filter : excludes) {
+						if (el.getSubmissionLocation().indexOf(filter) >= 0) {
+							ignoreThisElement = true;
 						}
 					}
-
-					if (skipSubLoc) {
-						continue;
-					}
-
-					GridTestElementFactory gte = GridTestElementFactory
-							.createGridTestElement(this, gridtestName,
-									serviceInterface,
-									Constants.NO_VERSION_INDICATOR_STRING,
-									subLoc);
-					gridTestElements.put(gte.getTestId(), gte);
-
-					Thread createJobThread = createCreateAndSubmitJobThread(
-							gte, fqan);
-					createAndSubmitJobThreads.put(gte.getTestId(),
-							createJobThread);
-				}
-
-			} else {
-				ApplicationInformation appInfo = registry
-						.getApplicationInformation(gridtestName);
-				Set<String> allVersions = appInfo
-						.getAllAvailableVersionsForFqan(fqan);
-
-				for (String version : allVersions) {
-
-					Set<String> subLocsForVersion = appInfo
-							.getAvailableSubmissionLocationsForVersionAndFqan(
-									version, fqan);
-
-					for (String subLoc : subLocsForVersion) {
-
-						boolean skipSubLoc = false;
-						if (includes.length == 0) {
-							for (String filter : excludes) {
-								if (subLoc.indexOf(filter) >= 0) {
-									skipSubLoc = true;
-									break;
-								}
-							}
-						} else {
-							for (String filter : includes) {
-								if (subLoc.indexOf(filter) < 0) {
-									skipSubLoc = true;
-									break;
-								}
-							}
+				} else {
+					for (String filter : includes) {
+						if (el.getSubmissionLocation().indexOf(filter) < 0) {
+							ignoreThisElement = true;
 						}
-
-						if (skipSubLoc) {
-							continue;
-						}
-
-						GridTestElementFactory gte = GridTestElementFactory
-								.createGridTestElement(this, appInfo
-										.getApplicationName(),
-										serviceInterface, version, subLoc);
-
-						gridTestElements.put(gte.getTestId(), gte);
-
-						Thread createJobThread = createCreateAndSubmitJobThread(
-								gte, fqan);
-						createAndSubmitJobThreads.put(gte.getTestId(),
-								createJobThread);
-
 					}
 				}
+				
+
+				
+				if ( ignoreThisElement ) {
+					continue;
+				}
+				
+				System.out.println("Adding grid test element: "+el.toString());
+				
+				gridTestElements.put(el.getTestId(), el);
+
+				Thread createJobThread = createCreateAndSubmitJobThread(
+						el, fqan);
+				createAndSubmitJobThreads.put(el.getTestId(),
+						createJobThread);
+				
 			}
+			
 		}
+		
 	}
 
-	private Thread createCreateAndSubmitJobThread(final GridTestElementFactory gte,
+	private Thread createCreateAndSubmitJobThread(final GridTestElement gte,
 			final String fqan) {
 
 		Thread thread = new Thread() {
@@ -464,7 +449,7 @@ public class GridTestController {
 
 	}
 
-	private Thread createCheckAndKillJobThread(final GridTestElementFactory gte) {
+	private Thread createCheckAndKillJobThread(final GridTestElement gte) {
 
 		Thread thread = new Thread() {
 			public void run() {

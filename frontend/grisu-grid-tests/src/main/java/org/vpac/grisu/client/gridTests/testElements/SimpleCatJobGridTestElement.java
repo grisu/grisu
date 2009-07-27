@@ -1,7 +1,9 @@
-package org.vpac.grisu.client.gridTests;
+package org.vpac.grisu.client.gridTests.testElements;
 
 import java.io.File;
 
+import org.vpac.grisu.client.gridTests.GridTestController;
+import org.vpac.grisu.client.gridTests.GridTestInfo;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
@@ -12,10 +14,10 @@ import org.vpac.grisu.model.GrisuRegistry;
 import au.org.arcs.mds.Constants;
 import au.org.arcs.mds.JobSubmissionProperty;
 
-public class GenericGridTestElement extends GridTestElementFactory {
+public class SimpleCatJobGridTestElement extends GridTestElement {
 	
-	public GenericGridTestElement(GridTestController c, ServiceInterface si, String version, String subLoc) throws MdsInformationException {
-		super(c, si, version, subLoc);
+	public SimpleCatJobGridTestElement(GridTestInfo info, String version, String subLoc) throws MdsInformationException {
+		super(info, version, subLoc);
 	}
 
 	@Override
@@ -64,7 +66,7 @@ public class GenericGridTestElement extends GridTestElementFactory {
 		jo.setApplication(Constants.GENERIC_APPLICATION_NAME);
 		
 		jo.setCommandline("cat genericTest.txt");
-		jo.addInputFileUrl(controller.getGridTestDirectory().getPath()+File.separator+"genericTest.txt");
+		jo.addInputFileUrl(info.getTestBaseDir().getPath()+File.separator+"genericTest.txt");
 		jo.setSubmissionLocation(submissionLocation);
 //		jo.addInputFileUrl(controller.getGridTestDirectory().getPath()+File.separator+"genericTest.txt");
 		
@@ -72,26 +74,22 @@ public class GenericGridTestElement extends GridTestElementFactory {
 		
 	}
 
-	@Override
-	protected String getApplicationSupported() {
+	public static String getApplicationName() {
 		return "generic";
 	}
 
-	@Override
-	protected boolean useMDS() {
+	public static boolean useMDS() {
 		return false;
 	}
 
-	@Override
-	public String getTestDescription() {
+	public static String getTestDescription() {
 		return "A simple cat job (including the staging of a small input file. The resulting stdout file is downloaded and checked for a non-zero filesize.";
 	}
 
-	@Override
-	public String getTestName() {
-		return "Simple_Cat_Test";
+	public static String getFixedVersion() {
+		return Constants.NO_VERSION_INDICATOR_STRING;
+		
 	}
-
 	
 
 

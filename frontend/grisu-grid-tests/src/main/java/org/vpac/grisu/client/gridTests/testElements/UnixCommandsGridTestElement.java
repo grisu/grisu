@@ -1,32 +1,32 @@
-package org.vpac.grisu.client.gridTests;
+package org.vpac.grisu.client.gridTests.testElements;
 
+import org.vpac.grisu.client.gridTests.GridTestInfo;
 import org.vpac.grisu.control.JobConstants;
-import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.frontend.model.job.JobObject;
 
-public class UnixCommandsGridTestElement extends GridTestElementFactory {
+import au.org.arcs.mds.Constants;
 
-	public UnixCommandsGridTestElement(GridTestController c,ServiceInterface si, String version, String submissionLocation) throws MdsInformationException {
-		super(c, si, version, submissionLocation);
+public class UnixCommandsGridTestElement extends GridTestElement {
+
+	public UnixCommandsGridTestElement(GridTestInfo info, String version, String submissionLocation) throws MdsInformationException {
+		super(info, version, submissionLocation);
 	}
 	
 	@Override
 	protected JobObject createJobObject() {
 		JobObject jo = new JobObject(serviceInterface);
 		
-		jo.setApplication(this.application);
+		jo.setApplication(getTestInfo().getApplicationName());
 		jo.setApplicationVersion(this.version);
 		
 		jo.setCommandline("echo hello world");
-//		jo.addInputFileUrl("/home/markus/test.txt");
 		
 		return jo;
 	}
 
-	@Override
-	protected String getApplicationSupported() {
-		return "unixcommands";
+	public static String getApplicationName() {
+		return "UnixCommands";
 	}
 	
 	protected boolean checkJobSuccess() {
@@ -41,20 +41,19 @@ public class UnixCommandsGridTestElement extends GridTestElementFactory {
 		
 		
 	}
-
-	@Override
-	protected boolean useMDS() {
+	
+	public static boolean useMDS() {
 		return true;
 	}
 
-	@Override
-	public String getTestDescription() {
+	public static String getTestDescription() {
 		return "A simple \"echo hello world\" is run. The tests checks whether the job status equals \"Done\" after the job finished.";
 	}
-
-	@Override
-	public String getTestName() {
-		return "Simple_Echo_Test";
+	
+	public static String getFixedVersion() {
+		return Constants.NO_VERSION_INDICATOR_STRING;
+		
 	}
+
 
 }

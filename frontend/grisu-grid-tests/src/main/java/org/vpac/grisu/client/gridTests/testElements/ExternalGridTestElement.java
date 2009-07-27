@@ -1,14 +1,12 @@
-package org.vpac.grisu.client.gridTests;
+package org.vpac.grisu.client.gridTests.testElements;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 
-import org.apache.commons.lang.StringUtils;
+import org.vpac.grisu.client.gridTests.GridExternalTestInfoImpl;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.frontend.control.login.LoginParams;
@@ -17,99 +15,13 @@ import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 
-public class ExternalGridTestElement extends GridTestElementFactory {
+public class ExternalGridTestElement extends GridTestElement {
 
-	public static final String TESTPROPERTIES_FILENAME = "grisu-test.properties";
 
-	private final File testDir;
-	private final File jsdl;
-	private final Properties testProperties = new Properties();
-	private final String testname;
-	private final String description;
-	private final List<String> inputFiles = new LinkedList<String>();
-	private final List<String> outputFiles = new LinkedList<String>();
-	private String command;
-	private boolean useMds = true;
-
-	public ExternalGridTestElement(File testDir, GridTestController c,
-			ServiceInterface si, String version, String subLoc)
+	public ExternalGridTestElement(GridExternalTestInfoImpl info, String version, String subLoc)
 			throws MdsInformationException {
-		super(c, si, version, subLoc);
-		this.testDir = testDir;
-		File propertiesFile = new File(testDir, TESTPROPERTIES_FILENAME);
-		if (propertiesFile.exists()) {
-			System.err.println("Can't create test for folder "
-					+ testDir.getPath() + ". No valid "
-					+ TESTPROPERTIES_FILENAME + " file found.");
-			System.err.println("Exiting...");
-			System.exit(1);
-		}
-		try {
-			this.testProperties.load(new FileInputStream(propertiesFile));
-		} catch (Exception e) {
-			System.err.println("Can't create test for folder "
-					+ testDir.getPath() + ". No valid "
-					+ TESTPROPERTIES_FILENAME + " file found.");
-			System.err.println("Exiting...");
-			System.exit(1);
-		}
-
-		if (StringUtils.isBlank(testProperties.getProperty("jsdlfile"))) {
-			// for the compiler
-			jsdl = null;
-			System.err.println("No jsdl file specified. Exiting...");
-			System.exit(1);
-		} else {
-			jsdl = new File(testProperties.getProperty("jsdlfile"));
-			if (!jsdl.exists()) {
-				System.err.println("Specified jsdl file doesn't exist.");
-			} else {
-				try {
-					SeveralXMLHelpers.loadXMLFile(jsdl);
-				} catch (Exception e) {
-					System.err.println("Could not parse jsdl file: "
-							+ e.getLocalizedMessage());
-					System.err.println("Exiting...");
-					System.exit(1);
-				}
-			}
-		}
-
-		if (StringUtils.isBlank(testProperties.getProperty("testname"))) {
-			testname = testDir.getName();
-		} else {
-			testname = testProperties.getProperty("testname");
-		}
-
-		if (StringUtils.isBlank(testProperties.getProperty("description"))) {
-			description = "No description.";
-		} else {
-			description = testProperties.getProperty("description");
-		}
-
-		String inputFilesString = testProperties.getProperty("inputfiles");
-		if (StringUtils.isNotBlank(inputFilesString)) {
-			for (String inputFile : inputFilesString.split(",")) {
-				inputFiles.add(inputFile);
-			}
-		}
-		String outputFilesString = testProperties
-				.getProperty("outputfilenames");
-		if (StringUtils.isNotBlank(outputFilesString)) {
-			for (String outputFileName : outputFilesString.split(",")) {
-				outputFiles.add(outputFileName);
-			}
-		}
-
-		command = testProperties.getProperty("command");
-		command = command.replaceAll("\\$TEST_DIR", testDir.getPath());
-
-		String temp = testProperties.getProperty("usemds", "true");
-		if ("true".equals(temp.toLowerCase())) {
-			useMds = true;
-		} else {
-			useMds = false;
-		}
+		
+		super(info, version, subLoc);
 
 	}
 
@@ -122,7 +34,7 @@ public class ExternalGridTestElement extends GridTestElementFactory {
 
 			File localCacheDir = null;
 
-			for (String filename : outputFiles) {
+			for (String filename : ((GridExternalTestInfoImpl)getTestInfo()).getOutputFiles()) {
 				addMessage("Downloading: " + filename + "...");
 				File file = jobObject.downloadAndCacheOutputFile(filename);
 				if (localCacheDir == null) {
@@ -151,51 +63,50 @@ public class ExternalGridTestElement extends GridTestElementFactory {
 	@Override
 	protected JobObject createJobObject() throws MdsInformationException {
 
-		Document jsdlDoc = SeveralXMLHelpers.loadXMLFile(jsdl);
+		Document jsdlDoc = ((GridExternalTestInfoImpl)getTestInfo()).getJsdlDoc();
 
 		JobObject job = new JobObject(serviceInterface, jsdlDoc);
-		for (String input : inputFiles) {
-			job.addInputFileUrl(input);
+		for (String input : ((GridExternalTestInfoImpl)getTestInfo()).getInputFiles()) {
+			job.addInputFileUrl(((GridExternalTestInfoImpl)getTestInfo()).getTestBaseDir()+File.separator+input);
 		}
 
 		return job;
 
 	}
 
-	@Override
-	protected String getApplicationSupported() {
-		return application;
-	}
-
-	@Override
-	public String getTestDescription() {
-		return description;
-	}
-
-	@Override
-	public String getTestName() {
-		return testname;
-	}
-
-	@Override
-	protected boolean useMDS() {
-		return useMds;
-	}
+//	@Override
+//	public String getApplicationSupported() {
+//		return application;
+//	}
+//
+//	@Override
+//	public String getTestDescription() {
+//		return description;
+//	}
+//
+//	@Override
+//	public String getTestName() {
+//		return testname;
+//	}
+//
+//	@Override
+//	protected boolean useMDS() {
+//		return useMds;
+//	}
 
 	private int executeScript(File outputDir, StringBuffer output) {
 
 		String s = null;
 
 		try {
-
+			String externalCommand = ((GridExternalTestInfoImpl)getTestInfo()).getCommand();
 			if (outputDir != null) {
-				command = command.replaceAll("\\$OUTPUT_DIR", outputDir
-						.getPath());
+				externalCommand = externalCommand.replaceAll("\\$OUTPUT_DIR", outputDir.getPath());
 			}
 
-			System.out.println("Running parser script using: " + command);
+			System.out.println("Running script using: " + externalCommand);
 
-			Process p = Runtime.getRuntime().exec(command);
+			Process p = Runtime.getRuntime().exec(externalCommand);
 			p.waitFor();
 
 			BufferedReader stdOut = new BufferedReader(new InputStreamReader(p

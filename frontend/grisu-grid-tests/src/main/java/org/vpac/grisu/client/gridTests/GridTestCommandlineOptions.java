@@ -23,6 +23,7 @@ public class GridTestCommandlineOptions {
 	private String url;
 	private String output;
 	private int timeout = 240;
+	private boolean list = false;
 	
 	public String getFqan() {
 		return fqan;
@@ -54,6 +55,10 @@ public class GridTestCommandlineOptions {
 	
 	public int getTimeout() {
 		return timeout;
+	}
+	
+	public boolean listTests() {
+		return list;
 	}
 
 
@@ -94,8 +99,12 @@ public class GridTestCommandlineOptions {
 			System.exit(1);
 		}
 		
-		if (line.hasOption("applications")) {
-			gridTestNames = line.getOptionValue("applications").split(",");
+		if ( line.hasOption("list") ) {
+			list = true;
+		}
+		
+		if (line.hasOption("tests")) {
+			gridTestNames = line.getOptionValue("tests").split(",");
 		}
 		
 		if (!line.hasOption("vo")) {
@@ -121,11 +130,11 @@ public class GridTestCommandlineOptions {
 			includes = line.getOptionValue("include").split(","); 
 		}
 		
-		if (line.hasOption("timeout")) {
+		if (line.hasOption("cancel")) {
 			try {
-				timeout = Integer.parseInt(line.getOptionValue("timeout"));
+				timeout = Integer.parseInt(line.getOptionValue("cancel"));
 			} catch (Exception e) {
-				System.err.println("Timeout not an integer.");
+				System.err.println("Cancel value not an integer.");
 				formatter.printHelp("grisu-grid-test", this.options);
 				System.exit(1);
 			}
@@ -167,7 +176,8 @@ public class GridTestCommandlineOptions {
 		Option outputFile = createOptionWithArg("output", "o", "the output file");
 		Option exclude = createOptionWithArg("exclude", "e", "(comma-seperated) filters to exclude certain hostnames/queues. Only used if the \"include\" option wasn't specified");
 		Option include = createOptionWithArg("include", "i", "(comma-seperated) filters to only include certain hostnames");
-		Option timeoutInMinutes = createOptionWithArg("timeout", "t", "timeout in minutes after which all jobs that aren't finished are getting killed (default: 240)");
+		Option timeoutInMinutes = createOptionWithArg("cancel", "c", "timeout in minutes after which all jobs that aren't finished are getting killed (default: 240)");
+		Option list = createOption("list", "l", "list all available tests");
 		
 		options = new Options();
 		options.addOption(apps);
@@ -177,6 +187,7 @@ public class GridTestCommandlineOptions {
 		options.addOption(include);
 		options.addOption(exclude);
 		options.addOption(timeoutInMinutes);
+		options.addOption(list);
 		
 		return options;
 	}

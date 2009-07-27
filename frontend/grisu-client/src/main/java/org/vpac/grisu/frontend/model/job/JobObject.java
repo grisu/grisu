@@ -343,6 +343,29 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 		return jobDirectory;
 	}
+	
+	public final File downloadAndCacheOutputFile(String relativePathToJobDirectory) {
+		
+		if (getStatus(false) <= JobConstants.ACTIVE) {
+			if (getStatus(true) < JobConstants.ACTIVE) {
+				throw new IllegalStateException(
+						"Job not started yet. No stdout file exists.");
+			}
+		}
+		//		
+		String url;
+		url = getJobDirectoryUrl()+ "/"	+ relativePathToJobDirectory;
+
+		File file = null;
+		try {
+			file = GrisuRegistry.getDefault(serviceInterface)
+					.getFileManager().downloadFile(url);
+		} catch (Exception e) {
+			throw new JobException(this, "Could not download file: "+url, e);
+		}
+
+		return file;
+	}
 
 	/**
 	 * This method downloads a current version of the stdout file for this job
@@ -356,27 +379,10 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 */
 	public final File getStdOutFile() {
 
-		if (getStatus(false) <= JobConstants.ACTIVE) {
-			if (getStatus(true) < JobConstants.ACTIVE) {
-				throw new IllegalStateException(
-						"Job not started yet. No stdout file exists.");
-			}
-		}
-		//		
-		String url;
+		File stdoutFile;
 		try {
-			url = getJobDirectoryUrl()
-					+ "/"
-					+ serviceInterface.getJobProperty(getJobname(),
-							JobSubmissionProperty.STDOUT.toString());
-		} catch (NoSuchJobException e) {
-			throw new JobException(this, "Could not get stdout url.", e);
-		}
-
-		File stdoutFile = null;
-		try {
-			stdoutFile = GrisuRegistry.getDefault(serviceInterface)
-					.getFileManager().downloadFile(url);
+			stdoutFile = downloadAndCacheOutputFile(serviceInterface.getJobProperty(getJobname(),
+				JobSubmissionProperty.STDOUT.toString()));
 		} catch (Exception e) {
 			throw new JobException(this, "Could not download stdout file.", e);
 		}
@@ -462,27 +468,10 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 */
 	public final File getStdErrFile() {
 
-		if (getStatus(false) <= JobConstants.ACTIVE) {
-			if (getStatus(true) < JobConstants.ACTIVE) {
-				throw new IllegalStateException(
-						"Job not started yet. No stderr file exists.");
-			}
-		}
-		//		
-		String url;
+		File stderrFile;
 		try {
-			url = getJobDirectoryUrl()
-					+ "/"
-					+ serviceInterface.getJobProperty(getJobname(),
-							JobSubmissionProperty.STDERR.toString());
-		} catch (NoSuchJobException e) {
-			throw new JobException(this, "Could not get stderr url.", e);
-		}
-
-		File stderrFile = null;
-		try {
-			stderrFile = GrisuRegistry.getDefault(serviceInterface)
-					.getFileManager().downloadFile(url);
+			stderrFile = downloadAndCacheOutputFile(serviceInterface.getJobProperty(getJobname(),
+				JobSubmissionProperty.STDERR.toString()));
 		} catch (Exception e) {
 			throw new JobException(this, "Could not download stderr file.", e);
 		}

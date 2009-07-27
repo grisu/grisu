@@ -6,39 +6,43 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.vpac.grisu.client.gridTests.testElements.GridTestElement;
+
+
 public class OutputModuleHelpers {
 	
-	private static Map<String, Set<GridTestElementFactory>> getTestElementMap(Collection<GridTestElementFactory> elements) {
+	private static Map<String, Set<GridTestElement>> getTestElementMap(Collection<GridTestElement> elements) {
 		
-		Map<String, Set<GridTestElementFactory>> testMap = new TreeMap<String, Set<GridTestElementFactory>>();
+		Map<String, Set<GridTestElement>> testMap = new TreeMap<String, Set<GridTestElement>>();
 		
-		for ( GridTestElementFactory element : elements ) {
+		for ( GridTestElement element : elements ) {
 			
-			if ( testMap.get(element.getTestName()) == null ) {
-				Set<GridTestElementFactory> elementList = new TreeSet<GridTestElementFactory>();
-				testMap.put(element.getTestName(), elementList);
+			if ( testMap.get(element.getTestInfo().getTestname()) == null ) {
+				Set<GridTestElement> elementList = new TreeSet<GridTestElement>();
+				testMap.put(element.getTestInfo().getTestname(), elementList);
 			}
 			
-			testMap.get(element.getTestName()).add(element);
+			testMap.get(element.getTestInfo().getTestname()).add(element);
 		}
 		return testMap;
 	}
 	
-	public static StringBuffer createTestSetupString(Collection<GridTestElementFactory> elements) {
+	public static StringBuffer createTestSetupString(Collection<GridTestElement> elements) {
 		
 		StringBuffer setup = new StringBuffer();
 		setup.append("Initialized jobs:\n");
 		//setup.append(StringUtils.join(gridTestElements.values(), "\n")+"\n");
 		
-		Map<String, Set<GridTestElementFactory>> testMap = getTestElementMap(elements);
+		Map<String, Set<GridTestElement>> testMap = getTestElementMap(elements);
 
 		
 		for ( String testname : testMap.keySet() ) {
 			setup.append("Testname: "+testname+"\n\n");
-			setup.append("Description: "+testMap.get(testname).iterator().next().getTestDescription()+"\n\n");
+			setup.append("Description: "+testMap.get(testname).iterator().next().getTestInfo().getDescription()+"\n\n");
 			setup.append("Jobs to run for this test category:\n");
-			for ( GridTestElementFactory el : testMap.get(testname) ) {
+			for ( GridTestElement el : testMap.get(testname) ) {
 				setup.append("\t"+el.toString()+"\n");
+				setup.append("\tid: "+el.getTestId()+"\n");
 			}
 			setup.append("\n\n");
 		}
@@ -46,11 +50,11 @@ public class OutputModuleHelpers {
 		return setup;
 	}
 	
-	public static StringBuffer createStringReport(GridTestElementFactory gte) {
+	public static StringBuffer createStringReport(GridTestElement gte) {
 		
 		StringBuffer outputString = new StringBuffer();
 		
-		outputString.append("Test for "+gte.getApplicationSupported()+", version: "+gte.getVersion());
+		outputString.append("Test for "+gte.getTestInfo().getApplicationName()+", version: "+gte.getVersion());
 
 		outputString.append("\nSubmissionLocation: "
 				+ gte.getSubmissionLocation() + "\n");
@@ -82,7 +86,7 @@ public class OutputModuleHelpers {
 		return outputString;
 	}
 	
-	public static StringBuffer createStatisticsString(Collection<GridTestElementFactory> elements) {
+	public static StringBuffer createStatisticsString(Collection<GridTestElement> elements) {
 		
 		StringBuffer statistics = new StringBuffer();
 		statistics.append("\nSummary:\n-------------\n");
@@ -90,7 +94,7 @@ public class OutputModuleHelpers {
 		int countSuccess = 0;
 		int countInterrupted = 0;
 		StringBuffer failedSubLocs = new StringBuffer();
-		for (GridTestElementFactory gte : elements) {
+		for (GridTestElement gte : elements) {
 			if ( gte.wasInterrupted() ) {
 				countInterrupted = countInterrupted + 1;
 			} else if (gte.failed()) {
@@ -115,14 +119,14 @@ public class OutputModuleHelpers {
 		
 		statistics.append("Results per test:\n");
 		
-		Map<String, Set<GridTestElementFactory>> testMap = getTestElementMap(elements);
+		Map<String, Set<GridTestElement>> testMap = getTestElementMap(elements);
 		
 		for ( String test : testMap.keySet() ) {
 			statistics.append("Testname: "+test+"\n");
 			int failed = 0;
 			int success = 0;
 			int interrupted = 0;
-			for (GridTestElementFactory gte : testMap.get(test)) {
+			for (GridTestElement gte : testMap.get(test)) {
 				if ( gte.wasInterrupted() ) {
 					interrupted = interrupted + 1;
 				} else if (gte.failed()) {

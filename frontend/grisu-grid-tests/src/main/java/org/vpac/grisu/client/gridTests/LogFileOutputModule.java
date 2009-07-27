@@ -3,6 +3,9 @@ package org.vpac.grisu.client.gridTests;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 
+import org.vpac.grisu.client.gridTests.testElements.GridTestElement;
+
+
 public class LogFileOutputModule implements OutputModule {
 
 	private String output;
@@ -11,7 +14,7 @@ public class LogFileOutputModule implements OutputModule {
 		this.output = output;
 	}
 	
-	public void writeTestElement(GridTestElementFactory element) {
+	public void writeTestElement(GridTestElement element) {
 
 		StringBuffer outputString = new StringBuffer();
 

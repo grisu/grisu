@@ -1,21 +1,25 @@
-package org.vpac.grisu.client.gridTests;
+package org.vpac.grisu.client.gridTests.testElements;
 
+import org.vpac.grisu.client.gridTests.GridTestController;
+import org.vpac.grisu.client.gridTests.GridTestInfo;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.frontend.model.job.JobObject;
 
-public class JavaGridTestElement extends GridTestElementFactory {
+import au.org.arcs.mds.Constants;
 
-	public JavaGridTestElement(GridTestController c, ServiceInterface si, String version, String submissionLocation) throws MdsInformationException {
-		super(c, si, version, submissionLocation);
+public class JavaGridTestElement extends GridTestElement {
+
+	public JavaGridTestElement(GridTestInfo info, String version, String submissionLocation) throws MdsInformationException {
+		super(info, version, submissionLocation);
 	}
 	
 	@Override
 	protected JobObject createJobObject() {
 		JobObject jo = new JobObject(serviceInterface);
 		
-		jo.setApplication(this.application);
+		jo.setApplication(this.getTestInfo().getApplicationName());
 		jo.setApplicationVersion(this.version);
 		
 		jo.setCommandline("java -version");
@@ -24,10 +28,10 @@ public class JavaGridTestElement extends GridTestElementFactory {
 		return jo;
 	}
 
-	@Override
-	protected String getApplicationSupported() {
-		return "java";
-	}
+//	@Override
+//	public String getApplicationSupported() {
+//		return "java";
+//	}
 	
 	protected boolean checkJobSuccess() {
 		
@@ -42,21 +46,23 @@ public class JavaGridTestElement extends GridTestElementFactory {
 		
 	}
 
-	@Override
-	protected boolean useMDS() {
+	public static boolean useMDS() {
 		return true;
 	}
 
-	@Override
-	public String getTestDescription() {
+	public static String getTestDescription() {
 		return "Simple test that checks whether the module on the resource is loaded correctly. It runs the java" +
 		" command to print out the java version and checks whether the job ran with error code 0";
 		
 	}
 
-	@Override
-	public String getTestName() {
-		return "Java_Version_Test";
+	public static String getApplicationName() {
+		return "Java";
+	}
+	
+	public static String getFixedVersion() {
+		return Constants.NO_VERSION_INDICATOR_STRING;
+		
 	}
 
 

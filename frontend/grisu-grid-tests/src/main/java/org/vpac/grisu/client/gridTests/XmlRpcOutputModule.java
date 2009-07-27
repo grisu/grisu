@@ -7,6 +7,7 @@ import java.util.Date;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
+import org.vpac.grisu.client.gridTests.testElements.GridTestElement;
 
 import au.org.arcs.mds.SubmissionLocationHelpers;
 
@@ -30,12 +31,15 @@ public class XmlRpcOutputModule implements OutputModule {
 		
 	}
 	
-	public void writeTestElement(GridTestElementFactory element) {
+	public void writeTestElement(GridTestElement element) {
 
 		String username = "grisu_test_client";
 		String password = "kaiJaej9ieSh"; 
 		
-			String application = element.getApplicationSupported();
+			String uuid = element.getTestId();
+			String testname = element.getTestInfo().getTestname();
+			String description = element.getTestInfo().getDescription();
+			String application = element.getTestInfo().getApplicationName();
 			String version = element.getVersion();
 			Date startDate = element.getStartDate();
 			Date endDate = element.getEndDate();
@@ -48,6 +52,9 @@ public class XmlRpcOutputModule implements OutputModule {
 			Object[] params = new Object[] {
 					username,
 					password,
+					uuid,
+					testname,
+					description,
 					application,
 					version,
 					startDate,
