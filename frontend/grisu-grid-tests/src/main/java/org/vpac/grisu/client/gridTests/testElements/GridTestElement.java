@@ -25,6 +25,8 @@ public abstract class GridTestElement implements JobStatusChangeListener, Compar
 	protected final String submissionLocation;
 
 	protected final String id;
+	
+	protected final String fqan;
 
 	private final List<GridTestStage> testStages = new LinkedList<GridTestStage>();
 
@@ -60,8 +62,9 @@ public abstract class GridTestElement implements JobStatusChangeListener, Compar
 	private Date endDate = null;
 
 	protected GridTestElement(GridTestInfo info, String version,
-			String submissionLocation) throws MdsInformationException {
+			String submissionLocation, String fqan) throws MdsInformationException {
 		this.info = info;
+		this.fqan = fqan;
 		startDate = new Date();
 		endDate = new Date();
 		beginNewStage("Initializing test element...");
@@ -348,7 +351,7 @@ public abstract class GridTestElement implements JobStatusChangeListener, Compar
 
 	@Override
 	public String toString() {
-		return "Application: "+info.getApplicationName()+",  version: "+version+", submissionlocation: "+submissionLocation;
+		return "Application: "+info.getApplicationName()+",  version: "+version+", submissionlocation: "+submissionLocation+", fqan: "+fqan;
 	}
 	
 	public int compareTo(GridTestElement o) {
@@ -366,6 +369,10 @@ public abstract class GridTestElement implements JobStatusChangeListener, Compar
 		}
 		int subLoc = this.getSubmissionLocation().compareTo(o.getSubmissionLocation());
 		return subLoc;
+	}
+	
+	public String getFqan() {
+		return fqan;
 	}
 	
 	abstract protected JobObject createJobObject() throws MdsInformationException;

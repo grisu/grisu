@@ -15,8 +15,8 @@ import au.org.arcs.mds.Constants;
 public class UnderworldGridTestElement extends GridTestElement {
 
 	public UnderworldGridTestElement(GridTestInfo info, String version,
-			String submissionLocation) throws MdsInformationException {
-		super(info, version, submissionLocation);
+			String submissionLocation, String fqan) throws MdsInformationException {
+		super(info, version, submissionLocation, fqan);
 	}
 
 	

@@ -16,8 +16,8 @@ import au.org.arcs.mds.JobSubmissionProperty;
 
 public class SimpleCatJobGridTestElement extends GridTestElement {
 	
-	public SimpleCatJobGridTestElement(GridTestInfo info, String version, String subLoc) throws MdsInformationException {
-		super(info, version, subLoc);
+	public SimpleCatJobGridTestElement(GridTestInfo info, String version, String subLoc, String fqan) throws MdsInformationException {
+		super(info, version, subLoc, fqan);
 	}
 
 	@Override

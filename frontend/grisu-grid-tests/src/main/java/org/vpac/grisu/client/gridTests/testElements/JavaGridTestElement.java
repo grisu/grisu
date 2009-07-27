@@ -11,8 +11,8 @@ import au.org.arcs.mds.Constants;
 
 public class JavaGridTestElement extends GridTestElement {
 
-	public JavaGridTestElement(GridTestInfo info, String version, String submissionLocation) throws MdsInformationException {
-		super(info, version, submissionLocation);
+	public JavaGridTestElement(GridTestInfo info, String version, String submissionLocation, String fqan) throws MdsInformationException {
+		super(info, version, submissionLocation, fqan);
 	}
 	
 	@Override

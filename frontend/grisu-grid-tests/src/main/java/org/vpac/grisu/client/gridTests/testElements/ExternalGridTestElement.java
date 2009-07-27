@@ -18,10 +18,10 @@ import org.w3c.dom.Document;
 public class ExternalGridTestElement extends GridTestElement {
 
 
-	public ExternalGridTestElement(GridExternalTestInfoImpl info, String version, String subLoc)
+	public ExternalGridTestElement(GridExternalTestInfoImpl info, String version, String subLoc, String fqan)
 			throws MdsInformationException {
 		
-		super(info, version, subLoc);
+		super(info, version, subLoc, fqan);
 
 	}
 

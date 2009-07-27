@@ -3,13 +3,9 @@ package org.vpac.grisu.client.gridTests;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.client.gridTests.testElements.GridTestElement;
@@ -28,16 +24,19 @@ public class GridInternalTestInfoImpl implements GridTestInfo {
 	private String versionName;
 	private String description;
 	private final GridTestController controller;
-	private final Map<String, Set<String>> subLocsPerVersions = new TreeMap<String, Set<String>>();
+//	private final Map<String, Set<String>> subLocsPerVersions = new TreeMap<String, Set<String>>();
+	private final String[] fqans;
 
 	public GridInternalTestInfoImpl(String testname,
-			GridTestController controller) throws ClassNotFoundException {
+			GridTestController controller, String[] fqans)
+			throws ClassNotFoundException {
 		this.controller = controller;
 		this.testname = testname;
+		this.fqans = fqans;
 
 		testClass = Class
 				.forName("org.vpac.grisu.client.gridTests.testElements."
-						+ testname+"GridTestElement");
+						+ testname + "GridTestElement");
 
 		try {
 			Method useMdsMethod = testClass.getMethod("useMDS");
@@ -93,47 +92,16 @@ public class GridInternalTestInfoImpl implements GridTestInfo {
 			System.exit(1);
 		}
 
-		if (useMds) {
-			ApplicationInformation appInfo = GrisuRegistry.getDefault(
-					controller.getServiceInterface())
-					.getApplicationInformation(applicationName);
-			if (StringUtils.isBlank(versionName)
-					|| Constants.NO_VERSION_INDICATOR_STRING
-							.equals(versionName)) {
-				Set<String> versions = appInfo
-						.getAllAvailableVersionsForFqan(controller.getFqan());
-				for (String version : versions) {
-					Set<String> submissionLocations = appInfo
-							.getAvailableSubmissionLocationsForVersionAndFqan(
-									version, controller.getFqan());
-					subLocsPerVersions.put(version, submissionLocations);
-				}
-			} else {
-				Set<String> submissionLocations = appInfo
-						.getAvailableSubmissionLocationsForVersionAndFqan(
-								versionName, controller.getFqan());
-				subLocsPerVersions.put(versionName, submissionLocations);
-			}
-		} else {
-			Set<String> submissionLocations = new HashSet<String>(Arrays
-					.asList(GrisuRegistry.getDefault(
-							controller.getServiceInterface())
-							.getResourceInformation()
-							.getAllAvailableSubmissionLocations(
-									controller.getFqan())));
-			subLocsPerVersions.put(Constants.NO_VERSION_INDICATOR_STRING,
-					submissionLocations);
-		}
 
 	}
 
 	public GridTestElement createGridTestElement(String version,
-			String submissionLocation) throws MdsInformationException {
+			String submissionLocation, String fqan) throws MdsInformationException {
 
 		Constructor testConstructor = null;
 		try {
-			testConstructor = testClass.getConstructor(
-					GridTestInfo.class, String.class, String.class);
+			testConstructor = testClass.getConstructor(GridTestInfo.class,
+					String.class, String.class, String.class);
 		} catch (Exception e) {
 			System.err.println("Could not create internal test " + testname
 					+ ": " + e.getLocalizedMessage());
@@ -143,7 +111,8 @@ public class GridInternalTestInfoImpl implements GridTestInfo {
 
 		GridTestElement gte = null;
 		try {
-			gte = (GridTestElement)testConstructor.newInstance(this, version, submissionLocation);
+			gte = (GridTestElement) testConstructor.newInstance(this, version,
+					submissionLocation, fqan);
 		} catch (Exception e) {
 			System.err.println("Could not create internal test " + testname
 					+ ": " + e.getLocalizedMessage());
@@ -155,18 +124,19 @@ public class GridInternalTestInfoImpl implements GridTestInfo {
 	}
 
 	public static final List<GridTestInfo> generateGridTestInfos(
-			GridTestController controller, String[] testnames) {
+			GridTestController controller, String[] testnames, String[] fqans) {
 
 		List<GridTestInfo> result = new LinkedList<GridTestInfo>();
-		
-		if ( testnames.length == 0 ) {
-			testnames = new String[]{"Java","SimpleCatJob","Underworld","UnixCommands"};
+
+		if (testnames.length == 0) {
+			testnames = new String[] { "Java", "SimpleCatJob", "Underworld",
+					"UnixCommands" };
 		}
 
 		for (String testname : testnames) {
 			GridInternalTestInfoImpl info;
 			try {
-				info = new GridInternalTestInfoImpl(testname, controller);
+				info = new GridInternalTestInfoImpl(testname, controller, fqans);
 				result.add(info);
 			} catch (ClassNotFoundException e) {
 				System.out.println("No internal gridtest with the name: "
@@ -183,13 +153,35 @@ public class GridInternalTestInfoImpl implements GridTestInfo {
 
 		List<GridTestElement> results = new LinkedList<GridTestElement>();
 
-		Map<String, Set<String>> map = getSubmissionLocationsPerVersion();
-		for (String version : map.keySet()) {
-			for (String subLoc : map.get(version)) {
-				results.add(createGridTestElement(version, subLoc));
+		ApplicationInformation appInfo = GrisuRegistry.getDefault(controller.getServiceInterface()).getApplicationInformation(applicationName);
+		
+		for ( String fqan : fqans ) {
+			
+			if ( useMds ) {
+				if ( StringUtils.isNotBlank(versionName) && ! Constants.NO_VERSION_INDICATOR_STRING.equals(versionName) ) {
+					// means only one version
+					Set<String> subLocs = appInfo.getAvailableSubmissionLocationsForVersionAndFqan(versionName, fqan);
+					for ( String subLoc : subLocs ) {
+						results.add(createGridTestElement(versionName, subLoc, fqan));
+					}
+				} else {
+					// means all versions
+					Set<String> versions = appInfo.getAllAvailableVersionsForFqan(fqan);
+					for ( String version : versions ) {
+						Set<String> subLocs = appInfo.getAvailableSubmissionLocationsForVersionAndFqan(version, fqan);
+						for ( String subLoc : subLocs ) {
+							results.add(createGridTestElement(version, subLoc, fqan));
+						}
+					}
+				}
+			} else {
+				String[] subLocs = GrisuRegistry.getDefault(controller.getServiceInterface()).getResourceInformation().getAllAvailableSubmissionLocations(fqan);
+				for ( String subLoc : subLocs ) {
+					results.add(createGridTestElement(Constants.NO_VERSION_INDICATOR_STRING, subLoc, fqan));
+				}
 			}
+			
 		}
-
 		return results;
 
 	}
@@ -206,9 +198,9 @@ public class GridInternalTestInfoImpl implements GridTestInfo {
 		return description;
 	}
 
-	public Map<String, Set<String>> getSubmissionLocationsPerVersion() {
-		return subLocsPerVersions;
-	}
+//	public Map<String, Set<String>> getSubmissionLocationsPerVersion() {
+//		return subLocsPerVersions;
+//	}
 
 	public File getTestBaseDir() {
 		return controller.getGridTestDirectory();
@@ -220,6 +212,10 @@ public class GridInternalTestInfoImpl implements GridTestInfo {
 
 	public boolean isUseMds() {
 		return useMds;
+	}
+
+	public String[] getFqans() {
+		return fqans;
 	}
 
 }

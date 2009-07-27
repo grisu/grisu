@@ -15,7 +15,7 @@ public class GridTestCommandlineOptions {
 	private HelpFormatter formatter = new HelpFormatter();
 	private Options options = null;
 	
-	private String fqan;
+	private String[] fqans;
 	private String[] gridTestNames = new String[]{};
 	private String[] excludes = new String[]{};
 	private String[] includes = new String[]{};
@@ -25,8 +25,8 @@ public class GridTestCommandlineOptions {
 	private int timeout = 240;
 	private boolean list = false;
 	
-	public String getFqan() {
-		return fqan;
+	public String[] getFqans() {
+		return fqans;
 	}
 
 	public String[] getGridTestNames() {
@@ -107,12 +107,10 @@ public class GridTestCommandlineOptions {
 			gridTestNames = line.getOptionValue("tests").split(",");
 		}
 		
-		if (!line.hasOption("vo")) {
-			System.err.println("No vo specified.");
-			formatter.printHelp("grisu-grid-test", this.options);
-			System.exit(1);
+		if (!line.hasOption("vos")) {
+			fqans = new String[]{};
 		} else {
-			fqan = line.getOptionValue("vo");
+			fqans = line.getOptionValue("vos").split(",");
 		}
 		
 		if (line.hasOption("username")) {
@@ -172,7 +170,7 @@ public class GridTestCommandlineOptions {
 		// common options
 		Option apps = createOptionWithArg("tests", "t", "the names of the tests to run. If not specified, all tests will run.");				    
 		Option myProxyUsername = createOptionWithArg("username", "u", "the myproxy username to use");
-		Option fqan = createOptionWithArg("vo", "v", "the vo to use");
+		Option fqan = createOptionWithArg("vos", "v", "the vos to use, seperated with a comma");
 		Option outputFile = createOptionWithArg("output", "o", "the output file");
 		Option exclude = createOptionWithArg("exclude", "e", "(comma-seperated) filters to exclude certain hostnames/queues. Only used if the \"include\" option wasn't specified");
 		Option include = createOptionWithArg("include", "i", "(comma-seperated) filters to only include certain hostnames");

@@ -56,7 +56,7 @@ public class GridTestController {
 	private final GrisuRegistry registry;
 
 	private String[] gridtestNames;
-	private final String fqan;
+	private final String[] fqans;
 	private String output = null;
 	private String[] excludes;
 	private String[] includes;
@@ -125,7 +125,12 @@ public class GridTestController {
 		registry = GrisuRegistry.getDefault(this.serviceInterface);
 		
 		
-		fqan = options.getFqan();
+		if ( options.getFqans().length == 0 ) {
+			fqans = serviceInterface.getFqans();
+		} else {
+			fqans = options.getFqans();
+		}
+		
 		if (options.getOutput() != null && options.getOutput().length() > 0) {
 			output = options.getOutput();
 		}
@@ -133,10 +138,11 @@ public class GridTestController {
 
 		if ( options.listTests() ) {
 			
-			List<GridTestInfo> externalinfos = GridExternalTestInfoImpl.generateGridTestInfos(this, new String[]{});
-			List<GridTestInfo> internalinfos = GridInternalTestInfoImpl.generateGridTestInfos(this, new String[]{});
-			
 			List<GridTestInfo> infos = new LinkedList<GridTestInfo>();
+
+			List<GridTestInfo> externalinfos = GridExternalTestInfoImpl.generateGridTestInfos(this, new String[]{}, fqans);
+			List<GridTestInfo> internalinfos = GridInternalTestInfoImpl.generateGridTestInfos(this, new String[]{}, fqans);
+			
 			infos.addAll(externalinfos);
 			infos.addAll(internalinfos);
 			
@@ -146,13 +152,17 @@ public class GridTestController {
 				System.out.println("Testname: "+info.getTestname());
 				System.out.println("\tApplication: "+info.getApplicationName());
 				System.out.println("\tDescription: "+info.getDescription());
-				System.out.println("\tSubmissionlocations to test:");
-				for ( String version : info.getSubmissionLocationsPerVersion().keySet() ) {
-					System.out.println("\t\t"+version+":");
-					for ( String subLoc : info.getSubmissionLocationsPerVersion().get(version) ) {
-						System.out.println("\t\t\t"+subLoc);
+				System.out.println("\tTest elements:");
+				try {
+					for ( GridTestElement el : info.generateAllGridTestElements() ) {
+						System.out.println("\t\t"+el.toString());
 					}
+				} catch (MdsInformationException e) {
+					System.err.println("Error while listing test elements: "+e.getLocalizedMessage());
+					System.err.println("Exiting...");
+					System.exit(1);
 				}
+
 				System.out.println();
 			}
 			
@@ -187,9 +197,9 @@ public class GridTestController {
 		return grid_tests_directory;
 	}
 	
-	public String getFqan() {
-		return this.fqan;
-	}
+//	public String getFqan() {
+//		return this.fqan;
+//	}
 
 	/**
 	 * @param args
@@ -375,8 +385,8 @@ public class GridTestController {
 
 	public void createJobsJobThreads() throws MdsInformationException {
 
-		List<GridTestInfo> externalinfos = GridExternalTestInfoImpl.generateGridTestInfos(this, gridtestNames);
-		List<GridTestInfo> internalinfos = GridInternalTestInfoImpl.generateGridTestInfos(this, gridtestNames);
+		List<GridTestInfo> externalinfos = GridExternalTestInfoImpl.generateGridTestInfos(this, gridtestNames, fqans);
+		List<GridTestInfo> internalinfos = GridInternalTestInfoImpl.generateGridTestInfos(this, gridtestNames, fqans);
 		
 		List<GridTestInfo> infos = new LinkedList<GridTestInfo>();
 		infos.addAll(externalinfos);
@@ -413,7 +423,7 @@ public class GridTestController {
 				gridTestElements.put(el.getTestId(), el);
 
 				Thread createJobThread = createCreateAndSubmitJobThread(
-						el, fqan);
+						el);
 				createAndSubmitJobThreads.put(el.getTestId(),
 						createJobThread);
 				
@@ -423,14 +433,13 @@ public class GridTestController {
 		
 	}
 
-	private Thread createCreateAndSubmitJobThread(final GridTestElement gte,
-			final String fqan) {
+	private Thread createCreateAndSubmitJobThread(final GridTestElement gte) {
 
 		Thread thread = new Thread() {
 			public void run() {
 				System.out.println("Creating job for subLoc: "
 						+ gte.getSubmissionLocation());
-				gte.createJob(fqan);
+				gte.createJob(gte.getFqan());
 				System.out.println("Submitting job for subLoc: "
 						+ gte.getSubmissionLocation());
 				gte.submitJob();

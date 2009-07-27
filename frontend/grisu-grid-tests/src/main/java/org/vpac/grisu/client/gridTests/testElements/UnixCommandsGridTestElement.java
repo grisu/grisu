@@ -9,8 +9,8 @@ import au.org.arcs.mds.Constants;
 
 public class UnixCommandsGridTestElement extends GridTestElement {
 
-	public UnixCommandsGridTestElement(GridTestInfo info, String version, String submissionLocation) throws MdsInformationException {
-		super(info, version, submissionLocation);
+	public UnixCommandsGridTestElement(GridTestInfo info, String version, String submissionLocation, String fqan) throws MdsInformationException {
+		super(info, version, submissionLocation, fqan);
 	}
 	
 	@Override

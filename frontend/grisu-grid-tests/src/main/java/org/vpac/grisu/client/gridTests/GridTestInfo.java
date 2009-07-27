@@ -33,9 +33,11 @@ public interface GridTestInfo {
 
 	public abstract String getApplicationName();
 
-	public abstract Map<String, Set<String>> getSubmissionLocationsPerVersion();
+//	public abstract Map<String, Set<String>> getSubmissionLocationsPerVersion();
 
 	public abstract GridTestElement createGridTestElement(String version,
-			String submissionLocation) throws MdsInformationException;
+			String submissionLocation, String fqan) throws MdsInformationException;
+	
+	public abstract String[] getFqans();
 
 }
