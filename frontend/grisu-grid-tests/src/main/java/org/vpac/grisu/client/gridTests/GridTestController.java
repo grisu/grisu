@@ -125,6 +125,12 @@ public class GridTestController {
 		registry = GrisuRegistry.getDefault(this.serviceInterface);
 		
 		
+		fqan = options.getFqan();
+		if (options.getOutput() != null && options.getOutput().length() > 0) {
+			output = options.getOutput();
+		}
+
+
 		if ( options.listTests() ) {
 			
 			List<GridTestInfo> externalinfos = GridExternalTestInfoImpl.generateGridTestInfos(this, new String[]{});
@@ -133,6 +139,7 @@ public class GridTestController {
 			List<GridTestInfo> infos = new LinkedList<GridTestInfo>();
 			infos.addAll(externalinfos);
 			infos.addAll(internalinfos);
+			
 			
 			System.out.println("Available tests: ");
 			for ( GridTestInfo info : infos ) {
@@ -154,11 +161,6 @@ public class GridTestController {
 		
 		gridtestNames = options.getGridTestNames();
 		Arrays.sort(gridtestNames);
-
-		fqan = options.getFqan();
-		if (options.getOutput() != null && options.getOutput().length() > 0) {
-			output = options.getOutput();
-		}
 
 		excludes = options.getExcludes();
 		includes = options.getIncludes();
