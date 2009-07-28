@@ -61,7 +61,8 @@ public class GridTestController {
 	private String[] excludes;
 	private String[] includes;
 
-	private final Date timeoutDate;
+	private Date timeoutDate;
+	private final int timeout;
 
 	private List<OutputModule> outputModules = new LinkedList<OutputModule>();
 
@@ -139,7 +140,8 @@ public class GridTestController {
 			output = options.getOutput();
 		}
 
-
+		timeout = options.getTimeout();
+		
 		if ( options.listTests() ) {
 			
 			List<GridTestInfo> infos = new LinkedList<GridTestInfo>();
@@ -182,12 +184,7 @@ public class GridTestController {
 		outputModules.add(new LogFileOutputModule(output));
 		outputModules.add(new XmlRpcOutputModule());
 
-		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.MINUTE, options.getTimeout());
-		timeoutDate = cal.getTime();
 
-		System.out.println("All remaining jobs will be killed at: "
-				+ timeoutDate.toString());
 	}
 
 	// public GridTestController(ServiceInterface si, String[] applications,
@@ -256,6 +253,13 @@ public class GridTestController {
 		System.out.println(setup.toString());
 
 		createAndSubmitAllJobs();
+		
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.MINUTE, timeout);
+		timeoutDate = cal.getTime();
+
+		System.out.println("All remaining jobs will be killed at: "
+				+ timeoutDate.toString());
 
 		for (GridTestElement gte : gridTestElements.values()) {
 			//

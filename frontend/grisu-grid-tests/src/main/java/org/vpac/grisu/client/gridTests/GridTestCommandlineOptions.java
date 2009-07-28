@@ -187,7 +187,7 @@ public class GridTestCommandlineOptions {
 		Options options = null;
 		
 		// common options
-		Option apps = createOptionWithArg("tests", "t", "the names of the tests to run. If not specified, all tests will run.");				    
+		Option apps = createOptionWithArg("tests", "t", "the names of the tests to run (seperated with a comma). If not specified, all tests will run.");				    
 		Option myProxyUsername = createOptionWithArg("username", "u", "the myproxy username to use");
 		Option fqan = createOptionWithArg("vos", "v", "the vos to use, seperated with a comma");
 		Option outputFile = createOptionWithArg("output", "o", "the output file");
