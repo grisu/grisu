@@ -2,6 +2,17 @@
 
 cd target
 
+# fix local backend
+mkdir local
+cd local
+unzip -o ../grisu-0.3-SNAPSHOT-grisu-local-backend.jar
+rm ../grisu-0.3-SNAPSHOT-grisu-local-backend.jar
+rm -f META-INF/INDEX.LIST
+cp ../../backend/grisu-core/src/main/resources/gluev12r2-ext-class-map.properties .
+jar cmf ../../backend/grisu-core/MANIFEST.MF ../grisu-local-backend.jar .
+cd ..
+#jar -i grisu-local-backend.jar
+
 # fix grid-tests client
 mkdir grisu-grid-tests
 cd grisu-grid-tests
