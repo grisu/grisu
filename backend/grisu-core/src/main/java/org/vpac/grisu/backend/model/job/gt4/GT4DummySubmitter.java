@@ -540,15 +540,15 @@ public class GT4DummySubmitter extends JobSubmitter {
 			String uid = handle.substring(handle.indexOf("?") + 1);
 			String hostname = host.substring(0, host
 					.indexOf(":8443/wsrf/services/ManagedJobFactoryService"));
-			String eprString = "<ns00:EndpointReferenceType xmlns:ns00=\"http://schemas.xmlsoap.org/ws/2004/03/addressing\">\n"
-					+ "<ns00:Address>"
-					+ hostname
-					+ ":8443/wsrf/services/ManagedExecutableJobService</ns00:Address>\n"
-					+ "<ns00:ReferenceProperties><ResourceID xmlns=\"http://www.globus.org/namespaces/2004/10/gram/job\">"
-					+ uid
-					+ "</ResourceID></ns00:ReferenceProperties>\n"
-					+ "<wsa:ReferenceParameters xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/03/addressing\"/>\n"
-					+ "</ns00:EndpointReferenceType>";
+//			String eprString = "<ns00:EndpointReferenceType xmlns:ns00=\"http://schemas.xmlsoap.org/ws/2004/03/addressing\">\n"
+//					+ "<ns00:Address>"
+//					+ hostname
+//					+ ":8443/wsrf/services/ManagedExecutableJobService</ns00:Address>\n"
+//					+ "<ns00:ReferenceProperties><ResourceID xmlns=\"http://www.globus.org/namespaces/2004/10/gram/job\">"
+//					+ uid
+//					+ "</ResourceID></ns00:ReferenceProperties>\n"
+//					+ "<wsa:ReferenceParameters xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/03/addressing\"/>\n"
+//					+ "</ns00:EndpointReferenceType>";
 			try {
 				myLogger.debug("Writing out epr file.");
 				String vo = job.getFqan();
@@ -558,19 +558,22 @@ public class GT4DummySubmitter extends JobSubmitter {
 					vo = vo.replace("/", "_");
 				}
 
+				//to create debug directory
+				ServerPropertiesManager.getDebugModeOn();
+				
 				String uFileName = ServerPropertiesManager.getDebugDirectory()
 						+ "/"
 						+ job.getDn().replace("=", "_").replace(",", "_")
 								.replace(" ", "_") + "_" + job.getJobname()
 						+ "_" + vo + "_" + job.hashCode();
-				FileWriter fileWriter = new FileWriter(uFileName + ".epr");
-				BufferedWriter buffWriter = new BufferedWriter(fileWriter);
-				buffWriter.write(eprString);
-
-				buffWriter.close();
+//				FileWriter fileWriter = new FileWriter(uFileName + ".epr");
+//				BufferedWriter buffWriter = new BufferedWriter(fileWriter);
+//				buffWriter.write(eprString);
+//
+//				buffWriter.close();
 
 				FileWriter fileWriter2 = new FileWriter(uFileName + ".rsl");
-				buffWriter = new BufferedWriter(fileWriter2);
+				BufferedWriter buffWriter = new BufferedWriter(fileWriter2);
 				buffWriter.write(submittedJobDesc);
 				buffWriter.close();
 

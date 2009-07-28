@@ -60,8 +60,10 @@ public final class ServerPropertiesManager {
 	 * @return the path to the debug directory.
 	 */
 	public static String getDebugDirectory() {
-		return new File(Environment.getGrisuDirectory(), "debug")
-				.getAbsolutePath();
+		
+		File dir = new File(Environment.getGrisuDirectory(), "debug");
+		
+		return dir.getAbsolutePath();
 	}
 
 	/**
