@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import java.net.URL;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -57,9 +58,9 @@ import au.org.arcs.mds.JsdlHelpers;
  * @author Markus Binsteiner
  * 
  */
-public class GT4Submitter extends JobSubmitter {
+public class GT4DummySubmitter extends JobSubmitter {
 
-	static final Logger myLogger = Logger.getLogger(GT4Submitter.class
+	static final Logger myLogger = Logger.getLogger(GT4DummySubmitter.class
 			.getName());
 
 	private InformationManager informationManager = CachedMdsInformationManager
@@ -503,39 +504,38 @@ public class GT4Submitter extends JobSubmitter {
 		Date serviceTermination = null;
 		int timeout = GramJob.DEFAULT_TIMEOUT;
 
-		String handle = null;
-		try {
-
-			GSSCredential credential = null;
-			credential = CredentialHelpers.convertByteArrayToGSSCredential(job
-					.getCredential().getCredentialData());
-
-			if (credential == null || credential.getRemainingLifetime() < 1) {
-				throw new NoValidCredentialException(
-						"Credential associated with job: " + job.getDn()
-								+ " / " + job.getJobname() + " is not valid.");
-			}
-
-			GramClient gram = new GramClient(credential);
-
-			handle = gram.submitRSL(getFactoryEPR(host, factoryType),
-					simpleJobCommandLine, jobDesc, authz, xmlSecurity,
-					batchMode, false, false, serviceDuration,
-					serviceTermination, timeout);
-
-		} catch (Exception e) {
-			// TODO handle that
-			e.printStackTrace();
-			if (handle == null) {
-				myLogger.error("Jobhandle is null....");
-				// TODO
-			}
-		}
+		String handle = "DummyHandle"+UUID.randomUUID().toString();
+//		try {
+//
+//			GSSCredential credential = null;
+//			credential = CredentialHelpers.convertByteArrayToGSSCredential(job
+//					.getCredential().getCredentialData());
+//
+//			if (credential == null || credential.getRemainingLifetime() < 1) {
+//				throw new NoValidCredentialException(
+//						"Credential associated with job: " + job.getDn()
+//								+ " / " + job.getJobname() + " is not valid.");
+//			}
+//
+//			GramClient gram = new GramClient(credential);
+//
+//			handle = gram.submitRSL(getFactoryEPR(host, factoryType),
+//					simpleJobCommandLine, jobDesc, authz, xmlSecurity,
+//					batchMode, false, false, serviceDuration,
+//					serviceTermination, timeout);
+//
+//		} catch (Exception e) {
+//			// TODO handle that
+//			e.printStackTrace();
+//			if (handle == null) {
+//				myLogger.error("Jobhandle is null....");
+//				// TODO
+//			}
+//		}
 
 		job.setSubmittedJobDescription(submittedJobDesc);
 		// for debug purposes
 
-		if (ServerPropertiesManager.getDebugModeOn()) {
 
 			String uid = handle.substring(handle.indexOf("?") + 1);
 			String hostname = host.substring(0, host
@@ -587,7 +587,6 @@ public class GT4Submitter extends JobSubmitter {
 				e.printStackTrace();
 			}
 
-		}
 
 		myLogger
 				.debug("Submitted rsl job description:\n--------------------------------");

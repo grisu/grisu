@@ -13,12 +13,12 @@ import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
  * 
  * @author Markus Binsteiner
  */
-public class LocalServiceInterfaceCreator implements ServiceInterfaceCreator {
+public class DummyServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 	static final Logger myLogger = Logger
-			.getLogger(LocalServiceInterfaceCreator.class.getName());
+			.getLogger(DummyServiceInterfaceCreator.class.getName());
 
-	static final String DEFAULT_LOCAL_URL = "Dummy";
+	static final String DEFAULT_LOCAL_URL = "Local";
 
 	public final ServiceInterface create(final String interfaceUrl, final String username,
 			final char[] password, final String myProxyServer, final String myProxyPort,
@@ -28,7 +28,7 @@ public class LocalServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 		try {
 			localServiceInterfaceClass = Class
-					.forName("org.vpac.grisu.control.serviceInterfaces.DummyServiceInterface");
+					.forName("org.vpac.grisu.control.serviceInterfaces.LocalServiceInterface");
 		} catch (ClassNotFoundException e) {
 			myLogger.warn("Could not find local service interface class.");
 			e.printStackTrace();

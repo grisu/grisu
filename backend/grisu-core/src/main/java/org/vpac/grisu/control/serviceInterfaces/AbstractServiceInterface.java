@@ -36,6 +36,7 @@ import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.backend.model.job.JobSubmissionManager;
 import org.vpac.grisu.backend.model.job.JobSubmitter;
+import org.vpac.grisu.backend.model.job.gt4.GT4DummySubmitter;
 import org.vpac.grisu.backend.model.job.gt4.GT4Submitter;
 import org.vpac.grisu.backend.utils.CertHelpers;
 import org.vpac.grisu.backend.utils.FileContentDataSourceConnector;
@@ -109,7 +110,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	private UserDAO userdao = new UserDAO();
 
-	private JobDAO jobdao = new JobDAO();
+	protected JobDAO jobdao = new JobDAO();
 
 	private MountPoint[] mountPointsForThisSession = null;
 
@@ -210,6 +211,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		if (manager == null) {
 			Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
 			submitters.put("GT4", new GT4Submitter());
+			submitters.put("GT4Dummy", new GT4DummySubmitter());
 			manager = new JobSubmissionManager(this, submitters);
 		}
 		return manager;
