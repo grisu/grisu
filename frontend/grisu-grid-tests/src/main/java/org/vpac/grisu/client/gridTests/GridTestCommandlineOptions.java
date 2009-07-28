@@ -104,6 +104,11 @@ public class GridTestCommandlineOptions {
 			System.exit(1);
 		}
 		
+		if ( line.hasOption("help") ) {
+			formatter.printHelp("grisu-grid-test", this.options);
+			System.exit(0);
+		}
+		
 		if ( line.hasOption("list") ) {
 			list = true;
 		}
@@ -191,6 +196,7 @@ public class GridTestCommandlineOptions {
 		Option timeoutInMinutes = createOptionWithArg("cancel", "c", "timeout in minutes after which all jobs that aren't finished are getting killed (default: 240)");
 		Option list = createOption("list", "l", "list all available tests");
 		Option threads = createOptionWithArg("simultaneousThreads", "s", "how many jobs to support at once. Default is 5 (which is recommended)");
+		Option help = createOption("help", "h", "this help text");
 		
 		options = new Options();
 		options.addOption(apps);
@@ -202,7 +208,7 @@ public class GridTestCommandlineOptions {
 		options.addOption(timeoutInMinutes);
 		options.addOption(list);
 		options.addOption(threads);
-		
+		options.addOption(help);
 		return options;
 	}
 	
