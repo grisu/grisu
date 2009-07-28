@@ -20,7 +20,7 @@ public class OutputModuleHelpers {
 			if ( testMap.get(element.getTestInfo().getTestname()) == null ) {
 				Set<GridTestElement> elementList = new TreeSet<GridTestElement>();
 				testMap.put(element.getTestInfo().getTestname(), elementList);
-			}
+			} 
 			
 			testMap.get(element.getTestInfo().getTestname()).add(element);
 		}

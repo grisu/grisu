@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import org.vpac.grisu.client.gridTests.GridTestController;
 import org.vpac.grisu.client.gridTests.GridTestInfo;
 import org.vpac.grisu.client.gridTests.GridTestStage;
 import org.vpac.grisu.client.gridTests.GridTestStageStatus;
@@ -368,7 +367,44 @@ public abstract class GridTestElement implements JobStatusChangeListener, Compar
 			return version;
 		}
 		int subLoc = this.getSubmissionLocation().compareTo(o.getSubmissionLocation());
-		return subLoc;
+		if ( subLoc != 0 ) {
+			return subLoc;
+		}
+		int fqan = this.getFqan().compareTo(o.getFqan());
+		return fqan;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		
+		GridTestElement other = null;
+		try {
+			other = (GridTestElement)o;
+		} catch (Exception e) {
+			return false;
+		}
+		
+		if ( ! this.getTestInfo().getApplicationName().equals(other.getTestInfo().getApplicationName()) ) {
+			return false;
+		}
+		if ( ! this.getTestInfo().getTestname().equals(other.getTestInfo().getTestname()) ) {
+			return false;
+		}
+		if ( ! this.getVersion().equals(other.getVersion()) ) {
+			return false;
+		}
+		if ( ! this.getFqan().equals(other.getFqan()) ) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	@Override
+	public int hashCode() {
+		
+		return (23*getTestInfo().getApplicationName().hashCode())+(12*getTestInfo().getTestname().hashCode())+(3*getVersion().hashCode())+(5*getFqan().hashCode());
+		
 	}
 	
 	public String getFqan() {
