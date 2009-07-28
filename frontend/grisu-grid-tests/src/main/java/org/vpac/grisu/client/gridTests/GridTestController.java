@@ -330,6 +330,9 @@ public class GridTestController {
 			System.out.println(remainingSubLocs.toString());
 
 			System.out.println("Sleeping for another 30 seconds...");
+			System.out.println("All remaining jobs will be killed at: "
+					+ timeoutDate.toString()+"\n");
+			
 
 			try {
 				Thread.sleep(30000);
