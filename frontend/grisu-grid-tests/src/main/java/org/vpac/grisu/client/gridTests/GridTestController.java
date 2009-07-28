@@ -258,7 +258,7 @@ public class GridTestController {
 		cal.add(Calendar.MINUTE, timeout);
 		timeoutDate = cal.getTime();
 
-		System.out.println("All remaining jobs will be killed at: "
+		System.out.println("All unfinished jobs will be killed: "
 				+ timeoutDate.toString());
 
 		for (GridTestElement gte : gridTestElements.values()) {
@@ -330,7 +330,7 @@ public class GridTestController {
 			System.out.println(remainingSubLocs.toString());
 
 			System.out.println("Sleeping for another 30 seconds...");
-			System.out.println("All remaining jobs will be killed at: "
+			System.out.println("All remaining jobs will be killed: "
 					+ timeoutDate.toString()+"\n");
 			
 

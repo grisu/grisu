@@ -350,7 +350,7 @@ public abstract class GridTestElement implements JobStatusChangeListener, Compar
 
 	@Override
 	public String toString() {
-		return "Application: "+info.getApplicationName()+",  version: "+version+", submissionlocation: "+submissionLocation+", fqan: "+fqan;
+		return "Test: "+info.getTestname()+", Application: "+info.getApplicationName()+",  version: "+version+", submissionlocation: "+submissionLocation+", fqan: "+fqan;
 	}
 	
 	public int compareTo(GridTestElement o) {
