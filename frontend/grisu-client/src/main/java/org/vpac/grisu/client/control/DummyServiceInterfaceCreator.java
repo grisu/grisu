@@ -33,7 +33,7 @@ public class DummyServiceInterfaceCreator implements ServiceInterfaceCreator {
 			myLogger.warn("Could not find local service interface class.");
 			e.printStackTrace();
 			throw new ServiceInterfaceException(
-					"Could not find LocalServiceInterface class. Probably grisu-local-backend.jar is not in the classpath.",
+					"Could not find DummyServiceInterface class. Probably grisu-local-backend.jar is not in the classpath.",
 					e);
 		}
 
