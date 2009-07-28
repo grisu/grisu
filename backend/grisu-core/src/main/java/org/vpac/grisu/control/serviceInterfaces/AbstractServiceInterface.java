@@ -299,6 +299,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		Job job;
 		try {
+			myLogger.debug("Trying to get job that shouldn't exist...");
 			job = getJob(jobname);
 			throw new JobPropertiesException(JobSubmissionProperty.JOBNAME,
 					"Jobname \"" + jobname
