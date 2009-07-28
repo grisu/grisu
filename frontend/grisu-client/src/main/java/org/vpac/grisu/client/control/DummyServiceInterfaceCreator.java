@@ -18,7 +18,7 @@ public class DummyServiceInterfaceCreator implements ServiceInterfaceCreator {
 	static final Logger myLogger = Logger
 			.getLogger(DummyServiceInterfaceCreator.class.getName());
 
-	static final String DEFAULT_LOCAL_URL = "Local";
+	static final String DEFAULT_LOCAL_URL = "Dummy";
 
 	public final ServiceInterface create(final String interfaceUrl, final String username,
 			final char[] password, final String myProxyServer, final String myProxyPort,
@@ -28,7 +28,7 @@ public class DummyServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 		try {
 			localServiceInterfaceClass = Class
-					.forName("org.vpac.grisu.control.serviceInterfaces.LocalServiceInterface");
+					.forName("org.vpac.grisu.control.serviceInterfaces.DummyServiceInterface");
 		} catch (ClassNotFoundException e) {
 			myLogger.warn("Could not find local service interface class.");
 			e.printStackTrace();
