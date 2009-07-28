@@ -1,6 +1,7 @@
 package org.vpac.grisu.backend.model.job.gt4;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.StringWriter;
 import java.net.URL;
@@ -30,19 +31,16 @@ import org.globus.exec.utils.rsl.RSLHelper;
 import org.globus.exec.utils.rsl.RSLParseException;
 import org.globus.wsrf.impl.security.authorization.Authorization;
 import org.globus.wsrf.impl.security.authorization.HostAuthorization;
-import org.ietf.jgss.GSSCredential;
 import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.backend.model.job.JobSubmitter;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.info.CachedMdsInformationManager;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.utils.DebugUtils;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
-import org.vpac.security.light.CredentialHelpers;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -560,6 +558,9 @@ public class GT4DummySubmitter extends JobSubmitter {
 
 				//to create debug directory
 				ServerPropertiesManager.getDebugModeOn();
+				if ( ! new File(ServerPropertiesManager.getDebugDirectory()).exists() ) {
+					new File(ServerPropertiesManager.getDebugDirectory()).mkdirs();
+				}
 				
 				String uFileName = ServerPropertiesManager.getDebugDirectory()
 						+ "/"
