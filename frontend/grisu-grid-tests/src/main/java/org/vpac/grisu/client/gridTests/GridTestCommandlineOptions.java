@@ -195,7 +195,7 @@ public class GridTestCommandlineOptions {
 		Option include = createOptionWithArg("include", "i", "(comma-seperated) filters to only include certain hostnames");
 		Option timeoutInMinutes = createOptionWithArg("cancel", "c", "timeout in minutes after which all jobs that aren't finished are getting killed (default: 240)");
 		Option list = createOption("list", "l", "list all available tests");
-		Option threads = createOptionWithArg("simultaneousThreads", "s", "how many jobs to support at once. Default is 5 (which is recommended)");
+		Option threads = createOptionWithArg("simultaneousThreads", "s", "how many jobs to submit at once. Default is 5 (which is recommended)");
 		Option help = createOption("help", "h", "this help text");
 		
 		options = new Options();
