@@ -825,7 +825,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							+ jobname);
 		}
 
-		job.addJobProperty("submissionTime", Long
+		job.addJobProperty(Constants.SUBMISSION_TIME_KEY, Long
 				.toString(new Date().getTime()));
 
 		// we don't want the credential to be stored with the job in this case
@@ -948,7 +948,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		DtoJobs dtoJobs = new DtoJobs();
 		for (Job job : jobs) {
-			DtoJob.createJob(job.getStatus(), job.getJobProperties());
+			DtoJob dtojob = DtoJob.createJob(job.getStatus(), job.getJobProperties());
+			dtoJobs.addJob(dtojob);
 		}
 
 		return dtoJobs;

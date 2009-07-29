@@ -449,7 +449,7 @@ public class JobSubmissionObjectImpl {
 	}
 	
 	@Transient
-	protected final String getJobDescriptionDocumentAsString() throws JobPropertiesException {
+	public final String getJobDescriptionDocumentAsString() throws JobPropertiesException {
 		
 		String jsdlString = null;
 		jsdlString = SeveralXMLHelpers.toString(getJobDescriptionDocument());
