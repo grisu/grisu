@@ -13,6 +13,7 @@ jar cmf ../../backend/grisu-core/MANIFEST.MF ../grisu-local-backend.jar .
 cd ..
 #jar -i grisu-local-backend.jar
 
+
 # fix grid-tests client
 mkdir grisu-grid-tests
 cd grisu-grid-tests
