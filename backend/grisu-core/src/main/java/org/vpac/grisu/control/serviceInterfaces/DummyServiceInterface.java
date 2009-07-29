@@ -326,12 +326,18 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 
 		myLogger.debug("Dummy staging files...");
 	}
-	
+
 	public String upload(final DataHandler source, final String filename,
 			final boolean return_absolute_url) throws RemoteFileSystemException {
 
 		return "DummyHandle";
 	}
 
+//	public boolean mkdir(final String url) throws RemoteFileSystemException {
+//
+//		myLogger.debug("Dummy. Not creating folder: " + url + "...");
+//		return true;
+//
+//	}
 
 }
