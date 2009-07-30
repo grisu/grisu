@@ -232,6 +232,14 @@ public class JobSubmissionObjectImpl {
 	public String getStdin() {
 		return this.stdin;
 	}
+	
+	public String getPbsDebug() {
+		return pbsDebug;
+	}
+
+	public void setPbsDebug(String pbsDebug) {
+		this.pbsDebug = pbsDebug;
+	}
 
 	private String jobname;
 	private String application;
@@ -251,6 +259,7 @@ public class JobSubmissionObjectImpl {
 	private String stderr;
 	private String stdout;
 	private String stdin;
+	private String pbsDebug;
 
 	public JobSubmissionObjectImpl() {
 	}
@@ -325,6 +334,8 @@ public class JobSubmissionObjectImpl {
 		this.stdout = jobProperties
 				.get(JobSubmissionProperty.STDOUT.toString());
 		this.stdin = jobProperties.get(JobSubmissionProperty.STDIN.toString());
+		
+		this.pbsDebug = jobProperties.get(JobSubmissionProperty.PBSDEBUG.toString());
 
 	}
 
@@ -375,6 +386,7 @@ public class JobSubmissionObjectImpl {
 		stderr = JsdlHelpers.getPosixStandardError(jsdl);
 		stdout = JsdlHelpers.getPosixStandardOutput(jsdl);
 		stdin = JsdlHelpers.getPosixStandardInput(jsdl);
+		pbsDebug = JsdlHelpers.getPbsDebugElement(jsdl);
 	}
 
 	@Transient
@@ -417,6 +429,7 @@ public class JobSubmissionObjectImpl {
 				submissionLocation);
 		jobProperties.put(JobSubmissionProperty.WALLTIME_IN_MINUTES,
 				new Integer(walltime_in_seconds).toString());
+		jobProperties.put(JobSubmissionProperty.PBSDEBUG, pbsDebug);
 
 		return jobProperties;
 	}

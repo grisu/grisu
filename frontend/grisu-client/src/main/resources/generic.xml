@@ -4,6 +4,7 @@
 		<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
 			<Email sendOnJobFinish="XXX_email_on_finish_XXX" sendOnJobStart="XXX_email_on_start_XXX" >XXX_email_address_XXX</Email>
 		</GrisuTemplate>
+		<PbsDebug xmlns="http://arcs.org.au/jsdl/jsdl-grisu">XXX_pbsDebug_XXX</PbsDebug>
 		XXX_modules_XXX
 		<JobIdentification>
 			<JobName>XXX_jobname_XXX</JobName>

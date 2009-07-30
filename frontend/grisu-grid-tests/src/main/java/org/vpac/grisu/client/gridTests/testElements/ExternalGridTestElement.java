@@ -65,6 +65,8 @@ public class ExternalGridTestElement extends GridTestElement {
 
 		Document jsdlDoc = ((GridExternalTestInfoImpl)getTestInfo()).getJsdlDoc();
 
+		System.out.println(SeveralXMLHelpers.toStringWithoutAnnoyingExceptions(jsdlDoc));
+		
 		JobObject job = new JobObject(serviceInterface, jsdlDoc);
 		for (String input : ((GridExternalTestInfoImpl)getTestInfo()).getInputFiles()) {
 			job.addInputFileUrl(((GridExternalTestInfoImpl)getTestInfo()).getTestBaseDir()+File.separator+input);
