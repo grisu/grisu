@@ -5,6 +5,8 @@ import org.vpac.grisu.frontend.control.login.LoginHelpers;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 
+import au.org.arcs.jcommons.constants.Constants;
+
 public final class CreateJobAndSubmitJobAndCheckJobInDifferentStages {
 
 	private CreateJobAndSubmitJobAndCheckJobInDifferentStages() {
@@ -35,7 +37,7 @@ public final class CreateJobAndSubmitJobAndCheckJobInDifferentStages {
 						.getJobDescriptionDocument()));
 
 		String newJobname = createJobObject.createJob("/ARCS/NGAdmin",
-				ServiceInterface.TIMESTAMP_METHOD);
+				Constants.TIMESTAMP_METHOD);
 
 		JobObject submitJobObject = new JobObject(si, newJobname);
 

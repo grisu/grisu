@@ -139,7 +139,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 */
 	public final String createJob(final String fqan) throws JobPropertiesException {
 
-		return createJob(fqan, ServiceInterface.FORCE_NAME_METHOD);
+		return createJob(fqan, Constants.FORCE_NAME_METHOD);
 	}
 
 	/**
