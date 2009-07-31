@@ -82,7 +82,7 @@ public class ProxyServiceInterface implements ServiceInterface {
 			throws RemoteFileSystemException {
 				try {
 			Method m = si.getClass().getMethod("cp", source.getClass(), target.getClass(), boolean.class, boolean.class);
-			return (String)(m.invoke(si, source, target));
+			return (String)(m.invoke(si, source, target, overwrite, waitForFileTransferToFinish));
 			
 			} catch (SecurityException e) {
 				throw new RuntimeException(e);
