@@ -34,7 +34,6 @@
 			<url>http://code.arcs.org.au/nexus/content/repositories/snapshots</url>
 			<uniqueVersion>false</uniqueVersion>
 		</snapshotRepository>
-
 	</distributionManagement>
 
 	<issueManagement>

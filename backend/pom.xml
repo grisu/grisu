@@ -15,6 +15,5 @@
 
 	<modules>
 		<module>grisu-core</module>
-		<module>grisu-enunciate</module>
 	</modules>
 </project>
