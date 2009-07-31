@@ -7,7 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.model.FileManager;
 import org.w3c.dom.Document;
 
-import au.org.arcs.mds.JobSubmissionProperty;
+import au.org.arcs.jcommons.constants.JobSubmissionProperty;
 
 /**
  * This class creats a job description document out of the job properties using

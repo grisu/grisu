@@ -23,7 +23,7 @@ import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 
-import au.org.arcs.mds.JobSubmissionProperty;
+import au.org.arcs.jcommons.constants.JobSubmissionProperty;
 
 /**
  * This is the central interface of grisu. These are the methods the web service

@@ -1,20 +1,12 @@
 package org.vpac.grisu.control.serviceInterfaces;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 import javax.activation.DataHandler;
 
-import org.apache.commons.vfs.FileContent;
-import org.apache.commons.vfs.FileObject;
-import org.apache.commons.vfs.FileSystemException;
 import org.globus.myproxy.CredentialInfo;
 import org.globus.myproxy.MyProxy;
 import org.globus.myproxy.MyProxyException;
@@ -41,9 +33,6 @@ import org.vpac.security.light.plainProxy.LocalProxy;
 import org.vpac.security.light.voms.VO;
 import org.vpac.security.light.voms.VOManagement.VOManagement;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import au.org.arcs.mds.JsdlHelpers;
 
 public class DummyServiceInterface extends AbstractServiceInterface implements
 		ServiceInterface {

@@ -11,23 +11,21 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Transient;
-import javax.xml.transform.TransformerException;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
-import org.vpac.grisu.utils.SeveralStringHelpers;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.vpac.grisu.utils.SimpleJsdlBuilder;
 import org.w3c.dom.Document;
 
-import au.org.arcs.mds.Constants;
-import au.org.arcs.mds.JobSubmissionProperty;
-import au.org.arcs.mds.JsdlHelpers;
+import au.org.arcs.jcommons.constants.Constants;
+import au.org.arcs.jcommons.utils.JsdlHelpers;
+import au.org.arcs.jcommons.constants.*;
 
 /**
  * A class that helps creating a job.
  * 
- * This class is extended by the JobObject class in the grisu-client-slim
+ * This class is extended by the JobObject class in the grisu-client
  * package which includes methods to create the job on the serviceinterface,
  * submit and monitor/control it.
  * 
@@ -250,7 +248,7 @@ public class JobSubmissionObjectImpl {
 	private int cpus = 1;
 	private boolean force_single = false;
 	private boolean force_mpi = false;
-	private long memory_in_bytes = 0;;
+	private long memory_in_bytes = 0;
 	private int walltime_in_seconds = 300;
 	private Set<String> inputFileUrls = new HashSet<String>();
 	private Set<String> modules = new HashSet<String>();

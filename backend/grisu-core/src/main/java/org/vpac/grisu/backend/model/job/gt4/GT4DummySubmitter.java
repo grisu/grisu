@@ -44,9 +44,9 @@ import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import au.org.arcs.mds.Constants;
-import au.org.arcs.mds.InformationManager;
-import au.org.arcs.mds.JsdlHelpers;
+import au.org.arcs.jcommons.constants.Constants;
+import au.org.arcs.jcommons.interfaces.InformationManager;
+import au.org.arcs.jcommons.utils.JsdlHelpers;
 
 /**
  * This class is the connector class between grisu and our GT4 gateways. It

@@ -13,7 +13,7 @@ import java.util.TreeSet;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.info.ResourceInformation;
 
-import au.org.arcs.mds.Constants;
+import au.org.arcs.jcommons.constants.Constants;
 
 /**
  * The implemenation of {@link UserEnvironmentManager}.

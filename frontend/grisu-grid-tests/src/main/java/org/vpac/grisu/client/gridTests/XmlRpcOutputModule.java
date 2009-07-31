@@ -9,7 +9,7 @@ import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.vpac.grisu.client.gridTests.testElements.GridTestElement;
 
-import au.org.arcs.mds.SubmissionLocationHelpers;
+import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
 
 public class XmlRpcOutputModule implements OutputModule {
 

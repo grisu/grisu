@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import au.org.arcs.mds.GridResource;
+import au.org.arcs.jcommons.interfaces.GridResource;
 
 /**
  * A wrapper object that is created when the grid is queried for resources that are able to 

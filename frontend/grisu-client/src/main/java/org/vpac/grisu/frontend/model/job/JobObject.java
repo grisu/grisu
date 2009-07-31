@@ -20,8 +20,8 @@ import org.vpac.grisu.utils.FileHelpers;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 
-import au.org.arcs.mds.Constants;
-import au.org.arcs.mds.JobSubmissionProperty;
+import au.org.arcs.jcommons.constants.Constants;
+import au.org.arcs.jcommons.constants.JobSubmissionProperty;
 
 /**
  * A model class that hides all the complexity of creating and submitting a job.

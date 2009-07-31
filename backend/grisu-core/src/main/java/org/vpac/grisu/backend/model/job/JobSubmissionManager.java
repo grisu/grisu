@@ -9,8 +9,8 @@ import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.w3c.dom.Document;
 
-import au.org.arcs.mds.Constants;
-import au.org.arcs.mds.JsdlHelpers;
+import au.org.arcs.jcommons.constants.Constants;
+import au.org.arcs.jcommons.utils.JsdlHelpers;
 
 /**
  * The JobSubmissionManager class provides an interface between grisu and the

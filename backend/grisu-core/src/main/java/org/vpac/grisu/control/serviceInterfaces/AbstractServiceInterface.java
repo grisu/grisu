@@ -73,12 +73,12 @@ import org.w3c.dom.Element;
 
 import au.org.arcs.grid.grisu.matchmaker.MatchMakerImpl;
 import au.org.arcs.grid.sched.MatchMaker;
-import au.org.arcs.mds.Constants;
-import au.org.arcs.mds.GridResource;
-import au.org.arcs.mds.InformationManager;
-import au.org.arcs.mds.JobSubmissionProperty;
-import au.org.arcs.mds.JsdlHelpers;
-import au.org.arcs.mds.SubmissionLocationHelpers;
+import au.org.arcs.jcommons.constants.Constants;
+import au.org.arcs.jcommons.constants.JobSubmissionProperty;
+import au.org.arcs.jcommons.interfaces.GridResource;
+import au.org.arcs.jcommons.interfaces.InformationManager;
+import au.org.arcs.jcommons.utils.JsdlHelpers;
+import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
 
 /**
  * This abstract class implements most of the methods of the

@@ -30,8 +30,6 @@ import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 
-import au.org.arcs.mds.JobSubmissionProperty;
-
 /**
  * This is the central interface of grisu. These are the methods the web service
  * provices for the clients to access. I tried to keep the number of methods as

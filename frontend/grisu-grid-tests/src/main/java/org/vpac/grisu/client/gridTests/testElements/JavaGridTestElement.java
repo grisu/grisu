@@ -7,7 +7,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.frontend.model.job.JobObject;
 
-import au.org.arcs.mds.Constants;
+import au.org.arcs.jcommons.constants.Constants;
 
 public class JavaGridTestElement extends GridTestElement {
 

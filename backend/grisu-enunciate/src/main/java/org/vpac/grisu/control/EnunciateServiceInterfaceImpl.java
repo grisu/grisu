@@ -56,7 +56,6 @@ import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.info.CachedMdsInformationManager;
-import org.vpac.grisu.control.serviceInterfaces.AbstractServiceInterface;
 import org.vpac.grisu.control.serviceInterfaces.LocalServiceInterface;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.DtoApplicationDetails;
@@ -84,12 +83,12 @@ import org.w3c.dom.Element;
 
 import au.org.arcs.grid.grisu.matchmaker.MatchMakerImpl;
 import au.org.arcs.grid.sched.MatchMaker;
-import au.org.arcs.mds.Constants;
-import au.org.arcs.mds.GridResource;
-import au.org.arcs.mds.InformationManager;
-import au.org.arcs.mds.JobSubmissionProperty;
-import au.org.arcs.mds.JsdlHelpers;
-import au.org.arcs.mds.SubmissionLocationHelpers;
+import au.org.arcs.jcommons.constants.Constants;
+import au.org.arcs.jcommons.constants.JobSubmissionProperty;
+import au.org.arcs.jcommons.interfaces.GridResource;
+import au.org.arcs.jcommons.interfaces.InformationManager;
+import au.org.arcs.jcommons.utils.JsdlHelpers;
+import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
 
 import com.sun.xml.ws.developer.StreamingAttachment;
 

@@ -11,8 +11,8 @@ import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistry;
 
-import au.org.arcs.mds.Constants;
-import au.org.arcs.mds.JobSubmissionProperty;
+import au.org.arcs.jcommons.constants.Constants;
+import au.org.arcs.jcommons.constants.JobSubmissionProperty;
 
 public class SimpleCatJobGridTestElement extends GridTestElement {
 	

@@ -1,9 +1,7 @@
 package org.vpac.grisu.backend.model.job;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Column;
@@ -24,8 +22,7 @@ import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import au.org.arcs.mds.Constants;
-import au.org.arcs.mds.JsdlHelpers;
+import au.org.arcs.jcommons.utils.JsdlHelpers;
 
 /**
  * This class holds all the relevant information about a job.

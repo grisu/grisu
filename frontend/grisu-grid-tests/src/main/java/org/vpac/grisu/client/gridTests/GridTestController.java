@@ -31,7 +31,7 @@ import org.vpac.grisu.model.info.ApplicationInformation;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.security.light.plainProxy.LocalProxy;
 
-import au.org.arcs.mds.Constants;
+import au.org.arcs.jcommons.constants.Constants;
 
 public class GridTestController {
 

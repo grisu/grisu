@@ -3,13 +3,10 @@ package org.vpac.grisu.client.gridTests;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.client.gridTests.testElements.ExternalGridTestElement;
@@ -20,8 +17,8 @@ import org.vpac.grisu.model.info.ApplicationInformation;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 
-import au.org.arcs.mds.Constants;
-import au.org.arcs.mds.JsdlHelpers;
+import au.org.arcs.jcommons.constants.Constants;
+import au.org.arcs.jcommons.utils.JsdlHelpers;
 
 public class GridExternalTestInfoImpl implements GridTestInfo {
 

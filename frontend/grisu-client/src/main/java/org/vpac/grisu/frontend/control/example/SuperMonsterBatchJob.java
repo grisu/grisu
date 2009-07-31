@@ -15,7 +15,7 @@ import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 
-import au.org.arcs.mds.Constants;
+import au.org.arcs.jcommons.constants.Constants;
 
 public final class SuperMonsterBatchJob {
 	

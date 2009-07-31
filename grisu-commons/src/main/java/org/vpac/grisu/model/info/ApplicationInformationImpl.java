@@ -11,7 +11,7 @@ import java.util.TreeSet;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.GrisuRegistry;
 
-import au.org.arcs.mds.Constants;
+import au.org.arcs.jcommons.constants.Constants;
 
 /**
  * Default implementation for {@link ApplicationInformation}.

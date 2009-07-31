@@ -6,7 +6,7 @@ import java.util.Map;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 
-import au.org.arcs.mds.Constants;
+import au.org.arcs.jcommons.constants.Constants;
 
 /**
  * Job properties that are available after a job is created on the backend.

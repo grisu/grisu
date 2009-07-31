@@ -12,8 +12,8 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.UserEnvironmentManager;
 import org.vpac.grisu.model.dto.DtoJob;
 
-import au.org.arcs.mds.GridResource;
-import au.org.arcs.mds.JobSubmissionProperty;
+import au.org.arcs.jcommons.constants.JobSubmissionProperty;
+import au.org.arcs.jcommons.interfaces.GridResource;
 
 /**
  * Implementation of {@link UserApplicationInformation}.

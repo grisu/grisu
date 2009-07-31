@@ -13,7 +13,7 @@ import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.info.ApplicationInformation;
 
-import au.org.arcs.mds.Constants;
+import au.org.arcs.jcommons.constants.Constants;
 
 public class GridInternalTestInfoImpl implements GridTestInfo {
 
