@@ -37,10 +37,6 @@ public interface ServiceInterface {
 
 	double INTERFACE_VERSION = 10;
 
-	// job creation method names
-	String FORCE_NAME_METHOD = "force-name";
-	String UUID_NAME_METHOD = "uuid";
-	String TIMESTAMP_METHOD = "timestamp";
 
 	// ---------------------------------------------------------------------------------------------------
 	// 

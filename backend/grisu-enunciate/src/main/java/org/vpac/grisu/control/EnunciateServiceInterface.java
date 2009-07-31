@@ -7,9 +7,14 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.annotation.security.RolesAllowed;
 import javax.jws.WebService;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.xml.bind.annotation.XmlMimeType;
 
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
@@ -30,6 +35,8 @@ import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 
+import au.org.arcs.mds.JobSubmissionProperty;
+
 /**
  * This is the central interface of grisu. These are the methods the web service
  * provices for the clients to access. I tried to keep the number of methods as
@@ -44,11 +51,6 @@ import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 public interface EnunciateServiceInterface extends ServiceInterface {
 
 	double INTERFACE_VERSION = 10;
-
-	// job creation method names
-	String FORCE_NAME_METHOD = "force-name";
-	String UUID_NAME_METHOD = "uuid";
-	String TIMESTAMP_METHOD = "timestamp";
 
 	// ---------------------------------------------------------------------------------------------------
 	// 
@@ -75,7 +77,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * @throws NoValidCredentialException
 	 *             if the login was not successful
 	 */
-	void login(String username, String password);
+	@POST
+	@Path("login")
+	@Consumes("text/plain")
+	void login(@QueryParam("username") String username, @QueryParam("password") String password);
 
 	/**
 	 * Logout of the service. Performs housekeeping tasks and usually deletes
@@ -83,6 +88,9 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * 
 	 * @return a logout message
 	 */
+	@POST
+	@Path("logout")
+	@Produces("text/plain")
 	String logout();
 
 	/**
@@ -128,13 +136,20 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 *            the key
 	 * @return the value
 	 */
-	String getUserProperty(String key);
+	@RolesAllowed("User")
+	@GET
+	@Path("user/properties/{key}")
+	@Produces("text/plain")
+	String getUserProperty(@PathParam("key") String key);
 
 	/**
 	 * Returns the end time of the credential used.
 	 * 
 	 * @return the end time or -1 if the endtime couldn't be determined
 	 */
+	@RolesAllowed("User")
+	@GET
+	@Path("user/session/credentialendtime")
 	long getCredentialEndTime();
 
 	/**
@@ -162,7 +177,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 *            the host
 	 * @return the site
 	 */
-	String getSite(String host);
+	@GET
+	@Path("info/hosts/{host}/site")
+	@Produces("text/plain")
+	String getSite(@PathParam("host") String host);
 
 	/**
 	 * This returns a map of all hosts that the information provider has listed
@@ -174,7 +192,7 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 *         belong to
 	 */
 	@GET
-	@Path("info/allHosts")
+	@Path("info/hosts/allHosts")
 	DtoHostsInfo getAllHosts();
 
 	/**
@@ -280,7 +298,9 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 *         the paths that are accessible for this VO there as values (e.g.
 	 *         /home/grid-admin)
 	 */
-	DtoDataLocations getDataLocationsForVO(String fqan);
+	@GET
+	@Path("info/{fqan}/datalocations")
+	DtoDataLocations getDataLocationsForVO(@PathParam("fqan") String fqan);
 
 	/**
 	 * Returns an array of the versions of the specified application that a submissionlocation
@@ -294,10 +314,6 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 */
 	String[] getVersionsOfApplicationOnSubmissionLocation(
 			String application, String submissionLocation);
-
-	//	
-	// public String[] getVersionsOfApplicationOnSubmissionLocation(String
-	// application, String submissionLocation, String fqan);
 
 	/**
 	 * Returns an array of the gridftp servers for the specified submission
@@ -323,6 +339,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * 
 	 * @return the dn of the users' certificate
 	 */
+	@GET
+	@RolesAllowed("User")
+	@Path("user/dn")
+	@Produces("text/plain")
 	String getDN();
 
 	/**
@@ -391,8 +411,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 *            the fqan to use to submit the job
 	 * @return a list of matching submissionLoctations
 	 */
-	DtoGridResources findMatchingSubmissionLocationsUsingJsdl(String jsdl,
-			String fqan);
+	@POST
+	@Path("info/submissionlocations/forJsdlAndFqan")
+	DtoGridResources findMatchingSubmissionLocationsUsingJsdl(@QueryParam("jsdl") String jsdl,
+			@QueryParam("fqan") String fqan);
 
 	/**
 	 * Takes a jsdl template and returns a list of submission locations that
@@ -406,8 +428,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 *            the fqan to use to submit the job
 	 * @return a list of matching submissionLoctations
 	 */
+	@POST
+	@Path("info/submissionlocations/forJobPropertiesAndFqan")
 	DtoGridResources findMatchingSubmissionLocationsUsingMap(
-			DtoJob jobProperties, String fqan);
+			@QueryParam("jobProperties") DtoJob jobProperties, @QueryParam("fqan") String fqan);
 
 	// ---------------------------------------------------------------------------------------------------
 	// 
@@ -431,8 +455,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the remote filesystem could not be mounted/connected to
 	 */
-	MountPoint mountWithoutFqan(String url, String mountpoint,
-			boolean useHomeDirectoryOnThisFileSystemIfPossible)
+	@POST
+	@Path("actions/mountWithoutFqan")
+	MountPoint mountWithoutFqan(@QueryParam("url") String url, @QueryParam("alias") String alias,
+			@QueryParam("useHomeDir") boolean useHomeDirectoryOnThisFileSystemIfPossible)
 			throws RemoteFileSystemException;
 
 	/**
@@ -454,8 +480,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the remote filesystem could not be mounted/connected to
 	 */
-	MountPoint mount(String url, String mountpoint, String fqan,
-			boolean useHomeDirectoryOnThisFileSystemIfPossible)
+	@POST
+	@Path("actions/mount")
+	MountPoint mount(@QueryParam("url") String url, @QueryParam("alias") String alias, @QueryParam("fqan") String fqan,
+			@QueryParam("useHomeDir") boolean useHomeDirectoryOnThisFileSystemIfPossible)
 			throws RemoteFileSystemException;
 
 	/**
@@ -465,7 +493,9 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 *            the mountpoint
 	 * @return whether it worked or not
 	 */
-	void umount(String mountpoint);
+	@POST
+	@Path("actions/umount")
+	void umount(@QueryParam("alias") String alias);
 
 	/**
 	 * Lists all the mountpoints of the user's virtual filesystem.
@@ -473,7 +503,7 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * @return all the MountPoints
 	 */
 	@GET
-	@Path("user/df")
+	@Path("user/allMountpoints")
 	@RolesAllowed("User")
 	DtoMountPoints df();
 
@@ -484,7 +514,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 *            the uri
 	 * @return the mountpoint or null if no mountpoint can be found
 	 */
-	MountPoint getMountPointForUri(String uri);
+	@POST
+	@RolesAllowed("User")
+	@Path("user/mountpointForUrl")
+	MountPoint getMountPointForUri(@QueryParam("url") String url);
 
 	/**
 	 * Upload a {@link DataSource} to the users' virtual filesystem.
@@ -501,8 +534,12 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 *             if the remote (target) filesystem could not be connected /
 	 *             mounted / is not writeable
 	 */
-	String upload(@XmlMimeType("application/octet-stream") DataHandler file, String filename,
-			boolean return_absolute_url) throws RemoteFileSystemException;
+	@POST
+	@RolesAllowed("User")
+	@Path("actions/upload")
+	@Produces("text/plain")
+	String upload(@XmlMimeType("application/octet-stream") DataHandler file, @QueryParam("filename") String filename,
+			@QueryParam("returnAbsUrl") boolean return_absolute_url) throws RemoteFileSystemException;
 
 	/**
 	 * Download a file to the client.
@@ -515,7 +552,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 *             /mounted / is not readable
 	 */
 	@XmlMimeType("application/octet-stream")
-	DataHandler download(String filename)
+	@POST
+	@RolesAllowed("User")
+	@Path("actions/download")
+	DataHandler download(@QueryParam("filename") String filename)
 			throws RemoteFileSystemException;
 
 	/**
@@ -539,7 +579,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the remote directory could not be read/mounted
 	 */
-	DtoFolder ls(String directory, int recursion_level) throws RemoteFileSystemException;
+	@POST
+	@Path("user/listDirectory")
+	@RolesAllowed("User")
+	DtoFolder ls(@QueryParam("url") String url, @QueryParam("recursionLevel") int recursionLevel) throws RemoteFileSystemException;
 
 	/**
 	 * Copies one file to another location (recursively if it's a directory).
@@ -558,8 +601,11 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 *             if the remote source file system could not be read/mounted or
 	 *             the remote target file system could not be written to
 	 */
-	String cp(String source, String target, boolean overwrite,
-			boolean waitForFileTransferToFinish)
+	@POST
+	@Path("actions/cp")
+	@RolesAllowed("User")
+	String cp(@QueryParam("source") String source, @QueryParam("target") String target, @QueryParam("overwrite") boolean overwrite,
+			@QueryParam("wait") boolean wait)
 			throws RemoteFileSystemException;
 
 
@@ -573,6 +619,9 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 *             if the file system can't be accessed to determine whether the
 	 *             file exists
 	 */
+	@POST
+	@Path("user/files/fileExists")
+	@RolesAllowed("User")
 	boolean fileExists(String file) throws RemoteFileSystemException;
 	
 	/**
@@ -584,6 +633,9 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the files can't be accessed
 	 */
+	@RolesAllowed("User")
+	@POST
+	@Path("user/files/isFolder")
 	boolean isFolder(String file) throws RemoteFileSystemException;
 
 	/**
@@ -600,7 +652,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the folder can't be accessed/read
 	 */
-	String[] getChildrenFileNames(String folder, boolean onlyFiles)
+	@RolesAllowed("User")
+	@POST
+	@Path("user/files/childrenfilenames")
+	String[] getChildrenFileNames(@QueryParam("url") String url, @QueryParam("onlyFiles") boolean onlyFiles)
 			throws RemoteFileSystemException;
 
 	/**
@@ -615,7 +670,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the file can't be accessed
 	 */
-	long getFileSize(String file) throws RemoteFileSystemException;
+	@RolesAllowed("User")
+	@POST
+	@Path("user/files/filesize")
+	long getFileSize(@QueryParam("url") String url) throws RemoteFileSystemException;
 
 
 	/**
@@ -626,7 +684,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * @return the last modified date
 	 * @throws RemoteFileSystemException if the file could not be accessed
 	 */
-	long lastModified(String remoteFile)
+	@RolesAllowed("User")
+	@POST
+	@Path("user/files/lastModified")
+	long lastModified(@QueryParam("url") String url)
 			throws RemoteFileSystemException;
 
 	/**
@@ -640,7 +701,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the filesystem could not be accessed
 	 */
-	boolean mkdir(String folder) throws RemoteFileSystemException;
+	@RolesAllowed("User")
+	@POST
+	@Path("actions/mkdir")
+	boolean mkdir(@QueryParam("url") String url) throws RemoteFileSystemException;
 
 	/**
 	 * Deletes a remote file.
@@ -650,7 +714,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the filesystem could not be accessed
 	 */
-	void deleteFile(String file) throws RemoteFileSystemException;
+	@RolesAllowed("User")
+	@POST
+	@Path("actions/delete")
+	void deleteFile(@QueryParam("url") String url) throws RemoteFileSystemException;
 
 	/**
 	 * Deletes a bunch of remote files.
@@ -676,7 +743,11 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 *  
 	 * @return xml formated information about all the users jobs
 	 */
-	DtoJobs ps(boolean refreshJobStatus);
+	@GET
+	@Path("user/alljobs/{refresh}")
+	@RolesAllowed("User")
+	DtoJobs ps(@PathParam("refresh") boolean refreshJobStatus);
+	
 
 	/**
 	 * Returns a list of all jobnames that are currently stored on this backend.
@@ -710,8 +781,11 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 *             already exists and force-jobname is specified as jobname
 	 *             creation method).
 	 */
-	String createJobUsingMap(DtoJob job, String fqan,
-			String jobnameCreationMethod) throws JobPropertiesException;
+	@POST
+	@Path("actions/createJobUsingJobProperties")
+	@RolesAllowed("User")
+	String createJobUsingMap(@QueryParam("job") DtoJob job, @QueryParam("fqan") String fqan,
+			@QueryParam("method") String jobnameCreationMethod) throws JobPropertiesException;
 
 	/**
 	 * This method calls {@link #createJobUsingMap(Map, String, String)} internally with
@@ -732,8 +806,11 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 *             already exists and force-jobname is specified as jobname
 	 *             creation method).
 	 */
-	String createJobUsingJsdl(String jsdl, String fqan,
-			String jobnameCreationMethod) throws JobPropertiesException;
+	@POST
+	@Path("actions/createJobUsingJsdl")
+	@RolesAllowed("User")
+	String createJobUsingJsdl(@QueryParam("jsdl") String jsdl, @QueryParam("fqan") String fqan,
+			@QueryParam("method") String jobnameCreationMethod) throws JobPropertiesException;
 
 	/**
 	 * Submits the job that was prepared before using
@@ -746,7 +823,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * @throws JobSubmissionException
 	 *             if the job could not submitted
 	 */
-	void submitJob(String jobname) throws JobSubmissionException;
+	@POST
+	@Path("actions/submitJob/{jobname}")
+	@RolesAllowed("User")
+	void submitJob(@PathParam("jobname") String jobname) throws JobSubmissionException;
 
 	/**
 	 * Method to query the status of a job. The String representation of the
@@ -759,7 +839,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * @throws NoSuchJobException
 	 *             if no job with the specified jobname exists
 	 */
-	int getJobStatus(String jobname);
+	@POST
+	@Path("user/jobs/status/{jobname}")
+	@RolesAllowed("User")
+	int getJobStatus(@PathParam("jobname") String jobname);
 
 	/**
 	 * Deletes the whole jobdirectory and if successful, the job from the
@@ -773,7 +856,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 *             if the files can't be deleted
 	 * @throws NoSuchJobException if no such job exists
 	 */
-	void kill(String jobname, boolean clean)
+	@POST
+	@Path("actions/kill/{jobname}")
+	@RolesAllowed("User")
+	void kill(@PathParam("jobname") String jobname, @QueryParam("clean") boolean clean)
 			throws RemoteFileSystemException, NoSuchJobException;
 
 	/**
@@ -791,7 +877,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * @throws NoSuchJobException
 	 *             if there is no job with this jobname in the database
 	 */
-	void addJobProperty(String jobname, String key, String value)
+	@POST
+	@Path("actions/addJobProperty/{jobname}")
+	@RolesAllowed("User")
+	void addJobProperty(@PathParam("jobname") String jobname, @QueryParam("key") String key, @QueryParam("value") String value)
 			throws NoSuchJobException;
 
 	/**
@@ -804,7 +893,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * @throws NoSuchJobException
 	 *             if there is no job with this jobname in the database
 	 */
-	void addJobProperties(String jobname, DtoJob properties)
+	@POST
+	@Path("actions/addJobProperties/{jobname}")
+	@RolesAllowed("User")
+	void addJobProperties(@PathParam("jobname") String jobname, @QueryParam("properties") DtoJob properties)
 			throws NoSuchJobException;
 
 	/**
@@ -817,8 +909,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * @return the value
 	 * @throws NoSuchJobException if no such job exists
 	 */
-
-	String getJobProperty(String jobname, String key)
+	@POST
+	@Path("user/getJobProperty/{jobname}/{key}")
+	@RolesAllowed("User")
+	String getJobProperty(@PathParam("jobname") String jobname, @PathParam("key") String key)
 			throws NoSuchJobException;
 
 	/**
@@ -829,7 +923,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * @return the job properties
 	 * @throws NoSuchJobException if no such job exists
 	 */
-	DtoJob getAllJobProperties(String jobname)
+	@POST
+	@Path("user/getAllJobProperties/{jobname}")
+	@RolesAllowed("User")
+	DtoJob getAllJobProperties(@PathParam("jobname") String jobname)
 			throws NoSuchJobException;
 
 
@@ -840,6 +937,10 @@ public interface EnunciateServiceInterface extends ServiceInterface {
 	 * @return the jsdl document
 	 * @throws NoSuchJobException if no such job exists
 	 */
-	String getJsdlDocument(String jobname) throws NoSuchJobException;
+	@GET
+	@Path("user/getJsdl/{jobname}")
+	@RolesAllowed("User")
+	@Produces("text/xml")
+	String getJsdlDocument(@PathParam("jobname") String jobname) throws NoSuchJobException;
 
 }

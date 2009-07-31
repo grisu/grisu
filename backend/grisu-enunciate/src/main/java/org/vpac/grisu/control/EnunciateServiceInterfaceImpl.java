@@ -115,7 +115,7 @@ import com.sun.xml.ws.developer.StreamingAttachment;
 @WebService(endpointInterface = "org.vpac.grisu.control.EnunciateServiceInterface")
 @MTOM(enabled = true)
 @StreamingAttachment(parseEagerly = true, memoryThreshold = 40000L)
-public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface {
+public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface, ServiceInterface {
 
 	static final Logger myLogger = Logger
 			.getLogger(EnunciateServiceInterfaceImpl.class.getName());
@@ -406,7 +406,7 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 		String jobname = JsdlHelpers.getJobname(jsdl);
 
 		if (jobnameCreationMethod == null
-				|| FORCE_NAME_METHOD.equals(jobnameCreationMethod)) {
+				|| Constants.FORCE_NAME_METHOD.equals(jobnameCreationMethod)) {
 
 			if (jobname == null) {
 				throw new JobPropertiesException(JobSubmissionProperty.JOBNAME,
@@ -422,13 +422,13 @@ public class EnunciateServiceInterfaceImpl implements EnunciateServiceInterface 
 								+ jobname
 								+ " already exists and job creation method is force-name.");
 			}
-		} else if (UUID_NAME_METHOD.equals(jobnameCreationMethod)) {
+		} else if (Constants.UUID_NAME_METHOD.equals(jobnameCreationMethod)) {
 			if (jobname != null) {
 				jobname = jobname + "_" + UUID.randomUUID().toString();
 			} else {
 				jobname = UUID.randomUUID().toString();
 			}
-		} else if (TIMESTAMP_METHOD.equals(jobnameCreationMethod)) {
+		} else if (Constants.TIMESTAMP_METHOD.equals(jobnameCreationMethod)) {
 
 			String[] allJobnames = getAllJobnames();
 			Arrays.sort(allJobnames);

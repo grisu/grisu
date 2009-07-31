@@ -240,7 +240,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		String jobname = JsdlHelpers.getJobname(jsdl);
 
 		if (jobnameCreationMethod == null
-				|| FORCE_NAME_METHOD.equals(jobnameCreationMethod)) {
+				|| Constants.FORCE_NAME_METHOD.equals(jobnameCreationMethod)) {
 
 			if (jobname == null) {
 				throw new JobPropertiesException(JobSubmissionProperty.JOBNAME,
@@ -256,13 +256,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								+ jobname
 								+ " already exists and job creation method is force-name.");
 			}
-		} else if (UUID_NAME_METHOD.equals(jobnameCreationMethod)) {
+		} else if (Constants.UUID_NAME_METHOD.equals(jobnameCreationMethod)) {
 			if (jobname != null) {
 				jobname = jobname + "_" + UUID.randomUUID().toString();
 			} else {
 				jobname = UUID.randomUUID().toString();
 			}
-		} else if (TIMESTAMP_METHOD.equals(jobnameCreationMethod)) {
+		} else if (Constants.TIMESTAMP_METHOD.equals(jobnameCreationMethod)) {
 
 			String[] allJobnames = getAllJobnames();
 			Arrays.sort(allJobnames);
