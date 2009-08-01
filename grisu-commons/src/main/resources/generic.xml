@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
+	<JobDescription >
+		<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
+			<Email sendOnJobFinish="XXX_email_on_finish_XXX" sendOnJobStart="XXX_email_on_start_XXX" >XXX_email_address_XXX</Email>
+		</GrisuTemplate>
+		<PbsDebug xmlns="http://arcs.org.au/jsdl/jsdl-grisu">XXX_pbsDebug_XXX</PbsDebug>
+		XXX_modules_XXX
+		<JobIdentification>
+			<JobName>XXX_jobname_XXX</JobName>
+		</JobIdentification>
+
+		<Application>
+			<ApplicationName>XXX_application_XXX</ApplicationName>
+			<ApplicationVersion>XXX_version_XXX</ApplicationVersion>
+			<POSIXApplication
+				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
+				XXX_commandline_XXX
+				<WorkingDirectory ></WorkingDirectory>
+				<Output>XXX_stdout_XXX</Output>
+				<Input>XXX_stdin_XXX</Input>
+				<Error>XXX_stderr_XXX</Error>
+			</POSIXApplication>
+			<TotalCPUTime>XXX_walltime_XXX</TotalCPUTime><!-- use this value and divide with no. of cpus to get actual walltime -->
+			<TotalCPUCount><exact>XXX_cpus_XXX</exact></TotalCPUCount>
+			<TotalPhysicalMemory><LowerBoundedRange>XXX_memory_XXX</LowerBoundedRange></TotalPhysicalMemory>
+		</Application>
+		<Resources>
+			<CandidateHosts>
+				XXX_submissionlocation_XXX
+			</CandidateHosts>
+
+		</Resources>
+		XXX_input_files_XXX
+	</JobDescription>
+</JobDefinition>
