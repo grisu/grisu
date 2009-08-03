@@ -42,7 +42,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 		if (cachedAllSubmissionLocations == null) {
 			cachedAllSubmissionLocations = serviceInterface
-					.getAllSubmissionLocations().getSubmissionLocationStrings();
+					.getAllSubmissionLocations().asSubmissionLocationStrings();
 		}
 		return cachedAllSubmissionLocations;
 	}
@@ -169,7 +169,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 	public final String[] getAllAvailableSubmissionLocations(final String fqan) {
 
 		if (cachedAllSubmissionLocationsPerFqan.get(fqan) == null) {
-			String[] temp = serviceInterface.getAllSubmissionLocationsForFqan(fqan).getSubmissionLocationStrings();
+			String[] temp = serviceInterface.getAllSubmissionLocationsForFqan(fqan).asSubmissionLocationStrings();
 			cachedAllSubmissionLocationsPerFqan.put(fqan, temp);
 		}
 		return cachedAllSubmissionLocationsPerFqan.get(fqan);

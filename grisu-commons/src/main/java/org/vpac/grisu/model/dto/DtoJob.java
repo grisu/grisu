@@ -69,7 +69,7 @@ public class DtoJob {
 		this.properties = properties;
 	}
 	
-	public Map<String, String> getPropertiesAsMap() {
+	public Map<String, String> propertiesAsMap() {
 		
 		Map<String, String> map = new HashMap<String, String>();
 		

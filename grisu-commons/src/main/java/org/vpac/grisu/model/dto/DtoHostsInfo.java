@@ -86,7 +86,7 @@ public class DtoHostsInfo {
 		return result;
 	}
 	
-	public Map<String, String> getAsMap() {
+	public Map<String, String> asMap() {
 		Map<String, String> result = new TreeMap<String, String>();
 		
 		for ( DtoHost host : getAllHosts() ) {

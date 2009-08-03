@@ -86,8 +86,12 @@ public class DtoFolder implements DtoRemoteObject {
 	public boolean isFolder() {
 		return true;
 	}
+	
+	public void setFolder(boolean dummy) {
+	}
 
-	public List<DtoRemoteObject> getChildren() {
+
+	public List<DtoRemoteObject> listAllChildren() {
 		
 		List<DtoRemoteObject> result = new LinkedList<DtoRemoteObject>();
 		

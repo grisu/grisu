@@ -116,7 +116,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		if (cachedAllSubmissionLocations == null) {
 			cachedAllSubmissionLocations = new HashSet(Arrays
 					.asList(serviceInterface
-							.getSubmissionLocationsForApplication(application).getSubmissionLocationStrings()));
+							.getSubmissionLocationsForApplication(application).asSubmissionLocationStrings()));
 		}
 		return cachedAllSubmissionLocations;
 
@@ -131,7 +131,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 			List<String> temp = Arrays
 					.asList(serviceInterface
 							.getSubmissionLocationsForApplicationAndVersion(application,
-									version).getSubmissionLocationStrings());
+									version).asSubmissionLocationStrings());
 			cachedSubmissionLocationsPerVersion.put(version, new HashSet(temp));
 		}
 		return cachedSubmissionLocationsPerVersion.get(version);

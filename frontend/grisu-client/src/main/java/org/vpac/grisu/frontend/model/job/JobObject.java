@@ -310,7 +310,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 		if (allJobProperties == null) {
 			try {
 				allJobProperties = serviceInterface
-						.getAllJobProperties(getJobname()).getPropertiesAsMap();
+						.getAllJobProperties(getJobname()).propertiesAsMap();
 			} catch (Exception e) {
 				throw new JobException(this, "Could not get jobproperties.", e);
 			}

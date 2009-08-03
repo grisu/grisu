@@ -128,8 +128,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			.getGrisuDirectory().toString());
 
 	public String getInterfaceVersion() {
-		return "<grisuVersion>" + ServiceInterface.INTERFACE_VERSION
-				+ "</grisuVersion>";
+		return ServiceInterface.INTERFACE_VERSION;
 	}
 
 	private Map<String, RemoteFileTransferObject> fileTransfers = new HashMap<String, RemoteFileTransferObject>();
@@ -359,7 +358,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throws JobPropertiesException {
 
 		JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl(jobProperties
-				.getPropertiesAsMap());
+				.propertiesAsMap());
 
 		return createJob(jso.getJobDescriptionDocument(), fqan,
 				jobCreationMethod);
@@ -1441,7 +1440,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		Job job = getJob(jobname);
 
-		job.addJobProperties(properties.getPropertiesAsMap());
+		job.addJobProperties(properties.propertiesAsMap());
 		jobdao.saveOrUpdate(job);
 
 		myLogger.debug("Added " + properties.getProperties().size()

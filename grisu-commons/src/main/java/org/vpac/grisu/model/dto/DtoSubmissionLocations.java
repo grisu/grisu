@@ -50,7 +50,7 @@ public class DtoSubmissionLocations {
 		this.allSubmissionLocations = allSubmissionLocations;
 	}
 	
-	public String[] getSubmissionLocationStrings() {
+	public String[] asSubmissionLocationStrings() {
 		
 		String[] result = new String[allSubmissionLocations.size()];
 		
