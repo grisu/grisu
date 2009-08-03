@@ -115,7 +115,7 @@
 				<configuration>
 					<aggregate>true</aggregate>
 					<linksource>true</linksource>
-					<excludePackageNames>org.vpac.grisu.grisuBatch.*:org.vpac.grisu.examples.*:cct.*:org.vpac.grisu.plugins.*:com.swtdesigner.*:org.vpac.grisu.client.*:org.vpac.grisu.backend.*</excludePackageNames>
+					<excludePackageNames>org.vpac.grisu.grisuBatch.*:org.vpac.grisu.examples.*:cct.*:org.vpac.grisu.plugins.*:com.swtdesigner.*</excludePackageNames>
 					<breakiterator>true</breakiterator>
 					<source>1.5</source>
 					<links>
