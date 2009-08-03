@@ -127,6 +127,10 @@
 						<link>http://java.sun.com/j2ee/1.4/docs/api/</link>
 						<link>http://java.sun.com/j2ee/sdk_1.3/techdocs/api/</link>
 
+						<!-- grisu stuff -->
+						<link>https://code.arcs.org.au/hudson/job/ARCS-JCommons/au.org.arcs.commons$arcs-jcommons/javadoc</link>
+						<link>https://code.arcs.org.au/hudson/job/Infosystems-SNAPSHOT/javadoc</link>
+
 						<!-- Libraries -->
 
 						<link>http://jakarta.apache.org/commons/collections/apidocs</link>
