@@ -63,9 +63,9 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			
 			bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY, username);
 			bp.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, new String(password));
-			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size", 4096);
-			SOAPBinding binding = (SOAPBinding)bp.getBinding();
-			binding.setMTOMEnabled(true);
+//			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size", 4096);
+//			SOAPBinding binding = (SOAPBinding)bp.getBinding();
+//			binding.setMTOMEnabled(true);
 
 			
 		} catch (Exception e) {

@@ -92,12 +92,8 @@
 <!--				<configuration>-->
 <!---->
 <!--					<descriptors>-->
-<!--						<descriptor>grisu-client-swing.assembly.xml</descriptor>-->
-<!--						<descriptor>gricli.assembly.xml</descriptor>-->
-<!--    						<descriptor>grisu-local-backend.assembly.xml</descriptor>-->
-<!--						<descriptor>grisu-client-batch.assembly.xml</descriptor>-->
+<!--    					<descriptor>grisu-local-backend.assembly.xml</descriptor>-->
 <!--						<descriptor>grisu-grid-test.assembly.xml</descriptor>-->
-<!--						<descriptor>grisu-client-slim.assembly.xml</descriptor>-->
 <!--					</descriptors>-->
 <!---->
 <!--					<archive>-->
