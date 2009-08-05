@@ -1145,7 +1145,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if one of the files doesn't exist
 	 */
-	private DataHandler[] download(final String[] filenames)
+	private synchronized DataHandler[] download(final String[] filenames)
 			throws RemoteFileSystemException {
 
 		final DataSource[] datasources = new DataSource[filenames.length];
@@ -1181,7 +1181,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	public DataHandler download(final String filename)
+	public synchronized DataHandler download(final String filename)
 			throws RemoteFileSystemException {
 
 		myLogger.debug("Downloading: " + filename);
@@ -1296,7 +1296,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * org.vpac.grisu.control.ServiceInterface#upload(javax.activation.DataSource
 	 * , java.lang.String)
 	 */
-	public String upload(final DataHandler source, final String filename,
+	public synchronized String upload(final DataHandler source, final String filename,
 			final boolean return_absolute_url) throws RemoteFileSystemException {
 
 		myLogger.debug("Receiving file: " + filename);
@@ -1498,7 +1498,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#isFolder(java.lang.String)
 	 */
-	public boolean isFolder(final String file)
+	public synchronized boolean isFolder(final String file)
 			throws RemoteFileSystemException {
 
 		boolean isFolder;
@@ -1527,7 +1527,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	public boolean fileExists(final String file)
+	public synchronized boolean fileExists(final String file)
 			throws RemoteFileSystemException {
 
 		boolean exists;
@@ -1551,7 +1551,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * org.vpac.grisu.control.ServiceInterface#getChildrenFiles(java.lang.String
 	 * , boolean)
 	 */
-	public String[] getChildrenFileNames(final String folder,
+	public synchronized String[] getChildrenFileNames(final String folder,
 			final boolean onlyFiles) throws RemoteFileSystemException {
 
 		String[] result = null;
@@ -1585,7 +1585,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see
 	 * org.vpac.grisu.control.ServiceInterface#getFileSize(java.lang.String)
 	 */
-	public long getFileSize(final String file)
+	public synchronized long getFileSize(final String file)
 			throws RemoteFileSystemException {
 
 		FileObject file_object = getUser().aquireFile(file);
@@ -1613,7 +1613,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see
 	 * org.vpac.grisu.control.ServiceInterface#lastModified(java.lang.String)
 	 */
-	public long lastModified(final String url)
+	public synchronized long lastModified(final String url)
 			throws RemoteFileSystemException {
 
 		try {
@@ -1637,7 +1637,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#mkdir(java.lang.String)
 	 */
-	public boolean mkdir(final String url)
+	public synchronized boolean mkdir(final String url)
 			throws RemoteFileSystemException {
 
 		myLogger.debug("Creating folder: " + url + "...");
@@ -1664,7 +1664,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#deleteFile(java.lang.String)
 	 */
-	public void deleteFile(final String file)
+	public synchronized void deleteFile(final String file)
 			throws RemoteFileSystemException {
 
 		FileObject fileObject = getUser().aquireFile(file);
@@ -1687,7 +1687,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see
 	 * org.vpac.grisu.control.ServiceInterface#deleteFiles(java.lang.String[])
 	 */
-	public void deleteFiles(final String[] files)
+	public synchronized void deleteFiles(final String[] files)
 			throws RemoteFileSystemException {
 
 		// ArrayList<String> filesNotDeleted = new ArrayList<String>();

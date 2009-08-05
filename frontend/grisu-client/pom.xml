@@ -1,36 +1,37 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <parent>
-    <artifactId>frontend</artifactId>
-    <groupId>org.vpac.grisu</groupId>
-    <version>0.3-SNAPSHOT</version>
-  </parent>
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.vpac.grisu</groupId>
-  <artifactId>grisu-client</artifactId>
-  <name>grisu-client-library</name>
-  <version>0.3-SNAPSHOT</version>
-  <description>Slimmed down version of the grisu-client library. This only contains very vew classes and helper methods that are needed to implement a (java) grisu client.</description>
- 
-  <dependencies>
-    <dependency>
-      <groupId>org.vpac.grisu</groupId>
-      <artifactId>grisu-commons</artifactId>
-      <version>0.3-SNAPSHOT</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-    	<groupId>au.org.arcs.auth</groupId>
-    	<artifactId>simpleProxyLib</artifactId>
-    	<version>0.4-SNAPSHOT</version>
-    </dependency>
-<!--    <dependency>-->
-<!--    	<groupId>com.sun.xml.ws</groupId>-->
-<!--    	<artifactId>jaxws-rt</artifactId>-->
-<!--    	<version>2.1.4</version>-->
-<!--    </dependency>-->
-  </dependencies>
-  
-  	<build>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<parent>
+		<artifactId>frontend</artifactId>
+		<groupId>org.vpac.grisu</groupId>
+		<version>0.3-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.vpac.grisu</groupId>
+	<artifactId>grisu-client</artifactId>
+	<name>grisu-client-library</name>
+	<version>0.3-SNAPSHOT</version>
+	<description>Slimmed down version of the grisu-client library. This only contains very vew classes and helper methods that are needed to implement a (java) grisu client.</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.vpac.grisu</groupId>
+			<artifactId>grisu-commons</artifactId>
+			<version>0.3-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>au.org.arcs.auth</groupId>
+			<artifactId>simpleProxyLib</artifactId>
+			<version>0.4-SNAPSHOT</version>
+		</dependency>
+		<!--    <dependency>-->
+		<!--    	<groupId>com.sun.xml.ws</groupId>-->
+		<!--    	<artifactId>jaxws-rt</artifactId>-->
+		<!--    	<version>2.1.4</version>-->
+		<!--    </dependency>-->
+	</dependencies>
+
+	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -53,7 +54,16 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>grisu-client-dependencies.assembly.xml</descriptor>
+					</descriptors>
+					<finalName>grisu</finalName>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
-	
+
 </project>
