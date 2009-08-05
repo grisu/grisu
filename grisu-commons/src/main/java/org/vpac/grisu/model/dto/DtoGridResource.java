@@ -144,23 +144,23 @@ public class DtoGridResource implements GridResource {
 	}
 	
 	public Set<String> getAllExecutables() {
-		return this.getAllExecutables();
+		return this.allExecutables;
 	}
 
 	public String getApplicationName() {
-		return this.getApplicationName();
+		return this.applicationName;
 	}
 
 	public List<String> getAvailableApplicationVersion() {
-		return this.getAvailableApplicationVersion();
+		return this.availableApplicationVersion;
 	}
 
 	public String getContactString() {
-		return this.getContactString();
+		return this.contactString;
 	}
 
 	public int getFreeJobSlots() {
-		return this.getFreeJobSlots();
+		return this.freeJobSlots;
 	}
 
 	public String getJobManager() {

@@ -537,12 +537,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 									&& resource
 											.getAvailableApplicationVersion()
 											.size() > 0) {
+								List<String> versionsAvail = resource.getAvailableApplicationVersion();
+								
 								JsdlHelpers
 										.setApplicationVersion(
 												jsdl,
-												resource
-														.getAvailableApplicationVersion()
-														.get(0));
+												versionsAvail.get(0));
 								myLogger
 										.debug("Set version to be: "
 												+ resource
