@@ -83,7 +83,7 @@ public class User {
 
 	// filesystem connections are cached so that we don't need to connect again
 	// everytime we access one
-	private Map<MountPoint, FileSystem> cachedFilesystemConnections = new HashMap<MountPoint, FileSystem>();
+//	private Map<MountPoint, FileSystem> cachedFilesystemConnections = new HashMap<MountPoint, FileSystem>();
 	// credentials are chache so we don't have to contact myproxy/voms anytime
 	// we want to make a transaction
 	private Map<String, ProxyCredential> cachedCredentials = new HashMap<String, ProxyCredential>();
@@ -300,7 +300,7 @@ public class User {
 		MountPoint new_mp = new MountPoint(cred.getDn(), cred.getFqan(), uri,
 				mountPointName);
 		try {
-			FileSystem fileSystem = connectToFileSystem(new_mp);
+			FileSystem fileSystem = createFilesystem(new_mp);
 			myLogger.debug("Connected to file system.");
 			if (useHomeDirectory) {
 				myLogger.debug("Using home directory: "
@@ -334,6 +334,65 @@ public class User {
 
 	}
 
+//	/**
+//	 * Connects to the filesystem where the file lives on.
+//	 * 
+//	 * @param file
+//	 *            the file you want to access (in a later step)
+//	 * @param cred
+//	 * @return
+//	 * @throws FileSystemException
+//	 * @throws VomsException
+//	 */
+//	private FileSystem connectToFileSystem(final MountPoint mp)
+//			throws FileSystemException {
+//
+//		// check whether a filesystem for this mountpoint is already cached
+//		if (cachedFilesystemConnections.containsKey(mp)) {
+//			myLogger.debug("Using already cached filesystem for mountpoint: "
+//					+ mp.getAlias());
+//			return this.cachedFilesystemConnections.get(mp);
+//		}
+//
+//		ProxyCredential credToUse = null;
+//
+//		// get the right credential for this mountpoint
+//		if (mp.getFqan() != null) {
+//
+//			credToUse = cachedCredentials.get(mp.getFqan());
+//			if (credToUse == null || !credToUse.isValid()) {
+//
+//				// put a new credential in the cache
+//				VO vo = VOManagement.getVO(getFqans().get(mp.getFqan()));
+//				credToUse = CertHelpers.getVOProxyCredential(vo, mp.getFqan(),
+//						getCred());
+//				cachedCredentials.put(mp.getFqan(), credToUse);
+//			} else {
+//				credToUse = cachedCredentials.get(mp.getFqan());
+//			}
+//
+//		} else {
+//			credToUse = getCred();
+//		}
+//
+//		FileSystemOptions opts = new FileSystemOptions();
+//
+//		if (mp.getRootUrl().startsWith("gsiftp")) {
+//			GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
+//					.getInstance();
+//			builder.setGSSCredential(opts, credToUse.getGssCredential());
+//			// builder.setUserDirIsRoot(opts, true);
+//		}
+//
+//		FileObject fileRoot = getFsManager().resolveFile(mp.getRootUrl(), opts);
+//
+//		FileSystem fileBase = fileRoot.getFileSystem();
+//
+//		this.cachedFilesystemConnections.put(mp, fileBase);
+//
+//		return fileBase;
+//	}
+
 	/**
 	 * Connects to the filesystem where the file lives on.
 	 * 
@@ -344,15 +403,15 @@ public class User {
 	 * @throws FileSystemException
 	 * @throws VomsException
 	 */
-	private FileSystem connectToFileSystem(final MountPoint mp)
+	private FileSystem createFilesystem(final MountPoint mp)
 			throws FileSystemException {
 
-		// check whether a filesystem for this mountpoint is already cached
-		if (cachedFilesystemConnections.containsKey(mp)) {
-			myLogger.debug("Using already cached filesystem for mountpoint: "
-					+ mp.getAlias());
-			return this.cachedFilesystemConnections.get(mp);
-		}
+//		// check whether a filesystem for this mountpoint is already cached
+//		if (cachedFilesystemConnections.containsKey(mp)) {
+//			myLogger.debug("Using already cached filesystem for mountpoint: "
+//					+ mp.getAlias());
+//			return this.cachedFilesystemConnections.get(mp);
+//		}
 
 		ProxyCredential credToUse = null;
 
@@ -388,11 +447,13 @@ public class User {
 
 		FileSystem fileBase = fileRoot.getFileSystem();
 
-		this.cachedFilesystemConnections.put(mp, fileBase);
+//		this.cachedFilesystemConnections.put(mp, fileBase);
 
 		return fileBase;
 	}
 
+	
+	
 	/**
 	 * Mounts a filesystem using the default credential of a user.
 	 * 
@@ -587,7 +648,8 @@ public class User {
 			// TODO check whether vfs does that already
 			// markus
 			// if (!cachedFilesystemConnections.containsKey(mp.getRootUrl())) {
-			root = this.connectToFileSystem(mp);
+//			root = this.connectToFileSystem(mp);
+			root = this.createFilesystem(mp);
 			// } else {
 			// root = this.cachedFilesystemConnections.get(mp.getRootUrl());
 			// }
@@ -782,7 +844,7 @@ public class User {
 
 	public void cleanCache() {
 		// TODO disconnect filesystems somehow?
-		cachedFilesystemConnections = new HashMap<MountPoint, FileSystem>();
+//		cachedFilesystemConnections = new HashMap<MountPoint, FileSystem>();
 		// // does this affect existing filesystem connection
 		// for ( ProxyCredential proxy : cachedCredentials.values() ) {
 		// proxy.destroy();
