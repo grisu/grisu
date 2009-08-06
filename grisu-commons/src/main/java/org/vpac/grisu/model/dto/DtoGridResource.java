@@ -222,12 +222,22 @@ public class DtoGridResource implements GridResource {
 //	}
 
 	public int compareTo(GridResource o) {
-		return this.getRank() < o.getRank() ? 1 :
-			(this.getRank() == o.getRank() ? 0 : -1);
+		
+		if ( this.getRank() < o.getRank() ) {
+			return Integer.MAX_VALUE;
+		} else if ( this.getRank() > o.getRank() ) {
+			return Integer.MIN_VALUE;
+		} else {
+			return this.getQueueName().compareTo(o.getQueueName());
+		}
 
 	}
 	
 	public boolean equals(Object o) {
+		
+		if ( o == null ) {
+			return false;
+		}
 		
 		GridResource anotherResource = null;
 		
