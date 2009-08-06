@@ -215,10 +215,43 @@ public class DtoGridResource implements GridResource {
 		return isDesiredVersionInstalled;
 	}
 
-	public int compareTo(Object arg0) {
-		GridResource anotherResource = (GridResource)arg0;
-		return this.getRank() < anotherResource.getRank() ? 1 :
-			(this.getRank() == anotherResource.getRank() ? 0 : -1);
+//	public int compareTo(Object arg0) {
+//		GridResource anotherResource = (GridResource)arg0;
+//		return this.getRank() < anotherResource.getRank() ? 1 :
+//			(this.getRank() == anotherResource.getRank() ? 0 : -1);
+//	}
+
+	public int compareTo(GridResource o) {
+		return this.getRank() < o.getRank() ? 1 :
+			(this.getRank() == o.getRank() ? 0 : -1);
+
+	}
+	
+	public boolean equals(Object o) {
+		
+		GridResource anotherResource = null;
+		
+		try {
+			anotherResource = (GridResource)o;	
+		} catch (Exception e) {
+			return false;
+		}
+		
+		if (queueName.equals(anotherResource.getQueueName()) &&
+				jobManager.equals(anotherResource.getJobManager()) &&
+				contactString.equals(anotherResource.getContactString())) {
+			return true;
+		}
+		return false;
+	}
+	
+	public int hashCode() {
+		return queueName.hashCode() + jobManager.hashCode() + contactString.hashCode() + 23 * rank;
+	}
+	
+	public String toString() {
+		
+		return queueName + " (Ranking: " + rank + ")";
 	}
 
 }

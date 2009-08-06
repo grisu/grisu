@@ -1,44 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
 
-	<JobDescription grisu_modules="GenericAuto">
+	<JobDescription grisu_modules="MatchMakerPanel">
 	<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
-			<Email 	template="Email" 
-					   	name="EmailAddress"
-					   	title="EmailAddress"
-						description="The email address to send an email to if the job status changes."
-						multiplicity="?" 
-						other="useLastValue" />
+			<Email template="Email" name="EmailAddress" title="EmailAddress" description="The email address to send an email to if the job status changes." multiplicity="?" other="useLastValue"/>
 		</GrisuTemplate>
 		<JobIdentification>
 
-			<JobName 	template="JobName" 
-						name="Jobname"
-						title="Jobname"
-						description="The name of the job." 
-						defaultValue="java_job" 
-						other="autosuggest,nosuggestbutton" />
+			<JobName template="JobName" name="Jobname" title="Jobname" description="The name of the job." defaultValue="java_job" other="autosuggest,nosuggestbutton"/>
 
 		</JobIdentification>
 		
 		<Application>
 
-			<ApplicationName >java</ApplicationName>
-			<ApplicationVersion template="Version" name="Version" title="Version" description="The version of java" defaultValue="1.5.0" other="useAny,useDefault,useExact"></ApplicationVersion>
-			<POSIXApplication
-				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
+			<ApplicationName>java</ApplicationName>
+			<ApplicationVersion template="ApplicationVersion" name="Version" title="Version" description="The version of java" defaultValue="1.6.0" other="useAny,useDefault,useExact"/>
+			<POSIXApplication xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
 				
 
-				<Executable template="CommandLine"
-						    name="I_Commandline"
-						    title="Commandline"
-						    description="The command you want to run"
-							other="useHistory"
-				/>
+				<Executable template="CommandLine" name="I_Commandline" title="Commandline" description="The command you want to run" other="useHistory"/>
 
-				<WorkingDirectory
-					postprocess="FillWithJobDirectoryRelativeToExecutionFileSystem"
-					filesystemName="userExecutionHostFs" />
+				<WorkingDirectory />
 				<!-- 	The name of the standard output file. -->
 				<Output>stdout.txt</Output>
 				<!--  	The name of the standard error file. -->
@@ -47,15 +29,9 @@
 
 			</POSIXApplication>
 			
-			<TotalCPUTime template="WallTime" name="Walltime" title="Walltime"
-				description="The total cpu time in seconds."
-				multiplicity="1" defaultValue="600" 
-				postprocess="TimesNoCPUs"
-			/>
+			<TotalCPUTime template="WallTime" name="Walltime" title="Walltime" description="The total cpu time in seconds." multiplicity="1" defaultValue="600" postprocess="TimesNoCPUs"/>
 
-			<TotalCPUCount><exact template="CPUs" name="CPUs" title="CPUs"
-				description="How many CPUs do you want to use to run this job."
-				multiplicity="1" defaultValue="1" prefills="1,2,4,8" /></TotalCPUCount>
+			<TotalCPUCount><exact template="CPUs" name="CPUs" title="CPUs" description="How many CPUs do you want to use to run this job." multiplicity="1" defaultValue="1" prefills="1,2,4,8"/></TotalCPUCount>
 				
 			<TotalPhysicalMemory> 
 				<LowerBoundedRange postprocess="ConvertToBytes" defaultValue="0" description="The minimum amount of memory in mb for this job." multiplicity="1" name="MinMem" title="MinMem" prefills="0,1024,2048,4096" template="InputInteger"> </LowerBoundedRange>
@@ -65,31 +41,18 @@
 		<Resources>
 			<CandidateHosts>
 
-				<HostName template="SubmissionLocation" name="HostName" title="HostName"
-					description="Where do you want to submit the job to?"
-					multiplicity="1" 			
-				/>
+				<HostName template="CandidateHost" name="HostName" title="HostName" description="Where do you want to submit the job to?" multiplicity="1"/>
 
 			</CandidateHosts>
 
-			<FileSystem name="userExecutionHostFs">
-				<MountSource template="ExecutionFileSystem"
-					name="ExecutionFileSystem" multiplicity="1" />
-
-				<FileSystemType>normal</FileSystemType>
-			</FileSystem>
 		</Resources>
 		<!--  The following DataStaging element -->
 		<DataStaging>
-			<FileName />
-			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<FileName/>
+			<FileSystemName/>
 			<Source>
 
-				<URI template="MultipleInputFiles" name="InputFiles"
-					title="Input files"
-					description="Provide at least one input file here."
-					multiplicity="?" postprocess="FillDataStagingFileNameElement"
-					validator="InputFile" />
+				<URI template="MultipleInputFiles" name="InputFiles" title="Input files" description="Provide at least one input file here." multiplicity="?" validator="InputFile"/>
 
 			</Source>
 		</DataStaging>

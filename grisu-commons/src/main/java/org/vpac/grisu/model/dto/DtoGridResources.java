@@ -2,6 +2,9 @@ package org.vpac.grisu.model.dto;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -52,9 +55,9 @@ public class DtoGridResources {
 		this.gridResources = gridResources;
 	}
 	
-	public List<GridResource> wrapGridResourcesIntoInterfaceType() {
+	public SortedSet<GridResource> wrapGridResourcesIntoInterfaceType() {
 		
-		List<GridResource> result = new LinkedList<GridResource>();
+		SortedSet<GridResource> result = new TreeSet<GridResource>();
 		
 		for ( DtoGridResource gr : getGridResources() ) {
 			result.add(gr);
@@ -62,5 +65,7 @@ public class DtoGridResources {
 		
 		return result;
 	}
+	
+	
 	
 }

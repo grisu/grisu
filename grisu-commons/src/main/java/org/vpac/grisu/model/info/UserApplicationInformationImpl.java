@@ -2,9 +2,9 @@ package org.vpac.grisu.model.info;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.vpac.grisu.control.JobConstants;
@@ -69,7 +69,7 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 		return cachedAllVersionsForUser;
 	}
 
-	public final List<GridResource> getBestSubmissionLocations(
+	public final SortedSet<GridResource> getBestSubmissionLocations(
 			final Map<JobSubmissionProperty, String> additionalJobProperties,
 			final String fqan) {
 

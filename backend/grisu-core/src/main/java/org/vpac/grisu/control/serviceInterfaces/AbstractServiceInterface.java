@@ -1758,7 +1758,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			String sourceUrl = JsdlHelpers.getStageInSource(stageIn);
 			//TODO remove that after swing client is fixed.
-			if ( sourceUrl.startsWith("file") ) {
+			if ( sourceUrl.startsWith("file") || sourceUrl.startsWith("dummy") ) {
 				continue;
 			}
 			String targetUrl = JsdlHelpers.getStageInTarget(stageIn);

@@ -1,8 +1,8 @@
 package org.vpac.grisu.model.info;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 
 import org.vpac.grisu.model.UserEnvironmentManager;
 
@@ -57,7 +57,7 @@ public interface UserApplicationInformation extends ApplicationInformation {
 	 *            the fqan to submit the job with
 	 * @return a sorted list of the best resources to submit this job to.
 	 */
-	List<GridResource> getBestSubmissionLocations(
+	SortedSet<GridResource> getBestSubmissionLocations(
 			Map<JobSubmissionProperty, String> additionalJobProperties,
 			String fqan);
 
