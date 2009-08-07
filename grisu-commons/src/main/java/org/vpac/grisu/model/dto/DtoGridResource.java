@@ -263,4 +263,77 @@ public class DtoGridResource implements GridResource {
 		return queueName + " (Ranking: " + rank + ")";
 	}
 
+	public void setAllExecutables(Set<String> allExecutables) {
+		this.allExecutables = allExecutables;
+	}
+
+	public void setApplicationName(String applicationName) {
+		this.applicationName = applicationName;
+	}
+
+	public void setAvailableApplicationVersion(
+			List<String> availableApplicationVersion) {
+		this.availableApplicationVersion = availableApplicationVersion;
+	}
+
+	public void setContactString(String contactString) {
+		this.contactString = contactString;
+	}
+
+	public void setFreeJobSlots(int freeJobSlots) {
+		this.freeJobSlots = freeJobSlots;
+	}
+
+	public void setJobManager(String jobManager) {
+		this.jobManager = jobManager;
+	}
+
+	public void setMainMemoryRAMSize(int mainMemoryRAMSize) {
+		this.mainMemoryRAMSize = mainMemoryRAMSize;
+	}
+
+	public void setMainMemoryVirtualSize(int mainMemoryVirtualSize) {
+		this.mainMemoryVirtualSize = mainMemoryVirtualSize;
+	}
+
+	public void setQueueName(String queueName) {
+		this.queueName = queueName;
+	}
+
+	public void setRank(int rank) {
+		this.rank = rank;
+	}
+
+	public void setRunningJobs(int runningJobs) {
+		this.runningJobs = runningJobs;
+	}
+
+	public void setSiteLatitude(double siteLatitude) {
+		this.siteLatitude = siteLatitude;
+	}
+
+	public void setSiteLongitude(double siteLongitude) {
+		this.siteLongitude = siteLongitude;
+	}
+
+	public void setSiteName(String siteName) {
+		this.siteName = siteName;
+	}
+
+	public void setSmpSize(int smpSize) {
+		this.smpSize = smpSize;
+	}
+
+	public void setTotalJobs(int totalJobs) {
+		this.totalJobs = totalJobs;
+	}
+
+	public void setWaitingJobs(int waitingJobs) {
+		this.waitingJobs = waitingJobs;
+	}
+
+	public void setDesiredSoftwareVersionInstalled(boolean isDesiredVersionInstalled) {
+		this.isDesiredVersionInstalled = isDesiredVersionInstalled;
+	}
+
 }
