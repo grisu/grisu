@@ -18,39 +18,38 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement(name="datalocation")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class DtoDataLocation {
 	
 	/**
 	 * The root url.
 	 */
-	@XmlAttribute(name="rooturl")
-	public String rooturl;
+	private String rooturl;
 	/**
 	 * A list of (local) relative paths (like "/home/grid-admin") that are available for the vo that is 
 	 * connected to this datalocation. 
 	 */
-	@XmlElement(name="path")
-	public List<String> paths;
+	private List<String> paths;
 	
 	/**
 	 * The fqan of the VO that is used to create a voms proxy to access this datalocation.
 	 */
-	@XmlElement
-	public String fqan;
-	
+	private String fqan;
+
+	@XmlAttribute(name="rooturl")
 	public String getRooturl() {
 		return rooturl;
 	}
 	public void setRooturl(String rooturl) {
 		this.rooturl = rooturl;
 	}
+	@XmlElement(name="path")
 	public List<String> getPaths() {
 		return paths;
 	}
 	public void setPaths(List<String> paths) {
 		this.paths = paths;
 	}
+	@XmlElement
 	public String getFqan() {
 		return fqan;
 	}

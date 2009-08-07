@@ -13,26 +13,26 @@ import javax.xml.bind.annotation.XmlValue;
  *
  */
 @XmlRootElement(name="applicationdetail")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class DtoApplicationDetail {
 	
 	/**
 	 * The name of the application detail. E.g. "executable"
 	 */
-	@XmlAttribute
-	public String key;
+	private String key;
 	/**
 	 * The value for this application details. E.g. "java"
 	 */
-	@XmlValue
-	public String value;
+	private String value;
 	
+	@XmlAttribute
 	public String getKey() {
 		return key;
 	}
 	public void setKey(String key) {
 		this.key = key;
 	}
+
+	@XmlValue
 	public String getValue() {
 		return value;
 	}

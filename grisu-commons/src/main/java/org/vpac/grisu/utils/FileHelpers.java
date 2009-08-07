@@ -52,6 +52,8 @@ public final class FileHelpers {
 			for (int n; (n = inputStream.read(buffer)) != -1;) {
 				outputStream.write(buffer, 0, n);
 			}
+		} catch (Exception e){
+			e.printStackTrace();
 		} finally {
 			outputStream.close();
 			inputStream.close();

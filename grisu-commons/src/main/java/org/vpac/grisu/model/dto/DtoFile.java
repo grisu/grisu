@@ -16,31 +16,27 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement(name="file")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class DtoFile implements DtoRemoteObject {
 	
 	/**
 	 * The absolute url to this remote file.
 	 */
-	@XmlAttribute(name="url")
 	private String rootUrl;
 	/**
 	 * The basename of this file.
 	 */
-	@XmlAttribute(name="name")
 	private String name;
 	
 	/**
 	 * The size of this file in bytes. 
 	 */
-	@XmlElement(name="size")
 	private long size;
 	/**
 	 * The last-modified timestamp of this file.
 	 */
-	@XmlElement(name="lastModified")
 	private long lastModified;
 	
+	@XmlAttribute(name="url")
 	public String getRootUrl() {
 		return rootUrl;
 	}
@@ -49,6 +45,7 @@ public class DtoFile implements DtoRemoteObject {
 		this.rootUrl = rootUrl;
 	}
 
+	@XmlElement(name="size")
 	public long getSize() {
 		return size;
 	}
@@ -57,6 +54,7 @@ public class DtoFile implements DtoRemoteObject {
 		this.size = size;
 	}
 
+	@XmlElement(name="lastModified")
 	public long getLastModified() {
 		return lastModified;
 	}
@@ -66,6 +64,7 @@ public class DtoFile implements DtoRemoteObject {
 	}
 
 	
+	@XmlAttribute(name="name")
 	public String getName() {
 		return name;
 	}
@@ -75,6 +74,7 @@ public class DtoFile implements DtoRemoteObject {
 		this.name = name;
 	}
 
+	@XmlAttribute(name="isFolder")
 	public boolean isFolder() {
 		return false;
 	}

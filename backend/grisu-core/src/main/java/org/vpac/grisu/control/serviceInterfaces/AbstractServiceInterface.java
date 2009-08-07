@@ -2136,7 +2136,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		Map<JobSubmissionProperty, String> converterMap = new HashMap<JobSubmissionProperty, String>();
 		for (DtoJobProperty jp : jobProperties.getProperties()) {
 			converterMap
-					.put(JobSubmissionProperty.fromString(jp.key), jp.value);
+					.put(JobSubmissionProperty.fromString(jp.getKey()), jp.getValue());
 		}
 
 		List<GridResource> resources = matchmaker.findMatchingResources(

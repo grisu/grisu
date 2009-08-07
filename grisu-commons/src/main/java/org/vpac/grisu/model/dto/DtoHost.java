@@ -12,7 +12,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement(name="host")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class DtoHost {
 	
 	public DtoHost() {
@@ -27,16 +26,15 @@ public class DtoHost {
     /**
      * The hostname.
      */
-    @XmlElement(name="hostname")
-    public String hostNameString; 
+    private String hostNameString; 
 
 	/**
      * The name of the site where this host is located.
      */
-    @XmlElement(name="sitename")
-    public String siteNameString;
+    private String siteNameString;
 
     
+    @XmlElement(name="hostname")
     public String getHostNameString() {
 		return hostNameString;
 	}
@@ -45,6 +43,7 @@ public class DtoHost {
 		this.hostNameString = hostNameString;
 	}
 
+    @XmlElement(name="sitename")
 	public String getSiteNameString() {
 		return siteNameString;
 	}

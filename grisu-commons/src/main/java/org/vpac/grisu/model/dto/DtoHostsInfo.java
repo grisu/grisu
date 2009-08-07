@@ -20,7 +20,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement(name="hostsinfo")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class DtoHostsInfo {
 	
 	public static DtoHostsInfo createHostsInfo(Map<String, String> allHosts) {
@@ -40,9 +39,9 @@ public class DtoHostsInfo {
 	/**
 	 * The list of hosts with the sitenames mapped to them.
 	 */
-	@XmlElement(name="host")
 	private List<DtoHost> allHosts = new LinkedList<DtoHost>();
 
+	@XmlElement(name="host")
 	public List<DtoHost> getAllHosts() {
 		return allHosts;
 	}
@@ -57,11 +56,11 @@ public class DtoHostsInfo {
 	 * @param host the hostname
 	 * @return the sitename
 	 */
-	public String getSiteForHost(String host) {
+	public String findSiteForHost(String host) {
 		
 		for ( DtoHost serchhost : allHosts ) {
-			if ( serchhost.hostNameString.equals(host) ) {
-				return serchhost.siteNameString;
+			if ( serchhost.getHostNameString().equals(host) ) {
+				return serchhost.getSiteNameString();
 			}
 		}
 		return null;
@@ -73,13 +72,13 @@ public class DtoHostsInfo {
 	 * @param site the name of the site
 	 * @return the list of hostnames
 	 */
-	public List<String> getHostsForSite(String site) {
+	public List<String> findHostsForSite(String site) {
 		
 		List<String> result = new LinkedList<String>();
 		
 		for ( DtoHost serchHost : allHosts ) {
-			if ( serchHost.siteNameString.equals(site) ) {
-				result.add(serchHost.hostNameString);
+			if ( serchHost.getSiteNameString().equals(site) ) {
+				result.add(serchHost.getHostNameString());
 			}
 		}
 		
@@ -90,7 +89,7 @@ public class DtoHostsInfo {
 		Map<String, String> result = new TreeMap<String, String>();
 		
 		for ( DtoHost host : getAllHosts() ) {
-			result.put(host.hostNameString, host.siteNameString);
+			result.put(host.getHostNameString(), host.getSiteNameString());
 		}
 		return result;
 	}

@@ -16,16 +16,15 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement(name="submissionlocation")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class DtoSubmissionLocationInfo {
 	
 	/**
 	 * The submission location string. The format for this String is:
 	 *            queue:host[#porttype]
 	 */
-	@XmlAttribute(name="name")
 	private String submissionLocation;
 
+	@XmlAttribute(name="name")
 	public String getSubmissionLocation() {
 		return submissionLocation;
 	}

@@ -20,7 +20,6 @@ import au.org.arcs.jcommons.interfaces.GridResource;
  *
  */
 @XmlRootElement(name="gridresources")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class DtoGridResources {
 
 	public static DtoGridResources createGridResources(List<GridResource> resources) {
@@ -44,9 +43,9 @@ public class DtoGridResources {
 	/**
 	 * The list of grid resources.
 	 */
-	@XmlElement(name="gridresource")
 	List<DtoGridResource> gridResources = new LinkedList<DtoGridResource>();
 
+	@XmlElement(name="gridresource")
 	public List<DtoGridResource> getGridResources() {
 		return gridResources;
 	}

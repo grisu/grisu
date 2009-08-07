@@ -13,28 +13,27 @@ import javax.xml.bind.annotation.XmlValue;
  *
  */
 @XmlRootElement(name="jobproperty")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class DtoJobProperty {
 	
 	/**
 	 * The key of the job property (see a list of possible values in the Constants class in the Infosystems
 	 * GlueInterface module.
 	 */
-	@XmlAttribute
-	public String key;
+	private String key;
 	/**
 	 * The value for this job property.
 	 */
-	@XmlValue
-	public String value;
+	private String value;
 	
 	
+	@XmlAttribute
 	public String getKey() {
 		return key;
 	}
 	public void setKey(String key) {
 		this.key = key;
 	}
+	@XmlValue
 	public String getValue() {
 		return value;
 	}

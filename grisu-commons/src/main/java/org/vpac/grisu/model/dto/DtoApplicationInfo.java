@@ -19,7 +19,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement(name="application")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class DtoApplicationInfo {
 	
 	public static DtoApplicationInfo createApplicationInfo(String name, Map<String, String> appversionmap) {
@@ -50,15 +49,14 @@ public class DtoApplicationInfo {
 	/**
 	 * The name of the application.
 	 */
-	@XmlAttribute(name="applicationName")
 	private String name;
 	
 	/**
 	 * All the versions of this application grid-wide, for all VOs.
 	 */
-	@XmlElement(name="version")
 	private List<DtoVersionInfo> allVersions = new LinkedList<DtoVersionInfo>();
 
+	@XmlElement(name="version")
 	public List<DtoVersionInfo> getAllVersions() {
 		return allVersions;
 	}
@@ -67,6 +65,7 @@ public class DtoApplicationInfo {
 		this.allVersions = allVersions;
 	}
 	
+	@XmlAttribute(name="applicationName")
 	public String getName() {
 		return name;
 	}

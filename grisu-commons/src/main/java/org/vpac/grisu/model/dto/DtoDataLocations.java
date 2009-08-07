@@ -17,7 +17,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement(name="datalocations")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class DtoDataLocations {
 	
 	public static DtoDataLocations createDataLocations(String fqan, Map<String, String[]> dataLocationsMap) {
@@ -28,9 +27,9 @@ public class DtoDataLocations {
 		
 		for ( String key : dataLocationsMap.keySet() ) {
 			DtoDataLocation temp = new DtoDataLocation();
-			temp.rooturl = key;
-			temp.fqan = fqan;
-			temp.paths = Arrays.asList(dataLocationsMap.get(key));
+			temp.setRooturl(key);
+			temp.setFqan(fqan);
+			temp.setPaths(Arrays.asList(dataLocationsMap.get(key)));
 			list.add(temp);
 		}
 		
@@ -42,9 +41,9 @@ public class DtoDataLocations {
 	/**
 	 * The list of datalocations.
 	 */
-	@XmlElement(name="datalocation")
 	private List<DtoDataLocation> dataLocations = new LinkedList<DtoDataLocation>();
 
+	@XmlElement(name="datalocation")
 	public List<DtoDataLocation> getDataLocations() {
 		return dataLocations;
 	}

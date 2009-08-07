@@ -34,27 +34,21 @@ public class MountPoint implements Comparable<MountPoint> {
 	/**
 	 * The dn of the user.
 	 */
-	@XmlElement(name="dn")
 	private String dn = null;
 	/**
 	 * The fqan that is used to create a voms credential to access this mountpoint.
 	 */
-	@XmlElement(name="fqan")
 	private String fqan = null;
 	/**
 	 * The alias of this mountpoint.
 	 */
-	@XmlAttribute(name="alias")
 	private String alias = null;
 	/**
 	 * The url of the root of this mountpoint.
 	 */
-	@XmlAttribute(name="url")
 	private String rootUrl = null;
 
-	@XmlElement(name="automounted")
 	private boolean automaticallyMounted = false;
-	@XmlElement(name="disabled")
 	private boolean disabled = false;
 
 	// for hibernate
@@ -116,6 +110,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	}
 
 	@Column(nullable = false)
+	@XmlElement(name="dn")
 	public String getDn() {
 		return dn;
 	}
@@ -129,6 +124,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	 * 
 	 * @return the fqan
 	 */
+	@XmlElement(name="fqan")
 	public String getFqan() {
 		return fqan;
 	}
@@ -138,6 +134,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	}
 
 	@Column(nullable = false)
+	@XmlAttribute(name="alias")
 	public String getAlias() {
 		return alias;
 	}
@@ -147,6 +144,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	}
 
 	@Column(nullable = false)
+	@XmlAttribute(name="url")
 	public String getRootUrl() {
 		return rootUrl;
 	}
@@ -357,6 +355,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	}
 
 	@Column(nullable = false)
+	@XmlElement(name="automounted")
 	public boolean isAutomaticallyMounted() {
 		return automaticallyMounted;
 	}
@@ -366,6 +365,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	}
 
 	@Column(nullable = false)
+	@XmlElement(name="disabled")
 	public boolean isDisabled() {
 		return disabled;
 	}

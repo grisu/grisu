@@ -18,7 +18,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement(name="applicationdetails")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class DtoApplicationDetails {
 	
 	public static DtoApplicationDetails createDetails(String appName, Map<String, String> details) {
@@ -28,8 +27,8 @@ public class DtoApplicationDetails {
 		List<DtoApplicationDetail> list = new LinkedList<DtoApplicationDetail>();
 		for ( String key : details.keySet() ) {
 			DtoApplicationDetail temp = new DtoApplicationDetail();
-			temp.key = key;
-			temp.value = details.get(key);
+			temp.setKey(key);
+			temp.setValue(details.get(key));
 			list.add(temp);
 		}
 		result.setDetails(list);
@@ -41,15 +40,14 @@ public class DtoApplicationDetails {
 	/**
 	 * A list of all the application details.
 	 */
-	@XmlElement(name="detail")
 	private List<DtoApplicationDetail> details = new LinkedList<DtoApplicationDetail>();
 	
 	/**
 	 * The name of the application.
 	 */
-	@XmlAttribute
 	private String applicationName;
 
+	@XmlAttribute
 	public String getApplicationName() {
 		return applicationName;
 	}
@@ -58,6 +56,7 @@ public class DtoApplicationDetails {
 		this.applicationName = applicationName;
 	}
 
+	@XmlElement(name="detail")
 	public List<DtoApplicationDetail> getDetails() {
 		return details;
 	}
@@ -71,7 +70,7 @@ public class DtoApplicationDetails {
 		
 		Map<String, String> map = new HashMap<String, String>();
 		for ( DtoApplicationDetail detail : getDetails() ) {
-			map.put(detail.key, detail.value);
+			map.put(detail.getKey(), detail.getValue());
 		}
 		return map;
 		

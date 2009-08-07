@@ -12,7 +12,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement(name="version")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class DtoVersionInfo {
 	
 	public static DtoVersionInfo createVersionInfo(String versionname, String[] submissionLocations) {
@@ -30,15 +29,14 @@ public class DtoVersionInfo {
 	/**
 	 * The version name.
 	 */
-	@XmlAttribute(name="name")
 	private String name;
 	
 	/**
 	 * The list of available submission locations.
 	 */
-	@XmlElement(name="submissionlocation")
 	private DtoSubmissionLocations allSubmissionLocations;
 
+	@XmlElement(name="submissionlocation")
 	public DtoSubmissionLocations getAllSubmissionLocations() {
 		return allSubmissionLocations;
 	}
@@ -48,6 +46,7 @@ public class DtoVersionInfo {
 		this.allSubmissionLocations = allSubmissionLocations;
 	}
 
+	@XmlAttribute(name="name")
 	public String getName() {
 		return name;
 	}

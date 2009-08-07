@@ -15,7 +15,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement(name="submissionlocations")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class DtoSubmissionLocations {
 	
 	public static DtoSubmissionLocations createSubmissionLocationsInfo(String[] submissionLocations) {
@@ -38,9 +37,9 @@ public class DtoSubmissionLocations {
 	/**
 	 * The list of submission location objects.
 	 */
-	@XmlElement(name="submissionlocation")
 	private List<DtoSubmissionLocationInfo> allSubmissionLocations = new LinkedList<DtoSubmissionLocationInfo>();
 
+	@XmlElement(name="submissionlocation")
 	public List<DtoSubmissionLocationInfo> getAllSubmissionLocations() {
 		return allSubmissionLocations;
 	}

@@ -18,43 +18,42 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement(name="folder")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class DtoFolder implements DtoRemoteObject {
 
 	/**
 	 * The absolute url to this folder.
 	 */
-	@XmlAttribute(name="url")
 	private String rootUrl;
 	/**
 	 * The basename of this folder.
 	 */
-	@XmlAttribute(name="name")
 	private String name;
 	/**
 	 * A list of children folders of this folder.
 	 */
-	@XmlElement(name="folder")
 	private List<DtoFolder> childrenFolders = new LinkedList<DtoFolder>();
 	/**
 	 * A list of children files of this folder.
 	 */
-	@XmlElement(name="file")
 	private List<DtoFile> childrenFiles = new LinkedList<DtoFile>();
 	
 	
+	@XmlAttribute(name="name")
 	public String getName() {
 		return name;
 	}
 	
+	@XmlAttribute(name="url")
 	public String getRootUrl() {
 		return rootUrl;
 	}
 	
+	@XmlElement(name="file")
 	public List<DtoFile> getChildrenFiles() {
 		return childrenFiles;
 	}
 	
+	@XmlElement(name="folder")
 	public List<DtoFolder> getChildrenFolders() {
 		return childrenFolders;
 	}
@@ -83,6 +82,7 @@ public class DtoFolder implements DtoRemoteObject {
 		childrenFiles.add(child);
 	}
 
+	@XmlAttribute(name="isFolder")
 	public boolean isFolder() {
 		return true;
 	}

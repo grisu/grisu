@@ -20,7 +20,6 @@ import org.vpac.grisu.model.MountPoint;
  *
  */
 @XmlRootElement(name="mountpoints")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class DtoMountPoints {
 	
 	public static DtoMountPoints createMountpoints(MountPoint[] mps) {
@@ -35,9 +34,9 @@ public class DtoMountPoints {
 	/**
 	 * All mountpoints that are available for the user.
 	 */
-	@XmlElement(name="mountpoint")
 	private List<MountPoint> mountpoints = new LinkedList<MountPoint>();
 
+	@XmlElement(name="mountpoint")
 	public List<MountPoint> getMountpoints() {
 		return mountpoints;
 	}

@@ -15,15 +15,14 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement(name="jobs")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class DtoJobs {
 	
 	/**
 	 * The list of jobs.
 	 */
-	@XmlElement(name="job")
 	private List<DtoJob> allJobs = new LinkedList<DtoJob>();
 
+	@XmlElement(name="job")
 	public List<DtoJob> getAllJobs() {
 		return allJobs;
 	}

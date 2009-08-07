@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import javax.activation.DataHandler;
+import javax.management.RuntimeErrorException;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
@@ -222,6 +223,9 @@ public class ProxyServiceInterface implements ServiceInterface {
 			} catch (InvocationTargetException e) {
 				if ( e.getCause() instanceof RemoteFileSystemException ) {
 					throw (RemoteFileSystemException) e.getCause();
+				} else if ( e.getCause() instanceof OutOfMemoryError ){
+					e.printStackTrace();
+					throw new RuntimeException(e);
 				} else {
 					throw (RuntimeException) e.getCause();
 				}

@@ -23,7 +23,6 @@ import org.vpac.grisu.control.JobConstants;
  *
  */
 @XmlRootElement(name="job")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class DtoJob {
 	
 	public static DtoJob createJob(int status, Map<String, String> jobProperties) {
@@ -35,8 +34,8 @@ public class DtoJob {
 		List<DtoJobProperty> list = new LinkedList<DtoJobProperty>();
 		for ( String key : jobProperties.keySet() ) {
 			DtoJobProperty temp = new DtoJobProperty();
-			temp.key = key;
-			temp.value = jobProperties.get(key);
+			temp.setKey(key);
+			temp.setValue(jobProperties.get(key));
 			list.add(temp);
 		}
 		
@@ -48,19 +47,17 @@ public class DtoJob {
 	/**
 	 * The list of job properties.
 	 */
-	@XmlElement(name="jobproperty")
 	private List<DtoJobProperty> properties = new LinkedList<DtoJobProperty>();
 	/**
 	 * The status of the job. Be aware that, depending on how you queried for this job, this can be stale information.
 	 */
-	@XmlElement(name="status")
 	private int status;
 	/**
 	 * The status of the job as a string.
 	 */
-	@XmlElement(name="statusstring")
 	private String statusString;
 
+	@XmlElement(name="jobproperty")
 	public List<DtoJobProperty> getProperties() {
 		return properties;
 	}
@@ -74,12 +71,13 @@ public class DtoJob {
 		Map<String, String> map = new HashMap<String, String>();
 		
 		for ( DtoJobProperty prop : getProperties() ) {
-			map.put(prop.key, prop.value);
+			map.put(prop.getKey(), prop.getValue());
 		}
 		
 		return map;
 	}
 
+	@XmlElement(name="status")
 	public int getStatus() {
 		return status;
 	}
@@ -88,6 +86,7 @@ public class DtoJob {
 		this.status = status;
 	}
 
+	@XmlElement(name="statusstring")
 	public String getStatusString() {
 		return statusString;
 	}
