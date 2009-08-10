@@ -1,25 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
 
-
-	<!-- 	Only the "Common" module is used here. It is recommended that you always
-		use the "Common" module because it is very unintuitive if the parameters 
-		it encapsulates have to be put in by hand. These parameters are:
-		* Jobname
-		* Walltime
-		* CPUs
-		* HostName
-		* ExecutionFileSystem
-		* EmailAddress 
-		
-		When using a module, you have to use which so called template nodes are used 
-		by it. And you have to know what names the module expects for these nodes.
-		If one or more of these names are not available in the template, the module is 
-		not used at all and all the template nodes that it normally would use are
-		given to the "Rest" module, which is automatically created everytime one or
-		more template nodes of a template are not claimed by a module.
-	-->
-	<JobDescription grisu_modules="CommonWithMemory">
+	<JobDescription grisu_modules="MatchMakerPanel">
 
 		<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
 		<Email 	template="Email" 
@@ -49,7 +31,7 @@
 				need to know what the name is that Grisu expects.
 			-->
 			<ApplicationName>gulp</ApplicationName>
-			<ApplicationVersion></ApplicationVersion>
+			<ApplicationVersion template="Version" name="Version" title="Version" description="The version of gulp" other="useAny,useExact"></ApplicationVersion>
 			<Description>
 				GULP description
 			</Description>
@@ -65,23 +47,16 @@
 					to further postprocess this value, which can be specified between the [ ] after the
 					substitute variable name. basename, for example, shortens the whole path with
 					the basename. -->
-				<Argument substitute="CONFIG_FILE[basename]"/>
-				<!-- 	This element contains the working directory of the job relative to the
-					mountpoint root folder of the user for this job. The grisu core element
-					converts it to be relative to the cluster home directory later.
-					In most cases you would leave that as it is.
-				-->
-				<WorkingDirectory filesystemName="userExecutionHostFs" postprocess="FillWithJobDirectoryRelativeToExecutionFileSystem"/>
+
+				<WorkingDirectory/>
 				
 				<!-- 	The name of the standard input file. -->
-				<Input title="Please enter your GULP input file (.gin)" name="Gulp_inputfile"  other="hideDescription,combobox,useHistory" template="InputString"> </Input>
+				<Input substitute="STDINPUTFILE[basename]"> </Input>
 				<!-- 	The name of the standard output file. -->
-				<Output title="Please enter your GULP output file (.got)" name="Gulp_outputfile" other="hideDescription,combobox,useHistory" template="InputString"> </Output>
+				<Output substitute="STDINPUTFILE[basenamechangeextension:(got)]" > </Output>
 				<!--  	The name of the standard error file. -->
 				<Error>stderr.txt</Error>
-				<!-- 	loads the module needed for a namd job -->
-				<Module description="The module to load" multiplicity="?" name="Module" template="InputString">gulp</Module>
-				
+
 			</POSIXApplication>
 
 			<!-- The total cpu time in seconds. Since the jsdl standard uses this instead
@@ -101,34 +76,30 @@
 		<Resources>
 			
 			<CandidateHosts>
-				<!-- The following two nodes depend on each other. You can't submit a job to the host specified
-					by "HostName" and stage the files into a filesystem "userExecutionHostFs" that is at a 
-					different site. The module "Common" should take care of that so just leave the following
-					two nodes as they are. If you are not using the "Common" module, you need to make sure that
-					the input is correct.
-				-->
-				<HostName description="Where do you want to submit the job to?" multiplicity="1" name="HostName" template="InputString"> </HostName>
+
+				<HostName name="HostName" template="InputString"> </HostName>
 
 			</CandidateHosts>
-			<!--  It is recommended to always use "userExecutionHostFs" as the filesystem alias for the filesystem you
-				are actually using to stage the input files. The value of this node is the root url of a mountpoing, 
-				for example: gsiftp://ngdata.vpac.org/home/grid-admin/<USER_DN>.
-				The grisu backend does all calculating of where that directory actually is relative to the cluster
-				home directory of the user the job gets run as locally. -->
-			<FileSystem name="userExecutionHostFs">
-				<MountSource multiplicity="1" name="ExecutionFileSystem" template="InputString"> </MountSource>
 
-				<FileSystemType>normal</FileSystemType>
-			</FileSystem>
 		</Resources>
 		<!--  The following DataStaging element -->
 
-		
 		<DataStaging>
-			<FileName>dummyfile</FileName>
+			<FileName />
 			<FileSystemName>userExecutionHostFs</FileSystemName>
 			<Source>
-				<URI description="All the other files you want to stage into the job directory." multiplicity="*" name="OptionalFiles" other="hideDescription" postprocess="FillDataStagingFileNameElement" template="MultipleInputFiles" title="Add here any additonal files for the GULP calculation - eg. restart files" validator="InputFile">dummyfile</URI>
+				<URI template="InputFile" name="A_Gulp_StdInputFile"
+					title="Please select your GULP input file (.gin)"
+					multiplicity="1"
+					other="render=combobox,useHistory"
+					postprocess="Substitute[name=STDINPUTFILE]" />
+			</Source>
+			</DataStaging>
+		<DataStaging>
+			<FileName></FileName>
+			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<Source>
+				<URI description="All the other files you want to stage into the job directory." multiplicity="*" name="OptionalFiles" other="hideDescription" template="MultipleInputFiles" title="Files to include with GULP input file - eg. restart files" validator="InputFile"></URI>
 			</Source>
 		</DataStaging>
 

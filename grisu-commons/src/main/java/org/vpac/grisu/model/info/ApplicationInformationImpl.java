@@ -17,7 +17,7 @@ import au.org.arcs.jcommons.constants.Constants;
  * Default implementation for {@link ApplicationInformation}.
  * 
  * @author Markus Binsteiner
-  */
+ */
 public class ApplicationInformationImpl implements ApplicationInformation {
 
 	private final ServiceInterface serviceInterface;
@@ -47,8 +47,10 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	/**
 	 * Default constructor for this class.
 	 * 
-	 * @param serviceInterface the serviceinterface
-	 * @param app the name of the application
+	 * @param serviceInterface
+	 *            the serviceinterface
+	 * @param app
+	 *            the name of the application
 	 */
 	public ApplicationInformationImpl(final ServiceInterface serviceInterface,
 			final String app) {
@@ -58,87 +60,140 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		this.application = app;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.vpac.grisu.model.info.ApplicationInformation#getApplicationDetails(java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.vpac.grisu.model.info.ApplicationInformation#getApplicationDetails
+	 * (java.lang.String, java.lang.String)
 	 */
 	public final Map<String, String> getApplicationDetails(final String subLoc,
 			final String version) {
 		final String KEY = version + "_" + subLoc;
 
 		if (cachedApplicationDetails.get(KEY) == null) {
-			Map<String, String> details = serviceInterface
-					.getApplicationDetailsForVersionAndSite(application, version, subLoc).getDetailsAsMap();
-			cachedApplicationDetails.put(KEY, details);
+			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
+				cachedApplicationDetails
+						.put(KEY, new HashMap<String, String>());
+			} else {
+				Map<String, String> details = serviceInterface
+						.getApplicationDetailsForVersionAndSite(application,
+								version, subLoc).getDetailsAsMap();
+				cachedApplicationDetails.put(KEY, details);
+			}
 		}
 		return cachedApplicationDetails.get(KEY);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.vpac.grisu.model.info.ApplicationInformation#getApplicationName()
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.vpac.grisu.model.info.ApplicationInformation#getApplicationName()
 	 */
 	public final String getApplicationName() {
 		return application;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.vpac.grisu.model.info.ApplicationInformation#getAvailableVersions(java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.vpac.grisu.model.info.ApplicationInformation#getAvailableVersions
+	 * (java.lang.String)
 	 */
 	public final Set<String> getAvailableVersions(final String subLoc) {
 
 		final String KEY = subLoc;
 
 		if (cachedVersionsPerSubmissionLocations.get(KEY) == null) {
-			List<String> temp = Arrays.asList(serviceInterface
-					.getVersionsOfApplicationOnSubmissionLocation(application,
-							subLoc));
-			cachedVersionsPerSubmissionLocations.put(KEY, new HashSet<String>(
-					temp));
+			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
+				Set<String> temp = new HashSet<String>();
+				temp.add(Constants.NO_VERSION_INDICATOR_STRING);
+				cachedVersionsPerSubmissionLocations.put(KEY, temp);
+			} else {
+				List<String> temp = Arrays.asList(serviceInterface
+						.getVersionsOfApplicationOnSubmissionLocation(
+								application, subLoc));
+				cachedVersionsPerSubmissionLocations.put(KEY,
+						new HashSet<String>(temp));
+			}
 		}
 		return cachedVersionsPerSubmissionLocations.get(KEY);
 
 	}
 
-	/* (non-Javadoc)
-	 * @see org.vpac.grisu.model.info.ApplicationInformation#getExecutables(java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.vpac.grisu.model.info.ApplicationInformation#getExecutables(java.
+	 * lang.String, java.lang.String)
 	 */
-	public final String[] getExecutables(final String subLoc, final String version) {
+	public final String[] getExecutables(final String subLoc,
+			final String version) {
 
 		return getApplicationDetails(subLoc, version).get(
 				Constants.MDS_EXECUTABLES_KEY).split(",");
 
 	}
 
-	/* (non-Javadoc)
-	 * @see org.vpac.grisu.model.info.ApplicationInformation#getAvailableAllSubmissionLocations()
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
+	 * getAvailableAllSubmissionLocations()
 	 */
 	public final Set<String> getAvailableAllSubmissionLocations() {
 
 		if (cachedAllSubmissionLocations == null) {
-			cachedAllSubmissionLocations = new HashSet(Arrays
-					.asList(serviceInterface
-							.getSubmissionLocationsForApplication(application).asSubmissionLocationStrings()));
+			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
+				cachedAllSubmissionLocations = new HashSet(Arrays
+						.asList(resourceInfo.getAllSubmissionLocations()));
+			} else {
+
+				cachedAllSubmissionLocations = new HashSet(Arrays
+						.asList(serviceInterface
+								.getSubmissionLocationsForApplication(
+										application)
+								.asSubmissionLocationStrings()));
+			}
 		}
 		return cachedAllSubmissionLocations;
 
 	}
 
-	/* (non-Javadoc)
-	 * @see org.vpac.grisu.model.info.ApplicationInformation#getAvailableSubmissionLocationsForVersion(java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
+	 * getAvailableSubmissionLocationsForVersion(java.lang.String)
 	 */
-	public final Set<String> getAvailableSubmissionLocationsForVersion(final String version) {
+	public final Set<String> getAvailableSubmissionLocationsForVersion(
+			final String version) {
 
 		if (cachedSubmissionLocationsPerVersion.get(version) == null) {
-			List<String> temp = Arrays
-					.asList(serviceInterface
-							.getSubmissionLocationsForApplicationAndVersion(application,
-									version).asSubmissionLocationStrings());
-			cachedSubmissionLocationsPerVersion.put(version, new HashSet(temp));
+			if (Constants.NO_VERSION_INDICATOR_STRING.equals(version)) {
+				cachedSubmissionLocationsPerVersion.put(version,
+						getAvailableAllSubmissionLocations());
+			} else {
+
+				List<String> temp = Arrays.asList(serviceInterface
+						.getSubmissionLocationsForApplicationAndVersion(
+								application, version)
+						.asSubmissionLocationStrings());
+				cachedSubmissionLocationsPerVersion.put(version, new HashSet(
+						temp));
+			}
 		}
 		return cachedSubmissionLocationsPerVersion.get(version);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.vpac.grisu.model.info.ApplicationInformation#getAllAvailableVersionsForFqan(java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
+	 * getAllAvailableVersionsForFqan(java.lang.String)
 	 */
 	public final Set<String> getAllAvailableVersionsForFqan(final String fqan) {
 
@@ -155,10 +210,14 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		return cachedVersionsForUserPerFqan.get(fqan);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.vpac.grisu.model.info.ApplicationInformation#getAvailableSubmissionLocationsForFqan(java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
+	 * getAvailableSubmissionLocationsForFqan(java.lang.String)
 	 */
-	public final Set<String> getAvailableSubmissionLocationsForFqan(final String fqan) {
+	public final Set<String> getAvailableSubmissionLocationsForFqan(
+			final String fqan) {
 
 		if (cachedSubmissionLocationsForUserPerFqan.get(fqan) == null) {
 			Set<String> temp = new HashSet<String>();
@@ -173,8 +232,12 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		return cachedSubmissionLocationsForUserPerFqan.get(fqan);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.vpac.grisu.model.info.ApplicationInformation#getAvailableSubmissionLocationsForVersionAndFqan(java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
+	 * getAvailableSubmissionLocationsForVersionAndFqan(java.lang.String,
+	 * java.lang.String)
 	 */
 	public final Set<String> getAvailableSubmissionLocationsForVersionAndFqan(
 			final String version, final String fqan) {

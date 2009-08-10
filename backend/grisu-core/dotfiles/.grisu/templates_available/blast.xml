@@ -65,31 +65,21 @@
 		<Resources>
 			<CandidateHosts>
 
-				<HostName template="InputString" name="HostName"
-					description="Where do you want to submit the job to?"
-					multiplicity="1" 
-					other="allQueues"				
-				/>
+				<HostName template="InputString" name="HostName"/>
 
 			</CandidateHosts>
 
-			<FileSystem name="userExecutionHostFs">
-				<MountSource template="InputString"
-					name="ExecutionFileSystem" multiplicity="1" />
-
-				<FileSystemType>normal</FileSystemType>
-			</FileSystem>
 		</Resources>
 		<!--  The following DataStaging element -->
 		<DataStaging>
 			<FileName />
-			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<FileSystemName></FileSystemName>
 			<Source>
 
 				<URI template="MultipleInputFiles" name="InputFiles"
 					title="Input files"
 					description="Provide at least one input file here."
-					multiplicity="?" postprocess="FillDataStagingFileNameElement"
+					multiplicity="?"
 					validator="InputFile" />
 
 			</Source>

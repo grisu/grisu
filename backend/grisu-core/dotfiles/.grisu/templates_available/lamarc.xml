@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
 	
-	<JobDescription grisu_modules="Common">
+	<JobDescription grisu_modules="MatchMakerPanel">
 	
 		<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
 			<Email description="The email address to send an email to if the job status changes." multiplicity="?" name="EmailAddress" other="useLastValue" template="Email"/>
@@ -16,7 +16,7 @@
 		<Application>
 
 			<ApplicationName>LAMARC</ApplicationName>
-			<ApplicationVersion></ApplicationVersion>
+			<ApplicationVersion template="Version" name="Version" title="Version" description="The version of LAMARC" other="useAny,useExact"></ApplicationVersion>
 			<Description>
 				LAMARC is a program which estimates population-genetic parameters such as population size, population growth rate, recombination rate, and migration rates.  Find more about LAMARC at http://evolution.genetics.washington.edu/lamarc/
 			</Description>
@@ -28,13 +28,12 @@
 				<Argument substitute="INPUT_FILE[basename]"/>
 				<Argument>-b</Argument>
 
-				<WorkingDirectory filesystemName="userExecutionHostFs" postprocess="FillWithJobDirectoryRelativeToExecutionFileSystem"/>
+				<WorkingDirectory />
 				<!-- 	The name of the standard output file. -->
 				<Output>stdout.txt</Output>
 				<!--  	The name of the standard error file. -->
 				<Error>stderr.txt</Error>
 				<!-- 	loads the module needed for a LAMARC job -->
-				<Module description="The module to load" multiplicity="?" name="Module" template="InputString"/>
 
 			</POSIXApplication>
 
@@ -43,27 +42,26 @@
 
 			<TotalCPUCount><exact defaultValue="1" description="How many CPUs do you want to use to run this job." multiplicity="1" name="CPUs" other="force=single" template="InputInteger"/></TotalCPUCount>
 
+			<TotalPhysicalMemory> 
+				<LowerBoundedRange postprocess="ConvertToBytes" defaultValue="0" description="The minimum amount of memory in mb for this job." multiplicity="1" name="MinMem" prefills="0,1024,2048,4096" template="InputInteger"> </LowerBoundedRange>
+			</TotalPhysicalMemory>
+			
 		</Application>
 		<Resources>
 			<CandidateHosts>
 	
-				<HostName description="Where do you want to submit the job to?" multiplicity="1" name="HostName" template="InputString"/>
+				<HostName name="HostName" template="InputString"/>
 
 			</CandidateHosts>
 
-			<FileSystem name="userExecutionHostFs">
-				<MountSource multiplicity="1" name="ExecutionFileSystem" template="InputString"/>
-
-				<FileSystemType>normal</FileSystemType>
-			</FileSystem>
 		</Resources>
 		<!--  The following DataStaging element -->
 		<DataStaging>
 			<FileName/>
-			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<FileSystemName></FileSystemName>
 			<Source>
 
-				<URI description="Please provide your LAMARC XML command file here." multiplicity="1" name="LAMARCInputFile" other="render=combobox,useHistory=6,directoryKey=LAMARC" postprocess="FillDataStagingFileNameElement,Substitute[name=INPUT_FILE]" template="InputFile" title="LAMARC XML command file" validator="InputFile"/>
+				<URI description="Please provide your LAMARC XML command file here." multiplicity="1" name="LAMARCInputFile" other="render=combobox,useHistory=6,directoryKey=LAMARC" postprocess="Substitute[name=INPUT_FILE]" template="InputFile" title="LAMARC XML command file" validator="InputFile"/>
 
 			</Source>
 		</DataStaging>

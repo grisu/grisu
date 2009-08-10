@@ -19,7 +19,7 @@
 			given to the "Rest" module, which is automatically created everytime one or
 			more template nodes of a template are not claimed by a module.
 	-->
-	<JobDescription grisu_modules="Common">
+	<JobDescription grisu_modules="MatchMakerPanel">
 	
 		<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
 		<Email 	template="Email" 
@@ -52,41 +52,27 @@
 				 	panel for this application exists so if you want to use one of these then you
 				 	need to know what the name is that Grisu expects.
 			-->
-			<ApplicationName >echo</ApplicationName>
-			<ApplicationVersion></ApplicationVersion>
+			<ApplicationName >generic</ApplicationName>
+			<ApplicationVersion template="Version" name="Version" title="Version" description="The version" defaultVersion="no_version" other="useDefault"></ApplicationVersion>
 			<POSIXApplication
 				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
 				
 				<!-- 	The path to the executable. If you load a module you may not need the
 						path and the name of the executable is enough.
 				-->
-				<Executable>/bin/echo</Executable>
+				<Executable>echo</Executable>
 				
 				<Argument template="MultipleInputString"
 						  name="Strings"
 						  description="The strings you want to echo."
 					      other="render=combobox,useHistory"
 			    />
-<!--				<Argument template="InputString"-->
-<!--						  name="SecondArgument"-->
-<!--						  title="The second argument."-->
-<!--						  description="Another string you want to echo."-->
-<!--					      other="render=combobox,useHistory,useLastValue"-->
-<!--			    />-->
-			    
-				
-				<!-- 	This element contains the working directory of the job relative to the
-						mountpoint root folder of the user for this job. The grisu core element
-						converts it to be relative to the cluster home directory later.
-				-->
-				<WorkingDirectory
-					postprocess="FillWithJobDirectoryRelativeToExecutionFileSystem"
-					filesystemName="userExecutionHostFs" />
+
+				<WorkingDirectory />
 				<!-- 	The name of the standard output file. -->
 				<Output>stdout.txt</Output>
 				<!--  	The name of the standard error file. -->
 				<Error>stderr.txt</Error>
-				<Module description="The module to load" multiplicity="?" name="Module" template="InputString"/>
 				
 			</POSIXApplication>
 			<TotalCPUTime template="InputInteger" name="Walltime"
@@ -96,22 +82,15 @@
 			<TotalCPUCount><exact template="InputInteger" name="CPUs"
 				description="How many CPUs do you want to use to run this job."
 				multiplicity="1" other="force=single" /></TotalCPUCount>
+			<TotalPhysicalMemory> 
+				<LowerBoundedRange postprocess="ConvertToBytes" defaultValue="0" description="The minimum amount of memory in mb for this job." multiplicity="1" name="MinMem" title="MinMem" prefills="0,1024,2048,4096" template="InputInteger"> </LowerBoundedRange>
+			</TotalPhysicalMemory>
 
 		</Application>
 		<Resources>
 			<CandidateHosts>
-				<HostName template="InputString" name="HostName"
-					description="Where do you want to submit the job to?"
-					multiplicity="1" prefills="ng2.vpac.org,ng2.sapac.edu.au" 
-					other="allQueues,hideAllQueuesCheckbox"/>
-
+				<HostName template="InputString" name="HostName"/>
 			</CandidateHosts>
-			<FileSystem name="userExecutionHostFs">
-				<MountSource template="InputString"
-					name="ExecutionFileSystem" multiplicity="1" />
-
-				<FileSystemType>normal</FileSystemType>
-			</FileSystem>
 		</Resources>
 
 	</JobDescription>

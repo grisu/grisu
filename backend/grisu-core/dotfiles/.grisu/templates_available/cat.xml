@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
 
-	<JobDescription grisu_modules="Common">
+	<JobDescription grisu_modules="MatchMakerPanel">
 		<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
 		<Email 	template="Email" 
 					   	name="EmailAddress"
@@ -21,8 +21,8 @@
 		
 		<Application>
 
-			<ApplicationName >cat</ApplicationName>
-			<ApplicationVersion></ApplicationVersion>
+			<ApplicationName >generic</ApplicationName>
+			<ApplicationVersion template="Version" name="Version" title="Version" description="The version" defaultVersion="no_version" other="useDefault"></ApplicationVersion>
 			<POSIXApplication
 				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
 				
@@ -34,18 +34,11 @@
             				other="render=combobox,useHistory=2"
             				multiplicity="?"
 				/>
-				<WorkingDirectory
-					postprocess="FillWithJobDirectoryRelativeToExecutionFileSystem"
-					filesystemName="userExecutionHostFs" />
+				<WorkingDirectory/>
 				<!-- 	The name of the standard output file. -->
 				<Output>stdout.txt</Output>
 				<!--  	The name of the standard error file. -->
 				<Error>stderr.txt</Error>
-				<Module    template="InputString"
-						   name="Module"
-						   description="The module to load"
-						   multiplicity="?"
-				></Module>
 
 			</POSIXApplication>
 			
@@ -58,37 +51,30 @@
 			<TotalCPUCount><exact template="InputInteger" name="CPUs"
 				description="How many CPUs do you want to use to run this job."
 				multiplicity="1" other="force=single" /></TotalCPUCount>
+				
+			<TotalPhysicalMemory> 
+				<LowerBoundedRange postprocess="ConvertToBytes" defaultValue="0" description="The minimum amount of memory in mb for this job." multiplicity="1" name="MinMem" title="MinMem" prefills="0,1024,2048,4096" template="InputInteger"> </LowerBoundedRange>
+			</TotalPhysicalMemory>
 
 		</Application>
 		<Resources>
 			<CandidateHosts>
 
-				<HostName template="InputString" name="HostName"
-					description="Where do you want to submit the job to?"
-					multiplicity="1" 
-					other="allQueues,hideAllQueuesCheckbox"				
-				/>
+				<HostName template="InputString" name="HostName" multiplicity="1"/>
 
 			</CandidateHosts>
 
-			<FileSystem name="userExecutionHostFs">
-				<MountSource template="InputString"
-					name="ExecutionFileSystem" multiplicity="1" />
-
-				<FileSystemType>normal</FileSystemType>
-			</FileSystem>
 		</Resources>
 		<!--  The following DataStaging element -->
 		<DataStaging>
 			<FileName />
-			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<FileSystemName></FileSystemName>
 			<Source>
 
 				<URI template="MultipleInputFiles" name="InputFiles"
 					title="Input files"
 					description="Provide at least one input file here."
-					multiplicity="?" postprocess="FillDataStagingFileNameElement"
-					validator="InputFile" />
+					multiplicity="?" validator="InputFile" />
 
 			</Source>
 		</DataStaging>

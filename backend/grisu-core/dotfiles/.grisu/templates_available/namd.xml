@@ -2,29 +2,12 @@
 <JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
 
 
-	<!-- 	Only the "Common" module is used here. It is recommended that you always
-		use the "Common" module because it is very unintuitive if the parameters 
-		it encapsulates have to be put in by hand. These parameters are:
-		* Jobname
-		* Walltime
-		* CPUs
-		* HostName
-		* ExecutionFileSystem
-		* EmailAddress 
-		
-		When using a module, you have to use which so called template nodes are used 
-		by it. And you have to know what names the module expects for these nodes.
-		If one or more of these names are not available in the template, the module is 
-		not used at all and all the template nodes that it normally would use are
-		given to the "Rest" module, which is automatically created everytime one or
-		more template nodes of a template are not claimed by a module.
-	-->
-	<JobDescription grisu_modules="GenericMDS">
-	
+	<JobDescription grisu_modules="MatchMakerPanel">
+
 		<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
 			<Email description="The email address to send an email to if the job status changes." multiplicity="?" name="EmailAddress" other="useLastValue" template="Email"/>
 	    </GrisuTemplate>
-
+	    
 		<JobIdentification>
 
 			<!-- The JobName template type renders a panel that is kind of 
@@ -47,8 +30,7 @@
 				need to know what the name is that Grisu expects.
 			-->
 			<ApplicationName>namd</ApplicationName>
-			
-			<ApplicationVersion template="Version" name="Version" description="The version of namd" other="useAny,useExact"></ApplicationVersion>
+			<ApplicationVersion template="ApplicationVersion" name="Version" title="Version" description="The version of namd" other="useAny,useExact"/>
 			<Description>
 				NAMD is a parallel molecular dynamics simulation program
 				used to model large biomolecular systems.
@@ -72,15 +54,12 @@
 					converts it to be relative to the cluster home directory later.
 					In most cases you would leave that as it is.
 				-->
-				<WorkingDirectory
-					postprocess="FillWithJobDirectoryRelativeToExecutionFileSystem"
-					filesystemName="userExecutionHostFs" />
+				<WorkingDirectory/>
 				<!-- 	The name of the standard output file. -->
 				<Output>stdout.txt</Output>
 				<!--  	The name of the standard error file. -->
 				<Error>stderr.txt</Error>
-
-
+	
 			</POSIXApplication>
 
 			<!-- The total cpu time in seconds. Since the jsdl standard uses this instead
@@ -93,42 +72,25 @@
 
 			<TotalCPUCount><exact template="InputInteger" name="CPUs"
 				description="How many CPUs do you want to use to run this job."
-				multiplicity="1" other="force=parallel" /></TotalCPUCount>
+				multiplicity="1" defaultValue="1" prefills="1,2,4,8" /></TotalCPUCount>
 				
 			<TotalPhysicalMemory> 
-				<LowerBoundedRange postprocess="ConvertToBytes" defaultValue="0" description="The minimum amount of memory in mb for this job." multiplicity="1" name="MinMem" prefills="0,1024,2048,4096" template="InputInteger"> </LowerBoundedRange>
+				<LowerBoundedRange postprocess="ConvertToBytes" defaultValue="0" description="The minimum amount of memory in mb for this job." multiplicity="1" name="MinMem" title="MinMem" prefills="0,1024,2048,4096" template="InputInteger"> </LowerBoundedRange>
 			</TotalPhysicalMemory>
 
 		</Application>
 		<Resources>
 			<CandidateHosts>
-				<!-- The following two nodes depend on each other. You can't submit a job to the host specified
-					by "HostName" and stage the files into a filesystem "userExecutionHostFs" that is at a 
-					different site. The module "Common" should take care of that so just leave the following
-					two nodes as they are. If you are not using the "Common" module, you need to make sure that
-					the input is correct.
-				-->
-				<HostName template="InputString" name="HostName"
-					description="Where do you want to submit the job to?"
-					multiplicity="1" />
+
+				<HostName template="InputString" name="HostName"/>
 
 			</CandidateHosts>
-			<!--  It is recommended to always use "userExecutionHostFs" as the filesystem alias for the filesystem you
-				are actually using to stage the input files. The value of this node is the root url of a mountpoing, 
-				for example: gsiftp://ngdata.vpac.org/home/grid-admin/<USER_DN>.
-				The grisu backend does all calculating of where that directory actually is relative to the cluster
-				home directory of the user the job gets run as locally. -->
-			<FileSystem name="userExecutionHostFs">
-				<MountSource template="InputString"
-					name="ExecutionFileSystem" multiplicity="1" />
 
-				<FileSystemType>normal</FileSystemType>
-			</FileSystem>
 		</Resources>
 		<!--  The following DataStaging element -->
 		<DataStaging>
 			<FileName />
-			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<FileSystemName></FileSystemName>
 			<Source>
 				<!-- InputFile renders a textfield with a browse button to the left. When the user clicks the 
 					browse button a file chooser dialog with all of the users' mounted filesystems is opened 
@@ -141,11 +103,11 @@
 					For a more detailed description or for description on other TemplateNodes that can be used have a look 
 					at "http://www.grid.apac.edu.au/repository/trac/grisu/wiki/GrisuTemplates".
 				-->
-				<URI template="NamdConfigInputFile" name="NamdConfigInputFile"
+				<URI template="InputFile" name="ConfigInputFile"
 					title="Namd config file"
 					description="Please provide the main namd config file here."
 					multiplicity="1"
-					postprocess="FillDataStagingFileNameElement,Substitute[name=CONFIG_FILE]"
+					postprocess="Substitute[name=CONFIG_FILE]"
 					other="render=combobox,useHistory=6,directoryKey=NAMD" validator="InputFile" />
 
 			</Source>
@@ -158,7 +120,6 @@
 				<URI template="MultipleInputFiles" name="OptionalFiles"
 					 title="Optional files"
 					description="All the other files you want to stage into the job directory." multiplicity="*"
-					postprocess="FillDataStagingFileNameElement"
 					validator="InputFile"
 					other="directoryKey=NAMD">
 				</URI>

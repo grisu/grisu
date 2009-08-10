@@ -19,7 +19,7 @@
 			given to the "Rest" module, which is automatically created everytime one or
 			more template nodes of a template are not claimed by a module.
 	-->
-	<JobDescription grisu_modules="Common">
+	<JobDescription grisu_modules="MatchMakerPanel">
 		<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
 		<Email 	template="Email" 
 					   	name="EmailAddress"
@@ -27,6 +27,7 @@
 						multiplicity="?" 
 						other="useLastValue" />
 		</GrisuTemplate>
+		<Module xmlns="http://arcs.org.au/jsdl/jsdl-grisu" name="A_Module" title="Module" template="InputString"></Module>
 	
 		<JobIdentification>
 	
@@ -52,7 +53,8 @@
 				 	need to know what the name is that Grisu expects.
 			-->
 			<ApplicationName >generic</ApplicationName>
-			<ApplicationVersion></ApplicationVersion>
+			<ApplicationVersion template="Version" name="Version" title="Version" description="The version" defaultVersion="no_version" other="useDefault"></ApplicationVersion>
+			
 			<POSIXApplication
 				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
 				
@@ -70,21 +72,12 @@
 						converts it to be relative tIn most cases you would leave that as it is.o the cluster home directory later.
 						In most cases you would leave that as it is.
 				-->
-				<WorkingDirectory
-					postprocess="FillWithJobDirectoryRelativeToExecutionFileSystem"
-					filesystemName="userExecutionHostFs" />
+				<WorkingDirectory />
 				<!-- 	The name of the standard output file. -->
 				<Output>stdout.txt</Output>
 				<!--  	The name of the standard error file. -->
 				<Error>stderr.txt</Error>
 				
-						
-				<Module template="InputString"
-				        name="Module"
-				        description="The name of the module you want to load."
-				        multiplicity="?"
-				        other="useHistory"
-				/>
 
 			</POSIXApplication>
 			
@@ -101,6 +94,10 @@
 			<TotalCPUCount><exact template="InputInteger" name="CPUs"
 				description="How many CPUs do you want to use to run this job."
 				multiplicity="1" defaultValue="1" prefills="1,2,4,8" /></TotalCPUCount>
+				
+			<TotalPhysicalMemory> 
+				<LowerBoundedRange postprocess="ConvertToBytes" defaultValue="0" description="The minimum amount of memory in mb for this job." multiplicity="1" name="MinMem" title="MinMem" prefills="0,1024,2048,4096" template="InputInteger"> </LowerBoundedRange>
+			</TotalPhysicalMemory>
 
 		</Application>
 		<Resources>
@@ -111,28 +108,14 @@
 					 two nodes as they are. If you are not using the "Common" module, you need to make sure that
 					 the input is correct.
 				-->
-				<HostName template="InputString" name="HostName"
-					description="Where do you want to submit the job to?"
-					multiplicity="1" 
-					other="hideAllQueuesCheckbox,allQueues"
-				/>
+				<HostName template="InputString" name="HostName"/>
 
 			</CandidateHosts>
-			<!--  It is recommended to always use "userExecutionHostFs" as the filesystem alias for the filesystem you
-				  are actually using to stage the input files. The value of this node is the root url of a mountpoing, 
-				  for example: gsiftp://ngdata.vpac.org/home/grid-admin/<USER_DN>.
-				  The grisu backend does all calculating of where that directory actually is relative to the cluster
-				  home directory of the user the job gets run as locally. -->
-			<FileSystem name="userExecutionHostFs">
-				<MountSource template="InputString"
-					name="ExecutionFileSystem" multiplicity="1" />
 
-				<FileSystemType>normal</FileSystemType>
-			</FileSystem>
 		</Resources>
 		<DataStaging>
 			<FileName />
-			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<FileSystemName></FileSystemName>
 			<Source>
 				<!-- The "MultipleInputFiles" is a TemplateNode that renders a NortonCommander like panel which allows
 					 the user to select multiple files (from different locations) which are staged in to the job
@@ -150,8 +133,7 @@
 		   		-->
 				<URI template="MultipleInputFiles" name="The files"
 					description="Provide input files (if needed)."
-					multiplicity="*" postprocess="FillDataStagingFileNameElement"
-					validator="InputFile" />
+					multiplicity="*" validator="InputFile" />
 
 			</Source>
 		</DataStaging>
