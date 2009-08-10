@@ -29,6 +29,18 @@
 		<!--    	<artifactId>jaxws-rt</artifactId>-->
 		<!--    	<version>2.1.4</version>-->
 		<!--    </dependency>-->
+		<dependency>
+			<groupId>external.grisu-client-xfire</groupId>
+			<artifactId>not-yet-commons-ssl</artifactId>
+			<version>0.3.9</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>3.0</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
