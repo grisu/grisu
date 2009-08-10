@@ -20,7 +20,6 @@ import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.settings.CaCertManager;
 
 
-
 public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 	
 	static final Logger myLogger = Logger
@@ -121,7 +120,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			Object[] otherOptions) throws ServiceInterfaceException {
 		
 		
-		createSocketFactory(interfaceUrl);
+//		createSocketFactory(interfaceUrl);
 		Class jaxwsServiceInterfaceClass = null;
 
 		try {
@@ -157,8 +156,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY, username);
 			bp.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, new String(password));
 			
-			SSLSocketFactory sslFactory = null;
-			bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory", createSocketFactory(interfaceUrl));
+			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory", createSocketFactory(interfaceUrl));
 
 			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size", 4096);
 			SOAPBinding binding = (SOAPBinding)bp.getBinding();
