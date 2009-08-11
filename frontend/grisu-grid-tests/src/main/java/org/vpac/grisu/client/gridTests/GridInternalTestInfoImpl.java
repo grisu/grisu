@@ -10,7 +10,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.client.gridTests.testElements.GridTestElement;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
-import org.vpac.grisu.model.GrisuRegistry;
+import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.info.ApplicationInformation;
 
 import au.org.arcs.jcommons.constants.Constants;
@@ -153,7 +153,7 @@ public class GridInternalTestInfoImpl implements GridTestInfo {
 
 		List<GridTestElement> results = new LinkedList<GridTestElement>();
 
-		ApplicationInformation appInfo = GrisuRegistry.getDefault(controller.getServiceInterface()).getApplicationInformation(applicationName);
+		ApplicationInformation appInfo = GrisuRegistryManager.getDefault(controller.getServiceInterface()).getApplicationInformation(applicationName);
 		
 		for ( String fqan : fqans ) {
 			
@@ -175,7 +175,7 @@ public class GridInternalTestInfoImpl implements GridTestInfo {
 					}
 				}
 			} else {
-				String[] subLocs = GrisuRegistry.getDefault(controller.getServiceInterface()).getResourceInformation().getAllAvailableSubmissionLocations(fqan);
+				String[] subLocs = GrisuRegistryManager.getDefault(controller.getServiceInterface()).getResourceInformation().getAllAvailableSubmissionLocations(fqan);
 				for ( String subLoc : subLocs ) {
 					results.add(createGridTestElement(Constants.NO_VERSION_INDICATOR_STRING, subLoc, fqan));
 				}

@@ -7,6 +7,7 @@ import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.model.GrisuRegistry;
+import org.vpac.grisu.model.GrisuRegistryManager;
 
 public final class GenericJobSubmissionWithoutMds {
 	
@@ -31,7 +32,7 @@ public final class GenericJobSubmissionWithoutMds {
 		final ServiceInterface si = ServiceInterfaceFactory
 				.createInterface(loginParams);
 
-		final GrisuRegistry registry = GrisuRegistry.getDefault(si);
+		final GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
 
 		JobObject job = new JobObject(si);
 		// job.setApplication(ServiceInterface.GENERIC_APPLICATION_NAME);

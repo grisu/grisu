@@ -2248,7 +2248,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	}
 
 	/**
-	 * Returns the name of the site for the give submissionLocation.
+	 * Returns the name of the site for the given submissionLocation.
 	 * 
 	 * @param subLoc
 	 *            the submissionLocation

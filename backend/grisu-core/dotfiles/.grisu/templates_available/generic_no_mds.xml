@@ -53,7 +53,7 @@
 				 	need to know what the name is that Grisu expects.
 			-->
 			<ApplicationName >generic</ApplicationName>
-			<ApplicationVersion template="Version" name="Version" title="Version" description="The version" defaultVersion="no_version" other="useDefault"></ApplicationVersion>
+			<ApplicationVersion template="Version" name="Version" title="Version" description="The version" defaultValue="no_version" other="useDefault"></ApplicationVersion>
 			
 			<POSIXApplication
 				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">

@@ -13,7 +13,7 @@ import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.model.FileManager;
-import org.vpac.grisu.model.GrisuRegistry;
+import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.job.JobCreatedProperty;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.utils.FileHelpers;
@@ -202,7 +202,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 		for (String inputFile : getInputFileUrls()) {
 			if (FileManager.isLocal(inputFile)) {
 				try {
-					GrisuRegistry.getDefault(serviceInterface).getFileManager()
+					GrisuRegistryManager.getDefault(serviceInterface).getFileManager()
 							.uploadFile(inputFile, jobDirectory);
 				} catch (FileTransferException e) {
 					throw new JobSubmissionException(
@@ -358,7 +358,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 		File file = null;
 		try {
-			file = GrisuRegistry.getDefault(serviceInterface)
+			file = GrisuRegistryManager.getDefault(serviceInterface)
 					.getFileManager().downloadFile(url);
 		} catch (Exception e) {
 			throw new JobException(this, "Could not download file: "+url, e);

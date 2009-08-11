@@ -2,14 +2,12 @@ package org.vpac.grisu.client.gridTests.testElements;
 
 import java.io.File;
 
-import org.vpac.grisu.client.gridTests.GridTestController;
 import org.vpac.grisu.client.gridTests.GridTestInfo;
-import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.model.FileManager;
-import org.vpac.grisu.model.GrisuRegistry;
+import org.vpac.grisu.model.GrisuRegistryManager;
 
 import au.org.arcs.jcommons.constants.Constants;
 import au.org.arcs.jcommons.constants.JobSubmissionProperty;
@@ -37,7 +35,7 @@ public class SimpleCatJobGridTestElement extends GridTestElement {
 			stdout = serviceInterface.getJobProperty(jobObject.getJobname(), JobSubmissionProperty.STDOUT.toString());
 			addMessage("url of stdout is: "+jobDir+"/"+stdout);
 			
-			FileManager fileHelper = GrisuRegistry.getDefault(serviceInterface).getFileManager();
+			FileManager fileHelper = GrisuRegistryManager.getDefault(serviceInterface).getFileManager();
 			File stdoutFile = fileHelper.downloadFile(jobDir+"/"+stdout);
 			
 			if ( stdoutFile.length() > 0 ) {

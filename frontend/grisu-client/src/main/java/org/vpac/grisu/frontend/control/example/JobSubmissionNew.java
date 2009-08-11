@@ -12,6 +12,7 @@ import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.model.job.JobStatusChangeListener;
 import org.vpac.grisu.model.GrisuRegistry;
+import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.info.ApplicationInformation;
 
 public class JobSubmissionNew implements JobStatusChangeListener {
@@ -40,7 +41,7 @@ public class JobSubmissionNew implements JobStatusChangeListener {
 		// "gsiftp://ng2.vpac.org/home/grid-mongeo/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner/test",
 		// true, false);
 
-		final GrisuRegistry registry = GrisuRegistry.getDefault(si);
+		final GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
 
 		ApplicationInformation javaInfo = registry
 				.getApplicationInformation("java");

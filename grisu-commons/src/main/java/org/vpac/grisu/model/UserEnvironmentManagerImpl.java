@@ -38,7 +38,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 
 	public UserEnvironmentManagerImpl(final ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
-		resourceInfo = GrisuRegistry.getDefault(serviceInterface)
+		resourceInfo = GrisuRegistryManager.getDefault(serviceInterface)
 				.getResourceInformation();
 	}
 

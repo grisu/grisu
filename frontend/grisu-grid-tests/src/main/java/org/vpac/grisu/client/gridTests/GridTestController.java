@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -27,11 +26,9 @@ import org.vpac.grisu.frontend.control.login.LoginHelpers;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.model.GrisuRegistry;
-import org.vpac.grisu.model.info.ApplicationInformation;
+import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.security.light.plainProxy.LocalProxy;
-
-import au.org.arcs.jcommons.constants.Constants;
 
 public class GridTestController {
 
@@ -127,7 +124,7 @@ public class GridTestController {
 			}
 		}
 
-		registry = GrisuRegistry.getDefault(this.serviceInterface);
+		registry = GrisuRegistryManager.getDefault(this.serviceInterface);
 		
 		
 		if ( options.getFqans().length == 0 ) {

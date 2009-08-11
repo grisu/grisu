@@ -11,9 +11,8 @@ import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.model.GrisuRegistry;
+import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.DtoJobs;
-import org.vpac.grisu.utils.SeveralXMLHelpers;
-import org.w3c.dom.Document;
 
 import au.org.arcs.jcommons.constants.Constants;
 
@@ -54,7 +53,7 @@ public final class SuperMonsterBatchJob {
 		final ServiceInterface si = ServiceInterfaceFactory
 				.createInterface(loginParams);
 
-		final GrisuRegistry registry = GrisuRegistry.getDefault(si);
+		final GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
 
 		final ConcurrentLinkedQueue<JobObject> jobObjects = new ConcurrentLinkedQueue<JobObject>();
 		final ConcurrentLinkedQueue<JobObject> failedJobObjects = new ConcurrentLinkedQueue<JobObject>();

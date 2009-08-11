@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.model.GrisuRegistry;
+import org.vpac.grisu.model.GrisuRegistryManager;
 
 import au.org.arcs.jcommons.constants.Constants;
 
@@ -55,7 +55,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	public ApplicationInformationImpl(final ServiceInterface serviceInterface,
 			final String app) {
 		this.serviceInterface = serviceInterface;
-		this.resourceInfo = GrisuRegistry.getDefault(serviceInterface)
+		this.resourceInfo = GrisuRegistryManager.getDefault(serviceInterface)
 				.getResourceInformation();
 		this.application = app;
 	}

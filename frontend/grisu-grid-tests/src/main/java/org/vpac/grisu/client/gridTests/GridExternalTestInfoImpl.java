@@ -12,7 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.client.gridTests.testElements.ExternalGridTestElement;
 import org.vpac.grisu.client.gridTests.testElements.GridTestElement;
 import org.vpac.grisu.control.exceptions.MdsInformationException;
-import org.vpac.grisu.model.GrisuRegistry;
+import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.info.ApplicationInformation;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
@@ -117,7 +117,7 @@ public class GridExternalTestInfoImpl implements GridTestInfo {
 
 		List<GridTestElement> results = new LinkedList<GridTestElement>();
 
-		ApplicationInformation appInfo = GrisuRegistry.getDefault(controller.getServiceInterface()).getApplicationInformation(applicationName);
+		ApplicationInformation appInfo = GrisuRegistryManager.getDefault(controller.getServiceInterface()).getApplicationInformation(applicationName);
 		
 		for ( String fqan : fqans ) {
 			
@@ -139,7 +139,7 @@ public class GridExternalTestInfoImpl implements GridTestInfo {
 					}
 				}
 			} else {
-				String[] subLocs = GrisuRegistry.getDefault(controller.getServiceInterface()).getResourceInformation().getAllAvailableSubmissionLocations(fqan);
+				String[] subLocs = GrisuRegistryManager.getDefault(controller.getServiceInterface()).getResourceInformation().getAllAvailableSubmissionLocations(fqan);
 				for ( String subLoc : subLocs ) {
 					results.add(createGridTestElement(Constants.NO_VERSION_INDICATOR_STRING, subLoc, fqan));
 				}

@@ -16,5 +16,6 @@
 	<modules>
 		<module>grisu-grid-tests</module>
 		<module>grisu-client</module>
+		<module>client-side-mds</module>
 	</modules>
 </project>
