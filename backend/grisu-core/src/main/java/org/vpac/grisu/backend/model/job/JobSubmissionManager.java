@@ -41,6 +41,8 @@ public class JobSubmissionManager {
 		this.serviceInterface = serviceInterface;
 		this.submitters = submitters;
 	}
+	
+	
 
 	/**
 	 * Submits the job to the specified {@link JobSubmitter}.

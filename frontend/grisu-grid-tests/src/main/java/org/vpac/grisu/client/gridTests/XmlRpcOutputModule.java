@@ -71,7 +71,7 @@ public class XmlRpcOutputModule implements OutputModule {
 				result = (Integer) client.execute("new_test_result", params);
 				System.out.println("Success. Output: "+result);
 			} catch (XmlRpcException e) {
-				System.out.println("Couldn't transfer results for test: "+application+", "+version+", "+submissionLocation+": "+e.getLocalizedMessage());
+				System.out.println("Couldn't transfer test results for test: "+application+", "+version+", "+submissionLocation+" to xmlrpc endpoint: "+e.getLocalizedMessage());
 			}
 			
 			

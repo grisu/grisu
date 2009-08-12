@@ -58,6 +58,8 @@ public class OutputModuleHelpers {
 
 		outputString.append("\nSubmissionLocation: "
 				+ gte.getSubmissionLocation() + "\n");
+		
+		outputString.append("Fqan: "+gte.getFqan()+"\n");
 
 		String resultString = null;
 		if ( gte.wasInterrupted() ) {
