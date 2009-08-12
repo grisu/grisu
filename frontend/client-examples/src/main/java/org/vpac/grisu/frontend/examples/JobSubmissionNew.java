@@ -19,13 +19,13 @@ public class JobSubmissionNew implements JobStatusChangeListener {
 
 	public static void main(final String[] args) throws Exception {
 
-		ExecutorService executor = Executors.newFixedThreadPool(1);
+		ExecutorService executor = Executors.newFixedThreadPool(10);
 
 		String username = args[0];
 		char[] password = args[1].toCharArray();
 
 		LoginParams loginParams = new LoginParams(
-//				"http://localhost:8080/grisu-cxf/services/grisu",
+//				"http://localhost:8080/enunciate-backend/soap/EnunciateServiceInterfaceService",
 				"https://ngportal.vpac.org/grisu-ws/soap/EnunciateServiceInterfaceService",
 				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
 //				 "Local",
@@ -41,17 +41,19 @@ public class JobSubmissionNew implements JobStatusChangeListener {
 				.getApplicationInformation("java");
 
 		Set<String> submissionLocations = javaInfo
-				.getAvailableSubmissionLocationsForFqan("/ARCS/StartUp");
+				.getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin");
 
 		final JobStatusChangeListener jsl = new JobSubmissionNew();
-		
+		int i = 0;
 		for (final String subLoc : submissionLocations) {
-
+			i = i +1;
+			final int jobnumber = i;
 			Thread subThread = new Thread() {
 				public void run() {
 
+					
 					JobObject jo = new JobObject(si);
-					jo.setJobname("java_" + UUID.randomUUID());
+					jo.setJobname("java_" + jobnumber + "_" + UUID.randomUUID());
 //					jo.setApplication("java");
 					jo.setModules(new String[]{"java"});
 					jo.setCommandline("java -version");
@@ -68,12 +70,14 @@ public class JobSubmissionNew implements JobStatusChangeListener {
 //						return;
 //					}
 					try {
-						jo.createJob("/ARCS/StartUp");
+						jo.createJob("/ARCS/NGAdmin");
 						jo.submitJob();
 					} catch (Exception e) {
+						e.printStackTrace();
 						System.err.println("Job to "
 								+ jo.getSubmissionLocation() + ": "
 								+ e.getLocalizedMessage());
+						jo.kill(true);
 					}
 				}
 

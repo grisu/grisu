@@ -19,8 +19,8 @@ import org.vpac.grisu.utils.SimpleJsdlBuilder;
 import org.w3c.dom.Document;
 
 import au.org.arcs.jcommons.constants.Constants;
+import au.org.arcs.jcommons.constants.JobSubmissionProperty;
 import au.org.arcs.jcommons.utils.JsdlHelpers;
-import au.org.arcs.jcommons.constants.*;
 
 /**
  * A class that helps creating a job.

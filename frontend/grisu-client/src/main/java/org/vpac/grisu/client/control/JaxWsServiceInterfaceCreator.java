@@ -158,6 +158,8 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			
 			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory", createSocketFactory(interfaceUrl));
 
+			bp.getRequestContext().put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
+			
 			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size", 4096);
 			SOAPBinding binding = (SOAPBinding)bp.getBinding();
 			binding.setMTOMEnabled(true);
