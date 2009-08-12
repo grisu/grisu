@@ -2,6 +2,10 @@ package org.vpac.grisu.model.info;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+
+import au.org.arcs.jcommons.constants.JobSubmissionProperty;
+import au.org.arcs.jcommons.interfaces.GridResource;
 
 /**
  * Interface which describes the stuff that needs to be known from an
@@ -106,5 +110,19 @@ public interface ApplicationInformation {
 	 * @return all available versions
 	 */
 	Set<String> getAllAvailableVersionsForFqan(String fqan);
+	
+	/**
+	 * Calculates the best {@link GridResource}s to submit this job to.
+	 * 
+	 * @param additionalJobProperties
+	 *            additional job properties (e.g. walltime). Have a look at the
+	 *            MatchMaker interface for supported keys.
+	 * @param fqan
+	 *            the fqan to submit the job with
+	 * @return a sorted list of the best resources to submit this job to.
+	 */
+	SortedSet<GridResource> getBestSubmissionLocations(
+			Map<JobSubmissionProperty, String> additionalJobProperties,
+			String fqan);
 
 }

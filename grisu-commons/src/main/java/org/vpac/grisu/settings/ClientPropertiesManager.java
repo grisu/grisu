@@ -13,7 +13,9 @@ import org.apache.log4j.Logger;
  * 
  */
 public final class ClientPropertiesManager {
-	
+
+	public static final int CONCURRENT_THREADS_DEFAULT = 5;
+
 	private ClientPropertiesManager() {
 	}
 
@@ -388,7 +390,8 @@ public final class ClientPropertiesManager {
 	 * @param serviceInterfaceUrl
 	 *            the url of the ServiceInterface
 	 */
-	public static void setDefaultServiceInterfaceUrl(final String serviceInterfaceUrl) {
+	public static void setDefaultServiceInterfaceUrl(
+			final String serviceInterfaceUrl) {
 		try {
 			getClientConfiguration().setProperty("defaultServiceInterfaceUrl",
 					serviceInterfaceUrl);
@@ -481,6 +484,23 @@ public final class ClientPropertiesManager {
 			return null;
 		}
 		return path;
+	}
+
+	public static int getConcurrentThreadsDefault() {
+		int threads = -1;
+		try {
+			threads = Integer.parseInt(getClientConfiguration().getString(
+					"concurrentThreads"));
+
+		} catch (Exception e) {
+			// myLogger.debug("Problem with config file: " + e.getMessage());
+			return CONCURRENT_THREADS_DEFAULT;
+		}
+		if (threads == -1) {
+			return CONCURRENT_THREADS_DEFAULT;
+		}
+
+		return threads;
 	}
 
 }

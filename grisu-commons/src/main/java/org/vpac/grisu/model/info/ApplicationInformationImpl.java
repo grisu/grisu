@@ -6,12 +6,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.GrisuRegistryManager;
+import org.vpac.grisu.model.dto.DtoJob;
 
 import au.org.arcs.jcommons.constants.Constants;
+import au.org.arcs.jcommons.constants.JobSubmissionProperty;
+import au.org.arcs.jcommons.interfaces.GridResource;
 
 /**
  * Default implementation for {@link ApplicationInformation}.
@@ -256,6 +261,26 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 			cachedSubmissionLocationsForUserPerVersionAndFqan.put(KEY, temp);
 		}
 		return cachedSubmissionLocationsForUserPerVersionAndFqan.get(KEY);
+	}
+	
+
+	public final SortedSet<GridResource> getBestSubmissionLocations(
+			final Map<JobSubmissionProperty, String> additionalJobProperties,
+			final String fqan) {
+
+		Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
+		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
+				getApplicationName());
+
+		basicJobProperties.putAll(additionalJobProperties);
+
+		Map<String, String> converterMap = new HashMap<String, String>();
+		for (JobSubmissionProperty key : basicJobProperties.keySet()) {
+			converterMap.put(key.toString(), basicJobProperties.get(key));
+		}
+
+		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(DtoJob.createJob(JobConstants.UNDEFINED, converterMap),
+				fqan).wrapGridResourcesIntoInterfaceType();
 	}
 
 }

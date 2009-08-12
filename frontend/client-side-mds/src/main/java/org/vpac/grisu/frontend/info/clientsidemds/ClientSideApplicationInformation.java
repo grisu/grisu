@@ -1,14 +1,21 @@
 package org.vpac.grisu.frontend.info.clientsidemds;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.info.ApplicationInformation;
+import org.vpac.grisu.settings.Environment;
 
+import au.org.arcs.grid.grisu.matchmaker.MatchMakerImpl;
+import au.org.arcs.grid.sched.MatchMaker;
 import au.org.arcs.jcommons.constants.Constants;
+import au.org.arcs.jcommons.constants.JobSubmissionProperty;
+import au.org.arcs.jcommons.interfaces.GridResource;
 import au.org.arcs.jcommons.interfaces.InformationManager;
 
 public class ClientSideApplicationInformation implements ApplicationInformation {
@@ -16,11 +23,14 @@ public class ClientSideApplicationInformation implements ApplicationInformation 
 	private final InformationManager infoManager;
 	private final String applicationName;
 	protected final GrisuRegistry registry;
+	private final MatchMaker matchMaker;
+
 	
 	public ClientSideApplicationInformation(GrisuRegistry registry, String applicationName, InformationManager infoManager) {
 		this.registry = registry;
 		this.infoManager = infoManager;
 		this.applicationName = applicationName;
+		this.matchMaker = new MatchMakerImpl(Environment.getGrisuDirectory().toString());
 	}
 	
 	public Set<String> getAllAvailableVersionsForFqan(String fqan) {
@@ -71,6 +81,17 @@ public class ClientSideApplicationInformation implements ApplicationInformation 
 				Constants.MDS_EXECUTABLES_KEY).split(",");
 	}
 	
+	public final SortedSet<GridResource> getBestSubmissionLocations(
+			final Map<JobSubmissionProperty, String> additionalJobProperties,
+			final String fqan) {
 
+		Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
+		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
+				getApplicationName());
+
+		basicJobProperties.putAll(additionalJobProperties);
+
+		return new TreeSet<GridResource>(matchMaker.findMatchingResources(basicJobProperties, fqan));
+	}
 
 }

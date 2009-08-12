@@ -860,8 +860,8 @@ public class ProxyServiceInterface implements ServiceInterface {
 
 			Method m;
 			try {
-				m = si.getClass().getMethod("kill", boolean.class);
-				m.invoke(si, clean);
+				m = si.getClass().getMethod("kill", jobname.getClass(), boolean.class);
+				m.invoke(si, jobname, clean);
 			} catch (SecurityException e) {
 				throw new RuntimeException("Proxy method exception.", e);
 			} catch (NoSuchMethodException e) {

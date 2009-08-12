@@ -27,13 +27,10 @@ public class ClientSideUserApplicationInformation extends
 	private Set<String> cachedAllSitesForUser = null;
 	private Set<String> cachedAllVersionsForUser = null;
 	private final UserEnvironmentManager userInfo;
-	private final MatchMaker matchMaker;
 	
 	public ClientSideUserApplicationInformation(GrisuRegistry registry, String applicationName, InformationManager infoManager) {
 		super(registry, applicationName, infoManager);
 		this.userInfo = registry.getUserEnvironmentManager();
-		this.matchMaker = new MatchMakerImpl(Environment.getGrisuDirectory().toString());
-		
 	}
 	
 	public final Set<String> getAllAvailableSubmissionLocationsForUser() {
@@ -71,17 +68,5 @@ public class ClientSideUserApplicationInformation extends
 		return cachedAllVersionsForUser;
 	}
 
-	public final SortedSet<GridResource> getBestSubmissionLocations(
-			final Map<JobSubmissionProperty, String> additionalJobProperties,
-			final String fqan) {
-
-		Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
-		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
-				getApplicationName());
-
-		basicJobProperties.putAll(additionalJobProperties);
-
-		return new TreeSet<GridResource>(matchMaker.findMatchingResources(basicJobProperties, fqan));
-	}
 
 }
