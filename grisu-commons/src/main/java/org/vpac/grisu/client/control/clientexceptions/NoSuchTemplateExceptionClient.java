@@ -1,6 +1,5 @@
 package org.vpac.grisu.client.control.clientexceptions;
 
-import javax.xml.ws.WebFault;
 
 public class NoSuchTemplateExceptionClient extends Exception {
 

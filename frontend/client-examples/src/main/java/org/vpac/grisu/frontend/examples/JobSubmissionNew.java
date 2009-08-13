@@ -25,8 +25,8 @@ public class JobSubmissionNew implements JobStatusChangeListener {
 		char[] password = args[1].toCharArray();
 
 		LoginParams loginParams = new LoginParams(
-//				"http://localhost:8080/enunciate-backend/soap/EnunciateServiceInterfaceService",
-				"https://ngportal.vpac.org/grisu-ws/soap/EnunciateServiceInterfaceService",
+				"http://localhost:8080/xfire-backend/services/grisu",
+//				"https://ngportal.vpac.org/grisu-ws/soap/EnunciateServiceInterfaceService",
 				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
 //				 "Local",
 				username, password);

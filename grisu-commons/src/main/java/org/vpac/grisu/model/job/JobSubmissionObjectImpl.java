@@ -471,7 +471,7 @@ public class JobSubmissionObjectImpl {
 	private void checkValidity() throws JobPropertiesException {
 
 		if (commandline == null || commandline.length() == 0) {
-			throw new JobPropertiesException(JobSubmissionProperty.COMMANDLINE,
+			throw new JobPropertiesException(JobSubmissionProperty.COMMANDLINE.toString() +": " +
 					"Commandline not specified.");
 		}
 

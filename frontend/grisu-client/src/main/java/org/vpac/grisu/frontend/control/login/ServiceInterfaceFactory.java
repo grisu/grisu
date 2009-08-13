@@ -32,7 +32,9 @@ public final class ServiceInterfaceFactory {
 		"LocalServiceInterfaceCreator", 
 		"DummyServiceInterfaceCreator",
 		"JaxWsServiceInterfaceCreator",
-		"XfireServiceInterfaceCreator"
+		"XfireServiceInterfaceCreator",
+		// the old xfire client...
+		"XFireServiceInterfaceCreator"
 	};
 
 	/**
