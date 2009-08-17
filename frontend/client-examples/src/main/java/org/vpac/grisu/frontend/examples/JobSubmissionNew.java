@@ -19,16 +19,16 @@ public class JobSubmissionNew implements JobStatusChangeListener {
 
 	public static void main(final String[] args) throws Exception {
 
-		ExecutorService executor = Executors.newFixedThreadPool(10);
+		ExecutorService executor = Executors.newFixedThreadPool(1);
 
 		String username = args[0];
 		char[] password = args[1].toCharArray();
 
 		LoginParams loginParams = new LoginParams(
-				"http://localhost:8080/xfire-backend/services/grisu",
+//				"http://localhost:8080/xfire-backend/services/grisu",
 //				"https://ngportal.vpac.org/grisu-ws/soap/EnunciateServiceInterfaceService",
 				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-//				 "Local",
+				 "Local",
 				username, password);
 
 		final ServiceInterface si = ServiceInterfaceFactory
@@ -43,7 +43,7 @@ public class JobSubmissionNew implements JobStatusChangeListener {
 		Set<String> submissionLocations = javaInfo
 				.getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin");
 
-		final JobStatusChangeListener jsl = new JobSubmissionNew();
+//		final JobStatusChangeListener jsl = new JobSubmissionNew();
 		int i = 0;
 		for (final String subLoc : submissionLocations) {
 			i = i +1;
@@ -60,7 +60,7 @@ public class JobSubmissionNew implements JobStatusChangeListener {
 					jo.setSubmissionLocation(subLoc);
 //					jo.addInputFileUrl("/home/markus/test.txt");
 //					jo.addInputFileUrl("gsiftp://ng2.vpac.org/home/grid-admin/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner/grisu-local-job-dir/java_job_new/test.jsdl");
-					jo.addJobStatusChangeListener(jsl);
+//					jo.addJobStatusChangeListener(jsl);
 
 					String site = registry.getResourceInformation().getSite(subLoc);
 					System.out.println("Site is: " + site);

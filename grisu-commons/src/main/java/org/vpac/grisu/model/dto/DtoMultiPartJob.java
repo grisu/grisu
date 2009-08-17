@@ -13,6 +13,9 @@ public class DtoMultiPartJob {
 	
 	private Set<String> jobnames = new TreeSet<String>();
 	
+	public DtoMultiPartJob() {
+	}
+	
 	public DtoMultiPartJob(String multiPartJobId) {
 		this.multiPartJobId = multiPartJobId;
 	}

@@ -7,6 +7,7 @@ import javax.activation.DataSource;
 
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
+import org.vpac.grisu.control.exceptions.MultiJobException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
@@ -21,6 +22,7 @@ import org.vpac.grisu.model.dto.DtoHostsInfo;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
+import org.vpac.grisu.model.dto.DtoMultiPartJob;
 import org.vpac.grisu.model.dto.DtoMultiPartJobs;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 
@@ -653,7 +655,7 @@ public interface ServiceInterface {
 	/**
 	 * Adds the specified job to the mulitpartJob.
 	 * 
-	 * @param multipartJobId the multipartjobid
+	 * @param multipartJobId the multipartjobidmM
 	 * @param jobname the jobname
 	 */
 	void addJobToMultiPartJob(String multipartJobId, String jobname) throws NoSuchJobException;
@@ -674,7 +676,7 @@ public interface ServiceInterface {
 	 * @param multiPartJobId the id (name) of the multipartjob
 	 * @throws JobPropertiesException 
 	 */
-	void createMultiPartJob(String multiPartJobId) throws JobPropertiesException;
+	DtoMultiPartJob createMultiPartJob(String multiPartJobId) throws JobPropertiesException;
 	
 	/**
 	 * Removes the multipartJob from the server.
@@ -684,6 +686,26 @@ public interface ServiceInterface {
 	 */
 	void deleteMultiPartJob(String multiPartJobId, boolean deleteChildJobsAsWell) throws NoSuchJobException;
 
+	/**
+	 * Distributes an input file to all the filesystems that are used in this multipartjob.
+	 * 
+	 * You need to reverence to the input file using relative paths in the commandline you specify in the jobs that need this inputfile.
+	 * 
+	 * @param multiPartJobId the id of the multipartjob
+	 * @param inputFile the inputfile
+	 */
+	void uploadMultiPartJobInputFile(String multiPartJobId, DataHandler inputFile, String relativePath) throws RemoteFileSystemException, NoSuchJobException;
+	
+	
+	/**
+	 * Submits all jobs that belong to this multipartjob.
+	 * 
+	 * @param multipartjobid the id of the multipartjob
+	 * @throws JobSubmissionException if one of the jobsubmission failed. 
+	 * @throws NoSuchJobException if no multipartjob with this id exists
+	 */
+	void submitMultiPartJob(String multipartjobid) throws JobSubmissionException, NoSuchJobException;
+	
 	/**
 	 * Returns a list of all jobnames that are currently stored on this backend.
 	 * 
@@ -786,9 +808,10 @@ public interface ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the files can't be deleted
 	 * @throws NoSuchJobException if no such job exists
+	 * @throws MultiJobException if the job is part of a multipartjob
 	 */
 	void kill(String jobname, boolean clean)
-			throws RemoteFileSystemException, NoSuchJobException;
+			throws RemoteFileSystemException, NoSuchJobException, MultiJobException;
 
 	/**
 	 * If you want to store certain values along with the job which can be used

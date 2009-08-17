@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import javax.activation.DataHandler;
-import javax.management.RuntimeErrorException;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
@@ -22,6 +21,7 @@ import org.vpac.grisu.model.dto.DtoHostsInfo;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
+import org.vpac.grisu.model.dto.DtoMultiPartJob;
 import org.vpac.grisu.model.dto.DtoMultiPartJobs;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 
@@ -1167,12 +1167,12 @@ public class ProxyServiceInterface implements ServiceInterface {
 		
 	}
 
-	public void createMultiPartJob(String multiPartJobId)
+	public DtoMultiPartJob createMultiPartJob(String multiPartJobId)
 			throws JobPropertiesException {
 		
 		try {
 			Method m = si.getClass().getMethod("createMultiPartJob", multiPartJobId.getClass());
-			m.invoke(si, multiPartJobId);
+			return (DtoMultiPartJob)(m.invoke(si, multiPartJobId));
 		} catch (SecurityException e) {
 			throw new RuntimeException(e);
 		} catch (NoSuchMethodException e) {
@@ -1274,6 +1274,57 @@ public class ProxyServiceInterface implements ServiceInterface {
 				}
 			}
 
+	}
+
+	public void uploadMultiPartJobInputFile(String multiPartJobId,
+			DataHandler inputFile, String relativePath) throws RemoteFileSystemException, NoSuchJobException {
+		Method m;
+		try {
+			m = si.getClass().getMethod("uploadMultiPartJobInputFile", multiPartJobId.getClass(), inputFile.getClass(), relativePath.getClass());
+			m.invoke(si, multiPartJobId, inputFile, relativePath);
+		} catch (SecurityException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (InvocationTargetException e) {
+			if ( e.getCause() instanceof RemoteFileSystemException ) {
+				throw (RemoteFileSystemException) e.getCause();
+			} else if ( e.getCause() instanceof NoSuchJobException ) {
+				throw (NoSuchJobException) e.getCause();
+			} else {
+				throw new RuntimeException("Proxy method exception.", e.getCause());
+			}
+		}
+	}
+
+	public void submitMultiPartJob(String multipartjobid)
+			throws JobSubmissionException, NoSuchJobException {
+
+		Method m;
+		try {
+			m = si.getClass().getMethod("uploadMultiPartJobInputFile", multipartjobid.getClass());
+			m.invoke(si, multipartjobid);
+		} catch (SecurityException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (InvocationTargetException e) {
+			if ( e.getCause() instanceof JobSubmissionException ) {
+				throw (JobSubmissionException) e.getCause();
+			} else if ( e.getCause() instanceof NoSuchJobException ) {
+				throw (NoSuchJobException) e.getCause();
+			} else {
+				throw new RuntimeException("Proxy method exception.", e.getCause());
+			}
+		}
 	}
 
 }

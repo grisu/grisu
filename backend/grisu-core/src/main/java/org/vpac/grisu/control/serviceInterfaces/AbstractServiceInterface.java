@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,6 @@ import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileType;
 import org.apache.commons.vfs.FileTypeSelector;
 import org.apache.log4j.Logger;
-import org.apache.xpath.operations.Mult;
 import org.vpac.grisu.backend.hibernate.JobDAO;
 import org.vpac.grisu.backend.hibernate.MultiPartJobDAO;
 import org.vpac.grisu.backend.hibernate.UserDAO;
@@ -48,6 +48,7 @@ import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
+import org.vpac.grisu.control.exceptions.MultiJobException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -732,7 +733,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					"Could not find stagingfilesystem for submission location: "
 							+ submissionLocation);
 		}
-
+		
 		JsdlHelpers.addOrRetrieveExistingFileSystemElement(jsdl,
 				JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM,
 				stagingFilesystemToUse);
@@ -747,6 +748,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		JsdlHelpers.setWorkingDirectory(jsdl,
 				JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM, workingDirectory);
+		job.addJobProperty(Constants.MOUNTPOINT_KEY, mountPointToUse.getRootUrl());
 		job.addJobProperty(Constants.STAGING_FILE_SYSTEM_KEY,
 				stagingFilesystemToUse);
 		job.addJobProperty(Constants.WORKINGDIRECTORY_KEY, workingDirectory);
@@ -784,24 +786,40 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// jobdao.attachDirty(job);
 		myLogger.debug("Preparing job done.");
 	}
-
-	public void submitJob(final String jobname)
-			throws JobSubmissionException {
-
-		myLogger.info("Submitting job: " + jobname + " for user " + getDN());
-		Job job;
-		try {
-			job = getJob(jobname);
-		} catch (NoSuchJobException e1) {
-			throw new JobSubmissionException("Job: " + jobname
-					+ " could not be found in the grisu job database.");
+	
+	public void submitMultiPartJob(String multiPartJobId) throws JobSubmissionException, NoSuchJobException {
+		
+		MultiPartJob multiJob = getMultiPartJob(multiPartJobId);
+		
+		Set<String> failedJobs = new TreeSet<String>();
+		
+		for ( String jobname : multiJob.getJobnames() ) {
+			
+			Job job = getJob(jobname);
+			try {
+				submitJob(job);
+				
+				System.out.println("STATUS AFTER SUBMISSION_2: "+JobConstants.translateStatus(job.getStatus()));
+			} catch (Exception e) {
+				myLogger.error("Job submission for multipartjob: "+multiPartJobId+", "+job.getJobname()+" failed: "+e.getLocalizedMessage());
+				failedJobs.add(job.getJobname());
+			}
+			
 		}
+		
+		if ( failedJobs.size() > 0 ) {
+			throw new JobSubmissionException("Not all job submissions successful. Failed jobs: "+StringUtils.join(failedJobs, ", "));
+		}
+		
+	}
 
+	
+	private void submitJob(final Job job) throws JobSubmissionException {
 		try {
 			myLogger.debug("Preparing job environment...");
 			prepareJobEnvironment(job);
 			myLogger.debug("Staging files...");
-			stageFiles(jobname);
+			stageFiles(job);
 		} catch (Exception e) {
 			throw new JobSubmissionException(
 					"Could not access remote filesystem: "
@@ -836,7 +854,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		if (handle == null) {
 			throw new JobSubmissionException(
 					"Job apparently submitted but jobhandle is null for job: "
-							+ jobname);
+							+ job.getJobname());
 		}
 
 		job.addJobProperty(Constants.SUBMISSION_TIME_KEY, Long
@@ -846,8 +864,25 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// TODO or do we want it to be stored?
 		job.setCredential(null);
 		jobdao.saveOrUpdate(job);
-		myLogger.info("Jobsubmission for job " + jobname + " and user "
+		myLogger.info("Jobsubmission for job " + job.getJobname() + " and user "
 				+ getDN() + " successful.");
+		
+		System.out.println("STATUS AFTER SUBMISSION_1: "+JobConstants.translateStatus(job.getStatus()));
+	}
+
+	public void submitJob(final String jobname)
+			throws JobSubmissionException {
+
+		myLogger.info("Submitting job: " + jobname + " for user " + getDN());
+		Job job;
+		try {
+			job = getJob(jobname);
+		} catch (NoSuchJobException e1) {
+			throw new JobSubmissionException("Job: " + jobname
+					+ " could not be found in the grisu job database.");
+		}
+
+		submitJob(job);
 
 	}
 
@@ -917,8 +952,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		int status = Integer.MIN_VALUE;
 		int old_status = job.getStatus();
+		
+//		System.out.println("OLDSTAUS "+jobname+": "+JobConstants.translateStatus(old_status));
 		if (old_status <= JobConstants.READY_TO_SUBMIT) {
-			// this couldn't have changed without manual intervtion
+			// this couldn't have changed without manual intervention
 			return old_status;
 		}
 
@@ -1004,8 +1041,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void addJobToMultiPartJob(String multipartJobId, String jobname) throws NoSuchJobException {
 		
 		MultiPartJob multiJob = getMultiPartJob(multipartJobId);
-		multiJob.addJob(getJob(jobname));
+		Job job = getJob(jobname);
+		job.addJobProperty(Constants.MULTIJOB_NAME, multipartJobId);
+		multiJob.addJob(jobname);
 		
+		jobdao.saveOrUpdate(job);
 		multiPartJobDao.saveOrUpdate(multiJob);
 	}
 	
@@ -1031,7 +1071,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @param multiPartJobId the id (name) of the multipartjob
 	 * @throws JobPropertiesException 
 	 */
-	public void createMultiPartJob(String multiPartJobId) throws JobPropertiesException {
+	public DtoMultiPartJob createMultiPartJob(String multiPartJobId) throws JobPropertiesException {
 		
 		try {
 			MultiPartJob multiJob = getMultiPartJob(multiPartJobId);
@@ -1039,7 +1079,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			// that's good
 			MultiPartJob multiJobCreate = new MultiPartJob(getDN(), multiPartJobId);
 			multiPartJobDao.saveOrUpdate(multiJobCreate);
-			return;
+			
+			DtoMultiPartJob dtoMultiJob = new DtoMultiPartJob(multiPartJobId);
+			return dtoMultiJob;
 		}
 		
 		throw new JobPropertiesException("MultiPartJob with name "+multiPartJobId+" already exists.");
@@ -1055,17 +1097,24 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		
 		MultiPartJob multiJob = getMultiPartJob(multiPartJobId);
 		
+		final Set<String> jobnames = multiJob.getJobnames();
+		
+		multiPartJobDao.delete(multiJob);
+		
 		if ( deleteChildJobsAsWell ) {
-			for ( String jobname : multiJob.getJobs().keySet() ) {
+			for ( String jobname : jobnames ) {
+				Job job = getJob(jobname);
 				try {
-					kill(jobname, true);
+					job.addJobProperty(Constants.MULTIJOB_NAME, null);
+					kill(job.getJobname(), true);
 				} catch (RemoteFileSystemException e) {
-					myLogger.error("Can't clean jobdirectory for job: "+jobname, e);
+					myLogger.error("Can't clean jobdirectory for job: "+job.getJobname(), e);
+				} catch (MultiJobException e) {
+					// should never happen
+					e.printStackTrace();
 				}
 			}
 		}
-		
-		multiPartJobDao.delete(multiJob);
 		
 	}
 	
@@ -1480,6 +1529,92 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return target.getName().getURI();
 		}
 	}
+	
+	private Set<String> findAllUsedMountPointsForMultiPartJob(String multiPartJobId) throws NoSuchJobException {
+		
+		Set<String> result = new HashSet<String>();
+		for ( String jobname : getMultiPartJob(multiPartJobId).getJobnames() ) {
+			Job job = getJob(jobname);
+			String mpRootUrl = job.getJobProperty(Constants.MOUNTPOINT_KEY);
+			result.add(mpRootUrl);
+		}
+		return result;
+	}
+	
+	
+	public void uploadMultiPartJobInputFile(String multipartjobid, DataHandler source, String relativePath) throws RemoteFileSystemException, NoSuchJobException {
+		
+		myLogger.debug("Receiving datahandler for multipartjob input file...");
+
+		BufferedInputStream buf;
+		try {
+			buf = new BufferedInputStream(source.getInputStream());
+		} catch (IOException e1) {
+			throw new RuntimeException("Could not get input stream from datahandler...");
+		}
+
+		for ( String stagingDir : findAllUsedMountPointsForMultiPartJob(multipartjobid) ) {
+		FileObject target = null;
+
+		OutputStream fout = null;
+		String filename = stagingDir+"/"+relativePath;
+		String parent = filename.substring(0, filename
+				.lastIndexOf(File.separator));
+		try {
+			FileObject parentObject = getUser().aquireFile(parent);
+			// FileObject tempObject = parentObject;
+
+			createFolder(parentObject);
+			// parentObject.createFolder();
+
+			target = getUser().aquireFile(filename);
+			// just to be sure that the folder exists.
+
+			myLogger.debug("Calculated target for multipartjob input file: " + target.getName().toString());
+
+			FileContent content = target.getContent();
+			fout = content.getOutputStream();
+		} catch (FileSystemException e) {
+			// e.printStackTrace();
+			throw new RemoteFileSystemException("Could not open file: "
+					+ filename + ":" + e.getMessage());
+		}
+
+		myLogger.debug("Receiving data for file: " + filename);
+
+		try {
+
+			byte[] buffer = new byte[1024]; // byte buffer
+			int bytesRead = 0;
+			while (true) {
+				bytesRead = buf.read(buffer, 0, 1024);
+				// bytesRead returns the actual number of bytes read from
+				// the stream. returns -1 when end of stream is detected
+				if (bytesRead == -1) {
+					break;
+				}
+				fout.write(buffer, 0, bytesRead);
+			}
+
+			if (buf != null) {
+				buf.close();
+			}
+			if (fout != null) {
+				fout.close();
+			}
+		} catch (IOException e) {
+			throw new RemoteFileSystemException("Could not write to file: "
+					+ filename + ": " + e.getMessage());
+		}
+		fout = null;
+		}
+
+		myLogger.debug("Data transmission for multiPartJob " + multipartjobid + " finished.");
+
+		buf = null;
+
+	}
+	
 
 	/*
 	 * (non-Javadoc)
@@ -1861,11 +1996,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#stageFiles(java.lang.String)
 	 */
-	public void stageFiles(final String jobname)
+	public void stageFiles(final Job job)
 			throws RemoteFileSystemException, NoSuchJobException {
 
-		Job job;
-		job = jobdao.findJobByDN(getUser().getDn(), jobname);
+//		Job job;
+//		job = jobdao.findJobByDN(getUser().getDn(), jobname);
 
 		List<Element> stageIns = JsdlHelpers.getStageInElements(job
 				.getJobDescription());
@@ -1943,9 +2078,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// now after the jsdl is ready, don't forget to fill the required fields
 		// into the database
 	}
+	
+	public void kill(final String jobname, final boolean clear) throws RemoteFileSystemException, NoSuchJobException, MultiJobException {
+		kill(jobname, clear, false);
+	}
 
-	public void kill(final String jobname, final boolean clear)
-			throws RemoteFileSystemException, NoSuchJobException {
+	private void kill(final String jobname, final boolean clear, final boolean clearMultiJob)
+			throws RemoteFileSystemException, NoSuchJobException, MultiJobException {
 
 		Job job;
 
@@ -1954,7 +2093,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		kill(jobname);
 
 		if (clear) {
-
+			String mpjid = job.getJobProperty(Constants.MULTIJOB_NAME);
+			if ( mpjid != null && !clearMultiJob ) {
+				throw new MultiJobException("Can't delete job. You need to delete the multipartjob "+mpjid+" first...");
+			}
+			
 			if (job.getJobProperty(Constants.JOBDIRECTORY_KEY) != null) {
 
 				try {

@@ -1,16 +1,20 @@
 package org.vpac.grisu.backend.model.job;
 
+import java.util.HashSet;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.CollectionOfElements;
+
+import au.org.arcs.jcommons.constants.Constants;
 
 @Entity
 public class MultiPartJob {
@@ -18,18 +22,23 @@ public class MultiPartJob {
 	// for hibernate
 	private Long id;
 	
-	static final Logger myLogger = Logger.getLogger(Job.class.getName());
+	static final Logger myLogger = Logger.getLogger(MultiPartJob.class.getName());
 	
 	// the user's dn
 	private String dn = null;
 	
-	private Map<String, Job> jobs = new TreeMap<String, Job>();
+	private Set<String> jobnames = new HashSet<String>();
 	
 	private String multiPartJobId;
 	
 	public MultiPartJob(String dn, String multiPartJobId) {
 		this.dn = dn;
 		this.multiPartJobId = multiPartJobId;
+	}
+	
+	// for hibernate
+	private MultiPartJob() {
+		
 	}
 	
 	// hibernate
@@ -72,25 +81,32 @@ public class MultiPartJob {
 		this.multiPartJobId = id;
 	}
 	
-	public void addJob(Job job) {
-		this.jobs.put(job.getJobname(), job);
-	}
-	
-	public void removeJob(Job job) {
-		this.jobs.remove(job.getJobname());
+	public void addJob(String jobname) {
+		this.jobnames.add(jobname);
 	}
 	
 	public void removeJob(String jobname) {
-		this.jobs.remove(jobname);
+		this.jobnames.remove(jobname);
 	}
 	
-	public Map<String, Job> getJobs() {
-		return jobs;
-	}
-	
+
 	@CollectionOfElements(fetch = FetchType.EAGER)
-	protected void setJobs(Map<String, Job> jobs) {
-		this.jobs = jobs;
+	public Set<String> getJobnames() {
+		return jobnames;
 	}
+	
+	protected void setJobnames(Set<String> jobnames) {
+		this.jobnames = jobnames;
+	}
+	
+//	@Transient
+//	public String[] findAllUsedMountPoints() {
+//		
+//		Set<String> result = new HashSet<String>();
+//		for ( String jobname : jobnames ) {
+//			result.add(jobname.getJobProperty(Constants.MOUNTPOINT_KEY));
+//		}
+//		return result.toArray(new String[]{});
+//	}
 
 }
