@@ -403,7 +403,7 @@ public class User {
 	 * @throws FileSystemException
 	 * @throws VomsException
 	 */
-	private FileSystem createFilesystem(final MountPoint mp)
+	private synchronized FileSystem createFilesystem(final MountPoint mp)
 			throws FileSystemException {
 
 //		// check whether a filesystem for this mountpoint is already cached

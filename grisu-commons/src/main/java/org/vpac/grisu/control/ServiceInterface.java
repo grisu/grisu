@@ -21,6 +21,7 @@ import org.vpac.grisu.model.dto.DtoHostsInfo;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
+import org.vpac.grisu.model.dto.DtoMultiPartJobs;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 
 import au.org.arcs.jcommons.constants.JobSubmissionProperty;
@@ -640,6 +641,48 @@ public interface ServiceInterface {
 	 * @return xml formated information about all the users jobs
 	 */
 	DtoJobs ps(boolean refreshJobStatus);
+	
+	
+	/**
+	 * Returns all multipart jobs for this user.
+	 * 
+	 * @return all the multipartjobs of the user
+	 */
+	DtoMultiPartJobs psMulti();
+	
+	/**
+	 * Adds the specified job to the mulitpartJob.
+	 * 
+	 * @param multipartJobId the multipartjobid
+	 * @param jobname the jobname
+	 */
+	void addJobToMultiPartJob(String multipartJobId, String jobname) throws NoSuchJobException;
+	
+	/**
+	 * Removes the specified job from the mulitpartJob.
+	 * 
+	 * @param multipartJobId the multipartjobid
+	 * @param jobname the jobname
+	 */
+	void removeJobFromMultiPartJob(String multipartJobId, String jobname) throws NoSuchJobException;
+	
+	/**
+	 * Creates a multipartjob on the server.
+	 * 
+	 * A multipartjob is just a collection of jobs that belong together to make them more easily managable.
+	 * 
+	 * @param multiPartJobId the id (name) of the multipartjob
+	 * @throws JobPropertiesException 
+	 */
+	void createMultiPartJob(String multiPartJobId) throws JobPropertiesException;
+	
+	/**
+	 * Removes the multipartJob from the server.
+	 * 
+	 * @param multiPartJobId the name of the multipartJob
+	 * @param deleteChildJobsAsWell whether to delete the child jobs of this multipartjob as well.
+	 */
+	void deleteMultiPartJob(String multiPartJobId, boolean deleteChildJobsAsWell) throws NoSuchJobException;
 
 	/**
 	 * Returns a list of all jobnames that are currently stored on this backend.
@@ -647,6 +690,14 @@ public interface ServiceInterface {
 	 * @return all jobnames
 	 */
 	String[] getAllJobnames();
+	
+	
+	/**
+	 * Returns a list of all multipart job ids that are currently stored on this backend
+	 * 
+	 * @return all multipartjobids
+	 */
+	String[] getAllMultiPartJobIds();
 
 	/**
 	 * Creates a job using the jobProperties that are specified in the map and

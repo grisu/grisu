@@ -8,6 +8,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.backend.model.job.Job;
+import org.vpac.grisu.backend.model.job.MultiPartJob;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.settings.Environment;
@@ -163,6 +164,7 @@ public final class HibernateSessionFactory {
 
 			configuration.addAnnotatedClass(User.class);
 			configuration.addAnnotatedClass(Job.class);
+			configuration.addAnnotatedClass(MultiPartJob.class);
 			configuration.addAnnotatedClass(MountPoint.class);
 			configuration.addAnnotatedClass(JobSubmissionObjectImpl.class);
 

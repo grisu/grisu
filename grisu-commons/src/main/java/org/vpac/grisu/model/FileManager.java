@@ -244,19 +244,29 @@ public class FileManager {
 		} else {
 			DataSource source = new FileDataSource(file);
 			DataHandler handler = new DataHandler(source);
+			String filetransferHandle = null;
 			try {
 				myLogger.info("Uploading file " + file.getName() + "...");
-				String filetransferHandle = serviceInterface.upload(handler,
+				filetransferHandle = serviceInterface.upload(handler,
 						targetDirectory + "/" + file.getName(), true);
 				myLogger.info("Upload of file " + file.getName()
 						+ " successful.");
 			} catch (Exception e1) {
+//				try {
+//				// try again
+//				myLogger.info("Uploading file " + file.getName() + "...");
+//				filetransferHandle = serviceInterface.upload(handler,
+//						targetDirectory + "/" + file.getName(), true);
+//				myLogger.info("Upload of file " + file.getName()
+//						+ " successful.");
+//				} catch (Exception e) {
 				myLogger.info("Upload of file " + file.getName() + " failed: "
 						+ e1.getLocalizedMessage());
 				myLogger.error("File upload failed: "
 						+ e1.getLocalizedMessage());
 				throw new FileTransferException(file.toString(),
 						targetDirectory, "Could not upload file.", e1);
+//				}
 			}
 		}
 

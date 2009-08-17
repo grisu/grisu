@@ -22,6 +22,7 @@ import org.vpac.grisu.model.dto.DtoHostsInfo;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
+import org.vpac.grisu.model.dto.DtoMultiPartJobs;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 
 public class ProxyServiceInterface implements ServiceInterface {
@@ -1140,6 +1141,139 @@ public class ProxyServiceInterface implements ServiceInterface {
 					throw (RuntimeException) e.getCause();
 				}
 			}
+	}
+
+	public void addJobToMultiPartJob(String multipartJobId, String jobname)
+			throws NoSuchJobException {
+
+		try {
+			Method m = si.getClass().getMethod("addJobToMultiPartJob", multipartJobId.getClass(), jobname.getClass());
+			m.invoke(si, multipartJobId, jobname);
+			} catch (SecurityException e) {
+				throw new RuntimeException("Proxy method exception.", e);
+			} catch (NoSuchMethodException e) {
+				throw new RuntimeException("Proxy method exception.", e);
+			} catch (IllegalArgumentException e) {
+				throw new RuntimeException("Proxy method exception.", e);
+			} catch (IllegalAccessException e) {
+				throw new RuntimeException("Proxy method exception.", e);
+			} catch (InvocationTargetException e) {
+				if ( e.getCause() instanceof NoSuchJobException ) {
+					throw (NoSuchJobException) e.getCause();
+				} else {
+					throw (RuntimeException) e.getCause();
+				}
+			}
+		
+	}
+
+	public void createMultiPartJob(String multiPartJobId)
+			throws JobPropertiesException {
+		
+		try {
+			Method m = si.getClass().getMethod("createMultiPartJob", multiPartJobId.getClass());
+			m.invoke(si, multiPartJobId);
+		} catch (SecurityException e) {
+			throw new RuntimeException(e);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		} catch (InvocationTargetException e) {
+			if ( e.getCause() instanceof JobPropertiesException ) {
+				throw (JobPropertiesException) e.getCause();
+			} else {
+				throw (RuntimeException) e.getCause();
+			}
+		}
+
+	}
+
+	public void deleteMultiPartJob(String multiPartJobId,
+			boolean deleteChildJobsAsWell) throws NoSuchJobException {
+		
+		try {
+			Method m = si.getClass().getMethod("deleteMultiPartJob", multiPartJobId.getClass(), boolean.class);
+			m.invoke(si, multiPartJobId, deleteChildJobsAsWell);
+			} catch (SecurityException e) {
+				throw new RuntimeException("Proxy method exception.", e);
+			} catch (NoSuchMethodException e) {
+				throw new RuntimeException("Proxy method exception.", e);
+			} catch (IllegalArgumentException e) {
+				throw new RuntimeException("Proxy method exception.", e);
+			} catch (IllegalAccessException e) {
+				throw new RuntimeException("Proxy method exception.", e);
+			} catch (InvocationTargetException e) {
+				if ( e.getCause() instanceof NoSuchJobException ) {
+					throw (NoSuchJobException) e.getCause();
+				} else {
+					throw (RuntimeException) e.getCause();
+				}
+			}
+		
+	}
+
+	public String[] getAllMultiPartJobIds() {
+
+			try {
+		Method m = si.getClass().getMethod("getAllMultiPartJobIds");
+		return (String[])(m.invoke(si));
+		} catch (SecurityException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (InvocationTargetException e) {
+			throw (RuntimeException) e.getCause();
+		}
+	}
+
+	public DtoMultiPartJobs psMulti() {
+
+		try {
+			Method m = si.getClass().getMethod("psMulti");
+			return (DtoMultiPartJobs)(m.invoke(si));
+			} catch (SecurityException e) {
+				throw new RuntimeException("Proxy method exception.", e);
+			} catch (NoSuchMethodException e) {
+				throw new RuntimeException("Proxy method exception.", e);
+			} catch (IllegalArgumentException e) {
+				throw new RuntimeException("Proxy method exception.", e);
+			} catch (IllegalAccessException e) {
+				throw new RuntimeException("Proxy method exception.", e);
+			} catch (InvocationTargetException e) {
+				throw (RuntimeException) e.getCause();
+			}
+		
+	}
+
+	public void removeJobFromMultiPartJob(String multipartJobId, String jobname)
+			throws NoSuchJobException {
+		
+		try {
+			Method m = si.getClass().getMethod("removeJobFromMultiPartJob", multipartJobId.getClass(), jobname.getClass());
+			m.invoke(si, multipartJobId, jobname);
+			} catch (SecurityException e) {
+				throw new RuntimeException("Proxy method exception.", e);
+			} catch (NoSuchMethodException e) {
+				throw new RuntimeException("Proxy method exception.", e);
+			} catch (IllegalArgumentException e) {
+				throw new RuntimeException("Proxy method exception.", e);
+			} catch (IllegalAccessException e) {
+				throw new RuntimeException("Proxy method exception.", e);
+			} catch (InvocationTargetException e) {
+				if ( e.getCause() instanceof NoSuchJobException ) {
+					throw (NoSuchJobException) e.getCause();
+				} else {
+					throw (RuntimeException) e.getCause();
+				}
+			}
+
 	}
 
 }
