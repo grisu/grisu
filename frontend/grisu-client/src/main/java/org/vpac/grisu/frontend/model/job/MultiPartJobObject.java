@@ -216,7 +216,7 @@ public class MultiPartJobObject {
 					myLogger.debug("Downloading file: "+child);
 					File cacheFile = GrisuRegistryManager.getDefault(serviceInterface).getFileManager().downloadFile(child);
 					try {
-						FileUtils.copyFile(cacheFile, new File(parent, child));
+						FileUtils.copyFile(cacheFile, new File(parent, cacheFile.getName()));
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
