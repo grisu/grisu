@@ -500,4 +500,20 @@ public class JobSubmissionObjectImpl {
 
 	}
 
+	@Override
+	public boolean equals(Object other) {
+		
+		if ( other instanceof JobSubmissionObjectImpl ) {
+			JobSubmissionObjectImpl otherJob = (JobSubmissionObjectImpl)other;
+			return getJobname().equals(otherJob.getJobname());
+		} else {
+			return false;
+		}
+		
+	}
+	
+	@Override
+	public int hashCode() {
+		return 73 * getJobname().hashCode();
+	}
 }

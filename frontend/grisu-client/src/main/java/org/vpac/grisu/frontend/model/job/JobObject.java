@@ -12,6 +12,7 @@ import org.vpac.grisu.control.exceptions.FileTransferException;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
+import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.job.JobCreatedProperty;
@@ -622,6 +623,29 @@ public class JobObject extends JobSubmissionObjectImpl {
 			jobStatusChangeListeners = new Vector<JobStatusChangeListener>();
 		}
 		jobStatusChangeListeners.removeElement(l);
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		
+		if ( other instanceof JobObject ) {
+			JobObject otherJob = (JobObject)other;
+			return getJobname().equals(otherJob.getJobname());
+		} else {
+			return false;
+		}
+		
+	}
+	
+	@Override
+	public int hashCode() {
+		return 73 * getJobname().hashCode();
+	}
+
+	public String[] listJobDirectory() throws RemoteFileSystemException {
+
+		return serviceInterface.getChildrenFileNames(getJobDirectoryUrl(), false);
+		
 	}
 
 }

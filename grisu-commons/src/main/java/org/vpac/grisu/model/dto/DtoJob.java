@@ -30,7 +30,7 @@ public class DtoJob {
 		DtoJob result = new DtoJob();
 		
 		result.setStatus(status);
-		result.setStatusString(JobConstants.translateStatus(status));
+
 		List<DtoJobProperty> list = new LinkedList<DtoJobProperty>();
 		for ( String key : jobProperties.keySet() ) {
 			DtoJobProperty temp = new DtoJobProperty();
@@ -52,10 +52,6 @@ public class DtoJob {
 	 * The status of the job. Be aware that, depending on how you queried for this job, this can be stale information.
 	 */
 	private int status;
-	/**
-	 * The status of the job as a string.
-	 */
-	private String statusString;
 
 	@XmlElement(name="jobproperty")
 	public List<DtoJobProperty> getProperties() {
@@ -86,13 +82,16 @@ public class DtoJob {
 		this.status = status;
 	}
 
-	@XmlElement(name="statusstring")
-	public String getStatusString() {
-		return statusString;
+	public String statusAsString() {
+		return JobConstants.translateStatus(status);
 	}
-
-	public void setStatusString(String statusString) {
-		this.statusString = statusString;
+	
+	public void addJobProperty(String key, String value) {
+		properties.add(new DtoJobProperty(key, value));
 	}
-
+	
+	public String readJobProperty(String key) {
+		return propertiesAsMap().get(key);
+	}
+	
 }

@@ -7,7 +7,7 @@ import javax.activation.DataSource;
 
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
-import org.vpac.grisu.control.exceptions.MultiJobException;
+import org.vpac.grisu.control.exceptions.MultiPartJobException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
@@ -650,7 +650,7 @@ public interface ServiceInterface {
 	 * 
 	 * @return all the multipartjobs of the user
 	 */
-	DtoMultiPartJobs psMulti();
+	DtoMultiPartJob getMultiPartJob(String multiJobPartId, boolean refresh) throws NoSuchJobException;
 	
 	/**
 	 * Adds the specified job to the mulitpartJob.
@@ -676,7 +676,7 @@ public interface ServiceInterface {
 	 * @param multiPartJobId the id (name) of the multipartjob
 	 * @throws JobPropertiesException 
 	 */
-	DtoMultiPartJob createMultiPartJob(String multiPartJobId) throws JobPropertiesException;
+	DtoMultiPartJob createMultiPartJob(String multiPartJobId) throws MultiPartJobException;
 	
 	/**
 	 * Removes the multipartJob from the server.
@@ -690,13 +690,26 @@ public interface ServiceInterface {
 	 * Distributes an input file to all the filesystems that are used in this multipartjob.
 	 * 
 	 * You need to reverence to the input file using relative paths in the commandline you specify in the jobs that need this inputfile.
+	 * Use this after you created all jobs for this multipartjob.
 	 * 
 	 * @param multiPartJobId the id of the multipartjob
 	 * @param inputFile the inputfile
 	 */
 	void uploadMultiPartJobInputFile(String multiPartJobId, DataHandler inputFile, String relativePath) throws RemoteFileSystemException, NoSuchJobException;
 	
-	
+	/**
+	 * Distributes a remote input file to all the filesystems that are used in this multipartjob.
+	 * 
+	 * Use this after you created all jobs for this multipartjob.
+	 * 
+	 * @param multiPartJobId the id of the multipartJob
+	 * @param inputFile the url of the inputfile
+	 * @param filename the target filename
+	 * @throws RemoteFileSystemException if there is a problem copying / accessing the file
+	 * @throws NoSuchJobException if the specified multipartjob doesn't exist
+	 */
+	void copyMultiPartJobInputFile(String multiPartJobId, String inputFile,	String filename) throws RemoteFileSystemException, NoSuchJobException;
+
 	/**
 	 * Submits all jobs that belong to this multipartjob.
 	 * 
@@ -808,10 +821,10 @@ public interface ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the files can't be deleted
 	 * @throws NoSuchJobException if no such job exists
-	 * @throws MultiJobException if the job is part of a multipartjob
+	 * @throws MultiPartJobException if the job is part of a multipartjob
 	 */
 	void kill(String jobname, boolean clean)
-			throws RemoteFileSystemException, NoSuchJobException, MultiJobException;
+			throws RemoteFileSystemException, NoSuchJobException, MultiPartJobException;
 
 	/**
 	 * If you want to store certain values along with the job which can be used
@@ -879,4 +892,5 @@ public interface ServiceInterface {
 	 */
 	String getJsdlDocument(String jobname) throws NoSuchJobException;
 
+	
 }

@@ -27,9 +27,19 @@ public final class ServerPropertiesManager {
 	 */
 	public static final int DEFAULT_MIN_PROXY_LIFETIME_BEFORE_REFRESH = 600;
 	/**
+	 * Default concurrent threads to query job status per user: 5
+	 */
+	public static final int DEFAULT_CONCURRENT_JOB_STATUS_THREADS_PER_USER = 5;
+	/**
+	 * Default concurrent threads when submitting the parts of a multipartjob: 5 
+	 */
+	public static final int DEFAULT_CONCURRENT_JOB_SUBMISSION_THREADS_PER_USER = 5;
+	/**
 	 * Default directory name used as parent for the jobdirectories.
 	 */
 	public static final String DEFAULT_JOB_DIR_NAME = "grisu-dir";
+	
+	public static final String DEFAULT_MULTIPARTJOB_DIR_NAME = "grisu-multijob-dir";
 
 	private static PropertiesConfiguration config = null;
 
@@ -128,6 +138,34 @@ public final class ServerPropertiesManager {
 
 		return jobDirName;
 	}
+	
+	/**
+	 * Returns the name of the directory in which grisu jobs are located
+	 * remotely.
+	 * 
+	 * @return the name of the direcotory in which grisu stores jobs or null if
+	 *         the jobs should be stored in the root home directory.
+	 */
+	public static String getGrisuMultiPartJobDirectoryName() {
+
+		String jobDirName = null;
+		try {
+			jobDirName = getServerConfiguration().getString("multiPartJobDirName");
+
+			if ("none".equals(jobDirName.toLowerCase())) {
+				jobDirName = null;
+			}
+
+		} catch (Exception e) {
+			jobDirName = null;
+		}
+
+		if (jobDirName == null) {
+			jobDirName = DEFAULT_MULTIPARTJOB_DIR_NAME;
+		}
+
+		return jobDirName;
+	}
 
 	/**
 	 * Returns the lifetime of a delegated proxy that is retrieved from myproxy.
@@ -172,6 +210,48 @@ public final class ServerPropertiesManager {
 		return lifetime_in_seconds;
 	}
 
+	/**
+	 * Returns the number of concurrent threads that are querying job status per user.
+	 * 
+	 * @return the number of concurrent threads
+	 */
+	public static int getConcurrentJobStatusThreadsPerUser() {
+		int concurrentThreads = -1;
+		try {
+			concurrentThreads = Integer.parseInt(getServerConfiguration()
+					.getString("concurrentJobStatusThreads"));
+
+		} catch (Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_CONCURRENT_JOB_STATUS_THREADS_PER_USER;
+		}
+		if (concurrentThreads == -1) {
+			return DEFAULT_CONCURRENT_JOB_STATUS_THREADS_PER_USER;
+		}
+		return concurrentThreads;
+	}
+	
+	/**
+	 * Returns the number of concurrent threads that are submitting (multi-)jobs status per user.
+	 * 
+	 * @return the number of concurrent threads
+	 */
+	public static int getConcurrentMultiPartJobSubmitThreadsPerUser() {
+		int concurrentThreads = -1;
+		try {
+			concurrentThreads = Integer.parseInt(getServerConfiguration()
+					.getString("concurrentMultiPartJobSubmitThreads"));
+
+		} catch (Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_CONCURRENT_JOB_STATUS_THREADS_PER_USER;
+		}
+		if (concurrentThreads == -1) {
+			return DEFAULT_CONCURRENT_JOB_STATUS_THREADS_PER_USER;
+		}
+		return concurrentThreads;
+	}
+	
 	/**
 	 * Checks whether the default (hsqldb) database configuration should be
 	 * used.

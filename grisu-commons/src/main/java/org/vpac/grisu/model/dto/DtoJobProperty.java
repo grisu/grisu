@@ -1,7 +1,9 @@
 package org.vpac.grisu.model.dto;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
@@ -15,6 +17,18 @@ import javax.xml.bind.annotation.XmlValue;
 @XmlRootElement(name="jobproperty")
 public class DtoJobProperty {
 	
+	public static List<DtoJobProperty> dtoJobPropertiesFromMap(Map<String, String> map) {
+		
+		List<DtoJobProperty> result = new LinkedList<DtoJobProperty>();
+		
+		for ( String key : map.keySet() ) {
+			result.add(new DtoJobProperty(key, map.get(key)));
+		}
+		
+		return result;
+		
+	}
+	
 	/**
 	 * The key of the job property (see a list of possible values in the Constants class in the Infosystems
 	 * GlueInterface module.
@@ -25,6 +39,13 @@ public class DtoJobProperty {
 	 */
 	private String value;
 	
+	public DtoJobProperty() {
+	}
+	
+	public DtoJobProperty(String key, String value) {
+		this.key = key;
+		this.value = value;
+	}
 	
 	@XmlAttribute
 	public String getKey() {

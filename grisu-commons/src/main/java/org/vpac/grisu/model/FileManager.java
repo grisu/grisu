@@ -50,8 +50,8 @@ public class FileManager {
 	 * @throws FileTransferException
 	 *             if the transfer fails
 	 */
-	public final void uploadFile(final String sourcePath, final String targetDirectory)
-			throws FileTransferException {
+	public final void uploadFile(final String sourcePath,
+			final String targetDirectory) throws FileTransferException {
 
 		File file = new File(sourcePath);
 		uploadFile(file, targetDirectory);
@@ -106,7 +106,8 @@ public class FileManager {
 	 * @throws FileTransferException
 	 *             if the transfer fails
 	 */
-	public final File downloadFile(final String url) throws FileTransferException {
+	public final File downloadFile(final String url)
+			throws FileTransferException {
 
 		File cacheTargetFile = getLocalCacheFile(url);
 		File cacheTargetParentFile = cacheTargetFile.getParentFile();
@@ -116,7 +117,8 @@ public class FileManager {
 				if (!cacheTargetParentFile.exists()) {
 					throw new FileTransferException(url, cacheTargetFile
 							.toString(),
-							"Could not create parent folder for cache file.", null);
+							"Could not create parent folder for cache file.",
+							null);
 				}
 			}
 		}
@@ -170,7 +172,8 @@ public class FileManager {
 	 * Uploads a file to the backend which forwards it to it's target
 	 * destination.
 	 * 
-	 * @param file the source file
+	 * @param file
+	 *            the source file
 	 * @param sourcePath
 	 *            the local file
 	 * @param targetDirectory
@@ -182,13 +185,13 @@ public class FileManager {
 			throws FileTransferException {
 
 		if (!file.exists()) {
-			throw new FileTransferException(file.toString(), targetDirectory, "File does not exist: "
-					+ file.toString(), null);
+			throw new FileTransferException(file.toString(), targetDirectory,
+					"File does not exist: " + file.toString(), null);
 		}
 
 		if (!file.canRead()) {
-			throw new FileTransferException(file.toString(), targetDirectory, "Can't read file: "
-					+ file.toString(), null);
+			throw new FileTransferException(file.toString(), targetDirectory,
+					"Can't read file: " + file.toString(), null);
 		}
 
 		// checking whether folder exists and is folder
@@ -198,17 +201,20 @@ public class FileManager {
 					boolean success = serviceInterface.mkdir(targetDirectory);
 
 					if (!success) {
-						throw new FileTransferException(file.toURL().toString(), targetDirectory,
+						throw new FileTransferException(
+								file.toURL().toString(), targetDirectory,
 								"Could not create target directory.", null);
 					}
 				} catch (Exception e) {
-					throw new FileTransferException(file.toURL().toString(), targetDirectory,
+					throw new FileTransferException(file.toURL().toString(),
+							targetDirectory,
 							"Could not create target directory.", e);
 				}
 			} else {
 				try {
 					if (!serviceInterface.isFolder(targetDirectory)) {
-						throw new FileTransferException(file.toURL().toString(), targetDirectory,
+						throw new FileTransferException(
+								file.toURL().toString(), targetDirectory,
 								"Can't upload file. Target is a file.", null);
 					}
 				} catch (Exception e2) {
@@ -220,11 +226,13 @@ public class FileManager {
 								.mkdir(targetDirectory);
 
 						if (!success) {
-							throw new FileTransferException(file.toURL().toString(), targetDirectory,
+							throw new FileTransferException(file.toURL()
+									.toString(), targetDirectory,
 									"Could not create target directory.", null);
 						}
 					} catch (Exception e) {
-						throw new FileTransferException(file.toURL().toString(), targetDirectory,
+						throw new FileTransferException(
+								file.toURL().toString(), targetDirectory,
 								"Could not create target directory.", e);
 					}
 				}
@@ -242,8 +250,7 @@ public class FileManager {
 			throw new FileTransferException(file.toString(), targetDirectory,
 					"Transfer of folders not supported yet.", null);
 		} else {
-			DataSource source = new FileDataSource(file);
-			DataHandler handler = new DataHandler(source);
+			DataHandler handler = createDataHandler(file);
 			String filetransferHandle = null;
 			try {
 				myLogger.info("Uploading file " + file.getName() + "...");
@@ -252,24 +259,36 @@ public class FileManager {
 				myLogger.info("Upload of file " + file.getName()
 						+ " successful.");
 			} catch (Exception e1) {
-//				try {
-//				// try again
-//				myLogger.info("Uploading file " + file.getName() + "...");
-//				filetransferHandle = serviceInterface.upload(handler,
-//						targetDirectory + "/" + file.getName(), true);
-//				myLogger.info("Upload of file " + file.getName()
-//						+ " successful.");
-//				} catch (Exception e) {
-				myLogger.info("Upload of file " + file.getName() + " failed: "
-						+ e1.getLocalizedMessage());
-				myLogger.error("File upload failed: "
-						+ e1.getLocalizedMessage());
-				throw new FileTransferException(file.toString(),
-						targetDirectory, "Could not upload file.", e1);
-//				}
+				try {
+					// try again
+					myLogger.info("Uploading file " + file.getName() + "...");
+					System.out.println("FAILED. SLEEPING 2 SECONDS");
+					Thread.sleep(2000);
+					filetransferHandle = serviceInterface.upload(handler,
+							targetDirectory + "/" + file.getName(), true);
+					myLogger.info("Upload of file " + file.getName()
+							+ " successful.");
+				} catch (Exception e) {
+					myLogger.info("Upload of file " + file.getName()
+							+ " failed: " + e1.getLocalizedMessage());
+					myLogger.error("File upload failed: "
+							+ e1.getLocalizedMessage());
+					throw new FileTransferException(file.toString(),
+							targetDirectory, "Could not upload file.", e1);
+				}
 			}
 		}
 
+	}
+	
+	public static final DataHandler createDataHandler(File file) {
+		DataSource source = new FileDataSource(file);
+		DataHandler handler = new DataHandler(source);
+		return handler;
+	}
+	
+	public static final DataHandler createDataHandler(String file) {
+		return createDataHandler(new File(file));
 	}
 
 }

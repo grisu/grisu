@@ -8,6 +8,7 @@ import javax.activation.DataHandler;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
+import org.vpac.grisu.control.exceptions.MultiPartJobException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -1168,7 +1169,7 @@ public class ProxyServiceInterface implements ServiceInterface {
 	}
 
 	public DtoMultiPartJob createMultiPartJob(String multiPartJobId)
-			throws JobPropertiesException {
+			throws MultiPartJobException {
 		
 		try {
 			Method m = si.getClass().getMethod("createMultiPartJob", multiPartJobId.getClass());
@@ -1182,8 +1183,8 @@ public class ProxyServiceInterface implements ServiceInterface {
 		} catch (IllegalAccessException e) {
 			throw new RuntimeException(e);
 		} catch (InvocationTargetException e) {
-			if ( e.getCause() instanceof JobPropertiesException ) {
-				throw (JobPropertiesException) e.getCause();
+			if ( e.getCause() instanceof MultiPartJobException ) {
+				throw (MultiPartJobException) e.getCause();
 			} else {
 				throw (RuntimeException) e.getCause();
 			}
@@ -1233,11 +1234,12 @@ public class ProxyServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public DtoMultiPartJobs psMulti() {
+	public DtoMultiPartJob getMultiPartJob(String multiJobPartId, boolean refresh)
+	throws NoSuchJobException {
 
 		try {
-			Method m = si.getClass().getMethod("psMulti");
-			return (DtoMultiPartJobs)(m.invoke(si));
+			Method m = si.getClass().getMethod("getMultiPartJob", multiJobPartId.getClass(), boolean.class);
+			return (DtoMultiPartJob)(m.invoke(si, multiJobPartId, refresh));
 			} catch (SecurityException e) {
 				throw new RuntimeException("Proxy method exception.", e);
 			} catch (NoSuchMethodException e) {
@@ -1247,7 +1249,11 @@ public class ProxyServiceInterface implements ServiceInterface {
 			} catch (IllegalAccessException e) {
 				throw new RuntimeException("Proxy method exception.", e);
 			} catch (InvocationTargetException e) {
-				throw (RuntimeException) e.getCause();
+				if ( e.getCause() instanceof NoSuchJobException ) {
+					throw (NoSuchJobException) e.getCause();
+				} else {
+					throw (RuntimeException) e.getCause();
+				}
 			}
 		
 	}
@@ -1325,6 +1331,34 @@ public class ProxyServiceInterface implements ServiceInterface {
 				throw new RuntimeException("Proxy method exception.", e.getCause());
 			}
 		}
+	}
+
+	public void copyMultiPartJobInputFile(String multiPartJobId,
+			String inputFile, String filename)
+			throws RemoteFileSystemException, NoSuchJobException {
+		
+		Method m;
+		try {
+			m = si.getClass().getMethod("uploadMultiPartJobInputFile", multiPartJobId.getClass(), inputFile.getClass(), filename.getClass());
+			m.invoke(si, multiPartJobId, inputFile, filename);
+		} catch (SecurityException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (InvocationTargetException e) {
+			if ( e.getCause() instanceof RemoteFileSystemException ) {
+				throw (RemoteFileSystemException) e.getCause();
+			} else if ( e.getCause() instanceof NoSuchJobException ) {
+				throw (NoSuchJobException) e.getCause();
+			} else {
+				throw new RuntimeException("Proxy method exception.", e.getCause());
+			}
+		}
+		
 	}
 
 }
