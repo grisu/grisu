@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import javax.activation.DataHandler;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.FileTransferException;
@@ -87,12 +88,19 @@ public class MultiPartJobObject {
 			System.out.println("Waiting jobs: "+dtoMultiPartJob.numberOfWaitingJobs());
 			System.out.println("Active jobs: "+dtoMultiPartJob.numberOfRunningJobs());
 			System.out.println("Successful jobs: "+dtoMultiPartJob.numberOfSuccessfulJobs());
-			System.out.println("Failed jobs: "+dtoMultiPartJob.numberOfFailedJobs());
+			System.out.print("Failed jobs: "+dtoMultiPartJob.numberOfFailedJobs()+" ");
+			if ( dtoMultiPartJob.numberOfFailedJobs() > 0 ) {
+				System.out.print("(");
+				StringUtils.join(dtoMultiPartJob.getFailedJobs(), " ,");
+				System.out.println(")");
+			} else {
+				System.out.println();
+			}
 			System.out.println("Unsubmitted jobs: "+dtoMultiPartJob.numberOfUnsubmittedJobs());
 
 			System.out.println();
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(15000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -163,6 +171,9 @@ public class MultiPartJobObject {
 	
 	
 	public void prepareAndCreateJobs() throws JobsException, BackendException {
+		
+		// check whether any of the jobnames already exist
+		
 		
 		myLogger.debug("Creating "+getJobs().size()+" jobs as part of multipartjob: "+multiPartJobId);
 		ExecutorService executor = Executors.newFixedThreadPool(getConcurrentJobCreationThreads());

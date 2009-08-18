@@ -1,16 +1,11 @@
 package org.vpac.grisu.frontend.examples;
 
-import java.io.File;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
 
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
@@ -18,10 +13,10 @@ import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.model.job.JobStatusChangeListener;
+import org.vpac.grisu.frontend.model.job.JobsException;
 import org.vpac.grisu.frontend.model.job.MultiPartJobObject;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
-import org.vpac.grisu.model.dto.DtoMultiPartJob;
 import org.vpac.grisu.model.info.ApplicationInformation;
 
 import au.org.arcs.jcommons.constants.JobSubmissionProperty;
@@ -52,6 +47,7 @@ public class BlenderTest implements JobStatusChangeListener {
 
 		ApplicationInformation blenderInfo = registry
 				.getApplicationInformation("blender");
+		Set<String> versions = blenderInfo.getAllAvailableVersionsForFqan("/ARCS/NGAdmin");
 
 		Map<JobSubmissionProperty, String> jobProperties = new HashMap<JobSubmissionProperty, String>();
 		SortedSet<GridResource> resources = blenderInfo.getBestSubmissionLocations(jobProperties, "/ARCS/NGAdmin");
@@ -68,23 +64,31 @@ public class BlenderTest implements JobStatusChangeListener {
 		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/NGAdmin");
 				
 		
-		for (int i=1; i<10; i++) {
+		for (int i=1; i<20; i++) {
 
 			final int frameNumber = i;
 				
 				JobObject jo = new JobObject(si);
 				jo.setJobname(multiJobName+"_" + frameNumber );
 				jo.setApplication("blender");
-				jo.setCommandline("blender -b "+multiPartJob.pathToInputFiles()+"/VPAC_logo.blend -F PNG -o logo_ -f "+frameNumber);
+				jo.setCommandline("blender -b "+multiPartJob.pathToInputFiles()+"/CubesTest.blend -F PNG -o logo_ -f "+frameNumber);
 				jo.setSubmissionLocation(subLoc);
-
+				jo.setModules(new String[]{"blender/2.49"});
+				jo.setWalltimeInSeconds(1200);
 				multiPartJob.addJob(jo);
 						
 		}
 
-		multiPartJob.addInputFile("/home/markus/Desktop/VPAC_logo.blend");
+		multiPartJob.addInputFile("/home/markus/Desktop/CubesTest.blend");
 		
-		multiPartJob.prepareAndCreateJobs();
+		try {
+			multiPartJob.prepareAndCreateJobs();
+		} catch (JobsException e) {
+			for ( JobObject job : e.getFailures().keySet() ) {
+				System.out.println("Creation "+job.getJobname()+" failed: "+e.getFailures().get(job).getLocalizedMessage());
+			}
+			System.exit(1);
+		}
 		
 		multiPartJob.submit();
 		
