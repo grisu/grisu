@@ -1,10 +1,10 @@
 package org.vpac.grisu.client.gridTests.testElements;
 
+import org.vpac.grisu.client.control.clientexceptions.MdsInformationException;
 import org.vpac.grisu.client.gridTests.GridTestController;
 import org.vpac.grisu.client.gridTests.GridTestInfo;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.frontend.model.job.JobObject;
 
 import au.org.arcs.jcommons.constants.Constants;

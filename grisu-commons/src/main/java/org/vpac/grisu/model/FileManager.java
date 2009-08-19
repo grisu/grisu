@@ -2,14 +2,19 @@ package org.vpac.grisu.model;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.vpac.grisu.client.control.clientexceptions.FileTransferException;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.exceptions.FileTransferException;
+import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
+import org.vpac.grisu.model.dto.DtoFolder;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.utils.FileHelpers;
 
@@ -37,25 +42,6 @@ public class FileManager {
 	 */
 	public FileManager(final ServiceInterface si) {
 		this.serviceInterface = si;
-	}
-
-	/**
-	 * Uploads a file to the backend which forwards it to it's target
-	 * destination.
-	 * 
-	 * @param sourcePath
-	 *            the path to the local file
-	 * @param targetDirectory
-	 *            the target url
-	 * @throws FileTransferException
-	 *             if the transfer fails
-	 */
-	public final void uploadFile(final String sourcePath,
-			final String targetDirectory) throws FileTransferException {
-
-		File file = new File(sourcePath);
-		uploadFile(file, targetDirectory);
-
 	}
 
 	/**
@@ -168,6 +154,71 @@ public class FileManager {
 		return cacheTargetFile;
 	}
 
+	
+	public final void uploadFile(final File file, final String targetFile, boolean overwrite) throws FileTransferException {
+		
+		if (!file.exists()) {
+			throw new FileTransferException(file.toString(), targetFile,
+					"File does not exist: " + file.toString(), null);
+		}
+
+		if (!file.canRead()) {
+			throw new FileTransferException(file.toString(), targetFile,
+					"Can't read file: " + file.toString(), null);
+		}
+
+		if (file.isDirectory()) {
+			throw new FileTransferException(file.toString(), targetFile,
+					"Transfer of folders not supported yet.", null);
+		}
+
+		// checking whether folder exists and is folder
+		try {
+			if (serviceInterface.fileExists(targetFile)) {
+
+				if ( ! overwrite ) {
+					throw new FileTransferException(file.toString(), targetFile, "Target file exists.", null);
+				}
+			}
+
+		} catch (Exception e) {
+			throw new FileTransferException(file.toString(), targetFile,
+					"Could not determine whether target directory exists: ", e);
+		}
+		
+		myLogger.debug("Uploading local file: " + file.toString() + " to: "
+				+ targetFile);
+
+		DataHandler handler = createDataHandler(file);
+		String filetransferHandle = null;
+		try {
+			myLogger.info("Uploading file " + file.getName() + "...");
+			filetransferHandle = serviceInterface.upload(handler,
+					targetFile, true);
+			myLogger.info("Upload of file " + file.getName() + " successful.");
+		} catch (Exception e1) {
+			try {
+				// try again
+				myLogger.info("Uploading file " + file.getName() + "...");
+				System.out.println("FAILED. SLEEPING 1 SECONDS");
+				Thread.sleep(1000);
+				filetransferHandle = serviceInterface.upload(handler,
+						targetFile + "/" + file.getName(), true);
+				myLogger.info("Upload of file " + file.getName()
+						+ " successful.");
+			} catch (Exception e) {
+				myLogger.info("Upload of file " + file.getName() + " failed: "
+						+ e1.getLocalizedMessage());
+				myLogger.error("File upload failed: "
+						+ e1.getLocalizedMessage());
+				throw new FileTransferException(file.toString(),
+						targetFile, "Could not upload file.", e1);
+			}
+		}
+		
+		
+		
+	}
 	/**
 	 * Uploads a file to the backend which forwards it to it's target
 	 * destination.
@@ -177,11 +228,12 @@ public class FileManager {
 	 * @param sourcePath
 	 *            the local file
 	 * @param targetDirectory
-	 *            the target url
+	 *            the target directory url
+	 * @param overwrite whether to overwrite a possibly existing target file
 	 * @throws FileTransferException
 	 *             if the transfer fails
 	 */
-	public final void uploadFile(final File file, final String targetDirectory)
+	public final void uploadFileToDirectory(final File file, final String targetDirectory, final boolean overwrite)
 			throws FileTransferException {
 
 		if (!file.exists()) {
@@ -192,6 +244,11 @@ public class FileManager {
 		if (!file.canRead()) {
 			throw new FileTransferException(file.toString(), targetDirectory,
 					"Can't read file: " + file.toString(), null);
+		}
+
+		if (file.isDirectory()) {
+			throw new FileTransferException(file.toString(), targetDirectory,
+					"Transfer of folders not supported yet.", null);
 		}
 
 		// checking whether folder exists and is folder
@@ -218,23 +275,11 @@ public class FileManager {
 								"Can't upload file. Target is a file.", null);
 					}
 				} catch (Exception e2) {
-					myLogger
-							.debug("Could not access target directory. Trying to create it...");
+					myLogger.debug("Could not access target directory.");
 
-					try {
-						boolean success = serviceInterface
-								.mkdir(targetDirectory);
-
-						if (!success) {
-							throw new FileTransferException(file.toURL()
-									.toString(), targetDirectory,
-									"Could not create target directory.", null);
-						}
-					} catch (Exception e) {
-						throw new FileTransferException(
-								file.toURL().toString(), targetDirectory,
-								"Could not create target directory.", e);
-					}
+					throw new FileTransferException(file.toURL().toString(),
+							targetDirectory,
+							"Could not access target directory.", e2);
 				}
 			}
 
@@ -246,49 +291,144 @@ public class FileManager {
 		myLogger.debug("Uploading local file: " + file.toString() + " to: "
 				+ targetDirectory);
 
+		uploadFile(file, targetDirectory + "/" + file.getName(), overwrite);
+
+	}
+	
+	/**
+	 * Uploads a file to the backend which forwards it to it's target
+	 * destination.
+	 * 
+	 * @param sourcePath
+	 *            the path to the local file
+	 * @param targetDirectory
+	 *            the target url
+	 * @param overwrite whether to overwrite a possibly existing target file
+	 * @throws FileTransferException
+	 *             if the transfer fails
+	 */
+	public final void uploadFileToDirectory(final String sourcePath,
+			final String targetDirectory, boolean overwrite) throws FileTransferException {
+
+		File file = new File(sourcePath);
 		if (file.isDirectory()) {
-			throw new FileTransferException(file.toString(), targetDirectory,
-					"Transfer of folders not supported yet.", null);
-		} else {
-			DataHandler handler = createDataHandler(file);
-			String filetransferHandle = null;
-			try {
-				myLogger.info("Uploading file " + file.getName() + "...");
-				filetransferHandle = serviceInterface.upload(handler,
-						targetDirectory + "/" + file.getName(), true);
-				myLogger.info("Upload of file " + file.getName()
-						+ " successful.");
-			} catch (Exception e1) {
-				try {
-					// try again
-					myLogger.info("Uploading file " + file.getName() + "...");
-					System.out.println("FAILED. SLEEPING 2 SECONDS");
-					Thread.sleep(2000);
-					filetransferHandle = serviceInterface.upload(handler,
-							targetDirectory + "/" + file.getName(), true);
-					myLogger.info("Upload of file " + file.getName()
-							+ " successful.");
-				} catch (Exception e) {
-					myLogger.info("Upload of file " + file.getName()
-							+ " failed: " + e1.getLocalizedMessage());
-					myLogger.error("File upload failed: "
-							+ e1.getLocalizedMessage());
-					throw new FileTransferException(file.toString(),
-							targetDirectory, "Could not upload file.", e1);
+			throw new RuntimeException("Upload of folders not supported (yet).");
+		}
+		uploadFileToDirectory(file, targetDirectory, overwrite);
+
+	}
+
+	/**
+	 * Helper method to extract the filename out of an url.
+	 * 
+	 * @param remoteurl the url
+	 * @return the filename
+	 */
+	public static String getFilename(String remoteurl) {
+
+		String filename = remoteurl.substring(0, remoteurl.lastIndexOf("/"));
+		return filename;
+
+	}
+
+	/**
+	 * Downloads a remote file to the specified target.
+	 * 
+	 * If the target is an existing directory, the file will be put in there, if
+	 * not, a file with that name will be created (along with all intermediate
+	 * directories). If the target file already exists then you need to specify
+	 * overwrite=true.
+	 * 
+	 * @param url
+	 *            the url of the source file
+	 * @param target
+	 *            the target directory of file
+	 * @param overwrite
+	 *            whether to overwrite a possibly existing file
+	 * @return the handle to the downloaded file
+	 * @throws IOException
+	 *             if the target isn't writable
+	 * @throws FileTransferException
+	 *             if the file can't be downloaded for some reason
+	 */
+	public File downloadFile(String url, String target, boolean overwrite)
+			throws IOException, FileTransferException {
+
+		File targetFile = new File(target);
+		if (targetFile.exists() && targetFile.isDirectory()) {
+			if (!targetFile.canWrite()) {
+				throw new IOException("Can't write to target: "
+						+ targetFile.toString());
+			}
+			targetFile = new File(target, getFilename(url));
+			if (targetFile.exists()) {
+				if (!overwrite) {
+					throw new IOException("Can't download file to "
+							+ targetFile + ". File already exists.");
 				}
 			}
 		}
 
+		File cacheFile = downloadFile(url);
+
+		FileUtils.copyFile(cacheFile, targetFile);
+
+		return targetFile;
+	}
+
+	/**
+	 * Deletes the remote file and a possible local cache file.
+	 * 
+	 * @param url
+	 *            the url of the remote file
+	 * @throws RemoteFileSystemException
+	 *             if the remote file can't be deleted for some reason
+	 */
+	public void deleteFile(String url) throws RemoteFileSystemException {
+
+		File localCacheFile = getLocalCacheFile(url);
+
+		if (localCacheFile.exists()) {
+			FileUtils.deleteQuietly(localCacheFile);
+		}
+
+		serviceInterface.deleteFile(url);
+
 	}
 	
+	public List<String> listAllChildrenFilesOfRemoteFolder(String folderUrl) throws RemoteFileSystemException {
+		
+		if ( ! serviceInterface.isFolder(folderUrl) ) {
+			throw new IllegalArgumentException("Specified url is not a folder.");
+		}
+		
+		DtoFolder folder = serviceInterface.ls(folderUrl, 0);
+		
+		return folder.listOfAllFilesUnderThisFolder();
+	}
+
+	/**
+	 * Convenience method to create a datahandler out of a file.
+	 * 
+	 * @param file
+	 *            the file
+	 * @return the datahandler
+	 */
 	public static final DataHandler createDataHandler(File file) {
 		DataSource source = new FileDataSource(file);
 		DataHandler handler = new DataHandler(source);
 		return handler;
 	}
-	
+
+	/**
+	 * Convenience method to create a datahandler out of a file.
+	 * 
+	 * @param file
+	 *            the file
+	 * @return the datahandler
+	 */
 	public static final DataHandler createDataHandler(String file) {
 		return createDataHandler(new File(file));
 	}
-
+	
 }

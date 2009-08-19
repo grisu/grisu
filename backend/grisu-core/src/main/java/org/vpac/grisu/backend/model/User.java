@@ -524,21 +524,6 @@ public class User {
 
 			fsmanager = VFSUtil.createNewFsManager(false, false, true, true,
 					true, true, true, null);
-			// fsmanager = VFSUtil.createNewFsManager(false, false, true, true,
-			// true, true, null);
-			// fsmanager = new DefaultFileSystemManager();
-			// FileSystemManager fsmanager = VFS.getManager();
-			// DefaultLocalFileProvider fileProvider = new
-			// DefaultLocalFileProvider();
-			// getFsManager().addProvider("file", fileProvider);
-			// GridFtpFileProvider provider = new GridFtpFileProvider();
-			// getFsManager().addProvider("gsiftp", provider);
-			// fsmanager.setCacheStrategy(CacheStrategycred.ON_RESOLVE);
-
-			// fsmanager.setCacheStrategy(CacheStrategy.ON_RESOLVE);
-			// getFsManager().setCacheStrategy(CacheStrategy.MANUAL);
-
-			// getFsManager().init();
 
 		}
 		return fsmanager;
@@ -586,7 +571,13 @@ public class User {
 		// ProxyCredential credToUse = null;
 		MountPoint mp = null;
 
-		if (file.startsWith("/")) {
+		if (file.startsWith("tmp:") || file.startsWith("ram:")) {
+			try {
+				return fsmanager.resolveFile(file);
+			} catch (FileSystemException e) {
+				throw new RemoteFileSystemException("Could not access file on local temp filesystem: "+e.getLocalizedMessage());
+			}
+		} else if (file.startsWith("/")) {
 			// means file on "mounted" filesystem
 
 			mp = getResponsibleMountpointForUserSpaceFile(file);

@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.vpac.grisu.client.control.clientexceptions.MdsInformationException;
 import org.vpac.grisu.client.gridTests.testElements.GridTestElement;
-import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.info.ApplicationInformation;
 

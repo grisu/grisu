@@ -2,19 +2,21 @@ package org.vpac.grisu.frontend.model.job;
 
 import java.io.File;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
+import org.vpac.grisu.client.control.clientexceptions.FileTransferException;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.exceptions.FileTransferException;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
+import org.vpac.grisu.model.dto.DtoFolder;
 import org.vpac.grisu.model.job.JobCreatedProperty;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.utils.FileHelpers;
@@ -176,6 +178,18 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 		return this.getJobname();
 	}
+	
+	public final void restartJob() throws JobSubmissionException, JobPropertiesException {
+		
+		try {
+			serviceInterface.restartJob(getJobname(), getJobDescriptionDocumentAsString());
+		} catch (NoSuchJobException e) {
+			throw new JobSubmissionException(
+					"Could not find job on backend.", e);
+		}
+		getStatus(true);
+		
+	}
 
 	/**
 	 * After you created the job on the backend using the
@@ -204,7 +218,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 			if (FileManager.isLocal(inputFile)) {
 				try {
 					GrisuRegistryManager.getDefault(serviceInterface).getFileManager()
-							.uploadFile(inputFile, jobDirectory);
+							.uploadFileToDirectory(inputFile, jobDirectory, true);
 				} catch (FileTransferException e) {
 					throw new JobSubmissionException(
 							"Could not stage-in file: " + inputFile, e);
@@ -216,7 +230,12 @@ public class JobObject extends JobSubmissionObjectImpl {
 			setStatus(JobConstants.INPUT_FILES_UPLOADED);
 		}
 
-		serviceInterface.submitJob(getJobname());
+		try {
+			serviceInterface.submitJob(getJobname());
+		} catch (NoSuchJobException e) {
+			throw new JobSubmissionException(
+					"Could not find job on backend.", e);
+		}
 		getStatus(true);
 	}
 
@@ -642,9 +661,21 @@ public class JobObject extends JobSubmissionObjectImpl {
 		return 73 * getJobname().hashCode();
 	}
 
-	public String[] listJobDirectory() throws RemoteFileSystemException {
+	/**
+	 * Lists all the files that are living under this jobs jobdirectory.
+	 * 
+	 * Specify a recursion level of 1 if you only are interested in the jobdirectory itself. Or the appropriate 
+	 * level if you want to look deeper. Use 0 to find all files on all levels.
+	 * 
+	 * @param recursionLevel the recursion level
+	 * @return the list of files
+	 * @throws RemoteFileSystemException
+	 */
+	public List<String> listJobDirectory(int recursionLevel) throws RemoteFileSystemException {
 
-		return serviceInterface.getChildrenFileNames(getJobDirectoryUrl(), false);
+		DtoFolder folder = serviceInterface.ls(getJobDirectoryUrl(), recursionLevel);
+		
+		return folder.listOfAllFilesUnderThisFolder();
 		
 	}
 

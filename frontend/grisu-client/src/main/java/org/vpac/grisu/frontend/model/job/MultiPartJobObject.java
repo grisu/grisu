@@ -19,14 +19,13 @@ import javax.activation.DataHandler;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.vpac.grisu.client.control.clientexceptions.FileTransferException;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.exceptions.FileTransferException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.MultiPartJobException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.FileManager;
-import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoMultiPartJob;
@@ -88,11 +87,12 @@ public class MultiPartJobObject {
 			System.out.println("Waiting jobs: "+dtoMultiPartJob.numberOfWaitingJobs());
 			System.out.println("Active jobs: "+dtoMultiPartJob.numberOfRunningJobs());
 			System.out.println("Successful jobs: "+dtoMultiPartJob.numberOfSuccessfulJobs());
-			System.out.print("Failed jobs: "+dtoMultiPartJob.numberOfFailedJobs()+" ");
+			System.out.println("Failed jobs: "+dtoMultiPartJob.numberOfFailedJobs()+" ");
 			if ( dtoMultiPartJob.numberOfFailedJobs() > 0 ) {
-				System.out.print("(");
-				StringUtils.join(dtoMultiPartJob.getFailedJobs(), " ,");
-				System.out.println(")");
+				for ( String jobname : dtoMultiPartJob.getFailedJobs() ) {
+					System.out.println("\tJobname: "+jobname+", Error: "+dtoMultiPartJob.retrieveJob(jobname).propertiesAsMap().get(Constants.ERROR_REASON));	
+				}
+				
 			} else {
 				System.out.println();
 			}
@@ -218,19 +218,32 @@ public class MultiPartJobObject {
 		}
 	}
 	
-	public void downloadResults(String pattern) throws RemoteFileSystemException, FileTransferException {
+	public void downloadResults(File parentFolder, String[] patterns, boolean createSeperateFoldersForEveryJob, boolean prefixWithJobname) throws RemoteFileSystemException, FileTransferException, IOException {
 		
-		File parent = new File("/home/markus/Desktop/multi");
 		for ( JobObject job : getJobs() ) {
-			for ( String child : job.listJobDirectory() ) {
-				if ( child.indexOf(pattern) >= 0 ) {
+			for ( String child : job.listJobDirectory(0) ) {
+				
+				boolean download = false;
+				for ( String pattern : patterns ) {
+					if ( child.indexOf(pattern) >= 0 ) {
+						download = true;
+						break;
+					}
+				}
+				
+				if ( download ) {
 					myLogger.debug("Downloading file: "+child);
 					File cacheFile = GrisuRegistryManager.getDefault(serviceInterface).getFileManager().downloadFile(child);
-					try {
-						FileUtils.copyFile(cacheFile, new File(parent, cacheFile.getName()));
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					String targetfilename = null;
+					if ( prefixWithJobname ) {
+						targetfilename = job.getJobname()+"_"+cacheFile.getName();
+					} else {
+						targetfilename = cacheFile.getName();
+					}
+					if ( createSeperateFoldersForEveryJob ) {
+						FileUtils.copyFile(cacheFile, new File(new File(parentFolder, job.getJobname()), targetfilename));
+					} else {
+						FileUtils.copyFile(cacheFile, new File(parentFolder, targetfilename));
 					}
 				}
 			}

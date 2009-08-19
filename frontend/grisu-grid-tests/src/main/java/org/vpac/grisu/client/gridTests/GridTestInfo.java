@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.vpac.grisu.client.control.clientexceptions.MdsInformationException;
 import org.vpac.grisu.client.gridTests.testElements.GridTestElement;
-import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.w3c.dom.Document;
 
 public interface GridTestInfo {

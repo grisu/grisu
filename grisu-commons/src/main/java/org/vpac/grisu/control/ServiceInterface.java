@@ -492,7 +492,7 @@ public interface ServiceInterface {
 	 *            absolute path (either something like: /ngdata_vpac/file.txt or
 	 *            gsiftp://ngdata.vpac.org/home/san04/markus/file.txt
 	 * @param recursion_level
-	 *            the level of recursion for the directory listing, use -1 for
+	 *            the level of recursion for the directory listing, use 0 for
 	 *            infinite but beware, the filelisting can take a long, long
 	 *            time. Usually you would specify 1 and fill your filetree on
 	 *            the clientside on demand.
@@ -794,9 +794,27 @@ public interface ServiceInterface {
 	 *            the jobname
 	 * @throws JobSubmissionException
 	 *             if the job could not submitted
+	 * @throws NoSuchJobException
+	 * 			   if no job with the specified jobname exists
 	 */
-	void submitJob(String jobname) throws JobSubmissionException;
-
+	void submitJob(String jobname) throws JobSubmissionException, NoSuchJobException;
+	
+	/**
+	 * Resubmit a job. Kills the old one if it's still running.
+	 * 
+	 * This uses the same job properties as the old job. If you want some of the properties changed, you need
+	 * to provide an updated jsdl file. Be aware that not all properties can be changed (for example you can't
+	 * change the filesystem the job runs on or the fqan). Have a look at the implemenation of this method to find 
+	 * out what can't be changed and what not. Anyway, use this
+	 * with caution and prefer to just submit a new job if possible.
+	 * 
+	 * @param jobname the name of the job
+	 * @param changedJsdl the updated jsdl or null (if you want to re-run the same job)
+	 * @throws JobSubmissionException if the job could not be resubmitted
+	 * @throws NoSuchJobException if no job with the specified jobname exists
+	 */
+	void restartJob(final String jobname, String changedJsdl) throws JobSubmissionException, NoSuchJobException;
+		
 	/**
 	 * Method to query the status of a job. The String representation of the
 	 * status can be obtained by calling

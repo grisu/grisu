@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+import org.vpac.grisu.client.control.clientexceptions.MdsInformationException;
 import org.vpac.grisu.client.gridTests.GridTestInfo;
 import org.vpac.grisu.client.gridTests.GridTestStage;
 import org.vpac.grisu.client.gridTests.GridTestStageStatus;
@@ -13,7 +14,6 @@ import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
-import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.model.job.JobStatusChangeListener;
 

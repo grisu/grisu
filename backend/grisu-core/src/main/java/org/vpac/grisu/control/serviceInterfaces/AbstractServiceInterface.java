@@ -3,6 +3,7 @@ package org.vpac.grisu.control.serviceInterfaces;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Arrays;
@@ -23,7 +24,6 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.xml.xpath.XPathExpressionException;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.AllFileSelector;
 import org.apache.commons.vfs.FileContent;
@@ -32,6 +32,7 @@ import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileType;
 import org.apache.commons.vfs.FileTypeSelector;
 import org.apache.log4j.Logger;
+import org.globus.wsrf.impl.security.descriptor.ContainerOnlyParamsParser;
 import org.vpac.grisu.backend.hibernate.JobDAO;
 import org.vpac.grisu.backend.hibernate.MultiPartJobDAO;
 import org.vpac.grisu.backend.hibernate.UserDAO;
@@ -209,7 +210,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return job;
 	}
 
-	protected MultiPartJob getMultiPartJob(final String multiPartJobId)
+	protected MultiPartJob getMultiPartJobFromDatabase(final String multiPartJobId)
 			throws NoSuchJobException {
 
 		MultiPartJob job = multiPartJobDao.findJobByDN(getUser().getCred()
@@ -489,7 +490,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							job.getFqan());
 					if (matchingResources != null
 							&& matchingResources.size() > 0) {
-						JsdlHelpers.setApplicationType(jsdl, app);
+						JsdlHelpers.setApplicationName(jsdl, app);
 						myLogger.debug("Calculated app: " + app);
 						break;
 					}
@@ -822,7 +823,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				.newFixedThreadPool(ServerPropertiesManager
 						.getConcurrentMultiPartJobSubmitThreadsPerUser());
 
-		final MultiPartJob multiJob = getMultiPartJob(multiPartJobId);
+		final MultiPartJob multiJob = getMultiPartJobFromDatabase(multiPartJobId);
 
 //		final Collection<String> failedJobs = CollectionUtils
 //				.synchronizedCollection(new TreeSet<String>());
@@ -840,7 +841,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						return;
 					}
 					try {
-						submitJob(job);
+						submitJob(job, true);
 
 					} catch (Exception e) {
 						myLogger.error("Job submission for multipartjob: "
@@ -850,6 +851,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					}
 				}
 			};
+			// just to get a better chance that the jobs are submitted in the right order...
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			executor.execute(thread);
 		}
 		executor.shutdown();
@@ -869,12 +877,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	private void submitJob(final Job job) throws JobSubmissionException {
+	private void submitJob(final Job job, boolean stageFiles) throws JobSubmissionException {
 		try {
 			myLogger.debug("Preparing job environment...");
 			prepareJobEnvironment(job);
-			myLogger.debug("Staging files...");
-			stageFiles(job);
+			if ( stageFiles ) {
+				myLogger.debug("Staging files...");
+				stageFiles(job);
+			}
 		} catch (Exception e) {
 			throw new JobSubmissionException(
 					"Could not access remote filesystem: "
@@ -923,19 +933,79 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				+ " and user " + getDN() + " successful.");
 
 	}
+	
+	public void restartJob(final String jobname, String changedJsdl) throws JobSubmissionException, NoSuchJobException {
+		
+		Job job = getJob(jobname);
 
-	public void submitJob(final String jobname) throws JobSubmissionException {
+		kill(jobname);
+		
+		job.setStatus(JobConstants.READY_TO_SUBMIT);
+		
+		job.getJobProperties().remove(Constants.ERROR_REASON);
+
+		
+		if ( StringUtils.isNotBlank(changedJsdl) ) {
+			
+			Document newJsdl;
+			Document oldJsdl = job.getJobDescription();
+
+			try {
+				newJsdl = SeveralXMLHelpers.fromString(changedJsdl);
+			} catch (Exception e3) {
+
+				myLogger.error(e3);
+				throw new RuntimeException("Invalid jsdl/xml format.", e3);
+			}
+			
+//			String newAppname = JsdlHelpers.getApplicationName(newJsdl);
+//			JsdlHelpers.setApplicationName(oldJsdl, newAppname);
+//			job.addJobProperty(Constants.APPLICATIONNAME_KEY, newAppname);
+//			String newAppVersion = JsdlHelpers.getApplicationVersion(newJsdl);
+//			JsdlHelpers.setApplicationVersion(oldJsdl, newAppVersion);
+//			job.addJobProperty(Constants.APPLICATIONVERSION_KEY, newAppVersion);
+
+			Integer newTotalCpuTime = JsdlHelpers.getWalltime(newJsdl) * JsdlHelpers.getProcessorCount(newJsdl);
+			JsdlHelpers.setTotalCPUTimeInSeconds(oldJsdl, newTotalCpuTime);
+			job.addJobProperty(Constants.WALLTIME_IN_MINUTES_KEY, new Integer(JsdlHelpers.getWalltime(newJsdl)).toString());
+			
+			Integer newProcCount = JsdlHelpers.getProcessorCount(newJsdl);
+			JsdlHelpers.setProcessorCount(oldJsdl, newProcCount);
+			job.addJobProperty(Constants.NO_CPUS_KEY, new Integer(newProcCount).toString());
+			
+			//TODO
+			JsdlHelpers.getTotalMemoryRequirement(newJsdl);
+			
+//			JsdlHelpers.getArcsJobType(newJsdl);
+//			JsdlHelpers.getModules(newJsdl);
+//			JsdlHelpers.getPosixApplicationArguments(newJsdl);
+//			JsdlHelpers.getPosixApplicationExecutable(newJsdl);
+//			JsdlHelpers.getPosixStandardError(newJsdl);
+//			JsdlHelpers.getPosixStandardInput(newJsdl);
+//			JsdlHelpers.getPosixStandardOutput(newJsdl);
+
+			
+			job.setJobDescription(oldJsdl);
+			jobdao.saveOrUpdate(job);
+		}
+		
+		myLogger.info("Submitting job: " + jobname + " for user " + getDN());
+		submitJob(job, false);
+		
+		
+	}
+
+	public void submitJob(final String jobname) throws JobSubmissionException, NoSuchJobException {
 
 		myLogger.info("Submitting job: " + jobname + " for user " + getDN());
 		Job job;
-		try {
-			job = getJob(jobname);
-		} catch (NoSuchJobException e1) {
-			throw new JobSubmissionException("Job: " + jobname
-					+ " could not be found in the grisu job database.");
+		job = getJob(jobname);
+
+		if ( job.getStatus() > JobConstants.READY_TO_SUBMIT ) {
+			throw new JobSubmissionException("Job already submitted.");
 		}
 
-		submitJob(job);
+		submitJob(job, true);
 
 	}
 
@@ -1031,6 +1101,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		if (old_status != status) {
 			job.setStatus(status);
+			if ( status >= JobConstants.FINISHED_EITHER_WAY && status != JobConstants.DONE ) {
+				job.addJobProperty(Constants.ERROR_REASON, "Job finished with status: "+JobConstants.translateStatus(status));
+			}
 			jobdao.saveOrUpdate(job);
 		}
 		myLogger.debug("Status of job: " + job.getJobname() + " is: " + status);
@@ -1079,30 +1152,40 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				.newFixedThreadPool(ServerPropertiesManager
 						.getConcurrentJobStatusThreadsPerUser());
 
-		final MultiPartJob multiJob = getMultiPartJob(multiJobPartId);
+		final MultiPartJob multiJob = getMultiPartJobFromDatabase(multiJobPartId);
 		final DtoMultiPartJob dtoMultiJob = new DtoMultiPartJob();
 
 		for (final String jobname : multiJob.getJobnames().keySet()) {
-			final DtoJob dtoJob = new DtoJob();
-			dtoJob.addJobProperty(Constants.JOBNAME_KEY, jobname);
 
 			Thread thread = new Thread() {
 				public void run() {
 
+					DtoJob dtoJob = null;
 					if (!refresh) {
 						int oldStatus = multiJob.getJobnames().get(jobname);
 						if ( oldStatus >= JobConstants.FINISHED_EITHER_WAY && oldStatus != JobConstants.DONE ) {
 							multiJob.addFailedJob(jobname, "Job finished with status: "+JobConstants.translateStatus(oldStatus));
 						}
-						dtoJob.setStatus(multiJob.getJobnames().get(jobname));
+						try {
+							dtoJob = DtoJob.createJob(multiJob.getJobnames().get(jobname), getJob(jobname).getJobProperties());
+							dtoMultiJob.addJob(dtoJob);
+						} catch (NoSuchJobException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					} else {
 						int newStatus = getJobStatus(jobname);
 						if ( newStatus >= JobConstants.FINISHED_EITHER_WAY && newStatus != JobConstants.DONE ) {
 							multiJob.addFailedJob(jobname, "Job finished with status: "+JobConstants.translateStatus(newStatus));
 						}
 						multiJob.getJobnames().put(jobname, newStatus);
-						dtoJob.setStatus(newStatus);
-						dtoMultiJob.addJob(dtoJob);
+						try {
+							dtoJob = DtoJob.createJob(newStatus, getJob(jobname).getJobProperties());
+							dtoMultiJob.addJob(dtoJob);
+						} catch (NoSuchJobException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				}
 			};
@@ -1117,6 +1200,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
+		
+		multiPartJobDao.saveOrUpdate(multiJob);
 		
 		dtoMultiJob.setFailedJobs(new LinkedList<String>(multiJob.getFailedJobs().keySet()));
 
@@ -1135,7 +1220,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void addJobToMultiPartJob(String multipartJobId, String jobname)
 			throws NoSuchJobException {
 
-		MultiPartJob multiJob = getMultiPartJob(multipartJobId);
+		MultiPartJob multiJob = getMultiPartJobFromDatabase(multipartJobId);
 		multiJob.addJob(jobname);
 
 		multiPartJobDao.saveOrUpdate(multiJob);
@@ -1152,7 +1237,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void removeJobFromMultiPartJob(String multipartJobId, String jobname)
 			throws NoSuchJobException {
 
-		MultiPartJob multiJob = getMultiPartJob(multipartJobId);
+		MultiPartJob multiJob = getMultiPartJobFromDatabase(multipartJobId);
 		multiJob.removeJob(jobname);
 
 		multiPartJobDao.saveOrUpdate(multiJob);
@@ -1172,7 +1257,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throws MultiPartJobException {
 
 		try {
-			MultiPartJob multiJob = getMultiPartJob(multiPartJobId);
+			MultiPartJob multiJob = getMultiPartJobFromDatabase(multiPartJobId);
 		} catch (NoSuchJobException e) {
 			// that's good
 			MultiPartJob multiJobCreate = new MultiPartJob(getDN(),
@@ -1202,7 +1287,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void deleteMultiPartJob(String multiPartJobId,
 			boolean deleteChildJobsAsWell) throws NoSuchJobException {
 
-		MultiPartJob multiJob = getMultiPartJob(multiPartJobId);
+		MultiPartJob multiJob = getMultiPartJobFromDatabase(multiPartJobId);
 		
 		for ( String mpRoot : multiJob.getAllUsedMountPoints() ) {
 			
@@ -1488,7 +1573,18 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		folder.setRootUrl(url);
 		folder.setName(fo.getName().getBaseName());
 
-		for (FileObject child : fo.getChildren()) {
+		//TODO the getChildren command seems to throw exceptions without reason every now and the
+		// probably a bug in commons-vfs-grid. Until this is resolved, I always try 2 times...
+		FileObject[] children = null;
+		try {
+			children = fo.getChildren();
+		} catch (Exception e) {
+			e.printStackTrace();
+			myLogger.error("Couldn't get children of :"+fo.getName().toString()+". Trying one more time...");
+			children = fo.getChildren();
+		}
+		
+		for (FileObject child : children) {
 			if (FileType.FOLDER.equals(child.getType())) {
 				DtoFolder childfolder = new DtoFolder();
 				childfolder.setName(child.getName().getBaseName());
@@ -1509,16 +1605,58 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		return folder;
 	}
+	
+	public DtoFolder fillFolder(DtoFolder folder, int recursionLevel) throws FileSystemException, RemoteFileSystemException {
+		
+		DtoFolder tempFolder = null;;
+		try {
+			tempFolder = getFolderListing(folder.getRootUrl());
+		} catch (Exception e) {
+			myLogger.error(e);
+			myLogger.error("Error getting folder listing. I suspect this to be a bug in the commons-vfs-grid library. Sleeping for 1 seconds and then trying again...");
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			tempFolder = getFolderListing(folder.getRootUrl());
+		}
+		folder.setChildrenFiles(tempFolder.getChildrenFiles());
+		
+		if ( recursionLevel <= 0 ) {
+			folder.setChildrenFolders(tempFolder.getChildrenFolders());
+		} else {
+			for ( DtoFolder childFolder : tempFolder.getChildrenFolders() ) {
+				folder.addChildFolder(fillFolder(childFolder, recursionLevel-1));
+			}
+			
+		}
+		return folder;
+	}
 
-	public DtoFolder ls(final String directory, final int recursion_level)
+	public DtoFolder ls(final String directory, int recursion_level)
 			throws RemoteFileSystemException {
 
 		// check whether credential still valid
 		getCredential();
 
 		try {
-			return getFolderListing(directory);
+
+			DtoFolder rootfolder = getFolderListing(directory);
+			recursion_level = recursion_level -1;
+			if ( recursion_level == 0 ) {
+				return rootfolder;
+			} else if ( recursion_level < 0 ){
+				recursion_level = Integer.MAX_VALUE;
+			}
+			fillFolder(rootfolder, recursion_level);
+			
+			return rootfolder;
+			
+			
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new RemoteFileSystemException("Could not list directory "
 					+ directory + ": " + e.getLocalizedMessage());
 		}
@@ -1651,7 +1789,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	
 	public void copyMultiPartJobInputFile(String multiPartJobId, String inputFile,	String filename) throws RemoteFileSystemException, NoSuchJobException {
 		
-		MultiPartJob multiJob = getMultiPartJob(multiPartJobId);
+		MultiPartJob multiJob = getMultiPartJobFromDatabase(multiPartJobId);
 		
 		String relpathFromMountPointRoot = multiJob.getJobProperty(Constants.RELATIVE_MULTIJOB_DIRECTORY_KEY);
 		
@@ -1679,13 +1817,49 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throw new RuntimeException(
 					"Could not get input stream from datahandler...");
 		}
+		
+		FileObject tempFile = getUser().aquireFile("tmp://"+UUID.randomUUID().toString());
+		OutputStream fout;
+		try {
+			fout = tempFile.getContent().getOutputStream();
+		} catch (FileSystemException e1) {
+			throw new RemoteFileSystemException("Could not create temp file.");
+		}
+		myLogger.debug("Receiving data for file: " + targetFilename);
 
-		MultiPartJob multiJob = getMultiPartJob(multipartjobid);
+		try {
+
+			byte[] buffer = new byte[1024]; // byte buffer
+			int bytesRead = 0;
+			while (true) {
+				bytesRead = buf.read(buffer, 0, 1024);
+				// bytesRead returns the actual number of bytes read from
+				// the stream. returns -1 when end of stream is detected
+				if (bytesRead == -1) {
+					break;
+				}
+				fout.write(buffer, 0, bytesRead);
+			}
+
+			if (buf != null) {
+				buf.close();
+			}
+			if (fout != null) {
+				fout.close();
+			}
+		} catch (IOException e) {
+			throw new RemoteFileSystemException("Could not write to file: "
+					+ targetFilename + ": " + e.getMessage());
+		}
+		fout = null;
+		
+//		getUser()
+
+		MultiPartJob multiJob = getMultiPartJobFromDatabase(multipartjobid);
 
 		for (String mountPointRoot : multiJob.getAllUsedMountPoints()) {
 			FileObject target = null;
 
-			OutputStream fout = null;
 			String relpathFromMountPointRoot = multiJob.getJobProperty(Constants.RELATIVE_MULTIJOB_DIRECTORY_KEY);
 //			String parent = filename.substring(0, filename
 //					.lastIndexOf(File.separator));
@@ -1703,48 +1877,60 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				myLogger
 						.debug("Calculated target for multipartjob input file: "
 								+ target.getName().toString());
+				
+				RemoteFileTransferObject fileTransfer = new RemoteFileTransferObject(
+						tempFile, target, true);
+				myLogger.info("Creating fileTransfer object for source: "
+						+ tempFile.getName() + " and target: "
+						+ target.toString());
+				// fileTransfers.put(targetFileString, fileTransfer);
 
-				FileContent content = target.getContent();
-				fout = content.getOutputStream();
+				fileTransfer.startTransfer();
+
 			} catch (FileSystemException e) {
 				// e.printStackTrace();
 				throw new RemoteFileSystemException("Could not open file: "
 						+ targetFilename + ":" + e.getMessage());
 			}
 
-			myLogger.debug("Receiving data for file: " + targetFilename);
-
-			try {
-
-				byte[] buffer = new byte[1024]; // byte buffer
-				int bytesRead = 0;
-				while (true) {
-					bytesRead = buf.read(buffer, 0, 1024);
-					// bytesRead returns the actual number of bytes read from
-					// the stream. returns -1 when end of stream is detected
-					if (bytesRead == -1) {
-						break;
-					}
-					fout.write(buffer, 0, bytesRead);
-				}
-
-				if (buf != null) {
-					buf.close();
-				}
-				if (fout != null) {
-					fout.close();
-				}
-			} catch (IOException e) {
-				throw new RemoteFileSystemException("Could not write to file: "
-						+ targetFilename + ": " + e.getMessage());
-			}
-			fout = null;
+//			myLogger.debug("Receiving data for file: " + targetFilename);
+//
+//			try {
+//
+//				byte[] buffer = new byte[1024]; // byte buffer
+//				int bytesRead = 0;
+//				while (true) {
+//					bytesRead = buf.read(buffer, 0, 1024);
+//					// bytesRead returns the actual number of bytes read from
+//					// the stream. returns -1 when end of stream is detected
+//					if (bytesRead == -1) {
+//						break;
+//					}
+//					fout.write(buffer, 0, bytesRead);
+//				}
+//
+//				if (buf != null) {
+//					buf.close();
+//				}
+//				if (fout != null) {
+//					fout.close();
+//				}
+//			} catch (IOException e) {
+//				throw new RemoteFileSystemException("Could not write to file: "
+//						+ targetFilename + ": " + e.getMessage());
+//			}
+//			fout = null;
 		}
 
 		myLogger.debug("Data transmission for multiPartJob " + multipartjobid
 				+ " finished.");
 
 		buf = null;
+		try {
+			tempFile.delete();
+		} catch (FileSystemException e) {
+			myLogger.error("Could not delete temp file...", e);
+		}
 
 	}
 

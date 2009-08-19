@@ -64,6 +64,10 @@ public class DtoMultiPartJob {
 		this.properties = properties;
 	}
 	
+	public DtoJob retrieveJob(String jobname) {
+		return getJobs().retrieveJob(jobname);
+	}
+	
 	public Map<String, String> propertiesAsMap() {
 		
 		Map<String, String> map = new HashMap<String, String>();

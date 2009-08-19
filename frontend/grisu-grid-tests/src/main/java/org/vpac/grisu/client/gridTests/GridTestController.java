@@ -17,10 +17,10 @@ import jline.ConsoleReader;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.backend.hibernate.HibernateSessionFactory;
+import org.vpac.grisu.client.control.clientexceptions.MdsInformationException;
 import org.vpac.grisu.client.gridTests.testElements.GridTestElement;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.frontend.control.login.LoginHelpers;
 import org.vpac.grisu.frontend.control.login.LoginParams;

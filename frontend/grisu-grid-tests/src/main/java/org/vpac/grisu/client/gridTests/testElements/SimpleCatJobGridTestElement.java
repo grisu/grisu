@@ -2,8 +2,8 @@ package org.vpac.grisu.client.gridTests.testElements;
 
 import java.io.File;
 
+import org.vpac.grisu.client.control.clientexceptions.MdsInformationException;
 import org.vpac.grisu.client.gridTests.GridTestInfo;
-import org.vpac.grisu.control.exceptions.MdsInformationException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.model.FileManager;

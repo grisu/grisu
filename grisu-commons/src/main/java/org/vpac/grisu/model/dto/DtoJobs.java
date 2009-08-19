@@ -8,6 +8,8 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import au.org.arcs.jcommons.constants.Constants;
+
 /**
  * A wrapper object that holds a list of {@link DtoJob} objects.
  * 
@@ -33,6 +35,15 @@ public class DtoJobs {
 	
 	public void addJob(DtoJob job) {
 		this.allJobs.add(job);
+	}
+	
+	public DtoJob retrieveJob(String jobname) {
+		for ( DtoJob job : allJobs ) {
+			if ( jobname.equals(job.propertiesAsMap().get(Constants.JOBNAME_KEY)) ) {
+				return job;
+			}
+		}
+		return null;
 	}
 	
 
