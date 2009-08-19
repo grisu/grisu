@@ -15,12 +15,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.activation.DataHandler;
+import javax.security.auth.login.FailedLoginException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.clientexceptions.FileTransferException;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.MultiPartJobException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
@@ -53,59 +54,167 @@ public class MultiPartJobObject {
 	
 	private DtoMultiPartJob dtoMultiPartJob = null;
 	
+	/**
+	 * Use this constructor if you want to create a multipartjob.
+	 * 
+	 * @param serviceInterface the serviceinterface
+	 * @param multiPartJobId the id of the multipartjob
+	 * @param submissionFqan the VO to use to submit the jobs of this multipartjob
+	 * @throws MultiPartJobException if the multipartjob can't be created
+	 */
 	public MultiPartJobObject(ServiceInterface serviceInterface, String multiPartJobId, String submissionFqan) throws MultiPartJobException {
 		this.serviceInterface = serviceInterface;
 		this.multiPartJobId = multiPartJobId;
 		this.submissionFqan = submissionFqan;
 		
-		dtoMultiPartJob = serviceInterface.createMultiPartJob(multiPartJobId);
+		dtoMultiPartJob = serviceInterface.createMultiPartJob(this.multiPartJobId);
 	}
 	
-	public MultiPartJobObject(ServiceInterface serviceInterface, String multiPartJobId) throws NoSuchJobException {
+	/**
+	 * Use this constructor to create a MultiPartJobObject for a multipartjob that already exists on the backend.
+	 * 
+	 * @param serviceInterface the serviceinterface
+	 * @param multiPartJobId the id of the multipartjob
+	 * @throws MultiPartJobException if one of the jobs of the multipartjob doesn't exist on the backend
+	 * @throws NoSuchJobException if there is no such multipartjob on the backend
+	 */
+	public MultiPartJobObject(ServiceInterface serviceInterface, String multiPartJobId) throws MultiPartJobException, NoSuchJobException {
 		this.serviceInterface = serviceInterface;
 		this.multiPartJobId = multiPartJobId;
 		
-		dtoMultiPartJob = serviceInterface.getMultiPartJob(multiPartJobId, true);
-		
-		for ( DtoJob dtoJob : dtoMultiPartJob.getJobs().getAllJobs() ) {
-			JobObject job = new JobObject(serviceInterface, dtoJob.propertiesAsMap().get(Constants.JOBNAME_KEY));
-			jobs.add(job);
+		try {
+			for ( DtoJob dtoJob : getMultiPartJob(true).getJobs().getAllJobs() ) {
+				JobObject job = new JobObject(serviceInterface, dtoJob.propertiesAsMap().get(Constants.JOBNAME_KEY));
+				jobs.add(job);
+			}
+		} catch (NoSuchJobException e) {
+			throw new MultiPartJobException("Multipart job is not complete. Missing at least one job."+e.getLocalizedMessage());
+		}
+
+	}
+	
+	public boolean isFinished() {
+		try {
+			return getMultiPartJob(true).allJobsFinished();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 	
-	public void monitorProgress() throws NoSuchJobException {
-		boolean allJobsFinished = false;
+	public boolean isSuccessful() {
+		try {
+			return getMultiPartJob(true).allJobsFinishedSuccessful();
+		} catch (NoSuchJobException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	private DtoMultiPartJob getMultiPartJob(boolean refresh) throws NoSuchJobException {
+		
+		if ( dtoMultiPartJob == null || refresh ) {
+			dtoMultiPartJob = serviceInterface.getMultiPartJob(multiPartJobId, true);
+		}
+		return dtoMultiPartJob;
+	}
+	
+	public void restartFailedJobs(FailedJobRestarter restarter) {
+		
+		if ( restarter == null ) {
+			restarter = new FailedJobRestarter() {
+				
+				public void restartJob(JobObject job) throws JobSubmissionException {
+					try {
+						job.restartJob();
+					} catch (JobPropertiesException e) {
+						throw new JobSubmissionException("Can't resubmit job: "+e.getLocalizedMessage());
+					}
+				}
+			};
+		}
+		
+		try {
+		for ( String jobname : getMultiPartJob(true).failedJobs ) {
+			
+			try {
+				JobObject failedJob = new JobObject(serviceInterface, jobname);
+			
+				restarter.restartJob(failedJob);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		} catch (NoSuchJobException e) {
+			throw new RuntimeException(e);
+		}
+		
+	}
+	
+
+	
+	/**
+	 * Monitors the status of all jobs of this multipartjob.
+	 * 
+	 * If you want to restart failed jobs while this is running, provide a {@link FailedJobRestarter}.
+	 * @param sleeptimeinseconds how long between monitor runs
+	 * @param enddate a date that indicates when the monitoring should stop. Use null if you want to monitor until all jobs are finished
+	 * @param forceSuccess forces monitoring until all jobs are finished successful or enddate is reached. Only a valid option if a restarter is provided.
+	 * @param restarter the restarter (or null if you don't want to restart failed jobs while monitoring)
+	 * 
+	 */
+	public void monitorProgress(int sleeptimeinseconds, Date enddate, boolean forceSuccess, FailedJobRestarter restarter) {
+		boolean finished = false;
 		do {
 			Date start = new Date();
-			dtoMultiPartJob = serviceInterface.getMultiPartJob(multiPartJobId, true);
+			
+			DtoMultiPartJob temp;
+			try {
+				temp = getMultiPartJob(true);
+			} catch (NoSuchJobException e) {
+				throw new RuntimeException(e);
+			}
 			Date end = new Date();
 			
 			System.out.println("Time to get all job status: "+(end.getTime()-start.getTime())/1000+" seconds.");
-			allJobsFinished = dtoMultiPartJob.allJobsFinished();
+			if ( forceSuccess && restarter != null ) {
+				finished = temp.allJobsFinishedSuccessful();
+			} else { 
+				finished = temp.allJobsFinished();
+			}
+
 			
-			System.out.println("Total number of jobs: "+dtoMultiPartJob.totalNumberOfJobs());
-			System.out.println("Waiting jobs: "+dtoMultiPartJob.numberOfWaitingJobs());
-			System.out.println("Active jobs: "+dtoMultiPartJob.numberOfRunningJobs());
-			System.out.println("Successful jobs: "+dtoMultiPartJob.numberOfSuccessfulJobs());
-			System.out.println("Failed jobs: "+dtoMultiPartJob.numberOfFailedJobs()+" ");
-			if ( dtoMultiPartJob.numberOfFailedJobs() > 0 ) {
-				for ( String jobname : dtoMultiPartJob.getFailedJobs() ) {
-					System.out.println("\tJobname: "+jobname+", Error: "+dtoMultiPartJob.retrieveJob(jobname).propertiesAsMap().get(Constants.ERROR_REASON));	
+			System.out.println("Total number of jobs: "+temp.totalNumberOfJobs());
+			System.out.println("Waiting jobs: "+temp.numberOfWaitingJobs());
+			System.out.println("Active jobs: "+temp.numberOfRunningJobs());
+			System.out.println("Successful jobs: "+temp.numberOfSuccessfulJobs());
+			System.out.println("Failed jobs: "+temp.numberOfFailedJobs()+" ");
+			if ( temp.numberOfFailedJobs() > 0 ) {
+				for ( String jobname : temp.getFailedJobs() ) {
+					System.out.println("\tJobname: "+jobname+", Error: "+temp.retrieveJob(jobname).propertiesAsMap().get(Constants.ERROR_REASON));	
+				}
+				
+				if ( restarter != null ) {
+					restartFailedJobs(restarter);
 				}
 				
 			} else {
 				System.out.println();
 			}
-			System.out.println("Unsubmitted jobs: "+dtoMultiPartJob.numberOfUnsubmittedJobs());
+			System.out.println("Unsubmitted jobs: "+temp.numberOfUnsubmittedJobs());
 
 			System.out.println();
+			
+			if ( finished || (enddate != null && new Date().after(enddate)) ) {
+				break;
+			}
 			try {
-				Thread.sleep(15000);
+				System.out.println("Sleeping for "+sleeptimeinseconds+" seconds...");
+				Thread.sleep(sleeptimeinseconds*1000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		} while ( ! allJobsFinished );
+		} while ( ! finished );
 	}
 	
 	public String getFqan() {
@@ -113,11 +222,19 @@ public class MultiPartJobObject {
 	}
 	
 	public Map<String, String> getProperties() {
-		return dtoMultiPartJob.propertiesAsMap();
+		try {
+			return getMultiPartJob(false).propertiesAsMap();
+		} catch (NoSuchJobException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	public String pathToInputFiles() {
-		return dtoMultiPartJob.pathToInputFiles();
+		try {
+			return getMultiPartJob(false).pathToInputFiles();
+		} catch (NoSuchJobException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	public void addJob(JobObject job) {
@@ -163,16 +280,16 @@ public class MultiPartJobObject {
 		}
 	}
 	
-	public void submit() throws JobSubmissionException, NoSuchJobException {
+	public void submit(boolean wait) throws JobSubmissionException, NoSuchJobException {
 		
-		serviceInterface.submitMultiPartJob(multiPartJobId);
+		serviceInterface.submitMultiPartJob(multiPartJobId, wait);
 		
 	}
 	
 	
 	public void prepareAndCreateJobs() throws JobsException, BackendException {
 		
-		// check whether any of the jobnames already exist
+		//TODO check whether any of the jobnames already exist
 		
 		
 		myLogger.debug("Creating "+getJobs().size()+" jobs as part of multipartjob: "+multiPartJobId);

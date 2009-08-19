@@ -17,6 +17,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.vfs.FileObject;
@@ -27,12 +28,15 @@ import org.apache.commons.vfs.impl.DefaultFileSystemManager;
 import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileSystemConfigBuilder;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.CollectionOfElements;
+import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.backend.utils.CertHelpers;
+import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.security.light.voms.VO;
 import org.vpac.security.light.voms.VOManagement.VOManagement;
+import org.vpac.security.light.vomsProxy.VomsException;
 
 import uk.ac.dl.escience.vfs.util.VFSUtil;
 
@@ -49,6 +53,7 @@ import uk.ac.dl.escience.vfs.util.VFSUtil;
  * 
  */
 @Entity
+@Table(name="users")
 public class User {
 
 	private static Logger myLogger = Logger.getLogger(User.class.getName());
@@ -573,7 +578,7 @@ public class User {
 
 		if (file.startsWith("tmp:") || file.startsWith("ram:")) {
 			try {
-				return fsmanager.resolveFile(file);
+				return getFsManager().resolveFile(file);
 			} catch (FileSystemException e) {
 				throw new RemoteFileSystemException("Could not access file on local temp filesystem: "+e.getLocalizedMessage());
 			}

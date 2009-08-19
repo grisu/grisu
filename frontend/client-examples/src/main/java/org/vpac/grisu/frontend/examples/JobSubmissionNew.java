@@ -53,12 +53,13 @@ public class JobSubmissionNew implements JobStatusChangeListener {
 
 					
 					JobObject jo = new JobObject(si);
-					jo.setJobname("java_" + jobnumber + "_" + UUID.randomUUID());
-//					jo.setApplication("java");
-					jo.setModules(new String[]{"java"});
-					jo.setCommandline("java -version");
+					jo.setJobname("sleep_" + jobnumber + "_" + UUID.randomUUID());
+					jo.setApplication("generic");
+//					jo.setModules(new String[]{"java"});
+					jo.setCommandline("sleep 120");
 					jo.setSubmissionLocation(subLoc);
-//					jo.addInputFileUrl("/home/markus/test.txt");
+					jo.setWalltimeInSeconds(60);
+//					jo.addInputFileUrl("/home/markus/src/grisu/backend/grisu-core/sample input files/JavaTestJob.jar");
 //					jo.addInputFileUrl("gsiftp://ng2.vpac.org/home/grid-admin/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner/grisu-local-job-dir/java_job_new/test.jsdl");
 //					jo.addJobStatusChangeListener(jsl);
 

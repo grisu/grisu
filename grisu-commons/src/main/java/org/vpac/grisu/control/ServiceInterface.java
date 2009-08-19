@@ -714,10 +714,11 @@ public interface ServiceInterface {
 	 * Submits all jobs that belong to this multipartjob.
 	 * 
 	 * @param multipartjobid the id of the multipartjob
+	 * @param waitForSubmissionsToFinish whether to wait for all submissions to finish before returning from method
 	 * @throws JobSubmissionException if one of the jobsubmission failed. 
 	 * @throws NoSuchJobException if no multipartjob with this id exists
 	 */
-	void submitMultiPartJob(String multipartjobid) throws JobSubmissionException, NoSuchJobException;
+	void submitMultiPartJob(String multipartjobid, boolean waitForSubmissionsToFinish) throws JobSubmissionException, NoSuchJobException;
 	
 	/**
 	 * Returns a list of all jobnames that are currently stored on this backend.

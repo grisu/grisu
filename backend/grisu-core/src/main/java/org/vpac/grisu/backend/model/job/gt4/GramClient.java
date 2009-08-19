@@ -9,8 +9,7 @@ import java.util.Date;
 import org.apache.axis.components.uuid.UUIDGen;
 import org.apache.axis.components.uuid.UUIDGenFactory;
 import org.apache.axis.message.addressing.EndpointReferenceType;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.globus.exec.client.GramJob;
 import org.globus.exec.client.GramJobListener;
 import org.globus.exec.generated.FaultType;
@@ -25,6 +24,7 @@ import org.globus.wsrf.impl.security.authorization.HostAuthorization;
 import org.ietf.jgss.GSSCredential;
 import org.oasis.wsrf.faults.BaseFaultType;
 import org.oasis.wsrf.faults.BaseFaultTypeDescription;
+import org.vpac.grisu.control.serviceInterfaces.AbstractServiceInterface;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.security.light.plainProxy.LocalProxy;
 
@@ -41,7 +41,9 @@ import org.vpac.security.light.plainProxy.LocalProxy;
 public class GramClient
 // Listen for job status messages
 		implements GramJobListener {
-	private static Log logger = LogFactory.getLog(GramClient.class.getName());
+
+	static final Logger logger = Logger
+	.getLogger(AbstractServiceInterface.class.getName());
 
 	// Amount of time to wait for job status changes
 	private static final long STATE_CHANGE_BASE_TIMEOUT_MILLIS = 60000;
@@ -361,11 +363,9 @@ public class GramClient
 
 				// B) Timeout when waiting for a notification (bad)
 				if (durationWaited >= durationToWait) {
-					if (logger.isWarnEnabled()) {
 						logger.warn("Did not receive any new notification of "
 								+ "job state change after a delay of "
 								+ durationToWait + " ms.\nPulling job state.");
-					}
 					// pull state from remote job and print the
 					// state only if it is a new state
 					// refreshJobStatus();
@@ -439,7 +439,7 @@ public class GramClient
 	 */
 	private void printMessage(final String message) {
 		if (!this.quiet) {
-			System.out.println(message);
+			logger.info(message);
 		}
 	}
 

@@ -1379,14 +1379,14 @@ public class ProxyServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public void submitMultiPartJob(String multipartjobid)
+	public void submitMultiPartJob(String multipartjobid, boolean wait)
 			throws JobSubmissionException, NoSuchJobException {
 
 		Method m;
 		try {
 			m = si.getClass().getMethod("uploadMultiPartJobInputFile",
-					multipartjobid.getClass());
-			m.invoke(si, multipartjobid);
+					multipartjobid.getClass(), boolean.class);
+			m.invoke(si, multipartjobid, wait);
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {

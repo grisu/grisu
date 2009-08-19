@@ -4,13 +4,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
 import org.apache.log4j.Logger;
@@ -44,7 +45,7 @@ public class MultiPartJob {
 	// the user's dn
 	private String dn = null;
 	
-	private Map<String, Integer> jobnames = new TreeMap<String, Integer>();
+	private Map<String, String> jobnames = new HashMap<String, String>();
 	
 	private Map<String, String> failedJobs = new HashMap<String, String>();
 	
@@ -104,7 +105,7 @@ public class MultiPartJob {
 	
 	public void addJob(String jobname) throws NoSuchJobException {
 		Job job = getJob(jobname);
-		this.jobnames.put(jobname, job.getStatus());
+		this.jobnames.put(jobname, JobConstants.translateStatus(job.getStatus()));
 		if ( job.getStatus() >= JobConstants.FINISHED_EITHER_WAY && job.getStatus() != JobConstants.DONE ) {
 			addFailedJob(jobname, "Job finished with status: "+JobConstants.translateStatus(job.getStatus()));
 		}
@@ -119,11 +120,11 @@ public class MultiPartJob {
 	
 
 	@CollectionOfElements(fetch = FetchType.EAGER)
-	public Map<String, Integer> getJobnames() {
+	public Map<String, String> getJobnames() {
 		return jobnames;
 	}
 	
-	protected void setJobnames(Map<String, Integer> jobnames) {
+	protected void setJobnames(Map<String, String> jobnames) {
 		this.jobnames = jobnames;
 	}
 	
@@ -140,6 +141,10 @@ public class MultiPartJob {
 		if ( ! this.failedJobs.keySet().contains(job) ) {
 			this.failedJobs.put(job, message);
 		}
+	}
+	
+	public synchronized void removeFailedJob(String jobname) {
+		this.failedJobs.remove(jobname);
 	}
 	
 	@CollectionOfElements(fetch = FetchType.EAGER)

@@ -15,7 +15,7 @@ public final class Environment {
 
 	private Environment() {
 	}
-
+	
 	private static final String GRISU_DEFAULT_DIRECTORY = System
 			.getProperty("user.home")
 			+ File.separator + ".grisu";

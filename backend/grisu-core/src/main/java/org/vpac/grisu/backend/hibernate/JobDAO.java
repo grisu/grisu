@@ -168,7 +168,7 @@ public class JobDAO extends BaseHibernateDAO {
 
 	}
 
-	public final void delete(final Job persistentInstance) {
+	public final synchronized void delete(final Job persistentInstance) {
 		myLogger.debug("deleting Job instance");
 
 		try {
@@ -189,7 +189,7 @@ public class JobDAO extends BaseHibernateDAO {
 		}
 	}
 
-	public final void saveOrUpdate(final Job instance) {
+	public final synchronized void saveOrUpdate(final Job instance) {
 
 		try {
 			getCurrentSession().beginTransaction();
@@ -206,6 +206,7 @@ public class JobDAO extends BaseHibernateDAO {
 			throw e; // or display error message
 		} finally {
 			getCurrentSession().close();
+//			System.out.println("CLOSED. VALUE: "+instance.getStatus());
 		}
 	}
 

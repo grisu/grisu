@@ -7,6 +7,7 @@ import java.util.SortedSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.vpac.grisu.backend.hibernate.HibernateSessionFactory;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginParams;
@@ -54,7 +55,7 @@ public class BlenderTest implements JobStatusChangeListener {
 		
 		final String subLoc = SubmissionLocationHelpers.createSubmissionLocationString(resources.first());
 		
-		final String multiJobName = "MULTI2";
+		final String multiJobName = "BlenderTest";
 		try {
 			si.deleteMultiPartJob(multiJobName, true);
 		} catch (Exception e) {
@@ -64,18 +65,18 @@ public class BlenderTest implements JobStatusChangeListener {
 		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/NGAdmin");
 				
 		
-		for (int i=58; i<60; i++) {
+		for (int i=0; i<101; i++) {
 
 			final int frameNumber = i;
 				
 				JobObject jo = new JobObject(si);
 				jo.setJobname(multiJobName+"_" + frameNumber );
 				jo.setApplication("blender");
-				jo.setCommandline("blender -b "+multiPartJob.pathToInputFiles()+"/CubesTest.blend -F PNG -o logo_ -f "+frameNumber);
+				jo.setCommandline("blender -b "+multiPartJob.pathToInputFiles()+"/CubesTest.blend -F PNG -o cubes_ -f "+frameNumber);
 				jo.setSubmissionLocation(subLoc);
 				jo.setModules(new String[]{"blender/2.49"});
-				jo.setWalltimeInSeconds(2400);
-				jo.setCpus(2);
+				jo.setWalltimeInSeconds(3000);
+				jo.setCpus(1);
 				multiPartJob.addJob(jo);
 						
 		}
@@ -91,10 +92,15 @@ public class BlenderTest implements JobStatusChangeListener {
 			System.exit(1);
 		}
 		
-		multiPartJob.submit();
+		multiPartJob.submit(true);
 		
-		
+
 		System.out.println("Submission finished...");
+		
+		if ( HibernateSessionFactory.HSQLDB_DBTYPE.equals(HibernateSessionFactory.usedDatabase) ) {
+			// for hqsqldb
+			Thread.sleep(10000);
+		}
 		
 //		MultiPartJobObject newObject = new MultiPartJobObject(si, multiJobName);
 //		
