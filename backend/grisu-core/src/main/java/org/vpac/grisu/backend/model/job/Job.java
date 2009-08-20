@@ -1,6 +1,8 @@
 package org.vpac.grisu.backend.model.job;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +19,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.CollectionOfElements;
 import org.vpac.grisu.backend.model.ProxyCredential;
@@ -185,7 +188,7 @@ public class Job {
 		this.fqan = fqan;
 	}
 	
-	private Map<Date, String> logMessages = new TreeMap<Date, String>();
+	private Map<Date, String> logMessages = Collections.synchronizedMap(new TreeMap<Date, String>());
 
 	@CollectionOfElements(fetch = FetchType.EAGER)
 	public Map<Date, String> getLogMessages() {
@@ -196,7 +199,16 @@ public class Job {
 		this.logMessages = logMessages;
 	}
 
-	public void addLogMessage(String message) {
+	public synchronized void addLogMessage(String message) {
+		Date now = new Date();
+		while ( this.logMessages.get(now) != null ) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				myLogger.error(e);
+				return;
+			}
+		}
 		this.logMessages.put(new Date(), message);
 	}
 

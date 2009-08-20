@@ -1,5 +1,6 @@
 package org.vpac.grisu.backend.model.job;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,7 +64,7 @@ public class MultiPartJob {
 
 	private String multiPartJobId;
 
-	private Map<Date, String> logMessages = new TreeMap<Date, String>();
+	private Map<Date, String> logMessages = Collections.synchronizedMap(new TreeMap<Date, String>());
 
 	@CollectionOfElements(fetch = FetchType.EAGER)
 	public Map<Date, String> getLogMessages() {
@@ -74,7 +75,16 @@ public class MultiPartJob {
 		this.logMessages = logMessages;
 	}
 
-	public void addLogMessage(String message) {
+	public synchronized void addLogMessage(String message) {
+		Date now = new Date();
+		while ( this.logMessages.get(now) != null ) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				myLogger.error(e);
+				return;
+			}
+		}
 		this.logMessages.put(new Date(), message);
 	}
 
