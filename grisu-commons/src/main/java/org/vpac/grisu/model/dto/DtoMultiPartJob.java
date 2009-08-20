@@ -66,7 +66,7 @@ public class DtoMultiPartJob {
 //	 */
 //	private int status;
 	
-	public DtoJobs failedJobs = new DtoJobs();
+	private DtoJobs failedJobs = new DtoJobs();
 	
 	@XmlElement(name="failedJob")
 	public DtoJobs getFailedJobs() {
