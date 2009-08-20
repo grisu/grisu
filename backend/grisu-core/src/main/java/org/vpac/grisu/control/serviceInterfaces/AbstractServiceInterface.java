@@ -881,7 +881,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	private void addLogMessageToPossibleMultiPartJobParent(Job job,
+	private synchronized void addLogMessageToPossibleMultiPartJobParent(Job job,
 			String message) {
 
 		String mpjName = job.getJobProperty(Constants.MULTIJOB_NAME);
@@ -1001,7 +1001,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		if (StringUtils.isNotBlank(possibleMultiPartJob)) {
 			MultiPartJob mpj = getMultiPartJobFromDatabase(possibleMultiPartJob);
-			mpj.addLogMessage("Re-submitting job " + jobname);
+			addLogMessageToPossibleMultiPartJobParent(job, "Re-submitting job " + jobname);
 			mpj.removeFailedJob(job.getJobname());
 			multiPartJobDao.saveOrUpdate(mpj);
 		}
@@ -1196,8 +1196,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					try {
 						MultiPartJob mpj = getMultiPartJobFromDatabase(multiPartJobParent);
 						mpj.addFailedJob(job.getJobname());
-						mpj
-								.addLogMessage("Job: "
+						addLogMessageToPossibleMultiPartJobParent(job, "Job: "
 										+ job.getJobname()
 										+ " failed. Status: "
 										+ JobConstants.translateStatus(job

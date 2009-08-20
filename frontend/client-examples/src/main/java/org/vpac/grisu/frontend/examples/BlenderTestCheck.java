@@ -22,14 +22,14 @@ public class BlenderTestCheck  {
 		LoginParams loginParams = new LoginParams(
 //				"http://localhost:8080/xfire-backend/services/grisu",
 //				"https://ngportal.vpac.org/grisu-ws/soap/EnunciateServiceInterfaceService",
-				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-				 "Local",
+				 "https://ngportal.vpac.org/grisu-ws/services/grisu",
+//				 "Local",
 				username, password);
 
 		final ServiceInterface si = ServiceInterfaceFactory
 				.createInterface(loginParams);
 
-		final String multiJobName = "BlenderTest";
+		final String multiJobName = "BlenderTest2";
 		
 		MultiPartJobObject newObject = new MultiPartJobObject(si, multiJobName);
 		

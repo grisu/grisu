@@ -55,7 +55,7 @@ public class BlenderTest implements JobStatusChangeListener {
 		
 		final String subLoc = SubmissionLocationHelpers.createSubmissionLocationString(resources.first());
 		
-		final String multiJobName = "BlenderTest";
+		final String multiJobName = "BlenderTest2";
 		try {
 			si.deleteMultiPartJob(multiJobName, true);
 		} catch (Exception e) {
