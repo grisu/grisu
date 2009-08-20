@@ -205,7 +205,7 @@ public class Job {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
-				myLogger.error(e);
+				myLogger.error(message);
 				return;
 			}
 		}
