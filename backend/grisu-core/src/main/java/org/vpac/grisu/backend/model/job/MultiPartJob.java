@@ -77,14 +77,14 @@ public class MultiPartJob {
 
 	public synchronized void addLogMessage(String message) {
 		Date now = new Date();
-		while ( this.logMessages.get(now) != null ) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				myLogger.error(e);
-				return;
-			}
-		}
+//		while ( this.logMessages.get(now) != null ) {
+//			try {
+//				Thread.sleep(100);
+//			} catch (InterruptedException e) {
+//				myLogger.error(e);
+//				return;
+//			}
+//		}
 		this.logMessages.put(new Date(), message);
 	}
 

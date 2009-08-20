@@ -190,7 +190,8 @@ public class Job {
 	
 	private Map<Date, String> logMessages = Collections.synchronizedMap(new TreeMap<Date, String>());
 
-	@CollectionOfElements(fetch = FetchType.EAGER)
+//	@CollectionOfElements(fetch = FetchType.EAGER)
+	@Transient
 	public Map<Date, String> getLogMessages() {
 		return logMessages;
 	}
@@ -201,14 +202,7 @@ public class Job {
 
 	public synchronized void addLogMessage(String message) {
 		Date now = new Date();
-		while ( this.logMessages.get(now) != null ) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				myLogger.error(message);
-				return;
-			}
-		}
+
 		this.logMessages.put(new Date(), message);
 	}
 
