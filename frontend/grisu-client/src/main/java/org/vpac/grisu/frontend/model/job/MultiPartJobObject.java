@@ -134,10 +134,10 @@ public class MultiPartJobObject {
 		}
 		
 		try {
-		for ( String jobname : getMultiPartJob(true).failedJobs ) {
+		for ( DtoJob dtoJob : getMultiPartJob(true).getFailedJobs().getAllJobs() ) {
 			
 			try {
-				JobObject failedJob = new JobObject(serviceInterface, jobname);
+				JobObject failedJob = new JobObject(serviceInterface, dtoJob.jobname());
 			
 				restarter.restartJob(failedJob);
 
@@ -176,7 +176,9 @@ public class MultiPartJobObject {
 			}
 			Date end = new Date();
 			
-			System.out.println("Time to get all job status: "+(end.getTime()-start.getTime())/1000+" seconds.");
+			StringBuffer output = new StringBuffer();
+			
+			output.append("Time to get all job status: "+(end.getTime()-start.getTime())/1000+" seconds."+"\n");
 			if ( forceSuccess && restarter != null ) {
 				finished = temp.allJobsFinishedSuccessful();
 			} else { 
@@ -184,14 +186,14 @@ public class MultiPartJobObject {
 			}
 
 			
-			System.out.println("Total number of jobs: "+temp.totalNumberOfJobs());
-			System.out.println("Waiting jobs: "+temp.numberOfWaitingJobs());
-			System.out.println("Active jobs: "+temp.numberOfRunningJobs());
-			System.out.println("Successful jobs: "+temp.numberOfSuccessfulJobs());
-			System.out.println("Failed jobs: "+temp.numberOfFailedJobs()+" ");
+			output.append("Total number of jobs: "+temp.totalNumberOfJobs()+"\n");
+			output.append("Waiting jobs: "+temp.numberOfWaitingJobs()+"\n");
+			output.append("Active jobs: "+temp.numberOfRunningJobs()+"\n");
+			output.append("Successful jobs: "+temp.numberOfSuccessfulJobs()+"\n");
+			output.append("Failed jobs: "+temp.numberOfFailedJobs()+"\n");
 			if ( temp.numberOfFailedJobs() > 0 ) {
-				for ( String jobname : temp.getFailedJobs() ) {
-					System.out.println("\tJobname: "+jobname+", Error: "+temp.retrieveJob(jobname).propertiesAsMap().get(Constants.ERROR_REASON));	
+				for ( DtoJob job : temp.getFailedJobs().getAllJobs() ) {
+					output.append("\tJobname: "+job.jobname()+", Error: "+job.propertiesAsMap().get(Constants.ERROR_REASON)+"\n");	
 				}
 				
 				if ( restarter != null ) {
@@ -199,15 +201,22 @@ public class MultiPartJobObject {
 				}
 				
 			} else {
-				System.out.println();
+				output.append("\n");
 			}
-			System.out.println("Unsubmitted jobs: "+temp.numberOfUnsubmittedJobs());
+			output.append("Unsubmitted jobs: "+temp.numberOfUnsubmittedJobs()+"\n");
 
-			System.out.println();
-			
 			if ( finished || (enddate != null && new Date().after(enddate)) ) {
 				break;
 			}
+			
+			for ( Date date : getLogMessages(false).keySet() ) {
+				System.out.println(date.toString()+": "+getLogMessages(false).get(date));
+			}
+			
+			System.out.println();
+			
+			System.out.println(output.toString());
+			
 			try {
 				System.out.println("Sleeping for "+sleeptimeinseconds+" seconds...");
 				Thread.sleep(sleeptimeinseconds*1000);
@@ -365,6 +374,16 @@ public class MultiPartJobObject {
 				}
 			}
 			
+		}
+		
+	}
+	
+	public Map<Date, String> getLogMessages(boolean refresh) {
+		
+		try {
+			return getMultiPartJob(refresh).messages();
+		} catch (NoSuchJobException e) {
+			throw new RuntimeException(e);
 		}
 		
 	}

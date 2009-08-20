@@ -1,8 +1,10 @@
 package org.vpac.grisu.backend.model.job;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -65,6 +67,20 @@ public class Job {
 	private ProxyCredential credential = null;
 
 	private String submissionType = null;
+	
+	private Date lastStatusCheck = null;
+
+	public Date getLastStatusCheck() {
+		
+		if ( lastStatusCheck == null ) {
+			lastStatusCheck = new Date();
+		}
+		return lastStatusCheck;
+	}
+
+	public void setLastStatusCheck(Date lastStatusCheck) {
+		this.lastStatusCheck = lastStatusCheck;
+	}
 
 	// ---------------------------------------------------------------
 	// not important infos but useful
@@ -167,6 +183,21 @@ public class Job {
 	 */
 	public void setFqan(final String fqan) {
 		this.fqan = fqan;
+	}
+	
+	private Map<Date, String> logMessages = new TreeMap<Date, String>();
+
+	@CollectionOfElements(fetch = FetchType.EAGER)
+	public Map<Date, String> getLogMessages() {
+		return logMessages;
+	}
+
+	private void setLogMessages(Map<Date, String> logMessages) {
+		this.logMessages = logMessages;
+	}
+
+	public void addLogMessage(String message) {
+		this.logMessages.put(new Date(), message);
 	}
 
 	/**
@@ -355,7 +386,7 @@ public class Job {
 	 * @throws TransformerFactoryConfigurationError
 	 * @throws TransformerException
 	 */
-	@Column(length = 2550)
+	@Column(length = 15000)
 	private String getJsdl() throws TransformerException {
 
 		return SeveralXMLHelpers.toString(jobDescription);

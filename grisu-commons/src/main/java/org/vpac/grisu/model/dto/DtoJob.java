@@ -12,6 +12,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.vpac.grisu.control.JobConstants;
 
+import au.org.arcs.jcommons.constants.Constants;
+
 /**
  * This one holds information about a job that was created (and maybe already submitted to the endpoint resource.
  * 
@@ -92,6 +94,10 @@ public class DtoJob {
 	
 	public String readJobProperty(String key) {
 		return propertiesAsMap().get(key);
+	}
+	
+	public String jobname() {
+		return propertiesAsMap().get(Constants.JOBNAME_KEY);
 	}
 	
 }

@@ -43,7 +43,13 @@ public class BlenderTestCheck  {
 		Date endDate = new Date();
 		
 		System.out.println("Started: "+startDate.toString());
-		System.out.println("Ended: "+endDate.toString());
+		System.out.println("Ended: "+endDate.toString()+"\n");
+		
+		for ( Date date : newObject.getLogMessages(false).keySet() ) {
+			System.out.println(date.toString()+": "+newObject.getLogMessages(false).get(date));
+		}
+		
+		
 		
 	}
 

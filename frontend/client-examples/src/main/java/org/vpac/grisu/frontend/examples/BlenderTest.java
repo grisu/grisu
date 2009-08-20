@@ -65,7 +65,7 @@ public class BlenderTest implements JobStatusChangeListener {
 		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/NGAdmin");
 				
 		
-		for (int i=0; i<101; i++) {
+		for (int i=30; i<40; i++) {
 
 			final int frameNumber = i;
 				
@@ -75,7 +75,7 @@ public class BlenderTest implements JobStatusChangeListener {
 				jo.setCommandline("blender -b "+multiPartJob.pathToInputFiles()+"/CubesTest.blend -F PNG -o cubes_ -f "+frameNumber);
 				jo.setSubmissionLocation(subLoc);
 				jo.setModules(new String[]{"blender/2.49"});
-				jo.setWalltimeInSeconds(3000);
+				jo.setWalltimeInSeconds(60);
 				jo.setCpus(1);
 				multiPartJob.addJob(jo);
 						

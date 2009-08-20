@@ -3,7 +3,6 @@ package org.vpac.grisu.control.serviceInterfaces;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Arrays;
@@ -32,7 +31,6 @@ import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileType;
 import org.apache.commons.vfs.FileTypeSelector;
 import org.apache.log4j.Logger;
-import org.globus.wsrf.impl.security.descriptor.ContainerOnlyParamsParser;
 import org.vpac.grisu.backend.hibernate.JobDAO;
 import org.vpac.grisu.backend.hibernate.MultiPartJobDAO;
 import org.vpac.grisu.backend.hibernate.UserDAO;
@@ -343,6 +341,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		job = new Job(getCredential().getDn(), jobname);
 
 		job.setStatus(JobConstants.JOB_CREATED);
+		job.addLogMessage("Job " + jobname + " created.");
 		jobdao.saveOrUpdate(job);
 
 		job.setJobDescription(jsdl);
@@ -376,6 +375,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		job.setStatus(JobConstants.READY_TO_SUBMIT);
+		job.addLogMessage("Job " + jobname + " ready to submit.");
 
 		jobdao.saveOrUpdate(job);
 		return jobname;
@@ -829,32 +829,24 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// final Collection<String> failedJobs = CollectionUtils
 		// .synchronizedCollection(new TreeSet<String>());
 
-		for (final String jobname : multiJob.getJobnames().keySet()) {
+		for (final Job job : multiJob.getJobs()) {
 
 			Thread thread = new Thread() {
 				public void run() {
 
-					Job job;
-					try {
-						job = getJob(jobname);
-					} catch (NoSuchJobException e1) {
-						e1.printStackTrace();
-						return;
-					}
 					try {
 						submitJob(job, true);
 
-//						System.out
-//								.println("SUBMISSION finished..."
-//										+ JobConstants.translateStatus(job
-//												.getStatus()));
+						// System.out
+						// .println("SUBMISSION finished..."
+						// + JobConstants.translateStatus(job
+						// .getStatus()));
 
 					} catch (Exception e) {
 						myLogger.error("Job submission for multipartjob: "
 								+ multiPartJobId + ", " + job.getJobname()
 								+ " failed: " + e.getLocalizedMessage());
-						multiJob.addFailedJob(job.getJobname(), e
-								.getLocalizedMessage());
+						multiJob.addFailedJob(job.getJobname());
 					}
 				}
 			};
@@ -889,14 +881,39 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
+	private void addLogMessageToPossibleMultiPartJobParent(Job job,
+			String message) {
+
+		String mpjName = job.getJobProperty(Constants.MULTIJOB_NAME);
+
+		if (mpjName != null) {
+			MultiPartJob mpj = null;
+			try {
+				mpj = getMultiPartJobFromDatabase(mpjName);
+			} catch (NoSuchJobException e) {
+				myLogger.error(e);
+				return;
+			}
+			mpj.addLogMessage(message);
+			multiPartJobDao.saveOrUpdate(mpj);
+		}
+
+	}
+
 	private void submitJob(final Job job, boolean stageFiles)
 			throws JobSubmissionException {
 		try {
 			myLogger.debug("Preparing job environment...");
+			job.addLogMessage("Preparing job environment.");
+
+			addLogMessageToPossibleMultiPartJobParent(job,
+					"Starting job submission for job: " + job.getJobname());
 			prepareJobEnvironment(job);
 			if (stageFiles) {
+				job.addLogMessage("Staging files.");
 				myLogger.debug("Staging files...");
 				stageFiles(job);
+				job.addLogMessage("File staging finished.");
 			}
 		} catch (Exception e) {
 			throw new JobSubmissionException(
@@ -915,14 +932,25 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								+ e.getLocalizedMessage());
 			}
 		} else {
+			job
+					.addLogMessage("Setting credential using fqan: "
+							+ job.getFqan());
 			job.setCredential(getCredential());
 		}
 
 		String handle = null;
 		myLogger.debug("Submitting job to endpoint...");
+
 		try {
+			job.addLogMessage("Submitting job to endpoint...");
 			handle = getSubmissionManager().submit("GT4", job);
+			job.addLogMessage("Submission finished.");
 		} catch (RuntimeException e) {
+			job.addLogMessage("Submission to endpoint failed: "
+					+ e.getLocalizedMessage());
+			addLogMessageToPossibleMultiPartJobParent(job,
+					"Job submission for job: " + job.getJobname() + " failed: "
+							+ e.getLocalizedMessage());
 			e.printStackTrace();
 			throw new JobSubmissionException(
 					"Job submission to endpoint failed: "
@@ -930,6 +958,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		if (handle == null) {
+			job.addLogMessage("Submission finished but jobhandle is null...");
+			addLogMessageToPossibleMultiPartJobParent(job,
+					"Job submission for job: " + job.getJobname()
+							+ " finished but jobhandle is null...");
 			throw new JobSubmissionException(
 					"Job apparently submitted but jobhandle is null for job: "
 							+ job.getJobname());
@@ -941,6 +973,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// we don't want the credential to be stored with the job in this case
 		// TODO or do we want it to be stored?
 		job.setCredential(null);
+		job.addLogMessage("Job submission finished successful.");
+		addLogMessageToPossibleMultiPartJobParent(job,
+				"Job submission for job: " + job.getJobname()
+						+ " finished successful.");
 		jobdao.saveOrUpdate(job);
 		myLogger.info("Jobsubmission for job " + job.getJobname()
 				+ " and user " + getDN() + " successful.");
@@ -952,22 +988,26 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		Job job = getJob(jobname);
 
+		job.addLogMessage("Restarting job...");
+		job.addLogMessage("Killing possibly running job...");
 		kill(jobname);
 
 		job.setStatus(JobConstants.READY_TO_SUBMIT);
 
 		job.getJobProperties().remove(Constants.ERROR_REASON);
-		
-		String possibleMultiPartJob = job.getJobProperty(Constants.MULTIJOB_NAME);
-		
-		if ( StringUtils.isNotBlank(possibleMultiPartJob) ) {
+
+		String possibleMultiPartJob = job
+				.getJobProperty(Constants.MULTIJOB_NAME);
+
+		if (StringUtils.isNotBlank(possibleMultiPartJob)) {
 			MultiPartJob mpj = getMultiPartJobFromDatabase(possibleMultiPartJob);
+			mpj.addLogMessage("Re-submitting job " + jobname);
 			mpj.removeFailedJob(job.getJobname());
 			multiPartJobDao.saveOrUpdate(mpj);
 		}
 
 		if (StringUtils.isNotBlank(changedJsdl)) {
-
+			job.addLogMessage("Changing job properties...");
 			Document newJsdl;
 			Document oldJsdl = job.getJobDescription();
 
@@ -990,17 +1030,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			Integer newTotalCpuTime = JsdlHelpers.getWalltime(newJsdl)
 					* JsdlHelpers.getProcessorCount(newJsdl);
+			job.addLogMessage("Setting totalcputime to: " + newTotalCpuTime);
 			JsdlHelpers.setTotalCPUTimeInSeconds(oldJsdl, newTotalCpuTime);
 			job.addJobProperty(Constants.WALLTIME_IN_MINUTES_KEY, new Integer(
 					JsdlHelpers.getWalltime(newJsdl)).toString());
 
 			Integer newProcCount = JsdlHelpers.getProcessorCount(newJsdl);
+			job.addLogMessage("Setting processor count to: " + newProcCount);
 			JsdlHelpers.setProcessorCount(oldJsdl, newProcCount);
 			job.addJobProperty(Constants.NO_CPUS_KEY, new Integer(newProcCount)
 					.toString());
 
 			// TODO
-			JsdlHelpers.getTotalMemoryRequirement(newJsdl);
+			// JsdlHelpers.getTotalMemoryRequirement(newJsdl);
 
 			// JsdlHelpers.getArcsJobType(newJsdl);
 			// JsdlHelpers.getModules(newJsdl);
@@ -1015,7 +1057,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		myLogger.info("Submitting job: " + jobname + " for user " + getDN());
+		job.addLogMessage("Starting re-submission...");
 		submitJob(job, false);
+		job.addLogMessage("Re-submission finished.");
 
 	}
 
@@ -1029,7 +1073,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		if (job.getStatus() > JobConstants.READY_TO_SUBMIT) {
 			throw new JobSubmissionException("Job already submitted.");
 		}
-
 		submitJob(job, true);
 
 	}
@@ -1052,6 +1095,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return JobConstants.NO_SUCH_JOB;
 		}
 
+		job.addLogMessage("Trying to kill job...");
 		int new_status = Integer.MIN_VALUE;
 		int old_status = job.getStatus();
 
@@ -1070,13 +1114,22 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		new_status = getSubmissionManager().killJob(job);
 
+		job.addLogMessage("Job killed.");
+		addLogMessageToPossibleMultiPartJobParent(job, "Job: "
+				+ job.getJobname() + " killed, new status: ");
+
 		if (changedCred) {
 			job.setCredential(null);
 		}
 		if (old_status != new_status) {
 			job.setStatus(new_status);
-			jobdao.saveOrUpdate(job);
 		}
+		job.addLogMessage("New job status: "
+				+ JobConstants.translateStatus(new_status));
+		addLogMessageToPossibleMultiPartJobParent(job, "Job: "
+				+ job.getJobname() + " killed, new status: "
+				+ JobConstants.translateStatus(new_status));
+		jobdao.saveOrUpdate(job);
 		myLogger.debug("Status of job: " + job.getJobname() + " is: "
 				+ new_status);
 
@@ -1097,7 +1150,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} catch (NoSuchJobException e) {
 			return JobConstants.NO_SUCH_JOB;
 		}
-
+		
 		int status = Integer.MIN_VALUE;
 		int old_status = job.getStatus();
 
@@ -1126,14 +1179,40 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		if (old_status != status) {
 			job.setStatus(status);
+			String message = "Job status for job: "+job.getJobname()+" changed since last check ("+job.getLastStatusCheck().toString()+") from: \""+JobConstants.translateStatus(old_status)+
+					"\" to: \""+JobConstants.translateStatus(status)+"\"";
+			job.addLogMessage(message);
+			addLogMessageToPossibleMultiPartJobParent(job, message);
 			if (status >= JobConstants.FINISHED_EITHER_WAY
 					&& status != JobConstants.DONE) {
 				job.addJobProperty(Constants.ERROR_REASON,
 						"Job finished with status: "
 								+ JobConstants.translateStatus(status));
+				job.addLogMessage("Job failed. Status: "
+						+ JobConstants.translateStatus(status));
+				String multiPartJobParent = job
+						.getJobProperty(Constants.MULTIJOB_NAME);
+				if (multiPartJobParent != null) {
+					try {
+						MultiPartJob mpj = getMultiPartJobFromDatabase(multiPartJobParent);
+						mpj.addFailedJob(job.getJobname());
+						mpj
+								.addLogMessage("Job: "
+										+ job.getJobname()
+										+ " failed. Status: "
+										+ JobConstants.translateStatus(job
+												.getStatus()));
+						multiPartJobDao.saveOrUpdate(mpj);
+					} catch (NoSuchJobException e) {
+						// well
+						myLogger.error(e);
+					}
+				}
 			}
-			jobdao.saveOrUpdate(job);
 		}
+		job.setLastStatusCheck(new Date());
+		jobdao.saveOrUpdate(job);
+
 		myLogger.debug("Status of job: " + job.getJobname() + " is: " + status);
 		return status;
 	}
@@ -1176,84 +1255,32 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public DtoMultiPartJob getMultiPartJob(String multiJobPartId,
 			final boolean refresh) throws NoSuchJobException {
 
-		ExecutorService executor = Executors
-				.newFixedThreadPool(ServerPropertiesManager
-						.getConcurrentJobStatusThreadsPerUser());
+		MultiPartJob multiPartJob = getMultiPartJobFromDatabase(multiJobPartId);
 
-		final MultiPartJob multiJob = getMultiPartJobFromDatabase(multiJobPartId);
-		final DtoMultiPartJob dtoMultiJob = new DtoMultiPartJob();
+		if (refresh) {
 
-		for (final String jobname : multiJob.getJobnames().keySet()) {
+			ExecutorService executor = Executors
+					.newFixedThreadPool(ServerPropertiesManager
+							.getConcurrentJobStatusThreadsPerUser());
 
-			Thread thread = new Thread() {
-				public void run() {
-
-					DtoJob dtoJob = null;
-					if (!refresh) {
-						int oldStatus = JobConstants
-								.translateStatusBack(multiJob.getJobnames()
-										.get(jobname));
-						if (oldStatus >= JobConstants.FINISHED_EITHER_WAY
-								&& oldStatus != JobConstants.DONE) {
-							multiJob
-									.addFailedJob(
-											jobname,
-											"Job finished with status: "
-													+ JobConstants
-															.translateStatus(oldStatus));
-						}
-						try {
-							dtoJob = DtoJob.createJob(JobConstants
-									.translateStatusBack(multiJob.getJobnames()
-											.get(jobname)), getJob(jobname)
-									.getJobProperties());
-							dtoMultiJob.addJob(dtoJob);
-						} catch (NoSuchJobException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					} else {
-						int newStatus = getJobStatus(jobname);
-						if (newStatus >= JobConstants.FINISHED_EITHER_WAY
-								&& newStatus != JobConstants.DONE) {
-							multiJob
-									.addFailedJob(
-											jobname,
-											"Job finished with status: "
-													+ JobConstants
-															.translateStatus(newStatus));
-						}
-						multiJob.getJobnames().put(jobname,
-								JobConstants.translateStatus(newStatus));
-						try {
-							dtoJob = DtoJob.createJob(newStatus,
-									getJob(jobname).getJobProperties());
-							dtoMultiJob.addJob(dtoJob);
-						} catch (NoSuchJobException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+			for (final Job job : multiPartJob.getJobs()) {
+				Thread thread = new Thread() {
+					public void run() {
+						getJobStatus(job.getJobname());
 					}
-				}
-			};
-			executor.execute(thread);
+				};
+				executor.execute(thread);
+			}
+			executor.shutdown();
+			try {
+				executor.awaitTermination(3600, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+			multiPartJob = getMultiPartJobFromDatabase(multiJobPartId);
 		}
 
-		executor.shutdown();
-		try {
-			executor.awaitTermination(3600, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		}
-
-		multiPartJobDao.saveOrUpdate(multiJob);
-
-		dtoMultiJob.setFailedJobs(new LinkedList<String>(multiJob
-				.getFailedJobs().keySet()));
-
-		return dtoMultiJob;
+		return multiPartJob.createDtoMultiPartJob();
 	}
 
 	/**
@@ -1285,8 +1312,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void removeJobFromMultiPartJob(String multipartJobId, String jobname)
 			throws NoSuchJobException {
 
+		Job job = getJob(jobname);
 		MultiPartJob multiJob = getMultiPartJobFromDatabase(multipartJobId);
-		multiJob.removeJob(jobname);
+		multiJob.removeJob(job);
 
 		multiPartJobDao.saveOrUpdate(multiJob);
 	}
@@ -1319,15 +1347,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					Constants.RELATIVE_MULTIJOB_DIRECTORY_KEY,
 					ServerPropertiesManager.getGrisuMultiPartJobDirectoryName()
 							+ "/" + multiPartJobId);
+
+			multiJobCreate.addLogMessage("MultiPartJob " + multiPartJobId
+					+ " created.");
 			multiPartJobDao.saveOrUpdate(multiJobCreate);
 
-			DtoMultiPartJob dtoMultiJob = new DtoMultiPartJob(multiPartJobId);
-			dtoMultiJob
-					.setProperties(DtoJobProperty
-							.dtoJobPropertiesFromMap(multiJobCreate
-									.getJobProperties()));
-
-			return dtoMultiJob;
+			try {
+				return multiJobCreate.createDtoMultiPartJob();
+			} catch (NoSuchJobException e1) {
+				// that should never happen
+				e1.printStackTrace();
+			}
 		}
 
 		throw new MultiPartJobException("MultiPartJob with name "
@@ -1361,16 +1391,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		}
 
-		final Set<String> jobnames = multiJob.getJobnames().keySet();
+		final Set<Job> jobs = multiJob.getJobs();
 
 		multiPartJobDao.delete(multiJob);
 
 		if (deleteChildJobsAsWell) {
-			for (String jobname : jobnames) {
-				Job job = getJob(jobname);
+			for (Job job : jobs) {
+
 				try {
 					job.addJobProperty(Constants.MULTIJOB_NAME, null);
-					kill(jobname, true, true);
+					kill(job.getJobname(), true, true);
 				} catch (RemoteFileSystemException e) {
 					myLogger.error("Can't clean jobdirectory for job: "
 							+ job.getJobname(), e);

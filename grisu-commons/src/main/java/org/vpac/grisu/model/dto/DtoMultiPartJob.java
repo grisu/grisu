@@ -1,9 +1,11 @@
 package org.vpac.grisu.model.dto;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -34,24 +36,44 @@ public class DtoMultiPartJob {
 	public void setMultiPartJobId(String multiPartJobId) {
 		this.multiPartJobId = multiPartJobId;
 	}
+	
+	private DtoLogMessages messages = new DtoLogMessages();
+
+	@XmlElement(name="logMessages")
+	public DtoLogMessages getMessages() {
+		return messages;
+	}
+
+	public void setMessages(DtoLogMessages messages) {
+		this.messages = messages;
+	}
+	
+	public Map<Date, String> messages() {
+		Map<Date, String> result = new TreeMap<Date, String>();
+		
+		for ( DtoLogMessage m : getMessages().getMessages() ) {
+			result.put(m.getDate(), m.getMessage());
+		}
+		return result;
+	}
 
 	/**
 	 * The list of job properties.
 	 */
 	private List<DtoJobProperty> properties = new LinkedList<DtoJobProperty>();
-	/**
-	 * The status of the job. Be aware that, depending on how you queried for this job, this can be stale information.
-	 */
-	private int status;
+//	/**
+//	 * The status of the job. Be aware that, depending on how you queried for this job, this can be stale information.
+//	 */
+//	private int status;
 	
-	public List<String> failedJobs = new LinkedList<String>();
+	public DtoJobs failedJobs = new DtoJobs();
 	
-	@XmlElement(name="failedJob")
-	public List<String> getFailedJobs() {
+	@XmlElement(name="failedJobs")
+	public DtoJobs getFailedJobs() {
 		return failedJobs;
 	}
 
-	public void setFailedJobs(List<String> failedJobs) {
+	public void setFailedJobs(DtoJobs failedJobs) {
 		this.failedJobs = failedJobs;
 	}
 	
@@ -86,7 +108,7 @@ public class DtoMultiPartJob {
 	}
 	
 	
-	@XmlElement(name="job")
+	@XmlElement(name="jobs")
 	public DtoJobs getJobs() {
 		return jobs;
 	}
