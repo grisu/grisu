@@ -13,11 +13,12 @@ public class DtoLogMessages {
 	
 	List<DtoLogMessage> messages = new LinkedList<DtoLogMessage>();
 	
-	public static DtoLogMessages createLogMessages(Map<Date, String> messages) {
+	public static DtoLogMessages createLogMessages(Map<Long, String> messages) {
 		
 		DtoLogMessages result = new DtoLogMessages();
-		for ( Date date : messages.keySet() ) {
-			result.addMessage(date, messages.get(date));
+		for ( Long time : messages.keySet() ) {
+			Date date = new Date(time);
+			result.addMessage(date, messages.get(time));
 		}
 		return result;
 	}

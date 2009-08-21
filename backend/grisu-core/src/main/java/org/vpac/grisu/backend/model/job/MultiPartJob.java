@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -21,6 +22,7 @@ import javax.persistence.Transient;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.CollectionOfElements;
 import org.vpac.grisu.backend.hibernate.JobDAO;
+import org.vpac.grisu.backend.hibernate.MultiPartJobDAO;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.model.dto.DtoJob;
@@ -64,21 +66,27 @@ public class MultiPartJob {
 
 	private String multiPartJobId;
 
-	private Map<Date, String> logMessages = Collections.synchronizedMap(new TreeMap<Date, String>());
+	private Map<Long, String> logMessages = Collections.synchronizedMap(new TreeMap<Long, String>());
 
 	@CollectionOfElements(fetch = FetchType.EAGER)
-	public Map<Date, String> getLogMessages() {
+	public Map<Long, String> getLogMessages() {
 		return logMessages;
 	}
 
-	private void setLogMessages(Map<Date, String> logMessages) {
+	private void setLogMessages(Map<Long, String> logMessages) {
 		this.logMessages = logMessages;
 	}
 
 	public synchronized void addLogMessage(String message) {
-		Date now = new Date();
+		Long now = new Date().getTime();
+//
+		while ( this.logMessages.containsKey(now) ) {
+			now = now+1;
+		}
+		this.logMessages.put(now, message);
+//		System.out.println("NOW: "+now.toString()+"   "+now);
+//		this.logMessages.put(UUID.randomUUID().toString(), message);
 
-//		this.logMessages.put(new Date(), message);
 	}
 
 	public MultiPartJob(String dn, String multiPartJobId) {

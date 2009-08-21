@@ -31,6 +31,7 @@ import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileType;
 import org.apache.commons.vfs.FileTypeSelector;
 import org.apache.log4j.Logger;
+import org.globus.exec.generated.MultiJobDescriptionType;
 import org.vpac.grisu.backend.hibernate.JobDAO;
 import org.vpac.grisu.backend.hibernate.MultiPartJobDAO;
 import org.vpac.grisu.backend.hibernate.UserDAO;
@@ -884,20 +885,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private synchronized void addLogMessageToPossibleMultiPartJobParent(Job job,
 			String message) {
 
-		String mpjName = job.getJobProperty(Constants.MULTIJOB_NAME);
+			String mpjName = job.getJobProperty(Constants.MULTIJOB_NAME);
 
-		if (mpjName != null) {
-			MultiPartJob mpj = null;
-			try {
-				mpj = getMultiPartJobFromDatabase(mpjName);
-			} catch (NoSuchJobException e) {
-				myLogger.error(e);
-				return;
+			if (mpjName != null) {
+				MultiPartJob mpj = null;
+				try {
+					mpj = getMultiPartJobFromDatabase(mpjName);
+				} catch (NoSuchJobException e) {
+					myLogger.error(e);
+					return;
+				}
+				mpj.addLogMessage(message);
+				multiPartJobDao.saveOrUpdate(mpj);
 			}
-			mpj.addLogMessage(message);
-			multiPartJobDao.saveOrUpdate(mpj);
-		}
-
 	}
 
 	private void submitJob(final Job job, boolean stageFiles)
@@ -910,8 +910,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					"Starting job submission for job: " + job.getJobname());
 			prepareJobEnvironment(job);
 			if (stageFiles) {
-				job.addLogMessage("Staging files.");
-				myLogger.debug("Staging files...");
+				job.addLogMessage("Staging possible input files.");
+				myLogger.debug("Staging possible input files...");
 				stageFiles(job);
 				job.addLogMessage("File staging finished.");
 			}
@@ -1001,7 +1001,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		if (StringUtils.isNotBlank(possibleMultiPartJob)) {
 			MultiPartJob mpj = getMultiPartJobFromDatabase(possibleMultiPartJob);
-			addLogMessageToPossibleMultiPartJobParent(job, "Re-submitting job " + jobname);
+			addLogMessageToPossibleMultiPartJobParent(job, "Re-submitting job "
+					+ jobname);
 			mpj.removeFailedJob(job.getJobname());
 			multiPartJobDao.saveOrUpdate(mpj);
 		}
@@ -1150,7 +1151,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} catch (NoSuchJobException e) {
 			return JobConstants.NO_SUCH_JOB;
 		}
-		
+
 		int status = Integer.MIN_VALUE;
 		int old_status = job.getStatus();
 
@@ -1179,8 +1180,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		if (old_status != status) {
 			job.setStatus(status);
-			String message = "Job status for job: "+job.getJobname()+" changed since last check ("+job.getLastStatusCheck().toString()+") from: \""+JobConstants.translateStatus(old_status)+
-					"\" to: \""+JobConstants.translateStatus(status)+"\"";
+			String message = "Job status for job: " + job.getJobname()
+					+ " changed since last check ("
+					+ job.getLastStatusCheck().toString() + ") from: \""
+					+ JobConstants.translateStatus(old_status) + "\" to: \""
+					+ JobConstants.translateStatus(status) + "\"";
 			job.addLogMessage(message);
 			addLogMessageToPossibleMultiPartJobParent(job, message);
 			if (status >= JobConstants.FINISHED_EITHER_WAY
@@ -1197,10 +1201,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						MultiPartJob mpj = getMultiPartJobFromDatabase(multiPartJobParent);
 						mpj.addFailedJob(job.getJobname());
 						addLogMessageToPossibleMultiPartJobParent(job, "Job: "
-										+ job.getJobname()
-										+ " failed. Status: "
-										+ JobConstants.translateStatus(job
-												.getStatus()));
+								+ job.getJobname() + " failed. Status: "
+								+ JobConstants.translateStatus(job.getStatus()));
 						multiPartJobDao.saveOrUpdate(mpj);
 					} catch (NoSuchJobException e) {
 						// well

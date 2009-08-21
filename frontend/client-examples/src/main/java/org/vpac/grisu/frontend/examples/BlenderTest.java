@@ -1,5 +1,6 @@
 package org.vpac.grisu.frontend.examples;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +29,7 @@ public class BlenderTest implements JobStatusChangeListener {
 
 	public static void main(final String[] args) throws Exception {
 
+
 		ExecutorService executor = Executors.newFixedThreadPool(5);
 
 		String username = args[0];
@@ -38,6 +40,7 @@ public class BlenderTest implements JobStatusChangeListener {
 //				"https://ngportal.vpac.org/grisu-ws/soap/EnunciateServiceInterfaceService",
 //				 "https://ngportal.vpac.org/grisu-ws/services/grisu",
 				 "Local",
+//				"Dummy",
 				username, password);
 
 		final ServiceInterface si = ServiceInterfaceFactory
@@ -55,17 +58,18 @@ public class BlenderTest implements JobStatusChangeListener {
 		
 		final String subLoc = SubmissionLocationHelpers.createSubmissionLocationString(resources.first());
 		
-		final String multiJobName = "BlenderTest2";
+		final String multiJobName = "BlenderTest8";
 		try {
 			si.deleteMultiPartJob(multiJobName, true);
 		} catch (Exception e) {
 			// doesn't matter
 		}
 
+//		System.exit(1);
 		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/NGAdmin");
 				
 		
-		for (int i=30; i<40; i++) {
+		for (int i=30; i<38; i++) {
 
 			final int frameNumber = i;
 				
@@ -73,9 +77,10 @@ public class BlenderTest implements JobStatusChangeListener {
 				jo.setJobname(multiJobName+"_" + frameNumber );
 				jo.setApplication("blender");
 				jo.setCommandline("blender -b "+multiPartJob.pathToInputFiles()+"/CubesTest.blend -F PNG -o cubes_ -f "+frameNumber);
+//				jo.setCommandline("echo hello");
 				jo.setSubmissionLocation(subLoc);
 				jo.setModules(new String[]{"blender/2.49"});
-				jo.setWalltimeInSeconds(60);
+				jo.setWalltimeInSeconds(200);
 				jo.setCpus(1);
 				multiPartJob.addJob(jo);
 						
