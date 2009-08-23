@@ -30,7 +30,7 @@ public class BlenderTest implements JobStatusChangeListener {
 	public static void main(final String[] args) throws Exception {
 
 
-		ExecutorService executor = Executors.newFixedThreadPool(5);
+		ExecutorService executor = Executors.newFixedThreadPool(10);
 
 		String username = args[0];
 		char[] password = args[1].toCharArray();
@@ -58,29 +58,34 @@ public class BlenderTest implements JobStatusChangeListener {
 		
 		final String subLoc = SubmissionLocationHelpers.createSubmissionLocationString(resources.first());
 		
-		final String multiJobName = "BlenderTest8";
+		Date start = new Date();
+		final String multiJobName = "PerformanceTest4";
 		try {
 			si.deleteMultiPartJob(multiJobName, true);
 		} catch (Exception e) {
 			// doesn't matter
 		}
-
-//		System.exit(1);
+		
+		System.out.println("Start: "+start.toString());
+		System.out.println("End: "+new Date().toString());
+		
+		System.exit(1);
 		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/NGAdmin");
 				
+//		multiPartJob.setConcurrentJobCreationThreads(3);
 		
-		for (int i=30; i<38; i++) {
+		for (int i=1; i<1001; i++) {
 
 			final int frameNumber = i;
 				
 				JobObject jo = new JobObject(si);
 				jo.setJobname(multiJobName+"_" + frameNumber );
 				jo.setApplication("blender");
-				jo.setCommandline("blender -b "+multiPartJob.pathToInputFiles()+"/CubesTest.blend -F PNG -o cubes_ -f "+frameNumber);
-//				jo.setCommandline("echo hello");
+//				jo.setCommandline("blender -b "+multiPartJob.pathToInputFiles()+"/CubesTest.blend -F PNG -o cubes_ -f "+frameNumber);
+				jo.setCommandline("echo hello");
 				jo.setSubmissionLocation(subLoc);
 				jo.setModules(new String[]{"blender/2.49"});
-				jo.setWalltimeInSeconds(200);
+				jo.setWalltimeInSeconds(100);
 				jo.setCpus(1);
 				multiPartJob.addJob(jo);
 						
@@ -97,7 +102,7 @@ public class BlenderTest implements JobStatusChangeListener {
 			System.exit(1);
 		}
 		
-		multiPartJob.submit(true);
+		multiPartJob.submit(false);
 		
 
 		System.out.println("Submission finished...");

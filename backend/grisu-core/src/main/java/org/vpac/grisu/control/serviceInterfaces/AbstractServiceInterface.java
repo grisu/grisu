@@ -31,7 +31,6 @@ import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileType;
 import org.apache.commons.vfs.FileTypeSelector;
 import org.apache.log4j.Logger;
-import org.globus.exec.generated.MultiJobDescriptionType;
 import org.vpac.grisu.backend.hibernate.JobDAO;
 import org.vpac.grisu.backend.hibernate.MultiPartJobDAO;
 import org.vpac.grisu.backend.hibernate.UserDAO;
@@ -57,6 +56,7 @@ import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.info.CachedMdsInformationManager;
 import org.vpac.grisu.model.MountPoint;
+import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.dto.DtoApplicationDetails;
 import org.vpac.grisu.model.dto.DtoApplicationInfo;
 import org.vpac.grisu.model.dto.DtoDataLocations;
@@ -142,8 +142,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	}
 
 	private Map<String, RemoteFileTransferObject> fileTransfers = new HashMap<String, RemoteFileTransferObject>();
-
-	private String currentStatus = null;
 
 	/**
 	 * Gets the user of the current session. Also connects the default
@@ -383,16 +381,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	public String createJobUsingMap(final DtoJob jobProperties,
-			final String fqan, final String jobCreationMethod)
-			throws JobPropertiesException {
-
-		JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl(jobProperties
-				.propertiesAsMap());
-
-		return createJob(jso.getJobDescriptionDocument(), fqan,
-				jobCreationMethod);
-	}
+//	public String createJobUsingMap(final DtoJob jobProperties,
+//			final String fqan, final String jobCreationMethod)
+//			throws JobPropertiesException {
+//
+//		JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl(jobProperties
+//				.propertiesAsMap());
+//
+//		return createJob(jso.getJobDescriptionDocument(), fqan,
+//				jobCreationMethod);
+//	}
 
 	private void setVO(final Job job, final String fqan)
 			throws NoSuchJobException, JobPropertiesException {
@@ -1145,6 +1143,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public int getJobStatus(final String jobname) {
 
+		myLogger.debug("Start getting status for job: "+jobname);
 		Job job;
 		try {
 			job = getJob(jobname);
@@ -1174,7 +1173,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			changedCred = true;
 		}
 
+		myLogger.debug("Getting status for job from submission manager: "+jobname);
+
 		status = getSubmissionManager().getJobStatus(job);
+		myLogger.debug("Status for job"+jobname+" from submission manager: "+status);
 		if (changedCred) {
 			job.setCredential(null);
 		}
@@ -1292,14 +1294,23 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @param jobname
 	 *            the jobname
 	 * @throws NoSuchJobException
+	 * @throws JobPropertiesException 
+	 * @throws NoSuchJobException 
 	 */
-	public void addJobToMultiPartJob(String multipartJobId, String jobname)
-			throws NoSuchJobException {
+	public String addJobToMultiPartJob(String multipartJobId, String jsdlString)
+			throws JobPropertiesException, NoSuchJobException {
 
 		MultiPartJob multiJob = getMultiPartJobFromDatabase(multipartJobId);
+		
+		//TODO calculate resulting jobname and check whether one already exists?
+		
+		String jobname = createJobUsingJsdl(jsdlString, multiJob.getFqan(), "force-name");
+
 		multiJob.addJob(jobname);
 
 		multiPartJobDao.saveOrUpdate(multiJob);
+		
+		return jobname;
 	}
 
 	/**
@@ -1330,7 +1341,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 *            the id (name) of the multipartjob
 	 * @throws JobPropertiesException
 	 */
-	public DtoMultiPartJob createMultiPartJob(String multiPartJobId)
+	public DtoMultiPartJob createMultiPartJob(String multiPartJobId, String fqan)
 			throws MultiPartJobException {
 
 		try {
@@ -1338,7 +1349,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} catch (NoSuchJobException e) {
 			// that's good
 			MultiPartJob multiJobCreate = new MultiPartJob(getDN(),
-					multiPartJobId);
+					multiPartJobId, fqan);
 			multiJobCreate.addJobProperty(Constants.RELATIVE_PATH_FROM_JOBDIR,
 					"../../"
 							+ ServerPropertiesManager
@@ -2950,13 +2961,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return getSite(contactString);
 	}
 
-	public String getCurrentStatusMessage(final String handle) {
-		return this.currentStatus;
+	public DtoActionStatus getActionStatus(final String handle) {
+
+		return getUser().getActionStatus(handle);
 	}
 
-	private void setCurrentStatus(final String status) {
-		this.currentStatus = status;
-	}
+//	private void setCurrentStatus(final String status) {
+//		this.currentStatus = status;
+//	}
 
 	/**
 	 * This method has to be implemented by the endpoint specific

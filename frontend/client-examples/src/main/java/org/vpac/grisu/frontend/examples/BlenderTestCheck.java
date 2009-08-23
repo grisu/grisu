@@ -29,16 +29,16 @@ public class BlenderTestCheck  {
 		final ServiceInterface si = ServiceInterfaceFactory
 				.createInterface(loginParams);
 
-		final String multiJobName = "BlenderTest8";
+		final String multiJobName = "PerformanceTest4";
 		
-		MultiPartJobObject newObject = new MultiPartJobObject(si, multiJobName);
+		MultiPartJobObject newObject = new MultiPartJobObject(si, multiJobName, false);
 		
 		FailedJobRestarter restarter = new DoubleWalltimeJobRestarter();
 
 		newObject.monitorProgress(15, null, true, restarter);
 	
 		
-		newObject.downloadResults(new File("/home/markus/Desktop/multiTest"), new String[]{"cubes"}, false, false);
+		newObject.downloadResults(new File("/home/markus/Desktop/multiTest"), new String[]{"stdout"}, false, true);
 
 		Date endDate = new Date();
 		

@@ -10,6 +10,7 @@ import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.backend.model.job.MultiPartJob;
 import org.vpac.grisu.model.MountPoint;
+import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.settings.ServerPropertiesManager;
@@ -214,7 +215,8 @@ public final class HibernateSessionFactory {
 			configuration.addAnnotatedClass(MultiPartJob.class);
 			configuration.addAnnotatedClass(MountPoint.class);
 			configuration.addAnnotatedClass(JobSubmissionObjectImpl.class);
-
+			configuration.addAnnotatedClass(DtoActionStatus.class);
+			
 			sessionFactory = configuration.buildSessionFactory();
 		} catch (Exception e) {
 			System.err.println("%%%% Error Creating SessionFactory %%%%");

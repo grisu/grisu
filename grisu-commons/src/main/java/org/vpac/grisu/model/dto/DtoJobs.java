@@ -1,5 +1,6 @@
 package org.vpac.grisu.model.dto;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class DtoJobs {
 	/**
 	 * The list of jobs.
 	 */
-	private List<DtoJob> allJobs = new LinkedList<DtoJob>();
+	private List<DtoJob> allJobs = Collections.synchronizedList(new LinkedList<DtoJob>());
 
 	@XmlElement(name="job")
 	public List<DtoJob> getAllJobs() {

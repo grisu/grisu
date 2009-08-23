@@ -3,6 +3,7 @@ package org.vpac.grisu.backend.model;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -33,6 +34,7 @@ import org.vpac.grisu.backend.utils.CertHelpers;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.MountPoint;
+import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.security.light.voms.VO;
 import org.vpac.security.light.voms.VOManagement.VOManagement;
@@ -99,6 +101,8 @@ public class User {
 	// private Map<String, String> fqans = null;
 
 	private Map<String, String> userProperties = new HashMap<String, String>();
+	
+	private Map<String, DtoActionStatus> actionStatuses = new HashMap<String, DtoActionStatus>();
 
 	private Map<String, JobSubmissionObjectImpl> jobTemplates = new HashMap<String, JobSubmissionObjectImpl>();
 
@@ -925,6 +929,38 @@ public class User {
 	public void setJobTemplates(
 			final Map<String, JobSubmissionObjectImpl> jobTemplates) {
 		this.jobTemplates = jobTemplates;
+	}
+	
+	
+	@CollectionOfElements
+	public Map<String, DtoActionStatus> getActionStatuses() {
+		return this.actionStatuses;
+	}
+	
+	public DtoActionStatus getActionStatus(String handle) {
+		return this.actionStatuses.get(handle);
+	}
+	
+	private void setActionStatuses(Map<String, DtoActionStatus> actionStatuses) {
+		this.actionStatuses = actionStatuses;
+	}
+	
+	public void addActionStatus(DtoActionStatus status) {
+		if ( this.actionStatuses.containsKey(status.getHandle()) ) {
+			throw new RuntimeException("Action exists status already.");
+		}
+		
+		this.actionStatuses.put(status.getHandle(), status);
+	}
+	
+	public void setActionStatus(String handle, DtoActionStatus.Status newStatus) {
+		if ( ! this.actionStatuses.containsKey(handle) ) {
+			throw new RuntimeException("Action "+handle+" doesn't exist...");
+		}
+		this.actionStatuses.get(handle).setStatus(newStatus);
+		if ( DtoActionStatus.Status.success.equals(newStatus) || DtoActionStatus.Status.failed.equals(newStatus) ) {
+			this.actionStatuses.get(handle).setEndTime(new Date());
+		}
 	}
 
 }

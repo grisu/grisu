@@ -65,8 +65,11 @@ public class MultiPartJob {
 	private Set<String> usedMountPoints = new HashSet<String>();
 
 	private String multiPartJobId;
+	
+	private String fqan = null;
 
-	private Map<Long, String> logMessages = Collections.synchronizedMap(new TreeMap<Long, String>());
+	private Map<Long, String> logMessages = Collections
+			.synchronizedMap(new TreeMap<Long, String>());
 
 	@CollectionOfElements(fetch = FetchType.EAGER)
 	public Map<Long, String> getLogMessages() {
@@ -79,21 +82,29 @@ public class MultiPartJob {
 
 	public synchronized void addLogMessage(String message) {
 		Long now = new Date().getTime();
-//
-		while ( this.logMessages.containsKey(now) ) {
-			now = now+1;
+		//
+		while (this.logMessages.containsKey(now)) {
+			now = now + 1;
 		}
 		this.logMessages.put(now, message);
-//		System.out.println("NOW: "+now.toString()+"   "+now);
-//		this.logMessages.put(UUID.randomUUID().toString(), message);
+		// System.out.println("NOW: "+now.toString()+"   "+now);
+		// this.logMessages.put(UUID.randomUUID().toString(), message);
 
 	}
 
-	public MultiPartJob(String dn, String multiPartJobId) {
+	public MultiPartJob(String dn, String multiPartJobId, String fqan) {
 		this.dn = dn;
 		this.multiPartJobId = multiPartJobId;
+		this.fqan = fqan;
+	}
+	
+	public String getFqan() {
+		return fqan;
 	}
 
+	private void setFqan(String fqan) {
+		this.fqan = fqan;
+	}
 	// for hibernate
 	private MultiPartJob() {
 
@@ -239,21 +250,36 @@ public class MultiPartJob {
 		result.setMessages(DtoLogMessages.createLogMessages(this
 				.getLogMessages()));
 
+		ExecutorService executor = Executors
+				.newFixedThreadPool(ServerPropertiesManager
+						.getConcurrentJobStatusThreadsPerUser());
+
 		for (final Job job : getJobs()) {
 
-			DtoJob dtoJob = null;
+			Thread thread = new Thread() {
+				public void run() {
 
-			int oldStatus = job.getStatus();
+					DtoJob dtoJob = null;
 
-			dtoJob = DtoJob.createJob(job.getStatus(), job.getJobProperties());
-			result.addJob(dtoJob);
+					dtoJob = DtoJob.createJob(job.getStatus(), job
+							.getJobProperties());
+					result.addJob(dtoJob);
+				}
+			};
+			executor.execute(thread);
+		}
+
+		executor.shutdown();
+		try {
+			executor.awaitTermination(3600, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
 		}
 
 		DtoJobs dtoJobs = new DtoJobs();
 		for (String jobname : getFailedJobs()) {
-			Job job = getJob(jobname);
-			dtoJobs.addJob(DtoJob.createJob(job.getStatus(), job
-					.getJobProperties()));
+			// Job job = getJob(jobname);
+			dtoJobs.addJob(result.retrieveJob(jobname));
 		}
 		result.setFailedJobs(dtoJobs);
 

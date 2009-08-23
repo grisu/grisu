@@ -13,6 +13,7 @@ import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.MountPoint;
+import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.dto.DtoApplicationDetails;
 import org.vpac.grisu.model.dto.DtoApplicationInfo;
 import org.vpac.grisu.model.dto.DtoDataLocations;
@@ -126,16 +127,15 @@ public interface ServiceInterface {
 	long getCredentialEndTime();
 
 	/**
-	 * Can be used to inform the frontend what the backend is doing at the
-	 * moment and what the bloody hell is taking so long... (like
-	 * file-cross-staging...)
+	 * Can be used to check whether a (possibly long-running) action like multi-job-creation
+	 * is still on-going.
 	 * 
 	 * @param handle
 	 *            the name of the action to monitor. This can be either a
 	 *            jobname or a filetransfer handle
 	 * @return the current status of any backend activity
 	 */
-	String getCurrentStatusMessage(String handle);
+	DtoActionStatus getActionStatus(String handle);
 
 	// ---------------------------------------------------------------------------------------------------
 	// 
@@ -657,8 +657,11 @@ public interface ServiceInterface {
 	 * 
 	 * @param multipartJobId the multipartjobidmM
 	 * @param jobname the jobname
+	 * @return the jobname of the new job
+	 * @throws JobPropertiesException if the job can't be created on the backend
+	 * @throws NoSuchJobException if no such multipartjob exists
 	 */
-	void addJobToMultiPartJob(String multipartJobId, String jobname) throws NoSuchJobException;
+	String addJobToMultiPartJob(String multipartJobId, String jobDescription) throws NoSuchJobException, JobPropertiesException;
 	
 	/**
 	 * Removes the specified job from the mulitpartJob.
@@ -674,9 +677,11 @@ public interface ServiceInterface {
 	 * A multipartjob is just a collection of jobs that belong together to make them more easily managable.
 	 * 
 	 * @param multiPartJobId the id (name) of the multipartjob
+	 * @param fqan the vo to use
+	 * 
 	 * @throws JobPropertiesException 
 	 */
-	DtoMultiPartJob createMultiPartJob(String multiPartJobId) throws MultiPartJobException;
+	DtoMultiPartJob createMultiPartJob(String multiPartJobId, String fqan) throws MultiPartJobException;
 	
 	/**
 	 * Removes the multipartJob from the server.
@@ -735,37 +740,42 @@ public interface ServiceInterface {
 	 */
 	String[] getAllMultiPartJobIds();
 
+//	/**
+//	 * Creates a job using the jobProperties that are specified in the map and
+//	 * the vo that should be used to submit the job.
+//	 * 
+//	 * Internally, this validates all the jobproperties, tries to auto-fill
+//	 * properties that are not specified (maybe version or submissionlocation).
+//	 * For a list of valid job property keynames have a look here:
+//	 * {@link JobSubmissionProperty}. If not all required job properties can be
+//	 * calculated, this method throws a {@link JobPropertiesException}.
+//	 * 
+//	 * @param jobProperties
+//	 *            a map of all job properties
+//	 * @param fqan
+//	 *            the vo to use to submit the job
+//	 * @param jobnameCreationMethod
+//	 *            the method to use to (possibly) auto-calculate the jobname (if
+//	 *            one with the specfied jobname in the jobProperties already
+//	 *            exists). This defaults to "force-name" if you specify null.
+//	 * @return the name of the job (auto-calculated or not) which is used as a
+//	 *         handle
+//	 * @throws JobPropertiesException
+//	 *             if the job could not be created (maybe because the jobname
+//	 *             already exists and force-jobname is specified as jobname
+//	 *             creation method).
+//	 */
+//	String createJobUsingMap(DtoJob job, String fqan,
+//			String jobnameCreationMethod) throws JobPropertiesException;
+
 	/**
-	 * Creates a job using the jobProperties that are specified in the map and
-	 * the vo that should be used to submit the job.
+	 * Creates a job using the specified jsdl on the backend.
 	 * 
 	 * Internally, this validates all the jobproperties, tries to auto-fill
 	 * properties that are not specified (maybe version or submissionlocation).
 	 * For a list of valid job property keynames have a look here:
 	 * {@link JobSubmissionProperty}. If not all required job properties can be
 	 * calculated, this method throws a {@link JobPropertiesException}.
-	 * 
-	 * @param jobProperties
-	 *            a map of all job properties
-	 * @param fqan
-	 *            the vo to use to submit the job
-	 * @param jobnameCreationMethod
-	 *            the method to use to (possibly) auto-calculate the jobname (if
-	 *            one with the specfied jobname in the jobProperties already
-	 *            exists). This defaults to "force-name" if you specify null.
-	 * @return the name of the job (auto-calculated or not) which is used as a
-	 *         handle
-	 * @throws JobPropertiesException
-	 *             if the job could not be created (maybe because the jobname
-	 *             already exists and force-jobname is specified as jobname
-	 *             creation method).
-	 */
-	String createJobUsingMap(DtoJob job, String fqan,
-			String jobnameCreationMethod) throws JobPropertiesException;
-
-	/**
-	 * This method calls {@link #createJobUsingMap(Map, String, String)} internally with
-	 * a map of job properties that are extracted from the jsdl document.
 	 * 
 	 * @param jsdl
 	 *            a jsdl document

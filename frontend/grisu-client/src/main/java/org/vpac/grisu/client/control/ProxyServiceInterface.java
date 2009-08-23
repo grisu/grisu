@@ -13,6 +13,7 @@ import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.MountPoint;
+import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.dto.DtoApplicationDetails;
 import org.vpac.grisu.model.dto.DtoApplicationInfo;
 import org.vpac.grisu.model.dto.DtoDataLocations;
@@ -513,11 +514,11 @@ public class ProxyServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public String getCurrentStatusMessage(String handle) {
+	public DtoActionStatus getActionStatus(String handle) {
 		try {
 			Method m = si.getClass().getMethod("getCurrentStatusMessage",
 					handle.getClass());
-			return (String) m.invoke(si, handle);
+			return (DtoActionStatus) m.invoke(si, handle);
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {
@@ -1207,13 +1208,13 @@ public class ProxyServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public void addJobToMultiPartJob(String multipartJobId, String jobname)
+	public String addJobToMultiPartJob(String multipartJobId, String jobname)
 			throws NoSuchJobException {
 
 		try {
 			Method m = si.getClass().getMethod("addJobToMultiPartJob",
 					multipartJobId.getClass(), jobname.getClass());
-			m.invoke(si, multipartJobId, jobname);
+			return (String)(m.invoke(si, multipartJobId, jobname));
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {
@@ -1232,13 +1233,13 @@ public class ProxyServiceInterface implements ServiceInterface {
 
 	}
 
-	public DtoMultiPartJob createMultiPartJob(String multiPartJobId)
+	public DtoMultiPartJob createMultiPartJob(String multiPartJobId, String fqan)
 			throws MultiPartJobException {
 
 		try {
 			Method m = si.getClass().getMethod("createMultiPartJob",
-					multiPartJobId.getClass());
-			return (DtoMultiPartJob) (m.invoke(si, multiPartJobId));
+					multiPartJobId.getClass(), fqan.getClass());
+			return (DtoMultiPartJob) (m.invoke(si, multiPartJobId, fqan));
 		} catch (SecurityException e) {
 			throw new RuntimeException(e);
 		} catch (NoSuchMethodException e) {

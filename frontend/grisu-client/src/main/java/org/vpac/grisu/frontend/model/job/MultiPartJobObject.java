@@ -38,6 +38,7 @@ public class MultiPartJobObject {
 	static final Logger myLogger = Logger
 	.getLogger(MultiPartJobObject.class.getName());
 	
+	public static final int DEFAULT_JOB_CREATION_RETRIES = 5;
 	
 	public static final int DEFAULT_JOB_CREATION_THREADS = 5;
 	
@@ -67,7 +68,7 @@ public class MultiPartJobObject {
 		this.multiPartJobId = multiPartJobId;
 		this.submissionFqan = submissionFqan;
 		
-		dtoMultiPartJob = serviceInterface.createMultiPartJob(this.multiPartJobId);
+		dtoMultiPartJob = serviceInterface.createMultiPartJob(this.multiPartJobId, this.submissionFqan);
 	}
 	
 	/**
@@ -75,20 +76,24 @@ public class MultiPartJobObject {
 	 * 
 	 * @param serviceInterface the serviceinterface
 	 * @param multiPartJobId the id of the multipartjob
+	 * @param refreshJobStatusOnBackend whether to refresh the status of the jobs on the backend. might take quite a while...
+	 * 
 	 * @throws MultiPartJobException if one of the jobs of the multipartjob doesn't exist on the backend
 	 * @throws NoSuchJobException if there is no such multipartjob on the backend
 	 */
-	public MultiPartJobObject(ServiceInterface serviceInterface, String multiPartJobId) throws MultiPartJobException, NoSuchJobException {
+	public MultiPartJobObject(ServiceInterface serviceInterface, String multiPartJobId, boolean refreshJobStatusOnBackend) throws MultiPartJobException, NoSuchJobException {
 		this.serviceInterface = serviceInterface;
 		this.multiPartJobId = multiPartJobId;
 		
 		try {
-			for ( DtoJob dtoJob : getMultiPartJob(true).getJobs().getAllJobs() ) {
+			for ( DtoJob dtoJob : getMultiPartJob(refreshJobStatusOnBackend).getJobs().getAllJobs() ) {
 				JobObject job = new JobObject(serviceInterface, dtoJob.propertiesAsMap().get(Constants.JOBNAME_KEY));
 				jobs.add(job);
 			}
 		} catch (NoSuchJobException e) {
 			throw new MultiPartJobException("Multipart job is not complete. Missing at least one job."+e.getLocalizedMessage());
+//			e.printStackTrace();
+//			return;
 		}
 
 	}
@@ -270,6 +275,10 @@ public class MultiPartJobObject {
 		}
 	}
 	
+	public void setConcurrentJobCreationThreads(int threads) {
+		this.concurrentJobCreationThreads = threads;
+	}
+	
 	public List<JobObject> getJobs() {
 		
 		return this.jobs;
@@ -310,13 +319,31 @@ public class MultiPartJobObject {
 			
 			Thread createThread = new Thread() {
 				public void run() {
-					try {
-						job.createJob(submissionFqan);
-						serviceInterface.addJobToMultiPartJob(multiPartJobId, job.getJobname());
-					} catch (Exception e) {
-						myLogger.error(e);
-						failedSubmissions.put(job, e);
-					}
+					boolean success = false;
+					Exception lastException = null;
+						for ( int i=0; i<DEFAULT_JOB_CREATION_RETRIES; i++) {
+							try {
+//								myLogger.info("Creating job: "+job.getJobname());
+//								job.createJob(submissionFqan);
+								myLogger.info("Adding job: "+job.getJobname()+" to multipartjob: "+multiPartJobId);
+								String jobname = serviceInterface.addJobToMultiPartJob(multiPartJobId, job.getJobDescriptionDocumentAsString());
+								job.setJobname(jobname);
+								success = true;
+								break;
+							} catch (Exception e) {
+								try {
+									serviceInterface.kill(job.getJobname(), true);
+								} catch (Exception e1) {
+									// doesn't matter
+								}
+								lastException = e;
+								myLogger.error(job.getJobname()+": "+e);
+							}
+						}
+						if ( ! success ) {
+							failedSubmissions.put(job, lastException);
+						}
+						
 				}
 			};
 			executor.execute(createThread);
