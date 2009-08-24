@@ -155,7 +155,44 @@ public class MultiPartJobObject {
 		
 	}
 	
+	public String getProgress(FailedJobRestarter restarter) {
+		Date start = new Date();
+		
+		DtoMultiPartJob temp;
+		try {
+			temp = getMultiPartJob(true);
+		} catch (NoSuchJobException e) {
+			throw new RuntimeException(e);
+		}
+		Date end = new Date();
+		
+		StringBuffer output = new StringBuffer();
+		
+		output.append("Time to get all job status: "+(end.getTime()-start.getTime())/1000+" seconds."+"\n");
 
+
+		
+		output.append("Total number of jobs: "+temp.totalNumberOfJobs()+"\n");
+		output.append("Waiting jobs: "+temp.numberOfWaitingJobs()+"\n");
+		output.append("Active jobs: "+temp.numberOfRunningJobs()+"\n");
+		output.append("Successful jobs: "+temp.numberOfSuccessfulJobs()+"\n");
+		output.append("Failed jobs: "+temp.numberOfFailedJobs()+"\n");
+		if ( temp.numberOfFailedJobs() > 0 ) {
+			for ( DtoJob job : temp.getFailedJobs().getAllJobs() ) {
+				output.append("\tJobname: "+job.jobname()+", Error: "+job.propertiesAsMap().get(Constants.ERROR_REASON)+"\n");	
+			}
+			
+			if ( restarter != null ) {
+				restartFailedJobs(restarter);
+			}
+			
+		} else {
+			output.append("\n");
+		}
+		output.append("Unsubmitted jobs: "+temp.numberOfUnsubmittedJobs()+"\n");
+		
+		return output.toString();
+	}
 	
 	/**
 	 * Monitors the status of all jobs of this multipartjob.
@@ -170,44 +207,20 @@ public class MultiPartJobObject {
 	public void monitorProgress(int sleeptimeinseconds, Date enddate, boolean forceSuccess, FailedJobRestarter restarter) {
 		boolean finished = false;
 		do {
-			Date start = new Date();
+
+			String progress = getProgress(restarter);
 			
 			DtoMultiPartJob temp;
 			try {
-				temp = getMultiPartJob(true);
+				temp = getMultiPartJob(false);
 			} catch (NoSuchJobException e) {
 				throw new RuntimeException(e);
 			}
-			Date end = new Date();
-			
-			StringBuffer output = new StringBuffer();
-			
-			output.append("Time to get all job status: "+(end.getTime()-start.getTime())/1000+" seconds."+"\n");
 			if ( forceSuccess && restarter != null ) {
 				finished = temp.allJobsFinishedSuccessful();
 			} else { 
 				finished = temp.allJobsFinished();
 			}
-
-			
-			output.append("Total number of jobs: "+temp.totalNumberOfJobs()+"\n");
-			output.append("Waiting jobs: "+temp.numberOfWaitingJobs()+"\n");
-			output.append("Active jobs: "+temp.numberOfRunningJobs()+"\n");
-			output.append("Successful jobs: "+temp.numberOfSuccessfulJobs()+"\n");
-			output.append("Failed jobs: "+temp.numberOfFailedJobs()+"\n");
-			if ( temp.numberOfFailedJobs() > 0 ) {
-				for ( DtoJob job : temp.getFailedJobs().getAllJobs() ) {
-					output.append("\tJobname: "+job.jobname()+", Error: "+job.propertiesAsMap().get(Constants.ERROR_REASON)+"\n");	
-				}
-				
-				if ( restarter != null ) {
-					restartFailedJobs(restarter);
-				}
-				
-			} else {
-				output.append("\n");
-			}
-			output.append("Unsubmitted jobs: "+temp.numberOfUnsubmittedJobs()+"\n");
 
 			if ( finished || (enddate != null && new Date().after(enddate)) ) {
 				break;
@@ -217,9 +230,8 @@ public class MultiPartJobObject {
 				System.out.println(date.toString()+": "+getLogMessages(false).get(date));
 			}
 			
+			System.out.println(progress);
 			System.out.println();
-			
-			System.out.println(output.toString());
 			
 			try {
 				System.out.println("Sleeping for "+sleeptimeinseconds+" seconds...");

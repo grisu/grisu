@@ -221,11 +221,11 @@ public class GT4Submitter extends JobSubmitter {
 		String jobname_string = JsdlHelpers.getJobname(jsdl);
 		// because of some pbs restrictions we have to keep the jobname to 6
 		// chars
-		if (jobname_string.length() > 6) {
-			jobname.setTextContent(jobname_string.substring(jobname_string
-					.length() - 6));
-		}
-		// jobname.setTextContent(jobname_string);
+//		if (jobname_string.length() > 6) {
+//			jobname.setTextContent(jobname_string.substring(jobname_string
+//					.length() - 6));
+//		}
+		 jobname.setTextContent(jobname_string);
 		extensions.appendChild(jobname);
 
 		// module -- old style

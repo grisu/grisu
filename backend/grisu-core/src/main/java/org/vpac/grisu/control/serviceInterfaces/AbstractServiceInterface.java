@@ -866,8 +866,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				myLogger.error(e);
 			}
 			executor.execute(thread);
 		}
@@ -1163,14 +1162,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return JobConstants.NO_SUCH_JOB;
 		}
 		
-		Date lastCheck = job.getLastStatusCheck();
-		Date now = new Date();
-		
-		if ( now.getTime() < lastCheck.getTime() + (ServerPropertiesManager.getWaitTimeBetweenJobStatusChecks()*1000) ) {
-			myLogger.debug("Last check was: "+lastCheck.toString()+". Too early to check job status again. Returning old status...");
-			return job.getStatus();
-		}
-
 		int status = Integer.MIN_VALUE;
 		int old_status = job.getStatus();
 
@@ -1183,6 +1174,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		if (old_status >= JobConstants.FINISHED_EITHER_WAY) {
 			return old_status;
 		}
+
+		Date lastCheck = job.getLastStatusCheck();
+		Date now = new Date();
+		
+		if ( now.getTime() < lastCheck.getTime() + (ServerPropertiesManager.getWaitTimeBetweenJobStatusChecks()*1000) ) {
+			myLogger.debug("Last check was: "+lastCheck.toString()+". Too early to check job status again. Returning old status...");
+			return job.getStatus();
+		}
+
 
 		ProxyCredential cred = job.getCredential();
 		boolean changedCred = false;
