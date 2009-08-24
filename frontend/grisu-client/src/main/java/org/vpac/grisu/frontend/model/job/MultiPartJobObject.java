@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.activation.DataHandler;
-import javax.security.auth.login.FailedLoginException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -30,6 +28,7 @@ import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoMultiPartJob;
+import org.vpac.grisu.utils.FileHelpers;
 
 import au.org.arcs.jcommons.constants.Constants;
 
@@ -51,7 +50,7 @@ public class MultiPartJobObject {
 	
 	private List<JobObject> jobs = new LinkedList<JobObject>();
 	
-	private Set<String> inputFiles = new HashSet<String>();
+	private Map<String, String> inputFiles = new HashMap<String, String>();
 	
 	private DtoMultiPartJob dtoMultiPartJob = null;
 	
@@ -259,12 +258,21 @@ public class MultiPartJobObject {
 		this.jobs.add(job);
 	}
 	
-	public Set<String> getInputFiles() {
+	public Map<String, String> getInputFiles() {
 		return inputFiles;
 	}
 	
+	public void addInputFile(String inputFile, String targetFilename) {
+		inputFiles.put(inputFile, targetFilename);
+	}
+	
 	public void addInputFile(String inputFile) {
-		inputFiles.add(inputFile);
+		if ( FileManager.isLocal(inputFile) ) {
+			inputFiles.put(inputFile, new File(inputFile).getName());
+		} else {
+			FileManager.getFilename(inputFile);
+			inputFiles.put(inputFile, FileManager.getFilename(inputFile));
+		}
 	}
 	
 	public int getConcurrentJobCreationThreads() {
@@ -286,21 +294,20 @@ public class MultiPartJobObject {
 	
 	private void uploadInputFiles() throws RemoteFileSystemException, NoSuchJobException {
 		
-		for ( String inputFile : inputFiles ) {
+		for ( String inputFile : inputFiles.keySet() ) {
 			if ( FileManager.isLocal(inputFile) ) {
 
 				DataHandler dh = FileManager.createDataHandler(inputFile);
-				serviceInterface.uploadMultiPartJobInputFile(multiPartJobId, dh, new File(inputFile).getName());
+				serviceInterface.uploadInputFile(multiPartJobId, dh, inputFiles.get(inputFile));
 			} else {
-				String filename = inputFile.substring(0, inputFile.lastIndexOf("/"));
-				serviceInterface.copyMultiPartJobInputFile(multiPartJobId, inputFile, filename);
+				serviceInterface.copyMultiPartJobInputFile(multiPartJobId, inputFile, inputFiles.get(inputFile));
 			}
 		}
 	}
 	
-	public void submit(boolean wait) throws JobSubmissionException, NoSuchJobException {
+	public void submit() throws JobSubmissionException, NoSuchJobException {
 		
-		serviceInterface.submitMultiPartJob(multiPartJobId, wait);
+		serviceInterface.submitMultiPartJob(multiPartJobId);
 		
 	}
 	

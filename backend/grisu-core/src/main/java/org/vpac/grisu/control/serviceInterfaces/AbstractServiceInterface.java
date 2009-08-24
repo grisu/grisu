@@ -234,7 +234,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return manager;
 	}
 
-	public String createJobUsingJsdl(String jsdlString, final String fqan,
+	public String createJob(String jsdlString, final String fqan,
 			final String jobnameCreationMethod) throws JobPropertiesException {
 
 		Document jsdl;
@@ -317,6 +317,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		if (jobname == null) {
 			throw new RuntimeException(
 					"Jobname is null. This should never happen. Please report to markus.binsteiner@arcs.org.au");
+		}
+		
+		try {
+			MultiPartJob mpj = getMultiPartJobFromDatabase(jobname);
+			throw new JobPropertiesException("Could not create job with jobname "+jobname+". Multipart job with this id already exists...");
+		} catch (NoSuchJobException e) {
+			// that's good
 		}
 
 		Job job;
@@ -815,8 +822,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		myLogger.debug("Preparing job done.");
 	}
 
-	public void submitMultiPartJob(final String multiPartJobId,
-			boolean waitForSubmissionsToFinish) throws JobSubmissionException,
+	public void submitMultiPartJob(final String multiPartJobId) throws JobSubmissionException,
 			NoSuchJobException {
 
 		ExecutorService executor = Executors
@@ -828,8 +834,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// final Collection<String> failedJobs = CollectionUtils
 		// .synchronizedCollection(new TreeSet<String>());
 
-		for (final Job job : multiJob.getJobs()) {
+		Job[] currentlyCreatedJobs = multiJob.getJobs().toArray(new Job[]{});
+		Arrays.sort(currentlyCreatedJobs);
+		
+		for (final Job job : currentlyCreatedJobs ) {
 
+			if ( job.getStatus() != JobConstants.READY_TO_SUBMIT ) {
+				continue;
+			}
 			Thread thread = new Thread() {
 				public void run() {
 
@@ -861,16 +873,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		executor.shutdown();
 
-		if (waitForSubmissionsToFinish) {
-
-			try {
-				executor.awaitTermination(3600 * 24, TimeUnit.SECONDS);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				throw new RuntimeException(e);
-			}
-		}
+//		if (waitForSubmissionsToFinish) {
+//
+//			try {
+//				executor.awaitTermination(3600 * 24, TimeUnit.SECONDS);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//				throw new RuntimeException(e);
+//			}
+//		}
 		//
 		// if (failedJobs.size() > 0) {
 		// throw new JobSubmissionException(
@@ -988,7 +1000,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		job.addLogMessage("Restarting job...");
 		job.addLogMessage("Killing possibly running job...");
-		kill(jobname);
+		kill(job);
 
 		job.setStatus(JobConstants.READY_TO_SUBMIT);
 
@@ -1085,14 +1097,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 *            the name of the job
 	 * @return the new status of the job
 	 */
-	protected int kill(final String jobname) {
+	protected int kill(final Job job) {
 
-		Job job;
-		try {
-			job = jobdao.findJobByDN(getUser().getDn(), jobname);
-		} catch (NoSuchJobException e) {
-			return JobConstants.NO_SUCH_JOB;
-		}
+//		Job job;
+//		try {
+//			job = jobdao.findJobByDN(getUser().getDn(), jobname);
+//		} catch (NoSuchJobException e) {
+//			return JobConstants.NO_SUCH_JOB;
+//		}
 
 		job.addLogMessage("Trying to kill job...");
 		int new_status = Integer.MIN_VALUE;
@@ -1149,6 +1161,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			job = getJob(jobname);
 		} catch (NoSuchJobException e) {
 			return JobConstants.NO_SUCH_JOB;
+		}
+		
+		Date lastCheck = job.getLastStatusCheck();
+		Date now = new Date();
+		
+		if ( now.getTime() < lastCheck.getTime() + (ServerPropertiesManager.getWaitTimeBetweenJobStatusChecks()*1000) ) {
+			myLogger.debug("Last check was: "+lastCheck.toString()+". Too early to check job status again. Returning old status...");
+			return job.getStatus();
 		}
 
 		int status = Integer.MIN_VALUE;
@@ -1266,7 +1286,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					.newFixedThreadPool(ServerPropertiesManager
 							.getConcurrentJobStatusThreadsPerUser());
 
-			for (final Job job : multiPartJob.getJobs()) {
+			Job[] currentJobs = multiPartJob.getJobs().toArray(new Job[]{});
+			Arrays.sort(currentJobs);
+			
+			for (final Job job : currentJobs) {
 				Thread thread = new Thread() {
 					public void run() {
 						getJobStatus(job.getJobname());
@@ -1304,7 +1327,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		
 		//TODO calculate resulting jobname and check whether one already exists?
 		
-		String jobname = createJobUsingJsdl(jsdlString, multiJob.getFqan(), "force-name");
+		String jobname = createJob(jsdlString, multiJob.getFqan(), "force-name");
 
 		multiJob.addJob(jobname);
 
@@ -1344,6 +1367,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public DtoMultiPartJob createMultiPartJob(String multiPartJobId, String fqan)
 			throws MultiPartJobException {
 
+		
+		try {
+			Job possibleJob = getJob(multiPartJobId);
+			throw new MultiPartJobException("Can't create multipartjob with id: "+multiPartJobId+". Non-multipartjob with this id already exists...");
+		} catch (NoSuchJobException e) {
+			// that's good
+		}
+		
 		try {
 			MultiPartJob multiJob = getMultiPartJobFromDatabase(multiPartJobId);
 		} catch (NoSuchJobException e) {
@@ -1389,6 +1420,27 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		MultiPartJob multiJob = getMultiPartJobFromDatabase(multiPartJobId);
 
+
+
+		final Job[] jobs = multiJob.getJobs().toArray(new Job[]{});
+
+		if (deleteChildJobsAsWell) {
+			for (Job job : jobs) {
+
+				try {
+					job.addJobProperty(Constants.MULTIJOB_NAME, null);
+					multiJob.removeJob(job);
+					multiPartJobDao.saveOrUpdate(multiJob);
+					kill(job, true, true);
+				} catch (RemoteFileSystemException e) {
+					myLogger.error("Can't clean jobdirectory for job: "
+							+ job.getJobname(), e);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 		for (String mpRoot : multiJob.getAllUsedMountPoints()) {
 
 			String url = mpRoot
@@ -1402,26 +1454,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 
 		}
-
-		final Set<Job> jobs = multiJob.getJobs();
-
+		
 		multiPartJobDao.delete(multiJob);
 
-		if (deleteChildJobsAsWell) {
-			for (Job job : jobs) {
 
-				try {
-					job.addJobProperty(Constants.MULTIJOB_NAME, null);
-					kill(job.getJobname(), true, true);
-				} catch (RemoteFileSystemException e) {
-					myLogger.error("Can't clean jobdirectory for job: "
-							+ job.getJobname(), e);
-				} catch (MultiPartJobException e) {
-					// should never happen
-					e.printStackTrace();
-				}
-			}
-		}
 
 	}
 
@@ -1916,7 +1952,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	public void uploadMultiPartJobInputFile(String multipartjobid,
+	public void uploadInputFile(String multipartjobid,
 			DataHandler source, String targetFilename)
 			throws RemoteFileSystemException, NoSuchJobException {
 
@@ -2509,18 +2545,23 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void kill(final String jobname, final boolean clear)
 			throws RemoteFileSystemException, NoSuchJobException,
 			MultiPartJobException {
-		kill(jobname, clear, false);
+		
+		Job job;
+		
+		job = jobdao.findJobByDN(getUser().getDn(), jobname);
+		
+		kill(job, clear, false);
 	}
 
-	private void kill(final String jobname, final boolean clear,
+	private void kill(final Job job, final boolean clear,
 			final boolean clearMultiJob) throws RemoteFileSystemException,
 			NoSuchJobException, MultiPartJobException {
 
-		Job job;
+//		Job job;
+//
+//		job = jobdao.findJobByDN(getUser().getDn(), jobname);
 
-		job = jobdao.findJobByDN(getUser().getDn(), jobname);
-
-		kill(jobname);
+		kill(job);
 
 		if (clear) {
 			String mpjid = job.getJobProperty(Constants.MULTIJOB_NAME);

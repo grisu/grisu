@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.UUID;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -22,8 +22,6 @@ import javax.persistence.Transient;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.CollectionOfElements;
 import org.vpac.grisu.backend.hibernate.JobDAO;
-import org.vpac.grisu.backend.hibernate.MultiPartJobDAO;
-import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoJobProperty;
@@ -163,13 +161,13 @@ public class MultiPartJob {
 		jobdao.saveOrUpdate(job);
 	}
 
-	public void removeJob(Job job) {
+	public synchronized void removeJob(Job job) {
 		this.jobs.remove(job);
 		this.failedJobs.remove(job);
 	}
 
 	@CollectionOfElements(fetch = FetchType.EAGER)
-	public Set<Job> getJobs() {
+	public synchronized Set<Job> getJobs() {
 		return jobs;
 	}
 

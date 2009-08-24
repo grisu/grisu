@@ -699,8 +699,9 @@ public interface ServiceInterface {
 	 * 
 	 * @param multiPartJobId the id of the multipartjob
 	 * @param inputFile the inputfile
+	 * @param the target filename
 	 */
-	void uploadMultiPartJobInputFile(String multiPartJobId, DataHandler inputFile, String relativePath) throws RemoteFileSystemException, NoSuchJobException;
+	void uploadInputFile(String jobNameOrMultiPartJobId, DataHandler inputFile, String targetFilename) throws RemoteFileSystemException, NoSuchJobException;
 	
 	/**
 	 * Distributes a remote input file to all the filesystems that are used in this multipartjob.
@@ -719,11 +720,10 @@ public interface ServiceInterface {
 	 * Submits all jobs that belong to this multipartjob.
 	 * 
 	 * @param multipartjobid the id of the multipartjob
-	 * @param waitForSubmissionsToFinish whether to wait for all submissions to finish before returning from method
 	 * @throws JobSubmissionException if one of the jobsubmission failed. 
 	 * @throws NoSuchJobException if no multipartjob with this id exists
 	 */
-	void submitMultiPartJob(String multipartjobid, boolean waitForSubmissionsToFinish) throws JobSubmissionException, NoSuchJobException;
+	void submitMultiPartJob(String multipartjobid) throws JobSubmissionException, NoSuchJobException;
 	
 	/**
 	 * Returns a list of all jobnames that are currently stored on this backend.
@@ -792,13 +792,13 @@ public interface ServiceInterface {
 	 *             already exists and force-jobname is specified as jobname
 	 *             creation method).
 	 */
-	String createJobUsingJsdl(String jsdl, String fqan,
+	String createJob(String jsdl, String fqan,
 			String jobnameCreationMethod) throws JobPropertiesException;
 
 	/**
 	 * Submits the job that was prepared before using
 	 * {@link #createJobUsingMap(Map, String, String)} or
-	 * {@link #createJobUsingJsdl(String, String, String)} to the specified submission
+	 * {@link #createJob(String, String, String)} to the specified submission
 	 * location.
 	 * 
 	 * @param jobname

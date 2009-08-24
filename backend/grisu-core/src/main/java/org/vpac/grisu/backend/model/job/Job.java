@@ -1,7 +1,6 @@
 package org.vpac.grisu.backend.model.job;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,7 +18,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.xpath.XPathExpressionException;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.CollectionOfElements;
 import org.vpac.grisu.backend.model.ProxyCredential;
@@ -36,7 +34,7 @@ import au.org.arcs.jcommons.utils.JsdlHelpers;
  * 
  */
 @Entity
-public class Job {
+public class Job implements Comparable<Job> {
 
 	static final Logger myLogger = Logger.getLogger(Job.class.getName());
 
@@ -519,6 +517,10 @@ public class Job {
 	@Transient
 	public String getJobProperty(final String key) {
 		return this.jobProperties.get(key);
+	}
+
+	public int compareTo(Job arg0) {
+		return this.getJobname().compareTo(arg0.getJobname());
 	}
 
 }

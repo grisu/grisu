@@ -165,7 +165,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 	public final String createJob(final String fqan, final String jobnameCreationMethod)
 			throws JobPropertiesException {
 
-		setJobname(serviceInterface.createJobUsingJsdl(getJobDescriptionDocumentAsString(),
+		setJobname(serviceInterface.createJob(getJobDescriptionDocumentAsString(),
 				fqan, jobnameCreationMethod));
 
 		try {

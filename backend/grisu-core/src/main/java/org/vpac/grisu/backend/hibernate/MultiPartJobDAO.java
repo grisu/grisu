@@ -191,7 +191,7 @@ public class MultiPartJobDAO extends BaseHibernateDAO {
 		}
 	}
 
-	public final void saveOrUpdate(final MultiPartJob instance) {
+	public final synchronized void saveOrUpdate(final MultiPartJob instance) {
 
 		try {
 			getCurrentSession().beginTransaction();

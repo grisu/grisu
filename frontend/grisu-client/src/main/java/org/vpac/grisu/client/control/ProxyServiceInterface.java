@@ -109,10 +109,10 @@ public class ProxyServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public String createJobUsingJsdl(String jsdl, String fqan,
+	public String createJob(String jsdl, String fqan,
 			String jobnameCreationMethod) throws JobPropertiesException {
 		try {
-			Method m = si.getClass().getMethod("createJobUsingJsdl",
+			Method m = si.getClass().getMethod("createJob",
 					jsdl.getClass(), fqan.getClass(),
 					jobnameCreationMethod.getClass());
 			return (String) (m.invoke(si, jsdl, fqan, jobnameCreationMethod));
@@ -1351,12 +1351,12 @@ public class ProxyServiceInterface implements ServiceInterface {
 
 	}
 
-	public void uploadMultiPartJobInputFile(String multiPartJobId,
+	public void uploadInputFile(String multiPartJobId,
 			DataHandler inputFile, String relativePath)
 			throws RemoteFileSystemException, NoSuchJobException {
 		Method m;
 		try {
-			m = si.getClass().getMethod("uploadMultiPartJobInputFile",
+			m = si.getClass().getMethod("uploadInputFile",
 					multiPartJobId.getClass(), inputFile.getClass(),
 					relativePath.getClass());
 			m.invoke(si, multiPartJobId, inputFile, relativePath);
@@ -1380,14 +1380,14 @@ public class ProxyServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public void submitMultiPartJob(String multipartjobid, boolean wait)
+	public void submitMultiPartJob(String multipartjobid)
 			throws JobSubmissionException, NoSuchJobException {
 
 		Method m;
 		try {
-			m = si.getClass().getMethod("uploadMultiPartJobInputFile",
-					multipartjobid.getClass(), boolean.class);
-			m.invoke(si, multipartjobid, wait);
+			m = si.getClass().getMethod("submitMultiPartJob",
+					multipartjobid.getClass());
+			m.invoke(si, multipartjobid);
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {

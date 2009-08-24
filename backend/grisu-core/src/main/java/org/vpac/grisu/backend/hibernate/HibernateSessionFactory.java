@@ -215,7 +215,7 @@ public final class HibernateSessionFactory {
 			configuration.addAnnotatedClass(MultiPartJob.class);
 			configuration.addAnnotatedClass(MountPoint.class);
 			configuration.addAnnotatedClass(JobSubmissionObjectImpl.class);
-			configuration.addAnnotatedClass(DtoActionStatus.class);
+//			configuration.addAnnotatedClass(DtoActionStatus.class);
 			
 			sessionFactory = configuration.buildSessionFactory();
 		} catch (Exception e) {

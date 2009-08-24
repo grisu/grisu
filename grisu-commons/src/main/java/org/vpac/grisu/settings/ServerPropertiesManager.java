@@ -39,6 +39,8 @@ public final class ServerPropertiesManager {
 	 */
 	public static final String DEFAULT_JOB_DIR_NAME = "grisu-dir";
 	
+	public static final int DEFAULT_TIME_INBETWEEN_STATUS_CHECKS_FOR_THE_SAME_JOB_IN_SECONDS = 60; 
+	
 	public static final String DEFAULT_MULTIPARTJOB_DIR_NAME = "grisu-multijob-dir";
 
 	private static PropertiesConfiguration config = null;
@@ -229,6 +231,27 @@ public final class ServerPropertiesManager {
 			return DEFAULT_CONCURRENT_JOB_STATUS_THREADS_PER_USER;
 		}
 		return concurrentThreads;
+	}
+	
+	/**
+	 * Returns the (forced) wait time in seconds inbetween status checks for the same job.
+	 * 
+	 * @return wait time in seconds
+	 */
+	public static int getWaitTimeBetweenJobStatusChecks() {
+		int waitTimeInSeconds = -1;
+		try {
+			waitTimeInSeconds = Integer.parseInt(getServerConfiguration()
+					.getString("waitTimeInbetweenJobStatusChecks"));
+
+		} catch (Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_TIME_INBETWEEN_STATUS_CHECKS_FOR_THE_SAME_JOB_IN_SECONDS;
+		}
+		if (waitTimeInSeconds == -1) {
+			return DEFAULT_TIME_INBETWEEN_STATUS_CHECKS_FOR_THE_SAME_JOB_IN_SECONDS;
+		}
+		return waitTimeInSeconds;
 	}
 	
 	/**

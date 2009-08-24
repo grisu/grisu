@@ -29,7 +29,7 @@ public class BlenderTestCheck  {
 		final ServiceInterface si = ServiceInterfaceFactory
 				.createInterface(loginParams);
 
-		final String multiJobName = "PerformanceTest4";
+		final String multiJobName = "PerformanceTest6";
 		
 		MultiPartJobObject newObject = new MultiPartJobObject(si, multiJobName, false);
 		

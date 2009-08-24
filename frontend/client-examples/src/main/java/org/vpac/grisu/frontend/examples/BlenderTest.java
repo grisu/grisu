@@ -54,44 +54,74 @@ public class BlenderTest implements JobStatusChangeListener {
 		Set<String> versions = blenderInfo.getAllAvailableVersionsForFqan("/ARCS/NGAdmin");
 
 		Map<JobSubmissionProperty, String> jobProperties = new HashMap<JobSubmissionProperty, String>();
-		SortedSet<GridResource> resources = blenderInfo.getBestSubmissionLocations(jobProperties, "/ARCS/NGAdmin");
+		jobProperties.put(JobSubmissionProperty.WALLTIME_IN_MINUTES, "21");
+		jobProperties.put(JobSubmissionProperty.APPLICATIONVERSION, "2.49");
+		GridResource[] resources = blenderInfo.getBestSubmissionLocations(jobProperties, "/ARCS/NGAdmin").toArray(new GridResource[]{});
 		
-		final String subLoc = SubmissionLocationHelpers.createSubmissionLocationString(resources.first());
+		final int numberOfJobs = 200;
+		
+		String[] subLocs = new String[numberOfJobs];
+
+//		int numberResources = resources.length;
+		int numberResources = 4;
+		int jobsPerResource = numberOfJobs/numberOfJobs;
+		
+		for ( int i=0; i<numberResources; i++) {
+
+			final String subLoc;
+			if ( i>=3 ) {
+				subLoc = SubmissionLocationHelpers.createSubmissionLocationString(resources[i+1]);
+			} else {
+				subLoc = SubmissionLocationHelpers.createSubmissionLocationString(resources[i]);
+			}
+
+			for ( int j=0; j<jobsPerResource; j++ ) {
+				subLocs[(i*jobsPerResource)+j] = subLoc;
+			}
+		}
+		final String subLoc = SubmissionLocationHelpers.createSubmissionLocationString(resources[0]);
+		for ( int i=numberResources*jobsPerResource; i<numberOfJobs; i++ ) {
+			subLocs[i] = subLoc;
+		}
 		
 		Date start = new Date();
-		final String multiJobName = "PerformanceTest4";
+		final String multiJobName = "PerformanceTest7";
 		try {
 			si.deleteMultiPartJob(multiJobName, true);
 		} catch (Exception e) {
 			// doesn't matter
+			e.printStackTrace();
 		}
 		
 		System.out.println("Start: "+start.toString());
 		System.out.println("End: "+new Date().toString());
 		
-		System.exit(1);
+//		System.exit(1);
 		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/NGAdmin");
 				
 //		multiPartJob.setConcurrentJobCreationThreads(3);
 		
-		for (int i=1; i<1001; i++) {
+		for (int i=0; i<numberOfJobs; i++) {
 
 			final int frameNumber = i;
 				
 				JobObject jo = new JobObject(si);
 				jo.setJobname(multiJobName+"_" + frameNumber );
 				jo.setApplication("blender");
-//				jo.setCommandline("blender -b "+multiPartJob.pathToInputFiles()+"/CubesTest.blend -F PNG -o cubes_ -f "+frameNumber);
-				jo.setCommandline("echo hello");
-				jo.setSubmissionLocation(subLoc);
-				jo.setModules(new String[]{"blender/2.49"});
-				jo.setWalltimeInSeconds(100);
+				jo.setCommandline("blender -b "+multiPartJob.pathToInputFiles()+"/CubesTest.blend -F PNG -o cubes_ -f "+frameNumber);
+//				jo.setCommandline("cat "+multiPartJob.pathToInputFiles()+"/test.txt "+multiPartJob.pathToInputFiles()+"/input.txt");
+				jo.setSubmissionLocation(subLocs[i]);
+//				jo.setModules(new String[]{"blender/2.49"});
+				jo.setWalltimeInSeconds(1260);
+//				jo.setWalltimeInSeconds(70);
 				jo.setCpus(1);
 				multiPartJob.addJob(jo);
 						
 		}
 
 		multiPartJob.addInputFile("/home/markus/Desktop/CubesTest.blend");
+//		multiPartJob.addInputFile("/home/markus/temp/test.txt");
+//		multiPartJob.addInputFile("gsiftp://ng2.canterbury.ac.nz/home/grid-admin/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner/input.txt");
 		
 		try {
 			multiPartJob.prepareAndCreateJobs();
@@ -102,7 +132,7 @@ public class BlenderTest implements JobStatusChangeListener {
 			System.exit(1);
 		}
 		
-		multiPartJob.submit(false);
+		multiPartJob.submit();
 		
 
 		System.out.println("Submission finished...");

@@ -326,7 +326,7 @@ public class FileManager {
 	 */
 	public static String getFilename(String remoteurl) {
 
-		String filename = remoteurl.substring(0, remoteurl.lastIndexOf("/"));
+		String filename = remoteurl.substring(remoteurl.lastIndexOf("/")+1);
 		return filename;
 
 	}

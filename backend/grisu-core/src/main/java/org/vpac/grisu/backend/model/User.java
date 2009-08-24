@@ -932,7 +932,8 @@ public class User {
 	}
 	
 	
-	@CollectionOfElements
+//	@CollectionOfElements
+	@Transient
 	public Map<String, DtoActionStatus> getActionStatuses() {
 		return this.actionStatuses;
 	}
