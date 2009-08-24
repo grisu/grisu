@@ -67,14 +67,36 @@ public class JobObject extends JobSubmissionObjectImpl {
 	public JobObject(final ServiceInterface si, final String jobname)
 			throws NoSuchJobException {
 
+		this(si, jobname, true);
+
+	}
+
+	/**
+	 * Use this constructor if the job is already created on the backend. It'll
+	 * fetch all the basic jobproperties from the backend and it'll also get the
+	 * current status of the job.
+	 * 
+	 * @param si
+	 *            the serviceInterface
+	 * @param jobname
+	 *            the name of the job
+	 * @param refreshJobStatusOnBackend 
+	 * 		      whether to refresh the status of the job on the backend
+	 * @throws NoSuchJobException
+	 *             if there is no job with the specified name on the backend
+	 *             connected to the specified serviceInterface
+	 */
+	public JobObject(final ServiceInterface si, final String jobname, boolean refreshJobStatusOnBackend)
+			throws NoSuchJobException {
+
 		super(SeveralXMLHelpers.fromString(si.getJsdlDocument(jobname)));
 		this.serviceInterface = si;
 		this.setJobname(jobname);
 
-		getStatus(true);
+		getStatus(refreshJobStatusOnBackend);
 
 	}
-
+	
 	/**
 	 * Use this constructor if you want to create a new job.
 	 * 

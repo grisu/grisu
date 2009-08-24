@@ -86,7 +86,7 @@ public class MultiPartJobObject {
 		
 		try {
 			for ( DtoJob dtoJob : getMultiPartJob(refreshJobStatusOnBackend).getJobs().getAllJobs() ) {
-				JobObject job = new JobObject(serviceInterface, dtoJob.propertiesAsMap().get(Constants.JOBNAME_KEY));
+				JobObject job = new JobObject(serviceInterface, dtoJob.propertiesAsMap().get(Constants.JOBNAME_KEY), false);
 				jobs.add(job);
 			}
 		} catch (NoSuchJobException e) {
