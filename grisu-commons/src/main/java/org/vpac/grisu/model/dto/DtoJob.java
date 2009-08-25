@@ -5,8 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -15,7 +13,7 @@ import org.vpac.grisu.control.JobConstants;
 import au.org.arcs.jcommons.constants.Constants;
 
 /**
- * This one holds information about a job that was created (and maybe already submitted to the endpoint resource.
+ * This one holds information about a job that was created (and maybe already submitted to the endpoint resource).
  * 
  * You can use this to query information like job-directory and status of the job. Have a look in the 
  * Constants class in the GlueInterface module of the Infosystems project

@@ -954,12 +954,12 @@ public class User {
 		this.actionStatuses.put(status.getHandle(), status);
 	}
 	
-	public void setActionStatus(String handle, DtoActionStatus.Status newStatus) {
+	public void setActionStatus(String handle, String newStatus) {
 		if ( ! this.actionStatuses.containsKey(handle) ) {
 			throw new RuntimeException("Action "+handle+" doesn't exist...");
 		}
 		this.actionStatuses.get(handle).setStatus(newStatus);
-		if ( DtoActionStatus.Status.success.equals(newStatus) || DtoActionStatus.Status.failed.equals(newStatus) ) {
+		if ( DtoActionStatus.SUCCESS.equals(newStatus) || DtoActionStatus.FAILED.equals(newStatus) ) {
 			this.actionStatuses.get(handle).setEndTime(new Date());
 		}
 	}

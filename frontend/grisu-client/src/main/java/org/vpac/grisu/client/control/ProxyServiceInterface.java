@@ -1202,6 +1202,8 @@ public class ProxyServiceInterface implements ServiceInterface {
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof RemoteFileSystemException) {
 				throw (RemoteFileSystemException) e.getCause();
+			} else if ( e.getCause() instanceof OutOfMemoryError ) {
+				throw new RuntimeException(e.getCause());
 			} else {
 				throw (RuntimeException) e.getCause();
 			}

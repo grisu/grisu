@@ -12,19 +12,23 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Entity
 public class DtoActionStatus {
 	
-	public enum Type {
-		filetransfer,
-		multijobsubmission,
-		multijobcancellation,
-		jobsubmission
-	}
+	public static final String STARTED = "started";
+	public static final String SUCCESS = "success";
+	public static final String FAILED = "failed";
 	
-	public enum Status {
-		started,
-		running,
-		success,
-		failed
-	}
+//	public enum Type {
+//		filetransfer,
+//		multijobsubmission,
+//		multijobcancellation,
+//		jobsubmission
+//	}
+//	
+//	public enum Status {
+//		started,
+//		running,
+//		success,
+//		failed
+//	}
 	
 	private Long id;
 	
@@ -42,15 +46,15 @@ public class DtoActionStatus {
 	private Date startTime;
 	private Date endTime;
 	
-	private Type actionType;
+	private String actionType;
 	
-	private Status status;
+	private String status;
 	
-	public DtoActionStatus(String handle, Type type) {
+	public DtoActionStatus(String handle, String type) {
 		this.handle = handle;
 		this.actionType = type;
 		this.startTime = new Date();
-		this.status = Status.started;
+		this.status = STARTED;
 	}
 	
 	public DtoActionStatus() {
@@ -84,20 +88,20 @@ public class DtoActionStatus {
 	}
 
 	@XmlElement(name="type")
-	public Type getActionType() {
+	public String getActionType() {
 		return actionType;
 	}
 
-	public void setActionType(Type actionType) {
+	public void setActionType(String actionType) {
 		this.actionType = actionType;
 	}
 
 	@XmlElement(name="status")
-	public Status getStatus() {
+	public String getStatus() {
 		return status;
 	}
 
-	public void setStatus(Status status) {
+	public void setStatus(String status) {
 		this.status = status;
 	}
 
