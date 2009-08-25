@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.ServiceInterfaceCreator;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.settings.ClientPropertiesManager;
 
 public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 
@@ -61,6 +62,15 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 					"setMTOMEnabled", boolean.class);
 			
 			setMTOMEnabled.invoke(xfireServiceInterface, true);
+			
+			Method getXfireClient = xfireServiceInterface.getClass().getMethod("getXFireClient");
+			Object xfireClient = getXfireClient.invoke(xfireServiceInterface);
+			
+			Method setPropertyMethod = xfireClient.getClass().getMethod("setProperty", String.class, Object.class);
+			setPropertyMethod.invoke(xfireClient, "urn:xfire:transport:http:chunking-enabled", "true");
+			
+			Long timeout = ClientPropertiesManager.getConnectionTimeoutInMS();
+			setPropertyMethod.invoke(xfireClient, "http.timeout", timeout.toString());
 
 
 		} catch (Exception e) {
