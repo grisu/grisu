@@ -925,6 +925,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				job.addLogMessage("File staging finished.");
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new JobSubmissionException(
 					"Could not access remote filesystem: "
 							+ e.getLocalizedMessage());
@@ -1178,7 +1179,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		Date lastCheck = job.getLastStatusCheck();
 		Date now = new Date();
 		
-		if ( now.getTime() < lastCheck.getTime() + (ServerPropertiesManager.getWaitTimeBetweenJobStatusChecks()*1000) ) {
+		if ( old_status != JobConstants.EXTERNAL_HANDLE_READY && (now.getTime() < lastCheck.getTime() + (ServerPropertiesManager.getWaitTimeBetweenJobStatusChecks()*1000)) ) {
 			myLogger.debug("Last check was: "+lastCheck.toString()+". Too early to check job status again. Returning old status...");
 			return job.getStatus();
 		}

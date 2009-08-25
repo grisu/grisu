@@ -39,7 +39,9 @@ public class BlenderTest implements JobStatusChangeListener {
 //				"http://localhost:8080/xfire-backend/services/grisu",
 //				"https://ngportal.vpac.org/grisu-ws/soap/EnunciateServiceInterfaceService",
 //				 "https://ngportal.vpac.org/grisu-ws/services/grisu",
-				 "Local",
+//				"https://ngportal.vpac.org/grisu-ws/soap/GrisuService",
+				"http://localhost:8080/enunciate-backend/soap/GrisuService",
+//				 "Local",
 //				"Dummy",
 				username, password);
 
