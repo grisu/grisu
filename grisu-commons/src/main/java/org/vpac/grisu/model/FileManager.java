@@ -321,13 +321,17 @@ public class FileManager {
 	/**
 	 * Helper method to extract the filename out of an url.
 	 * 
-	 * @param remoteurl the url
+	 * @param url the url
 	 * @return the filename
 	 */
-	public static String getFilename(String remoteurl) {
+	public static String getFilename(String url) {
 
-		String filename = remoteurl.substring(remoteurl.lastIndexOf("/")+1);
-		return filename;
+		if ( isLocal(url) ) {
+			return new File(url).getName();
+		} else { 
+			String filename = url.substring(url.lastIndexOf("/")+1);
+			return filename;
+		}
 
 	}
 
@@ -429,6 +433,16 @@ public class FileManager {
 	 */
 	public static final DataHandler createDataHandler(String file) {
 		return createDataHandler(new File(file));
+	}
+
+	public boolean fileExists(String file) throws RemoteFileSystemException {
+
+		if ( isLocal(file) ) {
+			return new File(file).exists();
+		} else {
+			return serviceInterface.fileExists(file);
+		}
+		
 	}
 	
 }

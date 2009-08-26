@@ -17,6 +17,7 @@ import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.DtoFolder;
+import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.job.JobCreatedProperty;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.utils.FileHelpers;
@@ -91,10 +92,18 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 		super(SeveralXMLHelpers.fromString(si.getJsdlDocument(jobname)));
 		this.serviceInterface = si;
-		this.setJobname(jobname);
 
 		getStatus(refreshJobStatusOnBackend);
 
+	}
+	
+	public JobObject(final ServiceInterface si, final DtoJob job) throws NoSuchJobException {
+		
+		super(SeveralXMLHelpers.fromString(si.getJsdlDocument(job.jobname())));
+		this.serviceInterface = si;
+
+		setStatus(job.getStatus());
+		allJobProperties = job.propertiesAsMap();
 	}
 	
 	/**
@@ -360,6 +369,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 		return allJobProperties;
 
 	}
+	
 
 	/**
 	 * Returns the absolute url to the job directory.

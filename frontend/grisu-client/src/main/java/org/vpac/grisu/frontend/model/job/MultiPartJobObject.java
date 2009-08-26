@@ -86,7 +86,7 @@ public class MultiPartJobObject {
 		
 		try {
 			for ( DtoJob dtoJob : getMultiPartJob(refreshJobStatusOnBackend).getJobs().getAllJobs() ) {
-				JobObject job = new JobObject(serviceInterface, dtoJob.propertiesAsMap().get(Constants.JOBNAME_KEY), false);
+				JobObject job = new JobObject(serviceInterface, dtoJob);
 				jobs.add(job);
 			}
 		} catch (NoSuchJobException e) {
@@ -376,7 +376,7 @@ public class MultiPartJobObject {
 			myLogger.error(e);
 			throw new RuntimeException("Job creation executor interrupted...");
 		}
-		myLogger.debug("Finished submission of "+getJobs().size()+" jobs as part of multipartjob: "+multiPartJobId);
+		myLogger.debug("Finished creation of "+getJobs().size()+" jobs as part of multipartjob: "+multiPartJobId);
 		
 		if ( failedSubmissions.size() > 0 ) {
 			myLogger.error(failedSubmissions.size()+" submission failed...");
