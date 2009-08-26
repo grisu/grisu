@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -18,6 +19,7 @@ import javax.activation.DataHandler;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.client.control.clientexceptions.FileTransferException;
+import org.vpac.grisu.client.control.clientexceptions.JobCreationException;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
@@ -28,9 +30,11 @@ import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoMultiPartJob;
-import org.vpac.grisu.utils.FileHelpers;
 
 import au.org.arcs.jcommons.constants.Constants;
+import au.org.arcs.jcommons.constants.JobSubmissionProperty;
+import au.org.arcs.jcommons.interfaces.GridResource;
+import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
 
 public class MultiPartJobObject {
 	
@@ -54,6 +58,18 @@ public class MultiPartJobObject {
 	
 	private DtoMultiPartJob dtoMultiPartJob = null;
 	
+	private String[] sitesToInclude;
+	private String[] sitesToExclude;
+	
+	private int maxWalltimeInSecondsAcrossJobs = 3600;
+	private int defaultWalltime = 3600;
+	
+	private String defaultApplication = Constants.GENERIC_APPLICATION_NAME;
+	private String defaultVersion = Constants.NO_VERSION_INDICATOR_STRING;
+	
+	private int defaultNoCpus = 1;
+	
+
 	/**
 	 * Use this constructor if you want to create a multipartjob.
 	 * 
@@ -267,8 +283,120 @@ public class MultiPartJobObject {
 		if ( jobs.contains(job) ) {
 			throw new IllegalArgumentException("Job: "+job.getJobname()+" already part of this multiPartJob.");
 		}
+		if ( job.getWalltimeInSeconds() <= 0 ) {
+			job.setWalltimeInSeconds(defaultWalltime);
+		} else {
+			if ( job.getWalltimeInSeconds() > maxWalltimeInSecondsAcrossJobs ) {
+				maxWalltimeInSecondsAcrossJobs = job.getWalltimeInSeconds();
+			}
+		}
 		this.jobs.add(job);
 	}
+	
+	public SortedSet<GridResource> findBestResources() {
+		
+		Map<JobSubmissionProperty, String> properties = new HashMap<JobSubmissionProperty, String>();
+		properties.put(JobSubmissionProperty.NO_CPUS, new Integer(defaultNoCpus).toString());
+		properties.put(JobSubmissionProperty.APPLICATIONVERSION, defaultVersion);
+		properties.put(JobSubmissionProperty.WALLTIME_IN_MINUTES, new Integer(defaultWalltime/60).toString());
+		
+		SortedSet<GridResource> result = GrisuRegistryManager.getDefault(serviceInterface).getApplicationInformation(defaultApplication).getBestSubmissionLocations(properties, getFqan());
+		return result;
+		
+	}
+	
+	public void fillOrOverwriteSubmissionLocationsUsingMatchmaker() throws JobCreationException, JobSubmissionException {
+		
+		Map<String, Integer> submissionLocations = new TreeMap<String, Integer>();
+		
+		Long allWalltime = 0L;
+		for ( JobObject job : this.jobs ) {
+			allWalltime = allWalltime + job.getWalltimeInSeconds();
+		}
+		
+		Map<GridResource, Long> resourcesToUse = new TreeMap<GridResource, Long>();
+		List<Integer> ranks = new LinkedList<Integer>();
+		Long allRanks = 0L;
+		for ( GridResource resource : findBestResources() ) {
+			
+			if ( resource.getQueueName().contains("sque") ) {
+				continue;
+			}
+			if ( sitesToInclude != null ) {
+				
+				for ( String site : sitesToInclude ) {
+					if ( site.equalsIgnoreCase(resource.getSiteName()) ) {
+						resourcesToUse.put(resource, new Long(0L));
+						ranks.add(resource.getRank());
+						allRanks = allRanks + resource.getRank();
+					}
+				}
+				
+			} else if ( sitesToExclude != null ) {
+				
+				for ( String site : sitesToExclude ) {
+					if ( ! site.equalsIgnoreCase(resource.getSiteName()) ) {
+						resourcesToUse.put(resource, new Long(0L));
+						ranks.add(resource.getRank());
+						allRanks = allRanks + resource.getRank();
+					}
+				}
+				
+			} else {
+				resourcesToUse.put(resource, new Long(0L));
+				ranks.add(resource.getRank());
+				allRanks = allRanks + resource.getRank();
+			}
+		}
+		
+		myLogger.debug("Rank summary: "+allRanks);
+		myLogger.debug("Walltime summary: "+allWalltime);
+		
+		//TODO change that later on so more than one frames can be included in one job
+		for ( JobObject job : this.jobs ) {
+			
+			
+			GridResource subLocResource = null;
+			long oldWalltimeSummary = 0L;
+			for ( GridResource resource : resourcesToUse.keySet() ) {
+				
+				long rankPercentage = (resource.getRank()*100)/(allRanks);
+				long wallTimePercentage = ((job.getWalltimeInSeconds()+resourcesToUse.get(resource))*100)/(allWalltime);
+				
+				if ( rankPercentage >= wallTimePercentage ) {
+					subLocResource = resource;
+					oldWalltimeSummary = resourcesToUse.get(subLocResource);
+					myLogger.debug("Rank percentage: "+rankPercentage+". Walltime percentage: "+wallTimePercentage+". Using resource: "+resource.getQueueName());
+					break;
+				} else {
+					myLogger.debug("Rank percentage: "+rankPercentage+". Walltime percentage: "+wallTimePercentage+". Not using resource: "+resource.getQueueName());
+				}
+			}
+			
+			if ( subLocResource == null ) {
+				subLocResource = resourcesToUse.keySet().iterator().next();
+				myLogger.error("Couldn't find resource for job: "+job.getJobname());
+			}
+			
+			String subLoc = SubmissionLocationHelpers.createSubmissionLocationString(subLocResource);
+			Integer currentCount = submissionLocations.get(subLocResource.toString());
+			if ( currentCount == null ) {
+				currentCount = 0;
+			}
+			submissionLocations.put(subLocResource.toString(), currentCount+1);
+
+			job.setSubmissionLocation(subLoc);
+			resourcesToUse.put(subLocResource, oldWalltimeSummary+job.getWalltimeInSeconds());
+		}
+		
+		myLogger.debug("Filled submissionlocations for multijob: "+multiPartJobId);
+		myLogger.debug("Submitted jobs to:\t\t\tAmount");
+		for ( String sl : submissionLocations.keySet() ) {
+			myLogger.debug(sl+"\t\t\t\t"+submissionLocations.get(sl));
+		}
+		
+	}
+	
 	
 	public Map<String, String> getInputFiles() {
 		return inputFiles;
@@ -434,4 +562,70 @@ public class MultiPartJobObject {
 		
 	}
 
+	public void setSitesToInclude(String[] sites) {
+		this.sitesToInclude = sites;
+		this.sitesToExclude = null;
+	}
+	
+	public void setSitesToExclude(String[] sites) {
+		this.sitesToExclude = sites;
+		this.sitesToInclude = null;
+	}
+	
+	public int getMaxWalltimeInSeconds() {
+		return maxWalltimeInSecondsAcrossJobs;
+	}
+	
+	public int getDefaultWalltime() {
+		return this.defaultWalltime;
+	}
+
+	public void setDefaultWalltimeInSeconds(int walltimeInSeconds) {
+		this.defaultWalltime = walltimeInSeconds;
+		this.maxWalltimeInSecondsAcrossJobs = walltimeInSeconds;
+		
+		for ( JobObject job : this.jobs ) {
+			job.setWalltimeInSeconds(walltimeInSeconds);
+		}
+	}
+	
+	public String getDefaultApplication() {
+		return defaultApplication;
+	}
+	
+	public void setDefaultApplication(String defaultApplication) {
+		this.defaultApplication = defaultApplication;
+		
+		for ( JobObject job : this.jobs ) {
+			job.setApplication(defaultApplication);
+		}
+	}
+
+	public String getDefaultVersion() {
+		return defaultVersion;
+	}
+
+	public void setDefaultVersion(String defaultVersion) {
+		this.defaultVersion = defaultVersion;
+
+		for ( JobObject job : this.jobs ) {
+			job.setApplicationVersion(defaultVersion);
+		}
+		
+	}
+
+	public int getDefaultNoCpus() {
+		
+		return defaultNoCpus;
+	}
+
+	public void setDefaultNoCpus(int defaultNoCpus) {
+		this.defaultNoCpus = defaultNoCpus;
+
+		for ( JobObject job : this.jobs ) {
+			job.setCpus(defaultNoCpus);
+		}
+		
+	}
+	
 }
