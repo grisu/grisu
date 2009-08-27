@@ -51,10 +51,10 @@ public class MultiJobSubmit implements JobStatusChangeListener {
 
 		final GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
 
-		final int numberOfJobs = 100;
+		final int numberOfJobs = 150;
 		
 		Date start = new Date();
-		final String multiJobName = "MultiJobTest2";
+		final String multiJobName = "MultiJobTest3";
 		try {
 			si.deleteMultiPartJob(multiJobName, true);
 		} catch (Exception e) {
@@ -88,7 +88,7 @@ public class MultiJobSubmit implements JobStatusChangeListener {
 //		multiPartJob.setConcurrentJobCreationThreads(1);
 		multiPartJob.setDefaultApplication("generic");
 		
-		multiPartJob.setSitesToExclude(new String[]{"vpac"});
+		multiPartJob.setSitesToExclude(new String[]{"vpac", "massey", "uq", "canterbury", "sapac", "ivec", "otago"});
 		
 		multiPartJob.setDefaultNoCpus(1);
 		multiPartJob.setDefaultWalltimeInSeconds(60*21);
