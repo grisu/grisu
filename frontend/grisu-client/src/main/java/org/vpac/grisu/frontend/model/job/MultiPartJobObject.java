@@ -2,6 +2,7 @@ package org.vpac.grisu.frontend.model.job;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -69,6 +70,7 @@ public class MultiPartJobObject {
 	
 	private int defaultNoCpus = 1;
 	
+	private String[] allRemoteJobnames;
 
 	/**
 	 * Use this constructor if you want to create a multipartjob.
@@ -283,6 +285,11 @@ public class MultiPartJobObject {
 		if ( jobs.contains(job) ) {
 			throw new IllegalArgumentException("Job: "+job.getJobname()+" already part of this multiPartJob.");
 		}
+		
+		if ( Arrays.binarySearch(getAllRemoteJobnames(), job.getJobname()) >= 0 ) {
+			throw new IllegalArgumentException("Job: "+job.getJobname()+" already exists on the backend.");
+		}
+		
 		if ( job.getWalltimeInSeconds() <= 0 ) {
 			job.setWalltimeInSeconds(defaultWalltime);
 		} else {
@@ -325,21 +332,27 @@ public class MultiPartJobObject {
 			if ( sitesToInclude != null ) {
 				
 				for ( String site : sitesToInclude ) {
-					if ( site.equalsIgnoreCase(resource.getSiteName()) ) {
+					if ( resource.getSiteName().toLowerCase().contains(site.toLowerCase()) ) {
 						resourcesToUse.put(resource, new Long(0L));
 						ranks.add(resource.getRank());
 						allRanks = allRanks + resource.getRank();
+						break;
 					}
 				}
 				
 			} else if ( sitesToExclude != null ) {
 				
+				boolean useSite = true;
 				for ( String site : sitesToExclude ) {
-					if ( ! site.equalsIgnoreCase(resource.getSiteName()) ) {
-						resourcesToUse.put(resource, new Long(0L));
-						ranks.add(resource.getRank());
-						allRanks = allRanks + resource.getRank();
+					if ( resource.getSiteName().toLowerCase().contains(site.toLowerCase()) ) {
+						useSite = false;
+						break;
 					}
+				}
+				if ( useSite ) {
+					resourcesToUse.put(resource, new Long(0L));
+					ranks.add(resource.getRank());
+					allRanks = allRanks + resource.getRank();					
 				}
 				
 			} else {
@@ -478,6 +491,7 @@ public class MultiPartJobObject {
 								success = true;
 								break;
 							} catch (Exception e) {
+								e.printStackTrace();
 								try {
 									serviceInterface.kill(job.getJobname(), true);
 								} catch (Exception e1) {
@@ -626,6 +640,14 @@ public class MultiPartJobObject {
 			job.setCpus(defaultNoCpus);
 		}
 		
+	}
+	
+	private String[] getAllRemoteJobnames() {
+		if ( allRemoteJobnames == null ) {
+			allRemoteJobnames = serviceInterface.getAllJobnames();
+			Arrays.sort(allRemoteJobnames);
+		}
+		return allRemoteJobnames;
 	}
 	
 }

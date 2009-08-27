@@ -66,6 +66,7 @@ public class MultiPartJob {
 	
 	private String fqan = null;
 
+
 	private Map<Long, String> logMessages = Collections
 			.synchronizedMap(new TreeMap<Long, String>());
 
@@ -283,5 +284,7 @@ public class MultiPartJob {
 
 		return result;
 	}
+	
+
 
 }

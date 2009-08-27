@@ -122,7 +122,7 @@ public final class ServiceInterfaceFactory {
 						.newInstance();
 			} catch (Exception e) {
 				// shouldn't really happen
-				e.printStackTrace();
+//				e.printStackTrace();
 				continue;
 			}
 
@@ -139,7 +139,7 @@ public final class ServiceInterfaceFactory {
 						username, password, myProxyServer, myProxyPort,
 						otherOptions);
 			} catch (ServiceInterfaceException e) {
-				e.printStackTrace();
+//				e.printStackTrace();
 				myLogger.debug("Couldn't connect to url " + interfaceUrl
 						+ " using serviceInterfaceCreator " + className + ": "
 						+ e.getLocalizedMessage());
@@ -150,7 +150,7 @@ public final class ServiceInterfaceFactory {
 			try {
 				serviceInterface.login(username, new String(password));
 			} catch (Exception e) {
-				e.printStackTrace();
+//				e.printStackTrace();
 				myLogger.debug("Couldn't login to grisu service on: "
 						+ interfaceUrl + ": " + e.getLocalizedMessage());
 				failedCreators.put(className, e);

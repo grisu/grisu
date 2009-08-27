@@ -54,7 +54,7 @@ public class MultiJobSubmit implements JobStatusChangeListener {
 		final int numberOfJobs = 100;
 		
 		Date start = new Date();
-		final String multiJobName = "PerformanceTest7";
+		final String multiJobName = "MultiJobTest2";
 		try {
 			si.deleteMultiPartJob(multiJobName, true);
 		} catch (Exception e) {
@@ -62,9 +62,10 @@ public class MultiJobSubmit implements JobStatusChangeListener {
 			e.printStackTrace();
 		}
 		
+		
 		System.out.println("Start: "+start.toString());
 		System.out.println("End: "+new Date().toString());
-		
+//		System.exit(1);
 //		System.exit(1);
 		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/NGAdmin");
 				
@@ -77,13 +78,17 @@ public class MultiJobSubmit implements JobStatusChangeListener {
 				JobObject jo = new JobObject(si);
 				jo.setJobname(multiJobName+"_" + frameNumber );
 //				jo.setApplication("java");
-				jo.setCommandline("java -version");
+//				jo.setCommandline("java -version");
+				jo.setCommandline("echo hello world");
 
 				multiPartJob.addJob(jo);
 						
 		}
 
-		multiPartJob.setDefaultApplication("java");
+//		multiPartJob.setConcurrentJobCreationThreads(1);
+		multiPartJob.setDefaultApplication("generic");
+		
+		multiPartJob.setSitesToExclude(new String[]{"vpac"});
 		
 		multiPartJob.setDefaultNoCpus(1);
 		multiPartJob.setDefaultWalltimeInSeconds(60*21);

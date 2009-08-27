@@ -79,6 +79,7 @@ import org.vpac.security.light.voms.VOManagement.VOManagement;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import au.org.arcs.grid.grisu.matchmaker.CachedMatchMakerImpl;
 import au.org.arcs.grid.grisu.matchmaker.MatchMakerImpl;
 import au.org.arcs.grid.sched.MatchMaker;
 import au.org.arcs.jcommons.constants.Constants;
@@ -134,8 +135,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	// protected ExecutorService executor = Executors.newFixedThreadPool(2);
 
-	private MatchMaker matchmaker = new MatchMakerImpl(Environment
-			.getGrisuDirectory().toString());
+//	private MatchMaker matchmaker = new MatchMakerImpl(Environment
+//			.getGrisuDirectory().toString());
+	private MatchMaker matchmaker = new CachedMatchMakerImpl(Environment.getGrisuDirectory().toString());
 
 	public String getInterfaceVersion() {
 		return ServiceInterface.INTERFACE_VERSION;
