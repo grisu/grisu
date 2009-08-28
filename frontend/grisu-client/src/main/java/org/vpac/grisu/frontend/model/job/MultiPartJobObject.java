@@ -307,7 +307,7 @@ public class MultiPartJobObject {
 		properties.put(JobSubmissionProperty.APPLICATIONVERSION, defaultVersion);
 		properties.put(JobSubmissionProperty.WALLTIME_IN_MINUTES, new Integer(defaultWalltime/60).toString());
 		
-		SortedSet<GridResource> result = GrisuRegistryManager.getDefault(serviceInterface).getApplicationInformation(defaultApplication).getBestSubmissionLocations(properties, getFqan());
+		SortedSet<GridResource> result = GrisuRegistryManager.getDefault(serviceInterface).getApplicationInformation(getDefaultApplication()).getBestSubmissionLocations(properties, getFqan());
 		return result;
 		
 	}

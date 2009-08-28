@@ -8,6 +8,7 @@ import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.DtoFolder;
+import org.vpac.grisu.model.dto.DtoMountPoints;
 
 public class FileListingTest {
 
@@ -32,6 +33,10 @@ public class FileListingTest {
 		
 		DtoFolder folder = si.ls("gsiftp://ng2.vpac.org/home/grid-admin/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner", 0);
 
+		DtoMountPoints mps = si.df();
+		for ( MountPoint mp : mps.getMountpoints() ) {
+			System.out.println(mp.getAlias());
+		}
 		for ( String file : folder.listOfAllFilesUnderThisFolder() ) {
 			System.out.println(file);
 		}

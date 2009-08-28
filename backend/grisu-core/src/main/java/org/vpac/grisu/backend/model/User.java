@@ -40,6 +40,8 @@ import org.vpac.security.light.voms.VO;
 import org.vpac.security.light.voms.VOManagement.VOManagement;
 import org.vpac.security.light.vomsProxy.VomsException;
 
+import au.org.arcs.jcommons.constants.Constants;
+
 import uk.ac.dl.escience.vfs.util.VFSUtil;
 
 /**
@@ -486,7 +488,7 @@ public class User {
 	public MountPoint mountFileSystem(final String root, final String name, final String fqan,
 			final boolean useHomeDirectory) throws RemoteFileSystemException {
 
-		if (fqan == null) {
+		if (fqan == null || Constants.NON_VO_FQAN.equals(fqan)) {
 			return mountFileSystem(root, name, useHomeDirectory);
 		} else {
 

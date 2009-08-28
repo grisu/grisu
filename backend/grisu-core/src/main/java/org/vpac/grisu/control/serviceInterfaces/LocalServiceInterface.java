@@ -8,6 +8,7 @@ import org.globus.myproxy.CredentialInfo;
 import org.globus.myproxy.MyProxy;
 import org.globus.myproxy.MyProxyException;
 import org.ietf.jgss.GSSException;
+import org.vpac.grisu.backend.hibernate.HibernateSessionFactory;
 import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.backend.utils.LocalTemplatesHelper;
 import org.vpac.grisu.control.ServiceInterface;
@@ -163,12 +164,20 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 		this.passphrase = password.toCharArray();
 
 		try {
+			// init database and make sure everything is all right
+			HibernateSessionFactory.getSessionFactory();
+		} catch (Throwable e) {
+			throw new RuntimeException("Could not initialize database.", e);
+		}
+
+		try {
 			getCredential();
 		} catch (Exception e) {
 //			e.printStackTrace();
 			throw new NoValidCredentialException("No valid credential: "
 					+ e.getLocalizedMessage());
 		}
+		
 	}
 
 	public final String logout() {

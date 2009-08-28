@@ -65,7 +65,7 @@ public class MultiJobSubmit implements JobStatusChangeListener {
 		
 		System.out.println("Start: "+start.toString());
 		System.out.println("End: "+new Date().toString());
-//		System.exit(1);
+		System.exit(1);
 //		System.exit(1);
 		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/NGAdmin");
 				

@@ -218,9 +218,10 @@ public final class HibernateSessionFactory {
 //			configuration.addAnnotatedClass(DtoActionStatus.class);
 			
 			sessionFactory = configuration.buildSessionFactory();
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			System.err.println("%%%% Error Creating SessionFactory %%%%");
-			e.printStackTrace();
+//			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 }

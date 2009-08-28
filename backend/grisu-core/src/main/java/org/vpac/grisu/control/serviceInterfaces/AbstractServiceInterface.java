@@ -135,9 +135,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	// protected ExecutorService executor = Executors.newFixedThreadPool(2);
 
-//	private MatchMaker matchmaker = new MatchMakerImpl(Environment
-//			.getGrisuDirectory().toString());
-	private MatchMaker matchmaker = new CachedMatchMakerImpl(Environment.getGrisuDirectory().toString());
+	private MatchMaker matchmaker = new MatchMakerImpl(Environment
+			.getGrisuDirectory().toString());
+//	private MatchMaker matchmaker = new CachedMatchMakerImpl(Environment.getGrisuDirectory().toString());
 
 	public String getInterfaceVersion() {
 		return ServiceInterface.INTERFACE_VERSION;
@@ -401,9 +401,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 //				jobCreationMethod);
 //	}
 
-	private void setVO(final Job job, final String fqan)
+	private void setVO(final Job job, String fqan)
 			throws NoSuchJobException, JobPropertiesException {
 
+		if ( fqan == null ) {
+			fqan = Constants.NON_VO_FQAN;
+		}
 		job.setFqan(fqan);
 		job.getJobProperties().put(Constants.FQAN_KEY, fqan);
 
@@ -1502,10 +1505,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	}
 
 	public MountPoint mount(final String url, final String mountpoint,
-			final String fqan, final boolean useHomeDirectory)
+			String fqan, final boolean useHomeDirectory)
 			throws RemoteFileSystemException {
 		myLogger.debug("Mounting: " + url + " to: " + mountpoint
 				+ " with fqan: " + fqan);
+		if ( fqan == null ) {
+			fqan = Constants.NON_VO_FQAN;
+		}
 		MountPoint mp = getUser().mountFileSystem(url, mountpoint, fqan,
 				useHomeDirectory);
 		userdao.saveOrUpdate(getUser());
