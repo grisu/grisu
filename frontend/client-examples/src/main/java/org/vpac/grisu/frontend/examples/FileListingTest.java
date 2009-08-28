@@ -30,21 +30,21 @@ public class FileListingTest {
 		final GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
 		final FileManager fileManager = registry.getFileManager();
 		
-//		DtoFolder folder = si.ls("gsiftp://ng2.vpac.org/home/grid-admin/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner", 0);
-//
-//		for ( String file : folder.listOfAllFilesUnderThisFolder() ) {
-//			System.out.println(file);
-//		}
-		
-		for ( MountPoint mp : si.df().getMountpoints() ) {
-			System.out.println("Deleting: "+mp.getRootUrl());
-			try {
-				fileManager.deleteFile(mp.getRootUrl());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
- 			
+		DtoFolder folder = si.ls("gsiftp://ng2.vpac.org/home/grid-admin/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner", 0);
+
+		for ( String file : folder.listOfAllFilesUnderThisFolder() ) {
+			System.out.println(file);
 		}
+		
+//		for ( MountPoint mp : si.df().getMountpoints() ) {
+//			System.out.println("Deleting: "+mp.getRootUrl());
+//			try {
+//				fileManager.deleteFile(mp.getRootUrl());
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+// 			
+//		}
 
 	}
 
