@@ -50,7 +50,13 @@ public final class LoginHelpers {
 	public static ServiceInterface myProxyLogin(final LoginParams loginParams)
 			throws LoginException, ServiceInterfaceException {
 
-		addPluginsToClasspath();
+		try {
+			addPluginsToClasspath();
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+			throw new RuntimeException(e2);
+		}
 		
 		ServiceInterface si = ServiceInterfaceFactory.createInterface(
 				loginParams.getServiceInterfaceUrl(), loginParams
@@ -120,7 +126,13 @@ public final class LoginHelpers {
 			ServiceInterfaceException {
 
 		
-		addPluginsToClasspath();
+		try {
+			addPluginsToClasspath();
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+			throw new RuntimeException(e2);
+		}
 		
 		
 		ServiceInterface serviceInterface = null;
@@ -205,7 +217,13 @@ public final class LoginHelpers {
 			final GSSCredential cred) throws LoginException,
 			ServiceInterfaceException {
 
-		addPluginsToClasspath();
+		try {
+			addPluginsToClasspath();
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+			throw new RuntimeException(e2);
+		}
 		
 		ServiceInterface serviceInterface = null;
 
@@ -292,7 +310,13 @@ public final class LoginHelpers {
 			final LoginParams loginParams) throws LoginException,
 			ServiceInterfaceException {
 		
-		addPluginsToClasspath();
+		try {
+			addPluginsToClasspath();
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+			throw new RuntimeException(e2);
+		}
 
 		ServiceInterface serviceInterface = null;
 
@@ -357,14 +381,11 @@ public final class LoginHelpers {
 		return serviceInterface;
 	}
 	
-	public static void addPluginsToClasspath() {
+	public static void addPluginsToClasspath() throws IOException {
 		
-		try {
-			DependencyManager.checkForDependency("org.bouncycastle.jce.provider.BouncyCastleProvider", "http://www.bouncycastle.org/download/bcprov-jdk15-143.jar", new File(Environment.getGrisuPluginDirectory(), "bcprov-jdk15-143.jar"));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		DependencyManager.checkForDependency("org.bouncycastle.jce.provider.BouncyCastleProvider", "http://www.bouncycastle.org/download/bcprov-jdk15-143.jar", new File(Environment.getGrisuPluginDirectory(), "bcprov-jdk15-143.jar"));
+
+		DependencyManager.checkForDependency("org.vpac.grisu.control.serviceInterfaces.LocalServiceInterface", "http://staff.vpac.org/~markus/grisu-local-backend.jar", new File(Environment.getGrisuPluginDirectory(), "grisu-local-backend.jar"));
 		
 		ClasspathHacker.initFolder(new File(Environment.getGrisuPluginDirectory()), new GrisuPluginFilenameFilter());
 		
