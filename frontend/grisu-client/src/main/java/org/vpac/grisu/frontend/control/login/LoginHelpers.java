@@ -1,5 +1,7 @@
 package org.vpac.grisu.frontend.control.login;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
@@ -13,8 +15,13 @@ import org.ietf.jgss.GSSCredential;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.settings.MyProxyServerParams;
+import org.vpac.grisu.utils.GrisuPluginFilenameFilter;
 import org.vpac.security.light.plainProxy.LocalProxy;
+
+import au.org.arcs.jcommons.dependencies.ClasspathHacker;
+import au.org.arcs.jcommons.dependencies.DependencyManager;
 
 /**
  * Some easy-to-use methods to login to a Grisu web service.
@@ -40,9 +47,11 @@ public final class LoginHelpers {
 	 * @throws LoginException
 	 * @throws ServiceInterfaceException
 	 */
-	public static ServiceInterface login(final LoginParams loginParams)
+	public static ServiceInterface myProxyLogin(final LoginParams loginParams)
 			throws LoginException, ServiceInterfaceException {
 
+		addPluginsToClasspath();
+		
 		ServiceInterface si = ServiceInterfaceFactory.createInterface(
 				loginParams.getServiceInterfaceUrl(), loginParams
 						.getMyProxyUsername(), loginParams
@@ -82,13 +91,13 @@ public final class LoginHelpers {
 	 * @throws GlobusCredentialException
 	 *             if there is no valid globus proxy on your machine
 	 */
-	public static ServiceInterface login() throws LoginException,
+	public static ServiceInterface defaultLocalProxyLogin() throws LoginException,
 			GlobusCredentialException, ServiceInterfaceException {
 
 		LoginParams defaultLoginParams = new LoginParams("Local", null, null,
 				MyProxyServerParams.DEFAULT_MYPROXY_SERVER, new Integer(
 						MyProxyServerParams.DEFAULT_MYPROXY_PORT).toString());
-		return login(defaultLoginParams, LocalProxy.loadGSSCredential());
+		return gssCredentialLogin(defaultLoginParams, LocalProxy.loadGSSCredential());
 
 	}
 
@@ -106,9 +115,14 @@ public final class LoginHelpers {
 	 * @throws ServiceInterfaceException
 	 *             if the serviceInterface can't be created
 	 */
-	public static ServiceInterface login(final LoginParams loginParams,
+	public static ServiceInterface globusCredentialLogin(final LoginParams loginParams,
 			final GlobusCredential proxy) throws LoginException,
 			ServiceInterfaceException {
+
+		
+		addPluginsToClasspath();
+		
+		
 		ServiceInterface serviceInterface = null;
 
 		Class directMyProxyUploadClass = null;
@@ -154,7 +168,7 @@ public final class LoginHelpers {
 			loginParams.setMyProxyServer(myProxyServer);
 			loginParams.setMyProxyPort(new Integer(myProxyPort).toString());
 
-			serviceInterface = login(loginParams);
+			serviceInterface = myProxyLogin(loginParams);
 			serviceInterface.login(myproxyusername, new String(myproxyDetails
 					.get(myproxyusername)));
 		} catch (InvocationTargetException re) {
@@ -187,9 +201,12 @@ public final class LoginHelpers {
 	 * @throws ServiceInterfaceException
 	 *             if the serviceInterface can't be created
 	 */
-	public static ServiceInterface login(final LoginParams loginParams,
+	public static ServiceInterface gssCredentialLogin(final LoginParams loginParams,
 			final GSSCredential cred) throws LoginException,
 			ServiceInterfaceException {
+
+		addPluginsToClasspath();
+		
 		ServiceInterface serviceInterface = null;
 
 		Class directMyProxyUploadClass = null;
@@ -235,7 +252,7 @@ public final class LoginHelpers {
 			loginParams.setMyProxyServer(myProxyServer);
 			loginParams.setMyProxyPort(new Integer(myProxyPort).toString());
 
-			serviceInterface = login(loginParams);
+			serviceInterface = myProxyLogin(loginParams);
 			serviceInterface.login(myproxyusername, new String(myproxyDetails
 					.get(myproxyusername)));
 		} catch (InvocationTargetException re) {
@@ -271,9 +288,11 @@ public final class LoginHelpers {
 	 *             if somethings gone wrong (i.e. wrong private key passphrase)
 	 * @throws ServiceInterfaceException
 	 */
-	public static ServiceInterface login(final char[] privateKeyPassphrase,
+	public static ServiceInterface localProxyLogin(final char[] privateKeyPassphrase,
 			final LoginParams loginParams) throws LoginException,
 			ServiceInterfaceException {
+		
+		addPluginsToClasspath();
 
 		ServiceInterface serviceInterface = null;
 
@@ -320,7 +339,7 @@ public final class LoginHelpers {
 			loginParams.setMyProxyServer(myProxyServer);
 			loginParams.setMyProxyPort(new Integer(myProxyPort).toString());
 
-			serviceInterface = login(loginParams);
+			serviceInterface = myProxyLogin(loginParams);
 			serviceInterface.login(myproxyusername, new String(myproxyDetails
 					.get(myproxyusername)));
 		} catch (InvocationTargetException re) {
@@ -336,6 +355,20 @@ public final class LoginHelpers {
 		}
 
 		return serviceInterface;
+	}
+	
+	public static void addPluginsToClasspath() {
+		
+		try {
+			DependencyManager.checkForDependency("org.bouncycastle.jce.provider.BouncyCastleProvider", "http://www.bouncycastle.org/download/bcprov-jdk15-143.jar", new File(Environment.getGrisuPluginDirectory(), "bcprov-jdk15-143.jar"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		ClasspathHacker.initFolder(new File(Environment.getGrisuPluginDirectory()), new GrisuPluginFilenameFilter());
+		
+
 	}
 
 }

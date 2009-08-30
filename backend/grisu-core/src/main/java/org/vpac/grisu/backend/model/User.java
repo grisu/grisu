@@ -531,13 +531,14 @@ public class User {
 	 */
 	@Transient
 	private DefaultFileSystemManager getFsManager() throws FileSystemException {
-		if (fsmanager == null) {
-
-			fsmanager = VFSUtil.createNewFsManager(false, false, true, true,
-					true, true, true, null);
-
-		}
-		return fsmanager;
+//		if (fsmanager == null) {
+//
+//			fsmanager = VFSUtil.createNewFsManager(false, false, true, true,
+//					true, true, true, null);
+//
+//		}
+//		return fsmanager;
+		return VFSUtil.createNewFsManager(false, false, true, true, true, true, true, null);
 	}
 
 	/**

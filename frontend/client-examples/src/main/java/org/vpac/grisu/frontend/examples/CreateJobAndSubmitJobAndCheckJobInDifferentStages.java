@@ -17,7 +17,7 @@ public final class CreateJobAndSubmitJobAndCheckJobInDifferentStages {
 	 */
 	public static void main(final String[] args) throws Exception {
 
-		ServiceInterface si = LoginHelpers.login();
+		ServiceInterface si = LoginHelpers.defaultLocalProxyLogin();
 
 		JobObject createJobObject = new JobObject(si);
 
