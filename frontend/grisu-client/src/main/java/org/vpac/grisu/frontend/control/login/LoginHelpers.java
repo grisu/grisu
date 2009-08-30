@@ -383,11 +383,12 @@ public final class LoginHelpers {
 	
 	public static void addPluginsToClasspath() throws IOException {
 		
+		ClasspathHacker.initFolder(new File(Environment.getGrisuPluginDirectory()), new GrisuPluginFilenameFilter());
+
 		DependencyManager.checkForDependency("org.bouncycastle.jce.provider.BouncyCastleProvider", "http://www.bouncycastle.org/download/bcprov-jdk15-143.jar", new File(Environment.getGrisuPluginDirectory(), "bcprov-jdk15-143.jar"));
 
 		DependencyManager.checkForDependency("org.vpac.grisu.control.serviceInterfaces.LocalServiceInterface", "http://staff.vpac.org/~markus/grisu-local-backend.jar", new File(Environment.getGrisuPluginDirectory(), "grisu-local-backend.jar"));
 		
-		ClasspathHacker.initFolder(new File(Environment.getGrisuPluginDirectory()), new GrisuPluginFilenameFilter());
 		
 
 	}

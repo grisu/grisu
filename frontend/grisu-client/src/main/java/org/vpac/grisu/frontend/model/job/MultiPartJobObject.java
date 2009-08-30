@@ -499,7 +499,7 @@ public class MultiPartJobObject {
 			fireJobStatusChange("Job submitssion for multipartjob "+multiPartJobId+" failed: "+nsje.getLocalizedMessage());
 			throw nsje;
 		}
-		fireJobStatusChange("Submission of multipartjob "+multiPartJobId+" successful.");
+		fireJobStatusChange("All jobs of multipartjob "+multiPartJobId+" ready for submission. Submitting in background...");
 	}
 	
 	

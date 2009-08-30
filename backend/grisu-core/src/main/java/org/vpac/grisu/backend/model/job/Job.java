@@ -408,7 +408,7 @@ public class Job implements Comparable<Job> {
 
 		if (jsdl_string == null
 				|| jsdl_string
-						.equals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")) {
+						.equals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")) {
 			return;
 		}
 

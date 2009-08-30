@@ -48,7 +48,12 @@ public final class Environment {
 	}
 
 	public static String getGrisuPluginDirectory() {
-		return getGrisuDirectory() + File.separator + "plugins";
+		String dir = getGrisuDirectory() + File.separator + "plugins";
+		
+		if ( ! new File(dir).exists() ) {
+			new File(dir).mkdirs();
+		}
+		return dir;
 	}
 
 	public static String getAxisClientConfig() {

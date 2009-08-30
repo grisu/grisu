@@ -198,10 +198,10 @@ public final class HibernateSessionFactory {
 				} else {
 					// use default hsqld database
 					configuration = new AnnotationConfiguration()
-							.configure("/grisu-hibernate-default-hsqldb.cfg.xml");
-					String url = "jdbc:hsqldb:file:"
-							+ Environment.getGrisuDirectory().getPath()
-							+ File.separator + "grisulocaldb";
+							.configure("/grisu-hibernate-default-derby.cfg.xml");
+					String url = "jdbc:derby:"
+						+ Environment.getGrisuDirectory().getPath()
+						+ File.separator + "grisulocaldb_derby;create=true";
 					configuration.setProperty("hibernate.connection.url", url);
 					configuration.setProperty("hibernate.connection.username",
 							"sa");
