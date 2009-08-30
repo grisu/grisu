@@ -374,7 +374,7 @@
 					<descriptors>
 						<descriptor>grisu-local-backend.assembly.xml</descriptor>
 					</descriptors>
-					<finalName>grisu</finalName>
+					<finalName>local</finalName>
 
 
 				</configuration>

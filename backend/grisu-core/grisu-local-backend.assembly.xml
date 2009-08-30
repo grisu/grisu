@@ -1,5 +1,5 @@
 <assembly>
-	<id>local-backend</id>
+	<id>backend</id>
 	<formats>
 		<format>jar</format>
 	</formats>

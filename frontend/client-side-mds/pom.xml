@@ -33,6 +33,15 @@
 					<target>1.5</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>client-side-mds.assembly.xml</descriptor>
+					</descriptors>
+					<finalName>client</finalName>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
