@@ -2,6 +2,7 @@ package org.vpac.grisu.frontend.examples;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginHelpers;
+import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 
@@ -17,7 +18,7 @@ public final class CreateJobAndSubmitJobAndCheckJobInDifferentStages {
 	 */
 	public static void main(final String[] args) throws Exception {
 
-		ServiceInterface si = LoginHelpers.defaultLocalProxyLogin();
+		ServiceInterface si = LoginManager.login(null, null, null, null, null);
 
 		JobObject createJobObject = new JobObject(si);
 

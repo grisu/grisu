@@ -137,7 +137,7 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 					.forName("org.vpac.grisu.control.impl.EnunciateServiceInterfaceImpl");
 		} catch (ClassNotFoundException e) {
 			myLogger.warn("Could not find xfire service interface class.");
-			e.printStackTrace();
+//			e.printStackTrace();
 			throw new ServiceInterfaceException(
 					"Could not find XfireServiceInterface class. Probably grisu-client-xfire is not in the classpath.",
 					e);

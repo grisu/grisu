@@ -52,7 +52,7 @@ public interface ServiceInterface {
 	 * @return the version
 	 */
 	String getInterfaceVersion();
-
+	
 	/**
 	 * Starts a session. For some service interfaces this could be just a dummy
 	 * method. Ideally a char[] would be used for the password, but jax-ws doesn't support this.

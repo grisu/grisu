@@ -128,7 +128,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 					.forName("org.vpac.grisu.control.impl.EnunciateServiceInterfaceImpl");
 		} catch (ClassNotFoundException e) {
 			myLogger.warn("Could not find jaxws service interface class.");
-			e.printStackTrace();
+//			e.printStackTrace();
 			throw new ServiceInterfaceException(
 					"Could not find JaxWsServiceInterface class. Probably grisu-client-jaxws is not in the classpath.",
 					e);
