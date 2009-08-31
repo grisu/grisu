@@ -14,7 +14,6 @@
 	<url>http://maven.apache.org</url>
 
 	<modules>
-		<module>grisu-grid-tests</module>
 		<module>grisu-client</module>
 		<module>client-side-mds</module>
 		<module>client-examples</module>
