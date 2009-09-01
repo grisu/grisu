@@ -575,7 +575,7 @@ public class MultiPartJobObject {
 
 		myLogger.debug("Creating " + getJobs().size()
 				+ " jobs as part of multipartjob: " + multiPartJobId);
-		fireJobStatusChange("reating " + getJobs().size()
+		fireJobStatusChange("Creating " + getJobs().size()
 				+ " jobs as part of multipartjob: " + multiPartJobId);
 		ExecutorService executor = Executors
 				.newFixedThreadPool(getConcurrentJobCreationThreads());
