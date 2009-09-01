@@ -31,6 +31,7 @@ import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileType;
 import org.apache.commons.vfs.FileTypeSelector;
 import org.apache.log4j.Logger;
+import org.apache.xpath.operations.Mult;
 import org.vpac.grisu.backend.hibernate.JobDAO;
 import org.vpac.grisu.backend.hibernate.MultiPartJobDAO;
 import org.vpac.grisu.backend.hibernate.UserDAO;
@@ -2167,12 +2168,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void addJobProperty(final String jobname, final String key,
 			final String value) throws NoSuchJobException {
 
-		Job job = getJob(jobname);
+		try {
+			Job job = getJob(jobname);
+			job.addJobProperty(key, value);
+			jobdao.saveOrUpdate(job);
+			myLogger.debug("Added job property: " + key);
+		} catch (NoSuchJobException e) {
+			MultiPartJob job = getMultiPartJobFromDatabase(jobname);
+			job.addJobProperty(key, value);
+			multiPartJobDao.saveOrUpdate(job);
+			myLogger.debug("Added multijob property: "+key);
+		}
 
-		job.addJobProperty(key, value);
-		jobdao.saveOrUpdate(job);
 
-		myLogger.debug("Added job property: " + key);
 	}
 
 	/*
@@ -2192,7 +2200,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		myLogger.debug("Added " + properties.getProperties().size()
 				+ " job properties.");
-
 	}
 
 	/*
@@ -2235,9 +2242,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public String getJobProperty(final String jobname, final String key)
 			throws NoSuchJobException {
 
-		Job job = getJob(jobname);
+		try {
+			Job job = getJob(jobname);
 
-		return job.getJobProperty(key);
+			return job.getJobProperty(key);
+		} catch (NoSuchJobException e) {
+			MultiPartJob mpj = getMultiPartJobFromDatabase(jobname);
+			return mpj.getJobProperty(key);
+		}
 	}
 
 	/*
