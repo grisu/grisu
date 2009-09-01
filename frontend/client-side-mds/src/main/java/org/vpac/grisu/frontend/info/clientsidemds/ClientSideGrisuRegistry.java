@@ -41,11 +41,11 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 		this.serviceInterface = serviceInterface;
 		this.infoManager = new CachedMdsInformationManager(Environment.getGrisuDirectory().getPath());
 		
-		try {
-			this.infoManager.getAllSubmissionLocations();
-		} catch (Exception e) {
-			throw new Exception("Couldn't query mds from here. Please use another GrisuRegistry...");
-		}
+//		try {
+//			this.infoManager.getAllSubmissionLocations();
+//		} catch (Exception e) {
+//			throw new Exception("Couldn't query mds from here. Please use another GrisuRegistry...");
+//		}
 		
 	}
 	

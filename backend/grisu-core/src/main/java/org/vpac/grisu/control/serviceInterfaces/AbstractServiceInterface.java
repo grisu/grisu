@@ -110,14 +110,16 @@ import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
  */
 public abstract class AbstractServiceInterface implements ServiceInterface {
 
-	public static final int DEFAULT_JOB_SUBMISSION_RETRIES = 5;
-
 	static final Logger myLogger = Logger
 			.getLogger(AbstractServiceInterface.class.getName());
 
 	private InformationManager informationManager = CachedMdsInformationManager
 			.getDefaultCachedMdsInformationManager(Environment
 					.getGrisuDirectory().toString());
+
+
+	
+	public static final int DEFAULT_JOB_SUBMISSION_RETRIES = 5;
 
 	private UserDAO userdao = new UserDAO();
 

@@ -104,14 +104,12 @@ public class MultiPartJobObject {
 		this.serviceInterface = serviceInterface;
 		this.multiPartJobId = multiPartJobId;
 		
-		try {
-			for ( DtoJob dtoJob : getMultiPartJob(refreshJobStatusOnBackend).getJobs().getAllJobs() ) {
+		List<DtoJob> alljobs = getMultiPartJob(refreshJobStatusOnBackend).getJobs().getAllJobs();
+
+			for ( DtoJob dtoJob : alljobs ) {
 				JobObject job = new JobObject(serviceInterface, dtoJob);
 				jobs.add(job);
 			}
-		} catch (NoSuchJobException e) {
-			throw new MultiPartJobException("Multipart job is not complete. Missing at least one job."+e.getLocalizedMessage());
-		}
 
 	}
 	
@@ -340,9 +338,6 @@ public class MultiPartJobObject {
 		Long allRanks = 0L;
 		for ( GridResource resource : findBestResources() ) {
 			
-			if ( resource.getQueueName().contains("sque") ) {
-				continue;
-			}
 			if ( sitesToInclude != null ) {
 				
 				for ( String site : sitesToInclude ) {
