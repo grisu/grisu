@@ -359,10 +359,12 @@ public interface ServiceInterface {
 	 *            the jdsl file
 	 * @param fqan
 	 *            the fqan to use to submit the job
+	 * @param excludeResourcesWithLessCPUslotsFreeThanRequested exclude resources that wouldn't run the job
+	 * 			  straight away
 	 * @return a list of matching submissionLoctations
 	 */
 	DtoGridResources findMatchingSubmissionLocationsUsingJsdl(String jsdl,
-			String fqan);
+			String fqan, boolean excludeResourcesWithLessCPUslotsFreeThanRequested);
 
 	/**
 	 * Takes a jsdl template and returns a list of submission locations that
@@ -374,10 +376,12 @@ public interface ServiceInterface {
 	 *            interface for supported keys)
 	 * @param fqan
 	 *            the fqan to use to submit the job
+	 * @param excludeResourcesWithLessCPUslotsFreeThanRequested exclude resources that wouldn't run the job
+	 * 			  straight away
 	 * @return a list of matching submissionLoctations
 	 */
 	DtoGridResources findMatchingSubmissionLocationsUsingMap(
-			DtoJob jobProperties, String fqan);
+			DtoJob jobProperties, String fqan, boolean excludeResourcesWithLessCPUslotsFreeThanRequested);
 
 	// ---------------------------------------------------------------------------------------------------
 	// 

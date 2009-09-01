@@ -502,7 +502,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								.getPosixApplicationExecutable(jsdl));
 				for (String app : calculatedApps) {
 					jobSubmissionObject.setApplication(app);
-					matchingResources = matchmaker.findMatchingResources(
+					matchingResources = matchmaker.findAllResources(
 							jobSubmissionObject.getJobSubmissionPropertyMap(),
 							job.getFqan());
 					if (matchingResources != null
@@ -525,7 +525,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			} else {
 
 				myLogger.debug("Trying to find matching grid resources...");
-				matchingResources = matchmaker.findMatchingResources(
+				matchingResources = matchmaker.findAvailableResources(
 						jobSubmissionObject.getJobSubmissionPropertyMap(), job
 								.getFqan());
 				if (matchingResources != null) {
@@ -2886,7 +2886,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	}
 
 	public DtoGridResources findMatchingSubmissionLocationsUsingMap(
-			final DtoJob jobProperties, final String fqan) {
+			final DtoJob jobProperties, final String fqan, boolean excludeResourcesWithLessCPUslotsFreeThanRequested) {
 
 		LinkedList<String> result = new LinkedList<String>();
 
@@ -2896,14 +2896,18 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					.getValue());
 		}
 
-		List<GridResource> resources = matchmaker.findMatchingResources(
-				converterMap, fqan);
+		List<GridResource> resources = null;
+		if ( excludeResourcesWithLessCPUslotsFreeThanRequested ) {
+			resources = matchmaker.findAvailableResources(converterMap, fqan);
+		} else {
+			resources = matchmaker.findAllResources(converterMap, fqan);
+		}
 
 		return DtoGridResources.createGridResources(resources);
 	}
 
 	public DtoGridResources findMatchingSubmissionLocationsUsingJsdl(
-			String jsdlString, final String fqan) {
+			String jsdlString, final String fqan, boolean excludeResourcesWithLessCPUslotsFreeThanRequested) {
 
 		Document jsdl;
 		try {
@@ -2912,10 +2916,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throw new RuntimeException(e);
 		}
 
-		LinkedList<String> result = new LinkedList<String>();
+//		LinkedList<String> result = new LinkedList<String>();
 
-		List<GridResource> resources = matchmaker.findMatchingResources(jsdl,
-				fqan);
+		List<GridResource> resources = null;
+		if ( excludeResourcesWithLessCPUslotsFreeThanRequested ) {
+			resources = matchmaker.findAvailableResources(jsdl, fqan);
+		} else {
+			resources = matchmaker.findAllResources(jsdl, fqan);
+		}
 
 		return DtoGridResources.createGridResources(resources);
 

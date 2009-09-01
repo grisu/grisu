@@ -265,12 +265,12 @@ public class ProxyServiceInterface implements ServiceInterface {
 	}
 
 	public DtoGridResources findMatchingSubmissionLocationsUsingJsdl(
-			String jsdl, String fqan) {
+			String jsdl, String fqan, boolean exclude) {
 		try {
 			Method m = si.getClass().getMethod(
 					"findMatchingSubmissionLocationsUsingJsdl",
-					jsdl.getClass(), fqan.getClass());
-			return (DtoGridResources) (m.invoke(si, jsdl, fqan));
+					jsdl.getClass(), fqan.getClass(), boolean.class);
+			return (DtoGridResources) (m.invoke(si, jsdl, fqan, exclude));
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {
@@ -285,12 +285,12 @@ public class ProxyServiceInterface implements ServiceInterface {
 	}
 
 	public DtoGridResources findMatchingSubmissionLocationsUsingMap(
-			DtoJob jobProperties, String fqan) {
+			DtoJob jobProperties, String fqan, boolean exclude) {
 		try {
 			Method m = si.getClass().getMethod(
 					"findMatchingSubmissionLocationsUsingMap",
-					jobProperties.getClass(), fqan.getClass());
-			return (DtoGridResources) (m.invoke(si, jobProperties, fqan));
+					jobProperties.getClass(), fqan.getClass(), boolean.class);
+			return (DtoGridResources) (m.invoke(si, jobProperties, fqan, exclude));
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {

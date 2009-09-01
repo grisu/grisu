@@ -280,7 +280,26 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		}
 
 		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(DtoJob.createJob(JobConstants.UNDEFINED, converterMap),
-				fqan).wrapGridResourcesIntoInterfaceType();
+				fqan, true).wrapGridResourcesIntoInterfaceType();
+	}
+
+	public SortedSet<GridResource> getAllSubmissionLocationsAsGridResources(
+			Map<JobSubmissionProperty, String> additionalJobProperties,
+			String fqan) {
+
+		Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
+		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
+				getApplicationName());
+
+		basicJobProperties.putAll(additionalJobProperties);
+
+		Map<String, String> converterMap = new HashMap<String, String>();
+		for (JobSubmissionProperty key : basicJobProperties.keySet()) {
+			converterMap.put(key.toString(), basicJobProperties.get(key));
+		}
+
+		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(DtoJob.createJob(JobConstants.UNDEFINED, converterMap),
+				fqan, false).wrapGridResourcesIntoInterfaceType();
 	}
 
 }

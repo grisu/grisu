@@ -91,7 +91,20 @@ public class ClientSideApplicationInformation implements ApplicationInformation 
 
 		basicJobProperties.putAll(additionalJobProperties);
 
-		return new TreeSet<GridResource>(matchMaker.findMatchingResources(basicJobProperties, fqan));
+		return new TreeSet<GridResource>(matchMaker.findAvailableResources(basicJobProperties, fqan));
+	}
+
+	public SortedSet<GridResource> getAllSubmissionLocationsAsGridResources(
+			Map<JobSubmissionProperty, String> additionalJobProperties,
+			String fqan) {
+
+		Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
+		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
+				getApplicationName());
+
+		basicJobProperties.putAll(additionalJobProperties);
+
+		return new TreeSet<GridResource>(matchMaker.findAllResources(basicJobProperties, fqan));
 	}
 
 }
