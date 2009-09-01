@@ -97,5 +97,9 @@ public class DtoJob {
 	public String jobname() {
 		return propertiesAsMap().get(Constants.JOBNAME_KEY);
 	}
+
+	public String jobProperty(String string) {
+		return propertiesAsMap().get(string);
+	}
 	
 }

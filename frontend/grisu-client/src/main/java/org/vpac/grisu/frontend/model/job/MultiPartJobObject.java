@@ -123,17 +123,21 @@ public class MultiPartJobObject {
 	}
 	
 	public boolean isSuccessful() {
-		try {
-			return getMultiPartJob(true).allJobsFinishedSuccessful();
-		} catch (NoSuchJobException e) {
-			throw new RuntimeException(e);
-		}
+		return getMultiPartJob(true).allJobsFinishedSuccessful();
 	}
 	
-	private DtoMultiPartJob getMultiPartJob(boolean refresh) throws NoSuchJobException {
+	public void refresh() {
+		getMultiPartJob(true);
+	}
+	
+	private DtoMultiPartJob getMultiPartJob(boolean refresh) {
 		
 		if ( dtoMultiPartJob == null || refresh ) {
-			dtoMultiPartJob = serviceInterface.getMultiPartJob(multiPartJobId, true);
+			try {
+				dtoMultiPartJob = serviceInterface.getMultiPartJob(multiPartJobId, true);
+			} catch (NoSuchJobException e) {
+				throw new RuntimeException(e);
+			}
 		}
 		return dtoMultiPartJob;
 	}
@@ -153,7 +157,6 @@ public class MultiPartJobObject {
 			};
 		}
 		
-		try {
 		for ( DtoJob dtoJob : getMultiPartJob(true).getFailedJobs().getAllJobs() ) {
 			
 			JobObject failedJob = null;
@@ -172,9 +175,6 @@ public class MultiPartJobObject {
 				e.printStackTrace();
 			}
 		}
-		} catch (NoSuchJobException e) {
-			throw new RuntimeException(e);
-		}
 		
 	}
 	
@@ -182,11 +182,8 @@ public class MultiPartJobObject {
 		Date start = new Date();
 		
 		DtoMultiPartJob temp;
-		try {
-			temp = getMultiPartJob(true);
-		} catch (NoSuchJobException e) {
-			throw new RuntimeException(e);
-		}
+		temp = getMultiPartJob(false);
+
 		Date end = new Date();
 		
 		StringBuffer output = new StringBuffer();
@@ -231,14 +228,12 @@ public class MultiPartJobObject {
 		boolean finished = false;
 		do {
 
+			refresh();
 			String progress = getProgress(restarter);
 			
 			DtoMultiPartJob temp;
-			try {
-				temp = getMultiPartJob(false);
-			} catch (NoSuchJobException e) {
-				throw new RuntimeException(e);
-			}
+			temp = getMultiPartJob(false);
+
 			if ( forceSuccess && restarter != null ) {
 				finished = temp.allJobsFinishedSuccessful();
 			} else { 
@@ -269,19 +264,11 @@ public class MultiPartJobObject {
 	}
 	
 	public Map<String, String> getProperties() {
-		try {
-			return getMultiPartJob(false).propertiesAsMap();
-		} catch (NoSuchJobException e) {
-			throw new RuntimeException(e);
-		}
+		return getMultiPartJob(false).propertiesAsMap();
 	}
 	
 	public String pathToInputFiles() {
-		try {
-			return getMultiPartJob(false).pathToInputFiles();
-		} catch (NoSuchJobException e) {
-			throw new RuntimeException(e);
-		}
+		return getMultiPartJob(false).pathToInputFiles();
 	}
 	
 	public void addJob(JobObject job) {
@@ -494,7 +481,7 @@ public class MultiPartJobObject {
 			fireJobStatusChange("Job submitssion for multipartjob "+multiPartJobId+" failed: "+nsje.getLocalizedMessage());
 			throw nsje;
 		}
-		fireJobStatusChange("All jobs of multipartjob "+multiPartJobId+" ready for submission. Submitting in background...");
+		fireJobStatusChange("All jobs of multipartjob "+multiPartJobId+" ready for submission. Continuing submission in background...");
 	}
 	
 	
@@ -612,12 +599,8 @@ public class MultiPartJobObject {
 	
 	public Map<Date, String> getLogMessages(boolean refresh) {
 		
-		try {
-			return getMultiPartJob(refresh).messages();
-		} catch (NoSuchJobException e) {
-			throw new RuntimeException(e);
-		}
-		
+		return getMultiPartJob(refresh).messages();
+
 	}
 
 	public void setSitesToInclude(String[] sites) {
@@ -752,6 +735,21 @@ public class MultiPartJobObject {
 			jobStatusChangeListeners = new Vector<MultiPartJobEventListener>();
 		}
 		jobStatusChangeListeners.removeElement(l);
+	}
+
+	public String getDetails() {
+
+		DtoMultiPartJob temp = getMultiPartJob(false);
+		
+		StringBuffer buffer = new StringBuffer("Details:\n\n");
+		for ( DtoJob job : temp.getJobs().getAllJobs() ) {
+			
+			buffer.append(job.jobname()+": "+job.statusAsString()+" (submitted to: "+job.jobProperty(Constants.SUBMISSION_SITE_KEY)+", "+job.jobProperty(Constants.QUEUE_KEY)+"\n");
+			
+		}
+		
+		return buffer.toString();
+		
 	}
 	
 }

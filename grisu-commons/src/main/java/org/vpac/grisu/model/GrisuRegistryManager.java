@@ -23,19 +23,28 @@ public class GrisuRegistryManager {
 		}
 
 		synchronized (serviceInterface) {
-			
+
 			if (cachedRegistries.get(serviceInterface) == null) {
 				GrisuRegistry defaultRegistry;
 				try {
-					// trying to manage mds information locally, because it's
-					// much faster...
-					Class clientSideRegistryClass = Class
-							.forName("org.vpac.grisu.frontend.info.clientsidemds.ClientSideGrisuRegistry");
-					Constructor clientSideRegistryConstructor = clientSideRegistryClass
-							.getConstructor(ServiceInterface.class);
-					defaultRegistry = (GrisuRegistry) (clientSideRegistryConstructor
-							.newInstance(serviceInterface));
-					myLogger.info("Using client side mds library.");
+
+					String classname = serviceInterface.getClass().getName();
+
+					if (!classname.contains("Local")) {
+						// trying to manage mds information locally, because
+						// it's
+						// much faster...
+						Class clientSideRegistryClass = Class
+								.forName("org.vpac.grisu.frontend.info.clientsidemds.ClientSideGrisuRegistry");
+						Constructor clientSideRegistryConstructor = clientSideRegistryClass
+								.getConstructor(ServiceInterface.class);
+						defaultRegistry = (GrisuRegistry) (clientSideRegistryConstructor
+								.newInstance(serviceInterface));
+						myLogger.info("Using client side mds library.");
+					} else {
+						defaultRegistry = new GrisuRegistryImpl(
+								serviceInterface);
+					}
 				} catch (Exception e) {
 					myLogger.info("Couldn't use client side mds library: "
 							+ e.getLocalizedMessage());
