@@ -799,11 +799,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				.getRootUrl());
 		job.addJobProperty(Constants.STAGING_FILE_SYSTEM_KEY,
 				stagingFilesystemToUse);
+
 		job.addJobProperty(Constants.WORKINGDIRECTORY_KEY, workingDirectory);
 		String submissionSite = informationManager
-				.getSiteForHostOrUrl(stagingFilesystemToUse);
+				.getSiteForHostOrUrl(SubmissionLocationHelpers.extractHost(submissionLocation));
 		myLogger.debug("Calculated submissionSite: " + submissionSite);
-		job.addJobProperty("submissionSite", submissionSite);
+		job.addJobProperty(Constants.SUBMISSION_SITE_KEY, submissionSite);
 		// job.setJob_directory(stagingFilesystemToUse + workingDirectory);
 		job.getJobProperties().put(Constants.JOBDIRECTORY_KEY,
 				stagingFilesystemToUse + workingDirectory);
