@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -104,7 +105,7 @@ public class MultiPartJobObject {
 		this.serviceInterface = serviceInterface;
 		this.multiPartJobId = multiPartJobId;
 		
-		List<DtoJob> alljobs = getMultiPartJob(refreshJobStatusOnBackend).getJobs().getAllJobs();
+		SortedSet<DtoJob> alljobs = getMultiPartJob(refreshJobStatusOnBackend).getJobs().getAllJobs();
 
 			for ( DtoJob dtoJob : alljobs ) {
 				JobObject job = new JobObject(serviceInterface, dtoJob);
@@ -740,13 +741,27 @@ public class MultiPartJobObject {
 	public String getDetails() {
 
 		DtoMultiPartJob temp = getMultiPartJob(false);
-		
+
 		StringBuffer buffer = new StringBuffer("Details:\n\n");
-		for ( DtoJob job : temp.getJobs().getAllJobs() ) {
-			
-			buffer.append(job.jobname()+": "+job.statusAsString()+" (submitted to: "+job.jobProperty(Constants.SUBMISSION_SITE_KEY)+", "+job.jobProperty(Constants.QUEUE_KEY)+"\n");
-			
+
+		buffer.append("Waiting jobs:\n");
+		for ( DtoJob job : temp.waitingJobs() ) {
+			buffer.append("\t"+job.jobname()+":\t"+job.statusAsString()+" (submitted to: "+job.jobProperty(Constants.SUBMISSION_SITE_KEY)+", "+job.jobProperty(Constants.QUEUE_KEY)+")\n");
 		}
+		buffer.append("Active jobs:\n");
+		for ( DtoJob job : temp.runningJobs() ) {
+			buffer.append("\t"+job.jobname()+":\t"+job.statusAsString()+" (submitted to: "+job.jobProperty(Constants.SUBMISSION_SITE_KEY)+", "+job.jobProperty(Constants.QUEUE_KEY)+")\n");
+		}
+		buffer.append("Successful jobs:\n");
+		for ( DtoJob job : temp.successfulJobs() ) {
+			buffer.append("\t"+job.jobname()+":\t"+job.statusAsString()+" (submitted to: "+job.jobProperty(Constants.SUBMISSION_SITE_KEY)+", "+job.jobProperty(Constants.QUEUE_KEY)+")\n");
+		}
+		buffer.append("Failed jobs:\n");
+		for ( DtoJob job : temp.failedJobs() ) {
+			buffer.append("\t"+job.jobname()+":\t"+job.statusAsString()+" (submitted to: "+job.jobProperty(Constants.SUBMISSION_SITE_KEY)+", "+job.jobProperty(Constants.QUEUE_KEY)+")\n");
+		}
+
+		buffer.append("\n");
 		
 		return buffer.toString();
 		

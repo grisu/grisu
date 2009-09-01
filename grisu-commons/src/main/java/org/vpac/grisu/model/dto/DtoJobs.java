@@ -1,11 +1,10 @@
 package org.vpac.grisu.model.dto;
 
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -23,14 +22,14 @@ public class DtoJobs {
 	/**
 	 * The list of jobs.
 	 */
-	private List<DtoJob> allJobs = Collections.synchronizedList(new LinkedList<DtoJob>());
+	private SortedSet<DtoJob> allJobs = Collections.synchronizedSortedSet(new TreeSet<DtoJob>());
 
 	@XmlElement(name="job")
-	public List<DtoJob> getAllJobs() {
+	public SortedSet<DtoJob> getAllJobs() {
 		return allJobs;
 	}
 
-	public void setAllJobs(List<DtoJob> allJobs) {
+	public void setAllJobs(SortedSet<DtoJob> allJobs) {
 		this.allJobs = allJobs;
 	}
 	

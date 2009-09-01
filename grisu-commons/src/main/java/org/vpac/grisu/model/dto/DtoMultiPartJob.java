@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -144,6 +146,19 @@ public class DtoMultiPartJob {
 			return false;
 		}
 	}
+	
+	public SortedSet<DtoJob> runningJobs() {
+
+		SortedSet<DtoJob> result = new TreeSet<DtoJob>();
+		
+		for ( DtoJob job : jobs.getAllJobs() ) {
+			if ( job.getStatus() == JobConstants.ACTIVE ) {
+				result.add(job);
+			}
+		}
+		
+		return result;
+	}
 
 	public int numberOfRunningJobs() {
 		int running = 0;
@@ -152,7 +167,22 @@ public class DtoMultiPartJob {
 				running = running + 1;
 			}
 		}
+		
+		
 		return running;
+	}
+	
+	public SortedSet<DtoJob> waitingJobs() {
+
+		SortedSet<DtoJob> result = new TreeSet<DtoJob>();
+		
+		for ( DtoJob job : jobs.getAllJobs() ) {
+			if ( job.getStatus() == JobConstants.PENDING ) {
+				result.add(job);
+			}
+		}
+		
+		return result;
 	}
 	
 	public int numberOfWaitingJobs() {
@@ -165,6 +195,19 @@ public class DtoMultiPartJob {
 		return waiting;
 	}
 	
+	public SortedSet<DtoJob> finishedJobs() {
+
+		SortedSet<DtoJob> result = new TreeSet<DtoJob>();
+		
+		for ( DtoJob job : jobs.getAllJobs() ) {
+			if ( job.getStatus() >= JobConstants.FINISHED_EITHER_WAY ) {
+				result.add(job);
+			}
+		}
+		
+		return result;
+	}
+	
 	public int numberOfFinishedJobs() {
 		int finished = 0;
 		for (DtoJob job : jobs.getAllJobs() ) {
@@ -173,6 +216,19 @@ public class DtoMultiPartJob {
 			}
 		}
 		return finished;
+	}
+	
+	public SortedSet<DtoJob> failedJobs() {
+
+		SortedSet<DtoJob> result = new TreeSet<DtoJob>();
+		
+		for ( DtoJob job : jobs.getAllJobs() ) {
+			if ( job.getStatus() >= JobConstants.FINISHED_EITHER_WAY && job.getStatus() != JobConstants.DONE ) {
+				result.add(job);
+			}
+		}
+		
+		return result;
 	}
 	
 	public int numberOfFailedJobs() {
@@ -185,6 +241,19 @@ public class DtoMultiPartJob {
 		return failed;
 	}
 	
+	public SortedSet<DtoJob> successfulJobs() {
+
+		SortedSet<DtoJob> result = new TreeSet<DtoJob>();
+		
+		for ( DtoJob job : jobs.getAllJobs() ) {
+			if ( job.getStatus() == JobConstants.DONE ) {
+				result.add(job);
+			}
+		}
+		
+		return result;
+	}
+	
 	public int numberOfSuccessfulJobs() {
 		int successful = 0;
 		for ( DtoJob job : jobs.getAllJobs() ) {
@@ -193,6 +262,19 @@ public class DtoMultiPartJob {
 			}
 		}
 		return successful;
+	}
+	
+	public SortedSet<DtoJob> unsubmittedJobs() {
+
+		SortedSet<DtoJob> result = new TreeSet<DtoJob>();
+		
+		for ( DtoJob job : jobs.getAllJobs() ) {
+			if ( job.getStatus() <= JobConstants.UNSUBMITTED ) {
+				result.add(job);
+			}
+		}
+		
+		return result;
 	}
 	
 	public int numberOfUnsubmittedJobs() {

@@ -23,7 +23,7 @@ import au.org.arcs.jcommons.constants.Constants;
  *
  */
 @XmlRootElement(name="job")
-public class DtoJob {
+public class DtoJob implements Comparable<DtoJob> {
 	
 	public static DtoJob createJob(int status, Map<String, String> jobProperties) {
 		
@@ -100,6 +100,26 @@ public class DtoJob {
 
 	public String jobProperty(String string) {
 		return propertiesAsMap().get(string);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		
+		if ( ! (o instanceof DtoJob) ) {
+			return false;
+		}
+		
+		return ((DtoJob)o).jobname().equals(this.jobname());
+		
+	}
+	
+	@Override
+	public int hashCode() {
+		return 253 * jobname().hashCode();
+	}
+	
+	public int compareTo(DtoJob o) {
+		return this.jobname().compareTo(o.jobname());
 	}
 	
 }
