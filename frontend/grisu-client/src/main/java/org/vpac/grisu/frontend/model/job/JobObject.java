@@ -441,17 +441,33 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 		return stdoutFile;
 	}
-
+	
 	/**
 	 * Tells you whether the job is finished (either sucessfully or not).
 	 * 
 	 * @return finished: true / still running/not started: false
 	 */
 	public final boolean isFinished() {
+		return isFinished(true);
+	}
+	
+	/**
+	 * Tells you whether the job is finished (either sucessfully or not).
+	 * 
+	 * @param refresh whether to refresh the job on the backend or not
+	 * 
+	 * @return finished: true / still running/not started: false
+	 */
+	public final boolean isFinished(boolean refresh) {
 
-		if (isFinished) {
+		if (getStatus(false) >= JobConstants.FINISHED_EITHER_WAY ) {
 			return true;
 		}
+		
+		if (!refresh) {
+			return false;
+		}
+			
 
 		if (getStatus(false) <= JobConstants.JOB_CREATED) {
 			throw new IllegalStateException("Job not submitted yet.");

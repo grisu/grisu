@@ -38,7 +38,7 @@ public class MultiJobCheck  {
 		newObject.monitorProgress(15, null, true, restarter);
 	
 		
-		newObject.downloadResults(new File("/home/markus/Desktop/multiTest"), new String[]{"stdout", "stderr"}, false, true);
+		newObject.downloadResults(true, new File("/home/markus/Desktop/multiTest"), new String[]{"stdout", "stderr"}, false, true);
 
 		Date endDate = new Date();
 		

@@ -38,7 +38,7 @@ public class BlenderTestCheck  {
 		newObject.monitorProgress(15, null, true, restarter);
 	
 		
-		newObject.downloadResults(new File("/home/markus/Desktop/multiTest"), new String[]{"stdout"}, false, true);
+		newObject.downloadResults(true, new File("/home/markus/Desktop/multiTest"), new String[]{"stdout"}, false, true);
 
 		Date endDate = new Date();
 		

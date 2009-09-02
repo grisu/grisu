@@ -72,7 +72,7 @@ public class FileManager {
 						File.separator);
 	}
 
-	private File getLocalCacheFile(final String url) {
+	public File getLocalCacheFile(final String url) {
 
 		String rootPath = null;
 		rootPath = Environment.getGrisuLocalCacheRoot() + File.separator
@@ -441,6 +441,40 @@ public class FileManager {
 			return new File(file).exists();
 		} else {
 			return serviceInterface.fileExists(file);
+		}
+		
+	}
+
+	public boolean needsDownloading(String url) {
+		
+		File cacheTargetFile = getLocalCacheFile(url);
+		File cacheTargetParentFile = cacheTargetFile.getParentFile();
+
+		if ( ! cacheTargetFile.exists() ) {
+			return true;
+		}
+		
+		long lastModified = -1;
+		try {
+			lastModified = serviceInterface.lastModified(url);
+		} catch (Exception e) {
+			throw new RuntimeException("Could not get last modified time of file"+url, e);
+		}
+
+		if (cacheTargetFile.exists()) {
+			// check last modified date
+			long local_last_modified = cacheTargetFile.lastModified();
+			myLogger.debug("local file timestamp:\t" + local_last_modified);
+			myLogger.debug("remote file timestamp:\t" + lastModified);
+			if (local_last_modified >= lastModified) {
+				myLogger
+						.debug("Local cache file is not older than remote file. No download necessary...");
+				return false;
+			} else {
+				return true;
+			}
+		} else {
+			return true;
 		}
 		
 	}

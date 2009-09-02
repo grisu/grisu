@@ -335,8 +335,9 @@ public class MultiPartJobObject {
 					+ " to default walltime: " + defaultWalltime);
 			job.setWalltimeInSeconds(defaultWalltime);
 		} else {
-//			fireJobStatusChange("Keeping walltime for job " + job.getJobname()
-//					+ ": " + job.getWalltimeInSeconds());
+			// fireJobStatusChange("Keeping walltime for job " +
+			// job.getJobname()
+			// + ": " + job.getWalltimeInSeconds());
 			if (job.getWalltimeInSeconds() > maxWalltimeInSecondsAcrossJobs) {
 				maxWalltimeInSecondsAcrossJobs = job.getWalltimeInSeconds();
 			}
@@ -661,15 +662,20 @@ public class MultiPartJobObject {
 		}
 	}
 
-	public void downloadResults(File parentFolder, String[] patterns,
+	public void downloadResults(boolean onlyDownloadWhenFinished, File parentFolder, String[] patterns,
 			boolean createSeperateFoldersForEveryJob, boolean prefixWithJobname)
 			throws RemoteFileSystemException, FileTransferException,
 			IOException {
 
-		fireJobStatusChange("Downloading output files for multipartjob: "
-				+ multiPartJobId);
+		fireJobStatusChange("Checking and possibly downloading output files for multipartjob: "
+				+ multiPartJobId + ". This might take a while...");
 
 		for (JobObject job : getJobs()) {
+			
+			if ( onlyDownloadWhenFinished && ! job.isFinished(false) ) {
+				continue;
+			}
+			
 			for (String child : job.listJobDirectory(0)) {
 
 				boolean download = false;
@@ -681,26 +687,33 @@ public class MultiPartJobObject {
 				}
 
 				if (download) {
-					myLogger.debug("Downloading file: " + child);
-					fireJobStatusChange("Downloading file: " + child);
-					File cacheFile = GrisuRegistryManager.getDefault(
-							serviceInterface).getFileManager().downloadFile(
-							child);
-					String targetfilename = null;
-					if (prefixWithJobname) {
-						targetfilename = job.getJobname() + "_"
-								+ cacheFile.getName();
+					File cacheFile = null;
+					if (GrisuRegistryManager.getDefault(serviceInterface)
+							.getFileManager().needsDownloading(child)) {
+						myLogger.debug("Downloading file: " + child);
+						fireJobStatusChange("Downloading file: " + child);
+						cacheFile = GrisuRegistryManager.getDefault(
+								serviceInterface).getFileManager()
+								.downloadFile(child);
 					} else {
-						targetfilename = cacheFile.getName();
+						cacheFile = GrisuRegistryManager.getDefault(
+								serviceInterface).getFileManager().getLocalCacheFile(child);
 					}
-					if (createSeperateFoldersForEveryJob) {
-						FileUtils.copyFile(cacheFile,
-								new File(new File(parentFolder, job
-										.getJobname()), targetfilename));
-					} else {
-						FileUtils.copyFile(cacheFile, new File(parentFolder,
-								targetfilename));
-					}
+						String targetfilename = null;
+						if (prefixWithJobname) {
+							targetfilename = job.getJobname() + "_"
+									+ cacheFile.getName();
+						} else {
+							targetfilename = cacheFile.getName();
+						}
+						if (createSeperateFoldersForEveryJob) {
+							FileUtils.copyFile(cacheFile, new File(new File(
+									parentFolder, job.getJobname()),
+									targetfilename));
+						} else {
+							FileUtils.copyFile(cacheFile, new File(
+									parentFolder, targetfilename));
+						}
 				}
 			}
 
@@ -856,12 +869,12 @@ public class MultiPartJobObject {
 		if (temp.numberOfWaitingJobs() == 0) {
 			buffer.append("\tNo waiting jobs.\n");
 		} else {
-		for (DtoJob job : temp.waitingJobs()) {
-			buffer.append("\t" + job.jobname() + ":\t" + job.statusAsString()
-					+ " (submitted to: "
-					+ job.jobProperty(Constants.SUBMISSION_SITE_KEY) + ", "
-					+ job.jobProperty(Constants.QUEUE_KEY) + ")\n");
-		}
+			for (DtoJob job : temp.waitingJobs()) {
+				buffer.append("\t" + job.jobname() + ":\t"
+						+ job.statusAsString() + " (submitted to: "
+						+ job.jobProperty(Constants.SUBMISSION_SITE_KEY) + ", "
+						+ job.jobProperty(Constants.QUEUE_KEY) + ")\n");
+			}
 		}
 		buffer.append("Active jobs:\n");
 		if (temp.numberOfRunningJobs() == 0) {
@@ -911,9 +924,9 @@ public class MultiPartJobObject {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	public String getJobProperty(String key) {
-		
+
 		try {
 			return serviceInterface.getJobProperty(multiPartJobId, key);
 		} catch (NoSuchJobException e) {
