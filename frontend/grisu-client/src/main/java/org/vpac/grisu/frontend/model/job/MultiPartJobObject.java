@@ -229,11 +229,11 @@ public class MultiPartJobObject {
 				+ "\n");
 		output.append("Failed jobs: " + temp.numberOfFailedJobs() + "\n");
 		if (temp.numberOfFailedJobs() > 0) {
-			for (DtoJob job : temp.getFailedJobs().getAllJobs()) {
-				output.append("\tJobname: " + job.jobname() + ", Error: "
-						+ job.propertiesAsMap().get(Constants.ERROR_REASON)
-						+ "\n");
-			}
+//			for (DtoJob job : temp.getFailedJobs().getAllJobs()) {
+//				output.append("\tJobname: " + job.jobname() + ", Error: "
+//						+ job.propertiesAsMap().get(Constants.ERROR_REASON)
+//						+ "\n");
+//			}
 
 			if (restarter != null) {
 				restartFailedJobs(restarter);
