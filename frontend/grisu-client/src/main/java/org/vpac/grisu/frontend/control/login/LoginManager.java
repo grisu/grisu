@@ -14,6 +14,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.utils.GrisuPluginFilenameFilter;
+import org.vpac.security.light.control.CertificateFiles;
 
 import au.org.arcs.jcommons.dependencies.ClasspathHacker;
 import au.org.arcs.jcommons.dependencies.DependencyManager;
@@ -59,6 +60,12 @@ public class LoginManager {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 			throw new RuntimeException(e2);
+		}
+		
+		try {
+			CertificateFiles.copyCACerts();
+		} catch (Exception e1) {
+			e1.printStackTrace();
 		}
 
 		// do the cacert thingy
