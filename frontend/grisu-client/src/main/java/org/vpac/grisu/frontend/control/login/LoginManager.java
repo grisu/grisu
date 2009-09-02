@@ -51,8 +51,7 @@ public class LoginManager {
 	 *             .grisu/plugins folder
 	 */
 	public static ServiceInterface login(GlobusCredential cred, char[] password, String username,
-			String idp, LoginParams loginParams) throws LoginException,
-			IOException {
+			String idp, LoginParams loginParams) throws LoginException {
 
 		try {
 			addPluginsToClasspath();

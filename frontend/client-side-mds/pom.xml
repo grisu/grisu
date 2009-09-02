@@ -1,29 +1,30 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <artifactId>frontend</artifactId>
-    <groupId>org.vpac.grisu</groupId>
-    <version>0.3-SNAPSHOT</version>
-  </parent>
-  <groupId>org.vpac.grisu</groupId>
-  <artifactId>client-side-mds</artifactId>
-  <version>0.3-SNAPSHOT</version>
-  <dependencies>
-  	<dependency>
-  		<groupId>org.vpac.grisu</groupId>
-  		<artifactId>grisu-commons</artifactId>
-  		<version>0.3-SNAPSHOT</version>
-  		<scope>compile</scope>
-  	</dependency>
-  	<dependency>
-  		<groupId>au.org.arcs.infosystems</groupId>
-  		<artifactId>matchmaker</artifactId>
-  		<version>0.4-SNAPSHOT</version>
-  		<scope>compile</scope>
-  	</dependency>
-  </dependencies>
-  
-  	<build>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>frontend</artifactId>
+		<groupId>org.vpac.grisu</groupId>
+		<version>0.3-SNAPSHOT</version>
+	</parent>
+	<groupId>org.vpac.grisu</groupId>
+	<artifactId>client-side-mds</artifactId>
+	<version>0.3-SNAPSHOT</version>
+	<dependencies>
+		<dependency>
+			<groupId>org.vpac.grisu</groupId>
+			<artifactId>grisu-commons</artifactId>
+			<version>0.3-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>au.org.arcs.infosystems</groupId>
+			<artifactId>matchmaker</artifactId>
+			<version>0.4-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -35,12 +36,20 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<descriptors>
-						<descriptor>client-side-mds.assembly.xml</descriptor>
-					</descriptors>
-					<finalName>client</finalName>
-				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<configuration>
+							<descriptors>
+								<descriptor>client-side-mds.assembly.xml</descriptor>
+							</descriptors>
+							<finalName>client</finalName>
+						</configuration>
+						<goals>
+							<goal>attached</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

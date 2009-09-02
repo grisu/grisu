@@ -369,15 +369,22 @@
 
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<configuration>
+							<descriptors>
+								<descriptor>grisu-local-backend.assembly.xml</descriptor>
+							</descriptors>
+							<finalName>local</finalName>
+						</configuration>
+						<goals>
+							<goal>attached</goal>
+						</goals>
 
-					<descriptors>
-						<descriptor>grisu-local-backend.assembly.xml</descriptor>
-					</descriptors>
-					<finalName>local</finalName>
+					</execution>
+				</executions>
 
-
-				</configuration>
 
 			</plugin>
 
