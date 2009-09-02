@@ -90,11 +90,8 @@ public class LoginManager {
 			e.printStackTrace();
 		}
 
-		DependencyManager.checkForDependency(
-				"org.bouncycastle.jce.provider.BouncyCastleProvider",
-				"http://www.bouncycastle.org/download/bcprov-jdk15-143.jar",
-				new File(Environment.getGrisuPluginDirectory(),
-						"bcprov-jdk15-143.jar"));
+		DependencyManager.initArcsCommonJavaLibDir();
+		DependencyManager.checkForBouncyCastleDependency();
 
 		String serviceInterfaceUrl = loginParams.getServiceInterfaceUrl();
 
@@ -103,7 +100,7 @@ public class LoginManager {
 			DependencyManager
 					.checkForDependency(
 							"org.vpac.grisu.control.serviceInterfaces.LocalServiceInterface",
-							"https://code.arcs.org.au/hudson/job/Grisu-SNAPSHOT-binaries/lastSuccessfulBuild/artifact/backend/grisu-core/target/local-backend.jar",
+							"https://code.arcs.org.au/hudson/job/Grisu-SNAPSHOT/org.vpac.grisu$grisu-core/lastSuccessfulBuild/artifact/org.vpac.grisu/grisu-core/0.3-SNAPSHOT/local-backend.jar",
 							new File(Environment.getGrisuPluginDirectory(),
 									"local-backend.jar"));
 		} else if (serviceInterfaceUrl.startsWith("http")) {
