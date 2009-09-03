@@ -688,13 +688,29 @@ public class MultiPartJobObject {
 
 				if (download) {
 					File cacheFile = null;
-					if (GrisuRegistryManager.getDefault(serviceInterface)
-							.getFileManager().needsDownloading(child)) {
+					
+					boolean needsDownloading = false;
+					
+					try {
+						needsDownloading = GrisuRegistryManager.getDefault(serviceInterface).getFileManager().needsDownloading(child);
+					} catch (RuntimeException e) {
+						myLogger.error("Could not access file "+child+": "+e.getLocalizedMessage());
+						fireJobStatusChange("Could not access file "+child+": "+e.getLocalizedMessage());
+						continue;
+					}
+					
+					if ( needsDownloading ) {
 						myLogger.debug("Downloading file: " + child);
 						fireJobStatusChange("Downloading file: " + child);
+						try {
 						cacheFile = GrisuRegistryManager.getDefault(
 								serviceInterface).getFileManager()
 								.downloadFile(child);
+						} catch (Exception e) {
+							myLogger.error("Could not download file "+child+": "+e.getLocalizedMessage());
+							fireJobStatusChange("Could not download file "+child+": "+e.getLocalizedMessage());
+							continue;
+						}
 					} else {
 						cacheFile = GrisuRegistryManager.getDefault(
 								serviceInterface).getFileManager().getLocalCacheFile(child);
