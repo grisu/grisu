@@ -123,13 +123,8 @@ public class MultiPartJobObject {
 		this.serviceInterface = serviceInterface;
 		this.multiPartJobId = multiPartJobId;
 
-		SortedSet<DtoJob> alljobs = getMultiPartJob(refreshJobStatusOnBackend)
-				.getJobs().getAllJobs();
-
-		for (DtoJob dtoJob : alljobs) {
-			JobObject job = new JobObject(serviceInterface, dtoJob);
-			jobs.add(job);
-		}
+//		SortedSet<DtoJob> alljobs = getMultiPartJob(refreshJobStatusOnBackend)
+//				.getJobs().getAllJobs();
 
 	}
 
@@ -156,6 +151,11 @@ public class MultiPartJobObject {
 			try {
 				dtoMultiPartJob = serviceInterface.getMultiPartJob(
 						multiPartJobId, true);
+				
+				for (DtoJob dtoJob : dtoMultiPartJob.getJobs().getAllJobs()) {
+					JobObject job = new JobObject(serviceInterface, dtoJob);
+					jobs.add(job);
+				}
 			} catch (NoSuchJobException e) {
 				throw new RuntimeException(e);
 			}
