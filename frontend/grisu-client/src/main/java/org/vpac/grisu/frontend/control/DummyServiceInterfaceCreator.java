@@ -1,4 +1,4 @@
-package org.vpac.grisu.client.control;
+package org.vpac.grisu.frontend.control;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;

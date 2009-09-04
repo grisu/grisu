@@ -1,8 +1,12 @@
-package org.vpac.grisu.client.control;
+package org.vpac.grisu.frontend.control;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URL;
+
+import javax.net.ssl.SSLSocketFactory;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.soap.SOAPBinding;
 
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
@@ -14,43 +18,22 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.ServiceInterfaceCreator;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.settings.CaCertManager;
-import org.vpac.grisu.settings.ClientPropertiesManager;
 
-public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 
+public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
+	
 	static final Logger myLogger = Logger
-			.getLogger(XfireServiceInterfaceCreator.class.getName());
+	.getLogger(JaxWsServiceInterfaceCreator.class.getName());
 
 	public boolean canHandleUrl(String url) {
-		if (StringUtils.isNotBlank(url) && url.startsWith("http")) {
+		if ( StringUtils.isNotBlank(url) && url.startsWith("http") ) {
 			return true;
 		} else {
 			return false;
 		}
 	}
-
-	public ServiceInterface create(String interfaceUrl, String username,
-			char[] password, String myProxyServer, String myProxyPort,
-			Object[] otherOptions) throws ServiceInterfaceException {
-		
-		String httpProxy = null;
-		int httpProxyPort = -1;
-		String httpProxyUsername = null;
-		char[] httpProxyPassword = null;
-
-		if (otherOptions == null && otherOptions.length == 4) {
-			try {
-				httpProxy = (String) otherOptions[0];
-				httpProxyPort = (Integer) otherOptions[1];
-				httpProxyUsername = (String) otherOptions[2];
-				httpProxyPassword = (char[]) otherOptions[3];
-			} catch (ClassCastException cce) {
-				throw new ServiceInterfaceException(
-						"Could not create serviceInterface: "
-								+ cce.getLocalizedMessage(), cce);
-			}
-		}
-
+	
+	private SSLSocketFactory createSocketFactory(String interfaceUrl) throws ServiceInterfaceException {
 		// Technique similar to
 		// http://juliusdavies.ca/commons-ssl/TrustExample.java.html
 		HttpSecureProtocol protocolSocketFactory;
@@ -67,7 +50,7 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 			try {
 				if (cacertFilename != null && !"".equals(cacertFilename)) {
-					cacertURL = XfireServiceInterfaceCreator.class
+					cacertURL = JaxWsServiceInterfaceCreator.class
 							.getResource("/" + cacertFilename);
 					if (cacertURL != null) {
 						myLogger.debug("Using cacert " + cacertFilename
@@ -88,13 +71,13 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 					myLogger
 							.debug("Found url in map. Trying to use this cacert file: "
 									+ cacertFilename);
-					cacertURL = XfireServiceInterfaceCreator.class
+					cacertURL = JaxWsServiceInterfaceCreator.class
 							.getResource("/" + cacertFilename);
 					if (cacertURL == null) {
 						myLogger
 								.debug("Didn't find cacert. Using the default one.");
 						// use the default one
-						cacertURL = XfireServiceInterfaceCreator.class
+						cacertURL = JaxWsServiceInterfaceCreator.class
 								.getResource("/cacert.pem");
 					} else {
 						myLogger.debug("Found cacert. Using it. Good.");
@@ -103,7 +86,7 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 					myLogger
 							.debug("Didn't find any configuration for a special cacert. Using the default one.");
 					// use the default one
-					cacertURL = XfireServiceInterfaceCreator.class
+					cacertURL = JaxWsServiceInterfaceCreator.class
 							.getResource("/cacert.pem");
 				}
 
@@ -122,69 +105,75 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 			Protocol protocol = new Protocol("https",
 					(ProtocolSocketFactory) protocolSocketFactory, 443);
 			Protocol.registerProtocol("https", protocol);
+			
+			return protocolSocketFactory;
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 //			e1.printStackTrace();
 			throw new ServiceInterfaceException(
 					"Unspecified error while trying to establish secure connection.", e1);
 		}
-		
+	}
 
-		Class xfireServiceInterfaceClass = null;
+	public ServiceInterface create(String interfaceUrl, String username,
+			char[] password, String myProxyServer, String myProxyPort,
+			Object[] otherOptions) throws ServiceInterfaceException {
+		
+		
+//		createSocketFactory(interfaceUrl);
+		Class jaxwsServiceInterfaceClass = null;
 
 		try {
-			xfireServiceInterfaceClass = Class
+			jaxwsServiceInterfaceClass = Class
 					.forName("org.vpac.grisu.control.impl.EnunciateServiceInterfaceImpl");
 		} catch (ClassNotFoundException e) {
-			myLogger.warn("Could not find xfire service interface class.");
+			myLogger.warn("Could not find jaxws service interface class.");
 //			e.printStackTrace();
 			throw new ServiceInterfaceException(
-					"Could not find XfireServiceInterface class. Probably grisu-client-xfire is not in the classpath.",
+					"Could not find JaxWsServiceInterface class. Probably grisu-client-jaxws is not in the classpath.",
 					e);
 		}
 
-		Object xfireServiceInterface = null;
+		Object jaxwsServiceInterface = null;
 		Class interfaceClass = null;
+		
 		try {
-			Constructor xfireServiceInterfaceConstructor;
+			Constructor jaxwsServiceInterfaceConstructor;
 			interfaceClass = Class.forName("org.vpac.grisu.control.EnunciateServiceInterface");
 
 			
-			xfireServiceInterfaceConstructor = xfireServiceInterfaceClass
+			jaxwsServiceInterfaceConstructor = jaxwsServiceInterfaceClass
 					.getConstructor(String.class);
 
-			xfireServiceInterface = xfireServiceInterfaceConstructor
+			jaxwsServiceInterface = jaxwsServiceInterfaceConstructor
 					.newInstance(interfaceUrl);
 
-			Method setAuthMethod = xfireServiceInterface.getClass().getMethod(
-					"setHttpAuthCredentials", String.class, String.class);
-			
-			setAuthMethod.invoke(xfireServiceInterface, username, new String(password));
-			
-			Method setMTOMEnabled = xfireServiceInterface.getClass().getMethod(
-					"setMTOMEnabled", boolean.class);
-			
-			setMTOMEnabled.invoke(xfireServiceInterface, true);
-			
-			Method getXfireClient = xfireServiceInterface.getClass().getMethod("getXFireClient");
-			Object xfireClient = getXfireClient.invoke(xfireServiceInterface);
-			
-			Method setPropertyMethod = xfireClient.getClass().getMethod("setProperty", String.class, Object.class);
-			setPropertyMethod.invoke(xfireClient, "urn:xfire:transport:http:chunking-enabled", "true");
-			
-			Long timeout = ClientPropertiesManager.getConnectionTimeoutInMS();
-			setPropertyMethod.invoke(xfireClient, "http.timeout", timeout.toString());
+			Method getBindingProvider = jaxwsServiceInterface.getClass().getMethod(
+					"_getBindingProvider");
 
+			BindingProvider bp = (BindingProvider) getBindingProvider.invoke(jaxwsServiceInterface);
+			
+			bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY, username);
+			bp.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, new String(password));
+			
+			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory", createSocketFactory(interfaceUrl));
 
+			bp.getRequestContext().put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
+			
+			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size", 4096);
+			SOAPBinding binding = (SOAPBinding)bp.getBinding();
+			binding.setMTOMEnabled(true);
+
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+//			e.printStackTrace();
 			throw new ServiceInterfaceException(
-					"Could not create XfireServiceInterface: "
+					"Could not create JaxwsServiceInterface: "
 							+ e.getLocalizedMessage(), e);
 		}
 		
-		return new ProxyServiceInterface(xfireServiceInterface);
+		return new ProxyServiceInterface(jaxwsServiceInterface);
 
 	}
 

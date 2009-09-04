@@ -7,13 +7,13 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-import org.vpac.grisu.client.control.clientexceptions.FileTransferException;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
+import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.DtoFolder;

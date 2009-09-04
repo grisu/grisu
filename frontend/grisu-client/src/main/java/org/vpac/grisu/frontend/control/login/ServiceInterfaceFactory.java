@@ -107,7 +107,7 @@ public final class ServiceInterfaceFactory {
 
 			try {
 				serviceInterfaceCreatorClass = Class
-						.forName("org.vpac.grisu.client.control." + className);
+						.forName("org.vpac.grisu.frontend.control." + className);
 			} catch (ClassNotFoundException e) {
 				myLogger.warn("Could not find serviceInterfaceCreator class: "
 						+ className);

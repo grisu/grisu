@@ -1,4 +1,4 @@
-package org.vpac.grisu.client.control;
+package org.vpac.grisu.frontend.control;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

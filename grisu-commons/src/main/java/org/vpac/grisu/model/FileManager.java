@@ -11,9 +11,9 @@ import javax.activation.FileDataSource;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.vpac.grisu.client.control.clientexceptions.FileTransferException;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
+import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
 import org.vpac.grisu.model.dto.DtoFolder;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.utils.FileHelpers;
