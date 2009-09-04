@@ -9,6 +9,7 @@ import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.ssl.HttpSecureProtocol;
 import org.apache.commons.ssl.TrustMaterial;
+import org.apache.log4j.Logger;
 import org.globus.gsi.GlobusCredential;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
@@ -20,6 +21,8 @@ import au.org.arcs.jcommons.dependencies.ClasspathHacker;
 import au.org.arcs.jcommons.dependencies.DependencyManager;
 
 public class LoginManager {
+	
+	static final Logger myLogger = Logger.getLogger(LoginManager.class.getName());
 
 	/**
 	 * One-for-all method to login to a Grisu backend.
@@ -64,7 +67,9 @@ public class LoginManager {
 		try {
 			CertificateFiles.copyCACerts();
 		} catch (Exception e1) {
-			e1.printStackTrace();
+			myLogger.warn(e1);
+//			e1.printStackTrace();
+
 		}
 
 		// do the cacert thingy
