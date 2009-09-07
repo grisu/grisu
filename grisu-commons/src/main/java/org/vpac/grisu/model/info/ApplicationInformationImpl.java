@@ -117,9 +117,9 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 				temp.add(Constants.NO_VERSION_INDICATOR_STRING);
 				cachedVersionsPerSubmissionLocations.put(KEY, temp);
 			} else {
-				List<String> temp = Arrays.asList(serviceInterface
+				List<String> temp = serviceInterface
 						.getVersionsOfApplicationOnSubmissionLocation(
-								application, subLoc));
+								application, subLoc).getStringList();
 				cachedVersionsPerSubmissionLocations.put(KEY,
 						new HashSet<String>(temp));
 			}
@@ -205,9 +205,9 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		if (cachedVersionsForUserPerFqan.get(fqan) == null) {
 			Set<String> result = new TreeSet<String>();
 			for (String subLoc : getAvailableSubmissionLocationsForFqan(fqan)) {
-				List<String> temp = Arrays.asList(serviceInterface
+				List<String> temp = serviceInterface
 						.getVersionsOfApplicationOnSubmissionLocation(
-								getApplicationName(), subLoc));
+								getApplicationName(), subLoc).getStringList();
 				result.addAll(temp);
 			}
 			cachedVersionsForUserPerFqan.put(fqan, result);

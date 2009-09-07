@@ -45,7 +45,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	public final String[] getAllAvailableFqans() {
 
 		if (cachedFqans == null) {
-			this.cachedFqans = serviceInterface.getFqans();
+			this.cachedFqans = serviceInterface.getFqans().asArray();
 		}
 		return cachedFqans;
 	}
