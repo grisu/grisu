@@ -25,6 +25,7 @@ import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
 import org.vpac.grisu.model.dto.DtoMultiPartJob;
 import org.vpac.grisu.model.dto.DtoMultiPartJobs;
+import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 
 import au.org.arcs.jcommons.constants.JobSubmissionProperty;
@@ -266,7 +267,7 @@ public interface ServiceInterface {
 	 *            the site
 	 * @return the supported versions
 	 */
-	String[] getVersionsOfApplicationOnSubmissionLocation(
+	DtoStringList getVersionsOfApplicationOnSubmissionLocation(
 			String application, String submissionLocation);
 
 	//	
@@ -282,7 +283,7 @@ public interface ServiceInterface {
 	 *            (queuename@cluster:contactstring#jobmanager)
 	 * @return the gridftp servers
 	 */
-	String[] getStagingFileSystemForSubmissionLocation(String subLoc);
+	DtoStringList getStagingFileSystemForSubmissionLocation(String subLoc);
 
 	/**
 	 * Returns all fqans of the user for the vo's that are configured on the
@@ -290,7 +291,7 @@ public interface ServiceInterface {
 	 * 
 	 * @return all fqans of the user
 	 */
-	String[] getFqans();
+	DtoStringList getFqans();
 
 	/**
 	 * Checks the current certificate and returns its' dn.
@@ -306,7 +307,7 @@ public interface ServiceInterface {
 	 * 
 	 * @return all sites
 	 */
-	String[] getAllSites();
+	DtoStringList getAllSites();
 
 	/**
 	 * Returns all applications that are available grid-wide or at certain
@@ -316,7 +317,7 @@ public interface ServiceInterface {
 	 *            all the sites you want to query or null for a grid-wide search
 	 * @return all applications
 	 */
-	String[] getAllAvailableApplications(String[] sites);
+	DtoStringList getAllAvailableApplications(DtoStringList sites);
 
 	/**
 	 * Returns all the details that are know about this version of the
@@ -570,7 +571,7 @@ public interface ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the folder can't be accessed/read
 	 */
-	String[] getChildrenFileNames(String folder, boolean onlyFiles)
+	DtoStringList getChildrenFileNames(String folder, boolean onlyFiles)
 			throws RemoteFileSystemException;
 
 	/**
@@ -630,7 +631,7 @@ public interface ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the filesystem could not be accessed
 	 */
-	void deleteFiles(String[] files) throws RemoteFileSystemException;
+	void deleteFiles(DtoStringList files) throws RemoteFileSystemException;
 
 	// ---------------------------------------------------------------------------------------------------
 	// 
@@ -734,7 +735,7 @@ public interface ServiceInterface {
 	 * 
 	 * @return all jobnames
 	 */
-	String[] getAllJobnames();
+	DtoStringList getAllJobnames();
 	
 	
 	/**
@@ -742,7 +743,7 @@ public interface ServiceInterface {
 	 * 
 	 * @return all multipartjobids
 	 */
-	String[] getAllMultiPartJobIds();
+	DtoStringList getAllMultiPartJobIds();
 
 //	/**
 //	 * Creates a job using the jobProperties that are specified in the map and

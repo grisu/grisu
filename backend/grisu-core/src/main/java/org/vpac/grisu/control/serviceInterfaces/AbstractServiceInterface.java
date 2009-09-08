@@ -31,7 +31,6 @@ import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileType;
 import org.apache.commons.vfs.FileTypeSelector;
 import org.apache.log4j.Logger;
-import org.apache.xpath.operations.Mult;
 import org.vpac.grisu.backend.hibernate.JobDAO;
 import org.vpac.grisu.backend.hibernate.MultiPartJobDAO;
 import org.vpac.grisu.backend.hibernate.UserDAO;
@@ -70,6 +69,7 @@ import org.vpac.grisu.model.dto.DtoJobProperty;
 import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
 import org.vpac.grisu.model.dto.DtoMultiPartJob;
+import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.settings.Environment;
@@ -80,7 +80,6 @@ import org.vpac.security.light.voms.VOManagement.VOManagement;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import au.org.arcs.grid.grisu.matchmaker.CachedMatchMakerImpl;
 import au.org.arcs.grid.grisu.matchmaker.MatchMakerImpl;
 import au.org.arcs.grid.sched.MatchMaker;
 import au.org.arcs.jcommons.constants.Constants;
@@ -274,7 +273,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								+ "Jobname not specified and job creation method is force-name.");
 			}
 
-			String[] allJobnames = getAllJobnames();
+			String[] allJobnames = getAllJobnames().asArray();
 			Arrays.sort(allJobnames);
 			if (Arrays.binarySearch(allJobnames, jobname) >= 0) {
 				throw new JobPropertiesException(
@@ -292,7 +291,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 		} else if (Constants.TIMESTAMP_METHOD.equals(jobnameCreationMethod)) {
 
-			String[] allJobnames = getAllJobnames();
+			String[] allJobnames = getAllJobnames().asArray();
 			Arrays.sort(allJobnames);
 
 			String temp;
@@ -1290,11 +1289,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return dtoJobs;
 	}
 
-	public String[] getAllJobnames() {
+	public DtoStringList getAllJobnames() {
 
 		List<String> jobnames = jobdao.findJobNamesByDn(getUser().getDn());
 
-		return jobnames.toArray(new String[] {});
+		return DtoStringList.fromStringList(jobnames);
 	}
 
 	/**
@@ -1487,11 +1486,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	public String[] getAllMultiPartJobIds() {
+	public DtoStringList getAllMultiPartJobIds() {
 
 		List<String> jobnames = multiPartJobDao.findJobNamesByDn(getDN());
 
-		return jobnames.toArray(new String[] {});
+		return DtoStringList.fromStringList(jobnames);
 	}
 
 	/**
@@ -1559,7 +1558,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			// getUser().removeAutoMountedMountpoints();
 			// userdao.attachClean(getUser());
 
-			getUser().setAutoMountedMountPoints(df_auto_mds(getAllSites()));
+			getUser().setAutoMountedMountPoints(df_auto_mds(getAllSites().asArray()));
 
 			Set<MountPoint> mps = getUser().getAllMountPoints();
 
@@ -1642,7 +1641,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		// for ( String site : sites ) {
 
-		for (String fqan : getFqans()) {
+		for (String fqan : getFqans().getStringList()) {
 			Date start = new Date();
 			Map<String, String[]> mpUrl = informationManager
 					.getDataLocationsForVO(fqan);
@@ -2118,7 +2117,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#getFqans()
 	 */
-	public String[] getFqans() {
+	public DtoStringList getFqans() {
 
 		if (currentFqans == null) {
 
@@ -2129,7 +2128,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			currentFqans = fqans.toArray(new String[fqans.size()]);
 		}
-		return currentFqans;
+		return DtoStringList.fromStringArray(currentFqans);
 	}
 
 	/*
@@ -2141,10 +2140,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return getUser().getDn();
 	}
 
-	public String[] getAllSites() {
+	public DtoStringList getAllSites() {
 
 		// if ( ServerPropertiesManager.getMDSenabled() ) {
-		return informationManager.getAllSites();
+		return DtoStringList.fromStringArray(informationManager.getAllSites());
 		// return MountPointManager.getAllSitesFromMDS();
 		// can't enable the mds version right now until the datadirectory thing
 		// works...
@@ -2309,7 +2308,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * org.vpac.grisu.control.ServiceInterface#getChildrenFiles(java.lang.String
 	 * , boolean)
 	 */
-	public String[] getChildrenFileNames(final String folder,
+	public DtoStringList getChildrenFileNames(final String folder,
 			final boolean onlyFiles) throws RemoteFileSystemException {
 
 		String[] result = null;
@@ -2333,7 +2332,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					+ folder + ": " + e.getMessage());
 		}
 
-		return result;
+		return DtoStringList.fromStringArray(result);
 
 	}
 
@@ -2441,11 +2440,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see
 	 * org.vpac.grisu.control.ServiceInterface#deleteFiles(java.lang.String[])
 	 */
-	public void deleteFiles(final String[] files)
+	public void deleteFiles(final DtoStringList files)
 			throws RemoteFileSystemException {
 
 		// ArrayList<String> filesNotDeleted = new ArrayList<String>();
-		for (String file : files) {
+		for (String file : files.getStringList()) {
 			try {
 				deleteFile(file);
 			} catch (Exception e) {
@@ -2748,10 +2747,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	public String[] getVersionsOfApplicationOnSubmissionLocation(
+	public DtoStringList getVersionsOfApplicationOnSubmissionLocation(
 			final String application, final String submissionLocation) {
-		return informationManager.getVersionsOfApplicationOnSubmissionLocation(
-				application, submissionLocation);
+		return DtoStringList.fromStringArray(informationManager.getVersionsOfApplicationOnSubmissionLocation(
+				application, submissionLocation));
 	}
 
 	public DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
@@ -2951,17 +2950,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * org.vpac.grisu.control.ServiceInterface#getAllAvailableApplications(java
 	 * .lang.String[])
 	 */
-	public String[] getAllAvailableApplications(final String[] sites) {
+	public DtoStringList getAllAvailableApplications(final DtoStringList sites) {
 		Set<String> siteList = new TreeSet<String>();
 
 		if (sites == null) {
-			return informationManager.getAllApplicationsOnGrid();
+			return DtoStringList.fromStringArray(informationManager.getAllApplicationsOnGrid());
 		}
-		for (int i = 0; i < sites.length; i++) {
-			siteList.addAll(Arrays.asList(informationManager
-					.getAllApplicationsAtSite(sites[i])));
+		for ( String site : sites.getStringList() ) {
+			siteList.addAll(Arrays.asList(informationManager.getAllApplicationsAtSite(site)));
 		}
-		return siteList.toArray(new String[] {});
+
+		return DtoStringList.fromStringArray(siteList.toArray(new String[]{}));
 
 	}
 
@@ -2971,10 +2970,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @seeorg.vpac.grisu.control.ServiceInterface#
 	 * getStagingFileSystemForSubmissionLocation(java.lang.String)
 	 */
-	public String[] getStagingFileSystemForSubmissionLocation(
+	public DtoStringList getStagingFileSystemForSubmissionLocation(
 			final String subLoc) {
-		return informationManager
-				.getStagingFileSystemForSubmissionLocation(subLoc);
+		return DtoStringList.fromStringArray(informationManager
+				.getStagingFileSystemForSubmissionLocation(subLoc));
 	}
 
 	/**

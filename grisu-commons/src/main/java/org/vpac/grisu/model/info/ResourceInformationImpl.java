@@ -52,7 +52,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 		if (cachedAllSites == null) {
 
 			for (String subLoc : getAllSubmissionLocations()) {
-				cachedAllSites = serviceInterface.getAllSites();
+				cachedAllSites = serviceInterface.getAllSites().asArray();
 			}
 		}
 		return cachedAllSites;
@@ -192,8 +192,8 @@ public class ResourceInformationImpl implements ResourceInformation {
 			return null;
 		}
 		if (cachedStagingFilesystemsPerSubLoc.get(subLoc) == null) {
-			List<String> temp = Arrays.asList(serviceInterface
-					.getStagingFileSystemForSubmissionLocation(subLoc));
+			List<String> temp = serviceInterface
+					.getStagingFileSystemForSubmissionLocation(subLoc).getStringList();
 			cachedStagingFilesystemsPerSubLoc.put(subLoc, temp);
 		}
 		return cachedStagingFilesystemsPerSubLoc.get(subLoc);

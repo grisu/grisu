@@ -24,7 +24,7 @@ import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
 import org.vpac.grisu.model.dto.DtoMultiPartJob;
-import org.vpac.grisu.model.dto.DtoMultiPartJobs;
+import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 
 public class ProxyServiceInterface implements ServiceInterface {
@@ -179,7 +179,7 @@ public class ProxyServiceInterface implements ServiceInterface {
 
 	}
 
-	public void deleteFiles(String[] files) throws RemoteFileSystemException {
+	public void deleteFiles(DtoStringList files) throws RemoteFileSystemException {
 		try {
 			Method m = si.getClass().getMethod("deleteFiles", files.getClass());
 			m.invoke(si, (Object) files);
@@ -304,11 +304,11 @@ public class ProxyServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public String[] getAllAvailableApplications(String[] sites) {
+	public DtoStringList getAllAvailableApplications(DtoStringList sites) {
 		try {
 			Method m = si.getClass().getMethod("getAllAvailableApplications",
 					sites.getClass());
-			return (String[]) (m.invoke(si, (Object) sites));
+			return (DtoStringList) (m.invoke(si, (Object) sites));
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {
@@ -361,10 +361,10 @@ public class ProxyServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public String[] getAllJobnames() {
+	public DtoStringList getAllJobnames() {
 		try {
 			Method m = si.getClass().getMethod("getAllJobnames");
-			return (String[]) (m.invoke(si));
+			return (DtoStringList) (m.invoke(si));
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {
@@ -378,10 +378,10 @@ public class ProxyServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public String[] getAllSites() {
+	public DtoStringList getAllSites() {
 		try {
 			Method m = si.getClass().getMethod("getAllSites");
-			return (String[]) (m.invoke(si));
+			return (DtoStringList) (m.invoke(si));
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {
@@ -474,12 +474,12 @@ public class ProxyServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public String[] getChildrenFileNames(String folder, boolean onlyFiles)
+	public DtoStringList getChildrenFileNames(String folder, boolean onlyFiles)
 			throws RemoteFileSystemException {
 		try {
 			Method m = si.getClass().getMethod("getChildrenFileNames",
 					folder.getClass(), boolean.class);
-			return (String[]) m.invoke(si, folder, onlyFiles);
+			return (DtoStringList) m.invoke(si, folder, onlyFiles);
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {
@@ -588,11 +588,11 @@ public class ProxyServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public String[] getFqans() {
+	public DtoStringList getFqans() {
 
 		try {
 			Method m = si.getClass().getMethod("getFqans");
-			return (String[]) (m.invoke(si));
+			return (DtoStringList) (m.invoke(si));
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {
@@ -721,12 +721,12 @@ public class ProxyServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public String[] getStagingFileSystemForSubmissionLocation(String subLoc) {
+	public DtoStringList getStagingFileSystemForSubmissionLocation(String subLoc) {
 		try {
 			Method m = si.getClass().getMethod(
 					"getStagingFileSystemForSubmissionLocation",
 					subLoc.getClass());
-			return (String[]) m.invoke(si, subLoc);
+			return (DtoStringList) m.invoke(si, subLoc);
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {
@@ -865,13 +865,13 @@ public class ProxyServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public String[] getVersionsOfApplicationOnSubmissionLocation(
+	public DtoStringList getVersionsOfApplicationOnSubmissionLocation(
 			String application, String submissionLocation) {
 		try {
 			Method m = si.getClass().getMethod(
 					"getVersionsOfApplicationOnSubmissionLocation",
 					application.getClass(), submissionLocation.getClass());
-			return (String[]) m.invoke(si, application, submissionLocation);
+			return (DtoStringList) m.invoke(si, application, submissionLocation);
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {
@@ -1285,11 +1285,11 @@ public class ProxyServiceInterface implements ServiceInterface {
 
 	}
 
-	public String[] getAllMultiPartJobIds() {
+	public DtoStringList getAllMultiPartJobIds() {
 
 		try {
 			Method m = si.getClass().getMethod("getAllMultiPartJobIds");
-			return (String[]) (m.invoke(si));
+			return (DtoStringList) (m.invoke(si));
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {

@@ -307,7 +307,7 @@ public class JobSubmissionObjectImpl {
 		}
 		try {
 			this.walltime_in_seconds = Integer.parseInt(jobProperties
-					.get(JobSubmissionProperty.WALLTIME_IN_MINUTES.toString()));
+					.get(JobSubmissionProperty.WALLTIME_IN_MINUTES.toString())) * 60;
 		} catch (NumberFormatException e) {
 			this.walltime_in_seconds = 0;
 		}
@@ -426,7 +426,7 @@ public class JobSubmissionObjectImpl {
 		jobProperties.put(JobSubmissionProperty.SUBMISSIONLOCATION,
 				submissionLocation);
 		jobProperties.put(JobSubmissionProperty.WALLTIME_IN_MINUTES,
-				new Integer(walltime_in_seconds).toString());
+				new Integer(walltime_in_seconds/60).toString());
 		jobProperties.put(JobSubmissionProperty.PBSDEBUG, pbsDebug);
 
 		return jobProperties;

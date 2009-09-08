@@ -62,7 +62,7 @@ public final class SimpleJsdlBuilder {
 			} else if (jp.equals(JobSubmissionProperty.WALLTIME_IN_MINUTES)) {
 
 				String walltime = jobProperties.get(jp);
-				int wallTimeInSeconds = Integer.parseInt(walltime);
+				int wallTimeInSeconds = Integer.parseInt(walltime)*60;
 				int cpus = Integer.parseInt(jobProperties
 						.get(JobSubmissionProperty.NO_CPUS));
 
