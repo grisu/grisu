@@ -19,7 +19,7 @@ import au.org.arcs.jcommons.constants.JobSubmissionProperty;
  * @author markus
  * 
  */
-public final class SimpleJsdlBuilder {
+public class SimpleJsdlBuilder {
 	
 	private SimpleJsdlBuilder() {
 	}
