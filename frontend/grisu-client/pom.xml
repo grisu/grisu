@@ -68,9 +68,11 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
+
 				<executions>
 					<execution>
 						<phase>package</phase>
+						<id>lib</id>
 						<configuration>
 							<descriptors>
 								<descriptor>grisu-client-dependencies.assembly.xml</descriptor>

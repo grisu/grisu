@@ -615,12 +615,13 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 		waitThread = new Thread() {
 			public void run() {
+				int oldStatus = getStatus(false);
 				while (!isFinished()) {
 
 					if (isInterrupted()) {
 						return;
 					}
-					System.out.println("Status: " + getStatusString(false));
+					fireJobStatusChange(oldStatus, getStatus(false));
 					try {
 						Thread.sleep(checkIntervallInSeconds * 1000);
 					} catch (InterruptedException e) {
@@ -640,6 +641,11 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 	private void fireJobStatusChange(final int oldStatus, final int newStatus) {
 
+		if ( oldStatus == newStatus ) {
+			myLogger.debug("Old status equals new status, not firing event...");
+			return;
+		}
+		
 		myLogger.debug("Fire job status change event.");
 		// if we have no mountPointsListeners, do nothing...
 		if (jobStatusChangeListeners != null

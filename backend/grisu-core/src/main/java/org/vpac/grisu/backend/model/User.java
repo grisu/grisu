@@ -64,7 +64,6 @@ public class User {
 	  private static class ThreadLocalFsManager extends ThreadLocal {
 		    public Object initialValue() {
 		    try {
-		    	System.out.println("Creating new FS Manager.");
 		    	myLogger.debug("Creating new FS Manager.");
 				return VFSUtil.createNewFsManager(false, false, true, true, true, true, true, null);
 			} catch (FileSystemException e) {

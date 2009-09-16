@@ -2408,8 +2408,24 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				return false;
 			}
 		} catch (FileSystemException e) {
-			throw new RemoteFileSystemException("Could not create directory: "
-					+ url);
+			
+			// try again. Commons-vfs sometimes seems to fail here without any reason I could figure out...
+			try {
+			FileObject dir = getUser().aquireFile(url);
+			if (!dir.exists()) {
+				dir.createFolder();
+				if (dir.exists()) {
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+			} catch (Exception e2) {
+			throw new RemoteFileSystemException("Could not create directory "
+					+ url +": "+e2.getLocalizedMessage());
+			}
 		}
 	}
 

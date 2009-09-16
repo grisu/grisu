@@ -74,7 +74,7 @@ public final class LocalTemplatesHelper {
 		if ( ! templatesDir.exists() || templatesDir.list().length == 0) {
 
 			if ( !templatesDir.mkdirs() ) {
-				myLogger.error("Could not create Templates directory...");
+				myLogger.warn("Could not create Templates directory...");
 			}
 			myLogger
 					.debug("Filling templates_available folder with a set of base templates...");
