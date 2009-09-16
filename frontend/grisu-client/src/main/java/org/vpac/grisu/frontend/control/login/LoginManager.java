@@ -2,7 +2,10 @@ package org.vpac.grisu.frontend.control.login;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URL;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
@@ -11,11 +14,13 @@ import org.apache.commons.ssl.HttpSecureProtocol;
 import org.apache.commons.ssl.TrustMaterial;
 import org.apache.log4j.Logger;
 import org.globus.gsi.GlobusCredential;
+import org.ietf.jgss.GSSCredential;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.utils.GrisuPluginFilenameFilter;
 import org.vpac.security.light.control.CertificateFiles;
+import org.vpac.security.light.plainProxy.PlainProxy;
 
 import au.org.arcs.jcommons.dependencies.ClasspathHacker;
 import au.org.arcs.jcommons.dependencies.DependencyManager;
@@ -171,10 +176,46 @@ public class LoginManager {
 				}
 			}
 		} else {
-			// means shib login
-			throw new RuntimeException("Shib login not supported yet...");
+			try {
+				// means shib login
+				DependencyManager.checkForArcsGsiDependency(1, 1, true);
+			
+				GSSCredential slcsproxy = slcsMyProxyInit(username, password, idp);
+				return LoginHelpers.gssCredentialLogin(loginParams, slcsproxy);
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new LoginException("Could not do slcs login: "+e.getLocalizedMessage(), e);
+			}
+
 		}
 
+	}
+	
+	public static GSSCredential slcsMyProxyInit(String username, char[] password, String idp) throws Exception {
+		
+		try {
+			
+			Class slcsClass = Class.forName("au.org.arcs.auth.slcs.SLCS");
+			Object slcsObject = slcsClass.newInstance();
+			
+			Method initMethod = slcsClass.getMethod("init", String.class, char[].class, String.class);
+			initMethod.invoke(slcsObject, username, password, idp);
+			
+			Method getCredMethod = slcsClass.getMethod("getCertificate");
+			X509Certificate cert = (X509Certificate)getCredMethod.invoke(slcsObject);
+			
+			Method getKeyMethod = slcsClass.getMethod("getPrivateKey");
+			PrivateKey privateKey = (PrivateKey)getKeyMethod.invoke(slcsObject);
+			
+			GSSCredential cred = PlainProxy.init(cert, privateKey, 24*7);
+			
+			return cred;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+		
 	}
 
 	public static void addPluginsToClasspath() throws IOException {

@@ -30,7 +30,7 @@ public class ShibLoginWithJython {
 		
 		SLCS slcs = new SLCS(url);
 		
-		slcs.init(username, password.toCharArray(), new IdpObject());
+		slcs.init(username, password.toCharArray(), "VPAC");
 		
 		GSSCredential cred = PlainProxy.init(slcs.getCertificate(), slcs.getPrivateKey(), 12);
 		
