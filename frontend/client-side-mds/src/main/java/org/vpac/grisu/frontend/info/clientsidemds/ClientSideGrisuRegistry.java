@@ -26,6 +26,11 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 	
 	static final Logger myLogger = Logger.getLogger(ClientSideGrisuRegistry.class.getName());
 	
+	// for package auto-download
+	public Integer getPackageVersion() {
+		return 1;
+	}
+	
 	private final ServiceInterface serviceInterface;
 
 	private final InformationManager infoManager;

@@ -30,6 +30,10 @@ public final class JobCreationInfo {
 		DtoJobs test = si.ps(true);
 
 		GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
+		
+		for ( String subLoc : registry.getUserEnvironmentManager().getAllAvailableSubmissionLocations() ) {
+			System.out.println(subLoc);
+		}
 
 		ApplicationInformation appInfo = registry
 				.getApplicationInformation("java");

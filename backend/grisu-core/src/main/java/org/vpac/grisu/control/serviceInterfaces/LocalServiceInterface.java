@@ -30,6 +30,11 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 	private ProxyCredential credential = null;
 	private String myproxy_username = null;
 	private char[] passphrase = null;
+	
+	// for package auto-download
+	public Integer getPackageVersion() {
+		return 1;
+	}
 
 	@Override
 	protected final ProxyCredential getCredential() {
