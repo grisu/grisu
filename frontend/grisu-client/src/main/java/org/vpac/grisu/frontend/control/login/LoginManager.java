@@ -68,8 +68,8 @@ public class LoginManager {
 		DependencyManager.initArcsCommonJavaLibDir();
 		DependencyManager.checkForBouncyCastleDependency();
 
-		Security
-				.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+//		Security
+//				.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
 		java.security.Security.addProvider(new ArcsSecurityProvider());
 
