@@ -65,6 +65,9 @@ public class LoginManager {
 			char[] password, String username, String idp,
 			LoginParams loginParams) throws LoginException {
 
+		DependencyManager.initArcsCommonJavaLibDir();
+		DependencyManager.checkForBouncyCastleDependency();
+
 		Security
 				.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
@@ -111,8 +114,6 @@ public class LoginManager {
 			e.printStackTrace();
 		}
 
-		DependencyManager.initArcsCommonJavaLibDir();
-		DependencyManager.checkForBouncyCastleDependency();
 
 		String serviceInterfaceUrl = loginParams.getServiceInterfaceUrl();
 

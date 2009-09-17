@@ -123,9 +123,8 @@ public class MultiPartJobObject {
 		this.serviceInterface = serviceInterface;
 		this.multiPartJobId = multiPartJobId;
 
-//		SortedSet<DtoJob> alljobs = getMultiPartJob(refreshJobStatusOnBackend)
-//				.getJobs().getAllJobs();
-
+		dtoMultiPartJob = getMultiPartJob(refreshJobStatusOnBackend);
+		
 	}
 
 	public boolean isFinished(boolean refresh) {
