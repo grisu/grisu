@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.vpac.grisu.backend.hibernate.HibernateSessionFactory;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginParams;
@@ -108,10 +107,10 @@ public class MultiJobSubmit implements JobStatusChangeListener, MultiPartJobEven
 
 		System.out.println("Submission finished: "+new Date());
 		
-		if ( HibernateSessionFactory.HSQLDB_DBTYPE.equals(HibernateSessionFactory.usedDatabase) ) {
-			// for hqsqldb
-			Thread.sleep(10000);
-		}
+//		if ( HibernateSessionFactory.HSQLDB_DBTYPE.equals(HibernateSessionFactory.usedDatabase) ) {
+//			// for hqsqldb
+//			Thread.sleep(10000);
+//		}
 		
 //		MultiPartJobObject newObject = new MultiPartJobObject(si, multiJobName);
 //		

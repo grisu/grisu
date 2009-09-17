@@ -13,7 +13,6 @@
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>org.vpac.grisu:grisu-client</include>
-				<include>jython:jython</include>
 			</includes>
 			<excludes>
 				<exclude>junit:junit</exclude>

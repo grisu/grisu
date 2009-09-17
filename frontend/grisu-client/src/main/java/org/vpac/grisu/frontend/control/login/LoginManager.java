@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.PrivateKey;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 
 import org.apache.commons.httpclient.protocol.Protocol;
@@ -24,11 +25,12 @@ import org.vpac.security.light.plainProxy.PlainProxy;
 
 import au.org.arcs.jcommons.dependencies.ClasspathHacker;
 import au.org.arcs.jcommons.dependencies.DependencyManager;
+import au.org.arcs.jcommons.utils.ArcsSecurityProvider;
 
 public class LoginManager {
-	
-	static final Logger myLogger = Logger
-	.getLogger(LoginManager.class.getName());
+
+	static final Logger myLogger = Logger.getLogger(LoginManager.class
+			.getName());
 
 	/**
 	 * One-for-all method to login to a Grisu backend.
@@ -59,8 +61,17 @@ public class LoginManager {
 	 *             if necessary plugins couldn't be downloaded/stored in the
 	 *             .grisu/plugins folder
 	 */
-	public static ServiceInterface login(GlobusCredential cred, char[] password, String username,
-			String idp, LoginParams loginParams) throws LoginException {
+	public static ServiceInterface login(GlobusCredential cred,
+			char[] password, String username, String idp,
+			LoginParams loginParams) throws LoginException {
+
+		Security
+				.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+
+		java.security.Security.addProvider(new ArcsSecurityProvider());
+
+		java.security.Security.setProperty("ssl.TrustManagerFactory.algorithm",
+				"TrustAllCertificates");
 
 		try {
 			addPluginsToClasspath();
@@ -69,11 +80,11 @@ public class LoginManager {
 			myLogger.warn(e2);
 			throw new RuntimeException(e2);
 		}
-		
+
 		try {
 			CertificateFiles.copyCACerts();
 		} catch (Exception e1) {
-//			e1.printStackTrace();
+			// e1.printStackTrace();
 			myLogger.warn(e1);
 		}
 
@@ -107,8 +118,11 @@ public class LoginManager {
 
 		if ("Local".equals(serviceInterfaceUrl)
 				|| "Dummy".equals(serviceInterfaceUrl)) {
-			DependencyManager.checkForVersionedDependency(
-							"org.vpac.grisu.control.serviceInterfaces.LocalServiceInterface", 1, 1,
+			DependencyManager
+					.checkForVersionedDependency(
+							"org.vpac.grisu.control.serviceInterfaces.LocalServiceInterface",
+							1,
+							1,
 							"https://code.arcs.org.au/hudson/job/Grisu-SNAPSHOT/org.vpac.grisu$grisu-core/lastSuccessfulBuild/artifact/org.vpac.grisu/grisu-core/0.3-SNAPSHOT/local-backend.jar",
 							new File(Environment.getGrisuPluginDirectory(),
 									"local-backend.jar"));
@@ -117,7 +131,9 @@ public class LoginManager {
 			// assume xfire -- that needs to get smarter later on
 			DependencyManager
 					.checkForVersionedDependency(
-							"org.vpac.grisu.client.control.XFireServiceInterfaceCreator", 1, 1,
+							"org.vpac.grisu.client.control.XFireServiceInterfaceCreator",
+							1,
+							1,
 							"https://code.arcs.org.au/hudson/job/Grisu-connectors-SNAPSHOT-binaries/lastSuccessfulBuild/artifact/frontend-modules/xfire-frontend/target/xfire-frontend.jar",
 							new File(Environment.getGrisuPluginDirectory(),
 									"xfire-frontend.jar"));
@@ -125,7 +141,9 @@ public class LoginManager {
 			// also try to use client side mds
 			DependencyManager
 					.checkForVersionedDependency(
-							"org.vpac.grisu.frontend.info.clientsidemds.ClientSideGrisuRegistry", 1, 1,
+							"org.vpac.grisu.frontend.info.clientsidemds.ClientSideGrisuRegistry",
+							1,
+							1,
 							"https://code.arcs.org.au/hudson/job/Grisu-SNAPSHOT-binaries/lastSuccessfulBuild/artifact/frontend/client-side-mds/target/client-side-mds.jar",
 							new File(Environment.getGrisuPluginDirectory(),
 									"client-side-mds.jar"));
@@ -135,9 +153,10 @@ public class LoginManager {
 
 			if (StringUtils.isBlank(loginParams.getMyProxyUsername())) {
 
-				if ( cred != null ) {
+				if (cred != null) {
 					try {
-						return LoginHelpers.globusCredentialLogin(loginParams, cred);
+						return LoginHelpers.globusCredentialLogin(loginParams,
+								cred);
 					} catch (Exception e) {
 						throw new LoginException("Could not login: "
 								+ e.getLocalizedMessage(), e);
@@ -146,10 +165,11 @@ public class LoginManager {
 					// means certificate auth
 					try {
 						// means try to load local proxy
-						if ( loginParams == null ) {
+						if (loginParams == null) {
 							return LoginHelpers.defaultLocalProxyLogin();
 						} else {
-							return LoginHelpers.defaultLocalProxyLogin(loginParams);
+							return LoginHelpers
+									.defaultLocalProxyLogin(loginParams);
 						}
 					} catch (Exception e) {
 						throw new LoginException("Could not login: "
@@ -179,43 +199,49 @@ public class LoginManager {
 			try {
 				// means shib login
 				DependencyManager.checkForArcsGsiDependency(1, 1, true);
-			
-				GSSCredential slcsproxy = slcsMyProxyInit(username, password, idp);
+
+				GSSCredential slcsproxy = slcsMyProxyInit(username, password,
+						idp);
 				return LoginHelpers.gssCredentialLogin(loginParams, slcsproxy);
 			} catch (Exception e) {
 				e.printStackTrace();
-				throw new LoginException("Could not do slcs login: "+e.getLocalizedMessage(), e);
+				throw new LoginException("Could not do slcs login: "
+						+ e.getLocalizedMessage(), e);
 			}
 
 		}
 
 	}
-	
-	public static GSSCredential slcsMyProxyInit(String username, char[] password, String idp) throws Exception {
-		
+
+	public static GSSCredential slcsMyProxyInit(String username,
+			char[] password, String idp) throws Exception {
+
 		try {
-			
+
 			Class slcsClass = Class.forName("au.org.arcs.auth.slcs.SLCS");
 			Object slcsObject = slcsClass.newInstance();
-			
-			Method initMethod = slcsClass.getMethod("init", String.class, char[].class, String.class);
+
+			Method initMethod = slcsClass.getMethod("init", String.class,
+					char[].class, String.class);
 			initMethod.invoke(slcsObject, username, password, idp);
-			
+
 			Method getCredMethod = slcsClass.getMethod("getCertificate");
-			X509Certificate cert = (X509Certificate)getCredMethod.invoke(slcsObject);
-			
+			X509Certificate cert = (X509Certificate) getCredMethod
+					.invoke(slcsObject);
+
 			Method getKeyMethod = slcsClass.getMethod("getPrivateKey");
-			PrivateKey privateKey = (PrivateKey)getKeyMethod.invoke(slcsObject);
-			
-			GSSCredential cred = PlainProxy.init(cert, privateKey, 24*7);
-			
+			PrivateKey privateKey = (PrivateKey) getKeyMethod
+					.invoke(slcsObject);
+
+			GSSCredential cred = PlainProxy.init(cert, privateKey, 24 * 7);
+
 			return cred;
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
 		}
-		
+
 	}
 
 	public static void addPluginsToClasspath() throws IOException {
