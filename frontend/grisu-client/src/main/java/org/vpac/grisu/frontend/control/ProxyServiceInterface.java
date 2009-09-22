@@ -112,9 +112,8 @@ public class ProxyServiceInterface implements ServiceInterface {
 	public String createJob(String jsdl, String fqan,
 			String jobnameCreationMethod) throws JobPropertiesException {
 		try {
-			Method m = si.getClass().getMethod("createJob",
-					jsdl.getClass(), fqan.getClass(),
-					jobnameCreationMethod.getClass());
+			Method m = si.getClass().getMethod("createJob", jsdl.getClass(),
+					fqan.getClass(), jobnameCreationMethod.getClass());
 			return (String) (m.invoke(si, jsdl, fqan, jobnameCreationMethod));
 		} catch (SecurityException e) {
 			throw new RuntimeException(e);
@@ -179,7 +178,8 @@ public class ProxyServiceInterface implements ServiceInterface {
 
 	}
 
-	public void deleteFiles(DtoStringList files) throws RemoteFileSystemException {
+	public void deleteFiles(DtoStringList files)
+			throws RemoteFileSystemException {
 		try {
 			Method m = si.getClass().getMethod("deleteFiles", files.getClass());
 			m.invoke(si, (Object) files);
@@ -290,7 +290,8 @@ public class ProxyServiceInterface implements ServiceInterface {
 			Method m = si.getClass().getMethod(
 					"findMatchingSubmissionLocationsUsingMap",
 					jobProperties.getClass(), fqan.getClass(), boolean.class);
-			return (DtoGridResources) (m.invoke(si, jobProperties, fqan, exclude));
+			return (DtoGridResources) (m.invoke(si, jobProperties, fqan,
+					exclude));
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {
@@ -430,33 +431,13 @@ public class ProxyServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public DtoApplicationDetails getApplicationDetailsForSite(
-			String application, String siteOrSubmissionLocation) {
-		try {
-			Method m = si.getClass()
-					.getMethod("getApplicationDetailsForSite",
-							application.getClass(),
-							siteOrSubmissionLocation.getClass());
-			return (DtoApplicationDetails) m.invoke(si, application,
-					siteOrSubmissionLocation);
-		} catch (SecurityException e) {
-			throw new RuntimeException("Proxy method exception.", e);
-		} catch (NoSuchMethodException e) {
-			throw new RuntimeException("Proxy method exception.", e);
-		} catch (IllegalArgumentException e) {
-			throw new RuntimeException("Proxy method exception.", e);
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException("Proxy method exception.", e);
-		} catch (InvocationTargetException e) {
-			throw (RuntimeException) e.getCause();
-		}
-	}
-
-	public DtoApplicationDetails getApplicationDetailsForVersionAndSite(
+	public DtoApplicationDetails getApplicationDetailsForVersionAndSubmissionLocation(
 			String application, String version, String site) {
 		try {
-			Method m = si.getClass()
-					.getMethod("getApplicationDetailsForVersionAndSite",
+			Method m = si
+					.getClass()
+					.getMethod(
+							"getApplicationDetailsForVersionAndSubmissionLocation",
 							application.getClass(), version.getClass(),
 							site.getClass());
 			return (DtoApplicationDetails) m.invoke(si, application, version,
@@ -871,7 +852,8 @@ public class ProxyServiceInterface implements ServiceInterface {
 			Method m = si.getClass().getMethod(
 					"getVersionsOfApplicationOnSubmissionLocation",
 					application.getClass(), submissionLocation.getClass());
-			return (DtoStringList) m.invoke(si, application, submissionLocation);
+			return (DtoStringList) m
+					.invoke(si, application, submissionLocation);
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {
@@ -1148,6 +1130,29 @@ public class ProxyServiceInterface implements ServiceInterface {
 
 	}
 
+	public void optimizeMultiPartJob(String jobname) throws NoSuchJobException {
+		try {
+			Method m = si.getClass().getMethod("optimizeMultiPartJob",
+					jobname.getClass());
+			m.invoke(si, jobname);
+		} catch (SecurityException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (InvocationTargetException e) {
+			if (e.getCause() instanceof NoSuchJobException) {
+				throw (NoSuchJobException) e.getCause();
+			} else {
+				throw (RuntimeException) e.getCause();
+			}
+		}
+
+	}
+
 	public void submitSupportRequest(String subject, String description) {
 		try {
 			Method m = si.getClass().getMethod("submitSupportRequest",
@@ -1202,7 +1207,7 @@ public class ProxyServiceInterface implements ServiceInterface {
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof RemoteFileSystemException) {
 				throw (RemoteFileSystemException) e.getCause();
-			} else if ( e.getCause() instanceof OutOfMemoryError ) {
+			} else if (e.getCause() instanceof OutOfMemoryError) {
 				throw new RuntimeException(e.getCause());
 			} else {
 				throw (RuntimeException) e.getCause();
@@ -1216,7 +1221,7 @@ public class ProxyServiceInterface implements ServiceInterface {
 		try {
 			Method m = si.getClass().getMethod("addJobToMultiPartJob",
 					multipartJobId.getClass(), jobname.getClass());
-			return (String)(m.invoke(si, multipartJobId, jobname));
+			return (String) (m.invoke(si, multipartJobId, jobname));
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {
@@ -1353,9 +1358,9 @@ public class ProxyServiceInterface implements ServiceInterface {
 
 	}
 
-	public void uploadInputFile(String multiPartJobId,
-			DataHandler inputFile, String relativePath)
-			throws RemoteFileSystemException, NoSuchJobException {
+	public void uploadInputFile(String multiPartJobId, DataHandler inputFile,
+			String relativePath) throws RemoteFileSystemException,
+			NoSuchJobException {
 		Method m;
 		try {
 			m = si.getClass().getMethod("uploadInputFile",
@@ -1373,34 +1378,6 @@ public class ProxyServiceInterface implements ServiceInterface {
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof RemoteFileSystemException) {
 				throw (RemoteFileSystemException) e.getCause();
-			} else if (e.getCause() instanceof NoSuchJobException) {
-				throw (NoSuchJobException) e.getCause();
-			} else {
-				throw new RuntimeException("Proxy method exception.", e
-						.getCause());
-			}
-		}
-	}
-
-	public void submitMultiPartJob(String multipartjobid)
-			throws JobSubmissionException, NoSuchJobException {
-
-		Method m;
-		try {
-			m = si.getClass().getMethod("submitMultiPartJob",
-					multipartjobid.getClass());
-			m.invoke(si, multipartjobid);
-		} catch (SecurityException e) {
-			throw new RuntimeException("Proxy method exception.", e);
-		} catch (NoSuchMethodException e) {
-			throw new RuntimeException("Proxy method exception.", e);
-		} catch (IllegalArgumentException e) {
-			throw new RuntimeException("Proxy method exception.", e);
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException("Proxy method exception.", e);
-		} catch (InvocationTargetException e) {
-			if (e.getCause() instanceof JobSubmissionException) {
-				throw (JobSubmissionException) e.getCause();
 			} else if (e.getCause() instanceof NoSuchJobException) {
 				throw (NoSuchJobException) e.getCause();
 			} else {

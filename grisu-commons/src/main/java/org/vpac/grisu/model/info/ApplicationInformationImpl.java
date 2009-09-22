@@ -82,7 +82,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 						.put(KEY, new HashMap<String, String>());
 			} else {
 				Map<String, String> details = serviceInterface
-						.getApplicationDetailsForVersionAndSite(application,
+						.getApplicationDetailsForVersionAndSubmissionLocation(application,
 								version, subLoc).getDetailsAsMap();
 				cachedApplicationDetails.put(KEY, details);
 			}

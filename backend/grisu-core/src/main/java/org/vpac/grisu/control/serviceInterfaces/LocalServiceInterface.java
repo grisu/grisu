@@ -33,7 +33,7 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 	
 	// for package auto-download
 	public Integer getPackageVersion() {
-		return 1;
+		return 2;
 	}
 
 	@Override

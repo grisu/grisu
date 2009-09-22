@@ -28,7 +28,7 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 	
 	// for package auto-download
 	public Integer getPackageVersion() {
-		return 1;
+		return 2;
 	}
 	
 	private final ServiceInterface serviceInterface;

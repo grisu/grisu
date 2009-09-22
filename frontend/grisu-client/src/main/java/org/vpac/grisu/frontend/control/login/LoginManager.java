@@ -122,8 +122,8 @@ public class LoginManager {
 			DependencyManager
 					.checkForVersionedDependency(
 							"org.vpac.grisu.control.serviceInterfaces.LocalServiceInterface",
-							1,
-							1,
+							2,
+							2,
 							"https://code.arcs.org.au/hudson/job/Grisu-SNAPSHOT/org.vpac.grisu$grisu-core/lastSuccessfulBuild/artifact/org.vpac.grisu/grisu-core/0.3-SNAPSHOT/local-backend.jar",
 							new File(Environment.getGrisuPluginDirectory(),
 									"local-backend.jar"));
@@ -133,8 +133,8 @@ public class LoginManager {
 			DependencyManager
 					.checkForVersionedDependency(
 							"org.vpac.grisu.client.control.XFireServiceInterfaceCreator",
-							1,
-							1,
+							2,
+							2,
 							"https://code.arcs.org.au/hudson/job/Grisu-connectors-SNAPSHOT-binaries/lastSuccessfulBuild/artifact/frontend-modules/xfire-frontend/target/xfire-frontend.jar",
 							new File(Environment.getGrisuPluginDirectory(),
 									"xfire-frontend.jar"));
@@ -143,8 +143,8 @@ public class LoginManager {
 			DependencyManager
 					.checkForVersionedDependency(
 							"org.vpac.grisu.frontend.info.clientsidemds.ClientSideGrisuRegistry",
-							1,
-							1,
+							2,
+							2,
 							"https://code.arcs.org.au/hudson/job/Grisu-SNAPSHOT-binaries/lastSuccessfulBuild/artifact/frontend/client-side-mds/target/client-side-mds.jar",
 							new File(Environment.getGrisuPluginDirectory(),
 									"client-side-mds.jar"));

@@ -73,7 +73,7 @@ public class GT4Submitter extends JobSubmitter {
 	 * (org.w3c.dom.Document)
 	 */
 	private String createJobSubmissionDescription(
-			final ServiceInterface serviceInterface, final Document jsdl) {
+			final InformationManager infoManager, final Document jsdl) {
 
 		DebugUtils.jsdlDebugOutput("Before translating into rsl: ", jsdl);
 
@@ -264,8 +264,7 @@ public class GT4Submitter extends JobSubmitter {
 					&& StringUtils.isNotBlank(version)
 					&& StringUtils.isNotBlank(subLoc)) {
 				// if we know application, version and submissionLocation
-				Map<String, String> appDetails = serviceInterface
-						.getApplicationDetailsForVersionAndSite(application, version, subLoc).getDetailsAsMap();
+				Map<String, String> appDetails = infoManager.getApplicationDetails(application, version, subLoc);
 
 				try {
 					modules_string = appDetails.get(
@@ -287,8 +286,7 @@ public class GT4Submitter extends JobSubmitter {
 				// doesn't matter
 			} else if (application != null && version == null && subLoc != null) {
 
-				Map<String, String> appDetails = serviceInterface
-						.getApplicationDetailsForSite(application, subLoc).getDetailsAsMap();
+				Map<String, String> appDetails = infoManager.getApplicationDetails(application, Constants.NO_VERSION_INDICATOR_STRING, subLoc);
 
 				try {
 					modules_string = appDetails.get(
@@ -464,14 +462,14 @@ public class GT4Submitter extends JobSubmitter {
 	 * @see org.vpac.grisu.js.control.job.JobSubmitter#submit(java.lang.String,
 	 * org.vpac.grisu.js.model.Job)
 	 */
-	protected final String submit(final ServiceInterface serviceInterface, final String host,
+	protected final String submit(final InformationManager infoManager, final String host,
 			final String factoryType, final Job job) {
 
 		JobDescriptionType jobDesc = null;
 		String submittedJobDesc = null;
 		try {
 			// String site = informationManager.getSiteForHostOrUrl(host);
-			submittedJobDesc = createJobSubmissionDescription(serviceInterface,
+			submittedJobDesc = createJobSubmissionDescription(infoManager,
 					job.getJobDescription());
 			jobDesc = RSLHelper.readRSL(submittedJobDesc);
 

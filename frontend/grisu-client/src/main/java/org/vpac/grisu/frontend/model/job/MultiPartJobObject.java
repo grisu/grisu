@@ -12,14 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.activation.DataHandler;
-import javax.management.RuntimeErrorException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -554,7 +552,7 @@ public class MultiPartJobObject {
 		fireJobStatusChange("Submitting multipartjob " + multiPartJobId
 				+ " to backend...");
 		try {
-			serviceInterface.submitMultiPartJob(multiPartJobId);
+			serviceInterface.submitJob(multiPartJobId);
 		} catch (JobSubmissionException jse) {
 			fireJobStatusChange("Job submitssion for multipartjob "
 					+ multiPartJobId + " failed: " + jse.getLocalizedMessage());

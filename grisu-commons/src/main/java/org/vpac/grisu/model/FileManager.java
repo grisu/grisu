@@ -458,6 +458,7 @@ public class FileManager {
 		try {
 			lastModified = serviceInterface.lastModified(url);
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new RuntimeException("Could not get last modified time of file: "+url, e);
 		}
 

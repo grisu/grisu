@@ -61,9 +61,6 @@ public class GT4DummySubmitter extends JobSubmitter {
 	static final Logger myLogger = Logger.getLogger(GT4DummySubmitter.class
 			.getName());
 
-	private InformationManager informationManager = CachedMdsInformationManager
-			.getDefaultCachedMdsInformationManager(Environment.getGrisuDirectory().toString());
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -72,7 +69,7 @@ public class GT4DummySubmitter extends JobSubmitter {
 	 * (org.w3c.dom.Document)
 	 */
 	private String createJobSubmissionDescription(
-			final ServiceInterface serviceInterface, final Document jsdl) {
+			final InformationManager infoManager, final Document jsdl) {
 
 		DebugUtils.jsdlDebugOutput("Before translating into rsl: ", jsdl);
 
@@ -262,8 +259,8 @@ public class GT4DummySubmitter extends JobSubmitter {
 					&& StringUtils.isNotBlank(version)
 					&& StringUtils.isNotBlank(subLoc)) {
 				// if we know application, version and submissionLocation
-				Map<String, String> appDetails = serviceInterface
-						.getApplicationDetailsForVersionAndSite(application, version, subLoc).getDetailsAsMap();
+				Map<String, String> appDetails = infoManager.getApplicationDetails(application, version, subLoc);
+
 
 				try {
 					modules_string = appDetails.get(
@@ -285,8 +282,7 @@ public class GT4DummySubmitter extends JobSubmitter {
 				// doesn't matter
 			} else if (application != null && version == null && subLoc != null) {
 
-				Map<String, String> appDetails = serviceInterface
-						.getApplicationDetailsForSite(application, subLoc).getDetailsAsMap();
+				Map<String, String> appDetails = infoManager.getApplicationDetails(application, version, subLoc);
 
 				try {
 					modules_string = appDetails.get(
@@ -462,14 +458,14 @@ public class GT4DummySubmitter extends JobSubmitter {
 	 * @see org.vpac.grisu.js.control.job.JobSubmitter#submit(java.lang.String,
 	 * org.vpac.grisu.js.model.Job)
 	 */
-	protected final String submit(final ServiceInterface serviceInterface, final String host,
+	protected final String submit(final InformationManager informationManager, final String host,
 			final String factoryType, final Job job) {
 
 		JobDescriptionType jobDesc = null;
 		String submittedJobDesc = null;
 		try {
 			// String site = informationManager.getSiteForHostOrUrl(host);
-			submittedJobDesc = createJobSubmissionDescription(serviceInterface,
+			submittedJobDesc = createJobSubmissionDescription(informationManager,
 					job.getJobDescription());
 			jobDesc = RSLHelper.readRSL(submittedJobDesc);
 

@@ -1,7 +1,8 @@
 package org.vpac.grisu.backend.model.job;
 
 import org.vpac.grisu.backend.model.ProxyCredential;
-import org.vpac.grisu.control.ServiceInterface;
+
+import au.org.arcs.jcommons.interfaces.InformationManager;
 
 /**
  * Extend this abstract class if you want to write a connector to a new
@@ -24,8 +25,8 @@ public abstract class JobSubmitter {
 	/**
 	 * Used to submit the job to the specified host.
 	 * 
-	 * @param serviceInterface
-	 *            the serviceInterface
+	 * @param infoManager
+	 *            an informationManager
 	 * @param host
 	 *            the host (something like ng2.vpac.org)
 	 * @param job
@@ -33,7 +34,7 @@ public abstract class JobSubmitter {
 	 * @return the (JobSubmitter-specific) handle to the job
 	 * @throws ServerJobSubmissionException
 	 */
-	protected abstract String submit(ServiceInterface serviceInterface,
+	protected abstract String submit(InformationManager infoManager,
 			String host, String factoryType, Job job);
 
 	// public String convertJobDescription(Job job) {

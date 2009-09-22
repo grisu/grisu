@@ -332,24 +332,8 @@ public interface ServiceInterface {
 	 *            the site where you want to run the application
 	 * @return details about the applications
 	 */
-	DtoApplicationDetails getApplicationDetailsForVersionAndSite(String application,
+	DtoApplicationDetails getApplicationDetailsForVersionAndSubmissionLocation(String application,
 			String version, String site);
-
-	/**
-	 * Returns all the details that are know about the default version of the
-	 * application. The return will look something like this: module=namd/2
-	 * executable=/usr/local/bin/namd2 or whatever.
-	 * 
-	 * @param application
-	 *            the name of the application
-	 * @param site_or_submissionLocation
-	 *            the site where you want to run the application, you can also
-	 *            specify a submissionlocation (but this will be slower
-	 *            possibly)
-	 * @return details about the applications
-	 */
-	DtoApplicationDetails getApplicationDetailsForSite(String application,
-			String site_or_submissionLocation);
 
 	/**
 	 * Takes a jsdl template and returns a list of submission locations that
@@ -721,14 +705,24 @@ public interface ServiceInterface {
 	 */
 	void copyMultiPartJobInputFile(String multiPartJobId, String inputFile,	String filename) throws RemoteFileSystemException, NoSuchJobException;
 
+	
 	/**
-	 * Submits all jobs that belong to this multipartjob.
+	 * Tries to find the best submissionlocations for the parts of this multipartjob.
 	 * 
-	 * @param multipartjobid the id of the multipartjob
-	 * @throws JobSubmissionException if one of the jobsubmission failed. 
-	 * @throws NoSuchJobException if no multipartjob with this id exists
+	 * 
+	 * @param multiPartJobId the name of the multipartjob
+	 * @throws NoSuchJobException if this multipartjob does not exist
 	 */
-	void submitMultiPartJob(String multipartjobid) throws JobSubmissionException, NoSuchJobException;
+	void optimizeMultiPartJob(String multiPartJobId) throws NoSuchJobException;
+	
+//	/**
+//	 * Submits all jobs that belong to this multipartjob.
+//	 * 
+//	 * @param multipartjobid the id of the multipartjob
+//	 * @throws JobSubmissionException if one of the jobsubmission failed. 
+//	 * @throws NoSuchJobException if no multipartjob with this id exists
+//	 */
+//	void submitMultiPartJob(String multipartjobid) throws JobSubmissionException, NoSuchJobException;
 	
 	/**
 	 * Returns a list of all jobnames that are currently stored on this backend.
@@ -801,10 +795,9 @@ public interface ServiceInterface {
 			String jobnameCreationMethod) throws JobPropertiesException;
 
 	/**
-	 * Submits the job that was prepared before using
-	 * {@link #createJobUsingMap(Map, String, String)} or
-	 * {@link #createJob(String, String, String)} to the specified submission
-	 * location.
+	 * Submits the job that was prepared before.
+	 * 
+	 * This either submits a single or multipartjob.
 	 * 
 	 * @param jobname
 	 *            the jobname

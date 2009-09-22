@@ -108,7 +108,7 @@ import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
  * @author Markus Binsteiner
  * 
  */
-public abstract class AbstractServiceInterface implements ServiceInterface {
+public abstract class AbstractServiceInterface {
 
 	static final Logger myLogger = Logger
 			.getLogger(AbstractServiceInterface.class.getName());
@@ -237,7 +237,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
 			submitters.put("GT4", new GT4Submitter());
 			submitters.put("GT4Dummy", new GT4DummySubmitter());
-			manager = new JobSubmissionManager(this, submitters);
+			manager = new JobSubmissionManager(this.informationManager, submitters);
 		}
 		return manager;
 	}
@@ -835,15 +835,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// jobdao.attachDirty(job);
 		myLogger.debug("Preparing job done.");
 	}
+	
+	public void optimizeMultiPartJob(String multiPartJobId) throws NoSuchJobException {
+		
+	}
 
-	public void submitMultiPartJob(final String multiPartJobId)
+	private void submitMultiPartJob(final MultiPartJob multiJob)
 			throws JobSubmissionException, NoSuchJobException {
 
 		ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
 						.getConcurrentMultiPartJobSubmitThreadsPerUser());
-
-		final MultiPartJob multiJob = getMultiPartJobFromDatabase(multiPartJobId);
 
 		// final Collection<String> failedJobs = CollectionUtils
 		// .synchronizedCollection(new TreeSet<String>());
@@ -866,7 +868,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							break;
 						} catch (Exception e) {
 							myLogger.error(job.getSubmissionHost()+": Job submission for multipartjob: "
-									+ multiPartJobId + ", " + job.getJobname()
+									+ multiJob.getMultiPartJobId() + ", " + job.getJobname()
 									+ " failed: " + e.getLocalizedMessage());
 							myLogger.error("Trying again...");
 							exc = e;
@@ -1092,17 +1094,22 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	public void submitJob(final String jobname) throws JobSubmissionException,
-			NoSuchJobException {
+	public void submitJob(final String jobname) throws JobSubmissionException, NoSuchJobException {
 
 		myLogger.info("Submitting job: " + jobname + " for user " + getDN());
 		Job job;
-		job = getJob(jobname);
+		try {
+			job = getJob(jobname);
+			if (job.getStatus() > JobConstants.READY_TO_SUBMIT) {
+				throw new JobSubmissionException("Job already submitted.");
+			}
+			submitJob(job, true);
 
-		if (job.getStatus() > JobConstants.READY_TO_SUBMIT) {
-			throw new JobSubmissionException("Job already submitted.");
+		} catch (NoSuchJobException e) {
+			// maybe it's a multipartjob
+			final MultiPartJob multiJob = getMultiPartJobFromDatabase(jobname);
+			submitMultiPartJob(multiJob);
 		}
-		submitJob(job, true);
 
 	}
 
@@ -2875,45 +2882,45 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * org.vpac.grisu.control.ServiceInterface#getApplicationDetails(java.lang
 	 * .String, java.lang.String, java.lang.String)
 	 */
-	public DtoApplicationDetails getApplicationDetailsForVersionAndSite(
+	public DtoApplicationDetails getApplicationDetailsForVersionAndSubmissionLocation(
 			final String application, final String version,
-			final String site_or_submissionLocation) {
+			final String submissionLocation) {
 
-		String site = site_or_submissionLocation;
-		if (isSubmissionLocation(site_or_submissionLocation)) {
-			myLogger.debug("Parameter " + site_or_submissionLocation
-					+ "is submission location not site. Calculating site...");
-			site = getSiteForSubmissionLocation(site_or_submissionLocation);
-			myLogger.debug("Site is: " + site);
-		}
+//		String site = site_or_submissionLocation;
+//		if (isSubmissionLocation(site_or_submissionLocation)) {
+//			myLogger.debug("Parameter " + site_or_submissionLocation
+//					+ "is submission location not site. Calculating site...");
+//			site = getSiteForSubmissionLocation(site_or_submissionLocation);
+//			myLogger.debug("Site is: " + site);
+//		}
 
 		return DtoApplicationDetails.createDetails(application,
 				informationManager.getApplicationDetails(application, version,
-						site));
+						submissionLocation));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.vpac.grisu.control.ServiceInterface#getApplicationDetails(java.lang
-	 * .String, java.lang.String)
-	 */
-	public DtoApplicationDetails getApplicationDetailsForSite(
-			final String application, final String site_or_submissionLocation) {
-
-		String site = site_or_submissionLocation;
-		if (isSubmissionLocation(site_or_submissionLocation)) {
-			myLogger.debug("Parameter " + site_or_submissionLocation
-					+ "is submission location not site. Calculating site...");
-			site = getSiteForSubmissionLocation(site_or_submissionLocation);
-			myLogger.debug("Site is: " + site);
-		}
-
-		return getApplicationDetailsForVersionAndSite(application,
-				getDefaultVersionForApplicationAtSite(application, site), site);
-
-	}
+//	/*
+//	 * (non-Javadoc)
+//	 * 
+//	 * @see
+//	 * org.vpac.grisu.control.ServiceInterface#getApplicationDetails(java.lang
+//	 * .String, java.lang.String)
+//	 */
+//	public DtoApplicationDetails getApplicationDetailsForSubmissionLocation(
+//			final String application, final String site_or_submissionLocation) {
+//
+//		String site = site_or_submissionLocation;
+//		if (isSubmissionLocation(site_or_submissionLocation)) {
+//			myLogger.debug("Parameter " + site_or_submissionLocation
+//					+ "is submission location not site. Calculating site...");
+//			site = getSiteForSubmissionLocation(site_or_submissionLocation);
+//			myLogger.debug("Site is: " + site);
+//		}
+//
+//		return getApplicationDetailsForVersionAndSite(application,
+//				getDefaultVersionForApplicationAtSite(application, site), site);
+//
+//	}
 
 	public DtoGridResources findMatchingSubmissionLocationsUsingMap(
 			final DtoJob jobProperties, final String fqan, boolean excludeResourcesWithLessCPUslotsFreeThanRequested) {

@@ -10,6 +10,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.w3c.dom.Document;
 
 import au.org.arcs.jcommons.constants.Constants;
+import au.org.arcs.jcommons.interfaces.InformationManager;
 import au.org.arcs.jcommons.utils.JsdlHelpers;
 
 /**
@@ -27,7 +28,8 @@ public class JobSubmissionManager {
 			.getName());
 
 	private Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
-	private ServiceInterface serviceInterface = null;
+
+	private InformationManager infoManager = null;
 
 	/**
 	 * Initializes the JobSubmissionManager with all supported
@@ -36,9 +38,9 @@ public class JobSubmissionManager {
 	 * @param submitters
 	 *            the supported JobSubmitters
 	 */
-	public JobSubmissionManager(final ServiceInterface serviceInterface,
+	public JobSubmissionManager(final InformationManager infoManager,
 			final Map<String, JobSubmitter> submitters) {
-		this.serviceInterface = serviceInterface;
+		this.infoManager = infoManager;
 		this.submitters = submitters;
 	}
 	
@@ -96,7 +98,7 @@ public class JobSubmissionManager {
 		myLogger.debug("FactoryType is: " + factoryType);
 		String submitHostEndpoint = submitter.getServerEndpoint(host);
 
-		String handle = submitter.submit(serviceInterface, submitHostEndpoint,
+		String handle = submitter.submit(infoManager, submitHostEndpoint,
 				factoryType, job);
 
 		job.setJobhandle(handle);
