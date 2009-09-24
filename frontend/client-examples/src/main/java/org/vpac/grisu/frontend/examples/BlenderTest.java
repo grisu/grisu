@@ -55,7 +55,7 @@ public class BlenderTest implements JobStatusChangeListener {
 
 		Map<JobSubmissionProperty, String> jobProperties = new HashMap<JobSubmissionProperty, String>();
 		jobProperties.put(JobSubmissionProperty.WALLTIME_IN_MINUTES, "21");
-		jobProperties.put(JobSubmissionProperty.APPLICATIONVERSION, "2.49");
+		jobProperties.put(JobSubmissionProperty.APPLICATIONVERSION, "2.49a");
 		GridResource[] resources = blenderInfo.getBestSubmissionLocations(jobProperties, "/ARCS/NGAdmin").toArray(new GridResource[]{});
 		
 		final int numberOfJobs = 200;
@@ -97,7 +97,7 @@ public class BlenderTest implements JobStatusChangeListener {
 		System.out.println("End: "+new Date().toString());
 		
 //		System.exit(1);
-		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/NGAdmin");
+		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/NGAdmin", "blender", "2.49a" );
 				
 //		multiPartJob.setConcurrentJobCreationThreads(3);
 		

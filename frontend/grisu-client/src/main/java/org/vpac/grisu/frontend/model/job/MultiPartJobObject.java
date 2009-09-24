@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import javax.activation.DataHandler;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
@@ -87,7 +88,7 @@ public class MultiPartJobObject {
 	 *             if the multipartjob can't be created
 	 */
 	public MultiPartJobObject(ServiceInterface serviceInterface,
-			String multiPartJobId, String submissionFqan)
+			String multiPartJobId, String submissionFqan, String defaultApplication, String defaultVersion)
 			throws MultiPartJobException {
 		this.serviceInterface = serviceInterface;
 		this.multiPartJobId = multiPartJobId;
@@ -95,6 +96,22 @@ public class MultiPartJobObject {
 
 		dtoMultiPartJob = serviceInterface.createMultiPartJob(
 				this.multiPartJobId, this.submissionFqan);
+
+		if ( StringUtils.isBlank(defaultApplication) ) {
+			defaultApplication = Constants.GENERIC_APPLICATION_NAME;
+		}
+		if ( StringUtils.isBlank(defaultVersion) ) {
+			defaultVersion = Constants.NO_VERSION_INDICATOR_STRING;
+		}
+		setDefaultApplication(defaultApplication);
+		setDefaultVersion(defaultVersion);
+		try {
+			serviceInterface.addJobProperty(this.multiPartJobId, Constants.APPLICATIONNAME_KEY, defaultApplication);
+			serviceInterface.addJobProperty(this.multiPartJobId, Constants.APPLICATIONVERSION_KEY, defaultVersion);
+		} catch (NoSuchJobException e) {
+			throw new RuntimeException(e);
+		}
+		
 	}
 
 	/**
@@ -122,6 +139,9 @@ public class MultiPartJobObject {
 		this.multiPartJobId = multiPartJobId;
 
 		dtoMultiPartJob = getMultiPartJob(refreshJobStatusOnBackend);
+		
+		setDefaultApplication(serviceInterface.getJobProperty(this.multiPartJobId, Constants.APPLICATIONNAME_KEY));
+		setDefaultVersion(serviceInterface.getJobProperty(this.multiPartJobId, Constants.APPLICATIONVERSION_KEY));
 		
 	}
 

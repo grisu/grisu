@@ -16,6 +16,8 @@ import org.vpac.grisu.frontend.model.job.MultiPartJobObject;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
 
+import au.org.arcs.jcommons.constants.Constants;
+
 public class MultiJobSubmit implements JobStatusChangeListener, MultiPartJobEventListener {
 
 	public static void main(final String[] args) throws Exception {
@@ -61,7 +63,7 @@ public class MultiJobSubmit implements JobStatusChangeListener, MultiPartJobEven
 		System.out.println("End: "+new Date().toString());
 		System.exit(1);
 
-		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/NGAdmin");
+		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/NGAdmin", Constants.GENERIC_APPLICATION_NAME, Constants.NO_VERSION_INDICATOR_STRING);
 				
 		multiPartJob.addJobStatusChangeListener(mjs);
 //		multiPartJob.setConcurrentJobCreationThreads(3);
