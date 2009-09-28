@@ -495,24 +495,6 @@ public class ProxyServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public DtoActionStatus getActionStatus(String handle) {
-		try {
-			Method m = si.getClass().getMethod("getCurrentStatusMessage",
-					handle.getClass());
-			return (DtoActionStatus) m.invoke(si, handle);
-		} catch (SecurityException e) {
-			throw new RuntimeException("Proxy method exception.", e);
-		} catch (NoSuchMethodException e) {
-			throw new RuntimeException("Proxy method exception.", e);
-		} catch (IllegalArgumentException e) {
-			throw new RuntimeException("Proxy method exception.", e);
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException("Proxy method exception.", e);
-		} catch (InvocationTargetException e) {
-			throw (RuntimeException) e.getCause();
-		}
-	}
-
 	public String getDN() {
 		try {
 			Method m = si.getClass().getMethod("getDN");
@@ -1439,6 +1421,23 @@ public class ProxyServiceInterface implements ServiceInterface {
 			} else {
 				throw (RuntimeException) e.getCause();
 			}
+		}
+	}
+
+	public DtoActionStatus getActionStatus(String actionHandle) {
+		try {
+			Method m = si.getClass().getMethod("getActionStatus", actionHandle.getClass());
+			return (DtoActionStatus) (m.invoke(si));
+		} catch (SecurityException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (InvocationTargetException e) {
+			throw (RuntimeException) e.getCause();
 		}
 	}
 

@@ -10,7 +10,6 @@ import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.backend.model.job.MultiPartJob;
 import org.vpac.grisu.model.MountPoint;
-import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.settings.ServerPropertiesManager;

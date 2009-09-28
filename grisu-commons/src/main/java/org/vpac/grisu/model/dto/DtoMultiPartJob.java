@@ -20,6 +20,7 @@ import au.org.arcs.jcommons.constants.Constants;
 public class DtoMultiPartJob {
 	
 	private String multiPartJobId;
+	private String submissionFqan;
 	
 	private DtoJobs jobs = new DtoJobs();
 
@@ -28,6 +29,15 @@ public class DtoMultiPartJob {
 	
 	public DtoMultiPartJob(String multiPartJobId) {
 		this.multiPartJobId = multiPartJobId;
+	}
+	
+	@XmlElement(name="fqan")
+	public String getSubmissionFqan() {
+		return this.submissionFqan;
+	}
+	
+	public void setSubmissionFqan(String fqan) {
+		this.submissionFqan = fqan;
 	}
 
 	@XmlElement(name="multiPartJobId")

@@ -1,66 +1,68 @@
 package org.vpac.grisu.model.dto;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name="actionStatus")
-@Entity
 public class DtoActionStatus {
 	
-	public static final String STARTED = "started";
-	public static final String SUCCESS = "success";
-	public static final String FAILED = "failed";
+	public static final String ACTION_STARTED_STRING = "Started";
+	public static final String ACTION_FINISHED_STRING = "Finished";
 	
-//	public enum Type {
-//		filetransfer,
-//		multijobsubmission,
-//		multijobcancellation,
-//		jobsubmission
-//	}
-//	
-//	public enum Status {
-//		started,
-//		running,
-//		success,
-//		failed
-//	}
+	private Map<Date, String> log =  Collections.synchronizedSortedMap(new TreeMap<Date, String>());
 	
-	private Long id;
+	private int totalElements;
 	
-	@Id
-	@GeneratedValue
-	private Long getId() {
-		return id;
+	@XmlAttribute(name="totalElements")
+	public int getTotalElements() {
+		return totalElements;
 	}
 
-	private void setId(final Long id) {
-		this.id = id;
+	public void setTotalElements(int totalElements) {
+		this.totalElements = totalElements;
 	}
+
+	@XmlElement(name="currentElements")
+	public int getCurrentElements() {
+		return currentElements;
+	}
+
+	public void setCurrentElements(int currentElements) {
+		this.currentElements = currentElements;
+	}
+	
+	public synchronized void addElement(String logMessage) {
+		this.currentElements = this.currentElements + 1;
+		this.log.put(new Date(), logMessage);
+	}
+	
+	public synchronized void addLogMessage(String logMessage) {
+		this.log.put(new Date(), logMessage);
+	}
+
+	private int currentElements = 0;
 	
 	private String handle;
-	private Date startTime;
-	private Date endTime;
-	
-	private String actionType;
-	
-	private String status;
-	
-	public DtoActionStatus(String handle, String type) {
-		this.handle = handle;
-		this.actionType = type;
-		this.startTime = new Date();
-		this.status = STARTED;
-	}
-	
-	public DtoActionStatus() {
+
+	@XmlElement(name="log")
+	public List<DtoLogItem> getLog() {
+
+		return DtoLogItem.generateLogItemList(this.log);
+		
 	}
 
-	@XmlElement(name="handle")
+	public void setLog(List<DtoLogItem> log) {
+		this.log = DtoLogItem.generateLogMap(log);
+	}
+
+	@XmlAttribute(name="handle")
 	public String getHandle() {
 		return handle;
 	}
@@ -69,40 +71,21 @@ public class DtoActionStatus {
 		this.handle = handle;
 	}
 
-	@XmlElement(name="starttime")
-	public Date getStartTime() {
-		return startTime;
+	public DtoActionStatus(){
 	}
-
-	public void setStartTime(Date startTime) {
-		this.startTime = startTime;
+	
+	public DtoActionStatus(String handle, int totalElements) {
+		this.handle = handle;
+		this.totalElements = totalElements;
+		log.put(new Date(), ACTION_STARTED_STRING);
 	}
-
-	@XmlElement(name="endtime")
-	public Date getEndTime() {
-		return endTime;
+	
+	public int percentFinished() {
+		return (currentElements*100)/totalElements;
 	}
-
-	public void setEndTime(Date endTime) {
-		this.endTime = endTime;
+	
+	public boolean finished() {
+		return currentElements == totalElements;
 	}
-
-	@XmlElement(name="type")
-	public String getActionType() {
-		return actionType;
-	}
-
-	public void setActionType(String actionType) {
-		this.actionType = actionType;
-	}
-
-	@XmlElement(name="status")
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
+	
 }

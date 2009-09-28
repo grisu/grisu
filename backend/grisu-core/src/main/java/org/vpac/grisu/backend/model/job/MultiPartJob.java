@@ -243,6 +243,8 @@ public class MultiPartJob {
 
 		final DtoMultiPartJob result = new DtoMultiPartJob(this
 				.getMultiPartJobId());
+		
+		result.setSubmissionFqan(this.getFqan());
 		result.setProperties(DtoJobProperty.dtoJobPropertiesFromMap(this
 				.getJobProperties()));
 

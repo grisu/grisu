@@ -1,7 +1,5 @@
 package org.vpac.grisu.control;
 
-import java.util.Map;
-
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 
@@ -24,7 +22,6 @@ import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
 import org.vpac.grisu.model.dto.DtoMultiPartJob;
-import org.vpac.grisu.model.dto.DtoMultiPartJobs;
 import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 
@@ -40,7 +37,7 @@ import au.org.arcs.jcommons.constants.JobSubmissionProperty;
  */
 public interface ServiceInterface {
 
-	String INTERFACE_VERSION = "<grisuVersion>10</grisuVersion>";
+	String INTERFACE_VERSION = "<grisuVersion>11</grisuVersion>";
 
 	// ---------------------------------------------------------------------------------------------------
 	// 
@@ -126,17 +123,6 @@ public interface ServiceInterface {
 	 * @return the end time or -1 if the endtime couldn't be determined
 	 */
 	long getCredentialEndTime();
-
-	/**
-	 * Can be used to check whether a (possibly long-running) action like multi-job-creation
-	 * is still on-going.
-	 * 
-	 * @param handle
-	 *            the name of the action to monitor. This can be either a
-	 *            jobname or a filetransfer handle
-	 * @return the current status of any backend activity
-	 */
-	DtoActionStatus getActionStatus(String handle);
 
 	// ---------------------------------------------------------------------------------------------------
 	// 
@@ -918,6 +904,18 @@ public interface ServiceInterface {
 	 * @throws NoSuchJobException if no such job exists
 	 */
 	String getJsdlDocument(String jobname) throws NoSuchJobException;
+	
+	/**
+	 * Returns the current status of an ongoing action. 
+	 * 
+	 * This is not stored in the database, so you can only access a status for an action that was created in the same session.
+	 * Don't rely on this method to check whether an action is really finished. It may be returning false for that even if
+	 * nothing is happening anymore. It's main use is to get status messages that can be displayed to the user.
+	 * 
+	 * @param actionHandle the (unique) handle of the action (e.g. the jobname or target url)
+	 * @return the status object
+	 */
+	DtoActionStatus getActionStatus(String actionHandle);
 
 	
 }

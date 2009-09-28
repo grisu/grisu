@@ -138,7 +138,10 @@ public class MultiPartJobObject {
 		this.serviceInterface = serviceInterface;
 		this.multiPartJobId = multiPartJobId;
 
+		
 		dtoMultiPartJob = getMultiPartJob(refreshJobStatusOnBackend);
+
+		this.submissionFqan = dtoMultiPartJob.getSubmissionFqan(); 
 		
 		setDefaultApplication(serviceInterface.getJobProperty(this.multiPartJobId, Constants.APPLICATIONNAME_KEY));
 		setDefaultVersion(serviceInterface.getJobProperty(this.multiPartJobId, Constants.APPLICATIONVERSION_KEY));
@@ -947,6 +950,10 @@ public class MultiPartJobObject {
 
 		return buffer.toString();
 
+	}
+	
+	public String getMultiPartJobId() {
+		return multiPartJobId;
 	}
 
 	public void addJobProperty(String key, String value) {

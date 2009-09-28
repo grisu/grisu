@@ -137,14 +137,12 @@ public abstract class AbstractServiceInterface {
 
 	private FileSystemStructureToXMLConverter fsconverter = null;
 
-	// protected ExecutorService executor = Executors.newFixedThreadPool(2);
-
 	private MatchMaker matchmaker = new MatchMakerImpl(Environment
 			.getGrisuDirectory().toString());
 
-	// private MatchMaker matchmaker = new
-	// CachedMatchMakerImpl(Environment.getGrisuDirectory().toString());
 
+	private final Map<String, DtoActionStatus> actionStatus = new HashMap<String, DtoActionStatus>();
+	
 	public String getInterfaceVersion() {
 		return ServiceInterface.INTERFACE_VERSION;
 	}
@@ -842,16 +840,21 @@ public abstract class AbstractServiceInterface {
 
 	private void submitMultiPartJob(final MultiPartJob multiJob)
 			throws JobSubmissionException, NoSuchJobException {
-
+		
+		final DtoActionStatus newActionStatus = new DtoActionStatus(multiJob.getMultiPartJobId(), 100);
+		this.actionStatus.put(multiJob.getMultiPartJobId(), newActionStatus);
+		
 		ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
 						.getConcurrentMultiPartJobSubmitThreadsPerUser());
 
-		// final Collection<String> failedJobs = CollectionUtils
-		// .synchronizedCollection(new TreeSet<String>());
 
 		Job[] currentlyCreatedJobs = multiJob.getJobs().toArray(new Job[] {});
 		Arrays.sort(currentlyCreatedJobs);
+
+		final int totalNumberOfJobs = currentlyCreatedJobs.length;
+		newActionStatus.setTotalElements(totalNumberOfJobs);
+				
 
 		for (final Job job : currentlyCreatedJobs) {
 
@@ -865,18 +868,21 @@ public abstract class AbstractServiceInterface {
 						try {
 							exc = null;
 							submitJob(job, true);
+							newActionStatus.addElement("Added job: "+job.getJobname());
 							break;
 						} catch (Exception e) {
 							myLogger.error(job.getSubmissionHost()+": Job submission for multipartjob: "
 									+ multiJob.getMultiPartJobId() + ", " + job.getJobname()
 									+ " failed: " + e.getLocalizedMessage());
 							myLogger.error("Trying again...");
+							newActionStatus.addLogMessage("Failed to submit job "+job.getJobname()+": "+e.getLocalizedMessage()+". Trying again...");
 							exc = e;
 						}
 						
 						if ( exc != null ) {
 							myLogger.error("Tried to resubmit job "+job.getJobname()+" "+DEFAULT_JOB_SUBMISSION_RETRIES+" times. Never worked. Giving up...");
 							multiJob.addFailedJob(job.getJobname());
+							newActionStatus.addElement("Tried to resubmit job "+job.getJobname()+" "+DEFAULT_JOB_SUBMISSION_RETRIES+" times. Never worked. Giving up...");
 						}
 					}
 				}
@@ -884,7 +890,7 @@ public abstract class AbstractServiceInterface {
 			// just to get a better chance that the jobs are submitted in the
 			// right order...
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(500);
 			} catch (InterruptedException e) {
 				myLogger.error(e);
 			}
@@ -3072,14 +3078,13 @@ public abstract class AbstractServiceInterface {
 		return getSite(contactString);
 	}
 
-	public DtoActionStatus getActionStatus(final String handle) {
-
-		return getUser().getActionStatus(handle);
+	
+	public DtoActionStatus getActionStatus(String actionHandle) {
+		
+		return actionStatus.get(actionHandle);
+		
 	}
 
-	// private void setCurrentStatus(final String status) {
-	// this.currentStatus = status;
-	// }
 
 	/**
 	 * This method has to be implemented by the endpoint specific
