@@ -22,26 +22,39 @@ public final class JobCreationInfo {
 		LoginParams loginParams = new LoginParams(
 		// "http://localhost:8080/grisu-ws/services/grisu",
 				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-				"Local", null, null);
+//				"Local", null, null);
+		"Local", username, password);
 		
 		
 		ServiceInterface si = null;
-		si = LoginManager.login(null, password, username, "VPAC", loginParams);
+//		si = LoginManager.login(null, password, username, "VPAC", loginParams);
+		si = LoginManager.login(null, null, null, "VPAC", loginParams);
 
 //		DtoJobs test = si.ps(true);
-
-		GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
 		
-		for ( String subLoc : registry.getUserEnvironmentManager().getAllAvailableSubmissionLocations() ) {
-			System.out.println(subLoc);
+		for ( String name : si.getAllMultiPartJobIds("Blender").asArray() ) {
+			System.out.println(name);
+		}
+		
+		System.out.println("--------------------------------------------");
+		
+		for ( String name : si.getAllJobnames("blender").asArray() ) {
+			System.out.println(name);
 		}
 
-		ApplicationInformation appInfo = registry
-				.getApplicationInformation("java");
-		for (String version : appInfo
-				.getAllAvailableVersionsForFqan("/ARCS/NGAdmin")) {
-			System.out.println(version);
-		}
+
+//		GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
+//		
+//		for ( String subLoc : registry.getUserEnvironmentManager().getAllAvailableSubmissionLocations() ) {
+//			System.out.println(subLoc);
+//		}
+//
+//		ApplicationInformation appInfo = registry
+//				.getApplicationInformation("java");
+//		for (String version : appInfo
+//				.getAllAvailableVersionsForFqan("/ARCS/NGAdmin")) {
+//			System.out.println(version);
+//		}
 
 	}
 

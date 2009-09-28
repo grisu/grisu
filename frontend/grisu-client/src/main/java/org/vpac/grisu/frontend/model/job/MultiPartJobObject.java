@@ -831,7 +831,7 @@ public class MultiPartJobObject {
 
 	private String[] getAllRemoteJobnames() {
 		if (allRemoteJobnames == null) {
-			allRemoteJobnames = serviceInterface.getAllJobnames().asArray();
+			allRemoteJobnames = serviceInterface.getAllJobnames(null).asArray();
 			Arrays.sort(allRemoteJobnames);
 		}
 		return allRemoteJobnames;

@@ -7,6 +7,8 @@ import org.hibernate.Query;
 import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 
+import au.org.arcs.jcommons.constants.Constants;
+
 /**
  * Class to make it easier to persist (and find {@link Job} objects to/from the
  * database.
@@ -50,7 +52,7 @@ public class JobDAO extends BaseHibernateDAO {
 			getCurrentSession().close();
 		}
 	}
-
+	
 	public final List<String> findJobNamesByDn(final String dn) {
 
 		myLogger.debug("Loading jobs with dn: " + dn + " from db.");
@@ -61,6 +63,33 @@ public class JobDAO extends BaseHibernateDAO {
 
 			Query queryObject = getCurrentSession().createQuery(queryString);
 			queryObject.setParameter(0, dn);
+
+			List<String> jobnames = (List<String>) (queryObject.list());
+
+			getCurrentSession().getTransaction().commit();
+
+			return jobnames;
+
+		} catch (RuntimeException e) {
+			getCurrentSession().getTransaction().rollback();
+			throw e; // or display error message
+		} finally {
+			getCurrentSession().close();
+		}
+
+	}
+	
+	public final List<String> findJobNamesPerApplicationByDn(final String dn, final String application) {
+
+		myLogger.debug("Loading jobs with dn: " + dn + " from db.");
+		String queryString = "select jobname from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.jobProperties['"+Constants.APPLICATIONNAME_KEY+"'] = ?";
+
+		try {
+			getCurrentSession().beginTransaction();
+
+			Query queryObject = getCurrentSession().createQuery(queryString);
+			queryObject.setParameter(0, dn);
+			queryObject.setParameter(1, application);
 
 			List<String> jobnames = (List<String>) (queryObject.list());
 

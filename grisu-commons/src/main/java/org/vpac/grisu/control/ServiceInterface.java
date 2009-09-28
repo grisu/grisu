@@ -712,18 +712,22 @@ public interface ServiceInterface {
 	
 	/**
 	 * Returns a list of all jobnames that are currently stored on this backend.
+	 *
+	 * @param application a filter to search only for certain jobs that use the specified application, null returns all jobnames
 	 * 
 	 * @return all jobnames
 	 */
-	DtoStringList getAllJobnames();
+	DtoStringList getAllJobnames(String application);
 	
 	
 	/**
 	 * Returns a list of all multipart job ids that are currently stored on this backend
 	 * 
+	 * @param application a filter to search only for certain jobs that use the specified application, null returns all jobnames
+	 * 
 	 * @return all multipartjobids
 	 */
-	DtoStringList getAllMultiPartJobIds();
+	DtoStringList getAllMultiPartJobIds(String application);
 
 //	/**
 //	 * Creates a job using the jobProperties that are specified in the map and

@@ -271,7 +271,7 @@ public abstract class AbstractServiceInterface {
 								+ "Jobname not specified and job creation method is force-name.");
 			}
 
-			String[] allJobnames = getAllJobnames().asArray();
+			String[] allJobnames = getAllJobnames(null).asArray();
 			Arrays.sort(allJobnames);
 			if (Arrays.binarySearch(allJobnames, jobname) >= 0) {
 				throw new JobPropertiesException(
@@ -289,7 +289,7 @@ public abstract class AbstractServiceInterface {
 			}
 		} else if (Constants.TIMESTAMP_METHOD.equals(jobnameCreationMethod)) {
 
-			String[] allJobnames = getAllJobnames().asArray();
+			String[] allJobnames = getAllJobnames(null).asArray();
 			Arrays.sort(allJobnames);
 
 			String temp;
@@ -1302,9 +1302,15 @@ public abstract class AbstractServiceInterface {
 		return dtoJobs;
 	}
 
-	public DtoStringList getAllJobnames() {
-
-		List<String> jobnames = jobdao.findJobNamesByDn(getUser().getDn());
+	public DtoStringList getAllJobnames(String application) {
+		
+		List<String> jobnames = null;
+		
+		if ( StringUtils.isBlank(application) ) {
+			jobnames = jobdao.findJobNamesByDn(getUser().getDn());
+		} else {
+			jobnames = jobdao.findJobNamesPerApplicationByDn(getUser().getDn(), application);
+		}
 
 		return DtoStringList.fromStringList(jobnames);
 	}
@@ -1499,9 +1505,15 @@ public abstract class AbstractServiceInterface {
 
 	}
 
-	public DtoStringList getAllMultiPartJobIds() {
-
-		List<String> jobnames = multiPartJobDao.findJobNamesByDn(getDN());
+	public DtoStringList getAllMultiPartJobIds(String application) {
+		
+		List<String> jobnames = null;
+		
+		if ( StringUtils.isBlank(application) ) {
+			jobnames = multiPartJobDao.findJobNamesByDn(getUser().getDn());
+		} else {
+			jobnames = multiPartJobDao.findJobNamesPerApplicationByDn(getUser().getDn(), application);
+		}
 
 		return DtoStringList.fromStringList(jobnames);
 	}

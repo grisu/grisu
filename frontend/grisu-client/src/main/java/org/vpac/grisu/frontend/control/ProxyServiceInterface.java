@@ -362,10 +362,10 @@ public class ProxyServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public DtoStringList getAllJobnames() {
+	public DtoStringList getAllJobnames(String application) {
 		try {
-			Method m = si.getClass().getMethod("getAllJobnames");
-			return (DtoStringList) (m.invoke(si));
+			Method m = si.getClass().getMethod("getAllJobnames", application.getClass());
+			return (DtoStringList) (m.invoke(si, application));
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {
@@ -1272,11 +1272,11 @@ public class ProxyServiceInterface implements ServiceInterface {
 
 	}
 
-	public DtoStringList getAllMultiPartJobIds() {
+	public DtoStringList getAllMultiPartJobIds(String application) {
 
 		try {
-			Method m = si.getClass().getMethod("getAllMultiPartJobIds");
-			return (DtoStringList) (m.invoke(si));
+			Method m = si.getClass().getMethod("getAllMultiPartJobIds", application.getClass());
+			return (DtoStringList) (m.invoke(si, application));
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {
