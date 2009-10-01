@@ -47,6 +47,11 @@ public class MountPoint implements Comparable<MountPoint> {
 	 * The url of the root of this mountpoint.
 	 */
 	private String rootUrl = null;
+	
+	/**
+	 * The name of the site this mountpoint belongs to. 
+	 */
+	private String site = null;
 
 	private boolean automaticallyMounted = false;
 	private boolean disabled = false;
@@ -67,11 +72,12 @@ public class MountPoint implements Comparable<MountPoint> {
 	 * @param mountpoint
 	 *            the name of the mountpoint
 	 */
-	public MountPoint(final String dn, final String fqan, final String url, final String mountpoint) {
+	public MountPoint(final String dn, final String fqan, final String url, final String mountpoint, final String site) {
 		this.dn = dn;
 		this.fqan = fqan;
 		this.rootUrl = url;
 		this.alias = mountpoint;
+		this.site = site;
 	}
 
 	/**
@@ -89,9 +95,9 @@ public class MountPoint implements Comparable<MountPoint> {
 	 *            whether this mountpoint was mounted automatically using mds
 	 *            information or manually by the user
 	 */
-	public MountPoint(final String dn, final String fqan, final String url, final String mountpoint,
+	public MountPoint(final String dn, final String fqan, final String url, final String mountpoint, final String site,
 			final boolean automaticallyMounted) {
-		this(dn, fqan, url, mountpoint);
+		this(dn, fqan, url, mountpoint, site);
 		this.automaticallyMounted = automaticallyMounted;
 	}
 
@@ -117,6 +123,16 @@ public class MountPoint implements Comparable<MountPoint> {
 
 	public void setDn(final String dn) {
 		this.dn = dn;
+	}
+	
+	@Column(nullable = false)
+	@XmlElement(name="site")
+	public String getSite() {
+		return site;
+	}
+	
+	public void setSite(final String site) {
+		this.site = site;
 	}
 
 	/**

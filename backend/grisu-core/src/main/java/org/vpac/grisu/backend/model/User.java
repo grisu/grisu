@@ -307,7 +307,7 @@ public class User {
 	 *             if the filesystem could not be mounted
 	 */
 	public MountPoint mountFileSystem(String uri, final String mountPointName,
-			final ProxyCredential cred, final boolean useHomeDirectory)
+			final ProxyCredential cred, final boolean useHomeDirectory, final String site)
 			throws RemoteFileSystemException {
 
 		// if (!mountPointName.startsWith("/")) {
@@ -324,7 +324,7 @@ public class User {
 		}
 
 		MountPoint new_mp = new MountPoint(cred.getDn(), cred.getFqan(), uri,
-				mountPointName);
+				mountPointName, site);
 		try {
 			FileSystem fileSystem = createFilesystem(new_mp);
 			myLogger.debug("Connected to file system.");
@@ -345,7 +345,7 @@ public class User {
 									"_"))).createFolder();
 				}
 				new_mp = new MountPoint(cred.getDn(), cred.getFqan(), uri,
-						mountPointName);
+						mountPointName, site);
 			}
 
 			if (!mountPoints.contains(new_mp)) {
@@ -495,16 +495,16 @@ public class User {
 	 * @throws VomsException
 	 */
 	public MountPoint mountFileSystem(final String root, final String name,
-			final boolean useHomeDirectory) throws RemoteFileSystemException {
+			final boolean useHomeDirectory, String site) throws RemoteFileSystemException {
 
-		return mountFileSystem(root, name, getCred(), useHomeDirectory);
+		return mountFileSystem(root, name, getCred(), useHomeDirectory, site);
 	}
 
 	public MountPoint mountFileSystem(final String root, final String name, final String fqan,
-			final boolean useHomeDirectory) throws RemoteFileSystemException {
+			final boolean useHomeDirectory, final String site) throws RemoteFileSystemException {
 
 		if (fqan == null || Constants.NON_VO_FQAN.equals(fqan)) {
-			return mountFileSystem(root, name, useHomeDirectory);
+			return mountFileSystem(root, name, useHomeDirectory, site);
 		} else {
 
 			Map<String, String> temp = getFqans();
@@ -513,7 +513,7 @@ public class User {
 			ProxyCredential vomsProxyCred = CertHelpers.getVOProxyCredential(
 					vo, fqan, getCred());
 
-			return mountFileSystem(root, name, vomsProxyCred, useHomeDirectory);
+			return mountFileSystem(root, name, vomsProxyCred, useHomeDirectory, site);
 		}
 	}
 

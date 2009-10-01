@@ -1,12 +1,15 @@
 package org.vpac.grisu.frontend.examples;
 
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.frontend.control.login.LoginException;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
+import org.vpac.grisu.model.dto.DtoJob;
+import org.vpac.grisu.model.dto.DtoMultiPartJob;
 import org.vpac.grisu.model.info.ApplicationInformation;
 
 public final class JobCreationInfo {
@@ -14,7 +17,7 @@ public final class JobCreationInfo {
 	private JobCreationInfo() {
 	}
 
-	public static void main(final String[] args) throws ServiceInterfaceException, LoginException {
+	public static void main(final String[] args) throws ServiceInterfaceException, LoginException, NoSuchJobException {
 
 		String username = args[0];
 		char[] password = args[1].toCharArray();
@@ -28,7 +31,7 @@ public final class JobCreationInfo {
 		
 		ServiceInterface si = null;
 //		si = LoginManager.login(null, password, username, "VPAC", loginParams);
-		si = LoginManager.login(null, null, null, "VPAC", loginParams);
+		si = LoginManager.login(null, null, null, null, loginParams);
 
 //		DtoJobs test = si.ps(true);
 		
@@ -40,6 +43,14 @@ public final class JobCreationInfo {
 		
 		for ( String name : si.getAllJobnames("blender").asArray() ) {
 			System.out.println(name);
+		}
+		
+		DtoMultiPartJob mjob = si.getMultiPartJob("blenderLogoTest", false);
+		
+		for ( DtoJob job : mjob.getJobs().getAllJobs() ) {
+			System.out.println("Job: "+job.jobname());
+			System.out.println(job.logMessagesAsString(true));
+			System.out.println("---------------------------------");
 		}
 
 

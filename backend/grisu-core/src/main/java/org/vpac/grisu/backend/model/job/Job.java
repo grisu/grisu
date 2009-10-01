@@ -188,8 +188,7 @@ public class Job implements Comparable<Job> {
 	
 	private Map<Date, String> logMessages = Collections.synchronizedMap(new TreeMap<Date, String>());
 
-//	@CollectionOfElements(fetch = FetchType.EAGER)
-	@Transient
+	@CollectionOfElements(fetch = FetchType.EAGER)
 	public Map<Date, String> getLogMessages() {
 		return logMessages;
 	}
@@ -200,8 +199,7 @@ public class Job implements Comparable<Job> {
 
 	public synchronized void addLogMessage(String message) {
 		Date now = new Date();
-
-		this.logMessages.put(new Date(), message);
+		this.logMessages.put(now, message);
 	}
 
 	/**

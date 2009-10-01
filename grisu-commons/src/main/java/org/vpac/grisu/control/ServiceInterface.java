@@ -288,8 +288,7 @@ public interface ServiceInterface {
 
 	/**
 	 * I don't know whether this one should sit on the web service side or the
-	 * client side. Anyway, here it is for now. It tells the client all sites a
-	 * job can be submitted to.
+	 * client side. Anyway, here it is for now. It tells the client all sites gridwide.
 	 * 
 	 * @return all sites
 	 */

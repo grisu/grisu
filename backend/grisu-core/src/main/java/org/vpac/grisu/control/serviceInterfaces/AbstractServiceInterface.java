@@ -1295,7 +1295,7 @@ public abstract class AbstractServiceInterface {
 		DtoJobs dtoJobs = new DtoJobs();
 		for (Job job : jobs) {
 			DtoJob dtojob = DtoJob.createJob(job.getStatus(), job
-					.getJobProperties());
+					.getJobProperties(), job.getLogMessages());
 			dtoJobs.addJob(dtojob);
 		}
 
@@ -1542,7 +1542,7 @@ public abstract class AbstractServiceInterface {
 			throws RemoteFileSystemException {
 
 		MountPoint mp = getUser().mountFileSystem(url, mountpoint,
-				useHomeDirectory);
+				useHomeDirectory, informationManager.getSiteForHostOrUrl(url));
 		userdao.saveOrUpdate(getUser());
 		mountPointsForThisSession = null;
 		return mp;
@@ -1557,7 +1557,7 @@ public abstract class AbstractServiceInterface {
 			fqan = Constants.NON_VO_FQAN;
 		}
 		MountPoint mp = getUser().mountFileSystem(url, mountpoint, fqan,
-				useHomeDirectory);
+				useHomeDirectory, informationManager.getSiteForHostOrUrl(url));
 		userdao.saveOrUpdate(getUser());
 		mountPointsForThisSession = null;
 		return mp;
@@ -1676,13 +1676,12 @@ public abstract class AbstractServiceInterface {
 					+ " ms.");
 			for (String server : mpUrl.keySet()) {
 				for (String path : mpUrl.get(server)) {
+					String url = server.replace(":2811", "")
+					+ path + "/" + User.get_vo_dn_path(getCredential().getDn());
+					
 					MountPoint mp = new MountPoint(getUser().getDn(), fqan,
-							server.replace(":2811", "")
-									+ path
-									+ "/"
-									+ User.get_vo_dn_path(getCredential()
-											.getDn()), calculateMountPointName(
-									server, fqan), true);
+							url, calculateMountPointName(
+									server, fqan), informationManager.getSiteForHostOrUrl(url), true);
 					// + "." + fqan + "." + path);
 					// + "." + fqan);
 					mps.add(mp);
@@ -2241,7 +2240,7 @@ public abstract class AbstractServiceInterface {
 		// job.getJobProperties().put(Constants.JOB_STATUS_KEY,
 		// JobConstants.translateStatus(getJobStatus(jobname)));
 
-		return DtoJob.createJob(job.getStatus(), job.getJobProperties());
+		return DtoJob.createJob(job.getStatus(), job.getJobProperties(), job.getLogMessages());
 	}
 
 	public String getJsdlDocument(final String jobname)

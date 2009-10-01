@@ -279,7 +279,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 			converterMap.put(key.toString(), basicJobProperties.get(key));
 		}
 
-		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(DtoJob.createJob(JobConstants.UNDEFINED, converterMap),
+		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null),
 				fqan, true).wrapGridResourcesIntoInterfaceType();
 	}
 
@@ -298,7 +298,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 			converterMap.put(key.toString(), basicJobProperties.get(key));
 		}
 
-		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(DtoJob.createJob(JobConstants.UNDEFINED, converterMap),
+		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null),
 				fqan, false).wrapGridResourcesIntoInterfaceType();
 	}
 

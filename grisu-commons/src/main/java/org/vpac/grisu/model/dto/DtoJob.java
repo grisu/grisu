@@ -1,9 +1,11 @@
 package org.vpac.grisu.model.dto;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -25,7 +27,7 @@ import au.org.arcs.jcommons.constants.Constants;
 @XmlRootElement(name="job")
 public class DtoJob implements Comparable<DtoJob> {
 	
-	public static DtoJob createJob(int status, Map<String, String> jobProperties) {
+	public static DtoJob createJob(int status, Map<String, String> jobProperties, Map<Date, String> logMessages) {
 		
 		DtoJob result = new DtoJob();
 		
@@ -38,8 +40,16 @@ public class DtoJob implements Comparable<DtoJob> {
 			temp.setValue(jobProperties.get(key));
 			list.add(temp);
 		}
-		
 		result.setProperties(list);
+		
+		if ( logMessages != null ) {
+			DtoLogMessages log = new DtoLogMessages();
+			for ( Date date : logMessages.keySet() ) {
+				log.addMessage(date, logMessages.get(date));
+			}
+			result.setLogMessages(log);
+		}
+		
 		return result;
 	}
 	
@@ -48,6 +58,12 @@ public class DtoJob implements Comparable<DtoJob> {
 	 * The list of job properties.
 	 */
 	private List<DtoJobProperty> properties = new LinkedList<DtoJobProperty>();
+	
+	/**
+	 * The log messages for this job until now.
+	 */
+	private DtoLogMessages logMessages = new DtoLogMessages();
+	
 	/**
 	 * The status of the job. Be aware that, depending on how you queried for this job, this can be stale information.
 	 */
@@ -56,6 +72,15 @@ public class DtoJob implements Comparable<DtoJob> {
 	@XmlElement(name="jobproperty")
 	public List<DtoJobProperty> getProperties() {
 		return properties;
+	}
+	
+	@XmlElement(name="logmessages")
+	public DtoLogMessages getLogMessages() {
+		return logMessages;
+	}
+	
+	public void setLogMessages(DtoLogMessages msgs) {
+		this.logMessages = msgs;
 	}
 
 	public void setProperties(List<DtoJobProperty> properties) {
@@ -72,7 +97,35 @@ public class DtoJob implements Comparable<DtoJob> {
 		
 		return map;
 	}
+	
+	public Map<Date, String> logMessagesAsMap() {
+		
+		Map<Date, String> map = new TreeMap<Date, String>();
+		
+		for ( DtoLogMessage msg : getLogMessages().getMessages() ) {
+			map.put(msg.getDate(), msg.getMessage());
+		}
+		
+		return map;
+	}
 
+	public String logMessagesAsString(boolean withDate) {
+		
+		StringBuffer result = new StringBuffer();
+		
+		Map<Date,String> temp = logMessagesAsMap();
+		
+		for ( Date date : temp.keySet() ) {
+			if ( withDate ) {
+				result.append(date.toString()+": ");
+			} 
+			result.append(temp.get(date)+"\n");
+		}
+		
+		return result.toString();
+		
+	}
+	
 	@XmlElement(name="status")
 	public int getStatus() {
 		return status;

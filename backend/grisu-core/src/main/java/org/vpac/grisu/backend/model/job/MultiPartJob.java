@@ -263,7 +263,7 @@ public class MultiPartJob {
 					DtoJob dtoJob = null;
 
 					dtoJob = DtoJob.createJob(job.getStatus(), job
-							.getJobProperties());
+							.getJobProperties(), job.getLogMessages());
 					result.addJob(dtoJob);
 				}
 			};
