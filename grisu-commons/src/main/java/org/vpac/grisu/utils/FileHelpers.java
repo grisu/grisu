@@ -60,7 +60,23 @@ public final class FileHelpers {
 		}
 
 	}
-
+	
+	public static void saveToDisk(final InputStream source, final File file) throws IOException {
+		
+		FileOutputStream outputStream = new FileOutputStream(file);
+		try {
+			byte[] buffer = new byte[BUFFER_SIZE * 4];
+			for (int n; (n = source.read(buffer)) != -1;) {
+				outputStream.write(buffer, 0, n);
+			}
+		} catch (Exception e){
+			e.printStackTrace();
+		} finally {
+			outputStream.close();
+			source.close();
+		}
+		
+	}
 	/**
 	 * Reads the content of a file into a String. Only use this when you know
 	 * the file is a text file.
