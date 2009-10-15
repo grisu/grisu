@@ -2,6 +2,7 @@ package org.vpac.grisu.backend.hibernate;
 
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.vpac.grisu.backend.model.job.Job;
@@ -38,6 +39,45 @@ public class JobDAO extends BaseHibernateDAO {
 
 			Query queryObject = getCurrentSession().createQuery(queryString);
 			queryObject.setParameter(0, dn);
+
+			List<Job> jobs = (List<Job>) (queryObject.list());
+
+			getCurrentSession().getTransaction().commit();
+
+			return jobs;
+
+		} catch (RuntimeException e) {
+			getCurrentSession().getTransaction().rollback();
+			throw e; // or display error message
+		} finally {
+			getCurrentSession().close();
+		}
+	}
+	
+	/**
+	 * Looks up the database whether a user with the specified dn is already
+	 * persisted. Filters with the specified application.
+	 * 
+	 * @param dn
+	 *            the dn of the user
+	 * @return the {@link User} or null if not found
+	 */
+	public final List<Job> findJobByDNPerApplication(final String dn, final String application) {
+
+		if ( StringUtils.isBlank(application) ) {
+			return findJobByDN(dn);
+		}
+		
+		myLogger.debug("Loading jobs with dn: " + dn + " from db.");
+		String queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.jobProperties['"+Constants.APPLICATIONNAME_KEY+"'] = ?";
+
+
+		try {
+			getCurrentSession().beginTransaction();
+
+			Query queryObject = getCurrentSession().createQuery(queryString);
+			queryObject.setParameter(0, dn);
+			queryObject.setParameter(1, application);
 
 			List<Job> jobs = (List<Job>) (queryObject.list());
 

@@ -13,6 +13,9 @@ import org.apache.log4j.Logger;
  * 
  */
 public final class ClientPropertiesManager {
+	
+    public static final String[] DEFAULT_HELPDESK_CLASSES = new String[]{"org.vpac.helpDesk.model.anonymousRT.AnonymousRTHelpDesk", "org.vpac.helpDesk.model.trac.TracHelpDesk"};
+    public static final String HELPDESK_CONFIG = "support.properties";
 
 	public static final int CONCURRENT_THREADS_DEFAULT = 5;
 
@@ -501,6 +504,16 @@ public final class ClientPropertiesManager {
 		}
 
 		return threads;
+	}
+	
+	public static String[] getDefaultHelpDesks() {
+		
+		return DEFAULT_HELPDESK_CLASSES;
+		
+	}
+	
+	public static String getHelpDeskConfig() {
+		return HELPDESK_CONFIG;
 	}
 
 }

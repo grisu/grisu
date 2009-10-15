@@ -37,7 +37,7 @@ import au.org.arcs.jcommons.constants.JobSubmissionProperty;
  */
 public interface ServiceInterface {
 
-	String INTERFACE_VERSION = "<grisuVersion>11</grisuVersion>";
+	String INTERFACE_VERSION = "<grisuVersion>12</grisuVersion>";
 
 	// ---------------------------------------------------------------------------------------------------
 	// 
@@ -616,7 +616,7 @@ public interface ServiceInterface {
 	 *  
 	 * @return xml formated information about all the users jobs
 	 */
-	DtoJobs ps(boolean refreshJobStatus);
+	DtoJobs ps(String application, boolean refreshJobStatus);
 	
 	
 	/**

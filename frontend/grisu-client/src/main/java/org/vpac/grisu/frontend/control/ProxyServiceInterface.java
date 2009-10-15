@@ -1070,10 +1070,10 @@ public class ProxyServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public DtoJobs ps(boolean refreshJobStatus) {
+	public DtoJobs ps(String application, boolean refreshJobStatus) {
 		try {
-			Method m = si.getClass().getMethod("ps", boolean.class);
-			return (DtoJobs) m.invoke(si, refreshJobStatus);
+			Method m = si.getClass().getMethod("ps", application.getClass(), boolean.class);
+			return (DtoJobs) m.invoke(si, application, refreshJobStatus);
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {

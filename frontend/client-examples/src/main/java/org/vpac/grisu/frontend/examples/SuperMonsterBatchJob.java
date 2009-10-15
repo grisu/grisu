@@ -106,7 +106,7 @@ public final class SuperMonsterBatchJob {
 		submissionExecutor.awaitTermination(36000, TimeUnit.SECONDS);
 		final Date allSubmissionFinishedDate = new Date();
 
-		DtoJobs ps = si.ps(true);
+		DtoJobs ps = si.ps(null, true);
 
 		final Date psDate = new Date();
 
