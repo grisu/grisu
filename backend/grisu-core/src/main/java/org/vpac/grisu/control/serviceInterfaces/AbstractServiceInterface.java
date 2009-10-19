@@ -2784,11 +2784,8 @@ public abstract class AbstractServiceInterface {
 								actionStat.setFinished(true);
 								throw new RemoteFileSystemException(rto.getPossibleException().getLocalizedMessage());
 							} else {
-								System.out.println("FINISHED: "+source);
 								actionStat.addElement("Finished transfer of file: "
 									+ source);
-								
-								System.out.println("FINISHED2: "+actionStat.getCurrentElements());
 							}
 						}
 						actionStat.setFinished(true);
