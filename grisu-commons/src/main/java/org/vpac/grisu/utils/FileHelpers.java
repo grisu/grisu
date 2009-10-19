@@ -218,4 +218,10 @@ public final class FileHelpers {
 		return (path.delete());
 	}
 
+	public static String getFilename(String url) {
+
+		return url.substring(url.lastIndexOf("/"));
+		
+	}
+
 }

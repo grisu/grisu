@@ -20,6 +20,14 @@ public class DtoStringList {
 		
 	}
 	
+	public static DtoStringList fromSingleString(String string) {
+		DtoStringList result = new DtoStringList();
+		List<String> list = new LinkedList<String>();
+		list.add(string);
+		result.setStringList(list);
+		return result;
+	}
+	
 	public static DtoStringList fromStringList(List<String> list) {
 		
 		DtoStringList result = new DtoStringList();

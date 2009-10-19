@@ -15,11 +15,35 @@ public class DtoActionStatus {
 	
 	public static final String ACTION_STARTED_STRING = "Started";
 	public static final String ACTION_FINISHED_STRING = "Finished";
+	public static final String ACTION_FAILED_STRING = "Failed";
 	
 	private Map<Date, String> log =  Collections.synchronizedSortedMap(new TreeMap<Date, String>());
 	
 	private int totalElements;
 	
+	private boolean finished = false;
+	private boolean failed = false;
+	
+	@XmlAttribute
+	public boolean isFinished() {
+		return finished;
+	}
+
+	public void setFinished(boolean finished) {
+		this.finished = finished;
+		addLogMessage(ACTION_FINISHED_STRING);
+	}
+
+	@XmlAttribute
+	public boolean isFailed() {
+		return failed;
+	}
+
+	public void setFailed(boolean failed) {
+		this.failed = failed;
+		addLogMessage(ACTION_FAILED_STRING);
+	}
+
 	@XmlAttribute(name="totalElements")
 	public int getTotalElements() {
 		return totalElements;
@@ -40,11 +64,26 @@ public class DtoActionStatus {
 	
 	public synchronized void addElement(String logMessage) {
 		this.currentElements = this.currentElements + 1;
-		this.log.put(new Date(), logMessage);
+		Date now = new Date();
+		String temp = this.log.get(now);
+		while ( temp != null ) {
+//			System.err.println("Already taken: "+now);
+			now = new Date(now.getTime()+1);
+			temp = this.log.get(now);
+		}
+		this.log.put(now, logMessage);
+//		System.out.println("Now "+currentElements+" elements");
 	}
 	
 	public synchronized void addLogMessage(String logMessage) {
-		this.log.put(new Date(), logMessage);
+		Date now = new Date();
+		String temp = this.log.get(now);
+		while ( temp != null ) {
+//			System.err.println("Already taken: "+now);
+			now = new Date(now.getTime()+1);
+			temp = this.log.get(now);
+		}
+		this.log.put(now, logMessage);
 	}
 
 	private int currentElements = 0;
@@ -77,15 +116,12 @@ public class DtoActionStatus {
 	public DtoActionStatus(String handle, int totalElements) {
 		this.handle = handle;
 		this.totalElements = totalElements;
-		log.put(new Date(), ACTION_STARTED_STRING);
+		addLogMessage(ACTION_STARTED_STRING);
 	}
 	
 	public int percentFinished() {
 		return (currentElements*100)/totalElements;
 	}
 	
-	public boolean finished() {
-		return currentElements == totalElements;
-	}
 	
 }

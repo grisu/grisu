@@ -83,7 +83,7 @@ public class ProxyServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public String cp(String source, String target, boolean overwrite,
+	public String cp(DtoStringList source, String target, boolean overwrite,
 			boolean waitForFileTransferToFinish)
 			throws RemoteFileSystemException {
 		try {

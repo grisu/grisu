@@ -55,6 +55,7 @@ import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.info.CachedMdsInformationManager;
+import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.dto.DtoApplicationDetails;
@@ -74,6 +75,7 @@ import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.settings.ServerPropertiesManager;
+import org.vpac.grisu.utils.FileHelpers;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.vpac.security.light.voms.VO;
 import org.vpac.security.light.voms.VOManagement.VOManagement;
@@ -117,8 +119,6 @@ public abstract class AbstractServiceInterface {
 			.getDefaultCachedMdsInformationManager(Environment
 					.getGrisuDirectory().toString());
 
-
-	
 	public static final int DEFAULT_JOB_SUBMISSION_RETRIES = 5;
 
 	private UserDAO userdao = new UserDAO();
@@ -140,14 +140,14 @@ public abstract class AbstractServiceInterface {
 	private MatchMaker matchmaker = new MatchMakerImpl(Environment
 			.getGrisuDirectory().toString());
 
-
 	private final Map<String, DtoActionStatus> actionStatus = new HashMap<String, DtoActionStatus>();
-	
+
 	public String getInterfaceVersion() {
 		return ServiceInterface.INTERFACE_VERSION;
 	}
 
-	private Map<String, RemoteFileTransferObject> fileTransfers = new HashMap<String, RemoteFileTransferObject>();
+	// private Map<String, RemoteFileTransferObject> fileTransfers = new
+	// HashMap<String, RemoteFileTransferObject>();
 
 	/**
 	 * Gets the user of the current session. Also connects the default
@@ -235,7 +235,8 @@ public abstract class AbstractServiceInterface {
 			Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
 			submitters.put("GT4", new GT4Submitter());
 			submitters.put("GT4Dummy", new GT4DummySubmitter());
-			manager = new JobSubmissionManager(this.informationManager, submitters);
+			manager = new JobSubmissionManager(this.informationManager,
+					submitters);
 		}
 		return manager;
 	}
@@ -800,7 +801,8 @@ public abstract class AbstractServiceInterface {
 
 		job.addJobProperty(Constants.WORKINGDIRECTORY_KEY, workingDirectory);
 		String submissionSite = informationManager
-				.getSiteForHostOrUrl(SubmissionLocationHelpers.extractHost(submissionLocation));
+				.getSiteForHostOrUrl(SubmissionLocationHelpers
+						.extractHost(submissionLocation));
 		myLogger.debug("Calculated submissionSite: " + submissionSite);
 		job.addJobProperty(Constants.SUBMISSION_SITE_KEY, submissionSite);
 		// job.setJob_directory(stagingFilesystemToUse + workingDirectory);
@@ -833,28 +835,28 @@ public abstract class AbstractServiceInterface {
 		// jobdao.attachDirty(job);
 		myLogger.debug("Preparing job done.");
 	}
-	
-	public void optimizeMultiPartJob(String multiPartJobId) throws NoSuchJobException {
-		
+
+	public void optimizeMultiPartJob(String multiPartJobId)
+			throws NoSuchJobException {
+
 	}
 
 	private void submitMultiPartJob(final MultiPartJob multiJob)
 			throws JobSubmissionException, NoSuchJobException {
-		
-		final DtoActionStatus newActionStatus = new DtoActionStatus(multiJob.getMultiPartJobId(), 100);
+
+		final DtoActionStatus newActionStatus = new DtoActionStatus(multiJob
+				.getMultiPartJobId(), 100);
 		this.actionStatus.put(multiJob.getMultiPartJobId(), newActionStatus);
-		
+
 		ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
 						.getConcurrentMultiPartJobSubmitThreadsPerUser());
-
 
 		Job[] currentlyCreatedJobs = multiJob.getJobs().toArray(new Job[] {});
 		Arrays.sort(currentlyCreatedJobs);
 
 		final int totalNumberOfJobs = currentlyCreatedJobs.length;
 		newActionStatus.setTotalElements(totalNumberOfJobs);
-				
 
 		for (final Job job : currentlyCreatedJobs) {
 
@@ -868,22 +870,43 @@ public abstract class AbstractServiceInterface {
 						try {
 							exc = null;
 							submitJob(job, true);
-							newActionStatus.addElement("Added job: "+job.getJobname());
+							newActionStatus.addElement("Added job: "
+									+ job.getJobname());
+
 							break;
 						} catch (Exception e) {
-							myLogger.error(job.getSubmissionHost()+": Job submission for multipartjob: "
-									+ multiJob.getMultiPartJobId() + ", " + job.getJobname()
-									+ " failed: " + e.getLocalizedMessage());
+							myLogger.error(job.getSubmissionHost()
+									+ ": Job submission for multipartjob: "
+									+ multiJob.getMultiPartJobId() + ", "
+									+ job.getJobname() + " failed: "
+									+ e.getLocalizedMessage());
 							myLogger.error("Trying again...");
-							newActionStatus.addLogMessage("Failed to submit job "+job.getJobname()+": "+e.getLocalizedMessage()+". Trying again...");
+							newActionStatus
+									.addLogMessage("Failed to submit job "
+											+ job.getJobname() + ": "
+											+ e.getLocalizedMessage()
+											+ ". Trying again...");
 							exc = e;
 						}
-						
-						if ( exc != null ) {
-							myLogger.error("Tried to resubmit job "+job.getJobname()+" "+DEFAULT_JOB_SUBMISSION_RETRIES+" times. Never worked. Giving up...");
+
+						if (exc != null) {
+							newActionStatus.setFailed(true);
+							myLogger.error("Tried to resubmit job "
+									+ job.getJobname() + " "
+									+ DEFAULT_JOB_SUBMISSION_RETRIES
+									+ " times. Never worked. Giving up...");
 							multiJob.addFailedJob(job.getJobname());
-							newActionStatus.addElement("Tried to resubmit job "+job.getJobname()+" "+DEFAULT_JOB_SUBMISSION_RETRIES+" times. Never worked. Giving up...");
+							newActionStatus.addElement("Tried to resubmit job "
+									+ job.getJobname() + " "
+									+ DEFAULT_JOB_SUBMISSION_RETRIES
+									+ " times. Never worked. Giving up...");
 						}
+
+						if (newActionStatus.getCurrentElements() == newActionStatus
+								.getTotalElements()) {
+							newActionStatus.setFinished(true);
+						}
+
 					}
 				}
 			};
@@ -1100,7 +1123,8 @@ public abstract class AbstractServiceInterface {
 
 	}
 
-	public void submitJob(final String jobname) throws JobSubmissionException, NoSuchJobException {
+	public void submitJob(final String jobname) throws JobSubmissionException,
+			NoSuchJobException {
 
 		myLogger.info("Submitting job: " + jobname + " for user " + getDN());
 		Job job;
@@ -1285,12 +1309,13 @@ public abstract class AbstractServiceInterface {
 	 * @see org.vpac.grisu.control.ServiceInterface#ps()
 	 */
 	public DtoJobs ps(String application, boolean refresh) {
-		
+
 		List<Job> jobs = null;
-		if ( StringUtils.isBlank(application) ) {
+		if (StringUtils.isBlank(application)) {
 			jobs = jobdao.findJobByDN(getUser().getDn());
 		} else {
-			jobs = jobdao.findJobByDNPerApplication(getUser().getDn(), application);
+			jobs = jobdao.findJobByDNPerApplication(getUser().getDn(),
+					application);
 		}
 
 		if (refresh) {
@@ -1308,13 +1333,14 @@ public abstract class AbstractServiceInterface {
 	}
 
 	public DtoStringList getAllJobnames(String application) {
-		
+
 		List<String> jobnames = null;
-		
-		if ( StringUtils.isBlank(application) ) {
+
+		if (StringUtils.isBlank(application)) {
 			jobnames = jobdao.findJobNamesByDn(getUser().getDn());
 		} else {
-			jobnames = jobdao.findJobNamesPerApplicationByDn(getUser().getDn(), application);
+			jobnames = jobdao.findJobNamesPerApplicationByDn(getUser().getDn(),
+					application);
 		}
 
 		return DtoStringList.fromStringList(jobnames);
@@ -1511,13 +1537,14 @@ public abstract class AbstractServiceInterface {
 	}
 
 	public DtoStringList getAllMultiPartJobIds(String application) {
-		
+
 		List<String> jobnames = null;
-		
-		if ( StringUtils.isBlank(application) ) {
+
+		if (StringUtils.isBlank(application)) {
 			jobnames = multiPartJobDao.findJobNamesByDn(getUser().getDn());
 		} else {
-			jobnames = multiPartJobDao.findJobNamesPerApplicationByDn(getUser().getDn(), application);
+			jobnames = multiPartJobDao.findJobNamesPerApplicationByDn(getUser()
+					.getDn(), application);
 		}
 
 		return DtoStringList.fromStringList(jobnames);
@@ -1588,7 +1615,8 @@ public abstract class AbstractServiceInterface {
 			// getUser().removeAutoMountedMountpoints();
 			// userdao.attachClean(getUser());
 
-			getUser().setAutoMountedMountPoints(df_auto_mds(getAllSites().asArray()));
+			getUser().setAutoMountedMountPoints(
+					df_auto_mds(getAllSites().asArray()));
 
 			Set<MountPoint> mps = getUser().getAllMountPoints();
 
@@ -1681,12 +1709,12 @@ public abstract class AbstractServiceInterface {
 					+ " ms.");
 			for (String server : mpUrl.keySet()) {
 				for (String path : mpUrl.get(server)) {
-					String url = server.replace(":2811", "")
-					+ path + "/" + User.get_vo_dn_path(getCredential().getDn());
-					
+					String url = server.replace(":2811", "") + path + "/"
+							+ User.get_vo_dn_path(getCredential().getDn());
+
 					MountPoint mp = new MountPoint(getUser().getDn(), fqan,
-							url, calculateMountPointName(
-									server, fqan), informationManager.getSiteForHostOrUrl(url), true);
+							url, calculateMountPointName(server, fqan),
+							informationManager.getSiteForHostOrUrl(url), true);
 					// + "." + fqan + "." + path);
 					// + "." + fqan);
 					mps.add(mp);
@@ -2003,7 +2031,7 @@ public abstract class AbstractServiceInterface {
 					+ "/" + filename;
 			myLogger.debug("Coping multipartjob inputfile " + filename
 					+ " to: " + targetUrl);
-			cp(inputFile, targetUrl, true, true);
+			cpSingleFile(inputFile, targetUrl, true, true);
 
 		}
 
@@ -2092,7 +2120,7 @@ public abstract class AbstractServiceInterface {
 						+ target.toString());
 				// fileTransfers.put(targetFileString, fileTransfer);
 
-				fileTransfer.startTransfer();
+				fileTransfer.startTransfer(true);
 
 			} catch (FileSystemException e) {
 				// e.printStackTrace();
@@ -2205,9 +2233,8 @@ public abstract class AbstractServiceInterface {
 			MultiPartJob job = getMultiPartJobFromDatabase(jobname);
 			job.addJobProperty(key, value);
 			multiPartJobDao.saveOrUpdate(job);
-			myLogger.debug("Added multijob property: "+key);
+			myLogger.debug("Added multijob property: " + key);
 		}
-
 
 	}
 
@@ -2245,7 +2272,8 @@ public abstract class AbstractServiceInterface {
 		// job.getJobProperties().put(Constants.JOB_STATUS_KEY,
 		// JobConstants.translateStatus(getJobStatus(jobname)));
 
-		return DtoJob.createJob(job.getStatus(), job.getJobProperties(), job.getLogMessages());
+		return DtoJob.createJob(job.getStatus(), job.getJobProperties(), job
+				.getLogMessages());
 	}
 
 	public String getJsdlDocument(final String jobname)
@@ -2437,23 +2465,25 @@ public abstract class AbstractServiceInterface {
 				return false;
 			}
 		} catch (FileSystemException e) {
-			
-			// try again. Commons-vfs sometimes seems to fail here without any reason I could figure out...
+
+			// try again. Commons-vfs sometimes seems to fail here without any
+			// reason I could figure out...
 			try {
-			FileObject dir = getUser().aquireFile(url);
-			if (!dir.exists()) {
-				dir.createFolder();
-				if (dir.exists()) {
-					return true;
+				FileObject dir = getUser().aquireFile(url);
+				if (!dir.exists()) {
+					dir.createFolder();
+					if (dir.exists()) {
+						return true;
+					} else {
+						return false;
+					}
 				} else {
 					return false;
 				}
-			} else {
-				return false;
-			}
 			} catch (Exception e2) {
-			throw new RemoteFileSystemException("Could not create directory "
-					+ url +": "+e2.getLocalizedMessage());
+				throw new RemoteFileSystemException(
+						"Could not create directory " + url + ": "
+								+ e2.getLocalizedMessage());
 			}
 		}
 	}
@@ -2581,7 +2611,7 @@ public abstract class AbstractServiceInterface {
 				}
 				myLogger.debug("Staging file: " + sourceUrl + " to: "
 						+ targetUrl);
-				cp(sourceUrl, targetUrl, true, true);
+				cpSingleFile(sourceUrl, targetUrl, true, true);
 				// job.addInputFile(targetUrl);
 			}
 			// }
@@ -2685,9 +2715,110 @@ public abstract class AbstractServiceInterface {
 	 * @see org.vpac.grisu.control.ServiceInterface#cp(java.lang.String,
 	 * java.lang.String, boolean, boolean)
 	 */
-	public String cp(final String source, final String target,
+	public String cp(final DtoStringList sources, final String target,
 			final boolean overwrite, final boolean waitForFileTransferToFinish)
 			throws RemoteFileSystemException {
+
+		String handle = null;
+
+		if (actionStatus.get(target) == null) {
+			handle = target;
+		} else {
+			int counter = 0;
+			do {
+				handle = target + "_" + counter;
+			} while (actionStatus.get(handle) != null);
+		}
+
+		final DtoActionStatus actionStat = new DtoActionStatus(handle, sources
+				.asArray().length * 2);
+
+		actionStatus.put(handle, actionStat);
+
+//		if (waitForFileTransferToFinish) {
+//			try {
+//				for (String source : sources.asArray()) {
+//					actionStat.addElement("Starting transfer of file: "
+//							+ source);
+//					
+//					String filename = FileHelpers.getFilename(source);
+//					
+//					RemoteFileTransferObject rto = cpSingleFile(source, target+"/"+filename, overwrite, true);
+//					
+//					if ( rto.isFailed() ) {
+//						actionStat.addElement("Transfer failed: "
+//								+ rto.getPossibleException().getLocalizedMessage());
+//						actionStat.setFailed(true);
+//						actionStat.setFinished(true);
+//						throw new RemoteFileSystemException(rto.getPossibleException().getLocalizedMessage());
+//					}
+//					
+//					actionStat.addElement("Finished transfer of file: "
+//							+ source);
+//				}
+//				actionStat.setFinished(true);
+//			} catch (Exception e) {
+//				
+//				// should never happen
+//				actionStat.addElement("Transfer failed: "
+//						+ e.getLocalizedMessage());
+//				actionStat.setFailed(true);
+//				actionStat.setFinished(true);
+//				throw new RemoteFileSystemException(e.getLocalizedMessage());
+//			}
+//		} else {
+			final String handleFinal = handle;
+			Thread cpThread = new Thread() {
+				public void run() {
+					try {
+						for (String source : sources.asArray()) {
+							actionStat.addElement("Starting transfer of file: "
+									+ source);
+							String filename = FileHelpers.getFilename(source);
+							RemoteFileTransferObject rto = cpSingleFile(source, target+"/"+filename, overwrite, true);
+							
+							if ( rto.isFailed() ) {
+								actionStat.addElement("Transfer failed: "
+										+ rto.getPossibleException().getLocalizedMessage());
+								actionStat.setFailed(true);
+								actionStat.setFinished(true);
+								throw new RemoteFileSystemException(rto.getPossibleException().getLocalizedMessage());
+							} else {
+								System.out.println("FINISHED: "+source);
+								actionStat.addElement("Finished transfer of file: "
+									+ source);
+								
+								System.out.println("FINISHED2: "+actionStat.getCurrentElements());
+							}
+						}
+						actionStat.setFinished(true);
+					} catch (Exception e) {
+						e.printStackTrace();
+						actionStat.addElement("Transfer failed: "
+								+ e.getLocalizedMessage());
+						actionStat.setFailed(true);
+						actionStat.setFinished(true);
+					}
+				}
+			};
+			
+			cpThread.start();
+			
+			if ( waitForFileTransferToFinish ) {
+				try {
+					cpThread.join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+		return handle;
+
+	}
+
+	private RemoteFileTransferObject cpSingleFile(final String source, final String target,
+			final boolean overwrite, final boolean waitForFileTransferToFinish) throws RemoteFileSystemException {
 
 		final FileObject source_file;
 		final FileObject target_file;
@@ -2706,32 +2837,25 @@ public abstract class AbstractServiceInterface {
 							+ e1.getLocalizedMessage());
 		}
 
-		if (source_file.getName().getURI().equals(
-				target_file.getName().getURI())) {
-			myLogger
-					.debug("Input file and target file are the same. No need to copy...");
-			return target_file.getName().getURI().toString();
-
-		}
-
 		RemoteFileTransferObject fileTransfer = new RemoteFileTransferObject(
 				source_file, target_file, overwrite);
+
 		myLogger.info("Creating fileTransfer object for source: "
 				+ source_file.getName() + " and target: "
 				+ target_file.toString());
 		// fileTransfers.put(targetFileString, fileTransfer);
 
-		fileTransfer.startTransfer();
+		fileTransfer.startTransfer(waitForFileTransferToFinish);
 
 		// if ( waitForFileTransferToFinish ) {
 		// myLogger.info("Waiting for filetransfer with target "+targetFileString+" to finish.");
 		// fileTransfer.joinFileTransfer();
 		// }
 
-		myLogger.info("Filtransfer with target " + targetFileString
-				+ " finished.");
+		// myLogger.info("Filetransfer with target " + targetFileString
+		// + " finished.");
 
-		return targetFileString;
+		return fileTransfer;
 	}
 
 	/*
@@ -2794,8 +2918,9 @@ public abstract class AbstractServiceInterface {
 
 	public DtoStringList getVersionsOfApplicationOnSubmissionLocation(
 			final String application, final String submissionLocation) {
-		return DtoStringList.fromStringArray(informationManager.getVersionsOfApplicationOnSubmissionLocation(
-				application, submissionLocation));
+		return DtoStringList.fromStringArray(informationManager
+				.getVersionsOfApplicationOnSubmissionLocation(application,
+						submissionLocation));
 	}
 
 	public DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
@@ -2908,44 +3033,45 @@ public abstract class AbstractServiceInterface {
 			final String application, final String version,
 			final String submissionLocation) {
 
-//		String site = site_or_submissionLocation;
-//		if (isSubmissionLocation(site_or_submissionLocation)) {
-//			myLogger.debug("Parameter " + site_or_submissionLocation
-//					+ "is submission location not site. Calculating site...");
-//			site = getSiteForSubmissionLocation(site_or_submissionLocation);
-//			myLogger.debug("Site is: " + site);
-//		}
+		// String site = site_or_submissionLocation;
+		// if (isSubmissionLocation(site_or_submissionLocation)) {
+		// myLogger.debug("Parameter " + site_or_submissionLocation
+		// + "is submission location not site. Calculating site...");
+		// site = getSiteForSubmissionLocation(site_or_submissionLocation);
+		// myLogger.debug("Site is: " + site);
+		// }
 
 		return DtoApplicationDetails.createDetails(application,
 				informationManager.getApplicationDetails(application, version,
 						submissionLocation));
 	}
 
-//	/*
-//	 * (non-Javadoc)
-//	 * 
-//	 * @see
-//	 * org.vpac.grisu.control.ServiceInterface#getApplicationDetails(java.lang
-//	 * .String, java.lang.String)
-//	 */
-//	public DtoApplicationDetails getApplicationDetailsForSubmissionLocation(
-//			final String application, final String site_or_submissionLocation) {
-//
-//		String site = site_or_submissionLocation;
-//		if (isSubmissionLocation(site_or_submissionLocation)) {
-//			myLogger.debug("Parameter " + site_or_submissionLocation
-//					+ "is submission location not site. Calculating site...");
-//			site = getSiteForSubmissionLocation(site_or_submissionLocation);
-//			myLogger.debug("Site is: " + site);
-//		}
-//
-//		return getApplicationDetailsForVersionAndSite(application,
-//				getDefaultVersionForApplicationAtSite(application, site), site);
-//
-//	}
+	// /*
+	// * (non-Javadoc)
+	// *
+	// * @see
+	// * org.vpac.grisu.control.ServiceInterface#getApplicationDetails(java.lang
+	// * .String, java.lang.String)
+	// */
+	// public DtoApplicationDetails getApplicationDetailsForSubmissionLocation(
+	// final String application, final String site_or_submissionLocation) {
+	//
+	// String site = site_or_submissionLocation;
+	// if (isSubmissionLocation(site_or_submissionLocation)) {
+	// myLogger.debug("Parameter " + site_or_submissionLocation
+	// + "is submission location not site. Calculating site...");
+	// site = getSiteForSubmissionLocation(site_or_submissionLocation);
+	// myLogger.debug("Site is: " + site);
+	// }
+	//
+	// return getApplicationDetailsForVersionAndSite(application,
+	// getDefaultVersionForApplicationAtSite(application, site), site);
+	//
+	// }
 
 	public DtoGridResources findMatchingSubmissionLocationsUsingMap(
-			final DtoJob jobProperties, final String fqan, boolean excludeResourcesWithLessCPUslotsFreeThanRequested) {
+			final DtoJob jobProperties, final String fqan,
+			boolean excludeResourcesWithLessCPUslotsFreeThanRequested) {
 
 		LinkedList<String> result = new LinkedList<String>();
 
@@ -2956,7 +3082,7 @@ public abstract class AbstractServiceInterface {
 		}
 
 		List<GridResource> resources = null;
-		if ( excludeResourcesWithLessCPUslotsFreeThanRequested ) {
+		if (excludeResourcesWithLessCPUslotsFreeThanRequested) {
 			resources = matchmaker.findAvailableResources(converterMap, fqan);
 		} else {
 			resources = matchmaker.findAllResources(converterMap, fqan);
@@ -2966,7 +3092,8 @@ public abstract class AbstractServiceInterface {
 	}
 
 	public DtoGridResources findMatchingSubmissionLocationsUsingJsdl(
-			String jsdlString, final String fqan, boolean excludeResourcesWithLessCPUslotsFreeThanRequested) {
+			String jsdlString, final String fqan,
+			boolean excludeResourcesWithLessCPUslotsFreeThanRequested) {
 
 		Document jsdl;
 		try {
@@ -2975,10 +3102,10 @@ public abstract class AbstractServiceInterface {
 			throw new RuntimeException(e);
 		}
 
-//		LinkedList<String> result = new LinkedList<String>();
+		// LinkedList<String> result = new LinkedList<String>();
 
 		List<GridResource> resources = null;
-		if ( excludeResourcesWithLessCPUslotsFreeThanRequested ) {
+		if (excludeResourcesWithLessCPUslotsFreeThanRequested) {
 			resources = matchmaker.findAvailableResources(jsdl, fqan);
 		} else {
 			resources = matchmaker.findAllResources(jsdl, fqan);
@@ -2999,13 +3126,15 @@ public abstract class AbstractServiceInterface {
 		Set<String> siteList = new TreeSet<String>();
 
 		if (sites == null) {
-			return DtoStringList.fromStringArray(informationManager.getAllApplicationsOnGrid());
+			return DtoStringList.fromStringArray(informationManager
+					.getAllApplicationsOnGrid());
 		}
-		for ( String site : sites.getStringList() ) {
-			siteList.addAll(Arrays.asList(informationManager.getAllApplicationsAtSite(site)));
+		for (String site : sites.getStringList()) {
+			siteList.addAll(Arrays.asList(informationManager
+					.getAllApplicationsAtSite(site)));
 		}
 
-		return DtoStringList.fromStringArray(siteList.toArray(new String[]{}));
+		return DtoStringList.fromStringArray(siteList.toArray(new String[] {}));
 
 	}
 
@@ -3094,13 +3223,15 @@ public abstract class AbstractServiceInterface {
 		return getSite(contactString);
 	}
 
-	
 	public DtoActionStatus getActionStatus(String actionHandle) {
-		
-		return actionStatus.get(actionHandle);
-		
-	}
 
+		DtoActionStatus result = actionStatus.get(actionHandle);
+		
+//		System.out.println("Elements before: "+result.getLog().size());
+		
+		return result;
+
+	}
 
 	/**
 	 * This method has to be implemented by the endpoint specific

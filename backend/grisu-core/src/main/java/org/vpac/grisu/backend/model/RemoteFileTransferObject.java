@@ -26,6 +26,23 @@ public class RemoteFileTransferObject {
 	private final FileObject source;
 	private final FileObject target;
 	private final boolean overwrite;
+	
+	public boolean isFailed() {
+		return failed;
+	}
+
+	public boolean isFinished() {
+		return finished;
+	}
+
+	public Exception getPossibleException() {
+		return possibleException;
+	}
+
+	private boolean  failed = false;
+	private boolean finished = false;
+	
+	private Exception possibleException;
 
 	private Map<Date, String> messages = new TreeMap<Date, String>();
 
@@ -42,9 +59,13 @@ public class RemoteFileTransferObject {
 					myLogger.info("Copy thread started for target: "
 							+ target.getName());
 					transferFile(source, target, overwrite);
+					finished = true;
 				} catch (RemoteFileSystemException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
+					
+					finished = true;
+					failed = true;
+					possibleException = e;
 				}
 			}
 		};
@@ -67,9 +88,15 @@ public class RemoteFileTransferObject {
 
 	}
 
-	public final void startTransfer() throws RemoteFileSystemException {
+	public final void startTransfer(boolean waitForTransferToFinish) throws RemoteFileSystemException {
 
-		transferFile(source, target, overwrite);
+//		transferFile(source, target, overwrite);
+		messages.put(new Date(), "Transfer started.");
+		fileTransferThread.start();
+		
+		if ( waitForTransferToFinish ) {
+			joinFileTransfer();
+		}
 
 	}
 
@@ -77,6 +104,14 @@ public class RemoteFileTransferObject {
 			final boolean overwrite) throws RemoteFileSystemException {
 
 		try {
+			
+			if (source_file.getName().getURI().equals(
+					target_file.getName().getURI())) {
+				messages.put(new Date(), "Input file and target file are the same. No need to copy...");
+				return;
+
+			}
+			
 			messages.put(new Date(), "Checking source file...");
 			if (!source_file.exists()) {
 				throw new RemoteFileSystemException("Could not copy file: "
@@ -119,6 +154,7 @@ public class RemoteFileTransferObject {
 			try {
 				messages.put(new Date(), "Starting file transfer...");
 				VFSUtil.copy(source_file, target_file, dummyMarker, true);
+				messages.put(new Date(), "Transfer finished...");
 			} catch (IOException e) {
 				messages.put(new Date(), "File transfer failed (io problem): "
 						+ e.getLocalizedMessage());

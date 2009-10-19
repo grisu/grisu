@@ -482,9 +482,9 @@ public interface ServiceInterface {
 	DtoFolder ls(String directory, int recursion_level) throws RemoteFileSystemException;
 
 	/**
-	 * Copies one file to another location (recursively if it's a directory).
+	 * Copies one or more files to a target location (recursively if it's a directory).
 	 * 
-	 * @param source
+	 * @param sources
 	 *            the source file
 	 * @param target
 	 *            the target file
@@ -498,11 +498,11 @@ public interface ServiceInterface {
 	 *             if the remote source file system could not be read/mounted or
 	 *             the remote target file system could not be written to
 	 */
-	String cp(String source, String target, boolean overwrite,
+	String cp(DtoStringList sources, String target, boolean overwrite,
 			boolean waitForFileTransferToFinish)
 			throws RemoteFileSystemException;
 
-
+	
 	/**
 	 * Checks whether the specified file/folder exists.
 	 * 
