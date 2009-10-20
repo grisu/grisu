@@ -24,6 +24,17 @@ public class DtoActionStatus {
 	private boolean finished = false;
 	private boolean failed = false;
 	
+	private Date lastUpdate = new Date();
+	
+	@XmlAttribute
+	public Date getLastUpdate() {
+		return lastUpdate;
+	}
+	
+	public void setLastUpdate(Date lastUpdate) {
+		this.lastUpdate = lastUpdate;
+	}
+	
 	@XmlAttribute
 	public boolean isFinished() {
 		return finished;
@@ -32,6 +43,7 @@ public class DtoActionStatus {
 	public void setFinished(boolean finished) {
 		this.finished = finished;
 		addLogMessage(ACTION_FINISHED_STRING);
+		lastUpdate = new Date();
 	}
 
 	@XmlAttribute
@@ -42,6 +54,7 @@ public class DtoActionStatus {
 	public void setFailed(boolean failed) {
 		this.failed = failed;
 		addLogMessage(ACTION_FAILED_STRING);
+		lastUpdate = new Date();
 	}
 
 	@XmlAttribute(name="totalElements")
@@ -72,6 +85,7 @@ public class DtoActionStatus {
 			temp = this.log.get(now);
 		}
 		this.log.put(now, logMessage);
+		lastUpdate = now;
 //		System.out.println("Now "+currentElements+" elements");
 	}
 	
@@ -84,6 +98,7 @@ public class DtoActionStatus {
 			temp = this.log.get(now);
 		}
 		this.log.put(now, logMessage);
+		lastUpdate = now;
 	}
 
 	private int currentElements = 0;

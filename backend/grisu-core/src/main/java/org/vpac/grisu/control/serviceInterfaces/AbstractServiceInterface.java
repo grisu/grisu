@@ -2727,6 +2727,7 @@ public abstract class AbstractServiceInterface {
 			int counter = 0;
 			do {
 				handle = target + "_" + counter;
+				counter = counter + 1;
 			} while (actionStatus.get(handle) != null);
 		}
 
@@ -2735,87 +2736,61 @@ public abstract class AbstractServiceInterface {
 
 		actionStatus.put(handle, actionStat);
 
-//		if (waitForFileTransferToFinish) {
-//			try {
-//				for (String source : sources.asArray()) {
-//					actionStat.addElement("Starting transfer of file: "
-//							+ source);
-//					
-//					String filename = FileHelpers.getFilename(source);
-//					
-//					RemoteFileTransferObject rto = cpSingleFile(source, target+"/"+filename, overwrite, true);
-//					
-//					if ( rto.isFailed() ) {
-//						actionStat.addElement("Transfer failed: "
-//								+ rto.getPossibleException().getLocalizedMessage());
-//						actionStat.setFailed(true);
-//						actionStat.setFinished(true);
-//						throw new RemoteFileSystemException(rto.getPossibleException().getLocalizedMessage());
-//					}
-//					
-//					actionStat.addElement("Finished transfer of file: "
-//							+ source);
-//				}
-//				actionStat.setFinished(true);
-//			} catch (Exception e) {
-//				
-//				// should never happen
-//				actionStat.addElement("Transfer failed: "
-//						+ e.getLocalizedMessage());
-//				actionStat.setFailed(true);
-//				actionStat.setFinished(true);
-//				throw new RemoteFileSystemException(e.getLocalizedMessage());
-//			}
-//		} else {
-			final String handleFinal = handle;
-			Thread cpThread = new Thread() {
-				public void run() {
-					try {
-						for (String source : sources.asArray()) {
-							actionStat.addElement("Starting transfer of file: "
-									+ source);
-							String filename = FileHelpers.getFilename(source);
-							RemoteFileTransferObject rto = cpSingleFile(source, target+"/"+filename, overwrite, true);
-							
-							if ( rto.isFailed() ) {
-								actionStat.addElement("Transfer failed: "
-										+ rto.getPossibleException().getLocalizedMessage());
-								actionStat.setFailed(true);
-								actionStat.setFinished(true);
-								throw new RemoteFileSystemException(rto.getPossibleException().getLocalizedMessage());
-							} else {
-								actionStat.addElement("Finished transfer of file: "
-									+ source);
-							}
-						}
-						actionStat.setFinished(true);
-					} catch (Exception e) {
-						e.printStackTrace();
-						actionStat.addElement("Transfer failed: "
-								+ e.getLocalizedMessage());
-						actionStat.setFailed(true);
-						actionStat.setFinished(true);
-					}
-				}
-			};
-			
-			cpThread.start();
-			
-			if ( waitForFileTransferToFinish ) {
+		final String handleFinal = handle;
+		Thread cpThread = new Thread() {
+			public void run() {
 				try {
-					cpThread.join();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
+					for (String source : sources.asArray()) {
+						actionStat.addElement("Starting transfer of file: "
+								+ source);
+						String filename = FileHelpers.getFilename(source);
+						RemoteFileTransferObject rto = cpSingleFile(source,
+								target + "/" + filename, overwrite, true);
+
+						if (rto.isFailed()) {
+							actionStat.addElement("Transfer failed: "
+									+ rto.getPossibleException()
+											.getLocalizedMessage());
+							actionStat.setFailed(true);
+							actionStat.setFinished(true);
+							throw new RemoteFileSystemException(rto
+									.getPossibleException()
+									.getLocalizedMessage());
+						} else {
+							actionStat.addElement("Finished transfer of file: "
+									+ source);
+						}
+					}
+					actionStat.setFinished(true);
+				} catch (Exception e) {
 					e.printStackTrace();
+					actionStat.addElement("Transfer failed: "
+							+ e.getLocalizedMessage());
+					actionStat.setFailed(true);
+					actionStat.setFinished(true);
 				}
 			}
+		};
+
+		cpThread.start();
+
+		if (waitForFileTransferToFinish) {
+			try {
+				cpThread.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 
 		return handle;
 
 	}
 
-	private RemoteFileTransferObject cpSingleFile(final String source, final String target,
-			final boolean overwrite, final boolean waitForFileTransferToFinish) throws RemoteFileSystemException {
+	private RemoteFileTransferObject cpSingleFile(final String source,
+			final String target, final boolean overwrite,
+			final boolean waitForFileTransferToFinish)
+			throws RemoteFileSystemException {
 
 		final FileObject source_file;
 		final FileObject target_file;
@@ -3223,9 +3198,9 @@ public abstract class AbstractServiceInterface {
 	public DtoActionStatus getActionStatus(String actionHandle) {
 
 		DtoActionStatus result = actionStatus.get(actionHandle);
-		
-//		System.out.println("Elements before: "+result.getLog().size());
-		
+
+		// System.out.println("Elements before: "+result.getLog().size());
+
 		return result;
 
 	}
