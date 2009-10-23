@@ -25,6 +25,7 @@ import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import au.org.arcs.jcommons.constants.Constants;
 import au.org.arcs.jcommons.utils.JsdlHelpers;
 
 /**
@@ -518,7 +519,28 @@ public class Job implements Comparable<Job> {
 	}
 
 	public int compareTo(Job arg0) {
-		return this.getJobname().compareTo(arg0.getJobname());
+
+		Long thisSubTime = null;
+		try {
+			thisSubTime = Long.parseLong(this.getJobProperty(Constants.SUBMISSION_TIME_KEY));
+		} catch (Exception e) {
+			thisSubTime = 0L;	
+		}
+
+		Long otherSubTime = null;
+		try {
+			otherSubTime = Long.parseLong(arg0.getJobProperty(Constants.SUBMISSION_TIME_KEY));
+		} catch (Exception e) {
+			otherSubTime = 0L;
+		}
+
+		int result = otherSubTime.compareTo(thisSubTime);
+		
+		if ( result != 0 ) {
+			return result;
+		} else {
+			return this.jobname.compareTo(arg0.getJobname());
+		}
 	}
 
 }

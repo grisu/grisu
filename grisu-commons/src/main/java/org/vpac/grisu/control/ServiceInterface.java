@@ -24,6 +24,7 @@ import org.vpac.grisu.model.dto.DtoMountPoints;
 import org.vpac.grisu.model.dto.DtoMultiPartJob;
 import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
+import org.vpac.grisu.model.dto.DtoUserProperties;
 
 import au.org.arcs.jcommons.constants.JobSubmissionProperty;
 
@@ -104,18 +105,32 @@ public interface ServiceInterface {
 	 */
 	void submitSupportRequest(String subject, String description);
 
+	
 	/**
-	 * Returns an array of strings that are associated with this key. The
+	 * Gets all the properties stored for the current user.
+	 * 
+	 * @return all userproperties
+	 */
+	DtoUserProperties getUserProperties();
+	
+	/**
+	 * Returns a value that are associated with this key. The
 	 * developer can store all kinds of stuff he wants to associate with the
 	 * user. Might be useful for history and such.
-	 * 
-	 * Not yet implemented though.
 	 * 
 	 * @param key
 	 *            the key
 	 * @return the value
 	 */
 	String getUserProperty(String key);
+	
+	/**
+	 * Sets a user property.
+	 * 
+	 * @param key the key
+	 * @param value the value
+	 */
+	void setUserProperty(String key, String value);
 
 	/**
 	 * Returns the end time of the credential used.

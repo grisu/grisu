@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -55,7 +56,6 @@ import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.info.CachedMdsInformationManager;
-import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.dto.DtoApplicationDetails;
@@ -72,6 +72,7 @@ import org.vpac.grisu.model.dto.DtoMountPoints;
 import org.vpac.grisu.model.dto.DtoMultiPartJob;
 import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
+import org.vpac.grisu.model.dto.DtoUserProperties;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.settings.ServerPropertiesManager;
@@ -960,26 +961,47 @@ public abstract class AbstractServiceInterface {
 
 	private void submitJob(final Job job, boolean stageFiles)
 			throws JobSubmissionException {
+		
+		DtoActionStatus status = null;
 		try {
+			
+			int noStageins = 0;
+			
+			if ( stageFiles ) {
+				List<Element> stageIns = JsdlHelpers.getStageInElements(job
+						.getJobDescription());
+				noStageins = stageIns.size();
+			} 
+			
+			status = new DtoActionStatus(job.getJobname(), 4+noStageins);
+			actionStatus.put(job.getJobname(), status);
+			
 			myLogger.debug("Preparing job environment...");
 			job.addLogMessage("Preparing job environment.");
 
+			status.addElement("Preparing job environment...");
+			
 			addLogMessageToPossibleMultiPartJobParent(job,
 					"Starting job submission for job: " + job.getJobname());
 			prepareJobEnvironment(job);
 			if (stageFiles) {
+				status.addLogMessage("Starting file stage-in.");
 				job.addLogMessage("Staging possible input files.");
 				myLogger.debug("Staging possible input files...");
-				stageFiles(job);
+				stageFiles(job, status);
 				job.addLogMessage("File staging finished.");
+				status.addLogMessage("File stage-in finished.");
 			}
 		} catch (Exception e) {
+			status.setFailed(true);
+			status.setFinished(true);
 			e.printStackTrace();
 			throw new JobSubmissionException(
 					"Could not access remote filesystem: "
 							+ e.getLocalizedMessage());
 		}
 
+		status.addElement("Setting credential...");
 		if (job.getFqan() != null) {
 			VO vo = VOManagement.getVO(getUser().getFqans().get(job.getFqan()));
 			try {
@@ -992,7 +1014,7 @@ public abstract class AbstractServiceInterface {
 			}
 		} else {
 			job
-					.addLogMessage("Setting credential using fqan: "
+					.addLogMessage("Setting non-vo credential: "
 							+ job.getFqan());
 			job.setCredential(getCredential());
 		}
@@ -1001,10 +1023,14 @@ public abstract class AbstractServiceInterface {
 		myLogger.debug("Submitting job to endpoint...");
 
 		try {
+			status.addElement("Starting job submission using GT4...");
 			job.addLogMessage("Submitting job to endpoint...");
 			handle = getSubmissionManager().submit("GT4", job);
 			job.addLogMessage("Submission finished.");
 		} catch (RuntimeException e) {
+			status.addLogMessage("Job submission failed.");
+			status.setFailed(true);
+			status.setFinished(true);
 			job.addLogMessage("Submission to endpoint failed: "
 					+ e.getLocalizedMessage());
 			addLogMessageToPossibleMultiPartJobParent(job,
@@ -1017,6 +1043,9 @@ public abstract class AbstractServiceInterface {
 		}
 
 		if (handle == null) {
+			status.addLogMessage("Submission finished but no jobhandle...");
+			status.setFailed(true);
+			status.setFinished(true);
 			job.addLogMessage("Submission finished but jobhandle is null...");
 			addLogMessageToPossibleMultiPartJobParent(job,
 					"Job submission for job: " + job.getJobname()
@@ -1039,7 +1068,9 @@ public abstract class AbstractServiceInterface {
 		jobdao.saveOrUpdate(job);
 		myLogger.info("Jobsubmission for job " + job.getJobname()
 				+ " and user " + getDN() + " successful.");
-
+		
+		status.addElement("Job submission finished...");
+		status.setFinished(true);
 	}
 
 	public void restartJob(final String jobname, String changedJsdl)
@@ -1317,7 +1348,7 @@ public abstract class AbstractServiceInterface {
 			jobs = jobdao.findJobByDNPerApplication(getUser().getDn(),
 					application);
 		}
-
+		
 		if (refresh) {
 			refreshJobStatus(jobs);
 		}
@@ -1557,7 +1588,7 @@ public abstract class AbstractServiceInterface {
 	 * @param jobs
 	 *            a list of jobs you want to have refreshed
 	 */
-	protected void refreshJobStatus(final List<Job> jobs) {
+	protected void refreshJobStatus(final Collection<Job> jobs) {
 		for (Job job : jobs) {
 			getJobStatus(job.getJobname());
 		}
@@ -2530,6 +2561,11 @@ public abstract class AbstractServiceInterface {
 
 	}
 
+	public DtoUserProperties getUserProperties() {
+		
+		return DtoUserProperties.createUserProperties(getUser().getUserProperties());
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -2543,6 +2579,12 @@ public abstract class AbstractServiceInterface {
 		return value;
 	}
 
+	public void setUserProperty(String key, String value) {
+		
+		getUser().getUserProperties().put(key, value);
+		
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -2573,7 +2615,7 @@ public abstract class AbstractServiceInterface {
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#stageFiles(java.lang.String)
 	 */
-	public void stageFiles(final Job job) throws RemoteFileSystemException,
+	public void stageFiles(final Job job, final DtoActionStatus optionalStatus) throws RemoteFileSystemException,
 			NoSuchJobException {
 
 		// Job job;
@@ -2585,6 +2627,9 @@ public abstract class AbstractServiceInterface {
 		for (Element stageIn : stageIns) {
 
 			String sourceUrl = JsdlHelpers.getStageInSource(stageIn);
+			if ( optionalStatus != null ) {
+				optionalStatus.addElement("Staging file "+sourceUrl.substring(sourceUrl.lastIndexOf("/")+1));
+			}
 			// TODO remove that after swing client is fixed.
 			if (sourceUrl.startsWith("file") || sourceUrl.startsWith("dummy")) {
 				continue;
@@ -2605,6 +2650,9 @@ public abstract class AbstractServiceInterface {
 						folder.createFolder();
 					}
 				} catch (FileSystemException e) {
+					if ( optionalStatus != null ) {
+						optionalStatus.addLogMessage("Error while staging in files.");
+					}
 					throw new RemoteFileSystemException(
 							"Could not create parent folder for file: "
 									+ targetUrl + ": " + e.getMessage());

@@ -11,7 +11,7 @@
 
 		<Application>
 			<ApplicationName>Java</ApplicationName>
-			<ApplicationVersion>no_version</ApplicationVersion>
+			<ApplicationVersion>any_version</ApplicationVersion>
 			<POSIXApplication xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
 				<Executable>java</Executable>
 				<Argument>-version</Argument>

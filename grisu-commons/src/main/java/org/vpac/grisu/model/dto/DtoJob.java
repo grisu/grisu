@@ -172,7 +172,28 @@ public class DtoJob implements Comparable<DtoJob> {
 	}
 	
 	public int compareTo(DtoJob o) {
-		return this.jobname().compareTo(o.jobname());
+		
+		Long thisSubTime = null;
+		try {
+			thisSubTime = Long.parseLong(readJobProperty(Constants.SUBMISSION_TIME_KEY));
+		} catch (Exception e) {
+			thisSubTime = 0L;	
+		}
+
+		Long otherSubTime = null;
+		try {
+			otherSubTime = Long.parseLong(o.readJobProperty(Constants.SUBMISSION_TIME_KEY));
+		} catch (Exception e) {
+			otherSubTime = 0L;
+		}
+
+		int result = otherSubTime.compareTo(thisSubTime);
+		
+		if ( result != 0 ) {
+			return result;
+		} else {
+			return this.jobname().compareTo(o.jobname());
+		}
 	}
 	
 }

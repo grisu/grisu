@@ -26,6 +26,7 @@ import org.vpac.grisu.model.dto.DtoMountPoints;
 import org.vpac.grisu.model.dto.DtoMultiPartJob;
 import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
+import org.vpac.grisu.model.dto.DtoUserProperties;
 
 public class ProxyServiceInterface implements ServiceInterface {
 
@@ -1428,6 +1429,43 @@ public class ProxyServiceInterface implements ServiceInterface {
 		try {
 			Method m = si.getClass().getMethod("getActionStatus", actionHandle.getClass());
 			return (DtoActionStatus) (m.invoke(si));
+		} catch (SecurityException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException("Proxy method exception.", e);
+		} catch (InvocationTargetException e) {
+			throw (RuntimeException) e.getCause();
+		}
+	}
+
+	public void setUserProperty(String key, String value) {
+
+		try {
+			Method m = si.getClass().getMethod("setUserProperty",
+					key.getClass(), value.getClass());
+			m.invoke(si, key, value);
+		} catch (SecurityException e) {
+			throw new RuntimeException(e);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		} catch (InvocationTargetException e) {
+			throw (RuntimeException) e.getCause();
+		}
+	}
+
+	public DtoUserProperties getUserProperties() {
+		
+		try {
+			Method m = si.getClass().getMethod("getUserProperties");
+			return (DtoUserProperties) m.invoke(si);
 		} catch (SecurityException e) {
 			throw new RuntimeException("Proxy method exception.", e);
 		} catch (NoSuchMethodException e) {
