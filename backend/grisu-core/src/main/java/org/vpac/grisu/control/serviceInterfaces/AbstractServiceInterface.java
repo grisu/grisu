@@ -870,7 +870,12 @@ public abstract class AbstractServiceInterface {
 					for (int i = 0; i < DEFAULT_JOB_SUBMISSION_RETRIES; i++) {
 						try {
 							exc = null;
-							submitJob(job, true);
+							
+							DtoActionStatus status = null;
+							status = new DtoActionStatus(job.getJobname(), 0);
+							actionStatus.put(job.getJobname(), status);
+							
+							submitJob(job, true, status);
 							newActionStatus.addElement("Added job: "
 									+ job.getJobname());
 
@@ -959,10 +964,9 @@ public abstract class AbstractServiceInterface {
 		}
 	}
 
-	private void submitJob(final Job job, boolean stageFiles)
+	private void submitJob(final Job job, boolean stageFiles, DtoActionStatus status)
 			throws JobSubmissionException {
 		
-		DtoActionStatus status = null;
 		try {
 			
 			int noStageins = 0;
@@ -973,8 +977,7 @@ public abstract class AbstractServiceInterface {
 				noStageins = stageIns.size();
 			} 
 			
-			status = new DtoActionStatus(job.getJobname(), 4+noStageins);
-			actionStatus.put(job.getJobname(), status);
+			status.setTotalElements(status.getTotalElements()+4+noStageins);
 			
 			myLogger.debug("Preparing job environment...");
 			job.addLogMessage("Preparing job environment.");
@@ -1077,13 +1080,18 @@ public abstract class AbstractServiceInterface {
 			throws JobSubmissionException, NoSuchJobException {
 
 		Job job = getJob(jobname);
+		
+		DtoActionStatus status = null;
+		status = new DtoActionStatus(job.getJobname(), 3);
+		actionStatus.put(job.getJobname(), status);
 
 		job.addLogMessage("Restarting job...");
 		job.addLogMessage("Killing possibly running job...");
+		status.addElement("Killing job...");
 		kill(job);
 
 		job.setStatus(JobConstants.READY_TO_SUBMIT);
-
+		status.addElement("Resetting job properties...");
 		job.getJobProperties().remove(Constants.ERROR_REASON);
 
 		String possibleMultiPartJob = job
@@ -1098,6 +1106,7 @@ public abstract class AbstractServiceInterface {
 		}
 
 		if (StringUtils.isNotBlank(changedJsdl)) {
+			status.addElement("Changing job description...");
 			job.addLogMessage("Changing job properties...");
 			Document newJsdl;
 			Document oldJsdl = job.getJobDescription();
@@ -1145,11 +1154,13 @@ public abstract class AbstractServiceInterface {
 
 			job.setJobDescription(oldJsdl);
 			jobdao.saveOrUpdate(job);
+		} else {
+			status.addElement("Keeping job description...");
 		}
 
 		myLogger.info("Submitting job: " + jobname + " for user " + getDN());
 		job.addLogMessage("Starting re-submission...");
-		submitJob(job, false);
+		submitJob(job, false, status);
 		job.addLogMessage("Re-submission finished.");
 
 	}
@@ -1159,12 +1170,17 @@ public abstract class AbstractServiceInterface {
 
 		myLogger.info("Submitting job: " + jobname + " for user " + getDN());
 		Job job;
+		
+		DtoActionStatus status = null;
+		status = new DtoActionStatus(jobname, 0);
+		actionStatus.put(jobname, status);
+
 		try {
 			job = getJob(jobname);
 			if (job.getStatus() > JobConstants.READY_TO_SUBMIT) {
 				throw new JobSubmissionException("Job already submitted.");
 			}
-			submitJob(job, true);
+			submitJob(job, true, status);
 
 		} catch (NoSuchJobException e) {
 			// maybe it's a multipartjob
@@ -2583,6 +2599,7 @@ public abstract class AbstractServiceInterface {
 		
 		getUser().getUserProperties().put(key, value);
 		
+		userdao.saveOrUpdate(getUser());
 	}
 	
 	/*

@@ -187,7 +187,7 @@ public class DtoJob implements Comparable<DtoJob> {
 			otherSubTime = 0L;
 		}
 
-		int result = otherSubTime.compareTo(thisSubTime);
+		int result = thisSubTime.compareTo(otherSubTime);
 		
 		if ( result != 0 ) {
 			return result;

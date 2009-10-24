@@ -932,7 +932,7 @@ public class User {
 	 * 
 	 * @return the users' properties
 	 */
-	@CollectionOfElements
+	@CollectionOfElements(fetch = FetchType.EAGER)
 	public Map<String, String> getUserProperties() {
 		return userProperties;
 	}

@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -35,6 +36,7 @@ import au.org.arcs.jcommons.utils.JsdlHelpers;
  * 
  */
 @Entity
+@Table(name="jobs")
 public class Job implements Comparable<Job> {
 
 	static final Logger myLogger = Logger.getLogger(Job.class.getName());
@@ -534,7 +536,7 @@ public class Job implements Comparable<Job> {
 			otherSubTime = 0L;
 		}
 
-		int result = otherSubTime.compareTo(thisSubTime);
+		int result = thisSubTime.compareTo(otherSubTime);
 		
 		if ( result != 0 ) {
 			return result;

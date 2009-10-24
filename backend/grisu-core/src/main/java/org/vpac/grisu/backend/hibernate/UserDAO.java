@@ -39,7 +39,7 @@ public class UserDAO extends BaseHibernateDAO {
 			getCurrentSession().beginTransaction();
 
 			Query queryObject = getCurrentSession().createQuery(queryString);
-
+			queryObject.setParameter(0, dn);
 			try {
 				User user = (User) queryObject.uniqueResult();
 				getCurrentSession().getTransaction().commit();
