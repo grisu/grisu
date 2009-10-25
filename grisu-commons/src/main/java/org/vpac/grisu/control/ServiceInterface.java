@@ -38,7 +38,7 @@ import au.org.arcs.jcommons.constants.JobSubmissionProperty;
  */
 public interface ServiceInterface {
 
-	String INTERFACE_VERSION = "<grisuVersion>12</grisuVersion>";
+	String INTERFACE_VERSION = "0.3-SNAPSHOT";
 
 	// ---------------------------------------------------------------------------------------------------
 	// 

@@ -20,17 +20,14 @@ import org.vpac.historyRepeater.DummyHistoryManager;
 import org.vpac.historyRepeater.HistoryManager;
 import org.vpac.historyRepeater.SimpleHistoryManager;
 
+import au.org.arcs.jcommons.dependencies.PackageIndicator;
 import au.org.arcs.jcommons.interfaces.InformationManager;
 
-public class ClientSideGrisuRegistry implements GrisuRegistry {
+public class ClientSideGrisuRegistry implements GrisuRegistry, PackageIndicator {
 	
 	static final Logger myLogger = Logger.getLogger(ClientSideGrisuRegistry.class.getName());
 	
-	// for package auto-download
-	public Integer getPackageVersion() {
-		return 2;
-	}
-	
+
 	private final ServiceInterface serviceInterface;
 
 	private final InformationManager infoManager;
@@ -122,6 +119,12 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 
 	public void setUserEnvironmentManager(UserEnvironmentManager ui) {
 		this.cachedUserInformation = ui;
+	}
+
+	public String getCurrentVersion() {
+
+		return "0.3-SNAPSHOT";
+		
 	}
 
 }

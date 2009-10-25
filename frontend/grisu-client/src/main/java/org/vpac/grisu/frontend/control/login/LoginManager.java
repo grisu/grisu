@@ -1,11 +1,9 @@
 package org.vpac.grisu.frontend.control.login;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.PrivateKey;
-import java.security.Security;
 import java.security.cert.X509Certificate;
 
 import org.apache.commons.httpclient.protocol.Protocol;
@@ -24,6 +22,7 @@ import org.vpac.security.light.control.CertificateFiles;
 import org.vpac.security.light.plainProxy.PlainProxy;
 
 import au.org.arcs.jcommons.dependencies.ClasspathHacker;
+import au.org.arcs.jcommons.dependencies.DefaultDependencies;
 import au.org.arcs.jcommons.dependencies.DependencyManager;
 import au.org.arcs.jcommons.utils.ArcsSecurityProvider;
 
@@ -120,34 +119,24 @@ public class LoginManager {
 		if ("Local".equals(serviceInterfaceUrl)
 				|| "Dummy".equals(serviceInterfaceUrl)) {
 			DependencyManager
-					.checkForVersionedDependency(
-							"org.vpac.grisu.control.serviceInterfaces.LocalServiceInterface",
-							2,
-							2,
-							"https://code.arcs.org.au/hudson/job/Grisu-SNAPSHOT/org.vpac.grisu$grisu-core/lastSuccessfulBuild/artifact/org.vpac.grisu/grisu-core/0.3-SNAPSHOT/local-backend.jar",
-							new File(Environment.getGrisuPluginDirectory(),
-									"local-backend.jar"));
+					.checkForVersionedDependency(DefaultDependencies.LOCALSERVICEINTERFACE,
+							ServiceInterface.INTERFACE_VERSION,
+							Environment.getGrisuPluginDirectory());
 		} else if (serviceInterfaceUrl.startsWith("http")) {
 
 			// assume xfire -- that needs to get smarter later on
 			DependencyManager
 					.checkForVersionedDependency(
-							"org.vpac.grisu.client.control.XFireServiceInterfaceCreator",
-							2,
-							2,
-							"https://code.arcs.org.au/hudson/job/Grisu-connectors-SNAPSHOT-binaries/lastSuccessfulBuild/artifact/frontend-modules/xfire-frontend/target/xfire-frontend.jar",
-							new File(Environment.getGrisuPluginDirectory(),
-									"xfire-frontend.jar"));
+							DefaultDependencies.XFIRESERVICEINTERFACECREATOR,
+							ServiceInterface.INTERFACE_VERSION,
+							Environment.getGrisuPluginDirectory());
 
 			// also try to use client side mds
 			DependencyManager
 					.checkForVersionedDependency(
-							"org.vpac.grisu.frontend.info.clientsidemds.ClientSideGrisuRegistry",
-							2,
-							2,
-							"https://code.arcs.org.au/hudson/job/Grisu-SNAPSHOT-binaries/lastSuccessfulBuild/artifact/frontend/client-side-mds/target/client-side-mds.jar",
-							new File(Environment.getGrisuPluginDirectory(),
-									"client-side-mds.jar"));
+							DefaultDependencies.CLIENTSIDEMDS,
+							ServiceInterface.INTERFACE_VERSION,
+							Environment.getGrisuPluginDirectory());
 		}
 
 		if (StringUtils.isBlank(username)) {
@@ -199,7 +188,7 @@ public class LoginManager {
 		} else {
 			try {
 				// means shib login
-				DependencyManager.checkForArcsGsiDependency(1, 1, true);
+				DependencyManager.checkForArcsGsiDependency("0.1-SNAPSHOT", true);
 
 				GSSCredential slcsproxy = slcsMyProxyInit(username, password,
 						idp);
@@ -247,8 +236,7 @@ public class LoginManager {
 
 	public static void addPluginsToClasspath() throws IOException {
 
-		ClasspathHacker.initFolder(new File(Environment
-				.getGrisuPluginDirectory()), new GrisuPluginFilenameFilter());
+		ClasspathHacker.initFolder(Environment.getGrisuPluginDirectory(), new GrisuPluginFilenameFilter());
 
 	}
 

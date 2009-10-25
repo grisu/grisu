@@ -112,6 +112,8 @@ import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
  * 
  */
 public abstract class AbstractServiceInterface {
+	
+	
 
 	static final Logger myLogger = Logger
 			.getLogger(AbstractServiceInterface.class.getName());
@@ -1357,6 +1359,8 @@ public abstract class AbstractServiceInterface {
 	 */
 	public DtoJobs ps(String application, boolean refresh) {
 
+		try {
+
 		List<Job> jobs = null;
 		if (StringUtils.isBlank(application)) {
 			jobs = jobdao.findJobByDN(getUser().getDn());
@@ -1369,14 +1373,23 @@ public abstract class AbstractServiceInterface {
 			refreshJobStatus(jobs);
 		}
 
+		
 		DtoJobs dtoJobs = new DtoJobs();
 		for (Job job : jobs) {
+			
 			DtoJob dtojob = DtoJob.createJob(job.getStatus(), job
 					.getJobProperties(), job.getLogMessages());
+			
+			// just to make sure
+			dtojob.addJobProperty(Constants.JOBNAME_KEY, job.getJobname());
 			dtoJobs.addJob(dtojob);
 		}
 
 		return dtoJobs;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
 	}
 
 	public DtoStringList getAllJobnames(String application) {

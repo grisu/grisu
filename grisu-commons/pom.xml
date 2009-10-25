@@ -92,12 +92,12 @@
 			<artifactId>ejb3-persistence</artifactId>
 			<version>1.0.1.GA</version>
 		</dependency>
-		<dependency>
-			<groupId>au.org.arcs.infosystems</groupId>
-			<artifactId>glue-interface</artifactId>
-			<version>0.4-SNAPSHOT</version>
-			<scope>compile</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>au.org.arcs.infosystems</groupId>-->
+<!--			<artifactId>glue-interface</artifactId>-->
+<!--			<version>0.4-SNAPSHOT</version>-->
+<!--			<scope>compile</scope>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>javax.xml.ws</groupId>
 			<artifactId>jaxws-api</artifactId>

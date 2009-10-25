@@ -47,11 +47,11 @@ public final class Environment {
 		return GLOBUS_HOME;
 	}
 
-	public static String getGrisuPluginDirectory() {
-		String dir = getGrisuDirectory() + File.separator + "plugins";
+	public static File getGrisuPluginDirectory() {
+		File dir = new File(getGrisuDirectory(), "plugins");
 		
-		if ( ! new File(dir).exists() ) {
-			new File(dir).mkdirs();
+		if ( ! dir.exists() ) {
+			dir.mkdirs();
 		}
 		return dir;
 	}

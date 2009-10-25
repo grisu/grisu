@@ -24,16 +24,18 @@ import org.vpac.security.light.myProxy.MyProxy_light;
 import org.vpac.security.light.plainProxy.LocalProxy;
 import org.w3c.dom.Document;
 
+import au.org.arcs.jcommons.dependencies.PackageIndicator;
+
 public class LocalServiceInterface extends AbstractServiceInterface implements
-		ServiceInterface {
+		ServiceInterface, PackageIndicator {
 
 	private ProxyCredential credential = null;
 	private String myproxy_username = null;
 	private char[] passphrase = null;
-	
+
 	// for package auto-download
-	public Integer getPackageVersion() {
-		return 2;
+	public String getCurrentVersion() {
+		return "0.3-SNAPSHOT";
 	}
 
 	@Override
