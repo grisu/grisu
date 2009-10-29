@@ -5,6 +5,8 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
@@ -21,8 +23,9 @@ import org.vpac.grisu.utils.GrisuPluginFilenameFilter;
 import org.vpac.security.light.control.CertificateFiles;
 import org.vpac.security.light.plainProxy.PlainProxy;
 
+import au.org.arcs.jcommons.constants.ArcsEnvironment;
 import au.org.arcs.jcommons.dependencies.ClasspathHacker;
-import au.org.arcs.jcommons.dependencies.DefaultDependencies;
+import au.org.arcs.jcommons.dependencies.Dependency;
 import au.org.arcs.jcommons.dependencies.DependencyManager;
 import au.org.arcs.jcommons.utils.ArcsSecurityProvider;
 
@@ -64,12 +67,6 @@ public class LoginManager {
 			char[] password, String username, String idp,
 			LoginParams loginParams) throws LoginException {
 
-		DependencyManager.initArcsCommonJavaLibDir();
-		DependencyManager.checkForBouncyCastleDependency();
-
-//		Security
-//				.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-
 		java.security.Security.addProvider(new ArcsSecurityProvider());
 
 		java.security.Security.setProperty("ssl.TrustManagerFactory.algorithm",
@@ -82,6 +79,12 @@ public class LoginManager {
 			myLogger.warn(e2);
 			throw new RuntimeException(e2);
 		}
+		
+		Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
+
+		dependencies.put(Dependency.BOUNCYCASTLE, "jdk15-143");
+
+		DependencyManager.addDependencies(dependencies, ArcsEnvironment.getArcsCommonJavaLibDirectory());
 
 		try {
 			CertificateFiles.copyCACerts();
@@ -118,25 +121,25 @@ public class LoginManager {
 
 		if ("Local".equals(serviceInterfaceUrl)
 				|| "Dummy".equals(serviceInterfaceUrl)) {
-			DependencyManager
-					.checkForVersionedDependency(DefaultDependencies.LOCALSERVICEINTERFACE,
-							ServiceInterface.INTERFACE_VERSION,
-							Environment.getGrisuPluginDirectory());
+			
+			dependencies = new HashMap<Dependency, String>();
+
+			dependencies.put(Dependency.GRISU_LOCAL_BACKEND, ServiceInterface.INTERFACE_VERSION);
+			
+			DependencyManager.addDependencies(dependencies, Environment.getGrisuPluginDirectory());
+
 		} else if (serviceInterfaceUrl.startsWith("http")) {
 
 			// assume xfire -- that needs to get smarter later on
-			DependencyManager
-					.checkForVersionedDependency(
-							DefaultDependencies.XFIRESERVICEINTERFACECREATOR,
-							ServiceInterface.INTERFACE_VERSION,
-							Environment.getGrisuPluginDirectory());
+			
+			dependencies = new HashMap<Dependency, String>();
 
+			dependencies.put(Dependency.GRISU_XFIRE_CLIENT_LIBS, ServiceInterface.INTERFACE_VERSION);
 			// also try to use client side mds
-			DependencyManager
-					.checkForVersionedDependency(
-							DefaultDependencies.CLIENTSIDEMDS,
-							ServiceInterface.INTERFACE_VERSION,
-							Environment.getGrisuPluginDirectory());
+			dependencies.put(Dependency.CLIENT_SIDE_MDS, ServiceInterface.INTERFACE_VERSION);
+			
+			DependencyManager.addDependencies(dependencies, Environment.getGrisuPluginDirectory());
+			
 		}
 
 		if (StringUtils.isBlank(username)) {
@@ -188,7 +191,11 @@ public class LoginManager {
 		} else {
 			try {
 				// means shib login
-				DependencyManager.checkForArcsGsiDependency("0.1-SNAPSHOT", true);
+				dependencies = new HashMap<Dependency, String>();
+
+				dependencies.put(Dependency.ARCSGSI, "1.2-SNAPSHOT");
+				
+				DependencyManager.addDependencies(dependencies, Environment.getGrisuPluginDirectory());
 
 				GSSCredential slcsproxy = slcsMyProxyInit(username, password,
 						idp);

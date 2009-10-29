@@ -7,10 +7,8 @@
 		<version>0.3-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.vpac.grisu</groupId>
 	<artifactId>grisu-core</artifactId>
 	<name>grisu-core</name>
-	<version>0.3-SNAPSHOT</version>
 	<description>grisu-core is the main module of the Grisu framework. It
 		manages
 		all the data/jobs/VOs of a user. It is able

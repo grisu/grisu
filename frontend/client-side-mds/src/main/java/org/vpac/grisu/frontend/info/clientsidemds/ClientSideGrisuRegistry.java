@@ -20,10 +20,9 @@ import org.vpac.historyRepeater.DummyHistoryManager;
 import org.vpac.historyRepeater.HistoryManager;
 import org.vpac.historyRepeater.SimpleHistoryManager;
 
-import au.org.arcs.jcommons.dependencies.PackageIndicator;
 import au.org.arcs.jcommons.interfaces.InformationManager;
 
-public class ClientSideGrisuRegistry implements GrisuRegistry, PackageIndicator {
+public class ClientSideGrisuRegistry implements GrisuRegistry {
 	
 	static final Logger myLogger = Logger.getLogger(ClientSideGrisuRegistry.class.getName());
 	
@@ -121,10 +120,5 @@ public class ClientSideGrisuRegistry implements GrisuRegistry, PackageIndicator 
 		this.cachedUserInformation = ui;
 	}
 
-	public String getCurrentVersion() {
-
-		return "0.3-SNAPSHOT";
-		
-	}
 
 }

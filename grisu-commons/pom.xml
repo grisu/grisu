@@ -7,10 +7,8 @@
 		<version>0.3-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.vpac.grisu</groupId>
 	<artifactId>grisu-commons</artifactId>
 	<name>grisu-commons</name>
-	<version>0.3-SNAPSHOT</version>
 	<description>The most important thing about the grisu-commons is that
 		it holds the ServiceInterface interface
 		which is used by both backend and frontend modules. It also holds a few
@@ -122,7 +120,7 @@
 		<dependency>
 			<groupId>au.org.arcs.commons</groupId>
 			<artifactId>arcs-jcommons</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>1.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>

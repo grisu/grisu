@@ -6,9 +6,7 @@
 		<groupId>org.vpac.grisu</groupId>
 		<version>0.3-SNAPSHOT</version>
 	</parent>
-	<groupId>org.vpac.grisu</groupId>
 	<artifactId>client-side-mds</artifactId>
-	<version>0.3-SNAPSHOT</version>
 	<dependencies>
 		<dependency>
 			<groupId>org.vpac.grisu</groupId>
