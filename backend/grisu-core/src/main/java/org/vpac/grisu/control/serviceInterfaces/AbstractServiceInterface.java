@@ -13,7 +13,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -2031,6 +2030,14 @@ public abstract class AbstractServiceInterface {
 			FileContent content = target.getContent();
 			fout = content.getOutputStream();
 		} catch (FileSystemException e) {
+			
+			try {
+				fout.close();
+				source.getInputStream().close();
+			} catch (Exception e1) {
+				myLogger.error(e1);
+			}
+			
 			// e.printStackTrace();
 			throw new RemoteFileSystemException("Could not open file: "
 					+ filename + ":" + e.getMessage());
@@ -2061,6 +2068,13 @@ public abstract class AbstractServiceInterface {
 				fout.close();
 			}
 		} catch (IOException e) {
+			try {
+				fout.close();
+				source.getInputStream().close();
+			} catch (Exception e1) {
+				myLogger.error(e1);
+			}
+			
 			throw new RemoteFileSystemException("Could not write to file: "
 					+ filename + ": " + e.getMessage());
 		}
