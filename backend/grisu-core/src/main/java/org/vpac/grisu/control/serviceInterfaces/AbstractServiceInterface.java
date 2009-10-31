@@ -110,7 +110,7 @@ import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
  * @author Markus Binsteiner
  * 
  */
-public abstract class AbstractServiceInterface {
+public abstract class AbstractServiceInterface implements ServiceInterface {
 	
 	
 
