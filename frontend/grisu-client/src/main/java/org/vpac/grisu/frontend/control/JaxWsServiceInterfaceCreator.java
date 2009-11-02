@@ -20,7 +20,6 @@ import org.vpac.grisu.control.ServiceInterfaceCreator;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.settings.CaCertManager;
 
-import com.sun.xml.internal.ws.developer.JAXWSProperties;
 
 
 public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
@@ -143,7 +142,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			BindingProvider bp = (javax.xml.ws.BindingProvider)service;
 			bp.getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, interfaceUrl);
 
-			bp.getRequestContext().put(JAXWSProperties.HTTP_CLIENT_STREAMING_CHUNK_SIZE, new Integer(4096));
+			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size", new Integer(4096));
 			
 			bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY, username);
 			bp.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, new String(password));
