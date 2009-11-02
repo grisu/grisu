@@ -6,11 +6,8 @@ import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.frontend.control.login.LoginException;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.control.login.LoginParams;
-import org.vpac.grisu.model.GrisuRegistry;
-import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoMultiPartJob;
-import org.vpac.grisu.model.info.ApplicationInformation;
 
 public final class JobCreationInfo {
 	
@@ -24,9 +21,10 @@ public final class JobCreationInfo {
 
 		LoginParams loginParams = new LoginParams(
 		// "http://localhost:8080/grisu-ws/services/grisu",
-				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-//				"Local", null, null);
-		"Local", username, password);
+//				 "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
+				"http://localhost:8080/enunciate-backend/soap/GrisuService",
+//		"Local", 
+		username, password);
 		
 		
 		ServiceInterface si = null;

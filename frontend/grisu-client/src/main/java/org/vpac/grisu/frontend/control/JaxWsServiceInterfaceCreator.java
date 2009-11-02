@@ -1,11 +1,12 @@
 package org.vpac.grisu.frontend.control;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.net.ssl.SSLSocketFactory;
+import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
+import javax.xml.ws.Service;
 import javax.xml.ws.soap.SOAPBinding;
 
 import org.apache.commons.httpclient.protocol.Protocol;
@@ -18,6 +19,8 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.ServiceInterfaceCreator;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.settings.CaCertManager;
+
+import com.sun.xml.internal.ws.developer.JAXWSProperties;
 
 
 public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
@@ -120,49 +123,63 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			Object[] otherOptions) throws ServiceInterfaceException {
 		
 		
-//		createSocketFactory(interfaceUrl);
-		Class jaxwsServiceInterfaceClass = null;
-
-		try {
-			jaxwsServiceInterfaceClass = Class
-					.forName("org.vpac.grisu.control.impl.EnunciateServiceInterfaceImpl");
-		} catch (ClassNotFoundException e) {
-			myLogger.warn("Could not find jaxws service interface class.");
-//			e.printStackTrace();
-			throw new ServiceInterfaceException(
-					"Could not find JaxWsServiceInterface class. Probably grisu-client-jaxws is not in the classpath.",
-					e);
-		}
-
-		Object jaxwsServiceInterface = null;
-		Class interfaceClass = null;
 		
 		try {
-			Constructor jaxwsServiceInterfaceConstructor;
-			interfaceClass = Class.forName("org.vpac.grisu.control.EnunciateServiceInterface");
+			
+			QName serviceName = new QName("http://api.grisu.arcs.org.au/", "GrisuService");
+			QName portName = new QName("http://api.grisu.arcs.org.au/", "ServiceInterfaceSOAPPort");
+
+			Service s;
+			try {
+				s = Service.create(new URL(interfaceUrl.replace("soap/GrisuService", "api.wsdl")), serviceName);
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			}
+			
+			ServiceInterface service = (ServiceInterface)s.getPort(portName, ServiceInterface.class);
 
 			
-			jaxwsServiceInterfaceConstructor = jaxwsServiceInterfaceClass
-					.getConstructor(String.class);
+			BindingProvider bp = (javax.xml.ws.BindingProvider)service;
+			bp.getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, interfaceUrl);
 
-			jaxwsServiceInterface = jaxwsServiceInterfaceConstructor
-					.newInstance(interfaceUrl);
-
-			Method getBindingProvider = jaxwsServiceInterface.getClass().getMethod(
-					"_getBindingProvider");
-
-			BindingProvider bp = (BindingProvider) getBindingProvider.invoke(jaxwsServiceInterface);
+			bp.getRequestContext().put(JAXWSProperties.HTTP_CLIENT_STREAMING_CHUNK_SIZE, new Integer(4096));
 			
 			bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY, username);
 			bp.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, new String(password));
 			
-			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory", createSocketFactory(interfaceUrl));
+			bp.getRequestContext().put(BindingProvider.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
 
-			bp.getRequestContext().put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
-			
-			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size", 4096);
-			SOAPBinding binding = (SOAPBinding)bp.getBinding();
+			SOAPBinding binding = (SOAPBinding) bp.getBinding();
 			binding.setMTOMEnabled(true);
+			
+			return service;
+			
+//			Constructor jaxwsServiceInterfaceConstructor;
+//			interfaceClass = Class.forName("org.vpac.grisu.control.EnunciateServiceInterface");
+//
+//			
+//			jaxwsServiceInterfaceConstructor = jaxwsServiceInterfaceClass
+//					.getConstructor(String.class);
+//
+//			jaxwsServiceInterface = jaxwsServiceInterfaceConstructor
+//					.newInstance(interfaceUrl);
+//
+//			Method getBindingProvider = jaxwsServiceInterface.getClass().getMethod(
+//					"_getBindingProvider");
+//
+//			BindingProvider bp = (BindingProvider) getBindingProvider.invoke(jaxwsServiceInterface);
+//			
+//			bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY, username);
+//			bp.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, new String(password));
+//			
+//			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory", createSocketFactory(interfaceUrl));
+//
+//			bp.getRequestContext().put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
+//			
+//			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size", 4096);
+//			SOAPBinding binding = (SOAPBinding)bp.getBinding();
+//			binding.setMTOMEnabled(true);
 
 			
 		} catch (Exception e) {
@@ -173,7 +190,6 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 							+ e.getLocalizedMessage(), e);
 		}
 		
-		return new ProxyServiceInterface(jaxwsServiceInterface);
 
 	}
 

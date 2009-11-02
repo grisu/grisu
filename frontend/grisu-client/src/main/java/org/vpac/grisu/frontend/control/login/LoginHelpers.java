@@ -59,19 +59,19 @@ public final class LoginHelpers {
 				loginParams.getHttpProxy(), loginParams.getHttpProxyPort(),
 				loginParams.getHttpProxyUsername(), loginParams
 						.getHttpProxyPassphrase());
-		try {
-			si.login(loginParams.getMyProxyUsername(), new String(loginParams
-					.getMyProxyPassphrase()));
-		} catch (NoValidCredentialException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw new LoginException(
-					"Could not create & upload proxy to the myproxy server. Probably because of a wrong private key passphrase or network problems.",
-					e);
-		} catch (Exception e1) {
-			throw new LoginException("Could not login. Unspecified error: "
-					+ e1.getLocalizedMessage(), e1);
-		}
+//		try {
+//			si.login(loginParams.getMyProxyUsername(), new String(loginParams
+//					.getMyProxyPassphrase()));
+//		} catch (NoValidCredentialException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			throw new LoginException(
+//					"Could not create & upload proxy to the myproxy server. Probably because of a wrong private key passphrase or network problems.",
+//					e);
+//		} catch (Exception e1) {
+//			throw new LoginException("Could not login. Unspecified error: "
+//					+ e1.getLocalizedMessage(), e1);
+//		}
 		loginParams.clearPasswords();
 
 		return si;

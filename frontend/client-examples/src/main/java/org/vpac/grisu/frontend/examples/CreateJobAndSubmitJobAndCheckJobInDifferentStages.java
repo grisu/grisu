@@ -1,8 +1,8 @@
 package org.vpac.grisu.frontend.examples;
 
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.frontend.control.login.LoginHelpers;
 import org.vpac.grisu.frontend.control.login.LoginManager;
+import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 
@@ -17,8 +17,16 @@ public final class CreateJobAndSubmitJobAndCheckJobInDifferentStages {
 	 * @param args
 	 */
 	public static void main(final String[] args) throws Exception {
+		
+		LoginParams loginParams = new LoginParams(
+				// "http://localhost:8080/grisu-ws/services/grisu",
+//						 "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
+//				"http://localhost:8080/enunciate-backend/soap/GrisuService",
+				"http://localhost:8080/soap/GrisuService",
+//				"Local", 
+				args[0], args[1].toCharArray());
 
-		ServiceInterface si = LoginManager.login(null, null, null, null, null);
+		ServiceInterface si = LoginManager.login(null, null, null, null, loginParams);
 
 		JobObject createJobObject = new JobObject(si);
 

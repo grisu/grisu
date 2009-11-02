@@ -91,6 +91,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 			throws NoSuchJobException {
 
 		super(SeveralXMLHelpers.fromString(si.getJsdlDocument(jobname)));
+		this.setJobname(jobname);
 		this.serviceInterface = si;
 
 		getStatus(refreshJobStatusOnBackend);
