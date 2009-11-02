@@ -38,9 +38,9 @@ public class LoginManager {
 	static {
 		
 		SERVICEALIASES.put("ARCS", "");
-		SERVICEALIASES.put("ARCS_DEV", "");
+		SERVICEALIASES.put("ARCS_DEV", "https://ngportal.vpac.org/grisu-ws/soap/GrisuService");
 		SERVICEALIASES.put("LOCAL_WS", "http://localhost:8080/soap/GrisuService");
-		
+
 	}
 
 	/**

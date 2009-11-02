@@ -1,5 +1,9 @@
 package org.vpac.grisu.frontend.control;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -11,6 +15,7 @@ import javax.xml.ws.soap.SOAPBinding;
 
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.ssl.HttpSecureProtocol;
 import org.apache.commons.ssl.TrustMaterial;
@@ -19,6 +24,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.ServiceInterfaceCreator;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.settings.CaCertManager;
+import org.vpac.grisu.settings.Environment;
 
 
 
@@ -26,7 +32,28 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 	
 	static final Logger myLogger = Logger
 	.getLogger(JaxWsServiceInterfaceCreator.class.getName());
+	
+	public static String TRUST_FILE_NAME = Environment.getGrisuDirectory().getPath() + File.separator + "truststore.jks";
 
+	/** 
+    configures secure connection parameters.
+ **/
+public JaxWsServiceInterfaceCreator() throws ServiceInterfaceException{
+	try {
+		if (!(new File(Environment.getGrisuDirectory(), "truststore.jks").exists())){
+			InputStream ts = JaxWsServiceInterfaceCreator.class.getResourceAsStream("/truststore.jks");
+			IOUtils.copy(ts, new FileOutputStream(TRUST_FILE_NAME));
+		}
+	}
+	catch (IOException ex){
+		throw new ServiceInterfaceException("cannot copy SSL certificate store into grisu home directory. Does "+
+						    Environment.getGrisuDirectory().getPath()+ " exist?",ex);
+	}
+	System.setProperty("javax.net.ssl.trustStore", TRUST_FILE_NAME);
+	System.setProperty("javax.net.ssl.trustStorePassword","changeit");
+}
+	
+	
 	public boolean canHandleUrl(String url) {
 		if ( StringUtils.isNotBlank(url) && url.startsWith("http") ) {
 			return true;
@@ -148,6 +175,8 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			bp.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, new String(password));
 			
 			bp.getRequestContext().put(BindingProvider.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
+			
+//			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory", createSocketFactory(interfaceUrl));
 
 			SOAPBinding binding = (SOAPBinding) bp.getBinding();
 			binding.setMTOMEnabled(true);
