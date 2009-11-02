@@ -33,6 +33,15 @@ public class LoginManager {
 
 	static final Logger myLogger = Logger.getLogger(LoginManager.class
 			.getName());
+	
+	static final Map<String, String> SERVICEALIASES = new HashMap<String, String>();
+	static {
+		
+		SERVICEALIASES.put("ARCS", "");
+		SERVICEALIASES.put("ARCS_DEV", "");
+		SERVICEALIASES.put("LOCAL_WS", "http://localhost:8080/soap/GrisuService");
+		
+	}
 
 	/**
 	 * One-for-all method to login to a Grisu backend.

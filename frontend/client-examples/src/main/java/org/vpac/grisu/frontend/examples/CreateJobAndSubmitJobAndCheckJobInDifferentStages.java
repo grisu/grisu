@@ -22,7 +22,8 @@ public final class CreateJobAndSubmitJobAndCheckJobInDifferentStages {
 				// "http://localhost:8080/grisu-ws/services/grisu",
 //						 "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
 //				"http://localhost:8080/enunciate-backend/soap/GrisuService",
-				"http://localhost:8080/soap/GrisuService",
+//				"http://localhost:8080/soap/GrisuService",
+				"LOCAL_WS",
 //				"Local", 
 				args[0], args[1].toCharArray());
 

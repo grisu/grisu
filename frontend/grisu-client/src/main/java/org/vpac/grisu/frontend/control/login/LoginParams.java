@@ -2,6 +2,7 @@ package org.vpac.grisu.frontend.control.login;
 
 import java.util.Arrays;
 
+import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.settings.MyProxyServerParams;
 
 /**
@@ -59,7 +60,7 @@ public class LoginParams {
 	 */
 	public LoginParams(final String serviceInterfaceUrl, final String myProxyUsername,
 			final char[] myProxyPassphrase, final String myProxyServer, final String myProxyPort) {
-		this.serviceInterfaceUrl = serviceInterfaceUrl;
+		setServiceInterfaceUrl(serviceInterfaceUrl);
 		this.myProxyUsername = myProxyUsername;
 		this.myProxyPassphrase = myProxyPassphrase;
 		this.myProxyServer = myProxyServer;
@@ -88,7 +89,7 @@ public class LoginParams {
 	public LoginParams(final String serviceInterfaceUrl, final String myProxyUsername,
 			final char[] myProxyPassphrase, final String myProxyServer, final String myProxyPort,
 			final String httpProxy, final int httpProxyPort) {
-		this.serviceInterfaceUrl = serviceInterfaceUrl;
+		setServiceInterfaceUrl(serviceInterfaceUrl);
 		this.myProxyUsername = myProxyUsername;
 		this.myProxyPassphrase = myProxyPassphrase;
 		this.myProxyServer = myProxyServer;
@@ -124,7 +125,7 @@ public class LoginParams {
 			final char[] myProxyPassphrase, final String myProxyServer, final String myProxyPort,
 			final String httpProxy, final int httpProxyPort, final String httpProxyUsername,
 			final char[] httpProxyPassphrase) {
-		this.serviceInterfaceUrl = serviceInterfaceUrl;
+		setServiceInterfaceUrl(serviceInterfaceUrl);
 		this.myProxyUsername = myProxyUsername;
 		this.myProxyPassphrase = myProxyPassphrase;
 		this.myProxyServer = myProxyServer;
@@ -151,7 +152,13 @@ public class LoginParams {
 	 *            the serviceInterface url
 	 */
 	public final void setServiceInterfaceUrl(final String serviceInterfaceUrl) {
-		this.serviceInterfaceUrl = serviceInterfaceUrl;
+		
+		String possibleAlias = LoginManager.SERVICEALIASES.get(serviceInterfaceUrl);
+		if ( StringUtils.isNotBlank(possibleAlias) ) {
+			this.serviceInterfaceUrl = possibleAlias;
+		} else {
+			this.serviceInterfaceUrl = serviceInterfaceUrl;
+		}
 	}
 
 	/**
