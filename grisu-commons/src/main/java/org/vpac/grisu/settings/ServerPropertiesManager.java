@@ -29,11 +29,11 @@ public final class ServerPropertiesManager {
 	/**
 	 * Default concurrent threads to query job status per user: 5
 	 */
-	public static final int DEFAULT_CONCURRENT_JOB_STATUS_THREADS_PER_USER = 5;
+	public static final int DEFAULT_CONCURRENT_JOB_STATUS_THREADS_PER_USER = 2;
 	/**
 	 * Default concurrent threads when submitting the parts of a multipartjob: 5 
 	 */
-	public static final int DEFAULT_CONCURRENT_JOB_SUBMISSION_THREADS_PER_USER = 5;
+	public static final int DEFAULT_CONCURRENT_JOB_SUBMISSION_THREADS_PER_USER = 2;
 	/**
 	 * Default directory name used as parent for the jobdirectories.
 	 */
@@ -267,10 +267,10 @@ public final class ServerPropertiesManager {
 
 		} catch (Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
-			return DEFAULT_CONCURRENT_JOB_STATUS_THREADS_PER_USER;
+			return DEFAULT_CONCURRENT_JOB_SUBMISSION_THREADS_PER_USER;
 		}
 		if (concurrentThreads == -1) {
-			return DEFAULT_CONCURRENT_JOB_STATUS_THREADS_PER_USER;
+			return DEFAULT_CONCURRENT_JOB_SUBMISSION_THREADS_PER_USER;
 		}
 		return concurrentThreads;
 	}

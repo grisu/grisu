@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
+import org.bushe.swing.event.EventBus;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
@@ -14,6 +15,7 @@ import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
+import org.vpac.grisu.frontend.model.events.JobStatusEvent;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.DtoFolder;
@@ -197,17 +199,22 @@ public class JobObject extends JobSubmissionObjectImpl {
 	public final String createJob(final String fqan, final String jobnameCreationMethod)
 			throws JobPropertiesException {
 
-		setJobname(serviceInterface.createJob(getJobDescriptionDocumentAsString(),
-				fqan, jobnameCreationMethod));
+		try {
+			setJobname(serviceInterface.createJob(getJobDescriptionDocumentAsString(),
+					fqan, jobnameCreationMethod));
+		} catch (JobPropertiesException e) {
+			throw e;
+		}
 
 		try {
 			jobDirectory = serviceInterface.getJobProperty(getJobname(),
 					Constants.JOBDIRECTORY_KEY);
 			getStatus(true);
 		} catch (NoSuchJobException e) {
+			EventBus.publish(new JobStatusEvent(this, this.status, JobConstants.NO_SUCH_JOB));
 			fireJobStatusChange(this.status, JobConstants.NO_SUCH_JOB);
 		}
-
+		
 		return this.getJobname();
 	}
 	
@@ -278,6 +285,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 		if (oldstatus != this.status) {
 			fireJobStatusChange(oldstatus, this.status);
+			EventBus.publish(new JobStatusEvent(this, oldstatus, this.status));
 		}
 
 	}
@@ -297,6 +305,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 			int oldStatus = this.status;
 			this.status = serviceInterface.getJobStatus(getJobname());
 			if (this.status != oldStatus) {
+				EventBus.publish(new JobStatusEvent(this, oldStatus, this.status));
 				fireJobStatusChange(oldStatus, this.status);
 			}
 		}
@@ -616,13 +625,17 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 		waitThread = new Thread() {
 			public void run() {
+
 				int oldStatus = getStatus(false);
 				while (!isFinished()) {
 
 					if (isInterrupted()) {
 						return;
 					}
-					fireJobStatusChange(oldStatus, getStatus(false));
+					if ( oldStatus != getStatus(false) ) {
+						fireJobStatusChange(oldStatus, getStatus(false));
+						EventBus.publish(new JobStatusEvent(JobObject.this, oldStatus, JobObject.this.getStatus(false)));
+					}
 					try {
 						Thread.sleep(checkIntervallInSeconds * 1000);
 					} catch (InterruptedException e) {

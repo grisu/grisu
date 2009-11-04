@@ -18,7 +18,8 @@
 		and interfaces.</description>
 
 	<properties>
-		<enunciate.version>1.15</enunciate.version>
+<!--		<enunciate.version>1.16-RC2</enunciate.version> -->
+		<enunciate.version>1.15</enunciate.version> 
 	</properties>
 
 	<dependencies>

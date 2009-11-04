@@ -37,7 +37,8 @@ public class MultiJobSubmit implements JobStatusChangeListener, MultiPartJobEven
 //				 "https://ngportal.vpac.org/grisu-ws/services/grisu",
 //				"https://ngportal.vpac.org/grisu-ws/soap/GrisuService",
 //				"http://localhost:8080/enunciate-backend/soap/GrisuService",
-				 "Local",
+//				 "Local",
+				 "ARCS_DEV",
 //				"Dummy",
 				username, password);
 
@@ -47,10 +48,10 @@ public class MultiJobSubmit implements JobStatusChangeListener, MultiPartJobEven
 
 		final GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
 
-		final int numberOfJobs = 400;
+		final int numberOfJobs = 10;
 		
 		Date start = new Date();
-		final String multiJobName = "400jobs";
+		final String multiJobName = "1000jobs";
 		try {
 			si.deleteMultiPartJob(multiJobName, true);
 		} catch (Exception e) {
@@ -59,9 +60,9 @@ public class MultiJobSubmit implements JobStatusChangeListener, MultiPartJobEven
 		}
 		
 		
-		System.out.println("Start: "+start.toString());
-		System.out.println("End: "+new Date().toString());
-		System.exit(1);
+//		System.out.println("Start: "+start.toString());
+//		System.out.println("End: "+new Date().toString());
+//		System.exit(1);
 
 		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/NGAdmin", Constants.GENERIC_APPLICATION_NAME, Constants.NO_VERSION_INDICATOR_STRING);
 				

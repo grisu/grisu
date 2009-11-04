@@ -1362,10 +1362,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		List<Job> jobs = null;
 		if (StringUtils.isBlank(application)) {
-			jobs = jobdao.findJobByDN(getUser().getDn());
+			jobs = jobdao.findJobByDN(getUser().getDn(), false);
 		} else {
 			jobs = jobdao.findJobByDNPerApplication(getUser().getDn(),
-					application);
+					application, false);
 		}
 		
 		if (refresh) {
@@ -1396,10 +1396,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		List<String> jobnames = null;
 
 		if (StringUtils.isBlank(application)) {
-			jobnames = jobdao.findJobNamesByDn(getUser().getDn());
+			jobnames = jobdao.findJobNamesByDn(getUser().getDn(), false);
 		} else {
-			jobnames = jobdao.findJobNamesPerApplicationByDn(getUser().getDn(),
-					application);
+			jobnames = jobdao.findJobNamesPerApplicationByDn(getUser().getDn(),	application, false);
 		}
 
 		return DtoStringList.fromStringList(jobnames);
@@ -2770,11 +2769,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		kill(job);
 
 		if (clear) {
-			String mpjid = job.getJobProperty(Constants.MULTIJOB_NAME);
-			if (mpjid != null && !clearMultiJob) {
+
+			if (job.isMultiPartJob() && !clearMultiJob) {
 				throw new MultiPartJobException(
-						"Can't delete job. You need to delete the multipartjob "
-								+ mpjid + " first...");
+						"Can't delete job. You need to delete the parent multipartjob first.");
 			}
 
 			if (job.getJobProperty(Constants.JOBDIRECTORY_KEY) != null) {

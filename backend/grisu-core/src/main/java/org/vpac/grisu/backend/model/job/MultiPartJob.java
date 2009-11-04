@@ -159,6 +159,7 @@ public class MultiPartJob {
 		// }
 		usedMountPoints.add(job.getJobProperty(Constants.MOUNTPOINT_KEY));
 		job.addJobProperty(Constants.MULTIJOB_NAME, multiPartJobId);
+		job.setMultiPartJob(true);
 		jobdao.saveOrUpdate(job);
 	}
 

@@ -86,14 +86,9 @@ public class Job implements Comparable<Job> {
 		this.lastStatusCheck = lastStatusCheck;
 	}
 
-	// ---------------------------------------------------------------
-	// not important infos but useful
-//	private String application = null;
-//	private String job_directory = null;
-//	private List<String> inputFiles = new ArrayList<String>();
 	private Map<String, String> jobProperties = new HashMap<String, String>();
-//	private String stdout = null;
-//	private String stderr = null;
+	
+	private boolean isMultiPartJob = false;
 //
 	// TODO later add requirements
 	// private ArrayList<Requirement> requirements = null;
@@ -496,6 +491,15 @@ public class Job implements Comparable<Job> {
 //	public final void setApplication(final String application) {
 //		this.application = application;
 //	}
+	
+	
+	public boolean isMultiPartJob() {
+		return isMultiPartJob;
+	}
+	
+	public void setMultiPartJob(boolean is) {
+		this.isMultiPartJob = is;
+	}
 
 	@CollectionOfElements(fetch = FetchType.EAGER)
 	@Column(length = 3000)

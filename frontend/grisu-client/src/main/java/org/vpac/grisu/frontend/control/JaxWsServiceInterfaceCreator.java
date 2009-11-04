@@ -11,6 +11,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Service;
+import javax.xml.ws.soap.MTOMFeature;
 import javax.xml.ws.soap.SOAPBinding;
 
 import org.apache.commons.httpclient.protocol.Protocol;
@@ -51,6 +52,8 @@ public JaxWsServiceInterfaceCreator() throws ServiceInterfaceException{
 	}
 	System.setProperty("javax.net.ssl.trustStore", TRUST_FILE_NAME);
 	System.setProperty("javax.net.ssl.trustStorePassword","changeit");
+	
+
 }
 	
 	
@@ -163,10 +166,13 @@ public JaxWsServiceInterfaceCreator() throws ServiceInterfaceException{
 				throw new RuntimeException(e);
 			}
 			
+			MTOMFeature mtom = new MTOMFeature(); 
+			s.getPort(portName, ServiceInterface.class, mtom);
+			
 			ServiceInterface service = (ServiceInterface)s.getPort(portName, ServiceInterface.class);
-
 			
 			BindingProvider bp = (javax.xml.ws.BindingProvider)service;
+			
 			bp.getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, interfaceUrl);
 
 			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size", new Integer(4096));
@@ -176,7 +182,13 @@ public JaxWsServiceInterfaceCreator() throws ServiceInterfaceException{
 			
 			bp.getRequestContext().put(BindingProvider.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
 			
+//			bp.getRequestContext().put(
+//			          JAXWSProperties.SSL_SOCKET_FACTORY, 
+//			          SSLClientUtil.getSSLSocketFactoryFromSysProperties());
+
+			
 //			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory", createSocketFactory(interfaceUrl));
+//			bp.getRequestContext().put(JAXWSProperties.SSL_SOCKET_FACTORY, createSocketFactory(interfaceUrl));
 
 			SOAPBinding binding = (SOAPBinding) bp.getBinding();
 			binding.setMTOMEnabled(true);
