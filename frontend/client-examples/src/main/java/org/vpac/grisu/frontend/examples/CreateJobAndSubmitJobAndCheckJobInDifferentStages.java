@@ -1,14 +1,18 @@
 package org.vpac.grisu.frontend.examples;
 
+import org.bushe.swing.event.EventBus;
+import org.bushe.swing.event.EventTopicSubscriber;
+import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.control.login.LoginParams;
+import org.vpac.grisu.frontend.model.events.JobStatusEvent;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 
 import au.org.arcs.jcommons.constants.Constants;
 
-public final class CreateJobAndSubmitJobAndCheckJobInDifferentStages {
+public final class CreateJobAndSubmitJobAndCheckJobInDifferentStages implements EventTopicSubscriber<JobStatusEvent>{
 
 	private CreateJobAndSubmitJobAndCheckJobInDifferentStages() {
 	}
@@ -29,6 +33,8 @@ public final class CreateJobAndSubmitJobAndCheckJobInDifferentStages {
 				args[0], args[1].toCharArray());
 
 		ServiceInterface si = LoginManager.login(null, null, null, null, loginParams);
+		
+		CreateJobAndSubmitJobAndCheckJobInDifferentStages eventHolder = new CreateJobAndSubmitJobAndCheckJobInDifferentStages();
 
 		JobObject createJobObject = new JobObject(si);
 
@@ -50,6 +56,8 @@ public final class CreateJobAndSubmitJobAndCheckJobInDifferentStages {
 		String newJobname = createJobObject.createJob("/ARCS/NGAdmin",
 				Constants.TIMESTAMP_METHOD);
 
+		EventBus.subscribe(newJobname, eventHolder);
+
 		JobObject submitJobObject = new JobObject(si, newJobname);
 
 		System.out.println("Application: " + submitJobObject.getApplication());
@@ -58,30 +66,40 @@ public final class CreateJobAndSubmitJobAndCheckJobInDifferentStages {
 
 		final JobObject checkJobObject = new JobObject(si, newJobname);
 
-		new Thread() {
+		Thread waitThread = new Thread() {
 			public void run() {
 				try {
-					Thread.sleep(20000);
+					Thread.sleep(80000);
 					System.out.println("Sleeping over.");
 					checkJobObject.stopWaitingForJobToFinish();
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					// e.printStackTrace();
 				}
 			}
-		}.start();
+		};
+		
+		waitThread.start();
 
 		boolean finished = checkJobObject.waitForJobToFinish(3);
 
 		if (!finished) {
 			System.out.println("not finished yet.");
 			checkJobObject.kill(true);
+			waitThread.interrupt();
 		} else {
 			System.out.println("Stdout: " + checkJobObject.getStdOutContent());
 			System.out.println("Stderr: " + checkJobObject.getStdErrContent());
 			checkJobObject.kill(true);
+			waitThread.interrupt();
 		}
 
+	}
+
+
+	public void onEvent(String arg0, JobStatusEvent arg1) {
+
+		System.out.println("Topic: "+arg0+" Event: "+JobConstants.translateStatus(arg1.getNewStatus()));		
 	}
 
 }

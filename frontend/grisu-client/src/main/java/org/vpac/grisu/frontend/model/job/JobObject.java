@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.vpac.grisu.control.JobConstants;
@@ -199,10 +200,23 @@ public class JobObject extends JobSubmissionObjectImpl {
 	public final String createJob(final String fqan, final String jobnameCreationMethod)
 			throws JobPropertiesException {
 
+		EventBus.publish(new JobStatusEvent(this, this.status, JobConstants.UNDEFINED));
+		if ( StringUtils.isNotBlank(getJobname()) ) {
+			EventBus.publish(this.getJobname(), new JobStatusEvent(this, this.status, JobConstants.UNDEFINED));
+		}
+		
 		try {
 			setJobname(serviceInterface.createJob(getJobDescriptionDocumentAsString(),
 					fqan, jobnameCreationMethod));
+			EventBus.publish(new JobStatusEvent(this, this.status, JobConstants.JOB_CREATED));
+			if ( StringUtils.isNotBlank(getJobname()) ) {
+				EventBus.publish(this.getJobname(), new JobStatusEvent(this, this.status, JobConstants.JOB_CREATED));
+			}
 		} catch (JobPropertiesException e) {
+			EventBus.publish(new JobStatusEvent(this, this.status, JobConstants.NO_SUCH_JOB));
+			if ( StringUtils.isNotBlank(getJobname()) ) {
+				EventBus.publish(this.getJobname(), new JobStatusEvent(this, this.status, JobConstants.NO_SUCH_JOB));
+			}
 			throw e;
 		}
 
@@ -212,7 +226,9 @@ public class JobObject extends JobSubmissionObjectImpl {
 			getStatus(true);
 		} catch (NoSuchJobException e) {
 			EventBus.publish(new JobStatusEvent(this, this.status, JobConstants.NO_SUCH_JOB));
-			fireJobStatusChange(this.status, JobConstants.NO_SUCH_JOB);
+			if ( StringUtils.isNotBlank(getJobname()) ) {
+				EventBus.publish(this.getJobname(), new JobStatusEvent(this, this.status, JobConstants.NO_SUCH_JOB));
+			}
 		}
 		
 		return this.getJobname();
@@ -284,8 +300,10 @@ public class JobObject extends JobSubmissionObjectImpl {
 		this.status = newStatus;
 
 		if (oldstatus != this.status) {
-			fireJobStatusChange(oldstatus, this.status);
 			EventBus.publish(new JobStatusEvent(this, oldstatus, this.status));
+			if ( StringUtils.isNotBlank(getJobname()) ) {
+				EventBus.publish(this.getJobname(), new JobStatusEvent(this, oldstatus, this.status));
+			}
 		}
 
 	}
@@ -306,7 +324,9 @@ public class JobObject extends JobSubmissionObjectImpl {
 			this.status = serviceInterface.getJobStatus(getJobname());
 			if (this.status != oldStatus) {
 				EventBus.publish(new JobStatusEvent(this, oldStatus, this.status));
-				fireJobStatusChange(oldStatus, this.status);
+				if ( StringUtils.isNotBlank(getJobname()) ) {
+					EventBus.publish(this.getJobname(), new JobStatusEvent(this, oldStatus, this.status));
+				}
 			}
 		}
 		return this.status;
@@ -633,8 +653,10 @@ public class JobObject extends JobSubmissionObjectImpl {
 						return;
 					}
 					if ( oldStatus != getStatus(false) ) {
-						fireJobStatusChange(oldStatus, getStatus(false));
 						EventBus.publish(new JobStatusEvent(JobObject.this, oldStatus, JobObject.this.getStatus(false)));
+						if ( StringUtils.isNotBlank(getJobname()) ) {
+							EventBus.publish(JobObject.this.getJobname(), new JobStatusEvent(JobObject.this, oldStatus, JobObject.this.getStatus(false)));
+						}
 					}
 					try {
 						Thread.sleep(checkIntervallInSeconds * 1000);
@@ -649,68 +671,6 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 	}
 
-	// event stuff
-	// ========================================================
-	private Vector<JobStatusChangeListener> jobStatusChangeListeners;
-
-	private void fireJobStatusChange(final int oldStatus, final int newStatus) {
-
-		if ( oldStatus == newStatus ) {
-			myLogger.debug("Old status equals new status, not firing event...");
-			return;
-		}
-		
-		myLogger.debug("Fire job status change event.");
-		// if we have no mountPointsListeners, do nothing...
-		if (jobStatusChangeListeners != null
-				&& !jobStatusChangeListeners.isEmpty()) {
-
-			// make a copy of the listener list in case
-			// anyone adds/removes mountPointsListeners
-			Vector<JobStatusChangeListener> valueChangedTargets;
-			synchronized (this) {
-				valueChangedTargets = (Vector<JobStatusChangeListener>) jobStatusChangeListeners
-						.clone();
-			}
-
-			// walk through the listener list and
-			// call the gridproxychanged method in each
-			Enumeration<JobStatusChangeListener> e = valueChangedTargets
-					.elements();
-			while (e.hasMoreElements()) {
-				JobStatusChangeListener valueChanged_l = e.nextElement();
-				valueChanged_l.jobStatusChanged(this, oldStatus, newStatus);
-			}
-		}
-	}
-
-	/**
-	 * Adds a jobstatus change listener.
-	 * 
-	 * @param l
-	 *            the listener
-	 */
-	public final synchronized void addJobStatusChangeListener(
-			final JobStatusChangeListener l) {
-		if (jobStatusChangeListeners == null) {
-			jobStatusChangeListeners = new Vector<JobStatusChangeListener>();
-		}
-		jobStatusChangeListeners.addElement(l);
-	}
-
-	/**
-	 * Removes a jobstatus change listener.
-	 * 
-	 * @param l
-	 *            the listener
-	 */
-	public final synchronized void removeJobStatusChangeListener(
-			final JobStatusChangeListener l) {
-		if (jobStatusChangeListeners == null) {
-			jobStatusChangeListeners = new Vector<JobStatusChangeListener>();
-		}
-		jobStatusChangeListeners.removeElement(l);
-	}
 	
 	@Override
 	public boolean equals(Object other) {

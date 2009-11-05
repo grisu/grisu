@@ -1,23 +1,13 @@
 package org.vpac.grisu.frontend.examples;
 
 import java.io.File;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
 
-import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
-import org.vpac.grisu.frontend.model.job.JobObject;
-import org.vpac.grisu.frontend.model.job.JobStatusChangeListener;
-import org.vpac.grisu.model.GrisuRegistry;
-import org.vpac.grisu.model.GrisuRegistryManager;
-import org.vpac.grisu.model.info.ApplicationInformation;
 
 public class FileUpload  {
 

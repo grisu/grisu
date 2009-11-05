@@ -7,12 +7,14 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.bushe.swing.event.annotation.AnnotationProcessor;
+import org.bushe.swing.event.annotation.EventSubscriber;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
+import org.vpac.grisu.frontend.model.events.JobStatusEvent;
 import org.vpac.grisu.frontend.model.job.JobObject;
-import org.vpac.grisu.frontend.model.job.JobStatusChangeListener;
 import org.vpac.grisu.frontend.model.job.JobsException;
 import org.vpac.grisu.frontend.model.job.MultiPartJobObject;
 import org.vpac.grisu.model.GrisuRegistry;
@@ -23,10 +25,15 @@ import au.org.arcs.jcommons.constants.JobSubmissionProperty;
 import au.org.arcs.jcommons.interfaces.GridResource;
 import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
 
-public class BlenderTest implements JobStatusChangeListener {
+public class BlenderTest  {
 
+	public BlenderTest() {
+		AnnotationProcessor.process(this);
+	}
+	
 	public static void main(final String[] args) throws Exception {
 
+		BlenderTest test = new BlenderTest();
 
 		ExecutorService executor = Executors.newFixedThreadPool(10);
 
@@ -38,8 +45,8 @@ public class BlenderTest implements JobStatusChangeListener {
 //				"https://ngportal.vpac.org/grisu-ws/soap/EnunciateServiceInterfaceService",
 //				 "https://ngportal.vpac.org/grisu-ws/services/grisu",
 //				"https://ngportal.vpac.org/grisu-ws/soap/GrisuService",
-				"http://localhost:8080/enunciate-backend/soap/GrisuService",
-//				 "Local",
+//				"http://localhost:8080/enunciate-backend/soap/GrisuService",
+				 "Local",
 //				"Dummy",
 				username, password);
 
@@ -58,7 +65,7 @@ public class BlenderTest implements JobStatusChangeListener {
 		jobProperties.put(JobSubmissionProperty.APPLICATIONVERSION, "2.49a");
 		GridResource[] resources = blenderInfo.getBestSubmissionLocations(jobProperties, "/ARCS/NGAdmin").toArray(new GridResource[]{});
 		
-		final int numberOfJobs = 200;
+		final int numberOfJobs = 40;
 		
 		String[] subLocs = new String[numberOfJobs];
 
@@ -85,7 +92,7 @@ public class BlenderTest implements JobStatusChangeListener {
 		}
 		
 		Date start = new Date();
-		final String multiJobName = "PerformanceTest7";
+		final String multiJobName = "PerformanceTest8";
 		try {
 			si.deleteMultiPartJob(multiJobName, true);
 		} catch (Exception e) {
@@ -151,11 +158,14 @@ public class BlenderTest implements JobStatusChangeListener {
 		
 	}
 
-	public final void jobStatusChanged(final JobObject job, final int oldStatus, final int newStatus) {
+
+	@EventSubscriber(eventClass=JobStatusEvent.class)
+    public void onEvent(JobStatusEvent statusEvent) {
 		System.out.println("JobSubmissionNew got job statusEvent: "
-				+ job.getJobname() + " submitted to "
-				+ job.getSubmissionLocation() + ": "
-				+ JobConstants.translateStatus(newStatus));
-	}
+				+ statusEvent.getJob().getJobname() + " submitted to "
+				+ statusEvent.getJob().getSubmissionLocation() + ": "
+				+ JobConstants.translateStatus(statusEvent.getNewStatus()));
+    }
+
 
 }

@@ -4,28 +4,29 @@ import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.vpac.grisu.control.JobConstants;
+import org.bushe.swing.event.annotation.AnnotationProcessor;
+import org.bushe.swing.event.annotation.EventSubscriber;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
+import org.vpac.grisu.frontend.model.events.MultiPartJobEvent;
 import org.vpac.grisu.frontend.model.job.JobObject;
-import org.vpac.grisu.frontend.model.job.JobStatusChangeListener;
 import org.vpac.grisu.frontend.model.job.JobsException;
-import org.vpac.grisu.frontend.model.job.MultiPartJobEventListener;
 import org.vpac.grisu.frontend.model.job.MultiPartJobObject;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
 
 import au.org.arcs.jcommons.constants.Constants;
 
-public class MultiJobSubmit implements JobStatusChangeListener, MultiPartJobEventListener {
+public class MultiJobSubmit {
+	
+	public MultiJobSubmit() {
+		AnnotationProcessor.process(this);
+	}
 
 	public static void main(final String[] args) throws Exception {
 
 
-		MultiJobSubmit mjs = new MultiJobSubmit();
-		
-		
 		ExecutorService executor = Executors.newFixedThreadPool(10);
 
 		String username = args[0];
@@ -59,6 +60,8 @@ public class MultiJobSubmit implements JobStatusChangeListener, MultiPartJobEven
 			e.printStackTrace();
 		}
 		
+		new MultiJobSubmit();
+		
 		
 //		System.out.println("Start: "+start.toString());
 //		System.out.println("End: "+new Date().toString());
@@ -66,9 +69,6 @@ public class MultiJobSubmit implements JobStatusChangeListener, MultiPartJobEven
 
 		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/NGAdmin", Constants.GENERIC_APPLICATION_NAME, Constants.NO_VERSION_INDICATOR_STRING);
 				
-		multiPartJob.addJobStatusChangeListener(mjs);
-//		multiPartJob.setConcurrentJobCreationThreads(3);
-		
 		for (int i=0; i<numberOfJobs; i++) {
 
 			final int frameNumber = i;
@@ -124,16 +124,12 @@ public class MultiJobSubmit implements JobStatusChangeListener, MultiPartJobEven
 		
 	}
 
-	public final void jobStatusChanged(final JobObject job, final int oldStatus, final int newStatus) {
-		System.out.println("JobSubmissionNew got job statusEvent: "
-				+ job.getJobname() + " submitted to "
-				+ job.getSubmissionLocation() + ": "
-				+ JobConstants.translateStatus(newStatus));
-	}
+	   @EventSubscriber(eventClass=MultiPartJobEvent.class)
+	   public void onMultiPartJobEvent(MultiPartJobEvent event) {
 
-	public void eventOccured(MultiPartJobObject job, String eventMessage) {
+		   System.out.println("Event: "+event.getMessage());
+		   
+	   }
 
-		System.out.println(eventMessage);
-	}
 
 }

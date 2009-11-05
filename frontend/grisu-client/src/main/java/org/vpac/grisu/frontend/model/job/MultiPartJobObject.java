@@ -1,5 +1,6 @@
 package org.vpac.grisu.frontend.model.job;
 
+import java.awt.Event;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -22,6 +23,7 @@ import javax.activation.DataHandler;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.bushe.swing.event.EventBus;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
@@ -30,6 +32,7 @@ import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
 import org.vpac.grisu.frontend.control.clientexceptions.JobCreationException;
+import org.vpac.grisu.frontend.model.events.MultiPartJobEvent;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.DtoJob;
@@ -205,20 +208,13 @@ public class MultiPartJobObject {
 			JobObject failedJob = null;
 			try {
 				failedJob = new JobObject(serviceInterface, dtoJob.jobname());
-				fireJobStatusChange("Restarting job " + failedJob.getJobname()
-						+ "...");
+				EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, "Restarting job " + failedJob.getJobname())+"...");
 				restarter.restartJob(failedJob);
-				fireJobStatusChange("Restarted job " + failedJob.getJobname()
-						+ ".");
-
 			} catch (Exception e) {
 				if (failedJob != null) {
-					fireJobStatusChange("Restarting of job "
-							+ failedJob.getJobname() + " failed: "
-							+ e.getLocalizedMessage());
+					EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, "Restarting of job " + failedJob.getJobname())+" failed: "+e.getLocalizedMessage());
 				} else {
-					fireJobStatusChange("Restarting failed: "
-							+ e.getLocalizedMessage());
+					EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, "Restarting failed: "+e.getLocalizedMessage()));					
 				}
 				e.printStackTrace();
 			}
@@ -314,11 +310,11 @@ public class MultiPartJobObject {
 						+ getLogMessages(false).get(date));
 			}
 
-			fireJobStatusChange(progress);
+			EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, progress));
 
 			try {
-				fireJobStatusChange("Pausing monitoring for "
-						+ sleeptimeinseconds + " seconds...");
+				EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, "Pausing monitoring for "+
+						sleeptimeinseconds + " seconds..."));
 				Thread.sleep(sleeptimeinseconds * 1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -351,8 +347,8 @@ public class MultiPartJobObject {
 		}
 
 		if (job.getWalltimeInSeconds() <= 0) {
-			fireJobStatusChange("Setting walltime for job " + job.getJobname()
-					+ " to default walltime: " + defaultWalltime);
+			EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, "Setting walltime for job " + job.getJobname()
+					+ " to default walltime: " + defaultWalltime));
 			job.setWalltimeInSeconds(defaultWalltime);
 		} else {
 			// fireJobStatusChange("Keeping walltime for job " +
@@ -362,8 +358,8 @@ public class MultiPartJobObject {
 				maxWalltimeInSecondsAcrossJobs = job.getWalltimeInSeconds();
 			}
 		}
-		fireJobStatusChange("Adding job " + job.getJobname()
-				+ " to multipartjob: " + this.multiPartJobId);
+		EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, 
+				"Adding job " + job.getJobname() + " to multipartjob: " + this.multiPartJobId));
 		this.jobs.add(job);
 	}
 
@@ -388,7 +384,8 @@ public class MultiPartJobObject {
 		message.append("Walltime in minutes: " + maxWalltimeInSecondsAcrossJobs
 				/ 60 + "\n");
 		message.append("No cpus: " + defaultNoCpus + "\n");
-		fireJobStatusChange(message.toString());
+		EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, message.toString()));
+
 		return result;
 
 	}
@@ -514,7 +511,7 @@ public class MultiPartJobObject {
 					.append(sl + "\t\t\t\t" + submissionLocations.get(sl)
 							+ "\n");
 		}
-		fireJobStatusChange(message.toString());
+		EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, message.toString()));
 
 	}
 
@@ -556,8 +553,9 @@ public class MultiPartJobObject {
 			NoSuchJobException {
 
 		for (String inputFile : inputFiles.keySet()) {
-			fireJobStatusChange("Uploading input file: " + inputFile
-					+ " for multipartjob " + multiPartJobId);
+			EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, 
+			 "Uploading input file: " + inputFile
+					+ " for multipartjob " + multiPartJobId));
 			if (FileManager.isLocal(inputFile)) {
 
 				DataHandler dh = FileManager.createDataHandler(inputFile);
@@ -572,22 +570,23 @@ public class MultiPartJobObject {
 
 	public void submit() throws JobSubmissionException, NoSuchJobException {
 
-		fireJobStatusChange("Submitting multipartjob " + multiPartJobId
-				+ " to backend...");
+		EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, 
+				"Submitting multipartjob " + multiPartJobId	+ " to backend..."));
 		try {
 			serviceInterface.submitJob(multiPartJobId);
 		} catch (JobSubmissionException jse) {
-			fireJobStatusChange("Job submitssion for multipartjob "
-					+ multiPartJobId + " failed: " + jse.getLocalizedMessage());
+			EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this,
+			 "Job submitssion for multipartjob "
+					+ multiPartJobId + " failed: " + jse.getLocalizedMessage()));
 			throw jse;
 		} catch (NoSuchJobException nsje) {
-			fireJobStatusChange("Job submitssion for multipartjob "
-					+ multiPartJobId + " failed: " + nsje.getLocalizedMessage());
+			EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, "Job submitssion for multipartjob "
+					+ multiPartJobId + " failed: " + nsje.getLocalizedMessage()));
 			throw nsje;
 		}
-		fireJobStatusChange("All jobs of multipartjob "
-				+ multiPartJobId
-				+ " ready for submission. Continuing submission in background...");
+		EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this,
+		 "All jobs of multipartjob " + multiPartJobId
+				+ " ready for submission. Continuing submission in background..."));
 	}
 
 	public void prepareAndCreateJobs() throws JobsException, BackendException {
@@ -596,8 +595,9 @@ public class MultiPartJobObject {
 
 		myLogger.debug("Creating " + getJobs().size()
 				+ " jobs as part of multipartjob: " + multiPartJobId);
-		fireJobStatusChange("Creating " + getJobs().size()
-				+ " jobs as part of multipartjob: " + multiPartJobId);
+		EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, 
+		 "Creating " + getJobs().size()
+				+ " jobs as part of multipartjob: " + multiPartJobId));
 		ExecutorService executor = Executors
 				.newFixedThreadPool(getConcurrentJobCreationThreads());
 
@@ -621,16 +621,18 @@ public class MultiPartJobObject {
 											multiPartJobId,
 											job
 													.getJobDescriptionDocumentAsString());
-							fireJobStatusChange("Creation of job "
-									+ job.getJobname() + " successful.");
+							EventBus.publish(MultiPartJobObject.this.multiPartJobId, new MultiPartJobEvent(
+									MultiPartJobObject.this, "Creation of job "
+									+ job.getJobname() + " successful."));
 							job.setJobname(jobname);
 							success = true;
 							break;
 						} catch (Exception e) {
 							e.printStackTrace();
-							fireJobStatusChange("Creation of job "
+							EventBus.publish(MultiPartJobObject.this.multiPartJobId, new MultiPartJobEvent(
+									MultiPartJobObject.this, "Creation of job "
 									+ job.getJobname() + " failed: "
-									+ e.getLocalizedMessage());
+									+ e.getLocalizedMessage()));
 							try {
 								serviceInterface.kill(job.getJobname(), true);
 							} catch (Exception e1) {
@@ -659,25 +661,30 @@ public class MultiPartJobObject {
 		}
 		myLogger.debug("Finished creation of " + getJobs().size()
 				+ " jobs as part of multipartjob: " + multiPartJobId);
-		fireJobStatusChange("Finished creation of " + getJobs().size()
-				+ " jobs as part of multipartjob: " + multiPartJobId);
+		EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this,
+				"Finished creation of " + getJobs().size()
+				+ " jobs as part of multipartjob: " + multiPartJobId));
 
 		if (failedSubmissions.size() > 0) {
 			myLogger.error(failedSubmissions.size() + " submission failed...");
-			fireJobStatusChange("Not all jobs for multipartjob "
-					+ multiPartJobId + " created successfully. Aborting...");
+			EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this,
+					"Not all jobs for multipartjob "
+					+ multiPartJobId + " created successfully. Aborting..."));
 			throw new JobsException(failedSubmissions);
 		}
 
 		try {
-			fireJobStatusChange("Uploading input files for multipartjob: "
-					+ multiPartJobId);
+			EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this,
+					"Uploading input files for multipartjob: "
+					+ multiPartJobId));
 			uploadInputFiles();
-			fireJobStatusChange("Uploading input files for multipartjob: "
-					+ multiPartJobId + " finished.");
+			EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, 
+					"Uploading input files for multipartjob: "
+					+ multiPartJobId + " finished."));
 		} catch (Exception e) {
-			fireJobStatusChange("Uploading input files for multipartjob: "
-					+ multiPartJobId + " failed: " + e.getLocalizedMessage());
+			EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this,
+					"Uploading input files for multipartjob: "
+					+ multiPartJobId + " failed: " + e.getLocalizedMessage()));
 			throw new BackendException("Could not upload input files...", e);
 		}
 	}
@@ -687,8 +694,8 @@ public class MultiPartJobObject {
 			throws RemoteFileSystemException, FileTransferException,
 			IOException {
 
-		fireJobStatusChange("Checking and possibly downloading output files for multipartjob: "
-				+ multiPartJobId + ". This might take a while...");
+		EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, "Checking and possibly downloading output files for multipartjob: "
+				+ multiPartJobId + ". This might take a while..."));
 
 		for (JobObject job : getJobs()) {
 			
@@ -715,20 +722,23 @@ public class MultiPartJobObject {
 						needsDownloading = GrisuRegistryManager.getDefault(serviceInterface).getFileManager().needsDownloading(child);
 					} catch (RuntimeException e) {
 						myLogger.error("Could not access file "+child+": "+e.getLocalizedMessage());
-						fireJobStatusChange("Could not access file "+child+": "+e.getLocalizedMessage());
+						EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this,
+								"Could not access file "+child+": "+e.getLocalizedMessage()));
 						continue;
 					}
 					
 					if ( needsDownloading ) {
 						myLogger.debug("Downloading file: " + child);
-						fireJobStatusChange("Downloading file: " + child);
+						EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this,
+								"Downloading file: " + child));
 						try {
 						cacheFile = GrisuRegistryManager.getDefault(
 								serviceInterface).getFileManager()
 								.downloadFile(child);
 						} catch (Exception e) {
 							myLogger.error("Could not download file "+child+": "+e.getLocalizedMessage());
-							fireJobStatusChange("Could not download file "+child+": "+e.getLocalizedMessage());
+							EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, 
+									"Could not download file "+child+": "+e.getLocalizedMessage()));
 							continue;
 						}
 					} else {
@@ -837,63 +847,6 @@ public class MultiPartJobObject {
 		return allRemoteJobnames;
 	}
 
-	// event stuff
-	// ========================================================
-	private Vector<MultiPartJobEventListener> jobStatusChangeListeners;
-
-	private void fireJobStatusChange(final String message) {
-
-		myLogger.debug("Fire job status change event.");
-		// if we have no mountPointsListeners, do nothing...
-		if (jobStatusChangeListeners != null
-				&& !jobStatusChangeListeners.isEmpty()) {
-
-			// make a copy of the listener list in case
-			// anyone adds/removes mountPointsListeners
-			Vector<MultiPartJobEventListener> valueChangedTargets;
-			synchronized (this) {
-				valueChangedTargets = (Vector<MultiPartJobEventListener>) jobStatusChangeListeners
-						.clone();
-			}
-
-			// walk through the listener list and
-			// call the gridproxychanged method in each
-			Enumeration<MultiPartJobEventListener> e = valueChangedTargets
-					.elements();
-			while (e.hasMoreElements()) {
-				MultiPartJobEventListener valueChanged_l = e.nextElement();
-				valueChanged_l.eventOccured(this, message);
-			}
-		}
-	}
-
-	/**
-	 * Adds a jobstatus change listener.
-	 * 
-	 * @param l
-	 *            the listener
-	 */
-	public final synchronized void addJobStatusChangeListener(
-			final MultiPartJobEventListener l) {
-		if (jobStatusChangeListeners == null) {
-			jobStatusChangeListeners = new Vector<MultiPartJobEventListener>();
-		}
-		jobStatusChangeListeners.addElement(l);
-	}
-
-	/**
-	 * Removes a jobstatus change listener.
-	 * 
-	 * @param l
-	 *            the listener
-	 */
-	public final synchronized void removeJobStatusChangeListener(
-			final MultiPartJobEventListener l) {
-		if (jobStatusChangeListeners == null) {
-			jobStatusChangeListeners = new Vector<MultiPartJobEventListener>();
-		}
-		jobStatusChangeListeners.removeElement(l);
-	}
 
 	public String getDetails() {
 

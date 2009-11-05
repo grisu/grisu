@@ -5,20 +5,19 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.frontend.model.job.JobObject;
-import org.vpac.grisu.frontend.model.job.JobStatusChangeListener;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.info.ApplicationInformation;
 
-public class JobSubmissionNew implements JobStatusChangeListener {
-
+public class JobSubmissionNew {
+	
+	
 	public static void main(final String[] args) throws Exception {
-
+		
 		ExecutorService executor = Executors.newFixedThreadPool(1);
 
 		String username = args[0];
@@ -92,11 +91,6 @@ public class JobSubmissionNew implements JobStatusChangeListener {
 
 	}
 
-	public final void jobStatusChanged(final JobObject job, final int oldStatus, final int newStatus) {
-		System.out.println("JobSubmissionNew got job statusEvent: "
-				+ job.getJobname() + " submitted to "
-				+ job.getSubmissionLocation() + ": "
-				+ JobConstants.translateStatus(newStatus));
-	}
+
 
 }
