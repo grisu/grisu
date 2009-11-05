@@ -730,15 +730,15 @@ public interface ServiceInterface {
 	/**
 	 * Deletes a bunch of remote files.
 	 * 
+	 * This doesn't throw an exception if the deletion of one file fails.
+	 * 
 	 * @param files
 	 *            the files to delete
-	 * @throws RemoteFileSystemException
-	 *             if the filesystem could not be accessed
 	 */
 	@RolesAllowed("User")
 	@POST
 	@Path("actions/deleteFiles")
-	void deleteFiles(@QueryParam("urls") DtoStringList files) throws RemoteFileSystemException;
+	void deleteFiles(@QueryParam("urls") DtoStringList files);
 
 	// ---------------------------------------------------------------------------------------------------
 	// 
@@ -833,7 +833,7 @@ public interface ServiceInterface {
 	int getJobStatus(@PathParam("jobname") String jobname);
 
 	/**
-	 * Deletes the whole jobdirectory and if successful, the job from the
+	 * Deletes the whole jobdirectory (if specified) and if successful, the job from the
 	 * database.
 	 * 
 	 * @param jobname
@@ -846,10 +846,24 @@ public interface ServiceInterface {
 	 * @throws MultiPartJobException if the job is part of a multipartjob
 	 */
 	@POST
-	@Path("actions/kill/{jobname}")
+	@Path("actions/killJob/{jobname}")
 	@RolesAllowed("User")
 	void kill(@PathParam("jobname") String jobname, @QueryParam("clean") boolean clean)
 			throws RemoteFileSystemException, NoSuchJobException, MultiPartJobException;
+	
+	/**
+	 * Deletes the whole jobdirectory (if specified) and if successful, the job from the
+	 * database.
+	 * 
+	 * This one doesn't throw an exception if something goes wrong.
+	 * 
+	 * @param jobnames a list of jobs to kill
+	 * @param clean whether to clean/delete the jobdirectory if possible
+	 */
+	@POST
+	@Path("actions/killJobs")
+	@RolesAllowed("User")
+	void killJobs(@QueryParam("jobnames") DtoStringList jobnames, @QueryParam("clean") boolean clean);
 
 	/**
 	 * If you want to store certain values along with the job which can be used

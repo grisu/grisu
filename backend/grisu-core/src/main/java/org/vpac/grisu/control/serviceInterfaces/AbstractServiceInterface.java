@@ -1,5 +1,6 @@
 package org.vpac.grisu.control.serviceInterfaces;
 
+import java.awt.Desktop.Action;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -2588,18 +2589,29 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see
 	 * org.vpac.grisu.control.ServiceInterface#deleteFiles(java.lang.String[])
 	 */
-	public void deleteFiles(final DtoStringList files)
-			throws RemoteFileSystemException {
+	public void deleteFiles(final DtoStringList files) {
 
-		// ArrayList<String> filesNotDeleted = new ArrayList<String>();
+		if ( files == null || files.asArray().length == 0 ) {
+			return;
+		}
+		
+		DtoActionStatus status = new DtoActionStatus(files.asArray()[0], files.asArray().length * 2);
+		actionStatus.put(files.asArray()[0], status);
+		
 		for (String file : files.getStringList()) {
 			try {
+				status.addElement("Deleting file "+file+"...");
 				deleteFile(file);
+				status.addElement("Success.");
 			} catch (Exception e) {
+				status.addElement("Failed: "+e.getLocalizedMessage());
+				status.setFailed(true);
 				myLogger.error("Could not delete file: " + file);
 				// filesNotDeleted.add(file);
 			}
 		}
+		
+		status.setFinished(true);
 
 	}
 
@@ -2745,6 +2757,30 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		// now after the jsdl is ready, don't forget to fill the required fields
 		// into the database
+	}
+	
+	public void killJobs(final DtoStringList jobnames, final boolean clear) {
+		
+		if ( jobnames == null || jobnames.asArray().length == 0 ) {
+			return;
+		}
+		
+		DtoActionStatus status = new DtoActionStatus(jobnames.asArray()[0], jobnames.asArray().length * 2);
+		actionStatus.put(jobnames.asArray()[0], status);
+		
+		for ( String jobname : jobnames.asArray() ) {
+			status.addElement("Killing job "+jobname+"...");
+			try {
+				kill(jobname, clear);
+				status.addElement("Success.");
+			} catch (Exception e) {
+				status.addElement("Failed: "+e.getLocalizedMessage());
+				status.setFailed(true);
+				myLogger.error("Could not kill job: " + jobname);
+			}
+		}
+		
+		status.setFinished(true);
 	}
 
 	public void kill(final String jobname, final boolean clear)

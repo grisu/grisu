@@ -143,7 +143,7 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 					e);
 		}
 
-		Object xfireServiceInterface = null;
+		ServiceInterface xfireServiceInterface = null;
 		Class interfaceClass = null;
 		try {
 			Constructor xfireServiceInterfaceConstructor;
@@ -153,7 +153,7 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 			xfireServiceInterfaceConstructor = xfireServiceInterfaceClass
 					.getConstructor(String.class);
 
-			xfireServiceInterface = xfireServiceInterfaceConstructor
+			xfireServiceInterface = (ServiceInterface)xfireServiceInterfaceConstructor
 					.newInstance(interfaceUrl);
 
 			Method setAuthMethod = xfireServiceInterface.getClass().getMethod(
@@ -184,7 +184,7 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 							+ e.getLocalizedMessage(), e);
 		}
 		
-		return new ProxyServiceInterface(xfireServiceInterface);
+		return xfireServiceInterface;
 
 	}
 
