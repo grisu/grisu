@@ -1745,7 +1745,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/**
 	 * Calculates all mountpoints that are automatically mounted using mds. At
-	 * the moment, the port of the gridftp file share is ignored. Maybe I'll
+	 * the moment, the port part of the gridftp url share is ignored. Maybe I'll
 	 * change that later.
 	 * 
 	 * @param sites
@@ -1768,8 +1768,27 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					+ " ms.");
 			for (String server : mpUrl.keySet()) {
 				for (String path : mpUrl.get(server)) {
-					String url = server.replace(":2811", "") + path + "/"
+					
+					String url = null;
+					if ( path.contains("${GLOBUS_USER_HOME}") ) {
+						
+						try {
+							url = getUser().getFileSystemHomeDirectory(server.replace(":2811", ""), fqan);
+						} catch (FileSystemException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+					} else {
+					
+						url = server.replace(":2811", "") + path + "/"
 							+ User.get_vo_dn_path(getCredential().getDn());
+					
+					}
+					
+					if ( StringUtils.isBlank(url) ) {
+						continue;
+					}
 
 					MountPoint mp = new MountPoint(getUser().getDn(), fqan,
 							url, calculateMountPointName(server, fqan),

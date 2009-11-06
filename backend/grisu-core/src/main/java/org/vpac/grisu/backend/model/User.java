@@ -282,6 +282,22 @@ public class User {
 	private void setMountPoints(final Set<MountPoint> mountPoints) {
 		this.mountPoints = mountPoints;
 	}
+	
+	public String getFileSystemHomeDirectory(String filesystemRoot, String fqan) throws FileSystemException {
+		
+		FileSystem fileSystem = createFilesystem(filesystemRoot, fqan);
+		myLogger.debug("Connected to file system.");
+		
+		myLogger.debug("Using home directory: "
+				+ ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
+						.substring(1));
+		
+		String home = (String) fileSystem.getAttribute("HOME_DIRECTORY");
+		String uri = fileSystem.getRoot().getName().getRootURI()
+		+ home.substring(1);
+		
+		return uri;
+	}
 
 	/**
 	 * Adds a filesystem to the mountpoints of this user. The mountpoint is just
@@ -326,7 +342,7 @@ public class User {
 		MountPoint new_mp = new MountPoint(cred.getDn(), cred.getFqan(), uri,
 				mountPointName, site);
 		try {
-			FileSystem fileSystem = createFilesystem(new_mp);
+			FileSystem fileSystem = createFilesystem(new_mp.getRootUrl(), new_mp.getFqan());
 			myLogger.debug("Connected to file system.");
 			if (useHomeDirectory) {
 				myLogger.debug("Using home directory: "
@@ -429,7 +445,7 @@ public class User {
 	 * @throws FileSystemException
 	 * @throws VomsException
 	 */
-	private synchronized FileSystem createFilesystem(final MountPoint mp)
+	private synchronized FileSystem createFilesystem(final String rootUrl, final String fqan)
 			throws FileSystemException {
 
 //		// check whether a filesystem for this mountpoint is already cached
@@ -442,18 +458,18 @@ public class User {
 		ProxyCredential credToUse = null;
 
 		// get the right credential for this mountpoint
-		if (mp.getFqan() != null) {
+		if (fqan != null) {
 
-			credToUse = cachedCredentials.get(mp.getFqan());
+			credToUse = cachedCredentials.get(fqan);
 			if (credToUse == null || !credToUse.isValid()) {
 
 				// put a new credential in the cache
-				VO vo = VOManagement.getVO(getFqans().get(mp.getFqan()));
-				credToUse = CertHelpers.getVOProxyCredential(vo, mp.getFqan(),
+				VO vo = VOManagement.getVO(getFqans().get(fqan));
+				credToUse = CertHelpers.getVOProxyCredential(vo, fqan,
 						getCred());
-				cachedCredentials.put(mp.getFqan(), credToUse);
+				cachedCredentials.put(fqan, credToUse);
 			} else {
-				credToUse = cachedCredentials.get(mp.getFqan());
+				credToUse = cachedCredentials.get(fqan);
 			}
 
 		} else {
@@ -462,14 +478,14 @@ public class User {
 
 		FileSystemOptions opts = new FileSystemOptions();
 
-		if (mp.getRootUrl().startsWith("gsiftp")) {
+		if (rootUrl.startsWith("gsiftp")) {
 			GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
 					.getInstance();
 			builder.setGSSCredential(opts, credToUse.getGssCredential());
 			// builder.setUserDirIsRoot(opts, true);
 		}
 
-		FileObject fileRoot = getFsManager().resolveFile(mp.getRootUrl(), opts);
+		FileObject fileRoot = getFsManager().resolveFile(rootUrl, opts);
 
 		FileSystem fileBase = fileRoot.getFileSystem();
 
@@ -669,7 +685,7 @@ public class User {
 			// markus
 			// if (!cachedFilesystemConnections.containsKey(mp.getRootUrl())) {
 //			root = this.connectToFileSystem(mp);
-			root = this.createFilesystem(mp);
+			root = this.createFilesystem(mp.getRootUrl(), mp.getFqan());
 			// } else {
 			// root = this.cachedFilesystemConnections.get(mp.getRootUrl());
 			// }
