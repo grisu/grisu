@@ -49,10 +49,10 @@ public class MultiJobSubmit {
 
 		final GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
 
-		final int numberOfJobs = 22;
+		final int numberOfJobs = 200;
 		
 		Date start = new Date();
-		final String multiJobName = "22jobs";
+		final String multiJobName = "200jobs";
 		try {
 			si.deleteMultiPartJob(multiJobName, true);
 		} catch (Exception e) {

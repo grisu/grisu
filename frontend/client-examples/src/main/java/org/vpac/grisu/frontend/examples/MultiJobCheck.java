@@ -30,7 +30,7 @@ public class MultiJobCheck  {
 		final ServiceInterface si = ServiceInterfaceFactory
 				.createInterface(loginParams);
 
-		final String multiJobName = "22jobs";
+		final String multiJobName = "200jobs";
 		
 		MultiPartJobObject newObject = new MultiPartJobObject(si, multiJobName, false);
 		
