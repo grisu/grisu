@@ -18,6 +18,11 @@ public final class ClientPropertiesManager {
     public static final String HELPDESK_CONFIG = "support.properties";
 
 	public static final int CONCURRENT_THREADS_DEFAULT = 5;
+	public static final int DEFAULT_JOBSTATUS_RECHECK_INTERVAL_IN_SECONDS = 5;
+	
+	
+	// keys
+	public static final String JOBSTATUS_RECHECK_INTERVAL_KEY = "statusRecheck";
 
 	private ClientPropertiesManager() {
 	}
@@ -514,6 +519,22 @@ public final class ClientPropertiesManager {
 	
 	public static String getHelpDeskConfig() {
 		return HELPDESK_CONFIG;
+	}
+
+	public static long getJobStatusRecheckIntervall() {
+
+		int interval = 0;
+		try {
+			interval = getClientConfiguration().getInt(JOBSTATUS_RECHECK_INTERVAL_KEY);
+		} catch (Exception e) {
+		}
+		
+		if ( interval <= 0 ) {
+			interval = DEFAULT_JOBSTATUS_RECHECK_INTERVAL_IN_SECONDS;
+		}
+		
+		return interval;
+		
 	}
 
 }

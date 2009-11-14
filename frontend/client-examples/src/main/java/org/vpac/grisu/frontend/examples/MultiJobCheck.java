@@ -23,14 +23,14 @@ public class MultiJobCheck  {
 //				"http://localhost:8080/xfire-backend/services/grisu",
 //				"https://ngportal.vpac.org/grisu-ws/soap/EnunciateServiceInterfaceService",
 //				 "https://ngportal.vpac.org/grisu-ws/services/grisu",
-//				 "Local",
-				"ARCS_DEV",
+				 "Local",
+//				"ARCS_DEV",
 				username, password);
 
 		final ServiceInterface si = ServiceInterfaceFactory
 				.createInterface(loginParams);
 
-		final String multiJobName = "100jobs";
+		final String multiJobName = "22jobs";
 		
 		MultiPartJobObject newObject = new MultiPartJobObject(si, multiJobName, false);
 		

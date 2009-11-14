@@ -38,8 +38,8 @@ public class MultiJobSubmit {
 //				 "https://ngportal.vpac.org/grisu-ws/services/grisu",
 //				"https://ngportal.vpac.org/grisu-ws/soap/GrisuService",
 //				"http://localhost:8080/enunciate-backend/soap/GrisuService",
-//				 "Local",
-				 "ARCS_DEV",
+				 "Local",
+//				 "ARCS_DEV",
 //				"Dummy",
 				username, password);
 
@@ -49,10 +49,10 @@ public class MultiJobSubmit {
 
 		final GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
 
-		final int numberOfJobs = 10;
+		final int numberOfJobs = 22;
 		
 		Date start = new Date();
-		final String multiJobName = "1000jobs";
+		final String multiJobName = "22jobs";
 		try {
 			si.deleteMultiPartJob(multiJobName, true);
 		} catch (Exception e) {

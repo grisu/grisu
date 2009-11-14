@@ -35,8 +35,10 @@ import org.vpac.grisu.frontend.control.clientexceptions.JobCreationException;
 import org.vpac.grisu.frontend.model.events.MultiPartJobEvent;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
+import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoMultiPartJob;
+import org.vpac.grisu.settings.ClientPropertiesManager;
 
 import au.org.arcs.jcommons.constants.Constants;
 import au.org.arcs.jcommons.constants.JobSubmissionProperty;
@@ -167,13 +169,42 @@ public class MultiPartJobObject {
 	public void refresh() {
 		getMultiPartJob(true);
 	}
+	
+	private void refreshMultiPartJobStatus(boolean waitForRefreshToFinish) {
+		
+		String handle;
+		try {
+			handle = serviceInterface.refreshMultiPartJob(multiPartJobId);
+		} catch (NoSuchJobException e) {
+			throw new RuntimeException(e);
+		}
+		
+		if ( waitForRefreshToFinish ) {
+			
+			DtoActionStatus status = serviceInterface.getActionStatus(handle);
+			while ( ! status.isFinished() ) {
+				try {
+					Thread.sleep(ClientPropertiesManager.getJobStatusRecheckIntervall());
+				} catch (InterruptedException e) {
+					// doesn't happen
+				}
+				status = serviceInterface.getActionStatus(handle);
+			}
+		}
+		
+	}
 
 	private DtoMultiPartJob getMultiPartJob(boolean refresh) {
 
 		if (dtoMultiPartJob == null || refresh) {
 			try {
+				
+				if ( refresh ) {
+					refreshMultiPartJobStatus(true);
+				}
+				
 				dtoMultiPartJob = serviceInterface.getMultiPartJob(
-						multiPartJobId, true);
+						multiPartJobId);
 				
 				for (DtoJob dtoJob : dtoMultiPartJob.getJobs().getAllJobs()) {
 					JobObject job = new JobObject(serviceInterface, dtoJob);

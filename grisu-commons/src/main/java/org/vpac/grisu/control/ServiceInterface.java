@@ -47,6 +47,7 @@ import org.vpac.grisu.model.dto.DtoUserProperties;
  * @author Markus Binsteiner
  * 
  */
+
 @WebService (
 		targetNamespace = "http://api.grisu.arcs.org.au/",
 			serviceName="GrisuService"
@@ -816,6 +817,8 @@ public interface ServiceInterface {
 	@RolesAllowed("User")
 	void submitJob(@PathParam("jobname") String jobname) throws JobSubmissionException, NoSuchJobException;
 
+//	void createAndSubmitJob(@PathParam("jobname") String jobname) throws JobSubmissionException, JobPropertiesException;
+	
 	/**
 	 * Method to query the status of a job. The String representation of the
 	 * status can be obtained by calling
@@ -996,16 +999,27 @@ public interface ServiceInterface {
 	
 
 
-
+	/**
+	 * Refreshes the status of all jobs that belong to this multipartjob.
+	 * 
+	 * @param multiPartJobId the multipartjob id
+	 * @return the action status handle for this. Use {@link #getActionStatus(String)} to find out when this is finished.
+	 * @throws NoSuchJobException if there is no multipart job with the specified id
+	 */
+	String refreshMultiPartJob(String multiPartJobId) throws NoSuchJobException;
 	
 	
 	/**
-	 * Returns all multipart jobs for this user.
+	 * Returns the {@link DtoMultiPartJob} with the specified name.
 	 * 
-	 * @return all the multipartjobs of the user
+	 * This method doesn't refresh the jobs that belong to this multipartjob. Call {@link #refreshMultiPartJob(String)} 
+	 * and monitor the action status for this until it finishes before you retrieve the multipartjob if you want
+	 * an up-to-date version of the multipartjob.
+	 * 
+	 * @return the multipartjob
 	 */
 	@RolesAllowed("User")
-	DtoMultiPartJob getMultiPartJob(String multiJobPartId, boolean refresh) throws NoSuchJobException;
+	DtoMultiPartJob getMultiPartJob(String multiJobPartId) throws NoSuchJobException;
 	
 
 

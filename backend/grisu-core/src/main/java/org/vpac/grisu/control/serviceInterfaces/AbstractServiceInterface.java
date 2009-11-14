@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -112,8 +113,6 @@ import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
  * 
  */
 public abstract class AbstractServiceInterface implements ServiceInterface {
-	
-	
 
 	static final Logger myLogger = Logger
 			.getLogger(AbstractServiceInterface.class.getName());
@@ -143,7 +142,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private MatchMaker matchmaker = new MatchMakerImpl(Environment
 			.getGrisuDirectory().toString());
 
-	private final Map<String, DtoActionStatus> actionStatus = new HashMap<String, DtoActionStatus>();
+	private final Map<String, DtoActionStatus> actionStatus = Collections.synchronizedMap(new HashMap<String, DtoActionStatus>());
 
 	public String getInterfaceVersion() {
 		return ServiceInterface.INTERFACE_VERSION;
@@ -872,11 +871,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					for (int i = 0; i < DEFAULT_JOB_SUBMISSION_RETRIES; i++) {
 						try {
 							exc = null;
-							
+
 							DtoActionStatus status = null;
 							status = new DtoActionStatus(job.getJobname(), 0);
 							actionStatus.put(job.getJobname(), status);
-							
+
 							submitJob(job, true, status);
 							newActionStatus.addElement("Added job: "
 									+ job.getJobname());
@@ -966,26 +965,26 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 	}
 
-	private void submitJob(final Job job, boolean stageFiles, DtoActionStatus status)
-			throws JobSubmissionException {
-		
+	private void submitJob(final Job job, boolean stageFiles,
+			DtoActionStatus status) throws JobSubmissionException {
+
 		try {
-			
+
 			int noStageins = 0;
-			
-			if ( stageFiles ) {
+
+			if (stageFiles) {
 				List<Element> stageIns = JsdlHelpers.getStageInElements(job
 						.getJobDescription());
 				noStageins = stageIns.size();
-			} 
-			
-			status.setTotalElements(status.getTotalElements()+4+noStageins);
-			
+			}
+
+			status.setTotalElements(status.getTotalElements() + 4 + noStageins);
+
 			myLogger.debug("Preparing job environment...");
 			job.addLogMessage("Preparing job environment.");
 
 			status.addElement("Preparing job environment...");
-			
+
 			addLogMessageToPossibleMultiPartJobParent(job,
 					"Starting job submission for job: " + job.getJobname());
 			prepareJobEnvironment(job);
@@ -1018,9 +1017,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								+ e.getLocalizedMessage());
 			}
 		} else {
-			job
-					.addLogMessage("Setting non-vo credential: "
-							+ job.getFqan());
+			job.addLogMessage("Setting non-vo credential: " + job.getFqan());
 			job.setCredential(getCredential());
 		}
 
@@ -1073,7 +1070,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		jobdao.saveOrUpdate(job);
 		myLogger.info("Jobsubmission for job " + job.getJobname()
 				+ " and user " + getDN() + " successful.");
-		
+
 		status.addElement("Job submission finished...");
 		status.setFinished(true);
 	}
@@ -1082,7 +1079,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throws JobSubmissionException, NoSuchJobException {
 
 		Job job = getJob(jobname);
-		
+
 		DtoActionStatus status = null;
 		status = new DtoActionStatus(job.getJobname(), 3);
 		actionStatus.put(job.getJobname(), status);
@@ -1172,7 +1169,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		myLogger.info("Submitting job: " + jobname + " for user " + getDN());
 		Job job;
-		
+
 		DtoActionStatus status = null;
 		status = new DtoActionStatus(jobname, 0);
 		actionStatus.put(jobname, status);
@@ -1361,31 +1358,30 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 
-		List<Job> jobs = null;
-		if (StringUtils.isBlank(application)) {
-			jobs = jobdao.findJobByDN(getUser().getDn(), false);
-		} else {
-			jobs = jobdao.findJobByDNPerApplication(getUser().getDn(),
-					application, false);
-		}
-		
-		if (refresh) {
-			refreshJobStatus(jobs);
-		}
+			List<Job> jobs = null;
+			if (StringUtils.isBlank(application)) {
+				jobs = jobdao.findJobByDN(getUser().getDn(), false);
+			} else {
+				jobs = jobdao.findJobByDNPerApplication(getUser().getDn(),
+						application, false);
+			}
 
-		
-		DtoJobs dtoJobs = new DtoJobs();
-		for (Job job : jobs) {
-			
-			DtoJob dtojob = DtoJob.createJob(job.getStatus(), job
-					.getJobProperties(), job.getLogMessages());
-			
-			// just to make sure
-			dtojob.addJobProperty(Constants.JOBNAME_KEY, job.getJobname());
-			dtoJobs.addJob(dtojob);
-		}
+			if (refresh) {
+				refreshJobStatus(jobs);
+			}
 
-		return dtoJobs;
+			DtoJobs dtoJobs = new DtoJobs();
+			for (Job job : jobs) {
+
+				DtoJob dtojob = DtoJob.createJob(job.getStatus(), job
+						.getJobProperties(), job.getLogMessages());
+
+				// just to make sure
+				dtojob.addJobProperty(Constants.JOBNAME_KEY, job.getJobname());
+				dtoJobs.addJob(dtojob);
+			}
+
+			return dtoJobs;
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
@@ -1399,10 +1395,56 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		if (StringUtils.isBlank(application)) {
 			jobnames = jobdao.findJobNamesByDn(getUser().getDn(), false);
 		} else {
-			jobnames = jobdao.findJobNamesPerApplicationByDn(getUser().getDn(),	application, false);
+			jobnames = jobdao.findJobNamesPerApplicationByDn(getUser().getDn(),
+					application, false);
 		}
 
 		return DtoStringList.fromStringList(jobnames);
+	}
+
+	public String refreshMultiPartJob(String multiJobPartId)
+			throws NoSuchJobException {
+
+		String handle = "REFRESH_" + multiJobPartId;
+		
+		DtoActionStatus status = actionStatus.get(handle);
+		
+		if ( status != null && ! status.isFinished() ) {
+			// refresh in progress. Just give back the handle
+			return handle;
+		}
+		
+		MultiPartJob multiPartJob = getMultiPartJobFromDatabase(multiJobPartId);
+
+		final DtoActionStatus statusfinal = new DtoActionStatus(handle, multiPartJob.getJobs().size());
+
+		actionStatus.put(handle, statusfinal);
+
+		ExecutorService executor = Executors
+				.newFixedThreadPool(ServerPropertiesManager
+						.getConcurrentJobStatusThreadsPerUser());
+
+		Job[] currentJobs = multiPartJob.getJobs().toArray(new Job[] {});
+		Arrays.sort(currentJobs);
+
+		for (final Job job : currentJobs) {
+			Thread thread = new Thread() {
+				public void run() {
+					statusfinal.addLogMessage("Refreshing job "+job.getJobname());
+					getJobStatus(job.getJobname());
+					statusfinal.addElement("Job status for job "+job.getJobname()+" refreshed.");
+					
+					if ( statusfinal.getTotalElements() <= statusfinal.getCurrentElements() ) {
+						statusfinal.setFinished(true);
+					}
+				}
+			};
+			executor.execute(thread);
+		}
+		executor.shutdown();
+
+		return handle;
+
 	}
 
 	/**
@@ -1410,36 +1452,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @return all the multipartjobs of the user
 	 */
-	public DtoMultiPartJob getMultiPartJob(String multiJobPartId,
-			final boolean refresh) throws NoSuchJobException {
+	public DtoMultiPartJob getMultiPartJob(String multiJobPartId) throws NoSuchJobException {
 
 		MultiPartJob multiPartJob = getMultiPartJobFromDatabase(multiJobPartId);
-
-		if (refresh) {
-
-			ExecutorService executor = Executors
-					.newFixedThreadPool(ServerPropertiesManager
-							.getConcurrentJobStatusThreadsPerUser());
-
-			Job[] currentJobs = multiPartJob.getJobs().toArray(new Job[] {});
-			Arrays.sort(currentJobs);
-
-			for (final Job job : currentJobs) {
-				Thread thread = new Thread() {
-					public void run() {
-						getJobStatus(job.getJobname());
-					}
-				};
-				executor.execute(thread);
-			}
-			executor.shutdown();
-			try {
-				executor.awaitTermination(3600, TimeUnit.SECONDS);
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}
-			multiPartJob = getMultiPartJobFromDatabase(multiJobPartId);
-		}
 
 		return multiPartJob.createDtoMultiPartJob();
 	}
@@ -1768,25 +1783,26 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					+ " ms.");
 			for (String server : mpUrl.keySet()) {
 				for (String path : mpUrl.get(server)) {
-					
+
 					String url = null;
-					if ( path.contains("${GLOBUS_USER_HOME}") ) {
-						
+					if (path.contains("${GLOBUS_USER_HOME}")) {
+
 						try {
-							url = getUser().getFileSystemHomeDirectory(server.replace(":2811", ""), fqan);
+							url = getUser().getFileSystemHomeDirectory(
+									server.replace(":2811", ""), fqan);
 						} catch (FileSystemException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						
+
 					} else {
-					
+
 						url = server.replace(":2811", "") + path + "/"
-							+ User.get_vo_dn_path(getCredential().getDn());
-					
+								+ User.get_vo_dn_path(getCredential().getDn());
+
 					}
-					
-					if ( StringUtils.isBlank(url) ) {
+
+					if (StringUtils.isBlank(url)) {
 						continue;
 					}
 
@@ -2049,14 +2065,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			FileContent content = target.getContent();
 			fout = content.getOutputStream();
 		} catch (FileSystemException e) {
-			
+
 			try {
 				fout.close();
 				source.getInputStream().close();
 			} catch (Exception e1) {
 				myLogger.error(e1);
 			}
-			
+
 			// e.printStackTrace();
 			throw new RemoteFileSystemException("Could not open file: "
 					+ filename + ":" + e.getMessage());
@@ -2093,7 +2109,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			} catch (Exception e1) {
 				myLogger.error(e1);
 			}
-			
+
 			throw new RemoteFileSystemException("Could not write to file: "
 					+ filename + ": " + e.getMessage());
 		}
@@ -2610,35 +2626,37 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public void deleteFiles(final DtoStringList files) {
 
-		if ( files == null || files.asArray().length == 0 ) {
+		if (files == null || files.asArray().length == 0) {
 			return;
 		}
-		
-		DtoActionStatus status = new DtoActionStatus(files.asArray()[0], files.asArray().length * 2);
+
+		DtoActionStatus status = new DtoActionStatus(files.asArray()[0], files
+				.asArray().length * 2);
 		actionStatus.put(files.asArray()[0], status);
-		
+
 		for (String file : files.getStringList()) {
 			try {
-				status.addElement("Deleting file "+file+"...");
+				status.addElement("Deleting file " + file + "...");
 				deleteFile(file);
 				status.addElement("Success.");
 			} catch (Exception e) {
-				status.addElement("Failed: "+e.getLocalizedMessage());
+				status.addElement("Failed: " + e.getLocalizedMessage());
 				status.setFailed(true);
 				myLogger.error("Could not delete file: " + file);
 				// filesNotDeleted.add(file);
 			}
 		}
-		
+
 		status.setFinished(true);
 
 	}
 
 	public DtoUserProperties getUserProperties() {
-		
-		return DtoUserProperties.createUserProperties(getUser().getUserProperties());
+
+		return DtoUserProperties.createUserProperties(getUser()
+				.getUserProperties());
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -2653,12 +2671,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	}
 
 	public void setUserProperty(String key, String value) {
-		
+
 		getUser().getUserProperties().put(key, value);
-		
+
 		userdao.saveOrUpdate(getUser());
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -2689,8 +2707,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#stageFiles(java.lang.String)
 	 */
-	public void stageFiles(final Job job, final DtoActionStatus optionalStatus) throws RemoteFileSystemException,
-			NoSuchJobException {
+	public void stageFiles(final Job job, final DtoActionStatus optionalStatus)
+			throws RemoteFileSystemException, NoSuchJobException {
 
 		// Job job;
 		// job = jobdao.findJobByDN(getUser().getDn(), jobname);
@@ -2701,8 +2719,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		for (Element stageIn : stageIns) {
 
 			String sourceUrl = JsdlHelpers.getStageInSource(stageIn);
-			if ( optionalStatus != null ) {
-				optionalStatus.addElement("Staging file "+sourceUrl.substring(sourceUrl.lastIndexOf("/")+1));
+			if (optionalStatus != null) {
+				optionalStatus.addElement("Staging file "
+						+ sourceUrl.substring(sourceUrl.lastIndexOf("/") + 1));
 			}
 			// TODO remove that after swing client is fixed.
 			if (sourceUrl.startsWith("file") || sourceUrl.startsWith("dummy")) {
@@ -2724,8 +2743,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						folder.createFolder();
 					}
 				} catch (FileSystemException e) {
-					if ( optionalStatus != null ) {
-						optionalStatus.addLogMessage("Error while staging in files.");
+					if (optionalStatus != null) {
+						optionalStatus
+								.addLogMessage("Error while staging in files.");
 					}
 					throw new RemoteFileSystemException(
 							"Could not create parent folder for file: "
@@ -2777,28 +2797,29 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// now after the jsdl is ready, don't forget to fill the required fields
 		// into the database
 	}
-	
+
 	public void killJobs(final DtoStringList jobnames, final boolean clear) {
-		
-		if ( jobnames == null || jobnames.asArray().length == 0 ) {
+
+		if (jobnames == null || jobnames.asArray().length == 0) {
 			return;
 		}
-		
-		DtoActionStatus status = new DtoActionStatus(jobnames.asArray()[0], jobnames.asArray().length * 2);
+
+		DtoActionStatus status = new DtoActionStatus(jobnames.asArray()[0],
+				jobnames.asArray().length * 2);
 		actionStatus.put(jobnames.asArray()[0], status);
-		
-		for ( String jobname : jobnames.asArray() ) {
-			status.addElement("Killing job "+jobname+"...");
+
+		for (String jobname : jobnames.asArray()) {
+			status.addElement("Killing job " + jobname + "...");
 			try {
 				kill(jobname, clear);
 				status.addElement("Success.");
 			} catch (Exception e) {
-				status.addElement("Failed: "+e.getLocalizedMessage());
+				status.addElement("Failed: " + e.getLocalizedMessage());
 				status.setFailed(true);
 				myLogger.error("Could not kill job: " + jobname);
 			}
 		}
-		
+
 		status.setFinished(true);
 	}
 
