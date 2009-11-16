@@ -43,7 +43,7 @@ public final class JobCreationInfo {
 			System.out.println(name);
 		}
 		
-		DtoMultiPartJob mjob = si.getMultiPartJob("blenderLogoTest", false);
+		DtoMultiPartJob mjob = si.getMultiPartJob("blenderLogoTest");
 		
 		for ( DtoJob job : mjob.getJobs().getAllJobs() ) {
 			System.out.println("Job: "+job.jobname());
