@@ -143,6 +143,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private MatchMaker matchmaker = new MatchMakerImpl(Environment
 			.getGrisuDirectory().toString());
 
+	protected JobDistributor jd = new JobDistributor();
+	
+
+	
 	private final Map<String, DtoActionStatus> actionStatus = Collections.synchronizedMap(new HashMap<String, DtoActionStatus>());
 
 	public String getInterfaceVersion() {
@@ -259,9 +263,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		return createJob(jsdl, fqan, jobnameCreationMethod);
 	}
-
-	private String createJob(Document jsdl, final String fqan,
-			final String jobnameCreationMethod) throws JobPropertiesException {
+	
+	private String calculateJobname(Document jsdl, String jobnameCreationMethod) throws JobPropertiesException {
+		
 
 		String jobname = JsdlHelpers.getJobname(jsdl);
 
@@ -328,6 +332,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throw new RuntimeException(
 					"Jobname is null. This should never happen. Please report to markus.binsteiner@arcs.org.au");
 		}
+		
+		return jobname;
+		
+	}
+
+	private String createJob(Document jsdl, final String fqan,
+			final String jobnameCreationMethod) throws JobPropertiesException {
+
+		String jobname = calculateJobname(jsdl, jobnameCreationMethod);
 
 		try {
 			MultiPartJob mpj = getMultiPartJobFromDatabase(jobname);
@@ -917,112 +930,26 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		
 		MultiPartJob mpj = getMultiPartJobFromDatabase(multiPartJobId);
 		
-		Map<String, Integer> submissionLocations = new TreeMap<String, Integer>();
+		optimizeMultiPartJob(mpj);
+	}
+	
+	private void optimizeMultiPartJob(MultiPartJob mpj) throws NoSuchJobException {
+		
+		String sitesToIncludeString = mpj.getJobProperty(Constants.SITES_TO_INCLUDE_KEY);
+		String[] sitesToInclude = null;
+		if ( StringUtils.isNotBlank(sitesToIncludeString) ) {
+			sitesToInclude = sitesToIncludeString.split(",");
+		}
+		
+		String sitesToExcludeString = mpj.getJobProperty(Constants.SITES_TO_EXCLUDE_KEY);
+		String[] sitesToExclude = null;
+		if ( StringUtils.isNotBlank(sitesToExcludeString) ) {
+			sitesToExclude = sitesToExcludeString.split(",");
+		}
+		
+		jd.distributeJobs(mpj.getJobs(), findBestResourcesForMultipartJob(mpj), sitesToInclude, sitesToExclude);
 
-		Long allWalltime = 0L;
 		for ( Job job : mpj.getJobs() ) {
-			allWalltime = allWalltime + Long.parseLong(job.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY));
-		}
-
-		Map<GridResource, Long> resourcesToUse = new TreeMap<GridResource, Long>();
-		List<Integer> ranks = new LinkedList<Integer>();
-		Long allRanks = 0L;
-		for (GridResource resource : findBestResourcesForMultipartJob(mpj)) {
-			String sitesToInclude = mpj.getJobProperty(Constants.SITES_TO_INCLUDE_KEY);
-			String sitesToExclude = mpj.getJobProperty(Constants.SITES_TO_EXCLUDE_KEY);
-			if (StringUtils.isNotBlank(sitesToInclude)) {
-
-				for (String site : sitesToInclude.split(",")) {
-					if (resource.getSiteName().toLowerCase().contains(
-							site.toLowerCase())) {
-						resourcesToUse.put(resource, new Long(0L));
-						ranks.add(resource.getRank());
-						allRanks = allRanks + resource.getRank();
-						break;
-					}
-				}
-
-			} else if (StringUtils.isNotBlank(sitesToExclude)) {
-
-				boolean useSite = true;
-				for (String site : sitesToExclude.split(",")) {
-					if (resource.getSiteName().toLowerCase().contains(
-							site.toLowerCase())) {
-						useSite = false;
-						break;
-					}
-				}
-				if (useSite) {
-					resourcesToUse.put(resource, new Long(0L));
-					ranks.add(resource.getRank());
-					allRanks = allRanks + resource.getRank();
-				}
-
-			} else {
-				resourcesToUse.put(resource, new Long(0L));
-				ranks.add(resource.getRank());
-				allRanks = allRanks + resource.getRank();
-			}
-		}
-
-		myLogger.debug("Rank summary: " + allRanks);
-		myLogger.debug("Walltime summary: " + allWalltime);
-
-		GridResource[] resourceArray = resourcesToUse.keySet().toArray(
-				new GridResource[] {});
-		int lastIndex = 0;
-
-		for (Job job : mpj.getJobs()) {
-
-			GridResource subLocResource = null;
-			long oldWalltimeSummary = 0L;
-
-			for (int i = lastIndex; i < resourceArray.length * 2; i++) {
-				int indexToUse = i;
-				if (i >= resourceArray.length) {
-					indexToUse = indexToUse - resourceArray.length;
-				}
-
-				GridResource resource = resourceArray[indexToUse];
-
-				long rankPercentage = (resource.getRank() * 100) / (allRanks);
-				long wallTimePercentage = ((Long.parseLong(job.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY)) + resourcesToUse
-						.get(resource)) * 100)
-						/ (allWalltime);
-
-				if (rankPercentage >= wallTimePercentage) {
-					subLocResource = resource;
-					oldWalltimeSummary = resourcesToUse.get(subLocResource);
-					myLogger.debug("Rank percentage: " + rankPercentage
-							+ ". Walltime percentage: " + wallTimePercentage
-							+ ". Using resource: " + resource.getQueueName());
-					lastIndex = lastIndex + 1;
-					if (lastIndex >= resourceArray.length) {
-						lastIndex = 0;
-					}
-					break;
-				} else {
-					// myLogger.debug("Rank percentage: "+rankPercentage+". Walltime percentage: "+wallTimePercentage+". Not using resource: "+resource.getQueueName());
-				}
-			}
-
-			if (subLocResource == null) {
-				subLocResource = resourcesToUse.keySet().iterator().next();
-				myLogger.error("Couldn't find resource for job: "
-						+ job.getJobname());
-			}
-
-			String subLoc = SubmissionLocationHelpers
-					.createSubmissionLocationString(subLocResource);
-			Integer currentCount = submissionLocations.get(subLocResource
-					.toString());
-			if (currentCount == null) {
-				currentCount = 0;
-			}
-			submissionLocations
-					.put(subLocResource.toString(), currentCount + 1);
-
-			job.addJobProperty(Constants.SUBMISSIONLOCATION_KEY, subLoc);
 			try {
 				processJobDescription(job);
 			} catch (JobPropertiesException e) {
@@ -1030,23 +957,144 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				throw new RuntimeException(e);
 			}
 			jobdao.saveOrUpdate(job);
-			resourcesToUse.put(subLocResource, oldWalltimeSummary + Long.parseLong(job.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY)));
 		}
-
-		StringBuffer message = new StringBuffer(
-				"Filled submissionlocations for multijob: " + multiPartJobId
-						+ "\n");
-		message.append("Submitted jobs to:\t\t\tAmount\n");
-		for (String sl : submissionLocations.keySet()) {
-			message
-					.append(sl + "\t\t\t\t" + submissionLocations.get(sl)
-							+ "\n");
-		}
-		myLogger.debug(message.toString());
-
 		
-
 	}
+	
+	
+//	private void optimizeMultiPartJob(MultiPartJob mpj) throws NoSuchJobException {
+//		
+//		Map<String, Integer> submissionLocations = new TreeMap<String, Integer>();
+//
+//		Long allWalltime = 0L;
+//		for ( Job job : mpj.getJobs() ) {
+//			allWalltime = allWalltime + Long.parseLong(job.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY));
+//		}
+//
+//		Map<GridResource, Long> resourcesToUse = new TreeMap<GridResource, Long>();
+//		List<Integer> ranks = new LinkedList<Integer>();
+//		Long allRanks = 0L;
+//		for (GridResource resource : findBestResourcesForMultipartJob(mpj)) {
+//			String sitesToInclude = mpj.getJobProperty(Constants.SITES_TO_INCLUDE_KEY);
+//			String sitesToExclude = mpj.getJobProperty(Constants.SITES_TO_EXCLUDE_KEY);
+//			if (StringUtils.isNotBlank(sitesToInclude)) {
+//
+//				for (String site : sitesToInclude.split(",")) {
+//					if (resource.getSiteName().toLowerCase().contains(
+//							site.toLowerCase())) {
+//						resourcesToUse.put(resource, new Long(0L));
+//						ranks.add(resource.getRank());
+//						allRanks = allRanks + resource.getRank();
+//						break;
+//					}
+//				}
+//
+//			} else if (StringUtils.isNotBlank(sitesToExclude)) {
+//
+//				boolean useSite = true;
+//				for (String site : sitesToExclude.split(",")) {
+//					if (resource.getSiteName().toLowerCase().contains(
+//							site.toLowerCase())) {
+//						useSite = false;
+//						break;
+//					}
+//				}
+//				if (useSite) {
+//					resourcesToUse.put(resource, new Long(0L));
+//					ranks.add(resource.getRank());
+//					allRanks = allRanks + resource.getRank();
+//				}
+//
+//			} else {
+//				resourcesToUse.put(resource, new Long(0L));
+//				ranks.add(resource.getRank());
+//				allRanks = allRanks + resource.getRank();
+//			}
+//		}
+//
+//		myLogger.debug("Rank summary: " + allRanks);
+//		myLogger.debug("Walltime summary: " + allWalltime);
+//
+//		GridResource[] resourceArray = resourcesToUse.keySet().toArray(
+//				new GridResource[] {});
+//		int lastIndex = 0;
+//		
+//		final Set<Job> alljobs = mpj.getJobs();
+//
+//		for (Job job : alljobs) {
+//
+//			GridResource subLocResource = null;
+//			long oldWalltimeSummary = 0L;
+//
+//			for (int i = lastIndex; i < resourceArray.length * 2; i++) {
+//				int indexToUse = i;
+//				if (i >= resourceArray.length) {
+//					indexToUse = indexToUse - resourceArray.length;
+//				}
+//
+//				GridResource resource = resourceArray[indexToUse];
+//
+//				long rankPercentage = (resource.getRank() * 100) / (allRanks);
+//				long wallTimePercentage = ((Long.parseLong(job.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY)) + resourcesToUse
+//						.get(resource)) * 100)
+//						/ (allWalltime);
+//
+//				if (rankPercentage >= wallTimePercentage) {
+//					subLocResource = resource;
+//					oldWalltimeSummary = resourcesToUse.get(subLocResource);
+//					myLogger.debug("Rank percentage: " + rankPercentage
+//							+ ". Walltime percentage: " + wallTimePercentage
+//							+ ". Using resource: " + resource.getQueueName());
+//					lastIndex = lastIndex + 1;
+//					if (lastIndex >= resourceArray.length) {
+//						lastIndex = 0;
+//					}
+//					break;
+//				} else {
+//					// myLogger.debug("Rank percentage: "+rankPercentage+". Walltime percentage: "+wallTimePercentage+". Not using resource: "+resource.getQueueName());
+//				}
+//			}
+//
+//			if (subLocResource == null) {
+//				subLocResource = resourcesToUse.keySet().iterator().next();
+//				myLogger.error("Couldn't find resource for job: "
+//						+ job.getJobname());
+//			}
+//
+//			String subLoc = SubmissionLocationHelpers
+//					.createSubmissionLocationString(subLocResource);
+//			Integer currentCount = submissionLocations.get(subLocResource
+//					.toString());
+//			if (currentCount == null) {
+//				currentCount = 0;
+//			}
+//			submissionLocations
+//					.put(subLocResource.toString(), currentCount + 1);
+//
+//			job.addJobProperty(Constants.SUBMISSIONLOCATION_KEY, subLoc);
+//			try {
+//				processJobDescription(job);
+//			} catch (JobPropertiesException e) {
+//				e.printStackTrace();
+//				throw new RuntimeException(e);
+//			}
+//			jobdao.saveOrUpdate(job);
+//			resourcesToUse.put(subLocResource, oldWalltimeSummary + Long.parseLong(job.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY)));
+//		}
+//
+//		StringBuffer message = new StringBuffer(
+//				"Filled submissionlocations for "+alljobs.size()+" jobs: " + "\n");
+//		message.append("Submitted jobs to:\t\t\tAmount\n");
+//		for (String sl : submissionLocations.keySet()) {
+//			message
+//					.append(sl + "\t\t\t\t" + submissionLocations.get(sl)
+//							+ "\n");
+//		}
+//		myLogger.debug(message.toString());
+//
+//		
+//
+//	}
 
 	private void submitMultiPartJob(final MultiPartJob multiJob)
 			throws JobSubmissionException, NoSuchJobException {
@@ -1678,14 +1726,22 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throws JobPropertiesException, NoSuchJobException {
 
 		MultiPartJob multiJob = getMultiPartJobFromDatabase(multipartJobId);
+		
+		Document jsdl;
 
-		// TODO calculate resulting jobname and check whether one already
-		// exists?
+		try {
+			jsdl = SeveralXMLHelpers.fromString(jsdlString);
+		} catch (Exception e3) {
+			throw new RuntimeException("Invalid jsdl/xml format.", e3);
+		}
+		
+		String jobnameCreationMethod = multiJob.getJobProperty(Constants.JOBNAME_CREATION_METHOD_KEY);
+		if ( StringUtils.isBlank(jobnameCreationMethod) ) {
+			jobnameCreationMethod = "force-name";
+		}
 
-		String jobname = createJob(jsdlString, multiJob.getFqan(), "force-name");
-
+		String jobname = createJob(jsdl, multiJob.getFqan(), "force-name");
 		multiJob.addJob(jobname);
-
 		multiPartJobDao.saveOrUpdate(multiJob);
 
 		return jobname;

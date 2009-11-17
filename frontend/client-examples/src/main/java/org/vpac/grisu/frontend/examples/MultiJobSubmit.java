@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.annotation.AnnotationProcessor;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.vpac.grisu.control.ServiceInterface;
@@ -60,8 +61,6 @@ public class MultiJobSubmit {
 			// doesn't matter
 			e.printStackTrace();
 		}
-		
-		new MultiJobSubmit();
 		
 		
 //		System.out.println("Start: "+start.toString());
