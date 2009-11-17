@@ -656,11 +656,23 @@ public class MultiPartJobObject {
 							// job.createJob(submissionFqan);
 							myLogger.info("Adding job: " + job.getJobname()
 									+ " to multipartjob: " + multiPartJobId);
-							String jobname = serviceInterface
-									.addJobToMultiPartJob(
-											multiPartJobId,
-											job
-													.getJobDescriptionDocumentAsString());
+							
+							String jobname = null;
+							try {
+								jobname = serviceInterface
+								.addJobToMultiPartJob(
+										multiPartJobId,
+										job
+												.getJobDescriptionDocumentAsString());
+							} catch (JobPropertiesException jpe) {
+								// try again in case there is a job with this name already
+								job.setJobname(job.getJobname()+"_new");
+								jobname = serviceInterface
+								.addJobToMultiPartJob(
+										multiPartJobId,
+										job
+												.getJobDescriptionDocumentAsString());
+							}
 							job.setJobname(jobname);
 							job.updateJobDirectory();
 							

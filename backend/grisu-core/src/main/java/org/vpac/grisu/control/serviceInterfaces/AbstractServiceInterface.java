@@ -1736,6 +1736,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			MultiPartJob multiJob = getMultiPartJobFromDatabase(multiPartJobId);
 		} catch (NoSuchJobException e) {
 			// that's good
+			
 			MultiPartJob multiJobCreate = new MultiPartJob(getDN(),
 					multiPartJobId, fqan);
 			multiJobCreate.addJobProperty(Constants.RELATIVE_PATH_FROM_JOBDIR,
@@ -1775,42 +1776,74 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void deleteMultiPartJob(String multiPartJobId,
 			boolean deleteChildJobsAsWell) throws NoSuchJobException {
 
-		MultiPartJob multiJob = getMultiPartJobFromDatabase(multiPartJobId);
+		final MultiPartJob multiJob = getMultiPartJobFromDatabase(multiPartJobId);
+		
+		final DtoActionStatus newActionStatus = new DtoActionStatus(multiJob
+				.getMultiPartJobId(), (multiJob.getJobs().size()*2)+(multiJob.getAllUsedMountPoints().size()*2)+1);
+		this.actionStatus.put(multiJob.getMultiPartJobId(), newActionStatus);
+
+		ExecutorService executor = Executors
+				.newFixedThreadPool(ServerPropertiesManager
+						.getConcurrentMultiPartJobSubmitThreadsPerUser());
+
 
 		final Job[] jobs = multiJob.getJobs().toArray(new Job[] {});
 
 		if (deleteChildJobsAsWell) {
-			for (Job job : jobs) {
-
-				try {
-					job.addJobProperty(Constants.MULTIJOB_NAME, null);
-					multiJob.removeJob(job);
-					multiPartJobDao.saveOrUpdate(multiJob);
-					kill(job, true, true);
-				} catch (RemoteFileSystemException e) {
-					myLogger.error("Can't clean jobdirectory for job: "
-							+ job.getJobname(), e);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			for (final Job job : jobs) {
+				Thread thread = new Thread() {
+					public void run() {
+						
+						try{
+							newActionStatus.addElement("Killing job: "+job.getJobname());
+							job.addJobProperty(Constants.MULTIJOB_NAME, null);
+							multiJob.removeJob(job);
+							multiPartJobDao.saveOrUpdate(multiJob);
+							kill(job, true, true);
+							newActionStatus.addElement("Killed job: "+job.getJobname());
+						} catch (Exception e) {
+							newActionStatus.addElement("Failed killing job "+job.getJobname()+": "+e.getLocalizedMessage());
+							newActionStatus.setFailed(true);
+							e.printStackTrace();
+						}
+						
+						if ( newActionStatus.getTotalElements() <= newActionStatus.getCurrentElements() ) {
+							newActionStatus.setFinished(true);
+						}
+					}
+				};
+				
+				executor.execute(thread);
 			}
+			
+			executor.shutdown();
+			
 		}
 
 		for (String mpRoot : multiJob.getAllUsedMountPoints()) {
 
+			newActionStatus.addElement("Deleting common dir for mountpoint: "+mpRoot);
 			String url = mpRoot
 					+ multiJob
 							.getJobProperty(Constants.RELATIVE_MULTIJOB_DIRECTORY_KEY);
 			myLogger.debug("Deleting multijobDir: " + url);
 			try {
 				deleteFile(url);
+				newActionStatus.addElement("Deleted common dir for mountpoint: "+mpRoot);
 			} catch (RemoteFileSystemException e) {
+				newActionStatus.addElement("Couldn't delete common dir for mountpoint: "+mpRoot);
+				newActionStatus.setFailed(true);
 				myLogger.error("Couldn't delete multijobDir: " + url);
 			}
 
 		}
 
 		multiPartJobDao.delete(multiJob);
+		newActionStatus.addElement("Deleted multipartjob from database.");
+		
+		if ( newActionStatus.getTotalElements() <= newActionStatus.getCurrentElements() ) {
+			newActionStatus.setFinished(true);
+		}
 
 	}
 
@@ -3051,8 +3084,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	}
 
 	private void kill(final Job job, final boolean clear,
-			final boolean clearMultiJob) throws RemoteFileSystemException,
-			NoSuchJobException, MultiPartJobException {
+			final boolean clearMultiJob) throws MultiPartJobException {
 
 		// Job job;
 		//
