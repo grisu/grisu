@@ -38,7 +38,7 @@ public class FileUpload  {
 				// fileUpload
 		DataHandler uploadDataHandler = new DataHandler(new FileDataSource(
 				new File(System.getProperty("user.home"), "large.iso")));
-		si.upload(uploadDataHandler, "gsiftp://ng2.vpac.org/home/arcscloud001/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner/test", true);
+		si.upload(uploadDataHandler, "gsiftp://ng2.vpac.org/home/arcscloud001/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner/test");
 
 		// fileDownload
 //		DataHandler downloadDataHandler = service.download(url2);

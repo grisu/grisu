@@ -49,10 +49,10 @@ public class MultiJobSubmit {
 
 		final GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
 
-		final int numberOfJobs = 200;
+		final int numberOfJobs = 10;
 		
 		Date start = new Date();
-		final String multiJobName = "200jobs";
+		final String multiJobName = "10jobs";
 		try {
 			si.deleteMultiPartJob(multiJobName, true);
 		} catch (Exception e) {
@@ -67,8 +67,10 @@ public class MultiJobSubmit {
 //		System.out.println("End: "+new Date().toString());
 //		System.exit(1);
 
-		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/NGAdmin", Constants.GENERIC_APPLICATION_NAME, Constants.NO_VERSION_INDICATOR_STRING);
-				
+		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/StartUp", Constants.GENERIC_APPLICATION_NAME, Constants.NO_VERSION_INDICATOR_STRING);
+			
+		String pathToInputFiles = multiPartJob.pathToInputFiles();
+		
 		for (int i=0; i<numberOfJobs; i++) {
 
 			final int frameNumber = i;
@@ -77,27 +79,30 @@ public class MultiJobSubmit {
 				jo.setJobname(multiJobName+"_" + frameNumber );
 //				jo.setApplication("java");
 //				jo.setCommandline("java -version");
-				jo.setCommandline("echo hello world");
+				jo.setCommandline("cat singleJobFile.txt "+pathToInputFiles+"/multiJobFile.txt");
 				jo.setWalltimeInSeconds(60*21);
+				jo.addInputFileUrl("/home/markus/test/singleJobFile.txt");
 
 				multiPartJob.addJob(jo);
 						
 		}
 
-//		multiPartJob.setConcurrentJobCreationThreads(1);
+		multiPartJob.addInputFile("/home/markus/test/multiJobFile.txt");
 		multiPartJob.setDefaultApplication("generic");
+		multiPartJob.setSitesToExclude(new String[]{"tpac"});
 		
 //		multiPartJob.setSitesToExclude(new String[]{"vpac", "massey", "uq", "canterbury", "sapac", "ivec", "otago"});
 		
 		multiPartJob.setDefaultNoCpus(1);
 		multiPartJob.setDefaultWalltimeInSeconds(60*21);
 		
-		multiPartJob.setSitesToExclude(new String[]{"otago"});
+		multiPartJob.setSitesToExclude(new String[]{"tpac"});
 		
-		multiPartJob.fillOrOverwriteSubmissionLocationsUsingMatchmaker();
+
+//		multiPartJob.fillOrOverwriteSubmissionLocationsUsingMatchmaker();
 		
 		try {
-			multiPartJob.prepareAndCreateJobs();
+			multiPartJob.prepareAndCreateJobs(true);
 		} catch (JobsException e) {
 			for ( JobObject job : e.getFailures().keySet() ) {
 				System.out.println("Creation "+job.getJobname()+" failed: "+e.getFailures().get(job).getLocalizedMessage());

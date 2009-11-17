@@ -102,8 +102,6 @@ public class JobSubmissionManager {
 				factoryType, job);
 
 		job.setJobhandle(handle);
-		// TODO remove that once I'm sure nobody is using it anymore
-		job.setSubmissionHost(host);
 		job.addJobProperty(Constants.SUBMISSION_HOST_KEY, host);
 		job.setSubmissionType(submitter_name);
 		job

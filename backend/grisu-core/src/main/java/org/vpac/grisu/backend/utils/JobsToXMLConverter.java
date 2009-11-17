@@ -75,10 +75,10 @@ public final class JobsToXMLConverter {
 		status.setTextContent(new Integer(job.getStatus()).toString());
 		jobElement.appendChild(status);
 
-		String host = job.getSubmissionHost();
+		String host = job.getJobProperty(Constants.SUBMISSION_HOST_KEY);
 		if (host != null && !"".equals(host)) {
 			Element hostElement = doc.createElement("host");
-			hostElement.setTextContent(job.getSubmissionHost());
+			hostElement.setTextContent(host);
 			jobElement.appendChild(hostElement);
 		}
 
@@ -112,7 +112,7 @@ public final class JobsToXMLConverter {
 		status.setValue(new Integer(job.getStatus()).toString());
 		jobElement.setAttributeNode(status);
 
-		String host = job.getSubmissionHost();
+		String host = job.getJobProperty(Constants.SUBMISSION_HOST_KEY);
 		if (host != null && !"".equals(host)) {
 			Attr host_attr = doc.createAttribute("host");
 			host_attr.setValue(host);
@@ -170,7 +170,7 @@ public final class JobsToXMLConverter {
 		status.setValue(new Integer(job.getStatus()).toString());
 		jobElement.setAttributeNode(status);
 
-		String host = job.getSubmissionHost();
+		String host = job.getJobProperty(Constants.SUBMISSION_HOST_KEY);
 		if (host != null && !"".equals(host)) {
 			Attr host_attr = doc.createAttribute("host");
 			host_attr.setValue(host);

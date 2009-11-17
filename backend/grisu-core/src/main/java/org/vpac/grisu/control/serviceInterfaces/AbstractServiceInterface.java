@@ -1,6 +1,5 @@
 package org.vpac.grisu.control.serviceInterfaces;
 
-import java.awt.Desktop.Action;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -15,11 +14,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -57,6 +57,7 @@ import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.info.CachedMdsInformationManager;
+import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.dto.DtoApplicationDetails;
@@ -441,6 +442,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		JobSubmissionObjectImpl jobSubmissionObject = new JobSubmissionObjectImpl(
 				jsdl);
+		
+		if ( jobSubmissionObject.getCommandline() == null ) {
+			throw new JobPropertiesException("No commandline specified.");
+		}
 
 		for (JobSubmissionProperty key : jobSubmissionObject
 				.getJobSubmissionPropertyMap().keySet()) {
@@ -457,9 +462,26 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// if all the necessary fields are specified and then continue without
 		// any
 		// auto-settings
+		
 
-		if (jobSubmissionObject.getApplication() != null
-				&& Constants.GENERIC_APPLICATION_NAME
+		if ( jobSubmissionObject.getApplication() == null ) {
+
+			String commandline = jobSubmissionObject.getCommandline();
+			
+			String[] apps = informationManager.getApplicationsThatProvideExecutable(jobSubmissionObject.extractExecutable());
+			
+			if ( apps == null || apps.length == 0 ) {
+				jobSubmissionObject.setApplication(Constants.GENERIC_APPLICATION_NAME);
+			} else if ( apps.length > 1 ) {
+				throw new JobPropertiesException("More than one application names for executable "+jobSubmissionObject.extractExecutable()+" found.");
+			} else {
+				jobSubmissionObject.setApplication(apps[0]);
+			}
+			
+
+		}
+		
+		if (Constants.GENERIC_APPLICATION_NAME
 						.equals(jobSubmissionObject.getApplication())) {
 
 			submissionLocation = jobSubmissionObject.getSubmissionLocation();
@@ -837,9 +859,192 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// jobdao.attachDirty(job);
 		myLogger.debug("Preparing job done.");
 	}
+	
+	private SortedSet<GridResource> findBestResourcesForMultipartJob(MultiPartJob mpj) {
+		
+		Map<JobSubmissionProperty, String> properties = new HashMap<JobSubmissionProperty, String>();
+		
+		String defaultApplication = mpj.getJobProperty(Constants.APPLICATIONNAME_KEY);
+		if ( StringUtils.isBlank(defaultApplication) ) {
+			defaultApplication = Constants.GENERIC_APPLICATION_NAME;
+		}
+		properties.put(JobSubmissionProperty.APPLICATIONNAME, defaultApplication);
+		
+		String defaultCpus = mpj.getJobProperty(Constants.NO_CPUS_KEY);
+		if ( StringUtils.isBlank(defaultCpus) ) {
+			defaultCpus = "1";
+		}
+		properties.put(JobSubmissionProperty.NO_CPUS, mpj.getJobProperty(Constants.NO_CPUS_KEY));
+
+		String defaultVersion = mpj.getJobProperty(Constants.APPLICATIONVERSION_KEY);
+		if ( StringUtils.isBlank(defaultVersion) ) {
+			defaultVersion = Constants.NO_VERSION_INDICATOR_STRING;
+		}
+		properties
+				.put(JobSubmissionProperty.APPLICATIONVERSION, defaultVersion);
+		
+		String maxWalltime = mpj.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY);
+		if ( StringUtils.isBlank(maxWalltime) ) {
+			int mwt = 0;
+			for ( Job job : mpj.getJobs() ) {
+				int wt = new Integer(job.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY));
+				if ( mwt < wt ) {
+					mwt = wt;
+				}
+			}
+			maxWalltime = new Integer(mwt).toString();
+		}
+		
+		properties.put(JobSubmissionProperty.WALLTIME_IN_MINUTES, maxWalltime);
+
+		SortedSet<GridResource> result = new TreeSet<GridResource>(matchmaker.findAvailableResources(properties, mpj.getFqan()));
+		
+//		StringBuffer message = new StringBuffer(
+//				"Finding best resources for mulipartjob " + multiPartJobId
+//						+ " using:\n");
+//		message.append("Version: " + defaultVersion + "\n");
+//		message.append("Walltime in minutes: " + maxWalltimeInSecondsAcrossJobs
+//				/ 60 + "\n");
+//		message.append("No cpus: " + defaultNoCpus + "\n");
+
+
+		return result;
+		
+	}
 
 	public void optimizeMultiPartJob(String multiPartJobId)
 			throws NoSuchJobException {
+		
+		MultiPartJob mpj = getMultiPartJobFromDatabase(multiPartJobId);
+		
+		Map<String, Integer> submissionLocations = new TreeMap<String, Integer>();
+
+		Long allWalltime = 0L;
+		for ( Job job : mpj.getJobs() ) {
+			allWalltime = allWalltime + Long.parseLong(job.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY));
+		}
+
+		Map<GridResource, Long> resourcesToUse = new TreeMap<GridResource, Long>();
+		List<Integer> ranks = new LinkedList<Integer>();
+		Long allRanks = 0L;
+		for (GridResource resource : findBestResourcesForMultipartJob(mpj)) {
+			String sitesToInclude = mpj.getJobProperty(Constants.SITES_TO_INCLUDE_KEY);
+			String sitesToExclude = mpj.getJobProperty(Constants.SITES_TO_EXCLUDE_KEY);
+			if (StringUtils.isNotBlank(sitesToInclude)) {
+
+				for (String site : sitesToInclude.split(",")) {
+					if (resource.getSiteName().toLowerCase().contains(
+							site.toLowerCase())) {
+						resourcesToUse.put(resource, new Long(0L));
+						ranks.add(resource.getRank());
+						allRanks = allRanks + resource.getRank();
+						break;
+					}
+				}
+
+			} else if (StringUtils.isNotBlank(sitesToExclude)) {
+
+				boolean useSite = true;
+				for (String site : sitesToExclude.split(",")) {
+					if (resource.getSiteName().toLowerCase().contains(
+							site.toLowerCase())) {
+						useSite = false;
+						break;
+					}
+				}
+				if (useSite) {
+					resourcesToUse.put(resource, new Long(0L));
+					ranks.add(resource.getRank());
+					allRanks = allRanks + resource.getRank();
+				}
+
+			} else {
+				resourcesToUse.put(resource, new Long(0L));
+				ranks.add(resource.getRank());
+				allRanks = allRanks + resource.getRank();
+			}
+		}
+
+		myLogger.debug("Rank summary: " + allRanks);
+		myLogger.debug("Walltime summary: " + allWalltime);
+
+		GridResource[] resourceArray = resourcesToUse.keySet().toArray(
+				new GridResource[] {});
+		int lastIndex = 0;
+
+		for (Job job : mpj.getJobs()) {
+
+			GridResource subLocResource = null;
+			long oldWalltimeSummary = 0L;
+
+			for (int i = lastIndex; i < resourceArray.length * 2; i++) {
+				int indexToUse = i;
+				if (i >= resourceArray.length) {
+					indexToUse = indexToUse - resourceArray.length;
+				}
+
+				GridResource resource = resourceArray[indexToUse];
+
+				long rankPercentage = (resource.getRank() * 100) / (allRanks);
+				long wallTimePercentage = ((Long.parseLong(job.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY)) + resourcesToUse
+						.get(resource)) * 100)
+						/ (allWalltime);
+
+				if (rankPercentage >= wallTimePercentage) {
+					subLocResource = resource;
+					oldWalltimeSummary = resourcesToUse.get(subLocResource);
+					myLogger.debug("Rank percentage: " + rankPercentage
+							+ ". Walltime percentage: " + wallTimePercentage
+							+ ". Using resource: " + resource.getQueueName());
+					lastIndex = lastIndex + 1;
+					if (lastIndex >= resourceArray.length) {
+						lastIndex = 0;
+					}
+					break;
+				} else {
+					// myLogger.debug("Rank percentage: "+rankPercentage+". Walltime percentage: "+wallTimePercentage+". Not using resource: "+resource.getQueueName());
+				}
+			}
+
+			if (subLocResource == null) {
+				subLocResource = resourcesToUse.keySet().iterator().next();
+				myLogger.error("Couldn't find resource for job: "
+						+ job.getJobname());
+			}
+
+			String subLoc = SubmissionLocationHelpers
+					.createSubmissionLocationString(subLocResource);
+			Integer currentCount = submissionLocations.get(subLocResource
+					.toString());
+			if (currentCount == null) {
+				currentCount = 0;
+			}
+			submissionLocations
+					.put(subLocResource.toString(), currentCount + 1);
+
+			job.addJobProperty(Constants.SUBMISSIONLOCATION_KEY, subLoc);
+			try {
+				processJobDescription(job);
+			} catch (JobPropertiesException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			}
+			jobdao.saveOrUpdate(job);
+			resourcesToUse.put(subLocResource, oldWalltimeSummary + Long.parseLong(job.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY)));
+		}
+
+		StringBuffer message = new StringBuffer(
+				"Filled submissionlocations for multijob: " + multiPartJobId
+						+ "\n");
+		message.append("Submitted jobs to:\t\t\tAmount\n");
+		for (String sl : submissionLocations.keySet()) {
+			message
+					.append(sl + "\t\t\t\t" + submissionLocations.get(sl)
+							+ "\n");
+		}
+		myLogger.debug(message.toString());
+
+		
 
 	}
 
@@ -882,8 +1087,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 							break;
 						} catch (Exception e) {
-							myLogger.error(job.getSubmissionHost()
-									+ ": Job submission for multipartjob: "
+							myLogger.error("Job submission for multipartjob: "
 									+ multiJob.getMultiPartJobId() + ", "
 									+ job.getJobname() + " failed: "
 									+ e.getLocalizedMessage());
@@ -1486,7 +1690,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		return jobname;
 	}
-
+	
 	/**
 	 * Removes the specified job from the mulitpartJob.
 	 * 
@@ -2041,8 +2245,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * org.vpac.grisu.control.ServiceInterface#upload(javax.activation.DataSource
 	 * , java.lang.String)
 	 */
-	public String upload(final DataHandler source, final String filename,
-			final boolean return_absolute_url) throws RemoteFileSystemException {
+	public String upload(final DataHandler source, final String filename) throws RemoteFileSystemException {
 
 		myLogger.debug("Receiving file: " + filename);
 		FileObject target = null;
@@ -2118,11 +2321,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		buf = null;
 		fout = null;
-		if (!return_absolute_url) {
-			return filename;
-		} else {
-			return target.getName().getURI();
-		}
+		return target.getName().getURI();
+
 	}
 
 	public void copyMultiPartJobInputFile(String multiPartJobId,
@@ -2146,9 +2346,26 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	public void uploadInputFile(String multipartjobid, DataHandler source,
+	public void uploadInputFile(String jobname, DataHandler source,
 			String targetFilename) throws RemoteFileSystemException,
 			NoSuchJobException {
+
+		// try whether job is single or multi
+		
+		try {
+			Job job = getJob(jobname);
+			
+			String jobdir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+			
+			upload(source, jobdir+"/"+targetFilename);
+			
+			return;
+		
+		} catch (NoSuchJobException e) {
+			// no single job, let's try a multijob
+		}
+		
+		MultiPartJob multiJob = getMultiPartJobFromDatabase(jobname);
 
 		myLogger.debug("Receiving datahandler for multipartjob input file...");
 
@@ -2198,7 +2415,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		// getUser()
 
-		MultiPartJob multiJob = getMultiPartJobFromDatabase(multipartjobid);
 
 		for (String mountPointRoot : multiJob.getAllUsedMountPoints()) {
 			FileObject target = null;
@@ -2266,7 +2482,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			// fout = null;
 		}
 
-		myLogger.debug("Data transmission for multiPartJob " + multipartjobid
+		myLogger.debug("Data transmission for multiPartJob " + jobname
 				+ " finished.");
 
 		buf = null;

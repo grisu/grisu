@@ -220,6 +220,14 @@ public class JobObject extends JobSubmissionObjectImpl {
 			throw e;
 		}
 
+		updateJobDirectory();
+
+		
+		return this.getJobname();
+	}
+	
+	public void updateJobDirectory() {
+		
 		try {
 			jobDirectory = serviceInterface.getJobProperty(getJobname(),
 					Constants.JOBDIRECTORY_KEY);
@@ -231,7 +239,6 @@ public class JobObject extends JobSubmissionObjectImpl {
 			}
 		}
 		
-		return this.getJobname();
 	}
 	
 	public final void restartJob() throws JobSubmissionException, JobPropertiesException {
@@ -243,6 +250,28 @@ public class JobObject extends JobSubmissionObjectImpl {
 					"Could not find job on backend.", e);
 		}
 		getStatus(true);
+		
+	}
+	
+	public final void stageFiles() throws FileTransferException {
+		
+		if (getInputFileUrls() != null && getInputFileUrls().length > 0) {
+			setStatus(JobConstants.INPUT_FILES_UPLOADING);
+		}
+
+		// stage in local files
+		for (String inputFile : getInputFileUrls()) {
+			if (FileManager.isLocal(inputFile)) {
+				
+				GrisuRegistryManager.getDefault(serviceInterface).getFileManager()
+						.uploadFileToDirectory(inputFile, jobDirectory, true);
+			}
+		}
+
+		if (getInputFileUrls() != null && getInputFileUrls().length > 0) {
+			setStatus(JobConstants.INPUT_FILES_UPLOADED);
+		}
+
 		
 	}
 
@@ -264,25 +293,10 @@ public class JobObject extends JobSubmissionObjectImpl {
 					+ ". Can't submit job.");
 		}
 
-		if (getInputFileUrls() != null && getInputFileUrls().length > 0) {
-			setStatus(JobConstants.INPUT_FILES_UPLOADING);
-		}
-
-		// stage in local files
-		for (String inputFile : getInputFileUrls()) {
-			if (FileManager.isLocal(inputFile)) {
-				try {
-					GrisuRegistryManager.getDefault(serviceInterface).getFileManager()
-							.uploadFileToDirectory(inputFile, jobDirectory, true);
-				} catch (FileTransferException e) {
-					throw new JobSubmissionException(
-							"Could not stage-in file: " + inputFile, e);
-				}
-			}
-		}
-
-		if (getInputFileUrls() != null && getInputFileUrls().length > 0) {
-			setStatus(JobConstants.INPUT_FILES_UPLOADED);
+		try {
+			stageFiles();
+		} catch (FileTransferException e) {
+			throw new JobSubmissionException("Could not stage in file.", e);
 		}
 
 		try {

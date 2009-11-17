@@ -221,24 +221,24 @@ public class Job implements Comparable<Job> {
 		return this.credential;
 	}
 
-	/**
-	 * Gets the host to which this job is going to be submitted/was submitted.
-	 * 
-	 * @return the hostname
-	 */
-	public String getSubmissionHost() {
-		return submissionHost;
-	}
+//	/**
+//	 * Gets the host to which this job is going to be submitted/was submitted.
+//	 * 
+//	 * @return the hostname
+//	 */
+//	public String getSubmissionHost() {
+//		return submissionHost;
+//	}
 
-	/**
-	 * Sets the host to which this job is going to be submitted.
-	 * 
-	 * @param host
-	 *            the hostname (like ng2.vpac.org)
-	 */
-	public void setSubmissionHost(final String host) {
-		this.submissionHost = host;
-	}
+//	/**
+//	 * Sets the host to which this job is going to be submitted.
+//	 * 
+//	 * @param host
+//	 *            the hostname (like ng2.vpac.org)
+//	 */
+//	public void setSubmissionHost(final String host) {
+//		this.submissionHost = host;
+//	}
 
 	/**
 	 * Gets the jsdl job description for this job.

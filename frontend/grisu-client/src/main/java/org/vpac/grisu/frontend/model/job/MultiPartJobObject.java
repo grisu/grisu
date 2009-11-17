@@ -394,7 +394,7 @@ public class MultiPartJobObject {
 		this.jobs.add(job);
 	}
 
-	public SortedSet<GridResource> findBestResources() {
+	private SortedSet<GridResource> findBestResources() {
 
 		Map<JobSubmissionProperty, String> properties = new HashMap<JobSubmissionProperty, String>();
 		properties.put(JobSubmissionProperty.NO_CPUS,
@@ -421,7 +421,7 @@ public class MultiPartJobObject {
 
 	}
 
-	public void fillOrOverwriteSubmissionLocationsUsingMatchmaker()
+	private void fillOrOverwriteSubmissionLocationsUsingMatchmaker()
 			throws JobCreationException, JobSubmissionException {
 
 		Map<String, Integer> submissionLocations = new TreeMap<String, Integer>();
@@ -580,9 +580,17 @@ public class MultiPartJobObject {
 		return this.jobs;
 	}
 
-	private void uploadInputFiles() throws RemoteFileSystemException,
+	private void uploadInputFiles() throws FileTransferException, RemoteFileSystemException,
 			NoSuchJobException {
+		
+		// uploading single job input files
+		
+		for ( JobObject job : getJobs() ) {
+			job.stageFiles();
+		}
 
+		
+		// uploading common job input files
 		for (String inputFile : inputFiles.keySet()) {
 			EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, 
 			 "Uploading input file: " + inputFile
@@ -620,7 +628,7 @@ public class MultiPartJobObject {
 				+ " ready for submission. Continuing submission in background..."));
 	}
 
-	public void prepareAndCreateJobs() throws JobsException, BackendException {
+	public void prepareAndCreateJobs(boolean optimize) throws JobsException, BackendException {
 
 		// TODO check whether any of the jobnames already exist
 
@@ -652,10 +660,13 @@ public class MultiPartJobObject {
 											multiPartJobId,
 											job
 													.getJobDescriptionDocumentAsString());
+							job.setJobname(jobname);
+							job.updateJobDirectory();
+							
 							EventBus.publish(MultiPartJobObject.this.multiPartJobId, new MultiPartJobEvent(
 									MultiPartJobObject.this, "Creation of job "
 									+ job.getJobname() + " successful."));
-							job.setJobname(jobname);
+							
 							success = true;
 							break;
 						} catch (Exception e) {
@@ -704,6 +715,20 @@ public class MultiPartJobObject {
 			throw new JobsException(failedSubmissions);
 		}
 
+		if ( optimize ) {
+		try {
+			EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this,
+					"Optimizing multipartjob: "
+					+ multiPartJobId));
+			serviceInterface.optimizeMultiPartJob(this.multiPartJobId);
+			EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this,
+					"Optimizing of multipartjob "
+					+ multiPartJobId + " finished."));
+		} catch (NoSuchJobException e) {
+			throw new RuntimeException(e);
+		}
+		}	
+		
 		try {
 			EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this,
 					"Uploading input files for multipartjob: "
@@ -807,11 +832,25 @@ public class MultiPartJobObject {
 	public void setSitesToInclude(String[] sites) {
 		this.sitesToInclude = sites;
 		this.sitesToExclude = null;
+		
+		try {
+			serviceInterface.addJobProperty(this.multiPartJobId, Constants.SITES_TO_INCLUDE_KEY, StringUtils.join(sites, ","));
+			serviceInterface.addJobProperty(this.multiPartJobId, Constants.SITES_TO_EXCLUDE_KEY, null);
+		} catch (NoSuchJobException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public void setSitesToExclude(String[] sites) {
 		this.sitesToExclude = sites;
 		this.sitesToInclude = null;
+
+		try {
+			serviceInterface.addJobProperty(this.multiPartJobId, Constants.SITES_TO_EXCLUDE_KEY, StringUtils.join(sites, ","));
+			serviceInterface.addJobProperty(this.multiPartJobId, Constants.SITES_TO_INCLUDE_KEY, null);
+		} catch (NoSuchJobException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public int getMaxWalltimeInSeconds() {
@@ -825,6 +864,12 @@ public class MultiPartJobObject {
 	public void setDefaultWalltimeInSeconds(int walltimeInSeconds) {
 		this.defaultWalltime = walltimeInSeconds;
 		this.maxWalltimeInSecondsAcrossJobs = walltimeInSeconds;
+		
+		try {
+			serviceInterface.addJobProperty(this.multiPartJobId, Constants.WALLTIME_IN_MINUTES_KEY, new Integer(walltimeInSeconds/60).toString());
+		} catch (NoSuchJobException e) {
+			throw new RuntimeException(e);
+		}
 
 		for (JobObject job : this.jobs) {
 			job.setWalltimeInSeconds(walltimeInSeconds);
@@ -838,6 +883,12 @@ public class MultiPartJobObject {
 	public void setDefaultApplication(String defaultApplication) {
 		this.defaultApplication = defaultApplication;
 
+		try {
+			serviceInterface.addJobProperty(this.multiPartJobId, Constants.APPLICATIONNAME_KEY, defaultApplication);
+		} catch (NoSuchJobException e) {
+			throw new RuntimeException(e);
+		}
+		
 		for (JobObject job : this.jobs) {
 			job.setApplication(defaultApplication);
 		}
@@ -849,6 +900,12 @@ public class MultiPartJobObject {
 
 	public void setDefaultVersion(String defaultVersion) {
 		this.defaultVersion = defaultVersion;
+		
+		try {
+			serviceInterface.addJobProperty(this.multiPartJobId, Constants.APPLICATIONVERSION_KEY, defaultVersion);
+		} catch (NoSuchJobException e) {
+			throw new RuntimeException(e);
+		}
 
 		for (JobObject job : this.jobs) {
 			job.setApplicationVersion(defaultVersion);
@@ -863,6 +920,12 @@ public class MultiPartJobObject {
 
 	public void setDefaultNoCpus(int defaultNoCpus) {
 		this.defaultNoCpus = defaultNoCpus;
+		
+		try {
+			serviceInterface.addJobProperty(this.multiPartJobId, Constants.NO_CPUS_KEY, new Integer(defaultNoCpus).toString());
+		} catch (NoSuchJobException e) {
+			throw new RuntimeException(e);
+		}
 
 		for (JobObject job : this.jobs) {
 			job.setCpus(defaultNoCpus);

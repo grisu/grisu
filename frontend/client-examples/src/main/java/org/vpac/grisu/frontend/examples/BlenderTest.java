@@ -131,7 +131,7 @@ public class BlenderTest  {
 //		multiPartJob.addInputFile("gsiftp://ng2.canterbury.ac.nz/home/grid-admin/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner/input.txt");
 		
 		try {
-			multiPartJob.prepareAndCreateJobs();
+			multiPartJob.prepareAndCreateJobs(true);
 		} catch (JobsException e) {
 			for ( JobObject job : e.getFailures().keySet() ) {
 				System.out.println("Creation "+job.getJobname()+" failed: "+e.getFailures().get(job).getLocalizedMessage());

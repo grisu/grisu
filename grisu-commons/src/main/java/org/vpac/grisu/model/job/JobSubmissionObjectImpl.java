@@ -202,6 +202,19 @@ public class JobSubmissionObjectImpl {
 	public String getCommandline() {
 		return commandline;
 	}
+	
+	public String extractExecutable() {
+		if ( commandline == null || commandline.length() == 0 ) {
+			return null;
+		}
+		
+		int i = commandline.indexOf(" ");
+		if ( i <= 0 ) {
+			return commandline;
+		} else {
+			return commandline.substring(0, i-1);
+		}
+	}
 
 	public void setCommandline(final String commandline) {
 		this.commandline = commandline;

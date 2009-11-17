@@ -535,9 +535,6 @@ public interface ServiceInterface {
 	 *            the (local) file you want to upload
 	 * @param filename
 	 *            the location you want the file upload to
-	 * @param return_absolute_url
-	 *            whether you want the new location of the file absolute or
-	 *            "user-space" style
 	 * @return the new path of the uploaded file or null if the upload failed
 	 * @throws RemoteFileSystemException
 	 *             if the remote (target) filesystem could not be connected /
@@ -547,8 +544,7 @@ public interface ServiceInterface {
 	@RolesAllowed("User")
 	@Path("actions/upload")
 	@Produces("text/plain")
-	String upload(@XmlMimeType("application/octet-stream") DataHandler file, @QueryParam("filename") String filename,
-			@QueryParam("returnAbsUrl") boolean return_absolute_url) throws RemoteFileSystemException;
+	String upload(@XmlMimeType("application/octet-stream") DataHandler file, @QueryParam("filename") String filename) throws RemoteFileSystemException;
 
 	/**
 	 * Download a file to the client.
@@ -953,10 +949,22 @@ public interface ServiceInterface {
 	 * Adds the specified job to the mulitpartJob.
 	 * 
 	 * @param multipartJobId the multipartjobid
-	 * @param jobname the jobname
+	 * @param jobdescription the jsdl string
 	 */
 	@RolesAllowed("User")
-	String addJobToMultiPartJob(String multipartJobId, String jobname) throws NoSuchJobException, JobPropertiesException;
+	String addJobToMultiPartJob(String multipartJobId, String jobdescription) throws NoSuchJobException, JobPropertiesException;
+	
+	/**
+	 * Tries to figure out the best submission locations for all the jobs that this multipartjob consists of.
+	 * 
+	 * Call this after you added all jobs to the multipartjob and before you upload/crosstage any files.
+	 * It will overwrite possibly specified submission locations on jobs.
+	 * 
+	 * @param multipartJobId the id of the multipartjob
+	 * @throws NoSuchJobException if there is no multipartjob with such an id
+	 */
+	@RolesAllowed("User")
+	void optimizeMultiPartJob(String multipartJobId) throws NoSuchJobException;
 	
 	/**
 	 * Removes the specified job from the mulitpartJob.
@@ -1027,9 +1035,11 @@ public interface ServiceInterface {
 
 
 	/**
-	 * Distributes an input file to all the filesystems that are used in this multipartjob.
+	 * Uploads input file for job or distributes an input file to all the filesystems that are used in a multipartjob if job is multijob.
 	 * 
-	 * You need to reverence to the input file using relative paths in the commandline you specify in the jobs that need this inputfile.
+	 * In case of single job: this gets put in the jobdirectory of the job.
+	 * 
+	 * In case of multijob: You need to reverence to the input file using relative paths in the commandline you specify in the jobs that need this inputfile.
 	 * Use this after you created all jobs for this multipartjob.
 	 * 
 	 * @param multiPartJobId the id of the multipartjob

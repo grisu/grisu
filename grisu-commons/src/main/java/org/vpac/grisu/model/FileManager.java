@@ -194,7 +194,7 @@ public class FileManager {
 		try {
 			myLogger.info("Uploading file " + file.getName() + "...");
 			filetransferHandle = serviceInterface.upload(handler,
-					targetFile, true);
+					targetFile);
 			myLogger.info("Upload of file " + file.getName() + " successful.");
 		} catch (Exception e1) {
 			try {
@@ -203,7 +203,7 @@ public class FileManager {
 				System.out.println("FAILED. SLEEPING 1 SECONDS");
 				Thread.sleep(1000);
 				filetransferHandle = serviceInterface.upload(handler,
-						targetFile + "/" + file.getName(), true);
+						targetFile + "/" + file.getName());
 				myLogger.info("Upload of file " + file.getName()
 						+ " successful.");
 			} catch (Exception e) {
