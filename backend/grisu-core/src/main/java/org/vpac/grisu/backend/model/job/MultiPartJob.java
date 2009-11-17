@@ -22,6 +22,7 @@ import javax.persistence.Transient;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.CollectionOfElements;
 import org.vpac.grisu.backend.hibernate.JobDAO;
+import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoJobProperty;
@@ -245,6 +246,7 @@ public class MultiPartJob {
 		final DtoMultiPartJob result = new DtoMultiPartJob(this
 				.getMultiPartJobId());
 		
+	
 		result.setSubmissionFqan(this.getFqan());
 		result.setProperties(DtoJobProperty.dtoJobPropertiesFromMap(this
 				.getJobProperties()));
@@ -278,10 +280,11 @@ public class MultiPartJob {
 			throw new RuntimeException(e);
 		}
 
+		boolean finished = true;
 		DtoJobs dtoJobs = new DtoJobs();
 		for (String jobname : getFailedJobs()) {
-			// Job job = getJob(jobname);
-			dtoJobs.addJob(result.retrieveJob(jobname));
+			DtoJob job = result.retrieveJob(jobname);
+			dtoJobs.addJob(job);
 		}
 		result.setFailedJobs(dtoJobs);
 

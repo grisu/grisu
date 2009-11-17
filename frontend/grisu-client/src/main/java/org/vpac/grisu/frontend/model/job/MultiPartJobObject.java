@@ -155,7 +155,7 @@ public class MultiPartJobObject {
 
 	public boolean isFinished(boolean refresh) {
 		try {
-			return getMultiPartJob(refresh).allJobsFinished();
+			return getMultiPartJob(refresh).isFinished();
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
@@ -203,6 +203,7 @@ public class MultiPartJobObject {
 					refreshMultiPartJobStatus(true);
 				}
 				
+				jobs.clear();
 				dtoMultiPartJob = serviceInterface.getMultiPartJob(
 						multiPartJobId);
 				
@@ -329,7 +330,7 @@ public class MultiPartJobObject {
 			if (forceSuccess && restarter != null) {
 				finished = temp.allJobsFinishedSuccessful();
 			} else {
-				finished = temp.allJobsFinished();
+				finished = temp.isFinished();
 			}
 
 			if (finished || (enddate != null && new Date().after(enddate))) {
@@ -1020,5 +1021,48 @@ public class MultiPartJobObject {
 			throw new RuntimeException();
 		}
 	}
+	
+	public SortedSet<DtoJob> runningJobs() {
+		return getMultiPartJob(false).runningJobs();
+	}
+	public int numberOfRunningJobs() {
+		return getMultiPartJob(false).numberOfRunningJobs();
+	}
+	
+	public SortedSet<DtoJob> waitingJobs() {
+		return getMultiPartJob(false).waitingJobs();
+	}
+	public int numberOfWaitingJobs() {
+		return getMultiPartJob(false).numberOfWaitingJobs();
+	}
+	
+	public SortedSet<DtoJob> finishedJobs() {
+		return getMultiPartJob(false).finishedJobs();
+	}
+	public int numberOfFinishedJobs() {
+		return getMultiPartJob(false).numberOfFinishedJobs();
+	}
+	
+	public SortedSet<DtoJob> failedJobs() {
+		return getMultiPartJob(false).failedJobs();
+	}
+	public int numberOfFailedJobs() {
+		return getMultiPartJob(false).numberOfFailedJobs();
+	}
+	
+	public SortedSet<DtoJob> successfulJobs() {
+		return getMultiPartJob(false).successfulJobs();
+	}
+	public int numberOfSuccessfulJobs() {
+		return getMultiPartJob(false).numberOfSuccessfulJobs();
+	}
+	
+	public SortedSet<DtoJob> unsubmittedJobs() {
+		return getMultiPartJob(false).unsubmittedJobs();
+	}
+	public int numberOfUnsubmittedJobs() {
+		return getMultiPartJob(false).numberOfUnsubmittedJobs();
+	}
+	
 
 }

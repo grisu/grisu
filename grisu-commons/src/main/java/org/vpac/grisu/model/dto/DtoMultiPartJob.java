@@ -9,6 +9,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -22,6 +23,8 @@ public class DtoMultiPartJob {
 	private String multiPartJobId;
 	private String submissionFqan;
 	
+	private boolean isFinished = true;
+	
 	private DtoJobs jobs = new DtoJobs();
 
 	public DtoMultiPartJob() {
@@ -30,6 +33,24 @@ public class DtoMultiPartJob {
 	public DtoMultiPartJob(String multiPartJobId) {
 		this.multiPartJobId = multiPartJobId;
 	}
+	
+	@XmlAttribute(name="finished")
+	public boolean isFinished() {
+		return this.isFinished;
+	}
+	
+	public void setFinished(boolean f) {
+		this.isFinished = f;
+	}
+	
+//	@XmlAttribute(name="failed")
+//	public boolean isFailed() {
+//		return this.isFailed;
+//	}
+//	
+//	public void setFailed(boolean f) {
+//		this.isFailed = f;
+//	}
 	
 	@XmlElement(name="fqan")
 	public String getSubmissionFqan() {
@@ -131,6 +152,9 @@ public class DtoMultiPartJob {
 	
 	public synchronized void addJob(DtoJob job) {
 		this.jobs.addJob(job);
+		if ( job.getStatus() < JobConstants.FINISHED_EITHER_WAY ) {
+			this.isFinished = false;
+		}
 	}
 	
 	public int totalNumberOfJobs() {
@@ -138,19 +162,22 @@ public class DtoMultiPartJob {
 	}
 	
 	
-	public boolean allJobsFinished() {
-		
-		if ( totalNumberOfJobs() == numberOfFinishedJobs() ) {
-			return true;
-		} else {
-			return false;
-		}
-		
-	}
+//	public boolean allJobsFinished() {
+//		
+//		if ( totalNumberOfJobs() == numberOfFinishedJobs() ) {
+//			return true;
+//		} else {
+//			return false;
+//		}
+//		
+//	}
 	
 	public boolean allJobsFinishedSuccessful() {
 		
-		if ( allJobsFinished() && totalNumberOfJobs() == numberOfSuccessfulJobs() ) {
+		if ( ! isFinished() ) {
+			return false;
+		}
+		if ( totalNumberOfJobs() == numberOfSuccessfulJobs() ) {
 			return true;
 		} else {
 			return false;

@@ -15,6 +15,7 @@ import org.vpac.grisu.frontend.model.job.JobsException;
 import org.vpac.grisu.frontend.model.job.MultiPartJobObject;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
+import org.vpac.grisu.model.dto.DtoMultiPartJob;
 
 import au.org.arcs.jcommons.constants.Constants;
 
@@ -52,7 +53,7 @@ public class MultiJobSubmit {
 		final int numberOfJobs = 10;
 		
 		Date start = new Date();
-		final String multiJobName = "10jobs";
+		final String multiJobName = "10jobs2";
 		try {
 			si.deleteMultiPartJob(multiJobName, true);
 		} catch (Exception e) {
@@ -88,7 +89,7 @@ public class MultiJobSubmit {
 		}
 
 		multiPartJob.addInputFile("/home/markus/test/multiJobFile.txt");
-		multiPartJob.setDefaultApplication("generic");
+		multiPartJob.setDefaultApplication("java");
 		multiPartJob.setSitesToExclude(new String[]{"tpac"});
 		
 //		multiPartJob.setSitesToExclude(new String[]{"vpac", "massey", "uq", "canterbury", "sapac", "ivec", "otago"});
@@ -114,6 +115,25 @@ public class MultiJobSubmit {
 		
 
 		System.out.println("Submission finished: "+new Date());
+		
+
+		while ( ! multiPartJob.isFinished(true) ) {
+			System.out.println("Not finished yet...");
+			multiPartJob.getJobs().size();
+
+			Thread.sleep(2000);
+		}
+		
+		for ( JobObject job : multiPartJob.getJobs() ) {
+			System.out.println("-------------------------------");
+			System.out.println(job.getJobname()+": "+job.getStatusString(false));
+			System.out.println(job.getStdOutContent());
+			System.out.println("-------------------------------");
+			System.out.println(job.getStdErrContent());
+			System.out.println("-------------------------------");
+			System.out.println();
+		}
+
 		
 //		if ( HibernateSessionFactory.HSQLDB_DBTYPE.equals(HibernateSessionFactory.usedDatabase) ) {
 //			// for hqsqldb
