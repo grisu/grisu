@@ -1773,13 +1773,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @param deleteChildJobsAsWell
 	 *            whether to delete the child jobs of this multipartjob as well.
 	 */
-	public void deleteMultiPartJob(String multiPartJobId,
-			boolean deleteChildJobsAsWell) throws NoSuchJobException {
+	private void deleteMultiPartJob(final MultiPartJob multiJob, final boolean clean)  {
 
-		final MultiPartJob multiJob = getMultiPartJobFromDatabase(multiPartJobId);
+		int size = multiJob.getJobs().size() * 2 + 1;
+		
+		if ( clean ) {
+			size = size + multiJob.getAllUsedMountPoints().size() * 2;
+		}
 		
 		final DtoActionStatus newActionStatus = new DtoActionStatus(multiJob
-				.getMultiPartJobId(), (multiJob.getJobs().size()*2)+(multiJob.getAllUsedMountPoints().size()*2)+1);
+				.getMultiPartJobId(), size);
 		this.actionStatus.put(multiJob.getMultiPartJobId(), newActionStatus);
 
 		ExecutorService executor = Executors
@@ -1788,18 +1791,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 
 		final Job[] jobs = multiJob.getJobs().toArray(new Job[] {});
+		
 
-		if (deleteChildJobsAsWell) {
+			for (Job job : jobs) {
+				multiJob.removeJob(job);
+			}
+			multiPartJobDao.saveOrUpdate(multiJob);
 			for (final Job job : jobs) {
 				Thread thread = new Thread() {
 					public void run() {
 						
 						try{
 							newActionStatus.addElement("Killing job: "+job.getJobname());
-							job.addJobProperty(Constants.MULTIJOB_NAME, null);
-							multiJob.removeJob(job);
-							multiPartJobDao.saveOrUpdate(multiJob);
-							kill(job, true, true);
+							kill(job, clean);
 							newActionStatus.addElement("Killed job: "+job.getJobname());
 						} catch (Exception e) {
 							newActionStatus.addElement("Failed killing job "+job.getJobname()+": "+e.getLocalizedMessage());
@@ -1818,8 +1822,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			
 			executor.shutdown();
 			
-		}
 
+			if ( clean ) {
 		for (String mpRoot : multiJob.getAllUsedMountPoints()) {
 
 			newActionStatus.addElement("Deleting common dir for mountpoint: "+mpRoot);
@@ -1837,6 +1841,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 
 		}
+			}
 
 		multiPartJobDao.delete(multiJob);
 		newActionStatus.addElement("Deleted multipartjob from database.");
@@ -3075,16 +3080,22 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void kill(final String jobname, final boolean clear)
 			throws RemoteFileSystemException, NoSuchJobException,
 			MultiPartJobException {
+		
 
-		Job job;
+		try {
+			Job job;
 
-		job = jobdao.findJobByDN(getUser().getDn(), jobname);
+			job = jobdao.findJobByDN(getUser().getDn(), jobname);
 
-		kill(job, clear, false);
+			kill(job, clear);
+			
+		} catch (NoSuchJobException nsje) {
+			MultiPartJob mpj = getMultiPartJobFromDatabase(jobname);
+			deleteMultiPartJob(mpj, clear);
+		}
 	}
 
-	private void kill(final Job job, final boolean clear,
-			final boolean clearMultiJob) throws MultiPartJobException {
+	private void kill(final Job job, final boolean clear) throws MultiPartJobException {
 
 		// Job job;
 		//
@@ -3094,9 +3105,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		if (clear) {
 
-			if (job.isMultiPartJob() && !clearMultiJob) {
-				throw new MultiPartJobException(
-						"Can't delete job. You need to delete the parent multipartjob first.");
+			if (job.isMultiPartJob()) {
+				
+				try {
+					MultiPartJob mpj = getMultiPartJobFromDatabase(job.getJobProperty(Constants.MULTIJOB_NAME));
+					mpj.removeJob(job);
+					multiPartJobDao.saveOrUpdate(mpj);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
 			}
 
 			if (job.getJobProperty(Constants.JOBDIRECTORY_KEY) != null) {

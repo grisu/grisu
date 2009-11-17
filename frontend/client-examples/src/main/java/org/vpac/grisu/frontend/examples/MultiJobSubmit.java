@@ -55,7 +55,7 @@ public class MultiJobSubmit {
 		Date start = new Date();
 		final String multiJobName = "10jobs2";
 		try {
-			si.deleteMultiPartJob(multiJobName, true);
+			si.kill(multiJobName, true);
 		} catch (Exception e) {
 			// doesn't matter
 			e.printStackTrace();

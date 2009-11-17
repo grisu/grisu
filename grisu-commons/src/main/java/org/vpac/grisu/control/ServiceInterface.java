@@ -835,6 +835,8 @@ public interface ServiceInterface {
 	 * Deletes the whole jobdirectory (if specified) and if successful, the job from the
 	 * database.
 	 * 
+	 * Also works with multipart jobs.
+	 * 
 	 * @param jobname
 	 *            the name of the job
 	 * @param clean
@@ -987,14 +989,14 @@ public interface ServiceInterface {
 	@RolesAllowed("User")
 	DtoMultiPartJob createMultiPartJob(String multiPartJobId, String fqan) throws MultiPartJobException;
 	
-	/**
-	 * Removes the multipartJob from the server.
-	 * 
-	 * @param multiPartJobId the name of the multipartJob
-	 * @param deleteChildJobsAsWell whether to delete the child jobs of this multipartjob as well.
-	 */
-	@RolesAllowed("User")
-	void deleteMultiPartJob(String multiPartJobId, boolean deleteChildJobsAsWell) throws NoSuchJobException;
+//	/**
+//	 * Removes the multipartJob from the server.
+//	 * 
+//	 * @param multiPartJobId the name of the multipartJob
+//	 * @param deleteChildJobsAsWell whether to delete the child jobs of this multipartjob as well.
+//	 */
+//	@RolesAllowed("User")
+//	void deleteMultiPartJob(String multiPartJobId, boolean deleteChildJobsAsWell) throws NoSuchJobException;
 	
 	
 	/**

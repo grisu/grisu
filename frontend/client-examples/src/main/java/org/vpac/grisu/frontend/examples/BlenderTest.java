@@ -94,7 +94,7 @@ public class BlenderTest  {
 		Date start = new Date();
 		final String multiJobName = "PerformanceTest8";
 		try {
-			si.deleteMultiPartJob(multiJobName, true);
+			si.kill(multiJobName, true);
 		} catch (Exception e) {
 			// doesn't matter
 			e.printStackTrace();
