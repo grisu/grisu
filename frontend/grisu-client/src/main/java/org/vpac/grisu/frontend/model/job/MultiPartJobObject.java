@@ -45,6 +45,14 @@ import au.org.arcs.jcommons.constants.JobSubmissionProperty;
 import au.org.arcs.jcommons.interfaces.GridResource;
 import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
 
+/**
+ * @author markus
+ *
+ */
+/**
+ * @author markus
+ *
+ */
 public class MultiPartJobObject {
 
 	static final Logger myLogger = Logger.getLogger(MultiPartJobObject.class
@@ -81,7 +89,7 @@ public class MultiPartJobObject {
 	private String[] allRemoteJobnames;
 
 	/**
-	 * Use this constructor if you want to create a multipartjob.
+	 * Use this constructor if you want to create a new multipartjob.
 	 * 
 	 * @param serviceInterface
 	 *            the serviceinterface
@@ -110,12 +118,12 @@ public class MultiPartJobObject {
 		}
 		setDefaultApplication(defaultApplication);
 		setDefaultVersion(defaultVersion);
-		try {
-			serviceInterface.addJobProperty(this.multiPartJobId, Constants.APPLICATIONNAME_KEY, defaultApplication);
-			serviceInterface.addJobProperty(this.multiPartJobId, Constants.APPLICATIONVERSION_KEY, defaultVersion);
-		} catch (NoSuchJobException e) {
-			throw new RuntimeException(e);
-		}
+//		try {
+//			serviceInterface.addJobProperty(this.multiPartJobId, Constants.APPLICATIONNAME_KEY, defaultApplication);
+//			serviceInterface.addJobProperty(this.multiPartJobId, Constants.APPLICATIONVERSION_KEY, defaultVersion);
+//		} catch (NoSuchJobException e) {
+//			throw new RuntimeException(e);
+//		}
 		
 	}
 
@@ -153,6 +161,12 @@ public class MultiPartJobObject {
 		
 	}
 
+	/**
+	 * Returns whether all jobs within this multipart job are finished (failed or not).
+	 * 
+	 * @param refresh whether to refresh all jobs on the backend
+	 * @return whether all jobs are finished or not.
+	 */
 	public boolean isFinished(boolean refresh) {
 		try {
 			return getMultiPartJob(refresh).isFinished();
@@ -162,10 +176,22 @@ public class MultiPartJobObject {
 		}
 	}
 
-	public boolean isSuccessful() {
-		return getMultiPartJob(true).allJobsFinishedSuccessful();
+	/**
+	 * Returns whether all jobs within this multipart job finished successfully.
+	 * 
+	 * @param refresh whether to refresh all jobs on the backend
+	 * @return whether all jobs finished successfully
+	 */
+	public boolean isSuccessful(boolean refresh) {
+		return getMultiPartJob(refresh).allJobsFinishedSuccessful();
 	}
 
+	
+	/**
+	 * Refresh all jobs on the backend. 
+	 * 
+	 * Waits for the refresh to finish.
+	 */
 	public void refresh() {
 		getMultiPartJob(true);
 	}
@@ -218,6 +244,11 @@ public class MultiPartJobObject {
 		return dtoMultiPartJob;
 	}
 
+	/**
+	 * Restarts all jobs that failed using the provided {@link FailedJobRestarter}.
+	 * 
+	 * @param restarter the job restarter that contains the logic how to restart the job
+	 */
 	public void restartFailedJobs(FailedJobRestarter restarter) {
 
 		if (restarter == null) {
@@ -254,20 +285,18 @@ public class MultiPartJobObject {
 
 	}
 
+	/**
+	 * Displays a summary of the job status.
+	 * 
+	 * @param restarter an (optional) FailedJobRestarter to restart failed jobs or null
+	 * @return the progress summary
+	 */
 	public String getProgress(FailedJobRestarter restarter) {
-		Date start = new Date();
 
 		DtoMultiPartJob temp;
 		temp = getMultiPartJob(false);
 
-		Date end = new Date();
-
 		StringBuffer output = new StringBuffer();
-
-		output
-				.append("Time to get all job status: "
-						+ (end.getTime() - start.getTime()) / 1000
-						+ " seconds." + "\n");
 
 		output.append("Total number of jobs: " + temp.totalNumberOfJobs()
 				+ "\n");
@@ -300,7 +329,7 @@ public class MultiPartJobObject {
 	 * Monitors the status of all jobs of this multipartjob.
 	 * 
 	 * If you want to restart failed jobs while this is running, provide a
-	 * {@link FailedJobRestarter}.
+	 * {@link FailedJobRestarter}. Prints out a lot of verbose information.
 	 * 
 	 * @param sleeptimeinseconds
 	 *            how long between monitor runs
@@ -336,6 +365,8 @@ public class MultiPartJobObject {
 			if (finished || (enddate != null && new Date().after(enddate))) {
 				break;
 			}
+			
+			System.out.println(progress);
 
 			for (Date date : getLogMessages(false).keySet()) {
 				System.out.println(date.toString() + ": "
@@ -354,18 +385,41 @@ public class MultiPartJobObject {
 		} while (!finished);
 	}
 
+	/**
+	 * Returns the fqan that is used for this multipartjob.
+	 * 
+	 * @return the fqan
+	 */
 	public String getFqan() {
 		return submissionFqan;
 	}
 
+	/**
+	 * Returns all the properties for this multipartjob. 
+	 * 
+	 * This method doesn't refresh the underlying object, you might want to do that yourself in some cases.
+	 * @return the properties
+	 */
 	public Map<String, String> getProperties() {
 		return getMultiPartJob(false).propertiesAsMap();
 	}
 
+	/**
+	 * Calculates the relative path from each of the job directories to the common input file directory for this multipart job.
+	 * 
+	 * This can be used to create the commandline for each of the part jobs.
+	 * 
+	 * @return the absolute path
+	 */
 	public String pathToInputFiles() {
 		return getMultiPartJob(false).pathToInputFiles();
 	}
 
+	/**
+	 * Adds a new job object to this multipart job.
+	 * 
+	 * @param job the new job object
+	 */
 	public void addJob(JobObject job) {
 
 		if (jobs.contains(job)) {
@@ -395,166 +449,188 @@ public class MultiPartJobObject {
 		this.jobs.add(job);
 	}
 
-	private SortedSet<GridResource> findBestResources() {
+//	private SortedSet<GridResource> findBestResources() {
+//
+//		Map<JobSubmissionProperty, String> properties = new HashMap<JobSubmissionProperty, String>();
+//		properties.put(JobSubmissionProperty.NO_CPUS,
+//				new Integer(defaultNoCpus).toString());
+//		properties
+//				.put(JobSubmissionProperty.APPLICATIONVERSION, defaultVersion);
+//		properties.put(JobSubmissionProperty.WALLTIME_IN_MINUTES, new Integer(
+//				maxWalltimeInSecondsAcrossJobs / 60).toString());
+//
+//		SortedSet<GridResource> result = GrisuRegistryManager.getDefault(
+//				serviceInterface).getApplicationInformation(
+//				getDefaultApplication()).getBestSubmissionLocations(properties,
+//				getFqan());
+//		StringBuffer message = new StringBuffer(
+//				"Finding best resources for mulipartjob " + multiPartJobId
+//						+ " using:\n");
+//		message.append("Version: " + defaultVersion + "\n");
+//		message.append("Walltime in minutes: " + maxWalltimeInSecondsAcrossJobs
+//				/ 60 + "\n");
+//		message.append("No cpus: " + defaultNoCpus + "\n");
+//		EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, message.toString()));
+//
+//		return result;
+//
+//	}
 
-		Map<JobSubmissionProperty, String> properties = new HashMap<JobSubmissionProperty, String>();
-		properties.put(JobSubmissionProperty.NO_CPUS,
-				new Integer(defaultNoCpus).toString());
-		properties
-				.put(JobSubmissionProperty.APPLICATIONVERSION, defaultVersion);
-		properties.put(JobSubmissionProperty.WALLTIME_IN_MINUTES, new Integer(
-				maxWalltimeInSecondsAcrossJobs / 60).toString());
+//	private void fillOrOverwriteSubmissionLocationsUsingMatchmaker()
+//			throws JobCreationException, JobSubmissionException {
+//
+//		Map<String, Integer> submissionLocations = new TreeMap<String, Integer>();
+//
+//		Long allWalltime = 0L;
+//		for (JobObject job : this.jobs) {
+//			allWalltime = allWalltime + job.getWalltimeInSeconds();
+//		}
+//
+//		Map<GridResource, Long> resourcesToUse = new TreeMap<GridResource, Long>();
+//		List<Integer> ranks = new LinkedList<Integer>();
+//		Long allRanks = 0L;
+//		for (GridResource resource : findBestResources()) {
+//
+//			if (sitesToInclude != null) {
+//
+//				for (String site : sitesToInclude) {
+//					if (resource.getSiteName().toLowerCase().contains(
+//							site.toLowerCase())) {
+//						resourcesToUse.put(resource, new Long(0L));
+//						ranks.add(resource.getRank());
+//						allRanks = allRanks + resource.getRank();
+//						break;
+//					}
+//				}
+//
+//			} else if (sitesToExclude != null) {
+//
+//				boolean useSite = true;
+//				for (String site : sitesToExclude) {
+//					if (resource.getSiteName().toLowerCase().contains(
+//							site.toLowerCase())) {
+//						useSite = false;
+//						break;
+//					}
+//				}
+//				if (useSite) {
+//					resourcesToUse.put(resource, new Long(0L));
+//					ranks.add(resource.getRank());
+//					allRanks = allRanks + resource.getRank();
+//				}
+//
+//			} else {
+//				resourcesToUse.put(resource, new Long(0L));
+//				ranks.add(resource.getRank());
+//				allRanks = allRanks + resource.getRank();
+//			}
+//		}
+//
+//		myLogger.debug("Rank summary: " + allRanks);
+//		myLogger.debug("Walltime summary: " + allWalltime);
+//
+//		GridResource[] resourceArray = resourcesToUse.keySet().toArray(
+//				new GridResource[] {});
+//		int lastIndex = 0;
+//
+//		for (JobObject job : this.jobs) {
+//
+//			GridResource subLocResource = null;
+//			long oldWalltimeSummary = 0L;
+//
+//			for (int i = lastIndex; i < resourceArray.length * 2; i++) {
+//				int indexToUse = i;
+//				if (i >= resourceArray.length) {
+//					indexToUse = indexToUse - resourceArray.length;
+//				}
+//
+//				GridResource resource = resourceArray[indexToUse];
+//
+//				long rankPercentage = (resource.getRank() * 100) / (allRanks);
+//				long wallTimePercentage = ((job.getWalltimeInSeconds() + resourcesToUse
+//						.get(resource)) * 100)
+//						/ (allWalltime);
+//
+//				if (rankPercentage >= wallTimePercentage) {
+//					subLocResource = resource;
+//					oldWalltimeSummary = resourcesToUse.get(subLocResource);
+//					myLogger.debug("Rank percentage: " + rankPercentage
+//							+ ". Walltime percentage: " + wallTimePercentage
+//							+ ". Using resource: " + resource.getQueueName());
+//					lastIndex = lastIndex + 1;
+//					if (lastIndex >= resourceArray.length) {
+//						lastIndex = 0;
+//					}
+//					break;
+//				} else {
+//					// myLogger.debug("Rank percentage: "+rankPercentage+". Walltime percentage: "+wallTimePercentage+". Not using resource: "+resource.getQueueName());
+//				}
+//			}
+//
+//			if (subLocResource == null) {
+//				subLocResource = resourcesToUse.keySet().iterator().next();
+//				myLogger.error("Couldn't find resource for job: "
+//						+ job.getJobname());
+//			}
+//
+//			String subLoc = SubmissionLocationHelpers
+//					.createSubmissionLocationString(subLocResource);
+//			Integer currentCount = submissionLocations.get(subLocResource
+//					.toString());
+//			if (currentCount == null) {
+//				currentCount = 0;
+//			}
+//			submissionLocations
+//					.put(subLocResource.toString(), currentCount + 1);
+//
+//			job.setSubmissionLocation(subLoc);
+//			resourcesToUse.put(subLocResource, oldWalltimeSummary
+//					+ job.getWalltimeInSeconds());
+//		}
+//
+//		StringBuffer message = new StringBuffer(
+//				"Filled submissionlocations for multijob: " + multiPartJobId
+//						+ "\n");
+//		message.append("Submitted jobs to:\t\t\tAmount\n");
+//		for (String sl : submissionLocations.keySet()) {
+//			message
+//					.append(sl + "\t\t\t\t" + submissionLocations.get(sl)
+//							+ "\n");
+//		}
+//		EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, message.toString()));
+//
+//	}
 
-		SortedSet<GridResource> result = GrisuRegistryManager.getDefault(
-				serviceInterface).getApplicationInformation(
-				getDefaultApplication()).getBestSubmissionLocations(properties,
-				getFqan());
-		StringBuffer message = new StringBuffer(
-				"Finding best resources for mulipartjob " + multiPartJobId
-						+ " using:\n");
-		message.append("Version: " + defaultVersion + "\n");
-		message.append("Walltime in minutes: " + maxWalltimeInSecondsAcrossJobs
-				/ 60 + "\n");
-		message.append("No cpus: " + defaultNoCpus + "\n");
-		EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, message.toString()));
-
-		return result;
-
-	}
-
-	private void fillOrOverwriteSubmissionLocationsUsingMatchmaker()
-			throws JobCreationException, JobSubmissionException {
-
-		Map<String, Integer> submissionLocations = new TreeMap<String, Integer>();
-
-		Long allWalltime = 0L;
-		for (JobObject job : this.jobs) {
-			allWalltime = allWalltime + job.getWalltimeInSeconds();
-		}
-
-		Map<GridResource, Long> resourcesToUse = new TreeMap<GridResource, Long>();
-		List<Integer> ranks = new LinkedList<Integer>();
-		Long allRanks = 0L;
-		for (GridResource resource : findBestResources()) {
-
-			if (sitesToInclude != null) {
-
-				for (String site : sitesToInclude) {
-					if (resource.getSiteName().toLowerCase().contains(
-							site.toLowerCase())) {
-						resourcesToUse.put(resource, new Long(0L));
-						ranks.add(resource.getRank());
-						allRanks = allRanks + resource.getRank();
-						break;
-					}
-				}
-
-			} else if (sitesToExclude != null) {
-
-				boolean useSite = true;
-				for (String site : sitesToExclude) {
-					if (resource.getSiteName().toLowerCase().contains(
-							site.toLowerCase())) {
-						useSite = false;
-						break;
-					}
-				}
-				if (useSite) {
-					resourcesToUse.put(resource, new Long(0L));
-					ranks.add(resource.getRank());
-					allRanks = allRanks + resource.getRank();
-				}
-
-			} else {
-				resourcesToUse.put(resource, new Long(0L));
-				ranks.add(resource.getRank());
-				allRanks = allRanks + resource.getRank();
-			}
-		}
-
-		myLogger.debug("Rank summary: " + allRanks);
-		myLogger.debug("Walltime summary: " + allWalltime);
-
-		GridResource[] resourceArray = resourcesToUse.keySet().toArray(
-				new GridResource[] {});
-		int lastIndex = 0;
-
-		for (JobObject job : this.jobs) {
-
-			GridResource subLocResource = null;
-			long oldWalltimeSummary = 0L;
-
-			for (int i = lastIndex; i < resourceArray.length * 2; i++) {
-				int indexToUse = i;
-				if (i >= resourceArray.length) {
-					indexToUse = indexToUse - resourceArray.length;
-				}
-
-				GridResource resource = resourceArray[indexToUse];
-
-				long rankPercentage = (resource.getRank() * 100) / (allRanks);
-				long wallTimePercentage = ((job.getWalltimeInSeconds() + resourcesToUse
-						.get(resource)) * 100)
-						/ (allWalltime);
-
-				if (rankPercentage >= wallTimePercentage) {
-					subLocResource = resource;
-					oldWalltimeSummary = resourcesToUse.get(subLocResource);
-					myLogger.debug("Rank percentage: " + rankPercentage
-							+ ". Walltime percentage: " + wallTimePercentage
-							+ ". Using resource: " + resource.getQueueName());
-					lastIndex = lastIndex + 1;
-					if (lastIndex >= resourceArray.length) {
-						lastIndex = 0;
-					}
-					break;
-				} else {
-					// myLogger.debug("Rank percentage: "+rankPercentage+". Walltime percentage: "+wallTimePercentage+". Not using resource: "+resource.getQueueName());
-				}
-			}
-
-			if (subLocResource == null) {
-				subLocResource = resourcesToUse.keySet().iterator().next();
-				myLogger.error("Couldn't find resource for job: "
-						+ job.getJobname());
-			}
-
-			String subLoc = SubmissionLocationHelpers
-					.createSubmissionLocationString(subLocResource);
-			Integer currentCount = submissionLocations.get(subLocResource
-					.toString());
-			if (currentCount == null) {
-				currentCount = 0;
-			}
-			submissionLocations
-					.put(subLocResource.toString(), currentCount + 1);
-
-			job.setSubmissionLocation(subLoc);
-			resourcesToUse.put(subLocResource, oldWalltimeSummary
-					+ job.getWalltimeInSeconds());
-		}
-
-		StringBuffer message = new StringBuffer(
-				"Filled submissionlocations for multijob: " + multiPartJobId
-						+ "\n");
-		message.append("Submitted jobs to:\t\t\tAmount\n");
-		for (String sl : submissionLocations.keySet()) {
-			message
-					.append(sl + "\t\t\t\t" + submissionLocations.get(sl)
-							+ "\n");
-		}
-		EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, message.toString()));
-
-	}
-
+	/**
+	 * Returns all the input files that are shared among the jobs of this multipart job.
+	 * 
+	 * @return the urls of all the input files (local & remote)
+	 */
 	public Map<String, String> getInputFiles() {
 		return inputFiles;
 	}
 
+	/**
+	 * Adds an input file to the pool of shared input files for this multipart job.
+	 * 
+	 * Those get staged in to the common directory on every site that runs parts of this multipartjob. You can access the relative path
+	 * from each job directory via the {@link #pathToInputFiles()} method.
+	 * 
+	 * @param inputFile the input file
+	 * @param targetFilename the filename in the common directory
+	 */
 	public void addInputFile(String inputFile, String targetFilename) {
 		inputFiles.put(inputFile, targetFilename);
 	}
 
+	/**
+	 * Adds an input file to the pool of shared input files for this multipart job.
+	 * 
+	 * Those get staged in to the common directory on every site that runs parts of this multipartjob. You can access the relative path
+	 * from each job directory via the {@link #pathToInputFiles()} method. The original filename is used.
+	 * 
+	 * @param inputFile the input file
+	 */
 	public void addInputFile(String inputFile) {
 		if (FileManager.isLocal(inputFile)) {
 			inputFiles.put(inputFile, new File(inputFile).getName());
@@ -564,6 +640,11 @@ public class MultiPartJobObject {
 		}
 	}
 
+	/**
+	 * This method returns how many job submission threads run at the same time. 
+	 * 
+	 * @return the number of threads
+	 */
 	public int getConcurrentJobCreationThreads() {
 		if (concurrentJobCreationThreads <= 0) {
 			return DEFAULT_JOB_CREATION_THREADS;
@@ -572,10 +653,22 @@ public class MultiPartJobObject {
 		}
 	}
 
+	/**
+	 * In this method you can specify how many jobs should be created at the same time.
+	 * 
+	 * Normally you don't need that. But you may experience a bit if you have a lot of jobs to create. 
+	 * 
+	 * @param threads the number of threads
+	 */
 	public void setConcurrentJobCreationThreads(int threads) {
 		this.concurrentJobCreationThreads = threads;
 	}
 
+	/**
+	 * Retrieves a list of all jobs that are part of this multipart job.
+	 * 
+	 * @return all jobs
+	 */
 	public List<JobObject> getJobs() {
 
 		return this.jobs;
@@ -608,6 +701,12 @@ public class MultiPartJobObject {
 		}
 	}
 
+	/**
+	 * Tells the backend to submit this multipart job.
+	 * 
+	 * @throws JobSubmissionException if the jobsubmission fails
+	 * @throws NoSuchJobException if no such job exists on the backend
+	 */
 	public void submit() throws JobSubmissionException, NoSuchJobException {
 
 		EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, 
@@ -629,6 +728,18 @@ public class MultiPartJobObject {
 				+ " ready for submission. Continuing submission in background..."));
 	}
 
+	/**
+	 * Prepares all jobs and creates them on the backend.
+	 * 
+	 * Internally, this method first adds all the jobs to the multipart job on the backend.
+	 * Then you can choose to optimize the multipart job which means the backend will recalulate all the submission locations
+	 * based on the number of total jobs and it will try to distribute them according to load to all the available sites.
+	 * After that all the input files are staged in.
+	 * 
+	 * @param optimize whether to optimize the job distribution (true) or use the submission locations you specified (or which are set by default -- false)
+	 * @throws JobsException if one or more jobs can't be created
+	 * @throws BackendException if something fails on the backend
+	 */
 	public void prepareAndCreateJobs(boolean optimize) throws JobsException, BackendException {
 
 		// TODO check whether any of the jobnames already exist
@@ -758,6 +869,18 @@ public class MultiPartJobObject {
 		}
 	}
 
+	/**
+	 * Downloads all the required results for this multipart job.
+	 * 
+	 * @param onlyDownloadWhenFinished only download results if the (single) job is finished.
+	 * @param parentFolder the folder to download all the results to
+	 * @param patterns a list of patterns that specify which files to download
+	 * @param createSeperateFoldersForEveryJob whether to create a seperete folder for every job (true) or download everything into the same folder (false)
+	 * @param prefixWithJobname whether to prefix downloaded results with the jobname it belongs to (true) or not (false)
+	 * @throws RemoteFileSystemException if a remote filetransfer fails
+	 * @throws FileTransferException if a filetransfer fails
+	 * @throws IOException if a file can't be saved
+	 */
 	public void downloadResults(boolean onlyDownloadWhenFinished, File parentFolder, String[] patterns,
 			boolean createSeperateFoldersForEveryJob, boolean prefixWithJobname)
 			throws RemoteFileSystemException, FileTransferException,
@@ -836,12 +959,25 @@ public class MultiPartJobObject {
 
 	}
 
+	/**
+	 * Returns all the log messages for this multipart job.
+	 * 
+	 * @param refresh whether to refresh the job on the backend or not
+	 * @return the log messages
+	 */
 	public Map<Date, String> getLogMessages(boolean refresh) {
 
 		return getMultiPartJob(refresh).messages();
 
 	}
 
+	/**
+	 * Sets a filter to only run jobs at the specified sites.
+	 * 
+	 * You can either set use this method or the {@link #setSitesToExclude(String[])} one. Only the last one set is used.
+	 * 
+	 * @param sites a list of simple patterns that specify on which sites to run jobs
+	 */
 	public void setSitesToInclude(String[] sites) {
 		this.sitesToInclude = sites;
 		this.sitesToExclude = null;
@@ -854,6 +990,13 @@ public class MultiPartJobObject {
 		}
 	}
 
+	/**
+	 * Sets a filter to only run jobs at  sites that don't match.
+	 * 
+	 * You can either set use this method or the {@link #setSitesToInclude(String[])} one. Only the last one set is used.
+	 * 
+	 * @param sites a list of simple patterns that specify on which sites to exclude to run jobs
+	 */
 	public void setSitesToExclude(String[] sites) {
 		this.sitesToExclude = sites;
 		this.sitesToInclude = null;
@@ -866,14 +1009,31 @@ public class MultiPartJobObject {
 		}
 	}
 
+	/**
+	 * Gets the maximum walltime for this multipartjob.
+	 * 
+	 * This is used internally to calculate the job distribution. If it is not set manually the largest single job walltime is used.
+	 * 
+	 * @return the max walltime in seconds
+	 */
 	public int getMaxWalltimeInSeconds() {
 		return maxWalltimeInSecondsAcrossJobs;
 	}
 
+	/**
+	 * If a defaultWalltime is set, this method returns it.
+	 * 
+	 * @return the default walltime.
+	 */
 	public int getDefaultWalltime() {
 		return this.defaultWalltime;
 	}
 
+	/**
+	 * A convenience method to set the same walltime to all jobs.
+	 * 
+	 * @param walltimeInSeconds the walltime.
+	 */
 	public void setDefaultWalltimeInSeconds(int walltimeInSeconds) {
 		this.defaultWalltime = walltimeInSeconds;
 		this.maxWalltimeInSecondsAcrossJobs = walltimeInSeconds;
@@ -889,11 +1049,22 @@ public class MultiPartJobObject {
 		}
 	}
 
+	/**
+	 * Returns the default application for this multipart job.
+	 * 
+	 * @return the default application
+	 */
 	public String getDefaultApplication() {
 		return defaultApplication;
 	}
 
-	public void setDefaultApplication(String defaultApplication) {
+	/**
+	 * Sets the default application for this multipart job.
+	 * 
+	 * This is used internally to use mds to calculate the job distribution. 
+	 * @param defaultApplication the default application
+	 */
+	private void setDefaultApplication(String defaultApplication) {
 		this.defaultApplication = defaultApplication;
 
 		try {
@@ -907,11 +1078,23 @@ public class MultiPartJobObject {
 		}
 	}
 
+	/**
+	 * Gets the default version for this multipart job.
+	 * 
+	 * This is used internally to use mds to calculate job distribution.
+	 * 
+	 * @return the default version
+	 */
 	public String getDefaultVersion() {
 		return defaultVersion;
 	}
 
-	public void setDefaultVersion(String defaultVersion) {
+	/**
+	 * Sets the default version for this multipart job.
+	 * 
+	 * @param defaultVersion
+	 */
+	private void setDefaultVersion(String defaultVersion) {
 		this.defaultVersion = defaultVersion;
 		
 		try {
@@ -926,11 +1109,28 @@ public class MultiPartJobObject {
 
 	}
 
+	/**
+	 * Gets the default number of cpus.
+	 * 
+	 * This is used internally to use mds to calculate job distribution.
+	 * 
+	 * @return the default number of cpus across jobs
+	 */
 	public int getDefaultNoCpus() {
 
 		return defaultNoCpus;
 	}
 
+	/**
+	 * In this method you can set the default number of cpus.
+	 * 
+	 * All cpu properties for all jobs that are added at this stage are overwritten.
+	 * 
+	 * It is used to calculate job distribution. You can have different numbers of cpus for each single job, but the 
+	 * metascheduling might become a tad unpredictable/sub-optimal.
+	 * 
+	 * @param defaultNoCpus the default number of cups
+	 */
 	public void setDefaultNoCpus(int defaultNoCpus) {
 		this.defaultNoCpus = defaultNoCpus;
 		
@@ -955,6 +1155,11 @@ public class MultiPartJobObject {
 	}
 
 
+	/**
+	 * A summary of the status of this job.
+	 * 
+	 * @return a job status detail string
+	 */
 	public String getDetails() {
 
 		DtoMultiPartJob temp = getMultiPartJob(false);
@@ -1012,10 +1217,21 @@ public class MultiPartJobObject {
 
 	}
 	
+	/**
+	 * The id of this multipart job. 
+	 * 
+	 * @return the id
+	 */
 	public String getMultiPartJobId() {
 		return multiPartJobId;
 	}
 
+	/**
+	 * Adds a job property to this job.
+	 * 
+	 * @param key the key 
+	 * @param value the value
+	 */
 	public void addJobProperty(String key, String value) {
 
 		try {
@@ -1025,6 +1241,12 @@ public class MultiPartJobObject {
 		}
 	}
 
+	/**
+	 * Gets a job property for this job.
+	 * 
+	 * @param key the key
+	 * @return the value
+	 */
 	public String getJobProperty(String key) {
 
 		try {
@@ -1034,44 +1256,104 @@ public class MultiPartJobObject {
 		}
 	}
 	
+	/**
+	 * Returns all running jobs.
+	 * 
+	 * @return all running jobs
+	 */
 	public SortedSet<DtoJob> runningJobs() {
 		return getMultiPartJob(false).runningJobs();
 	}
+	/**
+	 * The number of running jobs for this multipart job.
+	 * 
+	 * @return the number of running jobs
+	 */
 	public int numberOfRunningJobs() {
 		return getMultiPartJob(false).numberOfRunningJobs();
 	}
-	
+	/**
+	 * Returns all waiting jobs.
+	 * 
+	 * @return all waiting jobs
+	 */
 	public SortedSet<DtoJob> waitingJobs() {
 		return getMultiPartJob(false).waitingJobs();
 	}
+	/**
+	 * The number of waiting jobs for this multipart job.
+	 * 
+	 * @return the number of waiting jobs
+	 */
 	public int numberOfWaitingJobs() {
 		return getMultiPartJob(false).numberOfWaitingJobs();
 	}
 	
+
+	/**
+	 * Returns all finished jobs.
+	 * 
+	 * @return all finished jobs
+	 */
 	public SortedSet<DtoJob> finishedJobs() {
 		return getMultiPartJob(false).finishedJobs();
 	}
+	/**
+	 * The number of finished jobs for this multipart job.
+	 * 
+	 * @return the number of finished jobs
+	 */
 	public int numberOfFinishedJobs() {
 		return getMultiPartJob(false).numberOfFinishedJobs();
 	}
 	
+	/**
+	 * Returns all failed jobs.
+	 * 
+	 * @return all failed jobs
+	 */
 	public SortedSet<DtoJob> failedJobs() {
 		return getMultiPartJob(false).failedJobs();
 	}
+	/**
+	 * The number of failed jobs for this multipart job.
+	 * 
+	 * @return the number of failed jobs
+	 */
 	public int numberOfFailedJobs() {
 		return getMultiPartJob(false).numberOfFailedJobs();
 	}
 	
+	/**
+	 * Returns all successful jobs.
+	 * 
+	 * @return all successful jobs
+	 */
 	public SortedSet<DtoJob> successfulJobs() {
 		return getMultiPartJob(false).successfulJobs();
 	}
+	/**
+	 * The number of successful jobs for this multipart job.
+	 * 
+	 * @return the number of successful jobs
+	 */
 	public int numberOfSuccessfulJobs() {
 		return getMultiPartJob(false).numberOfSuccessfulJobs();
 	}
 	
+	/**
+	 * Returns all unsubmitted jobs.
+	 * 
+	 * @return all unsubmitted jobs
+	 */
 	public SortedSet<DtoJob> unsubmittedJobs() {
 		return getMultiPartJob(false).unsubmittedJobs();
 	}
+	/**
+	 * The number of unsubmitted jobs for this multipart job.
+	 * 
+	 * @return the number of unsubmitted jobs
+	 */
 	public int numberOfUnsubmittedJobs() {
 		return getMultiPartJob(false).numberOfUnsubmittedJobs();
 	}

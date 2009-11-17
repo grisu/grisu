@@ -101,6 +101,13 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 	}
 	
+	/**
+	 * This can be also used to create a JobObject when the job is already created on the backend.
+	 * 
+	 * @param si the serviceinterface
+	 * @param job the job
+	 * @throws NoSuchJobException if no such job exists on the backend
+	 */
 	public JobObject(final ServiceInterface si, final DtoJob job) throws NoSuchJobException {
 		
 		super(SeveralXMLHelpers.fromString(si.getJsdlDocument(job.jobname())));
@@ -226,6 +233,9 @@ public class JobObject extends JobSubmissionObjectImpl {
 		return this.getJobname();
 	}
 	
+	/**
+	 * Synchronizes the internally stored value for the location of the jobdirectory with the backend.
+	 */
 	public void updateJobDirectory() {
 		
 		try {
@@ -241,6 +251,14 @@ public class JobObject extends JobSubmissionObjectImpl {
 		
 	}
 	
+	/**
+	 * Restarts the job.
+	 * 
+	 * Don't use that at the moment, it's not properly implemented yet.
+	 * 
+	 * @throws JobSubmissionException
+	 * @throws JobPropertiesException
+	 */
 	public final void restartJob() throws JobSubmissionException, JobPropertiesException {
 		
 		try {
@@ -253,6 +271,13 @@ public class JobObject extends JobSubmissionObjectImpl {
 		
 	}
 	
+	/**
+	 * Stages in input files. 
+	 * 
+	 * Normally you don't have to call this method manually, it gets called just before job submission automatically.
+	 * 
+	 * @throws FileTransferException if a file can't be staged in
+	 */
 	public final void stageFiles() throws FileTransferException {
 		
 		if (getInputFileUrls() != null && getInputFileUrls().length > 0) {
@@ -440,6 +465,12 @@ public class JobObject extends JobSubmissionObjectImpl {
 		return jobDirectory;
 	}
 	
+	/**
+	 * Downloads the specified file (relative path to the jobdirectory) and puts it into the local cache.
+	 * 
+	 * @param relativePathToJobDirectory the path to the file to download
+	 * @return the file handle to the file in the local cache dir
+	 */
 	public final File downloadAndCacheOutputFile(String relativePathToJobDirectory) {
 		
 		if (getStatus(false) <= JobConstants.ACTIVE) {

@@ -68,7 +68,7 @@ public class MultiJobSubmit {
 //		System.out.println("End: "+new Date().toString());
 //		System.exit(1);
 
-		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/StartUp", Constants.GENERIC_APPLICATION_NAME, Constants.NO_VERSION_INDICATOR_STRING);
+		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/StartUp", "Java", Constants.NO_VERSION_INDICATOR_STRING);
 			
 		String pathToInputFiles = multiPartJob.pathToInputFiles();
 		
@@ -89,7 +89,7 @@ public class MultiJobSubmit {
 		}
 
 		multiPartJob.addInputFile("/home/markus/test/multiJobFile.txt");
-		multiPartJob.setDefaultApplication("java");
+//		multiPartJob.setDefaultApplication("java");
 		multiPartJob.setSitesToExclude(new String[]{"tpac"});
 		
 //		multiPartJob.setSitesToExclude(new String[]{"vpac", "massey", "uq", "canterbury", "sapac", "ivec", "otago"});
