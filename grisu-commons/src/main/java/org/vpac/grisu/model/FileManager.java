@@ -74,11 +74,17 @@ public class FileManager {
 
 	public File getLocalCacheFile(final String url) {
 
-		String rootPath = null;
-		rootPath = Environment.getGrisuLocalCacheRoot() + File.separator
-				+ get_url_strin_path(url);
+		if (isLocal(url)) {
+			
+			return new File(url);
+		} else {
 
-		return new File(rootPath);
+			String rootPath = null;
+			rootPath = Environment.getGrisuLocalCacheRoot() + File.separator
+					+ get_url_strin_path(url);
+
+			return new File(rootPath);
+		}
 
 	}
 
@@ -154,9 +160,9 @@ public class FileManager {
 		return cacheTargetFile;
 	}
 
-	
-	public final void uploadFile(final File file, final String targetFile, boolean overwrite) throws FileTransferException {
-		
+	public final void uploadFile(final File file, final String targetFile,
+			boolean overwrite) throws FileTransferException {
+
 		if (!file.exists()) {
 			throw new FileTransferException(file.toString(), targetFile,
 					"File does not exist: " + file.toString(), null);
@@ -176,8 +182,9 @@ public class FileManager {
 		try {
 			if (serviceInterface.fileExists(targetFile)) {
 
-				if ( ! overwrite ) {
-					throw new FileTransferException(file.toString(), targetFile, "Target file exists.", null);
+				if (!overwrite) {
+					throw new FileTransferException(file.toString(),
+							targetFile, "Target file exists.", null);
 				}
 			}
 
@@ -185,7 +192,7 @@ public class FileManager {
 			throw new FileTransferException(file.toString(), targetFile,
 					"Could not determine whether target directory exists: ", e);
 		}
-		
+
 		myLogger.debug("Uploading local file: " + file.toString() + " to: "
 				+ targetFile);
 
@@ -193,8 +200,7 @@ public class FileManager {
 		String filetransferHandle = null;
 		try {
 			myLogger.info("Uploading file " + file.getName() + "...");
-			filetransferHandle = serviceInterface.upload(handler,
-					targetFile);
+			filetransferHandle = serviceInterface.upload(handler, targetFile);
 			myLogger.info("Upload of file " + file.getName() + " successful.");
 		} catch (Exception e1) {
 			try {
@@ -211,14 +217,13 @@ public class FileManager {
 						+ e1.getLocalizedMessage());
 				myLogger.error("File upload failed: "
 						+ e1.getLocalizedMessage());
-				throw new FileTransferException(file.toString(),
-						targetFile, "Could not upload file.", e1);
+				throw new FileTransferException(file.toString(), targetFile,
+						"Could not upload file.", e1);
 			}
 		}
-		
-		
-		
+
 	}
+
 	/**
 	 * Uploads a file to the backend which forwards it to it's target
 	 * destination.
@@ -229,11 +234,13 @@ public class FileManager {
 	 *            the local file
 	 * @param targetDirectory
 	 *            the target directory url
-	 * @param overwrite whether to overwrite a possibly existing target file
+	 * @param overwrite
+	 *            whether to overwrite a possibly existing target file
 	 * @throws FileTransferException
 	 *             if the transfer fails
 	 */
-	public final void uploadFileToDirectory(final File file, final String targetDirectory, final boolean overwrite)
+	public final void uploadFileToDirectory(final File file,
+			final String targetDirectory, final boolean overwrite)
 			throws FileTransferException {
 
 		if (!file.exists()) {
@@ -294,7 +301,7 @@ public class FileManager {
 		uploadFile(file, targetDirectory + "/" + file.getName(), overwrite);
 
 	}
-	
+
 	/**
 	 * Uploads a file to the backend which forwards it to it's target
 	 * destination.
@@ -303,12 +310,14 @@ public class FileManager {
 	 *            the path to the local file
 	 * @param targetDirectory
 	 *            the target url
-	 * @param overwrite whether to overwrite a possibly existing target file
+	 * @param overwrite
+	 *            whether to overwrite a possibly existing target file
 	 * @throws FileTransferException
 	 *             if the transfer fails
 	 */
 	public final void uploadFileToDirectory(final String sourcePath,
-			final String targetDirectory, boolean overwrite) throws FileTransferException {
+			final String targetDirectory, boolean overwrite)
+			throws FileTransferException {
 
 		File file = new File(sourcePath);
 		if (file.isDirectory()) {
@@ -321,15 +330,16 @@ public class FileManager {
 	/**
 	 * Helper method to extract the filename out of an url.
 	 * 
-	 * @param url the url
+	 * @param url
+	 *            the url
 	 * @return the filename
 	 */
 	public static String getFilename(String url) {
 
-		if ( isLocal(url) ) {
+		if (isLocal(url)) {
 			return new File(url).getName();
-		} else { 
-			String filename = url.substring(url.lastIndexOf("/")+1);
+		} else {
+			String filename = url.substring(url.lastIndexOf("/") + 1);
 			return filename;
 		}
 
@@ -399,15 +409,16 @@ public class FileManager {
 		serviceInterface.deleteFile(url);
 
 	}
-	
-	public List<String> listAllChildrenFilesOfRemoteFolder(String folderUrl) throws RemoteFileSystemException {
-		
-		if ( ! serviceInterface.isFolder(folderUrl) ) {
+
+	public List<String> listAllChildrenFilesOfRemoteFolder(String folderUrl)
+			throws RemoteFileSystemException {
+
+		if (!serviceInterface.isFolder(folderUrl)) {
 			throw new IllegalArgumentException("Specified url is not a folder.");
 		}
-		
+
 		DtoFolder folder = serviceInterface.ls(folderUrl, 0);
-		
+
 		return folder.listOfAllFilesUnderThisFolder();
 	}
 
@@ -437,29 +448,30 @@ public class FileManager {
 
 	public boolean fileExists(String file) throws RemoteFileSystemException {
 
-		if ( isLocal(file) ) {
+		if (isLocal(file)) {
 			return new File(file).exists();
 		} else {
 			return serviceInterface.fileExists(file);
 		}
-		
+
 	}
 
 	public boolean needsDownloading(String url) {
-		
+
 		File cacheTargetFile = getLocalCacheFile(url);
 		File cacheTargetParentFile = cacheTargetFile.getParentFile();
 
-		if ( ! cacheTargetFile.exists() ) {
+		if (!cacheTargetFile.exists()) {
 			return true;
 		}
-		
+
 		long lastModified = -1;
 		try {
 			lastModified = serviceInterface.lastModified(url);
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new RuntimeException("Could not get last modified time of file: "+url, e);
+			throw new RuntimeException(
+					"Could not get last modified time of file: " + url, e);
 		}
 
 		if (cacheTargetFile.exists()) {
@@ -477,7 +489,7 @@ public class FileManager {
 		} else {
 			return true;
 		}
-		
+
 	}
-	
+
 }

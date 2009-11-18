@@ -25,7 +25,7 @@ public class JobDistributor {
 	static final Logger myLogger = Logger
 	.getLogger(JobDistributor.class.getName());
 	
-	public void distributeJobs(Set<Job> alljobs, SortedSet<GridResource> allAvailableResources, String[] sitesToInclude, String[] sitesToExclude) {
+	public String distributeJobs(Set<Job> alljobs, SortedSet<GridResource> allAvailableResources, String[] sitesToInclude, String[] sitesToExclude) {
 		
 		Map<String, Integer> submissionLocations = new TreeMap<String, Integer>();
 
@@ -152,6 +152,8 @@ public class JobDistributor {
 							+ "\n");
 		}
 		myLogger.debug(message.toString());
+		
+		return message.toString();
 		
 	}
 

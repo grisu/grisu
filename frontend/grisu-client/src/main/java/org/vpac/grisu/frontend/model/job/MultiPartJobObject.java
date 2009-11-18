@@ -1,19 +1,15 @@
 package org.vpac.grisu.frontend.model.job;
 
-import java.awt.Event;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -31,7 +27,6 @@ import org.vpac.grisu.control.exceptions.MultiPartJobException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
-import org.vpac.grisu.frontend.control.clientexceptions.JobCreationException;
 import org.vpac.grisu.frontend.model.events.MultiPartJobEvent;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -41,9 +36,6 @@ import org.vpac.grisu.model.dto.DtoMultiPartJob;
 import org.vpac.grisu.settings.ClientPropertiesManager;
 
 import au.org.arcs.jcommons.constants.Constants;
-import au.org.arcs.jcommons.constants.JobSubmissionProperty;
-import au.org.arcs.jcommons.interfaces.GridResource;
-import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
 
 /**
  * @author markus
@@ -118,13 +110,7 @@ public class MultiPartJobObject {
 		}
 		setDefaultApplication(defaultApplication);
 		setDefaultVersion(defaultVersion);
-//		try {
-//			serviceInterface.addJobProperty(this.multiPartJobId, Constants.APPLICATIONNAME_KEY, defaultApplication);
-//			serviceInterface.addJobProperty(this.multiPartJobId, Constants.APPLICATIONVERSION_KEY, defaultVersion);
-//		} catch (NoSuchJobException e) {
-//			throw new RuntimeException(e);
-//		}
-		
+	
 	}
 
 	/**
@@ -306,11 +292,6 @@ public class MultiPartJobObject {
 				+ "\n");
 		output.append("Failed jobs: " + temp.numberOfFailedJobs() + "\n");
 		if (temp.numberOfFailedJobs() > 0) {
-//			for (DtoJob job : temp.getFailedJobs().getAllJobs()) {
-//				output.append("\tJobname: " + job.jobname() + ", Error: "
-//						+ job.propertiesAsMap().get(Constants.ERROR_REASON)
-//						+ "\n");
-//			}
 
 			if (restarter != null) {
 				restartFailedJobs(restarter);
@@ -420,7 +401,7 @@ public class MultiPartJobObject {
 	 * 
 	 * @param job the new job object
 	 */
-	public void addJob(JobObject job) {
+	public void addJob(JobObject job) throws IllegalArgumentException {
 
 		if (jobs.contains(job)) {
 			throw new IllegalArgumentException("Job: " + job.getJobname()
@@ -437,169 +418,16 @@ public class MultiPartJobObject {
 					+ " to default walltime: " + defaultWalltime));
 			job.setWalltimeInSeconds(defaultWalltime);
 		} else {
-			// fireJobStatusChange("Keeping walltime for job " +
-			// job.getJobname()
-			// + ": " + job.getWalltimeInSeconds());
+
 			if (job.getWalltimeInSeconds() > maxWalltimeInSecondsAcrossJobs) {
 				maxWalltimeInSecondsAcrossJobs = job.getWalltimeInSeconds();
 			}
 		}
 		EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, 
-				"Adding job " + job.getJobname() + " to multipartjob: " + this.multiPartJobId));
+				"Adding job " + job.getJobname()));
 		this.jobs.add(job);
 	}
 
-//	private SortedSet<GridResource> findBestResources() {
-//
-//		Map<JobSubmissionProperty, String> properties = new HashMap<JobSubmissionProperty, String>();
-//		properties.put(JobSubmissionProperty.NO_CPUS,
-//				new Integer(defaultNoCpus).toString());
-//		properties
-//				.put(JobSubmissionProperty.APPLICATIONVERSION, defaultVersion);
-//		properties.put(JobSubmissionProperty.WALLTIME_IN_MINUTES, new Integer(
-//				maxWalltimeInSecondsAcrossJobs / 60).toString());
-//
-//		SortedSet<GridResource> result = GrisuRegistryManager.getDefault(
-//				serviceInterface).getApplicationInformation(
-//				getDefaultApplication()).getBestSubmissionLocations(properties,
-//				getFqan());
-//		StringBuffer message = new StringBuffer(
-//				"Finding best resources for mulipartjob " + multiPartJobId
-//						+ " using:\n");
-//		message.append("Version: " + defaultVersion + "\n");
-//		message.append("Walltime in minutes: " + maxWalltimeInSecondsAcrossJobs
-//				/ 60 + "\n");
-//		message.append("No cpus: " + defaultNoCpus + "\n");
-//		EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, message.toString()));
-//
-//		return result;
-//
-//	}
-
-//	private void fillOrOverwriteSubmissionLocationsUsingMatchmaker()
-//			throws JobCreationException, JobSubmissionException {
-//
-//		Map<String, Integer> submissionLocations = new TreeMap<String, Integer>();
-//
-//		Long allWalltime = 0L;
-//		for (JobObject job : this.jobs) {
-//			allWalltime = allWalltime + job.getWalltimeInSeconds();
-//		}
-//
-//		Map<GridResource, Long> resourcesToUse = new TreeMap<GridResource, Long>();
-//		List<Integer> ranks = new LinkedList<Integer>();
-//		Long allRanks = 0L;
-//		for (GridResource resource : findBestResources()) {
-//
-//			if (sitesToInclude != null) {
-//
-//				for (String site : sitesToInclude) {
-//					if (resource.getSiteName().toLowerCase().contains(
-//							site.toLowerCase())) {
-//						resourcesToUse.put(resource, new Long(0L));
-//						ranks.add(resource.getRank());
-//						allRanks = allRanks + resource.getRank();
-//						break;
-//					}
-//				}
-//
-//			} else if (sitesToExclude != null) {
-//
-//				boolean useSite = true;
-//				for (String site : sitesToExclude) {
-//					if (resource.getSiteName().toLowerCase().contains(
-//							site.toLowerCase())) {
-//						useSite = false;
-//						break;
-//					}
-//				}
-//				if (useSite) {
-//					resourcesToUse.put(resource, new Long(0L));
-//					ranks.add(resource.getRank());
-//					allRanks = allRanks + resource.getRank();
-//				}
-//
-//			} else {
-//				resourcesToUse.put(resource, new Long(0L));
-//				ranks.add(resource.getRank());
-//				allRanks = allRanks + resource.getRank();
-//			}
-//		}
-//
-//		myLogger.debug("Rank summary: " + allRanks);
-//		myLogger.debug("Walltime summary: " + allWalltime);
-//
-//		GridResource[] resourceArray = resourcesToUse.keySet().toArray(
-//				new GridResource[] {});
-//		int lastIndex = 0;
-//
-//		for (JobObject job : this.jobs) {
-//
-//			GridResource subLocResource = null;
-//			long oldWalltimeSummary = 0L;
-//
-//			for (int i = lastIndex; i < resourceArray.length * 2; i++) {
-//				int indexToUse = i;
-//				if (i >= resourceArray.length) {
-//					indexToUse = indexToUse - resourceArray.length;
-//				}
-//
-//				GridResource resource = resourceArray[indexToUse];
-//
-//				long rankPercentage = (resource.getRank() * 100) / (allRanks);
-//				long wallTimePercentage = ((job.getWalltimeInSeconds() + resourcesToUse
-//						.get(resource)) * 100)
-//						/ (allWalltime);
-//
-//				if (rankPercentage >= wallTimePercentage) {
-//					subLocResource = resource;
-//					oldWalltimeSummary = resourcesToUse.get(subLocResource);
-//					myLogger.debug("Rank percentage: " + rankPercentage
-//							+ ". Walltime percentage: " + wallTimePercentage
-//							+ ". Using resource: " + resource.getQueueName());
-//					lastIndex = lastIndex + 1;
-//					if (lastIndex >= resourceArray.length) {
-//						lastIndex = 0;
-//					}
-//					break;
-//				} else {
-//					// myLogger.debug("Rank percentage: "+rankPercentage+". Walltime percentage: "+wallTimePercentage+". Not using resource: "+resource.getQueueName());
-//				}
-//			}
-//
-//			if (subLocResource == null) {
-//				subLocResource = resourcesToUse.keySet().iterator().next();
-//				myLogger.error("Couldn't find resource for job: "
-//						+ job.getJobname());
-//			}
-//
-//			String subLoc = SubmissionLocationHelpers
-//					.createSubmissionLocationString(subLocResource);
-//			Integer currentCount = submissionLocations.get(subLocResource
-//					.toString());
-//			if (currentCount == null) {
-//				currentCount = 0;
-//			}
-//			submissionLocations
-//					.put(subLocResource.toString(), currentCount + 1);
-//
-//			job.setSubmissionLocation(subLoc);
-//			resourcesToUse.put(subLocResource, oldWalltimeSummary
-//					+ job.getWalltimeInSeconds());
-//		}
-//
-//		StringBuffer message = new StringBuffer(
-//				"Filled submissionlocations for multijob: " + multiPartJobId
-//						+ "\n");
-//		message.append("Submitted jobs to:\t\t\tAmount\n");
-//		for (String sl : submissionLocations.keySet()) {
-//			message
-//					.append(sl + "\t\t\t\t" + submissionLocations.get(sl)
-//							+ "\n");
-//		}
-//		EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, message.toString()));
-//
-//	}
 
 	/**
 	 * Returns all the input files that are shared among the jobs of this multipart job.
@@ -748,7 +576,7 @@ public class MultiPartJobObject {
 				+ " jobs as part of multipartjob: " + multiPartJobId);
 		EventBus.publish(this.multiPartJobId, new MultiPartJobEvent(this, 
 		 "Creating " + getJobs().size()
-				+ " jobs as part of multipartjob: " + multiPartJobId));
+				+ " jobs"));
 		ExecutorService executor = Executors
 				.newFixedThreadPool(getConcurrentJobCreationThreads());
 
@@ -763,27 +591,20 @@ public class MultiPartJobObject {
 					Exception lastException = null;
 					for (int i = 0; i < DEFAULT_JOB_CREATION_RETRIES; i++) {
 						try {
-							// myLogger.info("Creating job: "+job.getJobname());
-							// job.createJob(submissionFqan);
+
 							myLogger.info("Adding job: " + job.getJobname()
 									+ " to multipartjob: " + multiPartJobId);
 							
 							String jobname = null;
-							try {
+							EventBus.publish(MultiPartJobObject.this.multiPartJobId, new MultiPartJobEvent(
+										MultiPartJobObject.this, "Adding job "
+										+ job.getJobname() + " to multipart job on backend."));
 								jobname = serviceInterface
 								.addJobToMultiPartJob(
 										multiPartJobId,
 										job
 												.getJobDescriptionDocumentAsString());
-							} catch (JobPropertiesException jpe) {
-								// try again in case there is a job with this name already
-								job.setJobname(job.getJobname()+"_new");
-								jobname = serviceInterface
-								.addJobToMultiPartJob(
-										multiPartJobId,
-										job
-												.getJobDescriptionDocumentAsString());
-							}
+
 							job.setJobname(jobname);
 							job.updateJobDirectory();
 							

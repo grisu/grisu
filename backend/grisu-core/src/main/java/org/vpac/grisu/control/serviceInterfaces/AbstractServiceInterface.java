@@ -114,6 +114,8 @@ import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
  * 
  */
 public abstract class AbstractServiceInterface implements ServiceInterface {
+	
+	private boolean INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND = true;
 
 	static final Logger myLogger = Logger
 			.getLogger(AbstractServiceInterface.class.getName());
@@ -947,7 +949,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			sitesToExclude = sitesToExcludeString.split(",");
 		}
 		
-		jd.distributeJobs(mpj.getJobs(), findBestResourcesForMultipartJob(mpj), sitesToInclude, sitesToExclude);
+		String optimizeStats = jd.distributeJobs(mpj.getJobs(), findBestResourcesForMultipartJob(mpj), sitesToInclude, sitesToExclude);
+		mpj.addJobProperty(Constants.OPTIMIZE_STATS, optimizeStats);
+		multiPartJobDao.saveOrUpdate(mpj);
 
 		for ( Job job : mpj.getJobs() ) {
 			try {
@@ -1612,10 +1616,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			List<Job> jobs = null;
 			if (StringUtils.isBlank(application)) {
-				jobs = jobdao.findJobByDN(getUser().getDn(), false);
+				jobs = jobdao.findJobByDN(getUser().getDn(), INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND);
 			} else {
 				jobs = jobdao.findJobByDNPerApplication(getUser().getDn(),
-						application, false);
+						application, INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND);
 			}
 
 			if (refresh) {
@@ -1645,10 +1649,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		List<String> jobnames = null;
 
 		if (StringUtils.isBlank(application)) {
-			jobnames = jobdao.findJobNamesByDn(getUser().getDn(), false);
+			jobnames = jobdao.findJobNamesByDn(getUser().getDn(), INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND);
 		} else {
 			jobnames = jobdao.findJobNamesPerApplicationByDn(getUser().getDn(),
-					application, false);
+					application, INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND);
 		}
 
 		return DtoStringList.fromStringList(jobnames);
@@ -1807,6 +1811,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			multiJobCreate.addLogMessage("MultiPartJob " + multiPartJobId
 					+ " created.");
+			multiJobCreate.addJobProperty(Constants.OPTIMIZE_STATS, "n/a");
 			multiPartJobDao.saveOrUpdate(multiJobCreate);
 
 			try {
@@ -3168,7 +3173,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					mpj.removeJob(job);
 					multiPartJobDao.saveOrUpdate(mpj);
 				} catch (Exception e) {
-					e.printStackTrace();
+//					e.printStackTrace();
+					// doesn't matter
 				}
 				
 			}
