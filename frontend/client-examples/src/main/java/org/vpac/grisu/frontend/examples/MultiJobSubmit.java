@@ -10,13 +10,15 @@ import org.bushe.swing.event.annotation.EventSubscriber;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
+import org.vpac.grisu.frontend.model.StatusObject;
 import org.vpac.grisu.frontend.model.events.MultiPartJobEvent;
-import org.vpac.grisu.frontend.model.events.SystemOutMultiJobLogger;
+import org.vpac.grisu.frontend.model.events.SystemOutStatusLogger;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.model.job.JobsException;
 import org.vpac.grisu.frontend.model.job.MultiPartJobObject;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
+import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.dto.DtoMultiPartJob;
 
 import au.org.arcs.jcommons.constants.Constants;
@@ -58,6 +60,10 @@ public class MultiJobSubmit {
 		final String multiJobName = "10jobs2";
 		try {
 			si.kill(multiJobName, true);
+
+			StatusObject status = new StatusObject(si, multiJobName, StatusObject.Listener.STDOUT);
+			status.waitForActionToFinish(3, true);
+			
 		} catch (Exception e) {
 			// doesn't matter
 			e.printStackTrace();
@@ -68,7 +74,7 @@ public class MultiJobSubmit {
 //		System.out.println("End: "+new Date().toString());
 //		System.exit(1);
 
-		SystemOutMultiJobLogger ssoes = new SystemOutMultiJobLogger(multiJobName);
+//		SystemOutStatusLogger ssoes = new SystemOutStatusLogger(multiJobName);
 
 		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/StartUp", "Java", Constants.NO_VERSION_INDICATOR_STRING);
 			

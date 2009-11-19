@@ -134,7 +134,7 @@ public class DtoActionStatus {
 		addLogMessage(ACTION_STARTED_STRING);
 	}
 	
-	public int percentFinished() {
+	public double percentFinished() {
 		return (currentElements*100)/totalElements;
 	}
 	

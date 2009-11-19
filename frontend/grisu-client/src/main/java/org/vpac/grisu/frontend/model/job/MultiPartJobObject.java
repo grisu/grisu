@@ -27,6 +27,7 @@ import org.vpac.grisu.control.exceptions.MultiPartJobException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
+import org.vpac.grisu.frontend.model.StatusObject;
 import org.vpac.grisu.frontend.model.events.MultiPartJobEvent;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -520,8 +521,13 @@ public class MultiPartJobObject {
 			if (FileManager.isLocal(inputFile)) {
 
 				DataHandler dh = FileManager.createDataHandler(inputFile);
+				StatusObject status = new StatusObject(serviceInterface, inputFiles.get(inputFile));
 				serviceInterface.uploadInputFile(multiPartJobId, dh, inputFiles
 						.get(inputFile));
+				
+				status.waitForActionToFinish(2, false);
+				
+				
 			} else {
 				serviceInterface.copyMultiPartJobInputFile(multiPartJobId,
 						inputFile, inputFiles.get(inputFile));

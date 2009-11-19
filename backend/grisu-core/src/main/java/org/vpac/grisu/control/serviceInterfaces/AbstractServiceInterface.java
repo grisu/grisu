@@ -263,7 +263,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throw new RuntimeException("Invalid jsdl/xml format.", e3);
 		}
 
-		return createJob(jsdl, fqan, jobnameCreationMethod);
+		return createJob(jsdl, fqan, jobnameCreationMethod, null);
 	}
 	
 	private String calculateJobname(Document jsdl, String jobnameCreationMethod) throws JobPropertiesException {
@@ -340,7 +340,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	}
 
 	private String createJob(Document jsdl, final String fqan,
-			final String jobnameCreationMethod) throws JobPropertiesException {
+			final String jobnameCreationMethod, final MultiPartJob optionalParentBatchJob) throws JobPropertiesException {
 
 		String jobname = calculateJobname(jsdl, jobnameCreationMethod);
 
@@ -381,7 +381,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 			setVO(job, fqan);
-			processJobDescription(job);
+			processJobDescription(job, optionalParentBatchJob);
 		} catch (NoSuchJobException e) {
 			// that should never happen
 			myLogger
@@ -446,7 +446,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @throws NoSuchJobException
 	 * @throws JobPropertiesException
 	 */
-	private void processJobDescription(final Job job)
+	private void processJobDescription(final Job job, final MultiPartJob multiPartJob)
 			throws NoSuchJobException, JobPropertiesException {
 
 		// TODO check whether fqan is set
@@ -824,11 +824,18 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				stagingFilesystemToUse);
 
 		// now calculate and set the proper paths
-		String workingDirectory = mountPointToUse.getRootUrl().substring(
+		String workingDirectory;
+		if ( multiPartJob == null ) {
+		      workingDirectory = mountPointToUse.getRootUrl().substring(
 				stagingFilesystemToUse.length())
 				+ "/"
 				+ ServerPropertiesManager.getGrisuJobDirectoryName()
 				+ "/" + job.getJobname();
+		} else {
+			workingDirectory = mountPointToUse.getRootUrl().substring(
+					stagingFilesystemToUse.length())
+					+ "/" + multiPartJob.getJobProperty(Constants.RELATIVE_MULTIJOB_DIRECTORY_KEY) + "/" + job.getJobname();
+		}
 		myLogger.debug("Calculated workingdirectory: " + workingDirectory);
 
 		JsdlHelpers.setWorkingDirectory(jsdl,
@@ -955,7 +962,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		for ( Job job : mpj.getJobs() ) {
 			try {
-				processJobDescription(job);
+				processJobDescription(job, mpj);
 			} catch (JobPropertiesException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e);
@@ -1744,7 +1751,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			jobnameCreationMethod = "force-name";
 		}
 
-		String jobname = createJob(jsdl, multiJob.getFqan(), "force-name");
+		String jobname = createJob(jsdl, multiJob.getFqan(), "force-name", multiJob);
 		multiJob.addJob(jobname);
 		multiPartJobDao.saveOrUpdate(multiJob);
 
@@ -1799,15 +1806,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			
 			MultiPartJob multiJobCreate = new MultiPartJob(getDN(),
 					multiPartJobId, fqan);
-			multiJobCreate.addJobProperty(Constants.RELATIVE_PATH_FROM_JOBDIR,
-					"../../"
-							+ ServerPropertiesManager
-									.getGrisuMultiPartJobDirectoryName() + "/"
-							+ multiPartJobId);
+			multiJobCreate.addJobProperty(Constants.RELATIVE_PATH_FROM_JOBDIR, "../");
 			multiJobCreate.addJobProperty(
 					Constants.RELATIVE_MULTIJOB_DIRECTORY_KEY,
-					ServerPropertiesManager.getGrisuMultiPartJobDirectoryName()
-							+ "/" + multiPartJobId);
+					ServerPropertiesManager.getGrisuJobDirectoryName() + "/" + multiPartJobId);
 
 			multiJobCreate.addLogMessage("MultiPartJob " + multiPartJobId
 					+ " created.");
@@ -2445,26 +2447,43 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	public void uploadInputFile(String jobname, DataHandler source,
-			String targetFilename) throws RemoteFileSystemException,
-			NoSuchJobException {
+	public void uploadInputFile(String jobname, final DataHandler source,
+			final String targetFilename) throws NoSuchJobException, RemoteFileSystemException {
 
-		// try whether job is single or multi
+
 		
 		try {
-			Job job = getJob(jobname);
+			final Job job = getJob(jobname);
 			
+			// try whether job is single or multi
+			final DtoActionStatus status = new DtoActionStatus(targetFilename, 1);
+			actionStatus.put(targetFilename, status);
+			
+			new Thread() {
+				public void run() {
+
 			String jobdir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
 			
-			upload(source, jobdir+"/"+targetFilename);
+			try {
+				upload(source, jobdir+"/"+targetFilename);
+				status.addElement("Upload to "+jobdir+"/"+targetFilename+" successful.");
+				status.setFinished(true);
+			} catch (RemoteFileSystemException e) {
+				status.addElement("Upload to "+jobdir+"/"+targetFilename+" failed.");
+				status.setFinished(true);
+				status.setFailed(true);
+			}
 			
+			
+				}
+			}.run();
 			return;
 		
 		} catch (NoSuchJobException e) {
 			// no single job, let's try a multijob
 		}
 		
-		MultiPartJob multiJob = getMultiPartJobFromDatabase(jobname);
+		final MultiPartJob multiJob = getMultiPartJobFromDatabase(jobname);
 
 		myLogger.debug("Receiving datahandler for multipartjob input file...");
 
@@ -2476,7 +2495,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					"Could not get input stream from datahandler...");
 		}
 
-		FileObject tempFile = getUser().aquireFile(
+		final FileObject tempFile = getUser().aquireFile(
 				"tmp://" + UUID.randomUUID().toString());
 		OutputStream fout;
 		try {
@@ -2512,10 +2531,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		fout = null;
 
-		// getUser()
+		ExecutorService executor = Executors
+		.newFixedThreadPool(multiJob.getAllUsedMountPoints().size());
+		
+		final DtoActionStatus status = new DtoActionStatus(targetFilename, multiJob.getAllUsedMountPoints().size());
+		actionStatus.put(targetFilename, status);
 
-
-		for (String mountPointRoot : multiJob.getAllUsedMountPoints()) {
+		for (final String mountPointRoot : multiJob.getAllUsedMountPoints()) {
+			
+			Thread thread = new Thread() {
+				public void run() {
+			
 			FileObject target = null;
 
 			String relpathFromMountPointRoot = multiJob
@@ -2523,6 +2549,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			// String parent = filename.substring(0, filename
 			// .lastIndexOf(File.separator));
 			String parent = mountPointRoot + "/" + relpathFromMountPointRoot;
+			
 			try {
 				FileObject parentObject = getUser().aquireFile(parent);
 				// FileObject tempObject = parentObject;
@@ -2545,51 +2572,37 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				// fileTransfers.put(targetFileString, fileTransfer);
 
 				fileTransfer.startTransfer(true);
+				status.addElement("Upload to folder "+parent+" successful.");
 
-			} catch (FileSystemException e) {
+			} catch (Exception e) {
 				// e.printStackTrace();
-				throw new RemoteFileSystemException("Could not open file: "
+				status.addElement("Upload to folder "+parent+" failed: Could not open file: "
 						+ targetFilename + ":" + e.getMessage());
+				status.setFailed(true);
 			}
+			
+			if ( status.getTotalElements() <= status.getCurrentElements() ) {
+				status.setFinished(true);
+			}
+			
+			
+				}
+			};
+			executor.execute(thread);
 
-			// myLogger.debug("Receiving data for file: " + targetFilename);
-			//
-			// try {
-			//
-			// byte[] buffer = new byte[1024]; // byte buffer
-			// int bytesRead = 0;
-			// while (true) {
-			// bytesRead = buf.read(buffer, 0, 1024);
-			// // bytesRead returns the actual number of bytes read from
-			// // the stream. returns -1 when end of stream is detected
-			// if (bytesRead == -1) {
-			// break;
-			// }
-			// fout.write(buffer, 0, bytesRead);
-			// }
-			//
-			// if (buf != null) {
-			// buf.close();
-			// }
-			// if (fout != null) {
-			// fout.close();
-			// }
-			// } catch (IOException e) {
-			// throw new RemoteFileSystemException("Could not write to file: "
-			// + targetFilename + ": " + e.getMessage());
-			// }
-			// fout = null;
 		}
 
-		myLogger.debug("Data transmission for multiPartJob " + jobname
-				+ " finished.");
+		executor.shutdown();
+		
+		myLogger.debug("All data transmissions for multiPartJob " + jobname
+				+ " started.");
 
-		buf = null;
-		try {
-			tempFile.delete();
-		} catch (FileSystemException e) {
-			myLogger.error("Could not delete temp file...", e);
-		}
+//		buf = null;
+//		try {
+//			tempFile.delete();
+//		} catch (FileSystemException e) {
+//			myLogger.error("Could not delete temp file...", e);
+//		}
 
 	}
 

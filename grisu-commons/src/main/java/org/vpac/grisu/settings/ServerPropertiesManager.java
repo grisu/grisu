@@ -41,7 +41,7 @@ public final class ServerPropertiesManager {
 	
 	public static final int DEFAULT_TIME_INBETWEEN_STATUS_CHECKS_FOR_THE_SAME_JOB_IN_SECONDS = 60; 
 	
-	public static final String DEFAULT_MULTIPARTJOB_DIR_NAME = "grisu-multijob-dir";
+//	public static final String DEFAULT_MULTIPARTJOB_DIR_NAME = "grisu-multijob-dir";
 
 	private static PropertiesConfiguration config = null;
 
@@ -141,33 +141,33 @@ public final class ServerPropertiesManager {
 		return jobDirName;
 	}
 	
-	/**
-	 * Returns the name of the directory in which grisu jobs are located
-	 * remotely.
-	 * 
-	 * @return the name of the direcotory in which grisu stores jobs or null if
-	 *         the jobs should be stored in the root home directory.
-	 */
-	public static String getGrisuMultiPartJobDirectoryName() {
-
-		String jobDirName = null;
-		try {
-			jobDirName = getServerConfiguration().getString("multiPartJobDirName");
-
-			if ("none".equals(jobDirName.toLowerCase())) {
-				jobDirName = null;
-			}
-
-		} catch (Exception e) {
-			jobDirName = null;
-		}
-
-		if (jobDirName == null) {
-			jobDirName = DEFAULT_MULTIPARTJOB_DIR_NAME;
-		}
-
-		return jobDirName;
-	}
+//	/**
+//	 * Returns the name of the directory in which grisu jobs are located
+//	 * remotely.
+//	 * 
+//	 * @return the name of the direcotory in which grisu stores jobs or null if
+//	 *         the jobs should be stored in the root home directory.
+//	 */
+//	public static String getGrisuMultiPartJobDirectoryName() {
+//
+//		String jobDirName = null;
+//		try {
+//			jobDirName = getServerConfiguration().getString("multiPartJobDirName");
+//
+//			if ("none".equals(jobDirName.toLowerCase())) {
+//				jobDirName = null;
+//			}
+//
+//		} catch (Exception e) {
+//			jobDirName = null;
+//		}
+//
+//		if (jobDirName == null) {
+//			jobDirName = DEFAULT_MULTIPARTJOB_DIR_NAME;
+//		}
+//
+//		return jobDirName;
+//	}
 
 	/**
 	 * Returns the lifetime of a delegated proxy that is retrieved from myproxy.
