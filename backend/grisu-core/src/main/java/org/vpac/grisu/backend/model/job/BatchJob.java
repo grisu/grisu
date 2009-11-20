@@ -28,13 +28,13 @@ import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoJobProperty;
 import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoLogMessages;
-import org.vpac.grisu.model.dto.DtoMultiPartJob;
+import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 
 import au.org.arcs.jcommons.constants.Constants;
 
 @Entity
-public class MultiPartJob {
+public class BatchJob {
 
 	protected Job getJob(final String jobname) throws NoSuchJobException {
 
@@ -51,7 +51,7 @@ public class MultiPartJob {
 
 	private Map<String, String> jobProperties = new HashMap<String, String>();
 
-	static final Logger myLogger = Logger.getLogger(MultiPartJob.class
+	static final Logger myLogger = Logger.getLogger(BatchJob.class
 			.getName());
 
 	// the user's dn
@@ -63,7 +63,7 @@ public class MultiPartJob {
 
 	private Set<String> usedMountPoints = new HashSet<String>();
 
-	private String multiPartJobId;
+	private String batchJobname;
 	
 	private String fqan = null;
 
@@ -92,9 +92,9 @@ public class MultiPartJob {
 
 	}
 
-	public MultiPartJob(String dn, String multiPartJobId, String fqan) {
+	public BatchJob(String dn, String batchJobname, String fqan) {
 		this.dn = dn;
-		this.multiPartJobId = multiPartJobId;
+		this.batchJobname = batchJobname;
 		this.fqan = fqan;
 	}
 	
@@ -106,7 +106,7 @@ public class MultiPartJob {
 		this.fqan = fqan;
 	}
 	// for hibernate
-	private MultiPartJob() {
+	private BatchJob() {
 
 	}
 
@@ -143,12 +143,12 @@ public class MultiPartJob {
 		this.dn = dn;
 	}
 
-	public String getMultiPartJobId() {
-		return multiPartJobId;
+	public String getbatchJobname() {
+		return batchJobname;
 	}
 
-	private void setMultiPartJobId(String id) {
-		this.multiPartJobId = id;
+	private void setbatchJobname(String id) {
+		this.batchJobname = id;
 	}
 
 	public void addJob(String jobname) throws NoSuchJobException {
@@ -159,7 +159,7 @@ public class MultiPartJob {
 		// addFailedJob(job);
 		// }
 		usedMountPoints.add(job.getJobProperty(Constants.MOUNTPOINT_KEY));
-		job.addJobProperty(Constants.MULTIJOB_NAME, multiPartJobId);
+		job.addJobProperty(Constants.BATCHJOB_NAME, batchJobname);
 		job.setMultiPartJob(true);
 		jobdao.saveOrUpdate(job);
 	}
@@ -241,10 +241,10 @@ public class MultiPartJob {
 		return this.jobProperties.get(key);
 	}
 
-	public DtoMultiPartJob createDtoMultiPartJob() throws NoSuchJobException {
+	public DtoBatchJob createDtoMultiPartJob() throws NoSuchJobException {
 
-		final DtoMultiPartJob result = new DtoMultiPartJob(this
-				.getMultiPartJobId());
+		final DtoBatchJob result = new DtoBatchJob(this
+				.getbatchJobname());
 		
 	
 		result.setSubmissionFqan(this.getFqan());

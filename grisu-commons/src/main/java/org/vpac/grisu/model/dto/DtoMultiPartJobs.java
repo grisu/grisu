@@ -12,9 +12,9 @@ public class DtoMultiPartJobs {
 	/**
 	 * The list of jobs.
 	 */
-	private List<DtoMultiPartJob> allJobs = new LinkedList<DtoMultiPartJob>();
+	private List<DtoBatchJob> allJobs = new LinkedList<DtoBatchJob>();
 	
-	public DtoMultiPartJobs(List<DtoMultiPartJob> allJobs) {
+	public DtoMultiPartJobs(List<DtoBatchJob> allJobs) {
 		this.allJobs = allJobs;
 	}
 	
@@ -22,15 +22,15 @@ public class DtoMultiPartJobs {
 	}
 
 	@XmlElement(name="multiPartJob")
-	public List<DtoMultiPartJob> getAllJobs() {
+	public List<DtoBatchJob> getAllJobs() {
 		return allJobs;
 	}
 
-	public void setAllJobs(List<DtoMultiPartJob> allJobs) {
+	public void setAllJobs(List<DtoBatchJob> allJobs) {
 		this.allJobs = allJobs;
 	}
 	
-	public void addJob(DtoMultiPartJob job) {
+	public void addJob(DtoBatchJob job) {
 		this.allJobs.add(job);
 	}
 

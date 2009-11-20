@@ -19,7 +19,7 @@ import org.vpac.grisu.frontend.model.job.MultiPartJobObject;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.DtoActionStatus;
-import org.vpac.grisu.model.dto.DtoMultiPartJob;
+import org.vpac.grisu.model.dto.DtoBatchJob;
 
 import au.org.arcs.jcommons.constants.Constants;
 
@@ -122,7 +122,7 @@ public class MultiJobSubmit {
 			System.exit(1);
 		}
 		
-		System.out.println(si.getJobProperty(multiPartJob.getMultiPartJobId(), Constants.OPTIMIZE_STATS));
+		System.out.println(si.getJobProperty(multiPartJob.getbatchJobname(), Constants.OPTIMIZE_STATS));
 		
 		multiPartJob.submit();
 		

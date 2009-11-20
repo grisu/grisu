@@ -16,9 +16,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.xml.bind.annotation.XmlMimeType;
 
+import org.vpac.grisu.control.exceptions.BatchJobException;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
-import org.vpac.grisu.control.exceptions.MultiPartJobException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
@@ -27,6 +27,7 @@ import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.dto.DtoApplicationDetails;
 import org.vpac.grisu.model.dto.DtoApplicationInfo;
+import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.dto.DtoDataLocations;
 import org.vpac.grisu.model.dto.DtoFolder;
 import org.vpac.grisu.model.dto.DtoGridResources;
@@ -34,7 +35,6 @@ import org.vpac.grisu.model.dto.DtoHostsInfo;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
-import org.vpac.grisu.model.dto.DtoMultiPartJob;
 import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 import org.vpac.grisu.model.dto.DtoUserProperties;
@@ -747,7 +747,6 @@ public interface ServiceInterface {
 	 * Returns a xml document that contains all the jobs of the user with
 	 * information about the jobs.
 	 * 
-	 * This doesn't list multipartjobs.
 	 * 
 	 * @param refreshJobStatus whether to refresh the status of all the jobs. This can take quite some time.
 	 *  
@@ -762,7 +761,7 @@ public interface ServiceInterface {
 	/**
 	 * Returns a list of all jobnames that are currently stored on this backend.
 	 * 
-	 * Doesn't include multipartjobs.
+	 * Doesn't include batchjobs.
 	 * 
 	 * @return all jobnames
 	 */
@@ -835,7 +834,7 @@ public interface ServiceInterface {
 	 * Deletes the whole jobdirectory (if specified) and if successful, the job from the
 	 * database.
 	 * 
-	 * Also works with multipart jobs.
+	 * Also works with batchjobs.
 	 * 
 	 * @param jobname
 	 *            the name of the job
@@ -844,13 +843,13 @@ public interface ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the files can't be deleted
 	 * @throws NoSuchJobException if no such job exists
-	 * @throws MultiPartJobException if the job is part of a multipartjob
+	 * @throws BatchJobException if the job is part of a batchjob
 	 */
 	@POST
 	@Path("actions/killJob/{jobname}")
 	@RolesAllowed("User")
 	void kill(@PathParam("jobname") String jobname, @QueryParam("clean") boolean clean)
-			throws RemoteFileSystemException, NoSuchJobException, MultiPartJobException;
+			throws RemoteFileSystemException, NoSuchJobException, BatchJobException;
 	
 	/**
 	 * Deletes the whole jobdirectory (if specified) and if successful, the job from the
@@ -950,119 +949,107 @@ public interface ServiceInterface {
 	/**
 	 * Adds the specified job to the mulitpartJob.
 	 * 
-	 * @param multipartJobId the multipartjobid
+	 * @param batchjobname the batchjobname
 	 * @param jobdescription the jsdl string
 	 */
 	@RolesAllowed("User")
-	String addJobToMultiPartJob(String multipartJobId, String jobdescription) throws NoSuchJobException, JobPropertiesException;
+	String addJobToBatchJob(String batchjobname, String jobdescription) throws NoSuchJobException, JobPropertiesException;
 	
 	/**
-	 * Tries to figure out the best submission locations for all the jobs that this multipartjob consists of.
+	 * Tries to figure out the best submission locations for all the jobs that this batchpartjob consists of.
 	 * 
-	 * Call this after you added all jobs to the multipartjob and before you upload/crosstage any files.
+	 * Call this after you added all jobs to the batchjob and before you upload/crosstage any files.
 	 * It will overwrite possibly specified submission locations on jobs.
 	 * 
-	 * @param multipartJobId the id of the multipartjob
-	 * @throws NoSuchJobException if there is no multipartjob with such an id
+	 * @param batchjobname the name of the batchjob
+	 * @throws NoSuchJobException if there is no batchjob with such an id
 	 */
 	@RolesAllowed("User")
-	void optimizeMultiPartJob(String multipartJobId) throws NoSuchJobException;
+	void redistributeBatchJob(String batchjobname) throws NoSuchJobException;
 	
 	/**
-	 * Removes the specified job from the mulitpartJob.
+	 * Removes the specified job from the batchJob.
 	 * 
-	 * @param multipartJobId the multipartjobid
+	 * @param batchJobname the batchJobname
 	 * @param jobname the jobname
 	 */
 	@RolesAllowed("User")
-	void removeJobFromMultiPartJob(String multipartJobId, String jobname) throws NoSuchJobException;
+	void removeJobFromBatchJob(String batchJobname, String jobname) throws NoSuchJobException;
 	
 	/**
-	 * Creates a multipartjob on the server.
+	 * Creates a batchjob on the server.
 	 * 
-	 * A multipartjob is just a collection of jobs that belong together to make them more easily managable.
+	 * A batchjob is just a collection of jobs that belong together to make them more easily managable.
 	 * 
-	 * @param multiPartJobId the id (name) of the multipartjob
+	 * @param batchJobname the id (name) of the batchjob
 	 * @param fqan the vo to use
 	 * @throws JobPropertiesException 
 	 */
 	@RolesAllowed("User")
-	DtoMultiPartJob createMultiPartJob(String multiPartJobId, String fqan) throws MultiPartJobException;
-	
-//	/**
-//	 * Removes the multipartJob from the server.
-//	 * 
-//	 * @param multiPartJobId the name of the multipartJob
-//	 * @param deleteChildJobsAsWell whether to delete the child jobs of this multipartjob as well.
-//	 */
-//	@RolesAllowed("User")
-//	void deleteMultiPartJob(String multiPartJobId, boolean deleteChildJobsAsWell) throws NoSuchJobException;
-	
-	
+	DtoBatchJob createBatchJob(String batchJobname, String fqan) throws BatchJobException;
+		
 	/**
-	 * Returns a list of all multipart job ids that are currently stored on this backend
+	 * Returns a list of all batch jobnames that are currently stored on this backend
 	 * 
-	 * @return all multipartjobids
+	 * @return all batchjobnames
 	 */
 	@RolesAllowed("User")
-	DtoStringList getAllMultiPartJobIds(String application);
+	DtoStringList getAllBatchJobnames(String application);
 	
 
 
 	/**
-	 * Refreshes the status of all jobs that belong to this multipartjob.
+	 * Refreshes the status of all jobs that belong to this batchjob.
 	 * 
-	 * @param multiPartJobId the multipartjob id
+	 * This returns immediately. You need to watch the action status if you want to know when all sub-jobs are refreshed.
+	 * 
+	 * @param batchJobname the name of the batchjob
 	 * @return the action status handle for this. Use {@link #getActionStatus(String)} to find out when this is finished.
-	 * @throws NoSuchJobException if there is no multipart job with the specified id
+	 * @throws NoSuchJobException if there is no batchjob with the specified id
 	 */
-	String refreshMultiPartJob(String multiPartJobId) throws NoSuchJobException;
+	String refreshBatchJobStatus(String batchJobname) throws NoSuchJobException;
 	
 	
 	/**
-	 * Returns the {@link DtoMultiPartJob} with the specified name.
+	 * Returns the {@link DtoBatchJob} with the specified name.
 	 * 
-	 * This method doesn't refresh the jobs that belong to this multipartjob. Call {@link #refreshMultiPartJob(String)} 
-	 * and monitor the action status for this until it finishes before you retrieve the multipartjob if you want
-	 * an up-to-date version of the multipartjob.
+	 * This method doesn't refresh the jobs that belong to this batchjob. Call {@link #refreshBatchJobStatus(String)} 
+	 * and monitor the action status for this until it finishes before you retrieve the batchjob if you want
+	 * an up-to-date version of the batchjob.
 	 * 
-	 * @return the multipartjob
+	 * @return the batchjob
 	 */
 	@RolesAllowed("User")
-	DtoMultiPartJob getMultiPartJob(String multiJobPartId) throws NoSuchJobException;
+	DtoBatchJob getBatchJob(String batchJobname) throws NoSuchJobException;
 	
-
-
-	
-
-
 	/**
-	 * Uploads input file for job or distributes an input file to all the filesystems that are used in a multipartjob if job is multijob.
+	 * Uploads input file for job or distributes an input file to all the filesystems that are used in a batchjob if job is batchjob.
 	 * 
-	 * In case of single job: this gets put in the jobdirectory of the job.
+	 * In case of single job: this gets put in the jobdirectory of the job and waits until the copying finished
 	 * 
-	 * In case of multijob: You need to reverence to the input file using relative paths in the commandline you specify in the jobs that need this inputfile.
-	 * Use this after you created all jobs for this multipartjob.
+	 * In case of batchjob: You need to reverence to the input file using relative paths in the commandline you specify in the jobs that need this inputfile.
+	 * Use this after you created all jobs for this batchjob. In the case of batchjob this method returns immediately after the file upload and you have to monitor the progress using
+	 * the {@link #getActionStatus(String)} method if you want to know when the file is copied to all targets.
 	 * 
-	 * @param multiPartJobId the id of the multipartjob
+	 * @param jobname the jobname
 	 * @param inputFile the inputfile
 	 */
 	@RolesAllowed("User")
-	void uploadInputFile(String multiPartJobId, DataHandler inputFile, String relativePath) throws RemoteFileSystemException, NoSuchJobException;
+	void uploadInputFile(String jobname, DataHandler inputFile, String relativePath) throws RemoteFileSystemException, NoSuchJobException;
 	
 	/**
-	 * Distributes a remote input file to all the filesystems that are used in this multipartjob.
+	 * Distributes a remote input file to all the filesystems that are used in this batchjob.
 	 * 
-	 * Use this after you created all jobs for this multipartjob.
+	 * Use this after you created all jobs for this batchjob.
 	 * 
-	 * @param multiPartJobId the id of the multipartJob
+	 * @param batchJobname the name of the batchjob
 	 * @param inputFile the url of the inputfile
 	 * @param filename the target filename
 	 * @throws RemoteFileSystemException if there is a problem copying / accessing the file
-	 * @throws NoSuchJobException if the specified multipartjob doesn't exist
+	 * @throws NoSuchJobException if the specified batchjob doesn't exist
 	 */
 	@RolesAllowed("User")
-	void copyMultiPartJobInputFile(String multiPartJobId, String inputFile,	String filename) throws RemoteFileSystemException, NoSuchJobException;
+	void copyBatchJobInputFile(String batchJobname, String inputFile, String filename) throws RemoteFileSystemException, NoSuchJobException;
 	
 	/**
 	 * Resubmit a job. Kills the old one if it's still running.

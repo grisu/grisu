@@ -12,7 +12,7 @@ import java.util.TreeSet;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.backend.model.job.Job;
-import org.vpac.grisu.backend.model.job.MultiPartJob;
+import org.vpac.grisu.backend.model.job.BatchJob;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 
 import au.org.arcs.jcommons.constants.Constants;

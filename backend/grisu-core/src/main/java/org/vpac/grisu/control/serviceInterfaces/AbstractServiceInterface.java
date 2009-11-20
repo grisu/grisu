@@ -34,7 +34,7 @@ import org.apache.commons.vfs.FileType;
 import org.apache.commons.vfs.FileTypeSelector;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.backend.hibernate.JobDAO;
-import org.vpac.grisu.backend.hibernate.MultiPartJobDAO;
+import org.vpac.grisu.backend.hibernate.BatchJobDAO;
 import org.vpac.grisu.backend.hibernate.UserDAO;
 import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.backend.model.RemoteFileTransferObject;
@@ -42,7 +42,7 @@ import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.backend.model.job.JobSubmissionManager;
 import org.vpac.grisu.backend.model.job.JobSubmitter;
-import org.vpac.grisu.backend.model.job.MultiPartJob;
+import org.vpac.grisu.backend.model.job.BatchJob;
 import org.vpac.grisu.backend.model.job.gt4.GT4DummySubmitter;
 import org.vpac.grisu.backend.model.job.gt4.GT4Submitter;
 import org.vpac.grisu.backend.utils.CertHelpers;
@@ -52,7 +52,7 @@ import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
-import org.vpac.grisu.control.exceptions.MultiPartJobException;
+import org.vpac.grisu.control.exceptions.BatchJobException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -71,7 +71,7 @@ import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoJobProperty;
 import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
-import org.vpac.grisu.model.dto.DtoMultiPartJob;
+import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 import org.vpac.grisu.model.dto.DtoUserProperties;
@@ -130,7 +130,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	protected JobDAO jobdao = new JobDAO();
 
-	protected MultiPartJobDAO multiPartJobDao = new MultiPartJobDAO();
+	protected BatchJobDAO multiPartJobDao = new BatchJobDAO();
 
 	private MountPoint[] mountPointsForThisSession = null;
 
@@ -222,11 +222,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return job;
 	}
 
-	protected MultiPartJob getMultiPartJobFromDatabase(
-			final String multiPartJobId) throws NoSuchJobException {
+	protected BatchJob getMultiPartJobFromDatabase(
+			final String batchJobname) throws NoSuchJobException {
 
-		MultiPartJob job = multiPartJobDao.findJobByDN(getUser().getCred()
-				.getDn(), multiPartJobId);
+		BatchJob job = multiPartJobDao.findJobByDN(getUser().getCred()
+				.getDn(), batchJobname);
 
 		return job;
 
@@ -340,12 +340,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	}
 
 	private String createJob(Document jsdl, final String fqan,
-			final String jobnameCreationMethod, final MultiPartJob optionalParentBatchJob) throws JobPropertiesException {
+			final String jobnameCreationMethod, final BatchJob optionalParentBatchJob) throws JobPropertiesException {
 
 		String jobname = calculateJobname(jsdl, jobnameCreationMethod);
 
 		try {
-			MultiPartJob mpj = getMultiPartJobFromDatabase(jobname);
+			BatchJob mpj = getMultiPartJobFromDatabase(jobname);
 			throw new JobPropertiesException(
 					"Could not create job with jobname " + jobname
 							+ ". Multipart job with this id already exists...");
@@ -446,7 +446,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @throws NoSuchJobException
 	 * @throws JobPropertiesException
 	 */
-	private void processJobDescription(final Job job, final MultiPartJob multiPartJob)
+	private void processJobDescription(final Job job, final BatchJob multiPartJob)
 			throws NoSuchJobException, JobPropertiesException {
 
 		// TODO check whether fqan is set
@@ -834,7 +834,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} else {
 			workingDirectory = mountPointToUse.getRootUrl().substring(
 					stagingFilesystemToUse.length())
-					+ "/" + multiPartJob.getJobProperty(Constants.RELATIVE_MULTIJOB_DIRECTORY_KEY) + "/" + job.getJobname();
+					+ "/" + multiPartJob.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY) + "/" + job.getJobname();
 		}
 		myLogger.debug("Calculated workingdirectory: " + workingDirectory);
 
@@ -882,7 +882,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		myLogger.debug("Preparing job done.");
 	}
 	
-	private SortedSet<GridResource> findBestResourcesForMultipartJob(MultiPartJob mpj) {
+	private SortedSet<GridResource> findBestResourcesForMultipartJob(BatchJob mpj) {
 		
 		Map<JobSubmissionProperty, String> properties = new HashMap<JobSubmissionProperty, String>();
 		
@@ -922,7 +922,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		SortedSet<GridResource> result = new TreeSet<GridResource>(matchmaker.findAvailableResources(properties, mpj.getFqan()));
 		
 //		StringBuffer message = new StringBuffer(
-//				"Finding best resources for mulipartjob " + multiPartJobId
+//				"Finding best resources for mulipartjob " + batchJobname
 //						+ " using:\n");
 //		message.append("Version: " + defaultVersion + "\n");
 //		message.append("Walltime in minutes: " + maxWalltimeInSecondsAcrossJobs
@@ -934,15 +934,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		
 	}
 
-	public void optimizeMultiPartJob(String multiPartJobId)
+	public void redistributeBatchJob(String batchJobname)
 			throws NoSuchJobException {
 		
-		MultiPartJob mpj = getMultiPartJobFromDatabase(multiPartJobId);
+		BatchJob mpj = getMultiPartJobFromDatabase(batchJobname);
 		
 		optimizeMultiPartJob(mpj);
 	}
 	
-	private void optimizeMultiPartJob(MultiPartJob mpj) throws NoSuchJobException {
+	private void optimizeMultiPartJob(BatchJob mpj) throws NoSuchJobException {
 		
 		String sitesToIncludeString = mpj.getJobProperty(Constants.SITES_TO_INCLUDE_KEY);
 		String[] sitesToInclude = null;
@@ -1107,12 +1107,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 //
 //	}
 
-	private void submitMultiPartJob(final MultiPartJob multiJob)
+	private void submitMultiPartJob(final BatchJob multiJob)
 			throws JobSubmissionException, NoSuchJobException {
 
 		final DtoActionStatus newActionStatus = new DtoActionStatus(multiJob
-				.getMultiPartJobId(), 100);
-		this.actionStatus.put(multiJob.getMultiPartJobId(), newActionStatus);
+				.getbatchJobname(), 100);
+		this.actionStatus.put(multiJob.getbatchJobname(), newActionStatus);
 
 		ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
@@ -1147,7 +1147,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							break;
 						} catch (Exception e) {
 							myLogger.error("Job submission for multipartjob: "
-									+ multiJob.getMultiPartJobId() + ", "
+									+ multiJob.getbatchJobname() + ", "
 									+ job.getJobname() + " failed: "
 									+ e.getLocalizedMessage());
 							myLogger.error("Trying again...");
@@ -1213,10 +1213,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private synchronized void addLogMessageToPossibleMultiPartJobParent(
 			Job job, String message) {
 
-		String mpjName = job.getJobProperty(Constants.MULTIJOB_NAME);
+		String mpjName = job.getJobProperty(Constants.BATCHJOB_NAME);
 
 		if (mpjName != null) {
-			MultiPartJob mpj = null;
+			BatchJob mpj = null;
 			try {
 				mpj = getMultiPartJobFromDatabase(mpjName);
 			} catch (NoSuchJobException e) {
@@ -1357,10 +1357,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		job.getJobProperties().remove(Constants.ERROR_REASON);
 
 		String possibleMultiPartJob = job
-				.getJobProperty(Constants.MULTIJOB_NAME);
+				.getJobProperty(Constants.BATCHJOB_NAME);
 
 		if (StringUtils.isNotBlank(possibleMultiPartJob)) {
-			MultiPartJob mpj = getMultiPartJobFromDatabase(possibleMultiPartJob);
+			BatchJob mpj = getMultiPartJobFromDatabase(possibleMultiPartJob);
 			addLogMessageToPossibleMultiPartJobParent(job, "Re-submitting job "
 					+ jobname);
 			mpj.removeFailedJob(job.getJobname());
@@ -1446,7 +1446,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		} catch (NoSuchJobException e) {
 			// maybe it's a multipartjob
-			final MultiPartJob multiJob = getMultiPartJobFromDatabase(jobname);
+			final BatchJob multiJob = getMultiPartJobFromDatabase(jobname);
 			submitMultiPartJob(multiJob);
 		}
 
@@ -1589,10 +1589,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				job.addLogMessage("Job failed. Status: "
 						+ JobConstants.translateStatus(status));
 				String multiPartJobParent = job
-						.getJobProperty(Constants.MULTIJOB_NAME);
+						.getJobProperty(Constants.BATCHJOB_NAME);
 				if (multiPartJobParent != null) {
 					try {
-						MultiPartJob mpj = getMultiPartJobFromDatabase(multiPartJobParent);
+						BatchJob mpj = getMultiPartJobFromDatabase(multiPartJobParent);
 						mpj.addFailedJob(job.getJobname());
 						addLogMessageToPossibleMultiPartJobParent(job, "Job: "
 								+ job.getJobname() + " failed. Status: "
@@ -1665,10 +1665,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return DtoStringList.fromStringList(jobnames);
 	}
 
-	public String refreshMultiPartJob(String multiJobPartId)
-			throws NoSuchJobException {
+	public String refreshBatchJobStatus(String batchJobname)	throws NoSuchJobException {
 
-		String handle = "REFRESH_" + multiJobPartId;
+		String handle = "REFRESH_" + batchJobname;
 		
 		DtoActionStatus status = actionStatus.get(handle);
 		
@@ -1677,8 +1676,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return handle;
 		}
 		
-		MultiPartJob multiPartJob = getMultiPartJobFromDatabase(multiJobPartId);
-
+		BatchJob multiPartJob = getMultiPartJobFromDatabase(batchJobname);
+		
 		final DtoActionStatus statusfinal = new DtoActionStatus(handle, multiPartJob.getJobs().size());
 
 		actionStatus.put(handle, statusfinal);
@@ -1715,28 +1714,28 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @return all the multipartjobs of the user
 	 */
-	public DtoMultiPartJob getMultiPartJob(String multiJobPartId) throws NoSuchJobException {
+	public DtoBatchJob getBatchJob(String batchJobname) throws NoSuchJobException {
 
-		MultiPartJob multiPartJob = getMultiPartJobFromDatabase(multiJobPartId);
-
+		BatchJob multiPartJob = getMultiPartJobFromDatabase(batchJobname);
+		
 		return multiPartJob.createDtoMultiPartJob();
 	}
 
 	/**
 	 * Adds the specified job to the mulitpartJob.
 	 * 
-	 * @param multipartJobId
-	 *            the multipartjobid
+	 * @param batchJobname
+	 *            the batchJobname
 	 * @param jobname
 	 *            the jobname
 	 * @throws NoSuchJobException
 	 * @throws JobPropertiesException
 	 * @throws NoSuchJobException
 	 */
-	public String addJobToMultiPartJob(String multipartJobId, String jsdlString)
+	public String addJobToBatchJob(String batchJobname, String jsdlString)
 			throws JobPropertiesException, NoSuchJobException {
 
-		MultiPartJob multiJob = getMultiPartJobFromDatabase(multipartJobId);
+		BatchJob multiJob = getMultiPartJobFromDatabase(batchJobname);
 		
 		Document jsdl;
 
@@ -1761,16 +1760,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/**
 	 * Removes the specified job from the mulitpartJob.
 	 * 
-	 * @param multipartJobId
-	 *            the multipartjobid
+	 * @param batchJobname
+	 *            the batchJobname
 	 * @param jobname
 	 *            the jobname
 	 */
-	public void removeJobFromMultiPartJob(String multipartJobId, String jobname)
+	public void removeJobFromBatchJob(String batchJobname, String jobname)
 			throws NoSuchJobException {
 
 		Job job = getJob(jobname);
-		MultiPartJob multiJob = getMultiPartJobFromDatabase(multipartJobId);
+		BatchJob multiJob = getMultiPartJobFromDatabase(batchJobname);
 		multiJob.removeJob(job);
 
 		multiPartJobDao.saveOrUpdate(multiJob);
@@ -1782,36 +1781,36 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * A multipartjob is just a collection of jobs that belong together to make
 	 * them more easily managable.
 	 * 
-	 * @param multiPartJobId
+	 * @param batchJobname
 	 *            the id (name) of the multipartjob
 	 * @throws JobPropertiesException
 	 */
-	public DtoMultiPartJob createMultiPartJob(String multiPartJobId, String fqan)
-			throws MultiPartJobException {
+	public DtoBatchJob createBatchJob(String batchJobname, String fqan)
+			throws BatchJobException {
 
 		try {
-			Job possibleJob = getJob(multiPartJobId);
-			throw new MultiPartJobException(
+			Job possibleJob = getJob(batchJobname);
+			throw new BatchJobException(
 					"Can't create multipartjob with id: "
-							+ multiPartJobId
+							+ batchJobname
 							+ ". Non-multipartjob with this id already exists...");
 		} catch (NoSuchJobException e) {
 			// that's good
 		}
 
 		try {
-			MultiPartJob multiJob = getMultiPartJobFromDatabase(multiPartJobId);
+			BatchJob multiJob = getMultiPartJobFromDatabase(batchJobname);
 		} catch (NoSuchJobException e) {
 			// that's good
 			
-			MultiPartJob multiJobCreate = new MultiPartJob(getDN(),
-					multiPartJobId, fqan);
+			BatchJob multiJobCreate = new BatchJob(getDN(),
+					batchJobname, fqan);
 			multiJobCreate.addJobProperty(Constants.RELATIVE_PATH_FROM_JOBDIR, "../");
 			multiJobCreate.addJobProperty(
-					Constants.RELATIVE_MULTIJOB_DIRECTORY_KEY,
-					ServerPropertiesManager.getGrisuJobDirectoryName() + "/" + multiPartJobId);
+					Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY,
+					ServerPropertiesManager.getGrisuJobDirectoryName() + "/" + batchJobname);
 
-			multiJobCreate.addLogMessage("MultiPartJob " + multiPartJobId
+			multiJobCreate.addLogMessage("MultiPartJob " + batchJobname
 					+ " created.");
 			multiJobCreate.addJobProperty(Constants.OPTIMIZE_STATS, "n/a");
 			multiPartJobDao.saveOrUpdate(multiJobCreate);
@@ -1824,19 +1823,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 		}
 
-		throw new MultiPartJobException("MultiPartJob with name "
-				+ multiPartJobId + " already exists.");
+		throw new BatchJobException("MultiPartJob with name "
+				+ batchJobname + " already exists.");
 	}
 
 	/**
 	 * Removes the multipartJob from the server.
 	 * 
-	 * @param multiPartJobId
+	 * @param batchJobname
 	 *            the name of the multipartJob
 	 * @param deleteChildJobsAsWell
 	 *            whether to delete the child jobs of this multipartjob as well.
 	 */
-	private void deleteMultiPartJob(final MultiPartJob multiJob, final boolean clean)  {
+	private void deleteMultiPartJob(final BatchJob multiJob, final boolean clean)  {
 
 		int size = multiJob.getJobs().size() * 2 + 1;
 		
@@ -1845,8 +1844,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		
 		final DtoActionStatus newActionStatus = new DtoActionStatus(multiJob
-				.getMultiPartJobId(), size);
-		this.actionStatus.put(multiJob.getMultiPartJobId(), newActionStatus);
+				.getbatchJobname(), size);
+		this.actionStatus.put(multiJob.getbatchJobname(), newActionStatus);
 
 		ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
@@ -1892,7 +1891,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			newActionStatus.addElement("Deleting common dir for mountpoint: "+mpRoot);
 			String url = mpRoot
 					+ multiJob
-							.getJobProperty(Constants.RELATIVE_MULTIJOB_DIRECTORY_KEY);
+							.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY);
 			myLogger.debug("Deleting multijobDir: " + url);
 			try {
 				deleteFile(url);
@@ -1915,7 +1914,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	public DtoStringList getAllMultiPartJobIds(String application) {
+	public DtoStringList getAllBatchJobnames(String application) {
 
 		List<String> jobnames = null;
 
@@ -2426,14 +2425,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	public void copyMultiPartJobInputFile(String multiPartJobId,
+	public void copyBatchJobInputFile(String batchJobname,
 			String inputFile, String filename)
 			throws RemoteFileSystemException, NoSuchJobException {
 
-		MultiPartJob multiJob = getMultiPartJobFromDatabase(multiPartJobId);
+		BatchJob multiJob = getMultiPartJobFromDatabase(batchJobname);
 
 		String relpathFromMountPointRoot = multiJob
-				.getJobProperty(Constants.RELATIVE_MULTIJOB_DIRECTORY_KEY);
+				.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY);
 
 		for (String mountPointRoot : multiJob.getAllUsedMountPoints()) {
 
@@ -2483,7 +2482,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			// no single job, let's try a multijob
 		}
 		
-		final MultiPartJob multiJob = getMultiPartJobFromDatabase(jobname);
+		final BatchJob multiJob = getMultiPartJobFromDatabase(jobname);
 
 		myLogger.debug("Receiving datahandler for multipartjob input file...");
 
@@ -2545,7 +2544,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			FileObject target = null;
 
 			String relpathFromMountPointRoot = multiJob
-					.getJobProperty(Constants.RELATIVE_MULTIJOB_DIRECTORY_KEY);
+					.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY);
 			// String parent = filename.substring(0, filename
 			// .lastIndexOf(File.separator));
 			String parent = mountPointRoot + "/" + relpathFromMountPointRoot;
@@ -2667,7 +2666,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			jobdao.saveOrUpdate(job);
 			myLogger.debug("Added job property: " + key);
 		} catch (NoSuchJobException e) {
-			MultiPartJob job = getMultiPartJobFromDatabase(jobname);
+			BatchJob job = getMultiPartJobFromDatabase(jobname);
 			job.addJobProperty(key, value);
 			multiPartJobDao.saveOrUpdate(job);
 			myLogger.debug("Added multijob property: " + key);
@@ -2740,7 +2739,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			return job.getJobProperty(key);
 		} catch (NoSuchJobException e) {
-			MultiPartJob mpj = getMultiPartJobFromDatabase(jobname);
+			BatchJob mpj = getMultiPartJobFromDatabase(jobname);
 			return mpj.getJobProperty(key);
 		}
 	}
@@ -3153,7 +3152,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public void kill(final String jobname, final boolean clear)
 			throws RemoteFileSystemException, NoSuchJobException,
-			MultiPartJobException {
+			BatchJobException {
 		
 
 		try {
@@ -3164,12 +3163,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			kill(job, clear);
 			
 		} catch (NoSuchJobException nsje) {
-			MultiPartJob mpj = getMultiPartJobFromDatabase(jobname);
+			BatchJob mpj = getMultiPartJobFromDatabase(jobname);
 			deleteMultiPartJob(mpj, clear);
 		}
 	}
 
-	private void kill(final Job job, final boolean clear) throws MultiPartJobException {
+	private void kill(final Job job, final boolean clear) throws BatchJobException {
 
 		// Job job;
 		//
@@ -3182,7 +3181,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			if (job.isMultiPartJob()) {
 				
 				try {
-					MultiPartJob mpj = getMultiPartJobFromDatabase(job.getJobProperty(Constants.MULTIJOB_NAME));
+					BatchJob mpj = getMultiPartJobFromDatabase(job.getJobProperty(Constants.BATCHJOB_NAME));
 					mpj.removeJob(job);
 					multiPartJobDao.saveOrUpdate(mpj);
 				} catch (Exception e) {

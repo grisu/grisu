@@ -18,20 +18,20 @@ import org.vpac.grisu.control.JobConstants;
 import au.org.arcs.jcommons.constants.Constants;
 
 @XmlRootElement(name="multiPartJob")
-public class DtoMultiPartJob {
+public class DtoBatchJob {
 	
-	private String multiPartJobId;
+	private String batchJobname;
 	private String submissionFqan;
 	
 	private boolean isFinished = true;
 	
 	private DtoJobs jobs = new DtoJobs();
 
-	public DtoMultiPartJob() {
+	public DtoBatchJob() {
 	}
 	
-	public DtoMultiPartJob(String multiPartJobId) {
-		this.multiPartJobId = multiPartJobId;
+	public DtoBatchJob(String batchJobname) {
+		this.batchJobname = batchJobname;
 	}
 	
 	@XmlAttribute(name="finished")
@@ -61,13 +61,13 @@ public class DtoMultiPartJob {
 		this.submissionFqan = fqan;
 	}
 
-	@XmlElement(name="multiPartJobId")
-	public String getMultiPartJobId() {
-		return multiPartJobId;
+	@XmlElement(name="batchJobname")
+	public String getbatchJobname() {
+		return batchJobname;
 	}
 
-	public void setMultiPartJobId(String multiPartJobId) {
-		this.multiPartJobId = multiPartJobId;
+	public void setbatchJobname(String batchJobname) {
+		this.batchJobname = batchJobname;
 	}
 	
 	private DtoLogMessages messages = new DtoLogMessages();

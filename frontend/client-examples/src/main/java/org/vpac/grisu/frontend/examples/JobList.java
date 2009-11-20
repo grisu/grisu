@@ -8,7 +8,7 @@ import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoJobs;
-import org.vpac.grisu.model.dto.DtoMultiPartJob;
+import org.vpac.grisu.model.dto.DtoBatchJob;
 
 public final class JobList {
 	
@@ -46,7 +46,7 @@ public final class JobList {
 		}
 		
 		System.out.println("all multipartjobnames");
-		for ( String name : si.getAllMultiPartJobIds(null).asArray() ) {
+		for ( String name : si.getAllBatchJobnames(null).asArray() ) {
 			System.out.println(name);
 		}
 	}

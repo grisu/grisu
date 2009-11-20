@@ -7,7 +7,7 @@ import org.vpac.grisu.frontend.control.login.LoginException;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.model.dto.DtoJob;
-import org.vpac.grisu.model.dto.DtoMultiPartJob;
+import org.vpac.grisu.model.dto.DtoBatchJob;
 
 public final class JobCreationInfo {
 	
@@ -33,7 +33,7 @@ public final class JobCreationInfo {
 
 //		DtoJobs test = si.ps(true);
 		
-		for ( String name : si.getAllMultiPartJobIds("Blender").asArray() ) {
+		for ( String name : si.getAllBatchJobnames("Blender").asArray() ) {
 			System.out.println(name);
 		}
 		
@@ -43,7 +43,7 @@ public final class JobCreationInfo {
 			System.out.println(name);
 		}
 		
-		DtoMultiPartJob mjob = si.getMultiPartJob("blenderLogoTest");
+		DtoBatchJob mjob = si.getBatchJob("blenderLogoTest");
 		
 		for ( DtoJob job : mjob.getJobs().getAllJobs() ) {
 			System.out.println("Job: "+job.jobname());

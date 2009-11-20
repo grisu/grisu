@@ -6,7 +6,7 @@ import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.backend.model.job.Job;
-import org.vpac.grisu.backend.model.job.MultiPartJob;
+import org.vpac.grisu.backend.model.job.BatchJob;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 
 import au.org.arcs.jcommons.constants.Constants;
@@ -18,9 +18,9 @@ import au.org.arcs.jcommons.constants.Constants;
  * @author Markus Binsteiner
  * 
  */
-public class MultiPartJobDAO extends BaseHibernateDAO {
+public class BatchJobDAO extends BaseHibernateDAO {
 
-	private static Logger myLogger = Logger.getLogger(MultiPartJobDAO.class.getName());
+	private static Logger myLogger = Logger.getLogger(BatchJobDAO.class.getName());
 
 	/**
 	 * Looks up the database whether a user with the specified dn is already
@@ -30,7 +30,7 @@ public class MultiPartJobDAO extends BaseHibernateDAO {
 	 *            the dn of the user
 	 * @return the {@link User} or null if not found
 	 */
-	public final List<MultiPartJob> findMultiPartJobByDN(final String dn) {
+	public final List<BatchJob> findMultiPartJobByDN(final String dn) {
 
 		myLogger.debug("Loading multipart with dn: " + dn + " from db.");
 		String queryString = "from org.vpac.grisu.backend.model.job.MultiPartJob as job where job.dn = ?";
@@ -41,7 +41,7 @@ public class MultiPartJobDAO extends BaseHibernateDAO {
 			Query queryObject = getCurrentSession().createQuery(queryString);
 			queryObject.setParameter(0, dn);
 
-			List<MultiPartJob> jobs = (List<MultiPartJob>) (queryObject.list());
+			List<BatchJob> jobs = (List<BatchJob>) (queryObject.list());
 
 			getCurrentSession().getTransaction().commit();
 
@@ -58,7 +58,7 @@ public class MultiPartJobDAO extends BaseHibernateDAO {
 	public final List<String> findJobNamesByDn(final String dn) {
 
 		myLogger.debug("Loading multipartjob with dn: " + dn + " from db.");
-		String queryString = "select multiPartJobId from org.vpac.grisu.backend.model.job.MultiPartJob as job where job.dn = ?";
+		String queryString = "select batchJobname from org.vpac.grisu.backend.model.job.MultiPartJob as job where job.dn = ?";
 
 		try {
 			getCurrentSession().beginTransaction();
@@ -84,7 +84,7 @@ public class MultiPartJobDAO extends BaseHibernateDAO {
 	public final List<String> findJobNamesPerApplicationByDn(final String dn, final String application) {
 
 		myLogger.debug("Loading multipartjob with dn: " + dn + " from db.");
-		String queryString = "select multiPartJobId from org.vpac.grisu.backend.model.job.MultiPartJob as job where job.dn = ? and job.jobProperties['"+Constants.APPLICATIONNAME_KEY+"'] = ?";
+		String queryString = "select batchJobname from org.vpac.grisu.backend.model.job.MultiPartJob as job where job.dn = ? and job.jobProperties['"+Constants.APPLICATIONNAME_KEY+"'] = ?";
 
 		try {
 			getCurrentSession().beginTransaction();
@@ -114,7 +114,7 @@ public class MultiPartJobDAO extends BaseHibernateDAO {
 	 * 
 	 * @param dn
 	 *            the user's dn
-	 * @param multiPartJobId
+	 * @param batchJobname
 	 *            the name of the job
 	 * @return the (unique) job
 	 * @throws NoJobFoundException
@@ -122,26 +122,26 @@ public class MultiPartJobDAO extends BaseHibernateDAO {
 	 * @throws DatabaseInconsitencyException
 	 *             there are several jobs with this dn and jobname. this is bad.
 	 */
-	public final MultiPartJob findJobByDN(final String dn, final String multiPartJobId) throws NoSuchJobException {
-		myLogger.debug("Loading multipartJob with dn: " + dn + " and multipartjobid: "
-				+ multiPartJobId + " from dn.");
-		String queryString = "from org.vpac.grisu.backend.model.job.MultiPartJob as job where job.dn = ? and job.multiPartJobId = ?";
+	public final BatchJob findJobByDN(final String dn, final String batchJobname) throws NoSuchJobException {
+		myLogger.debug("Loading multipartJob with dn: " + dn + " and batchJobname: "
+				+ batchJobname + " from dn.");
+		String queryString = "from org.vpac.grisu.backend.model.job.MultiPartJob as job where job.dn = ? and job.batchJobname = ?";
 
 		try {
 			getCurrentSession().beginTransaction();
 
 			Query queryObject = getCurrentSession().createQuery(queryString);
 			queryObject.setParameter(0, dn);
-			queryObject.setParameter(1, multiPartJobId);
+			queryObject.setParameter(1, batchJobname);
 
-			MultiPartJob job = (MultiPartJob) (queryObject.uniqueResult());
+			BatchJob job = (BatchJob) (queryObject.uniqueResult());
 
 			getCurrentSession().getTransaction().commit();
 
 			if (job == null) {
 				throw new NoSuchJobException(
 						"Could not find a multiPartJob for the dn: " + dn
-								+ " and the multiPartJobId: " + multiPartJobId);
+								+ " and the batchJobname: " + batchJobname);
 			}
 			return job;
 
@@ -160,33 +160,33 @@ public class MultiPartJobDAO extends BaseHibernateDAO {
 	 * 
 	 * @param dn
 	 *            the dn of the user
-	 * @param multiPartJobId
+	 * @param batchJobname
 	 *            the start of the jobname
 	 * @result a list of jobs that start with the specified jobname
 	 * @throws NoJobFoundException
 	 *             if there is no such job
 	 */
-	public final List<MultiPartJob> getSimilarJobNamesByDN(final String dn, final String multiPartJobId)
+	public final List<BatchJob> getSimilarJobNamesByDN(final String dn, final String batchJobname)
 			throws NoSuchJobException {
-		myLogger.debug("Loading job with dn: " + dn + " and multiPartJobId: "
-				+ multiPartJobId + " from dn.");
-		String queryString = "from org.vpac.grisu.backend.model.job.MultiPartJob as job where job.dn = ? and job.multiPartJobId like ?";
+		myLogger.debug("Loading job with dn: " + dn + " and batchJobname: "
+				+ batchJobname + " from dn.");
+		String queryString = "from org.vpac.grisu.backend.model.job.MultiPartJob as job where job.dn = ? and job.batchJobname like ?";
 
 		try {
 			getCurrentSession().beginTransaction();
 
 			Query queryObject = getCurrentSession().createQuery(queryString);
 			queryObject.setParameter(0, dn);
-			queryObject.setParameter(1, multiPartJobId + "%");
+			queryObject.setParameter(1, batchJobname + "%");
 
-			List<MultiPartJob> jobs = (List<MultiPartJob>) (queryObject.list());
+			List<BatchJob> jobs = (List<BatchJob>) (queryObject.list());
 
 			getCurrentSession().getTransaction().commit();
 
 			if (jobs.size() == 0) {
 				throw new NoSuchJobException(
 						"Could not find a job for the dn: " + dn
-								+ " and the jobname: " + multiPartJobId);
+								+ " and the jobname: " + batchJobname);
 			}
 			return jobs;
 
@@ -199,7 +199,7 @@ public class MultiPartJobDAO extends BaseHibernateDAO {
 
 	}
 
-	public final void delete(final MultiPartJob persistentInstance) {
+	public final void delete(final BatchJob persistentInstance) {
 		myLogger.debug("deleting Job instance");
 
 		try {
@@ -220,7 +220,7 @@ public class MultiPartJobDAO extends BaseHibernateDAO {
 		}
 	}
 
-	public final synchronized void saveOrUpdate(final MultiPartJob instance) {
+	public final synchronized void saveOrUpdate(final BatchJob instance) {
 
 		try {
 			getCurrentSession().beginTransaction();
