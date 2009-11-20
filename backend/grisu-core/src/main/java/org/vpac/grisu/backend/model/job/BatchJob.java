@@ -200,6 +200,15 @@ public class BatchJob {
 	public Set<String> getAllUsedMountPoints() {
 		return this.usedMountPoints;
 	}
+	
+	public void recalculateAllUsedMountPoints() {
+		
+		this.usedMountPoints.clear();
+		for ( Job job : getJobs() ) {
+			usedMountPoints.add(job.getJobProperty(Constants.MOUNTPOINT_KEY));
+		}
+		
+	}
 
 	// for hibernate
 	private void setAllUsedMountPoints(Set<String> usedMountPoints) {

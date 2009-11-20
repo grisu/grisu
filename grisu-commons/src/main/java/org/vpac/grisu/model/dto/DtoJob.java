@@ -27,7 +27,7 @@ import au.org.arcs.jcommons.constants.Constants;
 @XmlRootElement(name="job")
 public class DtoJob implements Comparable<DtoJob> {
 	
-	public static DtoJob createJob(int status, Map<String, String> jobProperties, Map<Date, String> logMessages) {
+	public static DtoJob createJob(int status, Map<String, String> jobProperties, Map<Long, String> logMessages) {
 		
 		DtoJob result = new DtoJob();
 		
@@ -44,8 +44,8 @@ public class DtoJob implements Comparable<DtoJob> {
 		
 		if ( logMessages != null ) {
 			DtoLogMessages log = new DtoLogMessages();
-			for ( Date date : logMessages.keySet() ) {
-				log.addMessage(date, logMessages.get(date));
+			for ( Long date : logMessages.keySet() ) {
+				log.addMessage(new Date(date), logMessages.get(date));
 			}
 			result.setLogMessages(log);
 		}

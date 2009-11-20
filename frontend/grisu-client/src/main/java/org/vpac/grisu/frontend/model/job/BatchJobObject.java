@@ -1049,7 +1049,7 @@ public class BatchJobObject {
 	 * 
 	 * @return the id
 	 */
-	public String getbatchJobname() {
+	public String getBatchJobname() {
 		return batchJobname;
 	}
 

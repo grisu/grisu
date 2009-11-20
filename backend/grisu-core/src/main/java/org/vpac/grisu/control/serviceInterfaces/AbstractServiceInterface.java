@@ -750,7 +750,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				// selectedSubmissionResource = matchingResources.get(0);
 				// jobSubmissionObject.setSubmissionLocation(submissionLocation);
 				try {
-					JsdlHelpers.addCandidateHosts(jsdl,
+					JsdlHelpers.setCandidateHosts(jsdl,
 							new String[] { submissionLocation });
 				} catch (XPathExpressionException e) {
 					// TODO Auto-generated catch block
@@ -957,7 +957,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		
 		String optimizeStats = jd.distributeJobs(mpj.getJobs(), findBestResourcesForMultipartJob(mpj), sitesToInclude, sitesToExclude);
 		mpj.addJobProperty(Constants.OPTIMIZE_STATS, optimizeStats);
-		multiPartJobDao.saveOrUpdate(mpj);
 
 		for ( Job job : mpj.getJobs() ) {
 			try {
@@ -968,7 +967,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 			jobdao.saveOrUpdate(job);
 		}
-		
+		mpj.recalculateAllUsedMountPoints();
+		multiPartJobDao.saveOrUpdate(mpj);
 	}
 	
 	

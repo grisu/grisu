@@ -1,23 +1,21 @@
 package org.vpac.grisu.control.serviceInterfaces;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
-import org.apache.commons.lang.StringUtils;
+import javax.xml.xpath.XPathExpressionException;
+
 import org.apache.log4j.Logger;
 import org.vpac.grisu.backend.model.job.Job;
-import org.vpac.grisu.backend.model.job.BatchJob;
-import org.vpac.grisu.control.exceptions.JobPropertiesException;
+import org.w3c.dom.Document;
 
 import au.org.arcs.jcommons.constants.Constants;
-import au.org.arcs.jcommons.constants.JobSubmissionProperty;
 import au.org.arcs.jcommons.interfaces.GridResource;
+import au.org.arcs.jcommons.utils.JsdlHelpers;
 import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
 
 public class JobDistributor {
@@ -132,6 +130,14 @@ public class JobDistributor {
 					.put(subLocResource.toString(), currentCount + 1);
 
 			job.addJobProperty(Constants.SUBMISSIONLOCATION_KEY, subLoc);
+			
+			try {
+				Document jsdl = job.getJobDescription();
+				JsdlHelpers.setCandidateHosts(jsdl, new String[]{subLoc});
+				job.setJobDescription(jsdl);
+			} catch (XPathExpressionException e) {
+				throw new RuntimeException(e);
+			}
 //			needs to be done on the backend
 //			try {
 //				processJobDescription(job);

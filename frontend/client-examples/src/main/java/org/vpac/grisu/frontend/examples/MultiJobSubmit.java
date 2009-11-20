@@ -124,7 +124,7 @@ public class MultiJobSubmit {
 			System.exit(1);
 		}
 		
-		System.out.println(si.getJobProperty(multiPartJob.getbatchJobname(), Constants.OPTIMIZE_STATS));
+		System.out.println(si.getJobProperty(multiPartJob.getBatchJobname(), Constants.OPTIMIZE_STATS));
 		
 		multiPartJob.submit();
 		

@@ -184,20 +184,20 @@ public class Job implements Comparable<Job> {
 		this.fqan = fqan;
 	}
 	
-	private Map<Date, String> logMessages = Collections.synchronizedMap(new TreeMap<Date, String>());
+	private Map<Long, String> logMessages = Collections.synchronizedMap(new TreeMap<Long, String>());
 
 	@CollectionOfElements(fetch = FetchType.EAGER)
-	public Map<Date, String> getLogMessages() {
+	public Map<Long, String> getLogMessages() {
 		return logMessages;
 	}
 
-	private void setLogMessages(Map<Date, String> logMessages) {
+	private void setLogMessages(Map<Long, String> logMessages) {
 		this.logMessages = logMessages;
 	}
 
 	public synchronized void addLogMessage(String message) {
 		Date now = new Date();
-		this.logMessages.put(now, message);
+		this.logMessages.put(now.getTime(), message);
 	}
 
 	/**
