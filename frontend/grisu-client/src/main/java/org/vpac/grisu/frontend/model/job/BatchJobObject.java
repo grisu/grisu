@@ -525,8 +525,11 @@ public class BatchJobObject {
 				serviceInterface.uploadInputFile(batchJobname, dh, inputFiles
 						.get(inputFile));
 				
-				status.waitForActionToFinish(2, false);
+				status.waitForActionToFinish(2, true, false);
 				
+				if ( status.getStatus().isFailed() ) {
+					throw new FileTransferException(inputFile, inputFiles.get(inputFile), "Error when trying to upload input file.", null);
+				}
 				
 			} else {
 				serviceInterface.copyBatchJobInputFile(batchJobname,

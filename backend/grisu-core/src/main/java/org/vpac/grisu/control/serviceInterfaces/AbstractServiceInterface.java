@@ -2573,7 +2573,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				status.addElement("Upload to folder "+parent+" successful.");
 
 			} catch (Exception e) {
-				// e.printStackTrace();
+				 e.printStackTrace();
 				status.addElement("Upload to folder "+parent+" failed: Could not open file: "
 						+ targetFilename + ":" + e.getMessage());
 				status.setFailed(true);

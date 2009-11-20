@@ -173,7 +173,7 @@ public class RemoteFileTransferObject {
 						+ target_file.getURL().toString() + "\": "
 						+ e.getMessage());
 			} catch (FileSystemException e1) {
-				throw new RemoteFileSystemException("Could not copy files...");
+				throw new RemoteFileSystemException("Could not copy files: "+e1.getLocalizedMessage());
 			}
 		}
 

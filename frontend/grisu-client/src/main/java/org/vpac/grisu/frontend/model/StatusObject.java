@@ -54,14 +54,21 @@ public class StatusObject {
 		return lastStatus;
 	}
 	
-	public void waitForActionToFinish(int recheckIntervalInSeconds, boolean sendStatusEvent) {
+	public void waitForActionToFinish(int recheckIntervalInSeconds, boolean exitIfFailed, boolean sendStatusEvent) {
 		
 		while ( ! (lastStatus = si.getActionStatus(handle)).isFinished() )  {
 			
-			try {
 				if ( sendStatusEvent ) {
 					EventBus.publish(handle, new ActionStatusEvent(lastStatus));
 				}
+
+			if ( exitIfFailed ) {
+				if ( lastStatus.isFailed() ) {
+					return;
+				}
+			}
+			
+			try {
 				Thread.sleep(recheckIntervalInSeconds * 1000);
 			} catch (InterruptedException e) {
 				// doesn't matter
