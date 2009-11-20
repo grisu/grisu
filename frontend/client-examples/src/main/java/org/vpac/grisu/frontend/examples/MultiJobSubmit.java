@@ -11,11 +11,11 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.frontend.model.StatusObject;
-import org.vpac.grisu.frontend.model.events.MultiPartJobEvent;
+import org.vpac.grisu.frontend.model.events.BatchJobEvent;
 import org.vpac.grisu.frontend.model.events.SystemOutStatusLogger;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.model.job.JobsException;
-import org.vpac.grisu.frontend.model.job.MultiPartJobObject;
+import org.vpac.grisu.frontend.model.job.BatchJobObject;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.DtoActionStatus;
@@ -53,6 +53,8 @@ public class MultiJobSubmit {
 
 
 		final GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
+		
+		registry.getApplicationInformation("java").getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin");
 
 		final int numberOfJobs = 10;
 		
@@ -76,7 +78,7 @@ public class MultiJobSubmit {
 
 //		SystemOutStatusLogger ssoes = new SystemOutStatusLogger(multiJobName);
 
-		MultiPartJobObject multiPartJob = new MultiPartJobObject(si, multiJobName, "/ARCS/StartUp", "Java", Constants.NO_VERSION_INDICATOR_STRING);
+		BatchJobObject multiPartJob = new BatchJobObject(si, multiJobName, "/ARCS/NGAdmin", "Java", Constants.NO_VERSION_INDICATOR_STRING);
 			
 		
 
@@ -162,8 +164,8 @@ public class MultiJobSubmit {
 		
 	}
 
-	   @EventSubscriber(eventClass=MultiPartJobEvent.class)
-	   public void onMultiPartJobEvent(MultiPartJobEvent event) {
+	   @EventSubscriber(eventClass=BatchJobEvent.class)
+	   public void onMultiPartJobEvent(BatchJobEvent event) {
 
 		   System.out.println("Event: "+event.getMessage());
 		   

@@ -6,7 +6,7 @@ import org.vpac.grisu.control.exceptions.JobSubmissionException;
 
 public class DoubleWalltimeJobRestarter implements FailedJobRestarter {
 	
-	static final Logger myLogger = Logger.getLogger(MultiPartJobObject.class.getName());
+	static final Logger myLogger = Logger.getLogger(BatchJobObject.class.getName());
 
 	public void restartJob(JobObject failedJob) throws JobSubmissionException {
 

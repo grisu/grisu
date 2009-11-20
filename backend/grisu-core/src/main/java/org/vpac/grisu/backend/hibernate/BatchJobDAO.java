@@ -33,7 +33,7 @@ public class BatchJobDAO extends BaseHibernateDAO {
 	public final List<BatchJob> findMultiPartJobByDN(final String dn) {
 
 		myLogger.debug("Loading multipart with dn: " + dn + " from db.");
-		String queryString = "from org.vpac.grisu.backend.model.job.MultiPartJob as job where job.dn = ?";
+		String queryString = "from org.vpac.grisu.backend.model.job.BatchJob as job where job.dn = ?";
 
 		try {
 			getCurrentSession().beginTransaction();
@@ -58,7 +58,7 @@ public class BatchJobDAO extends BaseHibernateDAO {
 	public final List<String> findJobNamesByDn(final String dn) {
 
 		myLogger.debug("Loading multipartjob with dn: " + dn + " from db.");
-		String queryString = "select batchJobname from org.vpac.grisu.backend.model.job.MultiPartJob as job where job.dn = ?";
+		String queryString = "select batchJobname from org.vpac.grisu.backend.model.job.BatchJob as job where job.dn = ?";
 
 		try {
 			getCurrentSession().beginTransaction();
@@ -84,7 +84,7 @@ public class BatchJobDAO extends BaseHibernateDAO {
 	public final List<String> findJobNamesPerApplicationByDn(final String dn, final String application) {
 
 		myLogger.debug("Loading multipartjob with dn: " + dn + " from db.");
-		String queryString = "select batchJobname from org.vpac.grisu.backend.model.job.MultiPartJob as job where job.dn = ? and job.jobProperties['"+Constants.APPLICATIONNAME_KEY+"'] = ?";
+		String queryString = "select batchJobname from org.vpac.grisu.backend.model.job.BatchJob as job where job.dn = ? and job.jobProperties['"+Constants.APPLICATIONNAME_KEY+"'] = ?";
 
 		try {
 			getCurrentSession().beginTransaction();
@@ -123,9 +123,9 @@ public class BatchJobDAO extends BaseHibernateDAO {
 	 *             there are several jobs with this dn and jobname. this is bad.
 	 */
 	public final BatchJob findJobByDN(final String dn, final String batchJobname) throws NoSuchJobException {
-		myLogger.debug("Loading multipartJob with dn: " + dn + " and batchJobname: "
+		myLogger.debug("Loading batchJob with dn: " + dn + " and batchJobname: "
 				+ batchJobname + " from dn.");
-		String queryString = "from org.vpac.grisu.backend.model.job.MultiPartJob as job where job.dn = ? and job.batchJobname = ?";
+		String queryString = "from org.vpac.grisu.backend.model.job.BatchJob as job where job.dn = ? and job.batchJobname = ?";
 
 		try {
 			getCurrentSession().beginTransaction();

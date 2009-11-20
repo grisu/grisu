@@ -8,7 +8,7 @@ import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.frontend.model.job.DoubleWalltimeJobRestarter;
 import org.vpac.grisu.frontend.model.job.FailedJobRestarter;
-import org.vpac.grisu.frontend.model.job.MultiPartJobObject;
+import org.vpac.grisu.frontend.model.job.BatchJobObject;
 
 public class BlenderTestCheck  {
 
@@ -31,7 +31,7 @@ public class BlenderTestCheck  {
 
 		final String multiJobName = "PerformanceTest6";
 		
-		MultiPartJobObject newObject = new MultiPartJobObject(si, multiJobName, false);
+		BatchJobObject newObject = new BatchJobObject(si, multiJobName, false);
 		
 		FailedJobRestarter restarter = new DoubleWalltimeJobRestarter();
 

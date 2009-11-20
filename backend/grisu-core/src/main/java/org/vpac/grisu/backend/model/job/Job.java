@@ -88,7 +88,7 @@ public class Job implements Comparable<Job> {
 
 	private Map<String, String> jobProperties = new HashMap<String, String>();
 	
-	private boolean isMultiPartJob = false;
+	private boolean isBatchJob = false;
 //
 	// TODO later add requirements
 	// private ArrayList<Requirement> requirements = null;
@@ -493,12 +493,12 @@ public class Job implements Comparable<Job> {
 //	}
 	
 	
-	public boolean isMultiPartJob() {
-		return isMultiPartJob;
+	public boolean isBatchJob() {
+		return isBatchJob;
 	}
 	
-	public void setMultiPartJob(boolean is) {
-		this.isMultiPartJob = is;
+	public void setBatchJob(boolean is) {
+		this.isBatchJob = is;
 	}
 
 	@CollectionOfElements(fetch = FetchType.EAGER)

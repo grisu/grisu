@@ -28,7 +28,7 @@ import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
 import org.vpac.grisu.frontend.model.StatusObject;
-import org.vpac.grisu.frontend.model.events.MultiPartJobEvent;
+import org.vpac.grisu.frontend.model.events.BatchJobEvent;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.DtoActionStatus;
@@ -46,9 +46,9 @@ import au.org.arcs.jcommons.constants.Constants;
  * @author markus
  *
  */
-public class MultiPartJobObject {
+public class BatchJobObject {
 
-	static final Logger myLogger = Logger.getLogger(MultiPartJobObject.class
+	static final Logger myLogger = Logger.getLogger(BatchJobObject.class
 			.getName());
 
 	public static final int DEFAULT_JOB_CREATION_RETRIES = 5;
@@ -93,7 +93,7 @@ public class MultiPartJobObject {
 	 * @throws BatchJobException
 	 *             if the multipartjob can't be created
 	 */
-	public MultiPartJobObject(ServiceInterface serviceInterface,
+	public BatchJobObject(ServiceInterface serviceInterface,
 			String batchJobname, String submissionFqan, String defaultApplication, String defaultVersion)
 			throws BatchJobException {
 		this.serviceInterface = serviceInterface;
@@ -132,7 +132,7 @@ public class MultiPartJobObject {
 	 * @throws NoSuchJobException
 	 *             if there is no such multipartjob on the backend
 	 */
-	public MultiPartJobObject(ServiceInterface serviceInterface,
+	public BatchJobObject(ServiceInterface serviceInterface,
 			String batchJobname, boolean refreshJobStatusOnBackend)
 			throws BatchJobException, NoSuchJobException {
 		this.serviceInterface = serviceInterface;
@@ -258,13 +258,13 @@ public class MultiPartJobObject {
 			JobObject failedJob = null;
 			try {
 				failedJob = new JobObject(serviceInterface, dtoJob.jobname());
-				EventBus.publish(this.batchJobname, new MultiPartJobEvent(this, "Restarting job " + failedJob.getJobname())+"...");
+				EventBus.publish(this.batchJobname, new BatchJobEvent(this, "Restarting job " + failedJob.getJobname())+"...");
 				restarter.restartJob(failedJob);
 			} catch (Exception e) {
 				if (failedJob != null) {
-					EventBus.publish(this.batchJobname, new MultiPartJobEvent(this, "Restarting of job " + failedJob.getJobname())+" failed: "+e.getLocalizedMessage());
+					EventBus.publish(this.batchJobname, new BatchJobEvent(this, "Restarting of job " + failedJob.getJobname())+" failed: "+e.getLocalizedMessage());
 				} else {
-					EventBus.publish(this.batchJobname, new MultiPartJobEvent(this, "Restarting failed: "+e.getLocalizedMessage()));					
+					EventBus.publish(this.batchJobname, new BatchJobEvent(this, "Restarting failed: "+e.getLocalizedMessage()));					
 				}
 				e.printStackTrace();
 			}
@@ -355,10 +355,10 @@ public class MultiPartJobObject {
 						+ getLogMessages(false).get(date));
 			}
 
-			EventBus.publish(this.batchJobname, new MultiPartJobEvent(this, progress));
+			EventBus.publish(this.batchJobname, new BatchJobEvent(this, progress));
 
 			try {
-				EventBus.publish(this.batchJobname, new MultiPartJobEvent(this, "Pausing monitoring for "+
+				EventBus.publish(this.batchJobname, new BatchJobEvent(this, "Pausing monitoring for "+
 						sleeptimeinseconds + " seconds..."));
 				Thread.sleep(sleeptimeinseconds * 1000);
 			} catch (InterruptedException e) {
@@ -415,7 +415,7 @@ public class MultiPartJobObject {
 		}
 
 		if (job.getWalltimeInSeconds() <= 0) {
-			EventBus.publish(this.batchJobname, new MultiPartJobEvent(this, "Setting walltime for job " + job.getJobname()
+			EventBus.publish(this.batchJobname, new BatchJobEvent(this, "Setting walltime for job " + job.getJobname()
 					+ " to default walltime: " + defaultWalltime));
 			job.setWalltimeInSeconds(defaultWalltime);
 		} else {
@@ -424,7 +424,7 @@ public class MultiPartJobObject {
 				maxWalltimeInSecondsAcrossJobs = job.getWalltimeInSeconds();
 			}
 		}
-		EventBus.publish(this.batchJobname, new MultiPartJobEvent(this, 
+		EventBus.publish(this.batchJobname, new BatchJobEvent(this, 
 				"Adding job " + job.getJobname()));
 		this.jobs.add(job);
 	}
@@ -515,7 +515,7 @@ public class MultiPartJobObject {
 		
 		// uploading common job input files
 		for (String inputFile : inputFiles.keySet()) {
-			EventBus.publish(this.batchJobname, new MultiPartJobEvent(this, 
+			EventBus.publish(this.batchJobname, new BatchJobEvent(this, 
 			 "Uploading input file: " + inputFile
 					+ " for multipartjob " + batchJobname));
 			if (FileManager.isLocal(inputFile)) {
@@ -543,21 +543,21 @@ public class MultiPartJobObject {
 	 */
 	public void submit() throws JobSubmissionException, NoSuchJobException {
 
-		EventBus.publish(this.batchJobname, new MultiPartJobEvent(this, 
+		EventBus.publish(this.batchJobname, new BatchJobEvent(this, 
 				"Submitting multipartjob " + batchJobname	+ " to backend..."));
 		try {
 			serviceInterface.submitJob(batchJobname);
 		} catch (JobSubmissionException jse) {
-			EventBus.publish(this.batchJobname, new MultiPartJobEvent(this,
+			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 			 "Job submitssion for multipartjob "
 					+ batchJobname + " failed: " + jse.getLocalizedMessage()));
 			throw jse;
 		} catch (NoSuchJobException nsje) {
-			EventBus.publish(this.batchJobname, new MultiPartJobEvent(this, "Job submitssion for multipartjob "
+			EventBus.publish(this.batchJobname, new BatchJobEvent(this, "Job submitssion for multipartjob "
 					+ batchJobname + " failed: " + nsje.getLocalizedMessage()));
 			throw nsje;
 		}
-		EventBus.publish(this.batchJobname, new MultiPartJobEvent(this,
+		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 		 "All jobs of multipartjob " + batchJobname
 				+ " ready for submission. Continuing submission in background..."));
 	}
@@ -580,7 +580,7 @@ public class MultiPartJobObject {
 
 		myLogger.debug("Creating " + getJobs().size()
 				+ " jobs as part of multipartjob: " + batchJobname);
-		EventBus.publish(this.batchJobname, new MultiPartJobEvent(this, 
+		EventBus.publish(this.batchJobname, new BatchJobEvent(this, 
 		 "Creating " + getJobs().size()
 				+ " jobs"));
 		ExecutorService executor = Executors
@@ -602,8 +602,8 @@ public class MultiPartJobObject {
 									+ " to multipartjob: " + batchJobname);
 							
 							String jobname = null;
-							EventBus.publish(MultiPartJobObject.this.batchJobname, new MultiPartJobEvent(
-										MultiPartJobObject.this, "Adding job "
+							EventBus.publish(BatchJobObject.this.batchJobname, new BatchJobEvent(
+										BatchJobObject.this, "Adding job "
 										+ job.getJobname() + " to multipart job on backend."));
 								jobname = serviceInterface
 								.addJobToBatchJob(
@@ -614,16 +614,16 @@ public class MultiPartJobObject {
 							job.setJobname(jobname);
 							job.updateJobDirectory();
 							
-							EventBus.publish(MultiPartJobObject.this.batchJobname, new MultiPartJobEvent(
-									MultiPartJobObject.this, "Creation of job "
+							EventBus.publish(BatchJobObject.this.batchJobname, new BatchJobEvent(
+									BatchJobObject.this, "Creation of job "
 									+ job.getJobname() + " successful."));
 							
 							success = true;
 							break;
 						} catch (Exception e) {
 							e.printStackTrace();
-							EventBus.publish(MultiPartJobObject.this.batchJobname, new MultiPartJobEvent(
-									MultiPartJobObject.this, "Creation of job "
+							EventBus.publish(BatchJobObject.this.batchJobname, new BatchJobEvent(
+									BatchJobObject.this, "Creation of job "
 									+ job.getJobname() + " failed: "
 									+ e.getLocalizedMessage()));
 							try {
@@ -654,13 +654,13 @@ public class MultiPartJobObject {
 		}
 		myLogger.debug("Finished creation of " + getJobs().size()
 				+ " jobs as part of multipartjob: " + batchJobname);
-		EventBus.publish(this.batchJobname, new MultiPartJobEvent(this,
+		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 				"Finished creation of " + getJobs().size()
 				+ " jobs as part of multipartjob: " + batchJobname));
 
 		if (failedSubmissions.size() > 0) {
 			myLogger.error(failedSubmissions.size() + " submission failed...");
-			EventBus.publish(this.batchJobname, new MultiPartJobEvent(this,
+			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 					"Not all jobs for multipartjob "
 					+ batchJobname + " created successfully. Aborting..."));
 			throw new JobsException(failedSubmissions);
@@ -668,11 +668,11 @@ public class MultiPartJobObject {
 
 		if ( optimize ) {
 		try {
-			EventBus.publish(this.batchJobname, new MultiPartJobEvent(this,
+			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 					"Optimizing multipartjob: "
 					+ batchJobname));
 			serviceInterface.redistributeBatchJob(this.batchJobname);
-			EventBus.publish(this.batchJobname, new MultiPartJobEvent(this,
+			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 					"Optimizing of multipartjob "
 					+ batchJobname + " finished."));
 		} catch (NoSuchJobException e) {
@@ -681,15 +681,15 @@ public class MultiPartJobObject {
 		}	
 		
 		try {
-			EventBus.publish(this.batchJobname, new MultiPartJobEvent(this,
+			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 					"Uploading input files for multipartjob: "
 					+ batchJobname));
 			uploadInputFiles();
-			EventBus.publish(this.batchJobname, new MultiPartJobEvent(this, 
+			EventBus.publish(this.batchJobname, new BatchJobEvent(this, 
 					"Uploading input files for multipartjob: "
 					+ batchJobname + " finished."));
 		} catch (Exception e) {
-			EventBus.publish(this.batchJobname, new MultiPartJobEvent(this,
+			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 					"Uploading input files for multipartjob: "
 					+ batchJobname + " failed: " + e.getLocalizedMessage()));
 			throw new BackendException("Could not upload input files...", e);
@@ -713,7 +713,7 @@ public class MultiPartJobObject {
 			throws RemoteFileSystemException, FileTransferException,
 			IOException {
 
-		EventBus.publish(this.batchJobname, new MultiPartJobEvent(this, "Checking and possibly downloading output files for multipartjob: "
+		EventBus.publish(this.batchJobname, new BatchJobEvent(this, "Checking and possibly downloading output files for multipartjob: "
 				+ batchJobname + ". This might take a while..."));
 
 		for (JobObject job : getJobs()) {
@@ -741,14 +741,14 @@ public class MultiPartJobObject {
 						needsDownloading = GrisuRegistryManager.getDefault(serviceInterface).getFileManager().needsDownloading(child);
 					} catch (RuntimeException e) {
 						myLogger.error("Could not access file "+child+": "+e.getLocalizedMessage());
-						EventBus.publish(this.batchJobname, new MultiPartJobEvent(this,
+						EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 								"Could not access file "+child+": "+e.getLocalizedMessage()));
 						continue;
 					}
 					
 					if ( needsDownloading ) {
 						myLogger.debug("Downloading file: " + child);
-						EventBus.publish(this.batchJobname, new MultiPartJobEvent(this,
+						EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 								"Downloading file: " + child));
 						try {
 						cacheFile = GrisuRegistryManager.getDefault(
@@ -756,7 +756,7 @@ public class MultiPartJobObject {
 								.downloadFile(child);
 						} catch (Exception e) {
 							myLogger.error("Could not download file "+child+": "+e.getLocalizedMessage());
-							EventBus.publish(this.batchJobname, new MultiPartJobEvent(this, 
+							EventBus.publish(this.batchJobname, new BatchJobEvent(this, 
 									"Could not download file "+child+": "+e.getLocalizedMessage()));
 							continue;
 						}

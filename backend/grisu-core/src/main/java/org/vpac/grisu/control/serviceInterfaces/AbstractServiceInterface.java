@@ -111,7 +111,6 @@ import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
  * somewhere. So light-weight clients can talk to it.
  * 
  * @author Markus Binsteiner
- * 
  */
 public abstract class AbstractServiceInterface implements ServiceInterface {
 	
@@ -1111,8 +1110,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throws JobSubmissionException, NoSuchJobException {
 
 		final DtoActionStatus newActionStatus = new DtoActionStatus(multiJob
-				.getbatchJobname(), 100);
-		this.actionStatus.put(multiJob.getbatchJobname(), newActionStatus);
+				.getBatchJobname(), 100);
+		this.actionStatus.put(multiJob.getBatchJobname(), newActionStatus);
 
 		ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
@@ -1147,7 +1146,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							break;
 						} catch (Exception e) {
 							myLogger.error("Job submission for multipartjob: "
-									+ multiJob.getbatchJobname() + ", "
+									+ multiJob.getBatchJobname() + ", "
 									+ job.getJobname() + " failed: "
 									+ e.getLocalizedMessage());
 							myLogger.error("Trying again...");
@@ -1844,8 +1843,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		
 		final DtoActionStatus newActionStatus = new DtoActionStatus(multiJob
-				.getbatchJobname(), size);
-		this.actionStatus.put(multiJob.getbatchJobname(), newActionStatus);
+				.getBatchJobname(), size);
+		this.actionStatus.put(multiJob.getBatchJobname(), newActionStatus);
 
 		ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
@@ -3178,7 +3177,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		if (clear) {
 
-			if (job.isMultiPartJob()) {
+			if (job.isBatchJob()) {
 				
 				try {
 					BatchJob mpj = getMultiPartJobFromDatabase(job.getJobProperty(Constants.BATCHJOB_NAME));

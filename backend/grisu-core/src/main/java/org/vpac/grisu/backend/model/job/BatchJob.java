@@ -143,11 +143,11 @@ public class BatchJob {
 		this.dn = dn;
 	}
 
-	public String getbatchJobname() {
+	public String getBatchJobname() {
 		return batchJobname;
 	}
 
-	private void setbatchJobname(String id) {
+	private void setBatchJobname(String id) {
 		this.batchJobname = id;
 	}
 
@@ -160,7 +160,7 @@ public class BatchJob {
 		// }
 		usedMountPoints.add(job.getJobProperty(Constants.MOUNTPOINT_KEY));
 		job.addJobProperty(Constants.BATCHJOB_NAME, batchJobname);
-		job.setMultiPartJob(true);
+		job.setBatchJob(true);
 		jobdao.saveOrUpdate(job);
 	}
 
@@ -244,7 +244,7 @@ public class BatchJob {
 	public DtoBatchJob createDtoMultiPartJob() throws NoSuchJobException {
 
 		final DtoBatchJob result = new DtoBatchJob(this
-				.getbatchJobname());
+				.getBatchJobname());
 		
 	
 		result.setSubmissionFqan(this.getFqan());
