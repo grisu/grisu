@@ -78,7 +78,7 @@ public class MultiJobSubmit {
 
 //		SystemOutStatusLogger ssoes = new SystemOutStatusLogger(multiJobName);
 
-		BatchJobObject multiPartJob = new BatchJobObject(si, multiJobName, "/ARCS/NGAdmin", "Java", Constants.NO_VERSION_INDICATOR_STRING);
+		BatchJobObject multiPartJob = new BatchJobObject(si, multiJobName, "/ARCS/NGAdmin", "java", Constants.NO_VERSION_INDICATOR_STRING);
 			
 		
 
@@ -91,7 +91,7 @@ public class MultiJobSubmit {
 				
 				JobObject jo = new JobObject(si);
 				jo.setJobname(multiJobName+"_" + frameNumber );
-//				jo.setApplication("java");
+				jo.setApplication("java");
 //				jo.setCommandline("java -version");
 				jo.setCommandline("cat singleJobFile.txt "+pathToInputFiles+"/multiJobFile.txt");
 				jo.setWalltimeInSeconds(60*21);
@@ -109,8 +109,6 @@ public class MultiJobSubmit {
 		
 		multiPartJob.setDefaultNoCpus(1);
 		multiPartJob.setDefaultWalltimeInSeconds(60*21);
-		
-		multiPartJob.setSitesToExclude(new String[]{"tpac"});
 		
 
 //		multiPartJob.fillOrOverwriteSubmissionLocationsUsingMatchmaker();
