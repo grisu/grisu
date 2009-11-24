@@ -143,9 +143,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private MatchMaker matchmaker = new MatchMakerImpl(Environment
 			.getGrisuDirectory().toString());
 
-//	protected JobDistributor jd = new PercentageJobDistributor();
-	protected JobDistributor jd = new EqualJobDistributor();
-
 	private final Map<String, DtoActionStatus> actionStatus = Collections
 			.synchronizedMap(new HashMap<String, DtoActionStatus>());
 
@@ -1008,6 +1005,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			} else {
 				resourcesToUse.put(resource, new Long(0L));
 			}
+		}
+		
+		JobDistributor jd;
+		
+		if ( Constants.DISTRIBUTION_METHOD_EQUAL.equals(mpj.getJobProperty(Constants.DISTRIBUTION_METHOD)) ) {
+			jd = new EqualJobDistributor();
+		} else {
+			jd = new PercentageJobDistributor();
 		}
 
 		Map<String, Integer> results = jd.distributeJobs(mpj.getJobs(),

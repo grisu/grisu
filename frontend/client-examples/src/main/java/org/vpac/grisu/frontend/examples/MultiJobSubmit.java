@@ -80,7 +80,7 @@ public class MultiJobSubmit {
 
 		BatchJobObject multiPartJob = new BatchJobObject(si, multiJobName, "/ARCS/NGAdmin", "java", Constants.NO_VERSION_INDICATOR_STRING);
 			
-		
+		multiPartJob.addJobProperty(Constants.DISTRIBUTION_METHOD, Constants.DISTRIBUTION_METHOD_EQUAL);
 
 		
 		String pathToInputFiles = multiPartJob.pathToInputFiles();
