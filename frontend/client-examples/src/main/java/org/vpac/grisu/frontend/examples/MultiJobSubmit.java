@@ -59,7 +59,7 @@ public class MultiJobSubmit {
 		final int numberOfJobs = 10;
 		
 		Date start = new Date();
-		final String multiJobName = "10jobs2";
+		final String multiJobName = "10jobs3";
 		try {
 			si.kill(multiJobName, true);
 
@@ -103,7 +103,7 @@ public class MultiJobSubmit {
 
 		multiPartJob.addInputFile("/home/markus/test/multiJobFile.txt");
 //		multiPartJob.setDefaultApplication("java");
-		multiPartJob.setSitesToExclude(new String[]{"tpac"});
+		multiPartJob.setSitesToExclude(new String[]{"tpac", "hpsc"});
 		
 //		multiPartJob.setSitesToExclude(new String[]{"vpac", "massey", "uq", "canterbury", "sapac", "ivec", "otago"});
 		

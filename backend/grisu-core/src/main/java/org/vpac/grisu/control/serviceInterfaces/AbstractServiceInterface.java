@@ -960,6 +960,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		for ( Job job : mpj.getJobs() ) {
 			try {
+				
+				if ( Constants.NO_VERSION_INDICATOR_STRING.equals(mpj.getJobProperty(Constants.APPLICATIONVERSION_KEY)) ) {
+					JsdlHelpers.setApplicationVersion(job.getJobDescription(), Constants.NO_VERSION_INDICATOR_STRING);
+				}
+				
 				processJobDescription(job, mpj);
 			} catch (JobPropertiesException e) {
 				e.printStackTrace();
