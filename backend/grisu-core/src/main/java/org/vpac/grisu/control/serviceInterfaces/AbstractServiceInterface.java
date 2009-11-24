@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -957,6 +958,26 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return DtoProperties.createUserPropertiesIntegerValue(results);
 		
 	}
+	
+	private boolean isValidSubmissionLocation(String subLoc, String fqan) {
+		
+		//TODO i'm sure this can be made much more quicker
+		String[] fs = informationManager.getStagingFileSystemForSubmissionLocation(subLoc);
+		
+		for ( MountPoint mp : df(fqan) ) {
+			
+			for ( String f : fs ) {
+				if ( mp.getRootUrl().startsWith(f.replace(":2811", "")) ) {
+					return true;
+					
+				}
+			}
+			
+		}
+		
+		return false;
+		
+	}
 
 	private Map<String, Integer> optimizeMultiPartJob(BatchJob mpj) throws NoSuchJobException {
 
@@ -983,7 +1004,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				for (String site : sitesToInclude) {
 					if (resource.getSiteName().toLowerCase().contains(
 							site.toLowerCase())) {
-						resourcesToUse.put(resource, new Long(0L));
+						if ( isValidSubmissionLocation(SubmissionLocationHelpers.createSubmissionLocationString(resource), mpj.getFqan())) {
+							resourcesToUse.put(resource, new Long(0L));
+						}
 						break;
 					}
 				}
@@ -999,11 +1022,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					}
 				}
 				if (useSite) {
-					resourcesToUse.put(resource, new Long(0L));
+					if ( isValidSubmissionLocation(SubmissionLocationHelpers.createSubmissionLocationString(resource), mpj.getFqan())) {
+						resourcesToUse.put(resource, new Long(0L));
+					}
 				}
 
 			} else {
-				resourcesToUse.put(resource, new Long(0L));
+				
+				if ( isValidSubmissionLocation(SubmissionLocationHelpers.createSubmissionLocationString(resource), mpj.getFqan())) {
+					resourcesToUse.put(resource, new Long(0L));
+				}
 			}
 		}
 		
@@ -1982,6 +2010,23 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public synchronized DtoMountPoints df() {
 
 		return DtoMountPoints.createMountpoints(df_internal());
+	}
+	
+	/**
+	 * Gets all mountpoints for this fqan.
+	 * 
+	 * @param fqan the fqan
+	 * @return the mountpoints
+	 */
+	protected Set<MountPoint> df(String fqan) {
+		
+		Set<MountPoint> result = new HashSet<MountPoint>();
+		for ( MountPoint mp : df_internal() ) {
+			if ( StringUtils.isNotBlank(mp.getFqan()) && mp.getFqan().equals(fqan) ) {
+				result.add(mp);
+			}
+		}
+		return result;
 	}
 
 	/*

@@ -103,7 +103,7 @@ public class MultiJobSubmit {
 
 		multiPartJob.addInputFile("/home/markus/test/multiJobFile.txt");
 //		multiPartJob.setDefaultApplication("java");
-		multiPartJob.setSitesToExclude(new String[]{"tpac", "hpsc", "Auckland"});
+//		multiPartJob.setSitesToExclude(new String[]{"tpac", "hpsc", "Auckland"});
 		
 //		multiPartJob.setSitesToExclude(new String[]{"vpac", "massey", "uq", "canterbury", "sapac", "ivec", "otago"});
 		
