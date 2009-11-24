@@ -59,7 +59,7 @@ public class MultiJobSubmit {
 		final int numberOfJobs = 10;
 		
 		Date start = new Date();
-		final String multiJobName = "10jobs3";
+		final String multiJobName = "10jobs4";
 		try {
 			si.kill(multiJobName, true);
 
@@ -103,7 +103,7 @@ public class MultiJobSubmit {
 
 		multiPartJob.addInputFile("/home/markus/test/multiJobFile.txt");
 //		multiPartJob.setDefaultApplication("java");
-		multiPartJob.setSitesToExclude(new String[]{"tpac", "hpsc"});
+		multiPartJob.setSitesToExclude(new String[]{"tpac", "hpsc", "Auckland"});
 		
 //		multiPartJob.setSitesToExclude(new String[]{"vpac", "massey", "uq", "canterbury", "sapac", "ivec", "otago"});
 		
@@ -122,7 +122,10 @@ public class MultiJobSubmit {
 			System.exit(1);
 		}
 		
-		System.out.println(si.getJobProperty(multiPartJob.getBatchJobname(), Constants.OPTIMIZE_STATS));
+		System.out.println("Job distribution:");
+		for ( String subLoc : multiPartJob.getOptimizationResult().keySet() ) {
+			System.out.println(subLoc + ":" + multiPartJob.getOptimizationResult().get(subLoc));
+		}
 		
 		multiPartJob.submit();
 		

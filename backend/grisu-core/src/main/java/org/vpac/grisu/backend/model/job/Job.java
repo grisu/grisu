@@ -502,7 +502,6 @@ public class Job implements Comparable<Job> {
 	}
 
 	@CollectionOfElements(fetch = FetchType.EAGER)
-	@Column(length = 3000)
 	public Map<String, String> getJobProperties() {
 		return jobProperties;
 	}

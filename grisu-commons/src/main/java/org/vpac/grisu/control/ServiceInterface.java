@@ -37,7 +37,7 @@ import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
 import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
-import org.vpac.grisu.model.dto.DtoUserProperties;
+import org.vpac.grisu.model.dto.DtoProperties;
 
 /**
  * This is the central interface of grisu. These are the methods the web service
@@ -137,7 +137,7 @@ public interface ServiceInterface {
 	@RolesAllowed("User")
 	@GET
 	@Path("user/allproperties")
-	DtoUserProperties getUserProperties();
+	DtoProperties getUserProperties();
 	
 	/**
 	 * Returns an array of strings that are associated with this key. The
@@ -965,7 +965,7 @@ public interface ServiceInterface {
 	 * @throws NoSuchJobException if there is no batchjob with such an id
 	 */
 	@RolesAllowed("User")
-	void redistributeBatchJob(String batchjobname) throws NoSuchJobException;
+	DtoProperties redistributeBatchJob(String batchjobname) throws NoSuchJobException;
 	
 	/**
 	 * Removes the specified job from the batchJob.

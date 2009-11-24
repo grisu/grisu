@@ -80,6 +80,12 @@ public class BatchJobObject {
 	private int defaultNoCpus = 1;
 
 	private String[] allRemoteJobnames;
+	
+	private Map<String, String> optimizationResult = new HashMap<String, String>();
+
+	public Map<String, String> getOptimizationResult() {
+		return optimizationResult;
+	}
 
 	/**
 	 * Use this constructor if you want to create a new multipartjob.
@@ -674,7 +680,7 @@ public class BatchJobObject {
 			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 					"Optimizing multipartjob: "
 					+ batchJobname));
-			serviceInterface.redistributeBatchJob(this.batchJobname);
+			optimizationResult = serviceInterface.redistributeBatchJob(this.batchJobname).propertiesAsMap();
 			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 					"Optimizing of multipartjob "
 					+ batchJobname + " finished."));
