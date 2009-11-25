@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,6 +31,7 @@ import org.vpac.grisu.model.dto.DtoLogMessages;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 
 import au.org.arcs.jcommons.constants.Constants;
+import au.org.arcs.jcommons.interfaces.GridResource;
 
 @Entity
 public class BatchJob {
@@ -64,7 +66,19 @@ public class BatchJob {
 	private String batchJobname;
 	
 	private String fqan = null;
+	
+	private Map<GridResource, Integer> resourcesToUse = null;
 
+
+
+	@Transient
+	public Map<GridResource, Integer> getResourcesToUse() {
+		return resourcesToUse;
+	}
+
+	public void setResourcesToUse(Map<GridResource, Integer> resourcesToUse) {
+		this.resourcesToUse = resourcesToUse;
+	}
 
 	private Map<Long, String> logMessages = Collections
 			.synchronizedMap(new TreeMap<Long, String>());

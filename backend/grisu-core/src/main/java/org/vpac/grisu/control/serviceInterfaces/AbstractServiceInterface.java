@@ -954,32 +954,33 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		BatchJob mpj = getMultiPartJobFromDatabase(batchJobname);
 
 		Map<String, Integer> results = optimizeMultiPartJob(mpj);
-		
+
 		return DtoProperties.createUserPropertiesIntegerValue(results);
-		
-	}
-	
-	private boolean isValidSubmissionLocation(String subLoc, String fqan) {
-		
-		//TODO i'm sure this can be made much more quicker
-		String[] fs = informationManager.getStagingFileSystemForSubmissionLocation(subLoc);
-		
-		for ( MountPoint mp : df(fqan) ) {
-			
-			for ( String f : fs ) {
-				if ( mp.getRootUrl().startsWith(f.replace(":2811", "")) ) {
-					return true;
-					
-				}
-			}
-			
-		}
-		
-		return false;
-		
+
 	}
 
-	private Map<String, Integer> optimizeMultiPartJob(BatchJob mpj) throws NoSuchJobException {
+	private boolean isValidSubmissionLocation(String subLoc, String fqan) {
+
+		// TODO i'm sure this can be made much more quicker
+		String[] fs = informationManager
+				.getStagingFileSystemForSubmissionLocation(subLoc);
+
+		for (MountPoint mp : df(fqan)) {
+
+			for (String f : fs) {
+				if (mp.getRootUrl().startsWith(f.replace(":2811", ""))) {
+					return true;
+
+				}
+			}
+
+		}
+
+		return false;
+
+	}
+
+	private Map<GridResource, Integer> calculateResourcesToUse(BatchJob mpj) {
 
 		String sitesToIncludeString = mpj
 				.getJobProperty(Constants.SITES_TO_INCLUDE_KEY);
@@ -995,7 +996,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			sitesToExclude = sitesToExcludeString.split(",");
 		}
 
-		Map<GridResource, Long> resourcesToUse = new TreeMap<GridResource, Long>();
+		Map<GridResource, Integer> resourcesToUse = new TreeMap<GridResource, Integer>();
 
 		for (GridResource resource : findBestResourcesForMultipartJob(mpj)) {
 
@@ -1004,8 +1005,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				for (String site : sitesToInclude) {
 					if (resource.getSiteName().toLowerCase().contains(
 							site.toLowerCase())) {
-						if ( isValidSubmissionLocation(SubmissionLocationHelpers.createSubmissionLocationString(resource), mpj.getFqan())) {
-							resourcesToUse.put(resource, new Long(0L));
+						if (isValidSubmissionLocation(SubmissionLocationHelpers
+								.createSubmissionLocationString(resource), mpj
+								.getFqan())) {
+							resourcesToUse.put(resource, 0);
 						}
 						break;
 					}
@@ -1022,22 +1025,41 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					}
 				}
 				if (useSite) {
-					if ( isValidSubmissionLocation(SubmissionLocationHelpers.createSubmissionLocationString(resource), mpj.getFqan())) {
-						resourcesToUse.put(resource, new Long(0L));
+					if (isValidSubmissionLocation(SubmissionLocationHelpers
+							.createSubmissionLocationString(resource), mpj
+							.getFqan())) {
+						resourcesToUse.put(resource, 0);
 					}
 				}
 
 			} else {
-				
-				if ( isValidSubmissionLocation(SubmissionLocationHelpers.createSubmissionLocationString(resource), mpj.getFqan())) {
-					resourcesToUse.put(resource, new Long(0L));
+
+				if (isValidSubmissionLocation(SubmissionLocationHelpers
+						.createSubmissionLocationString(resource), mpj
+						.getFqan())) {
+					resourcesToUse.put(resource, 0);
 				}
 			}
 		}
+
+		return resourcesToUse;
+
+	}
+
+	private Map<String, Integer> optimizeMultiPartJob(BatchJob mpj)
+			throws NoSuchJobException {
+
+		Map<GridResource, Integer> resourcesToUse = null;
+		if ( mpj.getResourcesToUse() == null ) {
+			resourcesToUse = calculateResourcesToUse(mpj);
+		} else { 
+			resourcesToUse = mpj.getResourcesToUse();
+		}
 		
 		JobDistributor jd;
-		
-		if ( Constants.DISTRIBUTION_METHOD_EQUAL.equals(mpj.getJobProperty(Constants.DISTRIBUTION_METHOD)) ) {
+
+		if (Constants.DISTRIBUTION_METHOD_EQUAL.equals(mpj
+				.getJobProperty(Constants.DISTRIBUTION_METHOD))) {
 			jd = new EqualJobDistributor();
 		} else {
 			jd = new PercentageJobDistributor();
@@ -1054,9 +1076,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		myLogger.debug(message.toString());
 
-//		System.out.println("Message length: "+message.length());
-		
-//		mpj.addJobProperty(Constants.OPTIMIZE_STATS, message.toString());
+		// System.out.println("Message length: "+message.length());
+
+		// mpj.addJobProperty(Constants.OPTIMIZE_STATS, message.toString());
 
 		for (Job job : mpj.getJobs()) {
 			try {
@@ -1076,10 +1098,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		mpj.recalculateAllUsedMountPoints();
 		multiPartJobDao.saveOrUpdate(mpj);
-		
+
 		return results;
 	}
-
 
 	private void submitMultiPartJob(final BatchJob multiJob)
 			throws JobSubmissionException, NoSuchJobException {
@@ -1732,6 +1753,35 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		if (StringUtils.isBlank(jobnameCreationMethod)) {
 			jobnameCreationMethod = "force-name";
 		}
+		
+		String[] candHosts = JsdlHelpers.getCandidateHosts(jsdl);
+		
+		if ( candHosts == null || candHosts.length == 0 ) {
+			Map<GridResource, Integer> resources = multiJob.getResourcesToUse();
+			if ( resources == null ) {
+				resources = calculateResourcesToUse(multiJob);
+				multiJob.setResourcesToUse(resources);
+			}
+			
+			GridResource leastUsed = null;
+			int amountOfJobs = Integer.MAX_VALUE;
+			for ( GridResource res : resources.keySet() ) {
+				if ( resources.get(res) < amountOfJobs ) {
+					leastUsed = res;
+				}
+			}
+			
+			resources.put(leastUsed, resources.get(leastUsed)+1);
+			
+			String subLoc = SubmissionLocationHelpers.createSubmissionLocationString(leastUsed);
+			try {
+				JsdlHelpers.setCandidateHosts(jsdl, new String[]{subLoc});
+			} catch (XPathExpressionException e) {
+				throw new RuntimeException(e);
+			}
+			
+			
+		}
 
 		String jobname = createJob(jsdl, multiJob.getFqan(), "force-name",
 				multiJob);
@@ -2011,18 +2061,20 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		return DtoMountPoints.createMountpoints(df_internal());
 	}
-	
+
 	/**
 	 * Gets all mountpoints for this fqan.
 	 * 
-	 * @param fqan the fqan
+	 * @param fqan
+	 *            the fqan
 	 * @return the mountpoints
 	 */
 	protected Set<MountPoint> df(String fqan) {
-		
+
 		Set<MountPoint> result = new HashSet<MountPoint>();
-		for ( MountPoint mp : df_internal() ) {
-			if ( StringUtils.isNotBlank(mp.getFqan()) && mp.getFqan().equals(fqan) ) {
+		for (MountPoint mp : df_internal()) {
+			if (StringUtils.isNotBlank(mp.getFqan())
+					&& mp.getFqan().equals(fqan)) {
 				result.add(mp);
 			}
 		}
@@ -2999,8 +3051,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public DtoProperties getUserProperties() {
 
-		return DtoProperties.createUserProperties(getUser()
-				.getUserProperties());
+		return DtoProperties
+				.createUserProperties(getUser().getUserProperties());
 	}
 
 	/*
