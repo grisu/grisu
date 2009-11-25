@@ -55,7 +55,7 @@ public class BatchJobObject {
 
 	public static final int DEFAULT_JOB_CREATION_THREADS = 5;
 
-	private static final int DEFAULT_FILE_UPLOAD_THREADS = 1;
+	private static final int DEFAULT_FILE_UPLOAD_THREADS = 10;
 
 	private int concurrentJobCreationThreads = 0;
 	private int concurrentFileUploadThreads = 0;
@@ -643,14 +643,14 @@ public class BatchJobObject {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			
-			if ( exceptions.size() >= 0 && exceptions.get(0) != null ) {
+			if ( exceptions.size() > 0 && exceptions.get(0) != null ) {
 				throw exceptions.get(0);
 			} else {
 				throw new Exception("Could not upload input file. Unknown reason.");
 			}
 		}
 		
-		if ( exceptions.size() >= 0 && exceptions.get(0) != null ) {
+		if ( exceptions.size() > 0 && exceptions.get(0) != null ) {
 			throw exceptions.get(0);
 		}
 	}
