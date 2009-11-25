@@ -55,7 +55,7 @@ public class BatchJobObject {
 
 	public static final int DEFAULT_JOB_CREATION_THREADS = 5;
 
-	private static final int DEFAULT_FILE_UPLOAD_THREADS = 10;
+	private static final int DEFAULT_FILE_UPLOAD_THREADS = 1;
 
 	private int concurrentJobCreationThreads = 0;
 	private int concurrentFileUploadThreads = 0;
