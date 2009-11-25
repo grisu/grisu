@@ -54,12 +54,12 @@ public class MultiJobSubmit {
 
 		final GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
 		
-		registry.getApplicationInformation("java").getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin");
+		registry.getApplicationInformation("povray").getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin");
 
-		final int numberOfJobs = 10;
+		final int numberOfJobs = 100;
 		
 		Date start = new Date();
-		final String multiJobName = "10jobs4";
+		final String multiJobName = "java_long";
 		try {
 			si.kill(multiJobName, true);
 
@@ -82,7 +82,7 @@ public class MultiJobSubmit {
 			
 		multiPartJob.addJobProperty(Constants.DISTRIBUTION_METHOD, Constants.DISTRIBUTION_METHOD_EQUAL);
 
-		
+//		multiPartJob.setSitesToInclude(new String[]{"canterbury"});
 		String pathToInputFiles = multiPartJob.pathToInputFiles();
 		
 		for (int i=0; i<numberOfJobs; i++) {
@@ -93,15 +93,16 @@ public class MultiJobSubmit {
 				jo.setJobname(multiJobName+"_" + frameNumber );
 				jo.setApplication("java");
 //				jo.setCommandline("java -version");
-				jo.setCommandline("cat singleJobFile.txt "+pathToInputFiles+"/multiJobFile.txt");
+//				jo.setCommandline("cat singleJobFile.txt "+pathToInputFiles+"/multiJobFile.txt");
+				jo.setCommandline("java -version");
 				jo.setWalltimeInSeconds(60*21);
-				jo.addInputFileUrl("/home/markus/test/singleJobFile.txt");
+//				jo.addInputFileUrl("/home/markus/test/singleJobFile.txt");
 
 				multiPartJob.addJob(jo);
 						
 		}
 
-		multiPartJob.addInputFile("/home/markus/test/multiJobFile.txt");
+//		multiPartJob.addInputFile("/home/markus/test/multiJobFile.txt");
 //		multiPartJob.setDefaultApplication("java");
 //		multiPartJob.setSitesToExclude(new String[]{"tpac", "hpsc", "Auckland"});
 		

@@ -86,6 +86,14 @@ public class BatchJobObject {
 
 	private Map<String, String> optimizationResult = new HashMap<String, String>();
 
+	/**
+	 * Info about how many jobs were submitted to which submission location.
+	 * 
+	 * You need to call this sometime after the {@link #prepareAndCreateJobs(boolean)} method. You need to use the same BatchJobObject object
+	 * where you called this method. If you re-create the object, this info will be lost.
+	 * 
+	 * @return info about job distribution
+	 */
 	public Map<String, String> getOptimizationResult() {
 		return optimizationResult;
 	}

@@ -969,8 +969,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			for (String f : fs) {
 				if (mp.getRootUrl().startsWith(f.replace(":2811", ""))) {
-					return true;
 
+					return true;
 				}
 			}
 
@@ -1052,6 +1052,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		Map<GridResource, Integer> resourcesToUse = null;
 		if ( mpj.getResourcesToUse() == null ) {
 			resourcesToUse = calculateResourcesToUse(mpj);
+			mpj.setResourcesToUse(resourcesToUse);
 		} else { 
 			resourcesToUse = mpj.getResourcesToUse();
 		}
@@ -1846,6 +1847,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			multiJobCreate.addLogMessage("MultiPartJob " + batchJobname
 					+ " created.");
+			
+			multiJobCreate.setResourcesToUse(calculateResourcesToUse(multiJobCreate));
+			
 			multiPartJobDao.saveOrUpdate(multiJobCreate);
 
 			try {
