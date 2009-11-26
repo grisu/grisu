@@ -47,6 +47,8 @@ public final class ServerPropertiesManager {
 
 	static final Logger myLogger = Logger
 			.getLogger(ServerPropertiesManager.class.getName());
+	
+	private static final int DEFAULT_CONCURRENT_JOB_SUBMISSION_RETRIES = 5;
 
 	/**
 	 * Retrieves the configuration parameters from the properties file.
@@ -358,6 +360,23 @@ public final class ServerPropertiesManager {
 		} catch (Exception e) {
 			return null;
 		}
+	}
+
+	public static int getJobSubmissionRetries() {
+		
+		int retries = -1;
+		try {
+			retries = Integer.parseInt(getServerConfiguration()
+					.getString("globusJobSubmissionRetries"));
+
+		} catch (Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_CONCURRENT_JOB_SUBMISSION_RETRIES;
+		}
+		if (retries == -1) {
+			return DEFAULT_CONCURRENT_JOB_SUBMISSION_RETRIES;
+		}
+		return retries;
 	}
 
 }
