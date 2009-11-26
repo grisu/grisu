@@ -47,7 +47,7 @@ import au.org.arcs.jcommons.constants.Constants;
  * 
  */
 public class BatchJobObject {
-
+	
 	static final Logger myLogger = Logger.getLogger(BatchJobObject.class
 			.getName());
 
@@ -1387,6 +1387,23 @@ public class BatchJobObject {
 	 */
 	public int numberOfUnsubmittedJobs() {
 		return getMultiPartJob(false).numberOfUnsubmittedJobs();
+	}
+
+	/**
+	 * Sets the method to distribute the job. 
+	 * 
+	 * Possible methods are: "percentage" (default) and "equal"
+	 * @param method the method
+	 */
+	public void setJobDistributionMethod(String method) {
+
+		try {
+			serviceInterface.addJobProperty(this.batchJobname,
+					Constants.DISTRIBUTION_METHOD, method);
+		} catch (NoSuchJobException e) {
+			throw new RuntimeException(e);
+		}
+		
 	}
 
 }
