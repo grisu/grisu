@@ -1,7 +1,4 @@
-target
-.project
-.settings
 .classpath
-META-INF
-.pydevproject
-*.log
+.project
+target
+.settings
