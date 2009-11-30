@@ -36,7 +36,7 @@ public class FileListPanel extends JPanel {
 
 	private EventList<GlazedFile> currentDirectoryContent = new BasicEventList<GlazedFile>();
 
-	private String currentUrl = null;
+	private GlazedFile currentDirectory = null;
 	private DtoFolder currentFolder = null;
 	private JTable table;
 
@@ -44,6 +44,8 @@ public class FileListPanel extends JPanel {
 	private JScrollPane scrollPane;
 
 	private boolean includeLocal = true;
+
+	private String rootUrl = null;
 
 	/**
 	 * Create the panel.
@@ -60,7 +62,13 @@ public class FileListPanel extends JPanel {
 				new GlazedFileTableFormat());
 		add(getScrollPane(), BorderLayout.CENTER);
 
-		setCurrent(startUrl);
+		if (startUrl == null) {
+			rootUrl = GlazedFile.ROOT;
+			setCurrent(GlazedFile.ROOT);
+		} else {
+			rootUrl = startUrl;
+			setCurrent(startUrl);
+		}
 	}
 
 	private synchronized void setCurrent(final String url, final GlazedFile file) {
@@ -96,7 +104,7 @@ public class FileListPanel extends JPanel {
 
 						} else {
 
-							if (url == null || "/".equals(url)) {
+							if (url == null || GlazedFile.ROOT.equals(url)) {
 								setCurrentDirToGridRoot();
 							} else if (em.getAllAvailableSites().contains(url)) {
 								setCurrentDirToSite(url);
@@ -137,6 +145,18 @@ public class FileListPanel extends JPanel {
 
 	}
 
+	public boolean currentUrlIsStartUrl() {
+		if (rootUrl.equals(getCurrentDirectory().getUrl())) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public GlazedFile getCurrentDirectory() {
+		return currentDirectory;
+	}
+
 	public void setCurrent(GlazedFile file) {
 
 		setCurrent(null, file);
@@ -153,7 +173,7 @@ public class FileListPanel extends JPanel {
 
 	private void setCurrentDirToGridRoot() {
 
-		currentUrl = "/";
+		currentDirectory = new GlazedFile();
 		currentFolder = null;
 
 		currentDirectoryContent.getReadWriteLock().writeLock().lock();
@@ -176,21 +196,23 @@ public class FileListPanel extends JPanel {
 
 	private void setCurrentDirToSite(String sitename) {
 
-		currentUrl = sitename;
+		currentDirectory = new GlazedFile(sitename);
 		currentFolder = null;
 
 		if (GlazedFile.LOCAL_FILESYSTEM.equals(sitename)) {
-			
+
 			currentDirectoryContent.getReadWriteLock().writeLock().lock();
 			try {
 				currentDirectoryContent.clear();
 
-				currentDirectoryContent.add(new GlazedFile());
-				
-				for ( File root : File.listRoots() ) {
+				if (!currentUrlIsStartUrl()) {
+					currentDirectoryContent.add(new GlazedFile());
+				}
+
+				for (File root : File.listRoots()) {
 					currentDirectoryContent.add(new GlazedFile(root));
 				}
-				
+
 			} finally {
 				currentDirectoryContent.getReadWriteLock().writeLock().unlock();
 			}
@@ -201,7 +223,9 @@ public class FileListPanel extends JPanel {
 			try {
 				currentDirectoryContent.clear();
 
-				currentDirectoryContent.add(new GlazedFile());
+				if (!currentUrlIsStartUrl()) {
+					currentDirectoryContent.add(new GlazedFile());
+				}
 
 				for (MountPoint mp : em.getMountPointsForSite(sitename)) {
 					currentDirectoryContent.add(new GlazedFile(mp));
@@ -214,33 +238,38 @@ public class FileListPanel extends JPanel {
 
 	private void setCurrentDirToFolder(DtoFolder folder) {
 
-		currentUrl = folder.getRootUrl();
+		currentDirectory = new GlazedFile(folder);
 		currentFolder = folder;
 
 		currentDirectoryContent.getReadWriteLock().writeLock().lock();
 		try {
 			currentDirectoryContent.clear();
-			
-			if ( ! FileManager.isLocal(folder.getRootUrl()) ) {
-				
-			if (em.isMountPointRoot(folder.getRootUrl())) {
-				currentDirectoryContent.add(new GlazedFile(em
-						.getMountPointForUrl(folder.getRootUrl()).getSite()));
-			} else {
-				currentDirectoryContent.add(new GlazedFile(fm
-						.calculateParentUrl(folder.getRootUrl()), si));
-			}
-			} else {
-				try {
-					File parent = new File(new URI(folder.getRootUrl())).getParentFile();
-					if ( parent == null ) {
-						currentDirectoryContent.add(new GlazedFile(GlazedFile.LOCAL_FILESYSTEM));
-					} else { 
-						currentDirectoryContent.add(new GlazedFile(parent));
+
+			if (!FileManager.isLocal(folder.getRootUrl())) {
+				if (!currentUrlIsStartUrl()) {
+
+					if (em.isMountPointRoot(folder.getRootUrl())) {
+						currentDirectoryContent.add(new GlazedFile(em
+								.getMountPointForUrl(folder.getRootUrl())
+								.getSite()));
+					} else {
+						currentDirectoryContent.add(new GlazedFile(fm
+								.calculateParentUrl(folder.getRootUrl()), si));
 					}
-				} catch (URISyntaxException e) {
-					e.printStackTrace();
-					throw new RuntimeException(e);
+				} else {
+					try {
+						File parent = new File(new URI(folder.getRootUrl()))
+								.getParentFile();
+						if (parent == null) {
+							currentDirectoryContent.add(new GlazedFile(
+									GlazedFile.LOCAL_FILESYSTEM));
+						} else {
+							currentDirectoryContent.add(new GlazedFile(parent));
+						}
+					} catch (URISyntaxException e) {
+						e.printStackTrace();
+						throw new RuntimeException(e);
+					}
 				}
 			}
 
@@ -273,6 +302,9 @@ public class FileListPanel extends JPanel {
 	private JTable getTable() {
 		if (table == null) {
 			table = new JTable(fileModel);
+			table.setDefaultRenderer(GlazedFile.class, new GlazedFileRenderer(
+					this));
+			table.setDefaultRenderer(Long.class, new FileSizeRenderer());
 			table.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {

@@ -19,6 +19,8 @@ public class GlazedFile {
 
 	public static final String LOCAL_FILESYSTEM = "Local";
 
+	public static final String ROOT = "FileRoot";
+
 	private final Type type;
 
 	private final DtoFile file;
@@ -35,10 +37,10 @@ public class GlazedFile {
 		this.type = Type.FILETYPE_ROOT;
 		this.file = null;
 		this.folder = null;
-		this.url = "/";
+		this.url = ROOT;
 		this.size = -1L;
 		this.lastModified = -1L;
-		this.name = "/";
+		this.name = ROOT;
 		this.si = null;
 	}
 

@@ -61,7 +61,8 @@ public class DtoFolder implements DtoRemoteObject {
 				result.getChildrenFiles().add(childFile);
 				
 			} else {
-				throw new RuntimeException("Can't determine type of file: "+child.getPath());
+				System.out.println("Can't determine type of file: "+child.getPath());
+//				throw new RuntimeException("Can't determine type of file: "+child.getPath());
 			}
 			
 		}

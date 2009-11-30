@@ -56,7 +56,7 @@ public class FileDialog extends JDialog {
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new BorderLayout(0, 0));
 		{
-			FileListPanel fileListPanel = new FileListPanel(si, (String) null);
+			FileListPanel fileListPanel = new FileListPanel(si, null);
 			contentPanel.add(fileListPanel, BorderLayout.CENTER);
 		}
 		{
