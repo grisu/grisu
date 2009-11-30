@@ -81,8 +81,4 @@ public class DtoFile implements DtoRemoteObject {
 		
 	}
 
-	public List<DtoRemoteObject> listAllChildren() {
-		return new LinkedList<DtoRemoteObject>();
-	}
-
 }

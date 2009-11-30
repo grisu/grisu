@@ -2,7 +2,8 @@ package org.vpac.grisu.model;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import javax.activation.DataHandler;
@@ -75,7 +76,7 @@ public class FileManager {
 	public File getLocalCacheFile(final String url) {
 
 		if (isLocal(url)) {
-			
+
 			return new File(url);
 		} else {
 
@@ -422,6 +423,36 @@ public class FileManager {
 		return folder.listOfAllFilesUnderThisFolder();
 	}
 
+	public DtoFolder ls(String url) throws RemoteFileSystemException {
+
+		return ls(url, 1);
+	}
+
+	public DtoFolder ls(String url, int recursionLevel)
+			throws RemoteFileSystemException {
+
+		if (isLocal(url)) {
+			File temp;
+			try {
+				temp = new File(new URI(url));
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			}
+
+			return DtoFolder.listLocalFolder(temp, false);
+
+		} else {
+
+			try {
+				return serviceInterface.ls(url, recursionLevel);
+			} catch (RemoteFileSystemException e) {
+
+				throw e;
+			}
+		}
+	}
+
 	/**
 	 * Convenience method to create a datahandler out of a file.
 	 * 
@@ -489,6 +520,14 @@ public class FileManager {
 		} else {
 			return true;
 		}
+
+	}
+
+	public String calculateParentUrl(String rootUrl) {
+
+		String result = rootUrl.substring(0, rootUrl.lastIndexOf("/"));
+
+		return result;
 
 	}
 

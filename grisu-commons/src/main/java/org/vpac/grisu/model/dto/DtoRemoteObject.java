@@ -14,6 +14,6 @@ public interface DtoRemoteObject {
 
 	public boolean isFolder();
 	
-	public List<DtoRemoteObject> listAllChildren();
+//	public List<DtoRemoteObject> listAllChildren();
 	
 }

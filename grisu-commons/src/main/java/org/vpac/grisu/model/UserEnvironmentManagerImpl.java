@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -29,10 +30,11 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 
 	private String[] cachedFqans = null;
 	private Set<String> cachedAllSubmissionLocations = null;
-	private Set<String> cachedAllSites = null;
+	private SortedSet<String> cachedAllSites = null;
 	private Map<String, Set<MountPoint>> alreadyQueriedMountPointsPerSubmissionLocation = new TreeMap<String, Set<MountPoint>>();
 	private Map<String, Set<MountPoint>> alreadyQueriedMountPointsPerFqan = new TreeMap<String, Set<MountPoint>>();
 	private MountPoint[] cachedMountPoints = null;
+	private Map<String, SortedSet<MountPoint>> alreadyQueriedMountPointsPerSite = new TreeMap<String, SortedSet<MountPoint>>();
 
 	private String currentFqan;
 
@@ -64,12 +66,12 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		return cachedAllSubmissionLocations;
 	}
 
-	public final Set<String> getAllAvailableSites() {
+	public final SortedSet<String> getAllAvailableSites() {
 
 		if (cachedAllSites == null) {
-			Set<String> temp = new TreeSet<String>();
+			cachedAllSites = new TreeSet<String>();
 			for (String subLoc : getAllAvailableSubmissionLocations()) {
-				temp.add(resourceInfo.getSite(subLoc));
+				cachedAllSites.add(resourceInfo.getSite(subLoc));
 			}
 		}
 		return cachedAllSites;
@@ -242,6 +244,64 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 
 	public final void setCurrentFqan(final String currentFqan) {
 		this.currentFqan = currentFqan;
+	}
+
+	public SortedSet<MountPoint> getMountPointsForSite(String site) {
+
+		if (site == null) {
+			throw new IllegalArgumentException("Site can't be null.");
+		}
+
+		synchronized (site) {
+
+			if (alreadyQueriedMountPointsPerSite.get(site) == null) {
+
+				SortedSet<MountPoint> mps = new TreeSet<MountPoint>();
+				for (MountPoint mp : getMountPoints()) {
+					if (mp.getSite().equals(site)) {
+						mps.add(mp);
+						continue;
+					}
+				}
+				alreadyQueriedMountPointsPerSite.put(site, mps);
+			}
+			return alreadyQueriedMountPointsPerSite.get(site);
+		}
+		
+	}
+
+	public boolean isMountPointAlias(String string) {
+
+		for ( MountPoint mp : getMountPoints() ) {
+			if ( mp.getAlias().equals(string) ) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	public MountPoint getMountPointForAlias(String alias) {
+
+		for ( MountPoint mp : getMountPoints() ) {
+			if ( mp.getAlias().equals(alias) ) {
+				return mp;
+			}
+		}
+		
+		return null;
+	}
+
+	public boolean isMountPointRoot(String rootUrl) {
+
+		for ( MountPoint mp : getMountPoints() ) {
+			if ( mp.getRootUrl().equals(rootUrl) ) {
+				return true;
+			}
+		}
+		
+		return false;
+		
 	}
 
 }

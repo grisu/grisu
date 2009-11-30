@@ -1,6 +1,7 @@
 package org.vpac.grisu.model;
 
 import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * Wrapps information about the user and the available resources to him
@@ -34,6 +35,14 @@ public interface UserEnvironmentManager {
 	 * @return the mountpoints
 	 */
 	Set<MountPoint> getMountPoints(String fqan);
+	
+	/**
+	 * Gets all mountpoints for a site.
+	 * 
+	 * @param site the site
+	 * @return the mountpoints
+	 */
+	SortedSet<MountPoint> getMountPointsForSite(String site);
 
 	/**
 	 * Get all the users' mountpoints.
@@ -71,7 +80,7 @@ public interface UserEnvironmentManager {
 	 * 
 	 * @return all sites
 	 */
-	Set<String> getAllAvailableSites();
+	SortedSet<String> getAllAvailableSites();
 
 	/**
 	 * Returns a recommended mountpoint for the specified combination of
@@ -125,5 +134,29 @@ public interface UserEnvironmentManager {
 	 *            the listener
 	 */
 	void removeFqanListener(FqanListener listener);
+
+	/**
+	 * Returns whether the provided string is a mountpoint alias of one of the users' available mountpoints.
+	 * 
+	 * @param string the string
+	 * @return whether the string is a mountpoint alias or not
+	 */
+	boolean isMountPointAlias(String string);
+
+	/**
+	 * Returns the mountPoint for this alias.
+	 * 
+	 * @param alias the alias
+	 * @return the mountpoint or null if no mountpoint with this alias was found
+	 */
+	MountPoint getMountPointForAlias(String url);
+
+	/**
+	 * Returns whether the specified url is the root url of one of the users mountpoints.
+	 * 
+	 * @param rootUrl the url
+	 * @return whether the url is a the root of a mountpoint or not
+	 */
+	boolean isMountPointRoot(String rootUrl);
 
 }

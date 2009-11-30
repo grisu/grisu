@@ -1,10 +1,9 @@
 package org.vpac.grisu.model.dto;
 
+import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -19,6 +18,56 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name="folder")
 public class DtoFolder implements DtoRemoteObject {
+	
+	public static DtoFolder listLocalFolder(File folder, boolean includeParentInFileListing) {
+		
+		DtoFolder result = new DtoFolder();
+		result.setRootUrl(folder.toURI().toString());
+		result.setFolder(true);
+		result.setName(folder.getName());
+		
+		if ( includeParentInFileListing ) {
+			DtoFolder childFolder = new DtoFolder();
+			childFolder.setFolder(true);
+			childFolder.setName(folder.getName());
+			childFolder.setRootUrl(folder.toURI().toString());
+		}
+		
+		for ( File child : folder.listFiles() ) {
+			
+			if ( child.isDirectory() ) {
+				
+				DtoFolder childFolder = new DtoFolder();
+				childFolder.setFolder(true);
+				childFolder.setName(child.getName());
+				childFolder.setRootUrl(child.toURI().toString());
+
+				result.getChildrenFolders().add(childFolder);
+				
+			} else if ( child.isFile() ) {
+				
+				DtoFile childFile = new DtoFile();
+				childFile.setFolder(false);
+				childFile.setName(child.getName());
+				childFile.setRootUrl(child.toURI().toString());
+				try {
+					childFile.setLastModified(child.lastModified());
+					childFile.setSize(child.length());
+				} catch (Exception e) {
+					// no idea why I need to catch this. Without it it seems to stall...
+					e.printStackTrace();
+				}
+				
+				result.getChildrenFiles().add(childFile);
+				
+			} else {
+				throw new RuntimeException("Can't determine type of file: "+child.getPath());
+			}
+			
+		}
+		
+		return result;
+	}
 
 	/**
 	 * The absolute url to this folder.
