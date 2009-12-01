@@ -59,7 +59,7 @@ public class MultiJobSubmit {
 		final int numberOfJobs = 10;
 		
 		Date start = new Date();
-		final String multiJobName = "java_Home4";
+		final String multiJobName = "java_Home5";
 		try {
 			si.kill(multiJobName, true);
 
@@ -139,6 +139,10 @@ public class MultiJobSubmit {
 			multiPartJob.getJobs().size();
 			System.out.println(multiPartJob.getDetails());
 			Thread.sleep(2000);
+		}
+		
+		if ( multiPartJob.failedJobs().size() > 0 ) {
+			System.out.println("Failed jobs.");
 		}
 		
 		for ( JobObject job : multiPartJob.getJobs() ) {
