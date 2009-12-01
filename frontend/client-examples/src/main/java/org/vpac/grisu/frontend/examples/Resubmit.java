@@ -32,18 +32,31 @@ public class Resubmit {
 
 
 		final GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
+		
+		String[] subLocs = registry.getApplicationInformation("UnixCommands").getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin").toArray(new String[]{});
 
-//		System.out.println(si.getJsdlDocument("MULTI2_58"));
+		JobObject createJobObject = new JobObject(si);
+
+		createJobObject.setJobname("Test5");
 		
-		JobObject jobO = new JobObject(si, "MULTI2_58");
-		jobO.setWalltimeInSeconds(2400);
-		jobO.setCpus(1);
+		createJobObject.setApplication("UnixCommands");
+		createJobObject.setCommandline("cat test.txt");
+		createJobObject.setWalltimeInSeconds(100);
+		createJobObject.setCpus(1);
+		createJobObject.addInputFileUrl("/home/markus/test.txt");
+		createJobObject.setSubmissionLocation(subLocs[0]);
+		System.out.println("Submissionlocation original: "+subLocs[0]);
+		System.out.println("Submissionlocation resubmit: "+subLocs[3]);
 		
-//		System.out.println(jobO.getJobDescriptionDocumentAsString());
+		createJobObject.createJob("/ARCS/NGAdmin");
 		
-		jobO.restartJob();
+		createJobObject.submitJob();
 		
-//		si.restartJob("MULTI4_1", null);
+		Thread.sleep(20000);
+		
+		createJobObject.setSubmissionLocation(subLocs[3]);
+		createJobObject.restartJob();
+		
 	}
 
 }

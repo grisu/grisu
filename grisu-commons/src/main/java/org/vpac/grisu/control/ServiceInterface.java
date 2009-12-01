@@ -1067,6 +1067,9 @@ public interface ServiceInterface {
 	 */
 	@RolesAllowed("User")
 	void restartJob(final String jobname, String changedJsdl) throws JobSubmissionException, NoSuchJobException;
+	
+	@RolesAllowed("User")
+	void restartBatchJob(final String jobname, String restartPolicy, DtoProperties properties) throws NoSuchJobException;
 		
 	/**
 	 * Returns the current status of an ongoing action. 

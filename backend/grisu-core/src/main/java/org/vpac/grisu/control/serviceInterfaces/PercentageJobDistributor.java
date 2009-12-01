@@ -7,8 +7,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
-import javax.xml.xpath.XPathExpressionException;
-
 import org.apache.log4j.Logger;
 import org.vpac.grisu.backend.model.job.Job;
 
@@ -22,12 +20,12 @@ public class PercentageJobDistributor implements JobDistributor {
 	static final Logger myLogger = Logger
 	.getLogger(PercentageJobDistributor.class.getName());
 	
-	public Map<String, Integer> distributeJobs(Set<Job> alljobs, SortedSet<GridResource> allAvailableResources) {
+	public Map<String, Integer> distributeJobs(Set<Job> allJobs, SortedSet<GridResource> allAvailableResources) {
 		
 		Map<String, Integer> submissionLocations = new TreeMap<String, Integer>();
 
 		Long allWalltime = 0L;
-		for ( Job job : alljobs ) {
+		for ( Job job : allJobs ) {
 			allWalltime = allWalltime + Long.parseLong(job.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY));
 		}
 
@@ -48,7 +46,7 @@ public class PercentageJobDistributor implements JobDistributor {
 				new GridResource[] {});
 		int lastIndex = 0;
 		
-		for (Job job : alljobs) {
+		for ( Job job : allJobs ) {
 
 			GridResource subLocResource = null;
 			long oldWalltimeSummary = 0L;
@@ -99,12 +97,8 @@ public class PercentageJobDistributor implements JobDistributor {
 
 			job.addJobProperty(Constants.SUBMISSIONLOCATION_KEY, subLoc);
 			
-			
-			try {
-				JsdlHelpers.setCandidateHosts(job.getJobDescription(), new String[]{subLoc}); 
-			} catch (XPathExpressionException e) {
-				throw new RuntimeException(e);
-			}
+			JsdlHelpers.setCandidateHosts(job.getJobDescription(), new String[]{subLoc}); 
+
 //			needs to be done on the backend
 //			try {
 //				processJobDescription(job);

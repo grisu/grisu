@@ -24,7 +24,6 @@ import java.util.concurrent.Executors;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
-import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.AllFileSelector;
@@ -452,6 +451,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		String jobFqan = job.getFqan();
 		Document jsdl = job.getJobDescription();
 
+		String oldJobDir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+		
+		try {
+			if ( StringUtils.isNotBlank(oldJobDir) && ! fileExists(oldJobDir) ) {
+				oldJobDir = null;
+			} else {
+				myLogger.debug("Old jobdir exists.");
+			}
+		} catch (RemoteFileSystemException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 		boolean applicationCalculated = false;
 
 		JobSubmissionObjectImpl jobSubmissionObject = new JobSubmissionObjectImpl(
@@ -756,7 +768,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				try {
 					JsdlHelpers.setCandidateHosts(jsdl,
 							new String[] { submissionLocation });
-				} catch (XPathExpressionException e) {
+				} catch (RuntimeException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					throw new JobPropertiesException(
@@ -862,6 +874,20 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				stagingFilesystemToUse + workingDirectory);
 		myLogger.debug("Calculated jobdirectory: " + stagingFilesystemToUse
 				+ workingDirectory);
+		
+		
+		if ( StringUtils.isNotBlank(oldJobDir) ) {
+		try {
+			// if old jobdir exists, try to move it here
+			cpSingleFile(oldJobDir, stagingFilesystemToUse+workingDirectory, true, true);
+			
+			deleteFile(oldJobDir);
+		} catch (Exception e) {
+			e.printStackTrace();
+			//TODO more
+		}
+		}
+		
 
 		myLogger.debug("Fixing urls in datastaging elements...");
 		// fix stage in target filesystems...
@@ -951,9 +977,18 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public DtoProperties redistributeBatchJob(String batchJobname)
 			throws NoSuchJobException {
 
-		BatchJob mpj = getMultiPartJobFromDatabase(batchJobname);
+		BatchJob job = getMultiPartJobFromDatabase(batchJobname);
+		
+		Map<GridResource, Integer> resourcesToUse = null;
+		if ( job.getResourcesToUse() == null ) {
+			resourcesToUse = calculateResourcesToUse(job);
+			job.setResourcesToUse(resourcesToUse);
+		} else { 
+			resourcesToUse = job.getResourcesToUse();
+		}
+		SubmitPolicy sp = new SubmitPolicy(job.getJobs(), new TreeSet<GridResource>(resourcesToUse.keySet()));
 
-		Map<String, Integer> results = optimizeMultiPartJob(mpj);
+		Map<String, Integer> results = optimizeMultiPartJob(sp, job.getJobProperty(Constants.DISTRIBUTION_METHOD), job);
 
 		return DtoProperties.createUserPropertiesIntegerValue(results);
 
@@ -982,31 +1017,32 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	private Map<GridResource, Integer> calculateResourcesToUse(BatchJob mpj) {
 
-		String sitesToIncludeString = mpj
-				.getJobProperty(Constants.SITES_TO_INCLUDE_KEY);
-		String[] sitesToInclude = null;
-		if (StringUtils.isNotBlank(sitesToIncludeString)) {
-			sitesToInclude = sitesToIncludeString.split(",");
+		String locationsToIncludeString = mpj
+				.getJobProperty(Constants.LOCATIONS_TO_INCLUDE_KEY);
+		String[] locationsToInclude = null;
+		if (StringUtils.isNotBlank(locationsToIncludeString)) {
+			locationsToInclude = locationsToIncludeString.split(",");
 		}
 
-		String sitesToExcludeString = mpj
-				.getJobProperty(Constants.SITES_TO_EXCLUDE_KEY);
-		String[] sitesToExclude = null;
-		if (StringUtils.isNotBlank(sitesToExcludeString)) {
-			sitesToExclude = sitesToExcludeString.split(",");
+		String locationsToExcludeString = mpj
+				.getJobProperty(Constants.LOCATIONS_TO_EXCLUDE_KEY);
+		String[] locationsToExclude = null;
+		if (StringUtils.isNotBlank(locationsToExcludeString)) {
+			locationsToExclude = locationsToExcludeString.split(",");
 		}
 
 		Map<GridResource, Integer> resourcesToUse = new TreeMap<GridResource, Integer>();
 
 		for (GridResource resource : findBestResourcesForMultipartJob(mpj)) {
 
-			if (sitesToInclude != null && sitesToInclude.length > 0) {
+			String tempSubLocString = SubmissionLocationHelpers.createSubmissionLocationString(resource);
+			
+			if (locationsToInclude != null && locationsToInclude.length > 0) {
 
-				for (String site : sitesToInclude) {
-					if (resource.getSiteName().toLowerCase().contains(
-							site.toLowerCase())) {
-						if (isValidSubmissionLocation(SubmissionLocationHelpers
-								.createSubmissionLocationString(resource), mpj
+				for (String subLoc : locationsToInclude) {
+					if (tempSubLocString.toLowerCase().contains(
+							subLoc.toLowerCase())) {
+						if (isValidSubmissionLocation(tempSubLocString, mpj
 								.getFqan())) {
 							resourcesToUse.put(resource, 0);
 						}
@@ -1014,19 +1050,18 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					}
 				}
 
-			} else if (sitesToExclude != null && sitesToExclude.length > 0) {
+			} else if (locationsToExclude != null && locationsToExclude.length > 0) {
 
-				boolean useSite = true;
-				for (String site : sitesToExclude) {
-					if (resource.getSiteName().toLowerCase().contains(
-							site.toLowerCase())) {
-						useSite = false;
+				boolean useSubLoc = true;
+				for (String subLoc : locationsToExclude) {
+					if (tempSubLocString.toLowerCase().contains(
+							subLoc.toLowerCase())) {
+						useSubLoc = false;
 						break;
 					}
 				}
-				if (useSite) {
-					if (isValidSubmissionLocation(SubmissionLocationHelpers
-							.createSubmissionLocationString(resource), mpj
+				if (useSubLoc) {
+					if (isValidSubmissionLocation(tempSubLocString, mpj
 							.getFqan())) {
 						resourcesToUse.put(resource, 0);
 					}
@@ -1034,8 +1069,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			} else {
 
-				if (isValidSubmissionLocation(SubmissionLocationHelpers
-						.createSubmissionLocationString(resource), mpj
+				if (isValidSubmissionLocation(tempSubLocString, mpj
 						.getFqan())) {
 					resourcesToUse.put(resource, 0);
 				}
@@ -1046,28 +1080,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	private Map<String, Integer> optimizeMultiPartJob(BatchJob mpj)
+	private Map<String, Integer> optimizeMultiPartJob(SubmitPolicy sp, String distributionMethod, BatchJob possibleParentBatchJob)
 			throws NoSuchJobException {
-
-		Map<GridResource, Integer> resourcesToUse = null;
-		if ( mpj.getResourcesToUse() == null ) {
-			resourcesToUse = calculateResourcesToUse(mpj);
-			mpj.setResourcesToUse(resourcesToUse);
-		} else { 
-			resourcesToUse = mpj.getResourcesToUse();
-		}
 		
 		JobDistributor jd;
 
-		if (Constants.DISTRIBUTION_METHOD_EQUAL.equals(mpj
-				.getJobProperty(Constants.DISTRIBUTION_METHOD))) {
+		if (Constants.DISTRIBUTION_METHOD_EQUAL.equals(distributionMethod)) {
 			jd = new EqualJobDistributor();
 		} else {
 			jd = new PercentageJobDistributor();
 		}
-
-		Map<String, Integer> results = jd.distributeJobs(mpj.getJobs(),
-				new TreeSet<GridResource>(resourcesToUse.keySet()));
+		
+		
+		Map<String, Integer> results = jd.distributeJobs(sp.getCalculatedJobs(), sp.getCalculatedGridResources());
 		StringBuffer message = new StringBuffer(
 				"Filled submissionlocations for " + results.size() + " jobs: "
 						+ "\n");
@@ -1081,24 +1106,26 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		// mpj.addJobProperty(Constants.OPTIMIZE_STATS, message.toString());
 
-		for (Job job : mpj.getJobs()) {
+		for (Job job : sp.getCalculatedJobs()) {
 			try {
 
-				if (Constants.NO_VERSION_INDICATOR_STRING.equals(mpj
+				if (Constants.NO_VERSION_INDICATOR_STRING.equals(possibleParentBatchJob
 						.getJobProperty(Constants.APPLICATIONVERSION_KEY))) {
 					JsdlHelpers.setApplicationVersion(job.getJobDescription(),
 							Constants.NO_VERSION_INDICATOR_STRING);
 				}
 
-				processJobDescription(job, mpj);
+				processJobDescription(job, possibleParentBatchJob);
 			} catch (JobPropertiesException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e);
 			}
 			jobdao.saveOrUpdate(job);
 		}
-		mpj.recalculateAllUsedMountPoints();
-		multiPartJobDao.saveOrUpdate(mpj);
+		if ( possibleParentBatchJob != null ) {
+			possibleParentBatchJob.recalculateAllUsedMountPoints();
+		multiPartJobDao.saveOrUpdate(possibleParentBatchJob);
+		}
 
 		return results;
 	}
@@ -1333,14 +1360,82 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		status.addElement("Job submission finished...");
 		status.setFinished(true);
 	}
-
+	
+	
+	public void restartBatchJob(final String batchJobname, String restartPolicy, DtoProperties properties) throws NoSuchJobException {
+		
+		BatchJob job = getMultiPartJobFromDatabase(batchJobname);
+		
+		Map<GridResource, Integer> resourcesToUse = null;
+		if ( job.getResourcesToUse() == null ) {
+			resourcesToUse = calculateResourcesToUse(job);
+			job.setResourcesToUse(resourcesToUse);
+		} else { 
+			resourcesToUse = job.getResourcesToUse();
+		}
+		SubmitPolicy sp = new SubmitPolicy(job.getJobs(), new TreeSet<GridResource>(resourcesToUse.keySet()));
+		sp.setSubmitToAllLocations(false);
+		
+		Map<String, Integer> results = optimizeMultiPartJob(sp, job.getJobProperty(Constants.DISTRIBUTION_METHOD), job);
+		
+		for ( Job jobToRestart : sp.getCalculatedJobs() ) {
+			try {
+				restartJob(jobToRestart, null);
+			} catch (JobSubmissionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		
+		
+		
+		
+	}
+	
 	public void restartJob(final String jobname, String changedJsdl)
-			throws JobSubmissionException, NoSuchJobException {
-
+	throws JobSubmissionException, NoSuchJobException {
+		
 		Job job = getJob(jobname);
 
+		restartJob(job, changedJsdl);
+	}
+	
+	
+//	private void moveJobDirectory(Job job, String newSubLoc, BatchJob possibleBatchJob) throws NoSuchJobException, JobPropertiesException, RemoteFileSystemException {
+//		
+//
+//		String oldJobDir = job.getJobProperty(Constants.JOBDIRECTORY_KEY); 
+//		JsdlHelpers.setCandidateHosts(job.getJobDescription(), new String[]{newSubLoc});
+//		
+//
+//		processJobDescription(job, possibleBatchJob);
+//		
+//		String newJobDir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+//		myLogger.debug("New jobdirectory: "+ newJobDir);
+//		
+//		
+//		cpSingleFile(oldJobDir, newJobDir, true, true);
+//		myLogger.debug("Moved old job dir from "+oldJobDir+" to "+newJobDir);
+//
+//		try {
+//			// try to delete old file
+//			deleteFile(oldJobDir);
+//		} catch (RemoteFileSystemException e) {
+//			// not good, but acceptable
+//			myLogger.error("Could not delete old jobdir.", e);
+//		}
+//
+//		jobdao.saveOrUpdate(job);
+//		
+//	}
+
+	private void restartJob(final Job job, String changedJsdl)
+			throws JobSubmissionException, NoSuchJobException {
+
+
 		DtoActionStatus status = null;
-		status = new DtoActionStatus(job.getJobname(), 3);
+		status = new DtoActionStatus(job.getJobname(), 5);
 		actionStatus.put(job.getJobname(), status);
 
 		job.addLogMessage("Restarting job...");
@@ -1355,10 +1450,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		String possibleMultiPartJob = job
 				.getJobProperty(Constants.BATCHJOB_NAME);
 
+		BatchJob mpj = null;
 		if (StringUtils.isNotBlank(possibleMultiPartJob)) {
-			BatchJob mpj = getMultiPartJobFromDatabase(possibleMultiPartJob);
+			mpj = getMultiPartJobFromDatabase(possibleMultiPartJob);
 			addLogMessageToPossibleMultiPartJobParent(job, "Re-submitting job "
-					+ jobname);
+					+ job.getJobname());
 			mpj.removeFailedJob(job.getJobname());
 			multiPartJobDao.saveOrUpdate(mpj);
 		}
@@ -1374,7 +1470,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			} catch (Exception e3) {
 
 				myLogger.error(e3);
-				throw new RuntimeException("Invalid jsdl/xml format.", e3);
+				throw new JobSubmissionException("Invalid jsdl/xml format.", e3);
 			}
 
 			// String newAppname = JsdlHelpers.getApplicationName(newJsdl);
@@ -1408,19 +1504,59 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			// JsdlHelpers.getPosixApplicationExecutable(newJsdl);
 			// JsdlHelpers.getPosixStandardError(newJsdl);
 			// JsdlHelpers.getPosixStandardInput(newJsdl);
-			// JsdlHelpers.getPosixStandardOutput(newJsdl);
+			// JsdlHelpers.getPosixStandardOutput(newJsdl);			
+			
+			String[] oldSubLocs = JsdlHelpers.getCandidateHosts(oldJsdl);
+			String oldSubLoc = oldSubLocs[0];
 
-			job.setJobDescription(oldJsdl);
+			String[] newSubLocs = JsdlHelpers.getCandidateHosts(newJsdl);
+			String newSubLoc = null;
+			if ( newSubLocs != null && newSubLocs.length >= 1 ) {
+				newSubLoc = newSubLocs[0];
+			}
+
+
+			if ( newSubLoc != null && ! newSubLoc.equals(oldSubLoc) ) {
+				// move job
+				JsdlHelpers.setCandidateHosts(oldJsdl, newSubLocs);
+				job.setJobDescription(oldJsdl);
+
+				status.addElement("Moving job from "+oldSubLoc+" to "+newSubLoc );
+				
+				try {
+					processJobDescription(job, mpj);
+				} catch (JobPropertiesException e) {
+
+					status.addLogMessage("Couldn't process new job description.");
+				}
+			} else {
+				job.setJobDescription(oldJsdl);
+				status.addElement("No need to move job...");
+				// no need to move job
+			}
+			
+			
 			jobdao.saveOrUpdate(job);
+			
+			
 		} else {
 			status.addElement("Keeping job description...");
+			status.addElement("No need to move job...");
 		}
 
-		myLogger.info("Submitting job: " + jobname + " for user " + getDN());
+		myLogger.info("Submitting job: " + job.getJobname() + " for user " + getDN());
 		job.addLogMessage("Starting re-submission...");
-		submitJob(job, false, status);
+		try {
+			submitJob(job, false, status);
+		} catch (JobSubmissionException e) {
+			status.addLogMessage("Job submission failed: " + e.getLocalizedMessage());
+			status.setFailed(true);
+			throw e;
+		}
 		job.addLogMessage("Re-submission finished.");
 
+		status.addElement("Re-submission finished successfully.");
+		status.setFinished(true);
 	}
 
 	public void submitJob(final String jobname) throws JobSubmissionException,
@@ -1775,11 +1911,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			resources.put(leastUsed, resources.get(leastUsed)+1);
 			
 			String subLoc = SubmissionLocationHelpers.createSubmissionLocationString(leastUsed);
-			try {
-				JsdlHelpers.setCandidateHosts(jsdl, new String[]{subLoc});
-			} catch (XPathExpressionException e) {
-				throw new RuntimeException(e);
-			}
+			JsdlHelpers.setCandidateHosts(jsdl, new String[]{subLoc});
 			
 			
 		}

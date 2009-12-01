@@ -71,8 +71,8 @@ public class BatchJobObject {
 
 	private DtoBatchJob dtoMultiPartJob = null;
 
-	private String[] sitesToInclude;
-	private String[] sitesToExclude;
+	private String[] submissionLocationsToInclude;
+	private String[] submissionLocationsToExclude;
 
 	private int maxWalltimeInSecondsAcrossJobs = 3600;
 	private int defaultWalltime = 3600;
@@ -970,25 +970,25 @@ public class BatchJobObject {
 	}
 
 	/**
-	 * Sets a filter to only run jobs at the specified sites.
+	 * Sets a filter to only run jobs at the specified submissionlocations.
 	 * 
 	 * You can either set use this method or the
-	 * {@link #setSitesToExclude(String[])} one. Only the last one set is used.
+	 * {@link #setLocationsToExclude(String[])} one. Only the last one set is used.
 	 * 
-	 * @param sites
-	 *            a list of simple patterns that specify on which sites to run
+	 * @param locationPatterns
+	 *            a list of simple pattern that specify on which submission locations to run
 	 *            jobs
 	 */
-	public void setSitesToInclude(String[] sites) {
-		this.sitesToInclude = sites;
-		this.sitesToExclude = null;
+	public void setLocationsToInclude(String[] locationPatterns) {
+		this.submissionLocationsToInclude = locationPatterns;
+		this.submissionLocationsToExclude = null;
 
 		try {
 			serviceInterface.addJobProperty(this.batchJobname,
-					Constants.SITES_TO_INCLUDE_KEY, StringUtils
-							.join(sites, ","));
+					Constants.LOCATIONS_TO_INCLUDE_KEY, StringUtils
+							.join(locationPatterns, ","));
 			serviceInterface.addJobProperty(this.batchJobname,
-					Constants.SITES_TO_EXCLUDE_KEY, null);
+					Constants.LOCATIONS_TO_EXCLUDE_KEY, null);
 		} catch (NoSuchJobException e) {
 			throw new RuntimeException(e);
 		}
@@ -998,22 +998,22 @@ public class BatchJobObject {
 	 * Sets a filter to only run jobs at sites that don't match.
 	 * 
 	 * You can either set use this method or the
-	 * {@link #setSitesToInclude(String[])} one. Only the last one set is used.
+	 * {@link #setLocationsToInclude(String[])} one. Only the last one set is used.
 	 * 
 	 * @param sites
 	 *            a list of simple patterns that specify on which sites to
 	 *            exclude to run jobs
 	 */
-	public void setSitesToExclude(String[] sites) {
-		this.sitesToExclude = sites;
-		this.sitesToInclude = null;
+	public void setLocationsToExclude(String[] sites) {
+		this.submissionLocationsToExclude = sites;
+		this.submissionLocationsToInclude = null;
 
 		try {
 			serviceInterface.addJobProperty(this.batchJobname,
-					Constants.SITES_TO_EXCLUDE_KEY, StringUtils
+					Constants.LOCATIONS_TO_EXCLUDE_KEY, StringUtils
 							.join(sites, ","));
 			serviceInterface.addJobProperty(this.batchJobname,
-					Constants.SITES_TO_INCLUDE_KEY, null);
+					Constants.LOCATIONS_TO_INCLUDE_KEY, null);
 		} catch (NoSuchJobException e) {
 			throw new RuntimeException(e);
 		}

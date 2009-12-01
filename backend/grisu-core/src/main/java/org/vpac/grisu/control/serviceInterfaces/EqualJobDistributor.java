@@ -5,9 +5,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
-import javax.xml.xpath.XPathExpressionException;
-
 import org.vpac.grisu.backend.model.job.Job;
+import org.vpac.grisu.control.ServiceInterface;
 
 import au.org.arcs.jcommons.interfaces.GridResource;
 import au.org.arcs.jcommons.utils.JsdlHelpers;
@@ -15,7 +14,7 @@ import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
 
 public class EqualJobDistributor implements JobDistributor {
 
-	public Map<String, Integer> distributeJobs(Set<Job> alljobs, SortedSet<GridResource> allAvailableResources) {
+	public Map<String, Integer> distributeJobs(Set<Job> allJobs, SortedSet<GridResource> allAvailableResources) {
 		
 		Map<String, Integer> submissionLocations = new TreeMap<String, Integer>();
 		
@@ -23,11 +22,11 @@ public class EqualJobDistributor implements JobDistributor {
 
 		GridResource[] allResources = allAvailableResources.toArray(new GridResource[]{});
 		
-		for ( Job job : alljobs ) {
+		for ( Job job : allJobs ) { 
 
-			try {
 				String subLoc = SubmissionLocationHelpers.createSubmissionLocationString(allResources[i]);
 				JsdlHelpers.setCandidateHosts(job.getJobDescription(), new String[]{subLoc});
+				
 				
 				Integer currentCount = submissionLocations.get(subLoc);
 				if (currentCount == null) {
@@ -41,9 +40,6 @@ public class EqualJobDistributor implements JobDistributor {
 					i = 0;
 				}
 				
-			} catch (XPathExpressionException e) {
-				throw new RuntimeException(e);
-			}
 			
 		}
 		
