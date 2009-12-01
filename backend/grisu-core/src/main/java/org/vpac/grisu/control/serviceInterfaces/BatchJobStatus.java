@@ -74,7 +74,7 @@ public class BatchJobStatus {
 			
 			if ( JobConstants.DONE == job.getStatus() ) {
 				addDone(job);
-			} else if ( JobConstants.FINISHED_EITHER_WAY == job.getStatus() ) {
+			} else if ( JobConstants.FINISHED_EITHER_WAY <= job.getStatus() ) {
 				addFailed(job);
 			} else if ( JobConstants.UNSUBMITTED > job.getStatus() ) {
 				addReadyJob(job);
