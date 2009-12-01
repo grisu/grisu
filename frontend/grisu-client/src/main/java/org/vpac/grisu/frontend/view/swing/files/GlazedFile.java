@@ -13,8 +13,10 @@ import org.vpac.grisu.model.dto.DtoRemoteObject;
 
 public class GlazedFile {
 
-	enum Type {
-		FILETYPE_SITE, FILETYPE_MOUNTPOINT, FILETYPE_FOLDER, FILETYPE_FILE, FILETYPE_ROOT
+	enum Type implements Comparable<Type>{
+		
+		FILETYPE_ROOT, FILETYPE_SITE, FILETYPE_MOUNTPOINT, FILETYPE_FOLDER, FILETYPE_FILE
+		
 	}
 
 	public static final String LOCAL_FILESYSTEM = "Local";
@@ -32,6 +34,16 @@ public class GlazedFile {
 	private final long size;
 	private final long lastModified;
 	private final ServiceInterface si;
+	
+	private boolean parentMarker = false;
+	
+	public void setParent() {
+		this.parentMarker = true;
+	}
+	
+	public boolean isMarkedAsParent() {
+		return this.parentMarker;
+	}
 
 	public GlazedFile() {
 		this.type = Type.FILETYPE_ROOT;

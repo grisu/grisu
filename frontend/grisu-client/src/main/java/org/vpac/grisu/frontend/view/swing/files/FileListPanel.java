@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
+import javax.swing.table.TableColumn;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -24,6 +25,7 @@ import org.vpac.grisu.model.dto.DtoFolder;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 public class FileListPanel extends JPanel {
@@ -35,6 +37,8 @@ public class FileListPanel extends JPanel {
 	private EventTableModel<GlazedFile> fileModel;
 
 	private EventList<GlazedFile> currentDirectoryContent = new BasicEventList<GlazedFile>();
+	private SortedList<GlazedFile> sortedList = new SortedList<GlazedFile>(
+			currentDirectoryContent, new GlazedFileComparator());
 
 	private GlazedFile currentDirectory = null;
 	private DtoFolder currentFolder = null;
@@ -50,7 +54,7 @@ public class FileListPanel extends JPanel {
 	/**
 	 * Create the panel.
 	 */
-	public FileListPanel(ServiceInterface si, String startUrl) {
+	public FileListPanel(ServiceInterface si, String rootUrl, String startUrl) {
 
 		this.si = si;
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
@@ -58,15 +62,24 @@ public class FileListPanel extends JPanel {
 				.getUserEnvironmentManager();
 		setLayout(new BorderLayout(0, 0));
 
-		fileModel = new EventTableModel<GlazedFile>(currentDirectoryContent,
+		fileModel = new EventTableModel<GlazedFile>(sortedList,
 				new GlazedFileTableFormat());
 		add(getScrollPane(), BorderLayout.CENTER);
 
+		setRootAndCurrentUrl(rootUrl, startUrl);
+
+	}
+
+	public void setRootAndCurrentUrl(String rootUrl, String startUrl) {
+		if (rootUrl == null) {
+			this.rootUrl = GlazedFile.ROOT;
+		} else {
+			this.rootUrl = rootUrl;
+		}
+
 		if (startUrl == null) {
-			rootUrl = GlazedFile.ROOT;
 			setCurrent(GlazedFile.ROOT);
 		} else {
-			rootUrl = startUrl;
 			setCurrent(startUrl);
 		}
 	}
@@ -146,6 +159,8 @@ public class FileListPanel extends JPanel {
 	}
 
 	public boolean currentUrlIsStartUrl() {
+		System.out.println("Compare:\n" + rootUrl + "\n"
+				+ getCurrentDirectory().getUrl() + "\n\n");
 		if (rootUrl.equals(getCurrentDirectory().getUrl())) {
 			return true;
 		} else {
@@ -206,7 +221,9 @@ public class FileListPanel extends JPanel {
 				currentDirectoryContent.clear();
 
 				if (!currentUrlIsStartUrl()) {
-					currentDirectoryContent.add(new GlazedFile());
+					GlazedFile temp = new GlazedFile();
+					temp.setParent();
+					currentDirectoryContent.add(temp);
 				}
 
 				for (File root : File.listRoots()) {
@@ -224,7 +241,9 @@ public class FileListPanel extends JPanel {
 				currentDirectoryContent.clear();
 
 				if (!currentUrlIsStartUrl()) {
-					currentDirectoryContent.add(new GlazedFile());
+					GlazedFile temp = new GlazedFile();
+					temp.setParent();
+					currentDirectoryContent.add(temp);
 				}
 
 				for (MountPoint mp : em.getMountPointsForSite(sitename)) {
@@ -249,23 +268,33 @@ public class FileListPanel extends JPanel {
 				if (!currentUrlIsStartUrl()) {
 
 					if (em.isMountPointRoot(folder.getRootUrl())) {
-						currentDirectoryContent.add(new GlazedFile(em
+						GlazedFile temp = new GlazedFile(em
 								.getMountPointForUrl(folder.getRootUrl())
-								.getSite()));
+								.getSite());
+						temp.setParent();
+						currentDirectoryContent.add(temp);
 					} else {
-						currentDirectoryContent.add(new GlazedFile(fm
-								.calculateParentUrl(folder.getRootUrl()), si));
+						GlazedFile temp = new GlazedFile(fm
+								.calculateParentUrl(folder.getRootUrl()), si);
+						temp.setParent();
+						currentDirectoryContent.add(temp);
 					}
-				} else {
+				}
+			} else {
+				if (!currentUrlIsStartUrl()) {
 					try {
 						File parent = new File(new URI(folder.getRootUrl()))
 								.getParentFile();
+
+						GlazedFile tempFile;
 						if (parent == null) {
-							currentDirectoryContent.add(new GlazedFile(
-									GlazedFile.LOCAL_FILESYSTEM));
+							tempFile = new GlazedFile(
+									GlazedFile.LOCAL_FILESYSTEM);
 						} else {
-							currentDirectoryContent.add(new GlazedFile(parent));
+							tempFile = new GlazedFile(parent);
 						}
+						tempFile.setParent();
+						currentDirectoryContent.add(tempFile);
 					} catch (URISyntaxException e) {
 						e.printStackTrace();
 						throw new RuntimeException(e);
@@ -305,6 +334,20 @@ public class FileListPanel extends JPanel {
 			table.setDefaultRenderer(GlazedFile.class, new GlazedFileRenderer(
 					this));
 			table.setDefaultRenderer(Long.class, new FileSizeRenderer());
+
+			// table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+			int vColIndex = 0;
+			TableColumn col = table.getColumnModel().getColumn(vColIndex);
+			int width = 120;
+			col.setPreferredWidth(width);
+			col.setMinWidth(80);
+			vColIndex = 1;
+			col = table.getColumnModel().getColumn(vColIndex);
+			width = 60;
+			col.setPreferredWidth(width);
+			col.setMaxWidth(60);
+
 			table.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {

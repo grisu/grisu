@@ -47,7 +47,7 @@ public class GlazedFileRenderer extends DefaultTableCellRenderer implements Tabl
 		
 		GlazedFile file = (GlazedFile)arg1;
 		
-		if ( row != 0 || panel.currentUrlIsStartUrl() ) {
+		if ( ! file.isMarkedAsParent() ) {
 			if ( file.isFolder() ) {
 				this.setIcon(folderIcon);
 			} else {
@@ -62,6 +62,7 @@ public class GlazedFileRenderer extends DefaultTableCellRenderer implements Tabl
 			}
 			
 		} else {
+			this.setIcon(null);
 			this.setText("..");
 		}
 		
