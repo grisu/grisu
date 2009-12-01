@@ -20,6 +20,8 @@ public final class ClientPropertiesManager {
 	public static final int CONCURRENT_THREADS_DEFAULT = 5;
 	public static final int DEFAULT_JOBSTATUS_RECHECK_INTERVAL_IN_SECONDS = 5;
 	
+	private static final int DEFAULT_FILE_UPLOAD_THREADS = 1;
+	
 	
 	// keys
 	public static final String JOBSTATUS_RECHECK_INTERVAL_KEY = "statusRecheck";
@@ -535,6 +537,24 @@ public final class ClientPropertiesManager {
 		
 		return interval;
 		
+	}
+
+	public static int getConcurrentUploadThreads() {
+		// TODO Auto-generated method stub
+		int threads = -1;
+		try {
+			threads = Integer.parseInt(getClientConfiguration().getString(
+					"concurrentUploadThreads"));
+
+		} catch (Exception e) {
+			// myLogger.debug("Problem with config file: " + e.getMessage());
+			return CONCURRENT_THREADS_DEFAULT;
+		}
+		if (threads == -1) {
+			return CONCURRENT_THREADS_DEFAULT;
+		}
+
+		return threads;
 	}
 
 }

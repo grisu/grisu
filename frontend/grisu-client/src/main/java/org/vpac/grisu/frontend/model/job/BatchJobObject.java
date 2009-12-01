@@ -55,8 +55,6 @@ public class BatchJobObject {
 
 	public static final int DEFAULT_JOB_CREATION_THREADS = 5;
 
-	private static final int DEFAULT_FILE_UPLOAD_THREADS = 1;
-
 	private int concurrentJobCreationThreads = 0;
 	private int concurrentFileUploadThreads = 0;
 
@@ -536,7 +534,7 @@ public class BatchJobObject {
 	 */
 	public int getConcurrentInputFileUploadThreads() {
 		if (concurrentFileUploadThreads <= 0) {
-			return DEFAULT_FILE_UPLOAD_THREADS;
+			return ClientPropertiesManager.getConcurrentUploadThreads();
 		} else {
 			return concurrentFileUploadThreads;
 		}

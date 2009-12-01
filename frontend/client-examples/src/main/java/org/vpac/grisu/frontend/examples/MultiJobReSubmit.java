@@ -24,13 +24,12 @@ import org.vpac.grisu.model.dto.DtoBatchJob;
 import au.org.arcs.jcommons.constants.Constants;
 
 public class MultiJobReSubmit {
-	
+
 	public MultiJobReSubmit() {
 		AnnotationProcessor.process(this);
 	}
 
 	public static void main(final String[] args) throws Exception {
-
 
 		ExecutorService executor = Executors.newFixedThreadPool(10);
 
@@ -38,145 +37,54 @@ public class MultiJobReSubmit {
 		char[] password = args[1].toCharArray();
 
 		LoginParams loginParams = new LoginParams(
-//				"http://localhost:8080/xfire-backend/services/grisu",
-//				"https://ngportal.vpac.org/grisu-ws/soap/EnunciateServiceInterfaceService",
-//				 "https://ngportal.vpac.org/grisu-ws/services/grisu",
-//				"https://ngportal.vpac.org/grisu-ws/soap/GrisuService",
-//				"http://localhost:8080/enunciate-backend/soap/GrisuService",
-				 "Local",
-//				 "ARCS_DEV",
-//				"Dummy",
+		// "http://localhost:8080/xfire-backend/services/grisu",
+				// "https://ngportal.vpac.org/grisu-ws/soap/EnunciateServiceInterfaceService",
+				// "https://ngportal.vpac.org/grisu-ws/services/grisu",
+				// "https://ngportal.vpac.org/grisu-ws/soap/GrisuService",
+				// "http://localhost:8080/enunciate-backend/soap/GrisuService",
+				"Local",
+				// "ARCS_DEV",
+				// "Dummy",
 				username, password);
 
 		final ServiceInterface si = ServiceInterfaceFactory
 				.createInterface(loginParams);
 
-
 		final GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
-		
-//		registry.getApplicationInformation("povray").getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin");
 
 		final int numberOfJobs = 10;
-		
-		Date start = new Date();
-		final String multiJobName = "java_Home4";
-//		try {
-//			si.kill(multiJobName, true);
-//
-//			StatusObject status = new StatusObject(si, multiJobName, StatusObject.Listener.STDOUT);
-//			status.waitForActionToFinish(3, true, true);
-//			
-//		} catch (Exception e) {
-//			// doesn't matter
-//			e.printStackTrace();
-//		}
-//		
-//		
-////		System.out.println("Start: "+start.toString());
-////		System.out.println("End: "+new Date().toString());
-////		System.exit(1);
-//
-////		SystemOutStatusLogger ssoes = new SystemOutStatusLogger(multiJobName);
-//
-//		BatchJobObject multiPartJob = new BatchJobObject(si, multiJobName, "/ARCS/NGAdmin", "java", Constants.NO_VERSION_INDICATOR_STRING);
-//			
-//		multiPartJob.addJobProperty(Constants.DISTRIBUTION_METHOD, Constants.DISTRIBUTION_METHOD_EQUAL);
-//
-////		multiPartJob.setSitesToInclude(new String[]{"canterbury"});
-//		String pathToInputFiles = multiPartJob.pathToInputFiles();
-//		
-//		for (int i=0; i<numberOfJobs; i++) {
-//
-//			final int frameNumber = i;
-//				
-//				JobObject jo = new JobObject(si);
-//				jo.setJobname(multiJobName+"_" + frameNumber );
-//				jo.setApplication("java");
-////				jo.setCommandline("java -version");
-////				jo.setCommandline("cat singleJobFile.txt "+pathToInputFiles+"/multiJobFile.txt");
-//				jo.setCommandline("java -version");
-//				jo.setWalltimeInSeconds(60);
-//				jo.addInputFileUrl("/home/markus/test/singleJobFile.txt");
-//
-//				multiPartJob.addJob(jo);
-//						
-//		}
-//
-////		multiPartJob.addInputFile("/home/markus/test/multiJobFile.txt");
-////		multiPartJob.setDefaultApplication("java");
-////		multiPartJob.setSitesToExclude(new String[]{"tpac", "hpsc", "Auckland"});
-//		
-////		multiPartJob.setSitesToExclude(new String[]{"vpac", "massey", "uq", "canterbury", "sapac", "ivec", "otago"});
-//		
-//		multiPartJob.setDefaultNoCpus(1);
-//		multiPartJob.setDefaultWalltimeInSeconds(60);
-//		
-//
-////		multiPartJob.fillOrOverwriteSubmissionLocationsUsingMatchmaker();
-//		
-//		try {
-//			multiPartJob.prepareAndCreateJobs(true);
-//		} catch (JobsException e) {
-//			for ( JobObject job : e.getFailures().keySet() ) {
-//				System.out.println("Creation "+job.getJobname()+" failed: "+e.getFailures().get(job).getLocalizedMessage());
-//			}
-//			System.exit(1);
-//		}
-//		
-//		System.out.println("Job distribution:");
-//		for ( String subLoc : multiPartJob.getOptimizationResult().keySet() ) {
-//			System.out.println(subLoc + ":" + multiPartJob.getOptimizationResult().get(subLoc));
-//		}
-//		
-//		multiPartJob.submit();
-		
 
-//		System.out.println("Submission finished: "+new Date());
-		
+		Date start = new Date();
+		final String multiJobName = "cat_restart";
+
 		si.restartBatchJob(multiJobName, null, null);
 
-		
 		BatchJobObject multiPartJob = new BatchJobObject(si, multiJobName, true);
 
-		
-		while ( ! multiPartJob.isFinished(true) ) {
+		while (!multiPartJob.isFinished(true)) {
 			System.out.println("Not finished yet...");
 			multiPartJob.getJobs().size();
 			System.out.println(multiPartJob.getDetails());
 			Thread.sleep(2000);
 		}
-		
-		for ( JobObject job : multiPartJob.getJobs() ) {
+
+		for (JobObject job : multiPartJob.getJobs()) {
 			System.out.println("-------------------------------");
-			System.out.println(job.getJobname()+": "+job.getStatusString(false));
+			System.out.println(job.getJobname() + ": "
+					+ job.getStatusString(false));
 			System.out.println(job.getStdOutContent());
 			System.out.println("-------------------------------");
 			System.out.println(job.getStdErrContent());
 			System.out.println("-------------------------------");
 			System.out.println();
 		}
-
-		
-//		if ( HibernateSessionFactory.HSQLDB_DBTYPE.equals(HibernateSessionFactory.usedDatabase) ) {
-//			// for hqsqldb
-//			Thread.sleep(10000);
-//		}
-		
-//		MultiPartJobObject newObject = new MultiPartJobObject(si, multiJobName);
-//		
-//		newObject.monitorProgress();
-//		
-//		newObject.downloadResults("logo");
-
-		
 	}
 
-	   @EventSubscriber(eventClass=BatchJobEvent.class)
-	   public void onMultiPartJobEvent(BatchJobEvent event) {
+	@EventSubscriber(eventClass = BatchJobEvent.class)
+	public void onMultiPartJobEvent(BatchJobEvent event) {
 
-		   System.out.println("Event: "+event.getMessage());
-		   
-	   }
+		System.out.println("Event: " + event.getMessage());
 
+	}
 
 }

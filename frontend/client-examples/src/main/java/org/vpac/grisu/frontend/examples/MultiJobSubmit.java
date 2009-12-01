@@ -59,7 +59,7 @@ public class MultiJobSubmit {
 		final int numberOfJobs = 10;
 		
 		Date start = new Date();
-		final String multiJobName = "java_Home5";
+		final String multiJobName = "cat_restart";
 		try {
 			si.kill(multiJobName, true);
 
@@ -67,22 +67,13 @@ public class MultiJobSubmit {
 			status.waitForActionToFinish(3, true, true);
 			
 		} catch (Exception e) {
-			// doesn't matter
 			e.printStackTrace();
 		}
 		
-		
-//		System.out.println("Start: "+start.toString());
-//		System.out.println("End: "+new Date().toString());
-//		System.exit(1);
-
-//		SystemOutStatusLogger ssoes = new SystemOutStatusLogger(multiJobName);
-
-		BatchJobObject multiPartJob = new BatchJobObject(si, multiJobName, "/ARCS/NGAdmin", "java", Constants.NO_VERSION_INDICATOR_STRING);
+		BatchJobObject multiPartJob = new BatchJobObject(si, multiJobName, "/ARCS/NGAdmin", "Java", Constants.NO_VERSION_INDICATOR_STRING);
 			
 		multiPartJob.addJobProperty(Constants.DISTRIBUTION_METHOD, Constants.DISTRIBUTION_METHOD_EQUAL);
 
-//		multiPartJob.setSitesToInclude(new String[]{"canterbury"});
 		String pathToInputFiles = multiPartJob.pathToInputFiles();
 		
 		for (int i=0; i<numberOfJobs; i++) {
@@ -103,17 +94,12 @@ public class MultiJobSubmit {
 		}
 
 		multiPartJob.addInputFile("/home/markus/test/multiJobFile.txt");
-//		multiPartJob.setDefaultApplication("java");
-//		multiPartJob.setSitesToExclude(new String[]{"tpac", "hpsc", "Auckland"});
-		
-//		multiPartJob.setSitesToExclude(new String[]{"vpac", "massey", "uq", "canterbury", "sapac", "ivec", "otago"});
+//		multiPartJob.setLocationsToExclude(new String[]{"serial"});
 		
 		multiPartJob.setDefaultNoCpus(1);
 		multiPartJob.setDefaultWalltimeInSeconds(60);
 		
 
-//		multiPartJob.fillOrOverwriteSubmissionLocationsUsingMatchmaker();
-		
 		try {
 			multiPartJob.prepareAndCreateJobs(true);
 		} catch (JobsException e) {
