@@ -1894,8 +1894,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		String[] candHosts = JsdlHelpers.getCandidateHosts(jsdl);
 		
 		if ( candHosts == null || candHosts.length == 0 ) {
-			Map<GridResource, Integer> resources = calculateResourcesToUse(multiJob);
-			multiJob.setResourcesToUse(resources);
+			Map<GridResource, Integer> resources = multiJob.getResourcesToUse();
+			if ( resources == null ) {
+				resources = calculateResourcesToUse(multiJob);
+				multiJob.setResourcesToUse(resources);
+			}
 			
 			GridResource leastUsed = null;
 			int amountOfJobs = Integer.MAX_VALUE;
