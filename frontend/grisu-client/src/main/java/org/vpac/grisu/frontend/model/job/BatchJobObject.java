@@ -15,12 +15,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.activation.DataHandler;
-import javax.management.RuntimeErrorException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
+import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.BatchJobException;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
@@ -827,6 +827,11 @@ public class BatchJobObject {
 					e.printStackTrace();
 					throw new RuntimeException(e);
 				}
+				
+				for ( JobObject job : getJobs() ) {
+					job.updateJobDirectory();
+				}
+				
 				EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 						"Optimizing of multipartjob " + batchJobname
 								+ " finished."));

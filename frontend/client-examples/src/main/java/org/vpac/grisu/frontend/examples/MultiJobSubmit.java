@@ -56,10 +56,10 @@ public class MultiJobSubmit {
 		
 //		registry.getApplicationInformation("povray").getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin");
 
-		final int numberOfJobs = 100;
+		final int numberOfJobs = 10;
 		
 		Date start = new Date();
-		final String multiJobName = "cat_restart100";
+		final String multiJobName = "cat_restart10";
 		try {
 			si.kill(multiJobName, true);
 
