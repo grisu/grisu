@@ -1000,8 +1000,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} else {
 			resourcesToUse = job.getResourcesToUse();
 		}
-		SubmitPolicy sp = new SubmitPolicy(job.getJobs(),
-				new TreeSet<GridResource>(resourcesToUse.keySet()));
+		SubmitPolicy sp = new DefaultSubmitPolicy(job.getJobs(),
+				new TreeSet<GridResource>(resourcesToUse.keySet()), null);
 
 		Map<String, Integer> results = optimizeMultiPartJob(sp, job
 				.getJobProperty(Constants.DISTRIBUTION_METHOD), job);
@@ -1425,6 +1425,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		BatchJob job = getMultiPartJobFromDatabase(batchJobname);
 
+		if ( actionStatus.get(batchJobname) != null && ! actionStatus.get(batchJobname).isFailed() ) {
+			// we don't want to interfere with a possible ongoing jobsubmission
+			return DtoProperties.createUserProperties(new HashMap<String, String>());
+		}
+		
+		final DtoActionStatus status = new DtoActionStatus(batchJobname, 3);
+		actionStatus.put(batchJobname, status);
+		
+		status.addElement("Finding resources to use...");
 		Map<GridResource, Integer> resourcesToUse = null;
 		if (job.getResourcesToUse() == null) {
 			resourcesToUse = calculateResourcesToUse(job);
@@ -1432,10 +1441,22 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} else {
 			resourcesToUse = job.getResourcesToUse();
 		}
-		SubmitPolicy sp = new SubmitPolicy(job.getJobs(),
-				new TreeSet<GridResource>(resourcesToUse.keySet()));
-		sp.setSubmitToAllLocations(false);
+		status.addElement("Investigating batchjob...");
+		SubmitPolicy sp = new DefaultResubmitSubmitPolicy(job.getJobs(),
+				new TreeSet<GridResource>(resourcesToUse.keySet()), properties.propertiesAsMap());
 
+		if ( sp.getCalculatedGridResources().size() == 0 || sp.getCalculatedJobs().size() == 0 ) {
+			
+			status.addElement("No locations or no jobs to submit found. Doing nothing...");
+			status.setFinished(true);
+			// nothing we can do...
+			return DtoProperties.createUserProperties(new HashMap<String, String>());
+		} else {
+			status.setTotalElements(3 + sp.getCalculatedJobs().size()*2);
+			status.addLogMessage("Found "+sp.getCalculatedJobs().size()+" jobs to resubmit.");
+		}
+
+		status.addElement("Optimizing job distribution...");
 		Map<String, Integer> results = optimizeMultiPartJob(sp, job
 				.getJobProperty(Constants.DISTRIBUTION_METHOD), job);
 
@@ -1448,12 +1469,21 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			Thread thread = new Thread() {
 				public void run() {
 					try {
+						status.addElement("Starting resubmission of job: "+jobToRestart.getJobname());
 						restartJob(jobToRestart, null);
+						status.addElement("Resubmission of job "+jobToRestart.getJobname()+" successful.");
 					} catch (JobSubmissionException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						status.addElement("Resubmission of job "+jobToRestart.getJobname()+" failed: "+e.getLocalizedMessage());
+						status.setFailed(true);
+						myLogger.debug(e);
 					} catch (NoSuchJobException e1) {
-						e1.printStackTrace();
+						status.addElement("Resubmission of job "+jobToRestart.getJobname()+" failed: "+e1.getLocalizedMessage());
+						status.setFailed(true);
+						myLogger.debug(e1);
+					}
+					
+					if ( status.getTotalElements() <= status.getCurrentElements() ) {
+						status.setFinished(true);
 					}
 				}
 			};
