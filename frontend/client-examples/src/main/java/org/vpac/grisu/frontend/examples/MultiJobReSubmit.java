@@ -55,7 +55,7 @@ public class MultiJobReSubmit {
 		final int numberOfJobs = 10;
 
 		Date start = new Date();
-		final String multiJobName = "cat_restart";
+		final String multiJobName = "cat_restart500";
 
 		si.restartBatchJob(multiJobName, null, null);
 

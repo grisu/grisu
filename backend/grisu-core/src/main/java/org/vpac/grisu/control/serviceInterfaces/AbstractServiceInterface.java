@@ -142,6 +142,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	private MatchMaker matchmaker = new MatchMakerImpl(Environment
 			.getGrisuDirectory().toString());
+//	private MatchMaker matchmaker = new CachedMatchMakerImpl(Environment
+//			.getGrisuDirectory().toString());
 
 	private final Map<String, DtoActionStatus> actionStatus = Collections
 			.synchronizedMap(new HashMap<String, DtoActionStatus>());
@@ -454,10 +456,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		String oldJobDir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
 
 		try {
-			if (StringUtils.isNotBlank(oldJobDir) && !fileExists(oldJobDir)) {
-				oldJobDir = null;
-			} else {
+			if (StringUtils.isNotBlank(oldJobDir) && fileExists(oldJobDir)) {
 				myLogger.debug("Old jobdir exists.");
+			} else {
+				oldJobDir = null;
 			}
 		} catch (RemoteFileSystemException e1) {
 			// TODO Auto-generated catch block
