@@ -49,7 +49,9 @@ public final class ServerPropertiesManager {
 			.getLogger(ServerPropertiesManager.class.getName());
 	
 	private static final int DEFAULT_CONCURRENT_JOB_SUBMISSION_RETRIES = 5;
-
+	
+	private static final boolean DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS = false;
+	
 	/**
 	 * Retrieves the configuration parameters from the properties file.
 	 * 
@@ -377,6 +379,25 @@ public final class ServerPropertiesManager {
 			return DEFAULT_CONCURRENT_JOB_SUBMISSION_RETRIES;
 		}
 		return retries;
+	}
+
+	public static boolean getCheckConnectionToMountPoint() {
+		
+		boolean check = false;
+
+		try {
+			try {
+				check = getServerConfiguration().getBoolean("checkConnectionToMountPoints");
+			} catch (NoSuchElementException e) {
+				// doesn't matter
+				myLogger.debug(e);
+				return DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS;
+			}
+
+		} catch (ConfigurationException e) {
+			return DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS;
+		}
+		return check;
 	}
 
 }
