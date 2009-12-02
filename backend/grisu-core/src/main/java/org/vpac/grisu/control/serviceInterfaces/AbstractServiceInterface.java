@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,6 +22,7 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -456,14 +458,25 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		String oldJobDir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
 
 		try {
-			if (StringUtils.isNotBlank(oldJobDir) && fileExists(oldJobDir)) {
-				myLogger.debug("Old jobdir exists.");
+			if (StringUtils.isNotBlank(oldJobDir)) {
+				
+				if ( fileExists(oldJobDir) ) {
+					
+					DtoFolder fol = ls(oldJobDir, 1);
+					if ( fol.getChildrenFiles().size() > 0 ||  fol.getChildrenFolders().size() > 0 ) {
+						myLogger.debug("Old jobdir exists.");
+					} else {
+						oldJobDir = null;
+					}
+				} else {
+					oldJobDir = null;
+				}
 			} else {
 				oldJobDir = null;
 			}
 		} catch (RemoteFileSystemException e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			oldJobDir = null;
 		}
 
 		boolean applicationCalculated = false;
@@ -976,7 +989,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	}
 
 	public DtoProperties redistributeBatchJob(String batchJobname)
-			throws NoSuchJobException {
+			throws NoSuchJobException, JobPropertiesException {
 
 		BatchJob job = getMultiPartJobFromDatabase(batchJobname);
 
@@ -1093,9 +1106,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	private Map<String, Integer> optimizeMultiPartJob(SubmitPolicy sp,
-			String distributionMethod, BatchJob possibleParentBatchJob)
-			throws NoSuchJobException {
+	private Map<String, Integer> optimizeMultiPartJob(final SubmitPolicy sp,
+			final String distributionMethod, final BatchJob possibleParentBatchJob)
+			throws NoSuchJobException, JobPropertiesException {
 
 		JobDistributor jd;
 
@@ -1116,12 +1129,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		myLogger.debug(message.toString());
 
-		// System.out.println("Message length: "+message.length());
 
-		// mpj.addJobProperty(Constants.OPTIMIZE_STATS, message.toString());
+		final ExecutorService executor = Executors
+				.newFixedThreadPool(ServerPropertiesManager
+						.getConcurrentMultiPartJobSubmitThreadsPerUser());
+		
+		final List<Exception> ex = Collections.synchronizedList(new ArrayList<Exception>());
+		
+		for (final Job job : sp.getCalculatedJobs()) {
 
-		for (Job job : sp.getCalculatedJobs()) {
+			Thread thread = new Thread() {
+				public void run() {
 			try {
+				
 
 				if (Constants.NO_VERSION_INDICATOR_STRING
 						.equals(possibleParentBatchJob
@@ -1133,10 +1153,33 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				processJobDescription(job, possibleParentBatchJob);
 			} catch (JobPropertiesException e) {
 				e.printStackTrace();
-				throw new RuntimeException(e);
+				ex.add(e);
+				executor.shutdownNow();
+			} catch (NoSuchJobException e) {
+				e.printStackTrace();
+				ex.add(e);
+				executor.shutdownNow();
 			}
 			jobdao.saveOrUpdate(job);
+			}
+			};
+			
+			executor.execute(thread);
 		}
+		
+		executor.shutdown();
+		
+		try {
+			executor.awaitTermination(10 * 3600, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if ( ex.size() > 0 ) {
+			throw new JobPropertiesException("Couldn't prepare at least one job: "+ex.get(0).getLocalizedMessage());
+		}
+		
 		if (possibleParentBatchJob != null) {
 			possibleParentBatchJob.recalculateAllUsedMountPoints();
 			multiPartJobDao.saveOrUpdate(possibleParentBatchJob);
@@ -1376,9 +1419,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		status.setFinished(true);
 	}
 
-	public void restartBatchJob(final String batchJobname,
+	public DtoProperties restartBatchJob(final String batchJobname,
 			String restartPolicy, DtoProperties properties)
-			throws NoSuchJobException {
+			throws NoSuchJobException, JobPropertiesException {
 
 		BatchJob job = getMultiPartJobFromDatabase(batchJobname);
 
@@ -1396,14 +1439,30 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		Map<String, Integer> results = optimizeMultiPartJob(sp, job
 				.getJobProperty(Constants.DISTRIBUTION_METHOD), job);
 
-		for (Job jobToRestart : sp.getCalculatedJobs()) {
-			try {
-				restartJob(jobToRestart, null);
-			} catch (JobSubmissionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		final ExecutorService executor = Executors
+		.newFixedThreadPool(ServerPropertiesManager
+				.getConcurrentMultiPartJobSubmitThreadsPerUser());
+		
+		for (final Job jobToRestart : sp.getCalculatedJobs()) {
+			
+			Thread thread = new Thread() {
+				public void run() {
+					try {
+						restartJob(jobToRestart, null);
+					} catch (JobSubmissionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (NoSuchJobException e1) {
+						e1.printStackTrace();
+					}
+				}
+			};
+			executor.execute(thread);
 		}
+		
+		executor.shutdown();
+		
+		return DtoProperties.createUserPropertiesIntegerValue(results);
 
 	}
 

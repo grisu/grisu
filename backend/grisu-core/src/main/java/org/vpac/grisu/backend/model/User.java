@@ -646,36 +646,6 @@ public class User {
 							+ file_to_aquire);
 		}
 
-		// // get the right credential for this mountpoint
-		// if (mp.getFqan() != null) {
-		//
-		// try {
-		// ProxyCredential credential = cachedCredentials.get(mp.getFqan());
-		// if ( credential == null
-		// || ! credential.isValid()
-		// || credential.getGssCredential().getRemainingLifetime() < 120 ) {
-		//					
-		// // put a new credential in the cache
-		// VO vo = VOManagement.getVO(getFqans().get(mp.getFqan()));
-		// credToUse = ProxyCredentialHelpers.getVOProxyCredential(vo, mp
-		// .getFqan(), plainCred);
-		// cachedCredentials.put(mp.getFqan(), credToUse);
-		// } else {
-		// credToUse = cachedCredentials.get(mp.getFqan());
-		// }
-		//				
-		// } catch (GSSException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// VO vo = VOManagement.getVO(getFqans().get(mp.getFqan()));
-		// credToUse = ProxyCredentialHelpers.getVOProxyCredential(vo, mp
-		// .getFqan(), plainCred);
-		// cachedCredentials.put(mp.getFqan(), credToUse);
-		// }
-		// } else {
-		// credToUse = plainCred;
-		// }
-
 		FileObject fileObject = null;
 		try {
 			FileSystem root = null;
@@ -698,8 +668,8 @@ public class User {
 				URI uri = new URI(file_to_aquire);
 				file_to_aquire = uri.toString();
 			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
+				throw new RemoteFileSystemException("Could not get uri for file "+file_to_aquire);
 			}
 
 			String tempUriString = file_to_aquire.replace(":2811", "")

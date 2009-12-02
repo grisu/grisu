@@ -963,9 +963,10 @@ public interface ServiceInterface {
 	 * 
 	 * @param batchjobname the name of the batchjob
 	 * @throws NoSuchJobException if there is no batchjob with such an id
+	 * @throws JobPropertiesException  if one of the jobs can't be re-created
 	 */
 	@RolesAllowed("User")
-	DtoProperties redistributeBatchJob(String batchjobname) throws NoSuchJobException;
+	DtoProperties redistributeBatchJob(String batchjobname) throws NoSuchJobException, JobPropertiesException;
 	
 	/**
 	 * Removes the specified job from the batchJob.
@@ -1068,8 +1069,21 @@ public interface ServiceInterface {
 	@RolesAllowed("User")
 	void restartJob(final String jobname, String changedJsdl) throws JobSubmissionException, NoSuchJobException;
 	
+	/**
+	 * Restarts a batch job.
+	 * 
+	 * Depending on the restart policy and the supplied properties, the backend will calculate which jobs
+	 * to restart and how.
+	 * 
+	 * @param jobname the batchjobname
+	 * @param restartPolicy the restart policy //TODO not implemented yet, only default one supported
+	 * @param properties the restart policy properties //TODO not implemented yet, only default one supported
+	 * @return the job distribution figures of the re-submitted jobs
+	 * @throws NoSuchJobException if no such batchjob exists
+	 * @throws JobPropertiesException if one of the jobs can't be recreated
+	 */
 	@RolesAllowed("User")
-	void restartBatchJob(final String jobname, String restartPolicy, DtoProperties properties) throws NoSuchJobException;
+	DtoProperties restartBatchJob(final String jobname, String restartPolicy, DtoProperties properties) throws NoSuchJobException, JobPropertiesException;
 		
 	/**
 	 * Returns the current status of an ongoing action. 

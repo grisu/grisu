@@ -15,6 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.activation.DataHandler;
+import javax.management.RuntimeErrorException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -818,8 +819,14 @@ public class BatchJobObject {
 			try {
 				EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 						"Optimizing multipartjob: " + batchJobname));
-				optimizationResult = serviceInterface.redistributeBatchJob(
-						this.batchJobname).propertiesAsMap();
+				try {
+					optimizationResult = serviceInterface.redistributeBatchJob(
+							this.batchJobname).propertiesAsMap();
+				} catch (JobPropertiesException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					throw new RuntimeException(e);
+				}
 				EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 						"Optimizing of multipartjob " + batchJobname
 								+ " finished."));
