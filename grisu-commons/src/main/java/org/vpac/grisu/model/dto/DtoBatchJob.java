@@ -225,7 +225,7 @@ public class DtoBatchJob {
 	public int numberOfWaitingJobs() {
 		int waiting = 0;
 		for (DtoJob job : jobs.getAllJobs() ) {
-			if ( job.getStatus() == JobConstants.PENDING ) {
+			if ( job.getStatus() >= JobConstants.UNSUBMITTED && job.getStatus() <= JobConstants.PENDING ) {
 				waiting = waiting + 1;
 			}
 		}
