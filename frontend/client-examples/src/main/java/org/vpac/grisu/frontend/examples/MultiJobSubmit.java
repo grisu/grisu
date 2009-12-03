@@ -59,7 +59,7 @@ public class MultiJobSubmit {
 		final int numberOfJobs = 30;
 		
 		Date start = new Date();
-		final String multiJobName = "restart30_4";
+		final String multiJobName = "cat30";
 		try {
 			si.kill(multiJobName, true);
 

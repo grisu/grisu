@@ -193,45 +193,45 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			
 			
 
-			if ( ServerPropertiesManager.getCheckConnectionToMountPoint() ) {
-
-				final Set<MountPoint> temp = Collections.synchronizedSet(new TreeSet<MountPoint>());
-				
-				ExecutorService executor = Executors.newFixedThreadPool(5);
-				
-				for ( final MountPoint mp : user.getAllMountPoints() ) {
-					Thread thread = new Thread() {
-						public void run() {
-							
-							try {
-								myLogger.debug("Checking mountpoint: "+mp.getAlias());
-								if ( user.aquireFile(mp.getRootUrl()).exists() ) {
-									myLogger.info("Checked mountpoint "+mp.getAlias()+". Adding it to usable mountpoints.");
-									temp.add(mp);
-								} else {
-									myLogger.warn("Mountpoint "+mp.getAlias()+" doesn't exist.");
-								}
-							} catch (Exception e) {
-								myLogger.error("Mountpoint "+mp.getAlias()+" not accessible. ",e);
-							}
-							
-						}
-					};
-					executor.execute(thread);
-				}
-				
-				executor.shutdown();
-				
-				try {
-					executor.awaitTermination(300, TimeUnit.SECONDS);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				user.setAutoMountedMountPoints(temp);
-				
-			}
+//			if ( ServerPropertiesManager.getCheckConnectionToMountPoint() ) {
+//
+//				final Set<MountPoint> temp = Collections.synchronizedSet(new TreeSet<MountPoint>());
+//				
+//				ExecutorService executor = Executors.newFixedThreadPool(5);
+//				
+//				for ( final MountPoint mp : user.getAllMountPoints() ) {
+//					Thread thread = new Thread() {
+//						public void run() {
+//							
+//							try {
+//								myLogger.debug("Checking mountpoint: "+mp.getAlias());
+//								if ( user.aquireFile(mp.getRootUrl()).exists() ) {
+//									myLogger.info("Checked mountpoint "+mp.getAlias()+". Adding it to usable mountpoints.");
+//									temp.add(mp);
+//								} else {
+//									myLogger.warn("Mountpoint "+mp.getAlias()+" doesn't exist.");
+//								}
+//							} catch (Exception e) {
+//								myLogger.error("Mountpoint "+mp.getAlias()+" not accessible. ",e);
+//							}
+//							
+//						}
+//					};
+//					executor.execute(thread);
+//				}
+//				
+//				executor.shutdown();
+//				
+//				try {
+//					executor.awaitTermination(300, TimeUnit.SECONDS);
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				
+//				user.setAutoMountedMountPoints(temp);
+//				
+//			}
 
 			
 
