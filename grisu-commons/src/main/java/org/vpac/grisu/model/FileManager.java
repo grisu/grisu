@@ -16,6 +16,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
 import org.vpac.grisu.model.dto.DtoFolder;
+import org.vpac.grisu.settings.ClientPropertiesManager;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.utils.FileHelpers;
 
@@ -164,63 +165,88 @@ public class FileManager {
 	public final void uploadFile(final File file, final String targetFile,
 			boolean overwrite) throws FileTransferException {
 
-		if (!file.exists()) {
-			throw new FileTransferException(file.toString(), targetFile,
-					"File does not exist: " + file.toString(), null);
-		}
+		FileTransferException lastException = null;
+		for (int i = 0; i < ClientPropertiesManager.getFileUploadRetries(); i++) {
 
-		if (!file.canRead()) {
-			throw new FileTransferException(file.toString(), targetFile,
-					"Can't read file: " + file.toString(), null);
-		}
-
-		if (file.isDirectory()) {
-			throw new FileTransferException(file.toString(), targetFile,
-					"Transfer of folders not supported yet.", null);
-		}
-
-		// checking whether folder exists and is folder
-		try {
-			if (serviceInterface.fileExists(targetFile)) {
-
-				if (!overwrite) {
-					throw new FileTransferException(file.toString(),
-							targetFile, "Target file exists.", null);
-				}
-			}
-
-		} catch (Exception e) {
-			throw new FileTransferException(file.toString(), targetFile,
-					"Could not determine whether target directory exists: ", e);
-		}
-
-		myLogger.debug("Uploading local file: " + file.toString() + " to: "
-				+ targetFile);
-
-		DataHandler handler = createDataHandler(file);
-		String filetransferHandle = null;
-		try {
-			myLogger.info("Uploading file " + file.getName() + "...");
-			filetransferHandle = serviceInterface.upload(handler, targetFile);
-			myLogger.info("Upload of file " + file.getName() + " successful.");
-		} catch (Exception e1) {
+			lastException = null;
 			try {
-				// try again
-				myLogger.info("Uploading file " + file.getName() + "...");
-				System.out.println("FAILED. SLEEPING 1 SECONDS");
-				Thread.sleep(1000);
-				filetransferHandle = serviceInterface.upload(handler,
-						targetFile + "/" + file.getName());
-				myLogger.info("Upload of file " + file.getName()
-						+ " successful.");
-			} catch (Exception e) {
-				myLogger.info("Upload of file " + file.getName() + " failed: "
-						+ e1.getLocalizedMessage());
-				myLogger.error("File upload failed: "
-						+ e1.getLocalizedMessage());
-				throw new FileTransferException(file.toString(), targetFile,
-						"Could not upload file.", e1);
+
+				if (!file.exists()) {
+					throw new FileTransferException(file.toString(),
+							targetFile, "File does not exist: "
+									+ file.toString(), null);
+				}
+
+				if (!file.canRead()) {
+					throw new FileTransferException(file.toString(),
+							targetFile, "Can't read file: " + file.toString(),
+							null);
+				}
+
+				if (file.isDirectory()) {
+					throw new FileTransferException(file.toString(),
+							targetFile,
+							"Transfer of folders not supported yet.", null);
+				}
+
+				// checking whether folder exists and is folder
+				try {
+					if (serviceInterface.fileExists(targetFile)) {
+
+						if (!overwrite) {
+							throw new FileTransferException(file.toString(),
+									targetFile, "Target file exists.", null);
+						}
+					}
+
+				} catch (Exception e) {
+					throw new FileTransferException(
+							file.toString(),
+							targetFile,
+							"Could not determine whether target directory exists: ",
+							e);
+				}
+
+				myLogger.debug("Uploading local file: " + file.toString()
+						+ " to: " + targetFile);
+
+				DataHandler handler = createDataHandler(file);
+				String filetransferHandle = null;
+				try {
+					myLogger.info("Uploading file " + file.getName() + "...");
+					filetransferHandle = serviceInterface.upload(handler,
+							targetFile);
+					myLogger.info("Upload of file " + file.getName()
+							+ " successful.");
+				} catch (Exception e1) {
+					try {
+						// try again
+						myLogger.info("Uploading file " + file.getName()
+								+ "...");
+						System.out.println("FAILED. SLEEPING 1 SECONDS");
+						Thread.sleep(1000);
+						filetransferHandle = serviceInterface.upload(handler,
+								targetFile + "/" + file.getName());
+						myLogger.info("Upload of file " + file.getName()
+								+ " successful.");
+					} catch (Exception e) {
+						myLogger.info("Upload of file " + file.getName()
+								+ " failed: " + e1.getLocalizedMessage());
+						myLogger.error("File upload failed: "
+								+ e1.getLocalizedMessage());
+						throw new FileTransferException(file.toString(),
+								targetFile, "Could not upload file.", e1);
+					}
+				}
+				// successful, no retry necessary
+				break;
+			} catch (FileTransferException e) {
+				lastException = e;
 			}
+		}
+
+		if (lastException != null) {
+			throw lastException;
 		}
 
 	}

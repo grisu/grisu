@@ -1160,6 +1160,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} else {
 			jd = new EqualJobDistributor();
 		}
+		
+		for ( Job job : sp.getCalculatedJobs() ) {
+			if ( job.getStatus() > JobConstants.READY_TO_SUBMIT ) {
+				try {
+					kill(job);
+				} catch (Exception e) {
+					myLogger.error(e);
+				}
+				job.setStatus(JobConstants.READY_TO_SUBMIT);
+			}
+		}
 
 		Map<String, Integer> results = jd.distributeJobs(
 				sp.getCalculatedJobs(), sp.getCalculatedGridResources());
@@ -1500,6 +1511,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		status.addElement("Optimizing job distribution...");
 		Map<String, Integer> results = optimizeMultiPartJob(sp, job
 				.getJobProperty(Constants.DISTRIBUTION_METHOD), job);
+		
+		multiPartJobDao.saveOrUpdate(job);
 
 		final ExecutorService executor = Executors
 		.newFixedThreadPool(ServerPropertiesManager
@@ -1590,7 +1603,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		job.setStatus(JobConstants.READY_TO_SUBMIT);
 		status.addElement("Resetting job properties...");
-		job.getJobProperties().clear();
+//		job.getJobProperties().clear();
 
 
 		String possibleMultiPartJob = job
@@ -1697,15 +1710,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			status.addLogMessage("Job submission failed: "
 					+ e.getLocalizedMessage());
 			status.setFailed(true);
-			jobdao.saveOrUpdate(job);
 			throw e;
 		}
-		job.addLogMessage("Re-submission finished.");
 
 		status.addElement("Re-submission finished successfully.");
 		status.setFinished(true);
 		
-		jobdao.saveOrUpdate(job);
 	}
 
 	public void submitJob(final String jobname) throws JobSubmissionException,

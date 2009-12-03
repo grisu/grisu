@@ -21,6 +21,7 @@ public final class ClientPropertiesManager {
 	public static final int DEFAULT_JOBSTATUS_RECHECK_INTERVAL_IN_SECONDS = 5;
 	
 	private static final int DEFAULT_FILE_UPLOAD_THREADS = 1;
+	private static final int DEFAULT_FILE_UPLOAD_RETRIES = 5;
 	
 	
 	// keys
@@ -555,6 +556,24 @@ public final class ClientPropertiesManager {
 		}
 
 		return threads;
+	}
+	
+	public static int getFileUploadRetries() {
+
+		int retries = -1;
+		try {
+			retries = Integer.parseInt(getClientConfiguration().getString(
+					"fileUploadRetries"));
+
+		} catch (Exception e) {
+			// myLogger.debug("Problem with config file: " + e.getMessage());
+			return DEFAULT_FILE_UPLOAD_RETRIES;
+		}
+		if (retries == -1) {
+			return DEFAULT_FILE_UPLOAD_RETRIES;
+		}
+
+		return retries;
 	}
 
 }

@@ -151,8 +151,10 @@ public class BatchJobObject {
 	public BatchJobObject(ServiceInterface serviceInterface,
 			String batchJobname, boolean refreshJobStatusOnBackend)
 			throws BatchJobException, NoSuchJobException {
+		
 		this.serviceInterface = serviceInterface;
 		this.batchJobname = batchJobname;
+		try {
 
 		dtoMultiPartJob = getMultiPartJob(refreshJobStatusOnBackend);
 
@@ -162,6 +164,9 @@ public class BatchJobObject {
 				this.batchJobname, Constants.APPLICATIONNAME_KEY));
 		setDefaultVersion(serviceInterface.getJobProperty(this.batchJobname,
 				Constants.APPLICATIONVERSION_KEY));
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+		}
 
 	}
 

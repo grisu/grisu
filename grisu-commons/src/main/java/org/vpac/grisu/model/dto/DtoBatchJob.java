@@ -214,7 +214,7 @@ public class DtoBatchJob {
 		SortedSet<DtoJob> result = new TreeSet<DtoJob>();
 		
 		for ( DtoJob job : jobs.getAllJobs() ) {
-			if ( job.getStatus() == JobConstants.PENDING ) {
+			if ( job.getStatus() >= JobConstants.UNSUBMITTED && job.getStatus() <= JobConstants.PENDING ) {
 				result.add(job);
 			}
 		}

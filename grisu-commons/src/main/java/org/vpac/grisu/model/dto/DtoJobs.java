@@ -30,6 +30,9 @@ public class DtoJobs {
 	}
 
 	public void setAllJobs(SortedSet<DtoJob> allJobs) {
+		if ( allJobs == null ) {
+			throw new RuntimeException();
+		}
 		this.allJobs = allJobs;
 	}
 	

@@ -56,10 +56,10 @@ public class MultiJobSubmit {
 		
 //		registry.getApplicationInformation("povray").getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin");
 
-		final int numberOfJobs = 30;
+		final int numberOfJobs = 10;
 		
 		Date start = new Date();
-		final String multiJobName = "cat30";
+		final String multiJobName = "cat_10_2";
 		try {
 			si.kill(multiJobName, true);
 
@@ -116,7 +116,12 @@ public class MultiJobSubmit {
 			System.out.println(subLoc + ":" + multiPartJob.getOptimizationResult().get(subLoc));
 		}
 		
-		multiPartJob.submit();
+		try { 
+			multiPartJob.submit();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 		
 
 		System.out.println("Submission finished: "+new Date());
