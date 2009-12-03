@@ -56,10 +56,10 @@ public class MultiJobSubmit {
 		
 //		registry.getApplicationInformation("povray").getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin");
 
-		final int numberOfJobs = 200;
+		final int numberOfJobs = 30;
 		
 		Date start = new Date();
-		final String multiJobName = "cat_restart200";
+		final String multiJobName = "restart30_4";
 		try {
 			si.kill(multiJobName, true);
 
@@ -72,7 +72,7 @@ public class MultiJobSubmit {
 		
 		BatchJobObject multiPartJob = new BatchJobObject(si, multiJobName, "/ARCS/NGAdmin", "Java", Constants.NO_VERSION_INDICATOR_STRING);
 			
-		multiPartJob.addJobProperty(Constants.DISTRIBUTION_METHOD, Constants.DISTRIBUTION_METHOD_EQUAL);
+//		multiPartJob.addJobProperty(Constants.DISTRIBUTION_METHOD, Constants.DISTRIBUTION_METHOD_EQUAL);
 
 		String pathToInputFiles = multiPartJob.pathToInputFiles();
 		

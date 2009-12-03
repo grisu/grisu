@@ -37,6 +37,7 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 		setSubmitReadyJobs(true);
 		setResubmitWaitingJobs(true);
 		setResubmitWaitingJobsOnFailedLocations(true);
+		setResubmitWaitingJobsOnWaitingLocations(true);
 		
 		// overwrite defaults
 		for ( String key : properties.keySet() ) {
@@ -120,22 +121,28 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 	}
 	
 	public boolean isResubmitWaitingJobsOnRunningLocations() {
-		return Boolean.parseBoolean(Constants.RESTART_RESTART_WAITING_JOBS_ON_RUNNING_LOCATIONS);
+		return Boolean.parseBoolean(initProperties.get(Constants.RESTART_RESTART_WAITING_JOBS_ON_RUNNING_LOCATIONS));
 	}
 	public void setResubmitWaitingJobsOnRunningLocations(Boolean restart) {
 		initProperties.put(Constants.RESTART_RESTART_WAITING_JOBS_ON_RUNNING_LOCATIONS, restart.toString());
 	}
 	public boolean isResubmitWaitingJobsOnDoneLocations() {
-		return Boolean.parseBoolean(Constants.RESTART_RESTART_WAITING_JOBS_ON_DONE_LOCATIONS);
+		return Boolean.parseBoolean(initProperties.get(Constants.RESTART_RESTART_WAITING_JOBS_ON_DONE_LOCATIONS));
 	}
 	public void setResubmitWaitingJobsOnDoneLocations(Boolean restart) {
 		initProperties.put(Constants.RESTART_RESTART_WAITING_JOBS_ON_DONE_LOCATIONS, restart.toString());
 	}
 	public boolean isResubmitWaitingJobsOnFailedLocations() {
-		return Boolean.parseBoolean(Constants.RESTART_RESTART_WAITING_JOBS_ON_FAILED_LOCATIONS);
+		return Boolean.parseBoolean(initProperties.get(Constants.RESTART_RESTART_WAITING_JOBS_ON_FAILED_LOCATIONS));
 	}
 	public void setResubmitWaitingJobsOnFailedLocations(Boolean restart) {
 		initProperties.put(Constants.RESTART_RESTART_WAITING_JOBS_ON_FAILED_LOCATIONS, restart.toString());
+	}
+	public boolean isResubmitWaitingJobsOnWaitingLocations() {
+		return Boolean.parseBoolean(initProperties.get(Constants.RESTART_RESTART_WAITING_JOBS_ON_WAITING_LOCATIONS));
+	}
+	public void setResubmitWaitingJobsOnWaitingLocations(Boolean restart) {
+		initProperties.put(Constants.RESTART_RESTART_WAITING_JOBS_ON_WAITING_LOCATIONS, restart.toString());
 	}
 	
 	
@@ -256,6 +263,8 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 					} else if ( isResubmitWaitingJobsOnFailedLocations() && bjs.getFailedSubLocs().contains(currentSubLoc)) {
 						calculatedJobs.add(job);
 					} else if ( isResubmitWaitingJobsOnRunningLocations() && bjs.getRunningSubLocs().contains(currentSubLoc)) {
+						calculatedJobs.add(job);
+					} else if ( isResubmitWaitingJobsOnWaitingLocations() && bjs.getWaitingSubLocs().contains(currentSubLoc)) {
 						calculatedJobs.add(job);
 					}
 					

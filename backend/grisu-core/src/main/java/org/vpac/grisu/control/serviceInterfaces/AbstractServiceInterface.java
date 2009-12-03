@@ -993,15 +993,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		BatchJob job = getMultiPartJobFromDatabase(batchJobname);
 
-		Map<GridResource, Integer> resourcesToUse = null;
-		if (job.getResourcesToUse() == null) {
-			resourcesToUse = calculateResourcesToUse(job);
-			job.setResourcesToUse(resourcesToUse);
-		} else {
-			resourcesToUse = job.getResourcesToUse();
-		}
-		SubmitPolicy sp = new DefaultSubmitPolicy(job.getJobs(),
-				new TreeSet<GridResource>(resourcesToUse.keySet()), null);
+		SortedSet<GridResource> resourcesToUse = calculateResourcesToUse(job);
+
+		SubmitPolicy sp = new DefaultSubmitPolicy(job.getJobs(), resourcesToUse, null);
 
 		Map<String, Integer> results = optimizeMultiPartJob(sp, job
 				.getJobProperty(Constants.DISTRIBUTION_METHOD), job);
@@ -1031,7 +1025,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	private Map<GridResource, Integer> calculateResourcesToUse(BatchJob mpj) {
+	private SortedSet<GridResource> calculateResourcesToUse(BatchJob mpj) {
 
 		String locationsToIncludeString = mpj
 				.getJobProperty(Constants.LOCATIONS_TO_INCLUDE_KEY);
@@ -1047,7 +1041,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			locationsToExclude = locationsToExcludeString.split(",");
 		}
 
-		Map<GridResource, Integer> resourcesToUse = new TreeMap<GridResource, Integer>();
+		SortedSet<GridResource> resourcesToUse = new TreeSet<GridResource>();
 
 		for (GridResource resource : findBestResourcesForMultipartJob(mpj)) {
 
@@ -1070,7 +1064,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							subLoc.toLowerCase())) {
 						if (isValidSubmissionLocation(tempSubLocString, mpj
 								.getFqan())) {
-							resourcesToUse.put(resource, 0);
+							resourcesToUse.add(resource);
 						}
 						break;
 					}
@@ -1090,14 +1084,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				if (useSubLoc) {
 					if (isValidSubmissionLocation(tempSubLocString, mpj
 							.getFqan())) {
-						resourcesToUse.put(resource, 0);
+						resourcesToUse.add(resource);
 					}
 				}
 
 			} else {
 
 				if (isValidSubmissionLocation(tempSubLocString, mpj.getFqan())) {
-					resourcesToUse.put(resource, 0);
+					resourcesToUse.add(resource);
 				}
 			}
 		}
@@ -1112,16 +1106,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		JobDistributor jd;
 
-		if (Constants.DISTRIBUTION_METHOD_EQUAL.equals(distributionMethod)) {
-			jd = new EqualJobDistributor();
-		} else {
+		if (Constants.DISTRIBUTION_METHOD_PERCENTAGE.equals(distributionMethod)) {
 			jd = new PercentageJobDistributor();
+		} else {
+			jd = new EqualJobDistributor();
 		}
 
 		Map<String, Integer> results = jd.distributeJobs(
 				sp.getCalculatedJobs(), sp.getCalculatedGridResources());
 		StringBuffer message = new StringBuffer(
-				"Filled submissionlocations for " + results.size() + " jobs: "
+				"Filled submissionlocations for " + sp.getCalculatedJobs().size() + " jobs: "
 						+ "\n");
 		message.append("Submitted jobs to:\t\t\tAmount\n");
 		for (String sl : results.keySet()) {
@@ -1434,16 +1428,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		actionStatus.put(batchJobname, status);
 		
 		status.addElement("Finding resources to use...");
-		Map<GridResource, Integer> resourcesToUse = null;
-		if (job.getResourcesToUse() == null) {
-			resourcesToUse = calculateResourcesToUse(job);
-			job.setResourcesToUse(resourcesToUse);
-		} else {
-			resourcesToUse = job.getResourcesToUse();
-		}
+		SortedSet resourcesToUse = calculateResourcesToUse(job);
+
 		status.addElement("Investigating batchjob...");
+		if (properties == null ) {
+			properties = DtoProperties.createUserProperties(new HashMap<String, String>());
+		}
 		SubmitPolicy sp = new DefaultResubmitSubmitPolicy(job.getJobs(),
-				new TreeSet<GridResource>(resourcesToUse.keySet()), properties.propertiesAsMap());
+				resourcesToUse, properties.propertiesAsMap());
 
 		if ( sp.getCalculatedGridResources().size() == 0 || sp.getCalculatedJobs().size() == 0 ) {
 			
@@ -1549,7 +1541,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		job.setStatus(JobConstants.READY_TO_SUBMIT);
 		status.addElement("Resetting job properties...");
-		job.getJobProperties().remove(Constants.ERROR_REASON);
+		job.getJobProperties().clear();
+
 
 		String possibleMultiPartJob = job
 				.getJobProperty(Constants.BATCHJOB_NAME);
@@ -1640,8 +1633,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				// no need to move job
 			}
 
-			jobdao.saveOrUpdate(job);
-
 		} else {
 			status.addElement("Keeping job description...");
 			status.addElement("No need to move job...");
@@ -1650,18 +1641,22 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		myLogger.info("Submitting job: " + job.getJobname() + " for user "
 				+ getDN());
 		job.addLogMessage("Starting re-submission...");
+		jobdao.saveOrUpdate(job);
 		try {
 			submitJob(job, false, status);
 		} catch (JobSubmissionException e) {
 			status.addLogMessage("Job submission failed: "
 					+ e.getLocalizedMessage());
 			status.setFailed(true);
+			jobdao.saveOrUpdate(job);
 			throw e;
 		}
 		job.addLogMessage("Re-submission finished.");
 
 		status.addElement("Re-submission finished successfully.");
 		status.setFinished(true);
+		
+		jobdao.saveOrUpdate(job);
 	}
 
 	public void submitJob(final String jobname) throws JobSubmissionException,
@@ -1997,30 +1992,37 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			jobnameCreationMethod = "force-name";
 		}
 
-		String[] candHosts = JsdlHelpers.getCandidateHosts(jsdl);
-
-		if (candHosts == null || candHosts.length == 0) {
-			Map<GridResource, Integer> resources = multiJob.getResourcesToUse();
-			if (resources == null) {
-				resources = calculateResourcesToUse(multiJob);
-				multiJob.setResourcesToUse(resources);
-			}
-
-			GridResource leastUsed = null;
-			int amountOfJobs = Integer.MAX_VALUE;
-			for (GridResource res : resources.keySet()) {
-				if (resources.get(res) < amountOfJobs) {
-					leastUsed = res;
-				}
-			}
-
-			resources.put(leastUsed, resources.get(leastUsed) + 1);
-
-			String subLoc = SubmissionLocationHelpers
-					.createSubmissionLocationString(leastUsed);
-			JsdlHelpers.setCandidateHosts(jsdl, new String[] { subLoc });
-
-		}
+//		String[] candHosts = JsdlHelpers.getCandidateHosts(jsdl);
+//
+//		if (candHosts == null || candHosts.length == 0) {
+//			SortedSet<GridResource> resources = calculateResourcesToUse(multiJob);
+//			Map<String, Integer> distribution = new HashMap<String, Integer>();
+//
+//			for ( Job job : multiJob.getJobs() ) {
+//				
+//				String subLoc = job.getJobProperty(Constants.SUBMISSIONLOCATION_KEY);
+//				if ( distribution.get(subLoc) == null ) {
+//					distribution.put(subLoc, 1);
+//				} else {
+//					distribution.put(subLoc, distribution.get(subLoc)+1);
+//				}
+//			
+//			}
+//
+//			// now find least used subloc
+//			String subLoc = null;
+//			int leastJobs = Integer.MAX_VALUE;
+//			for ( String sl : distribution.keySet() ) {
+//				if ( distribution.get(sl) < leastJobs ) {
+//					subLoc = sl;
+//					leastJobs = distribution.get(sl);
+//				}
+//			}
+//			JsdlHelpers.setCandidateHosts(jsdl, new String[] { subLoc });
+//			
+//			myLogger.debug("Using "+subLoc+" for new sub-job or: "+multiJob.getBatchJobname());
+//
+//		}
 
 		String jobname = createJob(jsdl, multiJob.getFqan(), "force-name",
 				multiJob);
@@ -2086,8 +2088,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			multiJobCreate.addLogMessage("MultiPartJob " + batchJobname
 					+ " created.");
 
-			multiJobCreate
-					.setResourcesToUse(calculateResourcesToUse(multiJobCreate));
+//			multiJobCreate
+//					.setResourcesToUse(calculateResourcesToUse(multiJobCreate));
 
 			multiPartJobDao.saveOrUpdate(multiJobCreate);
 

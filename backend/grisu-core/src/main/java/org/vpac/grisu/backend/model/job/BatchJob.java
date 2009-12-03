@@ -67,19 +67,6 @@ public class BatchJob {
 	
 	private String fqan = null;
 	
-	private Map<GridResource, Integer> resourcesToUse = null;
-
-
-
-	@Transient
-	public Map<GridResource, Integer> getResourcesToUse() {
-		return resourcesToUse;
-	}
-
-	public void setResourcesToUse(Map<GridResource, Integer> resourcesToUse) {
-		this.resourcesToUse = resourcesToUse;
-	}
-
 	private Map<Long, String> logMessages = Collections
 			.synchronizedMap(new TreeMap<Long, String>());
 
