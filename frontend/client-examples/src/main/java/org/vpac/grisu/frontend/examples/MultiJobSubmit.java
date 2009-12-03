@@ -56,10 +56,10 @@ public class MultiJobSubmit {
 		
 //		registry.getApplicationInformation("povray").getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin");
 
-		final int numberOfJobs = 10;
+		final int numberOfJobs = 100;
 		
 		Date start = new Date();
-		final String multiJobName = "cat_10_2";
+		final String multiJobName = "sleep100";
 		try {
 			si.kill(multiJobName, true);
 
@@ -85,21 +85,22 @@ public class MultiJobSubmit {
 				jo.setApplication("java");
 //				jo.setCommandline("java -version");
 //				jo.setCommandline("cat "+pathToInputFiles+"multiJobFile.txt");
-				jo.setCommandline("cat singleJobFile.txt "+pathToInputFiles+"/multiJobFile.txt");
+//				jo.setCommandline("cat singleJobFile.txt "+pathToInputFiles+"/multiJobFile.txt");
 //				jo.setCommandline("cat singleJobFile_"+i+".txt "+pathToInputFiles+"/multiJobFile.txt");
-				jo.setWalltimeInSeconds(60);
+				jo.setCommandline("sleep 300");
+				jo.setWalltimeInSeconds(310);
 //				jo.addInputFileUrl("/home/markus/test/singleJobFile_"+i+".txt");
-				jo.addInputFileUrl("/home/markus/test/singleJobFile.txt");
+//				jo.addInputFileUrl("/home/markus/test/singleJobFile.txt");
 
 				multiPartJob.addJob(jo);
 						
 		}
 
-		multiPartJob.addInputFile("/home/markus/test/multiJobFile.txt");
+//		multiPartJob.addInputFile("/home/markus/test/multiJobFile.txt");
 //		multiPartJob.setLocationsToExclude(new String[]{"serial"});
 		
 		multiPartJob.setDefaultNoCpus(1);
-		multiPartJob.setDefaultWalltimeInSeconds(60);
+		multiPartJob.setDefaultWalltimeInSeconds(310);
 		
 
 		try {

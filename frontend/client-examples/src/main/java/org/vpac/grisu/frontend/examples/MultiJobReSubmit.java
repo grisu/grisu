@@ -52,10 +52,8 @@ public class MultiJobReSubmit {
 
 		final GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
 
-		final int numberOfJobs = 10;
-
 		Date start = new Date();
-		final String multiJobName = "cat_10_2";
+		final String multiJobName = "sleep100";
 
 		si.restartBatchJob(multiJobName, null, null);
 
