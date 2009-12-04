@@ -166,7 +166,22 @@ public interface ServiceInterface {
 	@RolesAllowed("User")
 	@POST
 	@Path("/user/setproperty/{key}")
-	void setUserProperty(@QueryParam("key") String key, @QueryParam("value") String value);
+	void setUserProperty(@PathParam("key") String key, @QueryParam("value") String value);
+	
+	
+	/**
+	 * Gets the users bookmarks
+	 * @param alias
+	 */
+	@RolesAllowed("User")
+	@GET
+	@Path("user/bookmarks")
+	DtoProperties getBookmarks();
+	
+	@RolesAllowed("User")
+	@POST
+	@Path("/user/setbookmark/{alias}")
+	void setBookmark(@PathParam("alias") String alias, @QueryParam("value") String value);
 	
 	
 	/**

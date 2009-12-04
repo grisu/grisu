@@ -1,8 +1,9 @@
-package org.vpac.grisu.frontend.view.swing.files;
+package org.vpac.grisu.model.files;
 
 import java.io.File;
 import java.net.MalformedURLException;
 
+import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.FileManager;
@@ -13,7 +14,7 @@ import org.vpac.grisu.model.dto.DtoRemoteObject;
 
 public class GlazedFile {
 
-	enum Type implements Comparable<Type>{
+	public enum Type implements Comparable<Type>{
 		
 		FILETYPE_ROOT, FILETYPE_SITE, FILETYPE_MOUNTPOINT, FILETYPE_FOLDER, FILETYPE_FILE
 		
@@ -115,15 +116,25 @@ public class GlazedFile {
 			size = file.getSize();
 			lastModified = file.getLastModified();
 		}
+		
 		url = obj.getRootUrl();
-		name = obj.getName();
+		if ( StringUtils.isNotBlank(obj.getName()) ) {
+			name = obj.getName();
+		} else {
+			name = "/";
+		}
 		this.si = null;
 	}
 
 	public GlazedFile(String url, ServiceInterface si) {
 
 		this.url = url;
-		this.name = FileManager.getFilename(url);
+		if ( StringUtils.isNotBlank(FileManager.getFilename(url)) ) {
+			this.name = FileManager.getFilename(url);			
+		} else {
+			this.name = "/";
+		}
+
 		this.si = si;
 		this.type = null;
 		this.folder = null;
@@ -210,6 +221,13 @@ public class GlazedFile {
 		
 		GlazedFile o = (GlazedFile)other;
 		return this.getUrl().equals(o.getUrl());
+		
+	}
+	
+	@Override 
+	public int hashCode() {
+		
+		return 23 * getUrl().hashCode();
 		
 	}
 

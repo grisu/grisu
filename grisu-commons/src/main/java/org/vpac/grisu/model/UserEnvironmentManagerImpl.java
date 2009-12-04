@@ -1,9 +1,11 @@
 package org.vpac.grisu.model;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,7 +13,10 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.model.files.FileSystemItem;
+import org.vpac.grisu.model.files.GlazedFile;
 import org.vpac.grisu.model.info.ResourceInformation;
 
 import au.org.arcs.jcommons.constants.Constants;
@@ -36,6 +41,14 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	private MountPoint[] cachedMountPoints = null;
 	private Map<String, SortedSet<MountPoint>> alreadyQueriedMountPointsPerSite = new TreeMap<String, SortedSet<MountPoint>>();
 
+	private Map<String, String> cachedUserProperties = null;
+	private Map<String, String> cachedBookmarks = null;
+	
+	private List<FileSystemItem> cachedLocalFilesystemList = null;
+	private List<FileSystemItem> cachedBookmarkFilesystemList = null;
+	private List<FileSystemItem> cachedRemoteFilesystemList = null;
+	private List<FileSystemItem> cachedAllFileSystems = null;
+	
 	private String currentFqan;
 
 	public UserEnvironmentManagerImpl(final ServiceInterface serviceInterface) {
@@ -44,7 +57,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 				.getResourceInformation();
 	}
 
-	public final String[] getAllAvailableFqans() {
+	public synchronized final String[] getAllAvailableFqans() {
 
 		if (cachedFqans == null) {
 			this.cachedFqans = serviceInterface.getFqans().asArray();
@@ -52,7 +65,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		return cachedFqans;
 	}
 
-	public final Set<String> getAllAvailableSubmissionLocations() {
+	public synchronized final Set<String> getAllAvailableSubmissionLocations() {
 
 		if (cachedAllSubmissionLocations == null) {
 			cachedAllSubmissionLocations = new HashSet<String>();
@@ -66,7 +79,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		return cachedAllSubmissionLocations;
 	}
 
-	public final SortedSet<String> getAllAvailableSites() {
+	public synchronized final SortedSet<String> getAllAvailableSites() {
 
 		if (cachedAllSites == null) {
 			cachedAllSites = new TreeSet<String>();
@@ -128,7 +141,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 				.get(submissionLocation);
 	}
 
-	public final Set<MountPoint> getMountPointsForSubmissionLocationAndFqan(
+	public synchronized final Set<MountPoint> getMountPointsForSubmissionLocationAndFqan(
 			final String submissionLocation, final String fqan) {
 
 		// String[] urls = serviceInterface
@@ -303,5 +316,124 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		return false;
 		
 	}
+
+	public synchronized String getProperty(String key) {
+
+		if ( StringUtils.isBlank(cachedUserProperties.get(key)) ) {
+			String temp = serviceInterface.getUserProperty(key);
+			if ( StringUtils.isBlank(temp) ) {
+				return null;
+			} else {
+				cachedUserProperties.put(key, temp);
+			}
+		}
+		return cachedUserProperties.get(key);
+		
+	}
+
+	public synchronized void setProperty(String key, String value) {
+
+		serviceInterface.setUserProperty(key, value);
+		cachedUserProperties.put(key, value);
+		
+	}
+
+	public synchronized Map<String, String> getBookmarks() {
+
+		if ( cachedBookmarks == null ) {
+			cachedBookmarks = serviceInterface.getBookmarks().propertiesAsMap();
+		}
+		
+		return cachedBookmarks;
+	}
+
+	public synchronized void setBookmark(String alias, String url) {
+
+		serviceInterface.setBookmark(alias, url);
+		
+		if ( StringUtils.isBlank(url) ) {
+			getBookmarks().remove(alias);
+			getBookmarksFilesystems().remove(new FileSystemItem(alias, FileSystemItem.Type.BOOKMARK, null));
+		} else {
+			getBookmarks().put(alias, url);
+			getBookmarksFilesystems().add(new FileSystemItem(alias, FileSystemItem.Type.BOOKMARK, 
+					createGlazedFileFromUrl(url)));
+		}
+		
+		
+		
+	}
+	
+	public synchronized List<FileSystemItem> getLocalFileSystems() {
+
+		if ( cachedLocalFilesystemList == null ) {
+			cachedLocalFilesystemList = new LinkedList<FileSystemItem>();
+			
+			File userHome = new File(System.getProperty("user.home"));
+			cachedLocalFilesystemList.add(new FileSystemItem(userHome.getName(), FileSystemItem.Type.LOCAL, 
+					new GlazedFile(userHome)));
+			
+			for ( File file : File.listRoots() ) {
+				cachedLocalFilesystemList.add(new FileSystemItem(file.getName(),
+						FileSystemItem.Type.LOCAL, new GlazedFile(file)));
+			}
+		}
+		return cachedLocalFilesystemList;
+	}
+
+	public synchronized List<FileSystemItem> getFileSystems() {
+
+		if ( cachedAllFileSystems == null ) {
+		
+			cachedAllFileSystems = new LinkedList<FileSystemItem>();
+	
+			cachedAllFileSystems.addAll(getLocalFileSystems());
+			cachedAllFileSystems.addAll(getBookmarksFilesystems());
+			cachedAllFileSystems.addAll(getRemoteSites());
+		} 
+		return cachedAllFileSystems;
+	}
+	
+	public GlazedFile createGlazedFileFromUrl(String url) {
+		
+		if ( FileManager.isLocal(url) ) {
+			try {
+				File file = new File(new URI(url));
+				return new GlazedFile(file);
+			} catch (URISyntaxException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			return new GlazedFile(url, serviceInterface);
+		}
+		
+	}
+	
+
+	public synchronized List<FileSystemItem> getBookmarksFilesystems() {
+
+		if ( cachedBookmarkFilesystemList == null ) {
+			cachedBookmarkFilesystemList = new LinkedList<FileSystemItem>();
+			for ( String bookmark : getBookmarks().keySet() ) {
+				String url = getBookmarks().get(bookmark);
+				cachedBookmarkFilesystemList.add(new FileSystemItem(bookmark, 
+							FileSystemItem.Type.BOOKMARK, createGlazedFileFromUrl(url)));
+			}
+		}
+		return cachedBookmarkFilesystemList;
+	}
+
+	public synchronized List<FileSystemItem> getRemoteSites() {
+
+		if ( cachedRemoteFilesystemList == null ) {
+			cachedRemoteFilesystemList = new LinkedList<FileSystemItem>();
+			for ( String site : getAllAvailableSites() ) {
+				cachedRemoteFilesystemList.add(new FileSystemItem(site, FileSystemItem.Type.REMOTE, new GlazedFile(site)));
+			}
+		}
+		return cachedRemoteFilesystemList;
+	}
+	
+	
 
 }

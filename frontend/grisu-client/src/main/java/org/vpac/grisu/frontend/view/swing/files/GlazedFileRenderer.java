@@ -13,6 +13,8 @@ import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
+import org.vpac.grisu.model.files.GlazedFile;
+
 public class GlazedFileRenderer extends DefaultTableCellRenderer implements TableCellRenderer {
 	
 	private static FileSystemView fsView =	FileSystemView.getFileSystemView();

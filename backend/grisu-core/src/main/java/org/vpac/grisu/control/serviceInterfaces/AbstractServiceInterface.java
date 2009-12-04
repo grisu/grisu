@@ -3383,6 +3383,23 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return DtoProperties
 				.createUserProperties(getUser().getUserProperties());
 	}
+	
+	public DtoProperties getBookmarks() {
+		
+		return DtoProperties.createUserProperties(getUser().getBookmarks());
+	}
+	
+	public void setBookmark(String alias, String value) {
+		
+		if ( StringUtils.isBlank(value) ) {
+			getUser().getBookmarks().remove(alias);
+		} else {
+			getUser().getBookmarks().put(alias, value);
+		}
+		
+		userdao.saveOrUpdate(getUser());
+		
+	}
 
 	/*
 	 * (non-Javadoc)

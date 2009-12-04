@@ -121,6 +121,8 @@ public class User {
 
 	private Map<String, String> userProperties = new HashMap<String, String>();
 	
+	private Map<String, String> bookmarks = new HashMap<String, String>();
+	
 	private Map<String, JobSubmissionObjectImpl> jobTemplates = new HashMap<String, JobSubmissionObjectImpl>();
 
 	// for hibernate
@@ -925,6 +927,28 @@ public class User {
 
 	private void setUserProperties(final Map<String, String> userProperties) {
 		this.userProperties = userProperties;
+	}
+	
+	/**
+	 * Gets a map of this users bookmarks.
+	 * 
+	 * @return the users' properties
+	 */
+	@CollectionOfElements(fetch = FetchType.EAGER)
+	public Map<String, String> getBookmarks() {
+		return bookmarks;
+	}
+
+	private void setBookmarks(final Map<String, String> bm) {
+		this.bookmarks = bm;
+	}
+	
+	public void removeBookmark(String alias) {
+		this.bookmarks.remove(alias);
+	}
+	
+	public void addBookmark(String alias, String url) {
+		this.bookmarks.put(alias, url);
 	}
 
 	@CollectionOfElements

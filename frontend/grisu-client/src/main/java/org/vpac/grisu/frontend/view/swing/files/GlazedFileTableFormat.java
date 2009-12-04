@@ -2,6 +2,8 @@ package org.vpac.grisu.frontend.view.swing.files;
 
 import java.util.Comparator;
 
+import org.vpac.grisu.model.files.GlazedFile;
+
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 
 

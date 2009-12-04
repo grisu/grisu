@@ -38,8 +38,10 @@ public class FileDialog extends JDialog {
 //			si = LoginManager.login(null, password, username, "VPAC", loginParams);
 			si = LoginManager.login(null, null, null, null, loginParams);
 			
+			System.out.println("Creating dialog.");
 			FileDialog dialog = new FileDialog(si);
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			System.out.println("Created dialog. Setting visible.");
 			dialog.setVisible(true);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -56,7 +58,7 @@ public class FileDialog extends JDialog {
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new BorderLayout(0, 0));
 		{
-			FileListPanel fileListPanel = new FileListPanel(si, null, null);
+			FileListPanelPlus fileListPanel = new FileListPanelPlus(si, null, null);
 			contentPanel.add(fileListPanel, BorderLayout.CENTER);
 		}
 		{

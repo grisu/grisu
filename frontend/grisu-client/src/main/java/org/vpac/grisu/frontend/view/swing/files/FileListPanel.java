@@ -22,6 +22,7 @@ import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.UserEnvironmentManager;
 import org.vpac.grisu.model.dto.DtoFile;
 import org.vpac.grisu.model.dto.DtoFolder;
+import org.vpac.grisu.model.files.GlazedFile;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -69,6 +70,27 @@ public class FileListPanel extends JPanel {
 		setRootAndCurrentUrl(rootUrl, startUrl);
 
 	}
+	
+	public void setRootAndCurrentUrl(GlazedFile startFile) {
+		
+		setRootAndCurrentUrl(startFile.getUrl(), startFile);
+	}
+	
+	public void setRootAndCurrentUrl(String rootUrl, GlazedFile startFile) {
+		
+		if ( rootUrl == null ) {
+			this.rootUrl = GlazedFile.ROOT;
+		} else {
+			this.rootUrl = rootUrl;
+		}
+		
+		if ( startFile == null ) {
+			setCurrent(GlazedFile.ROOT);
+		} else {
+			setCurrent(startFile);
+		}
+		
+	}
 
 	public void setRootAndCurrentUrl(String rootUrl, String startUrl) {
 		if (rootUrl == null) {
@@ -86,9 +108,17 @@ public class FileListPanel extends JPanel {
 
 	private synchronized void setCurrent(final String url, final GlazedFile file) {
 
-		if (updateThread == null || !updateThread.isAlive()) {
+		if (updateThread != null && updateThread.isAlive()) {
+			updateThread.interrupt();
+			try {
+				updateThread.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} 
 
-			updateThread = new Thread("Populating fileList") {
+		updateThread = new Thread("Populating fileList") {
 
 				public void run() {
 
@@ -138,6 +168,7 @@ public class FileListPanel extends JPanel {
 						SwingUtilities.invokeLater(new Thread() {
 							public void run() {
 								table.repaint();
+								table.clearSelection();
 							}
 
 						});
@@ -148,7 +179,6 @@ public class FileListPanel extends JPanel {
 			};
 
 			updateThread.start();
-		}
 
 	}
 
