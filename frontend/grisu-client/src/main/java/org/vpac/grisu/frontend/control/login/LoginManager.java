@@ -1,10 +1,7 @@
 package org.vpac.grisu.frontend.control.login;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.URL;
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +20,11 @@ import org.vpac.grisu.utils.GrisuPluginFilenameFilter;
 import org.vpac.security.light.control.CertificateFiles;
 import org.vpac.security.light.plainProxy.PlainProxy;
 
+import au.org.arcs.auth.shibboleth.CredentialManager;
+import au.org.arcs.auth.shibboleth.IdpObject;
+import au.org.arcs.auth.shibboleth.StaticCredentialManager;
+import au.org.arcs.auth.shibboleth.StaticIdpObject;
+import au.org.arcs.auth.slcs.SLCS;
 import au.org.arcs.jcommons.constants.ArcsEnvironment;
 import au.org.arcs.jcommons.dependencies.ClasspathHacker;
 import au.org.arcs.jcommons.dependencies.Dependency;
@@ -41,6 +43,149 @@ public class LoginManager {
 		SERVICEALIASES.put("ARCS_DEV", "https://ngportal.vpac.org/grisu-ws/soap/GrisuService");
 		SERVICEALIASES.put("LOCAL_WS", "http://localhost:8080/soap/GrisuService");
 
+	}
+	
+	/**
+	 * Simplest way to login.
+	 * 
+	 * Logs into a local backend using an already existing local proxy.
+	 * 
+	 * @return the serviceinterface
+	 * @throws LoginException  if the login doesn't succeed
+	 */
+	public static ServiceInterface login() throws LoginException {
+		return login((GlobusCredential)null, (char[])null, (String)null, (String)null, (LoginParams)null, false);
+	}
+	
+	/**
+	 * 2nd simplest way to login.
+	 * 
+	 * Logs into a backend using an already existing local proxy.
+	 * 
+	 * @param url the url of the serviceinterface
+	 * 
+	 * @return the serviceinterface
+	 * @throws LoginException  if the login doesn't succeed
+	 */
+	public static ServiceInterface login(String url) throws LoginException {
+		return login((GlobusCredential)null, (char[])null, (String)null, (String)null, url, false);
+	}
+	
+	/**
+	 * Standard shib login to local backend.
+	 * 
+	 * Logs into a backend using an already existing local proxy.
+	 * 
+	 * @param username the idp username
+	 * @param password the idp password
+	 * @param idp the idp name
+	 * @param url the url of the serviceinterface
+	 * @param saveCredendentialsToLocalProxy whether to save the credentials to a local proxy afterwards
+	 * 
+	 * @return the serviceinterface
+	 * @throws LoginException  if the login doesn't succeed
+	 */
+	public static ServiceInterface shiblogin(String username, char[] password, String idp, boolean saveCredendentialsToLocalProxy) throws LoginException {
+		return login((GlobusCredential)null, password, username, idp, "Local", saveCredendentialsToLocalProxy);
+	}
+	
+	/**
+	 * Standard shib login.
+	 * 
+	 * Logs into a backend using an already existing local proxy.
+	 * 
+	 * @param username the idp username
+	 * @param password the idp password
+	 * @param idp the idp name
+	 * @param url the url of the serviceinterface
+	 * @param saveCredendentialsToLocalProxy whether to save the credentials to a local proxy afterwards
+	 * 
+	 * @return the serviceinterface
+	 * @throws LoginException  if the login doesn't succeed
+	 */
+	public static ServiceInterface shiblogin(String username, char[] password, String idp, String url, boolean saveCredendentialsToLocalProxy) throws LoginException {
+		return login((GlobusCredential)null, password, username, idp, url, saveCredendentialsToLocalProxy);
+	}
+	
+	public static ServiceInterface login(GlobusCredential cred,
+			char[] password, String username, String idp,
+			LoginParams loginParams) throws LoginException {
+		return login(cred, password, username, idp, loginParams, false);
+	}
+	
+	/**
+	 * One-for-all method to login to a Grisu backend.
+	 * 
+	 * Specify nothing except the loginParams (without the myproxy username &
+	 * password) in order to use a local proxy. If you specify the password in
+	 * addition to that the local x509 cert will be used to create a local proxy
+	 * which in turn will be used to login to the Grisu backend.
+	 * 
+	 * If you specify the myproxy username & password in the login params those
+	 * will be used for a simple myproxy login to the backend.
+	 * 
+	 * In order to use shibboleth login, you need to specify the password, the
+	 * idp-username and the name of the idp.
+	 * 
+	 * @param password
+	 *            the password or null
+	 * @param username
+	 *            the shib-username or null
+	 * @param idp
+	 *            the name of the idp or null
+	 * @param url
+	 *            the serviceInterfaceUrl to connect to
+	 * @param saveCredentialAsLocalProxy 
+	 * 			  whether to save the credential as a local proxy after successful login or not
+	 * @return the serviceinterface
+	 * @throws LoginException
+	 *             if the login doesn't succeed
+	 * @throws IOException
+	 *             if necessary plugins couldn't be downloaded/stored in the
+	 *             .grisu/plugins folder
+	 */
+	public static ServiceInterface login(GlobusCredential cred,
+			char[] password, String username, String idp,
+			String url, boolean saveCredentialAsLocalProxy) throws LoginException {
+		
+		LoginParams params = new LoginParams(url, null, null);
+		return login(cred, password, username, idp, params, saveCredentialAsLocalProxy);
+		
+	}
+	
+	/**
+	 * One-for-all method to login to a local Grisu backend.
+	 * 
+	 * Specify nothing in order to use a local proxy. If you specify the password in
+	 * addition to that the local x509 cert will be used to create a proxy from your local cert
+	 * which in turn will be used to login to the Grisu backend.
+	 * 
+	 * 
+	 * In order to use shibboleth login, you need to specify the password, the
+	 * idp-username and the name of the idp.
+	 * 
+	 * @param password
+	 *            the password or null
+	 * @param username
+	 *            the shib-username or null
+	 * @param idp
+	 *            the name of the idp or null
+	 * @param saveCredentialAsLocalProxy 
+	 * 			  whether to save the credential as a local proxy after successful login or not
+	 * @return the serviceinterface
+	 * @throws LoginException
+	 *             if the login doesn't succeed
+	 * @throws IOException
+	 *             if necessary plugins couldn't be downloaded/stored in the
+	 *             .grisu/plugins folder
+	 */
+	public static ServiceInterface login(GlobusCredential cred,
+			char[] password, String username, String idp,
+			boolean saveCredentialAsLocalProxy) throws LoginException {
+		
+		LoginParams params = new LoginParams("Local", null, null);
+		return login(cred, password, username, idp, params, saveCredentialAsLocalProxy);
+		
 	}
 
 	/**
@@ -65,6 +210,8 @@ public class LoginManager {
 	 *            the name of the idp or null
 	 * @param loginParams
 	 *            the login parameters
+	 * @param saveCredentialAsLocalProxy 
+	 * 			  whether to save the credential as a local proxy after successful login or not
 	 * @return the serviceinterface
 	 * @throws LoginException
 	 *             if the login doesn't succeed
@@ -74,7 +221,7 @@ public class LoginManager {
 	 */
 	public static ServiceInterface login(GlobusCredential cred,
 			char[] password, String username, String idp,
-			LoginParams loginParams) throws LoginException {
+			LoginParams loginParams, boolean saveCredentialAsLocalProxy) throws LoginException {
 
 		java.security.Security.addProvider(new ArcsSecurityProvider());
 
@@ -224,30 +371,40 @@ public class LoginManager {
 
 		try {
 
-			Class slcsClass = Class.forName("au.org.arcs.auth.slcs.SLCS");
-			Object slcsObject = slcsClass.newInstance();
-
-			Method initMethod = slcsClass.getMethod("init", String.class,
-					char[].class, String.class);
-			initMethod.invoke(slcsObject, username, password, idp);
-
-			Method getCredMethod = slcsClass.getMethod("getCertificate");
-			X509Certificate cert = (X509Certificate) getCredMethod
-					.invoke(slcsObject);
-
-			Method getKeyMethod = slcsClass.getMethod("getPrivateKey");
-			PrivateKey privateKey = (PrivateKey) getKeyMethod
-					.invoke(slcsObject);
-
-			GSSCredential cred = PlainProxy.init(cert, privateKey, 24 * 7);
-
+//			Class slcsClass = Class.forName("au.org.arcs.auth.slcs.SLCS");
+//			Object slcsObject = slcsClass.newInstance();
+//
+//			Method initMethod = slcsClass.getMethod("init", String.class,
+//					char[].class, String.class);
+//			initMethod.invoke(slcsObject, username, password, idp);
+//
+//			Method getCredMethod = slcsClass.getMethod("getCertificate");
+//			X509Certificate cert = (X509Certificate) getCredMethod
+//					.invoke(slcsObject);
+//
+//			Method getKeyMethod = slcsClass.getMethod("getPrivateKey");
+//			PrivateKey privateKey = (PrivateKey) getKeyMethod
+//					.invoke(slcsObject);
+			
+			IdpObject idpO = new StaticIdpObject(idp);
+			CredentialManager cm = new StaticCredentialManager(username, password);
+			SLCS slcs = new SLCS(SLCS.DEFAULT_SLCS_URL, idpO, cm);
+			
+			GSSCredential cred = PlainProxy.init(slcs.getCertificate(), slcs.getPrivateKey(), 24 * 10);
 			return cred;
+
 
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
 		}
 
+	}
+	
+	public static void main(String[] args) throws LoginException {
+		
+		ServiceInterface si = LoginManager.shiblogin("name", "passwd".toCharArray(), "VPAC", true);
+		
 	}
 
 	public static void addPluginsToClasspath() throws IOException {
