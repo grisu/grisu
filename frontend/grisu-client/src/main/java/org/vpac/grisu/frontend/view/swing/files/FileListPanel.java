@@ -189,8 +189,7 @@ public class FileListPanel extends JPanel {
 	}
 
 	public boolean currentUrlIsStartUrl() {
-		System.out.println("Compare:\n" + rootUrl + "\n"
-				+ getCurrentDirectory().getUrl() + "\n\n");
+
 		if (rootUrl.equals(getCurrentDirectory().getUrl())) {
 			return true;
 		} else {
@@ -200,6 +199,14 @@ public class FileListPanel extends JPanel {
 
 	public GlazedFile getCurrentDirectory() {
 		return currentDirectory;
+	}
+	
+	public String getCurrentDirectoryUrl() {
+		if ( currentDirectory != null ) {
+			return currentDirectory.getUrl();
+		} else {
+			return null;
+		}
 	}
 
 	public void setCurrent(GlazedFile file) {
@@ -346,7 +353,7 @@ public class FileListPanel extends JPanel {
 
 	}
 
-	private void fileSelectionOccured() {
+	private void fileDoubleClickOccured() {
 
 		int selRow = table.getSelectedRow();
 		if (selRow >= 0) {
@@ -365,8 +372,6 @@ public class FileListPanel extends JPanel {
 					this));
 			table.setDefaultRenderer(Long.class, new FileSizeRenderer());
 
-			// table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-
 			int vColIndex = 0;
 			TableColumn col = table.getColumnModel().getColumn(vColIndex);
 			int width = 120;
@@ -383,7 +388,7 @@ public class FileListPanel extends JPanel {
 				public void mouseClicked(MouseEvent arg0) {
 
 					if (arg0.getClickCount() == 2) {
-						fileSelectionOccured();
+						fileDoubleClickOccured();
 					}
 
 				}

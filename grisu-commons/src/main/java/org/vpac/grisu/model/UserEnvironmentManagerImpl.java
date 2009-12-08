@@ -433,6 +433,17 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		}
 		return cachedRemoteFilesystemList;
 	}
+
+	public FileSystemItem getFileSystemForUrl(String url) {
+
+		for ( FileSystemItem item : getFileSystems() ) {
+			
+			if ( !item.isDummy() && url.startsWith(item.getRootFile().getUrl()) ) {
+				return item;
+			}
+		}
+		return null;
+	}
 	
 	
 

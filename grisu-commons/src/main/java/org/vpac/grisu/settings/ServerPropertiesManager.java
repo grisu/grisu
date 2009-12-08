@@ -34,6 +34,8 @@ public final class ServerPropertiesManager {
 	 * Default concurrent threads when submitting the parts of a multipartjob: 5 
 	 */
 	public static final int DEFAULT_CONCURRENT_JOB_SUBMISSION_THREADS_PER_USER = 2;
+	
+	public static final int DEFAULT_CONCURRENT_FILE_TRANSFER_THREADS_PER_USER = 5;
 	/**
 	 * Default directory name used as parent for the jobdirectories.
 	 */
@@ -51,6 +53,8 @@ public final class ServerPropertiesManager {
 	private static final int DEFAULT_CONCURRENT_JOB_SUBMISSION_RETRIES = 5;
 	
 	private static final boolean DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS = false;
+	private static final int DEFAULT_FILE_TRANSFER_RETRIES = 3;
+	private static final int DEFAULT_TIME_BETWEEN_FILE_TRANSFER_RETRIES_IN_SECONDS = 1;
 	
 	/**
 	 * Retrieves the configuration parameters from the properties file.
@@ -398,6 +402,60 @@ public final class ServerPropertiesManager {
 			return DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS;
 		}
 		return check;
+	}
+
+	public static int getConcurrentFileTransfersPerUser() {
+		
+		int retries = -1;
+		try {
+			retries = Integer.parseInt(getServerConfiguration()
+					.getString("concurrentFileTransfersPerUser"));
+
+		} catch (Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_CONCURRENT_FILE_TRANSFER_THREADS_PER_USER;
+		}
+		if (retries == -1) {
+			return DEFAULT_CONCURRENT_FILE_TRANSFER_THREADS_PER_USER;
+		}
+		return retries;
+
+	}
+
+	public static int getFileTransferRetries() {
+		// TODO Auto-generated method stub
+		int retries = -1;
+		try {
+			retries = Integer.parseInt(getServerConfiguration()
+					.getString("fileTransferRetries"));
+
+		} catch (Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_FILE_TRANSFER_RETRIES;
+		}
+		if (retries == -1) {
+			return DEFAULT_FILE_TRANSFER_RETRIES;
+		}
+		return retries;
+		
+	}
+
+	public static int getWaitTimeBetweenFailedFileTransferAndNextTryInSeconds() {
+		
+		int waitTimeInSeconds = -1;
+		try {
+			waitTimeInSeconds = Integer.parseInt(getServerConfiguration()
+					.getString("waitTimeInbetweenFileTransferRetries"));
+
+		} catch (Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_TIME_BETWEEN_FILE_TRANSFER_RETRIES_IN_SECONDS;
+		}
+		if (waitTimeInSeconds == -1) {
+			return DEFAULT_TIME_BETWEEN_FILE_TRANSFER_RETRIES_IN_SECONDS;
+		}
+		return waitTimeInSeconds;
+
 	}
 
 }

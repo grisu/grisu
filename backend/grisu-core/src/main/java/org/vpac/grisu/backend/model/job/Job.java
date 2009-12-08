@@ -86,7 +86,7 @@ public class Job implements Comparable<Job> {
 		this.lastStatusCheck = lastStatusCheck;
 	}
 
-	private Map<String, String> jobProperties = new HashMap<String, String>();
+	private Map<String, String> jobProperties = Collections.synchronizedMap(new HashMap<String, String>());
 	
 	private boolean isBatchJob = false;
 //
@@ -502,20 +502,20 @@ public class Job implements Comparable<Job> {
 	}
 
 	@CollectionOfElements(fetch = FetchType.EAGER)
-	public Map<String, String> getJobProperties() {
+	public synchronized Map<String, String> getJobProperties() {
 		return jobProperties;
 	}
 
-	private void setJobProperties(final Map<String, String> jobProperties) {
+	private synchronized void setJobProperties(final Map<String, String> jobProperties) {
 		this.jobProperties = jobProperties;
 	}
 
-	public void addJobProperty(final String key, final String value) {
-		this.jobProperties.put(key, value);
+	public synchronized void addJobProperty(final String key, final String value) {
+		getJobProperties().put(key, value);
 	}
 
-	public void addJobProperties(final Map<String, String> properties) {
-		this.jobProperties.putAll(properties);
+	public synchronized void addJobProperties(final Map<String, String> properties) {
+		getJobProperties().putAll(properties);
 	}
 
 	@Transient

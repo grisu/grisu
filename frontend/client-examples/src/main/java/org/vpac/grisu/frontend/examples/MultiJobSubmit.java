@@ -56,10 +56,10 @@ public class MultiJobSubmit {
 		
 //		registry.getApplicationInformation("povray").getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin");
 
-		final int numberOfJobs = 100;
+		final int numberOfJobs = 5;
 		
 		Date start = new Date();
-		final String multiJobName = "sleep100";
+		final String multiJobName = "jobdeleteTest5";
 		try {
 			si.kill(multiJobName, true);
 
@@ -83,14 +83,14 @@ public class MultiJobSubmit {
 				JobObject jo = new JobObject(si);
 				jo.setJobname(multiJobName+"_" + frameNumber );
 				jo.setApplication("java");
-//				jo.setCommandline("java -version");
+				jo.setCommandline("java -version");
 //				jo.setCommandline("cat "+pathToInputFiles+"multiJobFile.txt");
 //				jo.setCommandline("cat singleJobFile.txt "+pathToInputFiles+"/multiJobFile.txt");
 //				jo.setCommandline("cat singleJobFile_"+i+".txt "+pathToInputFiles+"/multiJobFile.txt");
-				jo.setCommandline("sleep 300");
+//				jo.setCommandline("sleep 300");
 				jo.setWalltimeInSeconds(310);
 //				jo.addInputFileUrl("/home/markus/test/singleJobFile_"+i+".txt");
-//				jo.addInputFileUrl("/home/markus/test/singleJobFile.txt");
+				jo.addInputFileUrl("/home/markus/test/singleJobFile.txt");
 
 				multiPartJob.addJob(jo);
 						

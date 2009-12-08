@@ -602,15 +602,18 @@ public class BatchJobObject {
 			});
 		}
 
+		int i = 0;
+		final int all = inputFiles.keySet().size();
 		// uploading common job input files
 		for (final String inputFile : inputFiles.keySet()) {
 
+			i = i+1;
+			final int j = i;
 			Thread thread = new Thread() {
 				public void run() {
-
 					try {
 						EventBus.publish(getBatchJobname(), new BatchJobEvent(
-								BatchJobObject.this, "Uploading input file: "
+								BatchJobObject.this, "Uploading/copying common input file ("+j+" of "+all+"): "
 										+ inputFile + " for multipartjob "
 										+ getBatchJobname()));
 						if (FileManager.isLocal(inputFile)) {

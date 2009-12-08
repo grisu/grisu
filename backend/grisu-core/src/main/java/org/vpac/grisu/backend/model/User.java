@@ -54,28 +54,100 @@ import au.org.arcs.jcommons.constants.Constants;
  * 
  */
 @Entity
-@Table(name="users")
+@Table(name = "users")
 public class User {
-	
-	// to get on filesystemmanager per thread
-	  private static class ThreadLocalFsManager extends ThreadLocal {
-		    public Object initialValue() {
-		    try {
-		    	myLogger.debug("Creating new FS Manager.");
-				return VFSUtil.createNewFsManager(false, false, true, true, true, true, true, null);
-			} catch (FileSystemException e) {
-				e.printStackTrace();
-				throw new RuntimeException(e);
+
+	// to get one filesystemmanager per thread
+	private class ThreadLocalFsManager extends ThreadLocal {
+
+		public Object initialValue() {
+				myLogger.debug("Creating new FS Manager.");
+				FileSystemCache cache = new FileSystemCache();
+				myLogger.debug("Creating fsm for thread "
+						+ Thread.currentThread().getName()+". cachedFileSystems size: "+cache.getFileSystems().size());
+				return cache;
+
+		}
+
+		@Override
+		public void remove() {
+			myLogger.debug("Removing fsm for thread "+Thread.currentThread().getName());
+			((FileSystemCache)get()).close();
+			super.remove();
+		}
+
+		public synchronized FileSystem getFileSystem(final String rootUrl,
+				String fqan) throws FileSystemException {
+
+			ProxyCredential credToUse = null;
+			
+			MountPoint temp = getResponsibleMountpointForAbsoluteFile(rootUrl);
+			if ( fqan == null && temp != null && temp.getFqan() != null ) {
+				fqan = temp.getFqan();
+			}
+			// get the right credential for this mountpoint
+			if (fqan != null) {
+
+				credToUse = getCred(fqan);
+
+
+			} else {
+				credToUse = getCred();
 			}
 
-		    }
+			FileSystem fileBase = null;
+			
+			if (temp == null) {
+				// means we have to figure out how to connect to this. I.e. which fqan to use...
+				throw new FileSystemException("Could not find mountpoint for url "+rootUrl);
+				
+			} else {
+				// great, we can re-use this filesystem
+				if ( ((FileSystemCache)get()).getFileSystem(temp) == null) {
+					FileSystemOptions opts = new FileSystemOptions();
 
-		    public DefaultFileSystemManager getFsManager() { 
-		      return (DefaultFileSystemManager) super.get(); 
-		    }
-		  }
+					if (temp.getRootUrl().startsWith("gsiftp")) {
+						GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
+								.getInstance();
+						builder.setGSSCredential(opts, credToUse
+								.getGssCredential());
+						// builder.setUserDirIsRoot(opts, true);
+					}
 
-	  private ThreadLocalFsManager threadLocalFsManager = new ThreadLocalFsManager();
+					FileObject fileRoot;
+					try {
+						fileRoot = getFsManager().resolveFile(rootUrl, opts);
+					} catch (FileSystemException e) {
+						throw new RuntimeException();
+					}
+					fileBase = fileRoot.getFileSystem();
+
+					if (temp != null) {
+						((FileSystemCache)get()).addFileSystem(temp, fileBase);
+					}
+				} else {
+					fileBase = ((FileSystemCache)get()).getFileSystem(temp);
+				}
+			}
+			return fileBase;
+
+		}
+
+		public DefaultFileSystemManager getFsManager() {
+			return ((FileSystemCache) super.get()).getFileSystemManager();
+		}
+	}
+
+	private ThreadLocalFsManager threadLocalFsManager = new ThreadLocalFsManager();
+	
+	public void closeFileSystems() {
+		threadLocalFsManager.remove();
+	}
+
+	// public void closeFileSystemManager() {
+	// System.out.println("Closing fsm for thread "+Thread.currentThread().getName());
+	// threadLocalFsManager.getFsManager().close();
+	// }
 
 	private static Logger myLogger = Logger.getLogger(User.class.getName());
 
@@ -109,7 +181,7 @@ public class User {
 
 	// filesystem connections are cached so that we don't need to connect again
 	// everytime we access one
-//	private Map<MountPoint, FileSystem> cachedFilesystemConnections = new HashMap<MountPoint, FileSystem>();
+	private Map<MountPoint, FileSystem> cachedFilesystemConnections = new HashMap<MountPoint, FileSystem>();
 	// credentials are chache so we don't have to contact myproxy/voms anytime
 	// we want to make a transaction
 	private Map<String, ProxyCredential> cachedCredentials = new HashMap<String, ProxyCredential>();
@@ -120,9 +192,9 @@ public class User {
 	// private Map<String, String> fqans = null;
 
 	private Map<String, String> userProperties = new HashMap<String, String>();
-	
+
 	private Map<String, String> bookmarks = new HashMap<String, String>();
-	
+
 	private Map<String, JobSubmissionObjectImpl> jobTemplates = new HashMap<String, JobSubmissionObjectImpl>();
 
 	// for hibernate
@@ -284,20 +356,22 @@ public class User {
 	private void setMountPoints(final Set<MountPoint> mountPoints) {
 		this.mountPoints = mountPoints;
 	}
-	
-	public String getFileSystemHomeDirectory(String filesystemRoot, String fqan) throws FileSystemException {
-		
-		FileSystem fileSystem = createFilesystem(filesystemRoot, fqan);
+
+	public String getFileSystemHomeDirectory(String filesystemRoot, String fqan)
+			throws FileSystemException {
+
+//		FileSystem fileSystem = createFilesystem(filesystemRoot, fqan);
+		FileSystem fileSystem = threadLocalFsManager.getFileSystem(filesystemRoot, fqan);
 		myLogger.debug("Connected to file system.");
-		
+
 		myLogger.debug("Using home directory: "
 				+ ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
 						.substring(1));
-		
+
 		String home = (String) fileSystem.getAttribute("HOME_DIRECTORY");
 		String uri = fileSystem.getRoot().getName().getRootURI()
-		+ home.substring(1);
-		
+				+ home.substring(1);
+
 		return uri;
 	}
 
@@ -325,8 +399,8 @@ public class User {
 	 *             if the filesystem could not be mounted
 	 */
 	public MountPoint mountFileSystem(String uri, final String mountPointName,
-			final ProxyCredential cred, final boolean useHomeDirectory, final String site)
-			throws RemoteFileSystemException {
+			final ProxyCredential cred, final boolean useHomeDirectory,
+			final String site) throws RemoteFileSystemException {
 
 		// if (!mountPointName.startsWith("/")) {
 		// mountPointName = "/" + mountPointName;
@@ -344,7 +418,10 @@ public class User {
 		MountPoint new_mp = new MountPoint(cred.getDn(), cred.getFqan(), uri,
 				mountPointName, site);
 		try {
-			FileSystem fileSystem = createFilesystem(new_mp.getRootUrl(), new_mp.getFqan());
+//			FileSystem fileSystem = createFilesystem(new_mp.getRootUrl(),
+//					new_mp.getFqan());
+			
+			FileSystem fileSystem = threadLocalFsManager.getFileSystem(new_mp.getRootUrl(), new_mp.getFqan());
 			myLogger.debug("Connected to file system.");
 			if (useHomeDirectory) {
 				myLogger.debug("Using home directory: "
@@ -378,6 +455,65 @@ public class User {
 
 	}
 
+	// /**
+	// * Connects to the filesystem where the file lives on.
+	// *
+	// * @param file
+	// * the file you want to access (in a later step)
+	// * @param cred
+	// * @return
+	// * @throws FileSystemException
+	// * @throws VomsException
+	// */
+	// private FileSystem connectToFileSystem(final MountPoint mp)
+	// throws FileSystemException {
+	//
+	// // check whether a filesystem for this mountpoint is already cached
+	// if (cachedFilesystemConnections.containsKey(mp)) {
+	// myLogger.debug("Using already cached filesystem for mountpoint: "
+	// + mp.getAlias());
+	// return this.cachedFilesystemConnections.get(mp);
+	// }
+	//
+	// ProxyCredential credToUse = null;
+	//
+	// // get the right credential for this mountpoint
+	// if (mp.getFqan() != null) {
+	//
+	// credToUse = cachedCredentials.get(mp.getFqan());
+	// if (credToUse == null || !credToUse.isValid()) {
+	//
+	// // put a new credential in the cache
+	// VO vo = VOManagement.getVO(getFqans().get(mp.getFqan()));
+	// credToUse = CertHelpers.getVOProxyCredential(vo, mp.getFqan(),
+	// getCred());
+	// cachedCredentials.put(mp.getFqan(), credToUse);
+	// } else {
+	// credToUse = cachedCredentials.get(mp.getFqan());
+	// }
+	//
+	// } else {
+	// credToUse = getCred();
+	// }
+	//
+	// FileSystemOptions opts = new FileSystemOptions();
+	//
+	// if (mp.getRootUrl().startsWith("gsiftp")) {
+	// GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
+	// .getInstance();
+	// builder.setGSSCredential(opts, credToUse.getGssCredential());
+	// // builder.setUserDirIsRoot(opts, true);
+	// }
+	//
+	// FileObject fileRoot = getFsManager().resolveFile(mp.getRootUrl(), opts);
+	//
+	// FileSystem fileBase = fileRoot.getFileSystem();
+	//
+	// this.cachedFilesystemConnections.put(mp, fileBase);
+	//
+	// return fileBase;
+	// }
+
 //	/**
 //	 * Connects to the filesystem where the file lives on.
 //	 * 
@@ -388,31 +524,31 @@ public class User {
 //	 * @throws FileSystemException
 //	 * @throws VomsException
 //	 */
-//	private FileSystem connectToFileSystem(final MountPoint mp)
-//			throws FileSystemException {
+//	private synchronized FileSystem createFilesystem(final String rootUrl,
+//			final String fqan) throws FileSystemException {
 //
-//		// check whether a filesystem for this mountpoint is already cached
-//		if (cachedFilesystemConnections.containsKey(mp)) {
-//			myLogger.debug("Using already cached filesystem for mountpoint: "
-//					+ mp.getAlias());
-//			return this.cachedFilesystemConnections.get(mp);
-//		}
+//		// // check whether a filesystem for this mountpoint is already cached
+//		// if (cachedFilesystemConnections.containsKey(mp)) {
+//		// myLogger.debug("Using already cached filesystem for mountpoint: "
+//		// + mp.getAlias());
+//		// return this.cachedFilesystemConnections.get(mp);
+//		// }
 //
 //		ProxyCredential credToUse = null;
 //
 //		// get the right credential for this mountpoint
-//		if (mp.getFqan() != null) {
+//		if (fqan != null) {
 //
-//			credToUse = cachedCredentials.get(mp.getFqan());
+//			credToUse = cachedCredentials.get(fqan);
 //			if (credToUse == null || !credToUse.isValid()) {
 //
 //				// put a new credential in the cache
-//				VO vo = VOManagement.getVO(getFqans().get(mp.getFqan()));
-//				credToUse = CertHelpers.getVOProxyCredential(vo, mp.getFqan(),
+//				VO vo = VOManagement.getVO(getFqans().get(fqan));
+//				credToUse = CertHelpers.getVOProxyCredential(vo, fqan,
 //						getCred());
-//				cachedCredentials.put(mp.getFqan(), credToUse);
+//				cachedCredentials.put(fqan, credToUse);
 //			} else {
-//				credToUse = cachedCredentials.get(mp.getFqan());
+//				credToUse = cachedCredentials.get(fqan);
 //			}
 //
 //		} else {
@@ -421,83 +557,22 @@ public class User {
 //
 //		FileSystemOptions opts = new FileSystemOptions();
 //
-//		if (mp.getRootUrl().startsWith("gsiftp")) {
+//		if (rootUrl.startsWith("gsiftp")) {
 //			GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
 //					.getInstance();
 //			builder.setGSSCredential(opts, credToUse.getGssCredential());
 //			// builder.setUserDirIsRoot(opts, true);
 //		}
 //
-//		FileObject fileRoot = getFsManager().resolveFile(mp.getRootUrl(), opts);
+//		FileObject fileRoot = getFsManager().resolveFile(rootUrl, opts);
 //
 //		FileSystem fileBase = fileRoot.getFileSystem();
 //
-//		this.cachedFilesystemConnections.put(mp, fileBase);
+//		// this.cachedFilesystemConnections.put(mp, fileBase);
 //
 //		return fileBase;
 //	}
 
-	/**
-	 * Connects to the filesystem where the file lives on.
-	 * 
-	 * @param file
-	 *            the file you want to access (in a later step)
-	 * @param cred
-	 * @return
-	 * @throws FileSystemException
-	 * @throws VomsException
-	 */
-	private synchronized FileSystem createFilesystem(final String rootUrl, final String fqan)
-			throws FileSystemException {
-
-//		// check whether a filesystem for this mountpoint is already cached
-//		if (cachedFilesystemConnections.containsKey(mp)) {
-//			myLogger.debug("Using already cached filesystem for mountpoint: "
-//					+ mp.getAlias());
-//			return this.cachedFilesystemConnections.get(mp);
-//		}
-
-		ProxyCredential credToUse = null;
-
-		// get the right credential for this mountpoint
-		if (fqan != null) {
-
-			credToUse = cachedCredentials.get(fqan);
-			if (credToUse == null || !credToUse.isValid()) {
-
-				// put a new credential in the cache
-				VO vo = VOManagement.getVO(getFqans().get(fqan));
-				credToUse = CertHelpers.getVOProxyCredential(vo, fqan,
-						getCred());
-				cachedCredentials.put(fqan, credToUse);
-			} else {
-				credToUse = cachedCredentials.get(fqan);
-			}
-
-		} else {
-			credToUse = getCred();
-		}
-
-		FileSystemOptions opts = new FileSystemOptions();
-
-		if (rootUrl.startsWith("gsiftp")) {
-			GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
-					.getInstance();
-			builder.setGSSCredential(opts, credToUse.getGssCredential());
-			// builder.setUserDirIsRoot(opts, true);
-		}
-
-		FileObject fileRoot = getFsManager().resolveFile(rootUrl, opts);
-
-		FileSystem fileBase = fileRoot.getFileSystem();
-
-//		this.cachedFilesystemConnections.put(mp, fileBase);
-
-		return fileBase;
-	}
-
-	
-	
 	/**
 	 * Mounts a filesystem using the default credential of a user.
 	 * 
@@ -513,13 +588,15 @@ public class User {
 	 * @throws VomsException
 	 */
 	public MountPoint mountFileSystem(final String root, final String name,
-			final boolean useHomeDirectory, String site) throws RemoteFileSystemException {
+			final boolean useHomeDirectory, String site)
+			throws RemoteFileSystemException {
 
 		return mountFileSystem(root, name, getCred(), useHomeDirectory, site);
 	}
 
-	public MountPoint mountFileSystem(final String root, final String name, final String fqan,
-			final boolean useHomeDirectory, final String site) throws RemoteFileSystemException {
+	public MountPoint mountFileSystem(final String root, final String name,
+			final String fqan, final boolean useHomeDirectory, final String site)
+			throws RemoteFileSystemException {
 
 		if (fqan == null || Constants.NON_VO_FQAN.equals(fqan)) {
 			return mountFileSystem(root, name, useHomeDirectory, site);
@@ -531,7 +608,8 @@ public class User {
 			ProxyCredential vomsProxyCred = CertHelpers.getVOProxyCredential(
 					vo, fqan, getCred());
 
-			return mountFileSystem(root, name, vomsProxyCred, useHomeDirectory, site);
+			return mountFileSystem(root, name, vomsProxyCred, useHomeDirectory,
+					site);
 		}
 	}
 
@@ -555,26 +633,27 @@ public class User {
 		}
 	}
 
-	/**
-	 * Used internally to mount filesystems.
-	 * 
-	 * @return the filesystem manager of the user
-	 * @throws FileSystemException
-	 *             if something goes wrong
-	 */
-	@Transient
-	private DefaultFileSystemManager getFsManager() throws FileSystemException {
-//		if (fsmanager == null) {
-//
-//			fsmanager = VFSUtil.createNewFsManager(false, false, true, true,
-//					true, true, true, null);
-//
-//		}
-//		return fsmanager;
-//		System.out.println("Creating new FS Manager.");
-//		return VFSUtil.createNewFsManager(false, false, true, true, true, true, true, null);
-		return threadLocalFsManager.getFsManager();
-	}
+//	/**
+//	 * Used internally to mount filesystems.
+//	 * 
+//	 * @return the filesystem manager of the user
+//	 * @throws FileSystemException
+//	 *             if something goes wrong
+//	 */
+//	@Transient
+//	private DefaultFileSystemManager getFsManager() throws FileSystemException {
+//		// if (fsmanager == null) {
+//		//
+//		// fsmanager = VFSUtil.createNewFsManager(false, false, true, true,
+//		// true, true, true, null);
+//		//
+//		// }
+//		// return fsmanager;
+//		// System.out.println("Creating new FS Manager.");
+//		// return VFSUtil.createNewFsManager(false, false, true, true, true,
+//		// true, true, null);
+//		return threadLocalFsManager.getFsManager();
+//	}
 
 	/**
 	 * Resolves the provided filename into a FileObject. If the filename starts
@@ -590,8 +669,9 @@ public class User {
 	 *             if the (possible) required voms credential could not be
 	 *             created
 	 */
-	public FileObject aquireFile(final String file) throws RemoteFileSystemException {
-		return aquireFile(file, getCred());
+	public FileObject aquireFile(final String file)
+			throws RemoteFileSystemException {
+		return aquireFile(file, null);
 	}
 
 	/**
@@ -611,23 +691,29 @@ public class User {
 	 *             if the (possible) required voms credential could not be
 	 *             created
 	 */
-	public FileObject aquireFile(final String file, final ProxyCredential plainCred)
+	public FileObject aquireFile(final String file, final String fqan)
 			throws RemoteFileSystemException {
 
 		String file_to_aquire = null;
-		// ProxyCredential credToUse = null;
-		MountPoint mp = null;
 
 		if (file.startsWith("tmp:") || file.startsWith("ram:")) {
 			try {
-				return getFsManager().resolveFile(file);
+				return threadLocalFsManager.getFsManager().resolveFile(file);
 			} catch (FileSystemException e) {
-				throw new RemoteFileSystemException("Could not access file on local temp filesystem: "+e.getLocalizedMessage());
+				throw new RemoteFileSystemException(
+						"Could not access file on local temp filesystem: "
+								+ e.getLocalizedMessage());
 			}
 		} else if (file.startsWith("/")) {
 			// means file on "mounted" filesystem
 
-			mp = getResponsibleMountpointForUserSpaceFile(file);
+			MountPoint mp = getResponsibleMountpointForUserSpaceFile(file);
+
+			if (mp == null) {
+				throw new RemoteFileSystemException(
+						"File path is not on any of the mountpoints for file: "
+								+ file);
+			}
 
 			file_to_aquire = mp.replaceMountpointWithAbsoluteUrl(file);
 
@@ -639,30 +725,14 @@ public class User {
 		} else {
 			// means absolute url
 			file_to_aquire = file;
-			mp = getResponsibleMountpointForAbsoluteFile(file_to_aquire);
-		}
-
-		if (mp == null) {
-			throw new RemoteFileSystemException(
-					"Could not find mountpoint for file with url: "
-							+ file_to_aquire);
 		}
 
 		FileObject fileObject = null;
 		try {
 			FileSystem root = null;
-			// check whether the file root is in the cache so we don't have to
-			// connect again.
-			// TODO check whether vfs does that already
-			// markus
-			// if (!cachedFilesystemConnections.containsKey(mp.getRootUrl())) {
-//			root = this.connectToFileSystem(mp);
-			root = this.createFilesystem(mp.getRootUrl(), mp.getFqan());
-			// } else {
-			// root = this.cachedFilesystemConnections.get(mp.getRootUrl());
-			// }
-			// String actualFile =
-			// file_to_aquire.substring(root.getName().getURI().length());
+
+			// root = this.createFilesystem(mp.getRootUrl(), mp.getFqan());
+			root = threadLocalFsManager.getFileSystem(file, fqan);
 
 			String fileUri = root.getRootName().getURI();
 
@@ -671,7 +741,8 @@ public class User {
 				file_to_aquire = uri.toString();
 			} catch (URISyntaxException e) {
 				e.printStackTrace();
-				throw new RemoteFileSystemException("Could not get uri for file "+file_to_aquire);
+				throw new RemoteFileSystemException(
+						"Could not get uri for file " + file_to_aquire);
 			}
 
 			String tempUriString = file_to_aquire.replace(":2811", "")
@@ -837,6 +908,23 @@ public class User {
 	public ProxyCredential getCred() {
 		return cred;
 	}
+	
+	@Transient
+	public ProxyCredential getCred(String fqan) {
+		
+		ProxyCredential credToUse = cachedCredentials.get(fqan);
+		
+		if (credToUse == null || !credToUse.isValid()) {
+
+			// put a new credential in the cache
+			VO vo = VOManagement.getVO(getFqans().get(fqan));
+			credToUse = CertHelpers.getVOProxyCredential(vo, fqan,
+					getCred());
+			cachedCredentials.put(fqan, credToUse);
+		} 
+		
+		return credToUse;
+	}
 
 	/**
 	 * Sets the default credential for the user. The default credential is used
@@ -852,7 +940,7 @@ public class User {
 
 	public void cleanCache() {
 		// TODO disconnect filesystems somehow?
-//		cachedFilesystemConnections = new HashMap<MountPoint, FileSystem>();
+		// cachedFilesystemConnections = new HashMap<MountPoint, FileSystem>();
 		// // does this affect existing filesystem connection
 		// for ( ProxyCredential proxy : cachedCredentials.values() ) {
 		// proxy.destroy();
@@ -928,7 +1016,7 @@ public class User {
 	private void setUserProperties(final Map<String, String> userProperties) {
 		this.userProperties = userProperties;
 	}
-	
+
 	/**
 	 * Gets a map of this users bookmarks.
 	 * 
@@ -942,11 +1030,11 @@ public class User {
 	private void setBookmarks(final Map<String, String> bm) {
 		this.bookmarks = bm;
 	}
-	
+
 	public void removeBookmark(String alias) {
 		this.bookmarks.remove(alias);
 	}
-	
+
 	public void addBookmark(String alias, String url) {
 		this.bookmarks.put(alias, url);
 	}
@@ -960,6 +1048,5 @@ public class User {
 			final Map<String, JobSubmissionObjectImpl> jobTemplates) {
 		this.jobTemplates = jobTemplates;
 	}
-	
 
 }

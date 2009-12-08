@@ -211,5 +211,7 @@ public interface UserEnvironmentManager {
 	List<FileSystemItem> getBookmarksFilesystems();
 	
 	List<FileSystemItem> getRemoteSites();
+	
+	FileSystemItem getFileSystemForUrl(String url);
 
 }

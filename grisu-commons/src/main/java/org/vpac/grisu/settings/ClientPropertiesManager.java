@@ -549,10 +549,10 @@ public final class ClientPropertiesManager {
 
 		} catch (Exception e) {
 			// myLogger.debug("Problem with config file: " + e.getMessage());
-			return CONCURRENT_THREADS_DEFAULT;
+			return DEFAULT_FILE_UPLOAD_THREADS;
 		}
 		if (threads == -1) {
-			return CONCURRENT_THREADS_DEFAULT;
+			return DEFAULT_FILE_UPLOAD_THREADS;
 		}
 
 		return threads;

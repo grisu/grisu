@@ -140,6 +140,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	private String[] currentFqans = null;
 
+	private boolean checkFileSystemsBeforeUse = false;
+
 	private FileSystemStructureToXMLConverter fsconverter = null;
 
 	private MatchMaker matchmaker = new MatchMakerImpl(Environment
@@ -1143,6 +1145,66 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 		}
 
+		if (checkFileSystemsBeforeUse) {
+
+			myLogger.debug("Checking filesystems to use...");
+
+			final ExecutorService executor1 = Executors
+					.newFixedThreadPool(ServerPropertiesManager
+							.getConcurrentFileTransfersPerUser());
+
+			final Set<GridResource> failSet = Collections
+					.synchronizedSet(new HashSet<GridResource>());
+
+			for (final GridResource gr : resourcesToUse) {
+
+				final String subLoc = SubmissionLocationHelpers
+						.createSubmissionLocationString(gr);
+
+				String[] fs = informationManager
+						.getStagingFileSystemForSubmissionLocation(subLoc);
+
+				for (final MountPoint mp : df(mpj.getFqan())) {
+
+					for (String f : fs) {
+						if (mp.getRootUrl().startsWith(f.replace(":2811", ""))) {
+
+							Thread thread = new Thread() {
+								public void run() {
+									try {
+										if (!fileExists(mp.getRootUrl())) {
+											myLogger.error("Removing sub loc "
+													+ subLoc);
+											failSet.add(gr);
+										}
+									} catch (RemoteFileSystemException e) {
+										myLogger.error("Removing sub loc "
+												+ subLoc + ": "
+												+ e.getLocalizedMessage());
+										failSet.add(gr);
+									}
+								}
+							};
+							executor1.execute(thread);
+						}
+					}
+				}
+			}
+
+			executor1.shutdown();
+
+			try {
+				executor1.awaitTermination(3600, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			resourcesToUse.removeAll(failSet);
+			myLogger.debug("Checking filesystems to use: finished");
+			myLogger.debug("Removed: " + StringUtils.join(failSet, ","));
+		}
+
 		return resourcesToUse;
 
 	}
@@ -1160,29 +1222,31 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			jd = new EqualJobDistributor();
 		}
 
-		final ExecutorService executor1 = Executors
-				.newFixedThreadPool(ServerPropertiesManager
-						.getConcurrentMultiPartJobSubmitThreadsPerUser());
-
-		for (final Job job : sp.getCalculatedJobs()) {
-			if (job.getStatus() > JobConstants.READY_TO_SUBMIT) {
-
-				Thread thread = new Thread() {
-					public void run() {
-					}
-				};
-				executor1.execute(thread);
-			}
-		}
-
-		executor1.shutdown();
-
-		try {
-			executor1.awaitTermination(3 * 3600, TimeUnit.SECONDS);
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		// final ExecutorService executor1 = Executors
+		// .newFixedThreadPool(ServerPropertiesManager
+		// .getConcurrentMultiPartJobSubmitThreadsPerUser());
+		//
+		// for (final Job job : sp.getCalculatedJobs()) {
+		// if (job.getStatus() > JobConstants.READY_TO_SUBMIT) {
+		//
+		// Thread thread = new Thread() {
+		// public void run() {
+		// //TODO what did I want to do here again?
+		// kill(job);
+		// }
+		// };
+		// executor1.execute(thread);
+		// }
+		// }
+		//
+		// executor1.shutdown();
+		//
+		// try {
+		// executor1.awaitTermination(3 * 3600, TimeUnit.SECONDS);
+		// } catch (InterruptedException e1) {
+		// // TODO Auto-generated catch block
+		// e1.printStackTrace();
+		// }
 
 		Map<String, Integer> results = jd.distributeJobs(
 				sp.getCalculatedJobs(), sp.getCalculatedGridResources());
@@ -1225,14 +1289,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						}
 
 						processJobDescription(job, possibleParentBatchJob);
+						jobdao.saveOrUpdate(job);
 					} catch (JobPropertiesException e) {
 						ex.add(e);
 						executor.shutdownNow();
+						jobdao.saveOrUpdate(job);
 					} catch (NoSuchJobException e) {
 						ex.add(e);
 						executor.shutdownNow();
+						jobdao.saveOrUpdate(job);
 					}
-					jobdao.saveOrUpdate(job);
 				}
 			};
 
@@ -1286,82 +1352,69 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 			Thread thread = new Thread() {
 				public void run() {
-					Exception exc = null;
-					for (int i = 0; i < DEFAULT_JOB_SUBMISSION_RETRIES; i++) {
-						try {
-							exc = null;
+					try {
+						Exception exc = null;
+						for (int i = 0; i < DEFAULT_JOB_SUBMISSION_RETRIES; i++) {
+							try {
+								exc = null;
 
-							DtoActionStatus status = null;
-							status = new DtoActionStatus(job.getJobname(), 0);
-							actionStatus.put(job.getJobname(), status);
+								DtoActionStatus status = null;
+								status = new DtoActionStatus(job.getJobname(),
+										0);
+								actionStatus.put(job.getJobname(), status);
 
-							submitJob(job, true, status);
-							newActionStatus.addElement("Added job: "
-									+ job.getJobname());
+								submitJob(job, true, status);
+								newActionStatus.addElement("Added job: "
+										+ job.getJobname());
 
-							break;
-						} catch (Exception e) {
-							myLogger.error("Job submission for multipartjob: "
-									+ multiJob.getBatchJobname() + ", "
-									+ job.getJobname() + " failed: "
-									+ e.getLocalizedMessage());
-							myLogger.error("Trying again...");
-							newActionStatus
-									.addLogMessage("Failed to submit job "
-											+ job.getJobname() + ": "
-											+ e.getLocalizedMessage()
-											+ ". Trying again...");
-							exc = e;
+								break;
+							} catch (Exception e) {
+								myLogger
+										.error("Job submission for multipartjob: "
+												+ multiJob.getBatchJobname()
+												+ ", "
+												+ job.getJobname()
+												+ " failed: "
+												+ e.getLocalizedMessage());
+								myLogger.error("Trying again...");
+								newActionStatus
+										.addLogMessage("Failed to submit job "
+												+ job.getJobname() + ": "
+												+ e.getLocalizedMessage()
+												+ ". Trying again...");
+								exc = e;
+							}
+
+							if (exc != null) {
+								newActionStatus.setFailed(true);
+								myLogger.error("Tried to resubmit job "
+										+ job.getJobname() + " "
+										+ DEFAULT_JOB_SUBMISSION_RETRIES
+										+ " times. Never worked. Giving up...");
+								multiJob.addFailedJob(job.getJobname());
+								newActionStatus
+										.addElement("Tried to resubmit job "
+												+ job.getJobname()
+												+ " "
+												+ DEFAULT_JOB_SUBMISSION_RETRIES
+												+ " times. Never worked. Giving up...");
+							}
+
+							if (newActionStatus.getCurrentElements() == newActionStatus
+									.getTotalElements()) {
+								newActionStatus.setFinished(true);
+							}
+
 						}
-
-						if (exc != null) {
-							newActionStatus.setFailed(true);
-							myLogger.error("Tried to resubmit job "
-									+ job.getJobname() + " "
-									+ DEFAULT_JOB_SUBMISSION_RETRIES
-									+ " times. Never worked. Giving up...");
-							multiJob.addFailedJob(job.getJobname());
-							newActionStatus.addElement("Tried to resubmit job "
-									+ job.getJobname() + " "
-									+ DEFAULT_JOB_SUBMISSION_RETRIES
-									+ " times. Never worked. Giving up...");
-						}
-
-						if (newActionStatus.getCurrentElements() == newActionStatus
-								.getTotalElements()) {
-							newActionStatus.setFinished(true);
-						}
-
+					} finally {
+						getUser().closeFileSystems();
 					}
 				}
 			};
-			// just to get a better chance that the jobs are submitted in the
-			// right order...
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				myLogger.error(e);
-			}
+
 			executor.execute(thread);
 		}
 		executor.shutdown();
-
-		// if (waitForSubmissionsToFinish) {
-		//
-		// try {
-		// executor.awaitTermination(3600 * 24, TimeUnit.SECONDS);
-		// } catch (InterruptedException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// throw new RuntimeException(e);
-		// }
-		// }
-		//
-		// if (failedJobs.size() > 0) {
-		// throw new JobSubmissionException(
-		// "Not all job submissions successful. Failed jobs: "
-		// + StringUtils.join(failedJobs, ", "));
-		// }
 
 	}
 
@@ -1633,8 +1686,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		job.addLogMessage("Restarting job...");
 		job.addLogMessage("Killing possibly running job...");
 		status.addElement("Killing job...");
-		
-		if ( job.getStatus() >= JobConstants.UNSUBMITTED ) {
+
+		if (job.getStatus() >= JobConstants.UNSUBMITTED) {
 			kill(job);
 		}
 
@@ -1810,7 +1863,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		boolean changedCred = false;
 		// TODO check whether cred is stored in the database in that case?
 		if (cred == null || !cred.isValid()) {
-			job.setCredential(user.getCred());
+			job.setCredential(getUser().getCred());
 			changedCred = true;
 		}
 
@@ -2232,13 +2285,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		multiPartJobDao.saveOrUpdate(multiJob);
 		for (final Job job : jobs) {
-			Thread thread = new Thread() {
+			Thread thread = new Thread("killing_" + job.getJobname()) {
 				public void run() {
-
 					try {
+						myLogger.debug("Killing job " + job.getJobname()
+								+ " in thread "
+								+ Thread.currentThread().getName());
+
 						newActionStatus.addElement("Killing job: "
 								+ job.getJobname());
 						kill(job, clean);
+						myLogger.debug("Killed job " + job.getJobname()
+								+ " in thread "
+								+ Thread.currentThread().getName());
 						newActionStatus.addElement("Killed job: "
 								+ job.getJobname());
 					} catch (Exception e) {
@@ -2248,11 +2307,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						newActionStatus.setFailed(true);
 						e.printStackTrace();
 					}
-
 					if (newActionStatus.getTotalElements() <= newActionStatus
 							.getCurrentElements()) {
 						newActionStatus.setFinished(true);
 					}
+
 				}
 			};
 
@@ -2865,6 +2924,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								+ targetFilename + " failed.");
 						status.setFinished(true);
 						status.setFailed(true);
+					} finally {
+						getUser().closeFileSystems();
 					}
 
 				}
@@ -2923,7 +2984,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		fout = null;
 
-		ExecutorService executor = Executors.newFixedThreadPool(multiJob
+		final ExecutorService executor = Executors.newFixedThreadPool(multiJob
 				.getAllUsedMountPoints().size());
 
 		final DtoActionStatus status = new DtoActionStatus(targetFilename,
@@ -2935,32 +2996,65 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			Thread thread = new Thread() {
 				public void run() {
 
-					FileObject target = null;
-
-					String relpathFromMountPointRoot = multiJob
-							.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY);
-					// String parent = filename.substring(0, filename
-					// .lastIndexOf(File.separator));
-					String parent = mountPointRoot + "/"
-							+ relpathFromMountPointRoot;
-
 					try {
-						FileObject parentObject = getUser().aquireFile(parent);
-						// FileObject tempObject = parentObject;
+						FileObject target = null;
 
-						createFolder(parentObject);
-						// parentObject.createFolder();
+						String relpathFromMountPointRoot = multiJob
+								.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY);
+						// String parent = filename.substring(0, filename
+						// .lastIndexOf(File.separator));
+						String parent = mountPointRoot + "/"
+								+ relpathFromMountPointRoot;
+						RemoteFileTransferObject fileTransfer;
 
-						target = getUser().aquireFile(
-								parent + "/" + targetFilename);
-						// just to be sure that the folder exists.
+						for (int tryNo = 0; tryNo <= ServerPropertiesManager
+								.getFileTransferRetries(); tryNo++) {
 
-						myLogger
-								.debug("Calculated target for multipartjob input file: "
-										+ target.getName().toString());
+							myLogger.debug(tryNo + 1
+									+ ". try to transfer file to "
+									+ mountPointRoot);
 
-						RemoteFileTransferObject fileTransfer = new RemoteFileTransferObject(
-								tempFile, target, true);
+							try {
+								FileObject parentObject = getUser().aquireFile(
+										parent);
+								// FileObject tempObject = parentObject;
+
+								createFolder(parentObject);
+								// parentObject.createFolder();
+
+								target = getUser().aquireFile(
+										parent + "/" + targetFilename);
+								// just to be sure that the folder exists.
+
+								myLogger
+										.debug("Calculated target for multipartjob input file: "
+												+ target.getName().toString());
+								break;
+							} catch (Exception e) {
+
+								e.printStackTrace();
+								if (tryNo >= ServerPropertiesManager
+										.getFileTransferRetries() - 1) {
+									status.addElement("Upload to folder "
+											+ parent
+											+ " failed: Could not open file: "
+											+ targetFilename + ":"
+											+ e.getMessage());
+									status.setFailed(true);
+									executor.shutdownNow();
+								} else {
+									// wait for a bit, maybe the gridftp server
+									// needs some time
+									try {
+										Thread.sleep(4000);
+									} catch (InterruptedException e1) {
+										e1.printStackTrace();
+									}
+								}
+							}
+						}
+						fileTransfer = new RemoteFileTransferObject(tempFile,
+								target, true);
 						myLogger
 								.info("Creating fileTransfer object for source: "
 										+ tempFile.getName()
@@ -2969,22 +3063,26 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						// fileTransfers.put(targetFileString, fileTransfer);
 
 						fileTransfer.startTransfer(true);
-						status.addElement("Upload to folder " + parent
-								+ " successful.");
 
-					} catch (Exception e) {
-						e.printStackTrace();
-						status.addElement("Upload to folder " + parent
-								+ " failed: Could not open file: "
-								+ targetFilename + ":" + e.getMessage());
-						status.setFailed(true);
+						if (fileTransfer.isFailed()) {
+							status.addElement("File transfer failed: "
+									+ fileTransfer
+											.getPossibleExceptionMessage());
+							status.setFailed(true);
+							executor.shutdownNow();
+						} else {
+							status.addElement("Upload to folder " + parent
+									+ " successful.");
+						}
+
+						if (status.getTotalElements() <= status
+								.getCurrentElements()) {
+							status.setFinished(true);
+						}
+
+					} finally {
+						getUser().closeFileSystems();
 					}
-
-					if (status.getTotalElements() <= status
-							.getCurrentElements()) {
-						status.setFinished(true);
-					}
-
 				}
 			};
 			executor.execute(thread);
@@ -3383,22 +3481,22 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return DtoProperties
 				.createUserProperties(getUser().getUserProperties());
 	}
-	
+
 	public DtoProperties getBookmarks() {
-		
+
 		return DtoProperties.createUserProperties(getUser().getBookmarks());
 	}
-	
+
 	public void setBookmark(String alias, String value) {
-		
-		if ( StringUtils.isBlank(value) ) {
+
+		if (StringUtils.isBlank(value)) {
 			getUser().getBookmarks().remove(alias);
 		} else {
 			getUser().getBookmarks().put(alias, value);
 		}
-		
+
 		userdao.saveOrUpdate(getUser());
-		
+
 	}
 
 	/*
@@ -3612,13 +3710,25 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			if (job.getJobProperty(Constants.JOBDIRECTORY_KEY) != null) {
 
 				try {
-					FileObject jobDir = getUser().aquireFile(
-							job.getJobProperty(Constants.JOBDIRECTORY_KEY));
-					jobDir.delete(new AllFileSelector());
-					jobDir.delete();
+					myLogger.debug("Deleting jobdir for "
+							+ job.getJobname() + " in thread "
+							+ Thread.currentThread().getName());
+					deleteFile(job.getJobProperty(Constants.JOBDIRECTORY_KEY));
+					myLogger.debug("Deleting success for jobdir for "
+							+ job.getJobname() + " in thread "
+							+ Thread.currentThread().getName());
+					// FileObject jobDir = getUser().aquireFile(
+					// job.getJobProperty(Constants.JOBDIRECTORY_KEY));
+					// jobDir.delete(new AllFileSelector());
+					// jobDir.delete();
 				} catch (Exception e) {
+					myLogger.debug("Deleting NOT success for jobdir for "
+							+ job.getJobname() + " in thread "
+							+ Thread.currentThread().getName() + ": "
+							+ e.getLocalizedMessage());
 					// throw new RemoteFileSystemException(
 					// "Could not delete jobdirectory: " + e.getMessage());
+					myLogger.error(Thread.currentThread().getName());
 					myLogger
 							.error("Could not delete jobdirectory: "
 									+ e.getMessage()
@@ -3692,6 +3802,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							+ e.getLocalizedMessage());
 					actionStat.setFailed(true);
 					actionStat.setFinished(true);
+				} finally {
+					getUser().closeFileSystems();
 				}
 			}
 		};
@@ -3742,14 +3854,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// fileTransfers.put(targetFileString, fileTransfer);
 
 		fileTransfer.startTransfer(waitForFileTransferToFinish);
-
-		// if ( waitForFileTransferToFinish ) {
-		// myLogger.info("Waiting for filetransfer with target "+targetFileString+" to finish.");
-		// fileTransfer.joinFileTransfer();
-		// }
-
-		// myLogger.info("Filetransfer with target " + targetFileString
-		// + " finished.");
 
 		return fileTransfer;
 	}

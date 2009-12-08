@@ -29,49 +29,62 @@ public class FileListPanelPlus extends JPanel {
 	private final ServiceInterface serviceInterface;
 	private String rootUrl;
 	private String startUrl;
-	
+
 	private final UserEnvironmentManager em;
-	
+
 	private FileSystemItem lastFileSystem = null;
-	
-	
+
 	private EventList<FileSystemItem> allFileSystems;
 	private SortedList<FileSystemItem> sortedFileSystemsList;
 	private EventComboBoxModel<FileSystemItem> filesystemModel;
-	
+
+	private boolean fireEvent = true;
+
 	/**
 	 * Create the panel.
 	 */
-	public FileListPanelPlus(ServiceInterface si, String rootUrl, String startUrl) {
+	public FileListPanelPlus(ServiceInterface si, String rootUrl,
+			String startUrl) {
 		this.serviceInterface = si;
-		this.em = GrisuRegistryManager.getDefault(serviceInterface).getUserEnvironmentManager();
-		
-		allFileSystems = GlazedLists.eventList(em.getFileSystems());
-		
-		// Add seperators 
-		allFileSystems.add(new FileSystemItem(FileSystemItem.Type.LOCAL, " -- Local -- "));
-		allFileSystems.add(new FileSystemItem(FileSystemItem.Type.BOOKMARK, " -- Bookmarks -- "));
-		allFileSystems.add(new FileSystemItem(FileSystemItem.Type.REMOTE, " -- Grid -- "));
-		
-		sortedFileSystemsList = new SortedList<FileSystemItem>(
-				allFileSystems, new FileSystemItemComparator());
+		this.em = GrisuRegistryManager.getDefault(serviceInterface)
+				.getUserEnvironmentManager();
 
-		filesystemModel = new EventComboBoxModel<FileSystemItem>(sortedFileSystemsList);
-		
+		allFileSystems = GlazedLists.eventList(em.getFileSystems());
+
+		// Add seperators
+		allFileSystems.add(new FileSystemItem(FileSystemItem.Type.LOCAL,
+				" -- Local -- "));
+		allFileSystems.add(new FileSystemItem(FileSystemItem.Type.BOOKMARK,
+				" -- Bookmarks -- "));
+		allFileSystems.add(new FileSystemItem(FileSystemItem.Type.REMOTE,
+				" -- Grid -- "));
+
+		sortedFileSystemsList = new SortedList<FileSystemItem>(allFileSystems,
+				new FileSystemItemComparator());
+
+		filesystemModel = new EventComboBoxModel<FileSystemItem>(
+				sortedFileSystemsList);
+
 		this.rootUrl = rootUrl;
 		this.startUrl = startUrl;
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(177dlu;default):grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-			new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getComboBox(), "2, 2, fill, default");
 		add(getFileListPanel(), "2, 4, fill, fill");
+		
+		FileSystemItem item = em.getFileSystemForUrl(startUrl);
+		if ( item != null ) {
+			fireEvent = false;
+			getComboBox().setSelectedItem(item);
+			lastFileSystem = item;
+			fireEvent = true;
+		}
 	}
 
 	private JComboBox getComboBox() {
@@ -80,34 +93,38 @@ public class FileListPanelPlus extends JPanel {
 			comboBox.setRenderer(new FileSystemItemRenderer());
 			comboBox.addItemListener(new ItemListener() {
 				public void itemStateChanged(ItemEvent arg0) {
-					
-					if ( ItemEvent.SELECTED == arg0.getStateChange() ) {
-						try {
-							FileSystemItem fsi = (FileSystemItem)(filesystemModel.getSelectedItem());
-							if ( fsi.isDummy() && lastFileSystem != null ) {
-								comboBox.setSelectedItem(lastFileSystem);
-								return;
+
+					if (fireEvent) {
+						if (ItemEvent.SELECTED == arg0.getStateChange()) {
+							try {
+								FileSystemItem fsi = (FileSystemItem) (filesystemModel
+										.getSelectedItem());
+								if (fsi.isDummy() && lastFileSystem != null) {
+									comboBox.setSelectedItem(lastFileSystem);
+									return;
+								}
+								GlazedFile sel = fsi.getRootFile();
+								if (sel.equals(lastFileSystem)) {
+									return;
+								}
+								getFileListPanel().setRootAndCurrentUrl(sel);
+								lastFileSystem = fsi;
+							} catch (NullPointerException e) {
+								// that's ok.
 							}
-							GlazedFile sel = fsi.getRootFile();
-							if ( sel.equals(lastFileSystem) ) {
-								return;
-							}
-							getFileListPanel().setRootAndCurrentUrl(sel);
-							lastFileSystem = fsi;
-						} catch (NullPointerException e) {
-							// that's ok.
+
 						}
-						
 					}
 				}
 			});
 		}
 		return comboBox;
 	}
-	
+
 	private FileListPanel getFileListPanel() {
 		if (fileListPanel == null) {
-			fileListPanel = new FileListPanel(serviceInterface, rootUrl, startUrl);
+			fileListPanel = new FileListPanel(serviceInterface, rootUrl,
+					startUrl);
 		}
 		return fileListPanel;
 	}
