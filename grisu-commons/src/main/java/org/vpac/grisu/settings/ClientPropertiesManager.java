@@ -55,6 +55,29 @@ public final class ClientPropertiesManager {
 		}
 		return config;
 	}
+	
+	public static String getProperty(String key) {
+		
+		String value = null;
+		try {
+			value = getClientConfiguration().getString(key);
+		} catch (ConfigurationException e) {
+			throw new RuntimeException(e);
+		}
+		return value;
+		
+	}
+	
+
+	public static void setProperty(String lastBlenderFileDir, String string) {
+
+		try {
+			getClientConfiguration().setProperty(lastBlenderFileDir, string);
+			getClientConfiguration().save();
+		} catch (ConfigurationException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	/**
 	 * Returns all serviceInterface urls that the user connected to successfully
@@ -575,5 +598,6 @@ public final class ClientPropertiesManager {
 
 		return retries;
 	}
+
 
 }
