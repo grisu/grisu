@@ -89,6 +89,7 @@ public class LoginManager {
 		return login((GlobusCredential)null, password, username, idp, "Local", saveCredendentialsToLocalProxy);
 	}
 	
+	
 	/**
 	 * Standard shib login.
 	 * 
@@ -371,21 +372,6 @@ public class LoginManager {
 
 		try {
 
-//			Class slcsClass = Class.forName("au.org.arcs.auth.slcs.SLCS");
-//			Object slcsObject = slcsClass.newInstance();
-//
-//			Method initMethod = slcsClass.getMethod("init", String.class,
-//					char[].class, String.class);
-//			initMethod.invoke(slcsObject, username, password, idp);
-//
-//			Method getCredMethod = slcsClass.getMethod("getCertificate");
-//			X509Certificate cert = (X509Certificate) getCredMethod
-//					.invoke(slcsObject);
-//
-//			Method getKeyMethod = slcsClass.getMethod("getPrivateKey");
-//			PrivateKey privateKey = (PrivateKey) getKeyMethod
-//					.invoke(slcsObject);
-			
 			IdpObject idpO = new StaticIdpObject(idp);
 			CredentialManager cm = new StaticCredentialManager(username, password);
 			SLCS slcs = new SLCS(SLCS.DEFAULT_SLCS_URL, idpO, cm);
@@ -403,7 +389,7 @@ public class LoginManager {
 	
 	public static void main(String[] args) throws LoginException {
 		
-		ServiceInterface si = LoginManager.shiblogin("name", "passwd".toCharArray(), "VPAC", true);
+		ServiceInterface si = LoginManager.shiblogin("markus", args[0].toCharArray(), "VPAC", true);
 		
 	}
 
