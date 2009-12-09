@@ -1384,28 +1384,26 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 												+ ". Trying again...");
 								exc = e;
 							}
-
-							if (exc != null) {
-								newActionStatus.setFailed(true);
-								myLogger.error("Tried to resubmit job "
-										+ job.getJobname() + " "
-										+ DEFAULT_JOB_SUBMISSION_RETRIES
-										+ " times. Never worked. Giving up...");
-								multiJob.addFailedJob(job.getJobname());
-								newActionStatus
-										.addElement("Tried to resubmit job "
-												+ job.getJobname()
-												+ " "
-												+ DEFAULT_JOB_SUBMISSION_RETRIES
-												+ " times. Never worked. Giving up...");
-							}
-
-							if (newActionStatus.getCurrentElements() >= newActionStatus
-									.getTotalElements()) {
-								newActionStatus.setFinished(true);
-							}
-
 						}
+
+						if (exc != null) {
+							newActionStatus.setFailed(true);
+							myLogger.error("Tried to resubmit job "
+									+ job.getJobname() + " "
+									+ DEFAULT_JOB_SUBMISSION_RETRIES
+									+ " times. Never worked. Giving up...");
+							multiJob.addFailedJob(job.getJobname());
+							newActionStatus.addElement("Tried to resubmit job "
+									+ job.getJobname() + " "
+									+ DEFAULT_JOB_SUBMISSION_RETRIES
+									+ " times. Never worked. Giving up...");
+						}
+
+						if (newActionStatus.getCurrentElements() >= newActionStatus
+								.getTotalElements()) {
+							newActionStatus.setFinished(true);
+						}
+
 					} finally {
 						getUser().closeFileSystems();
 					}
@@ -1554,15 +1552,20 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		if (actionStatus.get(batchJobname) != null
 				&& !actionStatus.get(batchJobname).isFinished()) {
-			
-//			System.out.println("Submission: "+actionStatus.get(batchJobname).getCurrentElements()+
-//					" / " +actionStatus.get(batchJobname).getTotalElements());
-			
+
+//			System.out
+//					.println("Submission: "
+//							+ actionStatus.get(batchJobname)
+//									.getCurrentElements() + " / "
+//							+ actionStatus.get(batchJobname).getTotalElements());
+
 			// we don't want to interfere with a possible ongoing jobsubmission
-			myLogger.debug("not restarting job because jobsubmission is still ongoing.");
-			throw new JobPropertiesException("Job submission is still ongoing in background.");
+			myLogger
+					.debug("not restarting job because jobsubmission is still ongoing.");
+			throw new JobPropertiesException(
+					"Job submission is still ongoing in background.");
 		}
-		
+
 		final DtoActionStatus status = new DtoActionStatus(batchJobname, 3);
 		actionStatus.put(batchJobname, status);
 
@@ -3714,9 +3717,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			if (job.getJobProperty(Constants.JOBDIRECTORY_KEY) != null) {
 
 				try {
-					myLogger.debug("Deleting jobdir for "
-							+ job.getJobname() + " in thread "
-							+ Thread.currentThread().getName());
+					myLogger.debug("Deleting jobdir for " + job.getJobname()
+							+ " in thread " + Thread.currentThread().getName());
 					deleteFile(job.getJobProperty(Constants.JOBDIRECTORY_KEY));
 					myLogger.debug("Deleting success for jobdir for "
 							+ job.getJobname() + " in thread "

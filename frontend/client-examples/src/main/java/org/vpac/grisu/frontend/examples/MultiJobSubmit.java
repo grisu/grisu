@@ -53,10 +53,10 @@ public class MultiJobSubmit {
 		
 //		registry.getApplicationInformation("povray").getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin");
 
-		final int numberOfJobs = 50;
+		final int numberOfJobs = 20;
 		
 		Date start = new Date();
-		final String multiJobName = "jobTest50_7";
+		final String multiJobName = "jobTest20_5";
 		try {
 			si.kill(multiJobName, true);
 
@@ -122,8 +122,7 @@ public class MultiJobSubmit {
 		
 
 		System.out.println("Submission finished: "+new Date());
-		
-		int i = 0;
+		int i=0;
 		boolean resubmitted = false;
 
 		while ( ! multiPartJob.isFinished(true) ) {
@@ -133,7 +132,7 @@ public class MultiJobSubmit {
 			multiPartJob.getJobs().size();
 			System.out.println(multiPartJob.getDetails());
 			
-			if ( i >= 10 && ! resubmitted ) {
+			if ( ! resubmitted ) {
 				System.out.println("Resubmitting....");
 				ResubmitPolicy policy = new ResubmitPolicy();
 				policy.setProperty(ResubmitPolicy.RESTART_WAITING_JOBS, false);

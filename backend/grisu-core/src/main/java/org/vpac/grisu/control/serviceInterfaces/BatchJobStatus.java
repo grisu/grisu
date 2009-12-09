@@ -84,6 +84,12 @@ public class BatchJobStatus {
 				addRunning(job);
 			}
 		}
+		
+		doneSubLocs.removeAll(failedSubLocs);
+		runningSubLocs.removeAll(failedSubLocs);
+		waitingSubLocs.removeAll(failedSubLocs);
+		waitingSubLocs.removeAll(doneSubLocs);
+		waitingSubLocs.removeAll(runningSubLocs);
 	}
 	
 	public List<Job> getReadyJobs() {
