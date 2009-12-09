@@ -13,11 +13,14 @@ import org.apache.commons.ssl.TrustMaterial;
 import org.apache.log4j.Logger;
 import org.globus.gsi.GlobusCredential;
 import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSException;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.utils.GrisuPluginFilenameFilter;
+import org.vpac.security.light.CredentialHelpers;
 import org.vpac.security.light.control.CertificateFiles;
+import org.vpac.security.light.plainProxy.LocalProxy;
 import org.vpac.security.light.plainProxy.PlainProxy;
 
 import au.org.arcs.auth.shibboleth.CredentialManager;
@@ -25,6 +28,7 @@ import au.org.arcs.auth.shibboleth.IdpObject;
 import au.org.arcs.auth.shibboleth.StaticCredentialManager;
 import au.org.arcs.auth.shibboleth.StaticIdpObject;
 import au.org.arcs.auth.slcs.SLCS;
+import au.org.arcs.jcommons.configuration.CommonArcsProperties;
 import au.org.arcs.jcommons.constants.ArcsEnvironment;
 import au.org.arcs.jcommons.dependencies.ClasspathHacker;
 import au.org.arcs.jcommons.dependencies.Dependency;
@@ -228,6 +232,10 @@ public class LoginManager {
 
 		java.security.Security.setProperty("ssl.TrustManagerFactory.algorithm",
 				"TrustAllCertificates");
+		
+		if ( loginParams == null ) {
+			loginParams = new LoginParams("Local", null, null);
+		}
 
 		try {
 			addPluginsToClasspath();
@@ -328,6 +336,14 @@ public class LoginManager {
 				} else {
 					// means to create local proxy
 					try {
+						//TODO should put that one somewhere else
+						if ( saveCredentialAsLocalProxy ) {
+						try {
+							LocalProxy.gridProxyInit(password, 240);
+						} catch (Exception e) {
+							throw new ServiceInterfaceException("Could not create local proxy.", e);
+						}
+						}
 						return LoginHelpers.localProxyLogin(password,
 								loginParams);
 					} catch (ServiceInterfaceException e) {
@@ -356,6 +372,11 @@ public class LoginManager {
 
 				GSSCredential slcsproxy = slcsMyProxyInit(username, password,
 						idp);
+				
+				if ( saveCredentialAsLocalProxy ) {
+					CredentialHelpers.writeToDisk(slcsproxy);
+				}
+				
 				return LoginHelpers.gssCredentialLogin(loginParams, slcsproxy);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -367,6 +388,7 @@ public class LoginManager {
 
 	}
 
+
 	public static GSSCredential slcsMyProxyInit(String username,
 			char[] password, String idp) throws Exception {
 
@@ -377,6 +399,9 @@ public class LoginManager {
 			SLCS slcs = new SLCS(SLCS.DEFAULT_SLCS_URL, idpO, cm);
 			
 			GSSCredential cred = PlainProxy.init(slcs.getCertificate(), slcs.getPrivateKey(), 24 * 10);
+			
+			CommonArcsProperties.getDefault().setLastShibUsername(username);
+			CommonArcsProperties.getDefault().setLastShibIdp(idp);
 			return cred;
 
 
