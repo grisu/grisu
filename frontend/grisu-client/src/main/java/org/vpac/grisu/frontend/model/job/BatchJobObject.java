@@ -256,15 +256,15 @@ public class BatchJobObject {
 		return dtoMultiPartJob;
 	}
 	
-	public void restart(ResubmitPolicy policy, boolean waitForRefreshToFinish) {
+	public boolean restart(ResubmitPolicy policy, boolean waitForRefreshToFinish) {
 		
 		
 		try {
 			optimizationResult = serviceInterface.restartBatchJob(batchJobname, Constants.SUBMIT_POLICY_DEFAULT_RESTART, policy.toDto()).propertiesAsMap();
 		} catch (NoSuchJobException e) {
-			throw new RuntimeException(e);
+			return false;
 		} catch (JobPropertiesException e) {
-			throw new RuntimeException(e);
+			return false;
 		}
 
 		if (waitForRefreshToFinish) {
@@ -272,6 +272,7 @@ public class BatchJobObject {
 			String handle = batchJobname;
 			DtoActionStatus status = serviceInterface.getActionStatus(handle);
 			while (!status.isFinished()) {
+				
 				try {
 					Thread.sleep(ClientPropertiesManager
 							.getJobStatusRecheckIntervall());
@@ -281,6 +282,8 @@ public class BatchJobObject {
 				status = serviceInterface.getActionStatus(handle);
 			}
 		}
+		
+		return true;
 		
 		
 	}

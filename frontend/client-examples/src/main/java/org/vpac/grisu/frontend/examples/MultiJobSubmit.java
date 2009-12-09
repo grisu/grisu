@@ -4,22 +4,19 @@ import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.annotation.AnnotationProcessor;
 import org.bushe.swing.event.annotation.EventSubscriber;
+import org.vpac.grisu.control.ResubmitPolicy;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.frontend.model.StatusObject;
 import org.vpac.grisu.frontend.model.events.BatchJobEvent;
-import org.vpac.grisu.frontend.model.events.SystemOutStatusLogger;
+import org.vpac.grisu.frontend.model.job.BatchJobObject;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.model.job.JobsException;
-import org.vpac.grisu.frontend.model.job.BatchJobObject;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
-import org.vpac.grisu.model.dto.DtoActionStatus;
-import org.vpac.grisu.model.dto.DtoBatchJob;
 
 import au.org.arcs.jcommons.constants.Constants;
 
@@ -56,10 +53,10 @@ public class MultiJobSubmit {
 		
 //		registry.getApplicationInformation("povray").getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin");
 
-		final int numberOfJobs = 5;
+		final int numberOfJobs = 50;
 		
 		Date start = new Date();
-		final String multiJobName = "jobdeleteTest5";
+		final String multiJobName = "jobTest50_7";
 		try {
 			si.kill(multiJobName, true);
 
@@ -67,7 +64,6 @@ public class MultiJobSubmit {
 			status.waitForActionToFinish(3, true, true);
 			
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 		
 		BatchJobObject multiPartJob = new BatchJobObject(si, multiJobName, "/ARCS/NGAdmin", "Java", Constants.NO_VERSION_INDICATOR_STRING);
@@ -90,7 +86,7 @@ public class MultiJobSubmit {
 //				jo.setCommandline("sleep 300");
 				jo.setWalltimeInSeconds(310);
 //				jo.addInputFileUrl("/home/markus/test/singleJobFile_"+i+".txt");
-				jo.addInputFileUrl("/home/markus/test/singleJobFile.txt");
+//				jo.addInputFileUrl("/home/markus/test/singleJobFile.txt");
 
 				multiPartJob.addJob(jo);
 						
@@ -127,11 +123,30 @@ public class MultiJobSubmit {
 
 		System.out.println("Submission finished: "+new Date());
 		
+		int i = 0;
+		boolean resubmitted = false;
 
 		while ( ! multiPartJob.isFinished(true) ) {
+			i = i+1;
 			System.out.println("Not finished yet...");
+			System.out.println("Iteration: "+i);
 			multiPartJob.getJobs().size();
 			System.out.println(multiPartJob.getDetails());
+			
+			if ( i >= 10 && ! resubmitted ) {
+				System.out.println("Resubmitting....");
+				ResubmitPolicy policy = new ResubmitPolicy();
+				policy.setProperty(ResubmitPolicy.RESTART_WAITING_JOBS, false);
+				
+				resubmitted = multiPartJob.restart(policy, true);
+				if ( resubmitted ) {
+				System.out.println("Distribution for job resubmission:");
+				for ( String subLoc : multiPartJob.getOptimizationResult().keySet() ) {
+					System.out.println(subLoc + ":" + multiPartJob.getOptimizationResult().get(subLoc));
+				}
+				}
+			}
+			
 			Thread.sleep(2000);
 		}
 		

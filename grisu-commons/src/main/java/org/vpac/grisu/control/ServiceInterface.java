@@ -1095,7 +1095,7 @@ public interface ServiceInterface {
 	 * @param properties the restart policy properties //TODO not implemented yet, only default one supported
 	 * @return the job distribution figures of the re-submitted jobs
 	 * @throws NoSuchJobException if no such batchjob exists
-	 * @throws JobPropertiesException if one of the jobs can't be recreated
+	 * @throws JobPropertiesException if one of the jobs can't be recreated or if the job submission of this batch job is still ongoing in the background
 	 */
 	@RolesAllowed("User")
 	DtoProperties restartBatchJob(final String jobname, String restartPolicy, DtoProperties properties) throws NoSuchJobException, JobPropertiesException;

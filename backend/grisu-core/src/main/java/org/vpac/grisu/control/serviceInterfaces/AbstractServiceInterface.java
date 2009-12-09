@@ -1400,7 +1400,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 												+ " times. Never worked. Giving up...");
 							}
 
-							if (newActionStatus.getCurrentElements() == newActionStatus
+							if (newActionStatus.getCurrentElements() >= newActionStatus
 									.getTotalElements()) {
 								newActionStatus.setFinished(true);
 							}
@@ -1553,12 +1553,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		BatchJob job = getMultiPartJobFromDatabase(batchJobname);
 
 		if (actionStatus.get(batchJobname) != null
-				&& !actionStatus.get(batchJobname).isFailed()) {
+				&& !actionStatus.get(batchJobname).isFinished()) {
+			
+//			System.out.println("Submission: "+actionStatus.get(batchJobname).getCurrentElements()+
+//					" / " +actionStatus.get(batchJobname).getTotalElements());
+			
 			// we don't want to interfere with a possible ongoing jobsubmission
-			return DtoProperties
-					.createUserProperties(new HashMap<String, String>());
+			myLogger.debug("not restarting job because jobsubmission is still ongoing.");
+			throw new JobPropertiesException("Job submission is still ongoing in background.");
 		}
-
+		
 		final DtoActionStatus status = new DtoActionStatus(batchJobname, 3);
 		actionStatus.put(batchJobname, status);
 
