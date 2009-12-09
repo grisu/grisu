@@ -20,6 +20,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
+import org.vpac.grisu.control.ResubmitPolicy;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.BatchJobException;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
@@ -253,6 +254,35 @@ public class BatchJobObject {
 			}
 		}
 		return dtoMultiPartJob;
+	}
+	
+	public void restart(ResubmitPolicy policy, boolean waitForRefreshToFinish) {
+		
+		
+		try {
+			optimizationResult = serviceInterface.restartBatchJob(batchJobname, Constants.SUBMIT_POLICY_DEFAULT_RESTART, policy.toDto()).propertiesAsMap();
+		} catch (NoSuchJobException e) {
+			throw new RuntimeException(e);
+		} catch (JobPropertiesException e) {
+			throw new RuntimeException(e);
+		}
+
+		if (waitForRefreshToFinish) {
+
+			String handle = batchJobname;
+			DtoActionStatus status = serviceInterface.getActionStatus(handle);
+			while (!status.isFinished()) {
+				try {
+					Thread.sleep(ClientPropertiesManager
+							.getJobStatusRecheckIntervall());
+				} catch (InterruptedException e) {
+					// doesn't happen
+				}
+				status = serviceInterface.getActionStatus(handle);
+			}
+		}
+		
+		
 	}
 
 	/**
