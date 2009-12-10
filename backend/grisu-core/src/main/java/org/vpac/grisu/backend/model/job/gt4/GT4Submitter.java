@@ -179,7 +179,7 @@ public class GT4Submitter extends JobSubmitter {
 		if (memory != null && memory >= 0) {
 			Element totalMemory = output.createElement("maxMemory");
 			// convert from bytes to mb
-			memory = memory / (1024 * 1024);
+			memory = memory / 1024;
 			totalMemory.setTextContent(memory.toString());
 			job.appendChild(totalMemory);
 		}
