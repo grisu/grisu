@@ -6,8 +6,11 @@ import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.frontend.control.login.LoginException;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.control.login.LoginParams;
-import org.vpac.grisu.model.dto.DtoJob;
+import org.vpac.grisu.model.GrisuRegistry;
+import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.DtoBatchJob;
+import org.vpac.grisu.model.dto.DtoJob;
+import org.vpac.grisu.model.info.ApplicationInformation;
 
 public final class JobCreationInfo {
 	
@@ -52,18 +55,19 @@ public final class JobCreationInfo {
 		}
 
 
-//		GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
-//		
-//		for ( String subLoc : registry.getUserEnvironmentManager().getAllAvailableSubmissionLocations() ) {
-//			System.out.println(subLoc);
-//		}
-//
-//		ApplicationInformation appInfo = registry
-//				.getApplicationInformation("java");
-//		for (String version : appInfo
-//				.getAllAvailableVersionsForFqan("/ARCS/NGAdmin")) {
-//			System.out.println(version);
-//		}
+		GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
+		registry.getResourceInformation().getAllSubmissionLocations();
+		
+		for ( String subLoc : registry.getUserEnvironmentManager().getAllAvailableSubmissionLocations() ) {
+			System.out.println(subLoc);
+		}
+
+		ApplicationInformation appInfo = registry
+				.getApplicationInformation("java");
+		for (String version : appInfo
+				.getAllAvailableVersionsForFqan("/ARCS/NGAdmin")) {
+			System.out.println(version);
+		}
 
 	}
 
