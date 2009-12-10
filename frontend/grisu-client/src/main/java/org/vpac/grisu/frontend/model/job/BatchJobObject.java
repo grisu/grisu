@@ -701,17 +701,8 @@ public class BatchJobObject {
 			throw exceptions.get(0);
 		}
 	}
-
-	/**
-	 * Tells the backend to submit this multipart job.
-	 * 
-	 * @throws JobSubmissionException
-	 *             if the jobsubmission fails
-	 * @throws NoSuchJobException
-	 *             if no such job exists on the backend
-	 */
-	public void submit() throws JobSubmissionException, NoSuchJobException {
-
+	
+	public void submit(boolean waitForSubmissionToFinish) throws JobSubmissionException, NoSuchJobException {
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 				"Submitting multipartjob " + batchJobname + " to backend..."));
 		try {
@@ -727,7 +718,8 @@ public class BatchJobObject {
 							+ " failed: " + nsje.getLocalizedMessage()));
 			throw nsje;
 		}
-		EventBus
+		if ( waitForSubmissionToFinish ) {
+			EventBus
 				.publish(
 						this.batchJobname,
 						new BatchJobEvent(
@@ -735,6 +727,26 @@ public class BatchJobObject {
 								"All jobs of multipartjob "
 										+ batchJobname
 										+ " ready for submission. Continuing submission in background..."));
+		} else {
+			
+			StatusObject status = new StatusObject(serviceInterface, this.batchJobname, (StatusObject.Listener)null);
+			
+			status.waitForActionToFinish(4, false, true, "Submission status: ");
+			
+		}
+	}
+
+	/**
+	 * Tells the backend to submit this multipart job.
+	 * 
+	 * @throws JobSubmissionException
+	 *             if the jobsubmission fails
+	 * @throws NoSuchJobException
+	 *             if no such job exists on the backend
+	 */
+	public void submit() throws JobSubmissionException, NoSuchJobException {
+
+		submit(false);
 	}
 
 	/**
@@ -874,7 +886,7 @@ public class BatchJobObject {
 				
 				EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 						"Optimizing of multipartjob " + batchJobname
-								+ " finished."));
+								+ " finished.\nJob distribution: "+getOptimizationResult()));
 			} catch (NoSuchJobException e) {
 				throw new RuntimeException(e);
 			}

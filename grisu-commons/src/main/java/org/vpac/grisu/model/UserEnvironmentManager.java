@@ -214,4 +214,18 @@ public interface UserEnvironmentManager {
 	
 	FileSystemItem getFileSystemForUrl(String url);
 
+	/**
+	 * Calculates a unique jobname.
+	 * 
+	 * Looks up all existing jobs and appends a number if the string already exists.
+	 * 
+	 * @param name the base-name
+	 * @return the unique jobname
+	 */
+	String calculateUniqueJobname(String name);
+	
+	SortedSet<String> getCurrentBatchJobnames();
+	
+	SortedSet<String> getCurrentJobnames();
+
 }

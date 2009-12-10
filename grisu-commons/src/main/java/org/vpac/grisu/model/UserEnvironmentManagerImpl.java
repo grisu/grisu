@@ -15,6 +15,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.files.FileSystemItem;
 import org.vpac.grisu.model.files.GlazedFile;
 import org.vpac.grisu.model.info.ResourceInformation;
@@ -48,6 +49,11 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	private List<FileSystemItem> cachedBookmarkFilesystemList = null;
 	private List<FileSystemItem> cachedRemoteFilesystemList = null;
 	private List<FileSystemItem> cachedAllFileSystems = null;
+	
+	private SortedSet<DtoJob> cachedJobList = null;
+	
+	private SortedSet<String> cachedJobNames = null;
+	private SortedSet<String> cachedBatchJobNames = null;
 	
 	private String currentFqan;
 
@@ -443,6 +449,42 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 			}
 		}
 		return null;
+	}
+	
+	public SortedSet<DtoJob> getCurrentJobs(boolean refreshJobStatus) {
+		if ( cachedJobList == null ) {
+			cachedJobList = serviceInterface.ps(null, refreshJobStatus).getAllJobs();
+		}
+		return cachedJobList;
+	}
+
+	public SortedSet<String> getCurrentJobnames() {
+
+		if ( cachedJobNames == null ) {
+			cachedJobNames = new TreeSet<String>(serviceInterface.getAllJobnames(null).getStringList());
+		}
+		return cachedJobNames;
+	}
+	
+	public SortedSet<String> getCurrentBatchJobnames() {
+
+		if ( cachedBatchJobNames == null ) {
+			cachedBatchJobNames = new TreeSet<String>(serviceInterface.getAllBatchJobnames(null).getStringList());
+		}
+		return cachedBatchJobNames;
+	}
+
+	public String calculateUniqueJobname(String name) {
+
+		String temp = name;
+		int i = 1;
+		
+		while ( getCurrentJobnames().contains(temp) || getCurrentBatchJobnames().contains(temp) ) {
+			temp = name +"_"+i;
+			i = i + 1;
+		}
+		
+		return temp;
 	}
 	
 	
