@@ -70,6 +70,11 @@ public class LoginManager {
 		return login((GlobusCredential)null, (char[])null, (String)null, (String)null, url, false);
 	}
 	
+	public static ServiceInterface myProxyLogin(String url, String username, char[] password) throws LoginException {
+		LoginParams loginParams = new LoginParams(url, username, password);
+		return login(null, null, null, null, loginParams, false);
+	}
+	
 	/**
 	 * Standard shib login to local backend.
 	 * 
