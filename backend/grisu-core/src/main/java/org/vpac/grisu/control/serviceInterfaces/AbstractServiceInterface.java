@@ -1310,9 +1310,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		try {
 			executor.awaitTermination(10 * 3600, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			executor.shutdownNow();
+			Thread.currentThread().interrupt();
+			return null;
 		}
+
 
 		if (ex.size() > 0) {
 			throw new JobPropertiesException(
@@ -2847,6 +2849,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			byte[] buffer = new byte[1024]; // byte buffer
 			int bytesRead = 0;
 			while (true) {
+				if (Thread.interrupted()) {
+					Thread.currentThread().interrupt();
+					buf.close();
+					fout.close();
+					throw new RemoteFileSystemException("File transfer interrupted.");
+				}
 				bytesRead = buf.read(buffer, 0, 1024);
 				// bytesRead returns the actual number of bytes read from
 				// the stream. returns -1 when end of stream is detected
@@ -2965,11 +2973,24 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		myLogger.debug("Receiving data for file: " + targetFilename);
 
+		if ( Thread.interrupted() ) {
+			Thread.currentThread().interrupt();
+			return;
+		}
+		
 		try {
 
 			byte[] buffer = new byte[1024]; // byte buffer
 			int bytesRead = 0;
 			while (true) {
+				
+				if ( Thread.interrupted() ) {
+					Thread.currentThread().interrupt();
+					fout.close();
+					buf.close();
+					return;
+				}
+				
 				bytesRead = buf.read(buffer, 0, 1024);
 				// bytesRead returns the actual number of bytes read from
 				// the stream. returns -1 when end of stream is detected
@@ -3000,6 +3021,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		for (final String mountPointRoot : multiJob.getAllUsedMountPoints()) {
 
+			if ( Thread.interrupted() ) {
+				executor.shutdownNow();
+				Thread.currentThread().interrupt();
+				status.setFinished(true);
+				status.setFailed(true);
+				return;
+			}
+			
 			Thread thread = new Thread() {
 				public void run() {
 
@@ -3021,6 +3050,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 									+ ". try to transfer file to "
 									+ mountPointRoot);
 
+							if ( Thread.interrupted() ) {
+								Thread.currentThread().interrupt();
+								executor.shutdownNow();
+								return;
+							}
+							
 							try {
 								FileObject parentObject = getUser().aquireFile(
 										parent);
@@ -3038,7 +3073,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 												+ target.getName().toString());
 								break;
 							} catch (Exception e) {
-
+								
+								if ( Thread.interrupted() ) {
+									Thread.currentThread().interrupt();
+									executor.shutdownNow();
+									return;
+								}
 								e.printStackTrace();
 								if (tryNo >= ServerPropertiesManager
 										.getFileTransferRetries() - 1) {
@@ -3053,12 +3093,21 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 									// wait for a bit, maybe the gridftp server
 									// needs some time
 									try {
-										Thread.sleep(4000);
+										Thread.sleep(3000);
 									} catch (InterruptedException e1) {
 										e1.printStackTrace();
+										Thread.currentThread().interrupt();
 									}
 								}
 							}
+						}
+
+						if ( Thread.interrupted() ) {
+							Thread.currentThread().interrupt();
+							executor.shutdownNow();
+							status.setFinished(true);
+							status.setFailed(true);
+							return;
 						}
 						fileTransfer = new RemoteFileTransferObject(tempFile,
 								target, true);
@@ -3068,8 +3117,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 										+ " and target: "
 										+ target.toString());
 						// fileTransfers.put(targetFileString, fileTransfer);
-
+						
 						fileTransfer.startTransfer(true);
+						
+						if ( Thread.interrupted() ) {
+							Thread.currentThread().interrupt();
+							executor.shutdownNow();
+							status.setFinished(true);
+							status.setFailed(true);
+							return;
+						}
 
 						if (fileTransfer.isFailed()) {
 							status.addElement("File transfer failed: "

@@ -23,6 +23,10 @@ public class DtoProperties {
 	
 	public static DtoProperties createUserPropertiesIntegerValue(Map<String, Integer> userProperties) {
 		
+		if ( userProperties == null ) {
+			return null;
+		}
+		
 		DtoProperties result = new DtoProperties();
 		
 		List<DtoProperty> list = new LinkedList<DtoProperty>();

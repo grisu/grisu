@@ -62,12 +62,12 @@ public class StatusObject {
 	}
 
 	public void waitForActionToFinish(int recheckIntervalInSeconds,
-			boolean exitIfFailed, boolean sendStatusEvent) {
+			boolean exitIfFailed, boolean sendStatusEvent) throws InterruptedException {
 		waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed, sendStatusEvent, null);
 	}
 	
 	public void waitForActionToFinish(int recheckIntervalInSeconds,
-				boolean exitIfFailed, boolean sendStatusEvent, String statusMessagePrefix) {
+				boolean exitIfFailed, boolean sendStatusEvent, String statusMessagePrefix) throws InterruptedException {
 
 		while (!(lastStatus = si.getActionStatus(handle)).isFinished()) {
 			if (sendStatusEvent) {
@@ -78,6 +78,10 @@ public class StatusObject {
 				if (lastStatus.isFailed()) {
 					return;
 				}
+			}
+			
+			if ( Thread.interrupted() ) {
+				throw new InterruptedException("Interrupted while waiting for action "+handle+" to finish on backend.");
 			}
 
 			try {

@@ -114,6 +114,7 @@ public class RemoteFileTransferObject {
 			fileTransferThread.join();
 		} catch (InterruptedException e) {
 			messages.put(new Date(), "File transfer thread interrupted.");
+			Thread.currentThread().interrupt();
 		}
 
 	}

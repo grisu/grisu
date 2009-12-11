@@ -277,8 +277,9 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 * Normally you don't have to call this method manually, it gets called just before job submission automatically.
 	 * 
 	 * @throws FileTransferException if a file can't be staged in
+	 * @throws InterruptedException 
 	 */
-	public final void stageFiles() throws FileTransferException {
+	public final void stageFiles() throws FileTransferException, InterruptedException {
 		
 		if (getInputFileUrls() != null && getInputFileUrls().length > 0) {
 			setStatus(JobConstants.INPUT_FILES_UPLOADING);
@@ -286,6 +287,11 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 		// stage in local files
 		for (String inputFile : getInputFileUrls()) {
+			
+			if ( Thread.interrupted() ) {
+				throw new InterruptedException("Interrupted when staging in input file(s)...");
+			}
+			
 			if (FileManager.isLocal(inputFile)) {
 				
 				GrisuRegistryManager.getDefault(serviceInterface).getFileManager()
@@ -309,8 +315,9 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 * 
 	 * @throws JobSubmissionException
 	 *             if the job could not be submitted
+	 * @throws InterruptedException 
 	 */
-	public final void submitJob() throws JobSubmissionException {
+	public final void submitJob() throws JobSubmissionException, InterruptedException {
 
 		if (status == JobConstants.UNDEFINED) {
 			throw new IllegalStateException("Job state "
@@ -324,6 +331,10 @@ public class JobObject extends JobSubmissionObjectImpl {
 			throw new JobSubmissionException("Could not stage in file.", e);
 		}
 
+		if ( Thread.interrupted() ) {
+			throw new InterruptedException("Interrupted after staging in input files.");
+		}
+		
 		try {
 			serviceInterface.submitJob(getJobname());
 		} catch (NoSuchJobException e) {

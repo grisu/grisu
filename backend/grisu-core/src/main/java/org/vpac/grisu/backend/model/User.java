@@ -61,6 +61,11 @@ public class User {
 	private class ThreadLocalFsManager extends ThreadLocal {
 
 		public Object initialValue() {
+
+			if ( Thread.interrupted() ) {
+				Thread.currentThread().interrupt();
+				return null;
+			}
 				myLogger.debug("Creating new FS Manager.");
 				FileSystemCache cache = new FileSystemCache();
 				myLogger.debug("Creating fsm for thread "
@@ -79,6 +84,12 @@ public class User {
 		public synchronized FileSystem getFileSystem(final String rootUrl,
 				String fqan) throws FileSystemException {
 
+			if ( Thread.interrupted() ) {
+				Thread.currentThread().interrupt();
+				remove();
+				return null;
+			}
+			
 			ProxyCredential credToUse = null;
 			
 			MountPoint temp = getResponsibleMountpointForAbsoluteFile(rootUrl);
@@ -129,11 +140,25 @@ public class User {
 					fileBase = ((FileSystemCache)get()).getFileSystem(temp);
 				}
 			}
+			
+			if ( Thread.interrupted() ) {
+				remove();
+				Thread.currentThread().interrupt();
+				return null;
+			}
+			
 			return fileBase;
 
 		}
 
 		public DefaultFileSystemManager getFsManager() {
+			
+			if ( Thread.interrupted() ) {
+				remove();
+				Thread.currentThread().interrupt();
+				return null;
+			}
+			
 			return ((FileSystemCache) super.get()).getFileSystemManager();
 		}
 	}
@@ -695,6 +720,11 @@ public class User {
 			throws RemoteFileSystemException {
 
 		String file_to_aquire = null;
+		
+		if ( Thread.interrupted() ) {
+			Thread.currentThread().interrupt();
+			throw new RemoteFileSystemException("Accessing file interrupted.");
+		}
 
 		if (file.startsWith("tmp:") || file.startsWith("ram:")) {
 			try {
