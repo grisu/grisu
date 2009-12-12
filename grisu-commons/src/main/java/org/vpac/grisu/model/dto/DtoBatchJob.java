@@ -18,7 +18,7 @@ import org.vpac.grisu.control.JobConstants;
 import au.org.arcs.jcommons.constants.Constants;
 
 @XmlRootElement(name="multiPartJob")
-public class DtoBatchJob {
+public class DtoBatchJob implements Comparable<DtoBatchJob> {
 	
 	private String batchJobname;
 	private String submissionFqan;
@@ -62,11 +62,11 @@ public class DtoBatchJob {
 	}
 
 	@XmlElement(name="batchJobname")
-	public String getbatchJobname() {
+	public String getBatchJobname() {
 		return batchJobname;
 	}
 
-	public void setbatchJobname(String batchJobname) {
+	public void setBatchJobname(String batchJobname) {
 		this.batchJobname = batchJobname;
 	}
 	
@@ -140,6 +140,11 @@ public class DtoBatchJob {
 		
 	}
 	
+	@Override
+	public String toString() {
+		return getBatchJobname();
+	}
+	
 	
 	@XmlElement(name="jobs")
 	public DtoJobs getJobs() {
@@ -159,6 +164,13 @@ public class DtoBatchJob {
 	
 	public int totalNumberOfJobs() {
 		return this.jobs.getAllJobs().size();
+	}
+	
+	public Double getStatus() {
+		if ( totalNumberOfJobs() <= 0 ) {
+			return 0.0;
+		}
+		return new Double((numberOfSuccessfulJobs() * 100) / totalNumberOfJobs()); 
 	}
 	
 	
@@ -322,6 +334,11 @@ public class DtoBatchJob {
 			}
 		}
 		return unsubmitted;
+	}
+
+	public int compareTo(DtoBatchJob o) {
+
+		return getBatchJobname().compareTo(o.getBatchJobname());
 	}
 	
 

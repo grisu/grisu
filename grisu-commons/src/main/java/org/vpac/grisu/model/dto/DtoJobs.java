@@ -37,7 +37,11 @@ public class DtoJobs {
 	}
 	
 	public void addJob(DtoJob job) {
-		this.allJobs.add(job);
+		if ( job == null ) {
+			//TODO what to do here?
+		} else {
+			this.allJobs.add(job);
+		} 
 	}
 	
 	public DtoJob retrieveJob(String jobname) {

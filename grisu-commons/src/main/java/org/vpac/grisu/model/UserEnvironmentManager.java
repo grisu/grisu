@@ -5,8 +5,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
+import org.vpac.grisu.control.exceptions.NoSuchJobException;
+import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.files.FileSystemItem;
-import org.vpac.grisu.model.files.GlazedFile;
 
 /**
  * Wrapps information about the user and the available resources to him
@@ -224,8 +225,49 @@ public interface UserEnvironmentManager {
 	 */
 	String calculateUniqueJobname(String name);
 	
+	/**
+	 * Returns all batchjobnames of the user.
+	 * 
+	 * @return all batchjobnames
+	 */
 	SortedSet<String> getCurrentBatchJobnames();
 	
+	/**
+	 * Returns all batchjobnames of the user where the batchjob is of the specified application.
+	 * 
+	 * @param application the application of the batchjobs
+	 * @param refresh whether to refresh the list of batchjobnames for this application
+	 * @return the batchjob names
+	 */
+	SortedSet<String> getCurrentBatchJobnames(String application, boolean refresh);
+	
+	SortedSet<DtoBatchJob> getBatchJobs(String application, boolean refresh);
+	
+	/**
+	 * Returns all jobnames (single & batch) of the user.
+	 * 
+	 * @return all jobnames
+	 */
 	SortedSet<String> getCurrentJobnames();
+	
+	/**
+	 * Returns all jobnames of the user where the (single) job is of the specified application.
+	 * 
+	 * @param application the application of the jobs
+	 * @param refresh whether to refresh the list
+	 * 
+	 * @return the jobnames
+	 */
+	SortedSet<String> getCurrentJobnames(String application, boolean refresh);
+
+	/**
+	 * Returns the DtoBatchJob object with the specified jobname.
+	 * 
+	 * @param jobname the name of the batchjob
+	 * @param refreshBatchJob whether to refresh the status of the batchjob
+	 * @return the DtoBatchJob object
+	 * @throws NoSuchJobException if no such job exists
+	 */
+	DtoBatchJob getBatchJob(String jobname, boolean refreshBatchJob) throws NoSuchJobException;
 
 }

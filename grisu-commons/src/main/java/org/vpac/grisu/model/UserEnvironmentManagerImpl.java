@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +16,8 @@ import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.NoSuchJobException;
+import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.files.FileSystemItem;
 import org.vpac.grisu.model.files.GlazedFile;
@@ -54,6 +57,13 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	
 	private SortedSet<String> cachedJobNames = null;
 	private SortedSet<String> cachedBatchJobNames = null;
+	
+	private Map<String, DtoBatchJob> cachedBatchJobs = new TreeMap<String, DtoBatchJob>();
+	private Map<String, SortedSet<String>> cachedBatchJobnamesPerApplication = new HashMap<String, SortedSet<String>>();
+	private Map<String, SortedSet<String>> cachedJobnamesPerApplication = new HashMap<String, SortedSet<String>>();
+	private Map<String, SortedSet<DtoBatchJob>> cachedBatchJobsPerApplication = new HashMap<String, SortedSet<DtoBatchJob>>();
+	
+
 	
 	private String currentFqan;
 
@@ -485,6 +495,82 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		}
 		
 		return temp;
+	}
+	
+	public DtoBatchJob getBatchJob(String jobname, boolean refresh) throws NoSuchJobException {
+
+		DtoBatchJob result = null;
+	
+		if ( ! refresh ) {
+			result = cachedBatchJobs.get(jobname);
+		}
+		if ( result == null || refresh ) {
+			result = serviceInterface.getBatchJob(jobname);
+			cachedBatchJobs.put(jobname, result);
+		}
+		
+		return result;
+	}
+
+	public SortedSet<String> getCurrentBatchJobnames(String application, boolean refreshBatchJobnames) {
+
+		SortedSet<String> result = null;
+		
+		if ( ! refreshBatchJobnames ) {
+			result = cachedBatchJobnamesPerApplication.get(application);
+		}
+		
+		if ( result == null || refreshBatchJobnames ) {
+			result = serviceInterface.getAllBatchJobnames(application).asSortedSet();
+			cachedBatchJobnamesPerApplication.put(application, result);
+		}
+		return result;
+	}
+	
+	public SortedSet<DtoBatchJob> getBatchJobs(String application, boolean refresh) {
+		
+		SortedSet<DtoBatchJob> result = null;
+		
+		if ( ! refresh ) {
+			result = cachedBatchJobsPerApplication.get(application);
+		}
+		
+		if ( result == null || refresh ) {
+			
+			result = new TreeSet<DtoBatchJob>();
+			
+			for ( String name : getCurrentBatchJobnames(application, true) ) {
+				
+				DtoBatchJob bj = null;
+				try {
+					bj = getBatchJob(name, refresh);
+				} catch (NoSuchJobException e) {
+					throw new RuntimeException(e);
+				}
+				
+				result.add(bj);
+			}
+			cachedBatchJobsPerApplication.put(application, result);
+			
+		}
+		
+		return result;
+	}
+
+	public SortedSet<String> getCurrentJobnames(String application, boolean refresh) {
+
+		SortedSet<String> result = null;
+		
+		if ( ! refresh ) {
+			result = cachedJobnamesPerApplication.get(application);
+		}
+		
+		if ( result == null || refresh ) {
+			result = serviceInterface.getAllJobnames(application).asSortedSet();
+			cachedJobnamesPerApplication.put(application, result);
+		}
+		return result;
+		
 	}
 	
 	

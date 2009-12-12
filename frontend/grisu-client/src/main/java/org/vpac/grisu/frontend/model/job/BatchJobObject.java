@@ -12,9 +12,8 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
-import javax.activation.DataHandler;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -613,6 +612,20 @@ public class BatchJobObject {
 
 		return this.jobs;
 	}
+	
+	private void checkInterruptedStatus(ExecutorService executor, List<Future<?>> tasks) throws InterruptedException {
+		
+		if ( Thread.currentThread().isInterrupted() ) {
+			executor.shutdownNow();
+			
+			for ( Future<?> f : tasks ) {
+				f.cancel(true);
+			}
+
+			throw new InterruptedException("Upload input files interrupted.");
+		}
+		
+	}
 
 	private void uploadInputFiles() throws InterruptedException, FileUploadException {
 
@@ -621,17 +634,22 @@ public class BatchJobObject {
 
 		final ExecutorService executor = Executors
 				.newFixedThreadPool(getConcurrentInputFileUploadThreads());
+
+		final int all = inputFiles.keySet().size();
+
+		EventBus.publish(getBatchJobname(), new BatchJobEvent(
+				BatchJobObject.this, "Uploading "+all+" input files ("+getConcurrentInputFileUploadThreads()+" concurrent upload threads.)"));
+		
+
+		List<Future<?>> tasks = new LinkedList<Future<?>>();
+		
 		// uploading single job input files
 
 		for (final JobObject job : getJobs()) {
 			
-			if ( Thread.currentThread().isInterrupted() ) {
-				executor.shutdownNow();
-
-				throw new InterruptedException("Upload input files interrupted.");
-			}
+			checkInterruptedStatus(executor, tasks);
 			
-			executor.execute(new Thread() {
+			Future<?> f =executor.submit(new Thread() {
 				public void run() {
 					try {
 						try {
@@ -645,72 +663,30 @@ public class BatchJobObject {
 					}
 				}
 			});
+			tasks.add(f);
 		}
 
 		int i = 0;
-		final int all = inputFiles.keySet().size();
+		
 		// uploading common job input files
 		for (final String inputFile : inputFiles.keySet()) {
 
-			if ( Thread.currentThread().isInterrupted() ) {
-				executor.shutdownNow();
-				throw new InterruptedException("Upload input files interrupted.");
-			}
+			checkInterruptedStatus(executor, tasks);
+			
 			i = i+1;
-			final int j = i;
-			Thread thread = new Thread() {
-				public void run() {
-					try {
-						EventBus.publish(getBatchJobname(), new BatchJobEvent(
-								BatchJobObject.this, "Uploading/copying common input file ("+j+" of "+all+"): "
-										+ inputFile + " for multipartjob "
-										+ getBatchJobname()));
-						if (FileManager.isLocal(inputFile)) {
-
-							DataHandler dh = FileManager
-									.createDataHandler(inputFile);
-							StatusObject status = new StatusObject(
-									serviceInterface, inputFiles.get(inputFile));
-							serviceInterface.uploadInputFile(getBatchJobname(),
-									dh, inputFiles.get(inputFile));
-							
-							if ( Thread.currentThread().isInterrupted() ) {
-								executor.shutdownNow();
-								return;
-							}
-
-							try {
-								status.waitForActionToFinish(2, true, false);
-							} catch (Exception e) {
-								executor.shutdownNow();
-								return;
-							}
-
-							if (status.getStatus().isFailed()) {
-								throw new FileTransferException(
-										inputFile,
-										inputFiles.get(inputFile),
-										"Error when trying to upload input file.",
-										null);
-							}
-
-						} else {
-							serviceInterface.copyBatchJobInputFile(
-									getBatchJobname(), inputFile, inputFiles
-											.get(inputFile));
-							if ( Thread.currentThread().isInterrupted() ) {
-								executor.shutdownNow();
-								return;
-							}
-						}
-					} catch (Exception e) {
-						// e.printStackTrace();
-						exceptions.add(e);
-						executor.shutdownNow();
-					}
+			Thread thread = new BatchJobFileUploadThread(serviceInterface,
+					this, inputFile, i, executor);
+			Future<?> f = executor.submit(thread);
+			// so the gridftp servers don't get hit at exactly the same time, to distribute the load
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				executor.shutdownNow();
+				for ( Future<?> f2 : tasks ) {
+					f2.cancel(true);
 				}
-			};
-			executor.execute(thread);
+				throw new InterruptedException("Interrupted while uploading common input files.");
+			}
 		}
 		
 		executor.shutdown();
@@ -720,23 +696,26 @@ public class BatchJobObject {
 		} catch (InterruptedException e) {
 			myLogger.debug("Interrupted....");
 			executor.shutdownNow();
+			for ( Future<?> f : tasks ) {
+				f.cancel(true);
+			}
 			throw new InterruptedException("Interrupted while waiting for file uploads to finish.");
 			
-//			if ( exceptions.size() > 0 && exceptions.get(0) != null ) {
-//				throw exceptions.get(0);
-//			} else {
-//				throw new Exception("Could not upload input file. Unknown reason.");
-//			}
 		}
 		
 		if ( exceptions.size() > 0 && exceptions.get(0) != null ) {
 			throw new FileUploadException(exceptions.get(0));
 		}
+
+		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
+				"Uploading input files for batchjob: " + batchJobname
+						+ " finished."));
+
 	}
 	
 	public void submit(boolean waitForSubmissionToFinish) throws JobSubmissionException, NoSuchJobException, InterruptedException {
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-				"Submitting multipartjob " + batchJobname + " to backend..."));
+				"Submitting batchjob " + batchJobname + " to backend..."));
 		
 		if ( Thread.interrupted() ) {
 			throw new InterruptedException("Interrupted before job submission.");
@@ -746,12 +725,12 @@ public class BatchJobObject {
 			serviceInterface.submitJob(batchJobname);
 		} catch (JobSubmissionException jse) {
 			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-					"Job submitssion for multipartjob " + batchJobname
+					"Job submission for batchjob " + batchJobname
 							+ " failed: " + jse.getLocalizedMessage()));
 			throw jse;
 		} catch (NoSuchJobException nsje) {
 			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-					"Job submitssion for multipartjob " + batchJobname
+					"Job submitssion for batchjob " + batchJobname
 							+ " failed: " + nsje.getLocalizedMessage()));
 			throw nsje;
 		}
@@ -763,7 +742,7 @@ public class BatchJobObject {
 						this.batchJobname,
 						new BatchJobEvent(
 								this,
-								"All jobs of multipartjob "
+								"All jobs of batchjob "
 										+ batchJobname
 										+ " ready for submission. Continuing submission in background..."));
 		} else {
@@ -776,7 +755,7 @@ public class BatchJobObject {
 	}
 
 	/**
-	 * Tells the backend to submit this multipart job.
+	 * Tells the backend to submit this batchjob.
 	 * 
 	 * @throws JobSubmissionException
 	 *             if the jobsubmission fails
@@ -792,8 +771,8 @@ public class BatchJobObject {
 	/**
 	 * Prepares all jobs and creates them on the backend.
 	 * 
-	 * Internally, this method first adds all the jobs to the multipart job on
-	 * the backend. Then you can choose to optimize the multipart job which
+	 * Internally, this method first adds all the jobs to the batchjob on
+	 * the backend. Then you can choose to optimize the batchpart job which
 	 * means the backend will recalulate all the submission locations based on
 	 * the number of total jobs and it will try to distribute them according to
 	 * load to all the available sites. After that all the input files are
@@ -815,7 +794,7 @@ public class BatchJobObject {
 		// TODO check whether any of the jobnames already exist
 
 		myLogger.debug("Creating " + getJobs().size()
-				+ " jobs as part of multipartjob: " + batchJobname);
+				+ " jobs as part of batchjob: " + batchJobname);
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this, "Creating "
 				+ getJobs().size() + " jobs"));
 		ExecutorService executor = Executors
@@ -839,7 +818,7 @@ public class BatchJobObject {
 						try {
 
 							myLogger.info("Adding job: " + job.getJobname()
-									+ " to multipartjob: " + batchJobname);
+									+ " to batchjob: " + batchJobname);
 
 							String jobname = null;
 							EventBus
@@ -849,7 +828,7 @@ public class BatchJobObject {
 													BatchJobObject.this,
 													"Adding job "
 															+ job.getJobname()
-															+ " to multipart job on backend."));
+															+ " to batchjob on backend."));
 							jobname = serviceInterface.addJobToBatchJob(
 									batchJobname,
 									job.getJobDescriptionDocumentAsString());
@@ -901,15 +880,15 @@ public class BatchJobObject {
 			throw new InterruptedException("Interrupted while creating jobs...");
 		}
 		myLogger.debug("Finished creation of " + getJobs().size()
-				+ " jobs as part of multipartjob: " + batchJobname);
+				+ " jobs as part of batchjob: " + batchJobname);
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 				"Finished creation of " + getJobs().size()
-						+ " jobs as part of multipartjob: " + batchJobname));
+						+ " jobs as part of batchjob: " + batchJobname));
 
 		if (failedSubmissions.size() > 0) {
 			myLogger.error(failedSubmissions.size() + " submission failed...");
 			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-					"Not all jobs for multipartjob " + batchJobname
+					"Not all jobs for batchjob " + batchJobname
 							+ " created successfully. Aborting..."));
 			throw new JobsException(failedSubmissions);
 		}
@@ -921,7 +900,7 @@ public class BatchJobObject {
 		if (optimize) {
 			try {
 				EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-						"Optimizing multipartjob: " + batchJobname));
+						"Optimizing batchjob: " + batchJobname));
 				try {
 					optimizationResult = serviceInterface.redistributeBatchJob(
 							this.batchJobname).propertiesAsMap();
@@ -941,32 +920,38 @@ public class BatchJobObject {
 				}
 				
 				EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-						"Optimizing of multipartjob " + batchJobname
-								+ " finished.\nJob distribution: "+getOptimizationResult()));
+						"Optimizing of batchjob " + batchJobname
+								+ " finished.\nJob distribution:\n"+prettyPrintOptimizationResult(getOptimizationResult())));
 			} catch (NoSuchJobException e) {
 				throw new RuntimeException(e);
 			}
 		}
 
 		try {
-			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-					"Uploading input files for multipartjob: " + batchJobname));
 			uploadInputFiles();
-			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-					"Uploading input files for multipartjob: " + batchJobname
-							+ " finished."));
 		} catch(InterruptedException e) {
 			throw e;
 		} catch (Exception e) {
 			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-					"Uploading input files for multipartjob: " + batchJobname
+					"Uploading input files for batchjob: " + batchJobname
 							+ " failed: " + e.getLocalizedMessage()));
 			throw new BackendException("Could not upload input files...", e);
 		}
 	}
+	
+	public static String prettyPrintOptimizationResult(Map<String, String> result) {
+		
+		StringBuffer pretty = new StringBuffer();
+		
+		for ( String key : result.keySet() ) {
+			pretty.append("\t"+key+":\t\t"+result.get(key)+"\n");
+		}
+		
+		return pretty.toString();
+	}
 
 	/**
-	 * Downloads all the required results for this multipart job.
+	 * Downloads all the required results for this batch job.
 	 * 
 	 * @param onlyDownloadWhenFinished
 	 *            only download results if the (single) job is finished.
@@ -994,7 +979,7 @@ public class BatchJobObject {
 			IOException {
 
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-				"Checking and possibly downloading output files for multipartjob: "
+				"Checking and possibly downloading output files for batchjob: "
 						+ batchJobname + ". This might take a while..."));
 
 		for (JobObject job : getJobs()) {
@@ -1077,7 +1062,7 @@ public class BatchJobObject {
 	}
 
 	/**
-	 * Returns all the log messages for this multipart job.
+	 * Returns all the log messages for this batchjob.
 	 * 
 	 * @param refresh
 	 *            whether to refresh the job on the backend or not
@@ -1100,10 +1085,15 @@ public class BatchJobObject {
 	 *            jobs
 	 */
 	public void setLocationsToInclude(String[] locationPatterns) {
+		
+		if ( locationPatterns == null ) {
+			locationPatterns = new String[]{};
+		}
+
 		this.submissionLocationsToInclude = locationPatterns;
 		this.submissionLocationsToExclude = null;
 
-		try {
+ 		try {
 			serviceInterface.addJobProperty(this.batchJobname,
 					Constants.LOCATIONS_TO_INCLUDE_KEY, StringUtils
 							.join(locationPatterns, ","));
@@ -1124,14 +1114,19 @@ public class BatchJobObject {
 	 *            a list of simple patterns that specify on which sites to
 	 *            exclude to run jobs
 	 */
-	public void setLocationsToExclude(String[] sites) {
-		this.submissionLocationsToExclude = sites;
+	public void setLocationsToExclude(String[] locationPatterns) {
+		if ( locationPatterns == null ) {
+			locationPatterns = new String[]{};
+		}
+
+		this.submissionLocationsToExclude = locationPatterns;
 		this.submissionLocationsToInclude = null;
+
 
 		try {
 			serviceInterface.addJobProperty(this.batchJobname,
 					Constants.LOCATIONS_TO_EXCLUDE_KEY, StringUtils
-							.join(sites, ","));
+							.join(locationPatterns, ","));
 			serviceInterface.addJobProperty(this.batchJobname,
 					Constants.LOCATIONS_TO_INCLUDE_KEY, null);
 		} catch (NoSuchJobException e) {

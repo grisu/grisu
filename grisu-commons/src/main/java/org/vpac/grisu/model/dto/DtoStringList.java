@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -60,6 +62,14 @@ public class DtoStringList {
 	public String[] asArray() {
 		if ( this.stringList != null ) {
 			return this.stringList.toArray(new String[]{});
+		} else {
+			return null;
+		}
+	}
+	
+	public SortedSet<String> asSortedSet() {
+		if ( this.stringList != null ) {
+			return new TreeSet<String>(this.stringList);
 		} else {
 			return null;
 		}

@@ -1973,9 +1973,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			addLogMessageToPossibleMultiPartJobParent(job, message);
 			if (status >= JobConstants.FINISHED_EITHER_WAY
 					&& status != JobConstants.DONE) {
-				job.addJobProperty(Constants.ERROR_REASON,
-						"Job finished with status: "
-								+ JobConstants.translateStatus(status));
+//				job.addJobProperty(Constants.ERROR_REASON,
+//						"Job finished with status: "
+//								+ JobConstants.translateStatus(status));
 				job.addLogMessage("Job failed. Status: "
 						+ JobConstants.translateStatus(status));
 				String multiPartJobParent = job
