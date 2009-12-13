@@ -1395,6 +1395,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 									+ DEFAULT_JOB_SUBMISSION_RETRIES
 									+ " times. Never worked. Giving up...");
 							multiJob.addFailedJob(job.getJobname());
+							multiPartJobDao.saveOrUpdate(multiJob);
 							newActionStatus.addElement("Tried to resubmit job "
 									+ job.getJobname() + " "
 									+ DEFAULT_JOB_SUBMISSION_RETRIES
@@ -1404,6 +1405,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						if (newActionStatus.getCurrentElements() >= newActionStatus
 								.getTotalElements()) {
 							newActionStatus.setFinished(true);
+							multiJob.setStatus(JobConstants.ACTIVE);
+							multiPartJobDao.saveOrUpdate(multiJob);
 						}
 
 					} finally {
@@ -1925,7 +1928,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return old_status;
 		}
 
-		if (old_status >= JobConstants.FINISHED_EITHER_WAY) {
+		//TODO check whether the no_such_job check is necessary
+		if (old_status >= JobConstants.FINISHED_EITHER_WAY && old_status != JobConstants.NO_SUCH_JOB) {
 			return old_status;
 		}
 
@@ -1949,7 +1953,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// TODO check whether cred is stored in the database in that case? also,
 		// is a voms credential needed? -- apparently not - only dn must match
 		if (cred == null || !cred.isValid()) {
-			job.setCredential(getCredential());
+			
+			VO vo = VOManagement.getVO(getUser().getFqans().get(job.getFqan()));
+			
+			job.setCredential(CertHelpers.getVOProxyCredential(vo, job
+					.getFqan(), getCredential()));
 			changedCred = true;
 		}
 
@@ -2069,7 +2077,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return handle;
 		}
 
-		BatchJob multiPartJob = getMultiPartJobFromDatabase(batchJobname);
+		final BatchJob multiPartJob = getMultiPartJobFromDatabase(batchJobname);
 
 		final DtoActionStatus statusfinal = new DtoActionStatus(handle,
 				multiPartJob.getJobs().size());
@@ -2095,6 +2103,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					if (statusfinal.getTotalElements() <= statusfinal
 							.getCurrentElements()) {
 						statusfinal.setFinished(true);
+						if ( multiPartJob.getFailedJobs().size() > 0 ) {
+							statusfinal.setFailed(true);
+							multiPartJob.setStatus(JobConstants.FAILED);
+						} else {
+							multiPartJob.setStatus(JobConstants.DONE);
+						}
+						multiPartJobDao.saveOrUpdate(multiPartJob);
 					}
 				}
 			};
@@ -2185,6 +2200,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		String jobname = createJob(jsdl, multiJob.getFqan(), "force-name",
 				multiJob);
 		multiJob.addJob(jobname);
+		multiJob.setStatus(JobConstants.READY_TO_SUBMIT);
 		multiPartJobDao.saveOrUpdate(multiJob);
 
 		return jobname;
@@ -2249,6 +2265,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			// multiJobCreate
 			// .setResourcesToUse(calculateResourcesToUse(multiJobCreate));
 
+			multiJobCreate.setStatus(JobConstants.JOB_CREATED);
+			
 			multiPartJobDao.saveOrUpdate(multiJobCreate);
 
 			try {
@@ -2952,6 +2970,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		final BatchJob multiJob = getMultiPartJobFromDatabase(jobname);
+		
+		multiJob.setStatus(JobConstants.INPUT_FILES_UPLOADING);
+		multiPartJobDao.saveOrUpdate(multiJob);
 
 		myLogger.debug("Receiving datahandler for multipartjob input file...");
 
@@ -3142,6 +3163,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						if (status.getTotalElements() <= status
 								.getCurrentElements()) {
 							status.setFinished(true);
+							multiJob.setStatus(JobConstants.READY_TO_SUBMIT);
+							multiPartJobDao.saveOrUpdate(multiJob);
 						}
 
 					} finally {

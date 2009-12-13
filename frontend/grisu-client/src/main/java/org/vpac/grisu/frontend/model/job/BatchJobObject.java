@@ -1,5 +1,7 @@
 package org.vpac.grisu.frontend.model.job;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -19,6 +21,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
+import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ResubmitPolicy;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.BatchJobException;
@@ -34,6 +37,7 @@ import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.dto.DtoJob;
+import org.vpac.grisu.model.job.JobMonitoringObject;
 import org.vpac.grisu.settings.ClientPropertiesManager;
 
 import au.org.arcs.jcommons.constants.Constants;
@@ -46,10 +50,13 @@ import au.org.arcs.jcommons.constants.Constants;
  * @author markus
  * 
  */
-public class BatchJobObject {
+public class BatchJobObject implements JobMonitoringObject {
 	
 	static final Logger myLogger = Logger.getLogger(BatchJobObject.class
 			.getName());
+	
+	private final PropertyChangeSupport pcs = new PropertyChangeSupport( this );
+
 
 	public static final int DEFAULT_JOB_CREATION_RETRIES = 5;
 
@@ -243,7 +250,13 @@ public class BatchJobObject {
 				}
 
 				jobs.clear();
+				int oldStatus = JobConstants.UNDEFINED;
+				if ( dtoMultiPartJob != null ) {
+					oldStatus = dtoMultiPartJob.getStatus();
+				}
 				dtoMultiPartJob = serviceInterface.getBatchJob(batchJobname);
+				
+				pcs.firePropertyChange("status", oldStatus, dtoMultiPartJob.getStatus());
 
 				for (DtoJob dtoJob : dtoMultiPartJob.getJobs().getAllJobs()) {
 					JobObject job = new JobObject(serviceInterface, dtoJob);
@@ -637,7 +650,7 @@ public class BatchJobObject {
 
 		final int all = inputFiles.keySet().size();
 
-		EventBus.publish(getBatchJobname(), new BatchJobEvent(
+		EventBus.publish(getJobname(), new BatchJobEvent(
 				BatchJobObject.this, "Uploading "+all+" input files ("+getConcurrentInputFileUploadThreads()+" concurrent upload threads.)"));
 		
 
@@ -1186,6 +1199,10 @@ public class BatchJobObject {
 	public String getDefaultApplication() {
 		return defaultApplication;
 	}
+	
+	public String getApplication() {
+		return getDefaultApplication();
+	}
 
 	/**
 	 * Sets the default application for this multipart job.
@@ -1355,11 +1372,11 @@ public class BatchJobObject {
 	}
 
 	/**
-	 * The id of this multipart job.
+	 * The name of this batchjob.
 	 * 
 	 * @return the id
 	 */
-	public String getBatchJobname() {
+	public String getJobname() {
 		return batchJobname;
 	}
 
@@ -1387,7 +1404,7 @@ public class BatchJobObject {
 	 *            the key
 	 * @return the value
 	 */
-	public String getJobProperty(String key) {
+	public String getProperty(String key) {
 
 		try {
 			return serviceInterface.getJobProperty(batchJobname, key);
@@ -1519,6 +1536,25 @@ public class BatchJobObject {
 			throw new RuntimeException(e);
 		}
 		
+	}
+
+    public void addPropertyChangeListener( PropertyChangeListener listener )
+    {
+        this.pcs.addPropertyChangeListener( listener );
+    }
+
+    public void removePropertyChangeListener( PropertyChangeListener listener )
+    {
+        this.pcs.removePropertyChangeListener( listener );
+    }
+
+
+	public int getStatus(boolean refresh) {
+		return 0;
+	}
+
+	public boolean isBatchJob() {
+		return true;
 	}
 
 }

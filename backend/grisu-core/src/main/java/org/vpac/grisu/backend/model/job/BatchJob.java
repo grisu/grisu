@@ -44,6 +44,9 @@ public class BatchJob {
 
 	// for hibernate
 	private Long id;
+	
+	// the status of the job
+	private int status = -1000;
 
 	protected JobDAO jobdao = new JobDAO();
 
@@ -95,6 +98,28 @@ public class BatchJob {
 		this.dn = dn;
 		this.batchJobname = batchJobname;
 		this.fqan = fqan;
+	}
+	
+	/**
+	 * Gets the status of the job. This does not ask the responsible
+	 * {@link JobSubmitter} about the status but the database. So take care to
+	 * refresh the job status before using this.
+	 * 
+	 * @return the status of the job
+	 */
+	@Column(nullable = false)
+	public int getStatus() {
+		return status;
+	}
+
+	/**
+	 * Sets the current status of this job. Only a {@link JobSubmitter} should
+	 * use this method.
+	 * 
+	 * @param status
+	 */
+	public void setStatus(final int status) {
+		this.status = status;
 	}
 	
 	public String getFqan() {
@@ -261,7 +286,9 @@ public class BatchJob {
 
 		result.setMessages(DtoLogMessages.createLogMessages(this
 				.getLogMessages()));
-
+		
+		result.setStatus(this.getStatus());
+		
 		ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
 						.getConcurrentJobStatusThreadsPerUser());

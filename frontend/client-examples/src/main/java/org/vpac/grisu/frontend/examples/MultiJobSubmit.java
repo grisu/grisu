@@ -56,7 +56,7 @@ public class MultiJobSubmit {
 		final int numberOfJobs = 20;
 		
 		Date start = new Date();
-		final String multiJobName = "jobTest20_5";
+		final String multiJobName = "jobTest20_7";
 		try {
 			si.kill(multiJobName, true);
 

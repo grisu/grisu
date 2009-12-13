@@ -39,17 +39,17 @@ public class BatchJobFileUploadThread extends Thread {
 		try {
 			
 			final int all = batchJob.getInputFiles().keySet().size();
-			EventBus.publish(batchJob.getBatchJobname(), new BatchJobEvent(
+			EventBus.publish(batchJob.getJobname(), new BatchJobEvent(
 					batchJob, "Uploading/copying common input file ("+noOfUpload+" of "+all+"): "
 							+ inputFile + " for multipartjob "
-							+ batchJob.getBatchJobname()));
+							+ batchJob.getJobname()));
 			if (FileManager.isLocal(inputFile)) {
 
 				DataHandler dh = FileManager
 						.createDataHandler(inputFile);
 				StatusObject status = new StatusObject(
 						si, batchJob.getInputFiles().get(inputFile));
-				si.uploadInputFile(batchJob.getBatchJobname(),
+				si.uploadInputFile(batchJob.getJobname(),
 						dh, batchJob.getInputFiles().get(inputFile));
 				
 				if ( Thread.currentThread().isInterrupted() ) {
@@ -74,7 +74,7 @@ public class BatchJobFileUploadThread extends Thread {
 
 			} else {
 				si.copyBatchJobInputFile(
-						batchJob.getBatchJobname(), inputFile, batchJob.getInputFiles()
+						batchJob.getJobname(), inputFile, batchJob.getInputFiles()
 								.get(inputFile));
 				if ( Thread.currentThread().isInterrupted() ) {
 					shutdownExecutor();

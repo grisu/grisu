@@ -25,6 +25,8 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 	
 	private boolean isFinished = true;
 	
+	private int status = JobConstants.UNDEFINED;
+	
 	private DtoJobs jobs = new DtoJobs();
 
 	public DtoBatchJob() {
@@ -42,6 +44,16 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 	public void setFinished(boolean f) {
 		this.isFinished = f;
 	}
+	
+	@XmlElement(name="status")
+	public int getStatus() {
+		return this.status;
+	}
+	
+	public void setStatus(int status) {
+		this.status = status;
+	}
+	
 	
 //	@XmlAttribute(name="failed")
 //	public boolean isFailed() {
@@ -166,7 +178,7 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 		return this.jobs.getAllJobs().size();
 	}
 	
-	public Double getStatus() {
+	public Double getPercentFinished() {
 		if ( totalNumberOfJobs() <= 0 ) {
 			return 0.0;
 		}

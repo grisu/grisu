@@ -65,7 +65,7 @@ public class Job implements Comparable<Job> {
 	private String submissionHost = null;
 
 	// the status of the job
-	private int status = -1;
+	private int status = -1000;
 
 	// the credential that is/was used to submit the job
 	private ProxyCredential credential = null;
