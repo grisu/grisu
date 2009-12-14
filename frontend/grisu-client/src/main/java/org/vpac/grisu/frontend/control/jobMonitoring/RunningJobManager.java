@@ -1,7 +1,7 @@
 package org.vpac.grisu.frontend.control.jobMonitoring;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.BatchJobException;
@@ -15,7 +15,7 @@ public class RunningJobManager {
 	private final UserEnvironmentManager em;
 	private final ServiceInterface si;
 	
-	private List<BatchJobObject> cachedAllBatchJobs = null;
+	private Map<String, BatchJobObject> cachedAllBatchJobs = new HashMap<String, BatchJobObject>();
 	
 	public RunningJobManager(ServiceInterface si) {
 		this.si = si;
@@ -23,31 +23,48 @@ public class RunningJobManager {
 	}
 	
 	
-	public List<BatchJobObject> getAllBatchJobs(boolean refresh) {
-	
-		if ( cachedAllBatchJobs == null ) {
-			cachedAllBatchJobs = new LinkedList<BatchJobObject>();
-			for ( String jobname : em.getCurrentBatchJobnames() ) {
-				try {
-					BatchJobObject temp = new BatchJobObject(si, jobname, refresh);
-					cachedAllBatchJobs.add(temp);
-				} catch (BatchJobException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (NoSuchJobException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		} else if ( refresh ) { 
+	public BatchJobObject getBatchJob(String jobname) throws BatchJobException {
+		
+		if ( cachedAllBatchJobs.get(jobname) == null ) {
 			
-			for ( BatchJobObject bj : cachedAllBatchJobs ) {
-				bj.refresh();
+			try {
+				BatchJobObject temp = new BatchJobObject(si, jobname, false);
+				cachedAllBatchJobs.put(jobname, temp);
+			} catch (NoSuchJobException e) {
+				throw new RuntimeException(e);
 			}
+			
 			
 		}
-		return cachedAllBatchJobs;
+		return cachedAllBatchJobs.get(jobname);
 	}
+	
+	
+//	public Map<String, BatchJobObject> getAllBatchJobs(boolean refresh) {
+//	
+//		if ( cachedAllBatchJobs == null ) {
+//			cachedAllBatchJobs = new HashMap<String, BatchJobObject>();
+//			for ( String jobname : em.getCurrentBatchJobnames() ) {
+//				try {
+//					BatchJobObject temp = new BatchJobObject(si, jobname, refresh);
+//					cachedAllBatchJobs.put(jobname, temp);
+//				} catch (BatchJobException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				} catch (NoSuchJobException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		} else if ( refresh ) { 
+//			
+//			for ( BatchJobObject bj : cachedAllBatchJobs.values() ) {
+//				bj.refresh(false);
+//			}
+//			
+//		}
+//		return cachedAllBatchJobs;
+//	}
 	
 	
 

@@ -114,6 +114,9 @@ public final class JobConstants {
 		case INPUT_FILES_UPLOADED:
 			return INPUT_FILES_UPLOADED_STRING;
 		default:
+			if ( status_no > 1 && status_no <= 100 ) {
+				return ACTIVE_STRING + "("+status_no+" % finished)";
+			}
 			break;
 		}
 
@@ -131,9 +134,18 @@ public final class JobConstants {
 		} else if (status != null && status.indexOf("(") >= 0) {
 			int start = status.indexOf("(") + 11;
 			int end = status.indexOf(")");
-			String errorCodeString = status.substring(start, end);
-			int errorCode = Integer.parseInt(errorCodeString);
-			return DONE + errorCode;
+			
+			if ( status.contains(ACTIVE_STRING) ) {
+				// means running
+				String percentString = status.substring(start, status.indexOf(" %"));
+				int percent = Integer.parseInt(percentString);
+				return percent;
+			} else {
+				// means error
+				String errorCodeString = status.substring(start, end);
+				int errorCode = Integer.parseInt(errorCodeString);
+				return DONE + errorCode;
+			}
 		} else if (LOADING_STRING.equals(status)) {
 			return LOADING;
 		} else if (NOT_AVAILABLE_STRING.equals(status)) {

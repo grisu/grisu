@@ -211,7 +211,11 @@ public class BatchJobObject implements JobMonitoringObject {
 	 * Waits for the refresh to finish.
 	 */
 	public void refresh() {
-		getMultiPartJob(true);
+		refresh(true);
+	}
+	
+	public void refresh(boolean wait) {
+		getMultiPartJob(true, wait);
 	}
 
 	private void refreshMultiPartJobStatus(boolean waitForRefreshToFinish) {
@@ -239,31 +243,49 @@ public class BatchJobObject implements JobMonitoringObject {
 		}
 
 	}
-
+	
 	private DtoBatchJob getMultiPartJob(boolean refresh) {
+		return getMultiPartJob(refresh, true);
+	}
+
+	private DtoBatchJob getMultiPartJob(final boolean refresh, final boolean waitForRefresh) {
 
 		if (dtoMultiPartJob == null || refresh) {
-			try {
 
-				if (refresh) {
-					refreshMultiPartJobStatus(true);
-				}
+			Thread refreshThread = new Thread() {
+				public void run() {
+					try {
+						if (refresh) {
+							refreshMultiPartJobStatus(true);
+						}
 
-				jobs.clear();
-				int oldStatus = JobConstants.UNDEFINED;
-				if ( dtoMultiPartJob != null ) {
-					oldStatus = dtoMultiPartJob.getStatus();
-				}
-				dtoMultiPartJob = serviceInterface.getBatchJob(batchJobname);
-				
-				pcs.firePropertyChange("status", oldStatus, dtoMultiPartJob.getStatus());
+						jobs.clear();
+						int oldStatus = JobConstants.UNDEFINED;
+						if ( dtoMultiPartJob != null ) {
+							oldStatus = dtoMultiPartJob.getStatus();
+						}
+						dtoMultiPartJob = serviceInterface.getBatchJob(batchJobname);
+						
+						pcs.firePropertyChange("status", oldStatus, dtoMultiPartJob.getStatus());
 
-				for (DtoJob dtoJob : dtoMultiPartJob.getJobs().getAllJobs()) {
-					JobObject job = new JobObject(serviceInterface, dtoJob);
-					jobs.add(job);
+						for (DtoJob dtoJob : dtoMultiPartJob.getJobs().getAllJobs()) {
+							JobObject job = new JobObject(serviceInterface, dtoJob);
+							jobs.add(job);
+						}
+					} catch (NoSuchJobException e) {
+						throw new RuntimeException(e);
+					}
 				}
-			} catch (NoSuchJobException e) {
-				throw new RuntimeException(e);
+			};
+			
+			refreshThread.start();
+			
+			if ( dtoMultiPartJob == null || waitForRefresh ) {
+				try {
+					refreshThread.join();
+				} catch (InterruptedException e) {
+					throw new RuntimeException(e);
+				}
 			}
 		}
 		return dtoMultiPartJob;

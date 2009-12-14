@@ -287,8 +287,6 @@ public class BatchJob {
 		result.setMessages(DtoLogMessages.createLogMessages(this
 				.getLogMessages()));
 		
-		result.setStatus(this.getStatus());
-		
 		ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
 						.getConcurrentJobStatusThreadsPerUser());
@@ -315,7 +313,10 @@ public class BatchJob {
 			throw new RuntimeException(e);
 		}
 
-		boolean finished = true;
+//		result.setStatus(this.getStatus());
+		result.setStatus(result.getPercentFinished().intValue());
+
+//		boolean finished = true;
 		DtoJobs dtoJobs = new DtoJobs();
 		for (String jobname : getFailedJobs()) {
 			DtoJob job = result.retrieveJob(jobname);
