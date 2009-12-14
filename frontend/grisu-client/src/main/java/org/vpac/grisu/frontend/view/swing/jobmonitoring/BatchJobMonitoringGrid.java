@@ -7,12 +7,14 @@ import javax.swing.JScrollPane;
 
 import org.jdesktop.swingx.JXTable;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.control.jobMonitoring.RunningJobManager;
+import org.vpac.grisu.frontend.model.job.BatchJobObject;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
-import org.vpac.grisu.model.dto.DtoBatchJob;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventTableModel;
 
@@ -21,13 +23,14 @@ public class BatchJobMonitoringGrid extends JPanel {
 	private JXTable table;
 	
 	
-	private EventTableModel<DtoBatchJob> batchJobModel;
+	private EventTableModel<BatchJobObject> batchJobModel;
 
-	private EventList<DtoBatchJob> batchJobs;
-	private SortedList<DtoBatchJob> sortedBatchJobList;
+	private EventList<BatchJobObject> batchJobs;
+	private SortedList<BatchJobObject> sortedBatchJobList;
 	private final ServiceInterface si;
 	
 	private final UserEnvironmentManager em;
+	private final RunningJobManager rjm;
 	
 	/**
 	 * Create the panel.
@@ -35,10 +38,14 @@ public class BatchJobMonitoringGrid extends JPanel {
 	public BatchJobMonitoringGrid(ServiceInterface si, String application) {
 		this.si = si;
 		this.em = GrisuRegistryManager.getDefault(si).getUserEnvironmentManager();
+		this.rjm = RunningJobManager.getDefault(si);
 		
-		batchJobs = GlazedLists.eventList(em.getBatchJobs(application, false));
-		sortedBatchJobList = new SortedList<DtoBatchJob>(batchJobs, new DtoBatchJobComparator());
-		batchJobModel = new EventTableModel<DtoBatchJob>(sortedBatchJobList, 
+		batchJobs = GlazedLists.eventList(rjm.getBatchJobs(application));
+		ObservableElementList.Connector<BatchJobObject> bjoConnector = GlazedLists.beanConnector(BatchJobObject.class);
+		EventList<BatchJobObject> observedCars = new ObservableElementList<BatchJobObject>(batchJobs, bjoConnector);
+
+		sortedBatchJobList = new SortedList<BatchJobObject>(observedCars, new BatchJobObjectComparator());
+		batchJobModel = new EventTableModel<BatchJobObject>(sortedBatchJobList, 
 				new GlazedBatchJobTableFormat());
 		
 		setLayout(new BorderLayout(0, 0));

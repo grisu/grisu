@@ -50,13 +50,12 @@ import au.org.arcs.jcommons.constants.Constants;
  * @author markus
  * 
  */
-public class BatchJobObject implements JobMonitoringObject {
+public class BatchJobObject implements JobMonitoringObject, Comparable<BatchJobObject> {
 	
 	static final Logger myLogger = Logger.getLogger(BatchJobObject.class
 			.getName());
 	
 	private final PropertyChangeSupport pcs = new PropertyChangeSupport( this );
-
 
 	public static final int DEFAULT_JOB_CREATION_RETRIES = 5;
 
@@ -88,6 +87,8 @@ public class BatchJobObject implements JobMonitoringObject {
 	private int defaultNoCpus = 1;
 
 	private String[] allRemoteJobnames;
+	
+	private boolean isRefreshing = false;
 
 	private Map<String, String> optimizationResult = new HashMap<String, String>();
 
@@ -205,6 +206,10 @@ public class BatchJobObject implements JobMonitoringObject {
 		return getMultiPartJob(refresh).allJobsFinishedSuccessful();
 	}
 
+	public boolean isRefreshing() {
+		return this.isRefreshing;
+	}
+	
 	/**
 	 * Refresh all jobs on the backend.
 	 * 
@@ -229,6 +234,8 @@ public class BatchJobObject implements JobMonitoringObject {
 
 		if (waitForRefreshToFinish) {
 
+			this.isRefreshing = true;
+			pcs.firePropertyChange("refreshing", false, true);
 			DtoActionStatus status = serviceInterface.getActionStatus(handle);
 			while (!status.isFinished()) {
 				try {
@@ -240,6 +247,8 @@ public class BatchJobObject implements JobMonitoringObject {
 				}
 				status = serviceInterface.getActionStatus(handle);
 			}
+			this.isRefreshing = false;
+			pcs.firePropertyChange("refreshing", true, false);
 		}
 
 	}
@@ -261,12 +270,18 @@ public class BatchJobObject implements JobMonitoringObject {
 
 						jobs.clear();
 						int oldStatus = JobConstants.UNDEFINED;
+						boolean oldFailed = false;
+						boolean oldFinished = false;
 						if ( dtoMultiPartJob != null ) {
 							oldStatus = dtoMultiPartJob.getStatus();
+							oldFailed = dtoMultiPartJob.failed();
+							oldFinished = dtoMultiPartJob.isFinished();
 						}
 						dtoMultiPartJob = serviceInterface.getBatchJob(batchJobname);
 						
 						pcs.firePropertyChange("status", oldStatus, dtoMultiPartJob.getStatus());
+						pcs.firePropertyChange("failed", oldFailed, dtoMultiPartJob.failed());
+						pcs.firePropertyChange("finished", oldFinished, dtoMultiPartJob.isFinished());
 
 						for (DtoJob dtoJob : dtoMultiPartJob.getJobs().getAllJobs()) {
 							JobObject job = new JobObject(serviceInterface, dtoJob);
@@ -1572,11 +1587,17 @@ public class BatchJobObject implements JobMonitoringObject {
 
 
 	public int getStatus(boolean refresh) {
-		return 0;
+		
+		return getMultiPartJob(refresh).getStatus();
 	}
 
 	public boolean isBatchJob() {
 		return true;
+	}
+
+	public int compareTo(BatchJobObject o) {
+
+		return this.getJobname().compareTo(o.getJobname());
 	}
 
 }

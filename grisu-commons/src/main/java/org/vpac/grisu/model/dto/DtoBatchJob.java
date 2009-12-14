@@ -352,6 +352,16 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 
 		return getBatchJobname().compareTo(o.getBatchJobname());
 	}
+
+	public boolean failed() {
+
+		if ( failedJobs().size() > 0 ) {
+			return true;
+		} else {
+			return false;
+		}
+		
+	}
 	
 
 }
