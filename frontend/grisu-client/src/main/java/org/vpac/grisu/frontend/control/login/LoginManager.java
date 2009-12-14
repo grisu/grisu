@@ -31,6 +31,8 @@ import au.org.arcs.jcommons.dependencies.DependencyManager;
 import au.org.arcs.jcommons.utils.ArcsSecurityProvider;
 
 public class LoginManager {
+	
+	public static boolean environmentInitialized = false;
 
 	static final Logger myLogger = Logger.getLogger(LoginManager.class
 			.getName());
@@ -192,6 +194,26 @@ public class LoginManager {
 		return login(cred, password, username, idp, params, saveCredentialAsLocalProxy);
 		
 	}
+	
+	public static void initEnvironment() {
+		
+		if ( ! environmentInitialized ) {
+		
+			java.security.Security.addProvider(new ArcsSecurityProvider());
+
+			java.security.Security.setProperty("ssl.TrustManagerFactory.algorithm",
+				"TrustAllCertificates");
+
+			Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
+
+			dependencies.put(Dependency.BOUNCYCASTLE, "jdk15-143");
+
+			DependencyManager.addDependencies(dependencies, ArcsEnvironment.getArcsCommonJavaLibDirectory());
+			
+			environmentInitialized = true;
+		}
+		
+	}
 
 	/**
 	 * One-for-all method to login to a Grisu backend.
@@ -228,10 +250,7 @@ public class LoginManager {
 			char[] password, String username, String idp,
 			LoginParams loginParams, boolean saveCredentialAsLocalProxy) throws LoginException {
 
-		java.security.Security.addProvider(new ArcsSecurityProvider());
-
-		java.security.Security.setProperty("ssl.TrustManagerFactory.algorithm",
-				"TrustAllCertificates");
+		initEnvironment();
 		
 		if ( loginParams == null ) {
 			loginParams = new LoginParams("Local", null, null);
@@ -245,12 +264,6 @@ public class LoginManager {
 			throw new RuntimeException(e2);
 		}
 		
-		Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
-
-		dependencies.put(Dependency.BOUNCYCASTLE, "jdk15-143");
-
-		DependencyManager.addDependencies(dependencies, ArcsEnvironment.getArcsCommonJavaLibDirectory());
-
 		try {
 			CertificateFiles.copyCACerts();
 		} catch (Exception e1) {
@@ -281,7 +294,7 @@ public class LoginManager {
 			e.printStackTrace();
 		}
 
-
+		Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
 		String serviceInterfaceUrl = loginParams.getServiceInterfaceUrl();
 
 		if ("Local".equals(serviceInterfaceUrl)
