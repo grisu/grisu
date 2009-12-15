@@ -49,6 +49,11 @@ public class JobSubmissionObjectImpl {
 	public String getJobname() {
 		return jobname;
 	}
+	
+	@Override
+	public String toString() {
+		return getJobname();
+	}
 
 	public void setJobname(final String jobname) {
 		this.jobname = jobname;
@@ -252,7 +257,7 @@ public class JobSubmissionObjectImpl {
 		this.pbsDebug = pbsDebug;
 	}
 
-	private String jobname;
+	protected String jobname;
 	private String application;
 	private String applicationVersion;
 	private String email_address;

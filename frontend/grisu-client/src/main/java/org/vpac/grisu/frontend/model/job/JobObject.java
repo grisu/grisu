@@ -1,10 +1,11 @@
 package org.vpac.grisu.frontend.model.job;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
-import java.util.Enumeration;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -21,6 +22,7 @@ import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.DtoFolder;
 import org.vpac.grisu.model.dto.DtoJob;
+import org.vpac.grisu.model.dto.DtoLogMessage;
 import org.vpac.grisu.model.job.JobCreatedProperty;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.utils.FileHelpers;
@@ -39,9 +41,11 @@ import au.org.arcs.jcommons.constants.JobSubmissionProperty;
  * 
  * @author Markus Binsteiner
  */
-public class JobObject extends JobSubmissionObjectImpl {
+public class JobObject extends JobSubmissionObjectImpl implements Comparable<JobObject> {
 
 	static final Logger myLogger = Logger.getLogger(JobObject.class.getName());
+	
+	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
 	private final ServiceInterface serviceInterface;
 
@@ -54,6 +58,8 @@ public class JobObject extends JobSubmissionObjectImpl {
 	private boolean isFinished = false;
 
 	private Thread waitThread;
+
+	private Map<Date, String> logMessages;
 
 	/**
 	 * Use this constructor if the job is already created on the backend. It'll
@@ -73,6 +79,29 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 		this(si, jobname, true);
 
+	}
+	
+	public void updateWithDtoJob(DtoJob job) {
+		
+		if ( ! job.jobname().equals(getJobname()) ) {
+			throw new IllegalArgumentException("Jobname differs. Can't update job");
+		}
+		allJobProperties = job.propertiesAsMap();
+		status = job.getStatus();
+		logMessages = job.getLogMessages().asMap();
+		
+	}
+	
+	public JobObject(final ServiceInterface si, final DtoJob job, final boolean refreshJobStatusOnBackend) throws NoSuchJobException {
+		
+		super(SeveralXMLHelpers.fromString(si.getJsdlDocument(job.jobname())));
+		this.setJobname(jobname);
+		this.serviceInterface = si;
+
+		updateWithDtoJob(job);
+		if ( refreshJobStatusOnBackend ) {
+			getStatus(true);
+		}
 	}
 
 	/**
@@ -97,12 +126,17 @@ public class JobObject extends JobSubmissionObjectImpl {
 		this.setJobname(jobname);
 		this.serviceInterface = si;
 
-		getStatus(refreshJobStatusOnBackend);
+		updateWithDtoJob(serviceInterface.getJob(jobname));
+		if ( refreshJobStatusOnBackend ) {
+			getStatus(true);
+		}
 
 	}
 	
 	/**
 	 * This can be also used to create a JobObject when the job is already created on the backend.
+	 * 
+	 * This one doesn't update the job status on the backend.
 	 * 
 	 * @param si the serviceinterface
 	 * @param job the job
@@ -110,11 +144,8 @@ public class JobObject extends JobSubmissionObjectImpl {
 	 */
 	public JobObject(final ServiceInterface si, final DtoJob job) throws NoSuchJobException {
 		
-		super(SeveralXMLHelpers.fromString(si.getJsdlDocument(job.jobname())));
-		this.serviceInterface = si;
+		this(si, job, false);
 
-		setStatus(job.getStatus());
-		allJobProperties = job.propertiesAsMap();
 	}
 	
 	/**
@@ -371,7 +402,11 @@ public class JobObject extends JobSubmissionObjectImpl {
 	public final int getStatus(final boolean forceRefresh) {
 		if (forceRefresh) {
 			int oldStatus = this.status;
+			boolean oldFinished = isFinished(false);
 			this.status = serviceInterface.getJobStatus(getJobname());
+			pcs.firePropertyChange("status", oldStatus, this.status);
+			pcs.firePropertyChange("statusString", JobConstants.translateStatus(oldStatus), getStatusString(false));
+			pcs.firePropertyChange("finished", oldFinished, isFinished(false));
 			if (this.status != oldStatus) {
 				EventBus.publish(new JobStatusEvent(this, oldStatus, this.status));
 				if ( StringUtils.isNotBlank(getJobname()) ) {
@@ -415,6 +450,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 
 		try {
 			this.serviceInterface.kill(this.getJobname(), clean);
+			getStatus(true);
 		} catch (Exception e) {
 			throw new JobException(this, "Could not kill/clean job.", e);
 		}
@@ -441,7 +477,7 @@ public class JobObject extends JobSubmissionObjectImpl {
 		if (allJobProperties == null) {
 			try {
 				allJobProperties = serviceInterface
-						.getAllJobProperties(getJobname()).propertiesAsMap();
+						.getJob(getJobname()).propertiesAsMap();
 			} catch (Exception e) {
 				throw new JobException(this, "Could not get jobproperties.", e);
 			}
@@ -762,5 +798,22 @@ public class JobObject extends JobSubmissionObjectImpl {
 		return folder.listOfAllFilesUnderThisFolder();
 		
 	}
+
+	public Map<Date, String> getLogMessages() {
+		return logMessages;
+	}
+
+	public int compareTo(JobObject o2) {
+		return getJobname().compareTo(o2.getJobname());
+	}
+	
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+		this.pcs.addPropertyChangeListener(listener);
+	}
+
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
+		this.pcs.removePropertyChangeListener(listener);
+	}
+
 
 }

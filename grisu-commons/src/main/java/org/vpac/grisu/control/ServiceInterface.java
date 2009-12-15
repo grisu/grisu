@@ -934,7 +934,9 @@ public interface ServiceInterface {
 			throws NoSuchJobException;
 
 	/**
-	 * Returns all job properties as a Map.
+	 * Returns the job details.
+	 * 
+	 * Does not refresh the job status.
 	 * 
 	 * @param jobname
 	 *            the name of the job
@@ -942,9 +944,9 @@ public interface ServiceInterface {
 	 * @throws NoSuchJobException if no such job exists
 	 */
 	@POST
-	@Path("user/getAllJobProperties/{jobname}")
+	@Path("user/getJobDetails/{jobname}")
 	@RolesAllowed("User")
-	DtoJob getAllJobProperties(@PathParam("jobname") String jobname)
+	DtoJob getJob(@PathParam("jobname") String jobname)
 			throws NoSuchJobException;
 
 

@@ -7,6 +7,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Vector;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -16,6 +17,8 @@ import javax.swing.table.TableColumn;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
+import org.vpac.grisu.frontend.model.job.BatchJobObject;
+import org.vpac.grisu.frontend.view.swing.jobmonitoring.BatchJobSelectionListener;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.MountPoint;
@@ -359,7 +362,12 @@ public class FileListPanel extends JPanel {
 		if (selRow >= 0) {
 
 			GlazedFile sel = (GlazedFile) fileModel.getValueAt(selRow, 0);
-			setCurrent(sel);
+			
+			if ( sel.isFolder() ) {
+				setCurrent(sel);
+			} else {
+				fireFileSelected(sel);
+			}
 
 		}
 
@@ -422,5 +430,48 @@ public class FileListPanel extends JPanel {
 			scrollPane = new JScrollPane(getTable());
 		}
 		return scrollPane;
+	}
+	
+	
+	// ---------------------------------------------------------------------------------------
+	// Event stuff
+	private Vector<FileSelectionListener> listeners;
+
+	private void fireFileSelected(GlazedFile file) {
+		// if we have no mountPointsListeners, do nothing...
+		if (listeners != null && !listeners.isEmpty()) {
+
+			// make a copy of the listener list in case
+			// anyone adds/removes mountPointsListeners
+			Vector<FileSelectionListener> targets;
+			synchronized (this) {
+				targets = (Vector<FileSelectionListener>) listeners.clone();
+			}
+
+			// walk through the listener list and
+			// call the userInput method in each
+			for ( FileSelectionListener l : targets ) {
+				try {
+					l.fileSelected(file);
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+
+	// register a listener
+	synchronized public void addUserInputListener(FileSelectionListener l) {
+		if (listeners == null)
+			listeners = new Vector<FileSelectionListener>();
+		listeners.addElement(l);
+	}
+
+	// remove a listener
+	synchronized public void removeUserInputListener(FileSelectionListener l) {
+		if (listeners == null) {
+			listeners = new Vector<FileSelectionListener>();
+		}
+		listeners.removeElement(l);
 	}
 }

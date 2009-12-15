@@ -262,7 +262,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 *            the name of the job (which is unique within one user)
 	 * @return the job
 	 */
-	protected Job getJob(final String jobname) throws NoSuchJobException {
+	protected Job getJobFromDatabase(final String jobname) throws NoSuchJobException {
 
 		Job job = jobdao.findJobByDN(getUser().getCred().getDn(), jobname);
 		return job;
@@ -404,7 +404,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		Job job;
 		try {
 			myLogger.debug("Trying to get job that shouldn't exist...");
-			job = getJob(jobname);
+			job = getJobFromDatabase(jobname);
 			throw new JobPropertiesException(JobSubmissionProperty.JOBNAME
 					.toString()
 					+ ": "
@@ -1652,7 +1652,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void restartJob(final String jobname, String changedJsdl)
 			throws JobSubmissionException, NoSuchJobException {
 
-		Job job = getJob(jobname);
+		Job job = getJobFromDatabase(jobname);
 
 		restartJob(job, changedJsdl);
 	}
@@ -1830,7 +1830,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		actionStatus.put(jobname, status);
 
 		try {
-			job = getJob(jobname);
+			job = getJobFromDatabase(jobname);
 			if (job.getStatus() > JobConstants.READY_TO_SUBMIT) {
 				throw new JobSubmissionException("Job already submitted.");
 			}
@@ -1914,7 +1914,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		myLogger.debug("Start getting status for job: " + jobname);
 		Job job;
 		try {
-			job = getJob(jobname);
+			job = getJobFromDatabase(jobname);
 		} catch (NoSuchJobException e) {
 			return JobConstants.NO_SUCH_JOB;
 		}
@@ -2217,7 +2217,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void removeJobFromBatchJob(String batchJobname, String jobname)
 			throws NoSuchJobException {
 
-		Job job = getJob(jobname);
+		Job job = getJobFromDatabase(jobname);
 		BatchJob multiJob = getMultiPartJobFromDatabase(batchJobname);
 		multiJob.removeJob(job);
 
@@ -2238,7 +2238,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throws BatchJobException {
 
 		try {
-			Job possibleJob = getJob(batchJobname);
+			Job possibleJob = getJobFromDatabase(batchJobname);
 			throw new BatchJobException("Can't create multipartjob with id: "
 					+ batchJobname
 					+ ". Non-multipartjob with this id already exists...");
@@ -2934,7 +2934,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			RemoteFileSystemException {
 
 		try {
-			final Job job = getJob(jobname);
+			final Job job = getJobFromDatabase(jobname);
 
 			// try whether job is single or multi
 			final DtoActionStatus status = new DtoActionStatus(targetFilename,
@@ -3246,7 +3246,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			final String value) throws NoSuchJobException {
 
 		try {
-			Job job = getJob(jobname);
+			Job job = getJobFromDatabase(jobname);
 			job.addJobProperty(key, value);
 			jobdao.saveOrUpdate(job);
 			myLogger.debug("Added job property: " + key);
@@ -3269,7 +3269,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void addJobProperties(final String jobname, final DtoJob properties)
 			throws NoSuchJobException {
 
-		Job job = getJob(jobname);
+		Job job = getJobFromDatabase(jobname);
 
 		job.addJobProperties(properties.propertiesAsMap());
 		jobdao.saveOrUpdate(job);
@@ -3285,10 +3285,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * org.vpac.grisu.control.ServiceInterface#getAllJobProperties(java.lang
 	 * .String)
 	 */
-	public DtoJob getAllJobProperties(final String jobname)
+	public DtoJob getJob(final String jobname)
 			throws NoSuchJobException {
 
-		Job job = getJob(jobname);
+		Job job = getJobFromDatabase(jobname);
 
 		// job.getJobProperties().put(Constants.JOB_STATUS_KEY,
 		// JobConstants.translateStatus(getJobStatus(jobname)));
@@ -3300,7 +3300,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public String getJsdlDocument(final String jobname)
 			throws NoSuchJobException {
 
-		Job job = getJob(jobname);
+		Job job = getJobFromDatabase(jobname);
 
 		String jsdlString;
 		jsdlString = SeveralXMLHelpers.toString(job.getJobDescription());
@@ -3320,7 +3320,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throws NoSuchJobException {
 
 		try {
-			Job job = getJob(jobname);
+			Job job = getJobFromDatabase(jobname);
 
 			return job.getJobProperty(key);
 		} catch (NoSuchJobException e) {

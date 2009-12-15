@@ -208,7 +208,7 @@ public class LoginManager {
 
 			dependencies.put(Dependency.BOUNCYCASTLE, "jdk15-143");
 
-			DependencyManager.addDependencies(dependencies, ArcsEnvironment.getArcsCommonJavaLibDirectory());
+			DependencyManager.addDependencies(dependencies, ArcsEnvironment.getArcsCommonJavaLibDirectory(), true);
 			
 			environmentInitialized = true;
 		}

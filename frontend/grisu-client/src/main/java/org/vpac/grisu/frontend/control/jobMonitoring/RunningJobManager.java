@@ -1,6 +1,7 @@
 package org.vpac.grisu.frontend.control.jobMonitoring;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -15,8 +16,14 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.BatchJobException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
+import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
+import org.vpac.grisu.model.dto.DtoJob;
+import org.vpac.grisu.model.dto.DtoJobs;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
 
 public class RunningJobManager {
 	
@@ -48,18 +55,22 @@ public class RunningJobManager {
 	private final UserEnvironmentManager em;
 	private final ServiceInterface si;
 	
-	private Map<String, BatchJobObject> cachedAllBatchJobs = new HashMap<String, BatchJobObject>();
+	private Map<String, BatchJobObject> cachedAllBatchJobs = Collections.synchronizedMap(new HashMap<String, BatchJobObject>());
 	
-	private Map<String, SortedSet<BatchJobObject>> cachedBatchJobsPerApplication = new HashMap<String, SortedSet<BatchJobObject>>();
+	private Map<String, EventList<BatchJobObject>> cachedBatchJobsPerApplication = Collections.synchronizedMap(new HashMap<String, EventList<BatchJobObject>>());
 	
 	private Timer updateTimer = new Timer();
 	private class UpdateTimerTask extends TimerTask {
 		
 		@Override
 		public void run() {
+			
+			for ( String application : cachedBatchJobsPerApplication.keySet() ) {
+				updateBatchJobList(application);
+			}
 
 			for ( BatchJobObject bj : getAllCurrentlyWatchedBatchJobs() ) {
-				if ( ! bj.isFinished(false) ) {
+				if ( ! bj.isFinished(false) && ! bj.isRefreshing() ) {
 					myLogger.debug("Refreshing job: "+bj.getJobname());
 					bj.refresh(true);
 				}
@@ -73,17 +84,17 @@ public class RunningJobManager {
 	public RunningJobManager(ServiceInterface si) {
 		this.si = si;
 		this.em = GrisuRegistryManager.getDefault(si).getUserEnvironmentManager();
-		
-		updateTimer.schedule(new UpdateTimerTask(), 0);
+
+		startAutoRefresh();
 	}
 	
 	public void startAutoRefresh() {
 		
-		
+		updateTimer.schedule(new UpdateTimerTask(), 0);
 		
 	}
 	
-	private Collection<BatchJobObject> getAllCurrentlyWatchedBatchJobs() {
+	private synchronized Collection<BatchJobObject> getAllCurrentlyWatchedBatchJobs() {
 		
 		return cachedAllBatchJobs.values();
 		
@@ -110,11 +121,11 @@ public class RunningJobManager {
 	}
 	
 	
-	public synchronized SortedSet<BatchJobObject> getBatchJobs(String application) {
+	public synchronized EventList<BatchJobObject> getBatchJobs(String application) {
 		
 		if ( cachedBatchJobsPerApplication.get(application) == null ) {
 			
-			SortedSet<BatchJobObject> temp = new TreeSet<BatchJobObject>();
+			EventList<BatchJobObject> temp = new BasicEventList<BatchJobObject>();
 			
 			for ( String jobname : em.getCurrentBatchJobnames(application, false) ) {
 				try {
@@ -130,6 +141,39 @@ public class RunningJobManager {
 		return cachedBatchJobsPerApplication.get(application);
 	}
 	
+	public static void updateJobList(ServiceInterface si, EventList<JobObject> jobObjectList, DtoJobs newJobs) {
+		
+		Set<JobObject> toRemove = new HashSet<JobObject>();
+		Set<DtoJob> newJobsCopy = new HashSet<DtoJob>(newJobs.getAllJobs());
+		
+		for ( JobObject jo : jobObjectList ) {
+			boolean inList = false;
+			
+			for ( DtoJob job : newJobs.getAllJobs() ) {
+				if ( jo.getJobname().equals(job.jobname()) ) {
+					inList = true;
+					jo.updateWithDtoJob(job);
+					newJobsCopy.remove(job);
+					break;
+				}
+			}
+			if ( ! inList ) {
+				toRemove.add(jo);
+			} 
+		}
+		
+		for ( DtoJob newJob : newJobsCopy ) {
+			try {
+				JobObject jo = new JobObject(si, newJob);
+				jobObjectList.add(jo);
+			} catch (NoSuchJobException e) {
+				// probably not that important
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	
 	/**
 	 * Updates the list of jobnames for this application.
 	 * 
@@ -139,7 +183,7 @@ public class RunningJobManager {
 	 */
 	public synchronized void updateBatchJobList(String application) {
 
-		SortedSet<BatchJobObject> list = getBatchJobs(application);
+		EventList<BatchJobObject> list = getBatchJobs(application);
 		
 		SortedSet<String> jobnames = em.getCurrentBatchJobnames(application, true);
 		SortedSet<String> jobnamesNew = new TreeSet<String>(jobnames);

@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -38,6 +39,16 @@ public class DtoLogMessages {
 	
 	public void addMessage(Date date, String message) {
 		addMessage(new DtoLogMessage(date, message));
+	}
+	
+	public Map<Date, String> asMap() {
+		
+		Map<Date, String> temp = new TreeMap<Date, String>();
+		
+		for ( DtoLogMessage msg : getMessages() ) {
+			temp.put(msg.getDate(), msg.getMessage());
+		}
+		return temp;
 	}
 	
 

@@ -67,7 +67,7 @@ public class BatchJobMonitoringApp {
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
-		frame.add(new BatchJobMonitoringGrid(si, null), BorderLayout.CENTER);
+		frame.add(new BatchJobTabbedPane(si, null), BorderLayout.CENTER);
 	}
 
 }
