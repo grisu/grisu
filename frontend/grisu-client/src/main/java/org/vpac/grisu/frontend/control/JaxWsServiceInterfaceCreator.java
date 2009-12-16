@@ -27,45 +27,151 @@ import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.settings.CaCertManager;
 import org.vpac.grisu.settings.Environment;
 
-
-
 public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
-	
+
 	static final Logger myLogger = Logger
-	.getLogger(JaxWsServiceInterfaceCreator.class.getName());
-	
-	public static String TRUST_FILE_NAME = Environment.getGrisuDirectory().getPath() + File.separator + "truststore.jks";
+			.getLogger(JaxWsServiceInterfaceCreator.class.getName());
 
-	/** 
-    configures secure connection parameters.
- **/
-public JaxWsServiceInterfaceCreator() throws ServiceInterfaceException{
-	try {
-		if (!(new File(Environment.getGrisuDirectory(), "truststore.jks").exists())){
-			InputStream ts = JaxWsServiceInterfaceCreator.class.getResourceAsStream("/truststore.jks");
-			IOUtils.copy(ts, new FileOutputStream(TRUST_FILE_NAME));
+	public static String TRUST_FILE_NAME = Environment.getGrisuDirectory()
+			.getPath()
+			+ File.separator + "truststore.jks";
+
+	/**
+	 * configures secure connection parameters.
+	 **/
+	public JaxWsServiceInterfaceCreator() throws ServiceInterfaceException {
+		try {
+			if (!(new File(Environment.getGrisuDirectory(), "truststore.jks")
+					.exists())) {
+				InputStream ts = JaxWsServiceInterfaceCreator.class
+						.getResourceAsStream("/truststore.jks");
+				IOUtils.copy(ts, new FileOutputStream(TRUST_FILE_NAME));
+			}
+		} catch (IOException ex) {
+			throw new ServiceInterfaceException(
+					"cannot copy SSL certificate store into grisu home directory. Does "
+							+ Environment.getGrisuDirectory().getPath()
+							+ " exist?", ex);
 		}
-	}
-	catch (IOException ex){
-		throw new ServiceInterfaceException("cannot copy SSL certificate store into grisu home directory. Does "+
-						    Environment.getGrisuDirectory().getPath()+ " exist?",ex);
-	}
-	System.setProperty("javax.net.ssl.trustStore", TRUST_FILE_NAME);
-	System.setProperty("javax.net.ssl.trustStorePassword","changeit");
-	
+		System.setProperty("javax.net.ssl.trustStore", TRUST_FILE_NAME);
+		System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
 
-}
-	
-	
+	}
+
 	public boolean canHandleUrl(String url) {
-		if ( StringUtils.isNotBlank(url) && url.startsWith("http") ) {
+		if (StringUtils.isNotBlank(url) && url.startsWith("http")) {
 			return true;
 		} else {
 			return false;
 		}
 	}
-	
-	private SSLSocketFactory createSocketFactory(String interfaceUrl) throws ServiceInterfaceException {
+
+	public ServiceInterface create(String interfaceUrl, String username,
+			char[] password, String myProxyServer, String myProxyPort,
+			Object[] otherOptions) throws ServiceInterfaceException {
+
+		try {
+
+			QName serviceName = new QName("http://api.grisu.arcs.org.au/",
+					"GrisuService");
+			QName portName = new QName("http://api.grisu.arcs.org.au/",
+					"ServiceInterfaceSOAPPort");
+
+			Service s;
+			try {
+				s = Service.create(new URL(interfaceUrl.replace(
+						"soap/GrisuService", "api.wsdl")), serviceName);
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			}
+
+			MTOMFeature mtom = new MTOMFeature();
+			s.getPort(portName, ServiceInterface.class, mtom);
+
+			ServiceInterface service = (ServiceInterface) s.getPort(portName,
+					ServiceInterface.class);
+
+			BindingProvider bp = (javax.xml.ws.BindingProvider) service;
+
+			bp.getRequestContext().put(
+					javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
+					interfaceUrl);
+
+			bp
+					.getRequestContext()
+					.put(
+							"com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size",
+							new Integer(4096));
+
+			bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY,
+					username);
+			bp.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY,
+					new String(password));
+
+			bp.getRequestContext().put(
+					BindingProvider.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
+
+			// bp.getRequestContext().put(
+			// JAXWSProperties.SSL_SOCKET_FACTORY,
+			// SSLClientUtil.getSSLSocketFactoryFromSysProperties());
+
+			// bp.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory",
+			// createSocketFactory(interfaceUrl));
+			// bp.getRequestContext().put(JAXWSProperties.SSL_SOCKET_FACTORY,
+			// createSocketFactory(interfaceUrl));
+
+			SOAPBinding binding = (SOAPBinding) bp.getBinding();
+			binding.setMTOMEnabled(true);
+
+			return service;
+
+			// Constructor jaxwsServiceInterfaceConstructor;
+			// interfaceClass =
+			// Class.forName("org.vpac.grisu.control.EnunciateServiceInterface");
+			//
+			//			
+			// jaxwsServiceInterfaceConstructor = jaxwsServiceInterfaceClass
+			// .getConstructor(String.class);
+			//
+			// jaxwsServiceInterface = jaxwsServiceInterfaceConstructor
+			// .newInstance(interfaceUrl);
+			//
+			// Method getBindingProvider =
+			// jaxwsServiceInterface.getClass().getMethod(
+			// "_getBindingProvider");
+			//
+			// BindingProvider bp = (BindingProvider)
+			// getBindingProvider.invoke(jaxwsServiceInterface);
+			//			
+			// bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY,
+			// username);
+			// bp.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, new
+			// String(password));
+			//			
+			// bp.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory",
+			// createSocketFactory(interfaceUrl));
+			//
+			// bp.getRequestContext().put(BindingProvider.SESSION_MAINTAIN_PROPERTY,
+			// true);
+			//			
+			// bp.getRequestContext().put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size",
+			// 4096);
+			// SOAPBinding binding = (SOAPBinding)bp.getBinding();
+			// binding.setMTOMEnabled(true);
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			// e.printStackTrace();
+			throw new ServiceInterfaceException(
+					"Could not create JaxwsServiceInterface: "
+							+ e.getLocalizedMessage(), e);
+		}
+
+	}
+
+	private SSLSocketFactory createSocketFactory(String interfaceUrl)
+			throws ServiceInterfaceException {
 		// Technique similar to
 		// http://juliusdavies.ca/commons-ssl/TrustExample.java.html
 		HttpSecureProtocol protocolSocketFactory;
@@ -137,100 +243,15 @@ public JaxWsServiceInterfaceCreator() throws ServiceInterfaceException{
 			Protocol protocol = new Protocol("https",
 					(ProtocolSocketFactory) protocolSocketFactory, 443);
 			Protocol.registerProtocol("https", protocol);
-			
+
 			return protocolSocketFactory;
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
-//			e1.printStackTrace();
+			// e1.printStackTrace();
 			throw new ServiceInterfaceException(
-					"Unspecified error while trying to establish secure connection.", e1);
+					"Unspecified error while trying to establish secure connection.",
+					e1);
 		}
-	}
-
-	public ServiceInterface create(String interfaceUrl, String username,
-			char[] password, String myProxyServer, String myProxyPort,
-			Object[] otherOptions) throws ServiceInterfaceException {
-		
-		
-		
-		try {
-			
-			QName serviceName = new QName("http://api.grisu.arcs.org.au/", "GrisuService");
-			QName portName = new QName("http://api.grisu.arcs.org.au/", "ServiceInterfaceSOAPPort");
-
-			Service s;
-			try {
-				s = Service.create(new URL(interfaceUrl.replace("soap/GrisuService", "api.wsdl")), serviceName);
-			} catch (MalformedURLException e) {
-				e.printStackTrace();
-				throw new RuntimeException(e);
-			}
-			
-			MTOMFeature mtom = new MTOMFeature(); 
-			s.getPort(portName, ServiceInterface.class, mtom);
-			
-			ServiceInterface service = (ServiceInterface)s.getPort(portName, ServiceInterface.class);
-			
-			BindingProvider bp = (javax.xml.ws.BindingProvider)service;
-			
-			bp.getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, interfaceUrl);
-
-			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size", new Integer(4096));
-			
-			bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY, username);
-			bp.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, new String(password));
-			
-			bp.getRequestContext().put(BindingProvider.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
-			
-//			bp.getRequestContext().put(
-//			          JAXWSProperties.SSL_SOCKET_FACTORY, 
-//			          SSLClientUtil.getSSLSocketFactoryFromSysProperties());
-
-			
-//			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory", createSocketFactory(interfaceUrl));
-//			bp.getRequestContext().put(JAXWSProperties.SSL_SOCKET_FACTORY, createSocketFactory(interfaceUrl));
-
-			SOAPBinding binding = (SOAPBinding) bp.getBinding();
-			binding.setMTOMEnabled(true);
-			
-			return service;
-			
-//			Constructor jaxwsServiceInterfaceConstructor;
-//			interfaceClass = Class.forName("org.vpac.grisu.control.EnunciateServiceInterface");
-//
-//			
-//			jaxwsServiceInterfaceConstructor = jaxwsServiceInterfaceClass
-//					.getConstructor(String.class);
-//
-//			jaxwsServiceInterface = jaxwsServiceInterfaceConstructor
-//					.newInstance(interfaceUrl);
-//
-//			Method getBindingProvider = jaxwsServiceInterface.getClass().getMethod(
-//					"_getBindingProvider");
-//
-//			BindingProvider bp = (BindingProvider) getBindingProvider.invoke(jaxwsServiceInterface);
-//			
-//			bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY, username);
-//			bp.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, new String(password));
-//			
-//			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory", createSocketFactory(interfaceUrl));
-//
-//			bp.getRequestContext().put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
-//			
-//			bp.getRequestContext().put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size", 4096);
-//			SOAPBinding binding = (SOAPBinding)bp.getBinding();
-//			binding.setMTOMEnabled(true);
-
-			
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-//			e.printStackTrace();
-			throw new ServiceInterfaceException(
-					"Could not create JaxwsServiceInterface: "
-							+ e.getLocalizedMessage(), e);
-		}
-		
-
 	}
 
 }

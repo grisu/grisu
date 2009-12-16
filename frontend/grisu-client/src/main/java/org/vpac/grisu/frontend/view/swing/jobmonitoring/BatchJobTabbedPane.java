@@ -12,13 +12,14 @@ import org.vpac.grisu.frontend.model.job.BatchJobObject;
 
 import com.jidesoft.swing.JideTabbedPane;
 
-public class BatchJobTabbedPane extends JPanel implements BatchJobSelectionListener {
-	
+public class BatchJobTabbedPane extends JPanel implements
+		BatchJobSelectionListener {
+
 	private JideTabbedPane jideTabbedPane;
 	private BatchJobMonitoringGrid grid;
-	
+
 	private Map<String, BatchJobPanel> panels = new HashMap<String, BatchJobPanel>();
-	
+
 	private final ServiceInterface si;
 	private final String application;
 
@@ -33,47 +34,15 @@ public class BatchJobTabbedPane extends JPanel implements BatchJobSelectionListe
 		addBatchJobSelectionListener(this);
 	}
 
-	private JideTabbedPane getJideTabbedPane() {
-		if (jideTabbedPane == null) {
-			jideTabbedPane = new JideTabbedPane();
-			jideTabbedPane.setHideOneTab(true);
-			jideTabbedPane.setShowCloseButtonOnTab(true);
-			jideTabbedPane.setCloseTabOnMouseMiddleButton(true);
-			jideTabbedPane.setTabClosableAt(0, false);
-			String title = null;
-			if ( StringUtils.isBlank(application) ) {
-				title = "All batchjobs";
-			} else {
-				title = application + " jobs";
-			}
-			jideTabbedPane.addTab(title, getGrid());
-			
-		}
-		return jideTabbedPane;
-	}
-	
-	private BatchJobMonitoringGrid getGrid() {
-		
-		if ( grid == null ) {
-			grid = new BatchJobMonitoringGrid(si, application);
-		}
-		return grid;
-	}
-	
 	// register a listener
 	public void addBatchJobSelectionListener(BatchJobSelectionListener l) {
 		getGrid().addBatchJobSelectionListener(l);
 	}
 
-	// remove a listener
-	synchronized public void removeBatchJobSelectionListener(BatchJobSelectionListener l) {
-		getGrid().removeBatchJobSelectionListener(l);
-	}
-
 	public void batchJobSelected(BatchJobObject bj) {
 
 		BatchJobPanel temp = panels.get(bj.getJobname());
-		if ( panels.get(bj.getJobname()) == null ) {
+		if (panels.get(bj.getJobname()) == null) {
 			temp = new BatchJobPanel(si, bj);
 			panels.put(bj.getJobname(), temp);
 		}
@@ -85,5 +54,38 @@ public class BatchJobTabbedPane extends JPanel implements BatchJobSelectionListe
 			getJideTabbedPane().setSelectedComponent(temp);
 		}
 
+	}
+
+	private BatchJobMonitoringGrid getGrid() {
+
+		if (grid == null) {
+			grid = new BatchJobMonitoringGrid(si, application);
+		}
+		return grid;
+	}
+
+	private JideTabbedPane getJideTabbedPane() {
+		if (jideTabbedPane == null) {
+			jideTabbedPane = new JideTabbedPane();
+			jideTabbedPane.setHideOneTab(true);
+			jideTabbedPane.setShowCloseButtonOnTab(true);
+			jideTabbedPane.setCloseTabOnMouseMiddleButton(true);
+			jideTabbedPane.setTabClosableAt(0, false);
+			String title = null;
+			if (StringUtils.isBlank(application)) {
+				title = "All batchjobs";
+			} else {
+				title = application + " jobs";
+			}
+			jideTabbedPane.addTab(title, getGrid());
+
+		}
+		return jideTabbedPane;
+	}
+
+	// remove a listener
+	synchronized public void removeBatchJobSelectionListener(
+			BatchJobSelectionListener l) {
+		getGrid().removeBatchJobSelectionListener(l);
 	}
 }

@@ -37,8 +37,9 @@ import org.vpac.historyRepeater.SimpleHistoryManager;
  * 
  */
 public class GrisuRegistryImpl implements GrisuRegistry {
-	
-	static final Logger myLogger = Logger.getLogger(GrisuRegistryImpl.class.getName());
+
+	static final Logger myLogger = Logger.getLogger(GrisuRegistryImpl.class
+			.getName());
 
 	// caching the registries for different serviceinterfaces. for a desktop
 	// application this most
@@ -61,30 +62,12 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 		this.serviceInterface = serviceInterface;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.vpac.grisu.model.GrisuRegistryInterface#setUserEnvironmentManager(org.vpac.grisu.model.UserEnvironmentManager)
-	 */
-	public final void setUserEnvironmentManager(final UserEnvironmentManager ui) {
-		this.cachedUserInformation = ui;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.vpac.grisu.model.GrisuRegistryInterface#getUserApplicationInformation(java.lang.String)
-	 */
-	public final UserApplicationInformation getUserApplicationInformation(
-			final String applicationName) {
-
-		if (cachedUserInformationObjects.get(applicationName) == null) {
-			UserApplicationInformation temp = new UserApplicationInformationImpl(
-					serviceInterface, getUserEnvironmentManager(),
-					applicationName);
-			cachedUserInformationObjects.put(applicationName, temp);
-		}
-		return cachedUserInformationObjects.get(applicationName);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.vpac.grisu.model.GrisuRegistryInterface#getApplicationInformation(java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.vpac.grisu.model.GrisuRegistryInterface#getApplicationInformation
+	 * (java.lang.String)
 	 */
 	public final ApplicationInformation getApplicationInformation(
 			final String applicationName) {
@@ -97,36 +80,27 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 		return cachedApplicationInformationObjects.get(applicationName);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.vpac.grisu.model.GrisuRegistryInterface#getUserEnvironmentManager()
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.vpac.grisu.model.GrisuRegistryInterface#getFileManager()
 	 */
-	public final UserEnvironmentManager getUserEnvironmentManager() {
-
-		if (cachedUserInformation == null) {
-			this.cachedUserInformation = new UserEnvironmentManagerImpl(
-					serviceInterface);
+	public final FileManager getFileManager() {
+		if (cachedFileHelper == null) {
+			cachedFileHelper = new FileManager(serviceInterface);
 		}
-		return cachedUserInformation;
+		return cachedFileHelper;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.vpac.grisu.model.GrisuRegistryInterface#getResourceInformation()
-	 */
-	public final ResourceInformation getResourceInformation() {
-		if (cachedResourceInformation == null) {
-			cachedResourceInformation = new ResourceInformationImpl(
-					serviceInterface);
-		}
-		return cachedResourceInformation;
-	}
-
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.vpac.grisu.model.GrisuRegistryInterface#getHistoryManager()
 	 */
 	public final HistoryManager getHistoryManager() {
 		if (historyManager == null) {
-			File historyFile = new File(Environment.getGrisuDirectory().getPath(),
-					GRISU_HISTORY_FILENAME);
+			File historyFile = new File(Environment.getGrisuDirectory()
+					.getPath(), GRISU_HISTORY_FILENAME);
 			if (!historyFile.exists()) {
 				try {
 					historyFile.createNewFile();
@@ -144,14 +118,62 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 		return historyManager;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.vpac.grisu.model.GrisuRegistryInterface#getFileManager()
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.vpac.grisu.model.GrisuRegistryInterface#getResourceInformation()
 	 */
-	public final FileManager getFileManager() {
-		if (cachedFileHelper == null) {
-			cachedFileHelper = new FileManager(serviceInterface);
+	public final ResourceInformation getResourceInformation() {
+		if (cachedResourceInformation == null) {
+			cachedResourceInformation = new ResourceInformationImpl(
+					serviceInterface);
 		}
-		return cachedFileHelper;
+		return cachedResourceInformation;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.vpac.grisu.model.GrisuRegistryInterface#getUserApplicationInformation
+	 * (java.lang.String)
+	 */
+	public final UserApplicationInformation getUserApplicationInformation(
+			final String applicationName) {
+
+		if (cachedUserInformationObjects.get(applicationName) == null) {
+			UserApplicationInformation temp = new UserApplicationInformationImpl(
+					serviceInterface, getUserEnvironmentManager(),
+					applicationName);
+			cachedUserInformationObjects.put(applicationName, temp);
+		}
+		return cachedUserInformationObjects.get(applicationName);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.vpac.grisu.model.GrisuRegistryInterface#getUserEnvironmentManager()
+	 */
+	public final UserEnvironmentManager getUserEnvironmentManager() {
+
+		if (cachedUserInformation == null) {
+			this.cachedUserInformation = new UserEnvironmentManagerImpl(
+					serviceInterface);
+		}
+		return cachedUserInformation;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.vpac.grisu.model.GrisuRegistryInterface#setUserEnvironmentManager
+	 * (org.vpac.grisu.model.UserEnvironmentManager)
+	 */
+	public final void setUserEnvironmentManager(final UserEnvironmentManager ui) {
+		this.cachedUserInformation = ui;
 	}
 
 }

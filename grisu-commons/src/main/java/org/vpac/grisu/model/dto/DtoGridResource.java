@@ -10,19 +10,21 @@ import javax.xml.bind.annotation.XmlRootElement;
 import au.org.arcs.jcommons.interfaces.GridResource;
 
 /**
- * A wrapper object that is created when the grid is queried for resources that are able to 
- * run a certain type of job.
+ * A wrapper object that is created when the grid is queried for resources that
+ * are able to run a certain type of job.
  * 
- * This contains a snapshot of values for a single grid resource that can be of importance when deciding where to run a job.
+ * This contains a snapshot of values for a single grid resource that can be of
+ * importance when deciding where to run a job.
  * 
  * @author Markus Binsteiner
- *
+ * 
  */
-@XmlRootElement(name="gridresource")
+@XmlRootElement(name = "gridresource")
 public class DtoGridResource implements GridResource {
 
 	/**
-	 * All the a executables that are available for the selected application on this grid resource.
+	 * All the a executables that are available for the selected application on
+	 * this grid resource.
 	 */
 	private Set<String> allExecutables;
 	/**
@@ -30,7 +32,8 @@ public class DtoGridResource implements GridResource {
 	 */
 	private String applicationName;
 	/**
-	 * A list of versions of the application that are available on this grid resource.
+	 * A list of versions of the application that are available on this grid
+	 * resource.
 	 */
 	private List<String> availableApplicationVersion;
 	/**
@@ -38,7 +41,8 @@ public class DtoGridResource implements GridResource {
 	 */
 	private String contactString;
 	/**
-	 * The number of free job slots for the VO that was used to find this grid resource.
+	 * The number of free job slots for the VO that was used to find this grid
+	 * resource.
 	 */
 	private int freeJobSlots;
 	/**
@@ -58,12 +62,13 @@ public class DtoGridResource implements GridResource {
 	 */
 	private String queueName;
 	/**
-	 * The rank for this grid resource. This is a value that was calculated by the ranking algorithm
-	 * that is used in the matchmaker library.
+	 * The rank for this grid resource. This is a value that was calculated by
+	 * the ranking algorithm that is used in the matchmaker library.
 	 */
 	private int rank;
 	/**
-	 * The total of running jobs for the VO that was used to find this grid resource.
+	 * The total of running jobs for the VO that was used to find this grid
+	 * resource.
 	 */
 	private int runningJobs;
 	/**
@@ -83,24 +88,28 @@ public class DtoGridResource implements GridResource {
 	 */
 	private int smpSize;
 	/**
-	 * The total number of jobs on this grid resource for the VO that was used to find this grid resource.
+	 * The total number of jobs on this grid resource for the VO that was used
+	 * to find this grid resource.
 	 */
 	private int totalJobs;
 	/**
-	 * The number of jobs that wait in the queue on this grid resource for the VO that was used to find this grid resource.
+	 * The number of jobs that wait in the queue on this grid resource for the
+	 * VO that was used to find this grid resource.
 	 */
 	private int waitingJobs;
 	/**
-	 * Whether the version that was specified in the initial query is available on this resource.
+	 * Whether the version that was specified in the initial query is available
+	 * on this resource.
 	 * 
-	 *  Don't use that, I think it doesn't work. Use the list of versions instead.
+	 * Don't use that, I think it doesn't work. Use the list of versions
+	 * instead.
 	 */
 	private boolean isDesiredVersionInstalled;
-	
+
 	public DtoGridResource() {
-		
+
 	}
-	
+
 	public DtoGridResource(GridResource gr) {
 		this.allExecutables = gr.getAllExecutables();
 		this.applicationName = gr.getApplicationName();
@@ -121,144 +130,140 @@ public class DtoGridResource implements GridResource {
 		this.waitingJobs = gr.getWaitingJobs();
 		this.isDesiredVersionInstalled = gr.isDesiredSoftwareVersionInstalled();
 	}
-	
-	@XmlElement(name="executable")
-	public Set<String> getAllExecutables() {
-		return this.allExecutables;
-	}
-
-	@XmlAttribute(name="applicationName")
-	public String getApplicationName() {
-		return this.applicationName;
-	}
-
-	@XmlElement(name="version")
-	public List<String> getAvailableApplicationVersion() {
-		return this.availableApplicationVersion;
-	}
-
-	@XmlElement(name="contactstring")
-	public String getContactString() {
-		return this.contactString;
-	}
-
-	@XmlElement(name="freejobslots")
-	public int getFreeJobSlots() {
-		return this.freeJobSlots;
-	}
-
-	@XmlElement(name="jobmanager")
-	public String getJobManager() {
-		return this.jobManager;
-	}
-
-	@XmlElement(name="mainmemoryramsize")
-	public int getMainMemoryRAMSize() {
-		return this.mainMemoryRAMSize;
-	}
-
-	@XmlElement(name="mainmemoryvirtualsize")
-	public int getMainMemoryVirtualSize() {
-		return this.mainMemoryVirtualSize;
-	}
-
-	@XmlAttribute(name="queuename")
-	public String getQueueName() {
-		return this.queueName;
-	}
-
-	@XmlElement(name="rank")
-	public int getRank() {
-		return this.rank;
-	}
-
-	@XmlElement(name="runningjobs")
-	public int getRunningJobs() {
-		return this.runningJobs;
-	}
-
-	@XmlAttribute(name="latitude")
-	public double getSiteLatitude() {
-		return this.siteLatitude;
-	}
-
-	@XmlAttribute(name="longitude")
-	public double getSiteLongitude() {
-		return this.siteLongitude;
-	}
-
-	@XmlAttribute(name="sitename")
-	public String getSiteName() {
-		return this.siteName;
-	}
-
-	@XmlElement(name="smpsize")
-	public int getSmpSize() {
-		return this.smpSize;
-	}
-
-	@XmlElement(name="totaljobs")
-	public int getTotalJobs() {
-		return this.totalJobs;
-	}
-
-	@XmlElement(name="waitingjobs")
-	public int getWaitingJobs() {
-		return this.waitingJobs;
-	}
-
-	@XmlAttribute(name="isdesiredversioninstalled")
-	public boolean isDesiredSoftwareVersionInstalled() {
-		return isDesiredVersionInstalled;
-	}
-
-//	public int compareTo(Object arg0) {
-//		GridResource anotherResource = (GridResource)arg0;
-//		return this.getRank() < anotherResource.getRank() ? 1 :
-//			(this.getRank() == anotherResource.getRank() ? 0 : -1);
-//	}
 
 	public int compareTo(GridResource o) {
-		
-		if ( this.getRank() < o.getRank() ) {
+
+		if (this.getRank() < o.getRank()) {
 			return Integer.MAX_VALUE;
-		} else if ( this.getRank() > o.getRank() ) {
+		} else if (this.getRank() > o.getRank()) {
 			return Integer.MIN_VALUE;
 		} else {
 			return this.getQueueName().compareTo(o.getQueueName());
 		}
 
 	}
-	
+
 	public boolean equals(Object o) {
-		
-		if ( o == null ) {
+
+		if (o == null) {
 			return false;
 		}
-		
+
 		GridResource anotherResource = null;
-		
+
 		try {
-			anotherResource = (GridResource)o;	
+			anotherResource = (GridResource) o;
 		} catch (Exception e) {
 			return false;
 		}
-		
-		if (queueName.equals(anotherResource.getQueueName()) &&
-				jobManager.equals(anotherResource.getJobManager()) &&
-				contactString.equals(anotherResource.getContactString())) {
+
+		if (queueName.equals(anotherResource.getQueueName())
+				&& jobManager.equals(anotherResource.getJobManager())
+				&& contactString.equals(anotherResource.getContactString())) {
 			return true;
 		}
 		return false;
 	}
-	
-	public int hashCode() {
-		return queueName.hashCode() + jobManager.hashCode() + contactString.hashCode() + 23 * rank;
+
+	@XmlElement(name = "executable")
+	public Set<String> getAllExecutables() {
+		return this.allExecutables;
 	}
-	
-	public String toString() {
-		
-		return queueName + " (Ranking: " + rank + ")";
+
+	@XmlAttribute(name = "applicationName")
+	public String getApplicationName() {
+		return this.applicationName;
+	}
+
+	@XmlElement(name = "version")
+	public List<String> getAvailableApplicationVersion() {
+		return this.availableApplicationVersion;
+	}
+
+	@XmlElement(name = "contactstring")
+	public String getContactString() {
+		return this.contactString;
+	}
+
+	@XmlElement(name = "freejobslots")
+	public int getFreeJobSlots() {
+		return this.freeJobSlots;
+	}
+
+	@XmlElement(name = "jobmanager")
+	public String getJobManager() {
+		return this.jobManager;
+	}
+
+	@XmlElement(name = "mainmemoryramsize")
+	public int getMainMemoryRAMSize() {
+		return this.mainMemoryRAMSize;
+	}
+
+	@XmlElement(name = "mainmemoryvirtualsize")
+	public int getMainMemoryVirtualSize() {
+		return this.mainMemoryVirtualSize;
+	}
+
+	@XmlAttribute(name = "queuename")
+	public String getQueueName() {
+		return this.queueName;
+	}
+
+	@XmlElement(name = "rank")
+	public int getRank() {
+		return this.rank;
+	}
+
+	@XmlElement(name = "runningjobs")
+	public int getRunningJobs() {
+		return this.runningJobs;
+	}
+
+	@XmlAttribute(name = "latitude")
+	public double getSiteLatitude() {
+		return this.siteLatitude;
+	}
+
+	@XmlAttribute(name = "longitude")
+	public double getSiteLongitude() {
+		return this.siteLongitude;
+	}
+
+	@XmlAttribute(name = "sitename")
+	public String getSiteName() {
+		return this.siteName;
+	}
+
+	@XmlElement(name = "smpsize")
+	public int getSmpSize() {
+		return this.smpSize;
+	}
+
+	@XmlElement(name = "totaljobs")
+	public int getTotalJobs() {
+		return this.totalJobs;
+	}
+
+	// public int compareTo(Object arg0) {
+	// GridResource anotherResource = (GridResource)arg0;
+	// return this.getRank() < anotherResource.getRank() ? 1 :
+	// (this.getRank() == anotherResource.getRank() ? 0 : -1);
+	// }
+
+	@XmlElement(name = "waitingjobs")
+	public int getWaitingJobs() {
+		return this.waitingJobs;
+	}
+
+	public int hashCode() {
+		return queueName.hashCode() + jobManager.hashCode()
+				+ contactString.hashCode() + 23 * rank;
+	}
+
+	@XmlAttribute(name = "isdesiredversioninstalled")
+	public boolean isDesiredSoftwareVersionInstalled() {
+		return isDesiredVersionInstalled;
 	}
 
 	public void setAllExecutables(Set<String> allExecutables) {
@@ -276,6 +281,11 @@ public class DtoGridResource implements GridResource {
 
 	public void setContactString(String contactString) {
 		this.contactString = contactString;
+	}
+
+	public void setDesiredSoftwareVersionInstalled(
+			boolean isDesiredVersionInstalled) {
+		this.isDesiredVersionInstalled = isDesiredVersionInstalled;
 	}
 
 	public void setFreeJobSlots(int freeJobSlots) {
@@ -330,8 +340,9 @@ public class DtoGridResource implements GridResource {
 		this.waitingJobs = waitingJobs;
 	}
 
-	public void setDesiredSoftwareVersionInstalled(boolean isDesiredVersionInstalled) {
-		this.isDesiredVersionInstalled = isDesiredVersionInstalled;
+	public String toString() {
+
+		return queueName + " (Ranking: " + rank + ")";
 	}
 
 }

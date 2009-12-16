@@ -9,6 +9,7 @@ import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.utils.FqanHelpers;
 import org.vpac.security.light.CredentialHelpers;
 import org.vpac.security.light.voms.VO;
+import org.vpac.security.light.vomsProxy.VomsException;
 import org.vpac.security.light.vomsProxy.VomsProxyCredential;
 
 /**
@@ -18,9 +19,6 @@ import org.vpac.security.light.vomsProxy.VomsProxyCredential;
  * 
  */
 public final class CertHelpers {
-
-	private CertHelpers() {
-	}
 
 	static final Logger myLogger = Logger
 			.getLogger(CertHelpers.class.getName());
@@ -121,6 +119,9 @@ public final class CertHelpers {
 		}
 
 		return vomsProxyCred;
+	}
+
+	private CertHelpers() {
 	}
 
 }

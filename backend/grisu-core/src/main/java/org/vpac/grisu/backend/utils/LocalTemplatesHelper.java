@@ -15,44 +15,39 @@ import org.vpac.grisu.settings.Environment;
 import org.vpac.security.light.Init;
 
 public final class LocalTemplatesHelper {
-	
-	private LocalTemplatesHelper() {
-	}
 
 	static final Logger myLogger = Logger.getLogger(LocalTemplatesHelper.class
 			.getName());
 
-
 	public static final File GLITE_DIRECTORY = new File(System
 			.getProperty("user.home"), ".glite");
 
-
-	/**
-	 * Creates the grisu directory if it doesn't exist yet.
-	 * 
-	 * @throws Exception
-	 *             if something goes wrong
-	 */
-	public static void createGrisuDirectories() throws Exception {
-
-		if (!Environment.getGrisuDirectory().exists()) {
-			if (!Environment.getGrisuDirectory().mkdirs()) {
-				myLogger.error("Could not create grisu directory.");
-				throw new Exception(
-						"Could not create grisu directory. Please set permissions for "
-								+ Environment.getGrisuDirectory().toString()
-								+ " to be created.");
+	public static void copyFile(final File in, final File out)
+			throws IOException {
+		FileChannel inChannel = new FileInputStream(in).getChannel();
+		FileChannel outChannel = new FileOutputStream(out).getChannel();
+		try {
+			inChannel.transferTo(0, inChannel.size(), outChannel);
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			if (inChannel != null) {
+				inChannel.close();
+			}
+			if (outChannel != null) {
+				outChannel.close();
 			}
 		}
+	}
 
-		if (!new File(Environment.getAvailableTemplatesDirectory()).exists()) {
-			if (!new File(Environment.getAvailableTemplatesDirectory()).mkdirs()) {
-				myLogger.error("Could not create available_vomses directory.");
-				throw new Exception(
-						"Could not create templates_available directory. Please set permissions for "
-								+ Environment.getAvailableTemplatesDirectory()
-								+ " to be created.");
+	public static void copyGlobusFolder() {
+		// copy globus floder if not already there
+		try {
+			if (!new File(Environment.getGlobusHome()).exists()) {
+				unzipFileToDir("/globus.zip", Environment.getGrisuDirectory());
 			}
+		} catch (Exception e) {
+			myLogger.error(e);
 		}
 	}
 
@@ -65,15 +60,16 @@ public final class LocalTemplatesHelper {
 	 */
 	public static void copyTemplatesAndMaybeGlobusFolder() throws Exception {
 
-		if (!new File(Environment.getAvailableTemplatesDirectory()).exists() || !Environment.getGrisuDirectory().exists()) {
+		if (!new File(Environment.getAvailableTemplatesDirectory()).exists()
+				|| !Environment.getGrisuDirectory().exists()) {
 			createGrisuDirectories();
 		}
 
 		File templatesDir = new File(Environment.getTemplateDirectory());
-		
-		if ( ! templatesDir.exists() || templatesDir.list().length == 0) {
 
-			if ( !templatesDir.mkdirs() ) {
+		if (!templatesDir.exists() || templatesDir.list().length == 0) {
+
+			if (!templatesDir.mkdirs()) {
 				myLogger.warn("Could not create Templates directory...");
 			}
 			myLogger
@@ -97,8 +93,9 @@ public final class LocalTemplatesHelper {
 					if (!entry.isDirectory()) {
 
 						myLogger.debug("Template name: " + entry.getName());
-						File vomses_file = new File(Environment.getAvailableTemplatesDirectory(),
-								entry.getName());
+						File vomses_file = new File(Environment
+								.getAvailableTemplatesDirectory(), entry
+								.getName());
 
 						// Write the file to the file system and overwrite
 						// possible
@@ -123,15 +120,34 @@ public final class LocalTemplatesHelper {
 		copyGlobusFolder();
 
 	}
-	
-	public static void copyGlobusFolder() {
-		// copy globus floder if not already there
-		try {
-			if (!new File(Environment.getGlobusHome()).exists()) {
-				unzipFileToDir("/globus.zip", Environment.getGrisuDirectory());
+
+	/**
+	 * Creates the grisu directory if it doesn't exist yet.
+	 * 
+	 * @throws Exception
+	 *             if something goes wrong
+	 */
+	public static void createGrisuDirectories() throws Exception {
+
+		if (!Environment.getGrisuDirectory().exists()) {
+			if (!Environment.getGrisuDirectory().mkdirs()) {
+				myLogger.error("Could not create grisu directory.");
+				throw new Exception(
+						"Could not create grisu directory. Please set permissions for "
+								+ Environment.getGrisuDirectory().toString()
+								+ " to be created.");
 			}
-		} catch (Exception e) {
-			myLogger.error(e);
+		}
+
+		if (!new File(Environment.getAvailableTemplatesDirectory()).exists()) {
+			if (!new File(Environment.getAvailableTemplatesDirectory())
+					.mkdirs()) {
+				myLogger.error("Could not create available_vomses directory.");
+				throw new Exception(
+						"Could not create templates_available directory. Please set permissions for "
+								+ Environment.getAvailableTemplatesDirectory()
+								+ " to be created.");
+			}
 		}
 	}
 
@@ -153,7 +169,8 @@ public final class LocalTemplatesHelper {
 
 			while ((entry = zipstream.getNextEntry()) != null) {
 				myLogger.debug("Entry: " + entry.getName());
-				String filePath = Environment.getGrisuDirectory().getAbsolutePath()
+				String filePath = Environment.getGrisuDirectory()
+						.getAbsolutePath()
 						+ File.separator + entry.getName();
 
 				if (!entry.isDirectory()) {
@@ -184,21 +201,7 @@ public final class LocalTemplatesHelper {
 
 	}
 
-	public static void copyFile(final File in, final File out) throws IOException {
-		FileChannel inChannel = new FileInputStream(in).getChannel();
-		FileChannel outChannel = new FileOutputStream(out).getChannel();
-		try {
-			inChannel.transferTo(0, inChannel.size(), outChannel);
-		} catch (IOException e) {
-			throw e;
-		} finally {
-			if (inChannel != null) {
-				inChannel.close();
-			}
-			if (outChannel != null) {
-				outChannel.close();
-			}
-		}
+	private LocalTemplatesHelper() {
 	}
 
 }

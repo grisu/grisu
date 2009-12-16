@@ -47,24 +47,22 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 
 	private Map<String, String> cachedUserProperties = null;
 	private Map<String, String> cachedBookmarks = null;
-	
+
 	private List<FileSystemItem> cachedLocalFilesystemList = null;
 	private List<FileSystemItem> cachedBookmarkFilesystemList = null;
 	private List<FileSystemItem> cachedRemoteFilesystemList = null;
 	private List<FileSystemItem> cachedAllFileSystems = null;
-	
+
 	private SortedSet<DtoJob> cachedJobList = null;
-	
+
 	private SortedSet<String> cachedJobNames = null;
 	private SortedSet<String> cachedBatchJobNames = null;
-	
+
 	private Map<String, DtoBatchJob> cachedBatchJobs = new TreeMap<String, DtoBatchJob>();
 	private Map<String, SortedSet<String>> cachedBatchJobnamesPerApplication = new HashMap<String, SortedSet<String>>();
 	private Map<String, SortedSet<String>> cachedJobnamesPerApplication = new HashMap<String, SortedSet<String>>();
 	private Map<String, SortedSet<DtoBatchJob>> cachedBatchJobsPerApplication = new HashMap<String, SortedSet<DtoBatchJob>>();
-	
 
-	
 	private String currentFqan;
 
 	public UserEnvironmentManagerImpl(final ServiceInterface serviceInterface) {
@@ -73,12 +71,57 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 				.getResourceInformation();
 	}
 
+	public void addFqanListener(final FqanListener listener) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public String calculateUniqueJobname(String name) {
+
+		String temp = name;
+		int i = 1;
+
+		while (getCurrentJobnames().contains(temp)
+				|| getCurrentBatchJobnames().contains(temp)) {
+			temp = name + "_" + i;
+			i = i + 1;
+		}
+
+		return temp;
+	}
+
+	public GlazedFile createGlazedFileFromUrl(String url) {
+
+		if (FileManager.isLocal(url)) {
+			try {
+				File file = new File(new URI(url));
+				return new GlazedFile(file);
+			} catch (URISyntaxException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			return new GlazedFile(url, serviceInterface);
+		}
+
+	}
+
 	public synchronized final String[] getAllAvailableFqans() {
 
 		if (cachedFqans == null) {
 			this.cachedFqans = serviceInterface.getFqans().asArray();
 		}
 		return cachedFqans;
+	}
+
+	public synchronized final SortedSet<String> getAllAvailableSites() {
+
+		if (cachedAllSites == null) {
+			cachedAllSites = new TreeSet<String>();
+			for (String subLoc : getAllAvailableSubmissionLocations()) {
+				cachedAllSites.add(resourceInfo.getSite(subLoc));
+			}
+		}
+		return cachedAllSites;
 	}
 
 	public synchronized final Set<String> getAllAvailableSubmissionLocations() {
@@ -95,24 +138,279 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		return cachedAllSubmissionLocations;
 	}
 
-	public synchronized final SortedSet<String> getAllAvailableSites() {
+	public DtoBatchJob getBatchJob(String jobname, boolean refresh)
+			throws NoSuchJobException {
 
-		if (cachedAllSites == null) {
-			cachedAllSites = new TreeSet<String>();
-			for (String subLoc : getAllAvailableSubmissionLocations()) {
-				cachedAllSites.add(resourceInfo.getSite(subLoc));
-			}
+		DtoBatchJob result = null;
+
+		if (!refresh) {
+			result = cachedBatchJobs.get(jobname);
 		}
-		return cachedAllSites;
+		if (result == null || refresh) {
+			result = serviceInterface.getBatchJob(jobname);
+			cachedBatchJobs.put(jobname, result);
+		}
+
+		return result;
 	}
 
-	public final MountPoint getRecommendedMountPoint(final String submissionLocation,
-			final String fqan) {
+	public SortedSet<DtoBatchJob> getBatchJobs(String application,
+			boolean refresh) {
 
-		Set<MountPoint> temp = getMountPointsForSubmissionLocationAndFqan(
-				submissionLocation, fqan);
+		SortedSet<DtoBatchJob> result = null;
 
-		return temp.iterator().next();
+		if (!refresh) {
+			result = cachedBatchJobsPerApplication.get(application);
+		}
+
+		if (result == null || refresh) {
+
+			result = new TreeSet<DtoBatchJob>();
+
+			for (String name : getCurrentBatchJobnames(application, true)) {
+
+				DtoBatchJob bj = null;
+				try {
+					bj = getBatchJob(name, refresh);
+				} catch (NoSuchJobException e) {
+					throw new RuntimeException(e);
+				}
+
+				result.add(bj);
+			}
+			cachedBatchJobsPerApplication.put(application, result);
+
+		}
+
+		return result;
+	}
+
+	public synchronized Map<String, String> getBookmarks() {
+
+		if (cachedBookmarks == null) {
+			cachedBookmarks = serviceInterface.getBookmarks().propertiesAsMap();
+		}
+
+		return cachedBookmarks;
+	}
+
+	public synchronized List<FileSystemItem> getBookmarksFilesystems() {
+
+		if (cachedBookmarkFilesystemList == null) {
+			cachedBookmarkFilesystemList = new LinkedList<FileSystemItem>();
+			for (String bookmark : getBookmarks().keySet()) {
+				String url = getBookmarks().get(bookmark);
+				cachedBookmarkFilesystemList.add(new FileSystemItem(bookmark,
+						FileSystemItem.Type.BOOKMARK,
+						createGlazedFileFromUrl(url)));
+			}
+		}
+		return cachedBookmarkFilesystemList;
+	}
+
+	public SortedSet<String> getCurrentBatchJobnames() {
+
+		if (cachedBatchJobNames == null) {
+			cachedBatchJobNames = new TreeSet<String>(serviceInterface
+					.getAllBatchJobnames(null).getStringList());
+		}
+		return cachedBatchJobNames;
+	}
+
+	public SortedSet<String> getCurrentBatchJobnames(String application,
+			boolean refreshBatchJobnames) {
+
+		SortedSet<String> result = null;
+
+		if (!refreshBatchJobnames) {
+			result = cachedBatchJobnamesPerApplication.get(application);
+		}
+
+		if (result == null || refreshBatchJobnames) {
+			result = serviceInterface.getAllBatchJobnames(application)
+					.asSortedSet();
+			cachedBatchJobnamesPerApplication.put(application, result);
+		}
+		return result;
+	}
+
+	public final String getCurrentFqan() {
+		return currentFqan;
+	}
+
+	public SortedSet<String> getCurrentJobnames() {
+
+		if (cachedJobNames == null) {
+			cachedJobNames = new TreeSet<String>(serviceInterface
+					.getAllJobnames(null).getStringList());
+		}
+		return cachedJobNames;
+	}
+
+	public SortedSet<String> getCurrentJobnames(String application,
+			boolean refresh) {
+
+		SortedSet<String> result = null;
+
+		if (!refresh) {
+			result = cachedJobnamesPerApplication.get(application);
+		}
+
+		if (result == null || refresh) {
+			result = serviceInterface.getAllJobnames(application).asSortedSet();
+			cachedJobnamesPerApplication.put(application, result);
+		}
+		return result;
+
+	}
+
+	public SortedSet<DtoJob> getCurrentJobs(boolean refreshJobStatus) {
+		if (cachedJobList == null) {
+			cachedJobList = serviceInterface.ps(null, refreshJobStatus)
+					.getAllJobs();
+		}
+		return cachedJobList;
+	}
+
+	public FileSystemItem getFileSystemForUrl(String url) {
+
+		for (FileSystemItem item : getFileSystems()) {
+
+			if (!item.isDummy() && url.startsWith(item.getRootFile().getUrl())) {
+				return item;
+			}
+		}
+		return null;
+	}
+
+	public synchronized List<FileSystemItem> getFileSystems() {
+
+		if (cachedAllFileSystems == null) {
+
+			cachedAllFileSystems = new LinkedList<FileSystemItem>();
+
+			cachedAllFileSystems.addAll(getLocalFileSystems());
+			cachedAllFileSystems.addAll(getBookmarksFilesystems());
+			cachedAllFileSystems.addAll(getRemoteSites());
+		}
+		return cachedAllFileSystems;
+	}
+
+	public synchronized List<FileSystemItem> getLocalFileSystems() {
+
+		if (cachedLocalFilesystemList == null) {
+			cachedLocalFilesystemList = new LinkedList<FileSystemItem>();
+
+			File userHome = new File(System.getProperty("user.home"));
+			cachedLocalFilesystemList.add(new FileSystemItem(
+					userHome.getName(), FileSystemItem.Type.LOCAL,
+					new GlazedFile(userHome)));
+
+			for (File file : File.listRoots()) {
+				cachedLocalFilesystemList.add(new FileSystemItem(
+						file.getName(), FileSystemItem.Type.LOCAL,
+						new GlazedFile(file)));
+			}
+		}
+		return cachedLocalFilesystemList;
+	}
+
+	public MountPoint getMountPointForAlias(String alias) {
+
+		for (MountPoint mp : getMountPoints()) {
+			if (mp.getAlias().equals(alias)) {
+				return mp;
+			}
+		}
+
+		return null;
+	}
+
+	public final MountPoint getMountPointForUrl(final String url) {
+
+		for (MountPoint mp : getMountPoints()) {
+			if (mp.isResponsibleForAbsoluteFile(url)) {
+				return mp;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get all the users' mountpoints.
+	 * 
+	 * @return all mountpoints
+	 */
+	public final synchronized MountPoint[] getMountPoints() {
+		if (cachedMountPoints == null) {
+			cachedMountPoints = serviceInterface.df().getMountpoints().toArray(
+					new MountPoint[] {});
+		}
+		return cachedMountPoints;
+	}
+
+	/**
+	 * Gets all the mountpoints for this particular VO.
+	 * 
+	 * @param fqan
+	 *            the fqan
+	 * @return the mountpoints
+	 */
+	public final Set<MountPoint> getMountPoints(String fqan) {
+
+		if (fqan == null) {
+			fqan = Constants.NON_VO_FQAN;
+		}
+
+		synchronized (fqan) {
+
+			if (alreadyQueriedMountPointsPerFqan.get(fqan) == null) {
+
+				Set<MountPoint> mps = new HashSet<MountPoint>();
+				for (MountPoint mp : getMountPoints()) {
+					if (mp.getFqan() == null
+							|| mp.getFqan().equals(Constants.NON_VO_FQAN)) {
+						if (fqan == null || fqan.equals(Constants.NON_VO_FQAN)) {
+							mps.add(mp);
+							continue;
+						} else {
+							continue;
+						}
+					} else {
+						if (mp.getFqan().equals(fqan)) {
+							mps.add(mp);
+							continue;
+						}
+					}
+				}
+				alreadyQueriedMountPointsPerFqan.put(fqan, mps);
+			}
+			return alreadyQueriedMountPointsPerFqan.get(fqan);
+		}
+	}
+
+	public SortedSet<MountPoint> getMountPointsForSite(String site) {
+
+		if (site == null) {
+			throw new IllegalArgumentException("Site can't be null.");
+		}
+
+		synchronized (site) {
+
+			if (alreadyQueriedMountPointsPerSite.get(site) == null) {
+
+				SortedSet<MountPoint> mps = new TreeSet<MountPoint>();
+				for (MountPoint mp : getMountPoints()) {
+					if (mp.getSite().equals(site)) {
+						mps.add(mp);
+						continue;
+					}
+				}
+				alreadyQueriedMountPointsPerSite.put(site, mps);
+			}
+			return alreadyQueriedMountPointsPerSite.get(site);
+		}
 
 	}
 
@@ -193,77 +491,63 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 
 	}
 
-	/**
-	 * Get all the users' mountpoints.
-	 * 
-	 * @return all mountpoints
-	 */
-	public final synchronized MountPoint[] getMountPoints() {
-		if (cachedMountPoints == null) {
-			cachedMountPoints = serviceInterface.df().getMountpoints().toArray(new MountPoint[]{});
-		}
-		return cachedMountPoints;
-	}
+	public synchronized String getProperty(String key) {
 
-	/**
-	 * Gets all the mountpoints for this particular VO.
-	 * 
-	 * @param fqan
-	 *            the fqan
-	 * @return the mountpoints
-	 */
-	public final Set<MountPoint> getMountPoints(String fqan) {
-
-		if (fqan == null) {
-			fqan = Constants.NON_VO_FQAN;
-		}
-
-		synchronized (fqan) {
-
-			if (alreadyQueriedMountPointsPerFqan.get(fqan) == null) {
-
-				Set<MountPoint> mps = new HashSet<MountPoint>();
-				for (MountPoint mp : getMountPoints()) {
-					if (mp.getFqan() == null
-							|| mp.getFqan().equals(Constants.NON_VO_FQAN)) {
-						if (fqan == null
-								|| fqan.equals(Constants.NON_VO_FQAN)) {
-							mps.add(mp);
-							continue;
-						} else {
-							continue;
-						}
-					} else {
-						if (mp.getFqan().equals(fqan)) {
-							mps.add(mp);
-							continue;
-						}
-					}
-				}
-				alreadyQueriedMountPointsPerFqan.put(fqan, mps);
+		if (StringUtils.isBlank(cachedUserProperties.get(key))) {
+			String temp = serviceInterface.getUserProperty(key);
+			if (StringUtils.isBlank(temp)) {
+				return null;
+			} else {
+				cachedUserProperties.put(key, temp);
 			}
-			return alreadyQueriedMountPointsPerFqan.get(fqan);
 		}
+		return cachedUserProperties.get(key);
+
 	}
 
-	public final MountPoint getMountPointForUrl(final String url) {
+	public final MountPoint getRecommendedMountPoint(
+			final String submissionLocation, final String fqan) {
+
+		Set<MountPoint> temp = getMountPointsForSubmissionLocationAndFqan(
+				submissionLocation, fqan);
+
+		return temp.iterator().next();
+
+	}
+
+	public synchronized List<FileSystemItem> getRemoteSites() {
+
+		if (cachedRemoteFilesystemList == null) {
+			cachedRemoteFilesystemList = new LinkedList<FileSystemItem>();
+			for (String site : getAllAvailableSites()) {
+				cachedRemoteFilesystemList.add(new FileSystemItem(site,
+						FileSystemItem.Type.REMOTE, new GlazedFile(site)));
+			}
+		}
+		return cachedRemoteFilesystemList;
+	}
+
+	public boolean isMountPointAlias(String string) {
 
 		for (MountPoint mp : getMountPoints()) {
-			if (mp.isResponsibleForAbsoluteFile(url)) {
-				return mp;
+			if (mp.getAlias().equals(string)) {
+				return true;
 			}
 		}
 
-		return null;
+		return false;
 	}
 
-	public void addFqanListener(final FqanListener listener) {
-		// TODO Auto-generated method stub
+	public boolean isMountPointRoot(String rootUrl) {
 
-	}
+		for (MountPoint mp : getMountPoints()) {
+			if (mp.getRootUrl().equals(rootUrl)) {
+				return true;
+			}
+		}
 
-	public final String getCurrentFqan() {
-		return currentFqan;
+		return false;
+
 	}
 
 	public void removeFqanListener(final FqanListener listener) {
@@ -271,308 +555,33 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 
 	}
 
+	public synchronized void setBookmark(String alias, String url) {
+
+		serviceInterface.setBookmark(alias, url);
+
+		if (StringUtils.isBlank(url)) {
+			getBookmarks().remove(alias);
+			getBookmarksFilesystems().remove(
+					new FileSystemItem(alias, FileSystemItem.Type.BOOKMARK,
+							null));
+		} else {
+			getBookmarks().put(alias, url);
+			getBookmarksFilesystems().add(
+					new FileSystemItem(alias, FileSystemItem.Type.BOOKMARK,
+							createGlazedFileFromUrl(url)));
+		}
+
+	}
+
 	public final void setCurrentFqan(final String currentFqan) {
 		this.currentFqan = currentFqan;
-	}
-
-	public SortedSet<MountPoint> getMountPointsForSite(String site) {
-
-		if (site == null) {
-			throw new IllegalArgumentException("Site can't be null.");
-		}
-
-		synchronized (site) {
-
-			if (alreadyQueriedMountPointsPerSite.get(site) == null) {
-
-				SortedSet<MountPoint> mps = new TreeSet<MountPoint>();
-				for (MountPoint mp : getMountPoints()) {
-					if (mp.getSite().equals(site)) {
-						mps.add(mp);
-						continue;
-					}
-				}
-				alreadyQueriedMountPointsPerSite.put(site, mps);
-			}
-			return alreadyQueriedMountPointsPerSite.get(site);
-		}
-		
-	}
-
-	public boolean isMountPointAlias(String string) {
-
-		for ( MountPoint mp : getMountPoints() ) {
-			if ( mp.getAlias().equals(string) ) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
-
-	public MountPoint getMountPointForAlias(String alias) {
-
-		for ( MountPoint mp : getMountPoints() ) {
-			if ( mp.getAlias().equals(alias) ) {
-				return mp;
-			}
-		}
-		
-		return null;
-	}
-
-	public boolean isMountPointRoot(String rootUrl) {
-
-		for ( MountPoint mp : getMountPoints() ) {
-			if ( mp.getRootUrl().equals(rootUrl) ) {
-				return true;
-			}
-		}
-		
-		return false;
-		
-	}
-
-	public synchronized String getProperty(String key) {
-
-		if ( StringUtils.isBlank(cachedUserProperties.get(key)) ) {
-			String temp = serviceInterface.getUserProperty(key);
-			if ( StringUtils.isBlank(temp) ) {
-				return null;
-			} else {
-				cachedUserProperties.put(key, temp);
-			}
-		}
-		return cachedUserProperties.get(key);
-		
 	}
 
 	public synchronized void setProperty(String key, String value) {
 
 		serviceInterface.setUserProperty(key, value);
 		cachedUserProperties.put(key, value);
-		
+
 	}
-
-	public synchronized Map<String, String> getBookmarks() {
-
-		if ( cachedBookmarks == null ) {
-			cachedBookmarks = serviceInterface.getBookmarks().propertiesAsMap();
-		}
-		
-		return cachedBookmarks;
-	}
-
-	public synchronized void setBookmark(String alias, String url) {
-
-		serviceInterface.setBookmark(alias, url);
-		
-		if ( StringUtils.isBlank(url) ) {
-			getBookmarks().remove(alias);
-			getBookmarksFilesystems().remove(new FileSystemItem(alias, FileSystemItem.Type.BOOKMARK, null));
-		} else {
-			getBookmarks().put(alias, url);
-			getBookmarksFilesystems().add(new FileSystemItem(alias, FileSystemItem.Type.BOOKMARK, 
-					createGlazedFileFromUrl(url)));
-		}
-		
-		
-		
-	}
-	
-	public synchronized List<FileSystemItem> getLocalFileSystems() {
-
-		if ( cachedLocalFilesystemList == null ) {
-			cachedLocalFilesystemList = new LinkedList<FileSystemItem>();
-			
-			File userHome = new File(System.getProperty("user.home"));
-			cachedLocalFilesystemList.add(new FileSystemItem(userHome.getName(), FileSystemItem.Type.LOCAL, 
-					new GlazedFile(userHome)));
-			
-			for ( File file : File.listRoots() ) {
-				cachedLocalFilesystemList.add(new FileSystemItem(file.getName(),
-						FileSystemItem.Type.LOCAL, new GlazedFile(file)));
-			}
-		}
-		return cachedLocalFilesystemList;
-	}
-
-	public synchronized List<FileSystemItem> getFileSystems() {
-
-		if ( cachedAllFileSystems == null ) {
-		
-			cachedAllFileSystems = new LinkedList<FileSystemItem>();
-	
-			cachedAllFileSystems.addAll(getLocalFileSystems());
-			cachedAllFileSystems.addAll(getBookmarksFilesystems());
-			cachedAllFileSystems.addAll(getRemoteSites());
-		} 
-		return cachedAllFileSystems;
-	}
-	
-	public GlazedFile createGlazedFileFromUrl(String url) {
-		
-		if ( FileManager.isLocal(url) ) {
-			try {
-				File file = new File(new URI(url));
-				return new GlazedFile(file);
-			} catch (URISyntaxException e) {
-				throw new RuntimeException(e);
-			}
-		} else {
-			return new GlazedFile(url, serviceInterface);
-		}
-		
-	}
-	
-
-	public synchronized List<FileSystemItem> getBookmarksFilesystems() {
-
-		if ( cachedBookmarkFilesystemList == null ) {
-			cachedBookmarkFilesystemList = new LinkedList<FileSystemItem>();
-			for ( String bookmark : getBookmarks().keySet() ) {
-				String url = getBookmarks().get(bookmark);
-				cachedBookmarkFilesystemList.add(new FileSystemItem(bookmark, 
-							FileSystemItem.Type.BOOKMARK, createGlazedFileFromUrl(url)));
-			}
-		}
-		return cachedBookmarkFilesystemList;
-	}
-
-	public synchronized List<FileSystemItem> getRemoteSites() {
-
-		if ( cachedRemoteFilesystemList == null ) {
-			cachedRemoteFilesystemList = new LinkedList<FileSystemItem>();
-			for ( String site : getAllAvailableSites() ) {
-				cachedRemoteFilesystemList.add(new FileSystemItem(site, FileSystemItem.Type.REMOTE, new GlazedFile(site)));
-			}
-		}
-		return cachedRemoteFilesystemList;
-	}
-
-	public FileSystemItem getFileSystemForUrl(String url) {
-
-		for ( FileSystemItem item : getFileSystems() ) {
-			
-			if ( !item.isDummy() && url.startsWith(item.getRootFile().getUrl()) ) {
-				return item;
-			}
-		}
-		return null;
-	}
-	
-	public SortedSet<DtoJob> getCurrentJobs(boolean refreshJobStatus) {
-		if ( cachedJobList == null ) {
-			cachedJobList = serviceInterface.ps(null, refreshJobStatus).getAllJobs();
-		}
-		return cachedJobList;
-	}
-
-	public SortedSet<String> getCurrentJobnames() {
-
-		if ( cachedJobNames == null ) {
-			cachedJobNames = new TreeSet<String>(serviceInterface.getAllJobnames(null).getStringList());
-		}
-		return cachedJobNames;
-	}
-	
-	public SortedSet<String> getCurrentBatchJobnames() {
-
-		if ( cachedBatchJobNames == null ) {
-			cachedBatchJobNames = new TreeSet<String>(serviceInterface.getAllBatchJobnames(null).getStringList());
-		}
-		return cachedBatchJobNames;
-	}
-
-	public String calculateUniqueJobname(String name) {
-
-		String temp = name;
-		int i = 1;
-		
-		while ( getCurrentJobnames().contains(temp) || getCurrentBatchJobnames().contains(temp) ) {
-			temp = name +"_"+i;
-			i = i + 1;
-		}
-		
-		return temp;
-	}
-	
-	public DtoBatchJob getBatchJob(String jobname, boolean refresh) throws NoSuchJobException {
-
-		DtoBatchJob result = null;
-	
-		if ( ! refresh ) {
-			result = cachedBatchJobs.get(jobname);
-		}
-		if ( result == null || refresh ) {
-			result = serviceInterface.getBatchJob(jobname);
-			cachedBatchJobs.put(jobname, result);
-		}
-		
-		return result;
-	}
-
-	public SortedSet<String> getCurrentBatchJobnames(String application, boolean refreshBatchJobnames) {
-
-		SortedSet<String> result = null;
-		
-		if ( ! refreshBatchJobnames ) {
-			result = cachedBatchJobnamesPerApplication.get(application);
-		}
-		
-		if ( result == null || refreshBatchJobnames ) {
-			result = serviceInterface.getAllBatchJobnames(application).asSortedSet();
-			cachedBatchJobnamesPerApplication.put(application, result);
-		}
-		return result;
-	}
-	
-	public SortedSet<DtoBatchJob> getBatchJobs(String application, boolean refresh) {
-		
-		SortedSet<DtoBatchJob> result = null;
-		
-		if ( ! refresh ) {
-			result = cachedBatchJobsPerApplication.get(application);
-		}
-		
-		if ( result == null || refresh ) {
-			
-			result = new TreeSet<DtoBatchJob>();
-			
-			for ( String name : getCurrentBatchJobnames(application, true) ) {
-				
-				DtoBatchJob bj = null;
-				try {
-					bj = getBatchJob(name, refresh);
-				} catch (NoSuchJobException e) {
-					throw new RuntimeException(e);
-				}
-				
-				result.add(bj);
-			}
-			cachedBatchJobsPerApplication.put(application, result);
-			
-		}
-		
-		return result;
-	}
-
-	public SortedSet<String> getCurrentJobnames(String application, boolean refresh) {
-
-		SortedSet<String> result = null;
-		
-		if ( ! refresh ) {
-			result = cachedJobnamesPerApplication.get(application);
-		}
-		
-		if ( result == null || refresh ) {
-			result = serviceInterface.getAllJobnames(application).asSortedSet();
-			cachedJobnamesPerApplication.put(application, result);
-		}
-		return result;
-		
-	}
-	
-	
 
 }

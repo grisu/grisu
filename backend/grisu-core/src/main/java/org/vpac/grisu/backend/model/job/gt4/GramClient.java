@@ -43,85 +43,48 @@ public class GramClient
 		implements GramJobListener {
 
 	static final Logger logger = Logger
-	.getLogger(AbstractServiceInterface.class.getName());
+			.getLogger(AbstractServiceInterface.class.getName());
 
 	// Amount of time to wait for job status changes
 	private static final long STATE_CHANGE_BASE_TIMEOUT_MILLIS = 60000;
 
-	private GSSCredential credential = null;
+	private static String destroyJob(final GramJob job) {
 
-	public GramClient(final GSSCredential credential) {
-		this.credential = credential;
+		try {
+			job.destroy();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-		System.setProperty("GLOBUS_LOCATION", Environment.getGlobusHome());
-		System.setProperty("axis.ClientConfigFile",
-				Environment.getAxisClientConfig());
+		return getJobStatus(job);
 
 	}
 
 	/**
-	 * Job submission member variables.
+	 * destroys the job WSRF resource Precondition: job ! =null &&
+	 * job.isRequested() && !job.isLocallyDestroyed()
 	 */
-	private GramJob job;
+	public static String destroyJob(final String gramJobHandle,
+			final GSSCredential cred) {
 
-	// completed if Done or Failed
-	private boolean jobCompleted = false;
-	// Batch runs will not wait for the job to complete
-	private boolean batch;
-
-	// Delegation
-	private boolean limitedDelegation = true;
-	private boolean delegationEnabled = true;
-
-	// Don't print messages by default
-	private boolean quiet = false;
-
-	// proxy credential
-	// private String proxyPath = null;
-
-	/**
-	 * Application error state.
-	 */
-	private boolean noInterruptHandling = false;
-	private boolean isInterrupted = true;
-	private boolean normalApplicationEnd = false;
-
-	/**
-	 * Callback as a GramJobListener. Will not be called in batch mode.
-	 */
-	public final void stateChanged(final GramJob job) {
-		StateEnumeration jobState = job.getState();
-		boolean holding = job.isHolding();
-		printMessage("========== State Notification ==========");
-		printJobState(jobState, holding);
-		printMessage("========================================");
-
-		synchronized (this) {
-			if (jobState.equals(StateEnumeration.Done)
-					|| jobState.equals(StateEnumeration.Failed)) {
-
-				printMessage("Exit Code: "
-						+ Integer.toString(job.getExitCode()));
-
-				this.jobCompleted = true;
-			}
-
-			notifyAll();
-
-			// if we a running an interractive job,
-			// prevent a hold from hanging the client
-			if (holding && !batch) {
-				logger
-						.debug("Automatically releasing hold for interactive job");
-				try {
-					job.release();
-				} catch (Exception e) {
-					String errorMessage = "Unable to release job from hold";
-					logger.debug(errorMessage, e);
-					printError(errorMessage + " - " + e.getMessage());
-				}
-			}
+		GramJob job;
+		try {
+			job = retrieveGramJob(gramJobHandle, cred);
+			job.refreshStatus();
+		} catch (NoSuchGT4JobException e) {
+			return "NoSuchJob";
+		} catch (Exception e) {
+			return "NoSuchJob";
 		}
+		destroyJob(job);
+		try {
+			job.refreshStatus();
+		} catch (Exception e) {
+			return "NoSuchJob";
+		}
+		return getJobStatus(job);
+
 	}
 
 	private static EndpointReferenceType getFactoryEPR(final String contact,
@@ -134,89 +97,227 @@ public class GramClient
 				factoryType);
 	}
 
-	/**
-	 * Submit a WS-GRAM Job (GT4).
-	 * 
-	 * @param factoryEndpoint
-	 *            Factory endpoint reference
-	 * @param simpleJobCommandLine
-	 *            Executable (null to use a job file)
-	 * @param rslFileJob
-	 *            XML file (null to use a command line)
-	 * @param authorization
-	 *            Authorizarion: Host, Self, Identity
-	 * @param xmlSecurity
-	 *            XML Sec: Encryption or signature
-	 * @param batchMode
-	 *            Submission mode: batch will not wait for completion
-	 * @param dryRunMode
-	 *            Used to parse RSL
-	 * @param quiet
-	 *            Messages/NO messages
-	 * @param duration
-	 *            Duartion date
-	 * @param terminationDate
-	 *            Termination date
-	 * @param timeout
-	 *            Job timeout (ms)
-	 */
-	public final String submitRSL(final EndpointReferenceType factoryEndpoint,
-			final String simpleJobCommandLine, final JobDescriptionType rslFile,
-			final Authorization authorization, final Integer xmlSecurity,
-			final boolean batchMode, final boolean dryRunMode, final boolean quiet,
-			final Date duration, final Date terminationDate, final int timeout) throws Exception {
-		System.setProperty("GLOBUS_LOCATION", Environment.getGlobusHome());
-		System.setProperty("axis.ClientConfigFile",
-				Environment.getAxisClientConfig());
+	public static String getJobStatus(final GramJob job) {
 
-		this.quiet = quiet;
-		this.batch = batchMode || dryRunMode; // in single job only.
-		// In multi-job, -batch is not allowed. Dryrun is.
+		String condition = null;
+		boolean error = false;
+		String errorMessage = "NONE";
 
-		if (batchMode) {
-			printMessage("Warning: Will not wait for job completion, "
-					+ "and will not destroy job service.");
-		}
+		try {
 
-		if (rslFile != null) {
-			try {
-				this.job = new GramJob(rslFile);
-			} catch (Exception e) {
-				String errorMessage = "Unable to parse RSL from file "
-						+ rslFile;
-				logger.debug(errorMessage, e);
-				throw new IOException(errorMessage + " - " + e.getMessage());
+			// Get the state of our job.
+			StateEnumeration jobState = job.getState();
+			condition = jobState.getValue();
+
+			// Checking for faults...
+			FaultType myFaultType = job.getFault();
+			if (myFaultType != null) {
+				BaseFaultTypeDescription[] myFaultArray = job.getFault()
+						.getDescription();
+				for (BaseFaultTypeDescription currFault : myFaultArray) {
+					logger.error(currFault.get_value());
+					condition += "\nReason: " + currFault.get_value();
+				}
 			}
-		} else {
-			this.job = new GramJob(RSLHelper
-					.makeSimpleJob(simpleJobCommandLine));
+
+		} catch (Exception e) {
+			// TODO do something here
+			e.printStackTrace();
+			error = true;
+			errorMessage = e.getMessage();
 		}
 
-		job.setTimeOut(timeout);
-		job.setAuthorization(authorization);
-		job.setMessageProtectionType(xmlSecurity);
-		job.setDelegationEnabled(this.delegationEnabled);
-		long now = new Date().getTime();
-		// long future = 3600 * 1000 * 24 * 45;
-		// long future = 3888000000l;
-		long future = 31536000000L;
-		long newTime = now + future;
-		logger.debug("Add time: " + future + " ms.");
-		logger.debug("Old time: " + now + " ms since 1970. (Now)");
-		logger.debug("New time: " + newTime + " ms since 1970 (Termination).");
-		Date newDate = new Date(newTime);
-		logger.debug("Old date: " + new Date(now).toString());
-		logger.debug("New date: " + newDate.toString());
-		// job.setDuration(newDate);
-		job.setTerminationTime(newDate);
-		// job.setDuration(new Date(ts));
-		// job.setTerminationTime(terminationDate);
-		// job.setDuration(duration);
-		// job.setTerminationTime(null);
-		// job.setDuration(null);
+		return condition;
+	}
+	/**
+	 * Get the status of our job, as well as any faults that may have occurred.
+	 * Returns a String containing the status and any faults.
+	 * 
+	 * @param eprFile
+	 *            The EPR file for this job
+	 * 
+	 * @return String indicating the status of this job
+	 */
+	public static String getJobStatus(final String gramJobHandle,
+			final GSSCredential cred) {
+		GramJob job;
+		try {
+			job = retrieveGramJob(gramJobHandle, cred);
+			job.refreshStatus();
 
-		// return null;
-		return this.processJob(job, factoryEndpoint, batch);
+			int error = job.getError();
+
+		} catch (NoSuchGT4JobException e) {
+			return "NoSuchJob";
+		} catch (Exception e) {
+			return "NoSuchJob";
+		}
+
+		String status = getJobStatus(job);
+
+		if ("Done".equals(status)) {
+			int error = job.getExitCode();
+			status = status + error;
+		}
+
+		return status;
+	}
+
+	/**
+	 * @param args
+	 */
+	public static void main(final String[] args) {
+		/*
+		 * Job test parameters (adjust to your needs)
+		 */
+		// remote host
+		String contact = "ng2.vpac.org";
+
+		// Factory type: Fork, Condor, PBS, LSF
+		// String factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.FORK;
+
+		// Job XML
+		File rslFile = new File("/tmp/simple.xml");
+
+		System.setProperty("GLOBUS_LOCATION",
+				"/home/markus/workspace/grisu-core/globus");
+		System.setProperty("axis.ClientConfigFile",
+				"/home/markus/workspace/grisu-core/globus/client-config.wsdd");
+
+		// Deafult Security: Host authorization + XML encryption
+		Authorization authz = HostAuthorization.getInstance();
+		Integer xmlSecurity = Constants.ENCRYPTION;
+
+		// Submission mode: batch = will not wait
+		boolean batchMode = false;
+
+		// a Simple command executable (if no job file)
+		String simpleJobCommandLine = null;
+
+		// Job timeout values: duration, termination times
+		Date serviceDuration = null;
+		Date serviceTermination = null;
+		int timeout = GramJob.DEFAULT_TIMEOUT;
+
+		try {
+			GramClient gram = new GramClient(LocalProxy.loadGSSCredential());
+			// gram.submitRSL(getFactoryEPR(contact,factoryType)
+			// , simpleJobCommandLine, rslFile
+			// , authz, xmlSecurity
+			// , batchMode, false, false
+			// , serviceDuration, serviceTermination, timeout );
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	private static GramJob retrieveGramJob(final String gramJobHandle,
+			final GSSCredential cred) throws NoSuchGT4JobException {
+		// TODO: Remove these? These error things are kinda useless if not
+		// returned.
+
+		GramJob job = new GramJob();
+
+		try {
+
+			System.setProperty("GLOBUS_LOCATION", Environment.getGlobusHome());
+			System.setProperty("axis.ClientConfigFile", Environment
+					.getAxisClientConfig());
+
+			// Find our job, and refresh its status.
+			job.setHandle(gramJobHandle);
+			job.setCredentials(cred);
+		} catch (Exception e) {
+			// e.printStackTrace();
+			logger.error(e.getMessage());
+			// means no such job
+			throw new NoSuchGT4JobException("Could not find job: "
+					+ gramJobHandle);
+		}
+
+		return job;
+	}
+
+	private GSSCredential credential = null;
+
+	// proxy credential
+	// private String proxyPath = null;
+
+	/**
+	 * Job submission member variables.
+	 */
+	private GramJob job;
+	// completed if Done or Failed
+	private boolean jobCompleted = false;
+	// Batch runs will not wait for the job to complete
+	private boolean batch;
+
+	// Delegation
+	private boolean limitedDelegation = true;
+
+	private boolean delegationEnabled = true;
+
+	// Don't print messages by default
+	private boolean quiet = false;
+
+	/**
+	 * Application error state.
+	 */
+	private boolean noInterruptHandling = false;
+
+	private boolean isInterrupted = true;
+
+	private boolean normalApplicationEnd = false;
+
+	public GramClient(final GSSCredential credential) {
+		this.credential = credential;
+
+		System.setProperty("GLOBUS_LOCATION", Environment.getGlobusHome());
+		System.setProperty("axis.ClientConfigFile", Environment
+				.getAxisClientConfig());
+
+	}
+
+	/**
+	 * Print error message with prefix.
+	 */
+	private void printError(final String message) {
+		System.err.println(message);
+	}
+
+	private void printJobFault(final GramJob job) {
+		BaseFaultType fault = job.getFault();
+		if (fault != null) {
+			printMessage("Fault:\n" + FaultUtils.faultToString(fault));
+		}
+	}
+
+	private void printJobState(final StateEnumeration jobState,
+			final boolean holding) {
+		String holdString = "";
+		if (holding) {
+			holdString = "HOLD ";
+		}
+		printMessage("Job State: " + holdString + jobState.getValue());
+	}
+
+	/*
+	 * private String convertEPRtoString(EndpointReferenceType endpoint) throws
+	 * Exception { return ObjectSerializer.toString( endpoint,
+	 * org.apache.axis.message.addressing.Constants. QNAME_ENDPOINT_REFERENCE);
+	 * }
+	 */
+
+	/**
+	 * Print message to user if not in quiet mode.
+	 * 
+	 * @param message
+	 *            the message to send to stdout.
+	 */
+	private void printMessage(final String message) {
+		if (!this.quiet) {
+			logger.info(message);
+		}
 	}
 
 	/**
@@ -311,6 +412,131 @@ public class GramClient
 	}
 
 	/**
+	 * Callback as a GramJobListener. Will not be called in batch mode.
+	 */
+	public final void stateChanged(final GramJob job) {
+		StateEnumeration jobState = job.getState();
+		boolean holding = job.isHolding();
+		printMessage("========== State Notification ==========");
+		printJobState(jobState, holding);
+		printMessage("========================================");
+
+		synchronized (this) {
+			if (jobState.equals(StateEnumeration.Done)
+					|| jobState.equals(StateEnumeration.Failed)) {
+
+				printMessage("Exit Code: "
+						+ Integer.toString(job.getExitCode()));
+
+				this.jobCompleted = true;
+			}
+
+			notifyAll();
+
+			// if we a running an interractive job,
+			// prevent a hold from hanging the client
+			if (holding && !batch) {
+				logger
+						.debug("Automatically releasing hold for interactive job");
+				try {
+					job.release();
+				} catch (Exception e) {
+					String errorMessage = "Unable to release job from hold";
+					logger.debug(errorMessage, e);
+					printError(errorMessage + " - " + e.getMessage());
+				}
+			}
+		}
+	}
+
+	/**
+	 * Submit a WS-GRAM Job (GT4).
+	 * 
+	 * @param factoryEndpoint
+	 *            Factory endpoint reference
+	 * @param simpleJobCommandLine
+	 *            Executable (null to use a job file)
+	 * @param rslFileJob
+	 *            XML file (null to use a command line)
+	 * @param authorization
+	 *            Authorizarion: Host, Self, Identity
+	 * @param xmlSecurity
+	 *            XML Sec: Encryption or signature
+	 * @param batchMode
+	 *            Submission mode: batch will not wait for completion
+	 * @param dryRunMode
+	 *            Used to parse RSL
+	 * @param quiet
+	 *            Messages/NO messages
+	 * @param duration
+	 *            Duartion date
+	 * @param terminationDate
+	 *            Termination date
+	 * @param timeout
+	 *            Job timeout (ms)
+	 */
+	public final String submitRSL(final EndpointReferenceType factoryEndpoint,
+			final String simpleJobCommandLine,
+			final JobDescriptionType rslFile,
+			final Authorization authorization, final Integer xmlSecurity,
+			final boolean batchMode, final boolean dryRunMode,
+			final boolean quiet, final Date duration,
+			final Date terminationDate, final int timeout) throws Exception {
+		System.setProperty("GLOBUS_LOCATION", Environment.getGlobusHome());
+		System.setProperty("axis.ClientConfigFile", Environment
+				.getAxisClientConfig());
+
+		this.quiet = quiet;
+		this.batch = batchMode || dryRunMode; // in single job only.
+		// In multi-job, -batch is not allowed. Dryrun is.
+
+		if (batchMode) {
+			printMessage("Warning: Will not wait for job completion, "
+					+ "and will not destroy job service.");
+		}
+
+		if (rslFile != null) {
+			try {
+				this.job = new GramJob(rslFile);
+			} catch (Exception e) {
+				String errorMessage = "Unable to parse RSL from file "
+						+ rslFile;
+				logger.debug(errorMessage, e);
+				throw new IOException(errorMessage + " - " + e.getMessage());
+			}
+		} else {
+			this.job = new GramJob(RSLHelper
+					.makeSimpleJob(simpleJobCommandLine));
+		}
+
+		job.setTimeOut(timeout);
+		job.setAuthorization(authorization);
+		job.setMessageProtectionType(xmlSecurity);
+		job.setDelegationEnabled(this.delegationEnabled);
+		long now = new Date().getTime();
+		// long future = 3600 * 1000 * 24 * 45;
+		// long future = 3888000000l;
+		long future = 31536000000L;
+		long newTime = now + future;
+		logger.debug("Add time: " + future + " ms.");
+		logger.debug("Old time: " + now + " ms since 1970. (Now)");
+		logger.debug("New time: " + newTime + " ms since 1970 (Termination).");
+		Date newDate = new Date(newTime);
+		logger.debug("Old date: " + new Date(now).toString());
+		logger.debug("New date: " + newDate.toString());
+		// job.setDuration(newDate);
+		job.setTerminationTime(newDate);
+		// job.setDuration(new Date(ts));
+		// job.setTerminationTime(terminationDate);
+		// job.setDuration(duration);
+		// job.setTerminationTime(null);
+		// job.setDuration(null);
+
+		// return null;
+		return this.processJob(job, factoryEndpoint, batch);
+	}
+
+	/**
 	 * Since messaging is assumed to be unreliable (i.e. a notification could
 	 * very well be lost), we implement policy of pulling the remote state when
 	 * a given waited-for notification has not has been received after a
@@ -363,9 +589,9 @@ public class GramClient
 
 				// B) Timeout when waiting for a notification (bad)
 				if (durationWaited >= durationToWait) {
-						logger.warn("Did not receive any new notification of "
-								+ "job state change after a delay of "
-								+ durationToWait + " ms.\nPulling job state.");
+					logger.warn("Did not receive any new notification of "
+							+ "job state change after a delay of "
+							+ durationToWait + " ms.\nPulling job state.");
 					// pull state from remote job and print the
 					// state only if it is a new state
 					// refreshJobStatus();
@@ -373,233 +599,12 @@ public class GramClient
 
 					// binary exponential backoff
 					durationToWait = 2 * durationToWait;
-				// C) Some other reason
+					// C) Some other reason
 				} else {
 					// wait but only for remainder of timeout duration
 					durationToWait = durationToWait - durationWaited;
 				}
 			}
 		}
-	}
-
-	/**
-	 * @param args
-	 */
-	public static void main(final String[] args) {
-		/*
-		 * Job test parameters (adjust to your needs)
-		 */
-		// remote host
-		String contact = "ng2.vpac.org";
-
-		// Factory type: Fork, Condor, PBS, LSF
-		// String factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.FORK;
-
-		// Job XML
-		File rslFile = new File("/tmp/simple.xml");
-
-		System.setProperty("GLOBUS_LOCATION",
-				"/home/markus/workspace/grisu-core/globus");
-		System.setProperty("axis.ClientConfigFile",
-				"/home/markus/workspace/grisu-core/globus/client-config.wsdd");
-
-		// Deafult Security: Host authorization + XML encryption
-		Authorization authz = HostAuthorization.getInstance();
-		Integer xmlSecurity = Constants.ENCRYPTION;
-
-		// Submission mode: batch = will not wait
-		boolean batchMode = false;
-
-		// a Simple command executable (if no job file)
-		String simpleJobCommandLine = null;
-
-		// Job timeout values: duration, termination times
-		Date serviceDuration = null;
-		Date serviceTermination = null;
-		int timeout = GramJob.DEFAULT_TIMEOUT;
-
-		try {
-			GramClient gram = new GramClient(LocalProxy.loadGSSCredential());
-			// gram.submitRSL(getFactoryEPR(contact,factoryType)
-			// , simpleJobCommandLine, rslFile
-			// , authz, xmlSecurity
-			// , batchMode, false, false
-			// , serviceDuration, serviceTermination, timeout );
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Print message to user if not in quiet mode.
-	 * 
-	 * @param message
-	 *            the message to send to stdout.
-	 */
-	private void printMessage(final String message) {
-		if (!this.quiet) {
-			logger.info(message);
-		}
-	}
-
-	/**
-	 * Print error message with prefix.
-	 */
-	private void printError(final String message) {
-		System.err.println(message);
-	}
-
-	private void printJobState(final StateEnumeration jobState, final boolean holding) {
-		String holdString = "";
-		if (holding) {
-			holdString = "HOLD ";
-		}
-		printMessage("Job State: " + holdString + jobState.getValue());
-	}
-
-	private void printJobFault(final GramJob job) {
-		BaseFaultType fault = job.getFault();
-		if (fault != null) {
-			printMessage("Fault:\n" + FaultUtils.faultToString(fault));
-		}
-	}
-
-	/*
-	 * private String convertEPRtoString(EndpointReferenceType endpoint) throws
-	 * Exception { return ObjectSerializer.toString( endpoint,
-	 * org.apache.axis.message.addressing.Constants. QNAME_ENDPOINT_REFERENCE);
-	 * }
-	 */
-
-	private static GramJob retrieveGramJob(final String gramJobHandle,
-			final GSSCredential cred) throws NoSuchGT4JobException {
-		// TODO: Remove these? These error things are kinda useless if not
-		// returned.
-
-		GramJob job = new GramJob();
-
-		try {
-
-			System.setProperty("GLOBUS_LOCATION", Environment.getGlobusHome());
-			System.setProperty("axis.ClientConfigFile",
-					Environment.getAxisClientConfig());
-
-			// Find our job, and refresh its status.
-			job.setHandle(gramJobHandle);
-			job.setCredentials(cred);
-		} catch (Exception e) {
-			// e.printStackTrace();
-			logger.error(e.getMessage());
-			// means no such job
-			throw new NoSuchGT4JobException("Could not find job: "
-					+ gramJobHandle);
-		}
-
-		return job;
-	}
-
-	public static String getJobStatus(final GramJob job) {
-
-		String condition = null;
-		boolean error = false;
-		String errorMessage = "NONE";
-
-		try {
-
-			// Get the state of our job.
-			StateEnumeration jobState = job.getState();
-			condition = jobState.getValue();
-
-			// Checking for faults...
-			FaultType myFaultType = job.getFault();
-			if (myFaultType != null) {
-				BaseFaultTypeDescription[] myFaultArray = job.getFault()
-						.getDescription();
-				for (BaseFaultTypeDescription currFault : myFaultArray) {
-					logger.error(currFault.get_value());
-					condition += "\nReason: " + currFault.get_value();
-				}
-			}
-
-		} catch (Exception e) {
-			// TODO do something here
-			e.printStackTrace();
-			error = true;
-			errorMessage = e.getMessage();
-		}
-
-		return condition;
-	}
-
-	/**
-	 * Get the status of our job, as well as any faults that may have occurred.
-	 * Returns a String containing the status and any faults.
-	 * 
-	 * @param eprFile
-	 *            The EPR file for this job
-	 * 
-	 * @return String indicating the status of this job
-	 */
-	public static String getJobStatus(final String gramJobHandle, final GSSCredential cred) {
-		GramJob job;
-		try {
-			job = retrieveGramJob(gramJobHandle, cred);
-			job.refreshStatus();
-
-			int error = job.getError();
-
-		} catch (NoSuchGT4JobException e) {
-			return "NoSuchJob";
-		} catch (Exception e) {
-			return "NoSuchJob";
-		}
-
-		String status = getJobStatus(job);
-
-		if ("Done".equals(status)) {
-			int error = job.getExitCode();
-			status = status + error;
-		}
-
-		return status;
-	}
-
-	/**
-	 * destroys the job WSRF resource Precondition: job ! =null &&
-	 * job.isRequested() && !job.isLocallyDestroyed()
-	 */
-	public static String destroyJob(final String gramJobHandle, final GSSCredential cred) {
-
-		GramJob job;
-		try {
-			job = retrieveGramJob(gramJobHandle, cred);
-			job.refreshStatus();
-		} catch (NoSuchGT4JobException e) {
-			return "NoSuchJob";
-		} catch (Exception e) {
-			return "NoSuchJob";
-		}
-		destroyJob(job);
-		try {
-			job.refreshStatus();
-		} catch (Exception e) {
-			return "NoSuchJob";
-		}
-		return getJobStatus(job);
-
-	}
-
-	private static String destroyJob(final GramJob job) {
-
-		try {
-			job.destroy();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return getJobStatus(job);
-
 	}
 }

@@ -6,19 +6,23 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
 
-@XmlRootElement(name="logMessage")
+@XmlRootElement(name = "logMessage")
 public class DtoLogMessage {
-	
+
 	private Date date;
 	private String message;
-	
+
+	public DtoLogMessage() {
+	}
+
+	public DtoLogMessage(Date date, String message) {
+		this.date = date;
+		this.message = message;
+	}
+
 	@XmlAttribute
 	public Date getDate() {
 		return date;
-	}
-
-	public void setDate(Date date) {
-		this.date = date;
 	}
 
 	@XmlValue
@@ -26,15 +30,11 @@ public class DtoLogMessage {
 		return message;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
+	public void setDate(Date date) {
+		this.date = date;
 	}
 
-	public DtoLogMessage() {
-	}
-	
-	public DtoLogMessage(Date date, String message) {
-		this.date = date;
+	public void setMessage(String message) {
 		this.message = message;
 	}
 

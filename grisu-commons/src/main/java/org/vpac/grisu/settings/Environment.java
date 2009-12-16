@@ -13,9 +13,6 @@ import org.apache.commons.lang.StringUtils;
  */
 public final class Environment {
 
-	private Environment() {
-	}
-	
 	private static final String GRISU_DEFAULT_DIRECTORY = System
 			.getProperty("user.home")
 			+ File.separator + ".grisu";
@@ -23,65 +20,28 @@ public final class Environment {
 	private static String USER_SET_GRISU_DIRECTORY = null;
 
 	private static String GLOBUS_HOME;
+
 	private static File GRISU_DIRECTORY;
-
-	public static String getTemplateDirectory() {
-		return getGrisuDirectory() + File.separator + "templates";
-	}
-
-	public static String getCacheDirName() {
-		return "cache";
-	}
-
 	public static String getAvailableTemplatesDirectory() {
 		return getGrisuDirectory() + File.separator + "templates_available";
-	}
-
-	public static String getGlobusHome() {
-		
-		if (StringUtils.isBlank(GLOBUS_HOME)) {
-			
-			GLOBUS_HOME = getGrisuDirectory() + File.separator + "globus";
-			
-		}
-		return GLOBUS_HOME;
-	}
-
-	public static File getGrisuPluginDirectory() {
-		File dir = new File(getGrisuDirectory(), "plugins");
-		
-		if ( ! dir.exists() ) {
-			dir.mkdirs();
-		}
-		return dir;
 	}
 
 	public static String getAxisClientConfig() {
 		return getGlobusHome() + File.separator + "client-config.wsdd";
 	}
 
-	/**
-	 * For some jobs/applications it is useful to cache output files locally so
-	 * they don't have to be transferred over and over again.
-	 * 
-	 * @return the location of the local directory where all job output files
-	 *         are chached (in subdirectories named after the jobname)
-	 */
-	public static File getLocalJobCacheDirectory() {
-
-		File dir = new File(getGrisuDirectory(), "jobs");
-		dir.mkdirs();
-		return dir;
+	public static String getCacheDirName() {
+		return "cache";
 	}
 
-	public static void setGrisuDirectory(String path) {
+	public static String getGlobusHome() {
 
-		if (GRISU_DIRECTORY != null) {
-			throw new RuntimeException(
-					"Can't set grisu directory because it was already accessed once after the start of this application...");
+		if (StringUtils.isBlank(GLOBUS_HOME)) {
+
+			GLOBUS_HOME = getGrisuDirectory() + File.separator + "globus";
+
 		}
-
-		USER_SET_GRISU_DIRECTORY = path;
+		return GLOBUS_HOME;
 	}
 
 	/**
@@ -93,7 +53,6 @@ public final class Environment {
 	public static File getGrisuDirectory() {
 
 		if (GRISU_DIRECTORY == null) {
-
 
 			File grisuDir = null;
 			if (StringUtils.isNotBlank(USER_SET_GRISU_DIRECTORY)) {
@@ -128,6 +87,46 @@ public final class Environment {
 			}
 		}
 		return root;
+	}
+
+	public static File getGrisuPluginDirectory() {
+		File dir = new File(getGrisuDirectory(), "plugins");
+
+		if (!dir.exists()) {
+			dir.mkdirs();
+		}
+		return dir;
+	}
+
+	/**
+	 * For some jobs/applications it is useful to cache output files locally so
+	 * they don't have to be transferred over and over again.
+	 * 
+	 * @return the location of the local directory where all job output files
+	 *         are chached (in subdirectories named after the jobname)
+	 */
+	public static File getLocalJobCacheDirectory() {
+
+		File dir = new File(getGrisuDirectory(), "jobs");
+		dir.mkdirs();
+		return dir;
+	}
+
+	public static String getTemplateDirectory() {
+		return getGrisuDirectory() + File.separator + "templates";
+	}
+
+	public static void setGrisuDirectory(String path) {
+
+		if (GRISU_DIRECTORY != null) {
+			throw new RuntimeException(
+					"Can't set grisu directory because it was already accessed once after the start of this application...");
+		}
+
+		USER_SET_GRISU_DIRECTORY = path;
+	}
+
+	private Environment() {
 	}
 
 }

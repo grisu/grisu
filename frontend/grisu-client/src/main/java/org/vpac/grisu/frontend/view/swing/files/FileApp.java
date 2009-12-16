@@ -12,12 +12,6 @@ import org.vpac.grisu.frontend.control.login.LoginParams;
 
 public class FileApp {
 
-	private JFrame frame;
-	private FileListPanelPlus fileListPanelPlus;
-	
-	private ServiceInterface si;
-	private String startUrl;
-
 	/**
 	 * Launch the application.
 	 */
@@ -25,25 +19,26 @@ public class FileApp {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					
+
 					String username = args[0];
 					char[] password = args[1].toCharArray();
 
 					LoginParams loginParams = new LoginParams(
 					// "http://localhost:8080/grisu-ws/services/grisu",
-//							 "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-//							"http://localhost:8080/enunciate-backend/soap/GrisuService",
-					"Local", 
-//					"LOCAL_WS",
-					username, password);
-					
-					
+							// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
+							// "http://localhost:8080/enunciate-backend/soap/GrisuService",
+							"Local",
+							// "LOCAL_WS",
+							username, password);
+
 					ServiceInterface si = null;
-//					si = LoginManager.login(null, password, username, "VPAC", loginParams);
-					si = LoginManager.login(null, null, null, null, loginParams);
-					
+					// si = LoginManager.login(null, password, username, "VPAC",
+					// loginParams);
+					si = LoginManager
+							.login(null, null, null, null, loginParams);
+
 					File home = new File(System.getProperty("user.home"));
-					
+
 					FileApp window = new FileApp(si, home.toURI().toString());
 					window.frame.setVisible(true);
 				} catch (Exception e) {
@@ -52,6 +47,12 @@ public class FileApp {
 			}
 		});
 	}
+	private JFrame frame;
+
+	private FileListPanelPlus fileListPanelPlus;
+	private ServiceInterface si;
+
+	private String startUrl;
 
 	/**
 	 * Create the application.
@@ -59,8 +60,16 @@ public class FileApp {
 	public FileApp(ServiceInterface si, String startUrl) {
 		this.si = si;
 		this.startUrl = startUrl;
-		
+
 		initialize();
+	}
+
+	private FileListPanelPlus getFileListPanelPlus() {
+		if (fileListPanelPlus == null) {
+			fileListPanelPlus = new FileListPanelPlus(si, (String) null,
+					startUrl);
+		}
+		return fileListPanelPlus;
 	}
 
 	/**
@@ -72,14 +81,5 @@ public class FileApp {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
 		frame.getContentPane().add(getFileListPanelPlus(), BorderLayout.CENTER);
-	}
-
-	
-	
-	private FileListPanelPlus getFileListPanelPlus() {
-		if (fileListPanelPlus == null) {
-			fileListPanelPlus = new FileListPanelPlus(si, (String) null, startUrl);
-		}
-		return fileListPanelPlus;
 	}
 }

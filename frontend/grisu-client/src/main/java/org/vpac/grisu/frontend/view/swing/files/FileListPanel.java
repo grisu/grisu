@@ -17,8 +17,6 @@ import javax.swing.table.TableColumn;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.frontend.model.job.BatchJobObject;
-import org.vpac.grisu.frontend.view.swing.jobmonitoring.BatchJobSelectionListener;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.MountPoint;
@@ -55,6 +53,10 @@ public class FileListPanel extends JPanel {
 
 	private String rootUrl = null;
 
+	// ---------------------------------------------------------------------------------------
+	// Event stuff
+	private Vector<FileSelectionListener> listeners;
+
 	/**
 	 * Create the panel.
 	 */
@@ -73,40 +75,132 @@ public class FileListPanel extends JPanel {
 		setRootAndCurrentUrl(rootUrl, startUrl);
 
 	}
-	
-	public void setRootAndCurrentUrl(GlazedFile startFile) {
-		
-		setRootAndCurrentUrl(startFile.getUrl(), startFile);
-	}
-	
-	public void setRootAndCurrentUrl(String rootUrl, GlazedFile startFile) {
-		
-		if ( rootUrl == null ) {
-			this.rootUrl = GlazedFile.ROOT;
-		} else {
-			this.rootUrl = rootUrl;
-		}
-		
-		if ( startFile == null ) {
-			setCurrent(GlazedFile.ROOT);
-		} else {
-			setCurrent(startFile);
-		}
-		
+
+	// register a listener
+	synchronized public void addUserInputListener(FileSelectionListener l) {
+		if (listeners == null)
+			listeners = new Vector<FileSelectionListener>();
+		listeners.addElement(l);
 	}
 
-	public void setRootAndCurrentUrl(String rootUrl, String startUrl) {
-		if (rootUrl == null) {
-			this.rootUrl = GlazedFile.ROOT;
+	public boolean currentUrlIsStartUrl() {
+
+		if (rootUrl.equals(getCurrentDirectory().getUrl())) {
+			return true;
 		} else {
-			this.rootUrl = rootUrl;
+			return false;
+		}
+	}
+
+	private void fileDoubleClickOccured() {
+
+		int selRow = table.getSelectedRow();
+		if (selRow >= 0) {
+
+			GlazedFile sel = (GlazedFile) fileModel.getValueAt(selRow, 0);
+
+			if (sel.isFolder()) {
+				setCurrent(sel);
+			} else {
+				fireFileSelected(sel);
+			}
+
 		}
 
-		if (startUrl == null) {
-			setCurrent(GlazedFile.ROOT);
-		} else {
-			setCurrent(startUrl);
+	}
+
+	private void fireFileSelected(GlazedFile file) {
+		// if we have no mountPointsListeners, do nothing...
+		if (listeners != null && !listeners.isEmpty()) {
+
+			// make a copy of the listener list in case
+			// anyone adds/removes mountPointsListeners
+			Vector<FileSelectionListener> targets;
+			synchronized (this) {
+				targets = (Vector<FileSelectionListener>) listeners.clone();
+			}
+
+			// walk through the listener list and
+			// call the userInput method in each
+			for (FileSelectionListener l : targets) {
+				try {
+					l.fileSelected(file);
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			}
 		}
+	}
+
+	public GlazedFile getCurrentDirectory() {
+		return currentDirectory;
+	}
+
+	public String getCurrentDirectoryUrl() {
+		if (currentDirectory != null) {
+			return currentDirectory.getUrl();
+		} else {
+			return null;
+		}
+	}
+
+	private JScrollPane getScrollPane() {
+		if (scrollPane == null) {
+			scrollPane = new JScrollPane(getTable());
+		}
+		return scrollPane;
+	}
+
+	private JTable getTable() {
+		if (table == null) {
+			table = new JTable(fileModel);
+			table.setDefaultRenderer(GlazedFile.class, new GlazedFileRenderer(
+					this));
+			table.setDefaultRenderer(Long.class, new FileSizeRenderer());
+
+			int vColIndex = 0;
+			TableColumn col = table.getColumnModel().getColumn(vColIndex);
+			int width = 120;
+			col.setPreferredWidth(width);
+			col.setMinWidth(80);
+			vColIndex = 1;
+			col = table.getColumnModel().getColumn(vColIndex);
+			width = 60;
+			col.setPreferredWidth(width);
+			col.setMaxWidth(60);
+
+			table.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+
+					if (arg0.getClickCount() == 2) {
+						fileDoubleClickOccured();
+					}
+
+				}
+			});
+		}
+		return table;
+	}
+
+	// remove a listener
+	synchronized public void removeUserInputListener(FileSelectionListener l) {
+		if (listeners == null) {
+			listeners = new Vector<FileSelectionListener>();
+		}
+		listeners.removeElement(l);
+	}
+
+	public void setCurrent(GlazedFile file) {
+
+		setCurrent(null, file);
+
+	}
+
+	public void setCurrent(String url) {
+
+		setCurrent(url, null);
+
 	}
 
 	private synchronized void setCurrent(final String url, final GlazedFile file) {
@@ -119,110 +213,130 @@ public class FileListPanel extends JPanel {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		} 
+		}
 
 		updateThread = new Thread("Populating fileList") {
 
-				public void run() {
+			public void run() {
 
-					setLoading(true);
+				setLoading(true);
 
-					try {
+				try {
 
-						if (file != null) {
+					if (file != null) {
 
-							if (file == null
-									|| GlazedFile.Type.FILETYPE_ROOT
-											.equals(file.getType())) {
-								setCurrentDirToGridRoot();
-							} else if (GlazedFile.Type.FILETYPE_SITE
-									.equals(file.getType())) {
-								setCurrentDirToSite(file.getName());
-							} else if (GlazedFile.Type.FILETYPE_MOUNTPOINT
-									.equals(file.getType())) {
-								setUrl(file.getUrl());
-							} else if (GlazedFile.Type.FILETYPE_FOLDER
-									.equals(file.getType())) {
-								setUrl(file.getUrl());
-							} else {
-								// do nothing
-							}
-
+						if (file == null
+								|| GlazedFile.Type.FILETYPE_ROOT.equals(file
+										.getType())) {
+							setCurrentDirToGridRoot();
+						} else if (GlazedFile.Type.FILETYPE_SITE.equals(file
+								.getType())) {
+							setCurrentDirToSite(file.getName());
+						} else if (GlazedFile.Type.FILETYPE_MOUNTPOINT
+								.equals(file.getType())) {
+							setUrl(file.getUrl());
+						} else if (GlazedFile.Type.FILETYPE_FOLDER.equals(file
+								.getType())) {
+							setUrl(file.getUrl());
 						} else {
-
-							if (url == null || GlazedFile.ROOT.equals(url)) {
-								setCurrentDirToGridRoot();
-							} else if (em.getAllAvailableSites().contains(url)) {
-								setCurrentDirToSite(url);
-							} else if (em.isMountPointAlias(url)) {
-								String rootUrl = em.getMountPointForAlias(url)
-										.getRootUrl();
-								setUrl(rootUrl);
-							} else {
-								setUrl(url);
-							}
-
+							// do nothing
 						}
 
-					} catch (Exception e) {
+					} else {
 
-					} finally {
+						if (url == null || GlazedFile.ROOT.equals(url)) {
+							setCurrentDirToGridRoot();
+						} else if (em.getAllAvailableSites().contains(url)) {
+							setCurrentDirToSite(url);
+						} else if (em.isMountPointAlias(url)) {
+							String rootUrl = em.getMountPointForAlias(url)
+									.getRootUrl();
+							setUrl(rootUrl);
+						} else {
+							setUrl(url);
+						}
 
-						SwingUtilities.invokeLater(new Thread() {
-							public void run() {
-								table.repaint();
-								table.clearSelection();
-							}
+					}
 
-						});
+				} catch (Exception e) {
 
-						setLoading(false);
+				} finally {
+
+					SwingUtilities.invokeLater(new Thread() {
+						public void run() {
+							table.repaint();
+							table.clearSelection();
+						}
+
+					});
+
+					setLoading(false);
+				}
+			}
+		};
+
+		updateThread.start();
+
+	}
+
+	private void setCurrentDirToFolder(DtoFolder folder) {
+
+		currentDirectory = new GlazedFile(folder);
+		currentFolder = folder;
+
+		currentDirectoryContent.getReadWriteLock().writeLock().lock();
+		try {
+			currentDirectoryContent.clear();
+
+			if (!FileManager.isLocal(folder.getRootUrl())) {
+				if (!currentUrlIsStartUrl()) {
+
+					if (em.isMountPointRoot(folder.getRootUrl())) {
+						GlazedFile temp = new GlazedFile(em
+								.getMountPointForUrl(folder.getRootUrl())
+								.getSite());
+						temp.setParent();
+						currentDirectoryContent.add(temp);
+					} else {
+						GlazedFile temp = new GlazedFile(fm
+								.calculateParentUrl(folder.getRootUrl()), si);
+						temp.setParent();
+						currentDirectoryContent.add(temp);
 					}
 				}
-			};
+			} else {
+				if (!currentUrlIsStartUrl()) {
+					try {
+						File parent = new File(new URI(folder.getRootUrl()))
+								.getParentFile();
 
-			updateThread.start();
+						GlazedFile tempFile;
+						if (parent == null) {
+							tempFile = new GlazedFile(
+									GlazedFile.LOCAL_FILESYSTEM);
+						} else {
+							tempFile = new GlazedFile(parent);
+						}
+						tempFile.setParent();
+						currentDirectoryContent.add(tempFile);
+					} catch (URISyntaxException e) {
+						e.printStackTrace();
+						throw new RuntimeException(e);
+					}
+				}
+			}
 
-	}
+			for (DtoFolder fol : folder.getChildrenFolders()) {
+				currentDirectoryContent.add(new GlazedFile(fol));
+			}
 
-	public void setCurrent(String url) {
+			for (DtoFile file : folder.getChildrenFiles()) {
+				currentDirectoryContent.add(new GlazedFile(file));
+			}
 
-		setCurrent(url, null);
-
-	}
-
-	public boolean currentUrlIsStartUrl() {
-
-		if (rootUrl.equals(getCurrentDirectory().getUrl())) {
-			return true;
-		} else {
-			return false;
+		} finally {
+			currentDirectoryContent.getReadWriteLock().writeLock().unlock();
 		}
-	}
-
-	public GlazedFile getCurrentDirectory() {
-		return currentDirectory;
-	}
-	
-	public String getCurrentDirectoryUrl() {
-		if ( currentDirectory != null ) {
-			return currentDirectory.getUrl();
-		} else {
-			return null;
-		}
-	}
-
-	public void setCurrent(GlazedFile file) {
-
-		setCurrent(null, file);
-
-	}
-
-	private void setUrl(String url) throws RemoteFileSystemException {
-
-		DtoFolder folder = fm.ls(url);
-
-		setCurrentDirToFolder(folder);
 
 	}
 
@@ -295,116 +409,6 @@ public class FileListPanel extends JPanel {
 		}
 	}
 
-	private void setCurrentDirToFolder(DtoFolder folder) {
-
-		currentDirectory = new GlazedFile(folder);
-		currentFolder = folder;
-
-		currentDirectoryContent.getReadWriteLock().writeLock().lock();
-		try {
-			currentDirectoryContent.clear();
-
-			if (!FileManager.isLocal(folder.getRootUrl())) {
-				if (!currentUrlIsStartUrl()) {
-
-					if (em.isMountPointRoot(folder.getRootUrl())) {
-						GlazedFile temp = new GlazedFile(em
-								.getMountPointForUrl(folder.getRootUrl())
-								.getSite());
-						temp.setParent();
-						currentDirectoryContent.add(temp);
-					} else {
-						GlazedFile temp = new GlazedFile(fm
-								.calculateParentUrl(folder.getRootUrl()), si);
-						temp.setParent();
-						currentDirectoryContent.add(temp);
-					}
-				}
-			} else {
-				if (!currentUrlIsStartUrl()) {
-					try {
-						File parent = new File(new URI(folder.getRootUrl()))
-								.getParentFile();
-
-						GlazedFile tempFile;
-						if (parent == null) {
-							tempFile = new GlazedFile(
-									GlazedFile.LOCAL_FILESYSTEM);
-						} else {
-							tempFile = new GlazedFile(parent);
-						}
-						tempFile.setParent();
-						currentDirectoryContent.add(tempFile);
-					} catch (URISyntaxException e) {
-						e.printStackTrace();
-						throw new RuntimeException(e);
-					}
-				}
-			}
-
-			for (DtoFolder fol : folder.getChildrenFolders()) {
-				currentDirectoryContent.add(new GlazedFile(fol));
-			}
-
-			for (DtoFile file : folder.getChildrenFiles()) {
-				currentDirectoryContent.add(new GlazedFile(file));
-			}
-
-		} finally {
-			currentDirectoryContent.getReadWriteLock().writeLock().unlock();
-		}
-
-	}
-
-	private void fileDoubleClickOccured() {
-
-		int selRow = table.getSelectedRow();
-		if (selRow >= 0) {
-
-			GlazedFile sel = (GlazedFile) fileModel.getValueAt(selRow, 0);
-			
-			if ( sel.isFolder() ) {
-				setCurrent(sel);
-			} else {
-				fireFileSelected(sel);
-			}
-
-		}
-
-	}
-
-	private JTable getTable() {
-		if (table == null) {
-			table = new JTable(fileModel);
-			table.setDefaultRenderer(GlazedFile.class, new GlazedFileRenderer(
-					this));
-			table.setDefaultRenderer(Long.class, new FileSizeRenderer());
-
-			int vColIndex = 0;
-			TableColumn col = table.getColumnModel().getColumn(vColIndex);
-			int width = 120;
-			col.setPreferredWidth(width);
-			col.setMinWidth(80);
-			vColIndex = 1;
-			col = table.getColumnModel().getColumn(vColIndex);
-			width = 60;
-			col.setPreferredWidth(width);
-			col.setMaxWidth(60);
-
-			table.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
-
-					if (arg0.getClickCount() == 2) {
-						fileDoubleClickOccured();
-					}
-
-				}
-			});
-		}
-		return table;
-	}
-
 	private void setLoading(final boolean loading) {
 
 		SwingUtilities.invokeLater(new Thread() {
@@ -425,53 +429,46 @@ public class FileListPanel extends JPanel {
 
 	}
 
-	private JScrollPane getScrollPane() {
-		if (scrollPane == null) {
-			scrollPane = new JScrollPane(getTable());
-		}
-		return scrollPane;
-	}
-	
-	
-	// ---------------------------------------------------------------------------------------
-	// Event stuff
-	private Vector<FileSelectionListener> listeners;
+	public void setRootAndCurrentUrl(GlazedFile startFile) {
 
-	private void fireFileSelected(GlazedFile file) {
-		// if we have no mountPointsListeners, do nothing...
-		if (listeners != null && !listeners.isEmpty()) {
-
-			// make a copy of the listener list in case
-			// anyone adds/removes mountPointsListeners
-			Vector<FileSelectionListener> targets;
-			synchronized (this) {
-				targets = (Vector<FileSelectionListener>) listeners.clone();
-			}
-
-			// walk through the listener list and
-			// call the userInput method in each
-			for ( FileSelectionListener l : targets ) {
-				try {
-					l.fileSelected(file);
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
-			}
-		}
+		setRootAndCurrentUrl(startFile.getUrl(), startFile);
 	}
 
-	// register a listener
-	synchronized public void addUserInputListener(FileSelectionListener l) {
-		if (listeners == null)
-			listeners = new Vector<FileSelectionListener>();
-		listeners.addElement(l);
+	public void setRootAndCurrentUrl(String rootUrl, GlazedFile startFile) {
+
+		if (rootUrl == null) {
+			this.rootUrl = GlazedFile.ROOT;
+		} else {
+			this.rootUrl = rootUrl;
+		}
+
+		if (startFile == null) {
+			setCurrent(GlazedFile.ROOT);
+		} else {
+			setCurrent(startFile);
+		}
+
 	}
 
-	// remove a listener
-	synchronized public void removeUserInputListener(FileSelectionListener l) {
-		if (listeners == null) {
-			listeners = new Vector<FileSelectionListener>();
+	public void setRootAndCurrentUrl(String rootUrl, String startUrl) {
+		if (rootUrl == null) {
+			this.rootUrl = GlazedFile.ROOT;
+		} else {
+			this.rootUrl = rootUrl;
 		}
-		listeners.removeElement(l);
+
+		if (startUrl == null) {
+			setCurrent(GlazedFile.ROOT);
+		} else {
+			setCurrent(startUrl);
+		}
+	}
+
+	private void setUrl(String url) throws RemoteFileSystemException {
+
+		DtoFolder folder = fm.ls(url);
+
+		setCurrentDirToFolder(folder);
+
 	}
 }

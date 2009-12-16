@@ -18,9 +18,6 @@ import org.vpac.grisu.control.exceptions.NoSuchJobException;
  * 
  */
 public final class JobNameManager {
-	
-	private JobNameManager() {
-	}
 
 	public static final String ITERATOR_SEPERATOR = "_";
 
@@ -110,7 +107,8 @@ public final class JobNameManager {
 	 *            the jobname in question
 	 * @return the "highest" jobname
 	 */
-	private static int highestJobnameNumber(final List<Job> jobs, final String jobname) {
+	private static int highestJobnameNumber(final List<Job> jobs,
+			final String jobname) {
 
 		int max = 0;
 
@@ -130,6 +128,9 @@ public final class JobNameManager {
 		}
 
 		return max;
+	}
+
+	private JobNameManager() {
 	}
 
 }

@@ -23,7 +23,7 @@ import org.apache.log4j.Logger;
  * 
  */
 @Entity
-@XmlRootElement(name="mountpoint")
+@XmlRootElement(name = "mountpoint")
 @XmlAccessorType(XmlAccessType.NONE)
 public class MountPoint implements Comparable<MountPoint> {
 
@@ -36,7 +36,8 @@ public class MountPoint implements Comparable<MountPoint> {
 	 */
 	private String dn = null;
 	/**
-	 * The fqan that is used to create a voms credential to access this mountpoint.
+	 * The fqan that is used to create a voms credential to access this
+	 * mountpoint.
 	 */
 	private String fqan = null;
 	/**
@@ -47,9 +48,9 @@ public class MountPoint implements Comparable<MountPoint> {
 	 * The url of the root of this mountpoint.
 	 */
 	private String rootUrl = null;
-	
+
 	/**
-	 * The name of the site this mountpoint belongs to. 
+	 * The name of the site this mountpoint belongs to.
 	 */
 	private String site = null;
 
@@ -58,6 +59,20 @@ public class MountPoint implements Comparable<MountPoint> {
 
 	// for hibernate
 	public MountPoint() {
+	}
+
+	/**
+	 * This is used primarily to create a "dummy" mountpoint to be able to use
+	 * the {@link User#unmountFileSystem(String)} method.
+	 * 
+	 * @param dn
+	 *            the dn of the user
+	 * @param mountpoint
+	 *            the name of the mountpoint
+	 */
+	public MountPoint(final String dn, final String mountpoint) {
+		this.dn = dn;
+		this.alias = mountpoint;
 	}
 
 	/**
@@ -72,7 +87,8 @@ public class MountPoint implements Comparable<MountPoint> {
 	 * @param mountpoint
 	 *            the name of the mountpoint
 	 */
-	public MountPoint(final String dn, final String fqan, final String url, final String mountpoint, final String site) {
+	public MountPoint(final String dn, final String fqan, final String url,
+			final String mountpoint, final String site) {
 		this.dn = dn;
 		this.fqan = fqan;
 		this.rootUrl = url;
@@ -95,103 +111,16 @@ public class MountPoint implements Comparable<MountPoint> {
 	 *            whether this mountpoint was mounted automatically using mds
 	 *            information or manually by the user
 	 */
-	public MountPoint(final String dn, final String fqan, final String url, final String mountpoint, final String site,
+	public MountPoint(final String dn, final String fqan, final String url,
+			final String mountpoint, final String site,
 			final boolean automaticallyMounted) {
 		this(dn, fqan, url, mountpoint, site);
 		this.automaticallyMounted = automaticallyMounted;
 	}
 
-	/**
-	 * This is used primarily to create a "dummy" mountpoint to be able to use
-	 * the {@link User#unmountFileSystem(String)} method.
-	 * 
-	 * @param dn
-	 *            the dn of the user
-	 * @param mountpoint
-	 *            the name of the mountpoint
-	 */
-	public MountPoint(final String dn, final String mountpoint) {
-		this.dn = dn;
-		this.alias = mountpoint;
+	public int compareTo(final MountPoint mp) {
+		return getRootUrl().compareTo(mp.getRootUrl());
 	}
-
-	@Column(nullable = false)
-	@XmlElement(name="dn")
-	public String getDn() {
-		return dn;
-	}
-
-	public void setDn(final String dn) {
-		this.dn = dn;
-	}
-	
-	@Column(nullable = false)
-	@XmlElement(name="site")
-	public String getSite() {
-		return site;
-	}
-	
-	public void setSite(final String site) {
-		this.site = site;
-	}
-
-	/**
-	 * The fqan that is used to create a voms proxy to access this mountpoint.
-	 * 
-	 * @return the fqan
-	 */
-	@XmlElement(name="fqan")
-	public String getFqan() {
-		return fqan;
-	}
-
-	public void setFqan(final String fqan) {
-		this.fqan = fqan;
-	}
-
-	@Column(nullable = false)
-	@XmlAttribute(name="alias")
-	public String getAlias() {
-		return alias;
-	}
-
-	public void setAlias(final String mountpoint) {
-		this.alias = mountpoint;
-	}
-
-	@Column(nullable = false)
-	@XmlAttribute(name="url")
-	public String getRootUrl() {
-		return rootUrl;
-	}
-
-	public void setRootUrl(final String rootUrl) {
-		this.rootUrl = rootUrl;
-	}
-
-	public void setUrl(final String url) {
-		this.rootUrl = url;
-	}
-
-	@Id
-	@GeneratedValue
-	public Long getMountPointId() {
-		return mountPointId;
-	}
-
-	public void setMountPointId(final Long id) {
-		this.mountPointId = id;
-	}
-
-	// public boolean equals(Object otherMountPoint) {
-	// if ( ! (otherMountPoint instanceof MountPoint) )
-	// return false;
-	// MountPoint other = (MountPoint)otherMountPoint;
-	// if ( other.dn.equals(this.dn) && other.mountpoint.equals(this.mountpoint)
-	// )
-	// return true;
-	// else return false;
-	// }
 
 	public boolean equals(final Object otherMountPoint) {
 
@@ -225,103 +154,32 @@ public class MountPoint implements Comparable<MountPoint> {
 
 	}
 
-	public int hashCode() {
-		// return dn.hashCode() + mountpoint.hashCode();
-		return alias.hashCode();
+	@Column(nullable = false)
+	@XmlAttribute(name = "alias")
+	public String getAlias() {
+		return alias;
+	}
+
+	@Column(nullable = false)
+	@XmlElement(name = "dn")
+	public String getDn() {
+		return dn;
 	}
 
 	/**
-	 * Translates a "mounted" file (on that filesystem to an absolute url like
-	 * gsiftp://ngdata.vpac.org/home/san04/markus/test.txt).
+	 * The fqan that is used to create a voms proxy to access this mountpoint.
 	 * 
-	 * @param file
-	 *            the "mounted" file (e.g. /ngdata.vpac/test.txt
-	 * @return the absoulte path of the file or null if the file is not in the
-	 *         mounted filesystem or is not a "mounted" file (starts with
-	 *         something like /home.sapac.ngadmin)
+	 * @return the fqan
 	 */
-	public String replaceMountpointWithAbsoluteUrl(final String file) {
-
-		if (file.startsWith(getAlias())) {
-			return file.replaceFirst(getAlias(), getRootUrl());
-		} else {
-			return null;
-		}
+	@XmlElement(name = "fqan")
+	public String getFqan() {
+		return fqan;
 	}
 
-	/**
-	 * Translates an absolute file url to a "mounted" file url.
-	 * 
-	 * @param file
-	 *            the absolute file
-	 *            (gsiftp://ngdata.vpac.org/home/sano4/markus/test.txt)
-	 * @return /ngdata.vpac.org/test.txt
-	 */
-	public String replaceAbsoluteRootUrlWithMountPoint(final String file) {
-
-		if (file.startsWith(getRootUrl())) {
-			return file.replaceFirst(getRootUrl(), getAlias());
-
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * Checks whether the "userspace" url (/ngdata.vpac/file.txt) contains the
-	 * file.
-	 * 
-	 * @param file
-	 *            the file
-	 * @return true - if it contains it; false - if not.
-	 */
-	public boolean isResponsibleForUserSpaceFile(final String file) {
-
-		if (file.startsWith("gsiftp")) {
-			if (file.startsWith(getRootUrl())) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-
-		if (file.startsWith(getAlias())) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * Checks whether the "userspace" url (/ngdata.vpac/file.txt) contains the
-	 * file.
-	 * 
-	 * @param file
-	 *            the file
-	 * @return true - if it contains it; false - if not.
-	 */
-	public boolean isResponsibleForAbsoluteFile(final String file) {
-
-		if (file.startsWith(getRootUrl())) {
-			return true;
-		} else {
-			if (file.startsWith(getRootUrl().replace(":2811", ""))) {
-				// warning
-				myLogger
-						.warn("Found mountpoint. Didn't compare port numbers though...");
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	public String toString() {
-		return getAlias();
+	@Id
+	@GeneratedValue
+	public Long getMountPointId() {
+		return mountPointId;
 	}
 
 	/**
@@ -361,33 +219,178 @@ public class MountPoint implements Comparable<MountPoint> {
 
 	}
 
-	// public int compareTo(Object o) {
-	// // return ((MountPoint)o).getMountpoint().compareTo(getMountpoint());
-	// return getRootUrl().compareTo(((MountPoint)o).getRootUrl());
-	// }
-
-	public int compareTo(final MountPoint mp) {
-		return getRootUrl().compareTo(mp.getRootUrl());
+	@Column(nullable = false)
+	@XmlAttribute(name = "url")
+	public String getRootUrl() {
+		return rootUrl;
 	}
 
 	@Column(nullable = false)
-	@XmlElement(name="automounted")
+	@XmlElement(name = "site")
+	public String getSite() {
+		return site;
+	}
+
+	public int hashCode() {
+		// return dn.hashCode() + mountpoint.hashCode();
+		return alias.hashCode();
+	}
+
+	@Column(nullable = false)
+	@XmlElement(name = "automounted")
 	public boolean isAutomaticallyMounted() {
 		return automaticallyMounted;
+	}
+
+	@Column(nullable = false)
+	@XmlElement(name = "disabled")
+	public boolean isDisabled() {
+		return disabled;
+	}
+
+	/**
+	 * Checks whether the "userspace" url (/ngdata.vpac/file.txt) contains the
+	 * file.
+	 * 
+	 * @param file
+	 *            the file
+	 * @return true - if it contains it; false - if not.
+	 */
+	public boolean isResponsibleForAbsoluteFile(final String file) {
+
+		if (file.startsWith(getRootUrl())) {
+			return true;
+		} else {
+			if (file.startsWith(getRootUrl().replace(":2811", ""))) {
+				// warning
+				myLogger
+						.warn("Found mountpoint. Didn't compare port numbers though...");
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// public boolean equals(Object otherMountPoint) {
+	// if ( ! (otherMountPoint instanceof MountPoint) )
+	// return false;
+	// MountPoint other = (MountPoint)otherMountPoint;
+	// if ( other.dn.equals(this.dn) && other.mountpoint.equals(this.mountpoint)
+	// )
+	// return true;
+	// else return false;
+	// }
+
+	/**
+	 * Checks whether the "userspace" url (/ngdata.vpac/file.txt) contains the
+	 * file.
+	 * 
+	 * @param file
+	 *            the file
+	 * @return true - if it contains it; false - if not.
+	 */
+	public boolean isResponsibleForUserSpaceFile(final String file) {
+
+		if (file.startsWith("gsiftp")) {
+			if (file.startsWith(getRootUrl())) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		if (file.startsWith(getAlias())) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Translates an absolute file url to a "mounted" file url.
+	 * 
+	 * @param file
+	 *            the absolute file
+	 *            (gsiftp://ngdata.vpac.org/home/sano4/markus/test.txt)
+	 * @return /ngdata.vpac.org/test.txt
+	 */
+	public String replaceAbsoluteRootUrlWithMountPoint(final String file) {
+
+		if (file.startsWith(getRootUrl())) {
+			return file.replaceFirst(getRootUrl(), getAlias());
+
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Translates a "mounted" file (on that filesystem to an absolute url like
+	 * gsiftp://ngdata.vpac.org/home/san04/markus/test.txt).
+	 * 
+	 * @param file
+	 *            the "mounted" file (e.g. /ngdata.vpac/test.txt
+	 * @return the absoulte path of the file or null if the file is not in the
+	 *         mounted filesystem or is not a "mounted" file (starts with
+	 *         something like /home.sapac.ngadmin)
+	 */
+	public String replaceMountpointWithAbsoluteUrl(final String file) {
+
+		if (file.startsWith(getAlias())) {
+			return file.replaceFirst(getAlias(), getRootUrl());
+		} else {
+			return null;
+		}
+	}
+
+	public void setAlias(final String mountpoint) {
+		this.alias = mountpoint;
 	}
 
 	public void setAutomaticallyMounted(final boolean am) {
 		this.automaticallyMounted = am;
 	}
 
-	@Column(nullable = false)
-	@XmlElement(name="disabled")
-	public boolean isDisabled() {
-		return disabled;
-	}
-
 	public void setDisabled(final boolean disabled) {
 		this.disabled = disabled;
+	}
+
+	public void setDn(final String dn) {
+		this.dn = dn;
+	}
+
+	public void setFqan(final String fqan) {
+		this.fqan = fqan;
+	}
+
+	// public int compareTo(Object o) {
+	// // return ((MountPoint)o).getMountpoint().compareTo(getMountpoint());
+	// return getRootUrl().compareTo(((MountPoint)o).getRootUrl());
+	// }
+
+	public void setMountPointId(final Long id) {
+		this.mountPointId = id;
+	}
+
+	public void setRootUrl(final String rootUrl) {
+		this.rootUrl = rootUrl;
+	}
+
+	public void setSite(final String site) {
+		this.site = site;
+	}
+
+	public void setUrl(final String url) {
+		this.rootUrl = url;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return getAlias();
 	}
 
 }

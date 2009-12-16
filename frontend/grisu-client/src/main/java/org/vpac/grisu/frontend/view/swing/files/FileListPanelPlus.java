@@ -77,9 +77,9 @@ public class FileListPanelPlus extends JPanel {
 				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getComboBox(), "2, 2, fill, default");
 		add(getFileListPanel(), "2, 4, fill, fill");
-		
+
 		FileSystemItem item = em.getFileSystemForUrl(startUrl);
-		if ( item != null ) {
+		if (item != null) {
 			fireEvent = false;
 			getComboBox().setSelectedItem(item);
 			lastFileSystem = item;

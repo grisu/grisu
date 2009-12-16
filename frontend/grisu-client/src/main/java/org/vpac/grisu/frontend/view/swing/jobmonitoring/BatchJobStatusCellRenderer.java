@@ -8,8 +8,9 @@ import javax.swing.JTable;
 import javax.swing.UIManager;
 import javax.swing.table.TableCellRenderer;
 
-public class BatchJobStatusCellRenderer extends JProgressBar implements TableCellRenderer {
-	
+public class BatchJobStatusCellRenderer extends JProgressBar implements
+		TableCellRenderer {
+
 	public BatchJobStatusCellRenderer() {
 		this.setMinimum(0);
 		this.setMaximum(100);
@@ -18,14 +19,14 @@ public class BatchJobStatusCellRenderer extends JProgressBar implements TableCel
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
 
-		if ( isSelected ) {
-			setBackground((Color)UIManager.get("Table.selectionBackground"));
+		if (isSelected) {
+			setBackground((Color) UIManager.get("Table.selectionBackground"));
 		} else {
 			setBackground(table.getBackground());
 		}
-		
-		Integer status = (Integer)value;
-		if ( status <= 0 ) {
+
+		Integer status = (Integer) value;
+		if (status <= 0) {
 			this.setEnabled(false);
 			this.setStringPainted(false);
 			this.setValue(0);
@@ -34,10 +35,9 @@ public class BatchJobStatusCellRenderer extends JProgressBar implements TableCel
 			this.setStringPainted(true);
 			this.setValue(status);
 		}
-		
-		
+
 		return this;
-		
+
 	}
 
 }

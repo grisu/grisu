@@ -13,22 +13,20 @@ import org.apache.log4j.Logger;
  * 
  */
 public final class ClientPropertiesManager {
-	
-    public static final String[] DEFAULT_HELPDESK_CLASSES = new String[]{"org.vpac.helpDesk.model.anonymousRT.AnonymousRTHelpDesk", "org.vpac.helpDesk.model.trac.TracHelpDesk"};
-    public static final String HELPDESK_CONFIG = "support.properties";
+
+	public static final String[] DEFAULT_HELPDESK_CLASSES = new String[] {
+			"org.vpac.helpDesk.model.anonymousRT.AnonymousRTHelpDesk",
+			"org.vpac.helpDesk.model.trac.TracHelpDesk" };
+	public static final String HELPDESK_CONFIG = "support.properties";
 
 	public static final int CONCURRENT_THREADS_DEFAULT = 5;
 	public static final int DEFAULT_JOBSTATUS_RECHECK_INTERVAL_IN_SECONDS = 5;
-	
+
 	private static final int DEFAULT_FILE_UPLOAD_THREADS = 1;
 	private static final int DEFAULT_FILE_UPLOAD_RETRIES = 5;
-	
-	
+
 	// keys
 	public static final String JOBSTATUS_RECHECK_INTERVAL_KEY = "statusRecheck";
-
-	private ClientPropertiesManager() {
-	}
 
 	public static final int DEFAULT_TIMEOUT = 0;
 
@@ -38,6 +36,63 @@ public final class ClientPropertiesManager {
 
 	static final Logger myLogger = Logger
 			.getLogger(ClientPropertiesManager.class.getName());
+
+	/**
+	 * Call this if the user wants a new (server-side) template to his personal
+	 * templates.
+	 * 
+	 * @param templateName
+	 *            the name of the template
+	 */
+	public static void addServerTemplate(final String templateName) {
+
+		boolean alreadyThere = false;
+		for (String url : config.getStringArray("serverTemplates")) {
+			if (url.equals(templateName)) {
+				alreadyThere = true;
+				break;
+			}
+
+		}
+
+		if (!alreadyThere) {
+			config.addProperty("serverTemplates", templateName);
+			try {
+				config.save();
+			} catch (ConfigurationException e) {
+				ClientPropertiesManager.myLogger
+						.debug("Could not write config file: " + e.getMessage());
+			}
+		}
+	}
+
+	/**
+	 * Use this if you want to add the url to the list of previously used.
+	 * 
+	 * @param serviceInterfaceUrl
+	 *            the url of the ServiceInterface
+	 */
+	public static void addServiceInterfaceUrl(final String serviceInterfaceUrl) {
+
+		boolean alreadyThere = false;
+		for (String url : config.getStringArray("serviceInterfaceUrl")) {
+			if (url.equals(serviceInterfaceUrl)) {
+				alreadyThere = true;
+				break;
+			}
+
+		}
+
+		if (!alreadyThere) {
+			config.addProperty("serviceInterfaceUrl", serviceInterfaceUrl);
+			try {
+				config.save();
+			} catch (ConfigurationException e) {
+				ClientPropertiesManager.myLogger
+						.debug("Could not write config file: " + e.getMessage());
+			}
+		}
+	}
 
 	/**
 	 * Retrieves the configuration parameters from the properties file.
@@ -55,9 +110,191 @@ public final class ClientPropertiesManager {
 		}
 		return config;
 	}
-	
+
+	public static int getConcurrentThreadsDefault() {
+		int threads = -1;
+		try {
+			threads = Integer.parseInt(getClientConfiguration().getString(
+					"concurrentThreads"));
+
+		} catch (Exception e) {
+			// myLogger.debug("Problem with config file: " + e.getMessage());
+			return CONCURRENT_THREADS_DEFAULT;
+		}
+		if (threads == -1) {
+			return CONCURRENT_THREADS_DEFAULT;
+		}
+
+		return threads;
+	}
+
+	public static int getConcurrentUploadThreads() {
+		// TODO Auto-generated method stub
+		int threads = -1;
+		try {
+			threads = Integer.parseInt(getClientConfiguration().getString(
+					"concurrentUploadThreads"));
+
+		} catch (Exception e) {
+			// myLogger.debug("Problem with config file: " + e.getMessage());
+			return DEFAULT_FILE_UPLOAD_THREADS;
+		}
+		if (threads == -1) {
+			return DEFAULT_FILE_UPLOAD_THREADS;
+		}
+
+		return threads;
+	}
+
+	/**
+	 * Gets the connection timeout for the connection to a backend.
+	 * 
+	 * @return the timeout
+	 */
+	public static long getConnectionTimeoutInMS() {
+		long timeout = -1;
+		try {
+			timeout = Long.parseLong(getClientConfiguration().getString(
+					"connectionTimeout"));
+
+		} catch (Exception e) {
+			myLogger.debug("Problem with config file: " + e.getMessage());
+			return DEFAULT_TIMEOUT;
+		}
+		if (timeout == -1) {
+			return DEFAULT_TIMEOUT;
+		}
+
+		return timeout;
+	}
+
+	/**
+	 * Returns the full path to the executable that is used as a default to
+	 * handle files with the specified extension.
+	 * 
+	 * @param extension
+	 *            the file extension
+	 * @return the full path to the executable
+	 */
+	public static String getDefaultExternalApplication(final String extension) {
+		String path = null;
+		try {
+			path = getClientConfiguration().getString(extension);
+		} catch (ConfigurationException ce) {
+			myLogger.debug("Problem with config file: " + ce.getMessage());
+		}
+		if (path == null || "".equals(path) || !new File(path).exists()) {
+			return null;
+		}
+		return path;
+	}
+
+	public static String[] getDefaultHelpDesks() {
+
+		return DEFAULT_HELPDESK_CLASSES;
+
+	}
+
+	/**
+	 * Returns the default (most likely: last used) serviceinterfaceurl for this
+	 * user.
+	 * 
+	 * @return the serviceInterfaceurl
+	 */
+	public static String getDefaultServiceInterfaceUrl() {
+		String defaultUrl = null;
+		try {
+			defaultUrl = getClientConfiguration().getString(
+					"defaultServiceInterfaceUrl");
+		} catch (ConfigurationException e) {
+			myLogger.debug("Problem with config file: " + e.getMessage());
+		}
+
+		if (defaultUrl == null || "".equals(defaultUrl)) {
+			defaultUrl = null;
+		}
+		return defaultUrl;
+	}
+
+	public static int getFileUploadRetries() {
+
+		int retries = -1;
+		try {
+			retries = Integer.parseInt(getClientConfiguration().getString(
+					"fileUploadRetries"));
+
+		} catch (Exception e) {
+			// myLogger.debug("Problem with config file: " + e.getMessage());
+			return DEFAULT_FILE_UPLOAD_RETRIES;
+		}
+		if (retries == -1) {
+			return DEFAULT_FILE_UPLOAD_RETRIES;
+		}
+
+		return retries;
+	}
+
+	public static String getHelpDeskConfig() {
+		return HELPDESK_CONFIG;
+	}
+
+	public static long getJobStatusRecheckIntervall() {
+
+		int interval = 0;
+		try {
+			interval = getClientConfiguration().getInt(
+					JOBSTATUS_RECHECK_INTERVAL_KEY);
+		} catch (Exception e) {
+		}
+
+		if (interval <= 0) {
+			interval = DEFAULT_JOBSTATUS_RECHECK_INTERVAL_IN_SECONDS;
+		}
+
+		return interval;
+
+	}
+
+	/**
+	 * Loads the last selected tab: certificate or myproxy.
+	 * 
+	 * @return the index of the tab
+	 */
+	public static int getLastSelectedTab() {
+		int tab = -1;
+		try {
+			tab = Integer.parseInt(getClientConfiguration().getString(
+					"selectedTab"));
+
+		} catch (Exception e) {
+			// myLogger.debug("Problem with config file: " + e.getMessage());
+			return 0;
+		}
+		if (tab == -1) {
+			return 0;
+		}
+
+		return tab;
+	}
+
+	/**
+	 * Returns the last used fqan for this user.
+	 * 
+	 * @return the fqan
+	 */
+	public static String getLastUsedFqan() {
+		String fqan = null;
+		try {
+			fqan = (String) (getClientConfiguration()
+					.getProperty("lastUsedFqan"));
+		} catch (ConfigurationException e) {
+			myLogger.debug("Problem with config file: " + e.getMessage());
+		}
+		return fqan;
+	}
+
 	public static String getProperty(String key) {
-		
+
 		String value = null;
 		try {
 			value = getClientConfiguration().getString(key);
@@ -65,18 +302,64 @@ public final class ClientPropertiesManager {
 			throw new RuntimeException(e);
 		}
 		return value;
-		
-	}
-	
 
-	public static void setProperty(String lastBlenderFileDir, String string) {
+	}
+
+	/**
+	 * Returns the name of the last used shib idp.
+	 * 
+	 * @return the idp name.
+	 */
+	public static String getSavedShibbolethIdp() {
+		String idp = null;
+		try {
+			idp = (String) (getClientConfiguration()
+					.getProperty("shibbolethIdp"));
+		} catch (ConfigurationException e) {
+			myLogger.debug("Problem with config file: " + e.getMessage());
+		}
+		return idp;
+	}
+
+	/**
+	 * Returns the last used shib username.
+	 * 
+	 * @return the username
+	 */
+	public static String getSavedShibbolethUsername() {
+		String username = null;
+		try {
+			username = (String) (getClientConfiguration()
+					.getProperty("shibbolethUsername"));
+		} catch (ConfigurationException e) {
+			myLogger.debug("Problem with config file: " + e.getMessage());
+		}
+		return username;
+	}
+
+	/**
+	 * Returns all the (server-side) templates this users added to his personal
+	 * templates.
+	 * 
+	 * @return the templates
+	 */
+	public static String[] getServerTemplates() {
+
+		String[] templates = null;
 
 		try {
-			getClientConfiguration().setProperty(lastBlenderFileDir, string);
-			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
-			throw new RuntimeException(e);
+			templates = getClientConfiguration().getStringArray(
+					"serverTemplates");
+		} catch (ConfigurationException ce) {
+			// myLogger.debug("Problem with config file: " + ce.getMessage());
+			return new String[] {};
 		}
+
+		if (templates.length == 0) {
+			myLogger.debug("No server templates found.");
+			return new String[] {};
+		}
+		return templates;
 	}
 
 	/**
@@ -114,60 +397,6 @@ public final class ClientPropertiesManager {
 	}
 
 	/**
-	 * Returns all the (server-side) templates this users added to his personal
-	 * templates.
-	 * 
-	 * @return the templates
-	 */
-	public static String[] getServerTemplates() {
-
-		String[] templates = null;
-
-		try {
-			templates = getClientConfiguration().getStringArray(
-					"serverTemplates");
-		} catch (ConfigurationException ce) {
-			// myLogger.debug("Problem with config file: " + ce.getMessage());
-			return new String[] {};
-		}
-
-		if (templates.length == 0) {
-			myLogger.debug("No server templates found.");
-			return new String[] {};
-		}
-		return templates;
-	}
-
-	/**
-	 * Call this if the user wants a new (server-side) template to his personal
-	 * templates.
-	 * 
-	 * @param templateName
-	 *            the name of the template
-	 */
-	public static void addServerTemplate(final String templateName) {
-
-		boolean alreadyThere = false;
-		for (String url : config.getStringArray("serverTemplates")) {
-			if (url.equals(templateName)) {
-				alreadyThere = true;
-				break;
-			}
-
-		}
-
-		if (!alreadyThere) {
-			config.addProperty("serverTemplates", templateName);
-			try {
-				config.save();
-			} catch (ConfigurationException e) {
-				ClientPropertiesManager.myLogger
-						.debug("Could not write config file: " + e.getMessage());
-			}
-		}
-	}
-
-	/**
 	 * Call this if a user wants to remove a (server-side) template from his
 	 * personal templates.
 	 * 
@@ -190,129 +419,6 @@ public final class ClientPropertiesManager {
 			ClientPropertiesManager.myLogger
 					.debug("Could not write config file: " + e.getMessage());
 		}
-	}
-
-	/**
-	 * Use this if you want to add the url to the list of previously used.
-	 * 
-	 * @param serviceInterfaceUrl
-	 *            the url of the ServiceInterface
-	 */
-	public static void addServiceInterfaceUrl(final String serviceInterfaceUrl) {
-
-		boolean alreadyThere = false;
-		for (String url : config.getStringArray("serviceInterfaceUrl")) {
-			if (url.equals(serviceInterfaceUrl)) {
-				alreadyThere = true;
-				break;
-			}
-
-		}
-
-		if (!alreadyThere) {
-			config.addProperty("serviceInterfaceUrl", serviceInterfaceUrl);
-			try {
-				config.save();
-			} catch (ConfigurationException e) {
-				ClientPropertiesManager.myLogger
-						.debug("Could not write config file: " + e.getMessage());
-			}
-		}
-	}
-
-	/**
-	 * Saves the last used shib username.
-	 * 
-	 * @param username
-	 *            the username
-	 */
-	public static void saveShibbolethUsername(final String username) {
-		try {
-			getClientConfiguration()
-					.setProperty("shibbolethUsername", username);
-			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
-			myLogger.debug("Problem with config file: " + e.getMessage());
-		}
-	}
-
-	/**
-	 * Returns the last used shib username.
-	 * 
-	 * @return the username
-	 */
-	public static String getSavedShibbolethUsername() {
-		String username = null;
-		try {
-			username = (String) (getClientConfiguration()
-					.getProperty("shibbolethUsername"));
-		} catch (ConfigurationException e) {
-			myLogger.debug("Problem with config file: " + e.getMessage());
-		}
-		return username;
-	}
-
-	/**
-	 * Call this to store the name of the last used shib idp.
-	 * 
-	 * @param idpName
-	 *            the name of the idp
-	 */
-	public static void saveShibbolethIdp(final String idpName) {
-		try {
-			getClientConfiguration().setProperty("shibbolethIdp", idpName);
-			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
-			myLogger.debug("Problem with config file: " + e.getMessage());
-		}
-	}
-
-	/**
-	 * Returns the name of the last used shib idp.
-	 * 
-	 * @return the idp name.
-	 */
-	public static String getSavedShibbolethIdp() {
-		String idp = null;
-		try {
-			idp = (String) (getClientConfiguration()
-					.getProperty("shibbolethIdp"));
-		} catch (ConfigurationException e) {
-			myLogger.debug("Problem with config file: " + e.getMessage());
-		}
-		return idp;
-	}
-
-	/**
-	 * Saves the httpproxy username for next time.
-	 * 
-	 * @param username
-	 *            the username to auththenticate against the httpproxy
-	 */
-	public static void saveDefaultHttpProxyUsername(final String username) {
-		try {
-			getClientConfiguration().setProperty("httpProxyUsername", username);
-			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
-			myLogger.debug("Problem with config file: " + e.getMessage());
-		}
-
-	}
-
-	/**
-	 * Saves the httpproxy server hostname for next time.
-	 * 
-	 * @param server
-	 *            the hostname of the proxy server (e.g. "proxy.vpac.org")
-	 */
-	public static void saveDefaultHttpProxyServer(final String server) {
-		try {
-			getClientConfiguration().setProperty("httpProxyServer", server);
-			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
-			myLogger.debug("Problem with config file: " + e.getMessage());
-		}
-
 	}
 
 	/**
@@ -349,6 +455,38 @@ public final class ClientPropertiesManager {
 	}
 
 	/**
+	 * Saves the httpproxy server hostname for next time.
+	 * 
+	 * @param server
+	 *            the hostname of the proxy server (e.g. "proxy.vpac.org")
+	 */
+	public static void saveDefaultHttpProxyServer(final String server) {
+		try {
+			getClientConfiguration().setProperty("httpProxyServer", server);
+			getClientConfiguration().save();
+		} catch (ConfigurationException e) {
+			myLogger.debug("Problem with config file: " + e.getMessage());
+		}
+
+	}
+
+	/**
+	 * Saves the httpproxy username for next time.
+	 * 
+	 * @param username
+	 *            the username to auththenticate against the httpproxy
+	 */
+	public static void saveDefaultHttpProxyUsername(final String username) {
+		try {
+			getClientConfiguration().setProperty("httpProxyUsername", username);
+			getClientConfiguration().save();
+		} catch (ConfigurationException e) {
+			myLogger.debug("Problem with config file: " + e.getMessage());
+		}
+
+	}
+
+	/**
 	 * Stores the last used fqan for this user.
 	 * 
 	 * @param fqan
@@ -361,22 +499,6 @@ public final class ClientPropertiesManager {
 		} catch (ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
-	}
-
-	/**
-	 * Returns the last used fqan for this user.
-	 * 
-	 * @return the fqan
-	 */
-	public static String getLastUsedFqan() {
-		String fqan = null;
-		try {
-			fqan = (String) (getClientConfiguration()
-					.getProperty("lastUsedFqan"));
-		} catch (ConfigurationException e) {
-			myLogger.debug("Problem with config file: " + e.getMessage());
-		}
-		return fqan;
 	}
 
 	/**
@@ -396,40 +518,14 @@ public final class ClientPropertiesManager {
 	}
 
 	/**
-	 * Loads the last selected tab: certificate or myproxy.
+	 * Call this to store the name of the last used shib idp.
 	 * 
-	 * @return the index of the tab
+	 * @param idpName
+	 *            the name of the idp
 	 */
-	public static int getLastSelectedTab() {
-		int tab = -1;
+	public static void saveShibbolethIdp(final String idpName) {
 		try {
-			tab = Integer.parseInt(getClientConfiguration().getString(
-					"selectedTab"));
-
-		} catch (Exception e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
-			return 0;
-		}
-		if (tab == -1) {
-			return 0;
-		}
-
-		return tab;
-	}
-
-	/**
-	 * Sets the ServiceInterface url that was used the last time the user
-	 * successfully connected to one.
-	 * 
-	 * @param serviceInterfaceUrl
-	 *            the url of the ServiceInterface
-	 */
-	public static void setDefaultServiceInterfaceUrl(
-			final String serviceInterfaceUrl) {
-		try {
-			getClientConfiguration().setProperty("defaultServiceInterfaceUrl",
-					serviceInterfaceUrl);
-			addServiceInterfaceUrl(serviceInterfaceUrl);
+			getClientConfiguration().setProperty("shibbolethIdp", idpName);
 			getClientConfiguration().save();
 		} catch (ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
@@ -437,46 +533,19 @@ public final class ClientPropertiesManager {
 	}
 
 	/**
-	 * Returns the default (most likely: last used) serviceinterfaceurl for this
-	 * user.
+	 * Saves the last used shib username.
 	 * 
-	 * @return the serviceInterfaceurl
+	 * @param username
+	 *            the username
 	 */
-	public static String getDefaultServiceInterfaceUrl() {
-		String defaultUrl = null;
+	public static void saveShibbolethUsername(final String username) {
 		try {
-			defaultUrl = getClientConfiguration().getString(
-					"defaultServiceInterfaceUrl");
+			getClientConfiguration()
+					.setProperty("shibbolethUsername", username);
+			getClientConfiguration().save();
 		} catch (ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
-
-		if (defaultUrl == null || "".equals(defaultUrl)) {
-			defaultUrl = null;
-		}
-		return defaultUrl;
-	}
-
-	/**
-	 * Gets the connection timeout for the connection to a backend.
-	 * 
-	 * @return the timeout
-	 */
-	public static long getConnectionTimeoutInMS() {
-		long timeout = -1;
-		try {
-			timeout = Long.parseLong(getClientConfiguration().getString(
-					"connectionTimeout"));
-
-		} catch (Exception e) {
-			myLogger.debug("Problem with config file: " + e.getMessage());
-			return DEFAULT_TIMEOUT;
-		}
-		if (timeout == -1) {
-			return DEFAULT_TIMEOUT;
-		}
-
-		return timeout;
 	}
 
 	/**
@@ -500,104 +569,35 @@ public final class ClientPropertiesManager {
 	}
 
 	/**
-	 * Returns the full path to the executable that is used as a default to
-	 * handle files with the specified extension.
+	 * Sets the ServiceInterface url that was used the last time the user
+	 * successfully connected to one.
 	 * 
-	 * @param extension
-	 *            the file extension
-	 * @return the full path to the executable
+	 * @param serviceInterfaceUrl
+	 *            the url of the ServiceInterface
 	 */
-	public static String getDefaultExternalApplication(final String extension) {
-		String path = null;
+	public static void setDefaultServiceInterfaceUrl(
+			final String serviceInterfaceUrl) {
 		try {
-			path = getClientConfiguration().getString(extension);
-		} catch (ConfigurationException ce) {
-			myLogger.debug("Problem with config file: " + ce.getMessage());
+			getClientConfiguration().setProperty("defaultServiceInterfaceUrl",
+					serviceInterfaceUrl);
+			addServiceInterfaceUrl(serviceInterfaceUrl);
+			getClientConfiguration().save();
+		} catch (ConfigurationException e) {
+			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
-		if (path == null || "".equals(path) || !new File(path).exists()) {
-			return null;
-		}
-		return path;
 	}
 
-	public static int getConcurrentThreadsDefault() {
-		int threads = -1;
+	public static void setProperty(String lastBlenderFileDir, String string) {
+
 		try {
-			threads = Integer.parseInt(getClientConfiguration().getString(
-					"concurrentThreads"));
-
-		} catch (Exception e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
-			return CONCURRENT_THREADS_DEFAULT;
+			getClientConfiguration().setProperty(lastBlenderFileDir, string);
+			getClientConfiguration().save();
+		} catch (ConfigurationException e) {
+			throw new RuntimeException(e);
 		}
-		if (threads == -1) {
-			return CONCURRENT_THREADS_DEFAULT;
-		}
-
-		return threads;
-	}
-	
-	public static String[] getDefaultHelpDesks() {
-		
-		return DEFAULT_HELPDESK_CLASSES;
-		
-	}
-	
-	public static String getHelpDeskConfig() {
-		return HELPDESK_CONFIG;
 	}
 
-	public static long getJobStatusRecheckIntervall() {
-
-		int interval = 0;
-		try {
-			interval = getClientConfiguration().getInt(JOBSTATUS_RECHECK_INTERVAL_KEY);
-		} catch (Exception e) {
-		}
-		
-		if ( interval <= 0 ) {
-			interval = DEFAULT_JOBSTATUS_RECHECK_INTERVAL_IN_SECONDS;
-		}
-		
-		return interval;
-		
+	private ClientPropertiesManager() {
 	}
-
-	public static int getConcurrentUploadThreads() {
-		// TODO Auto-generated method stub
-		int threads = -1;
-		try {
-			threads = Integer.parseInt(getClientConfiguration().getString(
-					"concurrentUploadThreads"));
-
-		} catch (Exception e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
-			return DEFAULT_FILE_UPLOAD_THREADS;
-		}
-		if (threads == -1) {
-			return DEFAULT_FILE_UPLOAD_THREADS;
-		}
-
-		return threads;
-	}
-	
-	public static int getFileUploadRetries() {
-
-		int retries = -1;
-		try {
-			retries = Integer.parseInt(getClientConfiguration().getString(
-					"fileUploadRetries"));
-
-		} catch (Exception e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
-			return DEFAULT_FILE_UPLOAD_RETRIES;
-		}
-		if (retries == -1) {
-			return DEFAULT_FILE_UPLOAD_RETRIES;
-		}
-
-		return retries;
-	}
-
 
 }

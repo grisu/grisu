@@ -21,7 +21,7 @@ import com.jgoodies.forms.layout.RowSpec;
 import com.jidesoft.swing.JideTabbedPane;
 
 public class JobDetailPanel extends JPanel implements PropertyChangeListener {
-	
+
 	private JLabel lblJobname;
 	private JTextField textField;
 	private JLabel lblStatus;
@@ -33,7 +33,7 @@ public class JobDetailPanel extends JPanel implements PropertyChangeListener {
 	private JTextArea propertiesTextArea;
 	private JScrollPane scrollPane_1;
 	private JTextArea logTextArea;
-	
+
 	/**
 	 * Create the panel.
 	 */
@@ -44,51 +44,28 @@ public class JobDetailPanel extends JPanel implements PropertyChangeListener {
 				ColumnSpec.decode("default:grow"),
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-			new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getLblJobname(), "2, 2, right, default");
 		add(getTextField(), "4, 2, fill, default");
 		add(getLblStatus(), "2, 4, right, default");
 		add(getTextField_1(), "4, 4, fill, default");
 		add(getJideTabbedPane(), "2, 6, 3, 1, fill, fill");
-		
 
 	}
-	
-	public void setJob(JobObject job) {
 
-		this.job = job;
-		
-		setProperties();
-		setLog();
-		
-	}
-	
-	private void setProperties() {
-		
-		StringBuffer temp = new StringBuffer();
-		
-		for ( String key : job.getAllJobProperties().keySet() ) {
-			temp.append(key+"\t\t"+job.getAllJobProperties().get(key)+"\n");
+	private JideTabbedPane getJideTabbedPane() {
+		if (jideTabbedPane == null) {
+			jideTabbedPane = new JideTabbedPane();
+			jideTabbedPane.setTabPlacement(JTabbedPane.BOTTOM);
+			jideTabbedPane.addTab("Properties", getScrollPane_1());
+			jideTabbedPane.addTab("Log", getScrollPane_1_1());
 		}
-		getPropertiesTextArea().setText(temp.toString());
-	}
-	
-	private void setLog() {
-		StringBuffer temp = new StringBuffer();
-		
-		for ( Date date : job.getLogMessages().keySet() ) {
-			temp.append(date.toString()+":\t"+job.getLogMessages().get(date)+"\n");
-		}
-		
-		getLogTextArea().setText(temp.toString());
+		return jideTabbedPane;
 	}
 
 	private JLabel getLblJobname() {
@@ -97,6 +74,44 @@ public class JobDetailPanel extends JPanel implements PropertyChangeListener {
 		}
 		return lblJobname;
 	}
+
+	private JLabel getLblStatus() {
+		if (lblStatus == null) {
+			lblStatus = new JLabel("Status");
+		}
+		return lblStatus;
+	}
+
+	private JTextArea getLogTextArea() {
+		if (logTextArea == null) {
+			logTextArea = new JTextArea();
+		}
+		return logTextArea;
+	}
+
+	private JTextArea getPropertiesTextArea() {
+		if (propertiesTextArea == null) {
+			propertiesTextArea = new JTextArea();
+		}
+		return propertiesTextArea;
+	}
+
+	private JScrollPane getScrollPane_1() {
+		if (scrollPane == null) {
+			scrollPane = new JScrollPane();
+			scrollPane.setViewportView(getPropertiesTextArea());
+		}
+		return scrollPane;
+	}
+
+	private JScrollPane getScrollPane_1_1() {
+		if (scrollPane_1 == null) {
+			scrollPane_1 = new JScrollPane();
+			scrollPane_1.setViewportView(getLogTextArea());
+		}
+		return scrollPane_1;
+	}
+
 	private JTextField getTextField() {
 		if (textField == null) {
 			textField = new JTextField();
@@ -105,12 +120,7 @@ public class JobDetailPanel extends JPanel implements PropertyChangeListener {
 		}
 		return textField;
 	}
-	private JLabel getLblStatus() {
-		if (lblStatus == null) {
-			lblStatus = new JLabel("Status");
-		}
-		return lblStatus;
-	}
+
 	private JTextField getTextField_1() {
 		if (textField_1 == null) {
 			textField_1 = new JTextField();
@@ -122,43 +132,42 @@ public class JobDetailPanel extends JPanel implements PropertyChangeListener {
 
 	public void propertyChange(PropertyChangeEvent evt) {
 
-		if ( evt.getPropertyName().equals("status") ) {
-			getTextField_1().setText(JobConstants.translateStatus((Integer)(evt.getNewValue())));
+		if (evt.getPropertyName().equals("status")) {
+			getTextField_1()
+					.setText(
+							JobConstants.translateStatus((Integer) (evt
+									.getNewValue())));
 		}
 	}
-	private JideTabbedPane getJideTabbedPane() {
-		if (jideTabbedPane == null) {
-			jideTabbedPane = new JideTabbedPane();
-			jideTabbedPane.setTabPlacement(JTabbedPane.BOTTOM);
-			jideTabbedPane.addTab("Properties", getScrollPane_1());
-			jideTabbedPane.addTab("Log", getScrollPane_1_1());
-		}
-		return jideTabbedPane;
+
+	public void setJob(JobObject job) {
+
+		this.job = job;
+
+		setProperties();
+		setLog();
+
 	}
-	private JScrollPane getScrollPane_1() {
-		if (scrollPane == null) {
-			scrollPane = new JScrollPane();
-			scrollPane.setViewportView(getPropertiesTextArea());
+
+	private void setLog() {
+		StringBuffer temp = new StringBuffer();
+
+		for (Date date : job.getLogMessages().keySet()) {
+			temp.append(date.toString() + ":\t"
+					+ job.getLogMessages().get(date) + "\n");
 		}
-		return scrollPane;
+
+		getLogTextArea().setText(temp.toString());
 	}
-	private JTextArea getPropertiesTextArea() {
-		if (propertiesTextArea == null) {
-			propertiesTextArea = new JTextArea();
+
+	private void setProperties() {
+
+		StringBuffer temp = new StringBuffer();
+
+		for (String key : job.getAllJobProperties().keySet()) {
+			temp.append(key + "\t\t" + job.getAllJobProperties().get(key)
+					+ "\n");
 		}
-		return propertiesTextArea;
-	}
-	private JScrollPane getScrollPane_1_1() {
-		if (scrollPane_1 == null) {
-			scrollPane_1 = new JScrollPane();
-			scrollPane_1.setViewportView(getLogTextArea());
-		}
-		return scrollPane_1;
-	}
-	private JTextArea getLogTextArea() {
-		if (logTextArea == null) {
-			logTextArea = new JTextArea();
-		}
-		return logTextArea;
+		getPropertiesTextArea().setText(temp.toString());
 	}
 }

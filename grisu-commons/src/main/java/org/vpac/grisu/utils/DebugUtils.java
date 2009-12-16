@@ -11,9 +11,6 @@ import org.w3c.dom.Document;
  */
 public final class DebugUtils {
 
-	private DebugUtils() {
-	}
-
 	static final Logger myLogger = Logger.getLogger(DebugUtils.class.getName());
 
 	public static void jsdlDebugOutput(final String stage, final Document jsdl) {
@@ -29,6 +26,9 @@ public final class DebugUtils {
 			}
 		}
 
+	}
+
+	private DebugUtils() {
 	}
 
 }

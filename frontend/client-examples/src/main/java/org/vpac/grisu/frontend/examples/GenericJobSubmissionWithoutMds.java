@@ -10,9 +10,6 @@ import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
 
 public final class GenericJobSubmissionWithoutMds {
-	
-	private GenericJobSubmissionWithoutMds() {
-	}
 
 	/**
 	 * @param args
@@ -47,6 +44,9 @@ public final class GenericJobSubmissionWithoutMds {
 		job.submitJob();
 
 		System.out.println("Main thread finished.");
+	}
+
+	private GenericJobSubmissionWithoutMds() {
 	}
 
 }

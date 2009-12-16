@@ -23,6 +23,26 @@ public class UserDAO extends BaseHibernateDAO {
 	// return user.getDn();
 	// }
 
+	public final void delete(final User persistentInstance) {
+		myLogger.debug("deleting Job instance");
+
+		try {
+			getCurrentSession().beginTransaction();
+
+			getCurrentSession().delete(persistentInstance);
+
+			getCurrentSession().getTransaction().commit();
+
+			myLogger.debug("delete successful");
+		} catch (RuntimeException e) {
+			myLogger.error("delete failed", e);
+			getCurrentSession().getTransaction().rollback();
+			throw e; // or display error message
+		} finally {
+			getCurrentSession().close();
+		}
+	}
+
 	/**
 	 * Looks up the database whether a user with the specified dn is already
 	 * persisted.
@@ -59,26 +79,6 @@ public class UserDAO extends BaseHibernateDAO {
 			getCurrentSession().close();
 		}
 
-	}
-
-	public final void delete(final User persistentInstance) {
-		myLogger.debug("deleting Job instance");
-
-		try {
-			getCurrentSession().beginTransaction();
-
-			getCurrentSession().delete(persistentInstance);
-
-			getCurrentSession().getTransaction().commit();
-
-			myLogger.debug("delete successful");
-		} catch (RuntimeException e) {
-			myLogger.error("delete failed", e);
-			getCurrentSession().getTransaction().rollback();
-			throw e; // or display error message
-		} finally {
-			getCurrentSession().close();
-		}
 	}
 
 	public final void saveOrUpdate(final User instance) {

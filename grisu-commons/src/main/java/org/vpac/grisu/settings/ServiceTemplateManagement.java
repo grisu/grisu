@@ -18,12 +18,33 @@ import org.w3c.dom.Document;
  * 
  */
 public final class ServiceTemplateManagement {
-	
-	private ServiceTemplateManagement() {
-	}
 
 	static final Logger myLogger = Logger
 			.getLogger(ServiceTemplateManagement.class.getName());
+
+	/**
+	 * Checks the $HOME_OF_TOMCAT_USER/.grisu/templates_available directories
+	 * for xml files and returns a list of all of the filenames (without
+	 * .xml-extension).
+	 * 
+	 * @return the list of all available application templates
+	 */
+	public static String[] getAllAvailableApplications() {
+
+		File[] templates = new File(Environment
+				.getAvailableTemplatesDirectory()).listFiles();
+		Set<String> allAvalableTemplates = new TreeSet<String>();
+
+		for (File file : templates) {
+			if (file.getName().endsWith(".xml")) {
+				allAvalableTemplates.add(file.getName().substring(0,
+						file.getName().lastIndexOf(".xml")));
+			}
+		}
+
+		return allAvalableTemplates.toArray(new String[allAvalableTemplates
+				.size()]);
+	}
 
 	/**
 	 * Loads the jsdl template from the .grisu/templates_available directory
@@ -39,9 +60,9 @@ public final class ServiceTemplateManagement {
 		Document jsdl_template = null;
 		try {
 			jsdl_template = SeveralXMLHelpers.fromString(FileHelpers
-					.readFromFile(new File(
-							Environment.getAvailableTemplatesDirectory()
-									+ File.separator + name + ".xml")));
+					.readFromFile(new File(Environment
+							.getAvailableTemplatesDirectory()
+							+ File.separator + name + ".xml")));
 		} catch (Exception e) {
 			myLogger
 					.error("Could not find/load jsdl template for application: "
@@ -51,28 +72,7 @@ public final class ServiceTemplateManagement {
 		return jsdl_template;
 	}
 
-	/**
-	 * Checks the $HOME_OF_TOMCAT_USER/.grisu/templates_available directories
-	 * for xml files and returns a list of all of the filenames (without
-	 * .xml-extension).
-	 * 
-	 * @return the list of all available application templates
-	 */
-	public static String[] getAllAvailableApplications() {
-
-		File[] templates = new File(Environment.getAvailableTemplatesDirectory())
-				.listFiles();
-		Set<String> allAvalableTemplates = new TreeSet<String>();
-
-		for (File file : templates) {
-			if (file.getName().endsWith(".xml")) {
-				allAvalableTemplates.add(file.getName().substring(0,
-						file.getName().lastIndexOf(".xml")));
-			}
-		}
-
-		return allAvalableTemplates.toArray(new String[allAvalableTemplates
-				.size()]);
+	private ServiceTemplateManagement() {
 	}
 
 }

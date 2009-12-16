@@ -28,25 +28,13 @@ public class RemoteFileTransferObject {
 	private final FileObject target;
 	private final boolean overwrite;
 
-	public boolean isFailed() {
-		return failed;
-	}
-
-	public boolean isFinished() {
-		return finished;
-	}
-
-	public Exception getPossibleException() {
-		return possibleException;
-	}
-
 	private boolean failed = false;
+
 	private boolean finished = false;
 
 	private Exception possibleException;
 
 	private Map<Date, String> messages = new TreeMap<Date, String>();
-
 	public RemoteFileTransferObject(final FileObject sourceF,
 			final FileObject targetF, final boolean overwriteB) {
 		this.source = sourceF;
@@ -58,45 +46,51 @@ public class RemoteFileTransferObject {
 			public void run() {
 
 				try {
-				for (int tryNo = 0; tryNo <= ServerPropertiesManager
-						.getFileTransferRetries(); tryNo++) {
+					for (int tryNo = 0; tryNo <= ServerPropertiesManager
+							.getFileTransferRetries(); tryNo++) {
 
-					myLogger.debug(tryNo+1+". try to transfer file: "+source.getName().getURI()+target.getName().getURI());
-					try {
-						myLogger.info("Copy thread started for target: "
-								+ target.getName());
-						transferFile(source, target, overwrite);
-						finished = true;
-						break;
-					} catch (RemoteFileSystemException e) {
-						e.printStackTrace();
-						if ( tryNo >= ServerPropertiesManager.getFileTransferRetries() - 1) {
+						myLogger.debug(tryNo + 1 + ". try to transfer file: "
+								+ source.getName().getURI()
+								+ target.getName().getURI());
+						try {
+							myLogger.info("Copy thread started for target: "
+									+ target.getName());
+							transferFile(source, target, overwrite);
 							finished = true;
-							failed = true;
-							possibleException = e;
-						} else {
-							// sleep for a few seconds, maybe the gridftp server needs some rest
-							try {
-								Thread.sleep(ServerPropertiesManager.getWaitTimeBetweenFailedFileTransferAndNextTryInSeconds()*1000);
-							} catch (InterruptedException e1) {
+							break;
+						} catch (RemoteFileSystemException e) {
+							e.printStackTrace();
+							if (tryNo >= ServerPropertiesManager
+									.getFileTransferRetries() - 1) {
+								finished = true;
+								failed = true;
+								possibleException = e;
+							} else {
+								// sleep for a few seconds, maybe the gridftp
+								// server needs some rest
+								try {
+									Thread
+											.sleep(ServerPropertiesManager
+													.getWaitTimeBetweenFailedFileTransferAndNextTryInSeconds() * 1000);
+								} catch (InterruptedException e1) {
+								}
 							}
 						}
 					}
-				}
 				} finally {
-//					try {
-//						sourceF.getFileSystem().getFileSystemManager().closeFileSystem(sourceF.getFileSystem());
-//					} catch (Exception e) {
-//						e.printStackTrace();
-//					}
-//					try {
-//						targetF.getFileSystem().getFileSystemManager().closeFileSystem(sourceF.getFileSystem());
-//					} catch (Exception e) {
-//						e.printStackTrace();
-//					}
-					
+					// try {
+					// sourceF.getFileSystem().getFileSystemManager().closeFileSystem(sourceF.getFileSystem());
+					// } catch (Exception e) {
+					// e.printStackTrace();
+					// }
+					// try {
+					// targetF.getFileSystem().getFileSystemManager().closeFileSystem(sourceF.getFileSystem());
+					// } catch (Exception e) {
+					// e.printStackTrace();
+					// }
+
 				}
-				
+
 			}
 		};
 
@@ -106,6 +100,28 @@ public class RemoteFileTransferObject {
 
 		return this.fileTransferThread;
 
+	}
+
+	public Exception getPossibleException() {
+		return possibleException;
+	}
+
+	public String getPossibleExceptionMessage() {
+
+		if (getPossibleException() == null) {
+			return "";
+		} else {
+			return getPossibleException().getLocalizedMessage();
+		}
+
+	}
+
+	public boolean isFailed() {
+		return failed;
+	}
+
+	public boolean isFinished() {
+		return finished;
 	}
 
 	public final void joinFileTransfer() {
@@ -119,8 +135,7 @@ public class RemoteFileTransferObject {
 
 	}
 
-	public final void startTransfer(boolean waitForTransferToFinish)
-			 {
+	public final void startTransfer(boolean waitForTransferToFinish) {
 
 		// transferFile(source, target, overwrite);
 		messages.put(new Date(), "Transfer started.");
@@ -211,16 +226,6 @@ public class RemoteFileTransferObject {
 				throw new RemoteFileSystemException("Could not copy files: "
 						+ e1.getLocalizedMessage());
 			}
-		}
-
-	}
-
-	public String getPossibleExceptionMessage() {
-
-		if (getPossibleException() == null) {
-			return "";
-		} else {
-			return getPossibleException().getLocalizedMessage();
 		}
 
 	}

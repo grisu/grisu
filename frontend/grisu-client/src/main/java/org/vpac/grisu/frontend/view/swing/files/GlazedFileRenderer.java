@@ -15,22 +15,25 @@ import javax.swing.table.TableCellRenderer;
 
 import org.vpac.grisu.model.files.GlazedFile;
 
-public class GlazedFileRenderer extends DefaultTableCellRenderer implements TableCellRenderer {
-	
-	private static FileSystemView fsView =	FileSystemView.getFileSystemView();
-	private static Icon folderIcon = fsView.getSystemIcon(new File(System.getProperty("user.home")));
-	//TODO think of something better?
+public class GlazedFileRenderer extends DefaultTableCellRenderer implements
+		TableCellRenderer {
+
+	private static FileSystemView fsView = FileSystemView.getFileSystemView();
+	private static Icon folderIcon = fsView.getSystemIcon(new File(System
+			.getProperty("user.home")));
+	// TODO think of something better?
 	private static Icon fileIcon = fsView.getSystemIcon(findFile());
-	
+
 	private static File findFile() {
-		for ( File file : new File(System.getProperty("user.home")).listFiles() ) {
-			if ( file.isFile() ) return file;
+		for (File file : new File(System.getProperty("user.home")).listFiles()) {
+			if (file.isFile())
+				return file;
 		}
 		return null;
 	}
-	
+
 	private FileListPanel panel = null;
-	
+
 	public GlazedFileRenderer(FileListPanel panel) {
 		this.panel = panel;
 		setOpaque(true);
@@ -38,38 +41,34 @@ public class GlazedFileRenderer extends DefaultTableCellRenderer implements Tabl
 
 	public Component getTableCellRendererComponent(JTable arg0, Object arg1,
 			boolean isSelected, boolean hasFocus, int row, int column) {
-		
-		
-		if ( isSelected ) {
-			setBackground((Color)UIManager.get("Table.selectionBackground"));
+
+		if (isSelected) {
+			setBackground((Color) UIManager.get("Table.selectionBackground"));
 		} else {
 			setBackground(arg0.getBackground());
 		}
 
-		
-		GlazedFile file = (GlazedFile)arg1;
-		
-		if ( ! file.isMarkedAsParent() ) {
-			if ( file.isFolder() ) {
+		GlazedFile file = (GlazedFile) arg1;
+
+		if (!file.isMarkedAsParent()) {
+			if (file.isFolder()) {
 				this.setIcon(folderIcon);
 			} else {
 				this.setIcon(fileIcon);
 			}
-			
+
 			try {
 				this.setText(URLDecoder.decode(file.getName(), "UTF-8"));
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 				this.setText(file.getName());
 			}
-			
+
 		} else {
 			this.setIcon(null);
 			this.setText("..");
 		}
-		
-		
-		
+
 		return this;
 	}
 

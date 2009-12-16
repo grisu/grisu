@@ -1,5 +1,6 @@
 package org.vpac.grisu.frontend.view.swing.jobmonitoring;
 
+import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
@@ -8,17 +9,13 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginException;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.control.login.LoginParams;
-import java.awt.BorderLayout;
 
 public class BatchJobMonitoringApp {
 
-	private JFrame frame;
-	
-	private ServiceInterface si;
-
 	/**
 	 * Launch the application.
-	 * @throws LoginException 
+	 * 
+	 * @throws LoginException
 	 */
 	public static void main(final String[] args) throws LoginException {
 
@@ -27,19 +24,19 @@ public class BatchJobMonitoringApp {
 
 		LoginParams loginParams = new LoginParams(
 		// "http://localhost:8080/grisu-ws/services/grisu",
-//				 "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-//				"http://localhost:8080/enunciate-backend/soap/GrisuService",
-		"Local", 
-//		"LOCAL_WS",
-		username, password);
-		
-		
+				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
+				// "http://localhost:8080/enunciate-backend/soap/GrisuService",
+				"Local",
+				// "LOCAL_WS",
+				username, password);
+
 		final ServiceInterface si;
-//		si = LoginManager.login(null, password, username, "VPAC", loginParams);
+		// si = LoginManager.login(null, password, username, "VPAC",
+		// loginParams);
 		si = LoginManager.login(null, null, null, null, loginParams);
-		
+
 		EventQueue.invokeLater(new Runnable() {
-			
+
 			public void run() {
 				try {
 					BatchJobMonitoringApp window = new BatchJobMonitoringApp(si);
@@ -50,6 +47,10 @@ public class BatchJobMonitoringApp {
 			}
 		});
 	}
+
+	private JFrame frame;
+
+	private ServiceInterface si;
 
 	/**
 	 * Create the application.

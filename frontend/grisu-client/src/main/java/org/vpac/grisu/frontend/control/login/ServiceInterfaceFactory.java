@@ -19,9 +19,6 @@ import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
  * 
  */
 public final class ServiceInterfaceFactory {
-	
-	private ServiceInterfaceFactory() {
-	}
 
 	static final Logger myLogger = Logger
 			.getLogger(ServiceInterfaceFactory.class.getName());
@@ -29,13 +26,10 @@ public final class ServiceInterfaceFactory {
 	public static final String DEFAULT_SERVICE_INTERFACE = "https://ngportal.vpac.org/grisu-ws/services/grisu";
 
 	public static final String[] KNOWN_SERVICE_INTERFACE_CREATORS = new String[] {
-		"LocalServiceInterfaceCreator", 
-		"DummyServiceInterfaceCreator",
-		"JaxWsServiceInterfaceCreator",
-		"XfireServiceInterfaceCreator",
-		// the old xfire client...
-		"XFireServiceInterfaceCreator"
-	};
+			"LocalServiceInterfaceCreator", "DummyServiceInterfaceCreator",
+			"JaxWsServiceInterfaceCreator", "XfireServiceInterfaceCreator",
+			// the old xfire client...
+			"XFireServiceInterfaceCreator" };
 
 	/**
 	 * Creates a serviceInterface from a {@link LoginParams} object.
@@ -88,8 +82,9 @@ public final class ServiceInterfaceFactory {
 	 * @throws ServiceInterfaceException
 	 */
 	public static ServiceInterface createInterface(final String interfaceUrl,
-			final String username, final char[] password, final String myProxyServer,
-			final String myProxyPort, final String httpProxy, final int httpProxyPort,
+			final String username, final char[] password,
+			final String myProxyServer, final String myProxyPort,
+			final String httpProxy, final int httpProxyPort,
 			final String httpProxyUsername, final char[] httpProxyPassword)
 			throws ServiceInterfaceException {
 
@@ -122,7 +117,7 @@ public final class ServiceInterfaceFactory {
 						.newInstance();
 			} catch (Exception e) {
 				// shouldn't really happen
-//				e.printStackTrace();
+				// e.printStackTrace();
 				continue;
 			}
 
@@ -139,7 +134,7 @@ public final class ServiceInterfaceFactory {
 						username, password, myProxyServer, myProxyPort,
 						otherOptions);
 			} catch (ServiceInterfaceException e) {
-//				e.printStackTrace();
+				// e.printStackTrace();
 				myLogger.debug("Couldn't connect to url " + interfaceUrl
 						+ " using serviceInterfaceCreator " + className + ": "
 						+ e.getLocalizedMessage());
@@ -150,7 +145,7 @@ public final class ServiceInterfaceFactory {
 			try {
 				serviceInterface.login(username, new String(password));
 			} catch (Exception e) {
-//				e.printStackTrace();
+				// e.printStackTrace();
 				myLogger.debug("Couldn't login to grisu service on: "
 						+ interfaceUrl + ": " + e.getLocalizedMessage());
 				failedCreators.put(className, e);
@@ -180,6 +175,9 @@ public final class ServiceInterfaceFactory {
 							+ failedOnes.toString(), null);
 		}
 
+	}
+
+	private ServiceInterfaceFactory() {
 	}
 
 }

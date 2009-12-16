@@ -16,6 +16,17 @@ import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 public interface ServiceInterfaceCreator {
 
 	/**
+	 * Checks whether this creator supports the creation of a serviceInterface
+	 * object for the specified url.
+	 * 
+	 * @param url
+	 *            the url (e.g. "https://grisu.vpac.org/grisu-ws/services/grisu"
+	 *            or "Local")
+	 * @return true if the url is supported - false if not
+	 */
+	boolean canHandleUrl(String url);
+
+	/**
 	 * Creates the serviceinterface object with the specified parameters.
 	 * 
 	 * @param interfaceUrl
@@ -39,16 +50,5 @@ public interface ServiceInterfaceCreator {
 	ServiceInterface create(String interfaceUrl, String username,
 			char[] password, String myProxyServer, String myProxyPort,
 			Object[] otherOptions) throws ServiceInterfaceException;
-
-	/**
-	 * Checks whether this creator supports the creation of a serviceInterface
-	 * object for the specified url.
-	 * 
-	 * @param url
-	 *            the url (e.g. "https://grisu.vpac.org/grisu-ws/services/grisu"
-	 *            or "Local")
-	 * @return true if the url is supported - false if not
-	 */
-	boolean canHandleUrl(String url);
 
 }

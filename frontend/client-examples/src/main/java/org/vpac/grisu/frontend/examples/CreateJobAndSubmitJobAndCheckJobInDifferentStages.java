@@ -12,28 +12,27 @@ import org.vpac.grisu.utils.SeveralXMLHelpers;
 
 import au.org.arcs.jcommons.constants.Constants;
 
-public final class CreateJobAndSubmitJobAndCheckJobInDifferentStages implements EventTopicSubscriber<JobStatusEvent>{
+public final class CreateJobAndSubmitJobAndCheckJobInDifferentStages implements
+		EventTopicSubscriber<JobStatusEvent> {
 
-	private CreateJobAndSubmitJobAndCheckJobInDifferentStages() {
-	}
-	
 	/**
 	 * @param args
 	 */
 	public static void main(final String[] args) throws Exception {
-		
+
 		LoginParams loginParams = new LoginParams(
-				// "http://localhost:8080/grisu-ws/services/grisu",
-//						 "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-//				"http://localhost:8080/enunciate-backend/soap/GrisuService",
-//				"http://localhost:8080/soap/GrisuService",
+		// "http://localhost:8080/grisu-ws/services/grisu",
+				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
+				// "http://localhost:8080/enunciate-backend/soap/GrisuService",
+				// "http://localhost:8080/soap/GrisuService",
 				"LOCAL_WS",
-//				"ARCS_DEV",
-//				"Local", 
+				// "ARCS_DEV",
+				// "Local",
 				args[0], args[1].toCharArray());
 
-		ServiceInterface si = LoginManager.login(null, null, null, null, loginParams);
-		
+		ServiceInterface si = LoginManager.login(null, null, null, null,
+				loginParams);
+
 		CreateJobAndSubmitJobAndCheckJobInDifferentStages eventHolder = new CreateJobAndSubmitJobAndCheckJobInDifferentStages();
 
 		JobObject createJobObject = new JobObject(si);
@@ -78,7 +77,7 @@ public final class CreateJobAndSubmitJobAndCheckJobInDifferentStages implements 
 				}
 			}
 		};
-		
+
 		waitThread.start();
 
 		boolean finished = checkJobObject.waitForJobToFinish(3);
@@ -96,10 +95,13 @@ public final class CreateJobAndSubmitJobAndCheckJobInDifferentStages implements 
 
 	}
 
+	private CreateJobAndSubmitJobAndCheckJobInDifferentStages() {
+	}
 
 	public void onEvent(String arg0, JobStatusEvent arg1) {
 
-		System.out.println("Topic: "+arg0+" Event: "+JobConstants.translateStatus(arg1.getNewStatus()));		
+		System.out.println("Topic: " + arg0 + " Event: "
+				+ JobConstants.translateStatus(arg1.getNewStatus()));
 	}
 
 }

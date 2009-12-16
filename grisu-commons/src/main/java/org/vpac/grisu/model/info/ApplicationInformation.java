@@ -18,32 +18,33 @@ import au.org.arcs.jcommons.interfaces.GridResource;
 public interface ApplicationInformation {
 
 	/**
-	 * The name of the application this object is all about.
+	 * Calculates all versions for this application that are availabe for this
+	 * fqan, regardless of submissionLocation.
 	 * 
-	 * @return the name of the application
+	 * @param fqan
+	 *            the fqan
+	 * @return all available versions
 	 */
-	String getApplicationName();
+	Set<String> getAllAvailableVersionsForFqan(String fqan);
 
 	/**
-	 * The available executables for this application on this submissionlocation.
+	 * Calculates all submissionlocations for this kind of job.
 	 * 
-	 * @param subLoc
-	 *            the submissionlocation
-	 * @param version
-	 *            the version of the application
-	 * @return a list of all executables
-	 */
-	String[] getExecutables(String subLoc, String version);
-
-	/**
-	 * Calculates all available versions of the application on this
-	 * submissionlocation.
+	 * Basically, this returns the same info as
+	 * {@link #getAllAvailableVersionsForFqan(String)}, but it returns fully
+	 * populated GridResources as a SortedList. It also takes into account
+	 * jobproperties. As a result, it might take a bit longer to get a result
+	 * from this method.
 	 * 
-	 * @param subLoc
-	 *            the submissionLocation
-	 * @return a set of all available versions
+	 * @param additionalJobProperties
+	 *            the jobProperties
+	 * @param fqan
+	 *            the fqan to submit the job
+	 * @return a sorted list of the best resources to submit this job to.
 	 */
-	Set<String> getAvailableVersions(String subLoc);
+	SortedSet<GridResource> getAllSubmissionLocationsAsGridResources(
+			Map<JobSubmissionProperty, String> additionalJobProperties,
+			String fqan);
 
 	/**
 	 * Retrieves a map of all available details (executables, modules, ...)
@@ -56,8 +57,14 @@ public interface ApplicationInformation {
 	 *            the version
 	 * @return the details
 	 */
-	Map<String, String> getApplicationDetails(String subLoc,
-			String version);
+	Map<String, String> getApplicationDetails(String subLoc, String version);
+
+	/**
+	 * The name of the application this object is all about.
+	 * 
+	 * @return the name of the application
+	 */
+	String getApplicationName();
 
 	/**
 	 * Returns a set of all available submissionLocations for this application
@@ -66,16 +73,6 @@ public interface ApplicationInformation {
 	 * @return the submissionLocations
 	 */
 	Set<String> getAvailableAllSubmissionLocations();
-
-	/**
-	 * Returns a set of all available submissionLocations for one version of
-	 * this application grid-wide.
-	 * 
-	 * @param version
-	 *            the version in question
-	 * @return the submissionLocations
-	 */
-	Set<String> getAvailableSubmissionLocationsForVersion(String version);
 
 	/**
 	 * Calculates all the submissionlocations that are available to the user for
@@ -87,6 +84,16 @@ public interface ApplicationInformation {
 	 * @return the submissionlocations
 	 */
 	Set<String> getAvailableSubmissionLocationsForFqan(String fqan);
+
+	/**
+	 * Returns a set of all available submissionLocations for one version of
+	 * this application grid-wide.
+	 * 
+	 * @param version
+	 *            the version in question
+	 * @return the submissionLocations
+	 */
+	Set<String> getAvailableSubmissionLocationsForVersion(String version);
 
 	/**
 	 * This calculates all the submissionlocations that are available to the
@@ -102,15 +109,15 @@ public interface ApplicationInformation {
 			String version, String fqan);
 
 	/**
-	 * Calculates all versions for this application that are availabe for this
-	 * fqan, regardless of submissionLocation.
+	 * Calculates all available versions of the application on this
+	 * submissionlocation.
 	 * 
-	 * @param fqan
-	 *            the fqan
-	 * @return all available versions
+	 * @param subLoc
+	 *            the submissionLocation
+	 * @return a set of all available versions
 	 */
-	Set<String> getAllAvailableVersionsForFqan(String fqan);
-	
+	Set<String> getAvailableVersions(String subLoc);
+
 	/**
 	 * Calculates the best {@link GridResource}s to submit this job to.
 	 * 
@@ -124,20 +131,17 @@ public interface ApplicationInformation {
 	SortedSet<GridResource> getBestSubmissionLocations(
 			Map<JobSubmissionProperty, String> additionalJobProperties,
 			String fqan);
-	
+
 	/**
-	 * Calculates all submissionlocations for this kind of job.
+	 * The available executables for this application on this
+	 * submissionlocation.
 	 * 
-	 * Basically, this returns the same info as {@link #getAllAvailableVersionsForFqan(String)}, 
-	 * but it returns fully populated GridResources as a SortedList. It also takes into account
-	 * jobproperties. As a result, it might take a bit longer to get a result from this method.
-	 * 
-	 * @param additionalJobProperties the jobProperties
-	 * @param fqan the fqan to submit the job
-	 * @return a sorted list of the best resources to submit this job to.
+	 * @param subLoc
+	 *            the submissionlocation
+	 * @param version
+	 *            the version of the application
+	 * @return a list of all executables
 	 */
-	SortedSet<GridResource> getAllSubmissionLocationsAsGridResources(
-			Map<JobSubmissionProperty, String> additionalJobProperties,
-			String fqan);
+	String[] getExecutables(String subLoc, String version);
 
 }

@@ -7,30 +7,8 @@ import org.vpac.historyRepeater.HistoryManager;
 import org.vpac.historyRepeater.SimpleHistoryManager;
 
 public interface GrisuRegistry {
-	
+
 	public static final String GRISU_HISTORY_FILENAME = "grisu.history";
-
-	/**
-	 * Sets the {@link UserEnvironmentManager} for this registry object.
-	 * 
-	 * @param ui
-	 *            the UserEnvironmentManager
-	 */
-	public abstract void setUserEnvironmentManager(
-			final UserEnvironmentManager ui);
-
-	/**
-	 * Gets the UserApplicationInformationObject for the specified application.
-	 * 
-	 * If an UserApplicationInformationObject for this application was already
-	 * specified, a cached version will be returned.
-	 * 
-	 * @param applicationName
-	 *            the name of the application
-	 * @return the information object for this application and user
-	 */
-	public abstract UserApplicationInformation getUserApplicationInformation(
-			final String applicationName);
 
 	/**
 	 * Gets the ApplicationInformationObject for the specified application.
@@ -46,19 +24,11 @@ public interface GrisuRegistry {
 			final String applicationName);
 
 	/**
-	 * Returns the management object for this users enironment.
+	 * Returns an object to help with file(-transfer) related things.
 	 * 
-	 * @return the UserEnvironmentManager object for this user
+	 * @return the file manager
 	 */
-	public abstract UserEnvironmentManager getUserEnvironmentManager();
-
-	/**
-	 * Returns the resource information object that can be used to get
-	 * information about the resources in this grid.
-	 * 
-	 * @return the resource information object
-	 */
-	public abstract ResourceInformation getResourceInformation();
+	public abstract FileManager getFileManager();
 
 	/**
 	 * Returns the history manager object for this user. By default it returns
@@ -70,10 +40,40 @@ public interface GrisuRegistry {
 	public abstract HistoryManager getHistoryManager();
 
 	/**
-	 * Returns an object to help with file(-transfer) related things.
+	 * Returns the resource information object that can be used to get
+	 * information about the resources in this grid.
 	 * 
-	 * @return the file manager
+	 * @return the resource information object
 	 */
-	public abstract FileManager getFileManager();
+	public abstract ResourceInformation getResourceInformation();
+
+	/**
+	 * Gets the UserApplicationInformationObject for the specified application.
+	 * 
+	 * If an UserApplicationInformationObject for this application was already
+	 * specified, a cached version will be returned.
+	 * 
+	 * @param applicationName
+	 *            the name of the application
+	 * @return the information object for this application and user
+	 */
+	public abstract UserApplicationInformation getUserApplicationInformation(
+			final String applicationName);
+
+	/**
+	 * Returns the management object for this users enironment.
+	 * 
+	 * @return the UserEnvironmentManager object for this user
+	 */
+	public abstract UserEnvironmentManager getUserEnvironmentManager();
+
+	/**
+	 * Sets the {@link UserEnvironmentManager} for this registry object.
+	 * 
+	 * @param ui
+	 *            the UserEnvironmentManager
+	 */
+	public abstract void setUserEnvironmentManager(
+			final UserEnvironmentManager ui);
 
 }

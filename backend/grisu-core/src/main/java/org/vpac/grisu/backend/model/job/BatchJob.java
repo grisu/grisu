@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,20 +30,13 @@ import org.vpac.grisu.model.dto.DtoLogMessages;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 
 import au.org.arcs.jcommons.constants.Constants;
-import au.org.arcs.jcommons.interfaces.GridResource;
 
 @Entity
 public class BatchJob {
 
-	protected Job getJob(final String jobname) throws NoSuchJobException {
-
-		Job job = jobdao.findJobByDN(getDn(), jobname);
-		return job;
-	}
-
 	// for hibernate
 	private Long id;
-	
+
 	// the status of the job
 	private int status = -1000;
 
@@ -54,8 +46,7 @@ public class BatchJob {
 
 	private Map<String, String> jobProperties = new HashMap<String, String>();
 
-	static final Logger myLogger = Logger.getLogger(BatchJob.class
-			.getName());
+	static final Logger myLogger = Logger.getLogger(BatchJob.class.getName());
 
 	// the user's dn
 	private String dn = null;
@@ -67,30 +58,14 @@ public class BatchJob {
 	private Set<String> usedMountPoints = new HashSet<String>();
 
 	private String batchJobname;
-	
+
 	private String fqan = null;
-	
+
 	private Map<Long, String> logMessages = Collections
 			.synchronizedMap(new TreeMap<Long, String>());
 
-	@CollectionOfElements(fetch = FetchType.EAGER)
-	public Map<Long, String> getLogMessages() {
-		return logMessages;
-	}
-
-	private void setLogMessages(Map<Long, String> logMessages) {
-		this.logMessages = logMessages;
-	}
-
-	public synchronized void addLogMessage(String message) {
-		Long now = new Date().getTime();
-		//
-		while (this.logMessages.containsKey(now)) {
-			now = now + 1;
-		}
-		this.logMessages.put(now, message);
-		// System.out.println("NOW: "+now.toString()+"   "+now);
-		// this.logMessages.put(UUID.randomUUID().toString(), message);
+	// for hibernate
+	private BatchJob() {
 
 	}
 
@@ -99,80 +74,13 @@ public class BatchJob {
 		this.batchJobname = batchJobname;
 		this.fqan = fqan;
 	}
-	
-	/**
-	 * Gets the status of the job. This does not ask the responsible
-	 * {@link JobSubmitter} about the status but the database. So take care to
-	 * refresh the job status before using this.
-	 * 
-	 * @return the status of the job
-	 */
-	@Column(nullable = false)
-	public int getStatus() {
-		return status;
+
+	public synchronized void addFailedJob(String job) {
+		getFailedJobs().add(job);
 	}
 
-	/**
-	 * Sets the current status of this job. Only a {@link JobSubmitter} should
-	 * use this method.
-	 * 
-	 * @param status
-	 */
-	public void setStatus(final int status) {
-		this.status = status;
-	}
-	
-	public String getFqan() {
-		return fqan;
-	}
-
-	private void setFqan(String fqan) {
-		this.fqan = fqan;
-	}
-	// for hibernate
-	private BatchJob() {
-
-	}
-
-	// hibernate
-	@Id
-	@GeneratedValue
-	private Long getId() {
-		return id;
-	}
-
-	// hibernate
-	protected void setId(final Long id) {
-		this.id = id;
-	}
-
-	/**
-	 * The dn of the user who created/submits this job.
-	 * 
-	 * @return the dn
-	 */
-	@Column(nullable = false)
-	public String getDn() {
-		return dn;
-	}
-
-	/**
-	 * Sets the dn of the user who submits this job. Should be only used by
-	 * hibernate
-	 * 
-	 * @param dn
-	 *            the dn
-	 */
-	protected void setDn(final String dn) {
-		this.dn = dn;
-	}
-
-	public String getBatchJobname() {
-		return batchJobname;
-	}
-
-	private void setBatchJobname(String id) {
-		this.batchJobname = id;
+	public void addInputFile(String inputFilename) {
+		this.inputFiles.add(inputFilename);
 	}
 
 	public void addJob(String jobname) throws NoSuchJobException {
@@ -188,105 +96,37 @@ public class BatchJob {
 		jobdao.saveOrUpdate(job);
 	}
 
-	public synchronized void removeJob(Job job) {
-		this.jobs.remove(job);
-		this.failedJobs.remove(job);
-	}
-
-	@CollectionOfElements(fetch = FetchType.EAGER)
-	public synchronized Set<Job> getJobs() {
-		return jobs;
-	}
-
-	protected void setJobs(Set<Job> jobs) {
-		this.jobs = jobs;
-	}
-
-	// @Transient
-	@CollectionOfElements(fetch = FetchType.EAGER)
-	public Set<String> getFailedJobs() {
-		return failedJobs;
-	}
-
-	private void setFailedJobs(Set<String> failedJobs) {
-		this.failedJobs = failedJobs;
-	}
-
-	public synchronized void addFailedJob(String job) {
-		getFailedJobs().add(job);
-	}
-
-	public synchronized void removeFailedJob(String jobname) {
-		getFailedJobs().remove(jobname);
-	}
-
-	@CollectionOfElements(fetch = FetchType.EAGER)
-	public Set<String> getAllUsedMountPoints() {
-		return this.usedMountPoints;
-	}
-	
-	public void recalculateAllUsedMountPoints() {
-		
-		this.usedMountPoints.clear();
-		for ( Job job : getJobs() ) {
-			usedMountPoints.add(job.getJobProperty(Constants.MOUNTPOINT_KEY));
-		}
-		
-	}
-
-	// for hibernate
-	private void setAllUsedMountPoints(Set<String> usedMountPoints) {
-		this.usedMountPoints = usedMountPoints;
-	}
-
-	@CollectionOfElements(fetch = FetchType.EAGER)
-	public Set<String> getInputFiles() {
-		return this.inputFiles;
-	}
-
-	private void setInputFiles(Set<String> inputfiles) {
-		this.inputFiles = inputFiles;
-	}
-
-	public void addInputFile(String inputFilename) {
-		this.inputFiles.add(inputFilename);
-	}
-
-	@CollectionOfElements(fetch = FetchType.EAGER)
-	public Map<String, String> getJobProperties() {
-		return jobProperties;
-	}
-
-	private void setJobProperties(final Map<String, String> jobProperties) {
-		this.jobProperties = jobProperties;
+	public void addJobProperties(final Map<String, String> properties) {
+		this.jobProperties.putAll(properties);
 	}
 
 	public void addJobProperty(final String key, final String value) {
 		this.jobProperties.put(key, value);
 	}
 
-	public void addJobProperties(final Map<String, String> properties) {
-		this.jobProperties.putAll(properties);
-	}
+	public synchronized void addLogMessage(String message) {
+		Long now = new Date().getTime();
+		//
+		while (this.logMessages.containsKey(now)) {
+			now = now + 1;
+		}
+		this.logMessages.put(now, message);
+		// System.out.println("NOW: "+now.toString()+"   "+now);
+		// this.logMessages.put(UUID.randomUUID().toString(), message);
 
-	@Transient
-	public String getJobProperty(final String key) {
-		return this.jobProperties.get(key);
 	}
 
 	public DtoBatchJob createDtoMultiPartJob() throws NoSuchJobException {
 
-		final DtoBatchJob result = new DtoBatchJob(this
-				.getBatchJobname());
-		
-	
+		final DtoBatchJob result = new DtoBatchJob(this.getBatchJobname());
+
 		result.setSubmissionFqan(this.getFqan());
 		result.setProperties(DtoJobProperty.dtoJobPropertiesFromMap(this
 				.getJobProperties()));
 
 		result.setMessages(DtoLogMessages.createLogMessages(this
 				.getLogMessages()));
-		
+
 		ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
 						.getConcurrentJobStatusThreadsPerUser());
@@ -313,10 +153,10 @@ public class BatchJob {
 			throw new RuntimeException(e);
 		}
 
-//		result.setStatus(this.getStatus());
+		// result.setStatus(this.getStatus());
 		result.setStatus(result.getPercentFinished().intValue());
 
-//		boolean finished = true;
+		// boolean finished = true;
 		DtoJobs dtoJobs = new DtoJobs();
 		for (String jobname : getFailedJobs()) {
 			DtoJob job = result.retrieveJob(jobname);
@@ -326,7 +166,161 @@ public class BatchJob {
 
 		return result;
 	}
-	
 
+	@CollectionOfElements(fetch = FetchType.EAGER)
+	public Set<String> getAllUsedMountPoints() {
+		return this.usedMountPoints;
+	}
+
+	public String getBatchJobname() {
+		return batchJobname;
+	}
+
+	/**
+	 * The dn of the user who created/submits this job.
+	 * 
+	 * @return the dn
+	 */
+	@Column(nullable = false)
+	public String getDn() {
+		return dn;
+	}
+
+	// @Transient
+	@CollectionOfElements(fetch = FetchType.EAGER)
+	public Set<String> getFailedJobs() {
+		return failedJobs;
+	}
+
+	public String getFqan() {
+		return fqan;
+	}
+
+	// hibernate
+	@Id
+	@GeneratedValue
+	private Long getId() {
+		return id;
+	}
+
+	@CollectionOfElements(fetch = FetchType.EAGER)
+	public Set<String> getInputFiles() {
+		return this.inputFiles;
+	}
+
+	protected Job getJob(final String jobname) throws NoSuchJobException {
+
+		Job job = jobdao.findJobByDN(getDn(), jobname);
+		return job;
+	}
+
+	@CollectionOfElements(fetch = FetchType.EAGER)
+	public Map<String, String> getJobProperties() {
+		return jobProperties;
+	}
+
+	@Transient
+	public String getJobProperty(final String key) {
+		return this.jobProperties.get(key);
+	}
+
+	@CollectionOfElements(fetch = FetchType.EAGER)
+	public synchronized Set<Job> getJobs() {
+		return jobs;
+	}
+
+	@CollectionOfElements(fetch = FetchType.EAGER)
+	public Map<Long, String> getLogMessages() {
+		return logMessages;
+	}
+
+	/**
+	 * Gets the status of the job. This does not ask the responsible
+	 * {@link JobSubmitter} about the status but the database. So take care to
+	 * refresh the job status before using this.
+	 * 
+	 * @return the status of the job
+	 */
+	@Column(nullable = false)
+	public int getStatus() {
+		return status;
+	}
+
+	public void recalculateAllUsedMountPoints() {
+
+		this.usedMountPoints.clear();
+		for (Job job : getJobs()) {
+			usedMountPoints.add(job.getJobProperty(Constants.MOUNTPOINT_KEY));
+		}
+
+	}
+
+	public synchronized void removeFailedJob(String jobname) {
+		getFailedJobs().remove(jobname);
+	}
+
+	public synchronized void removeJob(Job job) {
+		this.jobs.remove(job);
+		this.failedJobs.remove(job);
+	}
+
+	// for hibernate
+	private void setAllUsedMountPoints(Set<String> usedMountPoints) {
+		this.usedMountPoints = usedMountPoints;
+	}
+
+	private void setBatchJobname(String id) {
+		this.batchJobname = id;
+	}
+
+	/**
+	 * Sets the dn of the user who submits this job. Should be only used by
+	 * hibernate
+	 * 
+	 * @param dn
+	 *            the dn
+	 */
+	protected void setDn(final String dn) {
+		this.dn = dn;
+	}
+
+	private void setFailedJobs(Set<String> failedJobs) {
+		this.failedJobs = failedJobs;
+	}
+
+	private void setFqan(String fqan) {
+		this.fqan = fqan;
+	}
+
+	// hibernate
+	protected void setId(final Long id) {
+		this.id = id;
+	}
+
+	private void setInputFiles(Set<String> inputfiles) {
+		this.inputFiles = inputFiles;
+	}
+
+	private void setJobProperties(final Map<String, String> jobProperties) {
+		this.jobProperties = jobProperties;
+	}
+
+	protected void setJobs(Set<Job> jobs) {
+		this.jobs = jobs;
+	}
+
+	private void setLogMessages(Map<Long, String> logMessages) {
+		this.logMessages = logMessages;
+	}
+
+	/**
+	 * Sets the current status of this job. Only a {@link JobSubmitter} should
+	 * use this method.
+	 * 
+	 * @param status
+	 */
+	public void setStatus(final int status) {
+		this.status = status;
+	}
 
 }

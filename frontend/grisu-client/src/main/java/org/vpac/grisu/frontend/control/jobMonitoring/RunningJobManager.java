@@ -26,15 +26,69 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
 public class RunningJobManager {
-	
-	static final Logger myLogger = Logger.getLogger(RunningJobManager.class.getName());
-	
+
+	private class UpdateTimerTask extends TimerTask {
+
+		@Override
+		public void run() {
+
+			for (String application : cachedBatchJobsPerApplication.keySet()) {
+				updateBatchJobList(application);
+			}
+
+			for (BatchJobObject bj : getAllCurrentlyWatchedBatchJobs()) {
+				if (!bj.isFinished(false) && !bj.isRefreshing()) {
+					myLogger.debug("Refreshing job: " + bj.getJobname());
+					bj.refresh(true);
+				}
+			}
+
+			updateTimer.schedule(new UpdateTimerTask(),
+					UPDATE_TIME_IN_SECONDS * 1000);
+		}
+	}
+
+	static final Logger myLogger = Logger.getLogger(RunningJobManager.class
+			.getName());
+
+	public static void updateJobList(ServiceInterface si,
+			EventList<JobObject> jobObjectList, DtoJobs newJobs) {
+
+		Set<JobObject> toRemove = new HashSet<JobObject>();
+		Set<DtoJob> newJobsCopy = new HashSet<DtoJob>(newJobs.getAllJobs());
+
+		for (JobObject jo : jobObjectList) {
+			boolean inList = false;
+
+			for (DtoJob job : newJobs.getAllJobs()) {
+				if (jo.getJobname().equals(job.jobname())) {
+					inList = true;
+					jo.updateWithDtoJob(job);
+					newJobsCopy.remove(job);
+					break;
+				}
+			}
+			if (!inList) {
+				toRemove.add(jo);
+			}
+		}
+
+		for (DtoJob newJob : newJobsCopy) {
+			try {
+				JobObject jo = new JobObject(si, newJob);
+				jobObjectList.add(jo);
+			} catch (NoSuchJobException e) {
+				// probably not that important
+				e.printStackTrace();
+			}
+		}
+
+	}
+
 	private final int UPDATE_TIME_IN_SECONDS = 10;
-	
+
 	private static Map<ServiceInterface, RunningJobManager> cachedRegistries = new HashMap<ServiceInterface, RunningJobManager>();
-	
-	public static RunningJobManager getDefault(
-			final ServiceInterface si) {
+	public static RunningJobManager getDefault(final ServiceInterface si) {
 
 		if (si == null) {
 			throw new RuntimeException(
@@ -50,164 +104,115 @@ public class RunningJobManager {
 
 		return cachedRegistries.get(si);
 	}
-	
-	
-	private final UserEnvironmentManager em;
-	private final ServiceInterface si;
-	
-	private Map<String, BatchJobObject> cachedAllBatchJobs = Collections.synchronizedMap(new HashMap<String, BatchJobObject>());
-	
-	private Map<String, EventList<BatchJobObject>> cachedBatchJobsPerApplication = Collections.synchronizedMap(new HashMap<String, EventList<BatchJobObject>>());
-	
-	private Timer updateTimer = new Timer();
-	private class UpdateTimerTask extends TimerTask {
-		
-		@Override
-		public void run() {
-			
-			for ( String application : cachedBatchJobsPerApplication.keySet() ) {
-				updateBatchJobList(application);
-			}
 
-			for ( BatchJobObject bj : getAllCurrentlyWatchedBatchJobs() ) {
-				if ( ! bj.isFinished(false) && ! bj.isRefreshing() ) {
-					myLogger.debug("Refreshing job: "+bj.getJobname());
-					bj.refresh(true);
-				}
-			}
-			
-			updateTimer.schedule(new UpdateTimerTask(), UPDATE_TIME_IN_SECONDS * 1000);
-		}
-	};
-	
-	
+	private final UserEnvironmentManager em;
+
+	private final ServiceInterface si;
+
+	private Map<String, BatchJobObject> cachedAllBatchJobs = Collections
+			.synchronizedMap(new HashMap<String, BatchJobObject>());
+
+	private Map<String, EventList<BatchJobObject>> cachedBatchJobsPerApplication = Collections
+			.synchronizedMap(new HashMap<String, EventList<BatchJobObject>>());;
+
+	private Timer updateTimer = new Timer();
+
 	public RunningJobManager(ServiceInterface si) {
 		this.si = si;
-		this.em = GrisuRegistryManager.getDefault(si).getUserEnvironmentManager();
+		this.em = GrisuRegistryManager.getDefault(si)
+				.getUserEnvironmentManager();
 
 		startAutoRefresh();
 	}
-	
-	public void startAutoRefresh() {
-		
-		updateTimer.schedule(new UpdateTimerTask(), 0);
-		
-	}
-	
+
 	private synchronized Collection<BatchJobObject> getAllCurrentlyWatchedBatchJobs() {
-		
+
 		return cachedAllBatchJobs.values();
-		
+
 	}
-	
-	
+
 	public BatchJobObject getBatchJob(String jobname) throws NoSuchJobException {
-		
-		synchronized(jobname) {
-		
-		if ( cachedAllBatchJobs.get(jobname) == null ) {
-			
-			try {
-				BatchJobObject temp = new BatchJobObject(si, jobname, false);
-				cachedAllBatchJobs.put(jobname, temp);
-			} catch (BatchJobException e) {
-				throw new RuntimeException(e);
+
+		synchronized (jobname) {
+
+			if (cachedAllBatchJobs.get(jobname) == null) {
+
+				try {
+					BatchJobObject temp = new BatchJobObject(si, jobname, false);
+					cachedAllBatchJobs.put(jobname, temp);
+				} catch (BatchJobException e) {
+					throw new RuntimeException(e);
+				}
+
 			}
-			
-		}
-		return cachedAllBatchJobs.get(jobname);
-		
+			return cachedAllBatchJobs.get(jobname);
+
 		}
 	}
-	
-	
-	public synchronized EventList<BatchJobObject> getBatchJobs(String application) {
-		
-		if ( cachedBatchJobsPerApplication.get(application) == null ) {
-			
+
+	public synchronized EventList<BatchJobObject> getBatchJobs(
+			String application) {
+
+		if (cachedBatchJobsPerApplication.get(application) == null) {
+
 			EventList<BatchJobObject> temp = new BasicEventList<BatchJobObject>();
-			
-			for ( String jobname : em.getCurrentBatchJobnames(application, false) ) {
+
+			for (String jobname : em
+					.getCurrentBatchJobnames(application, false)) {
 				try {
 					temp.add(getBatchJob(jobname));
 				} catch (NoSuchJobException e) {
 					throw new RuntimeException(e);
 				}
 			}
-			
+
 			cachedBatchJobsPerApplication.put(application, temp);
-			
-		} 
+
+		}
 		return cachedBatchJobsPerApplication.get(application);
 	}
-	
-	public static void updateJobList(ServiceInterface si, EventList<JobObject> jobObjectList, DtoJobs newJobs) {
-		
-		Set<JobObject> toRemove = new HashSet<JobObject>();
-		Set<DtoJob> newJobsCopy = new HashSet<DtoJob>(newJobs.getAllJobs());
-		
-		for ( JobObject jo : jobObjectList ) {
-			boolean inList = false;
-			
-			for ( DtoJob job : newJobs.getAllJobs() ) {
-				if ( jo.getJobname().equals(job.jobname()) ) {
-					inList = true;
-					jo.updateWithDtoJob(job);
-					newJobsCopy.remove(job);
-					break;
-				}
-			}
-			if ( ! inList ) {
-				toRemove.add(jo);
-			} 
-		}
-		
-		for ( DtoJob newJob : newJobsCopy ) {
-			try {
-				JobObject jo = new JobObject(si, newJob);
-				jobObjectList.add(jo);
-			} catch (NoSuchJobException e) {
-				// probably not that important
-				e.printStackTrace();
-			}
-		}
-		
+
+	public void startAutoRefresh() {
+
+		updateTimer.schedule(new UpdateTimerTask(), 0);
+
 	}
-	
+
 	/**
 	 * Updates the list of jobnames for this application.
 	 * 
 	 * This doesn't update the batchjobs itself.
 	 * 
-	 * @param application the application
+	 * @param application
+	 *            the application
 	 */
 	public synchronized void updateBatchJobList(String application) {
 
 		EventList<BatchJobObject> list = getBatchJobs(application);
-		
-		SortedSet<String> jobnames = em.getCurrentBatchJobnames(application, true);
+
+		SortedSet<String> jobnames = em.getCurrentBatchJobnames(application,
+				true);
 		SortedSet<String> jobnamesNew = new TreeSet<String>(jobnames);
-		
-		for ( BatchJobObject bj : list ) {
+
+		for (BatchJobObject bj : list) {
 			jobnamesNew.remove(bj.getJobname());
 		}
-		for ( String name : jobnamesNew ) {
+		for (String name : jobnamesNew) {
 			try {
 				list.add(getBatchJob(name));
 			} catch (NoSuchJobException e) {
 				throw new RuntimeException(e);
 			}
 		}
-		
+
 		Set<BatchJobObject> toRemove = new HashSet<BatchJobObject>();
-		for ( BatchJobObject bj : list ) {
-			if ( ! jobnames.contains(bj.getJobname()) ) {
+		for (BatchJobObject bj : list) {
+			if (!jobnames.contains(bj.getJobname())) {
 				toRemove.add(bj);
 			}
 		}
 		list.removeAll(toRemove);
-		
-		
+
 	}
 
 }

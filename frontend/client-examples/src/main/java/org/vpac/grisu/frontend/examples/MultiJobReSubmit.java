@@ -4,30 +4,18 @@ import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.annotation.AnnotationProcessor;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
-import org.vpac.grisu.frontend.model.StatusObject;
 import org.vpac.grisu.frontend.model.events.BatchJobEvent;
-import org.vpac.grisu.frontend.model.events.SystemOutStatusLogger;
-import org.vpac.grisu.frontend.model.job.JobObject;
-import org.vpac.grisu.frontend.model.job.JobsException;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
+import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
-import org.vpac.grisu.model.dto.DtoActionStatus;
-import org.vpac.grisu.model.dto.DtoBatchJob;
-
-import au.org.arcs.jcommons.constants.Constants;
 
 public class MultiJobReSubmit {
-
-	public MultiJobReSubmit() {
-		AnnotationProcessor.process(this);
-	}
 
 	public static void main(final String[] args) throws Exception {
 
@@ -76,6 +64,10 @@ public class MultiJobReSubmit {
 			System.out.println("-------------------------------");
 			System.out.println();
 		}
+	}
+
+	public MultiJobReSubmit() {
+		AnnotationProcessor.process(this);
 	}
 
 	@EventSubscriber(eventClass = BatchJobEvent.class)

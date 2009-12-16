@@ -44,6 +44,30 @@ public class ProxyCredential {
 	// the internal "non-raw" credential data
 	private GSSCredential gsscredential = null;
 
+	// all jobs that use this credential
+	private Set<Job> jobs = new HashSet<Job>();
+
+	// the "raw" credential data
+	private byte[] credentialData = null;
+
+	// for hibernate
+	private Long id = null;
+
+	// the dn of the credential - easier for db queries that way
+	private String dn = null;
+
+	// when will this credential expire - easier for db queries that way
+	private Date expiryDate = null;
+
+	// the (primary) fqan of this certificate (can be null)
+	private String fqan = null;
+
+	// whether this certificate is renewable - not used yet but maybe usefull
+	// for MyProxy certificates
+	private Boolean renewable = false;
+	// For hibernate only
+	protected ProxyCredential() {
+	}
 	/**
 	 * This constructor creates a ProxyCredential using a standard GSSCredential
 	 * as parameter and wraps all the grisu-credential specific things around
@@ -58,7 +82,6 @@ public class ProxyCredential {
 
 		setCredentialData(convertFromGSSCredential(proxy));
 	}
-
 	/**
 	 * This constructor wraps a voms enabled proxy into this ProxyCredential
 	 * class.
@@ -70,88 +93,10 @@ public class ProxyCredential {
 	 * @throws Exception
 	 *             if something is wrong with the proxy
 	 */
-	public ProxyCredential(final GSSCredential proxy, final String fqan) throws Exception {
+	public ProxyCredential(final GSSCredential proxy, final String fqan)
+			throws Exception {
 		setCredentialData(convertFromGSSCredential(proxy));
 		setFqan(fqan);
-	}
-
-	// For hibernate only
-	protected ProxyCredential() {
-	}
-
-	// all jobs that use this credential
-	private Set<Job> jobs = new HashSet<Job>();
-
-	// the "raw" credential data
-	private byte[] credentialData = null;
-
-	// for hibernate
-	private Long id = null;
-
-	// the dn of the credential - easier for db queries that way
-	private String dn = null;
-	// when will this credential expire - easier for db queries that way
-	private Date expiryDate = null;
-	// the (primary) fqan of this certificate (can be null)
-	private String fqan = null;
-	// whether this certificate is renewable - not used yet but maybe usefull
-	// for MyProxy certificates
-	private Boolean renewable = false;
-
-	/**
-	 * This should be used only by hibernate. This only sets the dn from the
-	 * database. We trust that this is the right dn. Once the CredentialData is
-	 * loaded from the database, the dn gets updated.
-	 * 
-	 * @param dn
-	 *            the dn
-	 */
-	protected final void setDn(final String dn) {
-		this.dn = dn;
-	}
-
-	/**
-	 * This should be used only by hibernate. This only sets the expiry date
-	 * from the database. We trust that this is the right expiry date. Once the
-	 * CredentialData is loaded from the database, the expiry date gets updated.
-	 * 
-	 * @param expiryDate
-	 *            the expiry date
-	 */
-	protected final void setExpiryDate(final Date expiryDate) {
-		this.expiryDate = expiryDate;
-	}
-
-	/**
-	 * This should be used only by hibernate. This only sets the fqan from the
-	 * database. We trust that this is the right fqan. Once the CredentialData
-	 * is loaded from the database, the fqan gets updated.
-	 * 
-	 * @param fqan
-	 *            the fqan
-	 */
-	protected final void setFqan(final String fqan) {
-		this.fqan = fqan;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.vpac.grisu.credential.model.GenericCredential#getJobs()
-	 */
-	public final Set<Job> getJobs() {
-		return jobs;
-	}
-
-	/**
-	 * Used by hibernate to initiate the credential object when loading it from
-	 * the database.
-	 * 
-	 * @param jobs
-	 *            all jobs that are using this credential
-	 */
-	private void setJobs(final Set<Job> jobs) {
-		this.jobs = jobs;
 	}
 
 	/*
@@ -167,36 +112,6 @@ public class ProxyCredential {
 		if (!jobs.contains(job)) {
 			jobs.add(job);
 		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.vpac.grisu.credential.model.GenericCredential#remove(org.vpac.grisu
-	 * .js.model.Job)
-	 */
-	public final void remove(final Job job) {
-		jobs.remove(job);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.vpac.grisu.credential.model.GenericCredential#getId()
-	 */
-	public final Long getId() {
-		return id;
-	}
-
-	/**
-	 * For hibernate. Sets the id of the job.
-	 * 
-	 * @param id
-	 *            the new id of the job.
-	 */
-	private void setId(final Long id) {
-		this.id = id;
 	}
 
 	/**
@@ -240,21 +155,15 @@ public class ProxyCredential {
 		return cred;
 	}
 
-	/**
-	 * Returns the credential in GSS format. This is just a convenience method
-	 * for credentials that are of type ProxyCredential. It does not exist for
-	 * the superclass.
-	 * 
-	 * @return the credential data in GSS format
-	 */
-	public final GSSCredential getGssCredential() {
-		if (credentialData == null) {
-			return null;
+	public final void destroy() {
+
+		try {
+			getGssCredential().dispose();
+		} catch (GSSException e) {
+			// bad luck
+			assert true;
 		}
-		if (this.gsscredential == null) {
-			this.gsscredential = convertToGSSCredential(this.credentialData);
-		}
-		return this.gsscredential;
+
 	}
 
 	/**
@@ -266,21 +175,6 @@ public class ProxyCredential {
 	 */
 	public final byte[] getCredentialData() {
 		return credentialData;
-	}
-
-	/**
-	 * Sets the credential using a byte[]. This is used by hibernate to load the
-	 * data back into a credential object form a database entry.
-	 * 
-	 * @param data
-	 *            the credential data
-	 */
-	protected final void setCredentialData(final byte[] data) {
-		this.credentialData = data;
-		this.gsscredential = convertToGSSCredential(data);
-		// forcing these two fields to refresh
-		this.dn = null;
-		this.expiryDate = null;
 	}
 
 	/**
@@ -329,6 +223,41 @@ public class ProxyCredential {
 	}
 
 	/**
+	 * Returns the credential in GSS format. This is just a convenience method
+	 * for credentials that are of type ProxyCredential. It does not exist for
+	 * the superclass.
+	 * 
+	 * @return the credential data in GSS format
+	 */
+	public final GSSCredential getGssCredential() {
+		if (credentialData == null) {
+			return null;
+		}
+		if (this.gsscredential == null) {
+			this.gsscredential = convertToGSSCredential(this.credentialData);
+		}
+		return this.gsscredential;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.vpac.grisu.credential.model.GenericCredential#getId()
+	 */
+	public final Long getId() {
+		return id;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.vpac.grisu.credential.model.GenericCredential#getJobs()
+	 */
+	public final Set<Job> getJobs() {
+		return jobs;
+	}
+
+	/**
 	 * Not used yet.
 	 * 
 	 * @return
@@ -337,32 +266,6 @@ public class ProxyCredential {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
-	/**
-	 * Not used yet.
-	 * 
-	 * @return
-	 */
-	public final boolean renew() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	// public static void main(String[] args) throws GlobusCredentialException,
-	// Exception {
-	//		
-	// ProxyCredentialDAO creddao = new ProxyCredentialDAO();
-	// ProxyCredential cred = new
-	// ProxyCredential(CredentialHelpers.wrapGlobusCredential(CredentialHelpers.loadGlobusCredential(new
-	// File("/tmp/x509up_u1000"))));
-	//		
-	// creddao.save(cred);
-	//		
-	// ProxyCredential cred2 = creddao.findCredentialByID(new Long(2));
-	//		
-	// System.out.println(cred2.getExpiryDate());
-	//		
-	// }
 
 	/**
 	 * Checks whether this credential is valid.
@@ -385,15 +288,113 @@ public class ProxyCredential {
 		}
 	}
 
-	public final void destroy() {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.vpac.grisu.credential.model.GenericCredential#remove(org.vpac.grisu
+	 * .js.model.Job)
+	 */
+	public final void remove(final Job job) {
+		jobs.remove(job);
+	}
 
-		try {
-			getGssCredential().dispose();
-		} catch (GSSException e) {
-			// bad luck
-			assert true;
-		}
+	/**
+	 * Not used yet.
+	 * 
+	 * @return
+	 */
+	public final boolean renew() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
+	/**
+	 * Sets the credential using a byte[]. This is used by hibernate to load the
+	 * data back into a credential object form a database entry.
+	 * 
+	 * @param data
+	 *            the credential data
+	 */
+	protected final void setCredentialData(final byte[] data) {
+		this.credentialData = data;
+		this.gsscredential = convertToGSSCredential(data);
+		// forcing these two fields to refresh
+		this.dn = null;
+		this.expiryDate = null;
+	}
+
+	/**
+	 * This should be used only by hibernate. This only sets the dn from the
+	 * database. We trust that this is the right dn. Once the CredentialData is
+	 * loaded from the database, the dn gets updated.
+	 * 
+	 * @param dn
+	 *            the dn
+	 */
+	protected final void setDn(final String dn) {
+		this.dn = dn;
+	}
+
+	/**
+	 * This should be used only by hibernate. This only sets the expiry date
+	 * from the database. We trust that this is the right expiry date. Once the
+	 * CredentialData is loaded from the database, the expiry date gets updated.
+	 * 
+	 * @param expiryDate
+	 *            the expiry date
+	 */
+	protected final void setExpiryDate(final Date expiryDate) {
+		this.expiryDate = expiryDate;
+	}
+
+	/**
+	 * This should be used only by hibernate. This only sets the fqan from the
+	 * database. We trust that this is the right fqan. Once the CredentialData
+	 * is loaded from the database, the fqan gets updated.
+	 * 
+	 * @param fqan
+	 *            the fqan
+	 */
+	protected final void setFqan(final String fqan) {
+		this.fqan = fqan;
+	}
+
+	// public static void main(String[] args) throws GlobusCredentialException,
+	// Exception {
+	//		
+	// ProxyCredentialDAO creddao = new ProxyCredentialDAO();
+	// ProxyCredential cred = new
+	// ProxyCredential(CredentialHelpers.wrapGlobusCredential(CredentialHelpers.loadGlobusCredential(new
+	// File("/tmp/x509up_u1000"))));
+	//		
+	// creddao.save(cred);
+	//		
+	// ProxyCredential cred2 = creddao.findCredentialByID(new Long(2));
+	//		
+	// System.out.println(cred2.getExpiryDate());
+	//		
+	// }
+
+	/**
+	 * For hibernate. Sets the id of the job.
+	 * 
+	 * @param id
+	 *            the new id of the job.
+	 */
+	private void setId(final Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * Used by hibernate to initiate the credential object when loading it from
+	 * the database.
+	 * 
+	 * @param jobs
+	 *            all jobs that are using this credential
+	 */
+	private void setJobs(final Set<Job> jobs) {
+		this.jobs = jobs;
 	}
 
 }

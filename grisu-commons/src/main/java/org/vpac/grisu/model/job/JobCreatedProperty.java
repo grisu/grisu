@@ -3,9 +3,6 @@ package org.vpac.grisu.model.job;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.vpac.grisu.control.JobConstants;
-import org.vpac.grisu.control.ServiceInterface;
-
 import au.org.arcs.jcommons.constants.Constants;
 
 /**
@@ -58,17 +55,6 @@ public enum JobCreatedProperty {
 		}
 	}
 
-	private final String keyName;
-
-	JobCreatedProperty(final String keyName) {
-		this.keyName = keyName;
-	}
-
-	@Override
-	public String toString() {
-		return this.keyName;
-	}
-
 	/**
 	 * Returns the enum for this keyname.
 	 * 
@@ -78,6 +64,17 @@ public enum JobCreatedProperty {
 	 */
 	public static JobCreatedProperty fromString(final String key) {
 		return stringToJobPropertyMap.get(key);
+	}
+
+	private final String keyName;
+
+	JobCreatedProperty(final String keyName) {
+		this.keyName = keyName;
+	}
+
+	@Override
+	public String toString() {
+		return this.keyName;
 	}
 
 }

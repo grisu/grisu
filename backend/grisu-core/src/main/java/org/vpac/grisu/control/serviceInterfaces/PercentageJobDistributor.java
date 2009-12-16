@@ -16,17 +16,20 @@ import au.org.arcs.jcommons.utils.JsdlHelpers;
 import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
 
 public class PercentageJobDistributor implements JobDistributor {
-	
+
 	static final Logger myLogger = Logger
-	.getLogger(PercentageJobDistributor.class.getName());
-	
-	public Map<String, Integer> distributeJobs(Set<Job> allJobs, SortedSet<GridResource> allAvailableResources) {
-		
+			.getLogger(PercentageJobDistributor.class.getName());
+
+	public Map<String, Integer> distributeJobs(Set<Job> allJobs,
+			SortedSet<GridResource> allAvailableResources) {
+
 		Map<String, Integer> submissionLocations = new TreeMap<String, Integer>();
 
 		Long allWalltime = 0L;
-		for ( Job job : allJobs ) {
-			allWalltime = allWalltime + Long.parseLong(job.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY));
+		for (Job job : allJobs) {
+			allWalltime = allWalltime
+					+ Long.parseLong(job
+							.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY));
 		}
 
 		Map<GridResource, Long> resourcesToUse = new TreeMap<GridResource, Long>();
@@ -34,9 +37,9 @@ public class PercentageJobDistributor implements JobDistributor {
 		Long allRanks = 0L;
 		for (GridResource resource : allAvailableResources) {
 
-				resourcesToUse.put(resource, new Long(0L));
-				ranks.add(resource.getRank());
-				allRanks = allRanks + resource.getRank();
+			resourcesToUse.put(resource, new Long(0L));
+			ranks.add(resource.getRank());
+			allRanks = allRanks + resource.getRank();
 		}
 
 		myLogger.debug("Rank summary: " + allRanks);
@@ -45,8 +48,8 @@ public class PercentageJobDistributor implements JobDistributor {
 		GridResource[] resourceArray = resourcesToUse.keySet().toArray(
 				new GridResource[] {});
 		int lastIndex = 0;
-		
-		for ( Job job : allJobs ) {
+
+		for (Job job : allJobs) {
 
 			GridResource subLocResource = null;
 			long oldWalltimeSummary = 0L;
@@ -60,7 +63,8 @@ public class PercentageJobDistributor implements JobDistributor {
 				GridResource resource = resourceArray[indexToUse];
 
 				long rankPercentage = (resource.getRank() * 100) / (allRanks);
-				long wallTimePercentage = ((Long.parseLong(job.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY)) + resourcesToUse
+				long wallTimePercentage = ((Long.parseLong(job
+						.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY)) + resourcesToUse
 						.get(resource)) * 100)
 						/ (allWalltime);
 
@@ -92,27 +96,32 @@ public class PercentageJobDistributor implements JobDistributor {
 			if (currentCount == null) {
 				currentCount = 0;
 			}
-			submissionLocations
-					.put(subLoc, currentCount + 1);
+			submissionLocations.put(subLoc, currentCount + 1);
 
 			job.addJobProperty(Constants.SUBMISSIONLOCATION_KEY, subLoc);
-			
-			JsdlHelpers.setCandidateHosts(job.getJobDescription(), new String[]{subLoc}); 
 
-//			needs to be done on the backend
-//			try {
-//				processJobDescription(job);
-//			} catch (JobPropertiesException e) {
-//				e.printStackTrace();
-//				throw new RuntimeException(e);
-//			}
-//			jobdao.saveOrUpdate(job);
-			resourcesToUse.put(subLocResource, oldWalltimeSummary + Long.parseLong(job.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY)));
+			JsdlHelpers.setCandidateHosts(job.getJobDescription(),
+					new String[] { subLoc });
+
+			// needs to be done on the backend
+			// try {
+			// processJobDescription(job);
+			// } catch (JobPropertiesException e) {
+			// e.printStackTrace();
+			// throw new RuntimeException(e);
+			// }
+			// jobdao.saveOrUpdate(job);
+			resourcesToUse
+					.put(
+							subLocResource,
+							oldWalltimeSummary
+									+ Long
+											.parseLong(job
+													.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY)));
 		}
-		
+
 		return submissionLocations;
 
-		
 	}
 
 }

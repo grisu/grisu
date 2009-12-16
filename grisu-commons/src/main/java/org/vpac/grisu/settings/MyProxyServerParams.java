@@ -13,9 +13,6 @@ import org.apache.log4j.Logger;
  * 
  */
 public final class MyProxyServerParams {
-	
-	private MyProxyServerParams() {
-	}
 
 	private static PropertiesConfiguration config = null;
 
@@ -26,11 +23,11 @@ public final class MyProxyServerParams {
 	 * Default myproxy server url. Points to myproxy2.arcs.org.au.
 	 */
 	public static final String DEFAULT_MYPROXY_SERVER = "myproxy2.arcs.org.au";
+
 	/**
 	 * Default myproxy server port. Default is 443.
 	 */
 	public static final int DEFAULT_MYPROXY_PORT = 443;
-
 	/**
 	 * Retrieves the configuration parameters from the properties file.
 	 * 
@@ -46,26 +43,6 @@ public final class MyProxyServerParams {
 					"grisu.config"));
 		}
 		return config;
-	}
-
-	/**
-	 * Get the myproxy server hostname to use.
-	 * 
-	 * @return the myproxy server hostname
-	 */
-	public static String getMyProxyServer() {
-		String myProxyServer = "";
-		try {
-			myProxyServer = getClientConfiguration().getString("myProxyServer");
-
-		} catch (ConfigurationException e) {
-			myLogger.debug("Problem with config file: " + e.getMessage());
-		}
-		if (myProxyServer == null || "".equals(myProxyServer)) {
-			myProxyServer = DEFAULT_MYPROXY_SERVER;
-		}
-
-		return myProxyServer;
 	}
 
 	/**
@@ -91,19 +68,23 @@ public final class MyProxyServerParams {
 	}
 
 	/**
-	 * Saves the MyProxy username for next time.
+	 * Get the myproxy server hostname to use.
 	 * 
-	 * @param username
-	 *            the username
+	 * @return the myproxy server hostname
 	 */
-	public static void saveDefaultMyProxyUsername(final String username) {
+	public static String getMyProxyServer() {
+		String myProxyServer = "";
 		try {
-			getClientConfiguration().setProperty("myProxyUsername", username);
-			getClientConfiguration().save();
+			myProxyServer = getClientConfiguration().getString("myProxyServer");
+
 		} catch (ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
+		if (myProxyServer == null || "".equals(myProxyServer)) {
+			myProxyServer = DEFAULT_MYPROXY_SERVER;
+		}
 
+		return myProxyServer;
 	}
 
 	/**
@@ -120,6 +101,25 @@ public final class MyProxyServerParams {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 		return username;
+	}
+
+	/**
+	 * Saves the MyProxy username for next time.
+	 * 
+	 * @param username
+	 *            the username
+	 */
+	public static void saveDefaultMyProxyUsername(final String username) {
+		try {
+			getClientConfiguration().setProperty("myProxyUsername", username);
+			getClientConfiguration().save();
+		} catch (ConfigurationException e) {
+			myLogger.debug("Problem with config file: " + e.getMessage());
+		}
+
+	}
+
+	private MyProxyServerParams() {
 	}
 
 }

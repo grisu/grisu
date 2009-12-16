@@ -27,13 +27,12 @@ import org.hibernate.Session;
  */
 public class BaseHibernateDAO implements IBaseHibernateDAO {
 
-	public final Session getSession() {
-		return HibernateSessionFactory.getSessionFactory().openSession();
+	public final Session getCurrentSession() {
+		return HibernateSessionFactory.getSessionFactory().getCurrentSession();
 	}
 
-	public final Session getCurrentSession() {
-		return HibernateSessionFactory.getSessionFactory()
-				.getCurrentSession();
+	public final Session getSession() {
+		return HibernateSessionFactory.getSessionFactory().openSession();
 	}
 
 }

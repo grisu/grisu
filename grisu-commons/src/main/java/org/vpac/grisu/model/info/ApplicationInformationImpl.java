@@ -30,25 +30,18 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 	private final ResourceInformation resourceInfo;
 
-	public final ServiceInterface getServiceInterface() {
-		return serviceInterface;
-	}
-
-	public final ResourceInformation getResourceInfo() {
-		return resourceInfo;
-	}
-
 	private Map<String, Map<String, String>> cachedApplicationDetails = new HashMap<String, Map<String, String>>();
+
 	private Set<String> cachedAllSubmissionLocations = null;
+
 	private Map<String, Set<String>> cachedVersionsPerSubmissionLocations = new HashMap<String, Set<String>>();
 	private Map<String, Set<String>> cachedSubmissionLocationsPerVersion = new HashMap<String, Set<String>>();
 	// private Map<String, Set<String>> cachedVersionsForSubmissionLocation =
 	// new HashMap<String, Set<String>>();
-
 	private Map<String, Set<String>> cachedSubmissionLocationsForUserPerFqan = new HashMap<String, Set<String>>();
 	private Map<String, Set<String>> cachedSubmissionLocationsForUserPerVersionAndFqan = new HashMap<String, Set<String>>();
-	private Map<String, Set<String>> cachedVersionsForUserPerFqan = new HashMap<String, Set<String>>();
 
+	private Map<String, Set<String>> cachedVersionsForUserPerFqan = new HashMap<String, Set<String>>();
 	/**
 	 * Default constructor for this class.
 	 * 
@@ -63,6 +56,46 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		this.resourceInfo = GrisuRegistryManager.getDefault(serviceInterface)
 				.getResourceInformation();
 		this.application = app;
+	}
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
+	 * getAllAvailableVersionsForFqan(java.lang.String)
+	 */
+	public final Set<String> getAllAvailableVersionsForFqan(final String fqan) {
+
+		if (cachedVersionsForUserPerFqan.get(fqan) == null) {
+			Set<String> result = new TreeSet<String>();
+			for (String subLoc : getAvailableSubmissionLocationsForFqan(fqan)) {
+				List<String> temp = serviceInterface
+						.getVersionsOfApplicationOnSubmissionLocation(
+								getApplicationName(), subLoc).getStringList();
+				result.addAll(temp);
+			}
+			cachedVersionsForUserPerFqan.put(fqan, result);
+		}
+		return cachedVersionsForUserPerFqan.get(fqan);
+	}
+
+	public SortedSet<GridResource> getAllSubmissionLocationsAsGridResources(
+			Map<JobSubmissionProperty, String> additionalJobProperties,
+			String fqan) {
+
+		Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
+		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
+				getApplicationName());
+
+		basicJobProperties.putAll(additionalJobProperties);
+
+		Map<String, String> converterMap = new HashMap<String, String>();
+		for (JobSubmissionProperty key : basicJobProperties.keySet()) {
+			converterMap.put(key.toString(), basicJobProperties.get(key));
+		}
+
+		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
+				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null),
+				fqan, false).wrapGridResourcesIntoInterfaceType();
 	}
 
 	/*
@@ -82,8 +115,8 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 						.put(KEY, new HashMap<String, String>());
 			} else {
 				Map<String, String> details = serviceInterface
-						.getApplicationDetailsForVersionAndSubmissionLocation(application,
-								version, subLoc).getDetailsAsMap();
+						.getApplicationDetailsForVersionAndSubmissionLocation(
+								application, version, subLoc).getDetailsAsMap();
 				cachedApplicationDetails.put(KEY, details);
 			}
 		}
@@ -98,49 +131,6 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	 */
 	public final String getApplicationName() {
 		return application;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.vpac.grisu.model.info.ApplicationInformation#getAvailableVersions
-	 * (java.lang.String)
-	 */
-	public final Set<String> getAvailableVersions(final String subLoc) {
-
-		final String KEY = subLoc;
-
-		if (cachedVersionsPerSubmissionLocations.get(KEY) == null) {
-			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
-				Set<String> temp = new HashSet<String>();
-				temp.add(Constants.NO_VERSION_INDICATOR_STRING);
-				cachedVersionsPerSubmissionLocations.put(KEY, temp);
-			} else {
-				List<String> temp = serviceInterface
-						.getVersionsOfApplicationOnSubmissionLocation(
-								application, subLoc).getStringList();
-				cachedVersionsPerSubmissionLocations.put(KEY,
-						new HashSet<String>(temp));
-			}
-		}
-		return cachedVersionsPerSubmissionLocations.get(KEY);
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.vpac.grisu.model.info.ApplicationInformation#getExecutables(java.
-	 * lang.String, java.lang.String)
-	 */
-	public final String[] getExecutables(final String subLoc,
-			final String version) {
-
-		return getApplicationDetails(subLoc, version).get(
-				Constants.MDS_EXECUTABLES_KEY).split(",");
-
 	}
 
 	/*
@@ -166,6 +156,28 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		}
 		return cachedAllSubmissionLocations;
 
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
+	 * getAvailableSubmissionLocationsForFqan(java.lang.String)
+	 */
+	public final Set<String> getAvailableSubmissionLocationsForFqan(
+			final String fqan) {
+
+		if (cachedSubmissionLocationsForUserPerFqan.get(fqan) == null) {
+			Set<String> temp = new HashSet<String>();
+			for (String subLoc : resourceInfo
+					.getAllAvailableSubmissionLocations(fqan)) {
+				if (getAvailableAllSubmissionLocations().contains(subLoc)) {
+					temp.add(subLoc);
+				}
+			}
+			cachedSubmissionLocationsForUserPerFqan.put(fqan, temp);
+		}
+		return cachedSubmissionLocationsForUserPerFqan.get(fqan);
 	}
 
 	/*
@@ -198,49 +210,6 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	 * (non-Javadoc)
 	 * 
 	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
-	 * getAllAvailableVersionsForFqan(java.lang.String)
-	 */
-	public final Set<String> getAllAvailableVersionsForFqan(final String fqan) {
-
-		if (cachedVersionsForUserPerFqan.get(fqan) == null) {
-			Set<String> result = new TreeSet<String>();
-			for (String subLoc : getAvailableSubmissionLocationsForFqan(fqan)) {
-				List<String> temp = serviceInterface
-						.getVersionsOfApplicationOnSubmissionLocation(
-								getApplicationName(), subLoc).getStringList();
-				result.addAll(temp);
-			}
-			cachedVersionsForUserPerFqan.put(fqan, result);
-		}
-		return cachedVersionsForUserPerFqan.get(fqan);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
-	 * getAvailableSubmissionLocationsForFqan(java.lang.String)
-	 */
-	public final Set<String> getAvailableSubmissionLocationsForFqan(
-			final String fqan) {
-
-		if (cachedSubmissionLocationsForUserPerFqan.get(fqan) == null) {
-			Set<String> temp = new HashSet<String>();
-			for (String subLoc : resourceInfo
-					.getAllAvailableSubmissionLocations(fqan)) {
-				if (getAvailableAllSubmissionLocations().contains(subLoc)) {
-					temp.add(subLoc);
-				}
-			}
-			cachedSubmissionLocationsForUserPerFqan.put(fqan, temp);
-		}
-		return cachedSubmissionLocationsForUserPerFqan.get(fqan);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
 	 * getAvailableSubmissionLocationsForVersionAndFqan(java.lang.String,
 	 * java.lang.String)
 	 */
@@ -262,7 +231,34 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		}
 		return cachedSubmissionLocationsForUserPerVersionAndFqan.get(KEY);
 	}
-	
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.vpac.grisu.model.info.ApplicationInformation#getAvailableVersions
+	 * (java.lang.String)
+	 */
+	public final Set<String> getAvailableVersions(final String subLoc) {
+
+		final String KEY = subLoc;
+
+		if (cachedVersionsPerSubmissionLocations.get(KEY) == null) {
+			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
+				Set<String> temp = new HashSet<String>();
+				temp.add(Constants.NO_VERSION_INDICATOR_STRING);
+				cachedVersionsPerSubmissionLocations.put(KEY, temp);
+			} else {
+				List<String> temp = serviceInterface
+						.getVersionsOfApplicationOnSubmissionLocation(
+								application, subLoc).getStringList();
+				cachedVersionsPerSubmissionLocations.put(KEY,
+						new HashSet<String>(temp));
+			}
+		}
+		return cachedVersionsPerSubmissionLocations.get(KEY);
+
+	}
 
 	public final SortedSet<GridResource> getBestSubmissionLocations(
 			final Map<JobSubmissionProperty, String> additionalJobProperties,
@@ -279,27 +275,32 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 			converterMap.put(key.toString(), basicJobProperties.get(key));
 		}
 
-		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null),
+		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
+				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null),
 				fqan, true).wrapGridResourcesIntoInterfaceType();
 	}
 
-	public SortedSet<GridResource> getAllSubmissionLocationsAsGridResources(
-			Map<JobSubmissionProperty, String> additionalJobProperties,
-			String fqan) {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.vpac.grisu.model.info.ApplicationInformation#getExecutables(java.
+	 * lang.String, java.lang.String)
+	 */
+	public final String[] getExecutables(final String subLoc,
+			final String version) {
 
-		Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
-		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
-				getApplicationName());
+		return getApplicationDetails(subLoc, version).get(
+				Constants.MDS_EXECUTABLES_KEY).split(",");
 
-		basicJobProperties.putAll(additionalJobProperties);
+	}
 
-		Map<String, String> converterMap = new HashMap<String, String>();
-		for (JobSubmissionProperty key : basicJobProperties.keySet()) {
-			converterMap.put(key.toString(), basicJobProperties.get(key));
-		}
+	public final ResourceInformation getResourceInfo() {
+		return resourceInfo;
+	}
 
-		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null),
-				fqan, false).wrapGridResourcesIntoInterfaceType();
+	public final ServiceInterface getServiceInterface() {
+		return serviceInterface;
 	}
 
 }

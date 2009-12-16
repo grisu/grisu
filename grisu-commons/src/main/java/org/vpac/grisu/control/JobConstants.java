@@ -8,31 +8,29 @@ package org.vpac.grisu.control;
  * 
  */
 public final class JobConstants {
-	
-	private JobConstants() {
-	}
 
 	public static final String REMOTE_FILE_TAGNAME = "File";
+
 	public static final String REMOTE_FOLDER_TAGNAME = "Directory";
 	public static final String LOCAL_FILE_TAGNAME = "File";
 	public static final String LOCAL_FOLDER_TAGNAME = "Folder";
 	public static final String LOCAL_DOCUMENTROOT_TAGNAME = "FileSystem";
-
 	// the DUMMY_START_STRING indicates to grisu that the element is not really
 	// filled,
 	// even when there is a value in the template elements text field
 	public static final String DUMMY_START_STRING = "dummy";
-	public static final String DUMMY_STAGE_FILE = "dummyfile";
 
+	public static final String DUMMY_STAGE_FILE = "dummyfile";
 	public static final int DONT_ACCEPT_NEW_JOB_WITH_EXISTING_JOBNAME = 0;
+
 	public static final int ALWAYS_INCREMENT_JOB_NAME = 1;
 	public static final int ONLY_INCREMENT_JOB_NAME_IF_JOB_EXISTS_WITH_SAME_NAME = 2;
 	public static final int ALWAYS_TIMESTAMP_JOB_NAME = 3;
 	public static final int ONLY_TIMESTAMP_JOB_NAME_IF_JOB_EXISTS_WITH_SAME_NAME = 3;
 	public static final int OVERWRITE_EXISTING_JOB = 10; // not recommended
-
 	// status
 	public static final int LOADING = -1002;
+
 	public static final int NOT_AVAILABLE = -1001;
 	public static final int UNDEFINED = -1000;
 	public static final int JOB_OBJECT_CREATED = -200;
@@ -51,8 +49,8 @@ public final class JobConstants {
 	public static final int KILLED = 998;
 	public static final int FAILED = 999;
 	public static final int DONE = 1000;
-
 	public static final String LOADING_STRING = "Loading...";
+
 	public static final String NOT_AVAILABLE_STRING = "n/a";
 	public static final String UNDEFINED_STRING = "Undefined";
 	public static final String NO_SUCH_JOB_STRING = "No such job";
@@ -71,7 +69,6 @@ public final class JobConstants {
 	public static final String JOB_OBJECT_CREATED_STRING = "Job object created";
 	public static final String INPUT_FILES_UPLOADING_STRING = "Uploading input files";
 	public static final String INPUT_FILES_UPLOADED_STRING = "Input files uploaded";
-
 	public static final String NO_DESCRIPTION_AVAILABLE = "No description available.";
 
 	public static String translateStatus(final int status_no) {
@@ -114,8 +111,8 @@ public final class JobConstants {
 		case INPUT_FILES_UPLOADED:
 			return INPUT_FILES_UPLOADED_STRING;
 		default:
-			if ( status_no > 1 && status_no <= 100 ) {
-				return ACTIVE_STRING + "("+status_no+" % finished)";
+			if (status_no > 1 && status_no <= 100) {
+				return ACTIVE_STRING + "(" + status_no + " % finished)";
 			}
 			break;
 		}
@@ -134,10 +131,11 @@ public final class JobConstants {
 		} else if (status != null && status.indexOf("(") >= 0) {
 			int start = status.indexOf("(") + 11;
 			int end = status.indexOf(")");
-			
-			if ( status.contains(ACTIVE_STRING) ) {
+
+			if (status.contains(ACTIVE_STRING)) {
 				// means running
-				String percentString = status.substring(start, status.indexOf(" %"));
+				String percentString = status.substring(start, status
+						.indexOf(" %"));
 				int percent = Integer.parseInt(percentString);
 				return percent;
 			} else {
@@ -183,6 +181,9 @@ public final class JobConstants {
 		}
 		return UNDEFINED;
 
+	}
+
+	private JobConstants() {
 	}
 
 }

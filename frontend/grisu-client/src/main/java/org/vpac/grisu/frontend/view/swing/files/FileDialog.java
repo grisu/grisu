@@ -14,30 +14,28 @@ import org.vpac.grisu.frontend.control.login.LoginParams;
 
 public class FileDialog extends JDialog {
 
-	private final JPanel contentPanel = new JPanel();
-
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
 		try {
-			
+
 			String username = args[0];
 			char[] password = args[1].toCharArray();
 
 			LoginParams loginParams = new LoginParams(
 			// "http://localhost:8080/grisu-ws/services/grisu",
-//					 "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-//					"http://localhost:8080/enunciate-backend/soap/GrisuService",
-			"Local", 
-//			"LOCAL_WS",
-			username, password);
-			
-			
+					// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
+					// "http://localhost:8080/enunciate-backend/soap/GrisuService",
+					"Local",
+					// "LOCAL_WS",
+					username, password);
+
 			ServiceInterface si = null;
-//			si = LoginManager.login(null, password, username, "VPAC", loginParams);
+			// si = LoginManager.login(null, password, username, "VPAC",
+			// loginParams);
 			si = LoginManager.login(null, null, null, null, loginParams);
-			
+
 			System.out.println("Creating dialog.");
 			FileDialog dialog = new FileDialog(si);
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -47,6 +45,8 @@ public class FileDialog extends JDialog {
 			e.printStackTrace();
 		}
 	}
+
+	private final JPanel contentPanel = new JPanel();
 
 	/**
 	 * Create the dialog.
@@ -58,7 +58,8 @@ public class FileDialog extends JDialog {
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new BorderLayout(0, 0));
 		{
-			FileListPanelPlus fileListPanel = new FileListPanelPlus(si, null, null);
+			FileListPanelPlus fileListPanel = new FileListPanelPlus(si, null,
+					null);
 			contentPanel.add(fileListPanel, BorderLayout.CENTER);
 		}
 		{

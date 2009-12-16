@@ -22,7 +22,7 @@ public class BatchJobPanel extends JPanel implements SingleJobSelectionListener 
 	private JSplitPane splitPane;
 	private SimpleSingleJobsGrid singleJobsGrid_1;
 	private JobDetailPanel jobDetailPanel;
-	
+
 	/**
 	 * Create the panel.
 	 */
@@ -32,15 +32,20 @@ public class BatchJobPanel extends JPanel implements SingleJobSelectionListener 
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-			new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getLabel(), "2, 2");
 		add(getSplitPane(), "2, 4, fill, fill");
+	}
+
+	private JobDetailPanel getJobDetailPanel() {
+		if (jobDetailPanel == null) {
+			jobDetailPanel = new JobDetailPanel();
+		}
+		return jobDetailPanel;
 	}
 
 	private JLabel getLabel() {
@@ -48,6 +53,14 @@ public class BatchJobPanel extends JPanel implements SingleJobSelectionListener 
 			label = new JLabel("New label");
 		}
 		return label;
+	}
+
+	private SimpleSingleJobsGrid getSingleJobsGrid_1() {
+		if (singleJobsGrid_1 == null) {
+			singleJobsGrid_1 = new SimpleSingleJobsGrid(si, batchJob.getJobs());
+			singleJobsGrid_1.addJobSelectionListener(this);
+		}
+		return singleJobsGrid_1;
 	}
 
 	private JSplitPane getSplitPane() {
@@ -58,23 +71,10 @@ public class BatchJobPanel extends JPanel implements SingleJobSelectionListener 
 		}
 		return splitPane;
 	}
-	private SimpleSingleJobsGrid getSingleJobsGrid_1() {
-		if (singleJobsGrid_1 == null) {
-			singleJobsGrid_1 = new SimpleSingleJobsGrid(si, batchJob.getJobs());
-			singleJobsGrid_1.addJobSelectionListener(this);
-		}
-		return singleJobsGrid_1;
-	}
-	private JobDetailPanel getJobDetailPanel() {
-		if (jobDetailPanel == null) {
-			jobDetailPanel = new JobDetailPanel();
-		}
-		return jobDetailPanel;
-	}
 
 	public void jobSelected(JobObject job) {
 
 		getJobDetailPanel().setJob(job);
-		
+
 	}
 }

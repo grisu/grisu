@@ -13,6 +13,7 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -32,9 +33,76 @@ import org.xml.sax.SAXException;
  * 
  */
 public final class SeveralXMLHelpers {
-	
-	private SeveralXMLHelpers() {
+
+	/**
+	 * Converts a xml element to a string.
+	 * 
+	 * @param element
+	 *            the element
+	 * @return the string
+	 */
+	private static String convertElementToString(final Element element) {
+
+		StringBuffer result = new StringBuffer();
+		String tagName = element.getTagName();
+		result.append("<" + tagName + " ");
+		NamedNodeMap attributes = element.getAttributes();
+		for (int i = 0; i < attributes.getLength(); i++) {
+			Node node = attributes.item(i);
+			Attr attr = (Attr) node;
+			result.append(attr.getName());
+			String value = attr.getValue();
+			result.append("=" + value + " ");
+		}
+		result.append(">\n");
+
+		NodeList childs = element.getChildNodes();
+		for (int i = 0; i < childs.getLength(); i++) {
+			Node node = childs.item(i);
+			Element child = (Element) node;
+			result.append(convertElementToString(child));
+		}
+		result.append("</" + tagName + ">\n");
+		return result.toString();
 	}
+
+	/**
+	 * Converts a xml element to a string.
+	 * 
+	 * @param element
+	 *            the element
+	 * @return the string
+	 */
+	public static String convertToString(final Element element) {
+
+		return convertElementToString(element);
+	}
+
+	// /**
+	// * This needs to be called if the cxf backend is used. It's a workaround
+	// for
+	// * the bug where cxf wraps a document parameter into return or arg0
+	// * elements.
+	// *
+	// * @param doc
+	// * the xml document
+	// * @param expectedElementName
+	// * the element name that you would expect for the first child
+	// * @return either a new xml document or the unchanged old one
+	// */
+	// public static Document cxfWorkaround(Document doc,
+	// final String expectedElementName) {
+	// Element element = (Element) doc.getFirstChild();
+	// if (!element.getTagName().equals(expectedElementName)) {
+	// try {
+	// doc = createDocumentFromElement((Element) element
+	// .getFirstChild());
+	// } catch (Exception e) {
+	// throw new RuntimeException("Could not parse jsdl document.", e);
+	// }
+	// }
+	// return doc;
+	// }
 
 	/**
 	 * Creates a new xml document from an xml element.
@@ -91,126 +159,6 @@ public final class SeveralXMLHelpers {
 
 	}
 
-//	/**
-//	 * This needs to be called if the cxf backend is used. It's a workaround for
-//	 * the bug where cxf wraps a document parameter into return or arg0
-//	 * elements.
-//	 * 
-//	 * @param doc
-//	 *            the xml document
-//	 * @param expectedElementName
-//	 *            the element name that you would expect for the first child
-//	 * @return either a new xml document or the unchanged old one
-//	 */
-//	public static Document cxfWorkaround(Document doc,
-//			final String expectedElementName) {
-//		Element element = (Element) doc.getFirstChild();
-//		if (!element.getTagName().equals(expectedElementName)) {
-//			try {
-//				doc = createDocumentFromElement((Element) element
-//						.getFirstChild());
-//			} catch (Exception e) {
-//				throw new RuntimeException("Could not parse jsdl document.", e);
-//			}
-//		}
-//		return doc;
-//	}
-
-	/**
-	 * Converts a xml element to a string.
-	 * 
-	 * @param element
-	 *            the element
-	 * @return the string
-	 */
-	private static String convertElementToString(final Element element) {
-
-		StringBuffer result = new StringBuffer();
-		String tagName = element.getTagName();
-		result.append("<" + tagName + " ");
-		NamedNodeMap attributes = element.getAttributes();
-		for (int i = 0; i < attributes.getLength(); i++) {
-			Node node = attributes.item(i);
-			Attr attr = (Attr) node;
-			result.append(attr.getName());
-			String value = attr.getValue();
-			result.append("=" + value + " ");
-		}
-		result.append(">\n");
-
-		NodeList childs = element.getChildNodes();
-		for (int i = 0; i < childs.getLength(); i++) {
-			Node node = childs.item(i);
-			Element child = (Element) node;
-			result.append(convertElementToString(child));
-		}
-		result.append("</" + tagName + ">\n");
-		return result.toString();
-	}
-
-	/**
-	 * Converts a xml element to a string.
-	 * 
-	 * @param element
-	 *            the element
-	 * @return the string
-	 */
-	public static String convertToString(final Element element) {
-
-		return convertElementToString(element);
-	}
-
-	/**
-	 * Converts a xml document to a string.
-	 * 
-	 * @param xml
-	 *            the xml document
-	 * @return the string
-	 * @throws TransformerFactoryConfigurationError xml error
-	 * @throws TransformerException xml error
-	 */
-	public static String toString(final Document xml){
-		
-		try {
-		// TODO use static transformer to reduce overhead?
-		Transformer transformer = TransformerFactory.newInstance()
-				.newTransformer();
-		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-
-		// initialize StreamResult with InputFile object to save to file
-		StreamResult result = new StreamResult(new StringWriter());
-		DOMSource source = new DOMSource(xml);
-		transformer.transform(source, result);
-
-		String jsdl_string = result.getWriter().toString();
-		return jsdl_string;
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	/**
-	 * Converts a xml document to a string. Surpresses exceptions.
-	 * 
-	 * @param xml
-	 *            the xml document
-	 * @return the string
-	 */
-	public static String toStringWithoutAnnoyingExceptions(final Document xml) {
-
-		String result;
-		try {
-			result = toString(xml);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			result = e.getLocalizedMessage();
-		}
-
-		return result;
-
-	}
-
 	/**
 	 * Creates a xml document from an input stream.
 	 * 
@@ -220,7 +168,8 @@ public final class SeveralXMLHelpers {
 	 * @throws Exception
 	 *             if the conversion fails
 	 */
-	public static Document fromInputStream(final InputStream input) throws Exception {
+	public static Document fromInputStream(final InputStream input)
+			throws Exception {
 		try {
 			final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
 			final String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
@@ -348,5 +297,61 @@ public final class SeveralXMLHelpers {
 		}
 
 		return jsdl;
+	}
+
+	/**
+	 * Converts a xml document to a string.
+	 * 
+	 * @param xml
+	 *            the xml document
+	 * @return the string
+	 * @throws TransformerFactoryConfigurationError
+	 *             xml error
+	 * @throws TransformerException
+	 *             xml error
+	 */
+	public static String toString(final Document xml) {
+
+		try {
+			// TODO use static transformer to reduce overhead?
+			Transformer transformer = TransformerFactory.newInstance()
+					.newTransformer();
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+
+			// initialize StreamResult with InputFile object to save to file
+			StreamResult result = new StreamResult(new StringWriter());
+			DOMSource source = new DOMSource(xml);
+			transformer.transform(source, result);
+
+			String jsdl_string = result.getWriter().toString();
+			return jsdl_string;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Converts a xml document to a string. Surpresses exceptions.
+	 * 
+	 * @param xml
+	 *            the xml document
+	 * @return the string
+	 */
+	public static String toStringWithoutAnnoyingExceptions(final Document xml) {
+
+		String result;
+		try {
+			result = toString(xml);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			result = e.getLocalizedMessage();
+		}
+
+		return result;
+
+	}
+
+	private SeveralXMLHelpers() {
 	}
 }

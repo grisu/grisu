@@ -21,6 +21,15 @@ public class StatusObject {
 
 	private DtoActionStatus lastStatus;
 
+	public StatusObject(ServiceInterface si, String handle) {
+		this(si, handle, new HashSet<Listener>());
+	}
+
+	public StatusObject(ServiceInterface si, String handle, Listener l) {
+		this(si, handle, new HashSet<Listener>());
+		addListener(l);
+	}
+
 	public StatusObject(ServiceInterface si, String handle,
 			Set<Listener> listeners) {
 		this.si = si;
@@ -32,11 +41,6 @@ public class StatusObject {
 				addListener(l);
 			}
 		}
-	}
-
-	public StatusObject(ServiceInterface si, String handle, Listener l) {
-		this(si, handle, new HashSet<Listener>());
-		addListener(l);
 	}
 
 	public void addListener(Listener l) {
@@ -51,10 +55,6 @@ public class StatusObject {
 
 	}
 
-	public StatusObject(ServiceInterface si, String handle) {
-		this(si, handle, new HashSet<Listener>());
-	}
-
 	public DtoActionStatus getStatus() {
 
 		lastStatus = si.getActionStatus(handle);
@@ -62,16 +62,20 @@ public class StatusObject {
 	}
 
 	public void waitForActionToFinish(int recheckIntervalInSeconds,
-			boolean exitIfFailed, boolean sendStatusEvent) throws InterruptedException {
-		waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed, sendStatusEvent, null);
+			boolean exitIfFailed, boolean sendStatusEvent)
+			throws InterruptedException {
+		waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed,
+				sendStatusEvent, null);
 	}
-	
+
 	public void waitForActionToFinish(int recheckIntervalInSeconds,
-				boolean exitIfFailed, boolean sendStatusEvent, String statusMessagePrefix) throws InterruptedException {
+			boolean exitIfFailed, boolean sendStatusEvent,
+			String statusMessagePrefix) throws InterruptedException {
 
 		while (!(lastStatus = si.getActionStatus(handle)).isFinished()) {
 			if (sendStatusEvent) {
-				EventBus.publish(handle, new ActionStatusEvent(lastStatus, "Submissionstatus: "));
+				EventBus.publish(handle, new ActionStatusEvent(lastStatus,
+						"Submissionstatus: "));
 			}
 
 			if (exitIfFailed) {
@@ -79,9 +83,11 @@ public class StatusObject {
 					return;
 				}
 			}
-			
-			if ( Thread.interrupted() ) {
-				throw new InterruptedException("Interrupted while waiting for action "+handle+" to finish on backend.");
+
+			if (Thread.interrupted()) {
+				throw new InterruptedException(
+						"Interrupted while waiting for action " + handle
+								+ " to finish on backend.");
 			}
 
 			try {

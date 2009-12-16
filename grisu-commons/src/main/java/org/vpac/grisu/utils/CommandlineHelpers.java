@@ -11,9 +11,6 @@ import java.util.ArrayList;
  */
 public final class CommandlineHelpers {
 
-	private CommandlineHelpers() {
-	}
-
 	/**
 	 * Returns the list of arguments for the specified commandline.
 	 * 
@@ -101,6 +98,9 @@ public final class CommandlineHelpers {
 			}
 		}
 		return strings;
+	}
+
+	private CommandlineHelpers() {
 	}
 
 }

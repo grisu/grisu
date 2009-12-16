@@ -11,13 +11,13 @@ public class FileUploadException extends Exception {
 		// TODO Auto-generated constructor stub
 	}
 
-	public FileUploadException(Throwable cause) {
-		super(cause);
+	public FileUploadException(String message, Throwable cause) {
+		super(message, cause);
 		// TODO Auto-generated constructor stub
 	}
 
-	public FileUploadException(String message, Throwable cause) {
-		super(message, cause);
+	public FileUploadException(Throwable cause) {
+		super(cause);
 		// TODO Auto-generated constructor stub
 	}
 

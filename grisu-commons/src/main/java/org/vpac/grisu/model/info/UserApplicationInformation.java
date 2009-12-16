@@ -1,13 +1,8 @@
 package org.vpac.grisu.model.info;
 
-import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 
 import org.vpac.grisu.model.UserEnvironmentManager;
-
-import au.org.arcs.jcommons.constants.JobSubmissionProperty;
-import au.org.arcs.jcommons.interfaces.GridResource;
 
 /**
  * This class contains information from {@link ApplicationInformation} and
@@ -24,6 +19,13 @@ import au.org.arcs.jcommons.interfaces.GridResource;
 public interface UserApplicationInformation extends ApplicationInformation {
 
 	/**
+	 * Calculates all the sites where this application is available to the user.
+	 * 
+	 * @return all sites
+	 */
+	Set<String> getAllAvailableSitesForUser();
+
+	/**
 	 * Calculates all the submissionlocations for this applications that are
 	 * available to the user regardless of version and fqan used to submit a
 	 * job.
@@ -31,13 +33,6 @@ public interface UserApplicationInformation extends ApplicationInformation {
 	 * @return all submissionlocations
 	 */
 	Set<String> getAllAvailableSubmissionLocationsForUser();
-
-	/**
-	 * Calculates all the sites where this application is available to the user.
-	 * 
-	 * @return all sites
-	 */
-	Set<String> getAllAvailableSitesForUser();
 
 	/**
 	 * Calculates all versions for this application that are availabe for the

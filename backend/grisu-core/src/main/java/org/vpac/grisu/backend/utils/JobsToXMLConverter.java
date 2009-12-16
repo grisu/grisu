@@ -24,43 +24,43 @@ import au.org.arcs.jcommons.constants.Constants;
  * 
  */
 public final class JobsToXMLConverter {
-	
-	private JobsToXMLConverter() {
-	}
 
 	private static DocumentBuilder docBuilder = null;
 
-	private static DocumentBuilder getDocumentBuilder() {
+	public static Element createJobElement(final Document doc, final Job job) {
 
-		if (docBuilder == null) {
-			try {
-				DocumentBuilderFactory docFactory = DocumentBuilderFactory
-						.newInstance();
-				docBuilder = docFactory.newDocumentBuilder();
-			} catch (ParserConfigurationException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				return null;
-			}
-		}
-		return docBuilder;
+		Element jobElement = doc.createElement("job");
 
-	}
+		Attr jobname = doc.createAttribute("jobname");
+		jobname.setValue(job.getJobname());
+		jobElement.setAttributeNode(jobname);
 
-	public static Document getJobsInformation(final List<Job> jobs) {
+		Attr status = doc.createAttribute("status");
+		status.setValue(new Integer(job.getStatus()).toString());
+		jobElement.setAttributeNode(status);
 
-		Document output = null;
-
-		output = getDocumentBuilder().newDocument();
-
-		Element root = output.createElement("jobs");
-		output.appendChild(root);
-
-		for (Job job : jobs) {
-			root.appendChild(createJobElementNew(output, job));
+		String host = job.getJobProperty(Constants.SUBMISSION_HOST_KEY);
+		if (host != null && !"".equals(host)) {
+			Attr host_attr = doc.createAttribute("host");
+			host_attr.setValue(host);
+			jobElement.setAttributeNode(host_attr);
 		}
 
-		return output;
+		String fqan = job.getFqan();
+		if (fqan != null && !"".equals(fqan)) {
+			Attr fqan_attr = doc.createAttribute("fqan");
+			fqan_attr.setValue(fqan);
+			jobElement.setAttributeNode(fqan_attr);
+		}
+
+		String submissionTime = job.getJobProperty("submissionTime");
+		if (submissionTime != null && !"".equals(submissionTime)) {
+			Attr submissionTime_attr = doc.createAttribute("submissionTime");
+			submissionTime_attr.setValue(submissionTime);
+			jobElement.setAttributeNode(submissionTime_attr);
+		}
+
+		return jobElement;
 	}
 
 	public static Element createJobElementNew(final Document doc, final Job job) {
@@ -98,42 +98,6 @@ public final class JobsToXMLConverter {
 
 		return jobElement;
 
-	}
-
-	public static Element createJobElement(final Document doc, final Job job) {
-
-		Element jobElement = doc.createElement("job");
-
-		Attr jobname = doc.createAttribute("jobname");
-		jobname.setValue(job.getJobname());
-		jobElement.setAttributeNode(jobname);
-
-		Attr status = doc.createAttribute("status");
-		status.setValue(new Integer(job.getStatus()).toString());
-		jobElement.setAttributeNode(status);
-
-		String host = job.getJobProperty(Constants.SUBMISSION_HOST_KEY);
-		if (host != null && !"".equals(host)) {
-			Attr host_attr = doc.createAttribute("host");
-			host_attr.setValue(host);
-			jobElement.setAttributeNode(host_attr);
-		}
-
-		String fqan = job.getFqan();
-		if (fqan != null && !"".equals(fqan)) {
-			Attr fqan_attr = doc.createAttribute("fqan");
-			fqan_attr.setValue(fqan);
-			jobElement.setAttributeNode(fqan_attr);
-		}
-
-		String submissionTime = job.getJobProperty("submissionTime");
-		if (submissionTime != null && !"".equals(submissionTime)) {
-			Attr submissionTime_attr = doc.createAttribute("submissionTime");
-			submissionTime_attr.setValue(submissionTime);
-			jobElement.setAttributeNode(submissionTime_attr);
-		}
-
-		return jobElement;
 	}
 
 	public static Document getDetailedJobInformation(final Job job) {
@@ -185,7 +149,8 @@ public final class JobsToXMLConverter {
 		}
 
 		Element files = doc.createElement("files");
-		files.setAttribute("job_directory", job.getJobProperty(Constants.JOBDIRECTORY_KEY));
+		files.setAttribute("job_directory", job
+				.getJobProperty(Constants.JOBDIRECTORY_KEY));
 		root.appendChild(files);
 
 		Element stdout = doc.createElement("file");
@@ -218,5 +183,41 @@ public final class JobsToXMLConverter {
 		descriptions.appendChild(rsl);
 
 		return doc;
+	}
+
+	private static DocumentBuilder getDocumentBuilder() {
+
+		if (docBuilder == null) {
+			try {
+				DocumentBuilderFactory docFactory = DocumentBuilderFactory
+						.newInstance();
+				docBuilder = docFactory.newDocumentBuilder();
+			} catch (ParserConfigurationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				return null;
+			}
+		}
+		return docBuilder;
+
+	}
+
+	public static Document getJobsInformation(final List<Job> jobs) {
+
+		Document output = null;
+
+		output = getDocumentBuilder().newDocument();
+
+		Element root = output.createElement("jobs");
+		output.appendChild(root);
+
+		for (Job job : jobs) {
+			root.appendChild(createJobElementNew(output, job));
+		}
+
+		return output;
+	}
+
+	private JobsToXMLConverter() {
 	}
 }

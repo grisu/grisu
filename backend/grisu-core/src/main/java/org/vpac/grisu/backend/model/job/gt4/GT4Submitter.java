@@ -34,10 +34,8 @@ import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.backend.model.job.JobSubmitter;
 import org.vpac.grisu.control.JobConstants;
-import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.info.CachedMdsInformationManager;
-import org.vpac.grisu.settings.ClientPropertiesManager;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.utils.DebugUtils;
@@ -63,9 +61,89 @@ public class GT4Submitter extends JobSubmitter {
 	static final Logger myLogger = Logger.getLogger(GT4Submitter.class
 			.getName());
 
+	private static EndpointReferenceType getFactoryEPR(final String contact,
+			final String factoryType) throws Exception {
+		URL factoryUrl = ManagedJobFactoryClientHelper.getServiceURL(contact)
+				.getURL();
+
+		myLogger.debug("Factory Url: " + factoryUrl);
+		return ManagedJobFactoryClientHelper.getFactoryEndpoint(factoryUrl,
+				factoryType);
+	}
+
 	private InformationManager informationManager = CachedMdsInformationManager
 			.getDefaultCachedMdsInformationManager(Environment
 					.getGrisuDirectory().toString());
+
+	// // this method is just for testing. Do not use!!!
+	// protected String submit(String host, String factoryType, Document jsdl,
+	// GSSCredential credential) {
+	//		
+	// JobDescriptionType jobDesc = null;
+	// String submittedJobDesc = null;
+	// try {
+	// submittedJobDesc = createJobSubmissionDescription(jsdl);
+	// jobDesc = RSLHelper.readRSL(submittedJobDesc);
+	//
+	// } catch (RSLParseException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// return null;
+	// }
+	//		
+	// /*
+	// * Job test parameters (adjust to your needs)
+	// */
+	// // remote host
+	// //String contact = "ng2.vpac.org";
+	//		
+	// // Factory type: Fork, Condor, PBS, LSF
+	// //String factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.FORK;
+	// // String factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
+	//		
+	// // Deafult Security: Host authorization + XML encryption
+	// Authorization authz = HostAuthorization.getInstance();
+	// Integer xmlSecurity = Constants.ENCRYPTION;
+	//		
+	// // Submission mode: batch = will not wait
+	// boolean batchMode = true;
+	//		
+	// // a Simple command executable (if no job file)
+	// String simpleJobCommandLine = null;
+	//		
+	// // Job timeout values: duration, termination times
+	// Date serviceDuration = null;
+	// Date serviceTermination = null;
+	// int timeout = GramJob.DEFAULT_TIMEOUT;
+	//		
+	// String handle = null;
+	// try {
+	//			
+	// if ( credential == null || credential.getRemainingLifetime() < 1 ) {
+	// throw new NoValidCredentialException("Credential is not valid.");
+	// }
+	//			
+	// GramClient gram = new GramClient(credential);
+	//
+	// handle = gram.submitRSL(getFactoryEPR(host,factoryType)
+	// , simpleJobCommandLine, jobDesc
+	// , authz, xmlSecurity
+	// , batchMode, false, false
+	// , serviceDuration, serviceTermination, timeout );
+	//			
+	// } catch (Exception e) {
+	// //TODO handle that
+	// e.printStackTrace();
+	// }
+	//		
+	// //job.setSubmittedJobDescription(submittedJobDesc);
+	//		
+	// myLogger.debug("Submitted rsl job
+	// description:\n--------------------------------");
+	// myLogger.debug(submittedJobDesc);
+	//
+	// return handle;
+	// }
 
 	/*
 	 * (non-Javadoc)
@@ -391,75 +469,61 @@ public class GT4Submitter extends JobSubmitter {
 		return result.getWriter().toString();
 	}
 
-	// // this method is just for testing. Do not use!!!
-	// protected String submit(String host, String factoryType, Document jsdl,
-	// GSSCredential credential) {
-	//		
-	// JobDescriptionType jobDesc = null;
-	// String submittedJobDesc = null;
-	// try {
-	// submittedJobDesc = createJobSubmissionDescription(jsdl);
-	// jobDesc = RSLHelper.readRSL(submittedJobDesc);
-	//
-	// } catch (RSLParseException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// return null;
-	// }
-	//		
-	// /*
-	// * Job test parameters (adjust to your needs)
-	// */
-	// // remote host
-	// //String contact = "ng2.vpac.org";
-	//		
-	// // Factory type: Fork, Condor, PBS, LSF
-	// //String factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.FORK;
-	// // String factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
-	//		
-	// // Deafult Security: Host authorization + XML encryption
-	// Authorization authz = HostAuthorization.getInstance();
-	// Integer xmlSecurity = Constants.ENCRYPTION;
-	//		
-	// // Submission mode: batch = will not wait
-	// boolean batchMode = true;
-	//		
-	// // a Simple command executable (if no job file)
-	// String simpleJobCommandLine = null;
-	//		
-	// // Job timeout values: duration, termination times
-	// Date serviceDuration = null;
-	// Date serviceTermination = null;
-	// int timeout = GramJob.DEFAULT_TIMEOUT;
-	//		
-	// String handle = null;
-	// try {
-	//			
-	// if ( credential == null || credential.getRemainingLifetime() < 1 ) {
-	// throw new NoValidCredentialException("Credential is not valid.");
-	// }
-	//			
-	// GramClient gram = new GramClient(credential);
-	//
-	// handle = gram.submitRSL(getFactoryEPR(host,factoryType)
-	// , simpleJobCommandLine, jobDesc
-	// , authz, xmlSecurity
-	// , batchMode, false, false
-	// , serviceDuration, serviceTermination, timeout );
-	//			
-	// } catch (Exception e) {
-	// //TODO handle that
-	// e.printStackTrace();
-	// }
-	//		
-	// //job.setSubmittedJobDescription(submittedJobDesc);
-	//		
-	// myLogger.debug("Submitted rsl job
-	// description:\n--------------------------------");
-	// myLogger.debug(submittedJobDesc);
-	//
-	// return handle;
-	// }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.vpac.grisu.js.control.job.JobSubmitter#getJobStatus(java.lang.String,
+	 * org.vpac.grisu.credential.model.ProxyCredential)
+	 */
+	public final int getJobStatus(final String endPointReference,
+			final ProxyCredential cred) {
+
+		String status = null;
+		int grisu_status = Integer.MIN_VALUE;
+		status = GramClient.getJobStatus(endPointReference, cred
+				.getGssCredential());
+
+		grisu_status = translateToGrisuStatus(status);
+
+		return grisu_status;
+	}
+
+	@Override
+	public final String getServerEndpoint(final String server) {
+		return "https://" + server
+				+ ":8443/wsrf/services/ManagedJobFactoryService";
+
+	}
+
+	private final int killJob(final String endpoint, final GSSCredential cred) {
+
+		String status = null;
+		int grisu_status = Integer.MIN_VALUE;
+		status = GramClient.destroyJob(endpoint, cred);
+
+		grisu_status = translateToGrisuStatus(status);
+
+		if (grisu_status == JobConstants.NO_SUCH_JOB) {
+			return JobConstants.KILLED;
+		}
+
+		return grisu_status;
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.vpac.grisu.js.control.job.JobSubmitter#killJob(java.lang.String,
+	 * org.vpac.grisu.credential.model.ProxyCredential)
+	 */
+	public final int killJob(final String endPointReference,
+			final ProxyCredential cred) {
+
+		return killJob(endPointReference, cred.getGssCredential());
+
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -626,23 +690,6 @@ public class GT4Submitter extends JobSubmitter {
 
 	}
 
-	private static EndpointReferenceType getFactoryEPR(final String contact,
-			final String factoryType) throws Exception {
-		URL factoryUrl = ManagedJobFactoryClientHelper.getServiceURL(contact)
-				.getURL();
-
-		myLogger.debug("Factory Url: " + factoryUrl);
-		return ManagedJobFactoryClientHelper.getFactoryEndpoint(factoryUrl,
-				factoryType);
-	}
-
-	@Override
-	public final String getServerEndpoint(final String server) {
-		return "https://" + server
-				+ ":8443/wsrf/services/ManagedJobFactoryService";
-
-	}
-
 	private int translateToGrisuStatus(final String status) {
 
 		int grisu_status = Integer.MIN_VALUE;
@@ -669,55 +716,6 @@ public class GT4Submitter extends JobSubmitter {
 			grisu_status = Integer.MAX_VALUE;
 		}
 		return grisu_status;
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.vpac.grisu.js.control.job.JobSubmitter#getJobStatus(java.lang.String,
-	 * org.vpac.grisu.credential.model.ProxyCredential)
-	 */
-	public final int getJobStatus(final String endPointReference,
-			final ProxyCredential cred) {
-
-		String status = null;
-		int grisu_status = Integer.MIN_VALUE;
-		status = GramClient.getJobStatus(endPointReference, cred
-				.getGssCredential());
-
-		grisu_status = translateToGrisuStatus(status);
-
-		return grisu_status;
-	}
-
-	private final int killJob(final String endpoint, final GSSCredential cred) {
-
-		String status = null;
-		int grisu_status = Integer.MIN_VALUE;
-		status = GramClient.destroyJob(endpoint, cred);
-
-		grisu_status = translateToGrisuStatus(status);
-
-		if (grisu_status == JobConstants.NO_SUCH_JOB) {
-			return JobConstants.KILLED;
-		}
-
-		return grisu_status;
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.vpac.grisu.js.control.job.JobSubmitter#killJob(java.lang.String,
-	 * org.vpac.grisu.credential.model.ProxyCredential)
-	 */
-	public final int killJob(final String endPointReference,
-			final ProxyCredential cred) {
-
-		return killJob(endPointReference, cred.getGssCredential());
 
 	}
 

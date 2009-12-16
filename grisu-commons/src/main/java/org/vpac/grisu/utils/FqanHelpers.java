@@ -7,22 +7,6 @@ package org.vpac.grisu.utils;
  * 
  */
 public final class FqanHelpers {
-	
-	private FqanHelpers() {
-	}
-
-	/**
-	 * Parses a fqan for the last part of the group (/APACGrid/NGAdmin would
-	 * return NGAdmin).
-	 * 
-	 * @param fqan
-	 *            the fqan
-	 * @return the name of the last subgroup
-	 */
-	public static String getLastGroupPart(final String fqan) {
-		String group = getGroupPart(fqan);
-		return group.substring(group.lastIndexOf("/") + 1);
-	}
 
 	/**
 	 * Parses a fqan for the group.
@@ -47,6 +31,19 @@ public final class FqanHelpers {
 	}
 
 	/**
+	 * Parses a fqan for the last part of the group (/APACGrid/NGAdmin would
+	 * return NGAdmin).
+	 * 
+	 * @param fqan
+	 *            the fqan
+	 * @return the name of the last subgroup
+	 */
+	public static String getLastGroupPart(final String fqan) {
+		String group = getGroupPart(fqan);
+		return group.substring(group.lastIndexOf("/") + 1);
+	}
+
+	/**
 	 * Parses the fqan for the role part.
 	 * 
 	 * @param fqan
@@ -63,6 +60,9 @@ public final class FqanHelpers {
 			return null;
 		}
 		return role;
+	}
+
+	private FqanHelpers() {
 	}
 
 }

@@ -32,7 +32,7 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 	public ServiceInterface create(String interfaceUrl, String username,
 			char[] password, String myProxyServer, String myProxyPort,
 			Object[] otherOptions) throws ServiceInterfaceException {
-		
+
 		String httpProxy = null;
 		int httpProxyPort = -1;
 		String httpProxyUsername = null;
@@ -124,11 +124,11 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 			Protocol.registerProtocol("https", protocol);
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
-//			e1.printStackTrace();
+			// e1.printStackTrace();
 			throw new ServiceInterfaceException(
-					"Unspecified error while trying to establish secure connection.", e1);
+					"Unspecified error while trying to establish secure connection.",
+					e1);
 		}
-		
 
 		Class xfireServiceInterfaceClass = null;
 
@@ -137,7 +137,7 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 					.forName("org.vpac.grisu.control.impl.EnunciateServiceInterfaceImpl");
 		} catch (ClassNotFoundException e) {
 			myLogger.warn("Could not find xfire service interface class.");
-//			e.printStackTrace();
+			// e.printStackTrace();
 			throw new ServiceInterfaceException(
 					"Could not find XfireServiceInterface class. Probably grisu-client-xfire is not in the classpath.",
 					e);
@@ -147,34 +147,38 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 		Class interfaceClass = null;
 		try {
 			Constructor xfireServiceInterfaceConstructor;
-			interfaceClass = Class.forName("org.vpac.grisu.control.EnunciateServiceInterface");
+			interfaceClass = Class
+					.forName("org.vpac.grisu.control.EnunciateServiceInterface");
 
-			
 			xfireServiceInterfaceConstructor = xfireServiceInterfaceClass
 					.getConstructor(String.class);
 
-			xfireServiceInterface = (ServiceInterface)xfireServiceInterfaceConstructor
+			xfireServiceInterface = (ServiceInterface) xfireServiceInterfaceConstructor
 					.newInstance(interfaceUrl);
 
 			Method setAuthMethod = xfireServiceInterface.getClass().getMethod(
 					"setHttpAuthCredentials", String.class, String.class);
-			
-			setAuthMethod.invoke(xfireServiceInterface, username, new String(password));
-			
+
+			setAuthMethod.invoke(xfireServiceInterface, username, new String(
+					password));
+
 			Method setMTOMEnabled = xfireServiceInterface.getClass().getMethod(
 					"setMTOMEnabled", boolean.class);
-			
-			setMTOMEnabled.invoke(xfireServiceInterface, true);
-			
-			Method getXfireClient = xfireServiceInterface.getClass().getMethod("getXFireClient");
-			Object xfireClient = getXfireClient.invoke(xfireServiceInterface);
-			
-			Method setPropertyMethod = xfireClient.getClass().getMethod("setProperty", String.class, Object.class);
-			setPropertyMethod.invoke(xfireClient, "urn:xfire:transport:http:chunking-enabled", "true");
-			
-			Long timeout = ClientPropertiesManager.getConnectionTimeoutInMS();
-			setPropertyMethod.invoke(xfireClient, "http.timeout", timeout.toString());
 
+			setMTOMEnabled.invoke(xfireServiceInterface, true);
+
+			Method getXfireClient = xfireServiceInterface.getClass().getMethod(
+					"getXFireClient");
+			Object xfireClient = getXfireClient.invoke(xfireServiceInterface);
+
+			Method setPropertyMethod = xfireClient.getClass().getMethod(
+					"setProperty", String.class, Object.class);
+			setPropertyMethod.invoke(xfireClient,
+					"urn:xfire:transport:http:chunking-enabled", "true");
+
+			Long timeout = ClientPropertiesManager.getConnectionTimeoutInMS();
+			setPropertyMethod.invoke(xfireClient, "http.timeout", timeout
+					.toString());
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -183,7 +187,7 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 					"Could not create XfireServiceInterface: "
 							+ e.getLocalizedMessage(), e);
 		}
-		
+
 		return xfireServiceInterface;
 
 	}

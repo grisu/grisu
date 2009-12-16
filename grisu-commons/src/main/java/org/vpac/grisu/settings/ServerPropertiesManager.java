@@ -14,14 +14,12 @@ import org.apache.log4j.Logger;
  * 
  */
 public final class ServerPropertiesManager {
-	
-	private ServerPropertiesManager() {
-	}
 
 	/**
 	 * Default myproxy lifetime: 3600 seconds.
 	 */
 	public static final int DEFAULT_MYPROXY_LIFETIME_IN_SECONDS = 3600;
+
 	/**
 	 * Default minimum myproxy lifetime before it gets refreshed: 600 seconds.
 	 */
@@ -31,46 +29,202 @@ public final class ServerPropertiesManager {
 	 */
 	public static final int DEFAULT_CONCURRENT_JOB_STATUS_THREADS_PER_USER = 2;
 	/**
-	 * Default concurrent threads when submitting the parts of a multipartjob: 5 
+	 * Default concurrent threads when submitting the parts of a multipartjob: 5
 	 */
 	public static final int DEFAULT_CONCURRENT_JOB_SUBMISSION_THREADS_PER_USER = 2;
-	
 	public static final int DEFAULT_CONCURRENT_FILE_TRANSFER_THREADS_PER_USER = 5;
+
 	/**
 	 * Default directory name used as parent for the jobdirectories.
 	 */
 	public static final String DEFAULT_JOB_DIR_NAME = "grisu-dir";
-	
-	public static final int DEFAULT_TIME_INBETWEEN_STATUS_CHECKS_FOR_THE_SAME_JOB_IN_SECONDS = 60; 
-	
-//	public static final String DEFAULT_MULTIPARTJOB_DIR_NAME = "grisu-multijob-dir";
+	public static final int DEFAULT_TIME_INBETWEEN_STATUS_CHECKS_FOR_THE_SAME_JOB_IN_SECONDS = 60;
 
 	private static PropertiesConfiguration config = null;
 
+	// public static final String DEFAULT_MULTIPARTJOB_DIR_NAME =
+	// "grisu-multijob-dir";
+
 	static final Logger myLogger = Logger
 			.getLogger(ServerPropertiesManager.class.getName());
-	
+
 	private static final int DEFAULT_CONCURRENT_JOB_SUBMISSION_RETRIES = 5;
-	
+
 	private static final boolean DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS = false;
+
 	private static final int DEFAULT_FILE_TRANSFER_RETRIES = 3;
 	private static final int DEFAULT_TIME_BETWEEN_FILE_TRANSFER_RETRIES_IN_SECONDS = 1;
-	
-	/**
-	 * Retrieves the configuration parameters from the properties file.
-	 * 
-	 * @return the configuration
-	 * @throws ConfigurationException
-	 *             if the file could not be read/parsed
-	 */
-	public static PropertiesConfiguration getServerConfiguration()
-			throws ConfigurationException {
-		if (config == null) {
-			File grisuDir = Environment.getGrisuDirectory();
-			config = new PropertiesConfiguration(new File(grisuDir,
-					"grisu-server.config"));
+	public static boolean getCheckConnectionToMountPoint() {
+
+		boolean check = false;
+
+		try {
+			try {
+				check = getServerConfiguration().getBoolean(
+						"checkConnectionToMountPoints");
+			} catch (NoSuchElementException e) {
+				// doesn't matter
+				myLogger.debug(e);
+				return DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS;
+			}
+
+		} catch (ConfigurationException e) {
+			return DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS;
 		}
-		return config;
+		return check;
+	}
+
+	public static int getConcurrentFileTransfersPerUser() {
+
+		int retries = -1;
+		try {
+			retries = Integer.parseInt(getServerConfiguration().getString(
+					"concurrentFileTransfersPerUser"));
+
+		} catch (Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_CONCURRENT_FILE_TRANSFER_THREADS_PER_USER;
+		}
+		if (retries == -1) {
+			return DEFAULT_CONCURRENT_FILE_TRANSFER_THREADS_PER_USER;
+		}
+		return retries;
+
+	}
+
+	/**
+	 * Returns the number of concurrent threads that are querying job status per
+	 * user.
+	 * 
+	 * @return the number of concurrent threads
+	 */
+	public static int getConcurrentJobStatusThreadsPerUser() {
+		int concurrentThreads = -1;
+		try {
+			concurrentThreads = Integer.parseInt(getServerConfiguration()
+					.getString("concurrentJobStatusThreads"));
+
+		} catch (Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_CONCURRENT_JOB_STATUS_THREADS_PER_USER;
+		}
+		if (concurrentThreads == -1) {
+			return DEFAULT_CONCURRENT_JOB_STATUS_THREADS_PER_USER;
+		}
+		return concurrentThreads;
+	}
+
+	/**
+	 * Returns the number of concurrent threads that are submitting (multi-)jobs
+	 * status per user.
+	 * 
+	 * @return the number of concurrent threads
+	 */
+	public static int getConcurrentMultiPartJobSubmitThreadsPerUser() {
+		int concurrentThreads = -1;
+		try {
+			concurrentThreads = Integer.parseInt(getServerConfiguration()
+					.getString("concurrentMultiPartJobSubmitThreads"));
+
+		} catch (Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_CONCURRENT_JOB_SUBMISSION_THREADS_PER_USER;
+		}
+		if (concurrentThreads == -1) {
+			return DEFAULT_CONCURRENT_JOB_SUBMISSION_THREADS_PER_USER;
+		}
+		return concurrentThreads;
+	}
+
+	/**
+	 * The url to connect to the database.
+	 * 
+	 * @return the url
+	 */
+	public static String getDatabaseConnectionUrl() {
+		String dbUrl;
+		try {
+			dbUrl = getServerConfiguration().getString("databaseConnectionUrl");
+			return dbUrl;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	// /**
+	// * Returns the name of the directory in which grisu jobs are located
+	// * remotely.
+	// *
+	// * @return the name of the direcotory in which grisu stores jobs or null
+	// if
+	// * the jobs should be stored in the root home directory.
+	// */
+	// public static String getGrisuMultiPartJobDirectoryName() {
+	//
+	// String jobDirName = null;
+	// try {
+	// jobDirName = getServerConfiguration().getString("multiPartJobDirName");
+	//
+	// if ("none".equals(jobDirName.toLowerCase())) {
+	// jobDirName = null;
+	// }
+	//
+	// } catch (Exception e) {
+	// jobDirName = null;
+	// }
+	//
+	// if (jobDirName == null) {
+	// jobDirName = DEFAULT_MULTIPARTJOB_DIR_NAME;
+	// }
+	//
+	// return jobDirName;
+	// }
+
+	/**
+	 * The database password.
+	 * 
+	 * @return the password
+	 */
+	public static String getDatabasePassword() {
+		String dbPassword;
+		try {
+			dbPassword = getServerConfiguration().getString("databasePassword");
+			return dbPassword;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Returns the type of database that should be used. At the moment hsqldb
+	 * and mysql are supported.
+	 * 
+	 * @return the db type
+	 */
+	public static String getDatabaseType() {
+
+		String dbType;
+		try {
+			dbType = getServerConfiguration().getString("databaseType");
+			return dbType;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Returns the database username.
+	 * 
+	 * @return the db username
+	 */
+	public static String getDatabaseUsername() {
+		String dbUsername;
+		try {
+			dbUsername = getServerConfiguration().getString("databaseUsername");
+			return dbUsername;
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	/**
@@ -80,9 +234,9 @@ public final class ServerPropertiesManager {
 	 * @return the path to the debug directory.
 	 */
 	public static String getDebugDirectory() {
-		
+
 		File dir = new File(Environment.getGrisuDirectory(), "debug");
-		
+
 		return dir.getAbsolutePath();
 	}
 
@@ -121,6 +275,24 @@ public final class ServerPropertiesManager {
 		return debug;
 	}
 
+	public static int getFileTransferRetries() {
+		// TODO Auto-generated method stub
+		int retries = -1;
+		try {
+			retries = Integer.parseInt(getServerConfiguration().getString(
+					"fileTransferRetries"));
+
+		} catch (Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_FILE_TRANSFER_RETRIES;
+		}
+		if (retries == -1) {
+			return DEFAULT_FILE_TRANSFER_RETRIES;
+		}
+		return retries;
+
+	}
+
 	/**
 	 * Returns the name of the directory in which grisu jobs are located
 	 * remotely.
@@ -148,54 +320,22 @@ public final class ServerPropertiesManager {
 
 		return jobDirName;
 	}
-	
-//	/**
-//	 * Returns the name of the directory in which grisu jobs are located
-//	 * remotely.
-//	 * 
-//	 * @return the name of the direcotory in which grisu stores jobs or null if
-//	 *         the jobs should be stored in the root home directory.
-//	 */
-//	public static String getGrisuMultiPartJobDirectoryName() {
-//
-//		String jobDirName = null;
-//		try {
-//			jobDirName = getServerConfiguration().getString("multiPartJobDirName");
-//
-//			if ("none".equals(jobDirName.toLowerCase())) {
-//				jobDirName = null;
-//			}
-//
-//		} catch (Exception e) {
-//			jobDirName = null;
-//		}
-//
-//		if (jobDirName == null) {
-//			jobDirName = DEFAULT_MULTIPARTJOB_DIR_NAME;
-//		}
-//
-//		return jobDirName;
-//	}
 
-	/**
-	 * Returns the lifetime of a delegated proxy that is retrieved from myproxy.
-	 * 
-	 * @return the lifetime in seconds
-	 */
-	public static int getMyProxyLifetime() {
-		int lifetime_in_seconds = -1;
+	public static int getJobSubmissionRetries() {
+
+		int retries = -1;
 		try {
-			lifetime_in_seconds = Integer.parseInt(getServerConfiguration()
-					.getString("myProxyLifetime"));
+			retries = Integer.parseInt(getServerConfiguration().getString(
+					"globusJobSubmissionRetries"));
 
 		} catch (Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
-			return DEFAULT_MYPROXY_LIFETIME_IN_SECONDS;
+			return DEFAULT_CONCURRENT_JOB_SUBMISSION_RETRIES;
 		}
-		if (lifetime_in_seconds == -1) {
-			return DEFAULT_MYPROXY_LIFETIME_IN_SECONDS;
+		if (retries == -1) {
+			return DEFAULT_CONCURRENT_JOB_SUBMISSION_RETRIES;
 		}
-		return lifetime_in_seconds;
+		return retries;
 	}
 
 	/**
@@ -221,28 +361,64 @@ public final class ServerPropertiesManager {
 	}
 
 	/**
-	 * Returns the number of concurrent threads that are querying job status per user.
+	 * Returns the lifetime of a delegated proxy that is retrieved from myproxy.
 	 * 
-	 * @return the number of concurrent threads
+	 * @return the lifetime in seconds
 	 */
-	public static int getConcurrentJobStatusThreadsPerUser() {
-		int concurrentThreads = -1;
+	public static int getMyProxyLifetime() {
+		int lifetime_in_seconds = -1;
 		try {
-			concurrentThreads = Integer.parseInt(getServerConfiguration()
-					.getString("concurrentJobStatusThreads"));
+			lifetime_in_seconds = Integer.parseInt(getServerConfiguration()
+					.getString("myProxyLifetime"));
 
 		} catch (Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
-			return DEFAULT_CONCURRENT_JOB_STATUS_THREADS_PER_USER;
+			return DEFAULT_MYPROXY_LIFETIME_IN_SECONDS;
 		}
-		if (concurrentThreads == -1) {
-			return DEFAULT_CONCURRENT_JOB_STATUS_THREADS_PER_USER;
+		if (lifetime_in_seconds == -1) {
+			return DEFAULT_MYPROXY_LIFETIME_IN_SECONDS;
 		}
-		return concurrentThreads;
+		return lifetime_in_seconds;
 	}
-	
+
 	/**
-	 * Returns the (forced) wait time in seconds inbetween status checks for the same job.
+	 * Retrieves the configuration parameters from the properties file.
+	 * 
+	 * @return the configuration
+	 * @throws ConfigurationException
+	 *             if the file could not be read/parsed
+	 */
+	public static PropertiesConfiguration getServerConfiguration()
+			throws ConfigurationException {
+		if (config == null) {
+			File grisuDir = Environment.getGrisuDirectory();
+			config = new PropertiesConfiguration(new File(grisuDir,
+					"grisu-server.config"));
+		}
+		return config;
+	}
+
+	public static int getWaitTimeBetweenFailedFileTransferAndNextTryInSeconds() {
+
+		int waitTimeInSeconds = -1;
+		try {
+			waitTimeInSeconds = Integer.parseInt(getServerConfiguration()
+					.getString("waitTimeInbetweenFileTransferRetries"));
+
+		} catch (Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_TIME_BETWEEN_FILE_TRANSFER_RETRIES_IN_SECONDS;
+		}
+		if (waitTimeInSeconds == -1) {
+			return DEFAULT_TIME_BETWEEN_FILE_TRANSFER_RETRIES_IN_SECONDS;
+		}
+		return waitTimeInSeconds;
+
+	}
+
+	/**
+	 * Returns the (forced) wait time in seconds inbetween status checks for the
+	 * same job.
 	 * 
 	 * @return wait time in seconds
 	 */
@@ -261,28 +437,7 @@ public final class ServerPropertiesManager {
 		}
 		return waitTimeInSeconds;
 	}
-	
-	/**
-	 * Returns the number of concurrent threads that are submitting (multi-)jobs status per user.
-	 * 
-	 * @return the number of concurrent threads
-	 */
-	public static int getConcurrentMultiPartJobSubmitThreadsPerUser() {
-		int concurrentThreads = -1;
-		try {
-			concurrentThreads = Integer.parseInt(getServerConfiguration()
-					.getString("concurrentMultiPartJobSubmitThreads"));
 
-		} catch (Exception e) {
-			// myLogger.error("Problem with config file: " + e.getMessage());
-			return DEFAULT_CONCURRENT_JOB_SUBMISSION_THREADS_PER_USER;
-		}
-		if (concurrentThreads == -1) {
-			return DEFAULT_CONCURRENT_JOB_SUBMISSION_THREADS_PER_USER;
-		}
-		return concurrentThreads;
-	}
-	
 	/**
 	 * Checks whether the default (hsqldb) database configuration should be
 	 * used.
@@ -306,156 +461,7 @@ public final class ServerPropertiesManager {
 
 	}
 
-	/**
-	 * Returns the type of database that should be used. At the moment hsqldb
-	 * and mysql are supported.
-	 * 
-	 * @return the db type
-	 */
-	public static String getDatabaseType() {
-
-		String dbType;
-		try {
-			dbType = getServerConfiguration().getString("databaseType");
-			return dbType;
-		} catch (Exception e) {
-			return null;
-		}
-	}
-
-	/**
-	 * The url to connect to the database.
-	 * 
-	 * @return the url
-	 */
-	public static String getDatabaseConnectionUrl() {
-		String dbUrl;
-		try {
-			dbUrl = getServerConfiguration().getString("databaseConnectionUrl");
-			return dbUrl;
-		} catch (Exception e) {
-			return null;
-		}
-	}
-
-	/**
-	 * Returns the database username.
-	 * 
-	 * @return the db username
-	 */
-	public static String getDatabaseUsername() {
-		String dbUsername;
-		try {
-			dbUsername = getServerConfiguration().getString("databaseUsername");
-			return dbUsername;
-		} catch (Exception e) {
-			return null;
-		}
-	}
-
-	/**
-	 * The database password.
-	 * 
-	 * @return the password
-	 */
-	public static String getDatabasePassword() {
-		String dbPassword;
-		try {
-			dbPassword = getServerConfiguration().getString("databasePassword");
-			return dbPassword;
-		} catch (Exception e) {
-			return null;
-		}
-	}
-
-	public static int getJobSubmissionRetries() {
-		
-		int retries = -1;
-		try {
-			retries = Integer.parseInt(getServerConfiguration()
-					.getString("globusJobSubmissionRetries"));
-
-		} catch (Exception e) {
-			// myLogger.error("Problem with config file: " + e.getMessage());
-			return DEFAULT_CONCURRENT_JOB_SUBMISSION_RETRIES;
-		}
-		if (retries == -1) {
-			return DEFAULT_CONCURRENT_JOB_SUBMISSION_RETRIES;
-		}
-		return retries;
-	}
-
-	public static boolean getCheckConnectionToMountPoint() {
-		
-		boolean check = false;
-
-		try {
-			try {
-				check = getServerConfiguration().getBoolean("checkConnectionToMountPoints");
-			} catch (NoSuchElementException e) {
-				// doesn't matter
-				myLogger.debug(e);
-				return DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS;
-			}
-
-		} catch (ConfigurationException e) {
-			return DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS;
-		}
-		return check;
-	}
-
-	public static int getConcurrentFileTransfersPerUser() {
-		
-		int retries = -1;
-		try {
-			retries = Integer.parseInt(getServerConfiguration()
-					.getString("concurrentFileTransfersPerUser"));
-
-		} catch (Exception e) {
-			// myLogger.error("Problem with config file: " + e.getMessage());
-			return DEFAULT_CONCURRENT_FILE_TRANSFER_THREADS_PER_USER;
-		}
-		if (retries == -1) {
-			return DEFAULT_CONCURRENT_FILE_TRANSFER_THREADS_PER_USER;
-		}
-		return retries;
-
-	}
-
-	public static int getFileTransferRetries() {
-		// TODO Auto-generated method stub
-		int retries = -1;
-		try {
-			retries = Integer.parseInt(getServerConfiguration()
-					.getString("fileTransferRetries"));
-
-		} catch (Exception e) {
-			// myLogger.error("Problem with config file: " + e.getMessage());
-			return DEFAULT_FILE_TRANSFER_RETRIES;
-		}
-		if (retries == -1) {
-			return DEFAULT_FILE_TRANSFER_RETRIES;
-		}
-		return retries;
-		
-	}
-
-	public static int getWaitTimeBetweenFailedFileTransferAndNextTryInSeconds() {
-		
-		int waitTimeInSeconds = -1;
-		try {
-			waitTimeInSeconds = Integer.parseInt(getServerConfiguration()
-					.getString("waitTimeInbetweenFileTransferRetries"));
-
-		} catch (Exception e) {
-			// myLogger.error("Problem with config file: " + e.getMessage());
-			return DEFAULT_TIME_BETWEEN_FILE_TRANSFER_RETRIES_IN_SECONDS;
-		}
-		if (waitTimeInSeconds == -1) {
-			return DEFAULT_TIME_BETWEEN_FILE_TRANSFER_RETRIES_IN_SECONDS;
-		}
-		return waitTimeInSeconds;
-
+	private ServerPropertiesManager() {
 	}
 
 }

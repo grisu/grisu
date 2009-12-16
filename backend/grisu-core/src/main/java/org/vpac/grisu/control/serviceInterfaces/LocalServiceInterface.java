@@ -114,6 +114,37 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 
 	}
 
+	public final long getCredentialEndTime() {
+
+		String myProxyServer = MyProxyServerParams.getMyProxyServer();
+		int myProxyPort = MyProxyServerParams.getMyProxyPort();
+
+		try {
+			// this is needed because of a possible round-robin myproxy server
+			myProxyServer = InetAddress.getByName(myProxyServer)
+					.getHostAddress();
+		} catch (UnknownHostException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			throw new NoValidCredentialException(
+					"Could not download myproxy credential: "
+							+ e1.getLocalizedMessage());
+		}
+
+		MyProxy myproxy = new MyProxy(myProxyServer, myProxyPort);
+		CredentialInfo info = null;
+		try {
+			info = myproxy.info(getCredential().getGssCredential(),
+					myproxy_username, new String(passphrase));
+		} catch (MyProxyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return info.getEndTime();
+
+	}
+
 	public final String getTemplate(final String application)
 			throws NoSuchTemplateException {
 		Document doc = ServiceTemplateManagement
@@ -128,8 +159,8 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 		return SeveralXMLHelpers.toString(doc);
 	}
 
-	public final Document getTemplate(final String application, final String version)
-			throws NoSuchTemplateException {
+	public final Document getTemplate(final String application,
+			final String version) throws NoSuchTemplateException {
 		Document doc = ServiceTemplateManagement
 				.getAvailableTemplate(application);
 
@@ -173,47 +204,16 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 		try {
 			getCredential();
 		} catch (Exception e) {
-//			e.printStackTrace();
+			// e.printStackTrace();
 			throw new NoValidCredentialException("No valid credential: "
 					+ e.getLocalizedMessage());
 		}
-		
+
 	}
 
 	public final String logout() {
 		Arrays.fill(passphrase, 'x');
 		return null;
-	}
-
-	public final long getCredentialEndTime() {
-
-		String myProxyServer = MyProxyServerParams.getMyProxyServer();
-		int myProxyPort = MyProxyServerParams.getMyProxyPort();
-
-		try {
-			// this is needed because of a possible round-robin myproxy server
-			myProxyServer = InetAddress.getByName(myProxyServer)
-					.getHostAddress();
-		} catch (UnknownHostException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-			throw new NoValidCredentialException(
-					"Could not download myproxy credential: "
-							+ e1.getLocalizedMessage());
-		}
-
-		MyProxy myproxy = new MyProxy(myProxyServer, myProxyPort);
-		CredentialInfo info = null;
-		try {
-			info = myproxy.info(getCredential().getGssCredential(),
-					myproxy_username, new String(passphrase));
-		} catch (MyProxyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return info.getEndTime();
-
 	}
 
 }

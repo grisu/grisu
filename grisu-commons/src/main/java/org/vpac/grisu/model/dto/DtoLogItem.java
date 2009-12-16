@@ -13,50 +13,33 @@ import javax.xml.bind.annotation.XmlValue;
 
 @XmlRootElement
 public class DtoLogItem {
-	
-	public static List<DtoLogItem> generateLogItemList(Map<Date,String> map) {
-		
+
+	public static List<DtoLogItem> generateLogItemList(Map<Date, String> map) {
+
 		List<DtoLogItem> result = new LinkedList<DtoLogItem>();
-		
-		for ( Date key : map.keySet() ) {
+
+		for (Date key : map.keySet()) {
 			result.add(new DtoLogItem(key, map.get(key)));
 		}
-		
+
 		return result;
 	}
-	
+
 	public static Map<Date, String> generateLogMap(List<DtoLogItem> list) {
-		
-		Map<Date, String> result = Collections.synchronizedMap(new TreeMap<Date, String>());
-		
-		for ( DtoLogItem item : list ) {
+
+		Map<Date, String> result = Collections
+				.synchronizedMap(new TreeMap<Date, String>());
+
+		for (DtoLogItem item : list) {
 			result.put(item.getTime(), item.getLogMessage());
 		}
-		
+
 		return result;
-		
+
 	}
-	
+
 	private Date time;
 	private String logMessage;
-	
-	@XmlAttribute
-	public Date getTime() {
-		return time;
-	}
-
-	public void setTime(Date time) {
-		this.time = time;
-	}
-
-	@XmlValue
-	public String getLogMessage() {
-		return logMessage;
-	}
-
-	public void setLogMessage(String logMessage) {
-		this.logMessage = logMessage;
-	}
 
 	public DtoLogItem() {
 	}
@@ -64,6 +47,24 @@ public class DtoLogItem {
 	public DtoLogItem(Date time, String logMessage) {
 		this.time = time;
 		this.logMessage = logMessage;
+	}
+
+	@XmlValue
+	public String getLogMessage() {
+		return logMessage;
+	}
+
+	@XmlAttribute
+	public Date getTime() {
+		return time;
+	}
+
+	public void setLogMessage(String logMessage) {
+		this.logMessage = logMessage;
+	}
+
+	public void setTime(Date time) {
+		this.time = time;
 	}
 
 }

@@ -23,19 +23,17 @@ public abstract class JobSubmitter {
 	// abstract protected String createJobSubmissionDescription(Document jsdl);
 
 	/**
-	 * Used to submit the job to the specified host.
+	 * Monitors the job with the specified (JobSubmitter-specific) jobhandle.
 	 * 
-	 * @param infoManager
-	 *            an informationManager
-	 * @param host
-	 *            the host (something like ng2.vpac.org)
-	 * @param job
-	 *            the job
-	 * @return the (JobSubmitter-specific) handle to the job
-	 * @throws ServerJobSubmissionException
+	 * @param endPointReference
+	 *            the handle for the job
+	 * @param cred
+	 *            the credential to authenticate yourself as being authorized to
+	 *            kill the job
+	 * @return the status of the job
 	 */
-	protected abstract String submit(InformationManager infoManager,
-			String host, String factoryType, Job job);
+	public abstract int getJobStatus(String endPointReference,
+			ProxyCredential cred);
 
 	// public String convertJobDescription(Job job) {
 	//		
@@ -56,19 +54,6 @@ public abstract class JobSubmitter {
 	public abstract String getServerEndpoint(String server);
 
 	/**
-	 * Monitors the job with the specified (JobSubmitter-specific) jobhandle.
-	 * 
-	 * @param endPointReference
-	 *            the handle for the job
-	 * @param cred
-	 *            the credential to authenticate yourself as being authorized to
-	 *            kill the job
-	 * @return the status of the job
-	 */
-	public abstract int getJobStatus(String endPointReference,
-			ProxyCredential cred);
-
-	/**
 	 * Kills the job with the specified (JobSubmitter-specific) jobhandle.
 	 * 
 	 * @param endPointReference
@@ -79,5 +64,20 @@ public abstract class JobSubmitter {
 	 * @return the new status of the job
 	 */
 	public abstract int killJob(String endPointReference, ProxyCredential cred);
+
+	/**
+	 * Used to submit the job to the specified host.
+	 * 
+	 * @param infoManager
+	 *            an informationManager
+	 * @param host
+	 *            the host (something like ng2.vpac.org)
+	 * @param job
+	 *            the job
+	 * @return the (JobSubmitter-specific) handle to the job
+	 * @throws ServerJobSubmissionException
+	 */
+	protected abstract String submit(InformationManager infoManager,
+			String host, String factoryType, Job job);
 
 }

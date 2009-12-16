@@ -14,6 +14,7 @@ import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.security.light.vomsProxy.VomsException;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -34,9 +35,6 @@ public class FileSystemStructureToXMLConverter {
 
 	private static DocumentBuilder docBuilder = null;
 
-	private Document output = null;
-	private User user = null;
-
 	public static DocumentBuilder getDocBuilder() {
 
 		if (docBuilder == null) {
@@ -52,6 +50,9 @@ public class FileSystemStructureToXMLConverter {
 		}
 		return docBuilder;
 	}
+	private Document output = null;
+
+	private User user = null;
 
 	/**
 	 * Build an instance of a FileSystemStructureToXMLConverter and connect it
@@ -63,103 +64,6 @@ public class FileSystemStructureToXMLConverter {
 	 */
 	public FileSystemStructureToXMLConverter(final User user) {
 		this.user = user;
-	}
-
-	/**
-	 * Parses the remote filesystem(s) and returns the structure of it/them in a
-	 * xml file.
-	 * 
-	 * @param folder
-	 *            the root folder
-	 * @param recursion_level
-	 *            the recursion_level (usually 1 because otherwise the browsing
-	 *            can take a long time)
-	 * @param absolutePath
-	 *            whether you want the path information within the xml file
-	 *            absolute (like gsiftp://ngdata.../file.txt) or not
-	 *            (/home.vpac.NGAdmin/file.txt)
-	 * @return the directory structure
-	 * @throws FileNotFoundException
-	 *             if the root folder does not exist
-	 * @throws DOMException
-	 *             if there is a xml problem
-	 * @throws RemoteFileSystemException
-	 *             if the filesystem can't be accessed
-	 * @throws VomsException
-	 *             if there is a problem with the vo / voms proxy
-	 */
-	public final Document getDirectoryStructure(final String folder,
-			final int recursion_level, final boolean absolutePath)
-			throws FileNotFoundException, RemoteFileSystemException,
-			VomsException {
-
-		output = getDocBuilder().newDocument();
-		Element root = output.createElement("Files");
-
-		if (absolutePath) {
-			root.setAttribute("absolutePath", "true");
-		} else {
-			root.setAttribute("absolutePath", "false");
-		}
-		root.setAttribute("name", "fs_root");
-
-		output.appendChild(root);
-
-		if ("/".equals(folder)) {
-			for (MountPoint mp : user.getAllMountPoints()) {
-				Element mp_element = output.createElement("MountPoint");
-				if (absolutePath) {
-					mp_element.setAttribute("path", mp.getRootUrl());
-					mp_element.setAttribute("name", mp.getRootUrl());
-				} else {
-					mp_element.setAttribute("path", mp.getAlias());
-					mp_element.setAttribute("name", mp.getAlias()
-							.substring(1));
-				}
-				if (recursion_level > 1) {
-					buildDirectoryStructure(mp_element, mp, absolutePath, 1,
-							recursion_level);
-				}
-				root.appendChild(mp_element);
-			}
-		} else {
-			MountPoint mp = null;
-			if (folder.startsWith("/")) {
-				mp = user.getResponsibleMountpointForUserSpaceFile(folder);
-			} else {
-				mp = user.getResponsibleMountpointForAbsoluteFile(folder);
-			}
-			Element root_element = null;
-			// if ( mp != null ) {
-			// root_element = output.createElement("MountPoint");
-			// if (absolutePath) {
-			// root_element.setAttribute("path", mp.getRootUrl());
-			// root_element.setAttribute("name", mp.getRootUrl());
-			// } else {
-			// root_element.setAttribute("path", mp.getMountpoint());
-			// root_element.setAttribute("name",
-			// mp.getMountpoint().substring(1));
-			//				
-			// }
-			//				
-			// buildDirectoryStructure(root_element, mp, absolutePath, 0,
-			// recursion_level);
-			// } else {
-			try {
-				root_element = createElement(user.aquireFile(folder),
-						absolutePath, mp);
-			} catch (FileSystemException e) {
-				throw new RemoteFileSystemException("Could not aquire file: "
-						+ folder + ": " + e.getMessage());
-			}
-			buildDirectoryStructure(root_element, mp, absolutePath, 1,
-					recursion_level);
-			// }
-			root.appendChild(root_element);
-
-		}
-
-		return output;
 	}
 
 	private void buildDirectoryStructure(final Element parentElement,
@@ -247,6 +151,102 @@ public class FileSystemStructureToXMLConverter {
 		}
 
 		return element;
+	}
+
+	/**
+	 * Parses the remote filesystem(s) and returns the structure of it/them in a
+	 * xml file.
+	 * 
+	 * @param folder
+	 *            the root folder
+	 * @param recursion_level
+	 *            the recursion_level (usually 1 because otherwise the browsing
+	 *            can take a long time)
+	 * @param absolutePath
+	 *            whether you want the path information within the xml file
+	 *            absolute (like gsiftp://ngdata.../file.txt) or not
+	 *            (/home.vpac.NGAdmin/file.txt)
+	 * @return the directory structure
+	 * @throws FileNotFoundException
+	 *             if the root folder does not exist
+	 * @throws DOMException
+	 *             if there is a xml problem
+	 * @throws RemoteFileSystemException
+	 *             if the filesystem can't be accessed
+	 * @throws VomsException
+	 *             if there is a problem with the vo / voms proxy
+	 */
+	public final Document getDirectoryStructure(final String folder,
+			final int recursion_level, final boolean absolutePath)
+			throws FileNotFoundException, RemoteFileSystemException,
+			VomsException {
+
+		output = getDocBuilder().newDocument();
+		Element root = output.createElement("Files");
+
+		if (absolutePath) {
+			root.setAttribute("absolutePath", "true");
+		} else {
+			root.setAttribute("absolutePath", "false");
+		}
+		root.setAttribute("name", "fs_root");
+
+		output.appendChild(root);
+
+		if ("/".equals(folder)) {
+			for (MountPoint mp : user.getAllMountPoints()) {
+				Element mp_element = output.createElement("MountPoint");
+				if (absolutePath) {
+					mp_element.setAttribute("path", mp.getRootUrl());
+					mp_element.setAttribute("name", mp.getRootUrl());
+				} else {
+					mp_element.setAttribute("path", mp.getAlias());
+					mp_element.setAttribute("name", mp.getAlias().substring(1));
+				}
+				if (recursion_level > 1) {
+					buildDirectoryStructure(mp_element, mp, absolutePath, 1,
+							recursion_level);
+				}
+				root.appendChild(mp_element);
+			}
+		} else {
+			MountPoint mp = null;
+			if (folder.startsWith("/")) {
+				mp = user.getResponsibleMountpointForUserSpaceFile(folder);
+			} else {
+				mp = user.getResponsibleMountpointForAbsoluteFile(folder);
+			}
+			Element root_element = null;
+			// if ( mp != null ) {
+			// root_element = output.createElement("MountPoint");
+			// if (absolutePath) {
+			// root_element.setAttribute("path", mp.getRootUrl());
+			// root_element.setAttribute("name", mp.getRootUrl());
+			// } else {
+			// root_element.setAttribute("path", mp.getMountpoint());
+			// root_element.setAttribute("name",
+			// mp.getMountpoint().substring(1));
+			//				
+			// }
+			//				
+			// buildDirectoryStructure(root_element, mp, absolutePath, 0,
+			// recursion_level);
+			// } else {
+			try {
+				root_element = createElement(user.aquireFile(folder),
+						absolutePath, mp);
+			} catch (FileSystemException e) {
+				throw new RemoteFileSystemException("Could not aquire file: "
+						+ folder + ": " + e.getMessage());
+			}
+			buildDirectoryStructure(root_element, mp, absolutePath, 1,
+					recursion_level);
+			// }
+			root.appendChild(root_element);
+
+		}
+
+		return output;
 	}
 
 }

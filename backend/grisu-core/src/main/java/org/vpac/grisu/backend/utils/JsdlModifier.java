@@ -15,9 +15,6 @@ import au.org.arcs.jcommons.utils.JsdlHelpers;
  * 
  */
 public final class JsdlModifier {
-	
-	private JsdlModifier() {
-	}
 
 	static final Logger myLogger = Logger.getLogger(JsdlModifier.class
 			.getName());
@@ -48,7 +45,8 @@ public final class JsdlModifier {
 	 * @throws Exception
 	 */
 	public static Document recalculateFileSystems(final Document jsdl_old,
-			final String clusterRootUrl, final boolean absolutePath) throws Exception {
+			final String clusterRootUrl, final boolean absolutePath)
+			throws Exception {
 
 		Document jsdl_new = (Document) jsdl_old.cloneNode(true);
 
@@ -112,6 +110,9 @@ public final class JsdlModifier {
 		// TODO change stagein elements
 
 		return jsdl_new;
+	}
+
+	private JsdlModifier() {
 	}
 
 }

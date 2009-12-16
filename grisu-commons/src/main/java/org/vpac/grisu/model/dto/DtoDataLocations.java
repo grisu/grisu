@@ -5,8 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -14,36 +12,37 @@ import javax.xml.bind.annotation.XmlRootElement;
  * A wrapper that contains a list of {@link DtoDataLocation} objects.
  * 
  * @author Markus Binsteiner
- *
+ * 
  */
-@XmlRootElement(name="datalocations")
+@XmlRootElement(name = "datalocations")
 public class DtoDataLocations {
-	
-	public static DtoDataLocations createDataLocations(String fqan, Map<String, String[]> dataLocationsMap) {
-		
+
+	public static DtoDataLocations createDataLocations(String fqan,
+			Map<String, String[]> dataLocationsMap) {
+
 		DtoDataLocations result = new DtoDataLocations();
-		
+
 		List<DtoDataLocation> list = new LinkedList<DtoDataLocation>();
-		
-		for ( String key : dataLocationsMap.keySet() ) {
+
+		for (String key : dataLocationsMap.keySet()) {
 			DtoDataLocation temp = new DtoDataLocation();
 			temp.setRooturl(key);
 			temp.setFqan(fqan);
 			temp.setPaths(Arrays.asList(dataLocationsMap.get(key)));
 			list.add(temp);
 		}
-		
+
 		result.setDataLocations(list);
-		
+
 		return result;
 	}
-	
+
 	/**
 	 * The list of datalocations.
 	 */
 	private List<DtoDataLocation> dataLocations = new LinkedList<DtoDataLocation>();
 
-	@XmlElement(name="datalocation")
+	@XmlElement(name = "datalocation")
 	public List<DtoDataLocation> getDataLocations() {
 		return dataLocations;
 	}
@@ -51,7 +50,5 @@ public class DtoDataLocations {
 	public void setDataLocations(List<DtoDataLocation> dataLocations) {
 		this.dataLocations = dataLocations;
 	}
-	
-	
 
 }

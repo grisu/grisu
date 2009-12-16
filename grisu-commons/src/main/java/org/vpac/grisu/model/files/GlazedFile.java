@@ -1,7 +1,6 @@
 package org.vpac.grisu.model.files;
 
 import java.io.File;
-import java.net.MalformedURLException;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.ServiceInterface;
@@ -14,10 +13,10 @@ import org.vpac.grisu.model.dto.DtoRemoteObject;
 
 public class GlazedFile {
 
-	public enum Type implements Comparable<Type>{
-		
+	public enum Type implements Comparable<Type> {
+
 		FILETYPE_ROOT, FILETYPE_SITE, FILETYPE_MOUNTPOINT, FILETYPE_FOLDER, FILETYPE_FILE
-		
+
 	}
 
 	public static final String LOCAL_FILESYSTEM = "Local";
@@ -35,16 +34,8 @@ public class GlazedFile {
 	private final long size;
 	private final long lastModified;
 	private final ServiceInterface si;
-	
+
 	private boolean parentMarker = false;
-	
-	public void setParent() {
-		this.parentMarker = true;
-	}
-	
-	public boolean isMarkedAsParent() {
-		return this.parentMarker;
-	}
 
 	public GlazedFile() {
 		this.type = Type.FILETYPE_ROOT;
@@ -54,50 +45,6 @@ public class GlazedFile {
 		this.size = -1L;
 		this.lastModified = -1L;
 		this.name = ROOT;
-		this.si = null;
-	}
-
-	public GlazedFile(String sitename) {
-		
-		this.type = Type.FILETYPE_SITE;
-		this.file = null;
-		this.folder = null;
-		this.url = sitename;
-		this.size = -1L;
-		this.lastModified = -1L;
-		this.name = sitename;
-		this.si = null;
-
-	}
-	
-	public GlazedFile(File localFile) {
-		
-		if ( localFile.isDirectory() ) {
-			this.type = Type.FILETYPE_FOLDER;			
-			this.size = -1L;
-		} else {
-			this.type = Type.FILETYPE_FILE;
-			this.size = localFile.length();
-		}
-
-		this.file = null;
-		this.folder = null;
-		this.url = localFile.toURI().toString();
-
-		this.lastModified = localFile.lastModified();
-		this.name = localFile.getName();
-		this.si = null;
-		
-	}
-
-	public GlazedFile(MountPoint mp) {
-		this.type = Type.FILETYPE_MOUNTPOINT;
-		this.file = null;
-		this.folder = null;
-		this.url = mp.getRootUrl();
-		this.size = -1L;
-		this.lastModified = -1L;
-		this.name = mp.getAlias();
 		this.si = null;
 	}
 
@@ -116,9 +63,9 @@ public class GlazedFile {
 			size = file.getSize();
 			lastModified = file.getLastModified();
 		}
-		
+
 		url = obj.getRootUrl();
-		if ( StringUtils.isNotBlank(obj.getName()) ) {
+		if (StringUtils.isNotBlank(obj.getName())) {
 			name = obj.getName();
 		} else {
 			name = "/";
@@ -126,11 +73,55 @@ public class GlazedFile {
 		this.si = null;
 	}
 
+	public GlazedFile(File localFile) {
+
+		if (localFile.isDirectory()) {
+			this.type = Type.FILETYPE_FOLDER;
+			this.size = -1L;
+		} else {
+			this.type = Type.FILETYPE_FILE;
+			this.size = localFile.length();
+		}
+
+		this.file = null;
+		this.folder = null;
+		this.url = localFile.toURI().toString();
+
+		this.lastModified = localFile.lastModified();
+		this.name = localFile.getName();
+		this.si = null;
+
+	}
+
+	public GlazedFile(MountPoint mp) {
+		this.type = Type.FILETYPE_MOUNTPOINT;
+		this.file = null;
+		this.folder = null;
+		this.url = mp.getRootUrl();
+		this.size = -1L;
+		this.lastModified = -1L;
+		this.name = mp.getAlias();
+		this.si = null;
+	}
+
+	public GlazedFile(String sitename) {
+
+		this.type = Type.FILETYPE_SITE;
+		this.file = null;
+		this.folder = null;
+		this.url = sitename;
+		this.size = -1L;
+		this.lastModified = -1L;
+		this.name = sitename;
+		this.si = null;
+
+	}
+
 	public GlazedFile(String url, ServiceInterface si) {
 
 		this.url = url;
-		if ( StringUtils.isNotBlank(FileManager.getFilename(url)) ) {
-			this.name = FileManager.getFilename(url);			
+		if (StringUtils.isNotBlank(FileManager.getFilename(url))) {
+			this.name = FileManager.getFilename(url);
 		} else {
 			this.name = "/";
 		}
@@ -141,6 +132,71 @@ public class GlazedFile {
 		this.file = null;
 		this.size = -1L;
 		this.lastModified = -1L;
+	}
+
+	@Override
+	public boolean equals(Object other) {
+
+		if (!(other instanceof GlazedFile)) {
+			return false;
+		}
+
+		GlazedFile o = (GlazedFile) other;
+		return this.getUrl().equals(o.getUrl());
+
+	}
+
+	public long getLastModified() {
+
+		if (si != null) {
+			try {
+				long result = si.lastModified(url);
+			} catch (RemoteFileSystemException e) {
+				return -1L;
+			}
+		}
+
+		return lastModified;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public long getSize() {
+
+		if (si != null) {
+			try {
+				long result = si.getFileSize(url);
+			} catch (RemoteFileSystemException e) {
+				return -1L;
+			}
+		}
+		return size;
+	}
+
+	public Type getType() {
+
+		if (si != null) {
+			if (isFolder()) {
+				return Type.FILETYPE_FOLDER;
+			} else {
+				return null;
+			}
+		}
+
+		return type;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	@Override
+	public int hashCode() {
+
+		return 23 * getUrl().hashCode();
+
 	}
 
 	public boolean isFolder() {
@@ -162,73 +218,16 @@ public class GlazedFile {
 		}
 	}
 
-	public Type getType() {
-		
-		if ( si != null ) {
-			if ( isFolder() ) {
-				return Type.FILETYPE_FOLDER;
-			} else {
-				return null;
-			}
-		}
-		
-		return type;
+	public boolean isMarkedAsParent() {
+		return this.parentMarker;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public long getSize() {
-		
-		if ( si != null ) {
-			try {
-				long result = si.getFileSize(url);
-			} catch (RemoteFileSystemException e) {
-				return -1L;
-			}
-		}
-		return size;
-	}
-
-	public long getLastModified() {
-		
-		if ( si != null ) {
-			try {
-				long result = si.lastModified(url);
-			} catch (RemoteFileSystemException e) {
-				return -1L;
-			}
-		}
-		
-		return lastModified;
+	public void setParent() {
+		this.parentMarker = true;
 	}
 
 	public String toString() {
 		return getName();
-	}
-	
-	@Override
-	public boolean equals(Object other) {
-		
-		if ( ! (other instanceof GlazedFile) ) {
-			return false;
-		}
-		
-		GlazedFile o = (GlazedFile)other;
-		return this.getUrl().equals(o.getUrl());
-		
-	}
-	
-	@Override 
-	public int hashCode() {
-		
-		return 23 * getUrl().hashCode();
-		
 	}
 
 }

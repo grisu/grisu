@@ -1,7 +1,6 @@
 package org.vpac.grisu.model.info;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,97 +22,6 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 	static final Logger myLogger = Logger.getLogger(ResourceInformation.class
 			.getName());
-
-	private ServiceInterface serviceInterface;
-
-	private String[] cachedAllSubmissionLocations = null;
-	private Map<String, Set<String>> cachedSiteAllSubmissionLocationsMap = new TreeMap<String, Set<String>>();
-	private String[] cachedAllSites = null;
-	private Map<String, String> cachedHosts = new HashMap<String, String>();
-	private Map<String, String[]> cachedAllSubmissionLocationsPerFqan = new HashMap<String, String[]>();
-	private Map<String, Set<String>> cachedAllSitesPerFqan = new HashMap<String, Set<String>>();
-	private Map<String, List<String>> cachedStagingFilesystemsPerSubLoc = new HashMap<String, List<String>>();
-
-	public ResourceInformationImpl(final ServiceInterface serviceInterface) {
-		this.serviceInterface = serviceInterface;
-	}
-
-	public final String[] getAllSubmissionLocations() {
-
-		if (cachedAllSubmissionLocations == null) {
-			cachedAllSubmissionLocations = serviceInterface
-					.getAllSubmissionLocations().asSubmissionLocationStrings();
-		}
-		return cachedAllSubmissionLocations;
-	}
-
-	public final String[] getAllSites() {
-
-		if (cachedAllSites == null) {
-
-			for (String subLoc : getAllSubmissionLocations()) {
-				cachedAllSites = serviceInterface.getAllSites().asArray();
-			}
-		}
-		return cachedAllSites;
-	}
-
-	public final Set<String> getAllSubmissionLocationsForSite(final String site) {
-
-		if (cachedSiteAllSubmissionLocationsMap.get(site) == null) {
-			// now we are building the complete map, not only for this one site
-			for (String subLoc : getAllSubmissionLocations()) {
-				String sitetemp = getSite(subLoc);
-				if (cachedSiteAllSubmissionLocationsMap.get(sitetemp) == null) {
-					cachedSiteAllSubmissionLocationsMap.put(sitetemp,
-							new HashSet<String>());
-				}
-				cachedSiteAllSubmissionLocationsMap.get(sitetemp).add(subLoc);
-			}
-		}
-		return cachedSiteAllSubmissionLocationsMap.get(site);
-
-	}
-
-	public final String getSite(final String urlOrSubmissionLocation) {
-
-		String host = getHost(urlOrSubmissionLocation);
-
-		if (cachedHosts.get(host) == null) {
-			cachedHosts.put(host, serviceInterface.getSite(host));
-		}
-		return cachedHosts.get(host);
-	}
-
-	public final Set<String> filterSubmissionLocationsForSite(final String site,
-			final Set<String> submissionlocations) {
-
-		Set<String> temp = new TreeSet<String>();
-		for (String subLoc : submissionlocations) {
-			if (site.equals(getSite(subLoc))) {
-				temp.add(subLoc);
-			}
-		}
-		return temp;
-	}
-
-	public final Set<String> distillSitesFromSubmissionLocations(
-			final Set<String> submissionLocations) {
-
-		Set<String> temp = new TreeSet<String>();
-		for (String subLoc : submissionLocations) {
-			String site = null;
-			try {
-				site = getSite(subLoc);
-				temp.add(site);
-			} catch (Exception e) {
-				myLogger.error("Could not get site for submissionlocation: "
-						+ subLoc + ", ignoring it. Error: "
-						+ e.getLocalizedMessage());
-			}
-		}
-		return temp;
-	}
 
 	public static String getHost(final String urlOrSubmissionLocation) {
 		String hostname = null;
@@ -166,13 +74,48 @@ public class ResourceInformationImpl implements ResourceInformation {
 		return hostname;
 	}
 
-	public final String[] getAllAvailableSubmissionLocations(final String fqan) {
+	private ServiceInterface serviceInterface;
+	private String[] cachedAllSubmissionLocations = null;
+	private Map<String, Set<String>> cachedSiteAllSubmissionLocationsMap = new TreeMap<String, Set<String>>();
+	private String[] cachedAllSites = null;
+	private Map<String, String> cachedHosts = new HashMap<String, String>();
+	private Map<String, String[]> cachedAllSubmissionLocationsPerFqan = new HashMap<String, String[]>();
+	private Map<String, Set<String>> cachedAllSitesPerFqan = new HashMap<String, Set<String>>();
 
-		if (cachedAllSubmissionLocationsPerFqan.get(fqan) == null) {
-			String[] temp = serviceInterface.getAllSubmissionLocationsForFqan(fqan).asSubmissionLocationStrings();
-			cachedAllSubmissionLocationsPerFqan.put(fqan, temp);
+	private Map<String, List<String>> cachedStagingFilesystemsPerSubLoc = new HashMap<String, List<String>>();
+
+	public ResourceInformationImpl(final ServiceInterface serviceInterface) {
+		this.serviceInterface = serviceInterface;
+	}
+
+	public final Set<String> distillSitesFromSubmissionLocations(
+			final Set<String> submissionLocations) {
+
+		Set<String> temp = new TreeSet<String>();
+		for (String subLoc : submissionLocations) {
+			String site = null;
+			try {
+				site = getSite(subLoc);
+				temp.add(site);
+			} catch (Exception e) {
+				myLogger.error("Could not get site for submissionlocation: "
+						+ subLoc + ", ignoring it. Error: "
+						+ e.getLocalizedMessage());
+			}
 		}
-		return cachedAllSubmissionLocationsPerFqan.get(fqan);
+		return temp;
+	}
+
+	public final Set<String> filterSubmissionLocationsForSite(
+			final String site, final Set<String> submissionlocations) {
+
+		Set<String> temp = new TreeSet<String>();
+		for (String subLoc : submissionlocations) {
+			if (site.equals(getSite(subLoc))) {
+				temp.add(subLoc);
+			}
+		}
+		return temp;
 	}
 
 	public final Set<String> getAllAvailableSites(final String fqan) {
@@ -186,17 +129,51 @@ public class ResourceInformationImpl implements ResourceInformation {
 		return cachedAllSitesPerFqan.get(fqan);
 	}
 
-	public final List<String> getStagingFilesystemsForSubmissionLocation(final String subLoc) {
+	public final String[] getAllAvailableSubmissionLocations(final String fqan) {
 
-		if (subLoc == null || "".equals(subLoc)) {
-			return null;
+		if (cachedAllSubmissionLocationsPerFqan.get(fqan) == null) {
+			String[] temp = serviceInterface.getAllSubmissionLocationsForFqan(
+					fqan).asSubmissionLocationStrings();
+			cachedAllSubmissionLocationsPerFqan.put(fqan, temp);
 		}
-		if (cachedStagingFilesystemsPerSubLoc.get(subLoc) == null) {
-			List<String> temp = serviceInterface
-					.getStagingFileSystemForSubmissionLocation(subLoc).getStringList();
-			cachedStagingFilesystemsPerSubLoc.put(subLoc, temp);
+		return cachedAllSubmissionLocationsPerFqan.get(fqan);
+	}
+
+	public final String[] getAllSites() {
+
+		if (cachedAllSites == null) {
+
+			for (String subLoc : getAllSubmissionLocations()) {
+				cachedAllSites = serviceInterface.getAllSites().asArray();
+			}
 		}
-		return cachedStagingFilesystemsPerSubLoc.get(subLoc);
+		return cachedAllSites;
+	}
+
+	public final String[] getAllSubmissionLocations() {
+
+		if (cachedAllSubmissionLocations == null) {
+			cachedAllSubmissionLocations = serviceInterface
+					.getAllSubmissionLocations().asSubmissionLocationStrings();
+		}
+		return cachedAllSubmissionLocations;
+	}
+
+	public final Set<String> getAllSubmissionLocationsForSite(final String site) {
+
+		if (cachedSiteAllSubmissionLocationsMap.get(site) == null) {
+			// now we are building the complete map, not only for this one site
+			for (String subLoc : getAllSubmissionLocations()) {
+				String sitetemp = getSite(subLoc);
+				if (cachedSiteAllSubmissionLocationsMap.get(sitetemp) == null) {
+					cachedSiteAllSubmissionLocationsMap.put(sitetemp,
+							new HashSet<String>());
+				}
+				cachedSiteAllSubmissionLocationsMap.get(sitetemp).add(subLoc);
+			}
+		}
+		return cachedSiteAllSubmissionLocationsMap.get(site);
+
 	}
 
 	public final String getRecommendedStagingFileSystemForSubmissionLocation(
@@ -208,6 +185,31 @@ public class ResourceInformationImpl implements ResourceInformation {
 		} else {
 			return null;
 		}
+	}
+
+	public final String getSite(final String urlOrSubmissionLocation) {
+
+		String host = getHost(urlOrSubmissionLocation);
+
+		if (cachedHosts.get(host) == null) {
+			cachedHosts.put(host, serviceInterface.getSite(host));
+		}
+		return cachedHosts.get(host);
+	}
+
+	public final List<String> getStagingFilesystemsForSubmissionLocation(
+			final String subLoc) {
+
+		if (subLoc == null || "".equals(subLoc)) {
+			return null;
+		}
+		if (cachedStagingFilesystemsPerSubLoc.get(subLoc) == null) {
+			List<String> temp = serviceInterface
+					.getStagingFileSystemForSubmissionLocation(subLoc)
+					.getStringList();
+			cachedStagingFilesystemsPerSubLoc.put(subLoc, temp);
+		}
+		return cachedStagingFilesystemsPerSubLoc.get(subLoc);
 	}
 
 }

@@ -9,22 +9,40 @@ import java.util.TreeMap;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name="logMessages")
+@XmlRootElement(name = "logMessages")
 public class DtoLogMessages {
-	
-	List<DtoLogMessage> messages = new LinkedList<DtoLogMessage>();
-	
+
 	public static DtoLogMessages createLogMessages(Map<Long, String> messages) {
-		
+
 		DtoLogMessages result = new DtoLogMessages();
-		for ( Long time : messages.keySet() ) {
+		for (Long time : messages.keySet()) {
 			Date date = new Date(time);
 			result.addMessage(date, messages.get(time));
 		}
 		return result;
 	}
 
-	@XmlElement(name="message")
+	List<DtoLogMessage> messages = new LinkedList<DtoLogMessage>();
+
+	public void addMessage(Date date, String message) {
+		addMessage(new DtoLogMessage(date, message));
+	}
+
+	public void addMessage(DtoLogMessage message) {
+		this.messages.add(message);
+	}
+
+	public Map<Date, String> asMap() {
+
+		Map<Date, String> temp = new TreeMap<Date, String>();
+
+		for (DtoLogMessage msg : getMessages()) {
+			temp.put(msg.getDate(), msg.getMessage());
+		}
+		return temp;
+	}
+
+	@XmlElement(name = "message")
 	public List<DtoLogMessage> getMessages() {
 		return messages;
 	}
@@ -32,24 +50,5 @@ public class DtoLogMessages {
 	public void setMessages(List<DtoLogMessage> messages) {
 		this.messages = messages;
 	}
-	
-	public void addMessage(DtoLogMessage message) {
-		this.messages.add(message);
-	}
-	
-	public void addMessage(Date date, String message) {
-		addMessage(new DtoLogMessage(date, message));
-	}
-	
-	public Map<Date, String> asMap() {
-		
-		Map<Date, String> temp = new TreeMap<Date, String>();
-		
-		for ( DtoLogMessage msg : getMessages() ) {
-			temp.put(msg.getDate(), msg.getMessage());
-		}
-		return temp;
-	}
-	
 
 }

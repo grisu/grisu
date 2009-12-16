@@ -23,9 +23,9 @@ import org.vpac.historyRepeater.SimpleHistoryManager;
 import au.org.arcs.jcommons.interfaces.InformationManager;
 
 public class ClientSideGrisuRegistry implements GrisuRegistry {
-	
-	static final Logger myLogger = Logger.getLogger(ClientSideGrisuRegistry.class.getName());
-	
+
+	static final Logger myLogger = Logger
+			.getLogger(ClientSideGrisuRegistry.class.getName());
 
 	private final ServiceInterface serviceInterface;
 
@@ -37,28 +37,32 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 	private UserEnvironmentManager cachedUserInformation;
 	private ResourceInformation cachedResourceInformation;
 	private FileManager cachedFileHelper;
-	
-	public ClientSideGrisuRegistry(ServiceInterface serviceInterface) throws Exception {
+
+	public ClientSideGrisuRegistry(ServiceInterface serviceInterface)
+			throws Exception {
 		this.serviceInterface = serviceInterface;
-		this.infoManager = new CachedMdsInformationManager(Environment.getGrisuDirectory().getPath());
-		
-//		try {
-//			this.infoManager.getAllSubmissionLocations();
-//		} catch (Exception e) {
-//			throw new Exception("Couldn't query mds from here. Please use another GrisuRegistry...");
-//		}
-		
+		this.infoManager = new CachedMdsInformationManager(Environment
+				.getGrisuDirectory().getPath());
+
+		// try {
+		// this.infoManager.getAllSubmissionLocations();
+		// } catch (Exception e) {
+		// throw new
+		// Exception("Couldn't query mds from here. Please use another GrisuRegistry...");
+		// }
+
 	}
-	
+
 	public ApplicationInformation getApplicationInformation(
 			String applicationName) {
 
 		if (cachedApplicationInformationObjects.get(applicationName) == null) {
-			ApplicationInformation temp = new ClientSideApplicationInformation(this, applicationName, infoManager);
+			ApplicationInformation temp = new ClientSideApplicationInformation(
+					this, applicationName, infoManager);
 			cachedApplicationInformationObjects.put(applicationName, temp);
 		}
 		return cachedApplicationInformationObjects.get(applicationName);
-		
+
 	}
 
 	public FileManager getFileManager() {
@@ -69,10 +73,10 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 	}
 
 	public HistoryManager getHistoryManager() {
-		
+
 		if (historyManager == null) {
-			File historyFile = new File(Environment.getGrisuDirectory().getPath(),
-					GRISU_HISTORY_FILENAME);
+			File historyFile = new File(Environment.getGrisuDirectory()
+					.getPath(), GRISU_HISTORY_FILENAME);
 			if (!historyFile.exists()) {
 				try {
 					historyFile.createNewFile();
@@ -91,18 +95,20 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 	}
 
 	public ResourceInformation getResourceInformation() {
-		
+
 		if (cachedResourceInformation == null) {
-			cachedResourceInformation = new ClientSideResourceInformation(this, infoManager);
+			cachedResourceInformation = new ClientSideResourceInformation(this,
+					infoManager);
 		}
 		return cachedResourceInformation;
 	}
 
 	public UserApplicationInformation getUserApplicationInformation(
 			String applicationName) {
-		
+
 		if (cachedUserInformationObjects.get(applicationName) == null) {
-			UserApplicationInformation temp = new ClientSideUserApplicationInformation(this, applicationName, infoManager);
+			UserApplicationInformation temp = new ClientSideUserApplicationInformation(
+					this, applicationName, infoManager);
 			cachedUserInformationObjects.put(applicationName, temp);
 		}
 		return cachedUserInformationObjects.get(applicationName);
@@ -119,6 +125,5 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 	public void setUserEnvironmentManager(UserEnvironmentManager ui) {
 		this.cachedUserInformation = ui;
 	}
-
 
 }

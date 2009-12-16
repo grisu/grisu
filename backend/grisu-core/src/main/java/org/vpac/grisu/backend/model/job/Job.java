@@ -36,7 +36,7 @@ import au.org.arcs.jcommons.utils.JsdlHelpers;
  * 
  */
 @Entity
-@Table(name="jobs")
+@Table(name = "jobs")
 public class Job implements Comparable<Job> {
 
 	static final Logger myLogger = Logger.getLogger(Job.class.getName());
@@ -71,43 +71,24 @@ public class Job implements Comparable<Job> {
 	private ProxyCredential credential = null;
 
 	private String submissionType = null;
-	
+
 	private Date lastStatusCheck = null;
 
-	public Date getLastStatusCheck() {
-		
-		if ( lastStatusCheck == null ) {
-			lastStatusCheck = new Date();
-		}
-		return lastStatusCheck;
-	}
+	private Map<String, String> jobProperties = Collections
+			.synchronizedMap(new HashMap<String, String>());
 
-	public void setLastStatusCheck(Date lastStatusCheck) {
-		this.lastStatusCheck = lastStatusCheck;
-	}
-
-	private Map<String, String> jobProperties = Collections.synchronizedMap(new HashMap<String, String>());
-	
 	private boolean isBatchJob = false;
-//
-	// TODO later add requirements
-	// private ArrayList<Requirement> requirements = null;
+
+	private Map<Long, String> logMessages = Collections
+			.synchronizedMap(new TreeMap<Long, String>());
 
 	// for hibernate
 	public Job() {
 	}
 
-	/**
-	 * If you use this constructor save the Job object straight away to prevent
-	 * duplicate names.
-	 * 
-	 * @param jobname
-	 *            the (base-)name you want for your job
-	 */
-	public Job(final String dn, final String jobname) {
-		this.dn = dn;
-		this.jobname = jobname;
-	}
+	//
+	// TODO later add requirements
+	// private ArrayList<Requirement> requirements = null;
 
 	/**
 	 * Creates a Job and associates a jsdl document with it straight away. It
@@ -145,54 +126,24 @@ public class Job implements Comparable<Job> {
 	}
 
 	/**
-	 * The dn of the user who created/submits this job.
+	 * If you use this constructor save the Job object straight away to prevent
+	 * duplicate names.
 	 * 
-	 * @return the dn
+	 * @param jobname
+	 *            the (base-)name you want for your job
 	 */
-	@Column(nullable = false)
-	public String getDn() {
-		return dn;
-	}
-
-	/**
-	 * Sets the dn of the user who submits this job. Should be only used by
-	 * hibernate
-	 * 
-	 * @param dn
-	 *            the dn
-	 */
-	protected void setDn(final String dn) {
+	public Job(final String dn, final String jobname) {
 		this.dn = dn;
+		this.jobname = jobname;
 	}
 
-	/**
-	 * The fqan of the VO/group for which this job is/was submitted.
-	 * 
-	 * @return the fqan
-	 */
-	public String getFqan() {
-		return fqan;
+	public synchronized void addJobProperties(
+			final Map<String, String> properties) {
+		getJobProperties().putAll(properties);
 	}
 
-	/**
-	 * Sets the fqan of the VO/group for which this job is going to be
-	 * submitted.
-	 * 
-	 * @param fqan
-	 */
-	public void setFqan(final String fqan) {
-		this.fqan = fqan;
-	}
-	
-	private Map<Long, String> logMessages = Collections.synchronizedMap(new TreeMap<Long, String>());
-
-	@CollectionOfElements(fetch = FetchType.EAGER)
-	public Map<Long, String> getLogMessages() {
-		return logMessages;
-	}
-
-	private void setLogMessages(Map<Long, String> logMessages) {
-		this.logMessages = logMessages;
+	public synchronized void addJobProperty(final String key, final String value) {
+		getJobProperties().put(key, value);
 	}
 
 	public synchronized void addLogMessage(String message) {
@@ -200,14 +151,46 @@ public class Job implements Comparable<Job> {
 		this.logMessages.put(now.getTime(), message);
 	}
 
-	/**
-	 * Connects a job to a credential.
-	 * 
-	 * @param credential
-	 *            the credential
-	 */
-	public void setCredential(final ProxyCredential credential) {
-		this.credential = credential;
+	public int compareTo(Job arg0) {
+
+		Long thisSubTime = null;
+		try {
+			thisSubTime = Long.parseLong(this
+					.getJobProperty(Constants.SUBMISSION_TIME_KEY));
+		} catch (Exception e) {
+			thisSubTime = 0L;
+		}
+
+		Long otherSubTime = null;
+		try {
+			otherSubTime = Long.parseLong(arg0
+					.getJobProperty(Constants.SUBMISSION_TIME_KEY));
+		} catch (Exception e) {
+			otherSubTime = 0L;
+		}
+
+		int result = thisSubTime.compareTo(otherSubTime);
+
+		if (result != 0) {
+			return result;
+		} else {
+			return this.jobname.compareTo(arg0.getJobname());
+		}
+	}
+
+	public boolean equals(final Object other) {
+		if (!(other instanceof Job)) {
+			return false;
+		}
+
+		Job otherJob = (Job) other;
+
+		if (this.dn.equals(otherJob.getDn())
+				&& this.jobname.equals(otherJob.getJobname())) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -221,24 +204,31 @@ public class Job implements Comparable<Job> {
 		return this.credential;
 	}
 
-//	/**
-//	 * Gets the host to which this job is going to be submitted/was submitted.
-//	 * 
-//	 * @return the hostname
-//	 */
-//	public String getSubmissionHost() {
-//		return submissionHost;
-//	}
+	/**
+	 * The dn of the user who created/submits this job.
+	 * 
+	 * @return the dn
+	 */
+	@Column(nullable = false)
+	public String getDn() {
+		return dn;
+	}
 
-//	/**
-//	 * Sets the host to which this job is going to be submitted.
-//	 * 
-//	 * @param host
-//	 *            the hostname (like ng2.vpac.org)
-//	 */
-//	public void setSubmissionHost(final String host) {
-//		this.submissionHost = host;
-//	}
+	/**
+	 * The fqan of the VO/group for which this job is/was submitted.
+	 * 
+	 * @return the fqan
+	 */
+	public String getFqan() {
+		return fqan;
+	}
+
+	// hibernate
+	@Id
+	@GeneratedValue
+	private Long getId() {
+		return id;
+	}
 
 	/**
 	 * Gets the jsdl job description for this job.
@@ -252,17 +242,6 @@ public class Job implements Comparable<Job> {
 	}
 
 	/**
-	 * Sets the job description for this job. Take care that you have got the
-	 * same jobname within this job description and in the jobname property.
-	 * 
-	 * @param jobDescription
-	 *            the job description as jsdl xml document
-	 */
-	public void setJobDescription(final Document jobDescription) {
-		this.jobDescription = jobDescription;
-	}
-
-	/**
 	 * Gets the (JobSubmitter-specific) jobhandle with which this job was
 	 * submitted.
 	 * 
@@ -272,15 +251,24 @@ public class Job implements Comparable<Job> {
 		return jobhandle;
 	}
 
-	/**
-	 * Sets the jobhandle. Only a JobSubmitter should use this method.
-	 * 
-	 * @param jobhandle
-	 *            the (JobSubmitter-specific) job handle
-	 */
-	public void setJobhandle(final String jobhandle) {
-		this.jobhandle = jobhandle;
-	}
+	// /**
+	// * Gets the host to which this job is going to be submitted/was submitted.
+	// *
+	// * @return the hostname
+	// */
+	// public String getSubmissionHost() {
+	// return submissionHost;
+	// }
+
+	// /**
+	// * Sets the host to which this job is going to be submitted.
+	// *
+	// * @param host
+	// * the hostname (like ng2.vpac.org)
+	// */
+	// public void setSubmissionHost(final String host) {
+	// this.submissionHost = host;
+	// }
 
 	/**
 	 * Gets the (along with the users' dn unique) name of the job.
@@ -292,15 +280,40 @@ public class Job implements Comparable<Job> {
 		return jobname;
 	}
 
+	@CollectionOfElements(fetch = FetchType.EAGER)
+	public synchronized Map<String, String> getJobProperties() {
+		return jobProperties;
+	}
+
+	@Transient
+	public String getJobProperty(final String key) {
+		return this.jobProperties.get(key);
+	}
+
 	/**
-	 * Sets the name of this job. Take care that it is unique when combined with
-	 * the users' dn.
+	 * For hibernate conversion xml-document -> string.
 	 * 
-	 * @param jobname
-	 *            the jobname
+	 * @return xml string
+	 * @throws TransformerFactoryConfigurationError
+	 * @throws TransformerException
 	 */
-	private void setJobname(final String jobname) {
-		this.jobname = jobname;
+	@Column(length = 15000)
+	private String getJsdl() throws TransformerException {
+
+		return SeveralXMLHelpers.toString(jobDescription);
+	}
+
+	public Date getLastStatusCheck() {
+
+		if (lastStatusCheck == null) {
+			lastStatusCheck = new Date();
+		}
+		return lastStatusCheck;
+	}
+
+	@CollectionOfElements(fetch = FetchType.EAGER)
+	public Map<Long, String> getLogMessages() {
+		return logMessages;
 	}
 
 	/**
@@ -316,25 +329,13 @@ public class Job implements Comparable<Job> {
 	}
 
 	/**
-	 * Sets the current status of this job. Only a {@link JobSubmitter} should
-	 * use this method.
+	 * Gets the type of the {@link JobSubmitter} that was used to submit this
+	 * job.
 	 * 
-	 * @param status
+	 * @return the type of the submitter (like "GT4")
 	 */
-	public void setStatus(final int status) {
-		this.status = status;
-	}
-
-	// hibernate
-	@Id
-	@GeneratedValue
-	private Long getId() {
-		return id;
-	}
-
-	// hibernate
-	private void setId(final Long id) {
-		this.id = id;
+	public String getSubmissionType() {
+		return submissionType;
 	}
 
 	/**
@@ -347,49 +348,142 @@ public class Job implements Comparable<Job> {
 		return submittedJobDescription;
 	}
 
-	/**
-	 * Sets the (JobSubmitter-specific) job description. Only a JobSubmitter
-	 * should use this method.
-	 * 
-	 * @param desc
-	 *            the job description in the JobSubmitter-specific format
-	 */
-	public void setSubmittedJobDescription(final String desc) {
-		this.submittedJobDescription = desc;
+	public int hashCode() {
+		return this.dn.hashCode() + this.jobname.hashCode();
+	}
+
+	public boolean isBatchJob() {
+		return isBatchJob;
+	}
+
+	public void setBatchJob(boolean is) {
+		this.isBatchJob = is;
 	}
 
 	/**
-	 * Gets the type of the {@link JobSubmitter} that was used to submit this
-	 * job.
+	 * Connects a job to a credential.
 	 * 
-	 * @return the type of the submitter (like "GT4")
+	 * @param credential
+	 *            the credential
 	 */
-	public String getSubmissionType() {
-		return submissionType;
+	public void setCredential(final ProxyCredential credential) {
+		this.credential = credential;
 	}
 
 	/**
-	 * Sets the type of the submitter you want to use to submit this job. grisu
-	 * only supports "GT4" at the moment.
+	 * Sets the dn of the user who submits this job. Should be only used by
+	 * hibernate
 	 * 
-	 * @param submissionType
-	 *            the type of the job submitter
+	 * @param dn
+	 *            the dn
 	 */
-	public void setSubmissionType(final String submissionType) {
-		this.submissionType = submissionType;
+	protected void setDn(final String dn) {
+		this.dn = dn;
 	}
 
 	/**
-	 * For hibernate conversion xml-document -> string.
+	 * Sets the fqan of the VO/group for which this job is going to be
+	 * submitted.
 	 * 
-	 * @return xml string
-	 * @throws TransformerFactoryConfigurationError
-	 * @throws TransformerException
+	 * @param fqan
 	 */
-	@Column(length = 15000)
-	private String getJsdl() throws TransformerException {
+	public void setFqan(final String fqan) {
+		this.fqan = fqan;
+	}
 
-		return SeveralXMLHelpers.toString(jobDescription);
+	// hibernate
+	private void setId(final Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * Sets the job description for this job. Take care that you have got the
+	 * same jobname within this job description and in the jobname property.
+	 * 
+	 * @param jobDescription
+	 *            the job description as jsdl xml document
+	 */
+	public void setJobDescription(final Document jobDescription) {
+		this.jobDescription = jobDescription;
+	}
+
+	/**
+	 * Sets the jobhandle. Only a JobSubmitter should use this method.
+	 * 
+	 * @param jobhandle
+	 *            the (JobSubmitter-specific) job handle
+	 */
+	public void setJobhandle(final String jobhandle) {
+		this.jobhandle = jobhandle;
+	}
+
+	// ---------------------
+	// job information
+	// most of this will be removed once only the jobproperties map is used
+	// ---------------------
+	// @CollectionOfElements(fetch = FetchType.EAGER)
+	// public final List<String> getInputFiles() {
+	// return inputFiles;
+	// }
+	//
+	// private void setInputFiles(final List<String> inputFiles) {
+	// this.inputFiles = inputFiles;
+	// }
+	//
+	// public final void addInputFile(final String inputFile) {
+	// this.inputFiles.add(inputFile);
+	// }
+	//
+	// public final void removeInputFile(final String inputFile) {
+	// this.inputFiles.remove(inputFile);
+	// }
+	//
+	// public final String getJob_directory() {
+	// return job_directory;
+	// }
+	//
+	// public final void setJob_directory(final String job_directory) {
+	// this.job_directory = job_directory;
+	// }
+	//
+	// public final String getStderr() {
+	// return stderr;
+	// }
+	//
+	// public final void setStderr(final String stderr) {
+	// this.stderr = stderr;
+	// }
+	//
+	// public final String getStdout() {
+	// return stdout;
+	// }
+	//
+	// public final void setStdout(final String stdout) {
+	// this.stdout = stdout;
+	// }
+	//
+	// public final String getApplication() {
+	// return application;
+	// }
+	//
+	// public final void setApplication(final String application) {
+	// this.application = application;
+	// }
+
+	/**
+	 * Sets the name of this job. Take care that it is unique when combined with
+	 * the users' dn.
+	 * 
+	 * @param jobname
+	 *            the jobname
+	 */
+	private void setJobname(final String jobname) {
+		this.jobname = jobname;
+	}
+
+	private synchronized void setJobProperties(
+			final Map<String, String> jobProperties) {
+		this.jobProperties = jobProperties;
 	}
 
 	/**
@@ -420,132 +514,44 @@ public class Job implements Comparable<Job> {
 
 	}
 
-	public boolean equals(final Object other) {
-		if (!(other instanceof Job)) {
-			return false;
-		}
-
-		Job otherJob = (Job) other;
-
-		if (this.dn.equals(otherJob.getDn()) 
-				&& this.jobname.equals(otherJob.getJobname())) {
-			return true;
-		} else {
-			return false;
-		}
+	public void setLastStatusCheck(Date lastStatusCheck) {
+		this.lastStatusCheck = lastStatusCheck;
 	}
 
-	public int hashCode() {
-		return this.dn.hashCode() + this.jobname.hashCode();
+	private void setLogMessages(Map<Long, String> logMessages) {
+		this.logMessages = logMessages;
 	}
 
-	// ---------------------
-	// job information
-	// most of this will be removed once only the jobproperties map is used
-	// ---------------------
-//	@CollectionOfElements(fetch = FetchType.EAGER)
-//	public final List<String> getInputFiles() {
-//		return inputFiles;
-//	}
-//
-//	private void setInputFiles(final List<String> inputFiles) {
-//		this.inputFiles = inputFiles;
-//	}
-//
-//	public final void addInputFile(final String inputFile) {
-//		this.inputFiles.add(inputFile);
-//	}
-//
-//	public final void removeInputFile(final String inputFile) {
-//		this.inputFiles.remove(inputFile);
-//	}
-//
-//	public final String getJob_directory() {
-//		return job_directory;
-//	}
-//
-//	public final void setJob_directory(final String job_directory) {
-//		this.job_directory = job_directory;
-//	}
-//
-//	public final String getStderr() {
-//		return stderr;
-//	}
-//
-//	public final void setStderr(final String stderr) {
-//		this.stderr = stderr;
-//	}
-//
-//	public final String getStdout() {
-//		return stdout;
-//	}
-//
-//	public final void setStdout(final String stdout) {
-//		this.stdout = stdout;
-//	}
-//
-//	public final String getApplication() {
-//		return application;
-//	}
-//
-//	public final void setApplication(final String application) {
-//		this.application = application;
-//	}
-	
-	
-	public boolean isBatchJob() {
-		return isBatchJob;
-	}
-	
-	public void setBatchJob(boolean is) {
-		this.isBatchJob = is;
+	/**
+	 * Sets the current status of this job. Only a {@link JobSubmitter} should
+	 * use this method.
+	 * 
+	 * @param status
+	 */
+	public void setStatus(final int status) {
+		this.status = status;
 	}
 
-	@CollectionOfElements(fetch = FetchType.EAGER)
-	public synchronized Map<String, String> getJobProperties() {
-		return jobProperties;
+	/**
+	 * Sets the type of the submitter you want to use to submit this job. grisu
+	 * only supports "GT4" at the moment.
+	 * 
+	 * @param submissionType
+	 *            the type of the job submitter
+	 */
+	public void setSubmissionType(final String submissionType) {
+		this.submissionType = submissionType;
 	}
 
-	private synchronized void setJobProperties(final Map<String, String> jobProperties) {
-		this.jobProperties = jobProperties;
-	}
-
-	public synchronized void addJobProperty(final String key, final String value) {
-		getJobProperties().put(key, value);
-	}
-
-	public synchronized void addJobProperties(final Map<String, String> properties) {
-		getJobProperties().putAll(properties);
-	}
-
-	@Transient
-	public String getJobProperty(final String key) {
-		return this.jobProperties.get(key);
-	}
-
-	public int compareTo(Job arg0) {
-
-		Long thisSubTime = null;
-		try {
-			thisSubTime = Long.parseLong(this.getJobProperty(Constants.SUBMISSION_TIME_KEY));
-		} catch (Exception e) {
-			thisSubTime = 0L;	
-		}
-
-		Long otherSubTime = null;
-		try {
-			otherSubTime = Long.parseLong(arg0.getJobProperty(Constants.SUBMISSION_TIME_KEY));
-		} catch (Exception e) {
-			otherSubTime = 0L;
-		}
-
-		int result = thisSubTime.compareTo(otherSubTime);
-		
-		if ( result != 0 ) {
-			return result;
-		} else {
-			return this.jobname.compareTo(arg0.getJobname());
-		}
+	/**
+	 * Sets the (JobSubmitter-specific) job description. Only a JobSubmitter
+	 * should use this method.
+	 * 
+	 * @param desc
+	 *            the job description in the JobSubmitter-specific format
+	 */
+	public void setSubmittedJobDescription(final String desc) {
+		this.submittedJobDescription = desc;
 	}
 
 }

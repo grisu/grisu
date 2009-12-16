@@ -36,8 +36,8 @@ public class LoginParams {
 	 * @param myProxyPassphrase
 	 *            your myproxy password
 	 */
-	public LoginParams(final String serviceInterfaceUrl, final String myProxyUsername,
-			final char[] myProxyPassphrase) {
+	public LoginParams(final String serviceInterfaceUrl,
+			final String myProxyUsername, final char[] myProxyPassphrase) {
 		this(serviceInterfaceUrl, myProxyUsername, myProxyPassphrase,
 				MyProxyServerParams.DEFAULT_MYPROXY_SERVER, new Integer(
 						MyProxyServerParams.DEFAULT_MYPROXY_PORT).toString());
@@ -58,8 +58,9 @@ public class LoginParams {
 	 * @param myProxyPort
 	 *            the port of the myproxy server
 	 */
-	public LoginParams(final String serviceInterfaceUrl, final String myProxyUsername,
-			final char[] myProxyPassphrase, final String myProxyServer, final String myProxyPort) {
+	public LoginParams(final String serviceInterfaceUrl,
+			final String myProxyUsername, final char[] myProxyPassphrase,
+			final String myProxyServer, final String myProxyPort) {
 		setServiceInterfaceUrl(serviceInterfaceUrl);
 		this.myProxyUsername = myProxyUsername;
 		this.myProxyPassphrase = myProxyPassphrase;
@@ -86,8 +87,9 @@ public class LoginParams {
 	 * @param httpProxyPort
 	 *            the http proxy server port
 	 */
-	public LoginParams(final String serviceInterfaceUrl, final String myProxyUsername,
-			final char[] myProxyPassphrase, final String myProxyServer, final String myProxyPort,
+	public LoginParams(final String serviceInterfaceUrl,
+			final String myProxyUsername, final char[] myProxyPassphrase,
+			final String myProxyServer, final String myProxyPort,
 			final String httpProxy, final int httpProxyPort) {
 		setServiceInterfaceUrl(serviceInterfaceUrl);
 		this.myProxyUsername = myProxyUsername;
@@ -121,10 +123,11 @@ public class LoginParams {
 	 * @param httpProxyPassphrase
 	 *            the http proxy server password
 	 */
-	public LoginParams(final String serviceInterfaceUrl, final String myProxyUsername,
-			final char[] myProxyPassphrase, final String myProxyServer, final String myProxyPort,
-			final String httpProxy, final int httpProxyPort, final String httpProxyUsername,
-			final char[] httpProxyPassphrase) {
+	public LoginParams(final String serviceInterfaceUrl,
+			final String myProxyUsername, final char[] myProxyPassphrase,
+			final String myProxyServer, final String myProxyPort,
+			final String httpProxy, final int httpProxyPort,
+			final String httpProxyUsername, final char[] httpProxyPassphrase) {
 		setServiceInterfaceUrl(serviceInterfaceUrl);
 		this.myProxyUsername = myProxyUsername;
 		this.myProxyPassphrase = myProxyPassphrase;
@@ -133,145 +136,6 @@ public class LoginParams {
 		this.httpProxy = httpProxy;
 		this.httpProxyPort = httpProxyPort;
 		this.httpProxyUsername = httpProxyUsername;
-		this.httpProxyPassphrase = httpProxyPassphrase;
-	}
-
-	/**
-	 * Returns the url of the backend to connect to.
-	 * 
-	 * @return the serviceInterface url
-	 */
-	public final String getServiceInterfaceUrl() {
-		return serviceInterfaceUrl;
-	}
-
-	/**
-	 * Sets the url of the backend to connect to.
-	 * 
-	 * @param serviceInterfaceUrl
-	 *            the serviceInterface url
-	 */
-	public final void setServiceInterfaceUrl(final String serviceInterfaceUrl) {
-		
-		String possibleAlias = LoginManager.SERVICEALIASES.get(serviceInterfaceUrl);
-		if ( StringUtils.isNotBlank(possibleAlias) ) {
-			this.serviceInterfaceUrl = possibleAlias;
-		} else {
-			this.serviceInterfaceUrl = serviceInterfaceUrl;
-		}
-	}
-
-	/**
-	 * Returns the myproxy username.
-	 * 
-	 * @return the myproxy username
-	 */
-	public final String getMyProxyUsername() {
-		return myProxyUsername;
-	}
-
-	/**
-	 * Sets the myproxy username.
-	 * 
-	 * @param myProxyUsername
-	 *            the myproxy username
-	 */
-	public final void setMyProxyUsername(final String myProxyUsername) {
-		this.myProxyUsername = myProxyUsername;
-	}
-
-	/**
-	 * Returns the myproxy password.
-	 * 
-	 * @return the myproxy password
-	 */
-	public final char[] getMyProxyPassphrase() {
-		return myProxyPassphrase;
-	}
-
-	/**
-	 * Sets the myproxy password.
-	 * 
-	 * @param myProxyPassphrase
-	 *            the myproxy password
-	 */
-	public final void setMyProxyPassphrase(final char[] myProxyPassphrase) {
-		this.myProxyPassphrase = myProxyPassphrase;
-	}
-
-	/**
-	 * Returns the http proxy server hostname.
-	 * 
-	 * @return the http proxy server hostname
-	 */
-	public final String getHttpProxy() {
-		return httpProxy;
-	}
-
-	/**
-	 * Sets the http proxy server port.
-	 * 
-	 * @param httpProxy
-	 *            the http proxy server port
-	 */
-	public final void setHttpProxy(final String httpProxy) {
-		this.httpProxy = httpProxy;
-	}
-
-	/**
-	 * Gets the http proxy server port.
-	 * 
-	 * @return the http proxy server port
-	 */
-	public final int getHttpProxyPort() {
-		return httpProxyPort;
-	}
-
-	/**
-	 * Returns the port of the http proxy server.
-	 * 
-	 * @param httpProxyPort
-	 *            the http proxy server port
-	 */
-	public final void setHttpProxyPort(final int httpProxyPort) {
-		this.httpProxyPort = httpProxyPort;
-	}
-
-	/**
-	 * Returns the username for the http proxy server.
-	 * 
-	 * @return the http proxy server username
-	 */
-	public final String getHttpProxyUsername() {
-		return httpProxyUsername;
-	}
-
-	/**
-	 * Sets the http proxy server username.
-	 * 
-	 * @param httpProxyUsername
-	 *            the username for the http proxy server
-	 */
-	public final void setHttpProxyUsername(final String httpProxyUsername) {
-		this.httpProxyUsername = httpProxyUsername;
-	}
-
-	/**
-	 * Returns the password for the http proxy server.
-	 * 
-	 * @return the http proxy server password
-	 */
-	public final char[] getHttpProxyPassphrase() {
-		return httpProxyPassphrase;
-	}
-
-	/**
-	 * Sets the password for the http proxy server.
-	 * 
-	 * @param httpProxyPassphrase
-	 *            the http proxy server password
-	 */
-	public final void setHttpProxyPassphrase(final char[] httpProxyPassphrase) {
 		this.httpProxyPassphrase = httpProxyPassphrase;
 	}
 
@@ -290,12 +154,144 @@ public class LoginParams {
 	}
 
 	/**
+	 * Returns the http proxy server hostname.
+	 * 
+	 * @return the http proxy server hostname
+	 */
+	public final String getHttpProxy() {
+		return httpProxy;
+	}
+
+	/**
+	 * Returns the password for the http proxy server.
+	 * 
+	 * @return the http proxy server password
+	 */
+	public final char[] getHttpProxyPassphrase() {
+		return httpProxyPassphrase;
+	}
+
+	/**
+	 * Gets the http proxy server port.
+	 * 
+	 * @return the http proxy server port
+	 */
+	public final int getHttpProxyPort() {
+		return httpProxyPort;
+	}
+
+	/**
+	 * Returns the username for the http proxy server.
+	 * 
+	 * @return the http proxy server username
+	 */
+	public final String getHttpProxyUsername() {
+		return httpProxyUsername;
+	}
+
+	/**
+	 * Returns the myproxy password.
+	 * 
+	 * @return the myproxy password
+	 */
+	public final char[] getMyProxyPassphrase() {
+		return myProxyPassphrase;
+	}
+
+	/**
+	 * Returns the port of the myproxy server.
+	 * 
+	 * @return the myproxy server port
+	 */
+	public final String getMyProxyPort() {
+		return myProxyPort;
+	}
+
+	/**
 	 * Returns the hostname of the myproxy server.
 	 * 
 	 * @return the myproxy server hostname
 	 */
 	public final String getMyProxyServer() {
 		return myProxyServer;
+	}
+
+	/**
+	 * Returns the myproxy username.
+	 * 
+	 * @return the myproxy username
+	 */
+	public final String getMyProxyUsername() {
+		return myProxyUsername;
+	}
+
+	/**
+	 * Returns the url of the backend to connect to.
+	 * 
+	 * @return the serviceInterface url
+	 */
+	public final String getServiceInterfaceUrl() {
+		return serviceInterfaceUrl;
+	}
+
+	/**
+	 * Sets the http proxy server port.
+	 * 
+	 * @param httpProxy
+	 *            the http proxy server port
+	 */
+	public final void setHttpProxy(final String httpProxy) {
+		this.httpProxy = httpProxy;
+	}
+
+	/**
+	 * Sets the password for the http proxy server.
+	 * 
+	 * @param httpProxyPassphrase
+	 *            the http proxy server password
+	 */
+	public final void setHttpProxyPassphrase(final char[] httpProxyPassphrase) {
+		this.httpProxyPassphrase = httpProxyPassphrase;
+	}
+
+	/**
+	 * Returns the port of the http proxy server.
+	 * 
+	 * @param httpProxyPort
+	 *            the http proxy server port
+	 */
+	public final void setHttpProxyPort(final int httpProxyPort) {
+		this.httpProxyPort = httpProxyPort;
+	}
+
+	/**
+	 * Sets the http proxy server username.
+	 * 
+	 * @param httpProxyUsername
+	 *            the username for the http proxy server
+	 */
+	public final void setHttpProxyUsername(final String httpProxyUsername) {
+		this.httpProxyUsername = httpProxyUsername;
+	}
+
+	/**
+	 * Sets the myproxy password.
+	 * 
+	 * @param myProxyPassphrase
+	 *            the myproxy password
+	 */
+	public final void setMyProxyPassphrase(final char[] myProxyPassphrase) {
+		this.myProxyPassphrase = myProxyPassphrase;
+	}
+
+	/**
+	 * Sets the port of the myproxy server.
+	 * 
+	 * @param myProxyPort
+	 *            the myproxy server port to use
+	 */
+	public final void setMyProxyPort(final String myProxyPort) {
+		this.myProxyPort = myProxyPort;
 	}
 
 	/**
@@ -309,22 +305,30 @@ public class LoginParams {
 	}
 
 	/**
-	 * Returns the port of the myproxy server.
+	 * Sets the myproxy username.
 	 * 
-	 * @return the myproxy server port
+	 * @param myProxyUsername
+	 *            the myproxy username
 	 */
-	public final String getMyProxyPort() {
-		return myProxyPort;
+	public final void setMyProxyUsername(final String myProxyUsername) {
+		this.myProxyUsername = myProxyUsername;
 	}
 
 	/**
-	 * Sets the port of the myproxy server.
+	 * Sets the url of the backend to connect to.
 	 * 
-	 * @param myProxyPort
-	 *            the myproxy server port to use
+	 * @param serviceInterfaceUrl
+	 *            the serviceInterface url
 	 */
-	public final void setMyProxyPort(final String myProxyPort) {
-		this.myProxyPort = myProxyPort;
+	public final void setServiceInterfaceUrl(final String serviceInterfaceUrl) {
+
+		String possibleAlias = LoginManager.SERVICEALIASES
+				.get(serviceInterfaceUrl);
+		if (StringUtils.isNotBlank(possibleAlias)) {
+			this.serviceInterfaceUrl = possibleAlias;
+		} else {
+			this.serviceInterfaceUrl = serviceInterfaceUrl;
+		}
 	}
 
 }

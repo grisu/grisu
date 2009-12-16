@@ -9,26 +9,27 @@ public class ShibLoginWithJython {
 
 	/**
 	 * @param args
-	 * @throws GeneralSecurityException 
-	 * @throws GSSException 
-	 * @throws IOException 
+	 * @throws GeneralSecurityException
+	 * @throws GSSException
+	 * @throws IOException
 	 */
-	public static void main(String[] args) throws GeneralSecurityException, IOException, GSSException {
+	public static void main(String[] args) throws GeneralSecurityException,
+			IOException, GSSException {
 
 		String username = args[0];
 		String password = args[1];
-//		String idp = args[2];
+		// String idp = args[2];
 		String url = "https://slcs1.arcs.org.au/SLCS/login";
-		
-//		SLCS slcs = new SLCS(url);
-//		
-//		slcs.init(username, password.toCharArray(), "VPAC");
-//		
-//		GSSCredential cred = PlainProxy.init(slcs.getCertificate(), slcs.getPrivateKey(), 12);
-//		
-//		CredentialHelpers.writeToDisk(cred, new File(LocalProxy.PROXY_FILE));
-		
-		
+
+		// SLCS slcs = new SLCS(url);
+		//		
+		// slcs.init(username, password.toCharArray(), "VPAC");
+		//		
+		// GSSCredential cred = PlainProxy.init(slcs.getCertificate(),
+		// slcs.getPrivateKey(), 12);
+		//		
+		// CredentialHelpers.writeToDisk(cred, new File(LocalProxy.PROXY_FILE));
+
 	}
 
 }

@@ -6,7 +6,6 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.globus.exec.utils.ManagedJobFactoryConstants;
 import org.vpac.grisu.control.JobConstants;
-import org.vpac.grisu.control.ServiceInterface;
 import org.w3c.dom.Document;
 
 import au.org.arcs.jcommons.constants.Constants;
@@ -42,78 +41,6 @@ public class JobSubmissionManager {
 			final Map<String, JobSubmitter> submitters) {
 		this.infoManager = infoManager;
 		this.submitters = submitters;
-	}
-	
-	
-
-	/**
-	 * Submits the job to the specified {@link JobSubmitter}.
-	 * 
-	 * @param submitter_name
-	 *            the JobSubmitter
-	 * @param job
-	 *            the Job
-	 * @return the (JobSubmitter-specific) handle to reconnect to the job later
-	 * @throws ServerJobSubmissionException
-	 *             if the job could not be submitted successful
-	 */
-	public final String submit(final String submitter_name, final Job job) {
-
-		Document jsdl = null;
-		jsdl = job.getJobDescription();
-		JobSubmitter submitter = submitters.get(submitter_name);
-
-		if (submitter == null) {
-			throw new NoSuchJobSubmitterException("Can't find JobSubmitter: "
-					+ submitter_name);
-		}
-
-		// String translatedJobDescription =
-		// submitter.convertJobDescription(job);
-
-		String host = JsdlHelpers.getCandidateHosts(jsdl)[0];
-		// TODO change that once I know how to handle queues properly
-
-		String queue = null;
-		if (host.indexOf(":") != -1) {
-			queue = host.substring(0, host.indexOf(":"));
-			host = host.substring(host.indexOf(":") + 1);
-		}
-		myLogger.debug("Submission host is: " + host);
-
-		// don't know whether factory type should be in here or in the
-		// GT4Submitter (more likely the latter)
-		String factoryType = null;
-		if (host.indexOf("#") != -1) {
-			factoryType = host.substring(host.indexOf("#") + 1);
-			if (factoryType == null || factoryType.length() == 0) {
-				factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
-			}
-			host = host.substring(0, host.indexOf("#"));
-		} else {
-			factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
-		}
-		job.addJobProperty(Constants.FACTORY_TYPE_KEY, factoryType);
-
-		myLogger.debug("FactoryType is: " + factoryType);
-		String submitHostEndpoint = submitter.getServerEndpoint(host);
-
-		String handle = submitter.submit(infoManager, submitHostEndpoint,
-				factoryType, job);
-
-		job.setJobhandle(handle);
-		job.addJobProperty(Constants.SUBMISSION_HOST_KEY, host);
-		job.setSubmissionType(submitter_name);
-		job
-				.addJobProperty(Constants.SUBMISSION_TYPE_KEY,
-						submitter_name);
-		if (queue != null && !"".equals(queue)) {
-			job.getJobProperties().put(Constants.QUEUE_KEY, queue);
-		}
-		job.setStatus(JobConstants.EXTERNAL_HANDLE_READY);
-
-		return handle;
-
 	}
 
 	/**
@@ -174,6 +101,74 @@ public class JobSubmissionManager {
 		}
 
 		return submitter.killJob(job.getJobhandle(), job.getCredential());
+	}
+
+	/**
+	 * Submits the job to the specified {@link JobSubmitter}.
+	 * 
+	 * @param submitter_name
+	 *            the JobSubmitter
+	 * @param job
+	 *            the Job
+	 * @return the (JobSubmitter-specific) handle to reconnect to the job later
+	 * @throws ServerJobSubmissionException
+	 *             if the job could not be submitted successful
+	 */
+	public final String submit(final String submitter_name, final Job job) {
+
+		Document jsdl = null;
+		jsdl = job.getJobDescription();
+		JobSubmitter submitter = submitters.get(submitter_name);
+
+		if (submitter == null) {
+			throw new NoSuchJobSubmitterException("Can't find JobSubmitter: "
+					+ submitter_name);
+		}
+
+		// String translatedJobDescription =
+		// submitter.convertJobDescription(job);
+
+		String host = JsdlHelpers.getCandidateHosts(jsdl)[0];
+		// TODO change that once I know how to handle queues properly
+
+		String queue = null;
+		if (host.indexOf(":") != -1) {
+			queue = host.substring(0, host.indexOf(":"));
+			host = host.substring(host.indexOf(":") + 1);
+		}
+		myLogger.debug("Submission host is: " + host);
+
+		// don't know whether factory type should be in here or in the
+		// GT4Submitter (more likely the latter)
+		String factoryType = null;
+		if (host.indexOf("#") != -1) {
+			factoryType = host.substring(host.indexOf("#") + 1);
+			if (factoryType == null || factoryType.length() == 0) {
+				factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
+			}
+			host = host.substring(0, host.indexOf("#"));
+		} else {
+			factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
+		}
+		job.addJobProperty(Constants.FACTORY_TYPE_KEY, factoryType);
+
+		myLogger.debug("FactoryType is: " + factoryType);
+		String submitHostEndpoint = submitter.getServerEndpoint(host);
+
+		String handle = submitter.submit(infoManager, submitHostEndpoint,
+				factoryType, job);
+
+		job.setJobhandle(handle);
+		job.addJobProperty(Constants.SUBMISSION_HOST_KEY, host);
+		job.setSubmissionType(submitter_name);
+		job.addJobProperty(Constants.SUBMISSION_TYPE_KEY, submitter_name);
+		if (queue != null && !"".equals(queue)) {
+			job.getJobProperties().put(Constants.QUEUE_KEY, queue);
+		}
+		job.setStatus(JobConstants.EXTERNAL_HANDLE_READY);
+
+		return handle;
+
 	}
 
 }

@@ -20,8 +20,14 @@ public class LocalServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 	static final String DEFAULT_LOCAL_URL = "Local";
 
-	public final ServiceInterface create(final String interfaceUrl, final String username,
-			final char[] password, final String myProxyServer, final String myProxyPort,
+	public final boolean canHandleUrl(final String url) {
+
+		return DEFAULT_LOCAL_URL.equals(url);
+	}
+
+	public final ServiceInterface create(final String interfaceUrl,
+			final String username, final char[] password,
+			final String myProxyServer, final String myProxyPort,
 			final Object[] otherOptions) throws ServiceInterfaceException {
 
 		Class localServiceInterfaceClass = null;
@@ -51,11 +57,6 @@ public class LocalServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 		return localServiceInterface;
 
-	}
-
-	public final boolean canHandleUrl(final String url) {
-
-		return DEFAULT_LOCAL_URL.equals(url);
 	}
 
 }

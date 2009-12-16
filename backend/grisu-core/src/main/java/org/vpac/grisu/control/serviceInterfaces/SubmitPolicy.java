@@ -8,9 +8,9 @@ import org.vpac.grisu.backend.model.job.Job;
 import au.org.arcs.jcommons.interfaces.GridResource;
 
 public interface SubmitPolicy {
-	
-	public Set<Job> getCalculatedJobs();
-	
+
 	public SortedSet<GridResource> getCalculatedGridResources();
+
+	public Set<Job> getCalculatedJobs();
 
 }

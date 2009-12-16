@@ -124,6 +124,37 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 
 	}
 
+	public final long getCredentialEndTime() {
+
+		String myProxyServer = MyProxyServerParams.getMyProxyServer();
+		int myProxyPort = MyProxyServerParams.getMyProxyPort();
+
+		try {
+			// this is needed because of a possible round-robin myproxy server
+			myProxyServer = InetAddress.getByName(myProxyServer)
+					.getHostAddress();
+		} catch (UnknownHostException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			throw new NoValidCredentialException(
+					"Could not download myproxy credential: "
+							+ e1.getLocalizedMessage());
+		}
+
+		MyProxy myproxy = new MyProxy(myProxyServer, myProxyPort);
+		CredentialInfo info = null;
+		try {
+			info = myproxy.info(getCredential().getGssCredential(),
+					myproxy_username, new String(passphrase));
+		} catch (MyProxyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return info.getEndTime();
+
+	}
+
 	public final String getTemplate(final String application)
 			throws NoSuchTemplateException {
 		Document doc = ServiceTemplateManagement
@@ -150,6 +181,33 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 		}
 
 		return doc;
+
+	}
+
+	protected int kill(final String jobname) {
+
+		Job job;
+		try {
+			job = jobdao.findJobByDN(getUser().getDn(), jobname);
+		} catch (NoSuchJobException e) {
+			return JobConstants.NO_SUCH_JOB;
+		}
+
+		return JobConstants.KILLED;
+	}
+
+	public void kill(final String jobname, final boolean clear)
+			throws RemoteFileSystemException, NoSuchJobException {
+
+		Job job;
+
+		job = jobdao.findJobByDN(getUser().getDn(), jobname);
+
+		kill(jobname);
+
+		if (clear) {
+			jobdao.delete(job);
+		}
 
 	}
 
@@ -187,35 +245,10 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 		return null;
 	}
 
-	public final long getCredentialEndTime() {
+	public void stageFiles(final String jobname)
+			throws RemoteFileSystemException, NoSuchJobException {
 
-		String myProxyServer = MyProxyServerParams.getMyProxyServer();
-		int myProxyPort = MyProxyServerParams.getMyProxyPort();
-
-		try {
-			// this is needed because of a possible round-robin myproxy server
-			myProxyServer = InetAddress.getByName(myProxyServer)
-					.getHostAddress();
-		} catch (UnknownHostException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-			throw new NoValidCredentialException(
-					"Could not download myproxy credential: "
-							+ e1.getLocalizedMessage());
-		}
-
-		MyProxy myproxy = new MyProxy(myProxyServer, myProxyPort);
-		CredentialInfo info = null;
-		try {
-			info = myproxy.info(getCredential().getGssCredential(),
-					myproxy_username, new String(passphrase));
-		} catch (MyProxyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return info.getEndTime();
-
+		myLogger.debug("Dummy staging files...");
 	}
 
 	public void submitJob(final String jobname) throws JobSubmissionException {
@@ -283,50 +316,17 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 
 	}
 
-	protected int kill(final String jobname) {
-
-		Job job;
-		try {
-			job = jobdao.findJobByDN(getUser().getDn(), jobname);
-		} catch (NoSuchJobException e) {
-			return JobConstants.NO_SUCH_JOB;
-		}
-
-		return JobConstants.KILLED;
-	}
-
-	public void kill(final String jobname, final boolean clear)
-			throws RemoteFileSystemException, NoSuchJobException {
-
-		Job job;
-
-		job = jobdao.findJobByDN(getUser().getDn(), jobname);
-
-		kill(jobname);
-
-		if (clear) {
-			jobdao.delete(job);
-		}
-
-	}
-
-	public void stageFiles(final String jobname)
-			throws RemoteFileSystemException, NoSuchJobException {
-
-		myLogger.debug("Dummy staging files...");
-	}
-
 	public String upload(final DataHandler source, final String filename,
 			final boolean return_absolute_url) throws RemoteFileSystemException {
 
 		return "DummyHandle";
 	}
 
-//	public boolean mkdir(final String url) throws RemoteFileSystemException {
-//
-//		myLogger.debug("Dummy. Not creating folder: " + url + "...");
-//		return true;
-//
-//	}
+	// public boolean mkdir(final String url) throws RemoteFileSystemException {
+	//
+	// myLogger.debug("Dummy. Not creating folder: " + url + "...");
+	// return true;
+	//
+	// }
 
 }

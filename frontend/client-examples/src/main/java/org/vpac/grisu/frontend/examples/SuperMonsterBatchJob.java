@@ -17,9 +17,6 @@ import org.vpac.grisu.model.dto.DtoJobs;
 import au.org.arcs.jcommons.constants.Constants;
 
 public final class SuperMonsterBatchJob {
-	
-	private SuperMonsterBatchJob() {
-	}
 
 	/**
 	 * @param args
@@ -71,8 +68,7 @@ public final class SuperMonsterBatchJob {
 					JobObject job = null;
 					try {
 						job = new JobObject(si);
-						job
-								.setApplication(Constants.GENERIC_APPLICATION_NAME);
+						job.setApplication(Constants.GENERIC_APPLICATION_NAME);
 						job.setJobname("monsterBatchJob_" + index + "_"
 								+ startDate.getTime());
 						job.setCommandline("echo \"Hello Brecca!\"");
@@ -145,7 +141,6 @@ public final class SuperMonsterBatchJob {
 				.println("---------------------------------------------------------------------------");
 		final Date psDate2 = new Date();
 
-
 		System.out.println("All submission finished.");
 		System.out.println("Start date: " + startDate.toString());
 		System.out.println("Submission finished date: "
@@ -161,5 +156,8 @@ public final class SuperMonsterBatchJob {
 				+ killFailedOjbects.size());
 		System.out.println("Successful jobs: " + successfulJobObjects.size());
 
+	}
+
+	private SuperMonsterBatchJob() {
 	}
 }

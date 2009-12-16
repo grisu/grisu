@@ -12,21 +12,22 @@ import org.vpac.grisu.model.info.ResourceInformation;
 import au.org.arcs.jcommons.interfaces.InformationManager;
 
 public class ClientSideResourceInformation implements ResourceInformation {
-	
-	static final Logger myLogger = Logger.getLogger(ClientSideResourceInformation.class
-			.getName());
-	
+
+	static final Logger myLogger = Logger
+			.getLogger(ClientSideResourceInformation.class.getName());
+
 	private final GrisuRegistry registry;
 	private final InformationManager infoManager;
-	
-	public ClientSideResourceInformation(GrisuRegistry registry, InformationManager infoManager) {
+
+	public ClientSideResourceInformation(GrisuRegistry registry,
+			InformationManager infoManager) {
 		this.registry = registry;
 		this.infoManager = infoManager;
 	}
 
 	public Set<String> distillSitesFromSubmissionLocations(
 			Set<String> submissionLocations) {
-		
+
 		Set<String> temp = new TreeSet<String>();
 		for (String subLoc : submissionLocations) {
 			String site = null;
@@ -72,7 +73,7 @@ public class ClientSideResourceInformation implements ResourceInformation {
 
 	public String getRecommendedStagingFileSystemForSubmissionLocation(
 			String subLoc) {
-		
+
 		List<String> temp = getStagingFilesystemsForSubmissionLocation(subLoc);
 		if (temp != null && temp.size() > 0) {
 			return temp.get(0);
@@ -82,13 +83,14 @@ public class ClientSideResourceInformation implements ResourceInformation {
 	}
 
 	public String getSite(String urlOrSubmissionLocation) {
-		
+
 		return infoManager.getSiteForHostOrUrl(urlOrSubmissionLocation);
 
 	}
 
 	public List<String> getStagingFilesystemsForSubmissionLocation(String subLoc) {
-		return Arrays.asList(infoManager.getStagingFileSystemForSubmissionLocation(subLoc));
+		return Arrays.asList(infoManager
+				.getStagingFileSystemForSubmissionLocation(subLoc));
 	}
 
 }

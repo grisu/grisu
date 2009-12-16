@@ -37,7 +37,8 @@ public class CaCertManager {
 	 *            the url
 	 * @return the cacert filename or null if url not found
 	 */
-	public final String getCaCertNameForServiceInterfaceUrl(final String serviceInterfaceUrl) {
+	public final String getCaCertNameForServiceInterfaceUrl(
+			final String serviceInterfaceUrl) {
 		return urls.get(serviceInterfaceUrl);
 	}
 

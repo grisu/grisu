@@ -25,272 +25,129 @@ import au.org.arcs.jcommons.utils.JsdlHelpers;
 /**
  * A class that helps creating a job.
  * 
- * This class is extended by the JobObject class in the grisu-client
- * package which includes methods to create the job on the serviceinterface,
- * submit and monitor/control it.
+ * This class is extended by the JobObject class in the grisu-client package
+ * which includes methods to create the job on the serviceinterface, submit and
+ * monitor/control it.
  * 
  * @author Markus Binsteiner
  */
 @Entity
 public class JobSubmissionObjectImpl {
 
+	public static void main(final String[] args) throws JobPropertiesException {
+
+		JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl();
+
+		jso.setJobname("testJobName");
+		jso.setApplication("testApplication");
+		jso.setApplicationVersion("testVersion");
+		jso.setCommandline("java -testcommandline -argument2");
+		jso.setCpus(1);
+		jso.setWalltimeInSeconds(400);
+		jso.setEmail_address("testEmailAddress");
+		jso.setEmail_on_job_start(true);
+		jso.setEmail_on_job_finish(true);
+		jso.setForce_mpi(true);
+		jso.setForce_single(false);
+		jso.setInputFileUrls(new String[] { "file:///temp/test",
+				"gsiftp://ng2.vpac.org/tmp/test" });
+		jso.setMemory(0);
+
+		jso.getJobDescriptionDocument();
+
+	}
+
 	private Long id;
 
-	@Id
-	@GeneratedValue
-	private Long getId() {
-		return this.id;
-	}
-
-	private void setId(final Long id) {
-		this.id = id;
-	}
-
-	public String getJobname() {
-		return jobname;
-	}
-	
-	@Override
-	public String toString() {
-		return getJobname();
-	}
-
-	public void setJobname(final String jobname) {
-		this.jobname = jobname;
-	}
-
-	public String getApplication() {
-		return application;
-	}
-
-	public void setApplication(final String app) {
-		this.application = app;
-	}
-
-	public String getApplicationVersion() {
-		if (StringUtils.isBlank(applicationVersion)) {
-			return Constants.NO_VERSION_INDICATOR_STRING;
-		}
-		return applicationVersion;
-	}
-
-	public void setApplicationVersion(final String appVersion) {
-		this.applicationVersion = appVersion;
-	}
-
-	public String getEmail_address() {
-		return email_address;
-	}
-
-	public void setEmail_address(final String email_address) {
-		this.email_address = email_address;
-	}
-
-	public boolean isEmail_on_job_start() {
-		return email_on_job_start;
-	}
-
-	public void setEmail_on_job_start(final boolean email_on_job_start) {
-		this.email_on_job_start = email_on_job_start;
-	}
-
-	public boolean isEmail_on_job_finish() {
-		return email_on_job_finish;
-	}
-
-	public void setEmail_on_job_finish(final boolean email_on_job_finish) {
-		this.email_on_job_finish = email_on_job_finish;
-	}
-
-	public int getCpus() {
-		return cpus;
-	}
-
-	public void setCpus(final int cpus) {
-		this.cpus = cpus;
-	}
-
-	public boolean isForce_single() {
-		return force_single;
-	}
-
-	public void setForce_single(final boolean force_single) {
-		this.force_single = force_single;
-		this.force_mpi = !force_mpi;
-	}
-
-	public boolean isForce_mpi() {
-		return force_mpi;
-	}
-
-	public void setForce_mpi(final boolean force_mpi) {
-		this.force_mpi = force_mpi;
-		this.force_single = !force_mpi;
-	}
-
-	public long getMemory() {
-		return memory_in_bytes;
-	}
-
-	public void setMemory(final long memory) {
-		this.memory_in_bytes = memory;
-	}
-
-	public int getWalltimeInSeconds() {
-		return walltime_in_seconds;
-	}
-
-	public void setWalltimeInSeconds(final int walltime) {
-		this.walltime_in_seconds = walltime;
-	}
-
-	public String[] getInputFileUrls() {
-		return inputFileUrls.toArray(new String[] {});
-	}
-
-	public void setInputFileUrls(final String[] inputFileUrls) {
-		if (inputFileUrls != null) {
-			this.inputFileUrls = new HashSet<String>(Arrays
-					.asList(inputFileUrls));
-		} else {
-			this.inputFileUrls = new HashSet<String>();
-		}
-	}
-
-	public void addInputFileUrl(final String url) {
-		this.inputFileUrls.add(url);
-	}
-
-	public void addModule(final String module) {
-		this.modules.add(module);
-	}
-
-	@Transient
-	public String getInputFileUrlsAsString() {
-		if (inputFileUrls != null && inputFileUrls.size() != 0) {
-			return StringUtils.join(inputFileUrls, ",");
-		} else {
-			return new String();
-		}
-	}
-
-	public String[] getModules() {
-		return modules.toArray(new String[] {});
-	}
-
-	public void setModules(final String[] modules) {
-		if (modules != null) {
-			this.modules = new HashSet<String>(Arrays.asList(modules));
-		} else {
-			this.modules = new HashSet<String>();
-		}
-	}
-
-	@Transient
-	public String getModulesAsString() {
-		if (modules != null && modules.size() != 0) {
-			return StringUtils.join(modules, ",");
-		} else {
-			return new String();
-		}
-	}
-
-	public String getSubmissionLocation() {
-		return submissionLocation;
-	}
-
-	public void setSubmissionLocation(final String submissionLocation) {
-		this.submissionLocation = submissionLocation;
-	}
-
-	@Column(nullable = false)
-	public String getCommandline() {
-		return commandline;
-	}
-	
-	public String extractExecutable() {
-		if ( commandline == null || commandline.length() == 0 ) {
-			return null;
-		}
-		
-		int i = commandline.indexOf(" ");
-		if ( i <= 0 ) {
-			return commandline;
-		} else {
-			return commandline.substring(0, i-1);
-		}
-	}
-
-	public void setCommandline(final String commandline) {
-		this.commandline = commandline;
-	}
-
-	public String getStderr() {
-		return stderr;
-	}
-
-	public void setStderr(final String stderr) {
-		this.stderr = stderr;
-	}
-
-	public String getStdout() {
-		return stdout;
-	}
-
-	public void setStdout(final String stdout) {
-		this.stdout = stdout;
-	}
-
-	public void setStdin(final String stdin) {
-		this.stdin = stdin;
-	}
-
-	public String getStdin() {
-		return this.stdin;
-	}
-	
-	public String getPbsDebug() {
-		return pbsDebug;
-	}
-
-	public void setPbsDebug(String pbsDebug) {
-		this.pbsDebug = pbsDebug;
-	}
-
 	protected String jobname;
+
 	private String application;
+
 	private String applicationVersion;
+
 	private String email_address;
+
 	private boolean email_on_job_start = false;
+
 	private boolean email_on_job_finish = false;
+
 	private int cpus = 1;
+
 	private boolean force_single = false;
+
 	private boolean force_mpi = false;
+
 	private long memory_in_bytes = 0;
+
 	private int walltime_in_seconds = 0;
+
 	private Set<String> inputFileUrls = new HashSet<String>();
+
 	private Set<String> modules = new HashSet<String>();
+
 	private String submissionLocation;
+
 	private String commandline;
+
 	private String stderr;
+
 	private String stdout;
+
 	private String stdin;
+
 	private String pbsDebug;
 
 	public JobSubmissionObjectImpl() {
 	}
 
-	private boolean checkForBoolean(final String booleanString) {
-		if (booleanString == null) {
-			return false;
-		}
+	public JobSubmissionObjectImpl(final Document jsdl) {
 
-		if ("true".equals(booleanString.toLowerCase())
-				|| "on".equals(booleanString.toLowerCase())) {
-			return true;
+		jobname = JsdlHelpers.getJobname(jsdl);
+		application = JsdlHelpers.getApplicationName(jsdl);
+		applicationVersion = JsdlHelpers.getApplicationVersion(jsdl);
+		email_address = JsdlHelpers.getEmail(jsdl);
+		email_on_job_start = JsdlHelpers.getSendEmailOnJobStart(jsdl);
+		email_on_job_finish = JsdlHelpers.getSendEmailOnJobFinish(jsdl);
+		cpus = JsdlHelpers.getProcessorCount(jsdl);
+		String jobTypeString = JsdlHelpers.getArcsJobType(jsdl);
+		if (jobTypeString != null) {
+			if (jobTypeString.toLowerCase().equals(
+					JobSubmissionProperty.FORCE_SINGLE.defaultValue())) {
+				force_single = true;
+				force_mpi = false;
+			} else if (jobTypeString.toLowerCase().equals(
+					JobSubmissionProperty.FORCE_SINGLE.defaultValue())) {
+				force_single = false;
+				force_mpi = true;
+			} else {
+				force_single = false;
+				force_mpi = false;
+			}
 		} else {
-			return false;
+			force_single = false;
+			force_mpi = false;
 		}
+		memory_in_bytes = JsdlHelpers.getTotalMemoryRequirement(jsdl);
+		walltime_in_seconds = JsdlHelpers.getWalltime(jsdl);
+		setInputFileUrls(JsdlHelpers.getInputFileUrls(jsdl));
+		setModules(JsdlHelpers.getModules(jsdl));
+		String[] candidateHosts = JsdlHelpers.getCandidateHosts(jsdl);
+		if (candidateHosts != null && candidateHosts.length > 0) {
+			submissionLocation = candidateHosts[0];
+		}
+		String executable = JsdlHelpers.getPosixApplicationExecutable(jsdl);
+		String[] arguments = JsdlHelpers.getPosixApplicationArguments(jsdl);
+		StringBuffer tempBuffer = new StringBuffer(executable);
+		if (arguments != null) {
+			for (String arg : arguments) {
+				tempBuffer.append(" " + arg);
+			}
+		}
+		commandline = tempBuffer.toString();
+		stderr = JsdlHelpers.getPosixStandardError(jsdl);
+		stdout = JsdlHelpers.getPosixStandardOutput(jsdl);
+		stdin = JsdlHelpers.getPosixStandardInput(jsdl);
+		pbsDebug = JsdlHelpers.getPbsDebugElement(jsdl);
 	}
 
 	public JobSubmissionObjectImpl(final Map<String, String> jobProperties) {
@@ -350,59 +207,137 @@ public class JobSubmissionObjectImpl {
 		this.stdout = jobProperties
 				.get(JobSubmissionProperty.STDOUT.toString());
 		this.stdin = jobProperties.get(JobSubmissionProperty.STDIN.toString());
-		
-		this.pbsDebug = jobProperties.get(JobSubmissionProperty.PBSDEBUG.toString());
+
+		this.pbsDebug = jobProperties.get(JobSubmissionProperty.PBSDEBUG
+				.toString());
 
 	}
 
-	public JobSubmissionObjectImpl(final Document jsdl) {
+	public void addInputFileUrl(final String url) {
+		this.inputFileUrls.add(url);
+	}
 
-		jobname = JsdlHelpers.getJobname(jsdl);
-		application = JsdlHelpers.getApplicationName(jsdl);
-		applicationVersion = JsdlHelpers.getApplicationVersion(jsdl);
-		email_address = JsdlHelpers.getEmail(jsdl);
-		email_on_job_start = JsdlHelpers.getSendEmailOnJobStart(jsdl);
-		email_on_job_finish = JsdlHelpers.getSendEmailOnJobFinish(jsdl);
-		cpus = JsdlHelpers.getProcessorCount(jsdl);
-		String jobTypeString = JsdlHelpers.getArcsJobType(jsdl);
-		if (jobTypeString != null) {
-			if (jobTypeString.toLowerCase().equals(
-					JobSubmissionProperty.FORCE_SINGLE.defaultValue())) {
-				force_single = true;
-				force_mpi = false;
-			} else if (jobTypeString.toLowerCase().equals(
-					JobSubmissionProperty.FORCE_SINGLE.defaultValue())) {
-				force_single = false;
-				force_mpi = true;
-			} else {
-				force_single = false;
-				force_mpi = false;
-			}
+	public void addModule(final String module) {
+		this.modules.add(module);
+	}
+
+	private boolean checkForBoolean(final String booleanString) {
+		if (booleanString == null) {
+			return false;
+		}
+
+		if ("true".equals(booleanString.toLowerCase())
+				|| "on".equals(booleanString.toLowerCase())) {
+			return true;
 		} else {
-			force_single = false;
-			force_mpi = false;
+			return false;
 		}
-		memory_in_bytes = JsdlHelpers.getTotalMemoryRequirement(jsdl);
-		walltime_in_seconds = JsdlHelpers.getWalltime(jsdl);
-		setInputFileUrls(JsdlHelpers.getInputFileUrls(jsdl));
-		setModules(JsdlHelpers.getModules(jsdl));
-		String[] candidateHosts = JsdlHelpers.getCandidateHosts(jsdl);
-		if (candidateHosts != null && candidateHosts.length > 0) {
-			submissionLocation = candidateHosts[0];
+	}
+
+	private void checkValidity() throws JobPropertiesException {
+
+		if (commandline == null || commandline.length() == 0) {
+			throw new JobPropertiesException(JobSubmissionProperty.COMMANDLINE
+					.toString()
+					+ ": " + "Commandline not specified.");
 		}
-		String executable = JsdlHelpers.getPosixApplicationExecutable(jsdl);
-		String[] arguments = JsdlHelpers.getPosixApplicationArguments(jsdl);
-		StringBuffer tempBuffer = new StringBuffer(executable);
-		if (arguments != null) {
-			for (String arg : arguments) {
-				tempBuffer.append(" " + arg);
-			}
+
+	}
+
+	@Override
+	public boolean equals(Object other) {
+
+		if (other instanceof JobSubmissionObjectImpl) {
+			JobSubmissionObjectImpl otherJob = (JobSubmissionObjectImpl) other;
+			return getJobname().equals(otherJob.getJobname());
+		} else {
+			return false;
 		}
-		commandline = tempBuffer.toString();
-		stderr = JsdlHelpers.getPosixStandardError(jsdl);
-		stdout = JsdlHelpers.getPosixStandardOutput(jsdl);
-		stdin = JsdlHelpers.getPosixStandardInput(jsdl);
-		pbsDebug = JsdlHelpers.getPbsDebugElement(jsdl);
+
+	}
+
+	public String extractExecutable() {
+		if (commandline == null || commandline.length() == 0) {
+			return null;
+		}
+
+		int i = commandline.indexOf(" ");
+		if (i <= 0) {
+			return commandline;
+		} else {
+			return commandline.substring(0, i - 1);
+		}
+	}
+
+	public String getApplication() {
+		return application;
+	}
+
+	public String getApplicationVersion() {
+		if (StringUtils.isBlank(applicationVersion)) {
+			return Constants.NO_VERSION_INDICATOR_STRING;
+		}
+		return applicationVersion;
+	}
+
+	@Column(nullable = false)
+	public String getCommandline() {
+		return commandline;
+	}
+
+	public int getCpus() {
+		return cpus;
+	}
+
+	public String getEmail_address() {
+		return email_address;
+	}
+
+	@Id
+	@GeneratedValue
+	private Long getId() {
+		return this.id;
+	}
+
+	public String[] getInputFileUrls() {
+		return inputFileUrls.toArray(new String[] {});
+	}
+
+	@Transient
+	public String getInputFileUrlsAsString() {
+		if (inputFileUrls != null && inputFileUrls.size() != 0) {
+			return StringUtils.join(inputFileUrls, ",");
+		} else {
+			return new String();
+		}
+	}
+
+	@Transient
+	public final Document getJobDescriptionDocument()
+			throws JobPropertiesException {
+
+		checkValidity();
+
+		Map<JobSubmissionProperty, String> jobProperties = getJobSubmissionPropertyMap();
+
+		Document jsdl = SimpleJsdlBuilder.buildJsdl(jobProperties);
+
+		return jsdl;
+
+	}
+
+	@Transient
+	public final String getJobDescriptionDocumentAsString()
+			throws JobPropertiesException {
+
+		String jsdlString = null;
+		jsdlString = SeveralXMLHelpers.toString(getJobDescriptionDocument());
+
+		return jsdlString;
+	}
+
+	public String getJobname() {
+		return jobname;
 	}
 
 	@Transient
@@ -444,12 +379,43 @@ public class JobSubmissionObjectImpl {
 		jobProperties.put(JobSubmissionProperty.SUBMISSIONLOCATION,
 				submissionLocation);
 		jobProperties.put(JobSubmissionProperty.WALLTIME_IN_MINUTES,
-				new Integer(walltime_in_seconds/60).toString());
+				new Integer(walltime_in_seconds / 60).toString());
 		jobProperties.put(JobSubmissionProperty.PBSDEBUG, pbsDebug);
 
 		return jobProperties;
 	}
 
+	public long getMemory() {
+		return memory_in_bytes;
+	}
+
+	public String[] getModules() {
+		return modules.toArray(new String[] {});
+	}
+
+	@Transient
+	public String getModulesAsString() {
+		if (modules != null && modules.size() != 0) {
+			return StringUtils.join(modules, ",");
+		} else {
+			return new String();
+		}
+	}
+
+	public String getPbsDebug() {
+		return pbsDebug;
+	}
+
+	public String getStderr() {
+		return stderr;
+	}
+
+	public String getStdin() {
+		return this.stdin;
+	}
+	public String getStdout() {
+		return stdout;
+	}
 	@Transient
 	public final Map<String, String> getStringJobSubmissionPropertyMap() {
 
@@ -463,75 +429,113 @@ public class JobSubmissionObjectImpl {
 		}
 		return stringPropertyMap;
 	}
-
-	@Transient
-	public final Document getJobDescriptionDocument() throws JobPropertiesException {
-
-		checkValidity();
-
-		Map<JobSubmissionProperty, String> jobProperties = getJobSubmissionPropertyMap();
-
-		Document jsdl = SimpleJsdlBuilder.buildJsdl(jobProperties);
-
-		return jsdl;
-
+	public String getSubmissionLocation() {
+		return submissionLocation;
 	}
-	
-	@Transient
-	public final String getJobDescriptionDocumentAsString() throws JobPropertiesException {
-		
-		String jsdlString = null;
-		jsdlString = SeveralXMLHelpers.toString(getJobDescriptionDocument());
-
-		return jsdlString;
+	public int getWalltimeInSeconds() {
+		return walltime_in_seconds;
 	}
-
-	private void checkValidity() throws JobPropertiesException {
-
-		if (commandline == null || commandline.length() == 0) {
-			throw new JobPropertiesException(JobSubmissionProperty.COMMANDLINE.toString() +": " +
-					"Commandline not specified.");
-		}
-
-	}
-
-	public static void main(final String[] args) throws JobPropertiesException {
-
-		JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl();
-
-		jso.setJobname("testJobName");
-		jso.setApplication("testApplication");
-		jso.setApplicationVersion("testVersion");
-		jso.setCommandline("java -testcommandline -argument2");
-		jso.setCpus(1);
-		jso.setWalltimeInSeconds(400);
-		jso.setEmail_address("testEmailAddress");
-		jso.setEmail_on_job_start(true);
-		jso.setEmail_on_job_finish(true);
-		jso.setForce_mpi(true);
-		jso.setForce_single(false);
-		jso.setInputFileUrls(new String[] { "file:///temp/test",
-				"gsiftp://ng2.vpac.org/tmp/test" });
-		jso.setMemory(0);
-
-		jso.getJobDescriptionDocument();
-
-	}
-
-	@Override
-	public boolean equals(Object other) {
-		
-		if ( other instanceof JobSubmissionObjectImpl ) {
-			JobSubmissionObjectImpl otherJob = (JobSubmissionObjectImpl)other;
-			return getJobname().equals(otherJob.getJobname());
-		} else {
-			return false;
-		}
-		
-	}
-	
 	@Override
 	public int hashCode() {
 		return 73 * getJobname().hashCode();
+	}
+	public boolean isEmail_on_job_finish() {
+		return email_on_job_finish;
+	}
+	public boolean isEmail_on_job_start() {
+		return email_on_job_start;
+	}
+	public boolean isForce_mpi() {
+		return force_mpi;
+	}
+	public boolean isForce_single() {
+		return force_single;
+	}
+	public void setApplication(final String app) {
+		this.application = app;
+	}
+	public void setApplicationVersion(final String appVersion) {
+		this.applicationVersion = appVersion;
+	}
+	public void setCommandline(final String commandline) {
+		this.commandline = commandline;
+	}
+	public void setCpus(final int cpus) {
+		this.cpus = cpus;
+	}
+	public void setEmail_address(final String email_address) {
+		this.email_address = email_address;
+	}
+	public void setEmail_on_job_finish(final boolean email_on_job_finish) {
+		this.email_on_job_finish = email_on_job_finish;
+	}
+	public void setEmail_on_job_start(final boolean email_on_job_start) {
+		this.email_on_job_start = email_on_job_start;
+	}
+	public void setForce_mpi(final boolean force_mpi) {
+		this.force_mpi = force_mpi;
+		this.force_single = !force_mpi;
+	}
+	public void setForce_single(final boolean force_single) {
+		this.force_single = force_single;
+		this.force_mpi = !force_mpi;
+	}
+
+	private void setId(final Long id) {
+		this.id = id;
+	}
+
+	public void setInputFileUrls(final String[] inputFileUrls) {
+		if (inputFileUrls != null) {
+			this.inputFileUrls = new HashSet<String>(Arrays
+					.asList(inputFileUrls));
+		} else {
+			this.inputFileUrls = new HashSet<String>();
+		}
+	}
+
+	public void setJobname(final String jobname) {
+		this.jobname = jobname;
+	}
+
+	public void setMemory(final long memory) {
+		this.memory_in_bytes = memory;
+	}
+
+	public void setModules(final String[] modules) {
+		if (modules != null) {
+			this.modules = new HashSet<String>(Arrays.asList(modules));
+		} else {
+			this.modules = new HashSet<String>();
+		}
+	}
+
+	public void setPbsDebug(String pbsDebug) {
+		this.pbsDebug = pbsDebug;
+	}
+
+	public void setStderr(final String stderr) {
+		this.stderr = stderr;
+	}
+
+	public void setStdin(final String stdin) {
+		this.stdin = stdin;
+	}
+
+	public void setStdout(final String stdout) {
+		this.stdout = stdout;
+	}
+
+	public void setSubmissionLocation(final String submissionLocation) {
+		this.submissionLocation = submissionLocation;
+	}
+
+	public void setWalltimeInSeconds(final int walltime) {
+		this.walltime_in_seconds = walltime;
+	}
+
+	@Override
+	public String toString() {
+		return getJobname();
 	}
 }

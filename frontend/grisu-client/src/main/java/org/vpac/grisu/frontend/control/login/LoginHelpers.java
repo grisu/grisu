@@ -1,7 +1,5 @@
 package org.vpac.grisu.frontend.control.login;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
@@ -13,15 +11,9 @@ import org.globus.gsi.GlobusCredential;
 import org.globus.gsi.GlobusCredentialException;
 import org.ietf.jgss.GSSCredential;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
-import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.settings.MyProxyServerParams;
-import org.vpac.grisu.utils.GrisuPluginFilenameFilter;
 import org.vpac.security.light.plainProxy.LocalProxy;
-
-import au.org.arcs.jcommons.dependencies.ClasspathHacker;
-import au.org.arcs.jcommons.dependencies.DependencyManager;
 
 /**
  * Some easy-to-use methods to login to a Grisu web service.
@@ -30,52 +22,9 @@ import au.org.arcs.jcommons.dependencies.DependencyManager;
  * 
  */
 public final class LoginHelpers {
-	
-	private LoginHelpers() {
-	}
 
 	static final Logger myLogger = Logger.getLogger(LoginHelpers.class
 			.getName());
-
-	/**
-	 * Use this if you want to login to the Grisu web service.
-	 * 
-	 * @param loginParams
-	 *            the details about the Grisu web service and connection
-	 *            properties.
-	 * @return the ServiceInterface
-	 * @throws LoginException
-	 * @throws ServiceInterfaceException
-	 */
-	public static ServiceInterface myProxyLogin(final LoginParams loginParams)
-			throws LoginException, ServiceInterfaceException {
-
-		
-		ServiceInterface si = ServiceInterfaceFactory.createInterface(
-				loginParams.getServiceInterfaceUrl(), loginParams
-						.getMyProxyUsername(), loginParams
-						.getMyProxyPassphrase(),
-				loginParams.getMyProxyServer(), loginParams.getMyProxyPort(),
-				loginParams.getHttpProxy(), loginParams.getHttpProxyPort(),
-				loginParams.getHttpProxyUsername(), loginParams
-						.getHttpProxyPassphrase());
-//		try {
-//			si.login(loginParams.getMyProxyUsername(), new String(loginParams
-//					.getMyProxyPassphrase()));
-//		} catch (NoValidCredentialException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//			throw new LoginException(
-//					"Could not create & upload proxy to the myproxy server. Probably because of a wrong private key passphrase or network problems.",
-//					e);
-//		} catch (Exception e1) {
-//			throw new LoginException("Could not login. Unspecified error: "
-//					+ e1.getLocalizedMessage(), e1);
-//		}
-		loginParams.clearPasswords();
-
-		return si;
-	}
 
 	/**
 	 * The easiest way to create a serviceInterface. This uses the a local grisu
@@ -90,29 +39,37 @@ public final class LoginHelpers {
 	 * @throws GlobusCredentialException
 	 *             if there is no valid globus proxy on your machine
 	 */
-	public static ServiceInterface defaultLocalProxyLogin() throws LoginException,
-			GlobusCredentialException, ServiceInterfaceException {
+	public static ServiceInterface defaultLocalProxyLogin()
+			throws LoginException, GlobusCredentialException,
+			ServiceInterfaceException {
 
 		LoginParams defaultLoginParams = new LoginParams("Local", null, null,
 				MyProxyServerParams.DEFAULT_MYPROXY_SERVER, new Integer(
 						MyProxyServerParams.DEFAULT_MYPROXY_PORT).toString());
-		return gssCredentialLogin(defaultLoginParams, LocalProxy.loadGSSCredential());
+		return gssCredentialLogin(defaultLoginParams, LocalProxy
+				.loadGSSCredential());
 
 	}
-	
+
 	/**
 	 * Uses an existing local proxy to login.
 	 * 
-	 * @param loginParams the login parameters
+	 * @param loginParams
+	 *            the login parameters
 	 * @return the serviceinterface
-	 * @throws ServiceInterfaceException  if the serviceInterface can't be created
-	 * @throws LoginException if the login fails
-	 * @throws GlobusCredentialException if there is no valid globus proxy on your machine
+	 * @throws ServiceInterfaceException
+	 *             if the serviceInterface can't be created
+	 * @throws LoginException
+	 *             if the login fails
+	 * @throws GlobusCredentialException
+	 *             if there is no valid globus proxy on your machine
 	 */
-	public static ServiceInterface defaultLocalProxyLogin(LoginParams loginParams) throws GlobusCredentialException, LoginException, ServiceInterfaceException {
-		
+	public static ServiceInterface defaultLocalProxyLogin(
+			LoginParams loginParams) throws GlobusCredentialException,
+			LoginException, ServiceInterfaceException {
+
 		return gssCredentialLogin(loginParams, LocalProxy.loadGSSCredential());
-		
+
 	}
 
 	/**
@@ -129,10 +86,10 @@ public final class LoginHelpers {
 	 * @throws ServiceInterfaceException
 	 *             if the serviceInterface can't be created
 	 */
-	public static ServiceInterface globusCredentialLogin(final LoginParams loginParams,
-			final GlobusCredential proxy) throws LoginException,
-			ServiceInterfaceException {
-		
+	public static ServiceInterface globusCredentialLogin(
+			final LoginParams loginParams, final GlobusCredential proxy)
+			throws LoginException, ServiceInterfaceException {
+
 		ServiceInterface serviceInterface = null;
 
 		Class directMyProxyUploadClass = null;
@@ -211,11 +168,10 @@ public final class LoginHelpers {
 	 * @throws ServiceInterfaceException
 	 *             if the serviceInterface can't be created
 	 */
-	public static ServiceInterface gssCredentialLogin(final LoginParams loginParams,
-			final GSSCredential cred) throws LoginException,
-			ServiceInterfaceException {
+	public static ServiceInterface gssCredentialLogin(
+			final LoginParams loginParams, final GSSCredential cred)
+			throws LoginException, ServiceInterfaceException {
 
-		
 		ServiceInterface serviceInterface = null;
 
 		Class directMyProxyUploadClass = null;
@@ -297,9 +253,9 @@ public final class LoginHelpers {
 	 *             if somethings gone wrong (i.e. wrong private key passphrase)
 	 * @throws ServiceInterfaceException
 	 */
-	public static ServiceInterface localProxyLogin(final char[] privateKeyPassphrase,
-			final LoginParams loginParams) throws LoginException,
-			ServiceInterfaceException {
+	public static ServiceInterface localProxyLogin(
+			final char[] privateKeyPassphrase, final LoginParams loginParams)
+			throws LoginException, ServiceInterfaceException {
 
 		ServiceInterface serviceInterface = null;
 
@@ -363,7 +319,47 @@ public final class LoginHelpers {
 
 		return serviceInterface;
 	}
-	
 
+	/**
+	 * Use this if you want to login to the Grisu web service.
+	 * 
+	 * @param loginParams
+	 *            the details about the Grisu web service and connection
+	 *            properties.
+	 * @return the ServiceInterface
+	 * @throws LoginException
+	 * @throws ServiceInterfaceException
+	 */
+	public static ServiceInterface myProxyLogin(final LoginParams loginParams)
+			throws LoginException, ServiceInterfaceException {
+
+		ServiceInterface si = ServiceInterfaceFactory.createInterface(
+				loginParams.getServiceInterfaceUrl(), loginParams
+						.getMyProxyUsername(), loginParams
+						.getMyProxyPassphrase(),
+				loginParams.getMyProxyServer(), loginParams.getMyProxyPort(),
+				loginParams.getHttpProxy(), loginParams.getHttpProxyPort(),
+				loginParams.getHttpProxyUsername(), loginParams
+						.getHttpProxyPassphrase());
+		// try {
+		// si.login(loginParams.getMyProxyUsername(), new String(loginParams
+		// .getMyProxyPassphrase()));
+		// } catch (NoValidCredentialException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// throw new LoginException(
+		// "Could not create & upload proxy to the myproxy server. Probably because of a wrong private key passphrase or network problems.",
+		// e);
+		// } catch (Exception e1) {
+		// throw new LoginException("Could not login. Unspecified error: "
+		// + e1.getLocalizedMessage(), e1);
+		// }
+		loginParams.clearPasswords();
+
+		return si;
+	}
+
+	private LoginHelpers() {
+	}
 
 }

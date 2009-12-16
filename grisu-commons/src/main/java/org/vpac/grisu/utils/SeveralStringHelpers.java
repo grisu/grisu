@@ -12,9 +12,6 @@ import java.io.InputStreamReader;
  * 
  */
 public final class SeveralStringHelpers {
-	
-	private SeveralStringHelpers() {
-	}
 
 	/**
 	 * Converts an inputstream to a string.
@@ -44,6 +41,9 @@ public final class SeveralStringHelpers {
 		}
 
 		return sb.toString();
+	}
+
+	private SeveralStringHelpers() {
 	}
 
 }

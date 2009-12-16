@@ -20,9 +20,6 @@ import au.org.arcs.jcommons.constants.JobSubmissionProperty;
  * 
  */
 public class SimpleJsdlBuilder {
-	
-	private SimpleJsdlBuilder() {
-	}
 
 	/**
 	 * Builds a jsdl file using the provided job properties.
@@ -62,7 +59,7 @@ public class SimpleJsdlBuilder {
 			} else if (jp.equals(JobSubmissionProperty.WALLTIME_IN_MINUTES)) {
 
 				String walltime = jobProperties.get(jp);
-				int wallTimeInSeconds = Integer.parseInt(walltime)*60;
+				int wallTimeInSeconds = Integer.parseInt(walltime) * 60;
 				int cpus = Integer.parseInt(jobProperties
 						.get(JobSubmissionProperty.NO_CPUS));
 
@@ -153,6 +150,9 @@ public class SimpleJsdlBuilder {
 			throw new RuntimeException("Couldn't create jsdl document");
 		}
 		return result;
+	}
+
+	private SimpleJsdlBuilder() {
 	}
 
 }

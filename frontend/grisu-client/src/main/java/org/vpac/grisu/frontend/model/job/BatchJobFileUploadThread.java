@@ -13,15 +13,17 @@ import org.vpac.grisu.frontend.model.events.BatchJobEvent;
 import org.vpac.grisu.model.FileManager;
 
 public class BatchJobFileUploadThread extends Thread {
-	
+
 	private final BatchJobObject batchJob;
 	private final String inputFile;
 	private final int noOfUpload;
 	private final ServiceInterface si;
 	private final ExecutorService executor;
 	private List<Exception> exceptions;
-	
-	public BatchJobFileUploadThread(ServiceInterface si, BatchJobObject batchJob, String inputFile, int noOfUpload, ExecutorService executor) {
+
+	public BatchJobFileUploadThread(ServiceInterface si,
+			BatchJobObject batchJob, String inputFile, int noOfUpload,
+			ExecutorService executor) {
 		this.si = si;
 		this.batchJob = batchJob;
 		this.inputFile = inputFile;
@@ -29,30 +31,23 @@ public class BatchJobFileUploadThread extends Thread {
 		this.executor = executor;
 	}
 
-	private void shutdownExecutor() {
-		if ( executor != null ) {
-			executor.shutdownNow();
-		}
-	}
-	
 	public void run() {
 		try {
-			
+
 			final int all = batchJob.getInputFiles().keySet().size();
-			EventBus.publish(batchJob.getJobname(), new BatchJobEvent(
-					batchJob, "Uploading/copying common input file ("+noOfUpload+" of "+all+"): "
-							+ inputFile + " for multipartjob "
-							+ batchJob.getJobname()));
+			EventBus.publish(batchJob.getJobname(), new BatchJobEvent(batchJob,
+					"Uploading/copying common input file (" + noOfUpload
+							+ " of " + all + "): " + inputFile
+							+ " for multipartjob " + batchJob.getJobname()));
 			if (FileManager.isLocal(inputFile)) {
 
-				DataHandler dh = FileManager
-						.createDataHandler(inputFile);
-				StatusObject status = new StatusObject(
-						si, batchJob.getInputFiles().get(inputFile));
-				si.uploadInputFile(batchJob.getJobname(),
-						dh, batchJob.getInputFiles().get(inputFile));
-				
-				if ( Thread.currentThread().isInterrupted() ) {
+				DataHandler dh = FileManager.createDataHandler(inputFile);
+				StatusObject status = new StatusObject(si, batchJob
+						.getInputFiles().get(inputFile));
+				si.uploadInputFile(batchJob.getJobname(), dh, batchJob
+						.getInputFiles().get(inputFile));
+
+				if (Thread.currentThread().isInterrupted()) {
 					shutdownExecutor();
 					return;
 				}
@@ -65,18 +60,15 @@ public class BatchJobFileUploadThread extends Thread {
 				}
 
 				if (status.getStatus().isFailed()) {
-					throw new FileTransferException(
-							inputFile,
-							batchJob.getInputFiles().get(inputFile),
-							"Error when trying to upload input file.",
-							null);
+					throw new FileTransferException(inputFile, batchJob
+							.getInputFiles().get(inputFile),
+							"Error when trying to upload input file.", null);
 				}
 
 			} else {
-				si.copyBatchJobInputFile(
-						batchJob.getJobname(), inputFile, batchJob.getInputFiles()
-								.get(inputFile));
-				if ( Thread.currentThread().isInterrupted() ) {
+				si.copyBatchJobInputFile(batchJob.getJobname(), inputFile,
+						batchJob.getInputFiles().get(inputFile));
+				if (Thread.currentThread().isInterrupted()) {
 					shutdownExecutor();
 					return;
 				}
@@ -87,6 +79,11 @@ public class BatchJobFileUploadThread extends Thread {
 			shutdownExecutor();
 		}
 	}
-	
+
+	private void shutdownExecutor() {
+		if (executor != null) {
+			executor.shutdownNow();
+		}
+	}
 
 }
