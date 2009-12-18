@@ -273,8 +273,10 @@ public interface UserEnvironmentManager {
 	 *            the alias
 	 * @param url
 	 *            the url
+	 * 
+	 * @return the filesystemitem that represents the bookmark
 	 */
-	void setBookmark(String alias, String url);
+	FileSystemItem setBookmark(String alias, String url);
 
 	/**
 	 * Sets the currently used fqan.

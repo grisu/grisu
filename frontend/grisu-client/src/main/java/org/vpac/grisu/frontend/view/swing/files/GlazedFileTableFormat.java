@@ -8,7 +8,7 @@ import ca.odell.glazedlists.gui.AdvancedTableFormat;
 
 public class GlazedFileTableFormat implements AdvancedTableFormat<GlazedFile> {
 
-	private GlazedFileComparator glazedFileComparator = new GlazedFileComparator();
+	private final GlazedFileComparator glazedFileComparator = new GlazedFileComparator();
 
 	public Class getColumnClass(int arg0) {
 
@@ -16,6 +16,8 @@ public class GlazedFileTableFormat implements AdvancedTableFormat<GlazedFile> {
 		case 0:
 			return GlazedFile.class;
 		case 1:
+			return Long.class;
+		case 2:
 			return Long.class;
 		}
 
@@ -29,13 +31,15 @@ public class GlazedFileTableFormat implements AdvancedTableFormat<GlazedFile> {
 			return glazedFileComparator;
 		case 1:
 			return null;
+		case 2:
+			return null;
 		}
 
 		throw new IllegalStateException();
 	}
 
 	public int getColumnCount() {
-		return 2;
+		return 3;
 	}
 
 	public String getColumnName(int arg0) {
@@ -45,6 +49,8 @@ public class GlazedFileTableFormat implements AdvancedTableFormat<GlazedFile> {
 			return "Name";
 		case 1:
 			return "Size";
+		case 2:
+			return "Date modified";
 		}
 
 		throw new IllegalStateException();
@@ -58,6 +64,8 @@ public class GlazedFileTableFormat implements AdvancedTableFormat<GlazedFile> {
 			return arg0;
 		case 1:
 			return new Long(arg0.getSize());
+		case 2:
+			return new Long(arg0.getLastModified());
 		}
 
 		throw new IllegalStateException();

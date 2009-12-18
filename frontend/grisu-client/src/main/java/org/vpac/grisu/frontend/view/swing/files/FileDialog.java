@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
 import org.vpac.grisu.control.ServiceInterface;
@@ -38,7 +39,7 @@ public class FileDialog extends JDialog {
 
 			System.out.println("Creating dialog.");
 			FileDialog dialog = new FileDialog(si);
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			System.out.println("Created dialog. Setting visible.");
 			dialog.setVisible(true);
 		} catch (Exception e) {
@@ -59,7 +60,7 @@ public class FileDialog extends JDialog {
 		contentPanel.setLayout(new BorderLayout(0, 0));
 		{
 			FileListPanelPlus fileListPanel = new FileListPanelPlus(si, null,
-					null);
+					null, true, true);
 			contentPanel.add(fileListPanel, BorderLayout.CENTER);
 		}
 		{

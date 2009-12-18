@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.view.swing.jobmonitoring.preview;
+package org.vpac.grisu.frontend.view.swing.jobmonitoring;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -7,12 +7,14 @@ import java.util.Date;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import org.vpac.grisu.control.JobConstants;
+import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.model.job.JobObject;
+import org.vpac.grisu.frontend.view.swing.files.preview.FileListWithPreviewPanel;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -33,11 +35,16 @@ public class JobDetailPanel extends JPanel implements PropertyChangeListener {
 	private JTextArea propertiesTextArea;
 	private JScrollPane scrollPane_1;
 	private JTextArea logTextArea;
+	private FileListWithPreviewPanel fileListWithPreviewPanel;
+
+	private final ServiceInterface si;
 
 	/**
 	 * Create the panel.
 	 */
-	public JobDetailPanel() {
+	public JobDetailPanel(ServiceInterface si) {
+
+		this.si = si;
 
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
@@ -58,10 +65,20 @@ public class JobDetailPanel extends JPanel implements PropertyChangeListener {
 
 	}
 
+	private FileListWithPreviewPanel getFileListWithPreviewPanel() {
+		if (fileListWithPreviewPanel == null) {
+			fileListWithPreviewPanel = new FileListWithPreviewPanel(si, null,
+					null, false, false, false);
+		}
+		return fileListWithPreviewPanel;
+	}
+
 	private JideTabbedPane getJideTabbedPane() {
 		if (jideTabbedPane == null) {
 			jideTabbedPane = new JideTabbedPane();
-			jideTabbedPane.setTabPlacement(JTabbedPane.BOTTOM);
+			jideTabbedPane.setTabPlacement(SwingConstants.BOTTOM);
+			jideTabbedPane.addTab("Job directory", null,
+					getFileListWithPreviewPanel(), null);
 			jideTabbedPane.addTab("Properties", getScrollPane_1());
 			jideTabbedPane.addTab("Log", getScrollPane_1_1());
 		}
@@ -143,6 +160,12 @@ public class JobDetailPanel extends JPanel implements PropertyChangeListener {
 	public void setJob(JobObject job) {
 
 		this.job = job;
+
+		getFileListWithPreviewPanel().setRootUrl(job.getJobDirectoryUrl());
+		getFileListWithPreviewPanel().setCurrentUrl(job.getJobDirectoryUrl());
+		getTextField().setText(job.getJobname());
+		getTextField_1().setText(
+				JobConstants.translateStatus(job.getStatus(false)));
 
 		setProperties();
 		setLog();

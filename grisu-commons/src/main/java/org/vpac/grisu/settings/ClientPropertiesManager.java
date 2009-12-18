@@ -25,6 +25,9 @@ public final class ClientPropertiesManager {
 	private static final int DEFAULT_FILE_UPLOAD_THREADS = 1;
 	private static final int DEFAULT_FILE_UPLOAD_RETRIES = 5;
 
+	public static final Long DEFAULT_DOWNLOAD_FILESIZE_TRESHOLD = new Long(
+			1024 * 1024 * 2);
+
 	// keys
 	public static final String JOBSTATUS_RECHECK_INTERVAL_KEY = "statusRecheck";
 
@@ -214,6 +217,25 @@ public final class ClientPropertiesManager {
 			defaultUrl = null;
 		}
 		return defaultUrl;
+	}
+
+	public static long getDownloadFileSizeTresholdInBytes() {
+
+		long treshold = -1;
+		try {
+			treshold = Long.parseLong(getClientConfiguration().getString(
+					"downloadFileSizeTreshold"));
+
+		} catch (Exception e) {
+			// myLogger.debug("Problem with config file: " + e.getMessage());
+			return DEFAULT_DOWNLOAD_FILESIZE_TRESHOLD;
+		}
+		if (treshold <= 0L) {
+			return DEFAULT_DOWNLOAD_FILESIZE_TRESHOLD;
+		}
+
+		return treshold;
+
 	}
 
 	public static int getFileUploadRetries() {

@@ -35,17 +35,17 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 
 	private final ServiceInterface serviceInterface;
 
-	private ResourceInformation resourceInfo;
+	private final ResourceInformation resourceInfo;
 
 	private String[] cachedFqans = null;
 	private Set<String> cachedAllSubmissionLocations = null;
 	private SortedSet<String> cachedAllSites = null;
-	private Map<String, Set<MountPoint>> alreadyQueriedMountPointsPerSubmissionLocation = new TreeMap<String, Set<MountPoint>>();
-	private Map<String, Set<MountPoint>> alreadyQueriedMountPointsPerFqan = new TreeMap<String, Set<MountPoint>>();
+	private final Map<String, Set<MountPoint>> alreadyQueriedMountPointsPerSubmissionLocation = new TreeMap<String, Set<MountPoint>>();
+	private final Map<String, Set<MountPoint>> alreadyQueriedMountPointsPerFqan = new TreeMap<String, Set<MountPoint>>();
 	private MountPoint[] cachedMountPoints = null;
-	private Map<String, SortedSet<MountPoint>> alreadyQueriedMountPointsPerSite = new TreeMap<String, SortedSet<MountPoint>>();
+	private final Map<String, SortedSet<MountPoint>> alreadyQueriedMountPointsPerSite = new TreeMap<String, SortedSet<MountPoint>>();
 
-	private Map<String, String> cachedUserProperties = null;
+	private final Map<String, String> cachedUserProperties = null;
 	private Map<String, String> cachedBookmarks = null;
 
 	private List<FileSystemItem> cachedLocalFilesystemList = null;
@@ -58,10 +58,10 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	private SortedSet<String> cachedJobNames = null;
 	private SortedSet<String> cachedBatchJobNames = null;
 
-	private Map<String, DtoBatchJob> cachedBatchJobs = new TreeMap<String, DtoBatchJob>();
-	private Map<String, SortedSet<String>> cachedBatchJobnamesPerApplication = new HashMap<String, SortedSet<String>>();
-	private Map<String, SortedSet<String>> cachedJobnamesPerApplication = new HashMap<String, SortedSet<String>>();
-	private Map<String, SortedSet<DtoBatchJob>> cachedBatchJobsPerApplication = new HashMap<String, SortedSet<DtoBatchJob>>();
+	private final Map<String, DtoBatchJob> cachedBatchJobs = new TreeMap<String, DtoBatchJob>();
+	private final Map<String, SortedSet<String>> cachedBatchJobnamesPerApplication = new HashMap<String, SortedSet<String>>();
+	private final Map<String, SortedSet<String>> cachedJobnamesPerApplication = new HashMap<String, SortedSet<String>>();
+	private final Map<String, SortedSet<DtoBatchJob>> cachedBatchJobsPerApplication = new HashMap<String, SortedSet<DtoBatchJob>>();
 
 	private String currentFqan;
 
@@ -555,20 +555,24 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 
 	}
 
-	public synchronized void setBookmark(String alias, String url) {
+	public synchronized FileSystemItem setBookmark(String alias, String url) {
 
 		serviceInterface.setBookmark(alias, url);
 
 		if (StringUtils.isBlank(url)) {
+			FileSystemItem temp = new FileSystemItem(alias,
+					FileSystemItem.Type.BOOKMARK, null);
 			getBookmarks().remove(alias);
-			getBookmarksFilesystems().remove(
-					new FileSystemItem(alias, FileSystemItem.Type.BOOKMARK,
-							null));
+			getBookmarksFilesystems().remove(temp);
+			getFileSystems().remove(temp);
+			return temp;
 		} else {
+			FileSystemItem temp = new FileSystemItem(alias,
+					FileSystemItem.Type.BOOKMARK, createGlazedFileFromUrl(url));
 			getBookmarks().put(alias, url);
-			getBookmarksFilesystems().add(
-					new FileSystemItem(alias, FileSystemItem.Type.BOOKMARK,
-							createGlazedFileFromUrl(url)));
+			getBookmarksFilesystems().add(temp);
+			getFileSystems().add(temp);
+			return temp;
 		}
 
 	}

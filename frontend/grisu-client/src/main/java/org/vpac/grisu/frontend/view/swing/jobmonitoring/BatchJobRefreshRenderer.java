@@ -40,7 +40,7 @@ public class BatchJobRefreshRenderer extends DefaultTableCellRenderer implements
 		this.setSize(24, 24);
 
 		Boolean isRefreshing = (Boolean) value;
-
+		loading.setFrameInterval(0);
 		if (isRefreshing) {
 			this.setIcon(loading);
 		} else {

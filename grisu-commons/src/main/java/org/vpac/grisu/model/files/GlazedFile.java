@@ -1,6 +1,7 @@
 package org.vpac.grisu.model.files;
 
 import java.io.File;
+import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.ServiceInterface;
@@ -22,6 +23,38 @@ public class GlazedFile {
 	public static final String LOCAL_FILESYSTEM = "Local";
 
 	public static final String ROOT = "FileRoot";
+
+	public static String calculateSizeString(Long size) {
+
+		String sizeString;
+
+		if (size.equals(-1L)) {
+			sizeString = "";
+		} else {
+
+			if (size > 1024 * 1024) {
+				sizeString = size / (1024 * 1024) + "MB";
+			} else if (size > 1024) {
+				sizeString = size / 1024 + " KB";
+			} else {
+				sizeString = size + " B";
+			}
+		}
+
+		return sizeString;
+
+	}
+
+	public static String calculateTimeStampString(Long timestamp) {
+
+		if (timestamp.equals(-1L)) {
+			return "";
+		} else {
+			Date date = new Date(timestamp);
+			return date.toString();
+		}
+
+	}
 
 	private final Type type;
 
@@ -226,6 +259,7 @@ public class GlazedFile {
 		this.parentMarker = true;
 	}
 
+	@Override
 	public String toString() {
 		return getName();
 	}

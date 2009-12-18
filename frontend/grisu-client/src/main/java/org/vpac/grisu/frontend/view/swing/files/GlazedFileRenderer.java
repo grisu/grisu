@@ -32,9 +32,9 @@ public class GlazedFileRenderer extends DefaultTableCellRenderer implements
 		return null;
 	}
 
-	private FileListPanel panel = null;
+	private FileListPanelSimple panel = null;
 
-	public GlazedFileRenderer(FileListPanel panel) {
+	public GlazedFileRenderer(FileListPanelSimple panel) {
 		this.panel = panel;
 		setOpaque(true);
 	}

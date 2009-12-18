@@ -11,12 +11,8 @@ import javax.swing.table.TableCellRenderer;
 
 import org.vpac.grisu.model.files.GlazedFile;
 
-public class FileSizeRenderer extends DefaultTableCellRenderer implements
+public class TimestampRenderer extends DefaultTableCellRenderer implements
 		TableCellRenderer {
-
-	public FileSizeRenderer() {
-		setOpaque(true);
-	}
 
 	@Override
 	public Component getTableCellRendererComponent(JTable arg0, Object arg1,
@@ -28,9 +24,9 @@ public class FileSizeRenderer extends DefaultTableCellRenderer implements
 			setBackground(arg0.getBackground());
 		}
 
-		Long size = (Long) arg1;
+		Long timestamp = (Long) arg1;
 
-		String sizeString = GlazedFile.calculateSizeString(size);
+		String sizeString = GlazedFile.calculateTimeStampString(timestamp);
 
 		this.setText(sizeString);
 		this.setHorizontalAlignment(SwingConstants.RIGHT);

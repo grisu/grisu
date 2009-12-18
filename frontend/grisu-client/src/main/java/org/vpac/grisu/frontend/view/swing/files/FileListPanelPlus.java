@@ -2,6 +2,7 @@ package org.vpac.grisu.frontend.view.swing.files;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Set;
 
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
@@ -13,7 +14,6 @@ import org.vpac.grisu.model.files.FileSystemItem;
 import org.vpac.grisu.model.files.GlazedFile;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventComboBoxModel;
 
@@ -22,21 +22,27 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class FileListPanelPlus extends JPanel {
+public class FileListPanelPlus extends JPanel implements FileListPanel,
+		FileListListener {
+
 	private JComboBox comboBox;
-	private FileListPanel fileListPanel;
+	private FileListPanelSimple fileListPanel;
 
 	private final ServiceInterface serviceInterface;
-	private String rootUrl;
-	private String startUrl;
+	private final String rootUrl;
+	private final String startUrl;
 
 	private final UserEnvironmentManager em;
+	private final FileSystemsManager fsm;
 
 	private FileSystemItem lastFileSystem = null;
 
-	private EventList<FileSystemItem> allFileSystems;
-	private SortedList<FileSystemItem> sortedFileSystemsList;
-	private EventComboBoxModel<FileSystemItem> filesystemModel;
+	private final EventList<FileSystemItem> allFileSystems;
+	private final SortedList<FileSystemItem> sortedFileSystemsList;
+	private final EventComboBoxModel<FileSystemItem> filesystemModel;
+
+	private boolean displaySize = true;
+	private boolean displayTimeStamp = false;
 
 	private boolean fireEvent = true;
 
@@ -44,12 +50,15 @@ public class FileListPanelPlus extends JPanel {
 	 * Create the panel.
 	 */
 	public FileListPanelPlus(ServiceInterface si, String rootUrl,
-			String startUrl) {
+			String startUrl, boolean displaySize, boolean displayTimestamp) {
+		this.displaySize = displaySize;
+		this.displayTimeStamp = displayTimestamp;
 		this.serviceInterface = si;
 		this.em = GrisuRegistryManager.getDefault(serviceInterface)
 				.getUserEnvironmentManager();
+		this.fsm = FileSystemsManager.getDefault(si);
 
-		allFileSystems = GlazedLists.eventList(em.getFileSystems());
+		allFileSystems = this.fsm.getAllFileSystems();
 
 		// Add seperators
 		allFileSystems.add(new FileSystemItem(FileSystemItem.Type.LOCAL,
@@ -87,6 +96,16 @@ public class FileListPanelPlus extends JPanel {
 		}
 	}
 
+	public void addFileListListener(FileListListener l) {
+		getFileListPanel().addFileListListener(l);
+	}
+
+	public void fileDoubleClicked(GlazedFile file) {
+	}
+
+	public void filesSelected(Set<GlazedFile> files) {
+	}
+
 	private JComboBox getComboBox() {
 		if (comboBox == null) {
 			comboBox = new JComboBox(filesystemModel);
@@ -121,11 +140,50 @@ public class FileListPanelPlus extends JPanel {
 		return comboBox;
 	}
 
-	private FileListPanel getFileListPanel() {
+	public GlazedFile getCurrentDirectory() {
+		return getFileListPanel().getCurrentDirectory();
+	}
+
+	private FileListPanelSimple getFileListPanel() {
 		if (fileListPanel == null) {
-			fileListPanel = new FileListPanel(serviceInterface, rootUrl,
-					startUrl);
+			fileListPanel = new FileListPanelSimple(serviceInterface, rootUrl,
+					startUrl, displaySize, displayTimeStamp);
+			fileListPanel.addFileListListener(this);
 		}
 		return fileListPanel;
+	}
+
+	public JPanel getPanel() {
+		return this;
+	}
+
+	public Set<GlazedFile> getSelectedFiles() {
+		return getFileListPanel().getSelectedFiles();
+	}
+
+	public void isLoading(boolean loading) {
+
+		getComboBox().setEnabled(!loading);
+
+	}
+
+	public void refresh() {
+
+		getFileListPanel().refresh();
+
+	}
+
+	public void removeFileListListener(FileListListener l) {
+		getFileListPanel().removeFileListListener(l);
+	}
+
+	public void setCurrentUrl(String url) {
+
+		getFileListPanel().setCurrentUrl(url);
+	}
+
+	public void setRootUrl(String url) {
+
+		getFileListPanel().setRootUrl(url);
 	}
 }

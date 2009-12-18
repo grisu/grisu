@@ -32,6 +32,8 @@ public class FileManager {
 
 	public static final String NON_MOUNTPOINT_CACHE_DIRECTORYNAME = "non-grisu-user-space";
 
+	private static long downloadTreshold = -1L;
+
 	/**
 	 * Convenience method to create a datahandler out of a file.
 	 * 
@@ -44,6 +46,7 @@ public class FileManager {
 		DataHandler handler = new DataHandler(source);
 		return handler;
 	}
+
 	/**
 	 * Convenience method to create a datahandler out of a file.
 	 * 
@@ -59,6 +62,18 @@ public class FileManager {
 		return url.replace("=", "_").replace(",", "_").replace(" ", "_")
 				.replace(":", "").replace("//", File.separator).replace("/",
 						File.separator);
+	}
+
+	public static long getDownloadFileSizeTreshold() {
+
+		if (downloadTreshold <= 0L) {
+			long treshold = ClientPropertiesManager
+					.getDownloadFileSizeTresholdInBytes();
+
+			return treshold;
+		} else {
+			return downloadTreshold;
+		}
 	}
 
 	/**
@@ -77,6 +92,10 @@ public class FileManager {
 			return filename;
 		}
 
+	}
+
+	public static void setDownloadFileSizeTreshold(long t) {
+		downloadTreshold = t;
 	}
 
 	private final ServiceInterface serviceInterface;
@@ -157,40 +176,11 @@ public class FileManager {
 	public final File downloadFile(final String url)
 			throws FileTransferException {
 
+		if (upToDateLocalCacheFileExists(url)) {
+			return getLocalCacheFile(url);
+		}
+
 		File cacheTargetFile = getLocalCacheFile(url);
-		File cacheTargetParentFile = cacheTargetFile.getParentFile();
-
-		if (!cacheTargetParentFile.exists()) {
-			if (!cacheTargetParentFile.mkdirs()) {
-				if (!cacheTargetParentFile.exists()) {
-					throw new FileTransferException(url, cacheTargetFile
-							.toString(),
-							"Could not create parent folder for cache file.",
-							null);
-				}
-			}
-		}
-
-		long lastModified = -1;
-		try {
-			lastModified = serviceInterface.lastModified(url);
-		} catch (Exception e) {
-			throw new FileTransferException(url, cacheTargetFile.toString(),
-					"Could not get last modified time of source file.", null);
-		}
-
-		if (cacheTargetFile.exists()) {
-			// check last modified date
-			long local_last_modified = cacheTargetFile.lastModified();
-			myLogger.debug("local file timestamp:\t" + local_last_modified);
-			myLogger.debug("remote file timestamp:\t" + lastModified);
-			if (local_last_modified >= lastModified) {
-				myLogger
-						.debug("Local cache file is not older than remote file. Doing nothing...");
-				return cacheTargetFile;
-			}
-		}
-
 		myLogger
 				.debug("Remote file newer than local cache file or not cached yet, downloading new copy.");
 		DataSource source = null;
@@ -205,9 +195,10 @@ public class FileManager {
 		}
 
 		try {
+			long lastModified = serviceInterface.lastModified(url);
 			FileHelpers.saveToDisk(handler.getDataSource(), cacheTargetFile);
 			cacheTargetFile.setLastModified(lastModified);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			myLogger.error("Could not save file: " + url.lastIndexOf("/") + 1);
 			throw new FileTransferException(url, cacheTargetFile.toString(),
 					"Could not save file.", e);
@@ -283,6 +274,19 @@ public class FileManager {
 					+ get_url_strin_path(url);
 
 			return new File(rootPath);
+		}
+
+	}
+
+	public boolean isBiggerThanTreshold(String url)
+			throws RemoteFileSystemException {
+
+		long remoteFileSize = serviceInterface.getFileSize(url);
+
+		if (remoteFileSize > getDownloadFileSizeTreshold()) {
+			return true;
+		} else {
+			return false;
 		}
 
 	}
@@ -555,6 +559,43 @@ public class FileManager {
 		}
 		uploadFileToDirectory(file, targetDirectory, overwrite);
 
+	}
+
+	public boolean upToDateLocalCacheFileExists(String url) {
+
+		File cacheTargetFile = getLocalCacheFile(url);
+		File cacheTargetParentFile = cacheTargetFile.getParentFile();
+
+		if (!cacheTargetParentFile.exists()) {
+			if (!cacheTargetParentFile.mkdirs()) {
+				if (!cacheTargetParentFile.exists()) {
+					throw new RuntimeException(
+							"Could not create parent folder for cache file "
+									+ cacheTargetFile);
+				}
+			}
+		}
+
+		long lastModified = -1;
+		try {
+			lastModified = serviceInterface.lastModified(url);
+		} catch (Exception e) {
+			return false;
+		}
+
+		if (cacheTargetFile.exists()) {
+			// check last modified date
+			long local_last_modified = cacheTargetFile.lastModified();
+			myLogger.debug("local file timestamp:\t" + local_last_modified);
+			myLogger.debug("remote file timestamp:\t" + lastModified);
+			if (local_last_modified >= lastModified) {
+				myLogger
+						.debug("Local cache file is not older than remote file. Doing nothing...");
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 }

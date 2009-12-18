@@ -9,6 +9,7 @@ import javax.swing.JFrame;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.control.login.LoginParams;
+import org.vpac.grisu.frontend.view.swing.files.preview.FileListWithPreviewPanel;
 
 public class FileApp {
 
@@ -47,12 +48,14 @@ public class FileApp {
 			}
 		});
 	}
+
 	private JFrame frame;
 
 	private FileListPanelPlus fileListPanelPlus;
-	private ServiceInterface si;
+	private FileListWithPreviewPanel flwpp;
+	private final ServiceInterface si;
 
-	private String startUrl;
+	private final String startUrl;
 
 	/**
 	 * Create the application.
@@ -67,9 +70,17 @@ public class FileApp {
 	private FileListPanelPlus getFileListPanelPlus() {
 		if (fileListPanelPlus == null) {
 			fileListPanelPlus = new FileListPanelPlus(si, (String) null,
-					startUrl);
+					startUrl, true, true);
 		}
 		return fileListPanelPlus;
+	}
+
+	private FileListWithPreviewPanel getFileListWithPreviewPanel() {
+		if (flwpp == null) {
+			flwpp = new FileListWithPreviewPanel(si, null, startUrl, true,
+					false, false);
+		}
+		return flwpp;
 	}
 
 	/**
@@ -80,6 +91,9 @@ public class FileApp {
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
-		frame.getContentPane().add(getFileListPanelPlus(), BorderLayout.CENTER);
+		// frame.getContentPane().add(getFileListPanelPlus(),
+		// BorderLayout.CENTER);
+		frame.getContentPane().add(getFileListWithPreviewPanel(),
+				BorderLayout.CENTER);
 	}
 }
