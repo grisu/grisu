@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.annotation.security.RolesAllowed;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.AllFileSelector;
@@ -114,18 +115,18 @@ import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
  */
 public abstract class AbstractServiceInterface implements ServiceInterface {
 
-	private boolean INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND = true;
+	private final boolean INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND = true;
 
 	static final Logger myLogger = Logger
 			.getLogger(AbstractServiceInterface.class.getName());
 
-	private InformationManager informationManager = CachedMdsInformationManager
+	private final InformationManager informationManager = CachedMdsInformationManager
 			.getDefaultCachedMdsInformationManager(Environment
 					.getGrisuDirectory().toString());
 
 	public static final int DEFAULT_JOB_SUBMISSION_RETRIES = 5;
 
-	private UserDAO userdao = new UserDAO();
+	private final UserDAO userdao = new UserDAO();
 
 	protected JobDAO jobdao = new JobDAO();
 
@@ -139,11 +140,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	private String[] currentFqans = null;
 
-	private boolean checkFileSystemsBeforeUse = false;
+	private final boolean checkFileSystemsBeforeUse = false;
 
 	private FileSystemStructureToXMLConverter fsconverter = null;
 
-	private MatchMaker matchmaker = new MatchMakerImpl(Environment
+	private final MatchMaker matchmaker = new MatchMakerImpl(Environment
 			.getGrisuDirectory().toString());
 	// private MatchMaker matchmaker = new CachedMatchMakerImpl(Environment
 	// .getGrisuDirectory().toString());
@@ -486,6 +487,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						if (mp.getRootUrl().startsWith(f.replace(":2811", ""))) {
 
 							Thread thread = new Thread() {
+								@Override
 								public void run() {
 									try {
 										if (!fileExists(mp.getRootUrl())) {
@@ -575,6 +577,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		final String handleFinal = handle;
 		Thread cpThread = new Thread() {
+			@Override
 			public void run() {
 				try {
 					for (String source : sources.asArray()) {
@@ -927,6 +930,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		multiPartJobDao.saveOrUpdate(multiJob);
 		for (final Job job : jobs) {
 			Thread thread = new Thread("killing_" + job.getJobname()) {
+				@Override
 				public void run() {
 					try {
 						myLogger.debug("Killing job " + job.getJobname()
@@ -1588,6 +1592,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see org.vpac.grisu.control.ServiceInterface#getDN()
 	 */
+	@RolesAllowed("User")
 	public String getDN() {
 		return getUser().getDn();
 	}
@@ -2638,6 +2643,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		for (final Job job : sp.getCalculatedJobs()) {
 
 			Thread thread = new Thread() {
+				@Override
 				public void run() {
 					try {
 						if (job.getStatus() > JobConstants.READY_TO_SUBMIT) {
@@ -3312,6 +3318,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		for (final Job job : currentJobs) {
 			Thread thread = new Thread() {
+				@Override
 				public void run() {
 					statusfinal.addLogMessage("Refreshing job "
 							+ job.getJobname());
@@ -3435,6 +3442,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		for (final Job jobToRestart : sp.getCalculatedJobs()) {
 
 			Thread thread = new Thread() {
+				@Override
 				public void run() {
 					try {
 						status.addElement("Starting resubmission of job: "
@@ -3879,6 +3887,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				continue;
 			}
 			Thread thread = new Thread() {
+				@Override
 				public void run() {
 					try {
 						Exception exc = null;
@@ -4081,6 +4090,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			actionStatus.put(targetFilename, status);
 
 			new Thread() {
+				@Override
 				public void run() {
 
 					String jobdir = job
@@ -4190,6 +4200,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 
 			Thread thread = new Thread() {
+				@Override
 				public void run() {
 
 					try {
