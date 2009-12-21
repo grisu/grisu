@@ -78,7 +78,7 @@ public class FileApp {
 	private FileListWithPreviewPanel getFileListWithPreviewPanel() {
 		if (flwpp == null) {
 			flwpp = new FileListWithPreviewPanel(si, null, startUrl, true,
-					false, false);
+					false, false, false);
 		}
 		return flwpp;
 	}

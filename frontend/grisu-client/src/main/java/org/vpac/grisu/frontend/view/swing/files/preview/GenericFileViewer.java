@@ -112,6 +112,9 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 
 	private GlazedFile currentGlazedFile = null;
 
+	private final JPanel emptyPanel = new JPanel();
+	private final String EMPTY_PANEL = "__empty__";
+
 	/**
 	 * Create the panel.
 	 */
@@ -120,6 +123,8 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 
 		setLayout(new CardLayout());
+
+		add(emptyPanel, EMPTY_PANEL);
 	}
 
 	public void fileDoubleClicked(GlazedFile file) {
@@ -143,8 +148,23 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 
 	}
 
+	private void setEmptyPanel() {
+		SwingUtilities.invokeLater(new Thread() {
+
+			@Override
+			public void run() {
+				CardLayout cl = (CardLayout) (getLayout());
+				cl.show(GenericFileViewer.this, EMPTY_PANEL);
+
+				revalidate();
+			}
+
+		});
+	}
+
 	public void setFile(GlazedFile file, File localCacheFile) {
 
+		setEmptyPanel();
 		currentGlazedFile = file;
 		if (localCacheFile != null && localCacheFile.exists()) {
 			currentLocalCacheFile = localCacheFile;
@@ -195,6 +215,8 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 			});
 
 		} else {
+
+			setEmptyPanel();
 			System.out.println("No viewer panel found.");
 		}
 

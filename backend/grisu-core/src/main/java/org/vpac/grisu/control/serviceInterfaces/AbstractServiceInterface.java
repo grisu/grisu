@@ -2596,32 +2596,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			jd = new EqualJobDistributor();
 		}
 
-		// final ExecutorService executor1 = Executors
-		// .newFixedThreadPool(ServerPropertiesManager
-		// .getConcurrentMultiPartJobSubmitThreadsPerUser());
-		//
-		// for (final Job job : sp.getCalculatedJobs()) {
-		// if (job.getStatus() > JobConstants.READY_TO_SUBMIT) {
-		//
-		// Thread thread = new Thread() {
-		// public void run() {
-		// //TODO what did I want to do here again?
-		// kill(job);
-		// }
-		// };
-		// executor1.execute(thread);
-		// }
-		// }
-		//
-		// executor1.shutdown();
-		//
-		// try {
-		// executor1.awaitTermination(3 * 3600, TimeUnit.SECONDS);
-		// } catch (InterruptedException e1) {
-		// // TODO Auto-generated catch block
-		// e1.printStackTrace();
-		// }
-
 		Map<String, Integer> results = jd.distributeJobs(
 				sp.getCalculatedJobs(), sp.getCalculatedGridResources());
 		StringBuffer message = new StringBuffer(
@@ -2900,7 +2874,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			} else {
 
 				myLogger.debug("Trying to find matching grid resources...");
-				matchingResources = matchmaker.findAvailableResources(
+				matchingResources = matchmaker.findAllResources(
 						jobSubmissionObject.getJobSubmissionPropertyMap(), job
 								.getFqan());
 				if (matchingResources != null) {

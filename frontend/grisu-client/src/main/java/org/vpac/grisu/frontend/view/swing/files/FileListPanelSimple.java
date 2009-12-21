@@ -35,6 +35,8 @@ import ca.odell.glazedlists.swing.EventTableModel;
 
 public class FileListPanelSimple extends JPanel implements FileListPanel {
 
+	public static final String UNDETERMINED = "undetermined";
+
 	private final ServiceInterface si;
 	private final FileManager fm;
 	private final UserEnvironmentManager em;
@@ -130,26 +132,42 @@ public class FileListPanelSimple extends JPanel implements FileListPanel {
 
 	}
 
-	private void fireFileDoubleClicked(GlazedFile file) {
+	private void fireFileDoubleClicked(final GlazedFile file) {
 		// if we have no mountPointsListeners, do nothing...
 		if (listeners != null && !listeners.isEmpty()) {
 
-			// make a copy of the listener list in case
-			// anyone adds/removes mountPointsListeners
-			Vector<FileListListener> targets;
-			synchronized (this) {
-				targets = (Vector<FileListListener>) listeners.clone();
-			}
+			Thread thread = new Thread() {
+				@Override
+				public void run() {
 
-			// walk through the listener list and
-			// call the userInput method in each
-			for (FileListListener l : targets) {
-				try {
-					l.fileDoubleClicked(file);
-				} catch (Exception e1) {
-					e1.printStackTrace();
+					setLoading(true);
+					try {
+						// make a copy of the listener list in case
+						// anyone adds/removes mountPointsListeners
+						Vector<FileListListener> targets;
+						synchronized (this) {
+							targets = (Vector<FileListListener>) listeners
+									.clone();
+						}
+
+						// walk through the listener list and
+						// call the userInput method in each
+						for (FileListListener l : targets) {
+							try {
+								l.fileDoubleClicked(file);
+							} catch (Exception e1) {
+								e1.printStackTrace();
+							}
+						}
+					} finally {
+						setLoading(false);
+					}
+
 				}
-			}
+			};
+
+			thread.start();
+
 		}
 	}
 
@@ -158,21 +176,26 @@ public class FileListPanelSimple extends JPanel implements FileListPanel {
 		// if we have no mountPointsListeners, do nothing...
 		if (listeners != null && !listeners.isEmpty()) {
 
-			// make a copy of the listener list in case
-			// anyone adds/removes mountPointsListeners
-			Vector<FileListListener> targets;
-			synchronized (this) {
-				targets = (Vector<FileListListener>) listeners.clone();
-			}
-
-			// walk through the listener list and
-			// call the userInput method in each
-			for (FileListListener l : targets) {
-				try {
-					l.filesSelected(files);
-				} catch (Exception e1) {
-					e1.printStackTrace();
+			setLoading(true);
+			try {
+				// make a copy of the listener list in case
+				// anyone adds/removes mountPointsListeners
+				Vector<FileListListener> targets;
+				synchronized (this) {
+					targets = (Vector<FileListListener>) listeners.clone();
 				}
+
+				// walk through the listener list and
+				// call the userInput method in each
+				for (FileListListener l : targets) {
+					try {
+						l.filesSelected(files);
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+				}
+			} finally {
+				setLoading(false);
 			}
 		}
 
@@ -343,9 +366,8 @@ public class FileListPanelSimple extends JPanel implements FileListPanel {
 
 					if (file != null) {
 
-						if (file == null
-								|| GlazedFile.Type.FILETYPE_ROOT.equals(file
-										.getType())) {
+						if (GlazedFile.Type.FILETYPE_ROOT
+								.equals(file.getType())) {
 							setCurrentDirToGridRoot();
 						} else if (GlazedFile.Type.FILETYPE_SITE.equals(file
 								.getType())) {
@@ -362,7 +384,9 @@ public class FileListPanelSimple extends JPanel implements FileListPanel {
 
 					} else {
 
-						if (url == null || GlazedFile.ROOT.equals(url)) {
+						if (url == null) {
+							setEmptyList();
+						} else if (GlazedFile.ROOT.equals(url)) {
 							setCurrentDirToGridRoot();
 						} else if (em.getAllAvailableSites().contains(url)) {
 							setCurrentDirToSite(url);
@@ -537,6 +561,31 @@ public class FileListPanelSimple extends JPanel implements FileListPanel {
 
 	}
 
+	private void setEmptyList() {
+
+		// currentDirectory = null;
+		// currentFolder = null;
+
+		try {
+			SwingUtilities.invokeAndWait(new Thread() {
+
+				@Override
+				public void run() {
+					currentDirectoryContent.getReadWriteLock().writeLock()
+							.lock();
+					currentDirectoryContent.clear();
+					currentDirectoryContent.getReadWriteLock().writeLock()
+							.unlock();
+					getTable().revalidate();
+				}
+
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
 	private void setLoading(final boolean loading) {
 
 		SwingUtilities.invokeLater(new Thread() {
@@ -544,7 +593,9 @@ public class FileListPanelSimple extends JPanel implements FileListPanel {
 			@Override
 			public void run() {
 
-				fireIsLoading(loading);
+				if (!loading) {
+					fireIsLoading(false);
+				}
 
 				getTable().setEnabled(!loading);
 				getScrollPane().setEnabled(!loading);
@@ -554,9 +605,11 @@ public class FileListPanelSimple extends JPanel implements FileListPanel {
 				} else {
 					setCursor(Cursor.getDefaultCursor());
 				}
+				if (loading) {
+					fireIsLoading(true);
+				}
 
 			}
-
 		});
 
 	}
@@ -589,11 +642,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel {
 			this.rootUrl = rootUrl;
 		}
 
-		if (startUrl == null) {
-			setCurrentUrl(GlazedFile.ROOT);
-		} else {
-			setCurrentUrl(startUrl);
-		}
+		setCurrentUrl(startUrl);
 	}
 
 	public void setRootUrl(String url) {
@@ -606,6 +655,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel {
 
 	private void setUrl(String url) throws RemoteFileSystemException {
 
+		setEmptyList();
 		DtoFolder folder = fm.ls(url);
 
 		setCurrentDirToFolder(folder);

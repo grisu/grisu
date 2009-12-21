@@ -26,10 +26,10 @@ public class SimpleSingleJobsGrid extends JPanel {
 	private final ServiceInterface si;
 	private final EventList<JobObject> jobList;
 
-	private EventTableModel<JobObject> jobModel;
+	private final EventTableModel<JobObject> jobModel;
 
-	private SortedList<JobObject> sortedJobList;
-	private EventList<JobObject> observedJobs;
+	private final SortedList<JobObject> sortedJobList;
+	private final EventList<JobObject> observedJobs;
 
 	// ---------------------------------------------------------------------------------------
 	// Event stuff
@@ -61,8 +61,9 @@ public class SimpleSingleJobsGrid extends JPanel {
 	// register a listener
 	synchronized public void addJobSelectionListener(
 			SingleJobSelectionListener l) {
-		if (listeners == null)
+		if (listeners == null) {
 			listeners = new Vector<SingleJobSelectionListener>();
+		}
 		listeners.addElement(l);
 	}
 
@@ -103,6 +104,11 @@ public class SimpleSingleJobsGrid extends JPanel {
 			table = new JXTable(jobModel);
 			table.setColumnControlVisible(true);
 			table.setHighlighters(HighlighterFactory.createAlternateStriping());
+
+			table.getColumnExt("Site").setVisible(false);
+			table.getColumnExt("Queue").setVisible(false);
+			table.getColumnExt("Submission time").setVisible(false);
+			table.getColumnExt("Group").setVisible(false);
 
 			table.addMouseListener(new MouseAdapter() {
 				@Override

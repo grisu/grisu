@@ -18,8 +18,9 @@ public class BatchJobRefreshRenderer extends DefaultTableCellRenderer implements
 
 	private static File findFile() {
 		for (File file : new File(System.getProperty("user.home")).listFiles()) {
-			if (file.isFile())
+			if (file.isFile()) {
 				return file;
+			}
 		}
 		return null;
 	}
@@ -28,6 +29,7 @@ public class BatchJobRefreshRenderer extends DefaultTableCellRenderer implements
 		setOpaque(true);
 	}
 
+	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
 
@@ -40,7 +42,6 @@ public class BatchJobRefreshRenderer extends DefaultTableCellRenderer implements
 		this.setSize(24, 24);
 
 		Boolean isRefreshing = (Boolean) value;
-		loading.setFrameInterval(0);
 		if (isRefreshing) {
 			this.setIcon(loading);
 		} else {

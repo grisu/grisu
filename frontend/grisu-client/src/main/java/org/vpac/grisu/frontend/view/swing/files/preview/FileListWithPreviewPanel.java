@@ -5,6 +5,7 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.WindowConstants;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.view.swing.files.FileDetailPanel;
@@ -15,7 +16,8 @@ import org.vpac.grisu.frontend.view.swing.files.FileListPanelPlus;
 import org.vpac.grisu.frontend.view.swing.files.FileListPanelSimple;
 import org.vpac.grisu.model.files.GlazedFile;
 
-public class FileListWithPreviewPanel extends JPanel implements FileListPanel {
+public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
+		FileListListener {
 
 	private JSplitPane splitPane;
 	private GenericFileViewer genericFileViewer;
@@ -31,6 +33,7 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel {
 	private boolean useFileListPanelPlus = false;
 	private boolean displayFileDetailsPanel = false;
 	private boolean displayFileActionPanel = false;
+	private boolean useSplitPane = true;
 
 	private final int splitOrientation = JSplitPane.HORIZONTAL_SPLIT;
 
@@ -40,28 +43,47 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel {
 	 * @wbp.parser.constructor
 	 */
 	public FileListWithPreviewPanel(ServiceInterface si) {
-		this(si, null, null, false, false, true);
+		this(si, null, null, false, false, true, true);
 	}
 
 	public FileListWithPreviewPanel(ServiceInterface si, String rootUrl,
 			String startUrl, boolean useAdvancedFileListPanel,
-			boolean displayFileActionPanel, boolean displayFileDetailsPanel) {
+			boolean displayFileActionPanel, boolean displayFileDetailsPanel,
+			boolean useSplitPane) {
 
 		this.si = si;
 		this.useFileListPanelPlus = useAdvancedFileListPanel;
 		this.displayFileActionPanel = displayFileActionPanel;
 		this.displayFileDetailsPanel = displayFileDetailsPanel;
+		this.useSplitPane = useSplitPane;
 		this.rootUrl = rootUrl;
 		this.startUrl = startUrl;
 
 		setLayout(new BorderLayout(0, 0));
-		add(getSplitPane(), BorderLayout.CENTER);
+
+		if (useSplitPane) {
+			add(getSplitPane(), BorderLayout.CENTER);
+		} else {
+			add(getRootPanel(), BorderLayout.CENTER);
+		}
 	}
 
 	public void addFileListListener(FileListListener l) {
 
 		getFileListPanel().addFileListListener(l);
 
+	}
+
+	public void fileDoubleClicked(GlazedFile file) {
+
+		FilePreviewDialog dialog = new FilePreviewDialog(si);
+		dialog.setFile(file, null);
+		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		dialog.setVisible(true);
+
+	}
+
+	public void filesSelected(Set<GlazedFile> files) {
 	}
 
 	public GlazedFile getCurrentDirectory() {
@@ -87,12 +109,16 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel {
 		if (fileListPanel == null) {
 			if (useFileListPanelPlus) {
 				fileListPanel = new FileListPanelPlus(si, rootUrl, startUrl,
-						false, false);
+						true, false);
 			} else {
 				fileListPanel = new FileListPanelSimple(si, rootUrl, startUrl,
-						false, false);
+						true, false);
 			}
-			fileListPanel.addFileListListener(getGenericFileViewer());
+			if (useSplitPane) {
+				fileListPanel.addFileListListener(getGenericFileViewer());
+			} else {
+				fileListPanel.addFileListListener(this);
+			}
 			if (displayFileDetailsPanel) {
 				fileListPanel.addFileListListener(getFileDetailPanel());
 			}
@@ -139,6 +165,9 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel {
 			splitPane.setDividerLocation(280 + splitPane.getInsets().left);
 		}
 		return splitPane;
+	}
+
+	public void isLoading(boolean loading) {
 	}
 
 	public void refresh() {

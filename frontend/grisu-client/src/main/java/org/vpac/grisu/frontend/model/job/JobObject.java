@@ -286,6 +286,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		}
 
 		waitThread = new Thread() {
+			@Override
 			public void run() {
 
 				int oldStatus = getStatus(false);
@@ -413,6 +414,20 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		}
 
 		return jobDirectory;
+	}
+
+	/**
+	 * Returns the specified job property.
+	 * 
+	 * Doesn't refresh job properties.
+	 * 
+	 * @param key
+	 *            the key
+	 * @return the property
+	 */
+	public final String getJobProperty(String key) {
+
+		return getAllJobProperties().get(key);
 	}
 
 	public Map<Date, String> getLogMessages() {

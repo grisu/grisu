@@ -68,7 +68,7 @@ public class JobDetailPanel extends JPanel implements PropertyChangeListener {
 	private FileListWithPreviewPanel getFileListWithPreviewPanel() {
 		if (fileListWithPreviewPanel == null) {
 			fileListWithPreviewPanel = new FileListWithPreviewPanel(si, null,
-					null, false, false, false);
+					null, false, true, false, false);
 		}
 		return fileListWithPreviewPanel;
 	}
@@ -76,7 +76,7 @@ public class JobDetailPanel extends JPanel implements PropertyChangeListener {
 	private JideTabbedPane getJideTabbedPane() {
 		if (jideTabbedPane == null) {
 			jideTabbedPane = new JideTabbedPane();
-			jideTabbedPane.setTabPlacement(SwingConstants.BOTTOM);
+			jideTabbedPane.setTabPlacement(SwingConstants.TOP);
 			jideTabbedPane.addTab("Job directory", null,
 					getFileListWithPreviewPanel(), null);
 			jideTabbedPane.addTab("Properties", getScrollPane_1());
