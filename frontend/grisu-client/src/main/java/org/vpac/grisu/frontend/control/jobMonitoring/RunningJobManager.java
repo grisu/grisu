@@ -72,6 +72,8 @@ public class RunningJobManager {
 				toRemove.add(jo);
 			}
 		}
+		
+		jobObjectList.removeAll(toRemove);
 
 		for (DtoJob newJob : newJobsCopy) {
 			try {

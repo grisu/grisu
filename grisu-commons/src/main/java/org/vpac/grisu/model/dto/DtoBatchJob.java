@@ -165,7 +165,12 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 
 	@XmlAttribute(name = "finished")
 	public boolean isFinished() {
-		return this.isFinished;
+		
+		if ( this.totalNumberOfJobs() <= 0 ) {
+			return false;
+		} else {
+			return this.isFinished;
+		}
 	}
 
 	public Map<Date, String> messages() {
