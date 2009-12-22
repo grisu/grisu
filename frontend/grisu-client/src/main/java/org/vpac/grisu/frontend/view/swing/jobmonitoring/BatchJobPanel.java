@@ -21,6 +21,7 @@ public class BatchJobPanel extends JPanel implements SingleJobSelectionListener 
 	private JSplitPane splitPane;
 	private SimpleSingleJobsGrid singleJobsGrid_1;
 	private JobDetailPanel jobDetailPanel;
+	private BatchJobStatusPanel batchJobControlPanel;
 
 	/**
 	 * Create the panel.
@@ -35,9 +36,19 @@ public class BatchJobPanel extends JPanel implements SingleJobSelectionListener 
 				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
+				FormFactory.RELATED_GAP_ROWSPEC,
+				RowSpec.decode("default:grow"),
 				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getLabel(), "2, 2");
-		add(getSplitPane(), "2, 4, fill, fill");
+		add(getBatchJobControlPanel(), "2, 4, fill, fill");
+		add(getSplitPane(), "2, 6, fill, fill");
+	}
+
+	private BatchJobStatusPanel getBatchJobControlPanel() {
+		if (batchJobControlPanel == null) {
+			batchJobControlPanel = new BatchJobStatusPanel(batchJob);
+		}
+		return batchJobControlPanel;
 	}
 
 	private JobDetailPanel getJobDetailPanel() {

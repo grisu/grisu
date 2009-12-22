@@ -72,6 +72,19 @@ public class BatchJobObject implements JobMonitoringObject,
 
 	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
+	// properties
+	public static final String STATUS = "status";
+	public static final String FINISHED = "finished";
+	public static final String FAILED = "failed";
+	public static final String REFRESHING = "refreshing";
+	public static final String NUMBER_OF_FAILED_JOBS = "numberOfFailedJobs";
+	public static final String NUMBER_OF_FINISHED_JOBS = "numberOfFinishedJobs";
+	public static final String NUMBER_OF_RUNNING_JOBS = "numberOfRunningJobs";
+	public static final String NUMBER_OF_WAITING_JOBS = "numberOfWaitingJobs";
+	public static final String NUMBER_OF_SUCCESSFULL_JOBS = "numberOfSuccessfulJobs";
+	public static final String NUMBER_OF_UNSUBMITTED_JOBS = "numberOfUnsubmittedJobs";
+	public static final String TOTAL_NUMBER_OF_JOBS = "totalNumberOfJobs";
+
 	public static final int UNDEFINED = Integer.MIN_VALUE;
 
 	public static final int DEFAULT_JOB_CREATION_RETRIES = 5;
@@ -86,9 +99,9 @@ public class BatchJobObject implements JobMonitoringObject,
 
 	private String submissionFqan;
 
-	private EventList<JobObject> jobs = new BasicEventList<JobObject>();
+	private final EventList<JobObject> jobs = new BasicEventList<JobObject>();
 
-	private Map<String, String> inputFiles = new HashMap<String, String>();
+	private final Map<String, String> inputFiles = new HashMap<String, String>();
 
 	private DtoBatchJob dtoMultiPartJob = null;
 	private String[] submissionLocationsToInclude;
@@ -640,6 +653,7 @@ public class BatchJobObject implements JobMonitoringObject,
 		if (dtoMultiPartJob == null || refresh) {
 
 			Thread refreshThread = new Thread() {
+				@Override
 				public void run() {
 					try {
 						if (refresh) {
@@ -647,6 +661,7 @@ public class BatchJobObject implements JobMonitoringObject,
 						}
 
 						// getJobs().clear();
+						int oldTotalJobs = UNDEFINED;
 						int oldStatus = UNDEFINED;
 						int oldRunningJobs = UNDEFINED;
 						int oldWaitingJobs = UNDEFINED;
@@ -658,7 +673,7 @@ public class BatchJobObject implements JobMonitoringObject,
 						boolean oldFinished = false;
 
 						if (dtoMultiPartJob != null) {
-
+							oldTotalJobs = dtoMultiPartJob.totalNumberOfJobs();
 							oldRunningJobs = dtoMultiPartJob
 									.numberOfRunningJobs();
 							oldWaitingJobs = dtoMultiPartJob
@@ -679,28 +694,31 @@ public class BatchJobObject implements JobMonitoringObject,
 						dtoMultiPartJob = serviceInterface
 								.getBatchJob(batchJobname);
 
-						pcs.firePropertyChange("status", oldStatus,
+						pcs.firePropertyChange(TOTAL_NUMBER_OF_JOBS,
+								oldTotalJobs, dtoMultiPartJob
+										.totalNumberOfJobs());
+						pcs.firePropertyChange(STATUS, oldStatus,
 								dtoMultiPartJob.getStatus());
-						pcs.firePropertyChange("failed", oldFailed,
+						pcs.firePropertyChange(FAILED, oldFailed,
 								dtoMultiPartJob.failed());
-						pcs.firePropertyChange("finished", oldFinished,
+						pcs.firePropertyChange(FINISHED, oldFinished,
 								dtoMultiPartJob.isFinished());
-						pcs.firePropertyChange("numberOfRunningJobs",
+						pcs.firePropertyChange(NUMBER_OF_RUNNING_JOBS,
 								oldRunningJobs, dtoMultiPartJob
 										.numberOfRunningJobs());
-						pcs.firePropertyChange("numberOfWaitingJobs",
+						pcs.firePropertyChange(NUMBER_OF_WAITING_JOBS,
 								oldWaitingJobs, dtoMultiPartJob
 										.numberOfWaitingJobs());
-						pcs.firePropertyChange("numberOfFinishedJobs",
+						pcs.firePropertyChange(NUMBER_OF_FINISHED_JOBS,
 								oldFinishedJobs, dtoMultiPartJob
 										.numberOfFinishedJobs());
-						pcs.firePropertyChange("numberOfFailedJobs",
+						pcs.firePropertyChange(NUMBER_OF_FAILED_JOBS,
 								oldFailedJobs, dtoMultiPartJob
 										.numberOfFailedJobs());
-						pcs.firePropertyChange("numberOfSuccessfulJobs",
+						pcs.firePropertyChange(NUMBER_OF_SUCCESSFULL_JOBS,
 								oldSuccessJobs, dtoMultiPartJob
 										.numberOfSuccessfulJobs());
-						pcs.firePropertyChange("numberOfUnsubmittedJobs",
+						pcs.firePropertyChange(NUMBER_OF_UNSUBMITTED_JOBS,
 								oldUnsubmittedJobs, dtoMultiPartJob
 										.numberOfUnsubmittedJobs());
 
@@ -1021,6 +1039,7 @@ public class BatchJobObject implements JobMonitoringObject,
 			}
 
 			Thread createThread = new Thread() {
+				@Override
 				public void run() {
 					boolean success = false;
 					Exception lastException = null;
@@ -1189,7 +1208,7 @@ public class BatchJobObject implements JobMonitoringObject,
 		if (waitForRefreshToFinish) {
 
 			this.isRefreshing = true;
-			pcs.firePropertyChange("refreshing", false, true);
+			pcs.firePropertyChange(REFRESHING, false, true);
 			DtoActionStatus status = serviceInterface.getActionStatus(handle);
 			while (!status.isFinished()) {
 				try {
@@ -1202,7 +1221,7 @@ public class BatchJobObject implements JobMonitoringObject,
 				status = serviceInterface.getActionStatus(handle);
 			}
 			this.isRefreshing = false;
-			pcs.firePropertyChange("refreshing", true, false);
+			pcs.firePropertyChange(REFRESHING, true, false);
 		}
 
 	}
@@ -1610,6 +1629,7 @@ public class BatchJobObject implements JobMonitoringObject,
 			checkInterruptedStatus(executor, tasks);
 
 			Future<?> f = executor.submit(new Thread() {
+				@Override
 				public void run() {
 					try {
 						try {

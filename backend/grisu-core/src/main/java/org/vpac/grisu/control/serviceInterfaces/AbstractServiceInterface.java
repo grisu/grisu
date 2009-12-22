@@ -3288,6 +3288,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						.getConcurrentJobStatusThreadsPerUser());
 
 		Job[] currentJobs = multiPartJob.getJobs().toArray(new Job[] {});
+
+		if (currentJobs.length == 0) {
+			multiPartJob.setStatus(JobConstants.JOB_CREATED);
+			multiPartJobDao.saveOrUpdate(multiPartJob);
+			statusfinal.addLogMessage("No jobs. Returning.");
+			statusfinal.setFailed(false);
+			statusfinal.setFinished(true);
+			return handle;
+		}
+
 		Arrays.sort(currentJobs);
 
 		for (final Job job : currentJobs) {
