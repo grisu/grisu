@@ -14,6 +14,8 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import java.awt.Font;
+import javax.swing.JSeparator;
 
 public class BatchJobStatusPanel extends JPanel implements
 		PropertyChangeListener {
@@ -32,6 +34,26 @@ public class BatchJobStatusPanel extends JPanel implements
 	private final BatchJobObject bj;
 	private JLabel totalLabel;
 	private JLabel label;
+	private JLabel unsubValueLabel;
+	private JLabel waitingValueLabel;
+	private JLabel runValueLabel;
+	private JLabel failValueLabel;
+	private JLabel doneValueLabel;
+	private JSeparator separator;
+	private JSeparator separator_1;
+	private JSeparator separator_2;
+	private JSeparator separator_3;
+	private JSeparator separator_4;
+	private JSeparator separator_5;
+	private JSeparator separator_6;
+	private JSeparator separator_7;
+	private JSeparator separator_8;
+	private JSeparator separator_9;
+	private JSeparator separator_10;
+	private JSeparator separator_11;
+	private JSeparator separator_12;
+	private JSeparator separator_13;
+	private JSeparator separator_14;
 
 	/**
 	 * Create the panel.
@@ -42,31 +64,70 @@ public class BatchJobStatusPanel extends JPanel implements
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(20dlu;default)"),
-				FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("24dlu"),
-				FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("24dlu"),
-				FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("24dlu"),
-				FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("24dlu"),
-				ColumnSpec.decode("12dlu"), ColumnSpec.decode("24dlu"), },
-				new RowSpec[] { FormFactory.RELATED_GAP_ROWSPEC,
-						FormFactory.DEFAULT_ROWSPEC, RowSpec.decode("12dlu"),
-						RowSpec.decode("top:default:grow"),
-						FormFactory.RELATED_GAP_ROWSPEC,
-						RowSpec.decode("bottom:default:grow"),
-						FormFactory.RELATED_GAP_ROWSPEC,
-						FormFactory.DEFAULT_ROWSPEC, }));
-		add(getLblStatus(), "4, 2");
-		add(getTotalLabel(), "2, 4, right, default");
-		add(getUnsubProgress(), "4, 4, 1, 3, center, default");
-		add(getWaitingProgress(), "6, 4, 1, 3, center, default");
-		add(getRunProgress(), "8, 4, 1, 3, center, default");
-		add(getFailProgress(), "10, 4, 1, 3, center, default");
-		add(getDoneProgress(), "12, 4, 1, 3, center, default");
-		add(getLabel(), "2, 6, right, default");
-		add(getLblUnsubmitted(), "4, 8, center, default");
-		add(getLblWaiting(), "6, 8, center, default");
-		add(getLblRun(), "8, 8, center, default");
-		add(getLblFail(), "10, 8, center, default");
-		add(getLblDone(), "12, 8, center, default");
+				FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("14dlu"),
+				ColumnSpec.decode("12dlu"),
+				FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("14dlu"),
+				ColumnSpec.decode("12dlu"),
+				FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("14dlu"),
+				ColumnSpec.decode("12dlu"),
+				FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("14dlu"),
+				ColumnSpec.decode("12dlu"),
+				FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("12dlu"),
+				ColumnSpec.decode("14dlu"),
+				ColumnSpec.decode("12dlu"),
+				FormFactory.RELATED_GAP_COLSPEC,},
+			new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				RowSpec.decode("8dlu"),
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				RowSpec.decode("top:max(24dlu;default):grow"),
+				FormFactory.RELATED_GAP_ROWSPEC,
+				RowSpec.decode("top:default"),
+				FormFactory.RELATED_GAP_ROWSPEC,
+				RowSpec.decode("bottom:max(24dlu;default):grow"),
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,}));
+		add(getLblStatus(), "2, 2");
+		add(getUnsubValueLabel(), "4, 4, 2, 1, right, default");
+		add(getWaitingValueLabel(), "7, 4, 2, 1, right, default");
+		add(getRunValueLabel(), "10, 4, 2, 1, right, default");
+		add(getFailValueLabel(), "13, 4, 2, 1, right, default");
+		add(getTotalLabel(), "2, 6, 1, 3, right, default");
+		add(getSeparator(), "4, 6");
+		add(getUnsubProgress(), "5, 6, 1, 5, right, default");
+		add(getSeparator_1(), "7, 6");
+		add(getWaitingProgress(), "8, 6, 1, 5, right, default");
+		add(getSeparator_2(), "10, 6");
+		add(getRunProgress(), "11, 6, 1, 5, right, default");
+		add(getSeparator_3(), "13, 6");
+		add(getFailProgress(), "14, 6, 1, 5, right, default");
+		add(getSeparator_4(), "16, 6, 2, 1");
+		add(getDoneProgress(), "18, 6, 1, 5, right, default");
+		add(getDoneValueLabel(), "17, 4, 2, 1, right, default");
+		add(getSeparator_11(), "3, 8, 2, 1");
+		add(getSeparator_12(), "7, 8");
+		add(getSeparator_13(), "10, 8");
+		add(getSeparator_14(), "13, 8");
+		add(getSeparator_10(), "16, 8, 2, 1");
+		add(getLabel(), "2, 10, right, default");
+		add(getSeparator_5(), "4, 10");
+		add(getSeparator_6(), "7, 10");
+		add(getSeparator_7(), "10, 10");
+		add(getSeparator_8(), "13, 10");
+		add(getSeparator_9(), "16, 10, 2, 1");
+		add(getLblUnsubmitted(), "4, 12, 2, 1, right, default");
+		add(getLblWaiting(), "7, 12, 2, 1, right, default");
+		add(getLblRun(), "10, 12, 2, 1, right, default");
+		add(getLblFail(), "13, 12, 2, 1, right, default");
+		add(getLblDone(), "18, 12, 2, 1, right, default");
 
 		refreshProgressBars();
 
@@ -176,6 +237,7 @@ public class BatchJobStatusPanel extends JPanel implements
 
 	public void propertyChange(PropertyChangeEvent evt) {
 
+		int i = (Integer) evt.getNewValue();
 		if (BatchJobObject.STATUS.equals(evt.getPropertyName())) {
 			// TODO
 		} else if (BatchJobObject.TOTAL_NUMBER_OF_JOBS.equals(evt
@@ -186,20 +248,45 @@ public class BatchJobStatusPanel extends JPanel implements
 		} else if (BatchJobObject.NUMBER_OF_UNSUBMITTED_JOBS.equals(evt
 				.getPropertyName())) {
 
-			getUnsubProgress().setValue((Integer) evt.getNewValue());
+			getUnsubProgress().setValue(i);
+			if ( i > 0 ) {
+				getUnsubValueLabel().setText(""+i);
+			} else {
+				getUnsubValueLabel().setText("");
+			}
 
 		} else if (BatchJobObject.NUMBER_OF_WAITING_JOBS.equals(evt
 				.getPropertyName())) {
-			getWaitingProgress().setValue((Integer) evt.getNewValue());
+			getWaitingProgress().setValue(i);
+			if ( i > 0 ) {
+				getWaitingValueLabel().setText(""+i);
+			} else {
+				getWaitingValueLabel().setText("");
+			}
 		} else if (BatchJobObject.NUMBER_OF_RUNNING_JOBS.equals(evt
 				.getPropertyName())) {
-			getRunProgress().setValue((Integer) evt.getNewValue());
+			getRunProgress().setValue(i);
+			if ( i > 0 ) {
+				getRunValueLabel().setText(""+i);
+			} else {
+				getRunValueLabel().setText("");
+			}
 		} else if (BatchJobObject.NUMBER_OF_FAILED_JOBS.equals(evt
 				.getPropertyName())) {
-			getFailProgress().setValue((Integer) evt.getNewValue());
+			getFailProgress().setValue(i);
+			if ( i > 0 ) {
+				getFailValueLabel().setText(""+i);
+			} else {
+				getFailValueLabel().setText("");
+			}
 		} else if (BatchJobObject.NUMBER_OF_SUCCESSFULL_JOBS.equals(evt
 				.getPropertyName())) {
-			getDoneProgress().setValue((Integer) evt.getNewValue());
+			getDoneProgress().setValue(i);
+			if ( i > 0 ) {
+				getDoneValueLabel().setText(""+i);
+			} else {
+				getDoneValueLabel().setText("");
+			}
 		} else if (BatchJobObject.NUMBER_OF_FINISHED_JOBS.equals(evt
 				.getPropertyName())) {
 			// TODO
@@ -208,21 +295,178 @@ public class BatchJobStatusPanel extends JPanel implements
 	}
 
 	private void refreshProgressBars() {
+		
+		getTotalLabel().setText(""+bj.getTotalNumberOfJobs());
 
 		getDoneProgress().setMaximum(bj.getTotalNumberOfJobs());
-		getDoneProgress().setValue(bj.getNumberOfSuccessfulJobs());
+		int i = bj.getNumberOfSuccessfulJobs();
+		getDoneProgress().setValue(i);
+		if ( i > 0 ) {
+			getDoneValueLabel().setText(""+i);
+		} else {
+			getDoneValueLabel().setText("");
+		}
 
 		getFailProgress().setMaximum(bj.getTotalNumberOfJobs());
-		getFailProgress().setValue(bj.getNumberOfFailedJobs());
+		i = bj.getNumberOfFailedJobs();
+		if ( i > 0 ) {
+			getFailValueLabel().setText(""+i);
+		} else {
+			getFailValueLabel().setText("");
+		}
 
 		getRunProgress().setMaximum(bj.getTotalNumberOfJobs());
-		getRunProgress().setValue(bj.getNumberOfRunningJobs());
+		i = bj.getNumberOfRunningJobs();
+		getRunProgress().setValue(i);
+		if ( i > 0 ) {
+			getRunValueLabel().setText(""+i);
+		} else {
+			getRunValueLabel().setText("");
+		}
 
 		getUnsubProgress().setMaximum(bj.getTotalNumberOfJobs());
-		getUnsubProgress().setValue(bj.getNumberOfUnsubmittedJobs());
+		i = bj.getNumberOfUnsubmittedJobs();
+		getUnsubProgress().setValue(i);
+		if ( i > 0 ) {
+			getUnsubValueLabel().setText(""+i);
+		} else {
+			getUnsubValueLabel().setText("");
+		}
 
 		getWaitingProgress().setMaximum(bj.getTotalNumberOfJobs());
-		getWaitingProgress().setValue(bj.getNumberOfWaitingJobs());
+		i = bj.getNumberOfWaitingJobs();
+		getWaitingProgress().setValue(i);
+		if ( i > 0 ) {
+			getWaitingValueLabel().setText(""+i);
+		} else {
+			getWaitingValueLabel().setText("");
+		}
 
+	}
+	private JLabel getUnsubValueLabel() {
+		if (unsubValueLabel == null) {
+			unsubValueLabel = new JLabel("");
+			unsubValueLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		}
+		return unsubValueLabel;
+	}
+	private JLabel getWaitingValueLabel() {
+		if (waitingValueLabel == null) {
+			waitingValueLabel = new JLabel("");
+			waitingValueLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		}
+		return waitingValueLabel;
+	}
+	private JLabel getRunValueLabel() {
+		if (runValueLabel == null) {
+			runValueLabel = new JLabel("");
+			runValueLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		}
+		return runValueLabel;
+	}
+	private JLabel getFailValueLabel() {
+		if (failValueLabel == null) {
+			failValueLabel = new JLabel("");
+			failValueLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		}
+		return failValueLabel;
+	}
+	private JLabel getDoneValueLabel() {
+		if (doneValueLabel == null) {
+			doneValueLabel = new JLabel("");
+			doneValueLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+			doneValueLabel.setFont(doneValueLabel.getFont().deriveFont(doneValueLabel.getFont().getStyle() | Font.BOLD));
+		}
+		return doneValueLabel;
+	}
+	private JSeparator getSeparator() {
+		if (separator == null) {
+			separator = new JSeparator();
+		}
+		return separator;
+	}
+	private JSeparator getSeparator_1() {
+		if (separator_1 == null) {
+			separator_1 = new JSeparator();
+		}
+		return separator_1;
+	}
+	private JSeparator getSeparator_2() {
+		if (separator_2 == null) {
+			separator_2 = new JSeparator();
+		}
+		return separator_2;
+	}
+	private JSeparator getSeparator_3() {
+		if (separator_3 == null) {
+			separator_3 = new JSeparator();
+		}
+		return separator_3;
+	}
+	private JSeparator getSeparator_4() {
+		if (separator_4 == null) {
+			separator_4 = new JSeparator();
+		}
+		return separator_4;
+	}
+	private JSeparator getSeparator_5() {
+		if (separator_5 == null) {
+			separator_5 = new JSeparator();
+		}
+		return separator_5;
+	}
+	private JSeparator getSeparator_6() {
+		if (separator_6 == null) {
+			separator_6 = new JSeparator();
+		}
+		return separator_6;
+	}
+	private JSeparator getSeparator_7() {
+		if (separator_7 == null) {
+			separator_7 = new JSeparator();
+		}
+		return separator_7;
+	}
+	private JSeparator getSeparator_8() {
+		if (separator_8 == null) {
+			separator_8 = new JSeparator();
+		}
+		return separator_8;
+	}
+	private JSeparator getSeparator_9() {
+		if (separator_9 == null) {
+			separator_9 = new JSeparator();
+		}
+		return separator_9;
+	}
+	private JSeparator getSeparator_10() {
+		if (separator_10 == null) {
+			separator_10 = new JSeparator();
+		}
+		return separator_10;
+	}
+	private JSeparator getSeparator_11() {
+		if (separator_11 == null) {
+			separator_11 = new JSeparator();
+		}
+		return separator_11;
+	}
+	private JSeparator getSeparator_12() {
+		if (separator_12 == null) {
+			separator_12 = new JSeparator();
+		}
+		return separator_12;
+	}
+	private JSeparator getSeparator_13() {
+		if (separator_13 == null) {
+			separator_13 = new JSeparator();
+		}
+		return separator_13;
+	}
+	private JSeparator getSeparator_14() {
+		if (separator_14 == null) {
+			separator_14 = new JSeparator();
+		}
+		return separator_14;
 	}
 }
