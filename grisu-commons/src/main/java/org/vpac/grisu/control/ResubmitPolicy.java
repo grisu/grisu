@@ -12,7 +12,7 @@ public class ResubmitPolicy {
 	 */
 	public static final String RESTART_DONE_JOBS = "restartDoneJobs";
 	/**
-	 * Restart jobs that are either unsubmitted or pending. Defaults to true.
+	 * Restart jobs that are either unsubmitted or pending. Defaults to false.
 	 * 
 	 * Note: along with this you also have to specify one of the
 	 * RESTART_RESTART_WAITING_JOBS_ON_XXX_LOCATIONS.
@@ -77,7 +77,7 @@ public class ResubmitPolicy {
 	 */
 	public static final String RESTART_TO_ALL_LOCATIONS = "submitToAllLocations";
 
-	private Map<String, Boolean> properties = new HashMap<String, Boolean>();
+	private final Map<String, Boolean> properties = new HashMap<String, Boolean>();
 
 	public void setProperty(String key, Boolean value) {
 		properties.put(key, value);

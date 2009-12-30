@@ -26,11 +26,11 @@ public class FileListActionPanel extends JPanel implements FileListListener {
 
 	private final ImageIcon REFRESH_ICON = new ImageIcon(
 			FileListActionPanel.class.getClassLoader().getResource(
-					"refresh.png"));
+			"refresh.png"));
 
 	private final ImageIcon BOOKMARK_ICON = new ImageIcon(
 			FileListActionPanel.class.getClassLoader().getResource(
-					"bookmark.png"));
+			"bookmark.png"));
 
 	private static SpinningDial LOADING_ICON = new SpinningDial(16, 16);
 

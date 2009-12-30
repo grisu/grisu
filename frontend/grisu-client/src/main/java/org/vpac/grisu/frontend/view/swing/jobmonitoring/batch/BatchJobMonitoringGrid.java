@@ -1,11 +1,19 @@
-package org.vpac.grisu.frontend.view.swing.jobmonitoring;
+package org.vpac.grisu.frontend.view.swing.jobmonitoring.batch;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableColumn;
 
@@ -24,22 +32,45 @@ import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 public class BatchJobMonitoringGrid extends JPanel {
+	private static void addPopup(Component component, final JPopupMenu popup) {
+		component.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+			private void showMenu(MouseEvent e) {
+				popup.show(e.getComponent(), e.getX(), e.getY());
+			}
+		});
+	}
 	private JScrollPane scrollPane;
+
 	private JXTable table;
 
-	private EventTableModel<BatchJobObject> batchJobModel;
+	private final EventTableModel<BatchJobObject> batchJobModel;
+	private final EventList<BatchJobObject> batchJobs;
+	private final SortedList<BatchJobObject> sortedBatchJobList;
+	private final EventList<BatchJobObject> observedBatchJobs;
 
-	private EventList<BatchJobObject> batchJobs;
-	private SortedList<BatchJobObject> sortedBatchJobList;
-	private EventList<BatchJobObject> observedBatchJobs;
 	private final ServiceInterface si;
-
 	private final UserEnvironmentManager em;
-	private final RunningJobManager rjm;
 
+	private final RunningJobManager rjm;
 	// ---------------------------------------------------------------------------------------
 	// Event stuff
 	private Vector<BatchJobSelectionListener> listeners;
+	private JPopupMenu popupMenu;
+	private JMenuItem mntmRefreshManually;
+
+	private JMenuItem mntmKillBatchjob;
 
 	/**
 	 * Create the panel.
@@ -47,12 +78,12 @@ public class BatchJobMonitoringGrid extends JPanel {
 	public BatchJobMonitoringGrid(ServiceInterface si, String application) {
 		this.si = si;
 		this.em = GrisuRegistryManager.getDefault(si)
-				.getUserEnvironmentManager();
+		.getUserEnvironmentManager();
 		this.rjm = RunningJobManager.getDefault(si);
 
 		batchJobs = rjm.getBatchJobs(application);
 		ObservableElementList.Connector<BatchJobObject> bjoConnector = GlazedLists
-				.beanConnector(BatchJobObject.class);
+		.beanConnector(BatchJobObject.class);
 		observedBatchJobs = new ObservableElementList<BatchJobObject>(
 				batchJobs, bjoConnector);
 
@@ -69,8 +100,9 @@ public class BatchJobMonitoringGrid extends JPanel {
 	// register a listener
 	synchronized public void addBatchJobSelectionListener(
 			BatchJobSelectionListener l) {
-		if (listeners == null)
+		if (listeners == null) {
 			listeners = new Vector<BatchJobSelectionListener>();
+		}
 		listeners.addElement(l);
 	}
 
@@ -88,7 +120,7 @@ public class BatchJobMonitoringGrid extends JPanel {
 
 	private void fireBatchJobSelected(BatchJobObject bj) {
 		// if we have no mountPointsListeners, do nothing...
-		if (listeners != null && !listeners.isEmpty()) {
+		if ((listeners != null) && !listeners.isEmpty()) {
 
 			// make a copy of the listener list in case
 			// anyone adds/removes mountPointsListeners
@@ -109,6 +141,63 @@ public class BatchJobMonitoringGrid extends JPanel {
 		}
 	}
 
+	private JMenuItem getMntmKillBatchjob() {
+		if (mntmKillBatchjob == null) {
+			mntmKillBatchjob = new JMenuItem("Kill batchjob(s)");
+			mntmKillBatchjob.addActionListener(new ActionListener() {
+
+				public void actionPerformed(ActionEvent e) {
+
+					Set<BatchJobObject> bjs = getSelectedBatchJobs();
+
+					StringBuffer message = new StringBuffer("Do you really want to kill and clean the following batchjobs?\n\n");
+
+					for ( BatchJobObject bj : bjs ) {
+						message.append(bj.getJobname()+"\n");
+					}
+
+					int n = JOptionPane.showConfirmDialog(
+							getRootPane(),
+							message.toString(),
+							"Kill and clean batchjobs",
+							JOptionPane.YES_NO_OPTION);
+
+					if ( n == JOptionPane.YES_OPTION ) {
+
+						for ( BatchJobObject bj : bjs ) {
+							bj.kill(true, false);
+						}
+					}
+				}
+			});
+		}
+		return mntmKillBatchjob;
+	}
+
+	private JMenuItem getMntmRefreshManually() {
+		if (mntmRefreshManually == null) {
+			mntmRefreshManually = new JMenuItem("Refresh manually");
+			mntmRefreshManually.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+
+					for ( BatchJobObject bj : getSelectedBatchJobs() ) {
+						bj.refresh(false);
+					}
+
+				}
+			});
+		}
+		return mntmRefreshManually;
+	}
+
+	private JPopupMenu getPopupMenu() {
+		if (popupMenu == null) {
+			popupMenu = new JPopupMenu();
+			popupMenu.add(getMntmRefreshManually());
+			popupMenu.add(getMntmKillBatchjob());
+		}
+		return popupMenu;
+	}
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
@@ -116,17 +205,41 @@ public class BatchJobMonitoringGrid extends JPanel {
 		}
 		return scrollPane;
 	}
+	public BatchJobObject getSelectedBatchJob() {
 
+		int row = getTable().getSelectedRow();
+
+		BatchJobObject bj = (BatchJobObject)batchJobModel.getValueAt(row, 1);
+
+		return bj;
+
+	}
+
+	public Set<BatchJobObject> getSelectedBatchJobs() {
+
+		Set<BatchJobObject> result = new HashSet<BatchJobObject>();
+		int[] rows = getTable().getSelectedRows();
+
+		for ( int row : rows ) {
+			BatchJobObject bj = (BatchJobObject)batchJobModel.getValueAt(row, 1);
+			result.add(bj);
+		}
+
+		return result;
+	}
 	private JXTable getTable() {
 		if (table == null) {
 			table = new JXTable(batchJobModel);
+			// to fix sorting with glazed lists and jxtable
 			table.setColumnControlVisible(true);
+			table.setSortable(false);
 
 			table.getColumnExt(0).setSortable(false);
-			// table.getColumnExt(0).setHeaderRenderer()
 
 			table.setHighlighters(HighlighterFactory.createAlternateStriping());
+			addPopup(table, getPopupMenu());
 
+			table.setDefaultRenderer(BatchJobObject.class, new BatchJobNameCellRenderer());
 			table.setDefaultRenderer(Boolean.class,
 					new BatchJobRefreshRenderer());
 			table.setDefaultRenderer(Double.class,
@@ -204,7 +317,6 @@ public class BatchJobMonitoringGrid extends JPanel {
 		}
 		return table;
 	}
-
 	// remove a listener
 	synchronized public void removeBatchJobSelectionListener(
 			BatchJobSelectionListener l) {

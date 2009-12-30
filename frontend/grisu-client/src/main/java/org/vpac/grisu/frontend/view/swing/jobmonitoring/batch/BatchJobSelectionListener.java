@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.view.swing.jobmonitoring;
+package org.vpac.grisu.frontend.view.swing.jobmonitoring.batch;
 
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
 

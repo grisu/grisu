@@ -27,5 +27,10 @@ public class ActionStatusEvent {
 			return prefix;
 		}
 	}
+	
+	@Override
+	public String toString() {
+		return getPrefix()+getPercentFinished()+"% finished";
+	}
 
 }

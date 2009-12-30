@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.view.swing.jobmonitoring;
+package org.vpac.grisu.frontend.view.swing.jobmonitoring.batch;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -9,7 +9,7 @@ import javax.swing.UIManager;
 import javax.swing.table.TableCellRenderer;
 
 public class BatchJobStatusCellRenderer extends JProgressBar implements
-		TableCellRenderer {
+TableCellRenderer {
 
 	public BatchJobStatusCellRenderer() {
 		this.setMinimum(0);

@@ -19,5 +19,10 @@ public class BatchJobEvent {
 	public BatchJobObject getMultiPartJob() {
 		return this.mpjo;
 	}
+	
+	@Override
+	public String toString() {
+		return getMessage();
+	}
 
 }

@@ -12,9 +12,11 @@ import java.util.TimerTask;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
+import org.bushe.swing.event.EventSubscriber;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.BatchJobException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
+import org.vpac.grisu.frontend.model.events.BatchJobKilledEvent;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -27,26 +29,46 @@ import ca.odell.glazedlists.EventList;
 
 public class RunningJobManager {
 
-	private class UpdateTimerTask extends TimerTask {
+	private class UpdateTimerTask extends TimerTask implements EventSubscriber {
+
+		public void onEvent(Object event) {
+
+			if ( event instanceof BatchJobKilledEvent ) {
+				BatchJobKilledEvent e = (BatchJobKilledEvent)event;
+
+				updateBatchJobList(e.getApplication());
+			}
+
+
+		}
 
 		@Override
 		public void run() {
 
-			for (String application : cachedBatchJobsPerApplication.keySet()) {
-				updateBatchJobList(application);
-			}
+			try {
 
-			for (BatchJobObject bj : getAllCurrentlyWatchedBatchJobs()) {
-				if (!bj.isFinished(false) && !bj.isRefreshing()) {
-					myLogger.debug("Refreshing job: " + bj.getJobname());
-					bj.refresh(true);
+				for (String application : cachedBatchJobsPerApplication.keySet()) {
+					updateBatchJobList(application);
 				}
-			}
 
-			updateTimer.schedule(new UpdateTimerTask(),
-					UPDATE_TIME_IN_SECONDS * 1000);
+				for (BatchJobObject bj : getAllCurrentlyWatchedBatchJobs()) {
+					if (!bj.isFinished(false) && !bj.isRefreshing() && !bj.isBeingKilled()) {
+						myLogger.debug("Refreshing job: " + bj.getJobname());
+						bj.refresh(true);
+					}
+				}
+
+				updateTimer.schedule(new UpdateTimerTask(),
+						UPDATE_TIME_IN_SECONDS * 1000);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
+
+
 	}
+
 
 	static final Logger myLogger = Logger.getLogger(RunningJobManager.class
 			.getName());
@@ -72,7 +94,7 @@ public class RunningJobManager {
 				toRemove.add(jo);
 			}
 		}
-		
+
 		jobObjectList.removeAll(toRemove);
 
 		for (DtoJob newJob : newJobsCopy) {
@@ -94,7 +116,7 @@ public class RunningJobManager {
 
 		if (si == null) {
 			throw new RuntimeException(
-					"ServiceInterface not initialized yet. Can't get default registry...");
+			"ServiceInterface not initialized yet. Can't get default registry...");
 		}
 
 		synchronized (si) {
@@ -111,18 +133,18 @@ public class RunningJobManager {
 
 	private final ServiceInterface si;
 
-	private Map<String, BatchJobObject> cachedAllBatchJobs = Collections
-			.synchronizedMap(new HashMap<String, BatchJobObject>());
+	private final Map<String, BatchJobObject> cachedAllBatchJobs = Collections
+	.synchronizedMap(new HashMap<String, BatchJobObject>());
 
-	private Map<String, EventList<BatchJobObject>> cachedBatchJobsPerApplication = Collections
-			.synchronizedMap(new HashMap<String, EventList<BatchJobObject>>());;
+	private final Map<String, EventList<BatchJobObject>> cachedBatchJobsPerApplication = Collections
+	.synchronizedMap(new HashMap<String, EventList<BatchJobObject>>());;
 
-	private Timer updateTimer = new Timer();
+	private final Timer updateTimer = new Timer();
 
 	public RunningJobManager(ServiceInterface si) {
 		this.si = si;
 		this.em = GrisuRegistryManager.getDefault(si)
-				.getUserEnvironmentManager();
+		.getUserEnvironmentManager();
 
 		startAutoRefresh();
 	}
@@ -174,7 +196,8 @@ public class RunningJobManager {
 		return cachedBatchJobsPerApplication.get(application);
 	}
 
-	public void startAutoRefresh() {
+
+	private void startAutoRefresh() {
 
 		updateTimer.schedule(new UpdateTimerTask(), 0);
 
@@ -214,6 +237,9 @@ public class RunningJobManager {
 			}
 		}
 		list.removeAll(toRemove);
+		for ( BatchJobObject bj : toRemove ) {
+			cachedAllBatchJobs.remove(bj.getJobname());
+		}
 
 	}
 

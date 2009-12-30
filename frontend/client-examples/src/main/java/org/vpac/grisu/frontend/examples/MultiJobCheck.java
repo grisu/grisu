@@ -7,8 +7,6 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
-import org.vpac.grisu.frontend.model.job.DoubleWalltimeJobRestarter;
-import org.vpac.grisu.frontend.model.job.FailedJobRestarter;
 
 public class MultiJobCheck {
 
@@ -20,7 +18,7 @@ public class MultiJobCheck {
 		Date startDate = new Date();
 
 		LoginParams loginParams = new LoginParams(
-		// "http://localhost:8080/xfire-backend/services/grisu",
+				// "http://localhost:8080/xfire-backend/services/grisu",
 				// "https://ngportal.vpac.org/grisu-ws/soap/EnunciateServiceInterfaceService",
 				// "https://ngportal.vpac.org/grisu-ws/services/grisu",
 				"Local",
@@ -28,19 +26,17 @@ public class MultiJobCheck {
 				username, password);
 
 		final ServiceInterface si = ServiceInterfaceFactory
-				.createInterface(loginParams);
+		.createInterface(loginParams);
 
 		final String multiJobName = "200jobs";
 
 		BatchJobObject newObject = new BatchJobObject(si, multiJobName, false);
 
-		FailedJobRestarter restarter = new DoubleWalltimeJobRestarter();
-
-		newObject.monitorProgress(15, null, true, restarter);
+		newObject.monitorProgress(15, null, true);
 
 		newObject.downloadResults(true, new File(
-				"/home/markus/Desktop/multiTest"), new String[] { "stdout",
-				"stderr" }, false, true);
+		"/home/markus/Desktop/multiTest"), new String[] { "stdout",
+		"stderr" }, false, true);
 
 		Date endDate = new Date();
 

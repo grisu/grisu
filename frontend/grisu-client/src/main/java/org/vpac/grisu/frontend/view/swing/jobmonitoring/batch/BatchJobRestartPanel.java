@@ -1,0 +1,104 @@
+package org.vpac.grisu.frontend.view.swing.jobmonitoring.batch;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
+
+import org.vpac.grisu.frontend.model.job.BatchJobObject;
+
+import com.jgoodies.forms.factories.FormFactory;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.RowSpec;
+
+public class BatchJobRestartPanel extends JPanel implements PropertyChangeListener {
+
+	private final BatchJobObject bj;
+	private JButton failedJobsButton;
+	private JButton waitingJobsButton;
+	private JButton failedWaitingJobsButton;
+
+	/**
+	 * Create the panel.
+	 */
+	public BatchJobRestartPanel(BatchJobObject bj) {
+		setBorder(new TitledBorder(null, "Resubmission", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		this.bj = bj;
+		setLayout(new FormLayout(new ColumnSpec[] {
+				FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("default:grow"),
+				FormFactory.RELATED_GAP_COLSPEC,},
+				new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,}));
+		add(getFailedJobsButton(), "2, 2, fill, default");
+		add(getButton_1(), "2, 4");
+		add(getButton_2(), "2, 6");
+
+	}
+
+	private JButton getButton_1() {
+		if (waitingJobsButton == null) {
+			waitingJobsButton = new JButton("Waiting jobs");
+			waitingJobsButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+
+					bj.restart(false, true, false);
+					bj.refresh(false);
+				}
+			});
+		}
+		return waitingJobsButton;
+	}
+	private JButton getButton_2() {
+		if (failedWaitingJobsButton == null) {
+			failedWaitingJobsButton = new JButton("Failed & Waiting");
+			failedWaitingJobsButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					bj.restart(true, true, false);
+					bj.refresh(false);
+				}
+			});
+		}
+		return failedWaitingJobsButton;
+	}
+	private JButton getFailedJobsButton() {
+		if (failedJobsButton == null) {
+			failedJobsButton = new JButton("Failed jobs");
+			failedJobsButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+
+					try {
+						bj.restart(true, false, false);
+						bj.refresh(false);
+					} catch (Throwable ex) {
+						ex.printStackTrace();
+					}
+				}
+			});
+		}
+		return failedJobsButton;
+	}
+	public void propertyChange(PropertyChangeEvent evt) {
+
+		if ( BatchJobObject.RESUBMITTING.equals(evt.getPropertyName()) ) {
+
+			if ( (Boolean)evt.getNewValue() ) {
+				System.out.println("Resubmitting.");
+			} else {
+				System.out.println("Resubmission finished.");
+			}
+		}
+
+	}
+}

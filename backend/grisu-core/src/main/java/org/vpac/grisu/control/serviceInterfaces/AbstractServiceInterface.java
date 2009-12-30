@@ -918,7 +918,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				.getBatchJobname(), size);
 		this.actionStatus.put(multiJob.getBatchJobname(), newActionStatus);
 
-		ExecutorService executor = Executors
+		final ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
 						.getConcurrentMultiPartJobSubmitThreadsPerUser());
 
@@ -965,39 +965,57 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		executor.shutdown();
 
-		if (clean) {
-			for (String mpRoot : multiJob.getAllUsedMountPoints()) {
+		Thread cleanupThread = new Thread() {
 
-				newActionStatus
-						.addElement("Deleting common dir for mountpoint: "
-								+ mpRoot);
-				String url = mpRoot
-						+ multiJob
-								.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY);
-				myLogger.debug("Deleting multijobDir: " + url);
+			public void run() {
+
 				try {
-					deleteFile(url);
-					newActionStatus
-							.addElement("Deleted common dir for mountpoint: "
-									+ mpRoot);
-				} catch (RemoteFileSystemException e) {
-					newActionStatus
-							.addElement("Couldn't delete common dir for mountpoint: "
-									+ mpRoot);
-					newActionStatus.setFailed(true);
-					myLogger.error("Couldn't delete multijobDir: " + url);
+					executor.awaitTermination(2, TimeUnit.HOURS);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
 				}
 
+				try {
+				if (clean) {
+					for (String mpRoot : multiJob.getAllUsedMountPoints()) {
+
+						newActionStatus
+								.addElement("Deleting common dir for mountpoint: "
+										+ mpRoot);
+						String url = mpRoot
+								+ multiJob
+										.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY);
+						myLogger.debug("Deleting multijobDir: " + url);
+						try {
+							deleteFile(url);
+							newActionStatus
+									.addElement("Deleted common dir for mountpoint: "
+											+ mpRoot);
+						} catch (RemoteFileSystemException e) {
+							newActionStatus
+									.addElement("Couldn't delete common dir for mountpoint: "
+											+ mpRoot);
+							newActionStatus.setFailed(true);
+							myLogger.error("Couldn't delete multijobDir: "
+									+ url);
+						}
+
+					}
+				}
+
+				multiPartJobDao.delete(multiJob);
+				newActionStatus
+						.addElement("Deleted multipartjob from database.");
+
+				} finally {
+					newActionStatus.setFinished(true);
+				}
+
+
 			}
-		}
+		};
 
-		multiPartJobDao.delete(multiJob);
-		newActionStatus.addElement("Deleted multipartjob from database.");
-
-		if (newActionStatus.getTotalElements() <= newActionStatus
-				.getCurrentElements()) {
-			newActionStatus.setFinished(true);
-		}
+		cleanupThread.start();
 
 	}
 

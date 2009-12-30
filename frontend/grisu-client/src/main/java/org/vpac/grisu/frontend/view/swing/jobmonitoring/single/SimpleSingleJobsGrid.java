@@ -1,6 +1,7 @@
-package org.vpac.grisu.frontend.view.swing.jobmonitoring;
+package org.vpac.grisu.frontend.view.swing.jobmonitoring.single;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Vector;
@@ -30,6 +31,8 @@ public class SimpleSingleJobsGrid extends JPanel {
 
 	private final SortedList<JobObject> sortedJobList;
 	private final EventList<JobObject> observedJobs;
+	
+	private boolean enableSingleMouseClick = false;
 
 	// ---------------------------------------------------------------------------------------
 	// Event stuff
@@ -66,11 +69,16 @@ public class SimpleSingleJobsGrid extends JPanel {
 		}
 		listeners.addElement(l);
 	}
+	
+	public void setEnableSingleMouseClick(boolean enable) {
+		this.enableSingleMouseClick = enable;
+	}
 
 	private void fireJobSelected(JobObject j) {
 		// if we have no mountPointsListeners, do nothing...
 		if (listeners != null && !listeners.isEmpty()) {
 
+			lockUI(true);
 			// make a copy of the listener list in case
 			// anyone adds/removes mountPointsListeners
 			Vector<SingleJobSelectionListener> targets;
@@ -88,7 +96,20 @@ public class SimpleSingleJobsGrid extends JPanel {
 					e1.printStackTrace();
 				}
 			}
+			lockUI(false);
 		}
+	}
+	
+	private void lockUI(boolean lock) {
+		
+//		getTable().setEnabled(lock);
+		
+		if ( ! lock ) {
+			this.setCursor(Cursor.getDefaultCursor());
+		} else {
+			this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		}
+		
 	}
 
 	private JScrollPane getScrollPane() {
@@ -114,7 +135,9 @@ public class SimpleSingleJobsGrid extends JPanel {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
 
-					if (arg0.getClickCount() == 2) {
+					if ( enableSingleMouseClick ) {
+						jobDoubleClickOccured();
+					} else if (arg0.getClickCount() == 2) {
 						jobDoubleClickOccured();
 					}
 

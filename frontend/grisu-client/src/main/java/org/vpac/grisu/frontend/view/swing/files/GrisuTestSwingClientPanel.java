@@ -5,7 +5,7 @@ import java.awt.BorderLayout;
 import javax.swing.JPanel;
 
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.frontend.view.swing.jobmonitoring.BatchJobTabbedPane;
+import org.vpac.grisu.frontend.view.swing.jobmonitoring.batch.BatchJobTabbedPane;
 import org.vpac.grisu.frontend.view.swing.login.GrisuSwingClient;
 import org.vpac.grisu.frontend.view.swing.login.LoginPanel;
 

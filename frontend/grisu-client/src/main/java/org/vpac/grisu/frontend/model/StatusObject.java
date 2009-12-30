@@ -6,7 +6,6 @@ import java.util.Set;
 import org.bushe.swing.event.EventBus;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.model.events.ActionStatusEvent;
-import org.vpac.grisu.frontend.model.events.SystemOutStatusLogger;
 import org.vpac.grisu.model.dto.DtoActionStatus;
 
 public class StatusObject {
@@ -48,8 +47,7 @@ public class StatusObject {
 		if (l != null) {
 			switch (l) {
 			case STDOUT:
-				new SystemOutStatusLogger(handle);
-				break;
+				throw new UnsupportedOperationException("not yet supported");
 			}
 		}
 

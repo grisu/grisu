@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.view.swing.jobmonitoring;
+package org.vpac.grisu.frontend.view.swing.jobmonitoring.single;
 
 import java.util.Comparator;
 import java.util.Date;

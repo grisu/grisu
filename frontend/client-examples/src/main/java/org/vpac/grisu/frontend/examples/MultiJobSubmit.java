@@ -54,8 +54,7 @@ public class MultiJobSubmit {
 		try {
 			si.kill(multiJobName, true);
 
-			StatusObject status = new StatusObject(si, multiJobName,
-					StatusObject.Listener.STDOUT);
+			StatusObject status = new StatusObject(si, multiJobName);
 			status.waitForActionToFinish(3, true, true);
 
 		} catch (Exception e) {

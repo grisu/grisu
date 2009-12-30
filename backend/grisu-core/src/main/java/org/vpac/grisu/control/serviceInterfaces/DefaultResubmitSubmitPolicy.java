@@ -23,7 +23,7 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 	private final SortedSet<GridResource> allResources;
 	private final BatchJobStatus bjs;
 
-	private Map<String, String> initProperties = new HashMap<String, String>();
+	private final Map<String, String> initProperties = new HashMap<String, String>();
 
 	private final Map<String, GridResource> cacheGridResourceMap = new HashMap<String, GridResource>();
 
@@ -42,7 +42,7 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 		setSubmitToDoneLocations(true);
 		setResubmitFailedJobs(true);
 		setSubmitReadyJobs(true);
-		setResubmitWaitingJobs(true);
+		setResubmitWaitingJobs(false);
 		setResubmitWaitingJobsOnFailedLocations(true);
 		setResubmitWaitingJobsOnWaitingLocations(true);
 
@@ -170,7 +170,7 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 				for (Job job : bjs.getWaitingJobs()) {
 
 					String currentSubLoc = job
-							.getJobProperty(Constants.SUBMISSIONLOCATION_KEY);
+					.getJobProperty(Constants.SUBMISSIONLOCATION_KEY);
 					if (isResubmitWaitingJobsOnDoneLocations()
 							&& bjs.getDoneSubLocs().contains(currentSubLoc)) {
 						calculatedJobs.add(job);
@@ -297,7 +297,7 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 	public void setResubmitWaitingJobsOnDoneLocations(Boolean restart) {
 		initProperties.put(
 				ResubmitPolicy.RESTART_WAITING_JOBS_ON_DONE_LOCATIONS, restart
-						.toString());
+				.toString());
 	}
 
 	public void setResubmitWaitingJobsOnFailedLocations(Boolean restart) {

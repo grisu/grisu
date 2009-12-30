@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.view.swing.jobmonitoring;
+package org.vpac.grisu.frontend.view.swing.jobmonitoring.single;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -21,11 +21,9 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import com.jidesoft.swing.JideTabbedPane;
+import javax.swing.border.TitledBorder;
 
 public class JobDetailPanel extends JPanel implements PropertyChangeListener {
-
-	private JLabel lblJobname;
-	private JTextField textField;
 	private JLabel lblStatus;
 	private JTextField textField_1;
 
@@ -43,6 +41,7 @@ public class JobDetailPanel extends JPanel implements PropertyChangeListener {
 	 * Create the panel.
 	 */
 	public JobDetailPanel(ServiceInterface si) {
+		setBorder(new TitledBorder(null, "Job: n/a", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 
 		this.si = si;
 
@@ -51,17 +50,16 @@ public class JobDetailPanel extends JPanel implements PropertyChangeListener {
 				ColumnSpec.decode("default:grow"),
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_COLSPEC,},
+			new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC, }));
-		add(getLblJobname(), "2, 2, right, default");
-		add(getTextField(), "4, 2, fill, default");
-		add(getLblStatus(), "2, 4, right, default");
-		add(getTextField_1(), "4, 4, fill, default");
-		add(getJideTabbedPane(), "2, 6, 3, 1, fill, fill");
+				FormFactory.RELATED_GAP_ROWSPEC,}));
+		add(getLblStatus(), "2, 2, right, default");
+		add(getTextField_1(), "4, 2, fill, default");
+		add(getJideTabbedPane(), "2, 4, 3, 1, fill, fill");
 
 	}
 
@@ -83,13 +81,6 @@ public class JobDetailPanel extends JPanel implements PropertyChangeListener {
 			jideTabbedPane.addTab("Log", getScrollPane_1_1());
 		}
 		return jideTabbedPane;
-	}
-
-	private JLabel getLblJobname() {
-		if (lblJobname == null) {
-			lblJobname = new JLabel("Jobname");
-		}
-		return lblJobname;
 	}
 
 	private JLabel getLblStatus() {
@@ -129,15 +120,6 @@ public class JobDetailPanel extends JPanel implements PropertyChangeListener {
 		return scrollPane_1;
 	}
 
-	private JTextField getTextField() {
-		if (textField == null) {
-			textField = new JTextField();
-			textField.setEditable(false);
-			textField.setColumns(10);
-		}
-		return textField;
-	}
-
 	private JTextField getTextField_1() {
 		if (textField_1 == null) {
 			textField_1 = new JTextField();
@@ -163,7 +145,7 @@ public class JobDetailPanel extends JPanel implements PropertyChangeListener {
 
 		getFileListWithPreviewPanel().setRootUrl(job.getJobDirectoryUrl());
 		getFileListWithPreviewPanel().setCurrentUrl(job.getJobDirectoryUrl());
-		getTextField().setText(job.getJobname());
+		setBorder(new TitledBorder(null, job.getJobname(), TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		getTextField_1().setText(
 				JobConstants.translateStatus(job.getStatus(false)));
 
