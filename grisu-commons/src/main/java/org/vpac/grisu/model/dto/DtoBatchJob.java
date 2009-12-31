@@ -2,9 +2,11 @@ package org.vpac.grisu.model.dto;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -61,7 +63,7 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 	// public boolean isFailed() {
 	// return this.isFailed;
 	// }
-	//	
+	//
 	// public void setFailed(boolean f) {
 	// this.isFailed = f;
 	// }
@@ -83,6 +85,33 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 		return getBatchJobname().compareTo(o.getBatchJobname());
 	}
 
+	public Set<String> currentlyRunningOrSuccessfullSubmissionLocations() {
+
+		Set<String> result = new HashSet<String>();
+		for ( DtoJob job : getJobs().getAllJobs() ) {
+			if ( (JobConstants.ACTIVE == job.getStatus()) || (JobConstants.DONE == job.getStatus()) ) {
+				result.add(job.jobProperty(Constants.SUBMISSIONLOCATION_KEY));
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Returns a set of all submission locations that are used at the moment for this batchjob.
+	 * 
+	 * @return the submission locations
+	 */
+	public Set<String> currentlyUsedSubmissionLocations() {
+
+		Set<String> result = new HashSet<String>();
+		for ( DtoJob job : getJobs().getAllJobs() ) {
+			result.add(job.jobProperty(Constants.SUBMISSIONLOCATION_KEY));
+		}
+
+		return result;
+	}
+
 	public boolean failed() {
 
 		if (failedJobs().size() > 0) {
@@ -98,8 +127,8 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 		SortedSet<DtoJob> result = new TreeSet<DtoJob>();
 
 		for (DtoJob job : jobs.getAllJobs()) {
-			if (job.getStatus() >= JobConstants.FINISHED_EITHER_WAY
-					&& job.getStatus() != JobConstants.DONE) {
+			if ((job.getStatus() >= JobConstants.FINISHED_EITHER_WAY)
+					&& (job.getStatus() != JobConstants.DONE)) {
 				result.add(job);
 			}
 		}
@@ -165,7 +194,7 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 
 	@XmlAttribute(name = "finished")
 	public boolean isFinished() {
-		
+
 		if ( this.totalNumberOfJobs() <= 0 ) {
 			return false;
 		} else {
@@ -185,8 +214,8 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 	public int numberOfFailedJobs() {
 		int failed = 0;
 		for (DtoJob job : jobs.getAllJobs()) {
-			if (job.getStatus() >= JobConstants.FINISHED_EITHER_WAY
-					&& job.getStatus() != JobConstants.DONE) {
+			if ((job.getStatus() >= JobConstants.FINISHED_EITHER_WAY)
+					&& (job.getStatus() != JobConstants.DONE)) {
 				failed = failed + 1;
 			}
 		}
@@ -237,8 +266,8 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 	public int numberOfWaitingJobs() {
 		int waiting = 0;
 		for (DtoJob job : jobs.getAllJobs()) {
-			if (job.getStatus() >= JobConstants.UNSUBMITTED
-					&& job.getStatus() <= JobConstants.PENDING) {
+			if ((job.getStatus() >= JobConstants.UNSUBMITTED)
+					&& (job.getStatus() <= JobConstants.PENDING)) {
 				waiting = waiting + 1;
 			}
 		}
@@ -263,13 +292,13 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 	}
 
 	// public boolean allJobsFinished() {
-	//		
+	//
 	// if ( totalNumberOfJobs() == numberOfFinishedJobs() ) {
 	// return true;
 	// } else {
 	// return false;
 	// }
-	//		
+	//
 	// }
 
 	public DtoJob retrieveJob(String jobname) {
@@ -321,6 +350,32 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 		this.submissionFqan = fqan;
 	}
 
+	public Map<Integer, Map<String, Integer>> statusMap() {
+
+		Map<Integer, Map<String, Integer>> statusMap = new TreeMap<Integer, Map<String, Integer>>();
+
+		for (DtoJob job : jobs.getAllJobs()) {
+
+			Integer status = job.getStatus();
+			if ( statusMap.get(status) == null ) {
+				Map<String, Integer> temp = new HashMap<String, Integer>();
+				statusMap.put(status, temp);
+			}
+
+			Map<String, Integer> temp = statusMap.get(status);
+			if (  temp.get(job.jobProperty(Constants.SUBMISSIONLOCATION_KEY)) == null ) {
+				temp.put(job.jobProperty(Constants.SUBMISSIONLOCATION_KEY), 0);
+			}
+
+			Integer sum = temp.get(job.jobProperty(Constants.SUBMISSIONLOCATION_KEY));
+			temp.put(job.jobProperty(Constants.SUBMISSIONLOCATION_KEY), sum + 1);
+
+		}
+
+		return statusMap;
+
+	}
+
 	public SortedSet<DtoJob> successfulJobs() {
 
 		SortedSet<DtoJob> result = new TreeSet<DtoJob>();
@@ -361,8 +416,8 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 		SortedSet<DtoJob> result = new TreeSet<DtoJob>();
 
 		for (DtoJob job : jobs.getAllJobs()) {
-			if (job.getStatus() >= JobConstants.UNSUBMITTED
-					&& job.getStatus() <= JobConstants.PENDING) {
+			if ((job.getStatus() >= JobConstants.UNSUBMITTED)
+					&& (job.getStatus() <= JobConstants.PENDING)) {
 				result.add(job);
 			}
 		}

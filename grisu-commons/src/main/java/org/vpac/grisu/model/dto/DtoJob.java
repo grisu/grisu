@@ -81,7 +81,7 @@ public class DtoJob implements Comparable<DtoJob> {
 			Long thisSubTime = null;
 			try {
 				thisSubTime = Long
-						.parseLong(readJobProperty(Constants.SUBMISSION_TIME_KEY));
+				.parseLong(readJobProperty(Constants.SUBMISSION_TIME_KEY));
 			} catch (Exception e) {
 				thisSubTime = 0L;
 			}

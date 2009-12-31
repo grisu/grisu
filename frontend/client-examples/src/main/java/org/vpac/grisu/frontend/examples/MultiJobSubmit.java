@@ -6,7 +6,7 @@ import java.util.concurrent.Executors;
 
 import org.bushe.swing.event.annotation.AnnotationProcessor;
 import org.bushe.swing.event.annotation.EventSubscriber;
-import org.vpac.grisu.control.ResubmitPolicy;
+import org.vpac.grisu.control.DefaultResubmitPolicy;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
@@ -130,8 +130,8 @@ public class MultiJobSubmit {
 
 			if (!resubmitted) {
 				System.out.println("Resubmitting....");
-				ResubmitPolicy policy = new ResubmitPolicy();
-				policy.setProperty(ResubmitPolicy.RESTART_WAITING_JOBS, false);
+				DefaultResubmitPolicy policy = new DefaultResubmitPolicy();
+				policy.setProperty(DefaultResubmitPolicy.RESTART_WAITING_JOBS, false);
 
 				resubmitted = multiPartJob.restart(policy, true);
 				if (resubmitted) {

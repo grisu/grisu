@@ -8,7 +8,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.vpac.grisu.backend.model.job.Job;
-import org.vpac.grisu.control.ResubmitPolicy;
+import org.vpac.grisu.control.DefaultResubmitPolicy;
 
 import au.org.arcs.jcommons.constants.Constants;
 import au.org.arcs.jcommons.interfaces.GridResource;
@@ -199,72 +199,72 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 
 	public boolean isResubmitDoneJobs() {
 		return Boolean.parseBoolean(initProperties
-				.get(ResubmitPolicy.RESTART_DONE_JOBS));
+				.get(DefaultResubmitPolicy.RESTART_DONE_JOBS));
 	}
 
 	public boolean isResubmitFailedJobs() {
 		return Boolean.parseBoolean(initProperties
-				.get(ResubmitPolicy.RESTART_FAILED_JOBS));
+				.get(DefaultResubmitPolicy.RESTART_FAILED_JOBS));
 	}
 
 	public boolean isResubmitRunningJobs() {
 		return Boolean.parseBoolean(initProperties
-				.get(ResubmitPolicy.RESTART_RUNNING_JOBS));
+				.get(DefaultResubmitPolicy.RESTART_RUNNING_JOBS));
 	}
 
 	public boolean isResubmitWaitingJobs() {
 		return Boolean.parseBoolean(initProperties
-				.get(ResubmitPolicy.RESTART_WAITING_JOBS));
+				.get(DefaultResubmitPolicy.RESTART_WAITING_JOBS));
 	}
 
 	public boolean isResubmitWaitingJobsOnDoneLocations() {
 		return Boolean.parseBoolean(initProperties
-				.get(ResubmitPolicy.RESTART_WAITING_JOBS_ON_DONE_LOCATIONS));
+				.get(DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_DONE_LOCATIONS));
 	}
 
 	public boolean isResubmitWaitingJobsOnFailedLocations() {
 		return Boolean.parseBoolean(initProperties
-				.get(ResubmitPolicy.RESTART_WAITING_JOBS_ON_FAILED_LOCATIONS));
+				.get(DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_FAILED_LOCATIONS));
 	}
 
 	public boolean isResubmitWaitingJobsOnRunningLocations() {
 		return Boolean.parseBoolean(initProperties
-				.get(ResubmitPolicy.RESTART_WAITING_JOBS_ON_RUNNING_LOCATIONS));
+				.get(DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_RUNNING_LOCATIONS));
 	}
 
 	public boolean isResubmitWaitingJobsOnWaitingLocations() {
 		return Boolean.parseBoolean(initProperties
-				.get(ResubmitPolicy.RESTART_WAITING_JOBS_ON_WAITING_LOCATIONS));
+				.get(DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_WAITING_LOCATIONS));
 	}
 
 	public boolean isSubmitReadyJobs() {
 		return Boolean.parseBoolean(initProperties
-				.get(ResubmitPolicy.START_NEWLY_READY_JOBS));
+				.get(DefaultResubmitPolicy.START_NEWLY_READY_JOBS));
 	}
 
 	public boolean isSubmitToAllLocations() {
 		return Boolean.parseBoolean(initProperties
-				.get(ResubmitPolicy.RESTART_TO_ALL_LOCATIONS));
+				.get(DefaultResubmitPolicy.RESTART_TO_ALL_LOCATIONS));
 	}
 
 	public boolean isSubmitToDoneLocations() {
 		return Boolean.parseBoolean(initProperties
-				.get(ResubmitPolicy.RESTART_TO_DONE_SUBMISSION_LOCATIONS));
+				.get(DefaultResubmitPolicy.RESTART_TO_DONE_SUBMISSION_LOCATIONS));
 	}
 
 	public boolean isSubmitToFailedLocations() {
 		return Boolean.parseBoolean(initProperties
-				.get(ResubmitPolicy.RESTART_TO_FAILED_SUBMISSION_LOCATIONS));
+				.get(DefaultResubmitPolicy.RESTART_TO_FAILED_SUBMISSION_LOCATIONS));
 	}
 
 	public boolean isSubmitToRunningLocations() {
 		return Boolean.parseBoolean(initProperties
-				.get(ResubmitPolicy.RESTART_TO_RUNNING_SUBMISSION_LOCATIONS));
+				.get(DefaultResubmitPolicy.RESTART_TO_RUNNING_SUBMISSION_LOCATIONS));
 	}
 
 	public boolean isSubmitToWaitingLocations() {
 		return Boolean.parseBoolean(initProperties
-				.get(ResubmitPolicy.RESTART_TO_WAITING_SUBMISSION_LOCATIONS));
+				.get(DefaultResubmitPolicy.RESTART_TO_WAITING_SUBMISSION_LOCATIONS));
 	}
 
 	public void recalculate() {
@@ -275,79 +275,79 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 	}
 
 	public void setResubmitDoneJobs(Boolean resubmitDoneJobs) {
-		initProperties.put(ResubmitPolicy.RESTART_DONE_JOBS, resubmitDoneJobs
+		initProperties.put(DefaultResubmitPolicy.RESTART_DONE_JOBS, resubmitDoneJobs
 				.toString());
 	}
 
 	public void setResubmitFailedJobs(Boolean resubmitFailedJobs) {
-		initProperties.put(ResubmitPolicy.RESTART_FAILED_JOBS,
+		initProperties.put(DefaultResubmitPolicy.RESTART_FAILED_JOBS,
 				resubmitFailedJobs.toString());
 	}
 
 	public void setResubmitRunningJobs(Boolean resubmitRunningJobs) {
-		initProperties.put(ResubmitPolicy.RESTART_RUNNING_JOBS,
+		initProperties.put(DefaultResubmitPolicy.RESTART_RUNNING_JOBS,
 				resubmitRunningJobs.toString());
 	}
 
 	public void setResubmitWaitingJobs(Boolean resubmitWaitingJobs) {
-		initProperties.put(ResubmitPolicy.RESTART_WAITING_JOBS,
+		initProperties.put(DefaultResubmitPolicy.RESTART_WAITING_JOBS,
 				resubmitWaitingJobs.toString());
 	}
 
 	public void setResubmitWaitingJobsOnDoneLocations(Boolean restart) {
 		initProperties.put(
-				ResubmitPolicy.RESTART_WAITING_JOBS_ON_DONE_LOCATIONS, restart
+				DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_DONE_LOCATIONS, restart
 				.toString());
 	}
 
 	public void setResubmitWaitingJobsOnFailedLocations(Boolean restart) {
 		initProperties.put(
-				ResubmitPolicy.RESTART_WAITING_JOBS_ON_FAILED_LOCATIONS,
+				DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_FAILED_LOCATIONS,
 				restart.toString());
 	}
 
 	public void setResubmitWaitingJobsOnRunningLocations(Boolean restart) {
 		initProperties.put(
-				ResubmitPolicy.RESTART_WAITING_JOBS_ON_RUNNING_LOCATIONS,
+				DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_RUNNING_LOCATIONS,
 				restart.toString());
 	}
 
 	public void setResubmitWaitingJobsOnWaitingLocations(Boolean restart) {
 		initProperties.put(
-				ResubmitPolicy.RESTART_WAITING_JOBS_ON_WAITING_LOCATIONS,
+				DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_WAITING_LOCATIONS,
 				restart.toString());
 	}
 
 	public void setSubmitReadyJobs(Boolean submitReadyJobs) {
-		initProperties.put(ResubmitPolicy.START_NEWLY_READY_JOBS,
+		initProperties.put(DefaultResubmitPolicy.START_NEWLY_READY_JOBS,
 				submitReadyJobs.toString());
 	}
 
 	public void setSubmitToAllLocations(Boolean all) {
-		initProperties.put(ResubmitPolicy.RESTART_TO_ALL_LOCATIONS, all
+		initProperties.put(DefaultResubmitPolicy.RESTART_TO_ALL_LOCATIONS, all
 				.toString());
 	}
 
 	public void setSubmitToDoneLocations(Boolean submitToDoneLocations) {
-		initProperties.put(ResubmitPolicy.RESTART_TO_DONE_SUBMISSION_LOCATIONS,
+		initProperties.put(DefaultResubmitPolicy.RESTART_TO_DONE_SUBMISSION_LOCATIONS,
 				submitToDoneLocations.toString());
 	}
 
 	public void setSubmitToFailedLocations(Boolean submitToFailedLocations) {
 		initProperties.put(
-				ResubmitPolicy.RESTART_TO_FAILED_SUBMISSION_LOCATIONS,
+				DefaultResubmitPolicy.RESTART_TO_FAILED_SUBMISSION_LOCATIONS,
 				submitToFailedLocations.toString());
 	}
 
 	public void setSubmitToRunningLocations(Boolean submitToRunningLocations) {
 		initProperties.put(
-				ResubmitPolicy.RESTART_TO_RUNNING_SUBMISSION_LOCATIONS,
+				DefaultResubmitPolicy.RESTART_TO_RUNNING_SUBMISSION_LOCATIONS,
 				submitToRunningLocations.toString());
 	}
 
 	public void setSubmitToWaitingLocations(Boolean submitToWaitingLocations) {
 		initProperties.put(
-				ResubmitPolicy.RESTART_TO_WAITING_SUBMISSION_LOCATIONS,
+				DefaultResubmitPolicy.RESTART_TO_WAITING_SUBMISSION_LOCATIONS,
 				submitToWaitingLocations.toString());
 	}
 

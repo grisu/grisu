@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "userproperties")
 public class DtoProperties {
 
-	public static DtoProperties createUserProperties(
+	public static DtoProperties createProperties(
 			Map<String, String> userProperties) {
 
 		DtoProperties result = new DtoProperties();

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,8 +22,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
+import org.vpac.grisu.control.DefaultResubmitPolicy;
 import org.vpac.grisu.control.ResubmitPolicy;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.SpecificJobsResubmitPolicy;
 import org.vpac.grisu.control.exceptions.BatchJobException;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
@@ -157,7 +160,7 @@ Comparable<BatchJobObject> {
 		this.batchJobname = batchJobname;
 		try {
 
-			dtoMultiPartJob = getMultiPartJob(refreshJobStatusOnBackend);
+			dtoMultiPartJob = getWrappedDtoBatchJob(refreshJobStatusOnBackend);
 
 			this.submissionFqan = dtoMultiPartJob.getSubmissionFqan();
 
@@ -318,6 +321,11 @@ Comparable<BatchJobObject> {
 		return this.getJobname().compareTo(o.getJobname());
 	}
 
+	public Set<String> currentlyUsedSubmissionLocations() {
+
+		return getWrappedDtoBatchJob(false).currentlyUsedSubmissionLocations();
+	}
+
 	/**
 	 * Downloads all the required results for this batch job.
 	 * 
@@ -435,7 +443,7 @@ Comparable<BatchJobObject> {
 	 * @return all failed jobs
 	 */
 	public SortedSet<DtoJob> failedJobs() {
-		return getMultiPartJob(false).failedJobs();
+		return getWrappedDtoBatchJob(false).failedJobs();
 	}
 
 	/**
@@ -444,7 +452,7 @@ Comparable<BatchJobObject> {
 	 * @return all finished jobs
 	 */
 	public SortedSet<DtoJob> finishedJobs() {
-		return getMultiPartJob(false).finishedJobs();
+		return getWrappedDtoBatchJob(false).finishedJobs();
 	}
 
 	private String[] getAllRemoteJobnames() {
@@ -484,6 +492,11 @@ Comparable<BatchJobObject> {
 		} else {
 			return concurrentJobCreationThreads;
 		}
+	}
+
+	public Set<String> getCurrentlyRunningOrSuccessfullSubmissionLocations() {
+
+		return getWrappedDtoBatchJob(false).currentlyRunningOrSuccessfullSubmissionLocations();
 	}
 
 	/**
@@ -534,7 +547,7 @@ Comparable<BatchJobObject> {
 	 */
 	public String getDetails() {
 
-		DtoBatchJob temp = getMultiPartJob(false);
+		DtoBatchJob temp = getWrappedDtoBatchJob(false);
 
 		StringBuffer buffer = new StringBuffer("Details:\n\n");
 
@@ -636,7 +649,7 @@ Comparable<BatchJobObject> {
 	 */
 	public Map<Date, String> getLogMessages(boolean refresh) {
 
-		return getMultiPartJob(refresh).messages();
+		return getWrappedDtoBatchJob(refresh).messages();
 
 	}
 
@@ -652,11 +665,159 @@ Comparable<BatchJobObject> {
 		return maxWalltimeInSecondsAcrossJobs;
 	}
 
-	private DtoBatchJob getMultiPartJob(boolean refresh) {
-		return getMultiPartJob(refresh, true);
+	/**
+	 * The number of failed jobs for this multipart job.
+	 * 
+	 * @return the number of failed jobs
+	 */
+	public int getNumberOfFailedJobs() {
+		return getWrappedDtoBatchJob(false).numberOfFailedJobs();
 	}
 
-	private DtoBatchJob getMultiPartJob(final boolean refresh,
+	/**
+	 * The number of finished jobs for this multipart job.
+	 * 
+	 * @return the number of finished jobs
+	 */
+	public int getNumberOfFinishedJobs() {
+		return getWrappedDtoBatchJob(false).numberOfFinishedJobs();
+	}
+
+	/**
+	 * The number of running jobs for this multipart job.
+	 * 
+	 * @return the number of running jobs
+	 */
+	public int getNumberOfRunningJobs() {
+		return getWrappedDtoBatchJob(false).numberOfRunningJobs();
+	}
+
+	/**
+	 * The number of successful jobs for this multipart job.
+	 * 
+	 * @return the number of successful jobs
+	 */
+	public int getNumberOfSuccessfulJobs() {
+		return getWrappedDtoBatchJob(false).numberOfSuccessfulJobs();
+	}
+
+	/**
+	 * The number of unsubmitted jobs for this multipart job.
+	 * 
+	 * @return the number of unsubmitted jobs
+	 */
+	public int getNumberOfUnsubmittedJobs() {
+		return getWrappedDtoBatchJob(false).numberOfUnsubmittedJobs();
+	}
+
+	/**
+	 * The number of waiting jobs for this multipart job.
+	 * 
+	 * @return the number of waiting jobs
+	 */
+	public int getNumberOfWaitingJobs() {
+		return getWrappedDtoBatchJob(false).numberOfWaitingJobs();
+	}
+
+	/**
+	 * Info about how many jobs were submitted to which submission location.
+	 * 
+	 * You need to call this sometime after the
+	 * {@link #prepareAndCreateJobs(boolean)} method. You need to use the same
+	 * BatchJobObject object where you called this method. If you re-create the
+	 * object, this info will be lost.
+	 * 
+	 * @return info about job distribution
+	 */
+	public Map<String, String> getOptimizationResult() {
+		return optimizationResult;
+	}
+
+	/**
+	 * Displays a summary of the job status.
+	 * 
+	 * @param restarter
+	 *            an (optional) FailedJobRestarter to restart failed jobs or
+	 *            null
+	 * @return the progress summary
+	 */
+	public String getProgress() {
+
+		DtoBatchJob temp;
+		temp = getWrappedDtoBatchJob(false);
+
+		StringBuffer output = new StringBuffer();
+
+		output.append("Total number of jobs: " + temp.totalNumberOfJobs()
+				+ "\n");
+		output.append("Waiting jobs: " + temp.numberOfWaitingJobs() + "\n");
+		output.append("Active jobs: " + temp.numberOfRunningJobs() + "\n");
+		output.append("Successful jobs: " + temp.numberOfSuccessfulJobs()
+				+ "\n");
+		output.append("Failed jobs: " + temp.numberOfFailedJobs() + "\n");
+		if (temp.numberOfFailedJobs() > 0) {
+
+			//			if (restarter != null) {
+			//				restartFailedJobs(restarter);
+			//			}
+
+		} else {
+			output.append("\n");
+		}
+		output.append("Unsubmitted jobs: " + temp.numberOfUnsubmittedJobs()
+				+ "\n");
+
+		return output.toString();
+	}
+
+	/**
+	 * Returns all the properties for this multipartjob.
+	 * 
+	 * This method doesn't refresh the underlying object, you might want to do
+	 * that yourself in some cases.
+	 * 
+	 * @return the properties
+	 */
+	public Map<String, String> getProperties() {
+		return getWrappedDtoBatchJob(false).propertiesAsMap();
+	}
+
+	/**
+	 * Gets a job property for this job.
+	 * 
+	 * @param key
+	 *            the key
+	 * @return the value
+	 */
+	public String getProperty(String key) {
+
+		try {
+			return serviceInterface.getJobProperty(batchJobname, key);
+		} catch (NoSuchJobException e) {
+			throw new RuntimeException();
+		}
+	}
+
+	public int getStatus(boolean refresh) {
+
+		return getWrappedDtoBatchJob(refresh).getStatus();
+	}
+
+	public Map<Integer, Map<String, Integer>> getStatusMap() {
+
+		return getWrappedDtoBatchJob(false).statusMap();
+
+	}
+
+	public int getTotalNumberOfJobs() {
+		return getWrappedDtoBatchJob(false).totalNumberOfJobs();
+	}
+
+	private DtoBatchJob getWrappedDtoBatchJob(boolean refresh) {
+		return getWrappedDtoBatchJob(refresh, true);
+	}
+
+	private DtoBatchJob getWrappedDtoBatchJob(final boolean refresh,
 			final boolean waitForRefresh) {
 
 		if ( ( (dtoMultiPartJob == null) || (! isRefreshing() && refresh)) || (refreshThread == null) || ((refreshThread != null) && ! refreshThread.isAlive()) ) {
@@ -756,148 +917,6 @@ Comparable<BatchJobObject> {
 		return dtoMultiPartJob;
 	}
 
-	/**
-	 * The number of failed jobs for this multipart job.
-	 * 
-	 * @return the number of failed jobs
-	 */
-	public int getNumberOfFailedJobs() {
-		return getMultiPartJob(false).numberOfFailedJobs();
-	}
-
-	/**
-	 * The number of finished jobs for this multipart job.
-	 * 
-	 * @return the number of finished jobs
-	 */
-	public int getNumberOfFinishedJobs() {
-		return getMultiPartJob(false).numberOfFinishedJobs();
-	}
-
-	/**
-	 * The number of running jobs for this multipart job.
-	 * 
-	 * @return the number of running jobs
-	 */
-	public int getNumberOfRunningJobs() {
-		return getMultiPartJob(false).numberOfRunningJobs();
-	}
-
-	/**
-	 * The number of successful jobs for this multipart job.
-	 * 
-	 * @return the number of successful jobs
-	 */
-	public int getNumberOfSuccessfulJobs() {
-		return getMultiPartJob(false).numberOfSuccessfulJobs();
-	}
-
-	/**
-	 * The number of unsubmitted jobs for this multipart job.
-	 * 
-	 * @return the number of unsubmitted jobs
-	 */
-	public int getNumberOfUnsubmittedJobs() {
-		return getMultiPartJob(false).numberOfUnsubmittedJobs();
-	}
-
-	/**
-	 * The number of waiting jobs for this multipart job.
-	 * 
-	 * @return the number of waiting jobs
-	 */
-	public int getNumberOfWaitingJobs() {
-		return getMultiPartJob(false).numberOfWaitingJobs();
-	}
-
-	/**
-	 * Info about how many jobs were submitted to which submission location.
-	 * 
-	 * You need to call this sometime after the
-	 * {@link #prepareAndCreateJobs(boolean)} method. You need to use the same
-	 * BatchJobObject object where you called this method. If you re-create the
-	 * object, this info will be lost.
-	 * 
-	 * @return info about job distribution
-	 */
-	public Map<String, String> getOptimizationResult() {
-		return optimizationResult;
-	}
-
-	/**
-	 * Displays a summary of the job status.
-	 * 
-	 * @param restarter
-	 *            an (optional) FailedJobRestarter to restart failed jobs or
-	 *            null
-	 * @return the progress summary
-	 */
-	public String getProgress() {
-
-		DtoBatchJob temp;
-		temp = getMultiPartJob(false);
-
-		StringBuffer output = new StringBuffer();
-
-		output.append("Total number of jobs: " + temp.totalNumberOfJobs()
-				+ "\n");
-		output.append("Waiting jobs: " + temp.numberOfWaitingJobs() + "\n");
-		output.append("Active jobs: " + temp.numberOfRunningJobs() + "\n");
-		output.append("Successful jobs: " + temp.numberOfSuccessfulJobs()
-				+ "\n");
-		output.append("Failed jobs: " + temp.numberOfFailedJobs() + "\n");
-		if (temp.numberOfFailedJobs() > 0) {
-
-			//			if (restarter != null) {
-			//				restartFailedJobs(restarter);
-			//			}
-
-		} else {
-			output.append("\n");
-		}
-		output.append("Unsubmitted jobs: " + temp.numberOfUnsubmittedJobs()
-				+ "\n");
-
-		return output.toString();
-	}
-
-	/**
-	 * Returns all the properties for this multipartjob.
-	 * 
-	 * This method doesn't refresh the underlying object, you might want to do
-	 * that yourself in some cases.
-	 * 
-	 * @return the properties
-	 */
-	public Map<String, String> getProperties() {
-		return getMultiPartJob(false).propertiesAsMap();
-	}
-
-	/**
-	 * Gets a job property for this job.
-	 * 
-	 * @param key
-	 *            the key
-	 * @return the value
-	 */
-	public String getProperty(String key) {
-
-		try {
-			return serviceInterface.getJobProperty(batchJobname, key);
-		} catch (NoSuchJobException e) {
-			throw new RuntimeException();
-		}
-	}
-
-	public int getStatus(boolean refresh) {
-
-		return getMultiPartJob(refresh).getStatus();
-	}
-
-	public int getTotalNumberOfJobs() {
-		return getMultiPartJob(false).totalNumberOfJobs();
-	}
-
 	public boolean isBatchJob() {
 		return true;
 	}
@@ -916,7 +935,7 @@ Comparable<BatchJobObject> {
 	 */
 	public boolean isFinished(boolean refresh) {
 		try {
-			return getMultiPartJob(refresh).isFinished();
+			return getWrappedDtoBatchJob(refresh).isFinished();
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
@@ -939,7 +958,7 @@ Comparable<BatchJobObject> {
 	 * @return whether all jobs finished successfully
 	 */
 	public boolean isSuccessful(boolean refresh) {
-		return getMultiPartJob(refresh).allJobsFinishedSuccessful();
+		return getWrappedDtoBatchJob(refresh).allJobsFinishedSuccessful();
 	}
 
 	public void kill(boolean clean, boolean waitForCompletion) {
@@ -1013,7 +1032,7 @@ Comparable<BatchJobObject> {
 			String progress = getProgress();
 
 			DtoBatchJob temp;
-			temp = getMultiPartJob(false);
+			temp = getWrappedDtoBatchJob(false);
 
 			if (forceSuccess) {
 				finished = temp.allJobsFinishedSuccessful();
@@ -1055,7 +1074,7 @@ Comparable<BatchJobObject> {
 	 * @return the absolute path
 	 */
 	public String pathToInputFiles() {
-		return getMultiPartJob(false).pathToInputFiles();
+		return getWrappedDtoBatchJob(false).pathToInputFiles();
 	}
 
 	/**
@@ -1255,7 +1274,7 @@ Comparable<BatchJobObject> {
 	}
 
 	public void refresh(boolean wait) {
-		getMultiPartJob(true, wait);
+		getWrappedDtoBatchJob(true, wait);
 	}
 
 	private void refreshMultiPartJobStatus(boolean waitForRefreshToFinish) {
@@ -1290,25 +1309,6 @@ Comparable<BatchJobObject> {
 
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		this.pcs.removePropertyChangeListener(listener);
-	}
-
-	/**
-	 * Wrapper method for the 2 most commonly used restart methods: Restarting failed jobs and restarting jobs that are still in the queue (on locations where no job is started yet).
-	 * 
-	 * @param restartFailedJobs restart jobs that failed (those jobs are moved to locations where jobs have successfully finished -- if possible)
-	 * @param resubmitWaitingJobs restart jobs that sit in queues at locations where no jobs have started yet. Those jobs are moved to locations where jobs are already running or have finished successfully.
-	 * @param waitForRestartToFinish whether to wait for the whole batchjob-restart to finish
-	 * @return whether the restart was successful or not (i.e. an error occured)
-	 */
-	public boolean restart(boolean restartFailedJobs, boolean resubmitWaitingJobs, boolean waitForRestartToFinish) {
-
-		ResubmitPolicy policy = new ResubmitPolicy();
-
-		policy.setProperty(ResubmitPolicy.RESTART_FAILED_JOBS,  restartFailedJobs);
-		policy.setProperty(ResubmitPolicy.RESTART_WAITING_JOBS, resubmitWaitingJobs);
-
-		return restart(policy, waitForRestartToFinish);
-
 	}
 
 	//	/**
@@ -1360,12 +1360,31 @@ Comparable<BatchJobObject> {
 	//
 	//	}
 
+	/**
+	 * Wrapper method for the 2 most commonly used restart methods: Restarting failed jobs and restarting jobs that are still in the queue (on locations where no job is started yet).
+	 * 
+	 * @param restartFailedJobs restart jobs that failed (those jobs are moved to locations where jobs have successfully finished -- if possible)
+	 * @param resubmitWaitingJobs restart jobs that sit in queues at locations where no jobs have started yet. Those jobs are moved to locations where jobs are already running or have finished successfully.
+	 * @param waitForRestartToFinish whether to wait for the whole batchjob-restart to finish
+	 * @return whether the restart was successful or not (i.e. an error occured)
+	 */
+	public boolean restart(boolean restartFailedJobs, boolean resubmitWaitingJobs, boolean waitForRestartToFinish) {
+
+		DefaultResubmitPolicy policy = new DefaultResubmitPolicy();
+
+		policy.setProperty(DefaultResubmitPolicy.RESTART_FAILED_JOBS,  restartFailedJobs);
+		policy.setProperty(DefaultResubmitPolicy.RESTART_WAITING_JOBS, resubmitWaitingJobs);
+
+		return restart(policy, waitForRestartToFinish);
+
+	}
+
 	public boolean restart(ResubmitPolicy policy, final boolean waitForRestartToFinish) {
 
 		setResubmitting(true);
 		try {
 			optimizationResult = serviceInterface.restartBatchJob(batchJobname,
-					Constants.SUBMIT_POLICY_DEFAULT_RESTART, policy.toDto())
+					policy.getName(), policy.getProperties())
 					.propertiesAsMap();
 		} catch (NoSuchJobException e) {
 			setResubmitting(false);
@@ -1411,13 +1430,20 @@ Comparable<BatchJobObject> {
 		return true;
 	}
 
+	public boolean restart(Set<String> jobnamesToRestart, Set<String> submissionLocationsToUse, boolean waitForRestartToFinish) {
+
+		ResubmitPolicy policy = new SpecificJobsResubmitPolicy(jobnamesToRestart, submissionLocationsToUse);
+
+		return restart(policy, waitForRestartToFinish);
+	}
+
 	/**
 	 * Returns all running jobs.
 	 * 
 	 * @return all running jobs
 	 */
 	public SortedSet<DtoJob> runningJobs() {
-		return getMultiPartJob(false).runningJobs();
+		return getWrappedDtoBatchJob(false).runningJobs();
 	}
 
 	/**
@@ -1705,7 +1731,7 @@ Comparable<BatchJobObject> {
 	 * @return all successful jobs
 	 */
 	public SortedSet<DtoJob> successfulJobs() {
-		return getMultiPartJob(false).successfulJobs();
+		return getWrappedDtoBatchJob(false).successfulJobs();
 	}
 
 	@Override
@@ -1719,7 +1745,7 @@ Comparable<BatchJobObject> {
 	 * @return all unsubmitted jobs
 	 */
 	public SortedSet<DtoJob> unsubmittedJobs() {
-		return getMultiPartJob(false).unsubmittedJobs();
+		return getWrappedDtoBatchJob(false).unsubmittedJobs();
 	}
 
 	private void uploadInputFiles() throws InterruptedException,
@@ -1820,6 +1846,6 @@ Comparable<BatchJobObject> {
 	 * @return all waiting jobs
 	 */
 	public SortedSet<DtoJob> waitingJobs() {
-		return getMultiPartJob(false).waitingJobs();
+		return getWrappedDtoBatchJob(false).waitingJobs();
 	}
 }

@@ -7,7 +7,6 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.view.swing.jobmonitoring.single.JobDetailPanel;
-import org.vpac.grisu.frontend.view.swing.jobmonitoring.single.SimpleSingleJobsGrid;
 import org.vpac.grisu.frontend.view.swing.jobmonitoring.single.SingleJobSelectionListener;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -20,7 +19,7 @@ public class BatchJobPanel extends JPanel implements SingleJobSelectionListener 
 	private final ServiceInterface si;
 	private final BatchJobObject batchJob;
 	private JSplitPane splitPane;
-	private SimpleSingleJobsGrid singleJobsGrid_1;
+	private BatchJobSubJobsGrid batchJobSubJobsGrid;
 	private JobDetailPanel jobDetailPanel;
 	private BatchJobStatusPanel batchJobControlPanel;
 	private BatchJobRestartPanel batchJobRestartPanel;
@@ -69,13 +68,13 @@ public class BatchJobPanel extends JPanel implements SingleJobSelectionListener 
 		return jobDetailPanel;
 	}
 
-	private SimpleSingleJobsGrid getSingleJobsGrid_1() {
-		if (singleJobsGrid_1 == null) {
-			singleJobsGrid_1 = new SimpleSingleJobsGrid(si, batchJob.getJobs());
-			singleJobsGrid_1.addJobSelectionListener(this);
-			singleJobsGrid_1.setEnableSingleMouseClick(true);
+	private BatchJobSubJobsGrid getSingleJobsGrid_1() {
+		if (batchJobSubJobsGrid == null) {
+			batchJobSubJobsGrid = new BatchJobSubJobsGrid(si, batchJob);
+			batchJobSubJobsGrid.addJobSelectionListener(this);
+			batchJobSubJobsGrid.setEnableSingleMouseClick(true);
 		}
-		return singleJobsGrid_1;
+		return batchJobSubJobsGrid;
 	}
 
 	private JSplitPane getSplitPane() {

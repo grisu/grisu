@@ -31,7 +31,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 
 	private final SortedList<JobObject> sortedJobList;
 	private final EventList<JobObject> observedJobs;
-	
+
 	private boolean enableSingleMouseClick = false;
 
 	// ---------------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 		this.jobList = jobList;
 
 		ObservableElementList.Connector<JobObject> joConnector = GlazedLists
-				.beanConnector(JobObject.class);
+		.beanConnector(JobObject.class);
 		observedJobs = new ObservableElementList<JobObject>(jobList,
 				joConnector);
 
@@ -69,14 +69,10 @@ public class SimpleSingleJobsGrid extends JPanel {
 		}
 		listeners.addElement(l);
 	}
-	
-	public void setEnableSingleMouseClick(boolean enable) {
-		this.enableSingleMouseClick = enable;
-	}
 
 	private void fireJobSelected(JobObject j) {
 		// if we have no mountPointsListeners, do nothing...
-		if (listeners != null && !listeners.isEmpty()) {
+		if ((listeners != null) && !listeners.isEmpty()) {
 
 			lockUI(true);
 			// make a copy of the listener list in case
@@ -84,7 +80,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 			Vector<SingleJobSelectionListener> targets;
 			synchronized (this) {
 				targets = (Vector<SingleJobSelectionListener>) listeners
-						.clone();
+				.clone();
 			}
 
 			// walk through the listener list and
@@ -99,18 +95,6 @@ public class SimpleSingleJobsGrid extends JPanel {
 			lockUI(false);
 		}
 	}
-	
-	private void lockUI(boolean lock) {
-		
-//		getTable().setEnabled(lock);
-		
-		if ( ! lock ) {
-			this.setCursor(Cursor.getDefaultCursor());
-		} else {
-			this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		}
-		
-	}
 
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
@@ -120,7 +104,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 		return scrollPane;
 	}
 
-	private JXTable getTable() {
+	protected JXTable getTable() {
 		if (table == null) {
 			table = new JXTable(jobModel);
 			table.setColumnControlVisible(true);
@@ -159,6 +143,18 @@ public class SimpleSingleJobsGrid extends JPanel {
 
 	}
 
+	private void lockUI(boolean lock) {
+
+		//		getTable().setEnabled(lock);
+
+		if ( ! lock ) {
+			this.setCursor(Cursor.getDefaultCursor());
+		} else {
+			this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		}
+
+	}
+
 	// remove a listener
 	synchronized public void removeJobSelectionListener(
 			SingleJobSelectionListener l) {
@@ -166,5 +162,9 @@ public class SimpleSingleJobsGrid extends JPanel {
 			listeners = new Vector<SingleJobSelectionListener>();
 		}
 		listeners.removeElement(l);
+	}
+
+	public void setEnableSingleMouseClick(boolean enable) {
+		this.enableSingleMouseClick = enable;
 	}
 }
