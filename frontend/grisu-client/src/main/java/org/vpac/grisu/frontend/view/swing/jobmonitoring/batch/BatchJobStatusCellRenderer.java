@@ -25,6 +25,7 @@ TableCellRenderer {
 			setBackground(table.getBackground());
 		}
 
+
 		Integer status = (Integer) value;
 		if (status <= 0) {
 			this.setEnabled(false);

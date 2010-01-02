@@ -38,7 +38,7 @@ public class BatchJobPanel extends JPanel implements SingleJobSelectionListener 
 				FormFactory.RELATED_GAP_COLSPEC,},
 				new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("default:grow"),
+				RowSpec.decode("max(95dlu;default)"),
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
 				FormFactory.RELATED_GAP_ROWSPEC,}));
@@ -72,7 +72,6 @@ public class BatchJobPanel extends JPanel implements SingleJobSelectionListener 
 		if (batchJobSubJobsGrid == null) {
 			batchJobSubJobsGrid = new BatchJobSubJobsGrid(si, batchJob);
 			batchJobSubJobsGrid.addJobSelectionListener(this);
-			batchJobSubJobsGrid.setEnableSingleMouseClick(true);
 		}
 		return batchJobSubJobsGrid;
 	}
@@ -82,7 +81,7 @@ public class BatchJobPanel extends JPanel implements SingleJobSelectionListener 
 			splitPane = new JSplitPane();
 			splitPane.setLeftComponent(getSingleJobsGrid_1());
 			splitPane.setRightComponent(getJobDetailPanel());
-			splitPane.setDividerLocation(260 + splitPane.getInsets().left);
+			splitPane.setDividerLocation(380 + splitPane.getInsets().left);
 
 		}
 		return splitPane;

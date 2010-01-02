@@ -8,7 +8,7 @@ import ca.odell.glazedlists.gui.AdvancedTableFormat;
 
 public class BatchJobTableFormat implements AdvancedTableFormat<BatchJobObject> {
 
-	private BatchJobObjectComparator batchJobComparator = new BatchJobObjectComparator();
+	private final BatchJobObjectComparator batchJobComparator = new BatchJobObjectComparator();
 
 	public Class getColumnClass(int column) {
 
@@ -76,7 +76,7 @@ public class BatchJobTableFormat implements AdvancedTableFormat<BatchJobObject> 
 		case 2:
 			return "Unsub";
 		case 3:
-			return "Wait";
+			return "Pend";
 		case 4:
 			return "Run";
 		case 5:

@@ -96,6 +96,7 @@ Comparable<BatchJobObject> {
 
 	public static final int DEFAULT_JOB_CREATION_THREADS = 5;
 
+
 	private Thread refreshThread;
 
 
@@ -499,6 +500,11 @@ Comparable<BatchJobObject> {
 		return getWrappedDtoBatchJob(false).currentlyRunningOrSuccessfullSubmissionLocations();
 	}
 
+	public Set<String> getCurrentlyUsedSubmissionLocations() {
+
+		return getWrappedDtoBatchJob(false).currentlyUsedSubmissionLocations();
+	}
+
 	/**
 	 * Returns the default application for this multipart job.
 	 * 
@@ -829,7 +835,11 @@ Comparable<BatchJobObject> {
 					public void run() {
 						try {
 							if (refresh) {
-								refreshMultiPartJobStatus(true);
+								try {
+									refreshMultiPartJobStatus(true);
+								} catch (InterruptedException e) {
+									return;
+								}
 							}
 
 							// getJobs().clear();
@@ -924,7 +934,6 @@ Comparable<BatchJobObject> {
 	public boolean isBeingKilled() {
 		return isBeingKilled;
 	}
-
 	/**
 	 * Returns whether all jobs within this multipart job are finished (failed
 	 * or not).
@@ -942,11 +951,15 @@ Comparable<BatchJobObject> {
 		}
 	}
 
+	public boolean isKilled() {
+		return isKilled;
+	}
+
 	public boolean isRefreshing() {
 		return this.isRefreshing;
 	}
 
-	private boolean isResubmitting() {
+	public boolean isResubmitting() {
 		return isResubmitting;
 	}
 
@@ -962,6 +975,14 @@ Comparable<BatchJobObject> {
 	}
 
 	public void kill(boolean clean, boolean waitForCompletion) {
+
+		if ( refreshThread != null ) {
+			try {
+				refreshThread.interrupt();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 
 		setIsBeingKilled(true);
 		try {
@@ -983,7 +1004,7 @@ Comparable<BatchJobObject> {
 				dtoMultiPartJob = null;
 				setIsBeingKilled(false);
 				isKilled = true;
-				pcs.firePropertyChange("isKilled", false, true);
+				pcs.firePropertyChange("killed", false, true);
 
 				EventBus.publish(new BatchJobKilledEvent(getJobname(), getApplication()));
 
@@ -1277,7 +1298,7 @@ Comparable<BatchJobObject> {
 		getWrappedDtoBatchJob(true, wait);
 	}
 
-	private void refreshMultiPartJobStatus(boolean waitForRefreshToFinish) {
+	private void refreshMultiPartJobStatus(boolean waitForRefreshToFinish) throws InterruptedException {
 
 		String handle;
 		try {
@@ -1288,17 +1309,29 @@ Comparable<BatchJobObject> {
 
 		if (waitForRefreshToFinish) {
 
+
+			if (Thread.interrupted()) {
+				this.isRefreshing = false;
+				pcs.firePropertyChange(REFRESHING, true, false);
+				Thread.currentThread().interrupt();
+				throw new InterruptedException("Batch job refresh interrupted.");
+			}
 			this.isRefreshing = true;
 			pcs.firePropertyChange(REFRESHING, false, true);
 			DtoActionStatus status = serviceInterface.getActionStatus(handle);
 			while (!status.isFinished()) {
+
 				try {
 					Thread.sleep(ClientPropertiesManager
 							.getJobStatusRecheckIntervall());
 				} catch (InterruptedException e) {
-					// doesn't happen, hopefully
-					e.printStackTrace();
+					this.isRefreshing = false;
+					pcs.firePropertyChange(REFRESHING, true, false);
+					throw e;
 				}
+
+
+
 				status = serviceInterface.getActionStatus(handle);
 			}
 			this.isRefreshing = false;
@@ -1426,6 +1459,8 @@ Comparable<BatchJobObject> {
 				e.printStackTrace();
 			}
 		}
+
+		getWrappedDtoBatchJob(true, false);
 
 		return true;
 	}
@@ -1685,6 +1720,7 @@ Comparable<BatchJobObject> {
 	public void submit(boolean waitForSubmissionToFinish)
 	throws JobSubmissionException, NoSuchJobException,
 	InterruptedException {
+
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 				"Submitting batchjob " + batchJobname + " to backend..."));
 
@@ -1706,6 +1742,22 @@ Comparable<BatchJobObject> {
 			throw nsje;
 		}
 
+		Thread waitThread = new Thread() {
+			@Override
+			public void run() {
+				StatusObject status = new StatusObject(serviceInterface,
+						BatchJobObject.this.batchJobname);
+
+				try {
+					status.waitForActionToFinish(4, false, true, "Submission status: ");
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		};
+
+		waitThread.start();
+
 		if (!waitForSubmissionToFinish) {
 			EventBus
 			.publish(
@@ -1716,11 +1768,11 @@ Comparable<BatchJobObject> {
 							+ batchJobname
 							+ " ready for submission. Continuing submission in background..."));
 		} else {
-
-			StatusObject status = new StatusObject(serviceInterface,
-					this.batchJobname);
-
-			status.waitForActionToFinish(4, false, true, "Submission status: ");
+			try {
+				waitThread.join();
+			} catch (InterruptedException e) {
+				waitThread.interrupt();
+			}
 
 		}
 	}

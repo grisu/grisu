@@ -213,28 +213,28 @@ PropertyChangeListener {
 
 	private JLabel getLblFail() {
 		if (lblFail == null) {
-			lblFail = new JLabel("Fail");
+			lblFail = new JLabel("Failed");
 		}
 		return lblFail;
 	}
 
 	private JLabel getLblRun() {
 		if (lblRun == null) {
-			lblRun = new JLabel("Run");
+			lblRun = new JLabel("Running");
 		}
 		return lblRun;
 	}
 
 	private JLabel getLblUnsubmitted() {
 		if (lblUnsubmitted == null) {
-			lblUnsubmitted = new JLabel("Unsub");
+			lblUnsubmitted = new JLabel("Unsubmitted");
 		}
 		return lblUnsubmitted;
 	}
 
 	private JLabel getLblWaiting() {
 		if (lblWaiting == null) {
-			lblWaiting = new JLabel("Waiting");
+			lblWaiting = new JLabel("Pending");
 		}
 		return lblWaiting;
 	}

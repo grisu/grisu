@@ -1,12 +1,20 @@
 package org.vpac.grisu.frontend.view.swing.jobmonitoring.single;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 
 import org.jdesktop.swingx.JXTable;
@@ -21,6 +29,27 @@ import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 public class SimpleSingleJobsGrid extends JPanel {
+
+	private static void addPopup(Component component, final JPopupMenu popup) {
+		component.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+			private void showMenu(MouseEvent e) {
+				popup.show(e.getComponent(), e.getX(), e.getY());
+			}
+		});
+	}
+
 	private JScrollPane scrollPane;
 	private JXTable table;
 
@@ -32,11 +61,15 @@ public class SimpleSingleJobsGrid extends JPanel {
 	private final SortedList<JobObject> sortedJobList;
 	private final EventList<JobObject> observedJobs;
 
+	private JPopupMenu popupMenu;
+
 	private boolean enableSingleMouseClick = false;
 
 	// ---------------------------------------------------------------------------------------
 	// Event stuff
 	private Vector<SingleJobSelectionListener> listeners;
+	private JMenuItem mntmKillSelectedJobs;
+	private JMenuItem mntmKillAndClean;
 
 	/**
 	 * Create the panel.
@@ -58,6 +91,9 @@ public class SimpleSingleJobsGrid extends JPanel {
 
 		setLayout(new BorderLayout(0, 0));
 		add(getScrollPane(), BorderLayout.CENTER);
+
+		addPopup(getTable(), getPopupMenu());
+
 
 	}
 
@@ -96,6 +132,54 @@ public class SimpleSingleJobsGrid extends JPanel {
 		}
 	}
 
+	private JMenuItem getMntmKillAndClean() {
+		if (mntmKillAndClean == null) {
+			mntmKillAndClean = new JMenuItem("Kill and clean selected job(s)");
+			mntmKillAndClean.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+
+					new Thread() {
+						@Override
+						public void run() {
+							killSelectedJobs(true);
+						}
+					}.start();
+
+
+				}
+			});
+		}
+		return mntmKillAndClean;
+	}
+
+	private JMenuItem getMntmKillSelectedJobs() {
+		if (mntmKillSelectedJobs == null) {
+			mntmKillSelectedJobs = new JMenuItem("Kill selected job(s)");
+			mntmKillSelectedJobs.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+
+					new Thread() {
+						@Override
+						public void run() {
+							killSelectedJobs(false);
+						}
+					}.start();
+
+				}
+			});
+		}
+		return mntmKillSelectedJobs;
+	}
+
+	protected JPopupMenu getPopupMenu() {
+		if (popupMenu == null) {
+			popupMenu = new JPopupMenu();
+			popupMenu.add(getMntmKillSelectedJobs());
+			popupMenu.add(getMntmKillAndClean());
+		}
+		return popupMenu;
+	}
+
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
@@ -104,11 +188,27 @@ public class SimpleSingleJobsGrid extends JPanel {
 		return scrollPane;
 	}
 
+	public Set<JobObject> getSelectedJobs() {
+
+		Set<JobObject> selected = new HashSet<JobObject>();
+		for (int r : table.getSelectedRows()) {
+
+			if (r >= 0) {
+				JobObject sel = (JobObject) jobModel.getValueAt(r, 0);
+				selected.add(sel);
+			}
+		}
+
+		return selected;
+	}
+
 	protected JXTable getTable() {
 		if (table == null) {
 			table = new JXTable(jobModel);
 			table.setColumnControlVisible(true);
 			table.setHighlighters(HighlighterFactory.createAlternateStriping());
+
+			table.setDefaultRenderer(JobObject.class, new JobNameCellRenderer());
 
 			table.getColumnExt("Site").setVisible(false);
 			table.getColumnExt("Queue").setVisible(false);
@@ -143,6 +243,35 @@ public class SimpleSingleJobsGrid extends JPanel {
 
 	}
 
+	protected void killSelectedJobs(boolean clean) {
+
+		StringBuffer message = new StringBuffer("Do you really want to kill ");
+		if ( clean ) {
+			message.append("and clean ");
+		}
+		message.append("the following job(s)?\n\n");
+
+		for ( JobObject job : getSelectedJobs() ) {
+			message.append(job.getJobname());
+		}
+
+		int n = JOptionPane.showConfirmDialog(
+				getRootPane(),
+				message.toString(),
+				"Kill and clean job(s)",
+				JOptionPane.YES_NO_OPTION);
+
+		if ( n == JOptionPane.YES_OPTION ) {
+			for ( JobObject job : getSelectedJobs() ) {
+				job.kill(clean);
+				if ( clean ) {
+					jobList.remove(job);
+				}
+			}
+		}
+
+	}
+
 	private void lockUI(boolean lock) {
 
 		//		getTable().setEnabled(lock);
@@ -154,7 +283,6 @@ public class SimpleSingleJobsGrid extends JPanel {
 		}
 
 	}
-
 	// remove a listener
 	synchronized public void removeJobSelectionListener(
 			SingleJobSelectionListener l) {
@@ -163,7 +291,6 @@ public class SimpleSingleJobsGrid extends JPanel {
 		}
 		listeners.removeElement(l);
 	}
-
 	public void setEnableSingleMouseClick(boolean enable) {
 		this.enableSingleMouseClick = enable;
 	}

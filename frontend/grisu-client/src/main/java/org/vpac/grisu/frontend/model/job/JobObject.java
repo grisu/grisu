@@ -41,7 +41,7 @@ import au.org.arcs.jcommons.constants.JobSubmissionProperty;
  * @author Markus Binsteiner
  */
 public class JobObject extends JobSubmissionObjectImpl implements
-		Comparable<JobObject> {
+Comparable<JobObject> {
 
 	static final Logger myLogger = Logger.getLogger(JobObject.class.getName());
 
@@ -61,6 +61,8 @@ public class JobObject extends JobSubmissionObjectImpl implements
 
 	private Map<Date, String> logMessages;
 
+	private boolean isBeingCleaned = false;
+
 	/**
 	 * Use this constructor if you want to create a new job.
 	 * 
@@ -71,6 +73,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		super();
 		this.serviceInterface = si;
 	}
+
 
 	/**
 	 * This constructor creates a new JobObject and initializes the basic job
@@ -103,7 +106,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 *             if no such job exists on the backend
 	 */
 	public JobObject(final ServiceInterface si, final DtoJob job)
-			throws NoSuchJobException {
+	throws NoSuchJobException {
 
 		this(si, job, false);
 
@@ -154,7 +157,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 *             connected to the specified serviceInterface
 	 */
 	public JobObject(final ServiceInterface si, final String jobname)
-			throws NoSuchJobException {
+	throws NoSuchJobException {
 
 		this(si, jobname, true);
 
@@ -218,7 +221,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 *             created on the backend
 	 */
 	public final String createJob(final String fqan)
-			throws JobPropertiesException {
+	throws JobPropertiesException {
 
 		return createJob(fqan, Constants.FORCE_NAME_METHOD);
 	}
@@ -302,7 +305,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 							EventBus.publish(JobObject.this.getJobname(),
 									new JobStatusEvent(JobObject.this,
 											oldStatus, JobObject.this
-													.getStatus(false)));
+											.getStatus(false)));
 						}
 					}
 					try {
@@ -332,17 +335,17 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		if (getStatus(false) <= JobConstants.ACTIVE) {
 			if (getStatus(true) < JobConstants.ACTIVE) {
 				throw new IllegalStateException(
-						"Job not started yet. No stdout file exists.");
+				"Job not started yet. No stdout file exists.");
 			}
 		}
-		//		
+		//
 		String url;
 		url = getJobDirectoryUrl() + "/" + relativePathToJobDirectory;
 
 		File file = null;
 		try {
 			file = GrisuRegistryManager.getDefault(serviceInterface)
-					.getFileManager().downloadFile(url);
+			.getFileManager().downloadFile(url);
 		} catch (Exception e) {
 			throw new JobException(this, "Could not download file: " + url, e);
 		}
@@ -382,7 +385,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		if (allJobProperties == null) {
 			try {
 				allJobProperties = serviceInterface.getJob(getJobname())
-						.propertiesAsMap();
+				.propertiesAsMap();
 			} catch (Exception e) {
 				throw new JobException(this, "Could not get jobproperties.", e);
 			}
@@ -573,6 +576,10 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		return 73 * getJobname().hashCode();
 	}
 
+	public boolean isBeingCleaned() {
+		return isBeingCleaned;
+	}
+
 	/**
 	 * Tells you whether the job is finished (either sucessfully or not).
 	 * 
@@ -632,6 +639,10 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		}
 
 		try {
+			if ( clean ) {
+				isBeingCleaned = true;
+				pcs.firePropertyChange("beingCleaned", false, true);
+			}
 			this.serviceInterface.kill(this.getJobname(), clean);
 			getStatus(true);
 		} catch (Exception e) {
@@ -653,7 +664,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 * @throws RemoteFileSystemException
 	 */
 	public List<String> listJobDirectory(int recursionLevel)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 
 		DtoFolder folder = serviceInterface.ls(getJobDirectoryUrl(),
 				recursionLevel);
@@ -675,7 +686,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 * @throws JobPropertiesException
 	 */
 	public final void restartJob() throws JobSubmissionException,
-			JobPropertiesException {
+	JobPropertiesException {
 
 		try {
 			serviceInterface.restartJob(getJobname(),
@@ -714,9 +725,9 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 * @throws InterruptedException
 	 */
 	public final void stageFiles() throws FileTransferException,
-			InterruptedException {
+	InterruptedException {
 
-		if (getInputFileUrls() != null && getInputFileUrls().length > 0) {
+		if ((getInputFileUrls() != null) && (getInputFileUrls().length > 0)) {
 			setStatus(JobConstants.INPUT_FILES_UPLOADING);
 		}
 
@@ -725,18 +736,18 @@ public class JobObject extends JobSubmissionObjectImpl implements
 
 			if (Thread.interrupted()) {
 				throw new InterruptedException(
-						"Interrupted when staging in input file(s)...");
+				"Interrupted when staging in input file(s)...");
 			}
 
 			if (FileManager.isLocal(inputFile)) {
 
 				GrisuRegistryManager.getDefault(serviceInterface)
-						.getFileManager().uploadFileToDirectory(inputFile,
-								jobDirectory, true);
+				.getFileManager().uploadFileToDirectory(inputFile,
+						jobDirectory, true);
 			}
 		}
 
-		if (getInputFileUrls() != null && getInputFileUrls().length > 0) {
+		if ((getInputFileUrls() != null) && (getInputFileUrls().length > 0)) {
 			setStatus(JobConstants.INPUT_FILES_UPLOADED);
 		}
 
@@ -747,7 +758,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 */
 	public final void stopWaitingForJobToFinish() {
 
-		if (waitThread == null || !waitThread.isAlive()) {
+		if ((waitThread == null) || !waitThread.isAlive()) {
 			return;
 		}
 
@@ -768,7 +779,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 * @throws InterruptedException
 	 */
 	public final void submitJob() throws JobSubmissionException,
-			InterruptedException {
+	InterruptedException {
 
 		if (status == JobConstants.UNDEFINED) {
 			throw new IllegalStateException("Job state "
@@ -784,7 +795,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 
 		if (Thread.interrupted()) {
 			throw new InterruptedException(
-					"Interrupted after staging in input files.");
+			"Interrupted after staging in input files.");
 		}
 
 		try {
@@ -821,7 +832,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 
 		if (!job.jobname().equals(getJobname())) {
 			throw new IllegalArgumentException(
-					"Jobname differs. Can't update job");
+			"Jobname differs. Can't update job");
 		}
 		allJobProperties = job.propertiesAsMap();
 		status = job.getStatus();
