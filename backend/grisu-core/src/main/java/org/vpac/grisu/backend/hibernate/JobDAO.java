@@ -42,6 +42,7 @@ public class JobDAO extends BaseHibernateDAO {
 		}
 	}
 
+
 	/**
 	 * Looks up the database whether a user with the specified dn is already
 	 * persisted.
@@ -59,7 +60,7 @@ public class JobDAO extends BaseHibernateDAO {
 		if (includeMultiPartJobs) {
 			queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ?";
 		} else {
-			queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.multiPartJob = false";
+			queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.batchJob = false";
 		}
 
 		try {
@@ -68,7 +69,7 @@ public class JobDAO extends BaseHibernateDAO {
 			Query queryObject = getCurrentSession().createQuery(queryString);
 			queryObject.setParameter(0, dn);
 
-			List<Job> jobs = (List<Job>) (queryObject.list());
+			List<Job> jobs = (queryObject.list());
 
 			getCurrentSession().getTransaction().commit();
 
@@ -97,7 +98,7 @@ public class JobDAO extends BaseHibernateDAO {
 	 *             there are several jobs with this dn and jobname. this is bad.
 	 */
 	public final Job findJobByDN(final String dn, final String jobname)
-			throws NoSuchJobException {
+	throws NoSuchJobException {
 		myLogger.debug("Loading job with dn: " + dn + " and jobname: "
 				+ jobname + " from dn.");
 		String queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.jobname = ?";
@@ -116,7 +117,7 @@ public class JobDAO extends BaseHibernateDAO {
 			if (job == null) {
 				throw new NoSuchJobException(
 						"Could not find a job for the dn: " + dn
-								+ " and the jobname: " + jobname);
+						+ " and the jobname: " + jobname);
 			}
 			return job;
 
@@ -149,11 +150,11 @@ public class JobDAO extends BaseHibernateDAO {
 		String queryString;
 		if (includeMultiPartJobs) {
 			queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.jobProperties['"
-					+ Constants.APPLICATIONNAME_KEY + "'] = ?";
+				+ Constants.APPLICATIONNAME_KEY + "'] = ?";
 		} else {
 			queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.jobProperties['"
-					+ Constants.APPLICATIONNAME_KEY
-					+ "'] = ? and job.multiPartJob = false";
+				+ Constants.APPLICATIONNAME_KEY
+				+ "'] = ? and job.multiPartJob = false";
 		}
 
 		try {
@@ -163,7 +164,7 @@ public class JobDAO extends BaseHibernateDAO {
 			queryObject.setParameter(0, dn);
 			queryObject.setParameter(1, application);
 
-			List<Job> jobs = (List<Job>) (queryObject.list());
+			List<Job> jobs = (queryObject.list());
 
 			getCurrentSession().getTransaction().commit();
 
@@ -186,7 +187,7 @@ public class JobDAO extends BaseHibernateDAO {
 		if (includeMultiPartJobs) {
 			queryString = "select jobname from org.vpac.grisu.backend.model.job.Job as job where job.dn = ?";
 		} else {
-			queryString = "select jobname from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.multiPartJob = false";
+			queryString = "select jobname from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.batchJob = false";
 		}
 
 		try {
@@ -195,7 +196,7 @@ public class JobDAO extends BaseHibernateDAO {
 			Query queryObject = getCurrentSession().createQuery(queryString);
 			queryObject.setParameter(0, dn);
 
-			List<String> jobnames = (List<String>) (queryObject.list());
+			List<String> jobnames = (queryObject.list());
 
 			getCurrentSession().getTransaction().commit();
 
@@ -218,11 +219,11 @@ public class JobDAO extends BaseHibernateDAO {
 		String queryString;
 		if (includeMultiPartJob) {
 			queryString = "select jobname from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.jobProperties['"
-					+ Constants.APPLICATIONNAME_KEY + "'] = ?";
+				+ Constants.APPLICATIONNAME_KEY + "'] = ?";
 		} else {
 			queryString = "select jobname from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.jobProperties['"
-					+ Constants.APPLICATIONNAME_KEY
-					+ "'] = ? and job.multiPartJob = false";
+				+ Constants.APPLICATIONNAME_KEY
+				+ "'] = ? and job.batchJob = false";
 		}
 
 		try {
@@ -232,7 +233,7 @@ public class JobDAO extends BaseHibernateDAO {
 			queryObject.setParameter(0, dn);
 			queryObject.setParameter(1, application);
 
-			List<String> jobnames = (List<String>) (queryObject.list());
+			List<String> jobnames = (queryObject.list());
 
 			getCurrentSession().getTransaction().commit();
 
@@ -272,14 +273,14 @@ public class JobDAO extends BaseHibernateDAO {
 			queryObject.setParameter(0, dn);
 			queryObject.setParameter(1, jobname + "%");
 
-			List<Job> jobs = (List<Job>) (queryObject.list());
+			List<Job> jobs = (queryObject.list());
 
 			getCurrentSession().getTransaction().commit();
 
 			if (jobs.size() == 0) {
 				throw new NoSuchJobException(
 						"Could not find a job for the dn: " + dn
-								+ " and the jobname: " + jobname);
+						+ " and the jobname: " + jobname);
 			}
 			return jobs;
 

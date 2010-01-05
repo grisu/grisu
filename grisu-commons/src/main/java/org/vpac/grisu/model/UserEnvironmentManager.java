@@ -72,7 +72,7 @@ public interface UserEnvironmentManager {
 	 *             if no such job exists
 	 */
 	DtoBatchJob getBatchJob(String jobname, boolean refreshBatchJob)
-			throws NoSuchJobException;
+	throws NoSuchJobException;
 
 	SortedSet<DtoBatchJob> getBatchJobs(String application, boolean refresh);
 
@@ -86,11 +86,33 @@ public interface UserEnvironmentManager {
 	List<FileSystemItem> getBookmarksFilesystems();
 
 	/**
+	 * Returns a list of all currently used applications for a user.
+	 * 
+	 * All currently used applications means applications where there is at least one job in the backend database.
+	 * 
+	 * @param refresh whether to refresh the list
+	 * @return the list of applications
+	 */
+	SortedSet<String> getCurrentApplications(boolean refresh);
+
+	/**
+	 * Returns a list of all currently used applications for batchjobs for a user.
+	 * 
+	 * All currently used applications means applications where there is at least one batchjob in the backend database.
+	 * 
+	 * @param refresh whether to refresh the list
+	 * @return the list of applications
+	 */
+	SortedSet<String> getCurrentApplicationsBatch(boolean refresh);
+
+	/**
 	 * Returns all batchjobnames of the user.
 	 * 
+	 * 
+	 * @param refresh whether to refresh the list or not
 	 * @return all batchjobnames
 	 */
-	SortedSet<String> getCurrentBatchJobnames();
+	SortedSet<String> getCurrentBatchJobnames(boolean refresh);
 
 	/**
 	 * Returns all batchjobnames of the user where the batchjob is of the
@@ -114,11 +136,12 @@ public interface UserEnvironmentManager {
 	String getCurrentFqan();
 
 	/**
-	 * Returns all jobnames (single & batch) of the user.
+	 * Returns all jobnames (for single jobs) of the user.
 	 * 
+	 * @param refresh whether to refresh the list or not
 	 * @return all jobnames
 	 */
-	SortedSet<String> getCurrentJobnames();
+	SortedSet<String> getCurrentJobnames(boolean refresh);
 
 	/**
 	 * Returns all jobnames of the user where the (single) job is of the

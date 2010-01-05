@@ -11,6 +11,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventSubscriber;
 import org.vpac.grisu.control.ServiceInterface;
@@ -24,6 +25,7 @@ import org.vpac.grisu.model.UserEnvironmentManager;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoJobs;
 
+import au.org.arcs.jcommons.constants.Constants;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
@@ -47,6 +49,16 @@ public class RunningJobManager {
 
 			try {
 
+				// update single jobs
+				for (String application : cachedSingleJobsPerApplication.keySet()) {
+					updateJobList(application);
+				}
+
+				for ( JobObject job : getAllCurrentlyWatchedSingleJobs() ) {
+					myLogger.debug("Refreshing job: " + job.getJobname());
+					job.getStatus(true);
+				}
+
 				for (String application : cachedBatchJobsPerApplication.keySet()) {
 					updateBatchJobList(application);
 				}
@@ -68,7 +80,6 @@ public class RunningJobManager {
 
 
 	}
-
 
 	static final Logger myLogger = Logger.getLogger(RunningJobManager.class
 			.getName());
@@ -133,6 +144,12 @@ public class RunningJobManager {
 
 	private final ServiceInterface si;
 
+	private final Map<String, JobObject> cachedAllSingleJobs = Collections
+	.synchronizedMap(new HashMap<String, JobObject>());
+
+	private final Map<String, EventList<JobObject>> cachedSingleJobsPerApplication = Collections
+	.synchronizedMap(new HashMap<String, EventList<JobObject>>());
+
 	private final Map<String, BatchJobObject> cachedAllBatchJobs = Collections
 	.synchronizedMap(new HashMap<String, BatchJobObject>());
 
@@ -153,6 +170,11 @@ public class RunningJobManager {
 
 		return cachedAllBatchJobs.values();
 
+	}
+
+	private synchronized Collection<JobObject> getAllCurrentlyWatchedSingleJobs() {
+
+		return cachedAllSingleJobs.values();
 	}
 
 	public BatchJobObject getBatchJob(String jobname) throws NoSuchJobException {
@@ -177,6 +199,10 @@ public class RunningJobManager {
 	public synchronized EventList<BatchJobObject> getBatchJobs(
 			String application) {
 
+		if ( StringUtils.isBlank(application) ) {
+			application = Constants.ALLJOBS_KEY;
+		}
+
 		if (cachedBatchJobsPerApplication.get(application) == null) {
 
 			EventList<BatchJobObject> temp = new BasicEventList<BatchJobObject>();
@@ -196,6 +222,48 @@ public class RunningJobManager {
 		return cachedBatchJobsPerApplication.get(application);
 	}
 
+	public JobObject getJob(String jobname, boolean refreshOnBackend) throws NoSuchJobException {
+
+		synchronized (jobname) {
+
+			if (cachedAllSingleJobs.get(jobname) == null) {
+
+				JobObject temp = new JobObject(si, jobname, refreshOnBackend);
+				cachedAllSingleJobs.put(jobname, temp);
+
+			}
+
+		}
+
+		return cachedAllSingleJobs.get(jobname);
+	}
+
+	public synchronized EventList<JobObject> getJobs(String application) {
+
+		if ( StringUtils.isBlank(application) ) {
+			application = Constants.ALLJOBS_KEY;
+		}
+
+		if (cachedSingleJobsPerApplication.get(application) == null) {
+
+			EventList<JobObject> temp = new BasicEventList<JobObject>();
+
+			for (String jobname : em.getCurrentJobnames(application, false)) {
+
+				try {
+					temp.add(getJob(jobname, false));
+				} catch (NoSuchJobException e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+			cachedSingleJobsPerApplication.put(application, temp);
+
+		}
+		return cachedSingleJobsPerApplication.get(application);
+
+	}
+
 
 	private void startAutoRefresh() {
 
@@ -212,6 +280,10 @@ public class RunningJobManager {
 	 *            the application
 	 */
 	public synchronized void updateBatchJobList(String application) {
+
+		if ( StringUtils.isBlank(application) ) {
+			application = Constants.ALLJOBS_KEY;
+		}
 
 		EventList<BatchJobObject> list = getBatchJobs(application);
 
@@ -239,6 +311,42 @@ public class RunningJobManager {
 		list.removeAll(toRemove);
 		for ( BatchJobObject bj : toRemove ) {
 			cachedAllBatchJobs.remove(bj.getJobname());
+		}
+
+	}
+
+	public synchronized void updateJobList(String application) {
+
+		if ( StringUtils.isBlank(application) ) {
+			application = Constants.ALLJOBS_KEY;
+		}
+
+		EventList<JobObject> list = getJobs(application);
+
+		SortedSet<String> jobnames = em.getCurrentJobnames(application,
+				true);
+		SortedSet<String> jobnamesNew = new TreeSet<String>(jobnames);
+
+		for (JobObject j : list) {
+			jobnamesNew.remove(j.getJobname());
+		}
+		for (String name : jobnamesNew) {
+			try {
+				list.add(getJob(name, false));
+			} catch (NoSuchJobException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		Set<JobObject> toRemove = new HashSet<JobObject>();
+		for (JobObject j : list) {
+			if (!jobnames.contains(j.getJobname())) {
+				toRemove.add(j);
+			}
+		}
+		list.removeAll(toRemove);
+		for ( JobObject j : toRemove ) {
+			cachedAllSingleJobs.remove(j.getJobname());
 		}
 
 	}

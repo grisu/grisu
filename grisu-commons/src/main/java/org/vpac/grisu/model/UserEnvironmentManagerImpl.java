@@ -53,6 +53,9 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	private List<FileSystemItem> cachedRemoteFilesystemList = null;
 	private List<FileSystemItem> cachedAllFileSystems = null;
 
+	private SortedSet<String> cachedAllUsedApplicationsSingle = null;
+	private SortedSet<String> cachedAllUsedApplicationsBatch = null;
+
 	private SortedSet<DtoJob> cachedJobList = null;
 
 	private SortedSet<String> cachedJobNames = null;
@@ -68,7 +71,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	public UserEnvironmentManagerImpl(final ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
 		resourceInfo = GrisuRegistryManager.getDefault(serviceInterface)
-				.getResourceInformation();
+		.getResourceInformation();
 	}
 
 	public void addFqanListener(final FqanListener listener) {
@@ -81,8 +84,8 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		String temp = name;
 		int i = 1;
 
-		while (getCurrentJobnames().contains(temp)
-				|| getCurrentBatchJobnames().contains(temp)) {
+		while (getCurrentJobnames(false).contains(temp)
+				|| getCurrentBatchJobnames(false).contains(temp)) {
 			temp = name + "_" + i;
 			i = i + 1;
 		}
@@ -139,14 +142,14 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	}
 
 	public DtoBatchJob getBatchJob(String jobname, boolean refresh)
-			throws NoSuchJobException {
+	throws NoSuchJobException {
 
 		DtoBatchJob result = null;
 
 		if (!refresh) {
 			result = cachedBatchJobs.get(jobname);
 		}
-		if (result == null || refresh) {
+		if ((result == null) || refresh) {
 			result = serviceInterface.getBatchJob(jobname);
 			cachedBatchJobs.put(jobname, result);
 		}
@@ -157,13 +160,17 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	public SortedSet<DtoBatchJob> getBatchJobs(String application,
 			boolean refresh) {
 
+		if ( StringUtils.isBlank(application) ) {
+			application = Constants.ALLJOBS_KEY;
+		}
+
 		SortedSet<DtoBatchJob> result = null;
 
 		if (!refresh) {
 			result = cachedBatchJobsPerApplication.get(application);
 		}
 
-		if (result == null || refresh) {
+		if ((result == null) || refresh) {
 
 			result = new TreeSet<DtoBatchJob>();
 
@@ -208,11 +215,36 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		return cachedBookmarkFilesystemList;
 	}
 
-	public SortedSet<String> getCurrentBatchJobnames() {
+	public SortedSet<String> getCurrentApplications(boolean refresh) {
+
+		if ( cachedAllUsedApplicationsSingle == null ) {
+			cachedAllUsedApplicationsSingle = new TreeSet<String>(serviceInterface.getUsedApplications().getStringList());
+		} else if ( refresh ) {
+			cachedAllUsedApplicationsSingle.clear();
+			cachedAllUsedApplicationsSingle.addAll(serviceInterface.getUsedApplications().getStringList());
+		}
+		return cachedAllUsedApplicationsSingle;
+	}
+
+	public SortedSet<String> getCurrentApplicationsBatch(boolean refresh) {
+
+		if ( cachedAllUsedApplicationsBatch == null ) {
+			cachedAllUsedApplicationsBatch = new TreeSet<String>(serviceInterface.getUsedApplicationsBatch().getStringList());
+		} else if ( refresh ) {
+			cachedAllUsedApplicationsBatch.clear();
+			cachedAllUsedApplicationsBatch.addAll(serviceInterface.getUsedApplicationsBatch().getStringList());
+		}
+		return cachedAllUsedApplicationsBatch;
+	}
+
+	public SortedSet<String> getCurrentBatchJobnames(boolean refresh) {
 
 		if (cachedBatchJobNames == null) {
 			cachedBatchJobNames = new TreeSet<String>(serviceInterface
 					.getAllBatchJobnames(null).getStringList());
+		} else if ( refresh ) {
+			cachedBatchJobNames.clear();
+			cachedBatchJobNames.addAll(serviceInterface.getAllBatchJobnames(null).getStringList());
 		}
 		return cachedBatchJobNames;
 	}
@@ -220,15 +252,19 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	public SortedSet<String> getCurrentBatchJobnames(String application,
 			boolean refreshBatchJobnames) {
 
+		if ( StringUtils.isBlank(application) ) {
+			application = Constants.ALLJOBS_KEY;
+		}
+
 		SortedSet<String> result = null;
 
 		if (!refreshBatchJobnames) {
 			result = cachedBatchJobnamesPerApplication.get(application);
 		}
 
-		if (result == null || refreshBatchJobnames) {
+		if ((result == null) || refreshBatchJobnames) {
 			result = serviceInterface.getAllBatchJobnames(application)
-					.asSortedSet();
+			.asSortedSet();
 			cachedBatchJobnamesPerApplication.put(application, result);
 		}
 		return result;
@@ -238,11 +274,14 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		return currentFqan;
 	}
 
-	public SortedSet<String> getCurrentJobnames() {
+	public SortedSet<String> getCurrentJobnames(boolean refresh) {
 
 		if (cachedJobNames == null) {
 			cachedJobNames = new TreeSet<String>(serviceInterface
 					.getAllJobnames(null).getStringList());
+		} else if ( refresh ) {
+			cachedJobNames.clear();
+			cachedJobNames.addAll(serviceInterface.getAllJobnames(null).getStringList());
 		}
 		return cachedJobNames;
 	}
@@ -250,13 +289,17 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	public SortedSet<String> getCurrentJobnames(String application,
 			boolean refresh) {
 
+		if ( StringUtils.isBlank(application) ) {
+			application = Constants.ALLJOBS_KEY;
+		}
+
 		SortedSet<String> result = null;
 
 		if (!refresh) {
 			result = cachedJobnamesPerApplication.get(application);
 		}
 
-		if (result == null || refresh) {
+		if ((result == null) || refresh) {
 			result = serviceInterface.getAllJobnames(application).asSortedSet();
 			cachedJobnamesPerApplication.put(application, result);
 		}
@@ -267,7 +310,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	public SortedSet<DtoJob> getCurrentJobs(boolean refreshJobStatus) {
 		if (cachedJobList == null) {
 			cachedJobList = serviceInterface.ps(null, refreshJobStatus)
-					.getAllJobs();
+			.getAllJobs();
 		}
 		return cachedJobList;
 	}
@@ -369,9 +412,9 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 
 				Set<MountPoint> mps = new HashSet<MountPoint>();
 				for (MountPoint mp : getMountPoints()) {
-					if (mp.getFqan() == null
+					if ((mp.getFqan() == null)
 							|| mp.getFqan().equals(Constants.NON_VO_FQAN)) {
-						if (fqan == null || fqan.equals(Constants.NON_VO_FQAN)) {
+						if ((fqan == null) || fqan.equals(Constants.NON_VO_FQAN)) {
 							mps.add(mp);
 							continue;
 						} else {
@@ -423,7 +466,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 			// String[] urls = serviceInterface
 			// .getStagingFileSystemForSubmissionLocation(submissionLocation);
 			List<String> urls = resourceInfo
-					.getStagingFilesystemsForSubmissionLocation(submissionLocation);
+			.getStagingFilesystemsForSubmissionLocation(submissionLocation);
 
 			Set<MountPoint> result = new TreeSet<MountPoint>();
 			for (String url : urls) {
@@ -435,8 +478,8 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 
 					for (MountPoint mp : getMountPoints()) {
 
-						if (mp.getRootUrl().indexOf(host) != -1
-								&& mp.getRootUrl().indexOf(protocol) != -1) {
+						if ((mp.getRootUrl().indexOf(host) != -1)
+								&& (mp.getRootUrl().indexOf(protocol) != -1)) {
 							result.add(mp);
 						}
 
@@ -452,7 +495,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 					submissionLocation, result);
 		}
 		return alreadyQueriedMountPointsPerSubmissionLocation
-				.get(submissionLocation);
+		.get(submissionLocation);
 	}
 
 	public synchronized final Set<MountPoint> getMountPointsForSubmissionLocationAndFqan(
@@ -461,7 +504,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		// String[] urls = serviceInterface
 		// .getStagingFileSystemForSubmissionLocation(submissionLocation);
 		List<String> urls = resourceInfo
-				.getStagingFilesystemsForSubmissionLocation(submissionLocation);
+		.getStagingFilesystemsForSubmissionLocation(submissionLocation);
 
 		Set<MountPoint> result = new TreeSet<MountPoint>();
 
@@ -474,8 +517,8 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 
 				for (MountPoint mp : getMountPoints(fqan)) {
 
-					if (mp.getRootUrl().indexOf(host) != -1
-							&& mp.getRootUrl().indexOf(protocol) != -1) {
+					if ((mp.getRootUrl().indexOf(host) != -1)
+							&& (mp.getRootUrl().indexOf(protocol) != -1)) {
 						result.add(mp);
 					}
 

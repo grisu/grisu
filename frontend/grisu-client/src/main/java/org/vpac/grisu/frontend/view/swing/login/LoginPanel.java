@@ -69,13 +69,17 @@ public class LoginPanel extends JPanel implements ProxyCreatorHolder {
 			return;
 		}
 
-		client.setServiceInterface(si);
-
-		switchToClientPanel();
-
+		setServiceInterface(si);
 	}
 
 	public void proxyCreationFailed(String message) {
+
+	}
+
+	public void setServiceInterface(ServiceInterface si) {
+		client.setServiceInterface(si);
+
+		switchToClientPanel();
 
 	}
 

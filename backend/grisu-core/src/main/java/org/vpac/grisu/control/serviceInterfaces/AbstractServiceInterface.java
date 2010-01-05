@@ -115,7 +115,7 @@ import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
  */
 public abstract class AbstractServiceInterface implements ServiceInterface {
 
-	private final boolean INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND = true;
+	private final boolean INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND = false;
 
 	static final Logger myLogger = Logger
 	.getLogger(AbstractServiceInterface.class.getName());
@@ -130,7 +130,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	protected JobDAO jobdao = new JobDAO();
 
-	protected BatchJobDAO multiPartJobDao = new BatchJobDAO();
+	protected BatchJobDAO batchJobDao = new BatchJobDAO();
 
 	private MountPoint[] mountPointsForThisSession = null;
 
@@ -192,7 +192,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} catch (NoSuchJobException e) {
 			BatchJob job = getMultiPartJobFromDatabase(jobname);
 			job.addJobProperty(key, value);
-			multiPartJobDao.saveOrUpdate(job);
+			batchJobDao.saveOrUpdate(job);
 			myLogger.debug("Added multijob property: " + key);
 		}
 
@@ -265,7 +265,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				multiJob);
 		multiJob.addJob(jobname);
 		multiJob.setStatus(JobConstants.READY_TO_SUBMIT);
-		multiPartJobDao.saveOrUpdate(multiJob);
+		batchJobDao.saveOrUpdate(multiJob);
 
 		return jobname;
 	}
@@ -284,7 +284,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				return;
 			}
 			mpj.addLogMessage(message);
-			multiPartJobDao.saveOrUpdate(mpj);
+			batchJobDao.saveOrUpdate(mpj);
 		}
 	}
 
@@ -718,7 +718,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			multiJobCreate.setStatus(JobConstants.JOB_CREATED);
 
-			multiPartJobDao.saveOrUpdate(multiJobCreate);
+			batchJobDao.saveOrUpdate(multiJobCreate);
 
 			try {
 				return multiJobCreate.createDtoMultiPartJob();
@@ -927,7 +927,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		for (Job job : jobs) {
 			multiJob.removeJob(job);
 		}
-		multiPartJobDao.saveOrUpdate(multiJob);
+		batchJobDao.saveOrUpdate(multiJob);
 		for (final Job job : jobs) {
 			Thread thread = new Thread("killing_" + job.getJobname()) {
 				@Override
@@ -1004,7 +1004,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						}
 					}
 
-					multiPartJobDao.delete(multiJob);
+					batchJobDao.delete(multiJob);
 					newActionStatus
 					.addElement("Deleted multipartjob from database.");
 
@@ -1398,14 +1398,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
+
 	public DtoStringList getAllBatchJobnames(String application) {
 
 		List<String> jobnames = null;
 
-		if (StringUtils.isBlank(application)) {
-			jobnames = multiPartJobDao.findJobNamesByDn(getUser().getDn());
+		if (StringUtils.isBlank(application) || Constants.ALLJOBS_KEY.equals(application)) {
+			jobnames = batchJobDao.findJobNamesByDn(getUser().getDn());
 		} else {
-			jobnames = multiPartJobDao.findJobNamesPerApplicationByDn(getUser()
+			jobnames = batchJobDao.findJobNamesPerApplicationByDn(getUser()
 					.getDn(), application);
 		}
 
@@ -1429,7 +1430,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		List<String> jobnames = null;
 
-		if (StringUtils.isBlank(application)) {
+		if (StringUtils.isBlank(application) || Constants.ALLJOBS_KEY.equals(application)) {
 			jobnames = jobdao.findJobNamesByDn(getUser().getDn(),
 					INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND);
 		} else {
@@ -1872,7 +1873,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						addLogMessageToPossibleMultiPartJobParent(job, "Job: "
 								+ job.getJobname() + " failed. Status: "
 								+ JobConstants.translateStatus(job.getStatus()));
-						multiPartJobDao.saveOrUpdate(mpj);
+						batchJobDao.saveOrUpdate(mpj);
 					} catch (NoSuchJobException e) {
 						// well
 						myLogger.error(e);
@@ -1911,10 +1912,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return null;
 	}
 
-	// public String getStagingFileSystem(String site) {
-	// return MountPointManager.getDefaultFileSystem(site);
-	// }
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1927,10 +1924,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return getUser().getResponsibleMountpointForAbsoluteFile(uri);
 	}
 
+	// public String getStagingFileSystem(String site) {
+	// return MountPointManager.getDefaultFileSystem(site);
+	// }
+
 	protected BatchJob getMultiPartJobFromDatabase(final String batchJobname)
 	throws NoSuchJobException {
 
-		BatchJob job = multiPartJobDao.findJobByDN(getUser().getCred().getDn(),
+		BatchJob job = batchJobDao.findJobByDN(getUser().getCred().getDn(),
 				batchJobname);
 
 		return job;
@@ -2089,6 +2090,36 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					submitters);
 		}
 		return manager;
+	}
+
+	public DtoStringList getUsedApplications() {
+
+		List<Job> jobs = null;
+		jobs = jobdao.findJobByDN(getUser().getDn(), false);
+
+		Set<String> apps = new TreeSet<String>();
+
+		for ( Job job : jobs ) {
+			apps.add(job.getJobProperty(Constants.APPLICATIONNAME_KEY));
+		}
+
+		return DtoStringList.fromStringColletion(apps);
+
+	}
+
+	public DtoStringList getUsedApplicationsBatch() {
+
+		List<BatchJob> jobs = null;
+		jobs = batchJobDao.findMultiPartJobByDN(getUser().getDn());
+
+		Set<String> apps = new TreeSet<String>();
+
+		for ( BatchJob job : jobs ) {
+			apps.add(job.getJobProperty(Constants.APPLICATIONNAME_KEY));
+		}
+
+		return DtoStringList.fromStringColletion(apps);
+
 	}
 
 	/**
@@ -2364,7 +2395,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					BatchJob mpj = getMultiPartJobFromDatabase(job
 							.getJobProperty(Constants.BATCHJOB_NAME));
 					mpj.removeJob(job);
-					multiPartJobDao.saveOrUpdate(mpj);
+					batchJobDao.saveOrUpdate(mpj);
 				} catch (Exception e) {
 					// e.printStackTrace();
 					// doesn't matter
@@ -2695,7 +2726,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		if (possibleParentBatchJob != null) {
 			possibleParentBatchJob.recalculateAllUsedMountPoints();
-			multiPartJobDao.saveOrUpdate(possibleParentBatchJob);
+			batchJobDao.saveOrUpdate(possibleParentBatchJob);
 		}
 
 		return results;
@@ -3314,7 +3345,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		if (currentJobs.length == 0) {
 			multiPartJob.setStatus(JobConstants.JOB_CREATED);
-			multiPartJobDao.saveOrUpdate(multiPartJob);
+			batchJobDao.saveOrUpdate(multiPartJob);
 			statusfinal.addLogMessage("No jobs. Returning.");
 			statusfinal.setFailed(false);
 			statusfinal.setFinished(true);
@@ -3342,7 +3373,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						} else {
 							multiPartJob.setStatus(JobConstants.DONE);
 						}
-						multiPartJobDao.saveOrUpdate(multiPartJob);
+						batchJobDao.saveOrUpdate(multiPartJob);
 					}
 				}
 			};
@@ -3382,7 +3413,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		BatchJob multiJob = getMultiPartJobFromDatabase(batchJobname);
 		multiJob.removeJob(job);
 
-		multiPartJobDao.saveOrUpdate(multiJob);
+		batchJobDao.saveOrUpdate(multiJob);
 	}
 
 	public DtoProperties restartBatchJob(final String batchJobname,
@@ -3451,7 +3482,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		Map<String, Integer> results = optimizeMultiPartJob(sp, job
 				.getJobProperty(Constants.DISTRIBUTION_METHOD), job);
 
-		multiPartJobDao.saveOrUpdate(job);
+		batchJobDao.saveOrUpdate(job);
 
 		final ExecutorService executor = Executors
 		.newFixedThreadPool(ServerPropertiesManager
@@ -3525,7 +3556,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			addLogMessageToPossibleMultiPartJobParent(job, "Re-submitting job "
 					+ job.getJobname());
 			mpj.removeFailedJob(job.getJobname());
-			multiPartJobDao.saveOrUpdate(mpj);
+			batchJobDao.saveOrUpdate(mpj);
 		}
 
 		if (StringUtils.isNotBlank(changedJsdl)) {
@@ -3948,7 +3979,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 									+ DEFAULT_JOB_SUBMISSION_RETRIES
 									+ " times. Never worked. Giving up...");
 							multiJob.addFailedJob(job.getJobname());
-							multiPartJobDao.saveOrUpdate(multiJob);
+							batchJobDao.saveOrUpdate(multiJob);
 							newActionStatus.addElement("Tried to resubmit job "
 									+ job.getJobname() + " "
 									+ DEFAULT_JOB_SUBMISSION_RETRIES
@@ -3959,7 +3990,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								.getTotalElements()) {
 							newActionStatus.setFinished(true);
 							multiJob.setStatus(JobConstants.ACTIVE);
-							multiPartJobDao.saveOrUpdate(multiJob);
+							batchJobDao.saveOrUpdate(multiJob);
 						}
 
 					} finally {
@@ -4139,7 +4170,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		final BatchJob multiJob = getMultiPartJobFromDatabase(jobname);
 
 		multiJob.setStatus(JobConstants.INPUT_FILES_UPLOADING);
-		multiPartJobDao.saveOrUpdate(multiJob);
+		batchJobDao.saveOrUpdate(multiJob);
 
 		myLogger.debug("Receiving datahandler for multipartjob input file...");
 
@@ -4332,7 +4363,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								.getCurrentElements()) {
 							status.setFinished(true);
 							multiJob.setStatus(JobConstants.READY_TO_SUBMIT);
-							multiPartJobDao.saveOrUpdate(multiJob);
+							batchJobDao.saveOrUpdate(multiJob);
 						}
 
 					} finally {

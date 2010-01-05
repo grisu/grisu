@@ -16,10 +16,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.control.jobMonitoring.RunningJobManager;
 import org.vpac.grisu.frontend.model.job.JobObject;
 
 import ca.odell.glazedlists.EventList;
@@ -94,6 +96,12 @@ public class SimpleSingleJobsGrid extends JPanel {
 
 		addPopup(getTable(), getPopupMenu());
 
+
+	}
+
+	public SimpleSingleJobsGrid(ServiceInterface si, String application) {
+
+		this(si, RunningJobManager.getDefault(si).getJobs(application));
 
 	}
 
@@ -243,7 +251,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 
 	}
 
-	protected void killSelectedJobs(boolean clean) {
+	protected void killSelectedJobs(final boolean clean) {
 
 		StringBuffer message = new StringBuffer("Do you really want to kill ");
 		if ( clean ) {
@@ -252,7 +260,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 		message.append("the following job(s)?\n\n");
 
 		for ( JobObject job : getSelectedJobs() ) {
-			message.append(job.getJobname());
+			message.append(job.getJobname()+"\n");
 		}
 
 		int n = JOptionPane.showConfirmDialog(
@@ -262,25 +270,39 @@ public class SimpleSingleJobsGrid extends JPanel {
 				JOptionPane.YES_NO_OPTION);
 
 		if ( n == JOptionPane.YES_OPTION ) {
+
+			lockUI(true);
+
 			for ( JobObject job : getSelectedJobs() ) {
+				//				getTable().getSelectionModel().clearSelection();
 				job.kill(clean);
 				if ( clean ) {
 					jobList.remove(job);
 				}
 			}
+
+			lockUI(false);
+
 		}
 
 	}
 
-	private void lockUI(boolean lock) {
+	private void lockUI(final boolean lock) {
 
-		//		getTable().setEnabled(lock);
+		SwingUtilities.invokeLater(new Thread() {
 
-		if ( ! lock ) {
-			this.setCursor(Cursor.getDefaultCursor());
-		} else {
-			this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		}
+			@Override
+			public void run() {
+				getTable().setEnabled(!lock);
+
+				if ( ! lock ) {
+					getTable().setCursor(Cursor.getDefaultCursor());
+				} else {
+					getTable().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				}
+			}
+
+		});
 
 	}
 	// remove a listener
