@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
 import org.vpac.grisu.control.ServiceInterface;
@@ -22,11 +23,27 @@ public class BatchJobDialog extends JDialog {
 			e.printStackTrace();
 		}
 	}
+	public static BatchJobDialog open(ServiceInterface si, BatchJobObject bj) {
+
+		final BatchJobDialog dialog = new BatchJobDialog(si, bj);
+
+		SwingUtilities.invokeLater(new Thread() {
+
+			@Override
+			public void run() {
+				dialog.setVisible(true);
+			}
+		});
+
+		return dialog;
+	}
+
 	private final ServiceInterface si;
 
 	private final BatchJobObject bj;
-
 	private final JPanel contentPanel = new JPanel();
+
+
 	private BatchJobPanel batchJobPanel;
 
 	/**
