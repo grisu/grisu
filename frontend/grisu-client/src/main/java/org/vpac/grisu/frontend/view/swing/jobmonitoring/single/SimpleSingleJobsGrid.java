@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
+import javax.swing.table.TableColumn;
 
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
@@ -218,10 +219,65 @@ public class SimpleSingleJobsGrid extends JPanel {
 
 			table.setDefaultRenderer(JobObject.class, new JobNameCellRenderer());
 
-			table.getColumnExt("Site").setVisible(false);
-			table.getColumnExt("Queue").setVisible(false);
-			table.getColumnExt("Submission time").setVisible(false);
-			table.getColumnExt("Group").setVisible(false);
+			// name
+			int vColIndex = 0;
+			TableColumn col = table.getColumnModel().getColumn(vColIndex);
+			int width = 120;
+			col.setPreferredWidth(width);
+			col.setMinWidth(80);
+
+			//application
+			vColIndex = 1;
+			col = table.getColumnModel().getColumn(vColIndex);
+			width = 90;
+			col.setPreferredWidth(width);
+			col.setMinWidth(60);
+			col.setMaxWidth(100);
+
+			// site
+			vColIndex = 2;
+			col = table.getColumnModel().getColumn(vColIndex);
+			width = 95;
+			col.setPreferredWidth(width);
+			col.setMinWidth(60);
+			col.setMaxWidth(120);
+
+			// queue
+			vColIndex = 3;
+			col = table.getColumnModel().getColumn(vColIndex);
+			width = 95;
+			col.setPreferredWidth(width);
+			col.setMinWidth(60);
+			col.setPreferredWidth(width);
+			col.setMaxWidth(120);
+
+			// submission time
+			vColIndex = 4;
+			col = table.getColumnModel().getColumn(vColIndex);
+			width = 100;
+			col.setPreferredWidth(width);
+			col.setMinWidth(60);
+			col.setPreferredWidth(width);
+			col.setMaxWidth(125);
+
+			// group
+			vColIndex = 5;
+			col = table.getColumnModel().getColumn(vColIndex);
+			width = 90;
+			col.setPreferredWidth(width);
+			col.setMinWidth(50);
+			col.setPreferredWidth(width);
+			col.setMaxWidth(120);
+
+			// status
+			vColIndex = 6;
+			col = table.getColumnModel().getColumn(vColIndex);
+			width = 90;
+			col.setMinWidth(50);
+			col.setPreferredWidth(width);
+			col.setMaxWidth(100);
+
+			setDefaultColumns();
 
 			table.addMouseListener(new MouseAdapter() {
 				@Override
@@ -305,6 +361,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 		});
 
 	}
+
 	// remove a listener
 	synchronized public void removeJobSelectionListener(
 			SingleJobSelectionListener l) {
@@ -312,6 +369,16 @@ public class SimpleSingleJobsGrid extends JPanel {
 			listeners = new Vector<SingleJobSelectionListener>();
 		}
 		listeners.removeElement(l);
+	}
+	protected void setDefaultColumns() {
+
+		getTable().getColumnExt("Site").setVisible(true);
+		getTable().getColumnExt("Queue").setVisible(false);
+		getTable().getColumnExt("Application").setVisible(true);
+		getTable().getColumnExt("Submission time").setVisible(true);
+		getTable().getColumnExt("Group").setVisible(false);
+		getTable().getColumnExt("Status").setVisible(true);
+
 	}
 	public void setEnableSingleMouseClick(boolean enable) {
 		this.enableSingleMouseClick = enable;

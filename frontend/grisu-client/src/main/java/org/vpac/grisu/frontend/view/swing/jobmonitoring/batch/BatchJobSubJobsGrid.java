@@ -91,6 +91,18 @@ public class BatchJobSubJobsGrid extends SimpleSingleJobsGrid implements Propert
 		}
 	}
 
+	@Override
+	protected void setDefaultColumns() {
+
+		getTable().getColumnExt("Site").setVisible(true);
+		getTable().getColumnExt("Application").setVisible(false);
+		getTable().getColumnExt("Queue").setVisible(false);
+		getTable().getColumnExt("Submission time").setVisible(false);
+		getTable().getColumnExt("Group").setVisible(false);
+		getTable().getColumnExt("Status").setVisible(true);
+
+	}
+
 
 
 

@@ -23,10 +23,12 @@ public class SingleJobTableFormat implements AdvancedTableFormat<JobObject> {
 		case 2:
 			return String.class;
 		case 3:
-			return Date.class;
-		case 4:
 			return String.class;
+		case 4:
+			return Date.class;
 		case 5:
+			return String.class;
+		case 6:
 			return String.class;
 		}
 
@@ -48,13 +50,15 @@ public class SingleJobTableFormat implements AdvancedTableFormat<JobObject> {
 			return null;
 		case 5:
 			return null;
+		case 6:
+			return null;
 		}
 
 		throw new IllegalStateException();
 	}
 
 	public int getColumnCount() {
-		return 6;
+		return 7;
 	}
 
 	public String getColumnName(int column) {
@@ -63,14 +67,16 @@ public class SingleJobTableFormat implements AdvancedTableFormat<JobObject> {
 		case 0:
 			return "Name";
 		case 1:
-			return "Site";
+			return "Application";
 		case 2:
-			return "Queue";
+			return "Site";
 		case 3:
-			return "Submission time";
+			return "Queue";
 		case 4:
-			return "Group";
+			return "Submission time";
 		case 5:
+			return "Group";
+		case 6:
 			return "Status";
 		}
 
@@ -84,12 +90,14 @@ public class SingleJobTableFormat implements AdvancedTableFormat<JobObject> {
 		case 0:
 			return baseObject;
 		case 1:
-			return baseObject.getJobProperty(Constants.SUBMISSION_SITE_KEY);
+			return baseObject.getJobProperty(Constants.APPLICATIONNAME_KEY);
 		case 2:
-			return baseObject.getJobProperty(Constants.QUEUE_KEY);
+			return baseObject.getJobProperty(Constants.SUBMISSION_SITE_KEY);
 		case 3:
+			return baseObject.getJobProperty(Constants.QUEUE_KEY);
+		case 4:
 			String time = baseObject
-					.getJobProperty(Constants.SUBMISSION_TIME_KEY);
+			.getJobProperty(Constants.SUBMISSION_TIME_KEY);
 			if (StringUtils.isBlank(time)) {
 				return null;
 			}
@@ -98,9 +106,9 @@ public class SingleJobTableFormat implements AdvancedTableFormat<JobObject> {
 			} catch (Exception e) {
 				return null;
 			}
-		case 4:
-			return baseObject.getJobProperty(Constants.FQAN_KEY);
 		case 5:
+			return baseObject.getJobProperty(Constants.FQAN_KEY);
+		case 6:
 			return baseObject.getStatusString(false);
 		}
 

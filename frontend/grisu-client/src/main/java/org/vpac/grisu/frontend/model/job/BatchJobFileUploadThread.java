@@ -19,26 +19,28 @@ public class BatchJobFileUploadThread extends Thread {
 	private final int noOfUpload;
 	private final ServiceInterface si;
 	private final ExecutorService executor;
-	private List<Exception> exceptions;
+	private final List<Exception> exceptions;
 
 	public BatchJobFileUploadThread(ServiceInterface si,
 			BatchJobObject batchJob, String inputFile, int noOfUpload,
-			ExecutorService executor) {
+			ExecutorService executor, List<Exception> exceptions) {
 		this.si = si;
 		this.batchJob = batchJob;
 		this.inputFile = inputFile;
 		this.noOfUpload = noOfUpload;
 		this.executor = executor;
+		this.exceptions = exceptions;
 	}
 
+	@Override
 	public void run() {
 		try {
 
 			final int all = batchJob.getInputFiles().keySet().size();
 			EventBus.publish(batchJob.getJobname(), new BatchJobEvent(batchJob,
 					"Uploading/copying common input file (" + noOfUpload
-							+ " of " + all + "): " + inputFile
-							+ " for multipartjob " + batchJob.getJobname()));
+					+ " of " + all + "): " + inputFile
+					+ " for multipartjob " + batchJob.getJobname()));
 			if (FileManager.isLocal(inputFile)) {
 
 				DataHandler dh = FileManager.createDataHandler(inputFile);

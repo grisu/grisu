@@ -25,7 +25,7 @@ public class FileApp {
 					char[] password = args[1].toCharArray();
 
 					LoginParams loginParams = new LoginParams(
-					// "http://localhost:8080/grisu-ws/services/grisu",
+							// "http://localhost:8080/grisu-ws/services/grisu",
 							// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
 							// "http://localhost:8080/enunciate-backend/soap/GrisuService",
 							"Local",
@@ -36,7 +36,7 @@ public class FileApp {
 					// si = LoginManager.login(null, password, username, "VPAC",
 					// loginParams);
 					si = LoginManager
-							.login(null, null, null, null, loginParams);
+					.login(null, null, null, null, loginParams);
 
 					File home = new File(System.getProperty("user.home"));
 
@@ -69,7 +69,7 @@ public class FileApp {
 
 	private FileListPanelPlus getFileListPanelPlus() {
 		if (fileListPanelPlus == null) {
-			fileListPanelPlus = new FileListPanelPlus(si, (String) null,
+			fileListPanelPlus = new FileListPanelPlus(si,
 					startUrl, true, true);
 		}
 		return fileListPanelPlus;
@@ -78,7 +78,7 @@ public class FileApp {
 	private FileListWithPreviewPanel getFileListWithPreviewPanel() {
 		if (flwpp == null) {
 			flwpp = new FileListWithPreviewPanel(si, null, startUrl, true,
-					false, false, false);
+					false, false, false, true);
 		}
 		return flwpp;
 	}

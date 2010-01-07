@@ -4,8 +4,10 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -17,6 +19,8 @@ import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
+import org.vpac.grisu.frontend.control.fileTransfers.FileTransfer;
+import org.vpac.grisu.frontend.control.fileTransfers.FileTransferManager;
 import org.vpac.grisu.frontend.model.events.JobStatusEvent;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -729,23 +733,39 @@ Comparable<JobObject> {
 
 		if ((getInputFileUrls() != null) && (getInputFileUrls().length > 0)) {
 			setStatus(JobConstants.INPUT_FILES_UPLOADING);
+		} else {
+			return;
 		}
 
-		// stage in local files
-		for (String inputFile : getInputFileUrls()) {
-
-			if (Thread.interrupted()) {
-				throw new InterruptedException(
-				"Interrupted when staging in input file(s)...");
-			}
-
-			if (FileManager.isLocal(inputFile)) {
-
-				GrisuRegistryManager.getDefault(serviceInterface)
-				.getFileManager().uploadFileToDirectory(inputFile,
-						jobDirectory, true);
+		Set<String> localFiles = new HashSet<String>();
+		for ( String inputFile : getInputFileUrls() ) {
+			if ( FileManager.isLocal(inputFile) ) {
+				localFiles.add(inputFile);
 			}
 		}
+
+		FileTransferManager ftm = FileTransferManager.getDefault(serviceInterface);
+
+		FileTransfer fileTransfer = ftm.addFileTransfer(localFiles, jobDirectory, true);
+
+		fileTransfer.join();
+
+
+		//		// stage in local files
+		//		for (String inputFile : getInputFileUrls()) {
+		//
+		//			if (Thread.interrupted()) {
+		//				throw new InterruptedException(
+		//				"Interrupted when staging in input file(s)...");
+		//			}
+		//
+		//			if (FileManager.isLocal(inputFile)) {
+		//
+		//				GrisuRegistryManager.getDefault(serviceInterface)
+		//				.getFileManager().uploadFileToDirectory(inputFile,
+		//						jobDirectory, true);
+		//			}
+		//		}
 
 		if ((getInputFileUrls() != null) && (getInputFileUrls().length > 0)) {
 			setStatus(JobConstants.INPUT_FILES_UPLOADED);

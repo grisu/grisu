@@ -17,7 +17,7 @@ public class MultiSingleJobMonitoringGrid extends JPanel {
 	private final ServiceInterface si;
 	private final UserEnvironmentManager em;
 
-	private final Map<String, SimpleSingleJobsGrid> grids = new HashMap<String, SimpleSingleJobsGrid>();
+	private final Map<String, SingleJobTabbedPane> grids = new HashMap<String, SingleJobTabbedPane>();
 
 	/**
 	 * Create the panel.
@@ -33,7 +33,7 @@ public class MultiSingleJobMonitoringGrid extends JPanel {
 
 		if ( grids.get(application) == null ) {
 
-			SimpleSingleJobsGrid temp = new SimpleSingleJobsGrid(si, application);
+			SingleJobTabbedPane temp = new SingleJobTabbedPane(si, application);
 			grids.put(application, temp);
 			add(temp, application);
 		}

@@ -25,4 +25,10 @@ public class LoadingPanel extends JPanel {
 		}
 		return busyLabel;
 	}
+
+	public void setLoading(boolean loading) {
+
+		busyLabel.setBusy(loading);
+
+	}
 }

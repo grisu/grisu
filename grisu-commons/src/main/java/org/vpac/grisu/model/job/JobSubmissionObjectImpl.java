@@ -14,6 +14,7 @@ import javax.persistence.Transient;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
+import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.vpac.grisu.utils.SimpleJsdlBuilder;
 import org.w3c.dom.Document;
@@ -50,7 +51,7 @@ public class JobSubmissionObjectImpl {
 		jso.setForce_mpi(true);
 		jso.setForce_single(false);
 		jso.setInputFileUrls(new String[] { "file:///temp/test",
-				"gsiftp://ng2.vpac.org/tmp/test" });
+		"gsiftp://ng2.vpac.org/tmp/test" });
 		jso.setMemory(0);
 
 		jso.getJobDescriptionDocument();
@@ -132,7 +133,7 @@ public class JobSubmissionObjectImpl {
 		setInputFileUrls(JsdlHelpers.getInputFileUrls(jsdl));
 		setModules(JsdlHelpers.getModules(jsdl));
 		String[] candidateHosts = JsdlHelpers.getCandidateHosts(jsdl);
-		if (candidateHosts != null && candidateHosts.length > 0) {
+		if ((candidateHosts != null) && (candidateHosts.length > 0)) {
 			submissionLocation = candidateHosts[0];
 		}
 		String executable = JsdlHelpers.getPosixApplicationExecutable(jsdl);
@@ -155,11 +156,11 @@ public class JobSubmissionObjectImpl {
 		this.jobname = jobProperties.get(JobSubmissionProperty.JOBNAME
 				.toString());
 		this.application = jobProperties
-				.get(JobSubmissionProperty.APPLICATIONNAME.toString());
+		.get(JobSubmissionProperty.APPLICATIONNAME.toString());
 		this.applicationVersion = jobProperties
-				.get(JobSubmissionProperty.APPLICATIONVERSION.toString());
+		.get(JobSubmissionProperty.APPLICATIONVERSION.toString());
 		this.email_address = jobProperties
-				.get(JobSubmissionProperty.EMAIL_ADDRESS.toString());
+		.get(JobSubmissionProperty.EMAIL_ADDRESS.toString());
 		this.email_on_job_start = checkForBoolean(jobProperties
 				.get(JobSubmissionProperty.EMAIL_ON_START.toString()));
 		this.email_on_job_finish = checkForBoolean(jobProperties
@@ -189,23 +190,23 @@ public class JobSubmissionObjectImpl {
 
 		String temp = jobProperties.get(JobSubmissionProperty.INPUT_FILE_URLS
 				.toString());
-		if (temp != null && temp.length() > 0) {
+		if ((temp != null) && (temp.length() > 0)) {
 			setInputFileUrls(temp.split(","));
 		}
 
 		temp = jobProperties.get(JobSubmissionProperty.MODULES.toString());
-		if (temp != null && temp.length() > 0) {
+		if ((temp != null) && (temp.length() > 0)) {
 			setModules(temp.split(","));
 		}
 
 		this.submissionLocation = jobProperties
-				.get(JobSubmissionProperty.SUBMISSIONLOCATION.toString());
+		.get(JobSubmissionProperty.SUBMISSIONLOCATION.toString());
 		this.commandline = jobProperties.get(JobSubmissionProperty.COMMANDLINE
 				.toString());
 		this.stderr = jobProperties
-				.get(JobSubmissionProperty.STDERR.toString());
+		.get(JobSubmissionProperty.STDERR.toString());
 		this.stdout = jobProperties
-				.get(JobSubmissionProperty.STDOUT.toString());
+		.get(JobSubmissionProperty.STDOUT.toString());
 		this.stdin = jobProperties.get(JobSubmissionProperty.STDIN.toString());
 
 		this.pbsDebug = jobProperties.get(JobSubmissionProperty.PBSDEBUG
@@ -213,7 +214,10 @@ public class JobSubmissionObjectImpl {
 
 	}
 
-	public void addInputFileUrl(final String url) {
+	public void addInputFileUrl(String url) {
+
+		url = FileManager.ensureUriFormat(url);
+
 		this.inputFileUrls.add(url);
 	}
 
@@ -236,7 +240,7 @@ public class JobSubmissionObjectImpl {
 
 	private void checkValidity() throws JobPropertiesException {
 
-		if (commandline == null || commandline.length() == 0) {
+		if ((commandline == null) || (commandline.length() == 0)) {
 			throw new JobPropertiesException(JobSubmissionProperty.COMMANDLINE
 					.toString()
 					+ ": " + "Commandline not specified.");
@@ -257,7 +261,7 @@ public class JobSubmissionObjectImpl {
 	}
 
 	public String extractExecutable() {
-		if (commandline == null || commandline.length() == 0) {
+		if ((commandline == null) || (commandline.length() == 0)) {
 			return null;
 		}
 
@@ -305,7 +309,7 @@ public class JobSubmissionObjectImpl {
 
 	@Transient
 	public String getInputFileUrlsAsString() {
-		if (inputFileUrls != null && inputFileUrls.size() != 0) {
+		if ((inputFileUrls != null) && (inputFileUrls.size() != 0)) {
 			return StringUtils.join(inputFileUrls, ",");
 		} else {
 			return new String();
@@ -314,7 +318,7 @@ public class JobSubmissionObjectImpl {
 
 	@Transient
 	public final Document getJobDescriptionDocument()
-			throws JobPropertiesException {
+	throws JobPropertiesException {
 
 		checkValidity();
 
@@ -328,7 +332,7 @@ public class JobSubmissionObjectImpl {
 
 	@Transient
 	public final String getJobDescriptionDocumentAsString()
-			throws JobPropertiesException {
+	throws JobPropertiesException {
 
 		String jsdlString = null;
 		jsdlString = SeveralXMLHelpers.toString(getJobDescriptionDocument());
@@ -373,7 +377,7 @@ public class JobSubmissionObjectImpl {
 		jobProperties.put(JobSubmissionProperty.MEMORY_IN_B, new Long(
 				memory_in_bytes).toString());
 		jobProperties.put(JobSubmissionProperty.NO_CPUS, new Integer(cpus)
-				.toString());
+		.toString());
 		jobProperties.put(JobSubmissionProperty.STDERR, stderr);
 		jobProperties.put(JobSubmissionProperty.STDOUT, stdout);
 		jobProperties.put(JobSubmissionProperty.SUBMISSIONLOCATION,
@@ -395,7 +399,7 @@ public class JobSubmissionObjectImpl {
 
 	@Transient
 	public String getModulesAsString() {
-		if (modules != null && modules.size() != 0) {
+		if ((modules != null) && (modules.size() != 0)) {
 			return StringUtils.join(modules, ",");
 		} else {
 			return new String();

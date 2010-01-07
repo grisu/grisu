@@ -40,7 +40,7 @@ public class GrisuMonitorNavigationTaskPaneBatch extends JXTaskPane implements E
 		this.navPanel = navPanel;
 		this.displayAllJobsItem = displayAllJobsItem;
 		this.displayApplicationSpecificItems = displayApplicationSpecificItems;
-		setTitle("Monitor batchjobs");
+		setTitle("Running Batch-jobs");
 
 		if ( displayAllJobsItem) {
 			addApplication(Constants.ALLJOBS_KEY);

@@ -26,17 +26,19 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer {
 	 */
 	public GrisuNavigationPanel(ServiceInterface si, GrisuCenterPanel centerPanel) {
 
-		this (si, centerPanel, true, true);
+		this (si, centerPanel, true, true, true);
 	}
 
 	public GrisuNavigationPanel(ServiceInterface si, GrisuCenterPanel centerPanel, boolean displaySingleJobMonitorItem,
-			boolean displayBatchJobMonitorItem) {
+			boolean displayBatchJobMonitorItem, boolean displayFileManagementItem) {
 
-		this(si, centerPanel, displaySingleJobMonitorItem, false, true, displayBatchJobMonitorItem, false, true);
+		this(si, centerPanel, displaySingleJobMonitorItem, false, true, displayBatchJobMonitorItem, false, true, displayFileManagementItem);
 	}
 
-	public GrisuNavigationPanel(ServiceInterface si, GrisuCenterPanel centerPanel, boolean displaySingleJobMonitorItem,
-			boolean displaySingleJobAllJobsMenuItem, boolean displaySingleJobAppSpecificMenuItems, boolean displayBatchJobMonitorItem, boolean displayBatchJobAllJobsMenuItem, boolean displayBatchJobAppSpecificMenuItems) {
+	public GrisuNavigationPanel(ServiceInterface si, GrisuCenterPanel centerPanel,
+			boolean displaySingleJobMonitorItem,	boolean displaySingleJobAllJobsMenuItem, boolean displaySingleJobAppSpecificMenuItems,
+			boolean displayBatchJobMonitorItem, boolean displayBatchJobAllJobsMenuItem, boolean displayBatchJobAppSpecificMenuItems,
+			boolean displayFileManagementItem) {
 
 		this.si = si;
 		this.centerPanel = centerPanel;
@@ -45,6 +47,9 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer {
 		}
 		if ( displayBatchJobMonitorItem ) {
 			addTaskPane(new GrisuMonitorNavigationTaskPaneBatch(si, this, displayBatchJobAllJobsMenuItem, displayBatchJobAppSpecificMenuItems));
+		}
+		if ( displayFileManagementItem ) {
+			addTaskPane(new GrisuFileNavigationTaskPane(si, this));
 		}
 
 	}

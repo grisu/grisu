@@ -222,6 +222,9 @@ Comparable<BatchJobObject> {
 	 *            the input file
 	 */
 	public void addInputFile(String inputFile) {
+
+		inputFile = FileManager.ensureUriFormat(inputFile);
+
 		if (FileManager.isLocal(inputFile)) {
 			inputFiles.put(inputFile, new File(inputFile).getName());
 		} else {
@@ -244,6 +247,7 @@ Comparable<BatchJobObject> {
 	 *            the filename in the common directory
 	 */
 	public void addInputFile(String inputFile, String targetFilename) {
+		inputFile = FileManager.ensureUriFormat(inputFile);
 		inputFiles.put(inputFile, targetFilename);
 	}
 
@@ -1851,7 +1855,7 @@ Comparable<BatchJobObject> {
 
 			i = i + 1;
 			Thread thread = new BatchJobFileUploadThread(serviceInterface,
-					this, inputFile, i, executor);
+					this, inputFile, i, executor, exceptions);
 			Future<?> f = executor.submit(thread);
 			// so the gridftp servers don't get hit at exactly the same time, to
 			// distribute the load

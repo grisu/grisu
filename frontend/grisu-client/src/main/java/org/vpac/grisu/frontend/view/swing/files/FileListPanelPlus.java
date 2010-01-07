@@ -23,7 +23,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class FileListPanelPlus extends JPanel implements FileListPanel,
-		FileListListener {
+FileListListener {
 
 	private JComboBox comboBox;
 	private FileListPanelSimple fileListPanel;
@@ -49,24 +49,15 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 	/**
 	 * Create the panel.
 	 */
-	public FileListPanelPlus(ServiceInterface si, String rootUrl,
-			String startUrl, boolean displaySize, boolean displayTimestamp) {
+	public FileListPanelPlus(ServiceInterface si,  String startUrl, boolean displaySize, boolean displayTimestamp) {
 		this.displaySize = displaySize;
 		this.displayTimeStamp = displayTimestamp;
 		this.serviceInterface = si;
 		this.em = GrisuRegistryManager.getDefault(serviceInterface)
-				.getUserEnvironmentManager();
+		.getUserEnvironmentManager();
 		this.fsm = FileSystemsManager.getDefault(si);
 
 		allFileSystems = this.fsm.getAllFileSystems();
-
-		// Add seperators
-		allFileSystems.add(new FileSystemItem(FileSystemItem.Type.LOCAL,
-				" -- Local -- "));
-		allFileSystems.add(new FileSystemItem(FileSystemItem.Type.BOOKMARK,
-				" -- Bookmarks -- "));
-		allFileSystems.add(new FileSystemItem(FileSystemItem.Type.REMOTE,
-				" -- Grid -- "));
 
 		sortedFileSystemsList = new SortedList<FileSystemItem>(allFileSystems,
 				new FileSystemItemComparator());
@@ -74,7 +65,7 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 		filesystemModel = new EventComboBoxModel<FileSystemItem>(
 				sortedFileSystemsList);
 
-		this.rootUrl = rootUrl;
+		//		this.rootUrl = rootUrl;
 		this.startUrl = startUrl;
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
@@ -85,15 +76,19 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 				RowSpec.decode("default:grow"),
 				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getComboBox(), "2, 2, fill, default");
-		add(getFileListPanel(), "2, 4, fill, fill");
 
 		FileSystemItem item = em.getFileSystemForUrl(startUrl);
 		if (item != null) {
+			rootUrl = item.getRootFile().getUrl();
 			fireEvent = false;
 			getComboBox().setSelectedItem(item);
 			lastFileSystem = item;
 			fireEvent = true;
+		} else {
+			startUrl = null;
+			rootUrl = null;
 		}
+		add(getFileListPanel(), "2, 4, fill, fill");
 	}
 
 	public void addFileListListener(FileListListener l) {
@@ -118,7 +113,7 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 							try {
 								FileSystemItem fsi = (FileSystemItem) (filesystemModel
 										.getSelectedItem());
-								if (fsi.isDummy() && lastFileSystem != null) {
+								if (fsi.isDummy() && (lastFileSystem != null)) {
 									comboBox.setSelectedItem(lastFileSystem);
 									return;
 								}

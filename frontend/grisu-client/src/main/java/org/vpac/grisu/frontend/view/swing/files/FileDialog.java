@@ -25,7 +25,7 @@ public class FileDialog extends JDialog {
 			char[] password = args[1].toCharArray();
 
 			LoginParams loginParams = new LoginParams(
-			// "http://localhost:8080/grisu-ws/services/grisu",
+					// "http://localhost:8080/grisu-ws/services/grisu",
 					// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
 					// "http://localhost:8080/enunciate-backend/soap/GrisuService",
 					"Local",
@@ -59,7 +59,7 @@ public class FileDialog extends JDialog {
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new BorderLayout(0, 0));
 		{
-			FileListPanelPlus fileListPanel = new FileListPanelPlus(si, null,
+			FileListPanelPlus fileListPanel = new FileListPanelPlus(si,
 					null, true, true);
 			contentPanel.add(fileListPanel, BorderLayout.CENTER);
 		}

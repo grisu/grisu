@@ -7,6 +7,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.view.swing.jobmonitoring.single.JobDetailPanel;
+import org.vpac.grisu.frontend.view.swing.jobmonitoring.single.JobDetailPanelSmall;
 import org.vpac.grisu.frontend.view.swing.jobmonitoring.single.SingleJobSelectionListener;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -63,7 +64,7 @@ public class BatchJobPanel extends JPanel implements SingleJobSelectionListener 
 
 	private JobDetailPanel getJobDetailPanel() {
 		if (jobDetailPanel == null) {
-			jobDetailPanel = new JobDetailPanel(si);
+			jobDetailPanel = new JobDetailPanelSmall(si);
 		}
 		return jobDetailPanel;
 	}
@@ -80,7 +81,7 @@ public class BatchJobPanel extends JPanel implements SingleJobSelectionListener 
 		if (splitPane == null) {
 			splitPane = new JSplitPane();
 			splitPane.setLeftComponent(getSingleJobsGrid_1());
-			splitPane.setRightComponent(getJobDetailPanel());
+			splitPane.setRightComponent(getJobDetailPanel().getPanel());
 			splitPane.setDividerLocation(380 + splitPane.getInsets().left);
 
 		}

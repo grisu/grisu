@@ -21,6 +21,9 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 	 */
 	public GrisuMainPanel() {
 		setLayout(new BorderLayout(0, 0));
+
+		//		add(getGrisuNavigationPanel(), BorderLayout.WEST);
+		//		add(getGrisuCenterPanel(), BorderLayout.CENTER);
 	}
 
 	private GrisuCenterPanel getGrisuCenterPanel() {

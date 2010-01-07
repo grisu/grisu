@@ -4,6 +4,7 @@ import java.util.Set;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import org.vpac.grisu.model.files.GlazedFile;
 
@@ -47,7 +48,7 @@ public class FileDetailPanel extends JPanel implements FileListListener {
 
 	public void filesSelected(Set<GlazedFile> files) {
 
-		if (files == null || files.size() == 0 || files.size() > 1) {
+		if ((files == null) || (files.size() == 0) || (files.size() > 1)) {
 			setFile(null);
 		} else {
 			GlazedFile sel = files.iterator().next();
@@ -86,21 +87,26 @@ public class FileDetailPanel extends JPanel implements FileListListener {
 		setFile(null);
 	}
 
-	public void setFile(GlazedFile file) {
+	public void setFile(final GlazedFile file) {
 
-		if (file == null) {
-			getNameLabel().setText(null);
-			getSizeLabel().setText(null);
-			getTimestampLabel().setText(null);
-		} else {
-			getNameLabel().setText(NAME_PREFIX + file.getName());
-			getSizeLabel().setText(
-					SIZE_PREFIX
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				if (file == null) {
+					getNameLabel().setText(null);
+					getSizeLabel().setText(null);
+					getTimestampLabel().setText(null);
+				} else {
+					getNameLabel().setText(NAME_PREFIX + file.getName());
+					getSizeLabel().setText(
+							SIZE_PREFIX
 							+ GlazedFile.calculateSizeString(file.getSize()));
-			getTimestampLabel().setText(
-					DATE_PREFIX
+					getTimestampLabel().setText(
+							DATE_PREFIX
 							+ GlazedFile.calculateTimeStampString(file
 									.getLastModified()));
-		}
+				}
+			}
+		});
 	}
 }

@@ -12,31 +12,31 @@ import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.MountPoint;
-import org.vpac.grisu.model.dto.DtoFolder;
 
 public class FileListingTest {
 
 	public static void main(final String[] args) throws Exception {
 
+		Date start = new Date();
 		String username = args[0];
 		char[] password = args[1].toCharArray();
 
 		LoginParams loginParams = new LoginParams(
-		// "http://localhost:8080/xfire-backend/services/grisu",
+				// "http://localhost:8080/xfire-backend/services/grisu",
 				// "https://ngportal.vpac.org/grisu-ws/soap/EnunciateServiceInterfaceService",
 				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
 				"Local", username, password);
 
 		final ServiceInterface si = ServiceInterfaceFactory
-				.createInterface(loginParams);
+		.createInterface(loginParams);
 
 		final GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
 		final FileManager fileManager = registry.getFileManager();
 
-		DtoFolder folder = si
-				.ls(
-						"gsiftp://ng2.vpac.org/home/grid-admin/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner",
-						0);
+		//		DtoFolder folder = si
+		//		.ls(
+		//				"gsiftp://ng2.vpac.org/home/grid-admin/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner",
+		//				0);
 
 		// DtoMountPoints mps = si.df();
 		// for ( MountPoint mp : mps.getMountpoints() ) {
@@ -50,6 +50,7 @@ public class FileListingTest {
 
 		for (final MountPoint mp : si.df().getMountpoints()) {
 			Thread thread = new Thread() {
+				@Override
 				public void run() {
 					System.out.println("Deleting: " + mp.getRootUrl());
 					try {
@@ -66,6 +67,7 @@ public class FileListingTest {
 
 		executor1.awaitTermination(3600 * 48, TimeUnit.SECONDS);
 
+		System.out.println("Started: "+ start);
 		System.out.println("Finished: " + new Date().toString());
 
 	}

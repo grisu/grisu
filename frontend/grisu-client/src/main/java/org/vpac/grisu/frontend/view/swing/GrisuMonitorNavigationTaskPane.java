@@ -40,7 +40,7 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements EventS
 		this.navPanel = navPanel;
 		this.displayAllJobsItem = displayAllJobsItem;
 		this.displayApplicationSpecificItems = displayApplicationSpecificItems;
-		setTitle("Monitor jobs");
+		setTitle("Running jobs");
 
 		if ( displayAllJobsItem ) {
 			addApplication(Constants.ALLJOBS_KEY);

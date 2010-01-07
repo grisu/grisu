@@ -1,7 +1,14 @@
 package org.vpac.grisu.model.files;
 
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.ServiceInterface;
@@ -12,13 +19,17 @@ import org.vpac.grisu.model.dto.DtoFile;
 import org.vpac.grisu.model.dto.DtoFolder;
 import org.vpac.grisu.model.dto.DtoRemoteObject;
 
-public class GlazedFile {
+public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
 	public enum Type implements Comparable<Type> {
 
 		FILETYPE_ROOT, FILETYPE_SITE, FILETYPE_MOUNTPOINT, FILETYPE_FOLDER, FILETYPE_FILE
 
 	}
+
+	public static final DataFlavor GLAZED_FILE_FLAVOR = new DataFlavor(GlazedFile.class, "Grisu file");
+
+	public static final DataFlavor[] DATA_FLAVORS = new DataFlavor[]{GLAZED_FILE_FLAVOR, DataFlavor.stringFlavor};
 
 	public static final String LOCAL_FILESYSTEM = "Local";
 
@@ -54,6 +65,15 @@ public class GlazedFile {
 			return date.toString();
 		}
 
+	}
+
+	public static Set<String> extractUrls(Set<GlazedFile> files) {
+
+		Set<String> temp = new HashSet<String>();
+		for ( GlazedFile source : files ) {
+			temp.add(source.getUrl());
+		}
+		return temp;
 	}
 
 	private final Type type;
@@ -167,17 +187,23 @@ public class GlazedFile {
 		this.lastModified = -1L;
 	}
 
+	public int compareTo(GlazedFile o) {
+
+		return this.getName().compareTo(o.getName());
+
+	}
+
 	@Override
 	public boolean equals(Object other) {
 
-		if (!(other instanceof GlazedFile)) {
-			return false;
+		if ( other instanceof GlazedFile ) {
+			String url = ((GlazedFile)other).getUrl();
+			return this.getUrl().equals(url);
 		}
-
-		GlazedFile o = (GlazedFile) other;
-		return this.getUrl().equals(o.getUrl());
+		return false;
 
 	}
+
 
 	public long getLastModified() {
 
@@ -208,6 +234,21 @@ public class GlazedFile {
 		return size;
 	}
 
+	public Object getTransferData(DataFlavor flavor)
+	throws UnsupportedFlavorException, IOException {
+
+		if ( DataFlavor.stringFlavor.equals(flavor) ) {
+			return getName();
+		}
+		throw new UnsupportedFlavorException(flavor);
+
+	}
+
+	public DataFlavor[] getTransferDataFlavors() {
+
+		return DATA_FLAVORS;
+	}
+
 	public Type getType() {
 
 		if (si != null) {
@@ -229,6 +270,17 @@ public class GlazedFile {
 	public int hashCode() {
 
 		return 23 * getUrl().hashCode();
+
+	}
+
+	public boolean isDataFlavorSupported(DataFlavor flavor) {
+
+		if ( Arrays.binarySearch(getTransferDataFlavors(), flavor) >= 0 ) {
+			return true;
+		} else {
+			return false;
+		}
+
 
 	}
 
