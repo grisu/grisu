@@ -1,13 +1,15 @@
 package org.vpac.grisu.frontend.view.swing.jobmonitoring.batch;
 
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 
 import javax.swing.JDialog;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.NoSuchJobException;
+import org.vpac.grisu.frontend.control.jobMonitoring.RunningJobManager;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
 
 public class BatchJobDialog extends JDialog {
@@ -23,19 +25,19 @@ public class BatchJobDialog extends JDialog {
 			e.printStackTrace();
 		}
 	}
-	public static BatchJobDialog open(ServiceInterface si, BatchJobObject bj) {
+	public static void open(final ServiceInterface si, final String batchJobName) throws NoSuchJobException{
 
-		final BatchJobDialog dialog = new BatchJobDialog(si, bj);
+		final BatchJobObject bj = RunningJobManager.getDefault(si).getBatchJob(batchJobName);
 
-		SwingUtilities.invokeLater(new Thread() {
+		EventQueue.invokeLater(new Runnable() {
 
-			@Override
 			public void run() {
+
+				final BatchJobDialog dialog = new BatchJobDialog(si, bj);
 				dialog.setVisible(true);
 			}
 		});
 
-		return dialog;
 	}
 
 	private final ServiceInterface si;

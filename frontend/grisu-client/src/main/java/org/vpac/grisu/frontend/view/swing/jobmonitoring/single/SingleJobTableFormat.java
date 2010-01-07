@@ -90,14 +90,31 @@ public class SingleJobTableFormat implements AdvancedTableFormat<JobObject> {
 		case 0:
 			return baseObject;
 		case 1:
-			return baseObject.getJobProperty(Constants.APPLICATIONNAME_KEY);
+			try {
+				return baseObject.getJobProperty(Constants.APPLICATIONNAME_KEY);
+			} catch (IllegalStateException e) {
+				return "n/a";
+			}
 		case 2:
-			return baseObject.getJobProperty(Constants.SUBMISSION_SITE_KEY);
+			try {
+				return baseObject.getJobProperty(Constants.SUBMISSION_SITE_KEY);
+			} catch (IllegalStateException e) {
+				return "n/a";
+			}
 		case 3:
-			return baseObject.getJobProperty(Constants.QUEUE_KEY);
+			try {
+				return baseObject.getJobProperty(Constants.QUEUE_KEY);
+			} catch (IllegalStateException e) {
+				return "n/a";
+			}
 		case 4:
-			String time = baseObject
-			.getJobProperty(Constants.SUBMISSION_TIME_KEY);
+			String time = null;
+			try {
+				time = baseObject
+				.getJobProperty(Constants.SUBMISSION_TIME_KEY);
+			} catch (IllegalStateException e) {
+				return null;
+			}
 			if (StringUtils.isBlank(time)) {
 				return null;
 			}
@@ -107,7 +124,12 @@ public class SingleJobTableFormat implements AdvancedTableFormat<JobObject> {
 				return null;
 			}
 		case 5:
-			return baseObject.getJobProperty(Constants.FQAN_KEY);
+			try {
+				return baseObject.getJobProperty(Constants.FQAN_KEY);
+			} catch (IllegalStateException e) {
+				return "n/a";
+			}
+
 		case 6:
 			return baseObject.getStatusString(false);
 		}
