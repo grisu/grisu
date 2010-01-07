@@ -11,6 +11,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.vpac.grisu.control.ServiceInterface;
@@ -112,17 +113,22 @@ FileListListener {
 
 	}
 
-	public void fileDoubleClicked(GlazedFile file) {
+	public void fileDoubleClicked(final GlazedFile file) {
 
-		if ( useSplitPane ) {
-			getComboBox().setSelectedItem(PREVIEW);
-		} else {
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				if ( useSplitPane ) {
+					getComboBox().setSelectedItem(PREVIEW);
+				} else {
 
-			FilePreviewDialog dialog = new FilePreviewDialog(si);
-			dialog.setFile(file, null);
-			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-			dialog.setVisible(true);
-		}
+					FilePreviewDialog dialog = new FilePreviewDialog(si);
+					dialog.setFile(file, null);
+					dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+					dialog.setVisible(true);
+				}
+			}
+		});
 	}
 
 	public void filesSelected(Set<GlazedFile> files) {
