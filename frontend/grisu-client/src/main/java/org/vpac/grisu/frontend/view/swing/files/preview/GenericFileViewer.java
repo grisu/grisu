@@ -12,6 +12,7 @@ import javax.swing.SwingUtilities;
 import net.sf.jmimemagic.Magic;
 import net.sf.jmimemagic.MagicMatch;
 
+import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
@@ -21,7 +22,7 @@ import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.files.GlazedFile;
 
 public class GenericFileViewer extends JPanel implements FileViewer,
-		FileListListener {
+FileListListener {
 
 	private static Set<String> viewers = null;
 
@@ -36,11 +37,12 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 			e.printStackTrace();
 		}
 
-		for (String f : findViewers()) {
+		Set<String> viewers = findViewers();
+		System.out.println("Found viewers: "+StringUtils.join(viewers, ","));
+		for (String f : viewers) {
 
 			try {
-				FileViewer viewerClass = (FileViewer) (Class.forName(f)
-						.newInstance());
+				FileViewer viewerClass = (FileViewer) (Class.forName(f)	.newInstance());
 
 				for (String t : viewerClass.getSupportedMimeTypes()) {
 					if (match.getMimeType().contains(t)) {
@@ -52,6 +54,22 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 			}
 
 		}
+
+		//		// if null, try known ones
+		//		FileViewer viewer = new PlainTextFileViewer();
+		//		for (String t : viewer.getSupportedMimeTypes()) {
+		//			if (match.getMimeType().contains(t)) {
+		//				return viewer;
+		//			}
+		//		}
+
+		//		viewer = new ImageFileViewer();
+		//		for (String t : viewer.getSupportedMimeTypes()) {
+		//			if (match.getMimeType().contains(t)) {
+		//				return viewer;
+		//			}
+		//		}
+
 		return null;
 	}
 
@@ -84,8 +102,8 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 						try {
 							// Try to create an instance of the object
 							Object o = Class
-									.forName(pckgname + "." + classname)
-									.newInstance();
+							.forName(pckgname + "." + classname)
+							.newInstance();
 							if (o instanceof FileViewer) {
 								viewers.add(pckgname + "." + classname);
 							}
@@ -101,6 +119,12 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 					}
 				}
 			}
+		}
+
+		if ( (viewers == null) || (viewers.size() == 0) ) {
+			viewers = new HashSet<String>();
+			viewers.add("org.vpac.grisu.frontend.view.swing.files.preview.fileViewers.PlainTextFileViewer");
+			viewers.add("org.vpac.grisu.frontend.view.swing.files.preview.fileViewers.ImageFileViewer");
 		}
 		return viewers;
 	}
@@ -166,7 +190,7 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 
 		setEmptyPanel();
 		currentGlazedFile = file;
-		if (localCacheFile != null && localCacheFile.exists()) {
+		if ((localCacheFile != null) && localCacheFile.exists()) {
 			currentLocalCacheFile = localCacheFile;
 		} else {
 			try {
@@ -190,7 +214,7 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 		}
 
 		if (!currentLocalCacheFile.exists()
-				|| currentLocalCacheFile.length() == 0L) {
+				|| (currentLocalCacheFile.length() == 0L)) {
 			System.out.println("File empty...");
 			return;
 		}
