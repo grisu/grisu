@@ -259,6 +259,7 @@ public class JobDetailPanelDefault extends JPanel implements PropertyChangeListe
 
 		this.job = job;
 
+		this.job.addPropertyChangeListener(this);
 		getStatusRefreshButton().setEnabled(true);
 		getJobnameTextField().setText(job.getJobname());
 		getSubmittedTextField().setText(job.getJobProperty(Constants.SUBMISSION_TIME_KEY));

@@ -12,7 +12,6 @@ import javax.swing.SwingUtilities;
 import net.sf.jmimemagic.Magic;
 import net.sf.jmimemagic.MagicMatch;
 
-import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
@@ -38,7 +37,6 @@ FileListListener {
 		}
 
 		Set<String> viewers = findViewers();
-		System.out.println("Found viewers: "+StringUtils.join(viewers, ","));
 		for (String f : viewers) {
 
 			try {
