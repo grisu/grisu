@@ -55,13 +55,6 @@
 			<type>jar</type>
 		</dependency>
 		<dependency>
-			<groupId>com.jgoodies</groupId>
-			<artifactId>forms</artifactId>
-			<version>1.2.1</version>
-			<type>jar</type>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>au.org.arcs.auth</groupId>
 			<artifactId>arcs-gsi</artifactId>
 			<version>1.2-SNAPSHOT</version>
@@ -71,6 +64,26 @@
 			<groupId>bouncycastle</groupId>
 			<artifactId>bcprov-jdk15</artifactId>
 			<version>140</version>
+			<type>jar</type>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.vpac.grisu</groupId>
+			<artifactId>grisu-core</artifactId>
+			<version>0.3-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>jmimemagic</groupId>
+			<artifactId>jmimemagic</artifactId>
+			<version>0.1.2</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.jgoodies</groupId>
+			<artifactId>forms</artifactId>
+			<version>1.2.1</version>
 			<type>jar</type>
 			<scope>provided</scope>
 		</dependency>
@@ -89,33 +102,11 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.vpac.grisu</groupId>
-			<artifactId>grisu-core</artifactId>
-			<version>0.3-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>furbelow</groupId>
 			<artifactId>furbelow</artifactId>
 			<version>1.0</version>
+			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>jmimemagic</groupId>
-			<artifactId>jmimemagic</artifactId>
-			<version>0.1.2</version>
-			<type>jar</type>
-			<scope>compile</scope>
-		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>external.swing</groupId>-->
-<!--			<artifactId>k5naccordion</artifactId>-->
-<!--			<version>1.0.0</version>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!-- 			<groupId>external.swing</groupId>-->
-<!--  			<artifactId>l2fprod-common-all</artifactId>-->
-<!--  			<version>7.3</version>-->
-<!--		</dependency>-->
 	</dependencies>
 
 	<build>

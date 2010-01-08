@@ -13,7 +13,7 @@ import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.info.ApplicationInformation;
 
-public class JobSubmissionNew {
+public class JobSubmissionWithDialog {
 
 	public static void main(final String[] args) throws Exception {
 
@@ -39,6 +39,8 @@ public class JobSubmissionNew {
 		Set<String> submissionLocations = javaInfo
 		.getAvailableSubmissionLocationsForFqan("/ARCS/NGAdmin");
 
+		//		JobListDialog.open(si, "generic");
+
 		// final JobStatusChangeListener jsl = new JobSubmissionNew();
 		int i = 0;
 		for (final String subLoc : submissionLocations) {
@@ -53,7 +55,7 @@ public class JobSubmissionNew {
 							+ UUID.randomUUID());
 					jo.setApplication("generic");
 					// jo.setModules(new String[]{"java"});
-					jo.setCommandline("sleep 50");
+					jo.setCommandline("sleep 120");
 					jo.setSubmissionLocation(subLoc);
 					jo.setWalltimeInSeconds(60);
 					// jo.addInputFileUrl("/home/markus/src/grisu/backend/grisu-core/sample input files/JavaTestJob.jar");

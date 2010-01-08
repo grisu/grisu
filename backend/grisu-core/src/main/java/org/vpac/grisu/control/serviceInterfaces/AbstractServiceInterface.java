@@ -2830,6 +2830,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		List<GridResource> matchingResources = null;
 
 		String submissionLocation = null;
+		String[] stagingFileSystems = null;
 
 		// check whether application is "generic". If that is the case, just
 		// check
@@ -2868,6 +2869,18 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						JobSubmissionProperty.SUBMISSIONLOCATION.toString()
 						+ ": "
 						+ "No submission location specified. Since application is of type \"generic\" Grisu can't auto-calculate one.");
+			}
+			stagingFileSystems = informationManager.getStagingFileSystemForSubmissionLocation(submissionLocation);
+
+			if ((stagingFileSystems == null) || (stagingFileSystems.length == 0)) {
+				myLogger
+				.error("No staging filesystem found for submissionlocation: "
+						+ submissionLocation);
+				throw new JobPropertiesException(
+						JobSubmissionProperty.SUBMISSIONLOCATION.toString()
+						+ ": "
+						+ "Could not find staging filesystem for submissionlocation "
+						+ submissionLocation);
 			}
 
 			// check whether submissionlocation is valid
@@ -2925,6 +2938,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				}
 
 				applicationCalculated = true;
+				JsdlHelpers.setApplicationName(jsdl, jobSubmissionObject.getApplication());
+				job.addJobProperty(Constants.APPLICATIONNAME_KEY, jobSubmissionObject.getApplication());
+				job.addJobProperty(Constants.APPLICATIONNAME_CALCULATED_KEY, "true");
 			} else {
 
 				myLogger.debug("Trying to find matching grid resources...");
@@ -2945,6 +2961,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				.debug("Submission location specified in jsdl: "
 						+ submissionLocation
 						+ ". Checking whether this is valid using mds information.");
+
+				stagingFileSystems = informationManager.getStagingFileSystemForSubmissionLocation(submissionLocation);
+				if ((stagingFileSystems == null) || (stagingFileSystems.length == 0)) {
+					myLogger
+					.error("No staging filesystem found for submissionlocation: "
+							+ submissionLocation);
+					throw new JobPropertiesException(
+							JobSubmissionProperty.SUBMISSIONLOCATION.toString()
+							+ ": "
+							+ "Could not find staging filesystem for submissionlocation "
+							+ submissionLocation);
+				}
+
 				// check whether submission location is specified. If so, check
 				// whether it is in the list of matching resources
 				boolean submissionLocationIsValid = false;
@@ -2996,6 +3025,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 								JsdlHelpers.setApplicationVersion(jsdl,
 										versionsAvail.get(0));
+
+								job.addJobProperty(Constants.APPLICATIONVERSION_KEY, versionsAvail.get(0));
+								job.addJobProperty(Constants.APPLICATIONVERSION_CALCULATED_KEY, "true");
 								myLogger
 								.debug("Set version to be: "
 										+ resource
@@ -3053,11 +3085,23 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					myLogger
 					.debug("No version specified in jsdl document. Will use the first one for the best grid resource.");
 					for (GridResource resource : matchingResources) {
+
+						String temp = SubmissionLocationHelpers.createSubmissionLocationString(resource);
+						stagingFileSystems =informationManager.getStagingFileSystemForSubmissionLocation(temp);
+						if ((stagingFileSystems == null) || (stagingFileSystems.length == 0)) {
+							myLogger.debug("SubLoc: "+temp+" has no staging file system. Trying next one.");
+							continue;
+						}
+
 						if ((resource.getAvailableApplicationVersion() != null)
 								&& (resource.getAvailableApplicationVersion()
 										.size() > 0)) {
 							JsdlHelpers.setApplicationVersion(jsdl, resource
 									.getAvailableApplicationVersion().get(0));
+							job.addJobProperty(Constants.APPLICATIONVERSION_KEY, resource
+									.getAvailableApplicationVersion().get(0));
+							job.addJobProperty(Constants.APPLICATIONVERSION_CALCULATED_KEY, "true");
+
 							// jobSubmissionObject.setApplicationVersion(resource.getAvailableApplicationVersion().get(0));
 							submissionLocation = SubmissionLocationHelpers
 							.createSubmissionLocationString(resource);
@@ -3085,6 +3129,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							.getApplicationVersion()
 							+ " specified. Trying to find a matching grid resource...");
 					for (GridResource resource : matchingResources) {
+
+						String temp = SubmissionLocationHelpers.createSubmissionLocationString(resource);
+						stagingFileSystems =informationManager.getStagingFileSystemForSubmissionLocation(temp);
+						if ((stagingFileSystems == null) || (stagingFileSystems.length == 0)) {
+							myLogger.debug("SubLoc: "+temp+" has no staging file system. Trying next one.");
+							continue;
+						}
+
 						if (resource.getAvailableApplicationVersion().contains(
 								jobSubmissionObject.getApplicationVersion())) {
 							submissionLocation = SubmissionLocationHelpers
@@ -3116,6 +3168,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				try {
 					JsdlHelpers.setCandidateHosts(jsdl,
 							new String[] { submissionLocation });
+					job.addJobProperty(Constants.SUBMISSIONLOCATION_CALCULATED_KEY, "true");
 				} catch (RuntimeException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -3130,8 +3183,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		myLogger
 		.debug("Trying to find staging filesystem for subissionlocation: "
 				+ submissionLocation);
-		String[] stagingFileSystems = informationManager
-		.getStagingFileSystemForSubmissionLocation(submissionLocation);
 
 		if ((stagingFileSystems == null) || (stagingFileSystems.length == 0)) {
 			myLogger

@@ -1,10 +1,13 @@
 package org.vpac.grisu.model.job;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -532,6 +535,32 @@ public class JobSubmissionObjectImpl {
 
 	public void setSubmissionLocation(final String submissionLocation) {
 		this.submissionLocation = submissionLocation;
+	}
+
+	@Transient
+	public void setTimestampJobname(final String jobname) {
+		SimpleDateFormat format = new SimpleDateFormat();
+		setTimestampJobname(jobname, format);
+	}
+
+	@Transient
+	public void setTimestampJobname(final String jobname, SimpleDateFormat format) {
+		String newJobname = jobname+"_"+format.format(new Date());
+		newJobname = newJobname.replace(":", "_");
+		newJobname = newJobname.replace("\\", "_");
+		newJobname = newJobname.replace("/", "_");
+		newJobname = newJobname.replaceAll("\\s", "_");
+		setJobname(newJobname);
+
+	}
+
+	@Transient
+	public void setUniqueJobname(final String jobname) {
+		if ( StringUtils.isBlank(jobname) ) {
+			setJobname(jobname);
+		} else {
+			setJobname(jobname+"_"+UUID.randomUUID().toString());
+		}
 	}
 
 	public void setWalltimeInSeconds(final int walltime) {

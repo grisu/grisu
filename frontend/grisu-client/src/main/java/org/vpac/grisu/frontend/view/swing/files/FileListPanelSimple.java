@@ -586,23 +586,19 @@ public class FileListPanelSimple extends JPanel implements FileListPanel, EventS
 		// currentDirectory = null;
 		// currentFolder = null;
 
-		try {
-			SwingUtilities.invokeAndWait(new Thread() {
+		SwingUtilities.invokeLater(new Thread() {
 
-				@Override
-				public void run() {
-					currentDirectoryContent.getReadWriteLock().writeLock()
-					.lock();
-					currentDirectoryContent.clear();
-					currentDirectoryContent.getReadWriteLock().writeLock()
-					.unlock();
-					getTable().revalidate();
-				}
+			@Override
+			public void run() {
+				currentDirectoryContent.getReadWriteLock().writeLock()
+				.lock();
+				currentDirectoryContent.clear();
+				currentDirectoryContent.getReadWriteLock().writeLock()
+				.unlock();
+				getTable().revalidate();
+			}
 
-			});
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		});
 
 	}
 

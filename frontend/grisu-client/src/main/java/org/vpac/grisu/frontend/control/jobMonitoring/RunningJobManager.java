@@ -70,9 +70,12 @@ public class RunningJobManager {
 					}
 				}
 
-				updateTimer.schedule(new UpdateTimerTask(),
-						UPDATE_TIME_IN_SECONDS * 1000);
-
+				if ( ! stop ) {
+					updateTimer.schedule(new UpdateTimerTask(),
+							UPDATE_TIME_IN_SECONDS * 1000);
+				} else {
+					updateTimer.cancel();
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -158,6 +161,8 @@ public class RunningJobManager {
 
 	private final Timer updateTimer = new Timer();
 
+	private boolean stop = false;
+
 	public RunningJobManager(ServiceInterface si) {
 		this.si = si;
 		this.em = GrisuRegistryManager.getDefault(si)
@@ -228,8 +233,13 @@ public class RunningJobManager {
 
 			if (cachedAllSingleJobs.get(jobname) == null) {
 
-				JobObject temp = new JobObject(si, jobname, refreshOnBackend);
-				cachedAllSingleJobs.put(jobname, temp);
+				try {
+					JobObject temp = new JobObject(si, jobname, refreshOnBackend);
+					cachedAllSingleJobs.put(jobname, temp);
+				} catch (RuntimeException e) {
+					myLogger.error(e);
+					return null;
+				}
 
 			}
 
@@ -251,7 +261,10 @@ public class RunningJobManager {
 			for (String jobname : em.getCurrentJobnames(application, false)) {
 
 				try {
-					temp.add(getJob(jobname, false));
+					JobObject j= getJob(jobname, false);
+					if ( j != null ) {
+						temp.add(j);
+					}
 				} catch (NoSuchJobException e) {
 					throw new RuntimeException(e);
 				}
@@ -269,6 +282,12 @@ public class RunningJobManager {
 
 		updateTimer.schedule(new UpdateTimerTask(), 0);
 
+	}
+
+	public void stopUpdate() {
+
+		this.stop = true;
+		updateTimer.cancel();
 	}
 
 	/**

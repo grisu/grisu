@@ -74,9 +74,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 	private JMenuItem mntmKillSelectedJobs;
 	private JMenuItem mntmKillAndClean;
 
-	/**
-	 * Create the panel.
-	 */
+
 	public SimpleSingleJobsGrid(ServiceInterface si,
 			EventList<JobObject> jobList) {
 		this.si = si;
