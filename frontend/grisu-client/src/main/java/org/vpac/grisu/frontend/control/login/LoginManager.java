@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+
+import jline.ConsoleReader;
 
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
@@ -21,13 +24,47 @@ import org.vpac.security.light.CredentialHelpers;
 import org.vpac.security.light.control.CertificateFiles;
 import org.vpac.security.light.plainProxy.LocalProxy;
 
+import au.org.arcs.auth.shibboleth.CredentialManager;
+import au.org.arcs.auth.shibboleth.DummyCredentialManager;
+import au.org.arcs.auth.shibboleth.DummyIdpObject;
+import au.org.arcs.auth.shibboleth.IdpObject;
+import au.org.arcs.auth.shibboleth.Shibboleth;
+import au.org.arcs.auth.slcs.SLCS;
+import au.org.arcs.jcommons.configuration.CommonArcsProperties;
 import au.org.arcs.jcommons.constants.ArcsEnvironment;
 import au.org.arcs.jcommons.dependencies.ClasspathHacker;
 import au.org.arcs.jcommons.dependencies.Dependency;
 import au.org.arcs.jcommons.dependencies.DependencyManager;
 import au.org.arcs.jcommons.utils.ArcsSecurityProvider;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+
 public class LoginManager {
+
+	public enum Type {
+		SHIBBOLETH("Institutions login"),
+		MYPROXY("MyProxy login"),
+		LOCAL_PROXY("Local proxy login"),
+		X509_CERTIFICATE("Certificate login");
+
+		private final String prettyName;
+
+		private Type(String prettyName) {
+			this.prettyName = prettyName;
+		}
+
+		public String getPrettyName() {
+			return prettyName;
+		}
+	}
+
+	public enum UI {
+		COMMANDLINE,
+		SWING
+	}
+
+	private static ConsoleReader consoleReader;
 
 	public static boolean environmentInitialized = false;
 
@@ -35,21 +72,33 @@ public class LoginManager {
 			.getName());
 
 	static final Map<String, String> SERVICEALIASES = new HashMap<String, String>();
+
 	static {
 
+		SERVICEALIASES.put("LOCAL", "Local");
 		SERVICEALIASES.put("ARCS", "");
 		SERVICEALIASES.put("ARCS_DEV",
-				"https://ngportal.vpac.org/grisu-ws/soap/GrisuService");
+		"https://ngportal.vpac.org/grisu-ws/soap/GrisuService");
 		SERVICEALIASES.put("LOCAL_WS",
-				"http://localhost:8080/soap/GrisuService");
+		"http://localhost:8080/soap/GrisuService");
 
 	}
-
 	public static void addPluginsToClasspath() throws IOException {
 
 		ClasspathHacker.initFolder(Environment.getGrisuPluginDirectory(),
 				new GrisuPluginFilenameFilter());
 
+	}
+
+	private static ConsoleReader getConsoleReader() {
+		if ( consoleReader == null ) {
+			try {
+				consoleReader = new ConsoleReader();
+			} catch (IOException e) {
+				throw new RuntimeException();
+			}
+		}
+		return consoleReader;
 	}
 
 	public static void initEnvironment() {
@@ -59,8 +108,8 @@ public class LoginManager {
 			java.security.Security.addProvider(new ArcsSecurityProvider());
 
 			java.security.Security
-					.setProperty("ssl.TrustManagerFactory.algorithm",
-							"TrustAllCertificates");
+			.setProperty("ssl.TrustManagerFactory.algorithm",
+			"TrustAllCertificates");
 
 			Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
 
@@ -167,7 +216,7 @@ public class LoginManager {
 	public static ServiceInterface login(GlobusCredential cred,
 			char[] password, String username, String idp,
 			LoginParams loginParams, boolean saveCredentialAsLocalProxy)
-			throws LoginException {
+	throws LoginException {
 
 		initEnvironment();
 
@@ -256,7 +305,7 @@ public class LoginManager {
 						throw new LoginException("Could not login: "
 								+ e.getLocalizedMessage(), e);
 					}
-				} else if (password == null || password.length == 0) {
+				} else if ((password == null) || (password.length == 0)) {
 					// means certificate auth
 					try {
 						// means try to load local proxy
@@ -264,7 +313,7 @@ public class LoginManager {
 							return LoginHelpers.defaultLocalProxyLogin();
 						} else {
 							return LoginHelpers
-									.defaultLocalProxyLogin(loginParams);
+							.defaultLocalProxyLogin(loginParams);
 						}
 					} catch (Exception e) {
 						throw new LoginException("Could not login: "
@@ -386,10 +435,277 @@ public class LoginManager {
 				(String) null, url, false);
 	}
 
+	public static ServiceInterface login(UI ui, Set<Type> types, String url) throws LoginException {
+
+		switch (ui){
+		case COMMANDLINE: return loginCommandline(types, url);
+		case SWING: return loginSwing(types, url);
+		}
+
+		throw new IllegalArgumentException("Login type "+ui.toString()+" not supported.");
+	}
+
+	public static ServiceInterface loginCommandline() throws LoginException {
+		return loginCommandline(SERVICEALIASES.get("LOCAL"));
+	}
+
+	public static ServiceInterface loginCommandline(Set<Type> types, String url) throws LoginException {
+
+		if ( (types == null) || (types.size() == 0) ) {
+
+			throw new IllegalArgumentException("No login type specified.");
+		}
+
+		if ( types.size() == 1 ) {
+			return loginCommandline(types.iterator().next(), url);
+		}
+
+		ImmutableList<Type> temp = ImmutableList.copyOf(types);
+
+		StringBuffer message = new StringBuffer("Please select your preferred login method:\n\n");
+
+		for ( int i=0; i<temp.size(); i++ ) {
+			message.append("["+(i+1)+"]\t"+temp.get(i).getPrettyName()+"\n");
+		}
+		message.append("\n[0]\tExit\n\n");
+
+		System.out.println(message.toString());
+
+		int choice = -1;
+		while ( (choice < 0) || (choice >= temp.size()) ) {
+			String input;
+			try {
+				input = getConsoleReader().readLine("Login method: ");
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+
+			try {
+				choice = Integer.parseInt(input);
+			} catch ( Exception e) {
+				continue;
+			}
+		}
+
+
+		if ( choice == 0 ) {
+			System.exit(0);
+		}
+
+		return loginCommandline(temp.get(choice-1), url);
+
+	}
+
+	public static ServiceInterface loginCommandline(String url) throws LoginException {
+
+		if ( LocalProxy.validGridProxyExists() ) {
+			return LoginManager.login(url);
+		} else {
+			ImmutableSet<Type> temp = ImmutableSet.of(Type.SHIBBOLETH, Type.MYPROXY, Type.X509_CERTIFICATE);
+			return loginCommandline(temp, url);
+		}
+
+	}
+
+
+	public static ServiceInterface loginCommandline(Type type, String url) throws LoginException {
+
+		switch (type) {
+		case SHIBBOLETH: return loginCommandlineShibboleth(url);
+		case MYPROXY: return loginCommandlineMyProxy(url);
+		case LOCAL_PROXY: return LoginManager.login(url);
+		case X509_CERTIFICATE: return loginCommandlineX509cert(url);
+		}
+		throw new IllegalArgumentException("Login type not supported.");
+
+	}
+
+	public static ServiceInterface loginCommandlineMyProxy(String url)  {
+
+		while ( true ) {
+			try {
+
+				StringBuffer prompt = new StringBuffer("Please enter your myproxy username");
+				String lastMyProxyUsername = CommonArcsProperties.getDefault().getLastMyProxyUsername();
+
+				if ( StringUtils.isNotBlank(lastMyProxyUsername) ) {
+					prompt.append(" ["+lastMyProxyUsername+"]: ");
+				} else {
+					prompt.append(": ");
+				}
+
+				String username = null;
+				while ( StringUtils.isBlank(username) ) {
+					try {
+						username = getConsoleReader().readLine(prompt.toString());
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+
+					if ( StringUtils.isNotBlank(lastMyProxyUsername) && StringUtils.isBlank(username) ) {
+						username = lastMyProxyUsername;
+					}
+				}
+
+				CommonArcsProperties.getDefault().setLastMyProxyUsername(username);
+
+				String password = null;
+				while ( StringUtils.isBlank(password) ) {
+					try {
+						password = getConsoleReader().readLine(new Character('*'));
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+
+				return LoginManager.myProxyLogin(url, username, password.toCharArray());
+
+			} catch (LoginException e) {
+				System.out.println("Login failed: "+e.getLocalizedMessage());
+			}
+		}
+
+	}
+
+	public static ServiceInterface loginCommandlineShibboleth(String url) {
+
+		while (true) {
+			try {
+
+				initEnvironment();
+
+				System.out.println("Loading list of institutions...");
+
+				StringBuffer prompt = new StringBuffer("Please select your institution");
+				String lastIdp = CommonArcsProperties.getDefault().getLastShibIdp();
+
+				IdpObject idpObj = new DummyIdpObject();
+				CredentialManager cm = new DummyCredentialManager();
+
+				Shibboleth shib = new Shibboleth(idpObj, cm);
+				shib.openurl(SLCS.DEFAULT_SLCS_URL);
+
+				ImmutableList<String> idps = ImmutableList.copyOf(idpObj.getIdps());
+				int defaultChoice = -1;
+
+				for ( int i=0; i<idps.size(); i++) {
+					System.out.println("["+(i+1)+"]\t"+idps.get(i));
+
+					if ( StringUtils.isNotBlank(lastIdp) && idps.get(i).equals(lastIdp)) {
+						defaultChoice = i+1;
+					}
+				}
+				System.out.println("\n[0]\tExit");
+
+				if ( defaultChoice < 0 ) {
+					prompt.append(": ");
+				} else {
+					prompt.append(" ["+defaultChoice+"] ");
+				}
+
+				String idpchoice = null;
+				int choice = -1;
+				while ( choice < 0 ) {
+					try {
+						idpchoice = getConsoleReader().readLine(prompt.toString());
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+
+					if ( (defaultChoice >= 0) && StringUtils.isBlank(idpchoice) ) {
+						idpchoice = new Integer(defaultChoice).toString();
+					}
+
+					try {
+						choice = Integer.parseInt(idpchoice);
+					} catch (Exception e) {
+						continue;
+					}
+				}
+
+
+
+				if ( choice == 0 ) {
+					System.exit(0);
+				}
+
+				idpchoice = idps.get(choice-1);
+
+				CommonArcsProperties.getDefault().setLastShibIdp(idpchoice);
+
+				prompt = new StringBuffer("Please enter your institution username");
+				String lastShibUsername = CommonArcsProperties.getDefault().getLastShibUsername();
+
+				if ( StringUtils.isNotBlank(lastShibUsername) ) {
+					prompt.append(" ["+lastShibUsername+"]: ");
+				} else {
+					prompt.append(": ");
+				}
+
+				String username = null;
+				while ( StringUtils.isBlank(username) ) {
+					try {
+						username = getConsoleReader().readLine(prompt.toString());
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+
+					if ( StringUtils.isNotBlank(lastShibUsername) && StringUtils.isBlank(username) ) {
+						username = lastShibUsername;
+					}
+				}
+
+				CommonArcsProperties.getDefault().setLastShibUsername(username);
+
+				String password = null;
+				while ( StringUtils.isBlank(password) ) {
+					try {
+						password = getConsoleReader().readLine("Please enter your institution password: ", new Character('*'));
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+
+				return LoginManager.shiblogin(username, password.toCharArray(), idpchoice, url, true);
+			} catch (LoginException e) {
+				System.out.println("Login failed: "+e.getLocalizedMessage());
+			}
+		}
+
+	}
+
+	public static ServiceInterface loginCommandlineX509cert(String url) {
+
+		while ( true ) {
+			try {
+
+
+				String password = null;
+				while ( StringUtils.isBlank(password) ) {
+					try {
+						password = getConsoleReader().readLine("Please enter your x509 certificate passphrase: ", new Character('*'));
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+
+				return LoginManager.login(null, password.toCharArray(), null, null, true);
+			} catch (LoginException e) {
+				System.out.println("Login exception: "+e.getLocalizedMessage());
+			}
+		}
+
+	}
+
+	public static ServiceInterface loginSwing(Set<Type> types, String url) {
+		throw new RuntimeException("Not supported yet.");
+	}
+
+
 	public static void main(String[] args) throws LoginException {
 
 		ServiceInterface si = LoginManager.shiblogin("markus", args[0]
-				.toCharArray(), "VPAC", true);
+		                                                            .toCharArray(), "VPAC", true);
 
 	}
 
@@ -421,7 +737,7 @@ public class LoginManager {
 	 */
 	public static ServiceInterface shiblogin(String username, char[] password,
 			String idp, boolean saveCredendentialsToLocalProxy)
-			throws LoginException {
+	throws LoginException {
 		return login((GlobusCredential) null, password, username, idp, "Local",
 				saveCredendentialsToLocalProxy);
 	}
@@ -448,7 +764,7 @@ public class LoginManager {
 	 */
 	public static ServiceInterface shiblogin(String username, char[] password,
 			String idp, String url, boolean saveCredendentialsToLocalProxy)
-			throws LoginException {
+	throws LoginException {
 		return login((GlobusCredential) null, password, username, idp, url,
 				saveCredendentialsToLocalProxy);
 	}

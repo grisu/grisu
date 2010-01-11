@@ -9,7 +9,7 @@ public class SimpleJobSubmission {
 
 	public static void main(String[] args) throws Exception {
 
-		ServiceInterface si = LoginManager.login();
+		ServiceInterface si = LoginManager.loginCommandline();
 
 		//GrisuRegistry registry = GrisuRegistryManager.getDefault si);
 
