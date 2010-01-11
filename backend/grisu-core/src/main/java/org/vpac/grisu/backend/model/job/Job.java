@@ -19,8 +19,13 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.CollectionOfElements;
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementMap;
+import org.simpleframework.xml.Root;
 import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
@@ -37,6 +42,7 @@ import au.org.arcs.jcommons.utils.JsdlHelpers;
  */
 @Entity
 @Table(name = "jobs")
+@Root
 public class Job implements Comparable<Job> {
 
 	static final Logger myLogger = Logger.getLogger(Job.class.getName());
@@ -45,50 +51,60 @@ public class Job implements Comparable<Job> {
 	private Long id;
 
 	// for the user to remember the job
+	@Attribute
 	private String jobname = null;
 	// the jobhandle that comes back from the job submission
+	@Element
 	private String jobhandle = null;
 
 	// the user's dn
+	@Element
 	private String dn = null;
 
 	// the vo for which the job runs
+	@Element
 	private String fqan = null;
 
 	// the job description
 	private Document jobDescription = null;
+
+	@Element(data=true)
+	private String serializedJobDescription = null;
+
 	// this is the job description that was submitted to the gateway (probably a
 	// gt4 rsl document)
+	@Element(data=true)
 	private String submittedJobDescription = null;
 
-	// the submissionHost the job is gonna be/was submitted to
-	private String submissionHost = null;
-
 	// the status of the job
+	@Attribute
 	private int status = -1000;
 
 	// the credential that is/was used to submit the job
 	private ProxyCredential credential = null;
 
+	@Element
 	private String submissionType = null;
+
+	@Element
+	private boolean isArchived = false;
 
 	private Date lastStatusCheck = null;
 
+	@ElementMap(entry="property", key="key", attribute=true, inline=true)
 	private Map<String, String> jobProperties = Collections
-			.synchronizedMap(new HashMap<String, String>());
+	.synchronizedMap(new HashMap<String, String>());
 
+	@Attribute
 	private boolean isBatchJob = false;
 
+	@ElementMap(entry="jobProperty", key="key", attribute=true, inline=true)
 	private Map<Long, String> logMessages = Collections
-			.synchronizedMap(new TreeMap<Long, String>());
+	.synchronizedMap(new TreeMap<Long, String>());
 
 	// for hibernate
 	public Job() {
 	}
-
-	//
-	// TODO later add requirements
-	// private ArrayList<Requirement> requirements = null;
 
 	/**
 	 * Creates a Job and associates a jsdl document with it straight away. It
@@ -109,7 +125,7 @@ public class Job implements Comparable<Job> {
 	 *             if the job description does not contain a jobname
 	 */
 	public Job(final String dn, final Document jsdl) throws SAXException,
-			XPathExpressionException {
+	XPathExpressionException {
 		this.dn = dn;
 		// if ( ! JsdlHelpers.validateJSDL(jobDescription) ) throw new
 		// SAXException("Job description not a valid jsdl document");
@@ -124,6 +140,10 @@ public class Job implements Comparable<Job> {
 		}
 		// TODO change the jobname in the jobDescription
 	}
+
+	//
+	// TODO later add requirements
+	// private ArrayList<Requirement> requirements = null;
 
 	/**
 	 * If you use this constructor save the Job object straight away to prevent
@@ -178,6 +198,7 @@ public class Job implements Comparable<Job> {
 		}
 	}
 
+	@Override
 	public boolean equals(final Object other) {
 		if (!(other instanceof Job)) {
 			return false;
@@ -237,7 +258,10 @@ public class Job implements Comparable<Job> {
 	 */
 	@Transient
 	public Document getJobDescription() {
-		// TODO return jobDescription;
+		// for serialized/archived version
+		if ( (this.jobDescription == null) && StringUtils.isNotBlank(serializedJobDescription) ) {
+			this.jobDescription = SeveralXMLHelpers.fromString(serializedJobDescription);
+		}
 		return this.jobDescription;
 	}
 
@@ -249,6 +273,21 @@ public class Job implements Comparable<Job> {
 	 */
 	public String getJobhandle() {
 		return jobhandle;
+	}
+
+	/**
+	 * Gets the (along with the users' dn unique) name of the job.
+	 * 
+	 * @return the jobname
+	 */
+	@Column(nullable = false)
+	public String getJobname() {
+		return jobname;
+	}
+
+	@CollectionOfElements(fetch = FetchType.EAGER)
+	public synchronized Map<String, String> getJobProperties() {
+		return jobProperties;
 	}
 
 	// /**
@@ -270,21 +309,6 @@ public class Job implements Comparable<Job> {
 	// this.submissionHost = host;
 	// }
 
-	/**
-	 * Gets the (along with the users' dn unique) name of the job.
-	 * 
-	 * @return the jobname
-	 */
-	@Column(nullable = false)
-	public String getJobname() {
-		return jobname;
-	}
-
-	@CollectionOfElements(fetch = FetchType.EAGER)
-	public synchronized Map<String, String> getJobProperties() {
-		return jobProperties;
-	}
-
 	@Transient
 	public String getJobProperty(final String key) {
 		return this.jobProperties.get(key);
@@ -299,7 +323,6 @@ public class Job implements Comparable<Job> {
 	 */
 	@Column(length = 15000)
 	private String getJsdl() throws TransformerException {
-
 		return SeveralXMLHelpers.toString(jobDescription);
 	}
 
@@ -348,12 +371,22 @@ public class Job implements Comparable<Job> {
 		return submittedJobDescription;
 	}
 
+	@Override
 	public int hashCode() {
 		return this.dn.hashCode() + this.jobname.hashCode();
 	}
 
+	@Transient
+	public boolean isArchived() {
+		return isArchived;
+	}
+
 	public boolean isBatchJob() {
 		return isBatchJob;
+	}
+
+	public void setArchived(boolean archived) {
+		this.isArchived = archived;
 	}
 
 	public void setBatchJob(boolean is) {
@@ -405,6 +438,7 @@ public class Job implements Comparable<Job> {
 	 */
 	public void setJobDescription(final Document jobDescription) {
 		this.jobDescription = jobDescription;
+		this.serializedJobDescription = SeveralXMLHelpers.toString(jobDescription);
 	}
 
 	/**
@@ -496,18 +530,19 @@ public class Job implements Comparable<Job> {
 	 */
 	private void setJsdl(final String jsdl_string) throws Exception {
 
-		if (jsdl_string == null
+		if ((jsdl_string == null)
 				|| jsdl_string
-						.equals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")) {
+				.equals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")) {
 			return;
 		}
 
 		try {
 			jobDescription = SeveralXMLHelpers.fromString(jsdl_string);
+			serializedJobDescription = jsdl_string;
 		} catch (Exception e) {
 			myLogger
-					.debug("Error saving jsdl for job. That's most probably ok. "
-							+ e.getMessage());
+			.debug("Error saving jsdl for job. That's most probably ok. "
+					+ e.getMessage());
 			// e.printStackTrace();
 			// TODO check what happens here
 		}

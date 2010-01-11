@@ -554,7 +554,7 @@ public class LoginManager {
 				String password = null;
 				while ( StringUtils.isBlank(password) ) {
 					try {
-						password = getConsoleReader().readLine(new Character('*'));
+						password = getConsoleReader().readLine("Please enter your myproxy password", new Character('*'));
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}

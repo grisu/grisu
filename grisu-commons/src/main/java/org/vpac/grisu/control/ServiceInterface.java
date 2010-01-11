@@ -38,6 +38,8 @@ import org.vpac.grisu.model.dto.DtoProperties;
 import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 
+import au.org.arcs.jcommons.constants.Constants;
+
 /**
  * This is the central interface of grisu. These are the methods the web service
  * provices for the clients to access. I tried to keep the number of methods as
@@ -102,6 +104,22 @@ public interface ServiceInterface {
 	@RolesAllowed("User")
 	String addJobToBatchJob(String batchjobname, String jobdescription)
 	throws NoSuchJobException, JobPropertiesException;
+
+	/**
+	 * Archives this job to the specified url and deletes it from the database.
+	 * 
+	 * If target is null, the user property {@link Constants#DEFAULT_ARCHIVE_LOCATION} is used.
+	 * 
+	 * @param jobname the jobname
+	 * @param target the url to archive the job to or null to use the (previously set) default archive location
+	 * @throws NoSuchJobException if no such job exists
+	 * @throws JobPropertiesException if the job is not finished yet
+	 * @throws RemoteFileSystemException if the archive location is not specified or there is some other kind of file related exception
+	 */
+	@POST
+	@Path("actions/archiveJob/{jobname}")
+	@RolesAllowed("User")
+	void archiveJob(@PathParam("jobname") String jobname, @QueryParam("target") String target) throws NoSuchJobException, JobPropertiesException, RemoteFileSystemException;
 
 	/**
 	 * Distributes a remote input file to all the filesystems that are used in

@@ -539,7 +539,7 @@ public class JobSubmissionObjectImpl {
 
 	@Transient
 	public void setTimestampJobname(final String jobname) {
-		SimpleDateFormat format = new SimpleDateFormat();
+		SimpleDateFormat format = new SimpleDateFormat("dd.MM.yy_HH.mm.SSS");
 		setTimestampJobname(jobname, format);
 	}
 

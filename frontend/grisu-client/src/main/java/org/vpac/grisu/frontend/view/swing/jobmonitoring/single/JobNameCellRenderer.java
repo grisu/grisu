@@ -25,7 +25,12 @@ TableCellRenderer {
 
 		JobObject j = (JobObject)value;
 
-		if ( j.isBeingCleaned() ) {
+		if ( j == null ) {
+			Component c = super.getTableCellRendererComponent(
+					table, value, isSelected, hasFocus, row, column);
+			c.setEnabled(false);
+			setText("n/a");
+		} else if ( j.isBeingCleaned() ) {
 			Component c = super.getTableCellRendererComponent(
 					table, value, isSelected, hasFocus, row, column);
 			c.setEnabled(false);

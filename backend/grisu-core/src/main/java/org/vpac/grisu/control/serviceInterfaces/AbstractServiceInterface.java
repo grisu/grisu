@@ -35,6 +35,8 @@ import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileType;
 import org.apache.commons.vfs.FileTypeSelector;
 import org.apache.log4j.Logger;
+import org.simpleframework.xml.Serializer;
+import org.simpleframework.xml.core.Persister;
 import org.vpac.grisu.backend.hibernate.BatchJobDAO;
 import org.vpac.grisu.backend.hibernate.JobDAO;
 import org.vpac.grisu.backend.hibernate.UserDAO;
@@ -59,6 +61,7 @@ import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.info.CachedMdsInformationManager;
+import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.dto.DtoApplicationDetails;
@@ -117,6 +120,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	private final boolean INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND = false;
 
+	public static String GRISU_JOB_FILE_NAME = ".grisujob";
+	public static String GRISU_BATCH_JOB_FILE_NAME = ".grisubatchjob";
+
 	static final Logger myLogger = Logger
 	.getLogger(AbstractServiceInterface.class.getName());
 
@@ -129,6 +135,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private final UserDAO userdao = new UserDAO();
 
 	protected JobDAO jobdao = new JobDAO();
+
+	private final File TEMPDIR = new File(System.getProperty("java.io.tmpdir"));
 
 	protected BatchJobDAO batchJobDao = new BatchJobDAO();
 
@@ -287,6 +295,82 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			batchJobDao.saveOrUpdate(mpj);
 		}
 	}
+
+	private void archiveBatchJob(BatchJob job, String target) throws NoSuchJobException {
+
+
+
+	}
+
+	public void archiveJob(String jobname, String target) throws NoSuchJobException, JobPropertiesException, RemoteFileSystemException {
+
+		if ((actionStatus.get(jobname) != null)
+				&& !actionStatus.get(jobname).isFinished()) {
+
+			myLogger
+			.debug("not archiving job because jobsubmission is still ongoing.");
+			throw new JobPropertiesException(
+			"Job (re-)submission is still ongoing in background.");
+
+		}
+
+		if ( StringUtils.isBlank(target) ) {
+
+			String defArcLoc = getUser().getUserProperties().get(Constants.DEFAULT_ARCHIVE_LOCATION);
+			if ( StringUtils.isBlank(defArcLoc) ) {
+				throw new RemoteFileSystemException("Archive location not specified.");
+			} else {
+				target = defArcLoc;
+			}
+
+		}
+
+		try {
+			BatchJob job = getMultiPartJobFromDatabase(jobname);
+			archiveBatchJob(job, target);
+			return;
+		} catch (NoSuchJobException e) {
+			Job job = getJobFromDatabase(jobname);
+			archiveSingleJob(job, target);
+			return;
+		}
+	}
+
+	private void archiveSingleJob(Job job, String target) throws NoSuchJobException, RemoteFileSystemException {
+
+		String jobdirUrl = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+		String targetDir = target + "/" + FileManager.getFilename(jobdirUrl);
+
+		RemoteFileTransferObject rftp = cpSingleFile(job.getJobProperty(Constants.JOBDIRECTORY_KEY), targetDir, false, true);
+
+		job.setArchived(true);
+
+		String grisuJobFileUrl = targetDir + "/" + GRISU_JOB_FILE_NAME;
+		FileObject grisujobFile = getUser().aquireFile(grisuJobFileUrl);
+		Serializer serializer = new Persister();
+
+		OutputStream fout = null;
+		try {
+			fout = grisujobFile.getContent().getOutputStream();
+			serializer.write(job, fout);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RemoteFileSystemException("Could not create .grisujob file.");
+		} finally {
+			try {
+				fout.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RemoteFileSystemException("Could not write .grisujob file.");
+			}
+		}
+
+		kill(job, true);
+
+	}
+
+
+
 
 	private String calculateJobname(Document jsdl, String jobnameCreationMethod)
 	throws JobPropertiesException {
@@ -2378,8 +2462,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return new_status;
 	}
 
-	private void kill(final Job job, final boolean clear)
-	throws BatchJobException {
+	private void kill(final Job job, final boolean clear) {
 
 		// Job job;
 		//
