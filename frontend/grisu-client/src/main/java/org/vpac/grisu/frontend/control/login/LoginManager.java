@@ -498,6 +498,8 @@ public class LoginManager {
 
 	public static ServiceInterface loginCommandline(String url) throws LoginException {
 
+		initEnvironment();
+
 		if ( LocalProxy.validGridProxyExists() ) {
 			return LoginManager.login(url);
 		} else {
