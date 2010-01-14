@@ -152,6 +152,18 @@
 								<descriptor>grisu-client-dependencies.assembly.xml</descriptor>
 							</descriptors>
 							<finalName>grisu</finalName>
+							<archive>
+
+								<index>true</index>
+								<manifest>
+									<mainClass>org.vpac.grisu.frontend.view.swing.GrisuApplicationWindow
+									</mainClass>
+								</manifest>
+								<manifestEntries>
+									<Class-Path>bcprov.jar bcprov-jdk15-143.jar local-backend.jar
+									</Class-Path>
+								</manifestEntries>
+							</archive>
 						</configuration>
 						<goals>
 							<goal>attached</goal>

@@ -203,8 +203,7 @@ FileListListener {
 	private FileListPanel getFileListPanelRight() {
 		if (fileListPanelRight == null) {
 			if (useFileListPanelPlus) {
-				fileListPanelRight = new FileListPanelPlus(si, startUrl,
-						true, false);
+				fileListPanelRight = new FileListPanelPlus(si, startUrl, true, false);
 			} else {
 				fileListPanelRight = new FileListPanelSimple(si, rootUrl, startUrl,
 						true, false);

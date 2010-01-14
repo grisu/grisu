@@ -68,10 +68,12 @@ public class FileManager {
 	public static String ensureUriFormat(String inputFile) {
 
 		try {
+			if ( (inputFile != null) && inputFile.startsWith("gsiftp:") ) {
+				return inputFile;
+			}
 			new URL(inputFile);
 			return inputFile;
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
 			File newFile = new File(inputFile);
 			return newFile.toURI().toString();
 		}

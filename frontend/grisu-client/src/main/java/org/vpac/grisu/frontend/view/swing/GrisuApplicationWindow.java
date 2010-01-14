@@ -64,7 +64,8 @@ public class GrisuApplicationWindow {
 		frame.getContentPane().setLayout(new BorderLayout());
 
 		GrisuMainPanel mainPanel = new GrisuMainPanel();
-		LoginPanel lp = new LoginPanel(mainPanel);
+		//		LoginPanel lp = new LoginPanel(mainPanel, true);
+		LoginPanel lp = new LoginPanel(mainPanel, false);
 		frame.getContentPane().add(lp, BorderLayout.CENTER);
 	}
 

@@ -111,7 +111,8 @@ public interface ServiceInterface {
 	 * If target is null, the user property {@link Constants#DEFAULT_ARCHIVE_LOCATION} is used.
 	 * 
 	 * @param jobname the jobname
-	 * @param target the url to archive the job to or null to use the (previously set) default archive location
+	 * @param target the url (of the parent dir) to archive the job to or null to use the (previously set) default archive location
+	 * @return the url of the target directory
 	 * @throws NoSuchJobException if no such job exists
 	 * @throws JobPropertiesException if the job is not finished yet
 	 * @throws RemoteFileSystemException if the archive location is not specified or there is some other kind of file related exception
@@ -119,7 +120,7 @@ public interface ServiceInterface {
 	@POST
 	@Path("actions/archiveJob/{jobname}")
 	@RolesAllowed("User")
-	void archiveJob(@PathParam("jobname") String jobname, @QueryParam("target") String target) throws NoSuchJobException, JobPropertiesException, RemoteFileSystemException;
+	String archiveJob(@PathParam("jobname") String jobname, @QueryParam("target") String target) throws NoSuchJobException, JobPropertiesException, RemoteFileSystemException;
 
 	/**
 	 * Distributes a remote input file to all the filesystems that are used in

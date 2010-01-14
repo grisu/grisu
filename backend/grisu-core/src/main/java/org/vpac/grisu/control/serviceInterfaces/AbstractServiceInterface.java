@@ -120,6 +120,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	private final boolean INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND = false;
 
+	public static final String REFRESH_STATUS_PREFIX = "REFRESH_";
+	public static final String ARCHIVE_STATUS_PREFIX = "ARCHIVE_";
+
 	public static String GRISU_JOB_FILE_NAME = ".grisujob";
 	public static String GRISU_BATCH_JOB_FILE_NAME = ".grisubatchjob";
 
@@ -135,8 +138,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private final UserDAO userdao = new UserDAO();
 
 	protected JobDAO jobdao = new JobDAO();
-
-	private final File TEMPDIR = new File(System.getProperty("java.io.tmpdir"));
 
 	protected BatchJobDAO batchJobDao = new BatchJobDAO();
 
@@ -296,13 +297,72 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 	}
 
-	private void archiveBatchJob(BatchJob job, String target) throws NoSuchJobException {
+	private void archiveBatchJob(final BatchJob batchJob, final String target) throws NoSuchJobException {
 
+		if ((actionStatus.get(batchJob.getBatchJobname()) != null)
+				&& !actionStatus.get(batchJob.getBatchJobname()).isFinished()) {
+			// this should not really happen
+			myLogger.error("Not archiving job because jobsubmission is still ongoing.");
+			return;
+		}
+
+		final DtoActionStatus status = new DtoActionStatus(ARCHIVE_STATUS_PREFIX + batchJob.getBatchJobname(), (batchJob.getJobs().size()*3)+3);
+		actionStatus.put(batchJob.getBatchJobname(), status);
+
+		Thread archiveThread = new Thread() {
+			@Override
+			public void run() {
+
+				status.addElement("Starting to archive batchjob "+batchJob.getBatchJobname());
+
+				final ExecutorService executor = Executors.newFixedThreadPool(ServerPropertiesManager
+						.getConcurrentFileTransfersPerUser());
+
+				for ( Job job : batchJob.getJobs() ) {
+					status.addElement("Creating job archive thread for job "+job.getJobname());
+					String jobdirUrl = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+					final String targetDir = target + "/" + FileManager.getFilename(jobdirUrl);
+
+					Thread archiveThread = archiveSingleJob(job, targetDir, status);
+					executor.execute(archiveThread);
+				}
+
+				executor.shutdown();
+
+				try {
+					executor.awaitTermination(24, TimeUnit.HOURS);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					status.setFailed(true);
+					status.setFinished(true);
+					status.addElement("Killing of sub-jobs interrupted: "+e.getLocalizedMessage());
+					return;
+				}
+
+				status.addElement("Killing batchjob.");
+				// now  kill batchjob
+				Thread deleteThread = deleteMultiPartJob(batchJob, true);
+
+				try {
+					deleteThread.join();
+					status.addElement("Batchjob killed.");
+				} catch (InterruptedException e) {
+					status.setFailed(true);
+					status.setFinished(true);
+					e.printStackTrace();
+					return;
+				}
+
+				status.setFinished(true);
+			}
+		};
+
+		archiveThread.start();
 
 
 	}
 
-	public void archiveJob(String jobname, String target) throws NoSuchJobException, JobPropertiesException, RemoteFileSystemException {
+	public String archiveJob(String jobname, String target) throws JobPropertiesException, NoSuchJobException, RemoteFileSystemException  {
 
 		if ((actionStatus.get(jobname) != null)
 				&& !actionStatus.get(jobname).isFinished()) {
@@ -311,7 +371,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			.debug("not archiving job because jobsubmission is still ongoing.");
 			throw new JobPropertiesException(
 			"Job (re-)submission is still ongoing in background.");
-
 		}
 
 		if ( StringUtils.isBlank(target) ) {
@@ -322,50 +381,141 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			} else {
 				target = defArcLoc;
 			}
-
 		}
 
 		try {
 			BatchJob job = getMultiPartJobFromDatabase(jobname);
-			archiveBatchJob(job, target);
-			return;
+			String jobdirUrl = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+
+			final String targetDir = target + "/" + FileManager.getFilename(jobdirUrl);
+
+			archiveBatchJob(job, targetDir);
+			return targetDir;
 		} catch (NoSuchJobException e) {
 			Job job = getJobFromDatabase(jobname);
-			archiveSingleJob(job, target);
-			return;
+
+			String jobdirUrl = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+			final String targetDir = target + "/" + FileManager.getFilename(jobdirUrl);
+
+			Thread archiveThread = archiveSingleJob(job, targetDir, null);
+			archiveThread.start();
+
+			return targetDir;
 		}
 	}
 
-	private void archiveSingleJob(Job job, String target) throws NoSuchJobException, RemoteFileSystemException {
+	private Thread archiveSingleJob(final Job job, final String targetDirUrl, final DtoActionStatus optionalBatchJobStatus) {
 
-		String jobdirUrl = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
-		String targetDir = target + "/" + FileManager.getFilename(jobdirUrl);
+		Thread archiveThread = new Thread() {
+			@Override
+			public void run() {
 
-		RemoteFileTransferObject rftp = cpSingleFile(job.getJobProperty(Constants.JOBDIRECTORY_KEY), targetDir, false, true);
+				if ( optionalBatchJobStatus != null ) {
+					optionalBatchJobStatus.addElement("Starting archiving of job: "+job.getJobname());
+				}
 
-		job.setArchived(true);
+				if ((actionStatus.get(job.getJobname()) != null)
+						&& !actionStatus.get(job.getJobname()).isFinished()) {
 
-		String grisuJobFileUrl = targetDir + "/" + GRISU_JOB_FILE_NAME;
-		FileObject grisujobFile = getUser().aquireFile(grisuJobFileUrl);
-		Serializer serializer = new Persister();
+					if ( optionalBatchJobStatus != null ) {
+						optionalBatchJobStatus.setFailed(true);
+						optionalBatchJobStatus.addElement("Cancelling archiving of job "+job.getJobname()+" because it seems to be still submitting.");
+					}
 
-		OutputStream fout = null;
-		try {
-			fout = grisujobFile.getContent().getOutputStream();
-			serializer.write(job, fout);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RemoteFileSystemException("Could not create .grisujob file.");
-		} finally {
-			try {
-				fout.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw new RemoteFileSystemException("Could not write .grisujob file.");
+					// this should not really happen
+					myLogger
+					.error("Not archiving job because jobsubmission is still ongoing.");
+					return;
+				}
+
+				final DtoActionStatus status = new DtoActionStatus(ARCHIVE_STATUS_PREFIX + job.getJobname(), 4);
+				actionStatus.put(job.getJobname(), status);
+
+				status.addElement("Transferring jobdirectory to: "+targetDirUrl);
+				RemoteFileTransferObject rftp = null;
+				try {
+					rftp = cpSingleFile(job.getJobProperty(Constants.JOBDIRECTORY_KEY), targetDirUrl, false, true, true);
+				} catch (RemoteFileSystemException e1) {
+					if ( optionalBatchJobStatus != null ) {
+						optionalBatchJobStatus.setFailed(true);
+						optionalBatchJobStatus.addElement("Failed archiving job "+job.getJobname()+": "+e1.getLocalizedMessage());
+					}
+					status.setFailed(true);
+					status.addElement("Transfer failed: "+e1.getLocalizedMessage());
+					status.setFinished(true);
+					return;
+				}
+
+				if ( (rftp != null) && rftp.isFailed() ) {
+					if ( optionalBatchJobStatus != null ) {
+						optionalBatchJobStatus.setFailed(true);
+						optionalBatchJobStatus.addElement("Failed archiving job "+job.getJobname());
+					}
+					status.setFailed(true);
+					String message = rftp.getPossibleExceptionMessage();
+					status.addElement("Transfer failed: "+ message);
+					status.setFinished(true);
+					return;
+				}
+
+				job.setArchived(true);
+				job.addJobProperty(Constants.JOBDIRECTORY_KEY, targetDirUrl);
+
+				status.addElement("Creating "+GRISU_JOB_FILE_NAME+" file.");
+
+				String grisuJobFileUrl = targetDirUrl + "/" + GRISU_JOB_FILE_NAME;
+				FileObject grisujobFile = null;;
+				try {
+					grisujobFile = getUser().aquireFile(grisuJobFileUrl);
+				} catch (RemoteFileSystemException e1) {
+					if ( optionalBatchJobStatus != null ) {
+						optionalBatchJobStatus.setFailed(true);
+						optionalBatchJobStatus.addElement("Failed archiving job "+job.getJobname()+": "+e1.getLocalizedMessage());
+					}
+					status.setFailed(true);
+					String message = rftp.getPossibleExceptionMessage();
+					status.addElement("Could not access grisufile url.");
+					status.setFinished(true);
+					return;
+				}
+				Serializer serializer = new Persister();
+
+				OutputStream fout = null;
+				try {
+					fout = grisujobFile.getContent().getOutputStream();
+					serializer.write(job, fout);
+				} catch (Exception e) {
+					if ( optionalBatchJobStatus != null ) {
+						optionalBatchJobStatus.setFailed(true);
+						optionalBatchJobStatus.addElement("Failed archiving job "+job.getJobname()+": "+e.getLocalizedMessage());
+					}
+					status.setFailed(true);
+					String message = rftp.getPossibleExceptionMessage();
+					status.addElement("Could not serialize job object.");
+					status.setFinished(true);
+					return;
+				} finally {
+					try {
+						fout.close();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+
+				status.addElement("Killing job.");
+				kill(job, true);
+
+				status.addElement("Job archived successfully.");
+				status.setFinished(true);
+				if ( optionalBatchJobStatus != null ) {
+					optionalBatchJobStatus.addElement("Successfully archived job: "+job.getJobname());
+				}
+
 			}
-		}
+		};
 
-		kill(job, true);
+
+		return archiveThread;
 
 	}
 
@@ -626,7 +776,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			+ "/" + filename;
 			myLogger.debug("Coping multipartjob inputfile " + filename
 					+ " to: " + targetUrl);
-			cpSingleFile(inputFile, targetUrl, true, true);
+			cpSingleFile(inputFile, targetUrl, true, true, true);
 
 		}
 
@@ -669,7 +819,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								+ source);
 						String filename = FileHelpers.getFilename(source);
 						RemoteFileTransferObject rto = cpSingleFile(source,
-								target + "/" + filename, overwrite, true);
+								target + "/" + filename, overwrite, true,  true);
 
 						if (rto.isFailed()) {
 							actionStat.addElement("Transfer failed: "
@@ -725,7 +875,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	// }
 
 	private RemoteFileTransferObject cpSingleFile(final String source,
-			final String target, final boolean overwrite,
+			final String target, final boolean overwrite, final boolean startFileTransfer,
 			final boolean waitForFileTransferToFinish)
 	throws RemoteFileSystemException {
 
@@ -754,7 +904,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				+ target_file.toString());
 		// fileTransfers.put(targetFileString, fileTransfer);
 
-		fileTransfer.startTransfer(waitForFileTransferToFinish);
+		if ( startFileTransfer ) {
+			fileTransfer.startTransfer(waitForFileTransferToFinish);
+		}
 
 		return fileTransfer;
 	}
@@ -990,7 +1142,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @param deleteChildJobsAsWell
 	 *            whether to delete the child jobs of this multipartjob as well.
 	 */
-	private void deleteMultiPartJob(final BatchJob multiJob, final boolean clean) {
+	private Thread deleteMultiPartJob(final BatchJob multiJob, final boolean clean) {
 
 		int size = multiJob.getJobs().size() * 2 + 1;
 
@@ -1102,6 +1254,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		cleanupThread.start();
 
+		return cleanupThread;
 	}
 
 	/*
@@ -3361,7 +3514,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			try {
 				// if old jobdir exists, try to move it here
 				cpSingleFile(oldJobDir, stagingFilesystemToUse
-						+ workingDirectory, true, true);
+						+ workingDirectory, true, true, true);
 
 				deleteFile(oldJobDir);
 			} catch (Exception e) {
@@ -3455,7 +3608,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public String refreshBatchJobStatus(String batchJobname)
 	throws NoSuchJobException {
 
-		String handle = "REFRESH_" + batchJobname;
+		String handle = REFRESH_STATUS_PREFIX + batchJobname;
 
 		DtoActionStatus status = actionStatus.get(handle);
 
@@ -3905,7 +4058,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				}
 				myLogger.debug("Staging file: " + sourceUrl + " to: "
 						+ targetUrl);
-				cpSingleFile(sourceUrl, targetUrl, true, true);
+				cpSingleFile(sourceUrl, targetUrl, true, true, true);
 				// job.addInputFile(targetUrl);
 			}
 			// }

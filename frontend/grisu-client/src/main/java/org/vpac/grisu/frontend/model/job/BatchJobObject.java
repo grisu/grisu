@@ -48,6 +48,8 @@ import au.org.arcs.jcommons.constants.Constants;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
+import com.google.common.collect.ImmutableList;
+
 /**
  * @author markus
  *
@@ -110,6 +112,8 @@ Comparable<BatchJobObject> {
 	private String submissionFqan;
 
 	private final EventList<JobObject> jobs = new BasicEventList<JobObject>();
+
+	private final List<JobObject> newlyAddedJobs = Collections.synchronizedList(new LinkedList<JobObject>());
 
 	private final Map<String, String> inputFiles = new HashMap<String, String>();
 
@@ -283,6 +287,7 @@ Comparable<BatchJobObject> {
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 				"Adding job " + job.getJobname()));
 		this.getJobs().add(job);
+		this.getNewlyAddedJobs().add(job);
 	}
 
 	/**
@@ -675,6 +680,12 @@ Comparable<BatchJobObject> {
 		return maxWalltimeInSecondsAcrossJobs;
 	}
 
+	private List<JobObject> getNewlyAddedJobs() {
+
+		return newlyAddedJobs;
+
+	}
+
 	/**
 	 * The number of failed jobs for this multipart job.
 	 * 
@@ -934,10 +945,10 @@ Comparable<BatchJobObject> {
 	public boolean isBatchJob() {
 		return true;
 	}
-
 	public boolean isBeingKilled() {
 		return isBeingKilled;
 	}
+
 	/**
 	 * Returns whether all jobs within this multipart job are finished (failed
 	 * or not).
@@ -1126,17 +1137,17 @@ Comparable<BatchJobObject> {
 
 		// TODO check whether any of the jobnames already exist
 
-		myLogger.debug("Creating " + getJobs().size()
+		myLogger.debug("Creating " + getNewlyAddedJobs().size()
 				+ " jobs as part of batchjob: " + batchJobname);
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this, "Creating "
-				+ getJobs().size() + " jobs"));
+				+ getNewlyAddedJobs().size() + " jobs"));
 		ExecutorService executor = Executors
 		.newFixedThreadPool(getConcurrentJobCreationThreads());
 
 		final Map<JobObject, Exception> failedSubmissions = Collections
 		.synchronizedMap(new HashMap<JobObject, Exception>());
 
-		for (final JobObject job : getJobs()) {
+		for (final JobObject job : ImmutableList.copyOf(getNewlyAddedJobs())) {
 
 			if (Thread.interrupted()) {
 				executor.shutdownNow();
@@ -1205,7 +1216,10 @@ Comparable<BatchJobObject> {
 					}
 					if (!success) {
 						failedSubmissions.put(job, lastException);
+					} else {
+						getNewlyAddedJobs().remove(job);
 					}
+
 
 				}
 			};
@@ -1221,10 +1235,10 @@ Comparable<BatchJobObject> {
 			executor.shutdownNow();
 			throw new InterruptedException("Interrupted while creating jobs...");
 		}
-		myLogger.debug("Finished creation of " + getJobs().size()
+		myLogger.debug("Finished creation of " + getNewlyAddedJobs().size()
 				+ " jobs as part of batchjob: " + batchJobname);
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-				"Finished creation of " + getJobs().size()
+				"Finished creation of " + getNewlyAddedJobs().size()
 				+ " jobs as part of batchjob: " + batchJobname));
 
 		if (failedSubmissions.size() > 0) {
@@ -1259,7 +1273,7 @@ Comparable<BatchJobObject> {
 					throw new RuntimeException(e);
 				}
 
-				for (JobObject job : getJobs()) {
+				for (JobObject job : getNewlyAddedJobs()) {
 					job.updateJobDirectory();
 				}
 
@@ -1344,10 +1358,6 @@ Comparable<BatchJobObject> {
 
 	}
 
-	public void removePropertyChangeListener(PropertyChangeListener listener) {
-		this.pcs.removePropertyChangeListener(listener);
-	}
-
 	//	/**
 	//	 * Restarts all jobs that failed using the provided
 	//	 * {@link FailedJobRestarter}.
@@ -1397,28 +1407,50 @@ Comparable<BatchJobObject> {
 	//
 	//	}
 
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
+		this.pcs.removePropertyChangeListener(listener);
+	}
+
 	/**
 	 * Wrapper method for the 2 most commonly used restart methods: Restarting failed jobs and restarting jobs that are still in the queue (on locations where no job is started yet).
 	 * 
 	 * @param restartFailedJobs restart jobs that failed (those jobs are moved to locations where jobs have successfully finished -- if possible)
 	 * @param resubmitWaitingJobs restart jobs that sit in queues at locations where no jobs have started yet. Those jobs are moved to locations where jobs are already running or have finished successfully.
+	 * @param startUnsubmittedJobs whether to start jobs that are newly added (not submitted at all yet)
 	 * @param waitForRestartToFinish whether to wait for the whole batchjob-restart to finish
 	 * @return whether the restart was successful or not (i.e. an error occured)
+	 * @throws InterruptedException if the creaton of newly added jobs is interrupted
+	 * @throws BackendException if something fails on the backend when creating newly adding jobs
+	 * @throws JobsException if a newly added job can't be created on the backend
 	 */
-	public boolean restart(boolean restartFailedJobs, boolean resubmitWaitingJobs, boolean waitForRestartToFinish) {
+	public boolean restart(boolean restartFailedJobs, boolean resubmitWaitingJobs, boolean startUnsubmittedJobs, boolean waitForRestartToFinish) throws JobsException, BackendException, InterruptedException {
 
 		DefaultResubmitPolicy policy = new DefaultResubmitPolicy();
 
 		policy.setProperty(DefaultResubmitPolicy.RESTART_FAILED_JOBS,  restartFailedJobs);
 		policy.setProperty(DefaultResubmitPolicy.RESTART_WAITING_JOBS, resubmitWaitingJobs);
+		policy.setProperty(DefaultResubmitPolicy.START_NEWLY_READY_JOBS, startUnsubmittedJobs);
 
 		return restart(policy, waitForRestartToFinish);
 
 	}
 
-	public boolean restart(ResubmitPolicy policy, final boolean waitForRestartToFinish) {
+
+	/**
+	 * Restarts the batchjob using the specified ResubmitPolicy
+	 * @param policy
+	 * @param waitForRestartToFinish
+	 * @return
+	 * @throws InterruptedException if the creaton of newly added jobs is interrupted
+	 * @throws BackendException if something fails on the backend when creating newly adding jobs
+	 * @throws JobsException if a newly added job can't be created on the backend
+	 */
+	public boolean restart(ResubmitPolicy policy, final boolean waitForRestartToFinish) throws JobsException, BackendException, InterruptedException {
 
 		setResubmitting(true);
+
+		prepareAndCreateJobs(false);
+
 		try {
 			optimizationResult = serviceInterface.restartBatchJob(batchJobname,
 					policy.getName(), policy.getProperties())
@@ -1469,7 +1501,16 @@ Comparable<BatchJobObject> {
 		return true;
 	}
 
-	public boolean restart(Set<String> jobnamesToRestart, Set<String> submissionLocationsToUse, boolean waitForRestartToFinish) {
+	/**
+	 * @param jobnamesToRestart
+	 * @param submissionLocationsToUse
+	 * @param waitForRestartToFinish
+	 * @return
+	 * @throws InterruptedException if the creaton of newly added jobs is interrupted
+	 * @throws BackendException if something fails on the backend when creating newly adding jobs
+	 * @throws JobsException if a newly added job can't be created on the backend
+	 */
+	public boolean restart(Set<String> jobnamesToRestart, Set<String> submissionLocationsToUse, boolean waitForRestartToFinish) throws JobsException, BackendException, InterruptedException {
 
 		ResubmitPolicy policy = new SpecificJobsResubmitPolicy(jobnamesToRestart, submissionLocationsToUse);
 

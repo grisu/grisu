@@ -2,7 +2,6 @@ package org.vpac.grisu.model.job;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -16,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang.StringUtils;
+import org.vpac.grisu.control.JobnameHelpers;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
@@ -412,11 +412,9 @@ public class JobSubmissionObjectImpl {
 	public String getPbsDebug() {
 		return pbsDebug;
 	}
-
 	public String getStderr() {
 		return stderr;
 	}
-
 	public String getStdin() {
 		return this.stdin;
 	}
@@ -479,10 +477,12 @@ public class JobSubmissionObjectImpl {
 	public void setEmail_on_job_start(final boolean email_on_job_start) {
 		this.email_on_job_start = email_on_job_start;
 	}
+
 	public void setForce_mpi(final boolean force_mpi) {
 		this.force_mpi = force_mpi;
 		this.force_single = !force_mpi;
 	}
+
 	public void setForce_single(final boolean force_single) {
 		this.force_single = force_single;
 		this.force_mpi = !force_mpi;
@@ -539,18 +539,13 @@ public class JobSubmissionObjectImpl {
 
 	@Transient
 	public void setTimestampJobname(final String jobname) {
-		SimpleDateFormat format = new SimpleDateFormat("dd.MM.yy_HH.mm.SSS");
-		setTimestampJobname(jobname, format);
+		setTimestampJobname(JobnameHelpers.calculateTimestampedJobname(jobname));
 	}
 
 	@Transient
 	public void setTimestampJobname(final String jobname, SimpleDateFormat format) {
-		String newJobname = jobname+"_"+format.format(new Date());
-		newJobname = newJobname.replace(":", "_");
-		newJobname = newJobname.replace("\\", "_");
-		newJobname = newJobname.replace("/", "_");
-		newJobname = newJobname.replaceAll("\\s", "_");
-		setJobname(newJobname);
+
+		setJobname(JobnameHelpers.calculateTimestampedJobname(jobname, format));
 
 	}
 

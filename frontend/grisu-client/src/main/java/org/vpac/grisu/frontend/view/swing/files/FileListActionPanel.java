@@ -24,15 +24,42 @@ import furbelow.SpinningDial;
 
 public class FileListActionPanel extends JPanel implements FileListListener {
 
-	private final ImageIcon REFRESH_ICON = new ImageIcon(
-			FileListActionPanel.class.getClassLoader().getResource(
-			"refresh.png"));
-
-	private final ImageIcon BOOKMARK_ICON = new ImageIcon(
-			FileListActionPanel.class.getClassLoader().getResource(
-			"bookmark.png"));
+	//	private static final ImageIcon REFRESH_ICON = new ImageIcon(
+	//			FileListActionPanel.class.getClassLoader().getResource(
+	//					"refresh.png"));
+	//
+	//	private static final ImageIcon BOOKMARK_ICON = new ImageIcon(
+	//			FileListActionPanel.class.getClassLoader().getResource(
+	//					"bookmark.png"));
 
 	private static SpinningDial LOADING_ICON = new SpinningDial(16, 16);
+
+
+	private final static ImageIcon REFRESH_ICON = createImageIcon("refresh.png", "Refresh");
+
+	private final static ImageIcon BOOKMARK_ICON = createImageIcon("bookmark.png", "Bookmark");
+
+	protected static ImageIcon createImageIcon(String path,
+			String description) {
+		//		java.net.URL imgURL = FileListActionPanel.class.getResource(path);
+		//		if (imgURL != null) {
+		//			return new ImageIcon(imgURL, description);
+		//		} else {
+		//			System.err.println("Couldn't find file: " + path);
+		//			return null;
+		//		}
+
+		ImageIcon icon = null;
+		try {
+			icon = new ImageIcon(
+					FileListActionPanel.class.getClassLoader().getResource(path));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return icon;
+
+	}
 
 	private JButton bookmarkButton;
 	private JButton refreshButton;

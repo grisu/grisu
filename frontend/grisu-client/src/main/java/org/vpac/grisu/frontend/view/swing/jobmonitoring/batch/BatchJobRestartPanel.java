@@ -9,7 +9,9 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
+import org.vpac.grisu.frontend.model.job.BackendException;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
+import org.vpac.grisu.frontend.model.job.JobsException;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -65,7 +67,7 @@ public class BatchJobRestartPanel extends JPanel implements PropertyChangeListen
 						@Override
 						public void run() {
 							try {
-								bj.restart(true, false, false);
+								bj.restart(true, false, false, false);
 								bj.refresh(false);
 							} catch (Throwable ex) {
 								ex.printStackTrace();
@@ -86,7 +88,18 @@ public class BatchJobRestartPanel extends JPanel implements PropertyChangeListen
 					new Thread() {
 						@Override
 						public void run() {
-							bj.restart(false, true, false);
+							try {
+								bj.restart(false, true, true, false);
+							} catch (JobsException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (BackendException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 							bj.refresh(false);
 						}
 					}.start();
@@ -104,7 +117,18 @@ public class BatchJobRestartPanel extends JPanel implements PropertyChangeListen
 					new Thread() {
 						@Override
 						public void run() {
-							bj.restart(true, true, false);
+							try {
+								bj.restart(true, true, true, false);
+							} catch (JobsException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (BackendException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 							bj.refresh(false);
 						}
 					}.start();

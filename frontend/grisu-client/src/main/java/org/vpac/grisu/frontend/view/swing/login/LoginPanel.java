@@ -9,6 +9,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginException;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.control.login.LoginParams;
+import org.vpac.security.light.plainProxy.LocalProxy;
 import org.vpac.security.light.view.swing.proxyInit.MultiProxyCreationPanel;
 
 import au.org.arcs.commonInterfaces.ProxyCreatorHolder;
@@ -24,17 +25,35 @@ public class LoginPanel extends JPanel implements ProxyCreatorHolder {
 	private final String SWING_CLIENT_PANEL = "ROOT";
 	private final String LOGIN_PANEL = "LOGIN";
 
+	private final boolean tryExistingGridProxy;
+
 	private final GrisuSwingClient client;
 	private MultiProxyCreationPanel multiProxyCreationPanel;
+
+	public LoginPanel(GrisuSwingClient client) {
+		this(client, false);
+	}
 
 	/**
 	 * Create the panel.
 	 */
-	public LoginPanel(GrisuSwingClient client) {
+	public LoginPanel(GrisuSwingClient client, boolean tryExistingGridProxy) {
 		this.client = client;
+		this.tryExistingGridProxy = tryExistingGridProxy;
 		setLayout(new CardLayout(0, 0));
 		add(getLoginPanel(), LOGIN_PANEL);
 		add(client.getRootPanel(), SWING_CLIENT_PANEL);
+
+		if ( tryExistingGridProxy ) {
+			if ( LocalProxy.validGridProxyExists() ) {
+				try {
+					ServiceInterface si = LoginManager.login();
+					setServiceInterface(si);
+				} catch (LoginException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	private JPanel getLoginPanel() {
@@ -64,7 +83,6 @@ public class LoginPanel extends JPanel implements ProxyCreatorHolder {
 		try {
 			si = LoginManager.login(proxy, null, null, null, loginParams, true);
 		} catch (LoginException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return;
 		}
@@ -80,7 +98,6 @@ public class LoginPanel extends JPanel implements ProxyCreatorHolder {
 		client.setServiceInterface(si);
 
 		switchToClientPanel();
-
 	}
 
 	private void switchToClientPanel() {

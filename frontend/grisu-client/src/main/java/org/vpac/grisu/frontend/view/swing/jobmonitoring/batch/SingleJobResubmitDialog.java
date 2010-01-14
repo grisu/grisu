@@ -12,7 +12,9 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import org.vpac.grisu.frontend.model.job.BackendException;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
+import org.vpac.grisu.frontend.model.job.JobsException;
 
 public class SingleJobResubmitDialog extends JDialog {
 
@@ -70,7 +72,18 @@ public class SingleJobResubmitDialog extends JDialog {
 								okButton.setEnabled(false);
 								cancelButton.setEnabled(false);
 								setCursor(Cursor.getDefaultCursor().getPredefinedCursor(Cursor.WAIT_CURSOR));
-								bj.restart(jobnames, singleJobResubmitPanel.getSubmissionLocations(), false);
+								try {
+									bj.restart(jobnames, singleJobResubmitPanel.getSubmissionLocations(), false);
+								} catch (JobsException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								} catch (BackendException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
 								dispose();
 							}
 						}.start();
