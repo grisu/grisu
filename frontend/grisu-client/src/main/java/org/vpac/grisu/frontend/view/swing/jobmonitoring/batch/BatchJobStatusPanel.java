@@ -79,7 +79,7 @@ PropertyChangeListener {
 				, BorderFactory.createEtchedBorder());
 
 		//		setBorder(new TitledBorder(null, "Status", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		setBorder(border);
+		//		setBorder(border);
 
 		this.bj = bj;
 		this.bj.addPropertyChangeListener(this);
@@ -157,7 +157,7 @@ PropertyChangeListener {
 		} else {
 			borderLabel.setIcon(null);
 		}
-		repaint();
+		//		repaint();
 
 
 	}

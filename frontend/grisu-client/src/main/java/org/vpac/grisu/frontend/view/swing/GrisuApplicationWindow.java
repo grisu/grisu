@@ -22,6 +22,8 @@ public class GrisuApplicationWindow {
 
 		Shibboleth.initDefaultSecurityProvider();
 
+		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler());
+
 		new ApplicationEventListener();
 
 		try {

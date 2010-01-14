@@ -55,6 +55,7 @@ BatchJobSelectionListener {
 			getJideTabbedPane().setSelectedComponent(temp);
 		}
 
+
 	}
 
 	private BatchJobMonitoringGrid getGrid() {
