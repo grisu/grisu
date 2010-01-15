@@ -35,7 +35,11 @@ public class JobDAO extends BaseHibernateDAO {
 
 		} catch (RuntimeException e) {
 			myLogger.error("delete failed", e);
-			getCurrentSession().getTransaction().rollback();
+			try {
+				getCurrentSession().getTransaction().rollback();
+			} catch (Exception er) {
+				myLogger.debug("Rollback failed.", er);
+			}
 			throw e; // or display error message
 		} finally {
 			getCurrentSession().close();
@@ -76,7 +80,11 @@ public class JobDAO extends BaseHibernateDAO {
 			return jobs;
 
 		} catch (RuntimeException e) {
-			getCurrentSession().getTransaction().rollback();
+			try {
+				getCurrentSession().getTransaction().rollback();
+			} catch (Exception er) {
+				myLogger.debug("Rollback failed.", er);
+			}
 			throw e; // or display error message
 		} finally {
 			getCurrentSession().close();
@@ -122,7 +130,11 @@ public class JobDAO extends BaseHibernateDAO {
 			return job;
 
 		} catch (RuntimeException e) {
-			getCurrentSession().getTransaction().rollback();
+			try {
+				getCurrentSession().getTransaction().rollback();
+			} catch (Exception er) {
+				myLogger.debug("Rollback failed.", er);
+			}
 			throw e; // or display error message
 		} finally {
 			getCurrentSession().close();
@@ -171,7 +183,11 @@ public class JobDAO extends BaseHibernateDAO {
 			return jobs;
 
 		} catch (RuntimeException e) {
-			getCurrentSession().getTransaction().rollback();
+			try {
+				getCurrentSession().getTransaction().rollback();
+			} catch (Exception er) {
+				myLogger.debug("Rollback failed.", er);
+			}
 			throw e; // or display error message
 		} finally {
 			getCurrentSession().close();
@@ -203,7 +219,11 @@ public class JobDAO extends BaseHibernateDAO {
 			return jobnames;
 
 		} catch (RuntimeException e) {
-			getCurrentSession().getTransaction().rollback();
+			try {
+				getCurrentSession().getTransaction().rollback();
+			} catch (Exception er) {
+				myLogger.debug("Rollback failed.", er);
+			}
 			throw e; // or display error message
 		} finally {
 			getCurrentSession().close();
@@ -240,7 +260,11 @@ public class JobDAO extends BaseHibernateDAO {
 			return jobnames;
 
 		} catch (RuntimeException e) {
-			getCurrentSession().getTransaction().rollback();
+			try {
+				getCurrentSession().getTransaction().rollback();
+			} catch (Exception er) {
+				myLogger.debug("Rollback failed.", er);
+			}
 			throw e; // or display error message
 		} finally {
 			getCurrentSession().close();
@@ -285,7 +309,11 @@ public class JobDAO extends BaseHibernateDAO {
 			return jobs;
 
 		} catch (RuntimeException e) {
-			getCurrentSession().getTransaction().rollback();
+			try {
+				getCurrentSession().getTransaction().rollback();
+			} catch (Exception er) {
+				myLogger.debug("Rollback failed.", er);
+			}
 			throw e; // or display error message
 		} finally {
 			getCurrentSession().close();
@@ -306,7 +334,11 @@ public class JobDAO extends BaseHibernateDAO {
 
 		} catch (RuntimeException e) {
 			myLogger.error("saveOrUpdate failed", e);
-			getCurrentSession().getTransaction().rollback();
+			try {
+				getCurrentSession().getTransaction().rollback();
+			} catch (Exception er) {
+				myLogger.debug("Rollback failed.", er);
+			}
 			throw e; // or display error message
 		} finally {
 			getCurrentSession().close();

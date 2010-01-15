@@ -24,38 +24,33 @@
 			<artifactId>simpleProxyLib</artifactId>
 			<version>0.4-SNAPSHOT</version>
 		</dependency>
-		<!--    <dependency>-->
-		<!--    	<groupId>com.sun.xml.ws</groupId>-->
-		<!--    	<artifactId>jaxws-rt</artifactId>-->
-		<!--    	<version>2.1.4</version>-->
-		<!--    </dependency>-->
-		<dependency>
-			<groupId>external.grisu-client-xfire</groupId>
-			<artifactId>not-yet-commons-ssl</artifactId>
-			<version>0.3.9</version>
-			<scope>compile</scope>
-		</dependency>
 		<dependency>
 			<groupId>commons-httpclient</groupId>
 			<artifactId>commons-httpclient</artifactId>
 			<version>3.0</version>
-			<type>jar</type>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.bushe</groupId>
 			<artifactId>eventbus</artifactId>
 			<version>1.3</version>
-			<type>jar</type>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.java.dev.glazedlists</groupId>
 			<artifactId>glazedlists_java15</artifactId>
 			<version>1.8.0</version>
-			<scope>compile</scope>
-			<type>jar</type>
 		</dependency>
+		<dependency>
+			<groupId>jmimemagic</groupId>
+			<artifactId>jmimemagic</artifactId>
+			<version>0.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.juliusdavies</groupId>
+			<artifactId>not-yet-commons-ssl</artifactId>
+			<version>0.3.11</version>
+		</dependency>
+		
+		
 		<dependency>
 			<groupId>au.org.arcs.auth</groupId>
 			<artifactId>arcs-gsi</artifactId>
@@ -65,7 +60,7 @@
 		<dependency>
 			<groupId>bouncycastle</groupId>
 			<artifactId>bcprov-jdk15</artifactId>
-			<version>140</version>
+			<version>143</version>
 			<type>jar</type>
 			<scope>provided</scope>
 		</dependency>
@@ -74,13 +69,6 @@
 			<artifactId>grisu-core</artifactId>
 			<version>0.3-SNAPSHOT</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>jmimemagic</groupId>
-			<artifactId>jmimemagic</artifactId>
-			<version>0.1.2</version>
-			<type>jar</type>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.jgoodies</groupId>
@@ -113,6 +101,12 @@
 			<groupId>org.vpac.grisu</groupId>
 			<artifactId>grisu-core</artifactId>
 			<version>0.3-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>au.org.arcs.auth</groupId>
+			<artifactId>arcs-shibboleth-client</artifactId>
+			<version>0.2-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
@@ -153,7 +147,6 @@
 							</descriptors>
 							<finalName>grisu</finalName>
 							<archive>
-
 								<index>true</index>
 								<manifest>
 									<mainClass>org.vpac.grisu.frontend.view.swing.GrisuApplicationWindow

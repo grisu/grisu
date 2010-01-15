@@ -6,15 +6,22 @@
 	<includeBaseDirectory>false</includeBaseDirectory>
 	<dependencySets>
 		<dependencySet>
-			<scope>provided</scope>
 			<unpack>true</unpack>
+			<scope>runtime</scope>
 			<useTransitiveDependencies>true</useTransitiveDependencies>
 			<useTransitiveFiltering>true</useTransitiveFiltering>
 			<useProjectArtifact>true</useProjectArtifact>
 			<outputDirectory>/</outputDirectory>
-			<includes>
-				<include>org.vpac.grisu:grisu-client</include>
-			</includes>
+<!--			<includes>-->
+<!--				<include>org.vpac.grisu:grisu-client</include>-->
+<!--				<include>org.vpac.grisu:grisu-core</include>-->
+<!--				<include>au.org.arcs.auth:arcs-gsi</include>-->
+<!--				<include>au.org.arcs.auth:arcs-shibboleth-client</include>-->
+<!--				<include>com.jgoodies:forms</include>-->
+<!--				<include>com.jidesoft:jide-oss</include>-->
+<!--				<include>org.swinglabs:swingx</include>-->
+<!--				<include>furbelow:furbelow</include>-->
+<!--			</includes>-->
 			<excludes>
 				<exclude>junit:junit</exclude>
 				<exclude>bouncycastle:bcprov-jdk15</exclude>
@@ -25,16 +32,40 @@
 					<exclude>**/MANIFEST.MF</exclude>
 					<exclude>**/LICENSE.txt</exclude>
 					<exclude>**/NOTICE.txt</exclude>
+					<exclude>**/log4j.properties</exclude>
+				</excludes>
+			</unpackOptions>
+		</dependencySet>
+
+		<dependencySet>
+			<unpack>true</unpack>
+			<scope>provided</scope>
+			<useTransitiveDependencies>true</useTransitiveDependencies>
+			<useTransitiveFiltering>true</useTransitiveFiltering>
+			<useProjectArtifact>true</useProjectArtifact>
+			<outputDirectory>/</outputDirectory>
+			<excludes>
+				<exclude>junit:junit</exclude>
+				<exclude>bouncycastle:bcprov-jdk15</exclude>
+			</excludes>
+			<unpackOptions>
+				<excludes>
+					<exclude>**/INDEX.LIST</exclude>
+					<exclude>**/MANIFEST.MF</exclude>
+					<exclude>**/LICENSE.txt</exclude>
+					<exclude>**/NOTICE.txt</exclude>
+					<exclude>**/log4j.properties</exclude>
 				</excludes>
 			</unpackOptions>
 		</dependencySet>
 	</dependencySets>
+	
+	<files>
+		<file>
+			<source>src/main/resources/log4j.properties</source>
+			<outputDirectory>/</outputDirectory>
+		</file>
+	</files>
 
-<!--	<files>-->
-<!--		<file>-->
-<!--			<source>src/main/resources/gluev12r2-ext-class-map.properties</source>-->
-<!--			<outputDirectory>/</outputDirectory>-->
-<!--		</file>-->
-<!--	</files>-->
 
 </assembly>

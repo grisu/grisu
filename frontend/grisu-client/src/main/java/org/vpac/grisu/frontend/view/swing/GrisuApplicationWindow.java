@@ -8,10 +8,9 @@ import javax.swing.UIManager;
 
 import org.jdesktop.swingx.JXFrame;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.model.events.ApplicationEventListener;
 import org.vpac.grisu.frontend.view.swing.login.LoginPanel;
-
-import au.org.arcs.auth.shibboleth.Shibboleth;
 
 public class GrisuApplicationWindow {
 
@@ -20,9 +19,7 @@ public class GrisuApplicationWindow {
 	 */
 	public static void main(String[] args) {
 
-		Shibboleth.initDefaultSecurityProvider();
-
-		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler());
+		LoginManager.initEnvironment();
 
 		new ApplicationEventListener();
 
@@ -67,7 +64,7 @@ public class GrisuApplicationWindow {
 
 		GrisuMainPanel mainPanel = new GrisuMainPanel();
 		//		LoginPanel lp = new LoginPanel(mainPanel, true);
-		LoginPanel lp = new LoginPanel(mainPanel, false);
+		LoginPanel lp = new LoginPanel(mainPanel, true);
 		frame.getContentPane().add(lp, BorderLayout.CENTER);
 	}
 

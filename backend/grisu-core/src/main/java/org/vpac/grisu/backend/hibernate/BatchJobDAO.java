@@ -37,7 +37,11 @@ public class BatchJobDAO extends BaseHibernateDAO {
 
 		} catch (RuntimeException e) {
 			myLogger.error("delete failed", e);
-			getCurrentSession().getTransaction().rollback();
+			try {
+				getCurrentSession().getTransaction().rollback();
+			} catch (Exception er) {
+				myLogger.debug("Rollback failed.", er);
+			}
 			throw e; // or display error message
 		} finally {
 			getCurrentSession().close();
@@ -59,7 +63,7 @@ public class BatchJobDAO extends BaseHibernateDAO {
 	 *             there are several jobs with this dn and jobname. this is bad.
 	 */
 	public final BatchJob findJobByDN(final String dn, final String batchJobname)
-			throws NoSuchJobException {
+	throws NoSuchJobException {
 		myLogger.debug("Loading batchJob with dn: " + dn
 				+ " and batchJobname: " + batchJobname + " from dn.");
 		String queryString = "from org.vpac.grisu.backend.model.job.BatchJob as job where job.dn = ? and job.batchJobname = ?";
@@ -78,12 +82,16 @@ public class BatchJobDAO extends BaseHibernateDAO {
 			if (job == null) {
 				throw new NoSuchJobException(
 						"Could not find a multiPartJob for the dn: " + dn
-								+ " and the batchJobname: " + batchJobname);
+						+ " and the batchJobname: " + batchJobname);
 			}
 			return job;
 
 		} catch (RuntimeException e) {
-			getCurrentSession().getTransaction().rollback();
+			try {
+				getCurrentSession().getTransaction().rollback();
+			} catch (Exception er) {
+				myLogger.debug("Rollback failed.", er);
+			}
 			throw e; // or display error message
 		} finally {
 			getCurrentSession().close();
@@ -102,7 +110,7 @@ public class BatchJobDAO extends BaseHibernateDAO {
 			Query queryObject = getCurrentSession().createQuery(queryString);
 			queryObject.setParameter(0, dn);
 
-			List<String> jobnames = (List<String>) (queryObject.list());
+			List<String> jobnames = (queryObject.list());
 
 			getCurrentSession().getTransaction().commit();
 
@@ -122,7 +130,7 @@ public class BatchJobDAO extends BaseHibernateDAO {
 
 		myLogger.debug("Loading multipartjob with dn: " + dn + " from db.");
 		String queryString = "select batchJobname from org.vpac.grisu.backend.model.job.BatchJob as job where job.dn = ? and job.jobProperties['"
-				+ Constants.APPLICATIONNAME_KEY + "'] = ?";
+			+ Constants.APPLICATIONNAME_KEY + "'] = ?";
 
 		try {
 			getCurrentSession().beginTransaction();
@@ -131,14 +139,18 @@ public class BatchJobDAO extends BaseHibernateDAO {
 			queryObject.setParameter(0, dn);
 			queryObject.setParameter(1, application);
 
-			List<String> jobnames = (List<String>) (queryObject.list());
+			List<String> jobnames = (queryObject.list());
 
 			getCurrentSession().getTransaction().commit();
 
 			return jobnames;
 
 		} catch (RuntimeException e) {
-			getCurrentSession().getTransaction().rollback();
+			try {
+				getCurrentSession().getTransaction().rollback();
+			} catch (Exception er) {
+				myLogger.debug("Rollback failed.", er);
+			}
 			throw e; // or display error message
 		} finally {
 			getCurrentSession().close();
@@ -165,14 +177,18 @@ public class BatchJobDAO extends BaseHibernateDAO {
 			Query queryObject = getCurrentSession().createQuery(queryString);
 			queryObject.setParameter(0, dn);
 
-			List<BatchJob> jobs = (List<BatchJob>) (queryObject.list());
+			List<BatchJob> jobs = (queryObject.list());
 
 			getCurrentSession().getTransaction().commit();
 
 			return jobs;
 
 		} catch (RuntimeException e) {
-			getCurrentSession().getTransaction().rollback();
+			try {
+				getCurrentSession().getTransaction().rollback();
+			} catch (Exception er) {
+				myLogger.debug("Rollback failed.", er);
+			}
 			throw e; // or display error message
 		} finally {
 			getCurrentSession().close();
@@ -204,19 +220,23 @@ public class BatchJobDAO extends BaseHibernateDAO {
 			queryObject.setParameter(0, dn);
 			queryObject.setParameter(1, batchJobname + "%");
 
-			List<BatchJob> jobs = (List<BatchJob>) (queryObject.list());
+			List<BatchJob> jobs = (queryObject.list());
 
 			getCurrentSession().getTransaction().commit();
 
 			if (jobs.size() == 0) {
 				throw new NoSuchJobException(
 						"Could not find a job for the dn: " + dn
-								+ " and the jobname: " + batchJobname);
+						+ " and the jobname: " + batchJobname);
 			}
 			return jobs;
 
 		} catch (RuntimeException e) {
-			getCurrentSession().getTransaction().rollback();
+			try {
+				getCurrentSession().getTransaction().rollback();
+			} catch (Exception er) {
+				myLogger.debug("Rollback failed.", er);
+			}
 			throw e; // or display error message
 		} finally {
 			getCurrentSession().close();
@@ -237,7 +257,11 @@ public class BatchJobDAO extends BaseHibernateDAO {
 
 		} catch (RuntimeException e) {
 			myLogger.error("saveOrUpdate failed", e);
-			getCurrentSession().getTransaction().rollback();
+			try {
+				getCurrentSession().getTransaction().rollback();
+			} catch (Exception er) {
+				myLogger.debug("Rollback failed.", er);
+			}
 			throw e; // or display error message
 		} finally {
 			getCurrentSession().close();

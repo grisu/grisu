@@ -28,7 +28,16 @@ import org.hibernate.Session;
 public class BaseHibernateDAO implements IBaseHibernateDAO {
 
 	public final Session getCurrentSession() {
-		return HibernateSessionFactory.getSessionFactory().getCurrentSession();
+		try {
+
+			//TODO disable that check for mysql
+			HibernateSessionFactory.ensureDerbyServerIsUp();
+
+			return HibernateSessionFactory.getSessionFactory().getCurrentSession();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public final Session getSession() {

@@ -18,6 +18,7 @@ import org.globus.gsi.GlobusCredential;
 import org.ietf.jgss.GSSCredential;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
+import org.vpac.grisu.frontend.view.swing.UncaughtExceptionHandler;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.utils.GrisuPluginFilenameFilter;
 import org.vpac.security.light.CredentialHelpers;
@@ -107,6 +108,12 @@ public class LoginManager {
 		if (!environmentInitialized) {
 
 			JythonHelpers.setJythonCachedir();
+
+			String debug =  CommonArcsProperties.getDefault().getArcsProperty(CommonArcsProperties.Property.DEBUG_UNCAUGHT_EXCEPTIONS);
+
+			if ( "true".equalsIgnoreCase(debug) ) {
+				Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler());
+			}
 
 			java.security.Security.addProvider(new ArcsSecurityProvider());
 

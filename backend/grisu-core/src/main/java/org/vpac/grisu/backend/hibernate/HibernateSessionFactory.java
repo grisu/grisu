@@ -28,17 +28,54 @@ public final class HibernateSessionFactory {
 	static final Logger myLogger = Logger
 	.getLogger(HibernateSessionFactory.class.getName());
 
+	private static boolean startedDerbyNetworkServer = false;
+	private static NetworkServerControl server = null;
+
 	private static SessionFactory sessionFactory;
 
 	private static String CUSTOM_HIBERNATE_CONFIG_FILE = null;
+
+	public static boolean derbyNetworkServerUp() {
+		try {
+			getNetworkServer().ping();
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	public static void ensureDerbyServerIsUp() {
+
+		if ( usingDerbyButNotStartedDerbyServer() ) {
+			if ( ! derbyNetworkServerUp() ) {
+				tryToStartDerbyServer();
+			}
+		}
+	}
+
+
+	public static NetworkServerControl getNetworkServer() {
+		if ( server == null ) {
+			try {
+				server = new NetworkServerControl	(InetAddress.getByName("localhost"),1527);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return server;
+	}
+
 
 	public static SessionFactory getSessionFactory() {
 
 		if (sessionFactory == null) {
 			initialize();
 		}
+
+
 		return sessionFactory;
 	}
+
 
 	private static void initialize() {
 		try {
@@ -155,17 +192,7 @@ public final class HibernateSessionFactory {
 						System.setProperty("derby.system.home", Environment.getGrisuDirectory().getPath()+File.separator+"derby");
 
 
-						new Thread() {
-							@Override
-							public void run() {
-								try {
-									NetworkServerControl server = new NetworkServerControl	(InetAddress.getByName("localhost"),1527);
-									server.start (new PrintWriter(System.out, true));
-								} catch (Exception e) {
-									e.printStackTrace();
-								}
-							}
-						}.start();
+						tryToStartDerbyServer();
 
 						configuration = new AnnotationConfiguration()
 						.configure("/grisu-hibernate-default-derby.cfg.xml");
@@ -204,18 +231,9 @@ public final class HibernateSessionFactory {
 					// use default derby database
 					System.setProperty("derby.system.home", Environment.getGrisuDirectory().getPath()+File.separator+"derby");
 
+					usedDatabase = DERBY_DBTYPE;
 
-					new Thread() {
-						@Override
-						public void run() {
-							try {
-								NetworkServerControl server = new NetworkServerControl	(InetAddress.getByName("localhost"),1527);
-								server.start (new PrintWriter(System.out, true));
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-					}.start();
+					tryToStartDerbyServer();
 
 					configuration = new AnnotationConfiguration()
 					.configure("/grisu-hibernate-default-derby.cfg.xml");
@@ -254,6 +272,31 @@ public final class HibernateSessionFactory {
 		}
 		CUSTOM_HIBERNATE_CONFIG_FILE = pathToHibernateConfigFile;
 	}
+
+	public static void tryToStartDerbyServer() {
+
+		try {
+
+			try {
+				getNetworkServer().ping();
+			} catch (Exception e) {
+				server.start (new PrintWriter(System.out, true));
+				startedDerbyNetworkServer = true;
+				sessionFactory = null;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static boolean usingDerbyButNotStartedDerbyServer() {
+		if ( DERBY_DBTYPE.equals(usedDatabase) ) {
+			return ! startedDerbyNetworkServer;
+		} else {
+			return false;
+		}
+	}
+
 
 	private HibernateSessionFactory() {
 	}
