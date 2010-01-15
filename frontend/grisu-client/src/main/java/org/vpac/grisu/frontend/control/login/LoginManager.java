@@ -36,6 +36,7 @@ import au.org.arcs.jcommons.dependencies.ClasspathHacker;
 import au.org.arcs.jcommons.dependencies.Dependency;
 import au.org.arcs.jcommons.dependencies.DependencyManager;
 import au.org.arcs.jcommons.utils.ArcsSecurityProvider;
+import au.org.arcs.jcommons.utils.JythonHelpers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -104,6 +105,8 @@ public class LoginManager {
 	public static void initEnvironment() {
 
 		if (!environmentInitialized) {
+
+			JythonHelpers.setJythonCachedir();
 
 			java.security.Security.addProvider(new ArcsSecurityProvider());
 
