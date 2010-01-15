@@ -78,11 +78,13 @@ PropertyChangeListener {
 		border = new ComponentTitledBorder(borderLabel, this
 				, BorderFactory.createEtchedBorder());
 
-		//		setBorder(new TitledBorder(null, "Status", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		//		setBorder(border);
+
+		setBorder(border);
 
 		this.bj = bj;
 		this.bj.addPropertyChangeListener(this);
+
+
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(20dlu;default)"),
@@ -147,7 +149,6 @@ PropertyChangeListener {
 		add(getLblRun(), "10, 10, 2, 1, right, default");
 		add(getLblFail(), "13, 10, 2, 1, right, default");
 		add(getLblDone(), "18, 10, 2, 1, right, default");
-
 
 
 		refreshProgressBars();

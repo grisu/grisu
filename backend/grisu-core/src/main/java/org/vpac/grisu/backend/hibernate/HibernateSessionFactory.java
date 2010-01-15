@@ -1,8 +1,11 @@
 package org.vpac.grisu.backend.hibernate;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.net.InetAddress;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.derby.drda.NetworkServerControl;
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
@@ -23,7 +26,7 @@ public final class HibernateSessionFactory {
 	public static String usedDatabase = "unknown";
 
 	static final Logger myLogger = Logger
-			.getLogger(HibernateSessionFactory.class.getName());
+	.getLogger(HibernateSessionFactory.class.getName());
 
 	private static SessionFactory sessionFactory;
 
@@ -47,36 +50,36 @@ public final class HibernateSessionFactory {
 
 				if (grisuHibernateConfigFile.exists()) {
 					myLogger
-							.debug("Found grisu-hibernate.cfg.xml file in .grisu directory. Using this to configure db connection.");
+					.debug("Found grisu-hibernate.cfg.xml file in .grisu directory. Using this to configure db connection.");
 					// use the user-provided config file
 					configuration = new AnnotationConfiguration()
-							.configure(grisuHibernateConfigFile);
+					.configure(grisuHibernateConfigFile);
 					if (StringUtils.isBlank(configuration
 							.getProperty("hibernate.connection.url"))) {
 						// setting default path to hsqldb if necessary
 						String url = "jdbc:hsqldb:file:"
-								+ Environment.getGrisuDirectory().getPath()
-								+ File.separator + "grisulocaldb";
+							+ Environment.getGrisuDirectory().getPath()
+							+ File.separator + "grisulocaldb";
 						configuration.setProperty("hibernate.connection.url",
 								url);
 					}
 				} else {
 					throw new RuntimeException(
 							"Could not find hibernate config file: "
-									+ CUSTOM_HIBERNATE_CONFIG_FILE);
+							+ CUSTOM_HIBERNATE_CONFIG_FILE);
 				}
 
 			} else {
 				File grisuJobDir = Environment.getGrisuDirectory();
 				File grisuHibernateConfigFile = new File(grisuJobDir,
-						"grisu-hibernate.cfg.xml");
+				"grisu-hibernate.cfg.xml");
 
 				if (grisuHibernateConfigFile.exists()) {
 					myLogger
-							.debug("Found grisu-hibernate.cfg.xml file in .grisu directory. Using this to configure db connection.");
+					.debug("Found grisu-hibernate.cfg.xml file in .grisu directory. Using this to configure db connection.");
 					// use the user-provided config file
 					configuration = new AnnotationConfiguration()
-							.configure(grisuHibernateConfigFile);
+					.configure(grisuHibernateConfigFile);
 				} else if (!ServerPropertiesManager.useDefaultDatabase()) {
 					// check whether something is specified in the
 					// grisu-server.config file
@@ -84,26 +87,26 @@ public final class HibernateSessionFactory {
 					if (MYSQL_DBTYPE.equals(dbType)) {
 						usedDatabase = MYSQL_DBTYPE;
 						configuration = new AnnotationConfiguration()
-								.configure("/grisu-hibernate-default-mysql.cfg.xml");
+						.configure("/grisu-hibernate-default-mysql.cfg.xml");
 
 						String url = ServerPropertiesManager
-								.getDatabaseConnectionUrl();
+						.getDatabaseConnectionUrl();
 						String username = ServerPropertiesManager
-								.getDatabaseUsername();
+						.getDatabaseUsername();
 						String password = ServerPropertiesManager
-								.getDatabasePassword();
+						.getDatabasePassword();
 
-						if (url == null || url.length() == 0) {
+						if ((url == null) || (url.length() == 0)) {
 							throw new RuntimeException(
-									"databaseConnectionUrl not specified in grisu-server.config file. Can't continue...");
+							"databaseConnectionUrl not specified in grisu-server.config file. Can't continue...");
 						}
-						if (username == null || username.length() == 0) {
+						if ((username == null) || (username.length() == 0)) {
 							throw new RuntimeException(
-									"databaseUsername not specified in grisu-server.config file. Can't continue...");
+							"databaseUsername not specified in grisu-server.config file. Can't continue...");
 						}
-						if (password == null || password.length() == 0) {
+						if ((password == null) || (password.length() == 0)) {
 							throw new RuntimeException(
-									"databasePassword not specified in grisu-server.config file. Can't continue...");
+							"databasePassword not specified in grisu-server.config file. Can't continue...");
 						}
 
 						configuration.setProperty("hibernate.connection.url",
@@ -116,21 +119,21 @@ public final class HibernateSessionFactory {
 					} else if (HSQLDB_DBTYPE.equals(dbType)) {
 						usedDatabase = HSQLDB_DBTYPE;
 						configuration = new AnnotationConfiguration()
-								.configure("/grisu-hibernate-default-hsqldb.cfg.xml");
+						.configure("/grisu-hibernate-default-hsqldb.cfg.xml");
 
 						String url = ServerPropertiesManager
-								.getDatabaseConnectionUrl();
+						.getDatabaseConnectionUrl();
 						String username = ServerPropertiesManager
-								.getDatabaseUsername();
+						.getDatabaseUsername();
 						String password = ServerPropertiesManager
-								.getDatabasePassword();
+						.getDatabasePassword();
 
-						if (url == null || url.length() == 0) {
+						if ((url == null) || (url.length() == 0)) {
 							url = "jdbc:hsqldb:file:"
-									+ Environment.getGrisuDirectory().getPath()
-									+ File.separator + "grisulocaldb";
+								+ Environment.getGrisuDirectory().getPath()
+								+ File.separator + "grisulocaldb";
 						}
-						if (username == null || username.length() == 0) {
+						if ((username == null) || (username.length() == 0)) {
 							username = "sa";
 						}
 						if (password == null) {
@@ -148,27 +151,41 @@ public final class HibernateSessionFactory {
 
 						usedDatabase = DERBY_DBTYPE;
 
+						// use default derby database
+						System.setProperty("derby.system.home", Environment.getGrisuDirectory().getPath()+File.separator+"derby");
+
+
+						new Thread() {
+							@Override
+							public void run() {
+								try {
+									NetworkServerControl server = new NetworkServerControl	(InetAddress.getByName("localhost"),1527);
+									server.start (new PrintWriter(System.out, true));
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+							}
+						}.start();
+
 						configuration = new AnnotationConfiguration()
-								.configure("/grisu-hibernate-default-derby.cfg.xml");
+						.configure("/grisu-hibernate-default-derby.cfg.xml");
 
 						String url = ServerPropertiesManager
-								.getDatabaseConnectionUrl();
+						.getDatabaseConnectionUrl();
 						String username = ServerPropertiesManager
-								.getDatabaseUsername();
+						.getDatabaseUsername();
 						String password = ServerPropertiesManager
-								.getDatabasePassword();
+						.getDatabasePassword();
 
-						if (url == null || url.length() == 0) {
-							url = "jdbc:derby:"
-									+ Environment.getGrisuDirectory().getPath()
-									+ File.separator
-									+ "grisulocaldb_derby;create=true";
+						if ((url == null) || (url.length() == 0)) {
+							url = "jdbc:derby://localhost:1527/grisu;create=true";
+
 						}
-						if (username == null || username.length() == 0) {
-							username = "sa";
+						if ((username == null) || (username.length() == 0)) {
+							username = "grisu";
 						}
 						if (password == null) {
-							password = "";
+							password = "password";
 						}
 
 						configuration.setProperty("hibernate.connection.url",
@@ -180,21 +197,37 @@ public final class HibernateSessionFactory {
 					} else {
 						throw new RuntimeException(
 								"DatabaseType \""
-										+ dbType
-										+ "\" in grisu-server.config file not recognized. Can't continue. Use either \"hsqldb\" or \"mysql\".");
+								+ dbType
+								+ "\" in grisu-server.config file not recognized. Can't continue. Use either \"hsqldb\" or \"mysql\".");
 					}
 				} else {
-					// use default hsqld database
+					// use default derby database
+					System.setProperty("derby.system.home", Environment.getGrisuDirectory().getPath()+File.separator+"derby");
+
+
+					new Thread() {
+						@Override
+						public void run() {
+							try {
+								NetworkServerControl server = new NetworkServerControl	(InetAddress.getByName("localhost"),1527);
+								server.start (new PrintWriter(System.out, true));
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					}.start();
+
 					configuration = new AnnotationConfiguration()
-							.configure("/grisu-hibernate-default-derby.cfg.xml");
-					String url = "jdbc:derby:"
-							+ Environment.getGrisuDirectory().getPath()
-							+ File.separator + "grisulocaldb_derby;create=true";
+					.configure("/grisu-hibernate-default-derby.cfg.xml");
+					//					String url = "jdbc:derby:"
+					//						+ Environment.getGrisuDirectory().getPath()
+					//						+ File.separator + "grisulocaldb_derby;create=true";
+					String url = "jdbc:derby://localhost:1527/grisu;create=true";
 					configuration.setProperty("hibernate.connection.url", url);
 					configuration.setProperty("hibernate.connection.username",
-							"sa");
+					"grisu");
 					configuration.setProperty("hibernate.connection.password",
-							"");
+					"password");
 				}
 			}
 
@@ -217,7 +250,7 @@ public final class HibernateSessionFactory {
 			String pathToHibernateConfigFile) {
 		if (sessionFactory != null) {
 			throw new RuntimeException(
-					"Sessionfactory already initialized. No use setting the hibernate config file anymore...");
+			"Sessionfactory already initialized. No use setting the hibernate config file anymore...");
 		}
 		CUSTOM_HIBERNATE_CONFIG_FILE = pathToHibernateConfigFile;
 	}

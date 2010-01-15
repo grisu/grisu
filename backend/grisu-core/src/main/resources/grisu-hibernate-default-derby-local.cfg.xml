@@ -7,13 +7,13 @@
 
 	<session-factory>
 		<property name="hibernate.current_session_context_class">thread</property>
-<!--		<property name="hibernate.transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</property>-->
+		<property name="hibernate.transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</property>
 
-<!--		<property name="hibernate.connection.pool_size">0</property>-->
+		<property name="hibernate.connection.pool_size">0</property>
 
-		<property name="hibernate.connection.username">grisu</property>
-		<property name="hibernate.connection.password">password</property>
-		<property name="hibernate.connection.driver_class">org.apache.derby.jdbc.ClientDriver</property>
+		<property name="hibernate.connection.username">sa</property>
+		<property name="hibernate.connection.password"></property>
+		<property name="hibernate.connection.driver_class">org.apache.derby.jdbc.EmbeddedDriver</property>
 		<property name="hibernate.dialect">org.hibernate.dialect.DerbyDialect</property>
 		
 <!--		<property name="hibernate.connection.writedelay">0</property>-->
