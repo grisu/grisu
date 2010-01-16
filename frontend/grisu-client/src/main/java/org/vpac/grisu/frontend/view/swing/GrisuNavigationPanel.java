@@ -32,7 +32,7 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer {
 	public GrisuNavigationPanel(ServiceInterface si, GrisuCenterPanel centerPanel, boolean displaySingleJobMonitorItem,
 			boolean displayBatchJobMonitorItem, boolean displayFileManagementItem) {
 
-		this(si, centerPanel, displaySingleJobMonitorItem, false, true, displayBatchJobMonitorItem, false, true, displayFileManagementItem);
+		this(si, centerPanel, displaySingleJobMonitorItem, true, true, displayBatchJobMonitorItem, true, true, displayFileManagementItem);
 	}
 
 	public GrisuNavigationPanel(ServiceInterface si, GrisuCenterPanel centerPanel,
