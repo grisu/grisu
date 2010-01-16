@@ -280,7 +280,7 @@ public final class HibernateSessionFactory {
 			try {
 				getNetworkServer().ping();
 			} catch (Exception e) {
-				server.start (new PrintWriter(System.out, true));
+				server.start(null);
 				startedDerbyNetworkServer = true;
 				sessionFactory = null;
 			}
