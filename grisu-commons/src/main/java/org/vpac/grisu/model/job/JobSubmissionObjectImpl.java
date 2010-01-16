@@ -539,7 +539,7 @@ public class JobSubmissionObjectImpl {
 
 	@Transient
 	public void setTimestampJobname(final String jobname) {
-		setTimestampJobname(JobnameHelpers.calculateTimestampedJobname(jobname));
+		setJobname(JobnameHelpers.calculateTimestampedJobname(jobname));
 	}
 
 	@Transient

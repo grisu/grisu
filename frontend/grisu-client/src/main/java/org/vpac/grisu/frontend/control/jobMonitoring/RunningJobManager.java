@@ -159,6 +159,8 @@ public class RunningJobManager {
 	private final Map<String, EventList<BatchJobObject>> cachedBatchJobsPerApplication = Collections
 	.synchronizedMap(new HashMap<String, EventList<BatchJobObject>>());;
 
+	private final boolean checkForNewApplicationsForSingleJobs = false;
+
 	private final Timer updateTimer = new Timer();
 
 	private boolean stop = false;
