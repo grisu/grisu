@@ -231,7 +231,7 @@ public final class SeveralXMLHelpers {
 			docBuildFactory.setNamespaceAware(true);
 			docBuildFactory.setValidating(false);
 
-			docBuildFactory.setAttribute(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA); // use
+//			docBuildFactory.setAttribute(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA); // use
 			// LANGUAGE
 			// here
 			// instead
@@ -240,8 +240,10 @@ public final class SeveralXMLHelpers {
 			// docBuildFactory.setAttribute(JAXP_SCHEMA_SOURCE, schemaFile);
 
 			DocumentBuilder docBuilder = docBuildFactory.newDocumentBuilder();
-			return docBuilder.parse(new ByteArrayInputStream(jsdl_string
+			Document result = docBuilder.parse(new ByteArrayInputStream(jsdl_string
 					.getBytes()));
+			
+			return result;
 		} catch (Exception e) {
 			// e.printStackTrace();
 			throw new RuntimeException(e);
@@ -268,6 +270,9 @@ public final class SeveralXMLHelpers {
 
 		DocumentBuilderFactory docBuildFactory = DocumentBuilderFactory
 				.newInstance();
+		docBuildFactory.setAttribute(
+				"http://apache.org/xml/features/nonvalidating/load-external-dtd",
+				false);
 		docBuildFactory.setNamespaceAware(true);
 		docBuildFactory.setValidating(false);
 

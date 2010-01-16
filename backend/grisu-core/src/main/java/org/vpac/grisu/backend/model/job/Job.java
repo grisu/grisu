@@ -529,7 +529,6 @@ public class Job implements Comparable<Job> {
 	 * @throws IOException
 	 */
 	private void setJsdl(final String jsdl_string) throws Exception {
-
 		if ((jsdl_string == null)
 				|| jsdl_string
 				.equals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")) {
