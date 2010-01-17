@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.bushe.swing.event.EventBus;
 import org.vpac.grisu.control.ServiceInterface;
@@ -62,8 +63,8 @@ public class FileTransferManager implements PropertyChangeListener {
 
 			fileTransfers.add(ft);
 			ft.addPropertyChangeListener(this);
-			executor1.execute(ft.getTransferThread());
-
+			final Future<FileTransfer.Status> future = executor1.submit(ft.getTransferThread());
+			ft.setFuture(future);
 			return ft;
 		}
 

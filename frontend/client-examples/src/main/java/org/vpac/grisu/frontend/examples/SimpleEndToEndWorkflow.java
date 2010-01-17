@@ -65,6 +65,11 @@ public class SimpleEndToEndWorkflow {
 
 		System.out.println("Stdout: "+job.getStdOutContent());
 		System.out.println("Stderr: " +job.getStdErrContent());
+		
+		// it's pretty important to shutdown the jvm properly. There might be some executors running in the background
+		// and they need to know when to shutdown.
+		// Otherwise, your application might not exit.
+		System.exit(0);
 
 	}
 

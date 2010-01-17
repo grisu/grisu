@@ -147,8 +147,10 @@ public class FileManager {
 	 *            the url of the file
 	 * @return whether the file is local or not.
 	 */
-	public static boolean isLocal(final String file) {
+	public static boolean isLocal(String file) {
 
+		file = ensureUriFormat(file);
+		
 		if (file.startsWith("gsiftp")) {
 			return false;
 		} else if (file.startsWith("file:")) {

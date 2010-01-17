@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -747,8 +748,23 @@ Comparable<JobObject> {
 		FileTransferManager ftm = FileTransferManager.getDefault(serviceInterface);
 
 		FileTransfer fileTransfer = ftm.addFileTransfer(localFiles, jobDirectory, true);
-
-		fileTransfer.join();
+		try {
+			fileTransfer.join();
+		} catch (ExecutionException e) {
+			if ( fileTransfer.getException() != null ) {
+				throw fileTransfer.getException();
+			} else {
+				throw new FileTransferException(fileTransfer.getFailedSourceFile(), jobDirectory, "File staging failed.", null);
+			}
+		}
+		
+		if ( ! FileTransfer.Status.FINISHED.equals(fileTransfer.getStatus()) ) {
+			if ( fileTransfer.getException() != null ) {
+				throw fileTransfer.getException();
+			} else {
+				throw new FileTransferException(fileTransfer.getFailedSourceFile(), jobDirectory, "File staging failed.", null);
+			}
+		}
 
 
 		//		// stage in local files
