@@ -8,15 +8,16 @@ import org.bushe.swing.event.annotation.AnnotationProcessor;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.vpac.grisu.control.DefaultResubmitPolicy;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
-import org.vpac.grisu.frontend.model.StatusObject;
 import org.vpac.grisu.frontend.model.events.BatchJobEvent;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.model.job.JobsException;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
+import org.vpac.grisu.model.status.StatusObject;
 
 import au.org.arcs.jcommons.constants.Constants;
 
@@ -40,8 +41,7 @@ public class MultiJobSubmit {
 				// "Dummy",
 				username, password);
 
-		final ServiceInterface si = ServiceInterfaceFactory
-				.createInterface(loginParams);
+		final ServiceInterface si = LoginManager.loginCommandline();
 
 		final GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
 
@@ -52,11 +52,11 @@ public class MultiJobSubmit {
 		Date start = new Date();
 		final String multiJobName = "jobTest20_7";
 		try {
+			System.out.println("Killing job: "+multiJobName);
 			si.kill(multiJobName, true);
 
-			StatusObject status = new StatusObject(si, multiJobName);
-			status.waitForActionToFinish(3, true, true);
-
+			registry.getUserEnvironmentManager().waitForActionToFinish(multiJobName);
+			System.out.println("Killed job.");
 		} catch (Exception e) {
 		}
 
@@ -80,7 +80,7 @@ public class MultiJobSubmit {
 			// jo.setCommandline("cat singleJobFile.txt "+pathToInputFiles+"/multiJobFile.txt");
 			// jo.setCommandline("cat singleJobFile_"+i+".txt "+pathToInputFiles+"/multiJobFile.txt");
 			// jo.setCommandline("sleep 300");
-			jo.setWalltimeInSeconds(310);
+			jo.setWalltimeInSeconds(60);
 			// jo.addInputFileUrl("/home/markus/test/singleJobFile_"+i+".txt");
 			// jo.addInputFileUrl("/home/markus/test/singleJobFile.txt");
 
@@ -128,24 +128,6 @@ public class MultiJobSubmit {
 			multiPartJob.getJobs().size();
 			System.out.println(multiPartJob.getDetails());
 
-			if (!resubmitted) {
-				System.out.println("Resubmitting....");
-				DefaultResubmitPolicy policy = new DefaultResubmitPolicy();
-				policy.setProperty(DefaultResubmitPolicy.RESTART_WAITING_JOBS, false);
-
-				resubmitted = multiPartJob.restart(policy, true);
-				if (resubmitted) {
-					System.out.println("Distribution for job resubmission:");
-					for (String subLoc : multiPartJob.getOptimizationResult()
-							.keySet()) {
-						System.out.println(subLoc
-								+ ":"
-								+ multiPartJob.getOptimizationResult().get(
-										subLoc));
-					}
-				}
-			}
-
 			Thread.sleep(2000);
 		}
 
@@ -163,20 +145,6 @@ public class MultiJobSubmit {
 			System.out.println("-------------------------------");
 			System.out.println();
 		}
-
-		// if (
-		// HibernateSessionFactory.HSQLDB_DBTYPE.equals(HibernateSessionFactory.usedDatabase)
-		// ) {
-		// // for hqsqldb
-		// Thread.sleep(10000);
-		// }
-
-		// MultiPartJobObject newObject = new MultiPartJobObject(si,
-		// multiJobName);
-		//		
-		// newObject.monitorProgress();
-		//		
-		// newObject.downloadResults("logo");
 
 	}
 

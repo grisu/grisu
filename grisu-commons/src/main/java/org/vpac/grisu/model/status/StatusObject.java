@@ -1,11 +1,10 @@
-package org.vpac.grisu.frontend.model;
+package org.vpac.grisu.model.status;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import org.bushe.swing.event.EventBus;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.frontend.model.events.ActionStatusEvent;
 import org.vpac.grisu.model.dto.DtoActionStatus;
 
 public class StatusObject {
@@ -59,6 +58,15 @@ public class StatusObject {
 		return lastStatus;
 	}
 
+	public static StatusObject waitForActionToFinish(ServiceInterface si, String handle, int recheckIntervalInSeconds,
+			boolean exitIfFailed, boolean sendStatusEvent) throws InterruptedException {
+		
+		StatusObject temp = new StatusObject(si, handle);
+		temp.waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed, sendStatusEvent);
+		
+		return temp;
+	}
+	
 	public void waitForActionToFinish(int recheckIntervalInSeconds,
 			boolean exitIfFailed, boolean sendStatusEvent)
 			throws InterruptedException {

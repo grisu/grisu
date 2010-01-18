@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.model.events;
+package org.vpac.grisu.model.status;
 
 import org.vpac.grisu.model.dto.DtoActionStatus;
 

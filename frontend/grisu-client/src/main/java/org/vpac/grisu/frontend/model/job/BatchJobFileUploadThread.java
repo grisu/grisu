@@ -8,9 +8,9 @@ import javax.activation.DataHandler;
 import org.bushe.swing.event.EventBus;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
-import org.vpac.grisu.frontend.model.StatusObject;
 import org.vpac.grisu.frontend.model.events.BatchJobEvent;
 import org.vpac.grisu.model.FileManager;
+import org.vpac.grisu.model.status.StatusObject;
 
 public class BatchJobFileUploadThread extends Thread {
 

@@ -2,6 +2,7 @@ package org.vpac.grisu.frontend.model.events;
 
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
+import org.vpac.grisu.model.status.ActionStatusEvent;
 
 public class ApplicationEventListener implements EventSubscriber {
 	

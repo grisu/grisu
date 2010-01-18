@@ -8,6 +8,7 @@ import java.util.SortedSet;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.files.FileSystemItem;
+import org.vpac.grisu.model.status.StatusObject;
 
 /**
  * Wrapps information about the user and the available resources to him
@@ -316,5 +317,14 @@ public interface UserEnvironmentManager {
 	 * @param value
 	 */
 	void setProperty(String key, String value);
+	
+	/**
+	 * Convenience method to wait for an action (like batchJob submission) to finish.
+	 * 
+	 * @param handle the action handle
+	 * @return the statusObject
+	 * @throws InterruptedException
+	 */
+	StatusObject waitForActionToFinish(String handle) throws InterruptedException;
 
 }

@@ -22,6 +22,8 @@ import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.files.FileSystemItem;
 import org.vpac.grisu.model.files.GlazedFile;
 import org.vpac.grisu.model.info.ResourceInformation;
+import org.vpac.grisu.model.status.StatusObject;
+import org.vpac.grisu.settings.ClientPropertiesManager;
 
 import au.org.arcs.jcommons.constants.Constants;
 
@@ -629,6 +631,16 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		serviceInterface.setUserProperty(key, value);
 		cachedUserProperties.put(key, value);
 
+	}
+
+	public StatusObject waitForActionToFinish(String handle)
+			throws InterruptedException {
+
+		StatusObject status = new StatusObject(serviceInterface, handle);
+		
+		status.waitForActionToFinish(ClientPropertiesManager.getDefaultActionStatusRecheckInterval(), false, false);
+		
+		return status;
 	}
 
 }

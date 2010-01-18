@@ -33,7 +33,6 @@ import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
 import org.vpac.grisu.frontend.control.jobMonitoring.RunningJobManager;
-import org.vpac.grisu.frontend.model.StatusObject;
 import org.vpac.grisu.frontend.model.events.BatchJobEvent;
 import org.vpac.grisu.frontend.model.events.BatchJobKilledEvent;
 import org.vpac.grisu.model.FileManager;
@@ -42,6 +41,7 @@ import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.job.JobMonitoringObject;
+import org.vpac.grisu.model.status.StatusObject;
 import org.vpac.grisu.settings.ClientPropertiesManager;
 
 import au.org.arcs.jcommons.constants.Constants;

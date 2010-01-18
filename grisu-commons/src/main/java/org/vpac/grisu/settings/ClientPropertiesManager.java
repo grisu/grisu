@@ -39,6 +39,7 @@ public final class ClientPropertiesManager {
 
 	static final Logger myLogger = Logger
 	.getLogger(ClientPropertiesManager.class.getName());
+	private static final int DEFAULT_ACTION_STATUS_RECHECK_INTERVAL_IN_SECONDS = 5;
 
 	/**
 	 * Call this if the user wants a new (server-side) template to his personal
@@ -677,6 +678,25 @@ public final class ClientPropertiesManager {
 	}
 
 	private ClientPropertiesManager() {
+	}
+
+	public static int getDefaultActionStatusRecheckInterval() {
+		
+		int intervalInSeconds = -1;
+		try {
+			intervalInSeconds = Integer.parseInt(getClientConfiguration().getString(
+			"actionStatusRecheckInterval"));
+
+		} catch (Exception e) {
+			// myLogger.debug("Problem with config file: " + e.getMessage());
+			return DEFAULT_ACTION_STATUS_RECHECK_INTERVAL_IN_SECONDS;
+		}
+		if (intervalInSeconds == -1) {
+			return DEFAULT_ACTION_STATUS_RECHECK_INTERVAL_IN_SECONDS;
+		}
+
+		return intervalInSeconds;
+
 	}
 
 }
