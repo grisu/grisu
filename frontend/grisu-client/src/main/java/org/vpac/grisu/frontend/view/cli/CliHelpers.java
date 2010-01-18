@@ -56,7 +56,7 @@ public class CliHelpers {
 		if ( StringUtils.isBlank(nonSelectionText) ) {
 			startIndex = 1;
 		}
-		while ( (choice < startIndex) || (choice >= list.size()) ) {
+		while ( (choice < startIndex) || (choice > list.size()) ) {
 			String input;
 			try {
 				input = getConsoleReader().readLine(prompt);

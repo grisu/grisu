@@ -57,7 +57,8 @@ public class SimpleEndToEndWorkflow2 {
 		// let's get an object that contains all the information about the application on the grid
 		ApplicationInformation appInfo = GrisuRegistryManager.getDefault(si).getApplicationInformation("UnixCommands");
 		// we don't care about the version here. it's possible to get that kind of information for a specific version too...
-		Set<String> allSubmissionLocations = appInfo.getAvailableSubmissionLocationsForFqan("/ARCS/Startup");
+		Set<String> allSubmissionLocations = appInfo.getAvailableSubmissionLocationsForFqan("/ARCS/StartUp");
+		appInfo.getAvailableSubmissionLocationsForVersionAndFqan("1.6.0", "/ARCS/StartUp");
 		
 		// now we ask the user (on the commandline) which submission location to use
 		// we give him the option of not specifing one, in which case we rely on grisu to figure out the best one
