@@ -1,5 +1,7 @@
 package org.vpac.grisu.model.job;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -60,6 +62,8 @@ public class JobSubmissionObjectImpl {
 		jso.getJobDescriptionDocument();
 
 	}
+
+	protected final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
 	private Long id;
 
@@ -226,6 +230,10 @@ public class JobSubmissionObjectImpl {
 
 	public void addModule(final String module) {
 		this.modules.add(module);
+	}
+
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+		this.pcs.addPropertyChangeListener(listener);
 	}
 
 	private boolean checkForBoolean(final String booleanString) {
@@ -396,6 +404,7 @@ public class JobSubmissionObjectImpl {
 		return memory_in_bytes;
 	}
 
+
 	public String[] getModules() {
 		return modules.toArray(new String[] {});
 	}
@@ -412,6 +421,7 @@ public class JobSubmissionObjectImpl {
 	public String getPbsDebug() {
 		return pbsDebug;
 	}
+
 	public String getStderr() {
 		return stderr;
 	}
@@ -456,36 +466,61 @@ public class JobSubmissionObjectImpl {
 	public boolean isForce_single() {
 		return force_single;
 	}
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
+		this.pcs.removePropertyChangeListener(listener);
+	}
 	public void setApplication(final String app) {
+		String oldValue = this.application;
 		this.application = app;
+		pcs.firePropertyChange("application", oldValue, this.application);
 	}
 	public void setApplicationVersion(final String appVersion) {
+		String oldValue = this.applicationVersion;
 		this.applicationVersion = appVersion;
+		pcs.firePropertyChange("applicationVersion", oldValue, this.applicationVersion);
 	}
 	public void setCommandline(final String commandline) {
+		String oldValue = this.commandline;
 		this.commandline = commandline;
+		pcs.firePropertyChange("commandline", oldValue, this.commandline);
 	}
 	public void setCpus(final int cpus) {
+		int oldValue = this.cpus;
 		this.cpus = cpus;
+		pcs.firePropertyChange("cpus", oldValue, this.cpus);
 	}
 	public void setEmail_address(final String email_address) {
+		String oldValue = this.email_address;
 		this.email_address = email_address;
+		pcs.firePropertyChange("email_address", oldValue, this.email_address);
 	}
 	public void setEmail_on_job_finish(final boolean email_on_job_finish) {
+		boolean oldValue = this.email_on_job_finish;
 		this.email_on_job_finish = email_on_job_finish;
+		pcs.firePropertyChange("email_on_job_finish", oldValue, this.email_on_job_finish);
 	}
 	public void setEmail_on_job_start(final boolean email_on_job_start) {
+		boolean oldValue = this.email_on_job_start;
 		this.email_on_job_start = email_on_job_start;
+		pcs.firePropertyChange("email_on_job_start", oldValue, this.email_on_job_start);
 	}
 
 	public void setForce_mpi(final boolean force_mpi) {
+		boolean oldValue = this.force_mpi;
+		boolean oldValue1 = this.force_single;
 		this.force_mpi = force_mpi;
 		this.force_single = !force_mpi;
+		pcs.firePropertyChange("force_mpi", oldValue, this.force_mpi);
+		pcs.firePropertyChange("force_single", oldValue1, this.force_single);
 	}
 
 	public void setForce_single(final boolean force_single) {
+		boolean oldValue = this.force_mpi;
+		boolean oldValue1 = this.force_single;
 		this.force_single = force_single;
 		this.force_mpi = !force_mpi;
+		pcs.firePropertyChange("force_mpi", oldValue, this.force_mpi);
+		pcs.firePropertyChange("force_single", oldValue1, this.force_single);
 	}
 
 	private void setId(final Long id) {
@@ -493,48 +528,66 @@ public class JobSubmissionObjectImpl {
 	}
 
 	public void setInputFileUrls(final String[] inputFileUrls) {
+		Set<String> oldValue = this.inputFileUrls;
 		if (inputFileUrls != null) {
 			this.inputFileUrls = new HashSet<String>(Arrays
 					.asList(inputFileUrls));
 		} else {
 			this.inputFileUrls = new HashSet<String>();
 		}
+		pcs.firePropertyChange("inputFileUrls", oldValue, this.inputFileUrls);
 	}
 
 	public void setJobname(final String jobname) {
+		String oldValue = this.jobname;
 		this.jobname = jobname;
+		pcs.firePropertyChange("jobname", oldValue, this.jobname);
 	}
 
 	public void setMemory(final long memory) {
+		long oldValue = this.memory_in_bytes;
 		this.memory_in_bytes = memory;
+		pcs.firePropertyChange("memory", oldValue, this.memory_in_bytes);
 	}
 
 	public void setModules(final String[] modules) {
+		Set<String> oldValue = this.modules;
 		if (modules != null) {
 			this.modules = new HashSet<String>(Arrays.asList(modules));
 		} else {
 			this.modules = new HashSet<String>();
 		}
+		pcs.firePropertyChange("modules", oldValue, this.modules);
 	}
 
 	public void setPbsDebug(String pbsDebug) {
+		String oldValue = this.pbsDebug;
 		this.pbsDebug = pbsDebug;
+		pcs.firePropertyChange("pbsDebug", oldValue, this.pbsDebug);
 	}
 
 	public void setStderr(final String stderr) {
+		String oldValue = this.stderr;
 		this.stderr = stderr;
+		pcs.firePropertyChange("stderr", oldValue, this.stderr);
 	}
 
 	public void setStdin(final String stdin) {
+		String oldValue = this.stdin;
 		this.stdin = stdin;
+		pcs.firePropertyChange("stdin", oldValue, this.stdout);
 	}
 
 	public void setStdout(final String stdout) {
+		String oldValue = this.stdout;
 		this.stdout = stdout;
+		pcs.firePropertyChange("stdout", oldValue, this.stdout);
 	}
 
 	public void setSubmissionLocation(final String submissionLocation) {
+		String oldValue = this.submissionLocation;
 		this.submissionLocation = submissionLocation;
+		pcs.firePropertyChange("submissionLocation", oldValue, this.submissionLocation);
 	}
 
 	@Transient
@@ -559,7 +612,9 @@ public class JobSubmissionObjectImpl {
 	}
 
 	public void setWalltimeInSeconds(final int walltime) {
+		int oldValue = this.walltime_in_seconds;
 		this.walltime_in_seconds = walltime;
+		pcs.firePropertyChange("walltimeInSeconds", oldValue, this.walltime_in_seconds);
 	}
 
 	@Override

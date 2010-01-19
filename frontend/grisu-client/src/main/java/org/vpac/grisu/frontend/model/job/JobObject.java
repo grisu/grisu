@@ -1,7 +1,5 @@
 package org.vpac.grisu.frontend.model.job;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.util.Date;
 import java.util.HashSet;
@@ -49,8 +47,6 @@ public class JobObject extends JobSubmissionObjectImpl implements
 Comparable<JobObject> {
 
 	static final Logger myLogger = Logger.getLogger(JobObject.class.getName());
-
-	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
 	private final ServiceInterface serviceInterface;
 
@@ -195,10 +191,6 @@ Comparable<JobObject> {
 			getStatus(true);
 		}
 
-	}
-
-	public void addPropertyChangeListener(PropertyChangeListener listener) {
-		this.pcs.addPropertyChangeListener(listener);
 	}
 
 	public int compareTo(JobObject o2) {
@@ -678,10 +670,6 @@ Comparable<JobObject> {
 
 	}
 
-	public void removePropertyChangeListener(PropertyChangeListener listener) {
-		this.pcs.removePropertyChangeListener(listener);
-	}
-
 	/**
 	 * Restarts the job.
 	 * 
@@ -757,7 +745,7 @@ Comparable<JobObject> {
 				throw new FileTransferException(fileTransfer.getFailedSourceFile(), jobDirectory, "File staging failed.", null);
 			}
 		}
-		
+
 		if ( ! FileTransfer.Status.FINISHED.equals(fileTransfer.getStatus()) ) {
 			if ( fileTransfer.getException() != null ) {
 				throw fileTransfer.getException();
