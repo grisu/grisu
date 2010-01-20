@@ -1,10 +1,12 @@
 package org.vpac.grisu.frontend.control.login;
 
+import org.apache.commons.lang.StringUtils;
 import org.ietf.jgss.GSSCredential;
 import org.vpac.security.light.plainProxy.PlainProxy;
 
 import au.org.arcs.auth.shibboleth.CredentialManager;
 import au.org.arcs.auth.shibboleth.IdpObject;
+import au.org.arcs.auth.shibboleth.Shibboleth;
 import au.org.arcs.auth.shibboleth.StaticCredentialManager;
 import au.org.arcs.auth.shibboleth.StaticIdpObject;
 import au.org.arcs.auth.slcs.SLCS;
@@ -13,9 +15,19 @@ import au.org.arcs.jcommons.configuration.CommonArcsProperties;
 public class SlcsLoginWrapper {
 
 	public static GSSCredential slcsMyProxyInit(String username,
-			char[] password, String idp) throws Exception {
+			char[] password, String idp, LoginParams params) throws Exception {
 
 		try {
+
+			if ( params != null ) {
+				String httproxy = params.getHttpProxy();
+				int httpProxyPort = params.getHttpProxyPort();
+
+				if ( StringUtils.isNotBlank(httproxy) ) {
+					Shibboleth.setHttpProxy(httproxy, httpProxyPort, params.getHttpProxyUsername(), params.getMyProxyPassphrase());
+				}
+			}
+
 
 			IdpObject idpO = new StaticIdpObject(idp);
 			CredentialManager cm = new StaticCredentialManager(username,

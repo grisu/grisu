@@ -2,6 +2,7 @@ package org.vpac.grisu.frontend.control.login;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -37,6 +38,7 @@ import au.org.arcs.jcommons.dependencies.ClasspathHacker;
 import au.org.arcs.jcommons.dependencies.Dependency;
 import au.org.arcs.jcommons.dependencies.DependencyManager;
 import au.org.arcs.jcommons.utils.ArcsSecurityProvider;
+import au.org.arcs.jcommons.utils.HttpProxyManager;
 import au.org.arcs.jcommons.utils.JythonHelpers;
 
 import com.google.common.collect.ImmutableList;
@@ -85,11 +87,23 @@ public class LoginManager {
 		"http://localhost:8080/soap/GrisuService");
 
 	}
+	public static  String httpProxyHost = null;
+
+	public static int httpProxyPort = 80;
+
+	public static String httpProxyUsername = null;
+
+	public static char[] httpProxyPassphrase = null;
+
 	public static void addPluginsToClasspath() throws IOException {
 
 		ClasspathHacker.initFolder(Environment.getGrisuPluginDirectory(),
 				new GrisuPluginFilenameFilter());
 
+	}
+
+	public static void clearHttpProxyPassword() {
+		Arrays.fill(httpProxyPassphrase, 'x');
 	}
 
 	private static ConsoleReader getConsoleReader() {
@@ -102,7 +116,6 @@ public class LoginManager {
 		}
 		return consoleReader;
 	}
-
 	public static void initEnvironment() {
 
 		if (!environmentInitialized) {
@@ -132,7 +145,6 @@ public class LoginManager {
 		}
 
 	}
-
 	/**
 	 * Simplest way to login.
 	 * 
@@ -146,7 +158,6 @@ public class LoginManager {
 		return login((GlobusCredential) null, (char[]) null, (String) null,
 				(String) null, (LoginParams) null, false);
 	}
-
 	/**
 	 * One-for-all method to login to a local Grisu backend.
 	 * 
@@ -232,6 +243,13 @@ public class LoginManager {
 
 		if (loginParams == null) {
 			loginParams = new LoginParams("Local", null, null);
+		}
+
+		if ( StringUtils.isNotBlank(httpProxyHost) ) {
+			loginParams.setHttpProxy(httpProxyHost);
+			loginParams.setHttpProxyPort(httpProxyPort);
+			loginParams.setHttpProxyUsername(httpProxyUsername);
+			loginParams.setHttpProxyPassphrase(httpProxyPassphrase);
 		}
 
 		try {
@@ -369,7 +387,7 @@ public class LoginManager {
 						.getGrisuPluginDirectory());
 
 				GSSCredential slcsproxy = slcsMyProxyInit(username, password,
-						idp);
+						idp, loginParams);
 
 				if (saveCredentialAsLocalProxy) {
 					CredentialHelpers.writeToDisk(slcsproxy);
@@ -519,7 +537,6 @@ public class LoginManager {
 
 	}
 
-
 	public static ServiceInterface loginCommandline(Type type, String url) throws LoginException {
 
 		switch (type) {
@@ -531,6 +548,7 @@ public class LoginManager {
 		throw new IllegalArgumentException("Login type not supported.");
 
 	}
+
 
 	public static ServiceInterface loginCommandlineMyProxy(String url)  {
 
@@ -713,7 +731,6 @@ public class LoginManager {
 		throw new RuntimeException("Not supported yet.");
 	}
 
-
 	public static void main(String[] args) throws LoginException {
 
 		ServiceInterface si = LoginManager.shiblogin("markus", args[0]
@@ -721,10 +738,19 @@ public class LoginManager {
 
 	}
 
+
 	public static ServiceInterface myProxyLogin(String url, String username,
 			char[] password) throws LoginException {
 		LoginParams loginParams = new LoginParams(url, username, password);
 		return login(null, null, null, null, loginParams, false);
+	}
+
+	public static void setHttpProxy(String host, int port, String username, char[] password) {
+		httpProxyHost = host;
+		httpProxyPort = port;
+		httpProxyUsername = username;
+		httpProxyPassphrase = password;
+		HttpProxyManager.setHttpProxy(httpProxyHost, httpProxyPort, httpProxyUsername, httpProxyPassphrase);
 	}
 
 	/**
@@ -782,9 +808,9 @@ public class LoginManager {
 	}
 
 	public static GSSCredential slcsMyProxyInit(String username,
-			char[] password, String idp) throws Exception {
+			char[] password, String idp, LoginParams params) throws Exception {
 
-		return SlcsLoginWrapper.slcsMyProxyInit(username, password, idp);
+		return SlcsLoginWrapper.slcsMyProxyInit(username, password, idp, params);
 
 	}
 

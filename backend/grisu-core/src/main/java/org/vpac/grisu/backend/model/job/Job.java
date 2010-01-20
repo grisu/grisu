@@ -54,7 +54,7 @@ public class Job implements Comparable<Job> {
 	@Attribute
 	private String jobname = null;
 	// the jobhandle that comes back from the job submission
-	@Element
+	//	@Element
 	private String jobhandle = null;
 
 	// the user's dn
