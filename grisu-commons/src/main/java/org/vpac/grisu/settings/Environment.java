@@ -14,10 +14,13 @@ import org.apache.commons.lang.StringUtils;
 public final class Environment {
 
 	private static final String GRISU_DEFAULT_DIRECTORY = System
-			.getProperty("user.home")
-			+ File.separator + ".grisu";
+	.getProperty("user.home")
+	+ File.separator + ".grisu";
+	private static final String GRISU_SYSTEM_WIDE_CONFIG_DIR = "/etc/grisu";
 
 	private static String USER_SET_GRISU_DIRECTORY = null;
+
+	private static boolean grisuDirectoryAccessed = false;
 
 	private static String GLOBUS_HOME;
 
@@ -52,19 +55,33 @@ public final class Environment {
 	 */
 	public static File getGrisuDirectory() {
 
+		grisuDirectoryAccessed = true;
+
 		if (GRISU_DIRECTORY == null) {
 
 			File grisuDir = null;
 			if (StringUtils.isNotBlank(USER_SET_GRISU_DIRECTORY)) {
+				// first, check whether user specified his own directory
 				grisuDir = new File(USER_SET_GRISU_DIRECTORY);
 			} else {
 				grisuDir = new File(GRISU_DEFAULT_DIRECTORY);
-			}
+				// now try whether a .grisu directory exists in the users home dir
+				// if not, check "/etc/grisu"
+				if ( grisuDir.exists() ) {
+					GRISU_DIRECTORY = grisuDir;
+				} else {
+					grisuDir = new File(GRISU_SYSTEM_WIDE_CONFIG_DIR);
 
-			if (!grisuDir.exists()) {
-				grisuDir.mkdirs();
+					if ( grisuDir.exists() ) {
+						GRISU_DIRECTORY = grisuDir;
+					} else {
+						// create the default .grisu dir in users home
+						grisuDir = new File(GRISU_DEFAULT_DIRECTORY);
+						grisuDir.mkdirs();
+						GRISU_DIRECTORY = grisuDir;
+					}
+				}
 			}
-			GRISU_DIRECTORY = grisuDir;
 		}
 		return GRISU_DIRECTORY;
 	}
@@ -81,8 +98,8 @@ public final class Environment {
 				if (!root.exists()) {
 					throw new RuntimeException(
 							"Could not create local cache root directory: "
-									+ root.getAbsolutePath()
-									+ ". Please check the permissions.");
+							+ root.getAbsolutePath()
+							+ ". Please check the permissions.");
 				}
 			}
 		}
@@ -118,9 +135,13 @@ public final class Environment {
 
 	public static void setGrisuDirectory(String path) {
 
+		if ( grisuDirectoryAccessed ) {
+			throw new RuntimeException("Can't set grisu directory because it was accessed once already. You need to set it before you do anything else.");
+		}
+
 		if (GRISU_DIRECTORY != null) {
 			throw new RuntimeException(
-					"Can't set grisu directory because it was already accessed once after the start of this application...");
+			"Can't set grisu directory because it was already accessed once after the start of this application...");
 		}
 
 		USER_SET_GRISU_DIRECTORY = path;
