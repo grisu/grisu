@@ -172,6 +172,10 @@ public class RunningJobManager {
 
 		startAutoRefresh();
 	}
+	
+	public final ServiceInterface getServiceInterface() {
+		return this.si;
+	}
 
 	private synchronized Collection<BatchJobObject> getAllCurrentlyWatchedBatchJobs() {
 
@@ -182,6 +186,14 @@ public class RunningJobManager {
 	private synchronized Collection<JobObject> getAllCurrentlyWatchedSingleJobs() {
 
 		return cachedAllSingleJobs.values();
+	}
+	
+	public synchronized BatchJobObject createBatchJob(String jobname, String submissionFqan, String defaultApplication, String defaultVersion) throws BatchJobException {
+		
+		BatchJobObject batchJob = new BatchJobObject(si, jobname, submissionFqan, defaultApplication, defaultVersion);
+		cachedAllBatchJobs.put(jobname, batchJob);
+		return batchJob;
+		
 	}
 
 	public BatchJobObject getBatchJob(String jobname) throws NoSuchJobException {

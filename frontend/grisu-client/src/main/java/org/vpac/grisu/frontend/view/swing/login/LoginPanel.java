@@ -78,7 +78,7 @@ public class LoginPanel extends JPanel implements ProxyCreatorHolder {
 
 	public void proxyCreated(GlobusCredential proxy) {
 
-		LoginParams loginParams = new LoginParams("Local", null, null);
+		LoginParams loginParams = new LoginParams("LOCAL_WS", null, null);
 		ServiceInterface si;
 		try {
 			si = LoginManager.login(proxy, null, null, null, loginParams, true);
