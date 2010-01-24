@@ -75,7 +75,8 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			QName serviceName = new QName("http://api.grisu.arcs.org.au/",
 					"GrisuService");
 			QName portName = new QName("http://api.grisu.arcs.org.au/",
-					"ServiceInterfaceSOAPPort");
+//					"ServiceInterfaceSOAPPort");
+					"ServiceInterfacePort");
 
 			Service s;
 			try {

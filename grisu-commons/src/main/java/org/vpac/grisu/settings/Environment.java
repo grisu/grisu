@@ -79,6 +79,7 @@ public final class Environment {
 						grisuDir = new File(GRISU_DEFAULT_DIRECTORY);
 						grisuDir.mkdirs();
 						GRISU_DIRECTORY = grisuDir;
+						
 					}
 				}
 			}

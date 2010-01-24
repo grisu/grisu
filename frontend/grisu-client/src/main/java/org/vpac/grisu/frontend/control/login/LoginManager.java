@@ -75,7 +75,7 @@ public class LoginManager {
 	static final Logger myLogger = Logger.getLogger(LoginManager.class
 			.getName());
 
-	static final Map<String, String> SERVICEALIASES = new HashMap<String, String>();
+	static final public Map<String, String> SERVICEALIASES = new HashMap<String, String>();
 
 	static {
 

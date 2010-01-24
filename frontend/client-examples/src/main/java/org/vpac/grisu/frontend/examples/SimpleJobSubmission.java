@@ -9,14 +9,16 @@ public class SimpleJobSubmission {
 
 	public static void main(String[] args) throws Exception {
 
-		ServiceInterface si = LoginManager.loginCommandline();
+//		ServiceInterface si = LoginManager.loginCommandline();
+		ServiceInterface si = LoginManager.loginCommandline(LoginManager.SERVICEALIASES.get("LOCAL_WS"));
 
 		//GrisuRegistry registry = GrisuRegistryManager.getDefault si);
 
 		JobListDialog.open(si, null);
 
 		JobObject job = new JobObject(si);
-		//		job.setApplication("java");
+		job.setApplication("java");
+		job.setApplicationVersion("1.6.0-06");
 		job.setTimestampJobname("java_job2");
 		job.setCommandline("java -version");
 
