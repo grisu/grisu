@@ -123,7 +123,7 @@ public class RunningJobManager {
 
 	}
 
-	private final int UPDATE_TIME_IN_SECONDS = 10;
+	private final int UPDATE_TIME_IN_SECONDS = 300;
 
 	private static Map<ServiceInterface, RunningJobManager> cachedRegistries = new HashMap<ServiceInterface, RunningJobManager>();
 	public static RunningJobManager getDefault(final ServiceInterface si) {
@@ -159,7 +159,7 @@ public class RunningJobManager {
 	private final Map<String, EventList<BatchJobObject>> cachedBatchJobsPerApplication = Collections
 	.synchronizedMap(new HashMap<String, EventList<BatchJobObject>>());;
 
-	private final boolean checkForNewApplicationsForSingleJobs = false;
+	//	private final boolean checkForNewApplicationsForSingleJobs = false;
 
 	private final Timer updateTimer = new Timer();
 
@@ -172,9 +172,14 @@ public class RunningJobManager {
 
 		startAutoRefresh();
 	}
-	
-	public final ServiceInterface getServiceInterface() {
-		return this.si;
+
+	public synchronized BatchJobObject createBatchJob(String jobname, String submissionFqan, String defaultApplication, String defaultVersion) throws BatchJobException {
+
+		BatchJobObject batchJob = new BatchJobObject(si, jobname, submissionFqan, defaultApplication, defaultVersion);
+		cachedAllBatchJobs.put(jobname, batchJob);
+		cachedBatchJobsPerApplication.get(defaultApplication).add(batchJob);
+		return batchJob;
+
 	}
 
 	private synchronized Collection<BatchJobObject> getAllCurrentlyWatchedBatchJobs() {
@@ -186,14 +191,6 @@ public class RunningJobManager {
 	private synchronized Collection<JobObject> getAllCurrentlyWatchedSingleJobs() {
 
 		return cachedAllSingleJobs.values();
-	}
-	
-	public synchronized BatchJobObject createBatchJob(String jobname, String submissionFqan, String defaultApplication, String defaultVersion) throws BatchJobException {
-		
-		BatchJobObject batchJob = new BatchJobObject(si, jobname, submissionFqan, defaultApplication, defaultVersion);
-		cachedAllBatchJobs.put(jobname, batchJob);
-		return batchJob;
-		
 	}
 
 	public BatchJobObject getBatchJob(String jobname) throws NoSuchJobException {
@@ -289,6 +286,10 @@ public class RunningJobManager {
 		}
 		return cachedSingleJobsPerApplication.get(application);
 
+	}
+
+	public final ServiceInterface getServiceInterface() {
+		return this.si;
 	}
 
 

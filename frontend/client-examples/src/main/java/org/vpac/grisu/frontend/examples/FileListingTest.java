@@ -6,8 +6,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.frontend.control.login.LoginParams;
-import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
+import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -21,14 +20,14 @@ public class FileListingTest {
 		String username = args[0];
 		char[] password = args[1].toCharArray();
 
-		LoginParams loginParams = new LoginParams(
-				// "http://localhost:8080/xfire-backend/services/grisu",
-				// "https://ngportal.vpac.org/grisu-ws/soap/EnunciateServiceInterfaceService",
-				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-				"Local", username, password);
+		//		LoginParams loginParams = new LoginParams(
+		//				// "http://localhost:8080/xfire-backend/services/grisu",
+		//				// "https://ngportal.vpac.org/grisu-ws/soap/EnunciateServiceInterfaceService",
+		//				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
+		//				"Local", username, password);
 
-		final ServiceInterface si = ServiceInterfaceFactory
-		.createInterface(loginParams);
+
+		final ServiceInterface si = LoginManager.shiblogin("markus", args[0].toCharArray(), "VPAC", false);
 
 		final GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
 		final FileManager fileManager = registry.getFileManager();

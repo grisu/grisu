@@ -1,7 +1,6 @@
 package org.vpac.grisu.frontend.view.swing;
 
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 public class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
 
@@ -27,15 +26,15 @@ public class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler
 
 		e.printStackTrace();
 
-		if (SwingUtilities.isEventDispatchThread()) {
-			showException(t, e);
-		} else {
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					showException(t, e);
-				}
-			});
-		}
+		//		if (SwingUtilities.isEventDispatchThread()) {
+		//			showException(t, e);
+		//		} else {
+		//			SwingUtilities.invokeLater(new Runnable() {
+		//				public void run() {
+		//					showException(t, e);
+		//				}
+		//			});
+		//		}
 	}
 
 }
