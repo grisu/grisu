@@ -134,12 +134,17 @@ public class LoginManager {
 			.setProperty("ssl.TrustManagerFactory.algorithm",
 			"TrustAllCertificates");
 
-			Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
+			String disableLoadBouncyCastle = System.getProperty("disableLoadBouncyCastle");
 
-			dependencies.put(Dependency.BOUNCYCASTLE, "jdk15-143");
+			if ( ! "true".equalsIgnoreCase(disableLoadBouncyCastle) ) {
 
-			DependencyManager.addDependencies(dependencies, ArcsEnvironment
-					.getArcsCommonJavaLibDirectory(), true);
+				Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
+
+				dependencies.put(Dependency.BOUNCYCASTLE, "jdk15-145");
+
+				DependencyManager.addDependencies(dependencies, ArcsEnvironment
+						.getArcsCommonJavaLibDirectory(), true);
+			}
 
 			environmentInitialized = true;
 		}
