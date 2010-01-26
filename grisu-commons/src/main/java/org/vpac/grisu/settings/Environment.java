@@ -17,6 +17,10 @@ public final class Environment {
 	.getProperty("user.home")
 	+ File.separator + ".grisu";
 	private static final String GRISU_SYSTEM_WIDE_CONFIG_DIR = "/etc/grisu";
+	private static final String GRISU_SYSTEM_WIDE_VAR_DIR = "/var/lib/grisu/";
+	private static final String GRISU_CLIENT_DIR = System
+	.getProperty("user.home")
+	+ File.separator + ".grisu";
 
 	private static String USER_SET_GRISU_DIRECTORY = null;
 
@@ -41,16 +45,36 @@ public final class Environment {
 
 		if (StringUtils.isBlank(GLOBUS_HOME)) {
 
-			GLOBUS_HOME = getGrisuDirectory() + File.separator + "globus";
+			GLOBUS_HOME = getVarGrisuDirectory() + File.separator + "globus";
 
 		}
 		return GLOBUS_HOME;
 	}
 
+	public static File getGrisuClientDirectory() {
+
+		if ( getGrisuDirectory().equals(new File(GRISU_SYSTEM_WIDE_CONFIG_DIR)) ) {
+			File clientDir = new File(GRISU_CLIENT_DIR);
+			if ( ! clientDir.exists() ) {
+				if (! clientDir.mkdirs() ) {
+					throw new RuntimeException("Could not create grisu client settings directory "+clientDir.toString()+". Please adjust permissions.");
+				}
+
+			}
+			if ( ! clientDir.canWrite() ) {
+				throw new RuntimeException("Can't write to directory "+clientDir.toString()+". Please adjust permissions.");
+			}
+			return clientDir;
+		} else {
+			return getGrisuDirectory();
+		}
+
+	}
+
 	/**
 	 * This one returns the location where grisu specific config/cache files are
 	 * stored. If it does not exist it gets created.
-	 * 
+	 *
 	 * @return the location of grisu specific config/cache files
 	 */
 	public static File getGrisuDirectory() {
@@ -79,7 +103,7 @@ public final class Environment {
 						grisuDir = new File(GRISU_DEFAULT_DIRECTORY);
 						grisuDir.mkdirs();
 						GRISU_DIRECTORY = grisuDir;
-						
+
 					}
 				}
 			}
@@ -93,7 +117,7 @@ public final class Environment {
 	 * @return the root of the local cache
 	 */
 	public static File getGrisuLocalCacheRoot() {
-		File root = new File(getGrisuDirectory(), getCacheDirName());
+		File root = new File(getGrisuClientDirectory(), getCacheDirName());
 		if (!root.exists()) {
 			if (!root.mkdirs()) {
 				if (!root.exists()) {
@@ -108,7 +132,7 @@ public final class Environment {
 	}
 
 	public static File getGrisuPluginDirectory() {
-		File dir = new File(getGrisuDirectory(), "plugins");
+		File dir = new File(getGrisuClientDirectory(), "plugins");
 
 		if (!dir.exists()) {
 			dir.mkdirs();
@@ -125,13 +149,27 @@ public final class Environment {
 	 */
 	public static File getLocalJobCacheDirectory() {
 
-		File dir = new File(getGrisuDirectory(), "jobs");
+		File dir = new File(getGrisuClientDirectory(), "jobs");
 		dir.mkdirs();
 		return dir;
 	}
 
 	public static String getTemplateDirectory() {
-		return getGrisuDirectory() + File.separator + "templates";
+		return getGrisuClientDirectory() + File.separator + "templates";
+	}
+
+	public static File getVarGrisuDirectory() {
+
+		if ( getGrisuDirectory().equals(new File(GRISU_SYSTEM_WIDE_CONFIG_DIR)) ) {
+			File varDir = new File(GRISU_SYSTEM_WIDE_VAR_DIR);
+			if ( ! varDir.canWrite() ) {
+				throw new RuntimeException("Can't write to directory "+varDir.toString()+". Please adjust permissions.");
+			}
+			return varDir;
+		} else {
+			return getGrisuDirectory();
+		}
+
 	}
 
 	public static void setGrisuDirectory(String path) {

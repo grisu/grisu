@@ -1,7 +1,6 @@
 package org.vpac.grisu.backend.hibernate;
 
 import java.io.File;
-import java.io.PrintWriter;
 import java.net.InetAddress;
 
 import org.apache.commons.lang.StringUtils;
@@ -95,7 +94,7 @@ public final class HibernateSessionFactory {
 							.getProperty("hibernate.connection.url"))) {
 						// setting default path to hsqldb if necessary
 						String url = "jdbc:hsqldb:file:"
-							+ Environment.getGrisuDirectory().getPath()
+							+ Environment.getVarGrisuDirectory().getPath()
 							+ File.separator + "grisulocaldb";
 						configuration.setProperty("hibernate.connection.url",
 								url);
@@ -167,7 +166,7 @@ public final class HibernateSessionFactory {
 
 						if ((url == null) || (url.length() == 0)) {
 							url = "jdbc:hsqldb:file:"
-								+ Environment.getGrisuDirectory().getPath()
+								+ Environment.getVarGrisuDirectory().getPath()
 								+ File.separator + "grisulocaldb";
 						}
 						if ((username == null) || (username.length() == 0)) {
@@ -189,7 +188,7 @@ public final class HibernateSessionFactory {
 						usedDatabase = DERBY_DBTYPE;
 
 						// use default derby database
-						System.setProperty("derby.system.home", Environment.getGrisuDirectory().getPath()+File.separator+"derby");
+						System.setProperty("derby.system.home", Environment.getVarGrisuDirectory().getPath()+File.separator+"derby");
 
 
 						tryToStartDerbyServer();
@@ -229,7 +228,7 @@ public final class HibernateSessionFactory {
 					}
 				} else {
 					// use default derby database
-					System.setProperty("derby.system.home", Environment.getGrisuDirectory().getPath()+File.separator+"derby");
+					System.setProperty("derby.system.home", Environment.getVarGrisuDirectory().getPath()+File.separator+"derby");
 
 					usedDatabase = DERBY_DBTYPE;
 

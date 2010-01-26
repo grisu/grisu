@@ -36,11 +36,11 @@ public final class MyProxyServerParams {
 	 *             if the file could not be read/parsed
 	 */
 	public static PropertiesConfiguration getClientConfiguration()
-			throws ConfigurationException {
+	throws ConfigurationException {
 		if (config == null) {
-			File grisuDir = Environment.getGrisuDirectory();
+			File grisuDir = Environment.getGrisuClientDirectory();
 			config = new PropertiesConfiguration(new File(grisuDir,
-					"grisu.config"));
+			"grisu.config"));
 		}
 		return config;
 	}
@@ -54,7 +54,7 @@ public final class MyProxyServerParams {
 		int myProxyPort = -1;
 		try {
 			myProxyPort = Integer.parseInt(getClientConfiguration().getString(
-					"myProxyPort"));
+			"myProxyPort"));
 
 		} catch (Exception e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
@@ -80,7 +80,7 @@ public final class MyProxyServerParams {
 		} catch (ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
-		if (myProxyServer == null || "".equals(myProxyServer)) {
+		if ((myProxyServer == null) || "".equals(myProxyServer)) {
 			myProxyServer = DEFAULT_MYPROXY_SERVER;
 		}
 

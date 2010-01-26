@@ -25,24 +25,24 @@ import au.org.arcs.jcommons.interfaces.InformationManager;
 public class ClientSideGrisuRegistry implements GrisuRegistry {
 
 	static final Logger myLogger = Logger
-			.getLogger(ClientSideGrisuRegistry.class.getName());
+	.getLogger(ClientSideGrisuRegistry.class.getName());
 
 	private final ServiceInterface serviceInterface;
 
 	private final InformationManager infoManager;
 
 	private HistoryManager historyManager = null;
-	private Map<String, ApplicationInformation> cachedApplicationInformationObjects = new HashMap<String, ApplicationInformation>();
-	private Map<String, UserApplicationInformation> cachedUserInformationObjects = new HashMap<String, UserApplicationInformation>();
+	private final Map<String, ApplicationInformation> cachedApplicationInformationObjects = new HashMap<String, ApplicationInformation>();
+	private final Map<String, UserApplicationInformation> cachedUserInformationObjects = new HashMap<String, UserApplicationInformation>();
 	private UserEnvironmentManager cachedUserInformation;
 	private ResourceInformation cachedResourceInformation;
 	private FileManager cachedFileHelper;
 
 	public ClientSideGrisuRegistry(ServiceInterface serviceInterface)
-			throws Exception {
+	throws Exception {
 		this.serviceInterface = serviceInterface;
 		this.infoManager = new CachedMdsInformationManager(Environment
-				.getGrisuDirectory().getPath());
+				.getGrisuClientDirectory().getPath());
 
 		// try {
 		// this.infoManager.getAllSubmissionLocations();
@@ -75,7 +75,7 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 	public HistoryManager getHistoryManager() {
 
 		if (historyManager == null) {
-			File historyFile = new File(Environment.getGrisuDirectory()
+			File historyFile = new File(Environment.getGrisuClientDirectory()
 					.getPath(), GRISU_HISTORY_FILENAME);
 			if (!historyFile.exists()) {
 				try {

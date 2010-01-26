@@ -26,7 +26,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 	static final Logger myLogger = Logger
 	.getLogger(JaxWsServiceInterfaceCreator.class.getName());
 
-	public static String TRUST_FILE_NAME = Environment.getGrisuDirectory()
+	public static String TRUST_FILE_NAME = Environment.getGrisuClientDirectory()
 	.getPath()
 	+ File.separator + "truststore.jks";
 
@@ -35,7 +35,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 	 **/
 	public JaxWsServiceInterfaceCreator() throws ServiceInterfaceException {
 		try {
-			if (!(new File(Environment.getGrisuDirectory(), "truststore.jks")
+			if (!(new File(Environment.getGrisuClientDirectory(), "truststore.jks")
 			.exists())) {
 				InputStream ts = JaxWsServiceInterfaceCreator.class
 				.getResourceAsStream("/truststore.jks");
@@ -44,7 +44,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 		} catch (IOException ex) {
 			throw new ServiceInterfaceException(
 					"cannot copy SSL certificate store into grisu home directory. Does "
-					+ Environment.getGrisuDirectory().getPath()
+					+ Environment.getGrisuClientDirectory().getPath()
 					+ " exist?", ex);
 		}
 		System.setProperty("javax.net.ssl.trustStore", TRUST_FILE_NAME);

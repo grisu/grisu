@@ -108,7 +108,7 @@ public final class ClientPropertiesManager {
 	public static PropertiesConfiguration getClientConfiguration()
 	throws ConfigurationException {
 		if (config == null) {
-			File grisuDir = Environment.getGrisuDirectory();
+			File grisuDir = Environment.getGrisuClientDirectory();
 			config = new PropertiesConfiguration(new File(grisuDir,
 			"grisu.config"));
 		}
@@ -170,6 +170,25 @@ public final class ClientPropertiesManager {
 		}
 
 		return timeout;
+	}
+
+	public static int getDefaultActionStatusRecheckInterval() {
+
+		int intervalInSeconds = -1;
+		try {
+			intervalInSeconds = Integer.parseInt(getClientConfiguration().getString(
+			"actionStatusRecheckInterval"));
+
+		} catch (Exception e) {
+			// myLogger.debug("Problem with config file: " + e.getMessage());
+			return DEFAULT_ACTION_STATUS_RECHECK_INTERVAL_IN_SECONDS;
+		}
+		if (intervalInSeconds == -1) {
+			return DEFAULT_ACTION_STATUS_RECHECK_INTERVAL_IN_SECONDS;
+		}
+
+		return intervalInSeconds;
+
 	}
 
 	/**
@@ -625,6 +644,7 @@ public final class ClientPropertiesManager {
 
 	}
 
+
 	/**
 	 * Sets the ServiceInterface url that was used the last time the user
 	 * successfully connected to one.
@@ -643,7 +663,6 @@ public final class ClientPropertiesManager {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 	}
-
 
 	public static void setLastUsedLeftUrl(
 			final String url) {
@@ -678,25 +697,6 @@ public final class ClientPropertiesManager {
 	}
 
 	private ClientPropertiesManager() {
-	}
-
-	public static int getDefaultActionStatusRecheckInterval() {
-		
-		int intervalInSeconds = -1;
-		try {
-			intervalInSeconds = Integer.parseInt(getClientConfiguration().getString(
-			"actionStatusRecheckInterval"));
-
-		} catch (Exception e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
-			return DEFAULT_ACTION_STATUS_RECHECK_INTERVAL_IN_SECONDS;
-		}
-		if (intervalInSeconds == -1) {
-			return DEFAULT_ACTION_STATUS_RECHECK_INTERVAL_IN_SECONDS;
-		}
-
-		return intervalInSeconds;
-
 	}
 
 }

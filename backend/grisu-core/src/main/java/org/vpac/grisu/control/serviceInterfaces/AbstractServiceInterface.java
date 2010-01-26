@@ -131,7 +131,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	private final InformationManager informationManager = CachedMdsInformationManager
 	.getDefaultCachedMdsInformationManager(Environment
-			.getGrisuDirectory().toString());
+			.getVarGrisuDirectory().toString());
 
 	public static final int DEFAULT_JOB_SUBMISSION_RETRIES = 5;
 
@@ -154,7 +154,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private FileSystemStructureToXMLConverter fsconverter = null;
 
 	private final MatchMaker matchmaker = new MatchMakerImpl(Environment
-			.getGrisuDirectory().toString());
+			.getVarGrisuDirectory().toString());
 	// private MatchMaker matchmaker = new CachedMatchMakerImpl(Environment
 	// .getGrisuDirectory().toString());
 

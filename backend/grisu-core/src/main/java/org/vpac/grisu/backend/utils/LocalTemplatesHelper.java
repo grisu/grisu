@@ -49,7 +49,7 @@ public final class LocalTemplatesHelper {
 			// copy globus floder if not already there
 			try {
 				if (!new File(Environment.getGlobusHome()).exists()) {
-					unzipFileToDir("/globus.zip", Environment.getGrisuDirectory());
+					unzipFileToDir("/globus.zip", Environment.getVarGrisuDirectory());
 				}
 			} catch (Exception e) {
 				myLogger.error(e);
@@ -159,6 +159,16 @@ public final class LocalTemplatesHelper {
 						+ " to be created.");
 			}
 		}
+
+		if (!Environment.getVarGrisuDirectory().exists()) {
+			if (!Environment.getVarGrisuDirectory().mkdirs()) {
+				myLogger.error("Coud not create grisu var directory.");
+				throw new Exception(
+						"Could not create grisu var directory. Please set proper permission for " +
+						Environment.getVarGrisuDirectory()+" to be created."
+				);
+			}
+		}
 	}
 
 	private static void unzipFileToDir(final String zipFileResourcePath,
@@ -179,7 +189,7 @@ public final class LocalTemplatesHelper {
 
 			while ((entry = zipstream.getNextEntry()) != null) {
 				myLogger.debug("Entry: " + entry.getName());
-				String filePath = Environment.getGrisuDirectory()
+				String filePath = targetDir
 				.getAbsolutePath()
 				+ File.separator + entry.getName();
 

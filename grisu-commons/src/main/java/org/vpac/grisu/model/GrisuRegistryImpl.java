@@ -52,8 +52,8 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	private final ServiceInterface serviceInterface;
 
 	private HistoryManager historyManager = null;
-	private Map<String, ApplicationInformation> cachedApplicationInformationObjects = new HashMap<String, ApplicationInformation>();
-	private Map<String, UserApplicationInformation> cachedUserInformationObjects = new HashMap<String, UserApplicationInformation>();
+	private final Map<String, ApplicationInformation> cachedApplicationInformationObjects = new HashMap<String, ApplicationInformation>();
+	private final Map<String, UserApplicationInformation> cachedUserInformationObjects = new HashMap<String, UserApplicationInformation>();
 	private UserEnvironmentManager cachedUserInformation;
 	private ResourceInformation cachedResourceInformation;
 	private FileManager cachedFileHelper;
@@ -99,7 +99,7 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	 */
 	public final HistoryManager getHistoryManager() {
 		if (historyManager == null) {
-			File historyFile = new File(Environment.getGrisuDirectory()
+			File historyFile = new File(Environment.getGrisuClientDirectory()
 					.getPath(), GRISU_HISTORY_FILENAME);
 			if (!historyFile.exists()) {
 				try {

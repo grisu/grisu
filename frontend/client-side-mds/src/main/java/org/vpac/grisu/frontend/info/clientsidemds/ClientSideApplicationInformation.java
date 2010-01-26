@@ -30,7 +30,7 @@ public class ClientSideApplicationInformation implements ApplicationInformation 
 		this.registry = registry;
 		this.infoManager = infoManager;
 		this.applicationName = applicationName;
-		this.matchMaker = new MatchMakerImpl(Environment.getGrisuDirectory()
+		this.matchMaker = new MatchMakerImpl(Environment.getGrisuClientDirectory()
 				.toString());
 	}
 
