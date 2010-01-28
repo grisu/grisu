@@ -35,6 +35,7 @@ import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileType;
 import org.apache.commons.vfs.FileTypeSelector;
 import org.apache.log4j.Logger;
+import org.globus.common.CoGProperties;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 import org.vpac.grisu.backend.hibernate.BatchJobDAO;
@@ -52,6 +53,7 @@ import org.vpac.grisu.backend.model.job.gt4.GT4Submitter;
 import org.vpac.grisu.backend.utils.CertHelpers;
 import org.vpac.grisu.backend.utils.FileContentDataSourceConnector;
 import org.vpac.grisu.backend.utils.FileSystemStructureToXMLConverter;
+import org.vpac.grisu.backend.utils.LocalTemplatesHelper;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.BatchJobException;
@@ -84,6 +86,8 @@ import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.utils.FileHelpers;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
+import org.vpac.security.light.control.CertificateFiles;
+import org.vpac.security.light.control.VomsesFiles;
 import org.vpac.security.light.voms.VO;
 import org.vpac.security.light.voms.VOManagement.VOManagement;
 import org.w3c.dom.Document;
@@ -118,6 +122,28 @@ import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
  */
 public abstract class AbstractServiceInterface implements ServiceInterface {
 
+	static final Logger myLogger = Logger
+	.getLogger(AbstractServiceInterface.class.getName());
+
+	static {
+		CoGProperties.getDefault().setProperty(
+				CoGProperties.ENFORCE_SIGNING_POLICY, "false");
+
+		System.out.println("ONE TIME INIT.");
+
+		try {
+			LocalTemplatesHelper.copyTemplatesAndMaybeGlobusFolder();
+			VomsesFiles.copyVomses();
+			CertificateFiles.copyCACerts();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			myLogger.error(e.getLocalizedMessage());
+			// throw new
+			// RuntimeException("Could not initiate local backend: "+e.getLocalizedMessage());
+		}
+
+	}
+
 	private final boolean INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND = false;
 
 	public static final String REFRESH_STATUS_PREFIX = "REFRESH_";
@@ -126,8 +152,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public static String GRISU_JOB_FILE_NAME = ".grisujob";
 	public static String GRISU_BATCH_JOB_FILE_NAME = ".grisubatchjob";
 
-	static final Logger myLogger = Logger
-	.getLogger(AbstractServiceInterface.class.getName());
 
 	private final InformationManager informationManager = CachedMdsInformationManager
 	.getDefaultCachedMdsInformationManager(Environment
