@@ -1254,6 +1254,8 @@ Comparable<BatchJobObject> {
 			"Interrupted after creating all jobs.");
 		}
 
+		refresh(false);
+
 		if (optimize) {
 			try {
 				EventBus.publish(this.batchJobname, new BatchJobEvent(this,
@@ -1291,6 +1293,8 @@ Comparable<BatchJobObject> {
 			}
 		}
 
+		refresh(false);
+
 		try {
 			uploadInputFiles();
 		} catch (InterruptedException e) {
@@ -1322,7 +1326,11 @@ Comparable<BatchJobObject> {
 		try {
 			handle = serviceInterface.refreshBatchJobStatus(batchJobname);
 		} catch (NoSuchJobException e) {
-			throw new RuntimeException(e);
+
+			this.isRefreshing = false;
+			pcs.firePropertyChange(REFRESHING, true, false);
+			myLogger.error(e);
+			return;
 		}
 
 		if (waitForRefreshToFinish) {
@@ -1820,6 +1828,7 @@ Comparable<BatchJobObject> {
 			}
 
 		}
+		refresh(false);
 	}
 
 	/**

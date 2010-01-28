@@ -59,7 +59,7 @@ public class BatchJobRestartPanel extends JPanel implements PropertyChangeListen
 
 	private JButton getFailedJobsButton() {
 		if (failedJobsButton == null) {
-			failedJobsButton = new JButton("Failed jobs");
+			failedJobsButton = new JButton("Failed Jobs");
 			failedJobsButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 
@@ -81,7 +81,7 @@ public class BatchJobRestartPanel extends JPanel implements PropertyChangeListen
 	}
 	private JButton getWaitingButton() {
 		if (waitingJobsButton == null) {
-			waitingJobsButton = new JButton("Waiting jobs");
+			waitingJobsButton = new JButton("Waiting Jobs");
 			waitingJobsButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 

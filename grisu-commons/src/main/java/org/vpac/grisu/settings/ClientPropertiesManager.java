@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -40,6 +41,7 @@ public final class ClientPropertiesManager {
 	static final Logger myLogger = Logger
 	.getLogger(ClientPropertiesManager.class.getName());
 	private static final int DEFAULT_ACTION_STATUS_RECHECK_INTERVAL_IN_SECONDS = 5;
+	private static final String DEFAULT_SHIBBOLETH_URL = "https://slcs1.arcs.org.au/SLCS/login";
 
 	/**
 	 * Call this if the user wants a new (server-side) template to his personal
@@ -472,6 +474,22 @@ public final class ClientPropertiesManager {
 		return urls;
 	}
 
+	public static String getShibbolethUrl() {
+
+		String url = null;
+		try {
+			url = (String) (getClientConfiguration()
+					.getProperty("shibbolethUrl"));
+		} catch (ConfigurationException e) {
+			myLogger.debug("Problem with config file: " + e.getMessage());
+		}
+
+		if ( StringUtils.isBlank(url) ) {
+			return DEFAULT_SHIBBOLETH_URL;
+		}
+		return url;
+	}
+
 	/**
 	 * Call this if a user wants to remove a (server-side) template from his
 	 * personal templates.
@@ -624,6 +642,7 @@ public final class ClientPropertiesManager {
 		}
 	}
 
+
 	/**
 	 * Sets the path to the executable for the default external application to
 	 * handle this kind of file extension.
@@ -643,7 +662,6 @@ public final class ClientPropertiesManager {
 		}
 
 	}
-
 
 	/**
 	 * Sets the ServiceInterface url that was used the last time the user

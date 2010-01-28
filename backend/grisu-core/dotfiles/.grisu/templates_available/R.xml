@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JobDefinition xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl">
+
+
+	<JobDescription grisu_modules="MatchMakerPanel">
+
+		<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
+			<Email description="The email address to send an email to if the job status changes." multiplicity="?" name="EmailAddress" other="useLastValue" template="Email"/>
+	</GrisuTemplate>
+
+		<JobIdentification>
+
+			<JobName defaultValue="R_job" description="The name of the job." name="Jobname" other="autosuggest,nosuggestbutton" template="JobName"/>
+
+		</JobIdentification>
+
+		<Application>
+
+			<ApplicationName>R</ApplicationName>
+			<ApplicationVersion template="ApplicationVersion" name="Version" title="Version" description="The version of R" other="useAny,useExact"/>
+			
+			<Description>
+				R is a language and environment for statistical computing and graphics. Find more about R at http:/www.r-project.org
+			</Description>
+			<POSIXApplication xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
+
+				<Executable>R</Executable>
+
+				<Argument>--no-readline</Argument>
+				<Argument>--no-restore</Argument>
+				<Argument>--no-save</Argument>
+				<Argument>-f</Argument>
+				<Argument substitute="INPUT_FILE[basename]"></Argument>
+
+				<WorkingDirectory filesystemName="userExecutionHostFs" postprocess="FillWithJobDirectoryRelativeToExecutionFileSystem"/>
+				<!-- 	The name of the standard output file. -->
+				<Output>stdout.txt</Output>
+				<!--  	The name of the standard error file. -->
+				<Error>stderr.txt</Error>
+				<!-- 	loads the module needed for a R job -->
+<!--				<Module description="The module to load" multiplicity="?" name="Module" template="InputString"/>-->
+
+				<Email description="The email address to send an email to if the job status changes." multiplicity="?" name="EmailAddress" other="useLastValue" template="Email"/>
+
+			</POSIXApplication>
+
+
+			<TotalCPUTime defaultValue="600" description="The total cpu time in seconds." multiplicity="1" name="Walltime" postprocess="TimesNoCPUs" template="InputInteger"/>
+
+			<TotalCPUCount><exact defaultValue="1" description="How many CPUs do you want to use to run this job." multiplicity="1" name="CPUs" prefills="1" template="InputInteger"/> </TotalCPUCount>
+			
+			<TotalPhysicalMemory> 
+				<LowerBoundedRange postprocess="ConvertToBytes" defaultValue="0" description="The minimum amount of memory in mb for this job." multiplicity="1" name="MinMem" title="MinMem" prefills="0,1024,2048,4096" template="InputInteger"> </LowerBoundedRange>
+			</TotalPhysicalMemory>
+
+		</Application>
+		<Resources>
+			<CandidateHosts>
+	
+				<HostName  name="HostName" template="InputString"/>
+
+			</CandidateHosts>
+
+		</Resources>
+
+		<DataStaging>
+			<FileName/>
+			<FileSystemName></FileSystemName>
+			<Source>
+
+				<URI description="Please provide your R script here." multiplicity="1" name="A_RInputFile" other="render=combobox,useHistory=6,directoryKey=R" postprocess="FillDataStagingFileNameElement,Substitute[name=INPUT_FILE]" template="InputFile" title="R script" validator="InputFile"/>
+
+			</Source>
+		</DataStaging>
+
+		<DataStaging>
+			<FileName/>
+			<FileSystemName>userExecutionHostFs</FileSystemName>
+			<Source>
+
+				<URI template="MultipleInputFiles" name="B_OtherFiles" title="Other input files"
+					description="Optional data files required by R script"
+					multiplicity="*" postprocess="FillDataStagingFileNameElement"
+					validator="InputFile" />
+
+			</Source>
+		</DataStaging>
+
+	</JobDescription>
+</JobDefinition>
