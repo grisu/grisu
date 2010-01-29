@@ -88,22 +88,20 @@ public final class Environment {
 				// first, check whether user specified his own directory
 				grisuDir = new File(USER_SET_GRISU_DIRECTORY);
 			} else {
-				grisuDir = new File(GRISU_DEFAULT_DIRECTORY);
+				grisuDir = new File(GRISU_SYSTEM_WIDE_CONFIG_DIR);
 				// now try whether a .grisu directory exists in the users home dir
 				// if not, check "/etc/grisu"
 				if ( grisuDir.exists() ) {
 					GRISU_DIRECTORY = grisuDir;
 				} else {
-					grisuDir = new File(GRISU_SYSTEM_WIDE_CONFIG_DIR);
+					grisuDir = new File(GRISU_DEFAULT_DIRECTORY);
 
 					if ( grisuDir.exists() ) {
 						GRISU_DIRECTORY = grisuDir;
 					} else {
 						// create the default .grisu dir in users home
-						grisuDir = new File(GRISU_DEFAULT_DIRECTORY);
 						grisuDir.mkdirs();
 						GRISU_DIRECTORY = grisuDir;
-
 					}
 				}
 			}
