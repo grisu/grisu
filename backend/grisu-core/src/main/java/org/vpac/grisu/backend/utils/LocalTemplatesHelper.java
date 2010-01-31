@@ -73,7 +73,7 @@ public final class LocalTemplatesHelper {
 		}
 
 		if ( ! templatesCopied ) {
-			File templatesDir = new File(Environment.getTemplateDirectory());
+			File templatesDir = new File(Environment.getAvailableTemplatesDirectory());
 
 			if (!templatesDir.exists() || (templatesDir.list().length == 0)) {
 
