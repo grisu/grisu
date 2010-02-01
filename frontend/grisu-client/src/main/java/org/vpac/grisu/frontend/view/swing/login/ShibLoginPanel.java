@@ -77,6 +77,8 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 		add(getLblPassword(), "2, 6, right, default");
 		add(getPasswordField(), "4, 6, fill, default");
 
+		loadIdpList();
+
 	}
 
 	private JComboBox getComboBox() {
@@ -129,9 +131,10 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 
 	private void loadIdpList() {
 
+		final String lastIdp = (String)idpModel.getSelectedItem();
+
 		Thread loadThread = new Thread() {
 
-			final String lastIdp = (String)idpModel.getSelectedItem();
 
 			@Override
 			public void run() {
@@ -171,6 +174,7 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 
 		};
 
+		loadThread.start();
 
 	}
 
@@ -191,7 +195,7 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 
 				loginSuccessful = false;
 				try {
-					si = LoginManager.shiblogin(username, password, idp, saveCredendentialsToLocalProxy);
+					si = LoginManager.login(null, password, username, idp, params, saveCredendentialsToLocalProxy);
 					loginSuccessful = true;
 				} catch (LoginException e) {
 					possibleException = e;
@@ -205,7 +209,7 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 	}
 
 	public boolean loginSuccessful() {
-		return false;
+		return loginSuccessful;
 	}
 
 }

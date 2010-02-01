@@ -95,7 +95,7 @@ public class MultiLoginPanel extends JPanel {
 
 		LoginMethodPanel temp = (LoginMethodPanel)(getTabbedPane().getSelectedComponent());
 
-		LoginParams params = new LoginParams("ARCS_DEV", null, null);
+		LoginParams params = new LoginParams("ARCS", null, null);
 
 		Thread loginThread = temp.login(params);
 

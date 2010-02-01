@@ -838,9 +838,11 @@ Comparable<JobObject> {
 	public void updateJobDirectory() {
 
 		try {
+			String oldUrl = jobDirectory;
 			jobDirectory = serviceInterface.getJobProperty(getJobname(),
 					Constants.JOBDIRECTORY_KEY);
 			getStatus(true);
+			pcs.firePropertyChange("jobDirectory", oldUrl, jobDirectory);
 		} catch (NoSuchJobException e) {
 			EventBus.publish(new JobStatusEvent(this, this.status,
 					JobConstants.NO_SUCH_JOB));

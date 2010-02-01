@@ -286,8 +286,13 @@ Comparable<BatchJobObject> {
 		}
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 				"Adding job " + job.getJobname()));
+		int oldNo = this.getJobs().size();
 		this.getJobs().add(job);
 		this.getNewlyAddedJobs().add(job);
+
+		pcs.firePropertyChange("totalNumberOfJobs", oldNo, this.getJobs().size());
+		pcs.firePropertyChange("jobs", null, getJobs());
+
 	}
 
 	/**
@@ -1216,10 +1221,7 @@ Comparable<BatchJobObject> {
 					}
 					if (!success) {
 						failedSubmissions.put(job, lastException);
-					} else {
-						getNewlyAddedJobs().remove(job);
 					}
-
 
 				}
 			};
@@ -1278,6 +1280,8 @@ Comparable<BatchJobObject> {
 				for (JobObject job : getNewlyAddedJobs()) {
 					job.updateJobDirectory();
 				}
+
+				getNewlyAddedJobs().clear();
 
 				EventBus
 				.publish(
