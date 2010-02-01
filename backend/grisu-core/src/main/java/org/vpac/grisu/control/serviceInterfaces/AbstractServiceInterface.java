@@ -134,7 +134,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		try {
 			LocalTemplatesHelper.copyTemplatesAndMaybeGlobusFolder();
 			VomsesFiles.copyVomses();
-			CertificateFiles.copyCACerts();
+			CertificateFiles.copyCACerts(false);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			myLogger.error(e.getLocalizedMessage());

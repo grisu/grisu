@@ -266,7 +266,7 @@ public class LoginManager {
 		}
 
 		try {
-			CertificateFiles.copyCACerts();
+			CertificateFiles.copyCACerts(true);
 		} catch (Exception e1) {
 			// e1.printStackTrace();
 			myLogger.warn(e1);
