@@ -10,6 +10,7 @@ import org.jdesktop.swingx.JXFrame;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.model.events.ApplicationEventListener;
+import org.vpac.grisu.frontend.view.swing.jobcreation.DummyJobCreationPanel;
 import org.vpac.grisu.frontend.view.swing.login.LoginPanel;
 
 public class GrisuApplicationWindow {
@@ -41,6 +42,8 @@ public class GrisuApplicationWindow {
 		});
 	}
 
+	private GrisuMainPanel mainPanel;
+
 	private LoginPanel lp;
 
 	private JXFrame frame;
@@ -62,7 +65,8 @@ public class GrisuApplicationWindow {
 
 		frame.getContentPane().setLayout(new BorderLayout());
 
-		GrisuMainPanel mainPanel = new GrisuMainPanel();
+		mainPanel = new GrisuMainPanel();
+		mainPanel.addJobCreationPanel(new DummyJobCreationPanel());
 		//		LoginPanel lp = new LoginPanel(mainPanel, true);
 		LoginPanel lp = new LoginPanel(mainPanel, true);
 		frame.getContentPane().add(lp, BorderLayout.CENTER);
@@ -80,5 +84,6 @@ public class GrisuApplicationWindow {
 
 		lp.setServiceInterface(si);
 	}
+
 
 }

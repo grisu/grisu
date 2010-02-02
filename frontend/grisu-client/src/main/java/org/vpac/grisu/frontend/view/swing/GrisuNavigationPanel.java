@@ -1,8 +1,12 @@
 package org.vpac.grisu.frontend.view.swing;
 
 import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -12,14 +16,23 @@ import javax.swing.SwingUtilities;
 import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.control.utils.ApplicationsManager;
+import org.vpac.grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 
-public class GrisuNavigationPanel extends JXTaskPaneContainer {
+public class GrisuNavigationPanel extends JXTaskPaneContainer implements PropertyChangeListener {
 
 	private final ServiceInterface si;
 
 	private final Map<String, JXTaskPane> taskPanes = new HashMap<String, JXTaskPane>();
 
 	private final GrisuCenterPanel centerPanel;
+
+	private final Set<String> applicationsToWatch = new TreeSet<String>();
+
+	private final GrisuMonitorNavigationTaskPane singleTaskPane;
+	private final GrisuMonitorNavigationTaskPaneBatch batchTaskPane;
+
+	private static final String JOB_CREATION_TASK_PANE = "Job creation";
 
 	/**
 	 * Create the panel.
@@ -42,14 +55,39 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer {
 
 		this.si = si;
 		this.centerPanel = centerPanel;
+		this.centerPanel.addPropertyChangeListener(this);
+
+		addTaskPane(JOB_CREATION_TASK_PANE, null);
+
+		singleTaskPane = new GrisuMonitorNavigationTaskPane(si, this, displaySingleJobAllJobsMenuItem, displaySingleJobAppSpecificMenuItems);
 		if ( displaySingleJobMonitorItem ) {
-			addTaskPane(new GrisuMonitorNavigationTaskPane(si, this, displaySingleJobAllJobsMenuItem, displaySingleJobAppSpecificMenuItems));
+			addTaskPane(singleTaskPane);
 		}
+		batchTaskPane = new GrisuMonitorNavigationTaskPaneBatch(si, this, displayBatchJobAllJobsMenuItem, displayBatchJobAppSpecificMenuItems);
 		if ( displayBatchJobMonitorItem ) {
-			addTaskPane(new GrisuMonitorNavigationTaskPaneBatch(si, this, displayBatchJobAllJobsMenuItem, displayBatchJobAppSpecificMenuItems));
+			addTaskPane(batchTaskPane);
 		}
 		if ( displayFileManagementItem ) {
 			addTaskPane(new GrisuFileNavigationTaskPane(si, this));
+		}
+
+	}
+
+	private void addApplicationsToWatch(Map<String, JobCreationPanel> applications) {
+
+		for ( String app : applications.keySet() ) {
+			if ( ! applicationsToWatch.contains(app) ) {
+
+				addTaskPaneItem(JOB_CREATION_TASK_PANE, ApplicationsManager.getPrettyName(app),
+						ApplicationsManager.getShortDescription(app), ApplicationsManager.getIcon(app));
+
+				if ( applications.get(app).createsBatchJob() ) {
+					batchTaskPane.addApplication(app);
+				} else {
+					singleTaskPane.addApplication(app);
+				}
+
+			}
 		}
 
 	}
@@ -88,6 +126,7 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer {
 			}
 			public void actionPerformed(ActionEvent e) {
 				System.out.println(e.getActionCommand());
+				setNavigationCommand(new String[]{itemTitle});
 			}
 		};
 
@@ -105,6 +144,14 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer {
 			}
 
 		});
+
+	}
+
+	public void propertyChange(PropertyChangeEvent evt) {
+
+		if ( "availableJobCreationPanels".equals(evt.getPropertyName()) ) {
+			addApplicationsToWatch((Map<String, JobCreationPanel>)evt.getNewValue());
+		}
 
 	}
 

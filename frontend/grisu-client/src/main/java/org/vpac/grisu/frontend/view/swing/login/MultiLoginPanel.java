@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.border.EtchedBorder;
 
 import org.vpac.grisu.frontend.control.login.LoginParams;
 
@@ -23,6 +24,7 @@ public class MultiLoginPanel extends JPanel {
 	private JButton button;
 
 	private final LoginPanel loginPanel;
+	private AdvancedLoginPanelOptions advancedLoginPanelOptions;
 
 	/**
 	 * Create the panel.
@@ -39,10 +41,21 @@ public class MultiLoginPanel extends JPanel {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
+				RowSpec.decode("max(15dlu;default)"),
+				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
 				FormFactory.RELATED_GAP_ROWSPEC,}));
 		add(getTabbedPane(), "2, 2, fill, fill");
-		add(getButton(), "2, 6, right, bottom");
+		add(getAdvancedLoginPanelOptions(), "2, 6, fill, fill");
+		add(getButton(), "2, 8, right, bottom");
+	}
+
+	private AdvancedLoginPanelOptions getAdvancedLoginPanelOptions() {
+		if (advancedLoginPanelOptions == null) {
+			advancedLoginPanelOptions = new AdvancedLoginPanelOptions();
+			advancedLoginPanelOptions.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		}
+		return advancedLoginPanelOptions;
 	}
 
 	private JButton getButton() {
@@ -62,7 +75,6 @@ public class MultiLoginPanel extends JPanel {
 		}
 		return button;
 	}
-
 	private MyProxyLoginPanel getMyProxyLoginPanel() {
 		if (myProxyLoginPanel == null) {
 			myProxyLoginPanel = new MyProxyLoginPanel();
@@ -75,6 +87,7 @@ public class MultiLoginPanel extends JPanel {
 		}
 		return shibLoginPanel;
 	}
+
 	private JTabbedPane getTabbedPane() {
 		if (tabbedPane == null) {
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -90,12 +103,13 @@ public class MultiLoginPanel extends JPanel {
 		}
 		return x509LoginPanel;
 	}
-
 	private void login() throws InterruptedException {
 
 		LoginMethodPanel temp = (LoginMethodPanel)(getTabbedPane().getSelectedComponent());
 
-		LoginParams params = new LoginParams("ARCS", null, null);
+		String url = getAdvancedLoginPanelOptions().getServiceInterfaceUrl();
+
+		LoginParams params = new LoginParams(url, null, null);
 
 		Thread loginThread = temp.login(params);
 

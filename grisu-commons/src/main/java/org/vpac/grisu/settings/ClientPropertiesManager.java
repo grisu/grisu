@@ -34,7 +34,7 @@ public final class ClientPropertiesManager {
 
 	public static final int DEFAULT_TIMEOUT = 0;
 
-	public static final String DEFAULT_SERVICE_INTERFACE = "https://ngportal.vpac.org/grisu-ws/services/grisu";
+	public static final String DEFAULT_SERVICE_INTERFACE = "ARCS";
 
 	private static PropertiesConfiguration config = null;
 
@@ -235,8 +235,8 @@ public final class ClientPropertiesManager {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
-		if ((defaultUrl == null) || "".equals(defaultUrl)) {
-			defaultUrl = null;
+		if (StringUtils.isBlank(defaultUrl)) {
+			defaultUrl = DEFAULT_SERVICE_INTERFACE;
 		}
 		return defaultUrl;
 	}

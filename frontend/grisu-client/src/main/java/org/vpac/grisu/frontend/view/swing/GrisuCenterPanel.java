@@ -1,12 +1,17 @@
 package org.vpac.grisu.frontend.view.swing;
 
 import java.awt.CardLayout;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.view.swing.files.preview.FileListWithPreviewPanel;
+import org.vpac.grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import org.vpac.grisu.frontend.view.swing.jobmonitoring.batch.MultiBatchJobMonitoringGrid;
 import org.vpac.grisu.frontend.view.swing.jobmonitoring.single.MultiSingleJobMonitoringGrid;
 import org.vpac.grisu.settings.ClientPropertiesManager;
@@ -30,7 +35,11 @@ public class GrisuCenterPanel extends JPanel {
 	private LoadingPanel loadingPanel;
 	private FileListWithPreviewPanel fileListWithPreviewPanel;
 
+	private final Map<String, JobCreationPanel> availableJobCreationPanels = new HashMap<String, JobCreationPanel>();
+
 	private final JPanel wrapperPanel;
+
+	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
 	/**
 	 * Create the panel.
@@ -55,6 +64,16 @@ public class GrisuCenterPanel extends JPanel {
 		wrapperPanel.add(getFileListWithPreviewPanel(), FILE_MANAGEMENT_PANEL);
 
 		add(wrapperPanel, "2, 2, fill, fill");
+	}
+	public void addJobCreationPanel(JobCreationPanel panel) {
+		availableJobCreationPanels.put(panel.getSupportedApplication(), panel);
+		wrapperPanel.add(panel.getPanel(), panel.getSupportedApplication());
+		pcs.firePropertyChange("availableJobCreationPanels", null, availableJobCreationPanels);
+	}
+
+	@Override
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+		pcs.addPropertyChangeListener(l);
 	}
 
 	public void displayBatchJobGrid(String application) {
@@ -92,6 +111,19 @@ public class GrisuCenterPanel extends JPanel {
 		});
 	}
 
+	private void displayJobCreationPanel(final JobCreationPanel panel) {
+
+		final CardLayout cl = (CardLayout)(wrapperPanel.getLayout());
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				cl.show(wrapperPanel, panel.getSupportedApplication());
+				revalidate();
+			}
+		});
+
+	}
+
 	public void displaySingleJobGrid(String application) {
 
 		final CardLayout cl = (CardLayout)(wrapperPanel.getLayout());
@@ -115,6 +147,10 @@ public class GrisuCenterPanel extends JPanel {
 		});
 	}
 
+	public Map<String, JobCreationPanel> getAvailableJobCreationPanels() {
+		return availableJobCreationPanels;
+	}
+
 	private FileListWithPreviewPanel getFileListWithPreviewPanel() {
 		if (fileListWithPreviewPanel == null) {
 			fileListWithPreviewPanel = new FileListWithPreviewPanel(si, null, ClientPropertiesManager.getLastUsedLeftUrl(),
@@ -131,6 +167,7 @@ public class GrisuCenterPanel extends JPanel {
 		return loadingPanel;
 	}
 
+
 	private MultiBatchJobMonitoringGrid getMultiBatchJobMonitoringGrid() {
 		if (multiBatchJobMonitoringGrid == null) {
 			multiBatchJobMonitoringGrid = new MultiBatchJobMonitoringGrid(si);
@@ -138,13 +175,18 @@ public class GrisuCenterPanel extends JPanel {
 		return multiBatchJobMonitoringGrid;
 	}
 
-
 	private MultiSingleJobMonitoringGrid getMultiSingleJobMonitoringGrid() {
 		if (multiSingleJobMonitoringGrid == null) {
 			multiSingleJobMonitoringGrid = new MultiSingleJobMonitoringGrid(si);
 		}
 		return multiSingleJobMonitoringGrid;
 	}
+
+	@Override
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+		pcs.removePropertyChangeListener(l);
+	}
+
 	public void setNavigationCommand(final String[] command) {
 
 		if ( (command == null) || (command.length == 0) ) {
@@ -157,6 +199,11 @@ public class GrisuCenterPanel extends JPanel {
 			displayBatchJobGrid(command[1]);
 		} else if ( GrisuFileNavigationTaskPane.FILE_MANAGEMENT.equals(command[0]) ) {
 			displayFileManagement();
+		}
+
+		JobCreationPanel panel = availableJobCreationPanels.get(command[0]);
+		if ( panel != null ) {
+			displayJobCreationPanel(panel);
 		}
 
 	}

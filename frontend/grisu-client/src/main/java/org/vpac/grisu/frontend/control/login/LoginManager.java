@@ -41,6 +41,7 @@ import au.org.arcs.jcommons.utils.ArcsSecurityProvider;
 import au.org.arcs.jcommons.utils.HttpProxyManager;
 import au.org.arcs.jcommons.utils.JythonHelpers;
 
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
@@ -75,18 +76,13 @@ public class LoginManager {
 	static final Logger myLogger = Logger.getLogger(LoginManager.class
 			.getName());
 
-	static final public Map<String, String> SERVICEALIASES = new HashMap<String, String>();
+	static final public ImmutableBiMap<String, String> SERVICEALIASES = new ImmutableBiMap.Builder<String, String>()
+	.put("LOCAL", "Local")
+	.put("ARCS", "https://grisu-vpac.arcs.org.au/grisu-ws/soap/GrisuService")
+	.put("ARCS_DEV", "https://ngportal.vpac.org/grisu-ws/soap/GrisuService")
+	.put("LOCAL_WS", "http://localhost:8080/soap/GrisuService")
+	.build();
 
-	static {
-
-		SERVICEALIASES.put("LOCAL", "Local");
-		SERVICEALIASES.put("ARCS", "https://grisu-vpac.arcs.org.au/grisu-ws/soap/GrisuService");
-		SERVICEALIASES.put("ARCS_DEV",
-		"https://ngportal.vpac.org/grisu-ws/soap/GrisuService");
-		SERVICEALIASES.put("LOCAL_WS",
-		"http://localhost:8080/soap/GrisuService");
-
-	}
 	public static  String httpProxyHost = null;
 
 	public static int httpProxyPort = 80;

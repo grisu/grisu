@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.view.swing.jobcreation;
+package org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels;
 
 import javax.swing.JPanel;
 

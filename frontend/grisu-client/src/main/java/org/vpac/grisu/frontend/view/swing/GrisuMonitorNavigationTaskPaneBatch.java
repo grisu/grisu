@@ -51,7 +51,7 @@ public class GrisuMonitorNavigationTaskPaneBatch extends JXTaskPane implements E
 		}
 	}
 
-	private void addApplication(final String app) {
+	public void addApplication(final String app) {
 
 		if ( actions.get(app) == null ) {
 			Action temp = new AbstractAction() {

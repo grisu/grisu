@@ -1,10 +1,13 @@
 package org.vpac.grisu.frontend.view.swing;
 
 import java.awt.BorderLayout;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.JPanel;
 
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import org.vpac.grisu.frontend.view.swing.login.GrisuSwingClient;
 import org.vpac.grisu.frontend.view.swing.login.LoginPanel;
 
@@ -16,6 +19,8 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 	private GrisuNavigationPanel grisuNavigationPanel;
 	private GrisuCenterPanel grisuCenterPanel;
 
+	private final Set<JobCreationPanel> jobCreationPanels = new HashSet<JobCreationPanel>();
+
 	/**
 	 * Create the panel.
 	 */
@@ -24,6 +29,17 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 
 		//		add(getGrisuNavigationPanel(), BorderLayout.WEST);
 		//		add(getGrisuCenterPanel(), BorderLayout.CENTER);
+	}
+
+	public void addJobCreationPanel(JobCreationPanel panel) {
+
+		jobCreationPanels.add(panel);
+		if ( si != null ) {
+			getGrisuCenterPanel().addJobCreationPanel(panel);
+			panel.setServiceInterface(si);
+		}
+
+
 	}
 
 	private GrisuCenterPanel getGrisuCenterPanel() {
@@ -51,6 +67,11 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 		this.si = si;
 		add(getGrisuNavigationPanel(), BorderLayout.WEST);
 		add(getGrisuCenterPanel(), BorderLayout.CENTER);
+
+		for (JobCreationPanel panel : jobCreationPanels ) {
+			getGrisuCenterPanel().addJobCreationPanel(panel);
+			panel.setServiceInterface(si);
+		}
 
 	}
 }

@@ -51,7 +51,7 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements EventS
 		}
 	}
 
-	private void addApplication(final String app) {
+	public void addApplication(final String app) {
 
 		if ( actions.get(app) == null ) {
 			Action temp = new AbstractAction() {
