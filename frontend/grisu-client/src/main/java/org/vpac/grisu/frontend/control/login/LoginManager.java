@@ -20,6 +20,7 @@ import org.ietf.jgss.GSSCredential;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.frontend.view.swing.UncaughtExceptionHandler;
+import org.vpac.grisu.settings.ClientPropertiesManager;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.utils.GrisuPluginFilenameFilter;
 import org.vpac.security.light.CredentialHelpers;
@@ -34,6 +35,8 @@ import au.org.arcs.auth.shibboleth.Shibboleth;
 import au.org.arcs.auth.slcs.SLCS;
 import au.org.arcs.jcommons.configuration.CommonArcsProperties;
 import au.org.arcs.jcommons.constants.ArcsEnvironment;
+import au.org.arcs.jcommons.constants.Enums.LoginType;
+import au.org.arcs.jcommons.constants.Enums.UI;
 import au.org.arcs.jcommons.dependencies.ClasspathHacker;
 import au.org.arcs.jcommons.dependencies.Dependency;
 import au.org.arcs.jcommons.dependencies.DependencyManager;
@@ -46,28 +49,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 public class LoginManager {
-
-	public enum Type {
-		SHIBBOLETH("Institutions login"),
-		MYPROXY("MyProxy login"),
-		LOCAL_PROXY("Local proxy login"),
-		X509_CERTIFICATE("Certificate login");
-
-		private final String prettyName;
-
-		private Type(String prettyName) {
-			this.prettyName = prettyName;
-		}
-
-		public String getPrettyName() {
-			return prettyName;
-		}
-	}
-
-	public enum UI {
-		COMMANDLINE,
-		SWING
-	}
 
 	private static ConsoleReader consoleReader;
 
@@ -243,7 +224,14 @@ public class LoginManager {
 		initEnvironment();
 
 		if (loginParams == null) {
-			loginParams = new LoginParams("Local", null, null);
+
+			String defaultUrl = ClientPropertiesManager.getDefaultServiceInterfaceUrl();
+			if ( StringUtils.isNotBlank(defaultUrl) ) {
+				loginParams = new LoginParams(defaultUrl, null, null);
+			} else {
+				loginParams = new LoginParams("Local", null, null);
+			}
+
 		}
 
 		if ( StringUtils.isNotBlank(httpProxyHost) ) {
@@ -322,13 +310,15 @@ public class LoginManager {
 
 		}
 
+		ServiceInterface si = null;
+
 		if (StringUtils.isBlank(username)) {
 
 			if (StringUtils.isBlank(loginParams.getMyProxyUsername())) {
 
 				if (cred != null) {
 					try {
-						return LoginHelpers.globusCredentialLogin(loginParams,
+						si = LoginHelpers.globusCredentialLogin(loginParams,
 								cred);
 					} catch (Exception e) {
 						throw new LoginException("Could not login: "
@@ -338,12 +328,10 @@ public class LoginManager {
 					// means certificate auth
 					try {
 						// means try to load local proxy
-						if (loginParams == null) {
-							return LoginHelpers.defaultLocalProxyLogin();
-						} else {
-							return LoginHelpers
-							.defaultLocalProxyLogin(loginParams);
-						}
+						si = LoginHelpers
+						.defaultLocalProxyLogin(loginParams);
+						ClientPropertiesManager.saveLastLoginType(LoginType.LOCAL_PROXY);
+
 					} catch (Exception e) {
 						throw new LoginException("Could not login: "
 								+ e.getLocalizedMessage(), e);
@@ -360,8 +348,9 @@ public class LoginManager {
 										"Could not create local proxy.", e);
 							}
 						}
-						return LoginHelpers.localProxyLogin(password,
+						si = LoginHelpers.localProxyLogin(password,
 								loginParams);
+						ClientPropertiesManager.saveLastLoginType(LoginType.X509_CERTIFICATE);
 					} catch (ServiceInterfaceException e) {
 						throw new LoginException("Could not login: "
 								+ e.getLocalizedMessage(), e);
@@ -371,7 +360,8 @@ public class LoginManager {
 			} else {
 				// means myproxy login
 				try {
-					return LoginHelpers.myProxyLogin(loginParams);
+					si = LoginHelpers.myProxyLogin(loginParams);
+					ClientPropertiesManager.saveLastLoginType(LoginType.MYPROXY);
 				} catch (ServiceInterfaceException e) {
 					throw new LoginException("Could not login: "
 							+ e.getLocalizedMessage(), e);
@@ -394,7 +384,8 @@ public class LoginManager {
 					CredentialHelpers.writeToDisk(slcsproxy);
 				}
 
-				return LoginHelpers.gssCredentialLogin(loginParams, slcsproxy);
+				si = LoginHelpers.gssCredentialLogin(loginParams, slcsproxy);
+				ClientPropertiesManager.saveLastLoginType(LoginType.SHIBBOLETH);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new LoginException("Could not do slcs login: "
@@ -403,6 +394,9 @@ public class LoginManager {
 
 		}
 
+		ClientPropertiesManager.setDefaultServiceInterfaceUrl(loginParams.getServiceInterfaceUrl());
+
+		return si;
 	}
 
 	/**
@@ -464,7 +458,7 @@ public class LoginManager {
 				(String) null, url, false);
 	}
 
-	public static ServiceInterface login(UI ui, Set<Type> types, String url) throws LoginException {
+	public static ServiceInterface login(UI ui, Set<LoginType> types, String url) throws LoginException {
 
 		switch (ui){
 		case COMMANDLINE: return loginCommandline(types, url);
@@ -478,7 +472,19 @@ public class LoginManager {
 		return loginCommandline(SERVICEALIASES.get("LOCAL"));
 	}
 
-	public static ServiceInterface loginCommandline(Set<Type> types, String url) throws LoginException {
+	public static ServiceInterface loginCommandline(LoginType type, String url) throws LoginException {
+
+		switch (type) {
+		case SHIBBOLETH: return loginCommandlineShibboleth(url);
+		case MYPROXY: return loginCommandlineMyProxy(url);
+		case LOCAL_PROXY: return LoginManager.login(url);
+		case X509_CERTIFICATE: return loginCommandlineX509cert(url);
+		}
+		throw new IllegalArgumentException("Login type not supported.");
+
+	}
+
+	public static ServiceInterface loginCommandline(Set<LoginType> types, String url) throws LoginException {
 
 		if ( (types == null) || (types.size() == 0) ) {
 
@@ -489,7 +495,7 @@ public class LoginManager {
 			return loginCommandline(types.iterator().next(), url);
 		}
 
-		ImmutableList<Type> temp = ImmutableList.copyOf(types);
+		ImmutableList<LoginType> temp = ImmutableList.copyOf(types);
 
 		StringBuffer message = new StringBuffer("Please select your preferred login method:\n\n");
 
@@ -532,21 +538,9 @@ public class LoginManager {
 		if ( LocalProxy.validGridProxyExists() ) {
 			return LoginManager.login(url);
 		} else {
-			ImmutableSet<Type> temp = ImmutableSet.of(Type.SHIBBOLETH, Type.MYPROXY, Type.X509_CERTIFICATE);
+			ImmutableSet<LoginType> temp = ImmutableSet.of(LoginType.SHIBBOLETH, LoginType.MYPROXY, LoginType.X509_CERTIFICATE);
 			return loginCommandline(temp, url);
 		}
-
-	}
-
-	public static ServiceInterface loginCommandline(Type type, String url) throws LoginException {
-
-		switch (type) {
-		case SHIBBOLETH: return loginCommandlineShibboleth(url);
-		case MYPROXY: return loginCommandlineMyProxy(url);
-		case LOCAL_PROXY: return LoginManager.login(url);
-		case X509_CERTIFICATE: return loginCommandlineX509cert(url);
-		}
-		throw new IllegalArgumentException("Login type not supported.");
 
 	}
 
@@ -728,7 +722,7 @@ public class LoginManager {
 
 	}
 
-	public static ServiceInterface loginSwing(Set<Type> types, String url) {
+	public static ServiceInterface loginSwing(Set<LoginType> types, String url) {
 		throw new RuntimeException("Not supported yet.");
 	}
 

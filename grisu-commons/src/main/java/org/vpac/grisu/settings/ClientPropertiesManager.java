@@ -7,6 +7,8 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import au.org.arcs.jcommons.constants.Enums.LoginType;
+
 /**
  * Manages the $HOME/.grisu/grisu.config file.
  * 
@@ -28,6 +30,8 @@ public final class ClientPropertiesManager {
 
 	public static final Long DEFAULT_DOWNLOAD_FILESIZE_TRESHOLD = new Long(
 			1024 * 1024 * 2);
+
+	public static final LoginType DEFAULT_LOGIN_TYPE = LoginType.SHIBBOLETH;
 
 	// keys
 	public static final String JOBSTATUS_RECHECK_INTERVAL_KEY = "statusRecheck";
@@ -297,6 +301,28 @@ public final class ClientPropertiesManager {
 
 		return interval;
 
+	}
+
+	public static LoginType getLastLoginType() {
+
+		String lastLoginType = null;
+		try {
+			lastLoginType = getClientConfiguration().getString(
+			"lastLoginType");
+		} catch (ConfigurationException e) {
+			myLogger.debug("Problem with config file: " + e.getMessage());
+		}
+
+		if (StringUtils.isBlank(lastLoginType)) {
+			return DEFAULT_LOGIN_TYPE;
+		}
+		LoginType result = LoginType.fromString(lastLoginType);
+
+		//		if ( result == null ) {
+		//			return DEFAULT_LOGIN_TYPE;
+		//		}
+
+		return result;
 	}
 
 	/**
@@ -573,6 +599,17 @@ public final class ClientPropertiesManager {
 	public static void saveDefaultHttpProxyUsername(final String username) {
 		try {
 			getClientConfiguration().setProperty("httpProxyUsername", username);
+			getClientConfiguration().save();
+		} catch (ConfigurationException e) {
+			myLogger.debug("Problem with config file: " + e.getMessage());
+		}
+
+	}
+
+	public static void saveLastLoginType(LoginType lastLoginType) {
+
+		try {
+			getClientConfiguration().setProperty("lastLoginType", lastLoginType.toString());
 			getClientConfiguration().save();
 		} catch (ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
