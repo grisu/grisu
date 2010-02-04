@@ -273,6 +273,11 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	}
 
 	public final String getCurrentFqan() {
+
+		if ( StringUtils.isBlank(currentFqan) ) {
+			currentFqan = getAllAvailableFqans()[0];
+		}
+
 		return currentFqan;
 	}
 
@@ -634,12 +639,12 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	}
 
 	public StatusObject waitForActionToFinish(String handle)
-			throws InterruptedException {
+	throws InterruptedException {
 
 		StatusObject status = new StatusObject(serviceInterface, handle);
-		
+
 		status.waitForActionToFinish(ClientPropertiesManager.getDefaultActionStatusRecheckInterval(), false, false);
-		
+
 		return status;
 	}
 

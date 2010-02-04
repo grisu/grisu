@@ -26,7 +26,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, EventTopicSubscriber {
+public class ExampleJobCreationPanel extends JPanel implements JobCreationPanel, EventTopicSubscriber {
 
 	private JLabel lblDummyJobSubmission;
 	private JButton btnSubmit;
@@ -41,7 +41,7 @@ public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, E
 	/**
 	 * Create the panel.
 	 */
-	public DummyJobCreationPanel() {
+	public ExampleJobCreationPanel() {
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -167,7 +167,7 @@ public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, E
 					job.setTimestampJobname("helloworldJob");
 
 					currentJobname = job.getJobname();
-					EventBus.subscribe(currentJobname, DummyJobCreationPanel.this);
+					EventBus.subscribe(currentJobname, ExampleJobCreationPanel.this);
 
 					job.setApplication("UnixCommands");
 					job.setCommandline("echo hello gridworld!");
