@@ -3,6 +3,7 @@ package org.vpac.grisu.model.dto;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -23,9 +24,14 @@ public class DtoMountPoints {
 	public static DtoMountPoints createMountpoints(MountPoint[] mps) {
 
 		DtoMountPoints result = new DtoMountPoints();
-
 		result.setMountpoints(Arrays.asList(mps));
+		return result;
+	}
 
+	public static DtoMountPoints createMountpoints(Set<MountPoint> mps) {
+
+		DtoMountPoints result = new DtoMountPoints();
+		result.setMountpoints(new LinkedList<MountPoint>(mps));
 		return result;
 	}
 

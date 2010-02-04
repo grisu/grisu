@@ -12,6 +12,7 @@ import org.globus.myproxy.MyProxy;
 import org.globus.myproxy.MyProxyException;
 import org.ietf.jgss.GSSException;
 import org.vpac.grisu.backend.model.ProxyCredential;
+import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.backend.utils.CertHelpers;
 import org.vpac.grisu.control.JobConstants;
@@ -37,6 +38,8 @@ ServiceInterface {
 	private ProxyCredential credential = null;
 	private String myproxy_username = null;
 	private char[] passphrase = null;
+
+	private User user;
 
 	@Override
 	protected final ProxyCredential getCredential() {
@@ -181,6 +184,18 @@ ServiceInterface {
 
 	}
 
+	@Override
+	protected final synchronized User getUser() {
+
+		if ( user == null ) {
+			this.user = User.createUser(getCredential(), this);
+		}
+
+		user.setCred(getCredential());
+
+		return user;
+	}
+
 	protected int kill(final String jobname) {
 
 		Job job;
@@ -238,6 +253,13 @@ ServiceInterface {
 		myLogger.debug("Dummy staging files...");
 	}
 
+	// public boolean mkdir(final String url) throws RemoteFileSystemException {
+	//
+	// myLogger.debug("Dummy. Not creating folder: " + url + "...");
+	// return true;
+	//
+	// }
+
 	@Override
 	public void submitJob(final String jobname) throws JobSubmissionException {
 
@@ -278,7 +300,7 @@ ServiceInterface {
 		String handle = null;
 		myLogger.debug("Submitting job to endpoint...");
 		try {
-			handle = getSubmissionManager().submit("GT4Dummy", job);
+			handle = getUser().getSubmissionManager().submit("GT4Dummy", job);
 		} catch (RuntimeException e) {
 			e.printStackTrace();
 			throw new JobSubmissionException(
@@ -309,12 +331,5 @@ ServiceInterface {
 
 		return "DummyHandle";
 	}
-
-	// public boolean mkdir(final String url) throws RemoteFileSystemException {
-	//
-	// myLogger.debug("Dummy. Not creating folder: " + url + "...");
-	// return true;
-	//
-	// }
 
 }

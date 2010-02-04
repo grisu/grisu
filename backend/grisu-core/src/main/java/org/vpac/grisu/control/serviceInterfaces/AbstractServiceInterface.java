@@ -4,7 +4,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -46,13 +45,8 @@ import org.vpac.grisu.backend.model.RemoteFileTransferObject;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.backend.model.job.BatchJob;
 import org.vpac.grisu.backend.model.job.Job;
-import org.vpac.grisu.backend.model.job.JobSubmissionManager;
-import org.vpac.grisu.backend.model.job.JobSubmitter;
-import org.vpac.grisu.backend.model.job.gt4.GT4DummySubmitter;
-import org.vpac.grisu.backend.model.job.gt4.GT4Submitter;
 import org.vpac.grisu.backend.utils.CertHelpers;
 import org.vpac.grisu.backend.utils.FileContentDataSourceConnector;
-import org.vpac.grisu.backend.utils.FileSystemStructureToXMLConverter;
 import org.vpac.grisu.backend.utils.LocalTemplatesHelper;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
@@ -144,46 +138,30 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
+
 	private final boolean INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND = false;
-
 	public static final String REFRESH_STATUS_PREFIX = "REFRESH_";
+
 	public static final String ARCHIVE_STATUS_PREFIX = "ARCHIVE_";
-
 	public static String GRISU_JOB_FILE_NAME = ".grisujob";
+
 	public static String GRISU_BATCH_JOB_FILE_NAME = ".grisubatchjob";
-
-
-	private final InformationManager informationManager = CachedMdsInformationManager
-	.getDefaultCachedMdsInformationManager(Environment
-			.getVarGrisuDirectory().toString());
 
 	public static final int DEFAULT_JOB_SUBMISSION_RETRIES = 5;
 
-	private final UserDAO userdao = new UserDAO();
+	public static final InformationManager informationManager = CachedMdsInformationManager
+	.getDefaultCachedMdsInformationManager(Environment
+			.getVarGrisuDirectory().toString());
 
-	protected JobDAO jobdao = new JobDAO();
-
-	protected BatchJobDAO batchJobDao = new BatchJobDAO();
-
-	private MountPoint[] mountPointsForThisSession = null;
-
-	private JobSubmissionManager manager = null;
-
-	private User user = null;
-
-	private String[] currentFqans = null;
+	private static final MatchMaker matchmaker = new MatchMakerImpl(Environment
+			.getVarGrisuDirectory().toString());
 
 	private final boolean checkFileSystemsBeforeUse = false;
+	protected final UserDAO userdao = new UserDAO();
+	protected final JobDAO jobdao = new JobDAO();
 
-	private FileSystemStructureToXMLConverter fsconverter = null;
+	protected final BatchJobDAO batchJobDao = new BatchJobDAO();
 
-	private final MatchMaker matchmaker = new MatchMakerImpl(Environment
-			.getVarGrisuDirectory().toString());
-	// private MatchMaker matchmaker = new CachedMatchMakerImpl(Environment
-	// .getGrisuDirectory().toString());
-
-	private final Map<String, DtoActionStatus> actionStatus = Collections
-	.synchronizedMap(new HashMap<String, DtoActionStatus>());
 
 	/*
 	 * (non-Javadoc)
@@ -204,8 +182,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				+ " job properties.");
 	}
 
-	// private Map<String, RemoteFileTransferObject> fileTransfers = new
-	// HashMap<String, RemoteFileTransferObject>();
+
 
 	/*
 	 * (non-Javadoc)
@@ -230,6 +207,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 	}
+
+	// private Map<String, RemoteFileTransferObject> fileTransfers = new
+	// HashMap<String, RemoteFileTransferObject>();
 
 	/**
 	 * Adds the specified job to the mulitpartJob.
@@ -323,15 +303,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	private void archiveBatchJob(final BatchJob batchJob, final String target) throws NoSuchJobException {
 
-		if ((actionStatus.get(batchJob.getBatchJobname()) != null)
-				&& !actionStatus.get(batchJob.getBatchJobname()).isFinished()) {
+		if ((getSessionActionStatus().get(batchJob.getBatchJobname()) != null)
+				&& !getSessionActionStatus().get(batchJob.getBatchJobname()).isFinished()) {
 			// this should not really happen
 			myLogger.error("Not archiving job because jobsubmission is still ongoing.");
 			return;
 		}
 
 		final DtoActionStatus status = new DtoActionStatus(ARCHIVE_STATUS_PREFIX + batchJob.getBatchJobname(), (batchJob.getJobs().size()*3)+3);
-		actionStatus.put(batchJob.getBatchJobname(), status);
+		getSessionActionStatus().put(batchJob.getBatchJobname(), status);
 
 		Thread archiveThread = new Thread() {
 			@Override
@@ -388,8 +368,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public String archiveJob(String jobname, String target) throws JobPropertiesException, NoSuchJobException, RemoteFileSystemException  {
 
-		if ((actionStatus.get(jobname) != null)
-				&& !actionStatus.get(jobname).isFinished()) {
+		if ((getSessionActionStatus().get(jobname) != null)
+				&& !getSessionActionStatus().get(jobname).isFinished()) {
 
 			myLogger
 			.debug("not archiving job because jobsubmission is still ongoing.");
@@ -438,8 +418,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					optionalBatchJobStatus.addElement("Starting archiving of job: "+job.getJobname());
 				}
 
-				if ((actionStatus.get(job.getJobname()) != null)
-						&& !actionStatus.get(job.getJobname()).isFinished()) {
+				if ((getSessionActionStatus().get(job.getJobname()) != null)
+						&& !getSessionActionStatus().get(job.getJobname()).isFinished()) {
 
 					if ( optionalBatchJobStatus != null ) {
 						optionalBatchJobStatus.setFailed(true);
@@ -453,7 +433,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				}
 
 				final DtoActionStatus status = new DtoActionStatus(ARCHIVE_STATUS_PREFIX + job.getJobname(), 4);
-				actionStatus.put(job.getJobname(), status);
+				getSessionActionStatus().put(job.getJobname(), status);
 
 				status.addElement("Transferring jobdirectory to: "+targetDirUrl);
 				RemoteFileTransferObject rftp = null;
@@ -543,9 +523,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-
-
-
 	private String calculateJobname(Document jsdl, String jobnameCreationMethod)
 	throws JobPropertiesException {
 
@@ -619,35 +596,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	/**
-	 * Calculates the name of the mountpoint for a given server and fqan. It
-	 * does that so the mountpoint looks something like:
-	 * "ng2.vpac.org (StartUp)". Not sure whether that is the way to go, but
-	 * it's the best namingscheme I came up with. Asked in the developers
-	 * mailing list but didn't get any answers that made sense...
-	 * 
-	 * @param server
-	 *            the hostname
-	 * @param fqan
-	 *            the VO
-	 * @return the name of the mountpoint
-	 */
-	private String calculateMountPointName(final String server,
-			final String fqan) {
 
-		URI uri = null;
-		String hostname = null;
-		try {
-			uri = new URI(server);
-			hostname = uri.getHost();
-		} catch (Exception e) {
-			hostname = server;
-		}
-		String name = hostname + " ("
-		+ (fqan.substring(fqan.lastIndexOf("/") + 1) + ")");
 
-		return name;
-	}
 
 	private SortedSet<GridResource> calculateResourcesToUse(BatchJob mpj) {
 
@@ -818,20 +768,20 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		String handle = null;
 
-		if (actionStatus.get(target) == null) {
+		if (getSessionActionStatus().get(target) == null) {
 			handle = target;
 		} else {
 			int counter = 0;
 			do {
 				handle = target + "_" + counter;
 				counter = counter + 1;
-			} while (actionStatus.get(handle) != null);
+			} while (getSessionActionStatus().get(handle) != null);
 		}
 
 		final DtoActionStatus actionStat = new DtoActionStatus(handle, sources
 				.asArray().length * 2);
 
-		actionStatus.put(handle, actionStat);
+		getSessionActionStatus().put(handle, actionStat);
 
 		final String handleFinal = handle;
 		Thread cpThread = new Thread() {
@@ -886,17 +836,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return handle;
 
 	}
-
-	// public String createJobUsingMap(final DtoJob jobProperties,
-	// final String fqan, final String jobCreationMethod)
-	// throws JobPropertiesException {
-	//
-	// JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl(jobProperties
-	// .propertiesAsMap());
-	//
-	// return createJob(jso.getJobDescriptionDocument(), fqan,
-	// jobCreationMethod);
-	// }
 
 	private RemoteFileTransferObject cpSingleFile(final String source,
 			final String target, final boolean overwrite, final boolean startFileTransfer,
@@ -991,6 +930,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		throw new BatchJobException("MultiPartJob with name " + batchJobname
 				+ " already exists.");
 	}
+
+	// public String createJobUsingMap(final DtoJob jobProperties,
+	// final String fqan, final String jobCreationMethod)
+	// throws JobPropertiesException {
+	//
+	// JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl(jobProperties
+	// .propertiesAsMap());
+	//
+	// return createJob(jso.getJobDescriptionDocument(), fqan,
+	// jobCreationMethod);
+	// }
 
 	/**
 	 * This, well, creates a folder, as one might expect.
@@ -1139,7 +1089,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		DtoActionStatus status = new DtoActionStatus(files.asArray()[0], files
 				.asArray().length * 2);
-		actionStatus.put(files.asArray()[0], status);
+		getSessionActionStatus().put(files.asArray()[0], status);
 
 		for (String file : files.getStringList()) {
 			try {
@@ -1176,7 +1126,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		final DtoActionStatus newActionStatus = new DtoActionStatus(multiJob
 				.getBatchJobname(), size);
-		this.actionStatus.put(multiJob.getBatchJobname(), newActionStatus);
+		this.getSessionActionStatus().put(multiJob.getBatchJobname(), newActionStatus);
 
 		final ExecutorService executor = Executors
 		.newFixedThreadPool(ServerPropertiesManager
@@ -1288,7 +1238,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public synchronized DtoMountPoints df() {
 
-		return DtoMountPoints.createMountpoints(df_internal());
+		return DtoMountPoints.createMountpoints(getUser().getAllMountPoints());
 	}
 
 	/**
@@ -1301,7 +1251,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	protected Set<MountPoint> df(String fqan) {
 
 		Set<MountPoint> result = new HashSet<MountPoint>();
-		for (MountPoint mp : df_internal()) {
+		for (MountPoint mp : getUser().getAllMountPoints()) {
 			if (StringUtils.isNotBlank(mp.getFqan())
 					&& mp.getFqan().equals(fqan)) {
 				result.add(mp);
@@ -1310,111 +1260,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return result;
 	}
 
-	/**
-	 * Calculates all mountpoints that are automatically mounted using mds. At
-	 * the moment, the port part of the gridftp url share is ignored. Maybe I'll
-	 * change that later.
-	 * 
-	 * @param sites
-	 *            the sites that should be used
-	 * @return all MountPoints
-	 */
-	private Set<MountPoint> df_auto_mds(final String[] sites) {
 
-		Set<MountPoint> mps = new TreeSet<MountPoint>();
-
-		// for ( String site : sites ) {
-
-		for (String fqan : getFqans().getStringList()) {
-			Date start = new Date();
-			Map<String, String[]> mpUrl = informationManager
-			.getDataLocationsForVO(fqan);
-			Date end = new Date();
-			myLogger.debug("Querying for data locations for all sites and+ "
-					+ fqan + " took: " + (end.getTime() - start.getTime())
-					+ " ms.");
-			for (String server : mpUrl.keySet()) {
-				for (String path : mpUrl.get(server)) {
-
-					String url = null;
-					if (path.contains("${GLOBUS_USER_HOME}")) {
-
-						try {
-							url = getUser().getFileSystemHomeDirectory(
-									server.replace(":2811", ""), fqan);
-						} catch (FileSystemException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-
-					} else {
-
-						url = server.replace(":2811", "") + path + "/"
-						+ User.get_vo_dn_path(getCredential().getDn());
-
-					}
-
-					if (StringUtils.isBlank(url)) {
-						continue;
-					}
-
-					MountPoint mp = new MountPoint(getUser().getDn(), fqan,
-							url, calculateMountPointName(server, fqan),
-							informationManager.getSiteForHostOrUrl(url), true);
-					// + "." + fqan + "." + path);
-					// + "." + fqan);
-					mps.add(mp);
-				}
-			}
-		}
-
-		// }
-
-		return mps;
-	}
-
-	private synchronized MountPoint[] df_internal() {
-
-		if (mountPointsForThisSession == null) {
-
-			Set<MountPoint> mps = getUser().getAllMountPoints();
-
-			mountPointsForThisSession = mps.toArray(new MountPoint[mps.size()]);
-
-		}
-		return mountPointsForThisSession;
-	}
-
-	// private void moveJobDirectory(Job job, String newSubLoc, BatchJob
-	// possibleBatchJob) throws NoSuchJobException, JobPropertiesException,
-	// RemoteFileSystemException {
-	//
-	//
-	// String oldJobDir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
-	// JsdlHelpers.setCandidateHosts(job.getJobDescription(), new
-	// String[]{newSubLoc});
-	//
-	//
-	// processJobDescription(job, possibleBatchJob);
-	//
-	// String newJobDir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
-	// myLogger.debug("New jobdirectory: "+ newJobDir);
-	//
-	//
-	// cpSingleFile(oldJobDir, newJobDir, true, true);
-	// myLogger.debug("Moved old job dir from "+oldJobDir+" to "+newJobDir);
-	//
-	// try {
-	// // try to delete old file
-	// deleteFile(oldJobDir);
-	// } catch (RemoteFileSystemException e) {
-	// // not good, but acceptable
-	// myLogger.error("Could not delete old jobdir.", e);
-	// }
-	//
-	// jobdao.saveOrUpdate(job);
-	//
-	// }
 
 	public DataHandler download(final String filename)
 	throws RemoteFileSystemException {
@@ -1469,6 +1315,37 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return datahandlers;
 
 	}
+
+	// private void moveJobDirectory(Job job, String newSubLoc, BatchJob
+	// possibleBatchJob) throws NoSuchJobException, JobPropertiesException,
+	// RemoteFileSystemException {
+	//
+	//
+	// String oldJobDir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+	// JsdlHelpers.setCandidateHosts(job.getJobDescription(), new
+	// String[]{newSubLoc});
+	//
+	//
+	// processJobDescription(job, possibleBatchJob);
+	//
+	// String newJobDir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+	// myLogger.debug("New jobdirectory: "+ newJobDir);
+	//
+	//
+	// cpSingleFile(oldJobDir, newJobDir, true, true);
+	// myLogger.debug("Moved old job dir from "+oldJobDir+" to "+newJobDir);
+	//
+	// try {
+	// // try to delete old file
+	// deleteFile(oldJobDir);
+	// } catch (RemoteFileSystemException e) {
+	// // not good, but acceptable
+	// myLogger.error("Could not delete old jobdir.", e);
+	// }
+	//
+	// jobdao.saveOrUpdate(job);
+	//
+	// }
 
 	public boolean fileExists(final String file)
 	throws RemoteFileSystemException {
@@ -1628,7 +1505,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public DtoActionStatus getActionStatus(String actionHandle) {
 
-		DtoActionStatus result = actionStatus.get(actionHandle);
+		DtoActionStatus result = getSessionActionStatus().get(actionHandle);
 
 		// System.out.println("Elements before: "+result.getLog().size());
 
@@ -1659,7 +1536,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-
 	public DtoStringList getAllBatchJobnames(String application) {
 
 		List<String> jobnames = null;
@@ -1686,6 +1562,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		return info;
 	}
+
 
 	public DtoStringList getAllJobnames(String application) {
 
@@ -1955,34 +1832,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see org.vpac.grisu.control.ServiceInterface#getFqans()
 	 */
 	public DtoStringList getFqans() {
-
-		if (currentFqans == null) {
-
-			getUser().fillFqans();
-			// TODO store it in database
-			// userdao.attachDirty(getUser());
-			Collection<String> fqans = getUser().getFqans().keySet();
-
-			currentFqans = fqans.toArray(new String[fqans.size()]);
-		}
-		return DtoStringList.fromStringArray(currentFqans);
-	}
-
-	/**
-	 * Just a helper method to convert the filesystem structure to xml. It may
-	 * make sense to replace that with JSON objects in the future.
-	 * 
-	 * @return the converter
-	 */
-	private FileSystemStructureToXMLConverter getFsConverter() {
-		if (fsconverter == null) {
-			fsconverter = new FileSystemStructureToXMLConverter(getUser());
-		}
-		return fsconverter;
-	}
-
-	public InformationManager getInformationManager() {
-		return informationManager;
+		return DtoStringList.fromStringColletion(getUser().getFqans().keySet());
 	}
 
 	public String getInterfaceVersion() {
@@ -2103,7 +1953,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		myLogger.debug("Getting status for job from submission manager: "
 				+ jobname);
 
-		status = getSubmissionManager().getJobStatus(job);
+		status = getUser().getSubmissionManager().getJobStatus(job);
 		myLogger.debug("Status for job" + jobname
 				+ " from submission manager: " + status);
 		if (changedCred) {
@@ -2185,10 +2035,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return getUser().getResponsibleMountpointForAbsoluteFile(uri);
 	}
 
-	// public String getStagingFileSystem(String site) {
-	// return MountPointManager.getDefaultFileSystem(site);
-	// }
-
 	protected BatchJob getMultiPartJobFromDatabase(final String batchJobname)
 	throws NoSuchJobException {
 
@@ -2197,6 +2043,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		return job;
 
+	}
+
+	protected Map<String, DtoActionStatus> getSessionActionStatus() {
+		return getUser().getActionStatuses();
 	}
 
 	/*
@@ -2209,6 +2059,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return informationManager.getSiteForHostOrUrl(host_or_url);
 
 	}
+
+	// public String getStagingFileSystem(String site) {
+	// return MountPointManager.getDefaultFileSystem(site);
+	// }
+
+	//	abstract protected DtoStringList getSessionFqans();
 
 	/**
 	 * Returns the name of the site for the given submissionLocation.
@@ -2335,24 +2191,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				appVersionMap);
 	}
 
-	/**
-	 * Creates a new {@link JobSubmissionManager} if it does not exist jet. The
-	 * JobSubmissionManager holds all the possible {@link JobSubmitter}s in a
-	 * HashMap. We only use GT4 (for now).
-	 * 
-	 * @return the JobSubmissionManager
-	 */
-	protected JobSubmissionManager getSubmissionManager() {
-		if (manager == null) {
-			Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
-			submitters.put("GT4", new GT4Submitter());
-			submitters.put("GT4Dummy", new GT4DummySubmitter());
-			manager = new JobSubmissionManager(this.informationManager,
-					submitters);
-		}
-		return manager;
-	}
-
 	public DtoStringList getUsedApplications() {
 
 		List<Job> jobs = null;
@@ -2391,79 +2229,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @throws NoValidCredentialException
 	 *             if no valid credential could be found to create the user
 	 */
-	protected final synchronized User getUser() {
 
-		// make sure there is a valid credential
-		if ((getCredential() == null) || !getCredential().isValid()) {
-			throw new NoValidCredentialException(
-					"No valid credential exists in this session for user: "
-					+ user);
-		}
+	abstract protected User getUser();
 
-		// if ( getCredential())
-
-		if (user == null) {
-			// try to look up user in the database
-			user = userdao.findUserByDN(getCredential().getDn());
-
-			if (user == null) {
-				user = new User(getCredential());
-				userdao.saveOrUpdate(user);
-			} else {
-				user.setCred(getCredential());
-			}
-			getFsConverter();
-			user
-			.setAutoMountedMountPoints(df_auto_mds(getAllSites()
-					.asArray()));
-
-			// if ( ServerPropertiesManager.getCheckConnectionToMountPoint() ) {
-			//
-			// final Set<MountPoint> temp = Collections.synchronizedSet(new
-			// TreeSet<MountPoint>());
-			//
-			// ExecutorService executor = Executors.newFixedThreadPool(5);
-			//
-			// for ( final MountPoint mp : user.getAllMountPoints() ) {
-			// Thread thread = new Thread() {
-			// public void run() {
-			//
-			// try {
-			// myLogger.debug("Checking mountpoint: "+mp.getAlias());
-			// if ( user.aquireFile(mp.getRootUrl()).exists() ) {
-			// myLogger.info("Checked mountpoint "+mp.getAlias()+". Adding it to usable mountpoints.");
-			// temp.add(mp);
-			// } else {
-			// myLogger.warn("Mountpoint "+mp.getAlias()+" doesn't exist.");
-			// }
-			// } catch (Exception e) {
-			// myLogger.error("Mountpoint "+mp.getAlias()+" not accessible. ",e);
-			// }
-			//
-			// }
-			// };
-			// executor.execute(thread);
-			// }
-			//
-			// executor.shutdown();
-			//
-			// try {
-			// executor.awaitTermination(300, TimeUnit.SECONDS);
-			// } catch (InterruptedException e) {
-			// // TODO Auto-generated catch block
-			// e.printStackTrace();
-			// }
-			//
-			// user.setAutoMountedMountPoints(temp);
-			//
-			// }
-
-			df();
-		} else {
-			user.setCred(getCredential());
-		}
-
-		return user;
+	public UserDAO getUserDao() {
+		return userdao;
 	}
 
 	public DtoProperties getUserProperties() {
@@ -2615,7 +2385,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			changedCred = true;
 		}
 
-		new_status = getSubmissionManager().killJob(job);
+		new_status = getUser().getSubmissionManager().killJob(job);
 
 		job.addLogMessage("Job killed.");
 		addLogMessageToPossibleMultiPartJobParent(job, "Job: "
@@ -2723,7 +2493,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		DtoActionStatus status = new DtoActionStatus(jobnames.asArray()[0],
 				jobnames.asArray().length * 2);
-		actionStatus.put(jobnames.asArray()[0], status);
+		getSessionActionStatus().put(jobnames.asArray()[0], status);
 
 		for (String jobname : jobnames.asArray()) {
 			status.addElement("Killing job " + jobname + "...");
@@ -2876,7 +2646,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		MountPoint mp = getUser().mountFileSystem(url, mountpoint, fqan,
 				useHomeDirectory, informationManager.getSiteForHostOrUrl(url));
 		userdao.saveOrUpdate(getUser());
-		mountPointsForThisSession = null;
+		getUser().resetMountPoints();
 		return mp;
 	}
 
@@ -2893,7 +2663,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		MountPoint mp = getUser().mountFileSystem(url, mountpoint,
 				useHomeDirectory, informationManager.getSiteForHostOrUrl(url));
 		userdao.saveOrUpdate(getUser());
-		mountPointsForThisSession = null;
+		getUser().resetMountPoints();
 		return mp;
 	}
 
@@ -3461,7 +3231,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		String stagingFilesystemToUse = null;
 		for (String stagingFs : stagingFileSystems) {
 
-			for (MountPoint mp : df_internal()) {
+			for (MountPoint mp : getUser().getAllMountPoints()) {
 				if (mp.getRootUrl().startsWith(stagingFs.replace(":2811", ""))
 						&& jobFqan.equals(mp.getFqan())) {
 					mountPointToUse = mp;
@@ -3634,7 +3404,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		String handle = REFRESH_STATUS_PREFIX + batchJobname;
 
-		DtoActionStatus status = actionStatus.get(handle);
+		DtoActionStatus status = getSessionActionStatus().get(handle);
 
 		if ((status != null) && !status.isFinished()) {
 			// refresh in progress. Just give back the handle
@@ -3646,7 +3416,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		final DtoActionStatus statusfinal = new DtoActionStatus(handle,
 				multiPartJob.getJobs().size());
 
-		actionStatus.put(handle, statusfinal);
+		getSessionActionStatus().put(handle, statusfinal);
 
 		ExecutorService executor = Executors
 		.newFixedThreadPool(ServerPropertiesManager
@@ -3733,8 +3503,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		BatchJob job = getMultiPartJobFromDatabase(batchJobname);
 
-		if ((actionStatus.get(batchJobname) != null)
-				&& !actionStatus.get(batchJobname).isFinished()) {
+		if ((getSessionActionStatus().get(batchJobname) != null)
+				&& !getSessionActionStatus().get(batchJobname).isFinished()) {
 
 			// System.out
 			// .println("Submission: "
@@ -3750,7 +3520,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		final DtoActionStatus status = new DtoActionStatus(batchJobname, 3);
-		actionStatus.put(batchJobname, status);
+		getSessionActionStatus().put(batchJobname, status);
 
 		status.addElement("Finding resources to use...");
 		SortedSet resourcesToUse = calculateResourcesToUse(job);
@@ -3844,7 +3614,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		DtoActionStatus status = null;
 		status = new DtoActionStatus(job.getJobname(), 5);
-		actionStatus.put(job.getJobname(), status);
+		getSessionActionStatus().put(job.getJobname(), status);
 
 		job.addLogMessage("Restarting job...");
 		job.addLogMessage("Killing possibly running job...");
@@ -4151,7 +3921,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		try {
 			status.addElement("Starting job submission using GT4...");
 			job.addLogMessage("Submitting job to endpoint...");
-			handle = getSubmissionManager().submit("GT4", job);
+			handle = getUser().getSubmissionManager().submit("GT4", job);
 			job.addLogMessage("Submission finished.");
 		} catch (RuntimeException e) {
 			status.addLogMessage("Job submission failed.");
@@ -4207,7 +3977,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		DtoActionStatus status = null;
 		status = new DtoActionStatus(jobname, 0);
-		actionStatus.put(jobname, status);
+		getSessionActionStatus().put(jobname, status);
 
 		try {
 			job = getJobFromDatabase(jobname);
@@ -4229,7 +3999,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		final DtoActionStatus newActionStatus = new DtoActionStatus(multiJob
 				.getBatchJobname(), 100);
-		this.actionStatus.put(multiJob.getBatchJobname(), newActionStatus);
+		this.getSessionActionStatus().put(multiJob.getBatchJobname(), newActionStatus);
 
 		ExecutorService executor = Executors
 		.newFixedThreadPool(ServerPropertiesManager
@@ -4258,7 +4028,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								DtoActionStatus status = null;
 								status = new DtoActionStatus(job.getJobname(),
 										0);
-								actionStatus.put(job.getJobname(), status);
+								getSessionActionStatus().put(job.getJobname(), status);
 
 								submitJob(job, true, status);
 								newActionStatus.addElement("Added job: "
@@ -4338,7 +4108,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		getUser().unmountFileSystem(mountpoint);
 		userdao.saveOrUpdate(getUser());
-		mountPointsForThisSession = null;
+		getUser().resetMountPoints();
 
 	}
 
@@ -4447,7 +4217,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			// try whether job is single or multi
 			final DtoActionStatus status = new DtoActionStatus(targetFilename,
 					1);
-			actionStatus.put(targetFilename, status);
+			getSessionActionStatus().put(targetFilename, status);
 
 			new Thread() {
 				@Override
@@ -4547,7 +4317,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		final DtoActionStatus status = new DtoActionStatus(targetFilename,
 				multiJob.getAllUsedMountPoints().size());
-		actionStatus.put(targetFilename, status);
+		getSessionActionStatus().put(targetFilename, status);
 
 		for (final String mountPointRoot : multiJob.getAllUsedMountPoints()) {
 

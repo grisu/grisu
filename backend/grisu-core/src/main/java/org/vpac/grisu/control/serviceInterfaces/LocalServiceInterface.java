@@ -10,6 +10,7 @@ import org.globus.myproxy.MyProxyException;
 import org.ietf.jgss.GSSException;
 import org.vpac.grisu.backend.hibernate.HibernateSessionFactory;
 import org.vpac.grisu.backend.model.ProxyCredential;
+import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
@@ -27,6 +28,8 @@ ServiceInterface {
 	private ProxyCredential credential = null;
 	private String myproxy_username = null;
 	private char[] passphrase = null;
+
+	private User user;
 
 	@Override
 	protected final ProxyCredential getCredential() {
@@ -171,10 +174,21 @@ ServiceInterface {
 
 	}
 
+	@Override
+	protected final synchronized User getUser() {
+
+		if ( user == null ) {
+			this.user = User.createUser(getCredential(), this);
+		}
+
+		user.setCred(getCredential());
+
+		return user;
+	}
+
 	public final String[] listHostedApplicationTemplates() {
 		return ServiceTemplateManagement.getAllAvailableApplications();
 	}
-
 	public final void login(final String username, final String password) {
 
 		this.myproxy_username = username;
