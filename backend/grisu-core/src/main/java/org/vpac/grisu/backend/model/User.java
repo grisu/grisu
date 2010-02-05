@@ -71,6 +71,33 @@ public class User {
 	// to get one filesystemmanager per thread
 	private class ThreadLocalFsManager extends ThreadLocal {
 
+		private FileSystem createFileSystem(String rootUrl, ProxyCredential credToUse) {
+
+			FileSystemOptions opts = new FileSystemOptions();
+
+			if (rootUrl.startsWith("gsiftp")) {
+				GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
+				.getInstance();
+				builder.setGSSCredential(opts, credToUse
+						.getGssCredential());
+				// builder.setUserDirIsRoot(opts, true);
+			}
+
+			FileObject fileRoot;
+			try {
+				fileRoot = getFsManager().resolveFile(rootUrl, opts);
+			} catch (FileSystemException e) {
+				throw new RuntimeException(e);
+			}
+
+			FileSystem fileBase = null;
+			fileBase = fileRoot.getFileSystem();
+
+			return fileBase;
+
+
+		}
+
 		public synchronized FileSystem getFileSystem(final String rootUrl,
 				String fqan) throws FileSystemException {
 
@@ -82,7 +109,12 @@ public class User {
 
 			ProxyCredential credToUse = null;
 
-			MountPoint temp = getResponsibleMountpointForAbsoluteFile(rootUrl);
+			MountPoint temp = null;
+			try {
+				temp = getResponsibleMountpointForAbsoluteFile(rootUrl);
+			} catch (IllegalStateException e) {
+				myLogger.info(e);
+			}
 			if ((fqan == null) && (temp != null) && (temp.getFqan() != null)) {
 				fqan = temp.getFqan();
 			}
@@ -100,29 +132,18 @@ public class User {
 			if (temp == null) {
 				// means we have to figure out how to connect to this. I.e.
 				// which fqan to use...
-				throw new FileSystemException(
-						"Could not find mountpoint for url " + rootUrl);
+				//				throw new FileSystemException(
+				//						"Could not find mountpoint for url " + rootUrl);
+
+				// creating a filesystem...
+				myLogger.info("Creating filesystem without mountpoint...");
+				return createFileSystem(rootUrl, credToUse);
 
 			} else {
 				// great, we can re-use this filesystem
 				if (((FileSystemCache) get()).getFileSystem(temp) == null) {
-					FileSystemOptions opts = new FileSystemOptions();
 
-					if (temp.getRootUrl().startsWith("gsiftp")) {
-						GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
-						.getInstance();
-						builder.setGSSCredential(opts, credToUse
-								.getGssCredential());
-						// builder.setUserDirIsRoot(opts, true);
-					}
-
-					FileObject fileRoot;
-					try {
-						fileRoot = getFsManager().resolveFile(rootUrl, opts);
-					} catch (FileSystemException e) {
-						throw new RuntimeException();
-					}
-					fileBase = fileRoot.getFileSystem();
+					fileBase = createFileSystem(temp.getRootUrl(), credToUse);
 
 					if (temp != null) {
 						((FileSystemCache) get()).addFileSystem(temp, fileBase);
@@ -541,11 +562,13 @@ public class User {
 	@Transient
 	public Set<MountPoint> getAllMountPoints() {
 		if (allMountPoints == null) {
-			allMountPoints = new TreeSet<MountPoint>();
-			// first the automounted ones because the manually ones are more
-			// important
-			allMountPoints.addAll(mountPointsAutoMounted);
-			allMountPoints.addAll(getMountPoints());
+
+			throw new IllegalStateException("Mountpoints not set yet.");
+			//			allMountPoints = new TreeSet<MountPoint>();
+			//			// first the automounted ones because the manually ones are more
+			//			// important
+			//			allMountPoints.addAll(mountPointsAutoMounted);
+			//			allMountPoints.addAll(getMountPoints());
 		}
 		return allMountPoints;
 	}
@@ -616,46 +639,46 @@ public class User {
 		return uri;
 	}
 
-	@Transient
-	public MountPoint getFirstResponsibleMountPointForHostAndFqan(
-			final String host_or_url, final String fqan) {
-
-		myLogger.debug("Looking for mountpoint for site: " + host_or_url
-				+ " and fqan: " + fqan);
-
-		if (host_or_url == null) {
-			return null;
-		}
-
-		String protocol = null;
-		String hostname = null;
-		try {
-			URI uri = new URI(host_or_url);
-			protocol = uri.getScheme();
-			hostname = uri.getHost();
-
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		for (MountPoint mp : getAllMountPoints()) {
-			if (((mp.getFqan() == null) && (fqan == null))
-					|| ((mp.getFqan() != null) && mp.getFqan().equals(fqan))) {
-				if ((protocol != null) && (hostname != null)) {
-					if ((mp.getRootUrl().indexOf(protocol) != -1)
-							&& (mp.getRootUrl().indexOf(hostname) != -1)) {
-						return mp;
-					}
-				} else {
-					if (mp.getRootUrl().indexOf(host_or_url) != -1) {
-						return mp;
-					}
-				}
-			}
-		}
-		return null;
-	}
+	//	@Transient
+	//	public MountPoint getFirstResponsibleMountPointForHostAndFqan(
+	//			final String host_or_url, final String fqan) {
+	//
+	//		myLogger.debug("Looking for mountpoint for site: " + host_or_url
+	//				+ " and fqan: " + fqan);
+	//
+	//		if (host_or_url == null) {
+	//			return null;
+	//		}
+	//
+	//		String protocol = null;
+	//		String hostname = null;
+	//		try {
+	//			URI uri = new URI(host_or_url);
+	//			protocol = uri.getScheme();
+	//			hostname = uri.getHost();
+	//
+	//		} catch (URISyntaxException e) {
+	//			// TODO Auto-generated catch block
+	//			e.printStackTrace();
+	//		}
+	//
+	//		for (MountPoint mp : getAllMountPoints()) {
+	//			if (((mp.getFqan() == null) && (fqan == null))
+	//					|| ((mp.getFqan() != null) && mp.getFqan().equals(fqan))) {
+	//				if ((protocol != null) && (hostname != null)) {
+	//					if ((mp.getRootUrl().indexOf(protocol) != -1)
+	//							&& (mp.getRootUrl().indexOf(hostname) != -1)) {
+	//						return mp;
+	//					}
+	//				} else {
+	//					if (mp.getRootUrl().indexOf(host_or_url) != -1) {
+	//						return mp;
+	//					}
+	//				}
+	//			}
+	//		}
+	//		return null;
+	//	}
 
 	/**
 	 * Getter for the users' fqans.
@@ -980,8 +1003,15 @@ public class User {
 	 *            the mountpoints to add (for this session)
 	 */
 	public void setAutoMountedMountPoints(final Set<MountPoint> amps) {
-		allMountPoints = null;
+		//		allMountPoints = null;
 		this.mountPointsAutoMounted = amps;
+
+		allMountPoints = new TreeSet<MountPoint>();
+		// first the automounted ones because the manually ones are more
+		// important
+		allMountPoints.addAll(mountPointsAutoMounted);
+		allMountPoints.addAll(getMountPoints());
+
 	}
 
 	// public void addProperty(String key, String value) {
