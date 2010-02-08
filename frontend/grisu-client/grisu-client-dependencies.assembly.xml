@@ -55,6 +55,7 @@
 					<exclude>**/LICENSE.txt</exclude>
 					<exclude>**/NOTICE.txt</exclude>
 					<exclude>**/log4j.properties</exclude>
+					<exclude>**/gluev12r2-ext-class-map.properties</exclude>
 				</excludes>
 			</unpackOptions>
 		</dependencySet>
@@ -63,6 +64,10 @@
 	<files>
 		<file>
 			<source>src/main/resources/log4j.properties</source>
+			<outputDirectory>/</outputDirectory>
+		</file>
+		<file>
+			<source>src/main/resources/gluev12r2-ext-class-map.properties</source>
 			<outputDirectory>/</outputDirectory>
 		</file>
 	</files>
