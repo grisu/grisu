@@ -19,7 +19,7 @@
 
     <properties>
 <!--		<enunciate.version>1.16-RC2</enunciate.version>  -->
-    	<enunciate.version>1.18-RC1</enunciate.version>  
+    	<enunciate.version>1.18</enunciate.version>  
     </properties>
 
 	<dependencies>
