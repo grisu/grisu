@@ -9,7 +9,10 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 
+import org.bushe.swing.event.EventBus;
+import org.bushe.swing.event.EventSubscriber;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.events.ClientPropertiesEvent;
 import org.vpac.grisu.settings.ClientPropertiesManager;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -17,7 +20,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class LoginProgressPanel extends JPanel {
+public class LoginProgressPanel extends JPanel implements EventSubscriber {
 	private JLabel label;
 	private JProgressBar progressBar;
 	private JLabel label_1;
@@ -27,6 +30,9 @@ public class LoginProgressPanel extends JPanel {
 	 * Create the panel.
 	 */
 	public LoginProgressPanel() {
+
+		EventBus.subscribe(ClientPropertiesEvent.class, this);
+
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,
@@ -88,6 +94,22 @@ public class LoginProgressPanel extends JPanel {
 			progressBar = new JProgressBar();
 		}
 		return progressBar;
+	}
+
+	public void onEvent(Object event) {
+
+		if ( event instanceof ClientPropertiesEvent ) {
+			ClientPropertiesEvent ev = (ClientPropertiesEvent)event;
+			if ( ClientPropertiesManager.AUTO_LOGIN_KEY.equals(((ClientPropertiesEvent) event).getKey()) ) {
+				try {
+					Boolean b = Boolean.parseBoolean(ev.getValue());
+					getChckbxAutologinwheneverPossible().setSelected(b);
+				} catch (Exception e) {
+					// not that important
+				}
+			}
+		}
+
 	}
 
 	public void setCreatingServiceInterface() {

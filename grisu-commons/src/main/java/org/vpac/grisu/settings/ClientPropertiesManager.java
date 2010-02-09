@@ -6,6 +6,8 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.bushe.swing.event.EventBus;
+import org.vpac.grisu.control.events.ClientPropertiesEvent;
 
 import au.org.arcs.jcommons.constants.Enums.LoginType;
 
@@ -46,6 +48,9 @@ public final class ClientPropertiesManager {
 	.getLogger(ClientPropertiesManager.class.getName());
 	private static final int DEFAULT_ACTION_STATUS_RECHECK_INTERVAL_IN_SECONDS = 5;
 	private static final String DEFAULT_SHIBBOLETH_URL = "https://slcs1.arcs.org.au/SLCS/login";
+
+
+	public static final String AUTO_LOGIN_KEY = "autoLogin";
 
 	/**
 	 * Call this if the user wants a new (server-side) template to his personal
@@ -108,7 +113,7 @@ public final class ClientPropertiesManager {
 
 		boolean autoLogin = false;
 		try {
-			autoLogin = Boolean.parseBoolean(getClientConfiguration().getString("autoLogin"));
+			autoLogin = Boolean.parseBoolean(getClientConfiguration().getString(AUTO_LOGIN_KEY));
 
 		} catch (Exception e) {
 			// myLogger.debug("Problem with config file: " + e.getMessage());
@@ -698,9 +703,14 @@ public final class ClientPropertiesManager {
 
 	public static void setAutoLogin(boolean selected) {
 
+		System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+
 		try {
-			getClientConfiguration().setProperty("autoLogin", new Boolean(selected).toString());
+			getClientConfiguration().setProperty(AUTO_LOGIN_KEY, new Boolean(selected).toString());
 			getClientConfiguration().save();
+
+			EventBus.publish(new ClientPropertiesEvent(AUTO_LOGIN_KEY, new Boolean(selected).toString()));
+
 		} catch (ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}

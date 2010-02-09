@@ -12,6 +12,9 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 
+import org.bushe.swing.event.EventBus;
+import org.bushe.swing.event.EventSubscriber;
+import org.vpac.grisu.control.events.ClientPropertiesEvent;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.settings.ClientPropertiesManager;
 
@@ -20,7 +23,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class MultiLoginPanel extends JPanel {
+public class MultiLoginPanel extends JPanel implements EventSubscriber {
 
 	private JTabbedPane tabbedPane;
 	private ShibLoginPanel shibLoginPanel;
@@ -36,6 +39,7 @@ public class MultiLoginPanel extends JPanel {
 	 * Create the panel.
 	 */
 	public MultiLoginPanel(LoginPanel loginPanel) {
+		EventBus.subscribe(ClientPropertiesEvent.class, this);
 		this.loginPanel = loginPanel;
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
@@ -78,6 +82,7 @@ public class MultiLoginPanel extends JPanel {
 				public void itemStateChanged(ItemEvent arg0) {
 
 					ClientPropertiesManager.setAutoLogin(autoLoginCheckbox.isSelected());
+
 				}
 			});
 		}
@@ -191,6 +196,22 @@ public class MultiLoginPanel extends JPanel {
 				}
 			}
 		}.start();
+
+	}
+
+	public void onEvent(Object event) {
+
+		if ( event instanceof ClientPropertiesEvent ) {
+			ClientPropertiesEvent ev = (ClientPropertiesEvent)event;
+			if ( ClientPropertiesManager.AUTO_LOGIN_KEY.equals(((ClientPropertiesEvent) event).getKey()) ) {
+				try {
+					Boolean b = Boolean.parseBoolean(ev.getValue());
+					getAutoLoginCheckbox().setSelected(b);
+				} catch (Exception e) {
+					// not that important
+				}
+			}
+		}
 
 	}
 }

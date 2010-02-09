@@ -2199,7 +2199,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		Set<String> apps = new TreeSet<String>();
 
 		for ( Job job : jobs ) {
-			apps.add(job.getJobProperty(Constants.APPLICATIONNAME_KEY));
+			String app = job.getJobProperty(Constants.APPLICATIONNAME_KEY);
+			if ( StringUtils.isNotBlank(app) ) {
+				apps.add(app);
+			}
 		}
 
 		return DtoStringList.fromStringColletion(apps);
