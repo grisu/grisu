@@ -2,13 +2,18 @@ package org.vpac.grisu.frontend.view.swing.login;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 
 import org.vpac.grisu.frontend.control.login.LoginParams;
+import org.vpac.grisu.settings.ClientPropertiesManager;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -25,6 +30,7 @@ public class MultiLoginPanel extends JPanel {
 
 	private final LoginPanel loginPanel;
 	private AdvancedLoginPanelOptions advancedLoginPanelOptions;
+	private JCheckBox autoLoginCheckbox;
 
 	/**
 	 * Create the panel.
@@ -34,6 +40,8 @@ public class MultiLoginPanel extends JPanel {
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("321px:grow"),
+				FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("105px"),
 				FormFactory.RELATED_GAP_COLSPEC,},
 				new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
@@ -45,9 +53,10 @@ public class MultiLoginPanel extends JPanel {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
 				FormFactory.RELATED_GAP_ROWSPEC,}));
-		add(getTabbedPane(), "2, 2, fill, fill");
-		add(getAdvancedLoginPanelOptions(), "2, 6, fill, fill");
-		add(getButton(), "2, 8, right, bottom");
+		add(getTabbedPane(), "2, 2, 3, 1, fill, fill");
+		add(getAdvancedLoginPanelOptions(), "2, 6, 3, 1, fill, fill");
+		add(getAutoLoginCheckbox(), "2, 8, default, bottom");
+		add(getButton(), "4, 8, right, bottom");
 	}
 
 	private AdvancedLoginPanelOptions getAdvancedLoginPanelOptions() {
@@ -56,6 +65,23 @@ public class MultiLoginPanel extends JPanel {
 			advancedLoginPanelOptions.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		}
 		return advancedLoginPanelOptions;
+	}
+	private JCheckBox getAutoLoginCheckbox() {
+		if (autoLoginCheckbox == null) {
+			autoLoginCheckbox = new JCheckBox("Auto-login (whenever possible)");
+
+			if ( ClientPropertiesManager.getAutoLogin() ) {
+				autoLoginCheckbox.setSelected(true);
+			}
+
+			autoLoginCheckbox.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent arg0) {
+
+					ClientPropertiesManager.setAutoLogin(autoLoginCheckbox.isSelected());
+				}
+			});
+		}
+		return autoLoginCheckbox;
 	}
 
 	private JButton getButton() {
@@ -75,19 +101,20 @@ public class MultiLoginPanel extends JPanel {
 		}
 		return button;
 	}
+
 	private MyProxyLoginPanel getMyProxyLoginPanel() {
 		if (myProxyLoginPanel == null) {
 			myProxyLoginPanel = new MyProxyLoginPanel();
 		}
 		return myProxyLoginPanel;
 	}
+
 	private ShibLoginPanel getShibLoginPanel() {
 		if (shibLoginPanel == null) {
 			shibLoginPanel = new ShibLoginPanel();
 		}
 		return shibLoginPanel;
 	}
-
 	private JTabbedPane getTabbedPane() {
 		if (tabbedPane == null) {
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -103,25 +130,62 @@ public class MultiLoginPanel extends JPanel {
 		}
 		return x509LoginPanel;
 	}
+
+	private void lockUI(final boolean lock) {
+
+		SwingUtilities.invokeLater(new Thread() {
+
+			@Override
+			public void run() {
+
+				getButton().setEnabled(!lock);
+				getTabbedPane().setEnabled(!lock);
+
+
+			}
+
+		});
+
+	}
+
 	private void login() throws InterruptedException {
 
-		LoginMethodPanel temp = (LoginMethodPanel)(getTabbedPane().getSelectedComponent());
+		new Thread() {
 
-		String url = getAdvancedLoginPanelOptions().getServiceInterfaceUrl();
+			@Override
+			public void run() {
 
-		LoginParams params = new LoginParams(url, null, null);
+				lockUI(true);
 
-		Thread loginThread = temp.login(params);
+				try {
+					LoginMethodPanel temp = (LoginMethodPanel)(getTabbedPane().getSelectedComponent());
 
-		loginThread.start();
+					String url = getAdvancedLoginPanelOptions().getServiceInterfaceUrl();
 
-		loginThread.join();
+					LoginParams params = new LoginParams(url, null, null);
 
-		if ( temp.loginSuccessful() ) {
-			loginPanel.setServiceInterface(temp.getServiceInterface());
-		} else {
-			temp.getPossibleException().printStackTrace();
-		}
+					Thread loginThread = temp.login(params);
+
+					loginThread.start();
+
+					try {
+						loginThread.join();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+						return;
+					}
+
+					if ( temp.loginSuccessful() ) {
+						loginPanel.setServiceInterface(temp.getServiceInterface());
+					} else {
+						temp.getPossibleException().printStackTrace();
+					}
+
+				} finally {
+					lockUI(false);
+				}
+			}
+		}.start();
 
 	}
 }

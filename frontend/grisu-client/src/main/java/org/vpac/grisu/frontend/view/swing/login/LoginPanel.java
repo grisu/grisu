@@ -3,10 +3,12 @@ package org.vpac.grisu.frontend.view.swing.login;
 import java.awt.CardLayout;
 
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginException;
 import org.vpac.grisu.frontend.control.login.LoginManager;
+import org.vpac.grisu.settings.ClientPropertiesManager;
 import org.vpac.security.light.plainProxy.LocalProxy;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -19,37 +21,44 @@ public class LoginPanel extends JPanel {
 
 	private final String SWING_CLIENT_PANEL = "ROOT";
 	private final String LOGIN_PANEL = "LOGIN";
+	private final String PROGRESS_PANEL = "PROGRESS";
 
 	private final boolean tryExistingGridProxy;
 
 	private final GrisuSwingClient client;
 	private MultiLoginPanel multiLoginPanel;
 
-	/**
-	 * @wbp.parser.constructor
-	 */
-	public LoginPanel(GrisuSwingClient client) {
-		this(client, false);
-	}
+	private LoginProgressPanel progressPanel = null;
 
 	/**
 	 * Create the panel.
 	 */
-	public LoginPanel(GrisuSwingClient client, boolean tryExistingGridProxy) {
+	public LoginPanel(GrisuSwingClient client) {
 		this.client = client;
-		this.tryExistingGridProxy = tryExistingGridProxy;
+		this.tryExistingGridProxy = ClientPropertiesManager.getAutoLogin();
 		setLayout(new CardLayout(0, 0));
 		add(getLoginPanel(), LOGIN_PANEL);
 		add(client.getRootPanel(), SWING_CLIENT_PANEL);
+		add(getProgressPanel(), PROGRESS_PANEL);
 
 		if ( tryExistingGridProxy ) {
 			if ( LocalProxy.validGridProxyExists() ) {
-				try {
-					ServiceInterface si = LoginManager.login();
-					setServiceInterface(si);
-				} catch (LoginException e) {
-					e.printStackTrace();
-				}
+
+				new Thread() {
+					@Override
+					public void run() {
+
+						try {
+							getProgressPanel().setCreatingServiceInterface();
+							switchToProgressPanel();
+							ServiceInterface si = LoginManager.login();
+							setServiceInterface(si);
+						} catch (LoginException e) {
+							switchToLoginPanel();
+						}
+					}
+				}.start();
+
 			}
 		}
 	}
@@ -74,9 +83,19 @@ public class LoginPanel extends JPanel {
 		return multiLoginPanel;
 	}
 
+	private LoginProgressPanel getProgressPanel() {
+
+		if ( progressPanel == null ) {
+			progressPanel = new LoginProgressPanel();
+		}
+		return progressPanel;
+	}
+
 
 	public void setServiceInterface(ServiceInterface si) {
 
+		getProgressPanel().setLoginToBackend(si);
+		switchToProgressPanel();
 		client.setServiceInterface(si);
 
 		switchToClientPanel();
@@ -84,8 +103,34 @@ public class LoginPanel extends JPanel {
 
 	private void switchToClientPanel() {
 
-		CardLayout cl = (CardLayout) (getLayout());
-		cl.show(this, SWING_CLIENT_PANEL);
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				CardLayout cl = (CardLayout) (getLayout());
+				cl.show(LoginPanel.this, SWING_CLIENT_PANEL);
+			}
+		});
+	}
 
+	private void switchToLoginPanel() {
+
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				CardLayout cl = (CardLayout) (getLayout());
+				cl.show(LoginPanel.this, LOGIN_PANEL);
+			}
+		});
+	}
+
+	private void switchToProgressPanel() {
+
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				CardLayout cl = (CardLayout) (getLayout());
+				cl.show(LoginPanel.this, PROGRESS_PANEL);
+			}
+		});
 	}
 }

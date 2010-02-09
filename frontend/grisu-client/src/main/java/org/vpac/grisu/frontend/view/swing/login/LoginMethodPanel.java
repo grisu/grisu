@@ -10,6 +10,8 @@ public interface LoginMethodPanel {
 
 	public ServiceInterface getServiceInterface();
 
+	public void lockUI(boolean lock);
+
 	public Thread login(LoginParams params);
 
 	public boolean loginSuccessful();

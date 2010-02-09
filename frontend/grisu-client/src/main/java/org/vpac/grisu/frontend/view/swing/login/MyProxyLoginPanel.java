@@ -4,6 +4,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginException;
@@ -83,6 +84,20 @@ public class MyProxyLoginPanel extends JPanel implements LoginMethodPanel {
 			textField.setColumns(10);
 		}
 		return textField;
+	}
+
+	public void lockUI(final boolean lock) {
+
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+
+				getTextField().setEnabled(!lock);
+				getPasswordField().setEnabled(!lock);
+
+			}
+		});
+
 	}
 
 	public Thread login(final LoginParams params) {

@@ -87,6 +87,7 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 		}
 		return comboBox;
 	}
+
 	private JLabel getLblInstitution() {
 		if (lblInstitution == null) {
 			lblInstitution = new JLabel("Institution");
@@ -105,7 +106,6 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 		}
 		return lblUsername;
 	}
-
 	private JPasswordField getPasswordField() {
 		if (passwordField == null) {
 			passwordField = new JPasswordField();
@@ -175,6 +175,19 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 		};
 
 		loadThread.start();
+
+	}
+
+	public void lockUI(final boolean lock) {
+
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				getTextField_1().setEnabled(!lock);
+				getPasswordField().setEnabled(!lock);
+				getComboBox().setEnabled(!lock);
+			}
+		});
 
 	}
 

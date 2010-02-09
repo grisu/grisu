@@ -3,6 +3,7 @@ package org.vpac.grisu.frontend.view.swing.login;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.SwingUtilities;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginException;
@@ -65,6 +66,17 @@ public class X509LoginPanel extends JPanel implements LoginMethodPanel {
 			textField.setColumns(10);
 		}
 		return textField;
+	}
+
+	public void lockUI(final boolean lock) {
+
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				getTextField().setEnabled(!lock);
+			}
+		});
+
 	}
 
 	public Thread login(final LoginParams params) {

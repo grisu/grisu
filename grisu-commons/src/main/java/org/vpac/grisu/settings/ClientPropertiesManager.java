@@ -104,6 +104,21 @@ public final class ClientPropertiesManager {
 		}
 	}
 
+	public static boolean getAutoLogin() {
+
+		boolean autoLogin = false;
+		try {
+			autoLogin = Boolean.parseBoolean(getClientConfiguration().getString("autoLogin"));
+
+		} catch (Exception e) {
+			// myLogger.debug("Problem with config file: " + e.getMessage());
+			return false;
+		}
+
+		return autoLogin;
+
+	}
+
 	/**
 	 * Retrieves the configuration parameters from the properties file.
 	 * 
@@ -663,6 +678,7 @@ public final class ClientPropertiesManager {
 		}
 	}
 
+
 	/**
 	 * Saves the last used shib username.
 	 * 
@@ -679,6 +695,18 @@ public final class ClientPropertiesManager {
 		}
 	}
 
+
+	public static void setAutoLogin(boolean selected) {
+
+		try {
+			getClientConfiguration().setProperty("autoLogin", new Boolean(selected).toString());
+			getClientConfiguration().save();
+		} catch (ConfigurationException e) {
+			myLogger.debug("Problem with config file: " + e.getMessage());
+		}
+
+
+	}
 
 	/**
 	 * Sets the path to the executable for the default external application to
