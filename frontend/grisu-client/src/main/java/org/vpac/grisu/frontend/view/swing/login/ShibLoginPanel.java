@@ -20,6 +20,7 @@ import au.org.arcs.auth.shibboleth.DummyCredentialManager;
 import au.org.arcs.auth.shibboleth.DummyIdpObject;
 import au.org.arcs.auth.shibboleth.IdpObject;
 import au.org.arcs.auth.shibboleth.Shibboleth;
+import au.org.arcs.jcommons.configuration.CommonArcsProperties;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -124,6 +125,10 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 	private JTextField getTextField_1() {
 		if (textField_1 == null) {
 			textField_1 = new JTextField();
+			String lastUsername = CommonArcsProperties.getDefault().getLastShibUsername();
+			if ( StringUtils.isNotBlank(lastUsername) ) {
+				textField_1.setText(lastUsername);
+			}
 			textField_1.setColumns(10);
 		}
 		return textField_1;
@@ -131,7 +136,6 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 
 	private void loadIdpList() {
 
-		final String lastIdp = (String)idpModel.getSelectedItem();
 
 		Thread loadThread = new Thread() {
 
@@ -155,10 +159,17 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 
 					@Override
 					public void run() {
+
+						String lastIdp = (String)idpModel.getSelectedItem();
+
 						idpModel.removeAllElements();
 
 						for (String idp : idpO.getIdps() ) {
 							idpModel.addElement(idp);
+						}
+
+						if ( StringUtils.isBlank(lastIdp) ) {
+							lastIdp = CommonArcsProperties.getDefault().getLastShibIdp();
 						}
 
 						if ( StringUtils.isNotBlank(lastIdp) && (idpModel.getIndexOf(lastIdp) >= 0) ) {

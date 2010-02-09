@@ -6,10 +6,13 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginException;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.control.login.LoginParams;
+
+import au.org.arcs.jcommons.configuration.CommonArcsProperties;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -81,6 +84,10 @@ public class MyProxyLoginPanel extends JPanel implements LoginMethodPanel {
 	private JTextField getTextField() {
 		if (textField == null) {
 			textField = new JTextField();
+			String lastUsername = CommonArcsProperties.getDefault().getLastMyProxyUsername();
+			if ( StringUtils.isNotBlank(lastUsername) ) {
+				textField.setText(lastUsername);
+			}
 			textField.setColumns(10);
 		}
 		return textField;

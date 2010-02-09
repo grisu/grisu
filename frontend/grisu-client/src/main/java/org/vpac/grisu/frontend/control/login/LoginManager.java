@@ -362,6 +362,7 @@ public class LoginManager {
 				try {
 					si = LoginHelpers.myProxyLogin(loginParams);
 					ClientPropertiesManager.saveLastLoginType(LoginType.MYPROXY);
+					CommonArcsProperties.getDefault().setLastMyProxyUsername(loginParams.getMyProxyUsername());
 				} catch (ServiceInterfaceException e) {
 					throw new LoginException("Could not login: "
 							+ e.getLocalizedMessage(), e);

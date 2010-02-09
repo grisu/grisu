@@ -49,7 +49,7 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber {
 				FormFactory.RELATED_GAP_COLSPEC,},
 				new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("144px"),
+				RowSpec.decode("184px"),
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
@@ -146,10 +146,10 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber {
 				getButton().setEnabled(!lock);
 				getTabbedPane().setEnabled(!lock);
 
-				getAdvancedLoginPanelOptions().lockUI(!lock);
-				getShibLoginPanel().lockUI(!lock);
-				getMyProxyLoginPanel().lockUI(!lock);
-				getX509LoginPanel().lockUI(!lock);
+				getAdvancedLoginPanelOptions().lockUI(lock);
+				getShibLoginPanel().lockUI(lock);
+				getMyProxyLoginPanel().lockUI(lock);
+				getX509LoginPanel().lockUI(lock);
 
 				getAutoLoginCheckbox().setEnabled(!lock);
 			}
