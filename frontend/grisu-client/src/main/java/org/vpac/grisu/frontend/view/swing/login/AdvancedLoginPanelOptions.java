@@ -5,6 +5,7 @@ import java.awt.event.ItemListener;
 
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -60,6 +61,19 @@ public class AdvancedLoginPanelOptions extends JPanel {
 		}
 		return serviceInterfaceUrlPanel;
 	}
+
+	public void lockUI(final boolean lock) {
+
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				getChckbxAdvancedConnectionSettings().setEnabled(!lock);
+				getServiceInterfaceUrlPanel().setEnabled(!lock);
+			}
+		});
+
+	}
+
 	private void showAdvancedOptions(boolean show) {
 
 		getServiceInterfaceUrlPanel().setVisible(show);

@@ -141,7 +141,12 @@ public class MultiLoginPanel extends JPanel {
 				getButton().setEnabled(!lock);
 				getTabbedPane().setEnabled(!lock);
 
+				getAdvancedLoginPanelOptions().lockUI(!lock);
+				getShibLoginPanel().lockUI(!lock);
+				getMyProxyLoginPanel().lockUI(!lock);
+				getX509LoginPanel().lockUI(!lock);
 
+				getAutoLoginCheckbox().setEnabled(!lock);
 			}
 
 		});
