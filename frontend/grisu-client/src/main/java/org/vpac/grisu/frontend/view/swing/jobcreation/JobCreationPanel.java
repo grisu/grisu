@@ -10,6 +10,8 @@ public interface JobCreationPanel {
 
 	public JPanel getPanel();
 
+	public String getPanelName();
+
 	public String getSupportedApplication();
 
 	public void setServiceInterface(ServiceInterface si);

@@ -66,8 +66,8 @@ public class GrisuCenterPanel extends JPanel {
 		add(wrapperPanel, "2, 2, fill, fill");
 	}
 	public void addJobCreationPanel(JobCreationPanel panel) {
-		availableJobCreationPanels.put(panel.getSupportedApplication(), panel);
-		wrapperPanel.add(panel.getPanel(), panel.getSupportedApplication());
+		availableJobCreationPanels.put(panel.getPanelName(), panel);
+		wrapperPanel.add(panel.getPanel(), panel.getPanelName());
 		pcs.firePropertyChange("availableJobCreationPanels", null, availableJobCreationPanels);
 	}
 
@@ -116,7 +116,7 @@ public class GrisuCenterPanel extends JPanel {
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
 			public void run() {
-				cl.show(wrapperPanel, panel.getSupportedApplication());
+				cl.show(wrapperPanel, panel.getPanelName());
 				revalidate();
 			}
 		});

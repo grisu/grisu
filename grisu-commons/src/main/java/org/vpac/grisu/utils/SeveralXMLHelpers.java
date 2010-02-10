@@ -114,7 +114,7 @@ public final class SeveralXMLHelpers {
 	 *             if the document can't be created
 	 */
 	public static Document createDocumentFromElement(final Element element)
-			throws Exception {
+	throws Exception {
 		try {
 			final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
 			final String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
@@ -124,11 +124,11 @@ public final class SeveralXMLHelpers {
 			// File("/home/markus/workspace/nw-core/jsdl.xsd");
 
 			DocumentBuilderFactory docBuildFactory = DocumentBuilderFactory
-					.newInstance();
+			.newInstance();
 			docBuildFactory
-					.setAttribute(
-							"http://apache.org/xml/features/nonvalidating/load-external-dtd",
-							false);
+			.setAttribute(
+					"http://apache.org/xml/features/nonvalidating/load-external-dtd",
+					false);
 			docBuildFactory.setNamespaceAware(true);
 			docBuildFactory.setValidating(false);
 
@@ -169,7 +169,7 @@ public final class SeveralXMLHelpers {
 	 *             if the conversion fails
 	 */
 	public static Document fromInputStream(final InputStream input)
-			throws Exception {
+	throws Exception {
 		try {
 			final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
 			final String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
@@ -179,11 +179,11 @@ public final class SeveralXMLHelpers {
 			// File("/home/markus/workspace/nw-core/jsdl.xsd");
 
 			DocumentBuilderFactory docBuildFactory = DocumentBuilderFactory
-					.newInstance();
+			.newInstance();
 			docBuildFactory
-					.setAttribute(
-							"http://apache.org/xml/features/nonvalidating/load-external-dtd",
-							false);
+			.setAttribute(
+					"http://apache.org/xml/features/nonvalidating/load-external-dtd",
+					false);
 			docBuildFactory.setNamespaceAware(true);
 			docBuildFactory.setValidating(false);
 
@@ -214,6 +214,10 @@ public final class SeveralXMLHelpers {
 	 */
 	public static Document fromString(final String jsdl_string) {
 
+		if ( "<?xml version=\"1.0\" encoding=\"UTF-8\"?>".equals(jsdl_string)  ) {
+			throw new RuntimeException("Only an empty string...");
+		}
+
 		try {
 			final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
 			final String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
@@ -223,15 +227,15 @@ public final class SeveralXMLHelpers {
 			// File("/home/markus/workspace/nw-core/jsdl.xsd");
 
 			DocumentBuilderFactory docBuildFactory = DocumentBuilderFactory
-					.newInstance();
+			.newInstance();
 			docBuildFactory
-					.setAttribute(
-							"http://apache.org/xml/features/nonvalidating/load-external-dtd",
-							false);
+			.setAttribute(
+					"http://apache.org/xml/features/nonvalidating/load-external-dtd",
+					false);
 			docBuildFactory.setNamespaceAware(true);
 			docBuildFactory.setValidating(false);
 
-//			docBuildFactory.setAttribute(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA); // use
+			//			docBuildFactory.setAttribute(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA); // use
 			// LANGUAGE
 			// here
 			// instead
@@ -242,7 +246,7 @@ public final class SeveralXMLHelpers {
 			DocumentBuilder docBuilder = docBuildFactory.newDocumentBuilder();
 			Document result = docBuilder.parse(new ByteArrayInputStream(jsdl_string
 					.getBytes()));
-			
+
 			return result;
 		} catch (Exception e) {
 			// e.printStackTrace();
@@ -269,7 +273,7 @@ public final class SeveralXMLHelpers {
 		// File("/home/markus/workspace/nw-core/jsdl.xsd");
 
 		DocumentBuilderFactory docBuildFactory = DocumentBuilderFactory
-				.newInstance();
+		.newInstance();
 		docBuildFactory.setAttribute(
 				"http://apache.org/xml/features/nonvalidating/load-external-dtd",
 				false);
@@ -286,7 +290,7 @@ public final class SeveralXMLHelpers {
 
 		try {
 			DocumentBuilder documentBuilder = docBuildFactory
-					.newDocumentBuilder();
+			.newDocumentBuilder();
 			jsdl = documentBuilder.parse(file);
 			// JsdlHelpers.validateJSDL(jsdl);
 
@@ -320,7 +324,7 @@ public final class SeveralXMLHelpers {
 		try {
 			// TODO use static transformer to reduce overhead?
 			Transformer transformer = TransformerFactory.newInstance()
-					.newTransformer();
+			.newTransformer();
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
 			// initialize StreamResult with InputFile object to save to file

@@ -13,11 +13,14 @@ import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.BatchJobException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.frontend.model.events.BatchJobKilledEvent;
+import org.vpac.grisu.frontend.model.events.JobKilledEvent;
+import org.vpac.grisu.frontend.model.events.NewJobEvent;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -29,20 +32,9 @@ import au.org.arcs.jcommons.constants.Constants;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
-public class RunningJobManager {
+public class RunningJobManager implements EventSubscriber {
 
-	private class UpdateTimerTask extends TimerTask implements EventSubscriber {
-
-		public void onEvent(Object event) {
-
-			if ( event instanceof BatchJobKilledEvent ) {
-				BatchJobKilledEvent e = (BatchJobKilledEvent)event;
-
-				updateBatchJobList(e.getApplication());
-			}
-
-
-		}
+	private class UpdateTimerTask extends TimerTask {
 
 		@Override
 		public void run() {
@@ -83,6 +75,8 @@ public class RunningJobManager {
 
 
 	}
+
+
 
 	static final Logger myLogger = Logger.getLogger(RunningJobManager.class
 			.getName());
@@ -126,6 +120,7 @@ public class RunningJobManager {
 	private final int UPDATE_TIME_IN_SECONDS = 300;
 
 	private static Map<ServiceInterface, RunningJobManager> cachedRegistries = new HashMap<ServiceInterface, RunningJobManager>();
+
 	public static RunningJobManager getDefault(final ServiceInterface si) {
 
 		if (si == null) {
@@ -142,10 +137,12 @@ public class RunningJobManager {
 
 		return cachedRegistries.get(si);
 	}
-
 	private final UserEnvironmentManager em;
 
 	private final ServiceInterface si;
+
+	private boolean watchingAllSingleJobs = false;
+	private boolean watchingAllBatchJobs = false;
 
 	private final Map<String, JobObject> cachedAllSingleJobs = Collections
 	.synchronizedMap(new HashMap<String, JobObject>());
@@ -157,11 +154,11 @@ public class RunningJobManager {
 	.synchronizedMap(new HashMap<String, BatchJobObject>());
 
 	private final Map<String, EventList<BatchJobObject>> cachedBatchJobsPerApplication = Collections
-	.synchronizedMap(new HashMap<String, EventList<BatchJobObject>>());;
+	.synchronizedMap(new HashMap<String, EventList<BatchJobObject>>());
+
+	private final Timer updateTimer = new Timer();;
 
 	//	private final boolean checkForNewApplicationsForSingleJobs = false;
-
-	private final Timer updateTimer = new Timer();
 
 	private boolean stop = false;
 
@@ -169,6 +166,10 @@ public class RunningJobManager {
 		this.si = si;
 		this.em = GrisuRegistryManager.getDefault(si)
 		.getUserEnvironmentManager();
+
+		EventBus.subscribe(NewJobEvent.class, this);
+		EventBus.subscribe(JobKilledEvent.class, this);
+		EventBus.subscribe(BatchJobKilledEvent.class, this);
 
 		startAutoRefresh();
 	}
@@ -183,6 +184,10 @@ public class RunningJobManager {
 
 	}
 
+	public EventList<BatchJobObject> getAllBatchJobs() {
+		return getBatchJobs(Constants.ALLJOBS_KEY);
+	}
+
 	private synchronized Collection<BatchJobObject> getAllCurrentlyWatchedBatchJobs() {
 
 		return cachedAllBatchJobs.values();
@@ -192,6 +197,10 @@ public class RunningJobManager {
 	private synchronized Collection<JobObject> getAllCurrentlyWatchedSingleJobs() {
 
 		return cachedAllSingleJobs.values();
+	}
+
+	public EventList<JobObject> getAllJobs() {
+		return getJobs(Constants.ALLJOBS_KEY);
 	}
 
 	public BatchJobObject getBatchJob(String jobname) throws NoSuchJobException {
@@ -220,6 +229,10 @@ public class RunningJobManager {
 			application = Constants.ALLJOBS_KEY;
 		}
 
+		if ( Constants.ALLJOBS_KEY.equals(application) ) {
+			watchingAllBatchJobs = true;
+		}
+
 		if (cachedBatchJobsPerApplication.get(application) == null) {
 
 			EventList<BatchJobObject> temp = new BasicEventList<BatchJobObject>();
@@ -227,6 +240,7 @@ public class RunningJobManager {
 			for (String jobname : em
 					.getCurrentBatchJobnames(application, false)) {
 				try {
+
 					temp.add(getBatchJob(jobname));
 				} catch (NoSuchJobException e) {
 					throw new RuntimeException(e);
@@ -266,6 +280,10 @@ public class RunningJobManager {
 			application = Constants.ALLJOBS_KEY;
 		}
 
+		if ( Constants.ALLJOBS_KEY.equals(application) ) {
+			watchingAllSingleJobs = true;
+		}
+
 		if (cachedSingleJobsPerApplication.get(application) == null) {
 
 			EventList<JobObject> temp = new BasicEventList<JobObject>();
@@ -275,6 +293,7 @@ public class RunningJobManager {
 				try {
 					JobObject j= getJob(jobname, false);
 					if ( j != null ) {
+
 						temp.add(j);
 					}
 				} catch (NoSuchJobException e) {
@@ -291,6 +310,22 @@ public class RunningJobManager {
 
 	public final ServiceInterface getServiceInterface() {
 		return this.si;
+	}
+
+	public void onEvent(Object event) {
+
+		if ( event instanceof BatchJobKilledEvent ) {
+			BatchJobKilledEvent e = (BatchJobKilledEvent)event;
+
+			updateBatchJobList(e.getApplication());
+		} else if ( event instanceof NewJobEvent ) {
+			NewJobEvent ev = (NewJobEvent)event;
+
+			updateJobList(ev.getJob().getApplication());
+		} else if ( event instanceof JobKilledEvent ) {
+			JobKilledEvent ev = (JobKilledEvent)event;
+			updateJobList(ev.getJob().getApplication());
+		}
 	}
 
 
@@ -331,6 +366,11 @@ public class RunningJobManager {
 		}
 		for (String name : jobnamesNew) {
 			try {
+
+				if ( watchingAllBatchJobs ) {
+					getAllBatchJobs().add(getBatchJob(name));
+				}
+
 				list.add(getBatchJob(name));
 			} catch (NoSuchJobException e) {
 				throw new RuntimeException(e);
@@ -343,6 +383,11 @@ public class RunningJobManager {
 				toRemove.add(bj);
 			}
 		}
+
+		if ( watchingAllBatchJobs ) {
+			getAllBatchJobs().removeAll(toRemove);
+		}
+
 		list.removeAll(toRemove);
 		for ( BatchJobObject bj : toRemove ) {
 			cachedAllBatchJobs.remove(bj.getJobname());
@@ -367,6 +412,11 @@ public class RunningJobManager {
 		}
 		for (String name : jobnamesNew) {
 			try {
+
+				if ( watchingAllSingleJobs ) {
+					getAllJobs().add(getJob(name, false));
+				}
+
 				list.add(getJob(name, false));
 			} catch (NoSuchJobException e) {
 				throw new RuntimeException(e);
@@ -379,6 +429,11 @@ public class RunningJobManager {
 				toRemove.add(j);
 			}
 		}
+
+		if ( watchingAllSingleJobs ) {
+			getAllJobs().removeAll(toRemove);
+		}
+
 		list.removeAll(toRemove);
 		for ( JobObject j : toRemove ) {
 			cachedAllSingleJobs.remove(j.getJobname());

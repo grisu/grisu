@@ -20,7 +20,9 @@ import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransfer;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransferManager;
+import org.vpac.grisu.frontend.model.events.JobKilledEvent;
 import org.vpac.grisu.frontend.model.events.JobStatusEvent;
+import org.vpac.grisu.frontend.model.events.NewJobEvent;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.DtoFolder;
@@ -642,6 +644,11 @@ Comparable<JobObject> {
 			}
 			this.serviceInterface.kill(this.getJobname(), clean);
 			getStatus(true);
+
+			if ( clean ) {
+				EventBus.publish(new JobKilledEvent(this));
+			}
+
 		} catch (Exception e) {
 			throw new JobException(this, "Could not kill/clean job.", e);
 		}
@@ -829,6 +836,8 @@ Comparable<JobObject> {
 					e);
 		}
 		getStatus(true);
+
+		EventBus.publish(new NewJobEvent(this));
 	}
 
 	/**

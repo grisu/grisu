@@ -100,6 +100,9 @@ public class ExampleJobCreationPanel extends JPanel implements JobCreationPanel,
 	public JPanel getPanel() {
 		return this;
 	}
+	public String getPanelName() {
+		return "Example";
+	}
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
@@ -107,6 +110,7 @@ public class ExampleJobCreationPanel extends JPanel implements JobCreationPanel,
 		}
 		return scrollPane;
 	}
+
 	private JTextArea getStatusTextArea() {
 		if (textArea == null) {
 			textArea = new JTextArea();
@@ -130,7 +134,6 @@ public class ExampleJobCreationPanel extends JPanel implements JobCreationPanel,
 		});
 
 	}
-
 	public void onEvent(String topic, Object data) {
 
 		if (data instanceof JobStatusEvent) {
@@ -144,6 +147,7 @@ public class ExampleJobCreationPanel extends JPanel implements JobCreationPanel,
 		}
 
 	}
+
 	public void setServiceInterface(ServiceInterface si) {
 		System.out.println("Serviceinterface set. DN: "+si.getDN());
 		this.si = si;

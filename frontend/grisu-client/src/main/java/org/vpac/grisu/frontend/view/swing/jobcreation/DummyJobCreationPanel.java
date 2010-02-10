@@ -100,6 +100,9 @@ public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, E
 	public JPanel getPanel() {
 		return this;
 	}
+	public String getPanelName() {
+		return "Dummy";
+	}
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
@@ -107,6 +110,7 @@ public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, E
 		}
 		return scrollPane;
 	}
+
 	private JTextArea getStatusTextArea() {
 		if (textArea == null) {
 			textArea = new JTextArea();
@@ -115,7 +119,7 @@ public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, E
 	}
 
 	public String getSupportedApplication() {
-		return "Dummy";
+		return "UnixCommands";
 	}
 
 	private void lockUI(final boolean lock) {
@@ -130,7 +134,6 @@ public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, E
 		});
 
 	}
-
 	public void onEvent(String topic, Object data) {
 
 		if (data instanceof JobStatusEvent) {
@@ -144,6 +147,7 @@ public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, E
 		}
 
 	}
+
 	public void setServiceInterface(ServiceInterface si) {
 		System.out.println("Serviceinterface set. DN: "+si.getDN());
 		this.si = si;

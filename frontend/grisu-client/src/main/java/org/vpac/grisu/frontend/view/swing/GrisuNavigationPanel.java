@@ -75,16 +75,16 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements Propert
 
 	private void addApplicationsToWatch(Map<String, JobCreationPanel> applications) {
 
-		for ( String app : applications.keySet() ) {
-			if ( ! applicationsToWatch.contains(app) ) {
+		for ( JobCreationPanel panel : applications.values() ) {
+			if ( ! applicationsToWatch.contains(panel.getSupportedApplication()) ) {
 
-				addTaskPaneItem(JOB_CREATION_TASK_PANE, ApplicationsManager.getPrettyName(app),
-						ApplicationsManager.getShortDescription(app), ApplicationsManager.getIcon(app));
+				addTaskPaneItem(JOB_CREATION_TASK_PANE, ApplicationsManager.getPrettyName(panel.getPanelName()),
+						ApplicationsManager.getShortDescription(panel.getSupportedApplication()), ApplicationsManager.getIcon(panel.getSupportedApplication()));
 
-				if ( applications.get(app).createsBatchJob() ) {
-					batchTaskPane.addApplication(app);
+				if ( panel.createsBatchJob() ) {
+					batchTaskPane.addApplication(panel.getSupportedApplication());
 				} else {
-					singleTaskPane.addApplication(app);
+					singleTaskPane.addApplication(panel.getSupportedApplication());
 				}
 
 			}

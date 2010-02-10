@@ -330,9 +330,6 @@ public class SimpleSingleJobsGrid extends JPanel {
 			for ( JobObject job : getSelectedJobs() ) {
 				//				getTable().getSelectionModel().clearSelection();
 				job.kill(clean);
-				if ( clean ) {
-					jobList.remove(job);
-				}
 			}
 
 			lockUI(false);
