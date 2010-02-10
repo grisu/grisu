@@ -4,6 +4,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.frontend.control.login.LoginManager;
@@ -15,6 +16,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class ServiceInterfaceUrlPanel extends JPanel {
+
 	private JComboBox comboBox;
 	private final DefaultComboBoxModel urlModel = new DefaultComboBoxModel();
 	private JLabel lblServiceinterfaceUrl;
@@ -73,5 +75,16 @@ public class ServiceInterfaceUrlPanel extends JPanel {
 	}
 	public String getServiceInterfaceUrl() {
 		return (String)(urlModel.getSelectedItem());
+	}
+
+	public void lockUI(final boolean lock) {
+
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				getComboBox().setEnabled(!lock);
+			}
+		});
+
 	}
 }

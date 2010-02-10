@@ -71,8 +71,7 @@ public class GrisuCenterPanel extends JPanel {
 		pcs.firePropertyChange("availableJobCreationPanels", null, availableJobCreationPanels);
 	}
 
-	@Override
-	public void addPropertyChangeListener(PropertyChangeListener l) {
+	public void addNavigationPanel(GrisuNavigationPanel l) {
 		pcs.addPropertyChangeListener(l);
 	}
 

@@ -55,7 +55,7 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements Propert
 
 		this.si = si;
 		this.centerPanel = centerPanel;
-		this.centerPanel.addPropertyChangeListener(this);
+		this.centerPanel.addNavigationPanel(this);
 
 		addTaskPane(JOB_CREATION_TASK_PANE, null);
 

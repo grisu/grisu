@@ -68,7 +68,7 @@ public class AdvancedLoginPanelOptions extends JPanel {
 			@Override
 			public void run() {
 				getChckbxAdvancedConnectionSettings().setEnabled(!lock);
-				getServiceInterfaceUrlPanel().setEnabled(!lock);
+				getServiceInterfaceUrlPanel().lockUI(lock);
 			}
 		});
 

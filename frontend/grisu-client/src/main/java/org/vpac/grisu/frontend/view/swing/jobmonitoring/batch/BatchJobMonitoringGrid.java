@@ -148,7 +148,7 @@ public class BatchJobMonitoringGrid extends JPanel {
 
 				public void actionPerformed(ActionEvent e) {
 
-					Set<BatchJobObject> bjs = getSelectedBatchJobs();
+					final Set<BatchJobObject> bjs = getSelectedBatchJobs();
 
 					StringBuffer message = new StringBuffer("Do you really want to kill and clean the following batchjobs?\n\n");
 
@@ -164,9 +164,16 @@ public class BatchJobMonitoringGrid extends JPanel {
 
 					if ( n == JOptionPane.YES_OPTION ) {
 
-						for ( BatchJobObject bj : bjs ) {
-							bj.kill(true, false);
-						}
+						new Thread() {
+							@Override
+							public void run() {
+
+								for ( BatchJobObject bj : bjs ) {
+									bj.kill(true, false);
+								}
+
+							}
+						}.start();
 					}
 				}
 			});

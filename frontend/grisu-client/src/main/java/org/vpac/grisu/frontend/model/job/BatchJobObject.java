@@ -8,11 +8,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -23,6 +26,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.vpac.grisu.control.DefaultResubmitPolicy;
+import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ResubmitPolicy;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.SpecificJobsResubmitPolicy;
@@ -166,6 +170,10 @@ Comparable<BatchJobObject> {
 		try {
 
 			dtoMultiPartJob = getWrappedDtoBatchJob(refreshJobStatusOnBackend);
+
+			if ( dtoMultiPartJob == null ) {
+				throw new NoSuchJobException("Could not access batchjob "+batchJobname+" on the backend.");
+			}
 
 			this.submissionFqan = dtoMultiPartJob.getSubmissionFqan();
 
@@ -338,7 +346,11 @@ Comparable<BatchJobObject> {
 
 	public Set<String> currentlyUsedSubmissionLocations() {
 
-		return getWrappedDtoBatchJob(false).currentlyUsedSubmissionLocations();
+		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		if ( temp == null ) {
+			return new HashSet<String>();
+		}
+		return temp.currentlyUsedSubmissionLocations();
 	}
 
 	/**
@@ -458,7 +470,11 @@ Comparable<BatchJobObject> {
 	 * @return all failed jobs
 	 */
 	public SortedSet<DtoJob> failedJobs() {
-		return getWrappedDtoBatchJob(false).failedJobs();
+		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		if ( temp == null ) {
+			return new TreeSet<DtoJob>();
+		}
+		return temp.failedJobs();
 	}
 
 	/**
@@ -511,12 +527,19 @@ Comparable<BatchJobObject> {
 
 	public Set<String> getCurrentlyRunningOrSuccessfullSubmissionLocations() {
 
-		return getWrappedDtoBatchJob(false).currentlyRunningOrSuccessfullSubmissionLocations();
+		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		if ( temp == null ) {
+			return new HashSet<String>();
+		}
+		return temp.currentlyRunningOrSuccessfullSubmissionLocations();
 	}
 
 	public Set<String> getCurrentlyUsedSubmissionLocations() {
-
-		return getWrappedDtoBatchJob(false).currentlyUsedSubmissionLocations();
+		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		if ( temp == null ) {
+			return new HashSet<String>();
+		}
+		return temp.currentlyUsedSubmissionLocations();
 	}
 
 	/**
@@ -568,6 +591,10 @@ Comparable<BatchJobObject> {
 	public String getDetails() {
 
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+
+		if (temp == null ) {
+			return "Could not find job.";
+		}
 
 		StringBuffer buffer = new StringBuffer("Details:\n\n");
 
@@ -669,7 +696,11 @@ Comparable<BatchJobObject> {
 	 */
 	public Map<Date, String> getLogMessages(boolean refresh) {
 
-		return getWrappedDtoBatchJob(refresh).messages();
+		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		if ( temp == null ) {
+			return new TreeMap<Date, String>();
+		}
+		return temp.messages();
 
 	}
 
@@ -697,7 +728,11 @@ Comparable<BatchJobObject> {
 	 * @return the number of failed jobs
 	 */
 	public int getNumberOfFailedJobs() {
-		return getWrappedDtoBatchJob(false).numberOfFailedJobs();
+		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		if ( temp == null ) {
+			return 0;
+		}
+		return temp.numberOfFailedJobs();
 	}
 
 	/**
@@ -706,7 +741,11 @@ Comparable<BatchJobObject> {
 	 * @return the number of finished jobs
 	 */
 	public int getNumberOfFinishedJobs() {
-		return getWrappedDtoBatchJob(false).numberOfFinishedJobs();
+		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		if ( temp == null ) {
+			return 0;
+		}
+		return temp.numberOfFinishedJobs();
 	}
 
 	/**
@@ -715,7 +754,11 @@ Comparable<BatchJobObject> {
 	 * @return the number of running jobs
 	 */
 	public int getNumberOfRunningJobs() {
-		return getWrappedDtoBatchJob(false).numberOfRunningJobs();
+		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		if ( temp == null ) {
+			return 0;
+		}
+		return temp.numberOfRunningJobs();
 	}
 
 	/**
@@ -724,7 +767,11 @@ Comparable<BatchJobObject> {
 	 * @return the number of successful jobs
 	 */
 	public int getNumberOfSuccessfulJobs() {
-		return getWrappedDtoBatchJob(false).numberOfSuccessfulJobs();
+		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		if ( temp == null ) {
+			return 0;
+		}
+		return temp.numberOfSuccessfulJobs();
 	}
 
 	/**
@@ -733,7 +780,11 @@ Comparable<BatchJobObject> {
 	 * @return the number of unsubmitted jobs
 	 */
 	public int getNumberOfUnsubmittedJobs() {
-		return getWrappedDtoBatchJob(false).numberOfUnsubmittedJobs();
+		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		if ( temp == null ) {
+			return 0;
+		}
+		return temp.numberOfUnsubmittedJobs();
 	}
 
 	/**
@@ -742,7 +793,11 @@ Comparable<BatchJobObject> {
 	 * @return the number of waiting jobs
 	 */
 	public int getNumberOfWaitingJobs() {
-		return getWrappedDtoBatchJob(false).numberOfWaitingJobs();
+		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		if ( temp == null ) {
+			return 0;
+		}
+		return temp.numberOfWaitingJobs();
 	}
 
 	/**
@@ -771,6 +826,10 @@ Comparable<BatchJobObject> {
 
 		DtoBatchJob temp;
 		temp = getWrappedDtoBatchJob(false);
+
+		if ( temp == null ) {
+			return "Could not access job.";
+		}
 
 		StringBuffer output = new StringBuffer();
 
@@ -805,7 +864,11 @@ Comparable<BatchJobObject> {
 	 * @return the properties
 	 */
 	public Map<String, String> getProperties() {
-		return getWrappedDtoBatchJob(false).propertiesAsMap();
+		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		if ( temp == null ) {
+			return new TreeMap<String, String>();
+		}
+		return temp.propertiesAsMap();
 	}
 
 	/**
@@ -826,17 +889,29 @@ Comparable<BatchJobObject> {
 
 	public int getStatus(boolean refresh) {
 
-		return getWrappedDtoBatchJob(refresh).getStatus();
+		DtoBatchJob temp = getWrappedDtoBatchJob(refresh);
+		if ( temp == null ) {
+			return JobConstants.UNDEFINED;
+		}
+		return temp.getStatus();
 	}
 
 	public Map<Integer, Map<String, Integer>> getStatusMap() {
 
-		return getWrappedDtoBatchJob(false).statusMap();
+		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		if ( temp == null ) {
+			return new TreeMap<Integer, Map<String, Integer>>();
+		}
+		return temp.statusMap();
 
 	}
 
 	public int getTotalNumberOfJobs() {
-		return getWrappedDtoBatchJob(false).totalNumberOfJobs();
+		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		if ( temp == null ) {
+			return 0;
+		}
+		return temp.totalNumberOfJobs();
 	}
 
 	private DtoBatchJob getWrappedDtoBatchJob(boolean refresh) {
@@ -845,6 +920,11 @@ Comparable<BatchJobObject> {
 
 	private DtoBatchJob getWrappedDtoBatchJob(final boolean refresh,
 			final boolean waitForRefresh) {
+
+		if ( isKilled || isBeingKilled ) {
+			myLogger.debug("Job is or is being killed. Not updating dtoobject...");
+			return dtoMultiPartJob;
+		}
 
 		if ( ( (dtoMultiPartJob == null) || (! isRefreshing() && refresh)) || (refreshThread == null) || ((refreshThread != null) && ! refreshThread.isAlive()) ) {
 
@@ -928,6 +1008,10 @@ Comparable<BatchJobObject> {
 									getJobs(), dtoMultiPartJob.getJobs());
 
 						} catch (NoSuchJobException e) {
+							e.printStackTrace();
+							if ( isBeingKilled || isKilled ) {
+								return;
+							}
 							throw new RuntimeException(e);
 						}
 					}
@@ -964,7 +1048,11 @@ Comparable<BatchJobObject> {
 	 */
 	public boolean isFinished(boolean refresh) {
 		try {
-			return getWrappedDtoBatchJob(refresh).isFinished();
+			DtoBatchJob temp = getWrappedDtoBatchJob(refresh);
+			if ( temp == null ) {
+				return false;
+			}
+			return temp.isFinished();
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
@@ -991,7 +1079,11 @@ Comparable<BatchJobObject> {
 	 * @return whether all jobs finished successfully
 	 */
 	public boolean isSuccessful(boolean refresh) {
-		return getWrappedDtoBatchJob(refresh).allJobsFinishedSuccessful();
+		DtoBatchJob temp = getWrappedDtoBatchJob(refresh);
+		if ( temp == null ) {
+			return false;
+		}
+		return temp.allJobsFinishedSuccessful();
 	}
 
 	public void kill(boolean clean, boolean waitForCompletion) {
@@ -1115,7 +1207,11 @@ Comparable<BatchJobObject> {
 	 * @return the absolute path
 	 */
 	public String pathToInputFiles() {
-		return getWrappedDtoBatchJob(false).pathToInputFiles();
+		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		if ( temp == null ) {
+			throw new RuntimeException("Could not access batchjob "+batchJobname);
+		}
+		return temp.pathToInputFiles();
 	}
 
 	/**
@@ -1349,11 +1445,19 @@ Comparable<BatchJobObject> {
 			this.isRefreshing = true;
 			pcs.firePropertyChange(REFRESHING, false, true);
 			DtoActionStatus status = serviceInterface.getActionStatus(handle);
-			while (!status.isFinished()) {
+
+			if ( status == null ) {
+				this.isRefreshing = false;
+				pcs.firePropertyChange(REFRESHING, true, false);
+				myLogger.error("Can't get status for handle: "+handle);
+				return;
+			}
+
+			while ( !status.isFinished()) {
 
 				try {
 					Thread.sleep(ClientPropertiesManager
-							.getJobStatusRecheckIntervall());
+							.getJobStatusRecheckIntervall()*1000);
 				} catch (InterruptedException e) {
 					this.isRefreshing = false;
 					pcs.firePropertyChange(REFRESHING, true, false);
@@ -1363,6 +1467,14 @@ Comparable<BatchJobObject> {
 
 
 				status = serviceInterface.getActionStatus(handle);
+
+				if ( status == null ) {
+					this.isRefreshing = false;
+					pcs.firePropertyChange(REFRESHING, true, false);
+					myLogger.error("Can't get status for handle: "+handle);
+					return;
+				}
+
 			}
 			this.isRefreshing = false;
 			pcs.firePropertyChange(REFRESHING, true, false);
@@ -1485,7 +1597,7 @@ Comparable<BatchJobObject> {
 
 					try {
 						Thread.sleep(ClientPropertiesManager
-								.getJobStatusRecheckIntervall());
+								.getJobStatusRecheckIntervall()*1000);
 					} catch (InterruptedException e) {
 						// doesn't happen
 					}
@@ -1841,7 +1953,11 @@ Comparable<BatchJobObject> {
 	 * @return all successful jobs
 	 */
 	public SortedSet<DtoJob> successfulJobs() {
-		return getWrappedDtoBatchJob(false).successfulJobs();
+		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		if ( temp == null ) {
+			return new TreeSet<DtoJob>();
+		}
+		return temp.successfulJobs();
 	}
 
 	@Override
@@ -1855,7 +1971,11 @@ Comparable<BatchJobObject> {
 	 * @return all unsubmitted jobs
 	 */
 	public SortedSet<DtoJob> unsubmittedJobs() {
-		return getWrappedDtoBatchJob(false).unsubmittedJobs();
+		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		if ( temp == null ) {
+			return new TreeSet<DtoJob>();
+		}
+		return temp.unsubmittedJobs();
 	}
 
 	private void uploadInputFiles() throws InterruptedException,
@@ -1956,6 +2076,10 @@ Comparable<BatchJobObject> {
 	 * @return all waiting jobs
 	 */
 	public SortedSet<DtoJob> waitingJobs() {
-		return getWrappedDtoBatchJob(false).waitingJobs();
+		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		if ( temp == null ) {
+			return new TreeSet<DtoJob>();
+		}
+		return temp.waitingJobs();
 	}
 }
