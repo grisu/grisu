@@ -47,6 +47,14 @@ public interface UserEnvironmentManager {
 	String[] getAllAvailableFqans();
 
 	/**
+	 * Returns all fqans for which there is an available submission location for the specified application
+	 * 
+	 * @param application the application
+	 * @return the list of fqans
+	 */
+	Set<String> getAllAvailableFqansForApplication(String application);
+
+	/**
 	 * Calculates all sites that are available for the user.
 	 * 
 	 * @return all sites
@@ -317,7 +325,7 @@ public interface UserEnvironmentManager {
 	 * @param value
 	 */
 	void setProperty(String key, String value);
-	
+
 	/**
 	 * Convenience method to wait for an action (like batchJob submission) to finish.
 	 * 

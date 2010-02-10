@@ -177,7 +177,8 @@ public class RunningJobManager {
 
 		BatchJobObject batchJob = new BatchJobObject(si, jobname, submissionFqan, defaultApplication, defaultVersion);
 		cachedAllBatchJobs.put(jobname, batchJob);
-		cachedBatchJobsPerApplication.get(defaultApplication).add(batchJob);
+		EventList<BatchJobObject> temp = cachedBatchJobsPerApplication.get(defaultApplication);
+		getBatchJobs(defaultApplication).add(batchJob);
 		return batchJob;
 
 	}

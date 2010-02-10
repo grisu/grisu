@@ -21,6 +21,7 @@ import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.files.FileSystemItem;
 import org.vpac.grisu.model.files.GlazedFile;
+import org.vpac.grisu.model.info.ApplicationInformation;
 import org.vpac.grisu.model.info.ResourceInformation;
 import org.vpac.grisu.model.status.StatusObject;
 import org.vpac.grisu.settings.ClientPropertiesManager;
@@ -40,6 +41,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	private final ResourceInformation resourceInfo;
 
 	private String[] cachedFqans = null;
+	private final Map<String, Set<String>> cachedFqansPerApplication = new HashMap<String, Set<String>>();
 	private Set<String> cachedAllSubmissionLocations = null;
 	private SortedSet<String> cachedAllSites = null;
 	private final Map<String, Set<MountPoint>> alreadyQueriedMountPointsPerSubmissionLocation = new TreeMap<String, Set<MountPoint>>();
@@ -116,6 +118,27 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 			this.cachedFqans = serviceInterface.getFqans().asArray();
 		}
 		return cachedFqans;
+	}
+
+	public Set<String> getAllAvailableFqansForApplication(String application) {
+
+		if ( cachedFqansPerApplication.get(application) == null ) {
+
+			ApplicationInformation ai = GrisuRegistryManager.getDefault(serviceInterface).getApplicationInformation(application);
+			Set<String> result = new TreeSet<String>();
+
+			for ( String vo : getAllAvailableFqans() ) {
+
+				Set<String> temp = ai.getAvailableSubmissionLocationsForFqan(vo);
+				if ( temp.size() > 0 ) {
+					result.add(vo);
+				}
+
+			}
+
+			cachedFqansPerApplication.put(application, result);
+		}
+		return cachedFqansPerApplication.get(application);
 	}
 
 	public synchronized final SortedSet<String> getAllAvailableSites() {
