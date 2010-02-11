@@ -158,7 +158,7 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber {
 
 	}
 
-	private void login() throws InterruptedException {
+	public void login() throws InterruptedException {
 
 		new Thread() {
 

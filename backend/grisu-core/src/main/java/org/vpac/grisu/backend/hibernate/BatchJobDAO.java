@@ -129,15 +129,15 @@ public class BatchJobDAO extends BaseHibernateDAO {
 			final String application) {
 
 		myLogger.debug("Loading multipartjob with dn: " + dn + " from db.");
-		String queryString = "select batchJobname from org.vpac.grisu.backend.model.job.BatchJob as job where job.dn = ? and job.jobProperties['"
-			+ Constants.APPLICATIONNAME_KEY + "'] = ?";
+		String queryString = "select batchJobname from org.vpac.grisu.backend.model.job.BatchJob as job where job.dn = ? and lower(job.jobProperties['"
+			+ Constants.APPLICATIONNAME_KEY + "']) = ?";
 
 		try {
 			getCurrentSession().beginTransaction();
 
 			Query queryObject = getCurrentSession().createQuery(queryString);
 			queryObject.setParameter(0, dn);
-			queryObject.setParameter(1, application);
+			queryObject.setParameter(1, application.toLowerCase());
 
 			List<String> jobnames = (queryObject.list());
 
@@ -195,54 +195,54 @@ public class BatchJobDAO extends BaseHibernateDAO {
 		}
 	}
 
-	/**
-	 * Searches for jobs from a specific user that start with the specified
-	 * jobname.
-	 * 
-	 * @param dn
-	 *            the dn of the user
-	 * @param batchJobname
-	 *            the start of the jobname
-	 * @result a list of jobs that start with the specified jobname
-	 * @throws NoJobFoundException
-	 *             if there is no such job
-	 */
-	public final List<BatchJob> getSimilarJobNamesByDN(final String dn,
-			final String batchJobname) throws NoSuchJobException {
-		myLogger.debug("Loading job with dn: " + dn + " and batchJobname: "
-				+ batchJobname + " from dn.");
-		String queryString = "from org.vpac.grisu.backend.model.job.MultiPartJob as job where job.dn = ? and job.batchJobname like ?";
-
-		try {
-			getCurrentSession().beginTransaction();
-
-			Query queryObject = getCurrentSession().createQuery(queryString);
-			queryObject.setParameter(0, dn);
-			queryObject.setParameter(1, batchJobname + "%");
-
-			List<BatchJob> jobs = (queryObject.list());
-
-			getCurrentSession().getTransaction().commit();
-
-			if (jobs.size() == 0) {
-				throw new NoSuchJobException(
-						"Could not find a job for the dn: " + dn
-						+ " and the jobname: " + batchJobname);
-			}
-			return jobs;
-
-		} catch (RuntimeException e) {
-			try {
-				getCurrentSession().getTransaction().rollback();
-			} catch (Exception er) {
-				myLogger.debug("Rollback failed.", er);
-			}
-			throw e; // or display error message
-		} finally {
-			getCurrentSession().close();
-		}
-
-	}
+	//	/**
+	//	 * Searches for jobs from a specific user that start with the specified
+	//	 * jobname.
+	//	 *
+	//	 * @param dn
+	//	 *            the dn of the user
+	//	 * @param batchJobname
+	//	 *            the start of the jobname
+	//	 * @result a list of jobs that start with the specified jobname
+	//	 * @throws NoJobFoundException
+	//	 *             if there is no such job
+	//	 */
+	//	public final List<BatchJob> getSimilarJobNamesByDN(final String dn,
+	//			final String batchJobname) throws NoSuchJobException {
+	//		myLogger.debug("Loading job with dn: " + dn + " and batchJobname: "
+	//				+ batchJobname + " from dn.");
+	//		String queryString = "from org.vpac.grisu.backend.model.job.MultiPartJob as job where job.dn = ? and job.batchJobname like ?";
+	//
+	//		try {
+	//			getCurrentSession().beginTransaction();
+	//
+	//			Query queryObject = getCurrentSession().createQuery(queryString);
+	//			queryObject.setParameter(0, dn);
+	//			queryObject.setParameter(1, batchJobname + "%");
+	//
+	//			List<BatchJob> jobs = (queryObject.list());
+	//
+	//			getCurrentSession().getTransaction().commit();
+	//
+	//			if (jobs.size() == 0) {
+	//				throw new NoSuchJobException(
+	//						"Could not find a job for the dn: " + dn
+	//						+ " and the jobname: " + batchJobname);
+	//			}
+	//			return jobs;
+	//
+	//		} catch (RuntimeException e) {
+	//			try {
+	//				getCurrentSession().getTransaction().rollback();
+	//			} catch (Exception er) {
+	//				myLogger.debug("Rollback failed.", er);
+	//			}
+	//			throw e; // or display error message
+	//		} finally {
+	//			getCurrentSession().close();
+	//		}
+	//
+	//	}
 
 	public final synchronized void saveOrUpdate(final BatchJob instance) {
 

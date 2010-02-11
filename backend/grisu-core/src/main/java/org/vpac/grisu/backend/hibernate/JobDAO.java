@@ -161,12 +161,12 @@ public class JobDAO extends BaseHibernateDAO {
 
 		String queryString;
 		if (includeMultiPartJobs) {
-			queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.jobProperties['"
-				+ Constants.APPLICATIONNAME_KEY + "'] = ?";
+			queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
+				+ Constants.APPLICATIONNAME_KEY + "']) = ?";
 		} else {
-			queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.jobProperties['"
+			queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
 				+ Constants.APPLICATIONNAME_KEY
-				+ "'] = ? and job.multiPartJob = false";
+				+ "']) = ? and job.multiPartJob = false";
 		}
 
 		try {
@@ -174,7 +174,7 @@ public class JobDAO extends BaseHibernateDAO {
 
 			Query queryObject = getCurrentSession().createQuery(queryString);
 			queryObject.setParameter(0, dn);
-			queryObject.setParameter(1, application);
+			queryObject.setParameter(1, application.toLowerCase());
 
 			List<Job> jobs = (queryObject.list());
 
@@ -238,12 +238,12 @@ public class JobDAO extends BaseHibernateDAO {
 
 		String queryString;
 		if (includeMultiPartJob) {
-			queryString = "select jobname from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.jobProperties['"
-				+ Constants.APPLICATIONNAME_KEY + "'] = ?";
+			queryString = "select jobname from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
+				+ Constants.APPLICATIONNAME_KEY + "']) = ?";
 		} else {
-			queryString = "select jobname from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.jobProperties['"
+			queryString = "select jobname from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
 				+ Constants.APPLICATIONNAME_KEY
-				+ "'] = ? and job.batchJob = false";
+				+ "']) = ? and job.batchJob = false";
 		}
 
 		try {
@@ -251,7 +251,7 @@ public class JobDAO extends BaseHibernateDAO {
 
 			Query queryObject = getCurrentSession().createQuery(queryString);
 			queryObject.setParameter(0, dn);
-			queryObject.setParameter(1, application);
+			queryObject.setParameter(1, application.toLowerCase());
 
 			List<String> jobnames = (queryObject.list());
 

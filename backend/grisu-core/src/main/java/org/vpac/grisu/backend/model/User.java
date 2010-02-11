@@ -646,47 +646,6 @@ public class User {
 		return uri;
 	}
 
-	//	@Transient
-	//	public MountPoint getFirstResponsibleMountPointForHostAndFqan(
-	//			final String host_or_url, final String fqan) {
-	//
-	//		myLogger.debug("Looking for mountpoint for site: " + host_or_url
-	//				+ " and fqan: " + fqan);
-	//
-	//		if (host_or_url == null) {
-	//			return null;
-	//		}
-	//
-	//		String protocol = null;
-	//		String hostname = null;
-	//		try {
-	//			URI uri = new URI(host_or_url);
-	//			protocol = uri.getScheme();
-	//			hostname = uri.getHost();
-	//
-	//		} catch (URISyntaxException e) {
-	//			// TODO Auto-generated catch block
-	//			e.printStackTrace();
-	//		}
-	//
-	//		for (MountPoint mp : getAllMountPoints()) {
-	//			if (((mp.getFqan() == null) && (fqan == null))
-	//					|| ((mp.getFqan() != null) && mp.getFqan().equals(fqan))) {
-	//				if ((protocol != null) && (hostname != null)) {
-	//					if ((mp.getRootUrl().indexOf(protocol) != -1)
-	//							&& (mp.getRootUrl().indexOf(hostname) != -1)) {
-	//						return mp;
-	//					}
-	//				} else {
-	//					if (mp.getRootUrl().indexOf(host_or_url) != -1) {
-	//						return mp;
-	//					}
-	//				}
-	//			}
-	//		}
-	//		return null;
-	//	}
-
 	/**
 	 * Getter for the users' fqans.
 	 * 

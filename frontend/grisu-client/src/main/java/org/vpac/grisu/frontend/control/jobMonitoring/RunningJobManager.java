@@ -358,6 +358,8 @@ public class RunningJobManager implements EventSubscriber {
 			application = Constants.ALLJOBS_KEY;
 		}
 
+		application = application.toLowerCase();
+
 		EventList<BatchJobObject> list = getBatchJobs(application);
 
 		SortedSet<String> jobnames = em.getCurrentBatchJobnames(application,
@@ -375,10 +377,14 @@ public class RunningJobManager implements EventSubscriber {
 					continue;
 				}
 				if ( watchingAllBatchJobs ) {
-					getAllBatchJobs().add(temp);
+					if ( ! getAllBatchJobs().contains(temp) ) {
+						getAllBatchJobs().add(temp);
+					}
 				}
 
-				list.add(temp);
+				if ( ! list.contains(temp) ) {
+					list.add(temp);
+				}
 			} catch (NoSuchJobException e) {
 				throw new RuntimeException(e);
 			}
@@ -408,6 +414,8 @@ public class RunningJobManager implements EventSubscriber {
 			application = Constants.ALLJOBS_KEY;
 		}
 
+		application = application.toLowerCase();
+
 		EventList<JobObject> list = getJobs(application);
 
 		SortedSet<String> jobnames = em.getCurrentJobnames(application,
@@ -425,10 +433,13 @@ public class RunningJobManager implements EventSubscriber {
 					continue;
 				}
 				if ( watchingAllSingleJobs ) {
-					getAllJobs().add(temp);
+					if ( ! getAllJobs().contains(temp) ) {
+						getAllJobs().add(temp);
+					}
 				}
-
-				list.add(temp);
+				if ( ! list.contains(temp) ) {
+					list.add(temp);
+				}
 			} catch (NoSuchJobException e) {
 				throw new RuntimeException(e);
 			}

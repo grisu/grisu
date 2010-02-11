@@ -281,6 +281,8 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 			application = Constants.ALLJOBS_KEY;
 		}
 
+		application = application.toLowerCase();
+
 		SortedSet<String> result = null;
 
 		if (!refreshBatchJobnames) {
@@ -322,6 +324,8 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		if ( StringUtils.isBlank(application) ) {
 			application = Constants.ALLJOBS_KEY;
 		}
+
+		application = application.toLowerCase();
 
 		SortedSet<String> result = null;
 
