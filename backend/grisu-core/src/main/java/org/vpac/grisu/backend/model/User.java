@@ -482,6 +482,13 @@ public class User {
 							e.printStackTrace();
 						}
 
+					}else  if  ( path.contains("${GLOBUS_SCRATCH_DIR") ) {
+						try {
+							url = getFileSystemHomeDirectory(
+									server.replace(":2811", ""), fqan)+"/.globus/scratch";
+						} catch (FileSystemException e) {
+							e.printStackTrace();
+						}
 					} else {
 
 						url = server.replace(":2811", "") + path + "/"
