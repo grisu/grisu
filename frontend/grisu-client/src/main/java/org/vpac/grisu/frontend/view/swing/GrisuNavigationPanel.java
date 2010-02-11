@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -24,13 +25,14 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements Propert
 	private final ServiceInterface si;
 
 	private final Map<String, JXTaskPane> taskPanes = new HashMap<String, JXTaskPane>();
+	private final Map<String, Set<Action>> taskPaneActions = new HashMap<String, Set<Action>>();
 
 	private final GrisuCenterPanel centerPanel;
 
 	private final Set<String> applicationsToWatch = new TreeSet<String>();
 
-	private final GrisuMonitorNavigationTaskPane singleTaskPane;
-	private final GrisuMonitorNavigationTaskPaneBatch batchTaskPane;
+	private GrisuMonitorNavigationTaskPane singleTaskPane;
+	private GrisuMonitorNavigationTaskPaneBatch batchTaskPane;
 
 	private static final String JOB_CREATION_TASK_PANE = "Job creation";
 
@@ -45,12 +47,14 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements Propert
 	public GrisuNavigationPanel(ServiceInterface si, GrisuCenterPanel centerPanel, boolean displaySingleJobMonitorItem,
 			boolean displayBatchJobMonitorItem, boolean displayFileManagementItem) {
 
-		this(si, centerPanel, displaySingleJobMonitorItem, true, true, displayBatchJobMonitorItem, true, true, displayFileManagementItem);
+		this(si, centerPanel, displaySingleJobMonitorItem, true, true, null, displayBatchJobMonitorItem, true, true, null, displayFileManagementItem);
 	}
 
 	public GrisuNavigationPanel(ServiceInterface si, GrisuCenterPanel centerPanel,
 			boolean displaySingleJobMonitorItem,	boolean displaySingleJobAllJobsMenuItem, boolean displaySingleJobAppSpecificMenuItems,
+			Set<String> singleApplicationsToWatch,
 			boolean displayBatchJobMonitorItem, boolean displayBatchJobAllJobsMenuItem, boolean displayBatchJobAppSpecificMenuItems,
+			Set<String> batchApplicationsToWatch,
 			boolean displayFileManagementItem) {
 
 		this.si = si;
@@ -59,12 +63,12 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements Propert
 
 		addTaskPane(JOB_CREATION_TASK_PANE, null);
 
-		singleTaskPane = new GrisuMonitorNavigationTaskPane(si, this, displaySingleJobAllJobsMenuItem, displaySingleJobAppSpecificMenuItems);
 		if ( displaySingleJobMonitorItem ) {
+			singleTaskPane = new GrisuMonitorNavigationTaskPane(si, this, displaySingleJobAllJobsMenuItem, displaySingleJobAppSpecificMenuItems, singleApplicationsToWatch);
 			addTaskPane(singleTaskPane);
 		}
-		batchTaskPane = new GrisuMonitorNavigationTaskPaneBatch(si, this, displayBatchJobAllJobsMenuItem, displayBatchJobAppSpecificMenuItems);
 		if ( displayBatchJobMonitorItem ) {
+			batchTaskPane = new GrisuMonitorNavigationTaskPaneBatch(si, this, displayBatchJobAllJobsMenuItem, displayBatchJobAppSpecificMenuItems, batchApplicationsToWatch);
 			addTaskPane(batchTaskPane);
 		}
 		if ( displayFileManagementItem ) {
@@ -114,6 +118,10 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements Propert
 			addTaskPane(taskPane, null);
 		}
 
+		if ( (taskPaneActions.get(taskPane) != null) && taskPaneActions.get(taskPane).contains(itemTitle) ) {
+			return;
+		}
+
 		Action tempAction = new AbstractAction() {
 			{
 
@@ -131,6 +139,12 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements Propert
 		};
 
 		taskPanes.get(taskPane).add(tempAction);
+		Set<Action> temp = taskPaneActions.get(taskPane);
+		if ( temp == null ) {
+			temp = new HashSet<Action>();
+			taskPaneActions.put(taskPane, temp);
+		}
+		temp.add(tempAction);
 
 	}
 

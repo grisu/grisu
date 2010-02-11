@@ -180,6 +180,9 @@ public class RunningJobManager implements EventSubscriber {
 		cachedAllBatchJobs.put(jobname, batchJob);
 		EventList<BatchJobObject> temp = cachedBatchJobsPerApplication.get(defaultApplication);
 		getBatchJobs(defaultApplication).add(batchJob);
+		if ( watchingAllBatchJobs ) {
+			getBatchJobs(Constants.ALLJOBS_KEY).add(batchJob);
+		}
 		return batchJob;
 
 	}
@@ -367,11 +370,15 @@ public class RunningJobManager implements EventSubscriber {
 		for (String name : jobnamesNew) {
 			try {
 
+				BatchJobObject temp = getBatchJob(name);
+				if ( temp == null ) {
+					continue;
+				}
 				if ( watchingAllBatchJobs ) {
-					getAllBatchJobs().add(getBatchJob(name));
+					getAllBatchJobs().add(temp);
 				}
 
-				list.add(getBatchJob(name));
+				list.add(temp);
 			} catch (NoSuchJobException e) {
 				throw new RuntimeException(e);
 			}
@@ -408,16 +415,20 @@ public class RunningJobManager implements EventSubscriber {
 		SortedSet<String> jobnamesNew = new TreeSet<String>(jobnames);
 
 		for (JobObject j : list) {
-			jobnamesNew.remove(j.getJobname());
+			String jobname = j.getJobname();
+			jobnamesNew.remove(jobname);
 		}
 		for (String name : jobnamesNew) {
 			try {
-
+				JobObject temp = getJob(name, false);
+				if ( temp == null ) {
+					continue;
+				}
 				if ( watchingAllSingleJobs ) {
-					getAllJobs().add(getJob(name, false));
+					getAllJobs().add(temp);
 				}
 
-				list.add(getJob(name, false));
+				list.add(temp);
 			} catch (NoSuchJobException e) {
 				throw new RuntimeException(e);
 			}
@@ -425,7 +436,8 @@ public class RunningJobManager implements EventSubscriber {
 
 		Set<JobObject> toRemove = new HashSet<JobObject>();
 		for (JobObject j : list) {
-			if (!jobnames.contains(j.getJobname())) {
+			String jobname = j.getJobname();
+			if (!jobnames.contains(jobname)) {
 				toRemove.add(j);
 			}
 		}

@@ -65,7 +65,7 @@ public class GrisuApplicationWindow {
 
 		frame.getContentPane().setLayout(new BorderLayout());
 
-		mainPanel = new GrisuMainPanel();
+		mainPanel = new GrisuMainPanel(true, true, true, null, true, true, true, null, true);
 		mainPanel.addJobCreationPanel(new DummyJobCreationPanel());
 		//		LoginPanel lp = new LoginPanel(mainPanel, true);
 		LoginPanel lp = new LoginPanel(mainPanel);

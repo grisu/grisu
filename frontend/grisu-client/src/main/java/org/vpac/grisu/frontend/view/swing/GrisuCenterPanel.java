@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.control.jobMonitoring.RunningJobManager;
 import org.vpac.grisu.frontend.view.swing.files.preview.FileListWithPreviewPanel;
 import org.vpac.grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import org.vpac.grisu.frontend.view.swing.jobmonitoring.batch.MultiBatchJobMonitoringGrid;
@@ -32,6 +33,7 @@ public class GrisuCenterPanel extends JPanel {
 	private MultiBatchJobMonitoringGrid multiBatchJobMonitoringGrid;
 
 	private final ServiceInterface si;
+	private final RunningJobManager rjm;
 	private LoadingPanel loadingPanel;
 	private FileListWithPreviewPanel fileListWithPreviewPanel;
 
@@ -46,6 +48,7 @@ public class GrisuCenterPanel extends JPanel {
 	 */
 	public GrisuCenterPanel(ServiceInterface si) {
 		this.si = si;
+		this.rjm = RunningJobManager.getDefault(si);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("219px:grow"),
@@ -194,8 +197,10 @@ public class GrisuCenterPanel extends JPanel {
 
 		if ( GrisuMonitorNavigationTaskPane.SINGLE_JOB_LIST.equals(command[0]) ) {
 			displaySingleJobGrid(command[1]);
+			rjm.updateJobList(command[1]);
 		} else if ( GrisuMonitorNavigationTaskPaneBatch.BATCH_JOB_LIST.equals(command[0])) {
 			displayBatchJobGrid(command[1]);
+			rjm.updateBatchJobList(command[1]);
 		} else if ( GrisuFileNavigationTaskPane.FILE_MANAGEMENT.equals(command[0]) ) {
 			displayFileManagement();
 		}

@@ -30,9 +30,14 @@ public class ServiceInterfaceUrlPanel extends JPanel {
 
 			String posAlias = LoginManager.SERVICEALIASES.inverse().get(url);
 			if ( StringUtils.isNotBlank(posAlias) ) {
-				urlModel.addElement(posAlias);
+
+				if ( urlModel.getIndexOf(posAlias) < 0 ) {
+					urlModel.addElement(posAlias);
+				}
 			} else {
-				urlModel.addElement(url);
+				if ( urlModel.getIndexOf(url)< 0 ) {
+					urlModel.addElement(url);
+				}
 			}
 		}
 

@@ -20,15 +20,41 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 	private GrisuCenterPanel grisuCenterPanel;
 
 	private final Set<JobCreationPanel> jobCreationPanels = new HashSet<JobCreationPanel>();
+	private final boolean displaySingleJobMonitorItem;
+	private final boolean displaySingleJobAllJobsMenuItem;
+	private final Set<String> singleApplicationsToWatch;
+	private final boolean displaySingleJobAppSpecificMenuItems;
+	private final boolean displayBatchJobAllJobsMenuItem;
+	private final boolean displayBatchJobMonitorItem;
+	private final Set<String> batchApplicationsToWatch;
+	private final boolean displayBatchJobAppSpecificMenuItems;
+	private final boolean displayFileManagementItem;
 
 	/**
 	 * Create the panel.
 	 */
-	public GrisuMainPanel() {
-		setLayout(new BorderLayout(0, 0));
+	public GrisuMainPanel(boolean displaySingleJobMonitorItem, boolean displaySingleJobAllJobsMenuItem,
+			boolean displaySingleJobAppSpecificMenuItems, Set<String> singleApplicationsToWatch,
+			boolean displayBatchJobMonitorItem, boolean displayBatchJobAllJobsMenuItem,
+			boolean displayBatchJobAppSpecificMenuItems, Set<String> batchApplicationsToWatch,
+			boolean displayFileManagementItem
+	) {
 
-		//		add(getGrisuNavigationPanel(), BorderLayout.WEST);
-		//		add(getGrisuCenterPanel(), BorderLayout.CENTER);
+		this.displaySingleJobMonitorItem = displaySingleJobMonitorItem;
+		this.displaySingleJobAllJobsMenuItem = displaySingleJobAllJobsMenuItem;
+		this.singleApplicationsToWatch = singleApplicationsToWatch;
+		this.displaySingleJobAppSpecificMenuItems = displaySingleJobAppSpecificMenuItems;
+		this.displayBatchJobAllJobsMenuItem = displayBatchJobAllJobsMenuItem;
+		this.displayBatchJobMonitorItem = displayBatchJobMonitorItem;
+		this.batchApplicationsToWatch = batchApplicationsToWatch;
+		this.displayBatchJobAppSpecificMenuItems = displayBatchJobAppSpecificMenuItems;
+		this.displayFileManagementItem = displayFileManagementItem;
+
+		setLayout(new BorderLayout(0, 0));
+	}
+
+	public GrisuMainPanel(boolean watchSingleApplication, Set<String> applicationsToWatch) {
+		this( watchSingleApplication, false, false, applicationsToWatch, !watchSingleApplication, false, false, applicationsToWatch, true);
 	}
 
 	public void addJobCreationPanel(JobCreationPanel panel) {
@@ -52,6 +78,12 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 	private GrisuNavigationPanel getGrisuNavigationPanel() {
 		if (grisuNavigationPanel == null) {
 			grisuNavigationPanel = new GrisuNavigationPanel(this.si, getGrisuCenterPanel());
+			grisuNavigationPanel = new GrisuNavigationPanel(this.si, getGrisuCenterPanel(),
+					displaySingleJobMonitorItem, displaySingleJobAllJobsMenuItem,
+					displaySingleJobAppSpecificMenuItems, singleApplicationsToWatch,
+					displayBatchJobMonitorItem, displayBatchJobAllJobsMenuItem,
+					displayBatchJobAppSpecificMenuItems, batchApplicationsToWatch,
+					displayFileManagementItem);
 		}
 		return grisuNavigationPanel;
 	}

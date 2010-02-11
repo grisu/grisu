@@ -3,6 +3,7 @@ package org.vpac.grisu.frontend.view.swing;
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -10,6 +11,7 @@ import javax.swing.Action;
 import org.bushe.swing.event.EventSubscriber;
 import org.jdesktop.swingx.JXTaskPane;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.control.jobMonitoring.RunningJobManager;
 import org.vpac.grisu.frontend.control.utils.ApplicationsManager;
 import org.vpac.grisu.frontend.model.events.NewBatchJobEvent;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -29,14 +31,18 @@ public class GrisuMonitorNavigationTaskPaneBatch extends JXTaskPane implements E
 	private boolean displayAllJobsItem = true;
 	private boolean displayApplicationSpecificItems = true;
 
+	private final Set<String> applicationsToWatch;
+
 	private final GrisuNavigationPanel navPanel;
 
 	/**
 	 * Create the panel.
 	 */
-	public GrisuMonitorNavigationTaskPaneBatch(ServiceInterface si, GrisuNavigationPanel navPanel, boolean displayAllJobsItem, boolean displayApplicationSpecificItems) {
+	public GrisuMonitorNavigationTaskPaneBatch(ServiceInterface si, GrisuNavigationPanel navPanel, boolean displayAllJobsItem, boolean displayApplicationSpecificItems, Set<String> applicationsToWatch) {
 		this.si = si;
 		this.em = GrisuRegistryManager.getDefault(si).getUserEnvironmentManager();
+
+		this.applicationsToWatch = applicationsToWatch;
 		this.navPanel = navPanel;
 		this.displayAllJobsItem = displayAllJobsItem;
 		this.displayApplicationSpecificItems = displayApplicationSpecificItems;
@@ -49,9 +55,21 @@ public class GrisuMonitorNavigationTaskPaneBatch extends JXTaskPane implements E
 		if ( displayApplicationSpecificItems ) {
 			updateApplications();
 		}
+
+		if ( (applicationsToWatch != null) && (applicationsToWatch.size() > 0) ) {
+			for ( String app : applicationsToWatch ) {
+				addApplication(app);
+			}
+		}
 	}
 
-	public void addApplication(final String app) {
+	public void addApplication(final String application) {
+
+		final String app = application.toLowerCase();
+
+		if ( Constants.ALLJOBS_KEY.equals(app) ) {
+			RunningJobManager.getDefault(si).getAllBatchJobs();
+		}
 
 		if ( actions.get(app) == null ) {
 			Action temp = new AbstractAction() {
