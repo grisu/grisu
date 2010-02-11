@@ -4235,8 +4235,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								+ targetFilename + " successful.");
 						status.setFinished(true);
 					} catch (RemoteFileSystemException e) {
+						e.printStackTrace();
 						status.addElement("Upload to " + jobdir + "/"
-								+ targetFilename + " failed.");
+								+ targetFilename + " failed: "+e.getLocalizedMessage());
 						status.setFinished(true);
 						status.setFailed(true);
 					} finally {
@@ -4244,7 +4245,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					}
 
 				}
-			}.run();
+			}.start();
 			return;
 
 		} catch (NoSuchJobException e) {

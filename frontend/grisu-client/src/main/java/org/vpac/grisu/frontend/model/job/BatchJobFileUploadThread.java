@@ -57,6 +57,7 @@ public class BatchJobFileUploadThread extends Thread {
 				try {
 					status.waitForActionToFinish(2, true, false);
 				} catch (Exception e) {
+					e.printStackTrace();
 					shutdownExecutor();
 					return;
 				}

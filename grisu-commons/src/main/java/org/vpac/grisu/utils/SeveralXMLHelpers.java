@@ -214,7 +214,7 @@ public final class SeveralXMLHelpers {
 	 */
 	public static Document fromString(final String jsdl_string) {
 
-		if ( "<?xml version=\"1.0\" encoding=\"UTF-8\"?>".equals(jsdl_string)  ) {
+		if ( "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".equals(jsdl_string)  ) {
 			throw new RuntimeException("Only an empty string...");
 		}
 
