@@ -34,6 +34,7 @@ public class LoginPanel extends JPanel {
 	 * Create the panel.
 	 */
 	public LoginPanel(GrisuSwingClient client) {
+
 		this.client = client;
 		this.tryExistingGridProxy = ClientPropertiesManager.getAutoLogin();
 		setLayout(new CardLayout(0, 0));

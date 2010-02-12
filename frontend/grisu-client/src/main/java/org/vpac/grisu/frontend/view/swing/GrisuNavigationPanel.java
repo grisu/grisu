@@ -87,7 +87,8 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements Propert
 
 				if ( panel.createsBatchJob() ) {
 					batchTaskPane.addApplication(panel.getSupportedApplication());
-				} else {
+				}
+				if ( panel.createsSingleJob() ) {
 					singleTaskPane.addApplication(panel.getSupportedApplication());
 				}
 

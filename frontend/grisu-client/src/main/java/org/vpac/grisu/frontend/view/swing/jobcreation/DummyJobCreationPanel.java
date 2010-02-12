@@ -78,6 +78,10 @@ public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, E
 		return false;
 	}
 
+	public boolean createsSingleJob() {
+		return true;
+	}
+
 	private JButton getBtnSubmit() {
 		if (btnSubmit == null) {
 			btnSubmit = new JButton("Submit");
@@ -96,13 +100,13 @@ public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, E
 		}
 		return lblDummyJobSubmission;
 	}
-
 	public JPanel getPanel() {
 		return this;
 	}
 	public String getPanelName() {
 		return "Dummy";
 	}
+
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
@@ -121,7 +125,6 @@ public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, E
 	public String getSupportedApplication() {
 		return "UnixCommands";
 	}
-
 	private void lockUI(final boolean lock) {
 
 		SwingUtilities.invokeLater(new Thread() {
@@ -134,6 +137,7 @@ public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, E
 		});
 
 	}
+
 	public void onEvent(String topic, Object data) {
 
 		if (data instanceof JobStatusEvent) {

@@ -1,7 +1,10 @@
 package org.vpac.grisu.frontend.view.swing;
 
+import java.awt.AWTEvent;
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
+import java.awt.Toolkit;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.swing.JFrame;
 import javax.swing.UIManager;
@@ -10,37 +13,12 @@ import org.jdesktop.swingx.JXFrame;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.model.events.ApplicationEventListener;
-import org.vpac.grisu.frontend.view.swing.jobcreation.DummyJobCreationPanel;
+import org.vpac.grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import org.vpac.grisu.frontend.view.swing.login.LoginPanel;
 
-public class GrisuApplicationWindow {
+public abstract class GrisuApplicationWindow implements WindowListener {
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-
-		LoginManager.initEnvironment();
-
-		new ApplicationEventListener();
-
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e) {
-
-		}
-
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					GrisuApplicationWindow window = new GrisuApplicationWindow();
-					window.frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+	private ServiceInterface si;
 
 	private GrisuMainPanel mainPanel;
 
@@ -49,25 +27,74 @@ public class GrisuApplicationWindow {
 	private JXFrame frame;
 
 	/**
-	 * Create the application.
+	 * Launch the application.
 	 */
-	public GrisuApplicationWindow() {
+	public GrisuApplicationWindow () {
+
+		LoginManager.initEnvironment();
+
+		new ApplicationEventListener();
+
+		Toolkit tk = Toolkit.getDefaultToolkit();
+		tk.addAWTEventListener(WindowSaver.getInstance(),
+				AWTEvent.WINDOW_EVENT_MASK);
+
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		initialize();
+
 	}
+
+	private void exit() {
+		try {
+			System.out.println("Exiting...");
+
+			if ( si != null ) {
+				si.logout();
+			}
+
+		} finally {
+			WindowSaver.saveSettings();
+			System.exit(0);
+		}
+	}
+
+	abstract public JobCreationPanel[] getJobCreationPanels();
+
+	abstract public String getName();
 
 	/**
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
 		frame = new JXFrame();
-		frame.setBounds(100, 100, 450, 300);
+		frame.setTitle(getName());
+		frame.addWindowListener(this);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		frame.getContentPane().setLayout(new BorderLayout());
 
-		mainPanel = new GrisuMainPanel(true, true, true, null, true, true, true, null, true);
-		mainPanel.addJobCreationPanel(new DummyJobCreationPanel());
-		//		LoginPanel lp = new LoginPanel(mainPanel, true);
+
+		boolean singleJobs = false;
+		boolean batchJobs = false;
+
+		for ( JobCreationPanel panel : getJobCreationPanels() ) {
+			if ( panel.createsBatchJob() ) {
+				batchJobs = true;
+			}
+			if ( panel.createsSingleJob() ) {
+				singleJobs = true;
+			}
+		}
+
+		mainPanel = new GrisuMainPanel(singleJobs, false, false, null, batchJobs, false, false, null, true);
+		for ( JobCreationPanel panel : getJobCreationPanels() ) {
+			mainPanel.addJobCreationPanel(panel);
+		}
 		LoginPanel lp = new LoginPanel(mainPanel);
 		frame.getContentPane().add(lp, BorderLayout.CENTER);
 	}
@@ -81,8 +108,46 @@ public class GrisuApplicationWindow {
 		if ( si == null ) {
 			throw new NullPointerException("ServiceInterface can't be null");
 		}
-
+		this.si = si;
 		lp.setServiceInterface(si);
+	}
+
+	public void setVisible(boolean visible) {
+		frame.setVisible(visible);
+	}
+
+	public void windowActivated(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void windowClosed(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void windowClosing(WindowEvent arg0) {
+		exit();
+	}
+
+	public void windowDeactivated(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void windowDeiconified(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void windowIconified(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void windowOpened(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+
 	}
 
 

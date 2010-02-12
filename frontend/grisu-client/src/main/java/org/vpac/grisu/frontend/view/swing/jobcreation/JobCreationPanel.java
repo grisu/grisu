@@ -7,6 +7,7 @@ import org.vpac.grisu.control.ServiceInterface;
 public interface JobCreationPanel {
 
 	public boolean createsBatchJob();
+	public boolean createsSingleJob();
 
 	public JPanel getPanel();
 
