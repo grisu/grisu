@@ -1573,7 +1573,7 @@ Comparable<BatchJobObject> {
 
 		setResubmitting(true);
 
-		prepareAndCreateJobs(false);
+		//		prepareAndCreateJobs(false);
 
 		try {
 			optimizationResult = serviceInterface.restartBatchJob(batchJobname,

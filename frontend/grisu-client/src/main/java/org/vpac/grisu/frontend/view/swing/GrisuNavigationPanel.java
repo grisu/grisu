@@ -34,7 +34,7 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements Propert
 	private GrisuMonitorNavigationTaskPane singleTaskPane;
 	private GrisuMonitorNavigationTaskPaneBatch batchTaskPane;
 
-	private static final String JOB_CREATION_TASK_PANE = "Job creation";
+	private static final String JOB_CREATION_TASK_PANE = "Create jobs";
 
 	/**
 	 * Create the panel.
