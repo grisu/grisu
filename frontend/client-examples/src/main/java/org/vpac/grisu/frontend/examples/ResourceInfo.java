@@ -33,6 +33,7 @@ public class ResourceInfo {
 					for ( String key : info.getApplicationDetails(subLoc, version).keySet() ) {
 						System.out.println("\t\t\t\t"+key+":\t"+info.getApplicationDetails(subLoc, version).get(key));
 					}
+
 				}
 				System.out.println();
 

@@ -374,11 +374,15 @@ public final class ClientPropertiesManager {
 	 */
 	public static String getLastUsedFqan() {
 		String fqan = null;
-		try {
-			fqan = (String) (getClientConfiguration()
-					.getProperty("lastUsedFqan"));
-		} catch (ConfigurationException e) {
-			myLogger.debug("Problem with config file: " + e.getMessage());
+		fqan = System.getProperty("grisu.defaultFqan");
+
+		if ( StringUtils.isBlank(fqan) ) {
+			try {
+				fqan = (String) (getClientConfiguration()
+						.getProperty("lastUsedFqan"));
+			} catch (ConfigurationException e) {
+				myLogger.debug("Problem with config file: " + e.getMessage());
+			}
 		}
 		return fqan;
 	}
