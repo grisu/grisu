@@ -81,7 +81,7 @@ public class StatusObject {
 		while (!(lastStatus = si.getActionStatus(handle)).isFinished()) {
 			if (sendStatusEvent) {
 				EventBus.publish(handle, new ActionStatusEvent(lastStatus,
-						"Submissionstatus: "));
+						statusMessagePrefix));
 			}
 
 			if (exitIfFailed) {

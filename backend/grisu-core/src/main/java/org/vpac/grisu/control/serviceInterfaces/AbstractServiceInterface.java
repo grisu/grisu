@@ -3385,20 +3385,64 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public DtoProperties redistributeBatchJob(String batchJobname)
+	public void redistributeBatchJob(String batchJobname)
 	throws NoSuchJobException, JobPropertiesException {
 
-		BatchJob job = getMultiPartJobFromDatabase(batchJobname);
+		final BatchJob job = getMultiPartJobFromDatabase(batchJobname);
 
-		SortedSet<GridResource> resourcesToUse = calculateResourcesToUse(job);
+		if ((getSessionActionStatus().get(batchJobname) != null)
+				&& !getSessionActionStatus().get(batchJobname).isFinished()) {
 
-		SubmitPolicy sp = new DefaultSubmitPolicy(job.getJobs(),
-				resourcesToUse, null);
+			// System.out
+			// .println("Submission: "
+			// + actionStatus.get(batchJobname)
+			// .getCurrentElements() + " / "
+			// + actionStatus.get(batchJobname).getTotalElements());
 
-		Map<String, Integer> results = optimizeMultiPartJob(sp, job
-				.getJobProperty(Constants.DISTRIBUTION_METHOD), job);
+			// we don't want to interfere with a possible ongoing jobsubmission
+			myLogger
+			.debug("not redistributing job because jobsubmission is still ongoing.");
+			throw new JobPropertiesException(
+			"Job submission is still ongoing in background.");
+		}
 
-		return DtoProperties.createUserPropertiesIntegerValue(results);
+		final DtoActionStatus status = new DtoActionStatus(batchJobname, 2);
+		getSessionActionStatus().put(batchJobname, status);
+
+		new Thread() {
+			@Override
+			public void run() {
+
+				status.addElement("Calculating redistribution...");
+				try {
+					SortedSet<GridResource> resourcesToUse = calculateResourcesToUse(job);
+
+					SubmitPolicy sp = new DefaultSubmitPolicy(job.getJobs(),
+							resourcesToUse, null);
+
+					Map<String, Integer> results = optimizeMultiPartJob(sp, job
+							.getJobProperty(Constants.DISTRIBUTION_METHOD), job);
+
+
+					StringBuffer optimizationResult = new StringBuffer();
+					for ( String subLoc : results.keySet() ) {
+						optimizationResult.append( subLoc + " : " +results.get(subLoc)+"\n" );
+					}
+					status.addLogMessage(optimizationResult.toString());
+					job.addJobProperty(Constants.BATCHJOB_OPTIMIZATION_RESULT, optimizationResult.toString());
+					batchJobDao.saveOrUpdate(job);
+					status.addElement("Finished.");
+					status.setFinished(true);
+
+				} catch (Exception e) {
+					status.setFailed(true);
+					status.setFinished(true);
+					status.addElement("Failed: "+e.getLocalizedMessage());
+				}
+
+			}
+		}.start();
+
 
 	}
 

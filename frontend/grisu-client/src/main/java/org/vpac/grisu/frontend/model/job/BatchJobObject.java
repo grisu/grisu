@@ -68,18 +68,6 @@ Comparable<BatchJobObject> {
 	static final Logger myLogger = Logger.getLogger(BatchJobObject.class
 			.getName());
 
-	public static String prettyPrintOptimizationResult(
-			Map<String, String> result) {
-
-		StringBuffer pretty = new StringBuffer();
-
-		for (String key : result.keySet()) {
-			pretty.append("\t" + key + ":\t\t" + result.get(key) + "\n");
-		}
-
-		return pretty.toString();
-	}
-
 	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
 	// properties
@@ -141,7 +129,7 @@ Comparable<BatchJobObject> {
 	private boolean isBeingKilled = false;
 	private boolean isKilled = false;
 
-	private Map<String, String> optimizationResult = new HashMap<String, String>();
+	private String optimizationResult = null;
 
 	/**
 	 * Use this constructor to create a MultiPartJobObject for a multipartjob
@@ -810,7 +798,7 @@ Comparable<BatchJobObject> {
 	 * 
 	 * @return info about job distribution
 	 */
-	public Map<String, String> getOptimizationResult() {
+	public String getOptimizationResult() {
 		return optimizationResult;
 	}
 
@@ -1235,6 +1223,12 @@ Comparable<BatchJobObject> {
 	 */
 	public void prepareAndCreateJobs(boolean optimize) throws JobsException,
 	BackendException, InterruptedException {
+		prepareAndCreateJobs(optimize, true);
+	}
+
+
+	private void prepareAndCreateJobs(boolean optimize, boolean uploadCommonFiles) throws JobsException,
+	BackendException, InterruptedException {
 
 		// TODO check whether any of the jobnames already exist
 
@@ -1359,8 +1353,23 @@ Comparable<BatchJobObject> {
 				EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 						"Optimizing batchjob: " + batchJobname));
 				try {
-					optimizationResult = serviceInterface.redistributeBatchJob(
-							this.batchJobname).propertiesAsMap();
+					serviceInterface.redistributeBatchJob(
+							this.batchJobname);
+
+
+					StatusObject status = new StatusObject(serviceInterface,
+							BatchJobObject.this.batchJobname);
+
+					try {
+						status.waitForActionToFinish(4, false, true, "Redistribution status: ");
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+						throw e;
+					}
+
+					EventBus.publish(this.batchJobname, new BatchJobEvent(this,	"Redistribution finished."));
+
+					optimizationResult = serviceInterface.getJobProperty(this.batchJobname, Constants.BATCHJOB_OPTIMIZATION_RESULT);
 
 					if (Thread.interrupted()) {
 						throw new InterruptedException(
@@ -1377,7 +1386,6 @@ Comparable<BatchJobObject> {
 					job.updateJobDirectory();
 				}
 
-				getNewlyAddedJobs().clear();
 
 				EventBus
 				.publish(
@@ -1387,7 +1395,7 @@ Comparable<BatchJobObject> {
 								"Optimizing of batchjob "
 								+ batchJobname
 								+ " finished.\nJob distribution:\n"
-								+ prettyPrintOptimizationResult(getOptimizationResult())));
+								+ getOptimizationResult()));
 			} catch (NoSuchJobException e) {
 				throw new RuntimeException(e);
 			}
@@ -1396,7 +1404,7 @@ Comparable<BatchJobObject> {
 		refresh(false);
 
 		try {
-			uploadInputFiles();
+			uploadInputFiles(uploadCommonFiles);
 		} catch (InterruptedException e) {
 			throw e;
 		} catch (Exception e) {
@@ -1405,6 +1413,7 @@ Comparable<BatchJobObject> {
 					+ " failed: " + e.getLocalizedMessage()));
 			throw new BackendException("Could not upload input files...", e);
 		}
+		getNewlyAddedJobs().clear();
 	}
 
 	/**
@@ -1573,10 +1582,10 @@ Comparable<BatchJobObject> {
 
 		setResubmitting(true);
 
-		//		prepareAndCreateJobs(false);
+		prepareAndCreateJobs(false, false);
 
 		try {
-			optimizationResult = serviceInterface.restartBatchJob(batchJobname,
+			serviceInterface.restartBatchJob(batchJobname,
 					policy.getName(), policy.getProperties())
 					.propertiesAsMap();
 		} catch (NoSuchJobException e) {
@@ -1605,7 +1614,6 @@ Comparable<BatchJobObject> {
 				}
 
 				setResubmitting(false);
-
 			}
 		};
 
@@ -1978,7 +1986,7 @@ Comparable<BatchJobObject> {
 		return temp.unsubmittedJobs();
 	}
 
-	private void uploadInputFiles() throws InterruptedException,
+	private void uploadInputFiles(boolean uploadCommonFiles) throws InterruptedException,
 	FileUploadException {
 
 		final List<Exception> exceptions = Collections
@@ -1998,7 +2006,8 @@ Comparable<BatchJobObject> {
 
 		// uploading single job input files
 
-		for (final JobObject job : getJobs()) {
+		//		for (final JobObject job : getJobs()) {
+		for (final JobObject job : getNewlyAddedJobs()) {
 
 			checkInterruptedStatus(executor, tasks);
 
@@ -2022,26 +2031,28 @@ Comparable<BatchJobObject> {
 
 		int i = 0;
 
-		// uploading common job input files
-		for (final String inputFile : inputFiles.keySet()) {
+		if ( uploadCommonFiles ) {
+			// uploading common job input files
+			for (final String inputFile : inputFiles.keySet()) {
 
-			checkInterruptedStatus(executor, tasks);
+				checkInterruptedStatus(executor, tasks);
 
-			i = i + 1;
-			Thread thread = new BatchJobFileUploadThread(serviceInterface,
-					this, inputFile, i, executor, exceptions);
-			Future<?> f = executor.submit(thread);
-			// so the gridftp servers don't get hit at exactly the same time, to
-			// distribute the load
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				executor.shutdownNow();
-				for (Future<?> f2 : tasks) {
-					f2.cancel(true);
+				i = i + 1;
+				Thread thread = new BatchJobFileUploadThread(serviceInterface,
+						this, inputFile, i, executor, exceptions);
+				Future<?> f = executor.submit(thread);
+				// so the gridftp servers don't get hit at exactly the same time, to
+				// distribute the load
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					executor.shutdownNow();
+					for (Future<?> f2 : tasks) {
+						f2.cancel(true);
+					}
+					throw new InterruptedException(
+					"Interrupted while uploading common input files.");
 				}
-				throw new InterruptedException(
-				"Interrupted while uploading common input files.");
 			}
 		}
 

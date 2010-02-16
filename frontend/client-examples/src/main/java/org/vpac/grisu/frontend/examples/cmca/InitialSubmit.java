@@ -101,9 +101,8 @@ public class InitialSubmit {
 
 		// this is not really needed
 		System.out.println( "Job distribution:");
-		for ( String subLoc : batchJob.getOptimizationResult().keySet() ) {
-			System.out.println( subLoc + " : " +batchJob.getOptimizationResult().get(subLoc) );
-		}
+		System.out.println( batchJob.getOptimizationResult() );
+
 		System.out.println( "Submitting jobs..." );
 		batchJob.submit(true);
 

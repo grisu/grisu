@@ -6,18 +6,15 @@ import java.util.concurrent.Executors;
 
 import org.bushe.swing.event.annotation.AnnotationProcessor;
 import org.bushe.swing.event.annotation.EventSubscriber;
-import org.vpac.grisu.control.DefaultResubmitPolicy;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.control.login.LoginParams;
-import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
 import org.vpac.grisu.frontend.model.events.BatchJobEvent;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.model.job.JobsException;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
-import org.vpac.grisu.model.status.StatusObject;
 
 import au.org.arcs.jcommons.constants.Constants;
 
@@ -31,7 +28,7 @@ public class MultiJobSubmit {
 		char[] password = args[1].toCharArray();
 
 		LoginParams loginParams = new LoginParams(
-		// "http://localhost:8080/xfire-backend/services/grisu",
+				// "http://localhost:8080/xfire-backend/services/grisu",
 				// "https://ngportal.vpac.org/grisu-ws/soap/EnunciateServiceInterfaceService",
 				// "https://ngportal.vpac.org/grisu-ws/services/grisu",
 				// "https://ngportal.vpac.org/grisu-ws/soap/GrisuService",
@@ -105,10 +102,7 @@ public class MultiJobSubmit {
 		}
 
 		System.out.println("Job distribution:");
-		for (String subLoc : multiPartJob.getOptimizationResult().keySet()) {
-			System.out.println(subLoc + ":"
-					+ multiPartJob.getOptimizationResult().get(subLoc));
-		}
+		System.out.println( multiPartJob.getOptimizationResult());
 
 		try {
 			multiPartJob.submit();
