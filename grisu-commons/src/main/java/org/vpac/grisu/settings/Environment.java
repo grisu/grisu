@@ -87,6 +87,7 @@ public final class Environment {
 			if (StringUtils.isNotBlank(USER_SET_GRISU_DIRECTORY)) {
 				// first, check whether user specified his own directory
 				grisuDir = new File(USER_SET_GRISU_DIRECTORY);
+				GRISU_DIRECTORY = grisuDir;
 			} else {
 				grisuDir = new File(GRISU_SYSTEM_WIDE_CONFIG_DIR);
 				// now try whether a .grisu directory exists in the users home dir
