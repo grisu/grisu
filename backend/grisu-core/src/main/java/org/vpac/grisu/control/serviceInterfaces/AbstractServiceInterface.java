@@ -123,8 +123,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		CoGProperties.getDefault().setProperty(
 				CoGProperties.ENFORCE_SIGNING_POLICY, "false");
 
-		System.out.println("ONE TIME INIT.");
-
 		try {
 			LocalTemplatesHelper.copyTemplatesAndMaybeGlobusFolder();
 			VomsesFiles.copyVomses();
