@@ -3966,7 +3966,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		try {
 			status.addElement("Starting job submission using GT4...");
 			job.addLogMessage("Submitting job to endpoint...");
-			handle = getUser().getSubmissionManager().submit("GT4", job);
+                        String candidate = JsdlHelpers.getCandidateHosts(job.getJobDescription())[0];
+                        String version = informationManager.getGridResource(candidate).getGRAMVersion();
+                      
+                        String submissionType = null;
+                        if ("5.0.0".equals(version)){
+                            submissionType = "GT5";
+                        }
+                        else {
+                            submissionType = "GT4";
+
+                        }
+                        handle = getUser().getSubmissionManager().submit(submissionType, job);
+                        
 			job.addLogMessage("Submission finished.");
 		} catch (RuntimeException e) {
 			status.addLogMessage("Job submission failed.");

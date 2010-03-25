@@ -106,6 +106,8 @@ public class DtoGridResource implements GridResource {
 	 */
 	private boolean isDesiredVersionInstalled;
 
+        private String gramVersion;
+
 	public DtoGridResource() {
 
 	}
@@ -129,6 +131,7 @@ public class DtoGridResource implements GridResource {
 		this.totalJobs = gr.getTotalJobs();
 		this.waitingJobs = gr.getWaitingJobs();
 		this.isDesiredVersionInstalled = gr.isDesiredSoftwareVersionInstalled();
+                this.gramVersion = gr.getGRAMVersion();
 	}
 
 	public int compareTo(GridResource o) {
@@ -159,7 +162,8 @@ public class DtoGridResource implements GridResource {
 
 		if (queueName.equals(anotherResource.getQueueName())
 				&& jobManager.equals(anotherResource.getJobManager())
-				&& contactString.equals(anotherResource.getContactString())) {
+		                && contactString.equals(anotherResource.getContactString()) 
+                	        && siteName.equals(anotherResource.getSiteName())) {
 			return true;
 		}
 		return false;
@@ -244,6 +248,11 @@ public class DtoGridResource implements GridResource {
 	public int getTotalJobs() {
 		return this.totalJobs;
 	}
+
+        @XmlElement(name ="GRAMversion")
+        public String getGRAMVersion(){
+            return this.gramVersion;
+        }
 
 	// public int compareTo(Object arg0) {
 	// GridResource anotherResource = (GridResource)arg0;
@@ -339,6 +348,10 @@ public class DtoGridResource implements GridResource {
 	public void setWaitingJobs(int waitingJobs) {
 		this.waitingJobs = waitingJobs;
 	}
+
+        public void setGRAMVersion(String gramVersion){
+            this.gramVersion = gramVersion;
+        }
 
 	public String toString() {
 

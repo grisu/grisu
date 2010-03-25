@@ -107,10 +107,9 @@ public final class ServiceInterfaceFactory {
 				serviceInterfaceCreatorClass = Class
 				.forName("org.vpac.grisu.frontend.control." + className);
 			} catch (ClassNotFoundException e) {
-				myLogger.warn("Could not find serviceInterfaceCreator class: "
-						+ className);
-				myLogger
-				.warn("Probably not in classpath. No worries, trying next one...");
+                            	myLogger.warn("Could not find serviceInterfaceCreator class: "	
+                                         + className); 
+				myLogger.warn("Probably not in classpath. No worries, trying next one...");
 				continue;
 			}
 
@@ -120,14 +119,13 @@ public final class ServiceInterfaceFactory {
 				.newInstance();
 			} catch (Exception e) {
 				// shouldn't really happen
-				// e.printStackTrace();
 				continue;
 			}
 
 			if (!serviceInterfaceCreator.canHandleUrl(interfaceUrl)) {
-				myLogger.debug(className + " doesn't handle url: "
-						+ interfaceUrl
-						+ ". Trying next serviceInterfaceCreator...");
+                            myLogger.debug(className + " doesn't handle url: "
+                              + interfaceUrl
+                              + ". Trying next serviceInterfaceCreator...");
 				continue;
 			}
 
