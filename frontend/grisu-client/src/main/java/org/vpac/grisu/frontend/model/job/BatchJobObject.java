@@ -1361,7 +1361,7 @@ Comparable<BatchJobObject> {
 							BatchJobObject.this.batchJobname);
 
 					try {
-						status.waitForActionToFinish(4, false, true, "Redistribution status: ");
+						status.waitForActionToFinish(4, false, true, "Redistribution: ");
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 						throw e;

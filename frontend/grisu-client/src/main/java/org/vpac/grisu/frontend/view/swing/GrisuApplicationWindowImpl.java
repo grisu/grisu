@@ -36,7 +36,7 @@ public class GrisuApplicationWindowImpl extends GrisuApplicationWindow {
 
 	@Override
 	public String getName() {
-		return "Dummy Grisu client";
+		return "Default Grisu client";
 	}
 
 }
