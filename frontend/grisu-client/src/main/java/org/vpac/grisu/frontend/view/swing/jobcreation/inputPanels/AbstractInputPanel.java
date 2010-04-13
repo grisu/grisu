@@ -7,41 +7,41 @@ import java.util.Map;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
+import org.apache.log4j.Logger;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
 import com.google.common.collect.ImmutableMap;
 
 public abstract class AbstractInputPanel extends JPanel implements PropertyChangeListener {
 
+	static final Logger myLogger = Logger
+	.getLogger(AbstractInputPanel.class.getName());
 
 	protected final String DEFAULT_VALUE = "defaultValue";
-	protected final String NAME = "name";
+	//	protected final String NAME = "name";
 	protected final String TITLE = "title";
 	protected final String PREFILLS = "prefills";
 	protected final String USE_LAST_VALUE = "useLastValue";
 
-	protected final JobSubmissionObjectImpl jobObject;
+	protected JobSubmissionObjectImpl jobObject;
 
-	public AbstractInputPanel(JobSubmissionObjectImpl jobObject, Map<String, String> panelProperties) {
+	protected final Map<String, String> panelProperties;
 
-		this.jobObject = jobObject;
-
-		//$hide>>$
-		//		this.jobObject.addPropertyChangeListener(this);
-		//$hide<<$
+	public AbstractInputPanel(Map<String, String> panelProperties) {
 
 		if ( panelProperties == null ) {
-			panelProperties = getDefaultPanelProperties();
+			this.panelProperties = getDefaultPanelProperties();
+		} else {
+			this.panelProperties = panelProperties;
 		}
 
 		try {
-			String title = panelProperties.get(TITLE);
+			String title = this.panelProperties.get(TITLE);
 			setBorder(new TitledBorder(null, title, TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		preparePanel(panelProperties);
 	}
 
 	/**
@@ -70,6 +70,19 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 
 	public void propertyChange(PropertyChangeEvent arg0) {
 		jobPropertyChanged(arg0);
+	}
+
+	public void setJobObject(JobSubmissionObjectImpl jobObject) {
+
+		if ( this.jobObject != null ) {
+			this.jobObject.removePropertyChangeListener(this);
+		}
+
+		this.jobObject = jobObject;
+		this.jobObject.addPropertyChangeListener(this);
+
+		preparePanel(panelProperties);
+
 	}
 
 

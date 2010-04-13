@@ -8,8 +8,6 @@ import java.util.Map;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 
-import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
-
 import com.google.common.collect.ImmutableMap;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -25,18 +23,11 @@ public class Cpus extends AbstractInputPanel {
 	private JCheckBox chckbxParallel;
 	private JComboBox comboBox;
 
-	/**
-	 * @wbp.parser.constructor
-	 */
-	public Cpus(JobSubmissionObjectImpl jobObject) {
+	private boolean userInput = true;
 
-		this(jobObject, null);
+	public Cpus(Map<String, String>panelProperties) {
 
-	}
-
-	public Cpus(JobSubmissionObjectImpl jobObject, Map<String, String>panelProperties) {
-
-		super(jobObject, panelProperties);
+		super(panelProperties);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -61,6 +52,9 @@ public class Cpus extends AbstractInputPanel {
 
 				public void itemStateChanged(ItemEvent e) {
 
+					if ( ! userInput ) {
+						return;
+					}
 					if ( e.getStateChange() == ItemEvent.SELECTED ) {
 						jobObject.setForce_mpi(true);
 					} else {
@@ -79,6 +73,10 @@ public class Cpus extends AbstractInputPanel {
 
 				public void itemStateChanged(ItemEvent e) {
 
+					if ( ! userInput ) {
+						return;
+					}
+
 					if ( ItemEvent.SELECTED == e.getStateChange() ) {
 						Integer value = (Integer)getComboBox().getSelectedItem();
 						jobObject.setCpus(value);
@@ -93,11 +91,13 @@ public class Cpus extends AbstractInputPanel {
 	@Override
 	protected ImmutableMap<String, String> getDefaultPanelProperties() {
 
-		return ImmutableMap.of("defaultCpuList", "1,2,4,8,16,32", "forceSingle", "false", "forceMpi", "false");
+		return ImmutableMap.of(TITLE, "CPUS", DEFAULT_VALUE, "1", PREFILLS, "1,2,4,8,16,32", "forceSingle", "false", "forceMpi", "false");
 	}
 
 	@Override
 	protected void jobPropertyChanged(PropertyChangeEvent e) {
+
+		userInput = false;
 
 		if ( "cpus".equals(e.getPropertyName()) ) {
 			int value = (Integer)e.getNewValue();
@@ -108,6 +108,7 @@ public class Cpus extends AbstractInputPanel {
 			getChckbxParallel().setSelected(true);
 		}
 
+		userInput = true;
 	}
 
 

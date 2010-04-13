@@ -2,8 +2,8 @@ package org.vpac.grisu.frontend.view.swing;
 
 import java.awt.EventQueue;
 
-import org.vpac.grisu.frontend.view.swing.jobcreation.DummyJobCreationPanel;
 import org.vpac.grisu.frontend.view.swing.jobcreation.JobCreationPanel;
+import org.vpac.grisu.frontend.view.swing.jobcreation.TestModuleJobCreationPanel;
 
 public class GrisuApplicationWindowImpl extends GrisuApplicationWindow {
 
@@ -31,7 +31,8 @@ public class GrisuApplicationWindowImpl extends GrisuApplicationWindow {
 	@Override
 	public JobCreationPanel[] getJobCreationPanels() {
 
-		return new JobCreationPanel[]{new DummyJobCreationPanel()};
+		//		return new JobCreationPanel[]{new DummyJobCreationPanel()};
+		return new JobCreationPanel[]{new TestModuleJobCreationPanel()};
 	}
 
 	@Override
