@@ -104,7 +104,7 @@ public class TestModuleJobCreationPanel extends JPanel implements JobCreationPan
 		jobObject = new JobObject(this.si);
 		jobObject.setApplication("UnixCommands");
 		jobObject.setCommandline("whoami");
-
+		getSimpleGeneric().setServiceInterface(si);
 		getSimpleGeneric().setJobObject(jobObject);
 
 	}

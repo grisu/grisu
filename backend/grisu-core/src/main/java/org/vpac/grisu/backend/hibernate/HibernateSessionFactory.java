@@ -34,7 +34,7 @@ public final class HibernateSessionFactory {
 
 	private static String CUSTOM_HIBERNATE_CONFIG_FILE = null;
 
-	public static boolean derbyNetworkServerUp() {
+	public synchronized static boolean derbyNetworkServerUp() {
 		try {
 			getNetworkServer().ping();
 			return true;
@@ -43,7 +43,7 @@ public final class HibernateSessionFactory {
 		}
 	}
 
-	public static void ensureDerbyServerIsUp() {
+	public synchronized static void ensureDerbyServerIsUp() {
 
 		if ( usingDerbyButNotStartedDerbyServer() ) {
 			if ( ! derbyNetworkServerUp() ) {

@@ -3,6 +3,7 @@ package org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
@@ -10,7 +11,6 @@ import javax.swing.JComboBox;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.google.common.collect.ImmutableMap;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -115,9 +115,16 @@ public class Walltime extends AbstractInputPanel {
 	}
 
 	@Override
-	protected ImmutableMap<String, String> getDefaultPanelProperties() {
-		return ImmutableMap.of(TITLE, "Walltime", "defaultAmountList", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,30,45",
-				"defaultAmount", "1", "defaultUnitList", "minutes,hours,days,weeks", "defaultUnit", "hours");
+	protected Map<String, String> getDefaultPanelProperties() {
+
+		Map<String, String> defaultProperties = new HashMap<String, String>();
+		defaultProperties.put(TITLE, "Walltime");
+		defaultProperties.put("defaultAmountList", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,30,45");
+		defaultProperties.put("defaultAmount", "1");
+		defaultProperties.put("defaultUnitList", "minutes,hours,days,weeks");
+		defaultProperties.put("defaultUnit", "hours");
+
+		return defaultProperties;
 	}
 
 	private JComboBox getUnitComboBox() {

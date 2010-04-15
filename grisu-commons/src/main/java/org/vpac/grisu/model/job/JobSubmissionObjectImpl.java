@@ -466,6 +466,9 @@ public class JobSubmissionObjectImpl {
 	public boolean isForce_single() {
 		return force_single;
 	}
+	public void removeInputFileUrl(String selectedFile) {
+		this.inputFileUrls.remove(selectedFile);
+	}
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		this.pcs.removePropertyChangeListener(listener);
 	}
@@ -499,6 +502,7 @@ public class JobSubmissionObjectImpl {
 		this.email_on_job_finish = email_on_job_finish;
 		pcs.firePropertyChange("email_on_job_finish", oldValue, this.email_on_job_finish);
 	}
+
 	public void setEmail_on_job_start(final boolean email_on_job_start) {
 		boolean oldValue = this.email_on_job_start;
 		this.email_on_job_start = email_on_job_start;

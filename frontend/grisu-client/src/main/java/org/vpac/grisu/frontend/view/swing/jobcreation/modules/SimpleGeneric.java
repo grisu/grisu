@@ -2,8 +2,11 @@ package org.vpac.grisu.frontend.view.swing.jobcreation.modules;
 
 import javax.swing.JPanel;
 
+import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels.Cpus;
 import org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels.Jobname;
+import org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels.MdsCommandline;
+import org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels.SingleInputFile;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -16,6 +19,10 @@ public class SimpleGeneric extends JPanel {
 	private Cpus cpus;
 
 	private JobSubmissionObjectImpl jobObject;
+	private MdsCommandline mdsCommandline;
+
+	private ServiceInterface si;
+	private SingleInputFile singleInputFile;
 
 	/**
 	 * Create the panel.
@@ -25,13 +32,20 @@ public class SimpleGeneric extends JPanel {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("default:grow"),},
+				ColumnSpec.decode("default:grow"),
+				FormFactory.RELATED_GAP_COLSPEC,},
 				new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("default:grow"),
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,}));
-		add(getJobname(), "2, 2, fill, fill");
-		add(getCpus(), "4, 2, fill, fill");
+		add(getMdsCommandline(), "2, 2, 3, 1, fill, fill");
+		add(getSingleInputFile(), "2, 4, 3, 1, fill, fill");
+		add(getJobname(), "2, 6, fill, fill");
+		add(getCpus(), "4, 6, fill, fill");
 
 	}
 
@@ -48,10 +62,29 @@ public class SimpleGeneric extends JPanel {
 		}
 		return jobname;
 	}
+	private MdsCommandline getMdsCommandline() {
+		if (mdsCommandline == null) {
+			mdsCommandline = new MdsCommandline(null);
+		}
+		return mdsCommandline;
+	}
+	private SingleInputFile getSingleInputFile() {
+		if (singleInputFile == null) {
+			singleInputFile = new SingleInputFile(null);
+		}
+		return singleInputFile;
+	}
+
 	public void setJobObject(JobSubmissionObjectImpl jobObject) {
 		this.jobObject = jobObject;
 
 		getCpus().setJobObject(this.jobObject);
 		getJobname().setJobObject(this.jobObject);
+		getMdsCommandline().setJobObject(this.jobObject);
+		getSingleInputFile().setJobObject(this.jobObject);
+	}
+	public void setServiceInterface(ServiceInterface si) {
+		this.si = si;
+		getSingleInputFile().setServiceInterface(si);
 	}
 }

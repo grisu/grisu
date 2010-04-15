@@ -1,13 +1,15 @@
 package org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels;
 
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JTextField;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.google.common.collect.ImmutableMap;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -30,14 +32,28 @@ public class Jobname extends AbstractInputPanel {
 	}
 
 	@Override
-	protected ImmutableMap<String, String> getDefaultPanelProperties() {
-		return ImmutableMap.of(TITLE, "Jobname", DEFAULT_VALUE, "gridJob_");
+	protected Map<String, String> getDefaultPanelProperties() {
+
+		Map<String, String> defaultProperties = new HashMap<String, String>();
+
+		defaultProperties.put(TITLE, "Jobname");
+		defaultProperties.put(DEFAULT_VALUE, "gridJob");
+
+		return defaultProperties;
 	}
 
 	private JTextField getJobnameTextField() {
 		if (jobnameTextField == null) {
 			jobnameTextField = new JTextField();
 			jobnameTextField.setColumns(10);
+			jobnameTextField.addKeyListener(new KeyAdapter() {
+
+				@Override
+				public void keyReleased(KeyEvent e) {
+					jobObject.setJobname(jobnameTextField.getText());
+				}
+
+			});
 		}
 		return jobnameTextField;
 	}

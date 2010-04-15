@@ -3,14 +3,15 @@ package org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
-
-import com.google.common.collect.ImmutableMap;
 
 public abstract class AbstractInputPanel extends JPanel implements PropertyChangeListener {
 
@@ -18,7 +19,7 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 	.getLogger(AbstractInputPanel.class.getName());
 
 	protected final String DEFAULT_VALUE = "defaultValue";
-	//	protected final String NAME = "name";
+	protected final String NAME = "name";
 	protected final String TITLE = "title";
 	protected final String PREFILLS = "prefills";
 	protected final String USE_LAST_VALUE = "useLastValue";
@@ -26,6 +27,7 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 	protected JobSubmissionObjectImpl jobObject;
 
 	protected final Map<String, String> panelProperties;
+	protected ServiceInterface si;
 
 	public AbstractInputPanel(Map<String, String> panelProperties) {
 
@@ -33,6 +35,10 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 			this.panelProperties = getDefaultPanelProperties();
 		} else {
 			this.panelProperties = panelProperties;
+		}
+
+		if ( StringUtils.isBlank(this.panelProperties.get(NAME)) ) {
+			this.panelProperties.put(NAME, UUID.randomUUID().toString());
 		}
 
 		try {
@@ -51,7 +57,7 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 	 * 
 	 * @return the properties
 	 */
-	abstract protected ImmutableMap<String, String> getDefaultPanelProperties();
+	abstract protected Map<String, String> getDefaultPanelProperties();
 
 	/**
 	 * Must be implemented if a change in a job property would possibly change the
@@ -83,6 +89,10 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 
 		preparePanel(panelProperties);
 
+	}
+
+	public void setServiceInterface(ServiceInterface si) {
+		this.si = si;
 	}
 
 

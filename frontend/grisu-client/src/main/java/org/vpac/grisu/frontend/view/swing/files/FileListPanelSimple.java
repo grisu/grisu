@@ -17,6 +17,7 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 
+import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.jdesktop.swingx.JXTable;
@@ -32,12 +33,15 @@ import org.vpac.grisu.model.dto.DtoFile;
 import org.vpac.grisu.model.dto.DtoFolder;
 import org.vpac.grisu.model.files.GlazedFile;
 
+import au.org.arcs.jcommons.dependencies.DependencyManager;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 public class FileListPanelSimple extends JPanel implements FileListPanel, EventSubscriber<FileTransferEvent> {
+
+	static final Logger myLogger = Logger.getLogger(DependencyManager.class.getName());
 
 	public static final String UNDETERMINED = "undetermined";
 
@@ -586,19 +590,24 @@ public class FileListPanelSimple extends JPanel implements FileListPanel, EventS
 		// currentDirectory = null;
 		// currentFolder = null;
 
-		SwingUtilities.invokeLater(new Thread() {
+		try {
+			SwingUtilities.invokeAndWait(new Thread() {
+				//		SwingUtilities.invokeLater(new Thread() {
 
-			@Override
-			public void run() {
-				currentDirectoryContent.getReadWriteLock().writeLock()
-				.lock();
-				currentDirectoryContent.clear();
-				currentDirectoryContent.getReadWriteLock().writeLock()
-				.unlock();
-				getTable().revalidate();
-			}
+				@Override
+				public void run() {
+					currentDirectoryContent.getReadWriteLock().writeLock()
+					.lock();
+					currentDirectoryContent.clear();
+					currentDirectoryContent.getReadWriteLock().writeLock()
+					.unlock();
+					getTable().revalidate();
+				}
 
-		});
+			});
+		} catch (Exception e) {
+			myLogger.warn(e);
+		}
 
 	}
 

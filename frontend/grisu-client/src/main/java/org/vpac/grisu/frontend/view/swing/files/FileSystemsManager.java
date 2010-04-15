@@ -45,6 +45,7 @@ public class FileSystemsManager {
 		allFileSystems.addAll(em.getFileSystems());
 
 		// Add seperators
+		allFileSystems.add(new FileSystemItem(FileSystemItem.Type.SELECT, "Click here to select filesystem..."));
 		allFileSystems.add(new FileSystemItem(FileSystemItem.Type.LOCAL,
 		" -- Local -- "));
 		allFileSystems.add(new FileSystemItem(FileSystemItem.Type.BOOKMARK,

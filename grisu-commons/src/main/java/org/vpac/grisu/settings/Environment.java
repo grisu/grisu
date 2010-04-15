@@ -84,7 +84,10 @@ public final class Environment {
 		if (GRISU_DIRECTORY == null) {
 
 			File grisuDir = null;
-			if (StringUtils.isNotBlank(USER_SET_GRISU_DIRECTORY)) {
+			if ( StringUtils.isNotBlank(System.getProperty("grisu.home")) ) {
+				grisuDir = new File(System.getProperty("grisu.home"));
+				GRISU_DIRECTORY = grisuDir;
+			} else if (StringUtils.isNotBlank(USER_SET_GRISU_DIRECTORY)) {
 				// first, check whether user specified his own directory
 				grisuDir = new File(USER_SET_GRISU_DIRECTORY);
 				GRISU_DIRECTORY = grisuDir;

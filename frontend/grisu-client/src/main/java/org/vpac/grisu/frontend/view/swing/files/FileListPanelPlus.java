@@ -131,6 +131,9 @@ FileListListener {
 					}
 				}
 			});
+			if ( (startUrl == null) || GlazedFile.ROOT.equals(startUrl) ) {
+				getComboBox().setSelectedIndex(0);
+			}
 		}
 		return comboBox;
 	}

@@ -351,6 +351,10 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 
 	public FileSystemItem getFileSystemForUrl(String url) {
 
+		if ( StringUtils.isBlank(url) ) {
+			return null;
+		}
+
 		for (FileSystemItem item : getFileSystems()) {
 
 			if (!item.isDummy() && url.startsWith(item.getRootFile().getUrl())) {
