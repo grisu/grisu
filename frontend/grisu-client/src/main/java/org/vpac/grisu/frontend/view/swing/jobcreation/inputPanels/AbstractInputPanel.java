@@ -25,6 +25,7 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 	protected final String TITLE = "title";
 	protected final String PREFILLS = "prefills";
 	protected final String USE_LAST_VALUE = "useLastValue";
+	protected final String DEPENDENCY = "dependency";
 
 	protected JobSubmissionObjectImpl jobObject;
 
