@@ -48,15 +48,15 @@ public class GrisuFileDialog extends JDialog implements FileListListener {
 	}
 
 	private final JPanel contentPanel = new JPanel();
+
 	private final JPanel buttonPane = new JPanel();
 	private JButton okButton = null;
 	private JButton cancelButton = null;
-
 	private FileListPanelPlus fileListPanel = null;
 
 	private Set<GlazedFile> selectedFiles = null;
-	private GlazedFile selectedFile = null;
 
+	private GlazedFile selectedFile = null;
 	private final ServiceInterface si;
 
 	/**
@@ -76,6 +76,11 @@ public class GrisuFileDialog extends JDialog implements FileListListener {
 		buttonPane.add(getOkButton());
 		getRootPane().setDefaultButton(getOkButton());
 		buttonPane.add(getCancelButton());
+	}
+
+	public void clearSelection() {
+		selectedFiles = null;
+		selectedFile = null;
 	}
 
 	public void fileDoubleClicked(GlazedFile file) {

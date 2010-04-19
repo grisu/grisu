@@ -30,18 +30,18 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 	private final ResourceInformation resourceInfo;
 
-	private Map<String, Map<String, String>> cachedApplicationDetails = new HashMap<String, Map<String, String>>();
+	private final Map<String, Map<String, String>> cachedApplicationDetails = new HashMap<String, Map<String, String>>();
 
 	private Set<String> cachedAllSubmissionLocations = null;
 
-	private Map<String, Set<String>> cachedVersionsPerSubmissionLocations = new HashMap<String, Set<String>>();
-	private Map<String, Set<String>> cachedSubmissionLocationsPerVersion = new HashMap<String, Set<String>>();
+	private final Map<String, Set<String>> cachedVersionsPerSubmissionLocations = new HashMap<String, Set<String>>();
+	private final Map<String, Set<String>> cachedSubmissionLocationsPerVersion = new HashMap<String, Set<String>>();
 	// private Map<String, Set<String>> cachedVersionsForSubmissionLocation =
 	// new HashMap<String, Set<String>>();
-	private Map<String, Set<String>> cachedSubmissionLocationsForUserPerFqan = new HashMap<String, Set<String>>();
-	private Map<String, Set<String>> cachedSubmissionLocationsForUserPerVersionAndFqan = new HashMap<String, Set<String>>();
+	private final Map<String, Set<String>> cachedSubmissionLocationsForUserPerFqan = new HashMap<String, Set<String>>();
+	private final Map<String, Set<String>> cachedSubmissionLocationsForUserPerVersionAndFqan = new HashMap<String, Set<String>>();
 
-	private Map<String, Set<String>> cachedVersionsForUserPerFqan = new HashMap<String, Set<String>>();
+	private final Map<String, Set<String>> cachedVersionsForUserPerFqan = new HashMap<String, Set<String>>();
 	/**
 	 * Default constructor for this class.
 	 * 
@@ -54,7 +54,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 			final String app) {
 		this.serviceInterface = serviceInterface;
 		this.resourceInfo = GrisuRegistryManager.getDefault(serviceInterface)
-				.getResourceInformation();
+		.getResourceInformation();
 		this.application = app;
 	}
 	/*
@@ -69,8 +69,8 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 			Set<String> result = new TreeSet<String>();
 			for (String subLoc : getAvailableSubmissionLocationsForFqan(fqan)) {
 				List<String> temp = serviceInterface
-						.getVersionsOfApplicationOnSubmissionLocation(
-								getApplicationName(), subLoc).getStringList();
+				.getVersionsOfApplicationOnSubmissionLocation(
+						getApplicationName(), subLoc).getStringList();
 				result.addAll(temp);
 			}
 			cachedVersionsForUserPerFqan.put(fqan, result);
@@ -94,7 +94,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		}
 
 		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
-				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null),
+				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null, null),
 				fqan, false).wrapGridResourcesIntoInterfaceType();
 	}
 
@@ -112,11 +112,11 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		if (cachedApplicationDetails.get(KEY) == null) {
 			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
 				cachedApplicationDetails
-						.put(KEY, new HashMap<String, String>());
+				.put(KEY, new HashMap<String, String>());
 			} else {
 				Map<String, String> details = serviceInterface
-						.getApplicationDetailsForVersionAndSubmissionLocation(
-								application, version, subLoc).getDetailsAsMap();
+				.getApplicationDetailsForVersionAndSubmissionLocation(
+						application, version, subLoc).getDetailsAsMap();
 				cachedApplicationDetails.put(KEY, details);
 			}
 		}
@@ -151,7 +151,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 						.asList(serviceInterface
 								.getSubmissionLocationsForApplication(
 										application)
-								.asSubmissionLocationStrings()));
+										.asSubmissionLocationStrings()));
 			}
 		}
 		return cachedAllSubmissionLocations;
@@ -198,7 +198,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 				List<String> temp = Arrays.asList(serviceInterface
 						.getSubmissionLocationsForApplicationAndVersion(
 								application, version)
-						.asSubmissionLocationStrings());
+								.asSubmissionLocationStrings());
 				cachedSubmissionLocationsPerVersion.put(version, new HashSet(
 						temp));
 			}
@@ -250,8 +250,8 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 				cachedVersionsPerSubmissionLocations.put(KEY, temp);
 			} else {
 				List<String> temp = serviceInterface
-						.getVersionsOfApplicationOnSubmissionLocation(
-								application, subLoc).getStringList();
+				.getVersionsOfApplicationOnSubmissionLocation(
+						application, subLoc).getStringList();
 				cachedVersionsPerSubmissionLocations.put(KEY,
 						new HashSet<String>(temp));
 			}
@@ -276,7 +276,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		}
 
 		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
-				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null),
+				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null, null),
 				fqan, true).wrapGridResourcesIntoInterfaceType();
 	}
 

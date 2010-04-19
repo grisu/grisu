@@ -1,10 +1,13 @@
 package org.vpac.grisu.backend.model.job;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.persistence.Column;
@@ -24,6 +27,7 @@ import org.apache.log4j.Logger;
 import org.hibernate.annotations.CollectionOfElements;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.Root;
 import org.vpac.grisu.backend.model.ProxyCredential;
@@ -95,6 +99,9 @@ public class Job implements Comparable<Job> {
 	private Map<String, String> jobProperties = Collections
 	.synchronizedMap(new HashMap<String, String>());
 
+	@ElementList(entry="inputFiles", inline=true)
+	private Set<String> inputFiles = Collections.synchronizedSet(new HashSet<String>());
+
 	@Attribute
 	private boolean isBatchJob = false;
 
@@ -141,10 +148,6 @@ public class Job implements Comparable<Job> {
 		// TODO change the jobname in the jobDescription
 	}
 
-	//
-	// TODO later add requirements
-	// private ArrayList<Requirement> requirements = null;
-
 	/**
 	 * If you use this constructor save the Job object straight away to prevent
 	 * duplicate names.
@@ -157,12 +160,25 @@ public class Job implements Comparable<Job> {
 		this.jobname = jobname;
 	}
 
+	public synchronized void addInputFile(final String inputFile) {
+		getInputFiles().add(inputFile);
+	}
+
+	public synchronized void addInputFiles(final Collection<String> inputFiles) {
+		getInputFiles().addAll(inputFiles);
+	}
+
 	public synchronized void addJobProperties(
 			final Map<String, String> properties) {
+
 		getJobProperties().putAll(properties);
 	}
 
+	//
+	// TODO later add requirements
+	// private ArrayList<Requirement> requirements = null;
 	public synchronized void addJobProperty(final String key, final String value) {
+
 		getJobProperties().put(key, value);
 	}
 
@@ -251,6 +267,11 @@ public class Job implements Comparable<Job> {
 		return id;
 	}
 
+	@CollectionOfElements(fetch = FetchType.EAGER)
+	public  synchronized Set<String> getInputFiles() {
+		return inputFiles;
+	}
+
 	/**
 	 * Gets the jsdl job description for this job.
 	 * 
@@ -285,9 +306,16 @@ public class Job implements Comparable<Job> {
 		return jobname;
 	}
 
+
 	@CollectionOfElements(fetch = FetchType.EAGER)
 	public synchronized Map<String, String> getJobProperties() {
+
 		return jobProperties;
+	}
+
+	@Transient
+	public String getJobProperty(final String key) {
+		return this.jobProperties.get(key);
 	}
 
 	// /**
@@ -308,11 +336,6 @@ public class Job implements Comparable<Job> {
 	// public void setSubmissionHost(final String host) {
 	// this.submissionHost = host;
 	// }
-
-	@Transient
-	public String getJobProperty(final String key) {
-		return this.jobProperties.get(key);
-	}
 
 	/**
 	 * For hibernate conversion xml-document -> string.
@@ -385,6 +408,16 @@ public class Job implements Comparable<Job> {
 		return isBatchJob;
 	}
 
+	public void removeAllInputFiles() {
+
+		this.inputFiles.clear();
+
+	}
+
+	public void removeInputFiles(Collection<String> inputFiles) {
+		this.inputFiles.removeAll(inputFiles);
+	}
+
 	public void setArchived(boolean archived) {
 		this.isArchived = archived;
 	}
@@ -429,6 +462,14 @@ public class Job implements Comparable<Job> {
 		this.id = id;
 	}
 
+	private synchronized void setInputFiles(Set<String> inputfiles) {
+		if ( inputFiles == null ) {
+			this.inputFiles = Collections.synchronizedSet(new HashSet<String>());
+		} else {
+			this.inputFiles = inputfiles;
+		}
+	}
+
 	/**
 	 * Sets the job description for this job. Take care that you have got the
 	 * same jobname within this job description and in the jobname property.
@@ -439,16 +480,6 @@ public class Job implements Comparable<Job> {
 	public void setJobDescription(final Document jobDescription) {
 		this.jobDescription = jobDescription;
 		this.serializedJobDescription = SeveralXMLHelpers.toString(jobDescription);
-	}
-
-	/**
-	 * Sets the jobhandle. Only a JobSubmitter should use this method.
-	 * 
-	 * @param jobhandle
-	 *            the (JobSubmitter-specific) job handle
-	 */
-	public void setJobhandle(final String jobhandle) {
-		this.jobhandle = jobhandle;
 	}
 
 	// ---------------------
@@ -503,6 +534,16 @@ public class Job implements Comparable<Job> {
 	// public final void setApplication(final String application) {
 	// this.application = application;
 	// }
+
+	/**
+	 * Sets the jobhandle. Only a JobSubmitter should use this method.
+	 * 
+	 * @param jobhandle
+	 *            the (JobSubmitter-specific) job handle
+	 */
+	public void setJobhandle(final String jobhandle) {
+		this.jobhandle = jobhandle;
+	}
 
 	/**
 	 * Sets the name of this job. Take care that it is unique when combined with

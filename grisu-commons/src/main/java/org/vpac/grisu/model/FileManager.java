@@ -19,6 +19,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
 import org.vpac.grisu.model.dto.DtoFolder;
+import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.files.GlazedFile;
 import org.vpac.grisu.settings.ClientPropertiesManager;
@@ -150,7 +151,7 @@ public class FileManager {
 	public static boolean isLocal(String file) {
 
 		file = ensureUriFormat(file);
-		
+
 		if (file.startsWith("gsiftp")) {
 			return false;
 		} else if (file.startsWith("file:")) {
@@ -685,6 +686,77 @@ public class FileManager {
 			throw new FileTransferException(uriOrPath, targetDirectory, "Upload of folders not supported (yet).", null);
 		}
 		uploadFileToDirectory(file, targetDirectory, overwrite);
+
+	}
+
+	public final void uploadInputFile(final File file, final String job) throws FileTransferException {
+
+		if (!file.exists()) {
+			throw new FileTransferException(file.toString(), null,
+					"File does not exist: " + file.toString(), null);
+		}
+
+		if (!file.canRead()) {
+			throw new FileTransferException(file.toString(), null,
+					"Can't read file: " + file.toString(), null);
+		}
+
+		if (file.isDirectory()) {
+			throw new FileTransferException(file.toString(), null,
+					"Transfer of folders not supported yet.", null);
+		}
+
+		// checking whether folder exists and is folder
+		try {
+
+			DtoJob jobdir = serviceInterface.getJob(job);
+
+		} catch (Exception e) {
+			throw new FileTransferException(file.toString(), job,
+					"Job does not exists on the backend.: ", e);
+		}
+
+		myLogger.debug("Uploading input file: " + file.toString() + " for job: "
+				+ job);
+
+		DataHandler handler = createDataHandler(file);
+		try {
+			myLogger.info("Uploading file " + file.getName() + "...");
+			serviceInterface.uploadInputFile(job, handler, file.getName());
+
+			myLogger.info("Upload of input file " + file.getName()
+					+ " successful.");
+		} catch (Exception e1) {
+			try {
+				// try again
+				myLogger.info("Uploading file " + file.getName()
+						+ "...");
+				System.out.println("FAILED. SLEEPING 1 SECONDS");
+				Thread.sleep(1000);
+				serviceInterface.uploadInputFile(job, handler, file.getName());
+
+				myLogger.info("Upload of file " + file.getName()
+						+ " successful.");
+			} catch (Exception e) {
+				myLogger.info("Upload of inpu file " + file.getName()
+						+ " failed: " + e1.getLocalizedMessage());
+				myLogger.error("Inputfile upload failed: "
+						+ e1.getLocalizedMessage());
+				throw new FileTransferException(file.toString(),
+						null, "Could not upload input file.", e1);
+			}
+		}
+
+	}
+
+	public final void uploadInputFile(final String uriOrPath, final String job) throws FileTransferException {
+
+		File file = getFileFromUriOrPath(uriOrPath);
+
+		if (file.isDirectory()) {
+			throw new FileTransferException(uriOrPath, null, "Upload of folders not supported (yet).", null);
+		}
+		uploadInputFile(file, job);
 
 	}
 

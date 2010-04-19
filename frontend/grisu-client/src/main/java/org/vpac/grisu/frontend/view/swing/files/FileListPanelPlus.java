@@ -5,6 +5,7 @@ import java.awt.event.ItemListener;
 import java.util.Set;
 
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.vpac.grisu.control.ServiceInterface;
@@ -45,6 +46,7 @@ FileListListener {
 	private boolean displayTimeStamp = false;
 
 	private boolean fireEvent = true;
+	private JLabel label;
 
 	/**
 	 * Create the panel.
@@ -69,13 +71,18 @@ FileListListener {
 		this.startUrl = startUrl;
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("max(41dlu;default)"),
+				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(177dlu;default):grow"),
-				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_COLSPEC,},
+				new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC, }));
-		add(getComboBox(), "2, 2, fill, default");
+				FormFactory.RELATED_GAP_ROWSPEC,}));
+		add(getLabel(), "2, 2, right, default");
+		add(getComboBox(), "4, 2, fill, default");
 
 		FileSystemItem item = em.getFileSystemForUrl(startUrl);
 		if (item != null) {
@@ -88,7 +95,7 @@ FileListListener {
 			startUrl = null;
 			rootUrl = null;
 		}
-		add(getFileListPanel(), "2, 4, fill, fill");
+		add(getFileListPanel(), "2, 4, 3, 1, fill, fill");
 	}
 
 	public void addFileListListener(FileListListener l) {
@@ -151,6 +158,13 @@ FileListListener {
 		return fileListPanel;
 	}
 
+	private JLabel getLabel() {
+		if (label == null) {
+			label = new JLabel("Filesystem:");
+		}
+		return label;
+	}
+
 	public JPanel getPanel() {
 		return this;
 	}
@@ -179,7 +193,6 @@ FileListListener {
 
 		getFileListPanel().setCurrentUrl(url);
 	}
-
 	public void setRootUrl(String url) {
 
 		getFileListPanel().setRootUrl(url);

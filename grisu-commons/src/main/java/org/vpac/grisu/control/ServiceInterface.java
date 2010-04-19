@@ -3,7 +3,6 @@ package org.vpac.grisu.control;
 import java.util.Map;
 
 import javax.activation.DataHandler;
-import javax.activation.DataSource;
 import javax.annotation.security.RolesAllowed;
 import javax.jws.WebService;
 import javax.ws.rs.Consumes;
@@ -1209,7 +1208,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Upload a {@link DataSource} to the users' virtual filesystem.
-	 * 
+	 *
 	 * @param file
 	 *            the (local) file you want to upload
 	 * @param filename

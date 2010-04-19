@@ -62,7 +62,7 @@ public class BatchJob {
 	private String fqan = null;
 
 	private Map<Long, String> logMessages = Collections
-			.synchronizedMap(new TreeMap<Long, String>());
+	.synchronizedMap(new TreeMap<Long, String>());
 
 	// for hibernate
 	private BatchJob() {
@@ -128,18 +128,19 @@ public class BatchJob {
 				.getLogMessages()));
 
 		ExecutorService executor = Executors
-				.newFixedThreadPool(ServerPropertiesManager
-						.getConcurrentJobStatusThreadsPerUser());
+		.newFixedThreadPool(ServerPropertiesManager
+				.getConcurrentJobStatusThreadsPerUser());
 
 		for (final Job job : getJobs()) {
 
 			Thread thread = new Thread() {
+				@Override
 				public void run() {
 
 					DtoJob dtoJob = null;
 
 					dtoJob = DtoJob.createJob(job.getStatus(), job
-							.getJobProperties(), job.getLogMessages());
+							.getJobProperties(), job.getInputFiles(), job.getLogMessages());
 					result.addJob(dtoJob);
 				}
 			};

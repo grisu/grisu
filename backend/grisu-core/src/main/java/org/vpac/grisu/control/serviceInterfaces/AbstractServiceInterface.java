@@ -173,7 +173,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		Job job = getJobFromDatabase(jobname);
 
-		job.addJobProperties(properties.propertiesAsMap());
+		Map<String, String> temp = properties.propertiesAsMap();
+
+		//		String urls = temp.get(Constants.INPUT_FILE_URLS_KEY);
+		//		if ( StringUtils.isNotBlank(urls) ) {
+		temp.remove(Constants.INPUT_FILE_URLS_KEY);
+		//			job.addInputFiles(Arrays.asList(urls.split(",")));
+		//		}
+
+		job.addJobProperties(temp);
 		jobdao.saveOrUpdate(job);
 
 		myLogger.debug("Added " + properties.getProperties().size()
@@ -194,9 +202,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 			Job job = getJobFromDatabase(jobname);
-			job.addJobProperty(key, value);
-			jobdao.saveOrUpdate(job);
-			myLogger.debug("Added job property: " + key);
+
+			// input files are added automatically
+			if ( ! Constants.INPUT_FILE_URLS_KEY.equals(key) ) {
+				//				if ( StringUtils.isBlank(value) ) {
+				//					job.removeAllInputFiles();
+				//				} else {
+				//					job.addInputFiles(Arrays.asList(value.split(",")));
+				//				}
+				//			} else {
+				job.addJobProperty(key, value);
+				jobdao.saveOrUpdate(job);
+				myLogger.debug("Added job property: " + key);
+			}
 		} catch (NoSuchJobException e) {
 			BatchJob job = getMultiPartJobFromDatabase(jobname);
 			job.addJobProperty(key, value);
@@ -1851,7 +1869,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// job.getJobProperties().put(Constants.JOB_STATUS_KEY,
 		// JobConstants.translateStatus(getJobStatus(jobname)));
 
-		return DtoJob.createJob(job.getStatus(), job.getJobProperties(), job
+		return DtoJob.createJob(job.getStatus(), job.getJobProperties(), job.getInputFiles(), job
 				.getLogMessages());
 	}
 
@@ -1862,7 +1880,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 *            the name of the job (which is unique within one user)
 	 * @return the job
 	 */
-	public Job getJobFromDatabase(final String jobname)
+	protected Job getJobFromDatabase(final String jobname)
 	throws NoSuchJobException {
 
 		Job job = jobdao.findJobByDN(getUser().getCred().getDn(), jobname);
@@ -1881,6 +1899,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 			Job job = getJobFromDatabase(jobname);
+
+			if ( Constants.INPUT_FILE_URLS_KEY.equals(key) ) {
+				return StringUtils.join(job.getInputFiles(), ",");
+			}
 
 			return job.getJobProperty(key);
 		} catch (NoSuchJobException e) {
@@ -2854,7 +2876,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		for (JobSubmissionProperty key : jobSubmissionObject
 				.getJobSubmissionPropertyMap().keySet()) {
-			job.getJobProperties().put(key.toString(),
+			job.addJobProperty(key.toString(),
 					jobSubmissionObject.getJobSubmissionPropertyMap().get(key));
 		}
 
@@ -3300,7 +3322,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		myLogger.debug("Calculated submissionSite: " + submissionSite);
 		job.addJobProperty(Constants.SUBMISSION_SITE_KEY, submissionSite);
 		// job.setJob_directory(stagingFilesystemToUse + workingDirectory);
-		job.getJobProperties().put(Constants.JOBDIRECTORY_KEY,
+		job.addJobProperty(Constants.JOBDIRECTORY_KEY,
 				stagingFilesystemToUse + workingDirectory);
 		myLogger.debug("Calculated jobdirectory: " + stagingFilesystemToUse
 				+ workingDirectory);
@@ -3369,7 +3391,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			for (Job job : jobs) {
 
 				DtoJob dtojob = DtoJob.createJob(job.getStatus(), job
-						.getJobProperties(), job.getLogMessages());
+						.getJobProperties(), job.getInputFiles(), job.getLogMessages());
 
 				// just to make sure
 				dtojob.addJobProperty(Constants.JOBNAME_KEY, job.getJobname());
@@ -3842,7 +3864,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			fqan = Constants.NON_VO_FQAN;
 		}
 		job.setFqan(fqan);
-		job.getJobProperties().put(Constants.FQAN_KEY, fqan);
+		job.addJobProperty(Constants.FQAN_KEY, fqan);
 
 	}
 
@@ -3878,7 +3900,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				continue;
 			}
 
-			if ((sourceUrl != null) && !"".equals(sourceUrl)) {
+			if (StringUtils.isNotBlank(sourceUrl)) {
 
 				try {
 					if (!getUser().aquireFile(targetUrl).getParent().exists()) {
@@ -3897,6 +3919,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				}
 				myLogger.debug("Staging file: " + sourceUrl + " to: "
 						+ targetUrl);
+				job.addInputFile(sourceUrl);
+				jobdao.saveOrUpdate(job);
 				cpSingleFile(sourceUrl, targetUrl, true, true, true);
 				// job.addInputFile(targetUrl);
 			}
@@ -3966,19 +3990,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		try {
 			status.addElement("Starting job submission using GT4...");
 			job.addLogMessage("Submitting job to endpoint...");
-                        String candidate = JsdlHelpers.getCandidateHosts(job.getJobDescription())[0];
-                        String version = informationManager.getGridResource(candidate).getGRAMVersion();
-                      
-                        String submissionType = null;
-                        if ("5.0.0".equals(version)){
-                            submissionType = "GT5";
-                        }
-                        else {
-                            submissionType = "GT4";
+			String candidate = JsdlHelpers.getCandidateHosts(job.getJobDescription())[0];
+			String version = informationManager.getGridResource(candidate).getGRAMVersion();
 
-                        }
-                        handle = getUser().getSubmissionManager().submit(submissionType, job);
-                        
+			String submissionType = null;
+			if ("5.0.0".equals(version)){
+				submissionType = "GT5";
+			}
+			else {
+				submissionType = "GT4";
+
+			}
+			handle = getUser().getSubmissionManager().submit(submissionType, job);
+
 			job.addLogMessage("Submission finished.");
 		} catch (RuntimeException e) {
 			status.addLogMessage("Job submission failed.");
@@ -4284,9 +4308,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					.getJobProperty(Constants.JOBDIRECTORY_KEY);
 
 					try {
-						upload(source, jobdir + "/" + targetFilename);
-						status.addElement("Upload to " + jobdir + "/"
-								+ targetFilename + " successful.");
+						String tarFileName = jobdir + "/" + targetFilename;
+						upload(source, tarFileName);
+						status.addElement("Upload to " + tarFileName + " successful.");
+						job.addInputFile(tarFileName);
+						jobdao.saveOrUpdate(job);
+
 						status.setFinished(true);
 					} catch (RemoteFileSystemException e) {
 						e.printStackTrace();

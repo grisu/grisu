@@ -6,11 +6,13 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 import javax.swing.border.TitledBorder;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
 public abstract class AbstractInputPanel extends JPanel implements PropertyChangeListener {
@@ -28,6 +30,23 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 
 	protected final Map<String, String> panelProperties;
 	protected ServiceInterface si;
+
+	protected static ServiceInterface singletonServiceinterface;
+	private static GrisuFileDialog dialog;
+
+	public static GrisuFileDialog getFileDialog() {
+
+		if ( singletonServiceinterface == null ) {
+			return null;
+		}
+
+		if ( dialog == null ) {
+			dialog = new GrisuFileDialog(singletonServiceinterface);
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+		}
+		return dialog;
+	}
 
 	public AbstractInputPanel(Map<String, String> panelProperties) {
 
@@ -92,6 +111,9 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 	}
 
 	public void setServiceInterface(ServiceInterface si) {
+		if ( singletonServiceinterface == null ) {
+			singletonServiceinterface = si;
+		}
 		this.si = si;
 	}
 

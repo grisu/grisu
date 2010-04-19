@@ -5,11 +5,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.JobConstants;
 
 import au.org.arcs.jcommons.constants.Constants;
@@ -29,7 +31,7 @@ import au.org.arcs.jcommons.constants.Constants;
 public class DtoJob implements Comparable<DtoJob> {
 
 	public static DtoJob createJob(int status,
-			Map<String, String> jobProperties, Map<Long, String> logMessages) {
+			Map<String, String> jobProperties, Set<String> inputFiles, Map<Long, String> logMessages) {
 
 		DtoJob result = new DtoJob();
 
@@ -42,6 +44,10 @@ public class DtoJob implements Comparable<DtoJob> {
 			temp.setValue(jobProperties.get(key));
 			list.add(temp);
 		}
+		DtoJobProperty temp2 = new DtoJobProperty();
+		temp2.setKey(Constants.INPUT_FILE_URLS_KEY);
+		temp2.setValue(StringUtils.join(inputFiles, ","));
+		list.add(temp2);
 		result.setProperties(list);
 
 		if (logMessages != null) {

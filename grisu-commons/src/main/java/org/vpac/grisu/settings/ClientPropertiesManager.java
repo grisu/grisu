@@ -707,7 +707,7 @@ public final class ClientPropertiesManager {
 
 	public static void setAutoLogin(boolean selected) {
 
-		System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+//		System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 
 		try {
 			getClientConfiguration().setProperty(AUTO_LOGIN_KEY, new Boolean(selected).toString());

@@ -8,7 +8,6 @@ import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.WindowConstants;
 
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
 import org.vpac.grisu.model.files.GlazedFile;
@@ -55,6 +54,7 @@ public class SingleInputFile extends AbstractInputPanel {
 					getFileDialog().setVisible(true);
 
 					GlazedFile file = getFileDialog().getSelectedFile();
+					getFileDialog().clearSelection();
 					if ( file == null ) {
 						return;
 					}
@@ -89,19 +89,19 @@ public class SingleInputFile extends AbstractInputPanel {
 		return defaultProperties;
 	}
 
-	private GrisuFileDialog getFileDialog() {
-
-		if ( si == null ) {
-			return null;
-		}
-
-		if ( dialog == null ) {
-			dialog = new GrisuFileDialog(si);
-			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-
-		}
-		return dialog;
-	}
+	//	private GrisuFileDialog getFileDialog() {
+	//
+	//		if ( si == null ) {
+	//			return null;
+	//		}
+	//
+	//		if ( dialog == null ) {
+	//			dialog = new GrisuFileDialog(si);
+	//			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+	//
+	//		}
+	//		return dialog;
+	//	}
 
 	@Override
 	protected void jobPropertyChanged(PropertyChangeEvent e) {

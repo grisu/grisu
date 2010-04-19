@@ -96,7 +96,7 @@ public class JobSubmissionManager {
 			// throw new NoSuchJobSubmitterException(
 			// "Can't find JobSubmitter: " + job.getSubmissionType());
 			myLogger
-					.error("Can't find jobsubitter: " + job.getSubmissionType());
+			.error("Can't find jobsubitter: " + job.getSubmissionType());
 			return JobConstants.KILLED;
 		}
 
@@ -143,7 +143,7 @@ public class JobSubmissionManager {
 		String factoryType = null;
 		if (host.indexOf("#") != -1) {
 			factoryType = host.substring(host.indexOf("#") + 1);
-			if (factoryType == null || factoryType.length() == 0) {
+			if ((factoryType == null) || (factoryType.length() == 0)) {
 				factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
 			}
 			host = host.substring(0, host.indexOf("#"));
@@ -162,8 +162,8 @@ public class JobSubmissionManager {
 		job.addJobProperty(Constants.SUBMISSION_HOST_KEY, host);
 		job.setSubmissionType(submitter_name);
 		job.addJobProperty(Constants.SUBMISSION_TYPE_KEY, submitter_name);
-		if (queue != null && !"".equals(queue)) {
-			job.getJobProperties().put(Constants.QUEUE_KEY, queue);
+		if ((queue != null) && !"".equals(queue)) {
+			job.addJobProperty(Constants.QUEUE_KEY, queue);
 		}
 		job.setStatus(JobConstants.EXTERNAL_HANDLE_READY);
 

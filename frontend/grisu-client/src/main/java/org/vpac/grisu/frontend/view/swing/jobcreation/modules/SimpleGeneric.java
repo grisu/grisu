@@ -1,12 +1,14 @@
 package org.vpac.grisu.frontend.view.swing.jobcreation.modules;
 
+import java.util.Map;
+
 import javax.swing.JPanel;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels.Cpus;
 import org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels.Jobname;
 import org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels.MdsCommandline;
-import org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels.SingleInputFile;
+import org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels.MultipleInputFiles;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -22,7 +24,7 @@ public class SimpleGeneric extends JPanel {
 	private MdsCommandline mdsCommandline;
 
 	private ServiceInterface si;
-	private SingleInputFile singleInputFile;
+	private MultipleInputFiles multipleInputFiles;
 
 	/**
 	 * Create the panel.
@@ -43,7 +45,7 @@ public class SimpleGeneric extends JPanel {
 				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,}));
 		add(getMdsCommandline(), "2, 2, 3, 1, fill, fill");
-		add(getSingleInputFile(), "2, 4, 3, 1, fill, fill");
+		add(getMultipleInputFiles(), "2, 4, 3, 1, fill, fill");
 		add(getJobname(), "2, 6, fill, fill");
 		add(getCpus(), "4, 6, fill, fill");
 
@@ -68,23 +70,23 @@ public class SimpleGeneric extends JPanel {
 		}
 		return mdsCommandline;
 	}
-	private SingleInputFile getSingleInputFile() {
-		if (singleInputFile == null) {
-			singleInputFile = new SingleInputFile(null);
-		}
-		return singleInputFile;
-	}
 
+	private MultipleInputFiles getMultipleInputFiles() {
+		if (multipleInputFiles == null) {
+			multipleInputFiles = new MultipleInputFiles((Map) null);
+		}
+		return multipleInputFiles;
+	}
 	public void setJobObject(JobSubmissionObjectImpl jobObject) {
 		this.jobObject = jobObject;
 
 		getCpus().setJobObject(this.jobObject);
 		getJobname().setJobObject(this.jobObject);
 		getMdsCommandline().setJobObject(this.jobObject);
-		getSingleInputFile().setJobObject(this.jobObject);
+		getMultipleInputFiles().setJobObject(this.jobObject);
 	}
 	public void setServiceInterface(ServiceInterface si) {
 		this.si = si;
-		getSingleInputFile().setServiceInterface(si);
+		getMultipleInputFiles().setServiceInterface(si);
 	}
 }

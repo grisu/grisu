@@ -742,7 +742,7 @@ Comparable<JobObject> {
 
 		FileTransferManager ftm = FileTransferManager.getDefault(serviceInterface);
 
-		FileTransfer fileTransfer = ftm.addFileTransfer(localFiles, jobDirectory, true);
+		FileTransfer fileTransfer = ftm.addJobInputFileTransfer(localFiles, this);
 		try {
 			fileTransfer.join();
 		} catch (ExecutionException e) {
