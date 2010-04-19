@@ -2,6 +2,8 @@ package org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.Method;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.UUID;
 
@@ -13,6 +15,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
+import org.vpac.grisu.frontend.view.swing.jobcreation.filters.Filter;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
 public abstract class AbstractInputPanel extends JPanel implements PropertyChangeListener {
@@ -26,8 +29,10 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 	protected final String PREFILLS = "prefills";
 	protected final String USE_LAST_VALUE = "useLastValue";
 	protected final String DEPENDENCY = "dependency";
+	
+	protected final LinkedList<Filter> filters;
 
-	protected JobSubmissionObjectImpl jobObject;
+	private JobSubmissionObjectImpl jobObject;
 
 	protected final Map<String, String> panelProperties;
 	protected ServiceInterface si;
@@ -49,7 +54,9 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 		return dialog;
 	}
 
-	public AbstractInputPanel(Map<String, String> panelProperties) {
+	public AbstractInputPanel(Map<String, String> panelProperties, LinkedList<Filter> filters) {
+		
+		this.filters = filters;
 
 		if ( panelProperties == null ) {
 			this.panelProperties = getDefaultPanelProperties();
@@ -86,13 +93,52 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 	 * @param e the property change event
 	 */
 	abstract protected void jobPropertyChanged(PropertyChangeEvent e);
-
+	
 	/**
 	 * Implement this if the panel needs to be prepared with values from the template.
 	 * 
 	 * @param panelProperties the properties for the initial state of the panel
 	 */
 	abstract protected void preparePanel(Map<String, String> panelProperties);
+	
+	protected void setValue(String bean, Object value) {
+		try {
+			Method method = jobObject.getClass().getMethod("set"+StringUtils.capitalize(bean), value.getClass());
+			method.invoke(jobObject, value);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	protected void addValue(String bean, Object value) {
+		try {
+			Method method = jobObject.getClass().getMethod("add"+StringUtils.capitalize(bean), value.getClass());
+			method.invoke(jobObject, value);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	protected void removeValue(String bean, Object value) {
+		try {
+			Method method = jobObject.getClass().getMethod("remove"+StringUtils.capitalize(bean), value.getClass());
+			method.invoke(jobObject, value);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private void applyFilters() {
+		
+		String string = get
+		for ( Filter filter : filters ) {
+			
+		}
+		
+	}
 
 	public void propertyChange(PropertyChangeEvent arg0) {
 		jobPropertyChanged(arg0);

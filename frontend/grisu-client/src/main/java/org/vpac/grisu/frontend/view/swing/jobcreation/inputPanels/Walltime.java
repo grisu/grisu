@@ -4,12 +4,14 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 
 import org.apache.commons.lang.StringUtils;
+import org.vpac.grisu.frontend.view.swing.jobcreation.filters.Filter;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -77,8 +79,8 @@ public class Walltime extends AbstractInputPanel {
 
 	private final DefaultComboBoxModel unitModel = new DefaultComboBoxModel();
 
-	public Walltime(Map<String, String> panelProperties) {
-		super(panelProperties);
+	public Walltime(Map<String, String> panelProperties, LinkedList<Filter> filters) {
+		super(panelProperties, filters);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -107,7 +109,7 @@ public class Walltime extends AbstractInputPanel {
 							new String[]{
 									(String)(getAmountComboBox().getSelectedItem()),
 									(String)(getUnitComboBox().getSelectedItem())});
-					jobObject.setWalltimeInSeconds(walltimeInSeconds);
+					setValue("walltimeInSeconds", walltimeInSeconds);
 				}
 			});
 		}
@@ -140,7 +142,7 @@ public class Walltime extends AbstractInputPanel {
 							new String[]{
 									(String)(getAmountComboBox().getSelectedItem()),
 									(String)(getUnitComboBox().getSelectedItem())});
-					jobObject.setWalltimeInSeconds(walltimeInSeconds);
+					setValue("walltimeInSeconds", walltimeInSeconds);
 				}
 			});
 		}

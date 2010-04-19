@@ -6,9 +6,12 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import javax.swing.JComboBox;
+
+import org.vpac.grisu.frontend.view.swing.jobcreation.filters.Filter;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -20,8 +23,8 @@ public class MdsCommandline extends AbstractInputPanel {
 
 	private String lastCalculatedExecutable = null;
 
-	public MdsCommandline(Map<String, String> panelProperties) {
-		super(panelProperties);
+	public MdsCommandline(Map<String, String> panelProperties, LinkedList<Filter> filters) {
+		super(panelProperties, filters);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -64,14 +67,14 @@ public class MdsCommandline extends AbstractInputPanel {
 
 		if (exe.length() == 0) {
 			lastCalculatedExecutable = null;
-			jobObject.setApplication(null);
-			jobObject.setApplicationVersion(null);
-			jobObject.setCommandline(null);
+			setValue("application", "");
+			setValue("applicationVersion", "");
+			setValue("commandline", "");
 			return;
 		}
 
 		//		jobObject.setApplication(exe);
-		jobObject.setCommandline(commandline);
+		setValue("commandline", commandline);
 
 	}
 

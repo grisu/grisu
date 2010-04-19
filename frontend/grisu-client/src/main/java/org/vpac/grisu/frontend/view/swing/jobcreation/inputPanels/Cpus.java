@@ -4,9 +4,12 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import javax.swing.JComboBox;
+
+import org.vpac.grisu.frontend.view.swing.jobcreation.filters.Filter;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -19,9 +22,9 @@ public class Cpus extends AbstractInputPanel {
 
 	private boolean userInput = true;
 
-	public Cpus(Map<String, String>panelProperties) {
+	public Cpus(Map<String, String>panelProperties, LinkedList<Filter> filters) {
 
-		super(panelProperties);
+		super(panelProperties, filters);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -48,7 +51,7 @@ public class Cpus extends AbstractInputPanel {
 
 					if ( ItemEvent.SELECTED == e.getStateChange() ) {
 						Integer value = (Integer)getComboBox().getSelectedItem();
-						jobObject.setCpus(value);
+						setValue("cpus", value);
 					}
 
 				}
@@ -89,7 +92,7 @@ public class Cpus extends AbstractInputPanel {
 		for ( String key : panelProperties.keySet() ) {
 			try {
 				if ( DEFAULT_VALUE.equals(key) ) {
-					jobObject.setCpus(Integer.parseInt(panelProperties.get(DEFAULT_VALUE)));
+					setValue("cpus", (Integer.parseInt(panelProperties.get(DEFAULT_VALUE))));
 				} else if (PREFILLS.equals(key)) {
 					for ( String item : panelProperties.get(PREFILLS).split(",") ) {
 						getComboBox().addItem(Integer.parseInt(item));
@@ -101,6 +104,9 @@ public class Cpus extends AbstractInputPanel {
 		}
 
 	}
+
+
+
 
 
 }

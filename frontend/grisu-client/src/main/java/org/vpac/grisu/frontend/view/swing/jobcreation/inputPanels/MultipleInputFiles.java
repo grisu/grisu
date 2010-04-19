@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,6 +13,7 @@ import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 
+import org.vpac.grisu.frontend.view.swing.jobcreation.filters.Filter;
 import org.vpac.grisu.model.files.GlazedFile;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -28,8 +30,8 @@ public class MultipleInputFiles extends AbstractInputPanel {
 	private JButton button;
 	private JButton button_1;
 
-	public MultipleInputFiles(Map<String, String> panelProperties) {
-		super(panelProperties);
+	public MultipleInputFiles(Map<String, String> panelProperties, LinkedList<Filter> filters) {
+		super(panelProperties, filters);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -79,7 +81,7 @@ public class MultipleInputFiles extends AbstractInputPanel {
 						}
 
 						fileModel.addElement(file);
-						jobObject.addInputFileUrl(file.getUrl());
+						setValue("inputFileUrl", file.getUrl());
 					}
 
 				}
@@ -98,7 +100,7 @@ public class MultipleInputFiles extends AbstractInputPanel {
 					Object[] selFiles = getList_1().getSelectedValues();
 
 					for ( Object file : selFiles ) {
-						jobObject.removeInputFileUrl(((GlazedFile)file).getUrl());
+						removeValue("inputFileUrl", ((GlazedFile)file).getUrl());
 						fileModel.removeElement(file);
 					}
 
@@ -113,7 +115,7 @@ public class MultipleInputFiles extends AbstractInputPanel {
 	protected Map<String, String> getDefaultPanelProperties() {
 
 		Map<String, String> defaultProperties = new HashMap<String, String>();
-		defaultProperties.put(TITLE, "Input file");
+		defaultProperties.put(TITLE, "Input files");
 
 		return defaultProperties;
 	}

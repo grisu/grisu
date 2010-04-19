@@ -57,7 +57,7 @@ public class JobSubmissionObjectImpl {
 		jso.setForce_single(false);
 		jso.setInputFileUrls(new String[] { "file:///temp/test",
 		"gsiftp://ng2.vpac.org/tmp/test" });
-		jso.setMemory(0);
+		jso.setMemory(0L);
 
 		jso.getJobDescriptionDocument();
 
@@ -300,7 +300,7 @@ public class JobSubmissionObjectImpl {
 		return commandline;
 	}
 
-	public int getCpus() {
+	public Integer getCpus() {
 		return cpus;
 	}
 
@@ -400,7 +400,7 @@ public class JobSubmissionObjectImpl {
 		return jobProperties;
 	}
 
-	public long getMemory() {
+	public Long getMemory() {
 		return memory_in_bytes;
 	}
 
@@ -454,16 +454,16 @@ public class JobSubmissionObjectImpl {
 	public int hashCode() {
 		return 73 * getJobname().hashCode();
 	}
-	public boolean isEmail_on_job_finish() {
+	public Boolean isEmail_on_job_finish() {
 		return email_on_job_finish;
 	}
-	public boolean isEmail_on_job_start() {
+	public Boolean isEmail_on_job_start() {
 		return email_on_job_start;
 	}
-	public boolean isForce_mpi() {
+	public Boolean isForce_mpi() {
 		return force_mpi;
 	}
-	public boolean isForce_single() {
+	public Boolean isForce_single() {
 		return force_single;
 	}
 	public void removeInputFileUrl(String selectedFile) {
@@ -487,7 +487,7 @@ public class JobSubmissionObjectImpl {
 		this.commandline = commandline;
 		pcs.firePropertyChange("commandline", oldValue, this.commandline);
 	}
-	public void setCpus(final int cpus) {
+	public void setCpus(final Integer cpus) {
 		int oldValue = this.cpus;
 		this.cpus = cpus;
 		pcs.firePropertyChange("cpus", oldValue, this.cpus);
@@ -497,19 +497,19 @@ public class JobSubmissionObjectImpl {
 		this.email_address = email_address;
 		pcs.firePropertyChange("email_address", oldValue, this.email_address);
 	}
-	public void setEmail_on_job_finish(final boolean email_on_job_finish) {
+	public void setEmail_on_job_finish(final Boolean email_on_job_finish) {
 		boolean oldValue = this.email_on_job_finish;
 		this.email_on_job_finish = email_on_job_finish;
 		pcs.firePropertyChange("email_on_job_finish", oldValue, this.email_on_job_finish);
 	}
 
-	public void setEmail_on_job_start(final boolean email_on_job_start) {
+	public void setEmail_on_job_start(final Boolean email_on_job_start) {
 		boolean oldValue = this.email_on_job_start;
 		this.email_on_job_start = email_on_job_start;
 		pcs.firePropertyChange("email_on_job_start", oldValue, this.email_on_job_start);
 	}
 
-	public void setForce_mpi(final boolean force_mpi) {
+	public void setForce_mpi(final Boolean force_mpi) {
 		boolean oldValue = this.force_mpi;
 		boolean oldValue1 = this.force_single;
 		this.force_mpi = force_mpi;
@@ -518,7 +518,7 @@ public class JobSubmissionObjectImpl {
 		pcs.firePropertyChange("force_single", oldValue1, this.force_single);
 	}
 
-	public void setForce_single(final boolean force_single) {
+	public void setForce_single(final Boolean force_single) {
 		boolean oldValue = this.force_mpi;
 		boolean oldValue1 = this.force_single;
 		this.force_single = force_single;
@@ -548,7 +548,7 @@ public class JobSubmissionObjectImpl {
 		pcs.firePropertyChange("jobname", oldValue, this.jobname);
 	}
 
-	public void setMemory(final long memory) {
+	public void setMemory(final Long memory) {
 		long oldValue = this.memory_in_bytes;
 		this.memory_in_bytes = memory;
 		pcs.firePropertyChange("memory", oldValue, this.memory_in_bytes);
@@ -615,7 +615,7 @@ public class JobSubmissionObjectImpl {
 		}
 	}
 
-	public void setWalltimeInSeconds(final int walltime) {
+	public void setWalltimeInSeconds(final Integer walltime) {
 		int oldValue = this.walltime_in_seconds;
 		this.walltime_in_seconds = walltime;
 		pcs.firePropertyChange("walltimeInSeconds", oldValue, this.walltime_in_seconds);

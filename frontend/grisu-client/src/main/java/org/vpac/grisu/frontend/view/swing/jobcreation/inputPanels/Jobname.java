@@ -4,11 +4,13 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import javax.swing.JTextField;
 
 import org.apache.commons.lang.StringUtils;
+import org.vpac.grisu.frontend.view.swing.jobcreation.filters.Filter;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -18,8 +20,8 @@ import com.jgoodies.forms.layout.RowSpec;
 public class Jobname extends AbstractInputPanel {
 	private JTextField jobnameTextField;
 
-	public Jobname(Map<String, String> panelProperties) {
-		super(panelProperties);
+	public Jobname(Map<String, String> panelProperties, LinkedList<Filter> filters) {
+		super(panelProperties, filters);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -50,7 +52,7 @@ public class Jobname extends AbstractInputPanel {
 
 				@Override
 				public void keyReleased(KeyEvent e) {
-					jobObject.setJobname(jobnameTextField.getText());
+					setValue("jobname", jobnameTextField.getText());
 				}
 
 			});
@@ -73,7 +75,7 @@ public class Jobname extends AbstractInputPanel {
 
 		String defaultValue = panelProperties.get(DEFAULT_VALUE);
 		if ( StringUtils.isNotBlank(defaultValue) ) {
-			jobObject.setJobname(defaultValue);
+			setValue("jobname", defaultValue);
 		}
 
 	}

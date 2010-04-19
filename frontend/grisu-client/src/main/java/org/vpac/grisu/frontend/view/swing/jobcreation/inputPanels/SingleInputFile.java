@@ -4,12 +4,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
+import org.vpac.grisu.frontend.view.swing.jobcreation.filters.Filter;
 import org.vpac.grisu.model.files.GlazedFile;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -24,8 +26,8 @@ public class SingleInputFile extends AbstractInputPanel {
 
 	private String selectedFile = null;
 
-	public SingleInputFile(Map<String, String> panelProperties) {
-		super(panelProperties);
+	public SingleInputFile(Map<String, String> panelProperties, LinkedList<Filter> filters) {
+		super(panelProperties, filters);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -60,10 +62,10 @@ public class SingleInputFile extends AbstractInputPanel {
 					}
 
 					if ( selectedFile != null ) {
-						jobObject.removeInputFileUrl(selectedFile);
+						removeValue("inputFileUrl", selectedFile);
 					}
 					selectedFile = file.getUrl();
-					jobObject.addInputFileUrl(selectedFile);
+					setValue("inputFileUrl", selectedFile);
 
 					getComboBox().setSelectedItem(selectedFile);
 				}
