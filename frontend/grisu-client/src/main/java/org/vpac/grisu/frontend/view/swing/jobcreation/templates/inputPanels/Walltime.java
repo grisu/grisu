@@ -1,17 +1,16 @@
-package org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels;
+package org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 
 import org.apache.commons.lang.StringUtils;
-import org.vpac.grisu.frontend.view.swing.jobcreation.filters.Filter;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -79,8 +78,8 @@ public class Walltime extends AbstractInputPanel {
 
 	private final DefaultComboBoxModel unitModel = new DefaultComboBoxModel();
 
-	public Walltime(Map<String, String> panelProperties, LinkedList<Filter> filters) {
-		super(panelProperties, filters);
+	public Walltime(PanelConfig config) {
+		super(config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -100,7 +99,7 @@ public class Walltime extends AbstractInputPanel {
 			amountComboBox = new JComboBox();
 			amountComboBox.setEditable(true);
 			amountComboBox.setModel(amountModel);
-			amountComboBox.setSelectedIndex(0);
+			//			amountComboBox.setSelectedIndex(0);
 			amountComboBox.addItemListener(new ItemListener() {
 
 				public void itemStateChanged(ItemEvent e) {
@@ -133,7 +132,7 @@ public class Walltime extends AbstractInputPanel {
 		if (unitComboBox == null) {
 			unitComboBox = new JComboBox();
 			unitComboBox.setModel(unitModel);
-			unitComboBox.setSelectedIndex(1);
+			//			unitComboBox.setSelectedIndex(1);
 			unitComboBox.addItemListener(new ItemListener() {
 
 				public void itemStateChanged(ItemEvent e) {
@@ -150,6 +149,10 @@ public class Walltime extends AbstractInputPanel {
 	}
 
 	@Override
+	protected String getValueAsString() {
+		throw new RuntimeException("Not implemented yet. Should not be needed.");
+	}
+	@Override
 	protected void jobPropertyChanged(PropertyChangeEvent e) {
 
 		if ( "walltimeInSeconds".equals(e.getPropertyName()) ) {
@@ -160,6 +163,7 @@ public class Walltime extends AbstractInputPanel {
 		}
 
 	}
+
 	@Override
 	protected void preparePanel(Map<String, String> panelProperties) {
 

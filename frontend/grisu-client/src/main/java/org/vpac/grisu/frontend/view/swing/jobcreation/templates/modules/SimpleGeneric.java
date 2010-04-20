@@ -1,14 +1,14 @@
-package org.vpac.grisu.frontend.view.swing.jobcreation.modules;
-
-import java.util.Map;
+package org.vpac.grisu.frontend.view.swing.jobcreation.templates.modules;
 
 import javax.swing.JPanel;
 
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels.Cpus;
-import org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels.Jobname;
-import org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels.MdsCommandline;
-import org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels.MultipleInputFiles;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateObject;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels.Cpus;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels.Jobname;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels.MdsCommandline;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels.MultipleInputFiles;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -26,10 +26,21 @@ public class SimpleGeneric extends JPanel {
 	private ServiceInterface si;
 	private MultipleInputFiles multipleInputFiles;
 
+	private final TemplateObject template;
+
 	/**
 	 * Create the panel.
 	 */
 	public SimpleGeneric() {
+
+		try {
+			template = new TemplateObject(null);
+		} catch (TemplateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -73,13 +84,14 @@ public class SimpleGeneric extends JPanel {
 
 	private MultipleInputFiles getMultipleInputFiles() {
 		if (multipleInputFiles == null) {
-			multipleInputFiles = new MultipleInputFiles((Map) null);
+			multipleInputFiles = new MultipleInputFiles(null);
 		}
 		return multipleInputFiles;
 	}
 	public void setJobObject(JobSubmissionObjectImpl jobObject) {
 		this.jobObject = jobObject;
 
+		template.setJobObject(jobObject);
 		getCpus().setJobObject(this.jobObject);
 		getJobname().setJobObject(this.jobObject);
 		getMdsCommandline().setJobObject(this.jobObject);
@@ -87,6 +99,6 @@ public class SimpleGeneric extends JPanel {
 	}
 	public void setServiceInterface(ServiceInterface si) {
 		this.si = si;
-		getMultipleInputFiles().setServiceInterface(si);
+		getMultipleInputFiles().setServiceInterface(template, si);
 	}
 }

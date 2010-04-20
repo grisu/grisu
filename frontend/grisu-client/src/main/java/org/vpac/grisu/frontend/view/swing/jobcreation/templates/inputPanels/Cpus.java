@@ -1,15 +1,14 @@
-package org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels;
+package org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 import javax.swing.JComboBox;
 
-import org.vpac.grisu.frontend.view.swing.jobcreation.filters.Filter;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -22,9 +21,9 @@ public class Cpus extends AbstractInputPanel {
 
 	private boolean userInput = true;
 
-	public Cpus(Map<String, String>panelProperties, LinkedList<Filter> filters) {
+	public Cpus(PanelConfig config) {
 
-		super(panelProperties, filters);
+		super(config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -73,6 +72,14 @@ public class Cpus extends AbstractInputPanel {
 	}
 
 	@Override
+	protected String getValueAsString() {
+
+		return ((Integer)(getComboBox().getSelectedItem())).toString();
+
+	}
+
+
+	@Override
 	protected void jobPropertyChanged(PropertyChangeEvent e) {
 
 		userInput = false;
@@ -84,7 +91,6 @@ public class Cpus extends AbstractInputPanel {
 
 		userInput = true;
 	}
-
 
 	@Override
 	protected void preparePanel(Map<String, String> panelProperties) {

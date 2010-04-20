@@ -24,7 +24,7 @@ import org.apache.log4j.Logger;
 public final class FileHelpers {
 
 	static final Logger myLogger = Logger
-			.getLogger(FileHelpers.class.getName());
+	.getLogger(FileHelpers.class.getName());
 
 	public static final int BUFFER_SIZE = 1024;
 
@@ -89,11 +89,11 @@ public final class FileHelpers {
 		}
 		if (path.exists()) {
 			File[] files = path.listFiles();
-			for (int i = 0; i < files.length; i++) {
-				if (files[i].isDirectory()) {
-					deleteDirectory(files[i]);
+			for (File file : files) {
+				if (file.isDirectory()) {
+					deleteDirectory(file);
 				} else {
-					files[i].delete();
+					file.delete();
 				}
 			}
 		}
@@ -102,7 +102,14 @@ public final class FileHelpers {
 
 	public static String getFilename(String url) {
 
-		return url.substring(url.lastIndexOf("/"));
+		int index = url.lastIndexOf("\\");
+		if ( index > 0 ) {
+			// means windows
+			return url.substring(index+1);
+		}
+		index = url.lastIndexOf("/");
+
+		return url.substring(index+1);
 
 	}
 
@@ -159,7 +166,7 @@ public final class FileHelpers {
 	 *             if the file could not be read
 	 */
 	public static String readFromFileWithException(final File file)
-			throws Exception {
+	throws Exception {
 
 		StringBuffer sb = new StringBuffer(BUFFER_SIZE);
 		BufferedReader reader = null;
@@ -188,7 +195,7 @@ public final class FileHelpers {
 	 *             if the file can't be written for some reason
 	 */
 	public static void saveToDisk(final DataSource source, final File file)
-			throws IOException {
+	throws IOException {
 
 		FileOutputStream outputStream = new FileOutputStream(file);
 		InputStream inputStream = source.getInputStream();
@@ -208,7 +215,7 @@ public final class FileHelpers {
 	}
 
 	public static void saveToDisk(final InputStream source, final File file)
-			throws IOException {
+	throws IOException {
 
 		FileOutputStream outputStream = new FileOutputStream(file);
 		try {

@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels;
+package org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -6,12 +6,11 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 import javax.swing.JComboBox;
 
-import org.vpac.grisu.frontend.view.swing.jobcreation.filters.Filter;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -23,8 +22,8 @@ public class MdsCommandline extends AbstractInputPanel {
 
 	private String lastCalculatedExecutable = null;
 
-	public MdsCommandline(Map<String, String> panelProperties, LinkedList<Filter> filters) {
-		super(panelProperties, filters);
+	public MdsCommandline(PanelConfig config) {
+		super(config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -107,6 +106,11 @@ public class MdsCommandline extends AbstractInputPanel {
 		defaultProperties.put(TITLE, "Commandline");
 
 		return defaultProperties;
+	}
+
+	@Override
+	protected String getValueAsString() {
+		return ((String)(getComboBox().getSelectedItem()));
 	}
 
 	@Override

@@ -1,17 +1,16 @@
-package org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels;
+package org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
-import org.vpac.grisu.frontend.view.swing.jobcreation.filters.Filter;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
 import org.vpac.grisu.model.files.GlazedFile;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -26,8 +25,8 @@ public class SingleInputFile extends AbstractInputPanel {
 
 	private String selectedFile = null;
 
-	public SingleInputFile(Map<String, String> panelProperties, LinkedList<Filter> filters) {
-		super(panelProperties, filters);
+	public SingleInputFile(PanelConfig config) {
+		super(config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -65,9 +64,10 @@ public class SingleInputFile extends AbstractInputPanel {
 						removeValue("inputFileUrl", selectedFile);
 					}
 					selectedFile = file.getUrl();
-					setValue("inputFileUrl", selectedFile);
-
 					getComboBox().setSelectedItem(selectedFile);
+
+					addValue("inputFileUrl", selectedFile);
+
 				}
 			});
 		}
@@ -106,10 +106,15 @@ public class SingleInputFile extends AbstractInputPanel {
 	//	}
 
 	@Override
+	protected String getValueAsString() {
+		return ((String)getComboBox().getSelectedItem());
+	}
+	@Override
 	protected void jobPropertyChanged(PropertyChangeEvent e) {
 		// TODO Auto-generated method stub
 
 	}
+
 	@Override
 	protected void preparePanel(Map<String, String> panelProperties) {
 		// TODO Auto-generated method stub

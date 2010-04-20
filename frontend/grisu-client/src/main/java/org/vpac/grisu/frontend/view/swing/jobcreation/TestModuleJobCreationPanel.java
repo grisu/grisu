@@ -10,7 +10,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.frontend.model.job.JobObject;
-import org.vpac.grisu.frontend.view.swing.jobcreation.modules.SimpleGeneric;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.modules.CatTemplate;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
 
@@ -23,7 +23,7 @@ public class TestModuleJobCreationPanel extends JPanel implements JobCreationPan
 	private ServiceInterface si;
 
 	private UserEnvironmentManager em;
-	private SimpleGeneric simpleGeneric;
+	private CatTemplate simpleGeneric;
 	private JButton button;
 
 	private JobObject jobObject;
@@ -39,7 +39,7 @@ public class TestModuleJobCreationPanel extends JPanel implements JobCreationPan
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,}));
-		add(getSimpleGeneric(), "2, 2, fill, fill");
+		add(getCatGeneric(), "2, 2, fill, fill");
 		add(getButton(), "2, 4");
 	}
 
@@ -78,19 +78,19 @@ public class TestModuleJobCreationPanel extends JPanel implements JobCreationPan
 		return button;
 	}
 
+	private CatTemplate getCatGeneric() {
+		if (simpleGeneric == null) {
+			simpleGeneric = new CatTemplate();
+		}
+		return simpleGeneric;
+	}
+
 	public JPanel getPanel() {
 		return this;
 	}
 
 	public String getPanelName() {
 		return "TestModule";
-	}
-
-	private SimpleGeneric getSimpleGeneric() {
-		if (simpleGeneric == null) {
-			simpleGeneric = new SimpleGeneric();
-		}
-		return simpleGeneric;
 	}
 
 	public String getSupportedApplication() {
@@ -103,9 +103,8 @@ public class TestModuleJobCreationPanel extends JPanel implements JobCreationPan
 
 		jobObject = new JobObject(this.si);
 		jobObject.setApplication("UnixCommands");
-		jobObject.setCommandline("whoami");
-		getSimpleGeneric().setServiceInterface(si);
-		getSimpleGeneric().setJobObject(jobObject);
+		getCatGeneric().setServiceInterface(si);
+		getCatGeneric().setJobObject(jobObject);
 
 	}
 }

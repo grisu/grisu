@@ -1,10 +1,9 @@
-package org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels;
+package org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,7 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 
-import org.vpac.grisu.frontend.view.swing.jobcreation.filters.Filter;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
 import org.vpac.grisu.model.files.GlazedFile;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -30,8 +29,8 @@ public class MultipleInputFiles extends AbstractInputPanel {
 	private JButton button;
 	private JButton button_1;
 
-	public MultipleInputFiles(Map<String, String> panelProperties, LinkedList<Filter> filters) {
-		super(panelProperties, filters);
+	public MultipleInputFiles(PanelConfig config) {
+		super(config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -81,7 +80,7 @@ public class MultipleInputFiles extends AbstractInputPanel {
 						}
 
 						fileModel.addElement(file);
-						setValue("inputFileUrl", file.getUrl());
+						addValue("inputFileUrl", file.getUrl());
 					}
 
 				}
@@ -136,8 +135,21 @@ public class MultipleInputFiles extends AbstractInputPanel {
 		return scrollPane;
 	}
 	@Override
+	protected String getValueAsString() {
+		StringBuffer temp = new StringBuffer();
+
+		for ( int i=0; i<fileModel.getSize(); i++) {
+			GlazedFile existingFile = (GlazedFile) fileModel.getElementAt(i);
+			temp.append(existingFile.getUrl()+",");
+		}
+
+		return temp.toString();
+
+	}
+	@Override
 	protected void jobPropertyChanged(PropertyChangeEvent e) {
 	}
+
 	@Override
 	protected void preparePanel(Map<String, String> panelProperties) {
 	}

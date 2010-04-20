@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels;
+package org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -15,7 +15,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
-import org.vpac.grisu.frontend.view.swing.jobcreation.filters.Filter;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateObject;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.filters.Filter;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
 public abstract class AbstractInputPanel extends JPanel implements PropertyChangeListener {
@@ -23,14 +25,15 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 	static final Logger myLogger = Logger
 	.getLogger(AbstractInputPanel.class.getName());
 
-	protected final String DEFAULT_VALUE = "defaultValue";
-	protected final String NAME = "name";
-	protected final String TITLE = "title";
-	protected final String PREFILLS = "prefills";
-	protected final String USE_LAST_VALUE = "useLastValue";
-	protected final String DEPENDENCY = "dependency";
-	
-	protected final LinkedList<Filter> filters;
+	public static final String DEFAULT_VALUE = "defaultValue";
+	public static final String NAME = "name";
+	public static final String TITLE = "title";
+	public static final String PREFILLS = "prefills";
+	public static final String USE_LAST_VALUE = "useLastValue";
+	public static final String DEPENDENCY = "dependency";
+
+	private TemplateObject template;
+	private final LinkedList<Filter> filters;
 
 	private JobSubmissionObjectImpl jobObject;
 
@@ -54,14 +57,19 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 		return dialog;
 	}
 
-	public AbstractInputPanel(Map<String, String> panelProperties, LinkedList<Filter> filters) {
-		
-		this.filters = filters;
 
-		if ( panelProperties == null ) {
+	public AbstractInputPanel(PanelConfig config) {
+
+		if ( (config == null) || (config.getFilters() == null) ) {
+			this.filters = new LinkedList<Filter>();
+		} else {
+			this.filters = config.getFilters();
+		}
+
+		if ( (config == null) || (config.getConfig() == null) || (config.getConfig().size() == 0) ) {
 			this.panelProperties = getDefaultPanelProperties();
 		} else {
-			this.panelProperties = panelProperties;
+			this.panelProperties = config.getConfig();
 		}
 
 		if ( StringUtils.isBlank(this.panelProperties.get(NAME)) ) {
@@ -75,6 +83,28 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 			e.printStackTrace();
 		}
 
+		//		this.template.registerInputPanel(this);
+
+	}
+
+	protected void addValue(String bean, Object value) {
+		try {
+			Method method = jobObject.getClass().getMethod("add"+StringUtils.capitalize(bean), value.getClass());
+			method.invoke(jobObject, value);
+			applyFilters();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	private void applyFilters() {
+
+		String string = getValueAsString();
+		for ( Filter filter : filters ) {
+			string = filter.filter(string);
+		}
+
+		template.userInput(getPanelName(), string);
 	}
 
 	/**
@@ -86,6 +116,23 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 	 */
 	abstract protected Map<String, String> getDefaultPanelProperties();
 
+	public String getPanelName() {
+		return this.panelProperties.get(NAME);
+	}
+
+	//	protected Object getValue(String bean) {
+	//		try {
+	//			Method method = jobObject.getClass().getMethod("get"+StringUtils.capitalize(bean));
+	//			return method.invoke(jobObject);
+	//		} catch (Exception e) {
+	//			// TODO Auto-generated catch block
+	//			e.printStackTrace();
+	//			return null;
+	//		}
+	//	}
+
+	abstract protected String getValueAsString();
+
 	/**
 	 * Must be implemented if a change in a job property would possibly change the
 	 * value of one of the job properties this panel is responsible for.
@@ -93,34 +140,18 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 	 * @param e the property change event
 	 */
 	abstract protected void jobPropertyChanged(PropertyChangeEvent e);
-	
+
 	/**
 	 * Implement this if the panel needs to be prepared with values from the template.
 	 * 
 	 * @param panelProperties the properties for the initial state of the panel
 	 */
 	abstract protected void preparePanel(Map<String, String> panelProperties);
-	
-	protected void setValue(String bean, Object value) {
-		try {
-			Method method = jobObject.getClass().getMethod("set"+StringUtils.capitalize(bean), value.getClass());
-			method.invoke(jobObject, value);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
+	public void propertyChange(PropertyChangeEvent arg0) {
+		jobPropertyChanged(arg0);
 	}
-	
-	protected void addValue(String bean, Object value) {
-		try {
-			Method method = jobObject.getClass().getMethod("add"+StringUtils.capitalize(bean), value.getClass());
-			method.invoke(jobObject, value);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
+
 	protected void removeValue(String bean, Object value) {
 		try {
 			Method method = jobObject.getClass().getMethod("remove"+StringUtils.capitalize(bean), value.getClass());
@@ -129,19 +160,6 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-	
-	private void applyFilters() {
-		
-		String string = get
-		for ( Filter filter : filters ) {
-			
-		}
-		
-	}
-
-	public void propertyChange(PropertyChangeEvent arg0) {
-		jobPropertyChanged(arg0);
 	}
 
 	public void setJobObject(JobSubmissionObjectImpl jobObject) {
@@ -157,11 +175,45 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 
 	}
 
-	public void setServiceInterface(ServiceInterface si) {
+	public void setServiceInterface(TemplateObject template, ServiceInterface si) {
+
+		this.template = template;
+
+		// needed for example for the file dialog
 		if ( singletonServiceinterface == null ) {
 			singletonServiceinterface = si;
 		}
 		this.si = si;
+	}
+
+	protected void setValue(String bean, Object value) {
+		try {
+			Method method = jobObject.getClass().getMethod("set"+StringUtils.capitalize(bean), value.getClass());
+			method.invoke(jobObject, value);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public String toString() {
+
+		StringBuffer temp = new StringBuffer();
+
+		temp.append("Name: "+getName()+"\n");
+		temp.append("Class: "+this.getClass().toString()+"\n");
+		temp.append("Properties: \n");
+		for ( String key : panelProperties.keySet() ) {
+			temp.append("\t"+key+": "+panelProperties.get(key)+"\n");
+		}
+		temp.append("Filters:\n");
+		for ( Filter filter : filters ) {
+			temp.append("\tClass: "+filter.getClass().toString()+"\n");
+		}
+
+		return temp.toString();
+
 	}
 
 

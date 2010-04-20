@@ -1,16 +1,15 @@
-package org.vpac.grisu.frontend.view.swing.jobcreation.inputPanels;
+package org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 import javax.swing.JTextField;
 
 import org.apache.commons.lang.StringUtils;
-import org.vpac.grisu.frontend.view.swing.jobcreation.filters.Filter;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -20,8 +19,8 @@ import com.jgoodies.forms.layout.RowSpec;
 public class Jobname extends AbstractInputPanel {
 	private JTextField jobnameTextField;
 
-	public Jobname(Map<String, String> panelProperties, LinkedList<Filter> filters) {
-		super(panelProperties, filters);
+	public Jobname(PanelConfig config) {
+		super(config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -58,6 +57,11 @@ public class Jobname extends AbstractInputPanel {
 			});
 		}
 		return jobnameTextField;
+	}
+
+	@Override
+	protected String getValueAsString() {
+		return getJobnameTextField().getText();
 	}
 
 	@Override

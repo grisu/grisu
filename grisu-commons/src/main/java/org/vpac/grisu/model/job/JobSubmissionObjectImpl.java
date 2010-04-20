@@ -17,6 +17,7 @@ import javax.persistence.Id;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.vpac.grisu.control.JobnameHelpers;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.model.FileManager;
@@ -39,6 +40,9 @@ import au.org.arcs.jcommons.utils.JsdlHelpers;
  */
 @Entity
 public class JobSubmissionObjectImpl {
+
+	static final Logger myLogger = Logger
+	.getLogger(JobSubmissionObjectImpl.class.getName());
 
 	public static void main(final String[] args) throws JobPropertiesException {
 
@@ -485,6 +489,7 @@ public class JobSubmissionObjectImpl {
 	public void setCommandline(final String commandline) {
 		String oldValue = this.commandline;
 		this.commandline = commandline;
+		myLogger.debug("Commandline for job: "+getJobname()+"changed: "+commandline);
 		pcs.firePropertyChange("commandline", oldValue, this.commandline);
 	}
 	public void setCpus(final Integer cpus) {
