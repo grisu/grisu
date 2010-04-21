@@ -27,7 +27,7 @@ public class MonitorCommandlinePanel extends AbstractInputPanel {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,}));
-		add(getTextField(), "2, 2, fill, default");
+		add(getTextField(), "2, 2, fill, fill");
 	}
 
 	@Override

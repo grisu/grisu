@@ -216,7 +216,6 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 
 					List<String> lines = new LinkedList(Arrays.asList(getTextArea().getText().split("\n")));
 
-					int size = lines.size();
 					try {
 
 						if (  (template != null) && (template.getJobSubmissionObject() != null) ) {
@@ -229,6 +228,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 
 						try {
 							getJsdlTextArea().setText(template.getJobSubmissionObject().getJobDescriptionDocumentAsString());
+							getJsdlTextArea().setCaretPosition(0);
 						} catch (JobPropertiesException e) {
 							StringBuffer temp = new StringBuffer("Can't calculate jsdl right now: "+e.getLocalizedMessage()+"\n\n");
 							temp.append(getStackTrace(e));
@@ -245,6 +245,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 						StringBuffer temp = new StringBuffer("Error when building template: "+e.getLocalizedMessage()+"\n\n");
 						temp.append(getStackTrace(e));
 						getErrorTextArea().setText(temp.toString());
+						getErrorTextArea().setCaretPosition(0);
 						cl.show(getCardPanel(),"error");
 					}
 
@@ -378,6 +379,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 		if ( (template != null) && (template.getJobSubmissionObject() != null) ) {
 			try {
 				getJsdlTextArea().setText(template.getJobSubmissionObject().getJobDescriptionDocumentAsString());
+				getJsdlTextArea().setCaretPosition(0);
 			} catch (JobPropertiesException e) {
 				StringBuffer temp = new StringBuffer("Can't calculate jsdl right now: "+e.getLocalizedMessage()+"\n\n");
 				temp.append(getStackTrace(e));
