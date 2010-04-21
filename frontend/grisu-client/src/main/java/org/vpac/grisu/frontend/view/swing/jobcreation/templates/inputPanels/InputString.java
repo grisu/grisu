@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.swing.JTextField;
 
+import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
 
@@ -14,10 +15,10 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class MonitorCommandlinePanel extends AbstractInputPanel {
+public class InputString extends AbstractInputPanel {
 	private JTextField textField;
 
-	public MonitorCommandlinePanel(PanelConfig config) throws TemplateException {
+	public InputString(PanelConfig config) throws TemplateException {
 		super(config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
@@ -34,9 +35,6 @@ public class MonitorCommandlinePanel extends AbstractInputPanel {
 	protected Map<String, String> getDefaultPanelProperties() {
 
 		Map<String, String> defaultProperties = new HashMap<String, String>();
-		defaultProperties.put(NAME, "Name");
-		defaultProperties.put(TITLE, "Commandline");
-		defaultProperties.put(DEFAULT_VALUE, "n/a");
 
 		return defaultProperties;
 	}
@@ -44,7 +42,6 @@ public class MonitorCommandlinePanel extends AbstractInputPanel {
 	private JTextField getTextField() {
 		if (textField == null) {
 			textField = new JTextField();
-			textField.setEditable(false);
 			textField.setColumns(10);
 		}
 		return textField;
@@ -52,22 +49,26 @@ public class MonitorCommandlinePanel extends AbstractInputPanel {
 
 	@Override
 	protected String getValueAsString() {
-		return null;
+		return getTextField().getText();
 	}
 
 	@Override
 	protected void jobPropertyChanged(PropertyChangeEvent e) {
-
-		if ( "commandline".equals(e.getPropertyName()) ) {
-			String newJobname = (String)e.getNewValue();
-			getTextField().setText(newJobname);
-		}
+		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	protected void preparePanel(Map<String, String> panelProperties) {
+	protected void preparePanel(Map<String, String> panelProperties) throws TemplateException {
 
+		if ( StringUtils.isBlank(bean) ) {
+			return;
+		}
+
+		String defaultValue = panelProperties.get(DEFAULT_VALUE);
+		if ( StringUtils.isNotBlank(defaultValue) ) {
+			setValue(bean, defaultValue);
+		}
 
 	}
 }

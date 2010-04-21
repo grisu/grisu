@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.swing.JComboBox;
 
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -22,7 +23,7 @@ public class MdsCommandline extends AbstractInputPanel {
 
 	private String lastCalculatedExecutable = null;
 
-	public MdsCommandline(PanelConfig config) {
+	public MdsCommandline(PanelConfig config) throws TemplateException {
 		super(config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
@@ -35,7 +36,7 @@ public class MdsCommandline extends AbstractInputPanel {
 		add(getComboBox(), "2, 2, fill, default");
 	}
 
-	private void commandlineChanged() {
+	private void commandlineChanged() throws TemplateException {
 
 		String commandline;
 		try {
@@ -84,7 +85,12 @@ public class MdsCommandline extends AbstractInputPanel {
 			comboBox.addItemListener(new ItemListener() {
 				public void itemStateChanged(ItemEvent e) {
 					if ( ItemEvent.SELECTED == e.getStateChange() ) {
-						commandlineChanged();
+						try {
+							commandlineChanged();
+						} catch (TemplateException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
 					}
 				}
 			});
@@ -92,7 +98,12 @@ public class MdsCommandline extends AbstractInputPanel {
 			comboBox.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
 				@Override
 				public void keyReleased(KeyEvent e) {
-					commandlineChanged();
+					try {
+						commandlineChanged();
+					} catch (TemplateException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 			});
 		}

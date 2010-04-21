@@ -10,6 +10,7 @@ import javax.swing.JTextField;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -19,7 +20,7 @@ import com.jgoodies.forms.layout.RowSpec;
 public class Jobname extends AbstractInputPanel {
 	private JTextField jobnameTextField;
 
-	public Jobname(PanelConfig config) {
+	public Jobname(PanelConfig config) throws TemplateException {
 		super(config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
@@ -51,7 +52,12 @@ public class Jobname extends AbstractInputPanel {
 
 				@Override
 				public void keyReleased(KeyEvent e) {
-					setValue("jobname", jobnameTextField.getText());
+					try {
+						setValue("jobname", jobnameTextField.getText());
+					} catch (TemplateException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 
 			});
@@ -75,7 +81,7 @@ public class Jobname extends AbstractInputPanel {
 	}
 
 	@Override
-	protected void preparePanel(Map<String, String> panelProperties) {
+	protected void preparePanel(Map<String, String> panelProperties) throws TemplateException {
 
 		String defaultValue = panelProperties.get(DEFAULT_VALUE);
 		if ( StringUtils.isNotBlank(defaultValue) ) {

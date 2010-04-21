@@ -64,41 +64,61 @@ public class SimpleGeneric extends JPanel {
 
 	private Cpus getCpus() {
 		if (cpus == null) {
-			cpus = new Cpus(null);
+			try {
+				cpus = new Cpus(null);
+			} catch (TemplateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		return cpus;
 	}
 
 	private Jobname getJobname() {
 		if (jobname == null) {
-			jobname = new Jobname(null);
+			try {
+				jobname = new Jobname(null);
+			} catch (TemplateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		return jobname;
 	}
 	private MdsCommandline getMdsCommandline() {
 		if (mdsCommandline == null) {
-			mdsCommandline = new MdsCommandline(null);
+			try {
+				mdsCommandline = new MdsCommandline(null);
+			} catch (TemplateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		return mdsCommandline;
 	}
 
 	private MultipleInputFiles getMultipleInputFiles() {
 		if (multipleInputFiles == null) {
-			multipleInputFiles = new MultipleInputFiles(null);
+			try {
+				multipleInputFiles = new MultipleInputFiles(null);
+			} catch (TemplateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		return multipleInputFiles;
 	}
-	public void setJobObject(JobSubmissionObjectImpl jobObject) {
-		this.jobObject = jobObject;
-
-		template.setJobObject(jobObject);
-		getCpus().setJobObject(this.jobObject);
-		getJobname().setJobObject(this.jobObject);
-		getMdsCommandline().setJobObject(this.jobObject);
-		getMultipleInputFiles().setJobObject(this.jobObject);
-	}
-	public void setServiceInterface(ServiceInterface si) {
-		this.si = si;
-		getMultipleInputFiles().setServiceInterface(template, si);
-	}
+	//	public void setJobObject(JobSubmissionObjectImpl jobObject) {
+	//		this.jobObject = jobObject;
+	//
+	//		template.setJobObject(jobObject);
+	//		getCpus().setJobObject(this.jobObject);
+	//		getJobname().setJobObject(this.jobObject);
+	//		getMdsCommandline().setJobObject(this.jobObject);
+	//		getMultipleInputFiles().setJobObject(this.jobObject);
+	//	}
+	//	public void setServiceInterface(ServiceInterface si) {
+	//		this.si = si;
+	//		getMultipleInputFiles().setServiceInterface(template, si);
+	//	}
 }

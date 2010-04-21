@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.swing.JComboBox;
 
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -21,7 +22,7 @@ public class Cpus extends AbstractInputPanel {
 
 	private boolean userInput = true;
 
-	public Cpus(PanelConfig config) {
+	public Cpus(PanelConfig config) throws TemplateException {
 
 		super(config);
 		setLayout(new FormLayout(new ColumnSpec[] {
@@ -50,7 +51,12 @@ public class Cpus extends AbstractInputPanel {
 
 					if ( ItemEvent.SELECTED == e.getStateChange() ) {
 						Integer value = (Integer)getComboBox().getSelectedItem();
-						setValue("cpus", value);
+						try {
+							setValue("cpus", value);
+						} catch (TemplateException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
 					}
 
 				}

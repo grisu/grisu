@@ -11,6 +11,7 @@ import javax.swing.JComboBox;
 
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
 import org.vpac.grisu.model.files.GlazedFile;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -25,7 +26,7 @@ public class SingleInputFile extends AbstractInputPanel {
 
 	private String selectedFile = null;
 
-	public SingleInputFile(PanelConfig config) {
+	public SingleInputFile(PanelConfig config) throws TemplateException {
 		super(config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,

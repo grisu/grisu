@@ -11,6 +11,7 @@ import javax.swing.JComboBox;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -21,6 +22,7 @@ import com.jgoodies.forms.layout.RowSpec;
 public class Walltime extends AbstractInputPanel {
 
 	public static int convertHumanReadableStringIntoSeconds(String[] humanReadable) {
+
 
 		int amount = -1;
 		try {
@@ -37,7 +39,7 @@ public class Walltime extends AbstractInputPanel {
 		} else if ("days".equals(unit) ) {
 			return amount * 3600 * 24;
 		} else {
-			throw new RuntimeException(unit+" not a supported unit name.");
+			//			throw new RuntimeException(unit+" not a supported unit name.");
 		}
 
 	}
@@ -78,7 +80,7 @@ public class Walltime extends AbstractInputPanel {
 
 	private final DefaultComboBoxModel unitModel = new DefaultComboBoxModel();
 
-	public Walltime(PanelConfig config) {
+	public Walltime(PanelConfig config) throws TemplateException {
 		super(config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
@@ -108,7 +110,12 @@ public class Walltime extends AbstractInputPanel {
 							new String[]{
 									(String)(getAmountComboBox().getSelectedItem()),
 									(String)(getUnitComboBox().getSelectedItem())});
-					setValue("walltimeInSeconds", walltimeInSeconds);
+					try {
+						setValue("walltimeInSeconds", walltimeInSeconds);
+					} catch (TemplateException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 			});
 		}
@@ -141,7 +148,11 @@ public class Walltime extends AbstractInputPanel {
 							new String[]{
 									(String)(getAmountComboBox().getSelectedItem()),
 									(String)(getUnitComboBox().getSelectedItem())});
-					setValue("walltimeInSeconds", walltimeInSeconds);
+					try {
+						setValue("walltimeInSeconds", walltimeInSeconds);
+					} catch (TemplateException e1) {
+						e1.printStackTrace();
+					}
 				}
 			});
 		}

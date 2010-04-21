@@ -1,18 +1,28 @@
 package org.vpac.grisu.frontend.view.swing.jobcreation.templates;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import javax.swing.BoxLayout;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.border.TitledBorder;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.filters.Filter;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels.AbstractInputPanel;
+import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
 public class TemplateHelpers {
 
@@ -46,7 +56,7 @@ public class TemplateHelpers {
 		if ( "type".equals(key) ) {
 			config.setType(value);
 		} if ( "filter".equals(key) ) {
-			Filter filter = null;
+			Filter filter = createFilter(value);
 			config.addFilter(filter);
 		} else {
 			config.addConfig(key, value);
@@ -64,6 +74,18 @@ public class TemplateHelpers {
 			Map<String, String> filterConfig = createFilterConfig(configString);
 
 			Class filterClass = Class.forName("org.vpac.grisu.frontend.view.swing.jobcreation.templates.filters."+filterConfig.get("type"));
+			filterConfig.remove("type");
+
+			Filter filter = null;
+			if ( filterConfig.size() == 0 ) {
+				filter = (Filter)filterClass.newInstance();
+			} else {
+				Constructor<Filter> filterConstructor = filterClass.getConstructor(Map.class);
+				filter = filterConstructor.newInstance(filterConfig);
+
+			}
+
+			return filter;
 
 		} catch (Exception e) {
 			throw new TemplateException("Can't create filter for config string: "+configString, e);
@@ -72,11 +94,36 @@ public class TemplateHelpers {
 
 	}
 
-	private static Map<String, String> createFilterConfig(String configString) {
+	private static Map<String, String> createFilterConfig(String configString) throws TemplateException {
+
+		configString = configString.trim();
 
 		Map<String, String> config = new HashMap<String, String>();
 
-		String
+		int startIndex = configString.indexOf("[");
+		if ( startIndex > 0 ) {
+			// means configuration
+			int endIndex = configString.indexOf("]");
+			String[] initValues = configString.substring(startIndex+1, endIndex).split(":");
+			for ( String value : initValues ) {
+				value = value.trim();
+				int index = value.indexOf("=");
+				if ( index <= 0 ) {
+					throw new TemplateException("Can't create filter config because. Unable to find = character in string "+value);
+				}
+				String key = value.substring(0, index).trim();
+				String value2 = value.substring(index+1).trim();
+				config.put(key, value2);
+			}
+		}
+
+		String type = null;
+		if ( startIndex == -1 ) {
+			type = configString;
+		} else {
+			type = configString.substring(0, startIndex).trim();
+		}
+		config.put("type", type);
 
 		return config;
 	}
@@ -99,6 +146,54 @@ public class TemplateHelpers {
 
 		} catch (Exception e) {
 			throw new TemplateException("Can't create input panel "+config.getConfig().get(AbstractInputPanel.NAME) + " of type " + config.getType(), e);
+		}
+
+	}
+
+	public static JPanel createTab(LinkedList<JPanel> rows) {
+
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+		for ( JPanel row : rows ) {
+			panel.add(row);
+		}
+
+		return panel;
+
+	}
+
+	private static String getNewPageIndicator(String line) throws TemplateException {
+
+		line = line.trim();
+
+		if ( line.startsWith("=") ) {
+			if ( ! line.endsWith("=") ) {
+				throw new TemplateException("Line starts with = but doesn't end with another =: "+line);
+			}
+
+			line = line.replace("=", "");
+			line = line.trim();
+			return line;
+		} else {
+			return null;
+		}
+	}
+
+	private static String getNewRowIndicator(String line) throws TemplateException {
+
+		line = line.trim();
+
+		if ( line.startsWith("-") ) {
+			if ( ! line.endsWith("-") ) {
+				throw new TemplateException("Line starts with - but doesn't end with another -: "+line);
+			}
+
+			line = line.replace("-", "");
+			line = line.trim();
+			return line;
+		} else {
+			return null;
 		}
 
 	}
@@ -133,7 +228,7 @@ public class TemplateHelpers {
 
 		List<String> lines = FileUtils.readLines(new File("/home/markus/Desktop/test.template"));
 
-		LinkedHashMap<String, AbstractInputPanel> panels = readConfig(lines);
+		LinkedHashMap<String, AbstractInputPanel> panels = parseConfig(lines);
 
 		for ( String panel : panels.keySet() ) {
 			System.out.println("Panelname: "+panel);
@@ -141,9 +236,132 @@ public class TemplateHelpers {
 		}
 
 
+
+
+
 	}
 
-	public static LinkedHashMap<String, AbstractInputPanel> readConfig(List<String> lines) throws TemplateException {
+	public static TemplateObject parseAndCreateTemplatePanel(ServiceInterface si, List<String> lines) throws TemplateException {
+
+		String commandline = lines.get(0);
+		commandline = commandline.trim();
+
+		if ( StringUtils.isBlank(commandline) ) {
+			throw new TemplateException("First line of the config needs to be the specification of the commandline (for example \"commandline = echo hello world\"");
+		}
+
+		if ( ! commandline.startsWith("commandline") ) {
+			throw new TemplateException("First line of the config needs to be the specification of the commandline (for example \"commandline = echo hello world\"");
+		}
+
+		int index = commandline.indexOf("=");
+		if ( index <= 0 ) {
+			throw new TemplateException("First line of the config needs to be the specification of the commandline (for example \"commandline = echo hello world\"");
+		}
+
+		commandline = commandline.substring(index+1).trim();
+		if ( StringUtils.isBlank(commandline) ) {
+			throw new TemplateException("First line of the config needs to be the specification of the commandline (for example \"commandline = echo hello world\"");
+		}
+
+		lines.remove(0);
+
+		TemplateObject template = new TemplateObject(commandline);
+
+		LinkedHashMap<String, AbstractInputPanel> inputPanels = parseConfig(lines);
+
+		LinkedHashMap<String, LinkedList<JPanel>> tabs = new LinkedHashMap<String, LinkedList<JPanel>>();
+
+		LinkedList<JPanel> currentTab = null;
+		JPanel currentRow = null;
+
+		for ( String line : lines ) {
+
+			line = line.trim();
+			if ( StringUtils.isBlank(line) ) {
+				continue;
+			}
+
+			String lineType = getNewPageIndicator(line);
+
+			if ( StringUtils.isNotBlank(lineType) ) {
+				// means a new page
+				currentRow = null;
+				currentTab = new LinkedList<JPanel>();
+				tabs.put(lineType, currentTab);
+				continue;
+			}
+
+			lineType = getNewRowIndicator(line);
+
+			if ( lineType != null ) {
+				currentRow = new JPanel();
+				currentRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+				currentRow.setAlignmentY(Component.TOP_ALIGNMENT);
+				BoxLayout layout = new BoxLayout(currentRow, BoxLayout.X_AXIS);
+				currentRow.setLayout(layout);
+				if ( lineType.length() > 0 ) {
+					currentRow.setBorder(new TitledBorder(null, lineType, TitledBorder.LEADING, TitledBorder.TOP, null, null));
+				}
+				if ( currentTab == null ) {
+					throw new TemplateException("Creating row but no tab created yet to add the row to...");
+				}
+				currentTab.add(currentRow);
+				continue;
+			}
+
+			lineType = getPanelName(line);
+			if ( StringUtils.isNotBlank(lineType) ) {
+				AbstractInputPanel panel = inputPanels.get(lineType);
+
+				if ( panel == null ) {
+					throw new TemplateException("Can't find panel for panelName: "+lineType);
+				}
+
+				if ( currentRow == null ) {
+					throw new TemplateException("No row created when trying to add panel with name: "+lineType);
+				}
+
+				if ( panel.isDisplayed() ) {
+					currentRow.add(panel);
+				}
+				continue;
+			}
+
+		}
+
+		JobSubmissionObjectImpl newJob = new JobSubmissionObjectImpl();
+
+		for ( AbstractInputPanel panel : inputPanels.values() ) {
+			panel.initPanel(template, si, newJob);
+		}
+
+		JPanel mainPanel = null;
+		// now create the tabs
+		if ( tabs.size() > 1 ) {
+			mainPanel = new JPanel();
+			mainPanel.setLayout(new BorderLayout());
+			JTabbedPane tabbedPanel = new JTabbedPane();
+
+			for ( String tabname : tabs.keySet() ) {
+				tabbedPanel.addTab(tabname, createTab(tabs.get(tabname)));
+			}
+
+			mainPanel.add(tabbedPanel, BorderLayout.CENTER);
+
+		} else {
+			mainPanel = createTab(tabs.values().iterator().next());
+		}
+
+		template.setTemplatePanel(mainPanel);
+		template.setJobObject(newJob);
+
+		template.userInput(null, null);
+
+		return template;
+	}
+
+	public static LinkedHashMap<String, AbstractInputPanel> parseConfig(List<String> lines) throws TemplateException {
 
 		LinkedHashMap<String, AbstractInputPanel> panels = new LinkedHashMap<String, AbstractInputPanel>();
 		String currentPanel = null;
@@ -172,6 +390,11 @@ public class TemplateHelpers {
 				currentConfig = new PanelConfig();
 				currentConfig.addConfig(AbstractInputPanel.NAME, panelName);
 			} else {
+
+				if ( (getNewPageIndicator(line) != null) || (getNewRowIndicator(line) != null) ) {
+					// that's ok
+					continue;
+				}
 
 				if ( StringUtils.isBlank(currentPanel) ) {
 					// means no current panel so nothing to configure

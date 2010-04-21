@@ -73,21 +73,36 @@ public class CatTemplate extends JPanel {
 
 	private Cpus getCpus() {
 		if (cpus == null) {
-			cpus = new Cpus(null);
+			try {
+				cpus = new Cpus(null);
+			} catch (TemplateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		return cpus;
 	}
 
 	private Jobname getJobname() {
 		if (jobname == null) {
-			jobname = new Jobname(null);
+			try {
+				jobname = new Jobname(null);
+			} catch (TemplateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		return jobname;
 	}
 
 	private MonitorCommandlinePanel getMonitorCommandlinePanel() {
 		if (monitorCommandlinePanel == null) {
-			monitorCommandlinePanel = new MonitorCommandlinePanel(null);
+			try {
+				monitorCommandlinePanel = new MonitorCommandlinePanel(null);
+			} catch (TemplateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		return monitorCommandlinePanel;
 	}
@@ -101,21 +116,26 @@ public class CatTemplate extends JPanel {
 			Filter filter = new BasenameFilter();
 			LinkedList filters = new LinkedList<Filter>();
 			filters.add(filter);
-			singleInputFile = new SingleInputFile(null);
+			try {
+				singleInputFile = new SingleInputFile(null);
+			} catch (TemplateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		return singleInputFile;
 	}
-	public void setJobObject(JobSubmissionObjectImpl jobObject) {
-		this.jobObject = jobObject;
-
-		template.setJobObject(this.jobObject);
-		getCpus().setJobObject(this.jobObject);
-		getJobname().setJobObject(this.jobObject);
-		getMonitorCommandlinePanel().setJobObject(this.jobObject);
-		getSingleInputFile().setJobObject(this.jobObject);
-	}
-	public void setServiceInterface(ServiceInterface si) {
-		this.si = si;
-		getSingleInputFile().setServiceInterface(template, this.si);
-	}
+	//	public void setJobObject(JobSubmissionObjectImpl jobObject) {
+	//		this.jobObject = jobObject;
+	//
+	//		template.setJobObject(this.jobObject);
+	//		getCpus().setJobObject(this.jobObject);
+	//		getJobname().setJobObject(this.jobObject);
+	//		getMonitorCommandlinePanel().setJobObject(this.jobObject);
+	//		getSingleInputFile().setJobObject(this.jobObject);
+	//	}
+	//	public void setServiceInterface(ServiceInterface si) {
+	//		this.si = si;
+	//		getSingleInputFile().setServiceInterface(template, this.si);
+	//	}
 }

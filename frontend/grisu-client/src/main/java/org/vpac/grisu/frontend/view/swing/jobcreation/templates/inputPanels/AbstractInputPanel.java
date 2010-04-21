@@ -1,5 +1,6 @@
 package org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels;
 
+import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
@@ -16,6 +17,7 @@ import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateObject;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.filters.Filter;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
@@ -31,9 +33,15 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 	public static final String PREFILLS = "prefills";
 	public static final String USE_LAST_VALUE = "useLastValue";
 	public static final String DEPENDENCY = "dependency";
+	public static final String SIZE = "size";
+	public static final String IS_VISIBLE = "isVisible";
+	public static final String BEAN = "property";
 
 	private TemplateObject template;
 	private final LinkedList<Filter> filters;
+
+	private boolean isVisible = true;
+	protected final String bean;
 
 	private JobSubmissionObjectImpl jobObject;
 
@@ -58,7 +66,7 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 	}
 
 
-	public AbstractInputPanel(PanelConfig config) {
+	public AbstractInputPanel(PanelConfig config) throws TemplateException {
 
 		if ( (config == null) || (config.getFilters() == null) ) {
 			this.filters = new LinkedList<Filter>();
@@ -69,13 +77,27 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 		if ( (config == null) || (config.getConfig() == null) || (config.getConfig().size() == 0) ) {
 			this.panelProperties = getDefaultPanelProperties();
 		} else {
-			this.panelProperties = config.getConfig();
+			this.panelProperties = getDefaultPanelProperties();
+			this.panelProperties.putAll(config.getConfig());
 		}
 
 		if ( StringUtils.isBlank(this.panelProperties.get(NAME)) ) {
 			this.panelProperties.put(NAME, UUID.randomUUID().toString());
 		}
 
+
+		if ( ! StringUtils.isBlank(this.panelProperties.get(BEAN)) ) {
+			bean = this.panelProperties.get(BEAN);
+		} else {
+			bean = null;
+		}
+		if ( ! StringUtils.isBlank(this.panelProperties.get(IS_VISIBLE)) ) {
+			try {
+				isVisible = Boolean.parseBoolean(this.panelProperties.get(IS_VISIBLE));
+			} catch (Exception e) {
+				throw new TemplateException("Can't parse isVisible property: "+e.getLocalizedMessage(), e);
+			}
+		}
 		try {
 			String title = this.panelProperties.get(TITLE);
 			setBorder(new TitledBorder(null, title, TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -83,8 +105,17 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 			e.printStackTrace();
 		}
 
-		//		this.template.registerInputPanel(this);
-
+		String size = this.panelProperties.get(SIZE);
+		if ( StringUtils.isNotBlank(size) ) {
+			try {
+				int width = Integer.parseInt(size.substring(0, size.indexOf("x")).trim());
+				int height = Integer.parseInt(size.substring(size.indexOf("x")+1).trim());
+				setPreferredSize(new Dimension(width, height));
+				setMaximumSize(new Dimension(width, height));
+			} catch (Exception e) {
+				throw new TemplateException("Can't parse size property for panel "+this.panelProperties.get(NAME)+": "+size);
+			}
+		}
 	}
 
 	protected void addValue(String bean, Object value) {
@@ -120,6 +151,8 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 		return this.panelProperties.get(NAME);
 	}
 
+	abstract protected String getValueAsString();
+
 	//	protected Object getValue(String bean) {
 	//		try {
 	//			Method method = jobObject.getClass().getMethod("get"+StringUtils.capitalize(bean));
@@ -131,7 +164,29 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 	//		}
 	//	}
 
-	abstract protected String getValueAsString();
+	public void initPanel(TemplateObject template, ServiceInterface si, JobSubmissionObjectImpl jobObject) throws TemplateException {
+
+		this.template = template;
+
+		// needed for example for the file dialog
+		if ( singletonServiceinterface == null ) {
+			singletonServiceinterface = si;
+		}
+		this.si = si;
+
+		if ( this.jobObject != null ) {
+			this.jobObject.removePropertyChangeListener(this);
+		}
+
+		this.jobObject = jobObject;
+		this.jobObject.addPropertyChangeListener(this);
+
+		preparePanel(panelProperties);
+	}
+
+	public boolean isDisplayed() {
+		return isVisible;
+	}
 
 	/**
 	 * Must be implemented if a change in a job property would possibly change the
@@ -145,8 +200,9 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 	 * Implement this if the panel needs to be prepared with values from the template.
 	 * 
 	 * @param panelProperties the properties for the initial state of the panel
+	 * @throws TemplateException
 	 */
-	abstract protected void preparePanel(Map<String, String> panelProperties);
+	abstract protected void preparePanel(Map<String, String> panelProperties) throws TemplateException;
 
 	public void propertyChange(PropertyChangeEvent arg0) {
 		jobPropertyChanged(arg0);
@@ -162,37 +218,12 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 		}
 	}
 
-	public void setJobObject(JobSubmissionObjectImpl jobObject) {
-
-		if ( this.jobObject != null ) {
-			this.jobObject.removePropertyChangeListener(this);
-		}
-
-		this.jobObject = jobObject;
-		this.jobObject.addPropertyChangeListener(this);
-
-		preparePanel(panelProperties);
-
-	}
-
-	public void setServiceInterface(TemplateObject template, ServiceInterface si) {
-
-		this.template = template;
-
-		// needed for example for the file dialog
-		if ( singletonServiceinterface == null ) {
-			singletonServiceinterface = si;
-		}
-		this.si = si;
-	}
-
-	protected void setValue(String bean, Object value) {
+	protected void setValue(String bean, Object value) throws TemplateException {
 		try {
 			Method method = jobObject.getClass().getMethod("set"+StringUtils.capitalize(bean), value.getClass());
 			method.invoke(jobObject, value);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new TemplateException("Can't set value for property "+bean+": "+e.getLocalizedMessage(), e);
 		}
 	}
 

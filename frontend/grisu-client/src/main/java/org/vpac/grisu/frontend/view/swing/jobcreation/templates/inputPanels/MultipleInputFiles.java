@@ -13,6 +13,7 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
 import org.vpac.grisu.model.files.GlazedFile;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -29,7 +30,7 @@ public class MultipleInputFiles extends AbstractInputPanel {
 	private JButton button;
 	private JButton button_1;
 
-	public MultipleInputFiles(PanelConfig config) {
+	public MultipleInputFiles(PanelConfig config) throws TemplateException {
 		super(config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
