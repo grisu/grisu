@@ -72,15 +72,15 @@ public class User {
 	// to get one filesystemmanager per thread
 	private class ThreadLocalFsManager extends ThreadLocal {
 
-		private FileSystem createFileSystem(String rootUrl, ProxyCredential credToUse) {
+		private FileSystem createFileSystem(String rootUrl,
+				ProxyCredential credToUse) {
 
 			FileSystemOptions opts = new FileSystemOptions();
 
 			if (rootUrl.startsWith("gsiftp")) {
 				GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
-				.getInstance();
-				builder.setGSSCredential(opts, credToUse
-						.getGssCredential());
+						.getInstance();
+				builder.setGSSCredential(opts, credToUse.getGssCredential());
 				// builder.setUserDirIsRoot(opts, true);
 			}
 
@@ -88,15 +88,15 @@ public class User {
 			try {
 				fileRoot = getFsManager().resolveFile(rootUrl, opts);
 			} catch (FileSystemException e) {
-				myLogger.error("Can't connect to filesystem: "+rootUrl);
-				throw new RuntimeException(e);
+				myLogger.error("Can't connect to filesystem: " + rootUrl);
+				throw new RuntimeException("Can't connect to filesystem "
+						+ rootUrl + ": " + e.getLocalizedMessage(), e);
 			}
 
 			FileSystem fileBase = null;
 			fileBase = fileRoot.getFileSystem();
 
 			return fileBase;
-
 
 		}
 
@@ -134,8 +134,8 @@ public class User {
 			if (temp == null) {
 				// means we have to figure out how to connect to this. I.e.
 				// which fqan to use...
-				//				throw new FileSystemException(
-				//						"Could not find mountpoint for url " + rootUrl);
+				// throw new FileSystemException(
+				// "Could not find mountpoint for url " + rootUrl);
 
 				// creating a filesystem...
 				myLogger.info("Creating filesystem without mountpoint...");
@@ -202,14 +202,15 @@ public class User {
 		}
 	}
 
-
 	private static Logger myLogger = Logger.getLogger(User.class.getName());
 
-	public static User createUser(ProxyCredential cred, AbstractServiceInterface si) {
+	public static User createUser(ProxyCredential cred,
+			AbstractServiceInterface si) {
 
 		// make sure there is a valid credential
 		if ((cred == null) || !cred.isValid()) {
-			throw new NoValidCredentialException("No valid credential exists in this session");
+			throw new NoValidCredentialException(
+					"No valid credential exists in this session");
 		}
 
 		// if ( getCredential())
@@ -225,10 +226,10 @@ public class User {
 			user.setCred(cred);
 		}
 
-		user.setAutoMountedMountPoints(user.df_auto_mds(si.getAllSites().asArray()));
+		user.setAutoMountedMountPoints(user.df_auto_mds(si.getAllSites()
+				.asArray()));
 
 		return user;
-
 
 	}
 
@@ -250,14 +251,13 @@ public class User {
 
 	private FileSystemStructureToXMLConverter fsconverter = null;
 	private final Map<String, DtoActionStatus> actionStatus = Collections
-	.synchronizedMap(new HashMap<String, DtoActionStatus>());
+			.synchronizedMap(new HashMap<String, DtoActionStatus>());
 
 	// the (default) credentials dn
 	private String dn = null;
 
 	// the mountpoints of a user
 	private Set<MountPoint> mountPoints = new HashSet<MountPoint>();
-
 
 	private Set<MountPoint> mountPointsAutoMounted = new HashSet<MountPoint>();
 
@@ -340,7 +340,7 @@ public class User {
 	 *             created
 	 */
 	public FileObject aquireFile(final String file)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 		return aquireFile(file, null);
 	}
 
@@ -362,7 +362,7 @@ public class User {
 	 *             created
 	 */
 	public FileObject aquireFile(final String file, final String fqan)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		String file_to_aquire = null;
 
@@ -377,7 +377,7 @@ public class User {
 			} catch (FileSystemException e) {
 				throw new RemoteFileSystemException(
 						"Could not access file on local temp filesystem: "
-						+ e.getLocalizedMessage());
+								+ e.getLocalizedMessage());
 			}
 		} else if (file.startsWith("/")) {
 			// means file on "mounted" filesystem
@@ -387,7 +387,7 @@ public class User {
 			if (mp == null) {
 				throw new RemoteFileSystemException(
 						"File path is not on any of the mountpoints for file: "
-						+ file);
+								+ file);
 			}
 
 			file_to_aquire = mp.replaceMountpointWithAbsoluteUrl(file);
@@ -395,7 +395,7 @@ public class User {
 			if (file_to_aquire == null) {
 				throw new RemoteFileSystemException(
 						"File path is not on any of the mountpoints for file: "
-						+ file);
+								+ file);
 			}
 		} else {
 			// means absolute url
@@ -421,7 +421,7 @@ public class User {
 			}
 
 			String tempUriString = file_to_aquire.replace(":2811", "")
-			.substring(fileUri.length());
+					.substring(fileUri.length());
 			fileObject = root.resolveFile(tempUriString);
 			// fileObject = root.resolveFile(file_to_aquire);
 
@@ -465,49 +465,57 @@ public class User {
 
 		for (String fqan : getFqans().keySet()) {
 			Date start = new Date();
-			Map<String, String[]> mpUrl = AbstractServiceInterface.informationManager.getDataLocationsForVO(fqan);
+			Map<String, String[]> mpUrl = AbstractServiceInterface.informationManager
+					.getDataLocationsForVO(fqan);
 			Date end = new Date();
 			myLogger.debug("Querying for data locations for all sites and+ "
 					+ fqan + " took: " + (end.getTime() - start.getTime())
 					+ " ms.");
 			for (String server : mpUrl.keySet()) {
-				for (String path : mpUrl.get(server)) {
+				try {
+					for (String path : mpUrl.get(server)) {
 
-					String url = null;
-					if (path.contains("${GLOBUS_USER_HOME}")) {
+						String url = null;
+						if (path.contains("${GLOBUS_USER_HOME}")) {
 
-						try {
-							url = getFileSystemHomeDirectory(
-									server.replace(":2811", ""), fqan);
-						} catch (FileSystemException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							try {
+								url = getFileSystemHomeDirectory(server
+										.replace(":2811", ""), fqan);
+							} catch (FileSystemException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+
+						} else if (path.contains("${GLOBUS_SCRATCH_DIR")) {
+							try {
+								url = getFileSystemHomeDirectory(server
+										.replace(":2811", ""), fqan)
+										+ "/.globus/scratch";
+							} catch (FileSystemException e) {
+								e.printStackTrace();
+							}
+						} else {
+
+							url = server.replace(":2811", "") + path + "/"
+									+ User.get_vo_dn_path(getCred().getDn());
+
 						}
 
-					}else  if  ( path.contains("${GLOBUS_SCRATCH_DIR") ) {
-						try {
-							url = getFileSystemHomeDirectory(
-									server.replace(":2811", ""), fqan)+"/.globus/scratch";
-						} catch (FileSystemException e) {
-							e.printStackTrace();
+						if (StringUtils.isBlank(url)) {
+							continue;
 						}
-					} else {
 
-						url = server.replace(":2811", "") + path + "/"
-						+ User.get_vo_dn_path(getCred().getDn());
-
+						MountPoint mp = new MountPoint(getDn(), fqan, url,
+								MountPointHelpers.calculateMountPointName(
+										server, fqan),
+								AbstractServiceInterface.informationManager
+										.getSiteForHostOrUrl(url), true);
+						// + "." + fqan + "." + path);
+						// + "." + fqan);
+						mps.add(mp);
 					}
-
-					if (StringUtils.isBlank(url)) {
-						continue;
-					}
-
-					MountPoint mp = new MountPoint(getDn(), fqan,
-							url, MountPointHelpers.calculateMountPointName(server, fqan),
-							AbstractServiceInterface.informationManager.getSiteForHostOrUrl(url), true);
-					// + "." + fqan + "." + path);
-					// + "." + fqan);
-					mps.add(mp);
+				} catch (Exception e) {
+					myLogger.error("Can't use mountpoint "+server+": "+e.getLocalizedMessage(), e);
 				}
 			}
 		}
@@ -545,7 +553,6 @@ public class User {
 		return actionStatus;
 	}
 
-
 	// private List<FileReservation> getFileReservations() {
 	// return fileReservations;
 	// }
@@ -573,15 +580,14 @@ public class User {
 		if (allMountPoints == null) {
 
 			throw new IllegalStateException("Mountpoints not set yet.");
-			//			allMountPoints = new TreeSet<MountPoint>();
-			//			// first the automounted ones because the manually ones are more
-			//			// important
-			//			allMountPoints.addAll(mountPointsAutoMounted);
-			//			allMountPoints.addAll(getMountPoints());
+			// allMountPoints = new TreeSet<MountPoint>();
+			// // first the automounted ones because the manually ones are more
+			// // important
+			// allMountPoints.addAll(mountPointsAutoMounted);
+			// allMountPoints.addAll(getMountPoints());
 		}
 		return allMountPoints;
 	}
-
 
 	/**
 	 * Gets a map of this users bookmarks.
@@ -630,7 +636,7 @@ public class User {
 	}
 
 	public String getFileSystemHomeDirectory(String filesystemRoot, String fqan)
-	throws FileSystemException {
+			throws FileSystemException {
 
 		// FileSystem fileSystem = createFilesystem(filesystemRoot, fqan);
 		FileSystem fileSystem = threadLocalFsManager.getFileSystem(
@@ -639,11 +645,11 @@ public class User {
 
 		myLogger.debug("Using home directory: "
 				+ ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
-				.substring(1));
+						.substring(1));
 
 		String home = (String) fileSystem.getAttribute("HOME_DIRECTORY");
 		String uri = fileSystem.getRoot().getName().getRootURI()
-		+ home.substring(1);
+				+ home.substring(1);
 
 		return uri;
 	}
@@ -655,7 +661,7 @@ public class User {
 	 */
 	@Transient
 	public Map<String, String> getFqans() {
-		if ( fqans == null ) {
+		if (fqans == null) {
 
 			myLogger.debug("Checking credential");
 			if (cred.isValid()) {
@@ -665,7 +671,6 @@ public class User {
 		}
 		return fqans;
 	}
-
 
 	@Transient
 	public FileSystemStructureToXMLConverter getFsConverter() {
@@ -762,8 +767,8 @@ public class User {
 			submitters.put("GT4", new GT4Submitter());
 			submitters.put("GT5", new GT5Submitter());
 			submitters.put("GT4Dummy", new GT4DummySubmitter());
-			manager = new JobSubmissionManager(AbstractServiceInterface.informationManager,
-					submitters);
+			manager = new JobSubmissionManager(
+					AbstractServiceInterface.informationManager, submitters);
 		}
 		return manager;
 	}
@@ -805,7 +810,7 @@ public class User {
 	 */
 	public MountPoint mountFileSystem(final String root, final String name,
 			final boolean useHomeDirectory, String site)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		return mountFileSystem(root, name, getCred(), useHomeDirectory, site);
 	}
@@ -846,7 +851,7 @@ public class User {
 			if (mountPointName.equals(mp.getAlias())) {
 				throw new RemoteFileSystemException(
 						"There is already a filesystem mounted on:"
-						+ mountPointName);
+								+ mountPointName);
 			}
 		}
 
@@ -862,18 +867,18 @@ public class User {
 			if (useHomeDirectory) {
 				myLogger.debug("Using home directory: "
 						+ ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
-						.substring(1));
+								.substring(1));
 				uri = fileSystem.getRoot().getName().getRootURI()
-				+ ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
-				.substring(1);
+						+ ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
+								.substring(1);
 				// if vo user, use $VOHOME/<DN> as homedirectory
 				if (cred.getFqan() != null) {
 					uri = uri + File.separator + get_vo_dn_path(cred.getDn());
 					fileSystem.resolveFile(
 							((String) fileSystem.getAttribute("HOME_DIRECTORY")
 									+ File.separator + cred.getDn().replace(
-											"=", "_").replace(",", "_").replace(" ",
-											"_"))).createFolder();
+									"=", "_").replace(",", "_").replace(" ",
+									"_"))).createFolder();
 				}
 				new_mp = new MountPoint(cred.getDn(), cred.getFqan(), uri,
 						mountPointName, site);
@@ -893,7 +898,7 @@ public class User {
 
 	public MountPoint mountFileSystem(final String root, final String name,
 			final String fqan, final boolean useHomeDirectory, final String site)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		if ((fqan == null) || Constants.NON_VO_FQAN.equals(fqan)) {
 			return mountFileSystem(root, name, useHomeDirectory, site);
@@ -972,7 +977,7 @@ public class User {
 	 *            the mountpoints to add (for this session)
 	 */
 	public void setAutoMountedMountPoints(final Set<MountPoint> amps) {
-		//		allMountPoints = null;
+		// allMountPoints = null;
 		this.mountPointsAutoMounted = amps;
 
 		allMountPoints = new TreeSet<MountPoint>();

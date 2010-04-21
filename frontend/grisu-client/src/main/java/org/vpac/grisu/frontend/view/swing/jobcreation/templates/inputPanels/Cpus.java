@@ -28,14 +28,12 @@ public class Cpus extends AbstractInputPanel {
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
+			new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,}));
-		add(getComboBox(), "2, 2, 3, 1, fill, default");
+		add(getComboBox(), "2, 2, fill, fill");
 	}
 
 	private JComboBox getComboBox() {

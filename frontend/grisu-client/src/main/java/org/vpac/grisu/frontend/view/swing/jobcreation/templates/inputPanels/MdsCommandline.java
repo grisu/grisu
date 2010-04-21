@@ -33,7 +33,7 @@ public class MdsCommandline extends AbstractInputPanel {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,}));
-		add(getComboBox(), "2, 2, fill, default");
+		add(getComboBox(), "2, 2, fill, fill");
 	}
 
 	private void commandlineChanged() throws TemplateException {

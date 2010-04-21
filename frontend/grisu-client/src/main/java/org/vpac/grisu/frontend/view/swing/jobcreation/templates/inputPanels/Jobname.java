@@ -30,7 +30,7 @@ public class Jobname extends AbstractInputPanel {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,}));
-		add(getJobnameTextField(), "2, 2, fill, default");
+		add(getJobnameTextField(), "2, 2, fill, fill");
 	}
 
 	@Override

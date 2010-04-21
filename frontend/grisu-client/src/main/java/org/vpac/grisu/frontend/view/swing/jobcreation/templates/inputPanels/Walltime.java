@@ -85,16 +85,16 @@ public class Walltime extends AbstractInputPanel {
 		super(config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("default:grow"),
+				ColumnSpec.decode("max(50dlu;default)"),
 				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,
+				ColumnSpec.decode("max(40dlu;default):grow"),
 				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
+			new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("default:grow"),
+				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,}));
-		add(getAmountComboBox(), "2, 2, fill, bottom");
-		add(getUnitComboBox(), "4, 2, fill, bottom");
+		add(getAmountComboBox(), "2, 2, fill, fill");
+		add(getUnitComboBox(), "4, 2, fill, fill");
 	}
 
 	private JComboBox getAmountComboBox() {
