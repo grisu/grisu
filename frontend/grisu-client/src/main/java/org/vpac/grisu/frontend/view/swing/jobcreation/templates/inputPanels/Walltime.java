@@ -40,6 +40,7 @@ public class Walltime extends AbstractInputPanel {
 			return amount * 3600 * 24;
 		} else {
 			//			throw new RuntimeException(unit+" not a supported unit name.");
+			return amount * 60; //default
 		}
 
 	}
@@ -161,7 +162,8 @@ public class Walltime extends AbstractInputPanel {
 
 	@Override
 	protected String getValueAsString() {
-		throw new RuntimeException("Not implemented yet. Should not be needed.");
+//		throw new RuntimeException("Not implemented yet. Should not be needed.");
+		return null;
 	}
 	@Override
 	protected void jobPropertyChanged(PropertyChangeEvent e) {

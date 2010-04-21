@@ -1,5 +1,7 @@
 package org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels;
 
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,10 +17,10 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class InputString extends AbstractInputPanel {
+public class TextField extends AbstractInputPanel {
 	private JTextField textField;
 
-	public InputString(PanelConfig config) throws TemplateException {
+	public TextField(PanelConfig config) throws TemplateException {
 		super(config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
@@ -43,6 +45,24 @@ public class InputString extends AbstractInputPanel {
 		if (textField == null) {
 			textField = new JTextField();
 			textField.setColumns(10);
+			textField.addKeyListener(new KeyAdapter() {
+
+				@Override
+				public void keyReleased(KeyEvent e) {
+					try {
+						
+//						if ( StringUtils.isBlank(bean) ) {
+//							return;
+//						}
+						
+						setValue(bean, textField.getText());
+					} catch (TemplateException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+
+			});
 		}
 		return textField;
 	}
@@ -61,9 +81,9 @@ public class InputString extends AbstractInputPanel {
 	@Override
 	protected void preparePanel(Map<String, String> panelProperties) throws TemplateException {
 
-		if ( StringUtils.isBlank(bean) ) {
-			return;
-		}
+//		if ( StringUtils.isBlank(bean) ) {
+//			return;
+//		}
 
 		String defaultValue = panelProperties.get(DEFAULT_VALUE);
 		if ( StringUtils.isNotBlank(defaultValue) ) {

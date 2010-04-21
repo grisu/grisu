@@ -331,6 +331,8 @@ public class TemplateHelpers {
 		}
 
 		JobSubmissionObjectImpl newJob = new JobSubmissionObjectImpl();
+		template.setJobObject(newJob);
+
 
 		for ( AbstractInputPanel panel : inputPanels.values() ) {
 			panel.initPanel(template, si, newJob);
@@ -354,7 +356,6 @@ public class TemplateHelpers {
 		}
 
 		template.setTemplatePanel(mainPanel);
-		template.setJobObject(newJob);
 
 		template.userInput(null, null);
 

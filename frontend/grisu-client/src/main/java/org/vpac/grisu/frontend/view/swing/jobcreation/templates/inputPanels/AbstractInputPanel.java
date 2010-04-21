@@ -212,6 +212,7 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 		try {
 			Method method = jobObject.getClass().getMethod("remove"+StringUtils.capitalize(bean), value.getClass());
 			method.invoke(jobObject, value);
+			applyFilters();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -220,8 +221,11 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 
 	protected void setValue(String bean, Object value) throws TemplateException {
 		try {
-			Method method = jobObject.getClass().getMethod("set"+StringUtils.capitalize(bean), value.getClass());
-			method.invoke(jobObject, value);
+			if ( bean != null ) {
+				Method method = jobObject.getClass().getMethod("set"+StringUtils.capitalize(bean), value.getClass());
+				method.invoke(jobObject, value);
+			}
+			applyFilters();
 		} catch (Exception e) {
 			throw new TemplateException("Can't set value for property "+bean+": "+e.getLocalizedMessage(), e);
 		}
