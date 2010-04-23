@@ -37,6 +37,9 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 	public static final String IS_VISIBLE = "isVisible";
 	public static final String BEAN = "property";
 
+	public static final String APPLICATION = "application";
+	public static final String TEMPLATENAME = "templatename";
+
 	private TemplateObject template;
 	private final LinkedList<Filter> filters;
 

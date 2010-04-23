@@ -163,6 +163,33 @@ public class TemplateHelpers {
 
 	}
 
+	public static String getCommandline(String line) throws TemplateException {
+
+		String commandline = line;
+		commandline = commandline.trim();
+
+		if ( StringUtils.isBlank(commandline) ) {
+			throw new TemplateException("First line of the config needs to be the specification of the commandline (for example \"commandline = echo hello world\"");
+		}
+
+		if ( ! commandline.startsWith("commandline") ) {
+			throw new TemplateException("First line of the config needs to be the specification of the commandline (for example \"commandline = echo hello world\"");
+		}
+
+		int index = commandline.indexOf("=");
+		if ( index <= 0 ) {
+			throw new TemplateException("First line of the config needs to be the specification of the commandline (for example \"commandline = echo hello world\"");
+		}
+
+		commandline = commandline.substring(index+1).trim();
+		if ( StringUtils.isBlank(commandline) ) {
+			throw new TemplateException("First line of the config needs to be the specification of the commandline (for example \"commandline = echo hello world\"");
+		}
+
+		return commandline;
+
+	}
+
 	private static String getNewPageIndicator(String line) throws TemplateException {
 
 		line = line.trim();
@@ -228,12 +255,12 @@ public class TemplateHelpers {
 
 		List<String> lines = FileUtils.readLines(new File("/home/markus/Desktop/test.template"));
 
-		LinkedHashMap<String, AbstractInputPanel> panels = parseConfig(lines);
-
-		for ( String panel : panels.keySet() ) {
-			System.out.println("Panelname: "+panel);
-			System.out.println(panels.get(panel).toString());
-		}
+		//		LinkedHashMap<String, AbstractInputPanel> panels = parseConfig(lines);
+		//
+		//		for ( String panel : panels.keySet() ) {
+		//			System.out.println("Panelname: "+panel);
+		//			System.out.println(panels.get(panel).toString());
+		//		}
 
 
 
@@ -241,34 +268,19 @@ public class TemplateHelpers {
 
 	}
 
-	public static TemplateObject parseAndCreateTemplatePanel(ServiceInterface si, List<String> lines) throws TemplateException {
 
-		String commandline = lines.get(0);
-		commandline = commandline.trim();
+	public static TemplateObject parseAndCreateTemplatePanel(ServiceInterface si, List<String> linesOrig) throws TemplateException {
 
-		if ( StringUtils.isBlank(commandline) ) {
-			throw new TemplateException("First line of the config needs to be the specification of the commandline (for example \"commandline = echo hello world\"");
-		}
 
-		if ( ! commandline.startsWith("commandline") ) {
-			throw new TemplateException("First line of the config needs to be the specification of the commandline (for example \"commandline = echo hello world\"");
-		}
+		String commandline = getCommandline(linesOrig.get(0));
 
-		int index = commandline.indexOf("=");
-		if ( index <= 0 ) {
-			throw new TemplateException("First line of the config needs to be the specification of the commandline (for example \"commandline = echo hello world\"");
-		}
-
-		commandline = commandline.substring(index+1).trim();
-		if ( StringUtils.isBlank(commandline) ) {
-			throw new TemplateException("First line of the config needs to be the specification of the commandline (for example \"commandline = echo hello world\"");
-		}
-
+		List<String> lines = new LinkedList(linesOrig);
 		lines.remove(0);
 
 		TemplateObject template = new TemplateObject(commandline);
 
-		LinkedHashMap<String, AbstractInputPanel> inputPanels = parseConfig(lines);
+		LinkedHashMap<String, PanelConfig> inputConfigs = parseConfig(lines);
+		LinkedHashMap<String, AbstractInputPanel> inputPanels = new LinkedHashMap<String, AbstractInputPanel>();
 
 		LinkedHashMap<String, LinkedList<JPanel>> tabs = new LinkedHashMap<String, LinkedList<JPanel>>();
 
@@ -281,6 +293,7 @@ public class TemplateHelpers {
 			if ( StringUtils.isBlank(line) ) {
 				continue;
 			}
+
 
 			String lineType = getNewPageIndicator(line);
 
@@ -312,7 +325,10 @@ public class TemplateHelpers {
 
 			lineType = getPanelName(line);
 			if ( StringUtils.isNotBlank(lineType) ) {
-				AbstractInputPanel panel = inputPanels.get(lineType);
+				PanelConfig config = inputConfigs.get(lineType);
+
+				AbstractInputPanel panel = createInputPanel(config);
+				inputPanels.put(lineType, panel);
 
 				if ( panel == null ) {
 					throw new TemplateException("Can't find panel for panelName: "+lineType);
@@ -362,11 +378,14 @@ public class TemplateHelpers {
 		return template;
 	}
 
-	public static LinkedHashMap<String, AbstractInputPanel> parseConfig(List<String> lines) throws TemplateException {
+	public static LinkedHashMap<String, PanelConfig> parseConfig(List<String> linesOrig) throws TemplateException {
 
-		LinkedHashMap<String, AbstractInputPanel> panels = new LinkedHashMap<String, AbstractInputPanel>();
+		LinkedHashMap<String, PanelConfig> panels = new LinkedHashMap<String, PanelConfig>();
 		String currentPanel = null;
 		PanelConfig currentConfig = null;
+
+		List<String> lines = new LinkedList(linesOrig);
+		lines.remove(0);
 
 		for ( String line : lines ) {
 
@@ -381,8 +400,7 @@ public class TemplateHelpers {
 				// means new or first panel
 				if ( (currentPanel != null) && (currentConfig != null) ) {
 
-					AbstractInputPanel panel = createInputPanel(currentConfig);
-					panels.put(currentPanel, panel);
+					panels.put(currentPanel, currentConfig);
 					currentPanel = null;
 					currentConfig = null;
 				}
@@ -408,15 +426,10 @@ public class TemplateHelpers {
 		}
 
 		if ( (currentPanel != null) && (currentConfig != null) ) {
-
-			AbstractInputPanel panel = createInputPanel(currentConfig);
-			panels.put(currentPanel, panel);
-
+			panels.put(currentPanel, currentConfig);
 		}
 
 		return panels;
-
-
 	}
 
 

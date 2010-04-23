@@ -3,6 +3,7 @@ package org.vpac.grisu.backend.model.job.gt5;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.globus.gram.GramJob;
 import org.globus.rsl.NameOpValue;
 import org.globus.rsl.RslNode;
@@ -23,28 +24,79 @@ import au.org.arcs.jcommons.utils.JsdlHelpers;
 
 public class GT5Submitter extends JobSubmitter{
 
+	static final Logger myLogger = Logger.getLogger(GT5Submitter.class
+			.getName());
+
+	private static String[] getModulesFromMDS(final InformationManager infoManager, final Document jsdl) {
+		String[] modules_string = JsdlHelpers.getModules(jsdl);
+		if (modules_string != null) {
+			return modules_string;
+		}
+		// mds based
+		String application = JsdlHelpers.getApplicationName(jsdl);
+		String version = JsdlHelpers.getApplicationVersion(jsdl);
+		String[] subLocs = JsdlHelpers.getCandidateHosts(jsdl);
+		if ( (subLocs != null) && (subLocs.length > 0) ) {
+			String subLoc =  subLocs[0];
+			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
+				return null;
+			} else if (StringUtils.isNotBlank(application) && StringUtils.isNotBlank(version) && StringUtils.isNotBlank(subLoc)) {
+				// if we know application, version and submissionLocation
+				Map<String, String> appDetails = infoManager.getApplicationDetails(application, version, subLoc);
+
+				try {
+					modules_string = appDetails.get(Constants.MDS_MODULES_KEY).split(",");
+
+					if ((modules_string == null) || "".equals(modules_string)) {
+						return null;
+					}
+				} catch (Exception e) {
+					return null;
+				}
+				return modules_string;
+			} else if ((application != null) && (version == null) && (subLoc != null)) {
+
+				Map<String, String> appDetails = infoManager.getApplicationDetails(application,
+						Constants.NO_VERSION_INDICATOR_STRING, subLoc);
+
+				try {
+					modules_string = appDetails.get(Constants.MDS_MODULES_KEY).split(",");
+
+					if ((modules_string == null) || "".equals(modules_string)) {
+						return null;
+					}
+
+				} catch (Exception e) {
+					return null;
+				}
+
+				return modules_string;
+
+			} else {
+				throw new RuntimeException(
+				"Can't determine module because either/or application, version submissionLocation are missing.");
+			}
+		} else {
+			myLogger.info("No submission location specified. If this happens when trying to submit a job, it's probably a bug...");
+			return new String[]{};
+		}
+
+	}
+
 	private Gram5Client gram5 = null;
 
 	public static final InformationManager informationManager = CachedMdsInformationManager
 	.getDefaultCachedMdsInformationManager(Environment
 			.getVarGrisuDirectory().toString());
 
-	public static void main(String[] args){
-		Gram5Client gram5 = new Gram5Client();
-	}
 
-
-	public GT5Submitter(){
-		gram5 = new Gram5Client();
-	}
-
-	private void addNotNull(RslNode node , NameOpValue value){
+	private static void addNotNull(RslNode node , NameOpValue value){
 		if (value != null){
 			node.add(value);
 		}
 	}
 
-	private String createJobSubmissionDescription(
+	public static String createJobSubmissionDescription(
 			final InformationManager infoManager, final Document jsdl) {
 
 		RslNode result = new RslNode();
@@ -83,17 +135,22 @@ public class GT5Submitter extends JobSubmitter{
 
 		// Add "queue" node
 		// TODO change that once I know how to specify queues in jsdl
-		String queueVal = JsdlHelpers.getCandidateHosts(jsdl)[0]; // TODO this
-		// always uses
-		// the first
-		// candidate
-		// host - not
-		// good
-		if (queueVal.indexOf(":") != -1) {
-			queueVal = queueVal.substring(0, queueVal.indexOf(":"));
-			queue = new NameOpValue("queue",NameOpValue.EQ,queueVal);
-		}
+		String[] queues = JsdlHelpers.getCandidateHosts(jsdl);
+		if ( (queues != null) && (queues.length > 0) ) {
+			String queueVal = queues[0];
+			// always uses
+			// the first
+			// candidate
+			// host - not
+			// good
+			if (queueVal.indexOf(":") != -1) {
+				queueVal = queueVal.substring(0, queueVal.indexOf(":"));
+				queue = new NameOpValue("queue",NameOpValue.EQ,queueVal);
+			}
 
+		} else {
+			myLogger.info("Can't parse queues. If that happens when trying to submit a job, it's probably a bug...");
+		}
 		// Add "jobtype" if mpi
 		int processorCount = JsdlHelpers.getProcessorCount(jsdl);
 
@@ -187,64 +244,22 @@ public class GT5Submitter extends JobSubmitter{
 		addNotNull(result,emailTermination);
 		addNotNull(result,emailAbort);
 
-		System.out.println(result.toRSL(true));
-		return result.toRSL(true);
+		String resultString = result.toRSL(true);
+		myLogger.debug("Translated jsdl into gt5 rsl: "+resultString);
+		return resultString;
+	}
+
+	public static void main(String[] args){
+		Gram5Client gram5 = new Gram5Client();
+	}
+
+	public GT5Submitter(){
+		gram5 = new Gram5Client();
 	}
 
 	@Override
 	public int getJobStatus(String endPointReference, ProxyCredential cred) {
 		return translateToGrisuStatus(gram5.getJobStatus(endPointReference, cred.getGssCredential()));
-	}
-
-	private String[] getModulesFromMDS(final InformationManager infoManager, final Document jsdl) {
-		String[] modules_string = JsdlHelpers.getModules(jsdl);
-		if (modules_string != null) {
-			return modules_string;
-		}
-		// mds based
-		String application = JsdlHelpers.getApplicationName(jsdl);
-		String version = JsdlHelpers.getApplicationVersion(jsdl);
-		String subLoc = JsdlHelpers.getCandidateHosts(jsdl)[0];
-
-		if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
-			return null;
-		} else if (StringUtils.isNotBlank(application) && StringUtils.isNotBlank(version) && StringUtils.isNotBlank(subLoc)) {
-			// if we know application, version and submissionLocation
-			Map<String, String> appDetails = infoManager.getApplicationDetails(application, version, subLoc);
-
-			try {
-				modules_string = appDetails.get(Constants.MDS_MODULES_KEY).split(",");
-
-				if ((modules_string == null) || "".equals(modules_string)) {
-					return null;
-				}
-			} catch (Exception e) {
-				return null;
-			}
-			return modules_string;
-		} else if ((application != null) && (version == null) && (subLoc != null)) {
-
-			Map<String, String> appDetails = infoManager.getApplicationDetails(application,
-					Constants.NO_VERSION_INDICATOR_STRING, subLoc);
-
-			try {
-				modules_string = appDetails.get(Constants.MDS_MODULES_KEY).split(",");
-
-				if ((modules_string == null) || "".equals(modules_string)) {
-					return null;
-				}
-
-			} catch (Exception e) {
-				return null;
-			}
-
-			return modules_string;
-
-		} else {
-			throw new RuntimeException(
-					"Can't determine module because either/or application, version submissionLocation are missing.");
-		}
-
 	}
 
 	@Override

@@ -61,90 +61,6 @@ public class GT4Submitter extends JobSubmitter {
 	static final Logger myLogger = Logger.getLogger(GT4Submitter.class
 			.getName());
 
-	private static EndpointReferenceType getFactoryEPR(final String contact,
-			final String factoryType) throws Exception {
-		URL factoryUrl = ManagedJobFactoryClientHelper.getServiceURL(contact)
-		.getURL();
-
-		myLogger.debug("Factory Url: " + factoryUrl);
-		return ManagedJobFactoryClientHelper.getFactoryEndpoint(factoryUrl,
-				factoryType);
-	}
-
-	private final InformationManager informationManager = CachedMdsInformationManager
-	.getDefaultCachedMdsInformationManager(Environment.getVarGrisuDirectory().toString());
-
-
-	// // this method is just for testing. Do not use!!!
-	// protected String submit(String host, String factoryType, Document jsdl,
-	// GSSCredential credential) {
-	//
-	// JobDescriptionType jobDesc = null;
-	// String submittedJobDesc = null;
-	// try {
-	// submittedJobDesc = createJobSubmissionDescription(jsdl);
-	// jobDesc = RSLHelper.readRSL(submittedJobDesc);
-	//
-	// } catch (RSLParseException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// return null;
-	// }
-	//
-	// /*
-	// * Job test parameters (adjust to your needs)
-	// */
-	// // remote host
-	// //String contact = "ng2.vpac.org";
-	//
-	// // Factory type: Fork, Condor, PBS, LSF
-	// //String factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.FORK;
-	// // String factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
-	//
-	// // Deafult Security: Host authorization + XML encryption
-	// Authorization authz = HostAuthorization.getInstance();
-	// Integer xmlSecurity = Constants.ENCRYPTION;
-	//
-	// // Submission mode: batch = will not wait
-	// boolean batchMode = true;
-	//
-	// // a Simple command executable (if no job file)
-	// String simpleJobCommandLine = null;
-	//
-	// // Job timeout values: duration, termination times
-	// Date serviceDuration = null;
-	// Date serviceTermination = null;
-	// int timeout = GramJob.DEFAULT_TIMEOUT;
-	//
-	// String handle = null;
-	// try {
-	//
-	// if ( credential == null || credential.getRemainingLifetime() < 1 ) {
-	// throw new NoValidCredentialException("Credential is not valid.");
-	// }
-	//
-	// GramClient gram = new GramClient(credential);
-	//
-	// handle = gram.submitRSL(getFactoryEPR(host,factoryType)
-	// , simpleJobCommandLine, jobDesc
-	// , authz, xmlSecurity
-	// , batchMode, false, false
-	// , serviceDuration, serviceTermination, timeout );
-	//
-	// } catch (Exception e) {
-	// //TODO handle that
-	// e.printStackTrace();
-	// }
-	//
-	// //job.setSubmittedJobDescription(submittedJobDesc);
-	//
-	// myLogger.debug("Submitted rsl job
-	// description:\n--------------------------------");
-	// myLogger.debug(submittedJobDesc);
-	//
-	// return handle;
-	// }
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -152,7 +68,7 @@ public class GT4Submitter extends JobSubmitter {
 	 * org.vpac.grisu.js.control.job.JobSubmitter#createJobSubmissionDescription
 	 * (org.w3c.dom.Document)
 	 */
-	private String createJobSubmissionDescription(
+	public static String createJobSubmissionDescription(
 			final InformationManager infoManager, final Document jsdl) {
 
 		DebugUtils.jsdlDebugOutput("Before translating into rsl: ", jsdl);
@@ -213,17 +129,23 @@ public class GT4Submitter extends JobSubmitter {
 
 		// Add "queue" node
 		// TODO change that once I know how to specify queues in jsdl
-		String queue = JsdlHelpers.getCandidateHosts(jsdl)[0]; // TODO this
-		// always uses
-		// the first
-		// candidate
-		// host - not
-		// good
-		if (queue.indexOf(":") != -1) {
-			queue = queue.substring(0, queue.indexOf(":"));
-			Element queue_node = output.createElement("queue");
-			queue_node.setTextContent(queue);
-			job.appendChild(queue_node);
+		String[] queues = JsdlHelpers.getCandidateHosts(jsdl);
+		if ( (queues != null) && (queues.length > 0) ) {
+			String queue = queues[0];
+			// TODO this
+			// always uses
+			// the first
+			// candidate
+			// host - not
+			// good
+			if (queue.indexOf(":") != -1) {
+				queue = queue.substring(0, queue.indexOf(":"));
+				Element queue_node = output.createElement("queue");
+				queue_node.setTextContent(queue);
+				job.appendChild(queue_node);
+			}
+		} else {
+			myLogger.info("Can't parse queues. If that happens when trying to submit a job, it's probably a bug...");
 		}
 
 		// Add "jobtype" if mpi
@@ -334,62 +256,67 @@ public class GT4Submitter extends JobSubmitter {
 
 			String application = JsdlHelpers.getApplicationName(jsdl);
 			String version = JsdlHelpers.getApplicationVersion(jsdl);
-			String subLoc = JsdlHelpers.getCandidateHosts(jsdl)[0];
+			String[] subLocs = JsdlHelpers.getCandidateHosts(jsdl);
+			if ( (subLocs != null) && (subLocs.length > 0) ) {
+				String subLoc =  subLocs[0];
 
-			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
-				myLogger
-				.debug("\"generic\" application. Not trying to calculate modules...");
+				if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
+					myLogger
+					.debug("\"generic\" application. Not trying to calculate modules...");
 
-			} else if (StringUtils.isNotBlank(application)
-					&& StringUtils.isNotBlank(version)
-					&& StringUtils.isNotBlank(subLoc)) {
-				// if we know application, version and submissionLocation
-				Map<String, String> appDetails = infoManager
-				.getApplicationDetails(application, version, subLoc);
+				} else if (StringUtils.isNotBlank(application)
+						&& StringUtils.isNotBlank(version)
+						&& StringUtils.isNotBlank(subLoc)) {
+					// if we know application, version and submissionLocation
+					Map<String, String> appDetails = infoManager
+					.getApplicationDetails(application, version, subLoc);
 
-				try {
-					modules_string = appDetails.get(Constants.MDS_MODULES_KEY)
-					.split(",");
+					try {
+						modules_string = appDetails.get(Constants.MDS_MODULES_KEY)
+						.split(",");
 
-					if ((modules_string == null) || "".equals(modules_string)) {
+						if ((modules_string == null) || "".equals(modules_string)) {
+							myLogger
+							.warn("No module for this application/version/submissionLocation found. Submitting nonetheless...");
+						}
+
+					} catch (Exception e) {
 						myLogger
-						.warn("No module for this application/version/submissionLocation found. Submitting nonetheless...");
+						.warn("Could not get module for this application/version/submissionLocation: "
+								+ e.getLocalizedMessage()
+								+ ". Submitting nonetheless...");
 					}
 
-				} catch (Exception e) {
-					myLogger
-					.warn("Could not get module for this application/version/submissionLocation: "
-							+ e.getLocalizedMessage()
-							+ ". Submitting nonetheless...");
-				}
+					// if we know application and submissionlocation but version
+					// doesn't matter
+				} else if ((application != null) && (version == null) && (subLoc != null)) {
 
-				// if we know application and submissionlocation but version
-				// doesn't matter
-			} else if ((application != null) && (version == null) && (subLoc != null)) {
+					Map<String, String> appDetails = infoManager
+					.getApplicationDetails(application,
+							Constants.NO_VERSION_INDICATOR_STRING, subLoc);
 
-				Map<String, String> appDetails = infoManager
-				.getApplicationDetails(application,
-						Constants.NO_VERSION_INDICATOR_STRING, subLoc);
+					try {
+						modules_string = appDetails.get(Constants.MDS_MODULES_KEY)
+						.split(",");
 
-				try {
-					modules_string = appDetails.get(Constants.MDS_MODULES_KEY)
-					.split(",");
+						if ((modules_string == null) || "".equals(modules_string)) {
+							myLogger
+							.warn("No module for this application/submissionLocation found. Submitting nonetheless...");
+						}
 
-					if ((modules_string == null) || "".equals(modules_string)) {
+					} catch (Exception e) {
 						myLogger
-						.warn("No module for this application/submissionLocation found. Submitting nonetheless...");
+						.warn("Could not get module for this application/submissionLocation: "
+								+ e.getLocalizedMessage()
+								+ ". Submitting nonetheless...");
 					}
 
-				} catch (Exception e) {
-					myLogger
-					.warn("Could not get module for this application/submissionLocation: "
-							+ e.getLocalizedMessage()
-							+ ". Submitting nonetheless...");
+				} else {
+					throw new RuntimeException(
+					"Can't determine module because either/or application, version submissionLocation are missing.");
 				}
-
 			} else {
-				throw new RuntimeException(
-				"Can't determine module because either/or application, version submissionLocation are missing.");
+				myLogger.info("No submission location specified. If this happens when trying to submit a job, it's probably a bug...");
 			}
 
 			if ((modules_string != null) && (modules_string.length > 0)) {
@@ -468,6 +395,90 @@ public class GT4Submitter extends JobSubmitter {
 
 		return result.getWriter().toString();
 	}
+
+	private static EndpointReferenceType getFactoryEPR(final String contact,
+			final String factoryType) throws Exception {
+		URL factoryUrl = ManagedJobFactoryClientHelper.getServiceURL(contact)
+		.getURL();
+
+		myLogger.debug("Factory Url: " + factoryUrl);
+		return ManagedJobFactoryClientHelper.getFactoryEndpoint(factoryUrl,
+				factoryType);
+	}
+
+
+	// // this method is just for testing. Do not use!!!
+	// protected String submit(String host, String factoryType, Document jsdl,
+	// GSSCredential credential) {
+	//
+	// JobDescriptionType jobDesc = null;
+	// String submittedJobDesc = null;
+	// try {
+	// submittedJobDesc = createJobSubmissionDescription(jsdl);
+	// jobDesc = RSLHelper.readRSL(submittedJobDesc);
+	//
+	// } catch (RSLParseException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// return null;
+	// }
+	//
+	// /*
+	// * Job test parameters (adjust to your needs)
+	// */
+	// // remote host
+	// //String contact = "ng2.vpac.org";
+	//
+	// // Factory type: Fork, Condor, PBS, LSF
+	// //String factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.FORK;
+	// // String factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
+	//
+	// // Deafult Security: Host authorization + XML encryption
+	// Authorization authz = HostAuthorization.getInstance();
+	// Integer xmlSecurity = Constants.ENCRYPTION;
+	//
+	// // Submission mode: batch = will not wait
+	// boolean batchMode = true;
+	//
+	// // a Simple command executable (if no job file)
+	// String simpleJobCommandLine = null;
+	//
+	// // Job timeout values: duration, termination times
+	// Date serviceDuration = null;
+	// Date serviceTermination = null;
+	// int timeout = GramJob.DEFAULT_TIMEOUT;
+	//
+	// String handle = null;
+	// try {
+	//
+	// if ( credential == null || credential.getRemainingLifetime() < 1 ) {
+	// throw new NoValidCredentialException("Credential is not valid.");
+	// }
+	//
+	// GramClient gram = new GramClient(credential);
+	//
+	// handle = gram.submitRSL(getFactoryEPR(host,factoryType)
+	// , simpleJobCommandLine, jobDesc
+	// , authz, xmlSecurity
+	// , batchMode, false, false
+	// , serviceDuration, serviceTermination, timeout );
+	//
+	// } catch (Exception e) {
+	// //TODO handle that
+	// e.printStackTrace();
+	// }
+	//
+	// //job.setSubmittedJobDescription(submittedJobDesc);
+	//
+	// myLogger.debug("Submitted rsl job
+	// description:\n--------------------------------");
+	// myLogger.debug(submittedJobDesc);
+	//
+	// return handle;
+	// }
+
+	private final InformationManager informationManager = CachedMdsInformationManager
+	.getDefaultCachedMdsInformationManager(Environment.getVarGrisuDirectory().toString());
 
 	/*
 	 * (non-Javadoc)

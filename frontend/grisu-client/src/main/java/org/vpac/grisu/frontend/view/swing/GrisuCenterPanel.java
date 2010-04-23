@@ -11,6 +11,7 @@ import javax.swing.SwingUtilities;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.jobMonitoring.RunningJobManager;
+import org.vpac.grisu.frontend.control.utils.ApplicationsManager;
 import org.vpac.grisu.frontend.view.swing.files.preview.FileListWithPreviewPanel;
 import org.vpac.grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import org.vpac.grisu.frontend.view.swing.jobmonitoring.batch.MultiBatchJobMonitoringGrid;
@@ -69,7 +70,7 @@ public class GrisuCenterPanel extends JPanel {
 		add(wrapperPanel, "2, 2, fill, fill");
 	}
 	public void addJobCreationPanel(JobCreationPanel panel) {
-		availableJobCreationPanels.put(panel.getPanelName(), panel);
+		availableJobCreationPanels.put(ApplicationsManager.getPrettyName(panel.getPanelName()), panel);
 		wrapperPanel.add(panel.getPanel(), panel.getPanelName());
 		pcs.firePropertyChange("availableJobCreationPanels", null, availableJobCreationPanels);
 	}

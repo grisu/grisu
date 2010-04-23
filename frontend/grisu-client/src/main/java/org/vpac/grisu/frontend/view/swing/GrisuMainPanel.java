@@ -77,7 +77,7 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 
 	private GrisuNavigationPanel getGrisuNavigationPanel() {
 		if (grisuNavigationPanel == null) {
-			grisuNavigationPanel = new GrisuNavigationPanel(this.si, getGrisuCenterPanel());
+			//			grisuNavigationPanel = new GrisuNavigationPanel(this.si, getGrisuCenterPanel());
 			grisuNavigationPanel = new GrisuNavigationPanel(this.si, getGrisuCenterPanel(),
 					displaySingleJobMonitorItem, displaySingleJobAllJobsMenuItem,
 					displaySingleJobAppSpecificMenuItems, singleApplicationsToWatch,

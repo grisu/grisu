@@ -28,11 +28,19 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 
+import org.vpac.grisu.backend.model.job.gt4.GT4Submitter;
+import org.vpac.grisu.backend.model.job.gt5.GT5Submitter;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
+import org.vpac.grisu.control.info.CachedMdsInformationManager;
 import org.vpac.grisu.frontend.control.login.LoginManager;
+import org.vpac.grisu.settings.Environment;
+import org.vpac.grisu.utils.SeveralXMLHelpers;
+
+import au.org.arcs.jcommons.interfaces.InformationManager;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -80,6 +88,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 			}
 		}
 	}
+
 	//////////////////////////////////////////////////// inner class SaveAction
 	class SaveAction extends AbstractAction {
 		//============================================= constructor
@@ -103,6 +112,9 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 			}
 		}
 	}
+	public static final InformationManager informationManager = CachedMdsInformationManager
+	.getDefaultCachedMdsInformationManager(Environment
+			.getVarGrisuDirectory().toString());
 	public static String getStackTrace(Throwable t) {
 		StringWriter stringWritter = new StringWriter();
 		PrintWriter printWritter = new PrintWriter(stringWritter, true);
@@ -160,10 +172,15 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 
 	private JPanel currentTemplatePanel = null;
 	private JButton button_1;
-	private JScrollPane scrollPane_2;
 	private JTextArea jsdlTextArea;
 
 	private TemplateObject template;
+	private JTabbedPane tabbedPane;
+	private JScrollPane scrollPane_3;
+	private JScrollPane scrollPane_2;
+	private JTextArea gt4TextArea;
+	private JScrollPane scrollPane_4;
+	private JTextArea gt5TextArea;
 
 	/**
 	 * Create the frame.
@@ -226,15 +243,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 
 						currentTemplatePanel = template.getTemplatePanel();
 
-						try {
-							getJsdlTextArea().setText(template.getJobSubmissionObject().getJobDescriptionDocumentAsString());
-							getJsdlTextArea().setCaretPosition(0);
-						} catch (JobPropertiesException e) {
-							StringBuffer temp = new StringBuffer("Can't calculate jsdl right now: "+e.getLocalizedMessage()+"\n\n");
-							temp.append(getStackTrace(e));
-							getJsdlTextArea().setText(temp.toString());
-							getJsdlTextArea().setCaretPosition(0);
-						}
+						setJobDescriptions();
 
 						getCardPanel().add(currentTemplatePanel, "currentTemplate");
 						cl.show(getCardPanel(),"currentTemplate");
@@ -306,6 +315,20 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 		}
 		return textArea_1;
 	}
+	private JTextArea getGt4TextArea() {
+		if (gt4TextArea == null) {
+			gt4TextArea = new JTextArea();
+			gt4TextArea.setEditable(false);
+		}
+		return gt4TextArea;
+	}
+	private JTextArea getGt5TextArea() {
+		if (gt5TextArea == null) {
+			gt5TextArea = new JTextArea();
+			gt5TextArea.setEditable(false);
+		}
+		return gt5TextArea;
+	}
 	private JTextArea getJsdlTextArea() {
 		if (jsdlTextArea == null) {
 			jsdlTextArea = new JTextArea();
@@ -326,12 +349,12 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 					FormFactory.RELATED_GAP_ROWSPEC,
 					RowSpec.decode("default:grow"),
 					FormFactory.RELATED_GAP_ROWSPEC,
-					RowSpec.decode("max(79dlu;default)"),
+					RowSpec.decode("max(79dlu;default):grow"),
 					FormFactory.RELATED_GAP_ROWSPEC,
 					FormFactory.DEFAULT_ROWSPEC,
 					FormFactory.RELATED_GAP_ROWSPEC,}));
 			panel_1.add(getScrollPane(), "2, 2, 3, 1, fill, fill");
-			panel_1.add(getScrollPane_2(), "2, 4, 3, 1, fill, fill");
+			panel_1.add(getTabbedPane(), "2, 4, 3, 1, fill, fill");
 			panel_1.add(getButton(), "2, 6, right, default");
 			panel_1.add(getButton_1(), "4, 6, right, default");
 		}
@@ -351,12 +374,27 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 		}
 		return scrollPane_1;
 	}
+
 	private JScrollPane getScrollPane_2() {
 		if (scrollPane_2 == null) {
 			scrollPane_2 = new JScrollPane();
-			scrollPane_2.setViewportView(getJsdlTextArea());
+			scrollPane_2.setViewportView(getGt4TextArea());
 		}
 		return scrollPane_2;
+	}
+	private JScrollPane getScrollPane_3() {
+		if (scrollPane_3 == null) {
+			scrollPane_3 = new JScrollPane();
+			scrollPane_3.setViewportView(getJsdlTextArea());
+		}
+		return scrollPane_3;
+	}
+	private JScrollPane getScrollPane_4() {
+		if (scrollPane_4 == null) {
+			scrollPane_4 = new JScrollPane();
+			scrollPane_4.setViewportView(getGt5TextArea());
+		}
+		return scrollPane_4;
 	}
 	private JSplitPane getSplitPane() {
 		if (splitPane == null) {
@@ -367,26 +405,53 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 		}
 		return splitPane;
 	}
+	private JTabbedPane getTabbedPane() {
+		if (tabbedPane == null) {
+			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+			tabbedPane.addTab("Jsdl", null, getScrollPane_3(), null);
+			tabbedPane.addTab("GT4 RSL", null, getScrollPane_2(), null);
+			tabbedPane.addTab("GT5 RSL", null, getScrollPane_4(), null);
+		}
+		return tabbedPane;
+	}
 	private JTextArea getTextArea() {
 		if (textArea == null) {
 			textArea = new JTextArea();
 		}
 		return textArea;
 	}
-
 	public void propertyChange(PropertyChangeEvent arg0) {
 
+		setJobDescriptions();
+
+	}
+
+	private void setJobDescriptions() {
 		if ( (template != null) && (template.getJobSubmissionObject() != null) ) {
+
+			String jsdl;
 			try {
-				getJsdlTextArea().setText(template.getJobSubmissionObject().getJobDescriptionDocumentAsString());
+				jsdl = template.getJobSubmissionObject().getJobDescriptionDocumentAsString();
+				getJsdlTextArea().setText(jsdl);
 				getJsdlTextArea().setCaretPosition(0);
 			} catch (JobPropertiesException e) {
 				StringBuffer temp = new StringBuffer("Can't calculate jsdl right now: "+e.getLocalizedMessage()+"\n\n");
 				temp.append(getStackTrace(e));
 				getJsdlTextArea().setText(temp.toString());
 				getJsdlTextArea().setCaretPosition(0);
+				getGt4TextArea().setText(temp.toString());
+				getGt4TextArea().setCaretPosition(0);
+				getGt5TextArea().setText(temp.toString());
+				getGt5TextArea().setCaretPosition(0);
+				return;
 			}
-		}
 
+			String gt4rsl = GT4Submitter.createJobSubmissionDescription(informationManager, SeveralXMLHelpers.fromString(jsdl));
+			getGt4TextArea().setText(gt4rsl);
+
+			String gt5rsl = GT5Submitter.createJobSubmissionDescription(informationManager, SeveralXMLHelpers.fromString(jsdl));
+			getGt5TextArea().setText(gt5rsl);
+
+		}
 	}
 }
