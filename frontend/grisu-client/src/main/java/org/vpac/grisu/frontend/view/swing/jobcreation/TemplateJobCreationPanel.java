@@ -119,6 +119,7 @@ public class TemplateJobCreationPanel extends JPanel implements JobCreationPanel
 		}
 		return "generic";
 	}
+
 	public void setServiceInterface(ServiceInterface si) {
 
 		try {
@@ -126,7 +127,7 @@ public class TemplateJobCreationPanel extends JPanel implements JobCreationPanel
 				remove(currentTemplatePanel);
 			}
 			template = TemplateHelpers.parseAndCreateTemplatePanel(si, lines);
-			currentTemplatePanel = template.getTemplatePanel();
+			currentTemplatePanel = new TemplateWrapperPanel(template);
 			add(currentTemplatePanel, TEMPLATE_PANEL);
 			cardLayout.show(this, TEMPLATE_PANEL);
 		} catch (TemplateException e) {

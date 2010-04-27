@@ -16,6 +16,8 @@ import org.vpac.grisu.frontend.model.events.ApplicationEventListener;
 import org.vpac.grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import org.vpac.grisu.frontend.view.swing.login.LoginPanel;
 
+import au.org.arcs.jcommons.constants.Constants;
+
 public abstract class GrisuApplicationWindow implements WindowListener {
 
 	private ServiceInterface si;
@@ -91,7 +93,18 @@ public abstract class GrisuApplicationWindow implements WindowListener {
 			}
 		}
 
-		mainPanel = new GrisuMainPanel(singleJobs, false, false, null, batchJobs, false, false, null, true);
+		boolean genericApp = false;
+		for ( JobCreationPanel panel : getJobCreationPanels() ) {
+			if ( Constants.GENERIC_APPLICATION_NAME.equals(panel.getSupportedApplication()) ) {
+				genericApp = true;
+			}
+		}
+
+		if ( genericApp ) {
+			mainPanel = new GrisuMainPanel(singleJobs, true, true, null, batchJobs, true, true, null, true);
+		} else {
+			mainPanel = new GrisuMainPanel(singleJobs, false, false, null, batchJobs, false, false, null, true);
+		}
 		for ( JobCreationPanel panel : getJobCreationPanels() ) {
 			mainPanel.addJobCreationPanel(panel);
 		}

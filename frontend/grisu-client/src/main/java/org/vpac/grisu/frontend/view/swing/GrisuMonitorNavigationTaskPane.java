@@ -8,6 +8,9 @@ import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.jdesktop.swingx.JXTaskPane;
 import org.vpac.grisu.control.ServiceInterface;
@@ -20,6 +23,9 @@ import org.vpac.grisu.model.UserEnvironmentManager;
 import au.org.arcs.jcommons.constants.Constants;
 
 public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements EventSubscriber<NewJobEvent>{
+
+	static final Logger myLogger = Logger
+	.getLogger(GrisuMonitorNavigationTaskPane.class.getName());
 
 	public static final String SINGLE_JOB_LIST = "single_list";
 
@@ -61,11 +67,19 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements EventS
 				addApplication(app);
 			}
 		}
+
+		EventBus.subscribe(NewJobEvent.class, this);
 	}
 
 	public void addApplication(final String application) {
 
+
 		final String app = application.toLowerCase();
+
+		if ( Constants.GENERIC_APPLICATION_NAME.equals(app) ) {
+			myLogger.debug("Not adding monitor generic application to navigation pane.");
+			return;
+		}
 
 		if ( Constants.ALLJOBS_KEY.equals(app) ) {
 			RunningJobManager.getDefault(si).getAllJobs();
@@ -100,7 +114,23 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements EventS
 	public void onEvent(NewJobEvent event) {
 
 		if ( displayApplicationSpecificItems ) {
-			addApplication(event.getJob().getApplication());
+
+			String application = event.getJob().getApplication();
+
+			if ( StringUtils.isBlank(application) ) {
+				try {
+					application = si.getJobProperty(event.getJob().getJobname(), Constants.APPLICATIONNAME_KEY);
+				} catch (Exception e) {
+					myLogger.error(e);
+					return;
+				}
+			}
+
+			if ( StringUtils.isBlank(application) ) {
+				return;
+			}
+
+			addApplication(application);
 		}
 
 	}

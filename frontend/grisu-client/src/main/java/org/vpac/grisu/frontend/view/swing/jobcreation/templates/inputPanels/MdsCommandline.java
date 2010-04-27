@@ -40,7 +40,7 @@ public class MdsCommandline extends AbstractInputPanel {
 
 		String commandline;
 		try {
-			commandline = ((String)getComboBox().getSelectedItem()).trim();
+			commandline = ((String)getComboBox().getEditor().getItem()).trim();
 		} catch (Exception e) {
 			myLogger.debug(e.getLocalizedMessage());
 			return;
@@ -60,6 +60,7 @@ public class MdsCommandline extends AbstractInputPanel {
 
 		if ((lastCalculatedExecutable != null)
 				&& lastCalculatedExecutable.equals(exe)) {
+			setValue("commandline", commandline);
 			return;
 		}
 
@@ -121,7 +122,8 @@ public class MdsCommandline extends AbstractInputPanel {
 
 	@Override
 	protected String getValueAsString() {
-		return ((String)(getComboBox().getSelectedItem()));
+		String value = ((String)(getComboBox().getEditor().getItem()));
+		return value;
 	}
 
 	@Override

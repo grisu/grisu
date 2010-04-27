@@ -37,6 +37,8 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.info.CachedMdsInformationManager;
 import org.vpac.grisu.frontend.control.login.LoginManager;
+import org.vpac.grisu.frontend.view.swing.login.GrisuSwingClient;
+import org.vpac.grisu.frontend.view.swing.login.LoginPanel;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 
@@ -47,7 +49,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class TemplateTestFrame extends JFrame implements PropertyChangeListener {
+public class TemplateTestFrame extends JFrame implements PropertyChangeListener, ActionListener, GrisuSwingClient {
 
 	///////////////////////////////////////////////////// inner class ExitAction
 	class ExitAction extends AbstractAction {
@@ -81,6 +83,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 				try {
 					FileReader reader = new FileReader(f);
 					textArea.read(reader, "");  // Use TextComponent read
+					TemplateTestFrame.this.actionPerformed(null);
 				} catch (IOException ioex) {
 					System.out.println(e);
 					System.exit(1);
@@ -137,7 +140,8 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 
 
 
-					TemplateTestFrame frame = new TemplateTestFrame(si);
+					TemplateTestFrame frame = new TemplateTestFrame();
+					frame.setServiceInterface(si);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -164,7 +168,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 	private JTextArea textArea;
 
 	private JButton button;
-	private final ServiceInterface si;
+	private ServiceInterface si;
 	private JPanel errorPanel;
 	private JScrollPane scrollPane_1;
 
@@ -181,12 +185,15 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 	private JTextArea gt4TextArea;
 	private JScrollPane scrollPane_4;
 	private JTextArea gt5TextArea;
+	private JButton OpenFileButton;
+
+	private LoginPanel lp;
 
 	/**
 	 * Create the frame.
 	 */
-	public TemplateTestFrame(ServiceInterface si) {
-		this.si = si;
+	public TemplateTestFrame() {
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 800, 600);
 
@@ -211,58 +218,59 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 	}
 
 
+	public void actionPerformed(ActionEvent arg0) {
+
+		if ( currentTemplatePanel != null ) {
+			getCardPanel().remove(currentTemplatePanel);
+		}
+
+		getErrorTextArea().setText("");
+		getJsdlTextArea().setText("");
+		CardLayout cl = (CardLayout)(getCardPanel().getLayout());
+		cl.show(getCardPanel(),"error");
+
+		List<String> lines = new LinkedList(Arrays.asList(getTextArea().getText().split("\n")));
+
+		try {
+
+			if (  (template != null) && (template.getJobSubmissionObject() != null) ) {
+				template.getJobSubmissionObject().removePropertyChangeListener(TemplateTestFrame.this);
+			}
+			template = createTemplatePanel(lines);
+			template.getJobSubmissionObject().addPropertyChangeListener(TemplateTestFrame.this);
+
+			currentTemplatePanel = template.getTemplatePanel();
+
+			setJobDescriptions();
+
+			getCardPanel().add(currentTemplatePanel, "currentTemplate");
+			cl.show(getCardPanel(),"currentTemplate");
+
+
+		} catch (TemplateException e) {
+
+			StringBuffer temp = new StringBuffer("Error when building template: "+e.getLocalizedMessage()+"\n\n");
+			temp.append(getStackTrace(e));
+			getErrorTextArea().setText(temp.toString());
+			getErrorTextArea().setCaretPosition(0);
+			cl.show(getCardPanel(),"error");
+		}
+
+	}
+
 	public TemplateObject createTemplatePanel(List<String> lines) throws TemplateException {
 		return TemplateHelpers.parseAndCreateTemplatePanel(si, lines);
 	}
 
+
 	private JButton getButton() {
 		if (button == null) {
 			button = new JButton("Apply");
-			button.addActionListener(new ActionListener() {
-
-				public void actionPerformed(ActionEvent arg0) {
-
-					if ( currentTemplatePanel != null ) {
-						getCardPanel().remove(currentTemplatePanel);
-					}
-
-					getErrorTextArea().setText("");
-					getJsdlTextArea().setText("");
-					CardLayout cl = (CardLayout)(getCardPanel().getLayout());
-					cl.show(getCardPanel(),"error");
-
-					List<String> lines = new LinkedList(Arrays.asList(getTextArea().getText().split("\n")));
-
-					try {
-
-						if (  (template != null) && (template.getJobSubmissionObject() != null) ) {
-							template.getJobSubmissionObject().removePropertyChangeListener(TemplateTestFrame.this);
-						}
-						template = createTemplatePanel(lines);
-						template.getJobSubmissionObject().addPropertyChangeListener(TemplateTestFrame.this);
-
-						currentTemplatePanel = template.getTemplatePanel();
-
-						setJobDescriptions();
-
-						getCardPanel().add(currentTemplatePanel, "currentTemplate");
-						cl.show(getCardPanel(),"currentTemplate");
-
-
-					} catch (TemplateException e) {
-
-						StringBuffer temp = new StringBuffer("Error when building template: "+e.getLocalizedMessage()+"\n\n");
-						temp.append(getStackTrace(e));
-						getErrorTextArea().setText(temp.toString());
-						getErrorTextArea().setCaretPosition(0);
-						cl.show(getCardPanel(),"error");
-					}
-
-				}
-			});
+			button.addActionListener(this);
 		}
 		return button;
 	}
+
 
 	private JButton getButton_1() {
 		if (button_1 == null) {
@@ -336,12 +344,23 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 		}
 		return jsdlTextArea;
 	}
+	private JButton getOpenFileButton() {
+		if (OpenFileButton == null) {
+			OpenFileButton = new JButton("Open file...");
+			OpenFileButton.setAction(_openAction);
+		}
+		return OpenFileButton;
+	}
 	private JPanel getPanel_1() {
 		if (panel_1 == null) {
 			panel_1 = new JPanel();
 			panel_1.setLayout(new FormLayout(new ColumnSpec[] {
 					FormFactory.RELATED_GAP_COLSPEC,
+					FormFactory.DEFAULT_COLSPEC,
+					FormFactory.RELATED_GAP_COLSPEC,
 					ColumnSpec.decode("default:grow"),
+					FormFactory.RELATED_GAP_COLSPEC,
+					FormFactory.DEFAULT_COLSPEC,
 					FormFactory.RELATED_GAP_COLSPEC,
 					FormFactory.DEFAULT_COLSPEC,
 					FormFactory.RELATED_GAP_COLSPEC,},
@@ -353,13 +372,18 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 					FormFactory.RELATED_GAP_ROWSPEC,
 					FormFactory.DEFAULT_ROWSPEC,
 					FormFactory.RELATED_GAP_ROWSPEC,}));
-			panel_1.add(getScrollPane(), "2, 2, 3, 1, fill, fill");
-			panel_1.add(getTabbedPane(), "2, 4, 3, 1, fill, fill");
-			panel_1.add(getButton(), "2, 6, right, default");
-			panel_1.add(getButton_1(), "4, 6, right, default");
+			panel_1.add(getScrollPane(), "2, 2, 7, 1, fill, fill");
+			panel_1.add(getTabbedPane(), "2, 4, 7, 1, fill, fill");
+			panel_1.add(getOpenFileButton(), "2, 6, left, default");
+			panel_1.add(getButton(), "6, 6, right, default");
+			panel_1.add(getButton_1(), "8, 6, right, default");
 		}
 		return panel_1;
 	}
+	public JPanel getRootPanel() {
+		return contentPane;
+	}
+
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
@@ -374,7 +398,6 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 		}
 		return scrollPane_1;
 	}
-
 	private JScrollPane getScrollPane_2() {
 		if (scrollPane_2 == null) {
 			scrollPane_2 = new JScrollPane();
@@ -414,6 +437,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 		}
 		return tabbedPane;
 	}
+
 	private JTextArea getTextArea() {
 		if (textArea == null) {
 			textArea = new JTextArea();
@@ -453,5 +477,16 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener 
 			getGt5TextArea().setText(gt5rsl);
 
 		}
+	}
+
+	public void setLoginPanel(LoginPanel lp) {
+
+		this.lp = lp;
+	}
+
+	public void setServiceInterface(ServiceInterface si) {
+
+		this.si = si;
+
 	}
 }

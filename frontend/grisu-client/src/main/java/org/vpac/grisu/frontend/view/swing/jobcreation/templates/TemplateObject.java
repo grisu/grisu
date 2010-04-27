@@ -6,6 +6,10 @@ import java.util.Map;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
+import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.JobPropertiesException;
+import org.vpac.grisu.control.exceptions.JobSubmissionException;
+import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
 public class TemplateObject {
@@ -40,12 +44,14 @@ public class TemplateObject {
 
 	private JobSubmissionObjectImpl jobObject;
 	private final String commandlineTemplate;
+	private final ServiceInterface si;
 
 	private JPanel templatePanel;
 	//	private final Map<String, AbstractInputPanel> panels = new HashMap<String, AbstractInputPanel>();
 	private final Map<String, String> changedValues;
 
-	public TemplateObject(String commandlineTemplate) throws TemplateException {
+	public TemplateObject(ServiceInterface si, String commandlineTemplate) throws TemplateException {
+		this.si = si;
 		this.commandlineTemplate= commandlineTemplate;
 		changedValues = parseCommandlineTemplate(commandlineTemplate);
 	}
@@ -68,6 +74,35 @@ public class TemplateObject {
 
 	public void setTemplatePanel(JPanel templatePanel) {
 		this.templatePanel = templatePanel;
+	}
+
+	public void submitJob() {
+
+		JobObject job = null;
+		try {
+			job = new JobObject(si, jobObject.getJobDescriptionDocument());
+		} catch (JobPropertiesException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		try {
+			job.createJob("/ACC");
+		} catch (JobPropertiesException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		try {
+			job.submitJob();
+		} catch (JobSubmissionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	public void userInput(String panelName, String newValue) {

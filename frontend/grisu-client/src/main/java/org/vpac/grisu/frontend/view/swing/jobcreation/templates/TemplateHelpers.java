@@ -277,7 +277,7 @@ public class TemplateHelpers {
 		List<String> lines = new LinkedList(linesOrig);
 		lines.remove(0);
 
-		TemplateObject template = new TemplateObject(commandline);
+		TemplateObject template = new TemplateObject(si, commandline);
 
 		LinkedHashMap<String, PanelConfig> inputConfigs = parseConfig(lines);
 		LinkedHashMap<String, AbstractInputPanel> inputPanels = new LinkedHashMap<String, AbstractInputPanel>();
