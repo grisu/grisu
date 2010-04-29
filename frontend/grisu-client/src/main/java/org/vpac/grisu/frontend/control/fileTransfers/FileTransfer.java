@@ -16,10 +16,7 @@ import org.vpac.grisu.model.files.GlazedFile;
 public class FileTransfer implements Comparable<FileTransfer> {
 
 	public enum Status {
-		CREATED,
-		TRANSFERRING,
-		FINISHED,
-		FAILED
+		CREATED, TRANSFERRING, FINISHED, FAILED
 	}
 
 	private final FileManager fm;
@@ -46,7 +43,8 @@ public class FileTransfer implements Comparable<FileTransfer> {
 
 	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
-	public FileTransfer(FileManager fm, Set<GlazedFile> sources, GlazedFile target, boolean overwrite) {
+	public FileTransfer(FileManager fm, Set<GlazedFile> sources,
+			GlazedFile target, boolean overwrite) {
 
 		this(fm, GlazedFile.extractUrls(sources), target.getUrl(), overwrite);
 	}
@@ -61,7 +59,8 @@ public class FileTransfer implements Comparable<FileTransfer> {
 
 	}
 
-	public FileTransfer(FileManager fm, Set<String> sourceUrl, String targetDirUrl, boolean overwrite) {
+	public FileTransfer(FileManager fm, Set<String> sourceUrl,
+			String targetDirUrl, boolean overwrite) {
 		this.fm = fm;
 		this.sourceUrls = sourceUrl;
 		this.targetDirUrl = targetDirUrl;
@@ -82,10 +81,11 @@ public class FileTransfer implements Comparable<FileTransfer> {
 	@Override
 	public boolean equals(Object o) {
 
-		if ( o instanceof FileTransfer ) {
-			FileTransfer ft = (FileTransfer)o;
-			if ( getSourceUrl().equals(ft.getSourceUrl()) && getTargetDirUrl().equals(ft.getTargetDirUrl())
-					&& getStatus().equals(ft.getStatus()) ) {
+		if (o instanceof FileTransfer) {
+			FileTransfer ft = (FileTransfer) o;
+			if (getSourceUrl().equals(ft.getSourceUrl())
+					&& getTargetDirUrl().equals(ft.getTargetDirUrl())
+					&& getStatus().equals(ft.getStatus())) {
 				return true;
 			} else {
 				return false;
@@ -124,7 +124,7 @@ public class FileTransfer implements Comparable<FileTransfer> {
 	}
 
 	public String getTargetDirUrl() {
-		if ( (targetDirUrl == null) && (job != null) ) {
+		if ((targetDirUrl == null) && (job != null)) {
 			return job.getJobDirectoryUrl();
 		} else {
 			return targetDirUrl;
@@ -141,7 +141,7 @@ public class FileTransfer implements Comparable<FileTransfer> {
 
 	public synchronized Callable<FileTransfer.Status> getTransferThread() {
 
-		if ( transferThread == null ) {
+		if (transferThread == null) {
 
 			transferThread = new Callable<FileTransfer.Status>() {
 
@@ -149,14 +149,28 @@ public class FileTransfer implements Comparable<FileTransfer> {
 
 					started = new Date();
 					status = Status.TRANSFERRING;
-					pcs.firePropertyChange("status", Status.CREATED, Status.TRANSFERRING);
+					pcs.firePropertyChange("status", Status.CREATED,
+							Status.TRANSFERRING);
 
-					for ( String sourceUrl : sourceUrls ) {
+					for (String sourceUrl : sourceUrls) {
+
+						if (Thread.currentThread().isInterrupted()) {
+
+							status = Status.FAILED;
+							finished = new Date();
+							pcs.firePropertyChange("status",
+									Status.TRANSFERRING, Status.FAILED);
+							failedSourceFile = sourceUrl;
+							throw new InterruptedException(
+									"Job staging interrupted.");
+						}
+
 						String oldFile = currentSourceFile;
 						currentSourceFile = sourceUrl;
-						pcs.firePropertyChange("currentSourceFile", oldFile, currentSourceFile);
+						pcs.firePropertyChange("currentSourceFile", oldFile,
+								currentSourceFile);
 						try {
-							if ( job != null ) {
+							if (job != null) {
 								fm.uploadInputFile(sourceUrl, job.getJobname());
 							} else {
 								fm.cp(sourceUrl, targetDirUrl, overwrite);
@@ -166,15 +180,19 @@ public class FileTransfer implements Comparable<FileTransfer> {
 							failedSourceFile = sourceUrl;
 							finished = new Date();
 							status = Status.FAILED;
-							pcs.firePropertyChange("status", Status.TRANSFERRING, Status.FAILED);
+							pcs.firePropertyChange("status",
+									Status.TRANSFERRING, Status.FAILED);
 							return status;
 						}
-						transferredSourceFiles = transferredSourceFiles+1;
-						pcs.firePropertyChange("transferredSourceFiles", transferredSourceFiles-1, transferredSourceFiles);
+						transferredSourceFiles = transferredSourceFiles + 1;
+						pcs.firePropertyChange("transferredSourceFiles",
+								transferredSourceFiles - 1,
+								transferredSourceFiles);
 					}
 					finished = new Date();
 					status = Status.FINISHED;
-					pcs.firePropertyChange("status", Status.TRANSFERRING, Status.FINISHED);
+					pcs.firePropertyChange("status", Status.TRANSFERRING,
+							Status.FINISHED);
 
 					return status;
 				}
@@ -187,12 +205,14 @@ public class FileTransfer implements Comparable<FileTransfer> {
 
 	@Override
 	public int hashCode() {
-		return 21 * getSourceUrl().hashCode() + 3 * getTargetDirUrl().hashCode() + 8 * getStatus().hashCode();
+		return 21 * getSourceUrl().hashCode() + 3
+				* getTargetDirUrl().hashCode() + 8 * getStatus().hashCode();
 	}
 
 	public boolean isFinished() {
 
-		if ( Status.FAILED.equals(this.getStatus()) || Status.FINISHED.equals(this.getStatus()) ) {
+		if (Status.FAILED.equals(this.getStatus())
+				|| Status.FINISHED.equals(this.getStatus())) {
 			return true;
 		} else {
 			return false;
@@ -206,12 +226,16 @@ public class FileTransfer implements Comparable<FileTransfer> {
 
 	public Status join() throws InterruptedException, ExecutionException {
 
-		if ( (transferThread == null) || (endStatus == null) ) {
+		if ((transferThread == null) || (endStatus == null)) {
 			throw new IllegalStateException("Transfer thread not created yet.");
 		}
 
-		return endStatus.get();
-
+		try {
+			return endStatus.get();
+		} catch (InterruptedException e) {
+			endStatus.cancel(true);
+			throw e;
+		}
 
 	}
 

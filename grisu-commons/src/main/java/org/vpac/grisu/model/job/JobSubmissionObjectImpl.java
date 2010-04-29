@@ -42,7 +42,7 @@ import au.org.arcs.jcommons.utils.JsdlHelpers;
 public class JobSubmissionObjectImpl {
 
 	static final Logger myLogger = Logger
-	.getLogger(JobSubmissionObjectImpl.class.getName());
+			.getLogger(JobSubmissionObjectImpl.class.getName());
 
 	public static void main(final String[] args) throws JobPropertiesException {
 
@@ -60,7 +60,7 @@ public class JobSubmissionObjectImpl {
 		jso.setForce_mpi(true);
 		jso.setForce_single(false);
 		jso.setInputFileUrls(new String[] { "file:///temp/test",
-		"gsiftp://ng2.vpac.org/tmp/test" });
+				"gsiftp://ng2.vpac.org/tmp/test" });
 		jso.setMemory(0L);
 
 		jso.getJobDescriptionDocument();
@@ -160,6 +160,7 @@ public class JobSubmissionObjectImpl {
 		stdout = JsdlHelpers.getPosixStandardOutput(jsdl);
 		stdin = JsdlHelpers.getPosixStandardInput(jsdl);
 		pbsDebug = JsdlHelpers.getPbsDebugElement(jsdl);
+
 	}
 
 	public JobSubmissionObjectImpl(final Map<String, String> jobProperties) {
@@ -167,11 +168,11 @@ public class JobSubmissionObjectImpl {
 		this.jobname = jobProperties.get(JobSubmissionProperty.JOBNAME
 				.toString());
 		this.application = jobProperties
-		.get(JobSubmissionProperty.APPLICATIONNAME.toString());
+				.get(JobSubmissionProperty.APPLICATIONNAME.toString());
 		this.applicationVersion = jobProperties
-		.get(JobSubmissionProperty.APPLICATIONVERSION.toString());
+				.get(JobSubmissionProperty.APPLICATIONVERSION.toString());
 		this.email_address = jobProperties
-		.get(JobSubmissionProperty.EMAIL_ADDRESS.toString());
+				.get(JobSubmissionProperty.EMAIL_ADDRESS.toString());
 		this.email_on_job_start = checkForBoolean(jobProperties
 				.get(JobSubmissionProperty.EMAIL_ON_START.toString()));
 		this.email_on_job_finish = checkForBoolean(jobProperties
@@ -211,13 +212,13 @@ public class JobSubmissionObjectImpl {
 		}
 
 		this.submissionLocation = jobProperties
-		.get(JobSubmissionProperty.SUBMISSIONLOCATION.toString());
+				.get(JobSubmissionProperty.SUBMISSIONLOCATION.toString());
 		this.commandline = jobProperties.get(JobSubmissionProperty.COMMANDLINE
 				.toString());
 		this.stderr = jobProperties
-		.get(JobSubmissionProperty.STDERR.toString());
+				.get(JobSubmissionProperty.STDERR.toString());
 		this.stdout = jobProperties
-		.get(JobSubmissionProperty.STDOUT.toString());
+				.get(JobSubmissionProperty.STDOUT.toString());
 		this.stdin = jobProperties.get(JobSubmissionProperty.STDIN.toString());
 
 		this.pbsDebug = jobProperties.get(JobSubmissionProperty.PBSDEBUG
@@ -333,7 +334,7 @@ public class JobSubmissionObjectImpl {
 
 	@Transient
 	public final Document getJobDescriptionDocument()
-	throws JobPropertiesException {
+			throws JobPropertiesException {
 
 		checkValidity();
 
@@ -347,7 +348,7 @@ public class JobSubmissionObjectImpl {
 
 	@Transient
 	public final String getJobDescriptionDocumentAsString()
-	throws JobPropertiesException {
+			throws JobPropertiesException {
 
 		String jsdlString = null;
 		jsdlString = SeveralXMLHelpers.toString(getJobDescriptionDocument());
@@ -392,7 +393,7 @@ public class JobSubmissionObjectImpl {
 		jobProperties.put(JobSubmissionProperty.MEMORY_IN_B, new Long(
 				memory_in_bytes).toString());
 		jobProperties.put(JobSubmissionProperty.NO_CPUS, new Integer(cpus)
-		.toString());
+				.toString());
 		jobProperties.put(JobSubmissionProperty.STDERR, stderr);
 		jobProperties.put(JobSubmissionProperty.STDOUT, stdout);
 		jobProperties.put(JobSubmissionProperty.SUBMISSIONLOCATION,
@@ -407,7 +408,6 @@ public class JobSubmissionObjectImpl {
 	public Long getMemory() {
 		return memory_in_bytes;
 	}
-
 
 	public String[] getModules() {
 		return modules.toArray(new String[] {});
@@ -429,12 +429,15 @@ public class JobSubmissionObjectImpl {
 	public String getStderr() {
 		return stderr;
 	}
+
 	public String getStdin() {
 		return this.stdin;
 	}
+
 	public String getStdout() {
 		return stdout;
 	}
+
 	@Transient
 	public final Map<String, String> getStringJobSubmissionPropertyMap() {
 
@@ -448,70 +451,89 @@ public class JobSubmissionObjectImpl {
 		}
 		return stringPropertyMap;
 	}
+
 	public String getSubmissionLocation() {
 		return submissionLocation;
 	}
+
 	public int getWalltimeInSeconds() {
 		return walltime_in_seconds;
 	}
+
 	@Override
 	public int hashCode() {
 		return 73 * getJobname().hashCode();
 	}
+
 	public Boolean isEmail_on_job_finish() {
 		return email_on_job_finish;
 	}
+
 	public Boolean isEmail_on_job_start() {
 		return email_on_job_start;
 	}
+
 	public Boolean isForce_mpi() {
 		return force_mpi;
 	}
+
 	public Boolean isForce_single() {
 		return force_single;
 	}
+
 	public void removeInputFileUrl(String selectedFile) {
 		this.inputFileUrls.remove(selectedFile);
 	}
+
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		this.pcs.removePropertyChangeListener(listener);
 	}
+
 	public void setApplication(final String app) {
 		String oldValue = this.application;
 		this.application = app;
 		pcs.firePropertyChange("application", oldValue, this.application);
 	}
+
 	public void setApplicationVersion(final String appVersion) {
 		String oldValue = this.applicationVersion;
 		this.applicationVersion = appVersion;
-		pcs.firePropertyChange("applicationVersion", oldValue, this.applicationVersion);
+		pcs.firePropertyChange("applicationVersion", oldValue,
+				this.applicationVersion);
 	}
+
 	public void setCommandline(final String commandline) {
 		String oldValue = this.commandline;
 		this.commandline = commandline;
-		myLogger.debug("Commandline for job: "+getJobname()+"changed: "+commandline);
+		myLogger.debug("Commandline for job: " + getJobname() + "changed: "
+				+ commandline);
 		pcs.firePropertyChange("commandline", oldValue, this.commandline);
 	}
+
 	public void setCpus(final Integer cpus) {
 		int oldValue = this.cpus;
 		this.cpus = cpus;
 		pcs.firePropertyChange("cpus", oldValue, this.cpus);
 	}
+
 	public void setEmail_address(final String email_address) {
 		String oldValue = this.email_address;
 		this.email_address = email_address;
 		pcs.firePropertyChange("email_address", oldValue, this.email_address);
 	}
+
 	public void setEmail_on_job_finish(final Boolean email_on_job_finish) {
 		boolean oldValue = this.email_on_job_finish;
 		this.email_on_job_finish = email_on_job_finish;
-		pcs.firePropertyChange("email_on_job_finish", oldValue, this.email_on_job_finish);
+		pcs.firePropertyChange("email_on_job_finish", oldValue,
+				this.email_on_job_finish);
 	}
 
 	public void setEmail_on_job_start(final Boolean email_on_job_start) {
 		boolean oldValue = this.email_on_job_start;
 		this.email_on_job_start = email_on_job_start;
-		pcs.firePropertyChange("email_on_job_start", oldValue, this.email_on_job_start);
+		pcs.firePropertyChange("email_on_job_start", oldValue,
+				this.email_on_job_start);
 	}
 
 	public void setForce_mpi(final Boolean force_mpi) {
@@ -596,7 +618,8 @@ public class JobSubmissionObjectImpl {
 	public void setSubmissionLocation(final String submissionLocation) {
 		String oldValue = this.submissionLocation;
 		this.submissionLocation = submissionLocation;
-		pcs.firePropertyChange("submissionLocation", oldValue, this.submissionLocation);
+		pcs.firePropertyChange("submissionLocation", oldValue,
+				this.submissionLocation);
 	}
 
 	@Transient
@@ -605,7 +628,8 @@ public class JobSubmissionObjectImpl {
 	}
 
 	@Transient
-	public void setTimestampJobname(final String jobname, SimpleDateFormat format) {
+	public void setTimestampJobname(final String jobname,
+			SimpleDateFormat format) {
 
 		setJobname(JobnameHelpers.calculateTimestampedJobname(jobname, format));
 
@@ -613,17 +637,18 @@ public class JobSubmissionObjectImpl {
 
 	@Transient
 	public void setUniqueJobname(final String jobname) {
-		if ( StringUtils.isBlank(jobname) ) {
+		if (StringUtils.isBlank(jobname)) {
 			setJobname(jobname);
 		} else {
-			setJobname(jobname+"_"+UUID.randomUUID().toString());
+			setJobname(jobname + "_" + UUID.randomUUID().toString());
 		}
 	}
 
 	public void setWalltimeInSeconds(final Integer walltime) {
 		int oldValue = this.walltime_in_seconds;
 		this.walltime_in_seconds = walltime;
-		pcs.firePropertyChange("walltimeInSeconds", oldValue, this.walltime_in_seconds);
+		pcs.firePropertyChange("walltimeInSeconds", oldValue,
+				this.walltime_in_seconds);
 	}
 
 	@Override

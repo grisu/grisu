@@ -1,5 +1,6 @@
 package org.vpac.grisu.model;
 
+import org.vpac.grisu.control.TemplateManager;
 import org.vpac.grisu.model.info.ApplicationInformation;
 import org.vpac.grisu.model.info.ResourceInformation;
 import org.vpac.grisu.model.info.UserApplicationInformation;
@@ -46,6 +47,13 @@ public interface GrisuRegistry {
 	 * @return the resource information object
 	 */
 	public abstract ResourceInformation getResourceInformation();
+
+	/**
+	 * Returns the template manager to access remote and local templates.
+	 * 
+	 * @return the template manager
+	 */
+	public abstract TemplateManager getTemplateManager();
 
 	/**
 	 * Gets the UserApplicationInformationObject for the specified application.

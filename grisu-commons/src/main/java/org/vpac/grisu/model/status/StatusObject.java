@@ -13,8 +13,20 @@ public class StatusObject {
 		STDOUT
 	}
 
+	public static StatusObject waitForActionToFinish(ServiceInterface si,
+			String handle, int recheckIntervalInSeconds, boolean exitIfFailed,
+			boolean sendStatusEvent) throws InterruptedException {
+
+		StatusObject temp = new StatusObject(si, handle);
+		temp.waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed,
+				sendStatusEvent);
+
+		return temp;
+	}
+
 	private final ServiceInterface si;
 	private final String handle;
+
 	private final Set<Listener> listeners;
 
 	private DtoActionStatus lastStatus;
@@ -58,15 +70,6 @@ public class StatusObject {
 		return lastStatus;
 	}
 
-	public static StatusObject waitForActionToFinish(ServiceInterface si, String handle, int recheckIntervalInSeconds,
-			boolean exitIfFailed, boolean sendStatusEvent) throws InterruptedException {
-		
-		StatusObject temp = new StatusObject(si, handle);
-		temp.waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed, sendStatusEvent);
-		
-		return temp;
-	}
-	
 	public void waitForActionToFinish(int recheckIntervalInSeconds,
 			boolean exitIfFailed, boolean sendStatusEvent)
 			throws InterruptedException {
@@ -90,7 +93,7 @@ public class StatusObject {
 				}
 			}
 
-			if (Thread.interrupted()) {
+			if (Thread.currentThread().isInterrupted()) {
 				throw new InterruptedException(
 						"Interrupted while waiting for action " + handle
 								+ " to finish on backend.");

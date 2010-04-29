@@ -1,8 +1,10 @@
 package org.vpac.grisu.frontend.model.job;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,9 +48,21 @@ import au.org.arcs.jcommons.constants.JobSubmissionProperty;
  * @author Markus Binsteiner
  */
 public class JobObject extends JobSubmissionObjectImpl implements
-Comparable<JobObject> {
+		Comparable<JobObject> {
 
 	static final Logger myLogger = Logger.getLogger(JobObject.class.getName());
+
+	public static JobObject createJobObject(ServiceInterface si,
+			JobSubmissionObjectImpl jobsubmissionObject)
+			throws JobPropertiesException {
+
+		JobObject job = new JobObject(si, jobsubmissionObject
+				.getJobDescriptionDocument());
+
+		job.setInputFileUrls(jobsubmissionObject.getInputFileUrls());
+
+		return job;
+	}
 
 	private final ServiceInterface serviceInterface;
 
@@ -66,6 +80,9 @@ Comparable<JobObject> {
 
 	private boolean isBeingCleaned = false;
 
+	private final List<String> submissionLog = Collections
+			.synchronizedList(new LinkedList<String>());
+
 	/**
 	 * Use this constructor if you want to create a new job.
 	 * 
@@ -75,8 +92,8 @@ Comparable<JobObject> {
 	public JobObject(final ServiceInterface si) {
 		super();
 		this.serviceInterface = si;
+		addJobLogMessage("Empty job created.");
 	}
-
 
 	/**
 	 * This constructor creates a new JobObject and initializes the basic job
@@ -93,6 +110,7 @@ Comparable<JobObject> {
 	public JobObject(final ServiceInterface si, final Document jsdl) {
 		super(jsdl);
 		this.serviceInterface = si;
+		addJobLogMessage("Job created from jsdl description.");
 	}
 
 	/**
@@ -109,10 +127,9 @@ Comparable<JobObject> {
 	 *             if no such job exists on the backend
 	 */
 	public JobObject(final ServiceInterface si, final DtoJob job)
-	throws NoSuchJobException {
+			throws NoSuchJobException {
 
 		this(si, job, false);
-
 	}
 
 	public JobObject(final ServiceInterface si, final DtoJob job,
@@ -123,9 +140,12 @@ Comparable<JobObject> {
 		this.serviceInterface = si;
 
 		updateWithDtoJob(job);
+		addJobLogMessage("Job retrieved from backend.");
+
 		if (refreshJobStatusOnBackend) {
 			getStatus(true);
 		}
+
 	}
 
 	/**
@@ -144,6 +164,7 @@ Comparable<JobObject> {
 			final Map<String, String> jobProperties) {
 		super(jobProperties);
 		this.serviceInterface = si;
+		addJobLogMessage("Job created from job properties.");
 	}
 
 	/**
@@ -160,7 +181,7 @@ Comparable<JobObject> {
 	 *             connected to the specified serviceInterface
 	 */
 	public JobObject(final ServiceInterface si, final String jobname)
-	throws NoSuchJobException {
+			throws NoSuchJobException {
 
 		this(si, jobname, true);
 
@@ -189,10 +210,18 @@ Comparable<JobObject> {
 		this.serviceInterface = si;
 
 		updateWithDtoJob(serviceInterface.getJob(jobname));
+
+		addJobLogMessage("Job retrieved from backend.");
+
 		if (refreshJobStatusOnBackend) {
 			getStatus(true);
 		}
 
+	}
+
+	private void addJobLogMessage(String message) {
+		this.submissionLog.add(message);
+		pcs.firePropertyChange("submissionLog", null, getSubmissionLog());
 	}
 
 	public int compareTo(JobObject o2) {
@@ -220,7 +249,7 @@ Comparable<JobObject> {
 	 *             created on the backend
 	 */
 	public final String createJob(final String fqan)
-	throws JobPropertiesException {
+			throws JobPropertiesException {
 
 		return createJob(fqan, Constants.FORCE_NAME_METHOD);
 	}
@@ -247,6 +276,7 @@ Comparable<JobObject> {
 
 		EventBus.publish(new JobStatusEvent(this, this.status,
 				JobConstants.UNDEFINED));
+		addJobLogMessage("Creating job on backend...");
 		if (StringUtils.isNotBlank(getJobname())) {
 			EventBus.publish(this.getJobname(), new JobStatusEvent(this,
 					this.status, JobConstants.UNDEFINED));
@@ -259,10 +289,13 @@ Comparable<JobObject> {
 			EventBus.publish(new JobStatusEvent(this, this.status,
 					JobConstants.JOB_CREATED));
 			if (StringUtils.isNotBlank(getJobname())) {
+				addJobLogMessage("Job created. Jobname: " + getJobname());
 				EventBus.publish(this.getJobname(), new JobStatusEvent(this,
 						this.status, JobConstants.JOB_CREATED));
 			}
 		} catch (JobPropertiesException e) {
+			addJobLogMessage("Could not create job on backend: "
+					+ e.getLocalizedMessage());
 			EventBus.publish(new JobStatusEvent(this, this.status,
 					JobConstants.NO_SUCH_JOB));
 			if (StringUtils.isNotBlank(getJobname())) {
@@ -304,7 +337,7 @@ Comparable<JobObject> {
 							EventBus.publish(JobObject.this.getJobname(),
 									new JobStatusEvent(JobObject.this,
 											oldStatus, JobObject.this
-											.getStatus(false)));
+													.getStatus(false)));
 						}
 					}
 					try {
@@ -331,10 +364,13 @@ Comparable<JobObject> {
 	public final File downloadAndCacheOutputFile(
 			String relativePathToJobDirectory) {
 
+		addJobLogMessage("Downloading and caching output file...");
+
 		if (getStatus(false) <= JobConstants.ACTIVE) {
 			if (getStatus(true) < JobConstants.ACTIVE) {
+				addJobLogMessage("Can't download output: job not started yet.");
 				throw new IllegalStateException(
-				"Job not started yet. No stdout file exists.");
+						"Job not started yet. No stdout file exists.");
 			}
 		}
 		//
@@ -344,8 +380,11 @@ Comparable<JobObject> {
 		File file = null;
 		try {
 			file = GrisuRegistryManager.getDefault(serviceInterface)
-			.getFileManager().downloadFile(url);
+					.getFileManager().downloadFile(url);
+			addJobLogMessage("Downloaded output file: " + url);
 		} catch (Exception e) {
+			addJobLogMessage("Could not download file " + url + ": "
+					+ e.getLocalizedMessage());
 			throw new JobException(this, "Could not download file: " + url, e);
 		}
 
@@ -384,7 +423,7 @@ Comparable<JobObject> {
 		if (allJobProperties == null) {
 			try {
 				allJobProperties = serviceInterface.getJob(getJobname())
-				.propertiesAsMap();
+						.propertiesAsMap();
 			} catch (Exception e) {
 				throw new JobException(this, "Could not get jobproperties.", e);
 			}
@@ -449,12 +488,16 @@ Comparable<JobObject> {
 	public final int getStatus(final boolean forceRefresh) {
 		if (forceRefresh) {
 			int oldStatus = this.status;
+			// addJobLogMessage("Getting new job status. Old status: "
+			// + JobConstants.translateStatus(oldStatus));
 			boolean oldFinished = isFinished(false);
 			this.status = serviceInterface.getJobStatus(getJobname());
 			pcs.firePropertyChange("status", oldStatus, this.status);
 			pcs.firePropertyChange("statusString", JobConstants
 					.translateStatus(oldStatus), getStatusString(false));
 			pcs.firePropertyChange("finished", oldFinished, isFinished(false));
+			// addJobLogMessage("Status refreshed. Status is: "
+			// + JobConstants.translateStatus(this.status));
 			if (this.status != oldStatus) {
 				EventBus.publish(new JobStatusEvent(this, oldStatus,
 						this.status));
@@ -570,6 +613,10 @@ Comparable<JobObject> {
 		return stdoutFile;
 	}
 
+	public List<String> getSubmissionLog() {
+		return submissionLog;
+	}
+
 	@Override
 	public int hashCode() {
 		return 73 * getJobname().hashCode();
@@ -638,14 +685,14 @@ Comparable<JobObject> {
 		}
 
 		try {
-			if ( clean ) {
+			if (clean) {
 				isBeingCleaned = true;
 				pcs.firePropertyChange("beingCleaned", false, true);
 			}
 			this.serviceInterface.kill(this.getJobname(), clean);
 			getStatus(true);
 
-			if ( clean ) {
+			if (clean) {
 				EventBus.publish(new JobKilledEvent(this));
 			}
 
@@ -668,7 +715,7 @@ Comparable<JobObject> {
 	 * @throws RemoteFileSystemException
 	 */
 	public List<String> listJobDirectory(int recursionLevel)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		DtoFolder folder = serviceInterface.ls(getJobDirectoryUrl(),
 				recursionLevel);
@@ -686,12 +733,16 @@ Comparable<JobObject> {
 	 * @throws JobPropertiesException
 	 */
 	public final void restartJob() throws JobSubmissionException,
-	JobPropertiesException {
+			JobPropertiesException {
+
+		addJobLogMessage("Restarting job...");
 
 		try {
 			serviceInterface.restartJob(getJobname(),
 					getJobDescriptionDocumentAsString());
+			addJobLogMessage("Job restarted.");
 		} catch (NoSuchJobException e) {
+			addJobLogMessage("Job restart failed: " + e.getLocalizedMessage());
 			throw new JobSubmissionException("Could not find job on backend.",
 					e);
 		}
@@ -725,7 +776,9 @@ Comparable<JobObject> {
 	 * @throws InterruptedException
 	 */
 	public final void stageFiles() throws FileTransferException,
-	InterruptedException {
+			InterruptedException {
+
+		addJobLogMessage("Staging in files...");
 
 		if ((getInputFileUrls() != null) && (getInputFileUrls().length > 0)) {
 			setStatus(JobConstants.INPUT_FILES_UPLOADING);
@@ -734,49 +787,40 @@ Comparable<JobObject> {
 		}
 
 		Set<String> localFiles = new HashSet<String>();
-		for ( String inputFile : getInputFileUrls() ) {
-			if ( FileManager.isLocal(inputFile) ) {
+		for (String inputFile : getInputFileUrls()) {
+			if (FileManager.isLocal(inputFile)) {
 				localFiles.add(inputFile);
 			}
 		}
 
-		FileTransferManager ftm = FileTransferManager.getDefault(serviceInterface);
+		FileTransferManager ftm = FileTransferManager
+				.getDefault(serviceInterface);
 
-		FileTransfer fileTransfer = ftm.addJobInputFileTransfer(localFiles, this);
+		FileTransfer fileTransfer = ftm.addJobInputFileTransfer(localFiles,
+				this);
 		try {
 			fileTransfer.join();
+			addJobLogMessage("Staging of input files finished.");
 		} catch (ExecutionException e) {
-			if ( fileTransfer.getException() != null ) {
+			addJobLogMessage("Staging failed: " + e.getLocalizedMessage());
+			if (fileTransfer.getException() != null) {
 				throw fileTransfer.getException();
 			} else {
-				throw new FileTransferException(fileTransfer.getFailedSourceFile(), jobDirectory, "File staging failed.", null);
+				throw new FileTransferException(fileTransfer
+						.getFailedSourceFile(), jobDirectory,
+						"File staging failed.", null);
 			}
 		}
 
-		if ( ! FileTransfer.Status.FINISHED.equals(fileTransfer.getStatus()) ) {
-			if ( fileTransfer.getException() != null ) {
+		if (!FileTransfer.Status.FINISHED.equals(fileTransfer.getStatus())) {
+			if (fileTransfer.getException() != null) {
 				throw fileTransfer.getException();
 			} else {
-				throw new FileTransferException(fileTransfer.getFailedSourceFile(), jobDirectory, "File staging failed.", null);
+				throw new FileTransferException(fileTransfer
+						.getFailedSourceFile(), jobDirectory,
+						"File staging failed.", null);
 			}
 		}
-
-
-		//		// stage in local files
-		//		for (String inputFile : getInputFileUrls()) {
-		//
-		//			if (Thread.interrupted()) {
-		//				throw new InterruptedException(
-		//				"Interrupted when staging in input file(s)...");
-		//			}
-		//
-		//			if (FileManager.isLocal(inputFile)) {
-		//
-		//				GrisuRegistryManager.getDefault(serviceInterface)
-		//				.getFileManager().uploadFileToDirectory(inputFile,
-		//						jobDirectory, true);
-		//			}
-		//		}
 
 		if ((getInputFileUrls() != null) && (getInputFileUrls().length > 0)) {
 			setStatus(JobConstants.INPUT_FILES_UPLOADED);
@@ -810,7 +854,9 @@ Comparable<JobObject> {
 	 * @throws InterruptedException
 	 */
 	public final void submitJob() throws JobSubmissionException,
-	InterruptedException {
+			InterruptedException {
+
+		addJobLogMessage("Starting job submission...");
 
 		if (status == JobConstants.UNDEFINED) {
 			throw new IllegalStateException("Job state "
@@ -826,18 +872,23 @@ Comparable<JobObject> {
 
 		if (Thread.interrupted()) {
 			throw new InterruptedException(
-			"Interrupted after staging in input files.");
+					"Interrupted after staging in input files.");
 		}
 
 		try {
+			addJobLogMessage("Submitting job to endpoint...");
 			serviceInterface.submitJob(getJobname());
+
 		} catch (NoSuchJobException e) {
+			addJobLogMessage("Submission failed: " + e.getLocalizedMessage());
 			throw new JobSubmissionException("Could not find job on backend.",
 					e);
 		}
 		getStatus(true);
 
 		EventBus.publish(new NewJobEvent(this));
+
+		addJobLogMessage("Job submission finished successfully.");
 	}
 
 	/**
@@ -867,7 +918,7 @@ Comparable<JobObject> {
 
 		if (!job.jobname().equals(getJobname())) {
 			throw new IllegalArgumentException(
-			"Jobname differs. Can't update job");
+					"Jobname differs. Can't update job");
 		}
 		allJobProperties = job.propertiesAsMap();
 		status = job.getStatus();
@@ -889,6 +940,8 @@ Comparable<JobObject> {
 	 *         wait-thread was interrupted otherwise
 	 */
 	public final boolean waitForJobToFinish(final int checkIntervallInSeconds) {
+
+		addJobLogMessage("Waiting for job to finish...");
 
 		if (waitThread != null) {
 			if (waitThread.isAlive()) {

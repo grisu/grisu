@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.TemplateManager;
 import org.vpac.grisu.model.info.ApplicationInformation;
 import org.vpac.grisu.model.info.ApplicationInformationImpl;
 import org.vpac.grisu.model.info.ResourceInformation;
@@ -57,6 +58,7 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	private UserEnvironmentManager cachedUserInformation;
 	private ResourceInformation cachedResourceInformation;
 	private FileManager cachedFileHelper;
+	private TemplateManager templateManager;
 
 	public GrisuRegistryImpl(final ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
@@ -129,6 +131,14 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 					serviceInterface);
 		}
 		return cachedResourceInformation;
+	}
+
+	public TemplateManager getTemplateManager() {
+
+		if (templateManager == null) {
+			templateManager = new TemplateManager(serviceInterface);
+		}
+		return templateManager;
 	}
 
 	/*

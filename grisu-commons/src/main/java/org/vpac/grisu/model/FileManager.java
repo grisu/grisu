@@ -22,6 +22,7 @@ import org.vpac.grisu.model.dto.DtoFolder;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.files.GlazedFile;
+import org.vpac.grisu.model.status.StatusObject;
 import org.vpac.grisu.settings.ClientPropertiesManager;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.utils.FileHelpers;
@@ -69,7 +70,7 @@ public class FileManager {
 	public static String ensureUriFormat(String inputFile) {
 
 		try {
-			if ( (inputFile != null) && inputFile.startsWith("gsiftp:") ) {
+			if ((inputFile != null) && inputFile.startsWith("gsiftp:")) {
 				return inputFile;
 			}
 			new URL(inputFile);
@@ -83,15 +84,15 @@ public class FileManager {
 
 	private static String get_url_strin_path(final String url) {
 		return url.replace("=", "_").replace(",", "_").replace(" ", "_")
-		.replace(":", "").replace("//", File.separator).replace("/",
-				File.separator);
+				.replace(":", "").replace("//", File.separator).replace("/",
+						File.separator);
 	}
 
 	public static long getDownloadFileSizeTreshold() {
 
 		if (downloadTreshold <= 0L) {
 			long treshold = ClientPropertiesManager
-			.getDownloadFileSizeTresholdInBytes();
+					.getDownloadFileSizeTresholdInBytes();
 
 			return treshold;
 		} else {
@@ -107,7 +108,6 @@ public class FileManager {
 		} catch (URISyntaxException e) {
 			return new File(uriOrPath);
 		}
-
 
 	}
 
@@ -135,10 +135,8 @@ public class FileManager {
 
 	private final ServiceInterface serviceInterface;
 
-
-
 	static final Logger myLogger = Logger
-	.getLogger(FileManager.class.getName());
+			.getLogger(FileManager.class.getName());
 
 	/**
 	 * Helper method to check whether the provided url is for a local file or
@@ -159,7 +157,8 @@ public class FileManager {
 		} else if (file.startsWith("http:")) {
 			return false;
 		} else {
-			throw new IllegalArgumentException("Protocol not supported for file: "+file);
+			throw new IllegalArgumentException(
+					"Protocol not supported for file: " + file);
 		}
 
 	}
@@ -182,40 +181,46 @@ public class FileManager {
 
 	}
 
-	public void copyLocalFiles(String sourceUrl, String targetDirUrl, boolean overwrite) throws FileTransferException {
-
+	public void copyLocalFiles(String sourceUrl, String targetDirUrl,
+			boolean overwrite) throws FileTransferException {
 
 		File sourceFile = getFileFromUriOrPath(sourceUrl);
 		File targetFile = getFileFromUriOrPath(targetDirUrl);
 
-		if ( ! sourceFile.exists() ) {
-			throw new FileTransferException(sourceUrl, targetDirUrl, "Source file doesn't exist.", null);
+		if (!sourceFile.exists()) {
+			throw new FileTransferException(sourceUrl, targetDirUrl,
+					"Source file doesn't exist.", null);
 		}
 
-		if ( targetFile.exists() ) {
-			if ( ! targetFile.isDirectory() ) {
-				throw new FileTransferException(sourceUrl, targetDirUrl, "Target not a directory.", null);
+		if (targetFile.exists()) {
+			if (!targetFile.isDirectory()) {
+				throw new FileTransferException(sourceUrl, targetDirUrl,
+						"Target not a directory.", null);
 			}
 		} else {
 			targetFile.mkdirs();
-			if ( ! targetFile.exists() ) {
-				throw new FileTransferException(sourceUrl, targetDirUrl, "Could not create target directory.", null);
+			if (!targetFile.exists()) {
+				throw new FileTransferException(sourceUrl, targetDirUrl,
+						"Could not create target directory.", null);
 			}
 		}
 
 		File targetFileName = new File(targetFile, sourceFile.getName());
-		if ( ! overwrite && targetFileName.exists() ) {
-			throw new FileTransferException(sourceUrl, targetDirUrl, "Target file already exists and overwrite not enabled.", null);
+		if (!overwrite && targetFileName.exists()) {
+			throw new FileTransferException(sourceUrl, targetDirUrl,
+					"Target file already exists and overwrite not enabled.",
+					null);
 		}
 
 		try {
-			if ( sourceFile.isDirectory() ) {
+			if (sourceFile.isDirectory()) {
 				FileUtils.copyDirectory(sourceFile, targetFile);
 			} else {
 				FileUtils.copyFileToDirectory(sourceFile, targetFile);
 			}
 		} catch (IOException e) {
-			throw new FileTransferException(sourceUrl, targetDirUrl, "Could not copy file.", e);
+			throw new FileTransferException(sourceUrl, targetDirUrl,
+					"Could not copy file.", e);
 		}
 	}
 
@@ -223,55 +228,61 @@ public class FileManager {
 			boolean overwrite) throws FileTransferException {
 
 		try {
-			serviceInterface.cp(DtoStringList.fromSingleString(sourceUrl), targetDirUrl, overwrite, true);
+			serviceInterface.cp(DtoStringList.fromSingleString(sourceUrl),
+					targetDirUrl, overwrite, true);
 		} catch (RemoteFileSystemException e) {
-			throw new FileTransferException(sourceUrl, targetDirUrl, "Could not copy remote files.", e);
+			throw new FileTransferException(sourceUrl, targetDirUrl,
+					"Could not copy remote files.", e);
 		}
 
 	}
 
-	public void cp(GlazedFile source, GlazedFile target, boolean overwrite) throws FileTransferException {
+	public void cp(GlazedFile source, GlazedFile target, boolean overwrite)
+			throws FileTransferException {
 		cp(source.getUrl(), target.getUrl(), overwrite);
 	}
 
+	public void cp(Set<GlazedFile> sources, GlazedFile targetDirectory,
+			boolean overwrite) throws FileTransferException {
 
-	public void cp(Set<GlazedFile> sources, GlazedFile targetDirectory, boolean overwrite) throws FileTransferException {
-
-		for ( GlazedFile source : sources ) {
+		for (GlazedFile source : sources) {
 			cp(source, targetDirectory, overwrite);
 		}
 
 	}
 
-	public void cp(String sourceUrl, String targetDirUrl, boolean overwrite) throws FileTransferException {
+	public void cp(String sourceUrl, String targetDirUrl, boolean overwrite)
+			throws FileTransferException {
 
-
-		if ( isLocal(sourceUrl) && isLocal(targetDirUrl) ) {
+		if (isLocal(sourceUrl) && isLocal(targetDirUrl)) {
 
 			copyLocalFiles(sourceUrl, targetDirUrl, overwrite);
 			return;
 
-		} else if ( isLocal(sourceUrl) && ! isLocal(targetDirUrl) ) {
+		} else if (isLocal(sourceUrl) && !isLocal(targetDirUrl)) {
 
 			uploadFileToDirectory(sourceUrl, targetDirUrl, overwrite);
 			return;
 
-		} else if ( !isLocal(sourceUrl) && isLocal(targetDirUrl) ) {
+		} else if (!isLocal(sourceUrl) && isLocal(targetDirUrl)) {
 
 			try {
 				downloadFile(sourceUrl, targetDirUrl, overwrite);
 			} catch (IOException e) {
-				throw new FileTransferException(sourceUrl, targetDirUrl, "Could not write target file.", e);
+				throw new FileTransferException(sourceUrl, targetDirUrl,
+						"Could not write target file.", e);
 			}
 			return;
 
-		} else if ( !isLocal(sourceUrl) && ! isLocal(targetDirUrl) ) {
+		} else if (!isLocal(sourceUrl) && !isLocal(targetDirUrl)) {
 
 			copyRemoteFiles(sourceUrl, targetDirUrl, overwrite);
 			return;
 		}
 
-		throw new IllegalArgumentException("Can't determine location of files for "+sourceUrl + "and " + targetDirUrl + ".");
+		throw new IllegalArgumentException(
+				"Can't determine location of files for " + sourceUrl + "and "
+						+ targetDirUrl + ".");
 	}
 
 	/**
@@ -305,7 +316,7 @@ public class FileManager {
 	 *             if the transfer fails
 	 */
 	public final File downloadFile(final String url)
-	throws FileTransferException {
+			throws FileTransferException {
 
 		if (upToDateLocalCacheFileExists(url)) {
 			return getLocalCacheFile(url);
@@ -313,7 +324,7 @@ public class FileManager {
 
 		File cacheTargetFile = getLocalCacheFile(url);
 		myLogger
-		.debug("Remote file newer than local cache file or not cached yet, downloading new copy.");
+				.debug("Remote file newer than local cache file or not cached yet, downloading new copy.");
 		DataSource source = null;
 		DataHandler handler = null;
 		try {
@@ -359,7 +370,7 @@ public class FileManager {
 	 *             if the file can't be downloaded for some reason
 	 */
 	public File downloadFile(String url, String target, boolean overwrite)
-	throws IOException, FileTransferException {
+			throws IOException, FileTransferException {
 
 		File targetFile = new File(target);
 		if (targetFile.exists() && targetFile.isDirectory()) {
@@ -403,7 +414,7 @@ public class FileManager {
 
 			String rootPath = null;
 			rootPath = Environment.getGrisuLocalCacheRoot() + File.separator
-			+ get_url_strin_path(url);
+					+ get_url_strin_path(url);
 
 			return new File(rootPath);
 		}
@@ -411,7 +422,7 @@ public class FileManager {
 	}
 
 	public boolean isBiggerThanTreshold(String url)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		long remoteFileSize = serviceInterface.getFileSize(url);
 
@@ -424,7 +435,7 @@ public class FileManager {
 	}
 
 	public List<String> listAllChildrenFilesOfRemoteFolder(String folderUrl)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		if (!serviceInterface.isFolder(folderUrl)) {
 			throw new IllegalArgumentException("Specified url is not a folder.");
@@ -441,7 +452,7 @@ public class FileManager {
 	}
 
 	public DtoFolder ls(String url, int recursionLevel)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		if (isLocal(url)) {
 			File temp;
@@ -485,7 +496,7 @@ public class FileManager {
 			myLogger.debug("remote file timestamp:\t" + lastModified);
 			if (local_last_modified >= lastModified) {
 				myLogger
-				.debug("Local cache file is not older than remote file. No download necessary...");
+						.debug("Local cache file is not older than remote file. No download necessary...");
 				return false;
 			} else {
 				return true;
@@ -508,7 +519,7 @@ public class FileManager {
 				if (!file.exists()) {
 					throw new FileTransferException(file.toString(),
 							targetFile, "File does not exist: "
-							+ file.toString(), null);
+									+ file.toString(), null);
 				}
 
 				if (!file.canRead()) {
@@ -602,7 +613,7 @@ public class FileManager {
 	 */
 	public final void uploadFileToDirectory(final File file,
 			final String targetDirectory, final boolean overwrite)
-	throws FileTransferException {
+			throws FileTransferException {
 
 		if (!file.exists()) {
 			throw new FileTransferException(file.toString(), targetDirectory,
@@ -678,18 +689,20 @@ public class FileManager {
 	 */
 	public final void uploadFileToDirectory(final String uriOrPath,
 			final String targetDirectory, boolean overwrite)
-	throws FileTransferException {
+			throws FileTransferException {
 
 		File file = getFileFromUriOrPath(uriOrPath);
 
 		if (file.isDirectory()) {
-			throw new FileTransferException(uriOrPath, targetDirectory, "Upload of folders not supported (yet).", null);
+			throw new FileTransferException(uriOrPath, targetDirectory,
+					"Upload of folders not supported (yet).", null);
 		}
 		uploadFileToDirectory(file, targetDirectory, overwrite);
 
 	}
 
-	public final void uploadInputFile(final File file, final String job) throws FileTransferException {
+	public final void uploadInputFile(final File file, final String job)
+			throws FileTransferException {
 
 		if (!file.exists()) {
 			throw new FileTransferException(file.toString(), null,
@@ -716,21 +729,28 @@ public class FileManager {
 					"Job does not exists on the backend.: ", e);
 		}
 
-		myLogger.debug("Uploading input file: " + file.toString() + " for job: "
-				+ job);
+		myLogger.debug("Uploading input file: " + file.toString()
+				+ " for job: " + job);
 
 		DataHandler handler = createDataHandler(file);
 		try {
 			myLogger.info("Uploading file " + file.getName() + "...");
 			serviceInterface.uploadInputFile(job, handler, file.getName());
 
+			StatusObject so = new StatusObject(serviceInterface, file.getName());
+			so.waitForActionToFinish(4, true, false);
+
+			if (so.getStatus().isFailed()) {
+				throw new FileTransferException(file.toString(), null,
+						"Could not upload input file.", null);
+			}
+
 			myLogger.info("Upload of input file " + file.getName()
 					+ " successful.");
 		} catch (Exception e1) {
 			try {
 				// try again
-				myLogger.info("Uploading file " + file.getName()
-						+ "...");
+				myLogger.info("Uploading file " + file.getName() + "...");
 				System.out.println("FAILED. SLEEPING 1 SECONDS");
 				Thread.sleep(1000);
 				serviceInterface.uploadInputFile(job, handler, file.getName());
@@ -742,19 +762,21 @@ public class FileManager {
 						+ " failed: " + e1.getLocalizedMessage());
 				myLogger.error("Inputfile upload failed: "
 						+ e1.getLocalizedMessage());
-				throw new FileTransferException(file.toString(),
-						null, "Could not upload input file.", e1);
+				throw new FileTransferException(file.toString(), null,
+						"Could not upload input file.", e1);
 			}
 		}
 
 	}
 
-	public final void uploadInputFile(final String uriOrPath, final String job) throws FileTransferException {
+	public final void uploadInputFile(final String uriOrPath, final String job)
+			throws FileTransferException {
 
 		File file = getFileFromUriOrPath(uriOrPath);
 
 		if (file.isDirectory()) {
-			throw new FileTransferException(uriOrPath, null, "Upload of folders not supported (yet).", null);
+			throw new FileTransferException(uriOrPath, null,
+					"Upload of folders not supported (yet).", null);
 		}
 		uploadInputFile(file, job);
 
@@ -762,7 +784,7 @@ public class FileManager {
 
 	public boolean upToDateLocalCacheFileExists(String url) {
 
-		if ( isLocal(url) ) {
+		if (isLocal(url)) {
 
 			return true;
 
@@ -776,7 +798,7 @@ public class FileManager {
 					if (!cacheTargetParentFile.exists()) {
 						throw new RuntimeException(
 								"Could not create parent folder for cache file "
-								+ cacheTargetFile);
+										+ cacheTargetFile);
 					}
 				}
 			}
@@ -795,7 +817,7 @@ public class FileManager {
 				myLogger.debug("remote file timestamp:\t" + lastModified);
 				if (local_last_modified >= lastModified) {
 					myLogger
-					.debug("Local cache file is not older than remote file. Doing nothing...");
+							.debug("Local cache file is not older than remote file. Doing nothing...");
 					return true;
 				}
 			}

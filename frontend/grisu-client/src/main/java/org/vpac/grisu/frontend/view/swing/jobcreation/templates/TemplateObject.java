@@ -14,23 +14,26 @@ import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
 public class TemplateObject {
 
-	static final Logger myLogger = Logger
-	.getLogger(TemplateObject.class.getName());
+	static final Logger myLogger = Logger.getLogger(TemplateObject.class
+			.getName());
 
-	public static Map<String, String> parseCommandlineTemplate(String template) throws TemplateException {
+	public static Map<String, String> parseCommandlineTemplate(String template)
+			throws TemplateException {
 
 		Map<String, String> map = new HashMap<String, String>();
 
 		String[] parts = template.split("\\$");
 
-		for ( String part : parts ) {
+		for (String part : parts) {
 
-			if ( !part.startsWith("{") ) {
+			if (!part.startsWith("{")) {
 				continue;
-				//				throw new TemplateException("Template format wrong: $ is not followed by {");
+				// throw new
+				// TemplateException("Template format wrong: $ is not followed by {");
 			}
-			if ( !part.contains("}") ) {
-				throw new TemplateException("Template format wrong: opening { does not have a closing }");
+			if (!part.contains("}")) {
+				throw new TemplateException(
+						"Template format wrong: opening { does not have a closing }");
 			}
 
 			String variableName = part.substring(1, part.indexOf("}"));
@@ -47,21 +50,27 @@ public class TemplateObject {
 	private final ServiceInterface si;
 
 	private JPanel templatePanel;
-	//	private final Map<String, AbstractInputPanel> panels = new HashMap<String, AbstractInputPanel>();
+	// private final Map<String, AbstractInputPanel> panels = new
+	// HashMap<String, AbstractInputPanel>();
 	private final Map<String, String> changedValues;
 
-	public TemplateObject(ServiceInterface si, String commandlineTemplate) throws TemplateException {
+	public TemplateObject(ServiceInterface si, String commandlineTemplate)
+			throws TemplateException {
 		this.si = si;
-		this.commandlineTemplate= commandlineTemplate;
+		this.commandlineTemplate = commandlineTemplate;
 		changedValues = parseCommandlineTemplate(commandlineTemplate);
 	}
 
-	//	public void registerInputPanel(AbstractInputPanel panel) {
-	//		panels.put(panel.getName(), panel);
-	//	}
-
 	public JobSubmissionObjectImpl getJobSubmissionObject() {
 		return this.jobObject;
+	}
+
+	// public void registerInputPanel(AbstractInputPanel panel) {
+	// panels.put(panel.getName(), panel);
+	// }
+
+	public ServiceInterface getServiceInterface() {
+		return this.si;
 	}
 
 	public JPanel getTemplatePanel() {
@@ -76,56 +85,40 @@ public class TemplateObject {
 		this.templatePanel = templatePanel;
 	}
 
-	public void submitJob() {
+	public void submitJob() throws JobPropertiesException,
+			JobSubmissionException, InterruptedException {
 
 		JobObject job = null;
-		try {
-			job = new JobObject(si, jobObject.getJobDescriptionDocument());
-		} catch (JobPropertiesException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		job = new JobObject(si, jobObject.getJobDescriptionDocument());
 
-		try {
-			job.createJob("/ACC");
-		} catch (JobPropertiesException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		job.createJob("/ACC");
 
-		try {
-			job.submitJob();
-		} catch (JobSubmissionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		job.submitJob();
 
 	}
 
 	public void userInput(String panelName, String newValue) {
 
-		if ( newValue == null ) {
+		if (newValue == null) {
 			newValue = "";
 		}
 
-		if ( (panelName != null) && (changedValues.get(panelName) == null) ) {
-			myLogger.debug("Commandline doesn't require value from panel "+panelName);
+		if ((panelName != null) && (changedValues.get(panelName) == null)) {
+			myLogger.debug("Commandline doesn't require value from panel "
+					+ panelName);
 			return;
 		}
 
-		if ( panelName != null ) {
+		if (panelName != null) {
 			changedValues.put(panelName, newValue);
 		}
 		String newCommandline = commandlineTemplate;
-		for ( String key : changedValues.keySet() ) {
-			newCommandline = newCommandline.replace("${"+key+"}", changedValues.get(key));
+		for (String key : changedValues.keySet()) {
+			newCommandline = newCommandline.replace("${" + key + "}",
+					changedValues.get(key));
 		}
 
 		jobObject.setCommandline(newCommandline);
 	}
-
 
 }
