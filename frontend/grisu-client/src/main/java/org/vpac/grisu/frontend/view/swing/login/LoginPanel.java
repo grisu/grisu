@@ -1,6 +1,8 @@
 package org.vpac.grisu.frontend.view.swing.login;
 
 import java.awt.CardLayout;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -30,20 +32,32 @@ public class LoginPanel extends JPanel {
 
 	private LoginProgressPanel progressPanel = null;
 
+	private final List<ServiceInterfaceHolder> siHolders;
+
+	public LoginPanel(GrisuSwingClient client) {
+		this(client, null);
+	}
+
 	/**
 	 * Create the panel.
 	 */
-	public LoginPanel(GrisuSwingClient client) {
+	public LoginPanel(GrisuSwingClient client,
+			List<ServiceInterfaceHolder> siHolders) {
 
 		this.client = client;
+		if (siHolders == null) {
+			this.siHolders = new LinkedList<ServiceInterfaceHolder>();
+		} else {
+			this.siHolders = siHolders;
+		}
 		this.tryExistingGridProxy = ClientPropertiesManager.getAutoLogin();
 		setLayout(new CardLayout(0, 0));
 		add(getLoginPanel(), LOGIN_PANEL);
 		add(client.getRootPanel(), SWING_CLIENT_PANEL);
 		add(getProgressPanel(), PROGRESS_PANEL);
 
-		if ( tryExistingGridProxy ) {
-			if ( LocalProxy.validGridProxyExists() ) {
+		if (tryExistingGridProxy) {
+			if (LocalProxy.validGridProxyExists()) {
 
 				new Thread() {
 					@Override
@@ -86,18 +100,20 @@ public class LoginPanel extends JPanel {
 
 	private LoginProgressPanel getProgressPanel() {
 
-		if ( progressPanel == null ) {
+		if (progressPanel == null) {
 			progressPanel = new LoginProgressPanel();
 		}
 		return progressPanel;
 	}
-
 
 	public void setServiceInterface(ServiceInterface si) {
 
 		getProgressPanel().setLoginToBackend(si);
 		switchToProgressPanel();
 		client.setServiceInterface(si);
+		for (ServiceInterfaceHolder sih : siHolders) {
+			sih.setServiceInterface(si);
+		}
 
 		switchToClientPanel();
 	}

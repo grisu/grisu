@@ -1,13 +1,12 @@
 package org.vpac.grisu.settings;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.vpac.grisu.utils.FileHelpers;
-import org.vpac.grisu.utils.SeveralXMLHelpers;
-import org.w3c.dom.Document;
 
 /**
  * Helps to manage all available jsdl templates that are stored in
@@ -36,9 +35,9 @@ public final class ServiceTemplateManagement {
 		Set<String> allAvalableTemplates = new TreeSet<String>();
 
 		for (File file : templates) {
-			if (file.getName().endsWith(".xml")) {
+			if (file.getName().endsWith(".template")) {
 				allAvalableTemplates.add(file.getName().substring(0,
-						file.getName().lastIndexOf(".xml")));
+						file.getName().lastIndexOf(".template")));
 			}
 		}
 
@@ -46,31 +45,46 @@ public final class ServiceTemplateManagement {
 				.size()]);
 	}
 
-	/**
-	 * Loads the jsdl template from the .grisu/templates_available directory
-	 * into a {@link Document}.
-	 * 
-	 * @param name
-	 *            the name of the jsdl template
-	 * @return the template as xml Document or null if it could not be
-	 *         found/loaded
-	 */
-	public static Document getAvailableTemplate(final String name) {
+	public static String getTemplate(String name) {
 
-		Document jsdl_template = null;
+		File file = new File(Environment.getAvailableTemplatesDirectory(), name
+				+ ".template");
+
+		String temp;
 		try {
-			jsdl_template = SeveralXMLHelpers.fromString(FileHelpers
-					.readFromFile(new File(Environment
-							.getAvailableTemplatesDirectory()
-							+ File.separator + name + ".xml")));
-		} catch (Exception e) {
-			myLogger
-					.error("Could not find/load jsdl template for application: "
-							+ name + ": " + e.getMessage());
+			temp = FileUtils.readFileToString(file);
+		} catch (IOException e) {
 			return null;
 		}
-		return jsdl_template;
+
+		return temp;
 	}
+
+	// /**
+	// * Loads the jsdl template from the .grisu/templates_available directory
+	// * into a {@link Document}.
+	// *
+	// * @param name
+	// * the name of the jsdl template
+	// * @return the template as xml Document or null if it could not be
+	// * found/loaded
+	// */
+	// public static Document getAvailableTemplate(final String name) {
+	//
+	// Document jsdl_template = null;
+	// try {
+	// jsdl_template = SeveralXMLHelpers.fromString(FileHelpers
+	// .readFromFile(new File(Environment
+	// .getAvailableTemplatesDirectory()
+	// + File.separator + name + ".xml")));
+	// } catch (Exception e) {
+	// myLogger
+	// .error("Could not find/load jsdl template for application: "
+	// + name + ": " + e.getMessage());
+	// return null;
+	// }
+	// return jsdl_template;
+	// }
 
 	private ServiceTemplateManagement() {
 	}

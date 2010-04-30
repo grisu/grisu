@@ -22,10 +22,11 @@ import org.vpac.grisu.model.UserEnvironmentManager;
 
 import au.org.arcs.jcommons.constants.Constants;
 
-public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements EventSubscriber<NewJobEvent>{
+public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements
+		EventSubscriber<NewJobEvent> {
 
 	static final Logger myLogger = Logger
-	.getLogger(GrisuMonitorNavigationTaskPane.class.getName());
+			.getLogger(GrisuMonitorNavigationTaskPane.class.getName());
 
 	public static final String SINGLE_JOB_LIST = "single_list";
 
@@ -44,9 +45,13 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements EventS
 	/**
 	 * Create the panel.
 	 */
-	public GrisuMonitorNavigationTaskPane(ServiceInterface si, GrisuNavigationPanel navPanel, boolean displayAllJobsItem, boolean displayApplicationSpecificItems, Set<String> applicationsToWatch) {
+	public GrisuMonitorNavigationTaskPane(ServiceInterface si,
+			GrisuNavigationPanel navPanel, boolean displayAllJobsItem,
+			boolean displayApplicationSpecificItems,
+			Set<String> applicationsToWatch) {
 		this.si = si;
-		this.em = GrisuRegistryManager.getDefault(si).getUserEnvironmentManager();
+		this.em = GrisuRegistryManager.getDefault(si)
+				.getUserEnvironmentManager();
 		this.applicationsToWatch = applicationsToWatch;
 
 		this.navPanel = navPanel;
@@ -54,16 +59,16 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements EventS
 		this.displayApplicationSpecificItems = displayApplicationSpecificItems;
 		setTitle("Monitor jobs");
 
-		if ( displayAllJobsItem ) {
+		if (displayAllJobsItem) {
 			addApplication(Constants.ALLJOBS_KEY);
 		}
 
-		if ( displayApplicationSpecificItems ) {
+		if (displayApplicationSpecificItems) {
 			updateApplications();
 		}
 
-		if ( (applicationsToWatch != null) && (applicationsToWatch.size() > 0) ) {
-			for ( String app : applicationsToWatch ) {
+		if ((applicationsToWatch != null) && (applicationsToWatch.size() > 0)) {
+			for (String app : applicationsToWatch) {
 				addApplication(app);
 			}
 		}
@@ -73,33 +78,41 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements EventS
 
 	public void addApplication(final String application) {
 
+		final String app;
 
-		final String app = application.toLowerCase();
-
-		if ( Constants.GENERIC_APPLICATION_NAME.equals(app) ) {
-			myLogger.debug("Not adding monitor generic application to navigation pane.");
-			return;
+		if (Constants.GENERIC_APPLICATION_NAME
+				.equals(application.toLowerCase())) {
+			myLogger
+					.debug("Not adding monitor generic application to navigation pane. Using all jobs instead...");
+			app = Constants.ALLJOBS_KEY;
+		} else {
+			app = application.toLowerCase();
 		}
 
-		if ( Constants.ALLJOBS_KEY.equals(app) ) {
+		if (Constants.ALLJOBS_KEY.equals(app)) {
 			RunningJobManager.getDefault(si).getAllJobs();
 		}
 
-		if ( actions.get(app) == null ) {
+		if (actions.get(app) == null) {
 			Action temp = new AbstractAction() {
 
 				private final String application = app;
 				{
-					putValue(Action.NAME, ApplicationsManager.getPrettyName(app));
-					putValue(Action.SHORT_DESCRIPTION, ApplicationsManager.getShortDescription(app));
-					putValue(Action.SMALL_ICON, ApplicationsManager.getIcon(app));
+					putValue(Action.NAME, ApplicationsManager
+							.getPrettyName(app));
+					putValue(Action.SHORT_DESCRIPTION, ApplicationsManager
+							.getShortDescription(app));
+					putValue(Action.SMALL_ICON, ApplicationsManager
+							.getIcon(app));
 				}
 
 				public void actionPerformed(ActionEvent e) {
-					System.out.println("Action command: "+e.getActionCommand());
-					System.out.println("Application: "+application);
+					System.out.println("Action command: "
+							+ e.getActionCommand());
+					System.out.println("Application: " + application);
 
-					navPanel.setNavigationCommand(new String[]{SINGLE_JOB_LIST, application});
+					navPanel.setNavigationCommand(new String[] {
+							SINGLE_JOB_LIST, application });
 				}
 
 				public String getApplication() {
@@ -113,20 +126,22 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements EventS
 
 	public void onEvent(NewJobEvent event) {
 
-		if ( displayApplicationSpecificItems ) {
+		if (displayApplicationSpecificItems) {
 
 			String application = event.getJob().getApplication();
 
-			if ( StringUtils.isBlank(application) ) {
+			if (StringUtils.isBlank(application)) {
 				try {
-					application = si.getJobProperty(event.getJob().getJobname(), Constants.APPLICATIONNAME_KEY);
+					application = si.getJobProperty(
+							event.getJob().getJobname(),
+							Constants.APPLICATIONNAME_KEY);
 				} catch (Exception e) {
 					myLogger.error(e);
 					return;
 				}
 			}
 
-			if ( StringUtils.isBlank(application) ) {
+			if (StringUtils.isBlank(application)) {
 				return;
 			}
 
@@ -137,7 +152,7 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements EventS
 
 	private void updateApplications() {
 
-		for ( final String app : em.getCurrentApplications(true) ) {
+		for (final String app : em.getCurrentApplications(true)) {
 
 			addApplication(app);
 

@@ -14,13 +14,18 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.SwingUtilities;
 
+import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.utils.ApplicationsManager;
 import org.vpac.grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 
-public class GrisuNavigationPanel extends JXTaskPaneContainer implements PropertyChangeListener {
+public class GrisuNavigationPanel extends JXTaskPaneContainer implements
+		PropertyChangeListener {
+
+	static final Logger myLogger = Logger.getLogger(GrisuNavigationPanel.class
+			.getName());
 
 	private final ServiceInterface si;
 
@@ -34,26 +39,35 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements Propert
 	private GrisuMonitorNavigationTaskPane singleTaskPane;
 	private GrisuMonitorNavigationTaskPaneBatch batchTaskPane;
 
-	private static final String JOB_CREATION_TASK_PANE = "Create jobs";
+	private static final String JOB_CREATION_TASK_PANE = "Create job";
 
 	/**
 	 * Create the panel.
 	 */
-	public GrisuNavigationPanel(ServiceInterface si, GrisuCenterPanel centerPanel) {
+	public GrisuNavigationPanel(ServiceInterface si,
+			GrisuCenterPanel centerPanel) {
 
-		this (si, centerPanel, true, true, true);
+		this(si, centerPanel, true, true, true);
 	}
 
-	public GrisuNavigationPanel(ServiceInterface si, GrisuCenterPanel centerPanel, boolean displaySingleJobMonitorItem,
-			boolean displayBatchJobMonitorItem, boolean displayFileManagementItem) {
+	public GrisuNavigationPanel(ServiceInterface si,
+			GrisuCenterPanel centerPanel, boolean displaySingleJobMonitorItem,
+			boolean displayBatchJobMonitorItem,
+			boolean displayFileManagementItem) {
 
-		this(si, centerPanel, displaySingleJobMonitorItem, true, true, null, displayBatchJobMonitorItem, true, true, null, displayFileManagementItem);
+		this(si, centerPanel, displaySingleJobMonitorItem, true, true, null,
+				displayBatchJobMonitorItem, true, true, null,
+				displayFileManagementItem);
 	}
 
-	public GrisuNavigationPanel(ServiceInterface si, GrisuCenterPanel centerPanel,
-			boolean displaySingleJobMonitorItem,	boolean displaySingleJobAllJobsMenuItem, boolean displaySingleJobAppSpecificMenuItems,
+	public GrisuNavigationPanel(ServiceInterface si,
+			GrisuCenterPanel centerPanel, boolean displaySingleJobMonitorItem,
+			boolean displaySingleJobAllJobsMenuItem,
+			boolean displaySingleJobAppSpecificMenuItems,
 			Set<String> singleApplicationsToWatch,
-			boolean displayBatchJobMonitorItem, boolean displayBatchJobAllJobsMenuItem, boolean displayBatchJobAppSpecificMenuItems,
+			boolean displayBatchJobMonitorItem,
+			boolean displayBatchJobAllJobsMenuItem,
+			boolean displayBatchJobAppSpecificMenuItems,
 			Set<String> batchApplicationsToWatch,
 			boolean displayFileManagementItem) {
 
@@ -63,34 +77,61 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements Propert
 
 		addTaskPane(JOB_CREATION_TASK_PANE, null);
 
-		if ( displaySingleJobMonitorItem ) {
-			singleTaskPane = new GrisuMonitorNavigationTaskPane(si, this, displaySingleJobAllJobsMenuItem, displaySingleJobAppSpecificMenuItems, singleApplicationsToWatch);
+		if (displaySingleJobMonitorItem) {
+			singleTaskPane = new GrisuMonitorNavigationTaskPane(si, this,
+					displaySingleJobAllJobsMenuItem,
+					displaySingleJobAppSpecificMenuItems,
+					singleApplicationsToWatch);
 			addTaskPane(singleTaskPane);
 		}
-		if ( displayBatchJobMonitorItem ) {
-			batchTaskPane = new GrisuMonitorNavigationTaskPaneBatch(si, this, displayBatchJobAllJobsMenuItem, displayBatchJobAppSpecificMenuItems, batchApplicationsToWatch);
+		if (displayBatchJobMonitorItem) {
+			batchTaskPane = new GrisuMonitorNavigationTaskPaneBatch(si, this,
+					displayBatchJobAllJobsMenuItem,
+					displayBatchJobAppSpecificMenuItems,
+					batchApplicationsToWatch);
 			addTaskPane(batchTaskPane);
 		}
-		if ( displayFileManagementItem ) {
+		if (displayFileManagementItem) {
 			addTaskPane(new GrisuFileNavigationTaskPane(si, this));
 		}
 
 	}
 
-	private void addApplicationsToWatch(Map<String, JobCreationPanel> applications) {
+	private void addApplicationsToWatch(
+			Map<String, JobCreationPanel> applications) {
 
-		for ( JobCreationPanel panel : applications.values() ) {
-			if ( ! applicationsToWatch.contains(panel.getSupportedApplication()) ) {
+		for (JobCreationPanel panel : applications.values()) {
+			if (!applicationsToWatch.contains(panel.getSupportedApplication())) {
 
-				addTaskPaneItem(JOB_CREATION_TASK_PANE, ApplicationsManager.getPrettyName(panel.getPanelName()),
-						//				addTaskPaneItem(JOB_CREATION_TASK_PANE, panel.getPanelName(),
-						ApplicationsManager.getShortDescription(panel.getSupportedApplication()), ApplicationsManager.getIcon(panel.getSupportedApplication()));
+				addTaskPaneItem(
+						JOB_CREATION_TASK_PANE,
+						ApplicationsManager.getPrettyName(panel.getPanelName()),
+						// addTaskPaneItem(JOB_CREATION_TASK_PANE,
+						// panel.getPanelName(),
+						ApplicationsManager.getShortDescription(panel
+								.getSupportedApplication()),
+						ApplicationsManager.getIcon(panel
+								.getSupportedApplication()));
 
-				if ( panel.createsBatchJob() ) {
-					batchTaskPane.addApplication(panel.getSupportedApplication());
+				if (panel.createsBatchJob()) {
+					if (batchTaskPane == null) {
+						myLogger
+								.warn("Can't add batch job "
+										+ panel.getPanelName()
+										+ " item because batchjob pane is not displayed...");
+					}
+					batchTaskPane.addApplication(panel
+							.getSupportedApplication());
 				}
-				if ( panel.createsSingleJob() ) {
-					singleTaskPane.addApplication(panel.getSupportedApplication());
+				if (panel.createsSingleJob()) {
+					if (singleTaskPane == null) {
+						myLogger
+								.warn("Can't add single job "
+										+ panel.getPanelName()
+										+ " item because single job pane is not displayed...");
+					}
+					singleTaskPane.addApplication(panel
+							.getSupportedApplication());
 				}
 
 			}
@@ -114,13 +155,15 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements Propert
 		addTaskPane(temp);
 	}
 
-	public void addTaskPaneItem(String taskPane, final String itemTitle, final String itemDescription, final Icon icon) {
+	public void addTaskPaneItem(String taskPane, final String itemTitle,
+			final String itemDescription, final Icon icon) {
 
-		if ( taskPanes.get(taskPane) == null ) {
+		if (taskPanes.get(taskPane) == null) {
 			addTaskPane(taskPane, null);
 		}
 
-		if ( (taskPaneActions.get(taskPane) != null) && taskPaneActions.get(taskPane).contains(itemTitle) ) {
+		if ((taskPaneActions.get(taskPane) != null)
+				&& taskPaneActions.get(taskPane).contains(itemTitle)) {
 			return;
 		}
 
@@ -134,15 +177,16 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements Propert
 				putValue(Action.SMALL_ICON, icon);
 
 			}
+
 			public void actionPerformed(ActionEvent e) {
 				System.out.println(e.getActionCommand());
-				setNavigationCommand(new String[]{itemTitle});
+				setNavigationCommand(new String[] { itemTitle });
 			}
 		};
 
 		taskPanes.get(taskPane).add(tempAction);
 		Set<Action> temp = taskPaneActions.get(taskPane);
-		if ( temp == null ) {
+		if (temp == null) {
 			temp = new HashSet<Action>();
 			taskPaneActions.put(taskPane, temp);
 		}
@@ -165,8 +209,14 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements Propert
 
 	public void propertyChange(PropertyChangeEvent evt) {
 
-		if ( "availableJobCreationPanels".equals(evt.getPropertyName()) ) {
-			addApplicationsToWatch((Map<String, JobCreationPanel>)evt.getNewValue());
+		if ("availableJobCreationPanels".equals(evt.getPropertyName())) {
+
+			Map<String, JobCreationPanel> temp = (Map<String, JobCreationPanel>) evt
+					.getNewValue();
+
+			taskPanes.get(JOB_CREATION_TASK_PANE).removeAll();
+
+			addApplicationsToWatch(temp);
 		}
 
 	}
@@ -184,7 +234,6 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements Propert
 				lockUI(false);
 			}
 		}.start();
-
 
 	}
 

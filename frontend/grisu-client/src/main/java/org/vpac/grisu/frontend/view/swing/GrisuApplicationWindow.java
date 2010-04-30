@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.UIManager;
@@ -15,10 +16,12 @@ import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.model.events.ApplicationEventListener;
 import org.vpac.grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import org.vpac.grisu.frontend.view.swing.login.LoginPanel;
+import org.vpac.grisu.frontend.view.swing.login.ServiceInterfaceHolder;
 
-import au.org.arcs.jcommons.constants.Constants;
+import com.google.common.collect.ImmutableList;
 
-public abstract class GrisuApplicationWindow implements WindowListener {
+public abstract class GrisuApplicationWindow implements WindowListener,
+		ServiceInterfaceHolder {
 
 	private ServiceInterface si;
 
@@ -31,7 +34,7 @@ public abstract class GrisuApplicationWindow implements WindowListener {
 	/**
 	 * Launch the application.
 	 */
-	public GrisuApplicationWindow () {
+	public GrisuApplicationWindow() {
 
 		LoginManager.initEnvironment();
 
@@ -51,11 +54,17 @@ public abstract class GrisuApplicationWindow implements WindowListener {
 
 	}
 
+	abstract public boolean displayAppSpecificMonitoringItems();
+
+	abstract public boolean displayBatchJobsCreationPane();
+
+	abstract public boolean displaySingleJobsCreationPane();
+
 	private void exit() {
 		try {
 			System.out.println("Exiting...");
 
-			if ( si != null ) {
+			if (si != null) {
 				si.logout();
 			}
 
@@ -65,9 +74,17 @@ public abstract class GrisuApplicationWindow implements WindowListener {
 		}
 	}
 
+	public JFrame getFrame() {
+		return frame;
+	}
+
 	abstract public JobCreationPanel[] getJobCreationPanels();
 
 	abstract public String getName();
+
+	public ServiceInterface getServiceInterface() {
+		return si;
+	}
 
 	/**
 	 * Initialize the contents of the frame.
@@ -80,49 +97,65 @@ public abstract class GrisuApplicationWindow implements WindowListener {
 
 		frame.getContentPane().setLayout(new BorderLayout());
 
+		boolean singleJobs = displaySingleJobsCreationPane();
+		boolean batchJobs = displayBatchJobsCreationPane();
 
-		boolean singleJobs = false;
-		boolean batchJobs = false;
+		// for (JobCreationPanel panel : getJobCreationPanels()) {
+		// if (panel.createsBatchJob()) {
+		// batchJobs = true;
+		// }
+		// if (panel.createsSingleJob()) {
+		// singleJobs = true;
+		// }
+		// }
 
-		for ( JobCreationPanel panel : getJobCreationPanels() ) {
-			if ( panel.createsBatchJob() ) {
-				batchJobs = true;
-			}
-			if ( panel.createsSingleJob() ) {
-				singleJobs = true;
-			}
-		}
+		boolean displayAppSpecificMonitoringItems = displayAppSpecificMonitoringItems();
 
-		boolean genericApp = false;
-		for ( JobCreationPanel panel : getJobCreationPanels() ) {
-			if ( Constants.GENERIC_APPLICATION_NAME.equals(panel.getSupportedApplication()) ) {
-				genericApp = true;
-			}
-		}
-
-		if ( genericApp ) {
-			mainPanel = new GrisuMainPanel(singleJobs, true, true, null, batchJobs, true, true, null, true);
+		if (displayAppSpecificMonitoringItems) {
+			mainPanel = new GrisuMainPanel(singleJobs, true, true, null,
+					batchJobs, true, true, null, true);
 		} else {
-			mainPanel = new GrisuMainPanel(singleJobs, false, false, null, batchJobs, false, false, null, true);
+			mainPanel = new GrisuMainPanel(singleJobs, false, false, null,
+					batchJobs, false, false, null, true);
 		}
-		for ( JobCreationPanel panel : getJobCreationPanels() ) {
+
+		List<ServiceInterfaceHolder> siHolders = ImmutableList
+				.of((ServiceInterfaceHolder) this);
+		LoginPanel lp = new LoginPanel(mainPanel, siHolders);
+		frame.getContentPane().add(lp, BorderLayout.CENTER);
+	}
+
+	abstract protected void initOptionalStuff(ServiceInterface si);
+
+	public void refreshJobCreationPanels() {
+
+		mainPanel.removeAlJobCreationPanelsl();
+		for (JobCreationPanel panel : getJobCreationPanels()) {
 			mainPanel.addJobCreationPanel(panel);
 		}
-		LoginPanel lp = new LoginPanel(mainPanel);
-		frame.getContentPane().add(lp, BorderLayout.CENTER);
+
 	}
 
 	public void setServiceInterface(ServiceInterface si) {
 
-		if ( lp == null ) {
+		this.si = si;
+		initOptionalStuff(si);
+		refreshJobCreationPanels();
+
+	}
+
+	public void setServiceInterfaceExternal(ServiceInterface si) {
+
+		if (lp == null) {
 			throw new IllegalStateException("LoginPanel not initialized.");
 		}
 
-		if ( si == null ) {
+		if (si == null) {
 			throw new NullPointerException("ServiceInterface can't be null");
 		}
-		this.si = si;
+		// this.si = si;
 		lp.setServiceInterface(si);
+
 	}
 
 	public void setVisible(boolean visible) {
@@ -162,6 +195,5 @@ public abstract class GrisuApplicationWindow implements WindowListener {
 		// TODO Auto-generated method stub
 
 	}
-
 
 }

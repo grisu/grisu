@@ -69,7 +69,7 @@ public class BatchJobMonitoringApp {
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
 		// frame.add(new BatchJobTabbedPane(si, null), BorderLayout.CENTER);
 		GrisuSwingClient client = new GrisuTestSwingClientPanel();
-		frame.add(new LoginPanel(client), BorderLayout.CENTER);
+		frame.add(new LoginPanel(client, null), BorderLayout.CENTER);
 	}
 
 }

@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
+import org.apache.commons.lang.StringUtils;
 import org.globus.myproxy.CredentialInfo;
 import org.globus.myproxy.MyProxy;
 import org.globus.myproxy.MyProxyException;
@@ -17,13 +18,11 @@ import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.settings.MyProxyServerParams;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.settings.ServiceTemplateManagement;
-import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.vpac.security.light.myProxy.MyProxy_light;
 import org.vpac.security.light.plainProxy.LocalProxy;
-import org.w3c.dom.Document;
 
 public class LocalServiceInterface extends AbstractServiceInterface implements
-ServiceInterface {
+		ServiceInterface {
 
 	private ProxyCredential credential = null;
 	private String myproxy_username = null;
@@ -38,18 +37,18 @@ ServiceInterface {
 		try {
 			if (credential != null) {
 				oldLifetime = credential.getGssCredential()
-				.getRemainingLifetime();
+						.getRemainingLifetime();
 			}
 		} catch (GSSException e2) {
 			myLogger
-			.debug("Problem getting lifetime of old certificate: " + e2);
+					.debug("Problem getting lifetime of old certificate: " + e2);
 			credential = null;
 		}
 		if (oldLifetime < ServerPropertiesManager
 				.getMinProxyLifetimeBeforeGettingNewProxy()) {
 			myLogger
-			.debug("Credential reached minimum lifetime. Getting new one from myproxy. Old lifetime: "
-					+ oldLifetime);
+					.debug("Credential reached minimum lifetime. Getting new one from myproxy. Old lifetime: "
+							+ oldLifetime);
 			this.credential = null;
 			// user.cleanCache();
 		}
@@ -64,11 +63,11 @@ ServiceInterface {
 								.loadGSSCredential());
 					} catch (Exception e) {
 						throw new NoValidCredentialException(
-						"Could not load credential/no valid login data.");
+								"Could not load credential/no valid login data.");
 					}
 					if (!credential.isValid()) {
 						throw new NoValidCredentialException(
-						"Local proxy is not valid anymore.");
+								"Local proxy is not valid anymore.");
 					}
 				}
 			} else {
@@ -80,13 +79,13 @@ ServiceInterface {
 					// this is needed because of a possible round-robin myproxy
 					// server
 					myProxyServer = InetAddress.getByName(myProxyServer)
-					.getHostAddress();
+							.getHostAddress();
 				} catch (UnknownHostException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 					throw new NoValidCredentialException(
 							"Could not download myproxy credential: "
-							+ e1.getLocalizedMessage());
+									+ e1.getLocalizedMessage());
 				}
 
 				try {
@@ -101,11 +100,11 @@ ServiceInterface {
 					e.printStackTrace();
 					throw new NoValidCredentialException(
 							"Could not get myproxy credential: "
-							+ e.getLocalizedMessage());
+									+ e.getLocalizedMessage());
 				}
 				if (!credential.isValid()) {
 					throw new NoValidCredentialException(
-					"MyProxy credential is not valid.");
+							"MyProxy credential is not valid.");
 				}
 			}
 		}
@@ -122,13 +121,13 @@ ServiceInterface {
 		try {
 			// this is needed because of a possible round-robin myproxy server
 			myProxyServer = InetAddress.getByName(myProxyServer)
-			.getHostAddress();
+					.getHostAddress();
 		} catch (UnknownHostException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 			throw new NoValidCredentialException(
 					"Could not download myproxy credential: "
-					+ e1.getLocalizedMessage());
+							+ e1.getLocalizedMessage());
 		}
 
 		MyProxy myproxy = new MyProxy(myProxyServer, myProxyPort);
@@ -146,38 +145,21 @@ ServiceInterface {
 	}
 
 	public final String getTemplate(final String application)
-	throws NoSuchTemplateException {
-		Document doc = ServiceTemplateManagement
-		.getAvailableTemplate(application);
+			throws NoSuchTemplateException {
+		String temp = ServiceTemplateManagement.getTemplate(application);
 
-		if (doc == null) {
+		if (StringUtils.isBlank(temp)) {
 			throw new NoSuchTemplateException(
 					"Could not find template for application: " + application
-					+ ".");
+							+ ".");
 		}
-
-		return SeveralXMLHelpers.toString(doc);
-	}
-
-	public final Document getTemplate(final String application,
-			final String version) throws NoSuchTemplateException {
-		Document doc = ServiceTemplateManagement
-		.getAvailableTemplate(application);
-
-		if (doc == null) {
-			throw new NoSuchTemplateException(
-					"Could not find template for application: " + application
-					+ ", version " + version);
-		}
-
-		return doc;
-
+		return temp;
 	}
 
 	@Override
 	protected final synchronized User getUser() {
 
-		if ( user == null ) {
+		if (user == null) {
 			this.user = User.createUser(getCredential(), this);
 		}
 
@@ -189,6 +171,7 @@ ServiceInterface {
 	public final String[] listHostedApplicationTemplates() {
 		return ServiceTemplateManagement.getAllAvailableApplications();
 	}
+
 	public final void login(final String username, final String password) {
 
 		this.myproxy_username = username;

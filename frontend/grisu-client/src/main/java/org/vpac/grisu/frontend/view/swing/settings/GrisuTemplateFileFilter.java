@@ -9,6 +9,10 @@ public class GrisuTemplateFileFilter extends FileFilter {
 	@Override
 	public boolean accept(File arg0) {
 
+		if (arg0.isDirectory()) {
+			return true;
+		}
+
 		if (arg0.getName().endsWith(".template")) {
 			return true;
 		} else {

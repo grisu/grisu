@@ -1,5 +1,7 @@
 package org.vpac.grisu.control.serviceInterfaces;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -7,6 +9,7 @@ import java.util.Date;
 
 import javax.activation.DataHandler;
 
+import org.apache.commons.io.FileUtils;
 import org.globus.myproxy.CredentialInfo;
 import org.globus.myproxy.MyProxy;
 import org.globus.myproxy.MyProxyException;
@@ -22,18 +25,17 @@ import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
+import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.settings.MyProxyServerParams;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.settings.ServiceTemplateManagement;
-import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.vpac.security.light.myProxy.MyProxy_light;
 import org.vpac.security.light.plainProxy.LocalProxy;
 import org.vpac.security.light.voms.VO;
 import org.vpac.security.light.voms.VOManagement.VOManagement;
-import org.w3c.dom.Document;
 
 public class DummyServiceInterface extends AbstractServiceInterface implements
-ServiceInterface {
+		ServiceInterface {
 
 	private ProxyCredential credential = null;
 	private String myproxy_username = null;
@@ -48,18 +50,18 @@ ServiceInterface {
 		try {
 			if (credential != null) {
 				oldLifetime = credential.getGssCredential()
-				.getRemainingLifetime();
+						.getRemainingLifetime();
 			}
 		} catch (GSSException e2) {
 			myLogger
-			.debug("Problem getting lifetime of old certificate: " + e2);
+					.debug("Problem getting lifetime of old certificate: " + e2);
 			credential = null;
 		}
 		if (oldLifetime < ServerPropertiesManager
 				.getMinProxyLifetimeBeforeGettingNewProxy()) {
 			myLogger
-			.debug("Credential reached minimum lifetime. Getting new one from myproxy. Old lifetime: "
-					+ oldLifetime);
+					.debug("Credential reached minimum lifetime. Getting new one from myproxy. Old lifetime: "
+							+ oldLifetime);
 			this.credential = null;
 			// user.cleanCache();
 		}
@@ -74,11 +76,11 @@ ServiceInterface {
 								.loadGSSCredential());
 					} catch (Exception e) {
 						throw new NoValidCredentialException(
-						"Could not load credential/no valid login data.");
+								"Could not load credential/no valid login data.");
 					}
 					if (!credential.isValid()) {
 						throw new NoValidCredentialException(
-						"Local proxy is not valid anymore.");
+								"Local proxy is not valid anymore.");
 					}
 				}
 			} else {
@@ -90,13 +92,13 @@ ServiceInterface {
 					// this is needed because of a possible round-robin myproxy
 					// server
 					myProxyServer = InetAddress.getByName(myProxyServer)
-					.getHostAddress();
+							.getHostAddress();
 				} catch (UnknownHostException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 					throw new NoValidCredentialException(
 							"Could not download myproxy credential: "
-							+ e1.getLocalizedMessage());
+									+ e1.getLocalizedMessage());
 				}
 
 				try {
@@ -111,11 +113,11 @@ ServiceInterface {
 					e.printStackTrace();
 					throw new NoValidCredentialException(
 							"Could not get myproxy credential: "
-							+ e.getLocalizedMessage());
+									+ e.getLocalizedMessage());
 				}
 				if (!credential.isValid()) {
 					throw new NoValidCredentialException(
-					"MyProxy credential is not valid.");
+							"MyProxy credential is not valid.");
 				}
 			}
 		}
@@ -132,13 +134,13 @@ ServiceInterface {
 		try {
 			// this is needed because of a possible round-robin myproxy server
 			myProxyServer = InetAddress.getByName(myProxyServer)
-			.getHostAddress();
+					.getHostAddress();
 		} catch (UnknownHostException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 			throw new NoValidCredentialException(
 					"Could not download myproxy credential: "
-					+ e1.getLocalizedMessage());
+							+ e1.getLocalizedMessage());
 		}
 
 		MyProxy myproxy = new MyProxy(myProxyServer, myProxyPort);
@@ -155,39 +157,25 @@ ServiceInterface {
 
 	}
 
-	public final String getTemplate(final String application)
-	throws NoSuchTemplateException {
-		Document doc = ServiceTemplateManagement
-		.getAvailableTemplate(application);
+	public final String getTemplate(final String name)
+			throws NoSuchTemplateException {
+		File file = new File(Environment.getAvailableTemplatesDirectory(), name
+				+ ".template");
 
-		if (doc == null) {
-			throw new NoSuchTemplateException(
-					"Could not find template for application: " + application
-					+ ".");
+		String temp;
+		try {
+			temp = FileUtils.readFileToString(file);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 
-		return SeveralXMLHelpers.toString(doc);
-	}
-
-	public final Document getTemplate(final String application,
-			final String version) throws NoSuchTemplateException {
-		Document doc = ServiceTemplateManagement
-		.getAvailableTemplate(application);
-
-		if (doc == null) {
-			throw new NoSuchTemplateException(
-					"Could not find template for application: " + application
-					+ ", version " + version);
-		}
-
-		return doc;
-
+		return temp;
 	}
 
 	@Override
 	protected final synchronized User getUser() {
 
-		if ( user == null ) {
+		if (user == null) {
 			this.user = User.createUser(getCredential(), this);
 		}
 
@@ -210,7 +198,7 @@ ServiceInterface {
 
 	@Override
 	public void kill(final String jobname, final boolean clear)
-	throws RemoteFileSystemException, NoSuchJobException {
+			throws RemoteFileSystemException, NoSuchJobException {
 
 		Job job;
 
@@ -248,7 +236,7 @@ ServiceInterface {
 	}
 
 	public void stageFiles(final String jobname)
-	throws RemoteFileSystemException, NoSuchJobException {
+			throws RemoteFileSystemException, NoSuchJobException {
 
 		myLogger.debug("Dummy staging files...");
 	}
@@ -280,7 +268,7 @@ ServiceInterface {
 		} catch (Exception e) {
 			throw new JobSubmissionException(
 					"Could not access remote filesystem: "
-					+ e.getLocalizedMessage());
+							+ e.getLocalizedMessage());
 		}
 
 		if (job.getFqan() != null) {
@@ -291,7 +279,7 @@ ServiceInterface {
 			} catch (Exception e) {
 				throw new JobSubmissionException(
 						"Could not create credential to use to submit the job: "
-						+ e.getLocalizedMessage());
+								+ e.getLocalizedMessage());
 			}
 		} else {
 			job.setCredential(getCredential());
@@ -305,13 +293,13 @@ ServiceInterface {
 			e.printStackTrace();
 			throw new JobSubmissionException(
 					"Job submission to endpoint failed: "
-					+ e.getLocalizedMessage());
+							+ e.getLocalizedMessage());
 		}
 
 		if (handle == null) {
 			throw new JobSubmissionException(
 					"Job apparently submitted but jobhandle is null for job: "
-					+ jobname);
+							+ jobname);
 		}
 
 		job.addJobProperty("submissionTime", Long

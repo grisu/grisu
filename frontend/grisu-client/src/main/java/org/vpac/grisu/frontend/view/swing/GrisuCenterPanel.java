@@ -53,26 +53,29 @@ public class GrisuCenterPanel extends JPanel {
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("219px:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("154px:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("154px:grow"),
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 
 		wrapperPanel = new JPanel();
 
 		wrapperPanel.setLayout(new CardLayout(0, 0));
 		wrapperPanel.add(getLoadingPanel(), LOADING_PANEL);
-		wrapperPanel.add(getMultiSingleJobMonitoringGrid(), SINGLE_JOB_MONITORING_GRID);
-		wrapperPanel.add(getMultiBatchJobMonitoringGrid(), BATCH_JOB_MONITORING_GRID);
+		wrapperPanel.add(getMultiSingleJobMonitoringGrid(),
+				SINGLE_JOB_MONITORING_GRID);
+		wrapperPanel.add(getMultiBatchJobMonitoringGrid(),
+				BATCH_JOB_MONITORING_GRID);
 		wrapperPanel.add(getFileListWithPreviewPanel(), FILE_MANAGEMENT_PANEL);
 
 		add(wrapperPanel, "2, 2, fill, fill");
 	}
+
 	public void addJobCreationPanel(JobCreationPanel panel) {
-		availableJobCreationPanels.put(ApplicationsManager.getPrettyName(panel.getPanelName()), panel);
+		availableJobCreationPanels.put(ApplicationsManager.getPrettyName(panel
+				.getPanelName()), panel);
 		wrapperPanel.add(panel.getPanel(), panel.getPanelName());
-		pcs.firePropertyChange("availableJobCreationPanels", null, availableJobCreationPanels);
+		pcs.firePropertyChange("availableJobCreationPanels", null,
+				availableJobCreationPanels);
 	}
 
 	public void addNavigationPanel(GrisuNavigationPanel l) {
@@ -81,7 +84,7 @@ public class GrisuCenterPanel extends JPanel {
 
 	public void displayBatchJobGrid(String application) {
 
-		final CardLayout cl = (CardLayout)(wrapperPanel.getLayout());
+		final CardLayout cl = (CardLayout) (wrapperPanel.getLayout());
 
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
@@ -104,7 +107,7 @@ public class GrisuCenterPanel extends JPanel {
 
 	public void displayFileManagement() {
 
-		final CardLayout cl = (CardLayout)(wrapperPanel.getLayout());
+		final CardLayout cl = (CardLayout) (wrapperPanel.getLayout());
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
 			public void run() {
@@ -116,7 +119,7 @@ public class GrisuCenterPanel extends JPanel {
 
 	private void displayJobCreationPanel(final JobCreationPanel panel) {
 
-		final CardLayout cl = (CardLayout)(wrapperPanel.getLayout());
+		final CardLayout cl = (CardLayout) (wrapperPanel.getLayout());
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
 			public void run() {
@@ -129,7 +132,7 @@ public class GrisuCenterPanel extends JPanel {
 
 	public void displaySingleJobGrid(String application) {
 
-		final CardLayout cl = (CardLayout)(wrapperPanel.getLayout());
+		final CardLayout cl = (CardLayout) (wrapperPanel.getLayout());
 
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
@@ -139,7 +142,8 @@ public class GrisuCenterPanel extends JPanel {
 			}
 		});
 
-		getMultiSingleJobMonitoringGrid().displayGridForApplication(application);
+		getMultiSingleJobMonitoringGrid()
+				.displayGridForApplication(application);
 
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
@@ -156,8 +160,9 @@ public class GrisuCenterPanel extends JPanel {
 
 	private FileListWithPreviewPanel getFileListWithPreviewPanel() {
 		if (fileListWithPreviewPanel == null) {
-			fileListWithPreviewPanel = new FileListWithPreviewPanel(si, null, ClientPropertiesManager.getLastUsedLeftUrl(),
-					true, true, true, true, true);
+			fileListWithPreviewPanel = new FileListWithPreviewPanel(si, null,
+					ClientPropertiesManager.getLastUsedLeftUrl(), true, true,
+					true, true, true);
 
 		}
 		return fileListWithPreviewPanel;
@@ -169,7 +174,6 @@ public class GrisuCenterPanel extends JPanel {
 		}
 		return loadingPanel;
 	}
-
 
 	private MultiBatchJobMonitoringGrid getMultiBatchJobMonitoringGrid() {
 		if (multiBatchJobMonitoringGrid == null) {
@@ -185,6 +189,13 @@ public class GrisuCenterPanel extends JPanel {
 		return multiSingleJobMonitoringGrid;
 	}
 
+	public void removeJobCreationPanels() {
+		availableJobCreationPanels.clear();
+		// wrapperPanel.removeAll();
+		pcs.firePropertyChange("availableJobCreationPanels", null,
+				availableJobCreationPanels);
+	}
+
 	@Override
 	public void removePropertyChangeListener(PropertyChangeListener l) {
 		pcs.removePropertyChangeListener(l);
@@ -192,23 +203,28 @@ public class GrisuCenterPanel extends JPanel {
 
 	public void setNavigationCommand(final String[] command) {
 
-		if ( (command == null) || (command.length == 0) ) {
+		if ((command == null) || (command.length == 0)) {
 			return;
 		}
 
-		if ( GrisuMonitorNavigationTaskPane.SINGLE_JOB_LIST.equals(command[0]) ) {
+		if (GrisuMonitorNavigationTaskPane.SINGLE_JOB_LIST.equals(command[0])) {
 			displaySingleJobGrid(command[1]);
 			rjm.updateJobList(command[1]);
-		} else if ( GrisuMonitorNavigationTaskPaneBatch.BATCH_JOB_LIST.equals(command[0])) {
+			return;
+		} else if (GrisuMonitorNavigationTaskPaneBatch.BATCH_JOB_LIST
+				.equals(command[0])) {
 			displayBatchJobGrid(command[1]);
 			rjm.updateBatchJobList(command[1]);
-		} else if ( GrisuFileNavigationTaskPane.FILE_MANAGEMENT.equals(command[0]) ) {
+			return;
+		} else if (GrisuFileNavigationTaskPane.FILE_MANAGEMENT
+				.equals(command[0])) {
 			displayFileManagement();
-		}
-
-		JobCreationPanel panel = availableJobCreationPanels.get(command[0]);
-		if ( panel != null ) {
-			displayJobCreationPanel(panel);
+			return;
+		} else {
+			JobCreationPanel panel = availableJobCreationPanels.get(command[0]);
+			if (panel != null) {
+				displayJobCreationPanel(panel);
+			}
 		}
 
 	}

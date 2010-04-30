@@ -13,7 +13,6 @@ import org.vpac.grisu.frontend.view.swing.login.LoginPanel;
 
 public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 
-
 	private ServiceInterface si;
 	private LoginPanel lp;
 	private GrisuNavigationPanel grisuNavigationPanel;
@@ -33,12 +32,15 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 	/**
 	 * Create the panel.
 	 */
-	public GrisuMainPanel(boolean displaySingleJobMonitorItem, boolean displaySingleJobAllJobsMenuItem,
-			boolean displaySingleJobAppSpecificMenuItems, Set<String> singleApplicationsToWatch,
-			boolean displayBatchJobMonitorItem, boolean displayBatchJobAllJobsMenuItem,
-			boolean displayBatchJobAppSpecificMenuItems, Set<String> batchApplicationsToWatch,
-			boolean displayFileManagementItem
-	) {
+	public GrisuMainPanel(boolean displaySingleJobMonitorItem,
+			boolean displaySingleJobAllJobsMenuItem,
+			boolean displaySingleJobAppSpecificMenuItems,
+			Set<String> singleApplicationsToWatch,
+			boolean displayBatchJobMonitorItem,
+			boolean displayBatchJobAllJobsMenuItem,
+			boolean displayBatchJobAppSpecificMenuItems,
+			Set<String> batchApplicationsToWatch,
+			boolean displayFileManagementItem) {
 
 		this.displaySingleJobMonitorItem = displaySingleJobMonitorItem;
 		this.displaySingleJobAllJobsMenuItem = displaySingleJobAllJobsMenuItem;
@@ -53,18 +55,20 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 		setLayout(new BorderLayout(0, 0));
 	}
 
-	public GrisuMainPanel(boolean watchSingleApplication, Set<String> applicationsToWatch) {
-		this( watchSingleApplication, false, false, applicationsToWatch, !watchSingleApplication, false, false, applicationsToWatch, true);
+	public GrisuMainPanel(boolean watchSingleApplication,
+			Set<String> applicationsToWatch) {
+		this(watchSingleApplication, false, false, applicationsToWatch,
+				!watchSingleApplication, false, false, applicationsToWatch,
+				true);
 	}
 
 	public void addJobCreationPanel(JobCreationPanel panel) {
 
 		jobCreationPanels.add(panel);
-		if ( si != null ) {
+		if (si != null) {
 			getGrisuCenterPanel().addJobCreationPanel(panel);
 			panel.setServiceInterface(si);
 		}
-
 
 	}
 
@@ -77,13 +81,16 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 
 	private GrisuNavigationPanel getGrisuNavigationPanel() {
 		if (grisuNavigationPanel == null) {
-			//			grisuNavigationPanel = new GrisuNavigationPanel(this.si, getGrisuCenterPanel());
-			grisuNavigationPanel = new GrisuNavigationPanel(this.si, getGrisuCenterPanel(),
-					displaySingleJobMonitorItem, displaySingleJobAllJobsMenuItem,
-					displaySingleJobAppSpecificMenuItems, singleApplicationsToWatch,
-					displayBatchJobMonitorItem, displayBatchJobAllJobsMenuItem,
-					displayBatchJobAppSpecificMenuItems, batchApplicationsToWatch,
-					displayFileManagementItem);
+			// grisuNavigationPanel = new GrisuNavigationPanel(this.si,
+			// getGrisuCenterPanel());
+			grisuNavigationPanel = new GrisuNavigationPanel(this.si,
+					getGrisuCenterPanel(), displaySingleJobMonitorItem,
+					displaySingleJobAllJobsMenuItem,
+					displaySingleJobAppSpecificMenuItems,
+					singleApplicationsToWatch, displayBatchJobMonitorItem,
+					displayBatchJobAllJobsMenuItem,
+					displayBatchJobAppSpecificMenuItems,
+					batchApplicationsToWatch, displayFileManagementItem);
 		}
 		return grisuNavigationPanel;
 	}
@@ -92,15 +99,25 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 		return this;
 	}
 
+	public void removeAlJobCreationPanelsl() {
+
+		jobCreationPanels.clear();
+		if (si != null) {
+			getGrisuCenterPanel().removeJobCreationPanels();
+		}
+
+	}
+
 	public void setLoginPanel(LoginPanel lp) {
 		this.lp = lp;
 	}
+
 	public void setServiceInterface(ServiceInterface si) {
 		this.si = si;
 		add(getGrisuNavigationPanel(), BorderLayout.WEST);
 		add(getGrisuCenterPanel(), BorderLayout.CENTER);
 
-		for (JobCreationPanel panel : jobCreationPanels ) {
+		for (JobCreationPanel panel : jobCreationPanels) {
 			getGrisuCenterPanel().addJobCreationPanel(panel);
 			panel.setServiceInterface(si);
 		}

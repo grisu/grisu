@@ -65,7 +65,7 @@ public class TemplateCreator {
 
 		TemplateTestFrame templateframe = new TemplateTestFrame();
 
-		LoginPanel lp = new LoginPanel(templateframe);
+		LoginPanel lp = new LoginPanel(templateframe, null);
 		frame.getContentPane().add(lp, BorderLayout.CENTER);
 	}
 

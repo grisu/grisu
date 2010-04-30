@@ -1,20 +1,17 @@
 package org.vpac.grisu.frontend.view.swing;
 
-import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
 
+import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.view.swing.settings.SettingsDialog;
 
-public class GrisuMenu extends JFrame {
+public class GrisuMenu extends JMenuBar {
 
 	/**
 	 * Launch the application.
@@ -32,8 +29,10 @@ public class GrisuMenu extends JFrame {
 		});
 	}
 
-	private final JPanel contentPane;
-	private JMenuBar menuBar;
+	private final SettingsDialog dialog = new SettingsDialog();
+
+	private ServiceInterface si;
+
 	private JMenu fileMenu;
 	private JMenu toolsMenu;
 
@@ -44,13 +43,9 @@ public class GrisuMenu extends JFrame {
 	 * Create the frame.
 	 */
 	public GrisuMenu() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
-		setJMenuBar(getMenuBar_1());
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		contentPane.setLayout(new BorderLayout(0, 0));
-		setContentPane(contentPane);
+
+		add(getFileMenu());
+		add(getToolsMenu());
 	}
 
 	private JMenuItem getExitItem() {
@@ -68,23 +63,12 @@ public class GrisuMenu extends JFrame {
 		return fileMenu;
 	}
 
-	private JMenuBar getMenuBar_1() {
-		if (menuBar == null) {
-			menuBar = new JMenuBar();
-			menuBar.add(getFileMenu());
-			menuBar.add(getToolsMenu());
-		}
-		return menuBar;
-	}
-
 	private JMenuItem getSettingsItem() {
 		if (settingsItem == null) {
 			settingsItem = new JMenuItem("Settings");
 			settingsItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 
-					SettingsDialog dialog = new SettingsDialog();
-					dialog.setServiceInterface(si);
 					dialog.setVisible(true);
 
 				}
@@ -99,5 +83,10 @@ public class GrisuMenu extends JFrame {
 			toolsMenu.add(getSettingsItem());
 		}
 		return toolsMenu;
+	}
+
+	public void setServiceInterface(ServiceInterface si) {
+		this.si = si;
+		dialog.setServiceInterface(si);
 	}
 }

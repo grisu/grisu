@@ -12,6 +12,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.control.login.LoginManager;
 
 public class SettingsDialog extends JDialog {
 
@@ -21,6 +22,10 @@ public class SettingsDialog extends JDialog {
 	public static void main(String[] args) {
 		try {
 			SettingsDialog dialog = new SettingsDialog();
+
+			ServiceInterface si = LoginManager.loginCommandline();
+			dialog.setServiceInterface(si);
+
 			dialog.setVisible(true);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -42,7 +42,7 @@ public class ApplicationSubscribePanel extends JPanel {
 	private JButton btnBrowse;
 	private JScrollPane scrollPane_2;
 	private JLabel lblAdd;
-	private JLabel label;
+	private JLabel lblRemove;
 	private JButton btnRemove;
 	private JList myRemoveApplicationList;
 	private JList localApplicationList;
@@ -94,7 +94,7 @@ public class ApplicationSubscribePanel extends JPanel {
 		add(getLblAdd(), "2, 16, right, center");
 		add(getBtnBrowse(), "4, 16, right, top");
 		add(getScrollPane_2(), "8, 16, 1, 3, fill, fill");
-		add(getLabel(), "2, 18");
+		add(getLblRemove(), "2, 18, right, default");
 		add(getBtnRemove(), "4, 18, right, default");
 
 	}
@@ -186,13 +186,6 @@ public class ApplicationSubscribePanel extends JPanel {
 		return button_1;
 	}
 
-	private JLabel getLabel() {
-		if (label == null) {
-			label = new JLabel("New label");
-		}
-		return label;
-	}
-
 	private JLabel getLabel_1() {
 		if (lblMyApplications == null) {
 			lblMyApplications = new JLabel("My applications");
@@ -219,6 +212,13 @@ public class ApplicationSubscribePanel extends JPanel {
 			lblRemoteApplications = new JLabel("Remote applications");
 		}
 		return lblRemoteApplications;
+	}
+
+	private JLabel getLblRemove() {
+		if (lblRemove == null) {
+			lblRemove = new JLabel("Remove");
+		}
+		return lblRemove;
 	}
 
 	private JList getLocalList() {
