@@ -25,7 +25,7 @@ public class PanelConfig {
 		filters.add(filter);
 	}
 
-	public Map<String, String> getConfig() {
+	public Map<String, String> getPanelConfig() {
 		return config;
 	}
 

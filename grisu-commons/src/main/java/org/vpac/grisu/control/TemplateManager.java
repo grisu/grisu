@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.io.FileUtils;
@@ -25,9 +24,10 @@ public class TemplateManager {
 
 	protected final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
-	private final Map<String, List<String>> remoteTemplates = new TreeMap<String, List<String>>();
+	// private final Map<String, List<String>> remoteTemplates = new
+	// TreeMap<String, List<String>>();
 	private String[] remoteTemplateNames = null;
-	private Map<String, List<String>> localTemplates = null;
+	// private Map<String, List<String>> localTemplates = null;
 
 	private final ServiceInterface si;
 
@@ -55,7 +55,7 @@ public class TemplateManager {
 			throw new RuntimeException(e);
 		}
 		String filename = FilenameUtils.getBaseName(file.toString());
-		localTemplates.put(filename, temp);
+		// localTemplates.put(filename, temp);
 
 		pcs.firePropertyChange("localTemplateNames", null,
 				getLocalTemplateNames());
@@ -95,29 +95,37 @@ public class TemplateManager {
 	}
 
 	public Map<String, List<String>> getLocalTemplates() {
-		if (localTemplates == null) {
+		// if (localTemplates == null) {
 
-			localTemplates = new HashMap<String, List<String>>();
+		Map<String, List<String>> localTemplates = new HashMap<String, List<String>>();
 
-			File tempDir = new File(Environment.getTemplateDirectory());
+		File tempDir = new File(Environment.getTemplateDirectory());
 
-			if (!tempDir.exists()) {
-				if (!tempDir.mkdirs()) {
-					throw new RuntimeException(
-							"Could not create directory "
-									+ tempDir.toString()
-									+ ". Please create it manually and make it writable by the current user.");
-				}
+		if (!tempDir.exists()) {
+			if (!tempDir.mkdirs()) {
+				throw new RuntimeException(
+						"Could not create directory "
+								+ tempDir.toString()
+								+ ". Please create it manually and make it writable by the current user.");
 			}
+		}
 
-			File[] templates = tempDir
-					.listFiles(new GrisuTemplateFilenameFilter());
+		File[] templates = tempDir.listFiles(new GrisuTemplateFilenameFilter());
 
-			for (File file : templates) {
-				addLocalTemplate(file);
+		for (File file : templates) {
+
+			List<String> temp;
+			try {
+				temp = FileUtils.readLines(file);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
+			String filename = FilenameUtils.getBaseName(file.toString());
+			localTemplates.put(filename, temp);
 
 		}
+
+		// }
 		return localTemplates;
 	}
 
@@ -131,16 +139,12 @@ public class TemplateManager {
 	public List<String> getRemoteTemplate(String name)
 			throws NoSuchTemplateException {
 
-		if (remoteTemplates.get(name) == null) {
-			String temp = si.getTemplate(name);
-			if (StringUtils.isBlank(temp)) {
-				throw new NoSuchTemplateException("Template " + name
-						+ " is empty.");
-			}
-			List<String> lines = Arrays.asList(StringUtils.split(temp, '\n'));
-			remoteTemplates.put(name, lines);
+		String temp = si.getTemplate(name);
+		if (StringUtils.isBlank(temp)) {
+			throw new NoSuchTemplateException("Template " + name + " is empty.");
 		}
-		return remoteTemplates.get(name);
+		List<String> lines = Arrays.asList(StringUtils.split(temp, '\n'));
+		return lines;
 	}
 
 	public String[] getRemoteTemplateNames() {
@@ -165,7 +169,7 @@ public class TemplateManager {
 
 	public void removeLocalApplication(String name) {
 
-		localTemplates.remove(name);
+		// localTemplates.remove(name);
 
 		File temp = new File(Environment.getTemplateDirectory(), name
 				+ ".template");

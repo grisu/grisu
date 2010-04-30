@@ -45,6 +45,8 @@ public class TemplateObject {
 
 	}
 
+	private String name;
+
 	private JobSubmissionObjectImpl jobObject;
 	private final String commandlineTemplate;
 	private final ServiceInterface si;
@@ -73,12 +75,20 @@ public class TemplateObject {
 		return this.si;
 	}
 
+	public String getTemplateName() {
+		return name;
+	}
+
 	public JPanel getTemplatePanel() {
 		return this.templatePanel;
 	}
 
 	public void setJobObject(JobSubmissionObjectImpl job) {
 		this.jobObject = job;
+	}
+
+	public void setTemplateName(String name) {
+		this.name = name;
 	}
 
 	public void setTemplatePanel(JPanel templatePanel) {

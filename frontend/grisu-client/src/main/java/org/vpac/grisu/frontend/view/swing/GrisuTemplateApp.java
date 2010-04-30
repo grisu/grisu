@@ -74,7 +74,7 @@ public class GrisuTemplateApp extends GrisuApplicationWindow implements
 
 		for (String name : allMyTemplates) {
 			try {
-				JobCreationPanel panel = new TemplateJobCreationPanel(tm
+				JobCreationPanel panel = new TemplateJobCreationPanel(name, tm
 						.getTemplate(name));
 				if (panel == null) {
 					myLogger.warn("Can't find template " + name);

@@ -22,7 +22,8 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class TemplateJobCreationPanel extends JPanel implements JobCreationPanel {
+public class TemplateJobCreationPanel extends JPanel implements
+		JobCreationPanel {
 
 	public static final String LOADING_PANEL = "loading";
 	public static final String TEMPLATE_PANEL = "template";
@@ -35,8 +36,10 @@ public class TemplateJobCreationPanel extends JPanel implements JobCreationPanel
 	private JProgressBar progressBar;
 	private JLabel label;
 	private JPanel currentTemplatePanel;
+	private final String templateFileName;
 
-	public TemplateJobCreationPanel(List<String> lines)  {
+	public TemplateJobCreationPanel(String templateFileName, List<String> lines) {
+		this.templateFileName = templateFileName;
 		this.lines = lines;
 		try {
 			this.panelConfigs = TemplateHelpers.parseConfig(lines);
@@ -46,7 +49,6 @@ public class TemplateJobCreationPanel extends JPanel implements JobCreationPanel
 		setLayout(cardLayout);
 		add(getLoadingPanel(), LOADING_PANEL);
 	}
-
 
 	public boolean createsBatchJob() {
 		return false;
@@ -67,16 +69,16 @@ public class TemplateJobCreationPanel extends JPanel implements JobCreationPanel
 	private JPanel getLoadingPanel() {
 		if (loadingPanel == null) {
 			loadingPanel = new JPanel();
-			loadingPanel.setLayout(new FormLayout(new ColumnSpec[] {
-					ColumnSpec.decode("24dlu"),
-					ColumnSpec.decode("default:grow"),
-					ColumnSpec.decode("24dlu"),},
-					new RowSpec[] {
-					RowSpec.decode("4dlu:grow"),
-					FormFactory.DEFAULT_ROWSPEC,
-					FormFactory.RELATED_GAP_ROWSPEC,
-					FormFactory.DEFAULT_ROWSPEC,
-					RowSpec.decode("4dlu:grow"),}));
+			loadingPanel
+					.setLayout(new FormLayout(new ColumnSpec[] {
+							ColumnSpec.decode("24dlu"),
+							ColumnSpec.decode("default:grow"),
+							ColumnSpec.decode("24dlu"), }, new RowSpec[] {
+							RowSpec.decode("4dlu:grow"),
+							FormFactory.DEFAULT_ROWSPEC,
+							FormFactory.RELATED_GAP_ROWSPEC,
+							FormFactory.DEFAULT_ROWSPEC,
+							RowSpec.decode("4dlu:grow"), }));
 			loadingPanel.add(getProgressBar(), "2, 2");
 			loadingPanel.add(getLabel(), "2, 4, fill, default");
 		}
@@ -89,12 +91,11 @@ public class TemplateJobCreationPanel extends JPanel implements JobCreationPanel
 
 	public String getPanelName() {
 
-		for ( PanelConfig config : panelConfigs.values() ) {
-			String bean = config.getConfig().get(AbstractInputPanel.NAME);
-			if ( AbstractInputPanel.TEMPLATENAME.equals(bean)) {
-			}
+		if (template == null) {
+			throw new IllegalStateException(
+					"No serviceinterface set yet. Can't determine panel name.");
 		}
-		return getSupportedApplication();
+		return template.getTemplateName();
 	}
 
 	private JProgressBar getProgressBar() {
@@ -104,13 +105,15 @@ public class TemplateJobCreationPanel extends JPanel implements JobCreationPanel
 		}
 		return progressBar;
 	}
+
 	public String getSupportedApplication() {
 
-		for ( PanelConfig config : panelConfigs.values() ) {
-			String bean = config.getConfig().get(AbstractInputPanel.BEAN);
-			if ( AbstractInputPanel.APPLICATION.equals(bean) ) {
-				String app = config.getConfig().get(AbstractInputPanel.DEFAULT_VALUE);
-				if ( StringUtils.isNotBlank(app) ) {
+		for (PanelConfig config : panelConfigs.values()) {
+			String bean = config.getPanelConfig().get(AbstractInputPanel.BEAN);
+			if (AbstractInputPanel.APPLICATION.equals(bean)) {
+				String app = config.getPanelConfig().get(
+						AbstractInputPanel.DEFAULT_VALUE);
+				if (StringUtils.isNotBlank(app)) {
 					return app;
 				} else {
 					break;
@@ -123,10 +126,11 @@ public class TemplateJobCreationPanel extends JPanel implements JobCreationPanel
 	public void setServiceInterface(ServiceInterface si) {
 
 		try {
-			if ( currentTemplatePanel != null ) {
+			if (currentTemplatePanel != null) {
 				remove(currentTemplatePanel);
 			}
-			template = TemplateHelpers.parseAndCreateTemplatePanel(si, lines);
+			template = TemplateHelpers.parseAndCreateTemplatePanel(si,
+					templateFileName, lines);
 			currentTemplatePanel = new TemplateWrapperPanel(template);
 			add(currentTemplatePanel, TEMPLATE_PANEL);
 			cardLayout.show(this, TEMPLATE_PANEL);

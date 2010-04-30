@@ -31,6 +31,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 
+import org.apache.commons.io.FilenameUtils;
 import org.vpac.grisu.backend.model.job.gt4.GT4Submitter;
 import org.vpac.grisu.backend.model.job.gt5.GT5Submitter;
 import org.vpac.grisu.control.ServiceInterface;
@@ -49,32 +50,34 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class TemplateTestFrame extends JFrame implements PropertyChangeListener, ActionListener, GrisuSwingClient {
+public class TemplateTestFrame extends JFrame implements
+		PropertyChangeListener, ActionListener, GrisuSwingClient {
 
-	///////////////////////////////////////////////////// inner class ExitAction
+	// /////////////////////////////////////////////////// inner class
+	// ExitAction
 	class ExitAction extends AbstractAction {
 
-		//============================================= constructor
+		// ============================================= constructor
 		public ExitAction() {
 			super("Exit");
 			putValue(MNEMONIC_KEY, new Integer('X'));
 		}
 
-		//========================================= actionPerformed
+		// ========================================= actionPerformed
 		public void actionPerformed(ActionEvent e) {
 			System.exit(0);
 		}
 	}
 
-	////////////////////////////////////////////////// inner class OpenAction
+	// //////////////////////////////////////////////// inner class OpenAction
 	class OpenAction extends AbstractAction {
-		//============================================= constructor
+		// ============================================= constructor
 		public OpenAction() {
 			super("Open...");
 			putValue(MNEMONIC_KEY, new Integer('O'));
 		}
 
-		//========================================= actionPerformed
+		// ========================================= actionPerformed
 		public void actionPerformed(ActionEvent e) {
 			int retval = _fileChooser.showOpenDialog(TemplateTestFrame.this);
 			if (retval == JFileChooser.APPROVE_OPTION) {
@@ -82,7 +85,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 				currentFile = f;
 				try {
 					FileReader reader = new FileReader(f);
-					textArea.read(reader, "");  // Use TextComponent read
+					textArea.read(reader, ""); // Use TextComponent read
 					TemplateTestFrame.this.actionPerformed(null);
 				} catch (IOException ioex) {
 					System.out.println(e);
@@ -92,22 +95,22 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 		}
 	}
 
-	//////////////////////////////////////////////////// inner class SaveAction
+	// ////////////////////////////////////////////////// inner class SaveAction
 	class SaveAction extends AbstractAction {
-		//============================================= constructor
+		// ============================================= constructor
 		SaveAction() {
 			super("Save...");
 			putValue(MNEMONIC_KEY, new Integer('S'));
 		}
 
-		//========================================= actionPerformed
+		// ========================================= actionPerformed
 		public void actionPerformed(ActionEvent e) {
 			int retval = _fileChooser.showSaveDialog(TemplateTestFrame.this);
 			if (retval == JFileChooser.APPROVE_OPTION) {
 				File f = _fileChooser.getSelectedFile();
 				try {
 					FileWriter writer = new FileWriter(f);
-					textArea.write(writer);  // Use TextComponent write
+					textArea.write(writer); // Use TextComponent write
 				} catch (IOException ioex) {
 					JOptionPane.showMessageDialog(TemplateTestFrame.this, ioex);
 					System.exit(1);
@@ -115,9 +118,11 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 			}
 		}
 	}
+
 	public static final InformationManager informationManager = CachedMdsInformationManager
-	.getDefaultCachedMdsInformationManager(Environment
-			.getVarGrisuDirectory().toString());
+			.getDefaultCachedMdsInformationManager(Environment
+					.getVarGrisuDirectory().toString());
+
 	public static String getStackTrace(Throwable t) {
 		StringWriter stringWritter = new StringWriter();
 		PrintWriter printWritter = new PrintWriter(stringWritter, true);
@@ -138,8 +143,6 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 
 					ServiceInterface si = LoginManager.loginCommandline();
 
-
-
 					TemplateTestFrame frame = new TemplateTestFrame();
 					frame.setServiceInterface(si);
 					frame.setVisible(true);
@@ -155,7 +158,6 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 	private final Action _openAction = new OpenAction();
 
 	private final Action _saveAction = new SaveAction();
-
 
 	private final Action _exitAction = new ExitAction();
 
@@ -203,7 +205,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 			JMenuBar menuBar = new JMenuBar();
 			JMenu fileMenu = menuBar.add(new JMenu("File"));
 			fileMenu.setMnemonic('F');
-			fileMenu.add(_openAction);       // Note use of actions, not text.
+			fileMenu.add(_openAction); // Note use of actions, not text.
 			fileMenu.add(_saveAction);
 			fileMenu.addSeparator();
 			fileMenu.add(_exitAction);
@@ -217,51 +219,61 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 
 	}
 
-
 	public void actionPerformed(ActionEvent arg0) {
 
-		if ( currentTemplatePanel != null ) {
+		if (currentTemplatePanel != null) {
 			getCardPanel().remove(currentTemplatePanel);
 		}
 
 		getErrorTextArea().setText("");
 		getJsdlTextArea().setText("");
-		CardLayout cl = (CardLayout)(getCardPanel().getLayout());
-		cl.show(getCardPanel(),"error");
+		CardLayout cl = (CardLayout) (getCardPanel().getLayout());
+		cl.show(getCardPanel(), "error");
 
-		List<String> lines = new LinkedList(Arrays.asList(getTextArea().getText().split("\n")));
+		List<String> lines = new LinkedList(Arrays.asList(getTextArea()
+				.getText().split("\n")));
 
 		try {
 
-			if (  (template != null) && (template.getJobSubmissionObject() != null) ) {
-				template.getJobSubmissionObject().removePropertyChangeListener(TemplateTestFrame.this);
+			if ((template != null)
+					&& (template.getJobSubmissionObject() != null)) {
+				template.getJobSubmissionObject().removePropertyChangeListener(
+						TemplateTestFrame.this);
 			}
-			template = createTemplatePanel(lines);
-			template.getJobSubmissionObject().addPropertyChangeListener(TemplateTestFrame.this);
+			String templateFilename = null;
+			if (currentFile != null) {
+				templateFilename = FilenameUtils.getBaseName(currentFile
+						.toString());
+			}
+			template = createTemplatePanel(templateFilename, lines);
+			template.getJobSubmissionObject().addPropertyChangeListener(
+					TemplateTestFrame.this);
 
 			currentTemplatePanel = template.getTemplatePanel();
 
 			setJobDescriptions();
 
 			getCardPanel().add(currentTemplatePanel, "currentTemplate");
-			cl.show(getCardPanel(),"currentTemplate");
-
+			cl.show(getCardPanel(), "currentTemplate");
 
 		} catch (TemplateException e) {
 
-			StringBuffer temp = new StringBuffer("Error when building template: "+e.getLocalizedMessage()+"\n\n");
+			StringBuffer temp = new StringBuffer(
+					"Error when building template: " + e.getLocalizedMessage()
+							+ "\n\n");
 			temp.append(getStackTrace(e));
 			getErrorTextArea().setText(temp.toString());
 			getErrorTextArea().setCaretPosition(0);
-			cl.show(getCardPanel(),"error");
+			cl.show(getCardPanel(), "error");
 		}
 
 	}
 
-	public TemplateObject createTemplatePanel(List<String> lines) throws TemplateException {
-		return TemplateHelpers.parseAndCreateTemplatePanel(si, lines);
+	public TemplateObject createTemplatePanel(String templateFileName,
+			List<String> lines) throws TemplateException {
+		return TemplateHelpers.parseAndCreateTemplatePanel(si,
+				templateFileName, lines);
 	}
-
 
 	private JButton getButton() {
 		if (button == null) {
@@ -271,15 +283,15 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 		return button;
 	}
 
-
 	private JButton getButton_1() {
 		if (button_1 == null) {
 			button_1 = new JButton("Save");
 			button_1.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					File f = currentFile;
-					if ( f == null ) {
-						int retval = _fileChooser.showSaveDialog(TemplateTestFrame.this);
+					if (f == null) {
+						int retval = _fileChooser
+								.showSaveDialog(TemplateTestFrame.this);
 						if (retval == JFileChooser.APPROVE_OPTION) {
 							f = _fileChooser.getSelectedFile();
 						} else {
@@ -288,9 +300,10 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 					}
 					try {
 						FileWriter writer = new FileWriter(f);
-						textArea.write(writer);  // Use TextComponent write
+						textArea.write(writer); // Use TextComponent write
 					} catch (IOException ioex) {
-						JOptionPane.showMessageDialog(TemplateTestFrame.this, ioex);
+						JOptionPane.showMessageDialog(TemplateTestFrame.this,
+								ioex);
 						System.exit(1);
 					}
 				}
@@ -298,8 +311,9 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 		}
 		return button_1;
 	}
+
 	private JPanel getCardPanel() {
-		if ( panel == null ) {
+		if (panel == null) {
 			panel = new JPanel();
 			panel.setLayout(new CardLayout(0, 0));
 			panel.add(getErrorPanel(), "error");
@@ -323,6 +337,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 		}
 		return textArea_1;
 	}
+
 	private JTextArea getGt4TextArea() {
 		if (gt4TextArea == null) {
 			gt4TextArea = new JTextArea();
@@ -330,6 +345,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 		}
 		return gt4TextArea;
 	}
+
 	private JTextArea getGt5TextArea() {
 		if (gt5TextArea == null) {
 			gt5TextArea = new JTextArea();
@@ -337,6 +353,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 		}
 		return gt5TextArea;
 	}
+
 	private JTextArea getJsdlTextArea() {
 		if (jsdlTextArea == null) {
 			jsdlTextArea = new JTextArea();
@@ -344,6 +361,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 		}
 		return jsdlTextArea;
 	}
+
 	private JButton getOpenFileButton() {
 		if (OpenFileButton == null) {
 			OpenFileButton = new JButton("Open file...");
@@ -351,6 +369,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 		}
 		return OpenFileButton;
 	}
+
 	private JPanel getPanel_1() {
 		if (panel_1 == null) {
 			panel_1 = new JPanel();
@@ -363,15 +382,14 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 					FormFactory.DEFAULT_COLSPEC,
 					FormFactory.RELATED_GAP_COLSPEC,
 					FormFactory.DEFAULT_COLSPEC,
-					FormFactory.RELATED_GAP_COLSPEC,},
-					new RowSpec[] {
+					FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
 					FormFactory.RELATED_GAP_ROWSPEC,
 					RowSpec.decode("default:grow"),
 					FormFactory.RELATED_GAP_ROWSPEC,
 					RowSpec.decode("max(79dlu;default):grow"),
 					FormFactory.RELATED_GAP_ROWSPEC,
 					FormFactory.DEFAULT_ROWSPEC,
-					FormFactory.RELATED_GAP_ROWSPEC,}));
+					FormFactory.RELATED_GAP_ROWSPEC, }));
 			panel_1.add(getScrollPane(), "2, 2, 7, 1, fill, fill");
 			panel_1.add(getTabbedPane(), "2, 4, 7, 1, fill, fill");
 			panel_1.add(getOpenFileButton(), "2, 6, left, default");
@@ -380,6 +398,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 		}
 		return panel_1;
 	}
+
 	public JPanel getRootPanel() {
 		return contentPane;
 	}
@@ -391,6 +410,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 		}
 		return scrollPane;
 	}
+
 	private JScrollPane getScrollPane_1() {
 		if (scrollPane_1 == null) {
 			scrollPane_1 = new JScrollPane();
@@ -398,6 +418,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 		}
 		return scrollPane_1;
 	}
+
 	private JScrollPane getScrollPane_2() {
 		if (scrollPane_2 == null) {
 			scrollPane_2 = new JScrollPane();
@@ -405,6 +426,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 		}
 		return scrollPane_2;
 	}
+
 	private JScrollPane getScrollPane_3() {
 		if (scrollPane_3 == null) {
 			scrollPane_3 = new JScrollPane();
@@ -412,6 +434,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 		}
 		return scrollPane_3;
 	}
+
 	private JScrollPane getScrollPane_4() {
 		if (scrollPane_4 == null) {
 			scrollPane_4 = new JScrollPane();
@@ -419,6 +442,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 		}
 		return scrollPane_4;
 	}
+
 	private JSplitPane getSplitPane() {
 		if (splitPane == null) {
 			splitPane = new JSplitPane();
@@ -428,6 +452,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 		}
 		return splitPane;
 	}
+
 	private JTabbedPane getTabbedPane() {
 		if (tabbedPane == null) {
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -444,6 +469,7 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 		}
 		return textArea;
 	}
+
 	public void propertyChange(PropertyChangeEvent arg0) {
 
 		setJobDescriptions();
@@ -451,15 +477,18 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 	}
 
 	private void setJobDescriptions() {
-		if ( (template != null) && (template.getJobSubmissionObject() != null) ) {
+		if ((template != null) && (template.getJobSubmissionObject() != null)) {
 
 			String jsdl;
 			try {
-				jsdl = template.getJobSubmissionObject().getJobDescriptionDocumentAsString();
+				jsdl = template.getJobSubmissionObject()
+						.getJobDescriptionDocumentAsString();
 				getJsdlTextArea().setText(jsdl);
 				getJsdlTextArea().setCaretPosition(0);
 			} catch (JobPropertiesException e) {
-				StringBuffer temp = new StringBuffer("Can't calculate jsdl right now: "+e.getLocalizedMessage()+"\n\n");
+				StringBuffer temp = new StringBuffer(
+						"Can't calculate jsdl right now: "
+								+ e.getLocalizedMessage() + "\n\n");
 				temp.append(getStackTrace(e));
 				getJsdlTextArea().setText(temp.toString());
 				getJsdlTextArea().setCaretPosition(0);
@@ -470,10 +499,12 @@ public class TemplateTestFrame extends JFrame implements PropertyChangeListener,
 				return;
 			}
 
-			String gt4rsl = GT4Submitter.createJobSubmissionDescription(informationManager, SeveralXMLHelpers.fromString(jsdl));
+			String gt4rsl = GT4Submitter.createJobSubmissionDescription(
+					informationManager, SeveralXMLHelpers.fromString(jsdl));
 			getGt4TextArea().setText(gt4rsl);
 
-			String gt5rsl = GT5Submitter.createJobSubmissionDescription(informationManager, SeveralXMLHelpers.fromString(jsdl));
+			String gt5rsl = GT5Submitter.createJobSubmissionDescription(
+					informationManager, SeveralXMLHelpers.fromString(jsdl));
 			getGt5TextArea().setText(gt5rsl);
 
 		}

@@ -77,11 +77,11 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 			this.filters = config.getFilters();
 		}
 
-		if ( (config == null) || (config.getConfig() == null) || (config.getConfig().size() == 0) ) {
+		if ( (config == null) || (config.getPanelConfig() == null) || (config.getPanelConfig().size() == 0) ) {
 			this.panelProperties = getDefaultPanelProperties();
 		} else {
 			this.panelProperties = getDefaultPanelProperties();
-			this.panelProperties.putAll(config.getConfig());
+			this.panelProperties.putAll(config.getPanelConfig());
 		}
 
 		if ( StringUtils.isBlank(this.panelProperties.get(NAME)) ) {
