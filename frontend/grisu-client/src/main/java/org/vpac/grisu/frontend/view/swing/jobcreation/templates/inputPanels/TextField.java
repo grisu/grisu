@@ -6,7 +6,9 @@ import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JComboBox;
 import javax.swing.JTextField;
+import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
@@ -25,11 +27,9 @@ public class TextField extends AbstractInputPanel {
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getTextField(), "2, 2, fill, fill");
 	}
 
@@ -41,6 +41,16 @@ public class TextField extends AbstractInputPanel {
 		return defaultProperties;
 	}
 
+	@Override
+	public JComboBox getJComboBox() {
+		return null;
+	}
+
+	@Override
+	public JTextComponent getTextComponent() {
+		return getTextField();
+	}
+
 	private JTextField getTextField() {
 		if (textField == null) {
 			textField = new JTextField();
@@ -50,11 +60,11 @@ public class TextField extends AbstractInputPanel {
 				@Override
 				public void keyReleased(KeyEvent e) {
 					try {
-						
-//						if ( StringUtils.isBlank(bean) ) {
-//							return;
-//						}
-						
+
+						// if ( StringUtils.isBlank(bean) ) {
+						// return;
+						// }
+
 						setValue(bean, textField.getText());
 					} catch (TemplateException e1) {
 						// TODO Auto-generated catch block
@@ -79,14 +89,15 @@ public class TextField extends AbstractInputPanel {
 	}
 
 	@Override
-	protected void preparePanel(Map<String, String> panelProperties) throws TemplateException {
+	protected void preparePanel(Map<String, String> panelProperties)
+			throws TemplateException {
 
-//		if ( StringUtils.isBlank(bean) ) {
-//			return;
-//		}
+		// if ( StringUtils.isBlank(bean) ) {
+		// return;
+		// }
 
 		String defaultValue = panelProperties.get(DEFAULT_VALUE);
-		if ( StringUtils.isNotBlank(defaultValue) ) {
+		if (StringUtils.isNotBlank(defaultValue)) {
 			setValue(bean, defaultValue);
 		}
 

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.TemplateManager;
 import org.vpac.grisu.control.info.CachedMdsInformationManager;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistry;
@@ -25,7 +26,7 @@ import au.org.arcs.jcommons.interfaces.InformationManager;
 public class ClientSideGrisuRegistry implements GrisuRegistry {
 
 	static final Logger myLogger = Logger
-	.getLogger(ClientSideGrisuRegistry.class.getName());
+			.getLogger(ClientSideGrisuRegistry.class.getName());
 
 	private final ServiceInterface serviceInterface;
 
@@ -37,9 +38,10 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 	private UserEnvironmentManager cachedUserInformation;
 	private ResourceInformation cachedResourceInformation;
 	private FileManager cachedFileHelper;
+	private TemplateManager templateManager;
 
 	public ClientSideGrisuRegistry(ServiceInterface serviceInterface)
-	throws Exception {
+			throws Exception {
 		this.serviceInterface = serviceInterface;
 		this.infoManager = new CachedMdsInformationManager(Environment
 				.getGrisuClientDirectory().getPath());
@@ -101,6 +103,14 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 					infoManager);
 		}
 		return cachedResourceInformation;
+	}
+
+	public TemplateManager getTemplateManager() {
+
+		if (templateManager == null) {
+			templateManager = new TemplateManager(serviceInterface);
+		}
+		return templateManager;
 	}
 
 	public UserApplicationInformation getUserApplicationInformation(

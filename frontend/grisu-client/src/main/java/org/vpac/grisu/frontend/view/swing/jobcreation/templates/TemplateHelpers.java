@@ -5,6 +5,8 @@ import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -19,6 +21,9 @@ import javax.swing.border.TitledBorder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.netbeans.validation.api.Validator;
+import org.netbeans.validation.api.builtin.Validators;
+import org.netbeans.validation.api.ui.ValidationPanel;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.filters.Filter;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels.AbstractInputPanel;
@@ -57,10 +62,12 @@ public class TemplateHelpers {
 
 		if ("type".equals(key)) {
 			config.setType(value);
-		}
-		if ("filter".equals(key)) {
+		} else if ("filter".equals(key)) {
 			Filter filter = createFilter(value);
 			config.addFilter(filter);
+		} else if ("validator".equals(key)) {
+			Validator<String> val = createValidator(value);
+			config.addValidator(val);
 		} else {
 			config.addConfig(key, value);
 		}
@@ -160,7 +167,7 @@ public class TemplateHelpers {
 
 		} catch (Exception e) {
 			throw new TemplateException("Can't create input panel "
-					+ config.getPanelConfig().get(AbstractInputPanel.NAME)
+					+ config.getProperties().get(AbstractInputPanel.NAME)
 					+ " of type " + config.getType(), e);
 		}
 
@@ -176,6 +183,83 @@ public class TemplateHelpers {
 		}
 
 		return panel;
+
+	}
+
+	private static Validator<String> createValidator(String configString)
+			throws TemplateException {
+
+		configString = configString.trim();
+
+		Map<String, String> config = new HashMap<String, String>();
+
+		int startIndex = configString.indexOf("[");
+		if (startIndex > 0) {
+			// means configuration
+			int endIndex = configString.indexOf("]");
+			String[] initValues = configString.substring(startIndex + 1,
+					endIndex).split(":");
+			for (String value : initValues) {
+				value = value.trim();
+				int index = value.indexOf("=");
+				if (index <= 0) {
+					throw new TemplateException(
+							"Can't create filter config because. Unable to find = character in string "
+									+ value);
+				}
+				String key = value.substring(0, index).trim();
+				String value2 = value.substring(index + 1).trim();
+				config.put(key, value2);
+			}
+		}
+
+		String valName = null;
+		if (startIndex == -1) {
+			valName = configString;
+		} else {
+			valName = configString.substring(0, startIndex).trim();
+		}
+
+		Exception exception;
+		// try {
+		Class validatorClass = null;
+		try {
+			validatorClass = Class
+					.forName("org.vpac.grisu.frontend.view.swing.jobcreation.templates.validators."
+							+ valName);
+		} catch (ClassNotFoundException e1) {
+			// that's ok. let's try the inbuild ones
+			myLogger.debug("Can't find validator with name: " + valName
+					+ "in classpath. Trying inbuild ones...");
+			Class valClass = Validators.class;
+
+			try {
+				Field field = valClass.getField(valName);
+				Validator<String> value = (Validator<String>) field.get(null);
+				return value;
+			} catch (Exception e) {
+				throw new TemplateException("Can't find validator with name "
+						+ valName + ".", e);
+			}
+		}
+
+		Constructor<Validator> constructor;
+		try {
+
+			if (config == null || config.size() == 0) {
+				Validator<String> val = (Validator<String>) validatorClass
+						.newInstance();
+				return val;
+			}
+
+			constructor = validatorClass.getConstructor(Map.class);
+			Validator<String> val = constructor.newInstance(config);
+
+			return val;
+		} catch (Exception e) {
+			throw new TemplateException("Can't create validator with name "
+					+ valName + ": " + e.getLocalizedMessage());
+		}
 
 	}
 
@@ -320,6 +404,8 @@ public class TemplateHelpers {
 
 		TemplateObject template = new TemplateObject(si, commandline);
 
+		ValidationPanel validationPanel = new ValidationPanel();
+
 		String templateName = getValue("templateName", lines);
 		try {
 			templateName = getValue("templateName", lines);
@@ -393,10 +479,29 @@ public class TemplateHelpers {
 			if (StringUtils.isNotBlank(lineType)) {
 				PanelConfig config = inputConfigs.get(lineType);
 
-				AbstractInputPanel panel = createInputPanel(config);
-				inputPanels.put(lineType, panel);
+				AbstractInputPanel iPanel = createInputPanel(config);
+				inputPanels.put(lineType, iPanel);
+				for (Validator<String> val : config.getValidators()) {
 
-				if (panel == null) {
+					try {
+						Method method = val.getClass().getMethod(
+								"setServiceInterface", ServiceInterface.class);
+						method.invoke(val, si);
+					} catch (Exception e) {
+						// doesn't matter. apparently serviceinterface is not
+						// needed by this validator
+					}
+
+					if (iPanel.getJComboBox() != null) {
+						validationPanel.getValidationGroup().add(
+								iPanel.getJComboBox(), val);
+					} else if (iPanel.getTextComponent() != null) {
+						validationPanel.getValidationGroup().add(
+								iPanel.getTextComponent(), val);
+					}
+				}
+
+				if (iPanel == null) {
 					throw new TemplateException(
 							"Can't find panel for panelName: " + lineType);
 				}
@@ -407,8 +512,8 @@ public class TemplateHelpers {
 									+ lineType);
 				}
 
-				if (panel.isDisplayed()) {
-					currentRow.add(panel);
+				if (iPanel.isDisplayed()) {
+					currentRow.add(iPanel);
 				}
 				continue;
 			}
@@ -440,7 +545,9 @@ public class TemplateHelpers {
 		}
 
 		template.setTemplatePanel(mainPanel);
+		template.setValidationPanel(validationPanel);
 
+		// init jobobject with default values
 		template.userInput(null, null);
 
 		return template;

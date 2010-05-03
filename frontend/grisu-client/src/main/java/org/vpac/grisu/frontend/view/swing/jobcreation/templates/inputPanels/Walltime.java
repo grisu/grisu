@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
+import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
@@ -18,11 +19,10 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-
 public class Walltime extends AbstractInputPanel {
 
-	public static int convertHumanReadableStringIntoSeconds(String[] humanReadable) {
-
+	public static int convertHumanReadableStringIntoSeconds(
+			String[] humanReadable) {
 
 		int amount = -1;
 		try {
@@ -32,47 +32,49 @@ public class Walltime extends AbstractInputPanel {
 		}
 		String unit = humanReadable[1];
 
-		if ( "minutes".equals(unit) ) {
+		if ("minutes".equals(unit)) {
 			return amount * 60;
-		} else if ( "hours".equals(unit) ) {
+		} else if ("hours".equals(unit)) {
 			return amount * 3600;
-		} else if ("days".equals(unit) ) {
+		} else if ("days".equals(unit)) {
 			return amount * 3600 * 24;
 		} else {
-			//			throw new RuntimeException(unit+" not a supported unit name.");
-			return amount * 60; //default
+			// throw new RuntimeException(unit+" not a supported unit name.");
+			return amount * 60; // default
 		}
 
 	}
 
-	public static String[] convertSecondsInHumanReadableString(int walltimeInSeconds) {
+	public static String[] convertSecondsInHumanReadableString(
+			int walltimeInSeconds) {
 
 		int days = walltimeInSeconds / (3600 * 24);
 		int hours = (walltimeInSeconds - (days * 3600 * 24)) / 3600;
 		int minutes = (walltimeInSeconds - ((days * 3600 * 24) + (hours * 3600))) / 60;
 
-		if ( (days > 0) && (hours == 0) && (minutes == 0)) {
-			return new String[]{new Integer(days).toString(), "days"};
-		} else if ( (days > 0) && (hours == 0) ) {
+		if ((days > 0) && (hours == 0) && (minutes == 0)) {
+			return new String[] { new Integer(days).toString(), "days" };
+		} else if ((days > 0) && (hours == 0)) {
 			// fuck the minutes
-			return  new String[]{new Integer(days).toString(), "days"};
-		} else if ( (days > 0) && (hours > 0) ) {
-			return new String[]{new Integer(days*24+hours).toString(), "hours"};
-		} else if ( (days == 0) && (hours > 0) && (minutes == 0) ) {
-			return new String[]{new Integer(hours).toString(), "hours"};
-		} else if ( (days == 0) && (hours > 0) && (minutes > 0) ) {
-			if ( hours > 6 ) {
+			return new String[] { new Integer(days).toString(), "days" };
+		} else if ((days > 0) && (hours > 0)) {
+			return new String[] { new Integer(days * 24 + hours).toString(),
+					"hours" };
+		} else if ((days == 0) && (hours > 0) && (minutes == 0)) {
+			return new String[] { new Integer(hours).toString(), "hours" };
+		} else if ((days == 0) && (hours > 0) && (minutes > 0)) {
+			if (hours > 6) {
 				// fuck the minutes
-				return new String[]{new Integer(hours).toString(), "hours"};
+				return new String[] { new Integer(hours).toString(), "hours" };
 			} else {
-				return new String[]{new Integer(hours*60+minutes).toString(), "minutes"};
+				return new String[] {
+						new Integer(hours * 60 + minutes).toString(), "minutes" };
 			}
 		} else {
-			return new String[]{new Integer(minutes).toString(), "minutes"};
+			return new String[] { new Integer(minutes).toString(), "minutes" };
 		}
 
 	}
-
 
 	private JComboBox amountComboBox;
 
@@ -84,15 +86,12 @@ public class Walltime extends AbstractInputPanel {
 	public Walltime(PanelConfig config) throws TemplateException {
 		super(config);
 		setLayout(new FormLayout(new ColumnSpec[] {
+				FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("27dlu"),
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("max(50dlu;default)"),
-				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("max(40dlu;default):grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-			new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				ColumnSpec.decode("max(42dlu;default):grow"),
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getAmountComboBox(), "2, 2, fill, fill");
 		add(getUnitComboBox(), "4, 2, fill, fill");
 	}
@@ -102,15 +101,14 @@ public class Walltime extends AbstractInputPanel {
 			amountComboBox = new JComboBox();
 			amountComboBox.setEditable(true);
 			amountComboBox.setModel(amountModel);
-			//			amountComboBox.setSelectedIndex(0);
+			// amountComboBox.setSelectedIndex(0);
 			amountComboBox.addItemListener(new ItemListener() {
 
 				public void itemStateChanged(ItemEvent e) {
 
-					int walltimeInSeconds = convertHumanReadableStringIntoSeconds(
-							new String[]{
-									(String)(getAmountComboBox().getSelectedItem()),
-									(String)(getUnitComboBox().getSelectedItem())});
+					int walltimeInSeconds = convertHumanReadableStringIntoSeconds(new String[] {
+							(String) (getAmountComboBox().getSelectedItem()),
+							(String) (getUnitComboBox().getSelectedItem()) });
 					try {
 						setValue("walltimeInSeconds", walltimeInSeconds);
 					} catch (TemplateException e1) {
@@ -128,7 +126,8 @@ public class Walltime extends AbstractInputPanel {
 
 		Map<String, String> defaultProperties = new HashMap<String, String>();
 		defaultProperties.put(TITLE, "Walltime");
-		defaultProperties.put("defaultAmountList", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,30,45");
+		defaultProperties.put("defaultAmountList",
+				"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,30,45");
 		defaultProperties.put("defaultAmount", "1");
 		defaultProperties.put("defaultUnitList", "minutes,hours,days,weeks");
 		defaultProperties.put("defaultUnit", "hours");
@@ -136,19 +135,28 @@ public class Walltime extends AbstractInputPanel {
 		return defaultProperties;
 	}
 
+	@Override
+	public JComboBox getJComboBox() {
+		return null;
+	}
+
+	@Override
+	public JTextComponent getTextComponent() {
+		return null;
+	}
+
 	private JComboBox getUnitComboBox() {
 		if (unitComboBox == null) {
 			unitComboBox = new JComboBox();
 			unitComboBox.setModel(unitModel);
-			//			unitComboBox.setSelectedIndex(1);
+			// unitComboBox.setSelectedIndex(1);
 			unitComboBox.addItemListener(new ItemListener() {
 
 				public void itemStateChanged(ItemEvent e) {
 
-					int walltimeInSeconds = convertHumanReadableStringIntoSeconds(
-							new String[]{
-									(String)(getAmountComboBox().getSelectedItem()),
-									(String)(getUnitComboBox().getSelectedItem())});
+					int walltimeInSeconds = convertHumanReadableStringIntoSeconds(new String[] {
+							(String) (getAmountComboBox().getSelectedItem()),
+							(String) (getUnitComboBox().getSelectedItem()) });
 					try {
 						setValue("walltimeInSeconds", walltimeInSeconds);
 					} catch (TemplateException e1) {
@@ -162,15 +170,18 @@ public class Walltime extends AbstractInputPanel {
 
 	@Override
 	protected String getValueAsString() {
-//		throw new RuntimeException("Not implemented yet. Should not be needed.");
+		// throw new
+		// RuntimeException("Not implemented yet. Should not be needed.");
 		return null;
 	}
+
 	@Override
 	protected void jobPropertyChanged(PropertyChangeEvent e) {
 
-		if ( "walltimeInSeconds".equals(e.getPropertyName()) ) {
+		if ("walltimeInSeconds".equals(e.getPropertyName())) {
 
-			String[] humanReadable = convertSecondsInHumanReadableString((Integer)(e.getNewValue()));
+			String[] humanReadable = convertSecondsInHumanReadableString((Integer) (e
+					.getNewValue()));
 			amountModel.setSelectedItem(humanReadable[0]);
 			unitModel.setSelectedItem(humanReadable[1]);
 		}
@@ -181,37 +192,43 @@ public class Walltime extends AbstractInputPanel {
 	protected void preparePanel(Map<String, String> panelProperties) {
 
 		String[] amounts = panelProperties.get("defaultAmountList").split(",");
-		for ( String amount : amounts ) {
+		for (String amount : amounts) {
 			try {
 				Integer a = Integer.parseInt(amount);
 				amountModel.addElement(amount);
 			} catch (Exception e) {
-				myLogger.error("Can't add amount "+amount+" to WalltimePanel: "+e.getLocalizedMessage());
+				myLogger.error("Can't add amount " + amount
+						+ " to WalltimePanel: " + e.getLocalizedMessage());
 			}
 		}
 		String defaultAmount = panelProperties.get("defaultAmount");
-		if ( StringUtils.isNotBlank(defaultAmount) ) {
+		if (StringUtils.isNotBlank(defaultAmount)) {
 			try {
 				Integer a = Integer.parseInt(defaultAmount);
 				amountModel.setSelectedItem(defaultAmount);
 			} catch (Exception e) {
-				myLogger.error("Can't set amount "+defaultAmount+" as default to WalltimePanel: "+e.getLocalizedMessage());
+				myLogger.error("Can't set amount " + defaultAmount
+						+ " as default to WalltimePanel: "
+						+ e.getLocalizedMessage());
 			}
 		}
 
 		String[] units = panelProperties.get("defaultUnitList").split(",");
-		for ( String unit : units ) {
-			if ( "minutes,hours,days,weeks".indexOf(unit) >= 0 ) {
+		for (String unit : units) {
+			if ("minutes,hours,days,weeks".indexOf(unit) >= 0) {
 				unitModel.addElement(unit);
 			} else {
-				myLogger.error("Can't add unit "+unit+" to WalltimePanel. Not a valid unitname.");
+				myLogger.error("Can't add unit " + unit
+						+ " to WalltimePanel. Not a valid unitname.");
 			}
 		}
 		String defaultUnit = panelProperties.get("defaultUnit");
-		if ( StringUtils.isNotBlank(defaultUnit) && ("minutes,hours,days,weeks".indexOf(defaultUnit) >= 0) ) {
+		if (StringUtils.isNotBlank(defaultUnit)
+				&& ("minutes,hours,days,weeks".indexOf(defaultUnit) >= 0)) {
 			unitModel.setSelectedItem(defaultUnit);
 		} else {
-			myLogger.error("Can't set unit "+defaultUnit+" as default to WalltimePanel. Not a valid unitname.");
+			myLogger.error("Can't set unit " + defaultUnit
+					+ " as default to WalltimePanel. Not a valid unitname.");
 		}
 
 	}

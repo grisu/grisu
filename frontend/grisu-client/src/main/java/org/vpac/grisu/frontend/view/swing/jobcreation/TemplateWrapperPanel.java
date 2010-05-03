@@ -8,6 +8,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import org.jdesktop.swingx.JXErrorPane;
+import org.netbeans.validation.api.ui.ValidationPanel;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateObject;
@@ -29,6 +30,7 @@ public class TemplateWrapperPanel extends JPanel {
 
 	private final TemplateObject template;
 	private JButton submitButton;
+	private ValidationPanel validationPanel;
 
 	/**
 	 * Create the panel.
@@ -43,14 +45,20 @@ public class TemplateWrapperPanel extends JPanel {
 		add(creationPanel, JOB_CREATE_PANEL);
 		creationPanel.setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("default:grow"),
+				ColumnSpec.decode("max(29dlu;default):grow"),
+				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
 				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC, }));
+
 		creationPanel.add(template.getTemplatePanel(), "2, 2, fill, fill");
-		creationPanel.add(getSubmitButton(), "2, 4, right, default");
+		if (template.getValidationPanel() != null) {
+			creationPanel
+					.add(template.getValidationPanel(), "2, 4, fill, fill");
+		}
+		creationPanel.add(getSubmitButton(), "4, 4, right, default");
 		add(monitorPanel, SUBMISSION_LOG_PANEL);
 
 		cardLayout.show(this, JOB_CREATE_PANEL);
@@ -80,6 +88,13 @@ public class TemplateWrapperPanel extends JPanel {
 			});
 		}
 		return submitButton;
+	}
+
+	private ValidationPanel getValidationPanel() {
+		if (validationPanel == null) {
+			validationPanel = new ValidationPanel();
+		}
+		return validationPanel;
 	}
 
 	public void switchToJobCreationPanel() {

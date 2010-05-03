@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
+import org.netbeans.validation.api.ui.ValidationPanel;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
@@ -52,6 +53,8 @@ public class TemplateObject {
 	private final ServiceInterface si;
 
 	private JPanel templatePanel;
+	private ValidationPanel validationPanel;
+
 	// private final Map<String, AbstractInputPanel> panels = new
 	// HashMap<String, AbstractInputPanel>();
 	private final Map<String, String> changedValues;
@@ -83,6 +86,10 @@ public class TemplateObject {
 		return this.templatePanel;
 	}
 
+	public ValidationPanel getValidationPanel() {
+		return validationPanel;
+	}
+
 	public void setJobObject(JobSubmissionObjectImpl job) {
 		this.jobObject = job;
 	}
@@ -93,6 +100,11 @@ public class TemplateObject {
 
 	public void setTemplatePanel(JPanel templatePanel) {
 		this.templatePanel = templatePanel;
+	}
+
+	public void setValidationPanel(ValidationPanel valP) {
+		this.validationPanel = valP;
+
 	}
 
 	public void submitJob() throws JobPropertiesException,

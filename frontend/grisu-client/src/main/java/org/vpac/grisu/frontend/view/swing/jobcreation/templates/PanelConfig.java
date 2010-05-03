@@ -2,15 +2,18 @@ package org.vpac.grisu.frontend.view.swing.jobcreation.templates;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.netbeans.validation.api.Validator;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.filters.Filter;
 
 public class PanelConfig {
 
 	private final Map<String, String> config = new HashMap<String, String>();
 	private final LinkedList<Filter> filters = new LinkedList<Filter>();
+	private final LinkedList<Validator<String>> validators = new LinkedList<Validator<String>>();
 
 	private String type;
 
@@ -25,8 +28,8 @@ public class PanelConfig {
 		filters.add(filter);
 	}
 
-	public Map<String, String> getPanelConfig() {
-		return config;
+	public void addValidator(Validator<String> validator) {
+		validators.add(validator);
 	}
 
 	public LinkedList<Filter> getFilters() {
@@ -37,12 +40,20 @@ public class PanelConfig {
 		return type;
 	}
 
+	public Map<String, String> getProperties() {
+		return config;
+	}
+
 	public String getType() {
-		if (StringUtils.isBlank(type) ) {
+		if (StringUtils.isBlank(type)) {
 			return "StringInput";
 		} else {
 			return type;
 		}
+	}
+
+	public List<Validator<String>> getValidators() {
+		return validators;
 	}
 
 	public void setType(String type) {

@@ -109,6 +109,12 @@
 			<version>0.2-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.kenai</groupId>
+			<artifactId>validationAPI</artifactId>
+			<version>0.4</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

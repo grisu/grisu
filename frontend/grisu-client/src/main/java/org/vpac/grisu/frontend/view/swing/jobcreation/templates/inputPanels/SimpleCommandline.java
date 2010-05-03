@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JComboBox;
+import javax.swing.text.JTextComponent;
 
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
@@ -18,21 +19,19 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class MdsCommandline extends AbstractInputPanel {
+public class SimpleCommandline extends AbstractInputPanel {
 	private JComboBox comboBox;
 
 	private String lastCalculatedExecutable = null;
 
-	public MdsCommandline(PanelConfig config) throws TemplateException {
+	public SimpleCommandline(PanelConfig config) throws TemplateException {
 		super(config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getComboBox(), "2, 2, fill, fill");
 	}
 
@@ -40,7 +39,7 @@ public class MdsCommandline extends AbstractInputPanel {
 
 		String commandline;
 		try {
-			commandline = ((String)getComboBox().getEditor().getItem()).trim();
+			commandline = ((String) getComboBox().getEditor().getItem()).trim();
 		} catch (Exception e) {
 			myLogger.debug(e.getLocalizedMessage());
 			return;
@@ -68,13 +67,13 @@ public class MdsCommandline extends AbstractInputPanel {
 
 		if (exe.length() == 0) {
 			lastCalculatedExecutable = null;
-			setValue("application", "");
-			setValue("applicationVersion", "");
+			// setValue("application", "");
+			// setValue("applicationVersion", "");
 			setValue("commandline", "");
 			return;
 		}
 
-		//		jobObject.setApplication(exe);
+		// jobObject.setApplication(exe);
 		setValue("commandline", commandline);
 
 	}
@@ -85,7 +84,7 @@ public class MdsCommandline extends AbstractInputPanel {
 			comboBox.setEditable(true);
 			comboBox.addItemListener(new ItemListener() {
 				public void itemStateChanged(ItemEvent e) {
-					if ( ItemEvent.SELECTED == e.getStateChange() ) {
+					if (ItemEvent.SELECTED == e.getStateChange()) {
 						try {
 							commandlineChanged();
 						} catch (TemplateException e1) {
@@ -96,17 +95,18 @@ public class MdsCommandline extends AbstractInputPanel {
 				}
 			});
 
-			comboBox.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
-				@Override
-				public void keyReleased(KeyEvent e) {
-					try {
-						commandlineChanged();
-					} catch (TemplateException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}
-			});
+			comboBox.getEditor().getEditorComponent().addKeyListener(
+					new KeyAdapter() {
+						@Override
+						public void keyReleased(KeyEvent e) {
+							try {
+								commandlineChanged();
+							} catch (TemplateException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+						}
+					});
 		}
 		return comboBox;
 	}
@@ -121,8 +121,18 @@ public class MdsCommandline extends AbstractInputPanel {
 	}
 
 	@Override
+	public JComboBox getJComboBox() {
+		return getComboBox();
+	}
+
+	@Override
+	public JTextComponent getTextComponent() {
+		return null;
+	}
+
+	@Override
 	protected String getValueAsString() {
-		String value = ((String)(getComboBox().getEditor().getItem()));
+		String value = ((String) (getComboBox().getEditor().getItem()));
 		return value;
 	}
 
@@ -135,9 +145,10 @@ public class MdsCommandline extends AbstractInputPanel {
 	@Override
 	protected void preparePanel(Map<String, String> panelProperties) {
 
-		for ( String key : panelProperties.keySet() ) {
-			if ( DEFAULT_VALUE.equals(key) ) {
-				getComboBox().setSelectedItem(panelProperties.get(DEFAULT_VALUE));
+		for (String key : panelProperties.keySet()) {
+			if (DEFAULT_VALUE.equals(key)) {
+				getComboBox().setSelectedItem(
+						panelProperties.get(DEFAULT_VALUE));
 			}
 		}
 

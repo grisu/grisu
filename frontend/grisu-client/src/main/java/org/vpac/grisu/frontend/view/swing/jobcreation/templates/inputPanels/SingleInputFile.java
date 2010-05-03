@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.text.JTextComponent;
 
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
@@ -31,13 +32,10 @@ public class SingleInputFile extends AbstractInputPanel {
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getComboBox(), "2, 2, fill, default");
 		add(getButton(), "4, 2");
 	}
@@ -49,7 +47,7 @@ public class SingleInputFile extends AbstractInputPanel {
 
 				public void actionPerformed(ActionEvent e) {
 
-					if ( si == null ) {
+					if (si == null) {
 						myLogger.error("ServiceInterface not set yet.");
 						return;
 					}
@@ -57,11 +55,11 @@ public class SingleInputFile extends AbstractInputPanel {
 
 					GlazedFile file = getFileDialog().getSelectedFile();
 					getFileDialog().clearSelection();
-					if ( file == null ) {
+					if (file == null) {
 						return;
 					}
 
-					if ( selectedFile != null ) {
+					if (selectedFile != null) {
 						removeValue("inputFileUrl", selectedFile);
 					}
 					selectedFile = file.getUrl();
@@ -92,24 +90,35 @@ public class SingleInputFile extends AbstractInputPanel {
 		return defaultProperties;
 	}
 
-	//	private GrisuFileDialog getFileDialog() {
+	// private GrisuFileDialog getFileDialog() {
 	//
-	//		if ( si == null ) {
-	//			return null;
-	//		}
+	// if ( si == null ) {
+	// return null;
+	// }
 	//
-	//		if ( dialog == null ) {
-	//			dialog = new GrisuFileDialog(si);
-	//			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+	// if ( dialog == null ) {
+	// dialog = new GrisuFileDialog(si);
+	// dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 	//
-	//		}
-	//		return dialog;
-	//	}
+	// }
+	// return dialog;
+	// }
+
+	@Override
+	public JComboBox getJComboBox() {
+		return null;
+	}
+
+	@Override
+	public JTextComponent getTextComponent() {
+		return null;
+	}
 
 	@Override
 	protected String getValueAsString() {
-		return ((String)getComboBox().getSelectedItem());
+		return ((String) getComboBox().getSelectedItem());
 	}
+
 	@Override
 	protected void jobPropertyChanged(PropertyChangeEvent e) {
 		// TODO Auto-generated method stub

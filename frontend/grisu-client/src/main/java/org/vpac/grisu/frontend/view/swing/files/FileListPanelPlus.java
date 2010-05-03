@@ -24,7 +24,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class FileListPanelPlus extends JPanel implements FileListPanel,
-FileListListener {
+		FileListListener {
 
 	private JComboBox comboBox;
 	private FileListPanelSimple fileListPanel;
@@ -51,12 +51,13 @@ FileListListener {
 	/**
 	 * Create the panel.
 	 */
-	public FileListPanelPlus(ServiceInterface si,  String startUrl, boolean displaySize, boolean displayTimestamp) {
+	public FileListPanelPlus(ServiceInterface si, String startUrl,
+			boolean displaySize, boolean displayTimestamp) {
 		this.displaySize = displaySize;
 		this.displayTimeStamp = displayTimestamp;
 		this.serviceInterface = si;
 		this.em = GrisuRegistryManager.getDefault(serviceInterface)
-		.getUserEnvironmentManager();
+				.getUserEnvironmentManager();
 		this.fsm = FileSystemsManager.getDefault(si);
 
 		allFileSystems = this.fsm.getAllFileSystems();
@@ -67,20 +68,18 @@ FileListListener {
 		filesystemModel = new EventComboBoxModel<FileSystemItem>(
 				sortedFileSystemsList);
 
-		//		this.rootUrl = rootUrl;
+		// this.rootUrl = rootUrl;
 		this.startUrl = startUrl;
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(41dlu;default)"),
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("max(177dlu;default):grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
+				ColumnSpec.decode("max(54dlu;default):grow"),
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getLabel(), "2, 2, right, default");
 		add(getComboBox(), "4, 2, fill, default");
 
@@ -138,7 +137,7 @@ FileListListener {
 					}
 				}
 			});
-			if ( (startUrl == null) || GlazedFile.ROOT.equals(startUrl) ) {
+			if ((startUrl == null) || GlazedFile.ROOT.equals(startUrl)) {
 				getComboBox().setSelectedIndex(0);
 			}
 		}
@@ -193,6 +192,7 @@ FileListListener {
 
 		getFileListPanel().setCurrentUrl(url);
 	}
+
 	public void setRootUrl(String url) {
 
 		getFileListPanel().setRootUrl(url);

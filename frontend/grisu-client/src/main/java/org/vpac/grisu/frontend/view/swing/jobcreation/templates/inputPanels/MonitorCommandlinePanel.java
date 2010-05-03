@@ -4,7 +4,9 @@ import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JComboBox;
 import javax.swing.JTextField;
+import javax.swing.text.JTextComponent;
 
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
@@ -22,11 +24,9 @@ public class MonitorCommandlinePanel extends AbstractInputPanel {
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getTextField(), "2, 2, fill, fill");
 	}
 
@@ -39,6 +39,16 @@ public class MonitorCommandlinePanel extends AbstractInputPanel {
 		defaultProperties.put(DEFAULT_VALUE, "n/a");
 
 		return defaultProperties;
+	}
+
+	@Override
+	public JComboBox getJComboBox() {
+		return null;
+	}
+
+	@Override
+	public JTextComponent getTextComponent() {
+		return getTextField();
 	}
 
 	private JTextField getTextField() {
@@ -58,8 +68,8 @@ public class MonitorCommandlinePanel extends AbstractInputPanel {
 	@Override
 	protected void jobPropertyChanged(PropertyChangeEvent e) {
 
-		if ( "commandline".equals(e.getPropertyName()) ) {
-			String newJobname = (String)e.getNewValue();
+		if ("commandline".equals(e.getPropertyName())) {
+			String newJobname = (String) e.getNewValue();
 			getTextField().setText(newJobname);
 		}
 
@@ -67,7 +77,6 @@ public class MonitorCommandlinePanel extends AbstractInputPanel {
 
 	@Override
 	protected void preparePanel(Map<String, String> panelProperties) {
-
 
 	}
 }

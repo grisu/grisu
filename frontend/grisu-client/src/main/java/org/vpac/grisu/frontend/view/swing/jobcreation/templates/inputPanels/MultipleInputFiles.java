@@ -9,8 +9,10 @@ import java.util.Set;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
+import javax.swing.text.JTextComponent;
 
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
@@ -35,17 +37,13 @@ public class MultipleInputFiles extends AbstractInputPanel {
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
+				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("max(79dlu;default)"),
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getScrollPane(), "2, 2, 5, 1, fill, fill");
 		add(getButton_1(), "4, 4, right, default");
 		add(getButton(), "6, 4, right, default");
@@ -58,7 +56,7 @@ public class MultipleInputFiles extends AbstractInputPanel {
 
 				public void actionPerformed(ActionEvent e) {
 
-					if ( si == null ) {
+					if (si == null) {
 						myLogger.error("ServiceInterface not set yet.");
 						return;
 					}
@@ -66,16 +64,17 @@ public class MultipleInputFiles extends AbstractInputPanel {
 
 					Set<GlazedFile> files = getFileDialog().getSelectedFiles();
 					getFileDialog().clearSelection();
-					if ( files == null ) {
+					if (files == null) {
 						return;
 					}
 
-					for ( GlazedFile file : files ) {
+					for (GlazedFile file : files) {
 
 						String filename = file.getName();
-						for ( int i=0; i<fileModel.getSize(); i++) {
-							GlazedFile existingFile = (GlazedFile) fileModel.getElementAt(i);
-							if ( existingFile.getName().equals(filename)  ) {
+						for (int i = 0; i < fileModel.getSize(); i++) {
+							GlazedFile existingFile = (GlazedFile) fileModel
+									.getElementAt(i);
+							if (existingFile.getName().equals(filename)) {
 								fileModel.removeElement(existingFile);
 							}
 						}
@@ -99,11 +98,11 @@ public class MultipleInputFiles extends AbstractInputPanel {
 
 					Object[] selFiles = getList_1().getSelectedValues();
 
-					for ( Object file : selFiles ) {
-						removeValue("inputFileUrl", ((GlazedFile)file).getUrl());
+					for (Object file : selFiles) {
+						removeValue("inputFileUrl", ((GlazedFile) file)
+								.getUrl());
 						fileModel.removeElement(file);
 					}
-
 
 				}
 			});
@@ -120,6 +119,11 @@ public class MultipleInputFiles extends AbstractInputPanel {
 		return defaultProperties;
 	}
 
+	@Override
+	public JComboBox getJComboBox() {
+		return null;
+	}
+
 	private JList getList_1() {
 		if (list == null) {
 			list = new JList(fileModel);
@@ -128,6 +132,7 @@ public class MultipleInputFiles extends AbstractInputPanel {
 		}
 		return list;
 	}
+
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
@@ -135,18 +140,25 @@ public class MultipleInputFiles extends AbstractInputPanel {
 		}
 		return scrollPane;
 	}
+
+	@Override
+	public JTextComponent getTextComponent() {
+		return null;
+	}
+
 	@Override
 	protected String getValueAsString() {
 		StringBuffer temp = new StringBuffer();
 
-		for ( int i=0; i<fileModel.getSize(); i++) {
+		for (int i = 0; i < fileModel.getSize(); i++) {
 			GlazedFile existingFile = (GlazedFile) fileModel.getElementAt(i);
-			temp.append(existingFile.getUrl()+",");
+			temp.append(existingFile.getUrl() + ",");
 		}
 
 		return temp.toString();
 
 	}
+
 	@Override
 	protected void jobPropertyChanged(PropertyChangeEvent e) {
 	}

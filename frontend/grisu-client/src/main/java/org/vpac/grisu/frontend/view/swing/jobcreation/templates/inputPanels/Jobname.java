@@ -6,7 +6,9 @@ import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JComboBox;
 import javax.swing.JTextField;
+import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
@@ -18,18 +20,23 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class Jobname extends AbstractInputPanel {
+
+	static final String REPLACEMENT_CHARACTERS = "\\s|;|'|\"|,|\\$|\\?|#";
+
+	public static String JOBNAME_CALC_METHOD_KEY = "jobnameCalcMethod";
+
 	private JTextField jobnameTextField;
+
+	private final String autoJobnameMethod = null;
 
 	public Jobname(PanelConfig config) throws TemplateException {
 		super(config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getJobnameTextField(), "2, 2, fill, fill");
 	}
 
@@ -40,8 +47,14 @@ public class Jobname extends AbstractInputPanel {
 
 		defaultProperties.put(TITLE, "Jobname");
 		defaultProperties.put(DEFAULT_VALUE, "gridJob");
+		defaultProperties.put(JOBNAME_CALC_METHOD_KEY, "uniqueNumber");
 
 		return defaultProperties;
+	}
+
+	@Override
+	public JComboBox getJComboBox() {
+		return null;
 	}
 
 	private JTextField getJobnameTextField() {
@@ -53,6 +66,12 @@ public class Jobname extends AbstractInputPanel {
 				@Override
 				public void keyReleased(KeyEvent e) {
 					try {
+						String input = jobnameTextField.getText();
+						int index = jobnameTextField.getCaretPosition();
+						input = input.replaceAll(REPLACEMENT_CHARACTERS, "_");
+						jobnameTextField.setText(input.trim());
+						jobnameTextField.setCaretPosition(index);
+
 						setValue("jobname", jobnameTextField.getText());
 					} catch (TemplateException e1) {
 						// TODO Auto-generated catch block
@@ -66,6 +85,11 @@ public class Jobname extends AbstractInputPanel {
 	}
 
 	@Override
+	public JTextComponent getTextComponent() {
+		return getJobnameTextField();
+	}
+
+	@Override
 	protected String getValueAsString() {
 		return getJobnameTextField().getText();
 	}
@@ -73,18 +97,19 @@ public class Jobname extends AbstractInputPanel {
 	@Override
 	protected void jobPropertyChanged(PropertyChangeEvent e) {
 
-		if ( "jobname".equals(e.getPropertyName()) ) {
-			String newJobname = (String)e.getNewValue();
+		if ("jobname".equals(e.getPropertyName())) {
+			String newJobname = (String) e.getNewValue();
 			getJobnameTextField().setText(newJobname);
 		}
 
 	}
 
 	@Override
-	protected void preparePanel(Map<String, String> panelProperties) throws TemplateException {
+	protected void preparePanel(Map<String, String> panelProperties)
+			throws TemplateException {
 
 		String defaultValue = panelProperties.get(DEFAULT_VALUE);
-		if ( StringUtils.isNotBlank(defaultValue) ) {
+		if (StringUtils.isNotBlank(defaultValue)) {
 			setValue("jobname", defaultValue);
 		}
 

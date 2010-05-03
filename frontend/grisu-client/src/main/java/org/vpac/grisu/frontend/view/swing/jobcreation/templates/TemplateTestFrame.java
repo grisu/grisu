@@ -249,7 +249,12 @@ public class TemplateTestFrame extends JFrame implements
 			template.getJobSubmissionObject().addPropertyChangeListener(
 					TemplateTestFrame.this);
 
-			currentTemplatePanel = template.getTemplatePanel();
+			JPanel tempPanel = new JPanel();
+			tempPanel.setLayout(new BorderLayout());
+			tempPanel.add(template.getTemplatePanel(), BorderLayout.CENTER);
+			tempPanel.add(template.getValidationPanel(), BorderLayout.SOUTH);
+
+			currentTemplatePanel = tempPanel;
 
 			setJobDescriptions();
 

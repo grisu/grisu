@@ -109,9 +109,9 @@ public class TemplateJobCreationPanel extends JPanel implements
 	public String getSupportedApplication() {
 
 		for (PanelConfig config : panelConfigs.values()) {
-			String bean = config.getPanelConfig().get(AbstractInputPanel.BEAN);
+			String bean = config.getProperties().get(AbstractInputPanel.BEAN);
 			if (AbstractInputPanel.APPLICATION.equals(bean)) {
-				String app = config.getPanelConfig().get(
+				String app = config.getProperties().get(
 						AbstractInputPanel.DEFAULT_VALUE);
 				if (StringUtils.isNotBlank(app)) {
 					return app;

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JComboBox;
+import javax.swing.text.JTextComponent;
 
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
@@ -15,7 +16,6 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-
 
 public class Cpus extends AbstractInputPanel {
 	private JComboBox comboBox;
@@ -27,12 +27,10 @@ public class Cpus extends AbstractInputPanel {
 		super(config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-			new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				ColumnSpec.decode("max(24dlu;default):grow"),
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getComboBox(), "2, 2, fill, fill");
 	}
 
@@ -43,12 +41,13 @@ public class Cpus extends AbstractInputPanel {
 
 				public void itemStateChanged(ItemEvent e) {
 
-					if ( ! userInput ) {
+					if (!userInput) {
 						return;
 					}
 
-					if ( ItemEvent.SELECTED == e.getStateChange() ) {
-						Integer value = (Integer)getComboBox().getSelectedItem();
+					if (ItemEvent.SELECTED == e.getStateChange()) {
+						Integer value = (Integer) getComboBox()
+								.getSelectedItem();
 						try {
 							setValue("cpus", value);
 						} catch (TemplateException e1) {
@@ -76,20 +75,29 @@ public class Cpus extends AbstractInputPanel {
 	}
 
 	@Override
-	protected String getValueAsString() {
-
-		return ((Integer)(getComboBox().getSelectedItem())).toString();
-
+	public JComboBox getJComboBox() {
+		return getJComboBox();
 	}
 
+	@Override
+	public JTextComponent getTextComponent() {
+		return null;
+	}
+
+	@Override
+	protected String getValueAsString() {
+
+		return ((Integer) (getComboBox().getSelectedItem())).toString();
+
+	}
 
 	@Override
 	protected void jobPropertyChanged(PropertyChangeEvent e) {
 
 		userInput = false;
 
-		if ( "cpus".equals(e.getPropertyName()) ) {
-			int value = (Integer)e.getNewValue();
+		if ("cpus".equals(e.getPropertyName())) {
+			int value = (Integer) e.getNewValue();
 			getComboBox().setSelectedItem(value);
 		}
 
@@ -99,12 +107,13 @@ public class Cpus extends AbstractInputPanel {
 	@Override
 	protected void preparePanel(Map<String, String> panelProperties) {
 
-		for ( String key : panelProperties.keySet() ) {
+		for (String key : panelProperties.keySet()) {
 			try {
-				if ( DEFAULT_VALUE.equals(key) ) {
-					setValue("cpus", (Integer.parseInt(panelProperties.get(DEFAULT_VALUE))));
+				if (DEFAULT_VALUE.equals(key)) {
+					setValue("cpus", (Integer.parseInt(panelProperties
+							.get(DEFAULT_VALUE))));
 				} else if (PREFILLS.equals(key)) {
-					for ( String item : panelProperties.get(PREFILLS).split(",") ) {
+					for (String item : panelProperties.get(PREFILLS).split(",")) {
 						getComboBox().addItem(Integer.parseInt(item));
 					}
 				}
@@ -114,9 +123,5 @@ public class Cpus extends AbstractInputPanel {
 		}
 
 	}
-
-
-
-
 
 }

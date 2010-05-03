@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
+import javax.swing.text.JTextComponent;
 
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
@@ -27,11 +28,9 @@ public class TextCombo extends AbstractInputPanel {
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getComboBox(), "2, 2, fill, fill");
 	}
 
@@ -44,9 +43,9 @@ public class TextCombo extends AbstractInputPanel {
 				public void keyReleased(KeyEvent e) {
 					try {
 
-						//						if ( StringUtils.isBlank(bean) ) {
-						//							return;
-						//						}
+						// if ( StringUtils.isBlank(bean) ) {
+						// return;
+						// }
 
 						setValue(bean, combobox.getSelectedItem());
 					} catch (TemplateException e1) {
@@ -67,8 +66,18 @@ public class TextCombo extends AbstractInputPanel {
 	}
 
 	@Override
+	public JComboBox getJComboBox() {
+		return getComboBox();
+	}
+
+	@Override
+	public JTextComponent getTextComponent() {
+		return null;
+	}
+
+	@Override
 	protected String getValueAsString() {
-		return (String)(combobox.getSelectedItem());
+		return (String) (combobox.getSelectedItem());
 	}
 
 	@Override
@@ -79,7 +88,7 @@ public class TextCombo extends AbstractInputPanel {
 
 	@Override
 	protected void preparePanel(Map<String, String> panelProperties)
-	throws TemplateException {
+			throws TemplateException {
 		// TODO Auto-generated method stub
 
 	}

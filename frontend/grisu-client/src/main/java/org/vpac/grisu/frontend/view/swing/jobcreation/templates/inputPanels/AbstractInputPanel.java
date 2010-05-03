@@ -4,13 +4,16 @@ import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 import javax.swing.border.TitledBorder;
+import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -22,10 +25,11 @@ import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateObject;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.filters.Filter;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
-public abstract class AbstractInputPanel extends JPanel implements PropertyChangeListener {
+public abstract class AbstractInputPanel extends JPanel implements
+		PropertyChangeListener {
 
-	static final Logger myLogger = Logger
-	.getLogger(AbstractInputPanel.class.getName());
+	static final Logger myLogger = Logger.getLogger(AbstractInputPanel.class
+			.getName());
 
 	public static final String DEFAULT_VALUE = "defaultValue";
 	public static final String NAME = "name";
@@ -48,7 +52,7 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 
 	private JobSubmissionObjectImpl jobObject;
 
-	protected final Map<String, String> panelProperties;
+	protected Map<String, String> panelProperties;
 	protected ServiceInterface si;
 
 	protected static ServiceInterface singletonServiceinterface;
@@ -56,11 +60,11 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 
 	public static GrisuFileDialog getFileDialog() {
 
-		if ( singletonServiceinterface == null ) {
+		if (singletonServiceinterface == null) {
 			return null;
 		}
 
-		if ( dialog == null ) {
+		if (dialog == null) {
 			dialog = new GrisuFileDialog(singletonServiceinterface);
 			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -68,62 +72,85 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 		return dialog;
 	}
 
-
 	public AbstractInputPanel(PanelConfig config) throws TemplateException {
 
-		if ( (config == null) || (config.getFilters() == null) ) {
+		if ((config == null) || (config.getFilters() == null)) {
 			this.filters = new LinkedList<Filter>();
 		} else {
 			this.filters = config.getFilters();
 		}
 
-		if ( (config == null) || (config.getPanelConfig() == null) || (config.getPanelConfig().size() == 0) ) {
+		if ((config == null) || (config.getProperties() == null)
+				|| (config.getProperties().size() == 0)) {
 			this.panelProperties = getDefaultPanelProperties();
+			if (this.panelProperties == null) {
+				this.panelProperties = new HashMap<String, String>();
+			}
 		} else {
 			this.panelProperties = getDefaultPanelProperties();
-			this.panelProperties.putAll(config.getPanelConfig());
+			this.panelProperties.putAll(config.getProperties());
 		}
 
-		if ( StringUtils.isBlank(this.panelProperties.get(NAME)) ) {
+		if (StringUtils.isBlank(this.panelProperties.get(NAME))) {
 			this.panelProperties.put(NAME, UUID.randomUUID().toString());
 		}
 
+		String title = panelProperties.get(TITLE);
 
-		if ( ! StringUtils.isBlank(this.panelProperties.get(BEAN)) ) {
+		if (StringUtils.isBlank(title)) {
+			title = panelProperties.get(NAME);
+		}
+
+		// so validator displays proper name
+		if (getTextComponent() != null) {
+			getTextComponent().setName(title);
+		} else if (getJComboBox() != null) {
+			getJComboBox().setName(title);
+		}
+
+		if (!StringUtils.isBlank(this.panelProperties.get(BEAN))) {
 			bean = this.panelProperties.get(BEAN);
 		} else {
 			bean = null;
 		}
-		if ( ! StringUtils.isBlank(this.panelProperties.get(IS_VISIBLE)) ) {
+		if (!StringUtils.isBlank(this.panelProperties.get(IS_VISIBLE))) {
 			try {
-				isVisible = Boolean.parseBoolean(this.panelProperties.get(IS_VISIBLE));
+				isVisible = Boolean.parseBoolean(this.panelProperties
+						.get(IS_VISIBLE));
 			} catch (Exception e) {
-				throw new TemplateException("Can't parse isVisible property: "+e.getLocalizedMessage(), e);
+				throw new TemplateException("Can't parse isVisible property: "
+						+ e.getLocalizedMessage(), e);
 			}
 		}
 		try {
-			String title = this.panelProperties.get(TITLE);
-			setBorder(new TitledBorder(null, title, TitledBorder.LEADING, TitledBorder.TOP, null, null));
+			title = this.panelProperties.get(TITLE);
+			setBorder(new TitledBorder(null, title, TitledBorder.LEADING,
+					TitledBorder.TOP, null, null));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		String size = this.panelProperties.get(SIZE);
-		if ( StringUtils.isNotBlank(size) ) {
+		if (StringUtils.isNotBlank(size)) {
 			try {
-				int width = Integer.parseInt(size.substring(0, size.indexOf("x")).trim());
-				int height = Integer.parseInt(size.substring(size.indexOf("x")+1).trim());
+				int width = Integer.parseInt(size.substring(0,
+						size.indexOf("x")).trim());
+				int height = Integer.parseInt(size.substring(
+						size.indexOf("x") + 1).trim());
 				setPreferredSize(new Dimension(width, height));
 				setMaximumSize(new Dimension(width, height));
 			} catch (Exception e) {
-				throw new TemplateException("Can't parse size property for panel "+this.panelProperties.get(NAME)+": "+size);
+				throw new TemplateException(
+						"Can't parse size property for panel "
+								+ this.panelProperties.get(NAME) + ": " + size);
 			}
 		}
 	}
 
 	protected void addValue(String bean, Object value) {
 		try {
-			Method method = jobObject.getClass().getMethod("add"+StringUtils.capitalize(bean), value.getClass());
+			Method method = jobObject.getClass().getMethod(
+					"add" + StringUtils.capitalize(bean), value.getClass());
 			method.invoke(jobObject, value);
 			applyFilters();
 		} catch (Exception e) {
@@ -131,10 +158,15 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 			e.printStackTrace();
 		}
 	}
+
 	private void applyFilters() {
 
 		String string = getValueAsString();
-		for ( Filter filter : filters ) {
+		if (string == null) {
+			myLogger.debug("Value is null. Not applying filters...");
+			return;
+		}
+		for (Filter filter : filters) {
 			string = filter.filter(string);
 		}
 
@@ -142,7 +174,8 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 	}
 
 	/**
-	 * Returns a set of default values if no configuration is specified in the template.
+	 * Returns a set of default values if no configuration is specified in the
+	 * template.
 	 * 
 	 * Good to have as a reference which values are available for this panel.
 	 * 
@@ -150,34 +183,40 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 	 */
 	abstract protected Map<String, String> getDefaultPanelProperties();
 
+	abstract public JComboBox getJComboBox();
+
 	public String getPanelName() {
 		return this.panelProperties.get(NAME);
 	}
 
+	abstract public JTextComponent getTextComponent();
+
 	abstract protected String getValueAsString();
 
-	//	protected Object getValue(String bean) {
-	//		try {
-	//			Method method = jobObject.getClass().getMethod("get"+StringUtils.capitalize(bean));
-	//			return method.invoke(jobObject);
-	//		} catch (Exception e) {
-	//			// TODO Auto-generated catch block
-	//			e.printStackTrace();
-	//			return null;
-	//		}
-	//	}
+	// protected Object getValue(String bean) {
+	// try {
+	// Method method =
+	// jobObject.getClass().getMethod("get"+StringUtils.capitalize(bean));
+	// return method.invoke(jobObject);
+	// } catch (Exception e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// return null;
+	// }
+	// }
 
-	public void initPanel(TemplateObject template, ServiceInterface si, JobSubmissionObjectImpl jobObject) throws TemplateException {
+	public void initPanel(TemplateObject template, ServiceInterface si,
+			JobSubmissionObjectImpl jobObject) throws TemplateException {
 
 		this.template = template;
 
 		// needed for example for the file dialog
-		if ( singletonServiceinterface == null ) {
+		if (singletonServiceinterface == null) {
 			singletonServiceinterface = si;
 		}
 		this.si = si;
 
-		if ( this.jobObject != null ) {
+		if (this.jobObject != null) {
 			this.jobObject.removePropertyChangeListener(this);
 		}
 
@@ -192,20 +231,24 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 	}
 
 	/**
-	 * Must be implemented if a change in a job property would possibly change the
-	 * value of one of the job properties this panel is responsible for.
+	 * Must be implemented if a change in a job property would possibly change
+	 * the value of one of the job properties this panel is responsible for.
 	 * 
-	 * @param e the property change event
+	 * @param e
+	 *            the property change event
 	 */
 	abstract protected void jobPropertyChanged(PropertyChangeEvent e);
 
 	/**
-	 * Implement this if the panel needs to be prepared with values from the template.
+	 * Implement this if the panel needs to be prepared with values from the
+	 * template.
 	 * 
-	 * @param panelProperties the properties for the initial state of the panel
+	 * @param panelProperties
+	 *            the properties for the initial state of the panel
 	 * @throws TemplateException
 	 */
-	abstract protected void preparePanel(Map<String, String> panelProperties) throws TemplateException;
+	abstract protected void preparePanel(Map<String, String> panelProperties)
+			throws TemplateException;
 
 	public void propertyChange(PropertyChangeEvent arg0) {
 		jobPropertyChanged(arg0);
@@ -213,7 +256,8 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 
 	protected void removeValue(String bean, Object value) {
 		try {
-			Method method = jobObject.getClass().getMethod("remove"+StringUtils.capitalize(bean), value.getClass());
+			Method method = jobObject.getClass().getMethod(
+					"remove" + StringUtils.capitalize(bean), value.getClass());
 			method.invoke(jobObject, value);
 			applyFilters();
 		} catch (Exception e) {
@@ -224,13 +268,15 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 
 	protected void setValue(String bean, Object value) throws TemplateException {
 		try {
-			if ( bean != null ) {
-				Method method = jobObject.getClass().getMethod("set"+StringUtils.capitalize(bean), value.getClass());
+			if (bean != null) {
+				Method method = jobObject.getClass().getMethod(
+						"set" + StringUtils.capitalize(bean), value.getClass());
 				method.invoke(jobObject, value);
 			}
 			applyFilters();
 		} catch (Exception e) {
-			throw new TemplateException("Can't set value for property "+bean+": "+e.getLocalizedMessage(), e);
+			throw new TemplateException("Can't set value for property " + bean
+					+ ": " + e.getLocalizedMessage(), e);
 		}
 	}
 
@@ -239,21 +285,19 @@ public abstract class AbstractInputPanel extends JPanel implements PropertyChang
 
 		StringBuffer temp = new StringBuffer();
 
-		temp.append("Name: "+getName()+"\n");
-		temp.append("Class: "+this.getClass().toString()+"\n");
+		temp.append("Name: " + getName() + "\n");
+		temp.append("Class: " + this.getClass().toString() + "\n");
 		temp.append("Properties: \n");
-		for ( String key : panelProperties.keySet() ) {
-			temp.append("\t"+key+": "+panelProperties.get(key)+"\n");
+		for (String key : panelProperties.keySet()) {
+			temp.append("\t" + key + ": " + panelProperties.get(key) + "\n");
 		}
 		temp.append("Filters:\n");
-		for ( Filter filter : filters ) {
-			temp.append("\tClass: "+filter.getClass().toString()+"\n");
+		for (Filter filter : filters) {
+			temp.append("\tClass: " + filter.getClass().toString() + "\n");
 		}
 
 		return temp.toString();
 
 	}
-
-
 
 }
