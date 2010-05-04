@@ -16,6 +16,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.exceptions.NoSuchTemplateException;
+import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.settings.ClientPropertiesManager;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.utils.GrisuTemplateFilenameFilter;
@@ -78,6 +79,35 @@ public class TemplateManager {
 		pcs.addPropertyChangeListener(l);
 	}
 
+	public String copyTemplateToLocalTemplateStore(String name)
+			throws NoSuchTemplateException {
+
+		List<String> temp = getRemoteTemplate(name);
+
+		File file = new File(Environment.getTemplateDirectory(), name
+				+ ".template");
+		int i = 1;
+		String tempName = name;
+		while (file.exists()) {
+			tempName = name + "_" + i;
+			file = new File(Environment.getTemplateDirectory(), tempName
+					+ ".template");
+			i = i + 1;
+		}
+
+		try {
+			FileUtils.writeLines(file, temp);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		pcs.firePropertyChange("localTemplateNames", null,
+				getLocalTemplateNames());
+
+		return tempName;
+
+	}
+
 	public SortedSet<String> getAllTemplateNames() {
 
 		SortedSet<String> allNames = new TreeSet<String>();
@@ -88,9 +118,26 @@ public class TemplateManager {
 		return allNames;
 	}
 
+	public List<String> getLocalTemplate(File template)
+			throws TemplateException {
+
+		if (!template.exists()) {
+			throw new TemplateException("Template " + template.toString()
+					+ " does not exit.");
+		}
+
+		try {
+			return FileUtils.readLines(template);
+		} catch (IOException e) {
+			throw new TemplateException("Can't read template: "
+					+ e.getLocalizedMessage(), e);
+		}
+
+	}
+
 	public List<String> getLocalTemplateNames() {
 
-		return new LinkedList(getLocalTemplates().keySet());
+		return new LinkedList<String>(getLocalTemplates().keySet());
 
 	}
 

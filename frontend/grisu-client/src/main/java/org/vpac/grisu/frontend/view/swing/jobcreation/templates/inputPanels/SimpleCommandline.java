@@ -11,8 +11,10 @@ import java.util.Map;
 import javax.swing.JComboBox;
 import javax.swing.text.JTextComponent;
 
+import org.apache.commons.lang.StringUtils;
+import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
-import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
+import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -24,8 +26,10 @@ public class SimpleCommandline extends AbstractInputPanel {
 
 	private String lastCalculatedExecutable = null;
 
-	public SimpleCommandline(PanelConfig config) throws TemplateException {
-		super(config);
+	public SimpleCommandline(String name, PanelConfig config)
+			throws TemplateException {
+
+		super(name, config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -116,7 +120,7 @@ public class SimpleCommandline extends AbstractInputPanel {
 
 		Map<String, String> defaultProperties = new HashMap<String, String>();
 		defaultProperties.put(TITLE, "Commandline");
-
+		defaultProperties.put(HISTORY_ITEMS, "5");
 		return defaultProperties;
 	}
 
@@ -145,12 +149,18 @@ public class SimpleCommandline extends AbstractInputPanel {
 	@Override
 	protected void preparePanel(Map<String, String> panelProperties) {
 
-		for (String key : panelProperties.keySet()) {
-			if (DEFAULT_VALUE.equals(key)) {
-				getComboBox().setSelectedItem(
-						panelProperties.get(DEFAULT_VALUE));
-			}
+		String def = getDefaultValue();
+
+		if (StringUtils.isNotBlank(def)) {
+			getComboBox().setSelectedItem(def);
 		}
+
+	}
+
+	@Override
+	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
+
+		addValueToHistory();
 
 	}
 }

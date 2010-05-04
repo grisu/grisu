@@ -9,8 +9,9 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.text.JTextComponent;
 
+import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
-import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
+import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -23,8 +24,9 @@ public class TextCombo extends AbstractInputPanel {
 
 	DefaultComboBoxModel model = new DefaultComboBoxModel();
 
-	public TextCombo(PanelConfig config) throws TemplateException {
-		super(config);
+	public TextCombo(String name, PanelConfig config) throws TemplateException {
+
+		super(name, config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -91,6 +93,12 @@ public class TextCombo extends AbstractInputPanel {
 			throws TemplateException {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import org.jdesktop.swingx.JXErrorPane;
 import org.netbeans.validation.api.ui.ValidationPanel;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
+import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateObject;
 
@@ -95,6 +96,11 @@ public class TemplateWrapperPanel extends JPanel {
 			validationPanel = new ValidationPanel();
 		}
 		return validationPanel;
+	}
+
+	public void resetTemplate() throws TemplateException {
+
+		template.reset();
 	}
 
 	public void switchToJobCreationPanel() {

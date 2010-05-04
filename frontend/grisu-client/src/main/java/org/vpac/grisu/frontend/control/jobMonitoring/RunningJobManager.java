@@ -42,27 +42,30 @@ public class RunningJobManager implements EventSubscriber {
 			try {
 
 				// update single jobs
-				for (String application : cachedSingleJobsPerApplication.keySet()) {
+				for (String application : cachedSingleJobsPerApplication
+						.keySet()) {
 					updateJobList(application);
 				}
 
-				for ( JobObject job : getAllCurrentlyWatchedSingleJobs() ) {
+				for (JobObject job : getAllCurrentlyWatchedSingleJobs()) {
 					myLogger.debug("Refreshing job: " + job.getJobname());
 					job.getStatus(true);
 				}
 
-				for (String application : cachedBatchJobsPerApplication.keySet()) {
+				for (String application : cachedBatchJobsPerApplication
+						.keySet()) {
 					updateBatchJobList(application);
 				}
 
 				for (BatchJobObject bj : getAllCurrentlyWatchedBatchJobs()) {
-					if (!bj.isFinished(false) && !bj.isRefreshing() && !bj.isBeingKilled()) {
+					if (!bj.isFinished(false) && !bj.isRefreshing()
+							&& !bj.isBeingKilled()) {
 						myLogger.debug("Refreshing job: " + bj.getJobname());
 						bj.refresh(true);
 					}
 				}
 
-				if ( ! stop ) {
+				if (!stop) {
 					updateTimer.schedule(new UpdateTimerTask(),
 							UPDATE_TIME_IN_SECONDS * 1000);
 				} else {
@@ -73,10 +76,7 @@ public class RunningJobManager implements EventSubscriber {
 			}
 		}
 
-
 	}
-
-
 
 	static final Logger myLogger = Logger.getLogger(RunningJobManager.class
 			.getName());
@@ -125,7 +125,7 @@ public class RunningJobManager implements EventSubscriber {
 
 		if (si == null) {
 			throw new RuntimeException(
-			"ServiceInterface not initialized yet. Can't get default registry...");
+					"ServiceInterface not initialized yet. Can't get default registry...");
 		}
 
 		synchronized (si) {
@@ -137,6 +137,7 @@ public class RunningJobManager implements EventSubscriber {
 
 		return cachedRegistries.get(si);
 	}
+
 	private final UserEnvironmentManager em;
 
 	private final ServiceInterface si;
@@ -145,27 +146,27 @@ public class RunningJobManager implements EventSubscriber {
 	private boolean watchingAllBatchJobs = false;
 
 	private final Map<String, JobObject> cachedAllSingleJobs = Collections
-	.synchronizedMap(new HashMap<String, JobObject>());
+			.synchronizedMap(new HashMap<String, JobObject>());
 
 	private final Map<String, EventList<JobObject>> cachedSingleJobsPerApplication = Collections
-	.synchronizedMap(new HashMap<String, EventList<JobObject>>());
+			.synchronizedMap(new HashMap<String, EventList<JobObject>>());
 
 	private final Map<String, BatchJobObject> cachedAllBatchJobs = Collections
-	.synchronizedMap(new HashMap<String, BatchJobObject>());
+			.synchronizedMap(new HashMap<String, BatchJobObject>());
 
 	private final Map<String, EventList<BatchJobObject>> cachedBatchJobsPerApplication = Collections
-	.synchronizedMap(new HashMap<String, EventList<BatchJobObject>>());
+			.synchronizedMap(new HashMap<String, EventList<BatchJobObject>>());
 
 	private final Timer updateTimer = new Timer();;
 
-	//	private final boolean checkForNewApplicationsForSingleJobs = false;
+	// private final boolean checkForNewApplicationsForSingleJobs = false;
 
 	private boolean stop = false;
 
 	public RunningJobManager(ServiceInterface si) {
 		this.si = si;
 		this.em = GrisuRegistryManager.getDefault(si)
-		.getUserEnvironmentManager();
+				.getUserEnvironmentManager();
 
 		EventBus.subscribe(NewJobEvent.class, this);
 		EventBus.subscribe(JobKilledEvent.class, this);
@@ -174,13 +175,17 @@ public class RunningJobManager implements EventSubscriber {
 		startAutoRefresh();
 	}
 
-	public synchronized BatchJobObject createBatchJob(String jobname, String submissionFqan, String defaultApplication, String defaultVersion) throws BatchJobException {
+	public synchronized BatchJobObject createBatchJob(String jobname,
+			String submissionFqan, String defaultApplication,
+			String defaultVersion) throws BatchJobException {
 
-		BatchJobObject batchJob = new BatchJobObject(si, jobname, submissionFqan, defaultApplication, defaultVersion);
+		BatchJobObject batchJob = new BatchJobObject(si, jobname,
+				submissionFqan, defaultApplication, defaultVersion);
 		cachedAllBatchJobs.put(jobname, batchJob);
-		EventList<BatchJobObject> temp = cachedBatchJobsPerApplication.get(defaultApplication);
+		EventList<BatchJobObject> temp = cachedBatchJobsPerApplication
+				.get(defaultApplication);
 		getBatchJobs(defaultApplication).add(batchJob);
-		if ( watchingAllBatchJobs ) {
+		if (watchingAllBatchJobs) {
 			getBatchJobs(Constants.ALLJOBS_KEY).add(batchJob);
 		}
 		return batchJob;
@@ -228,11 +233,11 @@ public class RunningJobManager implements EventSubscriber {
 	public synchronized EventList<BatchJobObject> getBatchJobs(
 			String application) {
 
-		if ( StringUtils.isBlank(application) ) {
+		if (StringUtils.isBlank(application)) {
 			application = Constants.ALLJOBS_KEY;
 		}
 
-		if ( Constants.ALLJOBS_KEY.equals(application) ) {
+		if (Constants.ALLJOBS_KEY.equals(application)) {
 			watchingAllBatchJobs = true;
 		}
 
@@ -256,14 +261,16 @@ public class RunningJobManager implements EventSubscriber {
 		return cachedBatchJobsPerApplication.get(application);
 	}
 
-	public JobObject getJob(String jobname, boolean refreshOnBackend) throws NoSuchJobException {
+	public JobObject getJob(String jobname, boolean refreshOnBackend)
+			throws NoSuchJobException {
 
 		synchronized (jobname) {
 
 			if (cachedAllSingleJobs.get(jobname) == null) {
 
 				try {
-					JobObject temp = new JobObject(si, jobname, refreshOnBackend);
+					JobObject temp = new JobObject(si, jobname,
+							refreshOnBackend);
 					cachedAllSingleJobs.put(jobname, temp);
 				} catch (RuntimeException e) {
 					myLogger.error(e);
@@ -279,11 +286,11 @@ public class RunningJobManager implements EventSubscriber {
 
 	public synchronized EventList<JobObject> getJobs(String application) {
 
-		if ( StringUtils.isBlank(application) ) {
+		if (StringUtils.isBlank(application)) {
 			application = Constants.ALLJOBS_KEY;
 		}
 
-		if ( Constants.ALLJOBS_KEY.equals(application) ) {
+		if (Constants.ALLJOBS_KEY.equals(application)) {
 			watchingAllSingleJobs = true;
 		}
 
@@ -294,8 +301,8 @@ public class RunningJobManager implements EventSubscriber {
 			for (String jobname : em.getCurrentJobnames(application, false)) {
 
 				try {
-					JobObject j= getJob(jobname, false);
-					if ( j != null ) {
+					JobObject j = getJob(jobname, false);
+					if (j != null) {
 
 						temp.add(j);
 					}
@@ -317,20 +324,22 @@ public class RunningJobManager implements EventSubscriber {
 
 	public void onEvent(Object event) {
 
-		if ( event instanceof BatchJobKilledEvent ) {
-			BatchJobKilledEvent e = (BatchJobKilledEvent)event;
+		if (event instanceof BatchJobKilledEvent) {
+			BatchJobKilledEvent e = (BatchJobKilledEvent) event;
 
 			updateBatchJobList(e.getApplication());
-		} else if ( event instanceof NewJobEvent ) {
-			NewJobEvent ev = (NewJobEvent)event;
+		} else if (event instanceof NewJobEvent) {
+			NewJobEvent ev = (NewJobEvent) event;
 
+			GrisuRegistryManager.getDefault(si).getUserEnvironmentManager()
+					.getCurrentJobnames(true);
 			updateJobList(ev.getJob().getApplication());
-		} else if ( event instanceof JobKilledEvent ) {
-			JobKilledEvent ev = (JobKilledEvent)event;
+
+		} else if (event instanceof JobKilledEvent) {
+			JobKilledEvent ev = (JobKilledEvent) event;
 			updateJobList(ev.getJob().getApplication());
 		}
 	}
-
 
 	private void startAutoRefresh() {
 
@@ -354,7 +363,7 @@ public class RunningJobManager implements EventSubscriber {
 	 */
 	public synchronized void updateBatchJobList(String application) {
 
-		if ( StringUtils.isBlank(application) ) {
+		if (StringUtils.isBlank(application)) {
 			application = Constants.ALLJOBS_KEY;
 		}
 
@@ -373,16 +382,16 @@ public class RunningJobManager implements EventSubscriber {
 			try {
 
 				BatchJobObject temp = getBatchJob(name);
-				if ( temp == null ) {
+				if (temp == null) {
 					continue;
 				}
-				if ( watchingAllBatchJobs ) {
-					if ( ! getAllBatchJobs().contains(temp) ) {
+				if (watchingAllBatchJobs) {
+					if (!getAllBatchJobs().contains(temp)) {
 						getAllBatchJobs().add(temp);
 					}
 				}
 
-				if ( ! list.contains(temp) ) {
+				if (!list.contains(temp)) {
 					list.add(temp);
 				}
 			} catch (NoSuchJobException e) {
@@ -397,12 +406,12 @@ public class RunningJobManager implements EventSubscriber {
 			}
 		}
 
-		if ( watchingAllBatchJobs ) {
+		if (watchingAllBatchJobs) {
 			getAllBatchJobs().removeAll(toRemove);
 		}
 
 		list.removeAll(toRemove);
-		for ( BatchJobObject bj : toRemove ) {
+		for (BatchJobObject bj : toRemove) {
 			cachedAllBatchJobs.remove(bj.getJobname());
 		}
 
@@ -410,7 +419,7 @@ public class RunningJobManager implements EventSubscriber {
 
 	public synchronized void updateJobList(String application) {
 
-		if ( StringUtils.isBlank(application) ) {
+		if (StringUtils.isBlank(application)) {
 			application = Constants.ALLJOBS_KEY;
 		}
 
@@ -418,8 +427,7 @@ public class RunningJobManager implements EventSubscriber {
 
 		EventList<JobObject> list = getJobs(application);
 
-		SortedSet<String> jobnames = em.getCurrentJobnames(application,
-				true);
+		SortedSet<String> jobnames = em.getCurrentJobnames(application, true);
 		SortedSet<String> jobnamesNew = new TreeSet<String>(jobnames);
 
 		for (JobObject j : list) {
@@ -429,15 +437,15 @@ public class RunningJobManager implements EventSubscriber {
 		for (String name : jobnamesNew) {
 			try {
 				JobObject temp = getJob(name, false);
-				if ( temp == null ) {
+				if (temp == null) {
 					continue;
 				}
-				if ( watchingAllSingleJobs ) {
-					if ( ! getAllJobs().contains(temp) ) {
+				if (watchingAllSingleJobs) {
+					if (!getAllJobs().contains(temp)) {
 						getAllJobs().add(temp);
 					}
 				}
-				if ( ! list.contains(temp) ) {
+				if (!list.contains(temp)) {
 					list.add(temp);
 				}
 			} catch (NoSuchJobException e) {
@@ -453,12 +461,12 @@ public class RunningJobManager implements EventSubscriber {
 			}
 		}
 
-		if ( watchingAllSingleJobs ) {
+		if (watchingAllSingleJobs) {
 			getAllJobs().removeAll(toRemove);
 		}
 
 		list.removeAll(toRemove);
-		for ( JobObject j : toRemove ) {
+		for (JobObject j : toRemove) {
 			cachedAllSingleJobs.remove(j.getJobname());
 		}
 

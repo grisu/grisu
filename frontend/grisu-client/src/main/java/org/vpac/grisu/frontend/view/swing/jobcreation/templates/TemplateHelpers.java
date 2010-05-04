@@ -25,6 +25,7 @@ import org.netbeans.validation.api.Validator;
 import org.netbeans.validation.api.builtin.Validators;
 import org.netbeans.validation.api.ui.ValidationPanel;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.filters.Filter;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels.AbstractInputPanel;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
@@ -145,8 +146,8 @@ public class TemplateHelpers {
 		return config;
 	}
 
-	public static AbstractInputPanel createInputPanel(PanelConfig config)
-			throws TemplateException {
+	public static AbstractInputPanel createInputPanel(String templateName,
+			PanelConfig config) throws TemplateException {
 
 		if (config == null) {
 			throw new TemplateException("No config object. Can't create panel.");
@@ -159,9 +160,10 @@ public class TemplateHelpers {
 					.forName("org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels."
 							+ type);
 			Constructor<AbstractInputPanel> constructor = inputPanelClass
-					.getConstructor(PanelConfig.class);
+					.getConstructor(String.class, PanelConfig.class);
 
-			AbstractInputPanel panel = constructor.newInstance(config);
+			AbstractInputPanel panel = constructor.newInstance(templateName,
+					config);
 
 			return panel;
 
@@ -406,17 +408,7 @@ public class TemplateHelpers {
 
 		ValidationPanel validationPanel = new ValidationPanel();
 
-		String templateName = getValue("templateName", lines);
-		try {
-			templateName = getValue("templateName", lines);
-		} catch (TemplateException e) {
-			if (StringUtils.isBlank(templateFileName)) {
-				throw new TemplateException("Can't figure out template name.");
-			} else {
-				templateName = templateFileName;
-			}
-		}
-		template.setTemplateName(templateName);
+		template.setTemplateName(templateFileName);
 
 		LinkedHashMap<String, PanelConfig> inputConfigs = parseConfig(lines);
 		LinkedHashMap<String, AbstractInputPanel> inputPanels = new LinkedHashMap<String, AbstractInputPanel>();
@@ -479,7 +471,8 @@ public class TemplateHelpers {
 			if (StringUtils.isNotBlank(lineType)) {
 				PanelConfig config = inputConfigs.get(lineType);
 
-				AbstractInputPanel iPanel = createInputPanel(config);
+				AbstractInputPanel iPanel = createInputPanel(templateFileName,
+						config);
 				inputPanels.put(lineType, iPanel);
 				for (Validator<String> val : config.getValidators()) {
 
@@ -545,6 +538,7 @@ public class TemplateHelpers {
 		}
 
 		template.setTemplatePanel(mainPanel);
+		template.setInputPanels(inputPanels);
 		template.setValidationPanel(validationPanel);
 
 		// init jobobject with default values

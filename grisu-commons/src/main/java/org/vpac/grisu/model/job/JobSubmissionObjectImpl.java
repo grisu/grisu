@@ -562,13 +562,10 @@ public class JobSubmissionObjectImpl {
 	public void setForce_single(final Boolean force_single) {
 		boolean oldValue = this.force_mpi;
 		boolean oldValue1 = this.force_single;
-		int oldHostCount = this.hostcount;
 		this.force_single = force_single;
-		this.force_mpi = !force_mpi;
-		this.hostcount = 1;
+		this.force_mpi = !force_single;
 		pcs.firePropertyChange("force_mpi", oldValue, this.force_mpi);
 		pcs.firePropertyChange("force_single", oldValue1, this.force_single);
-		pcs.firePropertyChange("hostCount", oldHostCount, this.hostcount);
 	}
 
 	public void setHostCount(Integer hc) {

@@ -11,8 +11,9 @@ import javax.swing.JComboBox;
 import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang.StringUtils;
+import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
-import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
+import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -83,8 +84,9 @@ public class Walltime extends AbstractInputPanel {
 
 	private final DefaultComboBoxModel unitModel = new DefaultComboBoxModel();
 
-	public Walltime(PanelConfig config) throws TemplateException {
-		super(config);
+	public Walltime(String name, PanelConfig config) throws TemplateException {
+
+		super(name, config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("27dlu"),
 				FormFactory.RELATED_GAP_COLSPEC,
@@ -231,5 +233,11 @@ public class Walltime extends AbstractInputPanel {
 					+ " as default to WalltimePanel. Not a valid unitname.");
 		}
 
+	}
+
+	@Override
+	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
+		// TODO Auto-generated method stub
+		
 	}
 }

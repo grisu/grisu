@@ -6,6 +6,7 @@ import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -18,12 +19,16 @@ import javax.swing.text.JTextComponent;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.TemplateException;
+import org.vpac.grisu.frontend.control.jobMonitoring.RunningJobManager;
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
-import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateObject;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.filters.Filter;
+import org.vpac.grisu.model.GrisuRegistryManager;
+import org.vpac.grisu.model.UserEnvironmentManager;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
+import org.vpac.historyRepeater.HistoryManager;
 
 public abstract class AbstractInputPanel extends JPanel implements
 		PropertyChangeListener {
@@ -35,7 +40,8 @@ public abstract class AbstractInputPanel extends JPanel implements
 	public static final String NAME = "name";
 	public static final String TITLE = "title";
 	public static final String PREFILLS = "prefills";
-	public static final String USE_LAST_VALUE = "useLastValue";
+	public static final String USE_HISTORY = "useHistory";
+	public static final String HISTORY_ITEMS = "historyItems";
 	public static final String DEPENDENCY = "dependency";
 	public static final String SIZE = "size";
 	public static final String IS_VISIBLE = "isVisible";
@@ -52,10 +58,16 @@ public abstract class AbstractInputPanel extends JPanel implements
 
 	private JobSubmissionObjectImpl jobObject;
 
-	protected Map<String, String> panelProperties;
-	protected ServiceInterface si;
+	protected final String historyManagerEntryName;
 
+	protected Map<String, String> panelProperties;
+
+	private ServiceInterface si;
+	private UserEnvironmentManager uem;
+	private RunningJobManager rjm;
+	private HistoryManager hm;
 	protected static ServiceInterface singletonServiceinterface;
+
 	private static GrisuFileDialog dialog;
 
 	public static GrisuFileDialog getFileDialog() {
@@ -72,7 +84,8 @@ public abstract class AbstractInputPanel extends JPanel implements
 		return dialog;
 	}
 
-	public AbstractInputPanel(PanelConfig config) throws TemplateException {
+	public AbstractInputPanel(String templateName, PanelConfig config)
+			throws TemplateException {
 
 		if ((config == null) || (config.getFilters() == null)) {
 			this.filters = new LinkedList<Filter>();
@@ -93,6 +106,24 @@ public abstract class AbstractInputPanel extends JPanel implements
 
 		if (StringUtils.isBlank(this.panelProperties.get(NAME))) {
 			this.panelProperties.put(NAME, UUID.randomUUID().toString());
+			historyManagerEntryName = templateName;
+		} else {
+			historyManagerEntryName = templateName + "_"
+					+ this.panelProperties.get(NAME);
+		}
+
+		if (useHistory()) {
+			if (panelProperties.get(HISTORY_ITEMS) != null) {
+				try {
+					Integer max = Integer.parseInt(panelProperties
+							.get(HISTORY_ITEMS));
+					hm.setMaxNumberOfEntries(historyManagerEntryName, max);
+				} catch (Exception e) {
+					throw new TemplateException(
+							"Can't setup history management for panel "
+									+ getPanelName(), e);
+				}
+			}
 		}
 
 		String title = panelProperties.get(TITLE);
@@ -147,6 +178,21 @@ public abstract class AbstractInputPanel extends JPanel implements
 		}
 	}
 
+	protected void addHistoryValue(String value) {
+		addHistoryValue(null, value);
+	}
+
+	protected void addHistoryValue(String optionalKey, String value) {
+
+		if (StringUtils.isBlank(optionalKey)) {
+			hm.addHistoryEntry(historyManagerEntryName, value);
+		} else {
+			hm.addHistoryEntry(historyManagerEntryName + "_" + optionalKey,
+					value);
+		}
+
+	}
+
 	protected void addValue(String bean, Object value) {
 		try {
 			Method method = jobObject.getClass().getMethod(
@@ -157,6 +203,16 @@ public abstract class AbstractInputPanel extends JPanel implements
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public void addValueToHistory() {
+
+		String value = getValueAsString();
+
+		if (StringUtils.isNotBlank(value)) {
+			addHistoryValue(value);
+		}
+
 	}
 
 	private void applyFilters() {
@@ -183,15 +239,62 @@ public abstract class AbstractInputPanel extends JPanel implements
 	 */
 	abstract protected Map<String, String> getDefaultPanelProperties();
 
-	abstract public JComboBox getJComboBox();
+	public String getDefaultValue() {
 
-	public String getPanelName() {
-		return this.panelProperties.get(NAME);
+		String last = null;
+
+		if (useHistory()) {
+			try {
+				last = getLastValue();
+				return last;
+			} catch (Exception e) {
+				myLogger.debug("No history value for "
+						+ panelProperties.get(NAME));
+			}
+		}
+
+		String def = panelProperties.get(DEFAULT_VALUE);
+		if (DEFAULT_VALUE.equals(def)) {
+			last = panelProperties.get(DEFAULT_VALUE);
+			return last;
+		}
+
+		return null;
 	}
 
-	abstract public JTextComponent getTextComponent();
+	protected HistoryManager getHistoryManager() {
+		return this.hm;
+	}
 
-	abstract protected String getValueAsString();
+	public List<String> getHistoryValues() {
+		return getHistoryValues(null);
+	}
+
+	public List<String> getHistoryValues(String optionalKey) {
+		if (StringUtils.isBlank(optionalKey)) {
+			return hm.getEntries(historyManagerEntryName);
+		} else {
+			return hm.getEntries(historyManagerEntryName + "_" + optionalKey);
+		}
+	}
+
+	abstract public JComboBox getJComboBox();
+
+	protected JobSubmissionObjectImpl getJobSubmissionObject() {
+		return jobObject;
+	}
+
+	protected String getLastValue() {
+		return getLastValue(null);
+	}
+
+	protected String getLastValue(String optionalKey) {
+		if (StringUtils.isBlank(optionalKey)) {
+			return hm.getLastEntry(historyManagerEntryName);
+		} else {
+			return hm.getLastEntry(historyManagerEntryName + "_" + optionalKey);
+		}
+	}
 
 	// protected Object getValue(String bean) {
 	// try {
@@ -205,25 +308,45 @@ public abstract class AbstractInputPanel extends JPanel implements
 	// }
 	// }
 
+	public String getPanelName() {
+		return this.panelProperties.get(NAME);
+	}
+
+	protected RunningJobManager getRunningJobManager() {
+
+		return this.rjm;
+	}
+
+	protected ServiceInterface getServiceInterface() {
+		return this.si;
+	}
+
+	abstract public JTextComponent getTextComponent();
+
+	protected UserEnvironmentManager getUserEnvironmentManager() {
+		return this.uem;
+	}
+
+	abstract protected String getValueAsString();
+
 	public void initPanel(TemplateObject template, ServiceInterface si,
 			JobSubmissionObjectImpl jobObject) throws TemplateException {
 
 		this.template = template;
 
-		// needed for example for the file dialog
-		if (singletonServiceinterface == null) {
-			singletonServiceinterface = si;
+		if (si != null) {
+			// needed for example for the file dialog
+			if (singletonServiceinterface == null) {
+				singletonServiceinterface = si;
+			}
+			this.si = si;
+			this.uem = GrisuRegistryManager.getDefault(si)
+					.getUserEnvironmentManager();
+			this.rjm = RunningJobManager.getDefault(si);
+			this.hm = GrisuRegistryManager.getDefault(si).getHistoryManager();
 		}
-		this.si = si;
+		refresh(jobObject);
 
-		if (this.jobObject != null) {
-			this.jobObject.removePropertyChangeListener(this);
-		}
-
-		this.jobObject = jobObject;
-		this.jobObject.addPropertyChangeListener(this);
-
-		preparePanel(panelProperties);
 	}
 
 	public boolean isDisplayed() {
@@ -254,6 +377,21 @@ public abstract class AbstractInputPanel extends JPanel implements
 		jobPropertyChanged(arg0);
 	}
 
+	public void refresh(JobSubmissionObjectImpl jobObject)
+			throws TemplateException {
+
+		if (this.jobObject != null) {
+			this.jobObject.removePropertyChangeListener(this);
+		}
+
+		this.jobObject = jobObject;
+		this.jobObject.addPropertyChangeListener(this);
+
+		templateRefresh(jobObject);
+
+		preparePanel(panelProperties);
+	}
+
 	protected void removeValue(String bean, Object value) {
 		try {
 			Method method = jobObject.getClass().getMethod(
@@ -268,6 +406,7 @@ public abstract class AbstractInputPanel extends JPanel implements
 
 	protected void setValue(String bean, Object value) throws TemplateException {
 		try {
+
 			if (bean != null) {
 				Method method = jobObject.getClass().getMethod(
 						"set" + StringUtils.capitalize(bean), value.getClass());
@@ -279,6 +418,8 @@ public abstract class AbstractInputPanel extends JPanel implements
 					+ ": " + e.getLocalizedMessage(), e);
 		}
 	}
+
+	abstract protected void templateRefresh(JobSubmissionObjectImpl jobObject);
 
 	@Override
 	public String toString() {
@@ -297,6 +438,22 @@ public abstract class AbstractInputPanel extends JPanel implements
 		}
 
 		return temp.toString();
+
+	}
+
+	public boolean useHistory() {
+
+		try {
+			if (panelProperties.get(USE_HISTORY) != null) {
+				boolean use = Boolean.parseBoolean(panelProperties
+						.get(USE_HISTORY));
+				return use;
+			} else {
+				return true;
+			}
+		} catch (Exception e) {
+			return true;
+		}
 
 	}
 

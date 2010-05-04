@@ -168,7 +168,7 @@ public class GT4Submitter extends JobSubmitter {
 
 				int hostCountValue = JsdlHelpers.getResourceCount(jsdl);
 
-				if (hostCountValue > 1) {
+				if (hostCountValue >= 1) {
 					Element hostCount = output.createElement("hostCount");
 					hostCount.setTextContent(new Integer(hostCountValue)
 							.toString());
@@ -176,7 +176,7 @@ public class GT4Submitter extends JobSubmitter {
 				}
 			}
 		} else {
-			if (jobTypeString == null) {
+			if (StringUtils.isBlank(jobTypeString)) {
 				jobType.setTextContent("single");
 			} else {
 				jobType.setTextContent(jobTypeString);

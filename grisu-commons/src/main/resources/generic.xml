@@ -4,6 +4,7 @@
 		<GrisuTemplate xmlns="http://arcs.org.au/jsdl/jsdl-grisu">
 			<Email sendOnJobFinish="XXX_email_on_finish_XXX" sendOnJobStart="XXX_email_on_start_XXX" >XXX_email_address_XXX</Email>
 		</GrisuTemplate>
+		<JobType xmlns="http://arcs.org.au/jsdl/jsdl-grisu">XXX_jobType_XXX</JobType>
 		<PbsDebug xmlns="http://arcs.org.au/jsdl/jsdl-grisu">XXX_pbsDebug_XXX</PbsDebug>
 		XXX_modules_XXX
 		<JobIdentification>
@@ -23,7 +24,7 @@
 			</POSIXApplication>
 			<TotalCPUTime>XXX_walltime_XXX</TotalCPUTime><!-- use this value and divide with no. of cpus to get actual walltime -->
 			<TotalCPUCount><exact>XXX_cpus_XXX</exact></TotalCPUCount>
-			<TotalResourceCount><exact>XXX_hostcount_XXX</exact></TotalResourceCount>
+			<TotalResourceCount><exact>XXX_hostCount_XXX</exact></TotalResourceCount>
 			<TotalPhysicalMemory><LowerBoundedRange>XXX_memory_XXX</LowerBoundedRange></TotalPhysicalMemory>
 		</Application>
 		<Resources>

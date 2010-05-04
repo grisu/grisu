@@ -5,6 +5,7 @@ import java.util.SortedSet;
 import org.netbeans.validation.api.Problems;
 import org.netbeans.validation.api.Validator;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.model.GrisuRegistryManager;
 
 public class JobnameValidator implements Validator {
 
@@ -12,7 +13,6 @@ public class JobnameValidator implements Validator {
 
 	public void setServiceInterface(ServiceInterface si) {
 		this.si = si;
-		System.out.println("ServiceInterface set...");
 	}
 
 	public boolean validate(Problems arg0, String arg1, Object arg2) {
@@ -23,7 +23,8 @@ public class JobnameValidator implements Validator {
 		}
 
 		// TODO: this is not very fast, need to cache it somehow
-		SortedSet<String> allJobnames = si.getAllJobnames(null).asSortedSet();
+		SortedSet<String> allJobnames = GrisuRegistryManager.getDefault(si)
+				.getUserEnvironmentManager().getCurrentJobnames(false);
 
 		if (allJobnames.contains(arg2)) {
 			arg0.add("Jobname " + arg2 + " already exists.");

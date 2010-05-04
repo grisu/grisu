@@ -8,8 +8,9 @@ import javax.swing.JComboBox;
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
 
+import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
-import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
+import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -19,8 +20,10 @@ import com.jgoodies.forms.layout.RowSpec;
 public class MonitorCommandlinePanel extends AbstractInputPanel {
 	private JTextField textField;
 
-	public MonitorCommandlinePanel(PanelConfig config) throws TemplateException {
-		super(config);
+	public MonitorCommandlinePanel(String name, PanelConfig config)
+			throws TemplateException {
+
+		super(name, config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -78,5 +81,11 @@ public class MonitorCommandlinePanel extends AbstractInputPanel {
 	@Override
 	protected void preparePanel(Map<String, String> panelProperties) {
 
+	}
+
+	@Override
+	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
+		// TODO Auto-generated method stub
+		
 	}
 }

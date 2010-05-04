@@ -16,8 +16,9 @@ import javax.swing.text.JTextComponent;
 import org.netbeans.validation.api.Problems;
 import org.netbeans.validation.api.Validator;
 import org.netbeans.validation.api.builtin.Validators;
+import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
-import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
+import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -30,8 +31,9 @@ public class Email extends AbstractInputPanel {
 	private JTextField textField;
 	private final Validator checkBoxValidator;
 
-	public Email(PanelConfig config) throws TemplateException {
-		super(config);
+	public Email(String name, PanelConfig config) throws TemplateException {
+
+		super(name, config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,
@@ -66,7 +68,7 @@ public class Email extends AbstractInputPanel {
 				public void itemStateChanged(ItemEvent arg0) {
 
 					try {
-						setValue("email_on_job_finish", startsCheckBox
+						setValue("email_on_job_finish", chckbxfinishes
 								.isSelected());
 						if (getChckbxfinishes().isSelected()
 								|| getStartsCheckBox().isSelected()) {
@@ -167,6 +169,11 @@ public class Email extends AbstractInputPanel {
 	@Override
 	protected void preparePanel(Map<String, String> panelProperties)
 			throws TemplateException {
+
+	}
+
+	@Override
+	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
 
 	}
 }

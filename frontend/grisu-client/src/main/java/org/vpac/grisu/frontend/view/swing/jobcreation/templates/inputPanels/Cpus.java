@@ -9,8 +9,10 @@ import java.util.Map;
 import javax.swing.JComboBox;
 import javax.swing.text.JTextComponent;
 
+import org.apache.commons.lang.StringUtils;
+import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
-import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
+import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -22,9 +24,9 @@ public class Cpus extends AbstractInputPanel {
 
 	private boolean userInput = true;
 
-	public Cpus(PanelConfig config) throws TemplateException {
+	public Cpus(String name, PanelConfig config) throws TemplateException {
 
-		super(config);
+		super(name, config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(24dlu;default):grow"),
@@ -76,7 +78,7 @@ public class Cpus extends AbstractInputPanel {
 
 	@Override
 	public JComboBox getJComboBox() {
-		return getJComboBox();
+		return getComboBox();
 	}
 
 	@Override
@@ -87,7 +89,15 @@ public class Cpus extends AbstractInputPanel {
 	@Override
 	protected String getValueAsString() {
 
-		return ((Integer) (getComboBox().getSelectedItem())).toString();
+		try {
+			String result = ((Integer) (getComboBox().getSelectedItem()))
+					.toString();
+			return result;
+		} catch (Exception e) {
+			myLogger.debug("Can't get value for panel " + getPanelName() + ": "
+					+ e.getLocalizedMessage());
+			return null;
+		}
 
 	}
 
@@ -107,16 +117,26 @@ public class Cpus extends AbstractInputPanel {
 	@Override
 	protected void preparePanel(Map<String, String> panelProperties) {
 
+		getComboBox().removeAllItems();
+
 		for (String key : panelProperties.keySet()) {
 			try {
-				if (DEFAULT_VALUE.equals(key)) {
-					setValue("cpus", (Integer.parseInt(panelProperties
-							.get(DEFAULT_VALUE))));
-				} else if (PREFILLS.equals(key)) {
+				if (PREFILLS.equals(key)) {
+					userInput = false;
 					for (String item : panelProperties.get(PREFILLS).split(",")) {
 						getComboBox().addItem(Integer.parseInt(item));
 					}
+					userInput = true;
 				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		String def = getDefaultValue();
+		if (StringUtils.isNotBlank(def)) {
+			try {
+				setValue("cpus", Integer.parseInt(def));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -124,4 +144,14 @@ public class Cpus extends AbstractInputPanel {
 
 	}
 
+	@Override
+	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
+
+		if (useHistory()) {
+			if (StringUtils.isNotBlank(getValueAsString())) {
+				addHistoryValue(getValueAsString());
+			}
+		}
+
+	}
 }

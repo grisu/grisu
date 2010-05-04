@@ -1,6 +1,7 @@
 package org.vpac.grisu.frontend.view.swing.jobcreation.templates;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.swing.JPanel;
@@ -10,7 +11,9 @@ import org.netbeans.validation.api.ui.ValidationPanel;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
+import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.model.job.JobObject;
+import org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels.AbstractInputPanel;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
 public class TemplateObject {
@@ -53,6 +56,7 @@ public class TemplateObject {
 	private final ServiceInterface si;
 
 	private JPanel templatePanel;
+	private LinkedHashMap<String, AbstractInputPanel> inputPanels;
 	private ValidationPanel validationPanel;
 
 	// private final Map<String, AbstractInputPanel> panels = new
@@ -66,13 +70,17 @@ public class TemplateObject {
 		changedValues = parseCommandlineTemplate(commandlineTemplate);
 	}
 
-	public JobSubmissionObjectImpl getJobSubmissionObject() {
-		return this.jobObject;
+	public LinkedHashMap<String, AbstractInputPanel> getInputPanels() {
+		return this.inputPanels;
 	}
 
 	// public void registerInputPanel(AbstractInputPanel panel) {
 	// panels.put(panel.getName(), panel);
 	// }
+
+	public JobSubmissionObjectImpl getJobSubmissionObject() {
+		return this.jobObject;
+	}
 
 	public ServiceInterface getServiceInterface() {
 		return this.si;
@@ -88,6 +96,25 @@ public class TemplateObject {
 
 	public ValidationPanel getValidationPanel() {
 		return validationPanel;
+	}
+
+	public void reset() throws TemplateException {
+
+		JobSubmissionObjectImpl newJob = new JobSubmissionObjectImpl();
+		setJobObject(newJob);
+
+		for (AbstractInputPanel panel : getInputPanels().values()) {
+			panel.initPanel(this, null, newJob);
+		}
+
+		userInput(null, null);
+	}
+
+	public void setInputPanels(
+			LinkedHashMap<String, AbstractInputPanel> inputPanels) {
+
+		this.inputPanels = inputPanels;
+
 	}
 
 	public void setJobObject(JobSubmissionObjectImpl job) {

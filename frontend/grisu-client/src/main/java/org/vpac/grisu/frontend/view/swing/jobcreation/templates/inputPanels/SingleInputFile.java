@@ -10,10 +10,11 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.text.JTextComponent;
 
+import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
-import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
 import org.vpac.grisu.model.files.GlazedFile;
+import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -27,8 +28,10 @@ public class SingleInputFile extends AbstractInputPanel {
 
 	private String selectedFile = null;
 
-	public SingleInputFile(PanelConfig config) throws TemplateException {
-		super(config);
+	public SingleInputFile(String name, PanelConfig config)
+			throws TemplateException {
+
+		super(name, config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -47,7 +50,7 @@ public class SingleInputFile extends AbstractInputPanel {
 
 				public void actionPerformed(ActionEvent e) {
 
-					if (si == null) {
+					if (getServiceInterface() == null) {
 						myLogger.error("ServiceInterface not set yet.");
 						return;
 					}
@@ -66,6 +69,8 @@ public class SingleInputFile extends AbstractInputPanel {
 					getComboBox().setSelectedItem(selectedFile);
 
 					addValue("inputFileUrl", selectedFile);
+
+					addHistoryValue(selectedFile);
 
 				}
 			});
@@ -127,6 +132,12 @@ public class SingleInputFile extends AbstractInputPanel {
 
 	@Override
 	protected void preparePanel(Map<String, String> panelProperties) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
 		// TODO Auto-generated method stub
 
 	}

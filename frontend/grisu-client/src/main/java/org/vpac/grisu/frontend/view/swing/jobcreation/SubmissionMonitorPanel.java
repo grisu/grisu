@@ -13,6 +13,7 @@ import javax.swing.SwingUtilities;
 
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
+import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.model.job.JobObject;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -69,6 +70,13 @@ public class SubmissionMonitorPanel extends JPanel implements
 				} else if ("Ok".equals(btnText)) {
 
 					if (templateWrapperPanel != null) {
+
+						try {
+							templateWrapperPanel.resetTemplate();
+						} catch (TemplateException e) {
+							e.printStackTrace();
+						}
+
 						templateWrapperPanel.switchToJobCreationPanel();
 					}
 

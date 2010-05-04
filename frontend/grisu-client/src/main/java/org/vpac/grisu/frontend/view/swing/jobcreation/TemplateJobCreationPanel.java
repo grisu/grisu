@@ -1,21 +1,29 @@
 package org.vpac.grisu.frontend.view.swing.jobcreation;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
-import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateException;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateHelpers;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateObject;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels.AbstractInputPanel;
+import org.vpac.grisu.model.GrisuRegistryManager;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -23,10 +31,21 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class TemplateJobCreationPanel extends JPanel implements
-		JobCreationPanel {
+		JobCreationPanel, PropertyChangeListener {
 
 	public static final String LOADING_PANEL = "loading";
 	public static final String TEMPLATE_PANEL = "template";
+	public static final String ERROR_PANEL = "error";
+
+	public static String getStackTrace(Throwable t) {
+		StringWriter stringWritter = new StringWriter();
+		PrintWriter printWritter = new PrintWriter(stringWritter, true);
+		t.printStackTrace(printWritter);
+		printWritter.flush();
+		stringWritter.flush();
+
+		return stringWritter.toString();
+	}
 
 	private TemplateObject template;
 	private final List<String> lines;
@@ -37,6 +56,11 @@ public class TemplateJobCreationPanel extends JPanel implements
 	private JLabel label;
 	private JPanel currentTemplatePanel;
 	private final String templateFileName;
+	private JPanel errorPanel;
+	private JScrollPane scrollPane;
+	private JTextArea errorTextArea;
+
+	private ServiceInterface si;
 
 	public TemplateJobCreationPanel(String templateFileName, List<String> lines) {
 		this.templateFileName = templateFileName;
@@ -48,6 +72,7 @@ public class TemplateJobCreationPanel extends JPanel implements
 		}
 		setLayout(cardLayout);
 		add(getLoadingPanel(), LOADING_PANEL);
+		add(getErrorPanel(), ERROR_PANEL);
 	}
 
 	public boolean createsBatchJob() {
@@ -56,6 +81,22 @@ public class TemplateJobCreationPanel extends JPanel implements
 
 	public boolean createsSingleJob() {
 		return true;
+	}
+
+	private JPanel getErrorPanel() {
+		if (errorPanel == null) {
+			errorPanel = new JPanel();
+			errorPanel.setLayout(new BorderLayout(0, 0));
+			errorPanel.add(getScrollPane(), BorderLayout.CENTER);
+		}
+		return errorPanel;
+	}
+
+	private JTextArea getErrorTextArea() {
+		if (errorTextArea == null) {
+			errorTextArea = new JTextArea();
+		}
+		return errorTextArea;
 	}
 
 	private JLabel getLabel() {
@@ -92,8 +133,9 @@ public class TemplateJobCreationPanel extends JPanel implements
 	public String getPanelName() {
 
 		if (template == null) {
-			throw new IllegalStateException(
-					"No serviceinterface set yet. Can't determine panel name.");
+			return "Template broken";
+			// throw new IllegalStateException(
+			// "No serviceinterface set yet. Can't determine panel name.");
 		}
 		return template.getTemplateName();
 	}
@@ -104,6 +146,14 @@ public class TemplateJobCreationPanel extends JPanel implements
 			progressBar.setIndeterminate(true);
 		}
 		return progressBar;
+	}
+
+	private JScrollPane getScrollPane() {
+		if (scrollPane == null) {
+			scrollPane = new JScrollPane();
+			scrollPane.setViewportView(getErrorTextArea());
+		}
+		return scrollPane;
 	}
 
 	public String getSupportedApplication() {
@@ -123,12 +173,31 @@ public class TemplateJobCreationPanel extends JPanel implements
 		return "generic";
 	}
 
+	public void propertyChange(PropertyChangeEvent arg0) {
+
+		if (si != null) {
+			if ("localTemplateNames".equals(arg0.getPropertyName())) {
+				if (((List<String>) arg0.getNewValue())
+						.contains(templateFileName)) {
+					setServiceInterface(si);
+				}
+
+			}
+		}
+	}
+
 	public void setServiceInterface(ServiceInterface si) {
+
+		this.si = si;
 
 		try {
 			if (currentTemplatePanel != null) {
 				remove(currentTemplatePanel);
 			}
+
+			GrisuRegistryManager.getDefault(si).getTemplateManager()
+					.addTemplateManagerListener(this);
+
 			template = TemplateHelpers.parseAndCreateTemplatePanel(si,
 					templateFileName, lines);
 			currentTemplatePanel = new TemplateWrapperPanel(template);
@@ -136,7 +205,8 @@ public class TemplateJobCreationPanel extends JPanel implements
 			cardLayout.show(this, TEMPLATE_PANEL);
 		} catch (TemplateException e) {
 			e.printStackTrace();
-			cardLayout.show(this, LOADING_PANEL);
+			getErrorTextArea().setText(getStackTrace(e));
+			cardLayout.show(this, ERROR_PANEL);
 		}
 
 	}

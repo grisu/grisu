@@ -44,7 +44,26 @@ public class SimpleJsdlBuilder {
 
 		for (JobSubmissionProperty jp : JobSubmissionProperty.values()) {
 
-			if (jp.equals(JobSubmissionProperty.SUBMISSIONLOCATION)) {
+			if (jp.equals(JobSubmissionProperty.FORCE_MPI)) {
+
+				Boolean force_MPI = Boolean.parseBoolean(jobProperties.get(jp));
+				if (force_MPI) {
+					jsdlTemplateString = jsdlTemplateString.replaceAll(
+							"XXX_jobType_XXX", "mpi");
+				}
+			} else if (jp.equals(JobSubmissionProperty.FORCE_SINGLE)) {
+
+				if (jp.equals(JobSubmissionProperty.FORCE_SINGLE)) {
+
+					Boolean force_single = Boolean.parseBoolean(jobProperties
+							.get(jp));
+					if (force_single) {
+						jsdlTemplateString = jsdlTemplateString.replaceAll(
+								"XXX_jobType_XXX", "single");
+					}
+				}
+
+			} else if (jp.equals(JobSubmissionProperty.SUBMISSIONLOCATION)) {
 
 				if (jobProperties.get(jp) == null
 						|| jobProperties.get(jp).length() == 0) {
@@ -140,6 +159,9 @@ public class SimpleJsdlBuilder {
 				}
 			}
 		}
+
+		jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_jobType_XXX",
+				"");
 
 		Document result;
 		try {
