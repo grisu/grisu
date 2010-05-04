@@ -76,7 +76,7 @@ public class GT4Submitter extends JobSubmitter {
 		Document output = null;
 		try {
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory
-			.newInstance();
+					.newInstance();
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 			output = docBuilder.newDocument();
 		} catch (ParserConfigurationException e1) {
@@ -130,7 +130,7 @@ public class GT4Submitter extends JobSubmitter {
 		// Add "queue" node
 		// TODO change that once I know how to specify queues in jsdl
 		String[] queues = JsdlHelpers.getCandidateHosts(jsdl);
-		if ( (queues != null) && (queues.length > 0) ) {
+		if ((queues != null) && (queues.length > 0)) {
 			String queue = queues[0];
 			// TODO this
 			// always uses
@@ -145,7 +145,8 @@ public class GT4Submitter extends JobSubmitter {
 				job.appendChild(queue_node);
 			}
 		} else {
-			myLogger.info("Can't parse queues. If that happens when trying to submit a job, it's probably a bug...");
+			myLogger
+					.info("Can't parse queues. If that happens when trying to submit a job, it's probably a bug...");
 		}
 
 		// Add "jobtype" if mpi
@@ -154,14 +155,25 @@ public class GT4Submitter extends JobSubmitter {
 		Element jobType = output.createElement("jobType");
 		String jobTypeString = JsdlHelpers.getArcsJobType(jsdl);
 
+		Element count = output.createElement("count");
+		count.setTextContent(new Integer(processorCount).toString());
+		job.appendChild(count);
+
 		if (processorCount > 1) {
-			Element count = output.createElement("count");
-			count.setTextContent(new Integer(processorCount).toString());
-			job.appendChild(count);
-			if (jobTypeString == null) {
+
+			if ("mpi".equals(jobTypeString)) {
 				jobType.setTextContent("mpi");
 			} else {
-				jobType.setTextContent(jobTypeString);
+				jobType.setTextContent("single");
+
+				int hostCountValue = JsdlHelpers.getResourceCount(jsdl);
+
+				if (hostCountValue > 1) {
+					Element hostCount = output.createElement("hostCount");
+					hostCount.setTextContent(new Integer(hostCountValue)
+							.toString());
+					job.appendChild(hostCount);
+				}
 			}
 		} else {
 			if (jobTypeString == null) {
@@ -179,7 +191,7 @@ public class GT4Submitter extends JobSubmitter {
 		if ((memory != null) && (memory >= 0)) {
 			Element totalMemory = output.createElement("maxMemory");
 			// convert from bytes to mb
-			memory = memory / (1024*1024);
+			memory = memory / (1024 * 1024);
 			totalMemory.setTextContent(memory.toString());
 			job.appendChild(totalMemory);
 		}
@@ -257,66 +269,71 @@ public class GT4Submitter extends JobSubmitter {
 			String application = JsdlHelpers.getApplicationName(jsdl);
 			String version = JsdlHelpers.getApplicationVersion(jsdl);
 			String[] subLocs = JsdlHelpers.getCandidateHosts(jsdl);
-			if ( (subLocs != null) && (subLocs.length > 0) ) {
-				String subLoc =  subLocs[0];
+			if ((subLocs != null) && (subLocs.length > 0)) {
+				String subLoc = subLocs[0];
 
 				if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
 					myLogger
-					.debug("\"generic\" application. Not trying to calculate modules...");
+							.debug("\"generic\" application. Not trying to calculate modules...");
 
 				} else if (StringUtils.isNotBlank(application)
 						&& StringUtils.isNotBlank(version)
 						&& StringUtils.isNotBlank(subLoc)) {
 					// if we know application, version and submissionLocation
 					Map<String, String> appDetails = infoManager
-					.getApplicationDetails(application, version, subLoc);
+							.getApplicationDetails(application, version, subLoc);
 
 					try {
-						modules_string = appDetails.get(Constants.MDS_MODULES_KEY)
-						.split(",");
+						modules_string = appDetails.get(
+								Constants.MDS_MODULES_KEY).split(",");
 
-						if ((modules_string == null) || "".equals(modules_string)) {
+						if ((modules_string == null)
+								|| "".equals(modules_string)) {
 							myLogger
-							.warn("No module for this application/version/submissionLocation found. Submitting nonetheless...");
+									.warn("No module for this application/version/submissionLocation found. Submitting nonetheless...");
 						}
 
 					} catch (Exception e) {
 						myLogger
-						.warn("Could not get module for this application/version/submissionLocation: "
-								+ e.getLocalizedMessage()
-								+ ". Submitting nonetheless...");
+								.warn("Could not get module for this application/version/submissionLocation: "
+										+ e.getLocalizedMessage()
+										+ ". Submitting nonetheless...");
 					}
 
 					// if we know application and submissionlocation but version
 					// doesn't matter
-				} else if ((application != null) && (version == null) && (subLoc != null)) {
+				} else if ((application != null) && (version == null)
+						&& (subLoc != null)) {
 
 					Map<String, String> appDetails = infoManager
-					.getApplicationDetails(application,
-							Constants.NO_VERSION_INDICATOR_STRING, subLoc);
+							.getApplicationDetails(application,
+									Constants.NO_VERSION_INDICATOR_STRING,
+									subLoc);
 
 					try {
-						modules_string = appDetails.get(Constants.MDS_MODULES_KEY)
-						.split(",");
+						modules_string = appDetails.get(
+								Constants.MDS_MODULES_KEY).split(",");
 
-						if ((modules_string == null) || "".equals(modules_string)) {
+						if ((modules_string == null)
+								|| "".equals(modules_string)) {
 							myLogger
-							.warn("No module for this application/submissionLocation found. Submitting nonetheless...");
+									.warn("No module for this application/submissionLocation found. Submitting nonetheless...");
 						}
 
 					} catch (Exception e) {
 						myLogger
-						.warn("Could not get module for this application/submissionLocation: "
-								+ e.getLocalizedMessage()
-								+ ". Submitting nonetheless...");
+								.warn("Could not get module for this application/submissionLocation: "
+										+ e.getLocalizedMessage()
+										+ ". Submitting nonetheless...");
 					}
 
 				} else {
 					throw new RuntimeException(
-					"Can't determine module because either/or application, version submissionLocation are missing.");
+							"Can't determine module because either/or application, version submissionLocation are missing.");
 				}
 			} else {
-				myLogger.info("No submission location specified. If this happens when trying to submit a job, it's probably a bug...");
+				myLogger
+						.info("No submission location specified. If this happens when trying to submit a job, it's probably a bug...");
 			}
 
 			if ((modules_string != null) && (modules_string.length > 0)) {
@@ -342,7 +359,7 @@ public class GT4Submitter extends JobSubmitter {
 
 			if (JsdlHelpers.getSendEmailOnJobStart(jsdl)) {
 				Element emailonexecution = output
-				.createElement("emailonexecution");
+						.createElement("emailonexecution");
 				emailonexecution.setTextContent("yes");
 				extensions.appendChild(emailonexecution);
 			}
@@ -351,7 +368,7 @@ public class GT4Submitter extends JobSubmitter {
 				Element emailonabort = output.createElement("emailonabort");
 				emailonabort.setTextContent("yes");
 				Element emailontermination = output
-				.createElement("emailontermination");
+						.createElement("emailontermination");
 				emailontermination.setTextContent("yes");
 				extensions.appendChild(emailonabort);
 				extensions.appendChild(emailontermination);
@@ -372,7 +389,7 @@ public class GT4Submitter extends JobSubmitter {
 		StreamResult result = null;
 		try {
 			Transformer transformer = TransformerFactory.newInstance()
-			.newTransformer();
+					.newTransformer();
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
 			result = new StreamResult(new StringWriter());
@@ -399,13 +416,12 @@ public class GT4Submitter extends JobSubmitter {
 	private static EndpointReferenceType getFactoryEPR(final String contact,
 			final String factoryType) throws Exception {
 		URL factoryUrl = ManagedJobFactoryClientHelper.getServiceURL(contact)
-		.getURL();
+				.getURL();
 
 		myLogger.debug("Factory Url: " + factoryUrl);
 		return ManagedJobFactoryClientHelper.getFactoryEndpoint(factoryUrl,
 				factoryType);
 	}
-
 
 	// // this method is just for testing. Do not use!!!
 	// protected String submit(String host, String factoryType, Document jsdl,
@@ -478,7 +494,8 @@ public class GT4Submitter extends JobSubmitter {
 	// }
 
 	private final InformationManager informationManager = CachedMdsInformationManager
-	.getDefaultCachedMdsInformationManager(Environment.getVarGrisuDirectory().toString());
+			.getDefaultCachedMdsInformationManager(Environment
+					.getVarGrisuDirectory().toString());
 
 	/*
 	 * (non-Javadoc)
@@ -504,7 +521,7 @@ public class GT4Submitter extends JobSubmitter {
 	@Override
 	public final String getServerEndpoint(final String server) {
 		return "https://" + server
-		+ ":8443/wsrf/services/ManagedJobFactoryService";
+				+ ":8443/wsrf/services/ManagedJobFactoryService";
 
 	}
 
@@ -597,14 +614,15 @@ public class GT4Submitter extends JobSubmitter {
 			try {
 
 				credential = CredentialHelpers
-				.convertByteArrayToGSSCredential(job.getCredential()
-						.getCredentialData());
+						.convertByteArrayToGSSCredential(job.getCredential()
+								.getCredentialData());
 
-				if ((credential == null) || (credential.getRemainingLifetime() < 1)) {
+				if ((credential == null)
+						|| (credential.getRemainingLifetime() < 1)) {
 					throw new NoValidCredentialException(
 							"Credential associated with job: " + job.getDn()
-							+ " / " + job.getJobname()
-							+ " is not valid.");
+									+ " / " + job.getJobname()
+									+ " is not valid.");
 				}
 
 				GramClient gram = new GramClient(credential);
@@ -648,14 +666,14 @@ public class GT4Submitter extends JobSubmitter {
 			String hostname = host.substring(0, host
 					.indexOf(":8443/wsrf/services/ManagedJobFactoryService"));
 			String eprString = "<ns00:EndpointReferenceType xmlns:ns00=\"http://schemas.xmlsoap.org/ws/2004/03/addressing\">\n"
-				+ "<ns00:Address>"
-				+ hostname
-				+ ":8443/wsrf/services/ManagedExecutableJobService</ns00:Address>\n"
-				+ "<ns00:ReferenceProperties><ResourceID xmlns=\"http://www.globus.org/namespaces/2004/10/gram/job\">"
-				+ uid
-				+ "</ResourceID></ns00:ReferenceProperties>\n"
-				+ "<wsa:ReferenceParameters xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/03/addressing\"/>\n"
-				+ "</ns00:EndpointReferenceType>";
+					+ "<ns00:Address>"
+					+ hostname
+					+ ":8443/wsrf/services/ManagedExecutableJobService</ns00:Address>\n"
+					+ "<ns00:ReferenceProperties><ResourceID xmlns=\"http://www.globus.org/namespaces/2004/10/gram/job\">"
+					+ uid
+					+ "</ResourceID></ns00:ReferenceProperties>\n"
+					+ "<wsa:ReferenceParameters xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/03/addressing\"/>\n"
+					+ "</ns00:EndpointReferenceType>";
 			try {
 				myLogger.debug("Writing out epr file.");
 				String vo = job.getFqan();
@@ -666,10 +684,10 @@ public class GT4Submitter extends JobSubmitter {
 				}
 
 				String uFileName = ServerPropertiesManager.getDebugDirectory()
-				+ "/"
-				+ job.getDn().replace("=", "_").replace(",", "_")
-				.replace(" ", "_") + "_" + job.getJobname()
-				+ "_" + vo + "_" + job.hashCode();
+						+ "/"
+						+ job.getDn().replace("=", "_").replace(",", "_")
+								.replace(" ", "_") + "_" + job.getJobname()
+						+ "_" + vo + "_" + job.hashCode();
 				FileWriter fileWriter = new FileWriter(uFileName + ".epr");
 				BufferedWriter buffWriter = new BufferedWriter(fileWriter);
 				buffWriter.write(eprString);
@@ -697,7 +715,7 @@ public class GT4Submitter extends JobSubmitter {
 		}
 
 		myLogger
-		.debug("Submitted rsl job description:\n--------------------------------");
+				.debug("Submitted rsl job description:\n--------------------------------");
 		myLogger.debug(submittedJobDesc);
 
 		return handle;

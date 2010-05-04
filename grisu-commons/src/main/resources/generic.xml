@@ -23,6 +23,7 @@
 			</POSIXApplication>
 			<TotalCPUTime>XXX_walltime_XXX</TotalCPUTime><!-- use this value and divide with no. of cpus to get actual walltime -->
 			<TotalCPUCount><exact>XXX_cpus_XXX</exact></TotalCPUCount>
+			<TotalResourceCount><exact>XXX_hostcount_XXX</exact></TotalResourceCount>
 			<TotalPhysicalMemory><LowerBoundedRange>XXX_memory_XXX</LowerBoundedRange></TotalPhysicalMemory>
 		</Application>
 		<Resources>

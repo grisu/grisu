@@ -89,6 +89,8 @@ public class JobSubmissionObjectImpl {
 
 	private boolean force_mpi = false;
 
+	private int hostcount = 0;
+
 	private long memory_in_bytes = 0;
 
 	private int walltime_in_seconds = 0;
@@ -121,6 +123,7 @@ public class JobSubmissionObjectImpl {
 		email_on_job_start = JsdlHelpers.getSendEmailOnJobStart(jsdl);
 		email_on_job_finish = JsdlHelpers.getSendEmailOnJobFinish(jsdl);
 		cpus = JsdlHelpers.getProcessorCount(jsdl);
+		hostcount = JsdlHelpers.getResourceCount(jsdl);
 		String jobTypeString = JsdlHelpers.getArcsJobType(jsdl);
 		if (jobTypeString != null) {
 			if (jobTypeString.toLowerCase().equals(
@@ -183,6 +186,8 @@ public class JobSubmissionObjectImpl {
 		} catch (NumberFormatException e) {
 			this.cpus = 1;
 		}
+		this.hostcount = Integer.parseInt(jobProperties
+				.get(JobSubmissionProperty.HOSTCOUNT.toString()));
 		this.force_single = checkForBoolean(jobProperties
 				.get(JobSubmissionProperty.FORCE_SINGLE.toString()));
 		this.force_mpi = checkForBoolean(jobProperties
@@ -313,6 +318,10 @@ public class JobSubmissionObjectImpl {
 		return email_address;
 	}
 
+	public Integer getHostCount() {
+		return hostcount;
+	}
+
 	@Id
 	@GeneratedValue
 	private Long getId() {
@@ -394,6 +403,8 @@ public class JobSubmissionObjectImpl {
 				memory_in_bytes).toString());
 		jobProperties.put(JobSubmissionProperty.NO_CPUS, new Integer(cpus)
 				.toString());
+		jobProperties.put(JobSubmissionProperty.HOSTCOUNT, new Integer(
+				getHostCount()).toString());
 		jobProperties.put(JobSubmissionProperty.STDERR, stderr);
 		jobProperties.put(JobSubmissionProperty.STDOUT, stdout);
 		jobProperties.put(JobSubmissionProperty.SUBMISSIONLOCATION,
@@ -539,19 +550,31 @@ public class JobSubmissionObjectImpl {
 	public void setForce_mpi(final Boolean force_mpi) {
 		boolean oldValue = this.force_mpi;
 		boolean oldValue1 = this.force_single;
+		int oldHostCount = this.hostcount;
 		this.force_mpi = force_mpi;
 		this.force_single = !force_mpi;
+		this.hostcount = -1;
 		pcs.firePropertyChange("force_mpi", oldValue, this.force_mpi);
 		pcs.firePropertyChange("force_single", oldValue1, this.force_single);
+		pcs.firePropertyChange("hostCount", oldHostCount, this.hostcount);
 	}
 
 	public void setForce_single(final Boolean force_single) {
 		boolean oldValue = this.force_mpi;
 		boolean oldValue1 = this.force_single;
+		int oldHostCount = this.hostcount;
 		this.force_single = force_single;
 		this.force_mpi = !force_mpi;
+		this.hostcount = 1;
 		pcs.firePropertyChange("force_mpi", oldValue, this.force_mpi);
 		pcs.firePropertyChange("force_single", oldValue1, this.force_single);
+		pcs.firePropertyChange("hostCount", oldHostCount, this.hostcount);
+	}
+
+	public void setHostCount(Integer hc) {
+		int oldHostCount = this.hostcount;
+		this.hostcount = hc;
+		pcs.firePropertyChange("hostCount", oldHostCount, this.hostcount);
 	}
 
 	private void setId(final Long id) {
