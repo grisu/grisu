@@ -147,10 +147,8 @@ public class Cpus extends AbstractInputPanel {
 	@Override
 	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
 
-		if (useHistory()) {
-			if (StringUtils.isNotBlank(getValueAsString())) {
-				addHistoryValue(getValueAsString());
-			}
+		if ( useHistory() ) {
+			addValueToHistory();
 		}
 
 	}

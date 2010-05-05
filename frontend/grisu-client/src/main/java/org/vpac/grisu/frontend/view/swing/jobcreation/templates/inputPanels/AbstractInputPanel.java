@@ -112,19 +112,6 @@ public abstract class AbstractInputPanel extends JPanel implements
 					+ this.panelProperties.get(NAME);
 		}
 
-		if (useHistory()) {
-			if (panelProperties.get(HISTORY_ITEMS) != null) {
-				try {
-					Integer max = Integer.parseInt(panelProperties
-							.get(HISTORY_ITEMS));
-					hm.setMaxNumberOfEntries(historyManagerEntryName, max);
-				} catch (Exception e) {
-					throw new TemplateException(
-							"Can't setup history management for panel "
-									+ getPanelName(), e);
-				}
-			}
-		}
 
 		String title = panelProperties.get(TITLE);
 
@@ -328,23 +315,56 @@ public abstract class AbstractInputPanel extends JPanel implements
 	}
 
 	abstract protected String getValueAsString();
+	
+	public void setServiceInterface(ServiceInterface si) {
+		
+		if (singletonServiceinterface == null) {
+			singletonServiceinterface = si;
+		}
+		this.si = si;
+		this.uem = GrisuRegistryManager.getDefault(si)
+				.getUserEnvironmentManager();
+		this.rjm = RunningJobManager.getDefault(si);
+		this.hm = GrisuRegistryManager.getDefault(si).getHistoryManager();
+		
+	}
 
-	public void initPanel(TemplateObject template, ServiceInterface si,
+	public void initPanel(TemplateObject template,
 			JobSubmissionObjectImpl jobObject) throws TemplateException {
 
+		if ( si == null ) {
+			throw new IllegalStateException("ServiceInterface not set yet.");
+		}
+		
 		this.template = template;
 
-		if (si != null) {
-			// needed for example for the file dialog
-			if (singletonServiceinterface == null) {
-				singletonServiceinterface = si;
+
+//		if (si != null) {
+//			// needed for example for the file dialog
+//			if (singletonServiceinterface == null) {
+//				singletonServiceinterface = si;
+//			}
+//			this.si = si;
+//			this.uem = GrisuRegistryManager.getDefault(si)
+//					.getUserEnvironmentManager();
+//			this.rjm = RunningJobManager.getDefault(si);
+//			this.hm = GrisuRegistryManager.getDefault(si).getHistoryManager();
+			
+			if (useHistory()) {
+				if (StringUtils.isNotBlank(panelProperties.get(HISTORY_ITEMS))) {
+					try {
+						Integer max = Integer.parseInt(panelProperties
+								.get(HISTORY_ITEMS));
+						hm.setMaxNumberOfEntries(historyManagerEntryName, max);
+					} catch (Exception e) {
+						throw new TemplateException(
+								"Can't setup history management for panel "
+										+ getPanelName(), e);
+					}
+				}
 			}
-			this.si = si;
-			this.uem = GrisuRegistryManager.getDefault(si)
-					.getUserEnvironmentManager();
-			this.rjm = RunningJobManager.getDefault(si);
-			this.hm = GrisuRegistryManager.getDefault(si).getHistoryManager();
-		}
+//		}
+
 		refresh(jobObject);
 
 	}

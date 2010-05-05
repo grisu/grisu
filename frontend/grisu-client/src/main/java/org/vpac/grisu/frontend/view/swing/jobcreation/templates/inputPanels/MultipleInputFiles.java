@@ -168,6 +168,9 @@ public class MultipleInputFiles extends AbstractInputPanel {
 
 	@Override
 	protected void preparePanel(Map<String, String> panelProperties) {
+		
+		fileModel.removeAllElements();
+		
 	}
 
 	@Override

@@ -18,6 +18,7 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import javax.swing.JLabel;
 
 public class TemplateWrapperPanel extends JPanel {
 
@@ -32,6 +33,8 @@ public class TemplateWrapperPanel extends JPanel {
 	private final TemplateObject template;
 	private JButton submitButton;
 	private ValidationPanel validationPanel;
+	private JLabel label;
+	private JLabel label_1;
 
 	/**
 	 * Create the panel.
@@ -54,11 +57,12 @@ public class TemplateWrapperPanel extends JPanel {
 				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC, }));
 
-		creationPanel.add(template.getTemplatePanel(), "2, 2, fill, fill");
+		creationPanel.add(template.getTemplatePanel(), "2, 2, 3, 1, fill, fill");
 		if (template.getValidationPanel() != null) {
 			creationPanel
 					.add(template.getValidationPanel(), "2, 4, fill, fill");
 		}
+
 		creationPanel.add(getSubmitButton(), "4, 4, right, default");
 		add(monitorPanel, SUBMISSION_LOG_PANEL);
 

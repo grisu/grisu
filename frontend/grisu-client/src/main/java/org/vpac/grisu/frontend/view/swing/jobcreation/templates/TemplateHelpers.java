@@ -517,7 +517,8 @@ public class TemplateHelpers {
 		template.setJobObject(newJob);
 
 		for (AbstractInputPanel panel : inputPanels.values()) {
-			panel.initPanel(template, si, newJob);
+			panel.setServiceInterface(si);
+			panel.initPanel(template, newJob);
 		}
 
 		JPanel mainPanel = null;

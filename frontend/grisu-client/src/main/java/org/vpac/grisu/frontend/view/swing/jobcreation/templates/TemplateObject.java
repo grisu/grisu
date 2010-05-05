@@ -104,7 +104,7 @@ public class TemplateObject {
 		setJobObject(newJob);
 
 		for (AbstractInputPanel panel : getInputPanels().values()) {
-			panel.initPanel(this, null, newJob);
+			panel.initPanel(this, newJob);
 		}
 
 		userInput(null, null);

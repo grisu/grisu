@@ -148,19 +148,22 @@ public class SimpleCommandline extends AbstractInputPanel {
 
 	@Override
 	protected void preparePanel(Map<String, String> panelProperties) {
-
-		String def = getDefaultValue();
-
-		if (StringUtils.isNotBlank(def)) {
-			getComboBox().setSelectedItem(def);
+		
+		getComboBox().removeAllItems();
+		
+		for ( String value : getHistoryValues() ) {
+			getComboBox().addItem(value);
 		}
-
+		
+		getComboBox().setSelectedItem("");
 	}
 
 	@Override
 	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
-
-		addValueToHistory();
+		
+		if ( useHistory() ) {
+			addValueToHistory();
+		}
 
 	}
 }
