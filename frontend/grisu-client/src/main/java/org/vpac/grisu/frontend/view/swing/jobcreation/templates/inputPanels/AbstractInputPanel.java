@@ -3,11 +3,13 @@ package org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels;
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.swing.JComboBox;
@@ -19,14 +21,17 @@ import javax.swing.text.JTextComponent;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.control.jobMonitoring.RunningJobManager;
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateObject;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.filters.Filter;
+import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
+import org.vpac.grisu.model.files.GlazedFile;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.historyRepeater.HistoryManager;
 
@@ -35,6 +40,8 @@ public abstract class AbstractInputPanel extends JPanel implements
 
 	static final Logger myLogger = Logger.getLogger(AbstractInputPanel.class
 			.getName());
+
+	public static final String FILE_DIALOG_LAST_DIRECTORY_KEY = "lastDirectory";
 
 	public static final String DEFAULT_VALUE = "defaultValue";
 	public static final String NAME = "name";
@@ -55,6 +62,7 @@ public abstract class AbstractInputPanel extends JPanel implements
 
 	private boolean isVisible = true;
 	protected final String bean;
+	protected final String templateName;
 
 	private JobSubmissionObjectImpl jobObject;
 
@@ -66,26 +74,52 @@ public abstract class AbstractInputPanel extends JPanel implements
 	private UserEnvironmentManager uem;
 	private RunningJobManager rjm;
 	private HistoryManager hm;
-	protected static ServiceInterface singletonServiceinterface;
 
-	private static GrisuFileDialog dialog;
+	private static Map<String, GrisuFileDialog> dialogs = new HashMap<String, GrisuFileDialog>();
 
-	public static GrisuFileDialog getFileDialog() {
+	private static void createSingletonFileDialog(ServiceInterface si,
+			String templateName) {
 
-		if (singletonServiceinterface == null) {
-			return null;
-		}
+		if (dialogs.get(templateName) == null) {
+			String startUrl = GrisuRegistryManager
+					.getDefault(si)
+					.getHistoryManager()
+					.getLastEntry(
+							templateName + "_" + FILE_DIALOG_LAST_DIRECTORY_KEY);
 
-		if (dialog == null) {
-			dialog = new GrisuFileDialog(singletonServiceinterface);
+			if (StringUtils.isBlank(startUrl)) {
+				startUrl = new File(System.getProperty("user.home")).toURI()
+						.toString();
+			} else if (!FileManager.isLocal(startUrl)) {
+				try {
+					if (!si.isFolder(startUrl)) {
+						startUrl = new File(System.getProperty("user.home"))
+								.toURI().toString();
+					}
+				} catch (RemoteFileSystemException e) {
+					myLogger.debug(e);
+					startUrl = new File(System.getProperty("user.home"))
+							.toURI().toString();
+				}
+			}
+			GrisuFileDialog dialog = new GrisuFileDialog(si, startUrl);
 			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-
+			dialogs.put(templateName, dialog);
 		}
-		return dialog;
+	}
+
+	public static GrisuFileDialog getFileDialog(String templateName) {
+
+		if (dialogs.get(templateName) == null) {
+			throw new IllegalStateException("File dialog not initialized yet.");
+		}
+		return dialogs.get(templateName);
 	}
 
 	public AbstractInputPanel(String templateName, PanelConfig config)
 			throws TemplateException {
+
+		this.templateName = templateName;
 
 		if ((config == null) || (config.getFilters() == null)) {
 			this.filters = new LinkedList<Filter>();
@@ -111,7 +145,6 @@ public abstract class AbstractInputPanel extends JPanel implements
 			historyManagerEntryName = templateName + "_"
 					+ this.panelProperties.get(NAME);
 		}
-
 
 		String title = panelProperties.get(TITLE);
 
@@ -249,6 +282,10 @@ public abstract class AbstractInputPanel extends JPanel implements
 		return null;
 	}
 
+	public GrisuFileDialog getFileDialog() {
+		return getFileDialog(templateName);
+	}
+
 	protected HistoryManager getHistoryManager() {
 		return this.hm;
 	}
@@ -283,6 +320,10 @@ public abstract class AbstractInputPanel extends JPanel implements
 		}
 	}
 
+	public String getPanelName() {
+		return this.panelProperties.get(NAME);
+	}
+
 	// protected Object getValue(String bean) {
 	// try {
 	// Method method =
@@ -294,10 +335,6 @@ public abstract class AbstractInputPanel extends JPanel implements
 	// return null;
 	// }
 	// }
-
-	public String getPanelName() {
-		return this.panelProperties.get(NAME);
-	}
 
 	protected RunningJobManager getRunningJobManager() {
 
@@ -315,55 +352,41 @@ public abstract class AbstractInputPanel extends JPanel implements
 	}
 
 	abstract protected String getValueAsString();
-	
-	public void setServiceInterface(ServiceInterface si) {
-		
-		if (singletonServiceinterface == null) {
-			singletonServiceinterface = si;
-		}
-		this.si = si;
-		this.uem = GrisuRegistryManager.getDefault(si)
-				.getUserEnvironmentManager();
-		this.rjm = RunningJobManager.getDefault(si);
-		this.hm = GrisuRegistryManager.getDefault(si).getHistoryManager();
-		
-	}
 
 	public void initPanel(TemplateObject template,
 			JobSubmissionObjectImpl jobObject) throws TemplateException {
 
-		if ( si == null ) {
+		if (si == null) {
 			throw new IllegalStateException("ServiceInterface not set yet.");
 		}
-		
+
 		this.template = template;
 
+		// if (si != null) {
+		// // needed for example for the file dialog
+		// if (singletonServiceinterface == null) {
+		// singletonServiceinterface = si;
+		// }
+		// this.si = si;
+		// this.uem = GrisuRegistryManager.getDefault(si)
+		// .getUserEnvironmentManager();
+		// this.rjm = RunningJobManager.getDefault(si);
+		// this.hm = GrisuRegistryManager.getDefault(si).getHistoryManager();
 
-//		if (si != null) {
-//			// needed for example for the file dialog
-//			if (singletonServiceinterface == null) {
-//				singletonServiceinterface = si;
-//			}
-//			this.si = si;
-//			this.uem = GrisuRegistryManager.getDefault(si)
-//					.getUserEnvironmentManager();
-//			this.rjm = RunningJobManager.getDefault(si);
-//			this.hm = GrisuRegistryManager.getDefault(si).getHistoryManager();
-			
-			if (useHistory()) {
-				if (StringUtils.isNotBlank(panelProperties.get(HISTORY_ITEMS))) {
-					try {
-						Integer max = Integer.parseInt(panelProperties
-								.get(HISTORY_ITEMS));
-						hm.setMaxNumberOfEntries(historyManagerEntryName, max);
-					} catch (Exception e) {
-						throw new TemplateException(
-								"Can't setup history management for panel "
-										+ getPanelName(), e);
-					}
+		if (useHistory()) {
+			if (StringUtils.isNotBlank(panelProperties.get(HISTORY_ITEMS))) {
+				try {
+					Integer max = Integer.parseInt(panelProperties
+							.get(HISTORY_ITEMS));
+					hm.setMaxNumberOfEntries(historyManagerEntryName, max);
+				} catch (Exception e) {
+					throw new TemplateException(
+							"Can't setup history management for panel "
+									+ getPanelName(), e);
 				}
 			}
-//		}
+		}
+		// }
 
 		refresh(jobObject);
 
@@ -381,6 +404,36 @@ public abstract class AbstractInputPanel extends JPanel implements
 	 *            the property change event
 	 */
 	abstract protected void jobPropertyChanged(PropertyChangeEvent e);
+
+	protected GlazedFile popupFileDialogAndAskForFile() {
+
+		getFileDialog().setVisible(true);
+
+		GlazedFile file = getFileDialog().getSelectedFile();
+		getFileDialog().clearSelection();
+
+		GlazedFile currentDir = getFileDialog().getCurrentDirectory();
+
+		hm.addHistoryEntry(templateName + "_" + FILE_DIALOG_LAST_DIRECTORY_KEY,
+				currentDir.getUrl());
+
+		return file;
+	}
+
+	protected Set<GlazedFile> popupFileDialogAndAskForFiles() {
+
+		getFileDialog().setVisible(true);
+
+		Set<GlazedFile> files = getFileDialog().getSelectedFiles();
+		getFileDialog().clearSelection();
+
+		GlazedFile currentDir = getFileDialog().getCurrentDirectory();
+
+		hm.addHistoryEntry(templateName + "_" + FILE_DIALOG_LAST_DIRECTORY_KEY,
+				currentDir.getUrl());
+
+		return files;
+	}
 
 	/**
 	 * Implement this if the panel needs to be prepared with values from the
@@ -422,6 +475,18 @@ public abstract class AbstractInputPanel extends JPanel implements
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public void setServiceInterface(ServiceInterface si) {
+
+		createSingletonFileDialog(si, templateName);
+
+		this.si = si;
+		this.uem = GrisuRegistryManager.getDefault(si)
+				.getUserEnvironmentManager();
+		this.rjm = RunningJobManager.getDefault(si);
+		this.hm = GrisuRegistryManager.getDefault(si).getHistoryManager();
+
 	}
 
 	protected void setValue(String bean, Object value) throws TemplateException {

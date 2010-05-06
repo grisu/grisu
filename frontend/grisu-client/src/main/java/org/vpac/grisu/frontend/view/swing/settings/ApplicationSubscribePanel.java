@@ -97,7 +97,7 @@ public class ApplicationSubscribePanel extends JPanel {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(25dlu;default):grow"),
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("max(20dlu;default):grow"),
+				ColumnSpec.decode("max(20dlu;default)"),
 				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(82dlu;default):grow"),
@@ -129,7 +129,7 @@ public class ApplicationSubscribePanel extends JPanel {
 		add(getLblAddLocalApplication(), "2, 16, 7, 1");
 		add(getBtnBrowse(), "4, 18, fill, bottom");
 		add(getScrollPane_2(), "8, 18, 1, 3, fill, fill");
-		add(getBtnRemove(), "4, 20, right, top");
+		add(getBtnRemove(), "4, 20, fill, top");
 
 	}
 

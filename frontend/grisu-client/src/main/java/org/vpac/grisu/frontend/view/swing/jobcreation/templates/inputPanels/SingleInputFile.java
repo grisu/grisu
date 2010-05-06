@@ -56,8 +56,8 @@ public class SingleInputFile extends AbstractInputPanel {
 					}
 					getFileDialog().setVisible(true);
 
-					GlazedFile file = getFileDialog().getSelectedFile();
-					getFileDialog().clearSelection();
+					GlazedFile file = popupFileDialogAndAskForFile();
+
 					if (file == null) {
 						return;
 					}

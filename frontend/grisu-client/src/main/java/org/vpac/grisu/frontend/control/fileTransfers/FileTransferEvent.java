@@ -3,13 +3,13 @@ package org.vpac.grisu.frontend.control.fileTransfers;
 
 public class FileTransferEvent {
 
-	private final FileTransfer fileTransfer;
+	private final FileTransaction fileTransfer;
 
-	public FileTransferEvent(FileTransfer ft) {
+	public FileTransferEvent(FileTransaction ft) {
 		this.fileTransfer = ft;
 	}
 
-	public FileTransfer getFileTransfer() {
+	public FileTransaction getFileTransfer() {
 		return this.fileTransfer;
 	}
 

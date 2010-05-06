@@ -17,6 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -119,6 +120,7 @@ public class TemplateEditPanel extends JPanel implements
 	}
 
 	protected final File currentFile;
+	protected JDialog optionalDialog;
 
 	// private final Action _openAction = new OpenAction();
 
@@ -279,10 +281,14 @@ public class TemplateEditPanel extends JPanel implements
 											currentFile);
 						}
 
+						if (optionalDialog != null) {
+							optionalDialog.dispose();
+						}
+
 					} catch (IOException ioex) {
 						JOptionPane.showMessageDialog(TemplateEditPanel.this,
 								ioex);
-						System.exit(1);
+						// System.exit(1);
 					}
 				}
 			});
@@ -442,6 +448,12 @@ public class TemplateEditPanel extends JPanel implements
 	public void propertyChange(PropertyChangeEvent arg0) {
 
 		setJobDescriptions();
+
+	}
+
+	public void setDialog(JDialog templateEditDialog) {
+
+		this.optionalDialog = templateEditDialog;
 
 	}
 

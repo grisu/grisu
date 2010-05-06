@@ -14,11 +14,13 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.view.swing.files.FileDetailPanel;
 import org.vpac.grisu.frontend.view.swing.files.FileListActionPanel;
 import org.vpac.grisu.frontend.view.swing.files.FileListListener;
 import org.vpac.grisu.frontend.view.swing.files.FileListPanel;
+import org.vpac.grisu.frontend.view.swing.files.FileListPanelContextMenu;
 import org.vpac.grisu.frontend.view.swing.files.FileListPanelPlus;
 import org.vpac.grisu.frontend.view.swing.files.FileListPanelSimple;
 import org.vpac.grisu.model.files.GlazedFile;
@@ -29,7 +31,10 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
-FileListListener {
+		FileListListener {
+
+	static final Logger myLogger = Logger
+			.getLogger(FileListWithPreviewPanel.class.getName());
 
 	public static final String PREVIEW = "Preview";
 	public static final String FILE_LIST = "File list";
@@ -60,8 +65,6 @@ FileListListener {
 	private JLabel label;
 	private JComboBox comboBox;
 
-
-
 	/**
 	 * @wbp.parser.constructor
 	 */
@@ -77,7 +80,8 @@ FileListListener {
 	 * @param displayFileActionPanel
 	 * @param displayFileDetailsPanel
 	 * @param useSplitPane
-	 * @param startWithRightFileList only applies when useSplitPane is true
+	 * @param startWithRightFileList
+	 *            only applies when useSplitPane is true
 	 */
 	public FileListWithPreviewPanel(ServiceInterface si, String rootUrl,
 			String startUrl, boolean useAdvancedFileListPanel,
@@ -96,7 +100,7 @@ FileListListener {
 
 		if (useSplitPane) {
 			add(getSplitPane(), BorderLayout.CENTER);
-			if ( startWithRightFileList ) {
+			if (startWithRightFileList) {
 				getComboBox().setSelectedItem(FILE_LIST);
 			} else {
 				getComboBox().setSelectedItem(PREVIEW);
@@ -118,13 +122,14 @@ FileListListener {
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
 			public void run() {
-				if ( useSplitPane ) {
+				if (useSplitPane) {
 					getComboBox().setSelectedItem(PREVIEW);
 				} else {
 
 					FilePreviewDialog dialog = new FilePreviewDialog(si);
 					dialog.setFile(file, null);
-					dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+					dialog
+							.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 					dialog.setVisible(true);
 				}
 			}
@@ -141,13 +146,14 @@ FileListListener {
 			comboBox.addItemListener(new ItemListener() {
 				public void itemStateChanged(ItemEvent e) {
 
-					if ( ItemEvent.SELECTED == e.getStateChange() ) {
-						setRightPanel((String)comboBox.getSelectedItem());
+					if (ItemEvent.SELECTED == e.getStateChange()) {
+						setRightPanel((String) comboBox.getSelectedItem());
 					}
 
 				}
 			});
-			comboBox.setModel(new DefaultComboBoxModel(new String[] {PREVIEW, FILE_LIST}));
+			comboBox.setModel(new DefaultComboBoxModel(new String[] { PREVIEW,
+					FILE_LIST }));
 		}
 		return comboBox;
 	}
@@ -182,8 +188,7 @@ FileListListener {
 	private FileListPanel getFileListPanel() {
 		if (fileListPanel == null) {
 			if (useFileListPanelPlus) {
-				fileListPanel = new FileListPanelPlus(si, startUrl,
-						true, false);
+				fileListPanel = new FileListPanelPlus(si, startUrl, true, false);
 			} else {
 				fileListPanel = new FileListPanelSimple(si, rootUrl, startUrl,
 						true, false);
@@ -203,10 +208,11 @@ FileListListener {
 	private FileListPanel getFileListPanelRight() {
 		if (fileListPanelRight == null) {
 			if (useFileListPanelPlus) {
-				fileListPanelRight = new FileListPanelPlus(si, startUrl, true, false);
+				fileListPanelRight = new FileListPanelPlus(si, startUrl, true,
+						false);
 			} else {
-				fileListPanelRight = new FileListPanelSimple(si, rootUrl, startUrl,
-						true, false);
+				fileListPanelRight = new FileListPanelSimple(si, rootUrl,
+						startUrl, true, false);
 			}
 
 		}
@@ -226,7 +232,7 @@ FileListListener {
 
 	public JPanel getRightCardPanel() {
 
-		if ( rightCardPanel == null ) {
+		if (rightCardPanel == null) {
 
 			rightCardPanel = new JPanel();
 			rightCardPanel.setLayout(new CardLayout());
@@ -236,14 +242,15 @@ FileListListener {
 		return rightCardPanel;
 	}
 
-
 	private JPanel getRightFileListWrapperPanel() {
 
-		if ( rightFileListWrapperPanel == null ) {
+		if (rightFileListWrapperPanel == null) {
 			rightFileListWrapperPanel = new JPanel();
 			rightFileListWrapperPanel.setLayout(new BorderLayout());
-			rightFileListWrapperPanel.add(getFileListActionPanelRight(), BorderLayout.NORTH);
-			rightFileListWrapperPanel.add(getFileListPanelRight().getPanel(), BorderLayout.CENTER);
+			rightFileListWrapperPanel.add(getFileListActionPanelRight(),
+					BorderLayout.NORTH);
+			rightFileListWrapperPanel.add(getFileListPanelRight().getPanel(),
+					BorderLayout.CENTER);
 		}
 		return rightFileListWrapperPanel;
 
@@ -251,14 +258,13 @@ FileListListener {
 
 	private JPanel getRightPanel() {
 
-		if ( rightPanel == null ) {
+		if (rightPanel == null) {
 			rightPanel = new JPanel();
-			rightPanel.setLayout(new FormLayout(new ColumnSpec[] {
-					ColumnSpec.decode("default:grow"),},
-					new RowSpec[] {
+			rightPanel.setLayout(new FormLayout(new ColumnSpec[] { ColumnSpec
+					.decode("default:grow"), }, new RowSpec[] {
 					RowSpec.decode("default:grow"),
 					FormFactory.RELATED_GAP_ROWSPEC,
-					FormFactory.DEFAULT_ROWSPEC,}));
+					FormFactory.DEFAULT_ROWSPEC, }));
 			rightPanel.add(getRightCardPanel(), "1, 1, fill, fill");
 			rightPanel.add(getComboBox(), "1, 3, right, default");
 		}
@@ -290,7 +296,7 @@ FileListListener {
 			splitPane.setOrientation(splitOrientation);
 			splitPane.setRightComponent(getRightPanel());
 			splitPane.setLeftComponent(getRootPanel());
-			//			splitPane.setDividerLocation(340 + splitPane.getInsets().left);
+			// splitPane.setDividerLocation(340 + splitPane.getInsets().left);
 		}
 		return splitPane;
 	}
@@ -305,6 +311,15 @@ FileListListener {
 	public void removeFileListListener(FileListListener l) {
 		getFileListPanel().removeFileListListener(l);
 	}
+
+	public void setContextMenu(FileListPanelContextMenu menu) {
+
+		myLogger
+				.warn("Setting of context-menu for FileListWithPreviewPanel not supported for right panel...");
+		getFileListPanel().setContextMenu(menu);
+
+	}
+
 	public void setCurrentUrl(String url) {
 
 		getFileListPanel().setCurrentUrl(url);
@@ -312,12 +327,13 @@ FileListListener {
 
 	private void setRightPanel(String panel) {
 
-		if ( PREVIEW.equals(panel) || FILE_LIST.equals(panel) ) {
-			CardLayout cl = (CardLayout)(getRightCardPanel().getLayout());
+		if (PREVIEW.equals(panel) || FILE_LIST.equals(panel)) {
+			CardLayout cl = (CardLayout) (getRightCardPanel().getLayout());
 			cl.show(getRightCardPanel(), panel);
 		}
 
 	}
+
 	public void setRootUrl(String url) {
 
 		getFileListPanel().setRootUrl(url);

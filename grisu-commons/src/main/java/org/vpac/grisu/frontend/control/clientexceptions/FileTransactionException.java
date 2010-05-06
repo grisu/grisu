@@ -1,12 +1,12 @@
 package org.vpac.grisu.frontend.control.clientexceptions;
 
-public class FileTransferException extends Exception {
+public class FileTransactionException extends Exception {
 
 	private final String sourceFileUrl;
 
 	private final String targetFileUrl;
 
-	public FileTransferException(final String sourceFileUrl,
+	public FileTransactionException(final String sourceFileUrl,
 			final String targetFileUrl, final String message,
 			final Throwable cause) {
 		super(message, cause);

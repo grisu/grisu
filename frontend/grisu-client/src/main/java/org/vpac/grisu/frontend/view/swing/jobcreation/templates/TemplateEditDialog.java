@@ -54,6 +54,7 @@ public class TemplateEditDialog extends JDialog {
 		{
 			TemplateEditPanel templateEditPanel = new TemplateEditPanel(si,
 					templateFile);
+			templateEditPanel.setDialog(this);
 			contentPanel.add(templateEditPanel, BorderLayout.CENTER);
 		}
 	}

@@ -30,13 +30,13 @@ public class GrisuFileDialog extends JDialog implements FileListListener {
 			si = LoginManager.login();
 
 			System.out.println("Creating dialog.");
-			GrisuFileDialog dialog = new GrisuFileDialog(si);
+			GrisuFileDialog dialog = new GrisuFileDialog(si, null);
 			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			System.out.println("Created dialog. Setting visible.");
 			dialog.setVisible(true);
 
-			for ( GlazedFile file : dialog.getSelectedFiles() ) {
-				System.out.println("File: "+file.getUrl());
+			for (GlazedFile file : dialog.getSelectedFiles()) {
+				System.out.println("File: " + file.getUrl());
 			}
 
 			dialog.dispose();
@@ -58,11 +58,13 @@ public class GrisuFileDialog extends JDialog implements FileListListener {
 
 	private GlazedFile selectedFile = null;
 	private final ServiceInterface si;
+	private final String startUrl;
 
 	/**
 	 * Create the dialog.
 	 */
-	public GrisuFileDialog(ServiceInterface si) {
+	public GrisuFileDialog(ServiceInterface si, String startUrl) {
+		this.startUrl = startUrl;
 		setModal(true);
 		this.si = si;
 		setBounds(100, 100, 450, 300);
@@ -92,13 +94,14 @@ public class GrisuFileDialog extends JDialog implements FileListListener {
 
 	public void filesSelected(Set<GlazedFile> files) {
 		try {
-			System.out.println("File selected: "+files.iterator().next().getUrl());
+			System.out.println("File selected: "
+					+ files.iterator().next().getUrl());
 		} catch (Exception e) {
 		}
 	}
 
 	protected JButton getCancelButton() {
-		if ( cancelButton == null ) {
+		if (cancelButton == null) {
 			cancelButton = new JButton("Cancel");
 			cancelButton.setActionCommand("Cancel");
 			cancelButton.addActionListener(new ActionListener() {
@@ -113,16 +116,21 @@ public class GrisuFileDialog extends JDialog implements FileListListener {
 		return cancelButton;
 	}
 
+	public GlazedFile getCurrentDirectory() {
+
+		return getFileListPanel().getCurrentDirectory();
+	}
+
 	protected FileListPanelPlus getFileListPanel() {
-		if ( fileListPanel == null ) {
-			fileListPanel = new FileListPanelPlus(si, null, true, true);
+		if (fileListPanel == null) {
+			fileListPanel = new FileListPanelPlus(si, startUrl, true, true);
 			fileListPanel.addFileListListener(this);
 		}
 		return fileListPanel;
 	}
 
 	protected JButton getOkButton() {
-		if ( okButton == null ) {
+		if (okButton == null) {
 			okButton = new JButton("OK");
 			okButton.setActionCommand("OK");
 			okButton.addActionListener(new ActionListener() {

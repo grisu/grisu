@@ -63,10 +63,9 @@ public class MultipleInputFiles extends AbstractInputPanel {
 						myLogger.error("ServiceInterface not set yet.");
 						return;
 					}
-					getFileDialog().setVisible(true);
 
-					Set<GlazedFile> files = getFileDialog().getSelectedFiles();
-					getFileDialog().clearSelection();
+					Set<GlazedFile> files = popupFileDialogAndAskForFiles();
+
 					if (files == null) {
 						return;
 					}
@@ -168,14 +167,14 @@ public class MultipleInputFiles extends AbstractInputPanel {
 
 	@Override
 	protected void preparePanel(Map<String, String> panelProperties) {
-		
+
 		fileModel.removeAllElements();
-		
+
 	}
 
 	@Override
 	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

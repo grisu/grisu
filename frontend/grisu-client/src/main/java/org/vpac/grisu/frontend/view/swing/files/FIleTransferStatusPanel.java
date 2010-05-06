@@ -9,7 +9,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import org.vpac.grisu.frontend.control.fileTransfers.FileTransfer;
+import org.vpac.grisu.frontend.control.fileTransfers.FileTransaction;
 import org.vpac.grisu.model.FileManager;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -23,12 +23,12 @@ public class FIleTransferStatusPanel extends JPanel implements PropertyChangeLis
 	private JLabel statusLabel;
 	private JTextField textField;
 
-	private final FileTransfer fileTransfer;
+	private final FileTransaction fileTransfer;
 
 	/**
 	 * Create the panel.
 	 */
-	public FIleTransferStatusPanel(FileTransfer ft) {
+	public FIleTransferStatusPanel(FileTransaction ft) {
 		this.fileTransfer = ft;
 		this.fileTransfer.addPropertyChangeListener(this);
 		setLayout(new FormLayout(new ColumnSpec[] {
@@ -80,9 +80,9 @@ public class FIleTransferStatusPanel extends JPanel implements PropertyChangeLis
 	public void propertyChange(PropertyChangeEvent evt) {
 
 		if ( "status".equals(evt.getPropertyName()) ) {
-			FileTransfer.Status status = (FileTransfer.Status)evt.getNewValue();
+			FileTransaction.Status status = (FileTransaction.Status)evt.getNewValue();
 			getTextField().setText(status.toString());
-			if ( FileTransfer.Status.FINISHED.equals(status) || FileTransfer.Status.FAILED.equals(status) ) {
+			if ( FileTransaction.Status.FINISHED.equals(status) || FileTransaction.Status.FAILED.equals(status) ) {
 				getProgressBar().setIndeterminate(false);
 				getProgressBar().setValue(getProgressBar().getMaximum());
 			}

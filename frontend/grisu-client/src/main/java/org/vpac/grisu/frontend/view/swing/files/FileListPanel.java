@@ -20,6 +20,8 @@ public interface FileListPanel {
 
 	public void removeFileListListener(FileListListener l);
 
+	public void setContextMenu(FileListPanelContextMenu menu);
+
 	public void setCurrentUrl(String url);
 
 	public void setRootUrl(String url);

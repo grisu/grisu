@@ -188,6 +188,11 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 		getFileListPanel().removeFileListListener(l);
 	}
 
+	public void setContextMenu(FileListPanelContextMenu menu) {
+
+		getFileListPanel().setContextMenu(menu);
+	}
+
 	public void setCurrentUrl(String url) {
 
 		getFileListPanel().setCurrentUrl(url);

@@ -19,9 +19,9 @@ import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
-import org.vpac.grisu.frontend.control.fileTransfers.FileTransfer;
-import org.vpac.grisu.frontend.control.fileTransfers.FileTransferManager;
+import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
+import org.vpac.grisu.frontend.control.fileTransfers.FileTransaction;
+import org.vpac.grisu.frontend.control.fileTransfers.FileTransactionManager;
 import org.vpac.grisu.frontend.model.events.JobKilledEvent;
 import org.vpac.grisu.frontend.model.events.JobStatusEvent;
 import org.vpac.grisu.frontend.model.events.NewJobEvent;
@@ -771,11 +771,11 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 * Normally you don't have to call this method manually, it gets called just
 	 * before job submission automatically.
 	 * 
-	 * @throws FileTransferException
+	 * @throws FileTransactionException
 	 *             if a file can't be staged in
 	 * @throws InterruptedException
 	 */
-	public final void stageFiles() throws FileTransferException,
+	public final void stageFiles() throws FileTransactionException,
 			InterruptedException {
 
 		addJobLogMessage("Staging in files...");
@@ -793,10 +793,10 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			}
 		}
 
-		FileTransferManager ftm = FileTransferManager
+		FileTransactionManager ftm = FileTransactionManager
 				.getDefault(serviceInterface);
 
-		FileTransfer fileTransfer = ftm.addJobInputFileTransfer(localFiles,
+		FileTransaction fileTransfer = ftm.addJobInputFileTransfer(localFiles,
 				this);
 		try {
 			fileTransfer.join();
@@ -806,17 +806,17 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			if (fileTransfer.getException() != null) {
 				throw fileTransfer.getException();
 			} else {
-				throw new FileTransferException(fileTransfer
+				throw new FileTransactionException(fileTransfer
 						.getFailedSourceFile(), jobDirectory,
 						"File staging failed.", null);
 			}
 		}
 
-		if (!FileTransfer.Status.FINISHED.equals(fileTransfer.getStatus())) {
+		if (!FileTransaction.Status.FINISHED.equals(fileTransfer.getStatus())) {
 			if (fileTransfer.getException() != null) {
 				throw fileTransfer.getException();
 			} else {
-				throw new FileTransferException(fileTransfer
+				throw new FileTransactionException(fileTransfer
 						.getFailedSourceFile(), jobDirectory,
 						"File staging failed.", null);
 			}
@@ -866,7 +866,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 
 		try {
 			stageFiles();
-		} catch (FileTransferException e) {
+		} catch (FileTransactionException e) {
 			throw new JobSubmissionException("Could not stage in file.", e);
 		}
 

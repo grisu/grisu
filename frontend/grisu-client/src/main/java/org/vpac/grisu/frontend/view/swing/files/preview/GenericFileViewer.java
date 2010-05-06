@@ -14,7 +14,7 @@ import net.sf.jmimemagic.MagicMatch;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
+import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
 import org.vpac.grisu.frontend.view.swing.files.FileListListener;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -206,7 +206,7 @@ FileListListener {
 
 			} catch (RemoteFileSystemException e) {
 				e.printStackTrace();
-			} catch (FileTransferException e) {
+			} catch (FileTransactionException e) {
 				e.printStackTrace();
 			}
 		}

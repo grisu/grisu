@@ -35,7 +35,7 @@ import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
+import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
 import org.vpac.grisu.frontend.control.jobMonitoring.RunningJobManager;
 import org.vpac.grisu.frontend.model.events.BatchJobEvent;
 import org.vpac.grisu.frontend.model.events.BatchJobKilledEvent;
@@ -358,7 +358,7 @@ Comparable<BatchJobObject> {
 	 *            belongs to (true) or not (false)
 	 * @throws RemoteFileSystemException
 	 *             if a remote filetransfer fails
-	 * @throws FileTransferException
+	 * @throws FileTransactionException
 	 *             if a filetransfer fails
 	 * @throws IOException
 	 *             if a file can't be saved
@@ -366,7 +366,7 @@ Comparable<BatchJobObject> {
 	public void downloadResults(boolean onlyDownloadWhenFinished,
 			File parentFolder, String[] patterns,
 			boolean createSeperateFoldersForEveryJob, boolean prefixWithJobname)
-	throws RemoteFileSystemException, FileTransferException,
+	throws RemoteFileSystemException, FileTransactionException,
 	IOException {
 
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
@@ -2020,7 +2020,7 @@ Comparable<BatchJobObject> {
 						} catch (InterruptedException e) {
 							executor.shutdownNow();
 						}
-					} catch (FileTransferException e) {
+					} catch (FileTransactionException e) {
 						exceptions.add(e);
 						executor.shutdownNow();
 					}

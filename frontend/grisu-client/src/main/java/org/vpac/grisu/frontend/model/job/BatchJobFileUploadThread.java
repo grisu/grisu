@@ -7,7 +7,7 @@ import javax.activation.DataHandler;
 
 import org.bushe.swing.event.EventBus;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.frontend.control.clientexceptions.FileTransferException;
+import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
 import org.vpac.grisu.frontend.model.events.BatchJobEvent;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.status.StatusObject;
@@ -63,7 +63,7 @@ public class BatchJobFileUploadThread extends Thread {
 				}
 
 				if (status.getStatus().isFailed()) {
-					throw new FileTransferException(inputFile, batchJob
+					throw new FileTransactionException(inputFile, batchJob
 							.getInputFiles().get(inputFile),
 							"Error when trying to upload input file.", null);
 				}
