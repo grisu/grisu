@@ -203,7 +203,7 @@ public class TemplateJobCreationPanel extends JPanel implements
 			currentTemplatePanel = new TemplateWrapperPanel(template);
 			add(currentTemplatePanel, TEMPLATE_PANEL);
 			cardLayout.show(this, TEMPLATE_PANEL);
-		} catch (TemplateException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			getErrorTextArea().setText(getStackTrace(e));
 			cardLayout.show(this, ERROR_PANEL);

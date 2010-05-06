@@ -285,7 +285,7 @@ public class TemplateEditPanel extends JPanel implements
 							optionalDialog.dispose();
 						}
 
-					} catch (IOException ioex) {
+					} catch (Exception ioex) {
 						JOptionPane.showMessageDialog(TemplateEditPanel.this,
 								ioex);
 						// System.exit(1);

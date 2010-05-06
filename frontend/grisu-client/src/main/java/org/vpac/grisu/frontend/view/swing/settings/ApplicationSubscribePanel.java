@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
@@ -18,6 +19,9 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.derby.iapi.util.StringUtil;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.TemplateManager;
@@ -85,6 +89,7 @@ public class ApplicationSubscribePanel extends JPanel {
 	private JPopupMenu popupMenu;
 	private JMenuItem editItem;
 	private JMenuItem renaneMenuItem;
+	private JMenuItem copyMenuItem;
 	private JMenuItem deleteMenuItem;
 	private JButton createFromTemplate;
 	private JLabel lblCreate;
@@ -124,7 +129,7 @@ public class ApplicationSubscribePanel extends JPanel {
 		add(getLblAddLocalApplication(), "8, 8, right, bottom");
 		add(getLblCreate(), "2, 10, default, top");
 		add(getScrollPane_2(), "4, 10, 5, 5, fill, fill");
-		add(getRemoteToLocalButton(), "2, 12, fill, top");
+		add(getNewTemplateButton(), "2, 12, fill, top");
 		add(getCreateFromTemplate(), "2, 14, fill, top");
 
 	}
@@ -178,6 +183,66 @@ public class ApplicationSubscribePanel extends JPanel {
 	private JButton getCreateFromTemplate() {
 		if (createFromTemplate == null) {
 			createFromTemplate = new JButton("from existing");
+			createFromTemplate.addActionListener(new ActionListener() {
+				
+				public void actionPerformed(ActionEvent arg0) {
+
+					String[] possibilities = tm.getRemoteTemplateNames();
+					String s = (String)JOptionPane.showInputDialog(
+					                    SwingUtilities.getRoot(ApplicationSubscribePanel.this),
+					                    "Please select the remote template to use:",
+					                    "Create new template",
+					                    JOptionPane.PLAIN_MESSAGE,
+					                    null,
+					                    possibilities,
+					                    null);
+
+					List<String> temp = null;
+					try {
+						temp = tm.getRemoteTemplate(s);
+					} catch (NoSuchTemplateException e) {
+						throw new RuntimeException(e);
+					}
+
+					String tempname = (String)JOptionPane.showInputDialog(
+		                    SwingUtilities.getRoot(ApplicationSubscribePanel.this),
+		                    "Please provide the name of the new template.\nA template with the same name will be overwritten.",
+		                    "Create new template",
+		                    JOptionPane.PLAIN_MESSAGE,
+		                    null,
+		                    null,
+		                    "");
+					
+					if ( StringUtils.isBlank(tempname) ) {
+						return;
+					}
+					
+					File file = new File(Environment.getTemplateDirectory(), tempname+".template");
+					
+					if ( file.exists() ) {
+						file.delete();
+					}
+					
+					try {
+						FileUtils.writeLines(file, temp);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+					
+					try {
+						TemplateEditDialog dialog = new TemplateEditDialog(
+								si, file);
+						dialog.setVisible(true);
+						if ( !localModel.contains(tempname) ) {
+							localModel.addElement(tempname);
+						}
+					} catch (TemplateException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+				}
+			});
 		}
 		return createFromTemplate;
 	}
@@ -198,10 +263,9 @@ public class ApplicationSubscribePanel extends JPanel {
 					}
 
 					for (Object name : getLocalList().getSelectedValues()) {
-						File templateFile = new File(Environment
-								.getTemplateDirectory(), (String) name
-								+ ".template");
-						templateFile.delete();
+						
+						tm.removeLocalApplication((String)name);
+						localModel.removeElement(name);
 					}
 				}
 			});
@@ -285,6 +349,7 @@ public class ApplicationSubscribePanel extends JPanel {
 			popupMenu.add(getEditItem());
 			popupMenu.add(getRenaneMenuItem());
 			popupMenu.add(getDeleteMenuItem());
+			popupMenu.add(getCopyMenuItem());
 		}
 		return popupMenu;
 	}
@@ -296,23 +361,50 @@ public class ApplicationSubscribePanel extends JPanel {
 		return remoteApplicationList;
 	}
 
-	private JButton getRemoteToLocalButton() {
+	private JButton getNewTemplateButton() {
 		if (remoteToLocalButton == null) {
 			remoteToLocalButton = new JButton("new");
 			remoteToLocalButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 
-					for (Object o : getMyRemoveApplicationList()
-							.getSelectedValues()) {
-						String name = (String) o;
-						try {
-							String newName = tm
-									.copyTemplateToLocalTemplateStore(name);
-							localModel.addElement(newName);
-						} catch (NoSuchTemplateException e) {
-							e.printStackTrace();
-						}
+					String s = (String)JOptionPane.showInputDialog(
+		                    SwingUtilities.getRoot(ApplicationSubscribePanel.this),
+		                    "Please provide the name of the new template.\nA template with the same name will be overwritten.",
+		                    "Create new template",
+		                    JOptionPane.PLAIN_MESSAGE,
+		                    null,
+		                    null,
+		                    "");
+					
+					if ( StringUtils.isBlank(s) ) {
+						return;
 					}
+					
+					File file = new File(Environment.getTemplateDirectory(), s+".template");
+					
+					if ( file.exists() ) {
+						file.delete();
+					}
+					
+					try {
+						file.createNewFile();
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+					
+					try {
+						TemplateEditDialog dialog = new TemplateEditDialog(
+								si, file);
+						dialog.setVisible(true);
+
+						if ( !localModel.contains(s) ) {
+							localModel.addElement(s);
+						}
+					} catch (TemplateException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
 
 				}
 			});
@@ -323,8 +415,90 @@ public class ApplicationSubscribePanel extends JPanel {
 	private JMenuItem getRenaneMenuItem() {
 		if (renaneMenuItem == null) {
 			renaneMenuItem = new JMenuItem("Rename");
+			renaneMenuItem.addActionListener(new ActionListener() {
+				
+				public void actionPerformed(ActionEvent arg0) {
+
+					Object[] temp = getLocalList().getSelectedValues();
+					if ( temp.length != 1 ) {
+						return;
+					}
+					
+					String s = (String)JOptionPane.showInputDialog(
+		                    SwingUtilities.getRoot(ApplicationSubscribePanel.this),
+		                    "Please provide the new name of the template.\nA template with the same name will be overwritten.",
+		                    "Rename template",
+		                    JOptionPane.PLAIN_MESSAGE,
+		                    null,
+		                    null,
+		                    "");
+					
+					if ( StringUtils.isBlank(s) ) {
+						return;
+					}
+					
+					File oldfile = new File(Environment.getTemplateDirectory(), (String)temp[0]+".template");
+					File newFile = new File(Environment.getTemplateDirectory(), s+".template");
+					
+					try {
+						FileUtils.moveFile(oldfile, newFile);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+					tm.removeLocalApplication((String)temp[0]);
+					localModel.removeElement(s);
+					tm.addLocalTemplate(newFile);
+					if ( !localModel.contains(s) ) {
+						localModel.addElement(s);
+					}
+
+				}
+			});
 		}
 		return renaneMenuItem;
+	}
+	
+	private JMenuItem getCopyMenuItem() {
+		if (copyMenuItem == null) {
+			copyMenuItem = new JMenuItem("Copy");
+			copyMenuItem.addActionListener(new ActionListener() {
+				
+				public void actionPerformed(ActionEvent arg0) {
+
+					Object[] temp = getLocalList().getSelectedValues();
+					if ( temp.length != 1 ) {
+						return;
+					}
+					
+					String s = (String)JOptionPane.showInputDialog(
+		                    SwingUtilities.getRoot(ApplicationSubscribePanel.this),
+		                    "Please provide the name of the new template.\nA template with the same name will be overwritten.",
+		                    "Copy template",
+		                    JOptionPane.PLAIN_MESSAGE,
+		                    null,
+		                    null,
+		                    "");
+					
+					if ( StringUtils.isBlank(s) ) {
+						return;
+					}
+					
+					File oldfile = new File(Environment.getTemplateDirectory(), (String)temp[0]+".template");
+					File newFile = new File(Environment.getTemplateDirectory(), s+".template");
+					
+					try {
+						FileUtils.copyFile(oldfile, newFile);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+					tm.addLocalTemplate(newFile);
+					if ( !localModel.contains(s) ) {
+						localModel.addElement(s);
+					}
+				}
+			});
+		}
+		return copyMenuItem;
 	}
 
 	private JScrollPane getScrollPane() {
