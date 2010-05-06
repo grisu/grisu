@@ -54,7 +54,6 @@ public class SingleInputFile extends AbstractInputPanel {
 						myLogger.error("ServiceInterface not set yet.");
 						return;
 					}
-					getFileDialog().setVisible(true);
 
 					GlazedFile file = popupFileDialogAndAskForFile();
 

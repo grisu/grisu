@@ -1,6 +1,5 @@
 package org.vpac.grisu.frontend.view.swing.settings;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -10,14 +9,14 @@ import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
+import javax.swing.SwingUtilities;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
@@ -39,8 +38,8 @@ public class ApplicationSubscribePanel extends JPanel {
 	static final Logger myLogger = Logger
 			.getLogger(ApplicationSubscribePanel.class.getName());
 
-	private static void addPopup(Component component, final JPopupMenu popup) {
-		component.addMouseListener(new MouseAdapter() {
+	private static void addPopup(JList list, final JPopupMenu popup) {
+		list.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				if (e.isPopupTrigger()) {
@@ -51,11 +50,13 @@ public class ApplicationSubscribePanel extends JPanel {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				if (e.isPopupTrigger()) {
+
 					showMenu(e);
 				}
 			}
 
 			private void showMenu(MouseEvent e) {
+
 				popup.show(e.getComponent(), e.getX(), e.getY());
 			}
 		});
@@ -69,14 +70,9 @@ public class ApplicationSubscribePanel extends JPanel {
 	private JList remoteApplicationList;
 	private JScrollPane scrollPane_1;
 	private JLabel lblAddLocalApplication;
-	private JButton btnBrowse;
 	private JScrollPane scrollPane_2;
-	private JButton btnRemove;
 	private JList myRemoveApplicationList;
 	private JList localApplicationList;
-	private JSeparator separator;
-
-	private JSeparator separator_1;
 	private final DefaultListModel remoteModel = new DefaultListModel();
 	private final DefaultListModel myRemoteModel = new DefaultListModel();
 
@@ -88,6 +84,10 @@ public class ApplicationSubscribePanel extends JPanel {
 
 	private JPopupMenu popupMenu;
 	private JMenuItem editItem;
+	private JMenuItem renaneMenuItem;
+	private JMenuItem deleteMenuItem;
+	private JButton createFromTemplate;
+	private JLabel lblCreate;
 
 	/**
 	 * Create the panel.
@@ -95,7 +95,7 @@ public class ApplicationSubscribePanel extends JPanel {
 	public ApplicationSubscribePanel() {
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("max(25dlu;default):grow"),
+				ColumnSpec.decode("max(25dlu;default)"),
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(20dlu;default)"),
 				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
@@ -103,75 +103,30 @@ public class ApplicationSubscribePanel extends JPanel {
 				ColumnSpec.decode("max(82dlu;default):grow"),
 				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("max(34dlu;default):grow"),
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("max(41dlu;default):grow"),
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("default:grow"),
+				RowSpec.decode("max(19dlu;default)"),
+				FormFactory.RELATED_GAP_ROWSPEC,
+				RowSpec.decode("max(19dlu;default)"),
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
 				FormFactory.RELATED_GAP_ROWSPEC, }));
-		add(getLabel_1(), "8, 2");
-		add(getSeparator_1(), "2, 4, 7, 1");
-		add(getLblRemoteApplications(), "2, 6, 3, 1");
-		add(getScrollPane(), "2, 8, 3, 5, fill, fill");
-		add(getButton(), "6, 8, default, bottom");
-		add(getScrollPane_1(), "8, 8, 1, 3, fill, fill");
-		add(getButton_1(), "6, 10, 1, 3, default, top");
-		add(getRemoteToLocalButton(), "8, 12, center, default");
-		add(getSeparator(), "2, 14, 7, 1");
-		add(getLblAddLocalApplication(), "2, 16, 7, 1");
-		add(getBtnBrowse(), "4, 18, fill, bottom");
-		add(getScrollPane_2(), "8, 18, 1, 3, fill, fill");
-		add(getBtnRemove(), "4, 20, fill, top");
+		add(getLblRemoteApplications(), "2, 2, 5, 1");
+		add(getLabel_1(), "8, 2, right, default");
+		add(getScrollPane(), "2, 4, 3, 3, fill, fill");
+		add(getButton(), "6, 4, default, bottom");
+		add(getScrollPane_1(), "8, 4, 1, 3, fill, fill");
+		add(getButton_1(), "6, 5, 1, 3, default, top");
+		add(getLblAddLocalApplication(), "8, 8, right, bottom");
+		add(getLblCreate(), "2, 10, default, top");
+		add(getScrollPane_2(), "4, 10, 5, 5, fill, fill");
+		add(getRemoteToLocalButton(), "2, 12, fill, top");
+		add(getCreateFromTemplate(), "2, 14, fill, top");
 
-	}
-
-	private JButton getBtnBrowse() {
-		if (btnBrowse == null) {
-			btnBrowse = new JButton("Add");
-			btnBrowse.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
-
-					final JFileChooser fc = new JFileChooser();
-					fc.setFileFilter(new GrisuTemplateFileFilter());
-					int returnVal = fc
-							.showOpenDialog(ApplicationSubscribePanel.this);
-
-					if (returnVal == JFileChooser.APPROVE_OPTION) {
-						File file = fc.getSelectedFile();
-
-						String templateName = tm.addLocalTemplate(file);
-						localModel.addElement(templateName);
-					}
-				}
-			});
-		}
-		return btnBrowse;
-	}
-
-	private JButton getBtnRemove() {
-		if (btnRemove == null) {
-			btnRemove = new JButton("Remove");
-			btnRemove.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
-
-					for (Object o : getLocalList().getSelectedValues()) {
-						String name = (String) o;
-						tm.removeLocalApplication(name);
-						localModel.removeElement(name);
-					}
-
-				}
-			});
-		}
-		return btnRemove;
 	}
 
 	private JButton getButton() {
@@ -220,6 +175,40 @@ public class ApplicationSubscribePanel extends JPanel {
 		return button_1;
 	}
 
+	private JButton getCreateFromTemplate() {
+		if (createFromTemplate == null) {
+			createFromTemplate = new JButton("from existing");
+		}
+		return createFromTemplate;
+	}
+
+	private JMenuItem getDeleteMenuItem() {
+		if (deleteMenuItem == null) {
+			deleteMenuItem = new JMenuItem("Delete");
+			deleteMenuItem.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+
+					int n = JOptionPane.showConfirmDialog(SwingUtilities
+							.getRoot(ApplicationSubscribePanel.this),
+							"Do you really want to delete those templates?",
+							"Confirm delete files", JOptionPane.YES_NO_OPTION);
+
+					if (n == JOptionPane.NO_OPTION) {
+						return;
+					}
+
+					for (Object name : getLocalList().getSelectedValues()) {
+						File templateFile = new File(Environment
+								.getTemplateDirectory(), (String) name
+								+ ".template");
+						templateFile.delete();
+					}
+				}
+			});
+		}
+		return deleteMenuItem;
+	}
+
 	private JMenuItem getEditItem() {
 		if (editItem == null) {
 			editItem = new JMenuItem("Edit");
@@ -249,21 +238,28 @@ public class ApplicationSubscribePanel extends JPanel {
 
 	private JLabel getLabel_1() {
 		if (lblMyApplications == null) {
-			lblMyApplications = new JLabel("My applications");
+			lblMyApplications = new JLabel("My remote applications");
 		}
 		return lblMyApplications;
 	}
 
 	private JLabel getLblAddLocalApplication() {
 		if (lblAddLocalApplication == null) {
-			lblAddLocalApplication = new JLabel("Local applications");
+			lblAddLocalApplication = new JLabel("My local applications");
 		}
 		return lblAddLocalApplication;
 	}
 
+	private JLabel getLblCreate() {
+		if (lblCreate == null) {
+			lblCreate = new JLabel("Create:");
+		}
+		return lblCreate;
+	}
+
 	private JLabel getLblRemoteApplications() {
 		if (lblRemoteApplications == null) {
-			lblRemoteApplications = new JLabel("Remote applications");
+			lblRemoteApplications = new JLabel("Available applications");
 		}
 		return lblRemoteApplications;
 	}
@@ -287,6 +283,8 @@ public class ApplicationSubscribePanel extends JPanel {
 		if (popupMenu == null) {
 			popupMenu = new JPopupMenu();
 			popupMenu.add(getEditItem());
+			popupMenu.add(getRenaneMenuItem());
+			popupMenu.add(getDeleteMenuItem());
 		}
 		return popupMenu;
 	}
@@ -300,7 +298,7 @@ public class ApplicationSubscribePanel extends JPanel {
 
 	private JButton getRemoteToLocalButton() {
 		if (remoteToLocalButton == null) {
-			remoteToLocalButton = new JButton("V");
+			remoteToLocalButton = new JButton("new");
 			remoteToLocalButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 
@@ -320,6 +318,13 @@ public class ApplicationSubscribePanel extends JPanel {
 			});
 		}
 		return remoteToLocalButton;
+	}
+
+	private JMenuItem getRenaneMenuItem() {
+		if (renaneMenuItem == null) {
+			renaneMenuItem = new JMenuItem("Rename");
+		}
+		return renaneMenuItem;
 	}
 
 	private JScrollPane getScrollPane() {
@@ -344,20 +349,6 @@ public class ApplicationSubscribePanel extends JPanel {
 			scrollPane_2.setViewportView(getLocalList());
 		}
 		return scrollPane_2;
-	}
-
-	private JSeparator getSeparator() {
-		if (separator == null) {
-			separator = new JSeparator();
-		}
-		return separator;
-	}
-
-	private JSeparator getSeparator_1() {
-		if (separator_1 == null) {
-			separator_1 = new JSeparator();
-		}
-		return separator_1;
 	}
 
 	public void setServiceInterface(ServiceInterface si) {
