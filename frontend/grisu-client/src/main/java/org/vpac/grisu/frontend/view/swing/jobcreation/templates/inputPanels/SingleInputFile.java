@@ -2,6 +2,10 @@ package org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,13 +38,26 @@ public class SingleInputFile extends AbstractInputPanel {
 		super(name, config);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("default:grow"),
+				ColumnSpec.decode("center:max(35dlu;default):grow"),
 				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getComboBox(), "2, 2, fill, default");
 		add(getButton(), "4, 2");
+	}
+
+	private void fileChanged() {
+
+		if (selectedFile != null) {
+			removeValue("inputFileUrl", selectedFile);
+		}
+		selectedFile = (String) getComboBox().getSelectedItem();
+
+		addValue("inputFileUrl", selectedFile);
+
+		addHistoryValue(selectedFile);
+
 	}
 
 	private JButton getButton() {
@@ -61,15 +78,7 @@ public class SingleInputFile extends AbstractInputPanel {
 						return;
 					}
 
-					if (selectedFile != null) {
-						removeValue("inputFileUrl", selectedFile);
-					}
-					selectedFile = file.getUrl();
-					getComboBox().setSelectedItem(selectedFile);
-
-					addValue("inputFileUrl", selectedFile);
-
-					addHistoryValue(selectedFile);
+					getComboBox().setSelectedItem(file.getUrl());
 
 				}
 			});
@@ -80,7 +89,25 @@ public class SingleInputFile extends AbstractInputPanel {
 	private JComboBox getComboBox() {
 		if (comboBox == null) {
 			comboBox = new JComboBox();
+			comboBox.setPrototypeDisplayValue("xxxxx");
 			comboBox.setEditable(true);
+			comboBox.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) {
+					if (ItemEvent.SELECTED == e.getStateChange()) {
+
+						fileChanged();
+
+					}
+				}
+			});
+
+			comboBox.getEditor().getEditorComponent().addKeyListener(
+					new KeyAdapter() {
+						@Override
+						public void keyReleased(KeyEvent e) {
+							fileChanged();
+						}
+					});
 		}
 		return comboBox;
 	}
@@ -90,6 +117,7 @@ public class SingleInputFile extends AbstractInputPanel {
 
 		Map<String, String> defaultProperties = new HashMap<String, String>();
 		defaultProperties.put(TITLE, "Input file");
+		defaultProperties.put(HISTORY_ITEMS, "8");
 
 		return defaultProperties;
 	}
@@ -125,19 +153,32 @@ public class SingleInputFile extends AbstractInputPanel {
 
 	@Override
 	protected void jobPropertyChanged(PropertyChangeEvent e) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	protected void preparePanel(Map<String, String> panelProperties) {
-		// TODO Auto-generated method stub
+
+		getComboBox().removeAllItems();
+
+		for (String value : getHistoryValues()) {
+			getComboBox().addItem(value);
+		}
+
+		if (fillDefaultValueIntoFieldWhenPreparingPanel()) {
+			getJobSubmissionObject().addInputFileUrl(getDefaultValue());
+			getComboBox().setSelectedItem(getDefaultValue());
+		} else {
+			getComboBox().setSelectedItem("");
+		}
 
 	}
 
 	@Override
 	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
-		// TODO Auto-generated method stub
 
+		if (useHistory()) {
+			addValueToHistory();
+		}
 	}
 }

@@ -316,6 +316,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 			table.setDropMode(DropMode.ON);
 			table.setTransferHandler(new GlazedFilesTransferHandler(this, si));
 
+			// disable sorting for now
 			table.setAutoCreateRowSorter(false);
 			table.setRowSorter(null);
 			table.setColumnControlVisible(true);

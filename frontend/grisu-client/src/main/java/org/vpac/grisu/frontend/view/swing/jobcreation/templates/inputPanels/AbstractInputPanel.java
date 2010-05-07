@@ -47,7 +47,9 @@ public abstract class AbstractInputPanel extends JPanel implements
 	public static final String NAME = "name";
 	public static final String TITLE = "title";
 	public static final String PREFILLS = "prefills";
-	public static final String USE_HISTORY = "useHistory";
+	public static final String USE_HISTORY = "useHistory"; // default: true
+	public static final String FILL_WITH_DEFAULT_VALUE = "fillWithDefaultValue"; // default:
+	// false
 	public static final String HISTORY_ITEMS = "historyItems";
 	public static final String DEPENDENCY = "dependency";
 	public static final String SIZE = "size";
@@ -156,7 +158,9 @@ public abstract class AbstractInputPanel extends JPanel implements
 		if (getTextComponent() != null) {
 			getTextComponent().setName(title);
 		} else if (getJComboBox() != null) {
-			getJComboBox().setName(title);
+			if (StringUtils.isNotBlank(title)) {
+				getJComboBox().setName(title);
+			}
 		}
 
 		if (!StringUtils.isBlank(this.panelProperties.get(BEAN))) {
@@ -249,6 +253,21 @@ public abstract class AbstractInputPanel extends JPanel implements
 		template.userInput(getPanelName(), string);
 	}
 
+	protected boolean fillDefaultValueIntoFieldWhenPreparingPanel() {
+
+		try {
+			if (panelProperties.get(FILL_WITH_DEFAULT_VALUE) != null) {
+				boolean use = Boolean.parseBoolean(panelProperties
+						.get(FILL_WITH_DEFAULT_VALUE));
+				return use;
+			} else {
+				return false;
+			}
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
 	/**
 	 * Returns a set of default values if no configuration is specified in the
 	 * template.
@@ -320,10 +339,6 @@ public abstract class AbstractInputPanel extends JPanel implements
 		}
 	}
 
-	public String getPanelName() {
-		return this.panelProperties.get(NAME);
-	}
-
 	// protected Object getValue(String bean) {
 	// try {
 	// Method method =
@@ -335,6 +350,10 @@ public abstract class AbstractInputPanel extends JPanel implements
 	// return null;
 	// }
 	// }
+
+	public String getPanelName() {
+		return this.panelProperties.get(NAME);
+	}
 
 	protected RunningJobManager getRunningJobManager() {
 

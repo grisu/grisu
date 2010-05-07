@@ -41,12 +41,14 @@ public class SimpleSingleJobsGrid extends JPanel {
 					showMenu(e);
 				}
 			}
+
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				if (e.isPopupTrigger()) {
 					showMenu(e);
 				}
 			}
+
 			private void showMenu(MouseEvent e) {
 				popup.show(e.getComponent(), e.getX(), e.getY());
 			}
@@ -74,14 +76,13 @@ public class SimpleSingleJobsGrid extends JPanel {
 	private JMenuItem mntmKillSelectedJobs;
 	private JMenuItem mntmKillAndClean;
 
-
 	public SimpleSingleJobsGrid(ServiceInterface si,
 			EventList<JobObject> jobList) {
 		this.si = si;
 		this.jobList = jobList;
 
 		ObservableElementList.Connector<JobObject> joConnector = GlazedLists
-		.beanConnector(JobObject.class);
+				.beanConnector(JobObject.class);
 		observedJobs = new ObservableElementList<JobObject>(jobList,
 				joConnector);
 
@@ -94,7 +95,6 @@ public class SimpleSingleJobsGrid extends JPanel {
 		add(getScrollPane(), BorderLayout.CENTER);
 
 		addPopup(getTable(), getPopupMenu());
-
 
 	}
 
@@ -123,7 +123,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 			Vector<SingleJobSelectionListener> targets;
 			synchronized (this) {
 				targets = (Vector<SingleJobSelectionListener>) listeners
-				.clone();
+						.clone();
 			}
 
 			// walk through the listener list and
@@ -151,7 +151,6 @@ public class SimpleSingleJobsGrid extends JPanel {
 							killSelectedJobs(true);
 						}
 					}.start();
-
 
 				}
 			});
@@ -215,7 +214,13 @@ public class SimpleSingleJobsGrid extends JPanel {
 			table.setColumnControlVisible(true);
 			table.setHighlighters(HighlighterFactory.createAlternateStriping());
 
-			table.setDefaultRenderer(JobObject.class, new JobNameCellRenderer());
+			// disable sorting
+			table.setAutoCreateRowSorter(false);
+			table.setRowSorter(null);
+
+			table
+					.setDefaultRenderer(JobObject.class,
+							new JobNameCellRenderer());
 
 			// name
 			int vColIndex = 0;
@@ -224,7 +229,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 			col.setPreferredWidth(width);
 			col.setMinWidth(80);
 
-			//application
+			// application
 			vColIndex = 1;
 			col = table.getColumnModel().getColumn(vColIndex);
 			width = 90;
@@ -281,7 +286,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
 
-					if ( enableSingleMouseClick ) {
+					if (enableSingleMouseClick) {
 						jobDoubleClickOccured();
 					} else if (arg0.getClickCount() == 2) {
 						jobDoubleClickOccured();
@@ -308,27 +313,25 @@ public class SimpleSingleJobsGrid extends JPanel {
 	protected void killSelectedJobs(final boolean clean) {
 
 		StringBuffer message = new StringBuffer("Do you really want to kill ");
-		if ( clean ) {
+		if (clean) {
 			message.append("and clean ");
 		}
 		message.append("the following job(s)?\n\n");
 
-		for ( JobObject job : getSelectedJobs() ) {
-			message.append(job.getJobname()+"\n");
+		for (JobObject job : getSelectedJobs()) {
+			message.append(job.getJobname() + "\n");
 		}
 
-		int n = JOptionPane.showConfirmDialog(
-				getRootPane(),
-				message.toString(),
-				"Kill and clean job(s)",
+		int n = JOptionPane.showConfirmDialog(getRootPane(),
+				message.toString(), "Kill and clean job(s)",
 				JOptionPane.YES_NO_OPTION);
 
-		if ( n == JOptionPane.YES_OPTION ) {
+		if (n == JOptionPane.YES_OPTION) {
 
 			lockUI(true);
 
-			for ( JobObject job : getSelectedJobs() ) {
-				//				getTable().getSelectionModel().clearSelection();
+			for (JobObject job : getSelectedJobs()) {
+				// getTable().getSelectionModel().clearSelection();
 				job.kill(clean);
 			}
 
@@ -346,10 +349,11 @@ public class SimpleSingleJobsGrid extends JPanel {
 			public void run() {
 				getTable().setEnabled(!lock);
 
-				if ( ! lock ) {
+				if (!lock) {
 					getTable().setCursor(Cursor.getDefaultCursor());
 				} else {
-					getTable().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					getTable().setCursor(
+							Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				}
 			}
 
@@ -365,6 +369,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 		}
 		listeners.removeElement(l);
 	}
+
 	protected void setDefaultColumns() {
 
 		getTable().getColumnExt("Site").setVisible(true);
@@ -375,6 +380,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 		getTable().getColumnExt("Status").setVisible(true);
 
 	}
+
 	public void setEnableSingleMouseClick(boolean enable) {
 		this.enableSingleMouseClick = enable;
 	}

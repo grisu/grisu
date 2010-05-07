@@ -11,7 +11,6 @@ import java.util.Map;
 import javax.swing.JComboBox;
 import javax.swing.text.JTextComponent;
 
-import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
@@ -37,6 +36,8 @@ public class SimpleCommandline extends AbstractInputPanel {
 				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getComboBox(), "2, 2, fill, fill");
+		// setLayout(new BorderLayout());
+		// add(getComboBox(), BorderLayout.CENTER);
 	}
 
 	private void commandlineChanged() throws TemplateException {
@@ -86,6 +87,7 @@ public class SimpleCommandline extends AbstractInputPanel {
 		if (comboBox == null) {
 			comboBox = new JComboBox();
 			comboBox.setEditable(true);
+			comboBox.setPrototypeDisplayValue("xxxxx");
 			comboBox.addItemListener(new ItemListener() {
 				public void itemStateChanged(ItemEvent e) {
 					if (ItemEvent.SELECTED == e.getStateChange()) {
@@ -120,7 +122,7 @@ public class SimpleCommandline extends AbstractInputPanel {
 
 		Map<String, String> defaultProperties = new HashMap<String, String>();
 		defaultProperties.put(TITLE, "Commandline");
-		defaultProperties.put(HISTORY_ITEMS, "5");
+		defaultProperties.put(HISTORY_ITEMS, "8");
 		return defaultProperties;
 	}
 
@@ -142,26 +144,29 @@ public class SimpleCommandline extends AbstractInputPanel {
 
 	@Override
 	protected void jobPropertyChanged(PropertyChangeEvent e) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	protected void preparePanel(Map<String, String> panelProperties) {
-		
+
 		getComboBox().removeAllItems();
-		
-		for ( String value : getHistoryValues() ) {
+
+		for (String value : getHistoryValues()) {
 			getComboBox().addItem(value);
 		}
-		
-		getComboBox().setSelectedItem("");
+
+		if (fillDefaultValueIntoFieldWhenPreparingPanel()) {
+			getComboBox().setSelectedItem(getDefaultValue());
+		} else {
+			getComboBox().setSelectedItem("");
+		}
 	}
 
 	@Override
 	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
-		
-		if ( useHistory() ) {
+
+		if (useHistory()) {
 			addValueToHistory();
 		}
 

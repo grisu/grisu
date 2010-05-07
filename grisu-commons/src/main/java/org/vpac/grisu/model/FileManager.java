@@ -6,14 +6,22 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -181,33 +189,31 @@ public class FileManager {
 
 	}
 
-	public void copyLocalFiles(String sourceUrl, String targetDirUrl,
+	public void copyLocalFiles(File sourceFile, File targetFile,
 			boolean overwrite) throws FileTransactionException {
-
-		File sourceFile = getFileFromUriOrPath(sourceUrl);
-		File targetFile = getFileFromUriOrPath(targetDirUrl);
-
 		if (!sourceFile.exists()) {
-			throw new FileTransactionException(sourceUrl, targetDirUrl,
-					"Source file doesn't exist.", null);
+			throw new FileTransactionException(sourceFile.toString(),
+					targetFile.toString(), "Source file doesn't exist.", null);
 		}
 
 		if (targetFile.exists()) {
 			if (!targetFile.isDirectory()) {
-				throw new FileTransactionException(sourceUrl, targetDirUrl,
-						"Target not a directory.", null);
+				throw new FileTransactionException(sourceFile.toString(),
+						targetFile.toString(), "Target not a directory.", null);
 			}
 		} else {
 			targetFile.mkdirs();
 			if (!targetFile.exists()) {
-				throw new FileTransactionException(sourceUrl, targetDirUrl,
+				throw new FileTransactionException(sourceFile.toString(),
+						targetFile.toString(),
 						"Could not create target directory.", null);
 			}
 		}
 
 		File targetFileName = new File(targetFile, sourceFile.getName());
 		if (!overwrite && targetFileName.exists()) {
-			throw new FileTransactionException(sourceUrl, targetDirUrl,
+			throw new FileTransactionException(sourceFile.toString(),
+					targetFile.toString(),
 					"Target file already exists and overwrite not enabled.",
 					null);
 		}
@@ -219,9 +225,19 @@ public class FileManager {
 				FileUtils.copyFileToDirectory(sourceFile, targetFile);
 			}
 		} catch (IOException e) {
-			throw new FileTransactionException(sourceUrl, targetDirUrl,
-					"Could not copy file.", e);
+			throw new FileTransactionException(sourceFile.toString(),
+					targetFile.toString(), "Could not copy file.", e);
 		}
+	}
+
+	public void copyLocalFiles(String sourceUrl, String targetDirUrl,
+			boolean overwrite) throws FileTransactionException {
+
+		File sourceFile = getFileFromUriOrPath(sourceUrl);
+		File targetFile = getFileFromUriOrPath(targetDirUrl);
+
+		copyLocalFiles(sourceFile, targetFile, overwrite);
+
 	}
 
 	private void copyRemoteFiles(String sourceUrl, String targetDirUrl,
@@ -233,6 +249,19 @@ public class FileManager {
 		} catch (RemoteFileSystemException e) {
 			throw new FileTransactionException(sourceUrl, targetDirUrl,
 					"Could not copy remote files.", e);
+		}
+
+	}
+
+	public void cp(File sourceFile, String targetDirUrl, boolean overwrite)
+			throws FileTransactionException {
+
+		if (isLocal(targetDirUrl)) {
+			File targetFile = getFileFromUriOrPath(targetDirUrl);
+			copyLocalFiles(sourceFile, targetFile, overwrite);
+		} else {
+			uploadUrlToDirectory(sourceFile.toURI().toString(), targetDirUrl,
+					overwrite);
 		}
 
 	}
@@ -261,7 +290,7 @@ public class FileManager {
 
 		} else if (isLocal(sourceUrl) && !isLocal(targetDirUrl)) {
 
-			uploadFileToDirectory(sourceUrl, targetDirUrl, overwrite);
+			uploadUrlToDirectory(sourceUrl, targetDirUrl, overwrite);
 			return;
 
 		} else if (!isLocal(sourceUrl) && isLocal(targetDirUrl)) {
@@ -611,60 +640,14 @@ public class FileManager {
 	 * @throws FileTransactionException
 	 *             if the transfer fails
 	 */
-	public final void uploadFileToDirectory(final File file,
+	private final void uploadFileToDirectory(final File file,
 			final String targetDirectory, final boolean overwrite)
 			throws FileTransactionException {
 
-		if (!file.exists()) {
-			throw new FileTransactionException(file.toString(), targetDirectory,
-					"File does not exist: " + file.toString(), null);
-		}
-
-		if (!file.canRead()) {
-			throw new FileTransactionException(file.toString(), targetDirectory,
-					"Can't read file: " + file.toString(), null);
-		}
-
 		if (file.isDirectory()) {
-			throw new FileTransactionException(file.toString(), targetDirectory,
-					"Transfer of folders not supported yet.", null);
-		}
-
-		// checking whether folder exists and is folder
-		try {
-			if (!serviceInterface.fileExists(targetDirectory)) {
-				try {
-					boolean success = serviceInterface.mkdir(targetDirectory);
-
-					if (!success) {
-						throw new FileTransactionException(
-								file.toURL().toString(), targetDirectory,
-								"Could not create target directory.", null);
-					}
-				} catch (Exception e) {
-					throw new FileTransactionException(file.toURL().toString(),
-							targetDirectory,
-							"Could not create target directory.", e);
-				}
-			} else {
-				try {
-					if (!serviceInterface.isFolder(targetDirectory)) {
-						throw new FileTransactionException(
-								file.toURL().toString(), targetDirectory,
-								"Can't upload file. Target is a file.", null);
-					}
-				} catch (Exception e2) {
-					myLogger.debug("Could not access target directory.");
-
-					throw new FileTransactionException(file.toURL().toString(),
-							targetDirectory,
-							"Could not access target directory.", e2);
-				}
-			}
-
-		} catch (Exception e) {
-			throw new FileTransactionException(file.toString(), targetDirectory,
-					"Could not determine whether target directory exists: ", e);
+			throw new FileTransactionException(file.toString(),
+					targetDirectory, "Transfer of folders not supported yet.",
+					null);
 		}
 
 		myLogger.debug("Uploading local file: " + file.toString() + " to: "
@@ -674,30 +657,68 @@ public class FileManager {
 
 	}
 
-	/**
-	 * Uploads a file to the backend which forwards it to it's target
-	 * destination.
-	 * 
-	 * @param uriOrPath
-	 *            the path to the local file
-	 * @param targetDirectory
-	 *            the target url
-	 * @param overwrite
-	 *            whether to overwrite a possibly existing target file
-	 * @throws FileTransactionException
-	 *             if the transfer fails
-	 */
-	public final void uploadFileToDirectory(final String uriOrPath,
-			final String targetDirectory, boolean overwrite)
+	public final void uploadFolderToDirectory(final File folder,
+			final String targetDirectory, final boolean overwrite)
 			throws FileTransactionException {
 
-		File file = getFileFromUriOrPath(uriOrPath);
-
-		if (file.isDirectory()) {
-			throw new FileTransactionException(uriOrPath, targetDirectory,
-					"Upload of folders not supported (yet).", null);
+		if (!folder.isDirectory()) {
+			throw new FileTransactionException(folder.toString(),
+					targetDirectory, "Source is no folder.", null);
 		}
-		uploadFileToDirectory(file, targetDirectory, overwrite);
+
+		Collection<File> allFiles = FileUtils.listFiles(folder, null, true);
+		final Map<String, Exception> errors = Collections
+				.synchronizedMap(new HashMap<String, Exception>());
+
+		final ExecutorService executor1 = Executors
+				.newFixedThreadPool(ClientPropertiesManager
+						.getConcurrentUploadThreads());
+
+		String basePath = folder.getPath();
+		for (final File file : allFiles) {
+
+			String filePath = file.getPath();
+			String deltaPathTemp = filePath.substring(basePath.length());
+
+			final String deltaPath;
+			if (deltaPathTemp.startsWith("/") || deltaPathTemp.startsWith("\\")) {
+				deltaPath = deltaPathTemp.substring(1);
+			} else {
+				deltaPath = deltaPathTemp;
+			}
+			Thread uploadThread = new Thread() {
+				@Override
+				public void run() {
+					try {
+						uploadFile(file, targetDirectory + "/" + deltaPath,
+								overwrite);
+					} catch (FileTransactionException e) {
+						errors.put(file.toString(), e);
+					}
+				}
+			};
+
+			executor1.execute(uploadThread);
+
+		}
+
+		executor1.shutdown();
+
+		try {
+			executor1.awaitTermination(10, TimeUnit.HOURS);
+		} catch (InterruptedException e) {
+			throw new FileTransactionException(folder.toString(),
+					targetDirectory, "File upload interrupted", e);
+		}
+
+		if (errors.size() > 0) {
+			throw new FileTransactionException(folder.toString(),
+					targetDirectory, "Error transfering the following files: "
+							+ StringUtils.join(errors.keySet(), ", "), null);
+		}
+
+		myLogger.debug("File upload for folder " + folder.toString()
+				+ " successful.");
 
 	}
 
@@ -779,6 +800,83 @@ public class FileManager {
 					"Upload of folders not supported (yet).", null);
 		}
 		uploadInputFile(file, job);
+
+	}
+
+	/**
+	 * Uploads a file to the backend which forwards it to it's target
+	 * destination.
+	 * 
+	 * @param uriOrPath
+	 *            the path to the local file
+	 * @param targetDirectory
+	 *            the target url
+	 * @param overwrite
+	 *            whether to overwrite a possibly existing target file
+	 * @throws FileTransactionException
+	 *             if the transfer fails
+	 */
+	public final void uploadUrlToDirectory(final String uriOrPath,
+			final String targetDirectory, boolean overwrite)
+			throws FileTransactionException {
+
+		File file = getFileFromUriOrPath(uriOrPath);
+
+		if (!file.exists()) {
+			throw new FileTransactionException(file.toString(),
+					targetDirectory, "File does not exist: " + file.toString(),
+					null);
+		}
+
+		if (!file.canRead()) {
+			throw new FileTransactionException(file.toString(),
+					targetDirectory, "Can't read file: " + file.toString(),
+					null);
+		}
+
+		// checking whether folder exists and is folder
+		try {
+			if (!serviceInterface.fileExists(targetDirectory)) {
+				try {
+					boolean success = serviceInterface.mkdir(targetDirectory);
+
+					if (!success) {
+						throw new FileTransactionException(file.toURL()
+								.toString(), targetDirectory,
+								"Could not create target directory.", null);
+					}
+				} catch (Exception e) {
+					throw new FileTransactionException(file.toURL().toString(),
+							targetDirectory,
+							"Could not create target directory.", e);
+				}
+			} else {
+				try {
+					if (!serviceInterface.isFolder(targetDirectory)) {
+						throw new FileTransactionException(file.toURL()
+								.toString(), targetDirectory,
+								"Can't upload file. Target is a file.", null);
+					}
+				} catch (Exception e2) {
+					myLogger.debug("Could not access target directory.");
+
+					throw new FileTransactionException(file.toURL().toString(),
+							targetDirectory,
+							"Could not access target directory.", e2);
+				}
+			}
+
+		} catch (Exception e) {
+			throw new FileTransactionException(file.toString(),
+					targetDirectory,
+					"Could not determine whether target directory exists: ", e);
+		}
+
+		if (file.isDirectory()) {
+			uploadFolderToDirectory(file, targetDirectory, overwrite);
+		} else {
+			uploadFileToDirectory(file, targetDirectory, overwrite);
+		}
 
 	}
 

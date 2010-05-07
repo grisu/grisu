@@ -59,7 +59,8 @@ public class FileTransactionStatusDialog extends JDialog implements
 		backgroundButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				ft.removePropertyChangeListener(FileTransactionStatusDialog.this);
+				ft
+						.removePropertyChangeListener(FileTransactionStatusDialog.this);
 				ft.removePropertyChangeListener(fileTransferStatusPanel);
 				dispose();
 			}
