@@ -29,6 +29,9 @@ public final class ClientPropertiesManager {
 
 	private static final int DEFAULT_FILE_UPLOAD_THREADS = 1;
 	private static final int DEFAULT_FILE_UPLOAD_RETRIES = 5;
+	
+	private static final int DEFAULT_FILE_DOWNLOAD_THREADS = 1;
+
 
 	public static final Long DEFAULT_DOWNLOAD_FILESIZE_TRESHOLD = new Long(
 			1024 * 1024 * 2);
@@ -171,6 +174,24 @@ public final class ClientPropertiesManager {
 		}
 		if (threads == -1) {
 			return DEFAULT_FILE_UPLOAD_THREADS;
+		}
+
+		return threads;
+	}
+	
+	public static int getConcurrentDownloadThreads() {
+		// TODO Auto-generated method stub
+		int threads = -1;
+		try {
+			threads = Integer.parseInt(getClientConfiguration().getString(
+			"concurrentDownloadThreads"));
+
+		} catch (Exception e) {
+			// myLogger.debug("Problem with config file: " + e.getMessage());
+			return DEFAULT_FILE_DOWNLOAD_THREADS;
+		}
+		if (threads == -1) {
+			return DEFAULT_FILE_DOWNLOAD_THREADS;
 		}
 
 		return threads;

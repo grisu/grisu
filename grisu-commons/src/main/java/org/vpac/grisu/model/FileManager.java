@@ -296,7 +296,7 @@ public class FileManager {
 		} else if (!isLocal(sourceUrl) && isLocal(targetDirUrl)) {
 
 			try {
-				downloadFile(sourceUrl, targetDirUrl, overwrite);
+				downloadUrl(sourceUrl, targetDirUrl, overwrite);
 			} catch (IOException e) {
 				throw new FileTransactionException(sourceUrl, targetDirUrl,
 						"Could not write target file.", e);
@@ -377,6 +377,58 @@ public class FileManager {
 
 		return cacheTargetFile;
 	}
+	
+	private File downloadFolder(final String url) throws FileTransactionException {
+
+		DtoFolder source = null;
+		try {
+			source = serviceInterface.ls(url, 0);
+		} catch (RemoteFileSystemException e) {
+			throw new FileTransactionException(url, null, "Can't list source folder.", e);
+		}
+		
+		List<String> files = source.listOfAllFilesUnderThisFolder();
+		final Map<String, Exception> exceptions = Collections.synchronizedMap(new HashMap<String, Exception>()); 
+		
+		final ExecutorService executor1 = Executors
+		.newFixedThreadPool(ClientPropertiesManager
+				.getConcurrentUploadThreads());
+		
+		for (final String file : files ) {
+			
+			Thread downloadThread = new Thread() {
+				public void run() {
+					try {
+						downloadFile(file);
+					} catch (FileTransactionException e) {
+						exceptions.put(file, e);
+					}
+				}
+			};
+			executor1.execute(downloadThread);
+		}
+		
+		executor1.shutdown();
+
+		try {
+			executor1.awaitTermination(10, TimeUnit.HOURS);
+		} catch (InterruptedException e) {
+			executor1.shutdownNow();
+			throw new FileTransactionException(url,
+					null, "Folder download interrupted", e);
+		}
+
+		if (exceptions.size() > 0) {
+			throw new FileTransactionException(url,
+					null, "Error transfering the following files: "
+							+ StringUtils.join(exceptions.keySet(), ", "), null);
+		}
+
+		myLogger.debug("File download for folder " + url
+				+ " successful.");
+		
+		return getLocalCacheFile(url);
+	}
 
 	/**
 	 * Downloads a remote file to the specified target.
@@ -398,7 +450,7 @@ public class FileManager {
 	 * @throws FileTransactionException
 	 *             if the file can't be downloaded for some reason
 	 */
-	public File downloadFile(String url, String target, boolean overwrite)
+	public File downloadUrl(String url, String target, boolean overwrite)
 			throws IOException, FileTransactionException {
 
 		File targetFile = new File(target);
@@ -416,9 +468,22 @@ public class FileManager {
 			}
 		}
 
-		File cacheFile = downloadFile(url);
+		boolean isFolder = false;
+		try {
+			isFolder = serviceInterface.isFolder(url);
+		} catch (RemoteFileSystemException e) {
+			throw new FileTransactionException(url, target, "Can't determine whether source is file or folder.", e);
+		}
+		
+		File cacheFile = null;
+		if ( isFolder ) {
+			cacheFile = downloadFolder(url);
+			FileUtils.copyDirectory(cacheFile, new File(targetFile, getFilename(url)));
+		} else {
+			cacheFile = downloadFile(url);
+			FileUtils.copyDirectory(cacheFile, targetFile);
+		}
 
-		FileUtils.copyFile(cacheFile, targetFile);
 
 		return targetFile;
 	}
