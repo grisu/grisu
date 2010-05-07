@@ -1,6 +1,7 @@
 package org.vpac.grisu.frontend.examples;
 
 import java.io.File;
+import java.util.Date;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginManager;
@@ -23,9 +24,16 @@ public class UploadLocalFolder {
 
 		FileManager fm = registry.getFileManager();
 
-		fm.cp(new File("/home/markus/sample input files"),
+		fm.deleteFile("gsiftp://ng2.vpac.org/home/acc004/test/");
+
+		Date start = new Date();
+
+		fm.cp(new File("/home/markus/Workspaces/Wicket"),
 				"gsiftp://ng2.vpac.org/home/acc004/test/", true);
 
+		Date end = new Date();
+
+		System.out.println("Time: " + (end.getTime() - start.getTime()));
 	}
 
 }

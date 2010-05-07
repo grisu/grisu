@@ -707,6 +707,7 @@ public class FileManager {
 		try {
 			executor1.awaitTermination(10, TimeUnit.HOURS);
 		} catch (InterruptedException e) {
+			executor1.shutdownNow();
 			throw new FileTransactionException(folder.toString(),
 					targetDirectory, "File upload interrupted", e);
 		}
