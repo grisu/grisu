@@ -10,10 +10,12 @@ import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.text.JTextComponent;
 
+import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
@@ -31,6 +33,8 @@ public class SingleInputFile extends AbstractInputPanel {
 	private GrisuFileDialog dialog;
 
 	private String selectedFile = null;
+
+	private final DefaultComboBoxModel comboBoxModel = new DefaultComboBoxModel();
 
 	public SingleInputFile(String name, PanelConfig config)
 			throws TemplateException {
@@ -88,7 +92,7 @@ public class SingleInputFile extends AbstractInputPanel {
 
 	private JComboBox getComboBox() {
 		if (comboBox == null) {
-			comboBox = new JComboBox();
+			comboBox = new JComboBox(comboBoxModel);
 			comboBox.setPrototypeDisplayValue("xxxxx");
 			comboBox.setEditable(true);
 			comboBox.addItemListener(new ItemListener() {
@@ -161,8 +165,21 @@ public class SingleInputFile extends AbstractInputPanel {
 
 		getComboBox().removeAllItems();
 
-		for (String value : getHistoryValues()) {
-			getComboBox().addItem(value);
+		String prefills = panelProperties.get(PREFILLS);
+		if (StringUtils.isNotBlank(prefills)) {
+
+			for (String value : prefills.split(",")) {
+				comboBoxModel.addElement(value);
+			}
+
+		}
+
+		if (useHistory()) {
+			for (String value : getHistoryValues()) {
+				if (comboBoxModel.getIndexOf(value) < 0) {
+					comboBoxModel.addElement(value);
+				}
+			}
 		}
 
 		if (fillDefaultValueIntoFieldWhenPreparingPanel()) {

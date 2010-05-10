@@ -377,26 +377,30 @@ public class FileManager {
 
 		return cacheTargetFile;
 	}
-	
-	private File downloadFolder(final String url) throws FileTransactionException {
+
+	private File downloadFolder(final String url)
+			throws FileTransactionException {
 
 		DtoFolder source = null;
 		try {
 			source = serviceInterface.ls(url, 0);
 		} catch (RemoteFileSystemException e) {
-			throw new FileTransactionException(url, null, "Can't list source folder.", e);
+			throw new FileTransactionException(url, null,
+					"Can't list source folder.", e);
 		}
-		
+
 		List<String> files = source.listOfAllFilesUnderThisFolder();
-		final Map<String, Exception> exceptions = Collections.synchronizedMap(new HashMap<String, Exception>()); 
-		
+		final Map<String, Exception> exceptions = Collections
+				.synchronizedMap(new HashMap<String, Exception>());
+
 		final ExecutorService executor1 = Executors
-		.newFixedThreadPool(ClientPropertiesManager
-				.getConcurrentUploadThreads());
-		
-		for (final String file : files ) {
-			
+				.newFixedThreadPool(ClientPropertiesManager
+						.getConcurrentUploadThreads());
+
+		for (final String file : files) {
+
 			Thread downloadThread = new Thread() {
+				@Override
 				public void run() {
 					try {
 						downloadFile(file);
@@ -407,26 +411,25 @@ public class FileManager {
 			};
 			executor1.execute(downloadThread);
 		}
-		
+
 		executor1.shutdown();
 
 		try {
 			executor1.awaitTermination(10, TimeUnit.HOURS);
 		} catch (InterruptedException e) {
 			executor1.shutdownNow();
-			throw new FileTransactionException(url,
-					null, "Folder download interrupted", e);
+			throw new FileTransactionException(url, null,
+					"Folder download interrupted", e);
 		}
 
 		if (exceptions.size() > 0) {
-			throw new FileTransactionException(url,
-					null, "Error transfering the following files: "
+			throw new FileTransactionException(url, null,
+					"Error transfering the following files: "
 							+ StringUtils.join(exceptions.keySet(), ", "), null);
 		}
 
-		myLogger.debug("File download for folder " + url
-				+ " successful.");
-		
+		myLogger.debug("File download for folder " + url + " successful.");
+
 		return getLocalCacheFile(url);
 	}
 
@@ -472,18 +475,19 @@ public class FileManager {
 		try {
 			isFolder = serviceInterface.isFolder(url);
 		} catch (RemoteFileSystemException e) {
-			throw new FileTransactionException(url, target, "Can't determine whether source is file or folder.", e);
+			throw new FileTransactionException(url, target,
+					"Can't determine whether source is file or folder.", e);
 		}
-		
+
 		File cacheFile = null;
-		if ( isFolder ) {
+		if (isFolder) {
 			cacheFile = downloadFolder(url);
-			FileUtils.copyDirectory(cacheFile, new File(targetFile, getFilename(url)));
+			FileUtils.copyDirectory(cacheFile, new File(targetFile,
+					getFilename(url)));
 		} else {
 			cacheFile = downloadFile(url);
 			FileUtils.copyDirectory(cacheFile, targetFile);
 		}
-
 
 		return targetFile;
 	}
@@ -739,7 +743,7 @@ public class FileManager {
 				.newFixedThreadPool(ClientPropertiesManager
 						.getConcurrentUploadThreads());
 
-		String basePath = folder.getPath();
+		String basePath = folder.getParentFile().getPath();
 		for (final File file : allFiles) {
 
 			String filePath = file.getPath();

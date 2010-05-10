@@ -29,10 +29,17 @@ public class TextField extends AbstractInputPanel {
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
+				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC, }));
-		add(getTextField(), "2, 2, fill, fill");
+		if (displayHelpLabel()) {
+			add(getTextField(), "2, 2, fill, fill");
+			add(getHelpLabel(), "4, 2");
+		} else {
+			add(getTextField(), "2, 2, 3, 1, fill, fill");
+		}
+
 	}
 
 	@Override
@@ -108,6 +115,6 @@ public class TextField extends AbstractInputPanel {
 	@Override
 	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

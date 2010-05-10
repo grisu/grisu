@@ -1,6 +1,7 @@
 package org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels;
 
 import java.awt.Dimension;
+import java.beans.Beans;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -12,6 +13,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
@@ -59,6 +63,8 @@ public abstract class AbstractInputPanel extends JPanel implements
 	public static final String APPLICATION = "application";
 	public static final String TEMPLATENAME = "templatename";
 
+	private static final String HELP = "help";
+
 	private TemplateObject template;
 	private final LinkedList<Filter> filters;
 
@@ -76,6 +82,9 @@ public abstract class AbstractInputPanel extends JPanel implements
 	private UserEnvironmentManager uem;
 	private RunningJobManager rjm;
 	private HistoryManager hm;
+
+	private JButton helpLabel;
+	private boolean displayHelpLabel = false;
 
 	private static Map<String, GrisuFileDialog> dialogs = new HashMap<String, GrisuFileDialog>();
 
@@ -154,12 +163,14 @@ public abstract class AbstractInputPanel extends JPanel implements
 			title = panelProperties.get(NAME);
 		}
 
-		// so validator displays proper name
-		if (getTextComponent() != null) {
-			getTextComponent().setName(title);
-		} else if (getJComboBox() != null) {
-			if (StringUtils.isNotBlank(title)) {
-				getJComboBox().setName(title);
+		if (!Beans.isDesignTime()) {
+			// so validator displays proper name
+			if (getTextComponent() != null) {
+				getTextComponent().setName(title);
+			} else if (getJComboBox() != null) {
+				if (StringUtils.isNotBlank(title)) {
+					getJComboBox().setName(title);
+				}
 			}
 		}
 
@@ -168,6 +179,7 @@ public abstract class AbstractInputPanel extends JPanel implements
 		} else {
 			bean = null;
 		}
+
 		if (!StringUtils.isBlank(this.panelProperties.get(IS_VISIBLE))) {
 			try {
 				isVisible = Boolean.parseBoolean(this.panelProperties
@@ -200,6 +212,15 @@ public abstract class AbstractInputPanel extends JPanel implements
 								+ this.panelProperties.get(NAME) + ": " + size);
 			}
 		}
+
+		String help = this.panelProperties.get(HELP);
+
+		if (StringUtils.isNotBlank(help)) {
+
+			displayHelpLabel = true;
+			getHelpLabel().setToolTipText(help);
+		}
+
 	}
 
 	protected void addHistoryValue(String value) {
@@ -253,6 +274,10 @@ public abstract class AbstractInputPanel extends JPanel implements
 		template.userInput(getPanelName(), string);
 	}
 
+	protected boolean displayHelpLabel() {
+		return displayHelpLabel;
+	}
+
 	protected boolean fillDefaultValueIntoFieldWhenPreparingPanel() {
 
 		try {
@@ -303,6 +328,19 @@ public abstract class AbstractInputPanel extends JPanel implements
 
 	public GrisuFileDialog getFileDialog() {
 		return getFileDialog(templateName);
+	}
+
+	protected JButton getHelpLabel() {
+		if (helpLabel == null) {
+			helpLabel = new JButton("");
+			helpLabel.setBorder(null);
+			Icon icon = new ImageIcon(TextField.class
+					.getResource("/help_icon.gif"));
+			helpLabel.setIcon(icon);
+			helpLabel.setDisabledIcon(icon);
+			helpLabel.setEnabled(false);
+		}
+		return helpLabel;
 	}
 
 	protected HistoryManager getHistoryManager() {

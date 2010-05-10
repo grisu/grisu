@@ -423,7 +423,7 @@ public class TemplateHelpers {
 		for (String line : lines) {
 
 			line = line.trim();
-			if (StringUtils.isBlank(line)) {
+			if (StringUtils.isBlank(line) || line.startsWith("#")) {
 				continue;
 			}
 
@@ -561,7 +561,7 @@ public class TemplateHelpers {
 
 			line = line.trim();
 
-			if (StringUtils.isBlank(line)) {
+			if (StringUtils.isBlank(line) || line.startsWith("#")) {
 				continue;
 			}
 
