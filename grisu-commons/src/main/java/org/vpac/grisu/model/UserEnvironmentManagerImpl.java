@@ -147,9 +147,13 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 
 		if (cachedAllSites == null) {
 			cachedAllSites = new TreeSet<String>();
-			for (String subLoc : getAllAvailableSubmissionLocations()) {
-				cachedAllSites.add(resourceInfo.getSite(subLoc));
+
+			for (MountPoint mp : getMountPoints()) {
+				cachedAllSites.add(mp.getSite());
 			}
+			// for (String subLoc : getAllAvailableSubmissionLocations()) {
+			// cachedAllSites.add(resourceInfo.getSite(subLoc));
+			// }
 		}
 		return cachedAllSites;
 	}

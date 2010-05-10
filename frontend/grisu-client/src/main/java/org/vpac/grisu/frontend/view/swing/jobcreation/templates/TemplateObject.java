@@ -1,11 +1,13 @@
 package org.vpac.grisu.frontend.view.swing.jobcreation.templates;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.swing.JPanel;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.netbeans.validation.api.ui.ValidationPanel;
 import org.vpac.grisu.control.ServiceInterface;
@@ -63,11 +65,17 @@ public class TemplateObject {
 	// HashMap<String, AbstractInputPanel>();
 	private final Map<String, String> changedValues;
 
-	public TemplateObject(ServiceInterface si, String commandlineTemplate)
-			throws TemplateException {
+	private final Map<String, String> fixedValues;
+
+	public TemplateObject(ServiceInterface si, String commandlineTemplate,
+			Map<String, String> fixedValues) throws TemplateException {
 		this.si = si;
 		this.commandlineTemplate = commandlineTemplate;
-		changedValues = parseCommandlineTemplate(commandlineTemplate);
+		this.fixedValues = fixedValues;
+		this.changedValues = parseCommandlineTemplate(commandlineTemplate);
+
+		this.jobObject = new JobSubmissionObjectImpl();
+
 	}
 
 	public LinkedHashMap<String, AbstractInputPanel> getInputPanels() {
@@ -100,26 +108,82 @@ public class TemplateObject {
 
 	public void reset() throws TemplateException {
 
-		JobSubmissionObjectImpl newJob = new JobSubmissionObjectImpl();
-		setJobObject(newJob);
+		this.jobObject = new JobSubmissionObjectImpl();
 
 		for (AbstractInputPanel panel : getInputPanels().values()) {
-			panel.initPanel(this, newJob);
+			panel.initPanel(this, this.jobObject);
 		}
+
+		setFixedValues();
 
 		userInput(null, null);
 	}
 
+	private void setFixedValues() throws TemplateException {
+
+		for (String key : fixedValues.keySet()) {
+
+			Object value = fixedValues.get(key);
+
+			Method[] methods = jobObject.getClass().getMethods();
+
+			for (Method m : methods) {
+
+				if (m.getName().equals("set" + StringUtils.capitalize(key))) {
+
+					Class parameterType = m.getParameterTypes()[0];
+
+					if (!parameterType.equals(String.class)) {
+						try {
+							Method fromMethod = parameterType.getMethod(
+									"valueOf", String.class);
+
+							value = fromMethod.invoke(null, value);
+							break;
+						} catch (Exception e) {
+							e.printStackTrace();
+							throw new TemplateException(
+									"Can't set fixed key/value pair: " + key
+											+ "/" + value.toString());
+						}
+					}
+				}
+
+			}
+
+			Method method = null;
+			try {
+
+				method = jobObject.getClass().getMethod(
+						"set" + StringUtils.capitalize(key), value.getClass());
+				method.invoke(jobObject, value);
+			} catch (Exception e) {
+				throw new TemplateException("Can't set fixed key/value pair: "
+						+ key + "/" + value.toString());
+			}
+
+			// jobObject.
+		}
+
+	}
+
 	public void setInputPanels(
-			LinkedHashMap<String, AbstractInputPanel> inputPanels) {
+			LinkedHashMap<String, AbstractInputPanel> inputPanels)
+			throws TemplateException {
 
 		this.inputPanels = inputPanels;
 
+		for (AbstractInputPanel panel : this.inputPanels.values()) {
+			panel.initPanel(this, this.jobObject);
+		}
+
+		setFixedValues();
+
 	}
 
-	public void setJobObject(JobSubmissionObjectImpl job) {
-		this.jobObject = job;
-	}
+	// public void setJobObject(JobSubmissionObjectImpl job) {
+	// this.jobObject = job;
+	// }
 
 	public void setTemplateName(String name) {
 		this.name = name;

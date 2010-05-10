@@ -28,7 +28,6 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.filters.Filter;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels.AbstractInputPanel;
-import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 
 public class TemplateHelpers {
 
@@ -265,6 +264,44 @@ public class TemplateHelpers {
 
 	}
 
+	public static Map<String, String> getAllStaticValues(List<String> lines)
+			throws TemplateException {
+
+		Map<String, String> result = new HashMap<String, String>();
+		for (String line : lines) {
+
+			line = line.trim();
+			if (StringUtils.isBlank(line) || line.startsWith("#")) {
+				continue;
+			}
+
+			if (line.startsWith("=")) {
+				break;
+			}
+
+			int index = line.indexOf("=");
+			if (index <= 0) {
+				throw new TemplateException(
+						"Config needs to have proper specification of the property "
+								+ line
+								+ " (in the form of for example \"commandline = echo hello world\"");
+			}
+
+			String propertyKey = line.substring(0, index).trim();
+			String propertyValue = line.substring(index + 1).trim();
+			if (StringUtils.isBlank(propertyKey)
+					|| StringUtils.isBlank(propertyValue)) {
+				throw new TemplateException(
+						"Config needs to have proper specification of the property "
+								+ line
+								+ " (in the form of for example \"commandline = echo hello world\"");
+			}
+			result.put(propertyKey, propertyValue);
+		}
+
+		return result;
+	}
+
 	private static String getNewPageIndicator(String line)
 			throws TemplateException {
 
@@ -402,9 +439,15 @@ public class TemplateHelpers {
 			ServiceInterface si, String templateFileName, List<String> lines)
 			throws TemplateException {
 
-		String commandline = getValue("commandline", lines);
+		Map<String, String> values = getAllStaticValues(lines);
+		String commandline = values.remove("commandline");
 
-		TemplateObject template = new TemplateObject(si, commandline);
+		if (StringUtils.isBlank(commandline)) {
+			throw new TemplateException(
+					"\"commandline\" property not specified. You need to have a line like: \'commandline = echo hello\' in your config");
+		}
+
+		TemplateObject template = new TemplateObject(si, commandline, values);
 
 		ValidationPanel validationPanel = new ValidationPanel();
 
@@ -513,12 +556,9 @@ public class TemplateHelpers {
 
 		}
 
-		JobSubmissionObjectImpl newJob = new JobSubmissionObjectImpl();
-		template.setJobObject(newJob);
-
 		for (AbstractInputPanel panel : inputPanels.values()) {
 			panel.setServiceInterface(si);
-			panel.initPanel(template, newJob);
+			panel.initPanel(template, template.getJobSubmissionObject());
 		}
 
 		JPanel mainPanel = null;
