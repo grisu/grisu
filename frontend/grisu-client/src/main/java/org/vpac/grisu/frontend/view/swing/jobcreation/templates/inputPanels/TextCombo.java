@@ -24,7 +24,7 @@ public class TextCombo extends AbstractInputPanel {
 
 	private JComboBox combobox;
 
-	private final DefaultComboBoxModel model = new DefaultComboBoxModel();
+	private DefaultComboBoxModel model;
 
 	public TextCombo(String name, PanelConfig config) throws TemplateException {
 
@@ -55,6 +55,7 @@ public class TextCombo extends AbstractInputPanel {
 
 	private JComboBox getComboBox() {
 		if (combobox == null) {
+			model = new DefaultComboBoxModel();
 			combobox = new JComboBox(model);
 			combobox.addKeyListener(new KeyAdapter() {
 

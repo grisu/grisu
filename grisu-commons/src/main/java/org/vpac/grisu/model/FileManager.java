@@ -298,6 +298,7 @@ public class FileManager {
 			try {
 				downloadUrl(sourceUrl, targetDirUrl, overwrite);
 			} catch (IOException e) {
+				e.printStackTrace();
 				throw new FileTransactionException(sourceUrl, targetDirUrl,
 						"Could not write target file.", e);
 			}
@@ -482,11 +483,15 @@ public class FileManager {
 		File cacheFile = null;
 		if (isFolder) {
 			cacheFile = downloadFolder(url);
-			FileUtils.copyDirectory(cacheFile, new File(targetFile,
-					getFilename(url)));
+			File newDir = new File(targetFile, getFilename(url));
+			boolean canWritePar = targetFile.canWrite();
+			boolean canWrite = newDir.canWrite();
+			boolean created = newDir.mkdirs();
+			FileUtils.copyDirectory(cacheFile, newDir);
 		} else {
 			cacheFile = downloadFile(url);
-			FileUtils.copyDirectory(cacheFile, targetFile);
+			File newFile = new File(targetFile, getFilename(url));
+			FileUtils.copyFile(cacheFile, newFile);
 		}
 
 		return targetFile;
