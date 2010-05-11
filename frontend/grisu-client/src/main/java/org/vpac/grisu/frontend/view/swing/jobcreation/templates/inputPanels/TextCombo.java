@@ -28,6 +28,8 @@ public class TextCombo extends AbstractInputPanel {
 
 	private DefaultComboBoxModel model;
 
+	private String currentValue = null;
+
 	public TextCombo(String name, PanelConfig config) throws TemplateException {
 
 		super(name, config);
@@ -57,7 +59,9 @@ public class TextCombo extends AbstractInputPanel {
 
 	private JComboBox getComboBox() {
 		if (combobox == null) {
-			model = new DefaultComboBoxModel();
+			if (model == null) {
+				model = new DefaultComboBoxModel();
+			}
 			combobox = new JComboBox(model);
 
 			combobox.addItemListener(new ItemListener() {
@@ -65,7 +69,8 @@ public class TextCombo extends AbstractInputPanel {
 					if (isInitFinished()) {
 						if (ItemEvent.SELECTED == e.getStateChange()) {
 							try {
-								setValue(bean, combobox.getSelectedItem());
+								currentValue = (String) model.getSelectedItem();
+								setValue(bean, currentValue);
 							} catch (TemplateException e1) {
 								e1.printStackTrace();
 							}
@@ -74,24 +79,27 @@ public class TextCombo extends AbstractInputPanel {
 				}
 			});
 
-			combobox.addKeyListener(new KeyAdapter() {
+			combobox.getEditor().getEditorComponent().addKeyListener(
+					new KeyAdapter() {
 
-				@Override
-				public void keyReleased(KeyEvent e) {
-					try {
+						@Override
+						public void keyReleased(KeyEvent e) {
+							try {
 
-						// if ( StringUtils.isBlank(bean) ) {
-						// return;
-						// }
+								// if ( StringUtils.isBlank(bean) ) {
+								// return;
+								// }
 
-						setValue(bean, combobox.getSelectedItem());
-					} catch (TemplateException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}
+								currentValue = (String) getComboBox()
+										.getEditor().getItem();
+								setValue(bean, currentValue);
+							} catch (TemplateException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+						}
 
-			});
+					});
 		}
 		return combobox;
 	}
@@ -117,7 +125,8 @@ public class TextCombo extends AbstractInputPanel {
 
 	@Override
 	protected String getValueAsString() {
-		return (String) (combobox.getSelectedItem());
+		// return (String) (getComboBox().getEditor().getItem());
+		return currentValue;
 	}
 
 	@Override
@@ -169,9 +178,32 @@ public class TextCombo extends AbstractInputPanel {
 	@Override
 	void setInitialValue() throws TemplateException {
 
-		if (fillDefaultValueIntoFieldWhenPreparingPanel()) {
-			getJobSubmissionObject().addInputFileUrl(getDefaultValue());
-			getComboBox().setSelectedItem(getDefaultValue());
+		boolean fill = false;
+		try {
+			if (StringUtils.isNotBlank(getPanelProperty(IS_EDITABLE))) {
+				fill = !Boolean.parseBoolean(getPanelProperty(IS_EDITABLE));
+			}
+		} catch (Exception e) {
+			throw new TemplateException(
+					"Can't parse editable value for combobox: "
+							+ e.getLocalizedMessage());
+		}
+
+		if (fill || fillDefaultValueIntoFieldWhenPreparingPanel()) {
+
+			String value = getDefaultValue();
+			if (StringUtils.isBlank(value)) {
+				try {
+					value = (String) model.getElementAt(0);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			currentValue = value;
+			getComboBox().setSelectedItem(value);
+			setValue(bean, value);
+
 		} else {
 			getComboBox().setSelectedItem("");
 		}

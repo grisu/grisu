@@ -85,8 +85,7 @@ public class MonitorCommandlinePanel extends AbstractInputPanel {
 
 	@Override
 	void setInitialValue() throws TemplateException {
-
-		// TODO
+		getTextField().setText(getJobSubmissionObject().getCommandline());
 	}
 
 	@Override
