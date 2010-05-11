@@ -119,9 +119,10 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements
 								.warn("Can't add batch job "
 										+ panel.getPanelName()
 										+ " item because batchjob pane is not displayed...");
+						batchTaskPane.addApplication(panel
+								.getSupportedApplication());
 					}
-					batchTaskPane.addApplication(panel
-							.getSupportedApplication());
+
 				}
 				if (panel.createsSingleJob()) {
 					if (singleTaskPane == null) {

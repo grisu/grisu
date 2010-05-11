@@ -53,7 +53,7 @@ public class GrisuTemplateApp extends GrisuApplicationWindow implements
 
 	@Override
 	public boolean displayBatchJobsCreationPane() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -69,6 +69,8 @@ public class GrisuTemplateApp extends GrisuApplicationWindow implements
 		}
 
 		List<JobCreationPanel> panels = new LinkedList<JobCreationPanel>();
+
+		panels.add(new MpiBlastExampleJobCreationPanel());
 
 		SortedSet<String> allMyTemplates = tm.getAllTemplateNames();
 
