@@ -5,7 +5,6 @@ import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.frontend.control.login.LoginException;
 import org.vpac.grisu.frontend.control.login.LoginManager;
-import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoJobs;
 
@@ -15,20 +14,7 @@ public final class JobList {
 			throws ServiceInterfaceException, LoginException,
 			NoSuchJobException {
 
-		String username = args[0];
-		char[] password = args[1].toCharArray();
-
-		LoginParams loginParams = new LoginParams(
-		// "http://localhost:8080/grisu-ws/services/grisu",
-				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-				// "http://localhost:8080/enunciate-backend/soap/GrisuService",
-				// "Local",
-				"LOCAL_WS", username, password);
-
-		ServiceInterface si = null;
-		// si = LoginManager.login(null, password, username, "VPAC",
-		// loginParams);
-		si = LoginManager.login(null, null, null, null, loginParams);
+		ServiceInterface si = LoginManager.loginCommandline("ARCS");
 
 		DtoJobs test = si.ps(null, true);
 
@@ -45,6 +31,17 @@ public final class JobList {
 		System.out.println("all multipartjobnames");
 		for (String name : si.getAllBatchJobnames(null).asArray()) {
 			System.out.println(name);
+		}
+
+		for (int i = 0; i < 20; i++) {
+			System.out.println("Rechecking...");
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			si.ps(null, true);
 		}
 	}
 

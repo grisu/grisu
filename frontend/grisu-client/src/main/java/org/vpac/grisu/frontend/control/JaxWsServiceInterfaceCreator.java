@@ -24,28 +24,28 @@ import org.vpac.grisu.settings.Environment;
 public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 	static final Logger myLogger = Logger
-	.getLogger(JaxWsServiceInterfaceCreator.class.getName());
+			.getLogger(JaxWsServiceInterfaceCreator.class.getName());
 
-	public static String TRUST_FILE_NAME = Environment.getGrisuClientDirectory()
-	.getPath()
-	+ File.separator + "truststore.jks";
+	public static String TRUST_FILE_NAME = Environment
+			.getGrisuClientDirectory().getPath()
+			+ File.separator + "truststore.jks";
 
 	/**
 	 * configures secure connection parameters.
 	 **/
 	public JaxWsServiceInterfaceCreator() throws ServiceInterfaceException {
 		try {
-			if (!(new File(Environment.getGrisuClientDirectory(), "truststore.jks")
-			.exists())) {
+			if (!(new File(Environment.getGrisuClientDirectory(),
+					"truststore.jks").exists())) {
 				InputStream ts = JaxWsServiceInterfaceCreator.class
-				.getResourceAsStream("/truststore.jks");
+						.getResourceAsStream("/truststore.jks");
 				IOUtils.copy(ts, new FileOutputStream(TRUST_FILE_NAME));
 			}
 		} catch (IOException ex) {
 			throw new ServiceInterfaceException(
 					"cannot copy SSL certificate store into grisu home directory. Does "
-					+ Environment.getGrisuClientDirectory().getPath()
-					+ " exist?", ex);
+							+ Environment.getGrisuClientDirectory().getPath()
+							+ " exist?", ex);
 		}
 		System.setProperty("javax.net.ssl.trustStore", TRUST_FILE_NAME);
 		System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
@@ -67,10 +67,10 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 		try {
 
 			QName serviceName = new QName("http://api.grisu.arcs.org.au/",
-			"GrisuService");
+					"GrisuService");
 			QName portName = new QName("http://api.grisu.arcs.org.au/",
-					//					"ServiceInterfaceSOAPPort");
-			"ServiceInterfacePort");
+			// "ServiceInterfaceSOAPPort");
+					"ServiceInterfacePort");
 
 			Service s;
 			try {
@@ -94,18 +94,18 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 					interfaceUrl);
 
 			bp
-			.getRequestContext()
-			.put(
-					"com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size",
-					new Integer(4096));
+					.getRequestContext()
+					.put(
+							"com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size",
+							new Integer(4096));
 
 			bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY,
 					username);
 			bp.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY,
 					new String(password));
 
-			//			bp.getRequestContext().put(
-			//					BindingProvider.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
+			// bp.getRequestContext().put(
+			// BindingProvider.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
 
 			// bp.getRequestContext().put(
 			// JAXWSProperties.SSL_SOCKET_FACTORY,
@@ -160,93 +160,93 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			// e.printStackTrace();
 			throw new ServiceInterfaceException(
 					"Could not create JaxwsServiceInterface: "
-					+ e.getLocalizedMessage(), e);
+							+ e.getLocalizedMessage(), e);
 		}
 
 	}
 
-	//	private SSLSocketFactory createSocketFactory(String interfaceUrl)
-	//			throws ServiceInterfaceException {
-	//		// Technique similar to
-	//		// http://juliusdavies.ca/commons-ssl/TrustExample.java.html
-	//		HttpSecureProtocol protocolSocketFactory;
-	//		try {
-	//			protocolSocketFactory = new HttpSecureProtocol();
+	// private SSLSocketFactory createSocketFactory(String interfaceUrl)
+	// throws ServiceInterfaceException {
+	// // Technique similar to
+	// // http://juliusdavies.ca/commons-ssl/TrustExample.java.html
+	// HttpSecureProtocol protocolSocketFactory;
+	// try {
+	// protocolSocketFactory = new HttpSecureProtocol();
 	//
-	//			TrustMaterial trustMaterial = null;
+	// TrustMaterial trustMaterial = null;
 	//
-	//			// "/thecertificate.cer" can be PEM or DER (raw ASN.1). Can even
-	//			// be several PEM certificates in one file.
+	// // "/thecertificate.cer" can be PEM or DER (raw ASN.1). Can even
+	// // be several PEM certificates in one file.
 	//
-	//			String cacertFilename = System.getProperty("grisu.cacert");
-	//			URL cacertURL = null;
+	// String cacertFilename = System.getProperty("grisu.cacert");
+	// URL cacertURL = null;
 	//
-	//			try {
-	//				if (cacertFilename != null && !"".equals(cacertFilename)) {
-	//					cacertURL = JaxWsServiceInterfaceCreator.class
-	//							.getResource("/" + cacertFilename);
-	//					if (cacertURL != null) {
-	//						myLogger.debug("Using cacert " + cacertFilename
-	//								+ " as configured in the -D option.");
-	//					}
-	//				}
-	//			} catch (Exception e) {
-	//				// doesn't matter
-	//				myLogger
-	//						.debug("Couldn't find specified cacert. Using default one.");
-	//			}
+	// try {
+	// if (cacertFilename != null && !"".equals(cacertFilename)) {
+	// cacertURL = JaxWsServiceInterfaceCreator.class
+	// .getResource("/" + cacertFilename);
+	// if (cacertURL != null) {
+	// myLogger.debug("Using cacert " + cacertFilename
+	// + " as configured in the -D option.");
+	// }
+	// }
+	// } catch (Exception e) {
+	// // doesn't matter
+	// myLogger
+	// .debug("Couldn't find specified cacert. Using default one.");
+	// }
 	//
-	//			if (cacertURL == null) {
+	// if (cacertURL == null) {
 	//
-	//				cacertFilename = new CaCertManager()
-	//						.getCaCertNameForServiceInterfaceUrl(interfaceUrl);
-	//				if (cacertFilename != null && cacertFilename.length() > 0) {
-	//					myLogger
-	//							.debug("Found url in map. Trying to use this cacert file: "
-	//									+ cacertFilename);
-	//					cacertURL = JaxWsServiceInterfaceCreator.class
-	//							.getResource("/" + cacertFilename);
-	//					if (cacertURL == null) {
-	//						myLogger
-	//								.debug("Didn't find cacert. Using the default one.");
-	//						// use the default one
-	//						cacertURL = JaxWsServiceInterfaceCreator.class
-	//								.getResource("/cacert.pem");
-	//					} else {
-	//						myLogger.debug("Found cacert. Using it. Good.");
-	//					}
-	//				} else {
-	//					myLogger
-	//							.debug("Didn't find any configuration for a special cacert. Using the default one.");
-	//					// use the default one
-	//					cacertURL = JaxWsServiceInterfaceCreator.class
-	//							.getResource("/cacert.pem");
-	//				}
+	// cacertFilename = new CaCertManager()
+	// .getCaCertNameForServiceInterfaceUrl(interfaceUrl);
+	// if (cacertFilename != null && cacertFilename.length() > 0) {
+	// myLogger
+	// .debug("Found url in map. Trying to use this cacert file: "
+	// + cacertFilename);
+	// cacertURL = JaxWsServiceInterfaceCreator.class
+	// .getResource("/" + cacertFilename);
+	// if (cacertURL == null) {
+	// myLogger
+	// .debug("Didn't find cacert. Using the default one.");
+	// // use the default one
+	// cacertURL = JaxWsServiceInterfaceCreator.class
+	// .getResource("/cacert.pem");
+	// } else {
+	// myLogger.debug("Found cacert. Using it. Good.");
+	// }
+	// } else {
+	// myLogger
+	// .debug("Didn't find any configuration for a special cacert. Using the default one.");
+	// // use the default one
+	// cacertURL = JaxWsServiceInterfaceCreator.class
+	// .getResource("/cacert.pem");
+	// }
 	//
-	//			}
+	// }
 	//
-	//			trustMaterial = new TrustMaterial(cacertURL);
+	// trustMaterial = new TrustMaterial(cacertURL);
 	//
-	//			// We can use setTrustMaterial() instead of addTrustMaterial()
-	//			// if we want to remove
-	//			// HttpSecureProtocol's default trust of TrustMaterial.CACERTS.
-	//			protocolSocketFactory.addTrustMaterial(trustMaterial);
+	// // We can use setTrustMaterial() instead of addTrustMaterial()
+	// // if we want to remove
+	// // HttpSecureProtocol's default trust of TrustMaterial.CACERTS.
+	// protocolSocketFactory.addTrustMaterial(trustMaterial);
 	//
-	//			// Maybe we want to turn off CN validation (not recommended!):
-	//			protocolSocketFactory.setCheckHostname(false);
+	// // Maybe we want to turn off CN validation (not recommended!):
+	// protocolSocketFactory.setCheckHostname(false);
 	//
-	//			Protocol protocol = new Protocol("https",
-	//					(ProtocolSocketFactory) protocolSocketFactory, 443);
-	//			Protocol.registerProtocol("https", protocol);
+	// Protocol protocol = new Protocol("https",
+	// (ProtocolSocketFactory) protocolSocketFactory, 443);
+	// Protocol.registerProtocol("https", protocol);
 	//
-	//			return protocolSocketFactory;
-	//		} catch (Exception e1) {
-	//			// TODO Auto-generated catch block
-	//			// e1.printStackTrace();
-	//			throw new ServiceInterfaceException(
-	//					"Unspecified error while trying to establish secure connection.",
-	//					e1);
-	//		}
-	//	}
+	// return protocolSocketFactory;
+	// } catch (Exception e1) {
+	// // TODO Auto-generated catch block
+	// // e1.printStackTrace();
+	// throw new ServiceInterfaceException(
+	// "Unspecified error while trying to establish secure connection.",
+	// e1);
+	// }
+	// }
 
 }
