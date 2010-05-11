@@ -57,7 +57,9 @@ public class TemplateHelpers {
 		}
 
 		if (StringUtils.isBlank(value)) {
-			throw new TemplateException("Can't parse value for line: " + line);
+			value = "";
+			// throw new TemplateException("Can't parse value for line: " +
+			// line);
 		}
 
 		if ("type".equals(key)) {

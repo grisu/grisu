@@ -173,8 +173,14 @@ public class MultipleInputFiles extends AbstractInputPanel {
 	}
 
 	@Override
+	void setInitialValue() throws TemplateException {
+
+	}
+
+	@Override
 	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
-		// TODO Auto-generated method stub
+
+		fileModel.removeAllElements();
 
 	}
 }

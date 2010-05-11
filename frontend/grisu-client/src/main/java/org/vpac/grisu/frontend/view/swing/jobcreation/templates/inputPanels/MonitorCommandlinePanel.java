@@ -84,8 +84,14 @@ public class MonitorCommandlinePanel extends AbstractInputPanel {
 	}
 
 	@Override
+	void setInitialValue() throws TemplateException {
+
+		// TODO
+	}
+
+	@Override
 	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

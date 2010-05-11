@@ -156,11 +156,17 @@ public class SimpleCommandline extends AbstractInputPanel {
 			getComboBox().addItem(value);
 		}
 
+	}
+
+	@Override
+	void setInitialValue() throws TemplateException {
+
 		if (fillDefaultValueIntoFieldWhenPreparingPanel()) {
 			getComboBox().setSelectedItem(getDefaultValue());
 		} else {
 			getComboBox().setSelectedItem("");
 		}
+
 	}
 
 	@Override

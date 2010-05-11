@@ -50,6 +50,7 @@ public abstract class AbstractInputPanel extends JPanel implements
 	public static final String DEFAULT_VALUE = "defaultValue";
 	public static final String NAME = "name";
 	public static final String TITLE = "title";
+	public static final String LABEL = "label";
 	public static final String PREFILLS = "prefills";
 	public static final String USE_HISTORY = "useHistory"; // default: true
 	public static final String FILL_WITH_DEFAULT_VALUE = "fillWithDefaultValue"; // default:
@@ -59,6 +60,7 @@ public abstract class AbstractInputPanel extends JPanel implements
 	public static final String SIZE = "size";
 	public static final String IS_VISIBLE = "isVisible";
 	public static final String BEAN = "property";
+	public static final String IS_EDITABLE = "editable";
 
 	public static final String APPLICATION = "application";
 	public static final String TEMPLATENAME = "templatename";
@@ -76,7 +78,7 @@ public abstract class AbstractInputPanel extends JPanel implements
 
 	protected final String historyManagerEntryName;
 
-	protected Map<String, String> panelProperties;
+	private Map<String, String> panelProperties;
 
 	private ServiceInterface si;
 	private UserEnvironmentManager uem;
@@ -85,6 +87,8 @@ public abstract class AbstractInputPanel extends JPanel implements
 
 	private JButton helpLabel;
 	private boolean displayHelpLabel = false;
+
+	private boolean initFinished = false;
 
 	private static Map<String, GrisuFileDialog> dialogs = new HashMap<String, GrisuFileDialog>();
 
@@ -239,6 +243,11 @@ public abstract class AbstractInputPanel extends JPanel implements
 	}
 
 	protected void addValue(String bean, Object value) {
+
+		if (!isInitFinished()) {
+			return;
+		}
+
 		try {
 			Method method = jobObject.getClass().getMethod(
 					"add" + StringUtils.capitalize(bean), value.getClass());
@@ -377,6 +386,18 @@ public abstract class AbstractInputPanel extends JPanel implements
 		}
 	}
 
+	public String getPanelName() {
+		return this.panelProperties.get(NAME);
+	}
+
+	protected String getPanelProperty(String key) {
+		if (panelProperties == null) {
+			throw new IllegalStateException(
+					"Panel properties not initialized yet");
+		}
+		return panelProperties.get(key);
+	}
+
 	// protected Object getValue(String bean) {
 	// try {
 	// Method method =
@@ -388,10 +409,6 @@ public abstract class AbstractInputPanel extends JPanel implements
 	// return null;
 	// }
 	// }
-
-	public String getPanelName() {
-		return this.panelProperties.get(NAME);
-	}
 
 	protected RunningJobManager getRunningJobManager() {
 
@@ -453,6 +470,10 @@ public abstract class AbstractInputPanel extends JPanel implements
 		return isVisible;
 	}
 
+	public boolean isInitFinished() {
+		return initFinished;
+	}
+
 	/**
 	 * Must be implemented if a change in a job property would possibly change
 	 * the value of one of the job properties this panel is responsible for.
@@ -510,6 +531,8 @@ public abstract class AbstractInputPanel extends JPanel implements
 	public void refresh(JobSubmissionObjectImpl jobObject)
 			throws TemplateException {
 
+		initFinished = false;
+
 		if (this.jobObject != null) {
 			this.jobObject.removePropertyChangeListener(this);
 		}
@@ -520,9 +543,17 @@ public abstract class AbstractInputPanel extends JPanel implements
 		templateRefresh(jobObject);
 
 		preparePanel(panelProperties);
+
+		initFinished = true;
+
+		setInitialValue();
 	}
 
 	protected void removeValue(String bean, Object value) {
+
+		if (!isInitFinished()) {
+			return;
+		}
 		try {
 			Method method = jobObject.getClass().getMethod(
 					"remove" + StringUtils.capitalize(bean), value.getClass());
@@ -533,6 +564,8 @@ public abstract class AbstractInputPanel extends JPanel implements
 			e.printStackTrace();
 		}
 	}
+
+	abstract void setInitialValue() throws TemplateException;
 
 	public void setServiceInterface(ServiceInterface si) {
 
@@ -547,9 +580,14 @@ public abstract class AbstractInputPanel extends JPanel implements
 	}
 
 	protected void setValue(String bean, Object value) throws TemplateException {
+
+		if (!isInitFinished()) {
+			return;
+		}
+
 		try {
 
-			if (bean != null) {
+			if (StringUtils.isNotBlank(bean)) {
 				Method method = jobObject.getClass().getMethod(
 						"set" + StringUtils.capitalize(bean), value.getClass());
 				method.invoke(jobObject, value);

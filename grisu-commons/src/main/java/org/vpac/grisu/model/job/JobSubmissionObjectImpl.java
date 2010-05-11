@@ -233,6 +233,10 @@ public class JobSubmissionObjectImpl {
 
 	public void addInputFileUrl(String url) {
 
+		if (StringUtils.isBlank(url)) {
+			return;
+		}
+
 		url = FileManager.ensureUriFormat(url);
 		String[] oldValue = getInputFileUrls();
 		this.inputFileUrls.add(url);
@@ -495,6 +499,10 @@ public class JobSubmissionObjectImpl {
 	}
 
 	public void removeInputFileUrl(String selectedFile) {
+
+		if (StringUtils.isBlank(selectedFile)) {
+			return;
+		}
 		String[] oldValue = getInputFileUrls();
 		this.inputFileUrls.remove(selectedFile);
 		pcs.firePropertyChange("inputFileUrls", oldValue, this.inputFileUrls);

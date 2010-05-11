@@ -173,6 +173,13 @@ public class Email extends AbstractInputPanel {
 	}
 
 	@Override
+	void setInitialValue() {
+
+		// TODO
+
+	}
+
+	@Override
 	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
 
 	}

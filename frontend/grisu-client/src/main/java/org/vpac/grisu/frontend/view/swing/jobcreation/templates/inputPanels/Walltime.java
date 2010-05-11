@@ -111,17 +111,19 @@ public class Walltime extends AbstractInputPanel {
 					String amount = (String) (getAmountComboBox()
 							.getSelectedItem());
 					String unit = (String) (getUnitComboBox().getSelectedItem());
-					
-					if ( StringUtils.isBlank(amount)||StringUtils.isBlank(unit)) {
+
+					if (StringUtils.isBlank(amount)
+							|| StringUtils.isBlank(unit)) {
 						return;
 					}
 
 					int walltimeInSeconds = -1;
 					try {
 						walltimeInSeconds = convertHumanReadableStringIntoSeconds(new String[] {
-							amount, unit });
+								amount, unit });
 					} catch (Exception e1) {
-						myLogger.debug("Can't parse "+amount+ ",  "+unit+": "+e1.getLocalizedMessage());
+						myLogger.debug("Can't parse " + amount + ",  " + unit
+								+ ": " + e1.getLocalizedMessage());
 						return;
 					}
 
@@ -226,6 +228,22 @@ public class Walltime extends AbstractInputPanel {
 			}
 		}
 
+		unitModel.removeAllElements();
+		String[] units = panelProperties.get("defaultUnitList").split(",");
+		for (String unit : units) {
+			if ("minutes,hours,days,weeks".indexOf(unit) >= 0) {
+				unitModel.addElement(unit);
+			} else {
+				myLogger.error("Can't add unit " + unit
+						+ " to WalltimePanel. Not a valid unitname.");
+			}
+		}
+
+	}
+
+	@Override
+	void setInitialValue() throws TemplateException {
+
 		String defaultAmount = null;
 		String defaultUnit = null;
 		if (useHistory()) {
@@ -246,7 +264,7 @@ public class Walltime extends AbstractInputPanel {
 		}
 
 		if (StringUtils.isBlank(defaultAmount)) {
-			defaultAmount = panelProperties.get("defaultAmount");
+			defaultAmount = getPanelProperty("defaultAmount");
 		}
 		if (StringUtils.isNotBlank(defaultAmount)) {
 			try {
@@ -259,18 +277,8 @@ public class Walltime extends AbstractInputPanel {
 			}
 		}
 
-		unitModel.removeAllElements();
-		String[] units = panelProperties.get("defaultUnitList").split(",");
-		for (String unit : units) {
-			if ("minutes,hours,days,weeks".indexOf(unit) >= 0) {
-				unitModel.addElement(unit);
-			} else {
-				myLogger.error("Can't add unit " + unit
-						+ " to WalltimePanel. Not a valid unitname.");
-			}
-		}
 		if (StringUtils.isBlank(defaultUnit)) {
-			defaultUnit = panelProperties.get("defaultUnit");
+			defaultUnit = getPanelProperty("defaultUnit");
 		}
 
 		if (StringUtils.isNotBlank(defaultUnit)

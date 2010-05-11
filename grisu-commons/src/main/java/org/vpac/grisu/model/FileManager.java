@@ -872,9 +872,11 @@ public class FileManager {
 
 		if (file.isDirectory()) {
 			throw new FileTransactionException(uriOrPath, null,
-					"Upload of folders not supported (yet).", null);
+					"Upload of folders not supported for job input files.",
+					null);
+		} else {
+			uploadInputFile(file, job);
 		}
-		uploadInputFile(file, job);
 
 	}
 

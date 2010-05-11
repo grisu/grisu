@@ -145,13 +145,22 @@ public class SubmissionMonitorPanel extends JPanel implements
 					job.submitJob();
 
 				} catch (JobPropertiesException e) {
-					// TODO Auto-generated catch block
+					StringBuffer temp = new StringBuffer(
+							"Job submission failed: " + e.getLocalizedMessage());
+					textArea.append("\n" + temp.toString());
+
 					e.printStackTrace();
 				} catch (JobSubmissionException e) {
-					// TODO Auto-generated catch block
+					StringBuffer temp = new StringBuffer(
+							"Job submission failed: " + e.getLocalizedMessage());
+					textArea.append("\n" + temp.toString());
+
 					e.printStackTrace();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
+					StringBuffer temp = new StringBuffer(
+							"Job submission failed: " + e.getLocalizedMessage());
+					textArea.append("\n" + temp.toString());
+
 					e.printStackTrace();
 				} finally {
 					SwingUtilities.invokeLater(new Thread() {

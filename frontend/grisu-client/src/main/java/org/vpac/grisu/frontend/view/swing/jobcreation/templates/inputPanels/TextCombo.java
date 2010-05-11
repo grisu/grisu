@@ -1,5 +1,7 @@
 package org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels;
 
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
@@ -57,6 +59,21 @@ public class TextCombo extends AbstractInputPanel {
 		if (combobox == null) {
 			model = new DefaultComboBoxModel();
 			combobox = new JComboBox(model);
+
+			combobox.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) {
+					if (isInitFinished()) {
+						if (ItemEvent.SELECTED == e.getStateChange()) {
+							try {
+								setValue(bean, combobox.getSelectedItem());
+							} catch (TemplateException e1) {
+								e1.printStackTrace();
+							}
+						}
+					}
+				}
+			});
+
 			combobox.addKeyListener(new KeyAdapter() {
 
 				@Override
@@ -131,12 +148,34 @@ public class TextCombo extends AbstractInputPanel {
 			}
 		}
 
+		boolean isEditable = true;
+		try {
+			if (panelProperties.get(IS_EDITABLE) != null) {
+				isEditable = Boolean.parseBoolean(panelProperties
+						.get(IS_EDITABLE));
+			}
+		} catch (Exception e) {
+			throw new TemplateException("Can't parse \"editable\" value: "
+					+ panelProperties.get(IS_EDITABLE));
+		}
+
+		if (isEditable) {
+			getComboBox().setEditable(true);
+		} else {
+			getComboBox().setEditable(false);
+		}
+	}
+
+	@Override
+	void setInitialValue() throws TemplateException {
+
 		if (fillDefaultValueIntoFieldWhenPreparingPanel()) {
 			getJobSubmissionObject().addInputFileUrl(getDefaultValue());
 			getComboBox().setSelectedItem(getDefaultValue());
 		} else {
 			getComboBox().setSelectedItem("");
 		}
+
 	}
 
 	@Override

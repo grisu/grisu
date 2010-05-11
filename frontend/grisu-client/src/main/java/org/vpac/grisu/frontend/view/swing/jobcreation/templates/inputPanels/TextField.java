@@ -105,16 +105,22 @@ public class TextField extends AbstractInputPanel {
 		// return;
 		// }
 
-		String defaultValue = panelProperties.get(DEFAULT_VALUE);
+	}
+
+	@Override
+	void setInitialValue() throws TemplateException {
+
+		String defaultValue = getPanelProperty(DEFAULT_VALUE);
 		if (StringUtils.isNotBlank(defaultValue)) {
 			setValue(bean, defaultValue);
 		}
-
 	}
 
 	@Override
 	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
-		// TODO Auto-generated method stub
 
+		if (useHistory()) {
+			addValueToHistory();
+		}
 	}
 }

@@ -115,7 +115,12 @@ public class Jobname extends AbstractInputPanel {
 	protected void preparePanel(Map<String, String> panelProperties)
 			throws TemplateException {
 
-		String defaultValue = panelProperties.get(DEFAULT_VALUE);
+	}
+
+	@Override
+	void setInitialValue() throws TemplateException {
+
+		String defaultValue = getPanelProperty(DEFAULT_VALUE);
 		if (StringUtils.isNotBlank(defaultValue)) {
 			String sugJobname = getUserEnvironmentManager()
 					.calculateUniqueJobname(defaultValue);
@@ -127,6 +132,6 @@ public class Jobname extends AbstractInputPanel {
 	@Override
 	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

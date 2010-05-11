@@ -181,27 +181,33 @@ public class JobType extends AbstractInputPanel implements ActionListener {
 	protected void preparePanel(Map<String, String> panelProperties)
 			throws TemplateException {
 
+	}
+
+	@Override
+	void setInitialValue() throws TemplateException {
+
 		String last = null;
-		if ( useHistory() ) {
+		if (useHistory()) {
 			last = getDefaultValue();
 		}
-		
-		if ( StringUtils.isBlank(last) ) {
+
+		if (StringUtils.isBlank(last)) {
 			int cpus = getJobSubmissionObject().getCpus();
-			if ( cpus == 1 ) {
+			if (cpus == 1) {
 				getSingleRadioBox().setSelected(true);
 			} else {
 				getMpiRadioBox().setSelected(true);
 			}
 		} else {
-			if ( SINGLE.equals(last) ) {
+			if (SINGLE.equals(last)) {
 				getSingleRadioBox().setSelected(true);
-			} else if ( THREADED.equals(last) ) {
+			} else if (THREADED.equals(last)) {
 				getThreadedRadioBox().setSelected(true);
-			} else if ( MPI.equals(last) ) {
+			} else if (MPI.equals(last)) {
 				getMpiRadioBox().setSelected(true);
 			} else {
-				myLogger.error("Value: "+last+" not a valid value for Jobtype.");
+				myLogger.error("Value: " + last
+						+ " not a valid value for Jobtype.");
 			}
 		}
 
@@ -210,9 +216,9 @@ public class JobType extends AbstractInputPanel implements ActionListener {
 	@Override
 	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
 
-		if ( useHistory() ) {
+		if (useHistory()) {
 			addValueToHistory();
 		}
-		
+
 	}
 }

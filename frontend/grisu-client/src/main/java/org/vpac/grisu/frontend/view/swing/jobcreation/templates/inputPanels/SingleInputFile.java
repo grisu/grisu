@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang.StringUtils;
@@ -35,23 +36,48 @@ public class SingleInputFile extends AbstractInputPanel {
 	private String selectedFile = null;
 
 	private final DefaultComboBoxModel comboBoxModel = new DefaultComboBoxModel();
+	private JLabel label;
 
 	public SingleInputFile(String name, PanelConfig config)
 			throws TemplateException {
 
 		super(name, config);
-		setLayout(new FormLayout(new ColumnSpec[] {
-				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("center:max(35dlu;default):grow"),
-				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, }));
-		add(getComboBox(), "2, 2, fill, default");
-		add(getButton(), "4, 2");
+
+		if (!displayHelpLabel()) {
+			setLayout(new FormLayout(new ColumnSpec[] {
+					FormFactory.RELATED_GAP_COLSPEC,
+					ColumnSpec.decode("center:max(35dlu;default):grow"),
+					FormFactory.RELATED_GAP_COLSPEC,
+					FormFactory.DEFAULT_COLSPEC,
+					FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+					FormFactory.RELATED_GAP_ROWSPEC,
+					FormFactory.DEFAULT_ROWSPEC,
+					FormFactory.RELATED_GAP_ROWSPEC, }));
+			add(getComboBox(), "2, 2, fill, default");
+			add(getButton(), "4, 2");
+		} else {
+			setLayout(new FormLayout(new ColumnSpec[] {
+					FormFactory.RELATED_GAP_COLSPEC,
+					ColumnSpec.decode("center:max(35dlu;default):grow"),
+					FormFactory.RELATED_GAP_COLSPEC,
+					FormFactory.DEFAULT_COLSPEC,
+					FormFactory.RELATED_GAP_COLSPEC,
+					FormFactory.DEFAULT_COLSPEC,
+					FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+					FormFactory.RELATED_GAP_ROWSPEC,
+					FormFactory.DEFAULT_ROWSPEC,
+					FormFactory.RELATED_GAP_ROWSPEC, }));
+			add(getComboBox(), "2, 2, fill, default");
+			add(getButton(), "4, 2");
+			add(getHelpLabel(), "6, 2");
+		}
 	}
 
 	private void fileChanged() {
+
+		if (!isInitFinished()) {
+			return;
+		}
 
 		if (selectedFile != null) {
 			removeValue("inputFileUrl", selectedFile);
@@ -99,7 +125,9 @@ public class SingleInputFile extends AbstractInputPanel {
 				public void itemStateChanged(ItemEvent e) {
 					if (ItemEvent.SELECTED == e.getStateChange()) {
 
-						fileChanged();
+						if (isInitFinished()) {
+							fileChanged();
+						}
 
 					}
 				}
@@ -182,6 +210,11 @@ public class SingleInputFile extends AbstractInputPanel {
 			}
 		}
 
+	}
+
+	@Override
+	void setInitialValue() throws TemplateException {
+
 		if (fillDefaultValueIntoFieldWhenPreparingPanel()) {
 			getJobSubmissionObject().addInputFileUrl(getDefaultValue());
 			getComboBox().setSelectedItem(getDefaultValue());
@@ -198,4 +231,5 @@ public class SingleInputFile extends AbstractInputPanel {
 			addValueToHistory();
 		}
 	}
+
 }

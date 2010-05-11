@@ -47,13 +47,16 @@ public class Cpus extends AbstractInputPanel {
 						return;
 					}
 
+					if (!isInitFinished()) {
+						return;
+					}
+
 					if (ItemEvent.SELECTED == e.getStateChange()) {
 						Integer value = (Integer) getComboBox()
 								.getSelectedItem();
 						try {
 							setValue("cpus", value);
 						} catch (TemplateException e1) {
-							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
 					}
@@ -133,6 +136,11 @@ public class Cpus extends AbstractInputPanel {
 			}
 		}
 
+	}
+
+	@Override
+	void setInitialValue() {
+
 		String def = getDefaultValue();
 		if (StringUtils.isNotBlank(def)) {
 			try {
@@ -147,7 +155,7 @@ public class Cpus extends AbstractInputPanel {
 	@Override
 	protected void templateRefresh(JobSubmissionObjectImpl jobObject) {
 
-		if ( useHistory() ) {
+		if (useHistory()) {
 			addValueToHistory();
 		}
 
