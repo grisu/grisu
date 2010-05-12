@@ -357,7 +357,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 			Iterator<String> it = currentFastaInput.iterator();
 			while (it.hasNext()) {
 				String line = it.next();
-				if (StringUtils.isBlank(line)) {
+				if (StringUtils.isBlank(line.trim())) {
 					it.remove();
 				}
 			}
@@ -379,6 +379,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 				}
 				currentPart.add(line);
 			}
+			currentParsedFastaInput.add(currentPart);
 
 		} catch (IOException e) {
 			e.printStackTrace();
