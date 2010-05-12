@@ -8,7 +8,6 @@ import org.bushe.swing.event.annotation.AnnotationProcessor;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginManager;
-import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.frontend.model.events.BatchJobEvent;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
 import org.vpac.grisu.frontend.model.job.JobObject;
@@ -24,20 +23,6 @@ public class MultiJobSubmit {
 
 		ExecutorService executor = Executors.newFixedThreadPool(10);
 
-		String username = args[0];
-		char[] password = args[1].toCharArray();
-
-		LoginParams loginParams = new LoginParams(
-				// "http://localhost:8080/xfire-backend/services/grisu",
-				// "https://ngportal.vpac.org/grisu-ws/soap/EnunciateServiceInterfaceService",
-				// "https://ngportal.vpac.org/grisu-ws/services/grisu",
-				// "https://ngportal.vpac.org/grisu-ws/soap/GrisuService",
-				// "http://localhost:8080/enunciate-backend/soap/GrisuService",
-				"Local",
-				// "ARCS_DEV",
-				// "Dummy",
-				username, password);
-
 		final ServiceInterface si = LoginManager.loginCommandline();
 
 		final GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
@@ -49,10 +34,11 @@ public class MultiJobSubmit {
 		Date start = new Date();
 		final String multiJobName = "jobTest20_7";
 		try {
-			System.out.println("Killing job: "+multiJobName);
+			System.out.println("Killing job: " + multiJobName);
 			si.kill(multiJobName, true);
 
-			registry.getUserEnvironmentManager().waitForActionToFinish(multiJobName);
+			registry.getUserEnvironmentManager().waitForActionToFinish(
+					multiJobName);
 			System.out.println("Killed job.");
 		} catch (Exception e) {
 		}
@@ -102,7 +88,7 @@ public class MultiJobSubmit {
 		}
 
 		System.out.println("Job distribution:");
-		System.out.println( multiPartJob.getOptimizationResult());
+		System.out.println(multiPartJob.getOptimizationResult());
 
 		try {
 			multiPartJob.submit();

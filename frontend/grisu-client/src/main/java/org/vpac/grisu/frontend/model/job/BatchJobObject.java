@@ -39,6 +39,7 @@ import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException
 import org.vpac.grisu.frontend.control.jobMonitoring.RunningJobManager;
 import org.vpac.grisu.frontend.model.events.BatchJobEvent;
 import org.vpac.grisu.frontend.model.events.BatchJobKilledEvent;
+import org.vpac.grisu.frontend.model.events.NewBatchJobEvent;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.DtoActionStatus;
@@ -63,7 +64,7 @@ import com.google.common.collect.ImmutableList;
  * 
  */
 public class BatchJobObject implements JobMonitoringObject,
-Comparable<BatchJobObject> {
+		Comparable<BatchJobObject> {
 
 	static final Logger myLogger = Logger.getLogger(BatchJobObject.class
 			.getName());
@@ -83,6 +84,7 @@ Comparable<BatchJobObject> {
 	public static final String NUMBER_OF_SUCCESSFULL_JOBS = "numberOfSuccessfulJobs";
 	public static final String NUMBER_OF_UNSUBMITTED_JOBS = "numberOfUnsubmittedJobs";
 	public static final String TOTAL_NUMBER_OF_JOBS = "totalNumberOfJobs";
+	public static final String SUBMITTING = "submitting";
 
 	public static final int UNDEFINED = Integer.MIN_VALUE;
 
@@ -90,9 +92,7 @@ Comparable<BatchJobObject> {
 
 	public static final int DEFAULT_JOB_CREATION_THREADS = 5;
 
-
 	private Thread refreshThread;
-
 
 	private int concurrentJobCreationThreads = 0;
 
@@ -105,7 +105,8 @@ Comparable<BatchJobObject> {
 
 	private final EventList<JobObject> jobs = new BasicEventList<JobObject>();
 
-	private final List<JobObject> newlyAddedJobs = Collections.synchronizedList(new LinkedList<JobObject>());
+	private final List<JobObject> newlyAddedJobs = Collections
+			.synchronizedList(new LinkedList<JobObject>());
 
 	private final Map<String, String> inputFiles = new HashMap<String, String>();
 
@@ -131,6 +132,11 @@ Comparable<BatchJobObject> {
 
 	private String optimizationResult = null;
 
+	private final List<String> submissionLog = Collections
+			.synchronizedList(new LinkedList<String>());
+
+	private boolean isSubmitting = false;
+
 	/**
 	 * Use this constructor to create a MultiPartJobObject for a multipartjob
 	 * that already exists on the backend.
@@ -151,7 +157,7 @@ Comparable<BatchJobObject> {
 	 */
 	public BatchJobObject(ServiceInterface serviceInterface,
 			String batchJobname, boolean refreshJobStatusOnBackend)
-	throws BatchJobException, NoSuchJobException {
+			throws BatchJobException, NoSuchJobException {
 
 		this.serviceInterface = serviceInterface;
 		this.batchJobname = batchJobname;
@@ -159,8 +165,9 @@ Comparable<BatchJobObject> {
 
 			dtoMultiPartJob = getWrappedDtoBatchJob(refreshJobStatusOnBackend);
 
-			if ( dtoMultiPartJob == null ) {
-				throw new NoSuchJobException("Could not access batchjob "+batchJobname+" on the backend.");
+			if (dtoMultiPartJob == null) {
+				throw new NoSuchJobException("Could not access batchjob "
+						+ batchJobname + " on the backend.");
 			}
 
 			this.submissionFqan = dtoMultiPartJob.getSubmissionFqan();
@@ -169,8 +176,11 @@ Comparable<BatchJobObject> {
 					this.batchJobname, Constants.APPLICATIONNAME_KEY));
 			setDefaultVersion(serviceInterface.getJobProperty(
 					this.batchJobname, Constants.APPLICATIONVERSION_KEY));
+
+			addJobLogMessage("Job loaded from backend.");
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
+			throw new BatchJobException(e.getLocalizedMessage());
 		}
 
 	}
@@ -190,7 +200,7 @@ Comparable<BatchJobObject> {
 	public BatchJobObject(ServiceInterface serviceInterface,
 			String batchJobname, String submissionFqan,
 			String defaultApplication, String defaultVersion)
-	throws BatchJobException {
+			throws BatchJobException {
 		this.serviceInterface = serviceInterface;
 		this.batchJobname = batchJobname;
 		this.submissionFqan = submissionFqan;
@@ -207,6 +217,7 @@ Comparable<BatchJobObject> {
 		setDefaultApplication(defaultApplication);
 		setDefaultVersion(defaultVersion);
 
+		addJobLogMessage("Empty job created.");
 	}
 
 	/**
@@ -231,6 +242,8 @@ Comparable<BatchJobObject> {
 			FileManager.getFilename(inputFile);
 			inputFiles.put(inputFile, FileManager.getFilename(inputFile));
 		}
+
+		addJobLogMessage("Added job-wide input file: " + inputFile);
 	}
 
 	/**
@@ -249,6 +262,7 @@ Comparable<BatchJobObject> {
 	public void addInputFile(String inputFile, String targetFilename) {
 		inputFile = FileManager.ensureUriFormat(inputFile);
 		inputFiles.put(inputFile, targetFilename);
+		addJobLogMessage("Added job-wide input file: " + inputFile);
 	}
 
 	/**
@@ -272,7 +286,7 @@ Comparable<BatchJobObject> {
 		if (job.getWalltimeInSeconds() <= 0) {
 			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 					"Setting walltime for job " + job.getJobname()
-					+ " to default walltime: " + defaultWalltime));
+							+ " to default walltime: " + defaultWalltime));
 			job.setWalltimeInSeconds(defaultWalltime);
 		} else {
 
@@ -286,9 +300,16 @@ Comparable<BatchJobObject> {
 		this.getJobs().add(job);
 		this.getNewlyAddedJobs().add(job);
 
-		pcs.firePropertyChange("totalNumberOfJobs", oldNo, this.getJobs().size());
+		pcs.firePropertyChange("totalNumberOfJobs", oldNo, this.getJobs()
+				.size());
 		pcs.firePropertyChange("jobs", null, getJobs());
+		addJobLogMessage("Added new sub-job: " + job.getJobname());
 
+	}
+
+	private void addJobLogMessage(String message) {
+		this.submissionLog.add(message);
+		pcs.firePropertyChange("submissionLog", null, getSubmissionLog());
 	}
 
 	/**
@@ -303,6 +324,7 @@ Comparable<BatchJobObject> {
 
 		try {
 			serviceInterface.addJobProperty(batchJobname, key, value);
+			addJobLogMessage("Added job property: " + key + "/" + value);
 		} catch (NoSuchJobException e) {
 			throw new RuntimeException(e);
 		}
@@ -335,7 +357,7 @@ Comparable<BatchJobObject> {
 	public Set<String> currentlyUsedSubmissionLocations() {
 
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
-		if ( temp == null ) {
+		if (temp == null) {
 			return new HashSet<String>();
 		}
 		return temp.currentlyUsedSubmissionLocations();
@@ -366,12 +388,12 @@ Comparable<BatchJobObject> {
 	public void downloadResults(boolean onlyDownloadWhenFinished,
 			File parentFolder, String[] patterns,
 			boolean createSeperateFoldersForEveryJob, boolean prefixWithJobname)
-	throws RemoteFileSystemException, FileTransactionException,
-	IOException {
+			throws RemoteFileSystemException, FileTransactionException,
+			IOException {
 
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 				"Checking and possibly downloading output files for batchjob: "
-				+ batchJobname + ". This might take a while..."));
+						+ batchJobname + ". This might take a while..."));
 
 		for (JobObject job : getJobs()) {
 
@@ -403,7 +425,7 @@ Comparable<BatchJobObject> {
 								+ e.getLocalizedMessage());
 						EventBus.publish(this.batchJobname, new BatchJobEvent(
 								this, "Could not access file " + child + ": "
-								+ e.getLocalizedMessage()));
+										+ e.getLocalizedMessage()));
 						continue;
 					}
 
@@ -421,8 +443,8 @@ Comparable<BatchJobObject> {
 							EventBus.publish(this.batchJobname,
 									new BatchJobEvent(this,
 											"Could not download file " + child
-											+ ": "
-											+ e.getLocalizedMessage()));
+													+ ": "
+													+ e.getLocalizedMessage()));
 							continue;
 						}
 					} else {
@@ -433,7 +455,7 @@ Comparable<BatchJobObject> {
 					String targetfilename = null;
 					if (prefixWithJobname) {
 						targetfilename = job.getJobname() + "_"
-						+ cacheFile.getName();
+								+ cacheFile.getName();
 					} else {
 						targetfilename = cacheFile.getName();
 					}
@@ -459,7 +481,7 @@ Comparable<BatchJobObject> {
 	 */
 	public SortedSet<DtoJob> failedJobs() {
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
-		if ( temp == null ) {
+		if (temp == null) {
 			return new TreeSet<DtoJob>();
 		}
 		return temp.failedJobs();
@@ -516,7 +538,7 @@ Comparable<BatchJobObject> {
 	public Set<String> getCurrentlyRunningOrSuccessfullSubmissionLocations() {
 
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
-		if ( temp == null ) {
+		if (temp == null) {
 			return new HashSet<String>();
 		}
 		return temp.currentlyRunningOrSuccessfullSubmissionLocations();
@@ -524,7 +546,7 @@ Comparable<BatchJobObject> {
 
 	public Set<String> getCurrentlyUsedSubmissionLocations() {
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
-		if ( temp == null ) {
+		if (temp == null) {
 			return new HashSet<String>();
 		}
 		return temp.currentlyUsedSubmissionLocations();
@@ -580,7 +602,7 @@ Comparable<BatchJobObject> {
 
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
 
-		if (temp == null ) {
+		if (temp == null) {
 			return "Could not find job.";
 		}
 
@@ -685,7 +707,7 @@ Comparable<BatchJobObject> {
 	public Map<Date, String> getLogMessages(boolean refresh) {
 
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
-		if ( temp == null ) {
+		if (temp == null) {
 			return new TreeMap<Date, String>();
 		}
 		return temp.messages();
@@ -717,7 +739,7 @@ Comparable<BatchJobObject> {
 	 */
 	public int getNumberOfFailedJobs() {
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
-		if ( temp == null ) {
+		if (temp == null) {
 			return 0;
 		}
 		return temp.numberOfFailedJobs();
@@ -730,7 +752,7 @@ Comparable<BatchJobObject> {
 	 */
 	public int getNumberOfFinishedJobs() {
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
-		if ( temp == null ) {
+		if (temp == null) {
 			return 0;
 		}
 		return temp.numberOfFinishedJobs();
@@ -743,7 +765,7 @@ Comparable<BatchJobObject> {
 	 */
 	public int getNumberOfRunningJobs() {
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
-		if ( temp == null ) {
+		if (temp == null) {
 			return 0;
 		}
 		return temp.numberOfRunningJobs();
@@ -756,7 +778,7 @@ Comparable<BatchJobObject> {
 	 */
 	public int getNumberOfSuccessfulJobs() {
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
-		if ( temp == null ) {
+		if (temp == null) {
 			return 0;
 		}
 		return temp.numberOfSuccessfulJobs();
@@ -769,7 +791,7 @@ Comparable<BatchJobObject> {
 	 */
 	public int getNumberOfUnsubmittedJobs() {
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
-		if ( temp == null ) {
+		if (temp == null) {
 			return 0;
 		}
 		return temp.numberOfUnsubmittedJobs();
@@ -782,7 +804,7 @@ Comparable<BatchJobObject> {
 	 */
 	public int getNumberOfWaitingJobs() {
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
-		if ( temp == null ) {
+		if (temp == null) {
 			return 0;
 		}
 		return temp.numberOfWaitingJobs();
@@ -815,7 +837,7 @@ Comparable<BatchJobObject> {
 		DtoBatchJob temp;
 		temp = getWrappedDtoBatchJob(false);
 
-		if ( temp == null ) {
+		if (temp == null) {
 			return "Could not access job.";
 		}
 
@@ -830,9 +852,9 @@ Comparable<BatchJobObject> {
 		output.append("Failed jobs: " + temp.numberOfFailedJobs() + "\n");
 		if (temp.numberOfFailedJobs() > 0) {
 
-			//			if (restarter != null) {
-			//				restartFailedJobs(restarter);
-			//			}
+			// if (restarter != null) {
+			// restartFailedJobs(restarter);
+			// }
 
 		} else {
 			output.append("\n");
@@ -853,7 +875,7 @@ Comparable<BatchJobObject> {
 	 */
 	public Map<String, String> getProperties() {
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
-		if ( temp == null ) {
+		if (temp == null) {
 			return new TreeMap<String, String>();
 		}
 		return temp.propertiesAsMap();
@@ -878,7 +900,7 @@ Comparable<BatchJobObject> {
 	public int getStatus(boolean refresh) {
 
 		DtoBatchJob temp = getWrappedDtoBatchJob(refresh);
-		if ( temp == null ) {
+		if (temp == null) {
 			return JobConstants.UNDEFINED;
 		}
 		return temp.getStatus();
@@ -887,16 +909,20 @@ Comparable<BatchJobObject> {
 	public Map<Integer, Map<String, Integer>> getStatusMap() {
 
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
-		if ( temp == null ) {
+		if (temp == null) {
 			return new TreeMap<Integer, Map<String, Integer>>();
 		}
 		return temp.statusMap();
 
 	}
 
+	public List<String> getSubmissionLog() {
+		return submissionLog;
+	}
+
 	public int getTotalNumberOfJobs() {
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
-		if ( temp == null ) {
+		if (temp == null) {
 			return 0;
 		}
 		return temp.totalNumberOfJobs();
@@ -909,14 +935,17 @@ Comparable<BatchJobObject> {
 	private DtoBatchJob getWrappedDtoBatchJob(final boolean refresh,
 			final boolean waitForRefresh) {
 
-		if ( isKilled || isBeingKilled ) {
-			myLogger.debug("Job is or is being killed. Not updating dtoobject...");
+		if (isKilled || isBeingKilled) {
+			myLogger
+					.debug("Job is or is being killed. Not updating dtoobject...");
 			return dtoMultiPartJob;
 		}
 
-		if ( ( (dtoMultiPartJob == null) || (! isRefreshing() && refresh)) || (refreshThread == null) || ((refreshThread != null) && ! refreshThread.isAlive()) ) {
+		if (((dtoMultiPartJob == null) || (!isRefreshing() && refresh))
+				|| (refreshThread == null)
+				|| ((refreshThread != null) && !refreshThread.isAlive())) {
 
-			if ((dtoMultiPartJob == null) || refresh ) {
+			if ((dtoMultiPartJob == null) || refresh) {
 
 				refreshThread = new Thread() {
 					@Override
@@ -943,30 +972,31 @@ Comparable<BatchJobObject> {
 							boolean oldFinished = false;
 
 							if (dtoMultiPartJob != null) {
-								oldTotalJobs = dtoMultiPartJob.totalNumberOfJobs();
+								oldTotalJobs = dtoMultiPartJob
+										.totalNumberOfJobs();
 								oldRunningJobs = dtoMultiPartJob
-								.numberOfRunningJobs();
+										.numberOfRunningJobs();
 								oldWaitingJobs = dtoMultiPartJob
-								.numberOfWaitingJobs();
+										.numberOfWaitingJobs();
 								oldFinishedJobs = dtoMultiPartJob
-								.numberOfFinishedJobs();
+										.numberOfFinishedJobs();
 								oldFailedJobs = dtoMultiPartJob
-								.numberOfFailedJobs();
+										.numberOfFailedJobs();
 								oldSuccessJobs = dtoMultiPartJob
-								.numberOfSuccessfulJobs();
+										.numberOfSuccessfulJobs();
 								oldUnsubmittedJobs = dtoMultiPartJob
-								.numberOfUnsubmittedJobs();
+										.numberOfUnsubmittedJobs();
 								oldStatus = dtoMultiPartJob.getStatus();
 								oldFailed = dtoMultiPartJob.failed();
 								oldFinished = dtoMultiPartJob.isFinished();
 							}
 
 							dtoMultiPartJob = serviceInterface
-							.getBatchJob(batchJobname);
+									.getBatchJob(batchJobname);
 
 							pcs.firePropertyChange(TOTAL_NUMBER_OF_JOBS,
 									oldTotalJobs, dtoMultiPartJob
-									.totalNumberOfJobs());
+											.totalNumberOfJobs());
 							pcs.firePropertyChange(STATUS, oldStatus,
 									dtoMultiPartJob.getStatus());
 							pcs.firePropertyChange(FAILED, oldFailed,
@@ -975,29 +1005,29 @@ Comparable<BatchJobObject> {
 									dtoMultiPartJob.isFinished());
 							pcs.firePropertyChange(NUMBER_OF_RUNNING_JOBS,
 									oldRunningJobs, dtoMultiPartJob
-									.numberOfRunningJobs());
+											.numberOfRunningJobs());
 							pcs.firePropertyChange(NUMBER_OF_WAITING_JOBS,
 									oldWaitingJobs, dtoMultiPartJob
-									.numberOfWaitingJobs());
+											.numberOfWaitingJobs());
 							pcs.firePropertyChange(NUMBER_OF_FINISHED_JOBS,
 									oldFinishedJobs, dtoMultiPartJob
-									.numberOfFinishedJobs());
+											.numberOfFinishedJobs());
 							pcs.firePropertyChange(NUMBER_OF_FAILED_JOBS,
 									oldFailedJobs, dtoMultiPartJob
-									.numberOfFailedJobs());
+											.numberOfFailedJobs());
 							pcs.firePropertyChange(NUMBER_OF_SUCCESSFULL_JOBS,
 									oldSuccessJobs, dtoMultiPartJob
-									.numberOfSuccessfulJobs());
+											.numberOfSuccessfulJobs());
 							pcs.firePropertyChange(NUMBER_OF_UNSUBMITTED_JOBS,
 									oldUnsubmittedJobs, dtoMultiPartJob
-									.numberOfUnsubmittedJobs());
+											.numberOfUnsubmittedJobs());
 
 							RunningJobManager.updateJobList(serviceInterface,
 									getJobs(), dtoMultiPartJob.getJobs());
 
 						} catch (NoSuchJobException e) {
 							e.printStackTrace();
-							if ( isBeingKilled || isKilled ) {
+							if (isBeingKilled || isKilled) {
 								return;
 							}
 							throw new RuntimeException(e);
@@ -1008,7 +1038,8 @@ Comparable<BatchJobObject> {
 				refreshThread.start();
 			}
 
-			if ( (refreshThread != null) && ((dtoMultiPartJob == null) || waitForRefresh)) {
+			if ((refreshThread != null)
+					&& ((dtoMultiPartJob == null) || waitForRefresh)) {
 				try {
 					refreshThread.join();
 				} catch (InterruptedException e) {
@@ -1022,6 +1053,7 @@ Comparable<BatchJobObject> {
 	public boolean isBatchJob() {
 		return true;
 	}
+
 	public boolean isBeingKilled() {
 		return isBeingKilled;
 	}
@@ -1037,7 +1069,7 @@ Comparable<BatchJobObject> {
 	public boolean isFinished(boolean refresh) {
 		try {
 			DtoBatchJob temp = getWrappedDtoBatchJob(refresh);
-			if ( temp == null ) {
+			if (temp == null) {
 				return false;
 			}
 			return temp.isFinished();
@@ -1059,6 +1091,10 @@ Comparable<BatchJobObject> {
 		return isResubmitting;
 	}
 
+	public boolean isSubmitting() {
+		return isSubmitting;
+	}
+
 	/**
 	 * Returns whether all jobs within this multipart job finished successfully.
 	 * 
@@ -1068,7 +1104,7 @@ Comparable<BatchJobObject> {
 	 */
 	public boolean isSuccessful(boolean refresh) {
 		DtoBatchJob temp = getWrappedDtoBatchJob(refresh);
-		if ( temp == null ) {
+		if (temp == null) {
 			return false;
 		}
 		return temp.allJobsFinishedSuccessful();
@@ -1076,7 +1112,7 @@ Comparable<BatchJobObject> {
 
 	public void kill(boolean clean, boolean waitForCompletion) {
 
-		if ( refreshThread != null ) {
+		if (refreshThread != null) {
 			try {
 				refreshThread.interrupt();
 			} catch (Exception e) {
@@ -1087,6 +1123,7 @@ Comparable<BatchJobObject> {
 		setIsBeingKilled(true);
 		try {
 			serviceInterface.kill(this.getJobname(), clean);
+			addJobLogMessage("Job kill command sent to backend.");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1094,7 +1131,8 @@ Comparable<BatchJobObject> {
 		Thread waitThread = new Thread() {
 			@Override
 			public void run() {
-				StatusObject statusO = new StatusObject(serviceInterface, getJobname());
+				StatusObject statusO = new StatusObject(serviceInterface,
+						getJobname());
 				try {
 					statusO.waitForActionToFinish(3, false, true);
 				} catch (InterruptedException e) {
@@ -1106,21 +1144,22 @@ Comparable<BatchJobObject> {
 				isKilled = true;
 				pcs.firePropertyChange("killed", false, true);
 
-				EventBus.publish(new BatchJobKilledEvent(getJobname(), getApplication()));
+				EventBus.publish(new BatchJobKilledEvent(getJobname(),
+						getApplication()));
+				addJobLogMessage("Job killed on backend.");
 
 			}
 		};
 
 		waitThread.start();
 
-		if ( waitForCompletion ) {
+		if (waitForCompletion) {
 			try {
 				waitThread.join();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-
 
 	}
 
@@ -1178,7 +1217,7 @@ Comparable<BatchJobObject> {
 			try {
 				EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 						"Pausing monitoring for " + sleeptimeinseconds
-						+ " seconds..."));
+								+ " seconds..."));
 				Thread.sleep(sleeptimeinseconds * 1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -1196,8 +1235,9 @@ Comparable<BatchJobObject> {
 	 */
 	public String pathToInputFiles() {
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
-		if ( temp == null ) {
-			throw new RuntimeException("Could not access batchjob "+batchJobname);
+		if (temp == null) {
+			throw new RuntimeException("Could not access batchjob "
+					+ batchJobname);
 		}
 		return temp.pathToInputFiles();
 	}
@@ -1222,32 +1262,33 @@ Comparable<BatchJobObject> {
 	 * @throws InterruptedException
 	 */
 	public void prepareAndCreateJobs(boolean optimize) throws JobsException,
-	BackendException, InterruptedException {
+			BackendException, InterruptedException {
 		prepareAndCreateJobs(optimize, true);
 	}
 
-
-	private void prepareAndCreateJobs(boolean optimize, boolean uploadCommonFiles) throws JobsException,
-	BackendException, InterruptedException {
+	private void prepareAndCreateJobs(boolean optimize,
+			boolean uploadCommonFiles) throws JobsException, BackendException,
+			InterruptedException {
 
 		// TODO check whether any of the jobnames already exist
 
 		myLogger.debug("Creating " + getNewlyAddedJobs().size()
 				+ " jobs as part of batchjob: " + batchJobname);
-		EventBus.publish(this.batchJobname, new BatchJobEvent(this, "Creating "
-				+ getNewlyAddedJobs().size() + " jobs"));
+		String message = "Creating " + getNewlyAddedJobs().size() + " jobs.";
+		EventBus.publish(this.batchJobname, new BatchJobEvent(this, message));
+		addJobLogMessage(message);
 		ExecutorService executor = Executors
-		.newFixedThreadPool(getConcurrentJobCreationThreads());
+				.newFixedThreadPool(getConcurrentJobCreationThreads());
 
 		final Map<JobObject, Exception> failedSubmissions = Collections
-		.synchronizedMap(new HashMap<JobObject, Exception>());
+				.synchronizedMap(new HashMap<JobObject, Exception>());
 
 		for (final JobObject job : ImmutableList.copyOf(getNewlyAddedJobs())) {
 
 			if (Thread.interrupted()) {
 				executor.shutdownNow();
 				throw new InterruptedException(
-				"Interrupted while creating jobs...");
+						"Interrupted while creating jobs...");
 			}
 
 			Thread createThread = new Thread() {
@@ -1262,14 +1303,12 @@ Comparable<BatchJobObject> {
 									+ " to batchjob: " + batchJobname);
 
 							String jobname = null;
-							EventBus
-							.publish(
-									BatchJobObject.this.batchJobname,
-									new BatchJobEvent(
-											BatchJobObject.this,
-											"Adding job "
-											+ job.getJobname()
-											+ " to batchjob on backend."));
+							String message = "Adding job " + job.getJobname()
+									+ " to batchjob on backend.";
+							EventBus.publish(BatchJobObject.this.batchJobname,
+									new BatchJobEvent(BatchJobObject.this,
+											message));
+							addJobLogMessage(message);
 							jobname = serviceInterface.addJobToBatchJob(
 									batchJobname,
 									job.getJobDescriptionDocumentAsString());
@@ -1277,28 +1316,26 @@ Comparable<BatchJobObject> {
 							job.setJobname(jobname);
 							job.updateJobDirectory();
 
+							String message2 = "Creation of job "
+									+ job.getJobname() + " successful.";
+
 							EventBus.publish(BatchJobObject.this.batchJobname,
 									new BatchJobEvent(BatchJobObject.this,
-											"Creation of job "
-											+ job.getJobname()
-											+ " successful."));
+											message2));
+							addJobLogMessage(message2);
 
 							success = true;
 							break;
 						} catch (Exception e) {
 							// e.printStackTrace();
-							EventBus
-							.publish(
-									BatchJobObject.this.batchJobname,
-									new BatchJobEvent(
-											BatchJobObject.this,
-											"Creation of job "
-											+ job.getJobname()
-											+ " failed or interrupted.\n\t("
-											+ e
-											.getLocalizedMessage()
-											+ ")")
-									+ "\n");
+							String message = "Creation of job "
+									+ job.getJobname()
+									+ " failed or interrupted.\n\t("
+									+ e.getLocalizedMessage() + ")";
+							EventBus.publish(BatchJobObject.this.batchJobname,
+									new BatchJobEvent(BatchJobObject.this,
+											message));
+							addJobLogMessage(message);
 
 							try {
 								serviceInterface.kill(job.getJobname(), true);
@@ -1327,53 +1364,60 @@ Comparable<BatchJobObject> {
 			executor.shutdownNow();
 			throw new InterruptedException("Interrupted while creating jobs...");
 		}
-		myLogger.debug("Finished creation of " + getNewlyAddedJobs().size()
-				+ " jobs as part of batchjob: " + batchJobname);
-		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-				"Finished creation of " + getNewlyAddedJobs().size()
-				+ " jobs as part of batchjob: " + batchJobname));
+		String message2 = "Finished creation of " + getNewlyAddedJobs().size()
+				+ " jobs as part of batchjob: " + batchJobname;
+		myLogger.debug(message2);
+		EventBus.publish(this.batchJobname, new BatchJobEvent(this, message2));
+		addJobLogMessage(message2);
 
 		if (failedSubmissions.size() > 0) {
 			myLogger.error(failedSubmissions.size() + " submission failed...");
+			String message3 = "Not all jobs for batchjob " + batchJobname
+					+ " created successfully. Aborting...";
 			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-					"Not all jobs for batchjob " + batchJobname
-					+ " created successfully. Aborting..."));
+					message3));
+			addJobLogMessage(message3);
 			throw new JobsException(failedSubmissions);
 		}
 
 		if (Thread.interrupted()) {
 			throw new InterruptedException(
-			"Interrupted after creating all jobs.");
+					"Interrupted after creating all jobs.");
 		}
 
 		refresh(false);
 
 		if (optimize) {
 			try {
+				String message3 = "Optimizing batchjob: " + batchJobname;
 				EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-						"Optimizing batchjob: " + batchJobname));
+						message3));
+				addJobLogMessage(message3);
 				try {
-					serviceInterface.redistributeBatchJob(
-							this.batchJobname);
-
+					serviceInterface.redistributeBatchJob(this.batchJobname);
 
 					StatusObject status = new StatusObject(serviceInterface,
 							BatchJobObject.this.batchJobname);
 
 					try {
-						status.waitForActionToFinish(4, false, true, "Redistribution: ");
+						status.waitForActionToFinish(4, false, true,
+								"Redistribution: ");
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 						throw e;
 					}
 
-					EventBus.publish(this.batchJobname, new BatchJobEvent(this,	"Redistribution finished."));
+					EventBus.publish(this.batchJobname, new BatchJobEvent(this,
+							"Redistribution finished."));
+					addJobLogMessage("Redistribution finished.");
 
-					optimizationResult = serviceInterface.getJobProperty(this.batchJobname, Constants.BATCHJOB_OPTIMIZATION_RESULT);
+					optimizationResult = serviceInterface.getJobProperty(
+							this.batchJobname,
+							Constants.BATCHJOB_OPTIMIZATION_RESULT);
 
 					if (Thread.interrupted()) {
 						throw new InterruptedException(
-						"Interrupted after creating all jobs.");
+								"Interrupted after creating all jobs.");
 					}
 
 				} catch (JobPropertiesException e) {
@@ -1386,16 +1430,12 @@ Comparable<BatchJobObject> {
 					job.updateJobDirectory();
 				}
 
-
-				EventBus
-				.publish(
-						this.batchJobname,
-						new BatchJobEvent(
-								this,
-								"Optimizing of batchjob "
-								+ batchJobname
-								+ " finished.\nJob distribution:\n"
-								+ getOptimizationResult()));
+				String message4 = "Optimizing of batchjob " + batchJobname
+						+ " finished.\nJob distribution:\n"
+						+ getOptimizationResult();
+				EventBus.publish(this.batchJobname, new BatchJobEvent(this,
+						message4));
+				addJobLogMessage(message4);
 			} catch (NoSuchJobException e) {
 				throw new RuntimeException(e);
 			}
@@ -1408,9 +1448,11 @@ Comparable<BatchJobObject> {
 		} catch (InterruptedException e) {
 			throw e;
 		} catch (Exception e) {
+			String message3 = "Uploading input files for batchjob: "
+					+ batchJobname + " failed: " + e.getLocalizedMessage();
 			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-					"Uploading input files for batchjob: " + batchJobname
-					+ " failed: " + e.getLocalizedMessage()));
+					message3));
+			addJobLogMessage(message3);
 			throw new BackendException("Could not upload input files...", e);
 		}
 		getNewlyAddedJobs().clear();
@@ -1429,7 +1471,58 @@ Comparable<BatchJobObject> {
 		getWrappedDtoBatchJob(true, wait);
 	}
 
-	private void refreshMultiPartJobStatus(boolean waitForRefreshToFinish) throws InterruptedException {
+	// /**
+	// * Restarts all jobs that failed using the provided
+	// * {@link FailedJobRestarter}.
+	// *
+	// * @param restarter
+	// * the job restarter that contains the logic how to restart the
+	// * job
+	// */
+	// public void restartFailedJobs(FailedJobRestarter restarter) {
+	//
+	// if (restarter == null) {
+	// restarter = new FailedJobRestarter() {
+	//
+	// public void restartJob(JobObject job)
+	// throws JobSubmissionException {
+	// try {
+	// job.restartJob();
+	// } catch (JobPropertiesException e) {
+	// throw new JobSubmissionException("Can't resubmit job: "
+	// + e.getLocalizedMessage());
+	// }
+	// }
+	// };
+	// }
+	//
+	// for (DtoJob dtoJob : getMultiPartJob(true).getFailedJobs().getAllJobs())
+	// {
+	//
+	// JobObject failedJob = null;
+	// try {
+	// failedJob = new JobObject(serviceInterface, dtoJob.jobname());
+	// EventBus.publish(this.batchJobname, new BatchJobEvent(this,
+	// "Restarting job " + failedJob.getJobname())
+	// + "...");
+	// restarter.restartJob(failedJob);
+	// } catch (Exception e) {
+	// if (failedJob != null) {
+	// EventBus.publish(this.batchJobname, new BatchJobEvent(this,
+	// "Restarting of job " + failedJob.getJobname())
+	// + " failed: " + e.getLocalizedMessage());
+	// } else {
+	// EventBus.publish(this.batchJobname, new BatchJobEvent(this,
+	// "Restarting failed: " + e.getLocalizedMessage()));
+	// }
+	// e.printStackTrace();
+	// }
+	// }
+	//
+	// }
+
+	private void refreshMultiPartJobStatus(boolean waitForRefreshToFinish)
+			throws InterruptedException {
 
 		String handle;
 		try {
@@ -1444,7 +1537,6 @@ Comparable<BatchJobObject> {
 
 		if (waitForRefreshToFinish) {
 
-
 			if (Thread.interrupted()) {
 				this.isRefreshing = false;
 				pcs.firePropertyChange(REFRESHING, true, false);
@@ -1455,32 +1547,30 @@ Comparable<BatchJobObject> {
 			pcs.firePropertyChange(REFRESHING, false, true);
 			DtoActionStatus status = serviceInterface.getActionStatus(handle);
 
-			if ( status == null ) {
+			if (status == null) {
 				this.isRefreshing = false;
 				pcs.firePropertyChange(REFRESHING, true, false);
-				myLogger.error("Can't get status for handle: "+handle);
+				myLogger.error("Can't get status for handle: " + handle);
 				return;
 			}
 
-			while ( !status.isFinished()) {
+			while (!status.isFinished()) {
 
 				try {
 					Thread.sleep(ClientPropertiesManager
-							.getJobStatusRecheckIntervall()*1000);
+							.getJobStatusRecheckIntervall() * 1000);
 				} catch (InterruptedException e) {
 					this.isRefreshing = false;
 					pcs.firePropertyChange(REFRESHING, true, false);
 					throw e;
 				}
 
-
-
 				status = serviceInterface.getActionStatus(handle);
 
-				if ( status == null ) {
+				if (status == null) {
 					this.isRefreshing = false;
 					pcs.firePropertyChange(REFRESHING, true, false);
-					myLogger.error("Can't get status for handle: "+handle);
+					myLogger.error("Can't get status for handle: " + handle);
 					return;
 				}
 
@@ -1491,103 +1581,79 @@ Comparable<BatchJobObject> {
 
 	}
 
-	//	/**
-	//	 * Restarts all jobs that failed using the provided
-	//	 * {@link FailedJobRestarter}.
-	//	 *
-	//	 * @param restarter
-	//	 *            the job restarter that contains the logic how to restart the
-	//	 *            job
-	//	 */
-	//	public void restartFailedJobs(FailedJobRestarter restarter) {
-	//
-	//		if (restarter == null) {
-	//			restarter = new FailedJobRestarter() {
-	//
-	//				public void restartJob(JobObject job)
-	//				throws JobSubmissionException {
-	//					try {
-	//						job.restartJob();
-	//					} catch (JobPropertiesException e) {
-	//						throw new JobSubmissionException("Can't resubmit job: "
-	//								+ e.getLocalizedMessage());
-	//					}
-	//				}
-	//			};
-	//		}
-	//
-	//		for (DtoJob dtoJob : getMultiPartJob(true).getFailedJobs().getAllJobs()) {
-	//
-	//			JobObject failedJob = null;
-	//			try {
-	//				failedJob = new JobObject(serviceInterface, dtoJob.jobname());
-	//				EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-	//						"Restarting job " + failedJob.getJobname())
-	//				+ "...");
-	//				restarter.restartJob(failedJob);
-	//			} catch (Exception e) {
-	//				if (failedJob != null) {
-	//					EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-	//							"Restarting of job " + failedJob.getJobname())
-	//					+ " failed: " + e.getLocalizedMessage());
-	//				} else {
-	//					EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-	//							"Restarting failed: " + e.getLocalizedMessage()));
-	//				}
-	//				e.printStackTrace();
-	//			}
-	//		}
-	//
-	//	}
-
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		this.pcs.removePropertyChangeListener(listener);
 	}
 
 	/**
-	 * Wrapper method for the 2 most commonly used restart methods: Restarting failed jobs and restarting jobs that are still in the queue (on locations where no job is started yet).
+	 * Wrapper method for the 2 most commonly used restart methods: Restarting
+	 * failed jobs and restarting jobs that are still in the queue (on locations
+	 * where no job is started yet).
 	 * 
-	 * @param restartFailedJobs restart jobs that failed (those jobs are moved to locations where jobs have successfully finished -- if possible)
-	 * @param resubmitWaitingJobs restart jobs that sit in queues at locations where no jobs have started yet. Those jobs are moved to locations where jobs are already running or have finished successfully.
-	 * @param startUnsubmittedJobs whether to start jobs that are newly added (not submitted at all yet)
-	 * @param waitForRestartToFinish whether to wait for the whole batchjob-restart to finish
+	 * @param restartFailedJobs
+	 *            restart jobs that failed (those jobs are moved to locations
+	 *            where jobs have successfully finished -- if possible)
+	 * @param resubmitWaitingJobs
+	 *            restart jobs that sit in queues at locations where no jobs
+	 *            have started yet. Those jobs are moved to locations where jobs
+	 *            are already running or have finished successfully.
+	 * @param startUnsubmittedJobs
+	 *            whether to start jobs that are newly added (not submitted at
+	 *            all yet)
+	 * @param waitForRestartToFinish
+	 *            whether to wait for the whole batchjob-restart to finish
 	 * @return whether the restart was successful or not (i.e. an error occured)
-	 * @throws InterruptedException if the creaton of newly added jobs is interrupted
-	 * @throws BackendException if something fails on the backend when creating newly adding jobs
-	 * @throws JobsException if a newly added job can't be created on the backend
+	 * @throws InterruptedException
+	 *             if the creaton of newly added jobs is interrupted
+	 * @throws BackendException
+	 *             if something fails on the backend when creating newly adding
+	 *             jobs
+	 * @throws JobsException
+	 *             if a newly added job can't be created on the backend
 	 */
-	public boolean restart(boolean restartFailedJobs, boolean resubmitWaitingJobs, boolean startUnsubmittedJobs, boolean waitForRestartToFinish) throws JobsException, BackendException, InterruptedException {
+	public boolean restart(boolean restartFailedJobs,
+			boolean resubmitWaitingJobs, boolean startUnsubmittedJobs,
+			boolean waitForRestartToFinish) throws JobsException,
+			BackendException, InterruptedException {
 
 		DefaultResubmitPolicy policy = new DefaultResubmitPolicy();
 
-		policy.setProperty(DefaultResubmitPolicy.RESTART_FAILED_JOBS,  restartFailedJobs);
-		policy.setProperty(DefaultResubmitPolicy.RESTART_WAITING_JOBS, resubmitWaitingJobs);
-		policy.setProperty(DefaultResubmitPolicy.START_NEWLY_READY_JOBS, startUnsubmittedJobs);
+		policy.setProperty(DefaultResubmitPolicy.RESTART_FAILED_JOBS,
+				restartFailedJobs);
+		policy.setProperty(DefaultResubmitPolicy.RESTART_WAITING_JOBS,
+				resubmitWaitingJobs);
+		policy.setProperty(DefaultResubmitPolicy.START_NEWLY_READY_JOBS,
+				startUnsubmittedJobs);
 
 		return restart(policy, waitForRestartToFinish);
 
 	}
 
-
 	/**
 	 * Restarts the batchjob using the specified ResubmitPolicy
+	 * 
 	 * @param policy
 	 * @param waitForRestartToFinish
 	 * @return
-	 * @throws InterruptedException if the creaton of newly added jobs is interrupted
-	 * @throws BackendException if something fails on the backend when creating newly adding jobs
-	 * @throws JobsException if a newly added job can't be created on the backend
+	 * @throws InterruptedException
+	 *             if the creaton of newly added jobs is interrupted
+	 * @throws BackendException
+	 *             if something fails on the backend when creating newly adding
+	 *             jobs
+	 * @throws JobsException
+	 *             if a newly added job can't be created on the backend
 	 */
-	public boolean restart(ResubmitPolicy policy, final boolean waitForRestartToFinish) throws JobsException, BackendException, InterruptedException {
+	public boolean restart(ResubmitPolicy policy,
+			final boolean waitForRestartToFinish) throws JobsException,
+			BackendException, InterruptedException {
 
 		setResubmitting(true);
 
 		prepareAndCreateJobs(false, false);
 
 		try {
-			serviceInterface.restartBatchJob(batchJobname,
-					policy.getName(), policy.getProperties())
-					.propertiesAsMap();
+			serviceInterface.restartBatchJob(batchJobname, policy.getName(),
+					policy.getProperties()).propertiesAsMap();
 		} catch (NoSuchJobException e) {
 			setResubmitting(false);
 			return false;
@@ -1601,12 +1667,13 @@ Comparable<BatchJobObject> {
 			public void run() {
 
 				String handle = batchJobname;
-				DtoActionStatus status = serviceInterface.getActionStatus(handle);
+				DtoActionStatus status = serviceInterface
+						.getActionStatus(handle);
 				while (!status.isFinished()) {
 
 					try {
 						Thread.sleep(ClientPropertiesManager
-								.getJobStatusRecheckIntervall()*1000);
+								.getJobStatusRecheckIntervall() * 1000);
 					} catch (InterruptedException e) {
 						// doesn't happen
 					}
@@ -1619,7 +1686,7 @@ Comparable<BatchJobObject> {
 
 		waitThread.start();
 
-		if ( waitForRestartToFinish ) {
+		if (waitForRestartToFinish) {
 
 			try {
 				waitThread.join();
@@ -1638,13 +1705,20 @@ Comparable<BatchJobObject> {
 	 * @param submissionLocationsToUse
 	 * @param waitForRestartToFinish
 	 * @return
-	 * @throws InterruptedException if the creaton of newly added jobs is interrupted
-	 * @throws BackendException if something fails on the backend when creating newly adding jobs
-	 * @throws JobsException if a newly added job can't be created on the backend
+	 * @throws InterruptedException
+	 *             if the creaton of newly added jobs is interrupted
+	 * @throws BackendException
+	 *             if something fails on the backend when creating newly adding
+	 *             jobs
+	 * @throws JobsException
+	 *             if a newly added job can't be created on the backend
 	 */
-	public boolean restart(Set<String> jobnamesToRestart, Set<String> submissionLocationsToUse, boolean waitForRestartToFinish) throws JobsException, BackendException, InterruptedException {
+	public boolean restart(Set<String> jobnamesToRestart,
+			Set<String> submissionLocationsToUse, boolean waitForRestartToFinish)
+			throws JobsException, BackendException, InterruptedException {
 
-		ResubmitPolicy policy = new SpecificJobsResubmitPolicy(jobnamesToRestart, submissionLocationsToUse);
+		ResubmitPolicy policy = new SpecificJobsResubmitPolicy(
+				jobnamesToRestart, submissionLocationsToUse);
 
 		return restart(policy, waitForRestartToFinish);
 	}
@@ -1726,7 +1800,7 @@ Comparable<BatchJobObject> {
 		try {
 			serviceInterface.addJobProperty(this.batchJobname,
 					Constants.NO_CPUS_KEY, new Integer(defaultNoCpus)
-			.toString());
+							.toString());
 		} catch (NoSuchJobException e) {
 			throw new RuntimeException(e);
 		}
@@ -1869,7 +1943,7 @@ Comparable<BatchJobObject> {
 
 	private void setResubmitting(boolean b) {
 
-		if ( isResubmitting == b ) {
+		if (isResubmitting == b) {
 			return;
 		}
 
@@ -1889,44 +1963,60 @@ Comparable<BatchJobObject> {
 	 * @throws InterruptedException
 	 */
 	public void submit() throws JobSubmissionException, NoSuchJobException,
-	InterruptedException {
+			InterruptedException {
 
 		submit(false);
 	}
 
 	public void submit(boolean waitForSubmissionToFinish)
-	throws JobSubmissionException, NoSuchJobException,
-	InterruptedException {
+			throws JobSubmissionException, NoSuchJobException,
+			InterruptedException {
 
-		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-				"Submitting batchjob " + batchJobname + " to backend..."));
+		String message = "Submitting batchjob " + batchJobname
+				+ " to backend...";
+		EventBus.publish(this.batchJobname, new BatchJobEvent(this, message));
+		addJobLogMessage(message);
+
+		isSubmitting = true;
+		pcs.firePropertyChange(SUBMITTING, !isSubmitting, isSubmitting);
 
 		if (Thread.interrupted()) {
+			isSubmitting = false;
+			pcs.firePropertyChange(SUBMITTING, !isSubmitting, isSubmitting);
 			throw new InterruptedException("Interrupted before job submission.");
 		}
 
 		try {
 			serviceInterface.submitJob(batchJobname);
 		} catch (JobSubmissionException jse) {
+			isSubmitting = false;
+			pcs.firePropertyChange(SUBMITTING, !isSubmitting, isSubmitting);
+			String message2 = "Job submission for batchjob " + batchJobname
+					+ " failed: " + jse.getLocalizedMessage();
 			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-					"Job submission for batchjob " + batchJobname + " failed: "
-					+ jse.getLocalizedMessage()));
+					message2));
+			addJobLogMessage(message2);
 			throw jse;
 		} catch (NoSuchJobException nsje) {
+			isSubmitting = false;
+			pcs.firePropertyChange(SUBMITTING, !isSubmitting, isSubmitting);
+			String message2 = "Job submitssion for batchjob " + batchJobname
+					+ " failed: " + nsje.getLocalizedMessage();
 			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-					"Job submitssion for batchjob " + batchJobname
-					+ " failed: " + nsje.getLocalizedMessage()));
+					message2));
+			addJobLogMessage(message2);
 			throw nsje;
 		}
 
-		Thread waitThread = new Thread() {
+		final Thread waitThread = new Thread() {
 			@Override
 			public void run() {
 				StatusObject status = new StatusObject(serviceInterface,
 						BatchJobObject.this.batchJobname);
 
 				try {
-					status.waitForActionToFinish(4, false, true, "Submission status: ");
+					status.waitForActionToFinish(4, false, true,
+							"Submission status: ");
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -1936,23 +2026,48 @@ Comparable<BatchJobObject> {
 		waitThread.start();
 
 		if (!waitForSubmissionToFinish) {
-			EventBus
-			.publish(
-					this.batchJobname,
-					new BatchJobEvent(
-							this,
-							"All jobs of batchjob "
-							+ batchJobname
-							+ " ready for submission. Continuing submission in background..."));
+			String message2 = "All jobs of batchjob "
+					+ batchJobname
+					+ " ready for submission. Continuing submission in background...";
+			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
+					message2));
+			addJobLogMessage(message2);
+
+			new Thread() {
+				@Override
+				public void run() {
+					try {
+						waitThread.join();
+						isSubmitting = false;
+						pcs.firePropertyChange(SUBMITTING, !isSubmitting,
+								isSubmitting);
+						EventBus.publish(new NewBatchJobEvent(
+								BatchJobObject.this));
+					} catch (InterruptedException e) {
+						isSubmitting = false;
+						pcs.firePropertyChange(SUBMITTING, !isSubmitting,
+								isSubmitting);
+
+						// e.printStackTrace();
+					}
+				}
+			}.start();
+
 		} else {
 			try {
 				waitThread.join();
+				isSubmitting = false;
+				pcs.firePropertyChange(SUBMITTING, !isSubmitting, isSubmitting);
+				EventBus.publish(new NewBatchJobEvent(this));
 			} catch (InterruptedException e) {
+				isSubmitting = false;
+				pcs.firePropertyChange(SUBMITTING, !isSubmitting, isSubmitting);
 				waitThread.interrupt();
 			}
 
 		}
 		refresh(false);
+
 	}
 
 	/**
@@ -1962,7 +2077,7 @@ Comparable<BatchJobObject> {
 	 */
 	public SortedSet<DtoJob> successfulJobs() {
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
-		if ( temp == null ) {
+		if (temp == null) {
 			return new TreeSet<DtoJob>();
 		}
 		return temp.successfulJobs();
@@ -1980,78 +2095,97 @@ Comparable<BatchJobObject> {
 	 */
 	public SortedSet<DtoJob> unsubmittedJobs() {
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
-		if ( temp == null ) {
+		if (temp == null) {
 			return new TreeSet<DtoJob>();
 		}
 		return temp.unsubmittedJobs();
 	}
 
-	private void uploadInputFiles(boolean uploadCommonFiles) throws InterruptedException,
-	FileUploadException {
+	private void uploadInputFiles(boolean uploadCommonFiles)
+			throws InterruptedException, FileUploadException {
 
 		final List<Exception> exceptions = Collections
-		.synchronizedList(new LinkedList<Exception>());
+				.synchronizedList(new LinkedList<Exception>());
 
 		final ExecutorService executor = Executors
-		.newFixedThreadPool(getConcurrentInputFileUploadThreads());
-
-		final int all = inputFiles.keySet().size();
-
-		EventBus.publish(getJobname(), new BatchJobEvent(BatchJobObject.this,
-				"Uploading " + all + " input files ("
-				+ getConcurrentInputFileUploadThreads()
-				+ " concurrent upload threads.)"));
+				.newFixedThreadPool(getConcurrentInputFileUploadThreads());
 
 		List<Future<?>> tasks = new LinkedList<Future<?>>();
 
-		// uploading single job input files
+		String messagex = "Starting file staging...";
+		EventBus.publish(getJobname(), new BatchJobEvent(BatchJobObject.this,
+				messagex));
+		addJobLogMessage(messagex);
 
-		//		for (final JobObject job : getJobs()) {
+		// for (final JobObject job : getJobs()) {
 		for (final JobObject job : getNewlyAddedJobs()) {
 
 			checkInterruptedStatus(executor, tasks);
 
-			Future<?> f = executor.submit(new Thread() {
-				@Override
-				public void run() {
-					try {
+			// uploading single job input files
+			if (job.getInputFileUrls().length > 0) {
+				String message = "Adding input files for job "
+						+ job.getJobname();
+				EventBus.publish(getJobname(), new BatchJobEvent(
+						BatchJobObject.this, message));
+				addJobLogMessage(message);
+
+				Future<?> f = executor.submit(new Thread() {
+					@Override
+					public void run() {
 						try {
-							job.stageFiles();
-						} catch (InterruptedException e) {
+							try {
+
+								job.stageFiles();
+							} catch (InterruptedException e) {
+								executor.shutdownNow();
+							}
+						} catch (FileTransactionException e) {
+							exceptions.add(e);
 							executor.shutdownNow();
 						}
-					} catch (FileTransactionException e) {
-						exceptions.add(e);
-						executor.shutdownNow();
 					}
-				}
-			});
-			tasks.add(f);
+				});
+				tasks.add(f);
+			}
 		}
 
 		int i = 0;
 
-		if ( uploadCommonFiles ) {
-			// uploading common job input files
-			for (final String inputFile : inputFiles.keySet()) {
+		final int all = inputFiles.keySet().size();
 
-				checkInterruptedStatus(executor, tasks);
+		if (all > 0) {
+			String message = "Uploading " + all + " input files ("
+					+ getConcurrentInputFileUploadThreads()
+					+ " concurrent upload threads.)";
+			EventBus.publish(getJobname(), new BatchJobEvent(
+					BatchJobObject.this, message));
+			addJobLogMessage(message);
 
-				i = i + 1;
-				Thread thread = new BatchJobFileUploadThread(serviceInterface,
-						this, inputFile, i, executor, exceptions);
-				Future<?> f = executor.submit(thread);
-				// so the gridftp servers don't get hit at exactly the same time, to
-				// distribute the load
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-					executor.shutdownNow();
-					for (Future<?> f2 : tasks) {
-						f2.cancel(true);
+			if (uploadCommonFiles) {
+				// uploading common job input files
+				for (final String inputFile : inputFiles.keySet()) {
+
+					checkInterruptedStatus(executor, tasks);
+
+					i = i + 1;
+					Thread thread = new BatchJobFileUploadThread(
+							serviceInterface, this, inputFile, i, executor,
+							exceptions);
+					Future<?> f = executor.submit(thread);
+					// so the gridftp servers don't get hit at exactly the same
+					// time, to
+					// distribute the load
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						executor.shutdownNow();
+						for (Future<?> f2 : tasks) {
+							f2.cancel(true);
+						}
+						throw new InterruptedException(
+								"Interrupted while uploading common input files.");
 					}
-					throw new InterruptedException(
-					"Interrupted while uploading common input files.");
 				}
 			}
 		}
@@ -2067,7 +2201,7 @@ Comparable<BatchJobObject> {
 				f.cancel(true);
 			}
 			throw new InterruptedException(
-			"Interrupted while waiting for file uploads to finish.");
+					"Interrupted while waiting for file uploads to finish.");
 
 		}
 
@@ -2075,9 +2209,10 @@ Comparable<BatchJobObject> {
 			throw new FileUploadException(exceptions.get(0));
 		}
 
-		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
-				"Uploading input files for batchjob: " + batchJobname
-				+ " finished."));
+		String message2 = "Staging of input files for batchjob: "
+				+ batchJobname + " finished.";
+		EventBus.publish(this.batchJobname, new BatchJobEvent(this, message2));
+		addJobLogMessage(message2);
 
 	}
 
@@ -2088,7 +2223,7 @@ Comparable<BatchJobObject> {
 	 */
 	public SortedSet<DtoJob> waitingJobs() {
 		DtoBatchJob temp = getWrappedDtoBatchJob(false);
-		if ( temp == null ) {
+		if (temp == null) {
 			return new TreeSet<DtoJob>();
 		}
 		return temp.waitingJobs();

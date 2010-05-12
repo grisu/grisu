@@ -163,8 +163,13 @@ public class GrisuFileDialog extends JDialog implements FileListListener {
 	}
 
 	private void setSelectedFiles(Set<GlazedFile> files) {
-		selectedFiles = files;
-		selectedFile = null;
+		if (files.size() == 1) {
+			selectedFile = files.iterator().next();
+			selectedFiles = files;
+		} else {
+			selectedFiles = files;
+			selectedFile = null;
+		}
 	}
 
 }

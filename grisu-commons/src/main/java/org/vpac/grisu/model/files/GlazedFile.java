@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -27,9 +28,11 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
 	}
 
-	public static final DataFlavor GLAZED_FILE_FLAVOR = new DataFlavor(GlazedFile.class, "Grisu file");
+	public static final DataFlavor GLAZED_FILE_FLAVOR = new DataFlavor(
+			GlazedFile.class, "Grisu file");
 
-	public static final DataFlavor[] DATA_FLAVORS = new DataFlavor[]{GLAZED_FILE_FLAVOR, DataFlavor.stringFlavor};
+	public static final DataFlavor[] DATA_FLAVORS = new DataFlavor[] {
+			GLAZED_FILE_FLAVOR, DataFlavor.stringFlavor };
 
 	public static final String LOCAL_FILESYSTEM = "Local";
 
@@ -70,7 +73,7 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 	public static Set<String> extractUrls(Set<GlazedFile> files) {
 
 		Set<String> temp = new HashSet<String>();
-		for ( GlazedFile source : files ) {
+		for (GlazedFile source : files) {
 			temp.add(source.getUrl());
 		}
 		return temp;
@@ -196,14 +199,13 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 	@Override
 	public boolean equals(Object other) {
 
-		if ( other instanceof GlazedFile ) {
-			String url = ((GlazedFile)other).getUrl();
+		if (other instanceof GlazedFile) {
+			String url = ((GlazedFile) other).getUrl();
 			return this.getUrl().equals(url);
 		}
 		return false;
 
 	}
-
 
 	public long getLastModified() {
 
@@ -222,6 +224,10 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 		return name;
 	}
 
+	public String getNameWithoutExtension() {
+		return FilenameUtils.getBaseName(getName());
+	}
+
 	public long getSize() {
 
 		if (si != null) {
@@ -235,9 +241,9 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 	}
 
 	public Object getTransferData(DataFlavor flavor)
-	throws UnsupportedFlavorException, IOException {
+			throws UnsupportedFlavorException, IOException {
 
-		if ( DataFlavor.stringFlavor.equals(flavor) ) {
+		if (DataFlavor.stringFlavor.equals(flavor)) {
 			return getName();
 		}
 		throw new UnsupportedFlavorException(flavor);
@@ -275,12 +281,11 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
 	public boolean isDataFlavorSupported(DataFlavor flavor) {
 
-		if ( Arrays.binarySearch(getTransferDataFlavors(), flavor) >= 0 ) {
+		if (Arrays.binarySearch(getTransferDataFlavors(), flavor) >= 0) {
 			return true;
 		} else {
 			return false;
 		}
-
 
 	}
 

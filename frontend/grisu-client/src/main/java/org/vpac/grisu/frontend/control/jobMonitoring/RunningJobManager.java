@@ -20,6 +20,7 @@ import org.vpac.grisu.control.exceptions.BatchJobException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.frontend.model.events.BatchJobKilledEvent;
 import org.vpac.grisu.frontend.model.events.JobKilledEvent;
+import org.vpac.grisu.frontend.model.events.NewBatchJobEvent;
 import org.vpac.grisu.frontend.model.events.NewJobEvent;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
 import org.vpac.grisu.frontend.model.job.JobObject;
@@ -171,6 +172,7 @@ public class RunningJobManager implements EventSubscriber {
 		EventBus.subscribe(NewJobEvent.class, this);
 		EventBus.subscribe(JobKilledEvent.class, this);
 		EventBus.subscribe(BatchJobKilledEvent.class, this);
+		EventBus.subscribe(NewBatchJobEvent.class, this);
 
 		startAutoRefresh();
 	}
@@ -324,7 +326,14 @@ public class RunningJobManager implements EventSubscriber {
 
 	public void onEvent(Object event) {
 
-		if (event instanceof BatchJobKilledEvent) {
+		if (event instanceof NewBatchJobEvent) {
+			NewBatchJobEvent ev = (NewBatchJobEvent) event;
+			GrisuRegistryManager.getDefault(si).getUserEnvironmentManager()
+					.getCurrentBatchJobnames(true);
+
+			updateBatchJobList(ev.getBatchJob().getApplication());
+
+		} else if (event instanceof BatchJobKilledEvent) {
 			BatchJobKilledEvent e = (BatchJobKilledEvent) event;
 
 			updateBatchJobList(e.getApplication());
