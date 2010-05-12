@@ -10,6 +10,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -69,7 +70,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 	private GrisuFileDialog dialog;
 
 	private GlazedFile currentFile;
-	private List<String> currentFastaInput;
+	private List<List<String>> currentParsedFastaInput;
 	private FileManager fm;
 	private UserEnvironmentManager uem;
 	private HistoryManager hm;
@@ -129,7 +130,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 		getSubmitButton().setText("Submit");
 		getJobSubmissionLogPanel().clear();
 		getJobnameField().setText("");
-		currentFastaInput = null;
+		currentParsedFastaInput = null;
 		currentFile = null;
 
 	}
@@ -347,6 +348,8 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 
 	private void parseFastaFile() {
 
+		List<String> currentFastaInput;
+
 		try {
 			currentFastaInput = FileUtils.readLines(fm
 					.getLocalCacheFile(currentFile.getUrl()));
@@ -357,6 +360,24 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 				if (StringUtils.isBlank(line)) {
 					it.remove();
 				}
+			}
+
+			currentParsedFastaInput = new LinkedList<List<String>>();
+			List<String> currentPart = null;
+			for (String line : currentFastaInput) {
+				if (line.startsWith(">")) {
+					if (currentPart != null && currentPart.size() > 0) {
+						currentParsedFastaInput.add(currentPart);
+					}
+					currentPart = new LinkedList<String>();
+				}
+				if (currentPart == null) {
+					throw new IllegalArgumentException(
+							"Can't parse fasta file: "
+									+ line
+									+ " doesn't start or doesn't belong to another line that starts with >");
+				}
+				currentPart.add(line);
 			}
 
 		} catch (IOException e) {
@@ -402,7 +423,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 
 		parseFastaFile();
 
-		getSlider().setMaximum(currentFastaInput.size());
+		getSlider().setMaximum(currentParsedFastaInput.size());
 
 		getJobnameField().setText(
 				uem.calculateUniqueJobname(currentFile
@@ -433,22 +454,23 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 
 		getJobSubmissionLogPanel().setBatchJob(currentBatchJob);
 
-		Map<String, List<String>> inputFiles = new LinkedHashMap<String, List<String>>();
+		Map<String, List<List<String>>> inputFiles = new LinkedHashMap<String, List<List<String>>>();
 
 		int noJobs = getSlider().getValue();
 
-		Double linesPerJobD = new Double(currentFastaInput.size())
+		Double linesPerJobD = new Double(currentParsedFastaInput.size())
 				/ new Double(noJobs);
 
 		int linesPerJob = new Long(Math.round(linesPerJobD + 0.499999))
 				.intValue();
 
-		for (int i = 0; i < currentFastaInput.size(); i = i + linesPerJob) {
+		for (int i = 0; i < currentParsedFastaInput.size(); i = i + linesPerJob) {
 			int end = i + linesPerJob;
-			if (end > currentFastaInput.size()) {
-				end = currentFastaInput.size();
+			if (end > currentParsedFastaInput.size()) {
+				end = currentParsedFastaInput.size();
 			}
-			List<String> tempList = currentFastaInput.subList(i, end);
+			List<List<String>> tempList = currentParsedFastaInput.subList(i,
+					end);
 			inputFiles.put("line" + formatter.format(i) + "-line"
 					+ formatter.format(end - 1), tempList);
 		}
@@ -461,7 +483,12 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 					inputFIlename);
 			tempFile.delete();
 			try {
-				FileUtils.writeLines(tempFile, inputFiles.get(jobname));
+				List<List<String>> all = inputFiles.get(jobname);
+				List<String> consolidated = new LinkedList<String>();
+				for (List<String> temp : all) {
+					consolidated.addAll(temp);
+				}
+				FileUtils.writeLines(tempFile, consolidated);
 			} catch (IOException e) {
 				throw new BatchJobException(e);
 			}

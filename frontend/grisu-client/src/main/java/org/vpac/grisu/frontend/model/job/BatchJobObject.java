@@ -1669,6 +1669,7 @@ public class BatchJobObject implements JobMonitoringObject,
 				String handle = batchJobname;
 				DtoActionStatus status = serviceInterface
 						.getActionStatus(handle);
+
 				while (!status.isFinished()) {
 
 					try {
