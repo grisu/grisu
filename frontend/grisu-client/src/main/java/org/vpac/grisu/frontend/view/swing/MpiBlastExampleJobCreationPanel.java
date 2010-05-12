@@ -472,7 +472,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 			}
 			List<List<String>> tempList = currentParsedFastaInput.subList(i,
 					end);
-			inputFiles.put("line" + formatter.format(i) + "-line"
+			inputFiles.put("part" + formatter.format(i) + "-part"
 					+ formatter.format(end - 1), tempList);
 		}
 
