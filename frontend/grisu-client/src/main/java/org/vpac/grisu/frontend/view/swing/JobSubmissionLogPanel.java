@@ -145,7 +145,7 @@ public class JobSubmissionLogPanel extends JPanel implements
 		this.batchJob = batchJob;
 		this.batchJob.addPropertyChangeListener(this);
 
-		getLblMonitoringJob().setText(this.batchJob.getJobname());
+		getTextField().setText(this.batchJob.getJobname());
 
 	}
 

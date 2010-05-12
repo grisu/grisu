@@ -474,7 +474,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 			tempJob.setApplicationVersion("1.5.0");
 			// tempJob.setWalltimeInSeconds(604800);
 			tempJob.setWalltimeInSeconds(DEFAULT_WALLTIME);
-			String commandline = "mpirun mpiblast -np 8 -p blastp -d nr -i "
+			String commandline = "mpiblast -np 8 -p blastp -d nr -i "
 					+ inputFIlename + " -o " + jobname + "out.txt";
 			tempJob.setCommandline(commandline);
 			tempJob.setForce_mpi(true);
