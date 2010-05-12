@@ -49,6 +49,8 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 	static final Logger myLogger = Logger
 			.getLogger(MpiBlastExampleJobCreationPanel.class.getName());
 
+	static final int DEFAULT_WALLTIME = 3600 * 24;
+
 	private ServiceInterface si;
 	private JLabel jobnameLabel;
 	private JTextField jobnameField;
@@ -470,8 +472,9 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 			tempJob.addInputFileUrl(tempFile.toURI().toString());
 			tempJob.setApplication("mpiblast");
 			tempJob.setApplicationVersion("1.5.0");
-			tempJob.setWalltimeInSeconds(604800);
-			String commandline = "mpirun -np 8 -p blastp -d nr -i "
+			// tempJob.setWalltimeInSeconds(604800);
+			tempJob.setWalltimeInSeconds(DEFAULT_WALLTIME);
+			String commandline = "mpirun mpiblast -np 8 -p blastp -d nr -i "
 					+ inputFIlename + " -o " + jobname + "out.txt";
 			tempJob.setCommandline(commandline);
 			tempJob.setForce_mpi(true);
@@ -481,7 +484,8 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 		}
 
 		currentBatchJob.setDefaultNoCpus(8);
-		currentBatchJob.setDefaultWalltimeInSeconds(604800);
+		// currentBatchJob.setDefaultWalltimeInSeconds(604800);
+		currentBatchJob.setDefaultWalltimeInSeconds(DEFAULT_WALLTIME);
 
 		try {
 			currentBatchJob.prepareAndCreateJobs(true);
