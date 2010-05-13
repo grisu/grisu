@@ -51,6 +51,12 @@ public class GrisuMenu extends JMenuBar {
 	private JMenuItem getExitItem() {
 		if (exitItem == null) {
 			exitItem = new JMenuItem("Exit");
+			exitItem.addActionListener(new ActionListener() {
+
+				public void actionPerformed(ActionEvent arg0) {
+					System.exit(0);
+				}
+			});
 		}
 		return exitItem;
 	}

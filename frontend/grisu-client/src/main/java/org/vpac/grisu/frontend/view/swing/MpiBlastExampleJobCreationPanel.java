@@ -29,6 +29,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.BatchJobException;
+import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
@@ -348,11 +349,16 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 
 	private void parseFastaFile() {
 
-		List<String> currentFastaInput;
+		List<String> currentFastaInput = null;
 
 		try {
-			currentFastaInput = FileUtils.readLines(fm
-					.getLocalCacheFile(currentFile.getUrl()));
+			try {
+				currentFastaInput = FileUtils.readLines(fm
+						.downloadFile(currentFile.getUrl()));
+			} catch (FileTransactionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 			Iterator<String> it = currentFastaInput.iterator();
 			while (it.hasNext()) {

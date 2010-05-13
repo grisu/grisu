@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import jline.ConsoleReader;
 
@@ -58,13 +59,14 @@ public class LoginManager {
 			.getName());
 
 	static final public ImmutableBiMap<String, String> SERVICEALIASES = new ImmutableBiMap.Builder<String, String>()
-	.put("LOCAL", "Local")
-	.put("ARCS", "https://grisu-vpac.arcs.org.au/grisu-ws/soap/GrisuService")
-	.put("ARCS_DEV", "https://ngportal.vpac.org/grisu-ws/soap/GrisuService")
-	.put("LOCAL_WS", "http://localhost:8080/soap/GrisuService")
-	.build();
+			.put("LOCAL", "Local")
+			.put("ARCS",
+					"https://grisu-vpac.arcs.org.au/grisu-ws/soap/GrisuService")
+			.put("ARCS_DEV",
+					"https://ngportal.vpac.org/grisu-ws/soap/GrisuService")
+			.put("LOCAL_WS", "http://localhost:8080/soap/GrisuService").build();
 
-	public static  String httpProxyHost = null;
+	public static String httpProxyHost = null;
 
 	public static int httpProxyPort = 80;
 
@@ -84,7 +86,7 @@ public class LoginManager {
 	}
 
 	private static ConsoleReader getConsoleReader() {
-		if ( consoleReader == null ) {
+		if (consoleReader == null) {
 			try {
 				consoleReader = new ConsoleReader();
 			} catch (IOException e) {
@@ -93,27 +95,31 @@ public class LoginManager {
 		}
 		return consoleReader;
 	}
+
 	public static void initEnvironment() {
 
 		if (!environmentInitialized) {
 
 			JythonHelpers.setJythonCachedir();
 
-			String debug =  CommonArcsProperties.getDefault().getArcsProperty(CommonArcsProperties.Property.DEBUG_UNCAUGHT_EXCEPTIONS);
+			String debug = CommonArcsProperties.getDefault().getArcsProperty(
+					CommonArcsProperties.Property.DEBUG_UNCAUGHT_EXCEPTIONS);
 
-			if ( "true".equalsIgnoreCase(debug) ) {
-				Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler());
+			if ("true".equalsIgnoreCase(debug)) {
+				Thread
+						.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler());
 			}
 
 			java.security.Security.addProvider(new ArcsSecurityProvider());
 
 			java.security.Security
-			.setProperty("ssl.TrustManagerFactory.algorithm",
-			"TrustAllCertificates");
+					.setProperty("ssl.TrustManagerFactory.algorithm",
+							"TrustAllCertificates");
 
-			String disableLoadBouncyCastle = System.getProperty("disableLoadBouncyCastle");
+			String disableLoadBouncyCastle = System
+					.getProperty("disableLoadBouncyCastle");
 
-			if ( ! "true".equalsIgnoreCase(disableLoadBouncyCastle) ) {
+			if (!"true".equalsIgnoreCase(disableLoadBouncyCastle)) {
 
 				Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
 
@@ -127,6 +133,7 @@ public class LoginManager {
 		}
 
 	}
+
 	/**
 	 * Simplest way to login.
 	 * 
@@ -140,6 +147,7 @@ public class LoginManager {
 		return login((GlobusCredential) null, (char[]) null, (String) null,
 				(String) null, (LoginParams) null, false);
 	}
+
 	/**
 	 * One-for-all method to login to a local Grisu backend.
 	 * 
@@ -219,22 +227,25 @@ public class LoginManager {
 	public static ServiceInterface login(GlobusCredential cred,
 			char[] password, String username, String idp,
 			LoginParams loginParams, boolean saveCredentialAsLocalProxy)
-	throws LoginException {
+			throws LoginException {
 
 		initEnvironment();
 
 		if (loginParams == null) {
 
-			String defaultUrl = ClientPropertiesManager.getDefaultServiceInterfaceUrl();
-			if ( StringUtils.isNotBlank(defaultUrl) ) {
+			String defaultUrl = ClientPropertiesManager
+					.getDefaultServiceInterfaceUrl();
+			if (StringUtils.isNotBlank(defaultUrl)) {
 				loginParams = new LoginParams(defaultUrl, null, null);
 			} else {
 				loginParams = new LoginParams("Local", null, null);
 			}
 
+		} else if (StringUtils.isBlank(loginParams.getMyProxyUsername())) {
+			loginParams.setMyProxyUsername(UUID.randomUUID().toString());
 		}
 
-		if ( StringUtils.isNotBlank(httpProxyHost) ) {
+		if (StringUtils.isNotBlank(httpProxyHost)) {
 			loginParams.setHttpProxy(httpProxyHost);
 			loginParams.setHttpProxyPort(httpProxyPort);
 			loginParams.setHttpProxyUsername(httpProxyUsername);
@@ -328,9 +339,9 @@ public class LoginManager {
 					// means certificate auth
 					try {
 						// means try to load local proxy
-						si = LoginHelpers
-						.defaultLocalProxyLogin(loginParams);
-						ClientPropertiesManager.saveLastLoginType(LoginType.LOCAL_PROXY);
+						si = LoginHelpers.defaultLocalProxyLogin(loginParams);
+						ClientPropertiesManager
+								.saveLastLoginType(LoginType.LOCAL_PROXY);
 
 					} catch (Exception e) {
 						throw new LoginException("Could not login: "
@@ -348,9 +359,10 @@ public class LoginManager {
 										"Could not create local proxy.", e);
 							}
 						}
-						si = LoginHelpers.localProxyLogin(password,
-								loginParams);
-						ClientPropertiesManager.saveLastLoginType(LoginType.X509_CERTIFICATE);
+						si = LoginHelpers
+								.localProxyLogin(password, loginParams);
+						ClientPropertiesManager
+								.saveLastLoginType(LoginType.X509_CERTIFICATE);
 					} catch (ServiceInterfaceException e) {
 						throw new LoginException("Could not login: "
 								+ e.getLocalizedMessage(), e);
@@ -361,8 +373,10 @@ public class LoginManager {
 				// means myproxy login
 				try {
 					si = LoginHelpers.myProxyLogin(loginParams);
-					ClientPropertiesManager.saveLastLoginType(LoginType.MYPROXY);
-					CommonArcsProperties.getDefault().setLastMyProxyUsername(loginParams.getMyProxyUsername());
+					ClientPropertiesManager
+							.saveLastLoginType(LoginType.MYPROXY);
+					CommonArcsProperties.getDefault().setLastMyProxyUsername(
+							loginParams.getMyProxyUsername());
 				} catch (ServiceInterfaceException e) {
 					throw new LoginException("Could not login: "
 							+ e.getLocalizedMessage(), e);
@@ -395,7 +409,8 @@ public class LoginManager {
 
 		}
 
-		ClientPropertiesManager.setDefaultServiceInterfaceUrl(loginParams.getServiceInterfaceUrl());
+		ClientPropertiesManager.setDefaultServiceInterfaceUrl(loginParams
+				.getServiceInterfaceUrl());
 
 		return si;
 	}
@@ -459,56 +474,68 @@ public class LoginManager {
 				(String) null, url, false);
 	}
 
-	public static ServiceInterface login(UI ui, Set<LoginType> types, String url) throws LoginException {
+	public static ServiceInterface login(UI ui, Set<LoginType> types, String url)
+			throws LoginException {
 
-		switch (ui){
-		case COMMANDLINE: return loginCommandline(types, url);
-		case SWING: return loginSwing(types, url);
+		switch (ui) {
+		case COMMANDLINE:
+			return loginCommandline(types, url);
+		case SWING:
+			return loginSwing(types, url);
 		}
 
-		throw new IllegalArgumentException("Login type "+ui.toString()+" not supported.");
+		throw new IllegalArgumentException("Login type " + ui.toString()
+				+ " not supported.");
 	}
 
 	public static ServiceInterface loginCommandline() throws LoginException {
 		return loginCommandline(SERVICEALIASES.get("LOCAL"));
 	}
 
-	public static ServiceInterface loginCommandline(LoginType type, String url) throws LoginException {
+	public static ServiceInterface loginCommandline(LoginType type, String url)
+			throws LoginException {
 
 		switch (type) {
-		case SHIBBOLETH: return loginCommandlineShibboleth(url);
-		case MYPROXY: return loginCommandlineMyProxy(url);
-		case LOCAL_PROXY: return LoginManager.login(url);
-		case X509_CERTIFICATE: return loginCommandlineX509cert(url);
+		case SHIBBOLETH:
+			return loginCommandlineShibboleth(url);
+		case MYPROXY:
+			return loginCommandlineMyProxy(url);
+		case LOCAL_PROXY:
+			return LoginManager.login(url);
+		case X509_CERTIFICATE:
+			return loginCommandlineX509cert(url);
 		}
 		throw new IllegalArgumentException("Login type not supported.");
 
 	}
 
-	public static ServiceInterface loginCommandline(Set<LoginType> types, String url) throws LoginException {
+	public static ServiceInterface loginCommandline(Set<LoginType> types,
+			String url) throws LoginException {
 
-		if ( (types == null) || (types.size() == 0) ) {
+		if ((types == null) || (types.size() == 0)) {
 
 			throw new IllegalArgumentException("No login type specified.");
 		}
 
-		if ( types.size() == 1 ) {
+		if (types.size() == 1) {
 			return loginCommandline(types.iterator().next(), url);
 		}
 
 		ImmutableList<LoginType> temp = ImmutableList.copyOf(types);
 
-		StringBuffer message = new StringBuffer("Please select your preferred login method:\n\n");
+		StringBuffer message = new StringBuffer(
+				"Please select your preferred login method:\n\n");
 
-		for ( int i=0; i<temp.size(); i++ ) {
-			message.append("["+(i+1)+"]\t"+temp.get(i).getPrettyName()+"\n");
+		for (int i = 0; i < temp.size(); i++) {
+			message.append("[" + (i + 1) + "]\t" + temp.get(i).getPrettyName()
+					+ "\n");
 		}
 		message.append("\n[0]\tExit\n\n");
 
 		System.out.println(message.toString());
 
 		int choice = -1;
-		while ( (choice < 0) || (choice >= temp.size()) ) {
+		while ((choice < 0) || (choice >= temp.size())) {
 			String input;
 			try {
 				input = getConsoleReader().readLine("Login method: ");
@@ -518,76 +545,85 @@ public class LoginManager {
 
 			try {
 				choice = Integer.parseInt(input);
-			} catch ( Exception e) {
+			} catch (Exception e) {
 				continue;
 			}
 		}
 
-
-		if ( choice == 0 ) {
+		if (choice == 0) {
 			System.exit(0);
 		}
 
-		return loginCommandline(temp.get(choice-1), url);
+		return loginCommandline(temp.get(choice - 1), url);
 
 	}
 
-	public static ServiceInterface loginCommandline(String url) throws LoginException {
+	public static ServiceInterface loginCommandline(String url)
+			throws LoginException {
 
 		initEnvironment();
 
-		if ( LocalProxy.validGridProxyExists() ) {
+		if (LocalProxy.validGridProxyExists()) {
 			return LoginManager.login(url);
 		} else {
-			ImmutableSet<LoginType> temp = ImmutableSet.of(LoginType.SHIBBOLETH, LoginType.MYPROXY, LoginType.X509_CERTIFICATE);
+			ImmutableSet<LoginType> temp = ImmutableSet.of(
+					LoginType.SHIBBOLETH, LoginType.MYPROXY,
+					LoginType.X509_CERTIFICATE);
 			return loginCommandline(temp, url);
 		}
 
 	}
 
+	public static ServiceInterface loginCommandlineMyProxy(String url) {
 
-	public static ServiceInterface loginCommandlineMyProxy(String url)  {
-
-		while ( true ) {
+		while (true) {
 			try {
 
-				StringBuffer prompt = new StringBuffer("Please enter your myproxy username");
-				String lastMyProxyUsername = CommonArcsProperties.getDefault().getLastMyProxyUsername();
+				StringBuffer prompt = new StringBuffer(
+						"Please enter your myproxy username");
+				String lastMyProxyUsername = CommonArcsProperties.getDefault()
+						.getLastMyProxyUsername();
 
-				if ( StringUtils.isNotBlank(lastMyProxyUsername) ) {
-					prompt.append(" ["+lastMyProxyUsername+"]: ");
+				if (StringUtils.isNotBlank(lastMyProxyUsername)) {
+					prompt.append(" [" + lastMyProxyUsername + "]: ");
 				} else {
 					prompt.append(": ");
 				}
 
 				String username = null;
-				while ( StringUtils.isBlank(username) ) {
+				while (StringUtils.isBlank(username)) {
 					try {
-						username = getConsoleReader().readLine(prompt.toString());
+						username = getConsoleReader().readLine(
+								prompt.toString());
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
 
-					if ( StringUtils.isNotBlank(lastMyProxyUsername) && StringUtils.isBlank(username) ) {
+					if (StringUtils.isNotBlank(lastMyProxyUsername)
+							&& StringUtils.isBlank(username)) {
 						username = lastMyProxyUsername;
 					}
 				}
 
-				CommonArcsProperties.getDefault().setLastMyProxyUsername(username);
+				CommonArcsProperties.getDefault().setLastMyProxyUsername(
+						username);
 
 				String password = null;
-				while ( StringUtils.isBlank(password) ) {
+				while (StringUtils.isBlank(password)) {
 					try {
-						password = getConsoleReader().readLine("Please enter your myproxy password", new Character('*'));
+						password = getConsoleReader().readLine(
+								"Please enter your myproxy password",
+								new Character('*'));
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
 				}
 
-				return LoginManager.myProxyLogin(url, username, password.toCharArray());
+				return LoginManager.myProxyLogin(url, username, password
+						.toCharArray());
 
 			} catch (LoginException e) {
-				System.out.println("Login failed: "+e.getLocalizedMessage());
+				System.out.println("Login failed: " + e.getLocalizedMessage());
 			}
 		}
 
@@ -602,8 +638,10 @@ public class LoginManager {
 
 				System.out.println("Loading list of institutions...");
 
-				StringBuffer prompt = new StringBuffer("Please select your institution");
-				String lastIdp = CommonArcsProperties.getDefault().getLastShibIdp();
+				StringBuffer prompt = new StringBuffer(
+						"Please select your institution");
+				String lastIdp = CommonArcsProperties.getDefault()
+						.getLastShibIdp();
 
 				IdpObject idpObj = new DummyIdpObject();
 				CredentialManager cm = new DummyCredentialManager();
@@ -611,34 +649,37 @@ public class LoginManager {
 				Shibboleth shib = new Shibboleth(idpObj, cm);
 				shib.openurl(SLCS.DEFAULT_SLCS_URL);
 
-				ImmutableList<String> idps = ImmutableList.copyOf(idpObj.getIdps());
+				ImmutableList<String> idps = ImmutableList.copyOf(idpObj
+						.getIdps());
 				int defaultChoice = -1;
 
-				for ( int i=0; i<idps.size(); i++) {
-					System.out.println("["+(i+1)+"]\t"+idps.get(i));
+				for (int i = 0; i < idps.size(); i++) {
+					System.out.println("[" + (i + 1) + "]\t" + idps.get(i));
 
-					if ( StringUtils.isNotBlank(lastIdp) && idps.get(i).equals(lastIdp)) {
-						defaultChoice = i+1;
+					if (StringUtils.isNotBlank(lastIdp)
+							&& idps.get(i).equals(lastIdp)) {
+						defaultChoice = i + 1;
 					}
 				}
 				System.out.println("\n[0]\tExit");
 
-				if ( defaultChoice < 0 ) {
+				if (defaultChoice < 0) {
 					prompt.append(": ");
 				} else {
-					prompt.append(" ["+defaultChoice+"] ");
+					prompt.append(" [" + defaultChoice + "] ");
 				}
 
 				String idpchoice = null;
 				int choice = -1;
-				while ( choice < 0 ) {
+				while (choice < 0) {
 					try {
-						idpchoice = getConsoleReader().readLine(prompt.toString());
+						idpchoice = getConsoleReader().readLine(
+								prompt.toString());
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
 
-					if ( (defaultChoice >= 0) && StringUtils.isBlank(idpchoice) ) {
+					if ((defaultChoice >= 0) && StringUtils.isBlank(idpchoice)) {
 						idpchoice = new Integer(defaultChoice).toString();
 					}
 
@@ -649,34 +690,36 @@ public class LoginManager {
 					}
 				}
 
-
-
-				if ( choice == 0 ) {
+				if (choice == 0) {
 					System.exit(0);
 				}
 
-				idpchoice = idps.get(choice-1);
+				idpchoice = idps.get(choice - 1);
 
 				CommonArcsProperties.getDefault().setLastShibIdp(idpchoice);
 
-				prompt = new StringBuffer("Please enter your institution username");
-				String lastShibUsername = CommonArcsProperties.getDefault().getLastShibUsername();
+				prompt = new StringBuffer(
+						"Please enter your institution username");
+				String lastShibUsername = CommonArcsProperties.getDefault()
+						.getLastShibUsername();
 
-				if ( StringUtils.isNotBlank(lastShibUsername) ) {
-					prompt.append(" ["+lastShibUsername+"]: ");
+				if (StringUtils.isNotBlank(lastShibUsername)) {
+					prompt.append(" [" + lastShibUsername + "]: ");
 				} else {
 					prompt.append(": ");
 				}
 
 				String username = null;
-				while ( StringUtils.isBlank(username) ) {
+				while (StringUtils.isBlank(username)) {
 					try {
-						username = getConsoleReader().readLine(prompt.toString());
+						username = getConsoleReader().readLine(
+								prompt.toString());
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
 
-					if ( StringUtils.isNotBlank(lastShibUsername) && StringUtils.isBlank(username) ) {
+					if (StringUtils.isNotBlank(lastShibUsername)
+							&& StringUtils.isBlank(username)) {
 						username = lastShibUsername;
 					}
 				}
@@ -684,17 +727,20 @@ public class LoginManager {
 				CommonArcsProperties.getDefault().setLastShibUsername(username);
 
 				String password = null;
-				while ( StringUtils.isBlank(password) ) {
+				while (StringUtils.isBlank(password)) {
 					try {
-						password = getConsoleReader().readLine("Please enter your institution password: ", new Character('*'));
+						password = getConsoleReader().readLine(
+								"Please enter your institution password: ",
+								new Character('*'));
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
 				}
 
-				return LoginManager.shiblogin(username, password.toCharArray(), idpchoice, url, true);
+				return LoginManager.shiblogin(username, password.toCharArray(),
+						idpchoice, url, true);
 			} catch (LoginException e) {
-				System.out.println("Login failed: "+e.getLocalizedMessage());
+				System.out.println("Login failed: " + e.getLocalizedMessage());
 			}
 		}
 
@@ -702,22 +748,26 @@ public class LoginManager {
 
 	public static ServiceInterface loginCommandlineX509cert(String url) {
 
-		while ( true ) {
+		while (true) {
 			try {
 
-
 				String password = null;
-				while ( StringUtils.isBlank(password) ) {
+				while (StringUtils.isBlank(password)) {
 					try {
-						password = getConsoleReader().readLine("Please enter your x509 certificate passphrase: ", new Character('*'));
+						password = getConsoleReader()
+								.readLine(
+										"Please enter your x509 certificate passphrase: ",
+										new Character('*'));
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
 				}
 
-				return LoginManager.login(null, password.toCharArray(), null, null, true);
+				return LoginManager.login(null, password.toCharArray(), null,
+						null, true);
 			} catch (LoginException e) {
-				System.out.println("Login exception: "+e.getLocalizedMessage());
+				System.out.println("Login exception: "
+						+ e.getLocalizedMessage());
 			}
 		}
 
@@ -730,10 +780,9 @@ public class LoginManager {
 	public static void main(String[] args) throws LoginException {
 
 		ServiceInterface si = LoginManager.shiblogin("markus", args[0]
-		                                                            .toCharArray(), "VPAC", true);
+				.toCharArray(), "VPAC", true);
 
 	}
-
 
 	public static ServiceInterface myProxyLogin(String url, String username,
 			char[] password) throws LoginException {
@@ -741,12 +790,14 @@ public class LoginManager {
 		return login(null, null, null, null, loginParams, false);
 	}
 
-	public static void setHttpProxy(String host, int port, String username, char[] password) {
+	public static void setHttpProxy(String host, int port, String username,
+			char[] password) {
 		httpProxyHost = host;
 		httpProxyPort = port;
 		httpProxyUsername = username;
 		httpProxyPassphrase = password;
-		HttpProxyManager.setHttpProxy(httpProxyHost, httpProxyPort, httpProxyUsername, httpProxyPassphrase);
+		HttpProxyManager.setHttpProxy(httpProxyHost, httpProxyPort,
+				httpProxyUsername, httpProxyPassphrase);
 	}
 
 	/**
@@ -771,7 +822,7 @@ public class LoginManager {
 	 */
 	public static ServiceInterface shiblogin(String username, char[] password,
 			String idp, boolean saveCredendentialsToLocalProxy)
-	throws LoginException {
+			throws LoginException {
 		return login((GlobusCredential) null, password, username, idp, "Local",
 				saveCredendentialsToLocalProxy);
 	}
@@ -798,7 +849,7 @@ public class LoginManager {
 	 */
 	public static ServiceInterface shiblogin(String username, char[] password,
 			String idp, String url, boolean saveCredendentialsToLocalProxy)
-	throws LoginException {
+			throws LoginException {
 		return login((GlobusCredential) null, password, username, idp, url,
 				saveCredendentialsToLocalProxy);
 	}
@@ -806,7 +857,8 @@ public class LoginManager {
 	public static GSSCredential slcsMyProxyInit(String username,
 			char[] password, String idp, LoginParams params) throws Exception {
 
-		return SlcsLoginWrapper.slcsMyProxyInit(username, password, idp, params);
+		return SlcsLoginWrapper
+				.slcsMyProxyInit(username, password, idp, params);
 
 	}
 
