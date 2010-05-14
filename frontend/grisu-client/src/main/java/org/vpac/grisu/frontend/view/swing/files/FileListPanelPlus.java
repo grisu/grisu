@@ -122,7 +122,9 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 
 	public void directoryChanged(GlazedFile newDirectory) {
 
-		if (!GlazedFile.Type.FILETYPE_FOLDER.equals(newDirectory.getType())) {
+		if (newDirectory == null
+				|| !GlazedFile.Type.FILETYPE_FOLDER.equals(newDirectory
+						.getType())) {
 			return;
 		}
 
