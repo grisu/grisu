@@ -51,6 +51,7 @@ public class JobSubmissionLogPanel extends JPanel implements
 	public void clear() {
 
 		getLogArea().setText("");
+		getTextField().setText("");
 
 	}
 

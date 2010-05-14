@@ -51,6 +51,9 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 	static final Logger myLogger = Logger
 			.getLogger(MpiBlastExampleJobCreationPanel.class.getName());
 
+	public static final String MPIBLAST_EXAMPLE_LAST_INPUT_FILE_DIR = "mpiblast_batch_last_input_file_dir";
+	public static final String MPIBLAST_BATCH_INPUT_FILES = "mpiblast_batch_input_files";
+
 	static final int DEFAULT_WALLTIME = 3600 * 24;
 
 	private ServiceInterface si;
@@ -124,6 +127,10 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 
 	private void cleanUpUI() {
 
+		getInputFileComboBox().removeAllItems();
+		for (String entry : hm.getEntries(MPIBLAST_BATCH_INPUT_FILES)) {
+			getInputFileComboBox().addItem(entry);
+		}
 		getInputFileComboBox().setSelectedItem(null);
 		getSlider().setEnabled(false);
 		getSlider().setMaximum(1);
@@ -186,8 +193,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 		}
 
 		if (dialog == null) {
-			String url = hm
-					.getLastEntry("MPIBLAST_EXAMPLE_LAST_INPUT_FILE_DIR");
+			String url = hm.getLastEntry(MPIBLAST_EXAMPLE_LAST_INPUT_FILE_DIR);
 			if (StringUtils.isBlank(url)) {
 				url = new File(System.getProperty("user.home")).toURI()
 						.toString();
@@ -327,6 +333,9 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 						};
 						subThread.start();
 						submitButton.setText("Cancel");
+						hm.addHistoryEntry(MPIBLAST_BATCH_INPUT_FILES,
+								(String) getInputFileComboBox()
+										.getSelectedItem());
 					} else if ("Cancel".equals(submitButton.getText())) {
 						subThread.interrupt();
 						submitButton.setText("Ok");
@@ -402,7 +411,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 
 		GlazedFile currentDir = getFileDialog().getCurrentDirectory();
 
-		hm.addHistoryEntry("MPIBLAST_EXAMPLE_LAST_INPUT_FILE_DIR", currentDir
+		hm.addHistoryEntry(MPIBLAST_EXAMPLE_LAST_INPUT_FILE_DIR, currentDir
 				.getUrl());
 
 		return file;
@@ -446,6 +455,9 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 		this.uem = GrisuRegistryManager.getDefault(si)
 				.getUserEnvironmentManager();
 		this.hm = GrisuRegistryManager.getDefault(si).getHistoryManager();
+		this.hm.setMaxNumberOfEntries(MPIBLAST_BATCH_INPUT_FILES, 8);
+
+		cleanUpUI();
 	}
 
 	public void submitJob() throws BatchJobException {

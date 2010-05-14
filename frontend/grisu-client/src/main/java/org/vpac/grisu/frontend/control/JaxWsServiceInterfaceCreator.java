@@ -104,8 +104,8 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			bp.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY,
 					new String(password));
 
-			// bp.getRequestContext().put(
-			// BindingProvider.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
+			 bp.getRequestContext().put(
+			 BindingProvider.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
 
 			// bp.getRequestContext().put(
 			// JAXWSProperties.SSL_SOCKET_FACTORY,
