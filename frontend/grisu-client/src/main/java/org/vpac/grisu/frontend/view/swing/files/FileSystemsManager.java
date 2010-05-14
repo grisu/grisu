@@ -19,7 +19,7 @@ public class FileSystemsManager {
 	public static FileSystemsManager getDefault(ServiceInterface si) {
 		if (si == null) {
 			throw new RuntimeException(
-			"ServiceInterface not initialized yet. Can't get default registry...");
+					"ServiceInterface not initialized yet. Can't get default registry...");
 		}
 
 		synchronized (si) {
@@ -40,18 +40,19 @@ public class FileSystemsManager {
 	public FileSystemsManager(ServiceInterface si) {
 		this.si = si;
 		this.em = GrisuRegistryManager.getDefault(si)
-		.getUserEnvironmentManager();
+				.getUserEnvironmentManager();
 
 		allFileSystems.addAll(em.getFileSystems());
 
 		// Add seperators
-		allFileSystems.add(new FileSystemItem(FileSystemItem.Type.SELECT, "Click here to select..."));
+		allFileSystems.add(new FileSystemItem(FileSystemItem.Type.SELECT,
+				"Click here to select..."));
 		allFileSystems.add(new FileSystemItem(FileSystemItem.Type.LOCAL,
-		" -- Local -- "));
+				" -- Local -- "));
 		allFileSystems.add(new FileSystemItem(FileSystemItem.Type.BOOKMARK,
-		" -- Bookmarks -- "));
+				" -- Bookmarks -- "));
 		allFileSystems.add(new FileSystemItem(FileSystemItem.Type.REMOTE,
-		" -- Grid -- "));
+				" -- Grid -- "));
 
 	}
 
@@ -62,6 +63,29 @@ public class FileSystemsManager {
 
 	public EventList<FileSystemItem> getAllFileSystems() {
 		return allFileSystems;
+	}
+
+	public FileSystemItem getFileSystemForUrl(String url) {
+
+		for (FileSystemItem fsi : getAllFileSystems()) {
+			if (FileSystemItem.Type.BOOKMARK.equals(fsi.getType())) {
+				continue;
+			}
+			if (url.startsWith(fsi.getRootFile().getUrl())) {
+				return fsi;
+			}
+		}
+
+		for (FileSystemItem fsi : getAllFileSystems()) {
+			if (!FileSystemItem.Type.BOOKMARK.equals(fsi.getType())) {
+				continue;
+			}
+			if (url.startsWith(fsi.getRootFile().getUrl())) {
+				return fsi;
+			}
+		}
+
+		return null;
 	}
 
 	public void removeBookmark(String alias) {

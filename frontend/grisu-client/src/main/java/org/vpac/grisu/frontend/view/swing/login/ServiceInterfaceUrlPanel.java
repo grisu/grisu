@@ -26,31 +26,28 @@ public class ServiceInterfaceUrlPanel extends JPanel {
 	 */
 	public ServiceInterfaceUrlPanel() {
 
-		for ( String url : ClientPropertiesManager.getServiceInterfaceUrls() ) {
+		for (String url : ClientPropertiesManager.getServiceInterfaceUrls()) {
 
 			String posAlias = LoginManager.SERVICEALIASES.inverse().get(url);
-			if ( StringUtils.isNotBlank(posAlias) ) {
+			if (StringUtils.isNotBlank(posAlias)) {
 
-				if ( urlModel.getIndexOf(posAlias) < 0 ) {
+				if (urlModel.getIndexOf(posAlias) < 0) {
 					urlModel.addElement(posAlias);
 				}
 			} else {
-				if ( urlModel.getIndexOf(url)< 0 ) {
+				if (urlModel.getIndexOf(url) < 0) {
 					urlModel.addElement(url);
 				}
 			}
 		}
 
 		setLayout(new FormLayout(new ColumnSpec[] {
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getLblServiceinterfaceUrl(), "2, 2, right, default");
 		add(getComboBox(), "4, 2, fill, default");
 
@@ -60,12 +57,14 @@ public class ServiceInterfaceUrlPanel extends JPanel {
 		if (comboBox == null) {
 			comboBox = new JComboBox(urlModel);
 			comboBox.setEditable(true);
-			String defaultUrl = ClientPropertiesManager.getDefaultServiceInterfaceUrl();
-			String posAlias = LoginManager.SERVICEALIASES.inverse().get(defaultUrl);
-			if ( StringUtils.isNotBlank(posAlias) ) {
+			String defaultUrl = ClientPropertiesManager
+					.getDefaultServiceInterfaceUrl();
+			String posAlias = LoginManager.SERVICEALIASES.inverse().get(
+					defaultUrl);
+			if (StringUtils.isNotBlank(posAlias)) {
 				defaultUrl = posAlias;
 			}
-			if ( StringUtils.isNotBlank(defaultUrl) ) {
+			if (StringUtils.isNotBlank(defaultUrl)) {
 				urlModel.setSelectedItem(defaultUrl);
 			}
 		}
@@ -74,12 +73,13 @@ public class ServiceInterfaceUrlPanel extends JPanel {
 
 	private JLabel getLblServiceinterfaceUrl() {
 		if (lblServiceinterfaceUrl == null) {
-			lblServiceinterfaceUrl = new JLabel("ServiceInterface:");
+			lblServiceinterfaceUrl = new JLabel("Grisu backend:");
 		}
 		return lblServiceinterfaceUrl;
 	}
+
 	public String getServiceInterfaceUrl() {
-		return (String)(urlModel.getSelectedItem());
+		return (String) (urlModel.getSelectedItem());
 	}
 
 	public void lockUI(final boolean lock) {

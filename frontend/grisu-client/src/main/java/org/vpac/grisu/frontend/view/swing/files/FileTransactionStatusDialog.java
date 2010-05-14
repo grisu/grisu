@@ -41,6 +41,7 @@ public class FileTransactionStatusDialog extends JDialog implements
 	 */
 	public FileTransactionStatusDialog(Frame owner, final FileTransaction ft) {
 		super(owner);
+
 		ft.addPropertyChangeListener(this);
 		setBounds(100, 100, 450, 138);
 		getContentPane().setLayout(new BorderLayout());
@@ -59,10 +60,15 @@ public class FileTransactionStatusDialog extends JDialog implements
 		backgroundButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				ft
-						.removePropertyChangeListener(FileTransactionStatusDialog.this);
-				ft.removePropertyChangeListener(fileTransferStatusPanel);
-				dispose();
+
+				try {
+					ft
+							.removePropertyChangeListener(FileTransactionStatusDialog.this);
+					ft.removePropertyChangeListener(fileTransferStatusPanel);
+					dispose();
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
 			}
 		});
 		buttonPane.add(backgroundButton);

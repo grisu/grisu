@@ -21,7 +21,7 @@ import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.files.GlazedFile;
 
 public class GenericFileViewer extends JPanel implements FileViewer,
-FileListListener {
+		FileListListener {
 
 	private static Set<String> viewers = null;
 
@@ -40,7 +40,8 @@ FileListListener {
 		for (String f : viewers) {
 
 			try {
-				FileViewer viewerClass = (FileViewer) (Class.forName(f)	.newInstance());
+				FileViewer viewerClass = (FileViewer) (Class.forName(f)
+						.newInstance());
 
 				for (String t : viewerClass.getSupportedMimeTypes()) {
 					if (match.getMimeType().contains(t)) {
@@ -53,20 +54,20 @@ FileListListener {
 
 		}
 
-		//		// if null, try known ones
-		//		FileViewer viewer = new PlainTextFileViewer();
-		//		for (String t : viewer.getSupportedMimeTypes()) {
-		//			if (match.getMimeType().contains(t)) {
-		//				return viewer;
-		//			}
-		//		}
+		// // if null, try known ones
+		// FileViewer viewer = new PlainTextFileViewer();
+		// for (String t : viewer.getSupportedMimeTypes()) {
+		// if (match.getMimeType().contains(t)) {
+		// return viewer;
+		// }
+		// }
 
-		//		viewer = new ImageFileViewer();
-		//		for (String t : viewer.getSupportedMimeTypes()) {
-		//			if (match.getMimeType().contains(t)) {
-		//				return viewer;
-		//			}
-		//		}
+		// viewer = new ImageFileViewer();
+		// for (String t : viewer.getSupportedMimeTypes()) {
+		// if (match.getMimeType().contains(t)) {
+		// return viewer;
+		// }
+		// }
 
 		return null;
 	}
@@ -100,8 +101,8 @@ FileListListener {
 						try {
 							// Try to create an instance of the object
 							Object o = Class
-							.forName(pckgname + "." + classname)
-							.newInstance();
+									.forName(pckgname + "." + classname)
+									.newInstance();
 							if (o instanceof FileViewer) {
 								viewers.add(pckgname + "." + classname);
 							}
@@ -119,10 +120,12 @@ FileListListener {
 			}
 		}
 
-		if ( (viewers == null) || (viewers.size() == 0) ) {
+		if ((viewers == null) || (viewers.size() == 0)) {
 			viewers = new HashSet<String>();
-			viewers.add("org.vpac.grisu.frontend.view.swing.files.preview.fileViewers.PlainTextFileViewer");
-			viewers.add("org.vpac.grisu.frontend.view.swing.files.preview.fileViewers.ImageFileViewer");
+			viewers
+					.add("org.vpac.grisu.frontend.view.swing.files.preview.fileViewers.PlainTextFileViewer");
+			viewers
+					.add("org.vpac.grisu.frontend.view.swing.files.preview.fileViewers.ImageFileViewer");
 		}
 		return viewers;
 	}
@@ -147,6 +150,10 @@ FileListListener {
 		setLayout(new CardLayout());
 
 		add(emptyPanel, EMPTY_PANEL);
+	}
+
+	public void directoryChanged(GlazedFile newDirectory) {
+		// TODO
 	}
 
 	public void fileDoubleClicked(GlazedFile file) {

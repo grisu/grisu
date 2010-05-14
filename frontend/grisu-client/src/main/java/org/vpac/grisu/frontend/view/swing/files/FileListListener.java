@@ -6,6 +6,8 @@ import org.vpac.grisu.model.files.GlazedFile;
 
 public interface FileListListener {
 
+	public void directoryChanged(GlazedFile newDirectory);
+
 	public void fileDoubleClicked(GlazedFile file);
 
 	public void filesSelected(Set<GlazedFile> files);

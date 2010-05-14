@@ -23,7 +23,9 @@ import javax.activation.FileDataSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.bushe.swing.event.EventBus;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.events.FolderCreatedEvent;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
 import org.vpac.grisu.model.dto.DtoFolder;
@@ -315,6 +317,45 @@ public class FileManager {
 						+ targetDirUrl + ".");
 	}
 
+	public boolean createFolder(GlazedFile currentDirectory, String s) {
+
+		if (!GlazedFile.Type.FILETYPE_FOLDER.equals(currentDirectory.getType())) {
+			return false;
+		}
+
+		String url = null;
+		if (isLocal(currentDirectory.getUrl())) {
+
+			url = currentDirectory.getUrl() + File.separator + s;
+			File newFolder = getFileFromUriOrPath(url);
+
+			if (newFolder.exists()) {
+				myLogger.debug("Folder " + newFolder.toString()
+						+ " already exists. Not creating it.");
+				return false;
+			} else {
+				boolean result = newFolder.mkdirs();
+				if (result) {
+					EventBus.publish(new FolderCreatedEvent(url));
+				}
+				return result;
+			}
+		} else {
+			url = currentDirectory.getUrl() + "/" + s;
+
+			try {
+				boolean result = serviceInterface.mkdir(url);
+				if (result) {
+					EventBus.publish(new FolderCreatedEvent(url));
+				}
+				return result;
+			} catch (RemoteFileSystemException e) {
+				return false;
+			}
+		}
+
+	}
+
 	/**
 	 * Deletes the remote file and a possible local cache file.
 	 * 
@@ -331,7 +372,9 @@ public class FileManager {
 			FileUtils.deleteQuietly(localCacheFile);
 		}
 
-		serviceInterface.deleteFile(url);
+		if (!isLocal(url)) {
+			serviceInterface.deleteFile(url);
+		}
 
 	}
 
@@ -457,13 +500,13 @@ public class FileManager {
 	public File downloadUrl(String url, String target, boolean overwrite)
 			throws IOException, FileTransactionException {
 
-		File targetFile = new File(target);
+		File targetFile = getFileFromUriOrPath(target);
 		if (targetFile.exists() && targetFile.isDirectory()) {
 			if (!targetFile.canWrite()) {
 				throw new IOException("Can't write to target: "
 						+ targetFile.toString());
 			}
-			targetFile = new File(target, getFilename(url));
+
 			if (targetFile.exists()) {
 				if (!overwrite) {
 					throw new IOException("Can't download file to "
@@ -483,11 +526,11 @@ public class FileManager {
 		File cacheFile = null;
 		if (isFolder) {
 			cacheFile = downloadFolder(url);
-			File newDir = new File(targetFile, getFilename(url));
-			boolean canWritePar = targetFile.canWrite();
-			boolean canWrite = newDir.canWrite();
-			boolean created = newDir.mkdirs();
-			FileUtils.copyDirectory(cacheFile, newDir);
+			// File newDir = new File(targetFile, getFilename(url));
+			// boolean canWritePar = targetFile.canWrite();
+			// boolean canWrite = newDir.canWrite();
+			// boolean created = newDir.mkdirs();
+			FileUtils.copyDirectory(cacheFile, targetFile);
 		} else {
 			cacheFile = downloadFile(url);
 			File newFile = new File(targetFile, getFilename(url));
@@ -1000,5 +1043,4 @@ public class FileManager {
 			return false;
 		}
 	}
-
 }

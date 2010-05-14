@@ -2,18 +2,14 @@ package org.vpac.grisu.frontend.view.swing.files;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.File;
 import java.util.Set;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
-import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.UserEnvironmentManager;
 import org.vpac.grisu.model.files.FileSystemItem;
 import org.vpac.grisu.model.files.GlazedFile;
@@ -27,7 +23,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class FileListPanelPlus extends JPanel implements FileListPanel,
+public class FileListPanelPlusOld extends JPanel implements FileListPanel,
 		FileListListener {
 
 	private JComboBox comboBox;
@@ -39,7 +35,6 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 
 	private final UserEnvironmentManager em;
 	private final FileSystemsManager fsm;
-	private final FileManager fm;
 
 	private FileSystemItem lastFileSystem = null;
 
@@ -52,15 +47,11 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 
 	private boolean fireEvent = true;
 	private JLabel label;
-	private JLabel lblPath;
-	private JTextField pathTextField;
-
-	private boolean comboLocked = false;
 
 	/**
 	 * Create the panel.
 	 */
-	public FileListPanelPlus(ServiceInterface si, String startUrl,
+	public FileListPanelPlusOld(ServiceInterface si, String startUrl,
 			boolean displaySize, boolean displayTimestamp) {
 		this.displaySize = displaySize;
 		this.displayTimeStamp = displayTimestamp;
@@ -68,8 +59,6 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 		this.em = GrisuRegistryManager.getDefault(serviceInterface)
 				.getUserEnvironmentManager();
 		this.fsm = FileSystemsManager.getDefault(si);
-		this.fm = GrisuRegistryManager.getDefault(serviceInterface)
-				.getFileManager();
 
 		allFileSystems = this.fsm.getAllFileSystems();
 
@@ -83,20 +72,16 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 		this.startUrl = startUrl;
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("max(17dlu;default)"),
-				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("max(12dlu;default)"),
+				ColumnSpec.decode("max(41dlu;default)"),
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(54dlu;default):grow"),
 				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("max(16dlu;default)"),
-				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
 				FormFactory.RELATED_GAP_ROWSPEC, }));
-		add(getLabel(), "2, 2, 3, 1, left, default");
-		add(getComboBox(), "6, 2, fill, default");
+		add(getLabel(), "2, 2, right, default");
+		add(getComboBox(), "4, 2, fill, default");
 
 		FileSystemItem item = em.getFileSystemForUrl(startUrl);
 		if (item != null) {
@@ -109,11 +94,7 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 			startUrl = null;
 			rootUrl = null;
 		}
-		add(getLblPath(), "2, 4, left, default");
-		add(getPathTextField(), "4, 4, 3, 1, fill, default");
-		add(getFileListPanel(), "2, 6, 5, 1, fill, fill");
-
-		directoryChanged(getCurrentDirectory());
+		add(getFileListPanel(), "2, 4, 3, 1, fill, fill");
 	}
 
 	public void addFileListListener(FileListListener l) {
@@ -122,32 +103,7 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 
 	public void directoryChanged(GlazedFile newDirectory) {
 
-		if (!GlazedFile.Type.FILETYPE_FOLDER.equals(newDirectory.getType())) {
-			return;
-		}
-
-		if (FileManager.isLocal(newDirectory.getUrl())) {
-
-			File curDir = FileManager.getFileFromUriOrPath(newDirectory
-					.getUrl());
-
-			getPathTextField().setText(curDir.toString());
-
-		} else {
-
-			MountPoint mp = this.em.getMountPointForUrl(newDirectory.getUrl());
-			if (mp == null) {
-				getPathTextField().setText("");
-				return;
-			} else {
-				String path = newDirectory.getUrl().substring(
-						mp.getRootUrl().length());
-				if (path.startsWith("/")) {
-					path = path.substring(1);
-				}
-				getPathTextField().setText(path);
-			}
-		}
+		// TODO
 
 	}
 
@@ -164,9 +120,6 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 			comboBox.addItemListener(new ItemListener() {
 				public void itemStateChanged(ItemEvent arg0) {
 
-					if (comboLocked) {
-						return;
-					}
 					if (fireEvent) {
 						if (ItemEvent.SELECTED == arg0.getStateChange()) {
 							try {
@@ -176,26 +129,12 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 									comboBox.setSelectedItem(lastFileSystem);
 									return;
 								}
-
 								GlazedFile sel = fsi.getRootFile();
-
-								if (FileSystemItem.Type.BOOKMARK.equals(fsi
-										.getType())) {
-									FileSystemItem fsi2 = fsm
-											.getFileSystemForUrl(fsi
-													.getRootFile().getUrl());
-									comboLocked = true;
-									comboBox.setSelectedItem(fsi2);
-									comboLocked = false;
-									lastFileSystem = fsi2;
-								} else {
-
-									if (sel.equals(lastFileSystem)) {
-										return;
-									}
-									lastFileSystem = fsi;
+								if (sel.equals(lastFileSystem)) {
+									return;
 								}
 								getFileListPanel().setRootAndCurrentUrl(sel);
+								lastFileSystem = fsi;
 							} catch (NullPointerException e) {
 								// that's ok.
 							}
@@ -231,24 +170,8 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 		return label;
 	}
 
-	private JLabel getLblPath() {
-		if (lblPath == null) {
-			lblPath = new JLabel("Path:");
-		}
-		return lblPath;
-	}
-
 	public JPanel getPanel() {
 		return this;
-	}
-
-	private JTextField getPathTextField() {
-		if (pathTextField == null) {
-			pathTextField = new JTextField();
-			pathTextField.setEditable(false);
-			pathTextField.setColumns(10);
-		}
-		return pathTextField;
 	}
 
 	public Set<GlazedFile> getSelectedFiles() {

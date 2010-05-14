@@ -41,6 +41,11 @@ public class FileDetailPanel extends JPanel implements FileListListener {
 
 	}
 
+	public void directoryChanged(GlazedFile newDirectory) {
+		// TODO Auto-generated method stub
+
+	}
+
 	public void fileDoubleClicked(GlazedFile file) {
 
 		setFile(file);
@@ -100,11 +105,12 @@ public class FileDetailPanel extends JPanel implements FileListListener {
 					getNameLabel().setText(NAME_PREFIX + file.getName());
 					getSizeLabel().setText(
 							SIZE_PREFIX
-							+ GlazedFile.calculateSizeString(file.getSize()));
+									+ GlazedFile.calculateSizeString(file
+											.getSize()));
 					getTimestampLabel().setText(
 							DATE_PREFIX
-							+ GlazedFile.calculateTimeStampString(file
-									.getLastModified()));
+									+ GlazedFile.calculateTimeStampString(file
+											.getLastModified()));
 				}
 			}
 		});

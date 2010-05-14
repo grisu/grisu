@@ -117,6 +117,10 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
 
 	}
 
+	public void directoryChanged(GlazedFile newDirectory) {
+
+	}
+
 	public void fileDoubleClicked(final GlazedFile file) {
 
 		SwingUtilities.invokeLater(new Thread() {

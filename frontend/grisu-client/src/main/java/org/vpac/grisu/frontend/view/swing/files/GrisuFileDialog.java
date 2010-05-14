@@ -85,6 +85,11 @@ public class GrisuFileDialog extends JDialog implements FileListListener {
 		selectedFile = null;
 	}
 
+	public void directoryChanged(GlazedFile newDirectory) {
+		// TODO Auto-generated method stub
+
+	}
+
 	public void fileDoubleClicked(GlazedFile file) {
 		Set<GlazedFile> temp = new HashSet<GlazedFile>();
 		temp.add(file);

@@ -25,6 +25,7 @@ import org.bushe.swing.event.EventSubscriber;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.events.FolderCreatedEvent;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransaction;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransferEvent;
@@ -42,7 +43,7 @@ import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 public class FileListPanelSimple extends JPanel implements FileListPanel,
-		EventSubscriber<FileTransferEvent> {
+		EventSubscriber {
 
 	static final Logger myLogger = Logger.getLogger(FileListPanelSimple.class
 			.getName());
@@ -131,6 +132,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 		setContextMenu(menu);
 
 		EventBus.subscribe(FileTransferEvent.class, this);
+		EventBus.subscribe(FolderCreatedEvent.class, this);
 	}
 
 	// register a listener
@@ -266,6 +268,29 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 		}
 	}
 
+	private void fireNewDirectory() {
+		// if we have no mountPointsListeners, do nothing...
+		if ((listeners != null) && !listeners.isEmpty()) {
+
+			// make a copy of the listener list in case
+			// anyone adds/removes mountPointsListeners
+			Vector<FileListListener> targets;
+			synchronized (this) {
+				targets = (Vector<FileListListener>) listeners.clone();
+			}
+
+			// walk through the listener list and
+			// call the userInput method in each
+			for (FileListListener l : targets) {
+				try {
+					l.directoryChanged(getCurrentDirectory());
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+
 	public GlazedFile getCurrentDirectory() {
 		return currentDirectory;
 	}
@@ -372,26 +397,37 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 		return table;
 	}
 
-	public void onEvent(FileTransferEvent event) {
+	public void onEvent(Object event) {
 
-		if (event.getFileTransfer().isFinished()) {
+		if (event instanceof FileTransferEvent) {
+			FileTransferEvent fevent = (FileTransferEvent) event;
+			if (fevent.getFileTransfer().isFinished()) {
 
-			if (FileTransaction.DELETE_STRING.equals(event.getFileTransfer()
-					.getTargetDirUrl())) {
-				// means files deleted
-				if ((getCurrentDirectoryUrl() != null)) {
-					for (String url : event.getFileTransfer().getSourceUrl()) {
-						if (url.startsWith(getCurrentDirectoryUrl())) {
-							refresh();
-							return;
+				if (FileTransaction.DELETE_STRING.equals(fevent
+						.getFileTransfer().getTargetDirUrl())) {
+					// means files deleted
+					if ((getCurrentDirectoryUrl() != null)) {
+						for (String url : fevent.getFileTransfer()
+								.getSourceUrl()) {
+							if (url.startsWith(getCurrentDirectoryUrl())) {
+								refresh();
+								return;
+							}
 						}
+
 					}
 
+				} else if ((getCurrentDirectoryUrl() != null)
+						&& getCurrentDirectoryUrl().equals(
+								fevent.getFileTransfer().getTargetDirUrl())) {
+					refresh();
 				}
+			}
+		} else if (event instanceof FolderCreatedEvent) {
+			FolderCreatedEvent fevent = (FolderCreatedEvent) event;
 
-			} else if ((getCurrentDirectoryUrl() != null)
-					&& getCurrentDirectoryUrl().equals(
-							event.getFileTransfer().getTargetDirUrl())) {
+			if ((getCurrentDirectoryUrl() != null)
+					&& fevent.getUrl().startsWith(getCurrentDirectoryUrl())) {
 				refresh();
 			}
 		}
@@ -448,6 +484,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 				setLoading(true);
 
+				GlazedFile oldDir = getCurrentDirectory();
 				try {
 
 					if (file != null) {
@@ -484,6 +521,10 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 							setUrl(url);
 						}
 
+					}
+
+					if (!oldDir.equals(getCurrentDirectory())) {
+						fireNewDirectory();
 					}
 
 				} catch (Exception e) {

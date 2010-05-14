@@ -224,7 +224,9 @@ public class FileTransaction implements Comparable<FileTransaction> {
 							Status.TRANSACTION_RUNNING, Status.FINISHED);
 
 					return status;
+
 				}
+
 			};
 
 		}

@@ -241,8 +241,6 @@ public class LoginManager {
 				loginParams = new LoginParams("Local", null, null);
 			}
 
-		} else if (StringUtils.isBlank(loginParams.getMyProxyUsername())) {
-			loginParams.setMyProxyUsername(UUID.randomUUID().toString());
 		}
 
 		if (StringUtils.isNotBlank(httpProxyHost)) {
@@ -326,6 +324,11 @@ public class LoginManager {
 		if (StringUtils.isBlank(username)) {
 
 			if (StringUtils.isBlank(loginParams.getMyProxyUsername())) {
+
+				// set random myproxy username, not dn, because otherwise
+				// parallel sessions
+				// wouldn't be possible
+				loginParams.setMyProxyUsername(UUID.randomUUID().toString());
 
 				if (cred != null) {
 					try {
