@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -29,6 +30,9 @@ import com.jgoodies.forms.layout.RowSpec;
 
 public class FileListPanelPlus extends JPanel implements FileListPanel,
 		FileListListener {
+
+	static final Logger myLogger = Logger.getLogger(FileListPanelPlus.class
+			.getName());
 
 	private JComboBox comboBox;
 	private FileListPanelSimple fileListPanel;
@@ -54,8 +58,6 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 	private JLabel label;
 	private JLabel lblPath;
 	private JTextField pathTextField;
-
-	private boolean comboLocked = false;
 
 	/**
 	 * Create the panel.
@@ -125,6 +127,8 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 		if (newDirectory == null
 				|| !GlazedFile.Type.FILETYPE_FOLDER.equals(newDirectory
 						.getType())) {
+			getPathTextField().setText("");
+			getPathTextField().setToolTipText("");
 			return;
 		}
 
@@ -134,12 +138,14 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 					.getUrl());
 
 			getPathTextField().setText(curDir.toString());
+			getPathTextField().setToolTipText(curDir.toString());
 
 		} else {
 
 			MountPoint mp = this.em.getMountPointForUrl(newDirectory.getUrl());
 			if (mp == null) {
 				getPathTextField().setText("");
+				getPathTextField().setToolTipText("");
 				return;
 			} else {
 				String path = newDirectory.getUrl().substring(
@@ -148,6 +154,7 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 					path = path.substring(1);
 				}
 				getPathTextField().setText(path);
+				getPathTextField().setToolTipText(path);
 			}
 		}
 
@@ -166,11 +173,10 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 			comboBox.addItemListener(new ItemListener() {
 				public void itemStateChanged(ItemEvent arg0) {
 
-					if (comboLocked) {
-						return;
-					}
 					if (fireEvent) {
 						if (ItemEvent.SELECTED == arg0.getStateChange()) {
+							myLogger
+									.debug("Filesystem not combobox locked. Changing filesystem...");
 							try {
 								FileSystemItem fsi = (FileSystemItem) (filesystemModel
 										.getSelectedItem());
@@ -181,24 +187,34 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 
 								GlazedFile sel = fsi.getRootFile();
 
-								if (FileSystemItem.Type.BOOKMARK.equals(fsi
-										.getType())) {
-									FileSystemItem fsi2 = fsm
-											.getFileSystemForUrl(fsi
-													.getRootFile().getUrl());
-									comboLocked = true;
-									comboBox.setSelectedItem(fsi2);
-									comboLocked = false;
-									lastFileSystem = fsi2;
-								} else {
+								// if (FileSystemItem.Type.BOOKMARK.equals(fsi
+								// .getType())) {
+								// myLogger
+								// .debug("Bookmark selected. Finding real filesystem...");
+								// FileSystemItem fsi2 = em
+								// .getFileSystemForUrl(fsi
+								// .getRootFile().getUrl());
+								// myLogger.debug("Filesystem found: "
+								// + fsi2.getAlias());
+								// comboLocked = true;
+								// lastFileSystem = fsi2;
+								// myLogger.debug("Index of filesystem:");
+								// filesystemModel.setSelectedItem(fsi2);
+								// getFileListPanel()
+								// .setRootAndCurrentUrl(sel);
+								// myLogger
+								// .debug("Filesystem set to underlying filelistpanel.");
+								// comboLocked = false;
+								// } else {
 
-									if (sel.equals(lastFileSystem)) {
-										return;
-									}
-									lastFileSystem = fsi;
+								if (sel.equals(lastFileSystem)) {
+									return;
 								}
+								lastFileSystem = fsi;
+								// }
 								getFileListPanel().setRootAndCurrentUrl(sel);
 							} catch (NullPointerException e) {
+								e.printStackTrace();
 								// that's ok.
 							}
 

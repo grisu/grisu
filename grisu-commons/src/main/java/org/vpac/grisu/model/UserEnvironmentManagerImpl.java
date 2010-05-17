@@ -15,6 +15,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.model.dto.DtoBatchJob;
@@ -35,6 +36,9 @@ import au.org.arcs.jcommons.constants.Constants;
  * 
  */
 public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
+
+	static final Logger myLogger = Logger
+			.getLogger(UserEnvironmentManagerImpl.class.getName());
 
 	private final ServiceInterface serviceInterface;
 
@@ -367,7 +371,34 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 			return null;
 		}
 
+		MountPoint mp = getMountPointForUrl(url);
+
+		if (mp != null) {
+			String site = mp.getSite();
+
+			for (FileSystemItem item : getFileSystems()) {
+
+				if (FileSystemItem.Type.BOOKMARK.equals(item.getType())) {
+					continue;
+				}
+
+				if (!item.isDummy()) {
+					myLogger.debug("Checking filesystem: "
+							+ item.getRootFile().getUrl());
+					myLogger.debug("Against site of found mountPoint: " + site);
+
+					if (site.equals(item.getRootFile().getName())) {
+						return item;
+					}
+				}
+			}
+		}
+
 		for (FileSystemItem item : getFileSystems()) {
+
+			// if (!FileSystemItem.Type.BOOKMARK.equals(item.getType())) {
+			// continue;
+			// }
 
 			if (!item.isDummy() && url.startsWith(item.getRootFile().getUrl())) {
 				return item;

@@ -500,7 +500,7 @@ public class FileManager {
 	public File downloadUrl(String url, String target, boolean overwrite)
 			throws IOException, FileTransactionException {
 
-		File targetFile = getFileFromUriOrPath(target);
+		File targetFile = getFileFromUriOrPath(target + "/" + getFilename(url));
 		if (targetFile.exists() && targetFile.isDirectory()) {
 			if (!targetFile.canWrite()) {
 				throw new IOException("Can't write to target: "
@@ -533,7 +533,7 @@ public class FileManager {
 			FileUtils.copyDirectory(cacheFile, targetFile);
 		} else {
 			cacheFile = downloadFile(url);
-			File newFile = new File(targetFile, getFilename(url));
+			File newFile = targetFile;
 			FileUtils.copyFile(cacheFile, newFile);
 		}
 

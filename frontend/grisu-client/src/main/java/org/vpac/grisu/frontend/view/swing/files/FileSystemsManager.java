@@ -3,6 +3,7 @@ package org.vpac.grisu.frontend.view.swing.files;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
@@ -13,6 +14,9 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
 public class FileSystemsManager {
+
+	static final Logger myLogger = Logger.getLogger(FileSystemsManager.class
+			.getName());
 
 	private static Map<ServiceInterface, FileSystemsManager> cachedRegistries = new HashMap<ServiceInterface, FileSystemsManager>();
 
@@ -65,28 +69,40 @@ public class FileSystemsManager {
 		return allFileSystems;
 	}
 
-	public FileSystemItem getFileSystemForUrl(String url) {
-
-		for (FileSystemItem fsi : getAllFileSystems()) {
-			if (FileSystemItem.Type.BOOKMARK.equals(fsi.getType())) {
-				continue;
-			}
-			if (url.startsWith(fsi.getRootFile().getUrl())) {
-				return fsi;
-			}
-		}
-
-		for (FileSystemItem fsi : getAllFileSystems()) {
-			if (!FileSystemItem.Type.BOOKMARK.equals(fsi.getType())) {
-				continue;
-			}
-			if (url.startsWith(fsi.getRootFile().getUrl())) {
-				return fsi;
-			}
-		}
-
-		return null;
-	}
+	// public FileSystemItem getFileSystemForUrl(String url) {
+	//		
+	// return user
+	//
+	// // for (FileSystemItem fsi : getAllFileSystems()) {
+	// //
+	// // if (FileSystemItem.Type.SELECT.equals(fsi.getType())) {
+	// // continue;
+	// // }
+	// //
+	// // if (FileSystemItem.Type.BOOKMARK.equals(fsi.getType())) {
+	// // continue;
+	// // }
+	// //
+	// // myLogger.debug("Checking filesystem: " + fsi.getAlias());
+	// //
+	// // if (url.startsWith(fsi.getRootFile().getUrl())) {
+	// // return fsi;
+	// // }
+	// // }
+	// //
+	// // for (FileSystemItem fsi : getAllFileSystems()) {
+	// //
+	// // if (!FileSystemItem.Type.BOOKMARK.equals(fsi.getType())) {
+	// // continue;
+	// // }
+	// // myLogger.debug("Checking bookmark: " + fsi.getAlias());
+	// // if (url.startsWith(fsi.getRootFile().getUrl())) {
+	// // return fsi;
+	// // }
+	// // }
+	// //
+	// // return null;
+	// }
 
 	public void removeBookmark(String alias) {
 		FileSystemItem temp = this.em.setBookmark(alias, null);
