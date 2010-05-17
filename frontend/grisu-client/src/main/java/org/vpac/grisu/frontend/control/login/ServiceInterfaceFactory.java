@@ -21,17 +21,17 @@ import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 public final class ServiceInterfaceFactory {
 
 	static final Logger myLogger = Logger
-	.getLogger(ServiceInterfaceFactory.class.getName());
+			.getLogger(ServiceInterfaceFactory.class.getName());
 
 	public static final String DEFAULT_SERVICE_INTERFACE = "ARCS";
 
 	public static final String[] KNOWN_SERVICE_INTERFACE_CREATORS = new String[] {
-		"LocalServiceInterfaceCreator",
-		//			"DummyServiceInterfaceCreator",
-		"JaxWsServiceInterfaceCreator",
-		//			"XfireServiceInterfaceCreator",
-		// the old xfire client...
-		//			"XFireServiceInterfaceCreator"
+			"LocalServiceInterfaceCreator",
+			// "DummyServiceInterfaceCreator",
+			"JaxWsServiceInterfaceCreator",
+	// "XfireServiceInterfaceCreator",
+	// the old xfire client...
+	// "XFireServiceInterfaceCreator"
 	};
 
 	/**
@@ -44,7 +44,7 @@ public final class ServiceInterfaceFactory {
 	 *             if the serviceInterface couldn't be created
 	 */
 	public static ServiceInterface createInterface(final LoginParams params)
-	throws ServiceInterfaceException {
+			throws ServiceInterfaceException {
 		return createInterface(params.getServiceInterfaceUrl(), params
 				.getMyProxyUsername(), params.getMyProxyPassphrase(), params
 				.getMyProxyServer(), params.getMyProxyPort(), params
@@ -89,7 +89,7 @@ public final class ServiceInterfaceFactory {
 			final String myProxyServer, final String myProxyPort,
 			final String httpProxy, final int httpProxyPort,
 			final String httpProxyUsername, final char[] httpProxyPassword)
-	throws ServiceInterfaceException {
+			throws ServiceInterfaceException {
 
 		Object[] otherOptions = new Object[4];
 		otherOptions[0] = httpProxy;
@@ -105,27 +105,28 @@ public final class ServiceInterfaceFactory {
 
 			try {
 				serviceInterfaceCreatorClass = Class
-				.forName("org.vpac.grisu.frontend.control." + className);
+						.forName("org.vpac.grisu.frontend.control." + className);
 			} catch (ClassNotFoundException e) {
-                            	myLogger.warn("Could not find serviceInterfaceCreator class: "	
-                                         + className); 
-				myLogger.warn("Probably not in classpath. No worries, trying next one...");
+				myLogger.warn("Could not find serviceInterfaceCreator class: "
+						+ className);
+				myLogger
+						.warn("Probably not in classpath. No worries, trying next one...");
 				continue;
 			}
 
 			ServiceInterfaceCreator serviceInterfaceCreator;
 			try {
 				serviceInterfaceCreator = (ServiceInterfaceCreator) serviceInterfaceCreatorClass
-				.newInstance();
+						.newInstance();
 			} catch (Exception e) {
 				// shouldn't really happen
 				continue;
 			}
 
 			if (!serviceInterfaceCreator.canHandleUrl(interfaceUrl)) {
-                            myLogger.debug(className + " doesn't handle url: "
-                              + interfaceUrl
-                              + ". Trying next serviceInterfaceCreator...");
+				myLogger.debug(className + " doesn't handle url: "
+						+ interfaceUrl
+						+ ". Trying next serviceInterfaceCreator...");
 				continue;
 			}
 
@@ -143,8 +144,21 @@ public final class ServiceInterfaceFactory {
 				continue;
 			}
 
+			if (serviceInterface == null) {
+				myLogger
+						.debug("Couldn't connect to url "
+								+ interfaceUrl
+								+ " using serviceInterfaceCreator "
+								+ className
+								+ ": "
+								+ "No serviceInterface created/serviceinterface is null");
+				failedCreators.put(className, null);
+				continue;
+			}
 
-			myLogger.info("Successfully created serviceInterface using creator: "+className);
+			myLogger
+					.info("Successfully created serviceInterface using creator: "
+							+ className);
 
 			try {
 				serviceInterface.login(username, new String(password));
@@ -177,7 +191,7 @@ public final class ServiceInterfaceFactory {
 		} else {
 			throw new ServiceInterfaceException(
 					"Could not find a single ServiceInterfaceCreator that worked. Tried these:\n"
-					+ failedOnes.toString(), null);
+							+ failedOnes.toString(), null);
 		}
 
 	}
