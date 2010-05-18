@@ -43,6 +43,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	private final ServiceInterface serviceInterface;
 
 	private final ResourceInformation resourceInfo;
+	private final FileManager fm;
 
 	private String[] cachedFqans = null;
 	private final Map<String, Set<String>> cachedFqansPerApplication = new HashMap<String, Set<String>>();
@@ -78,8 +79,10 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 
 	public UserEnvironmentManagerImpl(final ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
-		resourceInfo = GrisuRegistryManager.getDefault(serviceInterface)
+		this.resourceInfo = GrisuRegistryManager.getDefault(serviceInterface)
 				.getResourceInformation();
+		this.fm = GrisuRegistryManager.getDefault(serviceInterface)
+				.getFileManager();
 	}
 
 	public void addFqanListener(final FqanListener listener) {
@@ -99,21 +102,6 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 		}
 
 		return temp;
-	}
-
-	public GlazedFile createGlazedFileFromUrl(String url) {
-
-		if (FileManager.isLocal(url)) {
-			try {
-				File file = new File(new URI(url));
-				return new GlazedFile(file);
-			} catch (URISyntaxException e) {
-				throw new RuntimeException(e);
-			}
-		} else {
-			return new GlazedFile(url, serviceInterface);
-		}
-
 	}
 
 	public synchronized final String[] getAllAvailableFqans() {
@@ -243,8 +231,8 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 			for (String bookmark : getBookmarks().keySet()) {
 				String url = getBookmarks().get(bookmark);
 				cachedBookmarkFilesystemList.add(new FileSystemItem(bookmark,
-						FileSystemItem.Type.BOOKMARK,
-						createGlazedFileFromUrl(url)));
+						FileSystemItem.Type.BOOKMARK, fm
+								.createGlazedFileFromUrl(url)));
 			}
 		}
 		return cachedBookmarkFilesystemList;
@@ -693,7 +681,8 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 			return temp;
 		} else {
 			FileSystemItem temp = new FileSystemItem(alias,
-					FileSystemItem.Type.BOOKMARK, createGlazedFileFromUrl(url));
+					FileSystemItem.Type.BOOKMARK, fm
+							.createGlazedFileFromUrl(url));
 			getBookmarks().put(alias, url);
 			getBookmarksFilesystems().add(temp);
 			getFileSystems().add(temp);

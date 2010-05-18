@@ -356,6 +356,21 @@ public class FileManager {
 
 	}
 
+	public GlazedFile createGlazedFileFromUrl(String url) {
+
+		if (FileManager.isLocal(url)) {
+			try {
+				File file = new File(new URI(url));
+				return new GlazedFile(file);
+			} catch (URISyntaxException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			return new GlazedFile(url, serviceInterface);
+		}
+
+	}
+
 	/**
 	 * Deletes the remote file and a possible local cache file.
 	 * 

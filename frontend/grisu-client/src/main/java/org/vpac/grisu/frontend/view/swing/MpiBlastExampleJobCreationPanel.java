@@ -2,6 +2,8 @@ package org.vpac.grisu.frontend.view.swing;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -27,6 +29,7 @@ import javax.swing.event.ChangeListener;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.jdesktop.swingx.JXErrorPane;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.BatchJobException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
@@ -207,6 +210,28 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 		if (inputFileComboBox == null) {
 			inputFileComboBox = new JComboBox();
 			inputFileComboBox.setEditable(true);
+			inputFileComboBox.addItemListener(new ItemListener() {
+
+				public void itemStateChanged(ItemEvent e) {
+
+					if (ItemEvent.SELECTED == e.getStateChange()) {
+
+						try {
+							GlazedFile file = fm
+									.createGlazedFileFromUrl((String) inputFileComboBox
+											.getSelectedItem());
+
+							setInputFile(file);
+						} catch (Exception e1) {
+
+							JXErrorPane.showDialog(e1);
+
+						}
+
+					}
+
+				}
+			});
 		}
 		return inputFileComboBox;
 	}
