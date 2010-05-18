@@ -14,7 +14,7 @@ import org.vpac.grisu.frontend.model.job.BatchJobObject;
 import com.jidesoft.swing.JideTabbedPane;
 
 public class BatchJobTabbedPane extends JPanel implements
-BatchJobSelectionListener {
+		BatchJobSelectionListener {
 
 	private JideTabbedPane jideTabbedPane;
 	private BatchJobMonitoringGrid grid;
@@ -23,6 +23,7 @@ BatchJobSelectionListener {
 
 	private final ServiceInterface si;
 	private final String application;
+	private BatchJobResultPreviewPanel batchJobResultPreviewPanel;
 
 	/**
 	 * Create the panel.
@@ -55,7 +56,6 @@ BatchJobSelectionListener {
 			getJideTabbedPane().setSelectedComponent(temp);
 		}
 
-
 	}
 
 	private BatchJobMonitoringGrid getGrid() {
@@ -72,12 +72,13 @@ BatchJobSelectionListener {
 			jideTabbedPane.setHideOneTab(false);
 			jideTabbedPane.setShowCloseButtonOnTab(true);
 			jideTabbedPane.setCloseTabOnMouseMiddleButton(true);
-			jideTabbedPane.setTabClosableAt(0, false);
+			jideTabbedPane.setTabClosableAt(2, false);
 			String title = null;
 			if (StringUtils.isBlank(application)) {
 				title = "All batchjobs";
 			} else {
-				title = ApplicationsManager.getPrettyName(application) + " jobs";
+				title = ApplicationsManager.getPrettyName(application)
+						+ " jobs";
 			}
 			jideTabbedPane.addTab(title, getGrid());
 

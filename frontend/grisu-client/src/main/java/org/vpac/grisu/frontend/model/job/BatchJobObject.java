@@ -697,6 +697,33 @@ public class BatchJobObject implements JobMonitoringObject,
 		return this.jobs;
 	}
 
+	public List<String> getListOfOutputFiles(boolean onlyWhenSubJobFinished,
+			String[] patterns) throws RemoteFileSystemException {
+
+		List<String> files = new LinkedList<String>();
+
+		for (JobObject job : getJobs()) {
+
+			if (onlyWhenSubJobFinished && !job.isFinished(false)) {
+				continue;
+			}
+
+			for (String child : job.listJobDirectory(0)) {
+
+				for (String pattern : patterns) {
+					if (child.indexOf(pattern) >= 0) {
+						files.add(child);
+						break;
+					}
+				}
+
+			}
+		}
+
+		return files;
+
+	}
+
 	/**
 	 * Returns all the log messages for this batchjob.
 	 * 

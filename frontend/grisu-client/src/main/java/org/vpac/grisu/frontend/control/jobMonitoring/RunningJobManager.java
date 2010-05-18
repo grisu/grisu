@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -18,16 +20,19 @@ import org.bushe.swing.event.EventSubscriber;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.BatchJobException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
+import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.model.events.BatchJobKilledEvent;
 import org.vpac.grisu.frontend.model.events.JobKilledEvent;
 import org.vpac.grisu.frontend.model.events.NewBatchJobEvent;
 import org.vpac.grisu.frontend.model.events.NewJobEvent;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
 import org.vpac.grisu.frontend.model.job.JobObject;
+import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoJobs;
+import org.vpac.grisu.model.files.GlazedFile;
 
 import au.org.arcs.jcommons.constants.Constants;
 import ca.odell.glazedlists.BasicEventList;
@@ -140,7 +145,7 @@ public class RunningJobManager implements EventSubscriber {
 	}
 
 	private final UserEnvironmentManager em;
-
+	private final FileManager fm;
 	private final ServiceInterface si;
 
 	private boolean watchingAllSingleJobs = false;
@@ -168,6 +173,7 @@ public class RunningJobManager implements EventSubscriber {
 		this.si = si;
 		this.em = GrisuRegistryManager.getDefault(si)
 				.getUserEnvironmentManager();
+		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 
 		EventBus.subscribe(NewJobEvent.class, this);
 		EventBus.subscribe(JobKilledEvent.class, this);
@@ -261,6 +267,22 @@ public class RunningJobManager implements EventSubscriber {
 
 		}
 		return cachedBatchJobsPerApplication.get(application);
+	}
+
+	public List<GlazedFile> getFinishedOutputFilesForBatchJob(
+			BatchJobObject batchJob, String[] patterns)
+			throws RemoteFileSystemException {
+
+		List<GlazedFile> files = new LinkedList<GlazedFile>();
+
+		List<String> fileurls = batchJob.getListOfOutputFiles(true, patterns);
+
+		for (String url : fileurls) {
+			files.add(fm.createGlazedFileFromUrl(url));
+		}
+
+		return files;
+
 	}
 
 	public JobObject getJob(String jobname, boolean refreshOnBackend)

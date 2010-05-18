@@ -26,19 +26,21 @@ public class GlazedFileRenderer extends DefaultTableCellRenderer implements
 
 	private static File findFile() {
 		for (File file : new File(System.getProperty("user.home")).listFiles()) {
-			if (file.isFile())
+			if (file.isFile()) {
 				return file;
+			}
 		}
 		return null;
 	}
 
-	private FileListPanelSimple panel = null;
+	private FileListPanel panel = null;
 
-	public GlazedFileRenderer(FileListPanelSimple panel) {
+	public GlazedFileRenderer(FileListPanel panel) {
 		this.panel = panel;
 		setOpaque(true);
 	}
 
+	@Override
 	public Component getTableCellRendererComponent(JTable arg0, Object arg1,
 			boolean isSelected, boolean hasFocus, int row, int column) {
 
