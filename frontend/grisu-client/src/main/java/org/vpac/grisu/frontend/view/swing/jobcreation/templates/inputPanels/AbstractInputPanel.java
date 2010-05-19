@@ -319,20 +319,17 @@ public abstract class AbstractInputPanel extends JPanel implements
 		if (useHistory()) {
 			try {
 				last = getLastValue();
-				return last;
+				if (last != null) {
+					return last;
+				}
 			} catch (Exception e) {
 				myLogger.debug("No history value for "
 						+ panelProperties.get(NAME));
 			}
 		}
 
-		String def = panelProperties.get(DEFAULT_VALUE);
-		if (DEFAULT_VALUE.equals(def)) {
-			last = panelProperties.get(DEFAULT_VALUE);
-			return last;
-		}
-
-		return null;
+		last = panelProperties.get(DEFAULT_VALUE);
+		return last;
 	}
 
 	public GrisuFileDialog getFileDialog() {
