@@ -34,15 +34,13 @@ public class BatchJobPanel extends JPanel implements SingleJobSelectionListener 
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
+				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("max(95dlu;default)"),
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getBatchJobControlPanel(), "2, 2, fill, fill");
 		add(getBatchJobRestartPanel(), "4, 2, fill, fill");
 		add(getSplitPane(), "2, 4, 3, 1, fill, fill");
@@ -87,6 +85,7 @@ public class BatchJobPanel extends JPanel implements SingleJobSelectionListener 
 		}
 		return splitPane;
 	}
+
 	public void jobSelected(JobObject job) {
 
 		getJobDetailPanel().setJob(job);

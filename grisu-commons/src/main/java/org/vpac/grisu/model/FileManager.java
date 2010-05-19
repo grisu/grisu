@@ -372,6 +372,30 @@ public class FileManager {
 	}
 
 	/**
+	 * Use this method to create a GlazedFile from a url and you already know
+	 * which type (file, folder) the file should be. That saves time in having
+	 * to look up the type.
+	 * 
+	 * @param url
+	 * @param type
+	 * @return
+	 */
+	public GlazedFile createGlazedFileFromUrl(String url, GlazedFile.Type type) {
+
+		if (FileManager.isLocal(url)) {
+			try {
+				File file = new File(new URI(url));
+				return new GlazedFile(file);
+			} catch (URISyntaxException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			return new GlazedFile(url, serviceInterface, type);
+		}
+
+	}
+
+	/**
 	 * Deletes the remote file and a possible local cache file.
 	 * 
 	 * @param url

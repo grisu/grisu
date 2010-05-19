@@ -63,6 +63,7 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel {
 	private ServiceInterface si;
 	private FileManager fm;
 	private RunningJobManager rjm;
+	private Thread rebuildThread;
 
 	private boolean displayTimestamp = false;
 
@@ -109,7 +110,6 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
 				FormFactory.RELATED_GAP_ROWSPEC, }));
-		add(getScrollPane(), "2, 2, fill, fill");
 
 		fileModel = new EventTableModel<GlazedFile>(sortedList,
 				new GlazedFileTableFormat());
@@ -333,23 +333,38 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel {
 		return table;
 	}
 
-	private void rebuildFileList() throws RemoteFileSystemException {
+	private synchronized void rebuildFileList()
+			throws RemoteFileSystemException {
 
 		if (this.si == null || this.batchJob == null) {
 			return;
 		}
 
-		currentDirectoryContent.getReadWriteLock().writeLock().lock();
+		if (rebuildThread != null && rebuildThread.isAlive()) {
+			return;
+		}
 
-		currentDirectoryContent.clear();
+		rebuildThread = new Thread() {
+			@Override
+			public void run() {
 
-		List<GlazedFile> files = this.rjm.getFinishedOutputFilesForBatchJob(
-				this.batchJob, this.patterns);
+				currentDirectoryContent.getReadWriteLock().writeLock().lock();
 
-		currentDirectoryContent.addAll(files);
+				currentDirectoryContent.clear();
 
-		currentDirectoryContent.getReadWriteLock().writeLock().unlock();
+				List<GlazedFile> files;
+				try {
+					files = rjm.getFinishedOutputFilesForBatchJob(batchJob,
+							patterns);
+					currentDirectoryContent.addAll(files);
+				} catch (RemoteFileSystemException e) {
+					e.printStackTrace();
+				}
+				currentDirectoryContent.getReadWriteLock().writeLock().unlock();
 
+			}
+		};
+		rebuildThread.start();
 	}
 
 	public void refresh() {
@@ -442,5 +457,8 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel {
 		this.si = si;
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		this.rjm = RunningJobManager.getDefault(si);
+
+		add(getScrollPane(), "2, 2, fill, fill");
+
 	}
 }

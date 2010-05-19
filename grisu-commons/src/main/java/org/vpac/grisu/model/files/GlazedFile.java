@@ -79,7 +79,7 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 		return temp;
 	}
 
-	private final Type type;
+	private Type type;
 
 	private final DtoFile file;
 	private final DtoFolder folder;
@@ -190,6 +190,30 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 		this.lastModified = -1L;
 	}
 
+	/**
+	 * Use this constructor if you know the type of the file. That saves
+	 * potentially having to connect the backend to find out the type.
+	 * 
+	 * @param url
+	 * @param si
+	 * @param type
+	 */
+	public GlazedFile(String url, ServiceInterface si, Type type) {
+		this.url = url;
+		if (StringUtils.isNotBlank(FileManager.getFilename(url))) {
+			this.name = FileManager.getFilename(url);
+		} else {
+			this.name = "/";
+		}
+
+		this.si = si;
+		this.type = type;
+		this.folder = null;
+		this.file = null;
+		this.size = -1L;
+		this.lastModified = -1L;
+	}
+
 	public int compareTo(GlazedFile o) {
 
 		return this.getName().compareTo(o.getName());
@@ -257,11 +281,31 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
 	public Type getType() {
 
-		if (si != null) {
-			if (isFolder()) {
-				return Type.FILETYPE_FOLDER;
+		if (type == null) {
+
+			if (FileManager.isLocal(getUrl())) {
+				File file = new File(getUrl());
+				if (file.isDirectory()) {
+					type = Type.FILETYPE_FOLDER;
+				} else if (file.exists()) {
+					type = Type.FILETYPE_FILE;
+				}
 			} else {
-				return null;
+
+				if (si != null) {
+					if (isFolder()) {
+						type = Type.FILETYPE_FOLDER;
+					} else {
+						try {
+							if (si.fileExists(url)) {
+								type = Type.FILETYPE_FILE;
+							}
+						} catch (RemoteFileSystemException e) {
+							e.printStackTrace();
+							throw new RuntimeException(e);
+						}
+					}
+				}
 			}
 		}
 

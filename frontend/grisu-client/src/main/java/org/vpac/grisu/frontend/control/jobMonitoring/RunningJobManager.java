@@ -278,7 +278,8 @@ public class RunningJobManager implements EventSubscriber {
 		List<String> fileurls = batchJob.getListOfOutputFiles(true, patterns);
 
 		for (String url : fileurls) {
-			files.add(fm.createGlazedFileFromUrl(url));
+			files.add(fm.createGlazedFileFromUrl(url,
+					GlazedFile.Type.FILETYPE_FILE));
 		}
 
 		return files;

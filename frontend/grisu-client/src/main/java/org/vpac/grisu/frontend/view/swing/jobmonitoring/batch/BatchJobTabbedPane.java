@@ -19,7 +19,7 @@ public class BatchJobTabbedPane extends JPanel implements
 	private JideTabbedPane jideTabbedPane;
 	private BatchJobMonitoringGrid grid;
 
-	private final Map<String, BatchJobPanel> panels = new HashMap<String, BatchJobPanel>();
+	private final Map<String, JPanel> panels = new HashMap<String, JPanel>();
 
 	private final ServiceInterface si;
 	private final String application;
@@ -43,9 +43,10 @@ public class BatchJobTabbedPane extends JPanel implements
 
 	public void batchJobSelected(BatchJobObject bj) {
 
-		BatchJobPanel temp = panels.get(bj.getJobname());
+		JPanel temp = panels.get(bj.getJobname());
 		if (panels.get(bj.getJobname()) == null) {
 			temp = new BatchJobPanel(si, bj);
+			// temp = new BatchJobWrapperPanel(si, bj);
 			panels.put(bj.getJobname(), temp);
 		}
 
