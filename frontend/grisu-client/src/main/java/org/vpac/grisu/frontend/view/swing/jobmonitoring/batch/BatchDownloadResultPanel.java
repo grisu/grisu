@@ -375,11 +375,10 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 							.lock();
 
 					currentDirectoryContent.addAll(files);
-				} catch (RemoteFileSystemException e) {
-					e.printStackTrace();
-				} finally {
 					currentDirectoryContent.getReadWriteLock().writeLock()
 							.unlock();
+				} catch (RemoteFileSystemException e) {
+					e.printStackTrace();
 				}
 
 			}

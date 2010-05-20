@@ -402,10 +402,10 @@ public class BatchJobObject implements JobMonitoringObject,
 			}
 
 			for (String child : job.listJobDirectory(0)) {
-
+				String temp = FileManager.getFilename(child);
 				boolean download = false;
 				for (String pattern : patterns) {
-					if (child.indexOf(pattern) >= 0) {
+					if (temp.indexOf(pattern) >= 0) {
 						download = true;
 						break;
 					}
@@ -709,9 +709,9 @@ public class BatchJobObject implements JobMonitoringObject,
 			}
 
 			for (String child : job.listJobDirectory(0)) {
-
+				String temp = FileManager.getFilename(child);
 				for (String pattern : patterns) {
-					if (child.indexOf(pattern) >= 0) {
+					if (temp.indexOf(pattern) >= 0) {
 						files.add(child);
 						break;
 					}

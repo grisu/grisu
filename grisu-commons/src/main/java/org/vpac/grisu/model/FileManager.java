@@ -113,6 +113,7 @@ public class FileManager {
 	public static File getFileFromUriOrPath(String uriOrPath) {
 
 		try {
+			System.out.println("URI: " + uriOrPath);
 			URI uri = new URI(uriOrPath);
 			return new File(uri);
 		} catch (URISyntaxException e) {
@@ -383,12 +384,8 @@ public class FileManager {
 	public GlazedFile createGlazedFileFromUrl(String url, GlazedFile.Type type) {
 
 		if (FileManager.isLocal(url)) {
-			try {
-				File file = new File(new URI(url));
-				return new GlazedFile(file);
-			} catch (URISyntaxException e) {
-				throw new RuntimeException(e);
-			}
+			File file = getFileFromUriOrPath(url);
+			return new GlazedFile(file);
 		} else {
 			return new GlazedFile(url, serviceInterface, type);
 		}
