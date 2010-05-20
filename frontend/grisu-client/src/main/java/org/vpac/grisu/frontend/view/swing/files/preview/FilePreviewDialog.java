@@ -46,7 +46,8 @@ public class FilePreviewDialog extends JDialog {
 
 	private GenericFileViewer getGenericFileViewer() {
 		if (genericFileViewer == null) {
-			genericFileViewer = new GenericFileViewer(si);
+			genericFileViewer = new GenericFileViewer();
+			genericFileViewer.setServiceInterface(si);
 		}
 		return genericFileViewer;
 	}

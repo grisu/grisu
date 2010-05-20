@@ -99,6 +99,7 @@ public class JobSubmissionLogPanel extends JPanel implements
 	private JTextArea getLogArea() {
 		if (logArea == null) {
 			logArea = new JTextArea();
+			logArea.setEditable(false);
 		}
 		return logArea;
 	}

@@ -43,6 +43,8 @@ import org.vpac.grisu.model.UserEnvironmentManager;
 import org.vpac.grisu.model.files.GlazedFile;
 import org.vpac.historyRepeater.HistoryManager;
 
+import au.org.arcs.jcommons.constants.Constants;
+
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -546,7 +548,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 			// tempJob.setWalltimeInSeconds(604800);
 			tempJob.setWalltimeInSeconds(DEFAULT_WALLTIME);
 			String commandline = "mpiblast -p blastp -d nr -i " + inputFIlename
-					+ " -o " + jobname + "out.txt";
+					+ " -o " + jobname + ".out.txt";
 			tempJob.setCommandline(commandline);
 			tempJob.setForce_mpi(true);
 			tempJob.setCpus(8);
@@ -569,6 +571,9 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 		} catch (Exception e) {
 			throw new BatchJobException(e);
 		}
+
+		currentBatchJob.addJobProperty(Constants.JOB_RESULT_FILENAME_PATTERNS,
+				".out.txt");
 
 	}
 }

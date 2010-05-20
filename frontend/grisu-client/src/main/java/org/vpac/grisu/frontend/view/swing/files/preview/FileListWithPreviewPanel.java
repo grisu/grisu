@@ -225,7 +225,8 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
 
 	private GenericFileViewer getGenericFileViewer() {
 		if (genericFileViewer == null) {
-			genericFileViewer = new GenericFileViewer(si);
+			genericFileViewer = new GenericFileViewer();
+			genericFileViewer.setServiceInterface(si);
 		}
 		return genericFileViewer;
 	}

@@ -15,6 +15,7 @@ import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.FileManager;
+import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.DtoFile;
 import org.vpac.grisu.model.dto.DtoFolder;
@@ -87,8 +88,8 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 	private final String name;
 
 	private final String url;
-	private final long size;
-	private final long lastModified;
+	private long size = -2L;
+	private long lastModified;
 	private final ServiceInterface si;
 
 	private boolean parentMarker = false;
@@ -186,8 +187,8 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 		this.type = null;
 		this.folder = null;
 		this.file = null;
-		this.size = -1L;
-		this.lastModified = -1L;
+		this.size = -2L;
+		this.lastModified = -2L;
 	}
 
 	/**
@@ -233,12 +234,20 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
 	public long getLastModified() {
 
-		if (si != null) {
-			try {
-				long result = si.lastModified(url);
-			} catch (RemoteFileSystemException e) {
-				return -1L;
-			}
+		if (lastModified > -2L) {
+			return lastModified;
+		}
+
+		if (si == null) {
+			lastModified = -2L;
+			return lastModified;
+		}
+
+		try {
+			lastModified = si.lastModified(url);
+		} catch (RemoteFileSystemException e) {
+			e.printStackTrace();
+			lastModified = -1L;
 		}
 
 		return lastModified;
@@ -254,12 +263,32 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
 	public long getSize() {
 
-		if (si != null) {
-			try {
-				long result = si.getFileSize(url);
-			} catch (RemoteFileSystemException e) {
-				return -1L;
+		if (size > -2L) {
+			return size;
+		}
+
+		if (si == null) {
+			size = -2L;
+			return size;
+		}
+		if (Type.FILETYPE_FILE.equals(getType())) {
+
+			if (FileManager.isLocal(getUrl())) {
+				File temp = GrisuRegistryManager.getDefault(si)
+						.getFileManager().getFileFromUriOrPath(getUrl());
+				size = temp.length();
+			} else {
+
+				try {
+					size = si.getFileSize(getUrl());
+				} catch (RemoteFileSystemException e) {
+					e.printStackTrace();
+					size = -1;
+				}
 			}
+
+		} else {
+			size = -1L;
 		}
 		return size;
 	}
@@ -335,25 +364,20 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
 	public boolean isFolder() {
 
-		if (si != null) {
-			try {
-				return si.isFolder(this.url);
-			} catch (RemoteFileSystemException e) {
-				e.printStackTrace();
-				return false;
-			}
+		if (Type.FILETYPE_FILE.equals(getType())) {
+			return false;
 		} else {
-
-			if (Type.FILETYPE_FILE.equals(type)) {
-				return false;
-			} else {
-				return true;
-			}
+			return true;
 		}
 	}
 
 	public boolean isMarkedAsParent() {
 		return this.parentMarker;
+	}
+
+	public void refresh() {
+		this.size = -2L;
+		this.lastModified = -2L;
 	}
 
 	public void setParent() {

@@ -8,8 +8,11 @@ import javax.swing.JPanel;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.frontend.control.utils.ApplicationsManager;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
+
+import au.org.arcs.jcommons.constants.Constants;
 
 import com.jidesoft.swing.JideTabbedPane;
 
@@ -45,8 +48,22 @@ public class BatchJobTabbedPane extends JPanel implements
 
 		JPanel temp = panels.get(bj.getJobname());
 		if (panels.get(bj.getJobname()) == null) {
-			temp = new BatchJobPanel(si, bj);
-			// temp = new BatchJobWrapperPanel(si, bj);
+
+			String patternString = null;
+			try {
+				patternString = si.getJobProperty(bj.getJobname(),
+						Constants.JOB_RESULT_FILENAME_PATTERNS);
+			} catch (NoSuchJobException e) {
+				// doesn't matter
+			}
+
+			if (StringUtils.isNotBlank(patternString)) {
+				String[] patterns = patternString.split(",");
+				temp = new BatchJobWrapperPanel(si, bj, patterns);
+			} else {
+				temp = new BatchJobPanel(si, bj);
+			}
+
 			panels.put(bj.getJobname(), temp);
 		}
 
@@ -73,7 +90,8 @@ public class BatchJobTabbedPane extends JPanel implements
 			jideTabbedPane.setHideOneTab(false);
 			jideTabbedPane.setShowCloseButtonOnTab(true);
 			jideTabbedPane.setCloseTabOnMouseMiddleButton(true);
-			jideTabbedPane.setTabClosableAt(2, false);
+			jideTabbedPane.setTabClosableAt(0, false);
+
 			String title = null;
 			if (StringUtils.isBlank(application)) {
 				title = "All batchjobs";

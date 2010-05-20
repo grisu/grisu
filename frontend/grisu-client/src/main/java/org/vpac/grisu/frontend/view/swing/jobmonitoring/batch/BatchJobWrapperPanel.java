@@ -15,13 +15,16 @@ public class BatchJobWrapperPanel extends JPanel {
 
 	private final ServiceInterface si;
 	private final BatchJobObject batchJob;
+	private final String[] patterns;
 
 	/**
 	 * Create the panel.
 	 */
-	public BatchJobWrapperPanel(ServiceInterface si, BatchJobObject batchJob) {
+	public BatchJobWrapperPanel(ServiceInterface si, BatchJobObject batchJob,
+			String[] patterns) {
 		this.si = si;
 		this.batchJob = batchJob;
+		this.patterns = patterns;
 		setLayout(new BorderLayout(0, 0));
 		add(getTabbedPane(), BorderLayout.CENTER);
 
@@ -38,9 +41,7 @@ public class BatchJobWrapperPanel extends JPanel {
 		if (batchJobResultPreviewPanel == null) {
 			batchJobResultPreviewPanel = new BatchJobResultPreviewPanel();
 			batchJobResultPreviewPanel.setServiceInterface(si);
-			batchJobResultPreviewPanel.setPatterns(new String[] { "stdout.txt",
-					"stderr.txt" });
-			batchJobResultPreviewPanel.setBatchJob(batchJob);
+			batchJobResultPreviewPanel.initialize(batchJob, patterns);
 		}
 		return batchJobResultPreviewPanel;
 	}

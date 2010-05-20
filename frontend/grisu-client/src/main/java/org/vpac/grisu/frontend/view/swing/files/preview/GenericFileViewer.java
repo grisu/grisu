@@ -130,8 +130,8 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 		return viewers;
 	}
 
-	private final ServiceInterface si;
-	private final FileManager fm;
+	private ServiceInterface si;
+	private FileManager fm;
 
 	private File currentLocalCacheFile = null;
 
@@ -143,9 +143,7 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 	/**
 	 * Create the panel.
 	 */
-	public GenericFileViewer(ServiceInterface si) {
-		this.si = si;
-		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
+	public GenericFileViewer() {
 
 		setLayout(new CardLayout());
 
@@ -253,5 +251,10 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 		System.out.println("Local file: " + currentLocalCacheFile.getPath());
 		System.out.println("Local filesize: " + currentLocalCacheFile.length());
 
+	}
+
+	public void setServiceInterface(ServiceInterface si) {
+		this.si = si;
+		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 	}
 }

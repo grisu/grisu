@@ -4,12 +4,13 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import javax.swing.DropMode;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -47,7 +48,8 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class BatchDownloadResultPanel extends JPanel implements FileListPanel {
+public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
+		PropertyChangeListener {
 	private JScrollPane scrollPane;
 	private JXTable table;
 
@@ -113,6 +115,8 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel {
 
 		fileModel = new EventTableModel<GlazedFile>(sortedList,
 				new GlazedFileTableFormat());
+
+		add(getScrollPane(), "2, 2, fill, fill");
 
 	}
 
@@ -275,8 +279,7 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel {
 			table = new JXTable(fileModel);
 
 			table.setDragEnabled(true);
-			table.setDropMode(DropMode.ON);
-			table.setTransferHandler(new GlazedFilesTransferHandler(this, si));
+			// table.setDropMode(DropMode.ON);
 
 			// disable sorting for now
 			table.setAutoCreateRowSorter(false);
@@ -333,6 +336,18 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel {
 		return table;
 	}
 
+	public void propertyChange(PropertyChangeEvent arg0) {
+
+		if (BatchJobObject.NUMBER_OF_FINISHED_JOBS.equals(arg0
+				.getPropertyName())) {
+			try {
+				rebuildFileList();
+			} catch (RemoteFileSystemException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	private synchronized void rebuildFileList()
 			throws RemoteFileSystemException {
 
@@ -351,20 +366,26 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel {
 				currentDirectoryContent.getReadWriteLock().writeLock().lock();
 
 				currentDirectoryContent.clear();
-
+				currentDirectoryContent.getReadWriteLock().writeLock().unlock();
 				List<GlazedFile> files;
 				try {
 					files = rjm.getFinishedOutputFilesForBatchJob(batchJob,
 							patterns);
+					currentDirectoryContent.getReadWriteLock().writeLock()
+							.lock();
+
 					currentDirectoryContent.addAll(files);
 				} catch (RemoteFileSystemException e) {
 					e.printStackTrace();
+				} finally {
+					currentDirectoryContent.getReadWriteLock().writeLock()
+							.unlock();
 				}
-				currentDirectoryContent.getReadWriteLock().writeLock().unlock();
 
 			}
 		};
 		rebuildThread.start();
+		myLogger.debug("Rebuilding file list started...");
 	}
 
 	public void refresh() {
@@ -387,13 +408,34 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel {
 	}
 
 	public void setBatchJob(BatchJobObject batchJob) {
+
+		if (this.batchJob != null) {
+			this.batchJob.removePropertyChangeListener(this);
+		}
 		this.batchJob = batchJob;
+		this.batchJob.addPropertyChangeListener(this);
+		try {
+			rebuildFileList();
+		} catch (RemoteFileSystemException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void setBatchJobAndPatterns(BatchJobObject batchJob,
+			String[] patterns) {
+		if (this.batchJob != null) {
+			this.batchJob.removePropertyChangeListener(this);
+		}
+		this.batchJob = batchJob;
+		this.batchJob.addPropertyChangeListener(this);
+		this.patterns = patterns;
 
 		try {
 			rebuildFileList();
 		} catch (RemoteFileSystemException e) {
 			e.printStackTrace();
 		}
+
 	}
 
 	public void setContextMenu(FileListPanelContextMenu menu) {
@@ -458,7 +500,9 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel {
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		this.rjm = RunningJobManager.getDefault(si);
 
-		add(getScrollPane(), "2, 2, fill, fill");
+		table.setTransferHandler(new GlazedFilesTransferHandler(this, si));
+		BatchResultContextMenu menu = new BatchResultContextMenu(this.si);
+		setContextMenu(menu);
 
 	}
 }

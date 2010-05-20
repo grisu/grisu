@@ -53,7 +53,7 @@ public class InfoField extends AbstractInputPanel {
 			textArea.setLineWrap(true);
 			textArea.setWrapStyleWord(true);
 			textArea.setBackground(UIManager.getColor("Label.background"));
-			// textArea.setEditable(false);
+			textArea.setEditable(false);
 		}
 		return textArea;
 	}
