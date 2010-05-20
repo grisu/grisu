@@ -81,6 +81,15 @@ public class StatusObject {
 			boolean exitIfFailed, boolean sendStatusEvent,
 			String statusMessagePrefix) throws InterruptedException {
 
+		if (si.getActionStatus(handle) == null) {
+			// wait a few seconds because it might not be ready yet...
+			try {
+				Thread.sleep(recheckIntervalInSeconds * 1000);
+			} catch (InterruptedException e) {
+				throw e;
+			}
+		}
+
 		while (!(lastStatus = si.getActionStatus(handle)).isFinished()) {
 			if (sendStatusEvent) {
 				EventBus.publish(handle, new ActionStatusEvent(lastStatus,
@@ -102,7 +111,7 @@ public class StatusObject {
 			try {
 				Thread.sleep(recheckIntervalInSeconds * 1000);
 			} catch (InterruptedException e) {
-				// doesn't matter
+				throw e;
 			}
 
 		}
