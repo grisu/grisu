@@ -35,6 +35,7 @@ import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
+import org.vpac.grisu.control.exceptions.StatusException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
 import org.vpac.grisu.frontend.control.jobMonitoring.RunningJobManager;
 import org.vpac.grisu.frontend.model.events.BatchJobEvent;
@@ -1164,6 +1165,8 @@ public class BatchJobObject implements JobMonitoringObject,
 					statusO.waitForActionToFinish(3, false, true);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
+				} catch (StatusException e) {
+					e.printStackTrace();
 				}
 
 				dtoMultiPartJob = null;
@@ -1421,10 +1424,11 @@ public class BatchJobObject implements JobMonitoringObject,
 						message3));
 				addJobLogMessage(message3);
 				try {
-					serviceInterface.redistributeBatchJob(this.batchJobname);
+					String handle = serviceInterface
+							.redistributeBatchJob(this.batchJobname);
 
 					StatusObject status = new StatusObject(serviceInterface,
-							BatchJobObject.this.batchJobname);
+							handle);
 
 					try {
 						status.waitForActionToFinish(4, false, true,
@@ -1432,6 +1436,8 @@ public class BatchJobObject implements JobMonitoringObject,
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 						throw e;
+					} catch (StatusException e) {
+						e.printStackTrace();
 					}
 
 					EventBus.publish(this.batchJobname, new BatchJobEvent(this,
@@ -2046,6 +2052,8 @@ public class BatchJobObject implements JobMonitoringObject,
 					status.waitForActionToFinish(4, false, true,
 							"Submission status: ");
 				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (StatusException e) {
 					e.printStackTrace();
 				}
 			}

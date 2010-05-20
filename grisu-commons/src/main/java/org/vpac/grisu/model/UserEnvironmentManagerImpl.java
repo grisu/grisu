@@ -18,6 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
+import org.vpac.grisu.control.exceptions.StatusException;
 import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.files.FileSystemItem;
@@ -703,7 +704,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	}
 
 	public StatusObject waitForActionToFinish(String handle)
-			throws InterruptedException {
+			throws InterruptedException, StatusException {
 
 		StatusObject status = new StatusObject(serviceInterface, handle);
 

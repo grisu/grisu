@@ -1076,7 +1076,7 @@ public interface ServiceInterface {
 	 *             if one of the jobs can't be re-created
 	 */
 	@RolesAllowed("User")
-	void redistributeBatchJob(String batchjobname) throws NoSuchJobException,
+	String redistributeBatchJob(String batchjobname) throws NoSuchJobException,
 			JobPropertiesException;
 
 	/**

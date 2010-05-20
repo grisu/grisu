@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.bushe.swing.event.EventBus;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.StatusException;
 import org.vpac.grisu.model.dto.DtoActionStatus;
 
 public class StatusObject {
@@ -15,7 +16,8 @@ public class StatusObject {
 
 	public static StatusObject waitForActionToFinish(ServiceInterface si,
 			String handle, int recheckIntervalInSeconds, boolean exitIfFailed,
-			boolean sendStatusEvent) throws InterruptedException {
+			boolean sendStatusEvent) throws InterruptedException,
+			StatusException {
 
 		StatusObject temp = new StatusObject(si, handle);
 		temp.waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed,
@@ -72,22 +74,21 @@ public class StatusObject {
 
 	public void waitForActionToFinish(int recheckIntervalInSeconds,
 			boolean exitIfFailed, boolean sendStatusEvent)
-			throws InterruptedException {
+			throws InterruptedException, StatusException {
 		waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed,
 				sendStatusEvent, null);
 	}
 
 	public void waitForActionToFinish(int recheckIntervalInSeconds,
 			boolean exitIfFailed, boolean sendStatusEvent,
-			String statusMessagePrefix) throws InterruptedException {
+			String statusMessagePrefix) throws InterruptedException,
+			StatusException {
 
+		// TODO reevaluate this
 		if (si.getActionStatus(handle) == null) {
-			// wait a few seconds because it might not be ready yet...
-			try {
-				Thread.sleep(recheckIntervalInSeconds * 1000);
-			} catch (InterruptedException e) {
-				throw e;
-			}
+
+			throw new StatusException("Can't find status with handle "
+					+ this.handle);
 		}
 
 		while (!(lastStatus = si.getActionStatus(handle)).isFinished()) {

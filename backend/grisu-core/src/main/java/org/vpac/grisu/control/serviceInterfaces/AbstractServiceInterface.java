@@ -3478,7 +3478,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public void redistributeBatchJob(String batchJobname)
+	public String redistributeBatchJob(String batchJobname)
 			throws NoSuchJobException, JobPropertiesException {
 
 		final BatchJob job = getMultiPartJobFromDatabase(batchJobname);
@@ -3499,8 +3499,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					"Job submission is still ongoing in background.");
 		}
 
-		final DtoActionStatus status = new DtoActionStatus(batchJobname, 2);
-		getSessionActionStatus().put(batchJobname, status);
+		final String handleName = Constants.REDISTRIBUTE + batchJobname;
+
+		final DtoActionStatus status = new DtoActionStatus(handleName, 2);
+		getSessionActionStatus().put(handleName, status);
 
 		new Thread() {
 			@Override
@@ -3536,6 +3538,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			}
 		}.start();
+
+		return handleName;
 
 	}
 

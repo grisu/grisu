@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
+import org.vpac.grisu.control.exceptions.StatusException;
 import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.files.FileSystemItem;
 import org.vpac.grisu.model.status.StatusObject;
@@ -47,9 +48,11 @@ public interface UserEnvironmentManager {
 	String[] getAllAvailableFqans();
 
 	/**
-	 * Returns all fqans for which there is an available submission location for the specified application
+	 * Returns all fqans for which there is an available submission location for
+	 * the specified application
 	 * 
-	 * @param application the application
+	 * @param application
+	 *            the application
 	 * @return the list of fqans
 	 */
 	Set<String> getAllAvailableFqansForApplication(String application);
@@ -81,7 +84,7 @@ public interface UserEnvironmentManager {
 	 *             if no such job exists
 	 */
 	DtoBatchJob getBatchJob(String jobname, boolean refreshBatchJob)
-	throws NoSuchJobException;
+			throws NoSuchJobException;
 
 	SortedSet<DtoBatchJob> getBatchJobs(String application, boolean refresh);
 
@@ -97,19 +100,24 @@ public interface UserEnvironmentManager {
 	/**
 	 * Returns a list of all currently used applications for a user.
 	 * 
-	 * All currently used applications means applications where there is at least one job in the backend database.
+	 * All currently used applications means applications where there is at
+	 * least one job in the backend database.
 	 * 
-	 * @param refresh whether to refresh the list
+	 * @param refresh
+	 *            whether to refresh the list
 	 * @return the list of applications
 	 */
 	SortedSet<String> getCurrentApplications(boolean refresh);
 
 	/**
-	 * Returns a list of all currently used applications for batchjobs for a user.
+	 * Returns a list of all currently used applications for batchjobs for a
+	 * user.
 	 * 
-	 * All currently used applications means applications where there is at least one batchjob in the backend database.
+	 * All currently used applications means applications where there is at
+	 * least one batchjob in the backend database.
 	 * 
-	 * @param refresh whether to refresh the list
+	 * @param refresh
+	 *            whether to refresh the list
 	 * @return the list of applications
 	 */
 	SortedSet<String> getCurrentApplicationsBatch(boolean refresh);
@@ -118,7 +126,8 @@ public interface UserEnvironmentManager {
 	 * Returns all batchjobnames of the user.
 	 * 
 	 * 
-	 * @param refresh whether to refresh the list or not
+	 * @param refresh
+	 *            whether to refresh the list or not
 	 * @return all batchjobnames
 	 */
 	SortedSet<String> getCurrentBatchJobnames(boolean refresh);
@@ -147,7 +156,8 @@ public interface UserEnvironmentManager {
 	/**
 	 * Returns all jobnames (for single jobs) of the user.
 	 * 
-	 * @param refresh whether to refresh the list or not
+	 * @param refresh
+	 *            whether to refresh the list or not
 	 * @return all jobnames
 	 */
 	SortedSet<String> getCurrentJobnames(boolean refresh);
@@ -327,12 +337,16 @@ public interface UserEnvironmentManager {
 	void setProperty(String key, String value);
 
 	/**
-	 * Convenience method to wait for an action (like batchJob submission) to finish.
+	 * Convenience method to wait for an action (like batchJob submission) to
+	 * finish.
 	 * 
-	 * @param handle the action handle
+	 * @param handle
+	 *            the action handle
 	 * @return the statusObject
 	 * @throws InterruptedException
+	 * @throws StatusException
 	 */
-	StatusObject waitForActionToFinish(String handle) throws InterruptedException;
+	StatusObject waitForActionToFinish(String handle)
+			throws InterruptedException, StatusException;
 
 }
