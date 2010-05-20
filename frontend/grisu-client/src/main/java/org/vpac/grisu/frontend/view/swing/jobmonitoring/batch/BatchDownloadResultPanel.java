@@ -24,6 +24,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.jobMonitoring.RunningJobManager;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
+import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.view.swing.files.FileListListener;
 import org.vpac.grisu.frontend.view.swing.files.FileListPanel;
 import org.vpac.grisu.frontend.view.swing.files.FileListPanelContextMenu;
@@ -367,16 +368,37 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 
 				currentDirectoryContent.clear();
 				currentDirectoryContent.getReadWriteLock().writeLock().unlock();
+
 				List<GlazedFile> files;
 				try {
-					files = rjm.getFinishedOutputFilesForBatchJob(batchJob,
-							patterns);
-					currentDirectoryContent.getReadWriteLock().writeLock()
-							.lock();
 
-					currentDirectoryContent.addAll(files);
-					currentDirectoryContent.getReadWriteLock().writeLock()
-							.unlock();
+					for (JobObject job : batchJob.getJobs()) {
+
+						if (!job.isFinished(false)) {
+							continue;
+						}
+
+						List<String> urls = job.listJobDirectory(0);
+
+						for (String child : urls) {
+							String temp = FileManager.getFilename(child);
+							for (String pattern : patterns) {
+								if (temp.indexOf(pattern) >= 0) {
+									GlazedFile gf = fm.createGlazedFileFromUrl(
+											child,
+											GlazedFile.Type.FILETYPE_FILE);
+									currentDirectoryContent.getReadWriteLock()
+											.writeLock().lock();
+									currentDirectoryContent.add(gf);
+									currentDirectoryContent.getReadWriteLock()
+											.writeLock().unlock();
+									break;
+								}
+							}
+
+						}
+					}
+
 				} catch (RemoteFileSystemException e) {
 					e.printStackTrace();
 				}

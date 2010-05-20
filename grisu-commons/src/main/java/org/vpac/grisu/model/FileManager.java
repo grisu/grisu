@@ -113,7 +113,6 @@ public class FileManager {
 	public static File getFileFromUriOrPath(String uriOrPath) {
 
 		try {
-			System.out.println("URI: " + uriOrPath);
 			URI uri = new URI(uriOrPath);
 			return new File(uri);
 		} catch (URISyntaxException e) {
