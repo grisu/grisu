@@ -364,10 +364,10 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 			@Override
 			public void run() {
 
-				currentDirectoryContent.getReadWriteLock().writeLock().lock();
-
-				currentDirectoryContent.clear();
-				currentDirectoryContent.getReadWriteLock().writeLock().unlock();
+				// currentDirectoryContent.getReadWriteLock().writeLock().lock();
+				//
+				// currentDirectoryContent.clear();
+				// currentDirectoryContent.getReadWriteLock().writeLock().unlock();
 
 				List<GlazedFile> files;
 				try {
@@ -387,11 +387,15 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 									GlazedFile gf = fm.createGlazedFileFromUrl(
 											child,
 											GlazedFile.Type.FILETYPE_FILE);
-									currentDirectoryContent.getReadWriteLock()
-											.writeLock().lock();
-									currentDirectoryContent.add(gf);
-									currentDirectoryContent.getReadWriteLock()
-											.writeLock().unlock();
+									if (!currentDirectoryContent.contains(gf)) {
+										currentDirectoryContent
+												.getReadWriteLock().writeLock()
+												.lock();
+										currentDirectoryContent.add(gf);
+										currentDirectoryContent
+												.getReadWriteLock().writeLock()
+												.unlock();
+									}
 									break;
 								}
 							}

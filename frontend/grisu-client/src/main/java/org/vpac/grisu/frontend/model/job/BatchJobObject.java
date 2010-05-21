@@ -475,6 +475,19 @@ public class BatchJobObject implements JobMonitoringObject,
 
 	}
 
+	@Override
+	public boolean equals(Object o) {
+
+		if (!(o instanceof BatchJobObject)) {
+			return false;
+		}
+
+		BatchJobObject other = (BatchJobObject) o;
+
+		return getJobname().equals(other.getJobname());
+
+	}
+
 	/**
 	 * Returns all failed jobs.
 	 * 
@@ -1720,6 +1733,11 @@ public class BatchJobObject implements JobMonitoringObject,
 		};
 
 		waitThread.start();
+
+		// to update all the jobdirectories
+		for (JobObject job : getJobs()) {
+			job.getAllJobProperties().clear();
+		}
 
 		if (waitForRestartToFinish) {
 
