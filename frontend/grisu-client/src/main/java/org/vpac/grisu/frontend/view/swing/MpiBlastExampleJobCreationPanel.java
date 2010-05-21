@@ -300,7 +300,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 	}
 
 	public String getPanelName() {
-		return "mpiBLAST (batch)";
+		return "mpiBLAST- multiFASTA";
 	}
 
 	private JComboBox getProgramCombobox() {

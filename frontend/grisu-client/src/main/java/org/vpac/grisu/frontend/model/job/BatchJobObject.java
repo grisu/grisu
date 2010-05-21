@@ -1427,6 +1427,7 @@ public class BatchJobObject implements JobMonitoringObject,
 					String handle = serviceInterface
 							.redistributeBatchJob(this.batchJobname);
 
+					System.out.println("Handle: " + handle);
 					StatusObject status = new StatusObject(serviceInterface,
 							handle);
 

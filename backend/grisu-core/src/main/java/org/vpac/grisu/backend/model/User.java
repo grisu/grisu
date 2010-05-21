@@ -3,7 +3,6 @@ package org.vpac.grisu.backend.model;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -255,8 +254,13 @@ public class User {
 	private JobSubmissionManager manager;
 
 	private FileSystemStructureToXMLConverter fsconverter = null;
-	private final Map<String, DtoActionStatus> actionStatus = Collections
-			.synchronizedMap(new HashMap<String, DtoActionStatus>());
+
+	// private final Map<String, DtoActionStatus> actionStatus = Collections
+	// .synchronizedMap(new HashMap<String, DtoActionStatus>());
+
+	// this needs to be static because otherwise the session be lost and the
+	// action status can't be found anymore by the client
+	private static final Map<String, Map<String, DtoActionStatus>> actionStatuses = new HashMap<String, Map<String, DtoActionStatus>>();
 
 	// the (default) credentials dn
 	private String dn = null;
@@ -558,25 +562,20 @@ public class User {
 
 	@Transient
 	public Map<String, DtoActionStatus> getActionStatuses() {
-		return actionStatus;
-	}
 
-	// private List<FileReservation> getFileReservations() {
-	// return fileReservations;
-	// }
-	//
-	// private void setFileReservations(List<FileReservation> fileReservations)
-	// {
-	// this.fileReservations = fileReservations;
-	// }
-	//
-	// private List<FileTransfer> getFileTransfers() {
-	// return fileTransfers;
-	// }
-	//
-	// private void setFileTransfers(List<FileTransfer> fileTransfers) {
-	// this.fileTransfers = fileTransfers;
-	// }
+		synchronized (dn) {
+
+			Map<String, DtoActionStatus> actionStatusesForUser = actionStatuses
+					.get(dn);
+			if (actionStatusesForUser == null) {
+				actionStatusesForUser = new HashMap<String, DtoActionStatus>();
+				actionStatuses.put(dn, actionStatusesForUser);
+			}
+
+			return actionStatusesForUser;
+
+		}
+	}
 
 	/**
 	 * Returns all mountpoints (including automounted ones for this session.
@@ -596,6 +595,23 @@ public class User {
 		}
 		return allMountPoints;
 	}
+
+	// private List<FileReservation> getFileReservations() {
+	// return fileReservations;
+	// }
+	//
+	// private void setFileReservations(List<FileReservation> fileReservations)
+	// {
+	// this.fileReservations = fileReservations;
+	// }
+	//
+	// private List<FileTransfer> getFileTransfers() {
+	// return fileTransfers;
+	// }
+	//
+	// private void setFileTransfers(List<FileTransfer> fileTransfers) {
+	// this.fileTransfers = fileTransfers;
+	// }
 
 	/**
 	 * Gets a map of this users bookmarks.
@@ -699,6 +715,13 @@ public class User {
 		return jobTemplates;
 	}
 
+	// for hibernate
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinTable
+	private Set<MountPoint> getMountPoints() {
+		return mountPoints;
+	}
+
 	// /**
 	// * Used internally to mount filesystems.
 	// *
@@ -721,13 +744,6 @@ public class User {
 	// // true, true, null);
 	// return threadLocalFsManager.getFsManager();
 	// }
-
-	// for hibernate
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinTable
-	private Set<MountPoint> getMountPoints() {
-		return mountPoints;
-	}
 
 	/**
 	 * Checks whether the filesystem of any of the users' mountpoints contains
@@ -800,6 +816,10 @@ public class User {
 	@Override
 	public int hashCode() {
 		return 29 * dn.hashCode();
+	}
+
+	public void logout() {
+		actionStatuses.remove(dn);
 	}
 
 	/**

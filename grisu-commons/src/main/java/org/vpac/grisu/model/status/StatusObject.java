@@ -84,14 +84,13 @@ public class StatusObject {
 			String statusMessagePrefix) throws InterruptedException,
 			StatusException {
 
-		// TODO reevaluate this
-		if (si.getActionStatus(handle) == null) {
+		lastStatus = si.getActionStatus(handle);
+		if (lastStatus == null) {
 
 			throw new StatusException("Can't find status with handle "
 					+ this.handle);
 		}
-
-		while (!(lastStatus = si.getActionStatus(handle)).isFinished()) {
+		while (!lastStatus.isFinished()) {
 			if (sendStatusEvent) {
 				EventBus.publish(handle, new ActionStatusEvent(lastStatus,
 						statusMessagePrefix));
@@ -113,6 +112,13 @@ public class StatusObject {
 				Thread.sleep(recheckIntervalInSeconds * 1000);
 			} catch (InterruptedException e) {
 				throw e;
+			}
+
+			lastStatus = si.getActionStatus(handle);
+			if (lastStatus == null) {
+
+				throw new StatusException("Can't find status with handle "
+						+ this.handle);
 			}
 
 		}
