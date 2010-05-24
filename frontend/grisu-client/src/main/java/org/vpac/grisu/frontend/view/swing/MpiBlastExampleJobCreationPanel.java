@@ -383,7 +383,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 		return "mpiBlast";
 	}
 
-	private void parseFastaFile() {
+	private void parseFastaFile() throws FileTransactionException {
 
 		List<String> currentFastaInput = null;
 
@@ -394,6 +394,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 			} catch (FileTransactionException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				throw e;
 			}
 
 			Iterator<String> it = currentFastaInput.iterator();
@@ -464,15 +465,20 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 
 		getSlider().setEnabled(true);
 
-		parseFastaFile();
+		try {
+			parseFastaFile();
 
-		getSlider().setMaximum(currentParsedFastaInput.size());
+			getSlider().setMaximum(currentParsedFastaInput.size());
 
-		getJobnameField().setText(
-				uem.calculateUniqueJobname(currentFile
-						.getNameWithoutExtension()
-						+ "_job"));
+			getJobnameField().setText(
+					uem.calculateUniqueJobname(currentFile
+							.getNameWithoutExtension()
+							+ "_job"));
 
+		} catch (Exception e) {
+			JXErrorPane.showDialog(e);
+			return;
+		}
 	}
 
 	public void setServiceInterface(ServiceInterface si) {
