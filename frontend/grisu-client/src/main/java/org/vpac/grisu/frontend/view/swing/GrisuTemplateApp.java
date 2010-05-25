@@ -115,10 +115,11 @@ public class GrisuTemplateApp extends GrisuApplicationWindow implements
 		SortedSet<String> allTemplates = null;
 		String fixedTemplates = System.getProperty("grisu.defaultApplications");
 		if (StringUtils.isNotBlank(fixedPanels)) {
+			myLogger.debug("Found defaultApplications: " + fixedTemplates);
 			String[] temp = fixedTemplates.split(",");
 			allTemplates = new TreeSet<String>(Arrays.asList(temp));
 		} else {
-
+			myLogger.debug("Didn't find defaultApplications,");
 			allTemplates = tm.getAllTemplateNames();
 		}
 
