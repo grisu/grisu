@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.view.swing;
+package org.vpac.grisu.frontend.view.swing.jobcreation.createJobPanels;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -35,6 +35,7 @@ import org.vpac.grisu.control.exceptions.BatchJobException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
 import org.vpac.grisu.frontend.model.job.JobObject;
+import org.vpac.grisu.frontend.view.swing.JobSubmissionLogPanel;
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
 import org.vpac.grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import org.vpac.grisu.model.FileManager;
