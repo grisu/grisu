@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 
+import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 
@@ -52,9 +53,20 @@ public class SettingsDialog extends JDialog {
 			JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 			contentPanel.add(tabbedPane, BorderLayout.CENTER);
 			{
-				applicationSubscribePanel = new ApplicationSubscribePanel();
-				tabbedPane.addTab("Applications", null,
-						applicationSubscribePanel, null);
+
+				String environmentVariable = System
+						.getProperty("grisu.defaultApplications");
+				if (StringUtils.isBlank(environmentVariable)) {
+					environmentVariable = System
+							.getProperty("grisu.createJobPanels");
+					if (StringUtils.isBlank(environmentVariable)) {
+						// only add that when no predefined applications
+						applicationSubscribePanel = new ApplicationSubscribePanel();
+						tabbedPane.addTab("Applications", null,
+								applicationSubscribePanel, null);
+					}
+				}
+
 			}
 		}
 		{
@@ -77,7 +89,9 @@ public class SettingsDialog extends JDialog {
 
 	public void setServiceInterface(ServiceInterface si) {
 		this.si = si;
-		applicationSubscribePanel.setServiceInterface(si);
+		if (applicationSubscribePanel != null) {
+			applicationSubscribePanel.setServiceInterface(si);
+		}
 	}
 
 }

@@ -322,17 +322,23 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 			} else {
 
 				if (si != null) {
-					if (isFolder()) {
-						type = Type.FILETYPE_FOLDER;
-					} else {
-						try {
-							if (si.fileExists(url)) {
-								type = Type.FILETYPE_FILE;
+
+					try {
+						if (si.isFolder(url)) {
+							type = Type.FILETYPE_FOLDER;
+						} else {
+							try {
+								if (si.fileExists(url)) {
+									type = Type.FILETYPE_FILE;
+								}
+							} catch (RemoteFileSystemException e) {
+								e.printStackTrace();
+								throw new RuntimeException(e);
 							}
-						} catch (RemoteFileSystemException e) {
-							e.printStackTrace();
-							throw new RuntimeException(e);
 						}
+					} catch (RemoteFileSystemException e) {
+						e.printStackTrace();
+						throw new RuntimeException(e);
 					}
 				}
 			}
