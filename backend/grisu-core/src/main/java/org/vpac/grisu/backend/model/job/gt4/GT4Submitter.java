@@ -159,30 +159,29 @@ public class GT4Submitter extends JobSubmitter {
 		count.setTextContent(new Integer(processorCount).toString());
 		job.appendChild(count);
 
-		if (processorCount > 1) {
-
-			if ("mpi".equals(jobTypeString)) {
-				jobType.setTextContent("mpi");
+		if (StringUtils.isBlank(jobTypeString)) {
+			if (processorCount > 1) {
+				jobTypeString = "mpi";
 			} else {
-				jobType.setTextContent("single");
-
-				int hostCountValue = JsdlHelpers.getResourceCount(jsdl);
-
-				if (hostCountValue >= 1) {
-					Element hostCount = output.createElement("hostCount");
-					hostCount.setTextContent(new Integer(hostCountValue)
-							.toString());
-					job.appendChild(hostCount);
-				}
+				jobTypeString = "single";
 			}
-		} else {
-			if (StringUtils.isBlank(jobTypeString)) {
-				jobType.setTextContent("single");
-			} else {
-				jobType.setTextContent(jobTypeString);
-			}
-
 		}
+
+		if ("mpi".equals(jobTypeString)) {
+			jobType.setTextContent("mpi");
+		} else {
+			jobType.setTextContent("single");
+
+			int hostCountValue = JsdlHelpers.getResourceCount(jsdl);
+
+			if (hostCountValue >= 1) {
+				Element hostCount = output.createElement("hostCount");
+				hostCount
+						.setTextContent(new Integer(hostCountValue).toString());
+				job.appendChild(hostCount);
+			}
+		}
+
 		job.appendChild(jobType);
 
 		// total memory

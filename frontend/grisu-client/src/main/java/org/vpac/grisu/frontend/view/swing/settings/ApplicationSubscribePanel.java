@@ -197,7 +197,7 @@ public class ApplicationSubscribePanel extends JPanel {
 											.getRoot(ApplicationSubscribePanel.this),
 									"Please provide the name of the new template.\nA template with the same name will be overwritten.",
 									"Copy template", JOptionPane.PLAIN_MESSAGE,
-									null, null, "");
+									null, null, "my_" + (String) temp[0]);
 
 					if (StringUtils.isBlank(s)) {
 						return;
@@ -251,7 +251,8 @@ public class ApplicationSubscribePanel extends JPanel {
 											.getRoot(ApplicationSubscribePanel.this),
 									"Please provide the name of the new template.\nA template with the same name will be overwritten.",
 									"Create new template",
-									JOptionPane.PLAIN_MESSAGE, null, null, "");
+									JOptionPane.PLAIN_MESSAGE, null, null,
+									"my_" + s);
 
 					if (StringUtils.isBlank(tempname)) {
 						return;
