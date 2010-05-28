@@ -15,18 +15,6 @@ public class FileListingTest {
 	public static void main(final String[] args) throws Exception {
 
 		Date start = new Date();
-		// String username = args[0];
-		// char[] password = args[1].toCharArray();
-
-		// LoginParams loginParams = new LoginParams(
-		// // "http://localhost:8080/xfire-backend/services/grisu",
-		// //
-		// "https://ngportal.vpac.org/grisu-ws/soap/EnunciateServiceInterfaceService",
-		// // "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-		// "Local", username, password);
-
-		// final ServiceInterface si = LoginManager.shiblogin("markus", args[0]
-		// .toCharArray(), "VPAC", false);
 
 		final ServiceInterface si = LoginManager.loginCommandline();
 
@@ -42,40 +30,6 @@ public class FileListingTest {
 			System.out.println("Name: " + file.getName() + ", size: "
 					+ file.getSize());
 		}
-
-		// DtoFolder folder = si
-		// .ls(
-		// "gsiftp://ng2.vpac.org/home/grid-admin/C_AU_O_APACGrid_OU_VPAC_CN_Markus_Binsteiner",
-		// 0);
-
-		// DtoMountPoints mps = si.df();
-		// for ( MountPoint mp : mps.getMountpoints() ) {
-		// System.out.println(mp.getAlias());
-		// }
-		// for ( String file : folder.listOfAllFilesUnderThisFolder() ) {
-		// System.out.println(file);
-		// }
-
-		// final ExecutorService executor1 = Executors.newFixedThreadPool(4);
-		//
-		// for (final MountPoint mp : si.df().getMountpoints()) {
-		// Thread thread = new Thread() {
-		// @Override
-		// public void run() {
-		// System.out.println("Deleting: " + mp.getRootUrl());
-		// try {
-		// fileManager.deleteFile(mp.getRootUrl());
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
-		// }
-		// };
-		// executor1.execute(thread);
-		// }
-		//
-		// executor1.shutdown();
-		//
-		// executor1.awaitTermination(3600 * 48, TimeUnit.SECONDS);
 
 		System.out.println("Started: " + start);
 		System.out.println("Finished: " + new Date().toString());
