@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -2861,7 +2862,36 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// now after the jsdl is ready, don't forget to fill the required fields
 		// into the database
 	}
-
+	
+	private boolean checkWhetherGridResourceIsActuallyAvailable(GridResource resource) {
+		
+		String[] filesystems = informationManager.getStagingFileSystemForSubmissionLocation(SubmissionLocationHelpers.createSubmissionLocationString(resource)); 
+		
+		for (MountPoint mp : df().getMountpoints() ) {
+			
+			for ( String fs : filesystems ) {
+				if ( mp.getRootUrl().startsWith(fs.replace(":2811", "")) ) {
+					return true;
+				}
+			}
+			
+		}
+		
+		return false;
+		
+	}
+	
+	private void removeResourcesWithUnaccessableFilesystems(List<GridResource> resources) {
+		
+	    Iterator<GridResource> i = resources.iterator();
+	    while ( i.hasNext() ){
+	    	if ( ! checkWhetherGridResourceIsActuallyAvailable(i.next()) ) {
+	    		i.remove();
+	    	}
+	    }
+		
+	}
+	
 	/**
 	 * This method tries to auto-fill in missing values like which
 	 * submissionlocation to submit to, which version to use (if not specified)
@@ -3015,6 +3045,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					matchingResources = matchmaker.findAllResources(
 							jobSubmissionObject.getJobSubmissionPropertyMap(),
 							job.getFqan());
+					removeResourcesWithUnaccessableFilesystems(matchingResources);
 					if ((matchingResources != null)
 							&& (matchingResources.size() > 0)) {
 						JsdlHelpers.setApplicationName(jsdl, app);
@@ -3044,6 +3075,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				matchingResources = matchmaker.findAllResources(
 						jobSubmissionObject.getJobSubmissionPropertyMap(), job
 								.getFqan());
+				removeResourcesWithUnaccessableFilesystems(matchingResources);
 				if (matchingResources != null) {
 					myLogger.debug("Found: " + matchingResources.size()
 							+ " of them...");
