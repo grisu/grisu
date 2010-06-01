@@ -1653,9 +1653,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public synchronized DtoSubmissionLocations getAllSubmissionLocations() {
 
-		return DtoSubmissionLocations
+		DtoSubmissionLocations locs = DtoSubmissionLocations
 				.createSubmissionLocationsInfo(informationManager
 						.getAllSubmissionLocations());
+		
+		locs.removeUnuseableSubmissionLocations(informationManager, df().getMountpoints());
+		return locs;
 	}
 
 	/*
@@ -1668,9 +1671,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public DtoSubmissionLocations getAllSubmissionLocationsForFqan(
 			final String fqan) {
 
-		return DtoSubmissionLocations
+		DtoSubmissionLocations locs =  DtoSubmissionLocations
 				.createSubmissionLocationsInfo(informationManager
 						.getAllSubmissionLocationsForVO(fqan));
+		
+		locs.removeUnuseableSubmissionLocations(informationManager, df().getMountpoints());
+		return locs;
 
 	}
 

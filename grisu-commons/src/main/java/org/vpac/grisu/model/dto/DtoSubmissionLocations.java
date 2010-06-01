@@ -1,10 +1,16 @@
 package org.vpac.grisu.model.dto;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import org.vpac.grisu.model.MountPoint;
+
+import au.org.arcs.jcommons.interfaces.InformationManager;
 
 /**
  * A wrapper that holds a list of {@link DtoSubmissionLocationInfo} objects.
@@ -31,6 +37,35 @@ public class DtoSubmissionLocations {
 
 		return result;
 
+	}
+	
+	private static boolean checkWhetherSubLocIsActuallyAvailable(InformationManager im, Collection<MountPoint> mps, String subLoc) {
+		
+		String[] filesystems = im.getStagingFileSystemForSubmissionLocation(subLoc); 
+		
+		for (MountPoint mp : mps ) {
+			
+			for ( String fs : filesystems ) {
+				if ( mp.getRootUrl().startsWith(fs.replace(":2811", "")) ) {
+					return true;
+				}
+			}
+			
+		}
+		
+		return false;
+		
+	}
+	
+	public void removeUnuseableSubmissionLocations(InformationManager im, Collection<MountPoint> mps) {
+		
+	    Iterator<DtoSubmissionLocationInfo> i = allSubmissionLocations.iterator();
+	    while ( i.hasNext() ){
+	    	if ( ! checkWhetherSubLocIsActuallyAvailable(im, mps, i.next().getSubmissionLocation()) ) {
+	    		i.remove();
+	    	}
+	    }
+		
 	}
 
 	/**

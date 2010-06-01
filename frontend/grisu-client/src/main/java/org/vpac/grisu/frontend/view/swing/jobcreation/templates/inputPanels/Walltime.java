@@ -88,7 +88,7 @@ public class Walltime extends AbstractInputPanel {
 
 		super(name, config);
 		setLayout(new FormLayout(new ColumnSpec[] {
-				FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("27dlu"),
+				FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("32dlu"),
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(42dlu;default):grow"),
 				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
