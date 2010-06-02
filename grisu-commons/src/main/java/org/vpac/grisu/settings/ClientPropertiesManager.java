@@ -274,8 +274,12 @@ public final class ClientPropertiesManager {
 	public static String getDefaultServiceInterfaceUrl() {
 		String defaultUrl = null;
 		try {
-			defaultUrl = getClientConfiguration().getString(
-			"defaultServiceInterfaceUrl");
+			
+			defaultUrl = System.getProperty("grisu.defaultFqan");
+			if ( StringUtils.isBlank(defaultUrl) ) {
+				defaultUrl = getClientConfiguration().getString(
+				"defaultServiceInterfaceUrl");
+			}
 		} catch (ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}

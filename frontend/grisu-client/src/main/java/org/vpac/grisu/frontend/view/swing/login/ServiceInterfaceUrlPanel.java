@@ -57,6 +57,8 @@ public class ServiceInterfaceUrlPanel extends JPanel {
 		if (comboBox == null) {
 			comboBox = new JComboBox(urlModel);
 			comboBox.setEditable(true);
+			
+			
 			String defaultUrl = ClientPropertiesManager
 					.getDefaultServiceInterfaceUrl();
 			String posAlias = LoginManager.SERVICEALIASES.inverse().get(
