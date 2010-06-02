@@ -144,7 +144,13 @@ public class GrisuTemplateApp extends GrisuApplicationWindow implements
 
 	@Override
 	public String getName() {
-		return "Default Grisu client";
+		
+		String name = System.getProperty("name");
+		if ( StringUtils.isNotBlank(name )) {
+			return name;
+		} else {
+			return "Default Grisu client";
+		}
 	}
 
 	@Override
