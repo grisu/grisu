@@ -17,6 +17,8 @@ import org.bushe.swing.event.EventSubscriber;
 import org.vpac.grisu.control.events.ClientPropertiesEvent;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.settings.ClientPropertiesManager;
+import org.vpac.security.light.CredentialHelpers;
+import org.vpac.security.light.certificate.CertificateHelper;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -124,7 +126,10 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber {
 		if (tabbedPane == null) {
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 			tabbedPane.addTab("Institution login", null, getShibLoginPanel(), null);
-			tabbedPane.addTab("Certificate login", null, getX509LoginPanel(), null);
+			
+			if ( CertificateHelper.globusCredentialsReady() ) {
+				tabbedPane.addTab("Certificate login", null, getX509LoginPanel(), null);
+			}
 			tabbedPane.addTab("MyProxy login", null, getMyProxyLoginPanel(), null);
 		}
 		return tabbedPane;
