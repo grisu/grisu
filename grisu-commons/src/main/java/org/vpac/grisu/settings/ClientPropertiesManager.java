@@ -275,7 +275,7 @@ public final class ClientPropertiesManager {
 		String defaultUrl = null;
 		try {
 			
-			defaultUrl = System.getProperty("grisu.defaultFqan");
+			defaultUrl = System.getProperty("grisu.defaultServiceInterface");
 			if ( StringUtils.isBlank(defaultUrl) ) {
 				defaultUrl = getClientConfiguration().getString(
 				"defaultServiceInterfaceUrl");
