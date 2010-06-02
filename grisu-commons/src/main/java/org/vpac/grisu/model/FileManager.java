@@ -112,13 +112,13 @@ public class FileManager {
 
 	public static File getFileFromUriOrPath(String uriOrPath) {
 
-try{
 		try {
-			URI uri = new URI(uriOrPath);
-			return new File(uri);
-		} catch (URISyntaxException e) {
-			return new File(uriOrPath);
-		}
+			try {
+				URI uri = new URI(uriOrPath);
+				return new File(uri);
+			} catch (URISyntaxException e) {
+				return new File(uriOrPath);
+			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
