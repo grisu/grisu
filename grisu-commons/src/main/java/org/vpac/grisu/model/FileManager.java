@@ -113,14 +113,14 @@ public class FileManager {
 	public static File getFileFromUriOrPath(String uriOrPath) {
 
 		try {
-			try {
-				URI uri = new URI(uriOrPath);
-				return new File(uri);
-			} catch (URISyntaxException e) {
-				return new File(uriOrPath);
-			}
+			URI uri = new URI(uriOrPath);
+			return new File(uri);
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			try {
+				return new File(uriOrPath);
+			} catch (Exception e2) {
+				throw new RuntimeException(e2);
+			}
 		}
 
 	}

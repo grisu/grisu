@@ -5,10 +5,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 
@@ -17,7 +21,6 @@ import org.bushe.swing.event.EventSubscriber;
 import org.vpac.grisu.control.events.ClientPropertiesEvent;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.settings.ClientPropertiesManager;
-import org.vpac.security.light.CredentialHelpers;
 import org.vpac.security.light.certificate.CertificateHelper;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -37,6 +40,21 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber {
 	private AdvancedLoginPanelOptions advancedLoginPanelOptions;
 	private JCheckBox autoLoginCheckbox;
 
+	private Action action = new AbstractAction() {
+
+		public void actionPerformed(ActionEvent arg0) {
+
+			try {
+				login();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+	};
+
+
 	/**
 	 * Create the panel.
 	 */
@@ -46,44 +64,54 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber {
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("321px:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("105px"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("184px"),
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("105px"),
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("184px"),
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("max(15dlu;default)"),
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getTabbedPane(), "2, 2, 3, 1, fill, fill");
 		add(getAdvancedLoginPanelOptions(), "2, 6, 3, 1, fill, fill");
 		add(getAutoLoginCheckbox(), "2, 8, default, bottom");
 		add(getButton(), "4, 8, right, bottom");
+
+		String keyStrokeAndKey = "ENTER";
+
+		KeyStroke keyStroke = KeyStroke.getKeyStroke(keyStrokeAndKey);
+		
+		getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+				keyStroke, keyStrokeAndKey);
+		getActionMap().put(keyStrokeAndKey, action);
+		// component.getInputMap(...).put(keyStroke, keyStrokeAndKey);
+		// component.getActionMap().put(keyStrokeAndKey, action);
+
 	}
 
 	private AdvancedLoginPanelOptions getAdvancedLoginPanelOptions() {
 		if (advancedLoginPanelOptions == null) {
 			advancedLoginPanelOptions = new AdvancedLoginPanelOptions();
-			advancedLoginPanelOptions.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+			advancedLoginPanelOptions.setBorder(new EtchedBorder(
+					EtchedBorder.LOWERED, null, null));
 		}
 		return advancedLoginPanelOptions;
 	}
+
 	private JCheckBox getAutoLoginCheckbox() {
 		if (autoLoginCheckbox == null) {
 			autoLoginCheckbox = new JCheckBox("Auto-login (whenever possible)");
 
-			if ( ClientPropertiesManager.getAutoLogin() ) {
+			if (ClientPropertiesManager.getAutoLogin()) {
 				autoLoginCheckbox.setSelected(true);
 			}
 
 			autoLoginCheckbox.addItemListener(new ItemListener() {
 				public void itemStateChanged(ItemEvent arg0) {
 
-					ClientPropertiesManager.setAutoLogin(autoLoginCheckbox.isSelected());
+					ClientPropertiesManager.setAutoLogin(autoLoginCheckbox
+							.isSelected());
 
 				}
 			});
@@ -122,15 +150,19 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber {
 		}
 		return shibLoginPanel;
 	}
+
 	private JTabbedPane getTabbedPane() {
 		if (tabbedPane == null) {
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-			tabbedPane.addTab("Institution login", null, getShibLoginPanel(), null);
-			
-			if ( CertificateHelper.globusCredentialsReady() ) {
-				tabbedPane.addTab("Certificate login", null, getX509LoginPanel(), null);
+			tabbedPane.addTab("Institution login", null, getShibLoginPanel(),
+					null);
+
+			if (CertificateHelper.globusCredentialsReady()) {
+				tabbedPane.addTab("Certificate login", null,
+						getX509LoginPanel(), null);
 			}
-			tabbedPane.addTab("MyProxy login", null, getMyProxyLoginPanel(), null);
+			tabbedPane.addTab("MyProxy login", null, getMyProxyLoginPanel(),
+					null);
 		}
 		return tabbedPane;
 	}
@@ -140,7 +172,6 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber {
 		}
 		return x509LoginPanel;
 	}
-
 	private void lockUI(final boolean lock) {
 
 		SwingUtilities.invokeLater(new Thread() {
@@ -173,9 +204,11 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber {
 				lockUI(true);
 
 				try {
-					LoginMethodPanel temp = (LoginMethodPanel)(getTabbedPane().getSelectedComponent());
+					LoginMethodPanel temp = (LoginMethodPanel) (getTabbedPane()
+							.getSelectedComponent());
 
-					String url = getAdvancedLoginPanelOptions().getServiceInterfaceUrl();
+					String url = getAdvancedLoginPanelOptions()
+							.getServiceInterfaceUrl();
 
 					LoginParams params = new LoginParams(url, null, null);
 
@@ -190,8 +223,9 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber {
 						return;
 					}
 
-					if ( temp.loginSuccessful() ) {
-						loginPanel.setServiceInterface(temp.getServiceInterface());
+					if (temp.loginSuccessful()) {
+						loginPanel.setServiceInterface(temp
+								.getServiceInterface());
 					} else {
 						temp.getPossibleException().printStackTrace();
 					}
@@ -206,9 +240,10 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber {
 
 	public void onEvent(Object event) {
 
-		if ( event instanceof ClientPropertiesEvent ) {
-			ClientPropertiesEvent ev = (ClientPropertiesEvent)event;
-			if ( ClientPropertiesManager.AUTO_LOGIN_KEY.equals(((ClientPropertiesEvent) event).getKey()) ) {
+		if (event instanceof ClientPropertiesEvent) {
+			ClientPropertiesEvent ev = (ClientPropertiesEvent) event;
+			if (ClientPropertiesManager.AUTO_LOGIN_KEY
+					.equals(((ClientPropertiesEvent) event).getKey())) {
 				try {
 					Boolean b = Boolean.parseBoolean(ev.getValue());
 					getAutoLoginCheckbox().setSelected(b);
