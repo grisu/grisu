@@ -21,7 +21,7 @@ public class JavaAppEndToEndWorkflow {
 		System.out.println("Logging in...");
 		ServiceInterface si = null;
 		try {
-			si = LoginManager.loginCommandline();
+			si = LoginManager.loginCommandline("ARCS");
 		} catch (LoginException e) {
 			System.err.println("Could not login: "+e.getLocalizedMessage());
 			System.exit(1);
@@ -35,6 +35,7 @@ public class JavaAppEndToEndWorkflow {
 		File javaJarFile = new File("/Users/local/EC/mbin029/Desktop/test.jar");
 		job.setCommandline("java -jar "+javaJarFile.getName());
 		job.addInputFileUrl(javaJarFile.toURI().toString());
+		
 		
 		job.setWalltimeInSeconds(60);
 

@@ -545,12 +545,12 @@ public class FileManager {
 				throw new IOException("Can't write to target: "
 						+ targetFile.toString());
 			}
+		}
 
-			if (targetFile.exists()) {
-				if (!overwrite) {
-					throw new IOException("Can't download file to "
-							+ targetFile + ". File already exists.");
-				}
+		if (targetFile.exists()) {
+			if (!overwrite) {
+				throw new IOException("Can't download file to " + targetFile
+						+ ". File already exists.");
 			}
 		}
 
