@@ -15,7 +15,9 @@ import java.util.Map;
 
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.border.TitledBorder;
 
 import org.apache.commons.io.FileUtils;
@@ -30,6 +32,9 @@ import org.vpac.grisu.frontend.view.swing.jobcreation.templates.filters.Filter;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels.AbstractInputPanel;
 
 public class TemplateHelpers {
+	
+	public static final String COMMANDLINE_KEY = "commandline";
+	public static final String USE_SCROLLBARS_KEY = "useScrollbars";
 
 	static final Logger myLogger = Logger.getLogger(TemplateHelpers.class
 			.getName());
@@ -176,16 +181,26 @@ public class TemplateHelpers {
 
 	}
 
-	public static JPanel createTab(LinkedList<JPanel> rows) {
+	public static JPanel createTab(LinkedList<JPanel> rows, boolean useScrollbars) {
 
-		JPanel panel = new JPanel();
+		
+		JPanel panel = new JPanel();		
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
 		for (JPanel row : rows) {
 			panel.add(row);
 		}
 
-		return panel;
+		if (useScrollbars) {
+		JScrollPane scrollPane = new JScrollPane(panel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		JPanel rootPanel = new JPanel();
+		rootPanel.setLayout(new BorderLayout());
+		rootPanel.add(scrollPane, BorderLayout.CENTER);
+		
+		return rootPanel;
+		} else {
+			return panel;
+		}
 
 	}
 
@@ -442,11 +457,20 @@ public class TemplateHelpers {
 			throws TemplateException {
 
 		Map<String, String> values = getAllStaticValues(lines);
-		String commandline = values.remove("commandline");
+		String commandline = values.remove(COMMANDLINE_KEY);
 
 		if (StringUtils.isBlank(commandline)) {
 			throw new TemplateException(
 					"\"commandline\" property not specified. You need to have a line like: \'commandline = echo hello\' in your config");
+		}
+		
+		Boolean useScrollbars = false;
+		try {
+			
+			useScrollbars = Boolean.parseBoolean(values.remove(USE_SCROLLBARS_KEY));
+			
+		} catch (Exception e) {
+			// doesn't matter
 		}
 
 		TemplateObject template = new TemplateObject(si, commandline, values);
@@ -571,13 +595,13 @@ public class TemplateHelpers {
 			JTabbedPane tabbedPanel = new JTabbedPane();
 
 			for (String tabname : tabs.keySet()) {
-				tabbedPanel.addTab(tabname, createTab(tabs.get(tabname)));
+				tabbedPanel.addTab(tabname, createTab(tabs.get(tabname), useScrollbars));
 			}
 
 			mainPanel.add(tabbedPanel, BorderLayout.CENTER);
 
 		} else {
-			mainPanel = createTab(tabs.values().iterator().next());
+			mainPanel = createTab(tabs.values().iterator().next(), useScrollbars);
 		}
 
 		template.setTemplatePanel(mainPanel);
