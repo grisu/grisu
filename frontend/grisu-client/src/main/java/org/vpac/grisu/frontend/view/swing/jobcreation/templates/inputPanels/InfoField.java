@@ -24,8 +24,11 @@ public class InfoField extends AbstractInputPanel {
 		super(templateName, config);
 		setLayout(new BorderLayout(0, 0));
 		add(getScrollPane(), BorderLayout.CENTER);
+
 	}
 
+	
+	
 	@Override
 	protected Map<String, String> getDefaultPanelProperties() {
 

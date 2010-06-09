@@ -121,6 +121,12 @@
 			<version>0.4</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.gjt.sp.jedit</groupId>
+			<artifactId>jedit</artifactId>
+			<version>4.3</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

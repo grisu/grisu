@@ -429,6 +429,10 @@ public class FileManager {
 	 */
 	public final File downloadFile(final String url)
 			throws FileTransactionException {
+		
+		if ( isLocal(url) ) {
+			return getFileFromUriOrPath(url);
+		}
 
 		if (upToDateLocalCacheFileExists(url)) {
 			return getLocalCacheFile(url);
