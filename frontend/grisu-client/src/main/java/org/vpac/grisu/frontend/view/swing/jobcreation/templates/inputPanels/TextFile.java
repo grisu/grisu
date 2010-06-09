@@ -44,7 +44,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class TextFile extends AbstractInputPanel {
-	
+
 	private class InputChangedValidator implements Validator {
 
 		private ServiceInterface si;
@@ -55,15 +55,14 @@ public class TextFile extends AbstractInputPanel {
 
 		public boolean validate(Problems arg0, String arg1, Object arg2) {
 
-			if ( documentChanged ) {
+			if (documentChanged) {
 				arg0.add("Input file changed. Please save first.");
 				return false;
 			}
 			return true;
 		}
 	}
-	
-	
+
 	private JComboBox comboBox;
 	private JButton button;
 	private GrisuFileDialog dialog;
@@ -77,12 +76,11 @@ public class TextFile extends AbstractInputPanel {
 	protected boolean documentChanged = false;
 	private JButton button_1;
 	private JLabel label_1;
-	
 
 	public TextFile(String name, PanelConfig config) throws TemplateException {
 
 		super(name, config);
-		
+
 		if (!displayHelpLabel()) {
 			setLayout(new FormLayout(new ColumnSpec[] {
 					FormFactory.RELATED_GAP_COLSPEC,
@@ -93,13 +91,12 @@ public class TextFile extends AbstractInputPanel {
 					FormFactory.DEFAULT_COLSPEC,
 					FormFactory.RELATED_GAP_COLSPEC,
 					FormFactory.DEFAULT_COLSPEC,
-					FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
+					FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
 					FormFactory.RELATED_GAP_ROWSPEC,
 					RowSpec.decode("max(58dlu;default):grow"),
 					FormFactory.RELATED_GAP_ROWSPEC,
 					FormFactory.DEFAULT_ROWSPEC,
-					FormFactory.RELATED_GAP_ROWSPEC,}));
+					FormFactory.RELATED_GAP_ROWSPEC, }));
 
 			add(getTextArea(), "2, 2, 7, 1, fill, fill");
 			add(getComboBox(), "2,2,2,1, fill, default");
@@ -115,13 +112,12 @@ public class TextFile extends AbstractInputPanel {
 					FormFactory.DEFAULT_COLSPEC,
 					FormFactory.RELATED_GAP_COLSPEC,
 					FormFactory.DEFAULT_COLSPEC,
-					FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
+					FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
 					FormFactory.RELATED_GAP_ROWSPEC,
 					RowSpec.decode("max(58dlu;default):grow"),
 					FormFactory.RELATED_GAP_ROWSPEC,
 					FormFactory.DEFAULT_ROWSPEC,
-					FormFactory.RELATED_GAP_ROWSPEC,}));
+					FormFactory.RELATED_GAP_ROWSPEC, }));
 
 			add(getTextArea(), "2, 2, 7, 1, fill, fill");
 			add(getComboBox(), "4, 4, fill, default");
@@ -129,18 +125,18 @@ public class TextFile extends AbstractInputPanel {
 			add(getHelpLabel(), "2, 4");
 			add(getButton_1(), "8, 4");
 		}
-		
+
 		Validator<String> val = new InputChangedValidator();
 		config.addValidator(val);
 	}
-	
+
 	private StandaloneTextArea getTextArea() {
 
 		if (textArea == null) {
-			Mode mode = new Mode("r");
-			mode.setProperty("file", "r.xml");
-			ModeProvider.instance.addMode(mode);
 			textArea = StandaloneTextArea.createTextArea();
+			Mode mode = new Mode("text");
+			mode.setProperty("file", "text.xml");
+			ModeProvider.instance.addMode(mode);
 			textArea.getBuffer().setMode(mode);
 			textArea.addKeyListener(new KeyAdapter() {
 				@Override
@@ -153,11 +149,12 @@ public class TextFile extends AbstractInputPanel {
 		}
 		return textArea;
 	}
-	
+
 	public void loadFile(GlazedFile gfile) {
-		
-		FileManager fm = GrisuRegistryManager.getDefault(getServiceInterface()).getFileManager();
-		
+
+		FileManager fm = GrisuRegistryManager.getDefault(getServiceInterface())
+				.getFileManager();
+
 		File file;
 		try {
 			file = fm.downloadFile(gfile.getUrl());
@@ -165,7 +162,7 @@ public class TextFile extends AbstractInputPanel {
 			e1.printStackTrace();
 			return;
 		}
-		
+
 		String text;
 		try {
 			text = FileUtils.readFileToString(file);
@@ -173,12 +170,12 @@ public class TextFile extends AbstractInputPanel {
 			e.printStackTrace();
 			return;
 		}
-		
+
 		getTextArea().setText(text);
-		
+
 		documentChanged = false;
 		getButton_1().setEnabled(false);
-		
+
 	}
 
 	private void fileChanged() {
@@ -187,17 +184,21 @@ public class TextFile extends AbstractInputPanel {
 			return;
 		}
 
-		if ( StringUtils.isBlank(selectedFile)) {
+		selectedFile = (String) getComboBox().getSelectedItem();
+
+		if (StringUtils.isBlank(selectedFile)) {
 			return;
 		}
-		
+
 		if (selectedFile != null) {
 			removeValue("inputFileUrl", selectedFile);
-		} 
+		}
 		selectedFile = (String) getComboBox().getSelectedItem();
-		
+
 		try {
-			GlazedFile file = GrisuRegistryManager.getDefault(getServiceInterface()).getFileManager().createGlazedFileFromUrl(selectedFile);
+			GlazedFile file = GrisuRegistryManager.getDefault(
+					getServiceInterface()).getFileManager()
+					.createGlazedFileFromUrl(selectedFile);
 			loadFile(file);
 
 			addValue("inputFileUrl", selectedFile);
@@ -228,7 +229,7 @@ public class TextFile extends AbstractInputPanel {
 					}
 
 					getComboBox().setSelectedItem(file.getUrl());
-					
+
 					loadFile(file);
 
 				}
@@ -271,6 +272,7 @@ public class TextFile extends AbstractInputPanel {
 		Map<String, String> defaultProperties = new HashMap<String, String>();
 		defaultProperties.put(TITLE, "Input file");
 		defaultProperties.put(HISTORY_ITEMS, "8");
+		defaultProperties.put("mode", "text");
 
 		return defaultProperties;
 	}
@@ -308,11 +310,11 @@ public class TextFile extends AbstractInputPanel {
 	protected void jobPropertyChanged(PropertyChangeEvent e) {
 
 	}
-	
+
 	private DefaultComboBoxModel getComboBoxModel() {
-		if ( comboBoxModel == null ) {
+		if (comboBoxModel == null) {
 			comboBoxModel = new DefaultComboBoxModel();
-		} 
+		}
 		return comboBoxModel;
 	}
 
@@ -320,7 +322,7 @@ public class TextFile extends AbstractInputPanel {
 	protected void preparePanel(Map<String, String> panelProperties) {
 
 		getComboBox().removeAllItems();
-		
+
 		String prefills = panelProperties.get(PREFILLS);
 		if (StringUtils.isNotBlank(prefills)) {
 
@@ -338,6 +340,16 @@ public class TextFile extends AbstractInputPanel {
 			}
 		}
 
+		String modeName = panelProperties.get("mode");
+
+		if (StringUtils.isNotBlank(modeName)) {
+
+			Mode mode = new Mode(modeName);
+			mode.setProperty("file", mode + ".xml");
+			ModeProvider.instance.addMode(mode);
+			textArea.getBuffer().setMode(mode);
+		}
+
 	}
 
 	@Override
@@ -345,7 +357,9 @@ public class TextFile extends AbstractInputPanel {
 
 		if (fillDefaultValueIntoFieldWhenPreparingPanel()) {
 			try {
-				GlazedFile file = GrisuRegistryManager.getDefault(getServiceInterface()).getFileManager().createGlazedFileFromUrl(getDefaultValue());
+				GlazedFile file = GrisuRegistryManager.getDefault(
+						getServiceInterface()).getFileManager()
+						.createGlazedFileFromUrl(getDefaultValue());
 				loadFile(file);
 				getJobSubmissionObject().addInputFileUrl(getDefaultValue());
 				getComboBox().setSelectedItem(getDefaultValue());
@@ -371,26 +385,32 @@ public class TextFile extends AbstractInputPanel {
 		if (button_1 == null) {
 			button_1 = new JButton("Save");
 			button_1.addActionListener(new ActionListener() {
-				
+
 				public void actionPerformed(ActionEvent e) {
-					
-					FileManager fm = GrisuRegistryManager.getDefault(getServiceInterface()).getFileManager();
-					String currentUrl = (String)getComboBox().getSelectedItem();
-					
-					if ( FileManager.isLocal(currentUrl) ) {
+
+					FileManager fm = GrisuRegistryManager.getDefault(
+							getServiceInterface()).getFileManager();
+					String currentUrl = (String) getComboBox()
+							.getSelectedItem();
+
+					if (FileManager.isLocal(currentUrl)) {
 						try {
-							FileUtils.forceDelete(fm.getFileFromUriOrPath(currentUrl));
-							FileUtils.writeStringToFile(fm.getFileFromUriOrPath(currentUrl), getTextArea().getText());
+							FileUtils.forceDelete(fm
+									.getFileFromUriOrPath(currentUrl));
+							FileUtils.writeStringToFile(fm
+									.getFileFromUriOrPath(currentUrl),
+									getTextArea().getText());
 						} catch (IOException e1) {
 							e1.printStackTrace();
 						}
 					} else {
-						
+
 						File temp = fm.getLocalCacheFile(currentUrl);
 						try {
 							FileUtils.forceDelete(temp);
-							FileUtils.writeStringToFile(temp, getTextArea().getText());
-							
+							FileUtils.writeStringToFile(temp, getTextArea()
+									.getText());
+
 							fm.uploadFile(temp, currentUrl, true);
 						} catch (IOException e1) {
 							// TODO Auto-generated catch block
@@ -399,12 +419,12 @@ public class TextFile extends AbstractInputPanel {
 							// TODO Auto-generated catch block
 							e2.printStackTrace();
 						}
-						
+
 					}
 
 					documentChanged = false;
 					button_1.setEnabled(false);
-					
+
 				}
 			});
 		}
