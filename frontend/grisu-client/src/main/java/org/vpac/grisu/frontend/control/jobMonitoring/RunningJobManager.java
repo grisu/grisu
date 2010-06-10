@@ -52,8 +52,8 @@ public class RunningJobManager implements EventSubscriber {
 						.keySet()) {
 					updateJobList(application);
 				}
-
-				for (JobObject job : getAllCurrentlyWatchedSingleJobs()) {
+				List<JobObject> tempList = new LinkedList<JobObject>(getAllCurrentlyWatchedSingleJobs());
+				for (JobObject job : tempList) {
 					myLogger.debug("Refreshing job: " + job.getJobname());
 					job.getStatus(true);
 				}
@@ -63,7 +63,8 @@ public class RunningJobManager implements EventSubscriber {
 					updateBatchJobList(application);
 				}
 
-				for (BatchJobObject bj : getAllCurrentlyWatchedBatchJobs()) {
+				List<BatchJobObject> tempListB = new LinkedList<BatchJobObject>(getAllCurrentlyWatchedBatchJobs());
+				for (BatchJobObject bj : tempListB) {
 					if (!bj.isFinished(false) && !bj.isRefreshing()
 							&& !bj.isBeingKilled()) {
 						myLogger.debug("Refreshing job: " + bj.getJobname());
