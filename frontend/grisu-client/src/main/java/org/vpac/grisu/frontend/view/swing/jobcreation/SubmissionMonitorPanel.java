@@ -141,7 +141,7 @@ public class SubmissionMonitorPanel extends JPanel implements
 					});
 
 					setJobObject(job);
-					job.createJob("/ACC");
+					job.createJob();
 					job.submitJob();
 
 				} catch (JobPropertiesException e) {
