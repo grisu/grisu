@@ -27,6 +27,7 @@ import org.vpac.grisu.frontend.model.events.JobStatusEvent;
 import org.vpac.grisu.frontend.model.events.NewJobEvent;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
+import org.vpac.grisu.model.UserEnvironmentManager;
 import org.vpac.grisu.model.dto.DtoFolder;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.job.JobCreatedProperty;
@@ -226,6 +227,34 @@ public class JobObject extends JobSubmissionObjectImpl implements
 
 	public int compareTo(JobObject o2) {
 		return getJobname().compareTo(o2.getJobname());
+	}
+	
+	/**
+	 * Creates the job on the grisu backend using the "force-name" method (which
+	 * means the backend will not change the jobname you specified -- if there
+	 * is a job with that jobname already the backend will throw an exception).
+	 * 
+	 * Also, this method uses the current fqan that the {@link UserEnvironmentManager} that is used for this client holds.
+	 * 
+	 * Be aware, that once that is done, you can't change any of the basic job
+	 * parameters anymore. The backend calculates all the (possibly) missing job
+	 * parameters and sets values like the final submissionlocation and such.
+	 * After you created a job on the backend, you can query these calculated
+	 * values using the {@link ServiceInterface#getJobProperty(String, String)}
+	 * method.
+	 * 
+	 * @return the final jobname (equals the one you specified when creating the
+	 *         JobObject object).
+	 * @throws JobPropertiesException
+	 *             if one of the properties is invalid and the job could not be
+	 *             created on the backend
+	 */
+	public final String createJob() throws JobPropertiesException {
+		
+		String fqan = GrisuRegistryManager.getDefault(serviceInterface).getUserEnvironmentManager().getCurrentFqan();
+		
+		return createJob(fqan);
+		
 	}
 
 	/**
@@ -968,6 +997,10 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		}
 
 		return isFinished();
+	}
+	
+	public ServiceInterface getServiceInterface() {
+		return this.serviceInterface;
 	}
 
 }

@@ -821,4 +821,16 @@ public final class ClientPropertiesManager {
 	private ClientPropertiesManager() {
 	}
 
+	public static void setLastUsedFqan(String currentFqan) {
+		
+		try {
+			getClientConfiguration().setProperty("lastUsedFqan",
+					currentFqan);
+			getClientConfiguration().save();
+		} catch (ConfigurationException e) {
+			myLogger.debug("Problem with config file: " + e.getMessage());
+		}
+
+	}
+
 }
