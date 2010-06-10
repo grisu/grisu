@@ -304,10 +304,10 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	public final String getCurrentFqan() {
 
 		if (StringUtils.isBlank(currentFqan)) {
-			
-				currentFqan = ClientPropertiesManager.getLastUsedFqan();
-				if (StringUtils.isBlank(currentFqan) ) {
-					currentFqan = getAllAvailableFqans()[0];
+
+			currentFqan = ClientPropertiesManager.getLastUsedFqan();
+			if (StringUtils.isBlank(currentFqan)) {
+				currentFqan = getAllAvailableFqans()[0];
 			}
 		}
 
@@ -697,8 +697,8 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 	}
 
 	public final void setCurrentFqan(final String currentFqan) {
-		
-		if ( StringUtils.isNotBlank(currentFqan) ) {
+
+		if (StringUtils.isNotBlank(currentFqan)) {
 			this.currentFqan = currentFqan;
 			ClientPropertiesManager.setLastUsedFqan(this.currentFqan);
 		}
