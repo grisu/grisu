@@ -251,17 +251,24 @@ public class RunningJobManager implements EventSubscriber {
 
 		if (cachedBatchJobsPerApplication.get(application) == null) {
 
-			EventList<BatchJobObject> temp = new BasicEventList<BatchJobObject>();
-
+			final EventList<BatchJobObject> temp = new BasicEventList<BatchJobObject>();
+			final String tempApp = application;
+			new Thread() {
+				public void run() {
+					
 			for (String jobname : em
-					.getCurrentBatchJobnames(application, false)) {
+					.getCurrentBatchJobnames(tempApp, false)) {
 				try {
-
+					temp.getReadWriteLock().writeLock().lock();
 					temp.add(getBatchJob(jobname));
 				} catch (NoSuchJobException e) {
 					throw new RuntimeException(e);
+				} finally {
+					temp.getReadWriteLock().writeLock().unlock();
 				}
 			}
+				}
+			}.start();
 
 			cachedBatchJobsPerApplication.put(application, temp);
 
@@ -434,7 +441,9 @@ public class RunningJobManager implements EventSubscriber {
 				}
 
 				if (!list.contains(temp)) {
+					list.getReadWriteLock().writeLock().lock();
 					list.add(temp);
+					list.getReadWriteLock().writeLock().unlock();
 				}
 			} catch (NoSuchJobException e) {
 				throw new RuntimeException(e);
@@ -449,7 +458,9 @@ public class RunningJobManager implements EventSubscriber {
 		}
 
 		if (watchingAllBatchJobs) {
+			getAllBatchJobs().getReadWriteLock().writeLock().lock();
 			getAllBatchJobs().removeAll(toRemove);
+			getAllBatchJobs().getReadWriteLock().writeLock().unlock();
 		}
 
 		list.removeAll(toRemove);
@@ -484,11 +495,15 @@ public class RunningJobManager implements EventSubscriber {
 				}
 				if (watchingAllSingleJobs) {
 					if (!getAllJobs().contains(temp)) {
+						getAllJobs().getReadWriteLock().writeLock().lock();
 						getAllJobs().add(temp);
+						getAllJobs().getReadWriteLock().writeLock().unlock();
 					}
 				}
 				if (!list.contains(temp)) {
+					list.getReadWriteLock().writeLock().lock();
 					list.add(temp);
+					list.getReadWriteLock().writeLock().unlock();
 				}
 			} catch (NoSuchJobException e) {
 				throw new RuntimeException(e);
@@ -504,7 +519,9 @@ public class RunningJobManager implements EventSubscriber {
 		}
 
 		if (watchingAllSingleJobs) {
+			getAllJobs().getReadWriteLock().writeLock().lock();
 			getAllJobs().removeAll(toRemove);
+			getAllJobs().getReadWriteLock().writeLock().unlock();
 		}
 
 		list.removeAll(toRemove);
