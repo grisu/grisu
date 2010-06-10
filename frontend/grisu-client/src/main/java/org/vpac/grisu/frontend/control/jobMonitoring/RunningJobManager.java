@@ -123,7 +123,7 @@ public class RunningJobManager implements EventSubscriber {
 
 	}
 
-	private final int UPDATE_TIME_IN_SECONDS = 300;
+	private final int UPDATE_TIME_IN_SECONDS = 120;
 
 	private static Map<ServiceInterface, RunningJobManager> cachedRegistries = new HashMap<ServiceInterface, RunningJobManager>();
 
@@ -321,20 +321,30 @@ public class RunningJobManager implements EventSubscriber {
 
 		if (cachedSingleJobsPerApplication.get(application) == null) {
 
-			EventList<JobObject> temp = new BasicEventList<JobObject>();
+			final EventList<JobObject> temp = new BasicEventList<JobObject>();
 
-			for (String jobname : em.getCurrentJobnames(application, false)) {
+			// we can load this in the background, since it's an eventlist,
+			// can't we?
+			final String tempApp = application;
+			new Thread() {
+				public void run() {
 
-				try {
-					JobObject j = getJob(jobname, false);
-					if (j != null) {
+					for (String jobname : em.getCurrentJobnames(tempApp, false)) {
 
-						temp.add(j);
+						try {
+							JobObject j = getJob(jobname, false);
+							if (j != null) {
+								temp.getReadWriteLock().writeLock().lock();
+								temp.add(j);
+							}
+						} catch (NoSuchJobException e) {
+							throw new RuntimeException(e);
+						} finally {
+							temp.getReadWriteLock().writeLock().unlock();
+						}
 					}
-				} catch (NoSuchJobException e) {
-					throw new RuntimeException(e);
 				}
-			}
+			}.start();
 
 			cachedSingleJobsPerApplication.put(application, temp);
 
