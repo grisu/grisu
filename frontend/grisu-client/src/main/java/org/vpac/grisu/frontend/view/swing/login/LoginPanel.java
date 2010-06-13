@@ -34,6 +34,9 @@ public class LoginPanel extends JPanel {
 
 	private final List<ServiceInterfaceHolder> siHolders;
 
+	/**
+	 * @wbp.parser.constructor
+	 */
 	public LoginPanel(GrisuSwingClient client) {
 		this(client, null);
 	}

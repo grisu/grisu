@@ -278,6 +278,7 @@ public class GT4Submitter extends JobSubmitter {
 				} else if (StringUtils.isNotBlank(application)
 						&& StringUtils.isNotBlank(version)
 						&& StringUtils.isNotBlank(subLoc)) {
+
 					// if we know application, version and submissionLocation
 					Map<String, String> appDetails = infoManager
 							.getApplicationDetails(application, version, subLoc);
@@ -333,6 +334,17 @@ public class GT4Submitter extends JobSubmitter {
 			} else {
 				myLogger
 						.info("No submission location specified. If this happens when trying to submit a job, it's probably a bug...");
+			}
+
+			if (StringUtils.isNotBlank(application)
+					&& !Constants.GENERIC_APPLICATION_NAME.equals(application)) {
+				myLogger.debug("Adding \"application\" element to rsl.");
+				// firstly, put the application element in there so pbs.pm can
+				// parse
+				// it if necessary.
+				Element appl = output.createElement("application");
+				appl.setTextContent(application);
+				extensions.appendChild(appl);
 			}
 
 			if ((modules_string != null) && (modules_string.length > 0)) {

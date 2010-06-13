@@ -1,8 +1,5 @@
 package org.vpac.grisu.frontend.view.swing.login;
 
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -40,48 +37,48 @@ public class LoginProgressPanel extends JPanel implements EventSubscriber {
 				ColumnSpec.decode("max(148dlu;default)"),
 				ColumnSpec.decode("4dlu:grow"),
 				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("max(14dlu;default)"),
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getLabel(), "4, 2, center, default");
 		add(getProgressBar(), "4, 4, fill, fill");
 		add(getMessageLabel(), "4, 6, center, default");
-		add(getChckbxAutologinwheneverPossible(), "2, 8, 6, 1");
+		// add(getChckbxAutologinwheneverPossible(), "2, 8, 6, 1");
 
 	}
 
-	private JCheckBox getChckbxAutologinwheneverPossible() {
-		if (chckbxAutologinwheneverPossible == null) {
-			chckbxAutologinwheneverPossible = new JCheckBox("Auto-login (whenever possible)");
-
-			if ( ClientPropertiesManager.getAutoLogin() ) {
-				chckbxAutologinwheneverPossible.setSelected(true);
-			}
-
-			chckbxAutologinwheneverPossible.addItemListener(new ItemListener() {
-				public void itemStateChanged(ItemEvent arg0) {
-
-					ClientPropertiesManager.setAutoLogin(chckbxAutologinwheneverPossible.isSelected());
-
-				}
-			});
-		}
-		return chckbxAutologinwheneverPossible;
-	}
+	// private JCheckBox getChckbxAutologinwheneverPossible() {
+	// if (chckbxAutologinwheneverPossible == null) {
+	// chckbxAutologinwheneverPossible = new
+	// JCheckBox("Auto-login (whenever possible)");
+	//
+	// if ( ClientPropertiesManager.getAutoLogin() ) {
+	// chckbxAutologinwheneverPossible.setSelected(true);
+	// }
+	//
+	// chckbxAutologinwheneverPossible.addItemListener(new ItemListener() {
+	// public void itemStateChanged(ItemEvent arg0) {
+	//
+	// ClientPropertiesManager.setAutoLogin(chckbxAutologinwheneverPossible.isSelected());
+	//
+	// }
+	// });
+	// }
+	// return chckbxAutologinwheneverPossible;
+	// }
 	private JLabel getLabel() {
 		if (label == null) {
 			label = new JLabel();
 		}
 		return label;
 	}
+
 	private JLabel getMessageLabel() {
 		if (label_1 == null) {
 			label_1 = new JLabel();
@@ -98,17 +95,19 @@ public class LoginProgressPanel extends JPanel implements EventSubscriber {
 
 	public void onEvent(Object event) {
 
-		if ( event instanceof ClientPropertiesEvent ) {
-			ClientPropertiesEvent ev = (ClientPropertiesEvent)event;
-			if ( ClientPropertiesManager.AUTO_LOGIN_KEY.equals(((ClientPropertiesEvent) event).getKey()) ) {
-				try {
-					Boolean b = Boolean.parseBoolean(ev.getValue());
-					getChckbxAutologinwheneverPossible().setSelected(b);
-				} catch (Exception e) {
-					// not that important
-				}
-			}
-		}
+		// if ( event instanceof ClientPropertiesEvent ) {
+		// ClientPropertiesEvent ev = (ClientPropertiesEvent)event;
+		// if (
+		// ClientPropertiesManager.AUTO_LOGIN_KEY.equals(((ClientPropertiesEvent)
+		// event).getKey()) ) {
+		// try {
+		// Boolean b = Boolean.parseBoolean(ev.getValue());
+		// getChckbxAutologinwheneverPossible().setSelected(b);
+		// } catch (Exception e) {
+		// // not that important
+		// }
+		// }
+		// }
 
 	}
 
@@ -134,7 +133,10 @@ public class LoginProgressPanel extends JPanel implements EventSubscriber {
 				getProgressBar().setIndeterminate(true);
 
 				getLabel().setText("Logging in...");
-				getMessageLabel().setText("Connecting to: "+ClientPropertiesManager.getDefaultServiceInterfaceUrl());
+				getMessageLabel().setText(
+						"Connecting to: "
+								+ ClientPropertiesManager
+										.getDefaultServiceInterfaceUrl());
 			}
 
 		});

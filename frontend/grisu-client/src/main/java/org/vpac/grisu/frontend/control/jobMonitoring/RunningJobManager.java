@@ -260,8 +260,11 @@ public class RunningJobManager implements EventSubscriber {
 			for (String jobname : em
 					.getCurrentBatchJobnames(tempApp, false)) {
 				try {
-					temp.getReadWriteLock().writeLock().lock();
-					temp.add(getBatchJob(jobname));
+					BatchJobObject j = getBatchJob(jobname);
+					if ( ! temp.contains(j)) {
+						temp.getReadWriteLock().writeLock().lock();
+						temp.add(j);
+					}
 				} catch (NoSuchJobException e) {
 					throw new RuntimeException(e);
 				} finally {
@@ -342,8 +345,10 @@ public class RunningJobManager implements EventSubscriber {
 						try {
 							JobObject j = getJob(jobname, false);
 							if (j != null) {
-								temp.getReadWriteLock().writeLock().lock();
-								temp.add(j);
+								if (! temp.contains(j) ) {
+									temp.getReadWriteLock().writeLock().lock();
+									temp.add(j);
+								}
 							}
 						} catch (NoSuchJobException e) {
 							throw new RuntimeException(e);
