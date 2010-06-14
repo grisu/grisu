@@ -1,5 +1,8 @@
 package org.vpac.grisu.frontend.view.swing.login;
 
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -49,29 +52,32 @@ public class LoginProgressPanel extends JPanel implements EventSubscriber {
 		add(getLabel(), "4, 2, center, default");
 		add(getProgressBar(), "4, 4, fill, fill");
 		add(getMessageLabel(), "4, 6, center, default");
-		// add(getChckbxAutologinwheneverPossible(), "2, 8, 6, 1");
+		add(getChckbxAutologinwheneverPossible(), "2, 8, 6, 1");
 
 	}
 
-	// private JCheckBox getChckbxAutologinwheneverPossible() {
-	// if (chckbxAutologinwheneverPossible == null) {
-	// chckbxAutologinwheneverPossible = new
-	// JCheckBox("Auto-login (whenever possible)");
-	//
-	// if ( ClientPropertiesManager.getAutoLogin() ) {
-	// chckbxAutologinwheneverPossible.setSelected(true);
-	// }
-	//
-	// chckbxAutologinwheneverPossible.addItemListener(new ItemListener() {
-	// public void itemStateChanged(ItemEvent arg0) {
-	//
-	// ClientPropertiesManager.setAutoLogin(chckbxAutologinwheneverPossible.isSelected());
-	//
-	// }
-	// });
-	// }
-	// return chckbxAutologinwheneverPossible;
-	// }
+	private JCheckBox getChckbxAutologinwheneverPossible() {
+		if (chckbxAutologinwheneverPossible == null) {
+			chckbxAutologinwheneverPossible = new JCheckBox(
+					"Quick-login (whenever possible)");
+
+			if (ClientPropertiesManager.getAutoLogin()) {
+				chckbxAutologinwheneverPossible.setSelected(true);
+			}
+
+			chckbxAutologinwheneverPossible.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent arg0) {
+
+					ClientPropertiesManager
+							.setAutoLogin(chckbxAutologinwheneverPossible
+									.isSelected());
+
+				}
+			});
+		}
+		return chckbxAutologinwheneverPossible;
+	}
+
 	private JLabel getLabel() {
 		if (label == null) {
 			label = new JLabel();
@@ -95,19 +101,18 @@ public class LoginProgressPanel extends JPanel implements EventSubscriber {
 
 	public void onEvent(Object event) {
 
-		// if ( event instanceof ClientPropertiesEvent ) {
-		// ClientPropertiesEvent ev = (ClientPropertiesEvent)event;
-		// if (
-		// ClientPropertiesManager.AUTO_LOGIN_KEY.equals(((ClientPropertiesEvent)
-		// event).getKey()) ) {
-		// try {
-		// Boolean b = Boolean.parseBoolean(ev.getValue());
-		// getChckbxAutologinwheneverPossible().setSelected(b);
-		// } catch (Exception e) {
-		// // not that important
-		// }
-		// }
-		// }
+		if (event instanceof ClientPropertiesEvent) {
+			ClientPropertiesEvent ev = (ClientPropertiesEvent) event;
+			if (ClientPropertiesManager.AUTO_LOGIN_KEY
+					.equals(((ClientPropertiesEvent) event).getKey())) {
+				try {
+					Boolean b = Boolean.parseBoolean(ev.getValue());
+					getChckbxAutologinwheneverPossible().setSelected(b);
+				} catch (Exception e) {
+					// not that important
+				}
+			}
+		}
 
 	}
 

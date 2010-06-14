@@ -52,7 +52,8 @@ public class RunningJobManager implements EventSubscriber {
 						.keySet()) {
 					updateJobList(application);
 				}
-				List<JobObject> tempList = new LinkedList<JobObject>(getAllCurrentlyWatchedSingleJobs());
+				List<JobObject> tempList = new LinkedList<JobObject>(
+						getAllCurrentlyWatchedSingleJobs());
 				for (JobObject job : tempList) {
 					myLogger.debug("Refreshing job: " + job.getJobname());
 					job.getStatus(true);
@@ -63,7 +64,8 @@ public class RunningJobManager implements EventSubscriber {
 					updateBatchJobList(application);
 				}
 
-				List<BatchJobObject> tempListB = new LinkedList<BatchJobObject>(getAllCurrentlyWatchedBatchJobs());
+				List<BatchJobObject> tempListB = new LinkedList<BatchJobObject>(
+						getAllCurrentlyWatchedBatchJobs());
 				for (BatchJobObject bj : tempListB) {
 					if (!bj.isFinished(false) && !bj.isRefreshing()
 							&& !bj.isBeingKilled()) {
@@ -255,22 +257,23 @@ public class RunningJobManager implements EventSubscriber {
 			final EventList<BatchJobObject> temp = new BasicEventList<BatchJobObject>();
 			final String tempApp = application;
 			new Thread() {
+				@Override
 				public void run() {
-					
-			for (String jobname : em
-					.getCurrentBatchJobnames(tempApp, false)) {
-				try {
-					BatchJobObject j = getBatchJob(jobname);
-					if ( ! temp.contains(j)) {
-						temp.getReadWriteLock().writeLock().lock();
-						temp.add(j);
+
+					for (String jobname : em.getCurrentBatchJobnames(tempApp,
+							false)) {
+						try {
+							BatchJobObject j = getBatchJob(jobname);
+							if (!temp.contains(j)) {
+								temp.getReadWriteLock().writeLock().lock();
+								temp.add(j);
+							}
+						} catch (NoSuchJobException e) {
+							throw new RuntimeException(e);
+						} finally {
+							temp.getReadWriteLock().writeLock().unlock();
+						}
 					}
-				} catch (NoSuchJobException e) {
-					throw new RuntimeException(e);
-				} finally {
-					temp.getReadWriteLock().writeLock().unlock();
-				}
-			}
 				}
 			}.start();
 
@@ -338,6 +341,7 @@ public class RunningJobManager implements EventSubscriber {
 			// can't we?
 			final String tempApp = application;
 			new Thread() {
+				@Override
 				public void run() {
 
 					for (String jobname : em.getCurrentJobnames(tempApp, false)) {
@@ -345,8 +349,8 @@ public class RunningJobManager implements EventSubscriber {
 						try {
 							JobObject j = getJob(jobname, false);
 							if (j != null) {
-								if (! temp.contains(j) ) {
-									temp.getReadWriteLock().writeLock().lock();
+								temp.getReadWriteLock().writeLock().lock();
+								if (!temp.contains(j)) {
 									temp.add(j);
 								}
 							}

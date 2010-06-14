@@ -11,12 +11,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedSet;
 
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.text.JTextComponent;
 
@@ -32,7 +31,6 @@ import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
-import org.vpac.grisu.frontend.view.swing.jobcreation.templates.validators.JobnameValidator;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.files.GlazedFile;
@@ -76,6 +74,8 @@ public class TextFile extends AbstractInputPanel {
 	protected boolean documentChanged = false;
 	private JButton button_1;
 	private JLabel label_1;
+
+	private final Validator<String> val = new InputChangedValidator();
 
 	public TextFile(String name, PanelConfig config) throws TemplateException {
 
@@ -126,8 +126,9 @@ public class TextFile extends AbstractInputPanel {
 			add(getButton_1(), "8, 4");
 		}
 
-		Validator<String> val = new InputChangedValidator();
+		// Validator<String> val2 = Validators.REQUIRE_NON_EMPTY_STRING;
 		config.addValidator(val);
+		// config.addValidator(val2);
 	}
 
 	private StandaloneTextArea getTextArea() {
@@ -143,6 +144,8 @@ public class TextFile extends AbstractInputPanel {
 				public void keyReleased(KeyEvent e) {
 					documentChanged = true;
 					getButton_1().setEnabled(true);
+
+					// TODO fire validation request
 				}
 
 			});
@@ -184,16 +187,15 @@ public class TextFile extends AbstractInputPanel {
 			return;
 		}
 
-		selectedFile = (String) getComboBox().getSelectedItem();
-
-		if (StringUtils.isBlank(selectedFile)) {
-			return;
-		}
-
 		if (selectedFile != null) {
 			removeValue("inputFileUrl", selectedFile);
 		}
 		selectedFile = (String) getComboBox().getSelectedItem();
+
+		if (StringUtils.isBlank(selectedFile)) {
+			getTextArea().setText("");
+			return;
+		}
 
 		try {
 			GlazedFile file = GrisuRegistryManager.getDefault(
@@ -228,6 +230,7 @@ public class TextFile extends AbstractInputPanel {
 						return;
 					}
 
+					getComboBox().addItem(file.getUrl());
 					getComboBox().setSelectedItem(file.getUrl());
 
 					loadFile(file);
@@ -242,7 +245,7 @@ public class TextFile extends AbstractInputPanel {
 		if (comboBox == null) {
 			comboBox = new JComboBox(getComboBoxModel());
 			comboBox.setPrototypeDisplayValue("xxxxx");
-			comboBox.setEditable(true);
+			comboBox.setEditable(false);
 			comboBox.addItemListener(new ItemListener() {
 				public void itemStateChanged(ItemEvent e) {
 					if (ItemEvent.SELECTED == e.getStateChange()) {
@@ -255,13 +258,13 @@ public class TextFile extends AbstractInputPanel {
 				}
 			});
 
-			comboBox.getEditor().getEditorComponent().addKeyListener(
-					new KeyAdapter() {
-						@Override
-						public void keyReleased(KeyEvent e) {
-							fileChanged();
-						}
-					});
+			// comboBox.getEditor().getEditorComponent().addKeyListener(
+			// new KeyAdapter() {
+			// @Override
+			// public void keyReleased(KeyEvent e) {
+			// fileChanged();
+			// }
+			// });
 		}
 		return comboBox;
 	}
@@ -273,6 +276,7 @@ public class TextFile extends AbstractInputPanel {
 		defaultProperties.put(TITLE, "Input file");
 		defaultProperties.put(HISTORY_ITEMS, "8");
 		defaultProperties.put("mode", "text");
+		defaultProperties.put(FILL_WITH_DEFAULT_VALUE, "false");
 
 		return defaultProperties;
 	}
@@ -319,7 +323,7 @@ public class TextFile extends AbstractInputPanel {
 	}
 
 	@Override
-	protected void preparePanel(Map<String, String> panelProperties) {
+	protected void preparePanel(final Map<String, String> panelProperties) {
 
 		getComboBox().removeAllItems();
 
@@ -367,6 +371,7 @@ public class TextFile extends AbstractInputPanel {
 				e.printStackTrace();
 			}
 		} else {
+			getComboBox().addItem("");
 			getComboBox().setSelectedItem("");
 			getTextArea().setText("");
 		}
@@ -393,10 +398,55 @@ public class TextFile extends AbstractInputPanel {
 					String currentUrl = (String) getComboBox()
 							.getSelectedItem();
 
+					if (StringUtils.isBlank(currentUrl)) {
+
+						// TODO write grid save dialog
+						JFileChooser fc = new JFileChooser();
+						int returnVal = fc.showDialog(TextFile.this,
+								"Save as...");
+
+						if (JFileChooser.CANCEL_OPTION == returnVal) {
+							return;
+						} else {
+							File selFile = fc.getSelectedFile();
+							currentUrl = selFile.toURI().toString();
+
+							try {
+								FileUtils.forceDelete(fm
+										.getFileFromUriOrPath(currentUrl));
+							} catch (Exception e2) {
+								// doesn't matter
+								myLogger.debug(e2);
+							}
+							try {
+								FileUtils.writeStringToFile(fm
+										.getFileFromUriOrPath(currentUrl),
+										getTextArea().getText());
+							} catch (IOException e1) {
+								e1.printStackTrace();
+							}
+
+							documentChanged = false;
+
+							getComboBox().addItem(currentUrl);
+							getComboBox().setSelectedItem(currentUrl);
+
+							button_1.setEnabled(false);
+
+							return;
+						}
+
+					}
+
 					if (FileManager.isLocal(currentUrl)) {
 						try {
 							FileUtils.forceDelete(fm
 									.getFileFromUriOrPath(currentUrl));
+						} catch (Exception e2) {
+							// doesn't matter
+							myLogger.debug(e2);
+						}
+						try {
 							FileUtils.writeStringToFile(fm
 									.getFileFromUriOrPath(currentUrl),
 									getTextArea().getText());

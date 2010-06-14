@@ -4,6 +4,7 @@ import org.vpac.grisu.control.ServiceInterface;
 
 public interface ServiceInterfaceHolder {
 
-	public void setServiceInterface(ServiceInterface si);
+	public void setServiceInterface(ServiceInterface si)
+			throws InterruptedException;
 
 }

@@ -38,8 +38,8 @@
 
 
 
-		<WHITESPACE> </WHITESPACE>
-		<WHITESPACE>	</WHITESPACE>
+<!--		<WHITESPACE> </WHITESPACE>-->
+<!--		<WHITESPACE>	</WHITESPACE>-->
 
 
 		<!-- uncomment this if you want user defined functions to be highlighted, too -->

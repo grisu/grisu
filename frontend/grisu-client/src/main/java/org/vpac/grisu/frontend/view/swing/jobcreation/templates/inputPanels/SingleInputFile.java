@@ -219,6 +219,7 @@ public class SingleInputFile extends AbstractInputPanel {
 			getJobSubmissionObject().addInputFileUrl(getDefaultValue());
 			getComboBox().setSelectedItem(getDefaultValue());
 		} else {
+			getComboBox().addItem("");
 			getComboBox().setSelectedItem("");
 		}
 

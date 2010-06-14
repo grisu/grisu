@@ -480,13 +480,21 @@ public class TemplateEditPanel extends JPanel implements
 				return;
 			}
 
-			String gt4rsl = GT4Submitter.createJobSubmissionDescription(
-					informationManager, SeveralXMLHelpers.fromString(jsdl));
-			getGt4TextArea().setText(gt4rsl);
+			try {
+				String gt4rsl = GT4Submitter.createJobSubmissionDescription(
+						informationManager, SeveralXMLHelpers.fromString(jsdl));
+				getGt4TextArea().setText(gt4rsl);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
-			String gt5rsl = GT5Submitter.createJobSubmissionDescription(
-					informationManager, SeveralXMLHelpers.fromString(jsdl));
-			getGt5TextArea().setText(gt5rsl);
+			try {
+				String gt5rsl = GT5Submitter.createJobSubmissionDescription(
+						informationManager, SeveralXMLHelpers.fromString(jsdl));
+				getGt5TextArea().setText(gt5rsl);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
 		}
 	}

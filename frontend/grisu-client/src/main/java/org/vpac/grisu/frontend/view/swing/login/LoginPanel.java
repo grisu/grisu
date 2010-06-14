@@ -111,14 +111,19 @@ public class LoginPanel extends JPanel {
 
 	public void setServiceInterface(ServiceInterface si) {
 
-		getProgressPanel().setLoginToBackend(si);
-		switchToProgressPanel();
-		client.setServiceInterface(si);
-		for (ServiceInterfaceHolder sih : siHolders) {
-			sih.setServiceInterface(si);
-		}
+		try {
+			getProgressPanel().setLoginToBackend(si);
+			switchToProgressPanel();
+			client.setServiceInterface(si);
+			for (ServiceInterfaceHolder sih : siHolders) {
+				sih.setServiceInterface(si);
+			}
 
-		switchToClientPanel();
+			switchToClientPanel();
+		} catch (InterruptedException ie) {
+			ie.printStackTrace();
+			switchToLoginPanel();
+		}
 	}
 
 	private void switchToClientPanel() {
