@@ -19,6 +19,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import javax.swing.JLabel;
+import org.vpac.grisu.frontend.view.swing.DefaultFqanChangePanel;
 
 public class TemplateWrapperPanel extends JPanel {
 
@@ -35,6 +36,7 @@ public class TemplateWrapperPanel extends JPanel {
 	private ValidationPanel validationPanel;
 	private JLabel label;
 	private JLabel label_1;
+	private final DefaultFqanChangePanel defaultFqanChangePanel = new DefaultFqanChangePanel();
 
 	/**
 	 * Create the panel.
@@ -50,24 +52,36 @@ public class TemplateWrapperPanel extends JPanel {
 		creationPanel.setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(29dlu;default):grow"),
-				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_COLSPEC,
+				FormFactory.DEFAULT_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC,},
+			new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, }));
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				RowSpec.decode("bottom:default"),
+				FormFactory.RELATED_GAP_ROWSPEC,}));
 
 		creationPanel.add(template.getTemplatePanel(), "2, 2, 3, 1, fill, fill");
 		if (template.getValidationPanel() != null) {
 			creationPanel
-					.add(template.getValidationPanel(), "2, 4, fill, fill");
+					.add(template.getValidationPanel(), "2, 4, 2, 1, fill, fill");
 		}
+		
+		creationPanel.add(defaultFqanChangePanel, "2, 6, left, bottom");
 
-		creationPanel.add(getSubmitButton(), "4, 4, right, default");
+		creationPanel.add(getSubmitButton(), "4, 6, right, bottom");
 		add(monitorPanel, SUBMISSION_LOG_PANEL);
 
 		cardLayout.show(this, JOB_CREATE_PANEL);
 		monitorPanel.setTemplateWrapperPanel(this);
+		try {
+			defaultFqanChangePanel.setServiceInterface(template.getServiceInterface());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 
 	}
 

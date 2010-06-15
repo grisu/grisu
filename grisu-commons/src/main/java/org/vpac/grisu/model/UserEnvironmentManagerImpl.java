@@ -16,6 +16,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.events.DefaultFqanChangedEvent;
@@ -38,8 +39,8 @@ import au.org.arcs.jcommons.constants.Constants;
  * @author markus
  * 
  */
-public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
-		EventSubscriber<DefaultFqanChangedEvent> {
+public class UserEnvironmentManagerImpl implements UserEnvironmentManager, EventSubscriber<FqanEvent>
+		 {
 
 	static final Logger myLogger = Logger
 			.getLogger(UserEnvironmentManagerImpl.class.getName());
@@ -81,16 +82,22 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 
 	private String currentFqan;
 
+	private boolean internalFqanEvent = true;
+
+	private boolean internalFqanChange = false;
+
 	public UserEnvironmentManagerImpl(final ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
 		this.resourceInfo = GrisuRegistryManager.getDefault(serviceInterface)
 				.getResourceInformation();
 		this.fm = GrisuRegistryManager.getDefault(serviceInterface)
 				.getFileManager();
+		
 	}
 
 	public void addFqanListener(final FqanListener listener) {
-		// TODO Auto-generated method stub
+
+		throw new RuntimeException("Adding of fqan listener not implemented yet.");
 
 	}
 
@@ -671,11 +678,28 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 
 	}
 
-	public void removeFqanListener(final FqanListener listener) {
-		// TODO Auto-generated method stub
+	public void onEvent(FqanEvent arg0) {
+
+		if (FqanEvent.DEFAULT_FQAN_CHANGED == arg0.getEvent_type()) {
+			if (internalFqanChange) {
+				return;
+			} else {
+				internalFqanEvent = false;
+				setCurrentFqan(arg0.getFqan());
+				internalFqanEvent = true;
+			}
+		}
+
+		// if ( arg0.getEvent_type() == FqanEvent.DEFAULT_FQAN_CHANGED ) {
+		// setCurrentFqan(arg0.getFqan());
+		// }
 
 	}
 
+	public void removeFqanListener(final FqanListener listener) {
+
+		throw new RuntimeException("Removal of fqan listener not implemented yet.");
+	}
 	public synchronized FileSystemItem setBookmark(String alias, String url) {
 
 		serviceInterface.setBookmark(alias, url);
@@ -704,6 +728,12 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 		if (StringUtils.isNotBlank(currentFqan)) {
 			this.currentFqan = currentFqan;
 			ClientPropertiesManager.setLastUsedFqan(this.currentFqan);
+			if (internalFqanEvent) {
+				internalFqanChange = true;
+				EventBus.publish(new FqanEvent(this,
+						FqanEvent.DEFAULT_FQAN_CHANGED, currentFqan));
+				internalFqanChange = false;
+			}
 		}
 	}
 
@@ -723,12 +753,6 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 				.getDefaultActionStatusRecheckInterval(), false, false);
 
 		return status;
-	}
-
-	public void onEvent(DefaultFqanChangedEvent arg0) {
-
-		setCurrentFqan(arg0.getNewFqan());
-
 	}
 
 }

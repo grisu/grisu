@@ -69,23 +69,30 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 		EventBus.subscribe(ClientPropertiesEvent.class, this);
 		this.loginPanel = loginPanel;
 		setLayout(new FormLayout(new ColumnSpec[] {
-				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC,
+				FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("110px:grow"),
-				FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("105px"),
-				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("184px"),
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("105px"),
+				FormFactory.RELATED_GAP_COLSPEC,},
+			new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC,
+				RowSpec.decode("184px"),
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("max(15dlu;default)"),
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC, }));
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,}));
 		add(getTabbedPane(), "2, 2, 5, 1, fill, fill");
 		add(getAdvancedLoginPanelOptions(), "2, 6, 5, 1, fill, fill");
-		add(getQuickLoginButton(), "2, 8, left, bottom");
-		add(getAutoLoginCheckbox(), "4, 8, left, bottom");
-		add(getLoginButton(), "6, 8, right, bottom");
+		add(getQuickLoginButton(), "2, 10, left, center");
+		add(getAutoLoginCheckbox(), "4, 10, left, center");
+		add(getLoginButton(), "6, 10, right, center");
 
 		String keyStrokeAndKey = "ENTER";
 
