@@ -20,114 +20,112 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class DefaultFqanChangePanel extends JPanel implements EventSubscriber<FqanEvent> {
+public class DefaultFqanChangePanel extends JPanel implements
+		EventSubscriber<FqanEvent> {
 
-	
 	private final DefaultComboBoxModel voModel = new DefaultComboBoxModel();
 	private ServiceInterface si = null;
 	private final JComboBox comboBox;
-	
+
 	private Thread fillThread = null;
-	
+
 	/**
 	 * Create the panel.
 	 */
 	public DefaultFqanChangePanel() {
 		setLayout(new FormLayout(new ColumnSpec[] {
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-			new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,}));
-		
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, }));
+
 		JLabel lblGroup = new JLabel("Group:");
 		add(lblGroup, "2, 2, right, default");
-		
+
 		comboBox = new JComboBox(voModel);
 		comboBox.setEditable(false);
 		comboBox.setPrototypeDisplayValue("xxxxxxxxxxxxxxxxxx");
 		comboBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-				
-				if ( si == null ) {
+
+				if (si == null) {
 					return;
 				}
-				
-				if ( ItemEvent.SELECTED == e.getStateChange() ) {
-					
-					String newVO = (String)voModel.getSelectedItem();
-					GrisuRegistryManager.getDefault(si).getUserEnvironmentManager().setCurrentFqan(newVO);
-					
+
+				if (ItemEvent.SELECTED == e.getStateChange()) {
+
+					String newVO = (String) voModel.getSelectedItem();
+					GrisuRegistryManager.getDefault(si)
+							.getUserEnvironmentManager().setCurrentFqan(newVO);
+
 				}
-				
+
 			}
 		});
 		add(comboBox, "4, 2, fill, default");
 	}
-	
-	public void setServiceInterface(ServiceInterface si) throws InterruptedException {
+
+	public void setServiceInterface(ServiceInterface si)
+			throws InterruptedException {
 		this.si = si;
-		String currentFqan = GrisuRegistryManager.getDefault(si).getUserEnvironmentManager().getCurrentFqan();
+		String currentFqan = GrisuRegistryManager.getDefault(si)
+				.getUserEnvironmentManager().getCurrentFqan();
 		comboBox.removeAll();
 		comboBox.addItem(currentFqan);
 		comboBox.setSelectedItem(currentFqan);
 		fillComboBox();
 	}
-	
+
 	public void fillComboBox() {
-		
-		if ( si == null ) {
+
+		if (si == null) {
 			return;
 		}
-		
-		if ( fillThread != null && fillThread.isAlive() ) {
+
+		if (fillThread != null && fillThread.isAlive()) {
 			return;
 		}
-		
+
 		fillThread = new Thread() {
+			@Override
 			public void run() {
 
-				UserEnvironmentManager uem = GrisuRegistryManager.getDefault(si).getUserEnvironmentManager();
-				String old = (String)voModel.getSelectedItem();
-				if ( StringUtils.isBlank(old)) {
+				UserEnvironmentManager uem = GrisuRegistryManager
+						.getDefault(si).getUserEnvironmentManager();
+				String old = (String) voModel.getSelectedItem();
+				if (StringUtils.isBlank(old)) {
 					old = uem.getCurrentFqan();
 				}
-				
+
 				String[] allVOs = uem.getAllAvailableFqans();
-				
+
 				voModel.removeAllElements();
 
-				for ( String vo : allVOs ) {
-					System.out.println(vo);
+				for (String vo : allVOs) {
 					voModel.addElement(vo);
 				}
-				
-				if ( StringUtils.isNotBlank(old) && voModel.getIndexOf(old) >=0 ) {
+
+				if (StringUtils.isNotBlank(old) && voModel.getIndexOf(old) >= 0) {
 					uem.setCurrentFqan(old);
 				} else {
-					old = (String)voModel.getElementAt(0);
-					if ( StringUtils.isNotBlank(old)) {
+					old = (String) voModel.getElementAt(0);
+					if (StringUtils.isNotBlank(old)) {
 						uem.setCurrentFqan(old);
 					}
 				}
-				
+
 			}
 		};
 		fillThread.start();
-		
+
 	}
-	
+
 	public void onEvent(FqanEvent arg0) {
 
-//		System.out.println("Fqan changed.");
-		
-	}
+		// System.out.println("Fqan changed.");
 
-	
-	
+	}
 
 }
