@@ -209,12 +209,23 @@ public class GrisuCenterPanel extends JPanel {
 
 		if (GrisuMonitorNavigationTaskPane.SINGLE_JOB_LIST.equals(command[0])) {
 			displaySingleJobGrid(command[1]);
-			rjm.updateJobList(command[1]);
+			new Thread() {
+				@Override
+				public void run() {
+					rjm.updateJobList(command[1]);
+
+				}
+			}.start();
 			return;
 		} else if (GrisuMonitorNavigationTaskPaneBatch.BATCH_JOB_LIST
 				.equals(command[0])) {
 			displayBatchJobGrid(command[1]);
-			rjm.updateBatchJobList(command[1]);
+			new Thread() {
+				@Override
+				public void run() {
+					rjm.updateBatchJobList(command[1]);
+				}
+			}.start();
 			return;
 		} else if (GrisuFileNavigationTaskPane.FILE_MANAGEMENT
 				.equals(command[0])) {

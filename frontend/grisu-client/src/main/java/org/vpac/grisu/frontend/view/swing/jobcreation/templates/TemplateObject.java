@@ -198,6 +198,13 @@ public class TemplateObject {
 
 	}
 
+	public void validateManually() {
+		if (this.validationPanel != null
+				&& this.validationPanel.getValidationGroup() != null) {
+			this.validationPanel.getValidationGroup().validateAll();
+		}
+	}
+
 	public void submitJob() throws JobPropertiesException,
 			JobSubmissionException, InterruptedException {
 

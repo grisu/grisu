@@ -242,6 +242,10 @@ public abstract class AbstractInputPanel extends JPanel implements
 
 	}
 
+	protected TemplateObject getTemplateObject() {
+		return this.template;
+	}
+
 	protected void addValue(String bean, Object value) {
 
 		if (!isInitFinished()) {
@@ -585,25 +589,29 @@ public abstract class AbstractInputPanel extends JPanel implements
 		try {
 
 			if (StringUtils.isNotBlank(bean)) {
-				
+
 				Method method = null;
 				try {
 					method = jobObject.getClass().getMethod(
-						"set" + StringUtils.capitalize(bean), value.getClass());
+							"set" + StringUtils.capitalize(bean),
+							value.getClass());
 				} catch (Exception e) {
 					// try add method
 					method = jobObject.getClass().getMethod(
-							"add"+StringUtils.capitalize(bean), value.getClass());
-					
-					System.out.println("Adding instead of setting for value: "+value);
-					if ( oldAddValue != null ) {
+							"add" + StringUtils.capitalize(bean),
+							value.getClass());
+
+					System.out.println("Adding instead of setting for value: "
+							+ value);
+					if (oldAddValue != null) {
 						Method removeMethod = jobObject.getClass().getMethod(
-								"remove"+StringUtils.capitalize(bean), oldAddValue.getClass());
+								"remove" + StringUtils.capitalize(bean),
+								oldAddValue.getClass());
 						removeMethod.invoke(jobObject, oldAddValue);
-						System.out.println("Removed old value: "+oldAddValue);
+						System.out.println("Removed old value: " + oldAddValue);
 					}
 					oldAddValue = value;
-					
+
 				}
 				method.invoke(jobObject, value);
 			}
@@ -613,7 +621,7 @@ public abstract class AbstractInputPanel extends JPanel implements
 					+ ": " + e.getLocalizedMessage(), e);
 		}
 	}
-	
+
 	private Object oldAddValue = null;
 
 	abstract protected void templateRefresh(JobSubmissionObjectImpl jobObject);

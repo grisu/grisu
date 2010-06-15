@@ -374,29 +374,52 @@ public class RunningJobManager implements EventSubscriber {
 		return this.si;
 	}
 
-	public void onEvent(Object event) {
+	public void onEvent(final Object event) {
 
 		if (event instanceof NewBatchJobEvent) {
-			NewBatchJobEvent ev = (NewBatchJobEvent) event;
+			final NewBatchJobEvent ev = (NewBatchJobEvent) event;
 			GrisuRegistryManager.getDefault(si).getUserEnvironmentManager()
 					.getCurrentBatchJobnames(true);
 
-			updateBatchJobList(ev.getBatchJob().getApplication());
+			new Thread() {
+				@Override
+				public void run() {
+
+					updateBatchJobList(ev.getBatchJob().getApplication());
+				}
+			}.start();
 
 		} else if (event instanceof BatchJobKilledEvent) {
-			BatchJobKilledEvent e = (BatchJobKilledEvent) event;
+			final BatchJobKilledEvent e = (BatchJobKilledEvent) event;
+			new Thread() {
+				@Override
+				public void run() {
 
-			updateBatchJobList(e.getApplication());
+					updateBatchJobList(e.getApplication());
+				}
+			}.start();
 		} else if (event instanceof NewJobEvent) {
-			NewJobEvent ev = (NewJobEvent) event;
+			final NewJobEvent ev = (NewJobEvent) event;
 
 			GrisuRegistryManager.getDefault(si).getUserEnvironmentManager()
 					.getCurrentJobnames(true);
-			updateJobList(ev.getJob().getApplication());
+			new Thread() {
+				@Override
+				public void run() {
+
+					updateJobList(ev.getJob().getApplication());
+				}
+			}.start();
 
 		} else if (event instanceof JobKilledEvent) {
-			JobKilledEvent ev = (JobKilledEvent) event;
-			updateJobList(ev.getJob().getApplication());
+			final JobKilledEvent ev = (JobKilledEvent) event;
+			new Thread() {
+				@Override
+				public void run() {
+
+					updateJobList(ev.getJob().getApplication());
+				}
+			}.start();
 		}
 	}
 

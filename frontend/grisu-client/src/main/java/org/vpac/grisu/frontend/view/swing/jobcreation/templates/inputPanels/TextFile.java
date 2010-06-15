@@ -146,6 +146,7 @@ public class TextFile extends AbstractInputPanel {
 					getButton_1().setEnabled(true);
 
 					// TODO fire validation request
+					// getTemplateObject().validateManually();
 				}
 
 			});

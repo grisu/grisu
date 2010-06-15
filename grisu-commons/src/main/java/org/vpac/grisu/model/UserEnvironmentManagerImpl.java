@@ -16,7 +16,9 @@ import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.bushe.swing.event.EventSubscriber;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.events.DefaultFqanChangedEvent;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.StatusException;
 import org.vpac.grisu.model.dto.DtoBatchJob;
@@ -36,7 +38,8 @@ import au.org.arcs.jcommons.constants.Constants;
  * @author markus
  * 
  */
-public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
+public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
+		EventSubscriber<DefaultFqanChangedEvent> {
 
 	static final Logger myLogger = Logger
 			.getLogger(UserEnvironmentManagerImpl.class.getName());
@@ -720,6 +723,12 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager {
 				.getDefaultActionStatusRecheckInterval(), false, false);
 
 		return status;
+	}
+
+	public void onEvent(DefaultFqanChangedEvent arg0) {
+
+		setCurrentFqan(arg0.getNewFqan());
+
 	}
 
 }
