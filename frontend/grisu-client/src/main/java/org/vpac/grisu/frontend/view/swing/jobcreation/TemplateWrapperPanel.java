@@ -70,9 +70,9 @@ public class TemplateWrapperPanel extends JPanel {
 					.add(template.getValidationPanel(), "2, 4, 2, 1, fill, fill");
 		}
 		
-		creationPanel.add(defaultFqanChangePanel, "2, 6, left, bottom");
+		creationPanel.add(defaultFqanChangePanel, "2, 6, left, center");
 
-		creationPanel.add(getSubmitButton(), "4, 6, right, bottom");
+		creationPanel.add(getSubmitButton(), "4, 6, right, center");
 		add(monitorPanel, SUBMISSION_LOG_PANEL);
 
 		cardLayout.show(this, JOB_CREATE_PANEL);
