@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.jdesktop.swingx.JXErrorPane;
@@ -12,14 +13,13 @@ import org.netbeans.validation.api.ui.ValidationPanel;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.model.job.JobObject;
+import org.vpac.grisu.frontend.view.swing.DefaultFqanChangePanel;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.TemplateObject;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-import javax.swing.JLabel;
-import org.vpac.grisu.frontend.view.swing.DefaultFqanChangePanel;
 
 public class TemplateWrapperPanel extends JPanel {
 
@@ -52,25 +52,23 @@ public class TemplateWrapperPanel extends JPanel {
 		creationPanel.setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(29dlu;default):grow"),
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,},
-			new RowSpec[] {
+				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("bottom:default"),
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 
-		creationPanel.add(template.getTemplatePanel(), "2, 2, 3, 1, fill, fill");
+		creationPanel
+				.add(template.getTemplatePanel(), "2, 2, 3, 1, fill, fill");
 		if (template.getValidationPanel() != null) {
-			creationPanel
-					.add(template.getValidationPanel(), "2, 4, 2, 1, fill, fill");
+			creationPanel.add(template.getValidationPanel(),
+					"2, 4, 2, 1, fill, fill");
 		}
-		
-		creationPanel.add(defaultFqanChangePanel, "2, 6, left, center");
+
+		// creationPanel.add(defaultFqanChangePanel, "2, 6, left, center");
 
 		creationPanel.add(getSubmitButton(), "4, 6, right, center");
 		add(monitorPanel, SUBMISSION_LOG_PANEL);
@@ -78,7 +76,8 @@ public class TemplateWrapperPanel extends JPanel {
 		cardLayout.show(this, JOB_CREATE_PANEL);
 		monitorPanel.setTemplateWrapperPanel(this);
 		try {
-			defaultFqanChangePanel.setServiceInterface(template.getServiceInterface());
+			defaultFqanChangePanel.setServiceInterface(template
+					.getServiceInterface());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

@@ -348,8 +348,8 @@ public class RunningJobManager implements EventSubscriber {
 
 						try {
 							JobObject j = getJob(jobname, false);
+							temp.getReadWriteLock().writeLock().lock();
 							if (j != null) {
-								temp.getReadWriteLock().writeLock().lock();
 								if (!temp.contains(j)) {
 									temp.add(j);
 								}

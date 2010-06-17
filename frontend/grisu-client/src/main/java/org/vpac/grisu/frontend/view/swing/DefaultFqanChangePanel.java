@@ -3,6 +3,7 @@ package org.vpac.grisu.frontend.view.swing;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
+import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -14,12 +15,6 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.FqanEvent;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
-
-import com.jgoodies.forms.factories.FormFactory;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.RowSpec;
-import javax.swing.BoxLayout;
 
 public class DefaultFqanChangePanel extends JPanel implements
 		EventSubscriber<FqanEvent> {
@@ -41,7 +36,7 @@ public class DefaultFqanChangePanel extends JPanel implements
 
 		comboBox = new JComboBox(voModel);
 		comboBox.setEditable(false);
-		comboBox.setPrototypeDisplayValue("xxxxxxxxxxxxxxxxxx");
+		// comboBox.setPrototypeDisplayValue("xxxxxxxxxxxxxxxxxx");
 		comboBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 

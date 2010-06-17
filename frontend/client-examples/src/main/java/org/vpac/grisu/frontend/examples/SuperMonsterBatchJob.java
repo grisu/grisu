@@ -7,8 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.frontend.control.login.LoginParams;
-import org.vpac.grisu.frontend.control.login.ServiceInterfaceFactory;
+import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -23,9 +22,6 @@ public final class SuperMonsterBatchJob {
 	 * @throws Exception
 	 */
 	public static void main(final String[] args) throws Exception {
-
-		String username = args[0];
-		char[] password = args[1].toCharArray();
 
 		int simultaniousJobs = 50;
 		if (args.length >= 3) {
@@ -42,13 +38,7 @@ public final class SuperMonsterBatchJob {
 		ExecutorService killingExecutor = Executors
 				.newFixedThreadPool(simultaniousJobs);
 
-		LoginParams loginParams = new LoginParams(
-		// "http://localhost:8080/grisu-ws/services/grisu",
-				// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-				"Local", username, password);
-
-		final ServiceInterface si = ServiceInterfaceFactory
-				.createInterface(loginParams);
+		final ServiceInterface si = LoginManager.loginCommandline("Local");
 
 		final GrisuRegistry registry = GrisuRegistryManager.getDefault(si);
 
@@ -64,6 +54,7 @@ public final class SuperMonsterBatchJob {
 			final int index = new Integer(i);
 			Thread temp = new Thread() {
 
+				@Override
 				public void run() {
 					JobObject job = null;
 					try {
@@ -119,6 +110,7 @@ public final class SuperMonsterBatchJob {
 
 		for (final JobObject job : jobObjects) {
 			Thread temp = new Thread() {
+				@Override
 				public void run() {
 					try {
 						job.kill(true);

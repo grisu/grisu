@@ -1656,8 +1656,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		DtoSubmissionLocations locs = DtoSubmissionLocations
 				.createSubmissionLocationsInfo(informationManager
 						.getAllSubmissionLocations());
-		
-		locs.removeUnuseableSubmissionLocations(informationManager, df().getMountpoints());
+
+		locs.removeUnuseableSubmissionLocations(informationManager, df()
+				.getMountpoints());
 		return locs;
 	}
 
@@ -1671,11 +1672,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public DtoSubmissionLocations getAllSubmissionLocationsForFqan(
 			final String fqan) {
 
-		DtoSubmissionLocations locs =  DtoSubmissionLocations
+		DtoSubmissionLocations locs = DtoSubmissionLocations
 				.createSubmissionLocationsInfo(informationManager
 						.getAllSubmissionLocationsForVO(fqan));
-		
-		locs.removeUnuseableSubmissionLocations(informationManager, df().getMountpoints());
+
+		locs.removeUnuseableSubmissionLocations(informationManager, df()
+				.getMountpoints());
 		return locs;
 
 	}
@@ -2868,36 +2870,40 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// now after the jsdl is ready, don't forget to fill the required fields
 		// into the database
 	}
-	
-	private boolean checkWhetherGridResourceIsActuallyAvailable(GridResource resource) {
-		
-		String[] filesystems = informationManager.getStagingFileSystemForSubmissionLocation(SubmissionLocationHelpers.createSubmissionLocationString(resource)); 
-		
-		for (MountPoint mp : df().getMountpoints() ) {
-			
-			for ( String fs : filesystems ) {
-				if ( mp.getRootUrl().startsWith(fs.replace(":2811", "")) ) {
+
+	private boolean checkWhetherGridResourceIsActuallyAvailable(
+			GridResource resource) {
+
+		String[] filesystems = informationManager
+				.getStagingFileSystemForSubmissionLocation(SubmissionLocationHelpers
+						.createSubmissionLocationString(resource));
+
+		for (MountPoint mp : df().getMountpoints()) {
+
+			for (String fs : filesystems) {
+				if (mp.getRootUrl().startsWith(fs.replace(":2811", ""))) {
 					return true;
 				}
 			}
-			
+
 		}
-		
+
 		return false;
-		
+
 	}
-	
-	private void removeResourcesWithUnaccessableFilesystems(List<GridResource> resources) {
-		
-	    Iterator<GridResource> i = resources.iterator();
-	    while ( i.hasNext() ){
-	    	if ( ! checkWhetherGridResourceIsActuallyAvailable(i.next()) ) {
-	    		i.remove();
-	    	}
-	    }
-		
+
+	private void removeResourcesWithUnaccessableFilesystems(
+			List<GridResource> resources) {
+
+		Iterator<GridResource> i = resources.iterator();
+		while (i.hasNext()) {
+			if (!checkWhetherGridResourceIsActuallyAvailable(i.next())) {
+				i.remove();
+			}
+		}
+
 	}
-	
+
 	/**
 	 * This method tries to auto-fill in missing values like which
 	 * submissionlocation to submit to, which version to use (if not specified)
@@ -4108,8 +4114,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			job.addLogMessage("Submitting job to endpoint...");
 			String candidate = JsdlHelpers.getCandidateHosts(job
 					.getJobDescription())[0];
-			String version = informationManager.getGridResource(candidate)
-					.getGRAMVersion();
+			GridResource resource = informationManager
+					.getGridResource(candidate);
+			String version = resource.getGRAMVersion();
 
 			String submissionType = null;
 			if ("5.0.0".equals(version)) {
