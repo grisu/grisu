@@ -298,7 +298,7 @@ public class TextFile extends AbstractInputPanel {
 
 	@Override
 	public JComboBox getJComboBox() {
-		return getComboBox();
+		return null;
 	}
 
 	@Override

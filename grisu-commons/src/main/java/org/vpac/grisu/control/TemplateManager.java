@@ -186,7 +186,12 @@ public class TemplateManager {
 	public List<String> getRemoteTemplate(String name)
 			throws NoSuchTemplateException {
 
-		String temp = si.getTemplate(name);
+		String temp = null;
+		try {
+			temp = si.getTemplate(name);
+		} catch (Exception e) {
+			// doesn't matter -- will be dealt with below...
+		}
 		if (StringUtils.isBlank(temp)) {
 			throw new NoSuchTemplateException("Template " + name + " is empty.");
 		}

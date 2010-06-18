@@ -268,7 +268,9 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
 				getApplicationName());
 
-		basicJobProperties.putAll(additionalJobProperties);
+		if ( additionalJobProperties != null ) {
+			basicJobProperties.putAll(additionalJobProperties);
+		}
 
 		Map<String, String> converterMap = new HashMap<String, String>();
 		for (JobSubmissionProperty key : basicJobProperties.keySet()) {

@@ -355,7 +355,7 @@ public class DtoGridResource implements GridResource {
 
 	public String toString() {
 
-		return queueName + " (Ranking: " + rank + ")";
+		return getSiteName() + " : " + getQueueName() + " (Ranking: " + getRank() + ")";
 	}
 
 }
