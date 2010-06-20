@@ -480,6 +480,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					rftp = cpSingleFile(job
 							.getJobProperty(Constants.JOBDIRECTORY_KEY),
 							targetDirUrl, false, true, true);
+					deleteFile(job.getJobProperty(Constants.JOBDIRECTORY_KEY));
 				} catch (RemoteFileSystemException e1) {
 					if (optionalBatchJobStatus != null) {
 						optionalBatchJobStatus.setFailed(true);
@@ -562,7 +563,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				}
 
 				status.addElement("Killing job.");
-				kill(job, true);
+				kill(job, false);
 
 				status.addElement("Job archived successfully.");
 				status.setFinished(true);
