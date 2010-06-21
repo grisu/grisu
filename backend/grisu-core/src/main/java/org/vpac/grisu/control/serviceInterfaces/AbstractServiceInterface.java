@@ -3,6 +3,7 @@ package org.vpac.grisu.control.serviceInterfaces;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1913,7 +1914,52 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public DtoJob getJob(final String jobname) throws NoSuchJobException {
 
-		Job job = getJobFromDatabase(jobname);
+		Job job = null;
+		try {
+			job = getJobFromDatabase(jobname);
+		} catch (NoSuchJobException nsje) {
+
+			if (jobname.startsWith("gridftp://")) {
+
+				String grisuJobPropertiesFile = jobname;
+
+				if (!jobname.endsWith(GRISU_JOB_FILE_NAME)) {
+					grisuJobPropertiesFile = jobname + "/"
+							+ GRISU_JOB_FILE_NAME;
+				}
+
+				try {
+					if (fileExists(grisuJobPropertiesFile)) {
+
+						Serializer serializer = new Persister();
+
+						InputStream fin = null;
+						try {
+							fin = getUser().aquireFile(grisuJobPropertiesFile)
+									.getContent().getInputStream();
+							job = serializer.read(Job.class, fin);
+						} catch (Exception e) {
+							e.printStackTrace();
+							throw nsje;
+						} finally {
+							try {
+								fin.close();
+							} catch (Exception e) {
+								e.printStackTrace();
+								throw nsje;
+							}
+						}
+
+					} else {
+						throw nsje;
+					}
+				} catch (RemoteFileSystemException e) {
+					throw nsje;
+				}
+
+			}
+
+		}
 
 		// job.getJobProperties().put(Constants.JOB_STATUS_KEY,
 		// JobConstants.translateStatus(getJobStatus(jobname)));
