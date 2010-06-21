@@ -7,12 +7,13 @@ import java.util.UUID;
 public class JobnameHelpers {
 
 	public static String calculateTimestampedJobname(String baseJobname) {
-		SimpleDateFormat format = new SimpleDateFormat("dd.MM.yy_HH.mm.SSS");
+		SimpleDateFormat format = new SimpleDateFormat("yy.MM.dd_HH.mm.SSS");
 		return calculateTimestampedJobname(baseJobname, format);
 	}
 
-	public static String calculateTimestampedJobname(String baseJobname, SimpleDateFormat format) {
-		String newJobname = baseJobname+"_"+format.format(new Date());
+	public static String calculateTimestampedJobname(String baseJobname,
+			SimpleDateFormat format) {
+		String newJobname = baseJobname + "_" + format.format(new Date());
 		newJobname = newJobname.replace(":", "_");
 		newJobname = newJobname.replace("\\", "_");
 		newJobname = newJobname.replace("/", "_");
@@ -21,7 +22,7 @@ public class JobnameHelpers {
 	}
 
 	public static String calculateUUIDJobname(String basejobname) {
-		return basejobname + "_" +UUID.randomUUID().toString();
+		return basejobname + "_" + UUID.randomUUID().toString();
 	}
 
 }
