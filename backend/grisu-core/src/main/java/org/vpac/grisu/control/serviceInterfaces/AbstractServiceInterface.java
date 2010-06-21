@@ -1720,6 +1720,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		BatchJob multiPartJob = getMultiPartJobFromDatabase(batchJobname);
 
+		// TODO enable loading of batchjob from jobdirectory url
+
 		return multiPartJob.createDtoMultiPartJob();
 	}
 
