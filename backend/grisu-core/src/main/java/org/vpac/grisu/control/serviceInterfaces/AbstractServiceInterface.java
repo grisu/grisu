@@ -470,7 +470,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				}
 
 				final DtoActionStatus status = new DtoActionStatus(
-						ARCHIVE_STATUS_PREFIX + job.getJobname(), 4);
+						ARCHIVE_STATUS_PREFIX + job.getJobname(), 5);
 				getSessionActionStatus().put(job.getJobname(), status);
 
 				status.addElement("Transferring jobdirectory to: "
@@ -480,6 +480,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					rftp = cpSingleFile(job
 							.getJobProperty(Constants.JOBDIRECTORY_KEY),
 							targetDirUrl, false, true, true);
+					status.addElement("Deleting old jobdirectory: "
+							+ job.getJobProperty(Constants.JOBDIRECTORY_KEY));
 					deleteFile(job.getJobProperty(Constants.JOBDIRECTORY_KEY));
 				} catch (RemoteFileSystemException e1) {
 					if (optionalBatchJobStatus != null) {
@@ -563,7 +565,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				}
 
 				status.addElement("Killing job.");
-				kill(job, false);
+				kill(job, true, false);
 
 				status.addElement("Job archived successfully.");
 				status.setFinished(true);
@@ -1206,7 +1208,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 						newActionStatus.addElement("Killing job: "
 								+ job.getJobname());
-						kill(job, clean);
+						kill(job, clean, clean);
 						myLogger.debug("Killed job " + job.getJobname()
 								+ " in thread "
 								+ Thread.currentThread().getName());
@@ -2481,7 +2483,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return new_status;
 	}
 
-	private void kill(final Job job, final boolean clear) {
+	private void kill(final Job job, final boolean removeFromDB,
+			final boolean delteJobDirectory) {
 
 		// Job job;
 		//
@@ -2489,7 +2492,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		kill(job);
 
-		if (clear) {
+		if (delteJobDirectory) {
 
 			if (job.isBatchJob()) {
 
@@ -2534,7 +2537,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 		}
 
-		if (clear) {
+		if (removeFromDB) {
 			jobdao.delete(job);
 		}
 
@@ -2549,7 +2552,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			job = jobdao.findJobByDN(getUser().getDn(), jobname);
 
-			kill(job, clear);
+			if (clear) {
+				kill(job, true, true);
+			} else {
+				kill(job, false, false);
+			}
 
 		} catch (NoSuchJobException nsje) {
 			BatchJob mpj = getMultiPartJobFromDatabase(jobname);
