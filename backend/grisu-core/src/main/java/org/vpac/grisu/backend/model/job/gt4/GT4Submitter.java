@@ -271,7 +271,9 @@ public class GT4Submitter extends JobSubmitter {
 			if ((subLocs != null) && (subLocs.length > 0)) {
 				String subLoc = subLocs[0];
 
-				if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
+				if (StringUtils.isBlank(application)
+						|| Constants.GENERIC_APPLICATION_NAME
+								.equals(application)) {
 					myLogger
 							.debug("\"generic\" application. Not trying to calculate modules...");
 

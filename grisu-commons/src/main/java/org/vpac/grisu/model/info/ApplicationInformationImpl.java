@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -42,6 +43,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	private final Map<String, Set<String>> cachedSubmissionLocationsForUserPerVersionAndFqan = new HashMap<String, Set<String>>();
 
 	private final Map<String, Set<String>> cachedVersionsForUserPerFqan = new HashMap<String, Set<String>>();
+
 	/**
 	 * Default constructor for this class.
 	 * 
@@ -54,9 +56,10 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 			final String app) {
 		this.serviceInterface = serviceInterface;
 		this.resourceInfo = GrisuRegistryManager.getDefault(serviceInterface)
-		.getResourceInformation();
+				.getResourceInformation();
 		this.application = app;
 	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -69,8 +72,8 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 			Set<String> result = new TreeSet<String>();
 			for (String subLoc : getAvailableSubmissionLocationsForFqan(fqan)) {
 				List<String> temp = serviceInterface
-				.getVersionsOfApplicationOnSubmissionLocation(
-						getApplicationName(), subLoc).getStringList();
+						.getVersionsOfApplicationOnSubmissionLocation(
+								getApplicationName(), subLoc).getStringList();
 				result.addAll(temp);
 			}
 			cachedVersionsForUserPerFqan.put(fqan, result);
@@ -90,12 +93,15 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 		Map<String, String> converterMap = new HashMap<String, String>();
 		for (JobSubmissionProperty key : basicJobProperties.keySet()) {
-			converterMap.put(key.toString(), basicJobProperties.get(key));
+			if (StringUtils.isNotBlank(basicJobProperties.get(key))) {
+				converterMap.put(key.toString(), basicJobProperties.get(key));
+			}
 		}
 
 		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
-				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null, null),
-				fqan, false).wrapGridResourcesIntoInterfaceType();
+				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null,
+						null), fqan, false)
+				.wrapGridResourcesIntoInterfaceType();
 	}
 
 	/*
@@ -112,11 +118,11 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		if (cachedApplicationDetails.get(KEY) == null) {
 			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
 				cachedApplicationDetails
-				.put(KEY, new HashMap<String, String>());
+						.put(KEY, new HashMap<String, String>());
 			} else {
 				Map<String, String> details = serviceInterface
-				.getApplicationDetailsForVersionAndSubmissionLocation(
-						application, version, subLoc).getDetailsAsMap();
+						.getApplicationDetailsForVersionAndSubmissionLocation(
+								application, version, subLoc).getDetailsAsMap();
 				cachedApplicationDetails.put(KEY, details);
 			}
 		}
@@ -151,7 +157,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 						.asList(serviceInterface
 								.getSubmissionLocationsForApplication(
 										application)
-										.asSubmissionLocationStrings()));
+								.asSubmissionLocationStrings()));
 			}
 		}
 		return cachedAllSubmissionLocations;
@@ -198,7 +204,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 				List<String> temp = Arrays.asList(serviceInterface
 						.getSubmissionLocationsForApplicationAndVersion(
 								application, version)
-								.asSubmissionLocationStrings());
+						.asSubmissionLocationStrings());
 				cachedSubmissionLocationsPerVersion.put(version, new HashSet(
 						temp));
 			}
@@ -250,8 +256,8 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 				cachedVersionsPerSubmissionLocations.put(KEY, temp);
 			} else {
 				List<String> temp = serviceInterface
-				.getVersionsOfApplicationOnSubmissionLocation(
-						application, subLoc).getStringList();
+						.getVersionsOfApplicationOnSubmissionLocation(
+								application, subLoc).getStringList();
 				cachedVersionsPerSubmissionLocations.put(KEY,
 						new HashSet<String>(temp));
 			}
@@ -268,7 +274,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
 				getApplicationName());
 
-		if ( additionalJobProperties != null ) {
+		if (additionalJobProperties != null) {
 			basicJobProperties.putAll(additionalJobProperties);
 		}
 
@@ -278,8 +284,8 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		}
 
 		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
-				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null, null),
-				fqan, true).wrapGridResourcesIntoInterfaceType();
+				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null,
+						null), fqan, true).wrapGridResourcesIntoInterfaceType();
 	}
 
 	/*

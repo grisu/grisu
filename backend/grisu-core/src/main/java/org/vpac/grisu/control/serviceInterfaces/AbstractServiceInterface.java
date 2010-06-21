@@ -3050,8 +3050,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		}
 
+		System.out.println("Subloc in si: "
+				+ jobSubmissionObject.getSubmissionLocation());
+
 		if (Constants.GENERIC_APPLICATION_NAME.equals(jobSubmissionObject
-				.getApplication())) {
+				.getApplication())
+				|| StringUtils.isNotBlank(jobSubmissionObject
+						.getSubmissionLocation())) {
 
 			submissionLocation = jobSubmissionObject.getSubmissionLocation();
 			if (StringUtils.isBlank(submissionLocation)) {

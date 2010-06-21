@@ -473,6 +473,10 @@ public class JobSubmissionObjectImpl {
 		return submissionLocation;
 	}
 
+	public int getWalltime() {
+		return getWalltimeInSeconds();
+	}
+
 	public int getWalltimeInSeconds() {
 		return walltime_in_seconds;
 	}
@@ -676,11 +680,15 @@ public class JobSubmissionObjectImpl {
 		}
 	}
 
+	@Transient
+	public void setWalltime(final Integer walltimeInSeconds) {
+		setWalltimeInSeconds(walltimeInSeconds);
+	}
+
 	public void setWalltimeInSeconds(final Integer walltime) {
 		int oldValue = this.walltime_in_seconds;
 		this.walltime_in_seconds = walltime;
-		pcs.firePropertyChange("walltimeInSeconds", oldValue,
-				this.walltime_in_seconds);
+		pcs.firePropertyChange("walltime", oldValue, this.walltime_in_seconds);
 	}
 
 	@Override

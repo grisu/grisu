@@ -1,8 +1,9 @@
 package org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels;
 
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
@@ -28,8 +29,6 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-import java.awt.event.ItemListener;
-import java.awt.event.ItemEvent;
 
 public class QueueSelector extends AbstractInputPanel {
 	private JLabel lblQueue;
@@ -37,7 +36,7 @@ public class QueueSelector extends AbstractInputPanel {
 	private JPanel panel;
 	private HidingQueueInfoPanel hidingQueueInfoPanel;
 
-	private DefaultComboBoxModel queueModel = new DefaultComboBoxModel();
+	private final DefaultComboBoxModel queueModel = new DefaultComboBoxModel();
 
 	private SortedSet<GridResource> currentQueues = null;
 
@@ -87,23 +86,40 @@ public class QueueSelector extends AbstractInputPanel {
 	@Override
 	protected void jobPropertyChanged(PropertyChangeEvent e) {
 
-		if (Constants.SUBMISSIONLOCATION_KEY.equals(e.getPropertyName())) {
+		String[] possibleBeans = new String[] { Constants.COMMANDLINE_KEY,
+				Constants.APPLICATIONNAME_KEY,
+				Constants.APPLICATIONVERSION_KEY, Constants.FORCE_MPI_KEY,
+				Constants.FORCE_SINGLE_KEY, Constants.HOSTCOUNT_KEY,
+				Constants.MEMORY_IN_B_KEY, Constants.NO_CPUS_KEY,
+				Constants.WALLTIME_IN_MINUTES_KEY };
+
+		boolean reloadQueues = false;
+		for (String bean : possibleBeans) {
+			if (bean.equals(e.getPropertyName())) {
+				reloadQueues = true;
+				break;
+			}
+		}
+
+		if (!reloadQueues) {
 			return;
 		}
-		
+
 		if (Constants.COMMANDLINE_KEY.equals(e.getPropertyName())) {
 			String temp = getJobSubmissionObject().getApplication();
 			if (temp == null) {
 				if (lastApplication == null) {
+					lastApplication = temp;
 					return;
 				}
 			} else {
-				if (temp.equals(lastApplication)) {
+				if (lastApplication == null || temp.equals(lastApplication)) {
+					lastApplication = temp;
 					return;
 				}
 			}
 		}
-
+		System.out.println(e.getPropertyName());
 		loadQueues();
 	}
 
@@ -128,8 +144,16 @@ public class QueueSelector extends AbstractInputPanel {
 		}
 
 		loadThread = new Thread() {
+			@Override
 			public void run() {
 
+				GridResource oldSubLoc = null;
+
+				try {
+					oldSubLoc = (GridResource) queueModel.getSelectedItem();
+				} catch (Exception e) {
+					// doesn't matter
+				}
 				setLoading(true);
 				String applicationName = getJobSubmissionObject()
 						.getApplication();
@@ -150,8 +174,15 @@ public class QueueSelector extends AbstractInputPanel {
 								.getUserEnvironmentManager().getCurrentFqan());
 				setLoading(false);
 				queueModel.removeAllElements();
+				boolean containsOld = false;
 				for (GridResource gr : currentQueues) {
+					if (gr.equals(oldSubLoc)) {
+						containsOld = true;
+					}
 					queueModel.addElement(gr);
+				}
+				if (containsOld) {
+					queueModel.setSelectedItem(oldSubLoc);
 				}
 			}
 		};
