@@ -14,9 +14,12 @@ import javax.swing.JPanel;
 import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang.StringUtils;
+import org.bushe.swing.event.EventBus;
+import org.bushe.swing.event.EventSubscriber;
 import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels.helperPanels.HidingQueueInfoPanel;
+import org.vpac.grisu.model.FqanEvent;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.info.ApplicationInformation;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
@@ -30,7 +33,8 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class QueueSelector extends AbstractInputPanel {
+public class QueueSelector extends AbstractInputPanel implements
+		EventSubscriber<FqanEvent> {
 	private JLabel lblQueue;
 	private JComboBox queueComboBox;
 	private JPanel panel;
@@ -59,6 +63,8 @@ public class QueueSelector extends AbstractInputPanel {
 		add(getLblQueue(), "2, 2, right, default");
 		add(getQueueComboBox(), "4, 2, fill, default");
 		// add(getHidingQueueInfoPanel(), "2, 4, 3, 1, fill, fill");
+
+		EventBus.subscribe(FqanEvent.class, this);
 	}
 
 	@Override
@@ -155,8 +161,11 @@ public class QueueSelector extends AbstractInputPanel {
 					// doesn't matter
 				}
 				setLoading(true);
-				String applicationName = getJobSubmissionObject()
-						.getApplication();
+				JobSubmissionObjectImpl job = getJobSubmissionObject();
+				if (job == null) {
+					return;
+				}
+				String applicationName = job.getApplication();
 				if (StringUtils.isBlank(applicationName)) {
 					applicationName = Constants.GENERIC_APPLICATION_NAME;
 				}
@@ -258,5 +267,11 @@ public class QueueSelector extends AbstractInputPanel {
 			hidingQueueInfoPanel = new HidingQueueInfoPanel();
 		}
 		return hidingQueueInfoPanel;
+	}
+
+	public void onEvent(FqanEvent arg0) {
+
+		loadQueues();
+
 	}
 }

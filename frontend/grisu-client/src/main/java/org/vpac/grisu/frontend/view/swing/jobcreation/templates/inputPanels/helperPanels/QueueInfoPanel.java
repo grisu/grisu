@@ -1,7 +1,8 @@
 package org.vpac.grisu.frontend.view.swing.jobcreation.templates.inputPanels.helperPanels;
 
-import javax.swing.JPanel;
 import java.awt.BorderLayout;
+
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
@@ -25,6 +26,7 @@ public class QueueInfoPanel extends JPanel {
 		}
 		return scrollPane;
 	}
+
 	private JTextArea getTxtrNa() {
 		if (txtrNa == null) {
 			txtrNa = new JTextArea();
@@ -35,10 +37,17 @@ public class QueueInfoPanel extends JPanel {
 
 	public void setLoading(boolean loading) {
 
-		if ( loading ) {
-			getTxtrNa().setText("n/a");
-		} 
+		// if (loading) {
+		// SwingUtilities.invokeLater(new Thread() {
+		//
+		// @Override
+		// public void run() {
+		// // getTxtrNa().setText("n/a");
+		// }
+		//
+		// });
+		// }
 		getTxtrNa().setEnabled(!loading);
-		
+
 	}
 }
