@@ -3,20 +3,21 @@ package org.vpac.grisu.frontend.view.swing;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.apache.commons.lang.StringUtils;
+import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.FqanEvent;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
-import com.jgoodies.forms.layout.FormLayout;
+
 import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class DefaultFqanChangePanel extends JPanel implements
@@ -27,25 +28,28 @@ public class DefaultFqanChangePanel extends JPanel implements
 	private final JComboBox comboBox;
 
 	private Thread fillThread = null;
+	private boolean externalChange = false;
 
 	/**
 	 * Create the panel.
 	 */
 	public DefaultFqanChangePanel() {
-		setLayout(new FormLayout(new ColumnSpec[] {
-				ColumnSpec.decode("107px"),
-				ColumnSpec.decode("218px"),},
-			new RowSpec[] {
-				RowSpec.decode("40px"),}));
+		setLayout(new FormLayout(new ColumnSpec[] { ColumnSpec.decode("107px"),
+				ColumnSpec.decode("218px"), }, new RowSpec[] { RowSpec
+				.decode("40px"), }));
 
 		JLabel lblGroup = new JLabel("Submit as group:");
 		add(lblGroup, "1, 1, left, center");
 
 		comboBox = new JComboBox(voModel);
-		 comboBox.setEditable(false);
-		 comboBox.setPrototypeDisplayValue("xxxxxxxxxxxxxxxxxx");
+		comboBox.setEditable(false);
+		comboBox.setPrototypeDisplayValue("xxxxxxxxxxxxxxxxxx");
 		comboBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
+
+				if (externalChange) {
+					return;
+				}
 
 				if (si == null) {
 					return;
@@ -62,6 +66,7 @@ public class DefaultFqanChangePanel extends JPanel implements
 			}
 		});
 		add(comboBox, "2, 1, fill, center");
+		EventBus.subscribe(FqanEvent.class, this);
 	}
 
 	public void setServiceInterface(ServiceInterface si)
@@ -121,7 +126,11 @@ public class DefaultFqanChangePanel extends JPanel implements
 
 	public void onEvent(FqanEvent arg0) {
 
-		// System.out.println("Fqan changed.");
+		if (FqanEvent.DEFAULT_FQAN_CHANGED == arg0.getEvent_type()) {
+			externalChange = true;
+			voModel.setSelectedItem(arg0.getFqan());
+			externalChange = false;
+		}
 
 	}
 

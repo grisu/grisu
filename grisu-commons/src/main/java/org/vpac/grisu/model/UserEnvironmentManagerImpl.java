@@ -19,7 +19,6 @@ import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.events.DefaultFqanChangedEvent;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.StatusException;
 import org.vpac.grisu.model.dto.DtoBatchJob;
@@ -39,8 +38,8 @@ import au.org.arcs.jcommons.constants.Constants;
  * @author markus
  * 
  */
-public class UserEnvironmentManagerImpl implements UserEnvironmentManager, EventSubscriber<FqanEvent>
-		 {
+public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
+		EventSubscriber<FqanEvent> {
 
 	static final Logger myLogger = Logger
 			.getLogger(UserEnvironmentManagerImpl.class.getName());
@@ -92,12 +91,15 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager, Event
 				.getResourceInformation();
 		this.fm = GrisuRegistryManager.getDefault(serviceInterface)
 				.getFileManager();
-		
+
+		EventBus.subscribe(FqanEvent.class, this);
+
 	}
 
 	public void addFqanListener(final FqanListener listener) {
 
-		throw new RuntimeException("Adding of fqan listener not implemented yet.");
+		throw new RuntimeException(
+				"Adding of fqan listener not implemented yet.");
 
 	}
 
@@ -698,8 +700,10 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager, Event
 
 	public void removeFqanListener(final FqanListener listener) {
 
-		throw new RuntimeException("Removal of fqan listener not implemented yet.");
+		throw new RuntimeException(
+				"Removal of fqan listener not implemented yet.");
 	}
+
 	public synchronized FileSystemItem setBookmark(String alias, String url) {
 
 		serviceInterface.setBookmark(alias, url);

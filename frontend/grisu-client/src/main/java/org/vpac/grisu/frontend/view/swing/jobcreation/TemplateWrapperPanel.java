@@ -36,7 +36,7 @@ public class TemplateWrapperPanel extends JPanel {
 	private ValidationPanel validationPanel;
 	private JLabel label;
 	private JLabel label_1;
-	private final DefaultFqanChangePanel defaultFqanChangePanel = new DefaultFqanChangePanel();
+	private DefaultFqanChangePanel defaultFqanChangePanel = null;
 
 	/**
 	 * Create the panel.
@@ -68,20 +68,28 @@ public class TemplateWrapperPanel extends JPanel {
 					"2, 4, 2, 1, fill, fill");
 		}
 
-		// creationPanel.add(defaultFqanChangePanel, "2, 6, left, center");
+		creationPanel.add(getDefaultFqanChangePanel(), "2, 6, left, center");
 
 		creationPanel.add(getSubmitButton(), "4, 6, right, center");
 		add(monitorPanel, SUBMISSION_LOG_PANEL);
 
 		cardLayout.show(this, JOB_CREATE_PANEL);
 		monitorPanel.setTemplateWrapperPanel(this);
-		try {
-			defaultFqanChangePanel.setServiceInterface(template
-					.getServiceInterface());
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 
+	}
+
+	private DefaultFqanChangePanel getDefaultFqanChangePanel() {
+		if (defaultFqanChangePanel == null) {
+			defaultFqanChangePanel = new DefaultFqanChangePanel();
+			try {
+				defaultFqanChangePanel.setServiceInterface(template
+						.getServiceInterface());
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return defaultFqanChangePanel;
 	}
 
 	private JButton getSubmitButton() {

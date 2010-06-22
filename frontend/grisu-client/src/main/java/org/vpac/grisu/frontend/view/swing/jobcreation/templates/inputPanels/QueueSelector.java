@@ -11,6 +11,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang.StringUtils;
@@ -125,7 +126,6 @@ public class QueueSelector extends AbstractInputPanel implements
 				}
 			}
 		}
-		System.out.println(e.getPropertyName());
 		loadQueues();
 	}
 
@@ -173,10 +173,6 @@ public class QueueSelector extends AbstractInputPanel implements
 						getServiceInterface()).getApplicationInformation(
 						applicationName);
 
-				// currentQueues = ai.getBestSubmissionLocations(
-				// getJobSubmissionObject().getJobSubmissionPropertyMap(),
-				// GrisuRegistryManager.getDefault(getServiceInterface())
-				// .getUserEnvironmentManager().getCurrentFqan());
 				currentQueues = ai.getAllSubmissionLocationsAsGridResources(
 						getJobSubmissionObject().getJobSubmissionPropertyMap(),
 						GrisuRegistryManager.getDefault(getServiceInterface())
@@ -184,14 +180,30 @@ public class QueueSelector extends AbstractInputPanel implements
 				setLoading(false);
 				queueModel.removeAllElements();
 				boolean containsOld = false;
-				for (GridResource gr : currentQueues) {
+				for (final GridResource gr : currentQueues) {
 					if (gr.equals(oldSubLoc)) {
 						containsOld = true;
 					}
-					queueModel.addElement(gr);
+					SwingUtilities.invokeLater(new Thread() {
+
+						@Override
+						public void run() {
+							queueModel.addElement(gr);
+						}
+
+					});
+
 				}
 				if (containsOld) {
-					queueModel.setSelectedItem(oldSubLoc);
+					final GridResource temp = oldSubLoc;
+					SwingUtilities.invokeLater(new Thread() {
+
+						@Override
+						public void run() {
+							queueModel.setSelectedItem(temp);
+						}
+
+					});
 				}
 			}
 		};
@@ -209,16 +221,20 @@ public class QueueSelector extends AbstractInputPanel implements
 
 	}
 
-	private void setLoading(boolean loading) {
+	private void setLoading(final boolean loading) {
 
-		if (loading) {
-			queueModel.removeAllElements();
-			queueModel.addElement("Calculating...");
-		}
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				if (loading) {
+					queueModel.removeAllElements();
+					queueModel.addElement("Calculating...");
+				}
 
-		getQueueComboBox().setEnabled(!loading);
-		getHidingQueueInfoPanel().setLoading(loading);
-
+				getQueueComboBox().setEnabled(!loading);
+				getHidingQueueInfoPanel().setLoading(loading);
+			}
+		});
 	}
 
 	private JLabel getLblQueue() {
@@ -231,6 +247,8 @@ public class QueueSelector extends AbstractInputPanel implements
 	private JComboBox getQueueComboBox() {
 		if (queueComboBox == null) {
 			queueComboBox = new JComboBox(queueModel);
+			queueComboBox
+					.setPrototypeDisplayValue("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 			queueComboBox.addItemListener(new ItemListener() {
 				public void itemStateChanged(ItemEvent e) {
 
