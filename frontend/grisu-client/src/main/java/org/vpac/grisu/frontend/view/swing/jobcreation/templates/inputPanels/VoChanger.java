@@ -13,16 +13,28 @@ import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.view.swing.DefaultFqanChangePanel;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.RowSpec;
+import com.jgoodies.forms.factories.FormFactory;
+import javax.swing.JLabel;
 
 public class VoChanger extends AbstractInputPanel {
 
 	private DefaultFqanChangePanel fqanChangePanel = null;
+	private JLabel label;
 
 	public VoChanger(String templateName, PanelConfig config)
 			throws TemplateException {
 		super(templateName, config);
-
-		setLayout(new BorderLayout());
+		setLayout(new FormLayout(new ColumnSpec[] {
+				FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("default:grow"),
+				FormFactory.RELATED_GAP_COLSPEC,},
+			new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,}));
 	}
 
 	public DefaultFqanChangePanel getFqanChangePanel() {
@@ -50,7 +62,8 @@ public class VoChanger extends AbstractInputPanel {
 	@Override
 	public void setServiceInterface(ServiceInterface si) {
 		super.setServiceInterface(si);
-		add(getFqanChangePanel(), BorderLayout.CENTER);
+		add(getFqanChangePanel(), "2, 2");
+
 	}
 
 	@Override

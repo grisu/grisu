@@ -15,6 +15,9 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.FqanEvent;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.RowSpec;
 
 public class DefaultFqanChangePanel extends JPanel implements
 		EventSubscriber<FqanEvent> {
@@ -29,14 +32,18 @@ public class DefaultFqanChangePanel extends JPanel implements
 	 * Create the panel.
 	 */
 	public DefaultFqanChangePanel() {
-		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+		setLayout(new FormLayout(new ColumnSpec[] {
+				ColumnSpec.decode("107px"),
+				ColumnSpec.decode("218px"),},
+			new RowSpec[] {
+				RowSpec.decode("40px"),}));
 
 		JLabel lblGroup = new JLabel("Submit as group:");
-		add(lblGroup);
+		add(lblGroup, "1, 1, left, center");
 
 		comboBox = new JComboBox(voModel);
-		comboBox.setEditable(false);
-		// comboBox.setPrototypeDisplayValue("xxxxxxxxxxxxxxxxxx");
+		 comboBox.setEditable(false);
+		 comboBox.setPrototypeDisplayValue("xxxxxxxxxxxxxxxxxx");
 		comboBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 
@@ -54,7 +61,7 @@ public class DefaultFqanChangePanel extends JPanel implements
 
 			}
 		});
-		add(comboBox);
+		add(comboBox, "2, 1, fill, center");
 	}
 
 	public void setServiceInterface(ServiceInterface si)
@@ -62,7 +69,7 @@ public class DefaultFqanChangePanel extends JPanel implements
 		this.si = si;
 		String currentFqan = GrisuRegistryManager.getDefault(si)
 				.getUserEnvironmentManager().getCurrentFqan();
-		comboBox.removeAll();
+		comboBox.removeAllItems();
 		comboBox.addItem(currentFqan);
 		comboBox.setSelectedItem(currentFqan);
 		fillComboBox();
