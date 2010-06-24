@@ -53,15 +53,13 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 						.getRemainingLifetime();
 			}
 		} catch (GSSException e2) {
-			myLogger
-					.debug("Problem getting lifetime of old certificate: " + e2);
+			myLogger.debug("Problem getting lifetime of old certificate: " + e2);
 			credential = null;
 		}
 		if (oldLifetime < ServerPropertiesManager
 				.getMinProxyLifetimeBeforeGettingNewProxy()) {
-			myLogger
-					.debug("Credential reached minimum lifetime. Getting new one from myproxy. Old lifetime: "
-							+ oldLifetime);
+			myLogger.debug("Credential reached minimum lifetime. Getting new one from myproxy. Old lifetime: "
+					+ oldLifetime);
 			this.credential = null;
 			// user.cleanCache();
 		}
@@ -72,8 +70,8 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 				if ((passphrase == null) || (passphrase.length == 0)) {
 					// try local proxy
 					try {
-						credential = new ProxyCredential(LocalProxy
-								.loadGSSCredential());
+						credential = new ProxyCredential(
+								LocalProxy.loadGSSCredential());
 					} catch (Exception e) {
 						throw new NoValidCredentialException(
 								"Could not load credential/no valid login data.");
@@ -102,9 +100,10 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 				}
 
 				try {
-					credential = new ProxyCredential(MyProxy_light
-							.getDelegation(myProxyServer, myProxyPort,
-									myproxy_username, passphrase, 3600));
+					credential = new ProxyCredential(
+							MyProxy_light.getDelegation(myProxyServer,
+									myProxyPort, myproxy_username, passphrase,
+									3600));
 					if (getUser() != null) {
 						getUser().cleanCache();
 					}
@@ -274,8 +273,8 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 		if (job.getFqan() != null) {
 			VO vo = VOManagement.getVO(getUser().getFqans().get(job.getFqan()));
 			try {
-				job.setCredential(CertHelpers.getVOProxyCredential(vo, job
-						.getFqan(), getCredential()));
+				job.setCredential(CertHelpers.getVOProxyCredential(vo,
+						job.getFqan(), getCredential()));
 			} catch (Exception e) {
 				throw new JobSubmissionException(
 						"Could not create credential to use to submit the job: "
@@ -302,8 +301,8 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 							+ jobname);
 		}
 
-		job.addJobProperty("submissionTime", Long
-				.toString(new Date().getTime()));
+		job.addJobProperty("submissionTime",
+				Long.toString(new Date().getTime()));
 
 		// we don't want the credential to be stored with the job in this case
 		// TODO or do we want it to be stored?
@@ -320,4 +319,8 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 		return "DummyHandle";
 	}
 
+	@Override
+	public String getInterfaceInfo() {
+		return "Local dummy serviceinterface to debug rsl files.";
+	}
 }

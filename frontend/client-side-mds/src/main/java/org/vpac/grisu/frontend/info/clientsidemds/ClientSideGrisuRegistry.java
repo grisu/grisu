@@ -32,6 +32,8 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 
 	private final InformationManager infoManager;
 
+	private static InformationManager staticInfoManager;
+
 	private HistoryManager historyManager = null;
 	private final Map<String, ApplicationInformation> cachedApplicationInformationObjects = new HashMap<String, ApplicationInformation>();
 	private final Map<String, UserApplicationInformation> cachedUserInformationObjects = new HashMap<String, UserApplicationInformation>();
@@ -40,18 +42,48 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 	private FileManager cachedFileHelper;
 	private TemplateManager templateManager;
 
-	public ClientSideGrisuRegistry(ServiceInterface serviceInterface)
+	public static void preloadInfoManager() {
+
+		// staticInfoManager = CachedMdsInformationManager
+		// .getDefaultCachedMdsInformationManager(Environment
+		// .getGrisuClientDirectory().getPath());
+		//
+		// new Thread() {
+		// @Override
+		// public void run() {
+		// System.out.println("Loading all sublocs...");
+		// staticInfoManager.getAllSubmissionLocations();
+		// System.out.println("Loading all sublocs finished.");
+		// }
+		// }.start();
+		//
+		// new Thread() {
+		// @Override
+		// public void run() {
+		// System.out.println("Loading all resources...");
+		// staticInfoManager.getAllGridResources();
+		// System.out.println("Loading all resources finished.");
+		// }
+		// }.start();
+		//
+		// new Thread() {
+		// @Override
+		// public void run() {
+		// System.out.println("Loading all hosts...");
+		// staticInfoManager.getAllHosts();
+		// System.out.println("Loading all hosts finished.");
+		// }
+		// }.start();
+
+	}
+
+	private ClientSideGrisuRegistry(ServiceInterface serviceInterface)
 			throws Exception {
 		this.serviceInterface = serviceInterface;
-		this.infoManager = new CachedMdsInformationManager(Environment
-				.getGrisuClientDirectory().getPath());
 
-		// try {
-		// this.infoManager.getAllSubmissionLocations();
-		// } catch (Exception e) {
-		// throw new
-		// Exception("Couldn't query mds from here. Please use another GrisuRegistry...");
-		// }
+		this.infoManager = CachedMdsInformationManager
+				.getDefaultCachedMdsInformationManager(Environment
+						.getGrisuClientDirectory().getPath());
 
 	}
 

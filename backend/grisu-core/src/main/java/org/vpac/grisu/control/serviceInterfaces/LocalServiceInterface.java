@@ -40,15 +40,13 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 						.getRemainingLifetime();
 			}
 		} catch (GSSException e2) {
-			myLogger
-					.debug("Problem getting lifetime of old certificate: " + e2);
+			myLogger.debug("Problem getting lifetime of old certificate: " + e2);
 			credential = null;
 		}
 		if (oldLifetime < ServerPropertiesManager
 				.getMinProxyLifetimeBeforeGettingNewProxy()) {
-			myLogger
-					.debug("Credential reached minimum lifetime. Getting new one from myproxy. Old lifetime: "
-							+ oldLifetime);
+			myLogger.debug("Credential reached minimum lifetime. Getting new one from myproxy. Old lifetime: "
+					+ oldLifetime);
 			this.credential = null;
 			// user.cleanCache();
 		}
@@ -59,8 +57,8 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 				if ((passphrase == null) || (passphrase.length == 0)) {
 					// try local proxy
 					try {
-						credential = new ProxyCredential(LocalProxy
-								.loadGSSCredential());
+						credential = new ProxyCredential(
+								LocalProxy.loadGSSCredential());
 					} catch (Exception e) {
 						throw new NoValidCredentialException(
 								"Could not load credential/no valid login data.");
@@ -89,9 +87,10 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 				}
 
 				try {
-					credential = new ProxyCredential(MyProxy_light
-							.getDelegation(myProxyServer, myProxyPort,
-									myproxy_username, passphrase, 3600));
+					credential = new ProxyCredential(
+							MyProxy_light.getDelegation(myProxyServer,
+									myProxyPort, myproxy_username, passphrase,
+									3600));
 					if (getUser() != null) {
 						getUser().cleanCache();
 					}
@@ -197,6 +196,11 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 	public final String logout() {
 		Arrays.fill(passphrase, 'x');
 		return null;
+	}
+
+	@Override
+	public String getInterfaceInfo() {
+		return "Local backend";
 	}
 
 }

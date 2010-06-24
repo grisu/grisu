@@ -64,6 +64,8 @@ public class LoginManager {
 					"https://grisu-vpac.arcs.org.au/grisu-ws/soap/GrisuService")
 			.put("ARCS_DEV",
 					"https://ngportal.vpac.org/grisu-ws/soap/GrisuService")
+			.put("BeSTGRID",
+					"https://globus.ceres.auckland.ac.nz:8443/grisu-ws/soap/GrisuService")
 			.put("LOCAL_WS", "http://localhost:8080/soap/GrisuService").build();
 
 	public static String httpProxyHost = null;

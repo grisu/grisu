@@ -577,6 +577,10 @@ public interface ServiceInterface {
 	@Path("interfaceVersion")
 	String getInterfaceVersion();
 
+	@GET
+	@Path("interfaceInfo")
+	String getInterfaceInfo();
+
 	/**
 	 * Returns the job details.
 	 * 

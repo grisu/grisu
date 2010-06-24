@@ -264,12 +264,14 @@ public class QueueSelector extends AbstractInputPanel implements
 					String subLoc = SubmissionLocationHelpers
 							.createSubmissionLocationString(gr);
 
+					System.out.println(subLoc);
 					if (subLoc.equals(lastSubLoc)) {
 						return;
 					}
 					lastSubLoc = subLoc;
 
 					try {
+						System.out.println("Setting: " + subLoc);
 						setValue("submissionLocation", subLoc);
 					} catch (TemplateException e1) {
 						e1.printStackTrace();

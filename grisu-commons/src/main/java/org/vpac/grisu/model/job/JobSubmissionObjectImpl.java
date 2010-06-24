@@ -368,6 +368,7 @@ public class JobSubmissionObjectImpl {
 		String jsdlString = null;
 		jsdlString = SeveralXMLHelpers.toString(getJobDescriptionDocument());
 
+		System.out.println(jsdlString);
 		return jsdlString;
 	}
 

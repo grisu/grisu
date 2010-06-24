@@ -13,7 +13,7 @@
 
 		<Application>
 			<ApplicationName>XXX_application_XXX</ApplicationName>
-			<ApplicationVersion>XXX_version_XXX</ApplicationVersion>
+			<ApplicationVersion>XXX_applicationVersion_XXX</ApplicationVersion>
 			<POSIXApplication
 				xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl-posix">
 				XXX_commandline_XXX
