@@ -268,9 +268,9 @@ public class JobSubmissionObjectImpl {
 	private void checkValidity() throws JobPropertiesException {
 
 		if ((commandline == null) || (commandline.length() == 0)) {
-			throw new JobPropertiesException(JobSubmissionProperty.COMMANDLINE
-					.toString()
-					+ ": " + "Commandline not specified.");
+			throw new JobPropertiesException(
+					JobSubmissionProperty.COMMANDLINE.toString() + ": "
+							+ "Commandline not specified.");
 		}
 
 	}
@@ -368,7 +368,6 @@ public class JobSubmissionObjectImpl {
 		String jsdlString = null;
 		jsdlString = SeveralXMLHelpers.toString(getJobDescriptionDocument());
 
-		System.out.println(jsdlString);
 		return jsdlString;
 	}
 
@@ -408,8 +407,8 @@ public class JobSubmissionObjectImpl {
 		jobProperties.put(JobSubmissionProperty.MODULES, getModulesAsString());
 		jobProperties.put(JobSubmissionProperty.MEMORY_IN_B, new Long(
 				memory_in_bytes).toString());
-		jobProperties.put(JobSubmissionProperty.NO_CPUS, new Integer(cpus)
-				.toString());
+		jobProperties.put(JobSubmissionProperty.NO_CPUS,
+				new Integer(cpus).toString());
 		jobProperties.put(JobSubmissionProperty.HOSTCOUNT, new Integer(
 				getHostCount()).toString());
 		jobProperties.put(JobSubmissionProperty.STDERR, stderr);
@@ -598,8 +597,8 @@ public class JobSubmissionObjectImpl {
 	public void setInputFileUrls(final String[] inputFileUrls) {
 		Set<String> oldValue = this.inputFileUrls;
 		if (inputFileUrls != null) {
-			this.inputFileUrls = new HashSet<String>(Arrays
-					.asList(inputFileUrls));
+			this.inputFileUrls = new HashSet<String>(
+					Arrays.asList(inputFileUrls));
 		} else {
 			this.inputFileUrls = new HashSet<String>();
 		}
