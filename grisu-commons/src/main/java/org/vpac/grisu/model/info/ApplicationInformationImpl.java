@@ -81,9 +81,13 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		return cachedVersionsForUserPerFqan.get(fqan);
 	}
 
-	public SortedSet<GridResource> getAllSubmissionLocationsAsGridResources(
+	public synchronized SortedSet<GridResource> getAllSubmissionLocationsAsGridResources(
 			Map<JobSubmissionProperty, String> additionalJobProperties,
 			String fqan) {
+
+		if (Thread.currentThread().isInterrupted()) {
+			return null;
+		}
 
 		Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
 		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
@@ -149,12 +153,12 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 		if (cachedAllSubmissionLocations == null) {
 			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
-				cachedAllSubmissionLocations = new HashSet(Arrays
-						.asList(resourceInfo.getAllSubmissionLocations()));
+				cachedAllSubmissionLocations = new HashSet(
+						Arrays.asList(resourceInfo.getAllSubmissionLocations()));
 			} else {
 
-				cachedAllSubmissionLocations = new HashSet(Arrays
-						.asList(serviceInterface
+				cachedAllSubmissionLocations = new HashSet(
+						Arrays.asList(serviceInterface
 								.getSubmissionLocationsForApplication(
 										application)
 								.asSubmissionLocationStrings()));

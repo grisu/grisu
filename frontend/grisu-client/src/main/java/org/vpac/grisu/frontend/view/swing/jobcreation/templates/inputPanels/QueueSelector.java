@@ -173,10 +173,19 @@ public class QueueSelector extends AbstractInputPanel implements
 						getServiceInterface()).getApplicationInformation(
 						applicationName);
 
+				if (Thread.interrupted()) {
+					return;
+				}
+
 				currentQueues = ai.getAllSubmissionLocationsAsGridResources(
 						getJobSubmissionObject().getJobSubmissionPropertyMap(),
 						GrisuRegistryManager.getDefault(getServiceInterface())
 								.getUserEnvironmentManager().getCurrentFqan());
+
+				if (Thread.interrupted()) {
+					return;
+				}
+
 				setLoading(false);
 				queueModel.removeAllElements();
 				boolean containsOld = false;

@@ -174,7 +174,7 @@
 							<archive>
 								<index>true</index>
 								<manifest>
-									<mainClass>org.vpac.grisu.frontend.view.swing.GrisuApplicationWindow
+									<mainClass>org.vpac.grisu.frontend.view.swing.GrisuTemplateApp
 									</mainClass>
 								</manifest>
 								<manifestEntries>

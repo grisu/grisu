@@ -175,15 +175,15 @@ public class TemplateJobCreationPanel extends JPanel implements
 
 	public void propertyChange(PropertyChangeEvent arg0) {
 
-		if (si != null) {
-			if ("localTemplateNames".equals(arg0.getPropertyName())) {
-				if (((List<String>) arg0.getNewValue())
-						.contains(templateFileName)) {
-					setServiceInterface(si);
-				}
-
-			}
-		}
+		// if (si != null) {
+		// if ("localTemplateNames".equals(arg0.getPropertyName())) {
+		// if (((List<String>) arg0.getNewValue())
+		// .contains(templateFileName)) {
+		// setServiceInterface(si);
+		// }
+		//
+		// }
+		// }
 	}
 
 	public void setServiceInterface(ServiceInterface si) {

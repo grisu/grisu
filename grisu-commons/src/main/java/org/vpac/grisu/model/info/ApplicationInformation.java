@@ -36,6 +36,8 @@ public interface ApplicationInformation {
 	 * jobproperties. As a result, it might take a bit longer to get a result
 	 * from this method.
 	 * 
+	 * If the current thread is interrupted this will return null
+	 * 
 	 * @param additionalJobProperties
 	 *            the jobProperties
 	 * @param fqan

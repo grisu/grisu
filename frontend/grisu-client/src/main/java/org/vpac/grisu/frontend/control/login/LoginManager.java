@@ -108,8 +108,7 @@ public class LoginManager {
 					CommonArcsProperties.Property.DEBUG_UNCAUGHT_EXCEPTIONS);
 
 			if ("true".equalsIgnoreCase(debug)) {
-				Thread
-						.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler());
+				Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler());
 			}
 
 			java.security.Security.addProvider(new ArcsSecurityProvider());
@@ -127,8 +126,8 @@ public class LoginManager {
 
 				dependencies.put(Dependency.BOUNCYCASTLE, "jdk15-145");
 
-				DependencyManager.addDependencies(dependencies, ArcsEnvironment
-						.getArcsCommonJavaLibDirectory(), true);
+				DependencyManager.addDependencies(dependencies,
+						ArcsEnvironment.getArcsCommonJavaLibDirectory(), true);
 			}
 
 			environmentInitialized = true;
@@ -301,8 +300,8 @@ public class LoginManager {
 			dependencies.put(Dependency.GRISU_LOCAL_BACKEND,
 					ServiceInterface.INTERFACE_VERSION);
 
-			DependencyManager.addDependencies(dependencies, Environment
-					.getGrisuPluginDirectory());
+			DependencyManager.addDependencies(dependencies,
+					Environment.getGrisuPluginDirectory());
 
 		} else if (serviceInterfaceUrl.startsWith("http")) {
 
@@ -316,8 +315,8 @@ public class LoginManager {
 			dependencies.put(Dependency.CLIENT_SIDE_MDS,
 					ServiceInterface.INTERFACE_VERSION);
 
-			DependencyManager.addDependencies(dependencies, Environment
-					.getGrisuPluginDirectory());
+			DependencyManager.addDependencies(dependencies,
+					Environment.getGrisuPluginDirectory());
 
 		}
 
@@ -394,8 +393,8 @@ public class LoginManager {
 
 				dependencies.put(Dependency.ARCSGSI, "1.2-SNAPSHOT");
 
-				DependencyManager.addDependencies(dependencies, Environment
-						.getGrisuPluginDirectory());
+				DependencyManager.addDependencies(dependencies,
+						Environment.getGrisuPluginDirectory());
 
 				GSSCredential slcsproxy = slcsMyProxyInit(username, password,
 						idp, loginParams);
@@ -624,8 +623,8 @@ public class LoginManager {
 					}
 				}
 
-				return LoginManager.myProxyLogin(url, username, password
-						.toCharArray());
+				return LoginManager.myProxyLogin(url, username,
+						password.toCharArray());
 
 			} catch (LoginException e) {
 				System.out.println("Login failed: " + e.getLocalizedMessage());
@@ -784,8 +783,8 @@ public class LoginManager {
 
 	public static void main(String[] args) throws LoginException {
 
-		ServiceInterface si = LoginManager.shiblogin("markus", args[0]
-				.toCharArray(), "VPAC", true);
+		ServiceInterface si = LoginManager.shiblogin("markus",
+				args[0].toCharArray(), "VPAC", true);
 
 	}
 

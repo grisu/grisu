@@ -58,7 +58,7 @@ public class Job implements Comparable<Job> {
 	@Attribute
 	private String jobname = null;
 	// the jobhandle that comes back from the job submission
-	//	@Element
+	// @Element
 	private String jobhandle = null;
 
 	// the user's dn
@@ -72,12 +72,12 @@ public class Job implements Comparable<Job> {
 	// the job description
 	private Document jobDescription = null;
 
-	@Element(data=true)
+	@Element(data = true)
 	private String serializedJobDescription = null;
 
 	// this is the job description that was submitted to the gateway (probably a
 	// gt4 rsl document)
-	@Element(data=true)
+	@Element(data = true)
 	private String submittedJobDescription = null;
 
 	// the status of the job
@@ -95,19 +95,20 @@ public class Job implements Comparable<Job> {
 
 	private Date lastStatusCheck = null;
 
-	@ElementMap(entry="property", key="key", attribute=true, inline=true)
+	@ElementMap(entry = "property", key = "key", attribute = true, inline = true)
 	private Map<String, String> jobProperties = Collections
-	.synchronizedMap(new HashMap<String, String>());
+			.synchronizedMap(new HashMap<String, String>());
 
-	@ElementList(entry="inputFiles", inline=true)
-	private Set<String> inputFiles = Collections.synchronizedSet(new HashSet<String>());
+	@ElementList(entry = "inputFiles", inline = true)
+	private Set<String> inputFiles = Collections
+			.synchronizedSet(new HashSet<String>());
 
 	@Attribute
 	private boolean isBatchJob = false;
 
-	@ElementMap(entry="jobProperty", key="key", attribute=true, inline=true)
+	@ElementMap(entry = "jobProperty", key = "key", attribute = true, inline = true)
 	private Map<Long, String> logMessages = Collections
-	.synchronizedMap(new TreeMap<Long, String>());
+			.synchronizedMap(new TreeMap<Long, String>());
 
 	// for hibernate
 	public Job() {
@@ -132,7 +133,7 @@ public class Job implements Comparable<Job> {
 	 *             if the job description does not contain a jobname
 	 */
 	public Job(final String dn, final Document jsdl) throws SAXException,
-	XPathExpressionException {
+			XPathExpressionException {
 		this.dn = dn;
 		// if ( ! JsdlHelpers.validateJSDL(jobDescription) ) throw new
 		// SAXException("Job description not a valid jsdl document");
@@ -268,7 +269,7 @@ public class Job implements Comparable<Job> {
 	}
 
 	@CollectionOfElements(fetch = FetchType.EAGER)
-	public  synchronized Set<String> getInputFiles() {
+	public synchronized Set<String> getInputFiles() {
 		return inputFiles;
 	}
 
@@ -280,8 +281,10 @@ public class Job implements Comparable<Job> {
 	@Transient
 	public Document getJobDescription() {
 		// for serialized/archived version
-		if ( (this.jobDescription == null) && StringUtils.isNotBlank(serializedJobDescription) ) {
-			this.jobDescription = SeveralXMLHelpers.fromString(serializedJobDescription);
+		if ((this.jobDescription == null)
+				&& StringUtils.isNotBlank(serializedJobDescription)) {
+			this.jobDescription = SeveralXMLHelpers
+					.fromString(serializedJobDescription);
 		}
 		return this.jobDescription;
 	}
@@ -305,7 +308,6 @@ public class Job implements Comparable<Job> {
 	public String getJobname() {
 		return jobname;
 	}
-
 
 	@CollectionOfElements(fetch = FetchType.EAGER)
 	public synchronized Map<String, String> getJobProperties() {
@@ -463,8 +465,9 @@ public class Job implements Comparable<Job> {
 	}
 
 	private synchronized void setInputFiles(Set<String> inputfiles) {
-		if ( inputFiles == null ) {
-			this.inputFiles = Collections.synchronizedSet(new HashSet<String>());
+		if (inputFiles == null) {
+			this.inputFiles = Collections
+					.synchronizedSet(new HashSet<String>());
 		} else {
 			this.inputFiles = inputfiles;
 		}
@@ -479,7 +482,8 @@ public class Job implements Comparable<Job> {
 	 */
 	public void setJobDescription(final Document jobDescription) {
 		this.jobDescription = jobDescription;
-		this.serializedJobDescription = SeveralXMLHelpers.toString(jobDescription);
+		this.serializedJobDescription = SeveralXMLHelpers
+				.toString(jobDescription);
 	}
 
 	// ---------------------
@@ -572,7 +576,7 @@ public class Job implements Comparable<Job> {
 	private void setJsdl(final String jsdl_string) throws Exception {
 		if ((jsdl_string == null)
 				|| jsdl_string
-				.equals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")) {
+						.equals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")) {
 			return;
 		}
 
@@ -580,8 +584,7 @@ public class Job implements Comparable<Job> {
 			jobDescription = SeveralXMLHelpers.fromString(jsdl_string);
 			serializedJobDescription = jsdl_string;
 		} catch (Exception e) {
-			myLogger
-			.debug("Error saving jsdl for job. That's most probably ok. "
+			myLogger.debug("Error saving jsdl for job. That's most probably ok. "
 					+ e.getMessage());
 			// e.printStackTrace();
 			// TODO check what happens here
