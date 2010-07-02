@@ -4,13 +4,14 @@ import java.awt.Font;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
 
@@ -19,11 +20,8 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-import externalHelpers.ComponentTitledBorder;
-import furbelow.SpinningDial;
-
 public class BatchJobStatusPanel extends JPanel implements
-PropertyChangeListener {
+		PropertyChangeListener {
 	private JLabel lblUnsubmitted;
 	private JProgressBar unsubProgress;
 	private JLabel lblWaiting;
@@ -59,10 +57,10 @@ PropertyChangeListener {
 	private JSeparator separator_13;
 	private JSeparator separator_14;
 
-	private ComponentTitledBorder border = null;
+	private Border border = null;
 	private final JLabel borderLabel;
 
-	private static SpinningDial LOADING_ICON = new SpinningDial(16, 16);
+	// private static SpinningDial LOADING_ICON = new SpinningDial(16, 16);
 
 	/**
 	 * Create the panel.
@@ -72,51 +70,38 @@ PropertyChangeListener {
 		borderLabel = new JLabel("Status");
 		borderLabel.setOpaque(true);
 
-
 		borderLabel.setHorizontalTextPosition(SwingConstants.LEFT);
 
-		border = new ComponentTitledBorder(borderLabel, this
-				, BorderFactory.createEtchedBorder());
+		// border = new ComponentTitledBorder(borderLabel, this,
+		// BorderFactory.createEtchedBorder());
 
+		border = new TitledBorder("Status");
 
 		setBorder(border);
 
 		this.bj = bj;
 		this.bj.addPropertyChangeListener(this);
 
-
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(20dlu;default)"),
-				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("14dlu"),
-				ColumnSpec.decode("12dlu"),
-				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("14dlu"),
-				ColumnSpec.decode("12dlu"),
-				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("14dlu"),
-				ColumnSpec.decode("12dlu"),
-				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("14dlu"),
-				ColumnSpec.decode("12dlu"),
-				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("12dlu"),
-				ColumnSpec.decode("14dlu"),
-				ColumnSpec.decode("12dlu"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
-				RowSpec.decode("8dlu"),
-				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("14dlu"),
+				ColumnSpec.decode("12dlu"), FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("14dlu"), ColumnSpec.decode("12dlu"),
+				FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("14dlu"),
+				ColumnSpec.decode("12dlu"), FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("14dlu"), ColumnSpec.decode("12dlu"),
+				FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("12dlu"),
+				ColumnSpec.decode("14dlu"), ColumnSpec.decode("12dlu"),
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				RowSpec.decode("8dlu"), FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("top:max(24dlu;default):grow"),
-				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("top:default"),
+				FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("top:default"),
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("bottom:max(24dlu;default):grow"),
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getUnsubValueLabel(), "4, 2, 2, 1, right, default");
 		add(getWaitingValueLabel(), "7, 2, 2, 1, right, default");
 		add(getRunValueLabel(), "10, 2, 2, 1, right, default");
@@ -150,16 +135,14 @@ PropertyChangeListener {
 		add(getLblFail(), "13, 10, 2, 1, right, default");
 		add(getLblDone(), "18, 10, 2, 1, right, default");
 
-
 		refreshProgressBars();
 
-		if ( bj.isRefreshing() ) {
-			borderLabel.setIcon(LOADING_ICON);
-		} else {
-			borderLabel.setIcon(null);
-		}
-		//		repaint();
-
+		// if ( bj.isRefreshing() ) {
+		// borderLabel.setIcon(LOADING_ICON);
+		// } else {
+		// borderLabel.setIcon(null);
+		// }
+		// repaint();
 
 	}
 
@@ -176,7 +159,8 @@ PropertyChangeListener {
 		if (doneValueLabel == null) {
 			doneValueLabel = new JLabel("");
 			doneValueLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-			doneValueLabel.setFont(doneValueLabel.getFont().deriveFont(doneValueLabel.getFont().getStyle() | Font.BOLD));
+			doneValueLabel.setFont(doneValueLabel.getFont().deriveFont(
+					doneValueLabel.getFont().getStyle() | Font.BOLD));
 		}
 		return doneValueLabel;
 	}
@@ -270,84 +254,98 @@ PropertyChangeListener {
 		}
 		return separator_1;
 	}
+
 	private JSeparator getSeparator_10() {
 		if (separator_10 == null) {
 			separator_10 = new JSeparator();
 		}
 		return separator_10;
 	}
+
 	private JSeparator getSeparator_11() {
 		if (separator_11 == null) {
 			separator_11 = new JSeparator();
 		}
 		return separator_11;
 	}
+
 	private JSeparator getSeparator_12() {
 		if (separator_12 == null) {
 			separator_12 = new JSeparator();
 		}
 		return separator_12;
 	}
+
 	private JSeparator getSeparator_13() {
 		if (separator_13 == null) {
 			separator_13 = new JSeparator();
 		}
 		return separator_13;
 	}
+
 	private JSeparator getSeparator_14() {
 		if (separator_14 == null) {
 			separator_14 = new JSeparator();
 		}
 		return separator_14;
 	}
+
 	private JSeparator getSeparator_2() {
 		if (separator_2 == null) {
 			separator_2 = new JSeparator();
 		}
 		return separator_2;
 	}
+
 	private JSeparator getSeparator_3() {
 		if (separator_3 == null) {
 			separator_3 = new JSeparator();
 		}
 		return separator_3;
 	}
+
 	private JSeparator getSeparator_4() {
 		if (separator_4 == null) {
 			separator_4 = new JSeparator();
 		}
 		return separator_4;
 	}
+
 	private JSeparator getSeparator_5() {
 		if (separator_5 == null) {
 			separator_5 = new JSeparator();
 		}
 		return separator_5;
 	}
+
 	private JSeparator getSeparator_6() {
 		if (separator_6 == null) {
 			separator_6 = new JSeparator();
 		}
 		return separator_6;
 	}
+
 	private JSeparator getSeparator_7() {
 		if (separator_7 == null) {
 			separator_7 = new JSeparator();
 		}
 		return separator_7;
 	}
+
 	private JSeparator getSeparator_8() {
 		if (separator_8 == null) {
 			separator_8 = new JSeparator();
 		}
 		return separator_8;
 	}
+
 	private JSeparator getSeparator_9() {
 		if (separator_9 == null) {
 			separator_9 = new JSeparator();
 		}
 		return separator_9;
 	}
+
 	private JLabel getTotalLabel() {
 		if (totalLabel == null) {
 			totalLabel = new JLabel("n/a");
@@ -355,6 +353,7 @@ PropertyChangeListener {
 		}
 		return totalLabel;
 	}
+
 	private JProgressBar getUnsubProgress() {
 		if (unsubProgress == null) {
 			unsubProgress = new JProgressBar();
@@ -363,6 +362,7 @@ PropertyChangeListener {
 		}
 		return unsubProgress;
 	}
+
 	private JLabel getUnsubValueLabel() {
 		if (unsubValueLabel == null) {
 			unsubValueLabel = new JLabel("");
@@ -370,6 +370,7 @@ PropertyChangeListener {
 		}
 		return unsubValueLabel;
 	}
+
 	private JProgressBar getWaitingProgress() {
 		if (waitingProgress == null) {
 			waitingProgress = new JProgressBar();
@@ -378,6 +379,7 @@ PropertyChangeListener {
 		}
 		return waitingProgress;
 	}
+
 	private JLabel getWaitingValueLabel() {
 		if (waitingValueLabel == null) {
 			waitingValueLabel = new JLabel("");
@@ -385,12 +387,13 @@ PropertyChangeListener {
 		}
 		return waitingValueLabel;
 	}
+
 	public void propertyChange(final PropertyChangeEvent evt) {
 
 		SwingUtilities.invokeLater(new Thread() {
 
 			@Override
-			public  void run() {
+			public void run() {
 
 				if (BatchJobObject.STATUS.equals(evt.getPropertyName())) {
 					// TODO
@@ -404,8 +407,8 @@ PropertyChangeListener {
 
 					int i = (Integer) evt.getNewValue();
 					getUnsubProgress().setValue(i);
-					if ( i > 0 ) {
-						getUnsubValueLabel().setText(""+i);
+					if (i > 0) {
+						getUnsubValueLabel().setText("" + i);
 					} else {
 						getUnsubValueLabel().setText("");
 					}
@@ -414,8 +417,8 @@ PropertyChangeListener {
 						.getPropertyName())) {
 					int i = (Integer) evt.getNewValue();
 					getWaitingProgress().setValue(i);
-					if ( i > 0 ) {
-						getWaitingValueLabel().setText(""+i);
+					if (i > 0) {
+						getWaitingValueLabel().setText("" + i);
 					} else {
 						getWaitingValueLabel().setText("");
 					}
@@ -423,8 +426,8 @@ PropertyChangeListener {
 						.getPropertyName())) {
 					int i = (Integer) evt.getNewValue();
 					getRunProgress().setValue(i);
-					if ( i > 0 ) {
-						getRunValueLabel().setText(""+i);
+					if (i > 0) {
+						getRunValueLabel().setText("" + i);
 					} else {
 						getRunValueLabel().setText("");
 					}
@@ -432,8 +435,8 @@ PropertyChangeListener {
 						.getPropertyName())) {
 					int i = (Integer) evt.getNewValue();
 					getFailProgress().setValue(i);
-					if ( i > 0 ) {
-						getFailValueLabel().setText(""+i);
+					if (i > 0) {
+						getFailValueLabel().setText("" + i);
 					} else {
 						getFailValueLabel().setText("");
 					}
@@ -441,20 +444,21 @@ PropertyChangeListener {
 						.getPropertyName())) {
 					int i = (Integer) evt.getNewValue();
 					getDoneProgress().setValue(i);
-					if ( i > 0 ) {
-						getDoneValueLabel().setText(""+i);
+					if (i > 0) {
+						getDoneValueLabel().setText("" + i);
 					} else {
 						getDoneValueLabel().setText("");
 					}
 				} else if (BatchJobObject.NUMBER_OF_FINISHED_JOBS.equals(evt
 						.getPropertyName())) {
-					//TODO
-				} else if (BatchJobObject.REFRESHING.equals(evt.getPropertyName())) {
-					if ( (Boolean)evt.getNewValue() ) {
-						borderLabel.setIcon(LOADING_ICON);
-					} else {
-						borderLabel.setIcon(null);
-					}
+					// TODO
+				} else if (BatchJobObject.REFRESHING.equals(evt
+						.getPropertyName())) {
+					// if ( (Boolean)evt.getNewValue() ) {
+					// borderLabel.setIcon(LOADING_ICON);
+					// } else {
+					// borderLabel.setIcon(null);
+					// }
 					repaint();
 
 				}
@@ -464,15 +468,16 @@ PropertyChangeListener {
 		});
 
 	}
+
 	private void refreshProgressBars() {
 
-		getTotalLabel().setText(""+bj.getTotalNumberOfJobs());
+		getTotalLabel().setText("" + bj.getTotalNumberOfJobs());
 
 		getDoneProgress().setMaximum(bj.getTotalNumberOfJobs());
 		int i = bj.getNumberOfSuccessfulJobs();
 		getDoneProgress().setValue(i);
-		if ( i > 0 ) {
-			getDoneValueLabel().setText(""+i);
+		if (i > 0) {
+			getDoneValueLabel().setText("" + i);
 		} else {
 			getDoneValueLabel().setText("");
 		}
@@ -480,8 +485,8 @@ PropertyChangeListener {
 		getFailProgress().setMaximum(bj.getTotalNumberOfJobs());
 		i = bj.getNumberOfFailedJobs();
 		getFailProgress().setValue(i);
-		if ( i > 0 ) {
-			getFailValueLabel().setText(""+i);
+		if (i > 0) {
+			getFailValueLabel().setText("" + i);
 		} else {
 			getFailValueLabel().setText("");
 		}
@@ -489,8 +494,8 @@ PropertyChangeListener {
 		getRunProgress().setMaximum(bj.getTotalNumberOfJobs());
 		i = bj.getNumberOfRunningJobs();
 		getRunProgress().setValue(i);
-		if ( i > 0 ) {
-			getRunValueLabel().setText(""+i);
+		if (i > 0) {
+			getRunValueLabel().setText("" + i);
 		} else {
 			getRunValueLabel().setText("");
 		}
@@ -498,8 +503,8 @@ PropertyChangeListener {
 		getUnsubProgress().setMaximum(bj.getTotalNumberOfJobs());
 		i = bj.getNumberOfUnsubmittedJobs();
 		getUnsubProgress().setValue(i);
-		if ( i > 0 ) {
-			getUnsubValueLabel().setText(""+i);
+		if (i > 0) {
+			getUnsubValueLabel().setText("" + i);
 		} else {
 			getUnsubValueLabel().setText("");
 		}
@@ -507,8 +512,8 @@ PropertyChangeListener {
 		getWaitingProgress().setMaximum(bj.getTotalNumberOfJobs());
 		i = bj.getNumberOfWaitingJobs();
 		getWaitingProgress().setValue(i);
-		if ( i > 0 ) {
-			getWaitingValueLabel().setText(""+i);
+		if (i > 0) {
+			getWaitingValueLabel().setText("" + i);
 		} else {
 			getWaitingValueLabel().setText("");
 		}
