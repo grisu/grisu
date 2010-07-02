@@ -96,7 +96,11 @@ public class BatchJobTableFormat implements AdvancedTableFormat<BatchJobObject> 
 
 		switch (column) {
 		case 0:
-			return baseObject.isRefreshing();
+			try {
+				return baseObject.isRefreshing();
+			} catch (Exception e) {
+				return null;
+			}
 		case 1:
 			return baseObject;
 		case 2:

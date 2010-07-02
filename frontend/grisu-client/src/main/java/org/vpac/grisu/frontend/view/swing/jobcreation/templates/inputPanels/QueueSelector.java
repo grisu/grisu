@@ -182,6 +182,10 @@ public class QueueSelector extends AbstractInputPanel implements
 						GrisuRegistryManager.getDefault(getServiceInterface())
 								.getUserEnvironmentManager().getCurrentFqan());
 
+				if (currentQueues == null) {
+					return;
+				}
+
 				if (Thread.interrupted()) {
 					return;
 				}

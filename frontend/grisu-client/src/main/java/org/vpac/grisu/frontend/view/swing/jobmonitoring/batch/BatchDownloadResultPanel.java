@@ -6,6 +6,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -378,7 +379,11 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 							continue;
 						}
 
+						Set<String> urlsToCheck = new HashSet<String>();
+
 						List<String> urls = job.listJobDirectory(0);
+
+						String path = batchJob.pathToInputFiles();
 
 						for (String child : urls) {
 							String temp = FileManager.getFilename(child);

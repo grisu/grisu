@@ -99,7 +99,7 @@ public class BatchJobObject implements JobMonitoringObject,
 
 	private int concurrentFileUploadThreads = 0;
 
-	private final ServiceInterface serviceInterface;
+	protected final ServiceInterface serviceInterface;
 	private final String batchJobname;
 
 	private String submissionFqan;
@@ -418,8 +418,8 @@ public class BatchJobObject implements JobMonitoringObject,
 					boolean needsDownloading = false;
 
 					try {
-						needsDownloading = GrisuRegistryManager.getDefault(
-								serviceInterface).getFileManager()
+						needsDownloading = GrisuRegistryManager
+								.getDefault(serviceInterface).getFileManager()
 								.needsDownloading(child);
 					} catch (RuntimeException e) {
 						myLogger.error("Could not access file " + child + ": "
@@ -435,13 +435,14 @@ public class BatchJobObject implements JobMonitoringObject,
 						EventBus.publish(this.batchJobname, new BatchJobEvent(
 								this, "Downloading file: " + child));
 						try {
-							cacheFile = GrisuRegistryManager.getDefault(
-									serviceInterface).getFileManager()
-									.downloadFile(child);
+							cacheFile = GrisuRegistryManager
+									.getDefault(serviceInterface)
+									.getFileManager().downloadFile(child);
 						} catch (Exception e) {
 							myLogger.error("Could not download file " + child
 									+ ": " + e.getLocalizedMessage());
-							EventBus.publish(this.batchJobname,
+							EventBus.publish(
+									this.batchJobname,
 									new BatchJobEvent(this,
 											"Could not download file " + child
 													+ ": "
@@ -449,8 +450,8 @@ public class BatchJobObject implements JobMonitoringObject,
 							continue;
 						}
 					} else {
-						cacheFile = GrisuRegistryManager.getDefault(
-								serviceInterface).getFileManager()
+						cacheFile = GrisuRegistryManager
+								.getDefault(serviceInterface).getFileManager()
 								.getLocalCacheFile(child);
 					}
 					String targetfilename = null;
@@ -461,7 +462,8 @@ public class BatchJobObject implements JobMonitoringObject,
 						targetfilename = cacheFile.getName();
 					}
 					if (createSeperateFoldersForEveryJob) {
-						FileUtils.copyFile(cacheFile,
+						FileUtils.copyFile(
+								cacheFile,
 								new File(new File(parentFolder, job
 										.getJobname()), targetfilename));
 					} else {
@@ -977,8 +979,7 @@ public class BatchJobObject implements JobMonitoringObject,
 			final boolean waitForRefresh) {
 
 		if (isKilled || isBeingKilled) {
-			myLogger
-					.debug("Job is or is being killed. Not updating dtoobject...");
+			myLogger.debug("Job is or is being killed. Not updating dtoobject...");
 			return dtoMultiPartJob;
 		}
 
@@ -1036,8 +1037,8 @@ public class BatchJobObject implements JobMonitoringObject,
 									.getBatchJob(batchJobname);
 
 							pcs.firePropertyChange(TOTAL_NUMBER_OF_JOBS,
-									oldTotalJobs, dtoMultiPartJob
-											.totalNumberOfJobs());
+									oldTotalJobs,
+									dtoMultiPartJob.totalNumberOfJobs());
 							pcs.firePropertyChange(STATUS, oldStatus,
 									dtoMultiPartJob.getStatus());
 							pcs.firePropertyChange(FAILED, oldFailed,
@@ -1045,23 +1046,23 @@ public class BatchJobObject implements JobMonitoringObject,
 							pcs.firePropertyChange(FINISHED, oldFinished,
 									dtoMultiPartJob.isFinished());
 							pcs.firePropertyChange(NUMBER_OF_RUNNING_JOBS,
-									oldRunningJobs, dtoMultiPartJob
-											.numberOfRunningJobs());
+									oldRunningJobs,
+									dtoMultiPartJob.numberOfRunningJobs());
 							pcs.firePropertyChange(NUMBER_OF_WAITING_JOBS,
-									oldWaitingJobs, dtoMultiPartJob
-											.numberOfWaitingJobs());
+									oldWaitingJobs,
+									dtoMultiPartJob.numberOfWaitingJobs());
 							pcs.firePropertyChange(NUMBER_OF_FINISHED_JOBS,
-									oldFinishedJobs, dtoMultiPartJob
-											.numberOfFinishedJobs());
+									oldFinishedJobs,
+									dtoMultiPartJob.numberOfFinishedJobs());
 							pcs.firePropertyChange(NUMBER_OF_FAILED_JOBS,
-									oldFailedJobs, dtoMultiPartJob
-											.numberOfFailedJobs());
+									oldFailedJobs,
+									dtoMultiPartJob.numberOfFailedJobs());
 							pcs.firePropertyChange(NUMBER_OF_SUCCESSFULL_JOBS,
-									oldSuccessJobs, dtoMultiPartJob
-											.numberOfSuccessfulJobs());
+									oldSuccessJobs,
+									dtoMultiPartJob.numberOfSuccessfulJobs());
 							pcs.firePropertyChange(NUMBER_OF_UNSUBMITTED_JOBS,
-									oldUnsubmittedJobs, dtoMultiPartJob
-											.numberOfUnsubmittedJobs());
+									oldUnsubmittedJobs,
+									dtoMultiPartJob.numberOfUnsubmittedJobs());
 
 							RunningJobManager.updateJobList(serviceInterface,
 									getJobs(), dtoMultiPartJob.getJobs());
@@ -1852,8 +1853,8 @@ public class BatchJobObject implements JobMonitoringObject,
 
 		try {
 			serviceInterface.addJobProperty(this.batchJobname,
-					Constants.NO_CPUS_KEY, new Integer(defaultNoCpus)
-							.toString());
+					Constants.NO_CPUS_KEY,
+					new Integer(defaultNoCpus).toString());
 		} catch (NoSuchJobException e) {
 			throw new RuntimeException(e);
 		}
@@ -1954,8 +1955,8 @@ public class BatchJobObject implements JobMonitoringObject,
 
 		try {
 			serviceInterface.addJobProperty(this.batchJobname,
-					Constants.LOCATIONS_TO_EXCLUDE_KEY, StringUtils.join(
-							locationPatterns, ","));
+					Constants.LOCATIONS_TO_EXCLUDE_KEY,
+					StringUtils.join(locationPatterns, ","));
 			serviceInterface.addJobProperty(this.batchJobname,
 					Constants.LOCATIONS_TO_INCLUDE_KEY, null);
 		} catch (NoSuchJobException e) {
@@ -1985,8 +1986,8 @@ public class BatchJobObject implements JobMonitoringObject,
 
 		try {
 			serviceInterface.addJobProperty(this.batchJobname,
-					Constants.LOCATIONS_TO_INCLUDE_KEY, StringUtils.join(
-							locationPatterns, ","));
+					Constants.LOCATIONS_TO_INCLUDE_KEY,
+					StringUtils.join(locationPatterns, ","));
 			serviceInterface.addJobProperty(this.batchJobname,
 					Constants.LOCATIONS_TO_EXCLUDE_KEY, null);
 		} catch (NoSuchJobException e) {

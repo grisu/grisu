@@ -94,8 +94,8 @@ public class FileManager {
 
 	private static String get_url_strin_path(final String url) {
 		return url.replace("=", "_").replace(",", "_").replace(" ", "_")
-				.replace(":", "").replace("//", File.separator).replace("/",
-						File.separator);
+				.replace(":", "").replace("//", File.separator)
+				.replace("/", File.separator);
 	}
 
 	public static long getDownloadFileSizeTreshold() {
@@ -364,7 +364,7 @@ public class FileManager {
 
 		if (FileManager.isLocal(url)) {
 			try {
-				File file = new File(new URI(url));
+				File file = new File(new URI(ensureUriFormat(url)));
 				return new GlazedFile(file);
 			} catch (URISyntaxException e) {
 				throw new RuntimeException(e);
@@ -429,8 +429,8 @@ public class FileManager {
 	 */
 	public final File downloadFile(final String url)
 			throws FileTransactionException {
-		
-		if ( isLocal(url) ) {
+
+		if (isLocal(url)) {
 			return getFileFromUriOrPath(url);
 		}
 
@@ -439,8 +439,7 @@ public class FileManager {
 		}
 
 		File cacheTargetFile = getLocalCacheFile(url);
-		myLogger
-				.debug("Remote file newer than local cache file or not cached yet, downloading new copy.");
+		myLogger.debug("Remote file newer than local cache file or not cached yet, downloading new copy.");
 		DataSource source = null;
 		DataHandler handler = null;
 		try {
@@ -684,8 +683,7 @@ public class FileManager {
 			myLogger.debug("local file timestamp:\t" + local_last_modified);
 			myLogger.debug("remote file timestamp:\t" + lastModified);
 			if (local_last_modified >= lastModified) {
-				myLogger
-						.debug("Local cache file is not older than remote file. No download necessary...");
+				myLogger.debug("Local cache file is not older than remote file. No download necessary...");
 				return false;
 			} else {
 				return true;
@@ -1077,8 +1075,7 @@ public class FileManager {
 				myLogger.debug("local file timestamp:\t" + local_last_modified);
 				myLogger.debug("remote file timestamp:\t" + lastModified);
 				if (local_last_modified >= lastModified) {
-					myLogger
-							.debug("Local cache file is not older than remote file. Doing nothing...");
+					myLogger.debug("Local cache file is not older than remote file. Doing nothing...");
 					return true;
 				}
 			}

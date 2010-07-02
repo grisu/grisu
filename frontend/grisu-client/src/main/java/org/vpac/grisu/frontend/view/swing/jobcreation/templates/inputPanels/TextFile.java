@@ -75,7 +75,7 @@ public class TextFile extends AbstractInputPanel {
 	private JButton button_1;
 	private JLabel label_1;
 
-	private final Validator<String> val = new InputChangedValidator();
+	// private final Validator<String> val = new InputChangedValidator();
 
 	public TextFile(String name, PanelConfig config) throws TemplateException {
 
@@ -127,8 +127,9 @@ public class TextFile extends AbstractInputPanel {
 		}
 
 		// Validator<String> val2 = Validators.REQUIRE_NON_EMPTY_STRING;
-		config.addValidator(val);
+		// config.addValidator(val);
 		// config.addValidator(val2);
+		// config.addValidator(new FileExistsValidator());
 	}
 
 	private StandaloneTextArea getTextArea() {
@@ -199,8 +200,8 @@ public class TextFile extends AbstractInputPanel {
 		}
 
 		try {
-			GlazedFile file = GrisuRegistryManager.getDefault(
-					getServiceInterface()).getFileManager()
+			GlazedFile file = GrisuRegistryManager
+					.getDefault(getServiceInterface()).getFileManager()
 					.createGlazedFileFromUrl(selectedFile);
 			loadFile(file);
 
@@ -298,7 +299,7 @@ public class TextFile extends AbstractInputPanel {
 
 	@Override
 	public JComboBox getJComboBox() {
-		return null;
+		return getComboBox();
 	}
 
 	@Override
@@ -362,8 +363,8 @@ public class TextFile extends AbstractInputPanel {
 
 		if (fillDefaultValueIntoFieldWhenPreparingPanel()) {
 			try {
-				GlazedFile file = GrisuRegistryManager.getDefault(
-						getServiceInterface()).getFileManager()
+				GlazedFile file = GrisuRegistryManager
+						.getDefault(getServiceInterface()).getFileManager()
 						.createGlazedFileFromUrl(getDefaultValue());
 				loadFile(file);
 				getJobSubmissionObject().addInputFileUrl(getDefaultValue());
@@ -420,8 +421,8 @@ public class TextFile extends AbstractInputPanel {
 								myLogger.debug(e2);
 							}
 							try {
-								FileUtils.writeStringToFile(fm
-										.getFileFromUriOrPath(currentUrl),
+								FileUtils.writeStringToFile(
+										fm.getFileFromUriOrPath(currentUrl),
 										getTextArea().getText());
 							} catch (IOException e1) {
 								e1.printStackTrace();
@@ -448,8 +449,8 @@ public class TextFile extends AbstractInputPanel {
 							myLogger.debug(e2);
 						}
 						try {
-							FileUtils.writeStringToFile(fm
-									.getFileFromUriOrPath(currentUrl),
+							FileUtils.writeStringToFile(
+									fm.getFileFromUriOrPath(currentUrl),
 									getTextArea().getText());
 						} catch (IOException e1) {
 							e1.printStackTrace();

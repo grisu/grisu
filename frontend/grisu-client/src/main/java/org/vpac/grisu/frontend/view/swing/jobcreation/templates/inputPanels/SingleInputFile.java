@@ -35,7 +35,7 @@ public class SingleInputFile extends AbstractInputPanel {
 
 	private String selectedFile = null;
 
-	private final DefaultComboBoxModel comboBoxModel = new DefaultComboBoxModel();
+	private DefaultComboBoxModel comboBoxModel;
 	private JLabel label;
 
 	public SingleInputFile(String name, PanelConfig config)
@@ -71,6 +71,8 @@ public class SingleInputFile extends AbstractInputPanel {
 			add(getButton(), "4, 2");
 			add(getHelpLabel(), "6, 2");
 		}
+
+		// config.addValidator(new FileExistsValidator());
 	}
 
 	private void fileChanged() {
@@ -118,6 +120,7 @@ public class SingleInputFile extends AbstractInputPanel {
 
 	private JComboBox getComboBox() {
 		if (comboBox == null) {
+			comboBoxModel = new DefaultComboBoxModel();
 			comboBox = new JComboBox(comboBoxModel);
 			comboBox.setPrototypeDisplayValue("xxxxx");
 			comboBox.setEditable(true);
@@ -133,8 +136,8 @@ public class SingleInputFile extends AbstractInputPanel {
 				}
 			});
 
-			comboBox.getEditor().getEditorComponent().addKeyListener(
-					new KeyAdapter() {
+			comboBox.getEditor().getEditorComponent()
+					.addKeyListener(new KeyAdapter() {
 						@Override
 						public void keyReleased(KeyEvent e) {
 							fileChanged();
@@ -170,7 +173,7 @@ public class SingleInputFile extends AbstractInputPanel {
 
 	@Override
 	public JComboBox getJComboBox() {
-		return null;
+		return getComboBox();
 	}
 
 	@Override
