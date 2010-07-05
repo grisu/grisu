@@ -269,6 +269,7 @@ public class Job implements Comparable<Job> {
 	}
 
 	@CollectionOfElements(fetch = FetchType.EAGER)
+	@Column(length = 1500)
 	public synchronized Set<String> getInputFiles() {
 		return inputFiles;
 	}
