@@ -7,38 +7,27 @@ import java.io.File;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.TitledBorder;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
 import org.vpac.grisu.model.FileManager;
-import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.files.GlazedFile;
-import org.vpac.historyRepeater.HistoryManager;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class SingleInputFile extends JPanel {
-
-	static final Logger myLogger = Logger.getLogger(SingleInputFile.class
-			.getName());
+public class SingleInputFile extends AbstractWidget {
 
 	private JComboBox comboBox;
 	private JButton btnBrowse;
 
 	private final DefaultComboBoxModel fileModel = new DefaultComboBoxModel();
-
-	private ServiceInterface si;
-	private String historyKey;
-	private HistoryManager hm;
 
 	private GrisuFileDialog fileDialog = null;
 
@@ -46,7 +35,7 @@ public class SingleInputFile extends JPanel {
 	 * Create the panel.
 	 */
 	public SingleInputFile() {
-
+		super();
 		setBorder(new TitledBorder(null, "Input file", TitledBorder.LEADING,
 				TitledBorder.TOP, null, null));
 		setLayout(new FormLayout(new ColumnSpec[] {
@@ -61,18 +50,9 @@ public class SingleInputFile extends JPanel {
 
 	}
 
-	public void setServiceInterface(ServiceInterface si) {
-		this.si = si;
-		this.hm = GrisuRegistryManager.getDefault(si).getHistoryManager();
-	}
-
-	public void setHistoryKey(String key) {
-		this.historyKey = key;
-	}
-
 	protected GlazedFile popupFileDialogAndAskForFile() {
 
-		if (si == null) {
+		if (getServiceInterface() == null) {
 			return null;
 		}
 
@@ -83,8 +63,9 @@ public class SingleInputFile extends JPanel {
 
 		GlazedFile currentDir = getFileDialog().getCurrentDirectory();
 
-		if (StringUtils.isNotBlank(historyKey)) {
-			hm.addHistoryEntry(historyKey, currentDir.getUrl());
+		if (StringUtils.isNotBlank(getHistoryKey())) {
+			getHistoryManager().addHistoryEntry(getHistoryKey() + "_last_dir",
+					currentDir.getUrl());
 		}
 
 		return file;
@@ -93,15 +74,15 @@ public class SingleInputFile extends JPanel {
 	protected GrisuFileDialog getFileDialog() {
 
 		if (fileDialog == null) {
-			String startUrl = GrisuRegistryManager.getDefault(si)
-					.getHistoryManager().getLastEntry(historyKey);
+			String startUrl = getHistoryManager().getLastEntry(
+					getHistoryKey() + "_last_dir");
 
 			if (StringUtils.isBlank(startUrl)) {
 				startUrl = new File(System.getProperty("user.home")).toURI()
 						.toString();
 			} else if (!FileManager.isLocal(startUrl)) {
 				try {
-					if (!si.isFolder(startUrl)) {
+					if (!getServiceInterface().isFolder(startUrl)) {
 						startUrl = new File(System.getProperty("user.home"))
 								.toURI().toString();
 					}
@@ -111,18 +92,13 @@ public class SingleInputFile extends JPanel {
 							.toURI().toString();
 				}
 			}
-			fileDialog = new GrisuFileDialog(si, startUrl);
+			fileDialog = new GrisuFileDialog(getServiceInterface(), startUrl);
 			fileDialog
 					.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		}
 		return fileDialog;
 
-	}
-
-	public void setTitle(String title) {
-		setBorder(new TitledBorder(null, title, TitledBorder.LEADING,
-				TitledBorder.TOP, null, null));
 	}
 
 	private JComboBox getComboBox() {
@@ -135,7 +111,7 @@ public class SingleInputFile extends JPanel {
 	}
 
 	private void setInputFile(String url) {
-		getComboBox().addItem(url);
+
 		getComboBox().setSelectedItem(url);
 	}
 
@@ -159,5 +135,36 @@ public class SingleInputFile extends JPanel {
 			});
 		}
 		return btnBrowse;
+	}
+
+	@Override
+	public void setValue(String value) {
+		setInputFile(value);
+	}
+
+	@Override
+	public String getValue() {
+		return getInputFileUrl();
+	}
+
+	@Override
+	public void historyKeySet() {
+		getHistoryManager().setMaxNumberOfEntries(getHistoryKey(), 8);
+		for (String entry : getHistoryManager().getEntries(getHistoryKey())) {
+			if (fileModel.getIndexOf(entry) < 0) {
+				getComboBox().addItem(entry);
+			}
+		}
+	}
+
+	public void lockIUI(final boolean lock) {
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				getComboBox().setEnabled(!lock);
+				getBtnBrowse().setEnabled(!lock);
+			}
+		});
+
 	}
 }

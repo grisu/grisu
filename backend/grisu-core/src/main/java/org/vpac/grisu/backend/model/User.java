@@ -77,10 +77,8 @@ public class User {
 			FileSystemOptions opts = new FileSystemOptions();
 
 			if (rootUrl.startsWith("gsiftp")) {
-				myLogger
-						.debug("Url \""
-								+ rootUrl
-								+ "\" is gsiftp url, using gridftpfilesystembuilder...");
+				myLogger.debug("Url \"" + rootUrl
+						+ "\" is gsiftp url, using gridftpfilesystembuilder...");
 
 				GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
 						.getInstance();
@@ -92,7 +90,8 @@ public class User {
 			try {
 				fileRoot = getFsManager().resolveFile(rootUrl, opts);
 			} catch (FileSystemException e) {
-				myLogger.error("Can't connect to filesystem: " + rootUrl);
+				myLogger.error("Can't connect to filesystem: " + rootUrl
+						+ " using VO: " + credToUse.getFqan());
 				throw new RuntimeException("Can't connect to filesystem "
 						+ rootUrl + ": " + e.getLocalizedMessage(), e);
 			}
@@ -490,8 +489,8 @@ public class User {
 						if (path.contains("${GLOBUS_USER_HOME}")) {
 
 							try {
-								url = getFileSystemHomeDirectory(server
-										.replace(":2811", ""), fqan);
+								url = getFileSystemHomeDirectory(
+										server.replace(":2811", ""), fqan);
 							} catch (FileSystemException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -499,8 +498,8 @@ public class User {
 
 						} else if (path.contains("${GLOBUS_SCRATCH_DIR")) {
 							try {
-								url = getFileSystemHomeDirectory(server
-										.replace(":2811", ""), fqan)
+								url = getFileSystemHomeDirectory(
+										server.replace(":2811", ""), fqan)
 										+ "/.globus/scratch";
 							} catch (FileSystemException e) {
 								e.printStackTrace();
@@ -526,8 +525,9 @@ public class User {
 						mps.add(mp);
 					}
 				} catch (Exception e) {
-					myLogger.error("Can't use mountpoint " + server + ": "
-							+ e.getLocalizedMessage(), e);
+					myLogger.error(
+							"Can't use mountpoint " + server + ": "
+									+ e.getLocalizedMessage(), e);
 				}
 			}
 		}
@@ -889,8 +889,8 @@ public class User {
 			// FileSystem fileSystem = createFilesystem(new_mp.getRootUrl(),
 			// new_mp.getFqan());
 
-			FileSystem fileSystem = threadLocalFsManager.getFileSystem(new_mp
-					.getRootUrl(), new_mp.getFqan());
+			FileSystem fileSystem = threadLocalFsManager.getFileSystem(
+					new_mp.getRootUrl(), new_mp.getFqan());
 			myLogger.debug("Connected to file system.");
 			if (useHomeDirectory) {
 				myLogger.debug("Using home directory: "
@@ -904,9 +904,9 @@ public class User {
 					uri = uri + File.separator + get_vo_dn_path(cred.getDn());
 					fileSystem.resolveFile(
 							((String) fileSystem.getAttribute("HOME_DIRECTORY")
-									+ File.separator + cred.getDn().replace(
-									"=", "_").replace(",", "_").replace(" ",
-									"_"))).createFolder();
+									+ File.separator + cred.getDn()
+									.replace("=", "_").replace(",", "_")
+									.replace(" ", "_"))).createFolder();
 				}
 				new_mp = new MountPoint(cred.getDn(), cred.getFqan(), uri,
 						mountPointName, site);
