@@ -1,6 +1,8 @@
 package org.vpac.grisu.frontend.view.swing.jobcreation.widgets;
 
 import java.awt.Component;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
@@ -19,6 +21,8 @@ public abstract class AbstractWidget extends JPanel {
 	public static Logger getMylogger() {
 		return myLogger;
 	}
+	
+	protected PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
 	private ServiceInterface si;
 
@@ -48,7 +52,15 @@ public abstract class AbstractWidget extends JPanel {
 	public void historyKeySet() {
 
 	}
+	
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+		pcs.addPropertyChangeListener(l);
+	}
 
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+		pcs.removePropertyChangeListener(l);
+	}
+	
 	private void initHistory() {
 
 		String lastValue = hm.getLastEntry(this.historyKey);

@@ -1003,4 +1003,5 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		return this.serviceInterface;
 	}
 
+
 }

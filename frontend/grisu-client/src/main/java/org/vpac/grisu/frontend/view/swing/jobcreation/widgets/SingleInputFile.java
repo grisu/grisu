@@ -14,6 +14,8 @@ import javax.swing.border.TitledBorder;
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
+import org.vpac.grisu.frontend.view.swing.utils.EmptySelectionListCellRenderer;
+import org.vpac.grisu.frontend.view.swing.utils.FirstItemPromptItemRenderer;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.files.GlazedFile;
 
@@ -30,6 +32,9 @@ public class SingleInputFile extends AbstractWidget {
 	private final DefaultComboBoxModel fileModel = new DefaultComboBoxModel();
 
 	private GrisuFileDialog fileDialog = null;
+	
+	public final String selString = "Please select a file";
+
 
 	/**
 	 * Create the panel.
@@ -104,7 +109,9 @@ public class SingleInputFile extends AbstractWidget {
 	private JComboBox getComboBox() {
 		if (comboBox == null) {
 			comboBox = new JComboBox();
-			comboBox.setEditable(true);
+			comboBox.setEditable(false);
+			comboBox.addItem(selString);
+			comboBox.setRenderer(new FirstItemPromptItemRenderer(selString));
 
 		}
 		return comboBox;
@@ -116,7 +123,13 @@ public class SingleInputFile extends AbstractWidget {
 	}
 
 	public String getInputFileUrl() {
-		return (String) getComboBox().getSelectedItem();
+		String temp = (String) getComboBox().getSelectedItem();
+		
+		if ( selString.equals(temp) ) {
+			return null;
+		} else {
+			return temp;
+		}
 	}
 
 	private JButton getBtnBrowse() {
@@ -124,6 +137,9 @@ public class SingleInputFile extends AbstractWidget {
 			btnBrowse = new JButton("Browse");
 			btnBrowse.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
+					
+					String oldValue = getValue();
+					
 					GlazedFile file = popupFileDialogAndAskForFile();
 
 					if (file == null) {
@@ -131,12 +147,13 @@ public class SingleInputFile extends AbstractWidget {
 					}
 
 					setInputFile(file.getUrl());
+					pcs.firePropertyChange("inputFileUrl", oldValue, getValue());
 				}
 			});
 		}
 		return btnBrowse;
 	}
-
+	
 	@Override
 	public void setValue(String value) {
 		setInputFile(value);
