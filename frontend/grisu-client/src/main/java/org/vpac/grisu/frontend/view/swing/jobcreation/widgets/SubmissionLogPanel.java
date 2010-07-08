@@ -119,4 +119,8 @@ public class SubmissionLogPanel extends JPanel implements
 			e.printStackTrace();
 		}
 	}
+
+	public void setText(String string) {
+		getTextArea().setText(string);
+	}
 }

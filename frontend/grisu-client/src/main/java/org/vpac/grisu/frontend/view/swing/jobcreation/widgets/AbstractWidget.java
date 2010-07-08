@@ -9,6 +9,7 @@ import javax.swing.border.TitledBorder;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.netbeans.validation.api.ui.ValidationGroup;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.historyRepeater.HistoryManager;
@@ -21,8 +22,8 @@ public abstract class AbstractWidget extends JPanel {
 	public static Logger getMylogger() {
 		return myLogger;
 	}
-	
-	protected PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+
+	private PropertyChangeSupport pcs = null;
 
 	private ServiceInterface si;
 
@@ -52,15 +53,34 @@ public abstract class AbstractWidget extends JPanel {
 	public void historyKeySet() {
 
 	}
-	
-	public void addPropertyChangeListener(PropertyChangeListener l) {
-		pcs.addPropertyChangeListener(l);
+
+	protected PropertyChangeSupport getPropertyChangeSupport() {
+		if (pcs == null) {
+			pcs = new PropertyChangeSupport(this);
+		}
+		return pcs;
 	}
 
-	public void removePropertyChangeListener(PropertyChangeListener l) {
-		pcs.removePropertyChangeListener(l);
+	@Override
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+		getPropertyChangeSupport().addPropertyChangeListener(l);
 	}
-	
+
+	@Override
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+		getPropertyChangeSupport().removePropertyChangeListener(l);
+	}
+
+	/**
+	 * Can be overwritten.
+	 * 
+	 * @param set
+	 *            whether to set the last used value or not
+	 */
+	protected boolean setLastValue() {
+		return true;
+	}
+
 	private void initHistory() {
 
 		String lastValue = hm.getLastEntry(this.historyKey);
@@ -70,10 +90,12 @@ public abstract class AbstractWidget extends JPanel {
 
 		historyKeySet();
 
-		try {
-			setValue(lastValue);
-		} catch (Exception e) {
-			return;
+		if (setLastValue()) {
+			try {
+				setValue(lastValue);
+			} catch (Exception e) {
+				return;
+			}
 		}
 
 	}
@@ -86,6 +108,14 @@ public abstract class AbstractWidget extends JPanel {
 			initHistory();
 		}
 
+	}
+
+	/**
+	 * Can be overwritten.
+	 * 
+	 * @param group
+	 */
+	public void setValidationGroup(ValidationGroup group) {
 	}
 
 	public void lockIUI(final boolean lock) {

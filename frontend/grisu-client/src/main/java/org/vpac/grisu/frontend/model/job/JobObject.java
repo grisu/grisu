@@ -57,8 +57,8 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			JobSubmissionObjectImpl jobsubmissionObject)
 			throws JobPropertiesException {
 
-		JobObject job = new JobObject(si, jobsubmissionObject
-				.getJobDescriptionDocument());
+		JobObject job = new JobObject(si,
+				jobsubmissionObject.getJobDescriptionDocument());
 
 		job.setInputFileUrls(jobsubmissionObject.getInputFileUrls());
 
@@ -228,13 +228,14 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	public int compareTo(JobObject o2) {
 		return getJobname().compareTo(o2.getJobname());
 	}
-	
+
 	/**
 	 * Creates the job on the grisu backend using the "force-name" method (which
 	 * means the backend will not change the jobname you specified -- if there
 	 * is a job with that jobname already the backend will throw an exception).
 	 * 
-	 * Also, this method uses the current fqan that the {@link UserEnvironmentManager} that is used for this client holds.
+	 * Also, this method uses the current fqan that the
+	 * {@link UserEnvironmentManager} that is used for this client holds.
 	 * 
 	 * Be aware, that once that is done, you can't change any of the basic job
 	 * parameters anymore. The backend calculates all the (possibly) missing job
@@ -250,11 +251,12 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 *             created on the backend
 	 */
 	public final String createJob() throws JobPropertiesException {
-		
-		String fqan = GrisuRegistryManager.getDefault(serviceInterface).getUserEnvironmentManager().getCurrentFqan();
-		
+
+		String fqan = GrisuRegistryManager.getDefault(serviceInterface)
+				.getUserEnvironmentManager().getCurrentFqan();
+
 		return createJob(fqan);
-		
+
 	}
 
 	/**
@@ -363,7 +365,8 @@ public class JobObject extends JobSubmissionObjectImpl implements
 						EventBus.publish(new JobStatusEvent(JobObject.this,
 								oldStatus, JobObject.this.getStatus(false)));
 						if (StringUtils.isNotBlank(getJobname())) {
-							EventBus.publish(JobObject.this.getJobname(),
+							EventBus.publish(
+									JobObject.this.getJobname(),
 									new JobStatusEvent(JobObject.this,
 											oldStatus, JobObject.this
 													.getStatus(false)));
@@ -522,8 +525,9 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			boolean oldFinished = isFinished(false);
 			this.status = serviceInterface.getJobStatus(getJobname());
 			pcs.firePropertyChange("status", oldStatus, this.status);
-			pcs.firePropertyChange("statusString", JobConstants
-					.translateStatus(oldStatus), getStatusString(false));
+			pcs.firePropertyChange("statusString",
+					JobConstants.translateStatus(oldStatus),
+					getStatusString(false));
 			pcs.firePropertyChange("finished", oldFinished, isFinished(false));
 			// addJobLogMessage("Status refreshed. Status is: "
 			// + JobConstants.translateStatus(this.status));
@@ -588,8 +592,8 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		File stderrFile;
 		try {
 			stderrFile = downloadAndCacheOutputFile(serviceInterface
-					.getJobProperty(getJobname(), JobSubmissionProperty.STDERR
-							.toString()));
+					.getJobProperty(getJobname(),
+							JobSubmissionProperty.STDERR.toString()));
 		} catch (Exception e) {
 			throw new JobException(this, "Could not download stderr file.", e);
 		}
@@ -633,8 +637,8 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		File stdoutFile;
 		try {
 			stdoutFile = downloadAndCacheOutputFile(serviceInterface
-					.getJobProperty(getJobname(), JobSubmissionProperty.STDOUT
-							.toString()));
+					.getJobProperty(getJobname(),
+							JobSubmissionProperty.STDOUT.toString()));
 		} catch (Exception e) {
 			throw new JobException(this, "Could not download stdout file.", e);
 		}
@@ -829,14 +833,13 @@ public class JobObject extends JobSubmissionObjectImpl implements
 				this);
 		try {
 			fileTransfer.join();
-			addJobLogMessage("Staging of input files finished.");
 		} catch (ExecutionException e) {
 			addJobLogMessage("Staging failed: " + e.getLocalizedMessage());
 			if (fileTransfer.getException() != null) {
 				throw fileTransfer.getException();
 			} else {
-				throw new FileTransactionException(fileTransfer
-						.getFailedSourceFile(), jobDirectory,
+				throw new FileTransactionException(
+						fileTransfer.getFailedSourceFile(), jobDirectory,
 						"File staging failed.", null);
 			}
 		}
@@ -845,11 +848,13 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			if (fileTransfer.getException() != null) {
 				throw fileTransfer.getException();
 			} else {
-				throw new FileTransactionException(fileTransfer
-						.getFailedSourceFile(), jobDirectory,
+				throw new FileTransactionException(
+						fileTransfer.getFailedSourceFile(), jobDirectory,
 						"File staging failed.", null);
 			}
 		}
+
+		addJobLogMessage("Staging of input files finished.");
 
 		if ((getInputFileUrls() != null) && (getInputFileUrls().length > 0)) {
 			setStatus(JobConstants.INPUT_FILES_UPLOADED);
@@ -896,10 +901,13 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		try {
 			stageFiles();
 		} catch (FileTransactionException e) {
+			addJobLogMessage("Could not stage in file: "
+					+ e.getLocalizedMessage());
 			throw new JobSubmissionException("Could not stage in file.", e);
 		}
 
 		if (Thread.interrupted()) {
+			addJobLogMessage("Job submission interrupted.");
 			throw new InterruptedException(
 					"Interrupted after staging in input files.");
 		}
@@ -998,10 +1006,9 @@ public class JobObject extends JobSubmissionObjectImpl implements
 
 		return isFinished();
 	}
-	
+
 	public ServiceInterface getServiceInterface() {
 		return this.serviceInterface;
 	}
-
 
 }

@@ -1083,4 +1083,37 @@ public class FileManager {
 			return false;
 		}
 	}
+
+	public boolean isFile(String file) {
+		if (isLocal(file)) {
+			return new File(file).isFile();
+		} else {
+			try {
+				if (serviceInterface.fileExists(file)) {
+					return !serviceInterface.isFolder(file);
+				} else {
+					return false;
+				}
+			} catch (RemoteFileSystemException e) {
+				return false;
+			}
+		}
+	}
+
+	public boolean isFolder(String file) {
+
+		if (isLocal(file)) {
+			return new File(file).isDirectory();
+		} else {
+			try {
+				if (serviceInterface.fileExists(file)) {
+					return serviceInterface.isFolder(file);
+				} else {
+					return false;
+				}
+			} catch (RemoteFileSystemException e) {
+				return false;
+			}
+		}
+	}
 }

@@ -14,7 +14,6 @@ import javax.swing.border.TitledBorder;
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
-import org.vpac.grisu.frontend.view.swing.utils.EmptySelectionListCellRenderer;
 import org.vpac.grisu.frontend.view.swing.utils.FirstItemPromptItemRenderer;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.files.GlazedFile;
@@ -29,12 +28,11 @@ public class SingleInputFile extends AbstractWidget {
 	private JComboBox comboBox;
 	private JButton btnBrowse;
 
-	private final DefaultComboBoxModel fileModel = new DefaultComboBoxModel();
+	protected final DefaultComboBoxModel fileModel = new DefaultComboBoxModel();
 
 	private GrisuFileDialog fileDialog = null;
-	
-	public final String selString = "Please select a file";
 
+	public final String selString = "Please select a file";
 
 	/**
 	 * Create the panel.
@@ -53,6 +51,11 @@ public class SingleInputFile extends AbstractWidget {
 		add(getComboBox(), "2, 2, fill, default");
 		add(getBtnBrowse(), "4, 2");
 
+	}
+
+	@Override
+	protected boolean setLastValue() {
+		return false;
 	}
 
 	protected GlazedFile popupFileDialogAndAskForFile() {
@@ -108,7 +111,7 @@ public class SingleInputFile extends AbstractWidget {
 
 	private JComboBox getComboBox() {
 		if (comboBox == null) {
-			comboBox = new JComboBox();
+			comboBox = new JComboBox(fileModel);
 			comboBox.setEditable(false);
 			comboBox.addItem(selString);
 			comboBox.setRenderer(new FirstItemPromptItemRenderer(selString));
@@ -117,29 +120,32 @@ public class SingleInputFile extends AbstractWidget {
 		return comboBox;
 	}
 
-	private void setInputFile(String url) {
-
-		getComboBox().setSelectedItem(url);
+	protected void setInputFile(String url) {
+		int index = fileModel.getIndexOf(url);
+		if (index < 0) {
+			fileModel.addElement(url);
+		}
+		fileModel.setSelectedItem(url);
 	}
 
 	public String getInputFileUrl() {
 		String temp = (String) getComboBox().getSelectedItem();
-		
-		if ( selString.equals(temp) ) {
+
+		if (selString.equals(temp)) {
 			return null;
 		} else {
 			return temp;
 		}
 	}
 
-	private JButton getBtnBrowse() {
+	protected JButton getBtnBrowse() {
 		if (btnBrowse == null) {
 			btnBrowse = new JButton("Browse");
 			btnBrowse.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					
+
 					String oldValue = getValue();
-					
+
 					GlazedFile file = popupFileDialogAndAskForFile();
 
 					if (file == null) {
@@ -147,13 +153,14 @@ public class SingleInputFile extends AbstractWidget {
 					}
 
 					setInputFile(file.getUrl());
-					pcs.firePropertyChange("inputFileUrl", oldValue, getValue());
+					getPropertyChangeSupport().firePropertyChange(
+							"inputFileUrl", oldValue, getValue());
 				}
 			});
 		}
 		return btnBrowse;
 	}
-	
+
 	@Override
 	public void setValue(String value) {
 		setInputFile(value);
@@ -169,11 +176,12 @@ public class SingleInputFile extends AbstractWidget {
 		getHistoryManager().setMaxNumberOfEntries(getHistoryKey(), 8);
 		for (String entry : getHistoryManager().getEntries(getHistoryKey())) {
 			if (fileModel.getIndexOf(entry) < 0) {
-				getComboBox().addItem(entry);
+				fileModel.addElement(entry);
 			}
 		}
 	}
 
+	@Override
 	public void lockIUI(final boolean lock) {
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
