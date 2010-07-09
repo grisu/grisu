@@ -115,6 +115,7 @@ public class SingleInputFile extends AbstractWidget {
 		if (comboBox == null) {
 			comboBox = new JComboBox(fileModel);
 			comboBox.setEditable(false);
+			comboBox.setPrototypeDisplayValue("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 			comboBox.addItem(selString);
 			comboBox.setRenderer(new FirstItemPromptItemRenderer(selString));
 			comboBox.addItemListener(new ItemListener() {
