@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JComboBox;
-import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.exceptions.TemplateException;
@@ -77,16 +76,6 @@ public class Cpus extends AbstractInputPanel {
 		defaultProperties.put(PREFILLS, "1,2,4,8,16,32");
 
 		return defaultProperties;
-	}
-
-	@Override
-	public JComboBox getJComboBox() {
-		return getComboBox();
-	}
-
-	@Override
-	public JTextComponent getTextComponent() {
-		return null;
 	}
 
 	@Override

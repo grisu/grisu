@@ -8,7 +8,6 @@ import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
-import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.exceptions.TemplateException;
@@ -22,7 +21,6 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class Walltime extends AbstractInputPanel {
-
 
 	private JComboBox amountComboBox;
 
@@ -66,8 +64,9 @@ public class Walltime extends AbstractInputPanel {
 
 					int walltimeInSeconds = -1;
 					try {
-						walltimeInSeconds = WalltimeUtils.convertHumanReadableStringIntoSeconds(new String[] {
-								amount, unit });
+						walltimeInSeconds = WalltimeUtils
+								.convertHumanReadableStringIntoSeconds(new String[] {
+										amount, unit });
 					} catch (Exception e1) {
 						myLogger.debug("Can't parse " + amount + ",  " + unit
 								+ ": " + e1.getLocalizedMessage());
@@ -100,16 +99,6 @@ public class Walltime extends AbstractInputPanel {
 		return defaultProperties;
 	}
 
-	@Override
-	public JComboBox getJComboBox() {
-		return null;
-	}
-
-	@Override
-	public JTextComponent getTextComponent() {
-		return null;
-	}
-
 	private JComboBox getUnitComboBox() {
 		if (unitComboBox == null) {
 			unitComboBox = new JComboBox();
@@ -119,9 +108,12 @@ public class Walltime extends AbstractInputPanel {
 
 				public void itemStateChanged(ItemEvent e) {
 
-					int walltimeInSeconds = WalltimeUtils.convertHumanReadableStringIntoSeconds(new String[] {
-							(String) (getAmountComboBox().getSelectedItem()),
-							(String) (getUnitComboBox().getSelectedItem()) });
+					int walltimeInSeconds = WalltimeUtils
+							.convertHumanReadableStringIntoSeconds(new String[] {
+									(String) (getAmountComboBox()
+											.getSelectedItem()),
+									(String) (getUnitComboBox()
+											.getSelectedItem()) });
 					try {
 						setValue("walltimeInSeconds", walltimeInSeconds);
 					} catch (TemplateException e1) {
@@ -138,8 +130,9 @@ public class Walltime extends AbstractInputPanel {
 		String amount = (String) getAmountComboBox().getSelectedItem();
 		String unit = (String) getUnitComboBox().getSelectedItem();
 		try {
-			Integer secs = WalltimeUtils.convertHumanReadableStringIntoSeconds(new String[] {
-					amount, unit });
+			Integer secs = WalltimeUtils
+					.convertHumanReadableStringIntoSeconds(new String[] {
+							amount, unit });
 			return secs.toString();
 		} catch (Exception e) {
 			return null;
@@ -152,8 +145,9 @@ public class Walltime extends AbstractInputPanel {
 
 		if ("walltimeInSeconds".equals(e.getPropertyName())) {
 
-			String[] humanReadable = WalltimeUtils.convertSecondsInHumanReadableString((Integer) (e
-					.getNewValue()));
+			String[] humanReadable = WalltimeUtils
+					.convertSecondsInHumanReadableString((Integer) (e
+							.getNewValue()));
 			amountModel.setSelectedItem(humanReadable[0]);
 			unitModel.setSelectedItem(humanReadable[1]);
 		}
@@ -197,8 +191,9 @@ public class Walltime extends AbstractInputPanel {
 			String defValue = getDefaultValue();
 
 			try {
-				String[] humanreadable = WalltimeUtils.convertSecondsInHumanReadableString(Integer
-						.parseInt(defValue));
+				String[] humanreadable = WalltimeUtils
+						.convertSecondsInHumanReadableString(Integer
+								.parseInt(defValue));
 				if (humanreadable != null && humanreadable.length == 2) {
 					defaultAmount = humanreadable[0];
 					defaultUnit = humanreadable[1];

@@ -5,11 +5,9 @@ import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JComboBox;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
-import javax.swing.text.JTextComponent;
 
 import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
@@ -27,19 +25,12 @@ public class InfoField extends AbstractInputPanel {
 
 	}
 
-	
-	
 	@Override
 	protected Map<String, String> getDefaultPanelProperties() {
 
 		Map<String, String> defaultProperties = new HashMap<String, String>();
 
 		return defaultProperties;
-	}
-
-	@Override
-	public JComboBox getJComboBox() {
-		return null;
 	}
 
 	private JScrollPane getScrollPane() {
@@ -59,11 +50,6 @@ public class InfoField extends AbstractInputPanel {
 			textArea.setEditable(false);
 		}
 		return textArea;
-	}
-
-	@Override
-	public JTextComponent getTextComponent() {
-		return null;
 	}
 
 	@Override

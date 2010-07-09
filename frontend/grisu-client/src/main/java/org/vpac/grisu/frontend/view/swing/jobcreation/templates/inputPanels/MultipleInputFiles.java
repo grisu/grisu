@@ -9,10 +9,8 @@ import java.util.Set;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
-import javax.swing.text.JTextComponent;
 
 import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
@@ -101,8 +99,8 @@ public class MultipleInputFiles extends AbstractInputPanel {
 					Object[] selFiles = getList_1().getSelectedValues();
 
 					for (Object file : selFiles) {
-						removeValue("inputFileUrl", ((GlazedFile) file)
-								.getUrl());
+						removeValue("inputFileUrl",
+								((GlazedFile) file).getUrl());
 						fileModel.removeElement(file);
 					}
 
@@ -121,11 +119,6 @@ public class MultipleInputFiles extends AbstractInputPanel {
 		return defaultProperties;
 	}
 
-	@Override
-	public JComboBox getJComboBox() {
-		return null;
-	}
-
 	private JList getList_1() {
 		if (list == null) {
 			list = new JList(fileModel);
@@ -141,11 +134,6 @@ public class MultipleInputFiles extends AbstractInputPanel {
 			scrollPane.setViewportView(getList_1());
 		}
 		return scrollPane;
-	}
-
-	@Override
-	public JTextComponent getTextComponent() {
-		return null;
 	}
 
 	@Override

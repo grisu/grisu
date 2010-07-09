@@ -6,7 +6,6 @@ import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JComboBox;
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
 
@@ -48,11 +47,6 @@ public class TextField extends AbstractInputPanel {
 		Map<String, String> defaultProperties = new HashMap<String, String>();
 
 		return defaultProperties;
-	}
-
-	@Override
-	public JComboBox getJComboBox() {
-		return null;
 	}
 
 	@Override

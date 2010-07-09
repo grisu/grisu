@@ -6,7 +6,6 @@ import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JComboBox;
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
 
@@ -57,11 +56,6 @@ public class Jobname extends AbstractInputPanel {
 		defaultProperties.put(JOBNAME_CALC_METHOD_KEY, "uniqueNumber");
 
 		return defaultProperties;
-	}
-
-	@Override
-	public JComboBox getJComboBox() {
-		return null;
 	}
 
 	private JTextField getJobnameTextField() {

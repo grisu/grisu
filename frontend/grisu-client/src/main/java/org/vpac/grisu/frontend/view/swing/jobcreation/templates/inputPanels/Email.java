@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
 
@@ -68,8 +67,8 @@ public class Email extends AbstractInputPanel {
 				public void itemStateChanged(ItemEvent arg0) {
 
 					try {
-						setValue("email_on_job_finish", chckbxfinishes
-								.isSelected());
+						setValue("email_on_job_finish",
+								chckbxfinishes.isSelected());
 						if (getChckbxfinishes().isSelected()
 								|| getStartsCheckBox().isSelected()) {
 							getTextField().setText(getTextField().getText());
@@ -96,11 +95,6 @@ public class Email extends AbstractInputPanel {
 		return defaultProperties;
 	}
 
-	@Override
-	public JComboBox getJComboBox() {
-		return null;
-	}
-
 	private JCheckBox getStartsCheckBox() {
 		if (startsCheckBox == null) {
 			startsCheckBox = new JCheckBox("...starts");
@@ -108,8 +102,8 @@ public class Email extends AbstractInputPanel {
 				public void itemStateChanged(ItemEvent arg0) {
 
 					try {
-						setValue("email_on_job_start", startsCheckBox
-								.isSelected());
+						setValue("email_on_job_start",
+								startsCheckBox.isSelected());
 						if (getChckbxfinishes().isSelected()
 								|| getStartsCheckBox().isSelected()) {
 							getTextField().setText(getTextField().getText());

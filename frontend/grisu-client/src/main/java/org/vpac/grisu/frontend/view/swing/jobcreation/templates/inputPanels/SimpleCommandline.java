@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JComboBox;
-import javax.swing.text.JTextComponent;
 
 import org.vpac.grisu.control.exceptions.TemplateException;
 import org.vpac.grisu.frontend.view.swing.jobcreation.templates.PanelConfig;
@@ -101,8 +100,8 @@ public class SimpleCommandline extends AbstractInputPanel {
 				}
 			});
 
-			comboBox.getEditor().getEditorComponent().addKeyListener(
-					new KeyAdapter() {
+			comboBox.getEditor().getEditorComponent()
+					.addKeyListener(new KeyAdapter() {
 						@Override
 						public void keyReleased(KeyEvent e) {
 							try {
@@ -124,16 +123,6 @@ public class SimpleCommandline extends AbstractInputPanel {
 		defaultProperties.put(TITLE, "Commandline");
 		defaultProperties.put(HISTORY_ITEMS, "8");
 		return defaultProperties;
-	}
-
-	@Override
-	public JComboBox getJComboBox() {
-		return getComboBox();
-	}
-
-	@Override
-	public JTextComponent getTextComponent() {
-		return null;
 	}
 
 	@Override

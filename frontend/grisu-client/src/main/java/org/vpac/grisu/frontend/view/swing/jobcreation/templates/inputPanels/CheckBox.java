@@ -8,9 +8,7 @@ import java.util.Map;
 
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.exceptions.TemplateException;
@@ -67,16 +65,6 @@ public class CheckBox extends AbstractInputPanel {
 		defaultProperties.put(UNCHECKED_VALUE, "false");
 		return defaultProperties;
 
-	}
-
-	@Override
-	public JComboBox getJComboBox() {
-		return null;
-	}
-
-	@Override
-	public JTextComponent getTextComponent() {
-		return null;
 	}
 
 	@Override

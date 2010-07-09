@@ -7,10 +7,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.JComboBox;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerListModel;
-import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.exceptions.TemplateException;
@@ -52,21 +50,11 @@ public class Spinner extends AbstractInputPanel {
 
 	}
 
-	@Override
-	public JComboBox getJComboBox() {
-		return null;
-	}
-
 	private JSpinner getSpinner() {
 		if (spinner == null) {
 			spinner = new JSpinner(model);
 		}
 		return spinner;
-	}
-
-	@Override
-	public JTextComponent getTextComponent() {
-		return null;
 	}
 
 	@Override

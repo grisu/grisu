@@ -456,6 +456,47 @@ public class User {
 		threadLocalFsManager.remove();
 	}
 
+	private MountPoint createMountPoint(String server, String path, String fqan) {
+
+		String url = null;
+		if (path.contains("${GLOBUS_USER_HOME}")) {
+
+			try {
+				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
+						fqan);
+			} catch (FileSystemException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		} else if (path.contains("${GLOBUS_SCRATCH_DIR")) {
+			try {
+				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
+						fqan) + "/.globus/scratch";
+			} catch (FileSystemException e) {
+				e.printStackTrace();
+			}
+		} else {
+
+			url = server.replace(":2811", "") + path + "/"
+					+ User.get_vo_dn_path(getCred().getDn());
+
+		}
+
+		if (StringUtils.isBlank(url)) {
+			myLogger.error("Url is blank for " + server + " and " + path);
+			return null;
+		}
+
+		MountPoint mp = new MountPoint(getDn(), fqan, url,
+				MountPointHelpers.calculateMountPointName(server, fqan),
+				AbstractServiceInterface.informationManager
+						.getSiteForHostOrUrl(url), true);
+		// + "." + fqan + "." + path);
+		// + "." + fqan);
+		return mp;
+	}
+
 	/**
 	 * Calculates all mountpoints that are automatically mounted using mds. At
 	 * the moment, the port part of the gridftp url share is ignored. Maybe I'll
@@ -485,44 +526,10 @@ public class User {
 				try {
 					for (String path : mpUrl.get(server)) {
 
-						String url = null;
-						if (path.contains("${GLOBUS_USER_HOME}")) {
-
-							try {
-								url = getFileSystemHomeDirectory(
-										server.replace(":2811", ""), fqan);
-							} catch (FileSystemException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-
-						} else if (path.contains("${GLOBUS_SCRATCH_DIR")) {
-							try {
-								url = getFileSystemHomeDirectory(
-										server.replace(":2811", ""), fqan)
-										+ "/.globus/scratch";
-							} catch (FileSystemException e) {
-								e.printStackTrace();
-							}
-						} else {
-
-							url = server.replace(":2811", "") + path + "/"
-									+ User.get_vo_dn_path(getCred().getDn());
-
+						MountPoint mp = createMountPoint(server, path, fqan);
+						if (mp != null) {
+							mps.add(mp);
 						}
-
-						if (StringUtils.isBlank(url)) {
-							continue;
-						}
-
-						MountPoint mp = new MountPoint(getDn(), fqan, url,
-								MountPointHelpers.calculateMountPointName(
-										server, fqan),
-								AbstractServiceInterface.informationManager
-										.getSiteForHostOrUrl(url), true);
-						// + "." + fqan + "." + path);
-						// + "." + fqan);
-						mps.add(mp);
 					}
 				} catch (Exception e) {
 					myLogger.error(

@@ -17,7 +17,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.text.JTextComponent;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -300,11 +299,6 @@ public class TextFile extends AbstractInputPanel {
 	@Override
 	public JComboBox getJComboBox() {
 		return getComboBox();
-	}
-
-	@Override
-	public JTextComponent getTextComponent() {
-		return null;
 	}
 
 	@Override

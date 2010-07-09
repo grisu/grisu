@@ -344,8 +344,8 @@ public abstract class AbstractInputPanel extends JPanel implements
 		if (helpLabel == null) {
 			helpLabel = new JButton("");
 			helpLabel.setBorder(null);
-			Icon icon = new ImageIcon(TextField.class
-					.getResource("/help_icon.gif"));
+			Icon icon = new ImageIcon(
+					TextField.class.getResource("/help_icon.gif"));
 			helpLabel.setIcon(icon);
 			helpLabel.setDisabledIcon(icon);
 			helpLabel.setEnabled(false);
@@ -369,7 +369,9 @@ public abstract class AbstractInputPanel extends JPanel implements
 		}
 	}
 
-	abstract public JComboBox getJComboBox();
+	public JComboBox getJComboBox() {
+		return null;
+	}
 
 	protected JobSubmissionObjectImpl getJobSubmissionObject() {
 		return jobObject;
@@ -420,7 +422,9 @@ public abstract class AbstractInputPanel extends JPanel implements
 		return this.si;
 	}
 
-	abstract public JTextComponent getTextComponent();
+	public JTextComponent getTextComponent() {
+		return null;
+	}
 
 	protected UserEnvironmentManager getUserEnvironmentManager() {
 		return this.uem;

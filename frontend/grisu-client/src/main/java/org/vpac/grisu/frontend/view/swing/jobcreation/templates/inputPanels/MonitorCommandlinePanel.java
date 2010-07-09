@@ -4,7 +4,6 @@ import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JComboBox;
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
 
@@ -42,11 +41,6 @@ public class MonitorCommandlinePanel extends AbstractInputPanel {
 		defaultProperties.put(DEFAULT_VALUE, "n/a");
 
 		return defaultProperties;
-	}
-
-	@Override
-	public JComboBox getJComboBox() {
-		return null;
 	}
 
 	@Override

@@ -8,9 +8,7 @@ import java.util.Map;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
-import javax.swing.JComboBox;
 import javax.swing.JRadioButton;
-import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.exceptions.TemplateException;
@@ -102,11 +100,6 @@ public class JobType extends AbstractInputPanel implements ActionListener {
 		return defaultProperties;
 	}
 
-	@Override
-	public JComboBox getJComboBox() {
-		return null;
-	}
-
 	private JRadioButton getMpiRadioBox() {
 		if (mpiRadioBox == null) {
 			mpiRadioBox = new JRadioButton("MPI");
@@ -123,11 +116,6 @@ public class JobType extends AbstractInputPanel implements ActionListener {
 			singleRadioBox.addActionListener(this);
 		}
 		return singleRadioBox;
-	}
-
-	@Override
-	public JTextComponent getTextComponent() {
-		return null;
 	}
 
 	private JRadioButton getThreadedRadioBox() {

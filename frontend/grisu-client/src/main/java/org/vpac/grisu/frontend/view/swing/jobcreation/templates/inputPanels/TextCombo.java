@@ -10,7 +10,6 @@ import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
-import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.exceptions.TemplateException;
@@ -79,8 +78,8 @@ public class TextCombo extends AbstractInputPanel {
 				}
 			});
 
-			combobox.getEditor().getEditorComponent().addKeyListener(
-					new KeyAdapter() {
+			combobox.getEditor().getEditorComponent()
+					.addKeyListener(new KeyAdapter() {
 
 						@Override
 						public void keyReleased(KeyEvent e) {
@@ -116,11 +115,6 @@ public class TextCombo extends AbstractInputPanel {
 	@Override
 	public JComboBox getJComboBox() {
 		return getComboBox();
-	}
-
-	@Override
-	public JTextComponent getTextComponent() {
-		return null;
 	}
 
 	@Override

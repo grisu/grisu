@@ -14,7 +14,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.exceptions.TemplateException;
@@ -170,16 +169,6 @@ public class SingleInputFile extends AbstractInputPanel {
 	// }
 	// return dialog;
 	// }
-
-	@Override
-	public JComboBox getJComboBox() {
-		return getComboBox();
-	}
-
-	@Override
-	public JTextComponent getTextComponent() {
-		return null;
-	}
 
 	@Override
 	protected String getValueAsString() {

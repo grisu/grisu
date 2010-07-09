@@ -12,7 +12,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
@@ -73,16 +72,6 @@ public class QueueSelector extends AbstractInputPanel implements
 		Map<String, String> defaultProperties = new HashMap<String, String>();
 
 		return defaultProperties;
-	}
-
-	@Override
-	public JComboBox getJComboBox() {
-		return null;
-	}
-
-	@Override
-	public JTextComponent getTextComponent() {
-		return null;
 	}
 
 	@Override
