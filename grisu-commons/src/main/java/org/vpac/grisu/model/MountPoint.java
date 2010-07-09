@@ -1,9 +1,13 @@
 package org.vpac.grisu.model;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -11,6 +15,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.log4j.Logger;
+import org.vpac.grisu.model.dto.DtoProperty;
 
 /**
  * The concept of MountPoints is pretty important within grisu. A MountPoint is
@@ -53,6 +58,8 @@ public class MountPoint implements Comparable<MountPoint> {
 	 * The name of the site this mountpoint belongs to.
 	 */
 	private String site = null;
+
+	private List<DtoProperty> properties = new LinkedList<DtoProperty>();
 
 	private boolean automaticallyMounted = false;
 	private boolean disabled = false;
@@ -122,6 +129,7 @@ public class MountPoint implements Comparable<MountPoint> {
 		return getRootUrl().compareTo(mp.getRootUrl());
 	}
 
+	@Override
 	public boolean equals(final Object otherMountPoint) {
 
 		if (otherMountPoint instanceof MountPoint) {
@@ -152,6 +160,20 @@ public class MountPoint implements Comparable<MountPoint> {
 			return false;
 		}
 
+	}
+
+	public void addProperty(String key, String value) {
+		this.properties.add(new DtoProperty(key, value));
+	}
+
+	@Transient
+	@XmlElement(name = "property")
+	public List<DtoProperty> getProperties() {
+		return properties;
+	}
+
+	public void setProperties(List<DtoProperty> properties) {
+		this.properties = properties;
 	}
 
 	@Column(nullable = false)
@@ -231,6 +253,7 @@ public class MountPoint implements Comparable<MountPoint> {
 		return site;
 	}
 
+	@Override
 	public int hashCode() {
 		// return dn.hashCode() + mountpoint.hashCode();
 		return alias.hashCode();
@@ -263,8 +286,7 @@ public class MountPoint implements Comparable<MountPoint> {
 		} else {
 			if (file.startsWith(getRootUrl().replace(":2811", ""))) {
 				// warning
-				myLogger
-						.warn("Found mountpoint. Didn't compare port numbers though...");
+				myLogger.warn("Found mountpoint. Didn't compare port numbers though...");
 				return true;
 			}
 		}
@@ -389,6 +411,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	 * 
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		return getAlias();
 	}

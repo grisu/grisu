@@ -2,6 +2,8 @@ package org.vpac.grisu.frontend.view.swing.jobcreation.widgets;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 
 import javax.swing.DefaultComboBoxModel;
@@ -115,12 +117,35 @@ public class SingleInputFile extends AbstractWidget {
 			comboBox.setEditable(false);
 			comboBox.addItem(selString);
 			comboBox.setRenderer(new FirstItemPromptItemRenderer(selString));
+			comboBox.addItemListener(new ItemListener() {
 
+				public void itemStateChanged(ItemEvent e) {
+
+					if (ItemEvent.SELECTED == e.getStateChange()) {
+
+						if (StringUtils.isNotBlank((String) fileModel
+								.getSelectedItem())) {
+
+							setInputFile((String) fileModel.getSelectedItem());
+							getPropertyChangeSupport().firePropertyChange(
+									"inputFileUrl", null, getValue());
+						}
+					}
+				}
+
+			});
 		}
+
 		return comboBox;
 	}
 
 	protected void setInputFile(String url) {
+
+		if (StringUtils.isBlank(url)) {
+			fileModel.setSelectedItem(selString);
+			return;
+		}
+
 		int index = fileModel.getIndexOf(url);
 		if (index < 0) {
 			fileModel.addElement(url);

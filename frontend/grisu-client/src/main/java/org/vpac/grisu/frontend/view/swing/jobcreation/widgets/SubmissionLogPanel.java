@@ -1,6 +1,7 @@
 package org.vpac.grisu.frontend.view.swing.jobcreation.widgets;
 
 import java.awt.BorderLayout;
+import java.awt.Insets;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
@@ -46,6 +47,7 @@ public class SubmissionLogPanel extends JPanel implements
 		if (textArea == null) {
 			textArea = new JTextArea();
 			textArea.setEditable(false);
+			textArea.setMargin(new Insets(5, 5, 5, 5));
 		}
 		return textArea;
 	}
@@ -57,7 +59,7 @@ public class SubmissionLogPanel extends JPanel implements
 		}
 
 		currentJob = jobObject;
-		getTextArea().setText("");
+		setText("");
 		currentJob.addPropertyChangeListener(this);
 
 	}
@@ -120,7 +122,12 @@ public class SubmissionLogPanel extends JPanel implements
 		}
 	}
 
-	public void setText(String string) {
-		getTextArea().setText(string);
+	public void setText(final String string) {
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				getTextArea().setText(string);
+			}
+		});
 	}
 }

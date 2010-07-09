@@ -488,10 +488,11 @@ public class User {
 			return null;
 		}
 
+		String site = AbstractServiceInterface.informationManager
+				.getSiteForHostOrUrl(url);
 		MountPoint mp = new MountPoint(getDn(), fqan, url,
-				MountPointHelpers.calculateMountPointName(server, fqan),
-				AbstractServiceInterface.informationManager
-						.getSiteForHostOrUrl(url), true);
+				MountPointHelpers.calculateMountPointName(server, fqan), site,
+				true);
 		// + "." + fqan + "." + path);
 		// + "." + fqan);
 		return mp;
