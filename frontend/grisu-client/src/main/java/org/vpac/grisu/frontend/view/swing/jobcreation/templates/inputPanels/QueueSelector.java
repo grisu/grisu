@@ -131,6 +131,74 @@ public class QueueSelector extends AbstractInputPanel implements
 
 	}
 
+	private synchronized void loadQueuesIntoComboBox() {
+		GridResource oldSubLoc = null;
+
+		try {
+			oldSubLoc = (GridResource) queueModel.getSelectedItem();
+		} catch (Exception e) {
+			// doesn't matter
+		}
+		setLoading(true);
+		JobSubmissionObjectImpl job = getJobSubmissionObject();
+		if (job == null) {
+			return;
+		}
+		String applicationName = job.getApplication();
+		if (StringUtils.isBlank(applicationName)) {
+			applicationName = Constants.GENERIC_APPLICATION_NAME;
+		}
+		ApplicationInformation ai = GrisuRegistryManager.getDefault(
+				getServiceInterface()).getApplicationInformation(
+				applicationName);
+
+		if (Thread.interrupted()) {
+			return;
+		}
+
+		currentQueues = ai.getAllSubmissionLocationsAsGridResources(
+				getJobSubmissionObject().getJobSubmissionPropertyMap(),
+				GrisuRegistryManager.getDefault(getServiceInterface())
+						.getUserEnvironmentManager().getCurrentFqan());
+
+		if (Thread.interrupted()) {
+			return;
+		}
+
+		if (currentQueues == null) {
+			return;
+		}
+
+		setLoading(false);
+		queueModel.removeAllElements();
+		boolean containsOld = false;
+		for (final GridResource gr : currentQueues) {
+			if (gr.equals(oldSubLoc)) {
+				containsOld = true;
+			}
+			SwingUtilities.invokeLater(new Thread() {
+
+				@Override
+				public void run() {
+					queueModel.addElement(gr);
+				}
+
+			});
+
+		}
+		if (containsOld) {
+			final GridResource temp = oldSubLoc;
+			SwingUtilities.invokeLater(new Thread() {
+
+				@Override
+				public void run() {
+					queueModel.setSelectedItem(temp);
+				}
+
+			});
+		}
+	}
+
 	private void loadQueues() {
 
 		if (loadThread != null && loadThread.isAlive()) {
@@ -141,73 +209,9 @@ public class QueueSelector extends AbstractInputPanel implements
 		loadThread = new Thread() {
 			@Override
 			public void run() {
-
-				GridResource oldSubLoc = null;
-
-				try {
-					oldSubLoc = (GridResource) queueModel.getSelectedItem();
-				} catch (Exception e) {
-					// doesn't matter
-				}
-				setLoading(true);
-				JobSubmissionObjectImpl job = getJobSubmissionObject();
-				if (job == null) {
-					return;
-				}
-				String applicationName = job.getApplication();
-				if (StringUtils.isBlank(applicationName)) {
-					applicationName = Constants.GENERIC_APPLICATION_NAME;
-				}
-				ApplicationInformation ai = GrisuRegistryManager.getDefault(
-						getServiceInterface()).getApplicationInformation(
-						applicationName);
-
-				if (Thread.interrupted()) {
-					return;
-				}
-
-				currentQueues = ai.getAllSubmissionLocationsAsGridResources(
-						getJobSubmissionObject().getJobSubmissionPropertyMap(),
-						GrisuRegistryManager.getDefault(getServiceInterface())
-								.getUserEnvironmentManager().getCurrentFqan());
-
-				if (currentQueues == null) {
-					return;
-				}
-
-				if (Thread.interrupted()) {
-					return;
-				}
-
-				setLoading(false);
-				queueModel.removeAllElements();
-				boolean containsOld = false;
-				for (final GridResource gr : currentQueues) {
-					if (gr.equals(oldSubLoc)) {
-						containsOld = true;
-					}
-					SwingUtilities.invokeLater(new Thread() {
-
-						@Override
-						public void run() {
-							queueModel.addElement(gr);
-						}
-
-					});
-
-				}
-				if (containsOld) {
-					final GridResource temp = oldSubLoc;
-					SwingUtilities.invokeLater(new Thread() {
-
-						@Override
-						public void run() {
-							queueModel.setSelectedItem(temp);
-						}
-
-					});
-				}
+				loadQueuesIntoComboBox();
 			}
+
 		};
 
 		loadThread.start();

@@ -60,8 +60,10 @@ public class Cpus extends AbstractWidget {
 	}
 
 	private void setCpus(Integer cpus) {
-		getComboBox().addItem(cpus.toString());
-		getComboBox().setSelectedItem(cpus.toString());
+		if (cpuModel.getIndexOf(cpus.toString()) < 0) {
+			cpuModel.addElement(cpus.toString());
+		}
+		cpuModel.setSelectedItem(cpus.toString());
 	}
 
 	@Override
@@ -81,6 +83,7 @@ public class Cpus extends AbstractWidget {
 		return getCpus().toString();
 	}
 
+	@Override
 	public void lockIUI(boolean lock) {
 
 		getComboBox().setEnabled(!lock);

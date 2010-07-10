@@ -13,6 +13,7 @@ import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -66,8 +67,8 @@ public class DefaultGrisuFileContextMenu extends JPopupMenu implements
 
 		public void actionPerformed(ActionEvent e) {
 
-			String s = (String) JOptionPane.showInputDialog(SwingUtilities
-					.getRoot(fileListPanel.getPanel()),
+			String s = (String) JOptionPane.showInputDialog(
+					SwingUtilities.getRoot(fileListPanel.getPanel()),
 					"Name of the new folder:", "Create folder",
 					JOptionPane.PLAIN_MESSAGE, null, null, "");
 
@@ -75,8 +76,8 @@ public class DefaultGrisuFileContextMenu extends JPopupMenu implements
 				return;
 			}
 
-			DefaultGrisuFileContextMenu.this.fm.createFolder(fileListPanel
-					.getCurrentDirectory(), s);
+			DefaultGrisuFileContextMenu.this.fm.createFolder(
+					fileListPanel.getCurrentDirectory(), s);
 
 			fileListPanel.refresh();
 
@@ -92,8 +93,7 @@ public class DefaultGrisuFileContextMenu extends JPopupMenu implements
 		public void actionPerformed(ActionEvent e) {
 
 			if (fileListPanel == null) {
-				myLogger
-						.error("Filelistpanel not set. Can't delete anything...");
+				myLogger.error("Filelistpanel not set. Can't delete anything...");
 				return;
 			}
 
@@ -135,7 +135,7 @@ public class DefaultGrisuFileContextMenu extends JPopupMenu implements
 		public void actionPerformed(ActionEvent e) {
 
 			Set<GlazedFile> files = fileListPanel.getSelectedFiles();
-			if (files != null || files.size() <= 0) {
+			if (files == null || files.size() <= 0) {
 				return;
 			}
 
@@ -161,6 +161,11 @@ public class DefaultGrisuFileContextMenu extends JPopupMenu implements
 					FileTransaction ft = new FileTransaction(fm, urls,
 							selectedFile.toURI().toString(), true);
 					ftm.addFileTransfer(ft);
+
+					FileTransactionStatusDialog d = new FileTransactionStatusDialog(
+							null, ft);
+					d.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+					d.setVisible(true);
 				} else {
 					return;
 				}
@@ -198,7 +203,7 @@ public class DefaultGrisuFileContextMenu extends JPopupMenu implements
 		this.ftm = FileTransactionManager.getDefault(si);
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		add(getCreateFolder());
-		add(getMenuItem());
+		add(getDownloadMenuItem());
 		add(getDeleteItem());
 		add(getClipboardItem());
 	}
@@ -294,7 +299,7 @@ public class DefaultGrisuFileContextMenu extends JPopupMenu implements
 		return this;
 	}
 
-	private JMenuItem getMenuItem() {
+	private JMenuItem getDownloadMenuItem() {
 		if (menuItem == null) {
 			menuItem = new JMenuItem("Download selected files");
 			menuItem.setAction(getDownloadAction());
