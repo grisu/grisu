@@ -4,6 +4,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Map;
+import java.util.logging.Level;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -18,6 +20,8 @@ import javax.swing.border.EtchedBorder;
 
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.events.ClientPropertiesEvent;
 import org.vpac.grisu.frontend.control.login.LoginException;
@@ -69,25 +73,19 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 		EventBus.subscribe(ClientPropertiesEvent.class, this);
 		this.loginPanel = loginPanel;
 		setLayout(new FormLayout(new ColumnSpec[] {
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("110px:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("105px"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-			new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("184px"),
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("105px"),
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("184px"),
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("max(15dlu;default)"),
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getTabbedPane(), "2, 2, 5, 1, fill, fill");
 		add(getAdvancedLoginPanelOptions(), "2, 6, 5, 1, fill, fill");
 		add(getQuickLoginButton(), "2, 10, left, center");
@@ -260,6 +258,14 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 								.getServiceInterface());
 					} else {
 						temp.getPossibleException().printStackTrace();
+						ErrorInfo info = new ErrorInfo("Login error",
+								"Error while trying to login.", temp
+										.getPossibleException()
+										.getLocalizedMessage(), (String) null,
+								temp.getPossibleException(), Level.SEVERE,
+								(Map) null);
+						JXErrorPane.showDialog(MultiLoginPanel.this, info);
+						// JXErrorPane.showDialog(temp.getPossibleException());
 					}
 
 				} finally {

@@ -4147,6 +4147,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					.getGridResource(candidate);
 			String version = resource.getGRAMVersion();
 
+			if (version == null) {
+				// TODO is that good enough?
+				version = "4.0.0";
+			}
+
 			String submissionType = null;
 			if ("5.0.0".equals(version)) {
 				submissionType = "GT5";
