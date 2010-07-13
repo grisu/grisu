@@ -5,6 +5,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.text.DateFormat;
 import java.util.Date;
 
 import javax.swing.ImageIcon;
@@ -28,12 +29,12 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import com.jidesoft.swing.JideTabbedPane;
 
-public class JobDetailPanelDefault extends JPanel implements PropertyChangeListener, JobDetailPanel {
-
+public class JobDetailPanelDefault extends JPanel implements
+		PropertyChangeListener, JobDetailPanel {
 
 	private final ImageIcon REFRESH_ICON = new ImageIcon(
 			JobDetailPanelDefault.class.getClassLoader().getResource(
-			"refresh.png"));
+					"refresh.png"));
 	private JTextField txtNa;
 
 	private JobObject job;
@@ -53,8 +54,12 @@ public class JobDetailPanelDefault extends JPanel implements PropertyChangeListe
 	private JLabel lblSubmitted;
 	private JTextField submittedTextField;
 
+	// public static SimpleDateFormat format = new SimpleDateFormat(
+	// "dd.MM.yyyy - HH.mm.SS");
+
 	/**
 	 * Create the panel.
+	 * 
 	 * @wbp.parser.constructor
 	 */
 	public JobDetailPanelDefault(ServiceInterface si) {
@@ -68,19 +73,14 @@ public class JobDetailPanelDefault extends JPanel implements PropertyChangeListe
 				ColumnSpec.decode("default:grow"),
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(42dlu;default)"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getLblJobname(), "2, 2, right, default");
 		add(getJobnameTextField(), "4, 2, fill, default");
 		add(getLblSubmitted(), "2, 4, right, default");
@@ -194,6 +194,7 @@ public class JobDetailPanelDefault extends JPanel implements PropertyChangeListe
 		}
 		return scrollPane_1;
 	}
+
 	private JLabel getStatusRefreshButton() {
 		if (statusRefreshButton == null) {
 			statusRefreshButton = new JLabel("Status");
@@ -201,20 +202,24 @@ public class JobDetailPanelDefault extends JPanel implements PropertyChangeListe
 				@Override
 				public void mouseClicked(MouseEvent e) {
 
-					if ( job != null ) {
+					if (job != null) {
 						Cursor old = statusRefreshButton.getCursor();
-						statusRefreshButton.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+						statusRefreshButton.setCursor(Cursor
+								.getPredefinedCursor(Cursor.WAIT_CURSOR));
 						job.getStatus(true);
 						statusRefreshButton.setCursor(old);
 					}
 
 				}
+
 				@Override
 				public void mouseEntered(MouseEvent e) {
 
-					statusRefreshButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+					statusRefreshButton.setCursor(Cursor
+							.getPredefinedCursor(Cursor.HAND_CURSOR));
 
 				}
+
 				@Override
 				public void mouseExited(MouseEvent e) {
 					statusRefreshButton.setCursor(Cursor.getDefaultCursor());
@@ -226,6 +231,7 @@ public class JobDetailPanelDefault extends JPanel implements PropertyChangeListe
 		}
 		return statusRefreshButton;
 	}
+
 	private JTextField getSubmittedTextField() {
 		if (submittedTextField == null) {
 			submittedTextField = new JTextField();
@@ -236,6 +242,7 @@ public class JobDetailPanelDefault extends JPanel implements PropertyChangeListe
 		}
 		return submittedTextField;
 	}
+
 	private JTextField getTxtNa() {
 		if (txtNa == null) {
 			txtNa = new JTextField();
@@ -246,15 +253,17 @@ public class JobDetailPanelDefault extends JPanel implements PropertyChangeListe
 		}
 		return txtNa;
 	}
+
 	public void propertyChange(PropertyChangeEvent evt) {
 
 		if (evt.getPropertyName().equals("status")) {
 			getTxtNa()
-			.setText(
-					JobConstants.translateStatus((Integer) (evt
-							.getNewValue())));
+					.setText(
+							JobConstants.translateStatus((Integer) (evt
+									.getNewValue())));
 		}
 	}
+
 	public void setJob(JobObject job) {
 
 		this.job = job;
@@ -262,17 +271,29 @@ public class JobDetailPanelDefault extends JPanel implements PropertyChangeListe
 		this.job.addPropertyChangeListener(this);
 		getStatusRefreshButton().setEnabled(true);
 		getJobnameTextField().setText(job.getJobname());
-		getSubmittedTextField().setText(job.getJobProperty(Constants.SUBMISSION_TIME_KEY));
-		getApplicationTextField().setText(job.getJobProperty(Constants.APPLICATIONNAME_KEY));
+		String subTime = null;
+		try {
+			String subTimeString = job
+					.getJobProperty(Constants.SUBMISSION_TIME_KEY);
+			System.out.println(subTimeString);
+			subTime = DateFormat.getInstance().format(
+					new Date(Long.parseLong(subTimeString)));
+		} catch (Exception e) {
+			e.printStackTrace();
+			subTime = "n/a";
+		}
+		getSubmittedTextField().setText(subTime);
+		getApplicationTextField().setText(
+				job.getJobProperty(Constants.APPLICATIONNAME_KEY));
 		getFileListWithPreviewPanel().setRootUrl(job.getJobDirectoryUrl());
 		getFileListWithPreviewPanel().setCurrentUrl(job.getJobDirectoryUrl());
-		getTxtNa().setText(
-				JobConstants.translateStatus(job.getStatus(false)));
+		getTxtNa().setText(JobConstants.translateStatus(job.getStatus(false)));
 
 		setProperties();
 		setLog();
 
 	}
+
 	private void setLog() {
 		StringBuffer temp = new StringBuffer();
 
@@ -283,6 +304,7 @@ public class JobDetailPanelDefault extends JPanel implements PropertyChangeListe
 
 		getLogTextArea().setText(temp.toString());
 	}
+
 	private void setProperties() {
 
 		StringBuffer temp = new StringBuffer();
