@@ -34,6 +34,8 @@ public class MountPoint implements Comparable<MountPoint> {
 
 	static final Logger myLogger = Logger.getLogger(MountPoint.class.getName());
 
+	public static final Object ALIAS_KEY = "label";
+
 	private Long mountPointId = null;
 
 	/**

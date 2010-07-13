@@ -3469,6 +3469,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						.extractHost(submissionLocation));
 		myLogger.debug("Calculated submissionSite: " + submissionSite);
 		job.addJobProperty(Constants.SUBMISSION_SITE_KEY, submissionSite);
+		String queue = SubmissionLocationHelpers
+				.extractQueue(submissionLocation);
+		job.addJobProperty(Constants.QUEUE_KEY, queue);
 		// job.setJob_directory(stagingFilesystemToUse + workingDirectory);
 		job.addJobProperty(Constants.JOBDIRECTORY_KEY, stagingFilesystemToUse
 				+ workingDirectory);

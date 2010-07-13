@@ -95,8 +95,7 @@ public class JobSubmissionManager {
 		if (submitter == null) {
 			// throw new NoSuchJobSubmitterException(
 			// "Can't find JobSubmitter: " + job.getSubmissionType());
-			myLogger
-			.error("Can't find jobsubitter: " + job.getSubmissionType());
+			myLogger.error("Can't find jobsubitter: " + job.getSubmissionType());
 			return JobConstants.KILLED;
 		}
 
@@ -131,9 +130,9 @@ public class JobSubmissionManager {
 		String host = JsdlHelpers.getCandidateHosts(jsdl)[0];
 		// TODO change that once I know how to handle queues properly
 
-		String queue = null;
+		// String queue = null;
 		if (host.indexOf(":") != -1) {
-			queue = host.substring(0, host.indexOf(":"));
+			// queue = host.substring(0, host.indexOf(":"));
 			host = host.substring(host.indexOf(":") + 1);
 		}
 		myLogger.debug("Submission host is: " + host);
@@ -162,9 +161,9 @@ public class JobSubmissionManager {
 		job.addJobProperty(Constants.SUBMISSION_HOST_KEY, host);
 		job.setSubmissionType(submitter_name);
 		job.addJobProperty(Constants.SUBMISSION_TYPE_KEY, submitter_name);
-		if ((queue != null) && !"".equals(queue)) {
-			job.addJobProperty(Constants.QUEUE_KEY, queue);
-		}
+		// if ((queue != null) && !"".equals(queue)) {
+		// job.addJobProperty(Constants.QUEUE_KEY, queue);
+		// }
 		job.setStatus(JobConstants.EXTERNAL_HANDLE_READY);
 
 		return handle;

@@ -220,7 +220,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 
 	}
 
-	private void addJobLogMessage(String message) {
+	private synchronized void addJobLogMessage(String message) {
 		this.submissionLog.add(message);
 		pcs.firePropertyChange("submissionLog", null, getSubmissionLog());
 	}
@@ -324,6 +324,20 @@ public class JobObject extends JobSubmissionObjectImpl implements
 				EventBus.publish(this.getJobname(), new JobStatusEvent(this,
 						this.status, JobConstants.JOB_CREATED));
 			}
+			// populate new job properties in background
+			new Thread() {
+				@Override
+				public void run() {
+					getAllJobProperties();
+					addJobLogMessage("Submission site is: "
+							+ getJobProperty(Constants.SUBMISSION_SITE_KEY));
+					addJobLogMessage("Submission queue is: "
+							+ getJobProperty(Constants.QUEUE_KEY));
+					addJobLogMessage("Job directory url is: "
+							+ getJobProperty(Constants.JOBDIRECTORY_KEY));
+				}
+			}.start();
+
 		} catch (JobPropertiesException e) {
 			addJobLogMessage("Could not create job on backend: "
 					+ e.getLocalizedMessage());
@@ -336,7 +350,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			throw e;
 		}
 
-		updateJobDirectory();
+		// updateJobDirectory();
 
 		return this.getJobname();
 	}
@@ -446,11 +460,11 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 */
 	public final Map<String, String> getAllJobProperties() {
 
-		if (getStatus(false) == JobConstants.UNDEFINED) {
-			throw new IllegalStateException("Job status "
-					+ JobConstants.translateStatus(JobConstants.UNDEFINED)
-					+ ". Can't access job properties yet.");
-		}
+		// if (getStatus(false) == JobConstants.UNDEFINED) {
+		// throw new IllegalStateException("Job status "
+		// + JobConstants.translateStatus(JobConstants.UNDEFINED)
+		// + ". Can't access job properties yet.");
+		// }
 
 		if (allJobProperties == null) {
 			try {
@@ -892,7 +906,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 
 		addJobLogMessage("Starting job submission...");
 
-		if (status == JobConstants.UNDEFINED) {
+		if (getStatus(true) == JobConstants.UNDEFINED) {
 			throw new IllegalStateException("Job state "
 					+ JobConstants.translateStatus(JobConstants.UNDEFINED)
 					+ ". Can't submit job.");

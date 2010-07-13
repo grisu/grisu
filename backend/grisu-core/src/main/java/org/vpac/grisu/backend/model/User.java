@@ -459,9 +459,39 @@ public class User {
 	private MountPoint createMountPoint(String server, String path, String fqan) {
 
 		String url = null;
-		if (path.contains("${GLOBUS_USER_HOME}")) {
+
+		int startProperties = path.indexOf("[");
+		int endProperties = path.indexOf("]");
+
+		if (startProperties >= 0 && endProperties < 0) {
+			myLogger.error("Path: " + path + " for host " + server
+					+ " has incorrect syntax. Ignoring...");
+			return null;
+		}
+
+		if (path.startsWith(".")) {
 
 			try {
+				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
+						fqan);
+
+				String additionalUrl = null;
+				if (startProperties < 0) {
+					additionalUrl = path.substring(1, path.length() - 1);
+				} else {
+					additionalUrl = path.substring(1, startProperties);
+				}
+
+				url = url + additionalUrl;
+
+			} catch (FileSystemException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		} else if (path.contains("${GLOBUS_USER_HOME}")) {
+			try {
+				myLogger.warn("Using ${GLOBUS_USER_HOME} is deprecated. Please use . instead.");
 				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
 						fqan);
 			} catch (FileSystemException e) {
@@ -490,9 +520,67 @@ public class User {
 
 		String site = AbstractServiceInterface.informationManager
 				.getSiteForHostOrUrl(url);
-		MountPoint mp = new MountPoint(getDn(), fqan, url,
-				MountPointHelpers.calculateMountPointName(server, fqan), site,
-				true);
+
+		String propString = null;
+		try {
+			propString = path.substring(startProperties + 1, endProperties);
+		} catch (Exception e) {
+			// that's ok
+			myLogger.debug("No extra properties for path: " + path);
+		}
+
+		MountPoint mp = null;
+
+		if (StringUtils.isNotBlank(propString)) {
+
+			Map<String, String> properties = new HashMap<String, String>();
+			String alias = null;
+			String[] parts = propString.split(";");
+			for (String part : parts) {
+				if (part.indexOf("=") <= 0) {
+					myLogger.error("Invalid path spec: " + path
+							+ ".  No \"=\" found. Ignoring this mountpoint...");
+					return null;
+				}
+				String key = part.substring(0, part.indexOf("="));
+				if (StringUtils.isBlank(key)) {
+					myLogger.error("Invalid path spec: " + path
+							+ ".  No key found. Ignoring this mountpoint...");
+					return null;
+				}
+				String value = null;
+				try {
+					value = part.substring(part.indexOf("=") + 1);
+					if (StringUtils.isBlank(value)) {
+						myLogger.error("Invalid path spec: "
+								+ path
+								+ ".  No key found. Ignoring this mountpoint...");
+						return null;
+					}
+				} catch (Exception e) {
+					myLogger.error("Invalid path spec: " + path
+							+ ".  No key found. Ignoring this mountpoint...");
+					return null;
+				}
+
+				properties.put(key, value);
+
+			}
+			alias = properties.get(MountPoint.ALIAS_KEY);
+			if (StringUtils.isBlank(alias)) {
+				alias = MountPointHelpers.calculateMountPointName(server, fqan);
+			}
+			mp = new MountPoint(getDn(), fqan, url, alias, site, true);
+			for (String key : properties.keySet()) {
+				mp.addProperty(key, properties.get(key));
+			}
+		} else {
+			mp = new MountPoint(getDn(), fqan, url,
+					MountPointHelpers.calculateMountPointName(server, fqan),
+					site, true);
+
+		}
+
 		// + "." + fqan + "." + path);
 		// + "." + fqan);
 		return mp;
