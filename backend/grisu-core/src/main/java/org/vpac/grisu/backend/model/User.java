@@ -469,57 +469,7 @@ public class User {
 			return null;
 		}
 
-		if (path.startsWith(".")) {
-
-			try {
-				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
-						fqan);
-
-				String additionalUrl = null;
-				if (startProperties < 0) {
-					additionalUrl = path.substring(1, path.length() - 1);
-				} else {
-					additionalUrl = path.substring(1, startProperties);
-				}
-
-				url = url + additionalUrl;
-
-			} catch (FileSystemException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-		} else if (path.contains("${GLOBUS_USER_HOME}")) {
-			try {
-				myLogger.warn("Using ${GLOBUS_USER_HOME} is deprecated. Please use . instead.");
-				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
-						fqan);
-			} catch (FileSystemException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-		} else if (path.contains("${GLOBUS_SCRATCH_DIR")) {
-			try {
-				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
-						fqan) + "/.globus/scratch";
-			} catch (FileSystemException e) {
-				e.printStackTrace();
-			}
-		} else {
-
-			url = server.replace(":2811", "") + path + "/"
-					+ User.get_vo_dn_path(getCred().getDn());
-
-		}
-
-		if (StringUtils.isBlank(url)) {
-			myLogger.error("Url is blank for " + server + " and " + path);
-			return null;
-		}
-
-		String site = AbstractServiceInterface.informationManager
-				.getSiteForHostOrUrl(url);
+		String alias = null;
 
 		String propString = null;
 		try {
@@ -529,12 +479,10 @@ public class User {
 			myLogger.debug("No extra properties for path: " + path);
 		}
 
-		MountPoint mp = null;
-
+		Map<String, String> properties = new HashMap<String, String>();
+		boolean userDnPath = true;
 		if (StringUtils.isNotBlank(propString)) {
 
-			Map<String, String> properties = new HashMap<String, String>();
-			String alias = null;
 			String[] parts = propString.split(";");
 			for (String part : parts) {
 				if (part.indexOf("=") <= 0) {
@@ -567,18 +515,102 @@ public class User {
 
 			}
 			alias = properties.get(MountPoint.ALIAS_KEY);
-			if (StringUtils.isBlank(alias)) {
-				alias = MountPointHelpers.calculateMountPointName(server, fqan);
+
+			try {
+				userDnPath = Boolean.parseBoolean(properties
+						.get(MountPoint.USER_SUBDIR_KEY));
+			} catch (Exception e) {
+				// that's ok
+				myLogger.debug("Could not find or parse"
+						+ MountPoint.USER_SUBDIR_KEY
+						+ " key. Using user subdirs..");
+				userDnPath = true;
 			}
-			mp = new MountPoint(getDn(), fqan, url, alias, site, true);
-			for (String key : properties.keySet()) {
-				mp.addProperty(key, properties.get(key));
+
+		}
+
+		String tempPath = null;
+		if (startProperties < 0) {
+			tempPath = path.substring(0, path.length());
+		} else {
+			tempPath = path.substring(0, startProperties);
+		}
+
+		properties.put(MountPoint.PATH_KEY, tempPath);
+
+		if (tempPath.startsWith(".")) {
+
+			try {
+				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
+						fqan);
+
+				String additionalUrl = null;
+				try {
+					additionalUrl = tempPath
+							.substring(1, tempPath.length() - 1);
+				} catch (Exception e) {
+					additionalUrl = "";
+				}
+
+				url = url + additionalUrl;
+
+			} catch (FileSystemException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		} else if (path.contains("${GLOBUS_USER_HOME}")) {
+			try {
+				myLogger.warn("Using ${GLOBUS_USER_HOME} is deprecated. Please use . instead.");
+				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
+						fqan);
+				userDnPath = false;
+			} catch (FileSystemException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		} else if (path.contains("${GLOBUS_SCRATCH_DIR")) {
+			try {
+				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
+						fqan) + "/.globus/scratch";
+				userDnPath = false;
+			} catch (FileSystemException e) {
+				e.printStackTrace();
 			}
 		} else {
-			mp = new MountPoint(getDn(), fqan, url,
-					MountPointHelpers.calculateMountPointName(server, fqan),
-					site, true);
 
+			// url = server.replace(":2811", "") + path + "/"
+			// + User.get_vo_dn_path(getCred().getDn());
+			url = server.replace(":2811", "") + tempPath;
+
+		}
+
+		if (StringUtils.isBlank(url)) {
+			myLogger.error("Url is blank for " + server + " and " + path);
+			return null;
+		}
+
+		// add dn dir if necessary
+		if (userDnPath) {
+			url = url + "/" + User.get_vo_dn_path(getCred().getDn());
+		}
+
+		String site = AbstractServiceInterface.informationManager
+				.getSiteForHostOrUrl(url);
+
+		if (site == null) {
+			System.out.println("Url: " + url + "\tpath" + path);
+		}
+		MountPoint mp = null;
+
+		if (StringUtils.isBlank(alias)) {
+			alias = MountPointHelpers.calculateMountPointName(server, fqan);
+		}
+		mp = new MountPoint(getDn(), fqan, url, alias, site, true);
+
+		for (String key : properties.keySet()) {
+			mp.addProperty(key, properties.get(key));
 		}
 
 		// + "." + fqan + "." + path);

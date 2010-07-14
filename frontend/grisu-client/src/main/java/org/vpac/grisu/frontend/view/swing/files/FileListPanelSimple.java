@@ -571,8 +571,8 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 						temp.setParent();
 						currentDirectoryContent.add(temp);
 					} else {
-						GlazedFile temp = new GlazedFile(fm
-								.calculateParentUrl(folder.getRootUrl()), si);
+						GlazedFile temp = new GlazedFile(
+								fm.calculateParentUrl(folder.getRootUrl()), si);
 						temp.setParent();
 						currentDirectoryContent.add(temp);
 					}
@@ -674,6 +674,10 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 				}
 
 				for (MountPoint mp : em.getMountPointsForSite(sitename)) {
+					// if ("true".equalsIgnoreCase(mp
+					// .getProperty(MountPoint.HIDDEN_KEY))) {
+					// continue;
+					// }
 					currentDirectoryContent.add(new GlazedFile(mp));
 				}
 			} finally {

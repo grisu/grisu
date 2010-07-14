@@ -130,4 +130,10 @@ public class SubmissionLogPanel extends JPanel implements
 			}
 		});
 	}
+
+	public void appendMessage(String message) {
+
+		getTextArea().append(message);
+
+	}
 }

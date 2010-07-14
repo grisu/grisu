@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 public class FileSystemItem {
 
 	public enum Type implements Comparable<Type> {
-		SELECT,LOCAL, BOOKMARK, REMOTE
+		SELECT, LOCAL, BOOKMARK, REMOTE
 	}
 
 	private String alias;

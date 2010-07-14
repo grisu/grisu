@@ -34,7 +34,11 @@ public class MountPoint implements Comparable<MountPoint> {
 
 	static final Logger myLogger = Logger.getLogger(MountPoint.class.getName());
 
-	public static final Object ALIAS_KEY = "label";
+	public static final String ALIAS_KEY = "label";
+	public static final String PATH_KEY = "path";
+	public static final String USER_SUBDIR_KEY = "user_subdir";
+
+	public static final String HIDDEN_KEY = "hidden";
 
 	private Long mountPointId = null;
 
@@ -172,6 +176,16 @@ public class MountPoint implements Comparable<MountPoint> {
 	@XmlElement(name = "property")
 	public List<DtoProperty> getProperties() {
 		return properties;
+	}
+
+	@Transient
+	public String getProperty(String key) {
+		for (DtoProperty prop : this.properties) {
+			if (prop.getKey().equals(key)) {
+				return prop.getValue();
+			}
+		}
+		return null;
 	}
 
 	public void setProperties(List<DtoProperty> properties) {
