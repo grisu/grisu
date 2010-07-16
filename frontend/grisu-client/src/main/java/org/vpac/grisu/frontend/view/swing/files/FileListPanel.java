@@ -26,4 +26,14 @@ public interface FileListPanel {
 
 	public void setRootUrl(String url);
 
+	public void displayHiddenFiles(boolean display);
+
+	/**
+	 * Sets the extensions to display.
+	 * 
+	 * @param extensions
+	 *            the extensions or null/empty for displaying everything
+	 */
+	public void setExtensionsToDisplay(String[] extensions);
+
 }

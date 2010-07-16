@@ -208,4 +208,12 @@ public class FileListPanelPlusOld extends JPanel implements FileListPanel,
 
 		getFileListPanel().setRootUrl(url);
 	}
+
+	public void displayHiddenFiles(boolean display) {
+		fileListPanel.displayHiddenFiles(display);
+	}
+
+	public void setExtensionsToDisplay(String[] extensions) {
+		fileListPanel.setExtensionsToDisplay(extensions);
+	}
 }

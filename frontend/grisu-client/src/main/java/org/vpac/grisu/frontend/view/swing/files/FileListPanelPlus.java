@@ -175,8 +175,7 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 
 					if (fireEvent) {
 						if (ItemEvent.SELECTED == arg0.getStateChange()) {
-							myLogger
-									.debug("Filesystem not combobox locked. Changing filesystem...");
+							myLogger.debug("Filesystem not combobox locked. Changing filesystem...");
 							try {
 								FileSystemItem fsi = (FileSystemItem) (filesystemModel
 										.getSelectedItem());
@@ -302,5 +301,13 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 	public void setRootUrl(String url) {
 
 		getFileListPanel().setRootUrl(url);
+	}
+
+	public void displayHiddenFiles(boolean display) {
+		fileListPanel.displayHiddenFiles(display);
+	}
+
+	public void setExtensionsToDisplay(String[] extensions) {
+		fileListPanel.setExtensionsToDisplay(extensions);
 	}
 }

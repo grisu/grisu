@@ -39,6 +39,7 @@ import org.vpac.grisu.model.files.GlazedFile;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventTableModel;
 
@@ -82,6 +83,12 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 	private final SortedList<GlazedFile> sortedList = new SortedList<GlazedFile>(
 			currentDirectoryContent, new GlazedFileComparator());
+
+	private final GlazedFileMatcherEditor textMatcherEditor = new GlazedFileMatcherEditor();
+
+	private final FilterList<GlazedFile> filteredList = new FilterList<GlazedFile>(
+			sortedList, textMatcherEditor);
+
 	private GlazedFile currentDirectory = null;
 	private DtoFolder currentFolder = null;
 
@@ -121,7 +128,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 				.getUserEnvironmentManager();
 		setLayout(new BorderLayout(0, 0));
 
-		fileModel = new EventTableModel<GlazedFile>(sortedList,
+		fileModel = new EventTableModel<GlazedFile>(filteredList,
 				new GlazedFileTableFormat());
 		add(getScrollPane(), BorderLayout.CENTER);
 
@@ -792,5 +799,14 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 		setCurrentDirToFolder(folder);
 
+	}
+
+	public void displayHiddenFiles(boolean display) {
+		textMatcherEditor.displayHiddenFiles(display);
+
+	}
+
+	public void setExtensionsToDisplay(String[] extensions) {
+		textMatcherEditor.setExtensionsToDisplay(extensions);
 	}
 }

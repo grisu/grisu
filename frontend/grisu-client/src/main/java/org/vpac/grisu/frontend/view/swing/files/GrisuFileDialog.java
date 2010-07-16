@@ -177,4 +177,12 @@ public class GrisuFileDialog extends JDialog implements FileListListener {
 		}
 	}
 
+	public void displayHiddenFiles(boolean display) {
+		fileListPanel.displayHiddenFiles(display);
+	}
+
+	public void setExtensionsToDisplay(String[] extensions) {
+		fileListPanel.setExtensionsToDisplay(extensions);
+	}
+
 }

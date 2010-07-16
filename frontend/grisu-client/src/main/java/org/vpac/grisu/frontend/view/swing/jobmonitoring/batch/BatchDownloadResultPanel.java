@@ -535,4 +535,16 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 		setContextMenu(menu);
 
 	}
+
+	public void displayHiddenFiles(boolean display) {
+		// do nothing
+		throw new RuntimeException(
+				"Setting of displayhiddenfiles not implemented");
+	}
+
+	public void setExtensionsToDisplay(String[] extensions) {
+		// do nothing
+		throw new RuntimeException(
+				"Setting of extensions to display not implemented");
+	}
 }

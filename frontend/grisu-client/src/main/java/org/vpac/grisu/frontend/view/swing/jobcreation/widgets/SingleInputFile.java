@@ -35,6 +35,8 @@ public class SingleInputFile extends AbstractWidget {
 	private GrisuFileDialog fileDialog = null;
 
 	public final String selString = "Please select a file";
+	private boolean displayHiddenFiles = false;
+	private String[] extensions = null;
 
 	/**
 	 * Create the panel.
@@ -106,6 +108,8 @@ public class SingleInputFile extends AbstractWidget {
 			fileDialog
 					.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
+			fileDialog.setExtensionsToDisplay(extensions);
+			fileDialog.displayHiddenFiles(displayHiddenFiles);
 		}
 		return fileDialog;
 
@@ -217,5 +221,19 @@ public class SingleInputFile extends AbstractWidget {
 			}
 		});
 
+	}
+
+	public void displayHiddenFiles(boolean display) {
+		this.displayHiddenFiles = display;
+		if (fileDialog != null) {
+			fileDialog.displayHiddenFiles(display);
+		}
+	}
+
+	public void setExtensionsToDisplay(String[] extensions) {
+		this.extensions = extensions;
+		if (fileDialog != null) {
+			fileDialog.setExtensionsToDisplay(extensions);
+		}
 	}
 }

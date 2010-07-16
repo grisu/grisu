@@ -132,8 +132,7 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
 
 					FilePreviewDialog dialog = new FilePreviewDialog(si);
 					dialog.setFile(file, null);
-					dialog
-							.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+					dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 					dialog.setVisible(true);
 				}
 			}
@@ -319,8 +318,7 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
 
 	public void setContextMenu(FileListPanelContextMenu menu) {
 
-		myLogger
-				.warn("Setting of context-menu for FileListWithPreviewPanel not supported for right panel...");
+		myLogger.warn("Setting of context-menu for FileListWithPreviewPanel not supported for right panel...");
 		getFileListPanel().setContextMenu(menu);
 
 	}
@@ -342,6 +340,17 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
 	public void setRootUrl(String url) {
 
 		getFileListPanel().setRootUrl(url);
+
+	}
+
+	public void displayHiddenFiles(boolean display) {
+		fileListPanel.displayHiddenFiles(display);
+		fileListPanelRight.displayHiddenFiles(display);
+	}
+
+	public void setExtensionsToDisplay(String[] extensions) {
+		fileListPanel.setExtensionsToDisplay(extensions);
+		fileListPanelRight.setExtensionsToDisplay(extensions);
 
 	}
 }
