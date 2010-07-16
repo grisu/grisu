@@ -13,6 +13,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
 import org.apache.commons.lang.StringUtils;
+import org.vpac.grisu.frontend.model.job.BatchJobObject;
 import org.vpac.grisu.frontend.model.job.JobObject;
 
 import au.org.arcs.jcommons.constants.Constants;
@@ -23,6 +24,7 @@ public class SubmissionLogPanel extends JPanel implements
 	private JTextArea textArea;
 
 	private JobObject currentJob = null;
+	private BatchJobObject currentBatchJobObject = null;
 
 	/**
 	 * Create the panel.
@@ -58,10 +60,30 @@ public class SubmissionLogPanel extends JPanel implements
 			currentJob.removePropertyChangeListener(this);
 		}
 
+		if (currentBatchJobObject != null) {
+			currentBatchJobObject.removePropertyChangeListener(this);
+		}
+		currentBatchJobObject = null;
+
 		currentJob = jobObject;
 		setText("");
 		currentJob.addPropertyChangeListener(this);
 
+	}
+
+	public void setBatchJobOject(BatchJobObject bjo) {
+		if (currentJob != null) {
+			currentJob.removePropertyChangeListener(this);
+		}
+		currentJob = null;
+
+		if (currentBatchJobObject != null) {
+			currentBatchJobObject.removePropertyChangeListener(this);
+		}
+
+		currentBatchJobObject = bjo;
+		setText("");
+		currentBatchJobObject.addPropertyChangeListener(this);
 	}
 
 	private void appendText(final String msg) {

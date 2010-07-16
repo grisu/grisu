@@ -187,11 +187,15 @@ public class FileManager {
 		this.serviceInterface = si;
 	}
 
-	public String calculateParentUrl(String rootUrl) {
+	public static String calculateParentUrl(String rootUrl) {
 
-		String result = rootUrl.substring(0, rootUrl.lastIndexOf("/"));
-
-		return result;
+		if (isLocal(rootUrl)) {
+			File file = getFileFromUriOrPath(rootUrl);
+			return file.getParent().toString();
+		} else {
+			String result = rootUrl.substring(0, rootUrl.lastIndexOf("/"));
+			return result;
+		}
 
 	}
 

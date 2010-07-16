@@ -9,6 +9,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -261,6 +264,8 @@ public class User {
 	// action status can't be found anymore by the client
 	private static final Map<String, Map<String, DtoActionStatus>> actionStatuses = new HashMap<String, Map<String, DtoActionStatus>>();
 
+	private static final Map<String, MountPoint> cachedGridFtpHomeDirs = new HashMap<String, MountPoint>();
+
 	// the (default) credentials dn
 	private String dn = null;
 
@@ -453,169 +458,216 @@ public class User {
 	}
 
 	public void closeFileSystems() {
+
+		myLogger.debug("Closing all filesystems for thread "
+				+ Thread.currentThread().getName());
+
 		threadLocalFsManager.remove();
 	}
 
-	private MountPoint createMountPoint(String server, String path, String fqan) {
+	private MountPoint createMountPoint(String server, String path,
+			final String fqan, Executor executor) {
 
-		String url = null;
+		String keyMP = getDn() + "_" + server + "_" + path + "_" + fqan;
+		if (cachedGridFtpHomeDirs.get(keyMP) == null) {
 
-		int startProperties = path.indexOf("[");
-		int endProperties = path.indexOf("]");
+			String url = null;
 
-		if (startProperties >= 0 && endProperties < 0) {
-			myLogger.error("Path: " + path + " for host " + server
-					+ " has incorrect syntax. Ignoring...");
-			return null;
-		}
+			int startProperties = path.indexOf("[");
+			int endProperties = path.indexOf("]");
 
-		String alias = null;
+			if (startProperties >= 0 && endProperties < 0) {
+				myLogger.error("Path: " + path + " for host " + server
+						+ " has incorrect syntax. Ignoring...");
+				return null;
+			}
 
-		String propString = null;
-		try {
-			propString = path.substring(startProperties + 1, endProperties);
-		} catch (Exception e) {
-			// that's ok
-			myLogger.debug("No extra properties for path: " + path);
-		}
+			String alias = null;
 
-		Map<String, String> properties = new HashMap<String, String>();
-		boolean userDnPath = true;
-		if (StringUtils.isNotBlank(propString)) {
+			String propString = null;
+			try {
+				propString = path.substring(startProperties + 1, endProperties);
+			} catch (Exception e) {
+				// that's ok
+				myLogger.debug("No extra properties for path: " + path);
+			}
 
-			String[] parts = propString.split(";");
-			for (String part : parts) {
-				if (part.indexOf("=") <= 0) {
-					myLogger.error("Invalid path spec: " + path
-							+ ".  No \"=\" found. Ignoring this mountpoint...");
-					return null;
-				}
-				String key = part.substring(0, part.indexOf("="));
-				if (StringUtils.isBlank(key)) {
-					myLogger.error("Invalid path spec: " + path
-							+ ".  No key found. Ignoring this mountpoint...");
-					return null;
-				}
-				String value = null;
-				try {
-					value = part.substring(part.indexOf("=") + 1);
-					if (StringUtils.isBlank(value)) {
+			Map<String, String> properties = new HashMap<String, String>();
+			boolean userDnPath = true;
+			if (StringUtils.isNotBlank(propString)) {
+
+				String[] parts = propString.split(";");
+				for (String part : parts) {
+					if (part.indexOf("=") <= 0) {
+						myLogger.error("Invalid path spec: "
+								+ path
+								+ ".  No \"=\" found. Ignoring this mountpoint...");
+						return null;
+					}
+					String key = part.substring(0, part.indexOf("="));
+					if (StringUtils.isBlank(key)) {
 						myLogger.error("Invalid path spec: "
 								+ path
 								+ ".  No key found. Ignoring this mountpoint...");
 						return null;
 					}
-				} catch (Exception e) {
-					myLogger.error("Invalid path spec: " + path
-							+ ".  No key found. Ignoring this mountpoint...");
-					return null;
+					String value = null;
+					try {
+						value = part.substring(part.indexOf("=") + 1);
+						if (StringUtils.isBlank(value)) {
+							myLogger.error("Invalid path spec: "
+									+ path
+									+ ".  No key found. Ignoring this mountpoint...");
+							return null;
+						}
+					} catch (Exception e) {
+						myLogger.error("Invalid path spec: "
+								+ path
+								+ ".  No key found. Ignoring this mountpoint...");
+						return null;
+					}
+
+					properties.put(key, value);
+
 				}
+				alias = properties.get(MountPoint.ALIAS_KEY);
 
-				properties.put(key, value);
-
-			}
-			alias = properties.get(MountPoint.ALIAS_KEY);
-
-			try {
-				userDnPath = Boolean.parseBoolean(properties
-						.get(MountPoint.USER_SUBDIR_KEY));
-			} catch (Exception e) {
-				// that's ok
-				myLogger.debug("Could not find or parse"
-						+ MountPoint.USER_SUBDIR_KEY
-						+ " key. Using user subdirs..");
-				userDnPath = true;
-			}
-
-		}
-
-		String tempPath = null;
-		if (startProperties < 0) {
-			tempPath = path.substring(0, path.length());
-		} else {
-			tempPath = path.substring(0, startProperties);
-		}
-
-		properties.put(MountPoint.PATH_KEY, tempPath);
-
-		if (tempPath.startsWith(".")) {
-
-			try {
-				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
-						fqan);
-
-				String additionalUrl = null;
 				try {
-					additionalUrl = tempPath
-							.substring(1, tempPath.length() - 1);
+					userDnPath = Boolean.parseBoolean(properties
+							.get(MountPoint.USER_SUBDIR_KEY));
 				} catch (Exception e) {
-					additionalUrl = "";
+					// that's ok
+					myLogger.debug("Could not find or parse"
+							+ MountPoint.USER_SUBDIR_KEY
+							+ " key. Using user subdirs..");
+					userDnPath = true;
 				}
 
-				url = url + additionalUrl;
-
-			} catch (FileSystemException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 
-		} else if (path.contains("${GLOBUS_USER_HOME}")) {
-			try {
-				myLogger.warn("Using ${GLOBUS_USER_HOME} is deprecated. Please use . instead.");
-				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
-						fqan);
-				userDnPath = false;
-			} catch (FileSystemException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			String tempPath = null;
+			if (startProperties < 0) {
+				tempPath = path.substring(0, path.length());
+			} else {
+				tempPath = path.substring(0, startProperties);
 			}
 
-		} else if (path.contains("${GLOBUS_SCRATCH_DIR")) {
-			try {
-				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
-						fqan) + "/.globus/scratch";
-				userDnPath = false;
-			} catch (FileSystemException e) {
-				e.printStackTrace();
+			properties.put(MountPoint.PATH_KEY, tempPath);
+
+			if (tempPath.startsWith(".")) {
+
+				try {
+					url = getFileSystemHomeDirectory(
+							server.replace(":2811", ""), fqan);
+
+					String additionalUrl = null;
+					try {
+						additionalUrl = tempPath.substring(1,
+								tempPath.length() - 1);
+					} catch (Exception e) {
+						additionalUrl = "";
+					}
+
+					url = url + additionalUrl;
+
+				} catch (FileSystemException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			} else if (path.contains("${GLOBUS_USER_HOME}")) {
+				try {
+					myLogger.warn("Using ${GLOBUS_USER_HOME} is deprecated. Please use . instead.");
+					url = getFileSystemHomeDirectory(
+							server.replace(":2811", ""), fqan);
+					userDnPath = false;
+				} catch (FileSystemException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			} else if (path.contains("${GLOBUS_SCRATCH_DIR")) {
+				try {
+					url = getFileSystemHomeDirectory(
+							server.replace(":2811", ""), fqan)
+							+ "/.globus/scratch";
+					userDnPath = false;
+				} catch (FileSystemException e) {
+					e.printStackTrace();
+				}
+			} else {
+
+				// url = server.replace(":2811", "") + path + "/"
+				// + User.get_vo_dn_path(getCred().getDn());
+				url = server.replace(":2811", "") + tempPath;
+
 			}
-		} else {
 
-			// url = server.replace(":2811", "") + path + "/"
-			// + User.get_vo_dn_path(getCred().getDn());
-			url = server.replace(":2811", "") + tempPath;
+			if (StringUtils.isBlank(url)) {
+				myLogger.error("Url is blank for " + server + " and " + path);
+				return null;
+			}
+
+			// add dn dir if necessary
+			if (userDnPath) {
+				url = url + "/" + User.get_vo_dn_path(getCred().getDn());
+
+				if (executor != null) {
+					final String urlTemp = url;
+					Thread t = new Thread() {
+						@Override
+						public void run() {
+							try {
+								// try to create the dir if it doesn't exist
+								myLogger.debug("Checking whether mountpoint "
+										+ urlTemp + " exists...");
+								boolean exists = aquireFile(urlTemp, fqan)
+										.exists();
+								if (!exists) {
+									myLogger.debug("Mountpoint does not exist. Trying to create non-exitent folder: "
+											+ urlTemp);
+									aquireFile(urlTemp, fqan).createFolder();
+								} else {
+									myLogger.debug("MountPoint " + urlTemp
+											+ " exists.");
+								}
+							} catch (Exception e) {
+								myLogger.error("Could not create folder: "
+										+ urlTemp);
+								e.printStackTrace();
+							} finally {
+								closeFileSystems();
+							}
+						}
+					};
+					executor.execute(t);
+				}
+
+			}
+
+			String site = AbstractServiceInterface.informationManager
+					.getSiteForHostOrUrl(url);
+
+			if (site == null) {
+				System.out.println("Url: " + url + "\tpath" + path);
+			}
+			MountPoint mp = null;
+
+			if (StringUtils.isBlank(alias)) {
+				alias = MountPointHelpers.calculateMountPointName(server, fqan);
+			}
+			mp = new MountPoint(getDn(), fqan, url, alias, site, true);
+
+			for (String key : properties.keySet()) {
+				mp.addProperty(key, properties.get(key));
+			}
+
+			// + "." + fqan + "." + path);
+			// + "." + fqan);
+			cachedGridFtpHomeDirs.put(keyMP, mp);
 
 		}
-
-		if (StringUtils.isBlank(url)) {
-			myLogger.error("Url is blank for " + server + " and " + path);
-			return null;
-		}
-
-		// add dn dir if necessary
-		if (userDnPath) {
-			url = url + "/" + User.get_vo_dn_path(getCred().getDn());
-		}
-
-		String site = AbstractServiceInterface.informationManager
-				.getSiteForHostOrUrl(url);
-
-		if (site == null) {
-			System.out.println("Url: " + url + "\tpath" + path);
-		}
-		MountPoint mp = null;
-
-		if (StringUtils.isBlank(alias)) {
-			alias = MountPointHelpers.calculateMountPointName(server, fqan);
-		}
-		mp = new MountPoint(getDn(), fqan, url, alias, site, true);
-
-		for (String key : properties.keySet()) {
-			mp.addProperty(key, properties.get(key));
-		}
-
-		// + "." + fqan + "." + path);
-		// + "." + fqan);
-		return mp;
+		return cachedGridFtpHomeDirs.get(keyMP);
 	}
 
 	/**
@@ -633,6 +685,10 @@ public class User {
 
 		Set<MountPoint> mps = new TreeSet<MountPoint>();
 
+		// to check whether dn_subdirs are created already and create them if
+		// not (in background)
+		final ExecutorService executor = Executors.newFixedThreadPool(2);
+
 		// for ( String site : sites ) {
 
 		for (String fqan : getFqans().keySet()) {
@@ -647,7 +703,8 @@ public class User {
 				try {
 					for (String path : mpUrl.get(server)) {
 
-						MountPoint mp = createMountPoint(server, path, fqan);
+						MountPoint mp = createMountPoint(server, path, fqan,
+								executor);
 						if (mp != null) {
 							mps.add(mp);
 						}
@@ -659,6 +716,11 @@ public class User {
 				}
 			}
 		}
+
+		executor.shutdown();
+
+		// TODO check whether that makes sense
+		closeFileSystems();
 
 		// }
 

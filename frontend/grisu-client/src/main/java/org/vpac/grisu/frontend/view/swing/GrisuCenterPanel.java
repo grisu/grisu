@@ -212,7 +212,7 @@ public class GrisuCenterPanel extends JPanel {
 			new Thread() {
 				@Override
 				public void run() {
-					rjm.updateJobList(command[1]);
+					rjm.updateJobnameList(command[1]);
 
 				}
 			}.start();

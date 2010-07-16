@@ -50,13 +50,7 @@ public class RunningJobManager implements EventSubscriber {
 				// update single jobs
 				for (String application : cachedSingleJobsPerApplication
 						.keySet()) {
-					updateJobList(application);
-				}
-				List<JobObject> tempList = new LinkedList<JobObject>(
-						getAllCurrentlyWatchedSingleJobs());
-				for (JobObject job : tempList) {
-					myLogger.debug("Refreshing job: " + job.getJobname());
-					job.getStatus(true);
+					updateJobnameList(application);
 				}
 
 				for (String application : cachedBatchJobsPerApplication
@@ -407,7 +401,7 @@ public class RunningJobManager implements EventSubscriber {
 				@Override
 				public void run() {
 
-					updateJobList(ev.getJob().getApplication());
+					updateJobnameList(ev.getJob().getApplication());
 				}
 			}.start();
 
@@ -417,7 +411,7 @@ public class RunningJobManager implements EventSubscriber {
 				@Override
 				public void run() {
 
-					updateJobList(ev.getJob().getApplication());
+					updateJobnameList(ev.getJob().getApplication());
 				}
 			}.start();
 		}
@@ -503,7 +497,7 @@ public class RunningJobManager implements EventSubscriber {
 
 	}
 
-	public synchronized void updateJobList(String application) {
+	public synchronized Thread updateJobnameList(String application) {
 
 		if (StringUtils.isBlank(application)) {
 			application = Constants.ALLJOBS_KEY;
@@ -562,6 +556,21 @@ public class RunningJobManager implements EventSubscriber {
 			cachedAllSingleJobs.remove(j.getJobname());
 		}
 
+		// do the rest in the background
+		Thread t = new Thread() {
+			@Override
+			public void run() {
+
+				List<JobObject> tempList = new LinkedList<JobObject>(
+						getAllCurrentlyWatchedSingleJobs());
+				for (JobObject job : tempList) {
+					myLogger.debug("Refreshing job: " + job.getJobname());
+					job.getStatus(true);
+				}
+			}
+		};
+		t.start();
+		return t;
 	}
 
 }

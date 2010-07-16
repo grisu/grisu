@@ -37,7 +37,7 @@ public class SingleJobTabbedPane extends JPanel implements
 		this.application = application;
 		setLayout(new BorderLayout(0, 0));
 		add(getJideTabbedPane(), BorderLayout.CENTER);
-		add(getUpdateButton(), BorderLayout.SOUTH);
+		// add(getUpdateButton(), BorderLayout.SOUTH);
 		addSingleJobSelectionListener(this);
 	}
 
@@ -53,7 +53,7 @@ public class SingleJobTabbedPane extends JPanel implements
 
 				public void actionPerformed(ActionEvent e) {
 
-					RunningJobManager.getDefault(si).updateJobList(null);
+					RunningJobManager.getDefault(si).updateJobnameList(null);
 
 				}
 			});
