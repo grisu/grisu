@@ -7,9 +7,9 @@ import ca.odell.glazedlists.matchers.Matcher;
 public class GlazedFileMatcher implements Matcher<GlazedFile> {
 
 	private boolean displayHiddenFiles = false;
-	private String[] extensions = new String[] { ".txt" };
+	// private String[] extensions = new String[] { ".txt" };
 
-	// private String[] extensions = null;
+	private String[] extensions = null;
 
 	public GlazedFileMatcher(boolean displayHiddenFiles) {
 		this.displayHiddenFiles = displayHiddenFiles;
