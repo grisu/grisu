@@ -65,6 +65,8 @@ public class SingleInputFile extends AbstractWidget {
 	protected GlazedFile popupFileDialogAndAskForFile() {
 
 		if (getServiceInterface() == null) {
+			getMylogger().error(
+					"ServiceInterface not set. Can't open dialog...");
 			return null;
 		}
 
