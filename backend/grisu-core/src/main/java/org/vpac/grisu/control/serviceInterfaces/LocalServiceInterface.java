@@ -199,8 +199,16 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 	}
 
 	@Override
-	public String getInterfaceInfo() {
-		return "Local backend";
+	public String getInterfaceInfo(String key) {
+		if ("HOSTNAME".equalsIgnoreCase(key)) {
+			return "localhost";
+		} else if ("VERSION".equalsIgnoreCase(key)) {
+			return ServiceInterface.INTERFACE_VERSION;
+		} else if ("NAME".equalsIgnoreCase(key)) {
+			return "Local serviceinterface";
+		}
+
+		return null;
 	}
 
 }

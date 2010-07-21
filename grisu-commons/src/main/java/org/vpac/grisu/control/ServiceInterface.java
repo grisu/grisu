@@ -573,13 +573,24 @@ public interface ServiceInterface {
 	 * 
 	 * @return the version
 	 */
-	@GET
-	@Path("interfaceVersion")
-	String getInterfaceVersion();
+	// @GET
+	// @Path("interfaceVersion")
+	// String getInterfaceVersion();
 
+	/**
+	 * Can provide information about the interface (like version, hostname where
+	 * it runs on, load).
+	 * 
+	 * Didn't figure out a set of available keys. I would suggest, for now
+	 * implement "VERSION" and "HOSTNAME".
+	 * 
+	 * @param key
+	 *            the key
+	 * @return the value
+	 */
 	@GET
-	@Path("interfaceInfo")
-	String getInterfaceInfo();
+	@Path("interfaceInfo/{key}")
+	String getInterfaceInfo(@PathParam("key") String key);
 
 	/**
 	 * Returns the job details.

@@ -1898,7 +1898,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return ServiceInterface.INTERFACE_VERSION;
 	}
 
-	abstract public String getInterfaceInfo();
+	abstract public String getInterfaceInfo(String key);
 
 	/*
 	 * (non-Javadoc)
