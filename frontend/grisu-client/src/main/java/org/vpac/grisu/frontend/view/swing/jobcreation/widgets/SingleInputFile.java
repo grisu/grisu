@@ -118,6 +118,8 @@ public class SingleInputFile extends AbstractWidget {
 			// fileDialog.setExtensionsToDisplay(extensions);
 			// fileDialog.displayHiddenFiles(displayHiddenFiles);
 		}
+		fileDialog.setExtensionsToDisplay(extensions);
+		fileDialog.displayHiddenFiles(displayHiddenFiles);
 		return fileDialog;
 
 	}
