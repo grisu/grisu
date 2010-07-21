@@ -149,6 +149,8 @@ public class SubmissionLogPanel extends JPanel implements
 			@Override
 			public void run() {
 				getTextArea().setText(string);
+				getTextArea()
+						.setCaretPosition(getTextArea().getText().length());
 			}
 		});
 	}

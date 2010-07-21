@@ -1,7 +1,7 @@
 package org.vpac.grisu.model.status;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Enumeration;
+import java.util.Vector;
 
 import org.bushe.swing.event.EventBus;
 import org.vpac.grisu.control.ServiceInterface;
@@ -10,8 +10,8 @@ import org.vpac.grisu.model.dto.DtoActionStatus;
 
 public class StatusObject {
 
-	public enum Listener {
-		STDOUT
+	public interface Listener {
+		public void statusMessage(ActionStatusEvent event);
 	}
 
 	public static StatusObject waitForActionToFinish(ServiceInterface si,
@@ -29,21 +29,21 @@ public class StatusObject {
 	private final ServiceInterface si;
 	private final String handle;
 
-	private final Set<Listener> listeners;
+	private Vector<Listener> listeners;
 
 	private DtoActionStatus lastStatus;
 
 	public StatusObject(ServiceInterface si, String handle) {
-		this(si, handle, new HashSet<Listener>());
+		this(si, handle, (Vector) null);
 	}
 
 	public StatusObject(ServiceInterface si, String handle, Listener l) {
-		this(si, handle, new HashSet<Listener>());
+		this(si, handle, (Vector) null);
 		addListener(l);
 	}
 
 	public StatusObject(ServiceInterface si, String handle,
-			Set<Listener> listeners) {
+			Vector<Listener> listeners) {
 		this.si = si;
 		this.handle = handle;
 		this.listeners = listeners;
@@ -55,15 +55,38 @@ public class StatusObject {
 		}
 	}
 
-	public void addListener(Listener l) {
+	synchronized public void addListener(Listener l) {
+		if (listeners == null) {
+			listeners = new Vector();
+		}
+		listeners.addElement(l);
+	}
 
-		if (l != null) {
-			switch (l) {
-			case STDOUT:
-				throw new UnsupportedOperationException("not yet supported");
+	synchronized public void removeListener(Listener l) {
+		if (listeners == null) {
+			listeners = new Vector<Listener>();
+		}
+		listeners.removeElement(l);
+	}
+
+	public void fireEvent(ActionStatusEvent message) {
+		if ((listeners != null) && !listeners.isEmpty()) {
+
+			// make a copy of the listener list in case
+			// anyone adds/removes mountPointsListeners
+			Vector targets;
+			synchronized (this) {
+				targets = (Vector) listeners.clone();
+			}
+
+			// walk through the listener list and
+			// call the gridproxychanged method in each
+			Enumeration e = targets.elements();
+			while (e.hasMoreElements()) {
+				Listener l = (Listener) e.nextElement();
+				l.statusMessage(message);
 			}
 		}
-
 	}
 
 	public DtoActionStatus getStatus() {
@@ -92,8 +115,10 @@ public class StatusObject {
 		}
 		while (!lastStatus.isFinished()) {
 			if (sendStatusEvent) {
-				EventBus.publish(handle, new ActionStatusEvent(lastStatus,
-						statusMessagePrefix));
+				ActionStatusEvent ev = new ActionStatusEvent(lastStatus,
+						statusMessagePrefix);
+				EventBus.publish(handle, ev);
+				fireEvent(ev);
 			}
 
 			if (exitIfFailed) {

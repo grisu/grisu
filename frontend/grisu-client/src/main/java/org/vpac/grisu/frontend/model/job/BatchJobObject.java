@@ -47,7 +47,9 @@ import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.job.JobMonitoringObject;
+import org.vpac.grisu.model.status.ActionStatusEvent;
 import org.vpac.grisu.model.status.StatusObject;
+import org.vpac.grisu.model.status.StatusObject.Listener;
 import org.vpac.grisu.settings.ClientPropertiesManager;
 
 import au.org.arcs.jcommons.constants.Constants;
@@ -65,7 +67,7 @@ import com.google.common.collect.ImmutableList;
  * 
  */
 public class BatchJobObject implements JobMonitoringObject,
-		Comparable<BatchJobObject> {
+		Comparable<BatchJobObject>, Listener {
 
 	static final Logger myLogger = Logger.getLogger(BatchJobObject.class
 			.getName());
@@ -2067,7 +2069,7 @@ public class BatchJobObject implements JobMonitoringObject,
 			public void run() {
 				StatusObject status = new StatusObject(serviceInterface,
 						BatchJobObject.this.batchJobname);
-
+				status.addListener(BatchJobObject.this);
 				try {
 					status.waitForActionToFinish(4, false, true,
 							"Submission status: ");
@@ -2075,6 +2077,8 @@ public class BatchJobObject implements JobMonitoringObject,
 					e.printStackTrace();
 				} catch (StatusException e) {
 					e.printStackTrace();
+				} finally {
+					status.removeListener(BatchJobObject.this);
 				}
 			}
 		};
@@ -2283,5 +2287,11 @@ public class BatchJobObject implements JobMonitoringObject,
 			return new TreeSet<DtoJob>();
 		}
 		return temp.waitingJobs();
+	}
+
+	public void statusMessage(ActionStatusEvent event) {
+
+		addJobLogMessage(event.toString());
+
 	}
 }
