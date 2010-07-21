@@ -4,20 +4,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.File;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
 import javax.swing.border.TitledBorder;
 
 import org.apache.commons.lang.StringUtils;
-import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
 import org.vpac.grisu.frontend.view.swing.utils.FirstItemPromptItemRenderer;
-import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.files.GlazedFile;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -85,33 +81,42 @@ public class SingleInputFile extends AbstractWidget {
 		return file;
 	}
 
+	public void setFileDialog(GrisuFileDialog d) {
+		this.fileDialog = d;
+	}
+
 	protected GrisuFileDialog getFileDialog() {
 
 		if (fileDialog == null) {
-			String startUrl = getHistoryManager().getLastEntry(
-					getHistoryKey() + "_last_dir");
 
-			if (StringUtils.isBlank(startUrl)) {
-				startUrl = new File(System.getProperty("user.home")).toURI()
-						.toString();
-			} else if (!FileManager.isLocal(startUrl)) {
-				try {
-					if (!getServiceInterface().isFolder(startUrl)) {
-						startUrl = new File(System.getProperty("user.home"))
-								.toURI().toString();
-					}
-				} catch (RemoteFileSystemException e) {
-					myLogger.debug(e);
-					startUrl = new File(System.getProperty("user.home"))
-							.toURI().toString();
-				}
-			}
-			fileDialog = new GrisuFileDialog(getServiceInterface(), startUrl);
-			fileDialog
-					.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-
-			fileDialog.setExtensionsToDisplay(extensions);
-			fileDialog.displayHiddenFiles(displayHiddenFiles);
+			fileDialog = createFileDialog(getServiceInterface(),
+					getHistoryKey() + "_last_dir", extensions,
+					displayHiddenFiles);
+			// String startUrl = getHistoryManager().getLastEntry(
+			// getHistoryKey() + "_last_dir");
+			//
+			// if (StringUtils.isBlank(startUrl)) {
+			// startUrl = new File(System.getProperty("user.home")).toURI()
+			// .toString();
+			// } else if (!FileManager.isLocal(startUrl)) {
+			// try {
+			// if (!getServiceInterface().isFolder(startUrl)) {
+			// startUrl = new File(System.getProperty("user.home"))
+			// .toURI().toString();
+			// }
+			// } catch (RemoteFileSystemException e) {
+			// myLogger.debug(e);
+			// startUrl = new File(System.getProperty("user.home"))
+			// .toURI().toString();
+			// }
+			// }
+			// fileDialog = new GrisuFileDialog(getServiceInterface(),
+			// startUrl);
+			// fileDialog
+			// .setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+			//
+			// fileDialog.setExtensionsToDisplay(extensions);
+			// fileDialog.displayHiddenFiles(displayHiddenFiles);
 		}
 		return fileDialog;
 

@@ -3,14 +3,19 @@ package org.vpac.grisu.frontend.view.swing.jobcreation.widgets;
 import java.awt.Component;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.File;
 
 import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 import javax.swing.border.TitledBorder;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.netbeans.validation.api.ui.ValidationGroup;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
+import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
+import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.historyRepeater.HistoryManager;
 
@@ -21,6 +26,40 @@ public abstract class AbstractWidget extends JPanel {
 
 	public static Logger getMylogger() {
 		return myLogger;
+	}
+
+	public static GrisuFileDialog createFileDialog(ServiceInterface si,
+			String historyKey, String[] extensions, boolean displayHiddenFiles) {
+
+		if (si == null) {
+			return null;
+		}
+
+		String startUrl = GrisuRegistryManager.getDefault(si)
+				.getHistoryManager().getLastEntry(historyKey);
+
+		if (StringUtils.isBlank(startUrl)) {
+			startUrl = new File(System.getProperty("user.home")).toURI()
+					.toString();
+		} else if (!FileManager.isLocal(startUrl)) {
+			try {
+				if (!si.isFolder(startUrl)) {
+					startUrl = new File(System.getProperty("user.home"))
+							.toURI().toString();
+				}
+			} catch (RemoteFileSystemException e) {
+				myLogger.debug(e);
+				startUrl = new File(System.getProperty("user.home")).toURI()
+						.toString();
+			}
+		}
+		GrisuFileDialog fileDialog = new GrisuFileDialog(si, startUrl);
+		fileDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+		fileDialog.setExtensionsToDisplay(extensions);
+		fileDialog.displayHiddenFiles(displayHiddenFiles);
+
+		return fileDialog;
 	}
 
 	private PropertyChangeSupport pcs = null;
