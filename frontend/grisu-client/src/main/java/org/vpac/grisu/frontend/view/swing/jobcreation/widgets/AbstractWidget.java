@@ -24,10 +24,6 @@ public abstract class AbstractWidget extends JPanel {
 	static final Logger myLogger = Logger.getLogger(SingleInputFile.class
 			.getName());
 
-	public static Logger getMylogger() {
-		return myLogger;
-	}
-
 	public static GrisuFileDialog createFileDialog(ServiceInterface si,
 			String historyKey, String[] extensions, boolean displayHiddenFiles) {
 
@@ -62,9 +58,14 @@ public abstract class AbstractWidget extends JPanel {
 		return fileDialog;
 	}
 
+	public static Logger getMylogger() {
+		return myLogger;
+	}
+
 	private PropertyChangeSupport pcs = null;
 
 	private ServiceInterface si;
+	private FileManager fm;
 
 	private HistoryManager hm;
 
@@ -72,6 +73,15 @@ public abstract class AbstractWidget extends JPanel {
 
 	public AbstractWidget() {
 		super();
+	}
+
+	@Override
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+		getPropertyChangeSupport().addPropertyChangeListener(l);
+	}
+
+	public FileManager getFileManager() {
+		return this.fm;
 	}
 
 	public String getHistoryKey() {
@@ -82,17 +92,6 @@ public abstract class AbstractWidget extends JPanel {
 		return hm;
 	}
 
-	public ServiceInterface getServiceInterface() {
-		return si;
-	}
-
-	/**
-	 * Can be overridden if necessary.
-	 */
-	public void historyKeySet() {
-
-	}
-
 	protected PropertyChangeSupport getPropertyChangeSupport() {
 		if (pcs == null) {
 			pcs = new PropertyChangeSupport(this);
@@ -100,24 +99,17 @@ public abstract class AbstractWidget extends JPanel {
 		return pcs;
 	}
 
-	@Override
-	public void addPropertyChangeListener(PropertyChangeListener l) {
-		getPropertyChangeSupport().addPropertyChangeListener(l);
+	public ServiceInterface getServiceInterface() {
+		return si;
 	}
 
-	@Override
-	public void removePropertyChangeListener(PropertyChangeListener l) {
-		getPropertyChangeSupport().removePropertyChangeListener(l);
-	}
+	abstract public String getValue();
 
 	/**
-	 * Can be overwritten.
-	 * 
-	 * @param set
-	 *            whether to set the last used value or not
+	 * Can be overridden if necessary.
 	 */
-	protected boolean setLastValue() {
-		return true;
+	public void historyKeySet() {
+
 	}
 
 	private void initHistory() {
@@ -139,6 +131,30 @@ public abstract class AbstractWidget extends JPanel {
 
 	}
 
+	public void lockIUI(final boolean lock) {
+
+		Component[] comps = getComponents();
+		for (Component comp : comps) {
+			comp.setEnabled(!lock);
+		}
+
+	}
+
+	@Override
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+		getPropertyChangeSupport().removePropertyChangeListener(l);
+	}
+
+	public void saveItemToHistory() {
+		if (hm != null && StringUtils.isNotBlank(historyKey)) {
+			String temp = getValue();
+			if (StringUtils.isNotBlank(temp)) {
+				System.out.println("Adding: " + this.getClass().toString());
+				hm.addHistoryEntry(this.historyKey, temp);
+			}
+		}
+	}
+
 	public void setHistoryKey(String key) {
 
 		this.historyKey = key;
@@ -152,46 +168,36 @@ public abstract class AbstractWidget extends JPanel {
 	/**
 	 * Can be overwritten.
 	 * 
-	 * @param group
+	 * @param set
+	 *            whether to set the last used value or not
 	 */
-	public void setValidationGroup(ValidationGroup group) {
-	}
-
-	public void lockIUI(final boolean lock) {
-
-		Component[] comps = getComponents();
-		for (Component comp : comps) {
-			comp.setEnabled(!lock);
-		}
-
-	}
-
-	public void setTitle(String title) {
-		setBorder(new TitledBorder(null, title, TitledBorder.LEADING,
-				TitledBorder.TOP, null, null));
-	}
-
-	public void saveItemToHistory() {
-		if (hm != null && StringUtils.isNotBlank(historyKey)) {
-			String temp = getValue();
-			if (StringUtils.isNotBlank(temp)) {
-				System.out.println("Adding: " + this.getClass().toString());
-				hm.addHistoryEntry(this.historyKey, temp);
-			}
-		}
+	protected boolean setLastValue() {
+		return true;
 	}
 
 	public void setServiceInterface(ServiceInterface si) {
 		this.si = si;
 		this.hm = GrisuRegistryManager.getDefault(si).getHistoryManager();
+		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 
 		if (historyKey != null) {
 			initHistory();
 		}
 	}
+	
+	public void setTitle(String title) {
+		setBorder(new TitledBorder(null, title, TitledBorder.LEADING,
+				TitledBorder.TOP, null, null));
+	}
+
+	/**
+	 * Can be overwritten.
+	 * 
+	 * @param group
+	 */
+	public void setValidationGroup(ValidationGroup group) {
+	}
 
 	abstract public void setValue(String value);
-
-	abstract public String getValue();
 
 }
