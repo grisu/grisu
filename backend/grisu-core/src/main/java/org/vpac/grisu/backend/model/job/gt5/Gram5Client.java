@@ -62,28 +62,34 @@ public class Gram5Client implements GramJobListener {
 		}
 	}
 
-	public int getJobStatus(String handle, GSSCredential cred) {
-		GramJob job = new GramJob(null);
-		try {
-			job.setID(handle);
-			job.setCredentials(cred);
-			job.bind();
-			Gram.jobStatus(job);
-		} catch (GramException ex) {
-			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
-					.log(Level.SEVERE, null, ex);
-		} catch (GSSException ex) {
-			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
-					.log(Level.SEVERE, null, ex);
-		} catch (MalformedURLException ex) {
-			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
-					.log(Level.SEVERE, null, ex);
+	   public int getJobStatus(String handle, GSSCredential cred) {
+        GramJob job = new GramJob(null);
+        try {
+            job.setID(handle);
+            job.setCredentials(cred);
+            job.bind();
+            Gram.jobStatus(job);
+        } catch (GramException ex) {
+            java.util.logging.Logger.getLogger(Gram5Client.class.getName()).log(Level.SEVERE, null, ex);
+            try {
+                if (ex.getCause().getClass().equals(Class.forName("java.net.ConnecException"))) {
+                    // GT2 problem - if job does not exist it can be considered as "done"
+                    return GramJob.STATUS_DONE;
+                }
+            } catch (ClassNotFoundException ex1) {
+                java.util.logging.Logger.getLogger(Gram5Client.class.getName()).log(Level.SEVERE, null, ex1);
+                // should never happen
+            }
+        } catch (GSSException ex) {
+            java.util.logging.Logger.getLogger(Gram5Client.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (MalformedURLException ex) {
+            java.util.logging.Logger.getLogger(Gram5Client.class.getName()).log(Level.SEVERE, null, ex);
 
-		}
-		myLogger.debug("job status for " + handle + " is "
-				+ job.getStatusAsString());
-		return job.getStatus();
-	}
+        }
+        myLogger.debug("job status for " + handle + " is "
+                + job.getStatusAsString());
+        return job.getStatus();
+    }
 
 	public static void main(String[] args) {
 

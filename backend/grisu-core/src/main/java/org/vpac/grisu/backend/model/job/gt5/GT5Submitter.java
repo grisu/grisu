@@ -236,7 +236,7 @@ public class GT5Submitter extends JobSubmitter {
 		// job name
 		String jobnameVal = JsdlHelpers.getJobname(jsdl);
 		NameOpValue jobname = new NameOpValue("jobname", NameOpValue.EQ,
-				jobnameVal.substring(jobnameVal.length() - 6));
+				jobnameVal.substring(Math.max(0, jobnameVal.length() - 6)));
 
 		// module setup
 		String[] modulesVal = getModulesFromMDS(infoManager, jsdl);
