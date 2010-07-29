@@ -8,12 +8,12 @@ import org.globus.gram.GramJob;
 import org.globus.rsl.NameOpValue;
 import org.globus.rsl.RslNode;
 import org.ietf.jgss.GSSCredential;
+import org.vpac.grisu.backend.info.InformationManagerManager;
 import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.backend.model.job.JobSubmitter;
 import org.vpac.grisu.control.JobConstants;
-import org.vpac.grisu.control.info.CachedMdsInformationManager;
-import org.vpac.grisu.settings.Environment;
+import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.utils.DebugUtils;
 import org.vpac.security.light.CredentialHelpers;
 import org.w3c.dom.Document;
@@ -85,8 +85,7 @@ public class GT5Submitter extends JobSubmitter {
 						"Can't determine module because either/or application, version submissionLocation are missing.");
 			}
 		} else {
-			myLogger
-					.info("No submission location specified. If this happens when trying to submit a job, it's probably a bug...");
+			myLogger.info("No submission location specified. If this happens when trying to submit a job, it's probably a bug...");
 			return new String[] {};
 		}
 
@@ -94,9 +93,9 @@ public class GT5Submitter extends JobSubmitter {
 
 	private Gram5Client gram5 = null;
 
-	public static final InformationManager informationManager = CachedMdsInformationManager
-			.getDefaultCachedMdsInformationManager(Environment
-					.getVarGrisuDirectory().toString());
+	public static final InformationManager informationManager = InformationManagerManager
+			.getInformationManager(ServerPropertiesManager
+					.getInformationManagerConf());
 
 	private static void addNotNull(RslNode node, NameOpValue value) {
 		if (value != null) {
@@ -126,8 +125,8 @@ public class GT5Submitter extends JobSubmitter {
 		String inputVal = JsdlHelpers.getPosixStandardInput(jsdl);
 		NameOpValue stdin = null;
 		if (inputVal != null) {
-			stdin = new NameOpValue("stdin", NameOpValue.EQ, JsdlHelpers
-					.getPosixStandardInput(jsdl));
+			stdin = new NameOpValue("stdin", NameOpValue.EQ,
+					JsdlHelpers.getPosixStandardInput(jsdl));
 		}
 
 		String dirValue = JsdlHelpers.getWorkingDirectory(jsdl);
@@ -161,8 +160,7 @@ public class GT5Submitter extends JobSubmitter {
 			}
 
 		} else {
-			myLogger
-					.info("Can't parse queues. If that happens when trying to submit a job, it's probably a bug...");
+			myLogger.info("Can't parse queues. If that happens when trying to submit a job, it's probably a bug...");
 		}
 		// Add "jobtype" if mpi
 		int processorCount = JsdlHelpers.getProcessorCount(jsdl);
@@ -297,8 +295,8 @@ public class GT5Submitter extends JobSubmitter {
 	@Override
 	protected String submit(InformationManager infoManager, String host,
 			String factoryType, Job job) {
-		String rsl = createJobSubmissionDescription(infoManager, job
-				.getJobDescription());
+		String rsl = createJobSubmissionDescription(infoManager,
+				job.getJobDescription());
 		myLogger.debug("RSL is ... " + rsl);
 
 		try {

@@ -1,10 +1,14 @@
 package org.vpac.grisu.settings;
 
 import java.io.File;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.TreeMap;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration.HierarchicalINIConfiguration;
+import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.log4j.Logger;
 
 /**
@@ -40,7 +44,7 @@ public final class ServerPropertiesManager {
 	public static final String DEFAULT_JOB_DIR_NAME = "grisu-dir";
 	public static final int DEFAULT_TIME_INBETWEEN_STATUS_CHECKS_FOR_THE_SAME_JOB_IN_SECONDS = 60;
 
-	private static PropertiesConfiguration config = null;
+	private static HierarchicalINIConfiguration config = null;
 
 	// public static final String DEFAULT_MULTIPARTJOB_DIR_NAME =
 	// "grisu-multijob-dir";
@@ -54,6 +58,7 @@ public final class ServerPropertiesManager {
 
 	private static final int DEFAULT_FILE_TRANSFER_RETRIES = 3;
 	private static final int DEFAULT_TIME_BETWEEN_FILE_TRANSFER_RETRIES_IN_SECONDS = 1;
+
 	public static boolean getCheckConnectionToMountPoint() {
 
 		boolean check = false;
@@ -263,8 +268,7 @@ public final class ServerPropertiesManager {
 				}
 
 				if (!debugDir.exists()) {
-					myLogger
-							.error("Can't create debug directory. Turning debug mode off.");
+					myLogger.error("Can't create debug directory. Turning debug mode off.");
 					debug = false;
 				}
 			}
@@ -388,11 +392,11 @@ public final class ServerPropertiesManager {
 	 * @throws ConfigurationException
 	 *             if the file could not be read/parsed
 	 */
-	public static PropertiesConfiguration getServerConfiguration()
+	public static HierarchicalINIConfiguration getServerConfiguration()
 			throws ConfigurationException {
 		if (config == null) {
 			File grisuDir = Environment.getGrisuDirectory();
-			config = new PropertiesConfiguration(new File(grisuDir,
+			config = new HierarchicalINIConfiguration(new File(grisuDir,
 					"grisu-server.config"));
 		}
 		return config;
@@ -459,6 +463,31 @@ public final class ServerPropertiesManager {
 			return true;
 		}
 
+	}
+
+	public static Map<String, String> getInformationManagerConf() {
+
+		SubnodeConfiguration conf;
+		try {
+			conf = getServerConfiguration().getSection("InformationManager");
+		} catch (ConfigurationException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		Map<String, String> result = new TreeMap<String, String>();
+		Iterator it = conf.getKeys();
+		while (it.hasNext()) {
+			Object key = it.next();
+			String value = conf.getString(key.toString());
+			result.put(key.toString(), value);
+		}
+
+		if (result.size() == 0) {
+			return null;
+		}
+
+		return result;
 	}
 
 	private ServerPropertiesManager() {

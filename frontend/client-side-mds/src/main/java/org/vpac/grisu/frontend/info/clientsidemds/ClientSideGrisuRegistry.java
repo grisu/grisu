@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.vpac.grisu.backend.info.InformationManagerManager;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.TemplateManager;
-import org.vpac.grisu.control.info.CachedMdsInformationManager;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.UserEnvironmentManager;
@@ -17,6 +17,7 @@ import org.vpac.grisu.model.info.ApplicationInformation;
 import org.vpac.grisu.model.info.ResourceInformation;
 import org.vpac.grisu.model.info.UserApplicationInformation;
 import org.vpac.grisu.settings.Environment;
+import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.historyRepeater.DummyHistoryManager;
 import org.vpac.historyRepeater.HistoryManager;
 import org.vpac.historyRepeater.SimpleHistoryManager;
@@ -81,10 +82,9 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 			throws Exception {
 		this.serviceInterface = serviceInterface;
 
-		this.infoManager = CachedMdsInformationManager
-				.getDefaultCachedMdsInformationManager(Environment
-						.getGrisuClientDirectory().getPath());
-
+		this.infoManager = InformationManagerManager
+				.getInformationManager(ServerPropertiesManager
+						.getInformationManagerConf());
 	}
 
 	public ApplicationInformation getApplicationInformation(

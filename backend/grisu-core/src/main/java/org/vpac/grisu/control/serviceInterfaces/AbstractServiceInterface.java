@@ -42,6 +42,7 @@ import org.simpleframework.xml.core.Persister;
 import org.vpac.grisu.backend.hibernate.BatchJobDAO;
 import org.vpac.grisu.backend.hibernate.JobDAO;
 import org.vpac.grisu.backend.hibernate.UserDAO;
+import org.vpac.grisu.backend.info.InformationManagerManager;
 import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.backend.model.RemoteFileTransferObject;
 import org.vpac.grisu.backend.model.User;
@@ -58,7 +59,6 @@ import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.control.info.CachedMdsInformationManager;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.DtoActionStatus;
@@ -148,9 +148,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public static final int DEFAULT_JOB_SUBMISSION_RETRIES = 5;
 
-	public static final InformationManager informationManager = CachedMdsInformationManager
-			.getDefaultCachedMdsInformationManager(Environment
-					.getVarGrisuDirectory().toString());
+	public static InformationManager createInformationManager() {
+		return InformationManagerManager
+				.getInformationManager(ServerPropertiesManager
+						.getInformationManagerConf());
+	}
+
+	public static final InformationManager informationManager = createInformationManager();
 
 	private static final MatchMaker matchmaker = new MatchMakerImpl(Environment
 			.getVarGrisuDirectory().toString());

@@ -27,15 +27,15 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 
 import org.apache.commons.io.FilenameUtils;
+import org.vpac.grisu.backend.info.InformationManagerManager;
 import org.vpac.grisu.backend.model.job.gt4.GT4Submitter;
 import org.vpac.grisu.backend.model.job.gt5.GT5Submitter;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.TemplateException;
-import org.vpac.grisu.control.info.CachedMdsInformationManager;
 import org.vpac.grisu.frontend.view.swing.login.LoginPanel;
 import org.vpac.grisu.model.GrisuRegistryManager;
-import org.vpac.grisu.settings.Environment;
+import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 
 import au.org.arcs.jcommons.interfaces.InformationManager;
@@ -105,9 +105,9 @@ public class TemplateEditPanel extends JPanel implements
 	// }
 	// }
 
-	public static final InformationManager informationManager = CachedMdsInformationManager
-			.getDefaultCachedMdsInformationManager(Environment
-					.getVarGrisuDirectory().toString());
+	public static final InformationManager informationManager = InformationManagerManager
+			.getInformationManager(ServerPropertiesManager
+					.getInformationManagerConf());
 
 	public static String getStackTrace(Throwable t) {
 		StringWriter stringWritter = new StringWriter();
@@ -277,8 +277,8 @@ public class TemplateEditPanel extends JPanel implements
 
 						if (si != null) {
 							GrisuRegistryManager.getDefault(si)
-									.getTemplateManager().addLocalTemplate(
-											currentFile);
+									.getTemplateManager()
+									.addLocalTemplate(currentFile);
 						}
 
 						if (optionalDialog != null) {

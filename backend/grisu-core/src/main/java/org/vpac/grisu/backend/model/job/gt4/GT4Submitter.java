@@ -30,13 +30,12 @@ import org.globus.exec.utils.rsl.RSLParseException;
 import org.globus.wsrf.impl.security.authorization.Authorization;
 import org.globus.wsrf.impl.security.authorization.HostAuthorization;
 import org.ietf.jgss.GSSCredential;
+import org.vpac.grisu.backend.info.InformationManagerManager;
 import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.backend.model.job.JobSubmitter;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
-import org.vpac.grisu.control.info.CachedMdsInformationManager;
-import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.utils.DebugUtils;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
@@ -145,8 +144,7 @@ public class GT4Submitter extends JobSubmitter {
 				job.appendChild(queue_node);
 			}
 		} else {
-			myLogger
-					.info("Can't parse queues. If that happens when trying to submit a job, it's probably a bug...");
+			myLogger.info("Can't parse queues. If that happens when trying to submit a job, it's probably a bug...");
 		}
 
 		// Add "jobtype" if mpi
@@ -274,8 +272,7 @@ public class GT4Submitter extends JobSubmitter {
 				if (StringUtils.isBlank(application)
 						|| Constants.GENERIC_APPLICATION_NAME
 								.equals(application)) {
-					myLogger
-							.debug("\"generic\" application. Not trying to calculate modules...");
+					myLogger.debug("\"generic\" application. Not trying to calculate modules...");
 
 				} else if (StringUtils.isNotBlank(application)
 						&& StringUtils.isNotBlank(version)
@@ -291,15 +288,13 @@ public class GT4Submitter extends JobSubmitter {
 
 						if ((modules_string == null)
 								|| "".equals(modules_string)) {
-							myLogger
-									.warn("No module for this application/version/submissionLocation found. Submitting nonetheless...");
+							myLogger.warn("No module for this application/version/submissionLocation found. Submitting nonetheless...");
 						}
 
 					} catch (Exception e) {
-						myLogger
-								.warn("Could not get module for this application/version/submissionLocation: "
-										+ e.getLocalizedMessage()
-										+ ". Submitting nonetheless...");
+						myLogger.warn("Could not get module for this application/version/submissionLocation: "
+								+ e.getLocalizedMessage()
+								+ ". Submitting nonetheless...");
 					}
 
 					// if we know application and submissionlocation but version
@@ -318,15 +313,13 @@ public class GT4Submitter extends JobSubmitter {
 
 						if ((modules_string == null)
 								|| "".equals(modules_string)) {
-							myLogger
-									.warn("No module for this application/submissionLocation found. Submitting nonetheless...");
+							myLogger.warn("No module for this application/submissionLocation found. Submitting nonetheless...");
 						}
 
 					} catch (Exception e) {
-						myLogger
-								.warn("Could not get module for this application/submissionLocation: "
-										+ e.getLocalizedMessage()
-										+ ". Submitting nonetheless...");
+						myLogger.warn("Could not get module for this application/submissionLocation: "
+								+ e.getLocalizedMessage()
+								+ ". Submitting nonetheless...");
 					}
 
 				} else {
@@ -334,8 +327,7 @@ public class GT4Submitter extends JobSubmitter {
 							"Can't determine module because either/or application, version submissionLocation are missing.");
 				}
 			} else {
-				myLogger
-						.info("No submission location specified. If this happens when trying to submit a job, it's probably a bug...");
+				myLogger.info("No submission location specified. If this happens when trying to submit a job, it's probably a bug...");
 			}
 
 			if (StringUtils.isNotBlank(application)
@@ -506,9 +498,9 @@ public class GT4Submitter extends JobSubmitter {
 	// return handle;
 	// }
 
-	private final InformationManager informationManager = CachedMdsInformationManager
-			.getDefaultCachedMdsInformationManager(Environment
-					.getVarGrisuDirectory().toString());
+	private final InformationManager informationManager = InformationManagerManager
+			.getInformationManager(ServerPropertiesManager
+					.getInformationManagerConf());
 
 	/*
 	 * (non-Javadoc)
@@ -523,8 +515,8 @@ public class GT4Submitter extends JobSubmitter {
 
 		String status = null;
 		int grisu_status = Integer.MIN_VALUE;
-		status = GramClient.getJobStatus(endPointReference, cred
-				.getGssCredential());
+		status = GramClient.getJobStatus(endPointReference,
+				cred.getGssCredential());
 
 		grisu_status = translateToGrisuStatus(status);
 
@@ -727,8 +719,7 @@ public class GT4Submitter extends JobSubmitter {
 
 		}
 
-		myLogger
-				.debug("Submitted rsl job description:\n--------------------------------");
+		myLogger.debug("Submitted rsl job description:\n--------------------------------");
 		myLogger.debug(submittedJobDesc);
 
 		return handle;
