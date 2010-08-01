@@ -2,6 +2,8 @@ package org.vpac.grisu.backend.model.job.gt5;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.logging.Level;
 
 import org.apache.log4j.Logger;
@@ -17,6 +19,9 @@ import org.vpac.security.light.plainProxy.LocalProxy;
 
 public class Gram5Client implements GramJobListener {
 
+        private static HashMap<String,String> contacts = new HashMap<String,String>();
+        private static HashSet<String> failed = new HashSet<String>();
+
 	static final Logger myLogger = Logger
 			.getLogger(Gram5Client.class.getName());
 
@@ -25,16 +30,31 @@ public class Gram5Client implements GramJobListener {
 		job.setCredentials(cred);
 		job.addListener(this);
 		try {
-			job.request(endPoint, true);
-			myLogger.debug(job.getIDAsString());
+                    job.request(endPoint, true);
+                    try {
+                        Thread.currentThread().sleep(1000);
+                    } catch (InterruptedException ex) {
+                        java.util.logging.Logger.getLogger(Gram5Client.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                        Gram.jobStatus(job);
+
+                        myLogger.fatal("JOB ERROR IS " + job.getError());
+                        myLogger.fatal("JOB STATUS IS " + job.getStatusAsString());
+			myLogger.fatal("JOB ID IS " + job.getIDAsString());
+                        contacts.put(job.getIDAsString(),endPoint);
 			return job.getIDAsString();
 		} catch (GramException ex) {
-			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
-					.log(Level.SEVERE, null, ex);
+
+                        myLogger.fatal("REAL JOB ERROR IS " + job.getError());
+                        myLogger.fatal("REAL JOB STATUS IS " + job.getStatusAsString());
+                        failed.add(job.getIDAsString());
+                    	java.util.logging.Logger.getLogger(Gram5Client.class.getName())
+					.log(Level.SEVERE, null,ex);
 			return null;
 		} catch (GSSException ex) {
 			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
-					.log(Level.SEVERE, null, ex);
+					.log(Level.SEVERE, null,ex);
 			return null;
 		}
 	}
@@ -54,7 +74,8 @@ public class Gram5Client implements GramJobListener {
 				java.util.logging.Logger.getLogger(Gram5Client.class.getName())
 						.log(Level.SEVERE, null, ex);
 			}
-			return job.getStatus();
+                        int status = job.getStatus();
+			return status;
 		} catch (MalformedURLException ex) {
 			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
 					.log(Level.SEVERE, null, ex);
@@ -63,6 +84,10 @@ public class Gram5Client implements GramJobListener {
 	}
 
     public int getJobStatus(String handle, GSSCredential cred) {
+        if (failed.contains(handle)){
+            return  GramJob.STATUS_FAILED;
+        }
+
         GramJob job = new GramJob(null);
         try {
             job.setID(handle);
@@ -70,10 +95,26 @@ public class Gram5Client implements GramJobListener {
             job.bind();
             Gram.jobStatus(job);
         } catch (GramException ex) {
-            java.util.logging.Logger.getLogger(Gram5Client.class.getName()).log(Level.SEVERE, null, ex);
+            myLogger.fatal("job submitted should be ..." + handle);
             if (ex.getErrorCode() == GramException.CONNECTION_FAILED) {
-                // GT2 problem - if job does not exist it can be considered as "done"
-                return GramJob.STATUS_DONE;
+                // maybe the job finished, but maybe we need to kick job manager
+
+                String rsl = "&(restart="+ handle +")";
+                GramJob restartJob = new GramJob(rsl);
+                restartJob.setCredentials(cred);
+                restartJob.addListener(this);
+                try {
+                    restartJob.request(contacts.get(handle), false);
+                } catch (GramException ex1) {
+                    // ok, now we are really done
+                    contacts.remove(handle);
+                    return GramJob.STATUS_DONE;
+                } catch (GSSException ex1) {
+                    throw new RuntimeException(ex1);
+                }
+
+                // nope, not done yet. 
+                return getJobStatus(handle,cred);
             }
         } catch (GSSException ex) {
             java.util.logging.Logger.getLogger(Gram5Client.class.getName()).log(Level.SEVERE, null, ex);
@@ -142,9 +183,9 @@ public class Gram5Client implements GramJobListener {
 	}
 
 	public void statusChanged(GramJob job) {
-		System.out.println("STATUS CHANGED STATUS CHANGED STATUS CHANGED "
+		myLogger.fatal("STATUS CHANGED STATUS CHANGED STATUS CHANGED "
 				+ job.getStatusAsString());
-		System.out.println("the job is : " + job.toString());
+		myLogger.fatal("the job is : " + job.toString());
 	}
 
 }
