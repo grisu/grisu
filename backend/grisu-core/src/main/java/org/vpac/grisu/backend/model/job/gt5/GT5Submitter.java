@@ -312,11 +312,14 @@ public class GT5Submitter extends JobSubmitter {
 		}
 	}
 
-	private int translateToGrisuStatus(final int status) {
+	private int translateToGrisuStatus(final int[] statusAndError) {
+
+                int status = statusAndError[0];
+                int error = statusAndError[1];
 
 		int grisu_status = Integer.MIN_VALUE;
 		if (status == GramJob.STATUS_DONE) {
-			grisu_status = JobConstants.DONE;
+			grisu_status = JobConstants.DONE + error;
 		} else if (status == GramJob.STATUS_STAGE_IN) {
 			grisu_status = JobConstants.STAGE_IN;
 		} else if (status == GramJob.STATUS_STAGE_OUT) {
