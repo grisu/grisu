@@ -2,6 +2,7 @@ package org.vpac.grisu.backend.model.job.gt5;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.logging.Level;
 
@@ -18,7 +19,6 @@ import org.vpac.security.light.plainProxy.LocalProxy;
 
 public class Gram5Client implements GramJobListener {
 
-    private static HashMap<String, String> contacts = new HashMap<String, String>();
     private static HashMap<String, Integer> statuses = new HashMap<String, Integer>();
     private static HashMap<String, Integer> errors = new HashMap<String, Integer>();
     static final Logger myLogger = Logger.getLogger(Gram5Client.class.getName());
@@ -40,8 +40,6 @@ public class Gram5Client implements GramJobListener {
         try {
             job.request(endPoint, false);
             Gram.jobStatus(job);
-
-            contacts.put(job.getIDAsString(), endPoint);
             return job.getIDAsString();
         } catch (GramException ex) {
             java.util.logging.Logger.getLogger(Gram5Client.class.getName()).log(Level.SEVERE, null, ex);
@@ -73,6 +71,16 @@ public class Gram5Client implements GramJobListener {
         }
     }
 
+    private String getContactString(String handle) {
+        try {
+            URL url = new URL(handle);
+            return url.getHost();
+        } catch (MalformedURLException ex1) {
+            java.util.logging.Logger.getLogger(Gram5Client.class.getName()).log(Level.SEVERE, null, ex1);
+            return null;
+        }
+    }
+
     public int[] getJobStatus(String handle, GSSCredential cred) {
 
         int[] results = new int[2];
@@ -92,6 +100,7 @@ public class Gram5Client implements GramJobListener {
             job.bind();
             Gram.jobStatus(job);
             myLogger.debug("job status is " + job.getStatusAsString());
+            myLogger.debug("job error is " + job.getError());
         } catch (GramException ex) {
             if (ex.getErrorCode() == GramException.CONNECTION_FAILED) {
                 // maybe the job finished, but maybe we need to kick job manager
@@ -102,10 +111,10 @@ public class Gram5Client implements GramJobListener {
                 restartJob.setCredentials(cred);
                 restartJob.addListener(this);
                 try {
-                    restartJob.request(contacts.get(handle), false);
+
+                    restartJob.request(getContactString(handle), false);
                 } catch (GramException ex1) {
                     // ok, now we are really done
-                    contacts.remove(handle);
                     return new int[]{GramJob.STATUS_DONE, 0};
                 } catch (GSSException ex1) {
                     throw new RuntimeException(ex1);
