@@ -78,7 +78,6 @@ import org.vpac.grisu.model.dto.DtoProperties;
 import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
-import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.utils.FileHelpers;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
@@ -89,7 +88,6 @@ import org.vpac.security.light.voms.VOManagement.VOManagement;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import au.org.arcs.grid.grisu.matchmaker.MatchMakerImpl;
 import au.org.arcs.grid.sched.MatchMaker;
 import au.org.arcs.jcommons.constants.Constants;
 import au.org.arcs.jcommons.constants.JobSubmissionProperty;
@@ -154,10 +152,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						.getInformationManagerConf());
 	}
 
+	public static MatchMaker createMatchMaker() {
+		return InformationManagerManager.getMatchMaker(ServerPropertiesManager
+				.getMatchMakerConf());
+	}
+
 	public static final InformationManager informationManager = createInformationManager();
 
-	private static final MatchMaker matchmaker = new MatchMakerImpl(Environment
-			.getVarGrisuDirectory().toString());
+	private static final MatchMaker matchmaker = createMatchMaker();
 
 	private final boolean checkFileSystemsBeforeUse = false;
 	protected final UserDAO userdao = new UserDAO();

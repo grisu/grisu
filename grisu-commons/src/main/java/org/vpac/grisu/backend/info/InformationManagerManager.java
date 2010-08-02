@@ -8,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.settings.Environment;
 
+import au.org.arcs.grid.sched.MatchMaker;
 import au.org.arcs.jcommons.interfaces.InformationManager;
 
 public class InformationManagerManager {
@@ -18,6 +19,7 @@ public class InformationManagerManager {
 	public static final String IM_CLASS = "type";
 
 	private static Map<String, InformationManager> infoManagers = new HashMap<String, InformationManager>();
+	private static Map<String, MatchMaker> matchMakers = new HashMap<String, MatchMaker>();
 
 	public static String createKey(Map<String, String> map) {
 
@@ -43,6 +45,21 @@ public class InformationManagerManager {
 			infoManagers.put(key, im);
 		}
 		return im;
+	}
+
+	public static MatchMaker getMatchMaker(Map<String, String> parameters) {
+		if (parameters == null) {
+			parameters = new HashMap<String, String>();
+		}
+		String key = createKey(parameters);
+		MatchMaker mm = matchMakers.get(key);
+
+		if (mm == null) {
+			System.out.println("Creating infoManager: " + key);
+			mm = createMatchMaker(parameters);
+			matchMakers.put(key, mm);
+		}
+		return mm;
 	}
 
 	public static InformationManager createInfoManager(
@@ -80,4 +97,41 @@ public class InformationManagerManager {
 		}
 
 	}
+
+	public static MatchMaker createMatchMaker(Map<String, String> parameters) {
+
+		try {
+			String imClassName = parameters.get("type");
+
+			if (StringUtils.isBlank(imClassName)) {
+				parameters.put("type",
+						"au.org.arcs.grid.grisu.matchmaker.MatchMakerImpl");
+				imClassName = "au.org.arcs.grid.grisu.matchmaker.MatchMakerImpl";
+
+				String dir = parameters.get("mdsFileDir");
+				if (StringUtils.isBlank(dir)) {
+					parameters.put("mdsFileDir", Environment
+							.getVarGrisuDirectory().toString());
+				}
+			}
+
+			if (!imClassName.contains(".")) {
+				imClassName = "org.vpac.grisu.control.info." + imClassName;
+			}
+
+			Class imClass = Class.forName(imClassName);
+			Constructor<MatchMaker> constructor = imClass
+					.getConstructor(Map.class);
+
+			MatchMaker im = constructor.newInstance(parameters);
+
+			return im;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
+	}
+
 }

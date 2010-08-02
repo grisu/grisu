@@ -126,8 +126,8 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>au.org.arcs.commons</groupId>
-			<artifactId>arcs-jcommons</artifactId>
+			<groupId>org.bestgrid</groupId>
+			<artifactId>grid-jcommons</artifactId>
 			<version>1.1-SNAPSHOT</version>
 		</dependency>
 

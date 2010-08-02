@@ -493,4 +493,28 @@ public final class ServerPropertiesManager {
 	private ServerPropertiesManager() {
 	}
 
+	public static Map<String, String> getMatchMakerConf() {
+		SubnodeConfiguration conf;
+		try {
+			conf = getServerConfiguration().getSection("MatchMaker");
+		} catch (ConfigurationException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		Map<String, String> result = new TreeMap<String, String>();
+		Iterator it = conf.getKeys();
+		while (it.hasNext()) {
+			Object key = it.next();
+			String value = conf.getString(key.toString());
+			result.put(key.toString(), value);
+		}
+
+		if (result.size() == 0) {
+			return null;
+		}
+
+		return result;
+	}
+
 }
