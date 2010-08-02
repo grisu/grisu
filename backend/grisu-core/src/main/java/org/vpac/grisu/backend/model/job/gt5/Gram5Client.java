@@ -93,7 +93,18 @@ public class Gram5Client implements GramJobListener {
             return results;
         }
 
+        String contact = getContactString(handle);
         GramJob job = new GramJob(null);
+        try {
+            // lets try to see if gateway is working first...
+            Gram.ping(contact);
+        } catch (GramException ex) {
+            // have no idea what the status is, gateway is down:
+            return new int[] {GramJob.STATUS_UNSUBMITTED,0};
+        } catch (GSSException ex) {
+            java.util.logging.Logger.getLogger(Gram5Client.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         try {
             job.setID(handle);
             job.setCredentials(cred);
@@ -112,7 +123,7 @@ public class Gram5Client implements GramJobListener {
                 restartJob.addListener(this);
                 try {
 
-                    restartJob.request(getContactString(handle), false);
+                    restartJob.request(contact, false);
                 } catch (GramException ex1) {
                     // ok, now we are really done
                     return new int[]{GramJob.STATUS_DONE, 0};
