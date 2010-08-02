@@ -4162,7 +4162,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 
 			String submissionType = null;
-			if ("5.0.0".equals(version)) {
+			if (version.startsWith("5")) {
 				submissionType = "GT5";
 			} else {
 				submissionType = "GT4";

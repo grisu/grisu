@@ -141,11 +141,18 @@
 			<artifactId>commons-beanutils</artifactId>
 			<version>0.1</version>
 		</dependency>
-		<dependency>
+<!--		<dependency>
 			<groupId>external.globus</groupId>
 			<artifactId>commons-collections-3</artifactId>
 			<version>0.1</version>
-		</dependency>
+		</dependency> 
+-->
+               <dependency>
+		<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2</version>
+	       </dependency>
+
 		<dependency>
 			<groupId>external.globus</groupId>
 			<artifactId>commons-digester</artifactId>

@@ -112,7 +112,7 @@ public class GT5Submitter extends JobSubmitter {
 
 		String[] argumentsVal = JsdlHelpers.getPosixApplicationArguments(jsdl);
 		NameOpValue arguments = null;
-		if (argumentsVal != null) {
+		if (argumentsVal != null && argumentsVal.length > 0) {
 			arguments = new NameOpValue("arguments", NameOpValue.EQ,
 					argumentsVal);
 		}
@@ -246,6 +246,7 @@ public class GT5Submitter extends JobSubmitter {
 			}
 		}
 
+                result.add(new NameOpValue("save_state",NameOpValue.EQ,"yes"));
 		addNotNull(result, executable);
 		addNotNull(result, jobname);
 		addNotNull(result, arguments);
@@ -311,11 +312,14 @@ public class GT5Submitter extends JobSubmitter {
 		}
 	}
 
-	private int translateToGrisuStatus(final int status) {
+	private int translateToGrisuStatus(final int[] statusAndError) {
+
+                int status = statusAndError[0];
+                int error = statusAndError[1];
 
 		int grisu_status = Integer.MIN_VALUE;
 		if (status == GramJob.STATUS_DONE) {
-			grisu_status = JobConstants.DONE;
+			grisu_status = JobConstants.DONE + error;
 		} else if (status == GramJob.STATUS_STAGE_IN) {
 			grisu_status = JobConstants.STAGE_IN;
 		} else if (status == GramJob.STATUS_STAGE_OUT) {
@@ -331,7 +335,7 @@ public class GT5Submitter extends JobSubmitter {
 		} else if (status == GramJob.STATUS_SUSPENDED) {
 			grisu_status = JobConstants.ACTIVE;
 		} else {
-			grisu_status = Integer.MAX_VALUE;
+			grisu_status = status;
 		}
 		return grisu_status;
 
