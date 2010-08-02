@@ -9,14 +9,12 @@ import java.util.TreeSet;
 
 import org.vpac.grisu.model.GrisuRegistry;
 import org.vpac.grisu.model.info.ApplicationInformation;
-import org.vpac.grisu.settings.Environment;
 
-import au.org.arcs.grid.grisu.matchmaker.MatchMakerImpl;
-import au.org.arcs.grid.sched.MatchMaker;
 import au.org.arcs.jcommons.constants.Constants;
 import au.org.arcs.jcommons.constants.JobSubmissionProperty;
 import au.org.arcs.jcommons.interfaces.GridResource;
 import au.org.arcs.jcommons.interfaces.InformationManager;
+import au.org.arcs.jcommons.interfaces.MatchMaker;
 
 public class ClientSideApplicationInformation implements ApplicationInformation {
 
@@ -26,12 +24,12 @@ public class ClientSideApplicationInformation implements ApplicationInformation 
 	private final MatchMaker matchMaker;
 
 	public ClientSideApplicationInformation(GrisuRegistry registry,
-			String applicationName, InformationManager infoManager) {
+			String applicationName, InformationManager infoManager,
+			MatchMaker mm) {
 		this.registry = registry;
 		this.infoManager = infoManager;
 		this.applicationName = applicationName;
-		this.matchMaker = new MatchMakerImpl(Environment.getGrisuClientDirectory()
-				.toString());
+		this.matchMaker = mm;
 	}
 
 	public Set<String> getAllAvailableVersionsForFqan(String fqan) {

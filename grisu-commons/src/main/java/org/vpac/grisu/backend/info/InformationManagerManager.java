@@ -8,8 +8,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.settings.Environment;
 
-import au.org.arcs.grid.sched.MatchMaker;
 import au.org.arcs.jcommons.interfaces.InformationManager;
+import au.org.arcs.jcommons.interfaces.MatchMaker;
 
 public class InformationManagerManager {
 
@@ -104,9 +104,8 @@ public class InformationManagerManager {
 			String imClassName = parameters.get("type");
 
 			if (StringUtils.isBlank(imClassName)) {
-				parameters.put("type",
-						"au.org.arcs.grid.grisu.matchmaker.MatchMakerImpl");
-				imClassName = "au.org.arcs.grid.grisu.matchmaker.MatchMakerImpl";
+				parameters.put("type", "MatchMakerImpl");
+				imClassName = "MatchMakerImpl";
 
 				String dir = parameters.get("mdsFileDir");
 				if (StringUtils.isBlank(dir)) {

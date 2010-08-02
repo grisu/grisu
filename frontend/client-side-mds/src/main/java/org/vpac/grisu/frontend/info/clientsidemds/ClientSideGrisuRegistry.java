@@ -23,6 +23,7 @@ import org.vpac.historyRepeater.HistoryManager;
 import org.vpac.historyRepeater.SimpleHistoryManager;
 
 import au.org.arcs.jcommons.interfaces.InformationManager;
+import au.org.arcs.jcommons.interfaces.MatchMaker;
 
 public class ClientSideGrisuRegistry implements GrisuRegistry {
 
@@ -32,8 +33,7 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 	private final ServiceInterface serviceInterface;
 
 	private final InformationManager infoManager;
-
-	private static InformationManager staticInfoManager;
+	private final MatchMaker matchMaker;
 
 	private HistoryManager historyManager = null;
 	private final Map<String, ApplicationInformation> cachedApplicationInformationObjects = new HashMap<String, ApplicationInformation>();
@@ -85,6 +85,8 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 		this.infoManager = InformationManagerManager
 				.getInformationManager(ServerPropertiesManager
 						.getInformationManagerConf());
+		this.matchMaker = InformationManagerManager
+				.getMatchMaker(ServerPropertiesManager.getMatchMakerConf());
 	}
 
 	public ApplicationInformation getApplicationInformation(
@@ -92,7 +94,7 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 
 		if (cachedApplicationInformationObjects.get(applicationName) == null) {
 			ApplicationInformation temp = new ClientSideApplicationInformation(
-					this, applicationName, infoManager);
+					this, applicationName, infoManager, matchMaker);
 			cachedApplicationInformationObjects.put(applicationName, temp);
 		}
 		return cachedApplicationInformationObjects.get(applicationName);
@@ -150,7 +152,7 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 
 		if (cachedUserInformationObjects.get(applicationName) == null) {
 			UserApplicationInformation temp = new ClientSideUserApplicationInformation(
-					this, applicationName, infoManager);
+					this, applicationName, infoManager, matchMaker);
 			cachedUserInformationObjects.put(applicationName, temp);
 		}
 		return cachedUserInformationObjects.get(applicationName);

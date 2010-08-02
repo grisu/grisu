@@ -88,11 +88,11 @@ import org.vpac.security.light.voms.VOManagement.VOManagement;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import au.org.arcs.grid.sched.MatchMaker;
 import au.org.arcs.jcommons.constants.Constants;
 import au.org.arcs.jcommons.constants.JobSubmissionProperty;
 import au.org.arcs.jcommons.interfaces.GridResource;
 import au.org.arcs.jcommons.interfaces.InformationManager;
+import au.org.arcs.jcommons.interfaces.MatchMaker;
 import au.org.arcs.jcommons.utils.JsdlHelpers;
 import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
 

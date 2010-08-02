@@ -373,6 +373,13 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>au.org.arcs.infosystems</groupId>
+			<artifactId>mysql-mds</artifactId>
+			<version>0.5-SNAPSHOT</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

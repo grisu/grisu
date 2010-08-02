@@ -570,7 +570,7 @@ public class User {
 
 					url = url + additionalUrl;
 
-				} catch (FileSystemException e) {
+				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -581,7 +581,7 @@ public class User {
 					url = getFileSystemHomeDirectory(
 							server.replace(":2811", ""), fqan);
 					userDnPath = false;
-				} catch (FileSystemException e) {
+				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -592,7 +592,7 @@ public class User {
 							server.replace(":2811", ""), fqan)
 							+ "/.globus/scratch";
 					userDnPath = false;
-				} catch (FileSystemException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			} else {

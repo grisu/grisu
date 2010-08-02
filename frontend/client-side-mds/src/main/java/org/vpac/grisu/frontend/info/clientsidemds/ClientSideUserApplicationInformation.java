@@ -9,6 +9,7 @@ import org.vpac.grisu.model.UserEnvironmentManager;
 import org.vpac.grisu.model.info.UserApplicationInformation;
 
 import au.org.arcs.jcommons.interfaces.InformationManager;
+import au.org.arcs.jcommons.interfaces.MatchMaker;
 
 public class ClientSideUserApplicationInformation extends
 		ClientSideApplicationInformation implements UserApplicationInformation {
@@ -19,8 +20,9 @@ public class ClientSideUserApplicationInformation extends
 	private final UserEnvironmentManager userInfo;
 
 	public ClientSideUserApplicationInformation(GrisuRegistry registry,
-			String applicationName, InformationManager infoManager) {
-		super(registry, applicationName, infoManager);
+			String applicationName, InformationManager infoManager,
+			MatchMaker matchMaker) {
+		super(registry, applicationName, infoManager, matchMaker);
 		this.userInfo = registry.getUserEnvironmentManager();
 	}
 

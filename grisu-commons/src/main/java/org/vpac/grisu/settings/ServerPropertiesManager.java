@@ -490,9 +490,6 @@ public final class ServerPropertiesManager {
 		return result;
 	}
 
-	private ServerPropertiesManager() {
-	}
-
 	public static Map<String, String> getMatchMakerConf() {
 		SubnodeConfiguration conf;
 		try {
