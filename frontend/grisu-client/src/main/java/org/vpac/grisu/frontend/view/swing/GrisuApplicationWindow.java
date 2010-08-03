@@ -5,7 +5,6 @@ import java.awt.BorderLayout;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -51,15 +50,15 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 			e.printStackTrace();
 		}
 		//
-		try {
-			Class clientSideRegistryClass = Class
-					.forName("org.vpac.grisu.frontend.info.clientsidemds.ClientSideGrisuRegistry");
-
-			Method m = clientSideRegistryClass.getMethod("preloadInfoManager");
-			m.invoke(null);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		// try {
+		// Class clientSideRegistryClass = Class
+		// .forName("org.vpac.grisu.frontend.info.clientsidemds.ClientSideGrisuRegistry");
+		//
+		// Method m = clientSideRegistryClass.getMethod("preloadInfoManager");
+		// m.invoke(null);
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
 
 		initialize();
 

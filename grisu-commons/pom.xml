@@ -84,7 +84,7 @@
 		<dependency>
 			<groupId>org.vpac.historyRepeater</groupId>
 			<artifactId>historyRepeater</artifactId>
-			<version>0.3-SNAPSHOT</version>
+			<version>0.4</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-beanutils</groupId>
@@ -128,7 +128,7 @@
 		<dependency>
 			<groupId>org.bestgrid</groupId>
 			<artifactId>grid-jcommons</artifactId>
-			<version>1.1-SNAPSHOT</version>
+			<version>1.1</version>
 		</dependency>
 
 
