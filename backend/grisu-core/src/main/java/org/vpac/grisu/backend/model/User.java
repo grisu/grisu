@@ -693,8 +693,11 @@ public class User {
 		// return cachedGridFtpHomeDirs.get(keyMP);
 	}
 
-	public void clearMountPointCache() {
-		this.mountPointCache = new HashMap<String, String>();
+	public void clearMountPointCache(String keypattern) {
+		if (StringUtils.isBlank(keypattern)) {
+			this.mountPointCache = new HashMap<String, String>();
+		}
+		userdao.saveOrUpdate(this);
 	}
 
 	/**

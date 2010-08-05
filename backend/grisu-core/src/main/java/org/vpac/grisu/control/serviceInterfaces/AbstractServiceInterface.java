@@ -3984,6 +3984,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public void setUserProperty(String key, String value) {
 
+		if (StringUtils.isBlank(key)) {
+			return;
+		}
+
+		if (Constants.CLEAR_MOUNTPOINT_CACHE.equals(key)) {
+			getUser().clearMountPointCache(value);
+		}
+
 		getUser().addProperty(key, value);
 
 	}
