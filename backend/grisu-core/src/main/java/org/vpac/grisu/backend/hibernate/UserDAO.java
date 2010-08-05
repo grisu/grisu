@@ -23,7 +23,7 @@ public class UserDAO extends BaseHibernateDAO {
 	// return user.getDn();
 	// }
 
-	public final void delete(final User persistentInstance) {
+	public final synchronized void delete(final User persistentInstance) {
 		myLogger.debug("deleting Job instance");
 
 		try {
@@ -89,7 +89,7 @@ public class UserDAO extends BaseHibernateDAO {
 
 	}
 
-	public final void saveOrUpdate(final User instance) {
+	public final synchronized void saveOrUpdate(final User instance) {
 		myLogger.debug("attaching dirty Job instance");
 
 		try {

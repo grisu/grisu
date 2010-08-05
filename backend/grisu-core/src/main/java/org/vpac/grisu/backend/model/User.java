@@ -222,7 +222,7 @@ public class User {
 					"No valid credential exists in this session");
 		}
 
-		myLogger.debug("CREATING USER: " + cred.getDn());
+		myLogger.debug("CREATING USER SESSION: " + cred.getDn());
 
 		// if ( getCredential())
 
