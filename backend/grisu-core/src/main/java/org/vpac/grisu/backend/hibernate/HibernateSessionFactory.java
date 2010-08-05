@@ -118,7 +118,7 @@ public final class HibernateSessionFactory {
 					.configure(grisuHibernateConfigFile);
 				} else if (!ServerPropertiesManager.useDefaultDatabase()) {
 					// check whether something is specified in the
-					// grisu-server.config file
+					// grisu-backend.config file
 					String dbType = ServerPropertiesManager.getDatabaseType();
 					if (MYSQL_DBTYPE.equals(dbType)) {
 						usedDatabase = MYSQL_DBTYPE;
@@ -134,15 +134,15 @@ public final class HibernateSessionFactory {
 
 						if ((url == null) || (url.length() == 0)) {
 							throw new RuntimeException(
-							"databaseConnectionUrl not specified in grisu-server.config file. Can't continue...");
+							"databaseConnectionUrl not specified in grisu-backend.config file. Can't continue...");
 						}
 						if ((username == null) || (username.length() == 0)) {
 							throw new RuntimeException(
-							"databaseUsername not specified in grisu-server.config file. Can't continue...");
+							"databaseUsername not specified in grisu-backend.config file. Can't continue...");
 						}
 						if ((password == null) || (password.length() == 0)) {
 							throw new RuntimeException(
-							"databasePassword not specified in grisu-server.config file. Can't continue...");
+							"databasePassword not specified in grisu-backend.config file. Can't continue...");
 						}
 
 						configuration.setProperty("hibernate.connection.url",
@@ -224,7 +224,7 @@ public final class HibernateSessionFactory {
 						throw new RuntimeException(
 								"DatabaseType \""
 								+ dbType
-								+ "\" in grisu-server.config file not recognized. Can't continue. Use either \"hsqldb\" or \"mysql\".");
+								+ "\" in grisu-backend.config file not recognized. Can't continue. Use either \"hsqldb\" or \"mysql\".");
 					}
 				} else {
 					// use default derby database

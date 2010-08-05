@@ -12,7 +12,7 @@ import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.log4j.Logger;
 
 /**
- * Manages the $HOME/.grisu/grisu-server.config file.
+ * Manages the $HOME/.grisu/grisu-backend.config file.
  * 
  * @author Markus Binsteiner
  * 
@@ -29,11 +29,11 @@ public final class ServerPropertiesManager {
 	 */
 	public static final int DEFAULT_MIN_PROXY_LIFETIME_BEFORE_REFRESH = 600;
 	/**
-	 * Default concurrent threads to query job status per user: 5
+	 * Default concurrent threads to query job status per user: 2
 	 */
 	public static final int DEFAULT_CONCURRENT_JOB_STATUS_THREADS_PER_USER = 2;
 	/**
-	 * Default concurrent threads when submitting the parts of a multipartjob: 5
+	 * Default concurrent threads when submitting the parts of a multipartjob: 2
 	 */
 	public static final int DEFAULT_CONCURRENT_JOB_SUBMISSION_THREADS_PER_USER = 2;
 	public static final int DEFAULT_CONCURRENT_FILE_TRANSFER_THREADS_PER_USER = 5;
@@ -59,32 +59,32 @@ public final class ServerPropertiesManager {
 	private static final int DEFAULT_FILE_TRANSFER_RETRIES = 3;
 	private static final int DEFAULT_TIME_BETWEEN_FILE_TRANSFER_RETRIES_IN_SECONDS = 1;
 
-	public static boolean getCheckConnectionToMountPoint() {
-
-		boolean check = false;
-
-		try {
-			try {
-				check = getServerConfiguration().getBoolean(
-						"checkConnectionToMountPoints");
-			} catch (NoSuchElementException e) {
-				// doesn't matter
-				myLogger.debug(e);
-				return DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS;
-			}
-
-		} catch (ConfigurationException e) {
-			return DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS;
-		}
-		return check;
-	}
+	// public static boolean getCheckConnectionToMountPoint() {
+	//
+	// boolean check = false;
+	//
+	// try {
+	// try {
+	// check = getServerConfiguration().getBoolean(
+	// "checkConnectionToMountPoints");
+	// } catch (NoSuchElementException e) {
+	// // doesn't matter
+	// myLogger.debug(e);
+	// return DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS;
+	// }
+	//
+	// } catch (ConfigurationException e) {
+	// return DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS;
+	// }
+	// return check;
+	// }
 
 	public static int getConcurrentFileTransfersPerUser() {
 
 		int retries = -1;
 		try {
 			retries = Integer.parseInt(getServerConfiguration().getString(
-					"concurrentFileTransfersPerUser"));
+					"ConcurrentThreadSettings.fileTransfersPerUser"));
 
 		} catch (Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -107,7 +107,7 @@ public final class ServerPropertiesManager {
 		int concurrentThreads = -1;
 		try {
 			concurrentThreads = Integer.parseInt(getServerConfiguration()
-					.getString("concurrentJobStatusThreads"));
+					.getString("ConcurrentThreadSettings.jobStatusThreads"));
 
 		} catch (Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -128,8 +128,9 @@ public final class ServerPropertiesManager {
 	public static int getConcurrentMultiPartJobSubmitThreadsPerUser() {
 		int concurrentThreads = -1;
 		try {
-			concurrentThreads = Integer.parseInt(getServerConfiguration()
-					.getString("concurrentMultiPartJobSubmitThreads"));
+			concurrentThreads = Integer
+					.parseInt(getServerConfiguration().getString(
+							"ConcurrentThreadSettings.batchJobSubmitThreads"));
 
 		} catch (Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -149,7 +150,8 @@ public final class ServerPropertiesManager {
 	public static String getDatabaseConnectionUrl() {
 		String dbUrl;
 		try {
-			dbUrl = getServerConfiguration().getString("databaseConnectionUrl");
+			dbUrl = getServerConfiguration().getString(
+					"Database.databaseConnectionUrl");
 			return dbUrl;
 		} catch (Exception e) {
 			return null;
@@ -193,7 +195,8 @@ public final class ServerPropertiesManager {
 	public static String getDatabasePassword() {
 		String dbPassword;
 		try {
-			dbPassword = getServerConfiguration().getString("databasePassword");
+			dbPassword = getServerConfiguration().getString(
+					"Database.databasePassword");
 			return dbPassword;
 		} catch (Exception e) {
 			return null;
@@ -210,7 +213,8 @@ public final class ServerPropertiesManager {
 
 		String dbType;
 		try {
-			dbType = getServerConfiguration().getString("databaseType");
+			dbType = getServerConfiguration()
+					.getString("Database.databaseType");
 			return dbType;
 		} catch (Exception e) {
 			return null;
@@ -225,7 +229,8 @@ public final class ServerPropertiesManager {
 	public static String getDatabaseUsername() {
 		String dbUsername;
 		try {
-			dbUsername = getServerConfiguration().getString("databaseUsername");
+			dbUsername = getServerConfiguration().getString(
+					"Database.databaseUsername");
 			return dbUsername;
 		} catch (Exception e) {
 			return null;
@@ -255,7 +260,7 @@ public final class ServerPropertiesManager {
 
 		try {
 			try {
-				debug = getServerConfiguration().getBoolean("debug");
+				debug = getServerConfiguration().getBoolean("Debug.enabled");
 			} catch (NoSuchElementException e) {
 				// doesn't matter
 				myLogger.debug(e);
@@ -284,7 +289,7 @@ public final class ServerPropertiesManager {
 		int retries = -1;
 		try {
 			retries = Integer.parseInt(getServerConfiguration().getString(
-					"fileTransferRetries"));
+					"RetrySettings.fileTransfers"));
 
 		} catch (Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -308,7 +313,8 @@ public final class ServerPropertiesManager {
 
 		String jobDirName = null;
 		try {
-			jobDirName = getServerConfiguration().getString("jobDirName");
+			jobDirName = getServerConfiguration().getString(
+					"General.jobDirName");
 
 			if ("none".equals(jobDirName.toLowerCase())) {
 				jobDirName = null;
@@ -330,7 +336,7 @@ public final class ServerPropertiesManager {
 		int retries = -1;
 		try {
 			retries = Integer.parseInt(getServerConfiguration().getString(
-					"globusJobSubmissionRetries"));
+					"RetrySettings.jobSubmissions"));
 
 		} catch (Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -352,7 +358,7 @@ public final class ServerPropertiesManager {
 		int lifetime_in_seconds = -1;
 		try {
 			lifetime_in_seconds = Integer.parseInt(getServerConfiguration()
-					.getString("minProxyLifetimeBeforeRefresh"));
+					.getString("General.minProxyLifetime"));
 
 		} catch (Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -373,7 +379,7 @@ public final class ServerPropertiesManager {
 		int lifetime_in_seconds = -1;
 		try {
 			lifetime_in_seconds = Integer.parseInt(getServerConfiguration()
-					.getString("myProxyLifetime"));
+					.getString("General.proxyLifetime"));
 
 		} catch (Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -397,7 +403,7 @@ public final class ServerPropertiesManager {
 		if (config == null) {
 			File grisuDir = Environment.getGrisuDirectory();
 			config = new HierarchicalINIConfiguration(new File(grisuDir,
-					"grisu-server.config"));
+					"grisu-backend.config"));
 		}
 		return config;
 	}
@@ -407,7 +413,7 @@ public final class ServerPropertiesManager {
 		int waitTimeInSeconds = -1;
 		try {
 			waitTimeInSeconds = Integer.parseInt(getServerConfiguration()
-					.getString("waitTimeInbetweenFileTransferRetries"));
+					.getString("RetrySettings.fileTransferWaitTime"));
 
 		} catch (Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -430,7 +436,7 @@ public final class ServerPropertiesManager {
 		int waitTimeInSeconds = -1;
 		try {
 			waitTimeInSeconds = Integer.parseInt(getServerConfiguration()
-					.getString("waitTimeInbetweenJobStatusChecks"));
+					.getString("General.statusCheckWaitTime"));
 
 		} catch (Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -451,7 +457,8 @@ public final class ServerPropertiesManager {
 	public static boolean useDefaultDatabase() {
 
 		try {
-			String dbtype = getServerConfiguration().getString("databaseType");
+			String dbtype = getServerConfiguration().getString(
+					"Database.databaseType");
 
 			if (dbtype == null || dbtype.length() == 0) {
 				return true;
