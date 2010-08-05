@@ -3990,6 +3990,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		if (Constants.CLEAR_MOUNTPOINT_CACHE.equals(key)) {
 			getUser().clearMountPointCache(value);
+			return;
 		}
 
 		getUser().addProperty(key, value);
