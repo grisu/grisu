@@ -30,9 +30,13 @@ public final class ServiceTemplateManagement {
 	 */
 	public static String[] getAllAvailableApplications() {
 
-		File[] templates = new File(Environment
-				.getAvailableTemplatesDirectory()).listFiles();
+		File[] templates = new File(
+				Environment.getAvailableTemplatesDirectory()).listFiles();
 		Set<String> allAvalableTemplates = new TreeSet<String>();
+
+		if (templates == null) {
+			return new String[] {};
+		}
 
 		for (File file : templates) {
 			if (file.getName().endsWith(".template")) {

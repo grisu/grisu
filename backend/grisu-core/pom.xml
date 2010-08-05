@@ -41,6 +41,12 @@
 			<groupId>au.org.arcs.auth</groupId>
 			<artifactId>simpleProxyLib</artifactId>
 			<version>0.4</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>cog-jglobus</artifactId>
+					<groupId>external.jglobus</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>external.jglobus</groupId>
@@ -293,11 +299,23 @@
 			<artifactId>commons-vfs-grid</artifactId>
 			<version>1.4.3-TEMP</version>
 			<type>jar</type>
+			<exclusions>
+				<exclusion>
+					<artifactId>cog-jglobus</artifactId>
+					<groupId>external.jglobus</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>matchmaker</artifactId>
 			<version>0.5-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>cog-jglobus</artifactId>
+					<groupId>external.jglobus</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!--		<dependency>-->
 		<!--			<groupId>au.edu.apac.genericgridclient</groupId>-->
@@ -379,6 +397,17 @@
 			<version>0.5-SNAPSHOT</version>
 			<type>jar</type>
 			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>cog-jglobus</artifactId>
+					<groupId>external.jglobus</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>external.jglobus</groupId>
+			<artifactId>cog-jglobus</artifactId>
+			<version>1.8.0-bestgrid</version>
 		</dependency>
 	</dependencies>
 

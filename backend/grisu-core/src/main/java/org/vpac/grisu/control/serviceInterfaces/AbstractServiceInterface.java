@@ -41,7 +41,6 @@ import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 import org.vpac.grisu.backend.hibernate.BatchJobDAO;
 import org.vpac.grisu.backend.hibernate.JobDAO;
-import org.vpac.grisu.backend.hibernate.UserDAO;
 import org.vpac.grisu.backend.info.InformationManagerManager;
 import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.backend.model.RemoteFileTransferObject;
@@ -162,7 +161,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private static final MatchMaker matchmaker = createMatchMaker();
 
 	private final boolean checkFileSystemsBeforeUse = false;
-	protected final UserDAO userdao = new UserDAO();
+	// protected final UserDAO userdao = new UserDAO();
 	protected final JobDAO jobdao = new JobDAO();
 
 	protected final BatchJobDAO batchJobDao = new BatchJobDAO();
@@ -2350,9 +2349,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	abstract protected User getUser();
 
-	public UserDAO getUserDao() {
-		return userdao;
-	}
+	// public UserDAO getUserDao() {
+	// return userdao;
+	// }
 
 	public DtoProperties getUserProperties() {
 
@@ -2766,7 +2765,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		MountPoint mp = getUser().mountFileSystem(url, mountpoint, fqan,
 				useHomeDirectory, informationManager.getSiteForHostOrUrl(url));
-		userdao.saveOrUpdate(getUser());
 		getUser().resetMountPoints();
 		return mp;
 	}
@@ -2783,7 +2781,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		MountPoint mp = getUser().mountFileSystem(url, mountpoint,
 				useHomeDirectory, informationManager.getSiteForHostOrUrl(url));
-		userdao.saveOrUpdate(getUser());
 		getUser().resetMountPoints();
 		return mp;
 	}
@@ -3978,20 +3975,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void setBookmark(String alias, String value) {
 
 		if (StringUtils.isBlank(value)) {
-			getUser().getBookmarks().remove(alias);
+			getUser().removeBookmark(alias);
 		} else {
-			getUser().getBookmarks().put(alias, value);
+			getUser().addBookmark(alias, value);
 		}
-
-		userdao.saveOrUpdate(getUser());
 
 	}
 
 	public void setUserProperty(String key, String value) {
 
-		getUser().getUserProperties().put(key, value);
+		getUser().addProperty(key, value);
 
-		userdao.saveOrUpdate(getUser());
 	}
 
 	// /*
@@ -4357,7 +4351,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void umount(final String mountpoint) {
 
 		getUser().unmountFileSystem(mountpoint);
-		userdao.saveOrUpdate(getUser());
+
 		getUser().resetMountPoints();
 
 	}
