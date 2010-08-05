@@ -82,7 +82,8 @@ mvn("grisu-virtscreen")
 package("grisu/frontend/grisu-client/target/grisu-client-dependencies.jar")
 package("grisu/frontend/client-side-mds/target/client-side-mds.jar")
 package("grisu/backend/grisu-core/target/local-backend.jar")
-copy("grisu-connectors/backend-modules/enunciate-backend/target/enunciate-backend-0.3-SNAPSHOT.war", "grisu-ws.war")
+copy("grisu-connectors/backend-modules/enunciate-backend/target/grisu-ws.war", "grisu-ws.war")
+copy("grisu-connectors/backend-modules/enunciate-backend/target/grisu-backend-ws.deb", "grisu-backend-ws.deb")
 package("grisu-virtscreen/target/grisu-virtscreen-binary.jar", "grisu-virtscreen.jar")
 
 
