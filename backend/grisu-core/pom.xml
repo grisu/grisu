@@ -46,12 +46,11 @@
 					<artifactId>cog-jglobus</artifactId>
 					<groupId>external.jglobus</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>cryptix</artifactId>
+					<groupId>external.jglobus</groupId>
+				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>external.jglobus</groupId>
-			<artifactId>puretls</artifactId>
-			<version>1.7.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
@@ -295,14 +294,37 @@
 			<version>0.1</version>
 		</dependency>
 		<dependency>
-			<groupId>external.grisu-core</groupId>
+<!--			<groupId>external.grisu-core</groupId>-->
+<!--			<artifactId>commons-vfs-grid</artifactId>-->
+<!--			<version>1.4.3-TEMP</version>-->
+			<groupId>commons-vfs-grid</groupId>
 			<artifactId>commons-vfs-grid</artifactId>
-			<version>1.4.3-TEMP</version>
+			<version>1.5.1-SNAPSHOT</version>
 			<type>jar</type>
 			<exclusions>
 				<exclusion>
 					<artifactId>cog-jglobus</artifactId>
 					<groupId>external.jglobus</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>cryptix</artifactId>
+					<groupId>external.jglobus</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>cryptix-asn1</artifactId>
+					<groupId>external.jglobus</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>cryptix32</artifactId>
+					<groupId>external.jglobus</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jce-jdk13-131</artifactId>
+					<groupId>external.jglobus</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>bcprov-jdk15</artifactId>
+					<groupId>bouncycastle</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
