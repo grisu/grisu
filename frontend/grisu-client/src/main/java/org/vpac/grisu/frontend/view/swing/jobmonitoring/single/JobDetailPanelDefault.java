@@ -54,7 +54,7 @@ public class JobDetailPanelDefault extends JPanel implements
 	private JLabel statusRefreshButton;
 	private JLabel lblSubmitted;
 	private JTextField submittedTextField;
-	
+
 	private AppSpecificViewerPanel asvp = null;
 
 	// public static SimpleDateFormat format = new SimpleDateFormat(
@@ -119,18 +119,12 @@ public class JobDetailPanelDefault extends JPanel implements
 		}
 		return fileListWithPreviewPanel;
 	}
-	
+
 	private JideTabbedPane getJideTabbedPane() {
 		if (jideTabbedPane == null) {
 			jideTabbedPane = new JideTabbedPane();
 			jideTabbedPane.setTabPlacement(SwingConstants.TOP);
-			
-			// try to create app specific panel
-			asvp = AppSpecificViewerPanel.create(job);
-			if ( asvp != null ) {
-				jideTabbedPane.addTab(asvp.getTitle(), null, asvp, null);
-			}
-			
+
 			jideTabbedPane.addTab("Job directory", null,
 					getFileListWithPreviewPanel(), null);
 			jideTabbedPane.addTab("Properties", getScrollPane_1());
@@ -280,8 +274,13 @@ public class JobDetailPanelDefault extends JPanel implements
 
 		this.job.addPropertyChangeListener(this);
 
-		if ( asvp != null ) {
+		// try to create app specific panel
+		asvp = AppSpecificViewerPanel.create(job);
+		if (asvp != null) {
+			getJideTabbedPane().insertTab(job.getApplication() + " details",
+					null, asvp, null, 0);
 			asvp.setJob(job);
+			getJideTabbedPane().setSelectedIndex(0);
 		}
 
 		getStatusRefreshButton().setEnabled(true);

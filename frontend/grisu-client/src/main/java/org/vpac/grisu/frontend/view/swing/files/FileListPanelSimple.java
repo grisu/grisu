@@ -530,7 +530,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 					}
 
-					if (!oldDir.equals(getCurrentDirectory())) {
+					if (oldDir != null && !oldDir.equals(getCurrentDirectory())) {
 						fireNewDirectory();
 					}
 

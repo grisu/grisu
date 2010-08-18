@@ -3007,6 +3007,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					.getJobSubmissionPropertyMap().get(key));
 		}
 
+		String executable = jobSubmissionObject.extractExecutable();
+		job.addJobProperty(Constants.EXECUTABLE_KEY, executable);
+
 		List<GridResource> matchingResources = null;
 
 		String submissionLocation = null;
