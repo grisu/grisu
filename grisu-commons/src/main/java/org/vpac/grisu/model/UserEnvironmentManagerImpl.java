@@ -154,7 +154,12 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 			cachedAllSites = new TreeSet<String>();
 
 			for (MountPoint mp : getMountPoints()) {
-				cachedAllSites.add(mp.getSite());
+				if ( StringUtils.isBlank(mp.getSite()) ) {
+					cachedAllSites.add("Unknown");
+					myLogger.error("No site specified for mountpoint: "+mp.getAlias()+", "+mp.getRootUrl());
+				} else {
+					cachedAllSites.add(mp.getSite());
+				}
 			}
 			// for (String subLoc : getAllAvailableSubmissionLocations()) {
 			// cachedAllSites.add(resourceInfo.getSite(subLoc));

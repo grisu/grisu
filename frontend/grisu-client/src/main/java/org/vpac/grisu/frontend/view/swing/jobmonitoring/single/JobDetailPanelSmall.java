@@ -39,6 +39,7 @@ public class JobDetailPanelSmall extends JPanel implements PropertyChangeListene
 
 	/**
 	 * Create the panel.
+	 * @wbp.parser.constructor
 	 */
 	public JobDetailPanelSmall(ServiceInterface si) {
 		setBorder(new TitledBorder(null, "Job: n/a", TitledBorder.LEADING, TitledBorder.TOP, null, null));

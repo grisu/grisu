@@ -20,6 +20,7 @@ import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.view.swing.files.preview.FileListWithPreviewPanel;
+import org.vpac.grisu.frontend.view.swing.jobmonitoring.single.appSpecific.AppSpecificViewerPanel;
 
 import au.org.arcs.jcommons.constants.Constants;
 
@@ -53,6 +54,8 @@ public class JobDetailPanelDefault extends JPanel implements
 	private JLabel statusRefreshButton;
 	private JLabel lblSubmitted;
 	private JTextField submittedTextField;
+	
+	private AppSpecificViewerPanel asvp = null;
 
 	// public static SimpleDateFormat format = new SimpleDateFormat(
 	// "dd.MM.yyyy - HH.mm.SS");
@@ -116,11 +119,18 @@ public class JobDetailPanelDefault extends JPanel implements
 		}
 		return fileListWithPreviewPanel;
 	}
-
+	
 	private JideTabbedPane getJideTabbedPane() {
 		if (jideTabbedPane == null) {
 			jideTabbedPane = new JideTabbedPane();
 			jideTabbedPane.setTabPlacement(SwingConstants.TOP);
+			
+			// try to create app specific panel
+			asvp = AppSpecificViewerPanel.create(job);
+			if ( asvp != null ) {
+				jideTabbedPane.addTab(asvp.getTitle(), null, asvp, null);
+			}
+			
 			jideTabbedPane.addTab("Job directory", null,
 					getFileListWithPreviewPanel(), null);
 			jideTabbedPane.addTab("Properties", getScrollPane_1());
@@ -269,6 +279,11 @@ public class JobDetailPanelDefault extends JPanel implements
 		this.job = job;
 
 		this.job.addPropertyChangeListener(this);
+
+		if ( asvp != null ) {
+			asvp.setJob(job);
+		}
+
 		getStatusRefreshButton().setEnabled(true);
 		getJobnameTextField().setText(job.getJobname());
 		String subTime = null;
