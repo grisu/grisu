@@ -127,7 +127,8 @@ public class SubmissionLogPanel extends JPanel implements
 			} else if (Constants.STATUS_STRING.equals(propName)) {
 				return;
 			} else if ("statusString".equals(propName)) {
-				text = "New status: " + newValue;
+				return;
+				// text = "New status: " + newValue;
 			} else if (StringUtils.isBlank(oldValue)
 					&& StringUtils.isNotBlank(newValue)) {
 				text = "Set " + propName + ": " + newValue;
