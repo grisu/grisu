@@ -19,6 +19,7 @@ import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.BatchJobException;
+import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.model.events.BatchJobKilledEvent;
@@ -187,14 +188,30 @@ public class RunningJobManager implements EventSubscriber {
 		BatchJobObject batchJob = new BatchJobObject(si, jobname,
 				submissionFqan, defaultApplication, defaultVersion);
 		cachedAllBatchJobs.put(jobname, batchJob);
-		EventList<BatchJobObject> temp = cachedBatchJobsPerApplication
-				.get(defaultApplication);
+		// EventList<BatchJobObject> temp = cachedBatchJobsPerApplication
+		// .get(defaultApplication);
 		getBatchJobs(defaultApplication).add(batchJob);
 		if (watchingAllBatchJobs) {
 			getBatchJobs(Constants.ALLJOBS_KEY).add(batchJob);
 		}
 		return batchJob;
 
+	}
+
+	public synchronized void createJob(JobObject job, String fqan)
+			throws JobPropertiesException {
+
+		if (StringUtils.isBlank(fqan)) {
+			job.createJob();
+		} else {
+			job.createJob(fqan);
+		}
+
+		cachedAllSingleJobs.put(job.getJobname(), job);
+		getJobs(job.getApplication()).add(job);
+		// if (watchingAllSingleJobs) {
+		// getJobs(Constants.ALLJOBS_KEY).add(job);
+		// }
 	}
 
 	public EventList<BatchJobObject> getAllBatchJobs() {

@@ -2,18 +2,23 @@ package org.vpac.grisu.frontend.view.swing.jobmonitoring.single.appSpecific;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.Constructor;
 
 import javax.swing.JPanel;
 
+import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.view.swing.jobmonitoring.single.JobDetailPanel;
+import org.vpac.grisu.model.FileManager;
+import org.vpac.grisu.model.GrisuRegistryManager;
 
 import au.org.arcs.jcommons.constants.Constants;
 
 public abstract class AppSpecificViewerPanel extends JPanel implements
 		JobDetailPanel, PropertyChangeListener {
 
-	public static AppSpecificViewerPanel create(JobObject job) {
+	public static AppSpecificViewerPanel create(ServiceInterface si,
+			JobObject job) {
 
 		try {
 			String appName = job.getJobProperty(Constants.APPLICATIONNAME_KEY);
@@ -22,8 +27,10 @@ public abstract class AppSpecificViewerPanel extends JPanel implements
 					+ appName;
 			Class classO = Class.forName(className);
 
-			AppSpecificViewerPanel asvp = (AppSpecificViewerPanel) classO
-					.newInstance();
+			Constructor<AppSpecificViewerPanel> constO = classO
+					.getConstructor(ServiceInterface.class);
+
+			AppSpecificViewerPanel asvp = constO.newInstance(si);
 
 			return asvp;
 
@@ -35,9 +42,17 @@ public abstract class AppSpecificViewerPanel extends JPanel implements
 	}
 
 	private JobObject job = null;
+	protected final ServiceInterface si;
+	protected final FileManager fm;
 
-	public AppSpecificViewerPanel() {
+	public AppSpecificViewerPanel(ServiceInterface si) {
 		super();
+		this.si = si;
+		if (si != null) {
+			this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
+		} else {
+			this.fm = null;
+		}
 	}
 
 	abstract public void initialize();

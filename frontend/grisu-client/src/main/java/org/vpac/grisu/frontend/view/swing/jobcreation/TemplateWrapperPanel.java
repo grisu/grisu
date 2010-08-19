@@ -26,7 +26,7 @@ public class TemplateWrapperPanel extends JPanel {
 	public static final String JOB_CREATE_PANEL = "jobCreatePanel";
 	public static final String SUBMISSION_LOG_PANEL = "logPanel";
 
-	private final SubmissionMonitorPanel monitorPanel = new SubmissionMonitorPanel();
+	private final SubmissionMonitorPanel monitorPanel;
 	private final JPanel creationPanel;
 
 	private final CardLayout cardLayout = new CardLayout();
@@ -44,6 +44,8 @@ public class TemplateWrapperPanel extends JPanel {
 	public TemplateWrapperPanel(TemplateObject template) {
 
 		this.template = template;
+		monitorPanel = new SubmissionMonitorPanel(
+				this.template.getServiceInterface());
 		setLayout(cardLayout);
 
 		creationPanel = new JPanel();
@@ -99,9 +101,9 @@ public class TemplateWrapperPanel extends JPanel {
 				public void actionPerformed(ActionEvent arg0) {
 
 					try {
-						JobObject job = JobObject.createJobObject(template
-								.getServiceInterface(), template
-								.getJobSubmissionObject());
+						JobObject job = JobObject.createJobObject(
+								template.getServiceInterface(),
+								template.getJobSubmissionObject());
 						monitorPanel.startJobSubmission(job);
 					} catch (JobPropertiesException e) {
 

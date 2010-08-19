@@ -275,7 +275,7 @@ public class JobDetailPanelDefault extends JPanel implements
 		this.job.addPropertyChangeListener(this);
 
 		// try to create app specific panel
-		asvp = AppSpecificViewerPanel.create(job);
+		asvp = AppSpecificViewerPanel.create(si, job);
 		if (asvp != null) {
 			getJideTabbedPane().insertTab(job.getApplication() + " details",
 					null, asvp, null, 0);

@@ -1120,4 +1120,11 @@ public class FileManager {
 			}
 		}
 	}
+
+	public long getFileSize(String url) throws RemoteFileSystemException {
+
+		Long fs = serviceInterface.getFileSize(url);
+		System.out.println("Filesize " + url + ": " + fs);
+		return fs;
+	}
 }

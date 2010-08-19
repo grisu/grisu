@@ -518,6 +518,14 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	}
 
 	public Map<Date, String> getLogMessages() {
+
+		if (logMessages == null) {
+			try {
+				updateWithDtoJob(serviceInterface.getJob(jobname));
+			} catch (NoSuchJobException e) {
+				e.printStackTrace();
+			}
+		}
 		return logMessages;
 	}
 
@@ -628,6 +636,27 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		String result;
 		try {
 			result = FileHelpers.readFromFileWithException(getStdOutFile());
+		} catch (Exception e) {
+			throw new JobException(this, "Could not read stdout file.", e);
+		}
+
+		return result;
+
+	}
+
+	/**
+	 * Returns the current content of the file for this job as a string.
+	 * 
+	 * Internally the file is downloaded to the local grisu cache and read.
+	 * 
+	 * @return the current content of the stdout file for this job
+	 */
+	public final String getFileContent(String relativePathToWorkingDir) {
+
+		String result;
+		try {
+			result = FileHelpers
+					.readFromFileWithException(downloadAndCacheOutputFile(relativePathToWorkingDir));
 		} catch (Exception e) {
 			throw new JobException(this, "Could not read stdout file.", e);
 		}
@@ -903,6 +932,26 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 */
 	public final void submitJob() throws JobSubmissionException,
 			InterruptedException {
+		submitJob(null);
+	}
+
+	/**
+	 * After you created the job on the backend using the
+	 * {@link #createJob(String)} or {@link #createJob(String, String)} method
+	 * you can tell the backend to actually submit the job to the endpoint
+	 * resource. Internally, this method also does possible stage-ins from your
+	 * local machine.
+	 * 
+	 * @param additionalJobProperties
+	 *            properties you want to store with the job (only get stored if
+	 *            submission was successful)
+	 * 
+	 * @throws JobSubmissionException
+	 *             if the job could not be submitted
+	 * @throws InterruptedException
+	 */
+	public final void submitJob(Map<String, String> additionalJobProperties)
+			throws JobSubmissionException, InterruptedException {
 
 		addJobLogMessage("Starting job submission...");
 
@@ -935,6 +984,21 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			throw new JobSubmissionException("Could not find job on backend.",
 					e);
 		}
+
+		if (additionalJobProperties != null
+				&& additionalJobProperties.size() > 0) {
+			addJobLogMessage("Setting additional job properties...");
+			try {
+				serviceInterface.addJobProperties(getJobname(), DtoJob
+						.createJob(-1, additionalJobProperties, null, null));
+			} catch (NoSuchJobException e) {
+				addJobLogMessage("Submission failed: "
+						+ e.getLocalizedMessage());
+				throw new JobSubmissionException(
+						"Could not find job on backend.", e);
+			}
+		}
+		allJobProperties = null;
 		getStatus(true);
 
 		EventBus.publish(new NewJobEvent(this));
@@ -1023,6 +1087,19 @@ public class JobObject extends JobSubmissionObjectImpl implements
 
 	public ServiceInterface getServiceInterface() {
 		return this.serviceInterface;
+	}
+
+	public long getFileSize(String relatevePathToJobDir) {
+
+		String url = getJobDirectoryUrl() + "/" + relatevePathToJobDir;
+
+		try {
+			return GrisuRegistryManager.getDefault(serviceInterface)
+					.getFileManager().getFileSize(url);
+		} catch (RemoteFileSystemException e) {
+			return -1;
+		}
+
 	}
 
 }

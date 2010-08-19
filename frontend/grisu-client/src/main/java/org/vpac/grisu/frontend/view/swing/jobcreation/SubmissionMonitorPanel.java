@@ -11,9 +11,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
+import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.TemplateException;
+import org.vpac.grisu.frontend.control.jobMonitoring.RunningJobManager;
 import org.vpac.grisu.frontend.model.job.JobObject;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -32,10 +34,13 @@ public class SubmissionMonitorPanel extends JPanel implements
 
 	private Thread submissionThread = null;
 
+	private final ServiceInterface si;
+
 	/**
 	 * Create the panel.
 	 */
-	public SubmissionMonitorPanel() {
+	public SubmissionMonitorPanel(ServiceInterface si) {
+		this.si = si;
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -141,7 +146,8 @@ public class SubmissionMonitorPanel extends JPanel implements
 					});
 
 					setJobObject(job);
-					job.createJob();
+					RunningJobManager.getDefault(si).createJob(job, null);
+					// job.createJob();
 					job.submitJob();
 
 				} catch (JobPropertiesException e) {
@@ -174,5 +180,4 @@ public class SubmissionMonitorPanel extends JPanel implements
 		};
 		submissionThread.start();
 	}
-
 }

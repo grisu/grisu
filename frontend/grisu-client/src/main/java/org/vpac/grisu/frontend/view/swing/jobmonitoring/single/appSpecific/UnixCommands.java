@@ -9,6 +9,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 
+import org.vpac.grisu.control.ServiceInterface;
+
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -27,8 +29,8 @@ public class UnixCommands extends AppSpecificViewerPanel {
 
 	private Thread updateThread = null;
 
-	public UnixCommands() {
-		super();
+	public UnixCommands(ServiceInterface si) {
+		super(si);
 		setLayout(new BorderLayout(0, 0));
 		add(getSplitPane());
 	}
