@@ -20,7 +20,7 @@ import org.globus.gsi.GlobusCredential;
 import org.ietf.jgss.GSSCredential;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
-import org.vpac.grisu.frontend.view.swing.UncaughtExceptionHandler;
+import org.vpac.grisu.frontend.control.UncaughtExceptionHandler;
 import org.vpac.grisu.settings.ClientPropertiesManager;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.utils.GrisuPluginFilenameFilter;

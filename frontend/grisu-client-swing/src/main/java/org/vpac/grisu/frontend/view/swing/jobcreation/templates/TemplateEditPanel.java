@@ -2,7 +2,6 @@ package org.vpac.grisu.frontend.view.swing.jobcreation.templates;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -13,17 +12,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -33,14 +29,11 @@ import javax.swing.JTextArea;
 
 import org.apache.commons.io.FilenameUtils;
 import org.vpac.grisu.backend.info.InformationManagerManager;
-import org.vpac.grisu.backend.model.job.gt4.GT4Submitter;
-import org.vpac.grisu.backend.model.job.gt5.GT5Submitter;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.TemplateException;
-import org.vpac.grisu.frontend.control.login.LoginManager;
-import org.vpac.grisu.frontend.view.swing.login.GrisuSwingClient;
 import org.vpac.grisu.frontend.view.swing.login.LoginPanel;
+import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 
@@ -51,74 +44,65 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class TemplateTestFrame extends JFrame implements
-		PropertyChangeListener, ActionListener, GrisuSwingClient {
+public class TemplateEditPanel extends JPanel implements
+		PropertyChangeListener, ActionListener {
 
-	// /////////////////////////////////////////////////// inner class
-	// ExitAction
-	class ExitAction extends AbstractAction {
-
-		// ============================================= constructor
-		public ExitAction() {
-			super("Exit");
-			putValue(MNEMONIC_KEY, new Integer('X'));
-		}
-
-		// ========================================= actionPerformed
-		public void actionPerformed(ActionEvent e) {
-			System.exit(0);
-		}
-	}
-
-	// //////////////////////////////////////////////// inner class OpenAction
-	class OpenAction extends AbstractAction {
-		// ============================================= constructor
-		public OpenAction() {
-			super("Open...");
-			putValue(MNEMONIC_KEY, new Integer('O'));
-		}
-
-		// ========================================= actionPerformed
-		public void actionPerformed(ActionEvent e) {
-			int retval = _fileChooser.showOpenDialog(TemplateTestFrame.this);
-			if (retval == JFileChooser.APPROVE_OPTION) {
-				File f = _fileChooser.getSelectedFile();
-				currentFile = f;
-				try {
-					FileReader reader = new FileReader(f);
-					textArea.read(reader, ""); // Use TextComponent read
-					TemplateTestFrame.this.actionPerformed(null);
-				} catch (IOException ioex) {
-					System.out.println(e);
-					System.exit(1);
-				}
-			}
-		}
-	}
+	// // //////////////////////////////////////////////// inner class
+	// OpenAction
+	// class OpenAction extends AbstractAction {
+	// // ============================================= constructor
+	// public OpenAction() {
+	// super("Open...");
+	// putValue(MNEMONIC_KEY, new Integer('O'));
+	// }
+	//
+	// // ========================================= actionPerformed
+	// public void actionPerformed(ActionEvent e) {
+	// int retval = _fileChooser.showOpenDialog(TemplateEditPanel.this);
+	// if (retval == JFileChooser.APPROVE_OPTION) {
+	// File f = _fileChooser.getSelectedFile();
+	// currentFile = f;
+	// try {
+	// FileReader reader = new FileReader(f);
+	// textArea.read(reader, ""); // Use TextComponent read
+	// TemplateEditPanel.this.actionPerformed(null);
+	// } catch (IOException ioex) {
+	// System.out.println(e);
+	// System.exit(1);
+	// }
+	// }
+	// }
+	// }
 
 	// ////////////////////////////////////////////////// inner class SaveAction
-	class SaveAction extends AbstractAction {
-		// ============================================= constructor
-		SaveAction() {
-			super("Save...");
-			putValue(MNEMONIC_KEY, new Integer('S'));
-		}
-
-		// ========================================= actionPerformed
-		public void actionPerformed(ActionEvent e) {
-			int retval = _fileChooser.showSaveDialog(TemplateTestFrame.this);
-			if (retval == JFileChooser.APPROVE_OPTION) {
-				File f = _fileChooser.getSelectedFile();
-				try {
-					FileWriter writer = new FileWriter(f);
-					textArea.write(writer); // Use TextComponent write
-				} catch (IOException ioex) {
-					JOptionPane.showMessageDialog(TemplateTestFrame.this, ioex);
-					System.exit(1);
-				}
-			}
-		}
-	}
+	// class SaveAction extends AbstractAction {
+	// // ============================================= constructor
+	// SaveAction() {
+	// super("Save...");
+	// putValue(MNEMONIC_KEY, new Integer('S'));
+	// }
+	//
+	// // ========================================= actionPerformed
+	// public void actionPerformed(ActionEvent e) {
+	// int retval = _fileChooser.showSaveDialog(TemplateEditPanel.this);
+	// if (retval == JFileChooser.APPROVE_OPTION) {
+	// File f = _fileChooser.getSelectedFile();
+	// try {
+	// FileWriter writer = new FileWriter(f);
+	// textArea.write(writer); // Use TextComponent write
+	//
+	// if (si != null) {
+	// GrisuRegistryManager.getDefault(si)
+	// .getTemplateManager().addLocalTemplate(
+	// currentFile);
+	// }
+	// } catch (IOException ioex) {
+	// JOptionPane.showMessageDialog(TemplateEditPanel.this, ioex);
+	// System.exit(1);
+	// }
+	// }
+	// }
+	// }
 
 	public static final InformationManager informationManager = InformationManagerManager
 			.getInformationManager(ServerPropertiesManager
@@ -134,36 +118,14 @@ public class TemplateTestFrame extends JFrame implements
 		return stringWritter.toString();
 	}
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
+	protected final File currentFile;
+	protected JDialog optionalDialog;
 
-					ServiceInterface si = LoginManager.loginCommandline();
+	// private final Action _openAction = new OpenAction();
 
-					TemplateTestFrame frame = new TemplateTestFrame();
-					frame.setServiceInterface(si);
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
-	protected File currentFile;
-
-	private final Action _openAction = new OpenAction();
-
-	private final Action _saveAction = new SaveAction();
-
-	private final Action _exitAction = new ExitAction();
+	// private final Action _saveAction = new SaveAction();
 
 	private final JFileChooser _fileChooser = new JFileChooser();
-	private final JPanel contentPane;
 	private JSplitPane splitPane;
 	private JPanel panel;
 	private JPanel panel_1;
@@ -171,7 +133,7 @@ public class TemplateTestFrame extends JFrame implements
 	private JTextArea textArea;
 
 	private JButton button;
-	private ServiceInterface si;
+	private final ServiceInterface si;
 	private JPanel errorPanel;
 	private JScrollPane scrollPane_1;
 
@@ -188,34 +150,38 @@ public class TemplateTestFrame extends JFrame implements
 	private JTextArea gt4TextArea;
 	private JScrollPane scrollPane_4;
 	private JTextArea gt5TextArea;
-	private JButton OpenFileButton;
 
 	private LoginPanel lp;
 
 	/**
 	 * Create the frame.
+	 * 
+	 * @throws TemplateException
 	 */
-	public TemplateTestFrame() {
+	public TemplateEditPanel(ServiceInterface si, File currentFile)
+			throws TemplateException {
 
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.si = si;
+
+		this.currentFile = currentFile;
+
 		setBounds(100, 100, 800, 600);
 
 		try {
-			contentPane = new JPanel();//
-			setContentPane(contentPane);
-			JMenuBar menuBar = new JMenuBar();
-			JMenu fileMenu = menuBar.add(new JMenu("File"));
-			fileMenu.setMnemonic('F');
-			fileMenu.add(_openAction); // Note use of actions, not text.
-			fileMenu.add(_saveAction);
-			fileMenu.addSeparator();
-			fileMenu.add(_exitAction);
-			setJMenuBar(menuBar);
-			contentPane.setLayout(new BorderLayout(0, 0));
-			contentPane.add(getSplitPane(), BorderLayout.CENTER);
+			setLayout(new BorderLayout(0, 0));
+			add(getSplitPane(), BorderLayout.CENTER);
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);
+		}
+
+		try {
+			FileReader reader = new FileReader(currentFile);
+			textArea.read(reader, ""); // Use TextComponent read
+			TemplateEditPanel.this.actionPerformed(null);
+		} catch (IOException ioex) {
+			throw new TemplateException("Could not open template "
+					+ currentFile.toString());
 		}
 
 	}
@@ -239,7 +205,7 @@ public class TemplateTestFrame extends JFrame implements
 			if ((template != null)
 					&& (template.getJobSubmissionObject() != null)) {
 				template.getJobSubmissionObject().removePropertyChangeListener(
-						TemplateTestFrame.this);
+						TemplateEditPanel.this);
 			}
 			String templateFilename = null;
 			if (currentFile != null) {
@@ -248,7 +214,7 @@ public class TemplateTestFrame extends JFrame implements
 			}
 			template = createTemplatePanel(templateFilename, lines);
 			template.getJobSubmissionObject().addPropertyChangeListener(
-					TemplateTestFrame.this);
+					TemplateEditPanel.this);
 
 			JPanel tempPanel = new JPanel();
 			tempPanel.setLayout(new BorderLayout());
@@ -297,7 +263,7 @@ public class TemplateTestFrame extends JFrame implements
 					File f = currentFile;
 					if (f == null) {
 						int retval = _fileChooser
-								.showSaveDialog(TemplateTestFrame.this);
+								.showSaveDialog(TemplateEditPanel.this);
 						if (retval == JFileChooser.APPROVE_OPTION) {
 							f = _fileChooser.getSelectedFile();
 						} else {
@@ -307,10 +273,21 @@ public class TemplateTestFrame extends JFrame implements
 					try {
 						FileWriter writer = new FileWriter(f);
 						textArea.write(writer); // Use TextComponent write
-					} catch (IOException ioex) {
-						JOptionPane.showMessageDialog(TemplateTestFrame.this,
+
+						if (si != null) {
+							GrisuRegistryManager.getDefault(si)
+									.getTemplateManager()
+									.addLocalTemplate(currentFile);
+						}
+
+						if (optionalDialog != null) {
+							optionalDialog.dispose();
+						}
+
+					} catch (Exception ioex) {
+						JOptionPane.showMessageDialog(TemplateEditPanel.this,
 								ioex);
-						System.exit(1);
+						// System.exit(1);
 					}
 				}
 			});
@@ -368,20 +345,12 @@ public class TemplateTestFrame extends JFrame implements
 		return jsdlTextArea;
 	}
 
-	private JButton getOpenFileButton() {
-		if (OpenFileButton == null) {
-			OpenFileButton = new JButton("Open file...");
-			OpenFileButton.setAction(_openAction);
-		}
-		return OpenFileButton;
-	}
-
 	private JPanel getPanel_1() {
 		if (panel_1 == null) {
 			panel_1 = new JPanel();
 			panel_1.setLayout(new FormLayout(new ColumnSpec[] {
 					FormFactory.RELATED_GAP_COLSPEC,
-					FormFactory.DEFAULT_COLSPEC,
+					ColumnSpec.decode("default:grow"),
 					FormFactory.RELATED_GAP_COLSPEC,
 					ColumnSpec.decode("default:grow"),
 					FormFactory.RELATED_GAP_COLSPEC,
@@ -398,7 +367,6 @@ public class TemplateTestFrame extends JFrame implements
 					FormFactory.RELATED_GAP_ROWSPEC, }));
 			panel_1.add(getScrollPane(), "2, 2, 7, 1, fill, fill");
 			panel_1.add(getTabbedPane(), "2, 4, 7, 1, fill, fill");
-			panel_1.add(getOpenFileButton(), "2, 6, left, default");
 			panel_1.add(getButton(), "6, 6, right, default");
 			panel_1.add(getButton_1(), "8, 6, right, default");
 		}
@@ -406,7 +374,7 @@ public class TemplateTestFrame extends JFrame implements
 	}
 
 	public JPanel getRootPanel() {
-		return contentPane;
+		return this;
 	}
 
 	private JScrollPane getScrollPane() {
@@ -482,6 +450,12 @@ public class TemplateTestFrame extends JFrame implements
 
 	}
 
+	public void setDialog(JDialog templateEditDialog) {
+
+		this.optionalDialog = templateEditDialog;
+
+	}
+
 	private void setJobDescriptions() {
 		if ((template != null) && (template.getJobSubmissionObject() != null)) {
 
@@ -505,14 +479,65 @@ public class TemplateTestFrame extends JFrame implements
 				return;
 			}
 
-			String gt4rsl = GT4Submitter.createJobSubmissionDescription(
-					informationManager, SeveralXMLHelpers.fromString(jsdl));
-			getGt4TextArea().setText(gt4rsl);
+			Method createDescMethod = null;
+			try {
 
-			String gt5rsl = GT5Submitter.createJobSubmissionDescription(
-					informationManager, SeveralXMLHelpers.fromString(jsdl));
-			getGt5TextArea().setText(gt5rsl);
+				Class gt4SubClass = Class
+						.forName("org.vpac.grisu.backend.model.job.gt4.GT4Submitter");
 
+				createDescMethod = gt4SubClass.getMethod(
+						"createJobSubmissionDescription",
+						InformationManager.class, String.class);
+
+			} catch (Exception e) {
+				getGt4TextArea()
+						.setText(
+								"Could not create rsl. Probably because localBackend jar is not in classpath.");
+			}
+
+			if (createDescMethod != null) {
+				try {
+
+					String gt4rsl = (String) createDescMethod.invoke(null,
+							informationManager,
+							SeveralXMLHelpers.fromString(jsdl));
+
+					// String gt4rsl =
+					// GT4Submitter.createJobSubmissionDescription(
+					// informationManager, SeveralXMLHelpers.fromString(jsdl));
+					getGt4TextArea().setText(gt4rsl);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			try {
+
+				Class gt5SubClass = Class
+						.forName("org.vpac.grisu.backend.model.job.gt5.GT5Submitter");
+
+				createDescMethod = gt5SubClass.getMethod(
+						"createJobSubmissionDescription",
+						InformationManager.class, String.class);
+
+			} catch (Exception e) {
+				getGt4TextArea()
+						.setText(
+								"Could not create rsl. Probably because localBackend jar is not in classpath.");
+			}
+
+			if (createDescMethod != null) {
+				try {
+
+					String gt5rsl = (String) createDescMethod.invoke(null,
+							informationManager,
+							SeveralXMLHelpers.fromString(jsdl));
+
+					getGt5TextArea().setText(gt5rsl);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 
@@ -521,9 +546,4 @@ public class TemplateTestFrame extends JFrame implements
 		this.lp = lp;
 	}
 
-	public void setServiceInterface(ServiceInterface si) {
-
-		this.si = si;
-
-	}
 }

@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.view.swing;
+package org.vpac.grisu.frontend.control;
 
 import javax.swing.JOptionPane;
 

@@ -1,33 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>frontend</artifactId>
 		<groupId>org.vpac.grisu</groupId>
 		<version>0.3-SNAPSHOT</version>
 	</parent>
-	<artifactId>client-examples</artifactId>
+	<artifactId>grisu-client-swing</artifactId>
+	<name>Grisu client library (Swing)</name>
+	<description>A client library that provides commonly used UI functionality using Java Swing</description>
 	<dependencies>
 		<dependency>
 			<groupId>org.vpac.grisu</groupId>
 			<artifactId>grisu-client</artifactId>
-			<version>0.3-SNAPSHOT</version>
-			<scope>compile</scope>
-		</dependency>
-		<!--		<dependency>-->
-		<!--			<groupId>org.vpac.grisu</groupId>-->
-		<!--			<artifactId>xfire-frontend</artifactId>-->
-		<!--			<version>0.3-SNAPSHOT</version>-->
-		<!--		</dependency>-->
-		<dependency>
-			<groupId>org.vpac.grisu</groupId>
-			<artifactId>xfire-frontend</artifactId>
-			<version>0.3-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.vpac.grisu</groupId>
-			<artifactId>grisu-core</artifactId>
 			<version>0.3-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
@@ -37,36 +22,49 @@
 			<artifactId>forms</artifactId>
 			<version>1.2.1</version>
 			<type>jar</type>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.jidesoft</groupId>
 			<artifactId>jide-oss</artifactId>
 			<version>2.9.1</version>
 			<type>jar</type>
-			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>aqua</groupId>
+					<artifactId>aqua</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.swinglabs</groupId>
 			<artifactId>swingx</artifactId>
 			<version>1.6</version>
 			<type>jar</type>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>furbelow</groupId>
 			<artifactId>furbelow</artifactId>
 			<version>1.0</version>
-			<scope>provided</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>com.kenai</groupId>
+			<artifactId>validationAPI</artifactId>
+			<version>0.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.gjt.sp.jedit</groupId>
+			<artifactId>jedit</artifactId>
+			<version>4.3</version>
+		</dependency>
+
 		<dependency>
 			<groupId>au.org.arcs.auth</groupId>
 			<artifactId>arcs-gsi</artifactId>
-			<version>1.2</version>
+			<version>1.2-SNAPSHOT</version>
+			<type>pom</type>
 			<scope>compile</scope>
 		</dependency>
-
-
 	</dependencies>
 
 	<build>
@@ -78,6 +76,20 @@
 					<source>1.5</source>
 					<target>1.5</target>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

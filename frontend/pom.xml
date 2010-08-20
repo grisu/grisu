@@ -14,7 +14,6 @@
 	<modules>
 		<module>grisu-client</module>
 		<module>client-side-mds</module>
-		<module>client-examples</module>
-		<module>grisu-client-jython</module>
+		<module>grisu-client-swing</module>
 	</modules>
 </project>
