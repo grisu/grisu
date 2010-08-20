@@ -12,16 +12,7 @@
 			<useTransitiveFiltering>true</useTransitiveFiltering>
 			<useProjectArtifact>true</useProjectArtifact>
 			<outputDirectory>/</outputDirectory>
-<!--			<includes>-->
-<!--				<include>org.vpac.grisu:grisu-client</include>-->
-<!--				<include>org.vpac.grisu:grisu-core</include>-->
-<!--				<include>au.org.arcs.auth:arcs-gsi</include>-->
-<!--				<include>au.org.arcs.auth:arcs-shibboleth-client</include>-->
-<!--				<include>com.jgoodies:forms</include>-->
-<!--				<include>com.jidesoft:jide-oss</include>-->
-<!--				<include>org.swinglabs:swingx</include>-->
-<!--				<include>furbelow:furbelow</include>-->
-<!--			</includes>-->
+
 			<excludes>
 				<exclude>junit:junit</exclude>
 				<exclude>bouncycastle:bcprov-jdk15</exclude>
