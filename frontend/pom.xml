@@ -13,7 +13,7 @@
 
 	<modules>
 		<module>grisu-client</module>
-		<module>client-side-mds</module>
 		<module>grisu-client-swing</module>
+		<module>client-side-mds</module>
 	</modules>
 </project>
