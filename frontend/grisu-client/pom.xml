@@ -70,18 +70,18 @@
 			<type>jar</type>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.vpac.grisu</groupId>
-			<artifactId>grisu-core</artifactId>
-			<version>0.3-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
-				<dependency>
-			<groupId>au.org.arcs.auth</groupId>
-			<artifactId>arcs-shibboleth-client</artifactId>
-			<version>0.2</version>
-			<scope>provided</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.vpac.grisu</groupId>-->
+<!--			<artifactId>grisu-core</artifactId>-->
+<!--			<version>0.3-SNAPSHOT</version>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--				<dependency>-->
+<!--			<groupId>au.org.arcs.auth</groupId>-->
+<!--			<artifactId>arcs-shibboleth-client</artifactId>-->
+<!--			<version>0.2</version>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
 
 	</dependencies>
 

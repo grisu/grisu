@@ -38,6 +38,7 @@
 			<excludes>
 				<exclude>junit:junit</exclude>
 				<exclude>bouncycastle:bcprov-jdk15</exclude>
+				<exclude>org.vpac.grisu:grisu-core</exclude>
 			</excludes>
 			<unpackOptions>
 				<excludes>

@@ -40,7 +40,6 @@ public class InformationManagerManager {
 		InformationManager im = infoManagers.get(key);
 
 		if (im == null) {
-			System.out.println("Creating infoManager: " + key);
 			im = createInfoManager(parameters);
 			infoManagers.put(key, im);
 		}
@@ -55,7 +54,6 @@ public class InformationManagerManager {
 		MatchMaker mm = matchMakers.get(key);
 
 		if (mm == null) {
-			System.out.println("Creating infoManager: " + key);
 			mm = createMatchMaker(parameters);
 			matchMakers.put(key, mm);
 		}
@@ -92,7 +90,7 @@ public class InformationManagerManager {
 			return im;
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			myLogger.debug(e);
 			return null;
 		}
 
@@ -127,7 +125,7 @@ public class InformationManagerManager {
 			return im;
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			myLogger.debug(e);
 			return null;
 		}
 
