@@ -186,12 +186,24 @@ public class JobSubmissionObjectImpl {
 		} catch (NumberFormatException e) {
 			this.cpus = 1;
 		}
+		try {
 		this.hostcount = Integer.parseInt(jobProperties
 				.get(JobSubmissionProperty.HOSTCOUNT.toString()));
-		this.force_single = checkForBoolean(jobProperties
+		} catch (Exception e) {
+			this.hostcount = 1;
+		}
+		try {
+			this.force_single = checkForBoolean(jobProperties
 				.get(JobSubmissionProperty.FORCE_SINGLE.toString()));
+		} catch (Exception e) {
+			this.force_single = false;
+		}
+		try {
 		this.force_mpi = checkForBoolean(jobProperties
 				.get(JobSubmissionProperty.FORCE_MPI.toString()));
+		} catch (Exception e ) {
+			this.force_mpi = false;
+		}
 		try {
 			this.memory_in_bytes = Integer.parseInt(jobProperties
 					.get(JobSubmissionProperty.MEMORY_IN_B.toString()));

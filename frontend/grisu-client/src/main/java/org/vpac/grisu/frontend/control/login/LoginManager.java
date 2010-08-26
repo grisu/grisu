@@ -68,7 +68,8 @@ public class LoginManager {
 					"https://globus.ceres.auckland.ac.nz:8443/grisu-ws/soap/GrisuService")
 			.put("BeSTGRID_TEST",
 					"https://grisu.ceres.auckland.ac.nz/grisu-ws/soap/GrisuService")
-			.put("LOCAL_WS", "http://localhost:8080/soap/GrisuService").build();
+			.put("LOCAL_WS", "http://localhost:8080/soap/GrisuService")
+			.put("LOCAL_WS_TOMCAT", "http://localhost:8080/grisu-ws/soap/GrisuService").build();
 
 	public static String httpProxyHost = null;
 
