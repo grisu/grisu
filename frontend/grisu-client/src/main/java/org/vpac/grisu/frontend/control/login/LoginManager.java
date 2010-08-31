@@ -25,6 +25,7 @@ import org.vpac.grisu.settings.ClientPropertiesManager;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.utils.GrisuPluginFilenameFilter;
 import org.vpac.security.light.CredentialHelpers;
+import org.vpac.security.light.Init;
 import org.vpac.security.light.control.CertificateFiles;
 import org.vpac.security.light.plainProxy.LocalProxy;
 
@@ -69,7 +70,8 @@ public class LoginManager {
 			.put("BeSTGRID_TEST",
 					"https://grisu.ceres.auckland.ac.nz/grisu-ws/soap/GrisuService")
 			.put("LOCAL_WS", "http://localhost:8080/soap/GrisuService")
-			.put("LOCAL_WS_TOMCAT", "http://localhost:8080/grisu-ws/soap/GrisuService").build();
+			.put("LOCAL_WS_TOMCAT",
+					"http://localhost:8080/grisu-ws/soap/GrisuService").build();
 
 	public static String httpProxyHost = null;
 
@@ -135,6 +137,8 @@ public class LoginManager {
 
 			environmentInitialized = true;
 		}
+
+		Init.initBouncyCastle();
 
 	}
 
