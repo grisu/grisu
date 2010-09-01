@@ -28,6 +28,7 @@ import org.vpac.grisu.frontend.control.login.LoginException;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.settings.ClientPropertiesManager;
+import org.vpac.security.light.Init;
 import org.vpac.security.light.certificate.CertificateHelper;
 import org.vpac.security.light.plainProxy.LocalProxy;
 
@@ -103,6 +104,7 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 		// component.getActionMap().put(keyStrokeAndKey, action);
 
 		try {
+			Init.initBouncyCastle();
 			if (LocalProxy.validGridProxyExists(120)) {
 				getQuickLoginAction().setEnabled(true);
 			} else {
