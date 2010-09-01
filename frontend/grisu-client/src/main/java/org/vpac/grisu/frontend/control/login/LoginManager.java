@@ -138,7 +138,11 @@ public class LoginManager {
 			environmentInitialized = true;
 		}
 
-		Init.initBouncyCastle();
+		try {
+			Init.initBouncyCastle();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 
