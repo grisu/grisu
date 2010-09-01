@@ -102,10 +102,14 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 		// component.getInputMap(...).put(keyStroke, keyStrokeAndKey);
 		// component.getActionMap().put(keyStrokeAndKey, action);
 
-		if (LocalProxy.validGridProxyExists(120)) {
-			getQuickLoginAction().setEnabled(true);
-		} else {
-			getQuickLoginAction().setEnabled(false);
+		try {
+			if (LocalProxy.validGridProxyExists(120)) {
+				getQuickLoginAction().setEnabled(true);
+			} else {
+				getQuickLoginAction().setEnabled(false);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 	}
