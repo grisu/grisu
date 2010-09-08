@@ -52,7 +52,7 @@
 			<id>arcs.snapshot</id>
 			<name>ARCS SNAPSHOT Repository</name>
 			<url>http://code.arcs.org.au/nexus/content/repositories/snapshots</url>
-			<uniqueVersion>false</uniqueVersion>
+			<uniqueVersion>true</uniqueVersion>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -107,26 +107,6 @@
 
 	<build>
 		<plugins>
-			<!--			<plugin>-->
-			<!--				<artifactId>maven-assembly-plugin</artifactId>-->
-			<!--				<configuration>-->
-<!---->
-			<!--					<descriptors>-->
-			<!--
-				<descriptor>grisu-local-backend.assembly.xml</descriptor>
-			-->
-			<!--						<descriptor>grisu-grid-test.assembly.xml</descriptor>-->
-			<!--					</descriptors>-->
-<!---->
-			<!--					<archive>-->
-			<!--						<index>true</index>-->
-			<!--						<manifest>-->
-			<!--							<addClasspath>true</addClasspath>-->
-			<!--						</manifest>-->
-			<!--					</archive>-->
-<!---->
-			<!--				</configuration>-->
-			<!--			</plugin>-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
