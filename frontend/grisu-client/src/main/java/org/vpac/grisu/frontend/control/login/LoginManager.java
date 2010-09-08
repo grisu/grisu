@@ -122,10 +122,19 @@ public class LoginManager {
 					.setProperty("ssl.TrustManagerFactory.algorithm",
 							"TrustAllCertificates");
 
+			boolean bcpresent = false;
+			try {
+				Class bcExampleClass = Class
+						.forName("org.bouncycastle.LICENSE");
+				bcpresent = true;
+			} catch (Exception e) {
+				myLogger.debug("BouncyCastle library not loaded....");
+			}
+
 			String disableLoadBouncyCastle = System
 					.getProperty("disableLoadBouncyCastle");
 
-			if (!"true".equalsIgnoreCase(disableLoadBouncyCastle)) {
+			if (!bcpresent && !"true".equalsIgnoreCase(disableLoadBouncyCastle)) {
 				myLogger.debug("Loading bouncy castle...");
 				Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
 
