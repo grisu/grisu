@@ -126,7 +126,7 @@ public class LoginManager {
 					.getProperty("disableLoadBouncyCastle");
 
 			if (!"true".equalsIgnoreCase(disableLoadBouncyCastle)) {
-
+				myLogger.debug("Loading bouncy castle...");
 				Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
 
 				dependencies.put(Dependency.BOUNCYCASTLE, "jdk15-145");
