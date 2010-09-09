@@ -105,6 +105,8 @@ public class LoginManager {
 
 	public static void initEnvironment() {
 
+		System.out.println("Grisu library updated...");
+
 		if (!environmentInitialized) {
 
 			JythonHelpers.setJythonCachedir();
