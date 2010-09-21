@@ -28,6 +28,13 @@
 		in order for the grisu-client to
 		connect to
 		it.</description>
+		
+	<repositories>
+		<repository>
+			<id>commons-vfs-grid</id>
+			<url>http://commonsvfsgrid.sourceforge.net/maven/</url>
+		</repository>
+	</repositories>		
 
 	<dependencies>
 
