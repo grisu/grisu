@@ -26,7 +26,6 @@ public class X509LoginPanel extends JPanel implements LoginMethodPanel {
 	private ServiceInterface si = null;
 	private boolean loginSuccessful = false;
 
-
 	/**
 	 * Create the panel.
 	 */
@@ -34,13 +33,10 @@ public class X509LoginPanel extends JPanel implements LoginMethodPanel {
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				RowSpec.decode("4dlu:grow"),}));
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				RowSpec.decode("4dlu:grow"), }));
 		add(getLblCertificatePassphrase(), "2, 2");
 		add(getTextField(), "2, 4, fill, default");
 
@@ -52,6 +48,7 @@ public class X509LoginPanel extends JPanel implements LoginMethodPanel {
 		}
 		return lblCertificatePassphrase;
 	}
+
 	public LoginException getPossibleException() {
 		return possibleException;
 	}
@@ -86,17 +83,17 @@ public class X509LoginPanel extends JPanel implements LoginMethodPanel {
 
 		final char[] passphrase = getTextField().getPassword();
 
-
-		Thread loginThread = new Thread() {
+		final Thread loginThread = new Thread() {
 
 			@Override
 			public void run() {
 
 				loginSuccessful = false;
 				try {
-					si = LoginManager.login(null, passphrase, null, null, params, saveCredendentialsToLocalProxy);
+					si = LoginManager.login(null, passphrase, null, null,
+							params, saveCredendentialsToLocalProxy);
 					loginSuccessful = true;
-				} catch (LoginException e) {
+				} catch (final LoginException e) {
 					possibleException = e;
 				}
 			}

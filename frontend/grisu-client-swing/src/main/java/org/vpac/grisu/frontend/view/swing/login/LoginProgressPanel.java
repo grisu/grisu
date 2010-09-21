@@ -102,13 +102,13 @@ public class LoginProgressPanel extends JPanel implements EventSubscriber {
 	public void onEvent(Object event) {
 
 		if (event instanceof ClientPropertiesEvent) {
-			ClientPropertiesEvent ev = (ClientPropertiesEvent) event;
+			final ClientPropertiesEvent ev = (ClientPropertiesEvent) event;
 			if (ClientPropertiesManager.AUTO_LOGIN_KEY
 					.equals(((ClientPropertiesEvent) event).getKey())) {
 				try {
-					Boolean b = Boolean.parseBoolean(ev.getValue());
+					final Boolean b = Boolean.parseBoolean(ev.getValue());
 					getChckbxAutologinwheneverPossible().setSelected(b);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					// not that important
 				}
 			}

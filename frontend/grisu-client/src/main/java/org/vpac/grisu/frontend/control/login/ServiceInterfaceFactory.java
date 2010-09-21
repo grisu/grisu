@@ -45,11 +45,11 @@ public final class ServiceInterfaceFactory {
 	 */
 	public static ServiceInterface createInterface(final LoginParams params)
 			throws ServiceInterfaceException {
-		return createInterface(params.getServiceInterfaceUrl(), params
-				.getMyProxyUsername(), params.getMyProxyPassphrase(), params
-				.getMyProxyServer(), params.getMyProxyPort(), params
-				.getHttpProxy(), params.getHttpProxyPort(), params
-				.getHttpProxyUsername(), params.getMyProxyPassphrase());
+		return createInterface(params.getServiceInterfaceUrl(),
+				params.getMyProxyUsername(), params.getMyProxyPassphrase(),
+				params.getMyProxyServer(), params.getMyProxyPort(),
+				params.getHttpProxy(), params.getHttpProxyPort(),
+				params.getHttpProxyUsername(), params.getMyProxyPassphrase());
 	}
 
 	/**
@@ -91,26 +91,25 @@ public final class ServiceInterfaceFactory {
 			final String httpProxyUsername, final char[] httpProxyPassword)
 			throws ServiceInterfaceException {
 
-		Object[] otherOptions = new Object[4];
+		final Object[] otherOptions = new Object[4];
 		otherOptions[0] = httpProxy;
 		otherOptions[1] = httpProxyPort;
 		otherOptions[2] = httpProxyUsername;
 		otherOptions[3] = httpProxyPassword;
 
-		Map<String, Exception> failedCreators = new HashMap<String, Exception>();
+		final Map<String, Exception> failedCreators = new HashMap<String, Exception>();
 
-		for (String className : KNOWN_SERVICE_INTERFACE_CREATORS) {
+		for (final String className : KNOWN_SERVICE_INTERFACE_CREATORS) {
 
 			Class serviceInterfaceCreatorClass = null;
 
 			try {
 				serviceInterfaceCreatorClass = Class
 						.forName("org.vpac.grisu.frontend.control." + className);
-			} catch (ClassNotFoundException e) {
+			} catch (final ClassNotFoundException e) {
 				myLogger.warn("Could not find serviceInterfaceCreator class: "
 						+ className);
-				myLogger
-						.warn("Probably not in classpath. No worries, trying next one...");
+				myLogger.warn("Probably not in classpath. No worries, trying next one...");
 				continue;
 			}
 
@@ -118,7 +117,7 @@ public final class ServiceInterfaceFactory {
 			try {
 				serviceInterfaceCreator = (ServiceInterfaceCreator) serviceInterfaceCreatorClass
 						.newInstance();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				// shouldn't really happen
 				continue;
 			}
@@ -135,7 +134,7 @@ public final class ServiceInterfaceFactory {
 				serviceInterface = serviceInterfaceCreator.create(interfaceUrl,
 						username, password, myProxyServer, myProxyPort,
 						otherOptions);
-			} catch (ServiceInterfaceException e) {
+			} catch (final ServiceInterfaceException e) {
 				// e.printStackTrace();
 				myLogger.debug("Couldn't connect to url " + interfaceUrl
 						+ " using serviceInterfaceCreator " + className + ": "
@@ -145,24 +144,22 @@ public final class ServiceInterfaceFactory {
 			}
 
 			if (serviceInterface == null) {
-				myLogger
-						.debug("Couldn't connect to url "
-								+ interfaceUrl
-								+ " using serviceInterfaceCreator "
-								+ className
-								+ ": "
-								+ "No serviceInterface created/serviceinterface is null");
+				myLogger.debug("Couldn't connect to url "
+						+ interfaceUrl
+						+ " using serviceInterfaceCreator "
+						+ className
+						+ ": "
+						+ "No serviceInterface created/serviceinterface is null");
 				failedCreators.put(className, null);
 				continue;
 			}
 
-			myLogger
-					.info("Successfully created serviceInterface using creator: "
-							+ className);
+			myLogger.info("Successfully created serviceInterface using creator: "
+					+ className);
 
 			try {
 				serviceInterface.login(username, new String(password));
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				// e.printStackTrace();
 				myLogger.debug("Couldn't login to grisu service on: "
 						+ interfaceUrl + ": " + e.getLocalizedMessage());
@@ -174,14 +171,14 @@ public final class ServiceInterfaceFactory {
 			return serviceInterface;
 		}
 
-		StringBuffer failedOnes = new StringBuffer();
-		for (String name : failedCreators.keySet()) {
+		final StringBuffer failedOnes = new StringBuffer();
+		for (final String name : failedCreators.keySet()) {
 			failedOnes.append(name + ": "
 					+ failedCreators.get(name).getLocalizedMessage() + "\n");
 		}
 
 		if (failedCreators.size() == 1) {
-			String key = failedCreators.keySet().iterator().next();
+			final String key = failedCreators.keySet().iterator().next();
 			throw new ServiceInterfaceException(failedCreators.get(key)
 					.getLocalizedMessage(), failedCreators.get(key));
 		} else if (failedCreators.size() == 0) {

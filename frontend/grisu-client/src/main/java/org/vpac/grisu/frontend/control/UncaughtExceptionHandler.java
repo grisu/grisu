@@ -2,7 +2,8 @@ package org.vpac.grisu.frontend.control;
 
 import javax.swing.JOptionPane;
 
-public class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
+public class UncaughtExceptionHandler implements
+		Thread.UncaughtExceptionHandler {
 
 	private void logException(Thread t, Throwable e) {
 		// todo: start a thread that sends an email, or write to a log file, or
@@ -10,7 +11,7 @@ public class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler
 	}
 
 	private void showException(Thread t, Throwable e) {
-		String msg = String.format("Unexpected problem on thread %s: %s",
+		final String msg = String.format("Unexpected problem on thread %s: %s",
 				t.getName(), e.getMessage());
 
 		logException(t, e);
@@ -26,15 +27,15 @@ public class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler
 
 		e.printStackTrace();
 
-		//		if (SwingUtilities.isEventDispatchThread()) {
-		//			showException(t, e);
-		//		} else {
-		//			SwingUtilities.invokeLater(new Runnable() {
-		//				public void run() {
-		//					showException(t, e);
-		//				}
-		//			});
-		//		}
+		// if (SwingUtilities.isEventDispatchThread()) {
+		// showException(t, e);
+		// } else {
+		// SwingUtilities.invokeLater(new Runnable() {
+		// public void run() {
+		// showException(t, e);
+		// }
+		// });
+		// }
 	}
 
 }

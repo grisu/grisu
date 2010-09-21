@@ -27,11 +27,11 @@ public final class LocalTemplatesHelper {
 
 	public static void copyFile(final File in, final File out)
 			throws IOException {
-		FileChannel inChannel = new FileInputStream(in).getChannel();
-		FileChannel outChannel = new FileOutputStream(out).getChannel();
+		final FileChannel inChannel = new FileInputStream(in).getChannel();
+		final FileChannel outChannel = new FileOutputStream(out).getChannel();
 		try {
 			inChannel.transferTo(0, inChannel.size(), outChannel);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw e;
 		} finally {
 			if (inChannel != null) {
@@ -52,7 +52,7 @@ public final class LocalTemplatesHelper {
 					unzipFileToDir("/globus.zip",
 							Environment.getVarGrisuDirectory());
 				}
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				myLogger.error(e);
 			}
 			globusFolderCopied = true;
@@ -74,7 +74,7 @@ public final class LocalTemplatesHelper {
 		}
 
 		if (!templatesCopied) {
-			File templatesDir = new File(
+			final File templatesDir = new File(
 					Environment.getAvailableTemplatesDirectory());
 
 			if (!templatesDir.exists() || (templatesDir.list().length == 0)) {
@@ -85,11 +85,11 @@ public final class LocalTemplatesHelper {
 				myLogger.debug("Filling templates_available folder with a set of base templates...");
 				final int BUFFER_SIZE = 8192;
 				int count;
-				byte[] data = new byte[BUFFER_SIZE];
+				final byte[] data = new byte[BUFFER_SIZE];
 
-				InputStream in = Init.class
+				final InputStream in = Init.class
 						.getResourceAsStream("/templates_available.zip");
-				ZipInputStream zipStream = new ZipInputStream(in);
+				final ZipInputStream zipStream = new ZipInputStream(in);
 
 				BufferedOutputStream dest = null;
 
@@ -102,7 +102,7 @@ public final class LocalTemplatesHelper {
 						if (!entry.isDirectory()) {
 
 							myLogger.debug("Template name: " + entry.getName());
-							File vomses_file = new File(
+							final File vomses_file = new File(
 									Environment
 											.getAvailableTemplatesDirectory(),
 									entry.getName());
@@ -110,7 +110,7 @@ public final class LocalTemplatesHelper {
 							// Write the file to the file system and overwrite
 							// possible
 							// old files with the same name
-							FileOutputStream fos = new FileOutputStream(
+							final FileOutputStream fos = new FileOutputStream(
 									vomses_file);
 							dest = new BufferedOutputStream(fos, BUFFER_SIZE);
 							while ((count = zipStream
@@ -121,7 +121,7 @@ public final class LocalTemplatesHelper {
 							dest.close();
 						}
 					}
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					myLogger.error(e);
 				}
 			} else {
@@ -179,10 +179,11 @@ public final class LocalTemplatesHelper {
 
 		final int BUFFER_SIZE = 8192;
 		int count;
-		byte[] data = new byte[BUFFER_SIZE];
+		final byte[] data = new byte[BUFFER_SIZE];
 
-		InputStream in = Init.class.getResourceAsStream(zipFileResourcePath);
-		ZipInputStream zipstream = new ZipInputStream(in);
+		final InputStream in = Init.class
+				.getResourceAsStream(zipFileResourcePath);
+		final ZipInputStream zipstream = new ZipInputStream(in);
 
 		BufferedOutputStream dest = null;
 
@@ -192,18 +193,19 @@ public final class LocalTemplatesHelper {
 
 			while ((entry = zipstream.getNextEntry()) != null) {
 				myLogger.debug("Entry: " + entry.getName());
-				String filePath = targetDir.getAbsolutePath() + File.separator
-						+ entry.getName();
+				final String filePath = targetDir.getAbsolutePath()
+						+ File.separator + entry.getName();
 
 				if (!entry.isDirectory()) {
 
 					// File vomses_file = new File(TEMPLATES_AVAILABLE_DIR,
 					// entry.getName());
-					File vomses_file = new File(filePath);
+					final File vomses_file = new File(filePath);
 
 					// Write the file to the file system and overwrite possible
 					// old files with the same name
-					FileOutputStream fos = new FileOutputStream(vomses_file);
+					final FileOutputStream fos = new FileOutputStream(
+							vomses_file);
 					dest = new BufferedOutputStream(fos, BUFFER_SIZE);
 					while ((count = zipstream.read(data, 0, BUFFER_SIZE)) != -1) {
 						dest.write(data, 0, count);
@@ -215,7 +217,7 @@ public final class LocalTemplatesHelper {
 					new File(filePath).mkdirs();
 				}
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
 			myLogger.error(e);

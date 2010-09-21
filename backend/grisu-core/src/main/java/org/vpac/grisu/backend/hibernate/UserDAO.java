@@ -34,11 +34,11 @@ public class UserDAO extends BaseHibernateDAO {
 			getCurrentSession().getTransaction().commit();
 
 			myLogger.debug("delete successful");
-		} catch (RuntimeException e) {
+		} catch (final RuntimeException e) {
 			myLogger.error("delete failed", e);
 			try {
 				getCurrentSession().getTransaction().rollback();
-			} catch (Exception er) {
+			} catch (final Exception er) {
 				myLogger.debug("Rollback failed.", er);
 			}
 			throw e; // or display error message
@@ -57,29 +57,30 @@ public class UserDAO extends BaseHibernateDAO {
 	 */
 	public final User findUserByDN(final String dn) {
 		myLogger.debug("Loading user with dn: " + dn + " from db.");
-		String queryString = "from org.vpac.grisu.backend.model.User as user where user.dn = ?";
+		final String queryString = "from org.vpac.grisu.backend.model.User as user where user.dn = ?";
 
 		try {
 			getCurrentSession().beginTransaction();
 
-			Query queryObject = getCurrentSession().createQuery(queryString);
+			final Query queryObject = getCurrentSession().createQuery(
+					queryString);
 			queryObject.setParameter(0, dn);
 			try {
-				User user = (User) queryObject.uniqueResult();
+				final User user = (User) queryObject.uniqueResult();
 				getCurrentSession().getTransaction().commit();
 				return user;
 
-			} catch (QueryException qe) {
+			} catch (final QueryException qe) {
 				// means user not in db yet.
 				myLogger.debug("User " + dn + " not found in database...");
 				return null;
 			}
 
-		} catch (RuntimeException e) {
+		} catch (final RuntimeException e) {
 			e.printStackTrace();
 			try {
 				getCurrentSession().getTransaction().rollback();
-			} catch (Exception er) {
+			} catch (final Exception er) {
 				myLogger.debug("Rollback failed.", er);
 			}
 			throw e; // or display error message
@@ -100,11 +101,11 @@ public class UserDAO extends BaseHibernateDAO {
 			getCurrentSession().getTransaction().commit();
 
 			myLogger.debug("saveOrUpdate successful");
-		} catch (RuntimeException e) {
+		} catch (final RuntimeException e) {
 			myLogger.error("saveOrUpdate failed", e);
 			try {
 				getCurrentSession().getTransaction().rollback();
-			} catch (Exception er) {
+			} catch (final Exception er) {
 				myLogger.debug("Rollback failed.", er);
 			}
 			throw e; // or display error message

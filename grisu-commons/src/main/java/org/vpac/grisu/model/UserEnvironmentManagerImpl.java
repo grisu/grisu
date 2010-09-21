@@ -129,13 +129,13 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 
 		if (cachedFqansPerApplication.get(application) == null) {
 
-			ApplicationInformation ai = GrisuRegistryManager.getDefault(
+			final ApplicationInformation ai = GrisuRegistryManager.getDefault(
 					serviceInterface).getApplicationInformation(application);
-			Set<String> result = new TreeSet<String>();
+			final Set<String> result = new TreeSet<String>();
 
-			for (String vo : getAllAvailableFqans()) {
+			for (final String vo : getAllAvailableFqans()) {
 
-				Set<String> temp = ai
+				final Set<String> temp = ai
 						.getAvailableSubmissionLocationsForFqan(vo);
 				if (temp.size() > 0) {
 					result.add(vo);
@@ -153,10 +153,11 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 		if (cachedAllSites == null) {
 			cachedAllSites = new TreeSet<String>();
 
-			for (MountPoint mp : getMountPoints()) {
-				if ( StringUtils.isBlank(mp.getSite()) ) {
+			for (final MountPoint mp : getMountPoints()) {
+				if (StringUtils.isBlank(mp.getSite())) {
 					cachedAllSites.add("Unknown");
-					myLogger.error("No site specified for mountpoint: "+mp.getAlias()+", "+mp.getRootUrl());
+					myLogger.error("No site specified for mountpoint: "
+							+ mp.getAlias() + ", " + mp.getRootUrl());
 				} else {
 					cachedAllSites.add(mp.getSite());
 				}
@@ -173,7 +174,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 		if (cachedAllSubmissionLocations == null) {
 			cachedAllSubmissionLocations = new HashSet<String>();
 			cachedAllSites = new TreeSet<String>();
-			for (String fqan : getAllAvailableFqans()) {
+			for (final String fqan : getAllAvailableFqans()) {
 				cachedAllSubmissionLocations.addAll(Arrays.asList(resourceInfo
 						.getAllAvailableSubmissionLocations(fqan)));
 			}
@@ -215,12 +216,12 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 
 			result = new TreeSet<DtoBatchJob>();
 
-			for (String name : getCurrentBatchJobnames(application, true)) {
+			for (final String name : getCurrentBatchJobnames(application, true)) {
 
 				DtoBatchJob bj = null;
 				try {
 					bj = getBatchJob(name, refresh);
-				} catch (NoSuchJobException e) {
+				} catch (final NoSuchJobException e) {
 					throw new RuntimeException(e);
 				}
 
@@ -246,8 +247,8 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 
 		if (cachedBookmarkFilesystemList == null) {
 			cachedBookmarkFilesystemList = new LinkedList<FileSystemItem>();
-			for (String bookmark : getBookmarks().keySet()) {
-				String url = getBookmarks().get(bookmark);
+			for (final String bookmark : getBookmarks().keySet()) {
+				final String url = getBookmarks().get(bookmark);
 				cachedBookmarkFilesystemList.add(new FileSystemItem(bookmark,
 						FileSystemItem.Type.BOOKMARK, fm
 								.createGlazedFileFromUrl(url)));
@@ -381,12 +382,12 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 			return null;
 		}
 
-		MountPoint mp = getMountPointForUrl(url);
+		final MountPoint mp = getMountPointForUrl(url);
 
 		if (mp != null) {
-			String site = mp.getSite();
+			final String site = mp.getSite();
 
-			for (FileSystemItem item : getFileSystems()) {
+			for (final FileSystemItem item : getFileSystems()) {
 
 				if (FileSystemItem.Type.BOOKMARK.equals(item.getType())) {
 					continue;
@@ -404,7 +405,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 			}
 		}
 
-		for (FileSystemItem item : getFileSystems()) {
+		for (final FileSystemItem item : getFileSystems()) {
 
 			// if (!FileSystemItem.Type.BOOKMARK.equals(item.getType())) {
 			// continue;
@@ -435,12 +436,12 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 		if (cachedLocalFilesystemList == null) {
 			cachedLocalFilesystemList = new LinkedList<FileSystemItem>();
 
-			File userHome = new File(System.getProperty("user.home"));
+			final File userHome = new File(System.getProperty("user.home"));
 			cachedLocalFilesystemList.add(new FileSystemItem(
 					userHome.getName(), FileSystemItem.Type.LOCAL,
 					new GlazedFile(userHome)));
 
-			for (File file : File.listRoots()) {
+			for (final File file : File.listRoots()) {
 				cachedLocalFilesystemList.add(new FileSystemItem(
 						file.getName(), FileSystemItem.Type.LOCAL,
 						new GlazedFile(file)));
@@ -451,7 +452,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 
 	public MountPoint getMountPointForAlias(String alias) {
 
-		for (MountPoint mp : getMountPoints()) {
+		for (final MountPoint mp : getMountPoints()) {
 			if (mp.getAlias().equals(alias)) {
 				return mp;
 			}
@@ -462,7 +463,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 
 	public final MountPoint getMountPointForUrl(final String url) {
 
-		for (MountPoint mp : getMountPoints()) {
+		for (final MountPoint mp : getMountPoints()) {
 			if (mp.isResponsibleForAbsoluteFile(url)) {
 				return mp;
 			}
@@ -478,8 +479,8 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 	 */
 	public final synchronized MountPoint[] getMountPoints() {
 		if (cachedMountPoints == null) {
-			cachedMountPoints = serviceInterface.df().getMountpoints().toArray(
-					new MountPoint[] {});
+			cachedMountPoints = serviceInterface.df().getMountpoints()
+					.toArray(new MountPoint[] {});
 		}
 		return cachedMountPoints;
 	}
@@ -501,8 +502,8 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 
 			if (alreadyQueriedMountPointsPerFqan.get(fqan) == null) {
 
-				Set<MountPoint> mps = new HashSet<MountPoint>();
-				for (MountPoint mp : getMountPoints()) {
+				final Set<MountPoint> mps = new HashSet<MountPoint>();
+				for (final MountPoint mp : getMountPoints()) {
 					if ((mp.getFqan() == null)
 							|| mp.getFqan().equals(Constants.NON_VO_FQAN)) {
 						if ((fqan == null)
@@ -535,8 +536,8 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 
 			if (alreadyQueriedMountPointsPerSite.get(site) == null) {
 
-				SortedSet<MountPoint> mps = new TreeSet<MountPoint>();
-				for (MountPoint mp : getMountPoints()) {
+				final SortedSet<MountPoint> mps = new TreeSet<MountPoint>();
+				for (final MountPoint mp : getMountPoints()) {
 					if (mp.getSite().equals(site)) {
 						mps.add(mp);
 						continue;
@@ -557,18 +558,18 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 
 			// String[] urls = serviceInterface
 			// .getStagingFileSystemForSubmissionLocation(submissionLocation);
-			List<String> urls = resourceInfo
+			final List<String> urls = resourceInfo
 					.getStagingFilesystemsForSubmissionLocation(submissionLocation);
 
-			Set<MountPoint> result = new TreeSet<MountPoint>();
-			for (String url : urls) {
+			final Set<MountPoint> result = new TreeSet<MountPoint>();
+			for (final String url : urls) {
 
 				try {
-					URI uri = new URI(url);
-					String host = uri.getHost();
-					String protocol = uri.getScheme();
+					final URI uri = new URI(url);
+					final String host = uri.getHost();
+					final String protocol = uri.getScheme();
 
-					for (MountPoint mp : getMountPoints()) {
+					for (final MountPoint mp : getMountPoints()) {
 
 						if ((mp.getRootUrl().indexOf(host) != -1)
 								&& (mp.getRootUrl().indexOf(protocol) != -1)) {
@@ -576,7 +577,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 						}
 
 					}
-				} catch (URISyntaxException e) {
+				} catch (final URISyntaxException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					return null;
@@ -595,19 +596,19 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 
 		// String[] urls = serviceInterface
 		// .getStagingFileSystemForSubmissionLocation(submissionLocation);
-		List<String> urls = resourceInfo
+		final List<String> urls = resourceInfo
 				.getStagingFilesystemsForSubmissionLocation(submissionLocation);
 
-		Set<MountPoint> result = new TreeSet<MountPoint>();
+		final Set<MountPoint> result = new TreeSet<MountPoint>();
 
-		for (String url : urls) {
+		for (final String url : urls) {
 
 			try {
-				URI uri = new URI(url);
-				String host = uri.getHost();
-				String protocol = uri.getScheme();
+				final URI uri = new URI(url);
+				final String host = uri.getHost();
+				final String protocol = uri.getScheme();
 
-				for (MountPoint mp : getMountPoints(fqan)) {
+				for (final MountPoint mp : getMountPoints(fqan)) {
 
 					if ((mp.getRootUrl().indexOf(host) != -1)
 							&& (mp.getRootUrl().indexOf(protocol) != -1)) {
@@ -615,7 +616,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 					}
 
 				}
-			} catch (URISyntaxException e) {
+			} catch (final URISyntaxException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				return null;
@@ -629,7 +630,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 	public synchronized String getProperty(String key) {
 
 		if (StringUtils.isBlank(cachedUserProperties.get(key))) {
-			String temp = serviceInterface.getUserProperty(key);
+			final String temp = serviceInterface.getUserProperty(key);
 			if (StringUtils.isBlank(temp)) {
 				return null;
 			} else {
@@ -643,7 +644,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 	public final MountPoint getRecommendedMountPoint(
 			final String submissionLocation, final String fqan) {
 
-		Set<MountPoint> temp = getMountPointsForSubmissionLocationAndFqan(
+		final Set<MountPoint> temp = getMountPointsForSubmissionLocationAndFqan(
 				submissionLocation, fqan);
 
 		return temp.iterator().next();
@@ -654,7 +655,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 
 		if (cachedRemoteFilesystemList == null) {
 			cachedRemoteFilesystemList = new LinkedList<FileSystemItem>();
-			for (String site : getAllAvailableSites()) {
+			for (final String site : getAllAvailableSites()) {
 				cachedRemoteFilesystemList.add(new FileSystemItem(site,
 						FileSystemItem.Type.REMOTE, new GlazedFile(site)));
 			}
@@ -664,7 +665,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 
 	public boolean isMountPointAlias(String string) {
 
-		for (MountPoint mp : getMountPoints()) {
+		for (final MountPoint mp : getMountPoints()) {
 			if (mp.getAlias().equals(string)) {
 				return true;
 			}
@@ -675,7 +676,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 
 	public boolean isMountPointRoot(String rootUrl) {
 
-		for (MountPoint mp : getMountPoints()) {
+		for (final MountPoint mp : getMountPoints()) {
 			if (mp.getRootUrl().equals(rootUrl)) {
 				return true;
 			}
@@ -714,16 +715,16 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 		serviceInterface.setBookmark(alias, url);
 
 		if (StringUtils.isBlank(url)) {
-			FileSystemItem temp = new FileSystemItem(alias,
+			final FileSystemItem temp = new FileSystemItem(alias,
 					FileSystemItem.Type.BOOKMARK, null);
 			getBookmarks().remove(alias);
 			getBookmarksFilesystems().remove(temp);
 			getFileSystems().remove(temp);
 			return temp;
 		} else {
-			FileSystemItem temp = new FileSystemItem(alias,
-					FileSystemItem.Type.BOOKMARK, fm
-							.createGlazedFileFromUrl(url));
+			final FileSystemItem temp = new FileSystemItem(alias,
+					FileSystemItem.Type.BOOKMARK,
+					fm.createGlazedFileFromUrl(url));
 			getBookmarks().put(alias, url);
 			getBookmarksFilesystems().add(temp);
 			getFileSystems().add(temp);
@@ -756,10 +757,11 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 	public StatusObject waitForActionToFinish(String handle)
 			throws InterruptedException, StatusException {
 
-		StatusObject status = new StatusObject(serviceInterface, handle);
+		final StatusObject status = new StatusObject(serviceInterface, handle);
 
-		status.waitForActionToFinish(ClientPropertiesManager
-				.getDefaultActionStatusRecheckInterval(), false, false);
+		status.waitForActionToFinish(
+				ClientPropertiesManager.getDefaultActionStatusRecheckInterval(),
+				false, false);
 
 		return status;
 	}

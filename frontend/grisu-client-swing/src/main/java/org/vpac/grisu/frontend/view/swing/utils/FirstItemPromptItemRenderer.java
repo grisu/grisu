@@ -9,24 +9,23 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
-import org.vpac.grisu.model.files.FileSystemItem;
+public class FirstItemPromptItemRenderer extends DefaultListCellRenderer
+		implements ListCellRenderer {
 
-public class FirstItemPromptItemRenderer extends DefaultListCellRenderer implements
-		ListCellRenderer {
-	
 	private final String selectionPrompt;
-	
+
 	public FirstItemPromptItemRenderer(String selPrompt) {
 		this.selectionPrompt = selPrompt;
 	}
 
+	@Override
 	public Component getListCellRendererComponent(JList arg0, Object arg1,
 			int arg2, boolean arg3, boolean arg4) {
 
 		if (arg1 == null) {
 			return this;
 		}
-		String item = (String) arg1;
+		final String item = (String) arg1;
 
 		this.setText(item);
 

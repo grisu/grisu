@@ -15,6 +15,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 
@@ -40,32 +41,63 @@ import com.jgoodies.forms.layout.RowSpec;
 public class MultiLoginPanel extends JPanel implements EventSubscriber,
 		LoginMethodPanel {
 
+	private class QuickLoginAction extends AbstractAction {
+		public QuickLoginAction() {
+			putValue(NAME, "Quick-login");
+			putValue(SHORT_DESCRIPTION,
+					"Use existing local credentials to login.");
+		}
+
+		public void actionPerformed(ActionEvent e) {
+
+			try {
+				login(MultiLoginPanel.this);
+			} catch (final InterruptedException e1) {
+				e1.printStackTrace();
+			}
+
+		}
+	}
+
 	private JTabbedPane tabbedPane;
 	private ShibLoginPanel shibLoginPanel;
 	private X509LoginPanel x509LoginPanel;
 	private MyProxyLoginPanel myProxyLoginPanel;
-	private JButton button;
 
+	private JButton button;
 	private final LoginPanel loginPanel;
 	private AdvancedLoginPanelOptions advancedLoginPanelOptions;
-	private JCheckBox autoLoginCheckbox;
 
+	private JCheckBox autoLoginCheckbox;
 	private final Action action = new AbstractAction() {
 
 		public void actionPerformed(ActionEvent arg0) {
 
 			try {
-				LoginMethodPanel temp = (LoginMethodPanel) (getTabbedPane()
+				final LoginMethodPanel temp = (LoginMethodPanel) (getTabbedPane()
 						.getSelectedComponent());
 				login(temp);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 
 	};
+
 	private JButton btnQuicklogin;
+
+	private Thread loginThread = null;
+
+	private LoginException possibleException = null;
+
+	private ServiceInterface si = null;
+
+	private boolean loginSuccessful = false;
+
+	private Action quickLoginAction;
+
+	private Action cancelAction;
 
 	/**
 	 * Create the panel.
@@ -93,9 +125,9 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 		add(getAutoLoginCheckbox(), "4, 10, left, center");
 		add(getLoginButton(), "6, 10, right, center");
 
-		String keyStrokeAndKey = "ENTER";
+		final String keyStrokeAndKey = "ENTER";
 
-		KeyStroke keyStroke = KeyStroke.getKeyStroke(keyStrokeAndKey);
+		final KeyStroke keyStroke = KeyStroke.getKeyStroke(keyStrokeAndKey);
 
 		getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStroke,
 				keyStrokeAndKey);
@@ -110,7 +142,7 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 			} else {
 				getQuickLoginAction().setEnabled(false);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 
@@ -152,10 +184,10 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 				public void actionPerformed(ActionEvent arg0) {
 
 					try {
-						LoginMethodPanel temp = (LoginMethodPanel) (getTabbedPane()
+						final LoginMethodPanel temp = (LoginMethodPanel) (getTabbedPane()
 								.getSelectedComponent());
 						login(temp);
-					} catch (InterruptedException e) {
+					} catch (final InterruptedException e) {
 						e.printStackTrace();
 					}
 
@@ -172,6 +204,29 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 		return myProxyLoginPanel;
 	}
 
+	public LoginException getPossibleException() {
+		return possibleException;
+	}
+
+	private Action getQuickLoginAction() {
+		if (quickLoginAction == null) {
+			quickLoginAction = new QuickLoginAction();
+		}
+		return quickLoginAction;
+	}
+
+	private JButton getQuickLoginButton() {
+		if (btnQuicklogin == null) {
+			btnQuicklogin = new JButton();
+			btnQuicklogin.setAction(getQuickLoginAction());
+		}
+		return btnQuicklogin;
+	}
+
+	public ServiceInterface getServiceInterface() {
+		return si;
+	}
+
 	private ShibLoginPanel getShibLoginPanel() {
 		if (shibLoginPanel == null) {
 			shibLoginPanel = new ShibLoginPanel();
@@ -181,7 +236,7 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 
 	private JTabbedPane getTabbedPane() {
 		if (tabbedPane == null) {
-			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+			tabbedPane = new JTabbedPane(SwingConstants.TOP);
 			tabbedPane.addTab("Institution login", null, getShibLoginPanel(),
 					null);
 
@@ -225,8 +280,6 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 
 	}
 
-	private Thread loginThread = null;
-
 	public void login(final LoginMethodPanel temp) throws InterruptedException {
 
 		new Thread() {
@@ -241,10 +294,10 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 				lockUI(true);
 
 				try {
-					String url = getAdvancedLoginPanelOptions()
+					final String url = getAdvancedLoginPanelOptions()
 							.getServiceInterfaceUrl();
 
-					LoginParams params = new LoginParams(url, null, null);
+					final LoginParams params = new LoginParams(url, null, null);
 
 					loginThread = temp.login(params);
 
@@ -252,7 +305,7 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 
 					try {
 						loginThread.join();
-					} catch (InterruptedException e) {
+					} catch (final InterruptedException e) {
 						e.printStackTrace();
 						return;
 					} finally {
@@ -264,7 +317,7 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 								.getServiceInterface());
 					} else {
 						temp.getPossibleException().printStackTrace();
-						ErrorInfo info = new ErrorInfo("Login error",
+						final ErrorInfo info = new ErrorInfo("Login error",
 								"Error while trying to login.", temp
 										.getPossibleException()
 										.getLocalizedMessage(), (String) null,
@@ -283,52 +336,13 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 
 	}
 
-	public void onEvent(Object event) {
-
-		if (event instanceof ClientPropertiesEvent) {
-			ClientPropertiesEvent ev = (ClientPropertiesEvent) event;
-			if (ClientPropertiesManager.AUTO_LOGIN_KEY
-					.equals(((ClientPropertiesEvent) event).getKey())) {
-				try {
-					Boolean b = Boolean.parseBoolean(ev.getValue());
-					getAutoLoginCheckbox().setSelected(b);
-				} catch (Exception e) {
-					// not that important
-				}
-			}
-		}
-
-	}
-
-	private LoginException possibleException = null;
-	private ServiceInterface si = null;
-	private boolean loginSuccessful = false;
-	private Action quickLoginAction;
-	private Action cancelAction;
-
-	private JButton getQuickLoginButton() {
-		if (btnQuicklogin == null) {
-			btnQuicklogin = new JButton();
-			btnQuicklogin.setAction(getQuickLoginAction());
-		}
-		return btnQuicklogin;
-	}
-
-	public LoginException getPossibleException() {
-		return possibleException;
-	}
-
-	public ServiceInterface getServiceInterface() {
-		return si;
-	}
-
 	public Thread login(final LoginParams params) {
 
 		loginSuccessful = false;
 		si = null;
 		possibleException = null;
 
-		Thread loginThread = new Thread() {
+		final Thread loginThread = new Thread() {
 
 			@Override
 			public void run() {
@@ -337,7 +351,7 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 				try {
 					si = LoginManager.login(params.getServiceInterfaceUrl());
 					loginSuccessful = true;
-				} catch (LoginException e) {
+				} catch (final LoginException e) {
 					possibleException = e;
 				}
 			}
@@ -351,29 +365,21 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 		return loginSuccessful;
 	}
 
-	private class QuickLoginAction extends AbstractAction {
-		public QuickLoginAction() {
-			putValue(NAME, "Quick-login");
-			putValue(SHORT_DESCRIPTION,
-					"Use existing local credentials to login.");
-		}
+	public void onEvent(Object event) {
 
-		public void actionPerformed(ActionEvent e) {
-
-			try {
-				login(MultiLoginPanel.this);
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
+		if (event instanceof ClientPropertiesEvent) {
+			final ClientPropertiesEvent ev = (ClientPropertiesEvent) event;
+			if (ClientPropertiesManager.AUTO_LOGIN_KEY
+					.equals(((ClientPropertiesEvent) event).getKey())) {
+				try {
+					final Boolean b = Boolean.parseBoolean(ev.getValue());
+					getAutoLoginCheckbox().setSelected(b);
+				} catch (final Exception e) {
+					// not that important
+				}
 			}
-
 		}
-	}
 
-	private Action getQuickLoginAction() {
-		if (quickLoginAction == null) {
-			quickLoginAction = new QuickLoginAction();
-		}
-		return quickLoginAction;
 	}
 
 	// private class CancelLoginAction extends AbstractAction {

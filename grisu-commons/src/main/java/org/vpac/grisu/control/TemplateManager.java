@@ -38,13 +38,13 @@ public class TemplateManager {
 
 	public String addLocalTemplate(File template) {
 
-		File file = new File(Environment.getTemplateDirectory(), template
-				.getName());
+		final File file = new File(Environment.getTemplateDirectory(),
+				template.getName());
 
 		if (!file.equals(template)) {
 			try {
 				FileUtils.copyFile(template, file);
-			} catch (IOException e1) {
+			} catch (final IOException e1) {
 				throw new RuntimeException(e1);
 			}
 		}
@@ -52,10 +52,10 @@ public class TemplateManager {
 		List<String> temp;
 		try {
 			temp = FileUtils.readLines(file);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
-		String filename = FilenameUtils.getBaseName(file.toString());
+		final String filename = FilenameUtils.getBaseName(file.toString());
 		// localTemplates.put(filename, temp);
 
 		pcs.firePropertyChange("localTemplateNames", null,
@@ -66,7 +66,7 @@ public class TemplateManager {
 
 	public void addRemoteTemplate(String name) throws NoSuchTemplateException {
 
-		List<String> temp = getRemoteTemplate(name);
+		final List<String> temp = getRemoteTemplate(name);
 
 		ClientPropertiesManager.addServerTemplate(name);
 
@@ -82,7 +82,7 @@ public class TemplateManager {
 	public String copyTemplateToLocalTemplateStore(String name)
 			throws NoSuchTemplateException {
 
-		List<String> temp = getRemoteTemplate(name);
+		final List<String> temp = getRemoteTemplate(name);
 
 		File file = new File(Environment.getTemplateDirectory(), name
 				+ ".template");
@@ -97,7 +97,7 @@ public class TemplateManager {
 
 		try {
 			FileUtils.writeLines(file, temp);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 
@@ -110,7 +110,7 @@ public class TemplateManager {
 
 	public SortedSet<String> getAllTemplateNames() {
 
-		SortedSet<String> allNames = new TreeSet<String>();
+		final SortedSet<String> allNames = new TreeSet<String>();
 
 		allNames.addAll(getMyRemoteTemplateNames());
 		allNames.addAll(getLocalTemplates().keySet());
@@ -128,7 +128,7 @@ public class TemplateManager {
 
 		try {
 			return FileUtils.readLines(template);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new TemplateException("Can't read template: "
 					+ e.getLocalizedMessage(), e);
 		}
@@ -144,9 +144,9 @@ public class TemplateManager {
 	public Map<String, List<String>> getLocalTemplates() {
 		// if (localTemplates == null) {
 
-		Map<String, List<String>> localTemplates = new HashMap<String, List<String>>();
+		final Map<String, List<String>> localTemplates = new HashMap<String, List<String>>();
 
-		File tempDir = new File(Environment.getTemplateDirectory());
+		final File tempDir = new File(Environment.getTemplateDirectory());
 
 		if (!tempDir.exists()) {
 			if (!tempDir.mkdirs()) {
@@ -157,17 +157,18 @@ public class TemplateManager {
 			}
 		}
 
-		File[] templates = tempDir.listFiles(new GrisuTemplateFilenameFilter());
+		final File[] templates = tempDir
+				.listFiles(new GrisuTemplateFilenameFilter());
 
-		for (File file : templates) {
+		for (final File file : templates) {
 
 			List<String> temp;
 			try {
 				temp = FileUtils.readLines(file);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new RuntimeException(e);
 			}
-			String filename = FilenameUtils.getBaseName(file.toString());
+			final String filename = FilenameUtils.getBaseName(file.toString());
 			localTemplates.put(filename, temp);
 
 		}
@@ -178,7 +179,7 @@ public class TemplateManager {
 
 	public List<String> getMyRemoteTemplateNames() {
 
-		String[] myTemps = ClientPropertiesManager.getServerTemplates();
+		final String[] myTemps = ClientPropertiesManager.getServerTemplates();
 
 		return Arrays.asList(myTemps);
 	}
@@ -189,13 +190,13 @@ public class TemplateManager {
 		String temp = null;
 		try {
 			temp = si.getTemplate(name);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// doesn't matter -- will be dealt with below...
 		}
 		if (StringUtils.isBlank(temp)) {
 			throw new NoSuchTemplateException("Template " + name + " is empty.");
 		}
-		List<String> lines = Arrays.asList(StringUtils.split(temp, '\n'));
+		final List<String> lines = Arrays.asList(StringUtils.split(temp, '\n'));
 		return lines;
 	}
 
@@ -209,7 +210,7 @@ public class TemplateManager {
 
 	public List<String> getTemplate(String name) throws NoSuchTemplateException {
 
-		List<String> result = getLocalTemplates().get(name);
+		final List<String> result = getLocalTemplates().get(name);
 
 		if (result == null || result.size() == 0) {
 			return getRemoteTemplate(name);
@@ -223,7 +224,7 @@ public class TemplateManager {
 
 		// localTemplates.remove(name);
 
-		File temp = new File(Environment.getTemplateDirectory(), name
+		final File temp = new File(Environment.getTemplateDirectory(), name
 				+ ".template");
 
 		temp.delete();

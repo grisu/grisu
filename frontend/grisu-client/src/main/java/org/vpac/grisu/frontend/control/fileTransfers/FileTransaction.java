@@ -101,7 +101,7 @@ public class FileTransaction implements Comparable<FileTransaction> {
 	public boolean equals(Object o) {
 
 		if (o instanceof FileTransaction) {
-			FileTransaction ft = (FileTransaction) o;
+			final FileTransaction ft = (FileTransaction) o;
 			if (getSourceUrl().equals(ft.getSourceUrl())
 					&& getTargetDirUrl().equals(ft.getTargetDirUrl())
 					&& getStatus().equals(ft.getStatus())) {
@@ -172,7 +172,7 @@ public class FileTransaction implements Comparable<FileTransaction> {
 					pcs.firePropertyChange("status", Status.CREATED,
 							Status.TRANSACTION_RUNNING);
 
-					for (String sourceUrl : sourceUrls) {
+					for (final String sourceUrl : sourceUrls) {
 
 						if (Thread.currentThread().isInterrupted()) {
 
@@ -185,7 +185,7 @@ public class FileTransaction implements Comparable<FileTransaction> {
 									"Job staging interrupted.");
 						}
 
-						String oldFile = currentSourceFile;
+						final String oldFile = currentSourceFile;
 						currentSourceFile = sourceUrl;
 						pcs.firePropertyChange("currentSourceFile", oldFile,
 								currentSourceFile);
@@ -196,7 +196,7 @@ public class FileTransaction implements Comparable<FileTransaction> {
 							if (DELETE_STRING.equals(targetDirUrl)) {
 								try {
 									fm.deleteFile(sourceUrl);
-								} catch (RemoteFileSystemException e1) {
+								} catch (final RemoteFileSystemException e1) {
 									throw new FileTransactionException(
 											sourceUrl, targetDirUrl,
 											"Can't delete file.", e1);
@@ -204,7 +204,7 @@ public class FileTransaction implements Comparable<FileTransaction> {
 							} else {
 								fm.cp(sourceUrl, targetDirUrl, overwrite);
 							}
-						} catch (FileTransactionException e) {
+						} catch (final FileTransactionException e) {
 							possibleException = e;
 							failedSourceFile = sourceUrl;
 							finished = new Date();
@@ -263,7 +263,7 @@ public class FileTransaction implements Comparable<FileTransaction> {
 
 		try {
 			return endStatus.get();
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			endStatus.cancel(true);
 			throw e;
 		}

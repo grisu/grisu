@@ -39,7 +39,7 @@ public class GlazedFileMatcher implements Matcher<GlazedFile> {
 			// display everything
 			return true;
 		} else {
-			for (String ext : extensions) {
+			for (final String ext : extensions) {
 				if (arg0.getName().endsWith(ext)) {
 					return true;
 				}

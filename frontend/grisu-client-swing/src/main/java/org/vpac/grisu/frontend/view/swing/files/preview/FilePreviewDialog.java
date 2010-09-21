@@ -21,10 +21,10 @@ public class FilePreviewDialog extends JDialog {
 	 */
 	public static void main(String[] args) {
 		try {
-			FilePreviewDialog dialog = new FilePreviewDialog(null);
+			final FilePreviewDialog dialog = new FilePreviewDialog(null);
 			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}

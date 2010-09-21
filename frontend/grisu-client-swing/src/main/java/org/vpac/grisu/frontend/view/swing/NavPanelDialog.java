@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
 import org.vpac.grisu.control.ServiceInterface;
@@ -15,10 +16,10 @@ public class NavPanelDialog extends JDialog {
 	 */
 	public static void main(String[] args) {
 		try {
-			NavPanelDialog dialog = new NavPanelDialog();
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			final NavPanelDialog dialog = new NavPanelDialog();
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -38,19 +39,26 @@ public class NavPanelDialog extends JDialog {
 		contentPanel.add(getGrisuNavigationPanel(), BorderLayout.CENTER);
 
 		getGrisuNavigationPanel().addTaskPane("Test1", null);
-		getGrisuNavigationPanel().addTaskPaneItem("Test1", "testitem1", "itemdesc1", null);
-		getGrisuNavigationPanel().addTaskPaneItem("Test1", "testitem2", "itemdesc2", null);
-		getGrisuNavigationPanel().addTaskPaneItem("Test1", "testitem3", "itemdesc3", null);
+		getGrisuNavigationPanel().addTaskPaneItem("Test1", "testitem1",
+				"itemdesc1", null);
+		getGrisuNavigationPanel().addTaskPaneItem("Test1", "testitem2",
+				"itemdesc2", null);
+		getGrisuNavigationPanel().addTaskPaneItem("Test1", "testitem3",
+				"itemdesc3", null);
 
 		getGrisuNavigationPanel().addTaskPane("Test2", null);
-		getGrisuNavigationPanel().addTaskPaneItem("Test2", "testitem1", "itemdesc1", null);
-		getGrisuNavigationPanel().addTaskPaneItem("Test2", "testitem2", "itemdesc2", null);
-		getGrisuNavigationPanel().addTaskPaneItem("Test2", "testitem3", "itemdesc3", null);
+		getGrisuNavigationPanel().addTaskPaneItem("Test2", "testitem1",
+				"itemdesc1", null);
+		getGrisuNavigationPanel().addTaskPaneItem("Test2", "testitem2",
+				"itemdesc2", null);
+		getGrisuNavigationPanel().addTaskPaneItem("Test2", "testitem3",
+				"itemdesc3", null);
 	}
 
 	private GrisuNavigationPanel getGrisuNavigationPanel() {
 		if (grisuNavigationPanel == null) {
-			grisuNavigationPanel = new GrisuNavigationPanel((ServiceInterface) null, null);
+			grisuNavigationPanel = new GrisuNavigationPanel(
+					(ServiceInterface) null, null);
 		}
 		return grisuNavigationPanel;
 	}

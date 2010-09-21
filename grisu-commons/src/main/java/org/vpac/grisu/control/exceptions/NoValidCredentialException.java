@@ -10,13 +10,14 @@ public class NoValidCredentialException extends RuntimeException implements
 
 	private static final long serialVersionUID = 1L;
 
-	private String message;
+	private final String message;
 
 	public NoValidCredentialException(final String message) {
 		super(message);
 		this.message = message;
 	}
 
+	@Override
 	public final String getMessage() {
 		return message;
 	}

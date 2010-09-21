@@ -28,7 +28,8 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 	public static String TRUST_FILE_NAME = Environment
 			.getGrisuClientDirectory().getPath()
-			+ File.separator + "truststore.jks";
+			+ File.separator
+			+ "truststore.jks";
 
 	/**
 	 * configures secure connection parameters.
@@ -37,11 +38,11 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 		try {
 			if (!(new File(Environment.getGrisuClientDirectory(),
 					"truststore.jks").exists())) {
-				InputStream ts = JaxWsServiceInterfaceCreator.class
+				final InputStream ts = JaxWsServiceInterfaceCreator.class
 						.getResourceAsStream("/truststore.jks");
 				IOUtils.copy(ts, new FileOutputStream(TRUST_FILE_NAME));
 			}
-		} catch (IOException ex) {
+		} catch (final IOException ex) {
 			throw new ServiceInterfaceException(
 					"cannot copy SSL certificate store into grisu home directory. Does "
 							+ Environment.getGrisuClientDirectory().getPath()
@@ -66,37 +67,36 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 		try {
 
-			QName serviceName = new QName("http://api.grisu.arcs.org.au/",
-					"GrisuService");
-			QName portName = new QName("http://api.grisu.arcs.org.au/",
+			final QName serviceName = new QName(
+					"http://api.grisu.arcs.org.au/", "GrisuService");
+			final QName portName = new QName("http://api.grisu.arcs.org.au/",
 			// "ServiceInterfaceSOAPPort");
 					"ServiceInterfacePort");
 
 			Service s;
 			try {
-				s = Service.create(new URL(interfaceUrl.replace(
-						"soap/GrisuService", "api.wsdl")), serviceName);
-			} catch (MalformedURLException e) {
+				s = Service.create(
+						new URL(interfaceUrl.replace("soap/GrisuService",
+								"api.wsdl")), serviceName);
+			} catch (final MalformedURLException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e);
 			}
 
-			MTOMFeature mtom = new MTOMFeature();
+			final MTOMFeature mtom = new MTOMFeature();
 			s.getPort(portName, ServiceInterface.class, mtom);
 
-			ServiceInterface service = s.getPort(portName,
+			final ServiceInterface service = s.getPort(portName,
 					ServiceInterface.class);
 
-			BindingProvider bp = (javax.xml.ws.BindingProvider) service;
+			final BindingProvider bp = (javax.xml.ws.BindingProvider) service;
 
 			bp.getRequestContext().put(
 					javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
 					interfaceUrl);
 
-			bp
-					.getRequestContext()
-					.put(
-							"com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size",
+			bp.getRequestContext()
+					.put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size",
 							new Integer(4096));
 
 			bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY,
@@ -104,8 +104,8 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			bp.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY,
 					new String(password));
 
-			 bp.getRequestContext().put(
-			 BindingProvider.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
+			bp.getRequestContext().put(
+					BindingProvider.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
 
 			// bp.getRequestContext().put(
 			// JAXWSProperties.SSL_SOCKET_FACTORY,
@@ -116,7 +116,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			// bp.getRequestContext().put(JAXWSProperties.SSL_SOCKET_FACTORY,
 			// createSocketFactory(interfaceUrl));
 
-			SOAPBinding binding = (SOAPBinding) bp.getBinding();
+			final SOAPBinding binding = (SOAPBinding) bp.getBinding();
 			binding.setMTOMEnabled(true);
 
 			return service;
@@ -155,7 +155,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			// SOAPBinding binding = (SOAPBinding)bp.getBinding();
 			// binding.setMTOMEnabled(true);
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
 			throw new ServiceInterfaceException(

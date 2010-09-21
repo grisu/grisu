@@ -50,7 +50,7 @@ public enum JobCreatedProperty {
 
 	private static final Map<String, JobCreatedProperty> stringToJobPropertyMap = new HashMap<String, JobCreatedProperty>();
 	static {
-		for (JobCreatedProperty jp : values()) {
+		for (final JobCreatedProperty jp : values()) {
 			stringToJobPropertyMap.put(jp.toString(), jp);
 		}
 	}

@@ -53,12 +53,12 @@ public class BatchJobTabbedPane extends JPanel implements
 			try {
 				patternString = si.getJobProperty(bj.getJobname(),
 						Constants.JOB_RESULT_FILENAME_PATTERNS);
-			} catch (NoSuchJobException e) {
+			} catch (final NoSuchJobException e) {
 				// doesn't matter
 			}
 
 			if (StringUtils.isNotBlank(patternString)) {
-				String[] patterns = patternString.split(",");
+				final String[] patterns = patternString.split(",");
 				temp = new BatchJobWrapperPanel(si, bj, patterns);
 			} else {
 				temp = new BatchJobPanel(si, bj);
@@ -69,7 +69,7 @@ public class BatchJobTabbedPane extends JPanel implements
 
 		try {
 			getJideTabbedPane().setSelectedComponent(temp);
-		} catch (IllegalArgumentException e) {
+		} catch (final IllegalArgumentException e) {
 			getJideTabbedPane().addTab(bj.getJobname(), temp);
 			getJideTabbedPane().setSelectedComponent(temp);
 		}

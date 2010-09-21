@@ -19,7 +19,7 @@ public class FileSystemCache {
 		try {
 			fsm = VFSUtil.createNewFsManager(false, false, true, true, true,
 					true, true, null);
-		} catch (FileSystemException e) {
+		} catch (final FileSystemException e) {
 			throw new RuntimeException(e);
 		}
 	}

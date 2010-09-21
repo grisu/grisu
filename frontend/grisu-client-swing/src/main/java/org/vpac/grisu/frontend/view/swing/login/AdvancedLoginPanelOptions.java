@@ -21,31 +21,30 @@ public class AdvancedLoginPanelOptions extends JPanel {
 	 */
 	public AdvancedLoginPanelOptions() {
 		setLayout(new FormLayout(new ColumnSpec[] {
-				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("33px"),
+				FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("33px"),
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("125px:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("22px"),
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("22px"),
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getChckbxAdvancedConnectionSettings(), "2, 2, 3, 1, left, center");
 		add(getServiceInterfaceUrlPanel(), "4, 4, fill, fill");
 	}
 
 	private JCheckBox getChckbxAdvancedConnectionSettings() {
 		if (chckbxAdvancedConnectionSettings == null) {
-			chckbxAdvancedConnectionSettings = new JCheckBox("Advanced connection settings");
-			chckbxAdvancedConnectionSettings.addItemListener(new ItemListener() {
-				public void itemStateChanged(ItemEvent e) {
+			chckbxAdvancedConnectionSettings = new JCheckBox(
+					"Advanced connection settings");
+			chckbxAdvancedConnectionSettings
+					.addItemListener(new ItemListener() {
+						public void itemStateChanged(ItemEvent e) {
 
-					showAdvancedOptions(chckbxAdvancedConnectionSettings.isSelected());
+							showAdvancedOptions(chckbxAdvancedConnectionSettings
+									.isSelected());
 
-				}
-			});
+						}
+					});
 		}
 		return chckbxAdvancedConnectionSettings;
 	}

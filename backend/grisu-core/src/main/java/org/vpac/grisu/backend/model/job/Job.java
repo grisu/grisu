@@ -141,7 +141,7 @@ public class Job implements Comparable<Job> {
 		this.jobname = JsdlHelpers.getJobname(jsdl);
 		try {
 			JsdlHelpers.setJobname(jsdl, this.jobname);
-		} catch (XPathExpressionException e) {
+		} catch (final XPathExpressionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw e;
@@ -184,7 +184,7 @@ public class Job implements Comparable<Job> {
 	}
 
 	public synchronized void addLogMessage(String message) {
-		Date now = new Date();
+		final Date now = new Date();
 		this.logMessages.put(now.getTime(), message);
 	}
 
@@ -194,7 +194,7 @@ public class Job implements Comparable<Job> {
 		try {
 			thisSubTime = Long.parseLong(this
 					.getJobProperty(Constants.SUBMISSION_TIME_KEY));
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			thisSubTime = 0L;
 		}
 
@@ -202,11 +202,11 @@ public class Job implements Comparable<Job> {
 		try {
 			otherSubTime = Long.parseLong(arg0
 					.getJobProperty(Constants.SUBMISSION_TIME_KEY));
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			otherSubTime = 0L;
 		}
 
-		int result = thisSubTime.compareTo(otherSubTime);
+		final int result = thisSubTime.compareTo(otherSubTime);
 
 		if (result != 0) {
 			return result;
@@ -221,7 +221,7 @@ public class Job implements Comparable<Job> {
 			return false;
 		}
 
-		Job otherJob = (Job) other;
+		final Job otherJob = (Job) other;
 
 		if (this.dn.equals(otherJob.getDn())
 				&& this.jobname.equals(otherJob.getJobname())) {
@@ -584,7 +584,7 @@ public class Job implements Comparable<Job> {
 		try {
 			jobDescription = SeveralXMLHelpers.fromString(jsdl_string);
 			serializedJobDescription = jsdl_string;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			myLogger.debug("Error saving jsdl for job. That's most probably ok. "
 					+ e.getMessage());
 			// e.printStackTrace();

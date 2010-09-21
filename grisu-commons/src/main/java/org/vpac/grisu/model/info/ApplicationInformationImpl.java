@@ -69,9 +69,9 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	public final Set<String> getAllAvailableVersionsForFqan(final String fqan) {
 
 		if (cachedVersionsForUserPerFqan.get(fqan) == null) {
-			Set<String> result = new TreeSet<String>();
-			for (String subLoc : getAvailableSubmissionLocationsForFqan(fqan)) {
-				List<String> temp = serviceInterface
+			final Set<String> result = new TreeSet<String>();
+			for (final String subLoc : getAvailableSubmissionLocationsForFqan(fqan)) {
+				final List<String> temp = serviceInterface
 						.getVersionsOfApplicationOnSubmissionLocation(
 								getApplicationName(), subLoc).getStringList();
 				result.addAll(temp);
@@ -89,14 +89,14 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 			return null;
 		}
 
-		Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
+		final Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
 		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
 				getApplicationName());
 
 		basicJobProperties.putAll(additionalJobProperties);
 
-		Map<String, String> converterMap = new HashMap<String, String>();
-		for (JobSubmissionProperty key : basicJobProperties.keySet()) {
+		final Map<String, String> converterMap = new HashMap<String, String>();
+		for (final JobSubmissionProperty key : basicJobProperties.keySet()) {
 			if (StringUtils.isNotBlank(basicJobProperties.get(key))) {
 				converterMap.put(key.toString(), basicJobProperties.get(key));
 			}
@@ -124,7 +124,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 				cachedApplicationDetails
 						.put(KEY, new HashMap<String, String>());
 			} else {
-				Map<String, String> details = serviceInterface
+				final Map<String, String> details = serviceInterface
 						.getApplicationDetailsForVersionAndSubmissionLocation(
 								application, version, subLoc).getDetailsAsMap();
 				cachedApplicationDetails.put(KEY, details);
@@ -178,8 +178,8 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 			final String fqan) {
 
 		if (cachedSubmissionLocationsForUserPerFqan.get(fqan) == null) {
-			Set<String> temp = new HashSet<String>();
-			for (String subLoc : resourceInfo
+			final Set<String> temp = new HashSet<String>();
+			for (final String subLoc : resourceInfo
 					.getAllAvailableSubmissionLocations(fqan)) {
 				if (getAvailableAllSubmissionLocations().contains(subLoc)) {
 					temp.add(subLoc);
@@ -205,7 +205,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 						getAvailableAllSubmissionLocations());
 			} else {
 
-				List<String> temp = Arrays.asList(serviceInterface
+				final List<String> temp = Arrays.asList(serviceInterface
 						.getSubmissionLocationsForApplicationAndVersion(
 								application, version)
 						.asSubmissionLocationStrings());
@@ -229,8 +229,8 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		final String KEY = version + "_" + fqan;
 
 		if (cachedSubmissionLocationsForUserPerVersionAndFqan.get(KEY) == null) {
-			Set<String> temp = new HashSet<String>();
-			for (String subLoc : resourceInfo
+			final Set<String> temp = new HashSet<String>();
+			for (final String subLoc : resourceInfo
 					.getAllAvailableSubmissionLocations(fqan)) {
 				if (getAvailableSubmissionLocationsForVersion(version)
 						.contains(subLoc)) {
@@ -255,11 +255,11 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 		if (cachedVersionsPerSubmissionLocations.get(KEY) == null) {
 			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
-				Set<String> temp = new HashSet<String>();
+				final Set<String> temp = new HashSet<String>();
 				temp.add(Constants.NO_VERSION_INDICATOR_STRING);
 				cachedVersionsPerSubmissionLocations.put(KEY, temp);
 			} else {
-				List<String> temp = serviceInterface
+				final List<String> temp = serviceInterface
 						.getVersionsOfApplicationOnSubmissionLocation(
 								application, subLoc).getStringList();
 				cachedVersionsPerSubmissionLocations.put(KEY,
@@ -274,7 +274,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 			final Map<JobSubmissionProperty, String> additionalJobProperties,
 			final String fqan) {
 
-		Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
+		final Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
 		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
 				getApplicationName());
 
@@ -282,8 +282,8 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 			basicJobProperties.putAll(additionalJobProperties);
 		}
 
-		Map<String, String> converterMap = new HashMap<String, String>();
-		for (JobSubmissionProperty key : basicJobProperties.keySet()) {
+		final Map<String, String> converterMap = new HashMap<String, String>();
+		for (final JobSubmissionProperty key : basicJobProperties.keySet()) {
 			converterMap.put(key.toString(), basicJobProperties.get(key));
 		}
 

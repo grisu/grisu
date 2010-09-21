@@ -41,6 +41,29 @@ public class TextCombo extends AbstractWidget {
 		return (String) getComboBox().getSelectedItem();
 	}
 
+	@Override
+	public String getValue() {
+		return getText();
+	}
+
+	@Override
+	public void historyKeySet() {
+		getHistoryManager().setMaxNumberOfEntries(getHistoryKey(), 8);
+		for (final String entry : getHistoryManager().getEntries(
+				getHistoryKey())) {
+			if (textModel.getIndexOf(entry) < 0) {
+				getComboBox().addItem(entry);
+			}
+		}
+	}
+
+	@Override
+	public void lockIUI(boolean lock) {
+
+		getComboBox().setEnabled(!lock);
+
+	}
+
 	public void setText(String text) {
 		if (textModel.getIndexOf(text) < 0) {
 			getComboBox().addItem(text);
@@ -51,27 +74,6 @@ public class TextCombo extends AbstractWidget {
 	@Override
 	public void setValue(String value) {
 		setText(value);
-	}
-
-	@Override
-	public String getValue() {
-		return getText();
-	}
-
-	@Override
-	public void historyKeySet() {
-		getHistoryManager().setMaxNumberOfEntries(getHistoryKey(), 8);
-		for (String entry : getHistoryManager().getEntries(getHistoryKey())) {
-			if (textModel.getIndexOf(entry) < 0) {
-				getComboBox().addItem(entry);
-			}
-		}
-	}
-
-	public void lockIUI(boolean lock) {
-
-		getComboBox().setEnabled(!lock);
-
 	}
 
 }

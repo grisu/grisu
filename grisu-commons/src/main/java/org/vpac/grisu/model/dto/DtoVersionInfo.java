@@ -17,9 +17,9 @@ public class DtoVersionInfo {
 	public static DtoVersionInfo createVersionInfo(String versionname,
 			String[] submissionLocations) {
 
-		DtoVersionInfo result = new DtoVersionInfo();
+		final DtoVersionInfo result = new DtoVersionInfo();
 
-		DtoSubmissionLocations subLocs = DtoSubmissionLocations
+		final DtoSubmissionLocations subLocs = DtoSubmissionLocations
 				.createSubmissionLocationsInfo(submissionLocations);
 
 		result.setAllSubmissionLocations(subLocs);

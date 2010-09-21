@@ -7,6 +7,7 @@ import java.awt.event.WindowEvent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
 import org.vpac.grisu.control.ServiceInterface;
@@ -19,10 +20,10 @@ public class JobListDialog extends JDialog {
 	 */
 	public static void main(String[] args) {
 		try {
-			JobListDialog dialog = new JobListDialog(null, null);
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			final JobListDialog dialog = new JobListDialog(null, null);
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -49,7 +50,6 @@ public class JobListDialog extends JDialog {
 
 	}
 
-
 	private final JPanel contentPanel = new JPanel();
 	private SingleJobTabbedPane singleJobTabbedPane;
 
@@ -62,7 +62,7 @@ public class JobListDialog extends JDialog {
 	public JobListDialog(ServiceInterface si, String application) {
 		this.si = si;
 		this.application = application;
-		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 852, 638);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));

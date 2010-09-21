@@ -43,11 +43,11 @@ public final class LoginHelpers {
 			throws LoginException, GlobusCredentialException,
 			ServiceInterfaceException {
 
-		LoginParams defaultLoginParams = new LoginParams("Local", null, null,
-				MyProxyServerParams.DEFAULT_MYPROXY_SERVER, new Integer(
+		final LoginParams defaultLoginParams = new LoginParams("Local", null,
+				null, MyProxyServerParams.DEFAULT_MYPROXY_SERVER, new Integer(
 						MyProxyServerParams.DEFAULT_MYPROXY_PORT).toString());
-		return gssCredentialLogin(defaultLoginParams, LocalProxy
-				.loadGSSCredential());
+		return gssCredentialLogin(defaultLoginParams,
+				LocalProxy.loadGSSCredential());
 
 	}
 
@@ -96,25 +96,25 @@ public final class LoginHelpers {
 		try {
 			directMyProxyUploadClass = Class
 					.forName("org.vpac.security.light.control.DirectMyProxyUpload");
-		} catch (ClassNotFoundException e1) {
+		} catch (final ClassNotFoundException e1) {
 			throw new RuntimeException(
 					"Proxy_light library not in path. Can't create proxy.");
 		}
 
 		try {
-			Method myProxyUploadMethod = directMyProxyUploadClass.getMethod(
-					"init", new Class[] { GlobusCredential.class, String.class,
-							int.class, String.class, char[].class,
-							String.class, String.class, String.class,
-							String.class, int.class });
+			final Method myProxyUploadMethod = directMyProxyUploadClass
+					.getMethod("init", new Class[] { GlobusCredential.class,
+							String.class, int.class, String.class,
+							char[].class, String.class, String.class,
+							String.class, String.class, int.class });
 
 			String myProxyServer = MyProxyServerParams.getMyProxyServer();
-			int myProxyPort = MyProxyServerParams.getMyProxyPort();
+			final int myProxyPort = MyProxyServerParams.getMyProxyPort();
 
 			try {
 				myProxyServer = InetAddress.getByName(myProxyServer)
 						.getHostAddress();
-			} catch (UnknownHostException e1) {
+			} catch (final UnknownHostException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
@@ -123,12 +123,14 @@ public final class LoginHelpers {
 
 			Map<String, char[]> myproxyDetails = null;
 			myproxyDetails = (Map<String, char[]>) myProxyUploadMethod.invoke(
-					null, new Object[] { proxy, myProxyServer, myProxyPort,
+					null,
+					new Object[] { proxy, myProxyServer, myProxyPort,
 							loginParams.getMyProxyUsername(),
 							loginParams.getMyProxyPassphrase(), null, null,
 							null, null, 3600 * 24 * 4 });
 
-			String myproxyusername = myproxyDetails.keySet().iterator().next();
+			final String myproxyusername = myproxyDetails.keySet().iterator()
+					.next();
 			loginParams.setMyProxyUsername(myproxyusername);
 			loginParams.setMyProxyPassphrase(myproxyDetails
 					.get(myproxyusername));
@@ -136,16 +138,16 @@ public final class LoginHelpers {
 			loginParams.setMyProxyPort(new Integer(myProxyPort).toString());
 
 			serviceInterface = myProxyLogin(loginParams);
-			serviceInterface.login(myproxyusername, new String(myproxyDetails
-					.get(myproxyusername)));
-		} catch (InvocationTargetException re) {
+			serviceInterface.login(myproxyusername,
+					new String(myproxyDetails.get(myproxyusername)));
+		} catch (final InvocationTargetException re) {
 			re.printStackTrace();
 			throw new LoginException(
 					"Could not create & upload proxy to the myproxy server. Probably because of a wrong private key passphrase or network problems.",
 					re);
-		} catch (ServiceInterfaceException e) {
+		} catch (final ServiceInterfaceException e) {
 			throw e;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 			throw new LoginException("Can't login to web service: "
 					+ e.getMessage(), e);
@@ -178,25 +180,25 @@ public final class LoginHelpers {
 		try {
 			directMyProxyUploadClass = Class
 					.forName("org.vpac.security.light.control.DirectMyProxyUpload");
-		} catch (ClassNotFoundException e1) {
+		} catch (final ClassNotFoundException e1) {
 			throw new RuntimeException(
 					"Proxy_light library not in path. Can't create proxy.");
 		}
 
 		try {
-			Method myProxyUploadMethod = directMyProxyUploadClass.getMethod(
-					"init", new Class[] { GSSCredential.class, String.class,
-							int.class, String.class, char[].class,
-							String.class, String.class, String.class,
-							String.class, int.class });
+			final Method myProxyUploadMethod = directMyProxyUploadClass
+					.getMethod("init", new Class[] { GSSCredential.class,
+							String.class, int.class, String.class,
+							char[].class, String.class, String.class,
+							String.class, String.class, int.class });
 
 			String myProxyServer = MyProxyServerParams.getMyProxyServer();
-			int myProxyPort = MyProxyServerParams.getMyProxyPort();
+			final int myProxyPort = MyProxyServerParams.getMyProxyPort();
 
 			try {
 				myProxyServer = InetAddress.getByName(myProxyServer)
 						.getHostAddress();
-			} catch (UnknownHostException e1) {
+			} catch (final UnknownHostException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
@@ -205,12 +207,14 @@ public final class LoginHelpers {
 
 			Map<String, char[]> myproxyDetails = null;
 			myproxyDetails = (Map<String, char[]>) myProxyUploadMethod.invoke(
-					null, new Object[] { cred, myProxyServer, myProxyPort,
+					null,
+					new Object[] { cred, myProxyServer, myProxyPort,
 							loginParams.getMyProxyUsername(),
 							loginParams.getMyProxyPassphrase(), null, null,
 							null, null, 3600 * 24 * 4 });
 
-			String myproxyusername = myproxyDetails.keySet().iterator().next();
+			final String myproxyusername = myproxyDetails.keySet().iterator()
+					.next();
 			loginParams.setMyProxyUsername(myproxyusername);
 			loginParams.setMyProxyPassphrase(myproxyDetails
 					.get(myproxyusername));
@@ -218,16 +222,16 @@ public final class LoginHelpers {
 			loginParams.setMyProxyPort(new Integer(myProxyPort).toString());
 
 			serviceInterface = myProxyLogin(loginParams);
-			serviceInterface.login(myproxyusername, new String(myproxyDetails
-					.get(myproxyusername)));
-		} catch (InvocationTargetException re) {
+			serviceInterface.login(myproxyusername,
+					new String(myproxyDetails.get(myproxyusername)));
+		} catch (final InvocationTargetException re) {
 			re.printStackTrace();
 			throw new LoginException(
 					"Could not create & upload proxy to the myproxy server. Probably because of a wrong private key passphrase or network problems.",
 					re);
-		} catch (ServiceInterfaceException e) {
+		} catch (final ServiceInterfaceException e) {
 			throw e;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 			throw new LoginException("Can't login to web service: "
 					+ e.getMessage(), e);
@@ -263,25 +267,25 @@ public final class LoginHelpers {
 		try {
 			directMyProxyUploadClass = Class
 					.forName("org.vpac.security.light.control.DirectMyProxyUpload");
-		} catch (ClassNotFoundException e1) {
+		} catch (final ClassNotFoundException e1) {
 			throw new RuntimeException(
 					"Proxy_light library not in path. Can't create proxy.");
 		}
 
 		try {
-			Method myProxyUploadMethod = directMyProxyUploadClass.getMethod(
-					"init", new Class[] { char[].class, String.class,
-							int.class, String.class, char[].class,
-							String.class, String.class, String.class,
-							String.class, int.class });
+			final Method myProxyUploadMethod = directMyProxyUploadClass
+					.getMethod("init", new Class[] { char[].class,
+							String.class, int.class, String.class,
+							char[].class, String.class, String.class,
+							String.class, String.class, int.class });
 
 			String myProxyServer = MyProxyServerParams.getMyProxyServer();
-			int myProxyPort = MyProxyServerParams.getMyProxyPort();
+			final int myProxyPort = MyProxyServerParams.getMyProxyPort();
 
 			try {
 				myProxyServer = InetAddress.getByName(myProxyServer)
 						.getHostAddress();
-			} catch (UnknownHostException e1) {
+			} catch (final UnknownHostException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
@@ -295,7 +299,8 @@ public final class LoginHelpers {
 							loginParams.getMyProxyPassphrase(), null, null,
 							null, null, 3600 * 24 * 4 });
 
-			String myproxyusername = myproxyDetails.keySet().iterator().next();
+			final String myproxyusername = myproxyDetails.keySet().iterator()
+					.next();
 			loginParams.setMyProxyUsername(myproxyusername);
 			loginParams.setMyProxyPassphrase(myproxyDetails
 					.get(myproxyusername));
@@ -303,15 +308,15 @@ public final class LoginHelpers {
 			loginParams.setMyProxyPort(new Integer(myProxyPort).toString());
 
 			serviceInterface = myProxyLogin(loginParams);
-			serviceInterface.login(myproxyusername, new String(myproxyDetails
-					.get(myproxyusername)));
-		} catch (InvocationTargetException re) {
-			Throwable t = re.getCause();
+			serviceInterface.login(myproxyusername,
+					new String(myproxyDetails.get(myproxyusername)));
+		} catch (final InvocationTargetException re) {
+			final Throwable t = re.getCause();
 			// re.printStackTrace();
 			throw new LoginException(t.getLocalizedMessage(), re);
-		} catch (ServiceInterfaceException e) {
+		} catch (final ServiceInterfaceException e) {
 			throw e;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// e.printStackTrace();
 			throw new LoginException("Can't login to web service: "
 					+ e.getMessage(), e);
@@ -333,14 +338,14 @@ public final class LoginHelpers {
 	public static ServiceInterface myProxyLogin(final LoginParams loginParams)
 			throws LoginException, ServiceInterfaceException {
 
-		ServiceInterface si = ServiceInterfaceFactory.createInterface(
-				loginParams.getServiceInterfaceUrl(), loginParams
-						.getMyProxyUsername(), loginParams
-						.getMyProxyPassphrase(),
+		final ServiceInterface si = ServiceInterfaceFactory.createInterface(
+				loginParams.getServiceInterfaceUrl(),
+				loginParams.getMyProxyUsername(),
+				loginParams.getMyProxyPassphrase(),
 				loginParams.getMyProxyServer(), loginParams.getMyProxyPort(),
 				loginParams.getHttpProxy(), loginParams.getHttpProxyPort(),
-				loginParams.getHttpProxyUsername(), loginParams
-						.getHttpProxyPassphrase());
+				loginParams.getHttpProxyUsername(),
+				loginParams.getHttpProxyPassphrase());
 		// try {
 		// si.login(loginParams.getMyProxyUsername(), new String(loginParams
 		// .getMyProxyPassphrase()));

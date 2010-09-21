@@ -100,7 +100,7 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements
 	private void addApplicationsToWatch(
 			Map<String, JobCreationPanel> applications) {
 
-		for (JobCreationPanel panel : applications.values()) {
+		for (final JobCreationPanel panel : applications.values()) {
 			if (!applicationsToWatch.contains(panel.getSupportedApplication())) {
 
 				addTaskPaneItem(
@@ -115,10 +115,9 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements
 
 				if (panel.createsBatchJob()) {
 					if (batchTaskPane == null) {
-						myLogger
-								.warn("Can't add batch job "
-										+ panel.getPanelName()
-										+ " item because batchjob pane is not displayed...");
+						myLogger.warn("Can't add batch job "
+								+ panel.getPanelName()
+								+ " item because batchjob pane is not displayed...");
 						batchTaskPane.addApplication(panel
 								.getSupportedApplication());
 					}
@@ -126,10 +125,9 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements
 				}
 				if (panel.createsSingleJob()) {
 					if (singleTaskPane == null) {
-						myLogger
-								.warn("Can't add single job "
-										+ panel.getPanelName()
-										+ " item because single job pane is not displayed...");
+						myLogger.warn("Can't add single job "
+								+ panel.getPanelName()
+								+ " item because single job pane is not displayed...");
 					}
 					singleTaskPane.addApplication(panel
 							.getSupportedApplication());
@@ -149,7 +147,7 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements
 
 	public void addTaskPane(String title, Icon icon) {
 
-		JXTaskPane temp = new JXTaskPane();
+		final JXTaskPane temp = new JXTaskPane();
 		temp.setTitle(title);
 		temp.setIcon(icon);
 
@@ -168,7 +166,7 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements
 			return;
 		}
 
-		Action tempAction = new AbstractAction() {
+		final Action tempAction = new AbstractAction() {
 			{
 
 				putValue(Action.NAME, itemTitle);
@@ -212,7 +210,7 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements
 
 		if ("availableJobCreationPanels".equals(evt.getPropertyName())) {
 
-			Map<String, JobCreationPanel> temp = (Map<String, JobCreationPanel>) evt
+			final Map<String, JobCreationPanel> temp = (Map<String, JobCreationPanel>) evt
 					.getNewValue();
 
 			taskPanes.get(JOB_CREATION_TASK_PANE).removeAll();

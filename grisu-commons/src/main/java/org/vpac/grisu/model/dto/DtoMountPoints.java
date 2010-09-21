@@ -23,14 +23,14 @@ public class DtoMountPoints {
 
 	public static DtoMountPoints createMountpoints(MountPoint[] mps) {
 
-		DtoMountPoints result = new DtoMountPoints();
+		final DtoMountPoints result = new DtoMountPoints();
 		result.setMountpoints(Arrays.asList(mps));
 		return result;
 	}
 
 	public static DtoMountPoints createMountpoints(Set<MountPoint> mps) {
 
-		DtoMountPoints result = new DtoMountPoints();
+		final DtoMountPoints result = new DtoMountPoints();
 		result.setMountpoints(new LinkedList<MountPoint>(mps));
 		return result;
 	}

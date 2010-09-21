@@ -30,15 +30,15 @@ public final class ServiceTemplateManagement {
 	 */
 	public static String[] getAllAvailableApplications() {
 
-		File[] templates = new File(
+		final File[] templates = new File(
 				Environment.getAvailableTemplatesDirectory()).listFiles();
-		Set<String> allAvalableTemplates = new TreeSet<String>();
+		final Set<String> allAvalableTemplates = new TreeSet<String>();
 
 		if (templates == null) {
 			return new String[] {};
 		}
 
-		for (File file : templates) {
+		for (final File file : templates) {
 			if (file.getName().endsWith(".template")) {
 				allAvalableTemplates.add(file.getName().substring(0,
 						file.getName().lastIndexOf(".template")));
@@ -51,13 +51,14 @@ public final class ServiceTemplateManagement {
 
 	public static String getTemplate(String name) {
 
-		File file = new File(Environment.getAvailableTemplatesDirectory(), name
-				+ ".template");
+		final File file = new File(
+				Environment.getAvailableTemplatesDirectory(), name
+						+ ".template");
 
 		String temp;
 		try {
 			temp = FileUtils.readFileToString(file);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			return null;
 		}
 

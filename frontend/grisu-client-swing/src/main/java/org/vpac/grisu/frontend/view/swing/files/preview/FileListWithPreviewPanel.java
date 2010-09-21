@@ -121,6 +121,11 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
 
 	}
 
+	public void displayHiddenFiles(boolean display) {
+		fileListPanel.displayHiddenFiles(display);
+		fileListPanelRight.displayHiddenFiles(display);
+	}
+
 	public void fileDoubleClicked(final GlazedFile file) {
 
 		SwingUtilities.invokeLater(new Thread() {
@@ -130,7 +135,7 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
 					getComboBox().setSelectedItem(PREVIEW);
 				} else {
 
-					FilePreviewDialog dialog = new FilePreviewDialog(si);
+					final FilePreviewDialog dialog = new FilePreviewDialog(si);
 					dialog.setFile(file, null);
 					dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 					dialog.setVisible(true);
@@ -328,10 +333,16 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
 		getFileListPanel().setCurrentUrl(url);
 	}
 
+	public void setExtensionsToDisplay(String[] extensions) {
+		fileListPanel.setExtensionsToDisplay(extensions);
+		fileListPanelRight.setExtensionsToDisplay(extensions);
+
+	}
+
 	private void setRightPanel(String panel) {
 
 		if (PREVIEW.equals(panel) || FILE_LIST.equals(panel)) {
-			CardLayout cl = (CardLayout) (getRightCardPanel().getLayout());
+			final CardLayout cl = (CardLayout) (getRightCardPanel().getLayout());
 			cl.show(getRightCardPanel(), panel);
 		}
 
@@ -340,17 +351,6 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
 	public void setRootUrl(String url) {
 
 		getFileListPanel().setRootUrl(url);
-
-	}
-
-	public void displayHiddenFiles(boolean display) {
-		fileListPanel.displayHiddenFiles(display);
-		fileListPanelRight.displayHiddenFiles(display);
-	}
-
-	public void setExtensionsToDisplay(String[] extensions) {
-		fileListPanel.setExtensionsToDisplay(extensions);
-		fileListPanelRight.setExtensionsToDisplay(extensions);
 
 	}
 }

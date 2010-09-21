@@ -1,6 +1,5 @@
 package org.vpac.grisu.frontend.control.fileTransfers;
 
-
 public class FileTransferEvent {
 
 	private final FileTransaction fileTransfer;

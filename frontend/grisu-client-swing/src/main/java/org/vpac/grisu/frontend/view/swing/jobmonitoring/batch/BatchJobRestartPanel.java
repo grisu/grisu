@@ -18,7 +18,8 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class BatchJobRestartPanel extends JPanel implements PropertyChangeListener {
+public class BatchJobRestartPanel extends JPanel implements
+		PropertyChangeListener {
 
 	private final BatchJobObject bj;
 	private JButton failedJobsButton;
@@ -29,10 +30,11 @@ public class BatchJobRestartPanel extends JPanel implements PropertyChangeListen
 	 * Create the panel.
 	 */
 	public BatchJobRestartPanel(BatchJobObject bj) {
-		setBorder(new TitledBorder(null, "Resubmission", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		setBorder(new TitledBorder(null, "Resubmission", TitledBorder.LEADING,
+				TitledBorder.TOP, null, null));
 		this.bj = bj;
 		this.bj.addPropertyChangeListener(this);
-		if (  this.bj.isResubmitting() ) {
+		if (this.bj.isResubmitting()) {
 			getWaitingButton().setEnabled(false);
 			getWaitingFailedButton().setEnabled(false);
 			getFailedJobsButton().setEnabled(false);
@@ -40,20 +42,14 @@ public class BatchJobRestartPanel extends JPanel implements PropertyChangeListen
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getFailedJobsButton(), "2, 2, fill, default");
 		add(getWaitingButton(), "2, 4");
 		add(getWaitingFailedButton(), "2, 6");
-
-
 
 	}
 
@@ -69,7 +65,7 @@ public class BatchJobRestartPanel extends JPanel implements PropertyChangeListen
 							try {
 								bj.restart(true, false, false, false);
 								bj.refresh(false);
-							} catch (Throwable ex) {
+							} catch (final Throwable ex) {
 								ex.printStackTrace();
 							}
 						}
@@ -79,6 +75,7 @@ public class BatchJobRestartPanel extends JPanel implements PropertyChangeListen
 		}
 		return failedJobsButton;
 	}
+
 	private JButton getWaitingButton() {
 		if (waitingJobsButton == null) {
 			waitingJobsButton = new JButton("Waiting Jobs");
@@ -90,13 +87,13 @@ public class BatchJobRestartPanel extends JPanel implements PropertyChangeListen
 						public void run() {
 							try {
 								bj.restart(false, true, true, false);
-							} catch (JobsException e) {
+							} catch (final JobsException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
-							} catch (BackendException e) {
+							} catch (final BackendException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
-							} catch (InterruptedException e) {
+							} catch (final InterruptedException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
@@ -108,6 +105,7 @@ public class BatchJobRestartPanel extends JPanel implements PropertyChangeListen
 		}
 		return waitingJobsButton;
 	}
+
 	private JButton getWaitingFailedButton() {
 		if (failedWaitingJobsButton == null) {
 			failedWaitingJobsButton = new JButton("Failed & Waiting");
@@ -119,13 +117,13 @@ public class BatchJobRestartPanel extends JPanel implements PropertyChangeListen
 						public void run() {
 							try {
 								bj.restart(true, true, true, false);
-							} catch (JobsException e) {
+							} catch (final JobsException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
-							} catch (BackendException e) {
+							} catch (final BackendException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
-							} catch (InterruptedException e) {
+							} catch (final InterruptedException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
@@ -137,11 +135,12 @@ public class BatchJobRestartPanel extends JPanel implements PropertyChangeListen
 		}
 		return failedWaitingJobsButton;
 	}
+
 	public void propertyChange(PropertyChangeEvent evt) {
 
-		if ( BatchJobObject.RESUBMITTING.equals(evt.getPropertyName()) ) {
+		if (BatchJobObject.RESUBMITTING.equals(evt.getPropertyName())) {
 
-			if ( (Boolean)evt.getNewValue() ) {
+			if ((Boolean) evt.getNewValue()) {
 				getWaitingButton().setEnabled(false);
 				getWaitingFailedButton().setEnabled(false);
 				getFailedJobsButton().setEnabled(false);

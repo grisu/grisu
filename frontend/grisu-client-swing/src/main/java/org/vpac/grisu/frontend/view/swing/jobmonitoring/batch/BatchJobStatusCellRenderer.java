@@ -9,7 +9,7 @@ import javax.swing.UIManager;
 import javax.swing.table.TableCellRenderer;
 
 public class BatchJobStatusCellRenderer extends JProgressBar implements
-TableCellRenderer {
+		TableCellRenderer {
 
 	public BatchJobStatusCellRenderer() {
 		this.setMinimum(0);
@@ -25,8 +25,7 @@ TableCellRenderer {
 			setBackground(table.getBackground());
 		}
 
-
-		Integer status = (Integer) value;
+		final Integer status = (Integer) value;
 		if (status <= 0) {
 			this.setEnabled(false);
 			this.setStringPainted(false);

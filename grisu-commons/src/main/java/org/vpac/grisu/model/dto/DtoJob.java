@@ -31,28 +31,29 @@ import au.org.arcs.jcommons.constants.Constants;
 public class DtoJob implements Comparable<DtoJob> {
 
 	public static DtoJob createJob(int status,
-			Map<String, String> jobProperties, Set<String> inputFiles, Map<Long, String> logMessages) {
+			Map<String, String> jobProperties, Set<String> inputFiles,
+			Map<Long, String> logMessages) {
 
-		DtoJob result = new DtoJob();
+		final DtoJob result = new DtoJob();
 
 		result.setStatus(status);
 
-		List<DtoJobProperty> list = new LinkedList<DtoJobProperty>();
-		for (String key : jobProperties.keySet()) {
-			DtoJobProperty temp = new DtoJobProperty();
+		final List<DtoJobProperty> list = new LinkedList<DtoJobProperty>();
+		for (final String key : jobProperties.keySet()) {
+			final DtoJobProperty temp = new DtoJobProperty();
 			temp.setKey(key);
 			temp.setValue(jobProperties.get(key));
 			list.add(temp);
 		}
-		DtoJobProperty temp2 = new DtoJobProperty();
+		final DtoJobProperty temp2 = new DtoJobProperty();
 		temp2.setKey(Constants.INPUT_FILE_URLS_KEY);
 		temp2.setValue(StringUtils.join(inputFiles, ","));
 		list.add(temp2);
 		result.setProperties(list);
 
 		if (logMessages != null) {
-			DtoLogMessages log = new DtoLogMessages();
-			for (Long date : logMessages.keySet()) {
+			final DtoLogMessages log = new DtoLogMessages();
+			for (final Long date : logMessages.keySet()) {
 				log.addMessage(new Date(date), logMessages.get(date));
 			}
 			result.setLogMessages(log);
@@ -87,8 +88,8 @@ public class DtoJob implements Comparable<DtoJob> {
 			Long thisSubTime = null;
 			try {
 				thisSubTime = Long
-				.parseLong(readJobProperty(Constants.SUBMISSION_TIME_KEY));
-			} catch (Exception e) {
+						.parseLong(readJobProperty(Constants.SUBMISSION_TIME_KEY));
+			} catch (final Exception e) {
 				thisSubTime = 0L;
 			}
 
@@ -96,11 +97,11 @@ public class DtoJob implements Comparable<DtoJob> {
 			try {
 				otherSubTime = Long.parseLong(o
 						.readJobProperty(Constants.SUBMISSION_TIME_KEY));
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				otherSubTime = 0L;
 			}
 
-			int result = thisSubTime.compareTo(otherSubTime);
+			final int result = thisSubTime.compareTo(otherSubTime);
 
 			if (result != 0) {
 				return result;
@@ -116,7 +117,7 @@ public class DtoJob implements Comparable<DtoJob> {
 
 				return thisJobname.compareTo(otherJobname);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 			return 0;
 		}
@@ -163,9 +164,9 @@ public class DtoJob implements Comparable<DtoJob> {
 
 	public Map<Date, String> logMessagesAsMap() {
 
-		Map<Date, String> map = new TreeMap<Date, String>();
+		final Map<Date, String> map = new TreeMap<Date, String>();
 
-		for (DtoLogMessage msg : getLogMessages().getMessages()) {
+		for (final DtoLogMessage msg : getLogMessages().getMessages()) {
 			map.put(msg.getDate(), msg.getMessage());
 		}
 
@@ -174,11 +175,11 @@ public class DtoJob implements Comparable<DtoJob> {
 
 	public String logMessagesAsString(boolean withDate) {
 
-		StringBuffer result = new StringBuffer();
+		final StringBuffer result = new StringBuffer();
 
-		Map<Date, String> temp = logMessagesAsMap();
+		final Map<Date, String> temp = logMessagesAsMap();
 
-		for (Date date : temp.keySet()) {
+		for (final Date date : temp.keySet()) {
 			if (withDate) {
 				result.append(date.toString() + ": ");
 			}
@@ -191,9 +192,9 @@ public class DtoJob implements Comparable<DtoJob> {
 
 	public Map<String, String> propertiesAsMap() {
 
-		Map<String, String> map = new HashMap<String, String>();
+		final Map<String, String> map = new HashMap<String, String>();
 
-		for (DtoJobProperty prop : getProperties()) {
+		for (final DtoJobProperty prop : getProperties()) {
 			map.put(prop.getKey(), prop.getValue());
 		}
 

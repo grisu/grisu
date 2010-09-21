@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
@@ -48,7 +49,7 @@ public class BatchJobWrapperPanel extends JPanel {
 
 	private JTabbedPane getTabbedPane() {
 		if (tabbedPane == null) {
-			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+			tabbedPane = new JTabbedPane(SwingConstants.TOP);
 			tabbedPane.addTab("Results", null, getBatchJobResultPreviewPanel(),
 					null);
 			tabbedPane.addTab("BatchJob", null, getBatchJobPanel(), null);

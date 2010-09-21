@@ -22,12 +22,12 @@ public class DtoGridResources {
 	public static DtoGridResources createGridResources(
 			List<GridResource> resources) {
 
-		DtoGridResources result = new DtoGridResources();
+		final DtoGridResources result = new DtoGridResources();
 
-		List<DtoGridResource> list = new LinkedList<DtoGridResource>();
+		final List<DtoGridResource> list = new LinkedList<DtoGridResource>();
 
-		for (GridResource r : resources) {
-			DtoGridResource dtor = new DtoGridResource(r);
+		for (final GridResource r : resources) {
+			final DtoGridResource dtor = new DtoGridResource(r);
 			list.add(dtor);
 		}
 
@@ -53,9 +53,9 @@ public class DtoGridResources {
 
 	public SortedSet<GridResource> wrapGridResourcesIntoInterfaceType() {
 
-		SortedSet<GridResource> result = new TreeSet<GridResource>();
+		final SortedSet<GridResource> result = new TreeSet<GridResource>();
 
-		for (DtoGridResource gr : getGridResources()) {
+		for (final DtoGridResource gr : getGridResources()) {
 			result.add(gr);
 		}
 

@@ -58,19 +58,14 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 	 */
 	public ShibLoginPanel() {
 		setLayout(new FormLayout(new ColumnSpec[] {
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				RowSpec.decode("8dlu"),
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				RowSpec.decode("4dlu:grow"),}));
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				RowSpec.decode("8dlu"), FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				RowSpec.decode("4dlu:grow"), }));
 		add(getLblInstitution(), "2, 2, right, default");
 		add(getComboBox(), "4, 2, fill, default");
 		add(getLblUsername(), "2, 4, right, default");
@@ -95,18 +90,21 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 		}
 		return lblInstitution;
 	}
+
 	private JLabel getLblPassword() {
 		if (lblPassword == null) {
 			lblPassword = new JLabel("Password");
 		}
 		return lblPassword;
 	}
+
 	private JLabel getLblUsername() {
 		if (lblUsername == null) {
 			lblUsername = new JLabel("Username");
 		}
 		return lblUsername;
 	}
+
 	private JPasswordField getPasswordField() {
 		if (passwordField == null) {
 			passwordField = new JPasswordField();
@@ -125,8 +123,9 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 	private JTextField getTextField_1() {
 		if (textField_1 == null) {
 			textField_1 = new JTextField();
-			String lastUsername = CommonArcsProperties.getDefault().getLastShibUsername();
-			if ( StringUtils.isNotBlank(lastUsername) ) {
+			final String lastUsername = CommonArcsProperties.getDefault()
+					.getLastShibUsername();
+			if (StringUtils.isNotBlank(lastUsername)) {
 				textField_1.setText(lastUsername);
 			}
 			textField_1.setColumns(10);
@@ -136,9 +135,7 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 
 	private void loadIdpList() {
 
-
-		Thread loadThread = new Thread() {
-
+		final Thread loadThread = new Thread() {
 
 			@Override
 			public void run() {
@@ -152,7 +149,7 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 
 				});
 
-				String url = ClientPropertiesManager.getShibbolethUrl();
+				final String url = ClientPropertiesManager.getShibbolethUrl();
 				shib.openurl(url);
 
 				SwingUtilities.invokeLater(new Thread() {
@@ -160,19 +157,21 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 					@Override
 					public void run() {
 
-						String lastIdp = (String)idpModel.getSelectedItem();
+						String lastIdp = (String) idpModel.getSelectedItem();
 
 						idpModel.removeAllElements();
 
-						for (String idp : idpO.getIdps() ) {
+						for (final String idp : idpO.getIdps()) {
 							idpModel.addElement(idp);
 						}
 
-						if ( StringUtils.isBlank(lastIdp) ) {
-							lastIdp = CommonArcsProperties.getDefault().getLastShibIdp();
+						if (StringUtils.isBlank(lastIdp)) {
+							lastIdp = CommonArcsProperties.getDefault()
+									.getLastShibIdp();
 						}
 
-						if ( StringUtils.isNotBlank(lastIdp) && (idpModel.getIndexOf(lastIdp) >= 0) ) {
+						if (StringUtils.isNotBlank(lastIdp)
+								&& (idpModel.getIndexOf(lastIdp) >= 0)) {
 							idpModel.setSelectedItem(lastIdp);
 						}
 
@@ -210,18 +209,19 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 
 		final String username = getTextField_1().getText();
 		final char[] password = getPasswordField().getPassword();
-		final String idp = (String)idpModel.getSelectedItem();
+		final String idp = (String) idpModel.getSelectedItem();
 
-		Thread loginThread = new Thread() {
+		final Thread loginThread = new Thread() {
 
 			@Override
 			public void run() {
 
 				loginSuccessful = false;
 				try {
-					si = LoginManager.login(null, password, username, idp, params, saveCredendentialsToLocalProxy);
+					si = LoginManager.login(null, password, username, idp,
+							params, saveCredendentialsToLocalProxy);
 					loginSuccessful = true;
-				} catch (LoginException e) {
+				} catch (final LoginException e) {
 					possibleException = e;
 				}
 			}

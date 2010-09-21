@@ -87,9 +87,10 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 
 	public Set<String> currentlyRunningOrSuccessfullSubmissionLocations() {
 
-		Set<String> result = new HashSet<String>();
-		for ( DtoJob job : getJobs().getAllJobs() ) {
-			if ( (JobConstants.ACTIVE == job.getStatus()) || (JobConstants.DONE == job.getStatus()) ) {
+		final Set<String> result = new HashSet<String>();
+		for (final DtoJob job : getJobs().getAllJobs()) {
+			if ((JobConstants.ACTIVE == job.getStatus())
+					|| (JobConstants.DONE == job.getStatus())) {
 				result.add(job.jobProperty(Constants.SUBMISSIONLOCATION_KEY));
 			}
 		}
@@ -98,14 +99,15 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 	}
 
 	/**
-	 * Returns a set of all submission locations that are used at the moment for this batchjob.
+	 * Returns a set of all submission locations that are used at the moment for
+	 * this batchjob.
 	 * 
 	 * @return the submission locations
 	 */
 	public Set<String> currentlyUsedSubmissionLocations() {
 
-		Set<String> result = new HashSet<String>();
-		for ( DtoJob job : getJobs().getAllJobs() ) {
+		final Set<String> result = new HashSet<String>();
+		for (final DtoJob job : getJobs().getAllJobs()) {
 			result.add(job.jobProperty(Constants.SUBMISSIONLOCATION_KEY));
 		}
 
@@ -124,9 +126,9 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 
 	public SortedSet<DtoJob> failedJobs() {
 
-		SortedSet<DtoJob> result = new TreeSet<DtoJob>();
+		final SortedSet<DtoJob> result = new TreeSet<DtoJob>();
 
-		for (DtoJob job : jobs.getAllJobs()) {
+		for (final DtoJob job : jobs.getAllJobs()) {
 			if ((job.getStatus() >= JobConstants.FINISHED_EITHER_WAY)
 					&& (job.getStatus() != JobConstants.DONE)) {
 				result.add(job);
@@ -138,9 +140,9 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 
 	public SortedSet<DtoJob> finishedJobs() {
 
-		SortedSet<DtoJob> result = new TreeSet<DtoJob>();
+		final SortedSet<DtoJob> result = new TreeSet<DtoJob>();
 
-		for (DtoJob job : jobs.getAllJobs()) {
+		for (final DtoJob job : jobs.getAllJobs()) {
 			if (job.getStatus() >= JobConstants.FINISHED_EITHER_WAY) {
 				result.add(job);
 			}
@@ -195,7 +197,7 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 	@XmlAttribute(name = "finished")
 	public boolean isFinished() {
 
-		if ( this.totalNumberOfJobs() <= 0 ) {
+		if (this.totalNumberOfJobs() <= 0) {
 			return false;
 		} else {
 			return this.isFinished;
@@ -203,9 +205,9 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 	}
 
 	public Map<Date, String> messages() {
-		Map<Date, String> result = new TreeMap<Date, String>();
+		final Map<Date, String> result = new TreeMap<Date, String>();
 
-		for (DtoLogMessage m : getMessages().getMessages()) {
+		for (final DtoLogMessage m : getMessages().getMessages()) {
 			result.put(m.getDate(), m.getMessage());
 		}
 		return result;
@@ -213,7 +215,7 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 
 	public int numberOfFailedJobs() {
 		int failed = 0;
-		for (DtoJob job : jobs.getAllJobs()) {
+		for (final DtoJob job : jobs.getAllJobs()) {
 			if ((job.getStatus() >= JobConstants.FINISHED_EITHER_WAY)
 					&& (job.getStatus() != JobConstants.DONE)) {
 				failed = failed + 1;
@@ -224,7 +226,7 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 
 	public int numberOfFinishedJobs() {
 		int finished = 0;
-		for (DtoJob job : jobs.getAllJobs()) {
+		for (final DtoJob job : jobs.getAllJobs()) {
 			if (job.getStatus() >= JobConstants.FINISHED_EITHER_WAY) {
 				finished = finished + 1;
 			}
@@ -234,7 +236,7 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 
 	public int numberOfRunningJobs() {
 		int running = 0;
-		for (DtoJob job : jobs.getAllJobs()) {
+		for (final DtoJob job : jobs.getAllJobs()) {
 			if (job.getStatus() == JobConstants.ACTIVE) {
 				running = running + 1;
 			}
@@ -245,7 +247,7 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 
 	public int numberOfSuccessfulJobs() {
 		int successful = 0;
-		for (DtoJob job : jobs.getAllJobs()) {
+		for (final DtoJob job : jobs.getAllJobs()) {
 			if (job.getStatus() == JobConstants.DONE) {
 				successful = successful + 1;
 			}
@@ -255,7 +257,7 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 
 	public int numberOfUnsubmittedJobs() {
 		int unsubmitted = 0;
-		for (DtoJob job : jobs.getAllJobs()) {
+		for (final DtoJob job : jobs.getAllJobs()) {
 			if (job.getStatus() <= JobConstants.UNSUBMITTED) {
 				unsubmitted = unsubmitted + 1;
 			}
@@ -265,7 +267,7 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 
 	public int numberOfWaitingJobs() {
 		int waiting = 0;
-		for (DtoJob job : jobs.getAllJobs()) {
+		for (final DtoJob job : jobs.getAllJobs()) {
 			if ((job.getStatus() >= JobConstants.UNSUBMITTED)
 					&& (job.getStatus() <= JobConstants.PENDING)) {
 				waiting = waiting + 1;
@@ -282,9 +284,9 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 
 	public Map<String, String> propertiesAsMap() {
 
-		Map<String, String> map = new HashMap<String, String>();
+		final Map<String, String> map = new HashMap<String, String>();
 
-		for (DtoJobProperty prop : getProperties()) {
+		for (final DtoJobProperty prop : getProperties()) {
 			map.put(prop.getKey(), prop.getValue());
 		}
 
@@ -307,9 +309,9 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 
 	public SortedSet<DtoJob> runningJobs() {
 
-		SortedSet<DtoJob> result = new TreeSet<DtoJob>();
+		final SortedSet<DtoJob> result = new TreeSet<DtoJob>();
 
-		for (DtoJob job : jobs.getAllJobs()) {
+		for (final DtoJob job : jobs.getAllJobs()) {
 			if (job.getStatus() == JobConstants.ACTIVE) {
 				result.add(job);
 			}
@@ -352,22 +354,23 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 
 	public Map<Integer, Map<String, Integer>> statusMap() {
 
-		Map<Integer, Map<String, Integer>> statusMap = new TreeMap<Integer, Map<String, Integer>>();
+		final Map<Integer, Map<String, Integer>> statusMap = new TreeMap<Integer, Map<String, Integer>>();
 
-		for (DtoJob job : jobs.getAllJobs()) {
+		for (final DtoJob job : jobs.getAllJobs()) {
 
-			Integer status = job.getStatus();
-			if ( statusMap.get(status) == null ) {
-				Map<String, Integer> temp = new HashMap<String, Integer>();
+			final Integer status = job.getStatus();
+			if (statusMap.get(status) == null) {
+				final Map<String, Integer> temp = new HashMap<String, Integer>();
 				statusMap.put(status, temp);
 			}
 
-			Map<String, Integer> temp = statusMap.get(status);
-			if (  temp.get(job.jobProperty(Constants.SUBMISSIONLOCATION_KEY)) == null ) {
+			final Map<String, Integer> temp = statusMap.get(status);
+			if (temp.get(job.jobProperty(Constants.SUBMISSIONLOCATION_KEY)) == null) {
 				temp.put(job.jobProperty(Constants.SUBMISSIONLOCATION_KEY), 0);
 			}
 
-			Integer sum = temp.get(job.jobProperty(Constants.SUBMISSIONLOCATION_KEY));
+			final Integer sum = temp.get(job
+					.jobProperty(Constants.SUBMISSIONLOCATION_KEY));
 			temp.put(job.jobProperty(Constants.SUBMISSIONLOCATION_KEY), sum + 1);
 
 		}
@@ -378,9 +381,9 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 
 	public SortedSet<DtoJob> successfulJobs() {
 
-		SortedSet<DtoJob> result = new TreeSet<DtoJob>();
+		final SortedSet<DtoJob> result = new TreeSet<DtoJob>();
 
-		for (DtoJob job : jobs.getAllJobs()) {
+		for (final DtoJob job : jobs.getAllJobs()) {
 			if (job.getStatus() == JobConstants.DONE) {
 				result.add(job);
 			}
@@ -400,9 +403,9 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 
 	public SortedSet<DtoJob> unsubmittedJobs() {
 
-		SortedSet<DtoJob> result = new TreeSet<DtoJob>();
+		final SortedSet<DtoJob> result = new TreeSet<DtoJob>();
 
-		for (DtoJob job : jobs.getAllJobs()) {
+		for (final DtoJob job : jobs.getAllJobs()) {
 			if (job.getStatus() <= JobConstants.UNSUBMITTED) {
 				result.add(job);
 			}
@@ -413,9 +416,9 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 
 	public SortedSet<DtoJob> waitingJobs() {
 
-		SortedSet<DtoJob> result = new TreeSet<DtoJob>();
+		final SortedSet<DtoJob> result = new TreeSet<DtoJob>();
 
-		for (DtoJob job : jobs.getAllJobs()) {
+		for (final DtoJob job : jobs.getAllJobs()) {
 			if ((job.getStatus() >= JobConstants.UNSUBMITTED)
 					&& (job.getStatus() <= JobConstants.PENDING)) {
 				result.add(job);

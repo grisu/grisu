@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
+import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 
@@ -33,11 +34,11 @@ public class JobDAO extends BaseHibernateDAO {
 
 			myLogger.debug("delete successful");
 
-		} catch (RuntimeException e) {
+		} catch (final RuntimeException e) {
 			myLogger.error("delete failed", e);
 			try {
 				getCurrentSession().getTransaction().rollback();
-			} catch (Exception er) {
+			} catch (final Exception er) {
 				myLogger.debug("Rollback failed.", er);
 			}
 			throw e; // or display error message
@@ -45,7 +46,6 @@ public class JobDAO extends BaseHibernateDAO {
 			getCurrentSession().close();
 		}
 	}
-
 
 	/**
 	 * Looks up the database whether a user with the specified dn is already
@@ -70,19 +70,20 @@ public class JobDAO extends BaseHibernateDAO {
 		try {
 			getCurrentSession().beginTransaction();
 
-			Query queryObject = getCurrentSession().createQuery(queryString);
+			final Query queryObject = getCurrentSession().createQuery(
+					queryString);
 			queryObject.setParameter(0, dn);
 
-			List<Job> jobs = (queryObject.list());
+			final List<Job> jobs = (queryObject.list());
 
 			getCurrentSession().getTransaction().commit();
 
 			return jobs;
 
-		} catch (RuntimeException e) {
+		} catch (final RuntimeException e) {
 			try {
 				getCurrentSession().getTransaction().rollback();
-			} catch (Exception er) {
+			} catch (final Exception er) {
 				myLogger.debug("Rollback failed.", er);
 			}
 			throw e; // or display error message
@@ -106,33 +107,34 @@ public class JobDAO extends BaseHibernateDAO {
 	 *             there are several jobs with this dn and jobname. this is bad.
 	 */
 	public final Job findJobByDN(final String dn, final String jobname)
-	throws NoSuchJobException {
+			throws NoSuchJobException {
 		myLogger.debug("Loading job with dn: " + dn + " and jobname: "
 				+ jobname + " from dn.");
-		String queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.jobname = ?";
+		final String queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.jobname = ?";
 
 		try {
 			getCurrentSession().beginTransaction();
 
-			Query queryObject = getCurrentSession().createQuery(queryString);
+			final Query queryObject = getCurrentSession().createQuery(
+					queryString);
 			queryObject.setParameter(0, dn);
 			queryObject.setParameter(1, jobname);
 
-			Job job = (Job) (queryObject.uniqueResult());
+			final Job job = (Job) (queryObject.uniqueResult());
 
 			getCurrentSession().getTransaction().commit();
 
 			if (job == null) {
 				throw new NoSuchJobException(
 						"Could not find a job for the dn: " + dn
-						+ " and the jobname: " + jobname);
+								+ " and the jobname: " + jobname);
 			}
 			return job;
 
-		} catch (RuntimeException e) {
+		} catch (final RuntimeException e) {
 			try {
 				getCurrentSession().getTransaction().rollback();
-			} catch (Exception er) {
+			} catch (final Exception er) {
 				myLogger.debug("Rollback failed.", er);
 			}
 			throw e; // or display error message
@@ -162,30 +164,31 @@ public class JobDAO extends BaseHibernateDAO {
 		String queryString;
 		if (includeMultiPartJobs) {
 			queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
-				+ Constants.APPLICATIONNAME_KEY + "']) = ?";
+					+ Constants.APPLICATIONNAME_KEY + "']) = ?";
 		} else {
 			queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
-				+ Constants.APPLICATIONNAME_KEY
-				+ "']) = ? and job.multiPartJob = false";
+					+ Constants.APPLICATIONNAME_KEY
+					+ "']) = ? and job.multiPartJob = false";
 		}
 
 		try {
 			getCurrentSession().beginTransaction();
 
-			Query queryObject = getCurrentSession().createQuery(queryString);
+			final Query queryObject = getCurrentSession().createQuery(
+					queryString);
 			queryObject.setParameter(0, dn);
 			queryObject.setParameter(1, application.toLowerCase());
 
-			List<Job> jobs = (queryObject.list());
+			final List<Job> jobs = (queryObject.list());
 
 			getCurrentSession().getTransaction().commit();
 
 			return jobs;
 
-		} catch (RuntimeException e) {
+		} catch (final RuntimeException e) {
 			try {
 				getCurrentSession().getTransaction().rollback();
-			} catch (Exception er) {
+			} catch (final Exception er) {
 				myLogger.debug("Rollback failed.", er);
 			}
 			throw e; // or display error message
@@ -209,19 +212,20 @@ public class JobDAO extends BaseHibernateDAO {
 		try {
 			getCurrentSession().beginTransaction();
 
-			Query queryObject = getCurrentSession().createQuery(queryString);
+			final Query queryObject = getCurrentSession().createQuery(
+					queryString);
 			queryObject.setParameter(0, dn);
 
-			List<String> jobnames = (queryObject.list());
+			final List<String> jobnames = (queryObject.list());
 
 			getCurrentSession().getTransaction().commit();
 
 			return jobnames;
 
-		} catch (RuntimeException e) {
+		} catch (final RuntimeException e) {
 			try {
 				getCurrentSession().getTransaction().rollback();
-			} catch (Exception er) {
+			} catch (final Exception er) {
 				myLogger.debug("Rollback failed.", er);
 			}
 			throw e; // or display error message
@@ -239,30 +243,31 @@ public class JobDAO extends BaseHibernateDAO {
 		String queryString;
 		if (includeMultiPartJob) {
 			queryString = "select jobname from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
-				+ Constants.APPLICATIONNAME_KEY + "']) = ?";
+					+ Constants.APPLICATIONNAME_KEY + "']) = ?";
 		} else {
 			queryString = "select jobname from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
-				+ Constants.APPLICATIONNAME_KEY
-				+ "']) = ? and job.batchJob = false";
+					+ Constants.APPLICATIONNAME_KEY
+					+ "']) = ? and job.batchJob = false";
 		}
 
 		try {
 			getCurrentSession().beginTransaction();
 
-			Query queryObject = getCurrentSession().createQuery(queryString);
+			final Query queryObject = getCurrentSession().createQuery(
+					queryString);
 			queryObject.setParameter(0, dn);
 			queryObject.setParameter(1, application.toLowerCase());
 
-			List<String> jobnames = (queryObject.list());
+			final List<String> jobnames = (queryObject.list());
 
 			getCurrentSession().getTransaction().commit();
 
 			return jobnames;
 
-		} catch (RuntimeException e) {
+		} catch (final RuntimeException e) {
 			try {
 				getCurrentSession().getTransaction().rollback();
-			} catch (Exception er) {
+			} catch (final Exception er) {
 				myLogger.debug("Rollback failed.", er);
 			}
 			throw e; // or display error message
@@ -288,30 +293,31 @@ public class JobDAO extends BaseHibernateDAO {
 			final String jobname) throws NoSuchJobException {
 		myLogger.debug("Loading job with dn: " + dn + " and jobname: "
 				+ jobname + " from dn.");
-		String queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.jobname like ?";
+		final String queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.jobname like ?";
 
 		try {
 			getCurrentSession().beginTransaction();
 
-			Query queryObject = getCurrentSession().createQuery(queryString);
+			final Query queryObject = getCurrentSession().createQuery(
+					queryString);
 			queryObject.setParameter(0, dn);
 			queryObject.setParameter(1, jobname + "%");
 
-			List<Job> jobs = (queryObject.list());
+			final List<Job> jobs = (queryObject.list());
 
 			getCurrentSession().getTransaction().commit();
 
 			if (jobs.size() == 0) {
 				throw new NoSuchJobException(
 						"Could not find a job for the dn: " + dn
-						+ " and the jobname: " + jobname);
+								+ " and the jobname: " + jobname);
 			}
 			return jobs;
 
-		} catch (RuntimeException e) {
+		} catch (final RuntimeException e) {
 			try {
 				getCurrentSession().getTransaction().rollback();
-			} catch (Exception er) {
+			} catch (final Exception er) {
 				myLogger.debug("Rollback failed.", er);
 			}
 			throw e; // or display error message
@@ -332,11 +338,11 @@ public class JobDAO extends BaseHibernateDAO {
 
 			myLogger.debug("saveOrUpdate of job successful");
 
-		} catch (RuntimeException e) {
+		} catch (final RuntimeException e) {
 			myLogger.error("saveOrUpdate failed", e);
 			try {
 				getCurrentSession().getTransaction().rollback();
-			} catch (Exception er) {
+			} catch (final Exception er) {
 				myLogger.debug("Rollback failed.", er);
 			}
 			throw e; // or display error message

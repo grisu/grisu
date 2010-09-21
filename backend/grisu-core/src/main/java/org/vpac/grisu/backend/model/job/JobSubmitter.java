@@ -36,7 +36,7 @@ public abstract class JobSubmitter {
 			ProxyCredential cred);
 
 	// public String convertJobDescription(Job job) {
-	//		
+	//
 	// String converted =
 	// createJobSubmissionDescription(job.getJobDescription());
 	//

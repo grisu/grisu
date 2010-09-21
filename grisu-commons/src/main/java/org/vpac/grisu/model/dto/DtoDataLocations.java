@@ -20,12 +20,12 @@ public class DtoDataLocations {
 	public static DtoDataLocations createDataLocations(String fqan,
 			Map<String, String[]> dataLocationsMap) {
 
-		DtoDataLocations result = new DtoDataLocations();
+		final DtoDataLocations result = new DtoDataLocations();
 
-		List<DtoDataLocation> list = new LinkedList<DtoDataLocation>();
+		final List<DtoDataLocation> list = new LinkedList<DtoDataLocation>();
 
-		for (String key : dataLocationsMap.keySet()) {
-			DtoDataLocation temp = new DtoDataLocation();
+		for (final String key : dataLocationsMap.keySet()) {
+			final DtoDataLocation temp = new DtoDataLocation();
 			temp.setRooturl(key);
 			temp.setFqan(fqan);
 			temp.setPaths(Arrays.asList(dataLocationsMap.get(key)));

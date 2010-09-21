@@ -37,16 +37,17 @@ public class SimpleJsdlBuilder {
 	public static Document buildJsdl(
 			final Map<JobSubmissionProperty, String> jobProperties) {
 
-		InputStream in = SimpleJsdlBuilder.class
+		final InputStream in = SimpleJsdlBuilder.class
 				.getResourceAsStream("/generic.xml");
 
 		String jsdlTemplateString = SeveralStringHelpers.fromInputStream(in);
 
-		for (JobSubmissionProperty jp : JobSubmissionProperty.values()) {
+		for (final JobSubmissionProperty jp : JobSubmissionProperty.values()) {
 
 			if (jp.equals(JobSubmissionProperty.FORCE_MPI)) {
 
-				Boolean force_MPI = Boolean.parseBoolean(jobProperties.get(jp));
+				final Boolean force_MPI = Boolean.parseBoolean(jobProperties
+						.get(jp));
 				if (force_MPI) {
 					jsdlTemplateString = jsdlTemplateString.replaceAll(
 							"XXX_jobType_XXX", "mpi");
@@ -55,8 +56,8 @@ public class SimpleJsdlBuilder {
 
 				if (jp.equals(JobSubmissionProperty.FORCE_SINGLE)) {
 
-					Boolean force_single = Boolean.parseBoolean(jobProperties
-							.get(jp));
+					final Boolean force_single = Boolean
+							.parseBoolean(jobProperties.get(jp));
 					if (force_single) {
 						jsdlTemplateString = jsdlTemplateString.replaceAll(
 								"XXX_jobType_XXX", "single");
@@ -77,64 +78,65 @@ public class SimpleJsdlBuilder {
 
 			} else if (jp.equals(JobSubmissionProperty.WALLTIME_IN_MINUTES)) {
 
-				String walltime = jobProperties.get(jp);
-				int wallTimeInSeconds = Integer.parseInt(walltime) * 60;
-				int cpus = Integer.parseInt(jobProperties
+				final String walltime = jobProperties.get(jp);
+				final int wallTimeInSeconds = Integer.parseInt(walltime) * 60;
+				final int cpus = Integer.parseInt(jobProperties
 						.get(JobSubmissionProperty.NO_CPUS));
 
-				int totalCpuTime = wallTimeInSeconds * cpus;
-				jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"
-						+ jp.toString() + "_XXX", new Integer(totalCpuTime)
-						.toString());
+				final int totalCpuTime = wallTimeInSeconds * cpus;
+				jsdlTemplateString = jsdlTemplateString.replaceAll(
+						"XXX_" + jp.toString() + "_XXX", new Integer(
+								totalCpuTime).toString());
 
 			} else if (jp.equals(JobSubmissionProperty.COMMANDLINE)) {
 
-				String executable = CommandlineHelpers
+				final String executable = CommandlineHelpers
 						.extractExecutable(jobProperties.get(jp));
-				StringBuffer exeAndArgsElements = new StringBuffer();
+				final StringBuffer exeAndArgsElements = new StringBuffer();
 				exeAndArgsElements.append("<Executable>");
 				exeAndArgsElements.append(executable);
 				exeAndArgsElements.append("</Executable>");
 
-				for (String arg : CommandlineHelpers
+				for (final String arg : CommandlineHelpers
 						.extractArgumentsFromCommandline(jobProperties.get(jp))) {
 					exeAndArgsElements.append("<Argument>");
 					exeAndArgsElements.append(arg);
 					exeAndArgsElements.append("</Argument>");
 				}
 
-				jsdlTemplateString = jsdlTemplateString
-						.replaceAll("XXX_" + jp.toString() + "_XXX",
-								exeAndArgsElements.toString());
+				jsdlTemplateString = jsdlTemplateString.replaceAll(
+						"XXX_" + jp.toString() + "_XXX",
+						exeAndArgsElements.toString());
 
 			} else if (jp.equals(JobSubmissionProperty.MODULES)) {
 
-				String modulesString = jobProperties.get(jp);
+				final String modulesString = jobProperties.get(jp);
 				if (StringUtils.isBlank(modulesString)) {
 					jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"
 							+ jp.toString() + "_XXX", "");
 					continue;
 				}
-				StringBuffer modulesElements = new StringBuffer();
-				for (String module : modulesString.split(",")) {
+				final StringBuffer modulesElements = new StringBuffer();
+				for (final String module : modulesString.split(",")) {
 					modulesElements
 							.append("<Module xmlns=\"http://arcs.org.au/jsdl/jsdl-grisu\">"
 									+ module + "</Module>");
 				}
-				jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"
-						+ jp.toString() + "_XXX", modulesElements.toString());
+				jsdlTemplateString = jsdlTemplateString.replaceAll(
+						"XXX_" + jp.toString() + "_XXX",
+						modulesElements.toString());
 
 			} else if (jp.equals(JobSubmissionProperty.INPUT_FILE_URLS)) {
 
-				String inputFileUrls = jobProperties.get(jp);
+				final String inputFileUrls = jobProperties.get(jp);
 				if (inputFileUrls == null || "".equals(inputFileUrls)) {
 					jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"
 							+ jp.toString() + "_XXX", "");
 					continue;
 				}
 
-				StringBuffer dataStagingElements = new StringBuffer();
-				for (String inputFileUrl : inputFileUrls.split(",")) {
+				final StringBuffer dataStagingElements = new StringBuffer();
+				for (final String inputFileUrl : inputFileUrls.split(",")) {
 					if (!FileManager.isLocal(inputFileUrl)) {
 						dataStagingElements
 								.append("<DataStaging>\n<FileName />\n<FileSystemName></FileSystemName>\n"
@@ -145,9 +147,9 @@ public class SimpleJsdlBuilder {
 					}
 				}
 
-				jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"
-						+ jp.toString() + "_XXX", dataStagingElements
-						.toString());
+				jsdlTemplateString = jsdlTemplateString.replaceAll(
+						"XXX_" + jp.toString() + "_XXX",
+						dataStagingElements.toString());
 
 			} else {
 				if (jobProperties.get(jp) == null) {
@@ -166,7 +168,7 @@ public class SimpleJsdlBuilder {
 		Document result;
 		try {
 			result = SeveralXMLHelpers.fromString(jsdlTemplateString);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new RuntimeException("Couldn't create jsdl document");

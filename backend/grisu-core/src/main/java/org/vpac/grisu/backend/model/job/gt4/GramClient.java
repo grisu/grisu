@@ -18,7 +18,7 @@ import org.globus.exec.generated.StateEnumeration;
 import org.globus.exec.utils.FaultUtils;
 import org.globus.exec.utils.client.ManagedJobFactoryClientHelper;
 import org.globus.exec.utils.rsl.RSLHelper;
-import org.globus.wsrf.impl.security.authentication.Constants;
+import org.globus.gsi.GSIConstants;
 import org.globus.wsrf.impl.security.authorization.Authorization;
 import org.globus.wsrf.impl.security.authorization.HostAuthorization;
 import org.ietf.jgss.GSSCredential;
@@ -52,7 +52,7 @@ public class GramClient
 
 		try {
 			job.destroy();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -72,15 +72,15 @@ public class GramClient
 		try {
 			job = retrieveGramJob(gramJobHandle, cred);
 			job.refreshStatus();
-		} catch (NoSuchGT4JobException e) {
+		} catch (final NoSuchGT4JobException e) {
 			return "NoSuchJob";
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return "NoSuchJob";
 		}
 		destroyJob(job);
 		try {
 			job.refreshStatus();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return "NoSuchJob";
 		}
 		return getJobStatus(job);
@@ -89,8 +89,8 @@ public class GramClient
 
 	private static EndpointReferenceType getFactoryEPR(final String contact,
 			final String factoryType) throws Exception {
-		URL factoryUrl = ManagedJobFactoryClientHelper.getServiceURL(contact)
-				.getURL();
+		final URL factoryUrl = ManagedJobFactoryClientHelper.getServiceURL(
+				contact).getURL();
 
 		logger.debug("Factory Url: " + factoryUrl);
 		return ManagedJobFactoryClientHelper.getFactoryEndpoint(factoryUrl,
@@ -106,21 +106,21 @@ public class GramClient
 		try {
 
 			// Get the state of our job.
-			StateEnumeration jobState = job.getState();
+			final StateEnumeration jobState = job.getState();
 			condition = jobState.getValue();
 
 			// Checking for faults...
-			FaultType myFaultType = job.getFault();
+			final FaultType myFaultType = job.getFault();
 			if (myFaultType != null) {
-				BaseFaultTypeDescription[] myFaultArray = job.getFault()
+				final BaseFaultTypeDescription[] myFaultArray = job.getFault()
 						.getDescription();
-				for (BaseFaultTypeDescription currFault : myFaultArray) {
+				for (final BaseFaultTypeDescription currFault : myFaultArray) {
 					logger.error(currFault.get_value());
 					condition += "\nReason: " + currFault.get_value();
 				}
 			}
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// TODO do something here
 			e.printStackTrace();
 			error = true;
@@ -129,6 +129,7 @@ public class GramClient
 
 		return condition;
 	}
+
 	/**
 	 * Get the status of our job, as well as any faults that may have occurred.
 	 * Returns a String containing the status and any faults.
@@ -145,18 +146,18 @@ public class GramClient
 			job = retrieveGramJob(gramJobHandle, cred);
 			job.refreshStatus();
 
-			int error = job.getError();
+			final int error = job.getError();
 
-		} catch (NoSuchGT4JobException e) {
+		} catch (final NoSuchGT4JobException e) {
 			return "NoSuchJob";
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return "NoSuchJob";
 		}
 
 		String status = getJobStatus(job);
 
 		if ("Done".equals(status)) {
-			int error = job.getExitCode();
+			final int error = job.getExitCode();
 			status = status + error;
 		}
 
@@ -171,13 +172,13 @@ public class GramClient
 		 * Job test parameters (adjust to your needs)
 		 */
 		// remote host
-		String contact = "ng2.vpac.org";
+		final String contact = "ng2.vpac.org";
 
 		// Factory type: Fork, Condor, PBS, LSF
 		// String factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.FORK;
 
 		// Job XML
-		File rslFile = new File("/tmp/simple.xml");
+		final File rslFile = new File("/tmp/simple.xml");
 
 		System.setProperty("GLOBUS_LOCATION",
 				"/home/markus/workspace/grisu-core/globus");
@@ -185,49 +186,51 @@ public class GramClient
 				"/home/markus/workspace/grisu-core/globus/client-config.wsdd");
 
 		// Deafult Security: Host authorization + XML encryption
-		Authorization authz = HostAuthorization.getInstance();
-		Integer xmlSecurity = Constants.ENCRYPTION;
+		final Authorization authz = HostAuthorization.getInstance();
+		final Integer xmlSecurity = GSIConstants.ENCRYPTION;
 
 		// Submission mode: batch = will not wait
-		boolean batchMode = false;
+		final boolean batchMode = false;
 
 		// a Simple command executable (if no job file)
-		String simpleJobCommandLine = null;
+		final String simpleJobCommandLine = null;
 
 		// Job timeout values: duration, termination times
-		Date serviceDuration = null;
-		Date serviceTermination = null;
-		int timeout = GramJob.DEFAULT_TIMEOUT;
+		final Date serviceDuration = null;
+		final Date serviceTermination = null;
+		final int timeout = GramJob.DEFAULT_TIMEOUT;
 
 		try {
-			GramClient gram = new GramClient(LocalProxy.loadGSSCredential());
+			final GramClient gram = new GramClient(
+					LocalProxy.loadGSSCredential());
 			// gram.submitRSL(getFactoryEPR(contact,factoryType)
 			// , simpleJobCommandLine, rslFile
 			// , authz, xmlSecurity
 			// , batchMode, false, false
 			// , serviceDuration, serviceTermination, timeout );
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
+
 	private static GramJob retrieveGramJob(final String gramJobHandle,
 			final GSSCredential cred) throws NoSuchGT4JobException {
 		// TODO: Remove these? These error things are kinda useless if not
 		// returned.
 
-		GramJob job = new GramJob();
+		final GramJob job = new GramJob();
 
 		try {
 
 			System.setProperty("GLOBUS_LOCATION", Environment.getGlobusHome());
-			System.setProperty("axis.ClientConfigFile", Environment
-					.getAxisClientConfig());
+			System.setProperty("axis.ClientConfigFile",
+					Environment.getAxisClientConfig());
 
 			// Find our job, and refresh its status.
 			job.setHandle(gramJobHandle);
 			job.setCredentials(cred);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// e.printStackTrace();
 			logger.error(e.getMessage());
 			// means no such job
@@ -253,9 +256,9 @@ public class GramClient
 	private boolean batch;
 
 	// Delegation
-	private boolean limitedDelegation = true;
+	private final boolean limitedDelegation = true;
 
-	private boolean delegationEnabled = true;
+	private final boolean delegationEnabled = true;
 
 	// Don't print messages by default
 	private boolean quiet = false;
@@ -263,18 +266,18 @@ public class GramClient
 	/**
 	 * Application error state.
 	 */
-	private boolean noInterruptHandling = false;
+	private final boolean noInterruptHandling = false;
 
-	private boolean isInterrupted = true;
+	private final boolean isInterrupted = true;
 
-	private boolean normalApplicationEnd = false;
+	private final boolean normalApplicationEnd = false;
 
 	public GramClient(final GSSCredential credential) {
 		this.credential = credential;
 
 		System.setProperty("GLOBUS_LOCATION", Environment.getGlobusHome());
-		System.setProperty("axis.ClientConfigFile", Environment
-				.getAxisClientConfig());
+		System.setProperty("axis.ClientConfigFile",
+				Environment.getAxisClientConfig());
 
 	}
 
@@ -286,7 +289,7 @@ public class GramClient
 	}
 
 	private void printJobFault(final GramJob job) {
-		BaseFaultType fault = job.getFault();
+		final BaseFaultType fault = job.getFault();
 		if (fault != null) {
 			printMessage("Fault:\n" + FaultUtils.faultToString(fault));
 		}
@@ -355,8 +358,8 @@ public class GramClient
 		job.setCredentials(credential);
 
 		// Generate a Job ID
-		UUIDGen uuidgen = UUIDGenFactory.getUUIDGen();
-		String submissionID = "uuid:" + uuidgen.nextUUID();
+		final UUIDGen uuidgen = UUIDGenFactory.getUUIDGen();
+		final String submissionID = "uuid:" + uuidgen.nextUUID();
 
 		printMessage("Submission ID: " + submissionID);
 
@@ -374,7 +377,7 @@ public class GramClient
 			job.submit(factoryEndpoint, batch, this.limitedDelegation,
 					submissionID);
 			submitted = true;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			logger.debug("Exception while submitting the job request: ", e);
 			throw new IOException("Job request error: " + e);
 		}
@@ -386,7 +389,7 @@ public class GramClient
 		}
 
 		if (logger.isDebugEnabled()) {
-			long millis = System.currentTimeMillis();
+			final long millis = System.currentTimeMillis();
 			BigDecimal seconds = new BigDecimal(((double) millis) / 1000);
 			seconds = seconds.setScale(3, BigDecimal.ROUND_HALF_DOWN);
 			logger.debug("Submission time (secs) after: " + seconds.toString());
@@ -399,8 +402,8 @@ public class GramClient
 			waitForJobCompletion(STATE_CHANGE_BASE_TIMEOUT_MILLIS);
 
 			try {
-				this.destroyJob(this.job);
-			} catch (Exception e) {
+				GramClient.destroyJob(this.job);
+			} catch (final Exception e) {
 				printError("coudl not destroy");
 			}
 
@@ -415,8 +418,8 @@ public class GramClient
 	 * Callback as a GramJobListener. Will not be called in batch mode.
 	 */
 	public final void stateChanged(final GramJob job) {
-		StateEnumeration jobState = job.getState();
-		boolean holding = job.isHolding();
+		final StateEnumeration jobState = job.getState();
+		final boolean holding = job.isHolding();
 		printMessage("========== State Notification ==========");
 		printJobState(jobState, holding);
 		printMessage("========================================");
@@ -436,12 +439,11 @@ public class GramClient
 			// if we a running an interractive job,
 			// prevent a hold from hanging the client
 			if (holding && !batch) {
-				logger
-						.debug("Automatically releasing hold for interactive job");
+				logger.debug("Automatically releasing hold for interactive job");
 				try {
 					job.release();
-				} catch (Exception e) {
-					String errorMessage = "Unable to release job from hold";
+				} catch (final Exception e) {
+					final String errorMessage = "Unable to release job from hold";
 					logger.debug(errorMessage, e);
 					printError(errorMessage + " - " + e.getMessage());
 				}
@@ -483,8 +485,8 @@ public class GramClient
 			final boolean quiet, final Date duration,
 			final Date terminationDate, final int timeout) throws Exception {
 		System.setProperty("GLOBUS_LOCATION", Environment.getGlobusHome());
-		System.setProperty("axis.ClientConfigFile", Environment
-				.getAxisClientConfig());
+		System.setProperty("axis.ClientConfigFile",
+				Environment.getAxisClientConfig());
 
 		this.quiet = quiet;
 		this.batch = batchMode || dryRunMode; // in single job only.
@@ -498,30 +500,30 @@ public class GramClient
 		if (rslFile != null) {
 			try {
 				this.job = new GramJob(rslFile);
-			} catch (Exception e) {
-				String errorMessage = "Unable to parse RSL from file "
+			} catch (final Exception e) {
+				final String errorMessage = "Unable to parse RSL from file "
 						+ rslFile;
 				logger.debug(errorMessage, e);
 				throw new IOException(errorMessage + " - " + e.getMessage());
 			}
 		} else {
-			this.job = new GramJob(RSLHelper
-					.makeSimpleJob(simpleJobCommandLine));
+			this.job = new GramJob(
+					RSLHelper.makeSimpleJob(simpleJobCommandLine));
 		}
 
 		job.setTimeOut(timeout);
 		job.setAuthorization(authorization);
 		job.setMessageProtectionType(xmlSecurity);
 		job.setDelegationEnabled(this.delegationEnabled);
-		long now = new Date().getTime();
+		final long now = new Date().getTime();
 		// long future = 3600 * 1000 * 24 * 45;
 		// long future = 3888000000l;
-		long future = 31536000000L;
-		long newTime = now + future;
+		final long future = 31536000000L;
+		final long newTime = now + future;
 		logger.debug("Add time: " + future + " ms.");
 		logger.debug("Old time: " + now + " ms since 1970. (Now)");
 		logger.debug("New time: " + newTime + " ms since 1970 (Termination).");
-		Date newDate = new Date(newTime);
+		final Date newDate = new Date(newTime);
 		logger.debug("Old date: " + new Date(now).toString());
 		logger.debug("New date: " + newDate.toString());
 		// job.setDuration(newDate);
@@ -570,22 +572,22 @@ public class GramClient
 			startTime = System.currentTimeMillis(); // (re)set start time
 			try {
 				wait(durationToWait); // wait for a state change notif
-			} catch (InterruptedException ie) {
-				String errorMessage = "interrupted thread waiting for job to finish";
+			} catch (final InterruptedException ie) {
+				final String errorMessage = "interrupted thread waiting for job to finish";
 				logger.debug(errorMessage, ie);
 				printError(errorMessage); // no exiting...
 			}
 
 			// now let's determine what stopped the wait():
 
-			StateEnumeration currentState = job.getState();
+			final StateEnumeration currentState = job.getState();
 			// A) New job state change notification (good!)
 			if (currentState != null && !currentState.equals(oldState)) {
 				oldState = currentState; // wait for next state notif
 				durationToWait = maxWaitPerStateNotificationMillis; // reset
 			} else {
-				long now = System.currentTimeMillis();
-				long durationWaited = now - startTime;
+				final long now = System.currentTimeMillis();
+				final long durationWaited = now - startTime;
 
 				// B) Timeout when waiting for a notification (bad)
 				if (durationWaited >= durationToWait) {

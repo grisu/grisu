@@ -8,7 +8,7 @@ package org.vpac.grisu.frontend.model.job;
  */
 public class JobException extends RuntimeException {
 
-	private JobObject jo;
+	private final JobObject jo;
 
 	public JobException(final JobObject jo, final String message) {
 		super(message);

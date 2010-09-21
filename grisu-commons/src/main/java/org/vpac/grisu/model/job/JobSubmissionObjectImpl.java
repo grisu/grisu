@@ -46,7 +46,7 @@ public class JobSubmissionObjectImpl {
 
 	public static void main(final String[] args) throws JobPropertiesException {
 
-		JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl();
+		final JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl();
 
 		jso.setJobname("testJobName");
 		jso.setApplication("testApplication");
@@ -124,7 +124,7 @@ public class JobSubmissionObjectImpl {
 		email_on_job_finish = JsdlHelpers.getSendEmailOnJobFinish(jsdl);
 		cpus = JsdlHelpers.getProcessorCount(jsdl);
 		hostcount = JsdlHelpers.getResourceCount(jsdl);
-		String jobTypeString = JsdlHelpers.getArcsJobType(jsdl);
+		final String jobTypeString = JsdlHelpers.getArcsJobType(jsdl);
 		if (jobTypeString != null) {
 			if (jobTypeString.toLowerCase().equals(
 					JobSubmissionProperty.FORCE_SINGLE.defaultValue())) {
@@ -146,15 +146,17 @@ public class JobSubmissionObjectImpl {
 		walltime_in_seconds = JsdlHelpers.getWalltime(jsdl);
 		setInputFileUrls(JsdlHelpers.getInputFileUrls(jsdl));
 		setModules(JsdlHelpers.getModules(jsdl));
-		String[] candidateHosts = JsdlHelpers.getCandidateHosts(jsdl);
+		final String[] candidateHosts = JsdlHelpers.getCandidateHosts(jsdl);
 		if ((candidateHosts != null) && (candidateHosts.length > 0)) {
 			submissionLocation = candidateHosts[0];
 		}
-		String executable = JsdlHelpers.getPosixApplicationExecutable(jsdl);
-		String[] arguments = JsdlHelpers.getPosixApplicationArguments(jsdl);
-		StringBuffer tempBuffer = new StringBuffer(executable);
+		final String executable = JsdlHelpers
+				.getPosixApplicationExecutable(jsdl);
+		final String[] arguments = JsdlHelpers
+				.getPosixApplicationArguments(jsdl);
+		final StringBuffer tempBuffer = new StringBuffer(executable);
 		if (arguments != null) {
-			for (String arg : arguments) {
+			for (final String arg : arguments) {
 				tempBuffer.append(" " + arg);
 			}
 		}
@@ -183,37 +185,37 @@ public class JobSubmissionObjectImpl {
 		try {
 			this.cpus = Integer.parseInt(jobProperties
 					.get(JobSubmissionProperty.NO_CPUS.toString()));
-		} catch (NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			this.cpus = 1;
 		}
 		try {
-		this.hostcount = Integer.parseInt(jobProperties
-				.get(JobSubmissionProperty.HOSTCOUNT.toString()));
-		} catch (Exception e) {
+			this.hostcount = Integer.parseInt(jobProperties
+					.get(JobSubmissionProperty.HOSTCOUNT.toString()));
+		} catch (final Exception e) {
 			this.hostcount = 1;
 		}
 		try {
 			this.force_single = checkForBoolean(jobProperties
-				.get(JobSubmissionProperty.FORCE_SINGLE.toString()));
-		} catch (Exception e) {
+					.get(JobSubmissionProperty.FORCE_SINGLE.toString()));
+		} catch (final Exception e) {
 			this.force_single = false;
 		}
 		try {
-		this.force_mpi = checkForBoolean(jobProperties
-				.get(JobSubmissionProperty.FORCE_MPI.toString()));
-		} catch (Exception e ) {
+			this.force_mpi = checkForBoolean(jobProperties
+					.get(JobSubmissionProperty.FORCE_MPI.toString()));
+		} catch (final Exception e) {
 			this.force_mpi = false;
 		}
 		try {
 			this.memory_in_bytes = Integer.parseInt(jobProperties
 					.get(JobSubmissionProperty.MEMORY_IN_B.toString()));
-		} catch (NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			this.memory_in_bytes = 0;
 		}
 		try {
 			this.walltime_in_seconds = Integer.parseInt(jobProperties
 					.get(JobSubmissionProperty.WALLTIME_IN_MINUTES.toString())) * 60;
-		} catch (NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			this.walltime_in_seconds = 0;
 		}
 
@@ -250,7 +252,7 @@ public class JobSubmissionObjectImpl {
 		}
 
 		url = FileManager.ensureUriFormat(url);
-		String[] oldValue = getInputFileUrls();
+		final String[] oldValue = getInputFileUrls();
 		this.inputFileUrls.add(url);
 		pcs.firePropertyChange("inputFileUrls", oldValue, this.inputFileUrls);
 
@@ -291,7 +293,7 @@ public class JobSubmissionObjectImpl {
 	public boolean equals(Object other) {
 
 		if (other instanceof JobSubmissionObjectImpl) {
-			JobSubmissionObjectImpl otherJob = (JobSubmissionObjectImpl) other;
+			final JobSubmissionObjectImpl otherJob = (JobSubmissionObjectImpl) other;
 			return getJobname().equals(otherJob.getJobname());
 		} else {
 			return false;
@@ -304,7 +306,7 @@ public class JobSubmissionObjectImpl {
 			return null;
 		}
 
-		int i = commandline.indexOf(" ");
+		final int i = commandline.indexOf(" ");
 		if (i <= 0) {
 			return commandline;
 		} else {
@@ -365,9 +367,9 @@ public class JobSubmissionObjectImpl {
 
 		checkValidity();
 
-		Map<JobSubmissionProperty, String> jobProperties = getJobSubmissionPropertyMap();
+		final Map<JobSubmissionProperty, String> jobProperties = getJobSubmissionPropertyMap();
 
-		Document jsdl = SimpleJsdlBuilder.buildJsdl(jobProperties);
+		final Document jsdl = SimpleJsdlBuilder.buildJsdl(jobProperties);
 
 		return jsdl;
 
@@ -390,7 +392,7 @@ public class JobSubmissionObjectImpl {
 	@Transient
 	public final Map<JobSubmissionProperty, String> getJobSubmissionPropertyMap() {
 
-		Map<JobSubmissionProperty, String> jobProperties = new HashMap<JobSubmissionProperty, String>();
+		final Map<JobSubmissionProperty, String> jobProperties = new HashMap<JobSubmissionProperty, String>();
 		jobProperties.put(JobSubmissionProperty.JOBNAME, jobname);
 		jobProperties.put(JobSubmissionProperty.APPLICATIONNAME, application);
 		jobProperties.put(JobSubmissionProperty.APPLICATIONVERSION,
@@ -470,11 +472,11 @@ public class JobSubmissionObjectImpl {
 	@Transient
 	public final Map<String, String> getStringJobSubmissionPropertyMap() {
 
-		Map<String, String> stringPropertyMap = new HashMap<String, String>();
-		Map<JobSubmissionProperty, String> jobPropertyMap = getJobSubmissionPropertyMap();
+		final Map<String, String> stringPropertyMap = new HashMap<String, String>();
+		final Map<JobSubmissionProperty, String> jobPropertyMap = getJobSubmissionPropertyMap();
 
-		for (JobSubmissionProperty jp : jobPropertyMap.keySet()) {
-			String value = jobPropertyMap.get(jp);
+		for (final JobSubmissionProperty jp : jobPropertyMap.keySet()) {
+			final String value = jobPropertyMap.get(jp);
 			stringPropertyMap.put(jp.toString(), value);
 
 		}
@@ -519,7 +521,7 @@ public class JobSubmissionObjectImpl {
 		if (StringUtils.isBlank(selectedFile)) {
 			return;
 		}
-		String[] oldValue = getInputFileUrls();
+		final String[] oldValue = getInputFileUrls();
 		this.inputFileUrls.remove(selectedFile);
 		pcs.firePropertyChange("inputFileUrls", oldValue, this.inputFileUrls);
 	}
@@ -529,20 +531,20 @@ public class JobSubmissionObjectImpl {
 	}
 
 	public void setApplication(final String app) {
-		String oldValue = this.application;
+		final String oldValue = this.application;
 		this.application = app;
 		pcs.firePropertyChange("application", oldValue, this.application);
 	}
 
 	public void setApplicationVersion(final String appVersion) {
-		String oldValue = this.applicationVersion;
+		final String oldValue = this.applicationVersion;
 		this.applicationVersion = appVersion;
 		pcs.firePropertyChange("applicationVersion", oldValue,
 				this.applicationVersion);
 	}
 
 	public void setCommandline(final String commandline) {
-		String oldValue = this.commandline;
+		final String oldValue = this.commandline;
 		this.commandline = commandline;
 		myLogger.debug("Commandline for job: " + getJobname() + "changed: "
 				+ commandline);
@@ -550,35 +552,35 @@ public class JobSubmissionObjectImpl {
 	}
 
 	public void setCpus(final Integer cpus) {
-		int oldValue = this.cpus;
+		final int oldValue = this.cpus;
 		this.cpus = cpus;
 		pcs.firePropertyChange("cpus", oldValue, this.cpus);
 	}
 
 	public void setEmail_address(final String email_address) {
-		String oldValue = this.email_address;
+		final String oldValue = this.email_address;
 		this.email_address = email_address;
 		pcs.firePropertyChange("email_address", oldValue, this.email_address);
 	}
 
 	public void setEmail_on_job_finish(final Boolean email_on_job_finish) {
-		boolean oldValue = this.email_on_job_finish;
+		final boolean oldValue = this.email_on_job_finish;
 		this.email_on_job_finish = email_on_job_finish;
 		pcs.firePropertyChange("email_on_job_finish", oldValue,
 				this.email_on_job_finish);
 	}
 
 	public void setEmail_on_job_start(final Boolean email_on_job_start) {
-		boolean oldValue = this.email_on_job_start;
+		final boolean oldValue = this.email_on_job_start;
 		this.email_on_job_start = email_on_job_start;
 		pcs.firePropertyChange("email_on_job_start", oldValue,
 				this.email_on_job_start);
 	}
 
 	public void setForce_mpi(final Boolean force_mpi) {
-		boolean oldValue = this.force_mpi;
-		boolean oldValue1 = this.force_single;
-		int oldHostCount = this.hostcount;
+		final boolean oldValue = this.force_mpi;
+		final boolean oldValue1 = this.force_single;
+		final int oldHostCount = this.hostcount;
 		this.force_mpi = force_mpi;
 		this.force_single = !force_mpi;
 		this.hostcount = -1;
@@ -588,8 +590,8 @@ public class JobSubmissionObjectImpl {
 	}
 
 	public void setForce_single(final Boolean force_single) {
-		boolean oldValue = this.force_mpi;
-		boolean oldValue1 = this.force_single;
+		final boolean oldValue = this.force_mpi;
+		final boolean oldValue1 = this.force_single;
 		this.force_single = force_single;
 		this.force_mpi = !force_single;
 		pcs.firePropertyChange("force_mpi", oldValue, this.force_mpi);
@@ -597,7 +599,7 @@ public class JobSubmissionObjectImpl {
 	}
 
 	public void setHostCount(Integer hc) {
-		int oldHostCount = this.hostcount;
+		final int oldHostCount = this.hostcount;
 		this.hostcount = hc;
 		pcs.firePropertyChange("hostCount", oldHostCount, this.hostcount);
 	}
@@ -607,7 +609,7 @@ public class JobSubmissionObjectImpl {
 	}
 
 	public void setInputFileUrls(final String[] inputFileUrls) {
-		Set<String> oldValue = this.inputFileUrls;
+		final Set<String> oldValue = this.inputFileUrls;
 		if (inputFileUrls != null) {
 			this.inputFileUrls = new HashSet<String>(
 					Arrays.asList(inputFileUrls));
@@ -618,19 +620,19 @@ public class JobSubmissionObjectImpl {
 	}
 
 	public void setJobname(final String jobname) {
-		String oldValue = this.jobname;
+		final String oldValue = this.jobname;
 		this.jobname = jobname;
 		pcs.firePropertyChange("jobname", oldValue, this.jobname);
 	}
 
 	public void setMemory(final Long memory) {
-		long oldValue = this.memory_in_bytes;
+		final long oldValue = this.memory_in_bytes;
 		this.memory_in_bytes = memory;
 		pcs.firePropertyChange("memory", oldValue, this.memory_in_bytes);
 	}
 
 	public void setModules(final String[] modules) {
-		Set<String> oldValue = this.modules;
+		final Set<String> oldValue = this.modules;
 		if (modules != null) {
 			this.modules = new HashSet<String>(Arrays.asList(modules));
 		} else {
@@ -640,31 +642,31 @@ public class JobSubmissionObjectImpl {
 	}
 
 	public void setPbsDebug(String pbsDebug) {
-		String oldValue = this.pbsDebug;
+		final String oldValue = this.pbsDebug;
 		this.pbsDebug = pbsDebug;
 		pcs.firePropertyChange("pbsDebug", oldValue, this.pbsDebug);
 	}
 
 	public void setStderr(final String stderr) {
-		String oldValue = this.stderr;
+		final String oldValue = this.stderr;
 		this.stderr = stderr;
 		pcs.firePropertyChange("stderr", oldValue, this.stderr);
 	}
 
 	public void setStdin(final String stdin) {
-		String oldValue = this.stdin;
+		final String oldValue = this.stdin;
 		this.stdin = stdin;
 		pcs.firePropertyChange("stdin", oldValue, this.stdout);
 	}
 
 	public void setStdout(final String stdout) {
-		String oldValue = this.stdout;
+		final String oldValue = this.stdout;
 		this.stdout = stdout;
 		pcs.firePropertyChange("stdout", oldValue, this.stdout);
 	}
 
 	public void setSubmissionLocation(final String submissionLocation) {
-		String oldValue = this.submissionLocation;
+		final String oldValue = this.submissionLocation;
 		this.submissionLocation = submissionLocation;
 		pcs.firePropertyChange("submissionLocation", oldValue,
 				this.submissionLocation);
@@ -698,7 +700,7 @@ public class JobSubmissionObjectImpl {
 	}
 
 	public void setWalltimeInSeconds(final Integer walltime) {
-		int oldValue = this.walltime_in_seconds;
+		final int oldValue = this.walltime_in_seconds;
 		this.walltime_in_seconds = walltime;
 		pcs.firePropertyChange("walltime", oldValue, this.walltime_in_seconds);
 	}

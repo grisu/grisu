@@ -30,18 +30,18 @@ public class GrisuFileDialog extends JDialog implements FileListListener {
 			si = LoginManager.login();
 
 			System.out.println("Creating dialog.");
-			GrisuFileDialog dialog = new GrisuFileDialog(si, null);
+			final GrisuFileDialog dialog = new GrisuFileDialog(si, null);
 			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			System.out.println("Created dialog. Setting visible.");
 			dialog.setVisible(true);
 
-			for (GlazedFile file : dialog.getSelectedFiles()) {
+			for (final GlazedFile file : dialog.getSelectedFiles()) {
 				System.out.println("File: " + file.getUrl());
 			}
 
 			dialog.dispose();
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 
@@ -90,8 +90,12 @@ public class GrisuFileDialog extends JDialog implements FileListListener {
 
 	}
 
+	public void displayHiddenFiles(boolean display) {
+		fileListPanel.displayHiddenFiles(display);
+	}
+
 	public void fileDoubleClicked(GlazedFile file) {
-		Set<GlazedFile> temp = new HashSet<GlazedFile>();
+		final Set<GlazedFile> temp = new HashSet<GlazedFile>();
 		temp.add(file);
 		setSelectedFiles(temp);
 		setSelectedFile(file);
@@ -101,7 +105,7 @@ public class GrisuFileDialog extends JDialog implements FileListListener {
 		try {
 			System.out.println("File selected: "
 					+ files.iterator().next().getUrl());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 		}
 	}
 
@@ -162,6 +166,10 @@ public class GrisuFileDialog extends JDialog implements FileListListener {
 		getOkButton().setEnabled(!loading);
 	}
 
+	public void setExtensionsToDisplay(String[] extensions) {
+		fileListPanel.setExtensionsToDisplay(extensions);
+	}
+
 	private void setSelectedFile(GlazedFile file) {
 		selectedFile = file;
 		this.setVisible(false);
@@ -175,14 +183,6 @@ public class GrisuFileDialog extends JDialog implements FileListListener {
 			selectedFiles = files;
 			selectedFile = null;
 		}
-	}
-
-	public void displayHiddenFiles(boolean display) {
-		fileListPanel.displayHiddenFiles(display);
-	}
-
-	public void setExtensionsToDisplay(String[] extensions) {
-		fileListPanel.setExtensionsToDisplay(extensions);
 	}
 
 }

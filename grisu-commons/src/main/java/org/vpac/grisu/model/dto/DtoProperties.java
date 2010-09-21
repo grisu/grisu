@@ -25,11 +25,11 @@ public class DtoProperties {
 	public static DtoProperties createProperties(
 			Map<String, String> userProperties) {
 
-		DtoProperties result = new DtoProperties();
+		final DtoProperties result = new DtoProperties();
 
-		List<DtoProperty> list = new LinkedList<DtoProperty>();
-		for (String key : userProperties.keySet()) {
-			DtoProperty temp = new DtoProperty();
+		final List<DtoProperty> list = new LinkedList<DtoProperty>();
+		for (final String key : userProperties.keySet()) {
+			final DtoProperty temp = new DtoProperty();
 			temp.setKey(key);
 			temp.setValue(userProperties.get(key));
 			list.add(temp);
@@ -46,11 +46,11 @@ public class DtoProperties {
 			return null;
 		}
 
-		DtoProperties result = new DtoProperties();
+		final DtoProperties result = new DtoProperties();
 
-		List<DtoProperty> list = new LinkedList<DtoProperty>();
-		for (String key : userProperties.keySet()) {
-			DtoProperty temp = new DtoProperty();
+		final List<DtoProperty> list = new LinkedList<DtoProperty>();
+		for (final String key : userProperties.keySet()) {
+			final DtoProperty temp = new DtoProperty();
 			temp.setKey(key);
 			temp.setValue(userProperties.get(key).toString());
 			list.add(temp);
@@ -76,9 +76,9 @@ public class DtoProperties {
 
 	public Map<String, String> propertiesAsMap() {
 
-		Map<String, String> map = new HashMap<String, String>();
+		final Map<String, String> map = new HashMap<String, String>();
 
-		for (DtoProperty prop : getProperties()) {
+		for (final DtoProperty prop : getProperties()) {
 			map.put(prop.getKey(), prop.getValue());
 		}
 

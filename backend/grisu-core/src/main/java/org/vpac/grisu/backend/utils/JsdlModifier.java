@@ -48,11 +48,11 @@ public final class JsdlModifier {
 			final String clusterRootUrl, final boolean absolutePath)
 			throws Exception {
 
-		Document jsdl_new = (Document) jsdl_old.cloneNode(true);
+		final Document jsdl_new = (Document) jsdl_old.cloneNode(true);
 
-		Element userFSElement = JsdlHelpers
+		final Element userFSElement = JsdlHelpers
 				.getUserExecutionHostFSElement(jsdl_new);
-		String executionHostFileSystemUrl = JsdlHelpers
+		final String executionHostFileSystemUrl = JsdlHelpers
 				.getUserExecutionHostFs(jsdl_new);
 
 		if (!executionHostFileSystemUrl.startsWith(clusterRootUrl)) {
@@ -62,16 +62,16 @@ public final class JsdlModifier {
 							+ "\nclusterRootUrl: " + clusterRootUrl);
 		}
 
-		Element clusterFSElement = JsdlHelpers
+		final Element clusterFSElement = JsdlHelpers
 				.addOrRetrieveExistingFileSystemElement(jsdl_new,
 						JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM,
 						clusterRootUrl);
 
-		List<Element> elementsWithURLs = JsdlHelpers
+		final List<Element> elementsWithURLs = JsdlHelpers
 				.getElementsWithFileSystemNameAttribute(jsdl_new,
 						JsdlHelpers.USER_EXECUTION_HOST_FILESYSTEM);
 
-		for (Element elementWithURL : elementsWithURLs) {
+		for (final Element elementWithURL : elementsWithURLs) {
 
 			myLogger.debug("Changing element: " + elementWithURL.getTagName());
 

@@ -35,7 +35,7 @@ public class LocalServiceInterfaceCreator implements ServiceInterfaceCreator {
 		try {
 			localServiceInterfaceClass = Class
 					.forName("org.vpac.grisu.control.serviceInterfaces.LocalServiceInterface");
-		} catch (ClassNotFoundException e) {
+		} catch (final ClassNotFoundException e) {
 			myLogger.warn("Could not find local service interface class.");
 			e.printStackTrace();
 			throw new ServiceInterfaceException(
@@ -47,7 +47,7 @@ public class LocalServiceInterfaceCreator implements ServiceInterfaceCreator {
 		try {
 			localServiceInterface = (ServiceInterface) localServiceInterfaceClass
 					.newInstance();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new ServiceInterfaceException(

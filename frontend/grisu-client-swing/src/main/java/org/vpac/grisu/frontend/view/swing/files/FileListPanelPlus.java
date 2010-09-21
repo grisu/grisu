@@ -100,7 +100,7 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 		add(getLabel(), "2, 2, 3, 1, left, default");
 		add(getComboBox(), "6, 2, fill, default");
 
-		FileSystemItem item = em.getFileSystemForUrl(startUrl);
+		final FileSystemItem item = em.getFileSystemForUrl(startUrl);
 		if (item != null) {
 			rootUrl = item.getRootFile().getUrl();
 			fireEvent = false;
@@ -134,7 +134,7 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 
 		if (FileManager.isLocal(newDirectory.getUrl())) {
 
-			File curDir = FileManager.getFileFromUriOrPath(newDirectory
+			final File curDir = FileManager.getFileFromUriOrPath(newDirectory
 					.getUrl());
 
 			getPathTextField().setText(curDir.toString());
@@ -142,7 +142,8 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 
 		} else {
 
-			MountPoint mp = this.em.getMountPointForUrl(newDirectory.getUrl());
+			final MountPoint mp = this.em.getMountPointForUrl(newDirectory
+					.getUrl());
 			if (mp == null) {
 				getPathTextField().setText("");
 				getPathTextField().setToolTipText("");
@@ -158,6 +159,10 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 			}
 		}
 
+	}
+
+	public void displayHiddenFiles(boolean display) {
+		fileListPanel.displayHiddenFiles(display);
 	}
 
 	public void fileDoubleClicked(GlazedFile file) {
@@ -177,14 +182,14 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 						if (ItemEvent.SELECTED == arg0.getStateChange()) {
 							myLogger.debug("Filesystem not combobox locked. Changing filesystem...");
 							try {
-								FileSystemItem fsi = (FileSystemItem) (filesystemModel
+								final FileSystemItem fsi = (FileSystemItem) (filesystemModel
 										.getSelectedItem());
 								if (fsi.isDummy() && (lastFileSystem != null)) {
 									comboBox.setSelectedItem(lastFileSystem);
 									return;
 								}
 
-								GlazedFile sel = fsi.getRootFile();
+								final GlazedFile sel = fsi.getRootFile();
 
 								// if (FileSystemItem.Type.BOOKMARK.equals(fsi
 								// .getType())) {
@@ -212,7 +217,7 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 								lastFileSystem = fsi;
 								// }
 								getFileListPanel().setRootAndCurrentUrl(sel);
-							} catch (NullPointerException e) {
+							} catch (final NullPointerException e) {
 								e.printStackTrace();
 								// that's ok.
 							}
@@ -298,16 +303,12 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 		getFileListPanel().setCurrentUrl(url);
 	}
 
+	public void setExtensionsToDisplay(String[] extensions) {
+		fileListPanel.setExtensionsToDisplay(extensions);
+	}
+
 	public void setRootUrl(String url) {
 
 		getFileListPanel().setRootUrl(url);
-	}
-
-	public void displayHiddenFiles(boolean display) {
-		fileListPanel.displayHiddenFiles(display);
-	}
-
-	public void setExtensionsToDisplay(String[] extensions) {
-		fileListPanel.setExtensionsToDisplay(extensions);
 	}
 }

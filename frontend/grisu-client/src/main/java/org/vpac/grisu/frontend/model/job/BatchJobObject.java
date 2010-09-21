@@ -181,7 +181,7 @@ public class BatchJobObject implements JobMonitoringObject,
 					this.batchJobname, Constants.APPLICATIONVERSION_KEY));
 
 			addJobLogMessage("Job loaded from backend.");
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace(System.err);
 			throw new BatchJobException(e.getLocalizedMessage());
 		}
@@ -299,7 +299,7 @@ public class BatchJobObject implements JobMonitoringObject,
 		}
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 				"Adding job " + job.getJobname()));
-		int oldNo = this.getJobs().size();
+		final int oldNo = this.getJobs().size();
 		this.getJobs().add(job);
 		this.getNewlyAddedJobs().add(job);
 
@@ -328,7 +328,7 @@ public class BatchJobObject implements JobMonitoringObject,
 		try {
 			serviceInterface.addJobProperty(batchJobname, key, value);
 			addJobLogMessage("Added job property: " + key + "/" + value);
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -343,7 +343,7 @@ public class BatchJobObject implements JobMonitoringObject,
 		if (Thread.currentThread().isInterrupted()) {
 			executor.shutdownNow();
 
-			for (Future<?> f : tasks) {
+			for (final Future<?> f : tasks) {
 				f.cancel(true);
 			}
 
@@ -359,7 +359,7 @@ public class BatchJobObject implements JobMonitoringObject,
 
 	public Set<String> currentlyUsedSubmissionLocations() {
 
-		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(false);
 		if (temp == null) {
 			return new HashSet<String>();
 		}
@@ -398,16 +398,16 @@ public class BatchJobObject implements JobMonitoringObject,
 				"Checking and possibly downloading output files for batchjob: "
 						+ batchJobname + ". This might take a while..."));
 
-		for (JobObject job : getJobs()) {
+		for (final JobObject job : getJobs()) {
 
 			if (onlyDownloadWhenFinished && !job.isFinished(false)) {
 				continue;
 			}
 
-			for (String child : job.listJobDirectory(0)) {
-				String temp = FileManager.getFilename(child);
+			for (final String child : job.listJobDirectory(0)) {
+				final String temp = FileManager.getFilename(child);
 				boolean download = false;
-				for (String pattern : patterns) {
+				for (final String pattern : patterns) {
 					if (temp.indexOf(pattern) >= 0) {
 						download = true;
 						break;
@@ -423,7 +423,7 @@ public class BatchJobObject implements JobMonitoringObject,
 						needsDownloading = GrisuRegistryManager
 								.getDefault(serviceInterface).getFileManager()
 								.needsDownloading(child);
-					} catch (RuntimeException e) {
+					} catch (final RuntimeException e) {
 						myLogger.error("Could not access file " + child + ": "
 								+ e.getLocalizedMessage());
 						EventBus.publish(this.batchJobname, new BatchJobEvent(
@@ -440,7 +440,7 @@ public class BatchJobObject implements JobMonitoringObject,
 							cacheFile = GrisuRegistryManager
 									.getDefault(serviceInterface)
 									.getFileManager().downloadFile(child);
-						} catch (Exception e) {
+						} catch (final Exception e) {
 							myLogger.error("Could not download file " + child
 									+ ": " + e.getLocalizedMessage());
 							EventBus.publish(
@@ -486,7 +486,7 @@ public class BatchJobObject implements JobMonitoringObject,
 			return false;
 		}
 
-		BatchJobObject other = (BatchJobObject) o;
+		final BatchJobObject other = (BatchJobObject) o;
 
 		return getJobname().equals(other.getJobname());
 
@@ -498,7 +498,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	 * @return all failed jobs
 	 */
 	public SortedSet<DtoJob> failedJobs() {
-		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(false);
 		if (temp == null) {
 			return new TreeSet<DtoJob>();
 		}
@@ -555,7 +555,7 @@ public class BatchJobObject implements JobMonitoringObject,
 
 	public Set<String> getCurrentlyRunningOrSuccessfullSubmissionLocations() {
 
-		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(false);
 		if (temp == null) {
 			return new HashSet<String>();
 		}
@@ -563,7 +563,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	}
 
 	public Set<String> getCurrentlyUsedSubmissionLocations() {
-		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(false);
 		if (temp == null) {
 			return new HashSet<String>();
 		}
@@ -618,19 +618,19 @@ public class BatchJobObject implements JobMonitoringObject,
 	 */
 	public String getDetails() {
 
-		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(false);
 
 		if (temp == null) {
 			return "Could not find job.";
 		}
 
-		StringBuffer buffer = new StringBuffer("Details:\n\n");
+		final StringBuffer buffer = new StringBuffer("Details:\n\n");
 
 		buffer.append("Waiting jobs:\n");
 		if (temp.numberOfWaitingJobs() == 0) {
 			buffer.append("\tNo waiting jobs.\n");
 		} else {
-			for (DtoJob job : temp.waitingJobs()) {
+			for (final DtoJob job : temp.waitingJobs()) {
 				buffer.append("\t" + job.jobname() + ":\t"
 						+ job.statusAsString() + " (submitted to: "
 						+ job.jobProperty(Constants.SUBMISSION_SITE_KEY) + ", "
@@ -641,7 +641,7 @@ public class BatchJobObject implements JobMonitoringObject,
 		if (temp.numberOfRunningJobs() == 0) {
 			buffer.append("\tNo active jobs.\n");
 		} else {
-			for (DtoJob job : temp.runningJobs()) {
+			for (final DtoJob job : temp.runningJobs()) {
 				buffer.append("\t" + job.jobname() + ":\t"
 						+ job.statusAsString() + " (submitted to: "
 						+ job.jobProperty(Constants.SUBMISSION_SITE_KEY) + ", "
@@ -652,7 +652,7 @@ public class BatchJobObject implements JobMonitoringObject,
 		if (temp.numberOfSuccessfulJobs() == 0) {
 			buffer.append("\tNo successful jobs.\n");
 		} else {
-			for (DtoJob job : temp.successfulJobs()) {
+			for (final DtoJob job : temp.successfulJobs()) {
 				buffer.append("\t" + job.jobname() + ":\t"
 						+ job.statusAsString() + " (submitted to: "
 						+ job.jobProperty(Constants.SUBMISSION_SITE_KEY) + ", "
@@ -663,7 +663,7 @@ public class BatchJobObject implements JobMonitoringObject,
 		if (temp.numberOfFailedJobs() == 0) {
 			buffer.append("\tNo failed jobs.\n");
 		} else {
-			for (DtoJob job : temp.failedJobs()) {
+			for (final DtoJob job : temp.failedJobs()) {
 				buffer.append("\t" + job.jobname() + ":\t"
 						+ job.statusAsString() + " (submitted to: "
 						+ job.jobProperty(Constants.SUBMISSION_SITE_KEY) + ", "
@@ -718,17 +718,17 @@ public class BatchJobObject implements JobMonitoringObject,
 	public List<String> getListOfOutputFiles(boolean onlyWhenSubJobFinished,
 			String[] patterns) throws RemoteFileSystemException {
 
-		List<String> files = new LinkedList<String>();
+		final List<String> files = new LinkedList<String>();
 
-		for (JobObject job : getJobs()) {
+		for (final JobObject job : getJobs()) {
 
 			if (onlyWhenSubJobFinished && !job.isFinished(false)) {
 				continue;
 			}
 
-			for (String child : job.listJobDirectory(0)) {
-				String temp = FileManager.getFilename(child);
-				for (String pattern : patterns) {
+			for (final String child : job.listJobDirectory(0)) {
+				final String temp = FileManager.getFilename(child);
+				for (final String pattern : patterns) {
 					if (temp.indexOf(pattern) >= 0) {
 						files.add(child);
 						break;
@@ -751,7 +751,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	 */
 	public Map<Date, String> getLogMessages(boolean refresh) {
 
-		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(false);
 		if (temp == null) {
 			return new TreeMap<Date, String>();
 		}
@@ -783,7 +783,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	 * @return the number of failed jobs
 	 */
 	public int getNumberOfFailedJobs() {
-		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(false);
 		if (temp == null) {
 			return 0;
 		}
@@ -796,7 +796,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	 * @return the number of finished jobs
 	 */
 	public int getNumberOfFinishedJobs() {
-		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(false);
 		if (temp == null) {
 			return 0;
 		}
@@ -809,7 +809,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	 * @return the number of running jobs
 	 */
 	public int getNumberOfRunningJobs() {
-		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(false);
 		if (temp == null) {
 			return 0;
 		}
@@ -822,7 +822,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	 * @return the number of successful jobs
 	 */
 	public int getNumberOfSuccessfulJobs() {
-		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(false);
 		if (temp == null) {
 			return 0;
 		}
@@ -835,7 +835,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	 * @return the number of unsubmitted jobs
 	 */
 	public int getNumberOfUnsubmittedJobs() {
-		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(false);
 		if (temp == null) {
 			return 0;
 		}
@@ -848,7 +848,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	 * @return the number of waiting jobs
 	 */
 	public int getNumberOfWaitingJobs() {
-		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(false);
 		if (temp == null) {
 			return 0;
 		}
@@ -886,7 +886,7 @@ public class BatchJobObject implements JobMonitoringObject,
 			return "Could not access job.";
 		}
 
-		StringBuffer output = new StringBuffer();
+		final StringBuffer output = new StringBuffer();
 
 		output.append("Total number of jobs: " + temp.totalNumberOfJobs()
 				+ "\n");
@@ -919,7 +919,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	 * @return the properties
 	 */
 	public Map<String, String> getProperties() {
-		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(false);
 		if (temp == null) {
 			return new TreeMap<String, String>();
 		}
@@ -937,14 +937,14 @@ public class BatchJobObject implements JobMonitoringObject,
 
 		try {
 			return serviceInterface.getJobProperty(batchJobname, key);
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			throw new RuntimeException();
 		}
 	}
 
 	public int getStatus(boolean refresh) {
 
-		DtoBatchJob temp = getWrappedDtoBatchJob(refresh);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(refresh);
 		if (temp == null) {
 			return JobConstants.UNDEFINED;
 		}
@@ -953,7 +953,7 @@ public class BatchJobObject implements JobMonitoringObject,
 
 	public Map<Integer, Map<String, Integer>> getStatusMap() {
 
-		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(false);
 		if (temp == null) {
 			return new TreeMap<Integer, Map<String, Integer>>();
 		}
@@ -966,7 +966,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	}
 
 	public int getTotalNumberOfJobs() {
-		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(false);
 		if (temp == null) {
 			return 0;
 		}
@@ -998,7 +998,7 @@ public class BatchJobObject implements JobMonitoringObject,
 							if (refresh) {
 								try {
 									refreshMultiPartJobStatus(true);
-								} catch (InterruptedException e) {
+								} catch (final InterruptedException e) {
 									return;
 								}
 							}
@@ -1069,7 +1069,7 @@ public class BatchJobObject implements JobMonitoringObject,
 							RunningJobManager.updateJobList(serviceInterface,
 									getJobs(), dtoMultiPartJob.getJobs());
 
-						} catch (NoSuchJobException e) {
+						} catch (final NoSuchJobException e) {
 							e.printStackTrace();
 							if (isBeingKilled || isKilled) {
 								return;
@@ -1086,7 +1086,7 @@ public class BatchJobObject implements JobMonitoringObject,
 					&& ((dtoMultiPartJob == null) || waitForRefresh)) {
 				try {
 					refreshThread.join();
-				} catch (InterruptedException e) {
+				} catch (final InterruptedException e) {
 					throw new RuntimeException(e);
 				}
 			}
@@ -1112,12 +1112,12 @@ public class BatchJobObject implements JobMonitoringObject,
 	 */
 	public boolean isFinished(boolean refresh) {
 		try {
-			DtoBatchJob temp = getWrappedDtoBatchJob(refresh);
+			final DtoBatchJob temp = getWrappedDtoBatchJob(refresh);
 			if (temp == null) {
 				return false;
 			}
 			return temp.isFinished();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
@@ -1147,7 +1147,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	 * @return whether all jobs finished successfully
 	 */
 	public boolean isSuccessful(boolean refresh) {
-		DtoBatchJob temp = getWrappedDtoBatchJob(refresh);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(refresh);
 		if (temp == null) {
 			return false;
 		}
@@ -1159,7 +1159,7 @@ public class BatchJobObject implements JobMonitoringObject,
 		if (refreshThread != null) {
 			try {
 				refreshThread.interrupt();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -1168,20 +1168,20 @@ public class BatchJobObject implements JobMonitoringObject,
 		try {
 			serviceInterface.kill(this.getJobname(), clean);
 			addJobLogMessage("Job kill command sent to backend.");
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 
-		Thread waitThread = new Thread() {
+		final Thread waitThread = new Thread() {
 			@Override
 			public void run() {
-				StatusObject statusO = new StatusObject(serviceInterface,
+				final StatusObject statusO = new StatusObject(serviceInterface,
 						getJobname());
 				try {
 					statusO.waitForActionToFinish(3, false, true);
-				} catch (InterruptedException e) {
+				} catch (final InterruptedException e) {
 					e.printStackTrace();
-				} catch (StatusException e) {
+				} catch (final StatusException e) {
 					e.printStackTrace();
 				}
 
@@ -1202,7 +1202,7 @@ public class BatchJobObject implements JobMonitoringObject,
 		if (waitForCompletion) {
 			try {
 				waitThread.join();
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
@@ -1235,7 +1235,7 @@ public class BatchJobObject implements JobMonitoringObject,
 		do {
 
 			refresh();
-			String progress = getProgress();
+			final String progress = getProgress();
 
 			DtoBatchJob temp;
 			temp = getWrappedDtoBatchJob(false);
@@ -1252,7 +1252,7 @@ public class BatchJobObject implements JobMonitoringObject,
 
 			System.out.println(progress);
 
-			for (Date date : getLogMessages(false).keySet()) {
+			for (final Date date : getLogMessages(false).keySet()) {
 				System.out.println(date.toString() + ": "
 						+ getLogMessages(false).get(date));
 			}
@@ -1265,7 +1265,7 @@ public class BatchJobObject implements JobMonitoringObject,
 						"Pausing monitoring for " + sleeptimeinseconds
 								+ " seconds..."));
 				Thread.sleep(sleeptimeinseconds * 1000);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				e.printStackTrace();
 			}
 		} while (!finished);
@@ -1280,7 +1280,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	 * @return the absolute path
 	 */
 	public String pathToInputFiles() {
-		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(false);
 		if (temp == null) {
 			throw new RuntimeException("Could not access batchjob "
 					+ batchJobname);
@@ -1320,10 +1320,11 @@ public class BatchJobObject implements JobMonitoringObject,
 
 		myLogger.debug("Creating " + getNewlyAddedJobs().size()
 				+ " jobs as part of batchjob: " + batchJobname);
-		String message = "Creating " + getNewlyAddedJobs().size() + " jobs.";
+		final String message = "Creating " + getNewlyAddedJobs().size()
+				+ " jobs.";
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this, message));
 		addJobLogMessage(message);
-		ExecutorService executor = Executors
+		final ExecutorService executor = Executors
 				.newFixedThreadPool(getConcurrentJobCreationThreads());
 
 		final Map<JobObject, Exception> failedSubmissions = Collections
@@ -1337,7 +1338,7 @@ public class BatchJobObject implements JobMonitoringObject,
 						"Interrupted while creating jobs...");
 			}
 
-			Thread createThread = new Thread() {
+			final Thread createThread = new Thread() {
 				@Override
 				public void run() {
 					boolean success = false;
@@ -1349,7 +1350,8 @@ public class BatchJobObject implements JobMonitoringObject,
 									+ " to batchjob: " + batchJobname);
 
 							String jobname = null;
-							String message = "Adding job " + job.getJobname()
+							final String message = "Adding job "
+									+ job.getJobname()
 									+ " to batchjob on backend.";
 							EventBus.publish(BatchJobObject.this.batchJobname,
 									new BatchJobEvent(BatchJobObject.this,
@@ -1362,7 +1364,7 @@ public class BatchJobObject implements JobMonitoringObject,
 							job.setJobname(jobname);
 							job.updateJobDirectory();
 
-							String message2 = "Creation of job "
+							final String message2 = "Creation of job "
 									+ job.getJobname() + " successful.";
 
 							EventBus.publish(BatchJobObject.this.batchJobname,
@@ -1372,9 +1374,9 @@ public class BatchJobObject implements JobMonitoringObject,
 
 							success = true;
 							break;
-						} catch (Exception e) {
+						} catch (final Exception e) {
 							// e.printStackTrace();
-							String message = "Creation of job "
+							final String message = "Creation of job "
 									+ job.getJobname()
 									+ " failed or interrupted.\n\t("
 									+ e.getLocalizedMessage() + ")";
@@ -1385,7 +1387,7 @@ public class BatchJobObject implements JobMonitoringObject,
 
 							try {
 								serviceInterface.kill(job.getJobname(), true);
-							} catch (Exception e1) {
+							} catch (final Exception e1) {
 								// doesn't matter
 							}
 							lastException = e;
@@ -1405,20 +1407,21 @@ public class BatchJobObject implements JobMonitoringObject,
 
 		try {
 			executor.awaitTermination(7200, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			myLogger.debug("Preparing and creation of jobs cancelled.");
 			executor.shutdownNow();
 			throw new InterruptedException("Interrupted while creating jobs...");
 		}
-		String message2 = "Finished creation of " + getNewlyAddedJobs().size()
-				+ " jobs as part of batchjob: " + batchJobname;
+		final String message2 = "Finished creation of "
+				+ getNewlyAddedJobs().size() + " jobs as part of batchjob: "
+				+ batchJobname;
 		myLogger.debug(message2);
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this, message2));
 		addJobLogMessage(message2);
 
 		if (failedSubmissions.size() > 0) {
 			myLogger.error(failedSubmissions.size() + " submission failed...");
-			String message3 = "Not all jobs for batchjob " + batchJobname
+			final String message3 = "Not all jobs for batchjob " + batchJobname
 					+ " created successfully. Aborting...";
 			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 					message3));
@@ -1435,25 +1438,25 @@ public class BatchJobObject implements JobMonitoringObject,
 
 		if (optimize) {
 			try {
-				String message3 = "Optimizing batchjob: " + batchJobname;
+				final String message3 = "Optimizing batchjob: " + batchJobname;
 				EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 						message3));
 				addJobLogMessage(message3);
 				try {
-					String handle = serviceInterface
+					final String handle = serviceInterface
 							.redistributeBatchJob(this.batchJobname);
 
 					System.out.println("Handle: " + handle);
-					StatusObject status = new StatusObject(serviceInterface,
-							handle);
+					final StatusObject status = new StatusObject(
+							serviceInterface, handle);
 
 					try {
 						status.waitForActionToFinish(4, false, true,
 								"Redistribution: ");
-					} catch (InterruptedException e) {
+					} catch (final InterruptedException e) {
 						e.printStackTrace();
 						throw e;
-					} catch (StatusException e) {
+					} catch (final StatusException e) {
 						e.printStackTrace();
 					}
 
@@ -1470,23 +1473,23 @@ public class BatchJobObject implements JobMonitoringObject,
 								"Interrupted after creating all jobs.");
 					}
 
-				} catch (JobPropertiesException e) {
+				} catch (final JobPropertiesException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					throw new RuntimeException(e);
 				}
 
-				for (JobObject job : getNewlyAddedJobs()) {
+				for (final JobObject job : getNewlyAddedJobs()) {
 					job.updateJobDirectory();
 				}
 
-				String message4 = "Optimizing of batchjob " + batchJobname
-						+ " finished.\nJob distribution:\n"
+				final String message4 = "Optimizing of batchjob "
+						+ batchJobname + " finished.\nJob distribution:\n"
 						+ getOptimizationResult();
 				EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 						message4));
 				addJobLogMessage(message4);
-			} catch (NoSuchJobException e) {
+			} catch (final NoSuchJobException e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -1495,10 +1498,10 @@ public class BatchJobObject implements JobMonitoringObject,
 
 		try {
 			uploadInputFiles(uploadCommonFiles);
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			throw e;
-		} catch (Exception e) {
-			String message3 = "Uploading input files for batchjob: "
+		} catch (final Exception e) {
+			final String message3 = "Uploading input files for batchjob: "
 					+ batchJobname + " failed: " + e.getLocalizedMessage();
 			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 					message3));
@@ -1577,7 +1580,7 @@ public class BatchJobObject implements JobMonitoringObject,
 		String handle;
 		try {
 			handle = serviceInterface.refreshBatchJobStatus(batchJobname);
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 
 			this.isRefreshing = false;
 			pcs.firePropertyChange(REFRESHING, true, false);
@@ -1609,7 +1612,7 @@ public class BatchJobObject implements JobMonitoringObject,
 				try {
 					Thread.sleep(ClientPropertiesManager
 							.getJobStatusRecheckIntervall() * 1000);
-				} catch (InterruptedException e) {
+				} catch (final InterruptedException e) {
 					this.isRefreshing = false;
 					pcs.firePropertyChange(REFRESHING, true, false);
 					throw e;
@@ -1666,7 +1669,7 @@ public class BatchJobObject implements JobMonitoringObject,
 			boolean waitForRestartToFinish) throws JobsException,
 			BackendException, InterruptedException {
 
-		DefaultResubmitPolicy policy = new DefaultResubmitPolicy();
+		final DefaultResubmitPolicy policy = new DefaultResubmitPolicy();
 
 		policy.setProperty(DefaultResubmitPolicy.RESTART_FAILED_JOBS,
 				restartFailedJobs);
@@ -1704,19 +1707,19 @@ public class BatchJobObject implements JobMonitoringObject,
 		try {
 			serviceInterface.restartBatchJob(batchJobname, policy.getName(),
 					policy.getProperties()).propertiesAsMap();
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			setResubmitting(false);
 			return false;
-		} catch (JobPropertiesException e) {
+		} catch (final JobPropertiesException e) {
 			setResubmitting(false);
 			return false;
 		}
 
-		Thread waitThread = new Thread() {
+		final Thread waitThread = new Thread() {
 			@Override
 			public void run() {
 
-				String handle = batchJobname;
+				final String handle = batchJobname;
 				DtoActionStatus status = serviceInterface
 						.getActionStatus(handle);
 
@@ -1725,7 +1728,7 @@ public class BatchJobObject implements JobMonitoringObject,
 					try {
 						Thread.sleep(ClientPropertiesManager
 								.getJobStatusRecheckIntervall() * 1000);
-					} catch (InterruptedException e) {
+					} catch (final InterruptedException e) {
 						// doesn't happen
 					}
 					status = serviceInterface.getActionStatus(handle);
@@ -1738,7 +1741,7 @@ public class BatchJobObject implements JobMonitoringObject,
 		waitThread.start();
 
 		// to update all the jobdirectories
-		for (JobObject job : getJobs()) {
+		for (final JobObject job : getJobs()) {
 			job.getAllJobProperties().clear();
 		}
 
@@ -1746,7 +1749,7 @@ public class BatchJobObject implements JobMonitoringObject,
 
 			try {
 				waitThread.join();
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
@@ -1773,7 +1776,7 @@ public class BatchJobObject implements JobMonitoringObject,
 			Set<String> submissionLocationsToUse, boolean waitForRestartToFinish)
 			throws JobsException, BackendException, InterruptedException {
 
-		ResubmitPolicy policy = new SpecificJobsResubmitPolicy(
+		final ResubmitPolicy policy = new SpecificJobsResubmitPolicy(
 				jobnamesToRestart, submissionLocationsToUse);
 
 		return restart(policy, waitForRestartToFinish);
@@ -1828,11 +1831,11 @@ public class BatchJobObject implements JobMonitoringObject,
 		try {
 			serviceInterface.addJobProperty(this.batchJobname,
 					Constants.APPLICATIONNAME_KEY, defaultApplication);
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			throw new RuntimeException(e);
 		}
 
-		for (JobObject job : this.getJobs()) {
+		for (final JobObject job : this.getJobs()) {
 			job.setApplication(defaultApplication);
 		}
 	}
@@ -1857,11 +1860,11 @@ public class BatchJobObject implements JobMonitoringObject,
 			serviceInterface.addJobProperty(this.batchJobname,
 					Constants.NO_CPUS_KEY,
 					new Integer(defaultNoCpus).toString());
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			throw new RuntimeException(e);
 		}
 
-		for (JobObject job : this.getJobs()) {
+		for (final JobObject job : this.getJobs()) {
 			job.setCpus(defaultNoCpus);
 		}
 
@@ -1878,11 +1881,11 @@ public class BatchJobObject implements JobMonitoringObject,
 		try {
 			serviceInterface.addJobProperty(this.batchJobname,
 					Constants.APPLICATIONVERSION_KEY, defaultVersion);
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			throw new RuntimeException(e);
 		}
 
-		for (JobObject job : this.getJobs()) {
+		for (final JobObject job : this.getJobs()) {
 			job.setApplicationVersion(defaultVersion);
 		}
 
@@ -1902,17 +1905,17 @@ public class BatchJobObject implements JobMonitoringObject,
 			serviceInterface.addJobProperty(this.batchJobname,
 					Constants.WALLTIME_IN_MINUTES_KEY, new Integer(
 							walltimeInSeconds / 60).toString());
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			throw new RuntimeException(e);
 		}
 
-		for (JobObject job : this.getJobs()) {
+		for (final JobObject job : this.getJobs()) {
 			job.setWalltimeInSeconds(walltimeInSeconds);
 		}
 	}
 
 	private void setIsBeingKilled(boolean isBeingKilled) {
-		boolean old = this.isBeingKilled;
+		final boolean old = this.isBeingKilled;
 		this.isBeingKilled = isBeingKilled;
 		pcs.firePropertyChange("isBeingKilled", old, isBeingKilled);
 	}
@@ -1930,7 +1933,7 @@ public class BatchJobObject implements JobMonitoringObject,
 		try {
 			serviceInterface.addJobProperty(this.batchJobname,
 					Constants.DISTRIBUTION_METHOD, method);
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			throw new RuntimeException(e);
 		}
 
@@ -1961,7 +1964,7 @@ public class BatchJobObject implements JobMonitoringObject,
 					StringUtils.join(locationPatterns, ","));
 			serviceInterface.addJobProperty(this.batchJobname,
 					Constants.LOCATIONS_TO_INCLUDE_KEY, null);
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -1992,7 +1995,7 @@ public class BatchJobObject implements JobMonitoringObject,
 					StringUtils.join(locationPatterns, ","));
 			serviceInterface.addJobProperty(this.batchJobname,
 					Constants.LOCATIONS_TO_EXCLUDE_KEY, null);
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -2006,6 +2009,12 @@ public class BatchJobObject implements JobMonitoringObject,
 		isResubmitting = b;
 
 		pcs.firePropertyChange(RESUBMITTING, !b, b);
+
+	}
+
+	public void statusMessage(ActionStatusEvent event) {
+
+		addJobLogMessage(event.toString());
 
 	}
 
@@ -2028,7 +2037,7 @@ public class BatchJobObject implements JobMonitoringObject,
 			throws JobSubmissionException, NoSuchJobException,
 			InterruptedException {
 
-		String message = "Submitting batchjob " + batchJobname
+		final String message = "Submitting batchjob " + batchJobname
 				+ " to backend...";
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this, message));
 		addJobLogMessage(message);
@@ -2044,20 +2053,20 @@ public class BatchJobObject implements JobMonitoringObject,
 
 		try {
 			serviceInterface.submitJob(batchJobname);
-		} catch (JobSubmissionException jse) {
+		} catch (final JobSubmissionException jse) {
 			isSubmitting = false;
 			pcs.firePropertyChange(SUBMITTING, !isSubmitting, isSubmitting);
-			String message2 = "Job submission for batchjob " + batchJobname
-					+ " failed: " + jse.getLocalizedMessage();
+			final String message2 = "Job submission for batchjob "
+					+ batchJobname + " failed: " + jse.getLocalizedMessage();
 			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 					message2));
 			addJobLogMessage(message2);
 			throw jse;
-		} catch (NoSuchJobException nsje) {
+		} catch (final NoSuchJobException nsje) {
 			isSubmitting = false;
 			pcs.firePropertyChange(SUBMITTING, !isSubmitting, isSubmitting);
-			String message2 = "Job submitssion for batchjob " + batchJobname
-					+ " failed: " + nsje.getLocalizedMessage();
+			final String message2 = "Job submitssion for batchjob "
+					+ batchJobname + " failed: " + nsje.getLocalizedMessage();
 			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 					message2));
 			addJobLogMessage(message2);
@@ -2067,15 +2076,15 @@ public class BatchJobObject implements JobMonitoringObject,
 		final Thread waitThread = new Thread() {
 			@Override
 			public void run() {
-				StatusObject status = new StatusObject(serviceInterface,
+				final StatusObject status = new StatusObject(serviceInterface,
 						BatchJobObject.this.batchJobname);
 				status.addListener(BatchJobObject.this);
 				try {
 					status.waitForActionToFinish(4, false, true,
 							"Submission status: ");
-				} catch (InterruptedException e) {
+				} catch (final InterruptedException e) {
 					e.printStackTrace();
-				} catch (StatusException e) {
+				} catch (final StatusException e) {
 					e.printStackTrace();
 				} finally {
 					status.removeListener(BatchJobObject.this);
@@ -2086,7 +2095,7 @@ public class BatchJobObject implements JobMonitoringObject,
 		waitThread.start();
 
 		if (!waitForSubmissionToFinish) {
-			String message2 = "All jobs of batchjob "
+			final String message2 = "All jobs of batchjob "
 					+ batchJobname
 					+ " ready for submission. Continuing submission in background...";
 			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
@@ -2103,7 +2112,7 @@ public class BatchJobObject implements JobMonitoringObject,
 								isSubmitting);
 						EventBus.publish(new NewBatchJobEvent(
 								BatchJobObject.this));
-					} catch (InterruptedException e) {
+					} catch (final InterruptedException e) {
 						isSubmitting = false;
 						pcs.firePropertyChange(SUBMITTING, !isSubmitting,
 								isSubmitting);
@@ -2119,7 +2128,7 @@ public class BatchJobObject implements JobMonitoringObject,
 				isSubmitting = false;
 				pcs.firePropertyChange(SUBMITTING, !isSubmitting, isSubmitting);
 				EventBus.publish(new NewBatchJobEvent(this));
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				isSubmitting = false;
 				pcs.firePropertyChange(SUBMITTING, !isSubmitting, isSubmitting);
 				waitThread.interrupt();
@@ -2136,7 +2145,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	 * @return all successful jobs
 	 */
 	public SortedSet<DtoJob> successfulJobs() {
-		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(false);
 		if (temp == null) {
 			return new TreeSet<DtoJob>();
 		}
@@ -2154,7 +2163,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	 * @return all unsubmitted jobs
 	 */
 	public SortedSet<DtoJob> unsubmittedJobs() {
-		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(false);
 		if (temp == null) {
 			return new TreeSet<DtoJob>();
 		}
@@ -2170,9 +2179,9 @@ public class BatchJobObject implements JobMonitoringObject,
 		final ExecutorService executor = Executors
 				.newFixedThreadPool(getConcurrentInputFileUploadThreads());
 
-		List<Future<?>> tasks = new LinkedList<Future<?>>();
+		final List<Future<?>> tasks = new LinkedList<Future<?>>();
 
-		String messagex = "Starting file staging...";
+		final String messagex = "Starting file staging...";
 		EventBus.publish(getJobname(), new BatchJobEvent(BatchJobObject.this,
 				messagex));
 		addJobLogMessage(messagex);
@@ -2184,23 +2193,23 @@ public class BatchJobObject implements JobMonitoringObject,
 
 			// uploading single job input files
 			if (job.getInputFileUrls().length > 0) {
-				String message = "Adding input files for job "
+				final String message = "Adding input files for job "
 						+ job.getJobname();
 				EventBus.publish(getJobname(), new BatchJobEvent(
 						BatchJobObject.this, message));
 				addJobLogMessage(message);
 
-				Future<?> f = executor.submit(new Thread() {
+				final Future<?> f = executor.submit(new Thread() {
 					@Override
 					public void run() {
 						try {
 							try {
 
 								job.stageFiles();
-							} catch (InterruptedException e) {
+							} catch (final InterruptedException e) {
 								executor.shutdownNow();
 							}
-						} catch (FileTransactionException e) {
+						} catch (final FileTransactionException e) {
 							exceptions.add(e);
 							executor.shutdownNow();
 						}
@@ -2215,7 +2224,7 @@ public class BatchJobObject implements JobMonitoringObject,
 		final int all = inputFiles.keySet().size();
 
 		if (all > 0) {
-			String message = "Uploading " + all + " input files ("
+			final String message = "Uploading " + all + " input files ("
 					+ getConcurrentInputFileUploadThreads()
 					+ " concurrent upload threads.)";
 			EventBus.publish(getJobname(), new BatchJobEvent(
@@ -2229,18 +2238,18 @@ public class BatchJobObject implements JobMonitoringObject,
 					checkInterruptedStatus(executor, tasks);
 
 					i = i + 1;
-					Thread thread = new BatchJobFileUploadThread(
+					final Thread thread = new BatchJobFileUploadThread(
 							serviceInterface, this, inputFile, i, executor,
 							exceptions);
-					Future<?> f = executor.submit(thread);
+					final Future<?> f = executor.submit(thread);
 					// so the gridftp servers don't get hit at exactly the same
 					// time, to
 					// distribute the load
 					try {
 						Thread.sleep(500);
-					} catch (InterruptedException e) {
+					} catch (final InterruptedException e) {
 						executor.shutdownNow();
-						for (Future<?> f2 : tasks) {
+						for (final Future<?> f2 : tasks) {
 							f2.cancel(true);
 						}
 						throw new InterruptedException(
@@ -2254,10 +2263,10 @@ public class BatchJobObject implements JobMonitoringObject,
 
 		try {
 			executor.awaitTermination(10 * 3600, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			myLogger.debug("Interrupted....");
 			executor.shutdownNow();
-			for (Future<?> f : tasks) {
+			for (final Future<?> f : tasks) {
 				f.cancel(true);
 			}
 			throw new InterruptedException(
@@ -2269,7 +2278,7 @@ public class BatchJobObject implements JobMonitoringObject,
 			throw new FileUploadException(exceptions.get(0));
 		}
 
-		String message2 = "Staging of input files for batchjob: "
+		final String message2 = "Staging of input files for batchjob: "
 				+ batchJobname + " finished.";
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this, message2));
 		addJobLogMessage(message2);
@@ -2282,16 +2291,10 @@ public class BatchJobObject implements JobMonitoringObject,
 	 * @return all waiting jobs
 	 */
 	public SortedSet<DtoJob> waitingJobs() {
-		DtoBatchJob temp = getWrappedDtoBatchJob(false);
+		final DtoBatchJob temp = getWrappedDtoBatchJob(false);
 		if (temp == null) {
 			return new TreeSet<DtoJob>();
 		}
 		return temp.waitingJobs();
-	}
-
-	public void statusMessage(ActionStatusEvent event) {
-
-		addJobLogMessage(event.toString());
-
 	}
 }

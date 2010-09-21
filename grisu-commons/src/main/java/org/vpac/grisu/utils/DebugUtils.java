@@ -21,7 +21,7 @@ public final class DebugUtils {
 				myLogger.debug("Jsdl when processing stage: " + stage
 						+ "\n-----------------------------\n"
 						+ SeveralXMLHelpers.toString(jsdl));
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				myLogger.error("Couldn't parse jsdl document.");
 			}
 		}

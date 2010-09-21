@@ -25,15 +25,13 @@ public class MountPointHelpers {
 		try {
 			uri = new URI(server);
 			hostname = uri.getHost();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			hostname = server;
 		}
-		String name = hostname + " ("
-		+ (fqan.substring(fqan.lastIndexOf("/") + 1) + ")");
+		final String name = hostname + " ("
+				+ (fqan.substring(fqan.lastIndexOf("/") + 1) + ")");
 
 		return name;
 	}
-
-
 
 }

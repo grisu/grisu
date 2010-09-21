@@ -31,30 +31,32 @@ public class RestartSpecificJobsRestartPolicy implements SubmitPolicy {
 		this.properties = properties;
 
 		calculatedJobs = new HashSet<Job>();
-		String[] allJobnamesToRestart = properties.get(Constants.JOBNAMES_TO_RESTART).split(",");
+		final String[] allJobnamesToRestart = properties.get(
+				Constants.JOBNAMES_TO_RESTART).split(",");
 		Arrays.sort(allJobnamesToRestart);
 
-		for ( Job job : allJobs ) {
-			if ( Arrays.binarySearch(allJobnamesToRestart, job.getJobname()) >= 0 ) {
+		for (final Job job : allJobs) {
+			if (Arrays.binarySearch(allJobnamesToRestart, job.getJobname()) >= 0) {
 				calculatedJobs.add(job);
 			}
 		}
 
 		calculatedGridResources = new TreeSet<GridResource>();
-		Map<String, GridResource> subLocMap = new HashMap<String, GridResource>();
-		for ( GridResource gr : allResources ) {
-			subLocMap.put(SubmissionLocationHelpers.createSubmissionLocationString(gr), gr);
+		final Map<String, GridResource> subLocMap = new HashMap<String, GridResource>();
+		for (final GridResource gr : allResources) {
+			subLocMap.put(SubmissionLocationHelpers
+					.createSubmissionLocationString(gr), gr);
 		}
 
-		for ( String submissionLocation : properties.get(Constants.SUBMISSIONLOCATIONS_TO_RESTART).split(",") ) {
-			GridResource gr = subLocMap.get(submissionLocation);
-			if ( gr != null ) {
+		for (final String submissionLocation : properties.get(
+				Constants.SUBMISSIONLOCATIONS_TO_RESTART).split(",")) {
+			final GridResource gr = subLocMap.get(submissionLocation);
+			if (gr != null) {
 				calculatedGridResources.add(gr);
 			}
 		}
 
 	}
-
 
 	public SortedSet<GridResource> getCalculatedGridResources() {
 		return calculatedGridResources;

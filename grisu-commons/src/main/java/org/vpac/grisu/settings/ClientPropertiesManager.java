@@ -20,8 +20,8 @@ import au.org.arcs.jcommons.constants.Enums.LoginType;
 public final class ClientPropertiesManager {
 
 	public static final String[] DEFAULT_HELPDESK_CLASSES = new String[] {
-		"org.vpac.helpDesk.model.anonymousRT.AnonymousRTHelpDesk",
-	"org.vpac.helpDesk.model.trac.TracHelpDesk" };
+			"org.vpac.helpDesk.model.anonymousRT.AnonymousRTHelpDesk",
+			"org.vpac.helpDesk.model.trac.TracHelpDesk" };
 	public static final String HELPDESK_CONFIG = "support.properties";
 
 	public static final int CONCURRENT_THREADS_DEFAULT = 5;
@@ -29,9 +29,8 @@ public final class ClientPropertiesManager {
 
 	private static final int DEFAULT_FILE_UPLOAD_THREADS = 1;
 	private static final int DEFAULT_FILE_UPLOAD_RETRIES = 5;
-	
-	private static final int DEFAULT_FILE_DOWNLOAD_THREADS = 1;
 
+	private static final int DEFAULT_FILE_DOWNLOAD_THREADS = 1;
 
 	public static final Long DEFAULT_DOWNLOAD_FILESIZE_TRESHOLD = new Long(
 			1024 * 1024 * 2);
@@ -48,10 +47,9 @@ public final class ClientPropertiesManager {
 	private static PropertiesConfiguration config = null;
 
 	static final Logger myLogger = Logger
-	.getLogger(ClientPropertiesManager.class.getName());
+			.getLogger(ClientPropertiesManager.class.getName());
 	private static final int DEFAULT_ACTION_STATUS_RECHECK_INTERVAL_IN_SECONDS = 5;
 	private static final String DEFAULT_SHIBBOLETH_URL = "https://slcs1.arcs.org.au/SLCS/login";
-
 
 	public static final String AUTO_LOGIN_KEY = "autoLogin";
 
@@ -65,7 +63,7 @@ public final class ClientPropertiesManager {
 	public static void addServerTemplate(final String templateName) {
 
 		boolean alreadyThere = false;
-		for (String url : config.getStringArray("serverTemplates")) {
+		for (final String url : config.getStringArray("serverTemplates")) {
 			if (url.equals(templateName)) {
 				alreadyThere = true;
 				break;
@@ -77,9 +75,9 @@ public final class ClientPropertiesManager {
 			config.addProperty("serverTemplates", templateName);
 			try {
 				config.save();
-			} catch (ConfigurationException e) {
+			} catch (final ConfigurationException e) {
 				ClientPropertiesManager.myLogger
-				.debug("Could not write config file: " + e.getMessage());
+						.debug("Could not write config file: " + e.getMessage());
 			}
 		}
 	}
@@ -93,7 +91,7 @@ public final class ClientPropertiesManager {
 	public static void addServiceInterfaceUrl(final String serviceInterfaceUrl) {
 
 		boolean alreadyThere = false;
-		for (String url : config.getStringArray("serviceInterfaceUrl")) {
+		for (final String url : config.getStringArray("serviceInterfaceUrl")) {
 			if (url.equals(serviceInterfaceUrl)) {
 				alreadyThere = true;
 				break;
@@ -105,9 +103,9 @@ public final class ClientPropertiesManager {
 			config.addProperty("serviceInterfaceUrl", serviceInterfaceUrl);
 			try {
 				config.save();
-			} catch (ConfigurationException e) {
+			} catch (final ConfigurationException e) {
 				ClientPropertiesManager.myLogger
-				.debug("Could not write config file: " + e.getMessage());
+						.debug("Could not write config file: " + e.getMessage());
 			}
 		}
 	}
@@ -116,9 +114,10 @@ public final class ClientPropertiesManager {
 
 		boolean autoLogin = false;
 		try {
-			autoLogin = Boolean.parseBoolean(getClientConfiguration().getString(AUTO_LOGIN_KEY));
+			autoLogin = Boolean.parseBoolean(getClientConfiguration()
+					.getString(AUTO_LOGIN_KEY));
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// myLogger.debug("Problem with config file: " + e.getMessage());
 			return false;
 		}
@@ -135,22 +134,40 @@ public final class ClientPropertiesManager {
 	 *             if the file could not be read/parsed
 	 */
 	public static PropertiesConfiguration getClientConfiguration()
-	throws ConfigurationException {
+			throws ConfigurationException {
 		if (config == null) {
-			File grisuDir = Environment.getGrisuClientDirectory();
+			final File grisuDir = Environment.getGrisuClientDirectory();
 			config = new PropertiesConfiguration(new File(grisuDir,
-			"grisu.config"));
+					"grisu.config"));
 		}
 		return config;
+	}
+
+	public static int getConcurrentDownloadThreads() {
+		// TODO Auto-generated method stub
+		int threads = -1;
+		try {
+			threads = Integer.parseInt(getClientConfiguration().getString(
+					"concurrentDownloadThreads"));
+
+		} catch (final Exception e) {
+			// myLogger.debug("Problem with config file: " + e.getMessage());
+			return DEFAULT_FILE_DOWNLOAD_THREADS;
+		}
+		if (threads == -1) {
+			return DEFAULT_FILE_DOWNLOAD_THREADS;
+		}
+
+		return threads;
 	}
 
 	public static int getConcurrentThreadsDefault() {
 		int threads = -1;
 		try {
 			threads = Integer.parseInt(getClientConfiguration().getString(
-			"concurrentThreads"));
+					"concurrentThreads"));
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// myLogger.debug("Problem with config file: " + e.getMessage());
 			return CONCURRENT_THREADS_DEFAULT;
 		}
@@ -166,32 +183,14 @@ public final class ClientPropertiesManager {
 		int threads = -1;
 		try {
 			threads = Integer.parseInt(getClientConfiguration().getString(
-			"concurrentUploadThreads"));
+					"concurrentUploadThreads"));
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// myLogger.debug("Problem with config file: " + e.getMessage());
 			return DEFAULT_FILE_UPLOAD_THREADS;
 		}
 		if (threads == -1) {
 			return DEFAULT_FILE_UPLOAD_THREADS;
-		}
-
-		return threads;
-	}
-	
-	public static int getConcurrentDownloadThreads() {
-		// TODO Auto-generated method stub
-		int threads = -1;
-		try {
-			threads = Integer.parseInt(getClientConfiguration().getString(
-			"concurrentDownloadThreads"));
-
-		} catch (Exception e) {
-			// myLogger.debug("Problem with config file: " + e.getMessage());
-			return DEFAULT_FILE_DOWNLOAD_THREADS;
-		}
-		if (threads == -1) {
-			return DEFAULT_FILE_DOWNLOAD_THREADS;
 		}
 
 		return threads;
@@ -206,9 +205,9 @@ public final class ClientPropertiesManager {
 		long timeout = -1;
 		try {
 			timeout = Long.parseLong(getClientConfiguration().getString(
-			"connectionTimeout"));
+					"connectionTimeout"));
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 			return DEFAULT_TIMEOUT;
 		}
@@ -223,10 +222,10 @@ public final class ClientPropertiesManager {
 
 		int intervalInSeconds = -1;
 		try {
-			intervalInSeconds = Integer.parseInt(getClientConfiguration().getString(
-			"actionStatusRecheckInterval"));
+			intervalInSeconds = Integer.parseInt(getClientConfiguration()
+					.getString("actionStatusRecheckInterval"));
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// myLogger.debug("Problem with config file: " + e.getMessage());
 			return DEFAULT_ACTION_STATUS_RECHECK_INTERVAL_IN_SECONDS;
 		}
@@ -250,7 +249,7 @@ public final class ClientPropertiesManager {
 		String path = null;
 		try {
 			path = getClientConfiguration().getString(extension);
-		} catch (ConfigurationException ce) {
+		} catch (final ConfigurationException ce) {
 			myLogger.debug("Problem with config file: " + ce.getMessage());
 		}
 		if ((path == null) || "".equals(path) || !new File(path).exists()) {
@@ -274,13 +273,13 @@ public final class ClientPropertiesManager {
 	public static String getDefaultServiceInterfaceUrl() {
 		String defaultUrl = null;
 		try {
-			
+
 			defaultUrl = System.getProperty("grisu.defaultServiceInterface");
-			if ( StringUtils.isBlank(defaultUrl) ) {
+			if (StringUtils.isBlank(defaultUrl)) {
 				defaultUrl = getClientConfiguration().getString(
-				"defaultServiceInterfaceUrl");
+						"defaultServiceInterfaceUrl");
 			}
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
@@ -295,9 +294,9 @@ public final class ClientPropertiesManager {
 		long treshold = -1;
 		try {
 			treshold = Long.parseLong(getClientConfiguration().getString(
-			"downloadFileSizeTreshold"));
+					"downloadFileSizeTreshold"));
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// myLogger.debug("Problem with config file: " + e.getMessage());
 			return DEFAULT_DOWNLOAD_FILESIZE_TRESHOLD;
 		}
@@ -314,9 +313,9 @@ public final class ClientPropertiesManager {
 		int retries = -1;
 		try {
 			retries = Integer.parseInt(getClientConfiguration().getString(
-			"fileUploadRetries"));
+					"fileUploadRetries"));
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// myLogger.debug("Problem with config file: " + e.getMessage());
 			return DEFAULT_FILE_UPLOAD_RETRIES;
 		}
@@ -337,7 +336,7 @@ public final class ClientPropertiesManager {
 		try {
 			interval = getClientConfiguration().getInt(
 					JOBSTATUS_RECHECK_INTERVAL_KEY);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 		}
 
 		if (interval <= 0) {
@@ -352,20 +351,19 @@ public final class ClientPropertiesManager {
 
 		String lastLoginType = null;
 		try {
-			lastLoginType = getClientConfiguration().getString(
-			"lastLoginType");
-		} catch (ConfigurationException e) {
+			lastLoginType = getClientConfiguration().getString("lastLoginType");
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
 		if (StringUtils.isBlank(lastLoginType)) {
 			return DEFAULT_LOGIN_TYPE;
 		}
-		LoginType result = LoginType.fromString(lastLoginType);
+		final LoginType result = LoginType.fromString(lastLoginType);
 
-		//		if ( result == null ) {
-		//			return DEFAULT_LOGIN_TYPE;
-		//		}
+		// if ( result == null ) {
+		// return DEFAULT_LOGIN_TYPE;
+		// }
 
 		return result;
 	}
@@ -379,9 +377,9 @@ public final class ClientPropertiesManager {
 		int tab = -1;
 		try {
 			tab = Integer.parseInt(getClientConfiguration().getString(
-			"selectedTab"));
+					"selectedTab"));
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// myLogger.debug("Problem with config file: " + e.getMessage());
 			return 0;
 		}
@@ -401,11 +399,11 @@ public final class ClientPropertiesManager {
 		String fqan = null;
 		fqan = System.getProperty("grisu.defaultFqan");
 
-		if ( StringUtils.isBlank(fqan) ) {
+		if (StringUtils.isBlank(fqan)) {
 			try {
 				fqan = (String) (getClientConfiguration()
 						.getProperty("lastUsedFqan"));
-			} catch (ConfigurationException e) {
+			} catch (final ConfigurationException e) {
 				myLogger.debug("Problem with config file: " + e.getMessage());
 			}
 		}
@@ -416,14 +414,14 @@ public final class ClientPropertiesManager {
 
 		String defaultUrl = null;
 		try {
-			defaultUrl = getClientConfiguration().getString(
-			"lastUsedLeftUrl");
-		} catch (ConfigurationException e) {
+			defaultUrl = getClientConfiguration().getString("lastUsedLeftUrl");
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
 		if ((defaultUrl == null) || "".equals(defaultUrl)) {
-			defaultUrl = new File(System.getProperty("user.home")).toURI().toString();
+			defaultUrl = new File(System.getProperty("user.home")).toURI()
+					.toString();
 		}
 		return defaultUrl;
 
@@ -433,14 +431,14 @@ public final class ClientPropertiesManager {
 
 		String defaultUrl = null;
 		try {
-			defaultUrl = getClientConfiguration().getString(
-			"lastUsedRightUrl");
-		} catch (ConfigurationException e) {
+			defaultUrl = getClientConfiguration().getString("lastUsedRightUrl");
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
 		if ((defaultUrl == null) || "".equals(defaultUrl)) {
-			defaultUrl = new File(System.getProperty("user.home")).toURI().toString();
+			defaultUrl = new File(System.getProperty("user.home")).toURI()
+					.toString();
 		}
 		return defaultUrl;
 
@@ -451,7 +449,7 @@ public final class ClientPropertiesManager {
 		String value = null;
 		try {
 			value = getClientConfiguration().getString(key);
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			throw new RuntimeException(e);
 		}
 		return value;
@@ -468,7 +466,7 @@ public final class ClientPropertiesManager {
 		try {
 			idp = (String) (getClientConfiguration()
 					.getProperty("shibbolethIdp"));
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 		return idp;
@@ -484,7 +482,7 @@ public final class ClientPropertiesManager {
 		try {
 			username = (String) (getClientConfiguration()
 					.getProperty("shibbolethUsername"));
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 		return username;
@@ -502,8 +500,8 @@ public final class ClientPropertiesManager {
 
 		try {
 			templates = getClientConfiguration().getStringArray(
-			"serverTemplates");
-		} catch (ConfigurationException ce) {
+					"serverTemplates");
+		} catch (final ConfigurationException ce) {
 			// myLogger.debug("Problem with config file: " + ce.getMessage());
 			return new String[] {};
 		}
@@ -527,21 +525,19 @@ public final class ClientPropertiesManager {
 
 		try {
 			urls = getClientConfiguration().getStringArray(
-			"serviceInterfaceUrl");
-		} catch (ConfigurationException e1) {
+					"serviceInterfaceUrl");
+		} catch (final ConfigurationException e1) {
 			// myLogger.debug("Problem with config file: " + e1.getMessage());
 			return new String[] { DEFAULT_SERVICE_INTERFACE };
 		}
 
 		if (urls.length == 0) {
-			config
-			.setProperty("serviceInterfaceUrl",
-					DEFAULT_SERVICE_INTERFACE);
+			config.setProperty("serviceInterfaceUrl", DEFAULT_SERVICE_INTERFACE);
 			try {
 				config.save();
-			} catch (ConfigurationException e) {
+			} catch (final ConfigurationException e) {
 				ClientPropertiesManager.myLogger
-				.debug("Could not write config file: " + e.getMessage());
+						.debug("Could not write config file: " + e.getMessage());
 			}
 			return new String[] { DEFAULT_SERVICE_INTERFACE };
 		}
@@ -555,11 +551,11 @@ public final class ClientPropertiesManager {
 		try {
 			url = (String) (getClientConfiguration()
 					.getProperty("shibbolethUrl"));
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
-		if ( StringUtils.isBlank(url) ) {
+		if (StringUtils.isBlank(url)) {
 			return DEFAULT_SHIBBOLETH_URL;
 		}
 		return url;
@@ -574,19 +570,19 @@ public final class ClientPropertiesManager {
 	 */
 	public static void removeServerTemplate(final String templateName) {
 
-		String[] templates = config.getStringArray("serverTemplates");
+		final String[] templates = config.getStringArray("serverTemplates");
 
 		config.clearProperty("serverTemplates");
-		for (String template : templates) {
+		for (final String template : templates) {
 			if (!templateName.equals(template)) {
 				config.addProperty("serverTemplates", template);
 			}
 		}
 		try {
 			config.save();
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			ClientPropertiesManager.myLogger
-			.debug("Could not write config file: " + e.getMessage());
+					.debug("Could not write config file: " + e.getMessage());
 		}
 	}
 
@@ -601,7 +597,7 @@ public final class ClientPropertiesManager {
 		try {
 			getClientConfiguration().setProperty("httpProxy", useHttpProxy);
 			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
@@ -617,7 +613,7 @@ public final class ClientPropertiesManager {
 		try {
 			getClientConfiguration().setProperty("httpProxyPort", port);
 			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
@@ -633,7 +629,7 @@ public final class ClientPropertiesManager {
 		try {
 			getClientConfiguration().setProperty("httpProxyServer", server);
 			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
@@ -649,7 +645,7 @@ public final class ClientPropertiesManager {
 		try {
 			getClientConfiguration().setProperty("httpProxyUsername", username);
 			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
@@ -658,9 +654,10 @@ public final class ClientPropertiesManager {
 	public static void saveLastLoginType(LoginType lastLoginType) {
 
 		try {
-			getClientConfiguration().setProperty("lastLoginType", lastLoginType.toString());
+			getClientConfiguration().setProperty("lastLoginType",
+					lastLoginType.toString());
 			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
@@ -676,7 +673,7 @@ public final class ClientPropertiesManager {
 		try {
 			getClientConfiguration().setProperty("lastUsedFqan", fqan);
 			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 	}
@@ -692,7 +689,7 @@ public final class ClientPropertiesManager {
 			getClientConfiguration().setProperty("selectedTab",
 					selectedLoginPanel);
 			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 	}
@@ -707,11 +704,10 @@ public final class ClientPropertiesManager {
 		try {
 			getClientConfiguration().setProperty("shibbolethIdp", idpName);
 			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 	}
-
 
 	/**
 	 * Saves the last used shib username.
@@ -722,28 +718,28 @@ public final class ClientPropertiesManager {
 	public static void saveShibbolethUsername(final String username) {
 		try {
 			getClientConfiguration()
-			.setProperty("shibbolethUsername", username);
+					.setProperty("shibbolethUsername", username);
 			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 	}
 
-
 	public static void setAutoLogin(boolean selected) {
 
-//		System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+		// System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 
 		try {
-			getClientConfiguration().setProperty(AUTO_LOGIN_KEY, new Boolean(selected).toString());
+			getClientConfiguration().setProperty(AUTO_LOGIN_KEY,
+					new Boolean(selected).toString());
 			getClientConfiguration().save();
 
-			EventBus.publish(new ClientPropertiesEvent(AUTO_LOGIN_KEY, new Boolean(selected).toString()));
+			EventBus.publish(new ClientPropertiesEvent(AUTO_LOGIN_KEY,
+					new Boolean(selected).toString()));
 
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
-
 
 	}
 
@@ -761,7 +757,7 @@ public final class ClientPropertiesManager {
 		try {
 			getClientConfiguration().setProperty(extension, path);
 			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
@@ -781,29 +777,36 @@ public final class ClientPropertiesManager {
 					serviceInterfaceUrl);
 			addServiceInterfaceUrl(serviceInterfaceUrl);
 			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 	}
 
-	public static void setLastUsedLeftUrl(
-			final String url) {
+	public static void setLastUsedFqan(String currentFqan) {
+
 		try {
-			getClientConfiguration().setProperty("lastUsedLeftUrl",
-					url);
+			getClientConfiguration().setProperty("lastUsedFqan", currentFqan);
 			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
+			myLogger.debug("Problem with config file: " + e.getMessage());
+		}
+
+	}
+
+	public static void setLastUsedLeftUrl(final String url) {
+		try {
+			getClientConfiguration().setProperty("lastUsedLeftUrl", url);
+			getClientConfiguration().save();
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 	}
 
-	public static void setLastUsedRightUrl(
-			final String url) {
+	public static void setLastUsedRightUrl(final String url) {
 		try {
-			getClientConfiguration().setProperty("lastUsedRightUrl",
-					url);
+			getClientConfiguration().setProperty("lastUsedRightUrl", url);
 			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 	}
@@ -813,24 +816,12 @@ public final class ClientPropertiesManager {
 		try {
 			getClientConfiguration().setProperty(lastBlenderFileDir, string);
 			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	private ClientPropertiesManager() {
-	}
-
-	public static void setLastUsedFqan(String currentFqan) {
-		
-		try {
-			getClientConfiguration().setProperty("lastUsedFqan",
-					currentFqan);
-			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
-			myLogger.debug("Problem with config file: " + e.getMessage());
-		}
-
 	}
 
 }

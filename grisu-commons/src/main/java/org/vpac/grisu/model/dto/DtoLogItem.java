@@ -16,9 +16,9 @@ public class DtoLogItem {
 
 	public static List<DtoLogItem> generateLogItemList(Map<Date, String> map) {
 
-		List<DtoLogItem> result = new LinkedList<DtoLogItem>();
+		final List<DtoLogItem> result = new LinkedList<DtoLogItem>();
 
-		for (Date key : map.keySet()) {
+		for (final Date key : map.keySet()) {
 			result.add(new DtoLogItem(key, map.get(key)));
 		}
 
@@ -27,10 +27,10 @@ public class DtoLogItem {
 
 	public static Map<Date, String> generateLogMap(List<DtoLogItem> list) {
 
-		Map<Date, String> result = Collections
+		final Map<Date, String> result = Collections
 				.synchronizedMap(new TreeMap<Date, String>());
 
-		for (DtoLogItem item : list) {
+		for (final DtoLogItem item : list) {
 			result.put(item.getTime(), item.getLogMessage());
 		}
 

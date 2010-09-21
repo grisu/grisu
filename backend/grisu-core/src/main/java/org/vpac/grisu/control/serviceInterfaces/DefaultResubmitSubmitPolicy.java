@@ -48,12 +48,12 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 
 		if (properties != null) {
 			// overwrite defaults
-			for (String key : properties.keySet()) {
+			for (final String key : properties.keySet()) {
 				initProperties.put(key, properties.get(key));
 			}
 		}
 
-		for (GridResource gr : allResources) {
+		for (final GridResource gr : allResources) {
 			cacheGridResourceMap.put(SubmissionLocationHelpers
 					.createSubmissionLocationString(gr), gr);
 		}
@@ -82,14 +82,15 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 			} else {
 
 				if (isSubmitToDoneLocations()) {
-					for (String subLoc : bjs.getDoneSubLocs()) {
+					for (final String subLoc : bjs.getDoneSubLocs()) {
 
 						if (bjs.getFailedSubLocs().contains(subLoc)) {
 							// at least one job failed on this subLoc
 							continue;
 						}
 
-						GridResource temp = cacheGridResourceMap.get(subLoc);
+						final GridResource temp = cacheGridResourceMap
+								.get(subLoc);
 
 						if (temp != null) {
 							calculatedResources.add(temp);
@@ -97,8 +98,9 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 					}
 				}
 				if (isSubmitToFailedLocations()) {
-					for (String subLoc : bjs.getFailedSubLocs()) {
-						GridResource temp = cacheGridResourceMap.get(subLoc);
+					for (final String subLoc : bjs.getFailedSubLocs()) {
+						final GridResource temp = cacheGridResourceMap
+								.get(subLoc);
 
 						if (temp != null) {
 							calculatedResources.add(temp);
@@ -106,7 +108,7 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 					}
 				}
 				if (isSubmitToRunningLocations()) {
-					for (String subLoc : bjs.getRunningSubLocs()) {
+					for (final String subLoc : bjs.getRunningSubLocs()) {
 
 						if (bjs.getDoneSubLocs().contains(subLoc)
 								|| bjs.getFailedJobs().contains(subLoc)) {
@@ -114,7 +116,8 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 							// this subloc
 							continue;
 						}
-						GridResource temp = cacheGridResourceMap.get(subLoc);
+						final GridResource temp = cacheGridResourceMap
+								.get(subLoc);
 
 						if (temp != null) {
 							calculatedResources.add(temp);
@@ -122,7 +125,7 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 					}
 				}
 				if (isSubmitToWaitingLocations()) {
-					for (String subLoc : bjs.getRunningSubLocs()) {
+					for (final String subLoc : bjs.getRunningSubLocs()) {
 
 						if (bjs.getDoneSubLocs().contains(subLoc)
 								|| bjs.getRunningSubLocs().contains(subLoc)
@@ -132,7 +135,8 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 							continue;
 						}
 
-						GridResource temp = cacheGridResourceMap.get(subLoc);
+						final GridResource temp = cacheGridResourceMap
+								.get(subLoc);
 
 						if (temp != null) {
 							calculatedResources.add(temp);
@@ -151,26 +155,26 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 
 			calculatedJobs = new HashSet<Job>();
 			if (isResubmitDoneJobs()) {
-				for (Job job : bjs.getDoneJobs()) {
+				for (final Job job : bjs.getDoneJobs()) {
 					calculatedJobs.add(job);
 				}
 			}
 			if (isResubmitFailedJobs()) {
-				for (Job job : bjs.getFailedJobs()) {
+				for (final Job job : bjs.getFailedJobs()) {
 					calculatedJobs.add(job);
 				}
 			}
 			if (isResubmitRunningJobs()) {
-				for (Job job : bjs.getRunningJobs()) {
+				for (final Job job : bjs.getRunningJobs()) {
 					calculatedJobs.add(job);
 				}
 			}
 			if (isResubmitWaitingJobs()) {
 
-				for (Job job : bjs.getWaitingJobs()) {
+				for (final Job job : bjs.getWaitingJobs()) {
 
-					String currentSubLoc = job
-					.getJobProperty(Constants.SUBMISSIONLOCATION_KEY);
+					final String currentSubLoc = job
+							.getJobProperty(Constants.SUBMISSIONLOCATION_KEY);
 					if (isResubmitWaitingJobsOnDoneLocations()
 							&& bjs.getDoneSubLocs().contains(currentSubLoc)) {
 						calculatedJobs.add(job);
@@ -188,7 +192,7 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 				}
 			}
 			if (isSubmitReadyJobs()) {
-				for (Job job : bjs.getReadyJobs()) {
+				for (final Job job : bjs.getReadyJobs()) {
 					calculatedJobs.add(job);
 				}
 			}
@@ -218,23 +222,27 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 	}
 
 	public boolean isResubmitWaitingJobsOnDoneLocations() {
-		return Boolean.parseBoolean(initProperties
-				.get(DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_DONE_LOCATIONS));
+		return Boolean
+				.parseBoolean(initProperties
+						.get(DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_DONE_LOCATIONS));
 	}
 
 	public boolean isResubmitWaitingJobsOnFailedLocations() {
-		return Boolean.parseBoolean(initProperties
-				.get(DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_FAILED_LOCATIONS));
+		return Boolean
+				.parseBoolean(initProperties
+						.get(DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_FAILED_LOCATIONS));
 	}
 
 	public boolean isResubmitWaitingJobsOnRunningLocations() {
-		return Boolean.parseBoolean(initProperties
-				.get(DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_RUNNING_LOCATIONS));
+		return Boolean
+				.parseBoolean(initProperties
+						.get(DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_RUNNING_LOCATIONS));
 	}
 
 	public boolean isResubmitWaitingJobsOnWaitingLocations() {
-		return Boolean.parseBoolean(initProperties
-				.get(DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_WAITING_LOCATIONS));
+		return Boolean
+				.parseBoolean(initProperties
+						.get(DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_WAITING_LOCATIONS));
 	}
 
 	public boolean isSubmitReadyJobs() {
@@ -248,23 +256,27 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 	}
 
 	public boolean isSubmitToDoneLocations() {
-		return Boolean.parseBoolean(initProperties
-				.get(DefaultResubmitPolicy.RESTART_TO_DONE_SUBMISSION_LOCATIONS));
+		return Boolean
+				.parseBoolean(initProperties
+						.get(DefaultResubmitPolicy.RESTART_TO_DONE_SUBMISSION_LOCATIONS));
 	}
 
 	public boolean isSubmitToFailedLocations() {
-		return Boolean.parseBoolean(initProperties
-				.get(DefaultResubmitPolicy.RESTART_TO_FAILED_SUBMISSION_LOCATIONS));
+		return Boolean
+				.parseBoolean(initProperties
+						.get(DefaultResubmitPolicy.RESTART_TO_FAILED_SUBMISSION_LOCATIONS));
 	}
 
 	public boolean isSubmitToRunningLocations() {
-		return Boolean.parseBoolean(initProperties
-				.get(DefaultResubmitPolicy.RESTART_TO_RUNNING_SUBMISSION_LOCATIONS));
+		return Boolean
+				.parseBoolean(initProperties
+						.get(DefaultResubmitPolicy.RESTART_TO_RUNNING_SUBMISSION_LOCATIONS));
 	}
 
 	public boolean isSubmitToWaitingLocations() {
-		return Boolean.parseBoolean(initProperties
-				.get(DefaultResubmitPolicy.RESTART_TO_WAITING_SUBMISSION_LOCATIONS));
+		return Boolean
+				.parseBoolean(initProperties
+						.get(DefaultResubmitPolicy.RESTART_TO_WAITING_SUBMISSION_LOCATIONS));
 	}
 
 	public void recalculate() {
@@ -275,8 +287,8 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 	}
 
 	public void setResubmitDoneJobs(Boolean resubmitDoneJobs) {
-		initProperties.put(DefaultResubmitPolicy.RESTART_DONE_JOBS, resubmitDoneJobs
-				.toString());
+		initProperties.put(DefaultResubmitPolicy.RESTART_DONE_JOBS,
+				resubmitDoneJobs.toString());
 	}
 
 	public void setResubmitFailedJobs(Boolean resubmitFailedJobs) {
@@ -296,8 +308,8 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 
 	public void setResubmitWaitingJobsOnDoneLocations(Boolean restart) {
 		initProperties.put(
-				DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_DONE_LOCATIONS, restart
-				.toString());
+				DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_DONE_LOCATIONS,
+				restart.toString());
 	}
 
 	public void setResubmitWaitingJobsOnFailedLocations(Boolean restart) {
@@ -307,15 +319,15 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 	}
 
 	public void setResubmitWaitingJobsOnRunningLocations(Boolean restart) {
-		initProperties.put(
-				DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_RUNNING_LOCATIONS,
-				restart.toString());
+		initProperties
+				.put(DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_RUNNING_LOCATIONS,
+						restart.toString());
 	}
 
 	public void setResubmitWaitingJobsOnWaitingLocations(Boolean restart) {
-		initProperties.put(
-				DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_WAITING_LOCATIONS,
-				restart.toString());
+		initProperties
+				.put(DefaultResubmitPolicy.RESTART_WAITING_JOBS_ON_WAITING_LOCATIONS,
+						restart.toString());
 	}
 
 	public void setSubmitReadyJobs(Boolean submitReadyJobs) {
@@ -324,12 +336,13 @@ public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 	}
 
 	public void setSubmitToAllLocations(Boolean all) {
-		initProperties.put(DefaultResubmitPolicy.RESTART_TO_ALL_LOCATIONS, all
-				.toString());
+		initProperties.put(DefaultResubmitPolicy.RESTART_TO_ALL_LOCATIONS,
+				all.toString());
 	}
 
 	public void setSubmitToDoneLocations(Boolean submitToDoneLocations) {
-		initProperties.put(DefaultResubmitPolicy.RESTART_TO_DONE_SUBMISSION_LOCATIONS,
+		initProperties.put(
+				DefaultResubmitPolicy.RESTART_TO_DONE_SUBMISSION_LOCATIONS,
 				submitToDoneLocations.toString());
 	}
 

@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public class CaCertManager {
 
-	private Map<String, String> urls = new HashMap<String, String>();
+	private final Map<String, String> urls = new HashMap<String, String>();
 
 	/**
 	 * Default constructor.

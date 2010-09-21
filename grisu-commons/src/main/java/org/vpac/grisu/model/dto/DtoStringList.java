@@ -14,8 +14,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class DtoStringList {
 
 	public static DtoStringList fromSingleString(String string) {
-		DtoStringList result = new DtoStringList();
-		List<String> list = new LinkedList<String>();
+		final DtoStringList result = new DtoStringList();
+		final List<String> list = new LinkedList<String>();
 		list.add(string);
 		result.setStringList(list);
 		return result;
@@ -23,7 +23,7 @@ public class DtoStringList {
 
 	public static DtoStringList fromStringArray(String[] array) {
 
-		DtoStringList result = new DtoStringList();
+		final DtoStringList result = new DtoStringList();
 		result.setStringList(Arrays.asList(array));
 
 		return result;
@@ -32,7 +32,7 @@ public class DtoStringList {
 
 	public static DtoStringList fromStringColletion(Collection<String> list) {
 
-		DtoStringList result = new DtoStringList();
+		final DtoStringList result = new DtoStringList();
 		result.setStringList(new LinkedList(list));
 
 		return result;
@@ -41,7 +41,7 @@ public class DtoStringList {
 
 	public static DtoStringList fromStringList(List<String> list) {
 
-		DtoStringList result = new DtoStringList();
+		final DtoStringList result = new DtoStringList();
 		result.setStringList(list);
 
 		return result;

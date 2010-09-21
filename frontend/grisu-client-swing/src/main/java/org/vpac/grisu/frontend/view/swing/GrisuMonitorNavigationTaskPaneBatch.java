@@ -19,7 +19,8 @@ import org.vpac.grisu.model.UserEnvironmentManager;
 
 import au.org.arcs.jcommons.constants.Constants;
 
-public class GrisuMonitorNavigationTaskPaneBatch extends JXTaskPane implements EventSubscriber<NewBatchJobEvent>{
+public class GrisuMonitorNavigationTaskPaneBatch extends JXTaskPane implements
+		EventSubscriber<NewBatchJobEvent> {
 
 	public static final String BATCH_JOB_LIST = "batch_list";
 
@@ -38,9 +39,13 @@ public class GrisuMonitorNavigationTaskPaneBatch extends JXTaskPane implements E
 	/**
 	 * Create the panel.
 	 */
-	public GrisuMonitorNavigationTaskPaneBatch(ServiceInterface si, GrisuNavigationPanel navPanel, boolean displayAllJobsItem, boolean displayApplicationSpecificItems, Set<String> applicationsToWatch) {
+	public GrisuMonitorNavigationTaskPaneBatch(ServiceInterface si,
+			GrisuNavigationPanel navPanel, boolean displayAllJobsItem,
+			boolean displayApplicationSpecificItems,
+			Set<String> applicationsToWatch) {
 		this.si = si;
-		this.em = GrisuRegistryManager.getDefault(si).getUserEnvironmentManager();
+		this.em = GrisuRegistryManager.getDefault(si)
+				.getUserEnvironmentManager();
 
 		this.applicationsToWatch = applicationsToWatch;
 		this.navPanel = navPanel;
@@ -48,16 +53,16 @@ public class GrisuMonitorNavigationTaskPaneBatch extends JXTaskPane implements E
 		this.displayApplicationSpecificItems = displayApplicationSpecificItems;
 		setTitle("Monitor batchjobs");
 
-		if ( displayAllJobsItem) {
+		if (displayAllJobsItem) {
 			addApplication(Constants.ALLJOBS_KEY);
 		}
 
-		if ( displayApplicationSpecificItems ) {
+		if (displayApplicationSpecificItems) {
 			updateApplications();
 		}
 
-		if ( (applicationsToWatch != null) && (applicationsToWatch.size() > 0) ) {
-			for ( String app : applicationsToWatch ) {
+		if ((applicationsToWatch != null) && (applicationsToWatch.size() > 0)) {
+			for (final String app : applicationsToWatch) {
 				addApplication(app);
 			}
 		}
@@ -67,25 +72,30 @@ public class GrisuMonitorNavigationTaskPaneBatch extends JXTaskPane implements E
 
 		final String app = application.toLowerCase();
 
-		if ( Constants.ALLJOBS_KEY.equals(app) ) {
+		if (Constants.ALLJOBS_KEY.equals(app)) {
 			RunningJobManager.getDefault(si).getAllBatchJobs();
 		}
 
-		if ( actions.get(app) == null ) {
-			Action temp = new AbstractAction() {
+		if (actions.get(app) == null) {
+			final Action temp = new AbstractAction() {
 
 				private final String application = app;
 				{
-					putValue(Action.NAME, ApplicationsManager.getPrettyName(app));
-					putValue(Action.SHORT_DESCRIPTION, ApplicationsManager.getShortDescription(app));
-					putValue(Action.SMALL_ICON, ApplicationsManager.getIcon(app));
+					putValue(Action.NAME,
+							ApplicationsManager.getPrettyName(app));
+					putValue(Action.SHORT_DESCRIPTION,
+							ApplicationsManager.getShortDescription(app));
+					putValue(Action.SMALL_ICON,
+							ApplicationsManager.getIcon(app));
 				}
 
 				public void actionPerformed(ActionEvent e) {
-					System.out.println("Action command: "+e.getActionCommand());
-					System.out.println("Application: "+application);
+					System.out.println("Action command: "
+							+ e.getActionCommand());
+					System.out.println("Application: " + application);
 
-					navPanel.setNavigationCommand(new String[]{BATCH_JOB_LIST, application});
+					navPanel.setNavigationCommand(new String[] {
+							BATCH_JOB_LIST, application });
 				}
 
 				public String getApplication() {
@@ -99,7 +109,7 @@ public class GrisuMonitorNavigationTaskPaneBatch extends JXTaskPane implements E
 
 	public void onEvent(NewBatchJobEvent event) {
 
-		if ( displayApplicationSpecificItems ) {
+		if (displayApplicationSpecificItems) {
 			addApplication(event.getBatchJob().getApplication());
 		}
 
@@ -107,7 +117,7 @@ public class GrisuMonitorNavigationTaskPaneBatch extends JXTaskPane implements E
 
 	private void updateApplications() {
 
-		for ( final String app : em.getCurrentApplicationsBatch(true) ) {
+		for (final String app : em.getCurrentApplicationsBatch(true)) {
 
 			addApplication(app);
 

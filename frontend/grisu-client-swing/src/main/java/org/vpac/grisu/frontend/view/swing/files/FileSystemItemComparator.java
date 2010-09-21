@@ -7,8 +7,8 @@ import org.vpac.grisu.model.files.FileSystemItem;
 
 public class FileSystemItemComparator implements Comparator<FileSystemItem> {
 
-	private static final String homeDirName = new File(System
-			.getProperty("user.home")).getName();
+	private static final String homeDirName = new File(
+			System.getProperty("user.home")).getName();
 
 	public int compare(FileSystemItem arg0, FileSystemItem arg1) {
 

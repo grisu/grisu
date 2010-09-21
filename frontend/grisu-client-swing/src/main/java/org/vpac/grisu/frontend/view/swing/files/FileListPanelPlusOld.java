@@ -83,7 +83,7 @@ public class FileListPanelPlusOld extends JPanel implements FileListPanel,
 		add(getLabel(), "2, 2, right, default");
 		add(getComboBox(), "4, 2, fill, default");
 
-		FileSystemItem item = em.getFileSystemForUrl(startUrl);
+		final FileSystemItem item = em.getFileSystemForUrl(startUrl);
 		if (item != null) {
 			rootUrl = item.getRootFile().getUrl();
 			fireEvent = false;
@@ -107,6 +107,10 @@ public class FileListPanelPlusOld extends JPanel implements FileListPanel,
 
 	}
 
+	public void displayHiddenFiles(boolean display) {
+		fileListPanel.displayHiddenFiles(display);
+	}
+
 	public void fileDoubleClicked(GlazedFile file) {
 	}
 
@@ -123,19 +127,19 @@ public class FileListPanelPlusOld extends JPanel implements FileListPanel,
 					if (fireEvent) {
 						if (ItemEvent.SELECTED == arg0.getStateChange()) {
 							try {
-								FileSystemItem fsi = (FileSystemItem) (filesystemModel
+								final FileSystemItem fsi = (FileSystemItem) (filesystemModel
 										.getSelectedItem());
 								if (fsi.isDummy() && (lastFileSystem != null)) {
 									comboBox.setSelectedItem(lastFileSystem);
 									return;
 								}
-								GlazedFile sel = fsi.getRootFile();
+								final GlazedFile sel = fsi.getRootFile();
 								if (sel.equals(lastFileSystem)) {
 									return;
 								}
 								getFileListPanel().setRootAndCurrentUrl(sel);
 								lastFileSystem = fsi;
-							} catch (NullPointerException e) {
+							} catch (final NullPointerException e) {
 								// that's ok.
 							}
 
@@ -204,16 +208,12 @@ public class FileListPanelPlusOld extends JPanel implements FileListPanel,
 		getFileListPanel().setCurrentUrl(url);
 	}
 
+	public void setExtensionsToDisplay(String[] extensions) {
+		fileListPanel.setExtensionsToDisplay(extensions);
+	}
+
 	public void setRootUrl(String url) {
 
 		getFileListPanel().setRootUrl(url);
-	}
-
-	public void displayHiddenFiles(boolean display) {
-		fileListPanel.displayHiddenFiles(display);
-	}
-
-	public void setExtensionsToDisplay(String[] extensions) {
-		fileListPanel.setExtensionsToDisplay(extensions);
 	}
 }

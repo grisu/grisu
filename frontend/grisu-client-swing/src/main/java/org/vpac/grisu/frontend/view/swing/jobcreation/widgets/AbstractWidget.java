@@ -43,13 +43,13 @@ public abstract class AbstractWidget extends JPanel {
 					startUrl = new File(System.getProperty("user.home"))
 							.toURI().toString();
 				}
-			} catch (RemoteFileSystemException e) {
+			} catch (final RemoteFileSystemException e) {
 				myLogger.debug(e);
 				startUrl = new File(System.getProperty("user.home")).toURI()
 						.toString();
 			}
 		}
-		GrisuFileDialog fileDialog = new GrisuFileDialog(si, startUrl);
+		final GrisuFileDialog fileDialog = new GrisuFileDialog(si, startUrl);
 		fileDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		fileDialog.setExtensionsToDisplay(extensions);
@@ -114,7 +114,7 @@ public abstract class AbstractWidget extends JPanel {
 
 	private void initHistory() {
 
-		String lastValue = hm.getLastEntry(this.historyKey);
+		final String lastValue = hm.getLastEntry(this.historyKey);
 		if (StringUtils.isBlank(lastValue)) {
 			return;
 		}
@@ -124,7 +124,7 @@ public abstract class AbstractWidget extends JPanel {
 		if (setLastValue()) {
 			try {
 				setValue(lastValue);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				return;
 			}
 		}
@@ -133,8 +133,8 @@ public abstract class AbstractWidget extends JPanel {
 
 	public void lockIUI(final boolean lock) {
 
-		Component[] comps = getComponents();
-		for (Component comp : comps) {
+		final Component[] comps = getComponents();
+		for (final Component comp : comps) {
 			comp.setEnabled(!lock);
 		}
 
@@ -147,7 +147,7 @@ public abstract class AbstractWidget extends JPanel {
 
 	public void saveItemToHistory() {
 		if (hm != null && StringUtils.isNotBlank(historyKey)) {
-			String temp = getValue();
+			final String temp = getValue();
 			if (StringUtils.isNotBlank(temp)) {
 				System.out.println("Adding: " + this.getClass().toString());
 				hm.addHistoryEntry(this.historyKey, temp);
@@ -184,7 +184,7 @@ public abstract class AbstractWidget extends JPanel {
 			initHistory();
 		}
 	}
-	
+
 	public void setTitle(String title) {
 		setBorder(new TitledBorder(null, title, TitledBorder.LEADING,
 				TitledBorder.TOP, null, null));

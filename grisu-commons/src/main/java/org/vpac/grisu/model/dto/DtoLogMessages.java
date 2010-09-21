@@ -14,9 +14,9 @@ public class DtoLogMessages {
 
 	public static DtoLogMessages createLogMessages(Map<Long, String> messages) {
 
-		DtoLogMessages result = new DtoLogMessages();
-		for (Long time : messages.keySet()) {
-			Date date = new Date(time);
+		final DtoLogMessages result = new DtoLogMessages();
+		for (final Long time : messages.keySet()) {
+			final Date date = new Date(time);
 			result.addMessage(date, messages.get(time));
 		}
 		return result;
@@ -34,9 +34,9 @@ public class DtoLogMessages {
 
 	public Map<Date, String> asMap() {
 
-		Map<Date, String> temp = new TreeMap<Date, String>();
+		final Map<Date, String> temp = new TreeMap<Date, String>();
 
-		for (DtoLogMessage msg : getMessages()) {
+		for (final DtoLogMessage msg : getMessages()) {
 			temp.put(msg.getDate(), msg.getMessage());
 		}
 		return temp;

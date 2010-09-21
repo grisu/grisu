@@ -75,7 +75,7 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 			final String applicationName) {
 
 		if (cachedApplicationInformationObjects.get(applicationName) == null) {
-			ApplicationInformation temp = new ApplicationInformationImpl(
+			final ApplicationInformation temp = new ApplicationInformationImpl(
 					serviceInterface, applicationName);
 			cachedApplicationInformationObjects.put(applicationName, temp);
 		}
@@ -101,13 +101,14 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	 */
 	public final HistoryManager getHistoryManager() {
 		if (historyManager == null) {
-			File historyFile = new File(Environment.getGrisuClientDirectory()
-					.getPath(), GRISU_HISTORY_FILENAME);
+			final File historyFile = new File(Environment
+					.getGrisuClientDirectory().getPath(),
+					GRISU_HISTORY_FILENAME);
 			if (!historyFile.exists()) {
 				try {
 					historyFile.createNewFile();
 
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					myLogger.debug(e);
 				}
 			}
@@ -152,7 +153,7 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 			final String applicationName) {
 
 		if (cachedUserInformationObjects.get(applicationName) == null) {
-			UserApplicationInformation temp = new UserApplicationInformationImpl(
+			final UserApplicationInformation temp = new UserApplicationInformationImpl(
 					serviceInterface, getUserEnvironmentManager(),
 					applicationName);
 			cachedUserInformationObjects.put(applicationName, temp);

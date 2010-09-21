@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.globus.gram.GramJob;
+import org.globus.gram.internal.GRAMConstants;
 import org.globus.rsl.NameOpValue;
 import org.globus.rsl.RslNode;
 import org.ietf.jgss.GSSCredential;
@@ -34,18 +34,18 @@ public class GT5Submitter extends JobSubmitter {
 			return modules_string;
 		}
 		// mds based
-		String application = JsdlHelpers.getApplicationName(jsdl);
-		String version = JsdlHelpers.getApplicationVersion(jsdl);
-		String[] subLocs = JsdlHelpers.getCandidateHosts(jsdl);
+		final String application = JsdlHelpers.getApplicationName(jsdl);
+		final String version = JsdlHelpers.getApplicationVersion(jsdl);
+		final String[] subLocs = JsdlHelpers.getCandidateHosts(jsdl);
 		if ((subLocs != null) && (subLocs.length > 0)) {
-			String subLoc = subLocs[0];
+			final String subLoc = subLocs[0];
 			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
 				return null;
 			} else if (StringUtils.isNotBlank(application)
 					&& StringUtils.isNotBlank(version)
 					&& StringUtils.isNotBlank(subLoc)) {
 				// if we know application, version and submissionLocation
-				Map<String, String> appDetails = infoManager
+				final Map<String, String> appDetails = infoManager
 						.getApplicationDetails(application, version, subLoc);
 
 				try {
@@ -55,14 +55,14 @@ public class GT5Submitter extends JobSubmitter {
 					if ((modules_string == null) || "".equals(modules_string)) {
 						return null;
 					}
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					return null;
 				}
 				return modules_string;
 			} else if ((application != null) && (version == null)
 					&& (subLoc != null)) {
 
-				Map<String, String> appDetails = infoManager
+				final Map<String, String> appDetails = infoManager
 						.getApplicationDetails(application,
 								Constants.NO_VERSION_INDICATOR_STRING, subLoc);
 
@@ -74,7 +74,7 @@ public class GT5Submitter extends JobSubmitter {
 						return null;
 					}
 
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					return null;
 				}
 
@@ -106,30 +106,31 @@ public class GT5Submitter extends JobSubmitter {
 	public static String createJobSubmissionDescription(
 			final InformationManager infoManager, final Document jsdl) {
 
-		RslNode result = new RslNode();
-		NameOpValue executable = new NameOpValue("executable", NameOpValue.EQ,
-				JsdlHelpers.getPosixApplicationExecutable(jsdl));
+		final RslNode result = new RslNode();
+		final NameOpValue executable = new NameOpValue("executable",
+				NameOpValue.EQ, JsdlHelpers.getPosixApplicationExecutable(jsdl));
 
-		String[] argumentsVal = JsdlHelpers.getPosixApplicationArguments(jsdl);
+		final String[] argumentsVal = JsdlHelpers
+				.getPosixApplicationArguments(jsdl);
 		NameOpValue arguments = null;
 		if (argumentsVal != null && argumentsVal.length > 0) {
 			arguments = new NameOpValue("arguments", NameOpValue.EQ,
 					argumentsVal);
 		}
 
-		NameOpValue stdout = new NameOpValue("stdout", NameOpValue.EQ,
+		final NameOpValue stdout = new NameOpValue("stdout", NameOpValue.EQ,
 				JsdlHelpers.getPosixStandardOutput(jsdl));
-		NameOpValue stderr = new NameOpValue("stderr", NameOpValue.EQ,
+		final NameOpValue stderr = new NameOpValue("stderr", NameOpValue.EQ,
 				JsdlHelpers.getPosixStandardError(jsdl));
 
-		String inputVal = JsdlHelpers.getPosixStandardInput(jsdl);
+		final String inputVal = JsdlHelpers.getPosixStandardInput(jsdl);
 		NameOpValue stdin = null;
 		if (inputVal != null) {
 			stdin = new NameOpValue("stdin", NameOpValue.EQ,
 					JsdlHelpers.getPosixStandardInput(jsdl));
 		}
 
-		String dirValue = JsdlHelpers.getWorkingDirectory(jsdl);
+		final String dirValue = JsdlHelpers.getWorkingDirectory(jsdl);
 		NameOpValue directory = null;
 		if ((dirValue != null) && !"".equals(dirValue.trim())) {
 			directory = new NameOpValue("directory", NameOpValue.EQ,
@@ -146,7 +147,7 @@ public class GT5Submitter extends JobSubmitter {
 
 		// Add "queue" node
 		// TODO change that once I know how to specify queues in jsdl
-		String[] queues = JsdlHelpers.getCandidateHosts(jsdl);
+		final String[] queues = JsdlHelpers.getCandidateHosts(jsdl);
 		if ((queues != null) && (queues.length > 0)) {
 			String queueVal = queues[0];
 			// always uses
@@ -163,9 +164,9 @@ public class GT5Submitter extends JobSubmitter {
 			myLogger.info("Can't parse queues. If that happens when trying to submit a job, it's probably a bug...");
 		}
 		// Add "jobtype" if mpi
-		int processorCount = JsdlHelpers.getProcessorCount(jsdl);
+		final int processorCount = JsdlHelpers.getProcessorCount(jsdl);
 
-		String jobTypeString = JsdlHelpers.getArcsJobType(jsdl);
+		final String jobTypeString = JsdlHelpers.getArcsJobType(jsdl);
 		count = new NameOpValue("count", NameOpValue.EQ, "" + processorCount);
 
 		if (processorCount > 1) {
@@ -197,7 +198,7 @@ public class GT5Submitter extends JobSubmitter {
 		}
 
 		// Add "maxWallTime" node
-		int walltime = JsdlHelpers.getWalltime(jsdl);
+		final int walltime = JsdlHelpers.getWalltime(jsdl);
 		if (walltime > 0) {
 			int wt = new Integer(JsdlHelpers.getWalltime(jsdl));
 			// convert to minutes
@@ -207,9 +208,9 @@ public class GT5Submitter extends JobSubmitter {
 		}
 
 		// send email on start/stop
-		String emailAddressVal = JsdlHelpers.getEmail(jsdl);
-		boolean onFinish = JsdlHelpers.getSendEmailOnJobFinish(jsdl);
-		boolean onStart = JsdlHelpers.getSendEmailOnJobStart(jsdl);
+		final String emailAddressVal = JsdlHelpers.getEmail(jsdl);
+		final boolean onFinish = JsdlHelpers.getSendEmailOnJobFinish(jsdl);
+		final boolean onStart = JsdlHelpers.getSendEmailOnJobStart(jsdl);
 
 		NameOpValue emailAddress = null;
 		NameOpValue emailStart = null;
@@ -232,21 +233,21 @@ public class GT5Submitter extends JobSubmitter {
 		}
 
 		// job name
-		String jobnameVal = JsdlHelpers.getJobname(jsdl);
-		NameOpValue jobname = new NameOpValue("jobname", NameOpValue.EQ,
+		final String jobnameVal = JsdlHelpers.getJobname(jsdl);
+		final NameOpValue jobname = new NameOpValue("jobname", NameOpValue.EQ,
 				jobnameVal.substring(Math.max(0, jobnameVal.length() - 6)));
 
 		// module setup
-		String[] modulesVal = getModulesFromMDS(infoManager, jsdl);
+		final String[] modulesVal = getModulesFromMDS(infoManager, jsdl);
 		if (modulesVal != null) {
-			for (String moduleStr : modulesVal) {
-				NameOpValue module = new NameOpValue("module", NameOpValue.EQ,
-						moduleStr);
+			for (final String moduleStr : modulesVal) {
+				final NameOpValue module = new NameOpValue("module",
+						NameOpValue.EQ, moduleStr);
 				addNotNull(result, module);
 			}
 		}
 
-                result.add(new NameOpValue("save_state",NameOpValue.EQ,"yes"));
+		result.add(new NameOpValue("save_state", NameOpValue.EQ, "yes"));
 		addNotNull(result, executable);
 		addNotNull(result, jobname);
 		addNotNull(result, arguments);
@@ -264,13 +265,13 @@ public class GT5Submitter extends JobSubmitter {
 		addNotNull(result, emailTermination);
 		addNotNull(result, emailAbort);
 
-		String resultString = result.toRSL(true);
+		final String resultString = result.toRSL(true);
 		myLogger.debug("Translated jsdl into gt5 rsl: " + resultString);
 		return resultString;
 	}
 
 	public static void main(String[] args) {
-		Gram5Client gram5 = new Gram5Client();
+		final Gram5Client gram5 = new Gram5Client();
 	}
 
 	public GT5Submitter() {
@@ -296,17 +297,17 @@ public class GT5Submitter extends JobSubmitter {
 	@Override
 	protected String submit(InformationManager infoManager, String host,
 			String factoryType, Job job) {
-		String rsl = createJobSubmissionDescription(infoManager,
+		final String rsl = createJobSubmissionDescription(infoManager,
 				job.getJobDescription());
 		myLogger.debug("RSL is ... " + rsl);
 
 		try {
-			GSSCredential credential = CredentialHelpers
+			final GSSCredential credential = CredentialHelpers
 					.convertByteArrayToGSSCredential(job.getCredential()
 							.getCredentialData());
-			String handle = gram5.submit(rsl, host, credential);
+			final String handle = gram5.submit(rsl, host, credential);
 			return handle;
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			ex.printStackTrace();
 			return null;
 		}
@@ -314,25 +315,25 @@ public class GT5Submitter extends JobSubmitter {
 
 	private int translateToGrisuStatus(final int[] statusAndError) {
 
-                int status = statusAndError[0];
-                int error = statusAndError[1];
+		final int status = statusAndError[0];
+		final int error = statusAndError[1];
 
 		int grisu_status = Integer.MIN_VALUE;
-		if (status == GramJob.STATUS_DONE) {
+		if (status == GRAMConstants.STATUS_DONE) {
 			grisu_status = JobConstants.DONE + error;
-		} else if (status == GramJob.STATUS_STAGE_IN) {
+		} else if (status == GRAMConstants.STATUS_STAGE_IN) {
 			grisu_status = JobConstants.STAGE_IN;
-		} else if (status == GramJob.STATUS_STAGE_OUT) {
+		} else if (status == GRAMConstants.STATUS_STAGE_OUT) {
 			grisu_status = JobConstants.STAGE_IN;
-		} else if (status == GramJob.STATUS_PENDING) {
+		} else if (status == GRAMConstants.STATUS_PENDING) {
 			grisu_status = JobConstants.PENDING;
-		} else if (status == GramJob.STATUS_UNSUBMITTED) {
+		} else if (status == GRAMConstants.STATUS_UNSUBMITTED) {
 			grisu_status = JobConstants.UNSUBMITTED;
-		} else if (status == GramJob.STATUS_ACTIVE) {
+		} else if (status == GRAMConstants.STATUS_ACTIVE) {
 			grisu_status = JobConstants.ACTIVE;
-		} else if (status == GramJob.STATUS_FAILED) {
+		} else if (status == GRAMConstants.STATUS_FAILED) {
 			grisu_status = JobConstants.FAILED;
-		} else if (status == GramJob.STATUS_SUSPENDED) {
+		} else if (status == GRAMConstants.STATUS_SUSPENDED) {
 			grisu_status = JobConstants.ACTIVE;
 		} else {
 			grisu_status = status;

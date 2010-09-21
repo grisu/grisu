@@ -68,7 +68,7 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements
 		}
 
 		if ((applicationsToWatch != null) && (applicationsToWatch.size() > 0)) {
-			for (String app : applicationsToWatch) {
+			for (final String app : applicationsToWatch) {
 				addApplication(app);
 			}
 		}
@@ -82,8 +82,7 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements
 
 		if (Constants.GENERIC_APPLICATION_NAME
 				.equals(application.toLowerCase())) {
-			myLogger
-					.debug("Not adding monitor generic application to navigation pane. Using all jobs instead...");
+			myLogger.debug("Not adding monitor generic application to navigation pane. Using all jobs instead...");
 			app = Constants.ALLJOBS_KEY;
 		} else {
 			app = application.toLowerCase();
@@ -94,16 +93,16 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements
 		}
 
 		if (actions.get(app) == null) {
-			Action temp = new AbstractAction() {
+			final Action temp = new AbstractAction() {
 
 				private final String application = app;
 				{
-					putValue(Action.NAME, ApplicationsManager
-							.getPrettyName(app));
-					putValue(Action.SHORT_DESCRIPTION, ApplicationsManager
-							.getShortDescription(app));
-					putValue(Action.SMALL_ICON, ApplicationsManager
-							.getIcon(app));
+					putValue(Action.NAME,
+							ApplicationsManager.getPrettyName(app));
+					putValue(Action.SHORT_DESCRIPTION,
+							ApplicationsManager.getShortDescription(app));
+					putValue(Action.SMALL_ICON,
+							ApplicationsManager.getIcon(app));
 				}
 
 				public void actionPerformed(ActionEvent e) {
@@ -135,7 +134,7 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements
 					application = si.getJobProperty(
 							event.getJob().getJobname(),
 							Constants.APPLICATIONNAME_KEY);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					myLogger.error(e);
 					return;
 				}

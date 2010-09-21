@@ -23,23 +23,23 @@ public class DtoFolder implements DtoRemoteObject {
 	public static DtoFolder listLocalFolder(File folder,
 			boolean includeParentInFileListing) {
 
-		DtoFolder result = new DtoFolder();
+		final DtoFolder result = new DtoFolder();
 		result.setRootUrl(folder.toURI().toString());
 		result.setFolder(true);
 		result.setName(folder.getName());
 
 		if (includeParentInFileListing) {
-			DtoFolder childFolder = new DtoFolder();
+			final DtoFolder childFolder = new DtoFolder();
 			childFolder.setFolder(true);
 			childFolder.setName(folder.getName());
 			childFolder.setRootUrl(folder.toURI().toString());
 		}
 
-		for (File child : folder.listFiles()) {
+		for (final File child : folder.listFiles()) {
 
 			if (child.isDirectory()) {
 
-				DtoFolder childFolder = new DtoFolder();
+				final DtoFolder childFolder = new DtoFolder();
 				childFolder.setFolder(true);
 				childFolder.setName(child.getName());
 				childFolder.setRootUrl(child.toURI().toString());
@@ -48,14 +48,14 @@ public class DtoFolder implements DtoRemoteObject {
 
 			} else if (child.isFile()) {
 
-				DtoFile childFile = new DtoFile();
+				final DtoFile childFile = new DtoFile();
 				childFile.setFolder(false);
 				childFile.setName(child.getName());
 				childFile.setRootUrl(child.toURI().toString());
 				try {
 					childFile.setLastModified(child.lastModified());
 					childFile.setSize(child.length());
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					// no idea why I need to catch this. Without it it seems to
 					// stall...
 					e.printStackTrace();
@@ -127,12 +127,12 @@ public class DtoFolder implements DtoRemoteObject {
 
 	public List<DtoRemoteObject> listAllChildren() {
 
-		List<DtoRemoteObject> result = new LinkedList<DtoRemoteObject>();
+		final List<DtoRemoteObject> result = new LinkedList<DtoRemoteObject>();
 
-		for (DtoFolder folder : getChildrenFolders()) {
+		for (final DtoFolder folder : getChildrenFolders()) {
 			result.add(folder);
 		}
-		for (DtoFile file : getChildrenFiles()) {
+		for (final DtoFile file : getChildrenFiles()) {
 			result.add(file);
 		}
 		return result;
@@ -140,12 +140,12 @@ public class DtoFolder implements DtoRemoteObject {
 
 	public List<String> listOfAllFilesUnderThisFolder() {
 
-		List<String> result = new LinkedList<String>();
+		final List<String> result = new LinkedList<String>();
 
-		for (DtoFolder childFolder : getChildrenFolders()) {
+		for (final DtoFolder childFolder : getChildrenFolders()) {
 			result.addAll(childFolder.listOfAllFilesUnderThisFolder());
 		}
-		for (DtoFile childFile : getChildrenFiles()) {
+		for (final DtoFile childFile : getChildrenFiles()) {
 			result.add(childFile.getRootUrl());
 		}
 		return result;

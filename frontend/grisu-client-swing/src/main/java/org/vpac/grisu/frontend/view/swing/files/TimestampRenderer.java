@@ -24,9 +24,10 @@ public class TimestampRenderer extends DefaultTableCellRenderer implements
 			setBackground(arg0.getBackground());
 		}
 
-		Long timestamp = (Long) arg1;
+		final Long timestamp = (Long) arg1;
 
-		String sizeString = GlazedFile.calculateTimeStampString(timestamp);
+		final String sizeString = GlazedFile
+				.calculateTimeStampString(timestamp);
 
 		this.setText(sizeString);
 		this.setHorizontalAlignment(SwingConstants.RIGHT);

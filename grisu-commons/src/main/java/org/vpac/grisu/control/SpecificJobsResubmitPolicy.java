@@ -14,7 +14,8 @@ public class SpecificJobsResubmitPolicy implements ResubmitPolicy {
 	private final Set<String> jobnames;
 	private final Set<String> submissionLocations;
 
-	public SpecificJobsResubmitPolicy(Set<String> jobnames, Set<String> submissionLocations) {
+	public SpecificJobsResubmitPolicy(Set<String> jobnames,
+			Set<String> submissionLocations) {
 		this.jobnames = jobnames;
 		this.submissionLocations = submissionLocations;
 	}
@@ -25,9 +26,11 @@ public class SpecificJobsResubmitPolicy implements ResubmitPolicy {
 
 	public DtoProperties getProperties() {
 
-		Map<String, String> result = new HashMap<String, String>();
-		result.put(Constants.JOBNAMES_TO_RESTART, StringUtils.join(jobnames, ","));
-		result.put(Constants.SUBMISSIONLOCATIONS_TO_RESTART, StringUtils.join(submissionLocations, ","));
+		final Map<String, String> result = new HashMap<String, String>();
+		result.put(Constants.JOBNAMES_TO_RESTART,
+				StringUtils.join(jobnames, ","));
+		result.put(Constants.SUBMISSIONLOCATIONS_TO_RESTART,
+				StringUtils.join(submissionLocations, ","));
 
 		return DtoProperties.createProperties(result);
 	}

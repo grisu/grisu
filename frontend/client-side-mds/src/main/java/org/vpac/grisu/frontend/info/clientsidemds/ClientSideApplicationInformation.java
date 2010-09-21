@@ -41,7 +41,7 @@ public class ClientSideApplicationInformation implements ApplicationInformation 
 			Map<JobSubmissionProperty, String> additionalJobProperties,
 			String fqan) {
 
-		Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
+		final Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
 		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
 				getApplicationName());
 
@@ -79,8 +79,8 @@ public class ClientSideApplicationInformation implements ApplicationInformation 
 	public Set<String> getAvailableSubmissionLocationsForVersionAndFqan(
 			String version, String fqan) {
 
-		Set<String> temp = new TreeSet<String>();
-		for (String subLoc : registry.getResourceInformation()
+		final Set<String> temp = new TreeSet<String>();
+		for (final String subLoc : registry.getResourceInformation()
 				.getAllAvailableSubmissionLocations(fqan)) {
 			if (getAvailableSubmissionLocationsForVersion(version).contains(
 					subLoc)) {
@@ -100,7 +100,7 @@ public class ClientSideApplicationInformation implements ApplicationInformation 
 			final Map<JobSubmissionProperty, String> additionalJobProperties,
 			final String fqan) {
 
-		Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
+		final Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
 		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
 				getApplicationName());
 

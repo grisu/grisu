@@ -11,7 +11,7 @@ public class DoubleWalltimeJobRestarter implements FailedJobRestarter {
 
 	public void restartJob(JobObject failedJob) throws JobSubmissionException {
 
-		int walltime = failedJob.getWalltimeInSeconds();
+		final int walltime = failedJob.getWalltimeInSeconds();
 
 		failedJob.setWalltimeInSeconds(walltime * 2);
 
@@ -19,7 +19,7 @@ public class DoubleWalltimeJobRestarter implements FailedJobRestarter {
 				+ " with walltime: " + failedJob.getWalltimeInSeconds());
 		try {
 			failedJob.restartJob();
-		} catch (JobPropertiesException e) {
+		} catch (final JobPropertiesException e) {
 			throw new JobSubmissionException("Could not restart job: "
 					+ e.getLocalizedMessage());
 		}

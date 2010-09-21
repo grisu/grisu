@@ -29,10 +29,12 @@ public class GrisuFileNavigationTaskPane extends JXTaskPane {
 	/**
 	 * Create the panel.
 	 */
-	public GrisuFileNavigationTaskPane(ServiceInterface si, GrisuNavigationPanel navPanel) {
+	public GrisuFileNavigationTaskPane(ServiceInterface si,
+			GrisuNavigationPanel navPanel) {
 
 		this.si = si;
-		this.em = GrisuRegistryManager.getDefault(si).getUserEnvironmentManager();
+		this.em = GrisuRegistryManager.getDefault(si)
+				.getUserEnvironmentManager();
 		this.navPanel = navPanel;
 
 		setTitle("Files");
@@ -41,15 +43,16 @@ public class GrisuFileNavigationTaskPane extends JXTaskPane {
 
 	private void initialize() {
 
-		Action temp = new AbstractAction() {
+		final Action temp = new AbstractAction() {
 			{
 				putValue(Action.NAME, "File management");
 				putValue(Action.SHORT_DESCRIPTION, "File management");
 				putValue(Action.SMALL_ICON, FILE_MANAGEMENT_ICON);
 			}
+
 			public void actionPerformed(ActionEvent e) {
 
-				navPanel.setNavigationCommand(new String[]{FILE_MANAGEMENT});
+				navPanel.setNavigationCommand(new String[] { FILE_MANAGEMENT });
 
 			}
 		};

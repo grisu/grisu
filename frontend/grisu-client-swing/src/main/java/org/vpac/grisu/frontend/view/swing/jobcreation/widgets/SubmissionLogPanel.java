@@ -37,6 +37,22 @@ public class SubmissionLogPanel extends JPanel implements
 
 	}
 
+	public void appendMessage(String message) {
+
+		getTextArea().append(message);
+		getTextArea().setCaretPosition(getTextArea().getText().length());
+
+	}
+
+	private void appendText(final String msg) {
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				getTextArea().append(msg + "\n");
+			}
+		});
+	}
+
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
@@ -52,6 +68,71 @@ public class SubmissionLogPanel extends JPanel implements
 			textArea.setMargin(new Insets(5, 5, 5, 5));
 		}
 		return textArea;
+	}
+
+	public void propertyChange(PropertyChangeEvent evt) {
+		try {
+
+			String oldValue = null;
+			if (evt.getOldValue() != null) {
+				try {
+					oldValue = (String) evt.getOldValue();
+				} catch (final Exception e) {
+				}
+			}
+			String newValue = null;
+			if (evt.getNewValue() != null) {
+				try {
+					newValue = (String) evt.getNewValue();
+				} catch (final Exception e) {
+					try {
+						newValue = ((Integer) evt.getNewValue()).toString();
+					} catch (final Exception e1) {
+					}
+				}
+			}
+
+			final String propName = evt.getPropertyName();
+
+			String text = null;
+
+			if ("submissionLog".equals(propName)) {
+				final List<String> log = (List<String>) evt.getNewValue();
+				text = log.get(log.size() - 1);
+			} else if (Constants.STATUS_STRING.equals(propName)) {
+				return;
+			} else if ("statusString".equals(propName)) {
+				return;
+				// text = "New status: " + newValue;
+			} else if (StringUtils.isBlank(oldValue)
+					&& StringUtils.isNotBlank(newValue)) {
+				text = "Set " + propName + ": " + newValue;
+			} else if (StringUtils.isNotBlank(oldValue)
+					&& StringUtils.isNotBlank(newValue)) {
+				text = "Changed value for " + propName + ": " + oldValue
+						+ " -> " + newValue;
+			}
+			if (StringUtils.isNotBlank(text)) {
+				appendText(text);
+			}
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void setBatchJobOject(BatchJobObject bjo) {
+		if (currentJob != null) {
+			currentJob.removePropertyChangeListener(this);
+		}
+		currentJob = null;
+
+		if (currentBatchJobObject != null) {
+			currentBatchJobObject.removePropertyChangeListener(this);
+		}
+
+		currentBatchJobObject = bjo;
+		setText("");
+		currentBatchJobObject.addPropertyChangeListener(this);
 	}
 
 	public void setJobObject(JobObject jobObject) {
@@ -71,80 +152,6 @@ public class SubmissionLogPanel extends JPanel implements
 
 	}
 
-	public void setBatchJobOject(BatchJobObject bjo) {
-		if (currentJob != null) {
-			currentJob.removePropertyChangeListener(this);
-		}
-		currentJob = null;
-
-		if (currentBatchJobObject != null) {
-			currentBatchJobObject.removePropertyChangeListener(this);
-		}
-
-		currentBatchJobObject = bjo;
-		setText("");
-		currentBatchJobObject.addPropertyChangeListener(this);
-	}
-
-	private void appendText(final String msg) {
-		SwingUtilities.invokeLater(new Thread() {
-			@Override
-			public void run() {
-				getTextArea().append(msg + "\n");
-			}
-		});
-	}
-
-	public void propertyChange(PropertyChangeEvent evt) {
-		try {
-
-			String oldValue = null;
-			if (evt.getOldValue() != null) {
-				try {
-					oldValue = (String) evt.getOldValue();
-				} catch (Exception e) {
-				}
-			}
-			String newValue = null;
-			if (evt.getNewValue() != null) {
-				try {
-					newValue = (String) evt.getNewValue();
-				} catch (Exception e) {
-					try {
-						newValue = ((Integer) evt.getNewValue()).toString();
-					} catch (Exception e1) {
-					}
-				}
-			}
-
-			String propName = evt.getPropertyName();
-
-			String text = null;
-
-			if ("submissionLog".equals(propName)) {
-				List<String> log = (List<String>) evt.getNewValue();
-				text = log.get(log.size() - 1);
-			} else if (Constants.STATUS_STRING.equals(propName)) {
-				return;
-			} else if ("statusString".equals(propName)) {
-				return;
-				// text = "New status: " + newValue;
-			} else if (StringUtils.isBlank(oldValue)
-					&& StringUtils.isNotBlank(newValue)) {
-				text = "Set " + propName + ": " + newValue;
-			} else if (StringUtils.isNotBlank(oldValue)
-					&& StringUtils.isNotBlank(newValue)) {
-				text = "Changed value for " + propName + ": " + oldValue
-						+ " -> " + newValue;
-			}
-			if (StringUtils.isNotBlank(text)) {
-				appendText(text);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
 	public void setText(final String string) {
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
@@ -154,12 +161,5 @@ public class SubmissionLogPanel extends JPanel implements
 						.setCaretPosition(getTextArea().getText().length());
 			}
 		});
-	}
-
-	public void appendMessage(String message) {
-
-		getTextArea().append(message);
-		getTextArea().setCaretPosition(getTextArea().getText().length());
-
 	}
 }

@@ -19,7 +19,7 @@ public class StatusObject {
 			boolean sendStatusEvent) throws InterruptedException,
 			StatusException {
 
-		StatusObject temp = new StatusObject(si, handle);
+		final StatusObject temp = new StatusObject(si, handle);
 		temp.waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed,
 				sendStatusEvent);
 
@@ -49,7 +49,7 @@ public class StatusObject {
 		this.listeners = listeners;
 
 		if (listeners != null) {
-			for (Listener l : listeners) {
+			for (final Listener l : listeners) {
 				addListener(l);
 			}
 		}
@@ -60,13 +60,6 @@ public class StatusObject {
 			listeners = new Vector();
 		}
 		listeners.addElement(l);
-	}
-
-	synchronized public void removeListener(Listener l) {
-		if (listeners == null) {
-			listeners = new Vector<Listener>();
-		}
-		listeners.removeElement(l);
 	}
 
 	public void fireEvent(ActionStatusEvent message) {
@@ -81,9 +74,9 @@ public class StatusObject {
 
 			// walk through the listener list and
 			// call the gridproxychanged method in each
-			Enumeration e = targets.elements();
+			final Enumeration e = targets.elements();
 			while (e.hasMoreElements()) {
-				Listener l = (Listener) e.nextElement();
+				final Listener l = (Listener) e.nextElement();
 				l.statusMessage(message);
 			}
 		}
@@ -93,6 +86,13 @@ public class StatusObject {
 
 		lastStatus = si.getActionStatus(handle);
 		return lastStatus;
+	}
+
+	synchronized public void removeListener(Listener l) {
+		if (listeners == null) {
+			listeners = new Vector<Listener>();
+		}
+		listeners.removeElement(l);
 	}
 
 	public void waitForActionToFinish(int recheckIntervalInSeconds,
@@ -115,7 +115,7 @@ public class StatusObject {
 		}
 		while (!lastStatus.isFinished()) {
 			if (sendStatusEvent) {
-				ActionStatusEvent ev = new ActionStatusEvent(lastStatus,
+				final ActionStatusEvent ev = new ActionStatusEvent(lastStatus,
 						statusMessagePrefix);
 				EventBus.publish(handle, ev);
 				fireEvent(ev);
@@ -135,7 +135,7 @@ public class StatusObject {
 
 			try {
 				Thread.sleep(recheckIntervalInSeconds * 1000);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				throw e;
 			}
 

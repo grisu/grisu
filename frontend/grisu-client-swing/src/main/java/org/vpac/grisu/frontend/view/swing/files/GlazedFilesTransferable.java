@@ -11,19 +11,19 @@ import org.vpac.grisu.model.files.GlazedFile;
 
 public class GlazedFilesTransferable implements Transferable {
 
-	public  final DataFlavor[] data_flavors;
+	public final DataFlavor[] data_flavors;
 	private final Set<GlazedFile> files;
 
 	public GlazedFilesTransferable(Set<GlazedFile> files) {
 		this.files = files;
-		data_flavors = new DataFlavor[]{GlazedFilesTransferHandler.SET_DATA_FLAVOR};
+		data_flavors = new DataFlavor[] { GlazedFilesTransferHandler.SET_DATA_FLAVOR };
 
 	}
 
 	public Object getTransferData(DataFlavor flavor)
-	throws UnsupportedFlavorException, IOException {
+			throws UnsupportedFlavorException, IOException {
 
-		if ( flavor.equals(GlazedFilesTransferHandler.SET_DATA_FLAVOR) ) {
+		if (flavor.equals(GlazedFilesTransferHandler.SET_DATA_FLAVOR)) {
 			return this.files;
 		}
 
@@ -38,7 +38,7 @@ public class GlazedFilesTransferable implements Transferable {
 
 	public boolean isDataFlavorSupported(DataFlavor flavor) {
 
-		if ( Arrays.binarySearch(getTransferDataFlavors(), flavor) >= 0 ) {
+		if (Arrays.binarySearch(getTransferDataFlavors(), flavor) >= 0) {
 			return true;
 		} else {
 			return false;

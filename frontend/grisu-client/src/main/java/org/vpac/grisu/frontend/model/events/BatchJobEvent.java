@@ -4,8 +4,8 @@ import org.vpac.grisu.frontend.model.job.BatchJobObject;
 
 public class BatchJobEvent {
 
-	private BatchJobObject mpjo;
-	private String message;
+	private final BatchJobObject mpjo;
+	private final String message;
 
 	public BatchJobEvent(BatchJobObject mpjo, String message) {
 		this.mpjo = mpjo;
@@ -19,7 +19,7 @@ public class BatchJobEvent {
 	public BatchJobObject getMultiPartJob() {
 		return this.mpjo;
 	}
-	
+
 	@Override
 	public String toString() {
 		return getMessage();

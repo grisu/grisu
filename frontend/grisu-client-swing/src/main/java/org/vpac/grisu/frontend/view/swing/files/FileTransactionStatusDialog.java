@@ -11,6 +11,7 @@ import java.beans.PropertyChangeListener;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransaction;
@@ -23,11 +24,11 @@ public class FileTransactionStatusDialog extends JDialog implements
 	 */
 	public static void main(String[] args) {
 		try {
-			FileTransactionStatusDialog dialog = new FileTransactionStatusDialog(
+			final FileTransactionStatusDialog dialog = new FileTransactionStatusDialog(
 					null, null);
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -53,7 +54,7 @@ public class FileTransactionStatusDialog extends JDialog implements
 				ft);
 		contentPanel.add(fileTransferStatusPanel, BorderLayout.CENTER);
 
-		JPanel buttonPane = new JPanel();
+		final JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		getContentPane().add(buttonPane, BorderLayout.SOUTH);
 		backgroundButton = new JButton("Transfer in background");
@@ -62,11 +63,10 @@ public class FileTransactionStatusDialog extends JDialog implements
 			public void actionPerformed(ActionEvent e) {
 
 				try {
-					ft
-							.removePropertyChangeListener(FileTransactionStatusDialog.this);
+					ft.removePropertyChangeListener(FileTransactionStatusDialog.this);
 					ft.removePropertyChangeListener(fileTransferStatusPanel);
 					dispose();
-				} catch (Exception e1) {
+				} catch (final Exception e1) {
 					e1.printStackTrace();
 				}
 			}
@@ -78,7 +78,7 @@ public class FileTransactionStatusDialog extends JDialog implements
 	public void propertyChange(PropertyChangeEvent evt) {
 
 		if ("status".equals(evt.getPropertyName())) {
-			FileTransaction.Status status = (FileTransaction.Status) evt
+			final FileTransaction.Status status = (FileTransaction.Status) evt
 					.getNewValue();
 
 			if (status.equals(FileTransaction.Status.FAILED)

@@ -20,9 +20,9 @@ public class DtoProperty {
 	public static List<DtoProperty> dtoUserPropertiesFromMap(
 			Map<String, String> map) {
 
-		List<DtoProperty> result = new LinkedList<DtoProperty>();
+		final List<DtoProperty> result = new LinkedList<DtoProperty>();
 
-		for (String key : map.keySet()) {
+		for (final String key : map.keySet()) {
 			result.add(new DtoProperty(key, map.get(key)));
 		}
 

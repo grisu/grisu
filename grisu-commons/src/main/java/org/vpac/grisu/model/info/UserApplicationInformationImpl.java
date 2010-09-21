@@ -31,7 +31,7 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 
 		if (cachedAllSitesForUser == null) {
 			cachedAllSitesForUser = new TreeSet<String>();
-			for (String subLoc : getAllAvailableSubmissionLocationsForUser()) {
+			for (final String subLoc : getAllAvailableSubmissionLocationsForUser()) {
 				cachedAllSitesForUser.add(getResourceInfo().getSite(subLoc));
 			}
 		}
@@ -42,7 +42,7 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 
 		if (cachedSubmissionLocationsForUser == null) {
 			cachedSubmissionLocationsForUser = new HashSet<String>();
-			for (String fqan : userInfo.getAllAvailableFqans()) {
+			for (final String fqan : userInfo.getAllAvailableFqans()) {
 				cachedSubmissionLocationsForUser
 						.addAll(getAvailableSubmissionLocationsForFqan(fqan));
 			}
@@ -54,7 +54,7 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 
 		if (cachedAllVersionsForUser == null) {
 			cachedAllVersionsForUser = new TreeSet<String>();
-			for (String fqan : userInfo.getAllAvailableFqans()) {
+			for (final String fqan : userInfo.getAllAvailableFqans()) {
 				cachedAllVersionsForUser
 						.addAll(getAllAvailableVersionsForFqan(fqan));
 			}

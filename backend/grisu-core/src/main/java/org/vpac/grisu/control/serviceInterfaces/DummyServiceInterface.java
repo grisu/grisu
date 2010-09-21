@@ -52,7 +52,7 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 				oldLifetime = credential.getGssCredential()
 						.getRemainingLifetime();
 			}
-		} catch (GSSException e2) {
+		} catch (final GSSException e2) {
 			myLogger.debug("Problem getting lifetime of old certificate: " + e2);
 			credential = null;
 		}
@@ -72,7 +72,7 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 					try {
 						credential = new ProxyCredential(
 								LocalProxy.loadGSSCredential());
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						throw new NoValidCredentialException(
 								"Could not load credential/no valid login data.");
 					}
@@ -84,14 +84,14 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 			} else {
 				// get credential from myproxy
 				String myProxyServer = MyProxyServerParams.getMyProxyServer();
-				int myProxyPort = MyProxyServerParams.getMyProxyPort();
+				final int myProxyPort = MyProxyServerParams.getMyProxyPort();
 
 				try {
 					// this is needed because of a possible round-robin myproxy
 					// server
 					myProxyServer = InetAddress.getByName(myProxyServer)
 							.getHostAddress();
-				} catch (UnknownHostException e1) {
+				} catch (final UnknownHostException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 					throw new NoValidCredentialException(
@@ -107,7 +107,7 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 					if (getUser() != null) {
 						getUser().cleanCache();
 					}
-				} catch (Throwable e) {
+				} catch (final Throwable e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					throw new NoValidCredentialException(
@@ -128,13 +128,13 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 	public final long getCredentialEndTime() {
 
 		String myProxyServer = MyProxyServerParams.getMyProxyServer();
-		int myProxyPort = MyProxyServerParams.getMyProxyPort();
+		final int myProxyPort = MyProxyServerParams.getMyProxyPort();
 
 		try {
 			// this is needed because of a possible round-robin myproxy server
 			myProxyServer = InetAddress.getByName(myProxyServer)
 					.getHostAddress();
-		} catch (UnknownHostException e1) {
+		} catch (final UnknownHostException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 			throw new NoValidCredentialException(
@@ -142,12 +142,12 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 							+ e1.getLocalizedMessage());
 		}
 
-		MyProxy myproxy = new MyProxy(myProxyServer, myProxyPort);
+		final MyProxy myproxy = new MyProxy(myProxyServer, myProxyPort);
 		CredentialInfo info = null;
 		try {
 			info = myproxy.info(getCredential().getGssCredential(),
 					myproxy_username, new String(passphrase));
-		} catch (MyProxyException e) {
+		} catch (final MyProxyException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -156,15 +156,30 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 
 	}
 
+	@Override
+	public String getInterfaceInfo(String key) {
+		if ("HOSTNAME".equalsIgnoreCase(key)) {
+			return "localhost";
+		} else if ("VERSION".equalsIgnoreCase(key)) {
+			return ServiceInterface.INTERFACE_VERSION;
+
+		} else if ("NAME".equalsIgnoreCase(key)) {
+			return "Local serviceinterface";
+		}
+
+		return null;
+	}
+
 	public final String getTemplate(final String name)
 			throws NoSuchTemplateException {
-		File file = new File(Environment.getAvailableTemplatesDirectory(), name
-				+ ".template");
+		final File file = new File(
+				Environment.getAvailableTemplatesDirectory(), name
+						+ ".template");
 
 		String temp;
 		try {
 			temp = FileUtils.readFileToString(file);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 
@@ -188,7 +203,7 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 		Job job;
 		try {
 			job = jobdao.findJobByDN(getUser().getDn(), jobname);
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			return JobConstants.NO_SUCH_JOB;
 		}
 
@@ -222,7 +237,7 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 
 		try {
 			getCredential();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// e.printStackTrace();
 			throw new NoValidCredentialException("No valid credential: "
 					+ e.getLocalizedMessage());
@@ -234,18 +249,18 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 		return null;
 	}
 
-	public void stageFiles(final String jobname)
-			throws RemoteFileSystemException, NoSuchJobException {
-
-		myLogger.debug("Dummy staging files...");
-	}
-
 	// public boolean mkdir(final String url) throws RemoteFileSystemException {
 	//
 	// myLogger.debug("Dummy. Not creating folder: " + url + "...");
 	// return true;
 	//
 	// }
+
+	public void stageFiles(final String jobname)
+			throws RemoteFileSystemException, NoSuchJobException {
+
+		myLogger.debug("Dummy staging files...");
+	}
 
 	@Override
 	public void submitJob(final String jobname) throws JobSubmissionException {
@@ -254,7 +269,7 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 		Job job;
 		try {
 			job = getJobFromDatabase(jobname);
-		} catch (NoSuchJobException e1) {
+		} catch (final NoSuchJobException e1) {
 			throw new JobSubmissionException("Job: " + jobname
 					+ " could not be found in the grisu job database.");
 		}
@@ -264,18 +279,19 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 			prepareJobEnvironment(job);
 			myLogger.debug("Staging files...");
 			stageFiles(jobname);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new JobSubmissionException(
 					"Could not access remote filesystem: "
 							+ e.getLocalizedMessage());
 		}
 
 		if (job.getFqan() != null) {
-			VO vo = VOManagement.getVO(getUser().getFqans().get(job.getFqan()));
+			final VO vo = VOManagement.getVO(getUser().getFqans().get(
+					job.getFqan()));
 			try {
 				job.setCredential(CertHelpers.getVOProxyCredential(vo,
 						job.getFqan(), getCredential()));
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				throw new JobSubmissionException(
 						"Could not create credential to use to submit the job: "
 								+ e.getLocalizedMessage());
@@ -288,7 +304,7 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 		myLogger.debug("Submitting job to endpoint...");
 		try {
 			handle = getUser().getSubmissionManager().submit("GT4Dummy", job);
-		} catch (RuntimeException e) {
+		} catch (final RuntimeException e) {
 			e.printStackTrace();
 			throw new JobSubmissionException(
 					"Job submission to endpoint failed: "
@@ -317,20 +333,6 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 			final boolean return_absolute_url) throws RemoteFileSystemException {
 
 		return "DummyHandle";
-	}
-
-	@Override
-	public String getInterfaceInfo(String key) {
-		if ("HOSTNAME".equalsIgnoreCase(key)) {
-			return "localhost";
-		} else if ("VERSION".equalsIgnoreCase(key)) {
-			return ServiceInterface.INTERFACE_VERSION;
-
-		} else if ("NAME".equalsIgnoreCase(key)) {
-			return "Local serviceinterface";
-		}
-
-		return null;
 	}
 
 }

@@ -49,19 +49,19 @@ public class RunningJobManager implements EventSubscriber {
 			try {
 
 				// update single jobs
-				for (String application : cachedSingleJobsPerApplication
+				for (final String application : cachedSingleJobsPerApplication
 						.keySet()) {
 					updateJobnameList(application);
 				}
 
-				for (String application : cachedBatchJobsPerApplication
+				for (final String application : cachedBatchJobsPerApplication
 						.keySet()) {
 					updateBatchJobList(application);
 				}
 
-				List<BatchJobObject> tempListB = new LinkedList<BatchJobObject>(
+				final List<BatchJobObject> tempListB = new LinkedList<BatchJobObject>(
 						getAllCurrentlyWatchedBatchJobs());
-				for (BatchJobObject bj : tempListB) {
+				for (final BatchJobObject bj : tempListB) {
 					if (!bj.isFinished(false) && !bj.isRefreshing()
 							&& !bj.isBeingKilled()) {
 						myLogger.debug("Refreshing job: " + bj.getJobname());
@@ -75,7 +75,7 @@ public class RunningJobManager implements EventSubscriber {
 				} else {
 					updateTimer.cancel();
 				}
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -88,13 +88,14 @@ public class RunningJobManager implements EventSubscriber {
 	public static void updateJobList(ServiceInterface si,
 			EventList<JobObject> jobObjectList, DtoJobs newJobs) {
 
-		Set<JobObject> toRemove = new HashSet<JobObject>();
-		Set<DtoJob> newJobsCopy = new HashSet<DtoJob>(newJobs.getAllJobs());
+		final Set<JobObject> toRemove = new HashSet<JobObject>();
+		final Set<DtoJob> newJobsCopy = new HashSet<DtoJob>(
+				newJobs.getAllJobs());
 
-		for (JobObject jo : jobObjectList) {
+		for (final JobObject jo : jobObjectList) {
 			boolean inList = false;
 
-			for (DtoJob job : newJobs.getAllJobs()) {
+			for (final DtoJob job : newJobs.getAllJobs()) {
 				if (jo.getJobname().equals(job.jobname())) {
 					inList = true;
 					jo.updateWithDtoJob(job);
@@ -109,11 +110,11 @@ public class RunningJobManager implements EventSubscriber {
 
 		jobObjectList.removeAll(toRemove);
 
-		for (DtoJob newJob : newJobsCopy) {
+		for (final DtoJob newJob : newJobsCopy) {
 			try {
-				JobObject jo = new JobObject(si, newJob);
+				final JobObject jo = new JobObject(si, newJob);
 				jobObjectList.add(jo);
-			} catch (NoSuchJobException e) {
+			} catch (final NoSuchJobException e) {
 				// probably not that important
 				e.printStackTrace();
 			}
@@ -134,7 +135,7 @@ public class RunningJobManager implements EventSubscriber {
 
 		synchronized (si) {
 			if (cachedRegistries.get(si) == null) {
-				RunningJobManager m = new RunningJobManager(si);
+				final RunningJobManager m = new RunningJobManager(si);
 				cachedRegistries.put(si, m);
 			}
 		}
@@ -185,7 +186,7 @@ public class RunningJobManager implements EventSubscriber {
 			String submissionFqan, String defaultApplication,
 			String defaultVersion) throws BatchJobException {
 
-		BatchJobObject batchJob = new BatchJobObject(si, jobname,
+		final BatchJobObject batchJob = new BatchJobObject(si, jobname,
 				submissionFqan, defaultApplication, defaultVersion);
 		cachedAllBatchJobs.put(jobname, batchJob);
 		// EventList<BatchJobObject> temp = cachedBatchJobsPerApplication
@@ -240,9 +241,10 @@ public class RunningJobManager implements EventSubscriber {
 			if (cachedAllBatchJobs.get(jobname) == null) {
 
 				try {
-					BatchJobObject temp = new BatchJobObject(si, jobname, false);
+					final BatchJobObject temp = new BatchJobObject(si, jobname,
+							false);
 					cachedAllBatchJobs.put(jobname, temp);
-				} catch (BatchJobException e) {
+				} catch (final BatchJobException e) {
 					throw new RuntimeException(e);
 				}
 
@@ -271,15 +273,15 @@ public class RunningJobManager implements EventSubscriber {
 				@Override
 				public void run() {
 
-					for (String jobname : em.getCurrentBatchJobnames(tempApp,
-							false)) {
+					for (final String jobname : em.getCurrentBatchJobnames(
+							tempApp, false)) {
 						try {
-							BatchJobObject j = getBatchJob(jobname);
+							final BatchJobObject j = getBatchJob(jobname);
 							if (!temp.contains(j)) {
 								temp.getReadWriteLock().writeLock().lock();
 								temp.add(j);
 							}
-						} catch (NoSuchJobException e) {
+						} catch (final NoSuchJobException e) {
 							throw new RuntimeException(e);
 						} finally {
 							temp.getReadWriteLock().writeLock().unlock();
@@ -298,11 +300,12 @@ public class RunningJobManager implements EventSubscriber {
 			BatchJobObject batchJob, String[] patterns)
 			throws RemoteFileSystemException {
 
-		List<GlazedFile> files = new LinkedList<GlazedFile>();
+		final List<GlazedFile> files = new LinkedList<GlazedFile>();
 
-		List<String> fileurls = batchJob.getListOfOutputFiles(true, patterns);
+		final List<String> fileurls = batchJob.getListOfOutputFiles(true,
+				patterns);
 
-		for (String url : fileurls) {
+		for (final String url : fileurls) {
 			files.add(fm.createGlazedFileFromUrl(url,
 					GlazedFile.Type.FILETYPE_FILE));
 		}
@@ -319,10 +322,10 @@ public class RunningJobManager implements EventSubscriber {
 			if (cachedAllSingleJobs.get(jobname) == null) {
 
 				try {
-					JobObject temp = new JobObject(si, jobname,
+					final JobObject temp = new JobObject(si, jobname,
 							refreshOnBackend);
 					cachedAllSingleJobs.put(jobname, temp);
-				} catch (RuntimeException e) {
+				} catch (final RuntimeException e) {
 					myLogger.error(e);
 					return null;
 				}
@@ -355,17 +358,18 @@ public class RunningJobManager implements EventSubscriber {
 				@Override
 				public void run() {
 
-					for (String jobname : em.getCurrentJobnames(tempApp, false)) {
+					for (final String jobname : em.getCurrentJobnames(tempApp,
+							false)) {
 
 						try {
-							JobObject j = getJob(jobname, false);
+							final JobObject j = getJob(jobname, false);
 							temp.getReadWriteLock().writeLock().lock();
 							if (j != null) {
 								if (!temp.contains(j)) {
 									temp.add(j);
 								}
 							}
-						} catch (NoSuchJobException e) {
+						} catch (final NoSuchJobException e) {
 							throw new RuntimeException(e);
 						} finally {
 							temp.getReadWriteLock().writeLock().unlock();
@@ -462,19 +466,19 @@ public class RunningJobManager implements EventSubscriber {
 
 		application = application.toLowerCase();
 
-		EventList<BatchJobObject> list = getBatchJobs(application);
+		final EventList<BatchJobObject> list = getBatchJobs(application);
 
-		SortedSet<String> jobnames = em.getCurrentBatchJobnames(application,
-				true);
-		SortedSet<String> jobnamesNew = new TreeSet<String>(jobnames);
+		final SortedSet<String> jobnames = em.getCurrentBatchJobnames(
+				application, true);
+		final SortedSet<String> jobnamesNew = new TreeSet<String>(jobnames);
 
-		for (BatchJobObject bj : list) {
+		for (final BatchJobObject bj : list) {
 			jobnamesNew.remove(bj.getJobname());
 		}
-		for (String name : jobnamesNew) {
+		for (final String name : jobnamesNew) {
 			try {
 
-				BatchJobObject temp = getBatchJob(name);
+				final BatchJobObject temp = getBatchJob(name);
 				if (temp == null) {
 					continue;
 				}
@@ -489,13 +493,13 @@ public class RunningJobManager implements EventSubscriber {
 					list.add(temp);
 					list.getReadWriteLock().writeLock().unlock();
 				}
-			} catch (NoSuchJobException e) {
+			} catch (final NoSuchJobException e) {
 				throw new RuntimeException(e);
 			}
 		}
 
-		Set<BatchJobObject> toRemove = new HashSet<BatchJobObject>();
-		for (BatchJobObject bj : list) {
+		final Set<BatchJobObject> toRemove = new HashSet<BatchJobObject>();
+		for (final BatchJobObject bj : list) {
 			if (!jobnames.contains(bj.getJobname())) {
 				toRemove.add(bj);
 			}
@@ -508,7 +512,7 @@ public class RunningJobManager implements EventSubscriber {
 		}
 
 		list.removeAll(toRemove);
-		for (BatchJobObject bj : toRemove) {
+		for (final BatchJobObject bj : toRemove) {
 			cachedAllBatchJobs.remove(bj.getJobname());
 		}
 
@@ -522,18 +526,19 @@ public class RunningJobManager implements EventSubscriber {
 
 		application = application.toLowerCase();
 
-		EventList<JobObject> list = getJobs(application);
+		final EventList<JobObject> list = getJobs(application);
 
-		SortedSet<String> jobnames = em.getCurrentJobnames(application, true);
-		SortedSet<String> jobnamesNew = new TreeSet<String>(jobnames);
+		final SortedSet<String> jobnames = em.getCurrentJobnames(application,
+				true);
+		final SortedSet<String> jobnamesNew = new TreeSet<String>(jobnames);
 
-		for (JobObject j : list) {
-			String jobname = j.getJobname();
+		for (final JobObject j : list) {
+			final String jobname = j.getJobname();
 			jobnamesNew.remove(jobname);
 		}
-		for (String name : jobnamesNew) {
+		for (final String name : jobnamesNew) {
 			try {
-				JobObject temp = getJob(name, false);
+				final JobObject temp = getJob(name, false);
 				if (temp == null) {
 					continue;
 				}
@@ -549,14 +554,14 @@ public class RunningJobManager implements EventSubscriber {
 					list.add(temp);
 					list.getReadWriteLock().writeLock().unlock();
 				}
-			} catch (NoSuchJobException e) {
+			} catch (final NoSuchJobException e) {
 				throw new RuntimeException(e);
 			}
 		}
 
-		Set<JobObject> toRemove = new HashSet<JobObject>();
-		for (JobObject j : list) {
-			String jobname = j.getJobname();
+		final Set<JobObject> toRemove = new HashSet<JobObject>();
+		for (final JobObject j : list) {
+			final String jobname = j.getJobname();
 			if (!jobnames.contains(jobname)) {
 				toRemove.add(j);
 			}
@@ -569,18 +574,18 @@ public class RunningJobManager implements EventSubscriber {
 		}
 
 		list.removeAll(toRemove);
-		for (JobObject j : toRemove) {
+		for (final JobObject j : toRemove) {
 			cachedAllSingleJobs.remove(j.getJobname());
 		}
 
 		// do the rest in the background
-		Thread t = new Thread() {
+		final Thread t = new Thread() {
 			@Override
 			public void run() {
 
-				List<JobObject> tempList = new LinkedList<JobObject>(
+				final List<JobObject> tempList = new LinkedList<JobObject>(
 						getAllCurrentlyWatchedSingleJobs());
-				for (JobObject job : tempList) {
+				for (final JobObject job : tempList) {
 					myLogger.debug("Refreshing job: " + job.getJobname());
 					job.getStatus(true);
 				}

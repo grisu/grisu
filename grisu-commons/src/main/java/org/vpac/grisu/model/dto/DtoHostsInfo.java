@@ -23,10 +23,10 @@ public class DtoHostsInfo {
 
 	public static DtoHostsInfo createHostsInfo(Map<String, String> allHosts) {
 
-		DtoHostsInfo result = new DtoHostsInfo();
-		List<DtoHost> list = new LinkedList<DtoHost>();
+		final DtoHostsInfo result = new DtoHostsInfo();
+		final List<DtoHost> list = new LinkedList<DtoHost>();
 
-		for (String key : allHosts.keySet()) {
+		for (final String key : allHosts.keySet()) {
 			list.add(new DtoHost(key, allHosts.get(key)));
 		}
 
@@ -41,9 +41,9 @@ public class DtoHostsInfo {
 	private List<DtoHost> allHosts = new LinkedList<DtoHost>();
 
 	public Map<String, String> asMap() {
-		Map<String, String> result = new TreeMap<String, String>();
+		final Map<String, String> result = new TreeMap<String, String>();
 
-		for (DtoHost host : getAllHosts()) {
+		for (final DtoHost host : getAllHosts()) {
 			result.put(host.getHostNameString(), host.getSiteNameString());
 		}
 		return result;
@@ -59,9 +59,9 @@ public class DtoHostsInfo {
 	 */
 	public List<String> findHostsForSite(String site) {
 
-		List<String> result = new LinkedList<String>();
+		final List<String> result = new LinkedList<String>();
 
-		for (DtoHost serchHost : allHosts) {
+		for (final DtoHost serchHost : allHosts) {
 			if (serchHost.getSiteNameString().equals(site)) {
 				result.add(serchHost.getHostNameString());
 			}
@@ -80,7 +80,7 @@ public class DtoHostsInfo {
 	 */
 	public String findSiteForHost(String host) {
 
-		for (DtoHost serchhost : allHosts) {
+		for (final DtoHost serchhost : allHosts) {
 			if (serchhost.getHostNameString().equals(host)) {
 				return serchhost.getSiteNameString();
 			}

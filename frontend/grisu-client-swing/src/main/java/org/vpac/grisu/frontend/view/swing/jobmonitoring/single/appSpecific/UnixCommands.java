@@ -35,19 +35,18 @@ public class UnixCommands extends AppSpecificViewerPanel {
 		add(getSplitPane());
 	}
 
-	@Override
-	public void initialize() {
-		jobUpdated(null);
+	private JLabel getLblStderr() {
+		if (lblStderr == null) {
+			lblStderr = new JLabel("stderr");
+		}
+		return lblStderr;
 	}
 
-	private JSplitPane getSplitPane() {
-		if (splitPane == null) {
-			splitPane = new JSplitPane();
-			splitPane.setLeftComponent(getPanel_1());
-			splitPane.setRightComponent(getPanel_1_1());
-			splitPane.setDividerLocation(400);
+	private JLabel getLblStdout() {
+		if (lblStdout == null) {
+			lblStdout = new JLabel("stdout");
 		}
-		return splitPane;
+		return lblStdout;
 	}
 
 	private JPanel getPanel_1() {
@@ -67,13 +66,6 @@ public class UnixCommands extends AppSpecificViewerPanel {
 		return panel;
 	}
 
-	private JLabel getLblStdout() {
-		if (lblStdout == null) {
-			lblStdout = new JLabel("stdout");
-		}
-		return lblStdout;
-	}
-
 	private JPanel getPanel_1_1() {
 		if (panel_1 == null) {
 			panel_1 = new JPanel();
@@ -91,19 +83,30 @@ public class UnixCommands extends AppSpecificViewerPanel {
 		return panel_1;
 	}
 
-	private JLabel getLblStderr() {
-		if (lblStderr == null) {
-			lblStderr = new JLabel("stderr");
-		}
-		return lblStderr;
-	}
-
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
 			scrollPane.setViewportView(getTextArea());
 		}
 		return scrollPane;
+	}
+
+	private JScrollPane getScrollPane_1() {
+		if (scrollPane_1 == null) {
+			scrollPane_1 = new JScrollPane();
+			scrollPane_1.setViewportView(getTextArea_1());
+		}
+		return scrollPane_1;
+	}
+
+	private JSplitPane getSplitPane() {
+		if (splitPane == null) {
+			splitPane = new JSplitPane();
+			splitPane.setLeftComponent(getPanel_1());
+			splitPane.setRightComponent(getPanel_1_1());
+			splitPane.setDividerLocation(400);
+		}
+		return splitPane;
 	}
 
 	private JTextArea getTextArea() {
@@ -115,14 +118,6 @@ public class UnixCommands extends AppSpecificViewerPanel {
 		return textArea;
 	}
 
-	private JScrollPane getScrollPane_1() {
-		if (scrollPane_1 == null) {
-			scrollPane_1 = new JScrollPane();
-			scrollPane_1.setViewportView(getTextArea_1());
-		}
-		return scrollPane_1;
-	}
-
 	private JTextArea getTextArea_1() {
 		if (textArea_1 == null) {
 			textArea_1 = new JTextArea();
@@ -130,6 +125,11 @@ public class UnixCommands extends AppSpecificViewerPanel {
 			textArea_1.setText("Loading...");
 		}
 		return textArea_1;
+	}
+
+	@Override
+	public void initialize() {
+		jobUpdated(null);
 	}
 
 	@Override

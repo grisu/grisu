@@ -80,7 +80,7 @@ public class FIleTransferStatusPanel extends JPanel implements
 	public void propertyChange(PropertyChangeEvent evt) {
 
 		if ("status".equals(evt.getPropertyName())) {
-			FileTransaction.Status status = (FileTransaction.Status) evt
+			final FileTransaction.Status status = (FileTransaction.Status) evt
 					.getNewValue();
 			getTextField().setText(status.toString());
 			if (FileTransaction.Status.FINISHED.equals(status)

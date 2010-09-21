@@ -28,6 +28,7 @@ public final class MyProxyServerParams {
 	 * Default myproxy server port. Default is 443.
 	 */
 	public static final int DEFAULT_MYPROXY_PORT = 443;
+
 	/**
 	 * Retrieves the configuration parameters from the properties file.
 	 * 
@@ -36,11 +37,11 @@ public final class MyProxyServerParams {
 	 *             if the file could not be read/parsed
 	 */
 	public static PropertiesConfiguration getClientConfiguration()
-	throws ConfigurationException {
+			throws ConfigurationException {
 		if (config == null) {
-			File grisuDir = Environment.getGrisuClientDirectory();
+			final File grisuDir = Environment.getGrisuClientDirectory();
 			config = new PropertiesConfiguration(new File(grisuDir,
-			"grisu.config"));
+					"grisu.config"));
 		}
 		return config;
 	}
@@ -54,9 +55,9 @@ public final class MyProxyServerParams {
 		int myProxyPort = -1;
 		try {
 			myProxyPort = Integer.parseInt(getClientConfiguration().getString(
-			"myProxyPort"));
+					"myProxyPort"));
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 			return DEFAULT_MYPROXY_PORT;
 		}
@@ -77,7 +78,7 @@ public final class MyProxyServerParams {
 		try {
 			myProxyServer = getClientConfiguration().getString("myProxyServer");
 
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 		if ((myProxyServer == null) || "".equals(myProxyServer)) {
@@ -97,7 +98,7 @@ public final class MyProxyServerParams {
 		try {
 			username = (String) (getClientConfiguration()
 					.getProperty("myProxyUsername"));
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 		return username;
@@ -113,7 +114,7 @@ public final class MyProxyServerParams {
 		try {
 			getClientConfiguration().setProperty("myProxyUsername", username);
 			getClientConfiguration().save();
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 

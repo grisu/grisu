@@ -21,11 +21,11 @@ public class DtoApplicationDetails {
 	public static DtoApplicationDetails createDetails(String appName,
 			Map<String, String> details) {
 
-		DtoApplicationDetails result = new DtoApplicationDetails();
+		final DtoApplicationDetails result = new DtoApplicationDetails();
 		result.setApplicationName(appName);
-		List<DtoApplicationDetail> list = new LinkedList<DtoApplicationDetail>();
-		for (String key : details.keySet()) {
-			DtoApplicationDetail temp = new DtoApplicationDetail();
+		final List<DtoApplicationDetail> list = new LinkedList<DtoApplicationDetail>();
+		for (final String key : details.keySet()) {
+			final DtoApplicationDetail temp = new DtoApplicationDetail();
 			temp.setKey(key);
 			temp.setValue(details.get(key));
 			list.add(temp);
@@ -57,8 +57,8 @@ public class DtoApplicationDetails {
 
 	public Map<String, String> getDetailsAsMap() {
 
-		Map<String, String> map = new HashMap<String, String>();
-		for (DtoApplicationDetail detail : getDetails()) {
+		final Map<String, String> map = new HashMap<String, String>();
+		for (final DtoApplicationDetail detail : getDetails()) {
 			map.put(detail.getKey(), detail.getValue());
 		}
 		return map;

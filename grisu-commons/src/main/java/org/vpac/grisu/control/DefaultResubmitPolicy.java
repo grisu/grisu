@@ -86,20 +86,20 @@ public class DefaultResubmitPolicy implements ResubmitPolicy {
 		return Constants.SUBMIT_POLICY_RESTART_DEFAULT;
 	}
 
-	public void setProperty(String key, Boolean value) {
-		properties.put(key, value);
-	}
-
 	public DtoProperties getProperties() {
 
-		Map<String, String> temp = new HashMap<String, String>();
+		final Map<String, String> temp = new HashMap<String, String>();
 
-		for (String key : properties.keySet()) {
+		for (final String key : properties.keySet()) {
 			temp.put(key, properties.get(key).toString());
 		}
 
 		return DtoProperties.createProperties(temp);
 
+	}
+
+	public void setProperty(String key, Boolean value) {
+		properties.put(key, value);
 	}
 
 }

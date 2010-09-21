@@ -29,33 +29,34 @@ public final class JobsToXMLConverter {
 
 	public static Element createJobElement(final Document doc, final Job job) {
 
-		Element jobElement = doc.createElement("job");
+		final Element jobElement = doc.createElement("job");
 
-		Attr jobname = doc.createAttribute("jobname");
+		final Attr jobname = doc.createAttribute("jobname");
 		jobname.setValue(job.getJobname());
 		jobElement.setAttributeNode(jobname);
 
-		Attr status = doc.createAttribute("status");
+		final Attr status = doc.createAttribute("status");
 		status.setValue(new Integer(job.getStatus()).toString());
 		jobElement.setAttributeNode(status);
 
-		String host = job.getJobProperty(Constants.SUBMISSION_HOST_KEY);
+		final String host = job.getJobProperty(Constants.SUBMISSION_HOST_KEY);
 		if (host != null && !"".equals(host)) {
-			Attr host_attr = doc.createAttribute("host");
+			final Attr host_attr = doc.createAttribute("host");
 			host_attr.setValue(host);
 			jobElement.setAttributeNode(host_attr);
 		}
 
-		String fqan = job.getFqan();
+		final String fqan = job.getFqan();
 		if (fqan != null && !"".equals(fqan)) {
-			Attr fqan_attr = doc.createAttribute("fqan");
+			final Attr fqan_attr = doc.createAttribute("fqan");
 			fqan_attr.setValue(fqan);
 			jobElement.setAttributeNode(fqan_attr);
 		}
 
-		String submissionTime = job.getJobProperty("submissionTime");
+		final String submissionTime = job.getJobProperty("submissionTime");
 		if (submissionTime != null && !"".equals(submissionTime)) {
-			Attr submissionTime_attr = doc.createAttribute("submissionTime");
+			final Attr submissionTime_attr = doc
+					.createAttribute("submissionTime");
 			submissionTime_attr.setValue(submissionTime);
 			jobElement.setAttributeNode(submissionTime_attr);
 		}
@@ -65,33 +66,34 @@ public final class JobsToXMLConverter {
 
 	public static Element createJobElementNew(final Document doc, final Job job) {
 
-		Element jobElement = doc.createElement("job");
+		final Element jobElement = doc.createElement("job");
 
-		Element jobname = doc.createElement("jobname");
+		final Element jobname = doc.createElement("jobname");
 		jobname.setTextContent(job.getJobname());
 		jobElement.appendChild(jobname);
 
-		Element status = doc.createElement("status");
+		final Element status = doc.createElement("status");
 		status.setTextContent(new Integer(job.getStatus()).toString());
 		jobElement.appendChild(status);
 
-		String host = job.getJobProperty(Constants.SUBMISSION_HOST_KEY);
+		final String host = job.getJobProperty(Constants.SUBMISSION_HOST_KEY);
 		if (host != null && !"".equals(host)) {
-			Element hostElement = doc.createElement("host");
+			final Element hostElement = doc.createElement("host");
 			hostElement.setTextContent(host);
 			jobElement.appendChild(hostElement);
 		}
 
-		String fqan = job.getFqan();
+		final String fqan = job.getFqan();
 		if (fqan != null && !"".equals(fqan)) {
-			Element fqanElement = doc.createElement("fqan");
+			final Element fqanElement = doc.createElement("fqan");
 			fqanElement.setTextContent(fqan);
 			jobElement.appendChild(fqanElement);
 		}
 
-		String submissionTime = job.getJobProperty("submissionTime");
+		final String submissionTime = job.getJobProperty("submissionTime");
 		if (submissionTime != null && !"".equals(submissionTime)) {
-			Element submissionTimeElement = doc.createElement("submissionTime");
+			final Element submissionTimeElement = doc
+					.createElement("submissionTime");
 			submissionTimeElement.setTextContent(submissionTime);
 			jobElement.appendChild(submissionTimeElement);
 		}
@@ -105,79 +107,79 @@ public final class JobsToXMLConverter {
 		Document doc = null;
 
 		try {
-			DocumentBuilderFactory docFactory = DocumentBuilderFactory
+			final DocumentBuilderFactory docFactory = DocumentBuilderFactory
 					.newInstance();
-			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+			final DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 			doc = docBuilder.newDocument();
-		} catch (ParserConfigurationException e1) {
+		} catch (final ParserConfigurationException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 			return null;
 		}
 
-		Element root = doc.createElement("jobs");
+		final Element root = doc.createElement("jobs");
 		doc.appendChild(root);
 
-		Element jobElement = doc.createElement("job");
+		final Element jobElement = doc.createElement("job");
 
 		root.appendChild(jobElement);
 
-		Attr jobname = doc.createAttribute("jobname");
+		final Attr jobname = doc.createAttribute("jobname");
 		jobname.setValue(job.getJobname());
 		jobElement.setAttributeNode(jobname);
 
-		Attr app = doc.createAttribute("application");
+		final Attr app = doc.createAttribute("application");
 		app.setValue(job.getJobProperty(Constants.APPLICATIONNAME_KEY));
 		jobElement.setAttributeNode(app);
 
-		Attr status = doc.createAttribute("status");
+		final Attr status = doc.createAttribute("status");
 		status.setValue(new Integer(job.getStatus()).toString());
 		jobElement.setAttributeNode(status);
 
-		String host = job.getJobProperty(Constants.SUBMISSION_HOST_KEY);
+		final String host = job.getJobProperty(Constants.SUBMISSION_HOST_KEY);
 		if (host != null && !"".equals(host)) {
-			Attr host_attr = doc.createAttribute("host");
+			final Attr host_attr = doc.createAttribute("host");
 			host_attr.setValue(host);
 			jobElement.setAttributeNode(host_attr);
 		}
 
-		String fqan = job.getFqan();
+		final String fqan = job.getFqan();
 		if (fqan != null && !"".equals(fqan)) {
-			Attr fqan_attr = doc.createAttribute("fqan");
+			final Attr fqan_attr = doc.createAttribute("fqan");
 			fqan_attr.setValue(fqan);
 			jobElement.setAttributeNode(fqan_attr);
 		}
 
-		Element files = doc.createElement("files");
-		files.setAttribute("job_directory", job
-				.getJobProperty(Constants.JOBDIRECTORY_KEY));
+		final Element files = doc.createElement("files");
+		files.setAttribute("job_directory",
+				job.getJobProperty(Constants.JOBDIRECTORY_KEY));
 		root.appendChild(files);
 
-		Element stdout = doc.createElement("file");
+		final Element stdout = doc.createElement("file");
 		stdout.setAttribute("name", "stdout");
 		stdout.setTextContent(job.getJobProperty(Constants.STDOUT_KEY));
 		files.appendChild(stdout);
 
-		Element stderr = doc.createElement("file");
+		final Element stderr = doc.createElement("file");
 		stderr.setAttribute("name", "stderr");
 		stderr.setTextContent(job.getJobProperty(Constants.STDERR_KEY));
 		files.appendChild(stderr);
 
-		Element descriptions = doc.createElement("descriptions");
+		final Element descriptions = doc.createElement("descriptions");
 		root.appendChild(descriptions);
 
-		Element jsdl = doc.createElement("description");
+		final Element jsdl = doc.createElement("description");
 		jsdl.setAttribute("type", "jsdl");
 		try {
 			jsdl.setTextContent(SeveralXMLHelpers.toString(job
 					.getJobDescription()));
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		descriptions.appendChild(jsdl);
 
-		Element rsl = doc.createElement("description");
+		final Element rsl = doc.createElement("description");
 		rsl.setAttribute("type", "rsl");
 		rsl.setTextContent(job.getSubmittedJobDescription());
 		descriptions.appendChild(rsl);
@@ -189,10 +191,10 @@ public final class JobsToXMLConverter {
 
 		if (docBuilder == null) {
 			try {
-				DocumentBuilderFactory docFactory = DocumentBuilderFactory
+				final DocumentBuilderFactory docFactory = DocumentBuilderFactory
 						.newInstance();
 				docBuilder = docFactory.newDocumentBuilder();
-			} catch (ParserConfigurationException e1) {
+			} catch (final ParserConfigurationException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 				return null;
@@ -208,10 +210,10 @@ public final class JobsToXMLConverter {
 
 		output = getDocumentBuilder().newDocument();
 
-		Element root = output.createElement("jobs");
+		final Element root = output.createElement("jobs");
 		output.appendChild(root);
 
-		for (Job job : jobs) {
+		for (final Job job : jobs) {
 			root.appendChild(createJobElementNew(output, job));
 		}
 

@@ -117,7 +117,7 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 		add(getGrisuNavigationPanel(), BorderLayout.WEST);
 		add(getGrisuCenterPanel(), BorderLayout.CENTER);
 
-		for (JobCreationPanel panel : jobCreationPanels) {
+		for (final JobCreationPanel panel : jobCreationPanels) {
 			getGrisuCenterPanel().addJobCreationPanel(panel);
 			panel.setServiceInterface(si);
 		}

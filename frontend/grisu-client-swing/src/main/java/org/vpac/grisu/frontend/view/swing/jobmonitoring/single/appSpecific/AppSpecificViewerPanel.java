@@ -21,20 +21,21 @@ public abstract class AppSpecificViewerPanel extends JPanel implements
 			JobObject job) {
 
 		try {
-			String appName = job.getJobProperty(Constants.APPLICATIONNAME_KEY);
+			final String appName = job
+					.getJobProperty(Constants.APPLICATIONNAME_KEY);
 
-			String className = "org.vpac.grisu.frontend.view.swing.jobmonitoring.single.appSpecific."
+			final String className = "org.vpac.grisu.frontend.view.swing.jobmonitoring.single.appSpecific."
 					+ appName;
-			Class classO = Class.forName(className);
+			final Class classO = Class.forName(className);
 
-			Constructor<AppSpecificViewerPanel> constO = classO
+			final Constructor<AppSpecificViewerPanel> constO = classO
 					.getConstructor(ServiceInterface.class);
 
-			AppSpecificViewerPanel asvp = constO.newInstance(si);
+			final AppSpecificViewerPanel asvp = constO.newInstance(si);
 
 			return asvp;
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 			return null;
 		}
@@ -55,9 +56,27 @@ public abstract class AppSpecificViewerPanel extends JPanel implements
 		}
 	}
 
+	public JobObject getJob() {
+		return this.job;
+	}
+
+	public JPanel getPanel() {
+		return this;
+	}
+
 	abstract public void initialize();
 
 	abstract public void jobUpdated(PropertyChangeEvent evt);
+
+	public void propertyChange(PropertyChangeEvent evt) {
+
+		System.out.println("Job property change.");
+		System.out.print(evt.getPropertyName() + ": ");
+		System.out.println(evt.getNewValue());
+
+		jobUpdated(evt);
+
+	}
 
 	public void setJob(JobObject job) {
 		if (this.job != null) {
@@ -68,27 +87,9 @@ public abstract class AppSpecificViewerPanel extends JPanel implements
 
 		try {
 			initialize();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	public JPanel getPanel() {
-		return this;
-	}
-
-	public JobObject getJob() {
-		return this.job;
-	}
-
-	public void propertyChange(PropertyChangeEvent evt) {
-
-		System.out.println("Job property change.");
-		System.out.print(evt.getPropertyName() + ": ");
-		System.out.println(evt.getNewValue());
-
-		jobUpdated(evt);
-
 	}
 
 }

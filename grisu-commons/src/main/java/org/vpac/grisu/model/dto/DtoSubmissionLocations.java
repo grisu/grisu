@@ -21,14 +21,34 @@ import au.org.arcs.jcommons.interfaces.InformationManager;
 @XmlRootElement(name = "submissionlocations")
 public class DtoSubmissionLocations {
 
+	private static boolean checkWhetherSubLocIsActuallyAvailable(
+			InformationManager im, Collection<MountPoint> mps, String subLoc) {
+
+		final String[] filesystems = im
+				.getStagingFileSystemForSubmissionLocation(subLoc);
+
+		for (final MountPoint mp : mps) {
+
+			for (final String fs : filesystems) {
+				if (mp.getRootUrl().startsWith(fs.replace(":2811", ""))) {
+					return true;
+				}
+			}
+
+		}
+
+		return false;
+
+	}
+
 	public static DtoSubmissionLocations createSubmissionLocationsInfo(
 			String[] submissionLocations) {
 
-		DtoSubmissionLocations result = new DtoSubmissionLocations();
+		final DtoSubmissionLocations result = new DtoSubmissionLocations();
 
-		List<DtoSubmissionLocationInfo> subLocs = new LinkedList<DtoSubmissionLocationInfo>();
-		for (String subLoc : submissionLocations) {
-			DtoSubmissionLocationInfo temp = new DtoSubmissionLocationInfo();
+		final List<DtoSubmissionLocationInfo> subLocs = new LinkedList<DtoSubmissionLocationInfo>();
+		for (final String subLoc : submissionLocations) {
+			final DtoSubmissionLocationInfo temp = new DtoSubmissionLocationInfo();
 			temp.setSubmissionLocation(subLoc);
 			subLocs.add(temp);
 		}
@@ -38,35 +58,6 @@ public class DtoSubmissionLocations {
 		return result;
 
 	}
-	
-	private static boolean checkWhetherSubLocIsActuallyAvailable(InformationManager im, Collection<MountPoint> mps, String subLoc) {
-		
-		String[] filesystems = im.getStagingFileSystemForSubmissionLocation(subLoc); 
-		
-		for (MountPoint mp : mps ) {
-			
-			for ( String fs : filesystems ) {
-				if ( mp.getRootUrl().startsWith(fs.replace(":2811", "")) ) {
-					return true;
-				}
-			}
-			
-		}
-		
-		return false;
-		
-	}
-	
-	public void removeUnuseableSubmissionLocations(InformationManager im, Collection<MountPoint> mps) {
-		
-	    Iterator<DtoSubmissionLocationInfo> i = allSubmissionLocations.iterator();
-	    while ( i.hasNext() ){
-	    	if ( ! checkWhetherSubLocIsActuallyAvailable(im, mps, i.next().getSubmissionLocation()) ) {
-	    		i.remove();
-	    	}
-	    }
-		
-	}
 
 	/**
 	 * The list of submission location objects.
@@ -75,7 +66,7 @@ public class DtoSubmissionLocations {
 
 	public String[] asSubmissionLocationStrings() {
 
-		String[] result = new String[allSubmissionLocations.size()];
+		final String[] result = new String[allSubmissionLocations.size()];
 
 		for (int i = 0; i < result.length; i++) {
 			result[i] = getAllSubmissionLocations().get(i)
@@ -87,6 +78,20 @@ public class DtoSubmissionLocations {
 	@XmlElement(name = "submissionlocation")
 	public List<DtoSubmissionLocationInfo> getAllSubmissionLocations() {
 		return allSubmissionLocations;
+	}
+
+	public void removeUnuseableSubmissionLocations(InformationManager im,
+			Collection<MountPoint> mps) {
+
+		final Iterator<DtoSubmissionLocationInfo> i = allSubmissionLocations
+				.iterator();
+		while (i.hasNext()) {
+			if (!checkWhetherSubLocIsActuallyAvailable(im, mps, i.next()
+					.getSubmissionLocation())) {
+				i.remove();
+			}
+		}
+
 	}
 
 	public void setAllSubmissionLocations(

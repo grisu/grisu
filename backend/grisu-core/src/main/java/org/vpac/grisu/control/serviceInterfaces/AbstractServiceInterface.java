@@ -126,7 +126,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			LocalTemplatesHelper.copyTemplatesAndMaybeGlobusFolder();
 			VomsesFiles.copyVomses();
 			CertificateFiles.copyCACerts(false);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// TODO Auto-generated catch block
 			myLogger.error(e.getLocalizedMessage());
 			// throw new
@@ -145,6 +145,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public static final int DEFAULT_JOB_SUBMISSION_RETRIES = 5;
 
+	public static final InformationManager informationManager = createInformationManager();
+
+	private static final MatchMaker matchmaker = createMatchMaker();
+
 	public static InformationManager createInformationManager() {
 		return InformationManagerManager
 				.getInformationManager(ServerPropertiesManager
@@ -155,10 +159,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return InformationManagerManager.getMatchMaker(ServerPropertiesManager
 				.getMatchMakerConf());
 	}
-
-	public static final InformationManager informationManager = createInformationManager();
-
-	private static final MatchMaker matchmaker = createMatchMaker();
 
 	private final boolean checkFileSystemsBeforeUse = false;
 	// protected final UserDAO userdao = new UserDAO();
@@ -176,9 +176,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void addJobProperties(final String jobname, final DtoJob properties)
 			throws NoSuchJobException {
 
-		Job job = getJobFromDatabase(jobname);
+		final Job job = getJobFromDatabase(jobname);
 
-		Map<String, String> temp = properties.propertiesAsMap();
+		final Map<String, String> temp = properties.propertiesAsMap();
 
 		// String urls = temp.get(Constants.INPUT_FILE_URLS_KEY);
 		// if ( StringUtils.isNotBlank(urls) ) {
@@ -204,7 +204,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			final String value) throws NoSuchJobException {
 
 		try {
-			Job job = getJobFromDatabase(jobname);
+			final Job job = getJobFromDatabase(jobname);
 
 			// input files are added automatically
 			if (!Constants.INPUT_FILE_URLS_KEY.equals(key)) {
@@ -218,8 +218,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				jobdao.saveOrUpdate(job);
 				myLogger.debug("Added job property: " + key);
 			}
-		} catch (NoSuchJobException e) {
-			BatchJob job = getMultiPartJobFromDatabase(jobname);
+		} catch (final NoSuchJobException e) {
+			final BatchJob job = getMultiPartJobFromDatabase(jobname);
 			job.addJobProperty(key, value);
 			batchJobDao.saveOrUpdate(job);
 			myLogger.debug("Added multijob property: " + key);
@@ -244,13 +244,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public String addJobToBatchJob(String batchJobname, String jsdlString)
 			throws JobPropertiesException, NoSuchJobException {
 
-		BatchJob multiJob = getMultiPartJobFromDatabase(batchJobname);
+		final BatchJob multiJob = getMultiPartJobFromDatabase(batchJobname);
 
 		Document jsdl;
 
 		try {
 			jsdl = SeveralXMLHelpers.fromString(jsdlString);
-		} catch (Exception e3) {
+		} catch (final Exception e3) {
 			throw new RuntimeException("Invalid jsdl/xml format.", e3);
 		}
 
@@ -293,8 +293,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		//
 		// }
 
-		String jobname = createJob(jsdl, multiJob.getFqan(), "force-name",
-				multiJob);
+		final String jobname = createJob(jsdl, multiJob.getFqan(),
+				"force-name", multiJob);
 		multiJob.addJob(jobname);
 		multiJob.setStatus(JobConstants.READY_TO_SUBMIT);
 		batchJobDao.saveOrUpdate(multiJob);
@@ -305,13 +305,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private synchronized void addLogMessageToPossibleMultiPartJobParent(
 			Job job, String message) {
 
-		String mpjName = job.getJobProperty(Constants.BATCHJOB_NAME);
+		final String mpjName = job.getJobProperty(Constants.BATCHJOB_NAME);
 
 		if (mpjName != null) {
 			BatchJob mpj = null;
 			try {
 				mpj = getMultiPartJobFromDatabase(mpjName);
-			} catch (NoSuchJobException e) {
+			} catch (final NoSuchJobException e) {
 				myLogger.error(e);
 				return;
 			}
@@ -336,7 +336,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						.getJobs().size() * 3) + 3);
 		getSessionActionStatus().put(batchJob.getBatchJobname(), status);
 
-		Thread archiveThread = new Thread() {
+		final Thread archiveThread = new Thread() {
 			@Override
 			public void run() {
 
@@ -347,16 +347,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						.newFixedThreadPool(ServerPropertiesManager
 								.getConcurrentFileTransfersPerUser());
 
-				for (Job job : batchJob.getJobs()) {
+				for (final Job job : batchJob.getJobs()) {
 					status.addElement("Creating job archive thread for job "
 							+ job.getJobname());
-					String jobdirUrl = job
+					final String jobdirUrl = job
 							.getJobProperty(Constants.JOBDIRECTORY_KEY);
 					final String targetDir = target + "/"
 							+ FileManager.getFilename(jobdirUrl);
 
-					Thread archiveThread = archiveSingleJob(job, targetDir,
-							status);
+					final Thread archiveThread = archiveSingleJob(job,
+							targetDir, status);
 					executor.execute(archiveThread);
 				}
 
@@ -364,7 +364,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				try {
 					executor.awaitTermination(24, TimeUnit.HOURS);
-				} catch (InterruptedException e) {
+				} catch (final InterruptedException e) {
 					e.printStackTrace();
 					status.setFailed(true);
 					status.setFinished(true);
@@ -375,12 +375,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				status.addElement("Killing batchjob.");
 				// now kill batchjob
-				Thread deleteThread = deleteMultiPartJob(batchJob, true);
+				final Thread deleteThread = deleteMultiPartJob(batchJob, true);
 
 				try {
 					deleteThread.join();
 					status.addElement("Batchjob killed.");
-				} catch (InterruptedException e) {
+				} catch (final InterruptedException e) {
 					status.setFailed(true);
 					status.setFinished(true);
 					e.printStackTrace();
@@ -409,7 +409,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		if (StringUtils.isBlank(target)) {
 
-			String defArcLoc = getUser().getUserProperties().get(
+			final String defArcLoc = getUser().getUserProperties().get(
 					Constants.DEFAULT_ARCHIVE_LOCATION);
 			if (StringUtils.isBlank(defArcLoc)) {
 				throw new RemoteFileSystemException(
@@ -420,22 +420,24 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		try {
-			BatchJob job = getMultiPartJobFromDatabase(jobname);
-			String jobdirUrl = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+			final BatchJob job = getMultiPartJobFromDatabase(jobname);
+			final String jobdirUrl = job
+					.getJobProperty(Constants.JOBDIRECTORY_KEY);
 
 			final String targetDir = target + "/"
 					+ FileManager.getFilename(jobdirUrl);
 
 			archiveBatchJob(job, targetDir);
 			return targetDir;
-		} catch (NoSuchJobException e) {
-			Job job = getJobFromDatabase(jobname);
+		} catch (final NoSuchJobException e) {
+			final Job job = getJobFromDatabase(jobname);
 
-			String jobdirUrl = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+			final String jobdirUrl = job
+					.getJobProperty(Constants.JOBDIRECTORY_KEY);
 			final String targetDir = target + "/"
 					+ FileManager.getFilename(jobdirUrl);
 
-			Thread archiveThread = archiveSingleJob(job, targetDir, null);
+			final Thread archiveThread = archiveSingleJob(job, targetDir, null);
 			archiveThread.start();
 
 			return targetDir;
@@ -445,7 +447,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private Thread archiveSingleJob(final Job job, final String targetDirUrl,
 			final DtoActionStatus optionalBatchJobStatus) {
 
-		Thread archiveThread = new Thread() {
+		final Thread archiveThread = new Thread() {
 			@Override
 			public void run() {
 
@@ -486,7 +488,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					status.addElement("Deleting old jobdirectory: "
 							+ job.getJobProperty(Constants.JOBDIRECTORY_KEY));
 					deleteFile(job.getJobProperty(Constants.JOBDIRECTORY_KEY));
-				} catch (RemoteFileSystemException e1) {
+				} catch (final RemoteFileSystemException e1) {
 					if (optionalBatchJobStatus != null) {
 						optionalBatchJobStatus.setFailed(true);
 						optionalBatchJobStatus
@@ -509,7 +511,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 										+ job.getJobname());
 					}
 					status.setFailed(true);
-					String message = rftp.getPossibleExceptionMessage();
+					final String message = rftp.getPossibleExceptionMessage();
 					status.addElement("Transfer failed: " + message);
 					status.setFinished(true);
 					return;
@@ -520,13 +522,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				status.addElement("Creating " + GRISU_JOB_FILE_NAME + " file.");
 
-				String grisuJobFileUrl = targetDirUrl + "/"
+				final String grisuJobFileUrl = targetDirUrl + "/"
 						+ GRISU_JOB_FILE_NAME;
 				FileObject grisujobFile = null;
 				;
 				try {
 					grisujobFile = getUser().aquireFile(grisuJobFileUrl);
-				} catch (RemoteFileSystemException e1) {
+				} catch (final RemoteFileSystemException e1) {
 					if (optionalBatchJobStatus != null) {
 						optionalBatchJobStatus.setFailed(true);
 						optionalBatchJobStatus
@@ -535,18 +537,18 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 										+ e1.getLocalizedMessage());
 					}
 					status.setFailed(true);
-					String message = rftp.getPossibleExceptionMessage();
+					final String message = rftp.getPossibleExceptionMessage();
 					status.addElement("Could not access grisufile url.");
 					status.setFinished(true);
 					return;
 				}
-				Serializer serializer = new Persister();
+				final Serializer serializer = new Persister();
 
 				OutputStream fout = null;
 				try {
 					fout = grisujobFile.getContent().getOutputStream();
 					serializer.write(job, fout);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					if (optionalBatchJobStatus != null) {
 						optionalBatchJobStatus.setFailed(true);
 						optionalBatchJobStatus
@@ -555,14 +557,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 										+ e.getLocalizedMessage());
 					}
 					status.setFailed(true);
-					String message = rftp.getPossibleExceptionMessage();
+					final String message = rftp.getPossibleExceptionMessage();
 					status.addElement("Could not serialize job object.");
 					status.setFinished(true);
 					return;
 				} finally {
 					try {
 						fout.close();
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						e.printStackTrace();
 					}
 				}
@@ -600,7 +602,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								+ "Jobname not specified and job creation method is force-name.");
 			}
 
-			String[] allJobnames = getAllJobnames(null).asArray();
+			final String[] allJobnames = getAllJobnames(null).asArray();
 			Arrays.sort(allJobnames);
 			if (Arrays.binarySearch(allJobnames, jobname) >= 0) {
 				throw new JobPropertiesException(
@@ -618,15 +620,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 		} else if (Constants.TIMESTAMP_METHOD.equals(jobnameCreationMethod)) {
 
-			String[] allJobnames = getAllJobnames(null).asArray();
+			final String[] allJobnames = getAllJobnames(null).asArray();
 			Arrays.sort(allJobnames);
 
 			String temp;
 			do {
-				String timestamp = new Long(new Date().getTime()).toString();
+				final String timestamp = new Long(new Date().getTime())
+						.toString();
 				try {
 					Thread.sleep(1);
-				} catch (InterruptedException e) {
+				} catch (final InterruptedException e) {
 					myLogger.debug(e);
 				}
 
@@ -658,39 +661,39 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	private SortedSet<GridResource> calculateResourcesToUse(BatchJob mpj) {
 
-		String locationsToIncludeString = mpj
+		final String locationsToIncludeString = mpj
 				.getJobProperty(Constants.LOCATIONS_TO_INCLUDE_KEY);
 		String[] locationsToInclude = null;
 		if (StringUtils.isNotBlank(locationsToIncludeString)) {
 			locationsToInclude = locationsToIncludeString.split(",");
 		}
 
-		String locationsToExcludeString = mpj
+		final String locationsToExcludeString = mpj
 				.getJobProperty(Constants.LOCATIONS_TO_EXCLUDE_KEY);
 		String[] locationsToExclude = null;
 		if (StringUtils.isNotBlank(locationsToExcludeString)) {
 			locationsToExclude = locationsToExcludeString.split(",");
 		}
 
-		SortedSet<GridResource> resourcesToUse = new TreeSet<GridResource>();
+		final SortedSet<GridResource> resourcesToUse = new TreeSet<GridResource>();
 
-		for (GridResource resource : findBestResourcesForMultipartJob(mpj)) {
+		for (final GridResource resource : findBestResourcesForMultipartJob(mpj)) {
 
-			String tempSubLocString = SubmissionLocationHelpers
+			final String tempSubLocString = SubmissionLocationHelpers
 					.createSubmissionLocationString(resource);
 
 			// check whether subloc is available for vo
-			String[] allSubLocs = informationManager
+			final String[] allSubLocs = informationManager
 					.getAllSubmissionLocationsForVO(mpj.getFqan());
 			Arrays.sort(allSubLocs);
-			int i = Arrays.binarySearch(allSubLocs, tempSubLocString);
+			final int i = Arrays.binarySearch(allSubLocs, tempSubLocString);
 			if (i < 0) {
 				continue;
 			}
 
 			if ((locationsToInclude != null) && (locationsToInclude.length > 0)) {
 
-				for (String subLoc : locationsToInclude) {
+				for (final String subLoc : locationsToInclude) {
 					if (tempSubLocString.toLowerCase().contains(
 							subLoc.toLowerCase())) {
 						if (isValidSubmissionLocation(tempSubLocString,
@@ -705,7 +708,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					&& (locationsToExclude.length > 0)) {
 
 				boolean useSubLoc = true;
-				for (String subLoc : locationsToExclude) {
+				for (final String subLoc : locationsToExclude) {
 					if (tempSubLocString.toLowerCase().contains(
 							subLoc.toLowerCase())) {
 						useSubLoc = false;
@@ -743,15 +746,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				final String subLoc = SubmissionLocationHelpers
 						.createSubmissionLocationString(gr);
 
-				String[] fs = informationManager
+				final String[] fs = informationManager
 						.getStagingFileSystemForSubmissionLocation(subLoc);
 
 				for (final MountPoint mp : df(mpj.getFqan())) {
 
-					for (String f : fs) {
+					for (final String f : fs) {
 						if (mp.getRootUrl().startsWith(f.replace(":2811", ""))) {
 
-							Thread thread = new Thread() {
+							final Thread thread = new Thread() {
 								@Override
 								public void run() {
 									try {
@@ -760,7 +763,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 													+ subLoc);
 											failSet.add(gr);
 										}
-									} catch (RemoteFileSystemException e) {
+									} catch (final RemoteFileSystemException e) {
 										myLogger.error("Removing sub loc "
 												+ subLoc + ": "
 												+ e.getLocalizedMessage());
@@ -778,7 +781,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			try {
 				executor1.awaitTermination(3600, TimeUnit.SECONDS);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -792,19 +795,40 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
+	private boolean checkWhetherGridResourceIsActuallyAvailable(
+			GridResource resource) {
+
+		final String[] filesystems = informationManager
+				.getStagingFileSystemForSubmissionLocation(SubmissionLocationHelpers
+						.createSubmissionLocationString(resource));
+
+		for (final MountPoint mp : df().getMountpoints()) {
+
+			for (final String fs : filesystems) {
+				if (mp.getRootUrl().startsWith(fs.replace(":2811", ""))) {
+					return true;
+				}
+			}
+
+		}
+
+		return false;
+
+	}
+
 	public void copyBatchJobInputFile(String batchJobname, String inputFile,
 			String filename) throws RemoteFileSystemException,
 			NoSuchJobException {
 
-		BatchJob multiJob = getMultiPartJobFromDatabase(batchJobname);
+		final BatchJob multiJob = getMultiPartJobFromDatabase(batchJobname);
 
-		String relpathFromMountPointRoot = multiJob
+		final String relpathFromMountPointRoot = multiJob
 				.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY);
 
-		for (String mountPointRoot : multiJob.getAllUsedMountPoints()) {
+		for (final String mountPointRoot : multiJob.getAllUsedMountPoints()) {
 
-			String targetUrl = mountPointRoot + "/" + relpathFromMountPointRoot
-					+ "/" + filename;
+			final String targetUrl = mountPointRoot + "/"
+					+ relpathFromMountPointRoot + "/" + filename;
 			myLogger.debug("Coping multipartjob inputfile " + filename
 					+ " to: " + targetUrl);
 			cpSingleFile(inputFile, targetUrl, true, true, true);
@@ -841,16 +865,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		getSessionActionStatus().put(handle, actionStat);
 
 		final String handleFinal = handle;
-		Thread cpThread = new Thread() {
+		final Thread cpThread = new Thread() {
 			@Override
 			public void run() {
 				try {
-					for (String source : sources.asArray()) {
+					for (final String source : sources.asArray()) {
 						actionStat.addElement("Starting transfer of file: "
 								+ source);
-						String filename = FileHelpers.getFilename(source);
-						RemoteFileTransferObject rto = cpSingleFile(source,
-								target + "/" + filename, overwrite, true, true);
+						final String filename = FileHelpers.getFilename(source);
+						final RemoteFileTransferObject rto = cpSingleFile(
+								source, target + "/" + filename, overwrite,
+								true, true);
 
 						if (rto.isFailed()) {
 							actionStat.addElement("Transfer failed: "
@@ -867,7 +892,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						}
 					}
 					actionStat.setFinished(true);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					e.printStackTrace();
 					actionStat.addElement("Transfer failed: "
 							+ e.getLocalizedMessage());
@@ -884,7 +909,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		if (waitForFileTransferToFinish) {
 			try {
 				cpThread.join();
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -909,7 +934,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		String targetFileString;
 		try {
 			targetFileString = target_file.getURL().toString();
-		} catch (FileSystemException e1) {
+		} catch (final FileSystemException e1) {
 			myLogger.error("Could not retrieve targetfile url: "
 					+ e1.getLocalizedMessage());
 			throw new RemoteFileSystemException(
@@ -917,7 +942,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							+ e1.getLocalizedMessage());
 		}
 
-		RemoteFileTransferObject fileTransfer = new RemoteFileTransferObject(
+		final RemoteFileTransferObject fileTransfer = new RemoteFileTransferObject(
 				source_file, target_file, overwrite);
 
 		myLogger.info("Creating fileTransfer object for source: "
@@ -931,6 +956,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		return fileTransfer;
 	}
+
+	// public String createJobUsingMap(final DtoJob jobProperties,
+	// final String fqan, final String jobCreationMethod)
+	// throws JobPropertiesException {
+	//
+	// JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl(jobProperties
+	// .propertiesAsMap());
+	//
+	// return createJob(jso.getJobDescriptionDocument(), fqan,
+	// jobCreationMethod);
+	// }
 
 	/**
 	 * Creates a multipartjob on the server.
@@ -946,20 +982,21 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throws BatchJobException {
 
 		try {
-			Job possibleJob = getJobFromDatabase(batchJobname);
+			final Job possibleJob = getJobFromDatabase(batchJobname);
 			throw new BatchJobException("Can't create multipartjob with id: "
 					+ batchJobname
 					+ ". Non-multipartjob with this id already exists...");
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			// that's good
 		}
 
 		try {
-			BatchJob multiJob = getMultiPartJobFromDatabase(batchJobname);
-		} catch (NoSuchJobException e) {
+			final BatchJob multiJob = getMultiPartJobFromDatabase(batchJobname);
+		} catch (final NoSuchJobException e) {
 			// that's good
 
-			BatchJob multiJobCreate = new BatchJob(getDN(), batchJobname, fqan);
+			final BatchJob multiJobCreate = new BatchJob(getDN(), batchJobname,
+					fqan);
 			multiJobCreate.addJobProperty(Constants.RELATIVE_PATH_FROM_JOBDIR,
 					"../");
 			multiJobCreate.addJobProperty(
@@ -979,7 +1016,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			try {
 				return multiJobCreate.createDtoMultiPartJob();
-			} catch (NoSuchJobException e1) {
+			} catch (final NoSuchJobException e1) {
 				// that should never happen
 				e1.printStackTrace();
 			}
@@ -988,17 +1025,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		throw new BatchJobException("MultiPartJob with name " + batchJobname
 				+ " already exists.");
 	}
-
-	// public String createJobUsingMap(final DtoJob jobProperties,
-	// final String fqan, final String jobCreationMethod)
-	// throws JobPropertiesException {
-	//
-	// JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl(jobProperties
-	// .propertiesAsMap());
-	//
-	// return createJob(jso.getJobDescriptionDocument(), fqan,
-	// jobCreationMethod);
-	// }
 
 	/**
 	 * This, well, creates a folder, as one might expect.
@@ -1023,14 +1049,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			final BatchJob optionalParentBatchJob)
 			throws JobPropertiesException {
 
-		String jobname = calculateJobname(jsdl, jobnameCreationMethod);
+		final String jobname = calculateJobname(jsdl, jobnameCreationMethod);
 
 		try {
-			BatchJob mpj = getMultiPartJobFromDatabase(jobname);
+			final BatchJob mpj = getMultiPartJobFromDatabase(jobname);
 			throw new JobPropertiesException(
 					"Could not create job with jobname " + jobname
 							+ ". Multipart job with this id already exists...");
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			// that's good
 		}
 
@@ -1042,7 +1068,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					JobSubmissionProperty.JOBNAME.toString() + ": "
 							+ "Jobname \"" + jobname
 							+ "\" already taken. Could not create job.");
-		} catch (NoSuchJobException e1) {
+		} catch (final NoSuchJobException e1) {
 			// that's ok
 			myLogger.debug("Checked jobname. Not yet in database. Good.");
 		}
@@ -1061,18 +1087,18 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		try {
 			setVO(job, fqan);
 			processJobDescription(job, optionalParentBatchJob);
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			// that should never happen
 			myLogger.error("Somehow the job was not created although it certainly should have. Must be a bug..");
 			throw new RuntimeException("Job was not created. Internal error.");
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			myLogger.error("Error when processing job description: "
 					+ e.getLocalizedMessage());
 			try {
 				jobdao.delete(job);
 				myLogger.debug("Deleted job " + jobname
 						+ " from database again.");
-			} catch (Exception e2) {
+			} catch (final Exception e2) {
 				myLogger.error("Could not delete job from database: "
 						+ e2.getLocalizedMessage());
 			}
@@ -1100,7 +1126,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 			jsdl = SeveralXMLHelpers.fromString(jsdlString);
-		} catch (Exception e3) {
+		} catch (final Exception e3) {
 
 			myLogger.error(e3);
 			throw new RuntimeException("Invalid jsdl/xml format.", e3);
@@ -1116,12 +1142,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public void deleteFile(final String file) throws RemoteFileSystemException {
 
-		FileObject fileObject = getUser().aquireFile(file);
+		final FileObject fileObject = getUser().aquireFile(file);
 		try {
 			if (fileObject.exists()) {
 				fileObject.delete(new AllFileSelector());
 			}
-		} catch (FileSystemException e) {
+		} catch (final FileSystemException e) {
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
 			throw new RemoteFileSystemException("Could not delete file: "
@@ -1142,16 +1168,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return;
 		}
 
-		DtoActionStatus status = new DtoActionStatus(files.asArray()[0],
+		final DtoActionStatus status = new DtoActionStatus(files.asArray()[0],
 				files.asArray().length * 2);
 		getSessionActionStatus().put(files.asArray()[0], status);
 
-		for (String file : files.getStringList()) {
+		for (final String file : files.getStringList()) {
 			try {
 				status.addElement("Deleting file " + file + "...");
 				deleteFile(file);
 				status.addElement("Success.");
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				status.addElement("Failed: " + e.getLocalizedMessage());
 				status.setFailed(true);
 				myLogger.error("Could not delete file: " + file);
@@ -1191,12 +1217,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		final Job[] jobs = multiJob.getJobs().toArray(new Job[] {});
 
-		for (Job job : jobs) {
+		for (final Job job : jobs) {
 			multiJob.removeJob(job);
 		}
 		batchJobDao.saveOrUpdate(multiJob);
 		for (final Job job : jobs) {
-			Thread thread = new Thread("killing_" + job.getJobname()) {
+			final Thread thread = new Thread("killing_" + job.getJobname()) {
 				@Override
 				public void run() {
 					try {
@@ -1212,7 +1238,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								+ Thread.currentThread().getName());
 						newActionStatus.addElement("Killed job: "
 								+ job.getJobname());
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						newActionStatus.addElement("Failed killing job "
 								+ job.getJobname() + ": "
 								+ e.getLocalizedMessage());
@@ -1232,25 +1258,26 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		executor.shutdown();
 
-		Thread cleanupThread = new Thread() {
+		final Thread cleanupThread = new Thread() {
 
 			@Override
 			public void run() {
 
 				try {
 					executor.awaitTermination(2, TimeUnit.HOURS);
-				} catch (InterruptedException e1) {
+				} catch (final InterruptedException e1) {
 					e1.printStackTrace();
 				}
 
 				try {
 					if (clean) {
-						for (String mpRoot : multiJob.getAllUsedMountPoints()) {
+						for (final String mpRoot : multiJob
+								.getAllUsedMountPoints()) {
 
 							newActionStatus
 									.addElement("Deleting common dir for mountpoint: "
 											+ mpRoot);
-							String url = mpRoot
+							final String url = mpRoot
 									+ multiJob
 											.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY);
 							myLogger.debug("Deleting multijobDir: " + url);
@@ -1259,7 +1286,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								newActionStatus
 										.addElement("Deleted common dir for mountpoint: "
 												+ mpRoot);
-							} catch (RemoteFileSystemException e) {
+							} catch (final RemoteFileSystemException e) {
 								newActionStatus
 										.addElement("Couldn't delete common dir for mountpoint: "
 												+ mpRoot);
@@ -1306,8 +1333,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	protected Set<MountPoint> df(String fqan) {
 
-		Set<MountPoint> result = new HashSet<MountPoint>();
-		for (MountPoint mp : getUser().getAllMountPoints()) {
+		final Set<MountPoint> result = new HashSet<MountPoint>();
+		for (final MountPoint mp : getUser().getAllMountPoints()) {
 			if (StringUtils.isNotBlank(mp.getFqan())
 					&& mp.getFqan().equals(fqan)) {
 				result.add(mp);
@@ -1323,6 +1350,37 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		return download(new String[] { filename })[0];
 	}
+
+	// private void moveJobDirectory(Job job, String newSubLoc, BatchJob
+	// possibleBatchJob) throws NoSuchJobException, JobPropertiesException,
+	// RemoteFileSystemException {
+	//
+	//
+	// String oldJobDir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+	// JsdlHelpers.setCandidateHosts(job.getJobDescription(), new
+	// String[]{newSubLoc});
+	//
+	//
+	// processJobDescription(job, possibleBatchJob);
+	//
+	// String newJobDir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+	// myLogger.debug("New jobdirectory: "+ newJobDir);
+	//
+	//
+	// cpSingleFile(oldJobDir, newJobDir, true, true);
+	// myLogger.debug("Moved old job dir from "+oldJobDir+" to "+newJobDir);
+	//
+	// try {
+	// // try to delete old file
+	// deleteFile(oldJobDir);
+	// } catch (RemoteFileSystemException e) {
+	// // not good, but acceptable
+	// myLogger.error("Could not delete old jobdir.", e);
+	// }
+	//
+	// jobdao.saveOrUpdate(job);
+	//
+	// }
 
 	/**
 	 * Downloads multiple files at once. It's not used at the moment for this
@@ -1357,7 +1415,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				datasource = new FileContentDataSourceConnector(
 						source.getContent());
-			} catch (FileSystemException e) {
+			} catch (final FileSystemException e) {
 				throw new RemoteFileSystemException(
 						"Could not find or read file: " + filenames[i] + ": "
 								+ e.getMessage());
@@ -1370,37 +1428,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	// private void moveJobDirectory(Job job, String newSubLoc, BatchJob
-	// possibleBatchJob) throws NoSuchJobException, JobPropertiesException,
-	// RemoteFileSystemException {
-	//
-	//
-	// String oldJobDir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
-	// JsdlHelpers.setCandidateHosts(job.getJobDescription(), new
-	// String[]{newSubLoc});
-	//
-	//
-	// processJobDescription(job, possibleBatchJob);
-	//
-	// String newJobDir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
-	// myLogger.debug("New jobdirectory: "+ newJobDir);
-	//
-	//
-	// cpSingleFile(oldJobDir, newJobDir, true, true);
-	// myLogger.debug("Moved old job dir from "+oldJobDir+" to "+newJobDir);
-	//
-	// try {
-	// // try to delete old file
-	// deleteFile(oldJobDir);
-	// } catch (RemoteFileSystemException e) {
-	// // not good, but acceptable
-	// myLogger.error("Could not delete old jobdir.", e);
-	// }
-	//
-	// jobdao.saveOrUpdate(job);
-	//
-	// }
-
 	public boolean fileExists(final String file)
 			throws RemoteFileSystemException {
 
@@ -1409,7 +1436,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		try {
 			exists = getUser().aquireFile(file).exists();
 			return exists;
-		} catch (FileSystemException e) {
+		} catch (final FileSystemException e) {
 
 			throw new RemoteFileSystemException(
 					"Could not connect to filesystem to aquire file: " + file);
@@ -1425,12 +1452,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		;
 		try {
 			tempFolder = getFolderListing(folder.getRootUrl());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			myLogger.error(e);
 			myLogger.error("Error getting folder listing. I suspect this to be a bug in the commons-vfs-grid library. Sleeping for 1 seconds and then trying again...");
 			try {
 				Thread.sleep(1000);
-			} catch (InterruptedException e1) {
+			} catch (final InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
@@ -1441,7 +1468,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		if (recursionLevel <= 0) {
 			folder.setChildrenFolders(tempFolder.getChildrenFolders());
 		} else {
-			for (DtoFolder childFolder : tempFolder.getChildrenFolders()) {
+			for (final DtoFolder childFolder : tempFolder.getChildrenFolders()) {
 				folder.addChildFolder(fillFolder(childFolder,
 						recursionLevel - 1));
 			}
@@ -1453,7 +1480,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private SortedSet<GridResource> findBestResourcesForMultipartJob(
 			BatchJob mpj) {
 
-		Map<JobSubmissionProperty, String> properties = new HashMap<JobSubmissionProperty, String>();
+		final Map<JobSubmissionProperty, String> properties = new HashMap<JobSubmissionProperty, String>();
 
 		String defaultApplication = mpj
 				.getJobProperty(Constants.APPLICATIONNAME_KEY);
@@ -1482,8 +1509,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY);
 		if (StringUtils.isBlank(maxWalltime)) {
 			int mwt = 0;
-			for (Job job : mpj.getJobs()) {
-				int wt = new Integer(
+			for (final Job job : mpj.getJobs()) {
+				final int wt = new Integer(
 						job.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY));
 				if (mwt < wt) {
 					mwt = wt;
@@ -1494,7 +1521,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		properties.put(JobSubmissionProperty.WALLTIME_IN_MINUTES, maxWalltime);
 
-		SortedSet<GridResource> result = new TreeSet<GridResource>(
+		final SortedSet<GridResource> result = new TreeSet<GridResource>(
 				matchmaker.findAvailableResources(properties, mpj.getFqan()));
 
 		// StringBuffer message = new StringBuffer(
@@ -1517,7 +1544,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		Document jsdl;
 		try {
 			jsdl = SeveralXMLHelpers.fromString(jsdlString);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 
@@ -1538,10 +1565,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			final DtoJob jobProperties, final String fqan,
 			boolean excludeResourcesWithLessCPUslotsFreeThanRequested) {
 
-		LinkedList<String> result = new LinkedList<String>();
+		final LinkedList<String> result = new LinkedList<String>();
 
-		Map<JobSubmissionProperty, String> converterMap = new HashMap<JobSubmissionProperty, String>();
-		for (DtoJobProperty jp : jobProperties.getProperties()) {
+		final Map<JobSubmissionProperty, String> converterMap = new HashMap<JobSubmissionProperty, String>();
+		for (final DtoJobProperty jp : jobProperties.getProperties()) {
 			converterMap.put(JobSubmissionProperty.fromString(jp.getKey()),
 					jp.getValue());
 		}
@@ -1558,7 +1585,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public DtoActionStatus getActionStatus(String actionHandle) {
 
-		DtoActionStatus result = getSessionActionStatus().get(actionHandle);
+		final DtoActionStatus result = getSessionActionStatus().get(
+				actionHandle);
 
 		// System.out.println("Elements before: "+result.getLog().size());
 
@@ -1574,13 +1602,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * .lang.String[])
 	 */
 	public DtoStringList getAllAvailableApplications(final DtoStringList sites) {
-		Set<String> siteList = new TreeSet<String>();
+		final Set<String> siteList = new TreeSet<String>();
 
 		if (sites == null) {
 			return DtoStringList.fromStringArray(informationManager
 					.getAllApplicationsOnGrid());
 		}
-		for (String site : sites.getStringList()) {
+		for (final String site : sites.getStringList()) {
 			siteList.addAll(Arrays.asList(informationManager
 					.getAllApplicationsAtSite(site)));
 		}
@@ -1611,8 +1639,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public synchronized DtoHostsInfo getAllHosts() {
 
-		DtoHostsInfo info = DtoHostsInfo.createHostsInfo(informationManager
-				.getAllHosts());
+		final DtoHostsInfo info = DtoHostsInfo
+				.createHostsInfo(informationManager.getAllHosts());
 
 		return info;
 	}
@@ -1653,7 +1681,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public synchronized DtoSubmissionLocations getAllSubmissionLocations() {
 
-		DtoSubmissionLocations locs = DtoSubmissionLocations
+		final DtoSubmissionLocations locs = DtoSubmissionLocations
 				.createSubmissionLocationsInfo(informationManager
 						.getAllSubmissionLocations());
 
@@ -1672,7 +1700,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public DtoSubmissionLocations getAllSubmissionLocationsForFqan(
 			final String fqan) {
 
-		DtoSubmissionLocations locs = DtoSubmissionLocations
+		final DtoSubmissionLocations locs = DtoSubmissionLocations
 				.createSubmissionLocationsInfo(informationManager
 						.getAllSubmissionLocationsForVO(fqan));
 
@@ -1714,7 +1742,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public DtoBatchJob getBatchJob(String batchJobname)
 			throws NoSuchJobException {
 
-		BatchJob multiPartJob = getMultiPartJobFromDatabase(batchJobname);
+		final BatchJob multiPartJob = getMultiPartJobFromDatabase(batchJobname);
 
 		// TODO enable loading of batchjob from jobdirectory url
 
@@ -1752,7 +1780,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				result[i] = objects[i].getName().getURI();
 			}
 
-		} catch (FileSystemException e) {
+		} catch (final FileSystemException e) {
 			throw new RemoteFileSystemException("Could not access folder: "
 					+ folder + ": " + e.getMessage());
 		}
@@ -1792,8 +1820,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private String getDefaultVersionForApplicationAtSite(
 			final String application, final String site) {
 
-		String[] versions = informationManager.getVersionsOfApplicationOnSite(
-				application, site);
+		final String[] versions = informationManager
+				.getVersionsOfApplicationOnSite(application, site);
 		double latestVersion = 0;
 		int index = 0;
 		try {
@@ -1804,7 +1832,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				}
 			}
 			return versions[index];
-		} catch (NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			return versions[0];
 		}
 	}
@@ -1827,11 +1855,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public long getFileSize(final String file) throws RemoteFileSystemException {
 
-		FileObject file_object = getUser().aquireFile(file);
+		final FileObject file_object = getUser().aquireFile(file);
 		long size;
 		try {
 			size = file_object.getContent().getSize();
-		} catch (FileSystemException e) {
+		} catch (final FileSystemException e) {
 			throw new RemoteFileSystemException("Could not get size of file: "
 					+ file + ": " + e.getMessage());
 		}
@@ -1842,9 +1870,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private DtoFolder getFolderListing(String url)
 			throws RemoteFileSystemException, FileSystemException {
 
-		DtoFolder folder = new DtoFolder();
+		final DtoFolder folder = new DtoFolder();
 
-		FileObject fo = getUser().aquireFile(url);
+		final FileObject fo = getUser().aquireFile(url);
 
 		if (!FileType.FOLDER.equals(fo.getType())) {
 			throw new RemoteFileSystemException("Url: " + url
@@ -1861,21 +1889,21 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		FileObject[] children = null;
 		try {
 			children = fo.getChildren();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 			myLogger.error("Couldn't get children of :"
 					+ fo.getName().toString() + ". Trying one more time...");
 			children = fo.getChildren();
 		}
 
-		for (FileObject child : children) {
+		for (final FileObject child : children) {
 			if (FileType.FOLDER.equals(child.getType())) {
-				DtoFolder childfolder = new DtoFolder();
+				final DtoFolder childfolder = new DtoFolder();
 				childfolder.setName(child.getName().getBaseName());
 				childfolder.setRootUrl(child.getURL().toString());
 				folder.addChildFolder(childfolder);
 			} else if (FileType.FILE.equals(child.getType())) {
-				DtoFile childFile = new DtoFile();
+				final DtoFile childFile = new DtoFile();
 				childFile.setName(child.getName().getBaseName());
 				childFile.setRootUrl(child.getURL().toString());
 
@@ -1899,11 +1927,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return DtoStringList.fromStringColletion(getUser().getFqans().keySet());
 	}
 
+	abstract public String getInterfaceInfo(String key);
+
 	public String getInterfaceVersion() {
 		return ServiceInterface.INTERFACE_VERSION;
 	}
-
-	abstract public String getInterfaceInfo(String key);
 
 	/*
 	 * (non-Javadoc)
@@ -1917,7 +1945,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		Job job = null;
 		try {
 			job = getJobFromDatabase(jobname);
-		} catch (NoSuchJobException nsje) {
+		} catch (final NoSuchJobException nsje) {
 
 			if (jobname.startsWith("gridftp://")) {
 
@@ -1931,20 +1959,20 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				try {
 					if (fileExists(grisuJobPropertiesFile)) {
 
-						Serializer serializer = new Persister();
+						final Serializer serializer = new Persister();
 
 						InputStream fin = null;
 						try {
 							fin = getUser().aquireFile(grisuJobPropertiesFile)
 									.getContent().getInputStream();
 							job = serializer.read(Job.class, fin);
-						} catch (Exception e) {
+						} catch (final Exception e) {
 							e.printStackTrace();
 							throw nsje;
 						} finally {
 							try {
 								fin.close();
-							} catch (Exception e) {
+							} catch (final Exception e) {
 								e.printStackTrace();
 								throw nsje;
 							}
@@ -1953,7 +1981,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					} else {
 						throw nsje;
 					}
-				} catch (RemoteFileSystemException e) {
+				} catch (final RemoteFileSystemException e) {
 					throw nsje;
 				}
 
@@ -1978,7 +2006,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	protected Job getJobFromDatabase(final String jobname)
 			throws NoSuchJobException {
 
-		Job job = jobdao.findJobByDN(getUser().getCred().getDn(), jobname);
+		final Job job = jobdao
+				.findJobByDN(getUser().getCred().getDn(), jobname);
 		return job;
 	}
 
@@ -1993,15 +2022,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throws NoSuchJobException {
 
 		try {
-			Job job = getJobFromDatabase(jobname);
+			final Job job = getJobFromDatabase(jobname);
 
 			if (Constants.INPUT_FILE_URLS_KEY.equals(key)) {
 				return StringUtils.join(job.getInputFiles(), ",");
 			}
 
 			return job.getJobProperty(key);
-		} catch (NoSuchJobException e) {
-			BatchJob mpj = getMultiPartJobFromDatabase(jobname);
+		} catch (final NoSuchJobException e) {
+			final BatchJob mpj = getMultiPartJobFromDatabase(jobname);
 			return mpj.getJobProperty(key);
 		}
 	}
@@ -2018,12 +2047,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		Job job;
 		try {
 			job = getJobFromDatabase(jobname);
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			return JobConstants.NO_SUCH_JOB;
 		}
 
 		int status = Integer.MIN_VALUE;
-		int old_status = job.getStatus();
+		final int old_status = job.getStatus();
 
 		// System.out.println("OLDSTAUS "+jobname+": "+JobConstants.translateStatus(old_status));
 		if (old_status <= JobConstants.READY_TO_SUBMIT) {
@@ -2037,8 +2066,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return old_status;
 		}
 
-		Date lastCheck = job.getLastStatusCheck();
-		Date now = new Date();
+		final Date lastCheck = job.getLastStatusCheck();
+		final Date now = new Date();
 
 		if ((old_status != JobConstants.EXTERNAL_HANDLE_READY)
 				&& (old_status != JobConstants.UNSUBMITTED)
@@ -2051,13 +2080,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return job.getStatus();
 		}
 
-		ProxyCredential cred = job.getCredential();
+		final ProxyCredential cred = job.getCredential();
 		boolean changedCred = false;
 		// TODO check whether cred is stored in the database in that case? also,
 		// is a voms credential needed? -- apparently not - only dn must match
 		if ((cred == null) || !cred.isValid()) {
 
-			VO vo = VOManagement.getVO(getUser().getFqans().get(job.getFqan()));
+			final VO vo = VOManagement.getVO(getUser().getFqans().get(
+					job.getFqan()));
 
 			job.setCredential(CertHelpers.getVOProxyCredential(vo,
 					job.getFqan(), getCredential()));
@@ -2075,7 +2105,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		if (old_status != status) {
 			job.setStatus(status);
-			String message = "Job status for job: " + job.getJobname()
+			final String message = "Job status for job: " + job.getJobname()
 					+ " changed since last check ("
 					+ job.getLastStatusCheck().toString() + ") from: \""
 					+ JobConstants.translateStatus(old_status) + "\" to: \""
@@ -2089,17 +2119,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				// + JobConstants.translateStatus(status));
 				job.addLogMessage("Job failed. Status: "
 						+ JobConstants.translateStatus(status));
-				String multiPartJobParent = job
+				final String multiPartJobParent = job
 						.getJobProperty(Constants.BATCHJOB_NAME);
 				if (multiPartJobParent != null) {
 					try {
-						BatchJob mpj = getMultiPartJobFromDatabase(multiPartJobParent);
+						final BatchJob mpj = getMultiPartJobFromDatabase(multiPartJobParent);
 						mpj.addFailedJob(job.getJobname());
 						addLogMessageToPossibleMultiPartJobParent(job, "Job: "
 								+ job.getJobname() + " failed. Status: "
 								+ JobConstants.translateStatus(job.getStatus()));
 						batchJobDao.saveOrUpdate(mpj);
-					} catch (NoSuchJobException e) {
+					} catch (final NoSuchJobException e) {
 						// well
 						myLogger.error(e);
 					}
@@ -2116,7 +2146,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public String getJsdlDocument(final String jobname)
 			throws NoSuchJobException {
 
-		Job job = getJobFromDatabase(jobname);
+		final Job job = getJobFromDatabase(jobname);
 
 		String jsdlString;
 		jsdlString = SeveralXMLHelpers.toString(job.getJobDescription());
@@ -2152,8 +2182,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	protected BatchJob getMultiPartJobFromDatabase(final String batchJobname)
 			throws NoSuchJobException {
 
-		BatchJob job = batchJobDao.findJobByDN(getUser().getCred().getDn(),
-				batchJobname);
+		final BatchJob job = batchJobDao.findJobByDN(getUser().getCred()
+				.getDn(), batchJobname);
 
 		return job;
 
@@ -2162,6 +2192,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	protected Map<String, DtoActionStatus> getSessionActionStatus() {
 		return getUser().getActionStatuses();
 	}
+
+	// public String getStagingFileSystem(String site) {
+	// return MountPointManager.getDefaultFileSystem(site);
+	// }
+
+	// abstract protected DtoStringList getSessionFqans();
 
 	/*
 	 * (non-Javadoc)
@@ -2173,12 +2209,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return informationManager.getSiteForHostOrUrl(host_or_url);
 
 	}
-
-	// public String getStagingFileSystem(String site) {
-	// return MountPointManager.getDefaultFileSystem(site);
-	// }
-
-	// abstract protected DtoStringList getSessionFqans();
 
 	/**
 	 * Returns the name of the site for the given submissionLocation.
@@ -2240,7 +2270,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersion(
 			final String application, final String version) {
 
-		String[] sls = informationManager.getAllSubmissionLocations(
+		final String[] sls = informationManager.getAllSubmissionLocations(
 				application, version);
 
 		return DtoSubmissionLocations.createSubmissionLocationsInfo(sls);
@@ -2260,8 +2290,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// if (ServerPropertiesManager.getMDSenabled()) {
 		myLogger.debug("Getting map of submissionlocations per version of application for: "
 				+ application);
-		Map<String, String> appVersionMap = new HashMap<String, String>();
-		String[] versions = informationManager
+		final Map<String, String> appVersionMap = new HashMap<String, String>();
+		final String[] versions = informationManager
 				.getAllVersionsOfApplicationOnGrid(application);
 		for (int i = 0; (versions != null) && (i < versions.length); i++) {
 			String[] submitLocations = null;
@@ -2277,7 +2307,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							+ "\". Most likely the mds is not published correctly.");
 					continue;
 				}
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				myLogger.error("Couldn't find submission locations for application: \""
 						+ application
 						+ "\""
@@ -2286,7 +2316,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						+ "\". Most likely the mds is not published correctly.");
 				continue;
 			}
-			StringBuffer submitLoc = new StringBuffer();
+			final StringBuffer submitLoc = new StringBuffer();
 
 			if (submitLocations != null) {
 				for (int j = 0; j < submitLocations.length; j++) {
@@ -2307,10 +2337,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		List<Job> jobs = null;
 		jobs = jobdao.findJobByDN(getUser().getDn(), false);
 
-		Set<String> apps = new TreeSet<String>();
+		final Set<String> apps = new TreeSet<String>();
 
-		for (Job job : jobs) {
-			String app = job.getJobProperty(Constants.APPLICATIONNAME_KEY);
+		for (final Job job : jobs) {
+			final String app = job
+					.getJobProperty(Constants.APPLICATIONNAME_KEY);
 			if (StringUtils.isNotBlank(app)) {
 				apps.add(app);
 			}
@@ -2325,10 +2356,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		List<BatchJob> jobs = null;
 		jobs = batchJobDao.findMultiPartJobByDN(getUser().getDn());
 
-		Set<String> apps = new TreeSet<String>();
+		final Set<String> apps = new TreeSet<String>();
 
-		for (BatchJob job : jobs) {
-			String app = job.getJobProperty(Constants.APPLICATIONNAME_KEY);
+		for (final BatchJob job : jobs) {
+			final String app = job
+					.getJobProperty(Constants.APPLICATIONNAME_KEY);
 			if (StringUtils.isNotBlank(app)) {
 				apps.add(app);
 			}
@@ -2337,6 +2369,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return DtoStringList.fromStringColletion(apps);
 
 	}
+
+	// public UserDAO getUserDao() {
+	// return userdao;
+	// }
 
 	/**
 	 * Gets the user of the current session. Also connects the default
@@ -2348,10 +2384,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 
 	abstract protected User getUser();
-
-	// public UserDAO getUserDao() {
-	// return userdao;
-	// }
 
 	public DtoProperties getUserProperties() {
 
@@ -2366,7 +2398,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public String getUserProperty(final String key) {
 
-		String value = getUser().getUserProperties().get(key);
+		final String value = getUser().getUserProperties().get(key);
 
 		return value;
 	}
@@ -2403,7 +2435,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		boolean isFolder;
 		try {
 			isFolder = (getUser().aquireFile(file).getType() == FileType.FOLDER);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			myLogger.error("Couldn't access file: " + file
 					+ " to check whether it is a folder."
 					+ e.getLocalizedMessage());
@@ -2412,7 +2444,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			try {
 				myLogger.debug("trying a second time...");
 				isFolder = (getUser().aquireFile(file).getType() == FileType.FOLDER);
-			} catch (Exception e2) {
+			} catch (final Exception e2) {
 				// e2.printStackTrace();
 				myLogger.error("Again couldn't access file: " + file
 						+ " to check whether it is a folder."
@@ -2448,12 +2480,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private boolean isValidSubmissionLocation(String subLoc, String fqan) {
 
 		// TODO i'm sure this can be made much more quicker
-		String[] fs = informationManager
+		final String[] fs = informationManager
 				.getStagingFileSystemForSubmissionLocation(subLoc);
 
-		for (MountPoint mp : df(fqan)) {
+		for (final MountPoint mp : df(fqan)) {
 
-			for (String f : fs) {
+			for (final String f : fs) {
 				if (mp.getRootUrl().startsWith(f.replace(":2811", ""))) {
 
 					return true;
@@ -2486,14 +2518,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		job.addLogMessage("Trying to kill job...");
 		int new_status = Integer.MIN_VALUE;
-		int old_status = job.getStatus();
+		final int old_status = job.getStatus();
 
 		// nothing to kill
 		if (old_status > 999) {
 			return old_status;
 		}
 
-		ProxyCredential cred = job.getCredential();
+		final ProxyCredential cred = job.getCredential();
 		boolean changedCred = false;
 		// TODO check whether cred is stored in the database in that case?
 		if ((cred == null) || !cred.isValid()) {
@@ -2539,11 +2571,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			if (job.isBatchJob()) {
 
 				try {
-					BatchJob mpj = getMultiPartJobFromDatabase(job
+					final BatchJob mpj = getMultiPartJobFromDatabase(job
 							.getJobProperty(Constants.BATCHJOB_NAME));
 					mpj.removeJob(job);
 					batchJobDao.saveOrUpdate(mpj);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					// e.printStackTrace();
 					// doesn't matter
 				}
@@ -2563,7 +2595,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					// job.getJobProperty(Constants.JOBDIRECTORY_KEY));
 					// jobDir.delete(new AllFileSelector());
 					// jobDir.delete();
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					myLogger.debug("Deleting NOT success for jobdir for "
 							+ job.getJobname() + " in thread "
 							+ Thread.currentThread().getName() + ": "
@@ -2599,8 +2631,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				kill(job, false, false);
 			}
 
-		} catch (NoSuchJobException nsje) {
-			BatchJob mpj = getMultiPartJobFromDatabase(jobname);
+		} catch (final NoSuchJobException nsje) {
+			final BatchJob mpj = getMultiPartJobFromDatabase(jobname);
 			deleteMultiPartJob(mpj, clear);
 		}
 	}
@@ -2611,16 +2643,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return;
 		}
 
-		DtoActionStatus status = new DtoActionStatus(jobnames.asArray()[0],
-				jobnames.asArray().length * 2);
+		final DtoActionStatus status = new DtoActionStatus(
+				jobnames.asArray()[0], jobnames.asArray().length * 2);
 		getSessionActionStatus().put(jobnames.asArray()[0], status);
 
-		for (String jobname : jobnames.asArray()) {
+		for (final String jobname : jobnames.asArray()) {
 			status.addElement("Killing job " + jobname + "...");
 			try {
 				kill(jobname, clear);
 				status.addElement("Success.");
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				status.addElement("Failed: " + e.getLocalizedMessage());
 				status.setFailed(true);
 				myLogger.error("Could not kill job: " + jobname);
@@ -2639,7 +2671,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public long lastModified(final String url) throws RemoteFileSystemException {
 
 		try {
-			FileObject file = getUser().aquireFile(url);
+			final FileObject file = getUser().aquireFile(url);
 			// myLogger.debug(url+" last modified before refresh:
 			// "+file.getContent().getLastModifiedTime());
 			// refresh to get non-cached date
@@ -2648,7 +2680,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			// myLogger.debug(url+" last modified after refresh:
 			// "+file.getContent().getLastModifiedTime());
 			return file.getContent().getLastModifiedTime();
-		} catch (FileSystemException e) {
+		} catch (final FileSystemException e) {
 			throw new RemoteFileSystemException("Could not access file " + url
 					+ ": " + e.getMessage());
 		}
@@ -2662,7 +2694,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 
-			DtoFolder rootfolder = getFolderListing(directory);
+			final DtoFolder rootfolder = getFolderListing(directory);
 			recursion_level = recursion_level - 1;
 			if (recursion_level == 0) {
 				return rootfolder;
@@ -2673,7 +2705,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			return rootfolder;
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 			throw new RemoteFileSystemException("Could not list directory "
 					+ directory + ": " + e.getLocalizedMessage());
@@ -2720,7 +2752,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		myLogger.debug("Creating folder: " + url + "...");
 		try {
-			FileObject dir = getUser().aquireFile(url);
+			final FileObject dir = getUser().aquireFile(url);
 			if (!dir.exists()) {
 				dir.createFolder();
 				if (dir.exists()) {
@@ -2731,12 +2763,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			} else {
 				return false;
 			}
-		} catch (FileSystemException e) {
+		} catch (final FileSystemException e) {
 
 			// try again. Commons-vfs sometimes seems to fail here without any
 			// reason I could figure out...
 			try {
-				FileObject dir = getUser().aquireFile(url);
+				final FileObject dir = getUser().aquireFile(url);
 				if (!dir.exists()) {
 					dir.createFolder();
 					if (dir.exists()) {
@@ -2747,7 +2779,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				} else {
 					return false;
 				}
-			} catch (Exception e2) {
+			} catch (final Exception e2) {
 				throw new RemoteFileSystemException(
 						"Could not create directory " + url + ": "
 								+ e2.getLocalizedMessage());
@@ -2763,7 +2795,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		if (fqan == null) {
 			fqan = Constants.NON_VO_FQAN;
 		}
-		MountPoint mp = getUser().mountFileSystem(url, mountpoint, fqan,
+		final MountPoint mp = getUser().mountFileSystem(url, mountpoint, fqan,
 				useHomeDirectory, informationManager.getSiteForHostOrUrl(url));
 		getUser().resetMountPoints();
 		return mp;
@@ -2779,7 +2811,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			final String mountpoint, final boolean useHomeDirectory)
 			throws RemoteFileSystemException {
 
-		MountPoint mp = getUser().mountFileSystem(url, mountpoint,
+		final MountPoint mp = getUser().mountFileSystem(url, mountpoint,
 				useHomeDirectory, informationManager.getSiteForHostOrUrl(url));
 		getUser().resetMountPoints();
 		return mp;
@@ -2798,13 +2830,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			jd = new EqualJobDistributor();
 		}
 
-		Map<String, Integer> results = jd.distributeJobs(
+		final Map<String, Integer> results = jd.distributeJobs(
 				sp.getCalculatedJobs(), sp.getCalculatedGridResources());
-		StringBuffer message = new StringBuffer(
+		final StringBuffer message = new StringBuffer(
 				"Filled submissionlocations for "
 						+ sp.getCalculatedJobs().size() + " jobs: " + "\n");
 		message.append("Submitted jobs to:\t\t\tAmount\n");
-		for (String sl : results.keySet()) {
+		for (final String sl : results.keySet()) {
 			message.append(sl + "\t\t\t\t" + results.get(sl) + "\n");
 		}
 		myLogger.debug(message.toString());
@@ -2818,14 +2850,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		for (final Job job : sp.getCalculatedJobs()) {
 
-			Thread thread = new Thread() {
+			final Thread thread = new Thread() {
 				@Override
 				public void run() {
 					try {
 						if (job.getStatus() > JobConstants.READY_TO_SUBMIT) {
 							try {
 								kill(job);
-							} catch (Exception e) {
+							} catch (final Exception e) {
 								myLogger.error(e);
 							}
 							job.setStatus(JobConstants.READY_TO_SUBMIT);
@@ -2841,11 +2873,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 						processJobDescription(job, possibleParentBatchJob);
 						jobdao.saveOrUpdate(job);
-					} catch (JobPropertiesException e) {
+					} catch (final JobPropertiesException e) {
 						ex.add(e);
 						executor.shutdownNow();
 						jobdao.saveOrUpdate(job);
-					} catch (NoSuchJobException e) {
+					} catch (final NoSuchJobException e) {
 						ex.add(e);
 						executor.shutdownNow();
 						jobdao.saveOrUpdate(job);
@@ -2860,7 +2892,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 			executor.awaitTermination(10 * 3600, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			executor.shutdownNow();
 			Thread.currentThread().interrupt();
 			return null;
@@ -2892,7 +2924,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	protected void prepareJobEnvironment(final Job job)
 			throws RemoteFileSystemException {
 
-		String jobDir = JsdlHelpers.getAbsoluteWorkingDirectoryUrl(job
+		final String jobDir = JsdlHelpers.getAbsoluteWorkingDirectoryUrl(job
 				.getJobDescription());
 
 		myLogger.debug("Using calculated jobdirectory: " + jobDir);
@@ -2900,54 +2932,21 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// job.setJob_directory(jobDir);
 
 		try {
-			FileObject jobDirObject = getUser().aquireFile(jobDir);
+			final FileObject jobDirObject = getUser().aquireFile(jobDir);
 			// have to do this, otherwise exception -> bug in commons vfs?
 			try {
 				jobDirObject.getParent().createFolder();
-			} catch (RuntimeException e) {
+			} catch (final RuntimeException e) {
 				myLogger.debug("Could not create parent folder. Most likely that's ok. Folder: "
 						+ jobDir);
 			}
 			jobDirObject.createFolder();
-		} catch (FileSystemException e) {
+		} catch (final FileSystemException e) {
 			throw new RemoteFileSystemException(
 					"Could not create job output folder: " + jobDir);
 		}
 		// now after the jsdl is ready, don't forget to fill the required fields
 		// into the database
-	}
-
-	private boolean checkWhetherGridResourceIsActuallyAvailable(
-			GridResource resource) {
-
-		String[] filesystems = informationManager
-				.getStagingFileSystemForSubmissionLocation(SubmissionLocationHelpers
-						.createSubmissionLocationString(resource));
-
-		for (MountPoint mp : df().getMountpoints()) {
-
-			for (String fs : filesystems) {
-				if (mp.getRootUrl().startsWith(fs.replace(":2811", ""))) {
-					return true;
-				}
-			}
-
-		}
-
-		return false;
-
-	}
-
-	private void removeResourcesWithUnaccessableFilesystems(
-			List<GridResource> resources) {
-
-		Iterator<GridResource> i = resources.iterator();
-		while (i.hasNext()) {
-			if (!checkWhetherGridResourceIsActuallyAvailable(i.next())) {
-				i.remove();
-			}
-		}
-
 	}
 
 	/**
@@ -2964,8 +2963,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			JobPropertiesException {
 
 		// TODO check whether fqan is set
-		String jobFqan = job.getFqan();
-		Document jsdl = job.getJobDescription();
+		final String jobFqan = job.getFqan();
+		final Document jsdl = job.getJobDescription();
 
 		String oldJobDir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
 
@@ -2974,7 +2973,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				if (fileExists(oldJobDir)) {
 
-					DtoFolder fol = ls(oldJobDir, 1);
+					final DtoFolder fol = ls(oldJobDir, 1);
 					if ((fol.getChildrenFiles().size() > 0)
 							|| (fol.getChildrenFolders().size() > 0)) {
 						myLogger.debug("Old jobdir exists.");
@@ -2987,27 +2986,27 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			} else {
 				oldJobDir = null;
 			}
-		} catch (RemoteFileSystemException e1) {
+		} catch (final RemoteFileSystemException e1) {
 			// TODO Auto-generated catch block
 			oldJobDir = null;
 		}
 
 		boolean applicationCalculated = false;
 
-		JobSubmissionObjectImpl jobSubmissionObject = new JobSubmissionObjectImpl(
+		final JobSubmissionObjectImpl jobSubmissionObject = new JobSubmissionObjectImpl(
 				jsdl);
 
 		if (jobSubmissionObject.getCommandline() == null) {
 			throw new JobPropertiesException("No commandline specified.");
 		}
 
-		for (JobSubmissionProperty key : jobSubmissionObject
+		for (final JobSubmissionProperty key : jobSubmissionObject
 				.getJobSubmissionPropertyMap().keySet()) {
 			job.addJobProperty(key.toString(), jobSubmissionObject
 					.getJobSubmissionPropertyMap().get(key));
 		}
 
-		String executable = jobSubmissionObject.extractExecutable();
+		final String executable = jobSubmissionObject.extractExecutable();
 		job.addJobProperty(Constants.EXECUTABLE_KEY, executable);
 
 		List<GridResource> matchingResources = null;
@@ -3023,9 +3022,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		if (jobSubmissionObject.getApplication() == null) {
 
-			String commandline = jobSubmissionObject.getCommandline();
+			final String commandline = jobSubmissionObject.getCommandline();
 
-			String[] apps = informationManager
+			final String[] apps = informationManager
 					.getApplicationsThatProvideExecutable(jobSubmissionObject
 							.extractExecutable());
 
@@ -3099,10 +3098,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			if (StringUtils.isBlank(jobSubmissionObject.getApplication())) {
 				myLogger.debug("No application specified. Trying to calculate it...");
 
-				String[] calculatedApps = informationManager
+				final String[] calculatedApps = informationManager
 						.getApplicationsThatProvideExecutable(JsdlHelpers
 								.getPosixApplicationExecutable(jsdl));
-				for (String app : calculatedApps) {
+				for (final String app : calculatedApps) {
 					jobSubmissionObject.setApplication(app);
 					matchingResources = matchmaker.findAllResources(
 							jobSubmissionObject.getJobSubmissionPropertyMap(),
@@ -3177,7 +3176,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					// check whether submission location is specified. If so,
 					// check
 					// whether it is in the list of matching resources
-					for (GridResource resource : matchingResources) {
+					for (final GridResource resource : matchingResources) {
 						if (submissionLocation.equals(SubmissionLocationHelpers
 								.createSubmissionLocationString(resource))) {
 							myLogger.debug("Found gridResource object for submission location. Now checking whether version is specified and if it is whether it is available on this resource.");
@@ -3218,7 +3217,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 										&& (resource
 												.getAvailableApplicationVersion()
 												.size() > 0)) {
-									List<String> versionsAvail = resource
+									final List<String> versionsAvail = resource
 											.getAvailableApplicationVersion();
 
 									JsdlHelpers.setApplicationVersion(jsdl,
@@ -3284,9 +3283,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								.equals(jobSubmissionObject
 										.getApplicationVersion())) {
 					myLogger.debug("No version specified in jsdl document. Will use the first one for the best grid resource.");
-					for (GridResource resource : matchingResources) {
+					for (final GridResource resource : matchingResources) {
 
-						String temp = SubmissionLocationHelpers
+						final String temp = SubmissionLocationHelpers
 								.createSubmissionLocationString(resource);
 						stagingFileSystems = informationManager
 								.getStagingFileSystemForSubmissionLocation(temp);
@@ -3334,9 +3333,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					myLogger.debug("Version: "
 							+ jobSubmissionObject.getApplicationVersion()
 							+ " specified. Trying to find a matching grid resource...");
-					for (GridResource resource : matchingResources) {
+					for (final GridResource resource : matchingResources) {
 
-						String temp = SubmissionLocationHelpers
+						final String temp = SubmissionLocationHelpers
 								.createSubmissionLocationString(resource);
 						stagingFileSystems = informationManager
 								.getStagingFileSystemForSubmissionLocation(temp);
@@ -3379,7 +3378,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							new String[] { submissionLocation });
 					job.addJobProperty(
 							Constants.SUBMISSIONLOCATION_CALCULATED_KEY, "true");
-				} catch (RuntimeException e) {
+				} catch (final RuntimeException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					throw new JobPropertiesException(
@@ -3407,9 +3406,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		MountPoint mountPointToUse = null;
 		String stagingFilesystemToUse = null;
-		for (String stagingFs : stagingFileSystems) {
+		for (final String stagingFs : stagingFileSystems) {
 
-			for (MountPoint mp : getUser().getAllMountPoints()) {
+			for (final MountPoint mp : getUser().getAllMountPoints()) {
 				if (mp.getRootUrl().startsWith(stagingFs.replace(":2811", ""))
 						&& jobFqan.equals(mp.getFqan())) {
 					mountPointToUse = mp;
@@ -3470,12 +3469,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				stagingFilesystemToUse);
 
 		job.addJobProperty(Constants.WORKINGDIRECTORY_KEY, workingDirectory);
-		String submissionSite = informationManager
+		final String submissionSite = informationManager
 				.getSiteForHostOrUrl(SubmissionLocationHelpers
 						.extractHost(submissionLocation));
 		myLogger.debug("Calculated submissionSite: " + submissionSite);
 		job.addJobProperty(Constants.SUBMISSION_SITE_KEY, submissionSite);
-		String queue = SubmissionLocationHelpers
+		final String queue = SubmissionLocationHelpers
 				.extractQueue(submissionLocation);
 		job.addJobProperty(Constants.QUEUE_KEY, queue);
 		// job.setJob_directory(stagingFilesystemToUse + workingDirectory);
@@ -3491,7 +3490,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						+ workingDirectory, true, true, true);
 
 				deleteFile(oldJobDir);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 				// TODO more
 			}
@@ -3499,16 +3498,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		myLogger.debug("Fixing urls in datastaging elements...");
 		// fix stage in target filesystems...
-		List<Element> stageInElements = JsdlHelpers.getStageInElements(jsdl);
-		for (Element stageInElement : stageInElements) {
+		final List<Element> stageInElements = JsdlHelpers
+				.getStageInElements(jsdl);
+		for (final Element stageInElement : stageInElements) {
 
-			String filePath = JsdlHelpers.getStageInSource(stageInElement);
+			final String filePath = JsdlHelpers
+					.getStageInSource(stageInElement);
 			if ("dummyfile".equals(filePath) || filePath.startsWith("file:")) {
 				continue;
 			}
-			String filename = filePath.substring(filePath.lastIndexOf("/"));
+			final String filename = filePath.substring(filePath
+					.lastIndexOf("/"));
 
-			Element el = JsdlHelpers
+			final Element el = JsdlHelpers
 					.getStageInTarget_filesystemPart(stageInElement);
 
 			el.setTextContent(JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM);
@@ -3544,10 +3546,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				refreshJobStatus(jobs);
 			}
 
-			DtoJobs dtoJobs = new DtoJobs();
-			for (Job job : jobs) {
+			final DtoJobs dtoJobs = new DtoJobs();
+			for (final Job job : jobs) {
 
-				DtoJob dtojob = DtoJob.createJob(job.getStatus(),
+				final DtoJob dtojob = DtoJob.createJob(job.getStatus(),
 						job.getJobProperties(), job.getInputFiles(),
 						job.getLogMessages());
 
@@ -3557,7 +3559,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 
 			return dtoJobs;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
@@ -3594,17 +3596,18 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				status.addElement("Calculating redistribution...");
 				try {
-					SortedSet<GridResource> resourcesToUse = calculateResourcesToUse(job);
+					final SortedSet<GridResource> resourcesToUse = calculateResourcesToUse(job);
 
-					SubmitPolicy sp = new DefaultSubmitPolicy(job.getJobs(),
-							resourcesToUse, null);
+					final SubmitPolicy sp = new DefaultSubmitPolicy(
+							job.getJobs(), resourcesToUse, null);
 
-					Map<String, Integer> results = optimizeMultiPartJob(sp,
+					final Map<String, Integer> results = optimizeMultiPartJob(
+							sp,
 							job.getJobProperty(Constants.DISTRIBUTION_METHOD),
 							job);
 
-					StringBuffer optimizationResult = new StringBuffer();
-					for (String subLoc : results.keySet()) {
+					final StringBuffer optimizationResult = new StringBuffer();
+					for (final String subLoc : results.keySet()) {
 						optimizationResult.append(subLoc + " : "
 								+ results.get(subLoc) + "\n");
 					}
@@ -3615,7 +3618,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					status.addElement("Finished.");
 					status.setFinished(true);
 
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					status.setFailed(true);
 					status.setFinished(true);
 					status.addElement("Failed: " + e.getLocalizedMessage());
@@ -3631,9 +3634,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public String refreshBatchJobStatus(String batchJobname)
 			throws NoSuchJobException {
 
-		String handle = REFRESH_STATUS_PREFIX + batchJobname;
+		final String handle = REFRESH_STATUS_PREFIX + batchJobname;
 
-		DtoActionStatus status = getSessionActionStatus().get(handle);
+		final DtoActionStatus status = getSessionActionStatus().get(handle);
 
 		if ((status != null) && !status.isFinished()) {
 			// refresh in progress. Just give back the handle
@@ -3647,11 +3650,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		getSessionActionStatus().put(handle, statusfinal);
 
-		ExecutorService executor = Executors
+		final ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
 						.getConcurrentJobStatusThreadsPerUser());
 
-		Job[] currentJobs = multiPartJob.getJobs().toArray(new Job[] {});
+		final Job[] currentJobs = multiPartJob.getJobs().toArray(new Job[] {});
 
 		if (currentJobs.length == 0) {
 			multiPartJob.setStatus(JobConstants.JOB_CREATED);
@@ -3665,7 +3668,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		Arrays.sort(currentJobs);
 
 		for (final Job job : currentJobs) {
-			Thread thread = new Thread() {
+			final Thread thread = new Thread() {
 				@Override
 				public void run() {
 					statusfinal.addLogMessage("Refreshing job "
@@ -3703,7 +3706,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 *            a list of jobs you want to have refreshed
 	 */
 	protected void refreshJobStatus(final Collection<Job> jobs) {
-		for (Job job : jobs) {
+		for (final Job job : jobs) {
 			getJobStatus(job.getJobname());
 		}
 	}
@@ -3719,18 +3722,30 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void removeJobFromBatchJob(String batchJobname, String jobname)
 			throws NoSuchJobException {
 
-		Job job = getJobFromDatabase(jobname);
-		BatchJob multiJob = getMultiPartJobFromDatabase(batchJobname);
+		final Job job = getJobFromDatabase(jobname);
+		final BatchJob multiJob = getMultiPartJobFromDatabase(batchJobname);
 		multiJob.removeJob(job);
 
 		batchJobDao.saveOrUpdate(multiJob);
+	}
+
+	private void removeResourcesWithUnaccessableFilesystems(
+			List<GridResource> resources) {
+
+		final Iterator<GridResource> i = resources.iterator();
+		while (i.hasNext()) {
+			if (!checkWhetherGridResourceIsActuallyAvailable(i.next())) {
+				i.remove();
+			}
+		}
+
 	}
 
 	public DtoProperties restartBatchJob(final String batchJobname,
 			String restartPolicy, DtoProperties properties)
 			throws NoSuchJobException, JobPropertiesException {
 
-		BatchJob job = getMultiPartJobFromDatabase(batchJobname);
+		final BatchJob job = getMultiPartJobFromDatabase(batchJobname);
 
 		if ((getSessionActionStatus().get(batchJobname) != null)
 				&& !getSessionActionStatus().get(batchJobname).isFinished()) {
@@ -3751,7 +3766,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		getSessionActionStatus().put(batchJobname, status);
 
 		status.addElement("Finding resources to use...");
-		SortedSet resourcesToUse = calculateResourcesToUse(job);
+		final SortedSet resourcesToUse = calculateResourcesToUse(job);
 
 		status.addElement("Investigating batchjob...");
 		if (properties == null) {
@@ -3788,7 +3803,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		status.addElement("Optimizing job distribution...");
-		Map<String, Integer> results = optimizeMultiPartJob(sp,
+		final Map<String, Integer> results = optimizeMultiPartJob(sp,
 				job.getJobProperty(Constants.DISTRIBUTION_METHOD), job);
 
 		batchJobDao.saveOrUpdate(job);
@@ -3799,7 +3814,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		for (final Job jobToRestart : sp.getCalculatedJobs()) {
 
-			Thread thread = new Thread() {
+			final Thread thread = new Thread() {
 				@Override
 				public void run() {
 					try {
@@ -3808,13 +3823,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						restartJob(jobToRestart, null);
 						status.addElement("Resubmission of job "
 								+ jobToRestart.getJobname() + " successful.");
-					} catch (JobSubmissionException e) {
+					} catch (final JobSubmissionException e) {
 						status.addElement("Resubmission of job "
 								+ jobToRestart.getJobname() + " failed: "
 								+ e.getLocalizedMessage());
 						status.setFailed(true);
 						myLogger.debug(e);
-					} catch (NoSuchJobException e1) {
+					} catch (final NoSuchJobException e1) {
 						status.addElement("Resubmission of job "
 								+ jobToRestart.getJobname() + " failed: "
 								+ e1.getLocalizedMessage());
@@ -3856,7 +3871,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		status.addElement("Resetting job properties...");
 		// job.getJobProperties().clear();
 
-		String possibleMultiPartJob = job
+		final String possibleMultiPartJob = job
 				.getJobProperty(Constants.BATCHJOB_NAME);
 
 		BatchJob mpj = null;
@@ -3872,11 +3887,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			status.addElement("Changing job description...");
 			job.addLogMessage("Changing job properties...");
 			Document newJsdl;
-			Document oldJsdl = job.getJobDescription();
+			final Document oldJsdl = job.getJobDescription();
 
 			try {
 				newJsdl = SeveralXMLHelpers.fromString(changedJsdl);
-			} catch (Exception e3) {
+			} catch (final Exception e3) {
 
 				myLogger.error(e3);
 				throw new JobSubmissionException("Invalid jsdl/xml format.", e3);
@@ -3891,14 +3906,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			// job.addJobProperty(Constants.APPLICATIONVERSION_KEY,
 			// newAppVersion);
 
-			Integer newTotalCpuTime = JsdlHelpers.getWalltime(newJsdl)
+			final Integer newTotalCpuTime = JsdlHelpers.getWalltime(newJsdl)
 					* JsdlHelpers.getProcessorCount(newJsdl);
 			job.addLogMessage("Setting totalcputime to: " + newTotalCpuTime);
 			JsdlHelpers.setTotalCPUTimeInSeconds(oldJsdl, newTotalCpuTime);
 			job.addJobProperty(Constants.WALLTIME_IN_MINUTES_KEY, new Integer(
 					JsdlHelpers.getWalltime(newJsdl)).toString());
 
-			Integer newProcCount = JsdlHelpers.getProcessorCount(newJsdl);
+			final Integer newProcCount = JsdlHelpers.getProcessorCount(newJsdl);
 			job.addLogMessage("Setting processor count to: " + newProcCount);
 			JsdlHelpers.setProcessorCount(oldJsdl, newProcCount);
 			job.addJobProperty(Constants.NO_CPUS_KEY,
@@ -3915,10 +3930,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			// JsdlHelpers.getPosixStandardInput(newJsdl);
 			// JsdlHelpers.getPosixStandardOutput(newJsdl);
 
-			String[] oldSubLocs = JsdlHelpers.getCandidateHosts(oldJsdl);
-			String oldSubLoc = oldSubLocs[0];
+			final String[] oldSubLocs = JsdlHelpers.getCandidateHosts(oldJsdl);
+			final String oldSubLoc = oldSubLocs[0];
 
-			String[] newSubLocs = JsdlHelpers.getCandidateHosts(newJsdl);
+			final String[] newSubLocs = JsdlHelpers.getCandidateHosts(newJsdl);
 			String newSubLoc = null;
 			if ((newSubLocs != null) && (newSubLocs.length >= 1)) {
 				newSubLoc = newSubLocs[0];
@@ -3934,7 +3949,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				try {
 					processJobDescription(job, mpj);
-				} catch (JobPropertiesException e) {
+				} catch (final JobPropertiesException e) {
 
 					status.addLogMessage("Couldn't process new job description.");
 				}
@@ -3955,7 +3970,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		jobdao.saveOrUpdate(job);
 		try {
 			submitJob(job, false, status);
-		} catch (JobSubmissionException e) {
+		} catch (final JobSubmissionException e) {
 			status.addLogMessage("Job submission failed: "
 					+ e.getLocalizedMessage());
 			status.setFailed(true);
@@ -3970,7 +3985,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void restartJob(final String jobname, String changedJsdl)
 			throws JobSubmissionException, NoSuchJobException {
 
-		Job job = getJobFromDatabase(jobname);
+		final Job job = getJobFromDatabase(jobname);
 
 		restartJob(job, changedJsdl);
 	}
@@ -4045,12 +4060,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// Job job;
 		// job = jobdao.findJobByDN(getUser().getDn(), jobname);
 
-		List<Element> stageIns = JsdlHelpers.getStageInElements(job
+		final List<Element> stageIns = JsdlHelpers.getStageInElements(job
 				.getJobDescription());
 
-		for (Element stageIn : stageIns) {
+		for (final Element stageIn : stageIns) {
 
-			String sourceUrl = JsdlHelpers.getStageInSource(stageIn);
+			final String sourceUrl = JsdlHelpers.getStageInSource(stageIn);
 			if (optionalStatus != null) {
 				optionalStatus.addElement("Staging file "
 						+ sourceUrl.substring(sourceUrl.lastIndexOf("/") + 1));
@@ -4059,7 +4074,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			if (sourceUrl.startsWith("file") || sourceUrl.startsWith("dummy")) {
 				continue;
 			}
-			String targetUrl = JsdlHelpers.getStageInTarget(stageIn);
+			final String targetUrl = JsdlHelpers.getStageInTarget(stageIn);
 
 			if (JobConstants.DUMMY_STAGE_FILE.equals(sourceUrl)
 					|| JobConstants.DUMMY_STAGE_FILE.equals(targetUrl)) {
@@ -4070,11 +4085,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				try {
 					if (!getUser().aquireFile(targetUrl).getParent().exists()) {
-						FileObject folder = getUser().aquireFile(targetUrl)
-								.getParent();
+						final FileObject folder = getUser().aquireFile(
+								targetUrl).getParent();
 						folder.createFolder();
 					}
-				} catch (FileSystemException e) {
+				} catch (final FileSystemException e) {
 					if (optionalStatus != null) {
 						optionalStatus
 								.addLogMessage("Error while staging in files.");
@@ -4102,8 +4117,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			int noStageins = 0;
 
 			if (stageFiles) {
-				List<Element> stageIns = JsdlHelpers.getStageInElements(job
-						.getJobDescription());
+				final List<Element> stageIns = JsdlHelpers
+						.getStageInElements(job.getJobDescription());
 				noStageins = stageIns.size();
 			}
 
@@ -4125,7 +4140,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				job.addLogMessage("File staging finished.");
 				status.addLogMessage("File stage-in finished.");
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			status.setFailed(true);
 			status.setFinished(true);
 			e.printStackTrace();
@@ -4136,11 +4151,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		status.addElement("Setting credential...");
 		if (job.getFqan() != null) {
-			VO vo = VOManagement.getVO(getUser().getFqans().get(job.getFqan()));
+			final VO vo = VOManagement.getVO(getUser().getFqans().get(
+					job.getFqan()));
 			try {
 				job.setCredential(CertHelpers.getVOProxyCredential(vo,
 						job.getFqan(), getCredential()));
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				throw new JobSubmissionException(
 						"Could not create credential to use to submit the job: "
 								+ e.getLocalizedMessage());
@@ -4156,9 +4172,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		try {
 			status.addElement("Starting job submission using GT4...");
 			job.addLogMessage("Submitting job to endpoint...");
-			String candidate = JsdlHelpers.getCandidateHosts(job
+			final String candidate = JsdlHelpers.getCandidateHosts(job
 					.getJobDescription())[0];
-			GridResource resource = informationManager
+			final GridResource resource = informationManager
 					.getGridResource(candidate);
 			String version = resource.getGRAMVersion();
 
@@ -4178,7 +4194,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					job);
 
 			job.addLogMessage("Submission finished.");
-		} catch (RuntimeException e) {
+		} catch (final RuntimeException e) {
 			status.addLogMessage("Job submission failed.");
 			status.setFailed(true);
 			status.setFinished(true);
@@ -4241,7 +4257,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 			submitJob(job, true, status);
 
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			// maybe it's a multipartjob
 			final BatchJob multiJob = getMultiPartJobFromDatabase(jobname);
 			submitMultiPartJob(multiJob);
@@ -4257,11 +4273,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		this.getSessionActionStatus().put(multiJob.getBatchJobname(),
 				newActionStatus);
 
-		ExecutorService executor = Executors
+		final ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
 						.getConcurrentMultiPartJobSubmitThreadsPerUser());
 
-		Job[] currentlyCreatedJobs = multiJob.getJobs().toArray(new Job[] {});
+		final Job[] currentlyCreatedJobs = multiJob.getJobs().toArray(
+				new Job[] {});
 		Arrays.sort(currentlyCreatedJobs);
 
 		final int totalNumberOfJobs = currentlyCreatedJobs.length;
@@ -4272,7 +4289,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			if (job.getStatus() != JobConstants.READY_TO_SUBMIT) {
 				continue;
 			}
-			Thread thread = new Thread() {
+			final Thread thread = new Thread() {
 				@Override
 				public void run() {
 					try {
@@ -4292,7 +4309,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 										+ job.getJobname());
 
 								break;
-							} catch (Exception e) {
+							} catch (final Exception e) {
 								myLogger.error("Job submission for multipartjob: "
 										+ multiJob.getBatchJobname()
 										+ ", "
@@ -4383,9 +4400,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		OutputStream fout = null;
 		try {
-			String parent = filename.substring(0,
+			final String parent = filename.substring(0,
 					filename.lastIndexOf(File.separator));
-			FileObject parentObject = getUser().aquireFile(parent);
+			final FileObject parentObject = getUser().aquireFile(parent);
 			// FileObject tempObject = parentObject;
 
 			createFolder(parentObject);
@@ -4396,14 +4413,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			myLogger.debug("Calculated target: " + target.getName().toString());
 
-			FileContent content = target.getContent();
+			final FileContent content = target.getContent();
 			fout = content.getOutputStream();
-		} catch (FileSystemException e) {
+		} catch (final FileSystemException e) {
 
 			try {
 				fout.close();
 				source.getInputStream().close();
-			} catch (Exception e1) {
+			} catch (final Exception e1) {
 				myLogger.error(e1);
 			}
 
@@ -4418,7 +4435,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		try {
 			buf = new BufferedInputStream(source.getInputStream());
 
-			byte[] buffer = new byte[1024]; // byte buffer
+			final byte[] buffer = new byte[1024]; // byte buffer
 			int bytesRead = 0;
 			while (true) {
 				if (Thread.interrupted()) {
@@ -4443,11 +4460,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			if (fout != null) {
 				fout.close();
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			try {
 				fout.close();
 				source.getInputStream().close();
-			} catch (Exception e1) {
+			} catch (final Exception e1) {
 				myLogger.error(e1);
 			}
 
@@ -4479,17 +4496,18 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			// @Override
 			// public void run() {
 
-			String jobdir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+			final String jobdir = job
+					.getJobProperty(Constants.JOBDIRECTORY_KEY);
 
 			try {
-				String tarFileName = jobdir + "/" + targetFilename;
+				final String tarFileName = jobdir + "/" + targetFilename;
 				upload(source, tarFileName);
 				status.addElement("Upload to " + tarFileName + " successful.");
 				job.addInputFile(tarFileName);
 				jobdao.saveOrUpdate(job);
 
 				status.setFinished(true);
-			} catch (RemoteFileSystemException e) {
+			} catch (final RemoteFileSystemException e) {
 				e.printStackTrace();
 				status.addElement("Upload to " + jobdir + "/" + targetFilename
 						+ " failed: " + e.getLocalizedMessage());
@@ -4503,7 +4521,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			// }.start();
 			return;
 
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			// no single job, let's try a multijob
 		}
 
@@ -4517,7 +4535,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		BufferedInputStream buf;
 		try {
 			buf = new BufferedInputStream(source.getInputStream());
-		} catch (IOException e1) {
+		} catch (final IOException e1) {
 			throw new RuntimeException(
 					"Could not get input stream from datahandler...");
 		}
@@ -4527,7 +4545,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		OutputStream fout;
 		try {
 			fout = tempFile.getContent().getOutputStream();
-		} catch (FileSystemException e1) {
+		} catch (final FileSystemException e1) {
 			throw new RemoteFileSystemException("Could not create temp file.");
 		}
 		myLogger.debug("Receiving data for file: " + targetFilename);
@@ -4539,7 +4557,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 
-			byte[] buffer = new byte[1024]; // byte buffer
+			final byte[] buffer = new byte[1024]; // byte buffer
 			int bytesRead = 0;
 			while (true) {
 
@@ -4565,7 +4583,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			if (fout != null) {
 				fout.close();
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RemoteFileSystemException("Could not write to file: "
 					+ targetFilename + ": " + e.getMessage());
 		}
@@ -4588,18 +4606,18 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				return;
 			}
 
-			Thread thread = new Thread() {
+			final Thread thread = new Thread() {
 				@Override
 				public void run() {
 
 					try {
 						FileObject target = null;
 
-						String relpathFromMountPointRoot = multiJob
+						final String relpathFromMountPointRoot = multiJob
 								.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY);
 						// String parent = filename.substring(0, filename
 						// .lastIndexOf(File.separator));
-						String parent = mountPointRoot + "/"
+						final String parent = mountPointRoot + "/"
 								+ relpathFromMountPointRoot;
 						RemoteFileTransferObject fileTransfer;
 
@@ -4617,8 +4635,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							}
 
 							try {
-								FileObject parentObject = getUser().aquireFile(
-										parent);
+								final FileObject parentObject = getUser()
+										.aquireFile(parent);
 								// FileObject tempObject = parentObject;
 
 								createFolder(parentObject);
@@ -4631,7 +4649,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								myLogger.debug("Calculated target for multipartjob input file: "
 										+ target.getName().toString());
 								break;
-							} catch (Exception e) {
+							} catch (final Exception e) {
 
 								if (Thread.interrupted()) {
 									Thread.currentThread().interrupt();
@@ -4653,7 +4671,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 									// needs some time
 									try {
 										Thread.sleep(3000);
-									} catch (InterruptedException e1) {
+									} catch (final InterruptedException e1) {
 										e1.printStackTrace();
 										Thread.currentThread().interrupt();
 									}

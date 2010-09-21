@@ -22,20 +22,20 @@ public class DtoApplicationInfo {
 	public static DtoApplicationInfo createApplicationInfo(String name,
 			Map<String, String> appversionmap) {
 
-		DtoApplicationInfo appInfo = new DtoApplicationInfo();
+		final DtoApplicationInfo appInfo = new DtoApplicationInfo();
 		appInfo.setName(name);
 
-		List<DtoVersionInfo> versionList = new LinkedList<DtoVersionInfo>();
-		for (String version : appversionmap.keySet()) {
-			DtoVersionInfo versionInfo = new DtoVersionInfo();
+		final List<DtoVersionInfo> versionList = new LinkedList<DtoVersionInfo>();
+		for (final String version : appversionmap.keySet()) {
+			final DtoVersionInfo versionInfo = new DtoVersionInfo();
 			versionInfo.setName(version);
-			List<DtoSubmissionLocationInfo> subLocs = new LinkedList<DtoSubmissionLocationInfo>();
-			for (String subLoc : appversionmap.get(version).split(",")) {
-				DtoSubmissionLocationInfo temp = new DtoSubmissionLocationInfo();
+			final List<DtoSubmissionLocationInfo> subLocs = new LinkedList<DtoSubmissionLocationInfo>();
+			for (final String subLoc : appversionmap.get(version).split(",")) {
+				final DtoSubmissionLocationInfo temp = new DtoSubmissionLocationInfo();
 				temp.setSubmissionLocation(subLoc);
 				subLocs.add(temp);
 			}
-			DtoSubmissionLocations subLocsObj = new DtoSubmissionLocations();
+			final DtoSubmissionLocations subLocsObj = new DtoSubmissionLocations();
 			subLocsObj.setAllSubmissionLocations(subLocs);
 			versionInfo.setAllSubmissionLocations(subLocsObj);
 			versionList.add(versionInfo);
@@ -66,17 +66,17 @@ public class DtoApplicationInfo {
 	}
 
 	public Map<String, String> getSubmissionLocationsPerVersionMap() {
-		Map<String, String> result = new TreeMap<String, String>();
+		final Map<String, String> result = new TreeMap<String, String>();
 
-		for (DtoVersionInfo version : getAllVersions()) {
-			String versionString = version.getName();
-			List<DtoSubmissionLocationInfo> subLocs = version
+		for (final DtoVersionInfo version : getAllVersions()) {
+			final String versionString = version.getName();
+			final List<DtoSubmissionLocationInfo> subLocs = version
 					.getAllSubmissionLocations().getAllSubmissionLocations();
-			StringBuffer subLocNames = new StringBuffer();
-			for (DtoSubmissionLocationInfo subLoc : subLocs) {
+			final StringBuffer subLocNames = new StringBuffer();
+			for (final DtoSubmissionLocationInfo subLoc : subLocs) {
 				subLocNames.append(subLoc.getSubmissionLocation() + ",");
 			}
-			String subLocString = subLocNames.substring(0,
+			final String subLocString = subLocNames.substring(0,
 					subLocNames.length() - 1).toString();
 			result.put(versionString, subLocString);
 		}

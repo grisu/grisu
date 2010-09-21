@@ -20,7 +20,7 @@ public class RemoteFileTransferObject {
 	static final Logger myLogger = Logger
 			.getLogger(RemoteFileTransferObject.class.getName());
 
-	private MarkerListener dummyMarker = new DummyMarkerImpl();
+	private final MarkerListener dummyMarker = new DummyMarkerImpl();
 
 	private final Thread fileTransferThread;
 
@@ -34,7 +34,8 @@ public class RemoteFileTransferObject {
 
 	private Exception possibleException;
 
-	private Map<Date, String> messages = new TreeMap<Date, String>();
+	private final Map<Date, String> messages = new TreeMap<Date, String>();
+
 	public RemoteFileTransferObject(final FileObject sourceF,
 			final FileObject targetF, final boolean overwriteB) {
 		this.source = sourceF;
@@ -43,6 +44,7 @@ public class RemoteFileTransferObject {
 		this.overwrite = overwriteB;
 
 		fileTransferThread = new Thread() {
+			@Override
 			public void run() {
 
 				try {
@@ -58,7 +60,7 @@ public class RemoteFileTransferObject {
 							transferFile(source, target, overwrite);
 							finished = true;
 							break;
-						} catch (RemoteFileSystemException e) {
+						} catch (final RemoteFileSystemException e) {
 							e.printStackTrace();
 							if (tryNo >= ServerPropertiesManager
 									.getFileTransferRetries() - 1) {
@@ -69,10 +71,9 @@ public class RemoteFileTransferObject {
 								// sleep for a few seconds, maybe the gridftp
 								// server needs some rest
 								try {
-									Thread
-											.sleep(ServerPropertiesManager
-													.getWaitTimeBetweenFailedFileTransferAndNextTryInSeconds() * 1000);
-								} catch (InterruptedException e1) {
+									Thread.sleep(ServerPropertiesManager
+											.getWaitTimeBetweenFailedFileTransferAndNextTryInSeconds() * 1000);
+								} catch (final InterruptedException e1) {
 								}
 							}
 						}
@@ -128,7 +129,7 @@ public class RemoteFileTransferObject {
 
 		try {
 			fileTransferThread.join();
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			messages.put(new Date(), "File transfer thread interrupted.");
 			Thread.currentThread().interrupt();
 		}
@@ -153,11 +154,10 @@ public class RemoteFileTransferObject {
 
 		try {
 
-			if (source_file.getName().getURI().equals(
-					target_file.getName().getURI())) {
-				messages
-						.put(new Date(),
-								"Input file and target file are the same. No need to copy...");
+			if (source_file.getName().getURI()
+					.equals(target_file.getName().getURI())) {
+				messages.put(new Date(),
+						"Input file and target file are the same. No need to copy...");
 				return;
 
 			}
@@ -174,17 +174,15 @@ public class RemoteFileTransferObject {
 			// worry about deleting the file because the VFSUtil method takes
 			// care of that
 			if (!overwrite && target_file.exists()) {
-				messages
-						.put(new Date(),
-								"Target file exists and overwrite mode not enabled. Cancelling transfer...");
+				messages.put(new Date(),
+						"Target file exists and overwrite mode not enabled. Cancelling transfer...");
 				throw new RemoteFileSystemException("Could not copy to file: "
 						+ target_file.getURL().toString() + ": "
 						+ "InputFile exists.");
 			} else if (target_file.exists()) {
 				if (!target_file.delete()) {
-					messages
-							.put(new Date(),
-									"Target file exists and can not be deleted. Cancelling transfer");
+					messages.put(new Date(),
+							"Target file exists and can not be deleted. Cancelling transfer");
 					throw new RemoteFileSystemException(
 							"Could not copy to file: "
 									+ target_file.getURL().toString() + ": "
@@ -205,7 +203,7 @@ public class RemoteFileTransferObject {
 				messages.put(new Date(), "Starting file transfer...");
 				VFSUtil.copy(source_file, target_file, dummyMarker, true);
 				messages.put(new Date(), "Transfer finished...");
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				messages.put(new Date(), "File transfer failed (io problem): "
 						+ e.getLocalizedMessage());
 				throw new RemoteFileSystemException("Could not copy \""
@@ -214,15 +212,15 @@ public class RemoteFileTransferObject {
 						+ e.getMessage());
 			}
 
-		} catch (FileSystemException e) {
-			messages.put(new Date(), "File transfer failed: "
-					+ e.getLocalizedMessage());
+		} catch (final FileSystemException e) {
+			messages.put(new Date(),
+					"File transfer failed: " + e.getLocalizedMessage());
 			try {
 				throw new RemoteFileSystemException("Could not copy \""
 						+ source_file.getURL().toString() + "\" to \""
 						+ target_file.getURL().toString() + "\": "
 						+ e.getMessage());
-			} catch (FileSystemException e1) {
+			} catch (final FileSystemException e1) {
 				throw new RemoteFileSystemException("Could not copy files: "
 						+ e1.getLocalizedMessage());
 			}

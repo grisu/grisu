@@ -24,7 +24,7 @@ import org.apache.log4j.Logger;
 public final class FileHelpers {
 
 	static final Logger myLogger = Logger
-	.getLogger(FileHelpers.class.getName());
+			.getLogger(FileHelpers.class.getName());
 
 	public static final int BUFFER_SIZE = 1024;
 
@@ -39,10 +39,10 @@ public final class FileHelpers {
 	public static void copyFileIntoDirectory(final File[] sources,
 			final File dest) {
 
-		for (File source : sources) {
+		for (final File source : sources) {
 
 			if (source.isDirectory()) {
-				File newDest = new File(dest, source.getName());
+				final File newDest = new File(dest, source.getName());
 				copyFileIntoDirectory(source.listFiles(), newDest);
 			} else {
 
@@ -51,13 +51,13 @@ public final class FileHelpers {
 					in = new FileInputStream(source).getChannel();
 					out = new FileOutputStream(dest).getChannel();
 
-					long size = in.size();
-					MappedByteBuffer buf = in.map(
+					final long size = in.size();
+					final MappedByteBuffer buf = in.map(
 							FileChannel.MapMode.READ_ONLY, 0, size);
 
 					out.write(buf);
 
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					myLogger.debug(e);
 				} finally {
 					try {
@@ -67,7 +67,7 @@ public final class FileHelpers {
 						if (out != null) {
 							out.close();
 						}
-					} catch (IOException e) {
+					} catch (final IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
@@ -88,8 +88,8 @@ public final class FileHelpers {
 			path.delete();
 		}
 		if (path.exists()) {
-			File[] files = path.listFiles();
-			for (File file : files) {
+			final File[] files = path.listFiles();
+			for (final File file : files) {
 				if (file.isDirectory()) {
 					deleteDirectory(file);
 				} else {
@@ -103,13 +103,13 @@ public final class FileHelpers {
 	public static String getFilename(String url) {
 
 		int index = url.lastIndexOf("\\");
-		if ( index > 0 ) {
+		if (index > 0) {
 			// means windows
-			return url.substring(index+1);
+			return url.substring(index + 1);
 		}
 		index = url.lastIndexOf("/");
 
-		return url.substring(index+1);
+		return url.substring(index + 1);
 
 	}
 
@@ -123,11 +123,11 @@ public final class FileHelpers {
 	 */
 	public static String readFromFile(final File file) {
 
-		StringBuffer sb = new StringBuffer(BUFFER_SIZE);
+		final StringBuffer sb = new StringBuffer(BUFFER_SIZE);
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new FileReader(file));
-		} catch (FileNotFoundException e1) {
+		} catch (final FileNotFoundException e1) {
 			// TODO Auto-generated catch block
 			// e1.printStackTrace();
 			myLogger.error("Could not read from file: " + file.toString()
@@ -138,13 +138,13 @@ public final class FileHelpers {
 		try {
 			// char[] chars = new char[1024];
 			String line = null;
-			int numRead = 0;
+			final int numRead = 0;
 			while ((line = reader.readLine()) != null) {
 				sb.append(String.valueOf(line) + "\n");
 			}
 
 			reader.close();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
 			myLogger.error("Could not read lines from file: " + file.toString()
@@ -166,16 +166,16 @@ public final class FileHelpers {
 	 *             if the file could not be read
 	 */
 	public static String readFromFileWithException(final File file)
-	throws Exception {
+			throws Exception {
 
-		StringBuffer sb = new StringBuffer(BUFFER_SIZE);
+		final StringBuffer sb = new StringBuffer(BUFFER_SIZE);
 		BufferedReader reader = null;
 
 		reader = new BufferedReader(new FileReader(file));
 
 		// char[] chars = new char[1024];
 		String line = null;
-		int numRead = 0;
+		final int numRead = 0;
 		while ((line = reader.readLine()) != null) {
 			sb.append(String.valueOf(line) + "\n");
 		}
@@ -195,17 +195,17 @@ public final class FileHelpers {
 	 *             if the file can't be written for some reason
 	 */
 	public static void saveToDisk(final DataSource source, final File file)
-	throws IOException {
+			throws IOException {
 
-		FileOutputStream outputStream = new FileOutputStream(file);
-		InputStream inputStream = source.getInputStream();
+		final FileOutputStream outputStream = new FileOutputStream(file);
+		final InputStream inputStream = source.getInputStream();
 
 		try {
-			byte[] buffer = new byte[BUFFER_SIZE * 4];
+			final byte[] buffer = new byte[BUFFER_SIZE * 4];
 			for (int n; (n = inputStream.read(buffer)) != -1;) {
 				outputStream.write(buffer, 0, n);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		} finally {
 			outputStream.close();
@@ -215,15 +215,15 @@ public final class FileHelpers {
 	}
 
 	public static void saveToDisk(final InputStream source, final File file)
-	throws IOException {
+			throws IOException {
 
-		FileOutputStream outputStream = new FileOutputStream(file);
+		final FileOutputStream outputStream = new FileOutputStream(file);
 		try {
-			byte[] buffer = new byte[BUFFER_SIZE * 4];
+			final byte[] buffer = new byte[BUFFER_SIZE * 4];
 			for (int n; (n = source.read(buffer)) != -1;) {
 				outputStream.write(buffer, 0, n);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		} finally {
 			outputStream.close();

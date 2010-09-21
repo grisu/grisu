@@ -96,7 +96,7 @@ public class LoginManager {
 		if (consoleReader == null) {
 			try {
 				consoleReader = new ConsoleReader();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new RuntimeException();
 			}
 		}
@@ -105,14 +105,14 @@ public class LoginManager {
 
 	public static void initEnvironment() {
 
-		System.out.println("Grisu library updated...");
-
 		if (!environmentInitialized) {
 
 			JythonHelpers.setJythonCachedir();
 
-			String debug = CommonArcsProperties.getDefault().getArcsProperty(
-					CommonArcsProperties.Property.DEBUG_UNCAUGHT_EXCEPTIONS);
+			final String debug = CommonArcsProperties
+					.getDefault()
+					.getArcsProperty(
+							CommonArcsProperties.Property.DEBUG_UNCAUGHT_EXCEPTIONS);
 
 			if ("true".equalsIgnoreCase(debug)) {
 				Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler());
@@ -126,19 +126,19 @@ public class LoginManager {
 
 			boolean bcpresent = false;
 			try {
-				Class bcExampleClass = Class
+				final Class bcExampleClass = Class
 						.forName("org.bouncycastle.LICENSE");
 				bcpresent = true;
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				myLogger.debug("BouncyCastle library not loaded....");
 			}
 
-			String disableLoadBouncyCastle = System
+			final String disableLoadBouncyCastle = System
 					.getProperty("disableLoadBouncyCastle");
 
 			if (!bcpresent && !"true".equalsIgnoreCase(disableLoadBouncyCastle)) {
 				myLogger.debug("Loading bouncy castle...");
-				Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
+				final Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
 
 				dependencies.put(Dependency.BOUNCYCASTLE, "jdk15-145");
 
@@ -151,7 +151,7 @@ public class LoginManager {
 
 		try {
 			Init.initBouncyCastle();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 
@@ -203,7 +203,7 @@ public class LoginManager {
 			char[] password, String username, String idp,
 			boolean saveCredentialAsLocalProxy) throws LoginException {
 
-		LoginParams params = new LoginParams("Local", null, null);
+		final LoginParams params = new LoginParams("Local", null, null);
 		return login(cred, password, username, idp, params,
 				saveCredentialAsLocalProxy);
 
@@ -256,7 +256,7 @@ public class LoginManager {
 
 		if (loginParams == null) {
 
-			String defaultUrl = ClientPropertiesManager
+			final String defaultUrl = ClientPropertiesManager
 					.getDefaultServiceInterfaceUrl();
 			if (StringUtils.isNotBlank(defaultUrl)) {
 				loginParams = new LoginParams(defaultUrl, null, null);
@@ -275,7 +275,7 @@ public class LoginManager {
 
 		try {
 			addPluginsToClasspath();
-		} catch (IOException e2) {
+		} catch (final IOException e2) {
 			// TODO Auto-generated catch block
 			myLogger.warn(e2);
 			throw new RuntimeException(e2);
@@ -283,15 +283,15 @@ public class LoginManager {
 
 		try {
 			CertificateFiles.copyCACerts(true);
-		} catch (Exception e1) {
+		} catch (final Exception e1) {
 			// e1.printStackTrace();
 			myLogger.warn(e1);
 		}
 
 		// do the cacert thingy
 		try {
-			URL cacertURL = LoginManager.class.getResource("/ipsca.pem");
-			HttpSecureProtocol protocolSocketFactory = new HttpSecureProtocol();
+			final URL cacertURL = LoginManager.class.getResource("/ipsca.pem");
+			final HttpSecureProtocol protocolSocketFactory = new HttpSecureProtocol();
 
 			TrustMaterial trustMaterial = null;
 			trustMaterial = new TrustMaterial(cacertURL);
@@ -304,15 +304,15 @@ public class LoginManager {
 			// Maybe we want to turn off CN validation (not recommended!):
 			protocolSocketFactory.setCheckHostname(false);
 
-			Protocol protocol = new Protocol("https",
+			final Protocol protocol = new Protocol("https",
 					(ProtocolSocketFactory) protocolSocketFactory, 443);
 			Protocol.registerProtocol("https", protocol);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 
 		Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
-		String serviceInterfaceUrl = loginParams.getServiceInterfaceUrl();
+		final String serviceInterfaceUrl = loginParams.getServiceInterfaceUrl();
 
 		if ("Local".equals(serviceInterfaceUrl)
 				|| "Dummy".equals(serviceInterfaceUrl)) {
@@ -357,7 +357,7 @@ public class LoginManager {
 					try {
 						si = LoginHelpers.globusCredentialLogin(loginParams,
 								cred);
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						throw new LoginException("Could not login: "
 								+ e.getLocalizedMessage(), e);
 					}
@@ -369,7 +369,7 @@ public class LoginManager {
 						ClientPropertiesManager
 								.saveLastLoginType(LoginType.LOCAL_PROXY);
 
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						throw new LoginException("Could not login: "
 								+ e.getLocalizedMessage(), e);
 					}
@@ -380,7 +380,7 @@ public class LoginManager {
 						if (saveCredentialAsLocalProxy) {
 							try {
 								LocalProxy.gridProxyInit(password, 240);
-							} catch (Exception e) {
+							} catch (final Exception e) {
 								throw new ServiceInterfaceException(
 										"Could not create local proxy.", e);
 							}
@@ -389,7 +389,7 @@ public class LoginManager {
 								.localProxyLogin(password, loginParams);
 						ClientPropertiesManager
 								.saveLastLoginType(LoginType.X509_CERTIFICATE);
-					} catch (ServiceInterfaceException e) {
+					} catch (final ServiceInterfaceException e) {
 						throw new LoginException("Could not login: "
 								+ e.getLocalizedMessage(), e);
 					}
@@ -403,7 +403,7 @@ public class LoginManager {
 							.saveLastLoginType(LoginType.MYPROXY);
 					CommonArcsProperties.getDefault().setLastMyProxyUsername(
 							loginParams.getMyProxyUsername());
-				} catch (ServiceInterfaceException e) {
+				} catch (final ServiceInterfaceException e) {
 					throw new LoginException("Could not login: "
 							+ e.getLocalizedMessage(), e);
 				}
@@ -418,8 +418,8 @@ public class LoginManager {
 				DependencyManager.addDependencies(dependencies,
 						Environment.getGrisuPluginDirectory());
 
-				GSSCredential slcsproxy = slcsMyProxyInit(username, password,
-						idp, loginParams);
+				final GSSCredential slcsproxy = slcsMyProxyInit(username,
+						password, idp, loginParams);
 
 				if (saveCredentialAsLocalProxy) {
 					CredentialHelpers.writeToDisk(slcsproxy);
@@ -427,7 +427,7 @@ public class LoginManager {
 
 				si = LoginHelpers.gssCredentialLogin(loginParams, slcsproxy);
 				ClientPropertiesManager.saveLastLoginType(LoginType.SHIBBOLETH);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 				throw new LoginException("Could not do slcs login: "
 						+ e.getLocalizedMessage(), e);
@@ -477,7 +477,7 @@ public class LoginManager {
 			char[] password, String username, String idp, String url,
 			boolean saveCredentialAsLocalProxy) throws LoginException {
 
-		LoginParams params = new LoginParams(url, null, null);
+		final LoginParams params = new LoginParams(url, null, null);
 		return login(cred, password, username, idp, params,
 				saveCredentialAsLocalProxy);
 
@@ -547,9 +547,9 @@ public class LoginManager {
 			return loginCommandline(types.iterator().next(), url);
 		}
 
-		ImmutableList<LoginType> temp = ImmutableList.copyOf(types);
+		final ImmutableList<LoginType> temp = ImmutableList.copyOf(types);
 
-		StringBuffer message = new StringBuffer(
+		final StringBuffer message = new StringBuffer(
 				"Please select your preferred login method:\n\n");
 
 		for (int i = 0; i < temp.size(); i++) {
@@ -565,13 +565,13 @@ public class LoginManager {
 			String input;
 			try {
 				input = getConsoleReader().readLine("Login method: ");
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new RuntimeException(e);
 			}
 
 			try {
 				choice = Integer.parseInt(input);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				continue;
 			}
 		}
@@ -592,7 +592,7 @@ public class LoginManager {
 		if (LocalProxy.validGridProxyExists()) {
 			return LoginManager.login(url);
 		} else {
-			ImmutableSet<LoginType> temp = ImmutableSet.of(
+			final ImmutableSet<LoginType> temp = ImmutableSet.of(
 					LoginType.SHIBBOLETH, LoginType.MYPROXY,
 					LoginType.X509_CERTIFICATE);
 			return loginCommandline(temp, url);
@@ -605,10 +605,10 @@ public class LoginManager {
 		while (true) {
 			try {
 
-				StringBuffer prompt = new StringBuffer(
+				final StringBuffer prompt = new StringBuffer(
 						"Please enter your myproxy username");
-				String lastMyProxyUsername = CommonArcsProperties.getDefault()
-						.getLastMyProxyUsername();
+				final String lastMyProxyUsername = CommonArcsProperties
+						.getDefault().getLastMyProxyUsername();
 
 				if (StringUtils.isNotBlank(lastMyProxyUsername)) {
 					prompt.append(" [" + lastMyProxyUsername + "]: ");
@@ -621,7 +621,7 @@ public class LoginManager {
 					try {
 						username = getConsoleReader().readLine(
 								prompt.toString());
-					} catch (IOException e) {
+					} catch (final IOException e) {
 						throw new RuntimeException(e);
 					}
 
@@ -640,7 +640,7 @@ public class LoginManager {
 						password = getConsoleReader().readLine(
 								"Please enter your myproxy password",
 								new Character('*'));
-					} catch (IOException e) {
+					} catch (final IOException e) {
 						throw new RuntimeException(e);
 					}
 				}
@@ -648,7 +648,7 @@ public class LoginManager {
 				return LoginManager.myProxyLogin(url, username,
 						password.toCharArray());
 
-			} catch (LoginException e) {
+			} catch (final LoginException e) {
 				System.out.println("Login failed: " + e.getLocalizedMessage());
 			}
 		}
@@ -666,16 +666,16 @@ public class LoginManager {
 
 				StringBuffer prompt = new StringBuffer(
 						"Please select your institution");
-				String lastIdp = CommonArcsProperties.getDefault()
+				final String lastIdp = CommonArcsProperties.getDefault()
 						.getLastShibIdp();
 
-				IdpObject idpObj = new DummyIdpObject();
-				CredentialManager cm = new DummyCredentialManager();
+				final IdpObject idpObj = new DummyIdpObject();
+				final CredentialManager cm = new DummyCredentialManager();
 
-				Shibboleth shib = new Shibboleth(idpObj, cm);
+				final Shibboleth shib = new Shibboleth(idpObj, cm);
 				shib.openurl(SLCS.DEFAULT_SLCS_URL);
 
-				ImmutableList<String> idps = ImmutableList.copyOf(idpObj
+				final ImmutableList<String> idps = ImmutableList.copyOf(idpObj
 						.getIdps());
 				int defaultChoice = -1;
 
@@ -701,7 +701,7 @@ public class LoginManager {
 					try {
 						idpchoice = getConsoleReader().readLine(
 								prompt.toString());
-					} catch (IOException e) {
+					} catch (final IOException e) {
 						throw new RuntimeException(e);
 					}
 
@@ -711,7 +711,7 @@ public class LoginManager {
 
 					try {
 						choice = Integer.parseInt(idpchoice);
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						continue;
 					}
 				}
@@ -726,8 +726,8 @@ public class LoginManager {
 
 				prompt = new StringBuffer(
 						"Please enter your institution username");
-				String lastShibUsername = CommonArcsProperties.getDefault()
-						.getLastShibUsername();
+				final String lastShibUsername = CommonArcsProperties
+						.getDefault().getLastShibUsername();
 
 				if (StringUtils.isNotBlank(lastShibUsername)) {
 					prompt.append(" [" + lastShibUsername + "]: ");
@@ -740,7 +740,7 @@ public class LoginManager {
 					try {
 						username = getConsoleReader().readLine(
 								prompt.toString());
-					} catch (IOException e) {
+					} catch (final IOException e) {
 						throw new RuntimeException(e);
 					}
 
@@ -758,14 +758,14 @@ public class LoginManager {
 						password = getConsoleReader().readLine(
 								"Please enter your institution password: ",
 								new Character('*'));
-					} catch (IOException e) {
+					} catch (final IOException e) {
 						throw new RuntimeException(e);
 					}
 				}
 
 				return LoginManager.shiblogin(username, password.toCharArray(),
 						idpchoice, url, true);
-			} catch (LoginException e) {
+			} catch (final LoginException e) {
 				System.out.println("Login failed: " + e.getLocalizedMessage());
 			}
 		}
@@ -784,14 +784,14 @@ public class LoginManager {
 								.readLine(
 										"Please enter your x509 certificate passphrase: ",
 										new Character('*'));
-					} catch (IOException e) {
+					} catch (final IOException e) {
 						throw new RuntimeException(e);
 					}
 				}
 
 				return LoginManager.login(null, password.toCharArray(), null,
 						null, true);
-			} catch (LoginException e) {
+			} catch (final LoginException e) {
 				System.out.println("Login exception: "
 						+ e.getLocalizedMessage());
 			}
@@ -805,14 +805,14 @@ public class LoginManager {
 
 	public static void main(String[] args) throws LoginException {
 
-		ServiceInterface si = LoginManager.shiblogin("markus",
+		final ServiceInterface si = LoginManager.shiblogin("markus",
 				args[0].toCharArray(), "VPAC", true);
 
 	}
 
 	public static ServiceInterface myProxyLogin(String url, String username,
 			char[] password) throws LoginException {
-		LoginParams loginParams = new LoginParams(url, username, password);
+		final LoginParams loginParams = new LoginParams(url, username, password);
 		return login(null, null, null, null, loginParams, false);
 	}
 

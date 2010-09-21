@@ -39,12 +39,12 @@ public class BatchJobFileUploadThread extends Thread {
 			final int all = batchJob.getInputFiles().keySet().size();
 			EventBus.publish(batchJob.getJobname(), new BatchJobEvent(batchJob,
 					"Uploading/copying common input file (" + noOfUpload
-					+ " of " + all + "): " + inputFile
-					+ " for multipartjob " + batchJob.getJobname()));
+							+ " of " + all + "): " + inputFile
+							+ " for multipartjob " + batchJob.getJobname()));
 			if (FileManager.isLocal(inputFile)) {
 
-				DataHandler dh = FileManager.createDataHandler(inputFile);
-				StatusObject status = new StatusObject(si, batchJob
+				final DataHandler dh = FileManager.createDataHandler(inputFile);
+				final StatusObject status = new StatusObject(si, batchJob
 						.getInputFiles().get(inputFile));
 				si.uploadInputFile(batchJob.getJobname(), dh, batchJob
 						.getInputFiles().get(inputFile));
@@ -56,7 +56,7 @@ public class BatchJobFileUploadThread extends Thread {
 
 				try {
 					status.waitForActionToFinish(2, true, false);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					e.printStackTrace();
 					shutdownExecutor();
 					return;
@@ -76,7 +76,7 @@ public class BatchJobFileUploadThread extends Thread {
 					return;
 				}
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// e.printStackTrace();
 			exceptions.add(e);
 			shutdownExecutor();

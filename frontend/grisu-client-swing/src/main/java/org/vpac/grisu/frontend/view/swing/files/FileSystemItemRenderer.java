@@ -14,13 +14,14 @@ import org.vpac.grisu.model.files.FileSystemItem;
 public class FileSystemItemRenderer extends DefaultListCellRenderer implements
 		ListCellRenderer {
 
+	@Override
 	public Component getListCellRendererComponent(JList arg0, Object arg1,
 			int arg2, boolean arg3, boolean arg4) {
 
 		if (arg1 == null) {
 			return this;
 		}
-		FileSystemItem item = (FileSystemItem) arg1;
+		final FileSystemItem item = (FileSystemItem) arg1;
 
 		this.setText(item.getAlias());
 

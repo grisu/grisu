@@ -44,7 +44,7 @@ public class ImageFileViewer extends JPanel implements FileViewer {
 			});
 			imagePanel.addMouseWheelListener(new MouseWheelListener() {
 				public void mouseWheelMoved(final MouseWheelEvent e) {
-					double amount = e.getWheelRotation();
+					final double amount = e.getWheelRotation();
 					if (amount < 0) {
 						currentScale = currentScale + currentScale * 0.10;
 					} else if (amount > 0) {
@@ -72,7 +72,7 @@ public class ImageFileViewer extends JPanel implements FileViewer {
 		if (imageFile != null) {
 			try {
 				getImagePanel().setImage(imageFile);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				e.printStackTrace();
 			}
 		}

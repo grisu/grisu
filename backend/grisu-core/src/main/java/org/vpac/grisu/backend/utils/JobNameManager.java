@@ -1,6 +1,5 @@
 package org.vpac.grisu.backend.utils;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.vpac.grisu.backend.hibernate.JobDAO;
@@ -54,7 +53,7 @@ public final class JobNameManager {
 			try {
 				// gets all jobnames that start with "jobname"
 				jobs = jobdao.getSimilarJobNamesByDN(dn, proposedJobname);
-			} catch (NoSuchJobException e) {
+			} catch (final NoSuchJobException e) {
 				// means we only have to return the jobname +0
 				return proposedJobname + "_0";
 			}
@@ -76,7 +75,7 @@ public final class JobNameManager {
 					job = jobdao.findJobByDN(dn, proposedJobname);
 					throw new RuntimeException(
 							"Could not create job: job with the same jobname already exists.");
-				} catch (NoSuchJobException e) {
+				} catch (final NoSuchJobException e) {
 					// that's actually good. No job with this jobname exists
 					// jet/anymore.
 					// TODO look whether there's a job directory in one of the
@@ -112,12 +111,12 @@ public final class JobNameManager {
 
 		int max = 0;
 
-		for (Iterator i = jobs.iterator(); i.hasNext();) {
+		for (final Object element : jobs) {
 			int value = 0;
 			try {
-				String tempName = ((Job) i.next()).getJobname();
+				final String tempName = ((Job) element).getJobname();
 				value = new Integer(tempName.substring(jobname.length() + 1));
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				// e.printStackTrace();
 				// this error is ok.
 				assert true;

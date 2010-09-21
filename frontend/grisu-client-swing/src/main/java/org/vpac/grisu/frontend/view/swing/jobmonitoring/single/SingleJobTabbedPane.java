@@ -46,21 +46,6 @@ public class SingleJobTabbedPane extends JPanel implements
 		getGrid().addJobSelectionListener(l);
 	}
 
-	private JButton getUpdateButton() {
-		if (updateButton == null) {
-			updateButton = new JButton("Update");
-			updateButton.addActionListener(new ActionListener() {
-
-				public void actionPerformed(ActionEvent e) {
-
-					RunningJobManager.getDefault(si).updateJobnameList(null);
-
-				}
-			});
-		}
-		return updateButton;
-	}
-
 	private SimpleSingleJobsGrid getGrid() {
 
 		if (grid == null) {
@@ -89,6 +74,21 @@ public class SingleJobTabbedPane extends JPanel implements
 		return jideTabbedPane;
 	}
 
+	private JButton getUpdateButton() {
+		if (updateButton == null) {
+			updateButton = new JButton("Update");
+			updateButton.addActionListener(new ActionListener() {
+
+				public void actionPerformed(ActionEvent e) {
+
+					RunningJobManager.getDefault(si).updateJobnameList(null);
+
+				}
+			});
+		}
+		return updateButton;
+	}
+
 	public void jobSelected(JobObject bj) {
 
 		JobDetailPanel temp = panels.get(bj.getJobname());
@@ -99,7 +99,7 @@ public class SingleJobTabbedPane extends JPanel implements
 
 		try {
 			getJideTabbedPane().setSelectedComponent(temp.getPanel());
-		} catch (IllegalArgumentException e) {
+		} catch (final IllegalArgumentException e) {
 			getJideTabbedPane().addTab(bj.getJobname(), temp.getPanel());
 			getJideTabbedPane().setSelectedComponent(temp.getPanel());
 		}

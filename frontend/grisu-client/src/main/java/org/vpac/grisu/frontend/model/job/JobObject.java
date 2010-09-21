@@ -57,7 +57,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			JobSubmissionObjectImpl jobsubmissionObject)
 			throws JobPropertiesException {
 
-		JobObject job = new JobObject(si,
+		final JobObject job = new JobObject(si,
 				jobsubmissionObject.getJobDescriptionDocument());
 
 		job.setInputFileUrls(jobsubmissionObject.getInputFileUrls());
@@ -252,7 +252,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 */
 	public final String createJob() throws JobPropertiesException {
 
-		String fqan = GrisuRegistryManager.getDefault(serviceInterface)
+		final String fqan = GrisuRegistryManager.getDefault(serviceInterface)
 				.getUserEnvironmentManager().getCurrentFqan();
 
 		return createJob(fqan);
@@ -338,7 +338,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 				}
 			}.start();
 
-		} catch (JobPropertiesException e) {
+		} catch (final JobPropertiesException e) {
 			addJobLogMessage("Could not create job on backend: "
 					+ e.getLocalizedMessage());
 			EventBus.publish(new JobStatusEvent(this, this.status,
@@ -361,7 +361,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			// just to make sure we don't create 2 or more threads. Should never
 			// happen.
 			waitThread.interrupt();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			myLogger.debug(e);
 		}
 
@@ -369,7 +369,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			@Override
 			public void run() {
 
-				int oldStatus = getStatus(false);
+				final int oldStatus = getStatus(false);
 				while (!isFinished()) {
 
 					if (isInterrupted()) {
@@ -388,7 +388,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 					}
 					try {
 						Thread.sleep(checkIntervallInSeconds * 1000);
-					} catch (InterruptedException e) {
+					} catch (final InterruptedException e) {
 						myLogger.debug("Wait thread for job " + getJobname()
 								+ " interrupted.");
 						return;
@@ -428,7 +428,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			file = GrisuRegistryManager.getDefault(serviceInterface)
 					.getFileManager().downloadFile(url);
 			addJobLogMessage("Downloaded output file: " + url);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			addJobLogMessage("Could not download file " + url + ": "
 					+ e.getLocalizedMessage());
 			throw new JobException(this, "Could not download file: " + url, e);
@@ -441,7 +441,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	public boolean equals(Object other) {
 
 		if (other instanceof JobObject) {
-			JobObject otherJob = (JobObject) other;
+			final JobObject otherJob = (JobObject) other;
 			return getJobname().equals(otherJob.getJobname());
 		} else {
 			return false;
@@ -470,11 +470,45 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			try {
 				allJobProperties = serviceInterface.getJob(getJobname())
 						.propertiesAsMap();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				throw new JobException(this, "Could not get jobproperties.", e);
 			}
 		}
 		return allJobProperties;
+
+	}
+
+	/**
+	 * Returns the current content of the file for this job as a string.
+	 * 
+	 * Internally the file is downloaded to the local grisu cache and read.
+	 * 
+	 * @return the current content of the stdout file for this job
+	 */
+	public final String getFileContent(String relativePathToWorkingDir) {
+
+		String result;
+		try {
+			result = FileHelpers
+					.readFromFileWithException(downloadAndCacheOutputFile(relativePathToWorkingDir));
+		} catch (final Exception e) {
+			throw new JobException(this, "Could not read stdout file.", e);
+		}
+
+		return result;
+
+	}
+
+	public long getFileSize(String relatevePathToJobDir) {
+
+		final String url = getJobDirectoryUrl() + "/" + relatevePathToJobDir;
+
+		try {
+			return GrisuRegistryManager.getDefault(serviceInterface)
+					.getFileManager().getFileSize(url);
+		} catch (final RemoteFileSystemException e) {
+			return -1;
+		}
 
 	}
 
@@ -495,7 +529,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		}
 
 		if (jobDirectory == null) {
-			String url = getAllJobProperties().get(
+			final String url = getAllJobProperties().get(
 					JobCreatedProperty.JOBDIRECTORY.toString());
 			jobDirectory = url;
 		}
@@ -522,11 +556,15 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		if (logMessages == null) {
 			try {
 				updateWithDtoJob(serviceInterface.getJob(jobname));
-			} catch (NoSuchJobException e) {
+			} catch (final NoSuchJobException e) {
 				e.printStackTrace();
 			}
 		}
 		return logMessages;
+	}
+
+	public ServiceInterface getServiceInterface() {
+		return this.serviceInterface;
 	}
 
 	/**
@@ -541,10 +579,10 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 */
 	public final int getStatus(final boolean forceRefresh) {
 		if (forceRefresh) {
-			int oldStatus = this.status;
+			final int oldStatus = this.status;
 			// addJobLogMessage("Getting new job status. Old status: "
 			// + JobConstants.translateStatus(oldStatus));
-			boolean oldFinished = isFinished(false);
+			final boolean oldFinished = isFinished(false);
 			this.status = serviceInterface.getJobStatus(getJobname());
 			pcs.firePropertyChange("status", oldStatus, this.status);
 			pcs.firePropertyChange("statusString",
@@ -591,7 +629,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		String result;
 		try {
 			result = FileHelpers.readFromFileWithException(getStdErrFile());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new JobException(this, "Could not read stdout file.", e);
 		}
 
@@ -616,7 +654,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			stderrFile = downloadAndCacheOutputFile(serviceInterface
 					.getJobProperty(getJobname(),
 							JobSubmissionProperty.STDERR.toString()));
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new JobException(this, "Could not download stderr file.", e);
 		}
 
@@ -636,28 +674,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		String result;
 		try {
 			result = FileHelpers.readFromFileWithException(getStdOutFile());
-		} catch (Exception e) {
-			throw new JobException(this, "Could not read stdout file.", e);
-		}
-
-		return result;
-
-	}
-
-	/**
-	 * Returns the current content of the file for this job as a string.
-	 * 
-	 * Internally the file is downloaded to the local grisu cache and read.
-	 * 
-	 * @return the current content of the stdout file for this job
-	 */
-	public final String getFileContent(String relativePathToWorkingDir) {
-
-		String result;
-		try {
-			result = FileHelpers
-					.readFromFileWithException(downloadAndCacheOutputFile(relativePathToWorkingDir));
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new JobException(this, "Could not read stdout file.", e);
 		}
 
@@ -682,7 +699,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			stdoutFile = downloadAndCacheOutputFile(serviceInterface
 					.getJobProperty(getJobname(),
 							JobSubmissionProperty.STDOUT.toString()));
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new JobException(this, "Could not download stdout file.", e);
 		}
 
@@ -772,7 +789,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 				EventBus.publish(new JobKilledEvent(this));
 			}
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new JobException(this, "Could not kill/clean job.", e);
 		}
 
@@ -793,7 +810,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	public List<String> listJobDirectory(int recursionLevel)
 			throws RemoteFileSystemException {
 
-		DtoFolder folder = serviceInterface.ls(getJobDirectoryUrl(),
+		final DtoFolder folder = serviceInterface.ls(getJobDirectoryUrl(),
 				recursionLevel);
 
 		return folder.listOfAllFilesUnderThisFolder();
@@ -817,7 +834,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			serviceInterface.restartJob(getJobname(),
 					getJobDescriptionDocumentAsString());
 			addJobLogMessage("Job restarted.");
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			addJobLogMessage("Job restart failed: " + e.getLocalizedMessage());
 			throw new JobSubmissionException("Could not find job on backend.",
 					e);
@@ -828,7 +845,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 
 	private void setStatus(final int newStatus) {
 
-		int oldstatus = this.status;
+		final int oldstatus = this.status;
 		this.status = newStatus;
 
 		if (oldstatus != this.status) {
@@ -862,21 +879,21 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			return;
 		}
 
-		Set<String> localFiles = new HashSet<String>();
-		for (String inputFile : getInputFileUrls()) {
+		final Set<String> localFiles = new HashSet<String>();
+		for (final String inputFile : getInputFileUrls()) {
 			if (FileManager.isLocal(inputFile)) {
 				localFiles.add(inputFile);
 			}
 		}
 
-		FileTransactionManager ftm = FileTransactionManager
+		final FileTransactionManager ftm = FileTransactionManager
 				.getDefault(serviceInterface);
 
-		FileTransaction fileTransfer = ftm.addJobInputFileTransfer(localFiles,
-				this);
+		final FileTransaction fileTransfer = ftm.addJobInputFileTransfer(
+				localFiles, this);
 		try {
 			fileTransfer.join();
-		} catch (ExecutionException e) {
+		} catch (final ExecutionException e) {
 			addJobLogMessage("Staging failed: " + e.getLocalizedMessage());
 			if (fileTransfer.getException() != null) {
 				throw fileTransfer.getException();
@@ -963,7 +980,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 
 		try {
 			stageFiles();
-		} catch (FileTransactionException e) {
+		} catch (final FileTransactionException e) {
 			addJobLogMessage("Could not stage in file: "
 					+ e.getLocalizedMessage());
 			throw new JobSubmissionException("Could not stage in file.", e);
@@ -979,7 +996,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			addJobLogMessage("Submitting job to endpoint...");
 			serviceInterface.submitJob(getJobname());
 
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			addJobLogMessage("Submission failed: " + e.getLocalizedMessage());
 			throw new JobSubmissionException("Could not find job on backend.",
 					e);
@@ -991,7 +1008,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			try {
 				serviceInterface.addJobProperties(getJobname(), DtoJob
 						.createJob(-1, additionalJobProperties, null, null));
-			} catch (NoSuchJobException e) {
+			} catch (final NoSuchJobException e) {
 				addJobLogMessage("Submission failed: "
 						+ e.getLocalizedMessage());
 				throw new JobSubmissionException(
@@ -1013,12 +1030,12 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	public void updateJobDirectory() {
 
 		try {
-			String oldUrl = jobDirectory;
+			final String oldUrl = jobDirectory;
 			jobDirectory = serviceInterface.getJobProperty(getJobname(),
 					Constants.JOBDIRECTORY_KEY);
 			getStatus(true);
 			pcs.firePropertyChange("jobDirectory", oldUrl, jobDirectory);
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			EventBus.publish(new JobStatusEvent(this, this.status,
 					JobConstants.NO_SUCH_JOB));
 			if (StringUtils.isNotBlank(getJobname())) {
@@ -1063,7 +1080,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 				try {
 					waitThread.join();
 					return isFinished();
-				} catch (InterruptedException e) {
+				} catch (final InterruptedException e) {
 					myLogger.debug("Job status wait thread interrupted.");
 					return isFinished();
 				}
@@ -1076,30 +1093,13 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			waitThread.start();
 			waitThread.join();
 			waitThread = null;
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			myLogger.debug("Job status wait thread interrupted.");
 			waitThread = null;
 			return isFinished();
 		}
 
 		return isFinished();
-	}
-
-	public ServiceInterface getServiceInterface() {
-		return this.serviceInterface;
-	}
-
-	public long getFileSize(String relatevePathToJobDir) {
-
-		String url = getJobDirectoryUrl() + "/" + relatevePathToJobDir;
-
-		try {
-			return GrisuRegistryManager.getDefault(serviceInterface)
-					.getFileManager().getFileSize(url);
-		} catch (RemoteFileSystemException e) {
-			return -1;
-		}
-
 	}
 
 }

@@ -81,7 +81,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 		this.si = si;
 		this.jobList = jobList;
 
-		ObservableElementList.Connector<JobObject> joConnector = GlazedLists
+		final ObservableElementList.Connector<JobObject> joConnector = GlazedLists
 				.beanConnector(JobObject.class);
 		observedJobs = new ObservableElementList<JobObject>(jobList,
 				joConnector);
@@ -128,10 +128,10 @@ public class SimpleSingleJobsGrid extends JPanel {
 
 			// walk through the listener list and
 			// call the userInput method in each
-			for (SingleJobSelectionListener bjsl : targets) {
+			for (final SingleJobSelectionListener bjsl : targets) {
 				try {
 					bjsl.jobSelected(j);
-				} catch (Exception e1) {
+				} catch (final Exception e1) {
 					e1.printStackTrace();
 				}
 			}
@@ -196,11 +196,11 @@ public class SimpleSingleJobsGrid extends JPanel {
 
 	public Set<JobObject> getSelectedJobs() {
 
-		Set<JobObject> selected = new HashSet<JobObject>();
-		for (int r : table.getSelectedRows()) {
+		final Set<JobObject> selected = new HashSet<JobObject>();
+		for (final int r : table.getSelectedRows()) {
 
 			if (r >= 0) {
-				JobObject sel = (JobObject) jobModel.getValueAt(r, 0);
+				final JobObject sel = (JobObject) jobModel.getValueAt(r, 0);
 				selected.add(sel);
 			}
 		}
@@ -218,9 +218,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 			table.setAutoCreateRowSorter(false);
 			table.setRowSorter(null);
 
-			table
-					.setDefaultRenderer(JobObject.class,
-							new JobNameCellRenderer());
+			table.setDefaultRenderer(JobObject.class, new JobNameCellRenderer());
 
 			// name
 			int vColIndex = 0;
@@ -301,10 +299,10 @@ public class SimpleSingleJobsGrid extends JPanel {
 
 	private void jobDoubleClickOccured() {
 
-		int selRow = table.getSelectedRow();
+		final int selRow = table.getSelectedRow();
 		if (selRow >= 0) {
 
-			JobObject sel = (JobObject) jobModel.getValueAt(selRow, 0);
+			final JobObject sel = (JobObject) jobModel.getValueAt(selRow, 0);
 			fireJobSelected(sel);
 		}
 
@@ -312,17 +310,18 @@ public class SimpleSingleJobsGrid extends JPanel {
 
 	protected void killSelectedJobs(final boolean clean) {
 
-		StringBuffer message = new StringBuffer("Do you really want to kill ");
+		final StringBuffer message = new StringBuffer(
+				"Do you really want to kill ");
 		if (clean) {
 			message.append("and clean ");
 		}
 		message.append("the following job(s)?\n\n");
 
-		for (JobObject job : getSelectedJobs()) {
+		for (final JobObject job : getSelectedJobs()) {
 			message.append(job.getJobname() + "\n");
 		}
 
-		int n = JOptionPane.showConfirmDialog(getRootPane(),
+		final int n = JOptionPane.showConfirmDialog(getRootPane(),
 				message.toString(), "Kill and clean job(s)",
 				JOptionPane.YES_NO_OPTION);
 
@@ -330,7 +329,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 
 			lockUI(true);
 
-			for (JobObject job : getSelectedJobs()) {
+			for (final JobObject job : getSelectedJobs()) {
 				// getTable().getSelectionModel().clearSelection();
 				job.kill(clean);
 			}

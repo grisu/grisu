@@ -63,24 +63,21 @@ public class Walltime extends AbstractWidget {
 		return unitsComboBox;
 	}
 
-	public void setWalltimeInSeconds(int seconds) {
-
-		String[] humanReadable = WalltimeUtils
-				.convertSecondsInHumanReadableString(seconds);
-		amountsModel.setSelectedItem(humanReadable[0]);
-		unitModel.setSelectedItem(humanReadable[1]);
-
+	@Override
+	public String getValue() {
+		return getWalltimeInSeconds().toString();
 	}
 
 	public Integer getWalltimeInSeconds() {
 		Integer secs = null;
 		try {
-			String amount = (String) getAmountComboBox().getSelectedItem();
-			String unit = (String) getUnitsComboBox().getSelectedItem();
+			final String amount = (String) getAmountComboBox()
+					.getSelectedItem();
+			final String unit = (String) getUnitsComboBox().getSelectedItem();
 			secs = WalltimeUtils
 					.convertHumanReadableStringIntoSeconds(new String[] {
 							amount, unit });
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 			return -1;
 		}
@@ -88,12 +85,20 @@ public class Walltime extends AbstractWidget {
 	}
 
 	@Override
+	public void lockIUI(boolean lock) {
+
+		getUnitsComboBox().setEnabled(!lock);
+		getAmountComboBox().setEnabled(!lock);
+
+	}
+
+	@Override
 	public void setValue(String value) {
 
 		try {
-			int temp = Integer.parseInt(value);
+			final int temp = Integer.parseInt(value);
 			setWalltimeInSeconds(temp);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			myLogger.debug("Error setting value for walltime widget: "
 					+ e.getLocalizedMessage());
 			return;
@@ -101,15 +106,12 @@ public class Walltime extends AbstractWidget {
 
 	}
 
-	@Override
-	public String getValue() {
-		return getWalltimeInSeconds().toString();
-	}
+	public void setWalltimeInSeconds(int seconds) {
 
-	public void lockIUI(boolean lock) {
-
-		getUnitsComboBox().setEnabled(!lock);
-		getAmountComboBox().setEnabled(!lock);
+		final String[] humanReadable = WalltimeUtils
+				.convertSecondsInHumanReadableString(seconds);
+		amountsModel.setSelectedItem(humanReadable[0]);
+		unitModel.setSelectedItem(humanReadable[1]);
 
 	}
 

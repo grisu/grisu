@@ -74,61 +74,62 @@ public class GT4Submitter extends JobSubmitter {
 
 		Document output = null;
 		try {
-			DocumentBuilderFactory docFactory = DocumentBuilderFactory
+			final DocumentBuilderFactory docFactory = DocumentBuilderFactory
 					.newInstance();
-			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+			final DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 			output = docBuilder.newDocument();
-		} catch (ParserConfigurationException e1) {
+		} catch (final ParserConfigurationException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 
 		// Add root element
-		Element job = output.createElement("job");
+		final Element job = output.createElement("job");
 		output.appendChild(job);
 
 		// Add "executable" node
-		Element executable = output.createElement("executable");
+		final Element executable = output.createElement("executable");
 		executable.setTextContent(JsdlHelpers
 				.getPosixApplicationExecutable(jsdl));
 		job.appendChild(executable);
 
 		// Add "argument"s
-		String[] arguments = JsdlHelpers.getPosixApplicationArguments(jsdl);
-		for (String argument : arguments) {
+		final String[] arguments = JsdlHelpers
+				.getPosixApplicationArguments(jsdl);
+		for (final String argument : arguments) {
 			if ((argument != null) && !"".equals(argument.trim())) {
-				Element argument_node = output.createElement("argument");
+				final Element argument_node = output.createElement("argument");
 				argument_node.setTextContent(argument);
 				job.appendChild(argument_node);
 			}
 		}
 
 		// Add "directory"
-		Element directory = output.createElement("directory");
+		final Element directory = output.createElement("directory");
 		directory.setTextContent(JsdlHelpers.getWorkingDirectory(jsdl));
 		job.appendChild(directory);
 
 		// "stdin" element if available
-		String stdinValue = JsdlHelpers.getPosixStandardInput(jsdl);
+		final String stdinValue = JsdlHelpers.getPosixStandardInput(jsdl);
 		if ((stdinValue != null) && !"".equals(stdinValue)) {
-			Element stdin = output.createElement("stdin");
+			final Element stdin = output.createElement("stdin");
 			stdin.setTextContent(stdinValue);
 			job.appendChild(stdin);
 		}
 
 		// Add "stdout"
-		Element stdout = output.createElement("stdout");
+		final Element stdout = output.createElement("stdout");
 		stdout.setTextContent(JsdlHelpers.getPosixStandardOutput(jsdl));
 		job.appendChild(stdout);
 
 		// Add "stderr"
-		Element stderr = output.createElement("stderr");
+		final Element stderr = output.createElement("stderr");
 		stderr.setTextContent(JsdlHelpers.getPosixStandardError(jsdl));
 		job.appendChild(stderr);
 
 		// Add "queue" node
 		// TODO change that once I know how to specify queues in jsdl
-		String[] queues = JsdlHelpers.getCandidateHosts(jsdl);
+		final String[] queues = JsdlHelpers.getCandidateHosts(jsdl);
 		if ((queues != null) && (queues.length > 0)) {
 			String queue = queues[0];
 			// TODO this
@@ -139,7 +140,7 @@ public class GT4Submitter extends JobSubmitter {
 			// good
 			if (queue.indexOf(":") != -1) {
 				queue = queue.substring(0, queue.indexOf(":"));
-				Element queue_node = output.createElement("queue");
+				final Element queue_node = output.createElement("queue");
 				queue_node.setTextContent(queue);
 				job.appendChild(queue_node);
 			}
@@ -148,12 +149,12 @@ public class GT4Submitter extends JobSubmitter {
 		}
 
 		// Add "jobtype" if mpi
-		int processorCount = JsdlHelpers.getProcessorCount(jsdl);
+		final int processorCount = JsdlHelpers.getProcessorCount(jsdl);
 
-		Element jobType = output.createElement("jobType");
+		final Element jobType = output.createElement("jobType");
 		String jobTypeString = JsdlHelpers.getArcsJobType(jsdl);
 
-		Element count = output.createElement("count");
+		final Element count = output.createElement("count");
 		count.setTextContent(new Integer(processorCount).toString());
 		job.appendChild(count);
 
@@ -170,10 +171,10 @@ public class GT4Submitter extends JobSubmitter {
 		} else {
 			jobType.setTextContent("single");
 
-			int hostCountValue = JsdlHelpers.getResourceCount(jsdl);
+			final int hostCountValue = JsdlHelpers.getResourceCount(jsdl);
 
 			if (hostCountValue >= 1) {
-				Element hostCount = output.createElement("hostCount");
+				final Element hostCount = output.createElement("hostCount");
 				hostCount
 						.setTextContent(new Integer(hostCountValue).toString());
 				job.appendChild(hostCount);
@@ -186,7 +187,7 @@ public class GT4Submitter extends JobSubmitter {
 		Long memory = JsdlHelpers.getTotalMemoryRequirement(jsdl);
 
 		if ((memory != null) && (memory >= 0)) {
-			Element totalMemory = output.createElement("maxMemory");
+			final Element totalMemory = output.createElement("maxMemory");
 			// convert from bytes to mb
 			memory = memory / (1024 * 1024);
 			totalMemory.setTextContent(memory.toString());
@@ -194,9 +195,9 @@ public class GT4Submitter extends JobSubmitter {
 		}
 
 		// Add "maxWallTime" node
-		int walltime = JsdlHelpers.getWalltime(jsdl);
+		final int walltime = JsdlHelpers.getWalltime(jsdl);
 		if (walltime > 0) {
-			Element maxWallTime = output.createElement("maxWallTime");
+			final Element maxWallTime = output.createElement("maxWallTime");
 			int wt = new Integer(JsdlHelpers.getWalltime(jsdl));
 			// convert to minutes
 			wt = wt / 60;
@@ -204,7 +205,7 @@ public class GT4Submitter extends JobSubmitter {
 			job.appendChild(maxWallTime);
 		}
 
-		Element fileStageIn = output.createElement("fileStageIn");
+		final Element fileStageIn = output.createElement("fileStageIn");
 		// stage ins
 		// Map<String, String> stageIns = JsdlHelpers.getStageIns(jsdl);
 		// // only append stageIns element if not 0 because globus will reject
@@ -225,11 +226,11 @@ public class GT4Submitter extends JobSubmitter {
 		// job.appendChild(fileStageIn);
 		// }
 		// Extensions
-		Element extensions = output.createElement("extensions");
+		final Element extensions = output.createElement("extensions");
 
 		// jobname
-		Element jobname = output.createElement("jobname");
-		String jobname_string = JsdlHelpers.getJobname(jsdl);
+		final Element jobname = output.createElement("jobname");
+		final String jobname_string = JsdlHelpers.getJobname(jsdl);
 		// because of some pbs restrictions we have to keep the jobname to 6
 		// chars
 		if (jobname_string.length() > 6) {
@@ -244,14 +245,14 @@ public class GT4Submitter extends JobSubmitter {
 		String[] modules_string = null;
 		try {
 			modules_string = JsdlHelpers.getModules(jsdl);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// doesn't matter
 			myLogger.debug(e);
 		}
 		if ((modules_string != null) && (modules_string.length > 0)) {
-			for (String module_string : modules_string) {
+			for (final String module_string : modules_string) {
 				if (!"".equals(module_string)) {
-					Element module = output.createElement("module");
+					final Element module = output.createElement("module");
 					module.setTextContent(module_string);
 					extensions.appendChild(module);
 				}
@@ -263,11 +264,11 @@ public class GT4Submitter extends JobSubmitter {
 			// disappear
 			// it was stupid in the first place to have it...
 
-			String application = JsdlHelpers.getApplicationName(jsdl);
-			String version = JsdlHelpers.getApplicationVersion(jsdl);
-			String[] subLocs = JsdlHelpers.getCandidateHosts(jsdl);
+			final String application = JsdlHelpers.getApplicationName(jsdl);
+			final String version = JsdlHelpers.getApplicationVersion(jsdl);
+			final String[] subLocs = JsdlHelpers.getCandidateHosts(jsdl);
 			if ((subLocs != null) && (subLocs.length > 0)) {
-				String subLoc = subLocs[0];
+				final String subLoc = subLocs[0];
 
 				if (StringUtils.isBlank(application)
 						|| Constants.GENERIC_APPLICATION_NAME
@@ -279,7 +280,7 @@ public class GT4Submitter extends JobSubmitter {
 						&& StringUtils.isNotBlank(subLoc)) {
 
 					// if we know application, version and submissionLocation
-					Map<String, String> appDetails = infoManager
+					final Map<String, String> appDetails = infoManager
 							.getApplicationDetails(application, version, subLoc);
 
 					try {
@@ -291,7 +292,7 @@ public class GT4Submitter extends JobSubmitter {
 							myLogger.warn("No module for this application/version/submissionLocation found. Submitting nonetheless...");
 						}
 
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						myLogger.warn("Could not get module for this application/version/submissionLocation: "
 								+ e.getLocalizedMessage()
 								+ ". Submitting nonetheless...");
@@ -302,7 +303,7 @@ public class GT4Submitter extends JobSubmitter {
 				} else if ((application != null) && (version == null)
 						&& (subLoc != null)) {
 
-					Map<String, String> appDetails = infoManager
+					final Map<String, String> appDetails = infoManager
 							.getApplicationDetails(application,
 									Constants.NO_VERSION_INDICATOR_STRING,
 									subLoc);
@@ -316,7 +317,7 @@ public class GT4Submitter extends JobSubmitter {
 							myLogger.warn("No module for this application/submissionLocation found. Submitting nonetheless...");
 						}
 
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						myLogger.warn("Could not get module for this application/submissionLocation: "
 								+ e.getLocalizedMessage()
 								+ ". Submitting nonetheless...");
@@ -336,16 +337,16 @@ public class GT4Submitter extends JobSubmitter {
 				// firstly, put the application element in there so pbs.pm can
 				// parse
 				// it if necessary.
-				Element appl = output.createElement("application");
+				final Element appl = output.createElement("application");
 				appl.setTextContent(application);
 				extensions.appendChild(appl);
 			}
 
 			if ((modules_string != null) && (modules_string.length > 0)) {
 
-				for (String module_string : modules_string) {
+				for (final String module_string : modules_string) {
 					if (!"".equals(module_string)) {
-						Element module = output.createElement("module");
+						final Element module = output.createElement("module");
 						module.setTextContent(module_string);
 						extensions.appendChild(module);
 					}
@@ -355,24 +356,25 @@ public class GT4Submitter extends JobSubmitter {
 		}
 
 		// email
-		String email = JsdlHelpers.getEmail(jsdl);
+		final String email = JsdlHelpers.getEmail(jsdl);
 
 		if ((email != null) && !"".equals(email)) {
-			Element email_address = output.createElement("email_address");
+			final Element email_address = output.createElement("email_address");
 			email_address.setTextContent(email);
 			extensions.appendChild(email_address);
 
 			if (JsdlHelpers.getSendEmailOnJobStart(jsdl)) {
-				Element emailonexecution = output
+				final Element emailonexecution = output
 						.createElement("emailonexecution");
 				emailonexecution.setTextContent("yes");
 				extensions.appendChild(emailonexecution);
 			}
 
 			if (JsdlHelpers.getSendEmailOnJobFinish(jsdl)) {
-				Element emailonabort = output.createElement("emailonabort");
+				final Element emailonabort = output
+						.createElement("emailonabort");
 				emailonabort.setTextContent("yes");
-				Element emailontermination = output
+				final Element emailontermination = output
 						.createElement("emailontermination");
 				emailontermination.setTextContent("yes");
 				extensions.appendChild(emailonabort);
@@ -381,9 +383,9 @@ public class GT4Submitter extends JobSubmitter {
 
 		}
 
-		String pbsDebug = JsdlHelpers.getPbsDebugElement(jsdl);
+		final String pbsDebug = JsdlHelpers.getPbsDebugElement(jsdl);
 		if (StringUtils.isNotBlank(pbsDebug)) {
-			Element pbsDebugElement = output.createElement("pbsDebug");
+			final Element pbsDebugElement = output.createElement("pbsDebug");
 			pbsDebugElement.setTextContent(pbsDebug);
 			extensions.appendChild(pbsDebugElement);
 		}
@@ -393,24 +395,24 @@ public class GT4Submitter extends JobSubmitter {
 		// initialize StreamResult with InputFile object to save to file
 		StreamResult result = null;
 		try {
-			Transformer transformer = TransformerFactory.newInstance()
+			final Transformer transformer = TransformerFactory.newInstance()
 					.newTransformer();
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
 			result = new StreamResult(new StringWriter());
-			DOMSource source = new DOMSource(output);
+			final DOMSource source = new DOMSource(output);
 
 			transformer.transform(source, result);
-		} catch (TransformerConfigurationException e) {
+		} catch (final TransformerConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
+		} catch (final IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (TransformerFactoryConfigurationError e) {
+		} catch (final TransformerFactoryConfigurationError e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (TransformerException e) {
+		} catch (final TransformerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -420,8 +422,8 @@ public class GT4Submitter extends JobSubmitter {
 
 	private static EndpointReferenceType getFactoryEPR(final String contact,
 			final String factoryType) throws Exception {
-		URL factoryUrl = ManagedJobFactoryClientHelper.getServiceURL(contact)
-				.getURL();
+		final URL factoryUrl = ManagedJobFactoryClientHelper.getServiceURL(
+				contact).getURL();
 
 		myLogger.debug("Factory Url: " + factoryUrl);
 		return ManagedJobFactoryClientHelper.getFactoryEndpoint(factoryUrl,
@@ -570,7 +572,7 @@ public class GT4Submitter extends JobSubmitter {
 	protected final String submit(final InformationManager infoManager,
 			final String host, final String factoryType, final Job job) {
 
-		int retries = ServerPropertiesManager.getJobSubmissionRetries();
+		final int retries = ServerPropertiesManager.getJobSubmissionRetries();
 
 		String submittedJobDesc = null;
 		String handle = null;
@@ -586,7 +588,7 @@ public class GT4Submitter extends JobSubmitter {
 						job.getJobDescription());
 				jobDesc = RSLHelper.readRSL(submittedJobDesc);
 
-			} catch (RSLParseException e) {
+			} catch (final RSLParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				throw new RuntimeException(e);
@@ -602,19 +604,19 @@ public class GT4Submitter extends JobSubmitter {
 			// ManagedJobFactoryConstants.FACTORY_TYPE.FORK;
 			// String factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
 			// Deafult Security: Host authorization + XML encryption
-			Authorization authz = HostAuthorization.getInstance();
-			Integer xmlSecurity = org.globus.wsrf.impl.security.authentication.Constants.ENCRYPTION;
+			final Authorization authz = HostAuthorization.getInstance();
+			final Integer xmlSecurity = org.globus.wsrf.impl.security.authentication.Constants.ENCRYPTION;
 
 			// Submission mode: batch = will not wait
-			boolean batchMode = true;
+			final boolean batchMode = true;
 
 			// a Simple command executable (if no job file)
-			String simpleJobCommandLine = null;
+			final String simpleJobCommandLine = null;
 
 			// Job timeout values: duration, termination times
-			Date serviceDuration = null;
-			Date serviceTermination = null;
-			int timeout = GramJob.DEFAULT_TIMEOUT;
+			final Date serviceDuration = null;
+			final Date serviceTermination = null;
+			final int timeout = GramJob.DEFAULT_TIMEOUT;
 
 			try {
 
@@ -630,7 +632,7 @@ public class GT4Submitter extends JobSubmitter {
 									+ " is not valid.");
 				}
 
-				GramClient gram = new GramClient(credential);
+				final GramClient gram = new GramClient(credential);
 
 				handle = gram.submitRSL(getFactoryEPR(host, factoryType),
 						simpleJobCommandLine, jobDesc, authz, xmlSecurity,
@@ -643,7 +645,7 @@ public class GT4Submitter extends JobSubmitter {
 
 				break;
 
-			} catch (Exception e) {
+			} catch (final Exception e) {
 
 				// TODO handle that
 				e.printStackTrace();
@@ -653,7 +655,7 @@ public class GT4Submitter extends JobSubmitter {
 				} else {
 					try {
 						killJob(handle, credential);
-					} catch (Exception e3) {
+					} catch (final Exception e3) {
 						myLogger.debug(e3);
 					}
 
@@ -667,10 +669,10 @@ public class GT4Submitter extends JobSubmitter {
 
 		if (ServerPropertiesManager.getDebugModeOn()) {
 
-			String uid = handle.substring(handle.indexOf("?") + 1);
-			String hostname = host.substring(0, host
+			final String uid = handle.substring(handle.indexOf("?") + 1);
+			final String hostname = host.substring(0, host
 					.indexOf(":8443/wsrf/services/ManagedJobFactoryService"));
-			String eprString = "<ns00:EndpointReferenceType xmlns:ns00=\"http://schemas.xmlsoap.org/ws/2004/03/addressing\">\n"
+			final String eprString = "<ns00:EndpointReferenceType xmlns:ns00=\"http://schemas.xmlsoap.org/ws/2004/03/addressing\">\n"
 					+ "<ns00:Address>"
 					+ hostname
 					+ ":8443/wsrf/services/ManagedExecutableJobService</ns00:Address>\n"
@@ -688,30 +690,35 @@ public class GT4Submitter extends JobSubmitter {
 					vo = vo.replace("/", "_");
 				}
 
-				String uFileName = ServerPropertiesManager.getDebugDirectory()
+				final String uFileName = ServerPropertiesManager
+						.getDebugDirectory()
 						+ "/"
 						+ job.getDn().replace("=", "_").replace(",", "_")
-								.replace(" ", "_") + "_" + job.getJobname()
+								.replace(" ", "_")
+						+ "_"
+						+ job.getJobname()
 						+ "_" + vo + "_" + job.hashCode();
-				FileWriter fileWriter = new FileWriter(uFileName + ".epr");
+				final FileWriter fileWriter = new FileWriter(uFileName + ".epr");
 				BufferedWriter buffWriter = new BufferedWriter(fileWriter);
 				buffWriter.write(eprString);
 
 				buffWriter.close();
 
-				FileWriter fileWriter2 = new FileWriter(uFileName + ".rsl");
+				final FileWriter fileWriter2 = new FileWriter(uFileName
+						+ ".rsl");
 				buffWriter = new BufferedWriter(fileWriter2);
 				buffWriter.write(submittedJobDesc);
 				buffWriter.close();
 
-				FileWriter fileWriter3 = new FileWriter(uFileName + ".jsdl");
+				final FileWriter fileWriter3 = new FileWriter(uFileName
+						+ ".jsdl");
 				buffWriter = new BufferedWriter(fileWriter3);
 				buffWriter.write(SeveralXMLHelpers
 						.toStringWithoutAnnoyingExceptions(job
 								.getJobDescription()));
 				buffWriter.close();
 
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				myLogger.error("Gt4 job submission error: "
 						+ e.getLocalizedMessage());
 				e.printStackTrace();
@@ -732,7 +739,7 @@ public class GT4Submitter extends JobSubmitter {
 		if ("Done".equals(status)) {
 			grisu_status = JobConstants.DONE;
 		} else if (status.startsWith("Done")) {
-			int error = Integer.parseInt(status.substring(4));
+			final int error = Integer.parseInt(status.substring(4));
 			grisu_status = JobConstants.DONE + error;
 		} else if ("StageIn".equals(status)) {
 			grisu_status = JobConstants.STAGE_IN;

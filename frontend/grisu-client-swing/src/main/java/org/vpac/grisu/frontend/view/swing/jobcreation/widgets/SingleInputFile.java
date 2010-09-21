@@ -53,36 +53,63 @@ public class SingleInputFile extends AbstractWidget {
 
 	}
 
-	@Override
-	protected boolean setLastValue() {
-		return false;
+	public void displayHiddenFiles(boolean display) {
+		this.displayHiddenFiles = display;
+		if (fileDialog != null) {
+			fileDialog.displayHiddenFiles(display);
+		}
 	}
 
-	protected GlazedFile popupFileDialogAndAskForFile() {
+	protected JButton getBtnBrowse() {
+		if (btnBrowse == null) {
+			btnBrowse = new JButton("Browse");
+			btnBrowse.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
 
-		if (getServiceInterface() == null) {
-			getMylogger().error(
-					"ServiceInterface not set. Can't open dialog...");
-			return null;
+					final String oldValue = getValue();
+
+					final GlazedFile file = popupFileDialogAndAskForFile();
+
+					if (file == null) {
+						return;
+					}
+
+					setInputFile(file.getUrl());
+					getPropertyChangeSupport().firePropertyChange(
+							"inputFileUrl", oldValue, getValue());
+				}
+			});
 		}
-
-		getFileDialog().setVisible(true);
-
-		GlazedFile file = getFileDialog().getSelectedFile();
-		getFileDialog().clearSelection();
-
-		GlazedFile currentDir = getFileDialog().getCurrentDirectory();
-
-		if (StringUtils.isNotBlank(getHistoryKey())) {
-			getHistoryManager().addHistoryEntry(getHistoryKey() + "_last_dir",
-					currentDir.getUrl());
-		}
-
-		return file;
+		return btnBrowse;
 	}
 
-	public void setFileDialog(GrisuFileDialog d) {
-		this.fileDialog = d;
+	private JComboBox getComboBox() {
+		if (comboBox == null) {
+			comboBox = new JComboBox(fileModel);
+			comboBox.setEditable(false);
+			comboBox.setPrototypeDisplayValue("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+			comboBox.addItem(selString);
+			comboBox.setRenderer(new FirstItemPromptItemRenderer(selString));
+			comboBox.addItemListener(new ItemListener() {
+
+				public void itemStateChanged(ItemEvent e) {
+
+					if (ItemEvent.SELECTED == e.getStateChange()) {
+
+						if (StringUtils.isNotBlank((String) fileModel
+								.getSelectedItem())) {
+
+							setInputFile((String) fileModel.getSelectedItem());
+							getPropertyChangeSupport().firePropertyChange(
+									"inputFileUrl", null, getValue());
+						}
+					}
+				}
+
+			});
+		}
+
+		return comboBox;
 	}
 
 	protected GrisuFileDialog getFileDialog() {
@@ -124,85 +151,14 @@ public class SingleInputFile extends AbstractWidget {
 
 	}
 
-	private JComboBox getComboBox() {
-		if (comboBox == null) {
-			comboBox = new JComboBox(fileModel);
-			comboBox.setEditable(false);
-			comboBox.setPrototypeDisplayValue("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-			comboBox.addItem(selString);
-			comboBox.setRenderer(new FirstItemPromptItemRenderer(selString));
-			comboBox.addItemListener(new ItemListener() {
-
-				public void itemStateChanged(ItemEvent e) {
-
-					if (ItemEvent.SELECTED == e.getStateChange()) {
-
-						if (StringUtils.isNotBlank((String) fileModel
-								.getSelectedItem())) {
-
-							setInputFile((String) fileModel.getSelectedItem());
-							getPropertyChangeSupport().firePropertyChange(
-									"inputFileUrl", null, getValue());
-						}
-					}
-				}
-
-			});
-		}
-
-		return comboBox;
-	}
-
-	protected void setInputFile(String url) {
-
-		if (StringUtils.isBlank(url)) {
-			fileModel.setSelectedItem(selString);
-			return;
-		}
-
-		int index = fileModel.getIndexOf(url);
-		if (index < 0) {
-			fileModel.addElement(url);
-		}
-		fileModel.setSelectedItem(url);
-	}
-
 	public String getInputFileUrl() {
-		String temp = (String) getComboBox().getSelectedItem();
+		final String temp = (String) getComboBox().getSelectedItem();
 
 		if (selString.equals(temp)) {
 			return null;
 		} else {
 			return temp;
 		}
-	}
-
-	protected JButton getBtnBrowse() {
-		if (btnBrowse == null) {
-			btnBrowse = new JButton("Browse");
-			btnBrowse.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-
-					String oldValue = getValue();
-
-					GlazedFile file = popupFileDialogAndAskForFile();
-
-					if (file == null) {
-						return;
-					}
-
-					setInputFile(file.getUrl());
-					getPropertyChangeSupport().firePropertyChange(
-							"inputFileUrl", oldValue, getValue());
-				}
-			});
-		}
-		return btnBrowse;
-	}
-
-	@Override
-	public void setValue(String value) {
-		setInputFile(value);
 	}
 
 	@Override
@@ -213,7 +169,8 @@ public class SingleInputFile extends AbstractWidget {
 	@Override
 	public void historyKeySet() {
 		getHistoryManager().setMaxNumberOfEntries(getHistoryKey(), 8);
-		for (String entry : getHistoryManager().getEntries(getHistoryKey())) {
+		for (final String entry : getHistoryManager().getEntries(
+				getHistoryKey())) {
 			if (fileModel.getIndexOf(entry) < 0) {
 				fileModel.addElement(entry);
 			}
@@ -232,11 +189,27 @@ public class SingleInputFile extends AbstractWidget {
 
 	}
 
-	public void displayHiddenFiles(boolean display) {
-		this.displayHiddenFiles = display;
-		if (fileDialog != null) {
-			fileDialog.displayHiddenFiles(display);
+	protected GlazedFile popupFileDialogAndAskForFile() {
+
+		if (getServiceInterface() == null) {
+			getMylogger().error(
+					"ServiceInterface not set. Can't open dialog...");
+			return null;
 		}
+
+		getFileDialog().setVisible(true);
+
+		final GlazedFile file = getFileDialog().getSelectedFile();
+		getFileDialog().clearSelection();
+
+		final GlazedFile currentDir = getFileDialog().getCurrentDirectory();
+
+		if (StringUtils.isNotBlank(getHistoryKey())) {
+			getHistoryManager().addHistoryEntry(getHistoryKey() + "_last_dir",
+					currentDir.getUrl());
+		}
+
+		return file;
 	}
 
 	public void setExtensionsToDisplay(String[] extensions) {
@@ -244,5 +217,33 @@ public class SingleInputFile extends AbstractWidget {
 		if (fileDialog != null) {
 			fileDialog.setExtensionsToDisplay(extensions);
 		}
+	}
+
+	public void setFileDialog(GrisuFileDialog d) {
+		this.fileDialog = d;
+	}
+
+	protected void setInputFile(String url) {
+
+		if (StringUtils.isBlank(url)) {
+			fileModel.setSelectedItem(selString);
+			return;
+		}
+
+		final int index = fileModel.getIndexOf(url);
+		if (index < 0) {
+			fileModel.addElement(url);
+		}
+		fileModel.setSelectedItem(url);
+	}
+
+	@Override
+	protected boolean setLastValue() {
+		return false;
+	}
+
+	@Override
+	public void setValue(String value) {
+		setInputFile(value);
 	}
 }

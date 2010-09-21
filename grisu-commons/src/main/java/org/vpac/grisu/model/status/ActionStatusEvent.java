@@ -4,7 +4,7 @@ import org.vpac.grisu.model.dto.DtoActionStatus;
 
 public class ActionStatusEvent {
 
-	private DtoActionStatus status;
+	private final DtoActionStatus status;
 	private String prefix;
 
 	public ActionStatusEvent(DtoActionStatus status) {
@@ -27,10 +27,10 @@ public class ActionStatusEvent {
 			return prefix;
 		}
 	}
-	
+
 	@Override
 	public String toString() {
-		return getPrefix()+getPercentFinished()+"% finished";
+		return getPrefix() + getPercentFinished() + "% finished";
 	}
 
 }

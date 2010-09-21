@@ -64,10 +64,12 @@ public class ProxyCredential {
 
 	// whether this certificate is renewable - not used yet but maybe usefull
 	// for MyProxy certificates
-	private Boolean renewable = false;
+	private final Boolean renewable = false;
+
 	// For hibernate only
 	protected ProxyCredential() {
 	}
+
 	/**
 	 * This constructor creates a ProxyCredential using a standard GSSCredential
 	 * as parameter and wraps all the grisu-credential specific things around
@@ -82,6 +84,7 @@ public class ProxyCredential {
 
 		setCredentialData(convertFromGSSCredential(proxy));
 	}
+
 	/**
 	 * This constructor wraps a voms enabled proxy into this ProxyCredential
 	 * class.
@@ -126,7 +129,7 @@ public class ProxyCredential {
 		byte[] data = null;
 		try {
 			data = CredentialHelpers.convertGSSCredentialToByteArray(proxy);
-		} catch (GSSException e) {
+		} catch (final GSSException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
@@ -147,7 +150,7 @@ public class ProxyCredential {
 		GSSCredential cred = null;
 		try {
 			cred = CredentialHelpers.convertByteArrayToGSSCredential(data);
-		} catch (GSSException e) {
+		} catch (final GSSException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
@@ -159,7 +162,7 @@ public class ProxyCredential {
 
 		try {
 			getGssCredential().dispose();
-		} catch (GSSException e) {
+		} catch (final GSSException e) {
 			// bad luck
 			assert true;
 		}
@@ -200,7 +203,7 @@ public class ProxyCredential {
 			long fromNow = 0;
 			try {
 				fromNow = getGssCredential().getRemainingLifetime();
-			} catch (GSSException e) {
+			} catch (final GSSException e) {
 				// return null in that case
 				e.printStackTrace();
 				return null;
@@ -282,7 +285,7 @@ public class ProxyCredential {
 			} else {
 				return true;
 			}
-		} catch (GSSException e) {
+		} catch (final GSSException e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -362,18 +365,18 @@ public class ProxyCredential {
 
 	// public static void main(String[] args) throws GlobusCredentialException,
 	// Exception {
-	//		
+	//
 	// ProxyCredentialDAO creddao = new ProxyCredentialDAO();
 	// ProxyCredential cred = new
 	// ProxyCredential(CredentialHelpers.wrapGlobusCredential(CredentialHelpers.loadGlobusCredential(new
 	// File("/tmp/x509up_u1000"))));
-	//		
+	//
 	// creddao.save(cred);
-	//		
+	//
 	// ProxyCredential cred2 = creddao.findCredentialByID(new Long(2));
-	//		
+	//
 	// System.out.println(cred2.getExpiryDate());
-	//		
+	//
 	// }
 
 	/**

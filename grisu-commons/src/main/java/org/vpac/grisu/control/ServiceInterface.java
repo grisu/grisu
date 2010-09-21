@@ -3,6 +3,7 @@ package org.vpac.grisu.control;
 import java.util.Map;
 
 import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.annotation.security.RolesAllowed;
 import javax.jws.WebService;
 import javax.ws.rs.Consumes;

@@ -23,7 +23,8 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import com.jidesoft.swing.JideTabbedPane;
 
-public class JobDetailPanelSmall extends JPanel implements PropertyChangeListener, JobDetailPanel {
+public class JobDetailPanelSmall extends JPanel implements
+		PropertyChangeListener, JobDetailPanel {
 	private JLabel lblStatus;
 	private JTextField textField_1;
 
@@ -39,10 +40,12 @@ public class JobDetailPanelSmall extends JPanel implements PropertyChangeListene
 
 	/**
 	 * Create the panel.
+	 * 
 	 * @wbp.parser.constructor
 	 */
 	public JobDetailPanelSmall(ServiceInterface si) {
-		setBorder(new TitledBorder(null, "Job: n/a", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		setBorder(new TitledBorder(null, "Job: n/a", TitledBorder.LEADING,
+				TitledBorder.TOP, null, null));
 
 		this.si = si;
 
@@ -51,13 +54,11 @@ public class JobDetailPanelSmall extends JPanel implements PropertyChangeListene
 				ColumnSpec.decode("default:grow"),
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getLblStatus(), "2, 2, right, default");
 		add(getTextField_1(), "4, 2, fill, default");
 		add(getJideTabbedPane(), "2, 4, 3, 1, fill, fill");
@@ -143,9 +144,9 @@ public class JobDetailPanelSmall extends JPanel implements PropertyChangeListene
 
 		if (evt.getPropertyName().equals("status")) {
 			getTextField_1()
-			.setText(
-					JobConstants.translateStatus((Integer) (evt
-							.getNewValue())));
+					.setText(
+							JobConstants.translateStatus((Integer) (evt
+									.getNewValue())));
 		}
 	}
 
@@ -155,7 +156,8 @@ public class JobDetailPanelSmall extends JPanel implements PropertyChangeListene
 
 		getFileListWithPreviewPanel().setRootUrl(job.getJobDirectoryUrl());
 		getFileListWithPreviewPanel().setCurrentUrl(job.getJobDirectoryUrl());
-		setBorder(new TitledBorder(null, job.getJobname(), TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		setBorder(new TitledBorder(null, job.getJobname(),
+				TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		getTextField_1().setText(
 				JobConstants.translateStatus(job.getStatus(false)));
 
@@ -165,9 +167,9 @@ public class JobDetailPanelSmall extends JPanel implements PropertyChangeListene
 	}
 
 	private void setLog() {
-		StringBuffer temp = new StringBuffer();
+		final StringBuffer temp = new StringBuffer();
 
-		for (Date date : job.getLogMessages().keySet()) {
+		for (final Date date : job.getLogMessages().keySet()) {
 			temp.append(date.toString() + ":\t"
 					+ job.getLogMessages().get(date) + "\n");
 		}
@@ -177,9 +179,9 @@ public class JobDetailPanelSmall extends JPanel implements PropertyChangeListene
 
 	private void setProperties() {
 
-		StringBuffer temp = new StringBuffer();
+		final StringBuffer temp = new StringBuffer();
 
-		for (String key : job.getAllJobProperties().keySet()) {
+		for (final String key : job.getAllJobProperties().keySet()) {
 			temp.append(key + "\t\t" + job.getAllJobProperties().get(key)
 					+ "\n");
 		}

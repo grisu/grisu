@@ -131,6 +131,10 @@ public class MountPoint implements Comparable<MountPoint> {
 		this.automaticallyMounted = automaticallyMounted;
 	}
 
+	public void addProperty(String key, String value) {
+		this.properties.add(new DtoProperty(key, value));
+	}
+
 	public int compareTo(final MountPoint mp) {
 		return getRootUrl().compareTo(mp.getRootUrl());
 	}
@@ -139,7 +143,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	public boolean equals(final Object otherMountPoint) {
 
 		if (otherMountPoint instanceof MountPoint) {
-			MountPoint other = (MountPoint) otherMountPoint;
+			final MountPoint other = (MountPoint) otherMountPoint;
 
 			return other.getAlias().equals(this.getAlias());
 
@@ -166,30 +170,6 @@ public class MountPoint implements Comparable<MountPoint> {
 			return false;
 		}
 
-	}
-
-	public void addProperty(String key, String value) {
-		this.properties.add(new DtoProperty(key, value));
-	}
-
-	@Transient
-	@XmlElement(name = "property")
-	public List<DtoProperty> getProperties() {
-		return properties;
-	}
-
-	@Transient
-	public String getProperty(String key) {
-		for (DtoProperty prop : this.properties) {
-			if (prop.getKey().equals(key)) {
-				return prop.getValue();
-			}
-		}
-		return null;
-	}
-
-	public void setProperties(List<DtoProperty> properties) {
-		this.properties = properties;
 	}
 
 	@Column(nullable = false)
@@ -220,6 +200,22 @@ public class MountPoint implements Comparable<MountPoint> {
 		return mountPointId;
 	}
 
+	@Transient
+	@XmlElement(name = "property")
+	public List<DtoProperty> getProperties() {
+		return properties;
+	}
+
+	@Transient
+	public String getProperty(String key) {
+		for (final DtoProperty prop : this.properties) {
+			if (prop.getKey().equals(key)) {
+				return prop.getValue();
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Returns the path of the specified file relative to the root of this
 	 * mountpoint.
@@ -235,7 +231,7 @@ public class MountPoint implements Comparable<MountPoint> {
 			if (!url.startsWith(getAlias())) {
 				return null;
 			} else {
-				String path = url.substring(getAlias().length());
+				final String path = url.substring(getAlias().length());
 				if (path.startsWith("/")) {
 					return path.substring(1);
 				} else {
@@ -246,7 +242,7 @@ public class MountPoint implements Comparable<MountPoint> {
 			if (!url.startsWith(getRootUrl())) {
 				return null;
 			} else {
-				String path = url.substring(getRootUrl().length());
+				final String path = url.substring(getRootUrl().length());
 				if (path.startsWith("/")) {
 					return path.substring(1);
 				} else {
@@ -309,16 +305,6 @@ public class MountPoint implements Comparable<MountPoint> {
 		return false;
 	}
 
-	// public boolean equals(Object otherMountPoint) {
-	// if ( ! (otherMountPoint instanceof MountPoint) )
-	// return false;
-	// MountPoint other = (MountPoint)otherMountPoint;
-	// if ( other.dn.equals(this.dn) && other.mountpoint.equals(this.mountpoint)
-	// )
-	// return true;
-	// else return false;
-	// }
-
 	/**
 	 * Checks whether the "userspace" url (/ngdata.vpac/file.txt) contains the
 	 * file.
@@ -343,6 +329,16 @@ public class MountPoint implements Comparable<MountPoint> {
 			return false;
 		}
 	}
+
+	// public boolean equals(Object otherMountPoint) {
+	// if ( ! (otherMountPoint instanceof MountPoint) )
+	// return false;
+	// MountPoint other = (MountPoint)otherMountPoint;
+	// if ( other.dn.equals(this.dn) && other.mountpoint.equals(this.mountpoint)
+	// )
+	// return true;
+	// else return false;
+	// }
 
 	/**
 	 * Translates an absolute file url to a "mounted" file url.
@@ -401,13 +397,17 @@ public class MountPoint implements Comparable<MountPoint> {
 		this.fqan = fqan;
 	}
 
+	public void setMountPointId(final Long id) {
+		this.mountPointId = id;
+	}
+
 	// public int compareTo(Object o) {
 	// // return ((MountPoint)o).getMountpoint().compareTo(getMountpoint());
 	// return getRootUrl().compareTo(((MountPoint)o).getRootUrl());
 	// }
 
-	public void setMountPointId(final Long id) {
-		this.mountPointId = id;
+	public void setProperties(List<DtoProperty> properties) {
+		this.properties = properties;
 	}
 
 	public void setRootUrl(final String rootUrl) {

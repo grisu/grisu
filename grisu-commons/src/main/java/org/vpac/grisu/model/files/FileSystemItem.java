@@ -29,7 +29,7 @@ public class FileSystemItem {
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof FileSystemItem) {
-			FileSystemItem other = (FileSystemItem) o;
+			final FileSystemItem other = (FileSystemItem) o;
 
 			if (getType().equals(other.getType())
 					&& getAlias().equals(other.getAlias())) {

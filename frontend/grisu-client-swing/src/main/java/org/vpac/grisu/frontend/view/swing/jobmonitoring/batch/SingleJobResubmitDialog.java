@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
 import org.vpac.grisu.frontend.model.job.BackendException;
@@ -23,10 +24,11 @@ public class SingleJobResubmitDialog extends JDialog {
 	 */
 	public static void main(String[] args) {
 		try {
-			SingleJobResubmitDialog dialog = new SingleJobResubmitDialog(null, null);
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			final SingleJobResubmitDialog dialog = new SingleJobResubmitDialog(
+					null, null);
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -38,7 +40,8 @@ public class SingleJobResubmitDialog extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public SingleJobResubmitDialog(final BatchJobObject bj, final Set<String> jobnames) {
+	public SingleJobResubmitDialog(final BatchJobObject bj,
+			final Set<String> jobnames) {
 		setModal(true);
 		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(new BorderLayout());
@@ -50,7 +53,7 @@ public class SingleJobResubmitDialog extends JDialog {
 			contentPanel.add(singleJobResubmitPanel);
 		}
 		{
-			JPanel buttonPane = new JPanel();
+			final JPanel buttonPane = new JPanel();
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			final JButton cancelButton = new JButton("Cancel");
@@ -71,16 +74,19 @@ public class SingleJobResubmitDialog extends JDialog {
 							public void run() {
 								okButton.setEnabled(false);
 								cancelButton.setEnabled(false);
-								setCursor(Cursor.getDefaultCursor().getPredefinedCursor(Cursor.WAIT_CURSOR));
+								setCursor(Cursor
+										.getDefaultCursor()
+										.getPredefinedCursor(Cursor.WAIT_CURSOR));
 								try {
-									bj.restart(jobnames, singleJobResubmitPanel.getSubmissionLocations(), false);
-								} catch (JobsException e) {
+									bj.restart(jobnames, singleJobResubmitPanel
+											.getSubmissionLocations(), false);
+								} catch (final JobsException e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
-								} catch (BackendException e) {
+								} catch (final BackendException e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
-								} catch (InterruptedException e) {
+								} catch (final InterruptedException e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}

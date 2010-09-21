@@ -27,6 +27,7 @@ public class BatchJobStatus {
 	private List<String> doneSubLocs;
 	private List<String> waitingSubLocs;
 	private List<String> runningSubLocs;
+
 	public BatchJobStatus(Set<Job> jobs) {
 		this.allJobs = jobs;
 		init();
@@ -37,14 +38,17 @@ public class BatchJobStatus {
 		doneJobs.add(job);
 		doneSubLocs.add(job.getJobProperty(Constants.SUBMISSIONLOCATION_KEY));
 	}
+
 	private void addFailed(Job job) {
 
 		failedJobs.add(job);
 		failedSubLocs.add(job.getJobProperty(Constants.SUBMISSIONLOCATION_KEY));
 	}
+
 	private void addReadyJob(Job job) {
 		readyJobs.add(job);
 	}
+
 	private void addRunning(Job job) {
 
 		runningJobs.add(job);
@@ -107,7 +111,7 @@ public class BatchJobStatus {
 		waitingSubLocs = new LinkedList<String>();
 		runningSubLocs = new LinkedList<String>();
 
-		for (Job job : allJobs) {
+		for (final Job job : allJobs) {
 
 			if (JobConstants.DONE == job.getStatus()) {
 				addDone(job);

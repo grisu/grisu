@@ -23,19 +23,19 @@ public class PercentageJobDistributor implements JobDistributor {
 	public Map<String, Integer> distributeJobs(Set<Job> allJobs,
 			SortedSet<GridResource> allAvailableResources) {
 
-		Map<String, Integer> submissionLocations = new TreeMap<String, Integer>();
+		final Map<String, Integer> submissionLocations = new TreeMap<String, Integer>();
 
 		Long allWalltime = 0L;
-		for (Job job : allJobs) {
+		for (final Job job : allJobs) {
 			allWalltime = allWalltime
 					+ Long.parseLong(job
 							.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY));
 		}
 
-		Map<GridResource, Long> resourcesToUse = new TreeMap<GridResource, Long>();
-		List<Integer> ranks = new LinkedList<Integer>();
+		final Map<GridResource, Long> resourcesToUse = new TreeMap<GridResource, Long>();
+		final List<Integer> ranks = new LinkedList<Integer>();
 		Long allRanks = 0L;
-		for (GridResource resource : allAvailableResources) {
+		for (final GridResource resource : allAvailableResources) {
 
 			resourcesToUse.put(resource, new Long(0L));
 			ranks.add(resource.getRank());
@@ -45,11 +45,11 @@ public class PercentageJobDistributor implements JobDistributor {
 		myLogger.debug("Rank summary: " + allRanks);
 		myLogger.debug("Walltime summary: " + allWalltime);
 
-		GridResource[] resourceArray = resourcesToUse.keySet().toArray(
+		final GridResource[] resourceArray = resourcesToUse.keySet().toArray(
 				new GridResource[] {});
 		int lastIndex = 0;
 
-		for (Job job : allJobs) {
+		for (final Job job : allJobs) {
 
 			GridResource subLocResource = null;
 			long oldWalltimeSummary = 0L;
@@ -60,10 +60,11 @@ public class PercentageJobDistributor implements JobDistributor {
 					indexToUse = indexToUse - resourceArray.length;
 				}
 
-				GridResource resource = resourceArray[indexToUse];
+				final GridResource resource = resourceArray[indexToUse];
 
-				long rankPercentage = (resource.getRank() * 100) / (allRanks);
-				long wallTimePercentage = ((Long.parseLong(job
+				final long rankPercentage = (resource.getRank() * 100)
+						/ (allRanks);
+				final long wallTimePercentage = ((Long.parseLong(job
 						.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY)) + resourcesToUse
 						.get(resource)) * 100)
 						/ (allWalltime);
@@ -90,7 +91,7 @@ public class PercentageJobDistributor implements JobDistributor {
 						+ job.getJobname());
 			}
 
-			String subLoc = SubmissionLocationHelpers
+			final String subLoc = SubmissionLocationHelpers
 					.createSubmissionLocationString(subLocResource);
 			Integer currentCount = submissionLocations.get(subLoc);
 			if (currentCount == null) {
@@ -112,12 +113,10 @@ public class PercentageJobDistributor implements JobDistributor {
 			// }
 			// jobdao.saveOrUpdate(job);
 			resourcesToUse
-					.put(
-							subLocResource,
+					.put(subLocResource,
 							oldWalltimeSummary
-									+ Long
-											.parseLong(job
-													.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY)));
+									+ Long.parseLong(job
+											.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY)));
 		}
 
 		return submissionLocations;

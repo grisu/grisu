@@ -207,7 +207,7 @@ public class JobDetailPanelDefault extends JPanel implements
 				public void mouseClicked(MouseEvent e) {
 
 					if (job != null) {
-						Cursor old = statusRefreshButton.getCursor();
+						final Cursor old = statusRefreshButton.getCursor();
 						statusRefreshButton.setCursor(Cursor
 								.getPredefinedCursor(Cursor.WAIT_CURSOR));
 						job.getStatus(true);
@@ -287,12 +287,12 @@ public class JobDetailPanelDefault extends JPanel implements
 		getJobnameTextField().setText(job.getJobname());
 		String subTime = null;
 		try {
-			String subTimeString = job
+			final String subTimeString = job
 					.getJobProperty(Constants.SUBMISSION_TIME_KEY);
 			System.out.println(subTimeString);
 			subTime = DateFormat.getInstance().format(
 					new Date(Long.parseLong(subTimeString)));
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 			subTime = "n/a";
 		}
@@ -309,9 +309,9 @@ public class JobDetailPanelDefault extends JPanel implements
 	}
 
 	private void setLog() {
-		StringBuffer temp = new StringBuffer();
+		final StringBuffer temp = new StringBuffer();
 
-		for (Date date : job.getLogMessages().keySet()) {
+		for (final Date date : job.getLogMessages().keySet()) {
 			temp.append(date.toString() + ":\t"
 					+ job.getLogMessages().get(date) + "\n");
 		}
@@ -321,9 +321,9 @@ public class JobDetailPanelDefault extends JPanel implements
 
 	private void setProperties() {
 
-		StringBuffer temp = new StringBuffer();
+		final StringBuffer temp = new StringBuffer();
 
-		for (String key : job.getAllJobProperties().keySet()) {
+		for (final String key : job.getAllJobProperties().keySet()) {
 			temp.append(key + "\t\t" + job.getAllJobProperties().get(key)
 					+ "\n");
 		}

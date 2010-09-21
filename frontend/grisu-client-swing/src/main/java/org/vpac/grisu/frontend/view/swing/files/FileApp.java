@@ -21,13 +21,13 @@ public class FileApp {
 			public void run() {
 				try {
 
-					String username = args[0];
-					char[] password = args[1].toCharArray();
+					final String username = args[0];
+					final char[] password = args[1].toCharArray();
 
-					LoginParams loginParams = new LoginParams(
-							// "http://localhost:8080/grisu-ws/services/grisu",
-							// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-							// "http://localhost:8080/enunciate-backend/soap/GrisuService",
+					final LoginParams loginParams = new LoginParams(
+					// "http://localhost:8080/grisu-ws/services/grisu",
+					// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
+					// "http://localhost:8080/enunciate-backend/soap/GrisuService",
 							"Local",
 							// "LOCAL_WS",
 							username, password);
@@ -36,13 +36,14 @@ public class FileApp {
 					// si = LoginManager.login(null, password, username, "VPAC",
 					// loginParams);
 					si = LoginManager
-					.login(null, null, null, null, loginParams);
+							.login(null, null, null, null, loginParams);
 
-					File home = new File(System.getProperty("user.home"));
+					final File home = new File(System.getProperty("user.home"));
 
-					FileApp window = new FileApp(si, home.toURI().toString());
+					final FileApp window = new FileApp(si, home.toURI()
+							.toString());
 					window.frame.setVisible(true);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -69,8 +70,7 @@ public class FileApp {
 
 	private FileListPanelPlus getFileListPanelPlus() {
 		if (fileListPanelPlus == null) {
-			fileListPanelPlus = new FileListPanelPlus(si,
-					startUrl, true, true);
+			fileListPanelPlus = new FileListPanelPlus(si, startUrl, true, true);
 		}
 		return fileListPanelPlus;
 	}

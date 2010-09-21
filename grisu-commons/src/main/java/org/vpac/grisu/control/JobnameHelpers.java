@@ -7,7 +7,8 @@ import java.util.UUID;
 public class JobnameHelpers {
 
 	public static String calculateTimestampedJobname(String baseJobname) {
-		SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd_HH.mm.SSS");
+		final SimpleDateFormat format = new SimpleDateFormat(
+				"yyyy.MM.dd_HH.mm.SSS");
 		return calculateTimestampedJobname(baseJobname, format);
 	}
 

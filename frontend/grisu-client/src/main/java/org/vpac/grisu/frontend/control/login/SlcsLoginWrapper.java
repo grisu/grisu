@@ -19,29 +19,30 @@ public class SlcsLoginWrapper {
 
 		try {
 
-			if ( params != null ) {
-				String httproxy = params.getHttpProxy();
-				int httpProxyPort = params.getHttpProxyPort();
+			if (params != null) {
+				final String httproxy = params.getHttpProxy();
+				final int httpProxyPort = params.getHttpProxyPort();
 
-				if ( StringUtils.isNotBlank(httproxy) ) {
-					Shibboleth.setHttpProxy(httproxy, httpProxyPort, params.getHttpProxyUsername(), params.getMyProxyPassphrase());
+				if (StringUtils.isNotBlank(httproxy)) {
+					Shibboleth.setHttpProxy(httproxy, httpProxyPort,
+							params.getHttpProxyUsername(),
+							params.getMyProxyPassphrase());
 				}
 			}
 
-
-			IdpObject idpO = new StaticIdpObject(idp);
-			CredentialManager cm = new StaticCredentialManager(username,
+			final IdpObject idpO = new StaticIdpObject(idp);
+			final CredentialManager cm = new StaticCredentialManager(username,
 					password);
-			SLCS slcs = new SLCS(SLCS.DEFAULT_SLCS_URL, idpO, cm);
+			final SLCS slcs = new SLCS(SLCS.DEFAULT_SLCS_URL, idpO, cm);
 
-			GSSCredential cred = PlainProxy.init(slcs.getCertificate(), slcs
-					.getPrivateKey(), 24 * 10);
+			final GSSCredential cred = PlainProxy.init(slcs.getCertificate(),
+					slcs.getPrivateKey(), 24 * 10);
 
 			CommonArcsProperties.getDefault().setLastShibUsername(username);
 			CommonArcsProperties.getDefault().setLastShibIdp(idp);
 			return cred;
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 			throw e;
 		}

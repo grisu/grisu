@@ -25,7 +25,8 @@ public class GlazedFileRenderer extends DefaultTableCellRenderer implements
 	private static Icon fileIcon = fsView.getSystemIcon(findFile());
 
 	private static File findFile() {
-		for (File file : new File(System.getProperty("user.home")).listFiles()) {
+		for (final File file : new File(System.getProperty("user.home"))
+				.listFiles()) {
 			if (file.isFile()) {
 				return file;
 			}
@@ -50,7 +51,7 @@ public class GlazedFileRenderer extends DefaultTableCellRenderer implements
 			setBackground(arg0.getBackground());
 		}
 
-		GlazedFile file = (GlazedFile) arg1;
+		final GlazedFile file = (GlazedFile) arg1;
 
 		if (!file.isMarkedAsParent()) {
 			if (file.isFolder()) {
@@ -61,7 +62,7 @@ public class GlazedFileRenderer extends DefaultTableCellRenderer implements
 
 			try {
 				this.setText(URLDecoder.decode(file.getName(), "UTF-8"));
-			} catch (UnsupportedEncodingException e) {
+			} catch (final UnsupportedEncodingException e) {
 				e.printStackTrace();
 				this.setText(file.getName());
 			}

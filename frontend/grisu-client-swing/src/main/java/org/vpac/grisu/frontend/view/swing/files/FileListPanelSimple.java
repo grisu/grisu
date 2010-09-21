@@ -134,7 +134,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 		setRootAndCurrentUrl(rootUrl, startUrl);
 
-		DefaultGrisuFileContextMenu menu = new DefaultGrisuFileContextMenu(
+		final DefaultGrisuFileContextMenu menu = new DefaultGrisuFileContextMenu(
 				this.si);
 		setContextMenu(menu);
 
@@ -159,6 +159,11 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 		}
 	}
 
+	public void displayHiddenFiles(boolean display) {
+		textMatcherEditor.displayHiddenFiles(display);
+
+	}
+
 	private void fileClickOccured() {
 
 		fireFilesSelected(getSelectedFiles());
@@ -167,10 +172,10 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 	private void fileDoubleClickOccured() {
 
-		int selRow = table.getSelectedRow();
+		final int selRow = table.getSelectedRow();
 		if (selRow >= 0) {
 
-			GlazedFile sel = (GlazedFile) fileModel.getValueAt(selRow, 0);
+			final GlazedFile sel = (GlazedFile) fileModel.getValueAt(selRow, 0);
 
 			if (sel.isFolder()) {
 				fireFilesSelected(null);
@@ -187,7 +192,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 		// if we have no mountPointsListeners, do nothing...
 		if ((listeners != null) && !listeners.isEmpty()) {
 
-			Thread thread = new Thread() {
+			final Thread thread = new Thread() {
 				@Override
 				public void run() {
 
@@ -203,10 +208,10 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 						// walk through the listener list and
 						// call the userInput method in each
-						for (FileListListener l : targets) {
+						for (final FileListListener l : targets) {
 							try {
 								l.fileDoubleClicked(file);
-							} catch (Exception e1) {
+							} catch (final Exception e1) {
 								e1.printStackTrace();
 							}
 						}
@@ -238,10 +243,10 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 				// walk through the listener list and
 				// call the userInput method in each
-				for (FileListListener l : targets) {
+				for (final FileListListener l : targets) {
 					try {
 						l.filesSelected(files);
-					} catch (Exception e1) {
+					} catch (final Exception e1) {
 						e1.printStackTrace();
 					}
 				}
@@ -265,10 +270,10 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 			// walk through the listener list and
 			// call the userInput method in each
-			for (FileListListener l : targets) {
+			for (final FileListListener l : targets) {
 				try {
 					l.isLoading(loading);
-				} catch (Exception e1) {
+				} catch (final Exception e1) {
 					e1.printStackTrace();
 				}
 			}
@@ -288,10 +293,10 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 			// walk through the listener list and
 			// call the userInput method in each
-			for (FileListListener l : targets) {
+			for (final FileListListener l : targets) {
 				try {
 					l.directoryChanged(getCurrentDirectory());
-				} catch (Exception e1) {
+				} catch (final Exception e1) {
 					e1.printStackTrace();
 				}
 			}
@@ -325,12 +330,12 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 	public Set<GlazedFile> getSelectedFiles() {
 
-		Set<GlazedFile> selected = new TreeSet<GlazedFile>();
+		final Set<GlazedFile> selected = new TreeSet<GlazedFile>();
 
-		for (int r : table.getSelectedRows()) {
+		for (final int r : table.getSelectedRows()) {
 
 			if (r >= 0) {
-				GlazedFile sel = (GlazedFile) fileModel.getValueAt(r, 0);
+				final GlazedFile sel = (GlazedFile) fileModel.getValueAt(r, 0);
 				selected.add(sel);
 			}
 
@@ -396,7 +401,8 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 			}
 
 			if (!displayTimestamp) {
-				TableColumnExt colext = table.getColumnExt("Date modified");
+				final TableColumnExt colext = table
+						.getColumnExt("Date modified");
 				colext.setVisible(false);
 			}
 
@@ -407,14 +413,14 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 	public void onEvent(Object event) {
 
 		if (event instanceof FileTransferEvent) {
-			FileTransferEvent fevent = (FileTransferEvent) event;
+			final FileTransferEvent fevent = (FileTransferEvent) event;
 			if (fevent.getFileTransfer().isFinished()) {
 
 				if (FileTransaction.DELETE_STRING.equals(fevent
 						.getFileTransfer().getTargetDirUrl())) {
 					// means files deleted
 					if ((getCurrentDirectoryUrl() != null)) {
-						for (String url : fevent.getFileTransfer()
+						for (final String url : fevent.getFileTransfer()
 								.getSourceUrl()) {
 							if (url.startsWith(getCurrentDirectoryUrl())) {
 								refresh();
@@ -431,7 +437,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 				}
 			}
 		} else if (event instanceof FolderCreatedEvent) {
-			FolderCreatedEvent fevent = (FolderCreatedEvent) event;
+			final FolderCreatedEvent fevent = (FolderCreatedEvent) event;
 
 			if ((getCurrentDirectoryUrl() != null)
 					&& fevent.getUrl().startsWith(getCurrentDirectoryUrl())) {
@@ -478,7 +484,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 			updateThread.interrupt();
 			try {
 				updateThread.join();
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -491,7 +497,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 				setLoading(true);
 
-				GlazedFile oldDir = getCurrentDirectory();
+				final GlazedFile oldDir = getCurrentDirectory();
 				try {
 
 					if (file != null) {
@@ -521,8 +527,8 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 						} else if (em.getAllAvailableSites().contains(url)) {
 							setCurrentDirToSite(url);
 						} else if (em.isMountPointAlias(url)) {
-							String rootUrl = em.getMountPointForAlias(url)
-									.getRootUrl();
+							final String rootUrl = em
+									.getMountPointForAlias(url).getRootUrl();
 							setUrl(rootUrl);
 						} else {
 							setUrl(url);
@@ -534,7 +540,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 						fireNewDirectory();
 					}
 
-				} catch (Exception e) {
+				} catch (final Exception e) {
 
 				} finally {
 
@@ -572,14 +578,15 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 				if (!currentUrlIsStartUrl()) {
 
 					if (em.isMountPointRoot(folder.getRootUrl())) {
-						GlazedFile temp = new GlazedFile(em
+						final GlazedFile temp = new GlazedFile(em
 								.getMountPointForUrl(folder.getRootUrl())
 								.getSite());
 						temp.setParent();
 						currentDirectoryContent.add(temp);
 					} else {
-						GlazedFile temp = new GlazedFile(
-								fm.calculateParentUrl(folder.getRootUrl()), si);
+						final GlazedFile temp = new GlazedFile(
+								FileManager.calculateParentUrl(folder
+										.getRootUrl()), si);
 						temp.setParent();
 						currentDirectoryContent.add(temp);
 					}
@@ -587,8 +594,8 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 			} else {
 				if (!currentUrlIsStartUrl()) {
 					try {
-						File parent = new File(new URI(folder.getRootUrl()))
-								.getParentFile();
+						final File parent = new File(new URI(
+								folder.getRootUrl())).getParentFile();
 
 						GlazedFile tempFile;
 						if (parent == null) {
@@ -599,18 +606,18 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 						}
 						tempFile.setParent();
 						currentDirectoryContent.add(tempFile);
-					} catch (URISyntaxException e) {
+					} catch (final URISyntaxException e) {
 						e.printStackTrace();
 						throw new RuntimeException(e);
 					}
 				}
 			}
 
-			for (DtoFolder fol : folder.getChildrenFolders()) {
+			for (final DtoFolder fol : folder.getChildrenFolders()) {
 				currentDirectoryContent.add(new GlazedFile(fol));
 			}
 
-			for (DtoFile file : folder.getChildrenFiles()) {
+			for (final DtoFile file : folder.getChildrenFiles()) {
 				currentDirectoryContent.add(new GlazedFile(file));
 			}
 
@@ -635,7 +642,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 						GlazedFile.LOCAL_FILESYSTEM));
 			}
 
-			for (String siteName : em.getAllAvailableSites()) {
+			for (final String siteName : em.getAllAvailableSites()) {
 				currentDirectoryContent.add(new GlazedFile(siteName));
 			}
 		} finally {
@@ -655,12 +662,12 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 				currentDirectoryContent.clear();
 
 				if (!currentUrlIsStartUrl()) {
-					GlazedFile temp = new GlazedFile();
+					final GlazedFile temp = new GlazedFile();
 					temp.setParent();
 					currentDirectoryContent.add(temp);
 				}
 
-				for (File root : File.listRoots()) {
+				for (final File root : File.listRoots()) {
 					currentDirectoryContent.add(new GlazedFile(root));
 				}
 
@@ -675,12 +682,12 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 				currentDirectoryContent.clear();
 
 				if (!currentUrlIsStartUrl()) {
-					GlazedFile temp = new GlazedFile();
+					final GlazedFile temp = new GlazedFile();
 					temp.setParent();
 					currentDirectoryContent.add(temp);
 				}
 
-				for (MountPoint mp : em.getMountPointsForSite(sitename)) {
+				for (final MountPoint mp : em.getMountPointsForSite(sitename)) {
 					// if ("true".equalsIgnoreCase(mp
 					// .getProperty(MountPoint.HIDDEN_KEY))) {
 					// continue;
@@ -719,10 +726,14 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 				}
 
 			});
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			myLogger.warn(e);
 		}
 
+	}
+
+	public void setExtensionsToDisplay(String[] extensions) {
+		textMatcherEditor.setExtensionsToDisplay(extensions);
 	}
 
 	private void setLoading(final boolean loading) {
@@ -795,18 +806,9 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 	private void setUrl(String url) throws RemoteFileSystemException {
 
 		setEmptyList();
-		DtoFolder folder = fm.ls(url);
+		final DtoFolder folder = fm.ls(url);
 
 		setCurrentDirToFolder(folder);
 
-	}
-
-	public void displayHiddenFiles(boolean display) {
-		textMatcherEditor.displayHiddenFiles(display);
-
-	}
-
-	public void setExtensionsToDisplay(String[] extensions) {
-		textMatcherEditor.setExtensionsToDisplay(extensions);
 	}
 }

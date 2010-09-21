@@ -59,8 +59,8 @@ public class FileManager {
 	 * @return the datahandler
 	 */
 	public static final DataHandler createDataHandler(File file) {
-		DataSource source = new FileDataSource(file);
-		DataHandler handler = new DataHandler(source);
+		final DataSource source = new FileDataSource(file);
+		final DataHandler handler = new DataHandler(source);
 		return handler;
 	}
 
@@ -85,8 +85,8 @@ public class FileManager {
 			}
 			new URL(inputFile);
 			return inputFile;
-		} catch (MalformedURLException e) {
-			File newFile = new File(inputFile);
+		} catch (final MalformedURLException e) {
+			final File newFile = new File(inputFile);
 			return newFile.toURI().toString();
 		}
 
@@ -101,7 +101,7 @@ public class FileManager {
 	public static long getDownloadFileSizeTreshold() {
 
 		if (downloadTreshold <= 0L) {
-			long treshold = ClientPropertiesManager
+			final long treshold = ClientPropertiesManager
 					.getDownloadFileSizeTresholdInBytes();
 
 			return treshold;
@@ -113,12 +113,12 @@ public class FileManager {
 	public static File getFileFromUriOrPath(String uriOrPath) {
 
 		try {
-			URI uri = new URI(uriOrPath);
+			final URI uri = new URI(uriOrPath);
 			return new File(uri);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			try {
 				return new File(uriOrPath);
-			} catch (Exception e2) {
+			} catch (final Exception e2) {
 				throw new RuntimeException(e2);
 			}
 		}
@@ -137,7 +137,7 @@ public class FileManager {
 		if (isLocal(url)) {
 			return new File(url).getName();
 		} else {
-			String filename = url.substring(url.lastIndexOf("/") + 1);
+			final String filename = url.substring(url.lastIndexOf("/") + 1);
 			return filename;
 		}
 
@@ -151,6 +151,19 @@ public class FileManager {
 
 	static final Logger myLogger = Logger
 			.getLogger(FileManager.class.getName());
+
+	public static String calculateParentUrl(String rootUrl) {
+
+		if (isLocal(rootUrl)) {
+			final File file = getFileFromUriOrPath(rootUrl);
+			return file.getParent().toString();
+		} else {
+			final String result = rootUrl
+					.substring(0, rootUrl.lastIndexOf("/"));
+			return result;
+		}
+
+	}
 
 	/**
 	 * Helper method to check whether the provided url is for a local file or
@@ -187,18 +200,6 @@ public class FileManager {
 		this.serviceInterface = si;
 	}
 
-	public static String calculateParentUrl(String rootUrl) {
-
-		if (isLocal(rootUrl)) {
-			File file = getFileFromUriOrPath(rootUrl);
-			return file.getParent().toString();
-		} else {
-			String result = rootUrl.substring(0, rootUrl.lastIndexOf("/"));
-			return result;
-		}
-
-	}
-
 	public void copyLocalFiles(File sourceFile, File targetFile,
 			boolean overwrite) throws FileTransactionException {
 		if (!sourceFile.exists()) {
@@ -220,7 +221,7 @@ public class FileManager {
 			}
 		}
 
-		File targetFileName = new File(targetFile, sourceFile.getName());
+		final File targetFileName = new File(targetFile, sourceFile.getName());
 		if (!overwrite && targetFileName.exists()) {
 			throw new FileTransactionException(sourceFile.toString(),
 					targetFile.toString(),
@@ -234,7 +235,7 @@ public class FileManager {
 			} else {
 				FileUtils.copyFileToDirectory(sourceFile, targetFile);
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new FileTransactionException(sourceFile.toString(),
 					targetFile.toString(), "Could not copy file.", e);
 		}
@@ -243,8 +244,8 @@ public class FileManager {
 	public void copyLocalFiles(String sourceUrl, String targetDirUrl,
 			boolean overwrite) throws FileTransactionException {
 
-		File sourceFile = getFileFromUriOrPath(sourceUrl);
-		File targetFile = getFileFromUriOrPath(targetDirUrl);
+		final File sourceFile = getFileFromUriOrPath(sourceUrl);
+		final File targetFile = getFileFromUriOrPath(targetDirUrl);
 
 		copyLocalFiles(sourceFile, targetFile, overwrite);
 
@@ -256,7 +257,7 @@ public class FileManager {
 		try {
 			serviceInterface.cp(DtoStringList.fromSingleString(sourceUrl),
 					targetDirUrl, overwrite, true);
-		} catch (RemoteFileSystemException e) {
+		} catch (final RemoteFileSystemException e) {
 			throw new FileTransactionException(sourceUrl, targetDirUrl,
 					"Could not copy remote files.", e);
 		}
@@ -267,7 +268,7 @@ public class FileManager {
 			throws FileTransactionException {
 
 		if (isLocal(targetDirUrl)) {
-			File targetFile = getFileFromUriOrPath(targetDirUrl);
+			final File targetFile = getFileFromUriOrPath(targetDirUrl);
 			copyLocalFiles(sourceFile, targetFile, overwrite);
 		} else {
 			uploadUrlToDirectory(sourceFile.toURI().toString(), targetDirUrl,
@@ -284,7 +285,7 @@ public class FileManager {
 	public void cp(Set<GlazedFile> sources, GlazedFile targetDirectory,
 			boolean overwrite) throws FileTransactionException {
 
-		for (GlazedFile source : sources) {
+		for (final GlazedFile source : sources) {
 			cp(source, targetDirectory, overwrite);
 		}
 
@@ -307,7 +308,7 @@ public class FileManager {
 
 			try {
 				downloadUrl(sourceUrl, targetDirUrl, overwrite);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				e.printStackTrace();
 				throw new FileTransactionException(sourceUrl, targetDirUrl,
 						"Could not write target file.", e);
@@ -335,14 +336,14 @@ public class FileManager {
 		if (isLocal(currentDirectory.getUrl())) {
 
 			url = currentDirectory.getUrl() + File.separator + s;
-			File newFolder = getFileFromUriOrPath(url);
+			final File newFolder = getFileFromUriOrPath(url);
 
 			if (newFolder.exists()) {
 				myLogger.debug("Folder " + newFolder.toString()
 						+ " already exists. Not creating it.");
 				return false;
 			} else {
-				boolean result = newFolder.mkdirs();
+				final boolean result = newFolder.mkdirs();
 				if (result) {
 					EventBus.publish(new FolderCreatedEvent(url));
 				}
@@ -352,12 +353,12 @@ public class FileManager {
 			url = currentDirectory.getUrl() + "/" + s;
 
 			try {
-				boolean result = serviceInterface.mkdir(url);
+				final boolean result = serviceInterface.mkdir(url);
 				if (result) {
 					EventBus.publish(new FolderCreatedEvent(url));
 				}
 				return result;
-			} catch (RemoteFileSystemException e) {
+			} catch (final RemoteFileSystemException e) {
 				return false;
 			}
 		}
@@ -368,9 +369,9 @@ public class FileManager {
 
 		if (FileManager.isLocal(url)) {
 			try {
-				File file = new File(new URI(ensureUriFormat(url)));
+				final File file = new File(new URI(ensureUriFormat(url)));
 				return new GlazedFile(file);
-			} catch (URISyntaxException e) {
+			} catch (final URISyntaxException e) {
 				throw new RuntimeException(e);
 			}
 		} else {
@@ -391,7 +392,7 @@ public class FileManager {
 	public GlazedFile createGlazedFileFromUrl(String url, GlazedFile.Type type) {
 
 		if (FileManager.isLocal(url)) {
-			File file = getFileFromUriOrPath(url);
+			final File file = getFileFromUriOrPath(url);
 			return new GlazedFile(file);
 		} else {
 			return new GlazedFile(url, serviceInterface, type);
@@ -409,7 +410,7 @@ public class FileManager {
 	 */
 	public void deleteFile(String url) throws RemoteFileSystemException {
 
-		File localCacheFile = getLocalCacheFile(url);
+		final File localCacheFile = getLocalCacheFile(url);
 
 		if (localCacheFile.exists()) {
 			FileUtils.deleteQuietly(localCacheFile);
@@ -442,24 +443,24 @@ public class FileManager {
 			return getLocalCacheFile(url);
 		}
 
-		File cacheTargetFile = getLocalCacheFile(url);
+		final File cacheTargetFile = getLocalCacheFile(url);
 		myLogger.debug("Remote file newer than local cache file or not cached yet, downloading new copy.");
-		DataSource source = null;
+		final DataSource source = null;
 		DataHandler handler = null;
 		try {
 
 			handler = serviceInterface.download(url);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			myLogger.error("Could not download file: " + url);
 			throw new FileTransactionException(url, cacheTargetFile.toString(),
 					"Could not download file.", e);
 		}
 
 		try {
-			long lastModified = serviceInterface.lastModified(url);
+			final long lastModified = serviceInterface.lastModified(url);
 			FileHelpers.saveToDisk(handler.getDataSource(), cacheTargetFile);
 			cacheTargetFile.setLastModified(lastModified);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			myLogger.error("Could not save file: " + url.lastIndexOf("/") + 1);
 			throw new FileTransactionException(url, cacheTargetFile.toString(),
 					"Could not save file.", e);
@@ -474,12 +475,12 @@ public class FileManager {
 		DtoFolder source = null;
 		try {
 			source = serviceInterface.ls(url, 0);
-		} catch (RemoteFileSystemException e) {
+		} catch (final RemoteFileSystemException e) {
 			throw new FileTransactionException(url, null,
 					"Can't list source folder.", e);
 		}
 
-		List<String> files = source.listOfAllFilesUnderThisFolder();
+		final List<String> files = source.listOfAllFilesUnderThisFolder();
 		final Map<String, Exception> exceptions = Collections
 				.synchronizedMap(new HashMap<String, Exception>());
 
@@ -489,12 +490,12 @@ public class FileManager {
 
 		for (final String file : files) {
 
-			Thread downloadThread = new Thread() {
+			final Thread downloadThread = new Thread() {
 				@Override
 				public void run() {
 					try {
 						downloadFile(file);
-					} catch (FileTransactionException e) {
+					} catch (final FileTransactionException e) {
 						exceptions.put(file, e);
 					}
 				}
@@ -506,7 +507,7 @@ public class FileManager {
 
 		try {
 			executor1.awaitTermination(10, TimeUnit.HOURS);
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			executor1.shutdownNow();
 			throw new FileTransactionException(url, null,
 					"Folder download interrupted", e);
@@ -546,7 +547,8 @@ public class FileManager {
 	public File downloadUrl(String url, String target, boolean overwrite)
 			throws IOException, FileTransactionException {
 
-		File targetFile = getFileFromUriOrPath(target + "/" + getFilename(url));
+		final File targetFile = getFileFromUriOrPath(target + "/"
+				+ getFilename(url));
 		if (targetFile.exists() && targetFile.isDirectory()) {
 			if (!targetFile.canWrite()) {
 				throw new IOException("Can't write to target: "
@@ -564,7 +566,7 @@ public class FileManager {
 		boolean isFolder = false;
 		try {
 			isFolder = serviceInterface.isFolder(url);
-		} catch (RemoteFileSystemException e) {
+		} catch (final RemoteFileSystemException e) {
 			throw new FileTransactionException(url, target,
 					"Can't determine whether source is file or folder.", e);
 		}
@@ -579,7 +581,7 @@ public class FileManager {
 			FileUtils.copyDirectory(cacheFile, targetFile);
 		} else {
 			cacheFile = downloadFile(url);
-			File newFile = targetFile;
+			final File newFile = targetFile;
 			FileUtils.copyFile(cacheFile, newFile);
 		}
 
@@ -594,6 +596,13 @@ public class FileManager {
 			return serviceInterface.fileExists(file);
 		}
 
+	}
+
+	public long getFileSize(String url) throws RemoteFileSystemException {
+
+		final Long fs = serviceInterface.getFileSize(url);
+		System.out.println("Filesize " + url + ": " + fs);
+		return fs;
 	}
 
 	public File getLocalCacheFile(final String url) {
@@ -616,7 +625,7 @@ public class FileManager {
 	public boolean isBiggerThanTreshold(String url)
 			throws RemoteFileSystemException {
 
-		long remoteFileSize = serviceInterface.getFileSize(url);
+		final long remoteFileSize = serviceInterface.getFileSize(url);
 
 		if (remoteFileSize > getDownloadFileSizeTreshold()) {
 			return true;
@@ -626,6 +635,39 @@ public class FileManager {
 
 	}
 
+	public boolean isFile(String file) {
+		if (isLocal(file)) {
+			return new File(file).isFile();
+		} else {
+			try {
+				if (serviceInterface.fileExists(file)) {
+					return !serviceInterface.isFolder(file);
+				} else {
+					return false;
+				}
+			} catch (final RemoteFileSystemException e) {
+				return false;
+			}
+		}
+	}
+
+	public boolean isFolder(String file) {
+
+		if (isLocal(file)) {
+			return new File(file).isDirectory();
+		} else {
+			try {
+				if (serviceInterface.fileExists(file)) {
+					return serviceInterface.isFolder(file);
+				} else {
+					return false;
+				}
+			} catch (final RemoteFileSystemException e) {
+				return false;
+			}
+		}
+	}
+
 	public List<String> listAllChildrenFilesOfRemoteFolder(String folderUrl)
 			throws RemoteFileSystemException {
 
@@ -633,7 +675,7 @@ public class FileManager {
 			throw new IllegalArgumentException("Specified url is not a folder.");
 		}
 
-		DtoFolder folder = serviceInterface.ls(folderUrl, 0);
+		final DtoFolder folder = serviceInterface.ls(folderUrl, 0);
 
 		return folder.listOfAllFilesUnderThisFolder();
 	}
@@ -656,7 +698,7 @@ public class FileManager {
 
 			try {
 				return serviceInterface.ls(url, recursionLevel);
-			} catch (RemoteFileSystemException e) {
+			} catch (final RemoteFileSystemException e) {
 
 				throw e;
 			}
@@ -665,8 +707,8 @@ public class FileManager {
 
 	public boolean needsDownloading(String url) {
 
-		File cacheTargetFile = getLocalCacheFile(url);
-		File cacheTargetParentFile = cacheTargetFile.getParentFile();
+		final File cacheTargetFile = getLocalCacheFile(url);
+		final File cacheTargetParentFile = cacheTargetFile.getParentFile();
 
 		if (!cacheTargetFile.exists()) {
 			return true;
@@ -675,7 +717,7 @@ public class FileManager {
 		long lastModified = -1;
 		try {
 			lastModified = serviceInterface.lastModified(url);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException(
 					"Could not get last modified time of file: " + url, e);
@@ -683,7 +725,7 @@ public class FileManager {
 
 		if (cacheTargetFile.exists()) {
 			// check last modified date
-			long local_last_modified = cacheTargetFile.lastModified();
+			final long local_last_modified = cacheTargetFile.lastModified();
 			myLogger.debug("local file timestamp:\t" + local_last_modified);
 			myLogger.debug("remote file timestamp:\t" + lastModified);
 			if (local_last_modified >= lastModified) {
@@ -735,7 +777,7 @@ public class FileManager {
 						}
 					}
 
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					throw new FileTransactionException(
 							file.toString(),
 							targetFile,
@@ -746,7 +788,7 @@ public class FileManager {
 				myLogger.debug("Uploading local file: " + file.toString()
 						+ " to: " + targetFile);
 
-				DataHandler handler = createDataHandler(file);
+				final DataHandler handler = createDataHandler(file);
 				String filetransferHandle = null;
 				try {
 					myLogger.info("Uploading file " + file.getName() + "...");
@@ -754,7 +796,7 @@ public class FileManager {
 							targetFile);
 					myLogger.info("Upload of file " + file.getName()
 							+ " successful.");
-				} catch (Exception e1) {
+				} catch (final Exception e1) {
 					try {
 						// try again
 						myLogger.info("Uploading file " + file.getName()
@@ -765,7 +807,7 @@ public class FileManager {
 								targetFile + "/" + file.getName());
 						myLogger.info("Upload of file " + file.getName()
 								+ " successful.");
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						myLogger.info("Upload of file " + file.getName()
 								+ " failed: " + e1.getLocalizedMessage());
 						myLogger.error("File upload failed: "
@@ -776,7 +818,7 @@ public class FileManager {
 				}
 				// successful, no retry necessary
 				break;
-			} catch (FileTransactionException e) {
+			} catch (final FileTransactionException e) {
 				lastException = e;
 			}
 		}
@@ -828,7 +870,8 @@ public class FileManager {
 					targetDirectory, "Source is no folder.", null);
 		}
 
-		Collection<File> allFiles = FileUtils.listFiles(folder, null, true);
+		final Collection<File> allFiles = FileUtils.listFiles(folder, null,
+				true);
 		final Map<String, Exception> errors = Collections
 				.synchronizedMap(new HashMap<String, Exception>());
 
@@ -836,11 +879,11 @@ public class FileManager {
 				.newFixedThreadPool(ClientPropertiesManager
 						.getConcurrentUploadThreads());
 
-		String basePath = folder.getParentFile().getPath();
+		final String basePath = folder.getParentFile().getPath();
 		for (final File file : allFiles) {
 
-			String filePath = file.getPath();
-			String deltaPathTemp = filePath.substring(basePath.length());
+			final String filePath = file.getPath();
+			final String deltaPathTemp = filePath.substring(basePath.length());
 
 			final String deltaPath;
 			if (deltaPathTemp.startsWith("/") || deltaPathTemp.startsWith("\\")) {
@@ -848,13 +891,13 @@ public class FileManager {
 			} else {
 				deltaPath = deltaPathTemp;
 			}
-			Thread uploadThread = new Thread() {
+			final Thread uploadThread = new Thread() {
 				@Override
 				public void run() {
 					try {
 						uploadFile(file, targetDirectory + "/" + deltaPath,
 								overwrite);
-					} catch (FileTransactionException e) {
+					} catch (final FileTransactionException e) {
 						errors.put(file.toString(), e);
 					}
 				}
@@ -868,7 +911,7 @@ public class FileManager {
 
 		try {
 			executor1.awaitTermination(10, TimeUnit.HOURS);
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			executor1.shutdownNow();
 			throw new FileTransactionException(folder.toString(),
 					targetDirectory, "File upload interrupted", e);
@@ -906,9 +949,9 @@ public class FileManager {
 		// checking whether folder exists and is folder
 		try {
 
-			DtoJob jobdir = serviceInterface.getJob(job);
+			final DtoJob jobdir = serviceInterface.getJob(job);
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new FileTransactionException(file.toString(), job,
 					"Job does not exists on the backend.: ", e);
 		}
@@ -916,12 +959,13 @@ public class FileManager {
 		myLogger.debug("Uploading input file: " + file.toString()
 				+ " for job: " + job);
 
-		DataHandler handler = createDataHandler(file);
+		final DataHandler handler = createDataHandler(file);
 		try {
 			myLogger.info("Uploading file " + file.getName() + "...");
 			serviceInterface.uploadInputFile(job, handler, file.getName());
 
-			StatusObject so = new StatusObject(serviceInterface, file.getName());
+			final StatusObject so = new StatusObject(serviceInterface,
+					file.getName());
 			so.waitForActionToFinish(4, true, false);
 
 			if (so.getStatus().isFailed()) {
@@ -931,7 +975,7 @@ public class FileManager {
 
 			myLogger.info("Upload of input file " + file.getName()
 					+ " successful.");
-		} catch (Exception e1) {
+		} catch (final Exception e1) {
 			try {
 				// try again
 				myLogger.info("Uploading file " + file.getName() + "...");
@@ -941,7 +985,7 @@ public class FileManager {
 
 				myLogger.info("Upload of file " + file.getName()
 						+ " successful.");
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				myLogger.info("Upload of inpu file " + file.getName()
 						+ " failed: " + e1.getLocalizedMessage());
 				myLogger.error("Inputfile upload failed: "
@@ -956,7 +1000,7 @@ public class FileManager {
 	public final void uploadInputFile(final String uriOrPath, final String job)
 			throws FileTransactionException {
 
-		File file = getFileFromUriOrPath(uriOrPath);
+		final File file = getFileFromUriOrPath(uriOrPath);
 
 		if (file.isDirectory()) {
 			throw new FileTransactionException(uriOrPath, null,
@@ -985,7 +1029,7 @@ public class FileManager {
 			final String targetDirectory, boolean overwrite)
 			throws FileTransactionException {
 
-		File file = getFileFromUriOrPath(uriOrPath);
+		final File file = getFileFromUriOrPath(uriOrPath);
 
 		if (!file.exists()) {
 			throw new FileTransactionException(file.toString(),
@@ -1003,14 +1047,15 @@ public class FileManager {
 		try {
 			if (!serviceInterface.fileExists(targetDirectory)) {
 				try {
-					boolean success = serviceInterface.mkdir(targetDirectory);
+					final boolean success = serviceInterface
+							.mkdir(targetDirectory);
 
 					if (!success) {
 						throw new FileTransactionException(file.toURL()
 								.toString(), targetDirectory,
 								"Could not create target directory.", null);
 					}
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					throw new FileTransactionException(file.toURL().toString(),
 							targetDirectory,
 							"Could not create target directory.", e);
@@ -1022,7 +1067,7 @@ public class FileManager {
 								.toString(), targetDirectory,
 								"Can't upload file. Target is a file.", null);
 					}
-				} catch (Exception e2) {
+				} catch (final Exception e2) {
 					myLogger.debug("Could not access target directory.");
 
 					throw new FileTransactionException(file.toURL().toString(),
@@ -1031,7 +1076,7 @@ public class FileManager {
 				}
 			}
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new FileTransactionException(file.toString(),
 					targetDirectory,
 					"Could not determine whether target directory exists: ", e);
@@ -1053,8 +1098,8 @@ public class FileManager {
 
 		} else {
 
-			File cacheTargetFile = getLocalCacheFile(url);
-			File cacheTargetParentFile = cacheTargetFile.getParentFile();
+			final File cacheTargetFile = getLocalCacheFile(url);
+			final File cacheTargetParentFile = cacheTargetFile.getParentFile();
 
 			if (!cacheTargetParentFile.exists()) {
 				if (!cacheTargetParentFile.mkdirs()) {
@@ -1069,13 +1114,13 @@ public class FileManager {
 			long lastModified = -1;
 			try {
 				lastModified = serviceInterface.lastModified(url);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				return false;
 			}
 
 			if (cacheTargetFile.exists()) {
 				// check last modified date
-				long local_last_modified = cacheTargetFile.lastModified();
+				final long local_last_modified = cacheTargetFile.lastModified();
 				myLogger.debug("local file timestamp:\t" + local_last_modified);
 				myLogger.debug("remote file timestamp:\t" + lastModified);
 				if (local_last_modified >= lastModified) {
@@ -1086,45 +1131,5 @@ public class FileManager {
 
 			return false;
 		}
-	}
-
-	public boolean isFile(String file) {
-		if (isLocal(file)) {
-			return new File(file).isFile();
-		} else {
-			try {
-				if (serviceInterface.fileExists(file)) {
-					return !serviceInterface.isFolder(file);
-				} else {
-					return false;
-				}
-			} catch (RemoteFileSystemException e) {
-				return false;
-			}
-		}
-	}
-
-	public boolean isFolder(String file) {
-
-		if (isLocal(file)) {
-			return new File(file).isDirectory();
-		} else {
-			try {
-				if (serviceInterface.fileExists(file)) {
-					return serviceInterface.isFolder(file);
-				} else {
-					return false;
-				}
-			} catch (RemoteFileSystemException e) {
-				return false;
-			}
-		}
-	}
-
-	public long getFileSize(String url) throws RemoteFileSystemException {
-
-		Long fs = serviceInterface.getFileSize(url);
-		System.out.println("Filesize " + url + ": " + fs);
-		return fs;
 	}
 }

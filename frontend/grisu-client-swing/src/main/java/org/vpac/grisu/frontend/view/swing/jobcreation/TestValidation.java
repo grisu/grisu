@@ -15,9 +15,9 @@ public class TestValidation {
 	 */
 	public static void main(String[] args) {
 		// This is our actual UI
-		JPanel inner = new JPanel();
-		JLabel lbl = new JLabel("Enter a URL");
-		JTextField f = new JTextField();
+		final JPanel inner = new JPanel();
+		final JLabel lbl = new JLabel("Enter a URL");
+		final JTextField f = new JTextField();
 		f.setColumns(40);
 
 		// Setting the component name is important - it is used in
@@ -29,9 +29,9 @@ public class TestValidation {
 
 		// Create a ValidationPanel - this is a panel that will show
 		// any problem with the input at the bottom with an icon
-		ValidationPanel panel = new ValidationPanel();
+		final ValidationPanel panel = new ValidationPanel();
 		// panel.setInnerComponent(inner);
-		ValidationGroup group = panel.getValidationGroup();
+		final ValidationGroup group = panel.getValidationGroup();
 
 		// This is all we do to validate the URL:
 		group.add(f, Validators.REQUIRE_NON_EMPTY_STRING,

@@ -28,13 +28,13 @@ public class ClientSideResourceInformation implements ResourceInformation {
 	public Set<String> distillSitesFromSubmissionLocations(
 			Set<String> submissionLocations) {
 
-		Set<String> temp = new TreeSet<String>();
-		for (String subLoc : submissionLocations) {
+		final Set<String> temp = new TreeSet<String>();
+		for (final String subLoc : submissionLocations) {
 			String site = null;
 			try {
 				site = getSite(subLoc);
 				temp.add(site);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				myLogger.error("Could not get site for submissionlocation: "
 						+ subLoc + ", ignoring it. Error: "
 						+ e.getLocalizedMessage());
@@ -46,8 +46,8 @@ public class ClientSideResourceInformation implements ResourceInformation {
 	public Set<String> filterSubmissionLocationsForSite(String site,
 			Set<String> submissionlocations) {
 
-		Set<String> temp = new TreeSet<String>();
-		for (String subLoc : submissionlocations) {
+		final Set<String> temp = new TreeSet<String>();
+		for (final String subLoc : submissionlocations) {
 			if (site.equals(getSite(subLoc))) {
 				temp.add(subLoc);
 			}
@@ -56,8 +56,8 @@ public class ClientSideResourceInformation implements ResourceInformation {
 	}
 
 	public Set<String> getAllAvailableSites(String fqan) {
-		Set<String> temp = new TreeSet<String>();
-		for (String subLoc : getAllAvailableSubmissionLocations(fqan)) {
+		final Set<String> temp = new TreeSet<String>();
+		for (final String subLoc : getAllAvailableSubmissionLocations(fqan)) {
 			temp.add(getSite(subLoc));
 		}
 		return temp;
@@ -74,7 +74,7 @@ public class ClientSideResourceInformation implements ResourceInformation {
 	public String getRecommendedStagingFileSystemForSubmissionLocation(
 			String subLoc) {
 
-		List<String> temp = getStagingFilesystemsForSubmissionLocation(subLoc);
+		final List<String> temp = getStagingFilesystemsForSubmissionLocation(subLoc);
 		if (temp != null && temp.size() > 0) {
 			return temp.get(0);
 		} else {

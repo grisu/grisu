@@ -38,7 +38,7 @@ public class DtoJobs {
 	}
 
 	public DtoJob retrieveJob(String jobname) {
-		for (DtoJob job : allJobs) {
+		for (final DtoJob job : allJobs) {
 			if (jobname
 					.equals(job.propertiesAsMap().get(Constants.JOBNAME_KEY))) {
 				return job;

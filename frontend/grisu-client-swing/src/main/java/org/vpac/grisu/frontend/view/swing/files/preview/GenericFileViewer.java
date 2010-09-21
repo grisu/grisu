@@ -27,28 +27,28 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 
 	private static FileViewer createViewerPanel(File currentLocalCacheFile) {
 
-		Magic parser = new Magic();
+		final Magic parser = new Magic();
 		MagicMatch match = null;
 		try {
 			match = Magic.getMagicMatch(currentLocalCacheFile, true);
 			System.out.println(match.getMimeType());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 
-		Set<String> viewers = findViewers();
-		for (String f : viewers) {
+		final Set<String> viewers = findViewers();
+		for (final String f : viewers) {
 
 			try {
-				FileViewer viewerClass = (FileViewer) (Class.forName(f)
+				final FileViewer viewerClass = (FileViewer) (Class.forName(f)
 						.newInstance());
 
-				for (String t : viewerClass.getSupportedMimeTypes()) {
+				for (final String t : viewerClass.getSupportedMimeTypes()) {
 					if (match.getMimeType().contains(t)) {
 						return viewerClass;
 					}
 				}
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 
@@ -77,7 +77,7 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 		if (viewers == null) {
 			viewers = new HashSet<String>();
 
-			String pckgname = "org.vpac.grisu.frontend.view.swing.files.preview.fileViewers";
+			final String pckgname = "org.vpac.grisu.frontend.view.swing.files.preview.fileViewers";
 			String name = new String(pckgname);
 			if (!name.startsWith("/")) {
 				name = "/" + name;
@@ -85,34 +85,34 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 			name = name.replace('.', '/');
 
 			// Get a File object for the package
-			URL url = GenericFileViewer.class.getResource(name);
-			File directory = new File(url.getFile());
+			final URL url = GenericFileViewer.class.getResource(name);
+			final File directory = new File(url.getFile());
 			// New code
 			// ======
 			if (directory.exists()) {
 				// Get the list of the files contained in the package
-				String[] files = directory.list();
-				for (String file : files) {
+				final String[] files = directory.list();
+				for (final String file : files) {
 
 					// we are only interested in .class files
 					if (file.endsWith(".class")) {
 						// removes the .class extension
-						String classname = file.substring(0, file.length() - 6);
+						final String classname = file.substring(0,
+								file.length() - 6);
 						try {
 							// Try to create an instance of the object
-							Object o = Class
-									.forName(pckgname + "." + classname)
-									.newInstance();
+							final Object o = Class.forName(
+									pckgname + "." + classname).newInstance();
 							if (o instanceof FileViewer) {
 								viewers.add(pckgname + "." + classname);
 							}
-						} catch (ClassNotFoundException cnfex) {
+						} catch (final ClassNotFoundException cnfex) {
 							System.err.println(cnfex);
-						} catch (InstantiationException iex) {
+						} catch (final InstantiationException iex) {
 							// We try to instantiate an interface
 							// or an object that does not have a
 							// default constructor
-						} catch (IllegalAccessException iaex) {
+						} catch (final IllegalAccessException iaex) {
 							// The class is not public
 						}
 					}
@@ -122,10 +122,8 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 
 		if ((viewers == null) || (viewers.size() == 0)) {
 			viewers = new HashSet<String>();
-			viewers
-					.add("org.vpac.grisu.frontend.view.swing.files.preview.fileViewers.PlainTextFileViewer");
-			viewers
-					.add("org.vpac.grisu.frontend.view.swing.files.preview.fileViewers.ImageFileViewer");
+			viewers.add("org.vpac.grisu.frontend.view.swing.files.preview.fileViewers.PlainTextFileViewer");
+			viewers.add("org.vpac.grisu.frontend.view.swing.files.preview.fileViewers.ImageFileViewer");
 		}
 		return viewers;
 	}
@@ -180,7 +178,7 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 
 			@Override
 			public void run() {
-				CardLayout cl = (CardLayout) (getLayout());
+				final CardLayout cl = (CardLayout) (getLayout());
 				cl.show(GenericFileViewer.this, EMPTY_PANEL);
 
 				revalidate();
@@ -209,9 +207,9 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 					currentLocalCacheFile = fm.downloadFile(file.getUrl());
 				}
 
-			} catch (RemoteFileSystemException e) {
+			} catch (final RemoteFileSystemException e) {
 				e.printStackTrace();
-			} catch (FileTransactionException e) {
+			} catch (final FileTransactionException e) {
 				e.printStackTrace();
 			}
 		}
@@ -232,9 +230,9 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 					viewer.setFile(currentGlazedFile, currentLocalCacheFile);
 					add(viewer.getPanel(), currentLocalCacheFile.toString());
 
-					CardLayout cl = (CardLayout) (getLayout());
-					cl.show(GenericFileViewer.this, currentLocalCacheFile
-							.toString());
+					final CardLayout cl = (CardLayout) (getLayout());
+					cl.show(GenericFileViewer.this,
+							currentLocalCacheFile.toString());
 
 					revalidate();
 				}

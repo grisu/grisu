@@ -5,10 +5,10 @@ import org.vpac.grisu.frontend.model.job.JobObject;
 
 public class JobStatusEvent {
 
-	private int oldStatus;
-	private int newStatus;
+	private final int oldStatus;
+	private final int newStatus;
 
-	private JobObject job;
+	private final JobObject job;
 
 	public JobStatusEvent(JobObject job, int oldStatus, int newStatus) {
 		this.job = job;
@@ -30,8 +30,10 @@ public class JobStatusEvent {
 
 	@Override
 	public String toString() {
-		return "Job status changed from \""+JobConstants.translateStatus(oldStatus) + "\" to \"" +
-				JobConstants.translateStatus(newStatus)+"\" for job "+job.getJobname();
+		return "Job status changed from \""
+				+ JobConstants.translateStatus(oldStatus) + "\" to \""
+				+ JobConstants.translateStatus(newStatus) + "\" for job "
+				+ job.getJobname();
 	}
-	
+
 }

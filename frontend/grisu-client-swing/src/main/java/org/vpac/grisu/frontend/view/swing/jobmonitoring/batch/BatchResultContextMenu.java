@@ -13,6 +13,7 @@ import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
@@ -43,15 +44,15 @@ public class BatchResultContextMenu extends JPopupMenu implements
 
 		public void actionPerformed(ActionEvent e) {
 
-			List<String> temp = new LinkedList<String>();
-			for (GlazedFile file : fileListPanel.getSelectedFiles()) {
+			final List<String> temp = new LinkedList<String>();
+			for (final GlazedFile file : fileListPanel.getSelectedFiles()) {
 				temp.add(file.getUrl());
 			}
 
-			String selection = StringUtils.join(temp, " ");
+			final String selection = StringUtils.join(temp, " ");
 
-			StringSelection data = new StringSelection(selection);
-			Clipboard clipboard = Toolkit.getDefaultToolkit()
+			final StringSelection data = new StringSelection(selection);
+			final Clipboard clipboard = Toolkit.getDefaultToolkit()
 					.getSystemClipboard();
 			clipboard.setContents(data, data);
 
@@ -66,31 +67,32 @@ public class BatchResultContextMenu extends JPopupMenu implements
 
 		public void actionPerformed(ActionEvent e) {
 
-			Set<GlazedFile> files = fileListPanel.getSelectedFiles();
+			final Set<GlazedFile> files = fileListPanel.getSelectedFiles();
 			if (files == null || files.size() <= 0) {
 				return;
 			}
 
-			FolderChooser _folderChooser = new FolderChooser(_currentFolder);
+			final FolderChooser _folderChooser = new FolderChooser(
+					_currentFolder);
 			// _folderChooser.setCurrentDirectory(_currentFolder);
 			_folderChooser.setRecentList(_recentList);
 			_folderChooser.setFileHidingEnabled(true);
-			int result = _folderChooser.showOpenDialog(SwingUtilities
+			final int result = _folderChooser.showOpenDialog(SwingUtilities
 					.getRootPane(fileListPanel.getPanel()));
 
-			if (result == FolderChooser.APPROVE_OPTION) {
+			if (result == JFileChooser.APPROVE_OPTION) {
 				_currentFolder = _folderChooser.getSelectedFile();
 				if (_recentList.contains(_currentFolder.toString())) {
 					_recentList.remove(_currentFolder.toString());
 				}
 				_recentList.add(0, _currentFolder.toString());
-				File selectedFile = _folderChooser.getSelectedFile();
+				final File selectedFile = _folderChooser.getSelectedFile();
 				if (selectedFile != null) {
-					Set<String> urls = new HashSet<String>();
-					for (GlazedFile file : files) {
+					final Set<String> urls = new HashSet<String>();
+					for (final GlazedFile file : files) {
 						urls.add(file.getUrl());
 					}
-					FileTransaction ft = new FileTransaction(fm, urls,
+					final FileTransaction ft = new FileTransaction(fm, urls,
 							selectedFile.toURI().toString(), true);
 					ftm.addFileTransfer(ft);
 				} else {

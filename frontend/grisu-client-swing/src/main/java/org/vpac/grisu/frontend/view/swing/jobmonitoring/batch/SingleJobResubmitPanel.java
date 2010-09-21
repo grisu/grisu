@@ -34,29 +34,25 @@ public class SingleJobResubmitPanel extends JPanel {
 	/**
 	 * Create the panel.
 	 */
-	public SingleJobResubmitPanel(BatchJobObject bj, Set<String> jobnamesToResubmit) {
+	public SingleJobResubmitPanel(BatchJobObject bj,
+			Set<String> jobnamesToResubmit) {
 		this.bj = bj;
 		this.jobnamesToResubmit = jobnamesToResubmit;
 		setLayout(new FormLayout(new ColumnSpec[] {
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 
 		buttonGroup = new ButtonGroup();
 
-		for ( String subLoc : bj.getCurrentlyUsedSubmissionLocations() ) {
+		for (final String subLoc : bj.getCurrentlyUsedSubmissionLocations()) {
 			manualModel.addElement(subLoc);
 		}
 
@@ -67,9 +63,10 @@ public class SingleJobResubmitPanel extends JPanel {
 		getRdbtnResubmitToAll().setSelected(true);
 
 	}
+
 	private void enableManualSelection(boolean enable) {
 
-		if ( enable ) {
+		if (enable) {
 			getCheckBoxList().setEnabled(true);
 		} else {
 			getCheckBoxList().setEnabled(false);
@@ -83,21 +80,26 @@ public class SingleJobResubmitPanel extends JPanel {
 		}
 		return checkBoxList;
 	}
+
 	private JRadioButton getRdbtnManuallySelectResubmitlocations() {
 		if (rdbtnManuallySelectResubmitlocations == null) {
-			rdbtnManuallySelectResubmitlocations = new JRadioButton("Manually select resubmit-locations:");
-			rdbtnManuallySelectResubmitlocations.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					enableManualSelection(true);
-				}
-			});
+			rdbtnManuallySelectResubmitlocations = new JRadioButton(
+					"Manually select resubmit-locations:");
+			rdbtnManuallySelectResubmitlocations
+					.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							enableManualSelection(true);
+						}
+					});
 			buttonGroup.add(rdbtnManuallySelectResubmitlocations);
 		}
 		return rdbtnManuallySelectResubmitlocations;
 	}
+
 	private JRadioButton getRdbtnResubmitToAll() {
 		if (rdbtnResubmitToAll == null) {
-			rdbtnResubmitToAll = new JRadioButton("Resubmit to all possible locations");
+			rdbtnResubmitToAll = new JRadioButton(
+					"Resubmit to all possible locations");
 			rdbtnResubmitToAll.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					enableManualSelection(false);
@@ -110,12 +112,13 @@ public class SingleJobResubmitPanel extends JPanel {
 
 	public Set<String> getSubmissionLocations() {
 
-		if ( getRdbtnResubmitToAll().isSelected() ) {
+		if (getRdbtnResubmitToAll().isSelected()) {
 			return bj.getCurrentlyUsedSubmissionLocations();
 		} else {
-			HashSet<String> subLocs = new HashSet<String>();
-			for ( Object subLoc : getCheckBoxList().getCheckBoxListSelectedValues() ) {
-				subLocs.add((String)subLoc);
+			final HashSet<String> subLocs = new HashSet<String>();
+			for (final Object subLoc : getCheckBoxList()
+					.getCheckBoxListSelectedValues()) {
+				subLocs.add((String) subLoc);
 			}
 			return subLocs;
 		}

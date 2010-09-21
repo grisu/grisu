@@ -30,11 +30,12 @@ public class BaseHibernateDAO implements IBaseHibernateDAO {
 	public final Session getCurrentSession() {
 		try {
 
-			//TODO disable that check for mysql
+			// TODO disable that check for mysql
 			HibernateSessionFactory.ensureDerbyServerIsUp();
 
-			return HibernateSessionFactory.getSessionFactory().getCurrentSession();
-		} catch (Exception e) {
+			return HibernateSessionFactory.getSessionFactory()
+					.getCurrentSession();
+		} catch (final Exception e) {
 			e.printStackTrace();
 			return null;
 		}

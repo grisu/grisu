@@ -7,25 +7,23 @@ import java.beans.PropertyChangeListener;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.swing.JDialog;
 import javax.swing.JMenuItem;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.view.swing.jobmonitoring.single.SimpleSingleJobsGrid;
 
-public class BatchJobSubJobsGrid extends SimpleSingleJobsGrid implements PropertyChangeListener {
+public class BatchJobSubJobsGrid extends SimpleSingleJobsGrid implements
+		PropertyChangeListener {
 
 	private static final long serialVersionUID = -1811967498034047862L;
-
-
 
 	private final BatchJobObject bj;
 
 	private JMenuItem mntmRestartSelectedJobs;
-
 
 	public BatchJobSubJobsGrid(ServiceInterface si, BatchJobObject bj) {
 		super(si, bj.getJobs());
@@ -34,7 +32,7 @@ public class BatchJobSubJobsGrid extends SimpleSingleJobsGrid implements Propert
 
 		getPopupMenu().add(getMntmRestartSelectedJobs());
 
-		if ( this.bj.isResubmitting() ) {
+		if (this.bj.isResubmitting()) {
 			SwingUtilities.invokeLater(new Thread() {
 				@Override
 				public void run() {
@@ -51,14 +49,15 @@ public class BatchJobSubJobsGrid extends SimpleSingleJobsGrid implements Propert
 			mntmRestartSelectedJobs.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 
-					Set<String> selectedJobs = new HashSet<String>();
+					final Set<String> selectedJobs = new HashSet<String>();
 
-					for ( JobObject job : getSelectedJobs() ) {
+					for (final JobObject job : getSelectedJobs()) {
 						selectedJobs.add(job.getJobname());
 					}
 
-					SingleJobResubmitDialog dialog = new SingleJobResubmitDialog(bj, selectedJobs);
-					dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+					final SingleJobResubmitDialog dialog = new SingleJobResubmitDialog(
+							bj, selectedJobs);
+					dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 					dialog.setVisible(true);
 
 				}
@@ -82,8 +81,8 @@ public class BatchJobSubJobsGrid extends SimpleSingleJobsGrid implements Propert
 
 	public void propertyChange(PropertyChangeEvent evt) {
 
-		if ( BatchJobObject.RESUBMITTING.equals(evt.getPropertyName()) ) {
-			if ( (Boolean)evt.getNewValue() ) {
+		if (BatchJobObject.RESUBMITTING.equals(evt.getPropertyName())) {
+			if ((Boolean) evt.getNewValue()) {
 				getTable().setEnabled(false);
 			} else {
 				getTable().setEnabled(true);
@@ -102,8 +101,5 @@ public class BatchJobSubJobsGrid extends SimpleSingleJobsGrid implements Propert
 		getTable().getColumnExt("Status").setVisible(true);
 
 	}
-
-
-
 
 }

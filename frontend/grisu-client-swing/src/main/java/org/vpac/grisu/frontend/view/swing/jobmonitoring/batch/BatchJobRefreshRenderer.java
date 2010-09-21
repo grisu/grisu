@@ -17,7 +17,8 @@ public class BatchJobRefreshRenderer extends DefaultTableCellRenderer implements
 	private static SpinningDial loading = new SpinningDial(16, 16);
 
 	private static File findFile() {
-		for (File file : new File(System.getProperty("user.home")).listFiles()) {
+		for (final File file : new File(System.getProperty("user.home"))
+				.listFiles()) {
 			if (file.isFile()) {
 				return file;
 			}
@@ -41,7 +42,7 @@ public class BatchJobRefreshRenderer extends DefaultTableCellRenderer implements
 
 		this.setSize(24, 24);
 
-		Boolean isRefreshing = (Boolean) value;
+		final Boolean isRefreshing = (Boolean) value;
 		if (isRefreshing) {
 			this.setIcon(loading);
 		} else {

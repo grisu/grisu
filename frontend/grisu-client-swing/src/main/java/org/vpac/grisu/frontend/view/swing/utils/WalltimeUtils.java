@@ -7,10 +7,10 @@ public class WalltimeUtils {
 		int amount = -1;
 		try {
 			amount = Integer.parseInt(humanReadable[0]);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException("Could not parse string.", e);
 		}
-		String unit = humanReadable[1];
+		final String unit = humanReadable[1];
 
 		if ("minutes".equals(unit)) {
 			return amount * 60;
@@ -28,9 +28,9 @@ public class WalltimeUtils {
 	public static String[] convertSecondsInHumanReadableString(
 			int walltimeInSeconds) {
 
-		int days = walltimeInSeconds / (3600 * 24);
-		int hours = (walltimeInSeconds - (days * 3600 * 24)) / 3600;
-		int minutes = (walltimeInSeconds - ((days * 3600 * 24) + (hours * 3600))) / 60;
+		final int days = walltimeInSeconds / (3600 * 24);
+		final int hours = (walltimeInSeconds - (days * 3600 * 24)) / 3600;
+		final int minutes = (walltimeInSeconds - ((days * 3600 * 24) + (hours * 3600))) / 60;
 
 		if ((days > 0) && (hours == 0) && (minutes == 0)) {
 			return new String[] { new Integer(days).toString(), "days" };

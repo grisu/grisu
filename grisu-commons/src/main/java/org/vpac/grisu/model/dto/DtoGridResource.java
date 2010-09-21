@@ -106,7 +106,7 @@ public class DtoGridResource implements GridResource {
 	 */
 	private boolean isDesiredVersionInstalled;
 
-        private String gramVersion;
+	private String gramVersion;
 
 	public DtoGridResource() {
 
@@ -131,7 +131,7 @@ public class DtoGridResource implements GridResource {
 		this.totalJobs = gr.getTotalJobs();
 		this.waitingJobs = gr.getWaitingJobs();
 		this.isDesiredVersionInstalled = gr.isDesiredSoftwareVersionInstalled();
-                this.gramVersion = gr.getGRAMVersion();
+		this.gramVersion = gr.getGRAMVersion();
 	}
 
 	public int compareTo(GridResource o) {
@@ -146,6 +146,7 @@ public class DtoGridResource implements GridResource {
 
 	}
 
+	@Override
 	public boolean equals(Object o) {
 
 		if (o == null) {
@@ -156,14 +157,14 @@ public class DtoGridResource implements GridResource {
 
 		try {
 			anotherResource = (GridResource) o;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return false;
 		}
 
 		if (queueName.equals(anotherResource.getQueueName())
 				&& jobManager.equals(anotherResource.getJobManager())
-		                && contactString.equals(anotherResource.getContactString()) 
-                	        && siteName.equals(anotherResource.getSiteName())) {
+				&& contactString.equals(anotherResource.getContactString())
+				&& siteName.equals(anotherResource.getSiteName())) {
 			return true;
 		}
 		return false;
@@ -192,6 +193,11 @@ public class DtoGridResource implements GridResource {
 	@XmlElement(name = "freejobslots")
 	public int getFreeJobSlots() {
 		return this.freeJobSlots;
+	}
+
+	@XmlElement(name = "GRAMversion")
+	public String getGRAMVersion() {
+		return this.gramVersion;
 	}
 
 	@XmlElement(name = "jobmanager")
@@ -249,11 +255,6 @@ public class DtoGridResource implements GridResource {
 		return this.totalJobs;
 	}
 
-        @XmlElement(name ="GRAMversion")
-        public String getGRAMVersion(){
-            return this.gramVersion;
-        }
-
 	// public int compareTo(Object arg0) {
 	// GridResource anotherResource = (GridResource)arg0;
 	// return this.getRank() < anotherResource.getRank() ? 1 :
@@ -265,6 +266,7 @@ public class DtoGridResource implements GridResource {
 		return this.waitingJobs;
 	}
 
+	@Override
 	public int hashCode() {
 		return queueName.hashCode() + jobManager.hashCode()
 				+ contactString.hashCode() + 23 * rank;
@@ -299,6 +301,10 @@ public class DtoGridResource implements GridResource {
 
 	public void setFreeJobSlots(int freeJobSlots) {
 		this.freeJobSlots = freeJobSlots;
+	}
+
+	public void setGRAMVersion(String gramVersion) {
+		this.gramVersion = gramVersion;
 	}
 
 	public void setJobManager(String jobManager) {
@@ -349,13 +355,11 @@ public class DtoGridResource implements GridResource {
 		this.waitingJobs = waitingJobs;
 	}
 
-        public void setGRAMVersion(String gramVersion){
-            this.gramVersion = gramVersion;
-        }
-
+	@Override
 	public String toString() {
 
-		return getSiteName() + " : " + getQueueName() + " (Ranking: " + getRank() + ")";
+		return getSiteName() + " : " + getQueueName() + " (Ranking: "
+				+ getRank() + ")";
 	}
 
 }

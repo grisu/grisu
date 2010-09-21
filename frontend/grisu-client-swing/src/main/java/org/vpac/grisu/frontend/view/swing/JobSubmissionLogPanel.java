@@ -63,13 +63,13 @@ public class JobSubmissionLogPanel extends JPanel implements
 
 		final StringBuffer temp = new StringBuffer();
 		if (singleJob != null) {
-			for (String line : singleJob.getSubmissionLog()) {
+			for (final String line : singleJob.getSubmissionLog()) {
 				temp.append(line + "\n");
 			}
 
 		} else if (batchJob != null) {
 
-			for (String line : batchJob.getSubmissionLog()) {
+			for (final String line : batchJob.getSubmissionLog()) {
 				temp.append(line + "\n");
 			}
 

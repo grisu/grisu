@@ -39,7 +39,7 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 				oldLifetime = credential.getGssCredential()
 						.getRemainingLifetime();
 			}
-		} catch (GSSException e2) {
+		} catch (final GSSException e2) {
 			myLogger.debug("Problem getting lifetime of old certificate: " + e2);
 			credential = null;
 		}
@@ -59,7 +59,7 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 					try {
 						credential = new ProxyCredential(
 								LocalProxy.loadGSSCredential());
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						throw new NoValidCredentialException(
 								"Could not load credential/no valid login data.");
 					}
@@ -71,14 +71,14 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 			} else {
 				// get credential from myproxy
 				String myProxyServer = MyProxyServerParams.getMyProxyServer();
-				int myProxyPort = MyProxyServerParams.getMyProxyPort();
+				final int myProxyPort = MyProxyServerParams.getMyProxyPort();
 
 				try {
 					// this is needed because of a possible round-robin myproxy
 					// server
 					myProxyServer = InetAddress.getByName(myProxyServer)
 							.getHostAddress();
-				} catch (UnknownHostException e1) {
+				} catch (final UnknownHostException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 					throw new NoValidCredentialException(
@@ -94,7 +94,7 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 					if (getUser() != null) {
 						getUser().cleanCache();
 					}
-				} catch (Throwable e) {
+				} catch (final Throwable e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					throw new NoValidCredentialException(
@@ -115,13 +115,13 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 	public final long getCredentialEndTime() {
 
 		String myProxyServer = MyProxyServerParams.getMyProxyServer();
-		int myProxyPort = MyProxyServerParams.getMyProxyPort();
+		final int myProxyPort = MyProxyServerParams.getMyProxyPort();
 
 		try {
 			// this is needed because of a possible round-robin myproxy server
 			myProxyServer = InetAddress.getByName(myProxyServer)
 					.getHostAddress();
-		} catch (UnknownHostException e1) {
+		} catch (final UnknownHostException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 			throw new NoValidCredentialException(
@@ -129,12 +129,12 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 							+ e1.getLocalizedMessage());
 		}
 
-		MyProxy myproxy = new MyProxy(myProxyServer, myProxyPort);
+		final MyProxy myproxy = new MyProxy(myProxyServer, myProxyPort);
 		CredentialInfo info = null;
 		try {
 			info = myproxy.info(getCredential().getGssCredential(),
 					myproxy_username, new String(passphrase));
-		} catch (MyProxyException e) {
+		} catch (final MyProxyException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -143,9 +143,22 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 
 	}
 
+	@Override
+	public String getInterfaceInfo(String key) {
+		if ("HOSTNAME".equalsIgnoreCase(key)) {
+			return "localhost";
+		} else if ("VERSION".equalsIgnoreCase(key)) {
+			return ServiceInterface.INTERFACE_VERSION;
+		} else if ("NAME".equalsIgnoreCase(key)) {
+			return "Local serviceinterface";
+		}
+
+		return null;
+	}
+
 	public final String getTemplate(final String application)
 			throws NoSuchTemplateException {
-		String temp = ServiceTemplateManagement.getTemplate(application);
+		final String temp = ServiceTemplateManagement.getTemplate(application);
 
 		if (StringUtils.isBlank(temp)) {
 			throw new NoSuchTemplateException(
@@ -179,13 +192,13 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 		try {
 			// init database and make sure everything is all right
 			HibernateSessionFactory.getSessionFactory();
-		} catch (Throwable e) {
+		} catch (final Throwable e) {
 			throw new RuntimeException("Could not initialize database.", e);
 		}
 
 		try {
 			getCredential();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// e.printStackTrace();
 			throw new NoValidCredentialException("No valid credential: "
 					+ e.getLocalizedMessage());
@@ -195,19 +208,6 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 
 	public final String logout() {
 		Arrays.fill(passphrase, 'x');
-		return null;
-	}
-
-	@Override
-	public String getInterfaceInfo(String key) {
-		if ("HOSTNAME".equalsIgnoreCase(key)) {
-			return "localhost";
-		} else if ("VERSION".equalsIgnoreCase(key)) {
-			return ServiceInterface.INTERFACE_VERSION;
-		} else if ("NAME".equalsIgnoreCase(key)) {
-			return "Local serviceinterface";
-		}
-
 		return null;
 	}
 

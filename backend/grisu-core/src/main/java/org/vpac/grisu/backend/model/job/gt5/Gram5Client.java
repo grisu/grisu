@@ -11,6 +11,8 @@ import org.globus.gram.Gram;
 import org.globus.gram.GramException;
 import org.globus.gram.GramJob;
 import org.globus.gram.GramJobListener;
+import org.globus.gram.internal.GRAMConstants;
+import org.globus.gram.internal.GRAMProtocolErrorConstants;
 import org.globus.gsi.GlobusCredentialException;
 import org.globus.io.gass.server.GassServer;
 import org.ietf.jgss.GSSCredential;
@@ -19,191 +21,204 @@ import org.vpac.security.light.plainProxy.LocalProxy;
 
 public class Gram5Client implements GramJobListener {
 
-    private static HashMap<String, Integer> statuses = new HashMap<String, Integer>();
-    private static HashMap<String, Integer> errors = new HashMap<String, Integer>();
-    static final Logger myLogger = Logger.getLogger(Gram5Client.class.getName());
+	private static HashMap<String, Integer> statuses = new HashMap<String, Integer>();
+	private static HashMap<String, Integer> errors = new HashMap<String, Integer>();
+	static final Logger myLogger = Logger
+			.getLogger(Gram5Client.class.getName());
 
-    public Gram5Client() {
-        try {
-            GassServer gass = new GassServer(LocalProxy.loadGSSCredential(), 0);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } catch (GlobusCredentialException ex) {
-            ex.printStackTrace();
-        }
-    }
+	public static void main(String[] args) {
 
-    public String submit(String rsl, String endPoint, GSSCredential cred) {
-        GramJob job = new GramJob(rsl);
-        job.setCredentials(cred);
-        job.addListener(this);
-        try {
-            job.request(endPoint, false);
-            Gram.jobStatus(job);
-            return job.getIDAsString();
-        } catch (GramException ex) {
-            java.util.logging.Logger.getLogger(Gram5Client.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        } catch (GSSException ex) {
-            java.util.logging.Logger.getLogger(Gram5Client.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
-    }
+		try {
+			final GassServer gass = new GassServer(
+					LocalProxy.loadGSSCredential(), 0);
+		} catch (final IOException ex) {
+			ex.printStackTrace();
+		} catch (final GlobusCredentialException ex) {
+			ex.printStackTrace();
+		}
 
-    public int kill(String handle, GSSCredential cred) {
-        try {
-            GramJob job = new GramJob(null);
-            job.setID(handle);
-            job.setCredentials(cred);
-            try {
-                new Gram().cancel(job);
-                // job.signal(job.SIGNAL_CANCEL);
-            } catch (GramException ex) {
-                java.util.logging.Logger.getLogger(Gram5Client.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (GSSException ex) {
-                java.util.logging.Logger.getLogger(Gram5Client.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            int status = job.getStatus();
-            return status;
-        } catch (MalformedURLException ex) {
-            java.util.logging.Logger.getLogger(Gram5Client.class.getName()).log(Level.SEVERE, null, ex);
-            throw new RuntimeException(ex);
-        }
-    }
+		final String testRSL = args[1];
+		final String contact = "ng1.canterbury.ac.nz";
+		try {
 
-    private String getContactString(String handle) {
-        try {
-            URL url = new URL(handle);
-            return url.getHost();
-        } catch (MalformedURLException ex1) {
-            java.util.logging.Logger.getLogger(Gram5Client.class.getName()).log(Level.SEVERE, null, ex1);
-            return null;
-        }
-    }
+			final Gram gram = new Gram();
+			Gram.ping(contact);
 
-    public int[] getJobStatus(String handle, GSSCredential cred) {
+			final GramJob testJob = new GramJob(testRSL);
+			testJob.setCredentials(LocalProxy.loadGSSCredential());
 
-        int[] results = new int[2];
+			final Gram5Client gram5 = new Gram5Client();
+			testJob.addListener(gram5);
 
-        // we need this to catch quick failure
-        Integer status = statuses.get(handle);
-        if (status != null && status == GramJob.STATUS_FAILED) {
-            results[0] = status;
-            results[1] = errors.get(handle);
-            return results;
-        }
+			// testJob.bind();
 
-        String contact = getContactString(handle);
-        GramJob job = new GramJob(null);
-        try {
-            // lets try to see if gateway is working first...
-            Gram.ping(contact);
-        } catch (GramException ex) {
-            // have no idea what the status is, gateway is down:
-            return new int[] {GramJob.STATUS_UNSUBMITTED,0};
-        } catch (GSSException ex) {
-            java.util.logging.Logger.getLogger(Gram5Client.class.getName()).log(Level.SEVERE, null, ex);
-        }
+			testJob.request("ng1.canterbury.ac.nz", true);
+			testJob.bind();
+			Gram.registerListener(testJob);
+			Gram.jobStatus(testJob);
 
-        try {
-            job.setID(handle);
-            job.setCredentials(cred);
-            job.bind();
-            Gram.jobStatus(job);
-            myLogger.debug("job status is " + job.getStatusAsString());
-            myLogger.debug("job error is " + job.getError());
-        } catch (GramException ex) {
-            if (ex.getErrorCode() == GramException.CONNECTION_FAILED) {
-                // maybe the job finished, but maybe we need to kick job manager
+			System.out
+					.println("job status is : " + testJob.getStatusAsString());
+			System.out.println("the job is : " + testJob.toString());
+			System.out.println("number of currently active jobs : "
+					+ Gram.getActiveJobs());
 
-                myLogger.debug("restarting job");
-                String rsl = "&(restart=" + handle + ")";
-                GramJob restartJob = new GramJob(rsl);
-                restartJob.setCredentials(cred);
-                restartJob.addListener(this);
-                try {
+			while (true) {
+				Gram.jobStatus(testJob);
+				System.out.println("job status is : "
+						+ testJob.getStatusAsString());
+				Thread.sleep(1000);
+			}
 
-                    restartJob.request(contact, false);
-                } catch (GramException ex1) {
-                    // ok, now we are really done
-                    return new int[]{GramJob.STATUS_DONE, 0};
-                } catch (GSSException ex1) {
-                    throw new RuntimeException(ex1);
-                }
+		} catch (final GlobusCredentialException gx) {
+			gx.printStackTrace();
+		} catch (final GramException grx) {
+			grx.printStackTrace();
+		} catch (final GSSException gssx) {
+			gssx.printStackTrace();
+		} catch (final Exception ex) {
+			ex.printStackTrace();
+		}
 
-                // nope, not done yet. 
-                return getJobStatus(handle, cred);
-            }
-        } catch (GSSException ex) {
-            java.util.logging.Logger.getLogger(Gram5Client.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (MalformedURLException ex) {
-            java.util.logging.Logger.getLogger(Gram5Client.class.getName()).log(Level.SEVERE, null, ex);
+	}
 
-        }
-        status = job.getStatus();
-        int error = job.getError();
-        return new int[]{status, error};
-    }
+	public Gram5Client() {
+		try {
+			final GassServer gass = new GassServer(
+					LocalProxy.loadGSSCredential(), 0);
+		} catch (final IOException ex) {
+			ex.printStackTrace();
+		} catch (final GlobusCredentialException ex) {
+			ex.printStackTrace();
+		}
+	}
 
-    public static void main(String[] args) {
+	private String getContactString(String handle) {
+		try {
+			final URL url = new URL(handle);
+			return url.getHost();
+		} catch (final MalformedURLException ex1) {
+			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
+					.log(Level.SEVERE, null, ex1);
+			return null;
+		}
+	}
 
-        try {
-            GassServer gass = new GassServer(LocalProxy.loadGSSCredential(), 0);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } catch (GlobusCredentialException ex) {
-            ex.printStackTrace();
-        }
+	public int[] getJobStatus(String handle, GSSCredential cred) {
 
-        String testRSL = args[1];
-        String contact = "ng1.canterbury.ac.nz";
-        try {
+		final int[] results = new int[2];
 
-            Gram gram = new Gram();
-            gram.ping(contact);
+		// we need this to catch quick failure
+		Integer status = statuses.get(handle);
+		if (status != null && status == GRAMConstants.STATUS_FAILED) {
+			results[0] = status;
+			results[1] = errors.get(handle);
+			return results;
+		}
 
-            GramJob testJob = new GramJob(testRSL);
-            testJob.setCredentials(LocalProxy.loadGSSCredential());
+		final String contact = getContactString(handle);
+		final GramJob job = new GramJob(null);
+		try {
+			// lets try to see if gateway is working first...
+			Gram.ping(contact);
+		} catch (final GramException ex) {
+			// have no idea what the status is, gateway is down:
+			return new int[] { GRAMConstants.STATUS_UNSUBMITTED, 0 };
+		} catch (final GSSException ex) {
+			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
+					.log(Level.SEVERE, null, ex);
+		}
 
-            Gram5Client gram5 = new Gram5Client();
-            testJob.addListener(gram5);
+		try {
+			job.setID(handle);
+			job.setCredentials(cred);
+			job.bind();
+			Gram.jobStatus(job);
+			myLogger.debug("job status is " + job.getStatusAsString());
+			myLogger.debug("job error is " + job.getError());
+		} catch (final GramException ex) {
+			if (ex.getErrorCode() == GRAMProtocolErrorConstants.CONNECTION_FAILED) {
+				// maybe the job finished, but maybe we need to kick job manager
 
-            // testJob.bind();
+				myLogger.debug("restarting job");
+				final String rsl = "&(restart=" + handle + ")";
+				final GramJob restartJob = new GramJob(rsl);
+				restartJob.setCredentials(cred);
+				restartJob.addListener(this);
+				try {
 
-            testJob.request("ng1.canterbury.ac.nz", true);
-            testJob.bind();
-            gram.registerListener(testJob);
-            gram.jobStatus(testJob);
+					restartJob.request(contact, false);
+				} catch (final GramException ex1) {
+					// ok, now we are really done
+					return new int[] { GRAMConstants.STATUS_DONE, 0 };
+				} catch (final GSSException ex1) {
+					throw new RuntimeException(ex1);
+				}
 
-            System.out.println("job status is : " + testJob.getStatusAsString());
-            System.out.println("the job is : " + testJob.toString());
-            System.out.println("number of currently active jobs : "
-                    + gram.getActiveJobs());
+				// nope, not done yet.
+				return getJobStatus(handle, cred);
+			}
+		} catch (final GSSException ex) {
+			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
+					.log(Level.SEVERE, null, ex);
+		} catch (final MalformedURLException ex) {
+			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
+					.log(Level.SEVERE, null, ex);
 
-            while (true) {
-                gram.jobStatus(testJob);
-                System.out.println("job status is : "
-                        + testJob.getStatusAsString());
-                Thread.sleep(1000);
-            }
+		}
+		status = job.getStatus();
+		final int error = job.getError();
+		return new int[] { status, error };
+	}
 
-        } catch (GlobusCredentialException gx) {
-            gx.printStackTrace();
-        } catch (GramException grx) {
-            grx.printStackTrace();
-        } catch (GSSException gssx) {
-            gssx.printStackTrace();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+	public int kill(String handle, GSSCredential cred) {
+		try {
+			final GramJob job = new GramJob(null);
+			job.setID(handle);
+			job.setCredentials(cred);
+			try {
+				new Gram();
+				Gram.cancel(job);
+				// job.signal(job.SIGNAL_CANCEL);
+			} catch (final GramException ex) {
+				java.util.logging.Logger.getLogger(Gram5Client.class.getName())
+						.log(Level.SEVERE, null, ex);
+			} catch (final GSSException ex) {
+				java.util.logging.Logger.getLogger(Gram5Client.class.getName())
+						.log(Level.SEVERE, null, ex);
+			}
+			final int status = job.getStatus();
+			return status;
+		} catch (final MalformedURLException ex) {
+			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
+					.log(Level.SEVERE, null, ex);
+			throw new RuntimeException(ex);
+		}
+	}
 
-    }
+	public void statusChanged(GramJob job) {
+		myLogger.debug("job status changed  " + job.getStatusAsString());
+		statuses.put(job.getIDAsString(), job.getStatus());
+		errors.put(job.getIDAsString(), job.getError());
+		myLogger.debug("the job is : " + job.toString());
+	}
 
-    public void statusChanged(GramJob job) {
-        myLogger.debug("job status changed  "
-                + job.getStatusAsString());
-        statuses.put(job.getIDAsString(), job.getStatus());
-        errors.put(job.getIDAsString(), job.getError());
-        myLogger.debug("the job is : " + job.toString());
-    }
+	public String submit(String rsl, String endPoint, GSSCredential cred) {
+		final GramJob job = new GramJob(rsl);
+		job.setCredentials(cred);
+		job.addListener(this);
+		try {
+			job.request(endPoint, false);
+			Gram.jobStatus(job);
+			return job.getIDAsString();
+		} catch (final GramException ex) {
+			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
+					.log(Level.SEVERE, null, ex);
+			return null;
+		} catch (final GSSException ex) {
+			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
+					.log(Level.SEVERE, null, ex);
+			return null;
+		}
+	}
 }

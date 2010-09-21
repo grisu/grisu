@@ -56,7 +56,7 @@ public class FileDetailPanel extends JPanel implements FileListListener {
 		if ((files == null) || (files.size() == 0) || (files.size() > 1)) {
 			setFile(null);
 		} else {
-			GlazedFile sel = files.iterator().next();
+			final GlazedFile sel = files.iterator().next();
 			if (sel.isFolder()) {
 				setFile(null);
 			} else {

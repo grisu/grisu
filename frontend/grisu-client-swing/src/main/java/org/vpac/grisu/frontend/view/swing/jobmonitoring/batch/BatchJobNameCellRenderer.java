@@ -10,8 +10,8 @@ import javax.swing.table.TableCellRenderer;
 
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
 
-public class BatchJobNameCellRenderer extends DefaultTableCellRenderer implements
-TableCellRenderer {
+public class BatchJobNameCellRenderer extends DefaultTableCellRenderer
+		implements TableCellRenderer {
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value,
@@ -23,17 +23,17 @@ TableCellRenderer {
 			setBackground(table.getBackground());
 		}
 
-		BatchJobObject bj = (BatchJobObject)value;
+		final BatchJobObject bj = (BatchJobObject) value;
 
-		if ( bj.isBeingKilled() ) {
-			Component c = super.getTableCellRendererComponent(
-					table, value, isSelected, hasFocus, row, column);
+		if (bj.isBeingKilled()) {
+			final Component c = super.getTableCellRendererComponent(table,
+					value, isSelected, hasFocus, row, column);
 			c.setEnabled(false);
 
-			setText(bj.getJobname()+" (being killed at the moment)");
+			setText(bj.getJobname() + " (being killed at the moment)");
 		} else {
-			Component c = super.getTableCellRendererComponent(
-					table, value, isSelected, hasFocus, row, column);
+			final Component c = super.getTableCellRendererComponent(table,
+					value, isSelected, hasFocus, row, column);
 			c.setEnabled(true);
 			setText(bj.getJobname());
 		}
@@ -41,7 +41,5 @@ TableCellRenderer {
 		return this;
 
 	}
-
-
 
 }

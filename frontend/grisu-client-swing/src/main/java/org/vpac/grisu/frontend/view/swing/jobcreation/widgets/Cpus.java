@@ -49,14 +49,26 @@ public class Cpus extends AbstractWidget {
 	}
 
 	public Integer getCpus() {
-		String integerString = (String) getComboBox().getSelectedItem();
+		final String integerString = (String) getComboBox().getSelectedItem();
 		try {
-			Integer result = Integer.parseInt(integerString);
+			final Integer result = Integer.parseInt(integerString);
 			return result;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 			return -1;
 		}
+	}
+
+	@Override
+	public String getValue() {
+		return getCpus().toString();
+	}
+
+	@Override
+	public void lockIUI(boolean lock) {
+
+		getComboBox().setEnabled(!lock);
+
 	}
 
 	private void setCpus(Integer cpus) {
@@ -70,23 +82,11 @@ public class Cpus extends AbstractWidget {
 	public void setValue(String value) {
 
 		try {
-			Integer temp = Integer.parseInt(value);
+			final Integer temp = Integer.parseInt(value);
 			setCpus(temp);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			myLogger.debug("Can't set cpus: " + e.getLocalizedMessage());
 		}
-
-	}
-
-	@Override
-	public String getValue() {
-		return getCpus().toString();
-	}
-
-	@Override
-	public void lockIUI(boolean lock) {
-
-		getComboBox().setEnabled(!lock);
 
 	}
 }

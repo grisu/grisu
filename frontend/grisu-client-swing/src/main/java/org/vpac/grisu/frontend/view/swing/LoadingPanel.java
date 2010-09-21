@@ -18,6 +18,7 @@ public class LoadingPanel extends JPanel {
 		add(getBusyLabel(), BorderLayout.CENTER);
 
 	}
+
 	private JXBusyLabel getBusyLabel() {
 		if (busyLabel == null) {
 			busyLabel = new JXBusyLabel();

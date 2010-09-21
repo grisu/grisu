@@ -35,10 +35,10 @@ public class DefaultFqanChangePanel extends JPanel implements
 	 */
 	public DefaultFqanChangePanel() {
 		setLayout(new FormLayout(new ColumnSpec[] { ColumnSpec.decode("107px"),
-				ColumnSpec.decode("218px"), }, new RowSpec[] { RowSpec
-				.decode("40px"), }));
+				ColumnSpec.decode("218px"), },
+				new RowSpec[] { RowSpec.decode("40px"), }));
 
-		JLabel lblGroup = new JLabel("Submit as group:");
+		final JLabel lblGroup = new JLabel("Submit as group:");
 		add(lblGroup, "1, 1, left, center");
 
 		comboBox = new JComboBox(voModel);
@@ -57,7 +57,7 @@ public class DefaultFqanChangePanel extends JPanel implements
 
 				if (ItemEvent.SELECTED == e.getStateChange()) {
 
-					String newVO = (String) voModel.getSelectedItem();
+					final String newVO = (String) voModel.getSelectedItem();
 					GrisuRegistryManager.getDefault(si)
 							.getUserEnvironmentManager().setCurrentFqan(newVO);
 
@@ -67,17 +67,6 @@ public class DefaultFqanChangePanel extends JPanel implements
 		});
 		add(comboBox, "2, 1, fill, center");
 		EventBus.subscribe(FqanEvent.class, this);
-	}
-
-	public void setServiceInterface(ServiceInterface si)
-			throws InterruptedException {
-		this.si = si;
-		String currentFqan = GrisuRegistryManager.getDefault(si)
-				.getUserEnvironmentManager().getCurrentFqan();
-		comboBox.removeAllItems();
-		comboBox.addItem(currentFqan);
-		comboBox.setSelectedItem(currentFqan);
-		fillComboBox();
 	}
 
 	public void fillComboBox() {
@@ -94,18 +83,18 @@ public class DefaultFqanChangePanel extends JPanel implements
 			@Override
 			public void run() {
 
-				UserEnvironmentManager uem = GrisuRegistryManager
+				final UserEnvironmentManager uem = GrisuRegistryManager
 						.getDefault(si).getUserEnvironmentManager();
 				String old = (String) voModel.getSelectedItem();
 				if (StringUtils.isBlank(old)) {
 					old = uem.getCurrentFqan();
 				}
 
-				String[] allVOs = uem.getAllAvailableFqans();
+				final String[] allVOs = uem.getAllAvailableFqans();
 
 				voModel.removeAllElements();
 
-				for (String vo : allVOs) {
+				for (final String vo : allVOs) {
 					voModel.addElement(vo);
 				}
 
@@ -132,6 +121,17 @@ public class DefaultFqanChangePanel extends JPanel implements
 			externalChange = false;
 		}
 
+	}
+
+	public void setServiceInterface(ServiceInterface si)
+			throws InterruptedException {
+		this.si = si;
+		final String currentFqan = GrisuRegistryManager.getDefault(si)
+				.getUserEnvironmentManager().getCurrentFqan();
+		comboBox.removeAllItems();
+		comboBox.addItem(currentFqan);
+		comboBox.setSelectedItem(currentFqan);
+		fillComboBox();
 	}
 
 }

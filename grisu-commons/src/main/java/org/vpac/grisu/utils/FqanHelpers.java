@@ -18,13 +18,13 @@ public final class FqanHelpers {
 	public static String getGroupPart(final String fqan) {
 		String groupPart = null;
 		try {
-			int index = fqan.indexOf("/Role=");
+			final int index = fqan.indexOf("/Role=");
 			if (index == -1) {
 				groupPart = fqan;
 			} else {
 				groupPart = fqan.substring(0, fqan.indexOf("/Role="));
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return null;
 		}
 		return groupPart;
@@ -39,7 +39,7 @@ public final class FqanHelpers {
 	 * @return the name of the last subgroup
 	 */
 	public static String getLastGroupPart(final String fqan) {
-		String group = getGroupPart(fqan);
+		final String group = getGroupPart(fqan);
 		return group.substring(group.lastIndexOf("/") + 1);
 	}
 
@@ -54,9 +54,9 @@ public final class FqanHelpers {
 
 		String role = null;
 		try {
-			role = fqan.substring(fqan.indexOf("/Role=") + 6, fqan
-					.indexOf("/Capability="));
-		} catch (Exception e) {
+			role = fqan.substring(fqan.indexOf("/Role=") + 6,
+					fqan.indexOf("/Capability="));
+		} catch (final Exception e) {
 			return null;
 		}
 		return role;

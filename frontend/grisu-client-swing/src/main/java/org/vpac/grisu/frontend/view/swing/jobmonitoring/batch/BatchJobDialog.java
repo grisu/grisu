@@ -5,6 +5,7 @@ import java.awt.EventQueue;
 
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
 import org.vpac.grisu.control.ServiceInterface;
@@ -19,15 +20,18 @@ public class BatchJobDialog extends JDialog {
 	 */
 	public static void main(String[] args) {
 		try {
-			BatchJobDialog dialog = new BatchJobDialog(null, null);
+			final BatchJobDialog dialog = new BatchJobDialog(null, null);
 			dialog.setVisible(true);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
-	public static void open(final ServiceInterface si, final String batchJobName) throws NoSuchJobException{
 
-		final BatchJobObject bj = RunningJobManager.getDefault(si).getBatchJob(batchJobName);
+	public static void open(final ServiceInterface si, final String batchJobName)
+			throws NoSuchJobException {
+
+		final BatchJobObject bj = RunningJobManager.getDefault(si).getBatchJob(
+				batchJobName);
 
 		EventQueue.invokeLater(new Runnable() {
 
@@ -45,7 +49,6 @@ public class BatchJobDialog extends JDialog {
 	private final BatchJobObject bj;
 	private final JPanel contentPanel = new JPanel();
 
-
 	private BatchJobPanel batchJobPanel;
 
 	/**
@@ -55,7 +58,7 @@ public class BatchJobDialog extends JDialog {
 		this.si = si;
 		this.bj = bj;
 		setModal(false);
-		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));

@@ -44,7 +44,7 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 				httpProxyPort = (Integer) otherOptions[1];
 				httpProxyUsername = (String) otherOptions[2];
 				httpProxyPassword = (char[]) otherOptions[3];
-			} catch (ClassCastException cce) {
+			} catch (final ClassCastException cce) {
 				throw new ServiceInterfaceException(
 						"Could not create serviceInterface: "
 								+ cce.getLocalizedMessage(), cce);
@@ -74,10 +74,9 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 								+ " as configured in the -D option.");
 					}
 				}
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				// doesn't matter
-				myLogger
-						.debug("Couldn't find specified cacert. Using default one.");
+				myLogger.debug("Couldn't find specified cacert. Using default one.");
 			}
 
 			if (cacertURL == null) {
@@ -85,14 +84,12 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 				cacertFilename = new CaCertManager()
 						.getCaCertNameForServiceInterfaceUrl(interfaceUrl);
 				if (cacertFilename != null && cacertFilename.length() > 0) {
-					myLogger
-							.debug("Found url in map. Trying to use this cacert file: "
-									+ cacertFilename);
+					myLogger.debug("Found url in map. Trying to use this cacert file: "
+							+ cacertFilename);
 					cacertURL = XfireServiceInterfaceCreator.class
 							.getResource("/" + cacertFilename);
 					if (cacertURL == null) {
-						myLogger
-								.debug("Didn't find cacert. Using the default one.");
+						myLogger.debug("Didn't find cacert. Using the default one.");
 						// use the default one
 						cacertURL = XfireServiceInterfaceCreator.class
 								.getResource("/cacert.pem");
@@ -100,8 +97,7 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 						myLogger.debug("Found cacert. Using it. Good.");
 					}
 				} else {
-					myLogger
-							.debug("Didn't find any configuration for a special cacert. Using the default one.");
+					myLogger.debug("Didn't find any configuration for a special cacert. Using the default one.");
 					// use the default one
 					cacertURL = XfireServiceInterfaceCreator.class
 							.getResource("/cacert.pem");
@@ -119,10 +115,10 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 			// Maybe we want to turn off CN validation (not recommended!):
 			protocolSocketFactory.setCheckHostname(false);
 
-			Protocol protocol = new Protocol("https",
+			final Protocol protocol = new Protocol("https",
 					(ProtocolSocketFactory) protocolSocketFactory, 443);
 			Protocol.registerProtocol("https", protocol);
-		} catch (Exception e1) {
+		} catch (final Exception e1) {
 			// TODO Auto-generated catch block
 			// e1.printStackTrace();
 			throw new ServiceInterfaceException(
@@ -135,7 +131,7 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 		try {
 			xfireServiceInterfaceClass = Class
 					.forName("org.vpac.grisu.control.impl.EnunciateServiceInterfaceImpl");
-		} catch (ClassNotFoundException e) {
+		} catch (final ClassNotFoundException e) {
 			myLogger.warn("Could not find xfire service interface class.");
 			// e.printStackTrace();
 			throw new ServiceInterfaceException(
@@ -156,31 +152,34 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 			xfireServiceInterface = (ServiceInterface) xfireServiceInterfaceConstructor
 					.newInstance(interfaceUrl);
 
-			Method setAuthMethod = xfireServiceInterface.getClass().getMethod(
-					"setHttpAuthCredentials", String.class, String.class);
+			final Method setAuthMethod = xfireServiceInterface.getClass()
+					.getMethod("setHttpAuthCredentials", String.class,
+							String.class);
 
 			setAuthMethod.invoke(xfireServiceInterface, username, new String(
 					password));
 
-			Method setMTOMEnabled = xfireServiceInterface.getClass().getMethod(
-					"setMTOMEnabled", boolean.class);
+			final Method setMTOMEnabled = xfireServiceInterface.getClass()
+					.getMethod("setMTOMEnabled", boolean.class);
 
 			setMTOMEnabled.invoke(xfireServiceInterface, true);
 
-			Method getXfireClient = xfireServiceInterface.getClass().getMethod(
-					"getXFireClient");
-			Object xfireClient = getXfireClient.invoke(xfireServiceInterface);
+			final Method getXfireClient = xfireServiceInterface.getClass()
+					.getMethod("getXFireClient");
+			final Object xfireClient = getXfireClient
+					.invoke(xfireServiceInterface);
 
-			Method setPropertyMethod = xfireClient.getClass().getMethod(
+			final Method setPropertyMethod = xfireClient.getClass().getMethod(
 					"setProperty", String.class, Object.class);
 			setPropertyMethod.invoke(xfireClient,
 					"urn:xfire:transport:http:chunking-enabled", "true");
 
-			Long timeout = ClientPropertiesManager.getConnectionTimeoutInMS();
-			setPropertyMethod.invoke(xfireClient, "http.timeout", timeout
-					.toString());
+			final Long timeout = ClientPropertiesManager
+					.getConnectionTimeoutInMS();
+			setPropertyMethod.invoke(xfireClient, "http.timeout",
+					timeout.toString());
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new ServiceInterfaceException(

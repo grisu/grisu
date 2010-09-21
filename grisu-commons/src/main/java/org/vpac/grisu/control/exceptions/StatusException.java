@@ -11,13 +11,13 @@ public class StatusException extends Exception {
 		// TODO Auto-generated constructor stub
 	}
 
-	public StatusException(Throwable arg0) {
-		super(arg0);
+	public StatusException(String arg0, Throwable arg1) {
+		super(arg0, arg1);
 		// TODO Auto-generated constructor stub
 	}
 
-	public StatusException(String arg0, Throwable arg1) {
-		super(arg0, arg1);
+	public StatusException(Throwable arg0) {
+		super(arg0);
 		// TODO Auto-generated constructor stub
 	}
 

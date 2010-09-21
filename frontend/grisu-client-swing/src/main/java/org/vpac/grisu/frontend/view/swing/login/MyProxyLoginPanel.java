@@ -36,17 +36,13 @@ public class MyProxyLoginPanel extends JPanel implements LoginMethodPanel {
 	 */
 	public MyProxyLoginPanel() {
 		setLayout(new FormLayout(new ColumnSpec[] {
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				RowSpec.decode("4dlu:grow"),}));
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				RowSpec.decode("4dlu:grow"), }));
 		add(getLblUsername(), "2, 2, right, default");
 		add(getTextField(), "4, 2, fill, default");
 		add(getLblPassword(), "2, 4, right, default");
@@ -60,12 +56,14 @@ public class MyProxyLoginPanel extends JPanel implements LoginMethodPanel {
 		}
 		return lblPassword;
 	}
+
 	private JLabel getLblUsername() {
 		if (lblUsername == null) {
 			lblUsername = new JLabel("Username");
 		}
 		return lblUsername;
 	}
+
 	private JPasswordField getPasswordField() {
 		if (textField_1 == null) {
 			textField_1 = new JPasswordField();
@@ -73,6 +71,7 @@ public class MyProxyLoginPanel extends JPanel implements LoginMethodPanel {
 		}
 		return textField_1;
 	}
+
 	public LoginException getPossibleException() {
 		return possibleException;
 	}
@@ -84,8 +83,9 @@ public class MyProxyLoginPanel extends JPanel implements LoginMethodPanel {
 	private JTextField getTextField() {
 		if (textField == null) {
 			textField = new JTextField();
-			String lastUsername = CommonArcsProperties.getDefault().getLastMyProxyUsername();
-			if ( StringUtils.isNotBlank(lastUsername) ) {
+			final String lastUsername = CommonArcsProperties.getDefault()
+					.getLastMyProxyUsername();
+			if (StringUtils.isNotBlank(lastUsername)) {
 				textField.setText(lastUsername);
 			}
 			textField.setColumns(10);
@@ -119,16 +119,17 @@ public class MyProxyLoginPanel extends JPanel implements LoginMethodPanel {
 		params.setMyProxyUsername(username);
 		params.setMyProxyPassphrase(password);
 
-		Thread loginThread = new Thread() {
+		final Thread loginThread = new Thread() {
 
 			@Override
 			public void run() {
 
 				loginSuccessful = false;
 				try {
-					si = LoginManager.login(null, null, null, null, params, saveCredendentialsToLocalProxy);
+					si = LoginManager.login(null, null, null, null, params,
+							saveCredendentialsToLocalProxy);
 					loginSuccessful = true;
-				} catch (LoginException e) {
+				} catch (final LoginException e) {
 					possibleException = e;
 				}
 			}

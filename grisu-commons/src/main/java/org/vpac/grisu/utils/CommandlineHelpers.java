@@ -21,7 +21,7 @@ public final class CommandlineHelpers {
 	public static ArrayList<String> extractArgumentsFromCommandline(
 			final String string) {
 
-		ArrayList<String> args = parseString(string);
+		final ArrayList<String> args = parseString(string);
 		args.remove(0);
 		return args;
 	}
@@ -34,7 +34,7 @@ public final class CommandlineHelpers {
 	 * @return the executable
 	 */
 	public static String extractExecutable(final String string) {
-		ArrayList<String> strings = parseString(string);
+		final ArrayList<String> strings = parseString(string);
 		return strings.get(0);
 	}
 
@@ -49,12 +49,12 @@ public final class CommandlineHelpers {
 	 * @return all tokens for this commandline
 	 */
 	public static ArrayList<String> parseString(final String string) {
-		ArrayList<String> strings = new ArrayList<String>();
+		final ArrayList<String> strings = new ArrayList<String>();
 
 		boolean lastCharacterIsWhitespace = false;
 		boolean inbetweenQuotationMarks = false;
 		StringBuffer part = new StringBuffer();
-		for (char character : string.toCharArray()) {
+		for (final char character : string.toCharArray()) {
 			if (Character.isWhitespace(character)) {
 				if (!lastCharacterIsWhitespace && !inbetweenQuotationMarks) {
 					strings.add(part.toString());

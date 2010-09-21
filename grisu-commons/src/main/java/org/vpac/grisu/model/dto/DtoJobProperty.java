@@ -20,9 +20,9 @@ public class DtoJobProperty {
 	public static List<DtoJobProperty> dtoJobPropertiesFromMap(
 			Map<String, String> map) {
 
-		List<DtoJobProperty> result = new LinkedList<DtoJobProperty>();
+		final List<DtoJobProperty> result = new LinkedList<DtoJobProperty>();
 
-		for (String key : map.keySet()) {
+		for (final String key : map.keySet()) {
 			result.add(new DtoJobProperty(key, map.get(key)));
 		}
 

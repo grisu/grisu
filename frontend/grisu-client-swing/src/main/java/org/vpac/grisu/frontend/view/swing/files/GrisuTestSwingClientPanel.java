@@ -30,7 +30,7 @@ public class GrisuTestSwingClientPanel extends JPanel implements
 
 	public void setServiceInterface(ServiceInterface si) {
 
-		JPanel panel = new BatchJobTabbedPane(si, null);
+		final JPanel panel = new BatchJobTabbedPane(si, null);
 
 		add(panel, BorderLayout.CENTER);
 	}

@@ -26,9 +26,11 @@ public class ServiceInterfaceUrlPanel extends JPanel {
 	 */
 	public ServiceInterfaceUrlPanel() {
 
-		for (String url : ClientPropertiesManager.getServiceInterfaceUrls()) {
+		for (final String url : ClientPropertiesManager
+				.getServiceInterfaceUrls()) {
 
-			String posAlias = LoginManager.SERVICEALIASES.inverse().get(url);
+			final String posAlias = LoginManager.SERVICEALIASES.inverse().get(
+					url);
 			if (StringUtils.isNotBlank(posAlias)) {
 
 				if (urlModel.getIndexOf(posAlias) < 0) {
@@ -57,11 +59,10 @@ public class ServiceInterfaceUrlPanel extends JPanel {
 		if (comboBox == null) {
 			comboBox = new JComboBox(urlModel);
 			comboBox.setEditable(true);
-			
-			
+
 			String defaultUrl = ClientPropertiesManager
 					.getDefaultServiceInterfaceUrl();
-			String posAlias = LoginManager.SERVICEALIASES.inverse().get(
+			final String posAlias = LoginManager.SERVICEALIASES.inverse().get(
 					defaultUrl);
 			if (StringUtils.isNotBlank(posAlias)) {
 				defaultUrl = posAlias;

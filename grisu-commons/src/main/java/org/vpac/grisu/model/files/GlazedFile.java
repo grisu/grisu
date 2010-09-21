@@ -65,7 +65,7 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 		if (timestamp.equals(-1L)) {
 			return "";
 		} else {
-			Date date = new Date(timestamp);
+			final Date date = new Date(timestamp);
 			return date.toString();
 		}
 
@@ -73,8 +73,8 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
 	public static Set<String> extractUrls(Set<GlazedFile> files) {
 
-		Set<String> temp = new HashSet<String>();
-		for (GlazedFile source : files) {
+		final Set<String> temp = new HashSet<String>();
+		for (final GlazedFile source : files) {
 			temp.add(source.getUrl());
 		}
 		return temp;
@@ -225,7 +225,7 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 	public boolean equals(Object other) {
 
 		if (other instanceof GlazedFile) {
-			String url = ((GlazedFile) other).getUrl();
+			final String url = ((GlazedFile) other).getUrl();
 			return this.getUrl().equals(url);
 		}
 		return false;
@@ -245,7 +245,7 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
 		try {
 			lastModified = si.lastModified(url);
-		} catch (RemoteFileSystemException e) {
+		} catch (final RemoteFileSystemException e) {
 			e.printStackTrace();
 			lastModified = -1L;
 		}
@@ -274,14 +274,14 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 		if (Type.FILETYPE_FILE.equals(getType())) {
 
 			if (FileManager.isLocal(getUrl())) {
-				File temp = GrisuRegistryManager.getDefault(si)
-						.getFileManager().getFileFromUriOrPath(getUrl());
+				GrisuRegistryManager.getDefault(si).getFileManager();
+				final File temp = FileManager.getFileFromUriOrPath(getUrl());
 				size = temp.length();
 			} else {
 
 				try {
 					size = si.getFileSize(getUrl());
-				} catch (RemoteFileSystemException e) {
+				} catch (final RemoteFileSystemException e) {
 					e.printStackTrace();
 					size = -1;
 				}
@@ -313,7 +313,7 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 		if (type == null) {
 
 			if (FileManager.isLocal(getUrl())) {
-				File file = new File(getUrl());
+				final File file = new File(getUrl());
 				if (file.isDirectory()) {
 					type = Type.FILETYPE_FOLDER;
 				} else if (file.exists()) {
@@ -331,12 +331,12 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 								if (si.fileExists(url)) {
 									type = Type.FILETYPE_FILE;
 								}
-							} catch (RemoteFileSystemException e) {
+							} catch (final RemoteFileSystemException e) {
 								e.printStackTrace();
 								throw new RuntimeException(e);
 							}
 						}
-					} catch (RemoteFileSystemException e) {
+					} catch (final RemoteFileSystemException e) {
 						e.printStackTrace();
 						throw new RuntimeException(e);
 					}

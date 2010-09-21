@@ -34,7 +34,7 @@ public class FileTransactionManager implements PropertyChangeListener {
 
 		synchronized (si) {
 			if (cachedFileTransferManagers.get(si) == null) {
-				FileTransactionManager m = new FileTransactionManager(si);
+				final FileTransactionManager m = new FileTransactionManager(si);
 				cachedFileTransferManagers.put(si, m);
 			}
 		}
@@ -77,7 +77,7 @@ public class FileTransactionManager implements PropertyChangeListener {
 
 	public FileTransaction addJobInputFileTransfer(Set<String> sources,
 			JobObject job) {
-		FileTransaction ft = new FileTransaction(fm, sources, job);
+		final FileTransaction ft = new FileTransaction(fm, sources, job);
 		return addFileTransfer(ft);
 	}
 
@@ -109,18 +109,10 @@ public class FileTransactionManager implements PropertyChangeListener {
 	// return addFileTransfer(ft);
 	// }
 
-	public FileTransaction deleteUrls(Set<String> urls) {
-
-		FileTransaction trans = new FileTransaction(fm, urls,
-				FileTransaction.DELETE_STRING);
-
-		return addFileTransfer(trans);
-	}
-
 	public FileTransaction deleteFiles(Set<GlazedFile> files) {
 
-		Set<String> temp = new HashSet<String>();
-		for (GlazedFile file : files) {
+		final Set<String> temp = new HashSet<String>();
+		for (final GlazedFile file : files) {
 			temp.add(file.getUrl());
 		}
 
@@ -128,9 +120,17 @@ public class FileTransactionManager implements PropertyChangeListener {
 
 	}
 
+	public FileTransaction deleteUrls(Set<String> urls) {
+
+		final FileTransaction trans = new FileTransaction(fm, urls,
+				FileTransaction.DELETE_STRING);
+
+		return addFileTransfer(trans);
+	}
+
 	public void propertyChange(PropertyChangeEvent evt) {
 
-		FileTransaction ft = (FileTransaction) evt.getSource();
+		final FileTransaction ft = (FileTransaction) evt.getSource();
 		EventBus.publish(new FileTransferEvent(ft));
 
 	}

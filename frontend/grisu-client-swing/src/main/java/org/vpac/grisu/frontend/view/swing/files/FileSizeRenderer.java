@@ -28,9 +28,9 @@ public class FileSizeRenderer extends DefaultTableCellRenderer implements
 			setBackground(arg0.getBackground());
 		}
 
-		Long size = (Long) arg1;
+		final Long size = (Long) arg1;
 
-		String sizeString = GlazedFile.calculateSizeString(size);
+		final String sizeString = GlazedFile.calculateSizeString(size);
 
 		this.setText(sizeString);
 		this.setHorizontalAlignment(SwingConstants.RIGHT);

@@ -129,19 +129,19 @@ public final class JobConstants {
 		if (DONE_STRING.equals(status)) {
 			return DONE;
 		} else if (status != null && status.indexOf("(") >= 0) {
-			int start = status.indexOf("(") + 11;
-			int end = status.indexOf(")");
+			final int start = status.indexOf("(") + 11;
+			final int end = status.indexOf(")");
 
 			if (status.contains(ACTIVE_STRING)) {
 				// means running
-				String percentString = status.substring(start, status
-						.indexOf(" %"));
-				int percent = Integer.parseInt(percentString);
+				final String percentString = status.substring(start,
+						status.indexOf(" %"));
+				final int percent = Integer.parseInt(percentString);
 				return percent;
 			} else {
 				// means error
-				String errorCodeString = status.substring(start, end);
-				int errorCode = Integer.parseInt(errorCodeString);
+				final String errorCodeString = status.substring(start, end);
+				final int errorCode = Integer.parseInt(errorCodeString);
 				return DONE + errorCode;
 			}
 		} else if (LOADING_STRING.equals(status)) {

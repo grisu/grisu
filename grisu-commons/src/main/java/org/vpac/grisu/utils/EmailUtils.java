@@ -33,6 +33,7 @@ public final class EmailUtils {
 	private static final String ADDRSPEC = "^" + LOCALPART + "@" + DOMAIN + "$";
 	// now compile it:
 	public static final Pattern VALID_PATTERN = Pattern.compile(ADDRSPEC);
+
 	public static boolean isValid(final String userEnteredEmailString) {
 		return VALID_PATTERN.matcher(userEnteredEmailString).matches();
 	}

@@ -117,7 +117,7 @@ public class JobSubmissionManager {
 
 		Document jsdl = null;
 		jsdl = job.getJobDescription();
-		JobSubmitter submitter = submitters.get(submitter_name);
+		final JobSubmitter submitter = submitters.get(submitter_name);
 
 		if (submitter == null) {
 			throw new NoSuchJobSubmitterException("Can't find JobSubmitter: "
@@ -152,9 +152,9 @@ public class JobSubmissionManager {
 		job.addJobProperty(Constants.FACTORY_TYPE_KEY, factoryType);
 
 		myLogger.debug("FactoryType is: " + factoryType);
-		String submitHostEndpoint = submitter.getServerEndpoint(host);
+		final String submitHostEndpoint = submitter.getServerEndpoint(host);
 
-		String handle = submitter.submit(infoManager, submitHostEndpoint,
+		final String handle = submitter.submit(infoManager, submitHostEndpoint,
 				factoryType, job);
 
 		job.setJobhandle(handle);

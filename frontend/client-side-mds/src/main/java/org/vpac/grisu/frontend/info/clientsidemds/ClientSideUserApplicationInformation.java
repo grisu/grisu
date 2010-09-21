@@ -30,7 +30,7 @@ public class ClientSideUserApplicationInformation extends
 
 		if (cachedAllSitesForUser == null) {
 			cachedAllSitesForUser = new TreeSet<String>();
-			for (String subLoc : getAllAvailableSubmissionLocationsForUser()) {
+			for (final String subLoc : getAllAvailableSubmissionLocationsForUser()) {
 				cachedAllSitesForUser.add(registry.getResourceInformation()
 						.getSite(subLoc));
 			}
@@ -42,7 +42,7 @@ public class ClientSideUserApplicationInformation extends
 
 		if (cachedSubmissionLocationsForUser == null) {
 			cachedSubmissionLocationsForUser = new HashSet<String>();
-			for (String fqan : userInfo.getAllAvailableFqans()) {
+			for (final String fqan : userInfo.getAllAvailableFqans()) {
 				cachedSubmissionLocationsForUser
 						.addAll(getAvailableSubmissionLocationsForFqan(fqan));
 			}
@@ -54,7 +54,7 @@ public class ClientSideUserApplicationInformation extends
 
 		if (cachedAllVersionsForUser == null) {
 			cachedAllVersionsForUser = new TreeSet<String>();
-			for (String fqan : userInfo.getAllAvailableFqans()) {
+			for (final String fqan : userInfo.getAllAvailableFqans()) {
 				cachedAllVersionsForUser
 						.addAll(getAllAvailableVersionsForFqan(fqan));
 			}

@@ -20,7 +20,7 @@ public class BatchJobKilledEvent {
 
 	@Override
 	public String toString() {
-		return getJobname()+" killed";
+		return getJobname() + " killed";
 	}
 
 }

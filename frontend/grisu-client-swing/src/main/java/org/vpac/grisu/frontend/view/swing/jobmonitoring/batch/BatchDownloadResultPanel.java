@@ -130,6 +130,12 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 		listeners.addElement(l);
 	}
 
+	public void displayHiddenFiles(boolean display) {
+		// do nothing
+		throw new RuntimeException(
+				"Setting of displayhiddenfiles not implemented");
+	}
+
 	private void fileClickOccured() {
 
 		fireFilesSelected(getSelectedFiles());
@@ -138,10 +144,10 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 
 	private void fileDoubleClickOccured() {
 
-		int selRow = table.getSelectedRow();
+		final int selRow = table.getSelectedRow();
 		if (selRow >= 0) {
 
-			GlazedFile sel = (GlazedFile) fileModel.getValueAt(selRow, 0);
+			final GlazedFile sel = (GlazedFile) fileModel.getValueAt(selRow, 0);
 
 			if (!sel.isFolder()) {
 				fireFileDoubleClicked(sel);
@@ -155,7 +161,7 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 		// if we have no mountPointsListeners, do nothing...
 		if ((listeners != null) && !listeners.isEmpty()) {
 
-			Thread thread = new Thread() {
+			final Thread thread = new Thread() {
 				@Override
 				public void run() {
 
@@ -171,10 +177,10 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 
 						// walk through the listener list and
 						// call the userInput method in each
-						for (FileListListener l : targets) {
+						for (final FileListListener l : targets) {
 							try {
 								l.fileDoubleClicked(file);
-							} catch (Exception e1) {
+							} catch (final Exception e1) {
 								e1.printStackTrace();
 							}
 						}
@@ -206,10 +212,10 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 
 				// walk through the listener list and
 				// call the userInput method in each
-				for (FileListListener l : targets) {
+				for (final FileListListener l : targets) {
 					try {
 						l.filesSelected(files);
-					} catch (Exception e1) {
+					} catch (final Exception e1) {
 						e1.printStackTrace();
 					}
 				}
@@ -233,10 +239,10 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 
 			// walk through the listener list and
 			// call the userInput method in each
-			for (FileListListener l : targets) {
+			for (final FileListListener l : targets) {
 				try {
 					l.isLoading(loading);
-				} catch (Exception e1) {
+				} catch (final Exception e1) {
 					e1.printStackTrace();
 				}
 			}
@@ -262,12 +268,12 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 
 	public Set<GlazedFile> getSelectedFiles() {
 
-		Set<GlazedFile> selected = new TreeSet<GlazedFile>();
+		final Set<GlazedFile> selected = new TreeSet<GlazedFile>();
 
-		for (int r : table.getSelectedRows()) {
+		for (final int r : table.getSelectedRows()) {
 
 			if (r >= 0) {
-				GlazedFile sel = (GlazedFile) fileModel.getValueAt(r, 0);
+				final GlazedFile sel = (GlazedFile) fileModel.getValueAt(r, 0);
 				selected.add(sel);
 			}
 
@@ -331,7 +337,8 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 			}
 
 			if (!displayTimestamp) {
-				TableColumnExt colext = table.getColumnExt("Date modified");
+				final TableColumnExt colext = table
+						.getColumnExt("Date modified");
 				colext.setVisible(false);
 			}
 		}
@@ -344,7 +351,7 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 				.getPropertyName())) {
 			try {
 				rebuildFileList();
-			} catch (RemoteFileSystemException e) {
+			} catch (final RemoteFileSystemException e) {
 				e.printStackTrace();
 			}
 		}
@@ -370,28 +377,29 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 				// currentDirectoryContent.clear();
 				// currentDirectoryContent.getReadWriteLock().writeLock().unlock();
 
-				List<GlazedFile> files;
+				final List<GlazedFile> files;
 				try {
 
-					for (JobObject job : batchJob.getJobs()) {
+					for (final JobObject job : batchJob.getJobs()) {
 
 						if (!job.isFinished(false)) {
 							continue;
 						}
 
-						Set<String> urlsToCheck = new HashSet<String>();
+						final Set<String> urlsToCheck = new HashSet<String>();
 
-						List<String> urls = job.listJobDirectory(0);
+						final List<String> urls = job.listJobDirectory(0);
 
-						String path = batchJob.pathToInputFiles();
+						final String path = batchJob.pathToInputFiles();
 
-						for (String child : urls) {
-							String temp = FileManager.getFilename(child);
-							for (String pattern : patterns) {
+						for (final String child : urls) {
+							final String temp = FileManager.getFilename(child);
+							for (final String pattern : patterns) {
 								if (temp.indexOf(pattern) >= 0) {
-									GlazedFile gf = fm.createGlazedFileFromUrl(
-											child,
-											GlazedFile.Type.FILETYPE_FILE);
+									final GlazedFile gf = fm
+											.createGlazedFileFromUrl(
+													child,
+													GlazedFile.Type.FILETYPE_FILE);
 									if (!currentDirectoryContent.contains(gf)) {
 										currentDirectoryContent
 												.getReadWriteLock().writeLock()
@@ -408,7 +416,7 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 						}
 					}
 
-				} catch (RemoteFileSystemException e) {
+				} catch (final RemoteFileSystemException e) {
 					e.printStackTrace();
 				}
 
@@ -422,7 +430,7 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 
 		try {
 			rebuildFileList();
-		} catch (RemoteFileSystemException e) {
+		} catch (final RemoteFileSystemException e) {
 			e.printStackTrace();
 		}
 
@@ -446,7 +454,7 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 		this.batchJob.addPropertyChangeListener(this);
 		try {
 			rebuildFileList();
-		} catch (RemoteFileSystemException e) {
+		} catch (final RemoteFileSystemException e) {
 			e.printStackTrace();
 		}
 	}
@@ -462,7 +470,7 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 
 		try {
 			rebuildFileList();
-		} catch (RemoteFileSystemException e) {
+		} catch (final RemoteFileSystemException e) {
 			e.printStackTrace();
 		}
 
@@ -481,6 +489,12 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 
 	public void setCurrentUrl(String url) {
 		// not used here
+	}
+
+	public void setExtensionsToDisplay(String[] extensions) {
+		// do nothing
+		throw new RuntimeException(
+				"Setting of extensions to display not implemented");
 	}
 
 	private void setLoading(final boolean loading) {
@@ -516,7 +530,7 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 
 		try {
 			rebuildFileList();
-		} catch (RemoteFileSystemException e) {
+		} catch (final RemoteFileSystemException e) {
 			e.printStackTrace();
 		}
 	}
@@ -531,20 +545,8 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 		this.rjm = RunningJobManager.getDefault(si);
 
 		table.setTransferHandler(new GlazedFilesTransferHandler(this, si));
-		BatchResultContextMenu menu = new BatchResultContextMenu(this.si);
+		final BatchResultContextMenu menu = new BatchResultContextMenu(this.si);
 		setContextMenu(menu);
 
-	}
-
-	public void displayHiddenFiles(boolean display) {
-		// do nothing
-		throw new RuntimeException(
-				"Setting of displayhiddenfiles not implemented");
-	}
-
-	public void setExtensionsToDisplay(String[] extensions) {
-		// do nothing
-		throw new RuntimeException(
-				"Setting of extensions to display not implemented");
 	}
 }

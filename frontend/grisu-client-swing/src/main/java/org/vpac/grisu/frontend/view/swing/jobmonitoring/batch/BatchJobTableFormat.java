@@ -98,7 +98,7 @@ public class BatchJobTableFormat implements AdvancedTableFormat<BatchJobObject> 
 		case 0:
 			try {
 				return baseObject.isRefreshing();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				return null;
 			}
 		case 1:

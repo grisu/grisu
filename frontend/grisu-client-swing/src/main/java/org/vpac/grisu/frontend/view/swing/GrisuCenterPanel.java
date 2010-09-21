@@ -71,8 +71,8 @@ public class GrisuCenterPanel extends JPanel {
 	}
 
 	public void addJobCreationPanel(JobCreationPanel panel) {
-		availableJobCreationPanels.put(ApplicationsManager.getPrettyName(panel
-				.getPanelName()), panel);
+		availableJobCreationPanels.put(
+				ApplicationsManager.getPrettyName(panel.getPanelName()), panel);
 		wrapperPanel.add(panel.getPanel(), panel.getPanelName());
 		pcs.firePropertyChange("availableJobCreationPanels", null,
 				availableJobCreationPanels);
@@ -232,7 +232,8 @@ public class GrisuCenterPanel extends JPanel {
 			displayFileManagement();
 			return;
 		} else {
-			JobCreationPanel panel = availableJobCreationPanels.get(command[0]);
+			final JobCreationPanel panel = availableJobCreationPanels
+					.get(command[0]);
 			if (panel != null) {
 				displayJobCreationPanel(panel);
 			}

@@ -134,7 +134,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 	private void cleanUpUI() {
 
 		getInputFileComboBox().removeAllItems();
-		for (String entry : hm.getEntries(MPIBLAST_BATCH_INPUT_FILES)) {
+		for (final String entry : hm.getEntries(MPIBLAST_BATCH_INPUT_FILES)) {
 			getInputFileComboBox().addItem(entry);
 		}
 		getInputFileComboBox().setSelectedItem(null);
@@ -168,7 +168,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 						return;
 					}
 
-					GlazedFile file = popupFileDialogAndAskForFile();
+					final GlazedFile file = popupFileDialogAndAskForFile();
 
 					if (file == null) {
 						return;
@@ -220,12 +220,12 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 					if (ItemEvent.SELECTED == e.getStateChange()) {
 
 						try {
-							GlazedFile file = fm
+							final GlazedFile file = fm
 									.createGlazedFileFromUrl((String) inputFileComboBox
 											.getSelectedItem());
 
 							setInputFile(file);
-						} catch (Exception e1) {
+						} catch (final Exception e1) {
 
 							JXErrorPane.showDialog(e1);
 
@@ -352,7 +352,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 
 								try {
 									submitJob();
-								} catch (BatchJobException e) {
+								} catch (final BatchJobException e) {
 
 									e.printStackTrace();
 									cleanUpUI();
@@ -392,15 +392,15 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 			try {
 				currentFastaInput = FileUtils.readLines(fm
 						.downloadFile(currentFile.getUrl()));
-			} catch (FileTransactionException e) {
+			} catch (final FileTransactionException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				throw e;
 			}
 
-			Iterator<String> it = currentFastaInput.iterator();
+			final Iterator<String> it = currentFastaInput.iterator();
 			while (it.hasNext()) {
-				String line = it.next();
+				final String line = it.next();
 				if (StringUtils.isBlank(line.trim())) {
 					it.remove();
 				}
@@ -408,7 +408,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 
 			currentParsedFastaInput = new LinkedList<List<String>>();
 			List<String> currentPart = null;
-			for (String line : currentFastaInput) {
+			for (final String line : currentFastaInput) {
 				if (line.startsWith(">")) {
 					if (currentPart != null && currentPart.size() > 0) {
 						currentParsedFastaInput.add(currentPart);
@@ -425,7 +425,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 			}
 			currentParsedFastaInput.add(currentPart);
 
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 
@@ -435,13 +435,13 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 
 		getFileDialog().setVisible(true);
 
-		GlazedFile file = getFileDialog().getSelectedFile();
+		final GlazedFile file = getFileDialog().getSelectedFile();
 		getFileDialog().clearSelection();
 
-		GlazedFile currentDir = getFileDialog().getCurrentDirectory();
+		final GlazedFile currentDir = getFileDialog().getCurrentDirectory();
 
-		hm.addHistoryEntry(MPIBLAST_EXAMPLE_LAST_INPUT_FILE_DIR, currentDir
-				.getUrl());
+		hm.addHistoryEntry(MPIBLAST_EXAMPLE_LAST_INPUT_FILE_DIR,
+				currentDir.getUrl());
 
 		return file;
 	}
@@ -473,10 +473,9 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 
 			getJobnameField().setText(
 					uem.calculateUniqueJobname(currentFile
-							.getNameWithoutExtension()
-							+ "_job"));
+							.getNameWithoutExtension() + "_job"));
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			JXErrorPane.showDialog(e);
 			return;
 		}
@@ -507,14 +506,14 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 
 		getJobSubmissionLogPanel().setBatchJob(currentBatchJob);
 
-		Map<String, List<List<String>>> inputFiles = new LinkedHashMap<String, List<List<String>>>();
+		final Map<String, List<List<String>>> inputFiles = new LinkedHashMap<String, List<List<String>>>();
 
-		int noJobs = getSlider().getValue();
+		final int noJobs = getSlider().getValue();
 
-		Double linesPerJobD = new Double(currentParsedFastaInput.size())
+		final Double linesPerJobD = new Double(currentParsedFastaInput.size())
 				/ new Double(noJobs);
 
-		int linesPerJob = new Long(Math.round(linesPerJobD + 0.499999))
+		final int linesPerJob = new Long(Math.round(linesPerJobD + 0.499999))
 				.intValue();
 
 		for (int i = 0; i < currentParsedFastaInput.size(); i = i + linesPerJob) {
@@ -522,31 +521,33 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 			if (end > currentParsedFastaInput.size()) {
 				end = currentParsedFastaInput.size();
 			}
-			List<List<String>> tempList = currentParsedFastaInput.subList(i,
-					end);
-			inputFiles.put("part" + formatter.format(i) + "-part"
-					+ formatter.format(end - 1), tempList);
+			final List<List<String>> tempList = currentParsedFastaInput
+					.subList(i, end);
+			inputFiles.put(
+					"part" + formatter.format(i) + "-part"
+							+ formatter.format(end - 1), tempList);
 		}
 
-		for (String jobname : inputFiles.keySet()) {
+		for (final String jobname : inputFiles.keySet()) {
 
 			// create temp file
-			String inputFIlename = jobname + "_" + currentBatchJob.getJobname();
-			File tempFile = new File(System.getProperty("java.io.tmpdir"),
-					inputFIlename);
+			final String inputFIlename = jobname + "_"
+					+ currentBatchJob.getJobname();
+			final File tempFile = new File(
+					System.getProperty("java.io.tmpdir"), inputFIlename);
 			tempFile.delete();
 			try {
-				List<List<String>> all = inputFiles.get(jobname);
-				List<String> consolidated = new LinkedList<String>();
-				for (List<String> temp : all) {
+				final List<List<String>> all = inputFiles.get(jobname);
+				final List<String> consolidated = new LinkedList<String>();
+				for (final List<String> temp : all) {
 					consolidated.addAll(temp);
 				}
 				FileUtils.writeLines(tempFile, consolidated);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new BatchJobException(e);
 			}
 
-			JobObject tempJob = new JobObject(si);
+			final JobObject tempJob = new JobObject(si);
 			tempJob.setJobname(uem.calculateUniqueJobname(jobname + "_"
 					+ currentBatchJob.getJobname()));
 			tempJob.addInputFileUrl(tempFile.toURI().toString());
@@ -554,8 +555,8 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 			tempJob.setApplicationVersion("1.5.0");
 			// tempJob.setWalltimeInSeconds(604800);
 			tempJob.setWalltimeInSeconds(DEFAULT_WALLTIME);
-			String commandline = "mpiblast -p blastp -d nr -i " + inputFIlename
-					+ " -o " + jobname + ".out.txt";
+			final String commandline = "mpiblast -p blastp -d nr -i "
+					+ inputFIlename + " -o " + jobname + ".out.txt";
 			tempJob.setCommandline(commandline);
 			tempJob.setForce_mpi(true);
 			tempJob.setCpus(8);
@@ -569,13 +570,13 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 
 		try {
 			currentBatchJob.prepareAndCreateJobs(true);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new BatchJobException(e);
 		}
 
 		try {
 			currentBatchJob.submit();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new BatchJobException(e);
 		}
 

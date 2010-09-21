@@ -40,17 +40,20 @@ public class BatchJobMonitoringGrid extends JPanel {
 					showMenu(e);
 				}
 			}
+
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				if (e.isPopupTrigger()) {
 					showMenu(e);
 				}
 			}
+
 			private void showMenu(MouseEvent e) {
 				popup.show(e.getComponent(), e.getX(), e.getY());
 			}
 		});
 	}
+
 	private JScrollPane scrollPane;
 
 	private JXTable table;
@@ -78,12 +81,12 @@ public class BatchJobMonitoringGrid extends JPanel {
 	public BatchJobMonitoringGrid(ServiceInterface si, String application) {
 		this.si = si;
 		this.em = GrisuRegistryManager.getDefault(si)
-		.getUserEnvironmentManager();
+				.getUserEnvironmentManager();
 		this.rjm = RunningJobManager.getDefault(si);
 
 		batchJobs = rjm.getBatchJobs(application);
-		ObservableElementList.Connector<BatchJobObject> bjoConnector = GlazedLists
-		.beanConnector(BatchJobObject.class);
+		final ObservableElementList.Connector<BatchJobObject> bjoConnector = GlazedLists
+				.beanConnector(BatchJobObject.class);
 		observedBatchJobs = new ObservableElementList<BatchJobObject>(
 				batchJobs, bjoConnector);
 
@@ -108,11 +111,11 @@ public class BatchJobMonitoringGrid extends JPanel {
 
 	private void batchJobDoubleClickOccured() {
 
-		int selRow = table.getSelectedRow();
+		final int selRow = table.getSelectedRow();
 		if (selRow >= 0) {
 
-			BatchJobObject sel = (BatchJobObject) batchJobModel.getValueAt(
-					selRow, 1);
+			final BatchJobObject sel = (BatchJobObject) batchJobModel
+					.getValueAt(selRow, 1);
 			fireBatchJobSelected(sel);
 		}
 
@@ -131,10 +134,10 @@ public class BatchJobMonitoringGrid extends JPanel {
 
 			// walk through the listener list and
 			// call the userInput method in each
-			for (BatchJobSelectionListener bjsl : targets) {
+			for (final BatchJobSelectionListener bjsl : targets) {
 				try {
 					bjsl.batchJobSelected(bj);
-				} catch (Exception e1) {
+				} catch (final Exception e1) {
 					e1.printStackTrace();
 				}
 			}
@@ -150,25 +153,24 @@ public class BatchJobMonitoringGrid extends JPanel {
 
 					final Set<BatchJobObject> bjs = getSelectedBatchJobs();
 
-					StringBuffer message = new StringBuffer("Do you really want to kill and clean the following batchjobs?\n\n");
+					final StringBuffer message = new StringBuffer(
+							"Do you really want to kill and clean the following batchjobs?\n\n");
 
-					for ( BatchJobObject bj : bjs ) {
-						message.append(bj.getJobname()+"\n");
+					for (final BatchJobObject bj : bjs) {
+						message.append(bj.getJobname() + "\n");
 					}
 
-					int n = JOptionPane.showConfirmDialog(
-							getRootPane(),
-							message.toString(),
-							"Kill and clean batchjobs",
+					final int n = JOptionPane.showConfirmDialog(getRootPane(),
+							message.toString(), "Kill and clean batchjobs",
 							JOptionPane.YES_NO_OPTION);
 
-					if ( n == JOptionPane.YES_OPTION ) {
+					if (n == JOptionPane.YES_OPTION) {
 
 						new Thread() {
 							@Override
 							public void run() {
 
-								for ( BatchJobObject bj : bjs ) {
+								for (final BatchJobObject bj : bjs) {
 									bj.kill(true, false);
 								}
 
@@ -187,7 +189,7 @@ public class BatchJobMonitoringGrid extends JPanel {
 			mntmRefreshManually.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 
-					for ( BatchJobObject bj : getSelectedBatchJobs() ) {
+					for (final BatchJobObject bj : getSelectedBatchJobs()) {
 						bj.refresh(false);
 					}
 
@@ -205,6 +207,7 @@ public class BatchJobMonitoringGrid extends JPanel {
 		}
 		return popupMenu;
 	}
+
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
@@ -212,11 +215,13 @@ public class BatchJobMonitoringGrid extends JPanel {
 		}
 		return scrollPane;
 	}
+
 	public BatchJobObject getSelectedBatchJob() {
 
-		int row = getTable().getSelectedRow();
+		final int row = getTable().getSelectedRow();
 
-		BatchJobObject bj = (BatchJobObject)batchJobModel.getValueAt(row, 1);
+		final BatchJobObject bj = (BatchJobObject) batchJobModel.getValueAt(
+				row, 1);
 
 		return bj;
 
@@ -224,16 +229,18 @@ public class BatchJobMonitoringGrid extends JPanel {
 
 	public Set<BatchJobObject> getSelectedBatchJobs() {
 
-		Set<BatchJobObject> result = new HashSet<BatchJobObject>();
-		int[] rows = getTable().getSelectedRows();
+		final Set<BatchJobObject> result = new HashSet<BatchJobObject>();
+		final int[] rows = getTable().getSelectedRows();
 
-		for ( int row : rows ) {
-			BatchJobObject bj = (BatchJobObject)batchJobModel.getValueAt(row, 1);
+		for (final int row : rows) {
+			final BatchJobObject bj = (BatchJobObject) batchJobModel
+					.getValueAt(row, 1);
 			result.add(bj);
 		}
 
 		return result;
 	}
+
 	private JXTable getTable() {
 		if (table == null) {
 			table = new JXTable(batchJobModel);
@@ -246,7 +253,8 @@ public class BatchJobMonitoringGrid extends JPanel {
 			table.setHighlighters(HighlighterFactory.createAlternateStriping());
 			addPopup(table, getPopupMenu());
 
-			table.setDefaultRenderer(BatchJobObject.class, new BatchJobNameCellRenderer());
+			table.setDefaultRenderer(BatchJobObject.class,
+					new BatchJobNameCellRenderer());
 			table.setDefaultRenderer(Boolean.class,
 					new BatchJobRefreshRenderer());
 			table.setDefaultRenderer(Double.class,
@@ -324,6 +332,7 @@ public class BatchJobMonitoringGrid extends JPanel {
 		}
 		return table;
 	}
+
 	// remove a listener
 	synchronized public void removeBatchJobSelectionListener(
 			BatchJobSelectionListener l) {

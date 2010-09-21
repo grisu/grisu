@@ -39,9 +39,9 @@ public class BatchJobMonitoringApp {
 
 			public void run() {
 				try {
-					BatchJobMonitoringApp window = new BatchJobMonitoringApp();
+					final BatchJobMonitoringApp window = new BatchJobMonitoringApp();
 					window.frame.setVisible(true);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -68,7 +68,7 @@ public class BatchJobMonitoringApp {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
 		// frame.add(new BatchJobTabbedPane(si, null), BorderLayout.CENTER);
-		GrisuSwingClient client = new GrisuTestSwingClientPanel();
+		final GrisuSwingClient client = new GrisuTestSwingClientPanel();
 		frame.add(new LoginPanel(client, null), BorderLayout.CENTER);
 	}
 

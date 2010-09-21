@@ -405,7 +405,7 @@ public class BatchJobStatusPanel extends JPanel implements
 				} else if (BatchJobObject.NUMBER_OF_UNSUBMITTED_JOBS.equals(evt
 						.getPropertyName())) {
 
-					int i = (Integer) evt.getNewValue();
+					final int i = (Integer) evt.getNewValue();
 					getUnsubProgress().setValue(i);
 					if (i > 0) {
 						getUnsubValueLabel().setText("" + i);
@@ -415,7 +415,7 @@ public class BatchJobStatusPanel extends JPanel implements
 
 				} else if (BatchJobObject.NUMBER_OF_WAITING_JOBS.equals(evt
 						.getPropertyName())) {
-					int i = (Integer) evt.getNewValue();
+					final int i = (Integer) evt.getNewValue();
 					getWaitingProgress().setValue(i);
 					if (i > 0) {
 						getWaitingValueLabel().setText("" + i);
@@ -424,7 +424,7 @@ public class BatchJobStatusPanel extends JPanel implements
 					}
 				} else if (BatchJobObject.NUMBER_OF_RUNNING_JOBS.equals(evt
 						.getPropertyName())) {
-					int i = (Integer) evt.getNewValue();
+					final int i = (Integer) evt.getNewValue();
 					getRunProgress().setValue(i);
 					if (i > 0) {
 						getRunValueLabel().setText("" + i);
@@ -433,7 +433,7 @@ public class BatchJobStatusPanel extends JPanel implements
 					}
 				} else if (BatchJobObject.NUMBER_OF_FAILED_JOBS.equals(evt
 						.getPropertyName())) {
-					int i = (Integer) evt.getNewValue();
+					final int i = (Integer) evt.getNewValue();
 					getFailProgress().setValue(i);
 					if (i > 0) {
 						getFailValueLabel().setText("" + i);
@@ -442,7 +442,7 @@ public class BatchJobStatusPanel extends JPanel implements
 					}
 				} else if (BatchJobObject.NUMBER_OF_SUCCESSFULL_JOBS.equals(evt
 						.getPropertyName())) {
-					int i = (Integer) evt.getNewValue();
+					final int i = (Integer) evt.getNewValue();
 					getDoneProgress().setValue(i);
 					if (i > 0) {
 						getDoneValueLabel().setText("" + i);

@@ -8,21 +8,22 @@ import javax.swing.JList;
 
 public class EmptySelectionListCellRenderer extends DefaultListCellRenderer {
 
-        private String selectionPrompt;
-        private JComboBox comboBox;
+	private final String selectionPrompt;
+	private final JComboBox comboBox;
 
-        public EmptySelectionListCellRenderer( JComboBox comboBox,
-                                     String selectionPrompt ) {
-            this.comboBox = comboBox;
-            this.selectionPrompt = selectionPrompt;
-        }
+	public EmptySelectionListCellRenderer(JComboBox comboBox,
+			String selectionPrompt) {
+		this.comboBox = comboBox;
+		this.selectionPrompt = selectionPrompt;
+	}
 
-        public Component getListCellRendererComponent( JList list,
-                Object value, int ix, boolean sel, boolean focus ) {
-            super.getListCellRendererComponent( list, value, ix,
-                    sel, focus );
-            if ( ix == -1 && comboBox.getSelectedIndex() == -1 )
-                setText( selectionPrompt );
-            return this;
-        }
-    }
+	@Override
+	public Component getListCellRendererComponent(JList list, Object value,
+			int ix, boolean sel, boolean focus) {
+		super.getListCellRendererComponent(list, value, ix, sel, focus);
+		if (ix == -1 && comboBox.getSelectedIndex() == -1) {
+			setText(selectionPrompt);
+		}
+		return this;
+	}
+}

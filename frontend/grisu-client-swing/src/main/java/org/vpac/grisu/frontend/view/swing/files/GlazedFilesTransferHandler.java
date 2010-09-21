@@ -8,11 +8,11 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
+import javax.swing.WindowConstants;
 
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransaction;
@@ -28,7 +28,7 @@ public class GlazedFilesTransferHandler extends TransferHandler {
 	{
 		try {
 			SET_DATA_FLAVOR = new DataFlavor(LOCAL_SET_TYPE);
-		} catch (ClassNotFoundException e) {
+		} catch (final ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}
 
@@ -57,10 +57,10 @@ public class GlazedFilesTransferHandler extends TransferHandler {
 	@Override
 	public boolean canImport(JComponent c, DataFlavor[] flavors) {
 
-		GlazedFile.Type type = fileList.getCurrentDirectory().getType();
+		final GlazedFile.Type type = fileList.getCurrentDirectory().getType();
 
 		if (GlazedFile.Type.FILETYPE_FOLDER.equals(type)) {
-			for (DataFlavor flavor : flavors) {
+			for (final DataFlavor flavor : flavors) {
 				if (SET_DATA_FLAVOR.equals(flavor)) {
 					return true;
 				}
@@ -75,14 +75,14 @@ public class GlazedFilesTransferHandler extends TransferHandler {
 
 		if (c instanceof JTable) {
 
-			JTable table = (JTable) c;
+			final JTable table = (JTable) c;
 
-			Set<GlazedFile> selected = new TreeSet<GlazedFile>();
+			final Set<GlazedFile> selected = new TreeSet<GlazedFile>();
 
-			for (int r : table.getSelectedRows()) {
+			for (final int r : table.getSelectedRows()) {
 
 				if (r >= 0) {
-					GlazedFile sel = (GlazedFile) table.getValueAt(r, 0);
+					final GlazedFile sel = (GlazedFile) table.getValueAt(r, 0);
 					if (GlazedFile.Type.FILETYPE_FILE.equals(sel.getType())
 							|| GlazedFile.Type.FILETYPE_FOLDER.equals(sel
 									.getType())) {
@@ -118,9 +118,9 @@ public class GlazedFilesTransferHandler extends TransferHandler {
 				importGlazedFilesSet((Set<GlazedFile>) t
 						.getTransferData(SET_DATA_FLAVOR));
 				return true;
-			} catch (UnsupportedFlavorException ufe) {
+			} catch (final UnsupportedFlavorException ufe) {
 				ufe.printStackTrace();
-			} catch (IOException ioe) {
+			} catch (final IOException ioe) {
 				ioe.printStackTrace();
 			}
 		}
@@ -130,14 +130,16 @@ public class GlazedFilesTransferHandler extends TransferHandler {
 
 	protected void importGlazedFilesSet(Set<GlazedFile> glazedFiles) {
 
-		FileTransaction ft = new FileTransaction(fm, glazedFiles, fileList
-				.getCurrentDirectory(), true);
+		final FileTransaction ft = new FileTransaction(fm, glazedFiles,
+				fileList.getCurrentDirectory(), true);
 		ftm.addFileTransfer(ft);
 
-		JFrame frame = (JFrame) SwingUtilities.getRoot(fileList.getPanel());
-		FileTransactionStatusDialog ftd = new FileTransactionStatusDialog(frame, ft);
+		final JFrame frame = (JFrame) SwingUtilities.getRoot(fileList
+				.getPanel());
+		final FileTransactionStatusDialog ftd = new FileTransactionStatusDialog(
+				frame, ft);
 
-		ftd.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		ftd.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		ftd.setVisible(true);
 
 	}

@@ -39,10 +39,10 @@ public class FileSystemStructureToXMLConverter {
 
 		if (docBuilder == null) {
 			try {
-				DocumentBuilderFactory docFactory = DocumentBuilderFactory
+				final DocumentBuilderFactory docFactory = DocumentBuilderFactory
 						.newInstance();
 				docBuilder = docFactory.newDocumentBuilder();
-			} catch (ParserConfigurationException e1) {
+			} catch (final ParserConfigurationException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 				return null;
@@ -50,6 +50,7 @@ public class FileSystemStructureToXMLConverter {
 		}
 		return docBuilder;
 	}
+
 	private Document output = null;
 
 	private User user = null;
@@ -72,16 +73,16 @@ public class FileSystemStructureToXMLConverter {
 			throws RemoteFileSystemException {
 
 		FileObject[] filesAndDirs;
-		String parentFolder = parentElement.getAttribute("path");
+		final String parentFolder = parentElement.getAttribute("path");
 		if (parentFolder == null || "".equals(parentFolder)) {
 			// means no folder
 			return;
 		}
-		FileObject folder = user.aquireFile(parentFolder);
+		final FileObject folder = user.aquireFile(parentFolder);
 		try {
 			myLogger.debug("Accessing folder: " + parentFolder);
 			filesAndDirs = folder.getChildren();
-		} catch (FileSystemException e) {
+		} catch (final FileSystemException e) {
 			// TODO improve that
 			e.printStackTrace();
 			myLogger.error("Can't access folder: " + parentFolder);
@@ -89,23 +90,25 @@ public class FileSystemStructureToXMLConverter {
 		}
 
 		try {
-			for (FileObject fo : filesAndDirs) {
+			for (final FileObject fo : filesAndDirs) {
 				if (fo.getType().equals(FileType.FOLDER)) {
 					if (currentRecursion < maxRecursion) {
-						Element element = createElement(fo, absolutePath, mp);
+						final Element element = createElement(fo, absolutePath,
+								mp);
 						parentElement.appendChild(element);
 						buildDirectoryStructure(element, mp, absolutePath,
 								currentRecursion + 1, maxRecursion);
 					} else {
-						Element element = createElement(fo, absolutePath, mp);
+						final Element element = createElement(fo, absolutePath,
+								mp);
 						parentElement.appendChild(element);
 					}
 				} else {
-					Element element = createElement(fo, absolutePath, mp);
+					final Element element = createElement(fo, absolutePath, mp);
 					parentElement.appendChild(element);
 				}
 			}
-		} catch (FileSystemException e) {
+		} catch (final FileSystemException e) {
 			throw new RemoteFileSystemException(
 					"Could not access file/folder under: " + parentFolder
 							+ ": " + e.getMessage());
@@ -146,8 +149,8 @@ public class FileSystemStructureToXMLConverter {
 
 		element.setAttribute("name", fo.getName().getBaseName());
 		if (fo.getType().equals(FileType.FILE)) {
-			element.setAttribute("size", new Long(fo.getContent().getSize())
-					.toString());
+			element.setAttribute("size",
+					new Long(fo.getContent().getSize()).toString());
 		}
 
 		return element;
@@ -182,7 +185,7 @@ public class FileSystemStructureToXMLConverter {
 			VomsException {
 
 		output = getDocBuilder().newDocument();
-		Element root = output.createElement("Files");
+		final Element root = output.createElement("Files");
 
 		if (absolutePath) {
 			root.setAttribute("absolutePath", "true");
@@ -194,8 +197,8 @@ public class FileSystemStructureToXMLConverter {
 		output.appendChild(root);
 
 		if ("/".equals(folder)) {
-			for (MountPoint mp : user.getAllMountPoints()) {
-				Element mp_element = output.createElement("MountPoint");
+			for (final MountPoint mp : user.getAllMountPoints()) {
+				final Element mp_element = output.createElement("MountPoint");
 				if (absolutePath) {
 					mp_element.setAttribute("path", mp.getRootUrl());
 					mp_element.setAttribute("name", mp.getRootUrl());
@@ -226,16 +229,16 @@ public class FileSystemStructureToXMLConverter {
 			// root_element.setAttribute("path", mp.getMountpoint());
 			// root_element.setAttribute("name",
 			// mp.getMountpoint().substring(1));
-			//				
+			//
 			// }
-			//				
+			//
 			// buildDirectoryStructure(root_element, mp, absolutePath, 0,
 			// recursion_level);
 			// } else {
 			try {
 				root_element = createElement(user.aquireFile(folder),
 						absolutePath, mp);
-			} catch (FileSystemException e) {
+			} catch (final FileSystemException e) {
 				throw new RemoteFileSystemException("Could not aquire file: "
 						+ folder + ": " + e.getMessage());
 			}

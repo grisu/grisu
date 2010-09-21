@@ -53,7 +53,7 @@ public class FileListActionPanel extends JPanel implements FileListListener {
 		try {
 			icon = new ImageIcon(FileListActionPanel.class.getClassLoader()
 					.getResource(path));
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 
@@ -110,7 +110,7 @@ public class FileListActionPanel extends JPanel implements FileListListener {
 
 				public void actionPerformed(ActionEvent e) {
 
-					String alias = (String) JOptionPane.showInputDialog(
+					final String alias = (String) JOptionPane.showInputDialog(
 							FileListActionPanel.this,
 							"Please provide the bookmark name:",
 							"Add bookmark", JOptionPane.PLAIN_MESSAGE,

@@ -19,12 +19,14 @@ public class TestPanel extends JPanel {
 					showMenu(e);
 				}
 			}
+
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				if (e.isPopupTrigger()) {
 					showMenu(e);
 				}
 			}
+
 			private void showMenu(MouseEvent e) {
 				popup.show(e.getComponent(), e.getX(), e.getY());
 			}
@@ -41,6 +43,7 @@ public class TestPanel extends JPanel {
 		addPopup(this, getPopupMenu());
 
 	}
+
 	private JMenuItem getMntmRestartSelectedJobs() {
 		if (mntmRestartSelectedJobs == null) {
 			mntmRestartSelectedJobs = new JMenuItem("Restart selected job(s)");
@@ -51,6 +54,7 @@ public class TestPanel extends JPanel {
 		}
 		return mntmRestartSelectedJobs;
 	}
+
 	private JPopupMenu getPopupMenu() {
 		if (popupMenu == null) {
 			popupMenu = new JPopupMenu();

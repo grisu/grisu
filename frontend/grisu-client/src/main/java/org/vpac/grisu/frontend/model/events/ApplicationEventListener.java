@@ -5,7 +5,7 @@ import org.bushe.swing.event.EventSubscriber;
 import org.vpac.grisu.model.status.ActionStatusEvent;
 
 public class ApplicationEventListener implements EventSubscriber {
-	
+
 	public ApplicationEventListener() {
 		EventBus.subscribe(ActionStatusEvent.class, this);
 		EventBus.subscribe(BatchJobEvent.class, this);
@@ -13,9 +13,8 @@ public class ApplicationEventListener implements EventSubscriber {
 		EventBus.subscribe(JobStatusEvent.class, this);
 	}
 
-
 	public void onEvent(Object event) {
-		System.out.println("EVENT: "+event.toString());
+		System.out.println("EVENT: " + event.toString());
 	}
 
 }

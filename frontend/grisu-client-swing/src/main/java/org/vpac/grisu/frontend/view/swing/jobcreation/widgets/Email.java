@@ -42,41 +42,6 @@ public class Email extends AbstractWidget {
 		setHistoryKey(EMAIL_HISTORY_KEY_GENERIC);
 	}
 
-	@Override
-	public String getValue() {
-		String emailAddress = getEmailAddress();
-		if (StringUtils.isBlank(emailAddress)) {
-			emailAddress = "null";
-		}
-		String value = getCheckBox().isSelected() + ","
-				+ getCheckBox_1().isSelected() + "," + emailAddress;
-		return value;
-	}
-
-	@Override
-	public void setValue(String value) {
-
-		if (StringUtils.isBlank(value)) {
-			return;
-		}
-
-		try {
-			String[] string = value.split(",");
-			boolean onStart = Boolean.parseBoolean(string[0]);
-			boolean onFinish = Boolean.parseBoolean(string[1]);
-			String emailAddress = string[2];
-			if (emailAddress == null || "null".equals(emailAddress)) {
-				emailAddress = "";
-			}
-			getCheckBox().setSelected(onStart);
-			getCheckBox_1().setSelected(onFinish);
-			getTextField().setText(emailAddress);
-
-		} catch (Exception e) {
-			return;
-		}
-	}
-
 	private JCheckBox getCheckBox() {
 		if (checkBox == null) {
 			checkBox = new JCheckBox("...started");
@@ -89,6 +54,10 @@ public class Email extends AbstractWidget {
 			checkBox_1 = new JCheckBox("...finished");
 		}
 		return checkBox_1;
+	}
+
+	public String getEmailAddress() {
+		return getTextField().getText();
 	}
 
 	private JLabel getLabel() {
@@ -106,6 +75,17 @@ public class Email extends AbstractWidget {
 		return textField;
 	}
 
+	@Override
+	public String getValue() {
+		String emailAddress = getEmailAddress();
+		if (StringUtils.isBlank(emailAddress)) {
+			emailAddress = "null";
+		}
+		final String value = getCheckBox().isSelected() + ","
+				+ getCheckBox_1().isSelected() + "," + emailAddress;
+		return value;
+	}
+
 	public boolean sendEmailWhenJobFinished() {
 		return getCheckBox_1().isSelected();
 	}
@@ -114,7 +94,27 @@ public class Email extends AbstractWidget {
 		return getCheckBox().isSelected();
 	}
 
-	public String getEmailAddress() {
-		return getTextField().getText();
+	@Override
+	public void setValue(String value) {
+
+		if (StringUtils.isBlank(value)) {
+			return;
+		}
+
+		try {
+			final String[] string = value.split(",");
+			final boolean onStart = Boolean.parseBoolean(string[0]);
+			final boolean onFinish = Boolean.parseBoolean(string[1]);
+			String emailAddress = string[2];
+			if (emailAddress == null || "null".equals(emailAddress)) {
+				emailAddress = "";
+			}
+			getCheckBox().setSelected(onStart);
+			getCheckBox_1().setSelected(onFinish);
+			getTextField().setText(emailAddress);
+
+		} catch (final Exception e) {
+			return;
+		}
 	}
 }

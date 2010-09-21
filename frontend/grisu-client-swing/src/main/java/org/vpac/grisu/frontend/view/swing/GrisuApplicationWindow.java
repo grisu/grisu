@@ -40,13 +40,13 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 
 		new ApplicationEventListener();
 
-		Toolkit tk = Toolkit.getDefaultToolkit();
+		final Toolkit tk = Toolkit.getDefaultToolkit();
 		tk.addAWTEventListener(WindowSaver.getInstance(),
 				AWTEvent.WINDOW_EVENT_MASK);
 
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 		//
@@ -107,8 +107,8 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 
 		frame.getContentPane().setLayout(new BorderLayout());
 
-		boolean singleJobs = displaySingleJobsCreationPane();
-		boolean batchJobs = displayBatchJobsCreationPane();
+		final boolean singleJobs = displaySingleJobsCreationPane();
+		final boolean batchJobs = displayBatchJobsCreationPane();
 
 		// for (JobCreationPanel panel : getJobCreationPanels()) {
 		// if (panel.createsBatchJob()) {
@@ -119,7 +119,7 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 		// }
 		// }
 
-		boolean displayAppSpecificMonitoringItems = displayAppSpecificMonitoringItems();
+		final boolean displayAppSpecificMonitoringItems = displayAppSpecificMonitoringItems();
 
 		if (displayAppSpecificMonitoringItems) {
 			mainPanel = new GrisuMainPanel(singleJobs, true, true, null,
@@ -129,9 +129,9 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 					batchJobs, false, false, null, true);
 		}
 
-		List<ServiceInterfaceHolder> siHolders = ImmutableList
+		final List<ServiceInterfaceHolder> siHolders = ImmutableList
 				.of((ServiceInterfaceHolder) this);
-		LoginPanel lp = new LoginPanel(mainPanel, siHolders);
+		final LoginPanel lp = new LoginPanel(mainPanel, siHolders);
 		frame.getContentPane().add(lp, BorderLayout.CENTER);
 	}
 
@@ -140,7 +140,7 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 	public void refreshJobCreationPanels() {
 
 		mainPanel.removeAlJobCreationPanelsl();
-		for (JobCreationPanel panel : getJobCreationPanels()) {
+		for (final JobCreationPanel panel : getJobCreationPanels()) {
 			mainPanel.addJobCreationPanel(panel);
 		}
 

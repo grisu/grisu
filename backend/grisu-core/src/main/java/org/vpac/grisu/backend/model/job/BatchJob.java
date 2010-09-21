@@ -62,7 +62,7 @@ public class BatchJob {
 	private String fqan = null;
 
 	private Map<Long, String> logMessages = Collections
-	.synchronizedMap(new TreeMap<Long, String>());
+			.synchronizedMap(new TreeMap<Long, String>());
 
 	// for hibernate
 	private BatchJob() {
@@ -84,7 +84,7 @@ public class BatchJob {
 	}
 
 	public void addJob(String jobname) throws NoSuchJobException {
-		Job job = getJob(jobname);
+		final Job job = getJob(jobname);
 		this.jobs.add(job);
 		// if ( job.getStatus() >= JobConstants.FINISHED_EITHER_WAY &&
 		// job.getStatus() != JobConstants.DONE ) {
@@ -127,20 +127,21 @@ public class BatchJob {
 		result.setMessages(DtoLogMessages.createLogMessages(this
 				.getLogMessages()));
 
-		ExecutorService executor = Executors
-		.newFixedThreadPool(ServerPropertiesManager
-				.getConcurrentJobStatusThreadsPerUser());
+		final ExecutorService executor = Executors
+				.newFixedThreadPool(ServerPropertiesManager
+						.getConcurrentJobStatusThreadsPerUser());
 
 		for (final Job job : getJobs()) {
 
-			Thread thread = new Thread() {
+			final Thread thread = new Thread() {
 				@Override
 				public void run() {
 
 					DtoJob dtoJob = null;
 
-					dtoJob = DtoJob.createJob(job.getStatus(), job
-							.getJobProperties(), job.getInputFiles(), job.getLogMessages());
+					dtoJob = DtoJob.createJob(job.getStatus(),
+							job.getJobProperties(), job.getInputFiles(),
+							job.getLogMessages());
 					result.addJob(dtoJob);
 				}
 			};
@@ -150,7 +151,7 @@ public class BatchJob {
 		executor.shutdown();
 		try {
 			executor.awaitTermination(3600, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			throw new RuntimeException(e);
 		}
 
@@ -158,9 +159,9 @@ public class BatchJob {
 		result.setStatus(result.getPercentFinished().intValue());
 
 		// boolean finished = true;
-		DtoJobs dtoJobs = new DtoJobs();
-		for (String jobname : getFailedJobs()) {
-			DtoJob job = result.retrieveJob(jobname);
+		final DtoJobs dtoJobs = new DtoJobs();
+		for (final String jobname : getFailedJobs()) {
+			final DtoJob job = result.retrieveJob(jobname);
 			dtoJobs.addJob(job);
 		}
 		result.setFailedJobs(dtoJobs);
@@ -211,7 +212,7 @@ public class BatchJob {
 
 	protected Job getJob(final String jobname) throws NoSuchJobException {
 
-		Job job = jobdao.findJobByDN(getDn(), jobname);
+		final Job job = jobdao.findJobByDN(getDn(), jobname);
 		return job;
 	}
 
@@ -250,7 +251,7 @@ public class BatchJob {
 	public void recalculateAllUsedMountPoints() {
 
 		this.usedMountPoints.clear();
-		for (Job job : getJobs()) {
+		for (final Job job : getJobs()) {
 			usedMountPoints.add(job.getJobProperty(Constants.MOUNTPOINT_KEY));
 		}
 

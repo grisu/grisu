@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class JobsException extends Exception {
 
-	private Map<JobObject, Exception> failures;
+	private final Map<JobObject, Exception> failures;
 
 	public JobsException(Map<JobObject, Exception> failures) {
 		super();

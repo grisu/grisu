@@ -72,21 +72,19 @@ import au.org.arcs.jcommons.constants.Constants;
 @Table(name = "users")
 public class User {
 
-	public static UserDAO userdao = new UserDAO();
-
 	// to get one filesystemmanager per thread
 	private class ThreadLocalFsManager extends ThreadLocal {
 
 		private FileSystem createFileSystem(String rootUrl,
 				ProxyCredential credToUse) {
 
-			FileSystemOptions opts = new FileSystemOptions();
+			final FileSystemOptions opts = new FileSystemOptions();
 
 			if (rootUrl.startsWith("gsiftp")) {
 				myLogger.debug("Url \"" + rootUrl
 						+ "\" is gsiftp url, using gridftpfilesystembuilder...");
 
-				GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
+				final GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
 						.getInstance();
 				builder.setGSSCredential(opts, credToUse.getGssCredential());
 				// builder.setUserDirIsRoot(opts, true);
@@ -95,7 +93,7 @@ public class User {
 			FileObject fileRoot;
 			try {
 				fileRoot = getFsManager().resolveFile(rootUrl, opts);
-			} catch (FileSystemException e) {
+			} catch (final FileSystemException e) {
 				myLogger.error("Can't connect to filesystem: " + rootUrl
 						+ " using VO: " + credToUse.getFqan());
 				throw new RuntimeException("Can't connect to filesystem "
@@ -123,7 +121,7 @@ public class User {
 			MountPoint temp = null;
 			try {
 				temp = getResponsibleMountpointForAbsoluteFile(rootUrl);
-			} catch (IllegalStateException e) {
+			} catch (final IllegalStateException e) {
 				myLogger.info(e);
 			}
 			if ((fqan == null) && (temp != null) && (temp.getFqan() != null)) {
@@ -193,7 +191,7 @@ public class User {
 				return null;
 			}
 			myLogger.debug("Creating new FS Manager.");
-			FileSystemCache cache = new FileSystemCache();
+			final FileSystemCache cache = new FileSystemCache();
 			myLogger.debug("Creating fsm for thread "
 					+ Thread.currentThread().getName()
 					+ ". cachedFileSystems size: "
@@ -210,6 +208,8 @@ public class User {
 			super.remove();
 		}
 	}
+
+	public static UserDAO userdao = new UserDAO();
 
 	private static Logger myLogger = Logger.getLogger(User.class.getName());
 
@@ -350,6 +350,13 @@ public class User {
 		fqans.put(fqan, vo);
 	}
 
+	public void addProperty(String key, String value) {
+
+		getUserProperties().put(key, value);
+		userdao.saveOrUpdate(this);
+
+	}
+
 	/**
 	 * Resolves the provided filename into a FileObject. If the filename starts
 	 * with "/" a file on one of the "mounted" filesystems is looked up. Else it
@@ -399,7 +406,7 @@ public class User {
 		if (file.startsWith("tmp:") || file.startsWith("ram:")) {
 			try {
 				return threadLocalFsManager.getFsManager().resolveFile(file);
-			} catch (FileSystemException e) {
+			} catch (final FileSystemException e) {
 				throw new RemoteFileSystemException(
 						"Could not access file on local temp filesystem: "
 								+ e.getLocalizedMessage());
@@ -407,7 +414,7 @@ public class User {
 		} else if (file.startsWith("/")) {
 			// means file on "mounted" filesystem
 
-			MountPoint mp = getResponsibleMountpointForUserSpaceFile(file);
+			final MountPoint mp = getResponsibleMountpointForUserSpaceFile(file);
 
 			if (mp == null) {
 				throw new RemoteFileSystemException(
@@ -434,23 +441,23 @@ public class User {
 			// root = this.createFilesystem(mp.getRootUrl(), mp.getFqan());
 			root = threadLocalFsManager.getFileSystem(file, fqan);
 
-			String fileUri = root.getRootName().getURI();
+			final String fileUri = root.getRootName().getURI();
 
 			try {
-				URI uri = new URI(file_to_aquire);
+				final URI uri = new URI(file_to_aquire);
 				file_to_aquire = uri.toString();
-			} catch (URISyntaxException e) {
+			} catch (final URISyntaxException e) {
 				e.printStackTrace();
 				throw new RemoteFileSystemException(
 						"Could not get uri for file " + file_to_aquire);
 			}
 
-			String tempUriString = file_to_aquire.replace(":2811", "")
+			final String tempUriString = file_to_aquire.replace(":2811", "")
 					.substring(fileUri.length());
 			fileObject = root.resolveFile(tempUriString);
 			// fileObject = root.resolveFile(file_to_aquire);
 
-		} catch (FileSystemException e) {
+		} catch (final FileSystemException e) {
 			throw new RemoteFileSystemException("Could not access file: "
 					+ file + ": " + e.getMessage());
 		}
@@ -469,6 +476,13 @@ public class User {
 		cachedCredentials = new HashMap<String, ProxyCredential>();
 	}
 
+	public void clearMountPointCache(String keypattern) {
+		if (StringUtils.isBlank(keypattern)) {
+			this.mountPointCache = new HashMap<String, String>();
+		}
+		userdao.saveOrUpdate(this);
+	}
+
 	public void closeFileSystems() {
 
 		myLogger.debug("Closing all filesystems for thread "
@@ -482,8 +496,8 @@ public class User {
 
 		String url = null;
 
-		int startProperties = path.indexOf("[");
-		int endProperties = path.indexOf("]");
+		final int startProperties = path.indexOf("[");
+		final int endProperties = path.indexOf("]");
 
 		if (startProperties >= 0 && endProperties < 0) {
 			myLogger.error("Path: " + path + " for host " + server
@@ -496,23 +510,23 @@ public class User {
 		String propString = null;
 		try {
 			propString = path.substring(startProperties + 1, endProperties);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// that's ok
 			myLogger.debug("No extra properties for path: " + path);
 		}
 
-		Map<String, String> properties = new HashMap<String, String>();
+		final Map<String, String> properties = new HashMap<String, String>();
 		boolean userDnPath = true;
 		if (StringUtils.isNotBlank(propString)) {
 
-			String[] parts = propString.split(";");
-			for (String part : parts) {
+			final String[] parts = propString.split(";");
+			for (final String part : parts) {
 				if (part.indexOf("=") <= 0) {
 					myLogger.error("Invalid path spec: " + path
 							+ ".  No \"=\" found. Ignoring this mountpoint...");
 					return null;
 				}
-				String key = part.substring(0, part.indexOf("="));
+				final String key = part.substring(0, part.indexOf("="));
 				if (StringUtils.isBlank(key)) {
 					myLogger.error("Invalid path spec: " + path
 							+ ".  No key found. Ignoring this mountpoint...");
@@ -527,7 +541,7 @@ public class User {
 								+ ".  No key found. Ignoring this mountpoint...");
 						return null;
 					}
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					myLogger.error("Invalid path spec: " + path
 							+ ".  No key found. Ignoring this mountpoint...");
 					return null;
@@ -541,7 +555,7 @@ public class User {
 			try {
 				userDnPath = Boolean.parseBoolean(properties
 						.get(MountPoint.USER_SUBDIR_KEY));
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				// that's ok
 				myLogger.debug("Could not find or parse"
 						+ MountPoint.USER_SUBDIR_KEY
@@ -570,13 +584,13 @@ public class User {
 				try {
 					additionalUrl = tempPath
 							.substring(1, tempPath.length() - 1);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					additionalUrl = "";
 				}
 
 				url = url + additionalUrl;
 
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -587,7 +601,7 @@ public class User {
 				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
 						fqan);
 				userDnPath = false;
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -597,7 +611,7 @@ public class User {
 				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
 						fqan) + "/.globus/scratch";
 				userDnPath = false;
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		} else {
@@ -619,10 +633,10 @@ public class User {
 
 			if (executor != null) {
 				final String urlTemp = url;
-				Thread t = new Thread() {
+				final Thread t = new Thread() {
 					@Override
 					public void run() {
-						String key = urlTemp + fqan;
+						final String key = urlTemp + fqan;
 						try {
 							// try to create the dir if it doesn't exist
 							myLogger.debug("Checking whether mountpoint "
@@ -639,7 +653,8 @@ public class User {
 							myLogger.debug("Did not find "
 									+ urlTemp
 									+ "in cache, trying to access/create folder...");
-							boolean exists = aquireFile(urlTemp, fqan).exists();
+							final boolean exists = aquireFile(urlTemp, fqan)
+									.exists();
 							if (!exists) {
 								myLogger.debug("Mountpoint does not exist. Trying to create non-exitent folder: "
 										+ urlTemp);
@@ -651,7 +666,7 @@ public class User {
 
 							mountPointCache.put(key, "Exists");
 
-						} catch (Exception e) {
+						} catch (final Exception e) {
 							myLogger.error("Could not create folder: "
 									+ urlTemp);
 							e.printStackTrace();
@@ -667,7 +682,7 @@ public class User {
 
 		}
 
-		String site = AbstractServiceInterface.informationManager
+		final String site = AbstractServiceInterface.informationManager
 				.getSiteForHostOrUrl(url);
 
 		if (site == null) {
@@ -680,7 +695,7 @@ public class User {
 		}
 		mp = new MountPoint(getDn(), fqan, url, alias, site, true);
 
-		for (String key : properties.keySet()) {
+		for (final String key : properties.keySet()) {
 			mp.addProperty(key, properties.get(key));
 		}
 
@@ -691,13 +706,6 @@ public class User {
 		// cachedGridFtpHomeDirs.put(keyMP, mp);
 		//
 		// return cachedGridFtpHomeDirs.get(keyMP);
-	}
-
-	public void clearMountPointCache(String keypattern) {
-		if (StringUtils.isBlank(keypattern)) {
-			this.mountPointCache = new HashMap<String, String>();
-		}
-		userdao.saveOrUpdate(this);
 	}
 
 	/**
@@ -713,7 +721,7 @@ public class User {
 
 		myLogger.debug("Getting mds mountpoints for user: " + getDn());
 
-		Set<MountPoint> mps = new TreeSet<MountPoint>();
+		final Set<MountPoint> mps = new TreeSet<MountPoint>();
 
 		// to check whether dn_subdirs are created already and create them if
 		// not (in background)
@@ -721,25 +729,25 @@ public class User {
 
 		// for ( String site : sites ) {
 
-		for (String fqan : getFqans().keySet()) {
-			Date start = new Date();
-			Map<String, String[]> mpUrl = AbstractServiceInterface.informationManager
+		for (final String fqan : getFqans().keySet()) {
+			final Date start = new Date();
+			final Map<String, String[]> mpUrl = AbstractServiceInterface.informationManager
 					.getDataLocationsForVO(fqan);
-			Date end = new Date();
+			final Date end = new Date();
 			myLogger.debug("Querying for data locations for all sites and+ "
 					+ fqan + " took: " + (end.getTime() - start.getTime())
 					+ " ms.");
-			for (String server : mpUrl.keySet()) {
+			for (final String server : mpUrl.keySet()) {
 				try {
-					for (String path : mpUrl.get(server)) {
+					for (final String path : mpUrl.get(server)) {
 
-						MountPoint mp = createMountPoint(server, path, fqan,
-								executor);
+						final MountPoint mp = createMountPoint(server, path,
+								fqan, executor);
 						if (mp != null) {
 							mps.add(mp);
 						}
 					}
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					myLogger.error(
 							"Can't use mountpoint " + server + ": "
 									+ e.getLocalizedMessage(), e);
@@ -797,6 +805,23 @@ public class User {
 		}
 	}
 
+	// private List<FileReservation> getFileReservations() {
+	// return fileReservations;
+	// }
+	//
+	// private void setFileReservations(List<FileReservation> fileReservations)
+	// {
+	// this.fileReservations = fileReservations;
+	// }
+	//
+	// private List<FileTransfer> getFileTransfers() {
+	// return fileTransfers;
+	// }
+	//
+	// private void setFileTransfers(List<FileTransfer> fileTransfers) {
+	// this.fileTransfers = fileTransfers;
+	// }
+
 	/**
 	 * Returns all mountpoints (including automounted ones for this session.
 	 * 
@@ -815,23 +840,6 @@ public class User {
 		}
 		return allMountPoints;
 	}
-
-	// private List<FileReservation> getFileReservations() {
-	// return fileReservations;
-	// }
-	//
-	// private void setFileReservations(List<FileReservation> fileReservations)
-	// {
-	// this.fileReservations = fileReservations;
-	// }
-	//
-	// private List<FileTransfer> getFileTransfers() {
-	// return fileTransfers;
-	// }
-	//
-	// private void setFileTransfers(List<FileTransfer> fileTransfers) {
-	// this.fileTransfers = fileTransfers;
-	// }
 
 	/**
 	 * Gets a map of this users bookmarks.
@@ -861,7 +869,7 @@ public class User {
 		if ((credToUse == null) || !credToUse.isValid()) {
 
 			// put a new credential in the cache
-			VO vo = VOManagement.getVO(getFqans().get(fqan));
+			final VO vo = VOManagement.getVO(getFqans().get(fqan));
 			credToUse = CertHelpers.getVOProxyCredential(vo, fqan, getCred());
 			cachedCredentials.put(fqan, credToUse);
 		}
@@ -882,7 +890,7 @@ public class User {
 	public String getFileSystemHomeDirectory(String filesystemRoot, String fqan)
 			throws FileSystemException {
 
-		String key = filesystemRoot + fqan;
+		final String key = filesystemRoot + fqan;
 		if (StringUtils.isNotBlank(mountPointCache.get(key))) {
 			if (NOT_ACCESSIBLE.equals(mountPointCache.get(key))) {
 
@@ -897,17 +905,17 @@ public class User {
 			try {
 				// FileSystem fileSystem = createFilesystem(filesystemRoot,
 				// fqan);
-				FileSystem fileSystem = threadLocalFsManager.getFileSystem(
-						filesystemRoot, fqan);
+				final FileSystem fileSystem = threadLocalFsManager
+						.getFileSystem(filesystemRoot, fqan);
 				myLogger.debug("Connected to file system.");
 
 				myLogger.debug("Using home directory: "
 						+ ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
 								.substring(1));
 
-				String home = (String) fileSystem
+				final String home = (String) fileSystem
 						.getAttribute("HOME_DIRECTORY");
-				String uri = fileSystem.getRoot().getName().getRootURI()
+				final String uri = fileSystem.getRoot().getName().getRootURI()
 						+ home.substring(1);
 
 				if (StringUtils.isNotBlank(uri)) {
@@ -916,7 +924,7 @@ public class User {
 				}
 
 				return uri;
-			} catch (Exception e) {
+			} catch (final Exception e) {
 
 				mountPointCache.put(key, NOT_ACCESSIBLE);
 				userdao.saveOrUpdate(this);
@@ -962,13 +970,6 @@ public class User {
 		return jobTemplates;
 	}
 
-	// for hibernate
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinTable
-	private Set<MountPoint> getMountPoints() {
-		return mountPoints;
-	}
-
 	@CollectionOfElements(fetch = FetchType.EAGER)
 	private Map<String, String> getMountPointCache() {
 		return mountPointCache;
@@ -997,6 +998,13 @@ public class User {
 	// return threadLocalFsManager.getFsManager();
 	// }
 
+	// for hibernate
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinTable
+	private Set<MountPoint> getMountPoints() {
+		return mountPoints;
+	}
+
 	/**
 	 * Checks whether the filesystem of any of the users' mountpoints contains
 	 * the specified file.
@@ -1007,10 +1015,10 @@ public class User {
 	 */
 	public MountPoint getResponsibleMountpointForAbsoluteFile(final String file) {
 
-		String new_file = null;
+		final String new_file = null;
 		myLogger.debug("Finding mountpoint for file: " + file);
 
-		for (MountPoint mountpoint : getAllMountPoints()) {
+		for (final MountPoint mountpoint : getAllMountPoints()) {
 			if (mountpoint.isResponsibleForAbsoluteFile(file)) {
 				return mountpoint;
 			}
@@ -1028,7 +1036,7 @@ public class User {
 	 */
 	public MountPoint getResponsibleMountpointForUserSpaceFile(final String file) {
 
-		for (MountPoint mountpoint : getAllMountPoints()) {
+		for (final MountPoint mountpoint : getAllMountPoints()) {
 			if (mountpoint.isResponsibleForUserSpaceFile(file)) {
 				return mountpoint;
 			}
@@ -1039,7 +1047,7 @@ public class User {
 	@Transient
 	public JobSubmissionManager getSubmissionManager() {
 		if (manager == null) {
-			Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
+			final Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
 			submitters.put("GT4", new GT4Submitter());
 			submitters.put("GT5", new GT5Submitter());
 			submitters.put("GT4Dummy", new GT4DummySubmitter());
@@ -1127,7 +1135,7 @@ public class User {
 		// }
 
 		myLogger.debug("Checking mountpoints for duplicates.");
-		for (MountPoint mp : getAllMountPoints()) {
+		for (final MountPoint mp : getAllMountPoints()) {
 			if (mountPointName.equals(mp.getAlias())) {
 				throw new RemoteFileSystemException(
 						"There is already a filesystem mounted on:"
@@ -1141,7 +1149,7 @@ public class User {
 			// FileSystem fileSystem = createFilesystem(new_mp.getRootUrl(),
 			// new_mp.getFqan());
 
-			FileSystem fileSystem = threadLocalFsManager.getFileSystem(
+			final FileSystem fileSystem = threadLocalFsManager.getFileSystem(
 					new_mp.getRootUrl(), new_mp.getFqan());
 			myLogger.debug("Connected to file system.");
 			if (useHomeDirectory) {
@@ -1171,7 +1179,7 @@ public class User {
 
 			userdao.saveOrUpdate(this);
 			return new_mp;
-		} catch (FileSystemException e) {
+		} catch (final FileSystemException e) {
 			throw new RemoteFileSystemException("Error while trying to mount: "
 					+ mountPointName);
 		}
@@ -1186,11 +1194,11 @@ public class User {
 			return mountFileSystem(root, name, useHomeDirectory, site);
 		} else {
 
-			Map<String, String> temp = getFqans();
-			VO vo = VOManagement.getVO(temp.get(fqan));
+			final Map<String, String> temp = getFqans();
+			final VO vo = VOManagement.getVO(temp.get(fqan));
 
-			ProxyCredential vomsProxyCred = CertHelpers.getVOProxyCredential(
-					vo, fqan, getCred());
+			final ProxyCredential vomsProxyCred = CertHelpers
+					.getVOProxyCredential(vo, fqan, getCred());
 
 			return mountFileSystem(root, name, vomsProxyCred, useHomeDirectory,
 					site);
@@ -1229,7 +1237,7 @@ public class User {
 	 *         the file is not within the user's filespace
 	 */
 	public String returnAbsoluteUrl(final String file) {
-		MountPoint mp = getResponsibleMountpointForUserSpaceFile(file);
+		final MountPoint mp = getResponsibleMountpointForUserSpaceFile(file);
 		if (mp == null) {
 			return null;
 		} else if (file.startsWith("gsiftp:")) {
@@ -1248,9 +1256,17 @@ public class User {
 	 * @return the "user-space" file url (/ngdata.vpac.org/test.txt)
 	 */
 	public String returnUserSpaceUrl(final String file) {
-		MountPoint mp = getResponsibleMountpointForAbsoluteFile(file);
+		final MountPoint mp = getResponsibleMountpointForAbsoluteFile(file);
 		return mp.replaceAbsoluteRootUrlWithMountPoint(file);
 	}
+
+	// public void addProperty(String key, String value) {
+	// List<String> list = userProperties.get(key);
+	// if ( list == null ) {
+	// list = new LinkedList<String>();
+	// }
+	// list.add(value);
+	// }
 
 	/**
 	 * Set's additional mountpoints that the user did not explicitly mount
@@ -1270,14 +1286,6 @@ public class User {
 		allMountPoints.addAll(getMountPoints());
 
 	}
-
-	// public void addProperty(String key, String value) {
-	// List<String> list = userProperties.get(key);
-	// if ( list == null ) {
-	// list = new LinkedList<String>();
-	// }
-	// list.add(value);
-	// }
 
 	private void setBookmarks(final Map<String, String> bm) {
 		this.bookmarks = bm;
@@ -1324,13 +1332,13 @@ public class User {
 		this.jobTemplates = jobTemplates;
 	}
 
+	private void setMountPointCache(final Map<String, String> mountPoints) {
+		this.mountPointCache = mountPoints;
+	}
+
 	// for hibernate
 	private void setMountPoints(final Set<MountPoint> mountPoints) {
 		this.mountPoints = mountPoints;
-	}
-
-	private void setMountPointCache(final Map<String, String> mountPoints) {
-		this.mountPointCache = mountPoints;
 	}
 
 	private void setUserProperties(final Map<String, String> userProperties) {
@@ -1348,7 +1356,7 @@ public class User {
 	 */
 	public void unmountFileSystem(final String mountPointName) {
 
-		for (MountPoint mp : mountPoints) {
+		for (final MountPoint mp : mountPoints) {
 			if (mp.getAlias().equals(mountPointName)) {
 				mountPoints.remove(mp);
 				allMountPoints = null;
@@ -1356,13 +1364,6 @@ public class User {
 			}
 		}
 		userdao.saveOrUpdate(this);
-	}
-
-	public void addProperty(String key, String value) {
-
-		getUserProperties().put(key, value);
-		userdao.saveOrUpdate(this);
-
 	}
 
 }

@@ -86,7 +86,7 @@ public final class ServerPropertiesManager {
 			retries = Integer.parseInt(getServerConfiguration().getString(
 					"ConcurrentThreadSettings.fileTransfersPerUser"));
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
 			return DEFAULT_CONCURRENT_FILE_TRANSFER_THREADS_PER_USER;
 		}
@@ -109,7 +109,7 @@ public final class ServerPropertiesManager {
 			concurrentThreads = Integer.parseInt(getServerConfiguration()
 					.getString("ConcurrentThreadSettings.jobStatusThreads"));
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
 			return DEFAULT_CONCURRENT_JOB_STATUS_THREADS_PER_USER;
 		}
@@ -132,7 +132,7 @@ public final class ServerPropertiesManager {
 					.parseInt(getServerConfiguration().getString(
 							"ConcurrentThreadSettings.batchJobSubmitThreads"));
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
 			return DEFAULT_CONCURRENT_JOB_SUBMISSION_THREADS_PER_USER;
 		}
@@ -153,7 +153,7 @@ public final class ServerPropertiesManager {
 			dbUrl = getServerConfiguration().getString(
 					"Database.databaseConnectionUrl");
 			return dbUrl;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return null;
 		}
 	}
@@ -198,7 +198,7 @@ public final class ServerPropertiesManager {
 			dbPassword = getServerConfiguration().getString(
 					"Database.databasePassword");
 			return dbPassword;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return null;
 		}
 	}
@@ -216,7 +216,7 @@ public final class ServerPropertiesManager {
 			dbType = getServerConfiguration()
 					.getString("Database.databaseType");
 			return dbType;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return null;
 		}
 	}
@@ -232,7 +232,7 @@ public final class ServerPropertiesManager {
 			dbUsername = getServerConfiguration().getString(
 					"Database.databaseUsername");
 			return dbUsername;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return null;
 		}
 	}
@@ -245,7 +245,7 @@ public final class ServerPropertiesManager {
 	 */
 	public static String getDebugDirectory() {
 
-		File dir = new File(Environment.getGrisuDirectory(), "debug");
+		final File dir = new File(Environment.getGrisuDirectory(), "debug");
 
 		return dir.getAbsolutePath();
 	}
@@ -261,13 +261,13 @@ public final class ServerPropertiesManager {
 		try {
 			try {
 				debug = getServerConfiguration().getBoolean("Debug.enabled");
-			} catch (NoSuchElementException e) {
+			} catch (final NoSuchElementException e) {
 				// doesn't matter
 				myLogger.debug(e);
 			}
 			if (debug) {
 				// try to create debug directory
-				File debugDir = new File(getDebugDirectory());
+				final File debugDir = new File(getDebugDirectory());
 				if (!debugDir.exists()) {
 					debugDir.mkdir();
 				}
@@ -277,7 +277,7 @@ public final class ServerPropertiesManager {
 					debug = false;
 				}
 			}
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
 			myLogger.debug(e);
 		}
@@ -291,7 +291,7 @@ public final class ServerPropertiesManager {
 			retries = Integer.parseInt(getServerConfiguration().getString(
 					"RetrySettings.fileTransfers"));
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
 			return DEFAULT_FILE_TRANSFER_RETRIES;
 		}
@@ -320,7 +320,7 @@ public final class ServerPropertiesManager {
 				jobDirName = null;
 			}
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			jobDirName = null;
 		}
 
@@ -331,6 +331,31 @@ public final class ServerPropertiesManager {
 		return jobDirName;
 	}
 
+	public static Map<String, String> getInformationManagerConf() {
+
+		SubnodeConfiguration conf;
+		try {
+			conf = getServerConfiguration().getSection("InformationManager");
+		} catch (final ConfigurationException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		final Map<String, String> result = new TreeMap<String, String>();
+		final Iterator it = conf.getKeys();
+		while (it.hasNext()) {
+			final Object key = it.next();
+			final String value = conf.getString(key.toString());
+			result.put(key.toString(), value);
+		}
+
+		if (result.size() == 0) {
+			return null;
+		}
+
+		return result;
+	}
+
 	public static int getJobSubmissionRetries() {
 
 		int retries = -1;
@@ -338,7 +363,7 @@ public final class ServerPropertiesManager {
 			retries = Integer.parseInt(getServerConfiguration().getString(
 					"RetrySettings.jobSubmissions"));
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
 			return DEFAULT_CONCURRENT_JOB_SUBMISSION_RETRIES;
 		}
@@ -346,6 +371,30 @@ public final class ServerPropertiesManager {
 			return DEFAULT_CONCURRENT_JOB_SUBMISSION_RETRIES;
 		}
 		return retries;
+	}
+
+	public static Map<String, String> getMatchMakerConf() {
+		SubnodeConfiguration conf;
+		try {
+			conf = getServerConfiguration().getSection("MatchMaker");
+		} catch (final ConfigurationException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		final Map<String, String> result = new TreeMap<String, String>();
+		final Iterator it = conf.getKeys();
+		while (it.hasNext()) {
+			final Object key = it.next();
+			final String value = conf.getString(key.toString());
+			result.put(key.toString(), value);
+		}
+
+		if (result.size() == 0) {
+			return null;
+		}
+
+		return result;
 	}
 
 	/**
@@ -360,7 +409,7 @@ public final class ServerPropertiesManager {
 			lifetime_in_seconds = Integer.parseInt(getServerConfiguration()
 					.getString("General.minProxyLifetime"));
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
 			return DEFAULT_MIN_PROXY_LIFETIME_BEFORE_REFRESH;
 		}
@@ -381,7 +430,7 @@ public final class ServerPropertiesManager {
 			lifetime_in_seconds = Integer.parseInt(getServerConfiguration()
 					.getString("General.proxyLifetime"));
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
 			return DEFAULT_MYPROXY_LIFETIME_IN_SECONDS;
 		}
@@ -401,7 +450,7 @@ public final class ServerPropertiesManager {
 	public static HierarchicalINIConfiguration getServerConfiguration()
 			throws ConfigurationException {
 		if (config == null) {
-			File grisuDir = Environment.getGrisuDirectory();
+			final File grisuDir = Environment.getGrisuDirectory();
 			config = new HierarchicalINIConfiguration(new File(grisuDir,
 					"grisu-backend.config"));
 		}
@@ -415,7 +464,7 @@ public final class ServerPropertiesManager {
 			waitTimeInSeconds = Integer.parseInt(getServerConfiguration()
 					.getString("RetrySettings.fileTransferWaitTime"));
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
 			return DEFAULT_TIME_BETWEEN_FILE_TRANSFER_RETRIES_IN_SECONDS;
 		}
@@ -438,7 +487,7 @@ public final class ServerPropertiesManager {
 			waitTimeInSeconds = Integer.parseInt(getServerConfiguration()
 					.getString("General.statusCheckWaitTime"));
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
 			return DEFAULT_TIME_INBETWEEN_STATUS_CHECKS_FOR_THE_SAME_JOB_IN_SECONDS;
 		}
@@ -457,7 +506,7 @@ public final class ServerPropertiesManager {
 	public static boolean useDefaultDatabase() {
 
 		try {
-			String dbtype = getServerConfiguration().getString(
+			final String dbtype = getServerConfiguration().getString(
 					"Database.databaseType");
 
 			if (dbtype == null || dbtype.length() == 0) {
@@ -465,60 +514,11 @@ public final class ServerPropertiesManager {
 			} else {
 				return false;
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 			return true;
 		}
 
-	}
-
-	public static Map<String, String> getInformationManagerConf() {
-
-		SubnodeConfiguration conf;
-		try {
-			conf = getServerConfiguration().getSection("InformationManager");
-		} catch (ConfigurationException e) {
-			e.printStackTrace();
-			return null;
-		}
-
-		Map<String, String> result = new TreeMap<String, String>();
-		Iterator it = conf.getKeys();
-		while (it.hasNext()) {
-			Object key = it.next();
-			String value = conf.getString(key.toString());
-			result.put(key.toString(), value);
-		}
-
-		if (result.size() == 0) {
-			return null;
-		}
-
-		return result;
-	}
-
-	public static Map<String, String> getMatchMakerConf() {
-		SubnodeConfiguration conf;
-		try {
-			conf = getServerConfiguration().getSection("MatchMaker");
-		} catch (ConfigurationException e) {
-			e.printStackTrace();
-			return null;
-		}
-
-		Map<String, String> result = new TreeMap<String, String>();
-		Iterator it = conf.getKeys();
-		while (it.hasNext()) {
-			Object key = it.next();
-			String value = conf.getString(key.toString());
-			result.put(key.toString(), value);
-		}
-
-		if (result.size() == 0) {
-			return null;
-		}
-
-		return result;
 	}
 
 }

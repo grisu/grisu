@@ -16,16 +16,16 @@ public class EqualJobDistributor implements JobDistributor {
 	public Map<String, Integer> distributeJobs(Set<Job> allJobs,
 			SortedSet<GridResource> allAvailableResources) {
 
-		Map<String, Integer> submissionLocations = new TreeMap<String, Integer>();
+		final Map<String, Integer> submissionLocations = new TreeMap<String, Integer>();
 
 		int i = 0;
 
-		GridResource[] allResources = allAvailableResources
+		final GridResource[] allResources = allAvailableResources
 				.toArray(new GridResource[] {});
 
-		for (Job job : allJobs) {
+		for (final Job job : allJobs) {
 
-			String subLoc = SubmissionLocationHelpers
+			final String subLoc = SubmissionLocationHelpers
 					.createSubmissionLocationString(allResources[i]);
 			JsdlHelpers.setCandidateHosts(job.getJobDescription(),
 					new String[] { subLoc });

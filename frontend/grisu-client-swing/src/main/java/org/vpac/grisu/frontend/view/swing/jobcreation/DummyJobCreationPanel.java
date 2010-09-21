@@ -26,7 +26,8 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, EventTopicSubscriber {
+public class DummyJobCreationPanel extends JPanel implements JobCreationPanel,
+		EventTopicSubscriber {
 
 	private JLabel lblDummyJobSubmission;
 	private JButton btnSubmit;
@@ -45,16 +46,13 @@ public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, E
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
-				new RowSpec[] {
+				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getLblDummyJobSubmission(), "2, 2");
 		add(getBtnSubmit(), "2, 5, right, default");
 		add(getScrollPane(), "2, 7, fill, fill");
@@ -66,7 +64,7 @@ public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, E
 
 			@Override
 			public void run() {
-				getStatusTextArea().append(message+"\n");
+				getStatusTextArea().append(message + "\n");
 				getStatusTextArea().setCaretPosition(
 						getStatusTextArea().getText().length());
 			}
@@ -100,9 +98,11 @@ public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, E
 		}
 		return lblDummyJobSubmission;
 	}
+
 	public JPanel getPanel() {
 		return this;
 	}
+
 	public String getPanelName() {
 		return "Dummy";
 	}
@@ -125,6 +125,7 @@ public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, E
 	public String getSupportedApplication() {
 		return "UnixCommands";
 	}
+
 	private void lockUI(final boolean lock) {
 
 		SwingUtilities.invokeLater(new Thread() {
@@ -142,20 +143,23 @@ public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, E
 
 		if (data instanceof JobStatusEvent) {
 
-			String message = "New status: "+JobConstants.translateStatus( ((JobStatusEvent)data).getNewStatus() );
+			final String message = "New status: "
+					+ JobConstants.translateStatus(((JobStatusEvent) data)
+							.getNewStatus());
 
 			addMessage(message);
 		} else if (data instanceof ActionStatusEvent) {
-			ActionStatusEvent d = ((ActionStatusEvent) data);
+			final ActionStatusEvent d = ((ActionStatusEvent) data);
 			addMessage(d.getPrefix() + d.getPercentFinished() + "% finished.\n");
 		}
 
 	}
 
 	public void setServiceInterface(ServiceInterface si) {
-		System.out.println("Serviceinterface set. DN: "+si.getDN());
+		System.out.println("Serviceinterface set. DN: " + si.getDN());
 		this.si = si;
-		this.em = GrisuRegistryManager.getDefault(si).getUserEnvironmentManager();
+		this.em = GrisuRegistryManager.getDefault(si)
+				.getUserEnvironmentManager();
 	}
 
 	private void submitJob() {
@@ -167,15 +171,16 @@ public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, E
 
 					lockUI(true);
 
-					if ( StringUtils.isNotBlank(currentJobname) ) {
+					if (StringUtils.isNotBlank(currentJobname)) {
 						EventBus.unsubscribe(currentJobname, this);
 					}
 
-					JobObject job = new JobObject(si);
+					final JobObject job = new JobObject(si);
 					job.setTimestampJobname("helloworldJob");
 
 					currentJobname = job.getJobname();
-					EventBus.subscribe(currentJobname, DummyJobCreationPanel.this);
+					EventBus.subscribe(currentJobname,
+							DummyJobCreationPanel.this);
 
 					job.setApplication("UnixCommands");
 					job.setCommandline("echo hello gridworld!");
@@ -184,12 +189,11 @@ public class DummyJobCreationPanel extends JPanel implements JobCreationPanel, E
 
 					// this will only work if you are in the StartUp VO.
 					job.createJob("/ARCS/StartUp");
-					//					job.createJob(em.getCurrentFqan());
+					// job.createJob(em.getCurrentFqan());
 
 					job.submitJob();
 
-
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					e.printStackTrace();
 					addMessage(e.getLocalizedMessage());
 				} finally {

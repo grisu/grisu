@@ -24,16 +24,18 @@ public class MultiSingleJobMonitoringGrid extends JPanel {
 	 */
 	public MultiSingleJobMonitoringGrid(ServiceInterface si) {
 		this.si = si;
-		this.em = GrisuRegistryManager.getDefault(si).getUserEnvironmentManager();
+		this.em = GrisuRegistryManager.getDefault(si)
+				.getUserEnvironmentManager();
 
 		setLayout(new CardLayout(0, 0));
 	}
 
 	public void displayGridForApplication(final String application) {
 
-		if ( grids.get(application) == null ) {
+		if (grids.get(application) == null) {
 
-			SingleJobTabbedPane temp = new SingleJobTabbedPane(si, application);
+			final SingleJobTabbedPane temp = new SingleJobTabbedPane(si,
+					application);
 			grids.put(application, temp);
 			add(temp, application);
 		}
@@ -41,7 +43,7 @@ public class MultiSingleJobMonitoringGrid extends JPanel {
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
 			public void run() {
-				CardLayout cl = (CardLayout)(getLayout());
+				final CardLayout cl = (CardLayout) (getLayout());
 				cl.show(MultiSingleJobMonitoringGrid.this, application);
 			}
 		});
@@ -51,6 +53,5 @@ public class MultiSingleJobMonitoringGrid extends JPanel {
 	public SortedSet<String> getAvailableApplications(boolean refreshOnBackend) {
 		return em.getCurrentApplicationsBatch(refreshOnBackend);
 	}
-
 
 }

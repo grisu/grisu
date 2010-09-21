@@ -69,9 +69,9 @@ public class LoginPanel extends JPanel {
 						try {
 							getProgressPanel().setCreatingServiceInterface();
 							switchToProgressPanel();
-							ServiceInterface si = LoginManager.login();
+							final ServiceInterface si = LoginManager.login();
 							setServiceInterface(si);
-						} catch (LoginException e) {
+						} catch (final LoginException e) {
 							switchToLoginPanel();
 						}
 					}
@@ -115,12 +115,12 @@ public class LoginPanel extends JPanel {
 			getProgressPanel().setLoginToBackend(si);
 			switchToProgressPanel();
 			client.setServiceInterface(si);
-			for (ServiceInterfaceHolder sih : siHolders) {
+			for (final ServiceInterfaceHolder sih : siHolders) {
 				sih.setServiceInterface(si);
 			}
 
 			switchToClientPanel();
-		} catch (InterruptedException ie) {
+		} catch (final InterruptedException ie) {
 			ie.printStackTrace();
 			switchToLoginPanel();
 		}
@@ -131,7 +131,7 @@ public class LoginPanel extends JPanel {
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
 			public void run() {
-				CardLayout cl = (CardLayout) (getLayout());
+				final CardLayout cl = (CardLayout) (getLayout());
 				cl.show(LoginPanel.this, SWING_CLIENT_PANEL);
 			}
 		});
@@ -142,7 +142,7 @@ public class LoginPanel extends JPanel {
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
 			public void run() {
-				CardLayout cl = (CardLayout) (getLayout());
+				final CardLayout cl = (CardLayout) (getLayout());
 				cl.show(LoginPanel.this, LOGIN_PANEL);
 			}
 		});
@@ -153,7 +153,7 @@ public class LoginPanel extends JPanel {
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
 			public void run() {
-				CardLayout cl = (CardLayout) (getLayout());
+				final CardLayout cl = (CardLayout) (getLayout());
 				cl.show(LoginPanel.this, PROGRESS_PANEL);
 			}
 		});

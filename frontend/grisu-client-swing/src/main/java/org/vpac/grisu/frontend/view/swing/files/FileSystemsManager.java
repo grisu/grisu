@@ -28,7 +28,7 @@ public class FileSystemsManager {
 
 		synchronized (si) {
 			if (cachedRegistries.get(si) == null) {
-				FileSystemsManager m = new FileSystemsManager(si);
+				final FileSystemsManager m = new FileSystemsManager(si);
 				cachedRegistries.put(si, m);
 			}
 		}
@@ -61,7 +61,7 @@ public class FileSystemsManager {
 	}
 
 	public void addBookmark(String alias, GlazedFile file) {
-		FileSystemItem temp = this.em.setBookmark(alias, file.getUrl());
+		final FileSystemItem temp = this.em.setBookmark(alias, file.getUrl());
 		allFileSystems.add(temp);
 	}
 
@@ -70,7 +70,7 @@ public class FileSystemsManager {
 	}
 
 	// public FileSystemItem getFileSystemForUrl(String url) {
-	//		
+	//
 	// return user
 	//
 	// // for (FileSystemItem fsi : getAllFileSystems()) {
@@ -105,7 +105,7 @@ public class FileSystemsManager {
 	// }
 
 	public void removeBookmark(String alias) {
-		FileSystemItem temp = this.em.setBookmark(alias, null);
+		final FileSystemItem temp = this.em.setBookmark(alias, null);
 		allFileSystems.remove(temp);
 	}
 

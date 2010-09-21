@@ -35,10 +35,10 @@ public final class CertHelpers {
 		try {
 			dn = PureTLSUtil.getX509Name(cred.getName().toString())
 					.getNameString();
-		} catch (GSSException e) {
+		} catch (final GSSException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -57,7 +57,7 @@ public final class CertHelpers {
 
 		try {
 			dn = PureTLSUtil.getX509Name(cred.getSubject()).getNameString();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -83,26 +83,26 @@ public final class CertHelpers {
 	 */
 	public static ProxyCredential getVOProxyCredential(final VO vo,
 			final String fqan, final ProxyCredential credToConnect) {
-		//		
+		//
 		VomsProxyCredential vomsGssCred = null;
 		try {
-			String group = FqanHelpers.getGroupPart(fqan);
-			String role = FqanHelpers.getRolePart(fqan);
+			final String group = FqanHelpers.getGroupPart(fqan);
+			final String role = FqanHelpers.getRolePart(fqan);
 			if (role == null || "NULL".equals(role)) {
-				vomsGssCred = new VomsProxyCredential(CredentialHelpers
-						.unwrapGlobusCredential(credToConnect
+				vomsGssCred = new VomsProxyCredential(
+						CredentialHelpers.unwrapGlobusCredential(credToConnect
 								.getGssCredential()), vo, "G" + group, null);
 			} else {
-				vomsGssCred = new VomsProxyCredential(CredentialHelpers
-						.unwrapGlobusCredential(credToConnect
+				vomsGssCred = new VomsProxyCredential(
+						CredentialHelpers.unwrapGlobusCredential(credToConnect
 								.getGssCredential()), vo, "B" + group + ":"
-						+ role, null);
+								+ role, null);
 			}
 			myLogger.debug("Created voms proxy for fqan: " + fqan
 					+ " with lifetime: "
 					+ vomsGssCred.getVomsProxy().getTimeLeft());
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException(
 					"Could not retrieve VomsProxyCredential for fqan \"" + fqan
 							+ "\": " + e.getMessage());
@@ -110,9 +110,10 @@ public final class CertHelpers {
 
 		ProxyCredential vomsProxyCred = null;
 		try {
-			vomsProxyCred = new ProxyCredential(CredentialHelpers
-					.wrapGlobusCredential(vomsGssCred.getVomsProxy()), fqan);
-		} catch (Exception e) {
+			vomsProxyCred = new ProxyCredential(
+					CredentialHelpers.wrapGlobusCredential(vomsGssCred
+							.getVomsProxy()), fqan);
+		} catch (final Exception e) {
 			throw new RuntimeException(
 					"Could not retrieve VomsProxyCredential for fqan \"" + fqan
 							+ "\": " + e.getMessage());

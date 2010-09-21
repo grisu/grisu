@@ -10,6 +10,8 @@ public interface FileListPanel {
 
 	public void addFileListListener(FileListListener l);
 
+	public void displayHiddenFiles(boolean display);
+
 	public GlazedFile getCurrentDirectory();
 
 	public JPanel getPanel();
@@ -24,10 +26,6 @@ public interface FileListPanel {
 
 	public void setCurrentUrl(String url);
 
-	public void setRootUrl(String url);
-
-	public void displayHiddenFiles(boolean display);
-
 	/**
 	 * Sets the extensions to display.
 	 * 
@@ -35,5 +33,7 @@ public interface FileListPanel {
 	 *            the extensions or null/empty for displaying everything
 	 */
 	public void setExtensionsToDisplay(String[] extensions);
+
+	public void setRootUrl(String url);
 
 }
