@@ -47,7 +47,7 @@
 		<dependency>
 			<groupId>au.org.arcs.auth</groupId>
 			<artifactId>simpleProxyLib</artifactId>
-			<version>0.5-SNAPSHOT</version>
+			<version>0.5</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>cog-jglobus</artifactId>
@@ -347,17 +347,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>au.org.arcs.infosystems</groupId>
-			<artifactId>matchmaker</artifactId>
-			<version>0.5-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>cog-jglobus</artifactId>
-					<groupId>external.jglobus</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 		<!--		<dependency>-->
 		<!--			<groupId>au.edu.apac.genericgridclient</groupId>-->
 		<!--			<artifactId>commons-vfs-grid</artifactId>-->
@@ -435,7 +424,7 @@
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>mysql-mds</artifactId>
-			<version>0.5-SNAPSHOT</version>
+			<version>0.7</version>
 			<type>jar</type>
 			<scope>compile</scope>
 			<exclusions>
