@@ -109,9 +109,8 @@ public class GrisuMenu extends JMenuBar {
 					String grisuclientversion = GrisuVersion
 							.get("grisu-client");
 
-					String message = "Version:\t\t" + clientVersion + "\n"
-							+ "Grisu client lib version:\t"
-							+ grisuclientversion;
+					String message = "Version: " + clientVersion + "\n\n"
+							+ "Grisu client lib version: " + grisuclientversion;
 
 					JOptionPane.showMessageDialog(parent, message);
 
