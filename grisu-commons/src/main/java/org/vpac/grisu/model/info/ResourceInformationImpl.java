@@ -80,6 +80,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 	private final Map<String, String> cachedHosts = new HashMap<String, String>();
 	private final Map<String, String[]> cachedAllSubmissionLocationsPerFqan = new HashMap<String, String[]>();
 	private final Map<String, Set<String>> cachedAllSitesPerFqan = new HashMap<String, Set<String>>();
+	private final Map<String, String[]> cachedApplicationPackagesForExecutables = new HashMap<String, String[]>();
 
 	private final Map<String, List<String>> cachedStagingFilesystemsPerSubLoc = new HashMap<String, List<String>>();
 
@@ -176,11 +177,22 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 	}
 
+	public String[] getApplicationPackageForExecutable(String executable) {
+
+		if (cachedApplicationPackagesForExecutables.get(executable) == null) {
+			String[] result = serviceInterface
+					.getApplicationPackagesForExecutable(executable);
+			cachedApplicationPackagesForExecutables.put(executable, result);
+		}
+
+		return cachedApplicationPackagesForExecutables.get(executable);
+	}
+
 	public final String getRecommendedStagingFileSystemForSubmissionLocation(
 			final String subLoc) {
 
 		final List<String> temp = getStagingFilesystemsForSubmissionLocation(subLoc);
-		if (temp != null && temp.size() > 0) {
+		if ((temp != null) && (temp.size() > 0)) {
 			return temp.get(0);
 		} else {
 			return null;
@@ -200,7 +212,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 	public final List<String> getStagingFilesystemsForSubmissionLocation(
 			final String subLoc) {
 
-		if (subLoc == null || "".equals(subLoc)) {
+		if ((subLoc == null) || "".equals(subLoc)) {
 			return null;
 		}
 		if (cachedStagingFilesystemsPerSubLoc.get(subLoc) == null) {

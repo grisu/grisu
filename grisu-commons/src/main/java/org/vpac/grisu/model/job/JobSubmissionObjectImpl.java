@@ -44,6 +44,21 @@ public class JobSubmissionObjectImpl {
 	static final Logger myLogger = Logger
 			.getLogger(JobSubmissionObjectImpl.class.getName());
 
+	public static String extractExecutable(String commandline) {
+
+		if ((commandline == null) || (commandline.length() == 0)) {
+			return null;
+		}
+
+		final int i = commandline.indexOf(" ");
+		if (i <= 0) {
+			return commandline;
+		} else {
+			String result = commandline.substring(0, i);
+			return result;
+		}
+	}
+
 	public static void main(final String[] args) throws JobPropertiesException {
 
 		final JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl();
@@ -302,16 +317,7 @@ public class JobSubmissionObjectImpl {
 	}
 
 	public String extractExecutable() {
-		if ((commandline == null) || (commandline.length() == 0)) {
-			return null;
-		}
-
-		final int i = commandline.indexOf(" ");
-		if (i <= 0) {
-			return commandline;
-		} else {
-			return commandline.substring(0, i - 1);
-		}
+		return extractExecutable(commandline);
 	}
 
 	public String getApplication() {
@@ -336,6 +342,11 @@ public class JobSubmissionObjectImpl {
 
 	public String getEmail_address() {
 		return email_address;
+	}
+
+	@Transient
+	public String getExecutable() {
+		return extractExecutable();
 	}
 
 	public Integer getHostCount() {
@@ -531,6 +542,7 @@ public class JobSubmissionObjectImpl {
 	}
 
 	public void setApplication(final String app) {
+		System.out.println("Set application: " + app);
 		final String oldValue = this.application;
 		this.application = app;
 		pcs.firePropertyChange("application", oldValue, this.application);
@@ -543,12 +555,15 @@ public class JobSubmissionObjectImpl {
 				this.applicationVersion);
 	}
 
-	public void setCommandline(final String commandline) {
+	public synchronized void setCommandline(final String commandline) {
 		final String oldValue = this.commandline;
+		final String oldExe = extractExecutable(this.commandline);
 		this.commandline = commandline;
 		myLogger.debug("Commandline for job: " + getJobname() + "changed: "
 				+ commandline);
 		pcs.firePropertyChange("commandline", oldValue, this.commandline);
+		final String newExe = extractExecutable();
+		pcs.firePropertyChange("executable", oldExe, newExe);
 	}
 
 	public void setCpus(final Integer cpus) {

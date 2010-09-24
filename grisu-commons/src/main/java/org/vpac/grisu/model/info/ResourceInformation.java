@@ -91,4 +91,13 @@ public interface ResourceInformation {
 	 */
 	List<String> getStagingFilesystemsForSubmissionLocation(String subLoc);
 
+	/**
+	 * Checks which application packages provide the provided executable.
+	 * 
+	 * @param executable
+	 *            the executable
+	 * @return the application package(s) or null if no package could be found
+	 */
+	String[] getApplicationPackageForExecutable(String executable);
+
 }

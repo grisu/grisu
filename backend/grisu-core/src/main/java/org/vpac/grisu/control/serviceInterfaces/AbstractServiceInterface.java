@@ -1734,6 +1734,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						submissionLocation));
 	}
 
+	public String[] getApplicationPackagesForExecutable(String executable) {
+
+		return informationManager
+				.getApplicationsThatProvideExecutable(executable);
+
+	}
+
 	/**
 	 * Returns all multipart jobs for this user.
 	 * 
@@ -2189,15 +2196,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	protected Map<String, DtoActionStatus> getSessionActionStatus() {
-		return getUser().getActionStatuses();
-	}
-
 	// public String getStagingFileSystem(String site) {
 	// return MountPointManager.getDefaultFileSystem(site);
 	// }
 
 	// abstract protected DtoStringList getSessionFqans();
+
+	protected Map<String, DtoActionStatus> getSessionActionStatus() {
+		return getUser().getActionStatuses();
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -2351,6 +2358,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
+	// public UserDAO getUserDao() {
+	// return userdao;
+	// }
+
 	public DtoStringList getUsedApplicationsBatch() {
 
 		List<BatchJob> jobs = null;
@@ -2369,10 +2380,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return DtoStringList.fromStringColletion(apps);
 
 	}
-
-	// public UserDAO getUserDao() {
-	// return userdao;
-	// }
 
 	/**
 	 * Gets the user of the current session. Also connects the default
@@ -2987,7 +2994,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				oldJobDir = null;
 			}
 		} catch (final RemoteFileSystemException e1) {
-			// TODO Auto-generated catch block
 			oldJobDir = null;
 		}
 

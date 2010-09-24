@@ -451,6 +451,16 @@ public interface ServiceInterface {
 			@PathParam("version") String version, @PathParam("site") String site);
 
 	/**
+	 * Returns a list of all application packages that provide the specified
+	 * executable.
+	 * 
+	 * @param executable
+	 *            the executable
+	 * @return the application package(s)
+	 */
+	String[] getApplicationPackagesForExecutable(String executable);
+
+	/**
 	 * Returns the {@link DtoBatchJob} with the specified name.
 	 * 
 	 * This method doesn't refresh the jobs that belong to this batchjob. Call
@@ -547,17 +557,6 @@ public interface ServiceInterface {
 	long getFileSize(@QueryParam("url") String url)
 			throws RemoteFileSystemException;
 
-	/**
-	 * Returns all fqans of the user for the vo's that are configured on the
-	 * machine where this serviceinterface is hosted.
-	 * 
-	 * @return all fqans of the user
-	 */
-	@GET
-	@Path("user/fqans")
-	@RolesAllowed("User")
-	DtoStringList getFqans();
-
 	// ---------------------------------------------------------------------------------------------------
 	//
 	// Filesystem methods
@@ -577,6 +576,17 @@ public interface ServiceInterface {
 	// @GET
 	// @Path("interfaceVersion")
 	// String getInterfaceVersion();
+
+	/**
+	 * Returns all fqans of the user for the vo's that are configured on the
+	 * machine where this serviceinterface is hosted.
+	 * 
+	 * @return all fqans of the user
+	 */
+	@GET
+	@Path("user/fqans")
+	@RolesAllowed("User")
+	DtoStringList getFqans();
 
 	/**
 	 * Can provide information about the interface (like version, hostname where
@@ -828,6 +838,12 @@ public interface ServiceInterface {
 	@Produces("text/plain")
 	String getUserProperty(@PathParam("key") String key);
 
+	// ---------------------------------------------------------------------------------------------------
+	//
+	// Job management methods
+	//
+	// ---------------------------------------------------------------------------------------------------
+
 	/**
 	 * Returns an array of the versions of the specified application that a
 	 * submissionlocation supports.
@@ -843,12 +859,6 @@ public interface ServiceInterface {
 	DtoStringList getVersionsOfApplicationOnSubmissionLocation(
 			@PathParam("application") String application,
 			@PathParam("submissionLocation") String submissionLocation);
-
-	// ---------------------------------------------------------------------------------------------------
-	//
-	// Job management methods
-	//
-	// ---------------------------------------------------------------------------------------------------
 
 	/**
 	 * Checks whether the specified file is a folder or not.
@@ -906,6 +916,9 @@ public interface ServiceInterface {
 	void killJobs(@QueryParam("jobnames") DtoStringList jobnames,
 			@QueryParam("clean") boolean clean);
 
+	// void createAndSubmitJob(@PathParam("jobname") String jobname) throws
+	// JobSubmissionException, JobPropertiesException;
+
 	/**
 	 * Returns the date when the file was last modified.
 	 * 
@@ -920,9 +933,6 @@ public interface ServiceInterface {
 	@Path("user/files/lastModified")
 	long lastModified(@QueryParam("url") String url)
 			throws RemoteFileSystemException;
-
-	// void createAndSubmitJob(@PathParam("jobname") String jobname) throws
-	// JobSubmissionException, JobPropertiesException;
 
 	/**
 	 * Lists all applications that are supported by this deployment of a service
