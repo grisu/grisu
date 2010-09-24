@@ -83,6 +83,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 	private final Map<String, String[]> cachedApplicationPackagesForExecutables = new HashMap<String, String[]>();
 
 	private final Map<String, List<String>> cachedStagingFilesystemsPerSubLoc = new HashMap<String, List<String>>();
+	private Set<String> cachedAllApps;
 
 	public ResourceInformationImpl(final ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
@@ -116,6 +117,16 @@ public class ResourceInformationImpl implements ResourceInformation {
 			}
 		}
 		return temp;
+	}
+
+	public synchronized Set<String> getAllApplications() {
+
+		if (cachedAllApps == null) {
+			cachedAllApps = serviceInterface.getAllAvailableApplications(null)
+					.asSortedSet();
+		}
+		return cachedAllApps;
+
 	}
 
 	public final Set<String> getAllAvailableSites(final String fqan) {

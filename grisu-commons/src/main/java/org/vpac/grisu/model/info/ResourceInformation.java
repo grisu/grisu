@@ -37,6 +37,13 @@ public interface ResourceInformation {
 			Set<String> submissionlocations);
 
 	/**
+	 * A list of all applications that are available grid-wide.
+	 * 
+	 * @return all application packages
+	 */
+	Set<String> getAllApplications();
+
+	/**
 	 * Returns a list of all sites a user that is member of the specified fqan
 	 * can access.
 	 * 
@@ -61,6 +68,15 @@ public interface ResourceInformation {
 	 * @return all submission locations
 	 */
 	String[] getAllSubmissionLocations();
+
+	/**
+	 * Checks which application packages provide the provided executable.
+	 * 
+	 * @param executable
+	 *            the executable
+	 * @return the application package(s) or null if no package could be found
+	 */
+	String[] getApplicationPackageForExecutable(String executable);
 
 	/**
 	 * Calculates the best staging filesystem for this submissionLocation.
@@ -90,14 +106,5 @@ public interface ResourceInformation {
 	 * @return the staging filesystems
 	 */
 	List<String> getStagingFilesystemsForSubmissionLocation(String subLoc);
-
-	/**
-	 * Checks which application packages provide the provided executable.
-	 * 
-	 * @param executable
-	 *            the executable
-	 * @return the application package(s) or null if no package could be found
-	 */
-	String[] getApplicationPackageForExecutable(String executable);
 
 }
