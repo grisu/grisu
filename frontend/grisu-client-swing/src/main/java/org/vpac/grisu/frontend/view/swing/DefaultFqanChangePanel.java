@@ -38,7 +38,7 @@ public class DefaultFqanChangePanel extends JPanel implements
 				ColumnSpec.decode("218px"), },
 				new RowSpec[] { RowSpec.decode("40px"), }));
 
-		final JLabel lblGroup = new JLabel("Submit as group:");
+		final JLabel lblGroup = new JLabel("Submit for group:");
 		add(lblGroup, "1, 1, left, center");
 
 		comboBox = new JComboBox(voModel);
@@ -75,7 +75,7 @@ public class DefaultFqanChangePanel extends JPanel implements
 			return;
 		}
 
-		if (fillThread != null && fillThread.isAlive()) {
+		if ((fillThread != null) && fillThread.isAlive()) {
 			return;
 		}
 
@@ -98,7 +98,8 @@ public class DefaultFqanChangePanel extends JPanel implements
 					voModel.addElement(vo);
 				}
 
-				if (StringUtils.isNotBlank(old) && voModel.getIndexOf(old) >= 0) {
+				if (StringUtils.isNotBlank(old)
+						&& (voModel.getIndexOf(old) >= 0)) {
 					uem.setCurrentFqan(old);
 				} else {
 					old = (String) voModel.getElementAt(0);
