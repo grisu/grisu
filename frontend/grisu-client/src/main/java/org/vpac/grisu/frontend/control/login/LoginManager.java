@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import jline.ConsoleReader;
 
@@ -106,6 +107,9 @@ public class LoginManager {
 	public static void initEnvironment() {
 
 		if (!environmentInitialized) {
+
+			java.util.logging.LogManager.getLogManager().reset();
+			java.util.logging.Logger.getLogger("root").setLevel(Level.OFF);
 
 			JythonHelpers.setJythonCachedir();
 

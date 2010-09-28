@@ -55,6 +55,11 @@ public class ClientSideResourceInformation implements ResourceInformation {
 		return temp;
 	}
 
+	public Set<String> getAllApplications() {
+		return new TreeSet<String>(Arrays.asList(infoManager
+				.getAllApplicationsOnGrid()));
+	}
+
 	public Set<String> getAllAvailableSites(String fqan) {
 		final Set<String> temp = new TreeSet<String>();
 		for (final String subLoc : getAllAvailableSubmissionLocations(fqan)) {
@@ -71,11 +76,15 @@ public class ClientSideResourceInformation implements ResourceInformation {
 		return infoManager.getAllSubmissionLocations();
 	}
 
+	public String[] getApplicationPackageForExecutable(String executable) {
+		return infoManager.getApplicationsThatProvideExecutable(executable);
+	}
+
 	public String getRecommendedStagingFileSystemForSubmissionLocation(
 			String subLoc) {
 
 		final List<String> temp = getStagingFilesystemsForSubmissionLocation(subLoc);
-		if (temp != null && temp.size() > 0) {
+		if ((temp != null) && (temp.size() > 0)) {
 			return temp.get(0);
 		} else {
 			return null;
