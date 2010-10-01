@@ -542,10 +542,10 @@ public class JobSubmissionObjectImpl {
 	}
 
 	public void setApplication(final String app) {
-		System.out.println("Set application: " + app);
 		final String oldValue = this.application;
 		this.application = app;
-		pcs.firePropertyChange("application", oldValue, this.application);
+		pcs.firePropertyChange("application", oldValue,
+				JobSubmissionObjectImpl.this.application);
 	}
 
 	public void setApplicationVersion(final String appVersion) {

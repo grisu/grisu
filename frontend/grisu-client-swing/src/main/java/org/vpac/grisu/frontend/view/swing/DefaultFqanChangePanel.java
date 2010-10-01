@@ -7,6 +7,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
@@ -114,12 +115,17 @@ public class DefaultFqanChangePanel extends JPanel implements
 
 	}
 
-	public void onEvent(FqanEvent arg0) {
+	public synchronized void onEvent(final FqanEvent arg0) {
 
 		if (FqanEvent.DEFAULT_FQAN_CHANGED == arg0.getEvent_type()) {
-			externalChange = true;
-			voModel.setSelectedItem(arg0.getFqan());
-			externalChange = false;
+			SwingUtilities.invokeLater(new Thread() {
+				@Override
+				public void run() {
+					externalChange = true;
+					voModel.setSelectedItem(arg0.getFqan());
+					externalChange = false;
+				}
+			});
 		}
 
 	}

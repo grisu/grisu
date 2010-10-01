@@ -319,7 +319,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 		return result;
 	}
 
-	public final String getCurrentFqan() {
+	public final synchronized String getCurrentFqan() {
 
 		if (StringUtils.isBlank(currentFqan)) {
 
