@@ -68,20 +68,24 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	 */
 	public final Set<String> getAllAvailableVersionsForFqan(final String fqan) {
 
-		if (cachedVersionsForUserPerFqan.get(fqan) == null) {
-			final Set<String> result = new TreeSet<String>();
-			for (final String subLoc : getAvailableSubmissionLocationsForFqan(fqan)) {
-				final List<String> temp = serviceInterface
-						.getVersionsOfApplicationOnSubmissionLocation(
-								getApplicationName(), subLoc).getStringList();
-				result.addAll(temp);
+		synchronized (fqan) {
+
+			if (cachedVersionsForUserPerFqan.get(fqan) == null) {
+				final Set<String> result = new TreeSet<String>();
+				for (final String subLoc : getAvailableSubmissionLocationsForFqan(fqan)) {
+					final List<String> temp = serviceInterface
+							.getVersionsOfApplicationOnSubmissionLocation(
+									getApplicationName(), subLoc)
+							.getStringList();
+					result.addAll(temp);
+				}
+				cachedVersionsForUserPerFqan.put(fqan, result);
 			}
-			cachedVersionsForUserPerFqan.put(fqan, result);
 		}
 		return cachedVersionsForUserPerFqan.get(fqan);
 	}
 
-	public synchronized SortedSet<GridResource> getAllSubmissionLocationsAsGridResources(
+	public SortedSet<GridResource> getAllSubmissionLocationsAsGridResources(
 			Map<JobSubmissionProperty, String> additionalJobProperties,
 			String fqan) {
 
@@ -119,17 +123,21 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 			final String version) {
 		final String KEY = version + "_" + subLoc;
 
-		if (cachedApplicationDetails.get(KEY) == null) {
-			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
-				cachedApplicationDetails
-						.put(KEY, new HashMap<String, String>());
-			} else {
-				final Map<String, String> details = serviceInterface
-						.getApplicationDetailsForVersionAndSubmissionLocation(
-								application, version, subLoc).getDetailsAsMap();
-				cachedApplicationDetails.put(KEY, details);
+		synchronized (KEY) {
+			if (cachedApplicationDetails.get(KEY) == null) {
+				if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
+					cachedApplicationDetails.put(KEY,
+							new HashMap<String, String>());
+				} else {
+					final Map<String, String> details = serviceInterface
+							.getApplicationDetailsForVersionAndSubmissionLocation(
+									application, version, subLoc)
+							.getDetailsAsMap();
+					cachedApplicationDetails.put(KEY, details);
+				}
 			}
 		}
+
 		return cachedApplicationDetails.get(KEY);
 	}
 
@@ -149,7 +157,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
 	 * getAvailableAllSubmissionLocations()
 	 */
-	public final Set<String> getAvailableAllSubmissionLocations() {
+	public synchronized final Set<String> getAvailableAllSubmissionLocations() {
 
 		if (cachedAllSubmissionLocations == null) {
 			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
@@ -177,15 +185,18 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	public final Set<String> getAvailableSubmissionLocationsForFqan(
 			final String fqan) {
 
-		if (cachedSubmissionLocationsForUserPerFqan.get(fqan) == null) {
-			final Set<String> temp = new HashSet<String>();
-			for (final String subLoc : resourceInfo
-					.getAllAvailableSubmissionLocations(fqan)) {
-				if (getAvailableAllSubmissionLocations().contains(subLoc)) {
-					temp.add(subLoc);
+		synchronized (fqan) {
+
+			if (cachedSubmissionLocationsForUserPerFqan.get(fqan) == null) {
+				final Set<String> temp = new HashSet<String>();
+				for (final String subLoc : resourceInfo
+						.getAllAvailableSubmissionLocations(fqan)) {
+					if (getAvailableAllSubmissionLocations().contains(subLoc)) {
+						temp.add(subLoc);
+					}
 				}
+				cachedSubmissionLocationsForUserPerFqan.put(fqan, temp);
 			}
-			cachedSubmissionLocationsForUserPerFqan.put(fqan, temp);
 		}
 		return cachedSubmissionLocationsForUserPerFqan.get(fqan);
 	}
@@ -199,18 +210,21 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	public final Set<String> getAvailableSubmissionLocationsForVersion(
 			final String version) {
 
-		if (cachedSubmissionLocationsPerVersion.get(version) == null) {
-			if (Constants.NO_VERSION_INDICATOR_STRING.equals(version)) {
-				cachedSubmissionLocationsPerVersion.put(version,
-						getAvailableAllSubmissionLocations());
-			} else {
+		synchronized (version) {
 
-				final List<String> temp = Arrays.asList(serviceInterface
-						.getSubmissionLocationsForApplicationAndVersion(
-								application, version)
-						.asSubmissionLocationStrings());
-				cachedSubmissionLocationsPerVersion.put(version, new HashSet(
-						temp));
+			if (cachedSubmissionLocationsPerVersion.get(version) == null) {
+				if (Constants.NO_VERSION_INDICATOR_STRING.equals(version)) {
+					cachedSubmissionLocationsPerVersion.put(version,
+							getAvailableAllSubmissionLocations());
+				} else {
+
+					final List<String> temp = Arrays.asList(serviceInterface
+							.getSubmissionLocationsForApplicationAndVersion(
+									application, version)
+							.asSubmissionLocationStrings());
+					cachedSubmissionLocationsPerVersion.put(version,
+							new HashSet(temp));
+				}
 			}
 		}
 		return cachedSubmissionLocationsPerVersion.get(version);
@@ -228,16 +242,20 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 		final String KEY = version + "_" + fqan;
 
-		if (cachedSubmissionLocationsForUserPerVersionAndFqan.get(KEY) == null) {
-			final Set<String> temp = new HashSet<String>();
-			for (final String subLoc : resourceInfo
-					.getAllAvailableSubmissionLocations(fqan)) {
-				if (getAvailableSubmissionLocationsForVersion(version)
-						.contains(subLoc)) {
-					temp.add(subLoc);
+		synchronized (KEY) {
+
+			if (cachedSubmissionLocationsForUserPerVersionAndFqan.get(KEY) == null) {
+				final Set<String> temp = new HashSet<String>();
+				for (final String subLoc : resourceInfo
+						.getAllAvailableSubmissionLocations(fqan)) {
+					if (getAvailableSubmissionLocationsForVersion(version)
+							.contains(subLoc)) {
+						temp.add(subLoc);
+					}
 				}
+				cachedSubmissionLocationsForUserPerVersionAndFqan
+						.put(KEY, temp);
 			}
-			cachedSubmissionLocationsForUserPerVersionAndFqan.put(KEY, temp);
 		}
 		return cachedSubmissionLocationsForUserPerVersionAndFqan.get(KEY);
 	}
@@ -253,17 +271,20 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 		final String KEY = subLoc;
 
-		if (cachedVersionsPerSubmissionLocations.get(KEY) == null) {
-			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
-				final Set<String> temp = new HashSet<String>();
-				temp.add(Constants.NO_VERSION_INDICATOR_STRING);
-				cachedVersionsPerSubmissionLocations.put(KEY, temp);
-			} else {
-				final List<String> temp = serviceInterface
-						.getVersionsOfApplicationOnSubmissionLocation(
-								application, subLoc).getStringList();
-				cachedVersionsPerSubmissionLocations.put(KEY,
-						new HashSet<String>(temp));
+		synchronized (KEY) {
+
+			if (cachedVersionsPerSubmissionLocations.get(KEY) == null) {
+				if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
+					final Set<String> temp = new HashSet<String>();
+					temp.add(Constants.NO_VERSION_INDICATOR_STRING);
+					cachedVersionsPerSubmissionLocations.put(KEY, temp);
+				} else {
+					final List<String> temp = serviceInterface
+							.getVersionsOfApplicationOnSubmissionLocation(
+									application, subLoc).getStringList();
+					cachedVersionsPerSubmissionLocations.put(KEY,
+							new HashSet<String>(temp));
+				}
 			}
 		}
 		return cachedVersionsPerSubmissionLocations.get(KEY);

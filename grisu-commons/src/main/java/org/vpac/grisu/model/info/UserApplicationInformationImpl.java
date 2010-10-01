@@ -27,7 +27,7 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 		this.userInfo = userInfo;
 	}
 
-	public final Set<String> getAllAvailableSitesForUser() {
+	public synchronized final Set<String> getAllAvailableSitesForUser() {
 
 		if (cachedAllSitesForUser == null) {
 			cachedAllSitesForUser = new TreeSet<String>();
@@ -38,7 +38,7 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 		return cachedAllSitesForUser;
 	}
 
-	public final Set<String> getAllAvailableSubmissionLocationsForUser() {
+	public synchronized final Set<String> getAllAvailableSubmissionLocationsForUser() {
 
 		if (cachedSubmissionLocationsForUser == null) {
 			cachedSubmissionLocationsForUser = new HashSet<String>();
@@ -50,7 +50,7 @@ public class UserApplicationInformationImpl extends ApplicationInformationImpl
 		return cachedSubmissionLocationsForUser;
 	}
 
-	public final Set<String> getAllAvailableVersionsForUser() {
+	public synchronized final Set<String> getAllAvailableVersionsForUser() {
 
 		if (cachedAllVersionsForUser == null) {
 			cachedAllVersionsForUser = new TreeSet<String>();

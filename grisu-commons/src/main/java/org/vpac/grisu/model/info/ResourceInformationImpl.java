@@ -131,10 +131,13 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 	public final Set<String> getAllAvailableSites(final String fqan) {
 
-		if (cachedAllSitesPerFqan.get(fqan) == null) {
-			final Set<String> temp = new TreeSet<String>();
-			for (final String subLoc : getAllAvailableSubmissionLocations(fqan)) {
-				temp.add(getSite(subLoc));
+		synchronized (fqan) {
+
+			if (cachedAllSitesPerFqan.get(fqan) == null) {
+				final Set<String> temp = new TreeSet<String>();
+				for (final String subLoc : getAllAvailableSubmissionLocations(fqan)) {
+					temp.add(getSite(subLoc));
+				}
 			}
 		}
 		return cachedAllSitesPerFqan.get(fqan);
@@ -142,16 +145,19 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 	public final String[] getAllAvailableSubmissionLocations(final String fqan) {
 
-		if (cachedAllSubmissionLocationsPerFqan.get(fqan) == null) {
-			final String[] temp = serviceInterface
-					.getAllSubmissionLocationsForFqan(fqan)
-					.asSubmissionLocationStrings();
-			cachedAllSubmissionLocationsPerFqan.put(fqan, temp);
+		synchronized (fqan) {
+
+			if (cachedAllSubmissionLocationsPerFqan.get(fqan) == null) {
+				final String[] temp = serviceInterface
+						.getAllSubmissionLocationsForFqan(fqan)
+						.asSubmissionLocationStrings();
+				cachedAllSubmissionLocationsPerFqan.put(fqan, temp);
+			}
 		}
 		return cachedAllSubmissionLocationsPerFqan.get(fqan);
 	}
 
-	public final String[] getAllSites() {
+	public synchronized final String[] getAllSites() {
 
 		if (cachedAllSites == null) {
 
@@ -162,7 +168,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 		return cachedAllSites;
 	}
 
-	public final String[] getAllSubmissionLocations() {
+	public synchronized final String[] getAllSubmissionLocations() {
 
 		if (cachedAllSubmissionLocations == null) {
 			cachedAllSubmissionLocations = serviceInterface
@@ -173,15 +179,20 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 	public final Set<String> getAllSubmissionLocationsForSite(final String site) {
 
-		if (cachedSiteAllSubmissionLocationsMap.get(site) == null) {
-			// now we are building the complete map, not only for this one site
-			for (final String subLoc : getAllSubmissionLocations()) {
-				final String sitetemp = getSite(subLoc);
-				if (cachedSiteAllSubmissionLocationsMap.get(sitetemp) == null) {
-					cachedSiteAllSubmissionLocationsMap.put(sitetemp,
-							new HashSet<String>());
+		synchronized (site) {
+
+			if (cachedSiteAllSubmissionLocationsMap.get(site) == null) {
+				// now we are building the complete map, not only for this one
+				// site
+				for (final String subLoc : getAllSubmissionLocations()) {
+					final String sitetemp = getSite(subLoc);
+					if (cachedSiteAllSubmissionLocationsMap.get(sitetemp) == null) {
+						cachedSiteAllSubmissionLocationsMap.put(sitetemp,
+								new HashSet<String>());
+					}
+					cachedSiteAllSubmissionLocationsMap.get(sitetemp).add(
+							subLoc);
 				}
-				cachedSiteAllSubmissionLocationsMap.get(sitetemp).add(subLoc);
 			}
 		}
 		return cachedSiteAllSubmissionLocationsMap.get(site);
@@ -190,10 +201,14 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 	public String[] getApplicationPackageForExecutable(String executable) {
 
-		if (cachedApplicationPackagesForExecutables.get(executable) == null) {
-			String[] result = serviceInterface
-					.getApplicationPackagesForExecutable(executable);
-			cachedApplicationPackagesForExecutables.put(executable, result);
+		synchronized (executable) {
+
+			if (cachedApplicationPackagesForExecutables.get(executable) == null) {
+				String[] result = serviceInterface
+						.getApplicationPackagesForExecutable(executable);
+				cachedApplicationPackagesForExecutables.put(executable, result);
+			}
+
 		}
 
 		return cachedApplicationPackagesForExecutables.get(executable);
@@ -214,8 +229,11 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 		final String host = getHost(urlOrSubmissionLocation);
 
-		if (cachedHosts.get(host) == null) {
-			cachedHosts.put(host, serviceInterface.getSite(host));
+		synchronized (host) {
+
+			if (cachedHosts.get(host) == null) {
+				cachedHosts.put(host, serviceInterface.getSite(host));
+			}
 		}
 		return cachedHosts.get(host);
 	}
@@ -226,11 +244,15 @@ public class ResourceInformationImpl implements ResourceInformation {
 		if ((subLoc == null) || "".equals(subLoc)) {
 			return null;
 		}
-		if (cachedStagingFilesystemsPerSubLoc.get(subLoc) == null) {
-			final List<String> temp = serviceInterface
-					.getStagingFileSystemForSubmissionLocation(subLoc)
-					.getStringList();
-			cachedStagingFilesystemsPerSubLoc.put(subLoc, temp);
+
+		synchronized (subLoc) {
+
+			if (cachedStagingFilesystemsPerSubLoc.get(subLoc) == null) {
+				final List<String> temp = serviceInterface
+						.getStagingFileSystemForSubmissionLocation(subLoc)
+						.getStringList();
+				cachedStagingFilesystemsPerSubLoc.put(subLoc, temp);
+			}
 		}
 		return cachedStagingFilesystemsPerSubLoc.get(subLoc);
 	}
