@@ -225,6 +225,28 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		pcs.firePropertyChange("submissionLog", null, getSubmissionLog());
 	}
 
+	/**
+	 * Archives the job.
+	 * 
+	 * @param target
+	 *            the url (of the parent dir) to archive the job to or null to
+	 *            use the (previously set) default archive location
+	 * @throws JobPropertiesException
+	 *             if the job is not finished yet
+	 * @throws RemoteFileSystemException
+	 *             if the archive location is not specified or there is some
+	 *             other kind of file related exception
+	 */
+	public final void archive(String target) throws JobPropertiesException,
+			RemoteFileSystemException {
+		try {
+			getServiceInterface().archiveJob(getJobname(), target);
+		} catch (NoSuchJobException e) {
+			// should never happen
+			myLogger.error(e);
+		}
+	}
+
 	public int compareTo(JobObject o2) {
 		return getJobname().compareTo(o2.getJobname());
 	}
@@ -1002,8 +1024,8 @@ public class JobObject extends JobSubmissionObjectImpl implements
 					e);
 		}
 
-		if (additionalJobProperties != null
-				&& additionalJobProperties.size() > 0) {
+		if ((additionalJobProperties != null)
+				&& (additionalJobProperties.size() > 0)) {
 			addJobLogMessage("Setting additional job properties...");
 			try {
 				serviceInterface.addJobProperties(getJobname(), DtoJob

@@ -74,10 +74,13 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	public final ApplicationInformation getApplicationInformation(
 			final String applicationName) {
 
-		if (cachedApplicationInformationObjects.get(applicationName) == null) {
-			final ApplicationInformation temp = new ApplicationInformationImpl(
-					serviceInterface, applicationName);
-			cachedApplicationInformationObjects.put(applicationName, temp);
+		synchronized (applicationName) {
+
+			if (cachedApplicationInformationObjects.get(applicationName) == null) {
+				final ApplicationInformation temp = new ApplicationInformationImpl(
+						serviceInterface, applicationName);
+				cachedApplicationInformationObjects.put(applicationName, temp);
+			}
 		}
 		return cachedApplicationInformationObjects.get(applicationName);
 	}
@@ -87,7 +90,7 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	 * 
 	 * @see org.vpac.grisu.model.GrisuRegistryInterface#getFileManager()
 	 */
-	public final FileManager getFileManager() {
+	public synchronized final FileManager getFileManager() {
 		if (cachedFileHelper == null) {
 			cachedFileHelper = new FileManager(serviceInterface);
 		}
@@ -99,7 +102,7 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	 * 
 	 * @see org.vpac.grisu.model.GrisuRegistryInterface#getHistoryManager()
 	 */
-	public final HistoryManager getHistoryManager() {
+	public synchronized final HistoryManager getHistoryManager() {
 		if (historyManager == null) {
 			final File historyFile = new File(Environment
 					.getGrisuClientDirectory().getPath(),
@@ -126,7 +129,7 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	 * 
 	 * @see org.vpac.grisu.model.GrisuRegistryInterface#getResourceInformation()
 	 */
-	public final ResourceInformation getResourceInformation() {
+	public final synchronized ResourceInformation getResourceInformation() {
 		if (cachedResourceInformation == null) {
 			cachedResourceInformation = new ResourceInformationImpl(
 					serviceInterface);
@@ -134,7 +137,7 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 		return cachedResourceInformation;
 	}
 
-	public TemplateManager getTemplateManager() {
+	public synchronized TemplateManager getTemplateManager() {
 
 		if (templateManager == null) {
 			templateManager = new TemplateManager(serviceInterface);
@@ -152,11 +155,14 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	public final UserApplicationInformation getUserApplicationInformation(
 			final String applicationName) {
 
-		if (cachedUserInformationObjects.get(applicationName) == null) {
-			final UserApplicationInformation temp = new UserApplicationInformationImpl(
-					serviceInterface, getUserEnvironmentManager(),
-					applicationName);
-			cachedUserInformationObjects.put(applicationName, temp);
+		synchronized (applicationName) {
+
+			if (cachedUserInformationObjects.get(applicationName) == null) {
+				final UserApplicationInformation temp = new UserApplicationInformationImpl(
+						serviceInterface, getUserEnvironmentManager(),
+						applicationName);
+				cachedUserInformationObjects.put(applicationName, temp);
+			}
 		}
 		return cachedUserInformationObjects.get(applicationName);
 	}
@@ -167,7 +173,7 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	 * @see
 	 * org.vpac.grisu.model.GrisuRegistryInterface#getUserEnvironmentManager()
 	 */
-	public final UserEnvironmentManager getUserEnvironmentManager() {
+	public final synchronized UserEnvironmentManager getUserEnvironmentManager() {
 
 		if (cachedUserInformation == null) {
 			this.cachedUserInformation = new UserEnvironmentManagerImpl(
@@ -183,7 +189,8 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	 * org.vpac.grisu.model.GrisuRegistryInterface#setUserEnvironmentManager
 	 * (org.vpac.grisu.model.UserEnvironmentManager)
 	 */
-	public final void setUserEnvironmentManager(final UserEnvironmentManager ui) {
+	public final synchronized void setUserEnvironmentManager(
+			final UserEnvironmentManager ui) {
 		this.cachedUserInformation = ui;
 	}
 

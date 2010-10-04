@@ -60,8 +60,8 @@ public class GrisuRegistryManager {
 		return cachedRegistries.get(serviceInterface);
 	}
 
-	public static void setDefault(final ServiceInterface serviceInterface,
-			GrisuRegistry registry) {
+	public synchronized static void setDefault(
+			final ServiceInterface serviceInterface, GrisuRegistry registry) {
 		cachedRegistries.put(serviceInterface, registry);
 	}
 

@@ -447,7 +447,7 @@ public class User {
 				final URI uri = new URI(file_to_aquire);
 				file_to_aquire = uri.toString();
 			} catch (final URISyntaxException e) {
-				e.printStackTrace();
+				myLogger.error(e);
 				throw new RemoteFileSystemException(
 						"Could not get uri for file " + file_to_aquire);
 			}
@@ -499,7 +499,7 @@ public class User {
 		final int startProperties = path.indexOf("[");
 		final int endProperties = path.indexOf("]");
 
-		if (startProperties >= 0 && endProperties < 0) {
+		if ((startProperties >= 0) && (endProperties < 0)) {
 			myLogger.error("Path: " + path + " for host " + server
 					+ " has incorrect syntax. Ignoring...");
 			return null;
@@ -592,7 +592,7 @@ public class User {
 
 			} catch (final Exception e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				myLogger.error(e);
 			}
 
 		} else if (path.contains("${GLOBUS_USER_HOME}")) {
@@ -602,8 +602,7 @@ public class User {
 						fqan);
 				userDnPath = false;
 			} catch (final Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				myLogger.error(e);
 			}
 
 		} else if (path.contains("${GLOBUS_SCRATCH_DIR")) {
@@ -612,7 +611,7 @@ public class User {
 						fqan) + "/.globus/scratch";
 				userDnPath = false;
 			} catch (final Exception e) {
-				e.printStackTrace();
+				myLogger.error(e);
 			}
 		} else {
 
@@ -668,8 +667,8 @@ public class User {
 
 						} catch (final Exception e) {
 							myLogger.error("Could not create folder: "
-									+ urlTemp);
-							e.printStackTrace();
+									+ urlTemp, e);
+
 							mountPointCache.put(key, "Does not exist");
 						} finally {
 							closeFileSystems();
@@ -685,9 +684,6 @@ public class User {
 		final String site = AbstractServiceInterface.informationManager
 				.getSiteForHostOrUrl(url);
 
-		if (site == null) {
-			System.out.println("Url: " + url + "\tpath" + path);
-		}
 		MountPoint mp = null;
 
 		if (StringUtils.isBlank(alias)) {
