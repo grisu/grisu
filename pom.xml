@@ -96,8 +96,8 @@
 		</contributor>
 	</contributors>
 	<scm>
-		<connection>scm:svn:http://projects.arcs.org.au/svn/grisu</connection>
-		<developerConnection>scm:svn:https://projects.arcs.org.au/svn/grisu</developerConnection>
+		<connection>scm:git:git://code.arcs.org.au/grisu/grisu.git</connection>
+		<developerConnection>scm:git:git://code.arcs.org.au/grisu/grisu.git</developerConnection>
 		<url>http://projects.arcs.org.au/trac/grisu/browser</url>
 	</scm>
 	<organization>
