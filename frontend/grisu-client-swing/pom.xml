@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>frontend</artifactId>
 		<groupId>org.vpac.grisu</groupId>
-		<version>0.3-beta1</version>
+		<version>0.3-beta2-SNAPSHOT</version>
 	</parent>
 	<artifactId>grisu-client-swing</artifactId>
 	<name>Grisu client library (Swing)</name>
@@ -12,7 +12,7 @@
 		<dependency>
 			<groupId>org.vpac.grisu</groupId>
 			<artifactId>grisu-client</artifactId>
-			<version>0.3-beta1</version>
+			<version>0.3-beta2-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -67,7 +67,7 @@
 		<dependency>
 			<groupId>org.vpac.grisu</groupId>
 			<artifactId>grisu-core</artifactId>
-			<version>0.3-beta1</version>
+			<version>0.3-beta2-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
