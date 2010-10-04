@@ -318,7 +318,7 @@
 <!--			<version>1.4.3-TEMP</version>-->
 			<groupId>commons-vfs-grid</groupId>
 			<artifactId>commons-vfs-grid</artifactId>
-			<version>1.5.1-SNAPSHOT</version>
+			<version>1.5.1-beta1</version>
 			<type>jar</type>
 			<exclusions>
 				<exclusion>
