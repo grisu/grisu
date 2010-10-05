@@ -6,6 +6,8 @@ import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.JFrame;
 import javax.swing.UIManager;
@@ -28,6 +30,7 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 	private GrisuMainPanel mainPanel;
 
 	private LoginPanel lp;
+	protected final GrisuMenu menu;
 
 	private JXFrame frame;
 
@@ -49,18 +52,11 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
-		//
-		// try {
-		// Class clientSideRegistryClass = Class
-		// .forName("org.vpac.grisu.frontend.info.clientsidemds.ClientSideGrisuRegistry");
-		//
-		// Method m = clientSideRegistryClass.getMethod("preloadInfoManager");
-		// m.invoke(null);
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
 
 		initialize();
+
+		menu = new GrisuMenu(this.getFrame());
+		getFrame().setJMenuBar(menu);
 
 	}
 
@@ -82,6 +78,15 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 			WindowSaver.saveSettings();
 			System.exit(0);
 		}
+	}
+
+	public Set<String> getApplicationsToMonitor() {
+
+		Set<String> result = new TreeSet<String>();
+		for (JobCreationPanel panel : getJobCreationPanels()) {
+			result.add(panel.getSupportedApplication());
+		}
+		return result;
 	}
 
 	public JFrame getFrame() {
@@ -110,23 +115,16 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 		final boolean singleJobs = displaySingleJobsCreationPane();
 		final boolean batchJobs = displayBatchJobsCreationPane();
 
-		// for (JobCreationPanel panel : getJobCreationPanels()) {
-		// if (panel.createsBatchJob()) {
-		// batchJobs = true;
-		// }
-		// if (panel.createsSingleJob()) {
-		// singleJobs = true;
-		// }
-		// }
-
 		final boolean displayAppSpecificMonitoringItems = displayAppSpecificMonitoringItems();
 
 		if (displayAppSpecificMonitoringItems) {
-			mainPanel = new GrisuMainPanel(singleJobs, true, true, null,
-					batchJobs, true, true, null, true);
+			mainPanel = new GrisuMainPanel(singleJobs, false, true,
+					getApplicationsToMonitor(), batchJobs, false, true,
+					getApplicationsToMonitor(), true);
 		} else {
-			mainPanel = new GrisuMainPanel(singleJobs, false, false, null,
-					batchJobs, false, false, null, true);
+			mainPanel = new GrisuMainPanel(singleJobs, true, false,
+					getApplicationsToMonitor(), batchJobs, true, false,
+					getApplicationsToMonitor(), true);
 		}
 
 		final List<ServiceInterfaceHolder> siHolders = ImmutableList
