@@ -23,7 +23,7 @@ import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.model.events.BatchJobKilledEvent;
-import org.vpac.grisu.frontend.model.events.JobKilledEvent;
+import org.vpac.grisu.frontend.model.events.JobCleanedEvent;
 import org.vpac.grisu.frontend.model.events.NewBatchJobEvent;
 import org.vpac.grisu.frontend.model.events.NewJobEvent;
 import org.vpac.grisu.frontend.model.job.BatchJobObject;
@@ -175,7 +175,7 @@ public class RunningJobManager implements EventSubscriber {
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 
 		EventBus.subscribe(NewJobEvent.class, this);
-		EventBus.subscribe(JobKilledEvent.class, this);
+		EventBus.subscribe(JobCleanedEvent.class, this);
 		EventBus.subscribe(BatchJobKilledEvent.class, this);
 		EventBus.subscribe(NewBatchJobEvent.class, this);
 
@@ -426,8 +426,8 @@ public class RunningJobManager implements EventSubscriber {
 				}
 			}.start();
 
-		} else if (event instanceof JobKilledEvent) {
-			final JobKilledEvent ev = (JobKilledEvent) event;
+		} else if (event instanceof JobCleanedEvent) {
+			final JobCleanedEvent ev = (JobCleanedEvent) event;
 			new Thread() {
 				@Override
 				public void run() {

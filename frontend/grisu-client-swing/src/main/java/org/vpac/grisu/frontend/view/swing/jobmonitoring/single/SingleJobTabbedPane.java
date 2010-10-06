@@ -10,15 +10,18 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import org.apache.commons.lang.StringUtils;
+import org.bushe.swing.event.EventBus;
+import org.bushe.swing.event.EventSubscriber;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.jobMonitoring.RunningJobManager;
 import org.vpac.grisu.frontend.control.utils.ApplicationsManager;
+import org.vpac.grisu.frontend.model.events.JobCleanedEvent;
 import org.vpac.grisu.frontend.model.job.JobObject;
 
 import com.jidesoft.swing.JideTabbedPane;
 
 public class SingleJobTabbedPane extends JPanel implements
-		SingleJobSelectionListener {
+		SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
 
 	private JideTabbedPane jideTabbedPane;
 	private SimpleSingleJobsGrid grid;
@@ -37,8 +40,8 @@ public class SingleJobTabbedPane extends JPanel implements
 		this.application = application;
 		setLayout(new BorderLayout(0, 0));
 		add(getJideTabbedPane(), BorderLayout.CENTER);
-		// add(getUpdateButton(), BorderLayout.SOUTH);
 		addSingleJobSelectionListener(this);
+		EventBus.subscribe(JobCleanedEvent.class, this);
 	}
 
 	// register a listener
@@ -102,6 +105,18 @@ public class SingleJobTabbedPane extends JPanel implements
 		} catch (final IllegalArgumentException e) {
 			getJideTabbedPane().addTab(bj.getJobname(), temp.getPanel());
 			getJideTabbedPane().setSelectedComponent(temp.getPanel());
+		}
+
+	}
+
+	public void onEvent(JobCleanedEvent arg0) {
+
+		System.out.println("Removing panel...");
+		JobObject bj = arg0.getJob();
+		JobDetailPanel temp = panels.get(bj.getJobname());
+		if (panels.get(bj.getJobname()) != null) {
+			panels.remove(bj.getJobname());
+			getJideTabbedPane().remove(temp.getPanel());
 		}
 
 	}

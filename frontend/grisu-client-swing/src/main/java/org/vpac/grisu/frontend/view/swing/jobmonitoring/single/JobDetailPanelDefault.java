@@ -16,6 +16,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import org.apache.log4j.Logger;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.model.job.JobObject;
@@ -32,6 +33,9 @@ import com.jidesoft.swing.JideTabbedPane;
 
 public class JobDetailPanelDefault extends JPanel implements
 		PropertyChangeListener, JobDetailPanel {
+
+	static final Logger myLogger = Logger.getLogger(JobDetailPanelDefault.class
+			.getName());
 
 	private final ImageIcon REFRESH_ICON = new ImageIcon(
 			JobDetailPanelDefault.class.getClassLoader().getResource(
@@ -277,12 +281,16 @@ public class JobDetailPanelDefault extends JPanel implements
 		// try to create app specific panel
 		asvp = AppSpecificViewerPanel.create(si, job);
 		if (asvp != null) {
-			getJideTabbedPane().insertTab(job.getApplication() + " details",
-					null, asvp, null, 0);
-			asvp.setJob(job);
-			getJideTabbedPane().setSelectedIndex(0);
+			try {
+				asvp.setJob(job);
+				getJideTabbedPane().insertTab(
+						job.getApplication() + " details", null, asvp, null, 0);
+			} catch (Exception e) {
+				myLogger.error(e);
+			}
 		}
 
+		getJideTabbedPane().setSelectedIndex(0);
 		getStatusRefreshButton().setEnabled(true);
 		getJobnameTextField().setText(job.getJobname());
 		String subTime = null;

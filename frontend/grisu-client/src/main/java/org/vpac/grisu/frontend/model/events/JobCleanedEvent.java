@@ -2,11 +2,11 @@ package org.vpac.grisu.frontend.model.events;
 
 import org.vpac.grisu.frontend.model.job.JobObject;
 
-public class JobKilledEvent {
+public class JobCleanedEvent {
 
 	private final JobObject job;
 
-	public JobKilledEvent(JobObject job) {
+	public JobCleanedEvent(JobObject job) {
 		this.job = job;
 	}
 

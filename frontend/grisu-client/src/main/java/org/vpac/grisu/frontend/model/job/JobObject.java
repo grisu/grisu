@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
@@ -22,7 +23,7 @@ import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransaction;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransactionManager;
-import org.vpac.grisu.frontend.model.events.JobKilledEvent;
+import org.vpac.grisu.frontend.model.events.JobCleanedEvent;
 import org.vpac.grisu.frontend.model.events.JobStatusEvent;
 import org.vpac.grisu.frontend.model.events.NewJobEvent;
 import org.vpac.grisu.model.FileManager;
@@ -521,6 +522,13 @@ public class JobObject extends JobSubmissionObjectImpl implements
 
 	}
 
+	/**
+	 * Returns the filesize of the specified file
+	 * 
+	 * @param relatevePathToJobDir
+	 *            the path to the file relative to the job directory.
+	 * @return the filesize in bytes
+	 */
 	public long getFileSize(String relatevePathToJobDir) {
 
 		final String url = getJobDirectoryUrl() + "/" + relatevePathToJobDir;
@@ -621,6 +629,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 							this, oldStatus, this.status));
 				}
 			}
+
 		}
 		return this.status;
 	}
@@ -684,6 +693,16 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	}
 
 	/**
+	 * Returns the size of the stderr file.
+	 * 
+	 * @return the size in bytes
+	 */
+	public long getStdErrFileSize() {
+
+		return getFileSize(getStderr());
+	}
+
+	/**
 	 * Returns the current content of the stdout file for this job as a string.
 	 * 
 	 * Internally the stdout file is downloaded to the local grisu cache and
@@ -726,6 +745,16 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		}
 
 		return stdoutFile;
+	}
+
+	/**
+	 * Returns the size of the stdout file.
+	 * 
+	 * @return the size in bytes
+	 */
+	public long getStdOutFileSize() {
+
+		return getFileSize(getStdout());
 	}
 
 	public List<String> getSubmissionLog() {
@@ -803,12 +832,26 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			if (clean) {
 				isBeingCleaned = true;
 				pcs.firePropertyChange("beingCleaned", false, true);
+
+				// delete local cache for this job
+				new Thread() {
+					@Override
+					public void run() {
+						myLogger.debug("Deleting local cached dir for job "
+								+ getJobname() + ": " + getJobDirectoryUrl());
+						File dir = GrisuRegistryManager
+								.getDefault(serviceInterface).getFileManager()
+								.getLocalCacheFile(getJobDirectoryUrl());
+						FileUtils.deleteQuietly(dir);
+					}
+				}.start();
+
 			}
 			this.serviceInterface.kill(this.getJobname(), clean);
 			getStatus(true);
 
 			if (clean) {
-				EventBus.publish(new JobKilledEvent(this));
+				EventBus.publish(new JobCleanedEvent(this));
 			}
 
 		} catch (final Exception e) {

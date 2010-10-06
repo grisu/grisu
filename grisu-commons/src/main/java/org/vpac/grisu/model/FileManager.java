@@ -444,6 +444,22 @@ public class FileManager {
 		}
 
 		final File cacheTargetFile = getLocalCacheFile(url);
+
+		long lastModified;
+		try {
+			lastModified = serviceInterface.lastModified(url);
+		} catch (RemoteFileSystemException e1) {
+			myLogger.error("Could not get last modified time of file: " + url);
+			throw new FileTransactionException(url, cacheTargetFile.toString(),
+					"Could not get lastModified time.", e1);
+		}
+		// if (cacheTargetFile.exists()) {
+		// long cacheFileLastModified = cacheTargetFile.lastModified();
+		// if (cacheFileLastModified >= lastModified) {
+		// return cacheTargetFile;
+		// }
+		// }
+
 		myLogger.debug("Remote file newer than local cache file or not cached yet, downloading new copy.");
 		final DataSource source = null;
 		DataHandler handler = null;
@@ -457,7 +473,6 @@ public class FileManager {
 		}
 
 		try {
-			final long lastModified = serviceInterface.lastModified(url);
 			FileHelpers.saveToDisk(handler.getDataSource(), cacheTargetFile);
 			cacheTargetFile.setLastModified(lastModified);
 		} catch (final Exception e) {

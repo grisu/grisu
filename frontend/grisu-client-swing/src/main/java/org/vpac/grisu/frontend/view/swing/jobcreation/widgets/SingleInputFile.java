@@ -34,6 +34,8 @@ public class SingleInputFile extends AbstractWidget {
 	private boolean displayHiddenFiles = false;
 	private String[] extensions = null;
 
+	private String currentUrl = null;
+
 	/**
 	 * Create the panel.
 	 */
@@ -101,8 +103,9 @@ public class SingleInputFile extends AbstractWidget {
 
 							setInputFile((String) fileModel.getSelectedItem());
 							getPropertyChangeSupport().firePropertyChange(
-									"inputFileUrl", null, getValue());
+									"inputFileUrl", currentUrl, getValue());
 						}
+						currentUrl = getValue();
 					}
 				}
 

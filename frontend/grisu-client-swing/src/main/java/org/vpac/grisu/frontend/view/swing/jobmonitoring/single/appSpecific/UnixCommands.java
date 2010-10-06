@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 import org.vpac.grisu.control.ServiceInterface;
 
@@ -26,8 +27,6 @@ public class UnixCommands extends AppSpecificViewerPanel {
 	private JTextArea textArea;
 	private JScrollPane scrollPane_1;
 	private JTextArea textArea_1;
-
-	private Thread updateThread = null;
 
 	public UnixCommands(ServiceInterface si) {
 		super(si);
@@ -113,7 +112,7 @@ public class UnixCommands extends AppSpecificViewerPanel {
 		if (textArea == null) {
 			textArea = new JTextArea();
 			textArea.setEditable(false);
-			textArea.setText("Loading...");
+			textArea.setText("n/a");
 		}
 		return textArea;
 	}
@@ -122,39 +121,93 @@ public class UnixCommands extends AppSpecificViewerPanel {
 		if (textArea_1 == null) {
 			textArea_1 = new JTextArea();
 			textArea_1.setEditable(false);
-			textArea_1.setText("Loading...");
+			textArea_1.setText("n/a");
 		}
 		return textArea_1;
 	}
 
 	@Override
 	public void initialize() {
-		jobUpdated(null);
+	}
+
+	@Override
+	void jobFinished() {
+		updateStdOutFiles();
+	}
+
+	@Override
+	public void jobStarted() {
+		updateStdOutFiles();
 	}
 
 	@Override
 	public synchronized void jobUpdated(PropertyChangeEvent evt) {
 
-		if (getJob() == null) {
-			System.out.println("Job not set yet...");
-			return;
-		}
+		// do nothing
 
-		if (updateThread != null && updateThread.isAlive()) {
-			System.out.println("Updating already...");
-			return;
-		}
+	}
 
-		updateThread = new Thread() {
+	@Override
+	void progressUpdate() {
+		updateStdOutFiles();
+	}
+
+	private void reloadStderr() {
+		SwingUtilities.invokeLater(new Thread() {
 			@Override
 			public void run() {
-				getTextArea().setText(getJob().getStdOutContent());
-				getTextArea_1().setText(getJob().getStdErrContent());
+				getTextArea_1().setText("Loading...");
 			}
-		};
+		});
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					final String text = getJob().getStdErrContent();
+					SwingUtilities.invokeLater(new Thread() {
+						@Override
+						public void run() {
+							getTextArea_1().setText(text);
+						}
+					});
+				} catch (Exception e) {
+					myLogger.error(e);
+				}
+			}
+		}.start();
+	}
 
-		updateThread.start();
+	private void reloadStdout() {
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				getTextArea().setText("Loading...");
+			}
+		});
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					final String text = getJob().getStdOutContent();
+					SwingUtilities.invokeLater(new Thread() {
+						@Override
+						public void run() {
+							getTextArea().setText(text);
+						}
+					});
+				} catch (Exception e) {
+					myLogger.error(e);
+				}
+			}
+		}.start();
+	}
 
+	private void updateStdOutFiles() {
+
+		System.out.println("UPDATING>>>>");
+
+		reloadStdout();
+		reloadStderr();
 	}
 
 }
