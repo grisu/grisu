@@ -34,6 +34,7 @@ import org.vpac.grisu.backend.info.InformationManagerManager;
 import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.backend.model.job.JobSubmitter;
+import org.vpac.grisu.backend.model.job.ServerJobSubmissionException;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.settings.ServerPropertiesManager;
@@ -570,7 +571,8 @@ public class GT4Submitter extends JobSubmitter {
 	 */
 	@Override
 	protected final String submit(final InformationManager infoManager,
-			final String host, final String factoryType, final Job job) {
+			final String host, final String factoryType, final Job job)
+			throws ServerJobSubmissionException {
 
 		final int retries = ServerPropertiesManager.getJobSubmissionRetries();
 
@@ -578,6 +580,8 @@ public class GT4Submitter extends JobSubmitter {
 		String handle = null;
 
 		GSSCredential credential = null;
+
+		Exception lastException = null;
 
 		for (int i = 0; i < retries; i++) {
 
@@ -648,7 +652,8 @@ public class GT4Submitter extends JobSubmitter {
 			} catch (final Exception e) {
 
 				// TODO handle that
-				e.printStackTrace();
+				lastException = e;
+				myLogger.error(e);
 				if (handle == null) {
 					myLogger.error("Jobhandle is null....");
 					// TODO
@@ -662,6 +667,16 @@ public class GT4Submitter extends JobSubmitter {
 				}
 			}
 
+		}
+
+		if (StringUtils.isBlank(handle)) {
+
+			if (lastException == null) {
+				throw new ServerJobSubmissionException("Unknown reason");
+			} else {
+				throw new ServerJobSubmissionException(
+						lastException.getLocalizedMessage(), lastException);
+			}
 		}
 
 		job.setSubmittedJobDescription(submittedJobDesc);

@@ -17,6 +17,7 @@ import org.ietf.jgss.GSSException;
 import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.backend.model.job.Job;
+import org.vpac.grisu.backend.model.job.ServerJobSubmissionException;
 import org.vpac.grisu.backend.utils.CertHelpers;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
@@ -303,7 +304,16 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 		String handle = null;
 		myLogger.debug("Submitting job to endpoint...");
 		try {
-			handle = getUser().getSubmissionManager().submit("GT4Dummy", job);
+			try {
+				handle = getUser().getSubmissionManager().submit("GT4Dummy",
+						job);
+			} catch (ServerJobSubmissionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new JobSubmissionException(
+						"Job submission to endpoint failed: "
+								+ e.getLocalizedMessage());
+			}
 		} catch (final RuntimeException e) {
 			e.printStackTrace();
 			throw new JobSubmissionException(

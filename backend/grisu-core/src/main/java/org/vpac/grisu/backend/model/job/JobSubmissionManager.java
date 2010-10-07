@@ -113,7 +113,8 @@ public class JobSubmissionManager {
 	 * @throws ServerJobSubmissionException
 	 *             if the job could not be submitted successful
 	 */
-	public final String submit(final String submitter_name, final Job job) {
+	public final String submit(final String submitter_name, final Job job)
+			throws ServerJobSubmissionException {
 
 		Document jsdl = null;
 		jsdl = job.getJobDescription();
@@ -154,8 +155,9 @@ public class JobSubmissionManager {
 		myLogger.debug("FactoryType is: " + factoryType);
 		final String submitHostEndpoint = submitter.getServerEndpoint(host);
 
-		final String handle = submitter.submit(infoManager, submitHostEndpoint,
-				factoryType, job);
+		String handle = null;
+		handle = submitter.submit(infoManager, submitHostEndpoint, factoryType,
+				job);
 
 		job.setJobhandle(handle);
 		job.addJobProperty(Constants.SUBMISSION_HOST_KEY, host);

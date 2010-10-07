@@ -54,7 +54,7 @@ public class GramClient
 			job.destroy();
 		} catch (final Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		}
 
 		return getJobStatus(job);
@@ -122,7 +122,7 @@ public class GramClient
 
 		} catch (final Exception e) {
 			// TODO do something here
-			e.printStackTrace();
+			logger.error(e);
 			error = true;
 			errorMessage = e.getMessage();
 		}
@@ -210,7 +210,7 @@ public class GramClient
 			// , serviceDuration, serviceTermination, timeout );
 
 		} catch (final Exception e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
@@ -582,7 +582,7 @@ public class GramClient
 
 			final StateEnumeration currentState = job.getState();
 			// A) New job state change notification (good!)
-			if (currentState != null && !currentState.equals(oldState)) {
+			if ((currentState != null) && !currentState.equals(oldState)) {
 				oldState = currentState; // wait for next state notif
 				durationToWait = maxWaitPerStateNotificationMillis; // reset
 			} else {

@@ -12,6 +12,7 @@ import org.vpac.grisu.backend.info.InformationManagerManager;
 import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.backend.model.job.JobSubmitter;
+import org.vpac.grisu.backend.model.job.ServerJobSubmissionException;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.utils.DebugUtils;
@@ -113,7 +114,7 @@ public class GT5Submitter extends JobSubmitter {
 		final String[] argumentsVal = JsdlHelpers
 				.getPosixApplicationArguments(jsdl);
 		NameOpValue arguments = null;
-		if (argumentsVal != null && argumentsVal.length > 0) {
+		if ((argumentsVal != null) && (argumentsVal.length > 0)) {
 			arguments = new NameOpValue("arguments", NameOpValue.EQ,
 					argumentsVal);
 		}
@@ -296,7 +297,7 @@ public class GT5Submitter extends JobSubmitter {
 
 	@Override
 	protected String submit(InformationManager infoManager, String host,
-			String factoryType, Job job) {
+			String factoryType, Job job) throws ServerJobSubmissionException {
 		final String rsl = createJobSubmissionDescription(infoManager,
 				job.getJobDescription());
 		myLogger.debug("RSL is ... " + rsl);
@@ -308,8 +309,8 @@ public class GT5Submitter extends JobSubmitter {
 			final String handle = gram5.submit(rsl, host, credential);
 			return handle;
 		} catch (final Exception ex) {
-			ex.printStackTrace();
-			return null;
+			myLogger.error(ex);
+			throw new ServerJobSubmissionException(ex.getLocalizedMessage(), ex);
 		}
 	}
 

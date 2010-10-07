@@ -47,6 +47,7 @@ import org.vpac.grisu.backend.model.RemoteFileTransferObject;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.backend.model.job.BatchJob;
 import org.vpac.grisu.backend.model.job.Job;
+import org.vpac.grisu.backend.model.job.ServerJobSubmissionException;
 import org.vpac.grisu.backend.utils.CertHelpers;
 import org.vpac.grisu.backend.utils.FileContentDataSourceConnector;
 import org.vpac.grisu.backend.utils.LocalTemplatesHelper;
@@ -4196,8 +4197,23 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				submissionType = "GT4";
 
 			}
-			handle = getUser().getSubmissionManager().submit(submissionType,
-					job);
+			try {
+				handle = getUser().getSubmissionManager().submit(
+						submissionType, job);
+			} catch (ServerJobSubmissionException e) {
+
+				status.addLogMessage("Job submission failed on server.");
+				status.setFailed(true);
+				status.setFinished(true);
+				job.addLogMessage("Submission to endpoint failed: "
+						+ e.getLocalizedMessage());
+				addLogMessageToPossibleMultiPartJobParent(job,
+						"Job submission for job: " + job.getJobname()
+								+ " failed: " + e.getLocalizedMessage());
+				throw new JobSubmissionException(
+						"Submission to endpoint failed: "
+								+ e.getLocalizedMessage());
+			}
 
 			job.addLogMessage("Submission finished.");
 		} catch (final RuntimeException e) {

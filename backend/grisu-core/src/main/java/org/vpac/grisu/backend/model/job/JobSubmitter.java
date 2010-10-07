@@ -78,6 +78,7 @@ public abstract class JobSubmitter {
 	 * @throws ServerJobSubmissionException
 	 */
 	protected abstract String submit(InformationManager infoManager,
-			String host, String factoryType, Job job);
+			String host, String factoryType, Job job)
+			throws ServerJobSubmissionException;
 
 }
