@@ -118,7 +118,7 @@ public abstract class AppSpecificViewerPanel extends JPanel implements
 
 	/**
 	 * Called once when the job is started on the cluster. Or when job is
-	 * already running when monitoring begins.
+	 * already running when monitoring begins (but is not finished yet).
 	 */
 	abstract public void jobStarted();
 
@@ -195,6 +195,8 @@ public abstract class AppSpecificViewerPanel extends JPanel implements
 					DEFAULT_PROGRESS_CHECK_INTERVALL * 1000,
 					DEFAULT_PROGRESS_CHECK_INTERVALL * 1000);
 
+		} else {
+			jobFinished();
 		}
 
 	}
