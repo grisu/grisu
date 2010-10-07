@@ -51,6 +51,27 @@ public class FileManager {
 
 	private static long downloadTreshold = -1L;
 
+	public static String calculateSizeString(Long size) {
+
+		String sizeString;
+
+		if (size.equals(-1L)) {
+			sizeString = "";
+		} else {
+
+			if (size > 1024 * 1024) {
+				sizeString = size / (1024 * 1024) + "MB";
+			} else if (size > 1024) {
+				sizeString = size / 1024 + " KB";
+			} else {
+				sizeString = size + " B";
+			}
+		}
+
+		return sizeString;
+
+	}
+
 	/**
 	 * Convenience method to create a datahandler out of a file.
 	 * 

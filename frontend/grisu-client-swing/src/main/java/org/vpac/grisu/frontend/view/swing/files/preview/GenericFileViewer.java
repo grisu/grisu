@@ -28,6 +28,8 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 
 	private static FileViewer createViewerPanel(File currentLocalCacheFile) {
 
+		// if ( )
+
 		final Magic parser = new Magic();
 		MagicMatch match = null;
 		try {
@@ -132,6 +134,8 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 	private ServiceInterface si;
 	private FileManager fm;
 
+	private boolean showsValidViewerAtTheMoment = false;
+
 	private File currentLocalCacheFile = null;
 
 	private GlazedFile currentGlazedFile = null;
@@ -190,7 +194,6 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 
 	public void setFile(GlazedFile file, File localCacheFile) {
 
-		setEmptyPanel();
 		currentGlazedFile = file;
 		if ((localCacheFile != null) && localCacheFile.exists()) {
 			currentLocalCacheFile = localCacheFile;
@@ -201,19 +204,20 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 				} else {
 					if (fm.isBiggerThanThreshold(file.getUrl())) {
 
-						Object[] options = { "Yes, please", "No, thanks",
-								"No eggs, no ham!" };
 						int n = JOptionPane
 								.showConfirmDialog(
 										getRootPane(),
 										"The file you selected is bigger than the default threshold\n"
-												+ fm.getDownloadFileSizeThreshold()
-												+ "bytes.\n"
-												+ "Are you sure you want to preview that file?",
+												+ FileManager
+														.calculateSizeString(FileManager
+																.getDownloadFileSizeThreshold())
+												+ "bytes. It may take a long time to load.\n"
+												+ "Do you still want to preview that file?",
 										"Warning: big file",
 										JOptionPane.YES_NO_OPTION);
 
 						if (n == JOptionPane.NO_OPTION) {
+							showsValidViewerAtTheMoment = false;
 							return;
 						}
 					}
@@ -226,11 +230,16 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 			} catch (final FileTransactionException e) {
 				e.printStackTrace();
 			}
+
 		}
 
-		if (!currentLocalCacheFile.exists()
-				|| (currentLocalCacheFile.length() == 0L)) {
-			System.out.println("File empty...");
+		setEmptyPanel();
+
+		if (!currentLocalCacheFile.exists()) {
+			showsValidViewerAtTheMoment = false;
+			return;
+		} else if (currentLocalCacheFile.length() == 0L) {
+			showsValidViewerAtTheMoment = true;
 			return;
 		}
 
@@ -253,20 +262,22 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 
 			});
 
+			showsValidViewerAtTheMoment = true;
+
 		} else {
-
+			showsValidViewerAtTheMoment = true;
+			// TODO set no viewer found...
 			setEmptyPanel();
-			System.out.println("No viewer panel found.");
 		}
-
-		System.out.println("File set: " + file.getName());
-		System.out.println("Local file: " + currentLocalCacheFile.getPath());
-		System.out.println("Local filesize: " + currentLocalCacheFile.length());
 
 	}
 
 	public void setServiceInterface(ServiceInterface si) {
 		this.si = si;
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
+	}
+
+	public boolean showsValidPreviewCurrently() {
+		return showsValidViewerAtTheMoment;
 	}
 }

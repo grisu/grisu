@@ -6,6 +6,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.files.GlazedFile;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -105,7 +106,7 @@ public class FileDetailPanel extends JPanel implements FileListListener {
 					getNameLabel().setText(NAME_PREFIX + file.getName());
 					getSizeLabel().setText(
 							SIZE_PREFIX
-									+ GlazedFile.calculateSizeString(file
+									+ FileManager.calculateSizeString(file
 											.getSize()));
 					getTimestampLabel().setText(
 							DATE_PREFIX

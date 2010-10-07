@@ -39,27 +39,6 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
 	public static final String ROOT = "FileRoot";
 
-	public static String calculateSizeString(Long size) {
-
-		String sizeString;
-
-		if (size.equals(-1L)) {
-			sizeString = "";
-		} else {
-
-			if (size > 1024 * 1024) {
-				sizeString = size / (1024 * 1024) + "MB";
-			} else if (size > 1024) {
-				sizeString = size / 1024 + " KB";
-			} else {
-				sizeString = size + " B";
-			}
-		}
-
-		return sizeString;
-
-	}
-
 	public static String calculateTimeStampString(Long timestamp) {
 
 		if (timestamp.equals(-1L)) {

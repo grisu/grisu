@@ -9,7 +9,7 @@ import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-import org.vpac.grisu.model.files.GlazedFile;
+import org.vpac.grisu.model.FileManager;
 
 public class FileSizeRenderer extends DefaultTableCellRenderer implements
 		TableCellRenderer {
@@ -30,7 +30,7 @@ public class FileSizeRenderer extends DefaultTableCellRenderer implements
 
 		final Long size = (Long) arg1;
 
-		final String sizeString = GlazedFile.calculateSizeString(size);
+		final String sizeString = FileManager.calculateSizeString(size);
 
 		this.setText(sizeString);
 		this.setHorizontalAlignment(SwingConstants.RIGHT);

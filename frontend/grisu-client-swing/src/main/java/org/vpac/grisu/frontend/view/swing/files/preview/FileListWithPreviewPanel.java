@@ -132,7 +132,9 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
 			@Override
 			public void run() {
 				if (useSplitPane) {
-					getComboBox().setSelectedItem(PREVIEW);
+					if (getGenericFileViewer().showsValidPreviewCurrently()) {
+						getComboBox().setSelectedItem(PREVIEW);
+					}
 				} else {
 
 					final FilePreviewDialog dialog = new FilePreviewDialog(si);
