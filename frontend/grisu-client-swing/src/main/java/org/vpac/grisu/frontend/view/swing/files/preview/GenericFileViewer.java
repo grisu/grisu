@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -198,10 +199,23 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 				if (fm.upToDateLocalCacheFileExists(file.getUrl())) {
 					currentLocalCacheFile = fm.getLocalCacheFile(file.getUrl());
 				} else {
-					if (fm.isBiggerThanTreshold(file.getUrl())) {
+					if (fm.isBiggerThanThreshold(file.getUrl())) {
 
-						System.out.println("Bigger than treshold...");
-						return;
+						Object[] options = { "Yes, please", "No, thanks",
+								"No eggs, no ham!" };
+						int n = JOptionPane
+								.showConfirmDialog(
+										getRootPane(),
+										"The file you selected is bigger than the default threshold\n"
+												+ fm.getDownloadFileSizeThreshold()
+												+ "bytes.\n"
+												+ "Are you sure you want to preview that file?",
+										"Warning: big file",
+										JOptionPane.YES_NO_OPTION);
+
+						if (n == JOptionPane.NO_OPTION) {
+							return;
+						}
 					}
 
 					currentLocalCacheFile = fm.downloadFile(file.getUrl());

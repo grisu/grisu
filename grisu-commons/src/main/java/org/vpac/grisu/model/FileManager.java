@@ -98,7 +98,7 @@ public class FileManager {
 				.replace("/", File.separator);
 	}
 
-	public static long getDownloadFileSizeTreshold() {
+	public static long getDownloadFileSizeThreshold() {
 
 		if (downloadTreshold <= 0L) {
 			final long treshold = ClientPropertiesManager
@@ -637,12 +637,12 @@ public class FileManager {
 
 	}
 
-	public boolean isBiggerThanTreshold(String url)
+	public boolean isBiggerThanThreshold(String url)
 			throws RemoteFileSystemException {
 
 		final long remoteFileSize = serviceInterface.getFileSize(url);
 
-		if (remoteFileSize > getDownloadFileSizeTreshold()) {
+		if (remoteFileSize > getDownloadFileSizeThreshold()) {
 			return true;
 		} else {
 			return false;
