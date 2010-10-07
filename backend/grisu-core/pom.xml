@@ -57,6 +57,10 @@
 					<artifactId>cryptix</artifactId>
 					<groupId>external.jglobus</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -430,7 +434,7 @@
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>mysql-mds</artifactId>
-			<version>0.7</version>
+			<version>0.8-SNAPSHOT</version>
 			<type>jar</type>
 			<scope>compile</scope>
 			<exclusions>
@@ -444,6 +448,19 @@
 			<groupId>external.jglobus</groupId>
 			<artifactId>cog-jglobus</artifactId>
 			<version>1.8.0-bestgrid</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.5.10</version>
+			<type>jar</type>
+			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 
