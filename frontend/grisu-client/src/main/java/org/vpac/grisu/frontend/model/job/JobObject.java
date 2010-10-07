@@ -351,13 +351,14 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			new Thread() {
 				@Override
 				public void run() {
-					getAllJobProperties();
+					getAllJobProperties(true);
 					addJobLogMessage("Submission site is: "
-							+ getJobProperty(Constants.SUBMISSION_SITE_KEY));
+							+ getJobProperty(Constants.SUBMISSION_SITE_KEY,
+									false));
 					addJobLogMessage("Submission queue is: "
-							+ getJobProperty(Constants.QUEUE_KEY));
+							+ getJobProperty(Constants.QUEUE_KEY, false));
 					addJobLogMessage("Job directory url is: "
-							+ getJobProperty(Constants.JOBDIRECTORY_KEY));
+							+ getJobProperty(Constants.JOBDIRECTORY_KEY, false));
 				}
 			}.start();
 
@@ -479,9 +480,28 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 * the backend using the {@link #createJob(String)} or
 	 * {@link #createJob(String, String)} method.
 	 * 
+	 * This method doesn't refresh job properties forcefully.
+	 * 
 	 * @return the job properties
 	 */
-	public final Map<String, String> getAllJobProperties() {
+	public synchronized final Map<String, String> getAllJobProperties() {
+
+		return getAllJobProperties(false);
+	}
+
+	/**
+	 * Returns a map of all known job properties.
+	 * 
+	 * It only makes sense to call this method if the job was already created on
+	 * the backend using the {@link #createJob(String)} or
+	 * {@link #createJob(String, String)} method.
+	 * 
+	 * @param forceRefresh
+	 *            whether to forcefully refresh the job properties
+	 * @return the job properties
+	 */
+	public synchronized final Map<String, String> getAllJobProperties(
+			boolean forceRefresh) {
 
 		// if (getStatus(false) == JobConstants.UNDEFINED) {
 		// throw new IllegalStateException("Job status "
@@ -489,7 +509,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		// + ". Can't access job properties yet.");
 		// }
 
-		if (allJobProperties == null) {
+		if ((allJobProperties == null) || forceRefresh) {
 			try {
 				allJobProperties = serviceInterface.getJob(getJobname())
 						.propertiesAsMap();
@@ -559,7 +579,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		}
 
 		if (jobDirectory == null) {
-			final String url = getAllJobProperties().get(
+			final String url = getAllJobProperties(false).get(
 					JobCreatedProperty.JOBDIRECTORY.toString());
 			jobDirectory = url;
 		}
@@ -568,22 +588,53 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	}
 
 	/**
-	 * Returns the specified job property.
-	 * 
-	 * Doesn't refresh job properties.
+	 * Returns the specified job property without a refresh.
 	 * 
 	 * @param key
 	 *            the key
+	 * 
 	 * @return the property
 	 */
 	public final String getJobProperty(String key) {
 
-		return getAllJobProperties().get(key);
+		return getAllJobProperties(false).get(key);
 	}
 
-	public Map<Date, String> getLogMessages() {
+	/**
+	 * Returns the specified job property.
+	 * 
+	 * @param key
+	 *            the key
+	 * @param forceRefresh
+	 *            whether to refresh the job property forcefully or not
+	 * 
+	 * @return the property
+	 */
+	public final String getJobProperty(String key, boolean forceRefresh) {
 
-		if (logMessages == null) {
+		return getAllJobProperties(forceRefresh).get(key);
+	}
+
+	/**
+	 * Returns the job log without a refresh.
+	 * 
+	 * @return the job log
+	 */
+	public synchronized Map<Date, String> getLogMessages() {
+
+		return getLogMessages(false);
+	}
+
+	/**
+	 * Returns the job log
+	 * 
+	 * @param forceRefresh
+	 *            whether to forcefully refresh the log messages
+	 * @return the job log
+	 */
+	public synchronized Map<Date, String> getLogMessages(boolean forceRefresh) {
+
+		if ((logMessages == null) || forceRefresh) {
 			try {
 				updateWithDtoJob(serviceInterface.getJob(jobname));
 			} catch (final NoSuchJobException e) {
@@ -614,6 +665,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			// + JobConstants.translateStatus(oldStatus));
 			final boolean oldFinished = isFinished(false);
 			this.status = serviceInterface.getJobStatus(getJobname());
+
 			pcs.firePropertyChange("status", oldStatus, this.status);
 			pcs.firePropertyChange("statusString",
 					JobConstants.translateStatus(oldStatus),

@@ -1,7 +1,6 @@
 package org.vpac.grisu.model.dto;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -192,7 +191,7 @@ public class DtoJob implements Comparable<DtoJob> {
 
 	public Map<String, String> propertiesAsMap() {
 
-		final Map<String, String> map = new HashMap<String, String>();
+		final Map<String, String> map = new TreeMap<String, String>();
 
 		for (final DtoJobProperty prop : getProperties()) {
 			map.put(prop.getKey(), prop.getValue());

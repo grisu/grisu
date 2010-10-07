@@ -41,8 +41,8 @@ public abstract class AppSpecificViewerPanel extends JPanel implements
 			JobObject job) {
 
 		try {
-			final String appName = job
-					.getJobProperty(Constants.APPLICATIONNAME_KEY);
+			final String appName = job.getJobProperty(
+					Constants.APPLICATIONNAME_KEY, false);
 
 			final String className = "org.vpac.grisu.frontend.view.swing.jobmonitoring.single.appSpecific."
 					+ appName;
@@ -185,7 +185,8 @@ public abstract class AppSpecificViewerPanel extends JPanel implements
 			throw new RuntimeException(e);
 		}
 
-		if (checkJobStatus() < JobConstants.FINISHED_EITHER_WAY) {
+		int status = checkJobStatus();
+		if (status < JobConstants.FINISHED_EITHER_WAY) {
 			// first time around we do it manually
 			if (checkJobStatus() == JobConstants.ACTIVE) {
 				jobStarted();
@@ -195,10 +196,9 @@ public abstract class AppSpecificViewerPanel extends JPanel implements
 					DEFAULT_PROGRESS_CHECK_INTERVALL * 1000,
 					DEFAULT_PROGRESS_CHECK_INTERVALL * 1000);
 
-		} else {
+		} else if (status != JobConstants.NO_SUCH_JOB) {
 			jobFinished();
 		}
 
 	}
-
 }

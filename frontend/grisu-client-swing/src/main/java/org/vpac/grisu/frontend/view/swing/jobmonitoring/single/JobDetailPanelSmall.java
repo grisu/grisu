@@ -3,6 +3,7 @@ package org.vpac.grisu.frontend.view.swing.jobmonitoring.single;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Date;
+import java.util.Map;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -169,9 +170,9 @@ public class JobDetailPanelSmall extends JPanel implements
 	private void setLog() {
 		final StringBuffer temp = new StringBuffer();
 
-		for (final Date date : job.getLogMessages().keySet()) {
-			temp.append(date.toString() + ":\t"
-					+ job.getLogMessages().get(date) + "\n");
+		Map<Date, String> log = job.getLogMessages(true);
+		for (final Date date : log.keySet()) {
+			temp.append(date.toString() + ":\t" + log.get(date) + "\n");
 		}
 
 		getLogTextArea().setText(temp.toString());
@@ -181,9 +182,9 @@ public class JobDetailPanelSmall extends JPanel implements
 
 		final StringBuffer temp = new StringBuffer();
 
-		for (final String key : job.getAllJobProperties().keySet()) {
-			temp.append(key + "\t\t" + job.getAllJobProperties().get(key)
-					+ "\n");
+		Map<String, String> prop = job.getAllJobProperties(true);
+		for (final String key : prop.keySet()) {
+			temp.append(key + "\t\t" + prop.get(key) + "\n");
 		}
 		getPropertiesTextArea().setText(temp.toString());
 	}

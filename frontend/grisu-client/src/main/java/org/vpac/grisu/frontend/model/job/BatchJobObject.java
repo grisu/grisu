@@ -1742,7 +1742,7 @@ public class BatchJobObject implements JobMonitoringObject,
 
 		// to update all the jobdirectories
 		for (final JobObject job : getJobs()) {
-			job.getAllJobProperties().clear();
+			job.getAllJobProperties(true);
 		}
 
 		if (waitForRestartToFinish) {

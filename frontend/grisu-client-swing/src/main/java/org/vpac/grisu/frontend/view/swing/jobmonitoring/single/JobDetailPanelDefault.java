@@ -7,12 +7,13 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Map;
 
 import javax.swing.ImageIcon;
+import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
@@ -37,19 +38,65 @@ public class JobDetailPanelDefault extends JPanel implements
 	static final Logger myLogger = Logger.getLogger(JobDetailPanelDefault.class
 			.getName());
 
+	private static String generateHtml(Map<String, String> jobProperties) {
+
+		final StringBuffer html = new StringBuffer(
+				"<html><table width=\"100%\">");
+
+		boolean alternate = true;
+		for (final String key : jobProperties.keySet()) {
+			if (alternate) {
+				html.append("<tr bgcolor=\"#FFFFFF\"><td>");
+			} else {
+				html.append("<tr><td>");
+			}
+			html.append(key);
+			html.append("</td><td>");
+			html.append(jobProperties.get(key));
+			html.append("</td></tr>");
+			alternate = !alternate;
+		}
+		html.append("</table></html>");
+
+		return html.toString();
+	}
+
+	private static String generateLogHtml(Map<Date, String> jobProperties) {
+
+		final StringBuffer html = new StringBuffer(
+				"<html><table width=\"100%\">");
+
+		boolean alternate = true;
+		for (final Date key : jobProperties.keySet()) {
+			if (alternate) {
+				html.append("<tr bgcolor=\"#FFFFFF\"><td>");
+			} else {
+				html.append("<tr><td>");
+			}
+			html.append(key.toString());
+			html.append("</td><td>");
+			html.append(jobProperties.get(key));
+			html.append("</td></tr>");
+			alternate = !alternate;
+		}
+		html.append("</table></html>");
+
+		return html.toString();
+	}
+
 	private final ImageIcon REFRESH_ICON = new ImageIcon(
 			JobDetailPanelDefault.class.getClassLoader().getResource(
 					"refresh.png"));
-	private JTextField txtNa;
 
+	private JTextField txtNa;
 	private JobObject job;
 	private JideTabbedPane jideTabbedPane;
 	private JScrollPane scrollPane;
-	private JTextArea propertiesTextArea;
+	// private JTextArea propertiesTextArea;
 	private JScrollPane scrollPane_1;
-	private JTextArea logTextArea;
-	private FileListWithPreviewPanel fileListWithPreviewPanel;
+	private JEditorPane logTextArea;
 
+	private FileListWithPreviewPanel fileListWithPreviewPanel;
 	private final ServiceInterface si;
 	private JLabel lblApplication;
 	private JLabel lblJobname;
@@ -57,12 +104,14 @@ public class JobDetailPanelDefault extends JPanel implements
 	private JTextField applicationTextField;
 	private JLabel statusRefreshButton;
 	private JLabel lblSubmitted;
-	private JTextField submittedTextField;
 
+	private JTextField submittedTextField;
 	private AppSpecificViewerPanel asvp = null;
 
 	// public static SimpleDateFormat format = new SimpleDateFormat(
 	// "dd.MM.yyyy - HH.mm.SS");
+
+	private JEditorPane propertiesPane;
 
 	/**
 	 * Create the panel.
@@ -169,28 +218,39 @@ public class JobDetailPanelDefault extends JPanel implements
 		return lblSubmitted;
 	}
 
-	private JTextArea getLogTextArea() {
+	private JEditorPane getLogTextArea() {
 		if (logTextArea == null) {
-			logTextArea = new JTextArea();
+			logTextArea = new JEditorPane();
+			logTextArea.setContentType("text/html");
+			logTextArea.setEditable(false);
 		}
 		return logTextArea;
 	}
+
+	// private JTextArea getPropertiesTextArea() {
+	// if (propertiesTextArea == null) {
+	// propertiesTextArea = new JTextArea();
+	// }
+	// return propertiesTextArea;
+	// }
 
 	public JPanel getPanel() {
 		return this;
 	}
 
-	private JTextArea getPropertiesTextArea() {
-		if (propertiesTextArea == null) {
-			propertiesTextArea = new JTextArea();
+	private JEditorPane getPropertiesPane() {
+		if (propertiesPane == null) {
+			propertiesPane = new JEditorPane();
+			propertiesPane.setContentType("text/html");
+			propertiesPane.setEditable(false);
 		}
-		return propertiesTextArea;
+		return propertiesPane;
 	}
 
 	private JScrollPane getScrollPane_1() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
-			scrollPane.setViewportView(getPropertiesTextArea());
+			scrollPane.setViewportView(getPropertiesPane());
 		}
 		return scrollPane;
 	}
@@ -265,10 +325,16 @@ public class JobDetailPanelDefault extends JPanel implements
 	public void propertyChange(PropertyChangeEvent evt) {
 
 		if (evt.getPropertyName().equals("status")) {
+
+			System.out.println("Prop: new " + evt.getNewValue());
 			getTxtNa()
 					.setText(
 							JobConstants.translateStatus((Integer) (evt
 									.getNewValue())));
+			setLog();
+			setProperties();
+
+			getFileListWithPreviewPanel().refresh();
 		}
 	}
 
@@ -293,20 +359,7 @@ public class JobDetailPanelDefault extends JPanel implements
 		getJideTabbedPane().setSelectedIndex(0);
 		getStatusRefreshButton().setEnabled(true);
 		getJobnameTextField().setText(job.getJobname());
-		String subTime = null;
-		try {
-			final String subTimeString = job
-					.getJobProperty(Constants.SUBMISSION_TIME_KEY);
-			System.out.println(subTimeString);
-			subTime = DateFormat.getInstance().format(
-					new Date(Long.parseLong(subTimeString)));
-		} catch (final Exception e) {
-			e.printStackTrace();
-			subTime = "n/a";
-		}
-		getSubmittedTextField().setText(subTime);
-		getApplicationTextField().setText(
-				job.getJobProperty(Constants.APPLICATIONNAME_KEY));
+
 		getFileListWithPreviewPanel().setRootUrl(job.getJobDirectoryUrl());
 		getFileListWithPreviewPanel().setCurrentUrl(job.getJobDirectoryUrl());
 		getTxtNa().setText(JobConstants.translateStatus(job.getStatus(false)));
@@ -317,24 +370,29 @@ public class JobDetailPanelDefault extends JPanel implements
 	}
 
 	private void setLog() {
-		final StringBuffer temp = new StringBuffer();
 
-		for (final Date date : job.getLogMessages().keySet()) {
-			temp.append(date.toString() + ":\t"
-					+ job.getLogMessages().get(date) + "\n");
-		}
+		String html = generateLogHtml(job.getLogMessages(true));
 
-		getLogTextArea().setText(temp.toString());
+		getLogTextArea().setText(html);
 	}
 
 	private void setProperties() {
+		String propText = generateHtml(job.getAllJobProperties(true));
+		getPropertiesPane().setText(propText);
 
-		final StringBuffer temp = new StringBuffer();
-
-		for (final String key : job.getAllJobProperties().keySet()) {
-			temp.append(key + "\t\t" + job.getAllJobProperties().get(key)
-					+ "\n");
+		String subTime = null;
+		try {
+			final String subTimeString = job.getJobProperty(
+					Constants.SUBMISSION_TIME_KEY, false);
+			subTime = DateFormat.getInstance().format(
+					new Date(Long.parseLong(subTimeString)));
+		} catch (final Exception e) {
+			subTime = "n/a";
 		}
-		getPropertiesTextArea().setText(temp.toString());
+		getSubmittedTextField().setText(subTime);
+
+		getApplicationTextField().setText(
+				job.getJobProperty(Constants.APPLICATIONNAME_KEY, false));
+
 	}
 }
