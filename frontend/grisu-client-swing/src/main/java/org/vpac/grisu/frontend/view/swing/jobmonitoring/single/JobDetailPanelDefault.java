@@ -326,7 +326,6 @@ public class JobDetailPanelDefault extends JPanel implements
 
 		if (evt.getPropertyName().equals("status")) {
 
-			System.out.println("Prop: new " + evt.getNewValue());
 			getTxtNa()
 					.setText(
 							JobConstants.translateStatus((Integer) (evt
@@ -334,7 +333,11 @@ public class JobDetailPanelDefault extends JPanel implements
 			setLog();
 			setProperties();
 
-			getFileListWithPreviewPanel().refresh();
+			int status = (Integer) evt.getNewValue();
+			if ((status >= JobConstants.ACTIVE)
+					&& (status != JobConstants.NO_SUCH_JOB)) {
+				getFileListWithPreviewPanel().refresh();
+			}
 		}
 	}
 

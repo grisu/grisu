@@ -91,6 +91,8 @@ public class DefaultFqanChangePanel extends JPanel implements
 					old = uem.getCurrentFqan();
 				}
 
+				externalChange = true;
+
 				final String[] allVOs = uem.getAllAvailableFqans();
 
 				voModel.removeAllElements();
@@ -98,6 +100,8 @@ public class DefaultFqanChangePanel extends JPanel implements
 				for (final String vo : allVOs) {
 					voModel.addElement(vo);
 				}
+
+				externalChange = false;
 
 				if (StringUtils.isNotBlank(old)
 						&& (voModel.getIndexOf(old) >= 0)) {
@@ -133,11 +137,6 @@ public class DefaultFqanChangePanel extends JPanel implements
 	public void setServiceInterface(ServiceInterface si)
 			throws InterruptedException {
 		this.si = si;
-		final String currentFqan = GrisuRegistryManager.getDefault(si)
-				.getUserEnvironmentManager().getCurrentFqan();
-		comboBox.removeAllItems();
-		comboBox.addItem(currentFqan);
-		comboBox.setSelectedItem(currentFqan);
 		fillComboBox();
 	}
 
