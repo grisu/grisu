@@ -45,25 +45,6 @@
 			<version>0.3-beta2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>au.org.arcs.auth</groupId>
-			<artifactId>simpleProxyLib</artifactId>
-			<version>0.5.2</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>cog-jglobus</artifactId>
-					<groupId>external.jglobus</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>cryptix</artifactId>
-					<groupId>external.jglobus</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>log4j</artifactId>
-					<groupId>log4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 			<version>3.3.1.GA</version>

@@ -150,7 +150,7 @@
 		<dependency>
 			<groupId>org.bestgrid</groupId>
 			<artifactId>grid-jcommons</artifactId>
-			<version>1.2.1</version>
+			<version>1.2.2</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -184,6 +184,13 @@
 			<scope>compile</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>au.org.arcs.auth</groupId>
+			<artifactId>simpleProxyLib</artifactId>
+			<version>0.5.4-SNAPSHOT</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

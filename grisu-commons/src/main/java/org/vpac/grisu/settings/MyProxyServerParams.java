@@ -6,6 +6,8 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.Logger;
 
+import au.org.arcs.jcommons.constants.ArcsEnvironment;
+
 /**
  * Class to help with the myproxy server parameters.
  * 
@@ -22,12 +24,14 @@ public final class MyProxyServerParams {
 	/**
 	 * Default myproxy server url. Points to myproxy2.arcs.org.au.
 	 */
-	public static final String DEFAULT_MYPROXY_SERVER = "myproxy2.arcs.org.au";
+	public static final String DEFAULT_MYPROXY_SERVER = ArcsEnvironment
+			.getDefaultMyProxyServer();
 
 	/**
 	 * Default myproxy server port. Default is 443.
 	 */
-	public static final int DEFAULT_MYPROXY_PORT = 443;
+	public static final int DEFAULT_MYPROXY_PORT = ArcsEnvironment
+			.getDefaultMyProxyPort();
 
 	/**
 	 * Retrieves the configuration parameters from the properties file.
