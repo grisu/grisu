@@ -28,15 +28,6 @@ public class Gram5Client implements GramJobListener {
 
 	public static void main(String[] args) {
 
-		try {
-			final GassServer gass = new GassServer(
-					LocalProxy.loadGSSCredential(), 0);
-		} catch (final IOException ex) {
-			ex.printStackTrace();
-		} catch (final GlobusCredentialException ex) {
-			ex.printStackTrace();
-		}
-
 		final String testRSL = args[1];
 		final String contact = "ng1.canterbury.ac.nz";
 		try {
@@ -110,7 +101,7 @@ public class Gram5Client implements GramJobListener {
 
 		// we need this to catch quick failure
 		Integer status = statuses.get(handle);
-		if (status != null && status == GRAMConstants.STATUS_FAILED) {
+		if ((status != null) && (status == GRAMConstants.STATUS_FAILED)) {
 			results[0] = status;
 			results[1] = errors.get(handle);
 			return results;
