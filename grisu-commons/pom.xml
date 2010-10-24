@@ -187,7 +187,7 @@
 		<dependency>
 			<groupId>au.org.arcs.auth</groupId>
 			<artifactId>simpleProxyLib</artifactId>
-			<version>0.5.4-SNAPSHOT</version>
+			<version>0.5.4</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
