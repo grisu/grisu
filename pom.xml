@@ -4,7 +4,7 @@
 	<groupId>org.vpac.grisu</groupId>
 	<artifactId>grisu</artifactId>
 	<packaging>pom</packaging>
-	<version>0.3-beta2-SNAPSHOT</version>
+	<version>0.3-beta2</version>
 	<name>Grisu</name>
 	<description>Grisu is an open source framework to help grid admins and developers to support end users in a grid environment. Grisu publishes an easy-to-use service interface which by default sits behind a web service. This service interface contains a set of methods that are usually needed to submit jobs to the grid, including providing information about the grid and the staging of input/output files from/to the users desktop. </description>
 	<url>http://maven.apache.org</url>
