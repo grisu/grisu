@@ -1,6 +1,7 @@
 package org.vpac.grisu.frontend.view.swing.jobcreation.widgets;
 
 import java.awt.Component;
+import java.awt.Window;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
@@ -25,7 +26,8 @@ public abstract class AbstractWidget extends JPanel {
 			.getName());
 
 	public static GrisuFileDialog createFileDialog(ServiceInterface si,
-			String historyKey, String[] extensions, boolean displayHiddenFiles) {
+			String historyKey, String[] extensions, boolean displayHiddenFiles,
+			Window owner) {
 
 		if (si == null) {
 			return null;
@@ -49,11 +51,14 @@ public abstract class AbstractWidget extends JPanel {
 						.toString();
 			}
 		}
-		final GrisuFileDialog fileDialog = new GrisuFileDialog(si, startUrl);
+		final GrisuFileDialog fileDialog = new GrisuFileDialog(owner, si,
+				startUrl);
 		fileDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		fileDialog.setExtensionsToDisplay(extensions);
 		fileDialog.displayHiddenFiles(displayHiddenFiles);
+
+		fileDialog.centerOnOwner();
 
 		return fileDialog;
 	}
@@ -146,7 +151,7 @@ public abstract class AbstractWidget extends JPanel {
 	}
 
 	public void saveItemToHistory() {
-		if (hm != null && StringUtils.isNotBlank(historyKey)) {
+		if ((hm != null) && StringUtils.isNotBlank(historyKey)) {
 			final String temp = getValue();
 			if (StringUtils.isNotBlank(temp)) {
 				System.out.println("Adding: " + this.getClass().toString());

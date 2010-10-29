@@ -121,7 +121,7 @@ public class SingleInputFile extends AbstractWidget {
 
 			fileDialog = createFileDialog(getServiceInterface(),
 					getHistoryKey() + "_last_dir", extensions,
-					displayHiddenFiles);
+					displayHiddenFiles, SwingUtilities.getWindowAncestor(this));
 			// String startUrl = getHistoryManager().getLastEntry(
 			// getHistoryKey() + "_last_dir");
 			//

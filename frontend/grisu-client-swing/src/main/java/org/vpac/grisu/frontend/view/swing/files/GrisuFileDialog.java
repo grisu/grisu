@@ -2,6 +2,7 @@ package org.vpac.grisu.frontend.view.swing.files;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashSet;
@@ -30,7 +31,7 @@ public class GrisuFileDialog extends JDialog implements FileListListener {
 			si = LoginManager.login();
 
 			System.out.println("Creating dialog.");
-			final GrisuFileDialog dialog = new GrisuFileDialog(si, null);
+			final GrisuFileDialog dialog = new GrisuFileDialog(null, si, null);
 			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			System.out.println("Created dialog. Setting visible.");
 			dialog.setVisible(true);
@@ -59,15 +60,19 @@ public class GrisuFileDialog extends JDialog implements FileListListener {
 	private GlazedFile selectedFile = null;
 	private final ServiceInterface si;
 	private final String startUrl;
+	private final Window owner;
 
 	/**
 	 * Create the dialog.
 	 */
-	public GrisuFileDialog(ServiceInterface si, String startUrl) {
+	public GrisuFileDialog(Window owner, ServiceInterface si, String startUrl) {
+		super(owner, "Select file(s)/folder");
 		this.startUrl = startUrl;
 		setModal(true);
+		setSize(450, 300);
+		this.owner = owner;
+		centerOnOwner();
 		this.si = si;
-		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -78,6 +83,10 @@ public class GrisuFileDialog extends JDialog implements FileListListener {
 		buttonPane.add(getOkButton());
 		getRootPane().setDefaultButton(getOkButton());
 		buttonPane.add(getCancelButton());
+	}
+
+	public void centerOnOwner() {
+		setLocationRelativeTo(owner);
 	}
 
 	public void clearSelection() {

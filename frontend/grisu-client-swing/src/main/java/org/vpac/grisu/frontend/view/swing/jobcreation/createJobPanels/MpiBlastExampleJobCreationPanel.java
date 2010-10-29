@@ -23,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -204,7 +205,8 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 				url = new File(System.getProperty("user.home")).toURI()
 						.toString();
 			}
-			dialog = new GrisuFileDialog(si, url);
+			dialog = new GrisuFileDialog(
+					SwingUtilities.getWindowAncestor(this), si, url);
 		}
 		return dialog;
 	}
@@ -410,7 +412,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 			List<String> currentPart = null;
 			for (final String line : currentFastaInput) {
 				if (line.startsWith(">")) {
-					if (currentPart != null && currentPart.size() > 0) {
+					if ((currentPart != null) && (currentPart.size() > 0)) {
 						currentParsedFastaInput.add(currentPart);
 					}
 					currentPart = new LinkedList<String>();
