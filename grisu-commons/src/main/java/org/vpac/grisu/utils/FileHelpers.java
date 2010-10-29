@@ -195,7 +195,7 @@ public final class FileHelpers {
 	 *             if the file can't be written for some reason
 	 */
 	public static void saveToDisk(final DataSource source, final File file)
-			throws IOException {
+			throws Exception {
 
 		final FileOutputStream outputStream = new FileOutputStream(file);
 		final InputStream inputStream = source.getInputStream();
@@ -207,6 +207,7 @@ public final class FileHelpers {
 			}
 		} catch (final Exception e) {
 			e.printStackTrace();
+			throw e;
 		} finally {
 			outputStream.close();
 			inputStream.close();
@@ -215,7 +216,7 @@ public final class FileHelpers {
 	}
 
 	public static void saveToDisk(final InputStream source, final File file)
-			throws IOException {
+			throws Exception {
 
 		final FileOutputStream outputStream = new FileOutputStream(file);
 		try {
@@ -225,6 +226,7 @@ public final class FileHelpers {
 			}
 		} catch (final Exception e) {
 			e.printStackTrace();
+			throw e;
 		} finally {
 			outputStream.close();
 			source.close();

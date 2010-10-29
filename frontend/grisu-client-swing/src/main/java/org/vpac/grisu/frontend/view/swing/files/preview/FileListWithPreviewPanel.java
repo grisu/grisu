@@ -5,6 +5,7 @@ import java.awt.CardLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Set;
+import java.util.logging.Level;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
@@ -15,7 +16,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.apache.log4j.Logger;
+import org.bushe.swing.event.EventBus;
+import org.bushe.swing.event.EventSubscriber;
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.control.fileTransfers.FileTransaction;
+import org.vpac.grisu.frontend.model.events.FileTransactionFailedEvent;
 import org.vpac.grisu.frontend.view.swing.files.FileDetailPanel;
 import org.vpac.grisu.frontend.view.swing.files.FileListActionPanel;
 import org.vpac.grisu.frontend.view.swing.files.FileListListener;
@@ -31,7 +38,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
-		FileListListener {
+		FileListListener, EventSubscriber<FileTransactionFailedEvent> {
 
 	static final Logger myLogger = Logger
 			.getLogger(FileListWithPreviewPanel.class.getName());
@@ -69,7 +76,7 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
 	 * @wbp.parser.constructor
 	 */
 	public FileListWithPreviewPanel(ServiceInterface si) {
-		this(si, null, null, false, false, true, true, true);
+		this(si, null, null, false, false, true, true, true, false);
 	}
 
 	/**
@@ -82,11 +89,37 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
 	 * @param useSplitPane
 	 * @param startWithRightFileList
 	 *            only applies when useSplitPane is true
+	 * 
 	 */
 	public FileListWithPreviewPanel(ServiceInterface si, String rootUrl,
 			String startUrl, boolean useAdvancedFileListPanel,
 			boolean displayFileActionPanel, boolean displayFileDetailsPanel,
 			boolean useSplitPane, boolean startWithRightFileList) {
+		this(si, rootUrl, startUrl, useAdvancedFileListPanel,
+				displayFileActionPanel, displayFileDetailsPanel, useSplitPane,
+				startWithRightFileList, false);
+	}
+
+	/**
+	 * @param si
+	 * @param rootUrl
+	 * @param startUrl
+	 * @param useAdvancedFileListPanel
+	 * @param displayFileActionPanel
+	 * @param displayFileDetailsPanel
+	 * @param useSplitPane
+	 * @param startWithRightFileList
+	 *            only applies when useSplitPane is true
+	 * @param subscribeToFileTransactionFailedEvents
+	 *            whether to subscribe to file transfer events. It's recommended
+	 *            that at least one file panel does that so the user gets a
+	 *            popup dialog when a transaction fails.
+	 */
+	public FileListWithPreviewPanel(ServiceInterface si, String rootUrl,
+			String startUrl, boolean useAdvancedFileListPanel,
+			boolean displayFileActionPanel, boolean displayFileDetailsPanel,
+			boolean useSplitPane, boolean startWithRightFileList,
+			boolean subscribeToFileTransactionFailedEvents) {
 
 		this.si = si;
 		this.useFileListPanelPlus = useAdvancedFileListPanel;
@@ -107,6 +140,10 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
 			}
 		} else {
 			add(getRootPanel(), BorderLayout.CENTER);
+		}
+
+		if (subscribeToFileTransactionFailedEvents) {
+			EventBus.subscribe(FileTransactionFailedEvent.class, this);
 		}
 
 	}
@@ -313,6 +350,26 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
 	}
 
 	public void isLoading(boolean loading) {
+	}
+
+	public void onEvent(FileTransactionFailedEvent arg0) {
+
+		FileTransaction ft = arg0.getFileTransaction();
+
+		ErrorInfo info = new ErrorInfo("File transfer error",
+				"Can't transfer file\n\n" + ft.getCurrentSourceFile(), null,
+				"Error", ft.getException(), Level.SEVERE, null);
+
+		JXErrorPane pane = new JXErrorPane();
+		pane.setErrorInfo(info);
+		// the following line could be used to show a button to
+		// submit
+		// a bug/ticket to a bug tracking system
+		// pane.setErrorReporter(new GrisuErrorReporter());
+
+		JXErrorPane.showDialog(FileListWithPreviewPanel.this.getRootPane(),
+				pane);
+
 	}
 
 	public void refresh() {

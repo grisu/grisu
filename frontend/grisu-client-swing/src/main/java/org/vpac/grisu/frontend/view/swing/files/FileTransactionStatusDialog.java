@@ -36,6 +36,9 @@ public class FileTransactionStatusDialog extends JDialog implements
 	private final JButton backgroundButton;
 
 	private final JPanel contentPanel = new JPanel();
+	private final FileTransaction ft;
+
+	final FIleTransferStatusPanel fileTransferStatusPanel;
 
 	/**
 	 * Create the dialog.
@@ -43,6 +46,7 @@ public class FileTransactionStatusDialog extends JDialog implements
 	public FileTransactionStatusDialog(Frame owner, final FileTransaction ft) {
 		super(owner);
 
+		this.ft = ft;
 		ft.addPropertyChangeListener(this);
 		setBounds(100, 100, 450, 138);
 		getContentPane().setLayout(new BorderLayout());
@@ -50,8 +54,7 @@ public class FileTransactionStatusDialog extends JDialog implements
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new BorderLayout(0, 0));
 
-		final FIleTransferStatusPanel fileTransferStatusPanel = new FIleTransferStatusPanel(
-				ft);
+		fileTransferStatusPanel = new FIleTransferStatusPanel(ft);
 		contentPanel.add(fileTransferStatusPanel, BorderLayout.CENTER);
 
 		final JPanel buttonPane = new JPanel();
@@ -84,9 +87,9 @@ public class FileTransactionStatusDialog extends JDialog implements
 			if (status.equals(FileTransaction.Status.FAILED)
 					|| status.equals(FileTransaction.Status.FINISHED)) {
 				backgroundButton.setText("OK");
+
 			}
 		}
 
 	}
-
 }

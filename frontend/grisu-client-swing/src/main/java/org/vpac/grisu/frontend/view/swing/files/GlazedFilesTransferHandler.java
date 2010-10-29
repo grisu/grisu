@@ -134,13 +134,20 @@ public class GlazedFilesTransferHandler extends TransferHandler {
 				fileList.getCurrentDirectory(), true);
 		ftm.addFileTransfer(ft);
 
-		final JFrame frame = (JFrame) SwingUtilities.getRoot(fileList
-				.getPanel());
-		final FileTransactionStatusDialog ftd = new FileTransactionStatusDialog(
-				frame, ft);
+		SwingUtilities.invokeLater(new Thread() {
 
-		ftd.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		ftd.setVisible(true);
+			@Override
+			public void run() {
+				final JFrame frame = (JFrame) SwingUtilities.getRoot(fileList
+						.getPanel());
+				final FileTransactionStatusDialog ftd = new FileTransactionStatusDialog(
+						frame, ft);
+
+				ftd.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+				ftd.setVisible(true);
+			}
+
+		});
 
 	}
 

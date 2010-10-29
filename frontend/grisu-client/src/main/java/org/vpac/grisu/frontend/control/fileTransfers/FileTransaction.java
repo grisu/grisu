@@ -265,7 +265,25 @@ public class FileTransaction implements Comparable<FileTransaction> {
 			return endStatus.get();
 		} catch (final InterruptedException e) {
 			endStatus.cancel(true);
+			failedSourceFile = currentSourceFile;
+			possibleException = new FileTransactionException(currentSourceFile,
+					targetDirUrl, "File transfer interrupted", e);
+			finished = new Date();
+			status = Status.FAILED;
+			pcs.firePropertyChange("status", Status.TRANSACTION_RUNNING,
+					Status.FAILED);
 			throw e;
+		} catch (final Exception e) {
+			endStatus.cancel(true);
+			failedSourceFile = currentSourceFile;
+			possibleException = new FileTransactionException(currentSourceFile,
+					targetDirUrl, "File transfer error", e);
+			finished = new Date();
+			status = Status.FAILED;
+			pcs.firePropertyChange("status", Status.TRANSACTION_RUNNING,
+					Status.FAILED);
+
+			throw new ExecutionException(e);
 		}
 
 	}

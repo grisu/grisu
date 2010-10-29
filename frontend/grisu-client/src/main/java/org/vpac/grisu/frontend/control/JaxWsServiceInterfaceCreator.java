@@ -107,53 +107,10 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			bp.getRequestContext().put(
 					BindingProvider.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
 
-			// bp.getRequestContext().put(
-			// JAXWSProperties.SSL_SOCKET_FACTORY,
-			// SSLClientUtil.getSSLSocketFactoryFromSysProperties());
-
-			// bp.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory",
-			// createSocketFactory(interfaceUrl));
-			// bp.getRequestContext().put(JAXWSProperties.SSL_SOCKET_FACTORY,
-			// createSocketFactory(interfaceUrl));
-
 			final SOAPBinding binding = (SOAPBinding) bp.getBinding();
 			binding.setMTOMEnabled(true);
 
 			return service;
-
-			// Constructor jaxwsServiceInterfaceConstructor;
-			// interfaceClass =
-			// Class.forName("org.vpac.grisu.control.EnunciateServiceInterface");
-			//
-			//
-			// jaxwsServiceInterfaceConstructor = jaxwsServiceInterfaceClass
-			// .getConstructor(String.class);
-			//
-			// jaxwsServiceInterface = jaxwsServiceInterfaceConstructor
-			// .newInstance(interfaceUrl);
-			//
-			// Method getBindingProvider =
-			// jaxwsServiceInterface.getClass().getMethod(
-			// "_getBindingProvider");
-			//
-			// BindingProvider bp = (BindingProvider)
-			// getBindingProvider.invoke(jaxwsServiceInterface);
-			//
-			// bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY,
-			// username);
-			// bp.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, new
-			// String(password));
-			//
-			// bp.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory",
-			// createSocketFactory(interfaceUrl));
-			//
-			// bp.getRequestContext().put(BindingProvider.SESSION_MAINTAIN_PROPERTY,
-			// true);
-			//
-			// bp.getRequestContext().put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size",
-			// 4096);
-			// SOAPBinding binding = (SOAPBinding)bp.getBinding();
-			// binding.setMTOMEnabled(true);
 
 		} catch (final Exception e) {
 			// TODO Auto-generated catch block

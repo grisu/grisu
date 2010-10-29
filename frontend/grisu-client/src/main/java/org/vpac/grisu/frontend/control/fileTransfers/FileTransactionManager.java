@@ -6,12 +6,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.model.events.FileTransactionFailedEvent;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -22,6 +25,9 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
 public class FileTransactionManager implements PropertyChangeListener {
+
+	static final Logger myLogger = Logger
+			.getLogger(FileTransactionManager.class.getName());
 
 	private static Map<ServiceInterface, FileTransactionManager> cachedFileTransferManagers = new HashMap<ServiceInterface, FileTransactionManager>();
 
@@ -65,13 +71,30 @@ public class FileTransactionManager implements PropertyChangeListener {
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 	}
 
-	public FileTransaction addFileTransfer(FileTransaction ft) {
+	public FileTransaction addFileTransfer(final FileTransaction ft) {
 
 		fileTransfers.add(ft);
 		ft.addPropertyChangeListener(this);
 		final Future<FileTransaction.Status> future = executor1.submit(ft
 				.getTransferThread());
 		ft.setFuture(future);
+
+		// someone has to watch the transfer thread
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					ft.join();
+				} catch (InterruptedException e) {
+					myLogger.error(e);
+					EventBus.publish(new FileTransactionFailedEvent(ft));
+				} catch (ExecutionException e) {
+					myLogger.error(e);
+					EventBus.publish(new FileTransactionFailedEvent(ft));
+				}
+			}
+		}.start();
+
 		return ft;
 	}
 

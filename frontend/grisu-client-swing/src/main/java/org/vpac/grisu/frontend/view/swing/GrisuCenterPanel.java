@@ -162,7 +162,7 @@ public class GrisuCenterPanel extends JPanel {
 		if (fileListWithPreviewPanel == null) {
 			fileListWithPreviewPanel = new FileListWithPreviewPanel(si, null,
 					ClientPropertiesManager.getLastUsedLeftUrl(), true, true,
-					true, true, true);
+					true, true, true, true);
 
 		}
 		return fileListWithPreviewPanel;

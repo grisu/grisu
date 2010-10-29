@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransaction;
 import org.vpac.grisu.model.FileManager;
@@ -85,8 +86,14 @@ public class FIleTransferStatusPanel extends JPanel implements
 			getTextField().setText(status.toString());
 			if (FileTransaction.Status.FINISHED.equals(status)
 					|| FileTransaction.Status.FAILED.equals(status)) {
-				getProgressBar().setIndeterminate(false);
-				getProgressBar().setValue(getProgressBar().getMaximum());
+				SwingUtilities.invokeLater(new Thread() {
+					@Override
+					public void run() {
+						getProgressBar().setIndeterminate(false);
+						getProgressBar()
+								.setValue(getProgressBar().getMaximum());
+					}
+				});
 			}
 			// System.out.println("New status: "+((FileTransfer.Status)evt.getNewValue()).toString());
 		} else if ("transferredSourceFiles".equals(evt.getPropertyName())) {
