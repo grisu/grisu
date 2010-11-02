@@ -14,6 +14,8 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.swing.tree.TreeModel;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
@@ -47,7 +49,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 	private final ServiceInterface serviceInterface;
 
 	private final ResourceInformation resourceInfo;
-	private final FileManager fm;
+	private FileManager fm;
 
 	private String[] cachedFqans = null;
 	private final Map<String, Set<String>> cachedFqansPerApplication = new HashMap<String, Set<String>>();
@@ -74,6 +76,8 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 	private SortedSet<String> cachedJobNames = null;
 	private SortedSet<String> cachedBatchJobNames = null;
 
+	private TreeModel groupFileTreemodel = null;
+
 	private final Map<String, DtoBatchJob> cachedBatchJobs = new TreeMap<String, DtoBatchJob>();
 	private final Map<String, SortedSet<String>> cachedBatchJobnamesPerApplication = new HashMap<String, SortedSet<String>>();
 	private final Map<String, SortedSet<String>> cachedJobnamesPerApplication = new HashMap<String, SortedSet<String>>();
@@ -89,8 +93,6 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 		this.serviceInterface = serviceInterface;
 		this.resourceInfo = GrisuRegistryManager.getDefault(serviceInterface)
 				.getResourceInformation();
-		this.fm = GrisuRegistryManager.getDefault(serviceInterface)
-				.getFileManager();
 
 		EventBus.subscribe(FqanEvent.class, this);
 
@@ -250,7 +252,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 			for (final String bookmark : getBookmarks().keySet()) {
 				final String url = getBookmarks().get(bookmark);
 				cachedBookmarkFilesystemList.add(new FileSystemItem(bookmark,
-						FileSystemItem.Type.BOOKMARK, fm
+						FileSystemItem.Type.BOOKMARK, getFileManager()
 								.createGlazedFileFromUrl(url)));
 			}
 		}
@@ -376,6 +378,14 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 		return cachedJobList;
 	}
 
+	private FileManager getFileManager() {
+		if (this.fm == null) {
+			this.fm = GrisuRegistryManager.getDefault(serviceInterface)
+					.getFileManager();
+		}
+		return this.fm;
+	}
+
 	public FileSystemItem getFileSystemForUrl(String url) {
 
 		if (StringUtils.isBlank(url)) {
@@ -429,6 +439,15 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 			cachedAllFileSystems.addAll(getRemoteSites());
 		}
 		return cachedAllFileSystems;
+	}
+
+	public TreeModel getGroupTreeFileModel(GlazedFile root) {
+
+		if (groupFileTreemodel == null) {
+			groupFileTreemodel = new UserspaceFileTreeModel(serviceInterface,
+					root);
+		}
+		return groupFileTreemodel;
 	}
 
 	public synchronized List<FileSystemItem> getLocalFileSystems() {
@@ -723,8 +742,8 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 			return temp;
 		} else {
 			final FileSystemItem temp = new FileSystemItem(alias,
-					FileSystemItem.Type.BOOKMARK,
-					fm.createGlazedFileFromUrl(url));
+					FileSystemItem.Type.BOOKMARK, getFileManager()
+							.createGlazedFileFromUrl(url));
 			getBookmarks().put(alias, url);
 			getBookmarksFilesystems().add(temp);
 			getFileSystems().add(temp);

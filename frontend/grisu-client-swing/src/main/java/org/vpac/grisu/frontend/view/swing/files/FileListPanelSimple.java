@@ -474,6 +474,11 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 	public void setCurrent(GlazedFile file) {
 
+		if (GlazedFile.Type.FILETYPE_GROUP.equals(file.getType())) {
+			throw new RuntimeException(
+					"Group filetye not supported by this filelistpanel.");
+		}
+
 		setCurrent(null, file);
 
 	}
@@ -536,7 +541,8 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 					}
 
-					if (oldDir != null && !oldDir.equals(getCurrentDirectory())) {
+					if ((oldDir != null)
+							&& !oldDir.equals(getCurrentDirectory())) {
 						fireNewDirectory();
 					}
 

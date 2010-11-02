@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.events.FolderCreatedEvent;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
+import org.vpac.grisu.model.dto.DtoFile;
 import org.vpac.grisu.model.dto.DtoFolder;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoStringList;
@@ -716,6 +718,42 @@ public class FileManager {
 		return folder.listOfAllFilesUnderThisFolder();
 	}
 
+	public synchronized List<GlazedFile> ls(GlazedFile parent)
+			throws RemoteFileSystemException {
+
+		List<GlazedFile> result = new ArrayList<GlazedFile>();
+
+		if (GlazedFile.Type.FILETYPE_GROUP.equals(parent.getType())) {
+
+			Set<MountPoint> mps = GrisuRegistryManager
+					.getDefault(serviceInterface).getUserEnvironmentManager()
+					.getMountPoints(parent.getName());
+			for (MountPoint mp : mps) {
+				GlazedFile f = new GlazedFile(mp);
+				result.add(f);
+			}
+
+		} else {
+
+			DtoFolder folder = ls(parent.getUrl());
+
+			for (DtoFolder f : folder.getChildrenFolders()) {
+				result.add(new GlazedFile(f));
+			}
+			for (DtoFile f : folder.getChildrenFiles()) {
+				result.add(new GlazedFile(f));
+			}
+		}
+
+		System.out.println();
+		for (GlazedFile file : result) {
+			System.out.println("File: " + file.getUrl());
+		}
+		System.out.println();
+
+		return result;
+	}
+
 	public DtoFolder ls(String url) throws RemoteFileSystemException {
 
 		return ls(url, 1);
@@ -733,7 +771,8 @@ public class FileManager {
 		} else {
 
 			try {
-				return serviceInterface.ls(url, recursionLevel);
+				DtoFolder result = serviceInterface.ls(url, recursionLevel);
+				return result;
 			} catch (final RemoteFileSystemException e) {
 
 				throw e;

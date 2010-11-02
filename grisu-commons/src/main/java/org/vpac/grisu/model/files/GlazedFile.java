@@ -25,7 +25,7 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
 	public enum Type implements Comparable<Type> {
 
-		FILETYPE_ROOT, FILETYPE_SITE, FILETYPE_MOUNTPOINT, FILETYPE_FOLDER, FILETYPE_FILE
+		FILETYPE_GROUP, FILETYPE_ROOT, FILETYPE_SITE, FILETYPE_MOUNTPOINT, FILETYPE_FOLDER, FILETYPE_FILE
 
 	}
 
@@ -140,16 +140,27 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 		this.si = null;
 	}
 
-	public GlazedFile(String sitename) {
+	public GlazedFile(String sitename_or_group) {
 
-		this.type = Type.FILETYPE_SITE;
-		this.file = null;
-		this.folder = null;
-		this.url = sitename;
-		this.size = -1L;
-		this.lastModified = -1L;
-		this.name = sitename;
-		this.si = null;
+		if (sitename_or_group.startsWith("/")) {
+			this.type = Type.FILETYPE_GROUP;
+			this.file = null;
+			this.folder = null;
+			this.url = sitename_or_group;
+			this.size = -1L;
+			this.lastModified = -1L;
+			this.name = sitename_or_group;
+			this.si = null;
+		} else {
+			this.type = Type.FILETYPE_SITE;
+			this.file = null;
+			this.folder = null;
+			this.url = sitename_or_group;
+			this.size = -1L;
+			this.lastModified = -1L;
+			this.name = sitename_or_group;
+			this.si = null;
+		}
 
 	}
 

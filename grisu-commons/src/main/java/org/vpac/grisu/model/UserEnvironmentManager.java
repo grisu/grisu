@@ -5,10 +5,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
+import javax.swing.tree.TreeModel;
+
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.control.exceptions.StatusException;
 import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.files.FileSystemItem;
+import org.vpac.grisu.model.files.GlazedFile;
 import org.vpac.grisu.model.status.StatusObject;
 
 /**
@@ -175,6 +178,13 @@ public interface UserEnvironmentManager {
 	 */
 	SortedSet<String> getCurrentJobnames(String application, boolean refresh);
 
+	/**
+	 * Returns the filesystem which is associated with the specified url.
+	 * 
+	 * @param url
+	 *            the url
+	 * @return the filesystem or null if no filsystem can be found
+	 */
 	FileSystemItem getFileSystemForUrl(String url);
 
 	/**
@@ -186,6 +196,23 @@ public interface UserEnvironmentManager {
 	 */
 	List<FileSystemItem> getFileSystems();
 
+	/**
+	 * Returns a {@link TreeModel} that can be used to traverse through a group
+	 * based view of all the users filesystems.
+	 * 
+	 * @param root
+	 *            the root of the view or null for a view with all the users
+	 *            groups at root level
+	 * 
+	 * @return the model
+	 */
+	TreeModel getGroupTreeFileModel(GlazedFile root);
+
+	/**
+	 * Returns all local filesystems.
+	 * 
+	 * @return all local filesystems
+	 */
 	List<FileSystemItem> getLocalFileSystems();
 
 	/**
