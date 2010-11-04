@@ -31,6 +31,7 @@ import org.vpac.grisu.model.info.ApplicationInformation;
 import org.vpac.grisu.model.info.ResourceInformation;
 import org.vpac.grisu.model.status.StatusObject;
 import org.vpac.grisu.settings.ClientPropertiesManager;
+import org.vpac.grisu.utils.FqanHelpers;
 
 import au.org.arcs.jcommons.constants.Constants;
 
@@ -52,6 +53,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 	private FileManager fm;
 
 	private String[] cachedFqans = null;
+	private String[] cachedUniqueGroupnames = null;
 	private final Map<String, Set<String>> cachedFqansPerApplication = new HashMap<String, Set<String>>();
 	private Set<String> cachedAllSubmissionLocations = null;
 	private SortedSet<String> cachedAllSites = null;
@@ -183,6 +185,17 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 
 		}
 		return cachedAllSubmissionLocations;
+	}
+
+	public String[] getAllAvailableUniqueGroupnames() {
+
+		if (cachedUniqueGroupnames == null) {
+			cachedUniqueGroupnames = new String[getAllAvailableFqans().length];
+			for (int i = 0; i < getAllAvailableUniqueGroupnames().length; i++) {
+				cachedUniqueGroupnames[i] = getUniqueGroupname(getAllAvailableFqans()[i]);
+			}
+		}
+		return cachedFqans;
 	}
 
 	public DtoBatchJob getBatchJob(String jobname, boolean refresh)
@@ -441,6 +454,10 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 		return cachedAllFileSystems;
 	}
 
+	public String getFullFqan(String uniqueGroupname) {
+		return FqanHelpers.getFullFqan(getAllAvailableFqans(), uniqueGroupname);
+	}
+
 	public TreeModel getGroupTreeFileModel(GlazedFile root) {
 
 		if (groupFileTreemodel == null) {
@@ -680,6 +697,10 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 			}
 		}
 		return cachedRemoteFilesystemList;
+	}
+
+	public String getUniqueGroupname(String fqan) {
+		return FqanHelpers.getUniqueGroupname(getAllAvailableFqans(), fqan);
 	}
 
 	public boolean isMountPointAlias(String string) {

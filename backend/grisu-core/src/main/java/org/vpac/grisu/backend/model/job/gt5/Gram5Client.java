@@ -1,6 +1,5 @@
 package org.vpac.grisu.backend.model.job.gt5;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -14,7 +13,6 @@ import org.globus.gram.GramJobListener;
 import org.globus.gram.internal.GRAMConstants;
 import org.globus.gram.internal.GRAMProtocolErrorConstants;
 import org.globus.gsi.GlobusCredentialException;
-import org.globus.io.gass.server.GassServer;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.vpac.security.light.plainProxy.LocalProxy;
@@ -74,14 +72,6 @@ public class Gram5Client implements GramJobListener {
 	}
 
 	public Gram5Client() {
-		try {
-			final GassServer gass = new GassServer(
-					LocalProxy.loadGSSCredential(), 0);
-		} catch (final IOException ex) {
-			ex.printStackTrace();
-		} catch (final GlobusCredentialException ex) {
-			ex.printStackTrace();
-		}
 	}
 
 	private String getContactString(String handle) {

@@ -22,7 +22,9 @@ public class GlazedFileTreeNode extends LazyLoadingTreeNode {
 
 	@Override
 	public boolean getAllowsChildren() {
-		if (GlazedFile.Type.FILETYPE_FILE.equals(getUserObject())) {
+
+		if (GlazedFile.Type.FILETYPE_FILE
+				.equals(((GlazedFile) (getUserObject())).getType())) {
 			return false;
 		} else {
 			return true;

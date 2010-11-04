@@ -1,5 +1,7 @@
 package org.vpac.grisu.utils;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Helps with the handling of FQANs. Basically just String manipulation.
  * 
@@ -7,6 +9,23 @@ package org.vpac.grisu.utils;
  * 
  */
 public final class FqanHelpers {
+
+	/**
+	 * Translate back the unique String from {@link #getUniqueGroupname(String)}
+	 * .
+	 * 
+	 * @param uniqueGroupname
+	 *            the unique groupname
+	 * @return the full fqan or null if no fqan could be found
+	 */
+	public static String getFullFqan(String[] allFqans, String groupname) {
+		for (String fqan : allFqans) {
+			if (fqan.endsWith(groupname)) {
+				return fqan;
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Parses a fqan for the group.
@@ -62,7 +81,118 @@ public final class FqanHelpers {
 		return role;
 	}
 
-	private FqanHelpers() {
+	/**
+	 * This method translates the provided fqan into the shortest possible
+	 * unique groupname, starting from the last token.
+	 * 
+	 * For example, if a user is a member of the following VOs:<br>
+	 * :/ARCS<br>
+	 * :/ARCS/BeSTGRID<br>
+	 * :/ARCS/BeSTGRID/Bio/<br>
+	 * :/ARCS/BeSTGRID/Bio/Project<br>
+	 * :/ARCS/BeSTGRID/Bio/Project2<br>
+	 * :/ARCS/BeSTGRID/Project<br>
+	 * :/ARCS/BeSTGRID/Drugs/Project<br>
+	 * <br>
+	 * this would be the result:<br>
+	 * :/ARCS/BeSTRID -> BeSTGRID :/ARCS/BeSTGRID/Bio/Project2 -> Project2
+	 * :/ARCS/BeSTGRID/Bio/Project -> Bio/Project :/ARCS/BeSTGRID/Project ->
+	 * BeSTGRID/Project :/ARCS/BeSTGRID/Drugs/Project -> Drugs/Project
+	 * 
+	 * @param fqan
+	 *            the fqan to shorten
+	 * @return the short, unique group name
+	 */
+	public static String getUniqueGroupname(String[] allFqans, String fqan) {
+
+		String[] tokens = fqan.split("/");
+
+		boolean unique = true;
+		String token = "";
+
+		for (int i = tokens.length - 1; i >= 0; i--) {
+
+			unique = true;
+			if (StringUtils.isBlank(token)) {
+				token = tokens[i];
+			} else {
+				token = tokens[i] + "/" + token;
+			}
+
+			for (String f : allFqans) {
+				if (f.equals(fqan)) {
+					continue;
+				}
+				if (f.endsWith(token)) {
+					unique = false;
+					break;
+				}
+			}
+
+			if (unique) {
+				return token;
+			}
+
+		}
+
+		return null;
+
+	}
+
+	public static void main(String[] args) {
+
+		String[] VOS = new String[] { "/ARCS", "/ARCS/BeSTGRID",
+				"/ARCS/BeSTGRID/Project", "/ARCS/BeSTGRID/Bio",
+				"/ARCS/BeSTGRID/Bio/Project", "/ARCS/BeSTGRID/Bio/Project2",
+				"/ARCS/BeSTGRID/Drugs", "/ARCS/BeSTGRID/Drugs/Project",
+				"/ARCS/BeSTGRID/Drugs/Project3", "/ARCS/BeSTGRID/Other" };
+
+		String unique = getUniqueGroupname(VOS, "/ARCS");
+		System.out.println("/ARCS -> " + unique);
+		System.out.println("...and back: " + getFullFqan(VOS, unique));
+
+		System.out.println();
+
+		unique = getUniqueGroupname(VOS, "/ARCS/BeSTGRID");
+		System.out.println("/ARCS/BeSTGRID -> " + unique);
+		System.out.println("...and back: " + getFullFqan(VOS, unique));
+
+		System.out.println();
+
+		unique = getUniqueGroupname(VOS, "/ARCS/BeSTGRID/Project");
+		System.out.println("/ARCS/BeSTGRID/Project -> " + unique);
+		System.out.println("...and back: " + getFullFqan(VOS, unique));
+
+		System.out.println();
+
+		unique = getUniqueGroupname(VOS, "/ARCS/BeSTGRID/Bio/Project");
+		System.out.println("/ARCS/BeSTGRID/Bio/Project -> " + unique);
+		System.out.println("...and back: " + getFullFqan(VOS, unique));
+
+		System.out.println();
+
+		unique = getUniqueGroupname(VOS, "/ARCS/BeSTGRID/Bio/Project2");
+		System.out.println("/ARCS/BeSTGRID/Bio/Project2 -> " + unique);
+		System.out.println("...and back: " + getFullFqan(VOS, unique));
+
+		System.out.println();
+
+		unique = getUniqueGroupname(VOS, "/ARCS/BeSTGRID/Drugs/Project");
+		System.out.println("/ARCS/BeSTGRID/Drugs/Project -> " + unique);
+		System.out.println("...and back: " + getFullFqan(VOS, unique));
+
+		System.out.println();
+
+		unique = getUniqueGroupname(VOS, "/ARCS/BeSTGRID/Drugs/Project3");
+		System.out.println("/ARCS/BeSTGRID/Drugs/Project3 -> " + unique);
+		System.out.println("...and back: " + getFullFqan(VOS, unique));
+
+		System.out.println();
+
+		unique = getUniqueGroupname(VOS, "/ARCS/BeSTGRID/Other");
+		System.out.println("/ARCS/BeSTGRID/Other -> " + unique);
+		System.out.println("...and back: " + getFullFqan(VOS, unique));
+
 	}
 
 }

@@ -76,6 +76,14 @@ public interface UserEnvironmentManager {
 	Set<String> getAllAvailableSubmissionLocations();
 
 	/**
+	 * A convenience method to get a list of all unique groupnames (shorter
+	 * aliases for the fqans) that are available for the user.
+	 * 
+	 * @return the unique groupnames
+	 */
+	String[] getAllAvailableUniqueGroupnames();
+
+	/**
 	 * Returns the DtoBatchJob object with the specified jobname.
 	 * 
 	 * @param jobname
@@ -197,6 +205,16 @@ public interface UserEnvironmentManager {
 	List<FileSystemItem> getFileSystems();
 
 	/**
+	 * Translate back the unique String from {@link #getUniqueGroupname(String)}
+	 * .
+	 * 
+	 * @param uniqueGroupname
+	 *            the unique groupname
+	 * @return the full fqan
+	 */
+	String getFullFqan(String uniqueGroupname);
+
+	/**
 	 * Returns a {@link TreeModel} that can be used to traverse through a group
 	 * based view of all the users filesystems.
 	 * 
@@ -304,6 +322,30 @@ public interface UserEnvironmentManager {
 	MountPoint getRecommendedMountPoint(String submissionLocation, String fqan);
 
 	List<FileSystemItem> getRemoteSites();
+
+	/**
+	 * This method translates the provided fqan into the shortest possible
+	 * unique groupname, starting from the last token.
+	 * 
+	 * For example, if a user is a member of the following VOs:<br>
+	 * :/ARCS<br>
+	 * :/ARCS/BeSTGRID<br>
+	 * :/ARCS/BeSTGRID/Bio/<br>
+	 * :/ARCS/BeSTGRID/Bio/Project<br>
+	 * :/ARCS/BeSTGRID/Bio/Project2<br>
+	 * :/ARCS/BeSTGRID/Project<br>
+	 * :/ARCS/BeSTGRID/Drugs/Project<br>
+	 * <br>
+	 * this would be the result:<br>
+	 * :/ARCS/BeSTRID -> BeSTGRID :/ARCS/BeSTGRID/Bio/Project2 -> Project2
+	 * :/ARCS/BeSTGRID/Bio/Project -> Bio/Project :/ARCS/BeSTGRID/Project ->
+	 * BeSTGRID/Project :/ARCS/BeSTGRID/Drugs/Project -> Drugs/Project
+	 * 
+	 * @param fqan
+	 *            the fqan to shorten
+	 * @return the short, unique group name
+	 */
+	String getUniqueGroupname(String fqan);
 
 	/**
 	 * Returns whether the provided string is a mountpoint alias of one of the
