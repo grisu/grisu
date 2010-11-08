@@ -300,7 +300,7 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 
 			int vColIndex = 0;
 			TableColumn col = table.getColumnModel().getColumn(vColIndex);
-			col.setCellRenderer(new GlazedFileRenderer(this));
+			col.setCellRenderer(new GlazedFileRenderer());
 			int width = 120;
 			col.setPreferredWidth(width);
 			col.setMinWidth(80);
@@ -360,11 +360,11 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 	private synchronized void rebuildFileList()
 			throws RemoteFileSystemException {
 
-		if (this.si == null || this.batchJob == null) {
+		if ((this.si == null) || (this.batchJob == null)) {
 			return;
 		}
 
-		if (rebuildThread != null && rebuildThread.isAlive()) {
+		if ((rebuildThread != null) && rebuildThread.isAlive()) {
 			return;
 		}
 

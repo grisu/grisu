@@ -44,11 +44,24 @@ public interface UserEnvironmentManager {
 	String calculateUniqueJobname(String name);
 
 	/**
-	 * All of the users fqans.
+	 * All of the users fqans, regardless of whether there is a filesystem
+	 * attached to it or not.
 	 * 
 	 * @return the fqans
 	 */
 	String[] getAllAvailableFqans();
+
+	/**
+	 * All of the users fqans.
+	 * 
+	 * @param excludeFqansWithNoDataQuota
+	 *            if set to true, this method will only return fqans that are
+	 *            actually usable because there is a filesystem connected to
+	 *            every fqan that is returned
+	 * 
+	 * @return the fqans
+	 */
+	String[] getAllAvailableFqans(boolean excludeFqansWithNoDataQuota);
 
 	/**
 	 * Returns all fqans for which there is an available submission location for

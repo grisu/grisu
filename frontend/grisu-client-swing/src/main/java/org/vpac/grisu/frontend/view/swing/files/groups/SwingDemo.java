@@ -72,7 +72,7 @@ public class SwingDemo implements Runnable {
 		}
 		tree.setModel(model);
 		final LazyLoadingTreeController controller = new LazyLoadingTreeController(
-				model);
+				tree);
 		tree.addTreeWillExpandListener(controller);
 		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

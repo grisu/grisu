@@ -2,6 +2,7 @@ package org.vpac.grisu.frontend.view.swing.files.groups;
 
 import java.util.concurrent.ExecutionException;
 
+import javax.swing.JTree;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -48,6 +49,7 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 	private SwingWorkerFactory<MutableTreeNode[], ?> workerFactory = new DefaultWorkerFactory();
 	/** Tree Model */
 	private final DefaultTreeModel model;
+	private final JTree tree;
 
 	/**
 	 * Default constructor
@@ -55,8 +57,9 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 	 * @param model
 	 *            Tree model
 	 */
-	public LazyLoadingTreeController(DefaultTreeModel model) {
-		this.model = model;
+	public LazyLoadingTreeController(JTree tree) {
+		this.tree = tree;
+		this.model = (DefaultTreeModel) tree.getModel();
 	}
 
 	/**
@@ -115,6 +118,15 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 			}
 
 			public void done(MutableTreeNode[] nodes) {
+
+				if (nodes == null) {
+					DefaultMutableTreeNode temp = (DefaultMutableTreeNode) node
+							.getChildAt(0);
+					temp.setUserObject("Exception/Can't access...");
+					model.nodeChanged(temp);
+					return;
+				}
+
 				if (nodes.length == 0) {
 					DefaultMutableTreeNode temp = (DefaultMutableTreeNode) node
 							.getChildAt(0);
@@ -126,6 +138,15 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 					node.setAllowsChildren((nodes != null)
 							&& (nodes.length > 0));
 					node.setChildren(nodes);
+
+					// if (nodes.length == 1) {
+					// DefaultMutableTreeNode tmp = (DefaultMutableTreeNode)
+					// node
+					// .getChildAt(0);
+					//
+					// TreePath path = new TreePath(tmp.getPath());
+					// tree.expandPath(path);
+					// }
 				}
 			}
 		};

@@ -3,6 +3,7 @@ package org.vpac.grisu.model;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,6 +54,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 	private FileManager fm;
 
 	private String[] cachedFqans = null;
+	private String[] cachedFqansUsable = null;
 	private String[] cachedUniqueGroupnames = null;
 	private final Map<String, Set<String>> cachedFqansPerApplication = new HashMap<String, Set<String>>();
 	private Set<String> cachedAllSubmissionLocations = null;
@@ -121,12 +123,32 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 		return temp;
 	}
 
-	public synchronized final String[] getAllAvailableFqans() {
+	public final String[] getAllAvailableFqans() {
+		return getAllAvailableFqans(false);
+	}
 
-		if (cachedFqans == null) {
-			this.cachedFqans = serviceInterface.getFqans().asArray();
+	public synchronized final String[] getAllAvailableFqans(
+			boolean excludeUnusableFqans) {
+
+		if (!excludeUnusableFqans) {
+
+			if (cachedFqans == null) {
+				this.cachedFqans = serviceInterface.getFqans().asArray();
+			}
+
+			return cachedFqans;
+		} else {
+			if (cachedFqansUsable == null) {
+				List<String> result = new ArrayList<String>();
+				for (String fqan : getAllAvailableFqans()) {
+					if (getMountPoints(fqan).size() > 0) {
+						result.add(fqan);
+					}
+				}
+				cachedFqansUsable = result.toArray(new String[result.size()]);
+			}
+			return cachedFqansUsable;
 		}
-		return cachedFqans;
 	}
 
 	public Set<String> getAllAvailableFqansForApplication(String application) {

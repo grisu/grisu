@@ -364,7 +364,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 			int vColIndex = 0;
 			TableColumn col = table.getColumnModel().getColumn(vColIndex);
-			col.setCellRenderer(new GlazedFileRenderer(this));
+			col.setCellRenderer(new GlazedFileRenderer());
 			int width = 120;
 			col.setPreferredWidth(width);
 			col.setMinWidth(80);

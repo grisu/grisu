@@ -89,6 +89,8 @@ public class GroupFileBrowserPanel extends JPanel implements FileListPanel {
 	private JTree getTree() {
 		if (tree == null) {
 			tree = new JTree();
+			tree.setCellRenderer(new GroupFileBrowserTreeRenderer(si));
+			tree.setRootVisible(true);
 		}
 		return tree;
 	}
@@ -104,16 +106,18 @@ public class GroupFileBrowserPanel extends JPanel implements FileListPanel {
 
 	private void initialize() {
 
-		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Root",
+		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Groups",
 				true);
 		DefaultTreeModel model = new DefaultTreeModel(rootNode);
 
-		rootNode.add(new GlazedFileTreeNode(fm,
-				new GlazedFile("/ARCS/BeSTGRID"), model));
+		for (String group : uem.getAllAvailableFqans(true)) {
+			rootNode.add(new GlazedFileTreeNode(fm, new GlazedFile(group),
+					model));
+		}
 
 		getTree().setModel(model);
 		final LazyLoadingTreeController controller = new LazyLoadingTreeController(
-				model);
+				getTree());
 		getTree().addTreeWillExpandListener(controller);
 
 	}
