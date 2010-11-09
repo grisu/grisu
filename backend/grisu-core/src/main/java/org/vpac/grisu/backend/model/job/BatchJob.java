@@ -24,9 +24,9 @@ import org.vpac.grisu.backend.hibernate.JobDAO;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.dto.DtoJob;
-import org.vpac.grisu.model.dto.DtoJobProperty;
 import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoLogMessages;
+import org.vpac.grisu.model.dto.DtoProperty;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 
 import au.org.arcs.jcommons.constants.Constants;
@@ -121,7 +121,7 @@ public class BatchJob {
 		final DtoBatchJob result = new DtoBatchJob(this.getBatchJobname());
 
 		result.setSubmissionFqan(this.getFqan());
-		result.setProperties(DtoJobProperty.dtoJobPropertiesFromMap(this
+		result.setProperties(DtoProperty.dtoPropertiesFromMap(this
 				.getJobProperties()));
 
 		result.setMessages(DtoLogMessages.createLogMessages(this

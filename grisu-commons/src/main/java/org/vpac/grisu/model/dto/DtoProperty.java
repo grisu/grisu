@@ -14,10 +14,10 @@ import javax.xml.bind.annotation.XmlValue;
  * @author Markus Binsteiner
  * 
  */
-@XmlRootElement(name = "userproperty")
+@XmlRootElement(name = "property")
 public class DtoProperty {
 
-	public static List<DtoProperty> dtoUserPropertiesFromMap(
+	public static List<DtoProperty> dtoPropertiesFromMap(
 			Map<String, String> map) {
 
 		final List<DtoProperty> result = new LinkedList<DtoProperty>();

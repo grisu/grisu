@@ -18,7 +18,7 @@ import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.DtoFile;
-import org.vpac.grisu.model.dto.DtoFolder;
+import org.vpac.grisu.model.dto.DtoFileObject;
 import org.vpac.grisu.model.dto.DtoRemoteObject;
 
 public class GlazedFile implements Comparable<GlazedFile>, Transferable {
@@ -26,7 +26,6 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 	public enum Type implements Comparable<Type> {
 
 		FILETYPE_GROUP, FILETYPE_ROOT, FILETYPE_SITE, FILETYPE_MOUNTPOINT, FILETYPE_FOLDER, FILETYPE_FILE
-
 	}
 
 	public static final DataFlavor GLAZED_FILE_FLAVOR = new DataFlavor(
@@ -36,8 +35,6 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 			GLAZED_FILE_FLAVOR, DataFlavor.stringFlavor };
 
 	public static final String LOCAL_FILESYSTEM = "Local";
-
-	public static final String ROOT = "FileRoot";
 
 	public static String calculateTimeStampString(Long timestamp) {
 
@@ -61,8 +58,7 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
 	private Type type;
 
-	private final DtoFile file;
-	private final DtoFolder folder;
+	// private final DtoFile file;
 
 	private final String name;
 
@@ -75,26 +71,21 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
 	public GlazedFile() {
 		this.type = Type.FILETYPE_ROOT;
-		this.file = null;
-		this.folder = null;
-		this.url = ROOT;
+		this.url = DtoFileObject.ROOT;
 		this.size = -1L;
 		this.lastModified = -1L;
-		this.name = ROOT;
+		this.name = DtoFileObject.ROOT;
 		this.si = null;
 	}
 
 	public GlazedFile(DtoRemoteObject obj) {
 
 		if (obj.isFolder()) {
-			folder = (DtoFolder) obj;
-			file = null;
 			type = Type.FILETYPE_FOLDER;
 			size = -1L;
 			lastModified = -1L;
 		} else {
-			folder = null;
-			file = (DtoFile) obj;
+			DtoFile file = (DtoFile) obj;
 			type = Type.FILETYPE_FILE;
 			size = file.getSize();
 			lastModified = file.getLastModified();
@@ -119,8 +110,6 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 			this.size = localFile.length();
 		}
 
-		this.file = null;
-		this.folder = null;
 		this.url = localFile.toURI().toString();
 
 		this.lastModified = localFile.lastModified();
@@ -131,8 +120,6 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
 	public GlazedFile(MountPoint mp) {
 		this.type = Type.FILETYPE_MOUNTPOINT;
-		this.file = null;
-		this.folder = null;
 		this.url = mp.getRootUrl();
 		this.size = -1L;
 		this.lastModified = -1L;
@@ -144,8 +131,6 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
 		if (sitename_or_group.startsWith("/")) {
 			this.type = Type.FILETYPE_GROUP;
-			this.file = null;
-			this.folder = null;
 			this.url = sitename_or_group;
 			this.size = -1L;
 			this.lastModified = -1L;
@@ -153,8 +138,6 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 			this.si = null;
 		} else {
 			this.type = Type.FILETYPE_SITE;
-			this.file = null;
-			this.folder = null;
 			this.url = sitename_or_group;
 			this.size = -1L;
 			this.lastModified = -1L;
@@ -175,8 +158,6 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
 		this.si = si;
 		this.type = null;
-		this.folder = null;
-		this.file = null;
 		this.size = -2L;
 		this.lastModified = -2L;
 	}
@@ -199,8 +180,6 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
 		this.si = si;
 		this.type = type;
-		this.folder = null;
-		this.file = null;
 		this.size = -1L;
 		this.lastModified = -1L;
 	}

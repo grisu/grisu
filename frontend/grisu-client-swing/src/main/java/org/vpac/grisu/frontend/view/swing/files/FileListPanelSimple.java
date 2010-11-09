@@ -34,6 +34,7 @@ import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.UserEnvironmentManager;
 import org.vpac.grisu.model.dto.DtoFile;
+import org.vpac.grisu.model.dto.DtoFileObject;
 import org.vpac.grisu.model.dto.DtoFolder;
 import org.vpac.grisu.model.files.GlazedFile;
 
@@ -527,7 +528,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 						if (url == null) {
 							setEmptyList();
-						} else if (GlazedFile.ROOT.equals(url)) {
+						} else if (DtoFileObject.ROOT.equals(url)) {
 							setCurrentDirToGridRoot();
 						} else if (em.getAllAvailableSites().contains(url)) {
 							setCurrentDirToSite(url);
@@ -778,13 +779,13 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 	public void setRootAndCurrentUrl(String rootUrl, GlazedFile startFile) {
 
 		if (rootUrl == null) {
-			this.rootUrl = GlazedFile.ROOT;
+			this.rootUrl = DtoFileObject.ROOT;
 		} else {
 			this.rootUrl = rootUrl;
 		}
 
 		if (startFile == null) {
-			setCurrentUrl(GlazedFile.ROOT);
+			setCurrentUrl(DtoFileObject.ROOT);
 		} else {
 			setCurrent(startFile);
 		}
@@ -793,7 +794,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 	public void setRootAndCurrentUrl(String rootUrl, String startUrl) {
 		if (rootUrl == null) {
-			this.rootUrl = GlazedFile.ROOT;
+			this.rootUrl = DtoFileObject.ROOT;
 		} else {
 			this.rootUrl = rootUrl;
 		}
@@ -803,7 +804,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 	public void setRootUrl(String url) {
 		if (url == null) {
-			this.rootUrl = GlazedFile.ROOT;
+			this.rootUrl = DtoFileObject.ROOT;
 		} else {
 			this.rootUrl = url;
 		}

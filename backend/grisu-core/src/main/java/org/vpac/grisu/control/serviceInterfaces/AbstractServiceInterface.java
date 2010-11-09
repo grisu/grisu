@@ -70,10 +70,10 @@ import org.vpac.grisu.model.dto.DtoFolder;
 import org.vpac.grisu.model.dto.DtoGridResources;
 import org.vpac.grisu.model.dto.DtoHostsInfo;
 import org.vpac.grisu.model.dto.DtoJob;
-import org.vpac.grisu.model.dto.DtoJobProperty;
 import org.vpac.grisu.model.dto.DtoJobs;
 import org.vpac.grisu.model.dto.DtoMountPoints;
 import org.vpac.grisu.model.dto.DtoProperties;
+import org.vpac.grisu.model.dto.DtoProperty;
 import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
@@ -1537,7 +1537,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		final LinkedList<String> result = new LinkedList<String>();
 
 		final Map<JobSubmissionProperty, String> converterMap = new HashMap<JobSubmissionProperty, String>();
-		for (final DtoJobProperty jp : jobProperties.getProperties()) {
+		for (final DtoProperty jp : jobProperties.getProperties()) {
 			converterMap.put(JobSubmissionProperty.fromString(jp.getKey()),
 					jp.getValue());
 		}
@@ -2635,37 +2635,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throw new RemoteFileSystemException("Could not list directory "
 					+ directory + ": " + e.getLocalizedMessage());
 		}
-
-		// Document result = null;
-		//
-		// // FileObject dir = null;
-		// // dir = getUser().aquireFile(directory);
-		//
-		// myLogger.debug("Listing directory: " + directory
-		// + " with recursion level: " + recursion_level);
-		//
-		// try {
-		// result = getFsConverter().getDirectoryStructure(directory,
-		// recursion_level, return_absolute_url);
-		// } catch (Exception e) {
-		// myLogger.error("Could not list directory: "
-		// + e.getLocalizedMessage());
-		// // e.printStackTrace();
-		// throw new RemoteFileSystemException("Could not read directory "
-		// + directory + " for ls command: " + e.getMessage());
-		// }
-		//
-		// try {
-		// myLogger.debug(SeveralXMLHelpers.toString(result));
-		// } catch (TransformerFactoryConfigurationError e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// } catch (TransformerException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		//
-		// return result;
 	}
 
 	/*
