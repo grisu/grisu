@@ -17,9 +17,7 @@ import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.MountPoint;
-import org.vpac.grisu.model.dto.DtoFile;
 import org.vpac.grisu.model.dto.DtoFileObject;
-import org.vpac.grisu.model.dto.DtoRemoteObject;
 
 public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
@@ -78,20 +76,18 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 		this.si = null;
 	}
 
-	public GlazedFile(DtoRemoteObject obj) {
-
+	public GlazedFile(DtoFileObject obj) {
 		if (obj.isFolder()) {
 			type = Type.FILETYPE_FOLDER;
 			size = -1L;
-			lastModified = -1L;
+			lastModified = obj.getLastModified();
 		} else {
-			DtoFile file = (DtoFile) obj;
 			type = Type.FILETYPE_FILE;
-			size = file.getSize();
-			lastModified = file.getLastModified();
+			size = obj.getSize();
+			lastModified = obj.getLastModified();
 		}
 
-		url = obj.getRootUrl();
+		url = obj.getMainUrl();
 		if (StringUtils.isNotBlank(obj.getName())) {
 			name = obj.getName();
 		} else {

@@ -66,7 +66,7 @@ import org.vpac.grisu.model.dto.DtoApplicationDetails;
 import org.vpac.grisu.model.dto.DtoApplicationInfo;
 import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.dto.DtoDataLocations;
-import org.vpac.grisu.model.dto.DtoFolder;
+import org.vpac.grisu.model.dto.DtoFileObject;
 import org.vpac.grisu.model.dto.DtoGridResources;
 import org.vpac.grisu.model.dto.DtoHostsInfo;
 import org.vpac.grisu.model.dto.DtoJob;
@@ -1414,13 +1414,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	public DtoFolder fillFolder(DtoFolder folder, int recursionLevel)
+	public DtoFileObject fillFolder(DtoFileObject folder, int recursionLevel)
 			throws FileSystemException, RemoteFileSystemException {
 
-		DtoFolder tempFolder = null;
-		;
+		DtoFileObject tempFolder = null;
+
 		try {
-			tempFolder = getUser().getFolderListing(folder.getRootUrl());
+			tempFolder = getUser().getFolderListing(folder.getMainUrl());
 		} catch (final Exception e) {
 			myLogger.error(e);
 			myLogger.error("Error getting folder listing. I suspect this to be a bug in the commons-vfs-grid library. Sleeping for 1 seconds and then trying again...");
@@ -1430,16 +1430,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			tempFolder = getUser().getFolderListing(folder.getRootUrl());
+			tempFolder = getUser().getFolderListing(folder.getMainUrl());
 		}
-		folder.setChildrenFiles(tempFolder.getChildrenFiles());
+		folder.setChildren(tempFolder.getChildren());
 
-		if (recursionLevel <= 0) {
-			folder.setChildrenFolders(tempFolder.getChildrenFolders());
-		} else {
-			for (final DtoFolder childFolder : tempFolder.getChildrenFolders()) {
-				folder.addChildFolder(fillFolder(childFolder,
-						recursionLevel - 1));
+		if (recursionLevel > 0) {
+			for (final DtoFileObject childFolder : tempFolder.getChildren()) {
+				if (childFolder.isFolder()) {
+					folder.addChild(fillFolder(childFolder, recursionLevel - 1));
+				}
 			}
 
 		}
@@ -2611,7 +2610,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public DtoFolder ls(final String directory, int recursion_level)
+	public DtoFileObject ls(final String directory, int recursion_level)
 			throws RemoteFileSystemException {
 
 		// check whether credential still valid
@@ -2619,7 +2618,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 
-			final DtoFolder rootfolder = getUser().getFolderListing(directory);
+			final DtoFileObject rootfolder = getUser().getFolderListing(
+					directory);
 			recursion_level = recursion_level - 1;
 			if (recursion_level == 0) {
 				return rootfolder;
@@ -2627,7 +2627,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				recursion_level = Integer.MAX_VALUE;
 			}
 			fillFolder(rootfolder, recursion_level);
-
 			return rootfolder;
 
 		} catch (final Exception e) {
@@ -2867,9 +2866,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				if (fileExists(oldJobDir)) {
 
-					final DtoFolder fol = ls(oldJobDir, 1);
-					if ((fol.getChildrenFiles().size() > 0)
-							|| (fol.getChildrenFolders().size() > 0)) {
+					final DtoFileObject fol = ls(oldJobDir, 1);
+					if (fol.getChildren().size() > 0) {
+
 						myLogger.debug("Old jobdir exists.");
 					} else {
 						oldJobDir = null;

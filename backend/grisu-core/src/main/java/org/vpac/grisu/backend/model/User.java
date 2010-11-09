@@ -49,8 +49,7 @@ import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.serviceInterfaces.AbstractServiceInterface;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.DtoActionStatus;
-import org.vpac.grisu.model.dto.DtoFile;
-import org.vpac.grisu.model.dto.DtoFolder;
+import org.vpac.grisu.model.dto.DtoFileObject;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.utils.MountPointHelpers;
 import org.vpac.security.light.voms.VO;
@@ -932,10 +931,8 @@ public class User {
 		}
 	}
 
-	public DtoFolder getFolderListing(final String url)
+	public DtoFileObject getFolderListing(final String url)
 			throws RemoteFileSystemException, FileSystemException {
-
-		final DtoFolder folder = new DtoFolder();
 
 		final FileObject fo = aquireFile(url);
 
@@ -943,9 +940,9 @@ public class User {
 			throw new RemoteFileSystemException("Url: " + url
 					+ " not a folder.");
 		}
+		long lastModified = fo.getContent().getLastModifiedTime();
 
-		folder.setRootUrl(url);
-		folder.setName(fo.getName().getBaseName());
+		final DtoFileObject folder = new DtoFileObject(url, lastModified);
 
 		// TODO the getChildren command seems to throw exceptions without reason
 		// every now and the
@@ -963,20 +960,15 @@ public class User {
 
 		for (final FileObject child : children) {
 			if (FileType.FOLDER.equals(child.getType())) {
-				final DtoFolder childfolder = new DtoFolder();
-				childfolder.setName(child.getName().getBaseName());
-				childfolder.setRootUrl(child.getURL().toString());
-				folder.addChildFolder(childfolder);
-			} else if (FileType.FILE.equals(child.getType())) {
-				final DtoFile childFile = new DtoFile();
-				childFile.setName(child.getName().getBaseName());
-				childFile.setRootUrl(child.getURL().toString());
-
-				childFile.setLastModified(child.getContent()
+				final DtoFileObject childfolder = new DtoFileObject(child
+						.getURL().toString(), child.getContent()
 						.getLastModifiedTime());
-				childFile.setSize(child.getContent().getSize());
-
-				folder.addChildFile(childFile);
+				folder.addChild(childfolder);
+			} else if (FileType.FILE.equals(child.getType())) {
+				final DtoFileObject childFile = new DtoFileObject(child
+						.getURL().toString(), child.getContent().getSize(),
+						child.getContent().getLastModifiedTime());
+				folder.addChild(childFile);
 			}
 		}
 

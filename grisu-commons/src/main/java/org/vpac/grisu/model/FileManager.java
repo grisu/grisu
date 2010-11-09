@@ -29,8 +29,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.events.FolderCreatedEvent;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
-import org.vpac.grisu.model.dto.DtoFile;
-import org.vpac.grisu.model.dto.DtoFolder;
+import org.vpac.grisu.model.dto.DtoFileObject;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.files.GlazedFile;
@@ -510,7 +509,7 @@ public class FileManager {
 	private File downloadFolder(final String url)
 			throws FileTransactionException {
 
-		DtoFolder source = null;
+		DtoFileObject source = null;
 		try {
 			source = serviceInterface.ls(url, 0);
 		} catch (final RemoteFileSystemException e) {
@@ -713,7 +712,7 @@ public class FileManager {
 			throw new IllegalArgumentException("Specified url is not a folder.");
 		}
 
-		final DtoFolder folder = serviceInterface.ls(folderUrl, 0);
+		final DtoFileObject folder = serviceInterface.ls(folderUrl, 0);
 
 		return folder.listOfAllFilesUnderThisFolder();
 	}
@@ -735,12 +734,9 @@ public class FileManager {
 
 		} else {
 
-			DtoFolder folder = ls(parent.getUrl());
+			DtoFileObject folder = ls(parent.getUrl());
 
-			for (DtoFolder f : folder.getChildrenFolders()) {
-				result.add(new GlazedFile(f));
-			}
-			for (DtoFile f : folder.getChildrenFiles()) {
+			for (DtoFileObject f : folder.getChildren()) {
 				result.add(new GlazedFile(f));
 			}
 		}
@@ -754,24 +750,24 @@ public class FileManager {
 		return result;
 	}
 
-	public DtoFolder ls(String url) throws RemoteFileSystemException {
+	public DtoFileObject ls(String url) throws RemoteFileSystemException {
 
 		return ls(url, 1);
 	}
 
-	public DtoFolder ls(String url, int recursionLevel)
+	public DtoFileObject ls(String url, int recursionLevel)
 			throws RemoteFileSystemException {
 
 		if (isLocal(url)) {
 			File temp;
 			temp = getFileFromUriOrPath(url);
 
-			return DtoFolder.listLocalFolder(temp, false);
+			return DtoFileObject.listLocalFolder(temp, false);
 
 		} else {
 
 			try {
-				DtoFolder result = serviceInterface.ls(url, recursionLevel);
+				DtoFileObject result = serviceInterface.ls(url, recursionLevel);
 				return result;
 			} catch (final RemoteFileSystemException e) {
 
