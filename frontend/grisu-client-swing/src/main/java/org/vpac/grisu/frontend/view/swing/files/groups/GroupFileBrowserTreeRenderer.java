@@ -51,10 +51,10 @@ public class GroupFileBrowserTreeRenderer extends DefaultTreeCellRenderer
 	public GroupFileBrowserTreeRenderer(ServiceInterface si,
 			boolean displayFullFqan) {
 		this.si = si;
+		this.displayFullFqan = displayFullFqan;
 		this.uem = GrisuRegistryManager.getDefault(si)
 				.getUserEnvironmentManager();
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
-		this.displayFullFqan = displayFullFqan;
 	}
 
 	@Override
@@ -81,13 +81,22 @@ public class GroupFileBrowserTreeRenderer extends DefaultTreeCellRenderer
 			String text = null;
 			if (file.isFolder()) {
 				if (GlazedFile.Type.FILETYPE_GROUP.equals(file.getType())) {
-					text = uem.getUniqueGroupname(file.getName());
+					if (displayFullFqan) {
+						text = file.getName();
+					} else {
+						text = uem.getUniqueGroupname(file.getName());
+					}
 				} else {
 					text = file.getName();
 				}
 
+				// if
+				// (GlazedFile.Type.FILETYPE_MOUNTPOINT.equals(file.getType()))
+				// {
+				// text = uem.getMountPointForUrl(file.getUrl()).getSite();
+				// }
 				if (GlazedFile.Type.FILETYPE_MOUNTPOINT.equals(file.getType())) {
-					text = uem.getMountPointForUrl(file.getUrl()).getSite();
+					text = uem.getMountPointForUrl(file.getUrl()).getAlias();
 				}
 
 				this.setIcon(folderIcon);

@@ -1352,37 +1352,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return download(new String[] { filename })[0];
 	}
 
-	// private void moveJobDirectory(Job job, String newSubLoc, BatchJob
-	// possibleBatchJob) throws NoSuchJobException, JobPropertiesException,
-	// RemoteFileSystemException {
-	//
-	//
-	// String oldJobDir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
-	// JsdlHelpers.setCandidateHosts(job.getJobDescription(), new
-	// String[]{newSubLoc});
-	//
-	//
-	// processJobDescription(job, possibleBatchJob);
-	//
-	// String newJobDir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
-	// myLogger.debug("New jobdirectory: "+ newJobDir);
-	//
-	//
-	// cpSingleFile(oldJobDir, newJobDir, true, true);
-	// myLogger.debug("Moved old job dir from "+oldJobDir+" to "+newJobDir);
-	//
-	// try {
-	// // try to delete old file
-	// deleteFile(oldJobDir);
-	// } catch (RemoteFileSystemException e) {
-	// // not good, but acceptable
-	// myLogger.error("Could not delete old jobdir.", e);
-	// }
-	//
-	// jobdao.saveOrUpdate(job);
-	//
-	// }
-
 	/**
 	 * Downloads multiple files at once. It's not used at the moment for this
 	 * purpose, though. Only for single file downloads. But maybe in the future.

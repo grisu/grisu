@@ -24,7 +24,20 @@ public class GroupFileBrowserTest {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					GroupFileBrowserTest window = new GroupFileBrowserTest(si);
+					GroupFileBrowserTest window = new GroupFileBrowserTest(si,
+							true);
+					window.frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					GroupFileBrowserTest window = new GroupFileBrowserTest(si,
+							false);
 					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -37,18 +50,22 @@ public class GroupFileBrowserTest {
 
 	private JFrame frame;
 	private GroupFileBrowserPanel groupFileBrowserPanel;
+	private final boolean displayFullFqan;
 
 	/**
 	 * Create the application.
 	 */
-	public GroupFileBrowserTest(ServiceInterface si) {
+	public GroupFileBrowserTest(ServiceInterface si, boolean displayFullFqan) {
 		this.si = si;
+		this.displayFullFqan = displayFullFqan;
+
 		initialize();
 	}
 
 	private GroupFileBrowserPanel getGroupFileBrowserPanel() {
 		if (groupFileBrowserPanel == null) {
-			groupFileBrowserPanel = new GroupFileBrowserPanel(si);
+			groupFileBrowserPanel = new GroupFileBrowserPanel(si,
+					displayFullFqan);
 		}
 		return groupFileBrowserPanel;
 	}

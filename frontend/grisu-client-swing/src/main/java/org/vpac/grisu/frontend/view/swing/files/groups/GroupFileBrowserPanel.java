@@ -32,12 +32,14 @@ public class GroupFileBrowserPanel extends JPanel implements FileListPanel {
 	private JScrollPane scrollPane;
 	private GroupFileBrowserPanel groupFileBrowserPanel;
 	private JTree tree;
+	private final boolean displayFullFqan;
 
 	/**
 	 * Create the panel.
 	 */
-	public GroupFileBrowserPanel(ServiceInterface si) {
+	public GroupFileBrowserPanel(ServiceInterface si, boolean displayFullFqan) {
 		this.si = si;
+		this.displayFullFqan = displayFullFqan;
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		this.uem = GrisuRegistryManager.getDefault(si)
 				.getUserEnvironmentManager();
@@ -89,7 +91,8 @@ public class GroupFileBrowserPanel extends JPanel implements FileListPanel {
 	private JTree getTree() {
 		if (tree == null) {
 			tree = new JTree();
-			tree.setCellRenderer(new GroupFileBrowserTreeRenderer(si));
+			tree.setCellRenderer(new GroupFileBrowserTreeRenderer(si,
+					displayFullFqan));
 			tree.setRootVisible(true);
 		}
 		return tree;

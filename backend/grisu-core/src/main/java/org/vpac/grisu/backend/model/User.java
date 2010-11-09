@@ -357,6 +357,10 @@ public class User {
 
 	}
 
+	// public DtoRemoteObject aquireFile(final String file) {
+	// return null;
+	// }
+
 	/**
 	 * Resolves the provided filename into a FileObject. If the filename starts
 	 * with "/" a file on one of the "mounted" filesystems is looked up. Else it
