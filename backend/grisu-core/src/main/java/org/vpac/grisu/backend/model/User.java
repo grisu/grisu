@@ -29,6 +29,7 @@ import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystem;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemOptions;
+import org.apache.commons.vfs.FileType;
 import org.apache.commons.vfs.impl.DefaultFileSystemManager;
 import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileSystemConfigBuilder;
 import org.apache.log4j.Logger;
@@ -48,6 +49,8 @@ import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.serviceInterfaces.AbstractServiceInterface;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.DtoActionStatus;
+import org.vpac.grisu.model.dto.DtoFile;
+import org.vpac.grisu.model.dto.DtoFolder;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.utils.MountPointHelpers;
 import org.vpac.security.light.voms.VO;
@@ -356,10 +359,6 @@ public class User {
 		userdao.saveOrUpdate(this);
 
 	}
-
-	// public DtoRemoteObject aquireFile(final String file) {
-	// return null;
-	// }
 
 	/**
 	 * Resolves the provided filename into a FileObject. If the filename starts
@@ -805,23 +804,6 @@ public class User {
 		}
 	}
 
-	// private List<FileReservation> getFileReservations() {
-	// return fileReservations;
-	// }
-	//
-	// private void setFileReservations(List<FileReservation> fileReservations)
-	// {
-	// this.fileReservations = fileReservations;
-	// }
-	//
-	// private List<FileTransfer> getFileTransfers() {
-	// return fileTransfers;
-	// }
-	//
-	// private void setFileTransfers(List<FileTransfer> fileTransfers) {
-	// this.fileTransfers = fileTransfers;
-	// }
-
 	/**
 	 * Returns all mountpoints (including automounted ones for this session.
 	 * 
@@ -840,6 +822,23 @@ public class User {
 		}
 		return allMountPoints;
 	}
+
+	// private List<FileReservation> getFileReservations() {
+	// return fileReservations;
+	// }
+	//
+	// private void setFileReservations(List<FileReservation> fileReservations)
+	// {
+	// this.fileReservations = fileReservations;
+	// }
+	//
+	// private List<FileTransfer> getFileTransfers() {
+	// return fileTransfers;
+	// }
+	//
+	// private void setFileTransfers(List<FileTransfer> fileTransfers) {
+	// this.fileTransfers = fileTransfers;
+	// }
 
 	/**
 	 * Gets a map of this users bookmarks.
@@ -931,6 +930,57 @@ public class User {
 				throw new FileSystemException(e);
 			}
 		}
+	}
+
+	public DtoFolder getFolderListing(final String url)
+			throws RemoteFileSystemException, FileSystemException {
+
+		final DtoFolder folder = new DtoFolder();
+
+		final FileObject fo = aquireFile(url);
+
+		if (!FileType.FOLDER.equals(fo.getType())) {
+			throw new RemoteFileSystemException("Url: " + url
+					+ " not a folder.");
+		}
+
+		folder.setRootUrl(url);
+		folder.setName(fo.getName().getBaseName());
+
+		// TODO the getChildren command seems to throw exceptions without reason
+		// every now and the
+		// probably a bug in commons-vfs-grid. Until this is resolved, I always
+		// try 2 times...
+		FileObject[] children = null;
+		try {
+			children = fo.getChildren();
+		} catch (final Exception e) {
+			e.printStackTrace();
+			myLogger.error("Couldn't get children of :"
+					+ fo.getName().toString() + ". Trying one more time...");
+			children = fo.getChildren();
+		}
+
+		for (final FileObject child : children) {
+			if (FileType.FOLDER.equals(child.getType())) {
+				final DtoFolder childfolder = new DtoFolder();
+				childfolder.setName(child.getName().getBaseName());
+				childfolder.setRootUrl(child.getURL().toString());
+				folder.addChildFolder(childfolder);
+			} else if (FileType.FILE.equals(child.getType())) {
+				final DtoFile childFile = new DtoFile();
+				childFile.setName(child.getName().getBaseName());
+				childFile.setRootUrl(child.getURL().toString());
+
+				childFile.setLastModified(child.getContent()
+						.getLastModifiedTime());
+				childFile.setSize(child.getContent().getSize());
+
+				folder.addChildFile(childFile);
+			}
+		}
+
+		return folder;
 	}
 
 	/**

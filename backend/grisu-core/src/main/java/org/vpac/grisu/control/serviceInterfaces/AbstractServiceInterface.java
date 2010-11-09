@@ -66,7 +66,6 @@ import org.vpac.grisu.model.dto.DtoApplicationDetails;
 import org.vpac.grisu.model.dto.DtoApplicationInfo;
 import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.dto.DtoDataLocations;
-import org.vpac.grisu.model.dto.DtoFile;
 import org.vpac.grisu.model.dto.DtoFolder;
 import org.vpac.grisu.model.dto.DtoGridResources;
 import org.vpac.grisu.model.dto.DtoHostsInfo;
@@ -1421,7 +1420,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		DtoFolder tempFolder = null;
 		;
 		try {
-			tempFolder = getFolderListing(folder.getRootUrl());
+			tempFolder = getUser().getFolderListing(folder.getRootUrl());
 		} catch (final Exception e) {
 			myLogger.error(e);
 			myLogger.error("Error getting folder listing. I suspect this to be a bug in the commons-vfs-grid library. Sleeping for 1 seconds and then trying again...");
@@ -1431,7 +1430,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			tempFolder = getFolderListing(folder.getRootUrl());
+			tempFolder = getUser().getFolderListing(folder.getRootUrl());
 		}
 		folder.setChildrenFiles(tempFolder.getChildrenFiles());
 
@@ -1842,57 +1841,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		return size;
-	}
-
-	private DtoFolder getFolderListing(String url)
-			throws RemoteFileSystemException, FileSystemException {
-
-		final DtoFolder folder = new DtoFolder();
-
-		final FileObject fo = getUser().aquireFile(url);
-
-		if (!FileType.FOLDER.equals(fo.getType())) {
-			throw new RemoteFileSystemException("Url: " + url
-					+ " not a folder.");
-		}
-
-		folder.setRootUrl(url);
-		folder.setName(fo.getName().getBaseName());
-
-		// TODO the getChildren command seems to throw exceptions without reason
-		// every now and the
-		// probably a bug in commons-vfs-grid. Until this is resolved, I always
-		// try 2 times...
-		FileObject[] children = null;
-		try {
-			children = fo.getChildren();
-		} catch (final Exception e) {
-			e.printStackTrace();
-			myLogger.error("Couldn't get children of :"
-					+ fo.getName().toString() + ". Trying one more time...");
-			children = fo.getChildren();
-		}
-
-		for (final FileObject child : children) {
-			if (FileType.FOLDER.equals(child.getType())) {
-				final DtoFolder childfolder = new DtoFolder();
-				childfolder.setName(child.getName().getBaseName());
-				childfolder.setRootUrl(child.getURL().toString());
-				folder.addChildFolder(childfolder);
-			} else if (FileType.FILE.equals(child.getType())) {
-				final DtoFile childFile = new DtoFile();
-				childFile.setName(child.getName().getBaseName());
-				childFile.setRootUrl(child.getURL().toString());
-
-				childFile.setLastModified(child.getContent()
-						.getLastModifiedTime());
-				childFile.setSize(child.getContent().getSize());
-
-				folder.addChildFile(childFile);
-			}
-		}
-
-		return folder;
 	}
 
 	/*
@@ -2671,7 +2619,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 
-			final DtoFolder rootfolder = getFolderListing(directory);
+			final DtoFolder rootfolder = getUser().getFolderListing(directory);
 			recursion_level = recursion_level - 1;
 			if (recursion_level == 0) {
 				return rootfolder;
