@@ -102,9 +102,17 @@ public class FileManager {
 	public static String ensureUriFormat(String inputFile) {
 
 		try {
-			if ((inputFile != null) && inputFile.startsWith("gsiftp:")) {
+			if ((inputFile != null) && (inputFile.startsWith("gsiftp:"))) {
 				return inputFile;
 			}
+
+			String[] supportedTokens = new String[] { "groups" };
+			for (String token : supportedTokens) {
+				if (inputFile.startsWith("/" + token)) {
+					return "grid:/" + inputFile;
+				}
+			}
+
 			new URL(inputFile);
 			return inputFile;
 		} catch (final MalformedURLException e) {
@@ -197,17 +205,18 @@ public class FileManager {
 	 */
 	public static boolean isLocal(String file) {
 
-		file = ensureUriFormat(file);
-
-		if (file.startsWith("gsiftp")) {
+		if (file.startsWith("gsiftp:")) {
+			return false;
+		} else if (file.startsWith("grid:")) {
 			return false;
 		} else if (file.startsWith("file:")) {
 			return true;
 		} else if (file.startsWith("http:")) {
 			return false;
 		} else {
-			throw new IllegalArgumentException(
-					"Protocol not supported for file: " + file);
+			return true;
+			// throw new IllegalArgumentException(
+			// "Protocol not supported for file: " + file);
 		}
 
 	}
@@ -751,7 +760,6 @@ public class FileManager {
 	}
 
 	public DtoFileObject ls(String url) throws RemoteFileSystemException {
-
 		return ls(url, 1);
 	}
 
@@ -779,7 +787,7 @@ public class FileManager {
 	public boolean needsDownloading(String url) {
 
 		final File cacheTargetFile = getLocalCacheFile(url);
-		final File cacheTargetParentFile = cacheTargetFile.getParentFile();
+		// final File cacheTargetParentFile = cacheTargetFile.getParentFile();
 
 		if (!cacheTargetFile.exists()) {
 			return true;

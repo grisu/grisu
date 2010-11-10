@@ -87,7 +87,7 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 			lastModified = obj.getLastModified();
 		}
 
-		url = obj.getMainUrl();
+		url = obj.getUrl();
 		if (StringUtils.isNotBlank(obj.getName())) {
 			name = obj.getName();
 		} else {

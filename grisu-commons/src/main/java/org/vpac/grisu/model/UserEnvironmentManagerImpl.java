@@ -217,7 +217,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 				cachedUniqueGroupnames[i] = getUniqueGroupname(getAllAvailableFqans()[i]);
 			}
 		}
-		return cachedFqans;
+		return cachedUniqueGroupnames;
 	}
 
 	public DtoBatchJob getBatchJob(String jobname, boolean refresh)

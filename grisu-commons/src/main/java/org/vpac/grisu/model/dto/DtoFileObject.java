@@ -74,20 +74,16 @@ public class DtoFileObject implements Comparable {
 	private String name;
 
 	private String mainUrl;
+	private String optionalPath;
 
 	private List<DtoProperty> urls = new LinkedList<DtoProperty>();
 	private long size = -2L;
 	private long lastModified;
+	private boolean isVirtual = false;
 	private Set<DtoFileObject> children = new TreeSet<DtoFileObject>();
 
 	public DtoFileObject() {
-
-		this.type = FILETYPE_ROOT;
-		this.mainUrl = ROOT;
-		addUrl(mainUrl, Integer.MAX_VALUE);
-		this.size = -1L;
-		this.lastModified = -1L;
-		this.name = ROOT;
+		this(null, -1L, -1L, FILETYPE_ROOT);
 	}
 
 	public DtoFileObject(MountPoint mp) {
@@ -101,30 +97,52 @@ public class DtoFileObject implements Comparable {
 	}
 
 	public DtoFileObject(String group) {
-		this.type = FILETYPE_GROUP;
-		this.mainUrl = "/groups/" + group;
-		addUrl(mainUrl, FILETYPE_GROUP_PRIORITY);
-		this.size = -1L;
-		this.lastModified = -1L;
-		this.name = group;
+		this(group, -1L, -1L, FILETYPE_GROUP);
 	}
 
 	public DtoFileObject(String url, long lastModified) {
-		this.type = FILETYPE_FOLDER;
-		this.mainUrl = url;
-		addUrl(mainUrl, FILETYPE_FOLDER_PRIORITY);
-		this.size = -1L;
-		this.lastModified = lastModified;
-		this.name = FileManager.getFilename(url);
+		this(url, -1L, lastModified, FILETYPE_FOLDER);
 	}
 
 	public DtoFileObject(String url, long size, long lastModified) {
-		this.type = FILETYPE_FILE;
-		this.mainUrl = url;
-		addUrl(mainUrl, FILETYPE_FILE_PRIORITY);
-		this.size = size;
-		this.lastModified = lastModified;
-		this.name = FileManager.getFilename(url);
+		this(url, size, lastModified, FILETYPE_FILE);
+	}
+
+	public DtoFileObject(String url, long size, long lastModified, String type) {
+		if (FILETYPE_FOLDER.equals(type)) {
+			this.type = FILETYPE_FOLDER;
+			this.mainUrl = url;
+			addUrl(mainUrl, FILETYPE_FOLDER_PRIORITY);
+			this.size = -1L;
+			this.lastModified = lastModified;
+			this.name = FileManager.getFilename(url);
+		} else if (FILETYPE_FILE.equals(type)) {
+			this.type = FILETYPE_FILE;
+			this.mainUrl = url;
+			addUrl(mainUrl, FILETYPE_FILE_PRIORITY);
+			this.size = size;
+			this.lastModified = lastModified;
+			this.name = FileManager.getFilename(url);
+		} else if (FILETYPE_GROUP.equals(type)) {
+			this.type = FILETYPE_GROUP;
+			this.mainUrl = "/groups/" + url;
+			addUrl(mainUrl, FILETYPE_GROUP_PRIORITY);
+			this.size = -1L;
+			this.lastModified = -1L;
+			this.name = url;
+		} else if (FILETYPE_MOUNTPOINT.equals(type)) {
+			throw new RuntimeException(
+					"Constructor not usable for mountpoints...");
+		} else if (FILETYPE_ROOT.equals(type)) {
+			this.type = FILETYPE_ROOT;
+			this.mainUrl = ROOT;
+			addUrl(mainUrl, Integer.MAX_VALUE);
+			this.size = -1L;
+			this.lastModified = -1L;
+			this.name = ROOT;
+		} else {
+			throw new RuntimeException("Type: " + type + " not supported...");
+		}
 	}
 
 	public void addChild(DtoFileObject child) {
@@ -165,8 +183,7 @@ public class DtoFileObject implements Comparable {
 	@Override
 	public boolean equals(Object other) {
 		if (other instanceof DtoFileObject) {
-			boolean eq = getMainUrl().equals(
-					((DtoFileObject) other).getMainUrl());
+			boolean eq = getUrl().equals(((DtoFileObject) other).getUrl());
 			return eq;
 		}
 		return false;
@@ -177,14 +194,9 @@ public class DtoFileObject implements Comparable {
 		return children;
 	}
 
-	@XmlElement(name = "lastModified")
+	@XmlAttribute(name = "lastModified")
 	public long getLastModified() {
 		return lastModified;
-	}
-
-	@XmlAttribute(name = "mainUrl")
-	public String getMainUrl() {
-		return mainUrl;
 	}
 
 	@XmlAttribute(name = "name")
@@ -192,7 +204,12 @@ public class DtoFileObject implements Comparable {
 		return name;
 	}
 
-	@XmlElement(name = "size")
+	@XmlElement(name = "path")
+	public String getPath() {
+		return optionalPath;
+	}
+
+	@XmlAttribute(name = "size")
 	public long getSize() {
 		return size;
 	}
@@ -202,6 +219,11 @@ public class DtoFileObject implements Comparable {
 		return type;
 	}
 
+	@XmlElement(name = "url")
+	public String getUrl() {
+		return mainUrl;
+	}
+
 	@XmlElement(name = "urls")
 	public List<DtoProperty> getUrls() {
 		return urls;
@@ -209,7 +231,7 @@ public class DtoFileObject implements Comparable {
 
 	@Override
 	public int hashCode() {
-		return getMainUrl().hashCode();
+		return getUrl().hashCode();
 	}
 
 	public boolean isFolder() {
@@ -220,6 +242,11 @@ public class DtoFileObject implements Comparable {
 		}
 	}
 
+	@XmlAttribute(name = "isVirtual")
+	public boolean isVirtual() {
+		return isVirtual;
+	}
+
 	public List<String> listOfAllFilesUnderThisFolder() {
 
 		final List<String> result = new LinkedList<String>();
@@ -228,7 +255,7 @@ public class DtoFileObject implements Comparable {
 			if (child.isFolder()) {
 				result.addAll(child.listOfAllFilesUnderThisFolder());
 			} else {
-				result.add(child.getMainUrl());
+				result.add(child.getUrl());
 			}
 		}
 
@@ -239,21 +266,29 @@ public class DtoFileObject implements Comparable {
 		this.children = children;
 	}
 
-	public void setLastModified(long lastModified) {
-		this.lastModified = lastModified;
+	public void setIsVirtual(boolean isVirtual) {
+		this.isVirtual = isVirtual;
 	}
 
-	private void setMainUrl(String url) {
-		this.mainUrl = url;
-		addUrl(url, 0);
+	public void setLastModified(long lastModified) {
+		this.lastModified = lastModified;
 	}
 
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	public void setPath(String path) {
+		this.optionalPath = path;
+	}
+
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	private void setUrl(String url) {
+		this.mainUrl = url;
+		addUrl(url, 0);
 	}
 
 	public void setUrls(List<DtoProperty> urls) {

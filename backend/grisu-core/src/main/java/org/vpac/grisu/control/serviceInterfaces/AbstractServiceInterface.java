@@ -1420,7 +1420,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		DtoFileObject tempFolder = null;
 
 		try {
-			tempFolder = getUser().getFolderListing(folder.getMainUrl());
+			tempFolder = getUser().getFolderListing(folder.getUrl());
 		} catch (final Exception e) {
 			myLogger.error(e);
 			myLogger.error("Error getting folder listing. I suspect this to be a bug in the commons-vfs-grid library. Sleeping for 1 seconds and then trying again...");
@@ -1430,7 +1430,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			tempFolder = getUser().getFolderListing(folder.getMainUrl());
+			tempFolder = getUser().getFolderListing(folder.getUrl());
 		}
 		folder.setChildren(tempFolder.getChildren());
 

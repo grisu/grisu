@@ -18,7 +18,7 @@ public class GroupFileBrowserTest {
 	 */
 	public static void main(String[] args) throws LoginException {
 
-		final ServiceInterface si = LoginManager.loginCommandline("BeSTGRID");
+		final ServiceInterface si = LoginManager.loginCommandline("LOCAL_WS");
 		// final ServiceInterface si = LoginManager.loginCommandline("Local");
 
 		EventQueue.invokeLater(new Runnable() {

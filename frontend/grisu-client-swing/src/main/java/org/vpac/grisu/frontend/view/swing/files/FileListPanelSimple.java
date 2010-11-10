@@ -579,19 +579,19 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 		try {
 			currentDirectoryContent.clear();
 
-			if (!FileManager.isLocal(folder.getMainUrl())) {
+			if (!FileManager.isLocal(folder.getUrl())) {
 				if (!currentUrlIsStartUrl()) {
 
-					if (em.isMountPointRoot(folder.getMainUrl())) {
+					if (em.isMountPointRoot(folder.getUrl())) {
 						final GlazedFile temp = new GlazedFile(em
-								.getMountPointForUrl(folder.getMainUrl())
+								.getMountPointForUrl(folder.getUrl())
 								.getSite());
 						temp.setParent();
 						currentDirectoryContent.add(temp);
 					} else {
 						final GlazedFile temp = new GlazedFile(
 								FileManager.calculateParentUrl(folder
-										.getMainUrl()), si);
+										.getUrl()), si);
 						temp.setParent();
 						currentDirectoryContent.add(temp);
 					}
@@ -600,7 +600,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 				if (!currentUrlIsStartUrl()) {
 					try {
 						final File parent = new File(new URI(
-								folder.getMainUrl())).getParentFile();
+								folder.getUrl())).getParentFile();
 
 						GlazedFile tempFile;
 						if (parent == null) {
