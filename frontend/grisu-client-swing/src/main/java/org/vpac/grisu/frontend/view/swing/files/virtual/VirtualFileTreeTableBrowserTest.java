@@ -49,7 +49,8 @@ public class VirtualFileTreeTableBrowserTest {
 	private final ServiceInterface si;
 
 	private JFrame frame;
-	private VirtualFileSystemTreeTablePanel groupFileBrowserPanel;
+	// private VirtualFileSystemTreeTablePanel groupFileBrowserPanel;
+	private VirtualFileSystemPanelsManager panel;
 
 	/**
 	 * Create the application.
@@ -60,11 +61,11 @@ public class VirtualFileTreeTableBrowserTest {
 		initialize();
 	}
 
-	private VirtualFileSystemTreeTablePanel getGroupFileBrowserPanel() {
-		if (groupFileBrowserPanel == null) {
-			groupFileBrowserPanel = new VirtualFileSystemTreeTablePanel(si);
+	private VirtualFileSystemPanelsManager getGroupFileBrowserPanel() {
+		if (panel == null) {
+			panel = new VirtualFileSystemPanelsManager(si);
 		}
-		return groupFileBrowserPanel;
+		return panel;
 	}
 
 	/**

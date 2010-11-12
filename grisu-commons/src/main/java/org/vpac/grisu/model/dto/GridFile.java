@@ -1,6 +1,12 @@
 package org.vpac.grisu.model.dto;
 
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -13,8 +19,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.MountPoint;
 
-@XmlRootElement(name = "fileObject")
-public class GridFile implements Comparable {
+@XmlRootElement(name = "gridfile")
+public class GridFile implements Comparable<GridFile>, Transferable {
+
+	public static final DataFlavor GRIDFILE_FLAVOR = new DataFlavor(
+			GridFile.class, "Grid file");
+
+	public static final DataFlavor[] DATA_FLAVORS = new DataFlavor[] {
+			GRIDFILE_FLAVOR, DataFlavor.stringFlavor };
 
 	public static final String ROOT = "FileRoot";
 
@@ -30,16 +42,24 @@ public class GridFile implements Comparable {
 	// public static final String FILETYPE_GROUP = "group";
 	// public static final int FILETYPE_GROUP_PRIORITY = Integer.MIN_VALUE + 2;
 
+	public static Set<String> extractUrls(Set<GridFile> files) {
+
+		final Set<String> temp = new HashSet<String>();
+		for (final GridFile source : files) {
+			temp.add(source.getUrl());
+		}
+		return temp;
+	}
+
 	public static GridFile listLocalFolder(File folder,
 			boolean includeParentInFileListing) {
 
 		String url = folder.toURI().toString();
-		final GridFile result = new GridFile(url,
-				folder.lastModified());
+		final GridFile result = new GridFile(url, folder.lastModified());
 
 		if (includeParentInFileListing) {
-			final GridFile childFolder = new GridFile(folder.toURI()
-					.toString(), folder.lastModified());
+			final GridFile childFolder = new GridFile(
+					folder.toURI().toString(), folder.lastModified());
 			result.addChild(childFolder);
 		}
 
@@ -47,8 +67,8 @@ public class GridFile implements Comparable {
 
 			if (child.isDirectory()) {
 
-				final GridFile childFolder = new GridFile(child
-						.toURI().toString(), child.lastModified());
+				final GridFile childFolder = new GridFile(child.toURI()
+						.toString(), child.lastModified());
 				result.addChild(childFolder);
 
 			} else if (child.isFile()) {
@@ -171,27 +191,21 @@ public class GridFile implements Comparable {
 		urls.add(temp);
 	}
 
-	public int compareTo(Object ot) {
+	public int compareTo(GridFile o) {
 
 		int result = Integer.MIN_VALUE;
-		if (ot instanceof GridFile) {
-			GridFile o = (GridFile) ot;
 
-			Integer thisPriority = Integer.parseInt(urls.get(0).getValue());
-			Integer otherPriority = Integer.parseInt(o.getUrls().get(0)
-					.getValue());
+		Integer thisPriority = Integer.parseInt(urls.get(0).getValue());
+		Integer otherPriority = Integer.parseInt(o.getUrls().get(0).getValue());
 
-			if (thisPriority.equals(otherPriority)) {
-				result = getName().compareTo(o.getName());
+		if (thisPriority.equals(otherPriority)) {
+			result = getName().compareTo(o.getName());
 
-				if (result == 0) {
-					result = getUrl().compareTo(o.getUrl());
-				}
-			} else {
-				result = thisPriority.compareTo(otherPriority);
+			if (result == 0) {
+				result = getUrl().compareTo(o.getUrl());
 			}
 		} else {
-			result = -1;
+			result = thisPriority.compareTo(otherPriority);
 		}
 
 		return result;
@@ -241,6 +255,18 @@ public class GridFile implements Comparable {
 		return size;
 	}
 
+	public Object getTransferData(DataFlavor flavor)
+			throws UnsupportedFlavorException, IOException {
+		if (DataFlavor.stringFlavor.equals(flavor)) {
+			return getName();
+		}
+		throw new UnsupportedFlavorException(flavor);
+	}
+
+	public DataFlavor[] getTransferDataFlavors() {
+		return DATA_FLAVORS;
+	}
+
 	@XmlAttribute(name = "type")
 	public String getType() {
 		return type;
@@ -259,6 +285,14 @@ public class GridFile implements Comparable {
 	@Override
 	public int hashCode() {
 		return getUrl().hashCode();
+	}
+
+	public boolean isDataFlavorSupported(DataFlavor flavor) {
+		if (Arrays.binarySearch(getTransferDataFlavors(), flavor) >= 0) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public boolean isFolder() {

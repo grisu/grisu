@@ -8,7 +8,7 @@ import org.vpac.grisu.model.dto.GridFile;
 
 public interface GridFileListPanel {
 
-	public void addFileListListener(FileListListener l);
+	public void addFileListListener(GridFileListListener l);
 
 	public void displayHiddenFiles(boolean display);
 
@@ -20,9 +20,9 @@ public interface GridFileListPanel {
 
 	public void refresh();
 
-	public void removeFileListListener(FileListListener l);
+	public void removeFileListListener(GridFileListListener l);
 
-	public void setContextMenu(FileListPanelContextMenu menu);
+	public void setContextMenu(GridFileListPanelContextMenu menu);
 
 	public void setCurrentUrl(String url);
 

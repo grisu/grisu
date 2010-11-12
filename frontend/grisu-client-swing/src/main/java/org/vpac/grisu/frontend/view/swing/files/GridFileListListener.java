@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.vpac.grisu.model.dto.GridFile;
 
-public interface GrdFileListListener {
+public interface GridFileListListener {
 
 	public void directoryChanged(GridFile newDirectory);
 

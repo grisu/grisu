@@ -1,26 +1,35 @@
 package org.vpac.grisu.frontend.view.swing.files.virtual;
 
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.Vector;
 
+import javax.swing.DropMode;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.ToolTipManager;
+import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeModel;
 
 import org.netbeans.swing.outline.DefaultOutlineModel;
 import org.netbeans.swing.outline.Outline;
 import org.netbeans.swing.outline.OutlineModel;
+import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.frontend.view.swing.files.FileListListener;
-import org.vpac.grisu.frontend.view.swing.files.FileListPanel;
-import org.vpac.grisu.frontend.view.swing.files.FileListPanelContextMenu;
+import org.vpac.grisu.frontend.view.swing.files.GridFileListListener;
+import org.vpac.grisu.frontend.view.swing.files.GridFileListPanel;
+import org.vpac.grisu.frontend.view.swing.files.GridFileListPanelContextMenu;
+import org.vpac.grisu.frontend.view.swing.files.GridFileTransferHandler;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
-import org.vpac.grisu.model.dto.DtoFileObject;
-import org.vpac.grisu.model.files.GlazedFile;
+import org.vpac.grisu.model.dto.GridFile;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -28,13 +37,40 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class VirtualFileSystemTreeTablePanel extends JPanel implements
-		FileListPanel {
+		GridFileListPanel {
+
+	private static void addPopup(Component component, final JPopupMenu popup) {
+		component.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+
+			private void showMenu(MouseEvent e) {
+				popup.show(e.getComponent(), e.getX(), e.getY());
+			}
+		});
+	}
 
 	private final ServiceInterface si;
 	private final UserEnvironmentManager uem;
 	private final FileManager fm;
 	private JScrollPane scrollPane;
 	private Outline tree;
+
+	private GridFile oldDir;
+
+	private Vector<GridFileListListener> listeners;
+	private GridFileListPanelContextMenu popupMenu;
 
 	/**
 	 * Create the panel.
@@ -56,9 +92,11 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 		initialize();
 	}
 
-	public void addFileListListener(FileListListener l) {
-		// TODO Auto-generated method stub
-
+	synchronized public void addFileListListener(GridFileListListener l) {
+		if (listeners == null) {
+			listeners = new Vector<GridFileListListener>();
+		}
+		listeners.addElement(l);
 	}
 
 	public void displayHiddenFiles(boolean display) {
@@ -66,13 +104,156 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 
 	}
 
-	@Override
-	public void finalize() {
-		ToolTipManager.sharedInstance().unregisterComponent(tree);
+	private void fileClickOccured() {
+
+		fireFilesSelected(getSelectedFiles());
+
 	}
 
-	public GlazedFile getCurrentDirectory() {
-		// TODO Auto-generated method stub
+	private void fileDoubleClickOccured() {
+
+		Set<GridFile> selFiles = getSelectedFiles();
+		X.p("Size: " + selFiles.size());
+		if (selFiles.size() == 1) {
+
+			GridFile f = selFiles.iterator().next();
+			if (f.isFolder()) {
+				fireFilesSelected(null);
+			} else {
+				fireFileDoubleClicked(f);
+			}
+
+		} else {
+			// TODO
+			System.out.println("Shouldn't happen");
+		}
+
+	}
+
+	private void fireFileDoubleClicked(final GridFile file) {
+		// if we have no mountPointsListeners, do nothing...
+		if ((listeners != null) && !listeners.isEmpty()) {
+
+			final Thread thread = new Thread() {
+				@Override
+				public void run() {
+
+					setLoading(true);
+					try {
+						// make a copy of the listener list in case
+						// anyone adds/removes mountPointsListeners
+						Vector<GridFileListListener> targets;
+						synchronized (this) {
+							targets = (Vector<GridFileListListener>) listeners
+									.clone();
+						}
+
+						// walk through the listener list and
+						// call the userInput method in each
+						for (final GridFileListListener l : targets) {
+							try {
+								l.fileDoubleClicked(file);
+							} catch (final Exception e1) {
+								e1.printStackTrace();
+							}
+						}
+					} finally {
+						setLoading(false);
+					}
+
+				}
+			};
+
+			thread.start();
+
+		}
+	}
+
+	private void fireFilesSelected(Set<GridFile> files) {
+
+		// if we have no mountPointsListeners, do nothing...
+		if ((listeners != null) && !listeners.isEmpty()) {
+
+			setLoading(true);
+			try {
+				// make a copy of the listener list in case
+				// anyone adds/removes mountPointsListeners
+				Vector<GridFileListListener> targets;
+				synchronized (this) {
+					targets = (Vector<GridFileListListener>) listeners.clone();
+				}
+
+				// walk through the listener list and
+				// call the userInput method in each
+				for (final GridFileListListener l : targets) {
+					try {
+						l.filesSelected(files);
+					} catch (final Exception e1) {
+						e1.printStackTrace();
+					}
+				}
+			} finally {
+				setLoading(false);
+			}
+		}
+
+	}
+
+	private void fireIsLoading(boolean loading) {
+		// if we have no mountPointsListeners, do nothing...
+		if ((listeners != null) && !listeners.isEmpty()) {
+
+			// make a copy of the listener list in case
+			// anyone adds/removes mountPointsListeners
+			Vector<GridFileListListener> targets;
+			synchronized (this) {
+				targets = (Vector<GridFileListListener>) listeners.clone();
+			}
+
+			// walk through the listener list and
+			// call the userInput method in each
+			for (final GridFileListListener l : targets) {
+				try {
+					l.isLoading(loading);
+				} catch (final Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+
+	private void fireNewDirectory() {
+		// if we have no mountPointsListeners, do nothing...
+		if ((listeners != null) && !listeners.isEmpty()) {
+
+			// make a copy of the listener list in case
+			// anyone adds/removes mountPointsListeners
+			Vector<GridFileListListener> targets;
+			synchronized (this) {
+				targets = (Vector<GridFileListListener>) listeners.clone();
+			}
+
+			// walk through the listener list and
+			// call the userInput method in each
+			for (final GridFileListListener l : targets) {
+				try {
+					l.directoryChanged(getCurrentDirectory());
+				} catch (final Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+
+	public GridFile getCurrentDirectory() {
+
+		Set<GridFile> selFiles = getSelectedFiles();
+		if (selFiles.size() == 1) {
+			GridFile f = selFiles.iterator().next();
+			if (f.isFolder()) {
+				return f;
+			}
+		}
 		return null;
 	}
 
@@ -89,9 +270,17 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 		return scrollPane;
 	}
 
-	public Set<GlazedFile> getSelectedFiles() {
-		// TODO Auto-generated method stub
-		return null;
+	public Set<GridFile> getSelectedFiles() {
+		int[] rows = getTree().getSelectedRows();
+		Set<GridFile> result = new HashSet<GridFile>();
+		for (int row : rows) {
+			GridFile file = (GridFile) ((VirtualFileTreeNode) (getTree()
+					.getValueAt(row, 0))).getUserObject();
+			X.p("Selected: " + file.getName() + ": " + file.getUrl());
+			result.add(file);
+		}
+
+		return result;
 	}
 
 	private Outline getTree() {
@@ -103,31 +292,41 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 			tree.setRootVisible(false);
 			tree.setRenderDataProvider(new VirtualFileTreeTableRenderer(si));
 			tree.setDragEnabled(true);
-			tree.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-			tree.setTransferHandler(newHandler)
+			tree.setDropMode(DropMode.INSERT);
+			tree.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+			tree.setTransferHandler(new GridFileTransferHandler(this, si));
+
+			tree.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					if (arg0.getClickCount() == 2) {
+
+						fileDoubleClickOccured();
+
+					} else if (arg0.getClickCount() == 1) {
+
+						GridFile sel = getCurrentDirectory();
+						if ((sel != null) && !sel.equals(oldDir)) {
+							fireNewDirectory();
+							oldDir = sel;
+						}
+					}
+				}
+			});
 		}
 		return tree;
 	}
 
-	// private JXTreeTable getTreeTable() {
-	// if (treeTable == null) {
-	// // TreeTableModel m = new UserspaceFileTreeTableModel(si,
-	// // "/ARCS/BeSTGRID");
-	// treeTable = new JXTreeTable();
-	// }
-	// return treeTable;
-	// }
-
 	private void initialize() {
 
-		DtoFileObject root = new DtoFileObject("grid://groups", -1L);
+		GridFile root = new GridFile("grid://groups", -1L);
 		VirtualFileTreeNode rootNode = new VirtualFileTreeNode(fm, root);
 
 		DefaultTreeModel model = new DefaultTreeModel(rootNode);
 		rootNode.setModel(model);
 
 		try {
-			for (DtoFileObject f : fm.ls(root)) {
+			for (GridFile f : fm.ls(root)) {
 				rootNode.add(new VirtualFileTreeNode(fm, f, model));
 			}
 		} catch (RemoteFileSystemException e) {
@@ -151,12 +350,14 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 
 	}
 
-	public void removeFileListListener(FileListListener l) {
-		// TODO Auto-generated method stub
-
+	synchronized public void removeFileListListener(GridFileListListener l) {
+		if (listeners == null) {
+			listeners = new Vector<GridFileListListener>();
+		}
+		listeners.removeElement(l);
 	}
 
-	public void setContextMenu(FileListPanelContextMenu menu) {
+	public void setContextMenu(GridFileListPanelContextMenu menu) {
 		// TODO Auto-generated method stub
 
 	}
@@ -168,6 +369,34 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 
 	public void setExtensionsToDisplay(String[] extensions) {
 		// TODO Auto-generated method stub
+
+	}
+
+	private void setLoading(final boolean loading) {
+
+		SwingUtilities.invokeLater(new Thread() {
+
+			@Override
+			public void run() {
+
+				if (!loading) {
+					fireIsLoading(false);
+				}
+
+				getTree().setEnabled(!loading);
+				getScrollPane().setEnabled(!loading);
+
+				if (loading) {
+					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				} else {
+					setCursor(Cursor.getDefaultCursor());
+				}
+				if (loading) {
+					fireIsLoading(true);
+				}
+
+			}
+		});
 
 	}
 
