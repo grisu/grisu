@@ -48,7 +48,7 @@ import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.serviceInterfaces.AbstractServiceInterface;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.DtoActionStatus;
-import org.vpac.grisu.model.dto.DtoFileObject;
+import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.utils.FqanHelpers;
 import org.vpac.grisu.utils.MountPointHelpers;
@@ -753,7 +753,7 @@ public class User {
 		return fsm;
 	}
 
-	public DtoFileObject getFolderListing(final String url)
+	public GridFile getFolderListing(final String url)
 			throws RemoteFileSystemException, FileSystemException {
 
 		try {

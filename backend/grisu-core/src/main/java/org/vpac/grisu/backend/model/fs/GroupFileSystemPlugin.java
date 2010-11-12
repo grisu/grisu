@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.MountPoint;
-import org.vpac.grisu.model.dto.DtoFileObject;
+import org.vpac.grisu.model.dto.GridFile;
 
 public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
@@ -29,20 +29,20 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 		this.user = user;
 	}
 
-	private DtoFileObject assembleFileObject(String path,
-			Map<String, DtoFileObject> lsMap) {
+	private GridFile assembleFileObject(String path,
+			Map<String, GridFile> lsMap) {
 
-		DtoFileObject result = new DtoFileObject(path, -1L);
+		GridFile result = new GridFile(path, -1L);
 		result.setIsVirtual(true);
 
 		for (String url : lsMap.keySet()) {
 			result.addUrl(url, 0);
 
-			DtoFileObject child = lsMap.get(url);
+			GridFile child = lsMap.get(url);
 
 			if (!child.isFolder()) {
 				boolean alreadyInChildren = false;
-				for (DtoFileObject resultChild : result.getChildren()) {
+				for (GridFile resultChild : result.getChildren()) {
 					if (resultChild.getName().equals(child.getName())) {
 						resultChild.addUrl(child.getUrl(), 0);
 						resultChild.setUrl(child.getPath());
@@ -70,9 +70,9 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				// now we add the children
 				// but me need to make sure that it's not already in there
 
-				for (DtoFileObject c : child.getChildren()) {
+				for (GridFile c : child.getChildren()) {
 					boolean alreadyInChildren = false;
-					for (DtoFileObject resultChild : result.getChildren()) {
+					for (GridFile resultChild : result.getChildren()) {
 						if (resultChild.getName().equals(c.getName())) {
 							resultChild.addUrl(c.getUrl(), 0);
 							resultChild.setUrl(c.getPath());
@@ -95,7 +95,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 		return result;
 	}
 
-	public DtoFileObject createDtoFileObject(final String path,
+	public GridFile createDtoFileObject(final String path,
 			int recursiveLevels) throws InvalidPathException {
 
 		if (recursiveLevels != 1) {
@@ -107,7 +107,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 		if (tokens.length == 2) {
 
-			DtoFileObject result = new DtoFileObject();
+			GridFile result = new GridFile();
 			result.setIsVirtual(true);
 
 			for (String group : user.getAllAvailableUniqueGroupnames()) {
@@ -123,14 +123,14 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				} else if (user.getMountPoints(fqan).size() == 1) {
 
 					MountPoint mp = user.getMountPoints(fqan).iterator().next();
-					DtoFileObject child = null;
+					GridFile child = null;
 					// try {
 					// child = new DtoFileObject(mp.getRootUrl(), user
 					// .aquireFile(mp.getRootUrl(), fqan).getContent()
 					// .getLastModifiedTime());
 					// } catch (Exception e) {
 					// myLogger.error(e);
-					child = new DtoFileObject(mp.getRootUrl(), -1L);
+					child = new GridFile(mp.getRootUrl(), -1L);
 					child.setName(group);
 					// }
 					child.setIsVirtual(false);
@@ -139,7 +139,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					result.addChild(child);
 					result.addSite(mp.getSite());
 				} else {
-					DtoFileObject child = new DtoFileObject("grid://"
+					GridFile child = new GridFile("grid://"
 							+ IDENTIFIER + "/" + group, -1L);
 					child.setIsVirtual(true);
 					child.addFqan(fqan);
@@ -175,8 +175,8 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			final String restUrl = StringUtils.join(tokens, "/", 3,
 					tokens.length);
 
-			final Map<String, DtoFileObject> lsMap = Collections
-					.synchronizedMap(new HashMap<String, DtoFileObject>());
+			final Map<String, GridFile> lsMap = Collections
+					.synchronizedMap(new HashMap<String, GridFile>());
 
 			final ExecutorService pool = Executors.newFixedThreadPool(10);
 
@@ -187,12 +187,12 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 						String urlToLs = mp.getRootUrl() + "/" + restUrl;
 						try {
-							DtoFileObject result = user
+							GridFile result = user
 									.getFolderListing(urlToLs);
 							myLogger.debug("retrieved results from: "
 									+ mp.getAlias());
 							result.setPath(path);
-							for (DtoFileObject c : result.getChildren()) {
+							for (GridFile c : result.getChildren()) {
 								if (path.endsWith("/")) {
 									c.setPath(path + c.getName());
 								} else {

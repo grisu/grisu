@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
-import org.vpac.grisu.model.dto.DtoFileObject;
+import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.files.FileSystemItem;
 import org.vpac.grisu.model.files.GlazedFile;
 
@@ -148,7 +148,7 @@ public class FileListPanelPlusOld extends JPanel implements FileListPanel,
 					}
 				}
 			});
-			if ((startUrl == null) || DtoFileObject.ROOT.equals(startUrl)) {
+			if ((startUrl == null) || GridFile.ROOT.equals(startUrl)) {
 				getComboBox().setSelectedIndex(0);
 			}
 		}

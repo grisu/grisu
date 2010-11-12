@@ -19,7 +19,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
-import org.vpac.grisu.model.dto.DtoFileObject;
+import org.vpac.grisu.model.dto.GridFile;
 
 import furbelow.SpinningDial;
 
@@ -89,8 +89,8 @@ public class VirtualFileSystemBrowserTreeRenderer extends
 				this.setIcon(null);
 			}
 
-		} else if (value2 instanceof DtoFileObject) {
-			final DtoFileObject file = (DtoFileObject) value2;
+		} else if (value2 instanceof GridFile) {
+			final GridFile file = (GridFile) value2;
 			String text = null;
 			if (file.isFolder()) {
 

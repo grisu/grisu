@@ -16,7 +16,7 @@ import org.vpac.grisu.frontend.view.swing.files.FileListPanelContextMenu;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
-import org.vpac.grisu.model.dto.DtoFileObject;
+import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.files.GlazedFile;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -112,14 +112,14 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 
 	private void initialize() {
 
-		DtoFileObject root = new DtoFileObject("grid://groups", -1L);
+		GridFile root = new GridFile("grid://groups", -1L);
 		VirtualFileTreeNode rootNode = new VirtualFileTreeNode(fm, root);
 
 		DefaultTreeModel model = new DefaultTreeModel(rootNode);
 		rootNode.setModel(model);
 
 		try {
-			for (DtoFileObject f : fm.ls(root)) {
+			for (GridFile f : fm.ls(root)) {
 				rootNode.add(new VirtualFileTreeNode(fm, f, model));
 			}
 		} catch (RemoteFileSystemException e) {

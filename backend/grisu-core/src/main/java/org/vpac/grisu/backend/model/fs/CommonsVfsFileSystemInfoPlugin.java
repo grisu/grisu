@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.MountPoint;
-import org.vpac.grisu.model.dto.DtoFileObject;
+import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.security.light.vomsProxy.VomsException;
 
 public class CommonsVfsFileSystemInfoPlugin implements FileSystemInfoPlugin,
@@ -101,7 +101,7 @@ public class CommonsVfsFileSystemInfoPlugin implements FileSystemInfoPlugin,
 		threadLocalFsManager.remove();
 	}
 
-	public DtoFileObject getFolderListing(String url)
+	public GridFile getFolderListing(String url)
 			throws RemoteFileSystemException {
 
 		final FileObject fo = aquireFile(url, null);
@@ -115,7 +115,7 @@ public class CommonsVfsFileSystemInfoPlugin implements FileSystemInfoPlugin,
 			long lastModified = fo.getContent().getLastModifiedTime();
 
 			MountPoint mp = user.getResponsibleMountpointForAbsoluteFile(url);
-			final DtoFileObject folder = new DtoFileObject(url, lastModified);
+			final GridFile folder = new GridFile(url, lastModified);
 
 			folder.addSite(mp.getSite());
 			folder.addFqan(mp.getFqan());
@@ -137,14 +137,14 @@ public class CommonsVfsFileSystemInfoPlugin implements FileSystemInfoPlugin,
 
 			for (final FileObject child : children) {
 				if (FileType.FOLDER.equals(child.getType())) {
-					final DtoFileObject childfolder = new DtoFileObject(child
+					final GridFile childfolder = new GridFile(child
 							.getURL().toString(), child.getContent()
 							.getLastModifiedTime());
 					childfolder.addFqan(mp.getFqan());
 					childfolder.addSite(mp.getSite());
 					folder.addChild(childfolder);
 				} else if (FileType.FILE.equals(child.getType())) {
-					final DtoFileObject childFile = new DtoFileObject(child
+					final GridFile childFile = new GridFile(child
 							.getURL().toString(), child.getContent().getSize(),
 							child.getContent().getLastModifiedTime());
 					childFile.addFqan(mp.getFqan());

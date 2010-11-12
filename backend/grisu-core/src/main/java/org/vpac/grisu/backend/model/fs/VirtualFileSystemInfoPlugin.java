@@ -8,7 +8,7 @@ import org.apache.commons.vfs.FileObject;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.model.dto.DtoFileObject;
+import org.vpac.grisu.model.dto.GridFile;
 
 public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 
@@ -27,7 +27,7 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 		throw new RuntimeException("Not implemented yet.");
 	}
 
-	public DtoFileObject getFolderListing(String url)
+	public GridFile getFolderListing(String url)
 			throws RemoteFileSystemException {
 
 		try {

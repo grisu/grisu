@@ -2,15 +2,15 @@ package org.vpac.grisu.frontend.view.swing.files;
 
 import java.util.Set;
 
-import org.vpac.grisu.model.dto.DtoFileObject;
+import org.vpac.grisu.model.dto.GridFile;
 
 public interface GrdFileListListener {
 
-	public void directoryChanged(DtoFileObject newDirectory);
+	public void directoryChanged(GridFile newDirectory);
 
-	public void fileDoubleClicked(DtoFileObject file);
+	public void fileDoubleClicked(GridFile file);
 
-	public void filesSelected(Set<DtoFileObject> files);
+	public void filesSelected(Set<GridFile> files);
 
 	public void isLoading(boolean loading);
 

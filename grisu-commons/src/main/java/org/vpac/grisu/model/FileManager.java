@@ -30,7 +30,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.events.FolderCreatedEvent;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
-import org.vpac.grisu.model.dto.DtoFileObject;
+import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.files.GlazedFile;
@@ -519,7 +519,7 @@ public class FileManager {
 	private File downloadFolder(final String url)
 			throws FileTransactionException {
 
-		DtoFileObject source = null;
+		GridFile source = null;
 		try {
 			source = serviceInterface.ls(url, 0);
 		} catch (final RemoteFileSystemException e) {
@@ -722,16 +722,16 @@ public class FileManager {
 			throw new IllegalArgumentException("Specified url is not a folder.");
 		}
 
-		final DtoFileObject folder = serviceInterface.ls(folderUrl, 0);
+		final GridFile folder = serviceInterface.ls(folderUrl, 0);
 
 		return folder.listOfAllFilesUnderThisFolder();
 	}
 
-	public synchronized Set<DtoFileObject> ls(DtoFileObject parent)
+	public synchronized Set<GridFile> ls(GridFile parent)
 			throws RemoteFileSystemException {
 
 		X.p(parent.getUrl());
-		DtoFileObject folder = ls(parent.getUrl());
+		GridFile folder = ls(parent.getUrl());
 
 		if (folder == null) {
 			return null;
@@ -746,9 +746,9 @@ public class FileManager {
 
 		List<GlazedFile> result = new ArrayList<GlazedFile>();
 
-		DtoFileObject folder = ls(parent.getUrl());
+		GridFile folder = ls(parent.getUrl());
 
-		for (DtoFileObject f : folder.getChildren()) {
+		for (GridFile f : folder.getChildren()) {
 			result.add(new GlazedFile(f));
 		}
 
@@ -761,23 +761,23 @@ public class FileManager {
 		return result;
 	}
 
-	public DtoFileObject ls(String url) throws RemoteFileSystemException {
+	public GridFile ls(String url) throws RemoteFileSystemException {
 		return ls(url, 1);
 	}
 
-	public DtoFileObject ls(String url, int recursionLevel)
+	public GridFile ls(String url, int recursionLevel)
 			throws RemoteFileSystemException {
 
 		if (isLocal(url)) {
 			File temp;
 			temp = getFileFromUriOrPath(url);
 
-			return DtoFileObject.listLocalFolder(temp, false);
+			return GridFile.listLocalFolder(temp, false);
 
 		} else {
 
 			try {
-				DtoFileObject result = serviceInterface.ls(url, recursionLevel);
+				GridFile result = serviceInterface.ls(url, recursionLevel);
 				return result;
 			} catch (final RemoteFileSystemException e) {
 

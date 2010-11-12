@@ -5,14 +5,14 @@ import java.util.Date;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.netbeans.swing.outline.RowModel;
-import org.vpac.grisu.model.dto.DtoFileObject;
+import org.vpac.grisu.model.dto.GridFile;
 
 public class VirtualFileTreeTableRowModel implements RowModel {
 
 	public Class getColumnClass(int col) {
 		switch (col) {
 		case 0:
-			return DtoFileObject.class;
+			return GridFile.class;
 		case 1:
 			return String.class;
 		default:
@@ -40,8 +40,8 @@ public class VirtualFileTreeTableRowModel implements RowModel {
 
 		Object userObject = ((DefaultMutableTreeNode) arg0).getUserObject();
 
-		if (userObject instanceof DtoFileObject) {
-			DtoFileObject f = (DtoFileObject) userObject;
+		if (userObject instanceof GridFile) {
+			GridFile f = (GridFile) userObject;
 			switch (col) {
 			case 0:
 				Long date = f.getLastModified();

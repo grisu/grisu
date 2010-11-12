@@ -66,7 +66,7 @@ import org.vpac.grisu.model.dto.DtoApplicationDetails;
 import org.vpac.grisu.model.dto.DtoApplicationInfo;
 import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.dto.DtoDataLocations;
-import org.vpac.grisu.model.dto.DtoFileObject;
+import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.dto.DtoGridResources;
 import org.vpac.grisu.model.dto.DtoHostsInfo;
 import org.vpac.grisu.model.dto.DtoJob;
@@ -1414,10 +1414,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	public DtoFileObject fillFolder(DtoFileObject folder, int recursionLevel)
+	public GridFile fillFolder(GridFile folder, int recursionLevel)
 			throws FileSystemException, RemoteFileSystemException {
 
-		DtoFileObject tempFolder = null;
+		GridFile tempFolder = null;
 
 		try {
 			tempFolder = getUser().getFolderListing(folder.getUrl());
@@ -1435,7 +1435,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		folder.setChildren(tempFolder.getChildren());
 
 		if (recursionLevel > 0) {
-			for (final DtoFileObject childFolder : tempFolder.getChildren()) {
+			for (final GridFile childFolder : tempFolder.getChildren()) {
 				if (childFolder.isFolder()) {
 					folder.addChild(fillFolder(childFolder, recursionLevel - 1));
 				}
@@ -2610,7 +2610,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public DtoFileObject ls(final String directory, int recursion_level)
+	public GridFile ls(final String directory, int recursion_level)
 			throws RemoteFileSystemException {
 
 		// check whether credential still valid
@@ -2618,7 +2618,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 
-			final DtoFileObject rootfolder = getUser().getFolderListing(
+			final GridFile rootfolder = getUser().getFolderListing(
 					directory);
 			recursion_level = recursion_level - 1;
 			if (recursion_level == 0) {
@@ -2866,7 +2866,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				if (fileExists(oldJobDir)) {
 
-					final DtoFileObject fol = ls(oldJobDir, 1);
+					final GridFile fol = ls(oldJobDir, 1);
 					if (fol.getChildren().size() > 0) {
 
 						myLogger.debug("Old jobdir exists.");

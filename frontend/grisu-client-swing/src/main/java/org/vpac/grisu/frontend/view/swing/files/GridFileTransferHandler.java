@@ -9,7 +9,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransactionManager;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
-import org.vpac.grisu.model.dto.DtoFileObject;
+import org.vpac.grisu.model.dto.GridFile;
 
 public class GridFileTransferHandler extends TransferHandler {
 
@@ -43,7 +43,7 @@ public class GridFileTransferHandler extends TransferHandler {
 
 		final String type = fileList.getCurrentDirectory().getType();
 
-		if (DtoFileObject.FILETYPE_FOLDER.equals(type)) {
+		if (GridFile.FILETYPE_FOLDER.equals(type)) {
 			for (final DataFlavor flavor : flavors) {
 				if (SET_DATA_FLAVOR.equals(flavor)) {
 					return true;

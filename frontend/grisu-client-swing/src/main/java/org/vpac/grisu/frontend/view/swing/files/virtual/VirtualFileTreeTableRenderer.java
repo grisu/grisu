@@ -12,7 +12,7 @@ import org.netbeans.swing.outline.RenderDataProvider;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
-import org.vpac.grisu.model.dto.DtoFileObject;
+import org.vpac.grisu.model.dto.GridFile;
 
 import furbelow.SpinningDial;
 
@@ -39,8 +39,8 @@ public class VirtualFileTreeTableRenderer implements RenderDataProvider {
 
 		if (userObject instanceof String) {
 			return (String) userObject;
-		} else if (userObject instanceof DtoFileObject) {
-			DtoFileObject f = (DtoFileObject) userObject;
+		} else if (userObject instanceof GridFile) {
+			GridFile f = (GridFile) userObject;
 			return f.getName();
 		} else {
 			return arg0.getClass().getName();
@@ -70,9 +70,9 @@ public class VirtualFileTreeTableRenderer implements RenderDataProvider {
 
 		Object userObject = ((DefaultMutableTreeNode) arg0).getUserObject();
 
-		if (userObject instanceof DtoFileObject) {
+		if (userObject instanceof GridFile) {
 
-			DtoFileObject file = (DtoFileObject) userObject;
+			GridFile file = (GridFile) userObject;
 
 			String siteString = null;
 

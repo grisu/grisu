@@ -14,7 +14,7 @@ import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.MountPoint;
 
 @XmlRootElement(name = "fileObject")
-public class DtoFileObject implements Comparable {
+public class GridFile implements Comparable {
 
 	public static final String ROOT = "FileRoot";
 
@@ -30,15 +30,15 @@ public class DtoFileObject implements Comparable {
 	// public static final String FILETYPE_GROUP = "group";
 	// public static final int FILETYPE_GROUP_PRIORITY = Integer.MIN_VALUE + 2;
 
-	public static DtoFileObject listLocalFolder(File folder,
+	public static GridFile listLocalFolder(File folder,
 			boolean includeParentInFileListing) {
 
 		String url = folder.toURI().toString();
-		final DtoFileObject result = new DtoFileObject(url,
+		final GridFile result = new GridFile(url,
 				folder.lastModified());
 
 		if (includeParentInFileListing) {
-			final DtoFileObject childFolder = new DtoFileObject(folder.toURI()
+			final GridFile childFolder = new GridFile(folder.toURI()
 					.toString(), folder.lastModified());
 			result.addChild(childFolder);
 		}
@@ -47,13 +47,13 @@ public class DtoFileObject implements Comparable {
 
 			if (child.isDirectory()) {
 
-				final DtoFileObject childFolder = new DtoFileObject(child
+				final GridFile childFolder = new GridFile(child
 						.toURI().toString(), child.lastModified());
 				result.addChild(childFolder);
 
 			} else if (child.isFile()) {
 
-				final DtoFileObject childFile = new DtoFileObject(child.toURI()
+				final GridFile childFile = new GridFile(child.toURI()
 						.toString(), child.length(), child.lastModified());
 
 				result.addChild(childFile);
@@ -83,14 +83,14 @@ public class DtoFileObject implements Comparable {
 	private long size = -2L;
 	private long lastModified;
 	private boolean isVirtual = false;
-	private Set<DtoFileObject> children = new TreeSet<DtoFileObject>();
+	private Set<GridFile> children = new TreeSet<GridFile>();
 
-	public DtoFileObject() {
+	public GridFile() {
 		this(null, -1L, -1L, FILETYPE_ROOT);
 		this.isVirtual = true;
 	}
 
-	public DtoFileObject(MountPoint mp) {
+	public GridFile(MountPoint mp) {
 
 		this.type = FILETYPE_MOUNTPOINT;
 		this.mainUrl = mp.getRootUrl();
@@ -104,15 +104,15 @@ public class DtoFileObject implements Comparable {
 	// this(group, -1L, -1L, FILETYPE_GROUP);
 	// }
 
-	public DtoFileObject(String url, long lastModified) {
+	public GridFile(String url, long lastModified) {
 		this(url, -1L, lastModified, FILETYPE_FOLDER);
 	}
 
-	public DtoFileObject(String url, long size, long lastModified) {
+	public GridFile(String url, long size, long lastModified) {
 		this(url, size, lastModified, FILETYPE_FILE);
 	}
 
-	public DtoFileObject(String url, long size, long lastModified, String type) {
+	public GridFile(String url, long size, long lastModified, String type) {
 		if (FILETYPE_FOLDER.equals(type)) {
 			this.type = FILETYPE_FOLDER;
 			this.mainUrl = url;
@@ -142,11 +142,11 @@ public class DtoFileObject implements Comparable {
 		}
 	}
 
-	public void addChild(DtoFileObject child) {
+	public void addChild(GridFile child) {
 		children.add(child);
 	}
 
-	public void addChildren(Set<DtoFileObject> children) {
+	public void addChildren(Set<GridFile> children) {
 		getChildren().addAll(children);
 	}
 
@@ -174,8 +174,8 @@ public class DtoFileObject implements Comparable {
 	public int compareTo(Object ot) {
 
 		int result = Integer.MIN_VALUE;
-		if (ot instanceof DtoFileObject) {
-			DtoFileObject o = (DtoFileObject) ot;
+		if (ot instanceof GridFile) {
+			GridFile o = (GridFile) ot;
 
 			Integer thisPriority = Integer.parseInt(urls.get(0).getValue());
 			Integer otherPriority = Integer.parseInt(o.getUrls().get(0)
@@ -199,15 +199,15 @@ public class DtoFileObject implements Comparable {
 
 	@Override
 	public boolean equals(Object other) {
-		if (other instanceof DtoFileObject) {
-			boolean eq = getUrl().equals(((DtoFileObject) other).getUrl());
+		if (other instanceof GridFile) {
+			boolean eq = getUrl().equals(((GridFile) other).getUrl());
 			return eq;
 		}
 		return false;
 	}
 
 	@XmlElement(name = "child")
-	public Set<DtoFileObject> getChildren() {
+	public Set<GridFile> getChildren() {
 		return children;
 	}
 
@@ -278,7 +278,7 @@ public class DtoFileObject implements Comparable {
 
 		final List<String> result = new LinkedList<String>();
 
-		for (final DtoFileObject child : getChildren()) {
+		for (final GridFile child : getChildren()) {
 			if (child.isFolder()) {
 				result.addAll(child.listOfAllFilesUnderThisFolder());
 			} else {
@@ -305,7 +305,7 @@ public class DtoFileObject implements Comparable {
 		getSites().removeAll(sites);
 	}
 
-	public void setChildren(Set<DtoFileObject> children) {
+	public void setChildren(Set<GridFile> children) {
 		this.children = children;
 	}
 

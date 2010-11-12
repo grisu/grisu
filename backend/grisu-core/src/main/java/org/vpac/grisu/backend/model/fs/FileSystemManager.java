@@ -7,7 +7,7 @@ import org.apache.axis.utils.StringUtils;
 import org.apache.commons.vfs.FileObject;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
-import org.vpac.grisu.model.dto.DtoFileObject;
+import org.vpac.grisu.model.dto.GridFile;
 
 public class FileSystemManager {
 
@@ -56,7 +56,7 @@ public class FileSystemManager {
 
 	}
 
-	public DtoFileObject getFolderListing(String pathOrUrl)
+	public GridFile getFolderListing(String pathOrUrl)
 			throws InvalidPathException, RemoteFileSystemException {
 
 		pathOrUrl = cleanPath(pathOrUrl);

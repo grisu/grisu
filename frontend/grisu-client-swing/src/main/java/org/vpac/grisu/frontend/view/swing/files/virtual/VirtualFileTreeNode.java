@@ -9,20 +9,20 @@ import javax.swing.tree.MutableTreeNode;
 import org.vpac.grisu.X;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.FileManager;
-import org.vpac.grisu.model.dto.DtoFileObject;
+import org.vpac.grisu.model.dto.GridFile;
 
 public class VirtualFileTreeNode extends LazyLoadingTreeNode {
 
 	private static final long serialVersionUID = 1L;
 	private final FileManager fm;
 
-	public VirtualFileTreeNode(FileManager fm, DtoFileObject userObject) {
+	public VirtualFileTreeNode(FileManager fm, GridFile userObject) {
 		super(userObject);
 		this.fm = fm;
 		setAllowsChildren(getAllowsChildren());
 	}
 
-	public VirtualFileTreeNode(FileManager fm, DtoFileObject userObject,
+	public VirtualFileTreeNode(FileManager fm, GridFile userObject,
 			DefaultTreeModel model) {
 		super(userObject, model);
 		this.fm = fm;
@@ -32,8 +32,8 @@ public class VirtualFileTreeNode extends LazyLoadingTreeNode {
 	@Override
 	public boolean getAllowsChildren() {
 
-		if (DtoFileObject.FILETYPE_FILE
-				.equals(((DtoFileObject) (getUserObject())).getType())) {
+		if (GridFile.FILETYPE_FILE
+				.equals(((GridFile) (getUserObject())).getType())) {
 			return false;
 		} else {
 			return true;
@@ -45,15 +45,15 @@ public class VirtualFileTreeNode extends LazyLoadingTreeNode {
 
 		ArrayList<MutableTreeNode> list = new ArrayList<MutableTreeNode>();
 
-		DtoFileObject temp = ((DtoFileObject) getUserObject());
+		GridFile temp = ((GridFile) getUserObject());
 		X.p(getUserObject().toString());
 
 		try {
-			Set<DtoFileObject> dfo = fm.ls((DtoFileObject) getUserObject());
+			Set<GridFile> dfo = fm.ls((GridFile) getUserObject());
 			if (dfo == null) {
 				return new MutableTreeNode[0];
 			}
-			for (DtoFileObject f : dfo) {
+			for (GridFile f : dfo) {
 				list.add(new VirtualFileTreeNode(fm, f, model));
 			}
 		} catch (RemoteFileSystemException e) {

@@ -4,7 +4,7 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
-import org.vpac.grisu.model.dto.DtoFileObject;
+import org.vpac.grisu.model.dto.GridFile;
 
 public interface GridFileListPanel {
 
@@ -12,11 +12,11 @@ public interface GridFileListPanel {
 
 	public void displayHiddenFiles(boolean display);
 
-	public DtoFileObject getCurrentDirectory();
+	public GridFile getCurrentDirectory();
 
 	public JPanel getPanel();
 
-	public Set<DtoFileObject> getSelectedFiles();
+	public Set<GridFile> getSelectedFiles();
 
 	public void refresh();
 
