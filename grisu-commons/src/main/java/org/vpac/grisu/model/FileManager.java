@@ -25,6 +25,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
+import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.events.FolderCreatedEvent;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -726,28 +727,29 @@ public class FileManager {
 		return folder.listOfAllFilesUnderThisFolder();
 	}
 
+	public synchronized Set<DtoFileObject> ls(DtoFileObject parent)
+			throws RemoteFileSystemException {
+
+		X.p(parent.getUrl());
+		DtoFileObject folder = ls(parent.getUrl());
+
+		if (folder == null) {
+			return null;
+		}
+
+		return folder.getChildren();
+
+	}
+
 	public synchronized List<GlazedFile> ls(GlazedFile parent)
 			throws RemoteFileSystemException {
 
 		List<GlazedFile> result = new ArrayList<GlazedFile>();
 
-		if (GlazedFile.Type.FILETYPE_GROUP.equals(parent.getType())) {
+		DtoFileObject folder = ls(parent.getUrl());
 
-			Set<MountPoint> mps = GrisuRegistryManager
-					.getDefault(serviceInterface).getUserEnvironmentManager()
-					.getMountPoints(parent.getName());
-			for (MountPoint mp : mps) {
-				GlazedFile f = new GlazedFile(mp);
-				result.add(f);
-			}
-
-		} else {
-
-			DtoFileObject folder = ls(parent.getUrl());
-
-			for (DtoFileObject f : folder.getChildren()) {
-				result.add(new GlazedFile(f));
-			}
+		for (DtoFileObject f : folder.getChildren()) {
+			result.add(new GlazedFile(f));
 		}
 
 		System.out.println();

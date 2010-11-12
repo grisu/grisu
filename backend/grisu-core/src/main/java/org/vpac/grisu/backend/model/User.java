@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -141,6 +142,7 @@ public class User {
 	private Set<MountPoint> mountPoints = new HashSet<MountPoint>();
 
 	private Map<String, String> mountPointCache = new HashMap<String, String>();
+	private final Map<String, Set<MountPoint>> mountPointsPerFqanCache = new TreeMap<String, Set<MountPoint>>();
 
 	private Set<MountPoint> mountPointsAutoMounted = new HashSet<MountPoint>();
 
@@ -808,6 +810,40 @@ public class User {
 	@JoinTable
 	private Set<MountPoint> getMountPoints() {
 		return mountPoints;
+	}
+
+	@Transient
+	public Set<MountPoint> getMountPoints(String fqan) {
+		if (fqan == null) {
+			fqan = Constants.NON_VO_FQAN;
+		}
+
+		synchronized (fqan) {
+
+			if (mountPointsPerFqanCache.get(fqan) == null) {
+
+				final Set<MountPoint> mps = new HashSet<MountPoint>();
+				for (final MountPoint mp : allMountPoints) {
+					if ((mp.getFqan() == null)
+							|| mp.getFqan().equals(Constants.NON_VO_FQAN)) {
+						if ((fqan == null)
+								|| fqan.equals(Constants.NON_VO_FQAN)) {
+							mps.add(mp);
+							continue;
+						} else {
+							continue;
+						}
+					} else {
+						if (mp.getFqan().equals(fqan)) {
+							mps.add(mp);
+							continue;
+						}
+					}
+				}
+				mountPointsPerFqanCache.put(fqan, mps);
+			}
+			return mountPointsPerFqanCache.get(fqan);
+		}
 	}
 
 	// /**

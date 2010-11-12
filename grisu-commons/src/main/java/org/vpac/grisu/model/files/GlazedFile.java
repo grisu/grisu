@@ -23,7 +23,7 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
 	public enum Type implements Comparable<Type> {
 
-		FILETYPE_GROUP, FILETYPE_ROOT, FILETYPE_SITE, FILETYPE_MOUNTPOINT, FILETYPE_FOLDER, FILETYPE_FILE
+		FILETYPE_ROOT, FILETYPE_SITE, FILETYPE_MOUNTPOINT, FILETYPE_FOLDER, FILETYPE_FILE
 	}
 
 	public static final DataFlavor GLAZED_FILE_FLAVOR = new DataFlavor(
@@ -123,23 +123,14 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 		this.si = null;
 	}
 
-	public GlazedFile(String sitename_or_group) {
+	public GlazedFile(String sitename) {
 
-		if (sitename_or_group.startsWith("/")) {
-			this.type = Type.FILETYPE_GROUP;
-			this.url = sitename_or_group;
-			this.size = -1L;
-			this.lastModified = -1L;
-			this.name = sitename_or_group;
-			this.si = null;
-		} else {
-			this.type = Type.FILETYPE_SITE;
-			this.url = sitename_or_group;
-			this.size = -1L;
-			this.lastModified = -1L;
-			this.name = sitename_or_group;
-			this.si = null;
-		}
+		this.type = Type.FILETYPE_SITE;
+		this.url = sitename;
+		this.size = -1L;
+		this.lastModified = -1L;
+		this.name = sitename;
+		this.si = null;
 
 	}
 

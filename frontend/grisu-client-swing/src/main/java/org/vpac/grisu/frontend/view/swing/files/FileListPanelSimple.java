@@ -473,11 +473,6 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 	public void setCurrent(GlazedFile file) {
 
-		if (GlazedFile.Type.FILETYPE_GROUP.equals(file.getType())) {
-			throw new RuntimeException(
-					"Group filetye not supported by this filelistpanel.");
-		}
-
 		setCurrent(null, file);
 
 	}
@@ -584,14 +579,13 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 					if (em.isMountPointRoot(folder.getUrl())) {
 						final GlazedFile temp = new GlazedFile(em
-								.getMountPointForUrl(folder.getUrl())
-								.getSite());
+								.getMountPointForUrl(folder.getUrl()).getSite());
 						temp.setParent();
 						currentDirectoryContent.add(temp);
 					} else {
 						final GlazedFile temp = new GlazedFile(
-								FileManager.calculateParentUrl(folder
-										.getUrl()), si);
+								FileManager.calculateParentUrl(folder.getUrl()),
+								si);
 						temp.setParent();
 						currentDirectoryContent.add(temp);
 					}
@@ -599,8 +593,8 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 			} else {
 				if (!currentUrlIsStartUrl()) {
 					try {
-						final File parent = new File(new URI(
-								folder.getUrl())).getParentFile();
+						final File parent = new File(new URI(folder.getUrl()))
+								.getParentFile();
 
 						GlazedFile tempFile;
 						if (parent == null) {

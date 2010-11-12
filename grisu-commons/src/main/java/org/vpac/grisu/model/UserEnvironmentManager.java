@@ -94,7 +94,7 @@ public interface UserEnvironmentManager {
 	 * 
 	 * @return the unique groupnames
 	 */
-	String[] getAllAvailableUniqueGroupnames();
+	String[] getAllAvailableUniqueGroupnames(boolean excludeFqansWithNoDataQuota);
 
 	/**
 	 * Returns the DtoBatchJob object with the specified jobname.

@@ -1,21 +1,22 @@
-package org.vpac.grisu.frontend.view.swing.files.groups;
+package org.vpac.grisu.frontend.view.swing.files.virtual;
 
 import java.util.Set;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.ToolTipManager;
 import javax.swing.tree.DefaultTreeModel;
 
-import org.jdesktop.swingx.JXTreeTable;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.view.swing.files.FileListListener;
 import org.vpac.grisu.frontend.view.swing.files.FileListPanel;
 import org.vpac.grisu.frontend.view.swing.files.FileListPanelContextMenu;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
+import org.vpac.grisu.model.dto.DtoFileObject;
 import org.vpac.grisu.model.files.GlazedFile;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -23,23 +24,20 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class GroupFileBrowserPanel extends JPanel implements FileListPanel {
-	private JXTreeTable treeTable;
+public class VirtualFileSystemTreePanel extends JPanel implements
+		FileListPanel {
 
 	private final ServiceInterface si;
 	private final UserEnvironmentManager uem;
 	private final FileManager fm;
 	private JScrollPane scrollPane;
-	private GroupFileBrowserPanel groupFileBrowserPanel;
 	private JTree tree;
-	private final boolean displayFullFqan;
 
 	/**
 	 * Create the panel.
 	 */
-	public GroupFileBrowserPanel(ServiceInterface si, boolean displayFullFqan) {
+	public VirtualFileSystemTreePanel(ServiceInterface si) {
 		this.si = si;
-		this.displayFullFqan = displayFullFqan;
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		this.uem = GrisuRegistryManager.getDefault(si)
 				.getUserEnvironmentManager();
@@ -63,6 +61,11 @@ public class GroupFileBrowserPanel extends JPanel implements FileListPanel {
 	public void displayHiddenFiles(boolean display) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void finalize() {
+		ToolTipManager.sharedInstance().unregisterComponent(tree);
 	}
 
 	public GlazedFile getCurrentDirectory() {
@@ -91,8 +94,8 @@ public class GroupFileBrowserPanel extends JPanel implements FileListPanel {
 	private JTree getTree() {
 		if (tree == null) {
 			tree = new JTree();
-			tree.setCellRenderer(new GroupFileBrowserTreeRenderer(si,
-					displayFullFqan));
+			ToolTipManager.sharedInstance().registerComponent(tree);
+			tree.setCellRenderer(new VirtualFileSystemBrowserTreeRenderer(si));
 			tree.setRootVisible(true);
 		}
 		return tree;
@@ -109,13 +112,20 @@ public class GroupFileBrowserPanel extends JPanel implements FileListPanel {
 
 	private void initialize() {
 
-		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Groups",
-				true);
-		DefaultTreeModel model = new DefaultTreeModel(rootNode);
+		DtoFileObject root = new DtoFileObject("grid://groups", -1L);
+		VirtualFileTreeNode rootNode = new VirtualFileTreeNode(fm, root);
 
-		for (String group : uem.getAllAvailableFqans(true)) {
-			rootNode.add(new GlazedFileTreeNode(fm, new GlazedFile(group),
-					model));
+		DefaultTreeModel model = new DefaultTreeModel(rootNode);
+		rootNode.setModel(model);
+
+		try {
+			for (DtoFileObject f : fm.ls(root)) {
+				rootNode.add(new VirtualFileTreeNode(fm, f, model));
+			}
+		} catch (RemoteFileSystemException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
 		}
 
 		getTree().setModel(model);

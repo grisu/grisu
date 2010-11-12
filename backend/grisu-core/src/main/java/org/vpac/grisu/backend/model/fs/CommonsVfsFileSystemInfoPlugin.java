@@ -10,20 +10,21 @@ import org.apache.commons.vfs.FileType;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
+import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.DtoFileObject;
 import org.vpac.security.light.vomsProxy.VomsException;
 
-public class CommonsVfsFileSystemInfoplugin implements FileSystemInfoPlugin,
+public class CommonsVfsFileSystemInfoPlugin implements FileSystemInfoPlugin,
 		FileTransferPlugin {
 
 	private static Logger myLogger = Logger
-			.getLogger(CommonsVfsFileSystemInfoplugin.class.getName());
+			.getLogger(CommonsVfsFileSystemInfoPlugin.class.getName());
 
 	private final User user;
 
 	private final ThreadLocalCommonsVfsManager threadLocalFsManager;
 
-	public CommonsVfsFileSystemInfoplugin(User user) {
+	public CommonsVfsFileSystemInfoPlugin(User user) {
 		this.user = user;
 		threadLocalFsManager = new ThreadLocalCommonsVfsManager(this.user);
 
@@ -113,8 +114,11 @@ public class CommonsVfsFileSystemInfoplugin implements FileSystemInfoPlugin,
 			}
 			long lastModified = fo.getContent().getLastModifiedTime();
 
+			MountPoint mp = user.getResponsibleMountpointForAbsoluteFile(url);
 			final DtoFileObject folder = new DtoFileObject(url, lastModified);
 
+			folder.addSite(mp.getSite());
+			folder.addFqan(mp.getFqan());
 			// TODO the getChildren command seems to throw exceptions without
 			// reason
 			// every now and the
@@ -136,11 +140,15 @@ public class CommonsVfsFileSystemInfoplugin implements FileSystemInfoPlugin,
 					final DtoFileObject childfolder = new DtoFileObject(child
 							.getURL().toString(), child.getContent()
 							.getLastModifiedTime());
+					childfolder.addFqan(mp.getFqan());
+					childfolder.addSite(mp.getSite());
 					folder.addChild(childfolder);
 				} else if (FileType.FILE.equals(child.getType())) {
 					final DtoFileObject childFile = new DtoFileObject(child
 							.getURL().toString(), child.getContent().getSize(),
 							child.getContent().getLastModifiedTime());
+					childFile.addFqan(mp.getFqan());
+					childFile.addSite(mp.getSite());
 					folder.addChild(childFile);
 				}
 			}

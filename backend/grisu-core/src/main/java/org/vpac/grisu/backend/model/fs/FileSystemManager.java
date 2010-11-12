@@ -14,17 +14,17 @@ public class FileSystemManager {
 	private final Map<String, FileTransferPlugin> filetransferPlugins = new HashMap<String, FileTransferPlugin>();
 	private final Map<String, FileSystemInfoPlugin> fileSystemInfoPlugins = new HashMap<String, FileSystemInfoPlugin>();
 
-	private final CommonsVfsFileSystemInfoplugin commonsVfsInfo;
+	private final CommonsVfsFileSystemInfoPlugin commonsVfsInfo;
 
 	public FileSystemManager(User user) {
 
-		commonsVfsInfo = new CommonsVfsFileSystemInfoplugin(user);
+		commonsVfsInfo = new CommonsVfsFileSystemInfoPlugin(user);
 		fileSystemInfoPlugins.put("gsiftp", commonsVfsInfo);
 		fileSystemInfoPlugins.put("ram", commonsVfsInfo);
 		fileSystemInfoPlugins.put("tmp", commonsVfsInfo);
 		filetransferPlugins.put("gsiftp-gsiftp", commonsVfsInfo);
 		fileSystemInfoPlugins
-				.put("grid", new VirtualFileSystemPluginImpl(user));
+				.put("grid", new VirtualFileSystemInfoPlugin(user));
 
 	}
 
@@ -59,7 +59,7 @@ public class FileSystemManager {
 	public DtoFileObject getFolderListing(String pathOrUrl)
 			throws InvalidPathException, RemoteFileSystemException {
 
-		// String url = cleanPath(pathOrUrl);
+		pathOrUrl = cleanPath(pathOrUrl);
 		return getFileSystemInfoPlugin(pathOrUrl).getFolderListing(pathOrUrl);
 
 	}

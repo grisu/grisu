@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.view.swing.files.groups;
+package org.vpac.grisu.frontend.view.swing.files.virtual;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -9,7 +9,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginException;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 
-public class GroupFileBrowserTest {
+public class VirtualFileTreeTableBrowserTest {
 
 	/**
 	 * Launch the application.
@@ -18,14 +18,14 @@ public class GroupFileBrowserTest {
 	 */
 	public static void main(String[] args) throws LoginException {
 
-		final ServiceInterface si = LoginManager.loginCommandline("LOCAL_WS");
+		final ServiceInterface si = LoginManager.loginCommandline("LOCAL");
 		// final ServiceInterface si = LoginManager.loginCommandline("Local");
 
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					GroupFileBrowserTest window = new GroupFileBrowserTest(si,
-							true);
+					VirtualFileTreeTableBrowserTest window = new VirtualFileTreeTableBrowserTest(
+							si);
 					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -33,39 +33,36 @@ public class GroupFileBrowserTest {
 			}
 		});
 
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					GroupFileBrowserTest window = new GroupFileBrowserTest(si,
-							false);
-					window.frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		// EventQueue.invokeLater(new Runnable() {
+		// public void run() {
+		// try {
+		// GroupFileBrowserTest window = new GroupFileBrowserTest(si,
+		// false);
+		// window.frame.setVisible(true);
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
+		// }
+		// });
 	}
 
 	private final ServiceInterface si;
 
 	private JFrame frame;
-	private GroupFileBrowserPanel groupFileBrowserPanel;
-	private final boolean displayFullFqan;
+	private VirtualFileSystemTreeTablePanel groupFileBrowserPanel;
 
 	/**
 	 * Create the application.
 	 */
-	public GroupFileBrowserTest(ServiceInterface si, boolean displayFullFqan) {
+	public VirtualFileTreeTableBrowserTest(ServiceInterface si) {
 		this.si = si;
-		this.displayFullFqan = displayFullFqan;
 
 		initialize();
 	}
 
-	private GroupFileBrowserPanel getGroupFileBrowserPanel() {
+	private VirtualFileSystemTreeTablePanel getGroupFileBrowserPanel() {
 		if (groupFileBrowserPanel == null) {
-			groupFileBrowserPanel = new GroupFileBrowserPanel(si,
-					displayFullFqan);
+			groupFileBrowserPanel = new VirtualFileSystemTreeTablePanel(si);
 		}
 		return groupFileBrowserPanel;
 	}

@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.view.swing.files.groups;
+package org.vpac.grisu.frontend.view.swing.files.virtual;
 
 public interface IWorker<T> {
 

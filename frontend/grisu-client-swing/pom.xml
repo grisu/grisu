@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>frontend</artifactId>
@@ -36,16 +37,19 @@
 		</dependency>
 		<dependency>
 			<groupId>org.swinglabs</groupId>
-			<artifactId>swingx</artifactId>
-			<version>1.6</version>
-			<type>jar</type>
+			<artifactId>swingx-core</artifactId>
+			<version>1.6.2-2</version>
 		</dependency>
 		<dependency>
 			<groupId>furbelow</groupId>
 			<artifactId>furbelow</artifactId>
 			<version>1.0</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.netbeans.swing</groupId>
+			<artifactId>outline</artifactId>
+			<version>6.8</version>
+		</dependency>
 		<dependency>
 			<groupId>com.kenai</groupId>
 			<artifactId>validationAPI</artifactId>

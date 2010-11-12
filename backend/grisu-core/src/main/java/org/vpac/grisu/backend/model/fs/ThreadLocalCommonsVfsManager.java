@@ -160,11 +160,18 @@ public class ThreadLocalCommonsVfsManager extends ThreadLocal {
 	public void remove() {
 		myLogger.debug("Removing fsm for thread "
 				+ Thread.currentThread().getName());
-		try {
-			((FileSystemCache) get()).close();
-		} catch (Exception e) {
-			myLogger.debug(e);
-		}
+
+		// I can do that in it's own thread, right? Within a ThreadLocal object?
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					((FileSystemCache) get()).close();
+				} catch (Exception e) {
+					myLogger.debug(e);
+				}
+			}
+		}.start();
 		super.remove();
 	}
 }

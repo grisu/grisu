@@ -19,15 +19,16 @@ public class DtoFileObject implements Comparable {
 	public static final String ROOT = "FileRoot";
 
 	public static final String FILETYPE_FILE = "file";
-	public static final int FILETYPE_FILE_PRIORITY = Integer.MIN_VALUE;
+	public static final int FILETYPE_FILE_PRIORITY = Integer.MAX_VALUE;
 	public static final String FILETYPE_FOLDER = "folder";
-	public static final int FILETYPE_FOLDER_PRIORITY = Integer.MIN_VALUE + 1;
+	public static final int FILETYPE_FOLDER_PRIORITY = Integer.MAX_VALUE - 1;
 	public static final String FILETYPE_ROOT = "root";
-	public static final int FILETYPE_ROOT_PRIORITY = Integer.MAX_VALUE;
+	public static final int FILETYPE_ROOT_PRIORITY = Integer.MIN_VALUE;
 	public static final String FILETYPE_MOUNTPOINT = "mountpoint";
-	public static final int FILETYPE_MOUNTPOINT_PRIORITY = Integer.MAX_VALUE - 1;
-	public static final String FILETYPE_GROUP = "group";
-	public static final int FILETYPE_GROUP_PRIORITY = Integer.MAX_VALUE - 2;
+	public static final int FILETYPE_MOUNTPOINT_PRIORITY = Integer.MIN_VALUE + 1;
+
+	// public static final String FILETYPE_GROUP = "group";
+	// public static final int FILETYPE_GROUP_PRIORITY = Integer.MIN_VALUE + 2;
 
 	public static DtoFileObject listLocalFolder(File folder,
 			boolean includeParentInFileListing) {
@@ -38,7 +39,7 @@ public class DtoFileObject implements Comparable {
 
 		if (includeParentInFileListing) {
 			final DtoFileObject childFolder = new DtoFileObject(folder.toURI()
-					.toString());
+					.toString(), folder.lastModified());
 			result.addChild(childFolder);
 		}
 
@@ -75,6 +76,8 @@ public class DtoFileObject implements Comparable {
 
 	private String mainUrl;
 	private String optionalPath;
+	private Set<String> sites = new TreeSet<String>();
+	private Set<String> fqans = new TreeSet<String>();
 
 	private List<DtoProperty> urls = new LinkedList<DtoProperty>();
 	private long size = -2L;
@@ -84,6 +87,7 @@ public class DtoFileObject implements Comparable {
 
 	public DtoFileObject() {
 		this(null, -1L, -1L, FILETYPE_ROOT);
+		this.isVirtual = true;
 	}
 
 	public DtoFileObject(MountPoint mp) {
@@ -96,9 +100,9 @@ public class DtoFileObject implements Comparable {
 		this.name = mp.getAlias();
 	}
 
-	public DtoFileObject(String group) {
-		this(group, -1L, -1L, FILETYPE_GROUP);
-	}
+	// public DtoFileObject(String group) {
+	// this(group, -1L, -1L, FILETYPE_GROUP);
+	// }
 
 	public DtoFileObject(String url, long lastModified) {
 		this(url, -1L, lastModified, FILETYPE_FOLDER);
@@ -123,13 +127,6 @@ public class DtoFileObject implements Comparable {
 			this.size = size;
 			this.lastModified = lastModified;
 			this.name = FileManager.getFilename(url);
-		} else if (FILETYPE_GROUP.equals(type)) {
-			this.type = FILETYPE_GROUP;
-			this.mainUrl = "/groups/" + url;
-			addUrl(mainUrl, FILETYPE_GROUP_PRIORITY);
-			this.size = -1L;
-			this.lastModified = -1L;
-			this.name = url;
 		} else if (FILETYPE_MOUNTPOINT.equals(type)) {
 			throw new RuntimeException(
 					"Constructor not usable for mountpoints...");
@@ -153,6 +150,22 @@ public class DtoFileObject implements Comparable {
 		getChildren().addAll(children);
 	}
 
+	public void addFqan(String fqan) {
+		this.fqans.add(fqan);
+	}
+
+	public void addFqans(Set<String> fqans) {
+		this.fqans.addAll(fqans);
+	}
+
+	public void addSite(String site) {
+		getSites().add(site);
+	}
+
+	public void addSites(Set<String> sites) {
+		getSites().addAll(sites);
+	}
+
 	public void addUrl(String url, Integer priority) {
 		DtoProperty temp = new DtoProperty(url, priority.toString());
 		urls.add(temp);
@@ -170,6 +183,10 @@ public class DtoFileObject implements Comparable {
 
 			if (thisPriority.equals(otherPriority)) {
 				result = getName().compareTo(o.getName());
+
+				if (result == 0) {
+					result = getUrl().compareTo(o.getUrl());
+				}
 			} else {
 				result = thisPriority.compareTo(otherPriority);
 			}
@@ -194,6 +211,11 @@ public class DtoFileObject implements Comparable {
 		return children;
 	}
 
+	@XmlAttribute(name = "fqan")
+	public Set<String> getFqans() {
+		return this.fqans;
+	}
+
 	@XmlAttribute(name = "lastModified")
 	public long getLastModified() {
 		return lastModified;
@@ -207,6 +229,11 @@ public class DtoFileObject implements Comparable {
 	@XmlElement(name = "path")
 	public String getPath() {
 		return optionalPath;
+	}
+
+	@XmlElement(name = "site")
+	public Set<String> getSites() {
+		return this.sites;
 	}
 
 	@XmlAttribute(name = "size")
@@ -262,8 +289,28 @@ public class DtoFileObject implements Comparable {
 		return result;
 	}
 
+	public void removeFqan(String fqan) {
+		this.fqans.remove(fqan);
+	}
+
+	public void removeFqans(Set<String> fqans) {
+		this.fqans.removeAll(fqans);
+	}
+
+	public void removeSite(String site) {
+		getSites().remove(site);
+	}
+
+	public void removeSites(Set<String> sites) {
+		getSites().removeAll(sites);
+	}
+
 	public void setChildren(Set<DtoFileObject> children) {
 		this.children = children;
+	}
+
+	private void setFqans(Set<String> fqans) {
+		this.fqans = fqans;
 	}
 
 	public void setIsVirtual(boolean isVirtual) {
@@ -282,11 +329,19 @@ public class DtoFileObject implements Comparable {
 		this.optionalPath = path;
 	}
 
+	private void setSites(Set<String> sites) {
+		this.sites = sites;
+	}
+
+	public void setSize(long size) {
+		this.size = size;
+	}
+
 	public void setType(String type) {
 		this.type = type;
 	}
 
-	private void setUrl(String url) {
+	public void setUrl(String url) {
 		this.mainUrl = url;
 		addUrl(url, 0);
 	}

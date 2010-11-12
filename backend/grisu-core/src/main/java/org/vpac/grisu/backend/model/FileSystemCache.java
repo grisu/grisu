@@ -30,6 +30,7 @@ public class FileSystemCache {
 
 	public void close() {
 		cachedFilesystems = null;
+
 		fsm.close();
 	}
 
