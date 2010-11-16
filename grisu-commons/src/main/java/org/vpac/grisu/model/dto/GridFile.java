@@ -6,6 +6,7 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +17,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.MountPoint;
 
@@ -33,7 +35,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	public static final String FILETYPE_FILE = "file";
 	public static final int FILETYPE_FILE_PRIORITY = Integer.MAX_VALUE;
 	public static final String FILETYPE_FOLDER = "folder";
-	public static final int FILETYPE_FOLDER_PRIORITY = Integer.MAX_VALUE - 1;
+	public static final int FILETYPE_FOLDER_PRIORITY = 0;
 	public static final String FILETYPE_ROOT = "root";
 	public static final int FILETYPE_ROOT_PRIORITY = Integer.MIN_VALUE;
 	public static final String FILETYPE_MOUNTPOINT = "mountpoint";
@@ -96,18 +98,51 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 
 	private String mainUrl;
 	private String optionalPath;
-	private Set<String> sites = new TreeSet<String>();
-	private Set<String> fqans = new TreeSet<String>();
+	private final Set<String> sites = Collections
+			.synchronizedSet(new TreeSet<String>());
+	private final Set<String> fqans = Collections
+			.synchronizedSet(new TreeSet<String>());
 
-	private List<DtoProperty> urls = new LinkedList<DtoProperty>();
+	private final List<DtoProperty> urls = Collections
+			.synchronizedList(new LinkedList<DtoProperty>());
 	private long size = -2L;
 	private long lastModified;
 	private boolean isVirtual = false;
-	private Set<GridFile> children = new TreeSet<GridFile>();
+	private Set<GridFile> children = Collections
+			.synchronizedSet(new TreeSet<GridFile>());
 
 	public GridFile() {
 		this(null, -1L, -1L, FILETYPE_ROOT);
 		this.isVirtual = true;
+		this.setName("Grid");
+		this.setUrl("grid://");
+	}
+
+	public GridFile(File f) {
+		this(f, ((f.isDirectory()) ? FILETYPE_FOLDER_PRIORITY
+				: FILETYPE_FILE_PRIORITY));
+
+	}
+
+	public GridFile(File f, int priority) {
+
+		if (f.isDirectory()) {
+			this.type = FILETYPE_FOLDER;
+			this.size = -1L;
+		} else {
+			this.type = FILETYPE_FILE;
+			this.size = f.length();
+		}
+		this.isVirtual = false;
+		if (StringUtils.isBlank(f.getName())) {
+			this.name = "/";
+		} else {
+			this.name = f.getName();
+		}
+		this.mainUrl = f.toURI().toString();
+		addUrl(this.mainUrl, priority);
+		this.lastModified = f.lastModified();
+		addSite("Local");
 	}
 
 	public GridFile(MountPoint mp) {
@@ -198,12 +233,13 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		Integer thisPriority = Integer.parseInt(urls.get(0).getValue());
 		Integer otherPriority = Integer.parseInt(o.getUrls().get(0).getValue());
 
-		if (thisPriority.equals(otherPriority)) {
+		if (otherPriority.equals(thisPriority)) {
 			result = getName().compareTo(o.getName());
 
 			if (result == 0) {
 				result = getUrl().compareTo(o.getUrl());
 			}
+
 		} else {
 			result = thisPriority.compareTo(otherPriority);
 		}
@@ -340,11 +376,16 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	}
 
 	public void setChildren(Set<GridFile> children) {
+		if (children == null) {
+			this.children.clear();
+			return;
+		}
 		this.children = children;
 	}
 
 	private void setFqans(Set<String> fqans) {
-		this.fqans = fqans;
+		this.fqans.clear();
+		this.fqans.addAll(fqans);
 	}
 
 	public void setIsVirtual(boolean isVirtual) {
@@ -364,7 +405,8 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	}
 
 	private void setSites(Set<String> sites) {
-		this.sites = sites;
+		this.sites.clear();
+		this.sites.addAll(sites);
 	}
 
 	public void setSize(long size) {
@@ -381,6 +423,12 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	}
 
 	public void setUrls(List<DtoProperty> urls) {
-		this.urls = urls;
+		this.urls.clear();
+		this.urls.addAll(urls);
+	}
+
+	@Override
+	public String toString() {
+		return getName();
 	}
 }

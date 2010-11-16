@@ -62,6 +62,9 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 	private Vector<GridFileListListener> listeners;
 	private GridFileListPanelContextMenu popupMenu;
 
+	private final boolean displayHiddenFiles = false;
+	private final String[] extensionsToDisplay = null;
+
 	/**
 	 * Create the panel.
 	 */
@@ -183,7 +186,8 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 
 		try {
 			for (GridFile f : fm.ls(root)) {
-				rootNode.add(new VirtualFileTreeNode(fm, f, model));
+				rootNode.add(new VirtualFileTreeNode(fm, f, model,
+						displayHiddenFiles, extensionsToDisplay));
 			}
 		} catch (RemoteFileSystemException e) {
 			// TODO Auto-generated catch block

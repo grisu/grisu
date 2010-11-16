@@ -14,6 +14,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.WindowConstants;
 
+import org.netbeans.swing.outline.Outline;
+import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransaction;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransactionManager;
@@ -40,37 +42,55 @@ public class GridFileTransferHandler extends TransferHandler {
 	private final FileTransactionManager ftm;
 	private final FileManager fm;
 	private final GridFileListPanel fileList;
+	private final boolean enableDrops;
 
 	public GridFileTransferHandler(GridFileListPanel fileList,
-			ServiceInterface si) {
+			ServiceInterface si, boolean enableDrops) {
 		this.si = si;
+		this.enableDrops = enableDrops;
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		this.ftm = FileTransactionManager.getDefault(si);
 		this.fileList = fileList;
 	}
 
+	// @Override
+	// public boolean canImport(JComponent c, DataFlavor[] flavors) {
+	//
+	// if (c instanceof Outline) {
+	//
+	// Outline outline = (Outline) c;
+	// DropLocation loc = outline.getDropLocation();
+	// outline.getdro
+	// }
+	//
+	// return true;
+	// }
+
 	@Override
-	public boolean canImport(JComponent c, DataFlavor[] flavors) {
+	public boolean canImport(TransferHandler.TransferSupport support) {
 
-		// final String type = fileList.getCurrentDirectory().getType();
-		//
-		// if (GridFile.FILETYPE_FOLDER.equals(type)) {
-		// for (final DataFlavor flavor : flavors) {
-		// if (SET_DATA_FLAVOR.equals(flavor)) {
-		// return true;
-		// }
-		// }
-		// }
+		if (!enableDrops) {
+			return false;
+		}
 
-		return false;
+		Outline outline = (Outline) (support.getComponent());
+
+		// X.p("Loc: " + outline.get
+		JTable.DropLocation dropLocation = (JTable.DropLocation) support
+				.getDropLocation();
+		int row = dropLocation.getRow();
+		int col = dropLocation.getColumn();
+		// X.p("Row: " + row + ", Col: " + col);
+		return true;
+
 	}
 
 	@Override
 	protected Transferable createTransferable(JComponent c) {
 
-		if (c instanceof JTable) {
+		if (c instanceof Outline) {
 
-			final JTable table = (JTable) c;
+			final Outline table = (Outline) c;
 
 			final Set<GridFile> selected = new TreeSet<GridFile>();
 
@@ -88,7 +108,13 @@ public class GridFileTransferHandler extends TransferHandler {
 				}
 
 			}
-			return new GridFilesTransferable(selected);
+
+			GridFilesTransferable temp = new GridFilesTransferable(selected);
+			for (DataFlavor f : temp.getTransferDataFlavors()) {
+				X.p(f.getHumanPresentableName());
+			}
+
+			return temp;
 		}
 
 		throw new RuntimeException("Container of class"
@@ -109,7 +135,7 @@ public class GridFileTransferHandler extends TransferHandler {
 	public boolean importData(JComponent c, Transferable t) {
 		if (canImport(c, t.getTransferDataFlavors())) {
 			try {
-				importGlazedFilesSet((Set<GridFile>) t
+				importGridFilesSet((Set<GridFile>) t
 						.getTransferData(SET_DATA_FLAVOR));
 				return true;
 			} catch (final UnsupportedFlavorException ufe) {
@@ -122,7 +148,7 @@ public class GridFileTransferHandler extends TransferHandler {
 		return false;
 	}
 
-	protected void importGlazedFilesSet(Set<GridFile> gridFiles) {
+	protected void importGridFilesSet(Set<GridFile> gridFiles) {
 
 		final FileTransaction ft = new FileTransaction(fm, gridFiles,
 				fileList.getCurrentDirectory(), true);

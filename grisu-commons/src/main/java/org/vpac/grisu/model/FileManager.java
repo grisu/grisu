@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -25,14 +26,13 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
-import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.events.FolderCreatedEvent;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
-import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoStringList;
+import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.files.GlazedFile;
 import org.vpac.grisu.model.status.StatusObject;
 import org.vpac.grisu.settings.ClientPropertiesManager;
@@ -174,6 +174,18 @@ public class FileManager {
 
 	}
 
+	public static Set<GridFile> getLocalFileSystems() {
+
+		File[] roots = File.listRoots();
+		Set<GridFile> result = new TreeSet<GridFile>();
+		for (File root : roots) {
+			GridFile f = new GridFile(root);
+			result.add(f);
+		}
+		return result;
+
+	}
+
 	public static void setDownloadFileSizeTreshold(long t) {
 		downloadTreshold = t;
 	}
@@ -211,6 +223,8 @@ public class FileManager {
 		} else if (file.startsWith("grid:")) {
 			return false;
 		} else if (file.startsWith("file:")) {
+			return true;
+		} else if (file.startsWith("local:")) {
 			return true;
 		} else if (file.startsWith("http:")) {
 			return false;
@@ -652,6 +666,10 @@ public class FileManager {
 		return fs;
 	}
 
+	public GridFile getGridRoot() {
+		return new GridFile();
+	}
+
 	public File getLocalCacheFile(final String url) {
 
 		if (isLocal(url)) {
@@ -667,6 +685,26 @@ public class FileManager {
 			return new File(rootPath);
 		}
 
+	}
+
+	public GridFile getLocalRoot() {
+
+		GridFile localRoot = new GridFile("local://", -1);
+		localRoot.setIsVirtual(true);
+		localRoot.setName("Local files");
+		localRoot.addSite("Local");
+
+		String homeDir = System.getProperty("user.home");
+		File h = new File(homeDir);
+		GridFile home = new GridFile(h, -100);
+
+		localRoot.addChild(home);
+
+		for (GridFile f : getLocalFileSystems()) {
+			localRoot.addChild(f);
+		}
+
+		return localRoot;
 	}
 
 	public boolean isBiggerThanThreshold(String url)
@@ -727,20 +765,6 @@ public class FileManager {
 		return folder.listOfAllFilesUnderThisFolder();
 	}
 
-	public synchronized Set<GridFile> ls(GridFile parent)
-			throws RemoteFileSystemException {
-
-		X.p(parent.getUrl());
-		GridFile folder = ls(parent.getUrl());
-
-		if (folder == null) {
-			return null;
-		}
-
-		return folder.getChildren();
-
-	}
-
 	public synchronized List<GlazedFile> ls(GlazedFile parent)
 			throws RemoteFileSystemException {
 
@@ -761,6 +785,19 @@ public class FileManager {
 		return result;
 	}
 
+	public synchronized Set<GridFile> ls(GridFile parent)
+			throws RemoteFileSystemException {
+
+		GridFile folder = ls(parent.getUrl());
+
+		if (folder == null) {
+			return null;
+		}
+
+		return folder.getChildren();
+
+	}
+
 	public GridFile ls(String url) throws RemoteFileSystemException {
 		return ls(url, 1);
 	}
@@ -769,6 +806,10 @@ public class FileManager {
 			throws RemoteFileSystemException {
 
 		if (isLocal(url)) {
+
+			if ("local://".equals(url)) {
+				return getLocalRoot();
+			}
 			File temp;
 			temp = getFileFromUriOrPath(url);
 

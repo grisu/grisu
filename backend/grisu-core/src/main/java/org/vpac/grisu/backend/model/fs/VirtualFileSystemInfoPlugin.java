@@ -1,7 +1,7 @@
 package org.vpac.grisu.backend.model.fs;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.FileObject;
@@ -15,7 +15,7 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 	static final Logger myLogger = Logger
 			.getLogger(VirtualFileSystemInfoPlugin.class.getName());
 
-	private final Map<String, VirtualFileSystemPlugin> plugins = new HashMap<String, VirtualFileSystemPlugin>();
+	private final Map<String, VirtualFileSystemPlugin> plugins = new TreeMap<String, VirtualFileSystemPlugin>();
 
 	public VirtualFileSystemInfoPlugin(User user) {
 		plugins.put(GroupFileSystemPlugin.IDENTIFIER,
@@ -30,6 +30,18 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 	public GridFile getFolderListing(String url)
 			throws RemoteFileSystemException {
 
+		if (url.equals("grid://")) {
+
+			GridFile root = new GridFile();
+			for (String key : plugins.keySet()) {
+				GridFile vfs = new GridFile("grid://" + key, -1L);
+				vfs.setIsVirtual(true);
+				vfs.setName(StringUtils.capitalize(key));
+				root.addChild(vfs);
+			}
+			return root;
+
+		}
 		try {
 			return getPlugin(url).createDtoFileObject(url, 1);
 		} catch (InvalidPathException e) {
@@ -39,7 +51,7 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 
 	private VirtualFileSystemPlugin getPlugin(String url) {
 		String plugin = StringUtils.split(url, "/")[1];
-		return plugins.get(plugin);
+		return plugins.get(plugin.toLowerCase());
 	}
 
 }

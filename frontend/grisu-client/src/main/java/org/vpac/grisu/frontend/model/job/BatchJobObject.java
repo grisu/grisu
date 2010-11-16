@@ -1611,7 +1611,7 @@ public class BatchJobObject implements JobMonitoringObject,
 
 				try {
 					Thread.sleep(ClientPropertiesManager
-							.getJobStatusRecheckIntervall() * 1000);
+							.getJobSubmitStatusRecheckIntervall() * 1000);
 				} catch (final InterruptedException e) {
 					this.isRefreshing = false;
 					pcs.firePropertyChange(REFRESHING, true, false);
@@ -1727,7 +1727,7 @@ public class BatchJobObject implements JobMonitoringObject,
 
 					try {
 						Thread.sleep(ClientPropertiesManager
-								.getJobStatusRecheckIntervall() * 1000);
+								.getJobSubmitStatusRecheckIntervall() * 1000);
 					} catch (final InterruptedException e) {
 						// doesn't happen
 					}

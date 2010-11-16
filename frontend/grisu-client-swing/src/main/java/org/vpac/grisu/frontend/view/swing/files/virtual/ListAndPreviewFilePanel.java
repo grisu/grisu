@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.view.swing.files.preview.GenericGridFileViewer;
+import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.GridFile;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -34,11 +35,23 @@ public class ListAndPreviewFilePanel extends JPanel {
 
 	boolean lockCombo = false;
 
+	private final GridFile root;
+
+	public ListAndPreviewFilePanel(ServiceInterface si) {
+		this(si, null);
+	}
+
 	/**
 	 * Create the panel.
 	 */
-	public ListAndPreviewFilePanel(ServiceInterface si) {
+	public ListAndPreviewFilePanel(ServiceInterface si, GridFile root) {
 		this.si = si;
+		if (root == null) {
+			this.root = GrisuRegistryManager.getDefault(si).getFileManager()
+					.getGridRoot();
+		} else {
+			this.root = root;
+		}
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -112,7 +125,7 @@ public class ListAndPreviewFilePanel extends JPanel {
 	private VirtualFileSystemTreeTablePanel getVirtualFileSystemTreeTablePanel() {
 		if (virtualFileSystemTreeTablePanel == null) {
 			virtualFileSystemTreeTablePanel = new VirtualFileSystemTreeTablePanel(
-					si);
+					si, root);
 		}
 		return virtualFileSystemTreeTablePanel;
 	}

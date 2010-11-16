@@ -1,5 +1,6 @@
 package org.vpac.grisu.frontend.view.swing.files.virtual;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.MouseAdapter;
@@ -8,7 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
-import javax.swing.DropMode;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -65,18 +66,51 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 	private final UserEnvironmentManager uem;
 	private final FileManager fm;
 	private JScrollPane scrollPane;
-	private Outline tree;
+	private Outline outline;
 
 	private GridFile oldDir;
 
+	private boolean useAsDropTarget = true;
+
 	private Vector<GridFileListListener> listeners;
 	private GridFileListPanelContextMenu popupMenu;
+	private boolean displayLocalFileSystems = true;
+
+	private final boolean displayHiddenFiles;
+	private final String[] extensionsToDisplay;
+
+	private final GridFile root;
+
+	public VirtualFileSystemTreeTablePanel(ServiceInterface si) {
+		this(si, null, true);
+	}
+
+	public VirtualFileSystemTreeTablePanel(ServiceInterface si, GridFile root) {
+		this(si, root, true);
+	}
+
+	public VirtualFileSystemTreeTablePanel(ServiceInterface si, GridFile root,
+			boolean useAsDropTarget) {
+		this(si, root, useAsDropTarget, false, null, true);
+	}
 
 	/**
 	 * Create the panel.
 	 */
-	public VirtualFileSystemTreeTablePanel(ServiceInterface si) {
+	public VirtualFileSystemTreeTablePanel(ServiceInterface si, GridFile root,
+			boolean useAsDropTarget, boolean displayHiddenFiles,
+			String[] extensionsToDisplay, boolean displayLocalFileSystems) {
 		this.si = si;
+		this.displayHiddenFiles = displayHiddenFiles;
+		this.extensionsToDisplay = extensionsToDisplay;
+		this.displayLocalFileSystems = displayLocalFileSystems;
+		if (root == null) {
+			this.root = GrisuRegistryManager.getDefault(si).getFileManager()
+					.getGridRoot();
+		} else {
+			this.root = root;
+		}
+		this.useAsDropTarget = useAsDropTarget;
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		this.uem = GrisuRegistryManager.getDefault(si)
 				.getUserEnvironmentManager();
@@ -89,7 +123,7 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getScrollPane(), "2, 2, fill, fill");
 
-		initialize();
+		initialize(this.root);
 	}
 
 	synchronized public void addFileListListener(GridFileListListener l) {
@@ -248,6 +282,9 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 	public GridFile getCurrentDirectory() {
 
 		Set<GridFile> selFiles = getSelectedFiles();
+		if (selFiles == null) {
+			return null;
+		}
 		if (selFiles.size() == 1) {
 			GridFile f = selFiles.iterator().next();
 			if (f.isFolder()) {
@@ -257,46 +294,27 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 		return null;
 	}
 
-	public JPanel getPanel() {
-		return this;
-	}
+	private Outline getOutline() {
+		if (outline == null) {
+			outline = new Outline();
+			outline.setRootVisible(false);
+			outline.setRenderDataProvider(new VirtualFileTreeTableRenderer(si));
+			outline.setDragEnabled(true);
+			outline.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+			outline.setTransferHandler(new GridFileTransferHandler(this, si,
+					useAsDropTarget));
 
-	private JScrollPane getScrollPane() {
-		if (scrollPane == null) {
-			scrollPane = new JScrollPane();
-			scrollPane.setViewportView(getTree());
+			outline.setGridColor(Color.white);
+			outline.setFillsViewportHeight(true);
 
-		}
-		return scrollPane;
-	}
+			// VirtualFileSystemDragSource ds = new VirtualFileSystemDragSource(
+			// tree, DnDConstants.ACTION_COPY);
+			if (useAsDropTarget) {
+				VirtualFileSystemDropTarget dt = new VirtualFileSystemDropTarget(
+						si, outline);
+			}
 
-	public Set<GridFile> getSelectedFiles() {
-		int[] rows = getTree().getSelectedRows();
-		Set<GridFile> result = new HashSet<GridFile>();
-		for (int row : rows) {
-			GridFile file = (GridFile) ((VirtualFileTreeNode) (getTree()
-					.getValueAt(row, 0))).getUserObject();
-			X.p("Selected: " + file.getName() + ": " + file.getUrl());
-			result.add(file);
-		}
-
-		return result;
-	}
-
-	private Outline getTree() {
-		if (tree == null) {
-			tree = new Outline();
-			// ToolTipManager.sharedInstance().registerComponent(tree);
-			// tree.setCellRenderer(new
-			// VirtualFileSystemBrowserTreeRenderer(si));
-			tree.setRootVisible(false);
-			tree.setRenderDataProvider(new VirtualFileTreeTableRenderer(si));
-			tree.setDragEnabled(true);
-			tree.setDropMode(DropMode.INSERT);
-			tree.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-			tree.setTransferHandler(new GridFileTransferHandler(this, si));
-
-			tree.addMouseListener(new MouseAdapter() {
+			outline.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
 					if (arg0.getClickCount() == 2) {
@@ -312,14 +330,45 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 						}
 					}
 				}
+
 			});
 		}
-		return tree;
+		return outline;
 	}
 
-	private void initialize() {
+	public JPanel getPanel() {
+		return this;
+	}
 
-		GridFile root = new GridFile("grid://groups", -1L);
+	private JScrollPane getScrollPane() {
+		if (scrollPane == null) {
+			scrollPane = new JScrollPane();
+			scrollPane.setViewportView(getOutline());
+
+		}
+		return scrollPane;
+	}
+
+	public Set<GridFile> getSelectedFiles() {
+		int[] rows = getOutline().getSelectedRows();
+		Set<GridFile> result = new HashSet<GridFile>();
+		for (int row : rows) {
+			try {
+				GridFile file = (GridFile) ((VirtualFileTreeNode) (getOutline()
+						.getValueAt(row, 0))).getUserObject();
+				X.p("Selected: " + file.getName() + ": " + file.getUrl());
+				result.add(file);
+			} catch (ClassCastException cce) {
+				X.p("Invalid file selected");
+				return null;
+			}
+		}
+
+		return result;
+	}
+
+	private void initialize(GridFile root) {
+
 		VirtualFileTreeNode rootNode = new VirtualFileTreeNode(fm, root);
 
 		DefaultTreeModel model = new DefaultTreeModel(rootNode);
@@ -327,7 +376,8 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 
 		try {
 			for (GridFile f : fm.ls(root)) {
-				rootNode.add(new VirtualFileTreeNode(fm, f, model));
+				rootNode.add(new VirtualFileTreeNode(fm, f, model,
+						displayHiddenFiles, extensionsToDisplay));
 			}
 		} catch (RemoteFileSystemException e) {
 			// TODO Auto-generated catch block
@@ -335,13 +385,24 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 			return;
 		}
 
+		if (displayLocalFileSystems) {
+
+			GridFile localRoot = fm.getLocalRoot();
+
+			VirtualFileTreeNode localRootNode = new VirtualFileTreeNode(fm,
+					localRoot, model, displayHiddenFiles, extensionsToDisplay);
+			rootNode.add(localRootNode);
+
+		}
+
 		OutlineModel m = DefaultOutlineModel.createOutlineModel(model,
 				new VirtualFileTreeTableRowModel(), false, "File");
+
 		final LazyLoadingTreeController controller = new LazyLoadingTreeController(
 				model);
 
 		m.getTreePathSupport().addTreeWillExpandListener(controller);
-		getTree().setModel(m);
+		getOutline().setModel(m);
 
 	}
 
@@ -383,7 +444,7 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 					fireIsLoading(false);
 				}
 
-				getTree().setEnabled(!loading);
+				getOutline().setEnabled(!loading);
 				getScrollPane().setEnabled(!loading);
 
 				if (loading) {
@@ -403,5 +464,34 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 	public void setRootUrl(String url) {
 		// TODO Auto-generated method stub
 
+	}
+
+	/**
+	 * Sets the table's selection mode to allow only single selections, a single
+	 * contiguous interval, or multiple intervals.
+	 * <P>
+	 * <bold>Note:</bold> <code>JTable</code> provides all the methods for
+	 * handling column and row selection. When setting states, such as
+	 * <code>setSelectionMode</code>, it not only updates the mode for the row
+	 * selection model but also sets similar values in the selection model of
+	 * the <code>columnModel</code>. If you want to have the row and column
+	 * selection models operating in different modes, set them both directly.
+	 * <p>
+	 * Both the row and column selection models for <code>JTable</code> default
+	 * to using a <code>DefaultListSelectionModel</code> so that
+	 * <code>JTable</code> works the same way as the <code>JList</code>. See the
+	 * <code>setSelectionMode</code> method in <code>JList</code> for details
+	 * about the modes.
+	 * 
+	 * @see JList#setSelectionMode
+	 * @beaninfo description: The selection mode used by the row and column
+	 *           selection models. enum: SINGLE_SELECTION
+	 *           ListSelectionModel.SINGLE_SELECTION SINGLE_INTERVAL_SELECTION
+	 *           ListSelectionModel.SINGLE_INTERVAL_SELECTION
+	 *           MULTIPLE_INTERVAL_SELECTION
+	 *           ListSelectionModel.MULTIPLE_INTERVAL_SELECTION
+	 */
+	public void setSelectionMode(int mode) {
+		getOutline().setSelectionMode(mode);
 	}
 }

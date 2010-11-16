@@ -12,87 +12,20 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.backend.model.User;
-import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.GridFile;
 
-public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
+public class JobsFileSystemPlugin implements VirtualFileSystemPlugin {
 
-	static final Logger myLogger = Logger.getLogger(GroupFileSystemPlugin.class
+	static final Logger myLogger = Logger.getLogger(JobsFileSystemPlugin.class
 			.getName());
 
-	public static final String IDENTIFIER = "groups";
+	public static final String IDENTIFIER = "jobs";
 
 	private final User user;
 
-	public GroupFileSystemPlugin(User user) {
+	public JobsFileSystemPlugin(User user) {
 		this.user = user;
-	}
-
-	private GridFile assembleFileObject(String path, Map<String, GridFile> lsMap) {
-
-		GridFile result = new GridFile(path, -1L);
-		result.setIsVirtual(true);
-
-		for (String url : lsMap.keySet()) {
-			result.addUrl(url, 0);
-
-			GridFile child = lsMap.get(url);
-
-			if (!child.isFolder()) {
-				boolean alreadyInChildren = false;
-				for (GridFile resultChild : result.getChildren()) {
-					if (resultChild.getName().equals(child.getName())) {
-						resultChild.addUrl(child.getUrl(), 0);
-						resultChild.setUrl(child.getPath());
-						resultChild.setIsVirtual(true);
-						resultChild.setLastModified(-1L);
-						resultChild.setSize(-1L);
-						resultChild.addSites(child.getSites());
-						result.addSites(child.getSites());
-						alreadyInChildren = true;
-						break;
-					}
-				}
-				if (!alreadyInChildren) {
-					result.addChild(child);
-					result.addSites(child.getSites());
-				}
-				continue;
-			} else {
-
-				// for a folder, we need to do a bit more.
-				// first, we add the parent url
-				// priority we can sort out later if necessary
-				result.addUrl(FileManager.calculateParentUrl(child.getUrl()), 0);
-
-				// now we add the children
-				// but me need to make sure that it's not already in there
-
-				for (GridFile c : child.getChildren()) {
-					boolean alreadyInChildren = false;
-					for (GridFile resultChild : result.getChildren()) {
-						if (resultChild.getName().equals(c.getName())) {
-							resultChild.addUrl(c.getUrl(), 0);
-							resultChild.setUrl(c.getPath());
-							resultChild.setIsVirtual(true);
-							resultChild.addSites(child.getSites());
-							resultChild.setLastModified(-1L);
-							result.addSites(child.getSites());
-							alreadyInChildren = true;
-							break;
-						}
-					}
-					if (!alreadyInChildren) {
-						result.addChild(c);
-						result.addSites(child.getSites());
-					}
-				}
-			}
-
-		}
-
-		return result;
 	}
 
 	public GridFile createDtoFileObject(final String path, int recursiveLevels)
@@ -106,7 +39,6 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 		String[] tokens = StringUtils.split(path, '/');
 
 		if (tokens.length == 2) {
-			// only display groups
 
 			GridFile result = new GridFile();
 			result.setIsVirtual(true);
@@ -225,10 +157,12 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			case 1:
 				return lsMap.values().iterator().next();
 			default:
-				return assembleFileObject(path, lsMap);
+				// return assembleFileObject(path, lsMap);
+				return null;
 
 			}
 		}
 
 	}
+
 }
