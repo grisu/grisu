@@ -1633,15 +1633,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public DtoStringList getAllSites() {
 
-		// if ( ServerPropertiesManager.getMDSenabled() ) {
 		return DtoStringList.fromStringArray(informationManager.getAllSites());
-		// return MountPointManager.getAllSitesFromMDS();
-		// can't enable the mds version right now until the datadirectory thing
-		// works...
-		// return MountPointManager.getAllSites();
-		// } else {
-		// return MountPointManager.getAllSites();
-		// }
 	}
 
 	/*

@@ -2,15 +2,14 @@ package org.vpac.grisu.utils;
 
 import java.net.URI;
 
-import com.google.common.collect.ImmutableBiMap;
-
 public class MountPointHelpers {
 
-	static final public ImmutableBiMap<String, String> MOUNTPOINT_ALIASS = new ImmutableBiMap.Builder<String, String>()
-			.put("ng2.auckland.ac.nz (BeSTGRID)", "Auckland")
-			.put("ng2.auckland.ac.nz (Workshop)", "Auckland")
-			.put("ng2.aut.ac.nz (BeSTGRID)", "AUT")
-			.put("ng2.canterbury.ac.nz (BeSTGRID)", "Canterbury").build();
+	// static final public ImmutableBiMap<String, String> MOUNTPOINT_ALIASS =
+	// new ImmutableBiMap.Builder<String, String>()
+	// .put("ng2.auckland.ac.nz (BeSTGRID)", "Auckland")
+	// // .put("ng2.auckland.ac.nz (Workshop)", "Auckland")
+	// .put("ng2.aut.ac.nz (BeSTGRID)", "AUT")
+	// .put("ng2.canterbury.ac.nz (BeSTGRID)", "Canterbury").build();
 
 	/**
 	 * Calculates the name of the mountpoint for a given server and fqan. It
