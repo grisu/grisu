@@ -26,6 +26,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
+import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.events.FolderCreatedEvent;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -166,8 +167,20 @@ public class FileManager {
 	public static String getFilename(String url) {
 
 		if (isLocal(url)) {
-			return new File(url).getName();
+			if ("local://".equals(url)) {
+				return "Local";
+			}
+			url = ensureUriFormat(url);
+			File file = null;
+			try {
+				file = new File(new URI(url));
+			} catch (URISyntaxException e) {
+				throw new RuntimeException(e);
+			}
+			String name = file.getName();
+			return name;
 		} else {
+			X.p("Not Local");
 			final String filename = url.substring(url.lastIndexOf("/") + 1);
 			return filename;
 		}
@@ -757,7 +770,8 @@ public class FileManager {
 			throws RemoteFileSystemException {
 
 		if (!serviceInterface.isFolder(folderUrl)) {
-			throw new IllegalArgumentException("Specified url is not a folder.");
+			throw new IllegalArgumentException("Specified url " + folderUrl
+					+ " is not a folder.");
 		}
 
 		final GridFile folder = serviceInterface.ls(folderUrl, 0);
@@ -775,12 +789,6 @@ public class FileManager {
 		for (GridFile f : folder.getChildren()) {
 			result.add(new GlazedFile(f));
 		}
-
-		System.out.println();
-		for (GlazedFile file : result) {
-			System.out.println("File: " + file.getUrl());
-		}
-		System.out.println();
 
 		return result;
 	}
@@ -805,6 +813,7 @@ public class FileManager {
 	public GridFile ls(String url, int recursionLevel)
 			throws RemoteFileSystemException {
 
+		X.p("XXX: " + url);
 		if (isLocal(url)) {
 
 			if ("local://".equals(url)) {

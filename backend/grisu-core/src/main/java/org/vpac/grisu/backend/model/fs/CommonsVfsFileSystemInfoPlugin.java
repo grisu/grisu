@@ -137,16 +137,16 @@ public class CommonsVfsFileSystemInfoPlugin implements FileSystemInfoPlugin,
 
 			for (final FileObject child : children) {
 				if (FileType.FOLDER.equals(child.getType())) {
-					final GridFile childfolder = new GridFile(child
-							.getURL().toString(), child.getContent()
+					final GridFile childfolder = new GridFile(child.getURL()
+							.toString(), child.getContent()
 							.getLastModifiedTime());
 					childfolder.addFqan(mp.getFqan());
 					childfolder.addSite(mp.getSite());
 					folder.addChild(childfolder);
 				} else if (FileType.FILE.equals(child.getType())) {
-					final GridFile childFile = new GridFile(child
-							.getURL().toString(), child.getContent().getSize(),
-							child.getContent().getLastModifiedTime());
+					final GridFile childFile = new GridFile(child.getURL()
+							.toString(), child.getContent().getSize(), child
+							.getContent().getLastModifiedTime());
 					childFile.addFqan(mp.getFqan());
 					childFile.addSite(mp.getSite());
 					folder.addChild(childFile);

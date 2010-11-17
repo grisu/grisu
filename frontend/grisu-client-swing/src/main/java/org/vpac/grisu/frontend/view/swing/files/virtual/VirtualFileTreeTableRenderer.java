@@ -40,6 +40,7 @@ public class VirtualFileTreeTableRenderer implements RenderDataProvider {
 		if (userObject instanceof String) {
 			return (String) userObject;
 		} else if (userObject instanceof GridFile) {
+
 			GridFile f = (GridFile) userObject;
 			return f.getName();
 		} else {
