@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.view.swing.files.virtual;
+package org.vpac.grisu.frontend.view.swing.files.virtual.utils;
 
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
@@ -18,6 +18,7 @@ import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListListener;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListPanel;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListPanelContextMenu;
+import org.vpac.grisu.frontend.view.swing.files.virtual.GridFileTreeNode;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
@@ -179,14 +180,14 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 	private void initialize() {
 
 		GridFile root = new GridFile("grid://groups", -1L);
-		VirtualFileTreeNode rootNode = new VirtualFileTreeNode(fm, root);
+		GridFileTreeNode rootNode = new GridFileTreeNode(fm, root);
 
 		DefaultTreeModel model = new DefaultTreeModel(rootNode);
 		rootNode.setModel(model);
 
 		try {
 			for (GridFile f : fm.ls(root)) {
-				rootNode.add(new VirtualFileTreeNode(fm, f, model,
+				rootNode.add(new GridFileTreeNode(fm, f, model,
 						displayHiddenFiles, extensionsToDisplay));
 			}
 		} catch (RemoteFileSystemException e) {

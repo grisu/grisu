@@ -7,10 +7,11 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
+import org.vpac.grisu.frontend.view.swing.files.virtual.utils.LazyLoadingTreeNode;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.dto.GridFile;
 
-public class VirtualFileTreeNode extends LazyLoadingTreeNode {
+public class GridFileTreeNode extends LazyLoadingTreeNode {
 
 	private static final long serialVersionUID = 1L;
 	private final FileManager fm;
@@ -18,16 +19,16 @@ public class VirtualFileTreeNode extends LazyLoadingTreeNode {
 	private final boolean displayHiddenFiles;
 	private final String[] extensionsToDisplay;
 
-	public VirtualFileTreeNode(FileManager fm, GridFile userObject) {
+	public GridFileTreeNode(FileManager fm, GridFile userObject) {
 		this(fm, userObject, null, true, null);
 	}
 
-	public VirtualFileTreeNode(FileManager fm, GridFile userObject,
+	public GridFileTreeNode(FileManager fm, GridFile userObject,
 			DefaultTreeModel model) {
 		this(fm, userObject, model, true, null);
 	}
 
-	public VirtualFileTreeNode(FileManager fm, GridFile userObject,
+	public GridFileTreeNode(FileManager fm, GridFile userObject,
 			DefaultTreeModel model, boolean displayHiddenFiles,
 			String[] extensionsToDisplay) {
 		super(userObject, model);
@@ -91,7 +92,7 @@ public class VirtualFileTreeNode extends LazyLoadingTreeNode {
 					}
 				}
 
-				list.add(new VirtualFileTreeNode(fm, f, model,
+				list.add(new GridFileTreeNode(fm, f, model,
 						displayHiddenFiles, extensionsToDisplay));
 				temp.addChild(f);
 			}

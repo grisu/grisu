@@ -14,23 +14,23 @@ import org.vpac.grisu.model.dto.GridFile;
 import com.jidesoft.swing.JideBoxLayout;
 import com.jidesoft.swing.JideSplitPane;
 
-public class VirtualFileSystemPanelsManager extends JPanel implements
+public class GridFileManagementPanel extends JPanel implements
 		GridFileListListener {
 	private JideSplitPane jideSplitPane;
 
 	private final ServiceInterface si;
 
-	private VirtualFileSystemTreeTablePanel fileListPanel;
+	private GridFileTreePanel fileListPanel;
 	private ListAndPreviewFilePanel listAndPreviewPanel;
 
 	private final GridFile leftRoot;
 	private final GridFile rightRoot;
 
-	public VirtualFileSystemPanelsManager(ServiceInterface si) {
+	public GridFileManagementPanel(ServiceInterface si) {
 		this(si, null, null);
 	}
 
-	public VirtualFileSystemPanelsManager(ServiceInterface si,
+	public GridFileManagementPanel(ServiceInterface si,
 			GridFile leftRoot, GridFile rightRoot) {
 		super();
 		this.si = si;
@@ -66,9 +66,9 @@ public class VirtualFileSystemPanelsManager extends JPanel implements
 
 	}
 
-	private VirtualFileSystemTreeTablePanel getFileListPanel() {
+	private GridFileTreePanel getFileListPanel() {
 		if (fileListPanel == null) {
-			fileListPanel = new VirtualFileSystemTreeTablePanel(si, leftRoot,
+			fileListPanel = new GridFileTreePanel(si, leftRoot,
 					false);
 			fileListPanel.addFileListListener(this);
 		}

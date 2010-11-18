@@ -7,7 +7,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import org.netbeans.swing.outline.RowModel;
 import org.vpac.grisu.model.dto.GridFile;
 
-public class VirtualFileTreeTableRowModel implements RowModel {
+public class GridFileTreeTableRowModel implements RowModel {
 
 	public Class getColumnClass(int col) {
 		switch (col) {

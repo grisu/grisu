@@ -28,7 +28,7 @@ public class ListAndPreviewFilePanel extends JPanel {
 	private JPanel cardPanel;
 	private JPanel actionPanel;
 	private JComboBox comboBox;
-	private VirtualFileSystemTreeTablePanel virtualFileSystemTreeTablePanel;
+	private GridFileTreePanel virtualFileSystemTreeTablePanel;
 
 	private final ServiceInterface si;
 	private GenericGridFileViewer genericFileViewer;
@@ -122,9 +122,9 @@ public class ListAndPreviewFilePanel extends JPanel {
 		return genericFileViewer;
 	}
 
-	private VirtualFileSystemTreeTablePanel getVirtualFileSystemTreeTablePanel() {
+	private GridFileTreePanel getVirtualFileSystemTreeTablePanel() {
 		if (virtualFileSystemTreeTablePanel == null) {
-			virtualFileSystemTreeTablePanel = new VirtualFileSystemTreeTablePanel(
+			virtualFileSystemTreeTablePanel = new GridFileTreePanel(
 					si, root);
 		}
 		return virtualFileSystemTreeTablePanel;

@@ -10,20 +10,21 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import org.apache.commons.lang.StringUtils;
 import org.netbeans.swing.outline.RenderDataProvider;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.view.swing.files.virtual.utils.VirtualFileSystemBrowserTreeRenderer;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
 import org.vpac.grisu.model.dto.GridFile;
 
 import furbelow.SpinningDial;
 
-public class VirtualFileTreeTableRenderer implements RenderDataProvider {
+public class GridFileTreeTableRenderer implements RenderDataProvider {
 
 	private static SpinningDial LOADING_ICON = new SpinningDial(16, 16);
 
 	private final ServiceInterface si;
 	private final UserEnvironmentManager uem;
 
-	public VirtualFileTreeTableRenderer(ServiceInterface si) {
+	public GridFileTreeTableRenderer(ServiceInterface si) {
 		this.si = si;
 		this.uem = GrisuRegistryManager.getDefault(si)
 				.getUserEnvironmentManager();

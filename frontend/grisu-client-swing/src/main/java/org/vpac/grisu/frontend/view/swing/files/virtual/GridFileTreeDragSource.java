@@ -12,14 +12,14 @@ import java.awt.dnd.DragSourceListener;
 import org.netbeans.swing.outline.Outline;
 import org.vpac.grisu.X;
 
-public class VirtualFileSystemDragSource implements DragSourceListener,
+public class GridFileTreeDragSource implements DragSourceListener,
 		DragGestureListener {
 	private final DragSource source;
 	private final DragGestureRecognizer recognizer;
 
 	Outline sourceTree;
 
-	public VirtualFileSystemDragSource(Outline tree, int actions) {
+	public GridFileTreeDragSource(Outline tree, int actions) {
 		sourceTree = tree;
 		source = new DragSource();
 		recognizer = source.createDefaultDragGestureRecognizer(sourceTree,

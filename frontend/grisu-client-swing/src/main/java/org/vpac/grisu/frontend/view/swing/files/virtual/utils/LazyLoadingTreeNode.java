@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.view.swing.files.virtual;
+package org.vpac.grisu.frontend.view.swing.files.virtual.utils;
 
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;

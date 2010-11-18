@@ -25,7 +25,7 @@ import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.GridFile;
 
-public class VirtualFileSystemDropTarget implements DropTargetListener {
+public class GridFileTreeDropTarget implements DropTargetListener {
 
 	class OpenFolderTask extends TimerTask {
 
@@ -58,7 +58,7 @@ public class VirtualFileSystemDropTarget implements DropTargetListener {
 
 	private final Timer timer = new Timer();
 
-	public VirtualFileSystemDropTarget(ServiceInterface si, Outline tree) {
+	public GridFileTreeDropTarget(ServiceInterface si, Outline tree) {
 		this.si = si;
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		targetOutline = tree;
@@ -105,8 +105,8 @@ public class VirtualFileSystemDropTarget implements DropTargetListener {
 		int y = new Double(dtde.getLocation().getY()).intValue();
 		TreePath p = outline.getClosestPathForLocation(x, y);
 
-		if (p.getLastPathComponent() instanceof VirtualFileTreeNode) {
-			GridFile dropTargetFile = ((VirtualFileTreeNode) p
+		if (p.getLastPathComponent() instanceof GridFileTreeNode) {
+			GridFile dropTargetFile = ((GridFileTreeNode) p
 					.getLastPathComponent()).getGridFile();
 
 			Point point = new Point(x, y);
@@ -136,7 +136,7 @@ public class VirtualFileSystemDropTarget implements DropTargetListener {
 
 			} else {
 				openFolderTask.cancel();
-				GridFile parent = ((VirtualFileTreeNode) p.getParentPath()
+				GridFile parent = ((GridFileTreeNode) p.getParentPath()
 						.getLastPathComponent()).getGridFile();
 
 				if (parent.isVirtual()) {
@@ -198,7 +198,7 @@ public class VirtualFileSystemDropTarget implements DropTargetListener {
 	private void selectFolderAndChildren(Outline outline, TreePath path,
 			Point point) {
 
-		GridFile dropTargetFile = ((VirtualFileTreeNode) path
+		GridFile dropTargetFile = ((GridFileTreeNode) path
 				.getLastPathComponent()).getGridFile();
 
 		if (dropTargetFile.isFolder()) {
@@ -216,13 +216,13 @@ public class VirtualFileSystemDropTarget implements DropTargetListener {
 
 		} else {
 			TreePath parentPath = path.getParentPath();
-			VirtualFileTreeNode parentNode = (VirtualFileTreeNode) parentPath
+			GridFileTreeNode parentNode = (GridFileTreeNode) parentPath
 					.getLastPathComponent();
 
 			int row = -1;
 			for (int i = 0; i < outline.getRowCount(); i++) {
 
-				VirtualFileTreeNode node = (VirtualFileTreeNode) outline
+				GridFileTreeNode node = (GridFileTreeNode) outline
 						.getValueAt(i, 0);
 				if (parentNode.equals(node)) {
 					row = i;
@@ -232,7 +232,7 @@ public class VirtualFileSystemDropTarget implements DropTargetListener {
 			Object o = outline.getOutlineModel().getChild(
 					parentPath.getLastPathComponent(), 0);
 
-			GridFile dropTargetFileParent = ((VirtualFileTreeNode) parentPath
+			GridFile dropTargetFileParent = ((GridFileTreeNode) parentPath
 					.getLastPathComponent()).getGridFile();
 
 			if (outline.getOutlineModel().getTreePathSupport()

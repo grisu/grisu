@@ -19,7 +19,7 @@ import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransaction;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransactionManager;
-import org.vpac.grisu.frontend.view.swing.files.virtual.VirtualFileTreeNode;
+import org.vpac.grisu.frontend.view.swing.files.virtual.GridFileTreeNode;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.GridFile;
@@ -97,7 +97,7 @@ public class GridFileTransferHandler extends TransferHandler {
 			for (final int r : table.getSelectedRows()) {
 
 				if (r >= 0) {
-					final GridFile sel = (GridFile) ((VirtualFileTreeNode) (table
+					final GridFile sel = (GridFile) ((GridFileTreeNode) (table
 							.getValueAt(r, 0))).getUserObject();
 					if (!sel.isVirtual()) {
 						selected.add(sel);

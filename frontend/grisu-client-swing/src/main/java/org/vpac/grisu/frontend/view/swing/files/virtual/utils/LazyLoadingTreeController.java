@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.view.swing.files.virtual;
+package org.vpac.grisu.frontend.view.swing.files.virtual.utils;
 
 import java.util.concurrent.ExecutionException;
 
@@ -11,6 +11,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
+
 
 public class LazyLoadingTreeController implements TreeWillExpandListener {
 

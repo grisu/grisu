@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.view.swing.files.virtual;
+package org.vpac.grisu.frontend.view.swing.files.virtual.utils;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -8,6 +8,7 @@ import javax.swing.JFrame;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginException;
 import org.vpac.grisu.frontend.control.login.LoginManager;
+import org.vpac.grisu.frontend.view.swing.files.virtual.GridFileManagementPanel;
 
 public class VirtualFileTreeTableBrowserTest {
 
@@ -50,7 +51,7 @@ public class VirtualFileTreeTableBrowserTest {
 
 	private JFrame frame;
 	// private VirtualFileSystemTreeTablePanel groupFileBrowserPanel;
-	private VirtualFileSystemPanelsManager panel;
+	private GridFileManagementPanel panel;
 
 	/**
 	 * Create the application.
@@ -61,9 +62,9 @@ public class VirtualFileTreeTableBrowserTest {
 		initialize();
 	}
 
-	private VirtualFileSystemPanelsManager getGroupFileBrowserPanel() {
+	private GridFileManagementPanel getGroupFileBrowserPanel() {
 		if (panel == null) {
-			panel = new VirtualFileSystemPanelsManager(si);
+			panel = new GridFileManagementPanel(si);
 		}
 		return panel;
 	}

@@ -27,6 +27,7 @@ import org.vpac.grisu.frontend.view.swing.files.GridFileListListener;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListPanel;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListPanelContextMenu;
 import org.vpac.grisu.frontend.view.swing.files.GridFileTransferHandler;
+import org.vpac.grisu.frontend.view.swing.files.virtual.utils.LazyLoadingTreeController;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
@@ -37,7 +38,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class VirtualFileSystemTreeTablePanel extends JPanel implements
+public class GridFileTreePanel extends JPanel implements
 		GridFileListPanel {
 
 	private static void addPopup(Component component, final JPopupMenu popup) {
@@ -81,15 +82,15 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 
 	private final GridFile root;
 
-	public VirtualFileSystemTreeTablePanel(ServiceInterface si) {
+	public GridFileTreePanel(ServiceInterface si) {
 		this(si, null, true);
 	}
 
-	public VirtualFileSystemTreeTablePanel(ServiceInterface si, GridFile root) {
+	public GridFileTreePanel(ServiceInterface si, GridFile root) {
 		this(si, root, true);
 	}
 
-	public VirtualFileSystemTreeTablePanel(ServiceInterface si, GridFile root,
+	public GridFileTreePanel(ServiceInterface si, GridFile root,
 			boolean useAsDropTarget) {
 		this(si, root, useAsDropTarget, false, null, true);
 	}
@@ -97,7 +98,7 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 	/**
 	 * Create the panel.
 	 */
-	public VirtualFileSystemTreeTablePanel(ServiceInterface si, GridFile root,
+	public GridFileTreePanel(ServiceInterface si, GridFile root,
 			boolean useAsDropTarget, boolean displayHiddenFiles,
 			String[] extensionsToDisplay, boolean displayLocalFileSystems) {
 		this.si = si;
@@ -298,7 +299,7 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 		if (outline == null) {
 			outline = new Outline();
 			outline.setRootVisible(false);
-			outline.setRenderDataProvider(new VirtualFileTreeTableRenderer(si));
+			outline.setRenderDataProvider(new GridFileTreeTableRenderer(si));
 			outline.setDragEnabled(true);
 			outline.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 			outline.setTransferHandler(new GridFileTransferHandler(this, si,
@@ -310,7 +311,7 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 			// VirtualFileSystemDragSource ds = new VirtualFileSystemDragSource(
 			// tree, DnDConstants.ACTION_COPY);
 			if (useAsDropTarget) {
-				VirtualFileSystemDropTarget dt = new VirtualFileSystemDropTarget(
+				GridFileTreeDropTarget dt = new GridFileTreeDropTarget(
 						si, outline);
 			}
 
@@ -354,7 +355,7 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 		Set<GridFile> result = new HashSet<GridFile>();
 		for (int row : rows) {
 			try {
-				GridFile file = (GridFile) ((VirtualFileTreeNode) (getOutline()
+				GridFile file = (GridFile) ((GridFileTreeNode) (getOutline()
 						.getValueAt(row, 0))).getUserObject();
 				X.p("Selected: " + file.getName() + ": " + file.getUrl());
 				result.add(file);
@@ -369,14 +370,14 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 
 	private void initialize(GridFile root) {
 
-		VirtualFileTreeNode rootNode = new VirtualFileTreeNode(fm, root);
+		GridFileTreeNode rootNode = new GridFileTreeNode(fm, root);
 
 		DefaultTreeModel model = new DefaultTreeModel(rootNode);
 		rootNode.setModel(model);
 
 		try {
 			for (GridFile f : fm.ls(root)) {
-				rootNode.add(new VirtualFileTreeNode(fm, f, model,
+				rootNode.add(new GridFileTreeNode(fm, f, model,
 						displayHiddenFiles, extensionsToDisplay));
 			}
 		} catch (RemoteFileSystemException e) {
@@ -389,14 +390,14 @@ public class VirtualFileSystemTreeTablePanel extends JPanel implements
 
 			GridFile localRoot = fm.getLocalRoot();
 
-			VirtualFileTreeNode localRootNode = new VirtualFileTreeNode(fm,
+			GridFileTreeNode localRootNode = new GridFileTreeNode(fm,
 					localRoot, model, displayHiddenFiles, extensionsToDisplay);
 			rootNode.add(localRootNode);
 
 		}
 
 		OutlineModel m = DefaultOutlineModel.createOutlineModel(model,
-				new VirtualFileTreeTableRowModel(), false, "File");
+				new GridFileTreeTableRowModel(), false, "File");
 
 		final LazyLoadingTreeController controller = new LazyLoadingTreeController(
 				model);

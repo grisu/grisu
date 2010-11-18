@@ -16,6 +16,7 @@ import org.netbeans.validation.api.ui.ValidationGroup;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
+import org.vpac.grisu.frontend.view.swing.files.virtual.GridFileTreeDialog;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.historyRepeater.HistoryManager;
@@ -57,6 +58,42 @@ public abstract class AbstractWidget extends JPanel {
 
 		fileDialog.setExtensionsToDisplay(extensions);
 		fileDialog.displayHiddenFiles(displayHiddenFiles);
+
+		fileDialog.centerOnOwner();
+
+		return fileDialog;
+	}
+
+	public static GridFileTreeDialog createGridFileDialog(
+			ServiceInterface si, String historyKey, String[] extensions,
+			boolean displayHiddenFiles, Window owner) {
+
+		if (si == null) {
+			return null;
+		}
+
+		String startUrl = GrisuRegistryManager.getDefault(si)
+				.getHistoryManager().getLastEntry(historyKey);
+
+		if (StringUtils.isBlank(startUrl)) {
+			startUrl = new File(System.getProperty("user.home")).toURI()
+					.toString();
+		} else if (!FileManager.isLocal(startUrl)) {
+			try {
+				if (!si.isFolder(startUrl)) {
+					startUrl = new File(System.getProperty("user.home"))
+							.toURI().toString();
+				}
+			} catch (final RemoteFileSystemException e) {
+				myLogger.debug(e);
+				startUrl = new File(System.getProperty("user.home")).toURI()
+						.toString();
+			}
+		}
+
+		final GridFileTreeDialog fileDialog = new GridFileTreeDialog(
+				owner, si, displayHiddenFiles, extensions, true, startUrl);
+		fileDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		fileDialog.centerOnOwner();
 
