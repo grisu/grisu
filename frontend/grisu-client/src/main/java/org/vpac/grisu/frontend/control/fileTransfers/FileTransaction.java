@@ -13,6 +13,7 @@ import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.model.FileManager;
+import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.files.GlazedFile;
 
 public class FileTransaction implements Comparable<FileTransaction> {
@@ -51,6 +52,12 @@ public class FileTransaction implements Comparable<FileTransaction> {
 			GlazedFile target, boolean overwrite) {
 
 		this(fm, GlazedFile.extractUrls(sources), target.getUrl(), overwrite);
+	}
+
+	public FileTransaction(FileManager fm, Set<GridFile> sources,
+			GridFile target, boolean overwrite) {
+
+		this(fm, GridFile.extractUrls(sources), target.getUrl(), overwrite);
 	}
 
 	public FileTransaction(FileManager fm, Set<String> sources, JobObject job) {

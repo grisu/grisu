@@ -29,7 +29,7 @@ import org.vpac.grisu.frontend.model.events.NewJobEvent;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
-import org.vpac.grisu.model.dto.DtoFolder;
+import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.job.JobCreatedProperty;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
@@ -927,7 +927,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	public List<String> listJobDirectory(int recursionLevel)
 			throws RemoteFileSystemException {
 
-		final DtoFolder folder = serviceInterface.ls(getJobDirectoryUrl(),
+		final GridFile folder = serviceInterface.ls(getJobDirectoryUrl(),
 				recursionLevel);
 
 		return folder.listOfAllFilesUnderThisFolder();

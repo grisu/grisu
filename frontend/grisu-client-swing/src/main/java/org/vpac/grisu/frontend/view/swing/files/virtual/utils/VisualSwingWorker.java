@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.view.swing.files.groups;
+package org.vpac.grisu.frontend.view.swing.files.virtual.utils;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -17,9 +17,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
-
-import org.jdesktop.swingworker.SwingWorker;
 
 public abstract class VisualSwingWorker<T, V> extends SwingWorker<T, V> {
 

@@ -1,10 +1,10 @@
-package org.vpac.grisu.frontend.view.swing.files.groups;
+package org.vpac.grisu.frontend.view.swing.files.virtual.utils;
 
 import java.awt.Color;
 import java.awt.Component;
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.Icon;
 import javax.swing.JTree;
@@ -14,14 +14,21 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
 
+import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
-import org.vpac.grisu.model.files.GlazedFile;
+import org.vpac.grisu.model.dto.GridFile;
 
-public class GroupFileBrowserTreeRenderer extends DefaultTreeCellRenderer
-		implements TreeCellRenderer {
+import furbelow.SpinningDial;
+
+public class VirtualFileSystemBrowserTreeRenderer extends
+		DefaultTreeCellRenderer implements TreeCellRenderer {
+
+	public static final String LOADING_STRING = "Loading...";
+
+	private static SpinningDial LOADING_ICON = new SpinningDial(16, 16);
 
 	private static FileSystemView fsView = FileSystemView.getFileSystemView();
 	private static Icon folderIcon = fsView.getSystemIcon(new File(System
@@ -39,19 +46,17 @@ public class GroupFileBrowserTreeRenderer extends DefaultTreeCellRenderer
 		return null;
 	}
 
-	private final boolean displayFullFqan;
 	private final ServiceInterface si;
 	private final UserEnvironmentManager uem;
 	private final FileManager fm;
 
-	public GroupFileBrowserTreeRenderer(ServiceInterface si) {
+	public VirtualFileSystemBrowserTreeRenderer(ServiceInterface si) {
 		this(si, false);
 	}
 
-	public GroupFileBrowserTreeRenderer(ServiceInterface si,
+	public VirtualFileSystemBrowserTreeRenderer(ServiceInterface si,
 			boolean displayFullFqan) {
 		this.si = si;
-		this.displayFullFqan = displayFullFqan;
 		this.uem = GrisuRegistryManager.getDefault(si)
 				.getUserEnvironmentManager();
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
@@ -61,6 +66,9 @@ public class GroupFileBrowserTreeRenderer extends DefaultTreeCellRenderer
 	public Component getTreeCellRendererComponent(JTree tree, Object value,
 			boolean isSelected, boolean expanded, boolean leaf, int row,
 			boolean hasFocus) {
+
+		super.getTreeCellRendererComponent(tree, value, isSelected, expanded,
+				leaf, row, hasFocus);
 
 		if (isSelected) {
 			setBackground((Color) UIManager.get("Table.selectionBackground"));
@@ -72,47 +80,67 @@ public class GroupFileBrowserTreeRenderer extends DefaultTreeCellRenderer
 
 		if (value2 instanceof String) {
 
+			String txt = (String) value2;
 			// this.setText((String) value2);
-			this.setText((String) value2);
-			this.setIcon(null);
+			this.setText(txt);
+			if (LOADING_STRING.equals(txt)) {
+				this.setIcon(LOADING_ICON);
+			} else {
+				this.setIcon(null);
+			}
 
-		} else if (value2 instanceof GlazedFile) {
-			final GlazedFile file = (GlazedFile) value2;
+		} else if (value2 instanceof GridFile) {
+			final GridFile file = (GridFile) value2;
 			String text = null;
 			if (file.isFolder()) {
-				if (GlazedFile.Type.FILETYPE_GROUP.equals(file.getType())) {
-					if (displayFullFqan) {
-						text = file.getName();
-					} else {
-						text = uem.getUniqueGroupname(file.getName());
-					}
-				} else {
-					text = file.getName();
-				}
-
-				// if
-				// (GlazedFile.Type.FILETYPE_MOUNTPOINT.equals(file.getType()))
-				// {
-				// text = uem.getMountPointForUrl(file.getUrl()).getSite();
-				// }
-				if (GlazedFile.Type.FILETYPE_MOUNTPOINT.equals(file.getType())) {
-					text = uem.getMountPointForUrl(file.getUrl()).getAlias();
-				}
 
 				this.setIcon(folderIcon);
 			} else {
 				this.setIcon(fileIcon);
-				try {
-					text = URLDecoder.decode(file.getName(), "UTF-8");
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-					text = file.getName();
-				}
+			}
+			text = file.getName();
+			this.setText(text);
+
+			String siteString = null;
+
+			switch (file.getSites().size()) {
+			case 0:
+				siteString = "Sites: n/a";
+				break;
+			case 1:
+				siteString = "Site: " + file.getSites().iterator().next();
+				break;
+			default:
+				siteString = "Sites: "
+						+ StringUtils.join(file.getSites(), ", ");
+				break;
 
 			}
 
-			this.setText(text);
+			String fqanString = null;
 
+			switch (file.getFqans().size()) {
+			case 0:
+				fqanString = "Groups: n/a";
+				break;
+			case 1:
+				fqanString = "Group: "
+						+ uem.getUniqueGroupname(file.getFqans().iterator()
+								.next());
+				break;
+			default:
+				Set<String> tmp = new TreeSet<String>();
+				for (String group : file.getFqans()) {
+					tmp.add(group);
+				}
+				fqanString = "Groups: " + StringUtils.join(tmp, ", ");
+				break;
+			}
+
+			String ttt = siteString + ", " + fqanString;
+
+			this.setToolTipText(ttt);
+			// tree.setToolTipText(ttt);
 		}
 
 		return this;

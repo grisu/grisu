@@ -56,6 +56,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 	private String[] cachedFqans = null;
 	private String[] cachedFqansUsable = null;
 	private String[] cachedUniqueGroupnames = null;
+	private String[] cachedUniqueGroupnamesUsable = null;
 	private final Map<String, Set<String>> cachedFqansPerApplication = new HashMap<String, Set<String>>();
 	private Set<String> cachedAllSubmissionLocations = null;
 	private SortedSet<String> cachedAllSites = null;
@@ -188,9 +189,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 					cachedAllSites.add(mp.getSite());
 				}
 			}
-			// for (String subLoc : getAllAvailableSubmissionLocations()) {
-			// cachedAllSites.add(resourceInfo.getSite(subLoc));
-			// }
+
 		}
 		return cachedAllSites;
 	}
@@ -209,15 +208,26 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 		return cachedAllSubmissionLocations;
 	}
 
-	public String[] getAllAvailableUniqueGroupnames() {
+	public String[] getAllAvailableUniqueGroupnames(
+			boolean excludeGroupsWithNoQuota) {
 
-		if (cachedUniqueGroupnames == null) {
-			cachedUniqueGroupnames = new String[getAllAvailableFqans().length];
-			for (int i = 0; i < getAllAvailableUniqueGroupnames().length; i++) {
-				cachedUniqueGroupnames[i] = getUniqueGroupname(getAllAvailableFqans()[i]);
+		if (!excludeGroupsWithNoQuota) {
+			if (cachedUniqueGroupnames == null) {
+				cachedUniqueGroupnames = new String[getAllAvailableFqans().length];
+				for (int i = 0; i < cachedUniqueGroupnames.length; i++) {
+					cachedUniqueGroupnames[i] = getUniqueGroupname(getAllAvailableFqans()[i]);
+				}
 			}
+			return cachedUniqueGroupnames;
+		} else {
+			if (cachedUniqueGroupnamesUsable == null) {
+				cachedUniqueGroupnamesUsable = new String[getAllAvailableFqans(true).length];
+				for (int i = 0; i < cachedUniqueGroupnamesUsable.length; i++) {
+					cachedUniqueGroupnamesUsable[i] = getUniqueGroupname(getAllAvailableFqans(true)[i]);
+				}
+			}
+			return cachedUniqueGroupnamesUsable;
 		}
-		return cachedFqans;
 	}
 
 	public DtoBatchJob getBatchJob(String jobname, boolean refresh)

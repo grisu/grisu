@@ -1,13 +1,13 @@
 package org.vpac.grisu.backend.model;
 
 import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -28,12 +28,13 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystem;
 import org.apache.commons.vfs.FileSystemException;
-import org.apache.commons.vfs.FileSystemOptions;
 import org.apache.commons.vfs.impl.DefaultFileSystemManager;
-import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileSystemConfigBuilder;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.CollectionOfElements;
 import org.vpac.grisu.backend.hibernate.UserDAO;
+import org.vpac.grisu.backend.model.fs.FileSystemManager;
+import org.vpac.grisu.backend.model.fs.InvalidPathException;
+import org.vpac.grisu.backend.model.fs.ThreadLocalCommonsVfsManager;
 import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.backend.model.job.JobSubmissionManager;
 import org.vpac.grisu.backend.model.job.JobSubmitter;
@@ -41,14 +42,15 @@ import org.vpac.grisu.backend.model.job.gt4.GT4DummySubmitter;
 import org.vpac.grisu.backend.model.job.gt4.GT4Submitter;
 import org.vpac.grisu.backend.model.job.gt5.GT5Submitter;
 import org.vpac.grisu.backend.utils.CertHelpers;
-import org.vpac.grisu.backend.utils.FileSystemStructureToXMLConverter;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.control.serviceInterfaces.AbstractServiceInterface;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.DtoActionStatus;
+import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
+import org.vpac.grisu.utils.FqanHelpers;
 import org.vpac.grisu.utils.MountPointHelpers;
 import org.vpac.security.light.voms.VO;
 import org.vpac.security.light.voms.VOManagement.VOManagement;
@@ -71,143 +73,6 @@ import au.org.arcs.jcommons.constants.Constants;
 @Entity
 @Table(name = "users")
 public class User {
-
-	// to get one filesystemmanager per thread
-	private class ThreadLocalFsManager extends ThreadLocal {
-
-		private FileSystem createFileSystem(String rootUrl,
-				ProxyCredential credToUse) {
-
-			final FileSystemOptions opts = new FileSystemOptions();
-
-			if (rootUrl.startsWith("gsiftp")) {
-				myLogger.debug("Url \"" + rootUrl
-						+ "\" is gsiftp url, using gridftpfilesystembuilder...");
-
-				final GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
-						.getInstance();
-				builder.setGSSCredential(opts, credToUse.getGssCredential());
-				// builder.setUserDirIsRoot(opts, true);
-			}
-
-			FileObject fileRoot;
-			try {
-				fileRoot = getFsManager().resolveFile(rootUrl, opts);
-			} catch (final FileSystemException e) {
-				myLogger.error("Can't connect to filesystem: " + rootUrl
-						+ " using VO: " + credToUse.getFqan());
-				throw new RuntimeException("Can't connect to filesystem "
-						+ rootUrl + ": " + e.getLocalizedMessage(), e);
-			}
-
-			FileSystem fileBase = null;
-			fileBase = fileRoot.getFileSystem();
-
-			return fileBase;
-
-		}
-
-		public synchronized FileSystem getFileSystem(final String rootUrl,
-				String fqan) throws FileSystemException {
-
-			if (Thread.interrupted()) {
-				Thread.currentThread().interrupt();
-				remove();
-				return null;
-			}
-
-			ProxyCredential credToUse = null;
-
-			MountPoint temp = null;
-			try {
-				temp = getResponsibleMountpointForAbsoluteFile(rootUrl);
-			} catch (final IllegalStateException e) {
-				myLogger.info(e);
-			}
-			if ((fqan == null) && (temp != null) && (temp.getFqan() != null)) {
-				fqan = temp.getFqan();
-			}
-			// get the right credential for this mountpoint
-			if (fqan != null) {
-
-				credToUse = getCred(fqan);
-
-			} else {
-				credToUse = getCred();
-			}
-
-			FileSystem fileBase = null;
-
-			if (temp == null) {
-				// means we have to figure out how to connect to this. I.e.
-				// which fqan to use...
-				// throw new FileSystemException(
-				// "Could not find mountpoint for url " + rootUrl);
-
-				// creating a filesystem...
-				myLogger.info("Creating filesystem without mountpoint...");
-				return createFileSystem(rootUrl, credToUse);
-
-			} else {
-				// great, we can re-use this filesystem
-				if (((FileSystemCache) get()).getFileSystem(temp) == null) {
-
-					fileBase = createFileSystem(temp.getRootUrl(), credToUse);
-
-					if (temp != null) {
-						((FileSystemCache) get()).addFileSystem(temp, fileBase);
-					}
-				} else {
-					fileBase = ((FileSystemCache) get()).getFileSystem(temp);
-				}
-			}
-
-			if (Thread.interrupted()) {
-				remove();
-				Thread.currentThread().interrupt();
-				return null;
-			}
-
-			return fileBase;
-
-		}
-
-		public DefaultFileSystemManager getFsManager() {
-
-			if (Thread.interrupted()) {
-				remove();
-				Thread.currentThread().interrupt();
-				return null;
-			}
-
-			return ((FileSystemCache) super.get()).getFileSystemManager();
-		}
-
-		@Override
-		public Object initialValue() {
-
-			if (Thread.interrupted()) {
-				Thread.currentThread().interrupt();
-				return null;
-			}
-			myLogger.debug("Creating new FS Manager.");
-			final FileSystemCache cache = new FileSystemCache();
-			myLogger.debug("Creating fsm for thread "
-					+ Thread.currentThread().getName()
-					+ ". cachedFileSystems size: "
-					+ cache.getFileSystems().size());
-			return cache;
-
-		}
-
-		@Override
-		public void remove() {
-			myLogger.debug("Removing fsm for thread "
-					+ Thread.currentThread().getName());
-			((FileSystemCache) get()).close();
-			super.remove();
-		}
-	}
 
 	public static UserDAO userdao = new UserDAO();
 
@@ -248,7 +113,8 @@ public class User {
 		return dn.replace("=", "_").replace(",", "_").replace(" ", "_");
 	}
 
-	private final ThreadLocalFsManager threadLocalFsManager = new ThreadLocalFsManager();
+	private final ThreadLocalCommonsVfsManager threadLocalFsManager = new ThreadLocalCommonsVfsManager(
+			this);
 
 	private Long id = null;
 
@@ -259,11 +125,6 @@ public class User {
 	private final DefaultFileSystemManager fsmanager = null;
 
 	private JobSubmissionManager manager;
-
-	private FileSystemStructureToXMLConverter fsconverter = null;
-
-	// private final Map<String, DtoActionStatus> actionStatus = Collections
-	// .synchronizedMap(new HashMap<String, DtoActionStatus>());
 
 	// this needs to be static because otherwise the session be lost and the
 	// action status can't be found anymore by the client
@@ -281,6 +142,7 @@ public class User {
 	private Set<MountPoint> mountPoints = new HashSet<MountPoint>();
 
 	private Map<String, String> mountPointCache = new HashMap<String, String>();
+	private final Map<String, Set<MountPoint>> mountPointsPerFqanCache = new TreeMap<String, Set<MountPoint>>();
 
 	private Set<MountPoint> mountPointsAutoMounted = new HashSet<MountPoint>();
 
@@ -303,11 +165,14 @@ public class User {
 	private Map<String, ProxyCredential> cachedCredentials = new HashMap<String, ProxyCredential>();
 	// All fqans of the user
 	private Map<String, String> fqans = null;
+	private Set<String> cachedUniqueGroupnames = null;
 
 	private Map<String, String> userProperties = new HashMap<String, String>();
 
 	private Map<String, String> bookmarks = new HashMap<String, String>();
 	private Map<String, JobSubmissionObjectImpl> jobTemplates = new HashMap<String, JobSubmissionObjectImpl>();
+
+	private FileSystemManager fsm;
 
 	// for hibernate
 	public User() {
@@ -357,10 +222,6 @@ public class User {
 
 	}
 
-	// public DtoRemoteObject aquireFile(final String file) {
-	// return null;
-	// }
-
 	/**
 	 * Resolves the provided filename into a FileObject. If the filename starts
 	 * with "/" a file on one of the "mounted" filesystems is looked up. Else it
@@ -377,7 +238,7 @@ public class User {
 	 */
 	public FileObject aquireFile(final String file)
 			throws RemoteFileSystemException {
-		return aquireFile(file, null);
+		return getFileSystemManager().aquireFile(file, null);
 	}
 
 	/**
@@ -385,7 +246,7 @@ public class User {
 	 * with "/" a file on one of the "mounted" filesystems is looked up. Else it
 	 * has to start with the name of a (supported) protocol (like: gsiftp:///).
 	 * 
-	 * @param file
+	 * @param urlOrPath
 	 *            the filename
 	 * @param cred
 	 *            the credential to access the filesystem on which the file
@@ -397,76 +258,10 @@ public class User {
 	 *             if the (possible) required voms credential could not be
 	 *             created
 	 */
-	public FileObject aquireFile(final String file, final String fqan)
+	public FileObject aquireFile(final String urlOrPath, final String fqan)
 			throws RemoteFileSystemException {
 
-		String file_to_aquire = null;
-
-		if (Thread.interrupted()) {
-			Thread.currentThread().interrupt();
-			throw new RemoteFileSystemException("Accessing file interrupted.");
-		}
-
-		if (file.startsWith("tmp:") || file.startsWith("ram:")) {
-			try {
-				return threadLocalFsManager.getFsManager().resolveFile(file);
-			} catch (final FileSystemException e) {
-				throw new RemoteFileSystemException(
-						"Could not access file on local temp filesystem: "
-								+ e.getLocalizedMessage());
-			}
-		} else if (file.startsWith("/")) {
-			// means file on "mounted" filesystem
-
-			final MountPoint mp = getResponsibleMountpointForUserSpaceFile(file);
-
-			if (mp == null) {
-				throw new RemoteFileSystemException(
-						"File path is not on any of the mountpoints for file: "
-								+ file);
-			}
-
-			file_to_aquire = mp.replaceMountpointWithAbsoluteUrl(file);
-
-			if (file_to_aquire == null) {
-				throw new RemoteFileSystemException(
-						"File path is not on any of the mountpoints for file: "
-								+ file);
-			}
-		} else {
-			// means absolute url
-			file_to_aquire = file;
-		}
-
-		FileObject fileObject = null;
-		try {
-			FileSystem root = null;
-
-			// root = this.createFilesystem(mp.getRootUrl(), mp.getFqan());
-			root = threadLocalFsManager.getFileSystem(file, fqan);
-
-			final String fileUri = root.getRootName().getURI();
-
-			try {
-				final URI uri = new URI(file_to_aquire);
-				file_to_aquire = uri.toString();
-			} catch (final URISyntaxException e) {
-				myLogger.error(e);
-				throw new RemoteFileSystemException(
-						"Could not get uri for file " + file_to_aquire);
-			}
-
-			final String tempUriString = file_to_aquire.replace(":2811", "")
-					.substring(fileUri.length());
-			fileObject = root.resolveFile(tempUriString);
-			// fileObject = root.resolveFile(file_to_aquire);
-
-		} catch (final FileSystemException e) {
-			throw new RemoteFileSystemException("Could not access file: "
-					+ file + ": " + e.getMessage());
-		}
-
-		return fileObject;
+		return getFileSystemManager().aquireFile(urlOrPath, fqan);
 
 	}
 
@@ -493,6 +288,7 @@ public class User {
 				+ Thread.currentThread().getName());
 
 		threadLocalFsManager.remove();
+		getFileSystemManager().closeFileSystems();
 	}
 
 	private MountPoint createMountPoint(String server, String path,
@@ -805,22 +601,21 @@ public class User {
 		}
 	}
 
-	// private List<FileReservation> getFileReservations() {
-	// return fileReservations;
-	// }
-	//
-	// private void setFileReservations(List<FileReservation> fileReservations)
-	// {
-	// this.fileReservations = fileReservations;
-	// }
-	//
-	// private List<FileTransfer> getFileTransfers() {
-	// return fileTransfers;
-	// }
-	//
-	// private void setFileTransfers(List<FileTransfer> fileTransfers) {
-	// this.fileTransfers = fileTransfers;
-	// }
+	@Transient
+	public Set<String> getAllAvailableUniqueGroupnames() {
+
+		if (cachedUniqueGroupnames == null) {
+
+			cachedUniqueGroupnames = new TreeSet<String>();
+			Iterator<String> it = getFqans().keySet().iterator();
+
+			while (it.hasNext()) {
+				String fqan = it.next();
+				cachedUniqueGroupnames.add(getUniqueGroupname(fqan));
+			}
+		}
+		return cachedUniqueGroupnames;
+	}
 
 	/**
 	 * Returns all mountpoints (including automounted ones for this session.
@@ -850,6 +645,23 @@ public class User {
 	public Map<String, String> getBookmarks() {
 		return bookmarks;
 	}
+
+	// private List<FileReservation> getFileReservations() {
+	// return fileReservations;
+	// }
+	//
+	// private void setFileReservations(List<FileReservation> fileReservations)
+	// {
+	// this.fileReservations = fileReservations;
+	// }
+	//
+	// private List<FileTransfer> getFileTransfers() {
+	// return fileTransfers;
+	// }
+	//
+	// private void setFileTransfers(List<FileTransfer> fileTransfers) {
+	// this.fileTransfers = fileTransfers;
+	// }
 
 	/**
 	 * Returns the default credential of the user (if any).
@@ -933,6 +745,27 @@ public class User {
 		}
 	}
 
+	@Transient
+	public FileSystemManager getFileSystemManager() {
+		if (fsm == null) {
+			this.fsm = new FileSystemManager(this);
+		}
+		return fsm;
+	}
+
+	public GridFile getFolderListing(final String url)
+			throws RemoteFileSystemException, FileSystemException {
+
+		try {
+			return getFileSystemManager().getFolderListing(url);
+		} catch (InvalidPathException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+
+			return null;
+		}
+	}
+
 	/**
 	 * Getter for the users' fqans.
 	 * 
@@ -952,11 +785,8 @@ public class User {
 	}
 
 	@Transient
-	public FileSystemStructureToXMLConverter getFsConverter() {
-		if (fsconverter == null) {
-			fsconverter = new FileSystemStructureToXMLConverter(this);
-		}
-		return fsconverter;
+	public String getFullFqan(String uniqueGroupname) {
+		return FqanHelpers.getFullFqan(getFqans().keySet(), uniqueGroupname);
 	}
 
 	@Id
@@ -973,6 +803,47 @@ public class User {
 	@CollectionOfElements(fetch = FetchType.EAGER)
 	private Map<String, String> getMountPointCache() {
 		return mountPointCache;
+	}
+
+	// for hibernate
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinTable
+	private Set<MountPoint> getMountPoints() {
+		return mountPoints;
+	}
+
+	@Transient
+	public Set<MountPoint> getMountPoints(String fqan) {
+		if (fqan == null) {
+			fqan = Constants.NON_VO_FQAN;
+		}
+
+		synchronized (fqan) {
+
+			if (mountPointsPerFqanCache.get(fqan) == null) {
+
+				final Set<MountPoint> mps = new HashSet<MountPoint>();
+				for (final MountPoint mp : allMountPoints) {
+					if ((mp.getFqan() == null)
+							|| mp.getFqan().equals(Constants.NON_VO_FQAN)) {
+						if ((fqan == null)
+								|| fqan.equals(Constants.NON_VO_FQAN)) {
+							mps.add(mp);
+							continue;
+						} else {
+							continue;
+						}
+					} else {
+						if (mp.getFqan().equals(fqan)) {
+							mps.add(mp);
+							continue;
+						}
+					}
+				}
+				mountPointsPerFqanCache.put(fqan, mps);
+			}
+			return mountPointsPerFqanCache.get(fqan);
+		}
 	}
 
 	// /**
@@ -997,13 +868,6 @@ public class User {
 	// // true, true, null);
 	// return threadLocalFsManager.getFsManager();
 	// }
-
-	// for hibernate
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinTable
-	private Set<MountPoint> getMountPoints() {
-		return mountPoints;
-	}
 
 	/**
 	 * Checks whether the filesystem of any of the users' mountpoints contains
@@ -1055,6 +919,11 @@ public class User {
 					AbstractServiceInterface.informationManager, submitters);
 		}
 		return manager;
+	}
+
+	@Transient
+	public String getUniqueGroupname(String fqan) {
+		return FqanHelpers.getUniqueGroupname(getFqans().keySet(), fqan);
 	}
 
 	/**
@@ -1225,26 +1094,6 @@ public class User {
 
 	public void resetMountPoints() {
 		allMountPoints = null;
-	}
-
-	/**
-	 * Translates an "user-space" file url into an absolute file url.
-	 * 
-	 * @param file
-	 *            an "user-space" file url (/ngdata.vpac.org/test.txt)
-	 * @return the absolute file url
-	 *         (gsiftp://ngdata.vpac.org/home/san04/markus/test.txt) or null if
-	 *         the file is not within the user's filespace
-	 */
-	public String returnAbsoluteUrl(final String file) {
-		final MountPoint mp = getResponsibleMountpointForUserSpaceFile(file);
-		if (mp == null) {
-			return null;
-		} else if (file.startsWith("gsiftp:")) {
-			return file;
-		} else {
-			return mp.replaceMountpointWithAbsoluteUrl(file);
-		}
 	}
 
 	/**

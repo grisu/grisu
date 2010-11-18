@@ -358,25 +358,6 @@ public class MountPoint implements Comparable<MountPoint> {
 		}
 	}
 
-	/**
-	 * Translates a "mounted" file (on that filesystem to an absolute url like
-	 * gsiftp://ngdata.vpac.org/home/san04/markus/test.txt).
-	 * 
-	 * @param file
-	 *            the "mounted" file (e.g. /ngdata.vpac/test.txt
-	 * @return the absoulte path of the file or null if the file is not in the
-	 *         mounted filesystem or is not a "mounted" file (starts with
-	 *         something like /home.sapac.ngadmin)
-	 */
-	public String replaceMountpointWithAbsoluteUrl(final String file) {
-
-		if (file.startsWith(getAlias())) {
-			return file.replaceFirst(getAlias(), getRootUrl());
-		} else {
-			return null;
-		}
-	}
-
 	public void setAlias(final String mountpoint) {
 		this.alias = mountpoint;
 	}

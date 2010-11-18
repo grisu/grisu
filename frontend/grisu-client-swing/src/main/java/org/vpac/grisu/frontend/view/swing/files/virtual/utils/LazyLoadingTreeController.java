@@ -1,8 +1,9 @@
-package org.vpac.grisu.frontend.view.swing.files.groups;
+package org.vpac.grisu.frontend.view.swing.files.virtual.utils;
 
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JTree;
+import javax.swing.SwingWorker;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -11,7 +12,6 @@ import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import org.jdesktop.swingworker.SwingWorker;
 
 public class LazyLoadingTreeController implements TreeWillExpandListener {
 
@@ -49,7 +49,12 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 	private SwingWorkerFactory<MutableTreeNode[], ?> workerFactory = new DefaultWorkerFactory();
 	/** Tree Model */
 	private final DefaultTreeModel model;
-	private final JTree tree;
+
+	// private final JTree tree;
+
+	public LazyLoadingTreeController(DefaultTreeModel model) {
+		this.model = model;
+	}
 
 	/**
 	 * Default constructor
@@ -58,7 +63,7 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 	 *            Tree model
 	 */
 	public LazyLoadingTreeController(JTree tree) {
-		this.tree = tree;
+		// this.tree = tree;
 		this.model = (DefaultTreeModel) tree.getModel();
 	}
 
@@ -67,7 +72,8 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 	 * @return a new Loading please wait node
 	 */
 	protected MutableTreeNode createLoadingNode() {
-		return new DefaultMutableTreeNode("Loading ...", false);
+		return new DefaultMutableTreeNode(
+				VirtualFileSystemBrowserTreeRenderer.LOADING_STRING, false);
 	}
 
 	/**

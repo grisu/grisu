@@ -1,5 +1,7 @@
 package org.vpac.grisu.utils;
 
+import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -9,6 +11,11 @@ import org.apache.commons.lang.StringUtils;
  * 
  */
 public final class FqanHelpers {
+
+	public static String getFullFqan(Set<String> keySet, String uniqueGroupname) {
+		return getFullFqan(keySet.toArray(new String[keySet.size()]),
+				uniqueGroupname);
+	}
 
 	/**
 	 * Translate back the unique String from {@link #getUniqueGroupname(String)}
@@ -20,7 +27,7 @@ public final class FqanHelpers {
 	 */
 	public static String getFullFqan(String[] allFqans, String groupname) {
 		for (String fqan : allFqans) {
-			if (fqan.endsWith(groupname)) {
+			if (fqan.endsWith(groupname.replace(".", "/"))) {
 				return fqan;
 			}
 		}
@@ -81,6 +88,11 @@ public final class FqanHelpers {
 		return role;
 	}
 
+	public static String getUniqueGroupname(Set<String> keySet, String fqan) {
+		return getUniqueGroupname(keySet.toArray(new String[keySet.size()]),
+				fqan);
+	}
+
 	/**
 	 * This method translates the provided fqan into the shortest possible
 	 * unique groupname, starting from the last token.
@@ -116,7 +128,7 @@ public final class FqanHelpers {
 			if (StringUtils.isBlank(token)) {
 				token = tokens[i];
 			} else {
-				token = tokens[i] + "/" + token;
+				token = tokens[i] + "." + token;
 			}
 
 			for (String f : allFqans) {

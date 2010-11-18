@@ -122,7 +122,7 @@ public class RunningJobManager implements EventSubscriber {
 
 	}
 
-	private final int UPDATE_TIME_IN_SECONDS = 120;
+	private final int UPDATE_TIME_IN_SECONDS = 360;
 
 	private static Map<ServiceInterface, RunningJobManager> cachedRegistries = new HashMap<ServiceInterface, RunningJobManager>();
 

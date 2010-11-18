@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.view.swing.files.groups;
+package org.vpac.grisu.frontend.view.swing.files.virtual.utils;
 
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -6,7 +6,13 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 
 public abstract class LazyLoadingTreeNode extends DefaultMutableTreeNode {
-	private final DefaultTreeModel model;
+
+	private static final long serialVersionUID = 1L;
+	private DefaultTreeModel model;
+
+	public LazyLoadingTreeNode(Object userObject) {
+		super(userObject);
+	}
 
 	/**
 	 * Default Constructor
@@ -82,6 +88,10 @@ public abstract class LazyLoadingTreeNode extends DefaultMutableTreeNode {
 		for (int i = 0; (nodes != null) && (i < nodes.length); i++) {
 			model.insertNodeInto(nodes[i], this, i);
 		}
+	}
+
+	public void setModel(DefaultTreeModel model) {
+		this.model = model;
 	}
 
 }

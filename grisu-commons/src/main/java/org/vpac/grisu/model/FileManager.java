@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -25,14 +26,14 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
+import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.events.FolderCreatedEvent;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
-import org.vpac.grisu.model.dto.DtoFile;
-import org.vpac.grisu.model.dto.DtoFolder;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoStringList;
+import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.files.GlazedFile;
 import org.vpac.grisu.model.status.StatusObject;
 import org.vpac.grisu.settings.ClientPropertiesManager;
@@ -103,9 +104,17 @@ public class FileManager {
 	public static String ensureUriFormat(String inputFile) {
 
 		try {
-			if ((inputFile != null) && inputFile.startsWith("gsiftp:")) {
+			if ((inputFile != null) && (inputFile.startsWith("gsiftp:"))) {
 				return inputFile;
 			}
+
+			String[] supportedTokens = new String[] { "groups" };
+			for (String token : supportedTokens) {
+				if (inputFile.startsWith("/" + token)) {
+					return "grid:/" + inputFile;
+				}
+			}
+
 			new URL(inputFile);
 			return inputFile;
 		} catch (final MalformedURLException e) {
@@ -158,11 +167,35 @@ public class FileManager {
 	public static String getFilename(String url) {
 
 		if (isLocal(url)) {
-			return new File(url).getName();
+			if ("local://".equals(url)) {
+				return "Local";
+			}
+			url = ensureUriFormat(url);
+			File file = null;
+			try {
+				file = new File(new URI(url));
+			} catch (URISyntaxException e) {
+				throw new RuntimeException(e);
+			}
+			String name = file.getName();
+			return name;
 		} else {
+			X.p("Not Local");
 			final String filename = url.substring(url.lastIndexOf("/") + 1);
 			return filename;
 		}
+
+	}
+
+	public static Set<GridFile> getLocalFileSystems() {
+
+		File[] roots = File.listRoots();
+		Set<GridFile> result = new TreeSet<GridFile>();
+		for (File root : roots) {
+			GridFile f = new GridFile(root);
+			result.add(f);
+		}
+		return result;
 
 	}
 
@@ -198,17 +231,20 @@ public class FileManager {
 	 */
 	public static boolean isLocal(String file) {
 
-		file = ensureUriFormat(file);
-
-		if (file.startsWith("gsiftp")) {
+		if (file.startsWith("gsiftp:")) {
+			return false;
+		} else if (file.startsWith("grid:")) {
 			return false;
 		} else if (file.startsWith("file:")) {
+			return true;
+		} else if (file.startsWith("local:")) {
 			return true;
 		} else if (file.startsWith("http:")) {
 			return false;
 		} else {
-			throw new IllegalArgumentException(
-					"Protocol not supported for file: " + file);
+			return true;
+			// throw new IllegalArgumentException(
+			// "Protocol not supported for file: " + file);
 		}
 
 	}
@@ -510,7 +546,7 @@ public class FileManager {
 	private File downloadFolder(final String url)
 			throws FileTransactionException {
 
-		DtoFolder source = null;
+		GridFile source = null;
 		try {
 			source = serviceInterface.ls(url, 0);
 		} catch (final RemoteFileSystemException e) {
@@ -643,6 +679,10 @@ public class FileManager {
 		return fs;
 	}
 
+	public GridFile getGridRoot() {
+		return new GridFile();
+	}
+
 	public File getLocalCacheFile(final String url) {
 
 		if (isLocal(url)) {
@@ -658,6 +698,26 @@ public class FileManager {
 			return new File(rootPath);
 		}
 
+	}
+
+	public GridFile getLocalRoot() {
+
+		GridFile localRoot = new GridFile("local://", -1);
+		localRoot.setIsVirtual(true);
+		localRoot.setName("Local files");
+		localRoot.addSite("Local");
+
+		String homeDir = System.getProperty("user.home");
+		File h = new File(homeDir);
+		GridFile home = new GridFile(h, -100);
+
+		localRoot.addChild(home);
+
+		for (GridFile f : getLocalFileSystems()) {
+			localRoot.addChild(f);
+		}
+
+		return localRoot;
 	}
 
 	public boolean isBiggerThanThreshold(String url)
@@ -710,10 +770,11 @@ public class FileManager {
 			throws RemoteFileSystemException {
 
 		if (!serviceInterface.isFolder(folderUrl)) {
-			throw new IllegalArgumentException("Specified url is not a folder.");
+			throw new IllegalArgumentException("Specified url " + folderUrl
+					+ " is not a folder.");
 		}
 
-		final DtoFolder folder = serviceInterface.ls(folderUrl, 0);
+		final GridFile folder = serviceInterface.ls(folderUrl, 0);
 
 		return folder.listOfAllFilesUnderThisFolder();
 	}
@@ -723,55 +784,50 @@ public class FileManager {
 
 		List<GlazedFile> result = new ArrayList<GlazedFile>();
 
-		if (GlazedFile.Type.FILETYPE_GROUP.equals(parent.getType())) {
+		GridFile folder = ls(parent.getUrl());
 
-			Set<MountPoint> mps = GrisuRegistryManager
-					.getDefault(serviceInterface).getUserEnvironmentManager()
-					.getMountPoints(parent.getName());
-			for (MountPoint mp : mps) {
-				GlazedFile f = new GlazedFile(mp);
-				result.add(f);
-			}
-
-		} else {
-
-			DtoFolder folder = ls(parent.getUrl());
-
-			for (DtoFolder f : folder.getChildrenFolders()) {
-				result.add(new GlazedFile(f));
-			}
-			for (DtoFile f : folder.getChildrenFiles()) {
-				result.add(new GlazedFile(f));
-			}
+		for (GridFile f : folder.getChildren()) {
+			result.add(new GlazedFile(f));
 		}
-
-		System.out.println();
-		for (GlazedFile file : result) {
-			System.out.println("File: " + file.getUrl());
-		}
-		System.out.println();
 
 		return result;
 	}
 
-	public DtoFolder ls(String url) throws RemoteFileSystemException {
+	public synchronized Set<GridFile> ls(GridFile parent)
+			throws RemoteFileSystemException {
 
+		GridFile folder = ls(parent.getUrl());
+
+		if (folder == null) {
+			return null;
+		}
+
+		return folder.getChildren();
+
+	}
+
+	public GridFile ls(String url) throws RemoteFileSystemException {
 		return ls(url, 1);
 	}
 
-	public DtoFolder ls(String url, int recursionLevel)
+	public GridFile ls(String url, int recursionLevel)
 			throws RemoteFileSystemException {
 
+		X.p("XXX: " + url);
 		if (isLocal(url)) {
+
+			if ("local://".equals(url)) {
+				return getLocalRoot();
+			}
 			File temp;
 			temp = getFileFromUriOrPath(url);
 
-			return DtoFolder.listLocalFolder(temp, false);
+			return GridFile.listLocalFolder(temp, false);
 
 		} else {
 
 			try {
-				DtoFolder result = serviceInterface.ls(url, recursionLevel);
+				GridFile result = serviceInterface.ls(url, recursionLevel);
 				return result;
 			} catch (final RemoteFileSystemException e) {
 
@@ -783,7 +839,7 @@ public class FileManager {
 	public boolean needsDownloading(String url) {
 
 		final File cacheTargetFile = getLocalCacheFile(url);
-		final File cacheTargetParentFile = cacheTargetFile.getParentFile();
+		// final File cacheTargetParentFile = cacheTargetFile.getParentFile();
 
 		if (!cacheTargetFile.exists()) {
 			return true;

@@ -33,8 +33,7 @@ import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.UserEnvironmentManager;
-import org.vpac.grisu.model.dto.DtoFile;
-import org.vpac.grisu.model.dto.DtoFolder;
+import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.files.GlazedFile;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -90,7 +89,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 			sortedList, textMatcherEditor);
 
 	private GlazedFile currentDirectory = null;
-	private DtoFolder currentFolder = null;
+	private GridFile currentFolder = null;
 
 	private JXTable table;
 	private Thread updateThread;
@@ -474,11 +473,6 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 	public void setCurrent(GlazedFile file) {
 
-		if (GlazedFile.Type.FILETYPE_GROUP.equals(file.getType())) {
-			throw new RuntimeException(
-					"Group filetye not supported by this filelistpanel.");
-		}
-
 		setCurrent(null, file);
 
 	}
@@ -527,7 +521,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 						if (url == null) {
 							setEmptyList();
-						} else if (GlazedFile.ROOT.equals(url)) {
+						} else if (GridFile.ROOT.equals(url)) {
 							setCurrentDirToGridRoot();
 						} else if (em.getAllAvailableSites().contains(url)) {
 							setCurrentDirToSite(url);
@@ -571,7 +565,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 	}
 
-	private void setCurrentDirToFolder(DtoFolder folder) {
+	private void setCurrentDirToFolder(GridFile folder) {
 
 		currentDirectory = new GlazedFile(folder);
 		currentFolder = folder;
@@ -580,19 +574,18 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 		try {
 			currentDirectoryContent.clear();
 
-			if (!FileManager.isLocal(folder.getRootUrl())) {
+			if (!FileManager.isLocal(folder.getUrl())) {
 				if (!currentUrlIsStartUrl()) {
 
-					if (em.isMountPointRoot(folder.getRootUrl())) {
+					if (em.isMountPointRoot(folder.getUrl())) {
 						final GlazedFile temp = new GlazedFile(em
-								.getMountPointForUrl(folder.getRootUrl())
-								.getSite());
+								.getMountPointForUrl(folder.getUrl()).getSite());
 						temp.setParent();
 						currentDirectoryContent.add(temp);
 					} else {
 						final GlazedFile temp = new GlazedFile(
-								FileManager.calculateParentUrl(folder
-										.getRootUrl()), si);
+								FileManager.calculateParentUrl(folder.getUrl()),
+								si);
 						temp.setParent();
 						currentDirectoryContent.add(temp);
 					}
@@ -600,8 +593,8 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 			} else {
 				if (!currentUrlIsStartUrl()) {
 					try {
-						final File parent = new File(new URI(
-								folder.getRootUrl())).getParentFile();
+						final File parent = new File(new URI(folder.getUrl()))
+								.getParentFile();
 
 						GlazedFile tempFile;
 						if (parent == null) {
@@ -619,12 +612,8 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 				}
 			}
 
-			for (final DtoFolder fol : folder.getChildrenFolders()) {
-				currentDirectoryContent.add(new GlazedFile(fol));
-			}
-
-			for (final DtoFile file : folder.getChildrenFiles()) {
-				currentDirectoryContent.add(new GlazedFile(file));
+			for (final GridFile f : folder.getChildren()) {
+				currentDirectoryContent.add(new GlazedFile(f));
 			}
 
 		} finally {
@@ -778,13 +767,13 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 	public void setRootAndCurrentUrl(String rootUrl, GlazedFile startFile) {
 
 		if (rootUrl == null) {
-			this.rootUrl = GlazedFile.ROOT;
+			this.rootUrl = GridFile.ROOT;
 		} else {
 			this.rootUrl = rootUrl;
 		}
 
 		if (startFile == null) {
-			setCurrentUrl(GlazedFile.ROOT);
+			setCurrentUrl(GridFile.ROOT);
 		} else {
 			setCurrent(startFile);
 		}
@@ -793,7 +782,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 	public void setRootAndCurrentUrl(String rootUrl, String startUrl) {
 		if (rootUrl == null) {
-			this.rootUrl = GlazedFile.ROOT;
+			this.rootUrl = GridFile.ROOT;
 		} else {
 			this.rootUrl = rootUrl;
 		}
@@ -803,7 +792,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 	public void setRootUrl(String url) {
 		if (url == null) {
-			this.rootUrl = GlazedFile.ROOT;
+			this.rootUrl = GridFile.ROOT;
 		} else {
 			this.rootUrl = url;
 		}
@@ -812,7 +801,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 	private void setUrl(String url) throws RemoteFileSystemException {
 
 		setEmptyList();
-		final DtoFolder folder = fm.ls(url);
+		final GridFile folder = fm.ls(url);
 
 		setCurrentDirToFolder(folder);
 

@@ -36,7 +36,7 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 	/**
 	 * The list of job properties.
 	 */
-	private List<DtoJobProperty> properties = new LinkedList<DtoJobProperty>();
+	private List<DtoProperty> properties = new LinkedList<DtoProperty>();
 	// /**
 	// * The status of the job. Be aware that, depending on how you queried for
 	// this job, this can be stale information.
@@ -180,7 +180,7 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 	}
 
 	@XmlElement(name = "jobproperty")
-	public List<DtoJobProperty> getProperties() {
+	public List<DtoProperty> getProperties() {
 		return properties;
 	}
 
@@ -286,7 +286,7 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 
 		final Map<String, String> map = new HashMap<String, String>();
 
-		for (final DtoJobProperty prop : getProperties()) {
+		for (final DtoProperty prop : getProperties()) {
 			map.put(prop.getKey(), prop.getValue());
 		}
 
@@ -340,7 +340,7 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 		this.messages = messages;
 	}
 
-	public void setProperties(List<DtoJobProperty> properties) {
+	public void setProperties(List<DtoProperty> properties) {
 		this.properties = properties;
 	}
 

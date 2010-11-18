@@ -37,14 +37,14 @@ public class DtoJob implements Comparable<DtoJob> {
 
 		result.setStatus(status);
 
-		final List<DtoJobProperty> list = new LinkedList<DtoJobProperty>();
+		final List<DtoProperty> list = new LinkedList<DtoProperty>();
 		for (final String key : jobProperties.keySet()) {
-			final DtoJobProperty temp = new DtoJobProperty();
+			final DtoProperty temp = new DtoProperty();
 			temp.setKey(key);
 			temp.setValue(jobProperties.get(key));
 			list.add(temp);
 		}
-		final DtoJobProperty temp2 = new DtoJobProperty();
+		final DtoProperty temp2 = new DtoProperty();
 		temp2.setKey(Constants.INPUT_FILE_URLS_KEY);
 		temp2.setValue(StringUtils.join(inputFiles, ","));
 		list.add(temp2);
@@ -64,7 +64,7 @@ public class DtoJob implements Comparable<DtoJob> {
 	/**
 	 * The list of job properties.
 	 */
-	private List<DtoJobProperty> properties = new LinkedList<DtoJobProperty>();
+	private List<DtoProperty> properties = new LinkedList<DtoProperty>();
 
 	/**
 	 * The log messages for this job until now.
@@ -78,7 +78,7 @@ public class DtoJob implements Comparable<DtoJob> {
 	private int status;
 
 	public void addJobProperty(String key, String value) {
-		properties.add(new DtoJobProperty(key, value));
+		properties.add(new DtoProperty(key, value));
 	}
 
 	public int compareTo(DtoJob o) {
@@ -139,7 +139,7 @@ public class DtoJob implements Comparable<DtoJob> {
 	}
 
 	@XmlElement(name = "jobproperty")
-	public List<DtoJobProperty> getProperties() {
+	public List<DtoProperty> getProperties() {
 		return properties;
 	}
 
@@ -193,7 +193,7 @@ public class DtoJob implements Comparable<DtoJob> {
 
 		final Map<String, String> map = new TreeMap<String, String>();
 
-		for (final DtoJobProperty prop : getProperties()) {
+		for (final DtoProperty prop : getProperties()) {
 			map.put(prop.getKey(), prop.getValue());
 		}
 
@@ -208,7 +208,7 @@ public class DtoJob implements Comparable<DtoJob> {
 		this.logMessages = msgs;
 	}
 
-	public void setProperties(List<DtoJobProperty> properties) {
+	public void setProperties(List<DtoProperty> properties) {
 		this.properties = properties;
 	}
 

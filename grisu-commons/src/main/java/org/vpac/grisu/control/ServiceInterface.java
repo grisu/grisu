@@ -28,7 +28,7 @@ import org.vpac.grisu.model.dto.DtoApplicationDetails;
 import org.vpac.grisu.model.dto.DtoApplicationInfo;
 import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.dto.DtoDataLocations;
-import org.vpac.grisu.model.dto.DtoFolder;
+import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.dto.DtoGridResources;
 import org.vpac.grisu.model.dto.DtoHostsInfo;
 import org.vpac.grisu.model.dto.DtoJob;
@@ -996,7 +996,7 @@ public interface ServiceInterface {
 	@POST
 	@Path("user/listDirectory")
 	@RolesAllowed("User")
-	DtoFolder ls(@QueryParam("url") String url,
+	GridFile ls(@QueryParam("url") String url,
 			@QueryParam("recursionLevel") int recursionLevel)
 			throws RemoteFileSystemException;
 

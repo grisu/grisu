@@ -25,7 +25,7 @@ public final class ClientPropertiesManager {
 	public static final String HELPDESK_CONFIG = "support.properties";
 
 	public static final int CONCURRENT_THREADS_DEFAULT = 5;
-	public static final int DEFAULT_JOBSTATUS_RECHECK_INTERVAL_IN_SECONDS = 5;
+	public static final int DEFAULT_JOBSUBMIT_STATUS_RECHECK_INTERVAL_IN_SECONDS = 5;
 
 	private static final int DEFAULT_FILE_UPLOAD_THREADS = 1;
 	private static final int DEFAULT_FILE_UPLOAD_RETRIES = 5;
@@ -330,7 +330,7 @@ public final class ClientPropertiesManager {
 		return HELPDESK_CONFIG;
 	}
 
-	public static long getJobStatusRecheckIntervall() {
+	public static long getJobSubmitStatusRecheckIntervall() {
 
 		int interval = 0;
 		try {
@@ -340,7 +340,7 @@ public final class ClientPropertiesManager {
 		}
 
 		if (interval <= 0) {
-			interval = DEFAULT_JOBSTATUS_RECHECK_INTERVAL_IN_SECONDS;
+			interval = DEFAULT_JOBSUBMIT_STATUS_RECHECK_INTERVAL_IN_SECONDS;
 		}
 
 		return interval;
