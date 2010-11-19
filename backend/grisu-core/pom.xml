@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<url>http://projects.arcs.org.au/trac/grisu/wiki/GrisuCore</url>
 	<parent>
 		<artifactId>backend</artifactId>
@@ -28,13 +29,20 @@
 		in order for the grisu-client to
 		connect to
 		it.</description>
-		
+
 	<repositories>
 		<repository>
 			<id>commons-vfs-grid</id>
 			<url>http://commonsvfsgrid.sourceforge.net/maven/</url>
 		</repository>
-	</repositories>		
+		<repository>
+			<id>JBoss</id>
+			<name>JBoss Repsitory</name>
+			<layout>default</layout>
+			<url>http://repository.jboss.org/maven2</url>
+		</repository>
+
+	</repositories>
 
 	<dependencies>
 
@@ -43,56 +51,63 @@
 			<groupId>org.vpac.grisu</groupId>
 			<artifactId>grisu-commons</artifactId>
 			<version>0.3-beta4-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-core</artifactId>
-			<version>3.3.1.GA</version>
 			<exclusions>
 				<exclusion>
-					<artifactId>slf4j-api</artifactId>
-					<groupId>org.slf4j</groupId>
+					<artifactId>cryptix32</artifactId>
+					<groupId>external.jglobus</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>cryptix-asn1</artifactId>
+					<groupId>external.jglobus</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jython</artifactId>
+					<groupId>jython</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-collections</artifactId>
+					<groupId>commons-collections</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
+
+
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-annotations</artifactId>
-			<version>3.3.1.GA</version>
+			<version>3.5.1-Final</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>xml-apis</artifactId>
+					<groupId>xml-apis</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-collections</artifactId>
+					<groupId>commons-collections</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-api</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate</artifactId>
-			<version>3.2.6.ga</version>
-			<!--
-				Explicitly remove: See:
-				http://blog.interface21.com/main/2007/06/11/asm-version-incompatibilities-using-spring-autowired-with-hibernate/
-			-->
+			<artifactId>hibernate-entitymanager</artifactId>
+			<version>3.5.1-Final</version>
 			<exclusions>
 				<exclusion>
-					<groupId>asm</groupId>
-					<artifactId>asm</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>asm</groupId>
-					<artifactId>asm-attrs</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>cglib</groupId>
 					<artifactId>cglib</artifactId>
+					<groupId>cglib</groupId>
 				</exclusion>
 			</exclusions>
-
 		</dependency>
 		<dependency>
-			<groupId>cglib</groupId>
-			<artifactId>cglib-nodep</artifactId>
-			<version>2.1_3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>1.5.10</version>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-c3p0</artifactId>
+			<version>3.5.1-Final</version>
+			<type>jar</type>
+			<scope>compile</scope>
 			<exclusions>
 				<exclusion>
 					<artifactId>slf4j-api</artifactId>
@@ -100,6 +115,23 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
+		<dependency>
+			<groupId>cglib</groupId>
+			<artifactId>cglib-nodep</artifactId>
+			<version>2.2</version>
+		</dependency>
+		<!-- <dependency> -->
+		<!-- <groupId>org.slf4j</groupId> -->
+		<!-- <artifactId>slf4j-simple</artifactId> -->
+		<!-- <version>1.5.8</version> -->
+		<!-- <exclusions> -->
+		<!-- <exclusion> -->
+		<!-- <artifactId>slf4j-api</artifactId> -->
+		<!-- <groupId>org.slf4j</groupId> -->
+		<!-- </exclusion> -->
+		<!-- </exclusions> -->
+		<!-- </dependency> -->
 		<dependency>
 			<groupId>javassist</groupId>
 			<artifactId>javassist</artifactId>
@@ -110,197 +142,9 @@
 			<artifactId>activation</artifactId>
 			<version>1.1</version>
 		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>addressing-1</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>axis</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>axis-url</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>cog-axis</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>cog-trap-1</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.jglobus</groupId>
-			<artifactId>cog-url</artifactId>
-			<version>1.6.0</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>commonj</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>commons-beanutils</artifactId>
-			<version>0.1</version>
-		</dependency>
-<!--		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>commons-collections-3</artifactId>
-			<version>0.1</version>
-		</dependency> 
--->
-               <dependency>
-		<groupId>commons-collections</groupId>
-			<artifactId>commons-collections</artifactId>
-			<version>3.2</version>
-	       </dependency>
 
 		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>commons-digester</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>commons-discovery</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>globus_delegation_service</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>globus_delegation_stubs</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>globus_wsrf_mds_aggregator_stubs</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>globus_wsrf_rendezvous_service</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>globus_wsrf_rendezvous_stubs</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>globus_wsrf_rft_stubs</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>gram-client</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>gram-stubs</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>gram-utils</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>jaxrpc</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>naming-common</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>naming-factory</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>naming-java</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>naming-resources</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>opensaml</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>wsdl4j</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>wsrf_core</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>wsrf_core_stubs</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>wsrf_mds_index_stubs</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>wsrf_mds_usefulrp_schema_stubs</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>wsrf_provider_jce</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>wsrf_tools</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>wss4j</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>xalan</groupId>
-			<artifactId>xalan</artifactId>
-			<version>2.7.1</version>
-		</dependency>
-		<dependency>
-			<groupId>external.globus</groupId>
-			<artifactId>xmlsec</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
-<!--			<groupId>external.grisu-core</groupId>-->
-<!--			<artifactId>commons-vfs-grid</artifactId>-->
-<!--			<version>1.4.3-TEMP</version>-->
+
 			<groupId>commons-vfs-grid</groupId>
 			<artifactId>commons-vfs-grid</artifactId>
 			<version>1.5.1-beta1</version>
@@ -330,28 +174,16 @@
 					<artifactId>bcprov-jdk15</artifactId>
 					<groupId>bouncycastle</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-log4j12</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-api</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
-		<!--		<dependency>-->
-		<!--			<groupId>au.edu.apac.genericgridclient</groupId>-->
-		<!--			<artifactId>commons-vfs-grid</artifactId>-->
-		<!--			<version>1.0-SNAPSHOT</version>-->
-		<!--		</dependency>-->
-		<!--		<dependency>-->
-		<!--			<groupId>external.globus</groupId>-->
-		<!--			<artifactId>xalan</artifactId>-->
-		<!--			<version>0.1</version>-->
-		<!--		</dependency>-->
-		<!--		<dependency>-->
-		<!--			<groupId>external.globus</groupId>-->
-		<!--			<artifactId>xercesImpl</artifactId>-->
-		<!--			<version>0.1</version>-->
-		<!--		</dependency>-->
-		<!--		<dependency>-->
-		<!--			<groupId>external.globus</groupId>-->
-		<!--			<artifactId>xml-apis</artifactId>-->
-		<!--			<version>0.1</version>-->
-		<!--		</dependency>-->
 		<dependency>
 			<groupId>hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
@@ -362,28 +194,16 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.13</version>
 		</dependency>
-<dependency>
-  <groupId>org.apache.derby</groupId>
-  <artifactId>derby</artifactId>
-  <version>10.5.3.0_1</version>
-</dependency>
 		<dependency>
 			<groupId>org.apache.derby</groupId>
-			<artifactId>derbyclient</artifactId>
-			<version>10.5.3.0_1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-c3p0</artifactId>
-			<version>3.3.1.GA</version>
-			<type>jar</type>
-			<scope>compile</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>slf4j-api</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-			</exclusions>
+			<artifactId>derby-all</artifactId>
+			<version>10.6.1.0</version>
+			<!-- contains: -->
+			<!-- <dependency> <groupId>org.apache.derby</groupId> <artifactId>derbynet</artifactId> 
+				<version>10.6.1.0</version> <type>jar</type> <scope>compile</scope> </dependency> 
+				<dependency> <groupId>org.apache.derby</groupId> <artifactId>derby</artifactId> 
+				<version>10.6.1.0</version> </dependency> <dependency> <groupId>org.apache.derby</groupId> 
+				<artifactId>derbyclient</artifactId> <version>10.6.1.0</version> </dependency> -->
 		</dependency>
 		<dependency>
 			<groupId>javax.xml.soap</groupId>
@@ -402,16 +222,15 @@
 			<groupId>org.simpleframework</groupId>
 			<artifactId>simple-xml</artifactId>
 			<version>2.1.3</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>stax-api</artifactId>
+					<groupId>stax</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 
-		<dependency>
-			<groupId>org.apache.derby</groupId>
-			<artifactId>derbynet</artifactId>
-			<version>10.5.3.0_1</version>
-			<type>jar</type>
-			<scope>compile</scope>
-		</dependency>
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>mysql-mds</artifactId>
@@ -423,6 +242,63 @@
 					<artifactId>cog-jglobus</artifactId>
 					<groupId>external.jglobus</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>jaxrpc</artifactId>
+					<groupId>external.globus</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>cryptix32</artifactId>
+					<groupId>external.jglobus</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>wsdl4j</artifactId>
+					<groupId>external.globus</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>cog-axis</artifactId>
+					<groupId>external.globus</groupId>
+				</exclusion>
+
+				<exclusion>
+					<artifactId>cryptix-asn1</artifactId>
+					<groupId>external.globus</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>axis</artifactId>
+					<groupId>external.globus</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-discovery</artifactId>
+					<groupId>external.globus</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>saaj-api</artifactId>
+					<groupId>external.globus</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>wsrf_core</artifactId>
+					<groupId>external.globus</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>wsrf_core_stubs</artifactId>
+					<groupId>external.globus</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>wss4j</artifactId>
+					<groupId>external.globus</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>addressing-1</artifactId>
+					<groupId>external.globus</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>stax-api</artifactId>
+					<groupId>stax</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>xmlbeans</artifactId>
+					<groupId>org.apache.xmlbeans</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -430,20 +306,85 @@
 			<artifactId>cog-jglobus</artifactId>
 			<version>1.8.0-bestgrid</version>
 		</dependency>
+
+
+		<dependency>
+			<groupId>external.globus</groupId>
+			<artifactId>globus-dependencies</artifactId>
+			<version>0.3</version>
+			<!-- consists of those dependencies: -->
+			<!-- 					<artifactId>xmlbeans</artifactId>
+					<groupId>org.apache.xmlbeans</groupId>
+					
+					
+									<artifactId>jython</artifactId>
+					<groupId>jython</groupId>	
+			
+			<dependency> <groupId>external.globus</groupId> <artifactId>addressing-1</artifactId> 
+				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
+				<artifactId>axis</artifactId> <version>0.1</version> </dependency> <dependency> 
+				<groupId>external.globus</groupId> <artifactId>axis-url</artifactId> <version>0.1</version> 
+				</dependency> <dependency> <groupId>external.globus</groupId> <artifactId>cog-axis</artifactId> 
+				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
+				<artifactId>cog-trap-1</artifactId> <version>0.1</version> </dependency> 
+				<dependency> <groupId>external.jglobus</groupId> <artifactId>cog-url</artifactId> 
+				<version>1.6.0</version> </dependency> <dependency> <groupId>external.globus</groupId> 
+				<artifactId>commonj</artifactId> <version>0.1</version> </dependency> <dependency> 
+				<groupId>external.globus</groupId> <artifactId>commons-beanutils</artifactId> 
+				<version>0.1</version> </dependency> <dependency> <groupId>commons-collections</groupId> 
+				<artifactId>commons-collections</artifactId> <version>3.2</version> </dependency> 
+				<dependency> <groupId>external.globus</groupId> <artifactId>commons-digester</artifactId> 
+				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
+				<artifactId>commons-discovery</artifactId> <version>0.1</version> </dependency> 
+				<dependency> <groupId>external.globus</groupId> <artifactId>globus_delegation_service</artifactId> 
+				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
+				<artifactId>globus_delegation_stubs</artifactId> <version>0.1</version> </dependency> 
+				<dependency> <groupId>external.globus</groupId> <artifactId>globus_wsrf_mds_aggregator_stubs</artifactId> 
+				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
+				<artifactId>globus_wsrf_rendezvous_service</artifactId> <version>0.1</version> 
+				</dependency> <dependency> <groupId>external.globus</groupId> <artifactId>globus_wsrf_rendezvous_stubs</artifactId> 
+				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
+				<artifactId>globus_wsrf_rft_stubs</artifactId> <version>0.1</version> </dependency> 
+				<dependency> <groupId>external.globus</groupId> <artifactId>gram-client</artifactId> 
+				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
+				<artifactId>gram-stubs</artifactId> <version>0.1</version> </dependency> 
+				<dependency> <groupId>external.globus</groupId> <artifactId>gram-utils</artifactId> 
+				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
+				<artifactId>jaxrpc</artifactId> <version>0.1</version> </dependency> <dependency> 
+				<groupId>external.globus</groupId> <artifactId>naming-common</artifactId> 
+				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
+				<artifactId>naming-factory</artifactId> <version>0.1</version> </dependency> 
+				<dependency> <groupId>external.globus</groupId> <artifactId>naming-java</artifactId> 
+				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
+				<artifactId>naming-resources</artifactId> <version>0.1</version> </dependency> 
+				<dependency> <groupId>external.globus</groupId> <artifactId>opensaml</artifactId> 
+				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
+				<artifactId>wsdl4j</artifactId> <version>0.1</version> </dependency> <dependency> 
+				<groupId>external.globus</groupId> <artifactId>wsrf_core</artifactId> <version>0.1</version> 
+				</dependency> <dependency> <groupId>external.globus</groupId> <artifactId>wsrf_core_stubs</artifactId> 
+				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
+				<artifactId>wsrf_mds_index_stubs</artifactId> <version>0.1</version> </dependency> 
+				<dependency> <groupId>external.globus</groupId> <artifactId>wsrf_mds_usefulrp_schema_stubs</artifactId> 
+				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
+				<artifactId>wsrf_provider_jce</artifactId> <version>0.1</version> </dependency> 
+				<dependency> <groupId>external.globus</groupId> <artifactId>wsrf_tools</artifactId> 
+				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
+				<artifactId>wss4j</artifactId> <version>0.1</version> </dependency> <dependency> 
+				<groupId>xalan</groupId> <artifactId>xalan</artifactId> <version>2.7.1</version> 
+				</dependency> <dependency> <groupId>external.globus</groupId> <artifactId>xmlsec</artifactId> 
+				<version>0.1</version> </dependency> -->
+		</dependency>
+
+
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.5.10</version>
+			<version>1.5.8</version>
 			<type>jar</type>
 			<scope>compile</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>log4j</artifactId>
-					<groupId>log4j</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 	</dependencies>
+
 
 	<build>
 		<plugins>
@@ -455,7 +396,7 @@
 					<target>1.5</target>
 				</configuration>
 			</plugin>
-			
+
 			<!-- replace version in file -->
 			<plugin>
 				<groupId>com.google.code.maven-replacer-plugin</groupId>
@@ -483,7 +424,7 @@
 					<value>${project.version}</value>
 				</configuration>
 			</plugin>
-			
+
 
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -502,24 +443,24 @@
 					</execution>
 				</executions>
 			</plugin>
-<!--			<plugin>-->
-<!--				<groupId>org.apache.maven.plugins</groupId>-->
-<!--				<artifactId>maven-jarsigner-plugin</artifactId>-->
-<!--				<version>1.2</version>-->
-<!--				<executions>-->
-<!--					<execution>-->
-<!--						<id>sign</id>-->
-<!--						<goals>-->
-<!--							<goal>sign</goal>-->
-<!--						</goals>-->
-<!--					</execution>-->
-<!--				</executions>-->
-<!--				<configuration>-->
-<!--					<alias>arcs</alias>-->
-<!--					<storepass>FxAKs3p6</storepass>-->
-<!--					<keypass>FxAKs3p6</keypass>-->
-<!--				</configuration>-->
-<!--			</plugin>-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jarsigner-plugin</artifactId>
+				<version>1.2</version>
+				<executions>
+					<execution>
+						<id>sign</id>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<alias>arcs</alias>
+					<storepass>FxAKs3p6</storepass>
+					<keypass>FxAKs3p6</keypass>
+				</configuration>
+			</plugin>
 
 		</plugins>
 	</build>
