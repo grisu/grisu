@@ -35,13 +35,6 @@
 			<id>commons-vfs-grid</id>
 			<url>http://commonsvfsgrid.sourceforge.net/maven/</url>
 		</repository>
-		<repository>
-			<id>JBoss</id>
-			<name>JBoss Repsitory</name>
-			<layout>default</layout>
-			<url>http://repository.jboss.org/maven2</url>
-		</repository>
-
 	</repositories>
 
 	<dependencies>
