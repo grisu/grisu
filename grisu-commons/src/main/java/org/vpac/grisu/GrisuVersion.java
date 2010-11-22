@@ -15,6 +15,7 @@ public class GrisuVersion {
 	public static String get(String module) {
 
 		try {
+
 			List<String> result = readTextFromJar("/" + module + ".version");
 
 			if ((result == null) || (result.size() == 0)

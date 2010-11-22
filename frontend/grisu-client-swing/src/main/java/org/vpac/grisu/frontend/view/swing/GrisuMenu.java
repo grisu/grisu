@@ -1,15 +1,18 @@
 package org.vpac.grisu.frontend.view.swing;
 
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
+import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.GrisuVersion;
 import org.vpac.grisu.control.ServiceInterface;
 
@@ -42,6 +45,10 @@ public class GrisuMenu extends JMenuBar {
 	private JMenuItem exitItem;
 	private JMenuItem versionItem;
 
+	private JLabel warningLabel;
+
+	private final boolean isDevelopmentVersion;
+
 	/**
 	 * Create the frame.
 	 */
@@ -49,7 +56,19 @@ public class GrisuMenu extends JMenuBar {
 		this.parent = parent;
 		add(getFileMenu());
 		add(getToolsMenu());
+
+		// check whether development release - if so, use red background color
+		String clientVersion = GrisuVersion.get("this-client");
+		if (StringUtils.containsIgnoreCase(clientVersion, "snapshot")) {
+			isDevelopmentVersion = true;
+			setOpaque(true);
+			setBackground(Color.RED);
+			add(getDevelopmentWarningLabel());
+		} else {
+			isDevelopmentVersion = false;
+		}
 		setHelpMenu(getGrisuHelpMenu());
+
 	}
 
 	@Override
@@ -59,6 +78,17 @@ public class GrisuMenu extends JMenuBar {
 		} else {
 			return super.add(menu);
 		}
+	}
+
+	private JLabel getDevelopmentWarningLabel() {
+		if (warningLabel == null) {
+			warningLabel = new JLabel(
+					"         --- DEVELOPMENT VERSION ---         ");
+			warningLabel.setBackground(Color.RED);
+			warningLabel.setForeground(Color.WHITE);
+			warningLabel.setOpaque(true);
+		}
+		return warningLabel;
 	}
 
 	private JMenuItem getExitItem() {

@@ -12,7 +12,9 @@ import java.util.TreeSet;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 
+import org.apache.commons.lang.StringUtils;
 import org.jdesktop.swingx.JXFrame;
+import org.vpac.grisu.GrisuVersion;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.model.events.ApplicationEventListener;
@@ -106,7 +108,15 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 	 */
 	private void initialize() {
 		frame = new JXFrame();
-		frame.setTitle(getName());
+		String title = null;
+		String clientVersion = GrisuVersion.get("this-client");
+		if (StringUtils.containsIgnoreCase(clientVersion, "snapshot")) {
+			title = getName() + "  (DEVELOPMENT VERSION)";
+		} else {
+			// title = getName() + "v" + clientVersion;
+			title = getName();
+		}
+		frame.setTitle(title);
 		frame.addWindowListener(this);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -147,6 +157,7 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 	public void setServiceInterface(ServiceInterface si) {
 
 		this.si = si;
+		this.menu.setServiceInterface(si);
 		initOptionalStuff(si);
 		refreshJobCreationPanels();
 

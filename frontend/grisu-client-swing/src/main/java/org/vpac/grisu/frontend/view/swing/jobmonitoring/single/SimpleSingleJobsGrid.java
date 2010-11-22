@@ -19,6 +19,7 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 
+import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.vpac.grisu.control.ServiceInterface;
@@ -32,6 +33,9 @@ import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 public class SimpleSingleJobsGrid extends JPanel {
+
+	static final Logger myLogger = Logger.getLogger(SimpleSingleJobsGrid.class
+			.getName());
 
 	private static void addPopup(Component component, final JPopupMenu popup) {
 		component.addMouseListener(new MouseAdapter() {
@@ -132,7 +136,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 				try {
 					bjsl.jobSelected(j);
 				} catch (final Exception e1) {
-					e1.printStackTrace();
+					myLogger.error(e1);
 				}
 			}
 			lockUI(false);
@@ -331,7 +335,11 @@ public class SimpleSingleJobsGrid extends JPanel {
 
 			for (final JobObject job : getSelectedJobs()) {
 				// getTable().getSelectionModel().clearSelection();
-				job.kill(clean);
+				try {
+					job.kill(clean);
+				} catch (Exception e) {
+
+				}
 			}
 
 			lockUI(false);
