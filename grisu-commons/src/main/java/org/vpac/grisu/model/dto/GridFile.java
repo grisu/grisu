@@ -53,6 +53,19 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		return temp;
 	}
 
+	public static List<String> getChildrenNames(GridFile file) {
+
+		if (file == null) {
+			return null;
+		}
+
+		List<String> result = new LinkedList<String>();
+		for (GridFile f : file.getChildren()) {
+			result.add(f.getName());
+		}
+		return result;
+	}
+
 	public static GridFile listLocalFolder(File folder,
 			boolean includeParentInFileListing) {
 
@@ -95,19 +108,19 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	private String type;
 
 	private String name;
-
 	private String mainUrl;
 	private String optionalPath;
 	private final Set<String> sites = Collections
 			.synchronizedSet(new TreeSet<String>());
+
 	private final Set<String> fqans = Collections
 			.synchronizedSet(new TreeSet<String>());
-
 	private final List<DtoProperty> urls = Collections
 			.synchronizedList(new LinkedList<DtoProperty>());
 	private long size = -2L;
 	private long lastModified;
 	private boolean isVirtual = false;
+
 	private Set<GridFile> children = Collections
 			.synchronizedSet(new TreeSet<GridFile>());
 
@@ -145,6 +158,10 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		addSite("Local");
 	}
 
+	// public DtoFileObject(String group) {
+	// this(group, -1L, -1L, FILETYPE_GROUP);
+	// }
+
 	public GridFile(MountPoint mp) {
 
 		this.type = FILETYPE_MOUNTPOINT;
@@ -154,10 +171,6 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		this.lastModified = -1L;
 		this.name = mp.getAlias();
 	}
-
-	// public DtoFileObject(String group) {
-	// this(group, -1L, -1L, FILETYPE_GROUP);
-	// }
 
 	public GridFile(String url, long lastModified) {
 		this(url, -1L, lastModified, FILETYPE_FOLDER);
