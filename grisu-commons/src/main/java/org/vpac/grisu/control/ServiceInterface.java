@@ -28,7 +28,6 @@ import org.vpac.grisu.model.dto.DtoApplicationDetails;
 import org.vpac.grisu.model.dto.DtoApplicationInfo;
 import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.dto.DtoDataLocations;
-import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.dto.DtoGridResources;
 import org.vpac.grisu.model.dto.DtoHostsInfo;
 import org.vpac.grisu.model.dto.DtoJob;
@@ -37,6 +36,7 @@ import org.vpac.grisu.model.dto.DtoMountPoints;
 import org.vpac.grisu.model.dto.DtoProperties;
 import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
+import org.vpac.grisu.model.dto.GridFile;
 
 import au.org.arcs.jcommons.constants.Constants;
 
@@ -52,7 +52,7 @@ import au.org.arcs.jcommons.constants.Constants;
 @WebService(targetNamespace = "http://api.grisu.arcs.org.au/", serviceName = "GrisuService")
 public interface ServiceInterface {
 
-	String INTERFACE_VERSION = "0.3-SNAPSHOT";
+	String INTERFACE_VERSION = "VERSION_TOKEN";
 
 	/**
 	 * Adds multiple job propeties in one go.

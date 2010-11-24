@@ -36,6 +36,8 @@ public class SingleInputGridFile extends AbstractWidget {
 
 	private String currentUrl = null;
 
+	private boolean lockCombo = false;
+
 	/**
 	 * Create the panel.
 	 */
@@ -76,9 +78,11 @@ public class SingleInputGridFile extends AbstractWidget {
 						return;
 					}
 
+					lockCombo = true;
 					setInputFile(file.getUrl());
 					getPropertyChangeSupport().firePropertyChange(
 							"inputFileUrl", oldValue, getValue());
+					lockCombo = false;
 				}
 			});
 		}
@@ -95,6 +99,10 @@ public class SingleInputGridFile extends AbstractWidget {
 			comboBox.addItemListener(new ItemListener() {
 
 				public void itemStateChanged(ItemEvent e) {
+
+					if (lockCombo) {
+						return;
+					}
 
 					if (ItemEvent.SELECTED == e.getStateChange()) {
 
@@ -219,6 +227,7 @@ public class SingleInputGridFile extends AbstractWidget {
 
 	protected void setInputFile(String url) {
 
+		lockCombo = true;
 		if (StringUtils.isBlank(url)) {
 			fileModel.setSelectedItem(selString);
 			return;
@@ -229,6 +238,7 @@ public class SingleInputGridFile extends AbstractWidget {
 			fileModel.addElement(url);
 		}
 		fileModel.setSelectedItem(url);
+		lockCombo = false;
 	}
 
 	@Override
@@ -238,6 +248,7 @@ public class SingleInputGridFile extends AbstractWidget {
 
 	@Override
 	public void setValue(String value) {
+
 		setInputFile(value);
 	}
 }

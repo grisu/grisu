@@ -180,7 +180,6 @@ public class FileManager {
 			String name = file.getName();
 			return name;
 		} else {
-			X.p("Not Local");
 			final String filename = url.substring(url.lastIndexOf("/") + 1);
 			return filename;
 		}
