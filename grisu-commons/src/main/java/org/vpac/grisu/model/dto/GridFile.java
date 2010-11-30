@@ -130,12 +130,12 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	private Set<GridFile> children = Collections
 			.synchronizedSet(new TreeSet<GridFile>());
 
-	// public GridFile() {
-	// this(null, -1L, -1L, FILETYPE_ROOT);
-	// this.isVirtual = true;
-	// this.setName("Grid");
-	// this.setUrl(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://");
-	// }
+	private GridFile() {
+		this(null, -1L, -1L, FILETYPE_ROOT);
+		this.isVirtual = true;
+		this.setName("Grid");
+		this.setUrl(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://");
+	}
 
 	public GridFile(File f) {
 		this(f, ((f.isDirectory()) ? FILETYPE_FOLDER_PRIORITY
