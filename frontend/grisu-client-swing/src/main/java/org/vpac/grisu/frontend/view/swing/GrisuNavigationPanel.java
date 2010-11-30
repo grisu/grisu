@@ -39,6 +39,8 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements
 	private GrisuMonitorNavigationTaskPane singleTaskPane;
 	private GrisuMonitorNavigationTaskPaneBatch batchTaskPane;
 
+	private GrisuFileNavigationTaskPane fileNaviagaionTaskPane;
+
 	private static final String JOB_CREATION_TASK_PANE = "Create job";
 
 	/**
@@ -56,8 +58,7 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements
 			boolean displayFileManagementItem) {
 
 		this(si, centerPanel, displaySingleJobMonitorItem, true, true, null,
-				displayBatchJobMonitorItem, true, true, null,
-				displayFileManagementItem);
+				displayBatchJobMonitorItem, true, true, null);
 	}
 
 	public GrisuNavigationPanel(ServiceInterface si,
@@ -68,8 +69,7 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements
 			boolean displayBatchJobMonitorItem,
 			boolean displayBatchJobAllJobsMenuItem,
 			boolean displayBatchJobAppSpecificMenuItems,
-			Set<String> batchApplicationsToWatch,
-			boolean displayFileManagementItem) {
+			Set<String> batchApplicationsToWatch) {
 
 		this.si = si;
 		this.centerPanel = centerPanel;
@@ -90,9 +90,6 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements
 					displayBatchJobAppSpecificMenuItems,
 					batchApplicationsToWatch);
 			addTaskPane(batchTaskPane);
-		}
-		if (displayFileManagementItem) {
-			addTaskPane(new GrisuFileNavigationTaskPane(si, this));
 		}
 
 	}
@@ -136,6 +133,14 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements
 			}
 		}
 
+	}
+
+	public void addDefaultFileManagementPanel() {
+		getFileNavigationTaskPane().addDefaultFileManagementPanel();
+	}
+
+	public void addGroupFileManagementPanel() {
+		getFileNavigationTaskPane().addGroupFileManagementPanel();
 	}
 
 	public void addTaskPane(JXTaskPane pane) {
@@ -191,6 +196,14 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements
 		}
 		temp.add(tempAction);
 
+	}
+
+	private GrisuFileNavigationTaskPane getFileNavigationTaskPane() {
+		if (fileNaviagaionTaskPane == null) {
+			fileNaviagaionTaskPane = new GrisuFileNavigationTaskPane(si, this);
+			addTaskPane(fileNaviagaionTaskPane);
+		}
+		return fileNaviagaionTaskPane;
 	}
 
 	private void lockUI(final boolean lock) {

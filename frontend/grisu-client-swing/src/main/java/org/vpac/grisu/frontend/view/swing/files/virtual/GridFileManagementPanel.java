@@ -1,6 +1,8 @@
 package org.vpac.grisu.frontend.view.swing.files.virtual;
 
 import java.awt.BorderLayout;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.JPanel;
@@ -23,28 +25,40 @@ public class GridFileManagementPanel extends JPanel implements
 	private GridFileTreePanel fileListPanel;
 	private ListAndPreviewFilePanel listAndPreviewPanel;
 
-	private final GridFile leftRoot;
-	private final GridFile rightRoot;
+	private final List<GridFile> leftRoots;
+	private final List<GridFile> rightRoots;
 
 	public GridFileManagementPanel(ServiceInterface si) {
 		this(si, null, null);
 	}
 
 	public GridFileManagementPanel(ServiceInterface si,
-			GridFile leftRoot, GridFile rightRoot) {
+			List<GridFile> leftRoots, List<GridFile> rightRoots) {
+
 		super();
 		this.si = si;
-		if (leftRoot == null) {
-			this.leftRoot = GrisuRegistryManager.getDefault(si)
+		if (leftRoots == null) {
+			GridFile gridRoot = GrisuRegistryManager.getDefault(si)
 					.getFileManager().getGridRoot();
+			GridFile localRoot = GrisuRegistryManager.getDefault(si)
+					.getFileManager().getLocalRoot();
+			this.leftRoots = new LinkedList<GridFile>();
+			this.leftRoots.add(gridRoot);
+			this.leftRoots.add(localRoot);
 		} else {
-			this.leftRoot = leftRoot;
+			this.leftRoots = leftRoots;
 		}
-		if (rightRoot == null) {
-			this.rightRoot = GrisuRegistryManager.getDefault(si)
+
+		if (rightRoots == null) {
+			GridFile gridRoot = GrisuRegistryManager.getDefault(si)
 					.getFileManager().getGridRoot();
+			GridFile localRoot = GrisuRegistryManager.getDefault(si)
+					.getFileManager().getLocalRoot();
+			this.rightRoots = new LinkedList<GridFile>();
+			this.rightRoots.add(gridRoot);
+			this.rightRoots.add(localRoot);
 		} else {
-			this.rightRoot = rightRoot;
+			this.rightRoots = leftRoots;
 		}
 		setLayout(new BorderLayout(0, 0));
 		add(getJideSplitPane(), BorderLayout.CENTER);
@@ -68,8 +82,7 @@ public class GridFileManagementPanel extends JPanel implements
 
 	private GridFileTreePanel getFileListPanel() {
 		if (fileListPanel == null) {
-			fileListPanel = new GridFileTreePanel(si, leftRoot,
-					false);
+			fileListPanel = new GridFileTreePanel(si, leftRoots, false);
 			fileListPanel.addFileListListener(this);
 		}
 		return fileListPanel;
@@ -87,7 +100,7 @@ public class GridFileManagementPanel extends JPanel implements
 
 	private ListAndPreviewFilePanel getListAndPreviewPanel() {
 		if (listAndPreviewPanel == null) {
-			listAndPreviewPanel = new ListAndPreviewFilePanel(si, rightRoot);
+			listAndPreviewPanel = new ListAndPreviewFilePanel(si, rightRoots);
 		}
 		return listAndPreviewPanel;
 	}

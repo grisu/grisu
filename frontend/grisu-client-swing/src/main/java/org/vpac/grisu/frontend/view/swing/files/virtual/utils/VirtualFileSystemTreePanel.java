@@ -179,7 +179,8 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 
 	private void initialize() {
 
-		GridFile root = new GridFile("grid://groups", -1L);
+		GridFile root = new GridFile(
+				ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://groups", -1L);
 		GridFileTreeNode rootNode = new GridFileTreeNode(fm, root);
 
 		DefaultTreeModel model = new DefaultTreeModel(rootNode);

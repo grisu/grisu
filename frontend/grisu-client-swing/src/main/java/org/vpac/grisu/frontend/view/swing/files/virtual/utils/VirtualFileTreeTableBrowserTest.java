@@ -2,6 +2,8 @@ package org.vpac.grisu.frontend.view.swing.files.virtual.utils;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -9,6 +11,8 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginException;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.view.swing.files.virtual.GridFileManagementPanel;
+import org.vpac.grisu.model.GrisuRegistryManager;
+import org.vpac.grisu.model.dto.GridFile;
 
 public class VirtualFileTreeTableBrowserTest {
 
@@ -64,7 +68,17 @@ public class VirtualFileTreeTableBrowserTest {
 
 	private GridFileManagementPanel getGroupFileBrowserPanel() {
 		if (panel == null) {
-			panel = new GridFileManagementPanel(si);
+			GridFile f = new GridFile(
+					"grid://groups/ARCS/BeSTGRID/Drug_discovery//");
+
+			f.setIsVirtual(true);
+			f.setPath(f.getUrl());
+			GridFile l = GrisuRegistryManager.getDefault(si).getFileManager()
+					.getLocalRoot();
+			List<GridFile> files = new LinkedList<GridFile>();
+			files.add(f);
+			files.add(l);
+			panel = new GridFileManagementPanel(si, files, files);
 		}
 		return panel;
 	}

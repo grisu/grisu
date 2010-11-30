@@ -6,6 +6,8 @@ import java.awt.Cursor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -22,7 +24,6 @@ import org.netbeans.swing.outline.Outline;
 import org.netbeans.swing.outline.OutlineModel;
 import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
-import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListListener;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListPanel;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListPanelContextMenu;
@@ -38,8 +39,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class GridFileTreePanel extends JPanel implements
-		GridFileListPanel {
+public class GridFileTreePanel extends JPanel implements GridFileListPanel {
 
 	private static void addPopup(Component component, final JPopupMenu popup) {
 		component.addMouseListener(new MouseAdapter() {
@@ -75,41 +75,45 @@ public class GridFileTreePanel extends JPanel implements
 
 	private Vector<GridFileListListener> listeners;
 	private GridFileListPanelContextMenu popupMenu;
-	private boolean displayLocalFileSystems = true;
 
 	private final boolean displayHiddenFiles;
 	private final String[] extensionsToDisplay;
 
-	private final GridFile root;
+	private final List<GridFile> roots;
 
 	public GridFileTreePanel(ServiceInterface si) {
 		this(si, null, true);
 	}
 
-	public GridFileTreePanel(ServiceInterface si, GridFile root) {
+	public GridFileTreePanel(ServiceInterface si, List<GridFile> root) {
 		this(si, root, true);
 	}
 
-	public GridFileTreePanel(ServiceInterface si, GridFile root,
+	public GridFileTreePanel(ServiceInterface si, List<GridFile> root,
 			boolean useAsDropTarget) {
-		this(si, root, useAsDropTarget, false, null, true);
+		this(si, root, useAsDropTarget, false, null);
 	}
 
 	/**
 	 * Create the panel.
 	 */
-	public GridFileTreePanel(ServiceInterface si, GridFile root,
+	public GridFileTreePanel(ServiceInterface si, List<GridFile> roots,
 			boolean useAsDropTarget, boolean displayHiddenFiles,
-			String[] extensionsToDisplay, boolean displayLocalFileSystems) {
+			String[] extensionsToDisplay) {
 		this.si = si;
 		this.displayHiddenFiles = displayHiddenFiles;
 		this.extensionsToDisplay = extensionsToDisplay;
-		this.displayLocalFileSystems = displayLocalFileSystems;
-		if (root == null) {
-			this.root = GrisuRegistryManager.getDefault(si).getFileManager()
-					.getGridRoot();
+		if (roots == null) {
+			GridFile gridRoot = GrisuRegistryManager.getDefault(si)
+					.getFileManager().getGridRoot();
+			GridFile localRoot = GrisuRegistryManager.getDefault(si)
+					.getFileManager().getLocalRoot();
+			this.roots = new LinkedList<GridFile>();
+			this.roots.add(gridRoot);
+			this.roots.add(localRoot);
+
 		} else {
-			this.root = root;
+			this.roots = roots;
 		}
 		this.useAsDropTarget = useAsDropTarget;
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
@@ -124,7 +128,7 @@ public class GridFileTreePanel extends JPanel implements
 				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getScrollPane(), "2, 2, fill, fill");
 
-		initialize(this.root);
+		initialize(this.roots);
 	}
 
 	synchronized public void addFileListListener(GridFileListListener l) {
@@ -311,8 +315,8 @@ public class GridFileTreePanel extends JPanel implements
 			// VirtualFileSystemDragSource ds = new VirtualFileSystemDragSource(
 			// tree, DnDConstants.ACTION_COPY);
 			if (useAsDropTarget) {
-				GridFileTreeDropTarget dt = new GridFileTreeDropTarget(
-						si, outline);
+				GridFileTreeDropTarget dt = new GridFileTreeDropTarget(si,
+						outline);
 			}
 
 			outline.addMouseListener(new MouseAdapter() {
@@ -368,32 +372,16 @@ public class GridFileTreePanel extends JPanel implements
 		return result;
 	}
 
-	private void initialize(GridFile root) {
+	private void initialize(List<GridFile> roots) {
 
-		GridFileTreeNode rootNode = new GridFileTreeNode(fm, root);
+		GridFileTreeNode rootNode = new GridFileTreeNode(fm, "virtual");
 
 		DefaultTreeModel model = new DefaultTreeModel(rootNode);
 		rootNode.setModel(model);
 
-		try {
-			for (GridFile f : fm.ls(root)) {
-				rootNode.add(new GridFileTreeNode(fm, f, model,
-						displayHiddenFiles, extensionsToDisplay));
-			}
-		} catch (RemoteFileSystemException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		}
-
-		if (displayLocalFileSystems) {
-
-			GridFile localRoot = fm.getLocalRoot();
-
-			GridFileTreeNode localRootNode = new GridFileTreeNode(fm,
-					localRoot, model, displayHiddenFiles, extensionsToDisplay);
-			rootNode.add(localRootNode);
-
+		for (GridFile f : roots) {
+			rootNode.add(new GridFileTreeNode(fm, f, model, displayHiddenFiles,
+					extensionsToDisplay));
 		}
 
 		OutlineModel m = DefaultOutlineModel.createOutlineModel(model,

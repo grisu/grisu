@@ -15,7 +15,8 @@ import org.vpac.grisu.model.UserEnvironmentManager;
 
 public class GrisuFileNavigationTaskPane extends JXTaskPane {
 
-	public static final String FILE_MANAGEMENT = "filemanagement";
+	public static final String DEFAULT_FILE_MANAGEMENT = "filemanagement";
+	public static final String GROUP_FILE_MANAGEMENT = "groupfilemanagement";
 
 	public static final Icon FILE_MANAGEMENT_ICON = null;
 
@@ -41,8 +42,7 @@ public class GrisuFileNavigationTaskPane extends JXTaskPane {
 		initialize();
 	}
 
-	private void initialize() {
-
+	public void addDefaultFileManagementPanel() {
 		final Action temp = new AbstractAction() {
 			{
 				putValue(Action.NAME, "File management");
@@ -52,13 +52,36 @@ public class GrisuFileNavigationTaskPane extends JXTaskPane {
 
 			public void actionPerformed(ActionEvent e) {
 
-				navPanel.setNavigationCommand(new String[] { FILE_MANAGEMENT });
+				navPanel.setNavigationCommand(new String[] { DEFAULT_FILE_MANAGEMENT });
 
 			}
 		};
 
-		actions.put(FILE_MANAGEMENT, temp);
+		actions.put(DEFAULT_FILE_MANAGEMENT, temp);
 		add(temp);
+	}
+
+	public void addGroupFileManagementPanel() {
+		final Action temp = new AbstractAction() {
+			{
+				putValue(Action.NAME, "File management");
+				putValue(Action.SHORT_DESCRIPTION, "File management");
+				putValue(Action.SMALL_ICON, FILE_MANAGEMENT_ICON);
+			}
+
+			public void actionPerformed(ActionEvent e) {
+
+				navPanel.setNavigationCommand(new String[] { GROUP_FILE_MANAGEMENT });
+
+			}
+		};
+
+		actions.put(GROUP_FILE_MANAGEMENT, temp);
+		add(temp);
+	}
+
+	private void initialize() {
+
 	}
 
 }

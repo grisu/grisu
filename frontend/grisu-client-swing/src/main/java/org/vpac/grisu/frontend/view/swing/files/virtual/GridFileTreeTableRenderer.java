@@ -1,10 +1,14 @@
 package org.vpac.grisu.frontend.view.swing.files.virtual;
 
 import java.awt.Color;
+import java.io.File;
+import java.net.URL;
 import java.util.Set;
 import java.util.TreeSet;
 
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.apache.commons.lang.StringUtils;
@@ -20,6 +24,25 @@ import furbelow.SpinningDial;
 public class GridFileTreeTableRenderer implements RenderDataProvider {
 
 	private static SpinningDial LOADING_ICON = new SpinningDial(16, 16);
+	private static URL imgURL = GridFileTreeTableRenderer.class
+			.getResource("/group.gif");
+
+	private static Icon groupIcon = new ImageIcon(imgURL);
+	private static FileSystemView fsView = FileSystemView.getFileSystemView();
+	private static Icon folderIcon = fsView.getSystemIcon(new File(System
+			.getProperty("user.home")));
+	// TODO think of something better?
+	private static Icon fileIcon = fsView.getSystemIcon(findFile());
+
+	private static File findFile() {
+		for (final File file : new File(System.getProperty("user.home"))
+				.listFiles()) {
+			if (file.isFile()) {
+				return file;
+			}
+		}
+		return null;
+	}
 
 	private final ServiceInterface si;
 	private final UserEnvironmentManager uem;
@@ -62,6 +85,19 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 			if (VirtualFileSystemBrowserTreeRenderer.LOADING_STRING
 					.equals(string)) {
 				return LOADING_ICON;
+			}
+		} else if (userObject instanceof GridFile) {
+			GridFile f = (GridFile) userObject;
+			// if (f.isVirtual()) {
+			if (f.isVirtual() && StringUtils.isNotBlank(f.getPath())
+					&& f.getPath().contains("group")) {
+				return groupIcon;
+				// }
+				// return null;
+			} else if (f.isFolder()) {
+				return folderIcon;
+			} else {
+				return fileIcon;
 			}
 		}
 

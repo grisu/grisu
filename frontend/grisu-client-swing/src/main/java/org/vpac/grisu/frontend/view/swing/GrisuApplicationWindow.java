@@ -21,6 +21,7 @@ import org.vpac.grisu.frontend.model.events.ApplicationEventListener;
 import org.vpac.grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import org.vpac.grisu.frontend.view.swing.login.LoginPanel;
 import org.vpac.grisu.frontend.view.swing.login.ServiceInterfaceHolder;
+import org.vpac.grisu.model.dto.GridFile;
 
 import com.google.common.collect.ImmutableList;
 
@@ -60,6 +61,14 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 		menu = new GrisuMenu(this.getFrame());
 		getFrame().setJMenuBar(menu);
 
+	}
+
+	public void addDefaultFileNavigationTaskPane() {
+		mainPanel.addDefaultFileNavigationTaskPane();
+	}
+
+	public void addGroupFileListPanel(List<GridFile> left, List<GridFile> right) {
+		mainPanel.addGroupFileListPanel(left, right);
 	}
 
 	abstract public boolean displayAppSpecificMonitoringItems();
@@ -130,11 +139,11 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 		if (displayAppSpecificMonitoringItems) {
 			mainPanel = new GrisuMainPanel(singleJobs, false, true,
 					getApplicationsToMonitor(), batchJobs, false, true,
-					getApplicationsToMonitor(), true);
+					getApplicationsToMonitor());
 		} else {
 			mainPanel = new GrisuMainPanel(singleJobs, true, false,
 					getApplicationsToMonitor(), batchJobs, true, false,
-					getApplicationsToMonitor(), true);
+					getApplicationsToMonitor());
 		}
 
 		final List<ServiceInterfaceHolder> siHolders = ImmutableList

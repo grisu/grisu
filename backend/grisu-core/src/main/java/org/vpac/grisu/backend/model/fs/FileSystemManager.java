@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.axis.utils.StringUtils;
 import org.apache.commons.vfs.FileObject;
 import org.vpac.grisu.backend.model.User;
+import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.dto.GridFile;
 
@@ -39,7 +40,7 @@ public class FileSystemManager {
 
 	private String cleanPath(String path) {
 		if (path.startsWith("/")) {
-			path = "grid:/" + path;
+			path = ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + ":/" + path;
 		}
 		return path;
 	}

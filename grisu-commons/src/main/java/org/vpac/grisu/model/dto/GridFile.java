@@ -18,6 +18,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang.StringUtils;
+import org.vpac.grisu.X;
+import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.MountPoint;
 
@@ -39,7 +41,8 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	public static final String FILETYPE_ROOT = "root";
 	public static final int FILETYPE_ROOT_PRIORITY = Integer.MIN_VALUE;
 	public static final String FILETYPE_MOUNTPOINT = "mountpoint";
-	public static final int FILETYPE_MOUNTPOINT_PRIORITY = Integer.MIN_VALUE + 1;
+	public static final int FILETYPE_MOUNTPOINT_PRIORITY = Integer.MIN_VALUE + 2;
+	public static final int FILETYPE_VIRTUAL_PRIORITY = Integer.MIN_VALUE + 1;
 
 	// public static final String FILETYPE_GROUP = "group";
 	// public static final int FILETYPE_GROUP_PRIORITY = Integer.MIN_VALUE + 2;
@@ -110,6 +113,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	private String name;
 	private String mainUrl;
 	private String optionalPath;
+	private String comment;
 	private final Set<String> sites = Collections
 			.synchronizedSet(new TreeSet<String>());
 
@@ -121,15 +125,17 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	private long lastModified;
 	private boolean isVirtual = false;
 
+	private boolean inaccessable = false;
+
 	private Set<GridFile> children = Collections
 			.synchronizedSet(new TreeSet<GridFile>());
 
-	public GridFile() {
-		this(null, -1L, -1L, FILETYPE_ROOT);
-		this.isVirtual = true;
-		this.setName("Grid");
-		this.setUrl("grid://");
-	}
+	// public GridFile() {
+	// this(null, -1L, -1L, FILETYPE_ROOT);
+	// this.isVirtual = true;
+	// this.setName("Grid");
+	// this.setUrl(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://");
+	// }
 
 	public GridFile(File f) {
 		this(f, ((f.isDirectory()) ? FILETYPE_FOLDER_PRIORITY
@@ -158,10 +164,6 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		addSite("Local");
 	}
 
-	// public DtoFileObject(String group) {
-	// this(group, -1L, -1L, FILETYPE_GROUP);
-	// }
-
 	public GridFile(MountPoint mp) {
 
 		this.type = FILETYPE_MOUNTPOINT;
@@ -170,6 +172,38 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		this.size = -1L;
 		this.lastModified = -1L;
 		this.name = mp.getAlias();
+		this.addSite(mp.getSite());
+		this.addFqan(mp.getFqan());
+	}
+
+	// public DtoFileObject(String group) {
+	// this(group, -1L, -1L, FILETYPE_GROUP);
+	// }
+
+	/**
+	 * Creates a folder with no lastModified time
+	 * 
+	 * @param url
+	 */
+	public GridFile(String url) {
+		this(url, -1L);
+	}
+
+	public GridFile(String url, boolean isFile, Exception e) {
+		this.mainUrl = url;
+		if (isFile) {
+			this.type = FILETYPE_FILE;
+			addUrl(this.mainUrl, FILETYPE_FILE_PRIORITY);
+		} else {
+			this.type = FILETYPE_FOLDER;
+			addUrl(this.mainUrl, FILETYPE_FOLDER_PRIORITY);
+		}
+		this.inaccessable = true;
+		this.isVirtual = true;
+		this.name = FileManager.getFilename(url) + " (error)";
+		this.lastModified = -1L;
+		this.size = -1L;
+		this.comment = e.getLocalizedMessage();
 	}
 
 	public GridFile(String url, long lastModified) {
@@ -187,7 +221,14 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 			addUrl(mainUrl, FILETYPE_FOLDER_PRIORITY);
 			this.size = -1L;
 			this.lastModified = lastModified;
-			this.name = FileManager.getFilename(url);
+			if ((ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://")
+					.equals(url)) {
+				this.name = "Remote files";
+			} else {
+				this.name = FileManager.getFilename(url);
+				X.p("NAME: " + this.name + " : " + url);
+			}
+
 		} else if (FILETYPE_FILE.equals(type)) {
 			this.type = FILETYPE_FILE;
 			this.mainUrl = url;
@@ -208,6 +249,18 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		} else {
 			throw new RuntimeException("Type: " + type + " not supported...");
 		}
+	}
+
+	public GridFile(String url, String fqan) {
+		this.type = FILETYPE_FOLDER;
+		this.isVirtual = true;
+		this.mainUrl = url;
+		addUrl(this.mainUrl, FILETYPE_VIRTUAL_PRIORITY);
+		this.size = -1L;
+		this.lastModified = -1L;
+		this.addFqan(fqan);
+		this.setPath(url);
+		this.name = FileManager.getFilename(url);
 	}
 
 	public void addChild(GridFile child) {
@@ -272,6 +325,11 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	@XmlElement(name = "child")
 	public Set<GridFile> getChildren() {
 		return children;
+	}
+
+	@XmlElement(name = "comment")
+	public String getComment() {
+		return this.comment;
 	}
 
 	@XmlAttribute(name = "fqan")
@@ -352,6 +410,11 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		}
 	}
 
+	@XmlAttribute(name = "isInaccessable")
+	public boolean isInaccessable() {
+		return this.inaccessable;
+	}
+
 	@XmlAttribute(name = "isVirtual")
 	public boolean isVirtual() {
 		return isVirtual;
@@ -394,6 +457,10 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 			return;
 		}
 		this.children = children;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 
 	private void setFqans(Set<String> fqans) {

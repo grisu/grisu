@@ -111,7 +111,8 @@ public class FileManager {
 			String[] supportedTokens = new String[] { "groups" };
 			for (String token : supportedTokens) {
 				if (inputFile.startsWith("/" + token)) {
-					return "grid:/" + inputFile;
+					return ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + ":/"
+							+ inputFile;
 				}
 			}
 
@@ -180,7 +181,16 @@ public class FileManager {
 			String name = file.getName();
 			return name;
 		} else {
-			final String filename = url.substring(url.lastIndexOf("/") + 1);
+
+			while (url.endsWith("/")) {
+				url = url.substring(0, url.length() - 2);
+			}
+			int lastIndex = url.lastIndexOf("/") + 1;
+			if (lastIndex <= 0) {
+				return "n/a";
+			}
+			String filename = url.substring(lastIndex);
+
 			return filename;
 		}
 
@@ -232,7 +242,8 @@ public class FileManager {
 
 		if (file.startsWith("gsiftp:")) {
 			return false;
-		} else if (file.startsWith("grid:")) {
+		} else if (file.startsWith(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
+				+ ":")) {
 			return false;
 		} else if (file.startsWith("file:")) {
 			return true;
@@ -679,7 +690,8 @@ public class FileManager {
 	}
 
 	public GridFile getGridRoot() {
-		return new GridFile();
+		return new GridFile(
+				ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://", -1L);
 	}
 
 	public File getLocalCacheFile(final String url) {

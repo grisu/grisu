@@ -1,11 +1,14 @@
 package org.vpac.grisu.frontend.view.swing.files.virtual;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 
+import org.apache.commons.lang.StringUtils;
+import org.vpac.grisu.X;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.view.swing.files.virtual.utils.LazyLoadingTreeNode;
 import org.vpac.grisu.model.FileManager;
@@ -38,6 +41,10 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 		setAllowsChildren(getAllowsChildren());
 	}
 
+	public GridFileTreeNode(FileManager fm, String name) {
+		this(fm, new GridFile(name, -1L), null, true, null);
+	}
+
 	@Override
 	public boolean getAllowsChildren() {
 
@@ -64,6 +71,8 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 	public MutableTreeNode[] loadChildren(DefaultTreeModel model) {
 
 		ArrayList<MutableTreeNode> list = new ArrayList<MutableTreeNode>();
+		Set<String> names = new HashSet<String>();
+		Set<String> duplicateNames = new HashSet<String>();
 
 		GridFile temp = ((GridFile) getUserObject());
 		temp.setChildren(null);
@@ -73,6 +82,11 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 				return new MutableTreeNode[0];
 			}
 			for (GridFile f : dfo) {
+
+				if (names.contains(f.getName())) {
+					String oldName = f.getName();
+					duplicateNames.add(oldName);
+				}
 
 				if (!displayHiddenFiles && f.getName().startsWith(".")) {
 					continue;
@@ -92,16 +106,30 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 					}
 				}
 
-				list.add(new GridFileTreeNode(fm, f, model,
-						displayHiddenFiles, extensionsToDisplay));
+				GridFileTreeNode gftn = new GridFileTreeNode(fm, f, model,
+						displayHiddenFiles, extensionsToDisplay);
+
+				list.add(gftn);
+				names.add(f.getName());
+
 				temp.addChild(f);
 			}
 		} catch (RemoteFileSystemException e) {
 			e.printStackTrace();
 			return null;
 		}
+
+		// replace duplicate names with sites appended to name
+		for (MutableTreeNode node : list) {
+			GridFile f = ((GridFileTreeNode) node).getGridFile();
+			String oldName = f.getName();
+			if (duplicateNames.contains(oldName)) {
+				X.p("replace: " + oldName);
+				String sites = StringUtils.join(f.getSites(), ",");
+				f.setName(oldName + " (" + sites + ")");
+			}
+		}
 		return list.toArray(new MutableTreeNode[list.size()]);
 
 	}
-
 }

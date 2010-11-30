@@ -3,10 +3,12 @@ package org.vpac.grisu.frontend.view.swing.files.virtual.utils;
 import java.awt.Color;
 import java.awt.Component;
 import java.io.File;
+import java.net.URL;
 import java.util.Set;
 import java.util.TreeSet;
 
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileSystemView;
@@ -15,6 +17,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
 
 import org.apache.commons.lang.StringUtils;
+import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -35,6 +38,10 @@ public class VirtualFileSystemBrowserTreeRenderer extends
 			.getProperty("user.home")));
 	// TODO think of something better?
 	private static Icon fileIcon = fsView.getSystemIcon(findFile());
+	private static URL imgURL = VirtualFileSystemBrowserTreeRenderer.class
+			.getResource("/group.gif");
+
+	private static Icon groupIcon = new ImageIcon(imgURL);
 
 	private static File findFile() {
 		for (final File file : new File(System.getProperty("user.home"))
@@ -92,7 +99,10 @@ public class VirtualFileSystemBrowserTreeRenderer extends
 		} else if (value2 instanceof GridFile) {
 			final GridFile file = (GridFile) value2;
 			String text = null;
-			if (file.isFolder()) {
+			X.p("File: " + file.getUrl() + " virtual: " + file.isVirtual());
+			if (file.isVirtual()) {
+				this.setIcon(groupIcon);
+			} else if (file.isFolder()) {
 
 				this.setIcon(folderIcon);
 			} else {

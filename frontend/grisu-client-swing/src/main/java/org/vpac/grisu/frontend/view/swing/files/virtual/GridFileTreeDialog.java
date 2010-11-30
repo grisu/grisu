@@ -21,8 +21,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.model.dto.GridFile;
 
-public class GridFileTreeDialog extends JDialog implements
-		WindowListener {
+public class GridFileTreeDialog extends JDialog implements WindowListener {
 
 	private class SwingAction extends AbstractAction {
 		public SwingAction() {
@@ -40,8 +39,8 @@ public class GridFileTreeDialog extends JDialog implements
 	public static void main(String[] args) {
 		try {
 			ServiceInterface si = LoginManager.loginCommandline("Local");
-			GridFileTreeDialog dialog = new GridFileTreeDialog(
-					si, false, new String[] { ".txt" }, true);
+			GridFileTreeDialog dialog = new GridFileTreeDialog(si, false,
+					new String[] { ".txt" }, true);
 			dialog.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			dialog.setVisible(true);
 
@@ -69,9 +68,8 @@ public class GridFileTreeDialog extends JDialog implements
 	/**
 	 * Create the dialog.
 	 */
-	public GridFileTreeDialog(ServiceInterface si,
-			boolean displayHiddenFiles, String[] extensionsToDisplay,
-			boolean displayLocalFilesystems) {
+	public GridFileTreeDialog(ServiceInterface si, boolean displayHiddenFiles,
+			String[] extensionsToDisplay, boolean displayLocalFilesystems) {
 		this(null, si, displayHiddenFiles, extensionsToDisplay,
 				displayLocalFilesystems, null);
 	}
@@ -92,9 +90,8 @@ public class GridFileTreeDialog extends JDialog implements
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new BorderLayout(0, 0));
 		{
-			virtualFileSystemTreeTablePanel = new GridFileTreePanel(
-					si, null, false, displayHiddenFiles, extensionsToDisplay,
-					displayLocalFilesystems);
+			virtualFileSystemTreeTablePanel = new GridFileTreePanel(si, null,
+					false, displayHiddenFiles, extensionsToDisplay);
 			contentPanel.add(virtualFileSystemTreeTablePanel,
 					BorderLayout.CENTER);
 		}

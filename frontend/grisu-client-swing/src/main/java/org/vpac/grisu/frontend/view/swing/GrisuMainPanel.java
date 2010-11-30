@@ -2,6 +2,7 @@ package org.vpac.grisu.frontend.view.swing;
 
 import java.awt.BorderLayout;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.JPanel;
@@ -10,6 +11,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import org.vpac.grisu.frontend.view.swing.login.GrisuSwingClient;
 import org.vpac.grisu.frontend.view.swing.login.LoginPanel;
+import org.vpac.grisu.model.dto.GridFile;
 
 public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 
@@ -27,7 +29,6 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 	private final boolean displayBatchJobMonitorItem;
 	private final Set<String> batchApplicationsToWatch;
 	private final boolean displayBatchJobAppSpecificMenuItems;
-	private final boolean displayFileManagementItem;
 
 	/**
 	 * Create the panel.
@@ -39,8 +40,7 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 			boolean displayBatchJobMonitorItem,
 			boolean displayBatchJobAllJobsMenuItem,
 			boolean displayBatchJobAppSpecificMenuItems,
-			Set<String> batchApplicationsToWatch,
-			boolean displayFileManagementItem) {
+			Set<String> batchApplicationsToWatch) {
 
 		this.displaySingleJobMonitorItem = displaySingleJobMonitorItem;
 		this.displaySingleJobAllJobsMenuItem = displaySingleJobAllJobsMenuItem;
@@ -50,7 +50,6 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 		this.displayBatchJobMonitorItem = displayBatchJobMonitorItem;
 		this.batchApplicationsToWatch = batchApplicationsToWatch;
 		this.displayBatchJobAppSpecificMenuItems = displayBatchJobAppSpecificMenuItems;
-		this.displayFileManagementItem = displayFileManagementItem;
 
 		setLayout(new BorderLayout(0, 0));
 	}
@@ -58,8 +57,17 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 	public GrisuMainPanel(boolean watchSingleApplication,
 			Set<String> applicationsToWatch) {
 		this(watchSingleApplication, false, false, applicationsToWatch,
-				!watchSingleApplication, false, false, applicationsToWatch,
-				true);
+				!watchSingleApplication, false, false, applicationsToWatch);
+	}
+
+	public void addDefaultFileNavigationTaskPane() {
+		getGrisuCenterPanel().addDefaultFileManagementPanel();
+		getGrisuNavigationPanel().addDefaultFileManagementPanel();
+	}
+
+	public void addGroupFileListPanel(List<GridFile> left, List<GridFile> right) {
+		getGrisuCenterPanel().addGroupFileManagementPanel(left, right);
+		getGrisuNavigationPanel().addGroupFileManagementPanel();
 	}
 
 	public void addJobCreationPanel(JobCreationPanel panel) {
@@ -90,7 +98,7 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 					singleApplicationsToWatch, displayBatchJobMonitorItem,
 					displayBatchJobAllJobsMenuItem,
 					displayBatchJobAppSpecificMenuItems,
-					batchApplicationsToWatch, displayFileManagementItem);
+					batchApplicationsToWatch);
 		}
 		return grisuNavigationPanel;
 	}

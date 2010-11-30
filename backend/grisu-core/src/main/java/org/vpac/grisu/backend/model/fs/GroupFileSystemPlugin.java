@@ -1,17 +1,18 @@
 package org.vpac.grisu.backend.model.fs;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.vpac.grisu.X;
 import org.vpac.grisu.backend.model.User;
+import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.GridFile;
@@ -23,212 +24,236 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 	public static final String IDENTIFIER = "groups";
 
+	private final static String BASE = (ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
+			+ "://" + IDENTIFIER);
+
 	private final User user;
 
 	public GroupFileSystemPlugin(User user) {
 		this.user = user;
 	}
 
-	private GridFile assembleFileObject(String path, Map<String, GridFile> lsMap) {
+	public GridFile createGridFile(final String path, int recursiveLevels)
+			throws RemoteFileSystemException {
 
-		GridFile result = new GridFile(path, -1L);
-		result.setIsVirtual(true);
-
-		for (String url : lsMap.keySet()) {
-			result.addUrl(url, 0);
-
-			GridFile child = lsMap.get(url);
-
-			if (!child.isFolder()) {
-				boolean alreadyInChildren = false;
-				for (GridFile resultChild : result.getChildren()) {
-					if (resultChild.getName().equals(child.getName())) {
-						resultChild.addUrl(child.getUrl(), 0);
-						resultChild.setUrl(child.getPath());
-						resultChild.setIsVirtual(true);
-						resultChild.setLastModified(-1L);
-						resultChild.setSize(-1L);
-						resultChild.addSites(child.getSites());
-						result.addSites(child.getSites());
-						alreadyInChildren = true;
-						break;
-					}
-				}
-				if (!alreadyInChildren) {
-					result.addChild(child);
-					result.addSites(child.getSites());
-				}
-				continue;
-			} else {
-
-				// for a folder, we need to do a bit more.
-				// first, we add the parent url
-				// priority we can sort out later if necessary
-				result.addUrl(FileManager.calculateParentUrl(child.getUrl()), 0);
-
-				// now we add the children
-				// but me need to make sure that it's not already in there
-
-				for (GridFile c : child.getChildren()) {
-					boolean alreadyInChildren = false;
-					for (GridFile resultChild : result.getChildren()) {
-						if (resultChild.getName().equals(c.getName())) {
-							resultChild.addUrl(c.getUrl(), 0);
-							resultChild.setUrl(c.getPath());
-							resultChild.setIsVirtual(true);
-							resultChild.addSites(child.getSites());
-							resultChild.setLastModified(-1L);
-							result.addSites(child.getSites());
-							alreadyInChildren = true;
-							break;
-						}
-					}
-					if (!alreadyInChildren) {
-						result.addChild(c);
-						result.addSites(child.getSites());
-					}
-				}
-			}
-
-		}
-
-		return result;
-	}
-
-	public GridFile createDtoFileObject(final String path, int recursiveLevels)
-			throws InvalidPathException {
+		X.p("Creating grid file for: " + path);
 
 		if (recursiveLevels != 1) {
 			throw new RuntimeException(
 					"Recursion levels other than 1 not supported yet");
 		}
 
-		String[] tokens = StringUtils.split(path, '/');
+		X.p("Base: " + BASE);
 
-		if (tokens.length == 2) {
-			// only display groups
+		GridFile result = new GridFile(path, -1L);
+		result.setIsVirtual(true);
+		result.setPath(path);
 
-			GridFile result = new GridFile();
-			result.setIsVirtual(true);
+		String rightPart = path.substring(BASE.length());
+		if (rightPart.contains("//")) {
+			// that means we everything before the // is the fqan and everything
+			// after is the path
 
-			for (String group : user.getAllAvailableUniqueGroupnames()) {
+			int i = rightPart.indexOf("//");
+			String fqanT = rightPart.substring(0, i);
+			String restPath = rightPart.substring(i + 2);
+			X.p("rightPart: " + rightPart);
+			X.p("Fqan: " + fqanT);
+			X.p("path: " + restPath);
 
-				String fqan = user.getFullFqan(group);
-				result.addFqan(fqan);
-				if (user.getMountPoints(fqan).size() == 0) {
-					// DtoFileObject child = new DtoFileObject("grid://"
-					// + IDENTIFIER + "/" + group, -1L);
-					// child.addFqan(fqan);
-					// result.addChild(child);
-					continue;
-				} else if (user.getMountPoints(fqan).size() == 1) {
+			Set<GridFile> childs = listGroup(fqanT, restPath);
+			for (GridFile file : childs) {
+				result.addChildren(file.getChildren());
+			}
 
-					MountPoint mp = user.getMountPoints(fqan).iterator().next();
-					GridFile child = null;
-					// try {
-					// child = new DtoFileObject(mp.getRootUrl(), user
-					// .aquireFile(mp.getRootUrl(), fqan).getContent()
-					// .getLastModifiedTime());
-					// } catch (Exception e) {
-					// myLogger.error(e);
-					child = new GridFile(mp.getRootUrl(), -1L);
-					child.setName(group);
-					// }
-					child.setIsVirtual(false);
-					child.addFqan(fqan);
-					child.addSite(mp.getSite());
-					result.addChild(child);
-					result.addSite(mp.getSite());
+			Set<String> childFqans = findDirectChildFqans(fqanT);
+			for (String fqan : childFqans) {
+				Set<MountPoint> mps = user.getMountPoints(fqan);
+				if (mps.size() == 1) {
+					GridFile file = new GridFile(mps.iterator().next());
+					file.setName(FileManager.getFilename(fqan));
+					file.setPath((path + "/" + file.getName()).replace("///",
+							"/").replace("//", "/")
+							+ "//");
+					result.addChild(file);
 				} else {
-					GridFile child = new GridFile("grid://" + IDENTIFIER + "/"
-							+ group, -1L);
-					child.setIsVirtual(true);
-					child.addFqan(fqan);
-
-					for (MountPoint mp : user.getMountPoints(fqan)) {
-						child.addSite(mp.getSite());
-						result.addSite(mp.getSite());
-						child.addUrl(mp.getRootUrl(), 0);
-					}
-					result.addChild(child);
+					GridFile file = new GridFile((BASE + fqan).replace("///",
+							"/").replace("//", "/")
+							+ "//", fqan);
+					file.setPath((path + "/" + file.getName()).replace("///",
+							"/").replace("//", "/")
+							+ "//");
+					result.addChild(file);
 				}
 			}
 
 			return result;
 
-		} else {
+		}
 
-			String uniqueGroup = tokens[2];
+		int index = BASE.length();
+		String importantUrlPart = path.substring(index);
+		X.p("Part: " + importantUrlPart);
+		String[] tokens = StringUtils.split(importantUrlPart, '/');
 
-			if (!user.getAllAvailableUniqueGroupnames().contains(uniqueGroup)) {
-				throw new InvalidPathException("Group \"" + tokens[2]
-						+ "\" not available.");
+		if (tokens.length == 0) {
+
+			for (String vo : user.getFqans().values()) {
+				GridFile f = new GridFile(BASE + "/" + vo, -1L);
+				f.setIsVirtual(true);
+				f.setPath(path + "/" + vo);
+				result.addChild(f);
 			}
-			String fullFqan = user.getFullFqan(uniqueGroup);
 
-			Set<MountPoint> mps = new HashSet<MountPoint>();
-			for (MountPoint mp : user.getAllMountPoints()) {
-				if (mp.getFqan().equals(fullFqan)) {
-					mps.add(mp);
+		} else if (tokens.length == 1) {
+
+			Set<String> childFqans = findDirectChildFqans("/" + tokens[0]);
+
+			for (String fqan : childFqans) {
+
+				Set<MountPoint> mps = user.getMountPoints(fqan);
+				if (mps.size() == 1) {
+					GridFile file = new GridFile(mps.iterator().next());
+					file.setName(FileManager.getFilename(fqan));
+					file.setPath(path + "/" + file.getName());
+					result.addChild(file);
+				} else {
+					GridFile file = new GridFile(BASE + fqan, fqan);
+					file.setPath(path + "/" + file.getName());
+					result.addChild(file);
 				}
 			}
 
-			final String restUrl = StringUtils.join(tokens, "/", 3,
-					tokens.length);
+		} else {
 
-			final Map<String, GridFile> lsMap = Collections
-					.synchronizedMap(new HashMap<String, GridFile>());
+			String currentUrl = BASE;
+			String potentialFqan = "";
 
-			final ExecutorService pool = Executors.newFixedThreadPool(10);
+			for (int i = 0; i < tokens.length; i++) {
+				X.p("----------------------------");
+				X.p("TOKEN " + i + ": " + tokens[i]);
+				currentUrl = currentUrl + "/" + tokens[i];
+				potentialFqan = potentialFqan + "/" + tokens[i];
 
-			for (final MountPoint mp : mps) {
-				Thread t = new Thread() {
-					@Override
-					public void run() {
+				if (!user.getFqans().keySet().contains(potentialFqan)) {
+					X.p("not a Fqan: " + potentialFqan);
+					continue;
+				}
 
-						String urlToLs = mp.getRootUrl() + "/" + restUrl;
-						try {
-							GridFile result = user.getFolderListing(urlToLs);
-							myLogger.debug("retrieved results from: "
-									+ mp.getAlias());
-							result.setPath(path);
-							for (GridFile c : result.getChildren()) {
-								if (path.endsWith("/")) {
-									c.setPath(path + c.getName());
-								} else {
-									c.setPath(path + "/" + c.getName());
-								}
-							}
-							result.addSite(mp.getSite());
-							result.addFqan(mp.getFqan());
-							lsMap.put(urlToLs, result);
-						} catch (Exception e) {
-							myLogger.error(e);
-						}
-					}
-				};
-				pool.execute(t);
+				X.p("PotentialFqan: " + potentialFqan);
+				X.p("Current url: " + currentUrl);
+				String rest = path.substring(currentUrl.length());
+				X.p("Rest of path: " + rest);
+
+				Set<GridFile> files = listGroup(potentialFqan, rest);
+				for (GridFile file : files) {
+					result.addChildren(file.getChildren());
+				}
+
 			}
 
-			pool.shutdown();
-
-			try {
-				pool.awaitTermination(5, TimeUnit.MINUTES);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			Set<String> childFqans = findDirectChildFqans(potentialFqan);
+			for (String fqan : childFqans) {
+				Set<MountPoint> mps = user.getMountPoints(fqan);
+				if (mps.size() == 1) {
+					GridFile file = new GridFile(mps.iterator().next());
+					file.setName(FileManager.getFilename(fqan));
+					file.setPath(path + "/" + file.getName());
+					result.addChild(file);
+				} else {
+					GridFile file = new GridFile(BASE + fqan, fqan);
+					file.setPath(path + "/" + file.getName());
+					result.addChild(file);
+				}
 			}
 
-			switch (lsMap.size()) {
-			case 0:
-				return null;
+		}
 
-			case 1:
-				return lsMap.values().iterator().next();
-			default:
-				return assembleFileObject(path, lsMap);
+		return result;
 
+	}
+
+	private Set<String> findDirectChildFqans(String parentFqan) {
+
+		String[] tokens = parentFqan.substring(1).split("/");
+
+		X.p(StringUtils.join(tokens, " --- "));
+
+		Set<String> result = new TreeSet<String>();
+
+		for (String fqan : user.getFqans().keySet()) {
+
+			X.p("Fqan: " + fqan);
+
+			String[] fqanTokens = fqan.substring(1).split("/");
+			int fqanTokenLength = fqanTokens.length;
+
+			if ((fqanTokenLength == tokens.length + 1)
+					&& fqanTokens[tokens.length - 1]
+							.equals(tokens[tokens.length - 1])) {
+				X.p("HIT: " + fqan);
+				result.add(fqan);
 			}
 		}
+		return result;
+	}
+
+	private Set<GridFile> listGroup(String fqan, String path)
+			throws RemoteFileSystemException {
+
+		Set<MountPoint> mps = user.getMountPoints(fqan);
+
+		final Set<GridFile> result = Collections
+				.synchronizedSet(new TreeSet<GridFile>());
+
+		final ExecutorService pool = Executors.newFixedThreadPool(20);
+
+		for (final MountPoint mp : mps) {
+
+			X.p("MOUNTPOINT: " + mp.getRootUrl());
+
+			final String urlToQuery = mp.getRootUrl() + "/" + path;
+			X.p("URL to query: " + urlToQuery);
+
+			Thread t = new Thread() {
+				@Override
+				public void run() {
+
+					try {
+						GridFile file = user.getFileSystemManager()
+								.getFolderListing(urlToQuery);
+						file.addSite(mp.getSite());
+						X.p("Added file: " + file.getUrl());
+						result.add(file);
+					} catch (InvalidPathException e) {
+						GridFile f = new GridFile(urlToQuery, true, e);
+						result.add(f);
+					} catch (RemoteFileSystemException rfse) {
+						String msg = rfse.getLocalizedMessage();
+						if (!msg.contains("not a folder")) {
+							GridFile f = new GridFile(urlToQuery, true, rfse);
+							result.add(f);
+						} else {
+							X.p("not folder");
+						}
+					}
+				}
+			};
+
+			pool.execute(t);
+		}
+
+		pool.shutdown();
+
+		try {
+			pool.awaitTermination(5, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			throw new RemoteFileSystemException(e);
+		}
+
+		X.p("FILES: " + StringUtils.join(result, " -- "));
+
+		return result;
 
 	}
 }

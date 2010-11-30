@@ -4,6 +4,7 @@ import java.awt.CardLayout;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JPanel;
@@ -13,9 +14,11 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.jobMonitoring.RunningJobManager;
 import org.vpac.grisu.frontend.control.utils.ApplicationsManager;
 import org.vpac.grisu.frontend.view.swing.files.preview.FileListWithPreviewPanel;
+import org.vpac.grisu.frontend.view.swing.files.virtual.GridFileManagementPanel;
 import org.vpac.grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import org.vpac.grisu.frontend.view.swing.jobmonitoring.batch.MultiBatchJobMonitoringGrid;
 import org.vpac.grisu.frontend.view.swing.jobmonitoring.single.MultiSingleJobMonitoringGrid;
+import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.settings.ClientPropertiesManager;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -29,6 +32,7 @@ public class GrisuCenterPanel extends JPanel {
 	public static final String SINGLE_JOB_MONITORING_GRID = "singleJobMontitoring";
 	public static final String BATCH_JOB_MONITORING_GRID = "batchJobMonitoring";
 	public static final String FILE_MANAGEMENT_PANEL = "fileManagement";
+	public static final String GROUP_FILE_MANAGEMENT_PANEL = "groupfileManagement";
 
 	private MultiSingleJobMonitoringGrid multiSingleJobMonitoringGrid;
 	private MultiBatchJobMonitoringGrid multiBatchJobMonitoringGrid;
@@ -37,6 +41,7 @@ public class GrisuCenterPanel extends JPanel {
 	private final RunningJobManager rjm;
 	private LoadingPanel loadingPanel;
 	private FileListWithPreviewPanel fileListWithPreviewPanel;
+	private GridFileManagementPanel groupFileListPanel;
 
 	private final Map<String, JobCreationPanel> availableJobCreationPanels = new HashMap<String, JobCreationPanel>();
 
@@ -65,9 +70,18 @@ public class GrisuCenterPanel extends JPanel {
 				SINGLE_JOB_MONITORING_GRID);
 		wrapperPanel.add(getMultiBatchJobMonitoringGrid(),
 				BATCH_JOB_MONITORING_GRID);
-		wrapperPanel.add(getFileListWithPreviewPanel(), FILE_MANAGEMENT_PANEL);
 
 		add(wrapperPanel, "2, 2, fill, fill");
+	}
+
+	public void addDefaultFileManagementPanel() {
+		wrapperPanel.add(getFileListWithPreviewPanel(), FILE_MANAGEMENT_PANEL);
+	}
+
+	public void addGroupFileManagementPanel(List<GridFile> left,
+			List<GridFile> right) {
+		wrapperPanel.add(getGroupFileManagementPanel(left, right),
+				GROUP_FILE_MANAGEMENT_PANEL);
 	}
 
 	public void addJobCreationPanel(JobCreationPanel panel) {
@@ -112,6 +126,18 @@ public class GrisuCenterPanel extends JPanel {
 			@Override
 			public void run() {
 				cl.show(wrapperPanel, FILE_MANAGEMENT_PANEL);
+				revalidate();
+			}
+		});
+	}
+
+	public void displayGroupFileManagement() {
+
+		final CardLayout cl = (CardLayout) (wrapperPanel.getLayout());
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				cl.show(wrapperPanel, GROUP_FILE_MANAGEMENT_PANEL);
 				revalidate();
 			}
 		});
@@ -166,6 +192,15 @@ public class GrisuCenterPanel extends JPanel {
 
 		}
 		return fileListWithPreviewPanel;
+	}
+
+	private GridFileManagementPanel getGroupFileManagementPanel(
+			List<GridFile> left, List<GridFile> right) {
+		if (groupFileListPanel == null) {
+			groupFileListPanel = new GridFileManagementPanel(si, left, right);
+
+		}
+		return groupFileListPanel;
 	}
 
 	private LoadingPanel getLoadingPanel() {
@@ -227,10 +262,14 @@ public class GrisuCenterPanel extends JPanel {
 				}
 			}.start();
 			return;
-		} else if (GrisuFileNavigationTaskPane.FILE_MANAGEMENT
+		} else if (GrisuFileNavigationTaskPane.DEFAULT_FILE_MANAGEMENT
 				.equals(command[0])) {
 			displayFileManagement();
 			return;
+		}
+		if (GrisuFileNavigationTaskPane.GROUP_FILE_MANAGEMENT
+				.equals(command[0])) {
+			displayGroupFileManagement();
 		} else {
 			final JobCreationPanel panel = availableJobCreationPanels
 					.get(command[0]);

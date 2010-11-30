@@ -15,6 +15,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.xml.bind.annotation.XmlMimeType;
 
+import org.vpac.grisu.GrisuVersion;
 import org.vpac.grisu.control.exceptions.BatchJobException;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
@@ -52,7 +53,9 @@ import au.org.arcs.jcommons.constants.Constants;
 @WebService(targetNamespace = "http://api.grisu.arcs.org.au/", serviceName = "GrisuService")
 public interface ServiceInterface {
 
-	String INTERFACE_VERSION = "VERSION_TOKEN";
+	String INTERFACE_VERSION = GrisuVersion.get("grisu-commons");
+
+	public static final String VIRTUAL_GRID_PROTOCOL_NAME = "grid";
 
 	/**
 	 * Adds multiple job propeties in one go.
