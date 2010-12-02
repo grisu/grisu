@@ -1,11 +1,13 @@
 package org.vpac.grisu.backend.info;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.vpac.grisu.X;
 import org.vpac.grisu.settings.Environment;
 
 import au.org.arcs.jcommons.interfaces.InformationManager;
@@ -24,36 +26,54 @@ public class InformationManagerManager {
 	public static InformationManager createInfoManager(
 			Map<String, String> parameters) {
 
+		// try {
+		String imClassName = parameters.get("type");
+
+		if (StringUtils.isBlank(imClassName)) {
+			parameters.put("type", "CachedMdsInformationManager");
+			imClassName = "CachedMdsInformationManager";
+
+			final String dir = parameters.get("mdsFileDir");
+			if (StringUtils.isBlank(dir)) {
+				parameters.put("mdsFileDir", Environment.getVarGrisuDirectory()
+						.toString());
+			}
+		}
+
+		if (!imClassName.contains(".")) {
+			imClassName = "org.vpac.grisu.control.info." + imClassName;
+		}
+
 		try {
-			String imClassName = parameters.get("type");
-
-			if (StringUtils.isBlank(imClassName)) {
-				parameters.put("type", "CachedMdsInformationManager");
-				imClassName = "CachedMdsInformationManager";
-
-				final String dir = parameters.get("mdsFileDir");
-				if (StringUtils.isBlank(dir)) {
-					parameters.put("mdsFileDir", Environment
-							.getVarGrisuDirectory().toString());
-				}
-			}
-
-			if (!imClassName.contains(".")) {
-				imClassName = "org.vpac.grisu.control.info." + imClassName;
-			}
-
 			final Class imClass = Class.forName(imClassName);
 			final Constructor<InformationManager> constructor = imClass
 					.getConstructor(Map.class);
 
-			final InformationManager im = constructor.newInstance(parameters);
+			InformationManager im;
 
+			im = constructor.newInstance(parameters);
 			return im;
-
-		} catch (final Exception e) {
-			myLogger.debug(e);
-			return null;
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			X.p("Invocation");
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		} catch (RuntimeException e) {
+			X.p("runtime");
+			e.printStackTrace();
+			throw e;
+		} catch (Exception e) {
+			X.p("excpetion");
+			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
+
+		// } catch (RuntimeException re) {
+		// throw re;
+		// } catch (final Exception e) {
+		// myLogger.debug(e);
+		// throw new RuntimeException(e);
+		// }
 
 	}
 
@@ -95,6 +115,7 @@ public class InformationManagerManager {
 			return im;
 
 		} catch (final Exception e) {
+			e.printStackTrace();
 			myLogger.debug(e);
 			return null;
 		}

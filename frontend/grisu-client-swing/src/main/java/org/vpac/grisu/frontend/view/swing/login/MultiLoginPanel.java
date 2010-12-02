@@ -25,7 +25,6 @@ import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.events.ClientPropertiesEvent;
-import org.vpac.grisu.frontend.control.login.LoginException;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.settings.ClientPropertiesManager;
@@ -89,7 +88,7 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 
 	private Thread loginThread = null;
 
-	private LoginException possibleException = null;
+	private Exception possibleException = null;
 
 	private ServiceInterface si = null;
 
@@ -204,7 +203,7 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 		return myProxyLoginPanel;
 	}
 
-	public LoginException getPossibleException() {
+	public Exception getPossibleException() {
 		return possibleException;
 	}
 
@@ -316,13 +315,22 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 						loginPanel.setServiceInterface(temp
 								.getServiceInterface());
 					} else {
-						temp.getPossibleException().printStackTrace();
-						final ErrorInfo info = new ErrorInfo("Login error",
-								"Error while trying to login.", temp
-										.getPossibleException()
-										.getLocalizedMessage(), (String) null,
-								temp.getPossibleException(), Level.SEVERE,
-								(Map) null);
+						Exception e = temp.getPossibleException();
+						ErrorInfo info = null;
+						if (e == null) {
+							info = new ErrorInfo("Login error",
+									"Error while trying to login.",
+									"Generic/Unspecific error.", (String) null,
+									null, Level.SEVERE, (Map) null);
+						} else {
+
+							info = new ErrorInfo("Login error",
+									"Error while trying to login.", temp
+											.getPossibleException()
+											.getLocalizedMessage(),
+									(String) null, temp.getPossibleException(),
+									Level.SEVERE, (Map) null);
+						}
 						JXErrorPane.showDialog(MultiLoginPanel.this, info);
 						// JXErrorPane.showDialog(temp.getPossibleException());
 					}
@@ -351,8 +359,12 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 				try {
 					si = LoginManager.login(params.getServiceInterfaceUrl());
 					loginSuccessful = true;
-				} catch (final LoginException e) {
-					possibleException = e;
+				} catch (final Throwable e) {
+					if (e instanceof Exception) {
+						possibleException = (Exception) e;
+					} else {
+						possibleException = new Exception(e);
+					}
 				}
 			}
 

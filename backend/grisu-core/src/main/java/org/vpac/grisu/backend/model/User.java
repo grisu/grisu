@@ -15,6 +15,7 @@ import java.util.concurrent.Executors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -102,8 +103,14 @@ public class User {
 			user.setCred(cred);
 		}
 
-		user.setAutoMountedMountPoints(user.df_auto_mds(si.getAllSites()
-				.asArray()));
+		try {
+			user.setAutoMountedMountPoints(user.df_auto_mds(si.getAllSites()
+					.asArray()));
+		} catch (Exception e) {
+			throw new RuntimeException(
+					"Can't aquire filesystems for user. Possibly because of misconfigured grisu backend",
+					e);
+		}
 
 		return user;
 
@@ -427,9 +434,12 @@ public class User {
 		}
 
 		// add dn dir if necessary
+
 		if (userDnPath) {
 			url = url + "/" + User.get_vo_dn_path(getCred().getDn());
 
+			// try to connect to filesystem in background and store in database
+			// if not successful, so next time won't be tried again...
 			if (executor != null) {
 				final String urlTemp = url;
 				final Thread t = new Thread() {
@@ -471,8 +481,15 @@ public class User {
 
 							mountPointCache.put(key, "Does not exist");
 						} finally {
-							closeFileSystems();
-							userdao.saveOrUpdate(User.this);
+							try {
+								closeFileSystems();
+								userdao.saveOrUpdate(User.this);
+							} catch (Exception e) {
+								myLogger.debug("Could not save filesystem state for fs "
+										+ urlTemp
+										+ ": "
+										+ e.getLocalizedMessage());
+							}
 						}
 					}
 				};
@@ -521,7 +538,7 @@ public class User {
 
 		// to check whether dn_subdirs are created already and create them if
 		// not (in background)
-		final ExecutorService executor = Executors.newFixedThreadPool(2);
+		final ExecutorService executor = Executors.newFixedThreadPool(1);
 
 		// for ( String site : sites ) {
 
@@ -795,12 +812,12 @@ public class User {
 		return id;
 	}
 
-	@CollectionOfElements
+	@ElementCollection
 	public Map<String, JobSubmissionObjectImpl> getJobTemplates() {
 		return jobTemplates;
 	}
 
-	@CollectionOfElements(fetch = FetchType.EAGER)
+	@ElementCollection(fetch = FetchType.EAGER)
 	private Map<String, String> getMountPointCache() {
 		return mountPointCache;
 	}
@@ -932,7 +949,7 @@ public class User {
 	 * 
 	 * @return the users' properties
 	 */
-	@CollectionOfElements(fetch = FetchType.EAGER)
+	@ElementCollection(fetch = FetchType.EAGER)
 	public Map<String, String> getUserProperties() {
 		return userProperties;
 	}

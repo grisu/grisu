@@ -94,6 +94,8 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 					if (getUser() != null) {
 						getUser().cleanCache();
 					}
+				} catch (RuntimeException re) {
+					throw re;
 				} catch (final Throwable e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -198,6 +200,8 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 
 		try {
 			getCredential();
+		} catch (final RuntimeException re) {
+			throw re;
 		} catch (final Exception e) {
 			// e.printStackTrace();
 			throw new NoValidCredentialException("No valid credential: "
