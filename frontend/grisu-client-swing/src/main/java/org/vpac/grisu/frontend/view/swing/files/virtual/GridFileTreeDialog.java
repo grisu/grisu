@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.AbstractAction;
@@ -39,7 +40,7 @@ public class GridFileTreeDialog extends JDialog implements WindowListener {
 	public static void main(String[] args) {
 		try {
 			ServiceInterface si = LoginManager.loginCommandline("Local");
-			GridFileTreeDialog dialog = new GridFileTreeDialog(si, false,
+			GridFileTreeDialog dialog = new GridFileTreeDialog(si, null, false,
 					new String[] { ".txt" }, true);
 			dialog.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			dialog.setVisible(true);
@@ -61,22 +62,24 @@ public class GridFileTreeDialog extends JDialog implements WindowListener {
 	/**
 	 * @wbp.parser.constructor
 	 */
-	public GridFileTreeDialog(ServiceInterface si) {
-		this(si, false, null, true);
+	public GridFileTreeDialog(ServiceInterface si, List<GridFile> roots) {
+		this(si, roots, false, null, true);
 	}
 
 	/**
 	 * Create the dialog.
 	 */
-	public GridFileTreeDialog(ServiceInterface si, boolean displayHiddenFiles,
-			String[] extensionsToDisplay, boolean displayLocalFilesystems) {
-		this(null, si, displayHiddenFiles, extensionsToDisplay,
+	public GridFileTreeDialog(ServiceInterface si, List<GridFile> roots,
+			boolean displayHiddenFiles, String[] extensionsToDisplay,
+			boolean displayLocalFilesystems) {
+		this(null, si, roots, displayHiddenFiles, extensionsToDisplay,
 				displayLocalFilesystems, null);
 	}
 
 	public GridFileTreeDialog(Window owner, ServiceInterface si,
-			boolean displayHiddenFiles, String[] extensionsToDisplay,
-			boolean displayLocalFilesystems, String startupUrl) {
+			List<GridFile> roots, boolean displayHiddenFiles,
+			String[] extensionsToDisplay, boolean displayLocalFilesystems,
+			String startupUrl) {
 		setModal(true);
 		setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 		addWindowListener(this);
@@ -90,7 +93,7 @@ public class GridFileTreeDialog extends JDialog implements WindowListener {
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new BorderLayout(0, 0));
 		{
-			virtualFileSystemTreeTablePanel = new GridFileTreePanel(si, null,
+			virtualFileSystemTreeTablePanel = new GridFileTreePanel(si, roots,
 					false, displayHiddenFiles, extensionsToDisplay);
 			contentPanel.add(virtualFileSystemTreeTablePanel,
 					BorderLayout.CENTER);
@@ -126,9 +129,9 @@ public class GridFileTreeDialog extends JDialog implements WindowListener {
 	}
 
 	public GridFileTreeDialog(Window owner, ServiceInterface si,
-			String startUpUrl) {
+			List<GridFile> roots, String startUpUrl) {
 
-		this(owner, si, false, null, true, startUpUrl);
+		this(owner, si, roots, false, null, true, startUpUrl);
 	}
 
 	public void centerOnOwner() {

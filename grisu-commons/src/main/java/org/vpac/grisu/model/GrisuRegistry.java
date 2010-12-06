@@ -12,6 +12,16 @@ public interface GrisuRegistry {
 	public static final String GRISU_HISTORY_FILENAME = "grisu.history";
 
 	/**
+	 * Allows to retrieve objects registered against this serviceinterface
+	 * (using the {@link #set(String, Object)} method).
+	 * 
+	 * @param key
+	 *            the key
+	 * @return the object
+	 */
+	public abstract Object get(String key);
+
+	/**
 	 * Gets the ApplicationInformationObject for the specified application.
 	 * 
 	 * If an ApplicationInformationObject for this application was already
@@ -74,6 +84,17 @@ public interface GrisuRegistry {
 	 * @return the UserEnvironmentManager object for this user
 	 */
 	public abstract UserEnvironmentManager getUserEnvironmentManager();
+
+	/**
+	 * With this method you can register arbitrary objects against a
+	 * serviceinterface.
+	 * 
+	 * @param key
+	 *            the key
+	 * @param object
+	 *            the object
+	 */
+	public abstract void set(String key, Object object);
 
 	/**
 	 * Sets the {@link UserEnvironmentManager} for this registry object.

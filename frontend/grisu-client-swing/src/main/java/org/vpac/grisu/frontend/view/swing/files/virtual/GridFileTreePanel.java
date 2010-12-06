@@ -81,6 +81,9 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel {
 
 	private final List<GridFile> roots;
 
+	/**
+	 * @wbp.parser.constructor
+	 */
 	public GridFileTreePanel(ServiceInterface si) {
 		this(si, null, true);
 	}
@@ -104,6 +107,11 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel {
 		this.displayHiddenFiles = displayHiddenFiles;
 		this.extensionsToDisplay = extensionsToDisplay;
 		if (roots == null) {
+			// GridFile p = new GridFile(
+			// "grid://groups/ARCS/BeSTGRID/Drug_discovery/Local//");
+			// p.setIsVirtual(false);
+			// p.setName("Personal files");
+			// p.setPath("grid://groups/ARCS/BeSTGRID/Drug_discovery/Local//");
 			GridFile gridRoot = GrisuRegistryManager.getDefault(si)
 					.getFileManager().getGridRoot();
 			GridFile localRoot = GrisuRegistryManager.getDefault(si)

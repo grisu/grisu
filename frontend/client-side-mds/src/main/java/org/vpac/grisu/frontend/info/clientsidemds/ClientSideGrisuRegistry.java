@@ -76,6 +76,8 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 	private ResourceInformation cachedResourceInformation;
 	private FileManager cachedFileHelper;
 
+	private final Map<String, Object> values = new HashMap<String, Object>();
+
 	private TemplateManager templateManager;
 
 	private ClientSideGrisuRegistry(ServiceInterface serviceInterface)
@@ -89,10 +91,15 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 				.getMatchMaker(ServerPropertiesManager.getMatchMakerConf());
 	}
 
+	public Object get(String key) {
+		return values.get(key);
+	}
+
 	public ApplicationInformation getApplicationInformation(
 			String applicationName) {
 
 		if (cachedApplicationInformationObjects.get(applicationName) == null) {
+
 			final ApplicationInformation temp = new ClientSideApplicationInformation(
 					this, applicationName, infoManager, matchMaker);
 			cachedApplicationInformationObjects.put(applicationName, temp);
@@ -165,6 +172,10 @@ public class ClientSideGrisuRegistry implements GrisuRegistry {
 					serviceInterface);
 		}
 		return this.cachedUserInformation;
+	}
+
+	public void set(String key, Object object) {
+		values.put(key, object);
 	}
 
 	public void setUserEnvironmentManager(UserEnvironmentManager ui) {

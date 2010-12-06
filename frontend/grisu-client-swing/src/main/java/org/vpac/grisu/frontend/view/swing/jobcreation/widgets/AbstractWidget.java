@@ -5,6 +5,7 @@ import java.awt.Window;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
+import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
@@ -19,6 +20,7 @@ import org.vpac.grisu.frontend.view.swing.files.GrisuFileDialog;
 import org.vpac.grisu.frontend.view.swing.files.virtual.GridFileTreeDialog;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
+import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.historyRepeater.HistoryManager;
 
 public abstract class AbstractWidget extends JPanel {
@@ -64,8 +66,8 @@ public abstract class AbstractWidget extends JPanel {
 		return fileDialog;
 	}
 
-	public static GridFileTreeDialog createGridFileDialog(
-			ServiceInterface si, String historyKey, String[] extensions,
+	public static GridFileTreeDialog createGridFileDialog(ServiceInterface si,
+			List<GridFile> roots, String historyKey, String[] extensions,
 			boolean displayHiddenFiles, Window owner) {
 
 		if (si == null) {
@@ -91,8 +93,8 @@ public abstract class AbstractWidget extends JPanel {
 			}
 		}
 
-		final GridFileTreeDialog fileDialog = new GridFileTreeDialog(
-				owner, si, displayHiddenFiles, extensions, true, startUrl);
+		final GridFileTreeDialog fileDialog = new GridFileTreeDialog(owner, si,
+				roots, displayHiddenFiles, extensions, true, startUrl);
 		fileDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		fileDialog.centerOnOwner();

@@ -52,6 +52,8 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 
 	private final ServiceInterface serviceInterface;
 
+	private final Map<String, Object> objects = new HashMap<String, Object>();
+
 	private HistoryManager historyManager = null;
 	private final Map<String, ApplicationInformation> cachedApplicationInformationObjects = new HashMap<String, ApplicationInformation>();
 	private final Map<String, UserApplicationInformation> cachedUserInformationObjects = new HashMap<String, UserApplicationInformation>();
@@ -62,6 +64,10 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 
 	public GrisuRegistryImpl(final ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
+	}
+
+	public Object get(String key) {
+		return objects.get(key);
 	}
 
 	/*
@@ -180,6 +186,10 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 					serviceInterface);
 		}
 		return cachedUserInformation;
+	}
+
+	public void set(String key, Object object) {
+		objects.put(key, object);
 	}
 
 	/*

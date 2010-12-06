@@ -335,16 +335,16 @@ public class LoginManager {
 
 			// assume xfire -- that needs to get smarter later on
 
-			dependencies = new HashMap<Dependency, String>();
-
-			dependencies.put(Dependency.GRISU_XFIRE_CLIENT_LIBS,
-					ServiceInterface.INTERFACE_VERSION);
-			// also try to use client side mds
-			dependencies.put(Dependency.CLIENT_SIDE_MDS,
-					ServiceInterface.INTERFACE_VERSION);
-
-			DependencyManager.addDependencies(dependencies,
-					Environment.getGrisuPluginDirectory());
+			// dependencies = new HashMap<Dependency, String>();
+			//
+			// dependencies.put(Dependency.GRISU_XFIRE_CLIENT_LIBS,
+			// ServiceInterface.INTERFACE_VERSION);
+			// // also try to use client side mds
+			// dependencies.put(Dependency.CLIENT_SIDE_MDS,
+			// ServiceInterface.INTERFACE_VERSION);
+			//
+			// DependencyManager.addDependencies(dependencies,
+			// Environment.getGrisuPluginDirectory());
 
 		}
 

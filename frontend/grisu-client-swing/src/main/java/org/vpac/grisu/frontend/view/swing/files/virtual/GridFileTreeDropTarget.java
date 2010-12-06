@@ -222,8 +222,8 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 			int row = -1;
 			for (int i = 0; i < outline.getRowCount(); i++) {
 
-				GridFileTreeNode node = (GridFileTreeNode) outline
-						.getValueAt(i, 0);
+				GridFileTreeNode node = (GridFileTreeNode) outline.getValueAt(
+						i, 0);
 				if (parentNode.equals(node)) {
 					row = i;
 					break;

@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.List;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -33,6 +34,8 @@ public class SingleInputGridFile extends AbstractWidget {
 	public final String selString = "Please select a file";
 	private boolean displayHiddenFiles = false;
 	private String[] extensions = null;
+
+	private List<GridFile> roots = null;
 
 	private String currentUrl = null;
 
@@ -127,7 +130,7 @@ public class SingleInputGridFile extends AbstractWidget {
 
 		if (fileDialog == null) {
 
-			fileDialog = createGridFileDialog(getServiceInterface(),
+			fileDialog = createGridFileDialog(getServiceInterface(), roots,
 					getHistoryKey() + "_last_dir", extensions,
 					displayHiddenFiles, SwingUtilities.getWindowAncestor(this));
 			// String startUrl = getHistoryManager().getLastEntry(
@@ -244,6 +247,10 @@ public class SingleInputGridFile extends AbstractWidget {
 	@Override
 	protected boolean setLastValue() {
 		return false;
+	}
+
+	public void setRoots(List<GridFile> roots) {
+		this.roots = roots;
 	}
 
 	@Override
