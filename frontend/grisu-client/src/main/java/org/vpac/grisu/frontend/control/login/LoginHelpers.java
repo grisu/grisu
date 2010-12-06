@@ -90,6 +90,8 @@ public final class LoginHelpers {
 			final LoginParams loginParams, final GlobusCredential proxy)
 			throws LoginException, ServiceInterfaceException {
 
+		myLogger.debug("Using globus credential login.");
+
 		ServiceInterface serviceInterface = null;
 
 		Class directMyProxyUploadClass = null;
@@ -119,9 +121,11 @@ public final class LoginHelpers {
 				e1.printStackTrace();
 			}
 
-			myLogger.debug("Contacting myProxyServer: " + myProxyServer);
+			myLogger.debug(" MyProxy to use: " + myProxyServer + " / "
+					+ myProxyPort);
 
 			Map<String, char[]> myproxyDetails = null;
+			myLogger.debug("Uploading proxy...");
 			myproxyDetails = (Map<String, char[]>) myProxyUploadMethod.invoke(
 					null,
 					new Object[] { proxy, myProxyServer, myProxyPort,
@@ -174,6 +178,8 @@ public final class LoginHelpers {
 			final LoginParams loginParams, final GSSCredential cred)
 			throws LoginException, ServiceInterfaceException {
 
+		myLogger.debug("gssCredential login...");
+
 		ServiceInterface serviceInterface = null;
 
 		Class directMyProxyUploadClass = null;
@@ -203,7 +209,8 @@ public final class LoginHelpers {
 				e1.printStackTrace();
 			}
 
-			myLogger.debug("Contacting myProxyServer: " + myProxyServer);
+			myLogger.debug("Using myProxyServer: " + myProxyServer + " / "
+					+ myProxyPort);
 
 			Map<String, char[]> myproxyDetails = null;
 			myproxyDetails = (Map<String, char[]>) myProxyUploadMethod.invoke(
@@ -261,6 +268,8 @@ public final class LoginHelpers {
 			final char[] privateKeyPassphrase, final LoginParams loginParams)
 			throws LoginException, ServiceInterfaceException {
 
+		myLogger.debug("Local proxy login...");
+
 		ServiceInterface serviceInterface = null;
 
 		Class directMyProxyUploadClass = null;
@@ -290,7 +299,8 @@ public final class LoginHelpers {
 				e1.printStackTrace();
 			}
 
-			myLogger.debug("Contacting myProxyServer: " + myProxyServer);
+			myLogger.debug("Using myProxyServer: " + myProxyServer + " / "
+					+ myProxyPort);
 
 			Map<String, char[]> myproxyDetails = null;
 			myproxyDetails = (Map<String, char[]>) myProxyUploadMethod.invoke(
