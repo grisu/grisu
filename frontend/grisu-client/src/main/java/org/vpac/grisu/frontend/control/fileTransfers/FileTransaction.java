@@ -198,7 +198,7 @@ public class FileTransaction implements Comparable<FileTransaction> {
 								currentSourceFile);
 						try {
 							if (job != null) {
-								fm.uploadInputFile(sourceUrl, job.getJobname());
+								fm.uploadJobInput(job.getJobname(), sourceUrl);
 							}
 							if (DELETE_STRING.equals(targetDirUrl)) {
 								try {

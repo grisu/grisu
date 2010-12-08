@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -24,7 +25,6 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.CollectionOfElements;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
@@ -268,7 +268,7 @@ public class Job implements Comparable<Job> {
 		return id;
 	}
 
-	@CollectionOfElements(fetch = FetchType.EAGER)
+	@ElementCollection(fetch = FetchType.EAGER)
 	@Column(length = 1500)
 	public synchronized Set<String> getInputFiles() {
 		return inputFiles;
@@ -310,7 +310,8 @@ public class Job implements Comparable<Job> {
 		return jobname;
 	}
 
-	@CollectionOfElements(fetch = FetchType.EAGER)
+	@ElementCollection(fetch = FetchType.EAGER)
+	@Column(length = 1000)
 	public synchronized Map<String, String> getJobProperties() {
 
 		return jobProperties;
@@ -360,7 +361,7 @@ public class Job implements Comparable<Job> {
 		return lastStatusCheck;
 	}
 
-	@CollectionOfElements(fetch = FetchType.EAGER)
+	@ElementCollection(fetch = FetchType.EAGER)
 	public Map<Long, String> getLogMessages() {
 		return logMessages;
 	}

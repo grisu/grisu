@@ -940,6 +940,7 @@ public class FileManager {
 							+ " successful.");
 				} catch (final Exception e1) {
 					try {
+						e1.printStackTrace();
 						// try again
 						myLogger.info("Uploading file " + file.getName()
 								+ "...");
@@ -1070,7 +1071,7 @@ public class FileManager {
 
 	}
 
-	public final void uploadInputFile(final File file, final String job)
+	private final void uploadInputFile(final String job, final File file)
 			throws FileTransactionException {
 
 		if (!file.exists()) {
@@ -1119,6 +1120,7 @@ public class FileManager {
 					+ " successful.");
 		} catch (final Exception e1) {
 			try {
+				e1.printStackTrace();
 				// try again
 				myLogger.info("Uploading file " + file.getName() + "...");
 				System.out.println("FAILED. SLEEPING 1 SECONDS");
@@ -1139,17 +1141,148 @@ public class FileManager {
 
 	}
 
-	public final void uploadInputFile(final String uriOrPath, final String job)
+	// private final void uploadInputFile(final String job, final String
+	// uriOrPath)
+	// throws FileTransactionException {
+	//
+	// final File file = getFileFromUriOrPath(uriOrPath);
+	//
+	// if (file.isDirectory()) {
+	// throw new FileTransactionException(uriOrPath, null,
+	// "Upload of folders not supported for job input files.",
+	// null);
+	// } else {
+	// uploadInputFile(file, job);
+	// }
+	//
+	// }
+
+	private final void uploadInputFolder(final String jobname, final File folder)
+			throws FileTransactionException {
+
+		if (!folder.isDirectory()) {
+			throw new FileTransactionException(folder.toString(), null,
+					"Source is no folder.", null);
+		}
+
+		final Collection<File> allFiles = FileUtils.listFiles(folder, null,
+				true);
+		final Map<String, Exception> errors = Collections
+				.synchronizedMap(new HashMap<String, Exception>());
+
+		final ExecutorService executor1 = Executors
+				.newFixedThreadPool(ClientPropertiesManager
+						.getConcurrentUploadThreads());
+
+		final String basePath = folder.getParentFile().getPath();
+		for (final File file : allFiles) {
+
+			final String filePath = file.getPath();
+			final String deltaPathTemp = filePath.substring(basePath.length());
+
+			final String deltaPath;
+			if (deltaPathTemp.startsWith("/") || deltaPathTemp.startsWith("\\")) {
+				deltaPath = deltaPathTemp.substring(1);
+			} else {
+				deltaPath = deltaPathTemp;
+			}
+
+			final DataHandler handler = createDataHandler(file);
+
+			final Thread uploadThread = new Thread() {
+				@Override
+				public void run() {
+					try {
+
+						try {
+							myLogger.info("Uploading file " + file.getName()
+									+ "...");
+							serviceInterface.uploadInputFile(jobname, handler,
+									deltaPath);
+
+							final StatusObject so = new StatusObject(
+									serviceInterface, deltaPath);
+							so.waitForActionToFinish(4, true, false);
+
+							if (so.getStatus().isFailed()) {
+								throw new FileTransactionException(
+										file.toString(), null,
+										"Could not upload input file.", null);
+							}
+
+							myLogger.info("Upload of input file "
+									+ file.getName() + " successful.");
+						} catch (final Exception e1) {
+							try {
+								e1.printStackTrace();
+								// try again
+								myLogger.info("Uploading file "
+										+ file.getName() + "...");
+								System.out
+										.println("FAILED. SLEEPING 1 SECONDS");
+								Thread.sleep(1000);
+								serviceInterface.uploadInputFile(jobname,
+										handler, file.getName());
+
+								myLogger.info("Upload of file "
+										+ file.getName() + " successful.");
+							} catch (final Exception e) {
+								myLogger.info("Upload of input file "
+										+ file.getName() + " failed: "
+										+ e1.getLocalizedMessage());
+								myLogger.error("Inputfile upload failed: "
+										+ e1.getLocalizedMessage());
+								throw new FileTransactionException(
+										file.toString(), null,
+										"Could not upload input file.", e1);
+							}
+						}
+
+					} catch (final FileTransactionException e) {
+						errors.put(file.toString(), e);
+						executor1.shutdownNow();
+					}
+				}
+			};
+
+			executor1.execute(uploadThread);
+
+		}
+
+		executor1.shutdown();
+
+		try {
+			executor1.awaitTermination(10, TimeUnit.HOURS);
+		} catch (final InterruptedException e) {
+			executor1.shutdownNow();
+			throw new FileTransactionException(folder.toString(), null,
+					"File upload interrupted", e);
+		}
+
+		if (errors.size() > 0) {
+			throw new FileTransactionException(folder.toString(), null,
+					"Error transfering the following files: "
+							+ StringUtils.join(errors.keySet(), ", "), null);
+		}
+
+		myLogger.debug("File upload for folder " + folder.toString()
+				+ " successful.");
+	}
+
+	public final void uploadJobInput(String job, String uriOrPath)
 			throws FileTransactionException {
 
 		final File file = getFileFromUriOrPath(uriOrPath);
 
-		if (file.isDirectory()) {
+		if (!file.exists()) {
 			throw new FileTransactionException(uriOrPath, null,
-					"Upload of folders not supported for job input files.",
-					null);
+					"Source file does not exist.", null);
+		}
+
+		if (file.isDirectory()) {
+			uploadInputFolder(job, file);
 		} else {
-			uploadInputFile(file, job);
+			uploadInputFile(job, file);
 		}
 
 	}
