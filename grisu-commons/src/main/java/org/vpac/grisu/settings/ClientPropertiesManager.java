@@ -750,7 +750,7 @@ public final class ClientPropertiesManager {
 
 	}
 
-	public static void setConcurrentUploadeThreads(int threads) {
+	public static void setConcurrentUploadThreads(int threads) {
 		concurrent_upload_thread_dynamic = threads;
 	}
 
