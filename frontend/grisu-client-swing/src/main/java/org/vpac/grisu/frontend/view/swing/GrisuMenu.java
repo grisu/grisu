@@ -11,10 +11,12 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.GrisuVersion;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.view.swing.utils.SettingsDialog;
 
 public class GrisuMenu extends JMenuBar {
 
@@ -47,6 +49,9 @@ public class GrisuMenu extends JMenuBar {
 
 	private JLabel warningLabel;
 
+	private JMenuItem settingsItem;
+	private final SettingsDialog dialog;
+
 	private final boolean isDevelopmentVersion;
 
 	/**
@@ -54,8 +59,13 @@ public class GrisuMenu extends JMenuBar {
 	 */
 	public GrisuMenu(Frame parent) {
 		this.parent = parent;
+
+		dialog = new SettingsDialog(parent);
+
 		add(getFileMenu());
 		add(getToolsMenu());
+
+		getToolsMenu().add(getSettingsItem());
 
 		// check whether development release - if so, use red background color
 		String clientVersion = GrisuVersion.get("this-client");
@@ -78,6 +88,10 @@ public class GrisuMenu extends JMenuBar {
 		} else {
 			return super.add(menu);
 		}
+	}
+
+	public void addSettingsPanel(String name, JPanel panel) {
+		dialog.addPanel(name, panel);
 	}
 
 	private JLabel getDevelopmentWarningLabel() {
@@ -118,6 +132,20 @@ public class GrisuMenu extends JMenuBar {
 			helpMenu.add(getVersionItem());
 		}
 		return helpMenu;
+	}
+
+	private JMenuItem getSettingsItem() {
+		if (settingsItem == null) {
+			settingsItem = new JMenuItem("Settings");
+			settingsItem.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+
+					dialog.setVisible(true);
+
+				}
+			});
+		}
+		return settingsItem;
 	}
 
 	public JMenu getToolsMenu() {

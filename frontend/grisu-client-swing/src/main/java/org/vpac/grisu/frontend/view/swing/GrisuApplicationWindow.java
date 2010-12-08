@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.UIManager;
 
 import org.apache.commons.lang.StringUtils;
@@ -21,7 +22,10 @@ import org.vpac.grisu.frontend.model.events.ApplicationEventListener;
 import org.vpac.grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import org.vpac.grisu.frontend.view.swing.login.LoginPanel;
 import org.vpac.grisu.frontend.view.swing.login.ServiceInterfaceHolder;
+import org.vpac.grisu.frontend.view.swing.utils.AdvancedSettingsPanel;
 import org.vpac.grisu.model.dto.GridFile;
+
+import au.org.arcs.jcommons.utils.HttpProxyPanel;
 
 import com.google.common.collect.ImmutableList;
 
@@ -36,6 +40,9 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 	protected final GrisuMenu menu;
 
 	private JXFrame frame;
+
+	private final HttpProxyPanel httpProxyPanel = new HttpProxyPanel();
+	private final AdvancedSettingsPanel advancedPanel = new AdvancedSettingsPanel();
 
 	/**
 	 * Launch the application.
@@ -61,6 +68,9 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 		menu = new GrisuMenu(this.getFrame());
 		getFrame().setJMenuBar(menu);
 
+		addSettingsPanel("Advanced", advancedPanel);
+		addSettingsPanel("Http proxy settings", httpProxyPanel);
+
 	}
 
 	public void addDefaultFileNavigationTaskPane() {
@@ -69,6 +79,10 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 
 	public void addGroupFileListPanel(List<GridFile> left, List<GridFile> right) {
 		mainPanel.addGroupFileListPanel(left, right);
+	}
+
+	public void addSettingsPanel(String name, JPanel panel) {
+		menu.addSettingsPanel(name, panel);
 	}
 
 	abstract public boolean displayAppSpecificMonitoringItems();
@@ -169,6 +183,8 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 		this.menu.setServiceInterface(si);
 		initOptionalStuff(si);
 		refreshJobCreationPanels();
+
+		advancedPanel.setServiceInterface(si);
 
 	}
 
