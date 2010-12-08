@@ -17,12 +17,28 @@ public class DtoActionStatus {
 	public static final String ACTION_FINISHED_STRING = "Finished";
 	public static final String ACTION_FAILED_STRING = "Failed";
 
+	public static String getLastMessage(DtoActionStatus status) {
+
+		DtoLogItem li = status.getLog().get(status.getLog().size() - 1);
+		return li.getLogMessage();
+
+	}
+
+	public static String getLogMessagesAsString(DtoActionStatus status) {
+
+		StringBuffer temp = new StringBuffer();
+		for (DtoLogItem li : status.getLog()) {
+			temp.append(li.getLogMessage() + ", ");
+		}
+		return temp.toString();
+	}
+
 	private Map<Date, String> log = Collections
 			.synchronizedSortedMap(new TreeMap<Date, String>());
 
 	private int totalElements;
-
 	private boolean finished = false;
+
 	private boolean failed = false;
 
 	private Date lastUpdate = new Date();

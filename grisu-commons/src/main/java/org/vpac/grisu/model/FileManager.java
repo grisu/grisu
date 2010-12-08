@@ -31,6 +31,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.events.FolderCreatedEvent;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
+import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.dto.GridFile;
@@ -1206,8 +1207,15 @@ public class FileManager {
 
 							if (so.getStatus().isFailed()) {
 								throw new FileTransactionException(
-										file.toString(), null,
-										"Could not upload input file.", null);
+										file.toString(),
+										null,
+										"Could not upload input file "
+												+ file.toString()
+												+ ": "
+												+ DtoActionStatus
+														.getLogMessagesAsString(so
+																.getStatus()),
+										null);
 							}
 
 							myLogger.info("Upload of input file "
@@ -1223,6 +1231,17 @@ public class FileManager {
 								Thread.sleep(1000);
 								serviceInterface.uploadInputFile(jobname,
 										handler, file.getName());
+
+								final StatusObject so = new StatusObject(
+										serviceInterface, deltaPath);
+								so.waitForActionToFinish(4, true, false);
+
+								if (so.getStatus().isFailed()) {
+									throw new FileTransactionException(
+											file.toString(), null,
+											"Could not upload input file.",
+											null);
+								}
 
 								myLogger.info("Upload of file "
 										+ file.getName() + " successful.");

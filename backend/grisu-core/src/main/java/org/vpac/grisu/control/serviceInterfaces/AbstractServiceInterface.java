@@ -1037,11 +1037,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	protected void createFolder(final FileObject folder)
 			throws FileSystemException {
 
-		if (!folder.getParent().exists()) {
-			createFolder(folder.getParent());
-		}
+		synchronized (getDN()) {
+			ArrayList<FileObject> temp = new ArrayList<FileObject>();
+			FileObject last = folder;
+			while (!last.getParent().exists()) {
+				temp.add(last);
+				last = last.getParent();
+			}
 
-		folder.createFolder();
+			Collections.reverse(temp);
+			for (FileObject f : temp) {
+				f.createFolder();
+			}
+		}
 	}
 
 	private String createJob(Document jsdl, final String fqan,
@@ -2610,8 +2618,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 
-			final GridFile rootfolder = getUser().getFolderListing(
-					directory);
+			final GridFile rootfolder = getUser().getFolderListing(directory);
 			recursion_level = recursion_level - 1;
 			if (recursion_level == 0) {
 				return rootfolder;
