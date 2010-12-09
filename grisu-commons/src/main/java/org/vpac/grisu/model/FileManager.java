@@ -1181,12 +1181,19 @@ public class FileManager {
 			final String filePath = file.getPath();
 			final String deltaPathTemp = filePath.substring(basePath.length());
 
-			final String deltaPath;
+			String deltaPath;
 			if (deltaPathTemp.startsWith("/") || deltaPathTemp.startsWith("\\")) {
 				deltaPath = deltaPathTemp.substring(1);
 			} else {
 				deltaPath = deltaPathTemp;
 			}
+
+			deltaPath = deltaPath.replace('\\', '/');
+			deltaPath = deltaPath.replace("/./", "/");
+
+			myLogger.debug("Delta path for input folder: " + deltaPath);
+
+			final String finalDeltaPath = deltaPath;
 
 			final DataHandler handler = createDataHandler(file);
 
@@ -1199,10 +1206,10 @@ public class FileManager {
 							myLogger.info("Uploading file " + file.getName()
 									+ "...");
 							serviceInterface.uploadInputFile(jobname, handler,
-									deltaPath);
+									finalDeltaPath);
 
 							final StatusObject so = new StatusObject(
-									serviceInterface, deltaPath);
+									serviceInterface, finalDeltaPath);
 							so.waitForActionToFinish(4, true, false);
 
 							if (so.getStatus().isFailed()) {
@@ -1233,7 +1240,7 @@ public class FileManager {
 										handler, file.getName());
 
 								final StatusObject so = new StatusObject(
-										serviceInterface, deltaPath);
+										serviceInterface, finalDeltaPath);
 								so.waitForActionToFinish(4, true, false);
 
 								if (so.getStatus().isFailed()) {
