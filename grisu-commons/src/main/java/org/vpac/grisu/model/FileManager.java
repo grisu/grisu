@@ -2,10 +2,12 @@ package org.vpac.grisu.model;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -1029,17 +1031,30 @@ public class FileManager {
 			final String filePath = file.getPath();
 			final String deltaPathTemp = filePath.substring(basePath.length());
 
-			final String deltaPath;
+			String deltaPath;
 			if (deltaPathTemp.startsWith("/") || deltaPathTemp.startsWith("\\")) {
 				deltaPath = deltaPathTemp.substring(1);
 			} else {
 				deltaPath = deltaPathTemp;
 			}
+
+			deltaPath = deltaPath.replace('\\', '/');
+			deltaPath = deltaPath.replace("/./", "/");
+
+			try {
+				deltaPath = URLEncoder.encode(deltaPath, "UTF-8");
+			} catch (UnsupportedEncodingException e2) {
+				// shouldn't happen
+			}
+
+			final String finalDeltaPath = deltaPath;
+
 			final Thread uploadThread = new Thread() {
 				@Override
 				public void run() {
 					try {
-						uploadFile(file, targetDirectory + "/" + deltaPath,
+						uploadFile(file,
+								targetDirectory + "/" + finalDeltaPath,
 								overwrite);
 					} catch (final FileTransactionException e) {
 						errors.put(file.toString(), e);
@@ -1191,7 +1206,15 @@ public class FileManager {
 			deltaPath = deltaPath.replace('\\', '/');
 			deltaPath = deltaPath.replace("/./", "/");
 
+			try {
+				deltaPath = URLEncoder.encode(deltaPath, "UTF-8");
+			} catch (UnsupportedEncodingException e2) {
+				// shouldn't happen
+			}
+
 			myLogger.debug("Delta path for input folder: " + deltaPath);
+
+			X.p("Delta: " + deltaPath);
 
 			final String finalDeltaPath = deltaPath;
 
