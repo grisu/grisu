@@ -1,7 +1,9 @@
 package org.vpac.grisu.backend.model.fs;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,14 +38,12 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 	public GridFile createGridFile(final String path, int recursiveLevels)
 			throws RemoteFileSystemException {
 
-		X.p("Creating grid file for: " + path);
+		// X.p("Creating grid file for: " + path);
 
 		if (recursiveLevels != 1) {
 			throw new RuntimeException(
 					"Recursion levels other than 1 not supported yet");
 		}
-
-		X.p("Base: " + BASE);
 
 		GridFile result = new GridFile(path, -1L);
 		result.setIsVirtual(true);
@@ -57,17 +57,18 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			int i = rightPart.indexOf("//");
 			String fqanT = rightPart.substring(0, i);
 			String restPath = rightPart.substring(i + 2);
-			X.p("rightPart: " + rightPart);
-			X.p("Fqan: " + fqanT);
-			X.p("path: " + restPath);
 
 			Set<GridFile> childs = listGroup(fqanT, restPath);
 			for (GridFile file : childs) {
 				result.addChildren(file.getChildren());
 			}
 
-			Set<String> childFqans = findDirectChildFqans(fqanT);
+			Map<String, Set<String>> temp = findDirectChildFqans(fqanT);
+			Set<String> childFqans = temp.keySet();
 			for (String fqan : childFqans) {
+
+				X.p("CHILD: " + fqan);
+
 				Set<MountPoint> mps = user.getMountPoints(fqan);
 				if (mps.size() == 1) {
 					GridFile file = new GridFile(mps.iterator().next());
@@ -75,6 +76,8 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					file.setPath((path + "/" + file.getName()).replace("///",
 							"/").replace("//", "/")
 							+ "//");
+					file.setIsVirtual(true);
+					file.addSites(temp.get(fqan));
 					result.addChild(file);
 				} else {
 					GridFile file = new GridFile((BASE + fqan).replace("///",
@@ -83,6 +86,8 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					file.setPath((path + "/" + file.getName()).replace("///",
 							"/").replace("//", "/")
 							+ "//");
+					file.setIsVirtual(true);
+					file.addSites(temp.get(fqan));
 					result.addChild(file);
 				}
 			}
@@ -93,7 +98,6 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 		int index = BASE.length();
 		String importantUrlPart = path.substring(index);
-		X.p("Part: " + importantUrlPart);
 		String[] tokens = StringUtils.split(importantUrlPart, '/');
 
 		if (tokens.length == 0) {
@@ -102,12 +106,19 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				GridFile f = new GridFile(BASE + "/" + vo, -1L);
 				f.setIsVirtual(true);
 				f.setPath(path + "/" + vo);
+
+				for (MountPoint mp : user.getMountPoints("/" + vo)) {
+					f.addSite(mp.getSite());
+				}
+
 				result.addChild(f);
 			}
 
 		} else if (tokens.length == 1) {
 
-			Set<String> childFqans = findDirectChildFqans("/" + tokens[0]);
+			Map<String, Set<String>> temp = findDirectChildFqans("/"
+					+ tokens[0]);
+			Set<String> childFqans = temp.keySet();
 
 			for (String fqan : childFqans) {
 
@@ -116,12 +127,21 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					GridFile file = new GridFile(mps.iterator().next());
 					file.setName(FileManager.getFilename(fqan));
 					file.setPath(path + "/" + file.getName());
+					file.setIsVirtual(true);
+					file.addSites(temp.get(fqan));
 					result.addChild(file);
 				} else {
 					GridFile file = new GridFile(BASE + fqan, fqan);
 					file.setPath(path + "/" + file.getName());
+					file.setIsVirtual(true);
+					file.addSites(temp.get(fqan));
 					result.addChild(file);
 				}
+			}
+
+			Set<GridFile> files = listGroup("/" + tokens[0], "");
+			for (GridFile file : files) {
+				result.addChildren(file.getChildren());
 			}
 
 		} else {
@@ -129,21 +149,16 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			String currentUrl = BASE;
 			String potentialFqan = "";
 
-			for (int i = 0; i < tokens.length; i++) {
-				X.p("----------------------------");
-				X.p("TOKEN " + i + ": " + tokens[i]);
-				currentUrl = currentUrl + "/" + tokens[i];
-				potentialFqan = potentialFqan + "/" + tokens[i];
+			for (String token : tokens) {
+
+				currentUrl = currentUrl + "/" + token;
+				potentialFqan = potentialFqan + "/" + token;
 
 				if (!user.getFqans().keySet().contains(potentialFqan)) {
-					X.p("not a Fqan: " + potentialFqan);
 					continue;
 				}
 
-				X.p("PotentialFqan: " + potentialFqan);
-				X.p("Current url: " + currentUrl);
 				String rest = path.substring(currentUrl.length());
-				X.p("Rest of path: " + rest);
 
 				Set<GridFile> files = listGroup(potentialFqan, rest);
 				for (GridFile file : files) {
@@ -152,17 +167,22 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 			}
 
-			Set<String> childFqans = findDirectChildFqans(potentialFqan);
+			Map<String, Set<String>> temp = findDirectChildFqans(potentialFqan);
+			Set<String> childFqans = temp.keySet();
 			for (String fqan : childFqans) {
 				Set<MountPoint> mps = user.getMountPoints(fqan);
 				if (mps.size() == 1) {
 					GridFile file = new GridFile(mps.iterator().next());
 					file.setName(FileManager.getFilename(fqan));
 					file.setPath(path + "/" + file.getName());
+					file.setIsVirtual(true);
+					file.addSites(temp.get(fqan));
 					result.addChild(file);
 				} else {
 					GridFile file = new GridFile(BASE + fqan, fqan);
 					file.setPath(path + "/" + file.getName());
+					file.setIsVirtual(true);
+					file.addSites(temp.get(fqan));
 					result.addChild(file);
 				}
 			}
@@ -173,17 +193,17 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 	}
 
-	private Set<String> findDirectChildFqans(String parentFqan) {
+	private Map<String, Set<String>> findDirectChildFqans(String parentFqan) {
 
 		String[] tokens = parentFqan.substring(1).split("/");
 
-		X.p(StringUtils.join(tokens, " --- "));
-
-		Set<String> result = new TreeSet<String>();
+		Map<String, Set<String>> result = new TreeMap<String, Set<String>>();
 
 		for (String fqan : user.getFqans().keySet()) {
 
-			X.p("Fqan: " + fqan);
+			if (!fqan.startsWith(parentFqan)) {
+				continue;
+			}
 
 			String[] fqanTokens = fqan.substring(1).split("/");
 			int fqanTokenLength = fqanTokens.length;
@@ -191,8 +211,13 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			if ((fqanTokenLength == tokens.length + 1)
 					&& fqanTokens[tokens.length - 1]
 							.equals(tokens[tokens.length - 1])) {
-				X.p("HIT: " + fqan);
-				result.add(fqan);
+
+				Set<String> sites = new TreeSet<String>();
+				for (MountPoint mp : user.getMountPoints(fqan)) {
+					sites.add(mp.getSite());
+				}
+
+				result.put(fqan, sites);
 			}
 		}
 		return result;
@@ -210,10 +235,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 		for (final MountPoint mp : mps) {
 
-			X.p("MOUNTPOINT: " + mp.getRootUrl());
-
 			final String urlToQuery = mp.getRootUrl() + "/" + path;
-			X.p("URL to query: " + urlToQuery);
 
 			Thread t = new Thread() {
 				@Override
@@ -223,7 +245,6 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 						GridFile file = user.getFileSystemManager()
 								.getFolderListing(urlToQuery);
 						file.addSite(mp.getSite());
-						X.p("Added file: " + file.getUrl());
 						result.add(file);
 					} catch (InvalidPathException e) {
 						GridFile f = new GridFile(urlToQuery, true, e);
@@ -233,8 +254,6 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 						if (!msg.contains("not a folder")) {
 							GridFile f = new GridFile(urlToQuery, true, rfse);
 							result.add(f);
-						} else {
-							X.p("not folder");
 						}
 					}
 				}
@@ -250,8 +269,6 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 		} catch (InterruptedException e) {
 			throw new RemoteFileSystemException(e);
 		}
-
-		X.p("FILES: " + StringUtils.join(result, " -- "));
 
 		return result;
 

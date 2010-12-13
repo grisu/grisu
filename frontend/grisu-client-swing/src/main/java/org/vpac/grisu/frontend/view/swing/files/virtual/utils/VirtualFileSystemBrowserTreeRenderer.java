@@ -17,7 +17,6 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
 
 import org.apache.commons.lang.StringUtils;
-import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -99,7 +98,6 @@ public class VirtualFileSystemBrowserTreeRenderer extends
 		} else if (value2 instanceof GridFile) {
 			final GridFile file = (GridFile) value2;
 			String text = null;
-			X.p("File: " + file.getUrl() + " virtual: " + file.isVirtual());
 			if (file.isVirtual()) {
 				this.setIcon(groupIcon);
 			} else if (file.isFolder()) {

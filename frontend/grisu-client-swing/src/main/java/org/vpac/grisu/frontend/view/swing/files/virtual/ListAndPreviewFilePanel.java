@@ -9,7 +9,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
-import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.view.swing.files.preview.GenericGridFileViewer;
 import org.vpac.grisu.model.dto.GridFile;
@@ -63,7 +62,6 @@ public class ListAndPreviewFilePanel extends JPanel {
 
 	public void displayFile(GridFile file) {
 		switchToPreview();
-		X.p("DISPLAY: " + file.getName());
 		getGenericFileViewer().setFile(file, null);
 	}
 

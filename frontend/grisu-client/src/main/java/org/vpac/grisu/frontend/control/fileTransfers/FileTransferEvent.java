@@ -4,8 +4,17 @@ public class FileTransferEvent {
 
 	private final FileTransaction fileTransfer;
 
-	public FileTransferEvent(FileTransaction ft) {
+	private final String propertyChanged;
+
+	public FileTransferEvent(FileTransaction ft, String propertyChanged) {
 		this.fileTransfer = ft;
+		this.propertyChanged = propertyChanged;
+
+		Thread.dumpStack();
+	}
+
+	public String getChangedProperty() {
+		return propertyChanged;
 	}
 
 	public FileTransaction getFileTransfer() {

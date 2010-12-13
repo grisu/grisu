@@ -9,7 +9,6 @@ import java.util.TreeSet;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.WindowConstants;
@@ -73,13 +72,13 @@ public class GridFileTransferHandler extends TransferHandler {
 			return false;
 		}
 
-		Outline outline = (Outline) (support.getComponent());
+		// Outline outline = (Outline) (support.getComponent());
 
 		// X.p("Loc: " + outline.get
-		JTable.DropLocation dropLocation = (JTable.DropLocation) support
-				.getDropLocation();
-		int row = dropLocation.getRow();
-		int col = dropLocation.getColumn();
+		// JTable.DropLocation dropLocation = (JTable.DropLocation) support
+		// .getDropLocation();
+		// int row = dropLocation.getRow();
+		// int col = dropLocation.getColumn();
 		// X.p("Row: " + row + ", Col: " + col);
 		return true;
 
@@ -110,9 +109,9 @@ public class GridFileTransferHandler extends TransferHandler {
 			}
 
 			GridFilesTransferable temp = new GridFilesTransferable(selected);
-			for (DataFlavor f : temp.getTransferDataFlavors()) {
-				X.p(f.getHumanPresentableName());
-			}
+			// for (DataFlavor f : temp.getTransferDataFlavors()) {
+			// X.p(f.getHumanPresentableName());
+			// }
 
 			return temp;
 		}
@@ -149,6 +148,8 @@ public class GridFileTransferHandler extends TransferHandler {
 	}
 
 	protected void importGridFilesSet(Set<GridFile> gridFiles) {
+
+		X.p("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX   IMPORT GRID FILES");
 
 		final FileTransaction ft = new FileTransaction(fm, gridFiles,
 				fileList.getCurrentDirectory(), true);

@@ -17,7 +17,6 @@ import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 
-import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.model.dto.GridFile;
@@ -176,7 +175,6 @@ public class GridFileTreeDialog extends JDialog implements WindowListener {
 
 	public void windowActivated(WindowEvent e) {
 		userCanceled = true;
-		X.p("OPened.");
 	}
 
 	public void windowClosed(WindowEvent e) {

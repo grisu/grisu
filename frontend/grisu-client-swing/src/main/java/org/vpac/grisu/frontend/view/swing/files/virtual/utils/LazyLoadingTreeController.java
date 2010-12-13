@@ -12,7 +12,6 @@ import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 
-
 public class LazyLoadingTreeController implements TreeWillExpandListener {
 
 	public static class DefaultWorkerFactory implements

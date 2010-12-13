@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.vpac.grisu.X;
 import org.vpac.grisu.settings.Environment;
 
 import au.org.arcs.jcommons.interfaces.InformationManager;
@@ -55,15 +54,12 @@ public class InformationManagerManager {
 			return im;
 		} catch (InvocationTargetException e) {
 			// TODO Auto-generated catch block
-			X.p("Invocation");
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		} catch (RuntimeException e) {
-			X.p("runtime");
 			e.printStackTrace();
 			throw e;
 		} catch (Exception e) {
-			X.p("excpetion");
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}

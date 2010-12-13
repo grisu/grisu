@@ -19,11 +19,15 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeModel;
 
+import org.apache.commons.lang.StringUtils;
+import org.bushe.swing.event.EventBus;
+import org.bushe.swing.event.EventSubscriber;
 import org.netbeans.swing.outline.DefaultOutlineModel;
 import org.netbeans.swing.outline.Outline;
 import org.netbeans.swing.outline.OutlineModel;
 import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.control.fileTransfers.FileTransferEvent;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListListener;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListPanel;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListPanelContextMenu;
@@ -39,7 +43,8 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class GridFileTreePanel extends JPanel implements GridFileListPanel {
+public class GridFileTreePanel extends JPanel implements GridFileListPanel,
+		EventSubscriber {
 
 	private static void addPopup(Component component, final JPopupMenu popup) {
 		component.addMouseListener(new MouseAdapter() {
@@ -136,6 +141,8 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel {
 				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getScrollPane(), "2, 2, fill, fill");
 
+		EventBus.subscribe(FileTransferEvent.class, this);
+
 		initialize(this.roots);
 	}
 
@@ -160,7 +167,6 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel {
 	private void fileDoubleClickOccured() {
 
 		Set<GridFile> selFiles = getSelectedFiles();
-		X.p("Size: " + selFiles.size());
 		if (selFiles.size() == 1) {
 
 			GridFile f = selFiles.iterator().next();
@@ -316,6 +322,7 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel {
 			outline.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 			outline.setTransferHandler(new GridFileTransferHandler(this, si,
 					useAsDropTarget));
+			// outline.setDropMode(DropMode.ON);
 
 			outline.setGridColor(Color.white);
 			outline.setFillsViewportHeight(true);
@@ -369,10 +376,8 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel {
 			try {
 				GridFile file = (GridFile) ((GridFileTreeNode) (getOutline()
 						.getValueAt(row, 0))).getUserObject();
-				X.p("Selected: " + file.getName() + ": " + file.getUrl());
 				result.add(file);
 			} catch (ClassCastException cce) {
-				X.p("Invalid file selected");
 				return null;
 			}
 		}
@@ -400,6 +405,24 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel {
 
 		m.getTreePathSupport().addTreeWillExpandListener(controller);
 		getOutline().setModel(m);
+
+	}
+
+	public void onEvent(Object event) {
+
+		if (event instanceof FileTransferEvent) {
+			FileTransferEvent ev = (FileTransferEvent) event;
+
+			X.p("---------------------------------");
+			X.p("Status: " + ev.getFileTransfer().getStatus());
+			X.p("Property changed: " + ev.getChangedProperty());
+			X.p("Transfer sources: "
+					+ StringUtils
+							.join(ev.getFileTransfer().getSourceUrl(), ","));
+			X.p("Transfer target: " + ev.getFileTransfer().getTargetDirUrl());
+			X.p("---------------------------------");
+
+		}
 
 	}
 

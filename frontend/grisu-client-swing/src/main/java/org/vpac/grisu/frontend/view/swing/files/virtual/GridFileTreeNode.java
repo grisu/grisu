@@ -8,7 +8,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 
 import org.apache.commons.lang.StringUtils;
-import org.vpac.grisu.X;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.view.swing.files.virtual.utils.LazyLoadingTreeNode;
 import org.vpac.grisu.model.FileManager;
@@ -124,7 +123,6 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 			GridFile f = ((GridFileTreeNode) node).getGridFile();
 			String oldName = f.getName();
 			if (duplicateNames.contains(oldName)) {
-				X.p("replace: " + oldName);
 				String sites = StringUtils.join(f.getSites(), ",");
 				f.setName(oldName + " (" + sites + ")");
 			}

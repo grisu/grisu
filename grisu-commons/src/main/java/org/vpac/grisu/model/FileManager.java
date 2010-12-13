@@ -28,7 +28,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
-import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.events.FolderCreatedEvent;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -354,6 +353,11 @@ public class FileManager {
 		cp(source.getUrl(), target.getUrl(), overwrite);
 	}
 
+	public void cp(GridFile source, GridFile targetDir, boolean overwrite)
+			throws FileTransactionException {
+		cp(source.getUrl(), targetDir.getUrl(), overwrite);
+	}
+
 	public void cp(Set<GlazedFile> sources, GlazedFile targetDirectory,
 			boolean overwrite) throws FileTransactionException {
 
@@ -361,6 +365,14 @@ public class FileManager {
 			cp(source, targetDirectory, overwrite);
 		}
 
+	}
+
+	public void cp(Set<GridFile> sources, GridFile targetDirectory,
+			boolean overwrite) throws FileTransactionException {
+
+		for (final GridFile file : sources) {
+			cp(file, targetDirectory, overwrite);
+		}
 	}
 
 	public void cp(String sourceUrl, String targetDirUrl, boolean overwrite)
@@ -807,8 +819,7 @@ public class FileManager {
 		return result;
 	}
 
-	public synchronized Set<GridFile> ls(GridFile parent)
-			throws RemoteFileSystemException {
+	public Set<GridFile> ls(GridFile parent) throws RemoteFileSystemException {
 
 		GridFile folder = ls(parent.getUrl());
 
@@ -827,7 +838,6 @@ public class FileManager {
 	public GridFile ls(String url, int recursionLevel)
 			throws RemoteFileSystemException {
 
-		X.p("XXX: " + url);
 		if (isLocal(url)) {
 
 			if ("local://".equals(url)) {
@@ -1213,8 +1223,6 @@ public class FileManager {
 			}
 
 			myLogger.debug("Delta path for input folder: " + deltaPath);
-
-			X.p("Delta: " + deltaPath);
 
 			final String finalDeltaPath = deltaPath;
 
