@@ -818,6 +818,7 @@ public class User {
 	}
 
 	@ElementCollection(fetch = FetchType.EAGER)
+	@Column(length = 400)
 	private Map<String, String> getMountPointCache() {
 		return mountPointCache;
 	}
