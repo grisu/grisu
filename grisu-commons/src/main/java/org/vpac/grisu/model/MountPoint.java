@@ -136,7 +136,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	}
 
 	public int compareTo(final MountPoint mp) {
-		return getRootUrl().compareTo(mp.getRootUrl());
+		return getAlias().compareTo(mp.getAlias());
 	}
 
 	@Override

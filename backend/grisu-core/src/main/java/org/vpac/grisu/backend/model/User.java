@@ -31,7 +31,6 @@ import org.apache.commons.vfs.FileSystem;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.impl.DefaultFileSystemManager;
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.CollectionOfElements;
 import org.vpac.grisu.backend.hibernate.UserDAO;
 import org.vpac.grisu.backend.model.fs.FileSystemManager;
 import org.vpac.grisu.backend.model.fs.InvalidPathException;
@@ -658,7 +657,7 @@ public class User {
 	 * 
 	 * @return the users' properties
 	 */
-	@CollectionOfElements(fetch = FetchType.EAGER)
+	@ElementCollection(fetch = FetchType.EAGER)
 	public Map<String, String> getBookmarks() {
 		return bookmarks;
 	}
