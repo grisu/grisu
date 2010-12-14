@@ -10,7 +10,7 @@ public class FileTransferEvent {
 		this.fileTransfer = ft;
 		this.propertyChanged = propertyChanged;
 
-		Thread.dumpStack();
+//		Thread.dumpStack();
 	}
 
 	public String getChangedProperty() {
