@@ -17,9 +17,10 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
 
-import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.netbeans.swing.outline.DefaultOutlineModel;
@@ -84,7 +85,11 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 	private final boolean displayHiddenFiles;
 	private final String[] extensionsToDisplay;
 
+	private DefaultTreeModel model;
+
 	private final List<GridFile> roots;
+
+	private LazyLoadingTreeController controller;
 
 	/**
 	 * @wbp.parser.constructor
@@ -389,7 +394,7 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 
 		GridFileTreeNode rootNode = new GridFileTreeNode(fm, "virtual");
 
-		DefaultTreeModel model = new DefaultTreeModel(rootNode);
+		model = new DefaultTreeModel(rootNode);
 		rootNode.setModel(model);
 
 		for (GridFile f : roots) {
@@ -400,30 +405,74 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 		OutlineModel m = DefaultOutlineModel.createOutlineModel(model,
 				new GridFileTreeTableRowModel(), false, "File");
 
-		final LazyLoadingTreeController controller = new LazyLoadingTreeController(
-				model);
+		controller = new LazyLoadingTreeController(model);
 
 		m.getTreePathSupport().addTreeWillExpandListener(controller);
 		getOutline().setModel(m);
 
 	}
 
-	public void onEvent(Object event) {
+	public synchronized void onEvent(Object event) {
 
 		if (event instanceof FileTransferEvent) {
 			FileTransferEvent ev = (FileTransferEvent) event;
 
-			X.p("---------------------------------");
-			X.p("Status: " + ev.getFileTransfer().getStatus());
-			X.p("Property changed: " + ev.getChangedProperty());
-			X.p("Transfer sources: "
-					+ StringUtils
-							.join(ev.getFileTransfer().getSourceUrl(), ","));
-			X.p("Transfer target: " + ev.getFileTransfer().getTargetDirUrl());
-			X.p("---------------------------------");
+			// X.p("---------------------------------");
+			// X.p("Status: " + ev.getFileTransfer().getStatus());
+			// X.p("Property changed: " + ev.getChangedProperty());
+			// X.p("Transfer sources: "
+			// + StringUtils
+			// .join(ev.getFileTransfer().getSourceUrl(), ","));
+			// X.p("Transfer target: " +
+			// ev.getFileTransfer().getTargetDirUrl());
+			// X.p("---------------------------------");
+
+			if (ev.getFileTransfer().isFinished()) {
+
+				TableModel m = getOutline().getModel();
+
+				for (int i = 0; i < m.getRowCount(); i++) {
+
+					final GridFileTreeNode node = (GridFileTreeNode) (m
+							.getValueAt(i, 0));
+
+					final GridFile f = (GridFile) node.getUserObject();
+
+					if (f.getUrl().equals(
+							ev.getFileTransfer().getTargetDirUrl())) {
+
+						SwingUtilities.invokeLater(new Thread() {
+							@Override
+							public void run() {
+
+								X.p("Updating: " + f.getUrl());
+
+								Set<MutableTreeNode> children = new HashSet<MutableTreeNode>();
+								for (int j = 0; j < node.getChildCount(); j++) {
+									MutableTreeNode childnode = (MutableTreeNode) node
+											.getChildAt(j);
+									children.add(childnode);
+									// model.removeNodeFromParent(childnode);
+									// GridFile f = (GridFile) childnode
+									// .getUserObject();
+									// X.p("Removing: " + f.getName());
+								}
+
+								for (MutableTreeNode n : children) {
+									model.removeNodeFromParent(n);
+
+								}
+
+								model.nodeChanged(node);
+
+								controller.expandNode(node, model);
+							}
+						});
+					}
+				}
+			}
 
 		}
-
 	}
 
 	public void refresh() {

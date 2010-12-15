@@ -18,7 +18,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang.StringUtils;
-import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.MountPoint;
@@ -226,7 +225,6 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 				this.name = "Remote files";
 			} else {
 				this.name = FileManager.getFilename(url);
-				X.p("NAME: " + this.name + " : " + url);
 			}
 
 		} else if (FILETYPE_FILE.equals(type)) {

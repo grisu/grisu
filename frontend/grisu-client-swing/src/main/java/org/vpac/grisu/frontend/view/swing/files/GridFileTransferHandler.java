@@ -14,7 +14,6 @@ import javax.swing.TransferHandler;
 import javax.swing.WindowConstants;
 
 import org.netbeans.swing.outline.Outline;
-import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransaction;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransactionManager;
@@ -148,8 +147,6 @@ public class GridFileTransferHandler extends TransferHandler {
 	}
 
 	protected void importGridFilesSet(Set<GridFile> gridFiles) {
-
-		X.p("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX   IMPORT GRID FILES");
 
 		final FileTransaction ft = new FileTransaction(fm, gridFiles,
 				fileList.getCurrentDirectory(), true);

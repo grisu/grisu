@@ -158,7 +158,8 @@ public class FileTransactionManager implements PropertyChangeListener {
 				+ " / " + evt.getNewValue());
 
 		final FileTransaction ft = (FileTransaction) evt.getSource();
-		EventBus.publish(new FileTransferEvent(ft, evt.getPropertyName()));
+		EventBus.publish(new FileTransferEvent(ft, evt.getPropertyName(), evt
+				.getNewValue()));
 
 	}
 

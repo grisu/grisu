@@ -13,7 +13,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.apache.commons.lang.StringUtils;
 import org.netbeans.swing.outline.RenderDataProvider;
-import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.view.swing.files.virtual.utils.VirtualFileSystemBrowserTreeRenderer;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -98,7 +97,6 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 				// }
 				// return null;
 			} else if (f.isFolder()) {
-				X.p("File: " + f.getName());
 				return folderIcon;
 			} else {
 				return fileIcon;

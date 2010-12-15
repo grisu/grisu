@@ -37,12 +37,12 @@ public class GridFileTreeDragSource implements DragSourceListener,
 	 */
 	public void dragEnter(DragSourceDragEvent dsde) {
 
-		X.p(dsde.getDragSourceContext().getDragSource().getClass().toString());
-		X.p("DGE2: " + dsde.getSource().toString());
+		// X.p(dsde.getDragSourceContext().getDragSource().getClass().toString());
+		// X.p("DGE2: " + dsde.getSource().toString());
 	}
 
 	public void dragExit(DragSourceEvent dse) {
-		X.p("DGE2: " + dse.getSource().toString());
+		// X.p("DGE2: " + dse.getSource().toString());
 	}
 
 	/*
@@ -50,7 +50,7 @@ public class GridFileTreeDragSource implements DragSourceListener,
 	 */
 	public void dragGestureRecognized(DragGestureEvent dge) {
 
-		X.p("DGE: " + dge.toString());
+		// X.p("DGE: " + dge.toString());
 
 		// TreePath path = sourceTree.getSelectionPath();
 		// if ((path == null) || (path.getPathCount() <= 1)) {

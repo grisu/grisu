@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.vpac.grisu.X;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -66,8 +65,6 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			Map<String, Set<String>> temp = findDirectChildFqans(fqanT);
 			Set<String> childFqans = temp.keySet();
 			for (String fqan : childFqans) {
-
-				X.p("CHILD: " + fqan);
 
 				Set<MountPoint> mps = user.getMountPoints(fqan);
 				if (mps.size() == 1) {

@@ -5,12 +5,15 @@ public class FileTransferEvent {
 	private final FileTransaction fileTransfer;
 
 	private final String propertyChanged;
+	private final Object newValue;
 
-	public FileTransferEvent(FileTransaction ft, String propertyChanged) {
+	public FileTransferEvent(FileTransaction ft, String propertyChanged,
+			Object newValue) {
 		this.fileTransfer = ft;
 		this.propertyChanged = propertyChanged;
+		this.newValue = newValue;
 
-//		Thread.dumpStack();
+		// Thread.dumpStack();
 	}
 
 	public String getChangedProperty() {
@@ -19,6 +22,10 @@ public class FileTransferEvent {
 
 	public FileTransaction getFileTransfer() {
 		return this.fileTransfer;
+	}
+
+	public Object getNewValue() {
+		return newValue;
 	}
 
 }

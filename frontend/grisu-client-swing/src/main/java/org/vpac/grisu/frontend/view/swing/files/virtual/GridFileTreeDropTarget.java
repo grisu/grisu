@@ -102,8 +102,6 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 
 	public void dragOver(DropTargetDragEvent dtde) {
 
-		X.p("Over");
-
 		Outline outline = (Outline) ((dtde.getDropTargetContext()
 				.getComponent()));
 
@@ -133,14 +131,21 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 								WAIT_DRAG_UNTIL_OPEN_FOLDER);
 					}
 				} else {
-					openFolderTask.cancel();
+					if (openFolderTask != null) {
+						openFolderTask.cancel();
+					}
 				}
 
 				if (dropTargetFile.isVirtual()) {
 
-					if (!dropTargetFile.getUrl().startsWith(
-							ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME)) {
-						dtde.acceptDrag(DnDConstants.ACTION_COPY);
+					if (dropTargetFile.getUrls().size() == 1) {
+
+						// if (!dropTargetFile.getUrl().startsWith(
+						// ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME)) {
+						// dtde.acceptDrag(DnDConstants.ACTION_COPY);
+
+						// for now
+						dtde.rejectDrag();
 					} else {
 						dtde.rejectDrag();
 					}
@@ -149,7 +154,9 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 				}
 
 			} else {
-				openFolderTask.cancel();
+				if (openFolderTask != null) {
+					openFolderTask.cancel();
+				}
 				GridFile parent = ((GridFileTreeNode) p.getParentPath()
 						.getLastPathComponent()).getGridFile();
 
@@ -161,14 +168,11 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 
 			}
 
-		} else {
-			X.p("Not filetreenode");
 		}
 
 	}
 
 	public void drop(DropTargetDropEvent dtde) {
-		X.p("drop");
 		if (openFolderTask != null) {
 			openFolderTask.cancel();
 		}
@@ -278,7 +282,7 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 	}
 
 	public void dropActionChanged(DropTargetDragEvent dtde) {
-		X.p("Drop action changed");
+		// X.p("Drop action changed");
 	}
 
 	private GridFile getSelectedTargetFolder(TreePath path) {
@@ -293,7 +297,7 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 					.getLastPathComponent();
 
 			GridFile file = (GridFile) parentNode.getUserObject();
-			X.p("node: " + file.getName());
+
 			return file;
 		}
 	}
