@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 
 import org.apache.commons.lang.StringUtils;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
+import org.vpac.grisu.frontend.view.swing.files.virtual.utils.LazyLoadingTreeController;
 import org.vpac.grisu.frontend.view.swing.files.virtual.utils.LazyLoadingTreeNode;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.dto.GridFile;
@@ -20,23 +22,25 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 
 	private final boolean displayHiddenFiles;
 	private final String[] extensionsToDisplay;
+	private final LazyLoadingTreeController controller;
 
 	public GridFileTreeNode(FileManager fm, GridFile userObject) {
 		this(fm, userObject, null, true, null);
 	}
 
 	public GridFileTreeNode(FileManager fm, GridFile userObject,
-			DefaultTreeModel model) {
-		this(fm, userObject, model, true, null);
+			LazyLoadingTreeController controller) {
+		this(fm, userObject, controller, true, null);
 	}
 
 	public GridFileTreeNode(FileManager fm, GridFile userObject,
-			DefaultTreeModel model, boolean displayHiddenFiles,
+			LazyLoadingTreeController controller, boolean displayHiddenFiles,
 			String[] extensionsToDisplay) {
-		super(userObject, model);
+		super(userObject, (controller == null) ? null : controller.getModel());
 		this.displayHiddenFiles = displayHiddenFiles;
 		this.extensionsToDisplay = extensionsToDisplay;
 		this.fm = fm;
+		this.controller = controller;
 		setAllowsChildren(getAllowsChildren());
 	}
 
@@ -105,7 +109,7 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 					}
 				}
 
-				GridFileTreeNode gftn = new GridFileTreeNode(fm, f, model,
+				GridFileTreeNode gftn = new GridFileTreeNode(fm, f, controller,
 						displayHiddenFiles, extensionsToDisplay);
 
 				list.add(gftn);
@@ -128,6 +132,41 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 			}
 		}
 		return list.toArray(new MutableTreeNode[list.size()]);
+
+	}
+
+	public void refresh() {
+
+		if (isLeaf()) {
+			return;
+		}
+
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+
+				// X.p("Updating: " + f.getUrl());
+
+				Set<MutableTreeNode> children = new HashSet<MutableTreeNode>();
+				for (int j = 0; j < getChildCount(); j++) {
+					MutableTreeNode childnode = (MutableTreeNode) getChildAt(j);
+					children.add(childnode);
+					// model.removeNodeFromParent(childnode);
+					// GridFile f = (GridFile) childnode
+					// .getUserObject();
+					// X.p("Removing: " + f.getName());
+				}
+
+				for (MutableTreeNode n : children) {
+					getModel().removeNodeFromParent(n);
+
+				}
+
+				getModel().nodeChanged(GridFileTreeNode.this);
+
+				controller.expandNode(GridFileTreeNode.this, getModel());
+			}
+		});
 
 	}
 }

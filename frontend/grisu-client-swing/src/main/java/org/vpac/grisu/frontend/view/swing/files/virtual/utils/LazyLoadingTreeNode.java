@@ -37,6 +37,10 @@ public abstract class LazyLoadingTreeNode extends DefaultMutableTreeNode {
 		return (getChildCount() > 0) && getAllowsChildren();
 	}
 
+	public DefaultTreeModel getModel() {
+		return model;
+	}
+
 	/**
 	 * If the
 	 * 

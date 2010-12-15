@@ -103,6 +103,10 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 		worker.execute();
 	}
 
+	public DefaultTreeModel getModel() {
+		return model;
+	}
+
 	/**
 	 * 
 	 * @return
@@ -156,6 +160,10 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 			}
 		};
 	}
+
+	// public void setModel(DefaultTreeModel model) {
+	// this.model = model;
+	// }
 
 	public void setWorkerFactory(
 			SwingWorkerFactory<MutableTreeNode[], ?> workerFactory) {

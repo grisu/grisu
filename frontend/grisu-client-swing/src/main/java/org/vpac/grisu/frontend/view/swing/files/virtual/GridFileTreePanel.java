@@ -19,14 +19,11 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.MutableTreeNode;
-
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.netbeans.swing.outline.DefaultOutlineModel;
 import org.netbeans.swing.outline.Outline;
 import org.netbeans.swing.outline.OutlineModel;
-import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransferEvent;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListListener;
@@ -396,16 +393,15 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 
 		model = new DefaultTreeModel(rootNode);
 		rootNode.setModel(model);
+		controller = new LazyLoadingTreeController(model);
 
 		for (GridFile f : roots) {
-			rootNode.add(new GridFileTreeNode(fm, f, model, displayHiddenFiles,
-					extensionsToDisplay));
+			rootNode.add(new GridFileTreeNode(fm, f, controller,
+					displayHiddenFiles, extensionsToDisplay));
 		}
 
 		OutlineModel m = DefaultOutlineModel.createOutlineModel(model,
 				new GridFileTreeTableRowModel(), false, "File");
-
-		controller = new LazyLoadingTreeController(model);
 
 		m.getTreePathSupport().addTreeWillExpandListener(controller);
 		getOutline().setModel(m);
@@ -441,33 +437,7 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 					if (f.getUrl().equals(
 							ev.getFileTransfer().getTargetDirUrl())) {
 
-						SwingUtilities.invokeLater(new Thread() {
-							@Override
-							public void run() {
-
-								X.p("Updating: " + f.getUrl());
-
-								Set<MutableTreeNode> children = new HashSet<MutableTreeNode>();
-								for (int j = 0; j < node.getChildCount(); j++) {
-									MutableTreeNode childnode = (MutableTreeNode) node
-											.getChildAt(j);
-									children.add(childnode);
-									// model.removeNodeFromParent(childnode);
-									// GridFile f = (GridFile) childnode
-									// .getUserObject();
-									// X.p("Removing: " + f.getName());
-								}
-
-								for (MutableTreeNode n : children) {
-									model.removeNodeFromParent(n);
-
-								}
-
-								model.nodeChanged(node);
-
-								controller.expandNode(node, model);
-							}
-						});
+						node.refresh();
 					}
 				}
 			}

@@ -186,9 +186,12 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 		DefaultTreeModel model = new DefaultTreeModel(rootNode);
 		rootNode.setModel(model);
 
+		final LazyLoadingTreeController controller = new LazyLoadingTreeController(
+				getTree());
+
 		try {
 			for (GridFile f : fm.ls(root)) {
-				rootNode.add(new GridFileTreeNode(fm, f, model,
+				rootNode.add(new GridFileTreeNode(fm, f, controller,
 						displayHiddenFiles, extensionsToDisplay));
 			}
 		} catch (RemoteFileSystemException e) {
@@ -198,8 +201,6 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 		}
 
 		getTree().setModel(model);
-		final LazyLoadingTreeController controller = new LazyLoadingTreeController(
-				getTree());
 		getTree().addTreeWillExpandListener(controller);
 
 	}
