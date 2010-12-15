@@ -560,7 +560,8 @@ public class FileManager {
 			FileHelpers.saveToDisk(handler.getDataSource(), cacheTargetFile);
 			cacheTargetFile.setLastModified(lastModified);
 		} catch (final Exception e) {
-			myLogger.error("Could not save file: " + url.lastIndexOf("/") + 1);
+			myLogger.error("Could not save file: "
+					+ url.substring(url.lastIndexOf("/")));
 			throw new FileTransactionException(url, cacheTargetFile.toString(),
 					"Could not save file.", e);
 		}

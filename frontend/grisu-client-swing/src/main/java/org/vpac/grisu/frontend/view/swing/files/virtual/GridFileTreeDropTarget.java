@@ -102,6 +102,8 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 
 	public void dragOver(DropTargetDragEvent dtde) {
 
+		X.p("Over");
+
 		Outline outline = (Outline) ((dtde.getDropTargetContext()
 				.getComponent()));
 
@@ -117,6 +119,8 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 			selectFolderAndChildren(outline, p, point);
 
 			if (dropTargetFile.isFolder()) {
+
+				X.p("Folder");
 
 				if (!outline.getOutlineModel().getTreePathSupport()
 						.hasBeenExpanded(p)) {
@@ -138,6 +142,9 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 
 				if (dropTargetFile.isVirtual()) {
 
+					X.p("Virtual");
+					X.p(dropTargetFile.getUrl());
+
 					if (dropTargetFile.getUrls().size() == 1) {
 
 						// if (!dropTargetFile.getUrl().startsWith(
@@ -146,6 +153,7 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 
 						// for now
 						dtde.rejectDrag();
+						// dtde.acceptDrag(DnDConstants.ACTION_COPY);
 					} else {
 						dtde.rejectDrag();
 					}
@@ -154,6 +162,7 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 				}
 
 			} else {
+				X.p("File");
 				if (openFolderTask != null) {
 					openFolderTask.cancel();
 				}
