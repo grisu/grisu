@@ -40,6 +40,7 @@ import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException
 import org.vpac.grisu.frontend.control.jobMonitoring.RunningJobManager;
 import org.vpac.grisu.frontend.model.events.BatchJobEvent;
 import org.vpac.grisu.frontend.model.events.BatchJobKilledEvent;
+import org.vpac.grisu.frontend.model.events.BatchJobStatusEvent;
 import org.vpac.grisu.frontend.model.events.NewBatchJobEvent;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -94,6 +95,8 @@ public class BatchJobObject implements JobMonitoringObject,
 	public static final int DEFAULT_JOB_CREATION_RETRIES = 5;
 
 	public static final int DEFAULT_JOB_CREATION_THREADS = 5;
+
+	private Thread waitThread;
 
 	private Thread refreshThread;
 
@@ -355,6 +358,52 @@ public class BatchJobObject implements JobMonitoringObject,
 	public int compareTo(BatchJobObject o) {
 
 		return this.getJobname().compareTo(o.getJobname());
+	}
+
+	private void createWaitThread(final int checkIntervallInSeconds) {
+
+		try {
+			// just to make sure we don't create 2 or more threads. Should never
+			// happen.
+			waitThread.interrupt();
+		} catch (final Exception e) {
+			myLogger.debug(e);
+		}
+
+		waitThread = new Thread() {
+			@Override
+			public void run() {
+
+				int oldStatus = getStatus(false);
+				while (oldStatus < JobConstants.FINISHED_EITHER_WAY) {
+
+					if (isInterrupted()) {
+						return;
+					}
+					if (oldStatus != getStatus(false)) {
+						EventBus.publish(new BatchJobStatusEvent(
+								BatchJobObject.this, oldStatus,
+								BatchJobObject.this.getStatus(false)));
+						if (StringUtils.isNotBlank(getJobname())) {
+							EventBus.publish(
+									BatchJobObject.this.getJobname(),
+									new BatchJobStatusEvent(
+											BatchJobObject.this, oldStatus,
+											BatchJobObject.this
+													.getStatus(false)));
+						}
+					}
+					try {
+						Thread.sleep(checkIntervallInSeconds * 1000);
+					} catch (final InterruptedException e) {
+						myLogger.debug("Wait thread for job " + getJobname()
+								+ " interrupted.");
+						return;
+					}
+				}
+			}
+		};
+
 	}
 
 	public Set<String> currentlyUsedSubmissionLocations() {
@@ -1520,10 +1569,6 @@ public class BatchJobObject implements JobMonitoringObject,
 		refresh(true);
 	}
 
-	public void refresh(boolean wait) {
-		getWrappedDtoBatchJob(true, wait);
-	}
-
 	// /**
 	// * Restarts all jobs that failed using the provided
 	// * {@link FailedJobRestarter}.
@@ -1573,6 +1618,10 @@ public class BatchJobObject implements JobMonitoringObject,
 	// }
 	//
 	// }
+
+	public void refresh(boolean wait) {
+		getWrappedDtoBatchJob(true, wait);
+	}
 
 	private void refreshMultiPartJobStatus(boolean waitForRefreshToFinish)
 			throws InterruptedException {
@@ -2282,6 +2331,62 @@ public class BatchJobObject implements JobMonitoringObject,
 				+ batchJobname + " finished.";
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this, message2));
 		addJobLogMessage(message2);
+
+	}
+
+	/**
+	 * You can use this method to wait for the job to finish (either
+	 * successfully or not) on the endpoint resource.
+	 * 
+	 * This will check the status of all jobs and will return once all of them
+	 * are finished one way or the other. You'll still have to check whether all
+	 * jobs were successful yourself and maybe restart the ones that failed.
+	 * 
+	 * This method is a convenience method and might not be the best way to do
+	 * that. It would be more efficient if you would check for failed jobs with
+	 * every statuscheck and resubmit those failed jobs instantly and not wait
+	 * until everything else is finished (like this method does).
+	 * 
+	 * But it should be good enough for most cases.
+	 * 
+	 * Use the int parameter to specify the sleep interval inbetween status
+	 * checks. Don't use a low number here please (except for testing) because
+	 * it could possibly cause a high load for the backend.
+	 * 
+	 * @param checkIntervallInSeconds
+	 *            the interval inbetween status checks
+	 * @return whether the job is actually finished (true) or the this
+	 *         wait-thread was interrupted otherwise
+	 */
+	public boolean waitForJobToFinish(final int checkIntervallInSeconds) {
+
+		addJobLogMessage("Waiting for job to finish...");
+
+		if (waitThread != null) {
+			if (waitThread.isAlive()) {
+				try {
+					waitThread.join();
+					return isFinished(false);
+				} catch (final InterruptedException e) {
+					myLogger.debug("Job status wait thread interrupted.");
+					return isFinished(false);
+				}
+			}
+		}
+
+		createWaitThread(checkIntervallInSeconds);
+
+		try {
+			waitThread.start();
+			waitThread.join();
+			waitThread = null;
+		} catch (final InterruptedException e) {
+			myLogger.debug("Job status wait thread interrupted.");
+			waitThread = null;
+			return isFinished(false);
+		}
+
+		return isFinished(false);
 
 	}
 
