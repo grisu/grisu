@@ -14,6 +14,15 @@ public class StatusObject {
 		public void statusMessage(ActionStatusEvent event);
 	}
 
+	public static StatusObject wait(ServiceInterface si, String handle) {
+		try {
+			return waitForActionToFinish(si, handle, 10, true, false);
+		} catch (Exception e) {
+			// TODO logging
+			return null;
+		}
+	}
+
 	public static StatusObject waitForActionToFinish(ServiceInterface si,
 			String handle, int recheckIntervalInSeconds, boolean exitIfFailed,
 			boolean sendStatusEvent) throws InterruptedException,

@@ -1333,8 +1333,8 @@ public class FileManager {
 		final File file = getFileFromUriOrPath(uriOrPath);
 
 		if (!file.exists()) {
-			throw new FileTransactionException(uriOrPath, null,
-					"Source file does not exist.", null);
+			throw new FileTransactionException(uriOrPath, null, "Source file ("
+					+ file.getPath() + ") does not exist.", null);
 		}
 
 		if (file.isDirectory()) {
