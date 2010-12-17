@@ -3,6 +3,7 @@ package org.vpac.grisu.frontend.model.job;
 import java.io.File;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,8 +30,8 @@ import org.vpac.grisu.frontend.model.events.NewJobEvent;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
-import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.dto.DtoJob;
+import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.job.JobCreatedProperty;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.utils.FileHelpers;
@@ -61,7 +62,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		final JobObject job = new JobObject(si,
 				jobsubmissionObject.getJobDescriptionDocument());
 
-		job.setInputFileUrls(jobsubmissionObject.getInputFileUrls());
+		job.setInputFiles(jobsubmissionObject.getInputFiles());
 
 		return job;
 	}
@@ -990,50 +991,63 @@ public class JobObject extends JobSubmissionObjectImpl implements
 
 		addJobLogMessage("Staging in files...");
 
-		if ((getInputFileUrls() != null) && (getInputFileUrls().length > 0)) {
+		if ((getInputFiles() != null) && (getInputFiles().size() > 0)) {
 			setStatus(JobConstants.INPUT_FILES_UPLOADING);
 		} else {
 			return;
 		}
 
 		final Set<String> localFiles = new HashSet<String>();
-		for (final String inputFile : getInputFileUrls()) {
+		for (final String inputFile : getInputFiles().keySet()) {
 			if (FileManager.isLocal(inputFile)) {
 				localFiles.add(inputFile);
 			}
 		}
 
+		Map<String, Set<String>> targets = new HashMap<String, Set<String>>();
+		for (String f : localFiles) {
+			String path = getInputFiles().get(f);
+			if (targets.get(path) == null) {
+				targets.put(path, new HashSet<String>());
+			}
+			targets.get(path).add(f);
+		}
+
 		final FileTransactionManager ftm = FileTransactionManager
 				.getDefault(serviceInterface);
 
-		final FileTransaction fileTransfer = ftm.addJobInputFileTransfer(
-				localFiles, this);
-		try {
-			fileTransfer.join();
-		} catch (final ExecutionException e) {
-			addJobLogMessage("Staging failed: " + e.getLocalizedMessage());
-			if (fileTransfer.getException() != null) {
-				throw fileTransfer.getException();
-			} else {
-				throw new FileTransactionException(
-						fileTransfer.getFailedSourceFile(), jobDirectory,
-						"File staging failed.", null);
-			}
-		}
+		for (String target : targets.keySet()) {
 
-		if (!FileTransaction.Status.FINISHED.equals(fileTransfer.getStatus())) {
-			if (fileTransfer.getException() != null) {
-				throw fileTransfer.getException();
-			} else {
-				throw new FileTransactionException(
-						fileTransfer.getFailedSourceFile(), jobDirectory,
-						"File staging failed.", null);
+			final FileTransaction fileTransfer = ftm.addJobInputFileTransfer(
+					targets.get(target), this, target);
+			try {
+				fileTransfer.join();
+			} catch (final ExecutionException e) {
+				addJobLogMessage("Staging failed: " + e.getLocalizedMessage());
+				if (fileTransfer.getException() != null) {
+					throw fileTransfer.getException();
+				} else {
+					throw new FileTransactionException(
+							fileTransfer.getFailedSourceFile(), jobDirectory,
+							"File staging failed.", null);
+				}
 			}
+			if (!FileTransaction.Status.FINISHED.equals(fileTransfer
+					.getStatus())) {
+				if (fileTransfer.getException() != null) {
+					throw fileTransfer.getException();
+				} else {
+					throw new FileTransactionException(
+							fileTransfer.getFailedSourceFile(), jobDirectory,
+							"File staging failed.", null);
+				}
+			}
+
 		}
 
 		addJobLogMessage("Staging of input files finished.");
 
-		if ((getInputFileUrls() != null) && (getInputFileUrls().length > 0)) {
+		if ((getInputFiles() != null) && (getInputFiles().size() > 0)) {
 			setStatus(JobConstants.INPUT_FILES_UPLOADED);
 		}
 

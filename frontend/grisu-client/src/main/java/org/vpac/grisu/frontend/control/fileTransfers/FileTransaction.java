@@ -60,11 +60,16 @@ public class FileTransaction implements Comparable<FileTransaction> {
 		this(fm, GridFile.extractUrls(sources), target.getUrl(), overwrite);
 	}
 
-	public FileTransaction(FileManager fm, Set<String> sources, JobObject job) {
+	public FileTransaction(FileManager fm, Set<String> sources, JobObject job,
+			String targetPath) {
 
 		this.fm = fm;
 		this.sourceUrls = sources;
-		this.targetDirUrl = job.getJobDirectoryUrl();
+		if (StringUtils.isBlank(targetPath)) {
+			this.targetDirUrl = job.getJobDirectoryUrl();
+		} else {
+			this.targetDirUrl = job.getJobDirectoryUrl() + "/" + targetPath;
+		}
 		this.job = job;
 		this.overwrite = true;
 

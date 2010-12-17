@@ -28,6 +28,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
+import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.events.FolderCreatedEvent;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -1216,12 +1217,15 @@ public class FileManager {
 
 			deltaPath = deltaPath.replace('\\', '/');
 			deltaPath = deltaPath.replace("/./", "/");
+			X.p("DELTA PATH: " + deltaPath);
 
-			try {
-				deltaPath = URLEncoder.encode(deltaPath, "UTF-8");
-			} catch (UnsupportedEncodingException e2) {
-				// shouldn't happen
-			}
+			// try {
+			// deltaPath = URLEncoder.encode(deltaPath, "UTF-8");
+			deltaPath = deltaPath.replaceAll("\\s", "%20");
+			// } catch (UnsupportedEncodingException e2) {
+			// // shouldn't happen
+			// }
+			X.p("DELTA PATH: " + deltaPath);
 
 			myLogger.debug("Delta path for input folder: " + deltaPath);
 
@@ -1237,6 +1241,7 @@ public class FileManager {
 						try {
 							myLogger.info("Uploading file " + file.getName()
 									+ "...");
+
 							serviceInterface.uploadInputFile(jobname, handler,
 									finalDeltaPath);
 

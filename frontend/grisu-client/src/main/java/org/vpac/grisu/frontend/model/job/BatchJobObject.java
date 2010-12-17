@@ -2241,7 +2241,7 @@ public class BatchJobObject implements JobMonitoringObject,
 			checkInterruptedStatus(executor, tasks);
 
 			// uploading single job input files
-			if (job.getInputFileUrls().length > 0) {
+			if (job.getInputFiles().size() > 0) {
 				final String message = "Adding input files for job "
 						+ job.getJobname();
 				EventBus.publish(getJobname(), new BatchJobEvent(

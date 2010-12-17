@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -23,6 +24,7 @@ import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.vpac.grisu.utils.SimpleJsdlBuilder;
+import org.vpac.grisu.utils.StringHelpers;
 import org.w3c.dom.Document;
 
 import au.org.arcs.jcommons.constants.Constants;
@@ -74,8 +76,8 @@ public class JobSubmissionObjectImpl {
 		jso.setEmail_on_job_finish(true);
 		jso.setForce_mpi(true);
 		jso.setForce_single(false);
-		jso.setInputFileUrls(new String[] { "file:///temp/test",
-				"gsiftp://ng2.vpac.org/tmp/test" });
+		// jso.setInputFileUrls(new String[] { "file:///temp/test",
+		// "gsiftp://ng2.vpac.org/tmp/test" });
 		jso.setMemory(0L);
 
 		jso.getJobDescriptionDocument();
@@ -110,7 +112,7 @@ public class JobSubmissionObjectImpl {
 
 	private int walltime_in_seconds = 0;
 
-	private Set<String> inputFileUrls = new HashSet<String>();
+	private Map<String, String> inputFiles = new HashMap<String, String>();
 
 	private Set<String> modules = new HashSet<String>();
 
@@ -159,7 +161,14 @@ public class JobSubmissionObjectImpl {
 		}
 		memory_in_bytes = JsdlHelpers.getTotalMemoryRequirement(jsdl);
 		walltime_in_seconds = JsdlHelpers.getWalltime(jsdl);
-		setInputFileUrls(JsdlHelpers.getInputFileUrls(jsdl));
+
+		String[] temp = JsdlHelpers.getInputFileUrls(jsdl);
+		Map<String, String> inf = new LinkedHashMap<String, String>();
+		for (String s : temp) {
+			inf.put(s, "");
+		}
+
+		setInputFiles(inf);
 		setModules(JsdlHelpers.getModules(jsdl));
 		final String[] candidateHosts = JsdlHelpers.getCandidateHosts(jsdl);
 		if ((candidateHosts != null) && (candidateHosts.length > 0)) {
@@ -236,8 +245,9 @@ public class JobSubmissionObjectImpl {
 
 		String temp = jobProperties.get(JobSubmissionProperty.INPUT_FILE_URLS
 				.toString());
-		if ((temp != null) && (temp.length() > 0)) {
-			setInputFileUrls(temp.split(","));
+		if (StringUtils.isNotBlank(temp)) {
+			setInputFiles(StringHelpers.StringToMap(temp));
+			// setInputFileUrls(temp.split(","));
 		}
 
 		temp = jobProperties.get(JobSubmissionProperty.MODULES.toString());
@@ -262,15 +272,19 @@ public class JobSubmissionObjectImpl {
 
 	public void addInputFileUrl(String url) {
 
+		addInputFileUrl(url, "");
+
+	}
+
+	public void addInputFileUrl(String url, String targetPath) {
 		if (StringUtils.isBlank(url)) {
 			return;
 		}
 
 		url = FileManager.ensureUriFormat(url);
-		final String[] oldValue = getInputFileUrls();
-		this.inputFileUrls.add(url);
-		pcs.firePropertyChange("inputFileUrls", oldValue, this.inputFileUrls);
-
+		// final String[] oldValue = getInputFileUrls().k;
+		this.inputFiles.put(url, targetPath);
+		pcs.firePropertyChange("inputFiles", null, this.inputFiles);
 	}
 
 	public void addModule(final String module) {
@@ -359,18 +373,22 @@ public class JobSubmissionObjectImpl {
 		return this.id;
 	}
 
-	public String[] getInputFileUrls() {
-		return inputFileUrls.toArray(new String[] {});
+	public Map<String, String> getInputFiles() {
+		return this.inputFiles;
 	}
 
-	@Transient
-	public String getInputFileUrlsAsString() {
-		if ((inputFileUrls != null) && (inputFileUrls.size() != 0)) {
-			return StringUtils.join(inputFileUrls, ",");
-		} else {
-			return new String();
-		}
-	}
+	// public String[] getInputFileUrls() {
+	// return inputFileUrls.toArray(new String[] {});
+	// }
+
+	// @Transient
+	// public String getInputFileUrlsAsString() {
+	// if ((inputFileUrls != null) && (inputFileUrls.size() != 0)) {
+	// return StringUtils.join(inputFileUrls, ",");
+	// } else {
+	// return new String();
+	// }
+	// }
 
 	@Transient
 	public final Document getJobDescriptionDocument()
@@ -428,7 +446,7 @@ public class JobSubmissionObjectImpl {
 			jobProperties.put(JobSubmissionProperty.FORCE_MPI, "true");
 		}
 		jobProperties.put(JobSubmissionProperty.INPUT_FILE_URLS,
-				getInputFileUrlsAsString());
+				StringHelpers.mapToString(getInputFiles()));
 		jobProperties.put(JobSubmissionProperty.MODULES, getModulesAsString());
 		jobProperties.put(JobSubmissionProperty.MEMORY_IN_B, new Long(
 				memory_in_bytes).toString());
@@ -532,9 +550,8 @@ public class JobSubmissionObjectImpl {
 		if (StringUtils.isBlank(selectedFile)) {
 			return;
 		}
-		final String[] oldValue = getInputFileUrls();
-		this.inputFileUrls.remove(selectedFile);
-		pcs.firePropertyChange("inputFileUrls", oldValue, this.inputFileUrls);
+		this.inputFiles.remove(selectedFile);
+		pcs.firePropertyChange("inputFileUrls", null, this.inputFiles);
 	}
 
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
@@ -623,16 +640,22 @@ public class JobSubmissionObjectImpl {
 		this.id = id;
 	}
 
-	public void setInputFileUrls(final String[] inputFileUrls) {
-		final Set<String> oldValue = this.inputFileUrls;
-		if (inputFileUrls != null) {
-			this.inputFileUrls = new HashSet<String>(
-					Arrays.asList(inputFileUrls));
-		} else {
-			this.inputFileUrls = new HashSet<String>();
-		}
-		pcs.firePropertyChange("inputFileUrls", oldValue, this.inputFileUrls);
+	public void setInputFiles(final Map<String, String> inputfiles) {
+		this.inputFiles = inputfiles;
+
+		pcs.firePropertyChange("inputFiles", null, this.inputFiles);
+
 	}
+
+	// public void setInputFileUrls(final String[] inputFileUrls) {
+	// final Set<String> oldValue = this.inputFiles;
+	// if (inputFileUrls != null) {
+	// this.inputFiles = new HashSet<String>(Arrays.asList(inputFileUrls));
+	// } else {
+	// this.inputFiles = new HashSet<String>();
+	// }
+	// pcs.firePropertyChange("inputFileUrls", oldValue, this.inputFiles);
+	// }
 
 	public void setJobname(final String jobname) {
 		final String oldValue = this.jobname;

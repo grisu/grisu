@@ -100,8 +100,9 @@ public class FileTransactionManager implements PropertyChangeListener {
 	}
 
 	public FileTransaction addJobInputFileTransfer(Set<String> sources,
-			JobObject job) {
-		final FileTransaction ft = new FileTransaction(fm, sources, job);
+			JobObject job, String targetPath) {
+		final FileTransaction ft = new FileTransaction(fm, sources, job,
+				targetPath);
 		return addFileTransfer(ft);
 	}
 
