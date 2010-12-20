@@ -47,7 +47,8 @@ public class BatchJobFileUploadThread extends Thread {
 				// FileManager.createDataHandler(inputFile);
 				// final StatusObject status = new StatusObject(si, batchJob
 				// .getInputFiles().get(inputFile));
-				fm.uploadJobInput(batchJob.getJobname(), inputFile);
+				fm.uploadJobInput(batchJob.getJobname(), inputFile, batchJob
+						.getInputFiles().get(inputFile));
 
 				// si.uploadInputFile(batchJob.getJobname(), dh, batchJob
 				// .getInputFiles().get(inputFile));

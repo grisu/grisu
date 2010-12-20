@@ -2,7 +2,6 @@ package org.vpac.grisu.backend.model.fs;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystem;
 import org.apache.commons.vfs.FileSystemException;
@@ -137,9 +136,17 @@ public class CommonsVfsFileSystemInfoPlugin implements FileSystemInfoPlugin,
 
 			for (final FileObject child : children) {
 				if (FileType.FOLDER.equals(child.getType())) {
-					final GridFile childfolder = new GridFile(child.getURL()
-							.toString(), child.getContent()
-							.getLastModifiedTime());
+					GridFile childfolder = new GridFile(child.getURL()
+							.toString());
+					// GridFile childfolder = child.getURL().get
+					// try {
+					// childfolder = new GridFile(child.getURL().toURI()
+					// .toASCIIString(), child.getContent()
+					// .getLastModifiedTime());
+					// } catch (URISyntaxException e) {
+					// e.printStackTrace();
+					// throw new RemoteFileSystemException(e);
+					// }
 					childfolder.addFqan(mp.getFqan());
 					childfolder.addSite(mp.getSite());
 					folder.addChild(childfolder);
@@ -158,5 +165,4 @@ public class CommonsVfsFileSystemInfoPlugin implements FileSystemInfoPlugin,
 		}
 
 	}
-
 }

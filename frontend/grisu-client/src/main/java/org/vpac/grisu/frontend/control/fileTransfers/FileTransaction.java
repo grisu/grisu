@@ -66,9 +66,9 @@ public class FileTransaction implements Comparable<FileTransaction> {
 		this.fm = fm;
 		this.sourceUrls = sources;
 		if (StringUtils.isBlank(targetPath)) {
-			this.targetDirUrl = job.getJobDirectoryUrl();
+			this.targetDirUrl = "";
 		} else {
-			this.targetDirUrl = job.getJobDirectoryUrl() + "/" + targetPath;
+			this.targetDirUrl = targetPath;
 		}
 		this.job = job;
 		this.overwrite = true;
@@ -203,7 +203,8 @@ public class FileTransaction implements Comparable<FileTransaction> {
 								currentSourceFile);
 						try {
 							if (job != null) {
-								fm.uploadJobInput(job.getJobname(), sourceUrl);
+								fm.uploadJobInput(job.getJobname(), sourceUrl,
+										targetDirUrl);
 							}
 							if (DELETE_STRING.equals(targetDirUrl)) {
 								try {

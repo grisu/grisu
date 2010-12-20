@@ -4324,7 +4324,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} catch (final FileSystemException e) {
 
 			try {
-				fout.close();
+				if (fout != null) {
+					fout.close();
+				}
 				source.getInputStream().close();
 			} catch (final Exception e1) {
 				myLogger.error(e1);
@@ -4389,6 +4391,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void uploadInputFile(String jobname, final DataHandler source,
 			final String targetFilename) throws NoSuchJobException,
 			RemoteFileSystemException {
+
+		// Thread.dumpStack();
 
 		try {
 			final Job job = getJobFromDatabase(jobname);

@@ -1099,8 +1099,8 @@ public class FileManager {
 
 	}
 
-	private final void uploadInputFile(final String job, final File file)
-			throws FileTransactionException {
+	private final void uploadInputFile(final String job, final File file,
+			final String targetPath) throws FileTransactionException {
 
 		if (!file.exists()) {
 			throw new FileTransactionException(file.toString(), null,
@@ -1133,10 +1133,10 @@ public class FileManager {
 		final DataHandler handler = createDataHandler(file);
 		try {
 			myLogger.info("Uploading file " + file.getName() + "...");
-			serviceInterface.uploadInputFile(job, handler, file.getName());
+			serviceInterface.uploadInputFile(job, handler, targetPath);
 
 			final StatusObject so = new StatusObject(serviceInterface,
-					file.getName());
+					targetPath);
 			so.waitForActionToFinish(4, true, false);
 
 			if (so.getStatus().isFailed()) {
@@ -1185,8 +1185,8 @@ public class FileManager {
 	//
 	// }
 
-	private final void uploadInputFolder(final String jobname, final File folder)
-			throws FileTransactionException {
+	private final void uploadInputFolder(final String jobname,
+			final File folder, String path) throws FileTransactionException {
 
 		if (!folder.isDirectory()) {
 			throw new FileTransactionException(folder.toString(), null,
@@ -1202,11 +1202,13 @@ public class FileManager {
 				.newFixedThreadPool(ClientPropertiesManager
 						.getConcurrentUploadThreads());
 
-		final String basePath = folder.getParentFile().getPath();
+		// final String basePath = folder.getParentFile().getPath();
+		final String basePath = folder.getPath();
 		for (final File file : allFiles) {
 
 			final String filePath = file.getPath();
-			final String deltaPathTemp = filePath.substring(basePath.length());
+			final String deltaPathTemp = path + "/"
+					+ filePath.substring(basePath.length());
 
 			String deltaPath;
 			if (deltaPathTemp.startsWith("/") || deltaPathTemp.startsWith("\\")) {
@@ -1332,8 +1334,8 @@ public class FileManager {
 				+ " successful.");
 	}
 
-	public final void uploadJobInput(String job, String uriOrPath)
-			throws FileTransactionException {
+	public final void uploadJobInput(String job, String uriOrPath,
+			String targetPath) throws FileTransactionException {
 
 		final File file = getFileFromUriOrPath(uriOrPath);
 
@@ -1342,10 +1344,18 @@ public class FileManager {
 					+ file.getPath() + ") does not exist.", null);
 		}
 
+		// try {
+		// targetPath = URLEncoder.encode(targetPath, "UTF-8");
+		// } catch (UnsupportedEncodingException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		targetPath = targetPath.replaceAll("\\s", "%20");
+
 		if (file.isDirectory()) {
-			uploadInputFolder(job, file);
+			uploadInputFolder(job, file, targetPath);
 		} else {
-			uploadInputFile(job, file);
+			uploadInputFile(job, file, targetPath);
 		}
 
 	}

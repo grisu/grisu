@@ -258,6 +258,7 @@ public final class HibernateSessionFactory {
 
 			sessionFactory = configuration.buildSessionFactory();
 		} catch (final Throwable e) {
+			e.printStackTrace();
 			System.err.println("%%%% Error Creating SessionFactory %%%%");
 			// e.printStackTrace();
 			throw new RuntimeException(e);

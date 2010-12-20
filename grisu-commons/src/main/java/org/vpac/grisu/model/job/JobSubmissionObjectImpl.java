@@ -12,7 +12,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Transient;
@@ -163,12 +165,14 @@ public class JobSubmissionObjectImpl {
 		walltime_in_seconds = JsdlHelpers.getWalltime(jsdl);
 
 		String[] temp = JsdlHelpers.getInputFileUrls(jsdl);
-		Map<String, String> inf = new LinkedHashMap<String, String>();
-		for (String s : temp) {
-			inf.put(s, "");
+		if (temp != null) {
+			Map<String, String> inf = new LinkedHashMap<String, String>();
+			for (String s : temp) {
+				inf.put(s, "");
+			}
+			setInputFiles(inf);
 		}
 
-		setInputFiles(inf);
 		setModules(JsdlHelpers.getModules(jsdl));
 		final String[] candidateHosts = JsdlHelpers.getCandidateHosts(jsdl);
 		if ((candidateHosts != null) && (candidateHosts.length > 0)) {
@@ -373,6 +377,7 @@ public class JobSubmissionObjectImpl {
 		return this.id;
 	}
 
+	@ElementCollection(fetch = FetchType.EAGER)
 	public Map<String, String> getInputFiles() {
 		return this.inputFiles;
 	}
