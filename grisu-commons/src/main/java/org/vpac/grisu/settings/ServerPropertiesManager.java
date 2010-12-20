@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalINIConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -316,7 +317,8 @@ public final class ServerPropertiesManager {
 			jobDirName = getServerConfiguration().getString(
 					"General.jobDirName");
 
-			if ("none".equals(jobDirName.toLowerCase())) {
+			if (StringUtils.isNotBlank(jobDirName)
+					&& "none".equals(jobDirName.toLowerCase())) {
 				jobDirName = null;
 			}
 
@@ -509,7 +511,7 @@ public final class ServerPropertiesManager {
 			final String dbtype = getServerConfiguration().getString(
 					"Database.databaseType");
 
-			if (dbtype == null || dbtype.length() == 0) {
+			if ((dbtype == null) || (dbtype.length() == 0)) {
 				return true;
 			} else {
 				return false;

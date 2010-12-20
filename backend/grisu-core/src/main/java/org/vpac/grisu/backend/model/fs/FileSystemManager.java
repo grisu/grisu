@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.axis.utils.StringUtils;
 import org.apache.commons.vfs.FileObject;
+import org.vpac.grisu.X;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -60,6 +61,7 @@ public class FileSystemManager {
 	public GridFile getFolderListing(String pathOrUrl)
 			throws InvalidPathException, RemoteFileSystemException {
 
+		X.p("PATH: " + pathOrUrl);
 		pathOrUrl = cleanPath(pathOrUrl);
 		return getFileSystemInfoPlugin(pathOrUrl).getFolderListing(pathOrUrl);
 
