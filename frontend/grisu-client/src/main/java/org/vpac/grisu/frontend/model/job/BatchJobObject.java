@@ -25,6 +25,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
+import org.vpac.grisu.X;
 import org.vpac.grisu.control.DefaultResubmitPolicy;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ResubmitPolicy;
@@ -40,7 +41,6 @@ import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException
 import org.vpac.grisu.frontend.control.jobMonitoring.RunningJobManager;
 import org.vpac.grisu.frontend.model.events.BatchJobEvent;
 import org.vpac.grisu.frontend.model.events.BatchJobKilledEvent;
-import org.vpac.grisu.frontend.model.events.BatchJobStatusEvent;
 import org.vpac.grisu.frontend.model.events.NewBatchJobEvent;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -235,6 +235,13 @@ public class BatchJobObject implements JobMonitoringObject,
 	 * directory via the {@link #pathToInputFiles()} method. The original
 	 * filename is used.
 	 * 
+	 * Be aware that, if you are specifying a folder here, the containing files
+	 * will not be uploaded concurrently (for reference:
+	 * {@link #setConcurrentInputFileUploadThreads(int)}) but one after another
+	 * If you would specify 2 folders as input, those, however, would be
+	 * uploaded in parallel (if the concurrentUploadThreads parameter is set of
+	 * course).
+	 * 
 	 * @param inputFile
 	 *            the input file
 	 */
@@ -260,10 +267,18 @@ public class BatchJobObject implements JobMonitoringObject,
 	 * of this multipartjob. You can access the relative path from each job
 	 * directory via the {@link #pathToInputFiles()} method.
 	 * 
+	 * Be aware that, if you are specifying a folder here, the containing files
+	 * will not be uploaded concurrently (for reference:
+	 * {@link #setConcurrentInputFileUploadThreads(int)}) but one after another
+	 * If you would specify 2 folders as input, those, however, would be
+	 * uploaded in parallel (if the concurrentUploadThreads parameter is set of
+	 * course).
+	 * 
+	 * 
 	 * @param inputFile
 	 *            the input file
 	 * @param targetFilename
-	 *            the filename in the common directory
+	 *            the path/filename in the common directory
 	 */
 	public void addInputFile(String inputFile, String targetFilename) {
 		inputFile = FileManager.ensureUriFormat(inputFile);
@@ -375,24 +390,25 @@ public class BatchJobObject implements JobMonitoringObject,
 			public void run() {
 
 				int oldStatus = getStatus(false);
-				while (oldStatus < JobConstants.FINISHED_EITHER_WAY) {
+				while (oldStatus < JobConstants.BATCH_JOB_FINISHED) {
 
 					if (isInterrupted()) {
 						return;
 					}
-					if (oldStatus != getStatus(false)) {
-						EventBus.publish(new BatchJobStatusEvent(
-								BatchJobObject.this, oldStatus,
-								BatchJobObject.this.getStatus(false)));
-						if (StringUtils.isNotBlank(getJobname())) {
-							EventBus.publish(
-									BatchJobObject.this.getJobname(),
-									new BatchJobStatusEvent(
-											BatchJobObject.this, oldStatus,
-											BatchJobObject.this
-													.getStatus(false)));
-						}
-					}
+					// if (oldStatus != getStatus(true)) {
+					// EventBus.publish(new BatchJobStatusEvent(
+					// BatchJobObject.this, oldStatus,
+					// BatchJobObject.this.getStatus(false)));
+					// if (StringUtils.isNotBlank(getJobname())) {
+					// EventBus.publish(
+					// BatchJobObject.this.getJobname(),
+					// new BatchJobStatusEvent(
+					// BatchJobObject.this, oldStatus,
+					// BatchJobObject.this
+					// .getStatus(false)));
+					// }
+					// }
+
 					try {
 						Thread.sleep(checkIntervallInSeconds * 1000);
 					} catch (final InterruptedException e) {
@@ -400,7 +416,14 @@ public class BatchJobObject implements JobMonitoringObject,
 								+ " interrupted.");
 						return;
 					}
+					oldStatus = getStatus(true);
+					X.p("New status: " + oldStatus);
+
+					if (isInterrupted()) {
+						return;
+					}
 				}
+				myLogger.debug("BatchJob finished. Exit monitoring...");
 			}
 		};
 

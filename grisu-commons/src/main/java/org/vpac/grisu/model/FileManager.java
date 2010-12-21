@@ -1219,7 +1219,6 @@ public class FileManager {
 
 			deltaPath = deltaPath.replace('\\', '/');
 			deltaPath = deltaPath.replace("/./", "/");
-			X.p("DELTA PATH: " + deltaPath);
 
 			// try {
 			// deltaPath = URLEncoder.encode(deltaPath, "UTF-8");
@@ -1227,7 +1226,6 @@ public class FileManager {
 			// } catch (UnsupportedEncodingException e2) {
 			// // shouldn't happen
 			// }
-			X.p("DELTA PATH: " + deltaPath);
 
 			myLogger.debug("Delta path for input folder: " + deltaPath);
 
@@ -1342,6 +1340,12 @@ public class FileManager {
 		if (!file.exists()) {
 			throw new FileTransactionException(uriOrPath, null, "Source file ("
 					+ file.getPath() + ") does not exist.", null);
+		}
+
+		if (StringUtils.isBlank(targetPath)) {
+			targetPath = FileManager.getFilename(uriOrPath);
+			X.p("Target path: " + targetPath);
+
 		}
 
 		// try {

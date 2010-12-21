@@ -73,9 +73,9 @@ public class FileTransaction implements Comparable<FileTransaction> {
 		this.job = job;
 		this.overwrite = true;
 
-		if (StringUtils.isBlank(this.targetDirUrl)) {
-			throw new RuntimeException("Targeturl not set.");
-		}
+		// if (StringUtils.isBlank(this.targetDirUrl)) {
+		// throw new RuntimeException("Targeturl not set.");
+		// }
 	}
 
 	public FileTransaction(FileManager fm, Set<String> sourceUrl,
@@ -203,19 +203,27 @@ public class FileTransaction implements Comparable<FileTransaction> {
 								currentSourceFile);
 						try {
 							if (job != null) {
-								fm.uploadJobInput(job.getJobname(), sourceUrl,
-										targetDirUrl);
-							}
-							if (DELETE_STRING.equals(targetDirUrl)) {
-								try {
-									fm.deleteFile(sourceUrl);
-								} catch (final RemoteFileSystemException e1) {
-									throw new FileTransactionException(
-											sourceUrl, targetDirUrl,
-											"Can't delete file.", e1);
+
+								if (StringUtils.isBlank(targetDirUrl)) {
+									fm.uploadJobInput(job.getJobname(),
+											sourceUrl,
+											FileManager.getFilename(sourceUrl));
+								} else {
+									fm.uploadJobInput(job.getJobname(),
+											sourceUrl, targetDirUrl);
 								}
 							} else {
-								fm.cp(sourceUrl, targetDirUrl, overwrite);
+								if (DELETE_STRING.equals(targetDirUrl)) {
+									try {
+										fm.deleteFile(sourceUrl);
+									} catch (final RemoteFileSystemException e1) {
+										throw new FileTransactionException(
+												sourceUrl, targetDirUrl,
+												"Can't delete file.", e1);
+									}
+								} else {
+									fm.cp(sourceUrl, targetDirUrl, overwrite);
+								}
 							}
 						} catch (final FileTransactionException e) {
 							possibleException = e;

@@ -800,10 +800,17 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 	private void setUrl(String url) throws RemoteFileSystemException {
 
+		GlazedFile old = getCurrentDirectory();
 		setEmptyList();
-		final GridFile folder = fm.ls(url);
+		try {
+			final GridFile folder = fm.ls(url);
 
-		setCurrentDirToFolder(folder);
+			setCurrentDirToFolder(folder);
+		} catch (Exception e) {
+			// TODO dialog?
+			e.printStackTrace();
+			setCurrent(old);
+		}
 
 	}
 }

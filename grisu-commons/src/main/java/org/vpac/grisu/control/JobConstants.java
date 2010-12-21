@@ -44,6 +44,7 @@ public final class JobConstants {
 	public static final int PENDING = 0;
 	public static final int ACTIVE = 1;
 	public static final int CLEAN_UP = 101;
+	public static final int BATCH_JOB_FINISHED = 100;
 	public static final int FINISHED_EITHER_WAY = 900;
 	public static final int NO_SUCH_JOB = 997;
 	public static final int KILLED = 998;
@@ -111,7 +112,7 @@ public final class JobConstants {
 		case INPUT_FILES_UPLOADED:
 			return INPUT_FILES_UPLOADED_STRING;
 		default:
-			if (status_no > 1 && status_no <= 100) {
+			if ((status_no > 1) && (status_no <= 100)) {
 				return ACTIVE_STRING + "(" + status_no + " % finished)";
 			}
 			break;
@@ -128,7 +129,7 @@ public final class JobConstants {
 
 		if (DONE_STRING.equals(status)) {
 			return DONE;
-		} else if (status != null && status.indexOf("(") >= 0) {
+		} else if ((status != null) && (status.indexOf("(") >= 0)) {
 			final int start = status.indexOf("(") + 11;
 			final int end = status.indexOf(")");
 

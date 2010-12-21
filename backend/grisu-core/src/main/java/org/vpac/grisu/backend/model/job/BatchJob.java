@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -19,8 +20,8 @@ import javax.persistence.Id;
 import javax.persistence.Transient;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.CollectionOfElements;
 import org.vpac.grisu.backend.hibernate.JobDAO;
+import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
 import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.dto.DtoJob;
@@ -155,9 +156,6 @@ public class BatchJob {
 			throw new RuntimeException(e);
 		}
 
-		// result.setStatus(this.getStatus());
-		result.setStatus(result.getPercentFinished().intValue());
-
 		// boolean finished = true;
 		final DtoJobs dtoJobs = new DtoJobs();
 		for (final String jobname : getFailedJobs()) {
@@ -166,10 +164,22 @@ public class BatchJob {
 		}
 		result.setFailedJobs(dtoJobs);
 
+		// result.setStatus(this.getStatus());
+		int s = result.getPercentFinished().intValue();
+		if (s >= 100) {
+			if (dtoJobs.getAllJobs().size() > 0) {
+				result.setStatus(JobConstants.FAILED);
+			} else {
+				result.setStatus(JobConstants.DONE);
+			}
+		} else {
+			result.setStatus(s);
+		}
+
 		return result;
 	}
 
-	@CollectionOfElements(fetch = FetchType.EAGER)
+	@ElementCollection(fetch = FetchType.EAGER)
 	public Set<String> getAllUsedMountPoints() {
 		return this.usedMountPoints;
 	}
@@ -189,7 +199,7 @@ public class BatchJob {
 	}
 
 	// @Transient
-	@CollectionOfElements(fetch = FetchType.EAGER)
+	@ElementCollection(fetch = FetchType.EAGER)
 	public Set<String> getFailedJobs() {
 		return failedJobs;
 	}
@@ -205,7 +215,7 @@ public class BatchJob {
 		return id;
 	}
 
-	@CollectionOfElements(fetch = FetchType.EAGER)
+	@ElementCollection(fetch = FetchType.EAGER)
 	public Set<String> getInputFiles() {
 		return this.inputFiles;
 	}
@@ -216,7 +226,7 @@ public class BatchJob {
 		return job;
 	}
 
-	@CollectionOfElements(fetch = FetchType.EAGER)
+	@ElementCollection(fetch = FetchType.EAGER)
 	public Map<String, String> getJobProperties() {
 		return jobProperties;
 	}
@@ -226,12 +236,12 @@ public class BatchJob {
 		return this.jobProperties.get(key);
 	}
 
-	@CollectionOfElements(fetch = FetchType.EAGER)
+	@ElementCollection(fetch = FetchType.EAGER)
 	public synchronized Set<Job> getJobs() {
 		return jobs;
 	}
 
-	@CollectionOfElements(fetch = FetchType.EAGER)
+	@ElementCollection(fetch = FetchType.EAGER)
 	public Map<Long, String> getLogMessages() {
 		return logMessages;
 	}

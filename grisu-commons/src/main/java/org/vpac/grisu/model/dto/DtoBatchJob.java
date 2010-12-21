@@ -175,8 +175,7 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 		if (totalNumberOfJobs() <= 0) {
 			return 0.0;
 		}
-		return new Double((numberOfSuccessfulJobs() * 100)
-				/ totalNumberOfJobs());
+		return new Double((numberOfFinishedJobs() * 100) / totalNumberOfJobs());
 	}
 
 	@XmlElement(name = "jobproperty")
