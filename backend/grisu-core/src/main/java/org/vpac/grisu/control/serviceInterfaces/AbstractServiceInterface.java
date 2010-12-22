@@ -4646,6 +4646,26 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		myLogger.debug("All data transmissions for multiPartJob " + jobname
 				+ " started.");
 
+		// cleanup
+
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					executor.awaitTermination(1, TimeUnit.DAYS);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+
+				try {
+					tempFile.delete();
+				} catch (FileSystemException e) {
+					e.printStackTrace();
+				}
+
+			}
+		}.start();
+
 		// buf = null;
 		// try {
 		// tempFile.delete();

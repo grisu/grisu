@@ -25,7 +25,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
-import org.vpac.grisu.X;
 import org.vpac.grisu.control.DefaultResubmitPolicy;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ResubmitPolicy;
@@ -417,7 +416,7 @@ public class BatchJobObject implements JobMonitoringObject,
 						return;
 					}
 					oldStatus = getStatus(true);
-					X.p("New status: " + oldStatus);
+					// X.p("New status: " + oldStatus);
 
 					if (isInterrupted()) {
 						return;
