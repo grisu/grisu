@@ -125,8 +125,8 @@ public class GenericGridFileViewer extends JPanel implements GridFileViewer,
 
 		if ((viewers == null) || (viewers.size() == 0)) {
 			viewers = new HashSet<String>();
-			viewers.add("org.vpac.grisu.frontend.view.swing.files.preview.fileViewers.PlainTextFileViewer");
-			viewers.add("org.vpac.grisu.frontend.view.swing.files.preview.fileViewers.ImageFileViewer");
+			viewers.add("org.vpac.grisu.frontend.view.swing.files.preview.fileViewers.PlainTextGridFileViewer");
+			viewers.add("org.vpac.grisu.frontend.view.swing.files.preview.fileViewers.ImageGridFileViewer");
 		}
 		return viewers;
 	}
