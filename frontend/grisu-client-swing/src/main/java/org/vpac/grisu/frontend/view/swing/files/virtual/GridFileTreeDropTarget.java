@@ -152,8 +152,8 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 						// dtde.acceptDrag(DnDConstants.ACTION_COPY);
 
 						// for now
-						dtde.rejectDrag();
-						// dtde.acceptDrag(DnDConstants.ACTION_COPY);
+						// dtde.rejectDrag();
+						dtde.acceptDrag(DnDConstants.ACTION_COPY);
 					} else {
 						dtde.rejectDrag();
 					}

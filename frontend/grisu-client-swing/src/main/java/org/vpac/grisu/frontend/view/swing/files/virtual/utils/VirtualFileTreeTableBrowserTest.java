@@ -18,8 +18,11 @@ public class VirtualFileTreeTableBrowserTest {
 	 */
 	public static void main(String[] args) throws LoginException {
 
-		final ServiceInterface si = LoginManager.loginCommandline("LOCAL");
-		// final ServiceInterface si = LoginManager.loginCommandline("Local");
+		// final ServiceInterface si = LoginManager.loginCommandline("LOCAL");
+		final ServiceInterface si = LoginManager.loginCommandline("LOCAL_WS");
+
+		// final ServiceInterface si = LoginManager
+		// .loginCommandline("BeSTGRID-DEV");
 
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {

@@ -150,7 +150,12 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 				break;
 			}
 
-			String ttt = siteString + ", " + fqanString;
+			String virt = "";
+			if (file.isVirtual()) {
+				virt = " / virtual";
+			}
+
+			String ttt = siteString + " / " + fqanString + virt;
 			return ttt;
 		} else {
 			return null;

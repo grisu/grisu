@@ -173,6 +173,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		this.name = mp.getAlias();
 		this.addSite(mp.getSite());
 		this.addFqan(mp.getFqan());
+		this.isVirtual = false;
 	}
 
 	// public DtoFileObject(String group) {
@@ -223,8 +224,10 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 			if ((ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://")
 					.equals(url)) {
 				this.name = "Remote files";
+				this.isVirtual = true;
 			} else {
 				this.name = FileManager.getFilename(url);
+				this.isVirtual = false;
 			}
 
 		} else if (FILETYPE_FILE.equals(type)) {
@@ -234,6 +237,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 			this.size = size;
 			this.lastModified = lastModified;
 			this.name = FileManager.getFilename(url);
+			this.isVirtual = false;
 		} else if (FILETYPE_MOUNTPOINT.equals(type)) {
 			throw new RuntimeException(
 					"Constructor not usable for mountpoints...");
@@ -244,6 +248,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 			this.size = -1L;
 			this.lastModified = -1L;
 			this.name = ROOT;
+			this.isVirtual = true;
 		} else {
 			throw new RuntimeException("Type: " + type + " not supported...");
 		}
@@ -288,6 +293,9 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	public void addUrl(String url, Integer priority) {
 		DtoProperty temp = new DtoProperty(url, priority.toString());
 		urls.add(temp);
+		if (urls.size() > 1) {
+			this.isVirtual = true;
+		}
 	}
 
 	public int compareTo(GridFile o) {
@@ -333,6 +341,12 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	@XmlAttribute(name = "fqan")
 	public Set<String> getFqans() {
 		return this.fqans;
+	}
+
+	// for jaxb marshalling
+	@XmlElement(name = "isInaccessable")
+	public boolean getInaccessable() {
+		return this.inaccessable;
 	}
 
 	@XmlAttribute(name = "lastModified")
@@ -387,6 +401,12 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		return urls;
 	}
 
+	// for jaxb marshalling
+	@XmlElement(name = "isVirtual")
+	public boolean getVirtual() {
+		return isVirtual;
+	}
+
 	@Override
 	public int hashCode() {
 		return getUrl().hashCode();
@@ -408,12 +428,10 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		}
 	}
 
-	@XmlAttribute(name = "isInaccessable")
 	public boolean isInaccessable() {
 		return this.inaccessable;
 	}
 
-	@XmlAttribute(name = "isVirtual")
 	public boolean isVirtual() {
 		return isVirtual;
 	}
