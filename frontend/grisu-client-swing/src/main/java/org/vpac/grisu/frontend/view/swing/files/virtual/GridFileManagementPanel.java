@@ -83,7 +83,7 @@ public class GridFileManagementPanel extends JPanel implements
 	private GridFileTreePanel getFileListPanel() {
 		if (fileListPanel == null) {
 			fileListPanel = new GridFileTreePanel(si, leftRoots, false);
-			fileListPanel.addFileListListener(this);
+			fileListPanel.addGridFileListListener(this);
 		}
 		return fileListPanel;
 	}

@@ -28,8 +28,9 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransferEvent;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListListener;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListPanel;
-import org.vpac.grisu.frontend.view.swing.files.GridFileListPanelContextMenu;
 import org.vpac.grisu.frontend.view.swing.files.GridFileTransferHandler;
+import org.vpac.grisu.frontend.view.swing.files.contextMenu.DefaultGridFileContextMenu;
+import org.vpac.grisu.frontend.view.swing.files.contextMenu.GridFileListPanelContextMenu;
 import org.vpac.grisu.frontend.view.swing.files.virtual.utils.LazyLoadingTreeController;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -143,12 +144,15 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getScrollPane(), "2, 2, fill, fill");
 
+		GridFileListPanelContextMenu contextMenu = new DefaultGridFileContextMenu();
+		setContextMenu(contextMenu);
+
 		EventBus.subscribe(FileTransferEvent.class, this);
 
 		initialize(this.roots);
 	}
 
-	synchronized public void addFileListListener(GridFileListListener l) {
+	synchronized public void addGridFileListListener(GridFileListListener l) {
 		if (listeners == null) {
 			listeners = new Vector<GridFileListListener>();
 		}
@@ -348,7 +352,10 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 						GridFile sel = getCurrentDirectory();
 						if ((sel != null) && !sel.equals(oldDir)) {
 							fireNewDirectory();
+							fireFilesSelected(getSelectedFiles());
 							oldDir = sel;
+						} else {
+							fireFilesSelected(getSelectedFiles());
 						}
 					}
 				}
@@ -385,6 +392,10 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 		}
 
 		return result;
+	}
+
+	public ServiceInterface getServiceInterface() {
+		return si;
 	}
 
 	private void initialize(List<GridFile> roots) {
@@ -450,7 +461,7 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 
 	}
 
-	synchronized public void removeFileListListener(GridFileListListener l) {
+	synchronized public void removeGridFileListListener(GridFileListListener l) {
 		if (listeners == null) {
 			listeners = new Vector<GridFileListListener>();
 		}
@@ -458,7 +469,14 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 	}
 
 	public void setContextMenu(GridFileListPanelContextMenu menu) {
-		// TODO Auto-generated method stub
+
+		if (this.popupMenu != null) {
+			removeGridFileListListener(this.popupMenu);
+		}
+		this.popupMenu = menu;
+		this.popupMenu.setGridFileListPanel(this);
+		addGridFileListListener(this.popupMenu);
+		addPopup(getOutline(), this.popupMenu.getJPopupMenu());
 
 	}
 

@@ -130,10 +130,10 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 			.synchronizedSet(new TreeSet<GridFile>());
 
 	public GridFile() {
-		this(null, -1L, -1L, FILETYPE_ROOT);
-		this.isVirtual = true;
-		this.setName("Grid");
-		this.setUrl(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://");
+		// this(null, -1L, -1L, FILETYPE_ROOT);
+		// this.isVirtual = true;
+		// this.setName("Grid");
+		// this.setUrl(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://");
 	}
 
 	public GridFile(File f) {
@@ -344,7 +344,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	}
 
 	// for jaxb marshalling
-	@XmlElement(name = "isInaccessable")
+	@XmlAttribute(name = "isInaccessable")
 	public boolean getInaccessable() {
 		return this.inaccessable;
 	}
@@ -402,7 +402,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	}
 
 	// for jaxb marshalling
-	@XmlElement(name = "isVirtual")
+	@XmlAttribute(name = "isVirtual")
 	public boolean getVirtual() {
 		return isVirtual;
 	}
@@ -498,11 +498,17 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 
 	public void setPath(String path) {
 		this.optionalPath = path;
+		if (StringUtils.isNotBlank(path)) {
+			this.isVirtual = true;
+		}
 	}
 
 	private void setSites(Set<String> sites) {
 		this.sites.clear();
 		this.sites.addAll(sites);
+		if ((sites != null) && (sites.size() > 1)) {
+			this.isVirtual = true;
+		}
 	}
 
 	public void setSize(long size) {
@@ -521,6 +527,9 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	public void setUrls(List<DtoProperty> urls) {
 		this.urls.clear();
 		this.urls.addAll(urls);
+		if ((urls != null) && (urls.size() > 1)) {
+			this.isVirtual = true;
+		}
 	}
 
 	@Override

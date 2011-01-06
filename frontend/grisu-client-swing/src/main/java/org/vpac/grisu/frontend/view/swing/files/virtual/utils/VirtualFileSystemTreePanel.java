@@ -17,7 +17,7 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListListener;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListPanel;
-import org.vpac.grisu.frontend.view.swing.files.GridFileListPanelContextMenu;
+import org.vpac.grisu.frontend.view.swing.files.contextMenu.GridFileListPanelContextMenu;
 import org.vpac.grisu.frontend.view.swing.files.virtual.GridFileTreeNode;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -86,7 +86,7 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 		initialize();
 	}
 
-	synchronized public void addFileListListener(GridFileListListener l) {
+	synchronized public void addGridFileListListener(GridFileListListener l) {
 		if (listeners == null) {
 			listeners = new Vector<GridFileListListener>();
 		}
@@ -146,6 +146,19 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 	//
 	// }
 
+	public ServiceInterface getServiceInterface() {
+		return si;
+	}
+
+	// private JXTreeTable getTreeTable() {
+	// if (treeTable == null) {
+	// // TreeTableModel m = new UserspaceFileTreeTableModel(si,
+	// // "/ARCS/BeSTGRID");
+	// treeTable = new JXTreeTable();
+	// }
+	// return treeTable;
+	// }
+
 	private JTree getTree() {
 		if (tree == null) {
 			tree = new JTree();
@@ -167,15 +180,6 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 		}
 		return tree;
 	}
-
-	// private JXTreeTable getTreeTable() {
-	// if (treeTable == null) {
-	// // TreeTableModel m = new UserspaceFileTreeTableModel(si,
-	// // "/ARCS/BeSTGRID");
-	// treeTable = new JXTreeTable();
-	// }
-	// return treeTable;
-	// }
 
 	private void initialize() {
 
@@ -210,7 +214,7 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 
 	}
 
-	synchronized public void removeFileListListener(GridFileListListener l) {
+	synchronized public void removeGridFileListListener(GridFileListListener l) {
 		if (listeners == null) {
 			listeners = new Vector<GridFileListListener>();
 		}
@@ -219,11 +223,11 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 
 	public void setContextMenu(GridFileListPanelContextMenu menu) {
 		if (this.popupMenu != null) {
-			removeFileListListener(this.popupMenu);
+			removeGridFileListListener(this.popupMenu);
 		}
 		this.popupMenu = menu;
-		menu.setFileListPanel(this);
-		addFileListListener(this.popupMenu);
+		// menu.setFileListPanel(this);
+		addGridFileListListener(this.popupMenu);
 		addPopup(getTree(), this.popupMenu.getJPopupMenu());
 	}
 

@@ -4,11 +4,13 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
+import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.view.swing.files.contextMenu.GridFileListPanelContextMenu;
 import org.vpac.grisu.model.dto.GridFile;
 
 public interface GridFileListPanel {
 
-	public void addFileListListener(GridFileListListener l);
+	public void addGridFileListListener(GridFileListListener l);
 
 	public void displayHiddenFiles(boolean display);
 
@@ -18,9 +20,11 @@ public interface GridFileListPanel {
 
 	public Set<GridFile> getSelectedFiles();
 
+	public ServiceInterface getServiceInterface();
+
 	public void refresh();
 
-	public void removeFileListListener(GridFileListListener l);
+	public void removeGridFileListListener(GridFileListListener l);
 
 	public void setContextMenu(GridFileListPanelContextMenu menu);
 
@@ -35,5 +39,4 @@ public interface GridFileListPanel {
 	public void setExtensionsToDisplay(String[] extensions);
 
 	public void setRootUrl(String url);
-
 }
