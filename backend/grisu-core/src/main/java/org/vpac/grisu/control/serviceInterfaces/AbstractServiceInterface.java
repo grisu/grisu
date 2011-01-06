@@ -878,11 +878,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								true, true);
 
 						if (rto.isFailed()) {
+							actionStat.setFailed(true);
+							actionStat.setFinished(true);
 							actionStat.addElement("Transfer failed: "
 									+ rto.getPossibleException()
 											.getLocalizedMessage());
-							actionStat.setFailed(true);
-							actionStat.setFinished(true);
 							throw new RemoteFileSystemException(rto
 									.getPossibleException()
 									.getLocalizedMessage());
@@ -893,11 +893,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					}
 					actionStat.setFinished(true);
 				} catch (final Exception e) {
-					e.printStackTrace();
-					actionStat.addElement("Transfer failed: "
-							+ e.getLocalizedMessage());
 					actionStat.setFailed(true);
 					actionStat.setFinished(true);
+					actionStat.addElement("Transfer failed: "
+							+ e.getLocalizedMessage());
 				} finally {
 					getUser().closeFileSystems();
 				}
@@ -909,6 +908,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		if (waitForFileTransferToFinish) {
 			try {
 				cpThread.join();
+
+				if (actionStat.isFailed()) {
+					throw new RemoteFileSystemException(
+							DtoActionStatus.getLastMessage(actionStat));
+				}
 			} catch (final InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -925,30 +929,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			final boolean waitForFileTransferToFinish)
 			throws RemoteFileSystemException {
 
-		final FileObject source_file;
-		final FileObject target_file;
-
-		source_file = getUser().aquireFile(source);
-		target_file = getUser().aquireFile(target);
-
-		String targetFileString;
-		try {
-			targetFileString = target_file.getURL().toString();
-		} catch (final FileSystemException e1) {
-			myLogger.error("Could not retrieve targetfile url: "
-					+ e1.getLocalizedMessage());
-			throw new RemoteFileSystemException(
-					"Could not retrive targetfile url: "
-							+ e1.getLocalizedMessage());
-		}
-
-		final RemoteFileTransferObject fileTransfer = new RemoteFileTransferObject(
-				source_file, target_file, overwrite);
-
-		myLogger.info("Creating fileTransfer object for source: "
-				+ source_file.getName() + " and target: "
-				+ target_file.toString());
-		// fileTransfers.put(targetFileString, fileTransfer);
+		final RemoteFileTransferObject fileTransfer = getUser()
+				.getFileSystemManager().copy(source, target, overwrite);
 
 		if (startFileTransfer) {
 			fileTransfer.startTransfer(waitForFileTransferToFinish);
@@ -956,17 +938,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		return fileTransfer;
 	}
-
-	// public String createJobUsingMap(final DtoJob jobProperties,
-	// final String fqan, final String jobCreationMethod)
-	// throws JobPropertiesException {
-	//
-	// JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl(jobProperties
-	// .propertiesAsMap());
-	//
-	// return createJob(jso.getJobDescriptionDocument(), fqan,
-	// jobCreationMethod);
-	// }
 
 	/**
 	 * Creates a multipartjob on the server.

@@ -18,7 +18,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class FIleTransferStatusPanel extends JPanel implements
+public class FileTransferStatusPanel extends JPanel implements
 		PropertyChangeListener {
 
 	private JProgressBar progressBar;
@@ -30,7 +30,7 @@ public class FIleTransferStatusPanel extends JPanel implements
 	/**
 	 * Create the panel.
 	 */
-	public FIleTransferStatusPanel(FileTransaction ft) {
+	public FileTransferStatusPanel(FileTransaction ft) {
 		this.fileTransfer = ft;
 		this.fileTransfer.addPropertyChangeListener(this);
 		setLayout(new FormLayout(new ColumnSpec[] {
@@ -83,7 +83,16 @@ public class FIleTransferStatusPanel extends JPanel implements
 		if ("status".equals(evt.getPropertyName())) {
 			final FileTransaction.Status status = (FileTransaction.Status) evt
 					.getNewValue();
-			getTextField().setText(status.toString());
+
+			if (FileTransaction.Status.FAILED.equals(status)) {
+				String msg = "Failed: "
+						+ fileTransfer.getException().getLocalizedMessage();
+				getTextField().setText(msg);
+			} else {
+				getTextField().setText(status.toString());
+
+			}
+
 			if (FileTransaction.Status.FINISHED.equals(status)
 					|| FileTransaction.Status.FAILED.equals(status)) {
 				SwingUtilities.invokeLater(new Thread() {

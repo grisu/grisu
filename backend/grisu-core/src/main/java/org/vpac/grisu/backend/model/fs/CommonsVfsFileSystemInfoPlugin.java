@@ -7,6 +7,7 @@ import org.apache.commons.vfs.FileSystem;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileType;
 import org.apache.log4j.Logger;
+import org.vpac.grisu.backend.model.RemoteFileTransferObject;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.MountPoint;
@@ -98,6 +99,37 @@ public class CommonsVfsFileSystemInfoPlugin implements FileSystemInfoPlugin,
 
 	public void closeFileSystems() {
 		threadLocalFsManager.remove();
+	}
+
+	public RemoteFileTransferObject copySingleFile(String source,
+			String target, boolean overwrite) throws RemoteFileSystemException {
+
+		final FileObject source_file;
+		final FileObject target_file;
+
+		source_file = aquireFile(source, null);
+		target_file = aquireFile(target, null);
+
+		// String targetFileString;
+		// try {
+		// targetFileString = target_file.getURL().toString();
+		// } catch (final FileSystemException e1) {
+		// myLogger.error("Could not retrieve targetfile url: "
+		// + e1.getLocalizedMessage());
+		// throw new RemoteFileSystemException(
+		// "Could not retrive targetfile url: "
+		// + e1.getLocalizedMessage());
+		// }
+
+		final RemoteFileTransferObject fileTransfer = new RemoteFileTransferObject(
+				source_file, target_file, overwrite);
+
+		myLogger.info("Creating fileTransfer object for source: "
+				+ source_file.getName() + " and target: "
+				+ target_file.toString());
+
+		return fileTransfer;
+
 	}
 
 	public GridFile getFolderListing(String url)

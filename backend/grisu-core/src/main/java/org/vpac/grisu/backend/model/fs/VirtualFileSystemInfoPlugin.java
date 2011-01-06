@@ -34,14 +34,13 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 			throws RemoteFileSystemException {
 
 		if (url.equals(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://")) {
-
 			GridFile root = new GridFile(url, -1L);
 			for (String key : plugins.keySet()) {
 				GridFile vfs = new GridFile(
 						ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://"
 								+ key, -1L);
 				vfs.setIsVirtual(true);
-				vfs.setPath(url + "/" + vfs.getName());
+				vfs.setPath(url + vfs.getName());
 				vfs.setName(StringUtils.capitalize(key));
 				root.addChild(vfs);
 			}

@@ -225,8 +225,6 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 			return;
 		}
 
-		X.p("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Copying files.....");
-
 		Set<GridFile> files = null;
 		try {
 			files = (Set<GridFile>) dtde.getTransferable().getTransferData(

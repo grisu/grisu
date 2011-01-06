@@ -168,6 +168,9 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			Set<String> childFqans = temp.keySet();
 			for (String fqan : childFqans) {
 				Set<MountPoint> mps = user.getMountPoints(fqan);
+				if (mps.size() == 0) {
+					continue;
+				}
 				if (mps.size() == 1) {
 					GridFile file = new GridFile(mps.iterator().next());
 					file.setName(FileManager.getFilename(fqan));

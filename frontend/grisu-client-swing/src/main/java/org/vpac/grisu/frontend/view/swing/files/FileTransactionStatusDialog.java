@@ -38,7 +38,7 @@ public class FileTransactionStatusDialog extends JDialog implements
 	private final JPanel contentPanel = new JPanel();
 	private final FileTransaction ft;
 
-	final FIleTransferStatusPanel fileTransferStatusPanel;
+	final FileTransferStatusPanel fileTransferStatusPanel;
 
 	/**
 	 * Create the dialog.
@@ -54,7 +54,7 @@ public class FileTransactionStatusDialog extends JDialog implements
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new BorderLayout(0, 0));
 
-		fileTransferStatusPanel = new FIleTransferStatusPanel(ft);
+		fileTransferStatusPanel = new FileTransferStatusPanel(ft);
 		contentPanel.add(fileTransferStatusPanel, BorderLayout.CENTER);
 
 		final JPanel buttonPane = new JPanel();

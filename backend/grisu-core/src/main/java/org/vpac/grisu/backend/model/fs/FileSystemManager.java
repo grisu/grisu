@@ -4,8 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.axis.utils.StringUtils;
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.vfs.FileObject;
-import org.vpac.grisu.X;
+import org.vpac.grisu.backend.model.RemoteFileTransferObject;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -50,6 +51,18 @@ public class FileSystemManager {
 		commonsVfsInfo.closeFileSystems();
 	}
 
+	public RemoteFileTransferObject copy(String source, String target,
+			boolean overwrite) throws RemoteFileSystemException {
+
+		String protSource = StringUtils.split(source, ':')[0];
+		String protTarget = StringUtils.split(target, ':')[0];
+
+		FileTransferPlugin pl = getFileTransferPlugin(protSource + "-"
+				+ protTarget);
+
+		return pl.copySingleFile(source, target, overwrite);
+	}
+
 	private FileSystemInfoPlugin getFileSystemInfoPlugin(String url) {
 
 		String protocol = StringUtils.split(url, ':')[0];
@@ -58,10 +71,21 @@ public class FileSystemManager {
 
 	}
 
+	private FileTransferPlugin getFileTransferPlugin(String key) {
+
+		FileTransferPlugin pl = filetransferPlugins.get(key);
+
+		if (pl == null) {
+			throw new NotImplementedException(
+					"Filetransferplugin for not implemented: " + key);
+		}
+
+		return pl;
+	}
+
 	public GridFile getFolderListing(String pathOrUrl)
 			throws InvalidPathException, RemoteFileSystemException {
 
-		X.p("PATH: " + pathOrUrl);
 		pathOrUrl = cleanPath(pathOrUrl);
 		return getFileSystemInfoPlugin(pathOrUrl).getFolderListing(pathOrUrl);
 

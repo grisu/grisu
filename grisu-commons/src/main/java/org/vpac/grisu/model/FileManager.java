@@ -331,7 +331,7 @@ public class FileManager {
 					targetDirUrl, overwrite, true);
 		} catch (final RemoteFileSystemException e) {
 			throw new FileTransactionException(sourceUrl, targetDirUrl,
-					"Could not copy remote files.", e);
+					e.getLocalizedMessage(), e);
 		}
 
 	}
@@ -862,7 +862,12 @@ public class FileManager {
 
 	public Set<GridFile> ls(GridFile parent) throws RemoteFileSystemException {
 
-		GridFile folder = ls(parent.getUrl());
+		GridFile folder = null;
+		if (StringUtils.isNotBlank(parent.getPath())) {
+			folder = ls(parent.getPath());
+		} else {
+			folder = ls(parent.getUrl());
+		}
 
 		if (folder == null) {
 			return null;

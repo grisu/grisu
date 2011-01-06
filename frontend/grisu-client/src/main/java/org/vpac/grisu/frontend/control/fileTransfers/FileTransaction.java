@@ -226,7 +226,14 @@ public class FileTransaction implements Comparable<FileTransaction> {
 												"Can't delete file.", e1);
 									}
 								} else {
-									fm.cp(sourceUrl, targetDirUrl, overwrite);
+									try {
+										fm.cp(sourceUrl, targetDirUrl,
+												overwrite);
+									} catch (Exception e3) {
+										throw new FileTransactionException(
+												sourceUrl, targetDirUrl,
+												e3.getLocalizedMessage(), e3);
+									}
 								}
 							}
 						} catch (final FileTransactionException e) {
