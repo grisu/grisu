@@ -5,7 +5,6 @@ import java.util.Set;
 import javax.swing.JPopupMenu;
 
 import org.apache.log4j.Logger;
-import org.vpac.grisu.X;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListPanel;
 import org.vpac.grisu.model.dto.GridFile;
 import javax.swing.JMenuItem;
@@ -21,6 +20,7 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 	private JMenuItem createFolderMenuItem;
 	private JMenuItem deleteMenuItem;
 	private JMenuItem copyUrlsMenuItem;
+	private JMenuItem refreshMenuItem;
 
 	public DefaultGridFileContextMenu() {
 	}
@@ -37,7 +37,16 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 
 	public void filesSelected(Set<GridFile> files) {
 
-		X.p("File selected.");
+		if (files.size() == 1) {
+			if (files.iterator().next().isFolder()) {
+				getRefreshMenuItem().setEnabled(true);
+			} else {
+				getRefreshMenuItem().setEnabled(false);
+			}
+		} else {
+			getRefreshMenuItem().setEnabled(false);
+		}
+
 		for (GridFile file : files) {
 			if (file.isVirtual()) {
 				getDownloadMenuItem().setEnabled(false);
@@ -88,11 +97,20 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 		return this;
 	}
 
+	private JMenuItem getRefreshMenuItem() {
+		if (refreshMenuItem == null) {
+			refreshMenuItem = new JMenuItem("Refresh");
+			refreshMenuItem.setAction(new RefreshAction(fileList));
+		}
+		return refreshMenuItem;
+	}
+
 	public void isLoading(boolean loading) {
 	}
 
 	public void setGridFileListPanel(GridFileListPanel panel) {
 		this.fileList = panel;
+		add(getRefreshMenuItem());
 		add(getCopyUrlsMenuItem());
 		add(getCreateFolderMenuItem());
 		add(getDeleteMenuItem());

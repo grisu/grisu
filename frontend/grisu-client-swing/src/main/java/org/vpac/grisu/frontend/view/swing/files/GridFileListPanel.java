@@ -24,6 +24,8 @@ public interface GridFileListPanel {
 
 	public void refresh();
 
+	public void refreshFolder(String url);
+
 	public void removeGridFileListListener(GridFileListListener l);
 
 	public void setContextMenu(GridFileListPanelContextMenu menu);

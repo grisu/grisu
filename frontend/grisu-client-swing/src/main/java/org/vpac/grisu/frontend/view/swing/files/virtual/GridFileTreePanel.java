@@ -462,7 +462,7 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 
 	}
 
-	private void refreshFolder(String url) {
+	public void refreshFolder(String url) {
 
 		TableModel m = getOutline().getModel();
 

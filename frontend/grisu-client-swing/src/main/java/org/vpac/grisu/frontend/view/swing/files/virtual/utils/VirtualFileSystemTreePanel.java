@@ -214,6 +214,11 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 
 	}
 
+	public void refreshFolder(String url) {
+		// TODO Auto-generated method stub
+
+	}
+
 	synchronized public void removeGridFileListListener(GridFileListListener l) {
 		if (listeners == null) {
 			listeners = new Vector<GridFileListListener>();
