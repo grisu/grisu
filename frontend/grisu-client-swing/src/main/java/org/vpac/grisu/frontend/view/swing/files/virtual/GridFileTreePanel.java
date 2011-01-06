@@ -24,7 +24,10 @@ import org.bushe.swing.event.EventSubscriber;
 import org.netbeans.swing.outline.DefaultOutlineModel;
 import org.netbeans.swing.outline.Outline;
 import org.netbeans.swing.outline.OutlineModel;
+import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.events.FileDeletedEvent;
+import org.vpac.grisu.control.events.FolderCreatedEvent;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransferEvent;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListListener;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListPanel;
@@ -148,6 +151,8 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 		setContextMenu(contextMenu);
 
 		EventBus.subscribe(FileTransferEvent.class, this);
+		EventBus.subscribe(FolderCreatedEvent.class, this);
+		EventBus.subscribe(FileDeletedEvent.class, this);
 
 		initialize(this.roots);
 	}
@@ -436,29 +441,46 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 
 			if (ev.getFileTransfer().isFinished()) {
 
-				TableModel m = getOutline().getModel();
+				refreshFolder(ev.getFileTransfer().getTargetDirUrl());
 
-				for (int i = 0; i < m.getRowCount(); i++) {
-
-					final GridFileTreeNode node = (GridFileTreeNode) (m
-							.getValueAt(i, 0));
-
-					final GridFile f = (GridFile) node.getUserObject();
-
-					if (f.getUrl().equals(
-							ev.getFileTransfer().getTargetDirUrl())) {
-
-						node.refresh();
-					}
-				}
 			}
 
+		} else if (event instanceof FolderCreatedEvent) {
+			FolderCreatedEvent ev = (FolderCreatedEvent) event;
+
+			refreshFolder(FileManager.calculateParentUrl(ev.getUrl()));
+		} else if (event instanceof FileDeletedEvent) {
+			FileDeletedEvent ev = (FileDeletedEvent) event;
+			X.p("CCC: " + FileManager.calculateParentUrl(ev.getUrl()));
+
+			refreshFolder(FileManager.calculateParentUrl(ev.getUrl()));
 		}
 	}
 
 	public void refresh() {
 		// TODO Auto-generated method stub
 
+	}
+
+	private void refreshFolder(String url) {
+
+		TableModel m = getOutline().getModel();
+
+		for (int i = 0; i < m.getRowCount(); i++) {
+
+			final GridFileTreeNode node = (GridFileTreeNode) (m
+					.getValueAt(i, 0));
+
+			final GridFile f = (GridFile) node.getUserObject();
+
+			// X.p(f.getUrl());
+			// X.p(url);
+
+			if (f.getUrl().equals(url)) {
+
+				node.refresh();
+			}
+		}
 	}
 
 	synchronized public void removeGridFileListListener(GridFileListListener l) {

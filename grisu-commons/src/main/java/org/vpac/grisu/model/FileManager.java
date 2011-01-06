@@ -224,7 +224,7 @@ public class FileManager {
 
 		if (isLocal(rootUrl)) {
 			final File file = getFileFromUriOrPath(rootUrl);
-			return file.getParent().toString();
+			return file.getParentFile().toURI().toASCIIString();
 		} else {
 			final String result = rootUrl
 					.substring(0, rootUrl.lastIndexOf("/"));
@@ -414,6 +414,45 @@ public class FileManager {
 	public boolean createFolder(GlazedFile currentDirectory, String s) {
 
 		if (!GlazedFile.Type.FILETYPE_FOLDER.equals(currentDirectory.getType())) {
+			return false;
+		}
+
+		String url = null;
+		if (isLocal(currentDirectory.getUrl())) {
+
+			url = currentDirectory.getUrl() + File.separator + s;
+			final File newFolder = getFileFromUriOrPath(url);
+
+			if (newFolder.exists()) {
+				myLogger.debug("Folder " + newFolder.toString()
+						+ " already exists. Not creating it.");
+				return false;
+			} else {
+				final boolean result = newFolder.mkdirs();
+				if (result) {
+					EventBus.publish(new FolderCreatedEvent(url));
+				}
+				return result;
+			}
+		} else {
+			url = currentDirectory.getUrl() + "/" + s;
+
+			try {
+				final boolean result = serviceInterface.mkdir(url);
+				if (result) {
+					EventBus.publish(new FolderCreatedEvent(url));
+				}
+				return result;
+			} catch (final RemoteFileSystemException e) {
+				return false;
+			}
+		}
+
+	}
+
+	public boolean createFolder(GridFile currentDirectory, String s) {
+
+		if (!GridFile.FILETYPE_FOLDER.equals(currentDirectory.getType())) {
 			return false;
 		}
 

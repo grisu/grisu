@@ -19,6 +19,7 @@ import org.vpac.grisu.frontend.model.events.FileTransactionFailedEvent;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
+import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.files.GlazedFile;
 import org.vpac.grisu.settings.ClientPropertiesManager;
 
@@ -134,11 +135,17 @@ public class FileTransactionManager implements PropertyChangeListener {
 	// return addFileTransfer(ft);
 	// }
 
-	public FileTransaction deleteFiles(Set<GlazedFile> files) {
+	public FileTransaction deleteFiles(Set files) {
 
 		final Set<String> temp = new HashSet<String>();
-		for (final GlazedFile file : files) {
-			temp.add(file.getUrl());
+		for (final Object file : files) {
+			if (file instanceof GlazedFile) {
+				temp.add(((GlazedFile) file).getUrl());
+			} else if (file instanceof GridFile) {
+				temp.add(((GridFile) file).getUrl());
+			} else if (file instanceof String) {
+				temp.add((String) file);
+			}
 		}
 
 		return deleteUrls(temp);
