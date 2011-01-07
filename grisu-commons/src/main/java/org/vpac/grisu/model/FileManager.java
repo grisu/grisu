@@ -356,6 +356,7 @@ public class FileManager {
 
 	public void cp(GridFile source, GridFile targetDir, boolean overwrite)
 			throws FileTransactionException {
+
 		cp(source.getUrl(), targetDir.getUrl(), overwrite);
 	}
 

@@ -68,12 +68,13 @@ public class DownloadAction extends AbstractAction {
 				}
 				final FileTransaction ft = new FileTransaction(fm, urls,
 						selectedFile.toURI().toString(), true);
-				ftm.addFileTransfer(ft);
 
 				final FileTransactionStatusDialog d = new FileTransactionStatusDialog(
-						null, ft);
+						null);
+				d.setFileTransaction(ft);
 				d.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 				d.setVisible(true);
+				ftm.addFileTransfer(ft);
 			} else {
 				return;
 			}

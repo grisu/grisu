@@ -150,7 +150,6 @@ public class GridFileTransferHandler extends TransferHandler {
 
 		final FileTransaction ft = new FileTransaction(fm, gridFiles,
 				fileList.getCurrentDirectory(), true);
-		ftm.addFileTransfer(ft);
 
 		SwingUtilities.invokeLater(new Thread() {
 
@@ -159,10 +158,11 @@ public class GridFileTransferHandler extends TransferHandler {
 				final JFrame frame = (JFrame) SwingUtilities.getRoot(fileList
 						.getPanel());
 				final FileTransactionStatusDialog ftd = new FileTransactionStatusDialog(
-						frame, ft);
-
+						frame);
+				ftd.setFileTransaction(ft);
 				ftd.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 				ftd.setVisible(true);
+				ftm.addFileTransfer(ft);
 			}
 
 		});

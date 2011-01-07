@@ -236,7 +236,6 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 		}
 
 		final FileTransaction ft = new FileTransaction(fm, files, target, true);
-		FileTransactionManager.getDefault(si).addFileTransfer(ft);
 
 		SwingUtilities.invokeLater(new Thread() {
 
@@ -244,10 +243,12 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 			public void run() {
 				final JFrame frame = (JFrame) SwingUtilities.getRoot(outline);
 				final FileTransactionStatusDialog ftd = new FileTransactionStatusDialog(
-						frame, ft);
+						frame);
+				ftd.setFileTransaction(ft);
 
 				ftd.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 				ftd.setVisible(true);
+				FileTransactionManager.getDefault(si).addFileTransfer(ft);
 			}
 
 		});

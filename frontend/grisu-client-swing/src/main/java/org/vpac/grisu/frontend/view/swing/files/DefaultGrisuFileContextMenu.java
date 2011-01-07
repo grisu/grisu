@@ -136,7 +136,7 @@ public class DefaultGrisuFileContextMenu extends JPopupMenu implements
 		public void actionPerformed(ActionEvent e) {
 
 			final Set<GlazedFile> files = fileListPanel.getSelectedFiles();
-			if (files == null || files.size() <= 0) {
+			if ((files == null) || (files.size() <= 0)) {
 				return;
 			}
 
@@ -162,10 +162,11 @@ public class DefaultGrisuFileContextMenu extends JPopupMenu implements
 					}
 					final FileTransaction ft = new FileTransaction(fm, urls,
 							selectedFile.toURI().toString(), true);
+					final FileTransactionStatusDialog d = new FileTransactionStatusDialog(
+							null);
+					d.setFileTransaction(ft);
 					ftm.addFileTransfer(ft);
 
-					final FileTransactionStatusDialog d = new FileTransactionStatusDialog(
-							null, ft);
 					d.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 					d.setVisible(true);
 				} else {
@@ -212,7 +213,7 @@ public class DefaultGrisuFileContextMenu extends JPopupMenu implements
 
 	public void directoryChanged(GlazedFile newDirectory) {
 
-		if (newDirectory != null
+		if ((newDirectory != null)
 				&& GlazedFile.Type.FILETYPE_FOLDER.equals(newDirectory
 						.getType())) {
 			getCreateFolder().setEnabled(true);
@@ -233,7 +234,7 @@ public class DefaultGrisuFileContextMenu extends JPopupMenu implements
 
 	public void filesSelected(Set<GlazedFile> files) {
 
-		if (files == null || files.size() == 0) {
+		if ((files == null) || (files.size() == 0)) {
 			getDeleteItem().setEnabled(false);
 			getClipboardItem().setEnabled(false);
 		} else {

@@ -137,11 +137,17 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 				}
 
 				if (nodes.length == 0) {
-					DefaultMutableTreeNode temp = (DefaultMutableTreeNode) node
-							.getChildAt(0);
-					model.removeNodeFromParent(temp);
+					try {
+						if (node.getChildCount() > 0) {
+							DefaultMutableTreeNode temp = (DefaultMutableTreeNode) node
+									.getChildAt(0);
+							model.removeNodeFromParent(temp);
+						}
 
-					model.nodeChanged(node);
+						model.nodeChanged(node);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 
 				} else {
 					node.setAllowsChildren((nodes != null)

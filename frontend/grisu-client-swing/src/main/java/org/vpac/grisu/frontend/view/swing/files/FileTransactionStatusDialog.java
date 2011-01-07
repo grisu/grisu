@@ -25,7 +25,7 @@ public class FileTransactionStatusDialog extends JDialog implements
 	public static void main(String[] args) {
 		try {
 			final FileTransactionStatusDialog dialog = new FileTransactionStatusDialog(
-					null, null);
+					null);
 			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 		} catch (final Exception e) {
@@ -33,49 +33,53 @@ public class FileTransactionStatusDialog extends JDialog implements
 		}
 	}
 
-	private final JButton backgroundButton;
+	private JButton backgroundButton;
 
 	private final JPanel contentPanel = new JPanel();
-	private final FileTransaction ft;
+	private FileTransaction ft;
 
 	final FileTransferStatusPanel fileTransferStatusPanel;
 
 	/**
 	 * Create the dialog.
 	 */
-	public FileTransactionStatusDialog(Frame owner, final FileTransaction ft) {
+	public FileTransactionStatusDialog(Frame owner) {
 		super(owner);
 
-		this.ft = ft;
-		ft.addPropertyChangeListener(this);
 		setBounds(100, 100, 450, 138);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new BorderLayout(0, 0));
 
-		fileTransferStatusPanel = new FileTransferStatusPanel(ft);
+		fileTransferStatusPanel = new FileTransferStatusPanel();
 		contentPanel.add(fileTransferStatusPanel, BorderLayout.CENTER);
 
 		final JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		getContentPane().add(buttonPane, BorderLayout.SOUTH);
-		backgroundButton = new JButton("Transfer in background");
-		backgroundButton.addActionListener(new ActionListener() {
+		buttonPane.add(getBackgroundButton());
 
-			public void actionPerformed(ActionEvent e) {
+	}
 
-				try {
-					ft.removePropertyChangeListener(FileTransactionStatusDialog.this);
-					ft.removePropertyChangeListener(fileTransferStatusPanel);
-					dispose();
-				} catch (final Exception e1) {
-					e1.printStackTrace();
+	public synchronized JButton getBackgroundButton() {
+		if (backgroundButton == null) {
+			backgroundButton = new JButton("Transfer in background");
+			backgroundButton.addActionListener(new ActionListener() {
+
+				public void actionPerformed(ActionEvent e) {
+
+					try {
+						ft.removePropertyChangeListener(FileTransactionStatusDialog.this);
+						ft.removePropertyChangeListener(fileTransferStatusPanel);
+						dispose();
+					} catch (final Exception e1) {
+						e1.printStackTrace();
+					}
 				}
-			}
-		});
-		buttonPane.add(backgroundButton);
-
+			});
+		}
+		return backgroundButton;
 	}
 
 	public void propertyChange(PropertyChangeEvent evt) {
@@ -86,10 +90,16 @@ public class FileTransactionStatusDialog extends JDialog implements
 
 			if (status.equals(FileTransaction.Status.FAILED)
 					|| status.equals(FileTransaction.Status.FINISHED)) {
-				backgroundButton.setText("OK");
+				getBackgroundButton().setText("OK");
 
 			}
 		}
 
+	}
+
+	public void setFileTransaction(FileTransaction ft) {
+		this.ft = ft;
+		fileTransferStatusPanel.setFileTransaction(ft);
+		ft.addPropertyChangeListener(this);
 	}
 }

@@ -468,17 +468,21 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 
 		for (int i = 0; i < m.getRowCount(); i++) {
 
-			final GridFileTreeNode node = (GridFileTreeNode) (m
-					.getValueAt(i, 0));
+			Object n = m.getValueAt(i, 0);
 
-			final GridFile f = (GridFile) node.getUserObject();
+			if (n instanceof GridFileTreeNode) {
 
-			// X.p(f.getUrl());
-			// X.p(url);
+				final GridFileTreeNode node = (GridFileTreeNode) n;
 
-			if (f.getUrl().equals(url)) {
+				final GridFile f = (GridFile) node.getUserObject();
 
-				node.refresh();
+				// X.p(f.getUrl());
+				// X.p(url);
+
+				if (f.getUrl().equals(url)) {
+
+					node.refresh();
+				}
 			}
 		}
 	}

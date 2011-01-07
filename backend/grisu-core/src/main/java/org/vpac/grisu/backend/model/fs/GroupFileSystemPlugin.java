@@ -56,8 +56,12 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			int i = rightPart.indexOf("//");
 			String fqanT = rightPart.substring(0, i);
 			String restPath = rightPart.substring(i + 2);
+			if (!fqanT.startsWith("/")) {
+				fqanT = "/" + fqanT;
+			}
 
 			Set<GridFile> childs = listGroup(fqanT, restPath);
+
 			for (GridFile file : childs) {
 				result.addChildren(file.getChildren());
 			}

@@ -25,14 +25,12 @@ public class FileTransferStatusPanel extends JPanel implements
 	private JLabel statusLabel;
 	private JTextField textField;
 
-	private final FileTransaction fileTransfer;
+	private FileTransaction fileTransfer;
 
 	/**
 	 * Create the panel.
 	 */
-	public FileTransferStatusPanel(FileTransaction ft) {
-		this.fileTransfer = ft;
-		this.fileTransfer.addPropertyChangeListener(this);
+	public FileTransferStatusPanel() {
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,
@@ -50,13 +48,6 @@ public class FileTransferStatusPanel extends JPanel implements
 	private JProgressBar getProgressBar() {
 		if (progressBar == null) {
 			progressBar = new JProgressBar();
-			if (fileTransfer.getTotalSourceFiles() == 1) {
-				progressBar.setIndeterminate(true);
-			} else {
-				progressBar.setMinimum(0);
-				progressBar.setMaximum(fileTransfer.getTotalSourceFiles());
-				progressBar.setValue(fileTransfer.getTransferredSourceFiles());
-			}
 		}
 		return progressBar;
 	}
@@ -117,5 +108,17 @@ public class FileTransferStatusPanel extends JPanel implements
 			// System.out.println("Current file: "+evt.getNewValue());
 		}
 
+	}
+
+	public void setFileTransaction(FileTransaction ft) {
+		this.fileTransfer = ft;
+		this.fileTransfer.addPropertyChangeListener(this);
+		if (fileTransfer.getTotalSourceFiles() == 1) {
+			progressBar.setIndeterminate(true);
+		} else {
+			progressBar.setMinimum(0);
+			progressBar.setMaximum(fileTransfer.getTotalSourceFiles());
+			progressBar.setValue(fileTransfer.getTransferredSourceFiles());
+		}
 	}
 }
