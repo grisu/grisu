@@ -7,8 +7,9 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import org.vpac.grisu.control.ServiceInterface;
 
+import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.view.swing.ServiceInterfacePanel;
 import au.org.arcs.jcommons.constants.Constants;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -16,11 +17,14 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class AdvancedSettingsPanel extends JPanel {
+public class AdvancedSettingsPanel extends JPanel implements
+		ServiceInterfacePanel {
+
 	private JLabel lblClearFilesystemCache;
 	private JButton btnClear;
 
 	private ServiceInterface si = null;
+	private JLabel lblUseoldSitebased;
 
 	/**
 	 * Create the panel.
@@ -31,9 +35,11 @@ public class AdvancedSettingsPanel extends JPanel {
 				ColumnSpec.decode("default:grow"),
 				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, }));
 		add(getLblClearFilesystemCache(), "2, 2");
 		add(getBtnClear(), "4, 2");
+		add(getLblUseoldSitebased(), "2, 4");
 	}
 
 	private JButton getBtnClear() {
@@ -68,6 +74,22 @@ public class AdvancedSettingsPanel extends JPanel {
 		return lblClearFilesystemCache;
 	}
 
+	private JLabel getLblUseoldSitebased() {
+		if (lblUseoldSitebased == null) {
+			lblUseoldSitebased = new JLabel(
+					"Use (old) site-based file management panel");
+		}
+		return lblUseoldSitebased;
+	}
+
+	public JPanel getPanel() {
+		return this;
+	}
+
+	public String getPanelTitle() {
+		return "Advanced settings";
+	}
+
 	public void setServiceInterface(ServiceInterface si) {
 
 		this.si = si;
@@ -78,4 +100,5 @@ public class AdvancedSettingsPanel extends JPanel {
 		}
 
 	}
+
 }

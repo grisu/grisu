@@ -73,11 +73,7 @@ public class DtoBatchJob implements Comparable<DtoBatchJob> {
 		if (!isFinished()) {
 			return false;
 		}
-		if (totalNumberOfJobs() == numberOfSuccessfulJobs()) {
-			return true;
-		} else {
-			return false;
-		}
+		return totalNumberOfJobs() == numberOfSuccessfulJobs();
 	}
 
 	public int compareTo(DtoBatchJob o) {

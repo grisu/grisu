@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -42,33 +43,56 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 	private JXFrame frame;
 
 	private final HttpProxyPanel httpProxyPanel = new HttpProxyPanel();
-	private final AdvancedSettingsPanel advancedPanel = new AdvancedSettingsPanel();
 
-	/**
-	 * Launch the application.
-	 */
+	private final Set<ServiceInterfacePanel> configPanels;
+
 	public GrisuApplicationWindow() {
+		this((ServiceInterfacePanel) null);
+	}
 
-		LoginManager.initEnvironment();
-
-		new ApplicationEventListener();
-
-		final Toolkit tk = Toolkit.getDefaultToolkit();
-		tk.addAWTEventListener(WindowSaver.getInstance(),
-				AWTEvent.WINDOW_EVENT_MASK);
-
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (final Exception e) {
-			e.printStackTrace();
-		}
+	public GrisuApplicationWindow(ServiceInterfacePanel panel) {
 
 		initialize();
 
 		menu = new GrisuMenu(this.getFrame());
 		getFrame().setJMenuBar(menu);
 
-		addSettingsPanel("Advanced", advancedPanel);
+		if (panel == null) {
+			this.configPanels = new HashSet<ServiceInterfacePanel>();
+			this.configPanels.add(new AdvancedSettingsPanel());
+			addSettingsPanel("Advanced", this.configPanels.iterator().next()
+					.getPanel());
+		} else {
+			this.configPanels = new HashSet<ServiceInterfacePanel>();
+			this.configPanels.add(panel);
+			for (ServiceInterfacePanel p : configPanels) {
+				addSettingsPanel(p.getPanelTitle(), p.getPanel());
+			}
+		}
+
+	}
+
+	/**
+	 * Launch the application.
+	 */
+	public GrisuApplicationWindow(Set<ServiceInterfacePanel> configpanels) {
+
+		initialize();
+
+		menu = new GrisuMenu(this.getFrame());
+		getFrame().setJMenuBar(menu);
+
+		if (configpanels == null) {
+			this.configPanels = new HashSet<ServiceInterfacePanel>();
+			this.configPanels.add(new AdvancedSettingsPanel());
+			addSettingsPanel("Advanced", this.configPanels.iterator().next()
+					.getPanel());
+		} else {
+			this.configPanels = configpanels;
+			for (ServiceInterfacePanel panel : configPanels) {
+				addSettingsPanel(panel.getPanelTitle(), panel.getPanel());
+			}
+		}
 		addSettingsPanel("Http proxy settings", httpProxyPanel);
 
 	}
@@ -130,6 +154,21 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+
+		LoginManager.initEnvironment();
+
+		new ApplicationEventListener();
+
+		final Toolkit tk = Toolkit.getDefaultToolkit();
+		tk.addAWTEventListener(WindowSaver.getInstance(),
+				AWTEvent.WINDOW_EVENT_MASK);
+
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
+
 		frame = new JXFrame();
 		String title = null;
 		String clientVersion = GrisuVersion.get("this-client");
@@ -184,7 +223,9 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 		initOptionalStuff(si);
 		refreshJobCreationPanels();
 
-		advancedPanel.setServiceInterface(si);
+		for (ServiceInterfacePanel panel : configPanels) {
+			panel.setServiceInterface(si);
+		}
 
 	}
 
