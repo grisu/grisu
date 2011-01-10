@@ -20,6 +20,11 @@ import org.vpac.grisu.frontend.view.swing.files.GridFileListListener;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.GridFile;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.RowSpec;
+import com.jgoodies.forms.factories.FormFactory;
+import javax.swing.JLabel;
 
 public class GenericGridFileViewer extends JPanel implements GridFileViewer,
 		GridFileListListener {
@@ -142,6 +147,9 @@ public class GenericGridFileViewer extends JPanel implements GridFileViewer,
 
 	private final JPanel emptyPanel = new JPanel();
 	private final String EMPTY_PANEL = "__empty__";
+	private JPanel loadingPane;
+	private final String LOADING_PANEL = "__loading__";
+	private JLabel lblLoading;
 
 	/**
 	 * Create the panel.
@@ -151,6 +159,7 @@ public class GenericGridFileViewer extends JPanel implements GridFileViewer,
 		setLayout(new CardLayout());
 
 		add(emptyPanel, EMPTY_PANEL);
+		add(getPanel_1(), LOADING_PANEL);
 	}
 
 	public void directoryChanged(GridFile newDirectory) {
@@ -166,8 +175,30 @@ public class GenericGridFileViewer extends JPanel implements GridFileViewer,
 
 	}
 
+	private JLabel getLblLoading() {
+		if (lblLoading == null) {
+			lblLoading = new JLabel("Loading...");
+		}
+		return lblLoading;
+	}
+
 	public JPanel getPanel() {
 		return this;
+	}
+
+	private JPanel getPanel_1() {
+		if (loadingPane == null) {
+			loadingPane = new JPanel();
+			loadingPane.setLayout(new FormLayout(new ColumnSpec[] {
+					FormFactory.RELATED_GAP_COLSPEC,
+					ColumnSpec.decode("center:default:grow"),
+					FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+					FormFactory.RELATED_GAP_ROWSPEC,
+					RowSpec.decode("default:grow"),
+					FormFactory.RELATED_GAP_ROWSPEC, }));
+			loadingPane.add(getLblLoading(), "2, 2");
+		}
+		return loadingPane;
 	}
 
 	public String[] getSupportedMimeTypes() {
@@ -222,6 +253,7 @@ public class GenericGridFileViewer extends JPanel implements GridFileViewer,
 						}
 					}
 
+					setLoadingPanel("Loading...");
 					currentLocalCacheFile = fm.downloadFile(file.getUrl());
 				}
 
@@ -270,6 +302,21 @@ public class GenericGridFileViewer extends JPanel implements GridFileViewer,
 			setEmptyPanel();
 		}
 
+	}
+
+	private void setLoadingPanel(final String msg) {
+		SwingUtilities.invokeLater(new Thread() {
+
+			@Override
+			public void run() {
+				getLblLoading().setText(msg);
+				final CardLayout cl = (CardLayout) (getLayout());
+				cl.show(GenericGridFileViewer.this, LOADING_PANEL);
+
+				revalidate();
+			}
+
+		});
 	}
 
 	public void setServiceInterface(ServiceInterface si) {

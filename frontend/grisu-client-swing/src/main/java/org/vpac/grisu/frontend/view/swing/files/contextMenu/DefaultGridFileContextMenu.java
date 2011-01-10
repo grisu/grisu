@@ -21,6 +21,7 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 	private JMenuItem deleteMenuItem;
 	private JMenuItem copyUrlsMenuItem;
 	private JMenuItem refreshMenuItem;
+	private JMenuItem viewMenuItem;
 
 	public DefaultGridFileContextMenu() {
 	}
@@ -47,6 +48,7 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 			getRefreshMenuItem().setEnabled(false);
 		}
 
+		boolean folder = false;
 		for (GridFile file : files) {
 			if (file.isVirtual()) {
 				getDownloadMenuItem().setEnabled(false);
@@ -54,6 +56,15 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 				getDeleteMenuItem().setEnabled(false);
 				return;
 			}
+			if (file.isFolder()) {
+				folder = true;
+			}
+		}
+
+		if (folder) {
+			getViewMenuItem().setEnabled(false);
+		} else {
+			getViewMenuItem().setEnabled(true);
 		}
 		getDownloadMenuItem().setEnabled(true);
 		getCreateFolderMenuItem().setEnabled(true);
@@ -105,12 +116,21 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 		return refreshMenuItem;
 	}
 
+	private JMenuItem getViewMenuItem() {
+		if (viewMenuItem == null) {
+			viewMenuItem = new JMenuItem("View");
+			viewMenuItem.setAction(new ViewAction(fileList));
+		}
+		return viewMenuItem;
+	}
+
 	public void isLoading(boolean loading) {
 	}
 
 	public void setGridFileListPanel(GridFileListPanel panel) {
 		this.fileList = panel;
 		add(getRefreshMenuItem());
+		add(getViewMenuItem());
 		add(getCopyUrlsMenuItem());
 		add(getCreateFolderMenuItem());
 		add(getDeleteMenuItem());
