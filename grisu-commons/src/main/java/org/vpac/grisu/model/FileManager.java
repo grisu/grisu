@@ -28,7 +28,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
-import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.events.FolderCreatedEvent;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -521,6 +520,21 @@ public class FileManager {
 			return new GlazedFile(file);
 		} else {
 			return new GlazedFile(url, serviceInterface, type);
+		}
+
+	}
+
+	public GridFile createGridFile(String url) throws RemoteFileSystemException {
+
+		if (FileManager.isLocal(url)) {
+			try {
+				final File file = new File(new URI(ensureUriFormat(url)));
+				return new GridFile(file);
+			} catch (final URISyntaxException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			return serviceInterface.ls(url, 0);
 		}
 
 	}
@@ -1389,7 +1403,7 @@ public class FileManager {
 
 		if (StringUtils.isBlank(targetPath)) {
 			targetPath = FileManager.getFilename(uriOrPath);
-			X.p("Target path: " + targetPath);
+			// X.p("Target path: " + targetPath);
 
 		}
 

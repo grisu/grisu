@@ -18,7 +18,6 @@ import javax.swing.tree.TreePath;
 
 import org.apache.log4j.Logger;
 import org.netbeans.swing.outline.Outline;
-import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransaction;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransactionManager;
@@ -102,7 +101,7 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 
 	public void dragOver(DropTargetDragEvent dtde) {
 
-		X.p("Over");
+		// X.p("Over");
 
 		Outline outline = (Outline) ((dtde.getDropTargetContext()
 				.getComponent()));
@@ -120,7 +119,7 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 
 			if (dropTargetFile.isFolder()) {
 
-				X.p("Folder");
+				// X.p("Folder");
 
 				if (!outline.getOutlineModel().getTreePathSupport()
 						.hasBeenExpanded(p)) {
@@ -142,8 +141,8 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 
 				if (dropTargetFile.isVirtual()) {
 
-					X.p("Virtual");
-					X.p(dropTargetFile.getUrl());
+					// X.p("Virtual");
+					// X.p(dropTargetFile.getUrl());
 
 					if (dropTargetFile.getUrls().size() == 1) {
 
@@ -162,7 +161,7 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 				}
 
 			} else {
-				X.p("File");
+				// X.p("File");
 				if (openFolderTask != null) {
 					openFolderTask.cancel();
 				}

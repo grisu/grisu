@@ -1,6 +1,7 @@
 package org.vpac.grisu.backend.model.fs;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -37,19 +38,16 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 	public GridFile createGridFile(final String path, int recursiveLevels)
 			throws RemoteFileSystemException {
 
-		// X.p("Creating grid file for: " + path);
-
-		if (recursiveLevels != 1) {
+		// Thread.dumpStack();
+		if (recursiveLevels > 1) {
 			throw new RuntimeException(
-					"Recursion levels other than 1 not supported yet");
+					"Recursion levels greater than 1 not supported yet");
 		}
-
-		GridFile result = new GridFile(path, -1L);
-		result.setIsVirtual(true);
-		result.setPath(path);
 
 		String rightPart = path.substring(BASE.length());
 		if (rightPart.contains("//")) {
+			GridFile result = null;
+
 			// that means we everything before the // is the fqan and everything
 			// after is the path
 
@@ -58,6 +56,25 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			String restPath = rightPart.substring(i + 2);
 			if (!fqanT.startsWith("/")) {
 				fqanT = "/" + fqanT;
+			}
+
+			Set<String> urls = resolveUrls(restPath, fqanT);
+
+			if (urls.size() == 0) {
+				// TODO not sure what to do
+				throw new RuntimeException("No real url found for virtual url.");
+			} else if (urls.size() == 1) {
+				result = new GridFile(urls.iterator().next(), -1L);
+				result.setIsVirtual(false);
+				result.setPath(path);
+			} else {
+				result = new GridFile(path, -1L);
+				result.setIsVirtual(true);
+				result.setPath(path);
+			}
+
+			if (recursiveLevels == 0) {
+				return result;
 			}
 
 			Set<GridFile> childs = listGroup(fqanT, restPath);
@@ -101,7 +118,18 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 		String importantUrlPart = path.substring(index);
 		String[] tokens = StringUtils.split(importantUrlPart, '/');
 
+		GridFile result = null;
+
 		if (tokens.length == 0) {
+			// means root of the groupfilesystem
+
+			result = new GridFile(path, -1L);
+			result.setIsVirtual(true);
+			result.setPath(path);
+
+			if (recursiveLevels == 0) {
+				return result;
+			}
 
 			for (String vo : user.getFqans().values()) {
 				GridFile f = new GridFile(BASE + "/" + vo, -1L);
@@ -116,9 +144,27 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			}
 
 		} else if (tokens.length == 1) {
+			// means is root of VO so we need to list potential files on all
+			// sites that support this vo
+			// and also all child vos
+			String parentfqan = "/" + tokens[0];
+			Set<String> urls = resolveUrls(path, parentfqan);
 
-			Map<String, Set<String>> temp = findDirectChildFqans("/"
-					+ tokens[0]);
+			if (urls.size() == 1) {
+				result = new GridFile(urls.iterator().next(), -1L);
+				result.setIsVirtual(false);
+				result.setPath(path);
+			} else {
+				result = new GridFile(path, -1L);
+				result.setIsVirtual(true);
+				result.setPath(path);
+			}
+
+			if (recursiveLevels == 0) {
+				return result;
+			}
+
+			Map<String, Set<String>> temp = findDirectChildFqans(parentfqan);
 			Set<String> childFqans = temp.keySet();
 
 			for (String fqan : childFqans) {
@@ -150,6 +196,9 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			String currentUrl = BASE;
 			String potentialFqan = "";
 
+			Set<String> parentUrls = new HashSet<String>();
+			Set<GridFile> children = new TreeSet<GridFile>();
+
 			for (String token : tokens) {
 
 				currentUrl = currentUrl + "/" + token;
@@ -161,36 +210,60 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 				String rest = path.substring(currentUrl.length());
 
-				Set<GridFile> files = listGroup(potentialFqan, rest);
-				for (GridFile file : files) {
-					result.addChildren(file.getChildren());
+				Set<String> urls = resolveUrls(rest, potentialFqan);
+				parentUrls.addAll(urls);
+
+				if (recursiveLevels == 1) {
+
+					Set<GridFile> files = listGroup(potentialFqan, rest);
+					for (GridFile file : files) {
+						children.addAll(file.getChildren());
+					}
+
 				}
 
 			}
 
-			Map<String, Set<String>> temp = findDirectChildFqans(potentialFqan);
-			Set<String> childFqans = temp.keySet();
-			for (String fqan : childFqans) {
-				Set<MountPoint> mps = user.getMountPoints(fqan);
-				if (mps.size() == 0) {
-					continue;
-				}
-				if (mps.size() == 1) {
-					GridFile file = new GridFile(mps.iterator().next());
-					file.setName(FileManager.getFilename(fqan));
-					file.setPath(path + "/" + file.getName());
-					file.setIsVirtual(true);
-					file.addSites(temp.get(fqan));
-					result.addChild(file);
-				} else {
-					GridFile file = new GridFile(BASE + fqan, fqan);
-					file.setPath(path + "/" + file.getName());
-					file.setIsVirtual(true);
-					file.addSites(temp.get(fqan));
-					result.addChild(file);
+			if (recursiveLevels == 1) {
+
+				Map<String, Set<String>> temp = findDirectChildFqans(potentialFqan);
+				Set<String> childFqans = temp.keySet();
+				for (String fqan : childFqans) {
+					Set<MountPoint> mps = user.getMountPoints(fqan);
+					if (mps.size() == 0) {
+						continue;
+					}
+					if (mps.size() == 1) {
+						GridFile file = new GridFile(mps.iterator().next());
+						file.setName(FileManager.getFilename(fqan));
+						file.setPath(path + "/" + file.getName());
+						file.setIsVirtual(true);
+						file.addSites(temp.get(fqan));
+						children.add(file);
+					} else {
+						GridFile file = new GridFile(BASE + fqan, fqan);
+						file.setPath(path + "/" + file.getName());
+						file.setIsVirtual(true);
+						file.addSites(temp.get(fqan));
+						children.add(file);
+					}
 				}
 			}
 
+			if (parentUrls.size() == 1) {
+				result = new GridFile(parentUrls.iterator().next(), -1L);
+				result.setIsVirtual(false);
+				result.setPath(path);
+			} else {
+				result = new GridFile(path, -1L);
+				result.setIsVirtual(true);
+				result.setPath(path);
+				for (String u : parentUrls) {
+					result.addUrl(u, GridFile.FILETYPE_FOLDER_PRIORITY);
+				}
+			}
+
+			result.addChildren(children);
 		}
 
 		return result;
@@ -247,7 +320,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 					try {
 						GridFile file = user.getFileSystemManager()
-								.getFolderListing(urlToQuery);
+								.getFolderListing(urlToQuery, 1);
 						file.addSite(mp.getSite());
 						result.add(file);
 					} catch (InvalidPathException e) {
@@ -259,6 +332,9 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 							GridFile f = new GridFile(urlToQuery, true, rfse);
 							result.add(f);
 						}
+					} catch (Exception ex) {
+						GridFile f = new GridFile(urlToQuery, true, ex);
+						result.add(f);
 					}
 				}
 			};
@@ -276,5 +352,19 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 		return result;
 
+	}
+
+	private Set<String> resolveUrls(String path, String fqan) {
+
+		Set<MountPoint> mps = user.getMountPoints(fqan);
+		Set<String> urls = new HashSet<String>();
+
+		for (final MountPoint mp : mps) {
+			final String urlToQuery = mp.getRootUrl() + "/" + path;
+			urls.add(urlToQuery);
+
+		}
+
+		return urls;
 	}
 }

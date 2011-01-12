@@ -9,7 +9,7 @@ public interface FileSystemInfoPlugin {
 	public FileObject aquireFile(String url, String fqan)
 			throws RemoteFileSystemException;
 
-	public GridFile getFolderListing(String url)
+	public GridFile getFolderListing(String url, int recursiveLevels)
 			throws RemoteFileSystemException;
 
 }

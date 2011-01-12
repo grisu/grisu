@@ -17,17 +17,23 @@ public class FileSystemManager {
 	private final Map<String, FileTransferPlugin> filetransferPlugins = new HashMap<String, FileTransferPlugin>();
 	private final Map<String, FileSystemInfoPlugin> fileSystemInfoPlugins = new HashMap<String, FileSystemInfoPlugin>();
 
-	private final CommonsVfsFileSystemInfoPlugin commonsVfsInfo;
+	private final CommonsVfsFileSystemInfoAndTransferPlugin commonsVfsInfo;
+	private final VirtualFileSystemInfoPlugin virtualFsInfo;
+	private final VirtualFsTransferPlugin virtualFsTransfer;
 
 	public FileSystemManager(User user) {
 
-		commonsVfsInfo = new CommonsVfsFileSystemInfoPlugin(user);
+		commonsVfsInfo = new CommonsVfsFileSystemInfoAndTransferPlugin(user);
+		virtualFsInfo = new VirtualFileSystemInfoPlugin(user);
+		virtualFsTransfer = new VirtualFsTransferPlugin(user);
 		fileSystemInfoPlugins.put("gsiftp", commonsVfsInfo);
 		fileSystemInfoPlugins.put("ram", commonsVfsInfo);
 		fileSystemInfoPlugins.put("tmp", commonsVfsInfo);
+		fileSystemInfoPlugins.put("grid", virtualFsInfo);
+
 		filetransferPlugins.put("gsiftp-gsiftp", commonsVfsInfo);
-		fileSystemInfoPlugins
-				.put("grid", new VirtualFileSystemInfoPlugin(user));
+		filetransferPlugins.put("grid-gsiftp", virtualFsTransfer);
+		filetransferPlugins.put("gsiftp-grid", virtualFsTransfer);
 
 	}
 
@@ -83,11 +89,12 @@ public class FileSystemManager {
 		return pl;
 	}
 
-	public GridFile getFolderListing(String pathOrUrl)
+	public GridFile getFolderListing(String pathOrUrl, int recursiveLevels)
 			throws InvalidPathException, RemoteFileSystemException {
 
 		pathOrUrl = cleanPath(pathOrUrl);
-		return getFileSystemInfoPlugin(pathOrUrl).getFolderListing(pathOrUrl);
+		return getFileSystemInfoPlugin(pathOrUrl).getFolderListing(pathOrUrl,
+				recursiveLevels);
 
 	}
 

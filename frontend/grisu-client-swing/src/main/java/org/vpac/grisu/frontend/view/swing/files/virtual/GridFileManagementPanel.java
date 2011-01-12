@@ -7,7 +7,6 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
-import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListListener;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -74,9 +73,9 @@ public class GridFileManagementPanel extends JPanel implements
 
 	public void filesSelected(Set<GridFile> files) {
 
-		for (GridFile f : files) {
-			X.p("Selected file on left panel: " + f.getName());
-		}
+		// for (GridFile f : files) {
+		// X.p("Selected file on left panel: " + f.getName());
+		// }
 
 	}
 

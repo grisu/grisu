@@ -14,17 +14,18 @@ import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.security.light.vomsProxy.VomsException;
 
-public class CommonsVfsFileSystemInfoPlugin implements FileSystemInfoPlugin,
-		FileTransferPlugin {
+public class CommonsVfsFileSystemInfoAndTransferPlugin implements
+		FileSystemInfoPlugin, FileTransferPlugin {
 
 	private static Logger myLogger = Logger
-			.getLogger(CommonsVfsFileSystemInfoPlugin.class.getName());
+			.getLogger(CommonsVfsFileSystemInfoAndTransferPlugin.class
+					.getName());
 
 	private final User user;
 
 	private final ThreadLocalCommonsVfsManager threadLocalFsManager;
 
-	public CommonsVfsFileSystemInfoPlugin(User user) {
+	public CommonsVfsFileSystemInfoAndTransferPlugin(User user) {
 		this.user = user;
 		threadLocalFsManager = new ThreadLocalCommonsVfsManager(this.user);
 
@@ -132,18 +133,38 @@ public class CommonsVfsFileSystemInfoPlugin implements FileSystemInfoPlugin,
 
 	}
 
-	public GridFile getFolderListing(String url)
+	public GridFile getFolderListing(String url, int recursiveLevels)
 			throws RemoteFileSystemException {
+
+		if (recursiveLevels > 1) {
+			throw new RuntimeException(
+					"Recursion > 1 not implemented for commonsvfsfilesystemplugin");
+		}
 
 		final FileObject fo = aquireFile(url, null);
 
 		try {
 
 			if (!FileType.FOLDER.equals(fo.getType())) {
-				throw new RemoteFileSystemException("Url: " + url
-						+ " not a folder.");
+				// throw new RemoteFileSystemException("Url: " + url
+				// + " not a folder.");
+
+				if (!fo.exists()) {
+					throw new RemoteFileSystemException("Url: " + url
+							+ " does not exist.");
+				}
+
+				GridFile result = new GridFile(url, fo.getContent().getSize(),
+						fo.getContent().getLastModifiedTime());
+				return result;
+
 			}
 			long lastModified = fo.getContent().getLastModifiedTime();
+
+			if (recursiveLevels == 0) {
+				GridFile result = new GridFile(url, lastModified);
+				return result;
+			}
 
 			MountPoint mp = user.getResponsibleMountpointForAbsoluteFile(url);
 			final GridFile folder = new GridFile(url, lastModified);

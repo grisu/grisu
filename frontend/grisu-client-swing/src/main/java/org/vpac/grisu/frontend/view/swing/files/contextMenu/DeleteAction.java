@@ -2,7 +2,6 @@ package org.vpac.grisu.frontend.view.swing.files.contextMenu;
 
 import java.awt.event.ActionEvent;
 import java.util.Set;
-
 import javax.swing.AbstractAction;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -15,7 +14,6 @@ import org.vpac.grisu.frontend.view.swing.files.GridFileListPanel;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.GridFile;
-import org.vpac.grisu.model.files.GlazedFile;
 
 public class DeleteAction extends AbstractAction {
 
@@ -61,6 +59,21 @@ public class DeleteAction extends AbstractAction {
 		}
 
 		final FileTransaction transaction = ftm.deleteFiles(files);
+
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					transaction.join();
+
+					if (transaction.getException() != null) {
+						transaction.getException().printStackTrace();
+					}
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+		}.start();
 
 	}
 

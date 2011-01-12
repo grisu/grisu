@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 
 import org.apache.log4j.Logger;
-import org.vpac.grisu.X;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransactionManager;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListPanel;
 import org.vpac.grisu.model.FileManager;
@@ -40,7 +39,6 @@ public class RefreshAction extends AbstractAction {
 		GridFile f = fileList.getSelectedFiles().iterator().next();
 
 		if (f.isFolder()) {
-			X.p("REFRESH");
 			fileList.refreshFolder(f.getUrl());
 		}
 

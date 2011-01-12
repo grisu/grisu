@@ -893,6 +893,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					}
 					actionStat.setFinished(true);
 				} catch (final Exception e) {
+					e.printStackTrace();
 					actionStat.setFailed(true);
 					actionStat.setFinished(true);
 					actionStat.addElement("Transfer failed: "
@@ -1130,7 +1131,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
 			throw new RemoteFileSystemException("Could not delete file: "
-					+ file);
+					+ e.getLocalizedMessage());
 		}
 
 	}

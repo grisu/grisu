@@ -14,20 +14,19 @@ import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.GridFile;
 
-public class ViewAction extends AbstractAction {
-
+public class PropertiesAction extends AbstractAction {
 	private final GridFileListPanel fileList;
 	private final FileManager fm;
 	private final FileTransactionManager ftm;
 
-	public ViewAction(GridFileListPanel fileList) {
+	public PropertiesAction(GridFileListPanel fileList) {
 		this.fileList = fileList;
 		this.fm = GrisuRegistryManager.getDefault(
 				fileList.getServiceInterface()).getFileManager();
 		this.ftm = FileTransactionManager.getDefault(fileList
 				.getServiceInterface());
-		putValue(NAME, "View");
-		putValue(SHORT_DESCRIPTION, "Preview selected file(s)");
+		putValue(NAME, "Properties");
+		putValue(SHORT_DESCRIPTION, "Display file properties");
 	}
 
 	public void actionPerformed(ActionEvent e) {

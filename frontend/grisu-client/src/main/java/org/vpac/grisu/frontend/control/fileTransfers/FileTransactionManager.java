@@ -13,7 +13,6 @@ import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
-import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.model.events.FileTransactionFailedEvent;
 import org.vpac.grisu.frontend.model.job.JobObject;
@@ -161,9 +160,6 @@ public class FileTransactionManager implements PropertyChangeListener {
 	}
 
 	public void propertyChange(PropertyChangeEvent evt) {
-
-		X.p("Event: " + evt.getPropertyName() + " : " + evt.getOldValue()
-				+ " / " + evt.getNewValue());
 
 		final FileTransaction ft = (FileTransaction) evt.getSource();
 		EventBus.publish(new FileTransferEvent(ft, evt.getPropertyName(), evt

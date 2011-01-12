@@ -30,11 +30,45 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 		throw new RuntimeException("Not implemented yet.");
 	}
 
-	public GridFile getFolderListing(String url)
+	// public RemoteFileTransferObject copySingleFile(String source,
+	// String target, boolean overwrite) throws RemoteFileSystemException {
+	//
+	// try {
+	// X.p("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+	// X.p("Source: " + source);
+	// X.p("Target: " + target);
+	// if (StringUtils.startsWith(source, "gridftp")) {
+	//
+	// } else if (StringUtils.startsWith(source, "grid")) {
+	//
+	// } else {
+	// throw new RuntimeException("Protocol not supported for file: "
+	// + source);
+	// }
+	// // GridFile sourceFile = getPlugin(source).createGridFile(source,
+	// // 0);
+	// GridFile targetFile = getPlugin(target).createGridFile(target, 0);
+	//
+	// // X.p("Source: " + sourceFile.getName());
+	// X.p("Target: " + targetFile.getName());
+	// X.p("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+	//
+	// throw new RuntimeException("Not implemented...");
+	// } catch (InvalidPathException e) {
+	// throw new RemoteFileSystemException(e);
+	// }
+	// }
+
+	public GridFile getFolderListing(String url, int recursiveLevels)
 			throws RemoteFileSystemException {
 
 		if (url.equals(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://")) {
 			GridFile root = new GridFile(url, -1L);
+			root.setIsVirtual(true);
+			root.setPath(url);
+			if (recursiveLevels == 0) {
+				return root;
+			}
 			for (String key : plugins.keySet()) {
 				GridFile vfs = new GridFile(
 						ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://"
@@ -48,7 +82,7 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 
 		}
 		try {
-			return getPlugin(url).createGridFile(url, 1);
+			return getPlugin(url).createGridFile(url, recursiveLevels);
 		} catch (InvalidPathException e) {
 			throw new RemoteFileSystemException(e);
 		}

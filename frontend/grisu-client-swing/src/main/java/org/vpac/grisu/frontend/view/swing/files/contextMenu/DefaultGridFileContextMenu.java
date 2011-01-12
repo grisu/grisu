@@ -22,6 +22,7 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 	private JMenuItem copyUrlsMenuItem;
 	private JMenuItem refreshMenuItem;
 	private JMenuItem viewMenuItem;
+	private JMenuItem propertiesMenuItem;
 
 	public DefaultGridFileContextMenu() {
 	}
@@ -108,6 +109,14 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 		return this;
 	}
 
+	private JMenuItem getPropetiesMenuItem() {
+		if (propertiesMenuItem == null) {
+			propertiesMenuItem = new JMenuItem("Properties");
+			propertiesMenuItem.setAction(new PropertiesAction(fileList));
+		}
+		return propertiesMenuItem;
+	}
+
 	private JMenuItem getRefreshMenuItem() {
 		if (refreshMenuItem == null) {
 			refreshMenuItem = new JMenuItem("Refresh");
@@ -135,5 +144,6 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 		add(getCreateFolderMenuItem());
 		add(getDeleteMenuItem());
 		add(getDownloadMenuItem());
+		add(getPropetiesMenuItem());
 	}
 }

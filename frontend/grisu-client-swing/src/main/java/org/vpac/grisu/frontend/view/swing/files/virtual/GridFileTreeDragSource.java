@@ -10,7 +10,6 @@ import java.awt.dnd.DragSourceEvent;
 import java.awt.dnd.DragSourceListener;
 
 import org.netbeans.swing.outline.Outline;
-import org.vpac.grisu.X;
 
 public class GridFileTreeDragSource implements DragSourceListener,
 		DragGestureListener {
@@ -69,7 +68,7 @@ public class GridFileTreeDragSource implements DragSourceListener,
 	}
 
 	public void dragOver(DragSourceDragEvent dsde) {
-		X.p("DGE2: " + dsde.getSource().toString());
+		// X.p("DGE2: " + dsde.getSource().toString());
 	}
 
 	public void dropActionChanged(DragSourceDragEvent dsde) {

@@ -24,7 +24,6 @@ import org.bushe.swing.event.EventSubscriber;
 import org.netbeans.swing.outline.DefaultOutlineModel;
 import org.netbeans.swing.outline.Outline;
 import org.netbeans.swing.outline.OutlineModel;
-import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.events.FileDeletedEvent;
 import org.vpac.grisu.control.events.FolderCreatedEvent;
@@ -451,7 +450,7 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 			refreshFolder(FileManager.calculateParentUrl(ev.getUrl()));
 		} else if (event instanceof FileDeletedEvent) {
 			FileDeletedEvent ev = (FileDeletedEvent) event;
-			X.p("CCC: " + FileManager.calculateParentUrl(ev.getUrl()));
+			// X.p("CCC: " + FileManager.calculateParentUrl(ev.getUrl()));
 
 			refreshFolder(FileManager.calculateParentUrl(ev.getUrl()));
 		}

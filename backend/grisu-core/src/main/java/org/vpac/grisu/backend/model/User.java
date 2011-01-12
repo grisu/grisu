@@ -773,7 +773,7 @@ public class User {
 			throws RemoteFileSystemException, FileSystemException {
 
 		try {
-			return getFileSystemManager().getFolderListing(url);
+			return getFileSystemManager().getFolderListing(url, 1);
 		} catch (InvalidPathException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -805,6 +805,14 @@ public class User {
 		return FqanHelpers.getFullFqan(getFqans().keySet(), uniqueGroupname);
 	}
 
+	public GridFile getGridFile(String source) throws RemoteFileSystemException {
+		try {
+			return getFileSystemManager().getFolderListing(source, 0);
+		} catch (InvalidPathException e) {
+			throw new RemoteFileSystemException(e);
+		}
+	}
+
 	@Id
 	@GeneratedValue
 	private Long getId() {
@@ -828,6 +836,29 @@ public class User {
 	private Set<MountPoint> getMountPoints() {
 		return mountPoints;
 	}
+
+	// /**
+	// * Used internally to mount filesystems.
+	// *
+	// * @return the filesystem manager of the user
+	// * @throws FileSystemException
+	// * if something goes wrong
+	// */
+	// @Transient
+	// private DefaultFileSystemManager getFsManager() throws
+	// FileSystemException {
+	// // if (fsmanager == null) {
+	// //
+	// // fsmanager = VFSUtil.createNewFsManager(false, false, true, true,
+	// // true, true, true, null);
+	// //
+	// // }
+	// // return fsmanager;
+	// // System.out.println("Creating new FS Manager.");
+	// // return VFSUtil.createNewFsManager(false, false, true, true, true,
+	// // true, true, null);
+	// return threadLocalFsManager.getFsManager();
+	// }
 
 	@Transient
 	public Set<MountPoint> getMountPoints(String fqan) {
@@ -862,29 +893,6 @@ public class User {
 			return mountPointsPerFqanCache.get(fqan);
 		}
 	}
-
-	// /**
-	// * Used internally to mount filesystems.
-	// *
-	// * @return the filesystem manager of the user
-	// * @throws FileSystemException
-	// * if something goes wrong
-	// */
-	// @Transient
-	// private DefaultFileSystemManager getFsManager() throws
-	// FileSystemException {
-	// // if (fsmanager == null) {
-	// //
-	// // fsmanager = VFSUtil.createNewFsManager(false, false, true, true,
-	// // true, true, true, null);
-	// //
-	// // }
-	// // return fsmanager;
-	// // System.out.println("Creating new FS Manager.");
-	// // return VFSUtil.createNewFsManager(false, false, true, true, true,
-	// // true, true, null);
-	// return threadLocalFsManager.getFsManager();
-	// }
 
 	/**
 	 * Checks whether the filesystem of any of the users' mountpoints contains
@@ -1113,6 +1121,14 @@ public class User {
 		allMountPoints = null;
 	}
 
+	// public void addProperty(String key, String value) {
+	// List<String> list = userProperties.get(key);
+	// if ( list == null ) {
+	// list = new LinkedList<String>();
+	// }
+	// list.add(value);
+	// }
+
 	/**
 	 * Translates an absolute file url into an "user-space" one.
 	 * 
@@ -1125,14 +1141,6 @@ public class User {
 		final MountPoint mp = getResponsibleMountpointForAbsoluteFile(file);
 		return mp.replaceAbsoluteRootUrlWithMountPoint(file);
 	}
-
-	// public void addProperty(String key, String value) {
-	// List<String> list = userProperties.get(key);
-	// if ( list == null ) {
-	// list = new LinkedList<String>();
-	// }
-	// list.add(value);
-	// }
 
 	/**
 	 * Set's additional mountpoints that the user did not explicitly mount
