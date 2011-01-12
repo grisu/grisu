@@ -8,9 +8,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,16 +58,21 @@ public class FileManager {
 
 	private static long downloadTreshold = -1L;
 
+	public static final SimpleDateFormat dateformat = new SimpleDateFormat(
+			"dd.MM.yyyy HH:mm:SSS");
+
 	public static String calculateSizeString(Long size) {
 
 		String sizeString;
 
-		if (size.equals(-1L)) {
+		if (size < 0) {
 			sizeString = "";
+		} else if (size.equals(0L)) {
+			sizeString = "0";
 		} else {
 
 			if (size > 1024 * 1024) {
-				sizeString = size / (1024 * 1024) + "MB";
+				sizeString = size / (1024 * 1024) + " MB";
 			} else if (size > 1024) {
 				sizeString = size / 1024 + " KB";
 			} else {
@@ -195,6 +202,16 @@ public class FileManager {
 
 			return filename;
 		}
+
+	}
+
+	public static String getLastModifiedString(Long date) {
+
+		if (date <= 0) {
+			return "";
+		}
+		String dateString = dateformat.format(new Date(date));
+		return dateString;
 
 	}
 

@@ -1,10 +1,9 @@
 package org.vpac.grisu.frontend.view.swing.files.virtual;
 
-import java.util.Date;
-
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.netbeans.swing.outline.RowModel;
+import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.dto.GridFile;
 
 public class GridFileTreeTableRowModel implements RowModel {
@@ -48,14 +47,14 @@ public class GridFileTreeTableRowModel implements RowModel {
 				if (date <= 0) {
 					return "";
 				} else {
-					return new Date(date).toString();
+					return FileManager.getLastModifiedString(date);
 				}
 			case 1:
 				Long size = f.getSize();
 				if (size < 0) {
 					return "";
 				} else {
-					return size.toString();
+					return FileManager.calculateSizeString(size);
 				}
 
 			default:

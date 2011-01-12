@@ -1,5 +1,6 @@
 package org.vpac.grisu.model.dto;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +18,7 @@ import javax.xml.bind.annotation.XmlValue;
 @XmlRootElement(name = "property")
 public class DtoProperty {
 
-	public static List<DtoProperty> dtoPropertiesFromMap(
-			Map<String, String> map) {
+	public static List<DtoProperty> dtoPropertiesFromMap(Map<String, String> map) {
 
 		final List<DtoProperty> result = new LinkedList<DtoProperty>();
 
@@ -28,6 +28,16 @@ public class DtoProperty {
 
 		return result;
 
+	}
+
+	public static Map<String, String> mapFromDtoPropertiesList(
+			List<DtoProperty> props) {
+
+		Map<String, String> result = new LinkedHashMap<String, String>();
+		for (DtoProperty p : props) {
+			result.put(p.getKey(), p.getValue());
+		}
+		return result;
 	}
 
 	/**

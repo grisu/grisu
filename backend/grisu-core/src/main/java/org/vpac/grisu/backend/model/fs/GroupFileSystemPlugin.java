@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.vpac.grisu.X;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -104,6 +105,11 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					file.setPath((path + "/" + file.getName()).replace("///",
 							"/").replace("//", "/")
 							+ "//");
+					for (MountPoint mp : mps) {
+						X.p("Add" + mp.getRootUrl());
+						file.addUrl(mp.getRootUrl(),
+								GridFile.FILETYPE_MOUNTPOINT_PRIORITY);
+					}
 					file.setIsVirtual(true);
 					file.addSites(temp.get(fqan));
 					result.addChild(file);
@@ -138,6 +144,8 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 				for (MountPoint mp : user.getMountPoints("/" + vo)) {
 					f.addSite(mp.getSite());
+					f.addUrl(mp.getRootUrl(),
+							GridFile.FILETYPE_MOUNTPOINT_PRIORITY);
 				}
 
 				result.addChild(f);
@@ -158,6 +166,9 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				result = new GridFile(path, -1L);
 				result.setIsVirtual(true);
 				result.setPath(path);
+				for (String u : urls) {
+					result.addUrl(u, GridFile.FILETYPE_MOUNTPOINT_PRIORITY);
+				}
 			}
 
 			if (recursiveLevels == 0) {
@@ -182,7 +193,13 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					file.setPath(path + "/" + file.getName());
 					file.setIsVirtual(true);
 					file.addSites(temp.get(fqan));
+					for (MountPoint mp : mps) {
+						file.addUrl(mp.getRootUrl(),
+								GridFile.FILETYPE_MOUNTPOINT_PRIORITY);
+					}
+					file.addFqan(fqan);
 					result.addChild(file);
+
 				}
 			}
 

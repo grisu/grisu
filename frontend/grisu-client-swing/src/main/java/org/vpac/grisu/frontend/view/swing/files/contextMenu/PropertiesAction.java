@@ -1,15 +1,15 @@
 package org.vpac.grisu.frontend.view.swing.files.contextMenu;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.util.Set;
 
 import javax.swing.AbstractAction;
+import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
 
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransactionManager;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListPanel;
-import org.vpac.grisu.frontend.view.swing.files.preview.GridFilePreviewDialog;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.GridFile;
@@ -29,7 +29,7 @@ public class PropertiesAction extends AbstractAction {
 		putValue(SHORT_DESCRIPTION, "Display file properties");
 	}
 
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(final ActionEvent e) {
 
 		final Set<GridFile> files = fileList.getSelectedFiles();
 		if ((files == null) || (files.size() <= 0)) {
@@ -42,17 +42,16 @@ public class PropertiesAction extends AbstractAction {
 
 				@Override
 				public void run() {
-					final GridFilePreviewDialog dialog = new GridFilePreviewDialog(
-							fileList.getServiceInterface());
-					dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-					dialog.setVisible(true);
+					JFrame parent = null;
+					try {
+						Component c = (Component) e.getSource();
+						parent = (JFrame) SwingUtilities.getRoot(c);
+					} catch (Exception eee) {
+					}
 
-					new Thread() {
-						@Override
-						public void run() {
-							dialog.setFile(f, null);
-						}
-					}.start();
+					final GridFilePropertiesDialog dialog = new GridFilePropertiesDialog(
+							parent);
+					dialog.setGridFile(f);
 
 				}
 			});

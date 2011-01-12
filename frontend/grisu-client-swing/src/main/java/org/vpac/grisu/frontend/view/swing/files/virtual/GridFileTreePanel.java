@@ -43,6 +43,7 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import javax.swing.ScrollPaneConstants;
 
 public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 		EventSubscriber {
@@ -376,6 +377,8 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
+			scrollPane
+					.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 			scrollPane.setViewportView(getOutline());
 
 		}

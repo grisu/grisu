@@ -1,7 +1,9 @@
 package org.vpac.grisu.frontend.view.swing.files.contextMenu;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.util.Set;
+
 import javax.swing.AbstractAction;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -34,7 +36,7 @@ public class DeleteAction extends AbstractAction {
 		putValue(SHORT_DESCRIPTION, "Delete selected file(s)");
 	}
 
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(final ActionEvent e) {
 
 		if (fileList == null) {
 			myLogger.error("Filelistpanel not set. Can't delete anything...");
@@ -70,11 +72,17 @@ public class DeleteAction extends AbstractAction {
 						transaction.getException().printStackTrace();
 					}
 				} catch (Exception e1) {
+					Component c = null;
+					try {
+						c = (Component) e.getSource();
+					} catch (Exception eee) {
+					}
+					JOptionPane.showMessageDialog(c, e1.getLocalizedMessage(),
+							"Delete error", JOptionPane.ERROR_MESSAGE);
 					e1.printStackTrace();
 				}
 			}
 		}.start();
 
 	}
-
 }
