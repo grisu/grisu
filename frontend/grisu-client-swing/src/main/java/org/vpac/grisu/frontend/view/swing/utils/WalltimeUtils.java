@@ -18,9 +18,11 @@ public class WalltimeUtils {
 			return amount * 3600;
 		} else if ("days".equals(unit)) {
 			return amount * 3600 * 24;
+		} else if ("weeks".equals(unit)) {
+			return amount * 3600 * 24 * 7;
 		} else {
-			// throw new RuntimeException(unit+" not a supported unit name.");
-			return amount * 60; // default
+			// throw new RuntimeException(unit + " not a supported unit name.");
+			return amount * 3600; // default
 		}
 
 	}

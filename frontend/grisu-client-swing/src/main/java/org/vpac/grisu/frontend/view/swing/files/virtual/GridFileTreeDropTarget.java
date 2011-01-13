@@ -16,6 +16,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.tree.TreePath;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.netbeans.swing.outline.Outline;
 import org.vpac.grisu.control.ServiceInterface;
@@ -152,9 +153,15 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 
 						// for now
 						// dtde.rejectDrag();
-						dtde.acceptDrag(DnDConstants.ACTION_COPY);
+
+						if (dropTargetFile.getUrl().startsWith(
+								ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME)) {
+							dtde.rejectDrag();
+						} else {
+							dtde.acceptDrag(DnDConstants.ACTION_COPY);
+						}
 					} else {
-						dtde.rejectDrag();
+						dtde.acceptDrag(DnDConstants.ACTION_COPY);
 					}
 				} else {
 					dtde.acceptDrag(DnDConstants.ACTION_COPY);
@@ -224,6 +231,21 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 			return;
 		}
 
+		String targetUrl = target.getUrl();
+		if (target.getUrls().size() > 1) {
+			DropVirtualGridFileDialog d = new DropVirtualGridFileDialog();
+			d.setTargetGridFile(target);
+			d.setVisible(true);
+
+			targetUrl = d.getSelectedUrl();
+
+			if (StringUtils.isBlank(targetUrl)) {
+				dtde.dropComplete(false);
+				return;
+			}
+
+		}
+
 		Set<GridFile> files = null;
 		try {
 			files = (Set<GridFile>) dtde.getTransferable().getTransferData(
@@ -234,7 +256,8 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 			return;
 		}
 
-		final FileTransaction ft = new FileTransaction(fm, files, target, true);
+		final FileTransaction ft = new FileTransaction(fm,
+				GridFile.extractUrls(files), targetUrl, true);
 
 		SwingUtilities.invokeLater(new Thread() {
 
