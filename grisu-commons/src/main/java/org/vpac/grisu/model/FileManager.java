@@ -893,7 +893,7 @@ public class FileManager {
 					+ " is not a folder.");
 		}
 
-		final GridFile folder = serviceInterface.ls(folderUrl, 0);
+		final GridFile folder = serviceInterface.ls(folderUrl, 1);
 
 		return folder.listOfAllFilesUnderThisFolder();
 	}
