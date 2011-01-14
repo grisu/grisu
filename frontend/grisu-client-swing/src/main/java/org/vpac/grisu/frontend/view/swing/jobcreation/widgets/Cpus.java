@@ -65,7 +65,7 @@ public class Cpus extends AbstractWidget {
 	}
 
 	@Override
-	public void lockIUI(boolean lock) {
+	public void lockUI(boolean lock) {
 
 		getComboBox().setEnabled(!lock);
 

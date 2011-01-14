@@ -103,21 +103,30 @@ public class SingleInputGridFile extends AbstractWidget {
 
 				public void itemStateChanged(ItemEvent e) {
 
-					if (lockCombo) {
+					if (e.getStateChange() == ItemEvent.DESELECTED) {
 						return;
 					}
 
-					if (ItemEvent.SELECTED == e.getStateChange()) {
+					// X.p("Combo");
 
-						if (StringUtils.isNotBlank((String) fileModel
-								.getSelectedItem())) {
+					// if (lockCombo) {
+					// X.p("Combo locked");
+					//
+					// return;
+					// } else {
+					// X.p("Combo not locked");
+					//
+					// }
 
-							setInputFile((String) fileModel.getSelectedItem());
-							getPropertyChangeSupport().firePropertyChange(
-									"inputFileUrl", currentUrl, getValue());
-						}
-						currentUrl = getValue();
+					// X.p("Combo in ");
+					if (StringUtils.isNotBlank((String) fileModel
+							.getSelectedItem())) {
+
+						setInputFile((String) fileModel.getSelectedItem());
+						getPropertyChangeSupport().firePropertyChange(
+								"inputFileUrl", currentUrl, getValue());
 					}
+					currentUrl = getValue();
 				}
 
 			});
@@ -191,7 +200,7 @@ public class SingleInputGridFile extends AbstractWidget {
 	}
 
 	@Override
-	public void lockIUI(final boolean lock) {
+	public void lockUI(final boolean lock) {
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
 			public void run() {

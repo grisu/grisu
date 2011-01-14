@@ -175,7 +175,7 @@ public abstract class AbstractWidget extends JPanel {
 
 	}
 
-	public void lockIUI(final boolean lock) {
+	public void lockUI(final boolean lock) {
 
 		final Component[] comps = getComponents();
 		for (final Component comp : comps) {

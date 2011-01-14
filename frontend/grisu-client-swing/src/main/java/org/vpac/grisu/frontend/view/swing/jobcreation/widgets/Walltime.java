@@ -85,7 +85,7 @@ public class Walltime extends AbstractWidget {
 	}
 
 	@Override
-	public void lockIUI(boolean lock) {
+	public void lockUI(boolean lock) {
 
 		getUnitsComboBox().setEnabled(!lock);
 		getAmountComboBox().setEnabled(!lock);

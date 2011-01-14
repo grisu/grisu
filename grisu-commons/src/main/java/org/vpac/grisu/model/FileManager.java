@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
+import javax.swing.filechooser.FileSystemView;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -53,6 +54,8 @@ import org.vpac.grisu.utils.FileHelpers;
  * 
  */
 public class FileManager {
+
+	private static FileSystemView VIEW = FileSystemView.getFileSystemView();
 
 	public static final String NON_MOUNTPOINT_CACHE_DIRECTORYNAME = "non-grisu-user-space";
 
@@ -221,6 +224,10 @@ public class FileManager {
 		Set<GridFile> result = new TreeSet<GridFile>();
 		for (File root : roots) {
 			GridFile f = new GridFile(root);
+			String name = VIEW.getSystemDisplayName(root);
+			if (StringUtils.isNotBlank(name)) {
+				f.setName(name);
+			}
 			result.add(f);
 		}
 		return result;

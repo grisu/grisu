@@ -181,7 +181,7 @@ public class SingleInputFile extends AbstractWidget {
 	}
 
 	@Override
-	public void lockIUI(final boolean lock) {
+	public void lockUI(final boolean lock) {
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
 			public void run() {
