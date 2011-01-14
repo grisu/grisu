@@ -234,6 +234,19 @@ public class FileManager {
 
 	}
 
+	public static String removeTrailingSlash(String url) {
+
+		if (StringUtils.isBlank(url)) {
+			return "";
+		} else {
+			if (url.endsWith("/")) {
+				return url.substring(0, url.lastIndexOf("/"));
+			} else {
+				return url;
+			}
+		}
+	}
+
 	public static void setDownloadFileSizeTreshold(long t) {
 		downloadTreshold = t;
 	}
@@ -1182,6 +1195,22 @@ public class FileManager {
 
 	}
 
+	// private final void uploadInputFile(final String job, final String
+	// uriOrPath)
+	// throws FileTransactionException {
+	//
+	// final File file = getFileFromUriOrPath(uriOrPath);
+	//
+	// if (file.isDirectory()) {
+	// throw new FileTransactionException(uriOrPath, null,
+	// "Upload of folders not supported for job input files.",
+	// null);
+	// } else {
+	// uploadInputFile(file, job);
+	// }
+	//
+	// }
+
 	private final void uploadInputFile(final String job, final File file,
 			final String targetPath) throws FileTransactionException {
 
@@ -1251,22 +1280,6 @@ public class FileManager {
 		}
 
 	}
-
-	// private final void uploadInputFile(final String job, final String
-	// uriOrPath)
-	// throws FileTransactionException {
-	//
-	// final File file = getFileFromUriOrPath(uriOrPath);
-	//
-	// if (file.isDirectory()) {
-	// throw new FileTransactionException(uriOrPath, null,
-	// "Upload of folders not supported for job input files.",
-	// null);
-	// } else {
-	// uploadInputFile(file, job);
-	// }
-	//
-	// }
 
 	private final void uploadInputFolder(final String jobname,
 			final File folder, String path) throws FileTransactionException {

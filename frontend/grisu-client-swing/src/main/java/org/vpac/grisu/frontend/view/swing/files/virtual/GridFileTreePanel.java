@@ -16,14 +16,17 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultTreeModel;
+
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.netbeans.swing.outline.DefaultOutlineModel;
 import org.netbeans.swing.outline.Outline;
 import org.netbeans.swing.outline.OutlineModel;
+import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.events.FileDeletedEvent;
 import org.vpac.grisu.control.events.FolderCreatedEvent;
@@ -43,7 +46,6 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-import javax.swing.ScrollPaneConstants;
 
 public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 		EventSubscriber {
@@ -453,7 +455,7 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 			refreshFolder(FileManager.calculateParentUrl(ev.getUrl()));
 		} else if (event instanceof FileDeletedEvent) {
 			FileDeletedEvent ev = (FileDeletedEvent) event;
-			// X.p("CCC: " + FileManager.calculateParentUrl(ev.getUrl()));
+			X.p("CCC: " + FileManager.calculateParentUrl(ev.getUrl()));
 
 			refreshFolder(FileManager.calculateParentUrl(ev.getUrl()));
 		}
@@ -466,6 +468,7 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 
 	public void refreshFolder(String url) {
 
+		String tempUrl = FileManager.removeTrailingSlash(url);
 		TableModel m = getOutline().getModel();
 
 		for (int i = 0; i < m.getRowCount(); i++) {
@@ -478,10 +481,10 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 
 				final GridFile f = (GridFile) node.getUserObject();
 
-				// X.p(f.getUrl());
-				// X.p(url);
-
-				if (f.getUrl().equals(url)) {
+				X.p(f.getUrl());
+				X.p(url);
+				String temp = FileManager.removeTrailingSlash(f.getUrl());
+				if (temp.equals(tempUrl)) {
 
 					node.refresh();
 				}

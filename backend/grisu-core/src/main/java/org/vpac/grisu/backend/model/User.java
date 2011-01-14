@@ -769,11 +769,11 @@ public class User {
 		return fsm;
 	}
 
-	public GridFile getFolderListing(final String url)
+	public GridFile getFolderListing(final String url, int recursionLevel)
 			throws RemoteFileSystemException, FileSystemException {
 
 		try {
-			return getFileSystemManager().getFolderListing(url, 1);
+			return getFileSystemManager().getFolderListing(url, recursionLevel);
 		} catch (InvalidPathException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
