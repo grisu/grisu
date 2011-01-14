@@ -13,6 +13,7 @@ import javax.swing.SwingUtilities;
 import net.sf.jmimemagic.Magic;
 import net.sf.jmimemagic.MagicMatch;
 
+import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
@@ -24,6 +25,9 @@ import org.vpac.grisu.model.files.GlazedFile;
 public class GenericFileViewer extends JPanel implements FileViewer,
 		FileListListener {
 
+	static final Logger myLogger = Logger.getLogger(GenericFileViewer.class
+			.getName());
+
 	private static Set<String> viewers = null;
 
 	private static FileViewer createViewerPanel(File currentLocalCacheFile) {
@@ -34,7 +38,6 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 		MagicMatch match = null;
 		try {
 			match = Magic.getMagicMatch(currentLocalCacheFile, true);
-			System.out.println(match.getMimeType());
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
@@ -110,7 +113,7 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 								viewers.add(pckgname + "." + classname);
 							}
 						} catch (final ClassNotFoundException cnfex) {
-							System.err.println(cnfex);
+							myLogger.debug(cnfex);
 						} catch (final InstantiationException iex) {
 							// We try to instantiate an interface
 							// or an object that does not have a

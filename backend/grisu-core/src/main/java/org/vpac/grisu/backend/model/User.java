@@ -777,7 +777,6 @@ public class User {
 		} catch (InvalidPathException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-
 			return null;
 		}
 	}

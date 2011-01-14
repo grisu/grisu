@@ -10,7 +10,6 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
-import org.vpac.grisu.X;
 import org.vpac.grisu.control.events.FileDeletedEvent;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
@@ -218,7 +217,7 @@ public class FileTransaction implements Comparable<FileTransaction> {
 							} else {
 								if (DELETE_STRING.equals(targetDirUrl)) {
 									try {
-										X.p("XXX: " + sourceUrl);
+										// X.p("XXX: " + sourceUrl);
 
 										fm.deleteFile(sourceUrl);
 										EventBus.publish(new FileDeletedEvent(

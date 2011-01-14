@@ -73,20 +73,20 @@ public class UserspaceFileTreeModel extends TreeModelSupport implements
 
 	public boolean isLeaf(Object node) {
 
-		System.out.println("ISLEAF: " + ((GlazedFile) node).getName());
+		// System.out.println("ISLEAF: " + ((GlazedFile) node).getName());
 		if (GlazedFile.Type.FILETYPE_FILE.equals(((GlazedFile) node).getType())) {
-			System.out.println("FALSE");
+			// System.out.println("FALSE");
 			return false;
 		} else {
-			System.out.println("TRUE");
+			// System.out.println("TRUE");
 			return true;
 		}
 	}
 
 	public void valueForPathChanged(TreePath path, Object newValue) {
 
-		System.out.println("Message: " + path.toString() + " for object: "
-				+ newValue.toString());
+		// System.out.println("Message: " + path.toString() + " for object: "
+		// + newValue.toString());
 	}
 
 }

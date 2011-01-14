@@ -90,10 +90,6 @@ public class GrisuMonitorNavigationTaskPaneBatch extends JXTaskPane implements
 				}
 
 				public void actionPerformed(ActionEvent e) {
-					System.out.println("Action command: "
-							+ e.getActionCommand());
-					System.out.println("Application: " + application);
-
 					navPanel.setNavigationCommand(new String[] {
 							BATCH_JOB_LIST, application });
 				}

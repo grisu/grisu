@@ -87,7 +87,7 @@ public abstract class AppSpecificViewerPanel extends JPanel implements
 	protected synchronized int checkJobStatus() {
 
 		int status = getJob().getStatus(false);
-		System.out.println("PANEL: " + JobConstants.translateStatus(status));
+		// System.out.println("PANEL: " + JobConstants.translateStatus(status));
 		if (status >= JobConstants.FINISHED_EITHER_WAY) {
 
 			if (timer != null) {
@@ -145,8 +145,6 @@ public abstract class AppSpecificViewerPanel extends JPanel implements
 	abstract void progressUpdate();
 
 	public void propertyChange(PropertyChangeEvent evt) {
-		System.out.println("PropertyChanged: " + evt.getPropertyName() + ": "
-				+ evt.getNewValue());
 
 		if ("status".equals(evt.getPropertyName())) {
 

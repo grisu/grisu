@@ -793,7 +793,6 @@ public class FileManager {
 	public long getFileSize(String url) throws RemoteFileSystemException {
 
 		final Long fs = serviceInterface.getFileSize(url);
-		System.out.println("Filesize " + url + ": " + fs);
 		return fs;
 	}
 
@@ -1055,7 +1054,7 @@ public class FileManager {
 						// try again
 						myLogger.info("Uploading file " + file.getName()
 								+ "...");
-						System.out.println("FAILED. SLEEPING 1 SECONDS");
+						myLogger.error("FAILED. SLEEPING 1 SECONDS");
 						Thread.sleep(1000);
 						filetransferHandle = serviceInterface.upload(handler,
 								targetFile + "/" + file.getName());
@@ -1263,7 +1262,7 @@ public class FileManager {
 				e1.printStackTrace();
 				// try again
 				myLogger.info("Uploading file " + file.getName() + "...");
-				System.out.println("FAILED. SLEEPING 1 SECONDS");
+				myLogger.error("FAILED. SLEEPING 1 SECONDS");
 				Thread.sleep(1000);
 				serviceInterface.uploadInputFile(job, handler, file.getName());
 
@@ -1366,8 +1365,7 @@ public class FileManager {
 								// try again
 								myLogger.info("Uploading file "
 										+ file.getName() + "...");
-								System.out
-										.println("FAILED. SLEEPING 1 SECONDS");
+								myLogger.error("FAILED. SLEEPING 1 SECONDS");
 								Thread.sleep(1000);
 								serviceInterface.uploadInputFile(jobname,
 										handler, file.getName());

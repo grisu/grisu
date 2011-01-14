@@ -193,7 +193,7 @@ public abstract class AbstractWidget extends JPanel {
 		if ((hm != null) && StringUtils.isNotBlank(historyKey)) {
 			final String temp = getValue();
 			if (StringUtils.isNotBlank(temp)) {
-				System.out.println("Adding: " + this.getClass().toString());
+				// System.out.println("Adding: " + this.getClass().toString());
 				hm.addHistoryEntry(this.historyKey, temp);
 			}
 		}

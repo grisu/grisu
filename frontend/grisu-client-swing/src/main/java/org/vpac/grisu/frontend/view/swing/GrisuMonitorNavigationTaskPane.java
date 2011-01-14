@@ -106,9 +106,8 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements
 				}
 
 				public void actionPerformed(ActionEvent e) {
-					System.out.println("Action command: "
-							+ e.getActionCommand());
-					System.out.println("Application: " + application);
+					myLogger.debug("Action command: " + e.getActionCommand());
+					myLogger.debug("Application: " + application);
 
 					navPanel.setNavigationCommand(new String[] {
 							SINGLE_JOB_LIST, application });

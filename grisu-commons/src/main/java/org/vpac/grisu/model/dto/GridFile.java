@@ -18,12 +18,15 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.MountPoint;
 
 @XmlRootElement(name = "gridfile")
 public class GridFile implements Comparable<GridFile>, Transferable {
+
+	static final Logger myLogger = Logger.getLogger(GridFile.class.getName());
 
 	public static final DataFlavor GRIDFILE_FLAVOR = new DataFlavor(
 			GridFile.class, "Grid file");
@@ -96,7 +99,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 				result.addChild(childFile);
 
 			} else {
-				System.out.println("Can't determine type of file: "
+				myLogger.error("Can't determine type of file: "
 						+ child.getPath());
 				// throw new
 				// RuntimeException("Can't determine type of file: "+child.getPath());

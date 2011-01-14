@@ -183,7 +183,7 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements
 			}
 
 			public void actionPerformed(ActionEvent e) {
-				System.out.println(e.getActionCommand());
+
 				setNavigationCommand(new String[] { itemTitle });
 			}
 		};

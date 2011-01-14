@@ -156,7 +156,7 @@ public class ExampleJobCreationPanel extends JPanel implements
 	}
 
 	public void setServiceInterface(ServiceInterface si) {
-		System.out.println("Serviceinterface set. DN: " + si.getDN());
+		// System.out.println("Serviceinterface set. DN: " + si.getDN());
 		this.si = si;
 		this.em = GrisuRegistryManager.getDefault(si)
 				.getUserEnvironmentManager();

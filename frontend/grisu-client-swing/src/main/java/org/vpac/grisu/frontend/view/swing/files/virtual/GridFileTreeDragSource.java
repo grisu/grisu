@@ -27,7 +27,7 @@ public class GridFileTreeDragSource implements DragSourceListener,
 
 	public void dragDropEnd(DragSourceDropEvent dsde) {
 
-		System.out.println("Drop Action: " + dsde.getDropAction());
+		// System.out.println("Drop Action: " + dsde.getDropAction());
 
 	}
 
@@ -72,9 +72,9 @@ public class GridFileTreeDragSource implements DragSourceListener,
 	}
 
 	public void dropActionChanged(DragSourceDragEvent dsde) {
-		System.out.println("Action: " + dsde.getDropAction());
-		System.out.println("Target Action: " + dsde.getTargetActions());
-		System.out.println("User Action: " + dsde.getUserAction());
+		// System.out.println("Action: " + dsde.getDropAction());
+		// System.out.println("Target Action: " + dsde.getTargetActions());
+		// System.out.println("User Action: " + dsde.getUserAction());
 	}
 
 }

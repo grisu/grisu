@@ -204,7 +204,7 @@ public class UnixCommands extends AppSpecificViewerPanel {
 
 	private void updateStdOutFiles() {
 
-		System.out.println("UPDATING>>>>");
+		// System.out.println("UPDATING>>>>");
 
 		reloadStdout();
 		reloadStderr();

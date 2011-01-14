@@ -111,7 +111,7 @@ public class SingleJobTabbedPane extends JPanel implements
 
 	public void onEvent(JobCleanedEvent arg0) {
 
-		System.out.println("Removing panel...");
+		// System.out.println("Removing panel...");
 		JobObject bj = arg0.getJob();
 		JobDetailPanel temp = panels.get(bj.getJobname());
 		if (panels.get(bj.getJobname()) != null) {
