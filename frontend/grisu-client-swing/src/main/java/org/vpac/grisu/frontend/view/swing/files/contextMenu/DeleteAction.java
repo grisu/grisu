@@ -1,6 +1,5 @@
 package org.vpac.grisu.frontend.view.swing.files.contextMenu;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.util.Set;
 
@@ -8,10 +7,12 @@ import javax.swing.AbstractAction;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransaction;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransactionManager;
+import org.vpac.grisu.frontend.view.swing.files.FileTransactionStatusDialog;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListPanel;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
@@ -60,29 +61,46 @@ public class DeleteAction extends AbstractAction {
 			return;
 		}
 
-		final FileTransaction transaction = ftm.deleteFiles(files);
+		final FileTransaction ft = ftm.deleteFiles(files);
 
-		new Thread() {
+		SwingUtilities.invokeLater(new Thread() {
+
 			@Override
 			public void run() {
-				try {
-					transaction.join();
+				final JFrame frame = (JFrame) SwingUtilities.getRoot(fileList
+						.getPanel());
+				final FileTransactionStatusDialog ftd = new FileTransactionStatusDialog(
+						frame);
+				ftd.setFileTransaction(ft);
 
-					if (transaction.getException() != null) {
-						transaction.getException().printStackTrace();
-					}
-				} catch (Exception e1) {
-					Component c = null;
-					try {
-						c = (Component) e.getSource();
-					} catch (Exception eee) {
-					}
-					JOptionPane.showMessageDialog(c, e1.getLocalizedMessage(),
-							"Delete error", JOptionPane.ERROR_MESSAGE);
-					e1.printStackTrace();
-				}
+				ftd.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+				ftd.setVisible(true);
+				ftm.addFileTransfer(ft);
 			}
-		}.start();
+
+		});
+
+		// new Thread() {
+		// @Override
+		// public void run() {
+		// try {
+		// transaction.join();
+		//
+		// if (transaction.getException() != null) {
+		// transaction.getException().printStackTrace();
+		// }
+		// } catch (Exception e1) {
+		// Component c = null;
+		// try {
+		// c = (Component) e.getSource();
+		// } catch (Exception eee) {
+		// }
+		// JOptionPane.showMessageDialog(c, e1.getLocalizedMessage(),
+		// "Delete error", JOptionPane.ERROR_MESSAGE);
+		// e1.printStackTrace();
+		// }
+		// }
+		// }.start();
 
 	}
 }
