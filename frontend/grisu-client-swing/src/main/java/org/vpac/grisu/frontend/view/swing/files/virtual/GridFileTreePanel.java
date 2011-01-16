@@ -39,6 +39,7 @@ import org.vpac.grisu.frontend.view.swing.files.virtual.utils.LazyLoadingTreeCon
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.UserEnvironmentManager;
+import org.vpac.grisu.model.dto.DtoProperty;
 import org.vpac.grisu.model.dto.GridFile;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -479,13 +480,16 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 				final GridFileTreeNode node = (GridFileTreeNode) n;
 
 				final GridFile f = (GridFile) node.getUserObject();
+				for (String urlTemp : DtoProperty.mapFromDtoPropertiesList(
+						f.getUrls()).keySet()) {
 
-				// X.p(f.getUrl());
-				// X.p(url);
-				String temp = FileManager.removeTrailingSlash(f.getUrl());
-				if (temp.equals(tempUrl)) {
+					// X.p(f.getUrl());
+					// X.p(url);
+					String temp = FileManager.removeTrailingSlash(urlTemp);
+					if (temp.equals(tempUrl)) {
 
-					node.refresh();
+						node.refresh();
+					}
 				}
 			}
 		}
