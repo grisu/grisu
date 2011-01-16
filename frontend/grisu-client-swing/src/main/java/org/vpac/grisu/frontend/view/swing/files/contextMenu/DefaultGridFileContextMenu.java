@@ -1,13 +1,17 @@
 package org.vpac.grisu.frontend.view.swing.files.contextMenu;
 
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.Transferable;
 import java.util.Set;
 
+import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
 import org.apache.log4j.Logger;
+import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListPanel;
+import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.dto.GridFile;
-import javax.swing.JMenuItem;
 
 public class DefaultGridFileContextMenu extends JPopupMenu implements
 		GridFileListPanelContextMenu {
@@ -23,6 +27,8 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 	private JMenuItem refreshMenuItem;
 	private JMenuItem viewMenuItem;
 	private JMenuItem propertiesMenuItem;
+	private JMenuItem copyMenuItem;
+	private JMenuItem pasteMenuItem;
 
 	public DefaultGridFileContextMenu() {
 	}
@@ -39,14 +45,51 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 
 	public void filesSelected(Set<GridFile> files) {
 
+		if ((files == null) || (files.size() == 0)) {
+			getViewMenuItem().setEnabled(false);
+			getRefreshMenuItem().setEnabled(false);
+			getDownloadMenuItem().setEnabled(false);
+			getCreateFolderMenuItem().setEnabled(false);
+			getDeleteMenuItem().setEnabled(false);
+			getCopyMenuItem().setEnabled(false);
+			return;
+		}
+
 		if (files.size() == 1) {
 			if (files.iterator().next().isFolder()) {
 				getRefreshMenuItem().setEnabled(true);
+
+				Clipboard cb = FileManager.FILE_TRANSFER_CLIPBOARD;
+				Transferable t = cb.getContents(null);
+				if (t != null) {
+
+					GridFile target = files.iterator().next();
+					if (target.isVirtual()) {
+						if (target.getUrls().size() == 1) {
+							if (target
+									.getUrl()
+									.startsWith(
+											ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME)) {
+								getPasteMenuItem().setEnabled(false);
+							} else {
+								getPasteMenuItem().setEnabled(true);
+							}
+						} else {
+							getPasteMenuItem().setEnabled(true);
+						}
+					} else {
+						getPasteMenuItem().setEnabled(true);
+					}
+				} else {
+					getPasteMenuItem().setEnabled(false);
+				}
 			} else {
 				getRefreshMenuItem().setEnabled(false);
+				getPasteMenuItem().setEnabled(false);
 			}
 		} else {
 			getRefreshMenuItem().setEnabled(false);
+			getPasteMenuItem().setEnabled(false);
 		}
 
 		boolean folder = false;
@@ -55,6 +98,7 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 				getDownloadMenuItem().setEnabled(false);
 				getCreateFolderMenuItem().setEnabled(false);
 				getDeleteMenuItem().setEnabled(false);
+				getCopyMenuItem().setEnabled(false);
 				return;
 			}
 			if (file.isFolder()) {
@@ -70,6 +114,15 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 		getDownloadMenuItem().setEnabled(true);
 		getCreateFolderMenuItem().setEnabled(true);
 		getDeleteMenuItem().setEnabled(true);
+		getCopyMenuItem().setEnabled(true);
+	}
+
+	private JMenuItem getCopyMenuItem() {
+		if (copyMenuItem == null) {
+			copyMenuItem = new JMenuItem("Copy");
+			copyMenuItem.setAction(new CopyAction(fileList));
+		}
+		return copyMenuItem;
 	}
 
 	private JMenuItem getCopyUrlsMenuItem() {
@@ -109,6 +162,14 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 		return this;
 	}
 
+	private JMenuItem getPasteMenuItem() {
+		if (pasteMenuItem == null) {
+			pasteMenuItem = new JMenuItem("Paste");
+			pasteMenuItem.setAction(new PasteAction(fileList));
+		}
+		return pasteMenuItem;
+	}
+
 	private JMenuItem getPropetiesMenuItem() {
 		if (propertiesMenuItem == null) {
 			propertiesMenuItem = new JMenuItem("Properties");
@@ -139,8 +200,11 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 	public void setGridFileListPanel(GridFileListPanel panel) {
 		this.fileList = panel;
 		add(getRefreshMenuItem());
+		add(getCopyMenuItem());
+		add(getPasteMenuItem());
+
 		add(getViewMenuItem());
-		add(getCopyUrlsMenuItem());
+		// add(getCopyUrlsMenuItem());
 		add(getCreateFolderMenuItem());
 		add(getDeleteMenuItem());
 		add(getDownloadMenuItem());

@@ -1,5 +1,6 @@
 package org.vpac.grisu.model;
 
+import java.awt.datatransfer.Clipboard;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -54,6 +55,9 @@ import org.vpac.grisu.utils.FileHelpers;
  * 
  */
 public class FileManager {
+
+	public static Clipboard FILE_TRANSFER_CLIPBOARD = new Clipboard(
+			"File transfers");
 
 	private static FileSystemView VIEW = FileSystemView.getFileSystemView();
 
