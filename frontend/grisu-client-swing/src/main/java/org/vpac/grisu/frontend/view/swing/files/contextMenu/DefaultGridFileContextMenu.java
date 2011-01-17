@@ -29,6 +29,7 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 	private JMenuItem propertiesMenuItem;
 	private JMenuItem copyMenuItem;
 	private JMenuItem pasteMenuItem;
+	private JMenuItem openMenuItem;
 
 	public DefaultGridFileContextMenu() {
 	}
@@ -94,15 +95,28 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 
 		boolean folder = false;
 		for (GridFile file : files) {
+			if (file.isFolder()) {
+				folder = true;
+			}
 			if (file.isVirtual()) {
-				getDownloadMenuItem().setEnabled(false);
+
+				if (folder) {
+					getDownloadMenuItem().setEnabled(false);
+					getOpenMenuItem().setEnabled(false);
+				} else {
+					if (file.getUrls().size() == 1) {
+						getDownloadMenuItem().setEnabled(true);
+						getOpenMenuItem().setEnabled(true);
+					} else {
+						getDownloadMenuItem().setEnabled(false);
+						getOpenMenuItem().setEnabled(false);
+					}
+				}
+
 				getCreateFolderMenuItem().setEnabled(false);
 				getDeleteMenuItem().setEnabled(false);
 				getCopyMenuItem().setEnabled(false);
 				return;
-			}
-			if (file.isFolder()) {
-				folder = true;
 			}
 		}
 
@@ -112,6 +126,7 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 			getViewMenuItem().setEnabled(true);
 		}
 		getDownloadMenuItem().setEnabled(true);
+		getOpenMenuItem().setEnabled(true);
 		getCreateFolderMenuItem().setEnabled(true);
 		getDeleteMenuItem().setEnabled(true);
 		getCopyMenuItem().setEnabled(true);
@@ -162,6 +177,14 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 		return this;
 	}
 
+	private JMenuItem getOpenMenuItem() {
+		if (openMenuItem == null) {
+			openMenuItem = new JMenuItem("Open");
+			openMenuItem.setAction(new OpenAction(fileList));
+		}
+		return openMenuItem;
+	}
+
 	private JMenuItem getPasteMenuItem() {
 		if (pasteMenuItem == null) {
 			pasteMenuItem = new JMenuItem("Paste");
@@ -199,6 +222,9 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 
 	public void setGridFileListPanel(GridFileListPanel panel) {
 		this.fileList = panel;
+
+		add(getOpenMenuItem());
+
 		add(getRefreshMenuItem());
 		add(getCopyMenuItem());
 		add(getPasteMenuItem());

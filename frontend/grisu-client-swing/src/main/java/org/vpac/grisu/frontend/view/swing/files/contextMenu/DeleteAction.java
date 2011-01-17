@@ -80,27 +80,5 @@ public class DeleteAction extends AbstractAction {
 
 		});
 
-		// new Thread() {
-		// @Override
-		// public void run() {
-		// try {
-		// transaction.join();
-		//
-		// if (transaction.getException() != null) {
-		// transaction.getException().printStackTrace();
-		// }
-		// } catch (Exception e1) {
-		// Component c = null;
-		// try {
-		// c = (Component) e.getSource();
-		// } catch (Exception eee) {
-		// }
-		// JOptionPane.showMessageDialog(c, e1.getLocalizedMessage(),
-		// "Delete error", JOptionPane.ERROR_MESSAGE);
-		// e1.printStackTrace();
-		// }
-		// }
-		// }.start();
-
 	}
 }
