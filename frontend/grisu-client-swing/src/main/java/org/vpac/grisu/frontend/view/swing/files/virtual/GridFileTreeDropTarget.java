@@ -7,6 +7,7 @@ import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -26,6 +27,7 @@ import org.vpac.grisu.frontend.view.swing.files.FileTransactionStatusDialog;
 import org.vpac.grisu.frontend.view.swing.files.GridFileTransferHandler;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
+import org.vpac.grisu.model.dto.DtoProperty;
 import org.vpac.grisu.model.dto.GridFile;
 
 public class GridFileTreeDropTarget implements DropTargetListener {
@@ -256,8 +258,29 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 			return;
 		}
 
-		final FileTransaction ft = new FileTransaction(fm,
-				GridFile.extractUrls(files), targetUrl, true);
+		Set<String> sourceUrls = new LinkedHashSet<String>();
+		for (GridFile f : files) {
+			Set<String> urls = DtoProperty
+					.mapFromDtoPropertiesList(f.getUrls()).keySet();
+			for (String u : urls) {
+				if (FileManager.removeTrailingSlash(
+						FileManager.calculateParentUrl(u)).equals(
+						FileManager.removeTrailingSlash(targetUrl))) {
+					continue;
+				} else {
+					sourceUrls.add(u);
+				}
+			}
+		}
+
+		if (sourceUrls.isEmpty()) {
+			dtde.dropComplete(false);
+			selectLastSelectedItems(outline);
+			return;
+		}
+
+		final FileTransaction ft = new FileTransaction(fm, sourceUrls,
+				targetUrl, true);
 
 		SwingUtilities.invokeLater(new Thread() {
 

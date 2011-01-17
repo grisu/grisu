@@ -82,7 +82,7 @@ public class FileDownloadDialogSmall extends JDialog {
 
 	private JLabel getLblDownloading() {
 		if (lblDownloading == null) {
-			lblDownloading = new JLabel("Downloading");
+			lblDownloading = new JLabel("Downloading:");
 		}
 		return lblDownloading;
 	}

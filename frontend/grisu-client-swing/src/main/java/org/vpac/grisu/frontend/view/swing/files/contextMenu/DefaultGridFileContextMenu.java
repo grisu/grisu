@@ -122,11 +122,12 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 
 		if (folder) {
 			getViewMenuItem().setEnabled(false);
+			getOpenMenuItem().setEnabled(false);
 		} else {
 			getViewMenuItem().setEnabled(true);
+			getOpenMenuItem().setEnabled(true);
 		}
 		getDownloadMenuItem().setEnabled(true);
-		getOpenMenuItem().setEnabled(true);
 		getCreateFolderMenuItem().setEnabled(true);
 		getDeleteMenuItem().setEnabled(true);
 		getCopyMenuItem().setEnabled(true);
