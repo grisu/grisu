@@ -29,12 +29,12 @@ import javax.activation.DataSource;
 import javax.annotation.security.RolesAllowed;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.vfs.AllFileSelector;
-import org.apache.commons.vfs.FileContent;
-import org.apache.commons.vfs.FileObject;
-import org.apache.commons.vfs.FileSystemException;
-import org.apache.commons.vfs.FileType;
-import org.apache.commons.vfs.FileTypeSelector;
+//import org.apache.commons.vfs.AllFileSelector;
+//import org.apache.commons.vfs.FileContent;
+//import org.apache.commons.vfs.FileObject;
+//import org.apache.commons.vfs.FileSystemException;
+//import org.apache.commons.vfs.FileType;
+//import org.apache.commons.vfs.FileTypeSelector;
 import org.apache.log4j.Logger;
 import org.globus.common.CoGProperties;
 import org.simpleframework.xml.Serializer;
@@ -998,32 +998,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				+ " already exists.");
 	}
 
-	/**
-	 * This, well, creates a folder, as one might expect.
-	 * 
-	 * @param folder
-	 *            the folder.
-	 * @throws FileSystemException
-	 *             if the parent folder doesn't exist.
-	 */
-	protected void createFolder(final FileObject folder)
-			throws FileSystemException {
-
-		synchronized (getDN()) {
-			ArrayList<FileObject> temp = new ArrayList<FileObject>();
-			FileObject last = folder;
-			while (!last.getParent().exists()) {
-				temp.add(last);
-				last = last.getParent();
-			}
-
-			Collections.reverse(temp);
-			for (FileObject f : temp) {
-				f.createFolder();
-			}
-		}
-	}
-
 	private String createJob(Document jsdl, final String fqan,
 			final String jobnameCreationMethod,
 			final BatchJob optionalParentBatchJob)
@@ -1400,7 +1374,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		GridFile tempFolder = null;
 
 		try {
-			tempFolder = getUser().getFolderListing(folder.getUrl(), 1);
+			tempFolder = getUser().getFileSystemManager().getFolderListing(
+					folder.getUrl(), 1);
 		} catch (final Exception e) {
 			myLogger.error(e);
 			myLogger.error("Error getting folder listing. I suspect this to be a bug in the commons-vfs-grid library. Sleeping for 1 seconds and then trying again...");
@@ -1410,7 +1385,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			tempFolder = getUser().getFolderListing(folder.getUrl(), 1);
+			tempFolder = getUser().getFileSystemManager().getFolderListing(
+					folder.getUrl(), 1);
+
 		}
 		folder.setChildren(tempFolder.getChildren());
 
@@ -2590,8 +2567,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 
-			final GridFile rootfolder = getUser().getFolderListing(directory,
-					recursion_level);
+			final GridFile rootfolder = getUser().getFileSystemManager()
+					.getFolderListing(directory, recursion_level);
 			recursion_level = recursion_level - 1;
 			if (recursion_level <= 0) {
 				return rootfolder;
@@ -4274,90 +4251,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public String upload(final DataHandler source, final String filename)
 			throws RemoteFileSystemException {
 
-		myLogger.debug("Receiving file: " + filename);
-		FileObject target = null;
-
-		OutputStream fout = null;
-		try {
-			final String parent = filename.substring(0,
-					filename.lastIndexOf(File.separator));
-			final FileObject parentObject = getUser().aquireFile(parent);
-			// FileObject tempObject = parentObject;
-
-			createFolder(parentObject);
-			// parentObject.createFolder();
-
-			target = getUser().aquireFile(filename);
-			// just to be sure that the folder exists.
-
-			myLogger.debug("Calculated target: " + target.getName().toString());
-
-			final FileContent content = target.getContent();
-			fout = content.getOutputStream();
-		} catch (final FileSystemException e) {
-
-			try {
-				if (fout != null) {
-					fout.close();
-				}
-				source.getInputStream().close();
-			} catch (final Exception e1) {
-				myLogger.error(e1);
-			}
-
-			// e.printStackTrace();
-			throw new RemoteFileSystemException("Could not open file: "
-					+ filename + ":" + e.getMessage());
-		}
-
-		myLogger.debug("Receiving data for file: " + filename);
-
-		BufferedInputStream buf;
-		try {
-			buf = new BufferedInputStream(source.getInputStream());
-
-			final byte[] buffer = new byte[1024]; // byte buffer
-			int bytesRead = 0;
-			while (true) {
-				if (Thread.interrupted()) {
-					Thread.currentThread().interrupt();
-					buf.close();
-					fout.close();
-					throw new RemoteFileSystemException(
-							"File transfer interrupted.");
-				}
-				bytesRead = buf.read(buffer, 0, 1024);
-				// bytesRead returns the actual number of bytes read from
-				// the stream. returns -1 when end of stream is detected
-				if (bytesRead == -1) {
-					break;
-				}
-				fout.write(buffer, 0, bytesRead);
-			}
-
-			if (buf != null) {
-				buf.close();
-			}
-			if (fout != null) {
-				fout.close();
-			}
-		} catch (final IOException e) {
-			try {
-				fout.close();
-				source.getInputStream().close();
-			} catch (final Exception e1) {
-				myLogger.error(e1);
-			}
-
-			throw new RemoteFileSystemException("Could not write to file: "
-					+ filename + ": " + e.getMessage());
-		}
-
-		myLogger.debug("Data transmission for file " + filename + " finished.");
-
-		buf = null;
-		fout = null;
-		return target.getName().getURI();
+		return getUser().getFileSystemManager().upload(source, filename);
 
 	}
 
@@ -4413,238 +4307,26 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		multiJob.setStatus(JobConstants.INPUT_FILES_UPLOADING);
 		batchJobDao.saveOrUpdate(multiJob);
 
-		myLogger.debug("Receiving datahandler for multipartjob input file...");
+		final String relpathFromMountPointRoot = multiJob
+				.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY);
 
-		BufferedInputStream buf;
-		try {
-			buf = new BufferedInputStream(source.getInputStream());
-		} catch (final IOException e1) {
-			throw new RuntimeException(
-					"Could not get input stream from datahandler...");
+		Set<String> urls = new HashSet<String>();
+
+		for (final String mountPointRoot : multiJob.getAllUsedMountPoints()) {
+
+			final String parent = mountPointRoot + "/"
+					+ relpathFromMountPointRoot;
+			urls.add(parent);
 		}
-
-		final FileObject tempFile = getUser().aquireFile(
-				"tmp://" + UUID.randomUUID().toString());
-		OutputStream fout;
-		try {
-			fout = tempFile.getContent().getOutputStream();
-		} catch (final FileSystemException e1) {
-			throw new RemoteFileSystemException("Could not create temp file.");
-		}
-		myLogger.debug("Receiving data for file: " + targetFilename);
-
-		if (Thread.interrupted()) {
-			Thread.currentThread().interrupt();
-			return;
-		}
-
-		try {
-
-			final byte[] buffer = new byte[1024]; // byte buffer
-			int bytesRead = 0;
-			while (true) {
-
-				if (Thread.interrupted()) {
-					Thread.currentThread().interrupt();
-					fout.close();
-					buf.close();
-					return;
-				}
-
-				bytesRead = buf.read(buffer, 0, 1024);
-				// bytesRead returns the actual number of bytes read from
-				// the stream. returns -1 when end of stream is detected
-				if (bytesRead == -1) {
-					break;
-				}
-				fout.write(buffer, 0, bytesRead);
-			}
-
-			if (buf != null) {
-				buf.close();
-			}
-			if (fout != null) {
-				fout.close();
-			}
-		} catch (final IOException e) {
-			throw new RemoteFileSystemException("Could not write to file: "
-					+ targetFilename + ": " + e.getMessage());
-		}
-		fout = null;
-
-		final ExecutorService executor = Executors.newFixedThreadPool(multiJob
-				.getAllUsedMountPoints().size());
 
 		final DtoActionStatus status = new DtoActionStatus(targetFilename,
 				multiJob.getAllUsedMountPoints().size());
 		getSessionActionStatus().put(targetFilename, status);
 
-		for (final String mountPointRoot : multiJob.getAllUsedMountPoints()) {
+		getUser().getFileSystemManager().uploadFileToMultipleLocations(urls,
+				source, targetFilename, status);
 
-			if (Thread.interrupted()) {
-				executor.shutdownNow();
-				Thread.currentThread().interrupt();
-				status.setFinished(true);
-				status.setFailed(true);
-				return;
-			}
-
-			final Thread thread = new Thread() {
-				@Override
-				public void run() {
-
-					try {
-						FileObject target = null;
-
-						final String relpathFromMountPointRoot = multiJob
-								.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY);
-						// String parent = filename.substring(0, filename
-						// .lastIndexOf(File.separator));
-						final String parent = mountPointRoot + "/"
-								+ relpathFromMountPointRoot;
-						RemoteFileTransferObject fileTransfer;
-
-						for (int tryNo = 0; tryNo <= ServerPropertiesManager
-								.getFileTransferRetries(); tryNo++) {
-
-							myLogger.debug(tryNo + 1
-									+ ". try to transfer file to "
-									+ mountPointRoot);
-
-							if (Thread.interrupted()) {
-								Thread.currentThread().interrupt();
-								executor.shutdownNow();
-								return;
-							}
-
-							try {
-								final FileObject parentObject = getUser()
-										.aquireFile(parent);
-								// FileObject tempObject = parentObject;
-
-								createFolder(parentObject);
-								// parentObject.createFolder();
-
-								target = getUser().aquireFile(
-										parent + "/" + targetFilename);
-								// just to be sure that the folder exists.
-
-								myLogger.debug("Calculated target for multipartjob input file: "
-										+ target.getName().toString());
-								break;
-							} catch (final Exception e) {
-
-								if (Thread.interrupted()) {
-									Thread.currentThread().interrupt();
-									executor.shutdownNow();
-									return;
-								}
-								e.printStackTrace();
-								if (tryNo >= ServerPropertiesManager
-										.getFileTransferRetries() - 1) {
-									status.addElement("Upload to folder "
-											+ parent
-											+ " failed: Could not open file: "
-											+ targetFilename + ":"
-											+ e.getMessage());
-									status.setFailed(true);
-									executor.shutdownNow();
-								} else {
-									// wait for a bit, maybe the gridftp server
-									// needs some time
-									try {
-										Thread.sleep(3000);
-									} catch (final InterruptedException e1) {
-										e1.printStackTrace();
-										Thread.currentThread().interrupt();
-									}
-								}
-							}
-						}
-
-						if (Thread.interrupted()) {
-							Thread.currentThread().interrupt();
-							executor.shutdownNow();
-							status.setFinished(true);
-							status.setFailed(true);
-							return;
-						}
-						fileTransfer = new RemoteFileTransferObject(tempFile,
-								target, true);
-						myLogger.info("Creating fileTransfer object for source: "
-								+ tempFile.getName()
-								+ " and target: "
-								+ target.toString());
-						// fileTransfers.put(targetFileString, fileTransfer);
-
-						fileTransfer.startTransfer(true);
-
-						if (Thread.interrupted()) {
-							Thread.currentThread().interrupt();
-							executor.shutdownNow();
-							status.setFinished(true);
-							status.setFailed(true);
-							return;
-						}
-
-						if (fileTransfer.isFailed()) {
-							status.addElement("File transfer failed: "
-									+ fileTransfer
-											.getPossibleExceptionMessage());
-							status.setFailed(true);
-							executor.shutdownNow();
-						} else {
-							status.addElement("Upload to folder " + parent
-									+ " successful.");
-						}
-
-						if (status.getTotalElements() <= status
-								.getCurrentElements()) {
-							status.setFinished(true);
-							multiJob.setStatus(JobConstants.READY_TO_SUBMIT);
-							batchJobDao.saveOrUpdate(multiJob);
-						}
-
-					} finally {
-						getUser().closeFileSystems();
-					}
-				}
-			};
-			executor.execute(thread);
-
-		}
-
-		executor.shutdown();
-
-		myLogger.debug("All data transmissions for multiPartJob " + jobname
-				+ " started.");
-
-		// cleanup
-
-		new Thread() {
-			@Override
-			public void run() {
-				try {
-					executor.awaitTermination(1, TimeUnit.DAYS);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-
-				try {
-					tempFile.delete();
-				} catch (FileSystemException e) {
-					e.printStackTrace();
-				}
-
-			}
-		}.start();
-
-		// buf = null;
-		// try {
-		// tempFile.delete();
-		// } catch (FileSystemException e) {
-		// myLogger.error("Could not delete temp file...", e);
-		// }
+		// TODO monitor status and set jobstatus to ready_to_submit?
 
 	}
 

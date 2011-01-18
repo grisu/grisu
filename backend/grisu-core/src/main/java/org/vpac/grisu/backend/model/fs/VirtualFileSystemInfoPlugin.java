@@ -3,12 +3,16 @@ package org.vpac.grisu.backend.model.fs;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.activation.DataHandler;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.FileObject;
 import org.apache.log4j.Logger;
+import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
+import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.GridFile;
 
 public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
@@ -59,6 +63,11 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 	// }
 	// }
 
+	public void createFolder(String url) throws RemoteFileSystemException {
+		throw new RemoteFileSystemException(
+				"Folder creation not supported for virtual file system.");
+	}
+
 	public GridFile getFolderListing(String url, int recursiveLevels)
 			throws RemoteFileSystemException {
 
@@ -93,4 +102,23 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 		return plugins.get(plugin.toLowerCase());
 	}
 
+	public MountPoint mountFileSystem(String uri, String mountPointName,
+			ProxyCredential cred, boolean useHomeDirectory, String site)
+			throws RemoteFileSystemException {
+		throw new RemoteFileSystemException(
+				"Mounting not supported for virtual file system.");
+	}
+
+	public String resolveFileSystemHomeDirectory(String filesystemRoot,
+			String fqan) throws RemoteFileSystemException {
+		throw new RemoteFileSystemException(
+				"Resolving file system home not supported for virtual file system.");
+	}
+
+	public String upload(DataHandler source, String filename)
+			throws RemoteFileSystemException {
+
+		throw new RemoteFileSystemException(
+				"File upload not supported for virtual file system.");
+	}
 }

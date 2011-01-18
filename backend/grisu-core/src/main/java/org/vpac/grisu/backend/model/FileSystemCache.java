@@ -3,19 +3,29 @@ package org.vpac.grisu.backend.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystem;
 import org.apache.commons.vfs.FileSystemException;
+import org.apache.commons.vfs.FileSystemOptions;
 import org.apache.commons.vfs.impl.DefaultFileSystemManager;
+import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileSystemConfigBuilder;
+import org.apache.log4j.Logger;
+import org.vpac.grisu.X;
 import org.vpac.grisu.model.MountPoint;
 
 import uk.ac.dl.escience.vfs.util.VFSUtil;
 
 public class FileSystemCache {
 
+	private static Logger myLogger = Logger.getLogger(FileSystemCache.class
+			.getName());
+
 	private Map<MountPoint, FileSystem> cachedFilesystems = new HashMap<MountPoint, FileSystem>();
 	private DefaultFileSystemManager fsm = null;
+	private final User user;
 
-	public FileSystemCache() {
+	public FileSystemCache(User user) {
+		this.user = user;
 		try {
 			fsm = VFSUtil.createNewFsManager(false, false, true, true, true,
 					true, true, null);
@@ -30,12 +40,99 @@ public class FileSystemCache {
 
 	public void close() {
 		cachedFilesystems = null;
-
+		X.p("Closed filesystems.");
 		fsm.close();
+	}
+
+	private FileSystem createFileSystem(String rootUrl,
+			ProxyCredential credToUse) {
+
+		final FileSystemOptions opts = new FileSystemOptions();
+
+		if (rootUrl.startsWith("gsiftp")) {
+			myLogger.debug("Url \"" + rootUrl
+					+ "\" is gsiftp url, using gridftpfilesystembuilder...");
+
+			final GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
+					.getInstance();
+			builder.setGSSCredential(opts, credToUse.getGssCredential());
+			// builder.setUserDirIsRoot(opts, true);
+		}
+
+		FileObject fileRoot;
+		try {
+			fileRoot = fsm.resolveFile(rootUrl, opts);
+		} catch (final FileSystemException e) {
+			myLogger.error("Can't connect to filesystem: " + rootUrl
+					+ " using VO: " + credToUse.getFqan());
+			throw new RuntimeException("Can't connect to filesystem " + rootUrl
+					+ ": " + e.getLocalizedMessage(), e);
+		}
+
+		FileSystem fileBase = null;
+		fileBase = fileRoot.getFileSystem();
+
+		return fileBase;
+
 	}
 
 	public FileSystem getFileSystem(MountPoint mp) {
 		return cachedFilesystems.get(mp);
+	}
+
+	public FileSystem getFileSystem(final String rootUrl, String fqan)
+			throws FileSystemException {
+
+		synchronized (rootUrl) {
+			ProxyCredential credToUse = null;
+
+			MountPoint temp = null;
+			try {
+				temp = user.getResponsibleMountpointForAbsoluteFile(rootUrl);
+			} catch (final IllegalStateException e) {
+				myLogger.info(e);
+			}
+			if ((fqan == null) && (temp != null) && (temp.getFqan() != null)) {
+				fqan = temp.getFqan();
+			}
+			// get the right credential for this mountpoint
+			if (fqan != null) {
+
+				credToUse = user.getCred(fqan);
+
+			} else {
+				credToUse = user.getCred();
+			}
+
+			FileSystem fileBase = null;
+
+			if (temp == null) {
+				// means we have to figure out how to connect to this. I.e.
+				// which fqan to use...
+				// throw new FileSystemException(
+				// "Could not find mountpoint for url " + rootUrl);
+
+				// creating a filesystem...
+				myLogger.info("Creating filesystem without mountpoint...");
+				return createFileSystem(rootUrl, credToUse);
+
+			} else {
+				// great, we can re-use this filesystem
+				if (getFileSystem(temp) == null) {
+
+					fileBase = createFileSystem(temp.getRootUrl(), credToUse);
+
+					if (temp != null) {
+						addFileSystem(temp, fileBase);
+					}
+				} else {
+					fileBase = getFileSystem(temp);
+				}
+			}
+
+			return fileBase;
+		}
+
 	}
 
 	public DefaultFileSystemManager getFileSystemManager() {

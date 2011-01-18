@@ -17,6 +17,7 @@ import javax.swing.UIManager;
 import org.apache.commons.lang.StringUtils;
 import org.jdesktop.swingx.JXFrame;
 import org.vpac.grisu.GrisuVersion;
+import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.model.events.ApplicationEventListener;
@@ -54,7 +55,7 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 
 		initialize();
 
-		menu = new GrisuMenu(this.getFrame());
+		menu = new GrisuMenu(this);
 		getFrame().setJMenuBar(menu);
 
 		if (panel == null) {
@@ -79,7 +80,7 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 
 		initialize();
 
-		menu = new GrisuMenu(this.getFrame());
+		menu = new GrisuMenu(this);
 		getFrame().setJMenuBar(menu);
 
 		if (configpanels == null) {
@@ -115,12 +116,13 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 
 	abstract public boolean displaySingleJobsCreationPane();
 
-	private void exit() {
+	public void exit() {
 		try {
-			// System.out.println("Exiting...");
+			X.p("Exiting...");
 
 			if (si != null) {
-				si.logout();
+				String temp = si.logout();
+				X.p(temp);
 			}
 
 		} finally {

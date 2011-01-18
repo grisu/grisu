@@ -192,7 +192,8 @@ public class AllGroupsFileSystemPlugin implements VirtualFileSystemPlugin {
 
 						String urlToLs = mp.getRootUrl() + "/" + restUrl;
 						try {
-							GridFile result = user.getFolderListing(urlToLs, 1);
+							GridFile result = user.getFileSystemManager()
+									.getFolderListing(urlToLs, 1);
 							myLogger.debug("retrieved results from: "
 									+ mp.getAlias());
 							result.setPath(path);

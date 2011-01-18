@@ -339,9 +339,6 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 								.getFolderListing(urlToQuery, 1);
 						file.addSite(mp.getSite());
 						result.add(file);
-					} catch (InvalidPathException e) {
-						GridFile f = new GridFile(urlToQuery, true, e);
-						result.add(f);
 					} catch (RemoteFileSystemException rfse) {
 						String msg = rfse.getLocalizedMessage();
 						if (!msg.contains("not a folder")) {

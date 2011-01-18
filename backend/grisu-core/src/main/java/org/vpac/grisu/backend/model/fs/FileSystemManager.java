@@ -2,14 +2,20 @@ package org.vpac.grisu.backend.model.fs;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+
+import javax.activation.DataHandler;
 
 import org.apache.axis.utils.StringUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.vfs.FileObject;
+import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.backend.model.RemoteFileTransferObject;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
+import org.vpac.grisu.model.MountPoint;
+import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.dto.GridFile;
 
 public class FileSystemManager {
@@ -69,6 +75,16 @@ public class FileSystemManager {
 		return pl.copySingleFile(source, target, overwrite);
 	}
 
+	public void createFolder(String url) throws RemoteFileSystemException {
+
+		getFileSystemInfoPlugin(url).createFolder(url);
+
+	}
+
+	public void deleteFile(final String file) throws RemoteFileSystemException {
+		getFileSystemInfoPlugin(file).deleteFile(file);
+	}
+
 	private FileSystemInfoPlugin getFileSystemInfoPlugin(String url) {
 
 		String protocol = StringUtils.split(url, ':')[0];
@@ -90,7 +106,7 @@ public class FileSystemManager {
 	}
 
 	public GridFile getFolderListing(String pathOrUrl, int recursiveLevels)
-			throws InvalidPathException, RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		pathOrUrl = cleanPath(pathOrUrl);
 		return getFileSystemInfoPlugin(pathOrUrl).getFolderListing(pathOrUrl,
@@ -98,4 +114,28 @@ public class FileSystemManager {
 
 	}
 
+	public MountPoint mountFileSystem(String uri, final String mountPointName,
+			final ProxyCredential cred, final boolean useHomeDirectory,
+			final String site) throws RemoteFileSystemException {
+		return getFileSystemInfoPlugin(uri).mountFileSystem(uri,
+				mountPointName, cred, useHomeDirectory, site);
+	}
+
+	public String resolveFileSystemHomeDirectory(String filesystemRoot,
+			String fqan) throws RemoteFileSystemException {
+		return getFileSystemInfoPlugin(filesystemRoot)
+				.resolveFileSystemHomeDirectory(filesystemRoot, fqan);
+	}
+
+	public String upload(final DataHandler source, final String filename)
+			throws RemoteFileSystemException {
+		return getFileSystemInfoPlugin(filename).upload(source, filename);
+	}
+
+	public void uploadFileToMultipleLocations(Set<String> parents,
+			final DataHandler source, final String targetFilename,
+			DtoActionStatus status) throws RemoteFileSystemException {
+		getFileSystemInfoPlugin(null).uploadFileToMultipleLocations(parents,
+				source, targetFilename, status);
+	}
 }
