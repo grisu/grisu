@@ -26,7 +26,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.log4j.Logger;
 import org.vpac.grisu.backend.hibernate.UserDAO;
@@ -200,49 +199,6 @@ public class User {
 
 		getUserProperties().put(key, value);
 		userdao.saveOrUpdate(this);
-
-	}
-
-	/**
-	 * Resolves the provided filename into a FileObject. If the filename starts
-	 * with "/" a file on one of the "mounted" filesystems is looked up. Else it
-	 * has to start with the name of a (supported) protocol (like: gsiftp:///).
-	 * 
-	 * @param file
-	 *            the filename
-	 * @return the FileObject
-	 * @throws RemoteFileSystemException
-	 *             if there was an error accessing the file
-	 * @throws VomsException
-	 *             if the (possible) required voms credential could not be
-	 *             created
-	 */
-	public FileObject aquireFile(final String file)
-			throws RemoteFileSystemException {
-		return getFileSystemManager().aquireFile(file, null);
-	}
-
-	/**
-	 * Resolves the provided filename into a FileObject. If the filename starts
-	 * with "/" a file on one of the "mounted" filesystems is looked up. Else it
-	 * has to start with the name of a (supported) protocol (like: gsiftp:///).
-	 * 
-	 * @param urlOrPath
-	 *            the filename
-	 * @param cred
-	 *            the credential to access the filesystem on which the file
-	 *            resides
-	 * @return the FileObject
-	 * @throws RemoteFileSystemException
-	 *             if there is a problem resolving the file
-	 * @throws VomsException
-	 *             if the (possible) required voms credential could not be
-	 *             created
-	 */
-	public FileObject aquireFile(final String urlOrPath, final String fqan)
-			throws RemoteFileSystemException {
-
-		return getFileSystemManager().aquireFile(urlOrPath, fqan);
 
 	}
 
@@ -435,12 +391,12 @@ public class User {
 							myLogger.debug("Did not find "
 									+ urlTemp
 									+ "in cache, trying to access/create folder...");
-							final boolean exists = aquireFile(urlTemp, fqan)
-									.exists();
+							final boolean exists = getFileSystemManager()
+									.fileExists(urlTemp);
 							if (!exists) {
 								myLogger.debug("Mountpoint does not exist. Trying to create non-exitent folder: "
 										+ urlTemp);
-								aquireFile(urlTemp, fqan).createFolder();
+								getFileSystemManager().createFolder(urlTemp);
 							} else {
 								myLogger.debug("MountPoint " + urlTemp
 										+ " exists.");

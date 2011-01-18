@@ -1,8 +1,5 @@
 package org.vpac.grisu.control.serviceInterfaces;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -25,16 +22,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.activation.DataHandler;
-import javax.activation.DataSource;
 import javax.annotation.security.RolesAllowed;
 
 import org.apache.commons.lang.StringUtils;
-//import org.apache.commons.vfs.AllFileSelector;
-//import org.apache.commons.vfs.FileContent;
-//import org.apache.commons.vfs.FileObject;
-//import org.apache.commons.vfs.FileSystemException;
-//import org.apache.commons.vfs.FileType;
-//import org.apache.commons.vfs.FileTypeSelector;
 import org.apache.log4j.Logger;
 import org.globus.common.CoGProperties;
 import org.simpleframework.xml.Serializer;
@@ -49,7 +39,6 @@ import org.vpac.grisu.backend.model.job.BatchJob;
 import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.backend.model.job.ServerJobSubmissionException;
 import org.vpac.grisu.backend.utils.CertHelpers;
-import org.vpac.grisu.backend.utils.FileContentDataSourceConnector;
 import org.vpac.grisu.backend.utils.LocalTemplatesHelper;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
@@ -66,7 +55,6 @@ import org.vpac.grisu.model.dto.DtoApplicationDetails;
 import org.vpac.grisu.model.dto.DtoApplicationInfo;
 import org.vpac.grisu.model.dto.DtoBatchJob;
 import org.vpac.grisu.model.dto.DtoDataLocations;
-import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.dto.DtoGridResources;
 import org.vpac.grisu.model.dto.DtoHostsInfo;
 import org.vpac.grisu.model.dto.DtoJob;
@@ -76,6 +64,7 @@ import org.vpac.grisu.model.dto.DtoProperties;
 import org.vpac.grisu.model.dto.DtoProperty;
 import org.vpac.grisu.model.dto.DtoStringList;
 import org.vpac.grisu.model.dto.DtoSubmissionLocations;
+import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.utils.FileHelpers;
@@ -524,10 +513,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				final String grisuJobFileUrl = targetDirUrl + "/"
 						+ GRISU_JOB_FILE_NAME;
-				FileObject grisujobFile = null;
-				;
+				OutputStream fout = null;
+
 				try {
-					grisujobFile = getUser().aquireFile(grisuJobFileUrl);
+					fout = getUser().getFileSystemManager().getOutputStream(
+							grisuJobFileUrl);
 				} catch (final RemoteFileSystemException e1) {
 					if (optionalBatchJobStatus != null) {
 						optionalBatchJobStatus.setFailed(true);
@@ -544,9 +534,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				}
 				final Serializer serializer = new Persister();
 
-				OutputStream fout = null;
 				try {
-					fout = grisujobFile.getContent().getOutputStream();
 					serializer.write(job, fout);
 				} catch (final Exception e) {
 					if (optionalBatchJobStatus != null) {
@@ -1096,17 +1084,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public void deleteFile(final String file) throws RemoteFileSystemException {
 
-		final FileObject fileObject = getUser().aquireFile(file);
-		try {
-			if (fileObject.exists()) {
-				fileObject.delete(new AllFileSelector());
-			}
-		} catch (final FileSystemException e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
-			throw new RemoteFileSystemException("Could not delete file: "
-					+ e.getLocalizedMessage());
-		}
+		getUser().getFileSystemManager().deleteFile(file);
 
 	}
 
@@ -1302,74 +1280,18 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		myLogger.debug("Downloading: " + filename);
 
-		return download(new String[] { filename })[0];
-	}
-
-	/**
-	 * Downloads multiple files at once. It's not used at the moment for this
-	 * purpose, though. Only for single file downloads. But maybe in the future.
-	 * 
-	 * @param filenames
-	 *            the urls of the files
-	 * @return the DataSources of the requested files
-	 * @throws RemoteFileSystemException
-	 *             if one of the files doesn't exist
-	 */
-	private DataHandler[] download(final String[] filenames)
-			throws RemoteFileSystemException {
-
-		final DataSource[] datasources = new DataSource[filenames.length];
-		final DataHandler[] datahandlers = new DataHandler[filenames.length];
-
-		for (int i = 0; i < filenames.length; i++) {
-
-			FileObject source = null;
-			DataSource datasource = null;
-			source = getUser().aquireFile(filenames[i]);
-			myLogger.debug("Preparing data for file transmission for file "
-					+ source.getName().toString());
-			try {
-				if (!source.exists()) {
-					throw new RemoteFileSystemException(
-							"Could not provide file: "
-									+ filenames[i]
-									+ " for download: InputFile does not exist.");
-				}
-
-				datasource = new FileContentDataSourceConnector(
-						source.getContent());
-			} catch (final FileSystemException e) {
-				throw new RemoteFileSystemException(
-						"Could not find or read file: " + filenames[i] + ": "
-								+ e.getMessage());
-			}
-			datasources[i] = datasource;
-			datahandlers[i] = new DataHandler(datasources[i]);
-		}
-
-		return datahandlers;
-
+		return getUser().getFileSystemManager().download(filename);
 	}
 
 	public boolean fileExists(final String file)
 			throws RemoteFileSystemException {
 
-		boolean exists;
-
-		try {
-			exists = getUser().aquireFile(file).exists();
-			return exists;
-		} catch (final FileSystemException e) {
-
-			throw new RemoteFileSystemException(
-					"Could not connect to filesystem to aquire file: " + file);
-
-		}
+		return getUser().getFileSystemManager().fileExists(file);
 
 	}
 
 	public GridFile fillFolder(GridFile folder, int recursionLevel)
-			throws FileSystemException, RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		GridFile tempFolder = null;
 
@@ -1678,41 +1600,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return DtoProperties.createProperties(getUser().getBookmarks());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.vpac.grisu.control.ServiceInterface#getChildrenFiles(java.lang.String
-	 * , boolean)
-	 */
-	public DtoStringList getChildrenFileNames(final String folder,
-			final boolean onlyFiles) throws RemoteFileSystemException {
-
-		String[] result = null;
-		try {
-			FileObject[] objects = null;
-			if (onlyFiles) {
-				objects = getUser().aquireFile(folder).findFiles(
-						new FileTypeSelector(FileType.FILE));
-			} else {
-				objects = getUser().aquireFile(folder).findFiles(
-						new AllFileSelector());
-			}
-
-			result = new String[objects.length];
-			for (int i = 0; i < objects.length; i++) {
-				result[i] = objects[i].getName().getURI();
-			}
-
-		} catch (final FileSystemException e) {
-			throw new RemoteFileSystemException("Could not access folder: "
-					+ folder + ": " + e.getMessage());
-		}
-
-		return DtoStringList.fromStringArray(result);
-
-	}
-
 	/**
 	 * This method has to be implemented by the endpoint specific
 	 * ServiceInterface. Since there are a few different ways to get a proxy
@@ -1779,16 +1666,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public long getFileSize(final String file) throws RemoteFileSystemException {
 
-		final FileObject file_object = getUser().aquireFile(file);
-		long size;
-		try {
-			size = file_object.getContent().getSize();
-		} catch (final FileSystemException e) {
-			throw new RemoteFileSystemException("Could not get size of file: "
-					+ file + ": " + e.getMessage());
-		}
-
-		return size;
+		return getUser().getFileSystemManager().getFileSize(file);
 	}
 
 	/*
@@ -1836,8 +1714,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 						InputStream fin = null;
 						try {
-							fin = getUser().aquireFile(grisuJobPropertiesFile)
-									.getContent().getInputStream();
+							fin = getUser().getFileSystemManager()
+									.getInputStream(grisuJobPropertiesFile);
 							job = serializer.read(Job.class, fin);
 						} catch (final Exception e) {
 							e.printStackTrace();
@@ -2305,29 +2183,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public boolean isFolder(final String file) throws RemoteFileSystemException {
 
-		boolean isFolder;
-		try {
-			isFolder = (getUser().aquireFile(file).getType() == FileType.FOLDER);
-		} catch (final Exception e) {
-			myLogger.error("Couldn't access file: " + file
-					+ " to check whether it is a folder."
-					+ e.getLocalizedMessage());
-			// e.printStackTrace();
-			// try again. sometimes it works the second time...
-			try {
-				myLogger.debug("trying a second time...");
-				isFolder = (getUser().aquireFile(file).getType() == FileType.FOLDER);
-			} catch (final Exception e2) {
-				// e2.printStackTrace();
-				myLogger.error("Again couldn't access file: " + file
-						+ " to check whether it is a folder."
-						+ e.getLocalizedMessage());
-				throw new RemoteFileSystemException("Could not aquire file: "
-						+ file);
-			}
-		}
-
-		return isFolder;
+		return getUser().getFileSystemManager().isFolder(file);
 
 	}
 
@@ -2543,20 +2399,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public long lastModified(final String url) throws RemoteFileSystemException {
 
-		try {
-			final FileObject file = getUser().aquireFile(url);
-			// myLogger.debug(url+" last modified before refresh:
-			// "+file.getContent().getLastModifiedTime());
-			// refresh to get non-cached date
-			// file.refresh();
-			// file.getParent().refresh();
-			// myLogger.debug(url+" last modified after refresh:
-			// "+file.getContent().getLastModifiedTime());
-			return file.getContent().getLastModifiedTime();
-		} catch (final FileSystemException e) {
-			throw new RemoteFileSystemException("Could not access file " + url
-					+ ": " + e.getMessage());
-		}
+		return getUser().getFileSystemManager().lastModified(url);
 	}
 
 	public GridFile ls(final String directory, int recursion_level)
@@ -2593,40 +2436,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public boolean mkdir(final String url) throws RemoteFileSystemException {
 
 		myLogger.debug("Creating folder: " + url + "...");
-		try {
-			final FileObject dir = getUser().aquireFile(url);
-			if (!dir.exists()) {
-				dir.createFolder();
-				if (dir.exists()) {
-					return true;
-				} else {
-					return false;
-				}
-			} else {
-				return false;
-			}
-		} catch (final FileSystemException e) {
+		return getUser().getFileSystemManager().createFolder(url);
 
-			// try again. Commons-vfs sometimes seems to fail here without any
-			// reason I could figure out...
-			try {
-				final FileObject dir = getUser().aquireFile(url);
-				if (!dir.exists()) {
-					dir.createFolder();
-					if (dir.exists()) {
-						return true;
-					} else {
-						return false;
-					}
-				} else {
-					return false;
-				}
-			} catch (final Exception e2) {
-				throw new RemoteFileSystemException(
-						"Could not create directory " + url + ": "
-								+ e2.getLocalizedMessage());
-			}
-		}
 	}
 
 	public MountPoint mount(final String url, final String mountpoint,
@@ -2773,20 +2584,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		// job.setJob_directory(jobDir);
 
-		try {
-			final FileObject jobDirObject = getUser().aquireFile(jobDir);
-			// have to do this, otherwise exception -> bug in commons vfs?
-			try {
-				jobDirObject.getParent().createFolder();
-			} catch (final RuntimeException e) {
-				myLogger.debug("Could not create parent folder. Most likely that's ok. Folder: "
-						+ jobDir);
-			}
-			jobDirObject.createFolder();
-		} catch (final FileSystemException e) {
-			throw new RemoteFileSystemException(
-					"Could not create job output folder: " + jobDir);
-		}
+		getUser().getFileSystemManager().createFolder(jobDir);
+
 		// now after the jsdl is ready, don't forget to fill the required fields
 		// into the database
 	}
@@ -3925,19 +3724,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			if (StringUtils.isNotBlank(sourceUrl)) {
 
 				try {
-					if (!getUser().aquireFile(targetUrl).getParent().exists()) {
-						final FileObject folder = getUser().aquireFile(
-								targetUrl).getParent();
-						folder.createFolder();
-					}
-				} catch (final FileSystemException e) {
+					getUser().getFileSystemManager().createFolder(targetUrl);
+
+				} catch (final RemoteFileSystemException e) {
 					if (optionalStatus != null) {
 						optionalStatus
-								.addLogMessage("Error while staging in files.");
+								.addLogMessage("Error while staging in files: "
+										+ e.getLocalizedMessage());
 					}
-					throw new RemoteFileSystemException(
-							"Could not create parent folder for file: "
-									+ targetUrl + ": " + e.getMessage());
+					throw e;
 				}
 				myLogger.debug("Staging file: " + sourceUrl + " to: "
 						+ targetUrl);

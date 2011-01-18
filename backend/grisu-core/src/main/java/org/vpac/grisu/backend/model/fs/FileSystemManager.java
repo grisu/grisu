@@ -1,5 +1,7 @@
 package org.vpac.grisu.backend.model.fs;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +16,7 @@ import org.vpac.grisu.backend.model.RemoteFileTransferObject;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
+import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.dto.GridFile;
@@ -75,9 +78,9 @@ public class FileSystemManager {
 		return pl.copySingleFile(source, target, overwrite);
 	}
 
-	public void createFolder(String url) throws RemoteFileSystemException {
+	public boolean createFolder(String url) throws RemoteFileSystemException {
 
-		getFileSystemInfoPlugin(url).createFolder(url);
+		return getFileSystemInfoPlugin(url).createFolder(url);
 
 	}
 
@@ -85,11 +88,31 @@ public class FileSystemManager {
 		getFileSystemInfoPlugin(file).deleteFile(file);
 	}
 
+	public DataHandler download(String filename)
+			throws RemoteFileSystemException {
+		return getFileSystemInfoPlugin(filename).download(filename);
+	}
+
+	public boolean fileExists(String file) throws RemoteFileSystemException {
+		return getFileSystemInfoPlugin(file).fileExists(file);
+	}
+
+	public long getFileSize(final String file) throws RemoteFileSystemException {
+		return getFileSystemInfoPlugin(file).getFileSize(file);
+	}
+
 	private FileSystemInfoPlugin getFileSystemInfoPlugin(String url) {
 
 		String protocol = StringUtils.split(url, ':')[0];
 
-		return fileSystemInfoPlugins.get(protocol);
+		FileSystemInfoPlugin p = fileSystemInfoPlugins.get(protocol);
+
+		if (p == null) {
+			throw new RuntimeException("Protocol " + protocol
+					+ " not supported.");
+		}
+
+		return p;
 
 	}
 
@@ -114,6 +137,24 @@ public class FileSystemManager {
 
 	}
 
+	public InputStream getInputStream(String file)
+			throws RemoteFileSystemException {
+		return getFileSystemInfoPlugin(file).getInputStream(file);
+	}
+
+	public OutputStream getOutputStream(String file)
+			throws RemoteFileSystemException {
+		return getFileSystemInfoPlugin(file).getOutputStream(file);
+	}
+
+	public boolean isFolder(final String file) throws RemoteFileSystemException {
+		return getFileSystemInfoPlugin(file).isFolder(file);
+	}
+
+	public long lastModified(final String url) throws RemoteFileSystemException {
+		return getFileSystemInfoPlugin(url).lastModified(url);
+	}
+
 	public MountPoint mountFileSystem(String uri, final String mountPointName,
 			final ProxyCredential cred, final boolean useHomeDirectory,
 			final String site) throws RemoteFileSystemException {
@@ -135,7 +176,18 @@ public class FileSystemManager {
 	public void uploadFileToMultipleLocations(Set<String> parents,
 			final DataHandler source, final String targetFilename,
 			DtoActionStatus status) throws RemoteFileSystemException {
-		getFileSystemInfoPlugin(null).uploadFileToMultipleLocations(parents,
+
+		String prot = null;
+		for (String parent : parents) {
+			String protNew = FileManager.getProtocol(parent);
+			if ((prot != null) && !prot.equals(protNew)) {
+				throw new RemoteFileSystemException(
+						"Multiple remote protocols not supported (yet).");
+			}
+			prot = protNew;
+		}
+
+		getFileSystemInfoPlugin(prot).uploadFileToMultipleLocations(parents,
 				source, targetFilename, status);
 	}
 }

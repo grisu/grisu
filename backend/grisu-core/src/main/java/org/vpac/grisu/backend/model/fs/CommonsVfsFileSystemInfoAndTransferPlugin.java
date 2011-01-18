@@ -3,6 +3,7 @@ package org.vpac.grisu.backend.model.fs;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -17,6 +18,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.activation.DataHandler;
+import javax.activation.DataSource;
 
 import org.apache.commons.vfs.AllFileSelector;
 import org.apache.commons.vfs.FileContent;
@@ -30,6 +32,7 @@ import org.vpac.grisu.backend.model.FileSystemCache;
 import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.backend.model.RemoteFileTransferObject;
 import org.vpac.grisu.backend.model.User;
+import org.vpac.grisu.backend.utils.FileContentDataSourceConnector;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.DtoActionStatus;
@@ -150,18 +153,7 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 		source_file = aquireFile(source, null);
 		target_file = aquireFile(target, null);
 
-		// String targetFileString;
-		// try {
-		// targetFileString = target_file.getURL().toString();
-		// } catch (final FileSystemException e1) {
-		// myLogger.error("Could not retrieve targetfile url: "
-		// + e1.getLocalizedMessage());
-		// throw new RemoteFileSystemException(
-		// "Could not retrive targetfile url: "
-		// + e1.getLocalizedMessage());
-		// }
-
-		final RemoteFileTransferObject fileTransfer = new RemoteFileTransferObject(
+		final RemoteFileTransferObject fileTransfer = new CommonsVfsRemoteFileTransferObject(
 				source_file, target_file, overwrite);
 
 		myLogger.info("Creating fileTransfer object for source: "
@@ -172,7 +164,7 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 
 	}
 
-	public void createFolder(FileObject folder)
+	public boolean createFolder(FileObject folder)
 			throws RemoteFileSystemException {
 
 		try {
@@ -189,15 +181,21 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 				f.createFolder();
 			}
 
+			if (folder.exists()) {
+				return true;
+			} else {
+				return false;
+			}
+
 		} catch (FileSystemException e) {
 			throw new RemoteFileSystemException(e);
 		}
 
 	}
 
-	public void createFolder(String url) throws RemoteFileSystemException {
+	public boolean createFolder(String url) throws RemoteFileSystemException {
 		FileObject folder = aquireFile(url, null);
-		createFolder(folder);
+		return createFolder(folder);
 	}
 
 	public void deleteFile(final String file) throws RemoteFileSystemException {
@@ -214,6 +212,75 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 					+ e.getLocalizedMessage());
 		}
 
+	}
+
+	public DataHandler download(String filename)
+			throws RemoteFileSystemException {
+
+		// just in case we want to enable multiple downloads later
+		String[] filenames = new String[] { filename };
+
+		final DataSource[] datasources = new DataSource[filenames.length];
+		final DataHandler[] datahandlers = new DataHandler[filenames.length];
+
+		for (int i = 0; i < filenames.length; i++) {
+
+			FileObject source = null;
+			DataSource datasource = null;
+			source = aquireFile(filenames[i]);
+			myLogger.debug("Preparing data for file transmission for file "
+					+ source.getName().toString());
+			try {
+				if (!source.exists()) {
+					throw new RemoteFileSystemException(
+							"Could not provide file: "
+									+ filenames[i]
+									+ " for download: InputFile does not exist.");
+				}
+
+				datasource = new FileContentDataSourceConnector(
+						source.getContent());
+			} catch (final FileSystemException e) {
+				throw new RemoteFileSystemException(
+						"Could not find or read file: " + filenames[i] + ": "
+								+ e.getMessage());
+			}
+			datasources[i] = datasource;
+			datahandlers[i] = new DataHandler(datasources[i]);
+		}
+
+		return datahandlers[0];
+
+	}
+
+	public boolean fileExists(String file) throws RemoteFileSystemException {
+
+		boolean exists;
+
+		try {
+			exists = aquireFile(file).exists();
+			return exists;
+		} catch (final FileSystemException e) {
+
+			throw new RemoteFileSystemException(
+					"Could not connect to filesystem to aquire file: " + file);
+
+		}
+
+	}
+
+	public long getFileSize(final String file) throws RemoteFileSystemException {
+
+		final FileObject file_object = aquireFile(file);
+		long size;
+		try {
+			size = file_object.getContent().getSize();
+		} catch (final FileSystemException e) {
+			throw new RemoteFileSystemException("Could not get size of file: "
+					+ file + ": " + e.getMessage());
+		}
+
+		return size;
 	}
 
 	private FileSystemCache getFileSystemCache() {
@@ -313,6 +380,76 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 			throw new RemoteFileSystemException(fse);
 		}
 
+	}
+
+	public InputStream getInputStream(String file)
+			throws RemoteFileSystemException {
+
+		FileObject f = aquireFile(file);
+		try {
+			return f.getContent().getInputStream();
+		} catch (FileSystemException e) {
+			throw new RemoteFileSystemException(e);
+		}
+	}
+
+	public OutputStream getOutputStream(String file)
+			throws RemoteFileSystemException {
+
+		FileObject fileO = aquireFile(file);
+
+		try {
+			return fileO.getContent().getOutputStream();
+		} catch (FileSystemException e) {
+			throw new RemoteFileSystemException(e);
+		}
+
+	}
+
+	public boolean isFolder(final String file) throws RemoteFileSystemException {
+
+		boolean isFolder;
+		try {
+			isFolder = (aquireFile(file).getType() == FileType.FOLDER);
+		} catch (final Exception e) {
+			myLogger.error("Couldn't access file: " + file
+					+ " to check whether it is a folder."
+					+ e.getLocalizedMessage());
+			// e.printStackTrace();
+			// try again. sometimes it works the second time...
+			try {
+				myLogger.debug("trying a second time...");
+				isFolder = (aquireFile(file).getType() == FileType.FOLDER);
+			} catch (final Exception e2) {
+				// e2.printStackTrace();
+				myLogger.error("Again couldn't access file: " + file
+						+ " to check whether it is a folder."
+						+ e.getLocalizedMessage());
+				throw new RemoteFileSystemException("Could not aquire file: "
+						+ file);
+			}
+		}
+
+		return isFolder;
+
+	}
+
+	public long lastModified(final String url) throws RemoteFileSystemException {
+
+		try {
+			final FileObject file = aquireFile(url);
+			// myLogger.debug(url+" last modified before refresh:
+			// "+file.getContent().getLastModifiedTime());
+			// refresh to get non-cached date
+			// file.refresh();
+			// file.getParent().refresh();
+			// myLogger.debug(url+" last modified after refresh:
+			// "+file.getContent().getLastModifiedTime());
+			return file.getContent().getLastModifiedTime();
+		} catch (final FileSystemException e) {
+			throw new RemoteFileSystemException("Could not access file " + url
+					+ ": " + e.getMessage());
+		}
 	}
 
 	/**
@@ -657,8 +794,8 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 							status.setFailed(true);
 							return;
 						}
-						fileTransfer = new RemoteFileTransferObject(tempFile,
-								target, true);
+						fileTransfer = new CommonsVfsRemoteFileTransferObject(
+								tempFile, target, true);
 						myLogger.info("Creating fileTransfer object for source: "
 								+ tempFile.getName()
 								+ " and target: "
