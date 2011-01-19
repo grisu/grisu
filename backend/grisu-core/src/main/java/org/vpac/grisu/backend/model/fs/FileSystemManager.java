@@ -10,7 +10,6 @@ import javax.activation.DataHandler;
 
 import org.apache.axis.utils.StringUtils;
 import org.apache.commons.lang.NotImplementedException;
-import org.apache.commons.vfs.FileObject;
 import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.backend.model.RemoteFileTransferObject;
 import org.vpac.grisu.backend.model.User;
@@ -46,14 +45,14 @@ public class FileSystemManager {
 
 	}
 
-	public FileObject aquireFile(String urlOrPath, String fqan)
-			throws RemoteFileSystemException {
-
-		String url = cleanPath(urlOrPath);
-
-		return getFileSystemInfoPlugin(url).aquireFile(url, fqan);
-
-	}
+	// public FileObject aquireFile(String urlOrPath, String fqan)
+	// throws RemoteFileSystemException {
+	//
+	// String url = cleanPath(urlOrPath);
+	//
+	// return getFileSystemInfoPlugin(url).aquireFile(url, fqan);
+	//
+	// }
 
 	private String cleanPath(String path) {
 		if (path.startsWith("/")) {

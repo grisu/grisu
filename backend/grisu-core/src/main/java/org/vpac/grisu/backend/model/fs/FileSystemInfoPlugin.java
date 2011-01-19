@@ -6,7 +6,6 @@ import java.util.Set;
 
 import javax.activation.DataHandler;
 
-import org.apache.commons.vfs.FileObject;
 import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.MountPoint;
@@ -14,9 +13,6 @@ import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.dto.GridFile;
 
 public interface FileSystemInfoPlugin {
-
-	public FileObject aquireFile(String url, String fqan)
-			throws RemoteFileSystemException;
 
 	public boolean createFolder(String url) throws RemoteFileSystemException;
 

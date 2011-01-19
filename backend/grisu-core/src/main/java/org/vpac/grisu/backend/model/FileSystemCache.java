@@ -10,7 +10,6 @@ import org.apache.commons.vfs.FileSystemOptions;
 import org.apache.commons.vfs.impl.DefaultFileSystemManager;
 import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileSystemConfigBuilder;
 import org.apache.log4j.Logger;
-import org.vpac.grisu.X;
 import org.vpac.grisu.model.MountPoint;
 
 import uk.ac.dl.escience.vfs.util.VFSUtil;
@@ -40,7 +39,6 @@ public class FileSystemCache {
 
 	public void close() {
 		cachedFilesystems = null;
-		X.p("Closed filesystems.");
 		fsm.close();
 	}
 

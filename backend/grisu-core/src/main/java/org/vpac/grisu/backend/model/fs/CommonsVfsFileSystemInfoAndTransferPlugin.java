@@ -9,8 +9,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -27,7 +25,6 @@ import org.apache.commons.vfs.FileSystem;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileType;
 import org.apache.log4j.Logger;
-import org.vpac.grisu.X;
 import org.vpac.grisu.backend.model.FileSystemCache;
 import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.backend.model.RemoteFileTransferObject;
@@ -49,16 +46,20 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 
 	private final User user;
 
-	private final Map<Thread, FileSystemCache> filesystems = Collections
-			.synchronizedMap(new HashMap<Thread, FileSystemCache>());
+	private final FileSystemCache globalFileSystemCache;
+
+	// private final Map<Thread, FileSystemCache> filesystems = Collections
+	// .synchronizedMap(new HashMap<Thread, FileSystemCache>());
 
 	public CommonsVfsFileSystemInfoAndTransferPlugin(User user) {
 		this.user = user;
+		globalFileSystemCache = new FileSystemCache(user);
 
 	}
 
-	public FileObject aquireFile(String url) throws RemoteFileSystemException {
-		return aquireFile(url, null);
+	public FileObject aquireFile(FileSystemCache fsCache, String url)
+			throws RemoteFileSystemException {
+		return aquireFile(fsCache, url, null);
 	}
 
 	/**
@@ -78,8 +79,8 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 	 *             if the (possible) required voms credential could not be
 	 *             created
 	 */
-	public FileObject aquireFile(String url, final String fqan)
-			throws RemoteFileSystemException {
+	public FileObject aquireFile(FileSystemCache fsCache, String url,
+			final String fqan) throws RemoteFileSystemException {
 
 		if (Thread.interrupted()) {
 			Thread.currentThread().interrupt();
@@ -88,8 +89,7 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 
 		if (url.startsWith("tmp:") || url.startsWith("ram:")) {
 			try {
-				return getFileSystemCache().getFileSystem(url, null)
-						.resolveFile(url);
+				return fsCache.getFileSystem(url, null).resolveFile(url);
 			} catch (final FileSystemException e) {
 				throw new RemoteFileSystemException(
 						"Could not access file on local temp filesystem: "
@@ -102,7 +102,7 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 			FileSystem root = null;
 
 			// root = this.createFilesystem(mp.getRootUrl(), mp.getFqan());
-			root = getFileSystemCache().getFileSystem(url, fqan);
+			root = fsCache.getFileSystem(url, fqan);
 
 			final String fileUri = root.getRootName().getURI();
 
@@ -131,17 +131,7 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 
 	public void closeFileSystems() {
 
-		myLogger.debug("Closing all filesystems for thread "
-				+ Thread.currentThread().getName());
-
-		// threadLocalFsManager.remove();
-
-		for (FileSystemCache fs : filesystems.values()) {
-			fs.close();
-		}
-
-		filesystems.clear();
-
+		globalFileSystemCache.close();
 	}
 
 	public RemoteFileTransferObject copySingleFile(String source,
@@ -150,11 +140,13 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 		final FileObject source_file;
 		final FileObject target_file;
 
-		source_file = aquireFile(source, null);
-		target_file = aquireFile(target, null);
+		FileSystemCache fsCache = new FileSystemCache(user);
+
+		source_file = aquireFile(fsCache, source, null);
+		target_file = aquireFile(fsCache, target, null);
 
 		final RemoteFileTransferObject fileTransfer = new CommonsVfsRemoteFileTransferObject(
-				source_file, target_file, overwrite);
+				fsCache, source_file, target_file, overwrite);
 
 		myLogger.info("Creating fileTransfer object for source: "
 				+ source_file.getName() + " and target: "
@@ -194,13 +186,20 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 	}
 
 	public boolean createFolder(String url) throws RemoteFileSystemException {
-		FileObject folder = aquireFile(url, null);
-		return createFolder(folder);
+		FileSystemCache fsCache = new FileSystemCache(user);
+		try {
+			FileObject folder = aquireFile(fsCache, url, null);
+			return createFolder(folder);
+		} finally {
+			fsCache.close();
+		}
 	}
 
 	public void deleteFile(final String file) throws RemoteFileSystemException {
 
-		final FileObject fileObject = aquireFile(file);
+		FileSystemCache fsCache = new FileSystemCache(user);
+
+		final FileObject fileObject = aquireFile(fsCache, file);
 		try {
 			if (fileObject.exists()) {
 				fileObject.delete(new AllFileSelector());
@@ -210,6 +209,8 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 			// e.printStackTrace();
 			throw new RemoteFileSystemException("Could not delete file: "
 					+ e.getLocalizedMessage());
+		} finally {
+			fsCache.close();
 		}
 
 	}
@@ -223,15 +224,18 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 		final DataSource[] datasources = new DataSource[filenames.length];
 		final DataHandler[] datahandlers = new DataHandler[filenames.length];
 
+		FileSystemCache fsCache = new FileSystemCache(user);
+
 		for (int i = 0; i < filenames.length; i++) {
 
 			FileObject source = null;
 			DataSource datasource = null;
-			source = aquireFile(filenames[i]);
+			source = aquireFile(fsCache, filenames[i]);
 			myLogger.debug("Preparing data for file transmission for file "
 					+ source.getName().toString());
 			try {
 				if (!source.exists()) {
+					fsCache.close();
 					throw new RemoteFileSystemException(
 							"Could not provide file: "
 									+ filenames[i]
@@ -241,6 +245,7 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 				datasource = new FileContentDataSourceConnector(
 						source.getContent());
 			} catch (final FileSystemException e) {
+				fsCache.close();
 				throw new RemoteFileSystemException(
 						"Could not find or read file: " + filenames[i] + ": "
 								+ e.getMessage());
@@ -249,6 +254,8 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 			datahandlers[i] = new DataHandler(datasources[i]);
 		}
 
+		fsCache.close();
+
 		return datahandlers[0];
 
 	}
@@ -256,44 +263,51 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 	public boolean fileExists(String file) throws RemoteFileSystemException {
 
 		boolean exists;
+		FileSystemCache fsCache = new FileSystemCache(user);
 
 		try {
-			exists = aquireFile(file).exists();
+			exists = aquireFile(fsCache, file).exists();
 			return exists;
 		} catch (final FileSystemException e) {
 
 			throw new RemoteFileSystemException(
 					"Could not connect to filesystem to aquire file: " + file);
 
+		} finally {
+			fsCache.close();
 		}
 
 	}
 
+	// private FileSystemCache getFileSystemCache() {
+	//
+	// Thread current = Thread.currentThread();
+	// if (filesystems.get(current) == null) {
+	// FileSystemCache fs = new FileSystemCache(user);
+	// filesystems.put(current, fs);
+	// X.p("Filesystemcache size: " + filesystems.size());
+	// }
+	//
+	// return filesystems.get(current);
+	//
+	// }
+
 	public long getFileSize(final String file) throws RemoteFileSystemException {
 
-		final FileObject file_object = aquireFile(file);
 		long size;
+		FileSystemCache fsCache = new FileSystemCache(user);
 		try {
+
+			final FileObject file_object = aquireFile(fsCache, file);
 			size = file_object.getContent().getSize();
 		} catch (final FileSystemException e) {
 			throw new RemoteFileSystemException("Could not get size of file: "
 					+ file + ": " + e.getMessage());
+		} finally {
+			fsCache.close();
 		}
 
 		return size;
-	}
-
-	private FileSystemCache getFileSystemCache() {
-
-		Thread current = Thread.currentThread();
-		if (filesystems.get(current) == null) {
-			FileSystemCache fs = new FileSystemCache(user);
-			filesystems.put(current, fs);
-			X.p("Filesystemcache size: " + filesystems.size());
-		}
-
-		return filesystems.get(current);
-
 	}
 
 	public GridFile getFolderListing(String url, int recursiveLevels)
@@ -304,7 +318,9 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 					"Recursion > 1 not implemented for commonsvfsfilesystemplugin");
 		}
 
-		final FileObject fo = aquireFile(url, null);
+		FileSystemCache fsCache = new FileSystemCache(user);
+
+		final FileObject fo = aquireFile(fsCache, url, null);
 
 		try {
 
@@ -378,6 +394,8 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 			return folder;
 		} catch (FileSystemException fse) {
 			throw new RemoteFileSystemException(fse);
+		} finally {
+			fsCache.close();
 		}
 
 	}
@@ -385,8 +403,8 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 	public InputStream getInputStream(String file)
 			throws RemoteFileSystemException {
 
-		FileObject f = aquireFile(file);
 		try {
+			FileObject f = aquireFile(globalFileSystemCache, file);
 			return f.getContent().getInputStream();
 		} catch (FileSystemException e) {
 			throw new RemoteFileSystemException(e);
@@ -396,7 +414,7 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 	public OutputStream getOutputStream(String file)
 			throws RemoteFileSystemException {
 
-		FileObject fileO = aquireFile(file);
+		FileObject fileO = aquireFile(globalFileSystemCache, file);
 
 		try {
 			return fileO.getContent().getOutputStream();
@@ -409,8 +427,9 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 	public boolean isFolder(final String file) throws RemoteFileSystemException {
 
 		boolean isFolder;
+		FileSystemCache fsCache = new FileSystemCache(user);
 		try {
-			isFolder = (aquireFile(file).getType() == FileType.FOLDER);
+			isFolder = (aquireFile(fsCache, file).getType() == FileType.FOLDER);
 		} catch (final Exception e) {
 			myLogger.error("Couldn't access file: " + file
 					+ " to check whether it is a folder."
@@ -419,7 +438,7 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 			// try again. sometimes it works the second time...
 			try {
 				myLogger.debug("trying a second time...");
-				isFolder = (aquireFile(file).getType() == FileType.FOLDER);
+				isFolder = (aquireFile(fsCache, file).getType() == FileType.FOLDER);
 			} catch (final Exception e2) {
 				// e2.printStackTrace();
 				myLogger.error("Again couldn't access file: " + file
@@ -428,6 +447,8 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 				throw new RemoteFileSystemException("Could not aquire file: "
 						+ file);
 			}
+		} finally {
+			fsCache.close();
 		}
 
 		return isFolder;
@@ -436,19 +457,15 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 
 	public long lastModified(final String url) throws RemoteFileSystemException {
 
+		FileSystemCache fsCache = new FileSystemCache(user);
 		try {
-			final FileObject file = aquireFile(url);
-			// myLogger.debug(url+" last modified before refresh:
-			// "+file.getContent().getLastModifiedTime());
-			// refresh to get non-cached date
-			// file.refresh();
-			// file.getParent().refresh();
-			// myLogger.debug(url+" last modified after refresh:
-			// "+file.getContent().getLastModifiedTime());
+			final FileObject file = aquireFile(fsCache, url);
 			return file.getContent().getLastModifiedTime();
 		} catch (final FileSystemException e) {
 			throw new RemoteFileSystemException("Could not access file " + url
 					+ ": " + e.getMessage());
+		} finally {
+			fsCache.close();
 		}
 	}
 
@@ -498,8 +515,9 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 			// FileSystem fileSystem = createFilesystem(new_mp.getRootUrl(),
 			// new_mp.getFqan());
 
-			final FileSystem fileSystem = getFileSystemCache().getFileSystem(
-					new_mp);
+			FileSystemCache fsCache = new FileSystemCache(user);
+
+			final FileSystem fileSystem = fsCache.getFileSystem(new_mp);
 			// final FileSystem fileSystem = threadLocalFsManager.getFileSystem(
 			// new_mp.getRootUrl(), new_mp.getFqan());
 			myLogger.debug("Connected to file system.");
@@ -524,6 +542,8 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 						mountPointName, site);
 			}
 
+			fsCache.close();
+
 			return new_mp;
 		} catch (final FileSystemException e) {
 			throw new RemoteFileSystemException("Error while trying to mount: "
@@ -536,9 +556,10 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 			String fqan) throws RemoteFileSystemException {
 
 		FileSystem fileSystem;
+		FileSystemCache fsCache = new FileSystemCache(user);
+
 		try {
-			fileSystem = getFileSystemCache().getFileSystem(filesystemRoot,
-					fqan);
+			fileSystem = fsCache.getFileSystem(filesystemRoot, fqan);
 
 			// final FileSystem fileSystem = threadLocalFsManager
 			// .getFileSystem(filesystemRoot, fqan);
@@ -552,9 +573,12 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 					.getAttribute("HOME_DIRECTORY");
 			final String uri = fileSystem.getRoot().getName().getRootURI()
 					+ home.substring(1);
+
 			return uri;
 		} catch (FileSystemException e) {
 			throw new RemoteFileSystemException(e);
+		} finally {
+			fsCache.close();
 		}
 
 	}
@@ -566,13 +590,15 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 		FileObject target = null;
 
 		OutputStream fout = null;
+		FileSystemCache fsCache = new FileSystemCache(user);
+
 		try {
 			final String parent = filename.substring(0,
 					filename.lastIndexOf(File.separator));
 
 			createFolder(parent);
 
-			target = aquireFile(filename);
+			target = aquireFile(fsCache, filename);
 			// just to be sure that the folder exists.
 
 			myLogger.debug("Calculated target: " + target.getName().toString());
@@ -590,6 +616,7 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 				myLogger.error(e1);
 			}
 
+			fsCache.close();
 			// e.printStackTrace();
 			throw new RemoteFileSystemException("Could not open file: "
 					+ filename + ":" + e.getMessage());
@@ -636,6 +663,8 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 
 			throw new RemoteFileSystemException("Could not write to file: "
 					+ filename + ": " + e.getMessage());
+		} finally {
+			fsCache.close();
 		}
 
 		myLogger.debug("Data transmission for file " + filename + " finished.");
@@ -660,12 +689,14 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 					"Could not get input stream from datahandler...");
 		}
 
-		final FileObject tempFile = aquireFile("tmp://"
+		final FileSystemCache fsCache = new FileSystemCache(user);
+		final FileObject tempFile = aquireFile(fsCache, "tmp://"
 				+ UUID.randomUUID().toString());
 		OutputStream fout;
 		try {
 			fout = tempFile.getContent().getOutputStream();
 		} catch (final FileSystemException e1) {
+			fsCache.close();
 			throw new RemoteFileSystemException("Could not create temp file.");
 		}
 		myLogger.debug("Receiving data for file: " + targetFilename);
@@ -704,6 +735,7 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 				fout.close();
 			}
 		} catch (final IOException e) {
+			fsCache.close();
 			throw new RemoteFileSystemException("Could not write to file: "
 					+ targetFilename + ": " + e.getMessage());
 		}
@@ -744,13 +776,14 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 							}
 
 							try {
-								final FileObject parentObject = aquireFile(parent);
+								final FileObject parentObject = aquireFile(
+										fsCache, parent);
 								// FileObject tempObject = parentObject;
 
 								createFolder(parentObject);
 								// parentObject.createFolder();
 
-								target = aquireFile(parent + "/"
+								target = aquireFile(fsCache, parent + "/"
 										+ targetFilename);
 								// just to be sure that the folder exists.
 
@@ -795,7 +828,7 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 							return;
 						}
 						fileTransfer = new CommonsVfsRemoteFileTransferObject(
-								tempFile, target, true);
+								fsCache, tempFile, target, true);
 						myLogger.info("Creating fileTransfer object for source: "
 								+ tempFile.getName()
 								+ " and target: "
@@ -859,6 +892,8 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 					tempFile.delete();
 				} catch (FileSystemException e) {
 					e.printStackTrace();
+				} finally {
+					fsCache.close();
 				}
 
 			}

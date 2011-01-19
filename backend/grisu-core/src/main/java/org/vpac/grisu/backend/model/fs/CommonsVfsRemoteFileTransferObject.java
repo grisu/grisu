@@ -9,6 +9,7 @@ import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.log4j.Logger;
 import org.globus.ftp.MarkerListener;
+import org.vpac.grisu.backend.model.FileSystemCache;
 import org.vpac.grisu.backend.model.RemoteFileTransferObject;
 import org.vpac.grisu.backend.utils.DummyMarkerImpl;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -35,11 +36,15 @@ public class CommonsVfsRemoteFileTransferObject implements
 
 	private final MarkerListener dummyMarker = new DummyMarkerImpl();
 
+	private final FileSystemCache fsCache;
+
 	static final Logger myLogger = Logger
 			.getLogger(CommonsVfsRemoteFileTransferObject.class.getName());
 
-	public CommonsVfsRemoteFileTransferObject(final FileObject sourceF,
-			final FileObject targetF, final boolean overwriteB) {
+	public CommonsVfsRemoteFileTransferObject(final FileSystemCache fsCache,
+			final FileObject sourceF, final FileObject targetF,
+			final boolean overwriteB) {
+		this.fsCache = fsCache;
 		this.source = sourceF;
 		this.target = targetF;
 
@@ -226,6 +231,8 @@ public class CommonsVfsRemoteFileTransferObject implements
 				throw new RemoteFileSystemException("Could not copy files: "
 						+ e1.getLocalizedMessage());
 			}
+		} finally {
+			fsCache.close();
 		}
 
 	}
