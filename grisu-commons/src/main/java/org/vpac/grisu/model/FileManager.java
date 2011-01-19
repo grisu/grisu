@@ -238,6 +238,12 @@ public class FileManager {
 
 	}
 
+	public static String getProtocol(String parent) {
+
+		return parent.split(":")[0];
+
+	}
+
 	public static String removeTrailingSlash(String url) {
 
 		if (StringUtils.isBlank(url)) {
@@ -952,6 +958,7 @@ public class FileManager {
 		} else {
 
 			try {
+
 				GridFile result = serviceInterface.ls(url, recursionLevel);
 				return result;
 			} catch (final RemoteFileSystemException e) {
@@ -1118,6 +1125,22 @@ public class FileManager {
 
 	}
 
+	// private final void uploadInputFile(final String job, final String
+	// uriOrPath)
+	// throws FileTransactionException {
+	//
+	// final File file = getFileFromUriOrPath(uriOrPath);
+	//
+	// if (file.isDirectory()) {
+	// throw new FileTransactionException(uriOrPath, null,
+	// "Upload of folders not supported for job input files.",
+	// null);
+	// } else {
+	// uploadInputFile(file, job);
+	// }
+	//
+	// }
+
 	public final void uploadFolderToDirectory(final File folder,
 			final String targetDirectory, final boolean overwrite)
 			throws FileTransactionException {
@@ -1197,22 +1220,6 @@ public class FileManager {
 				+ " successful.");
 
 	}
-
-	// private final void uploadInputFile(final String job, final String
-	// uriOrPath)
-	// throws FileTransactionException {
-	//
-	// final File file = getFileFromUriOrPath(uriOrPath);
-	//
-	// if (file.isDirectory()) {
-	// throw new FileTransactionException(uriOrPath, null,
-	// "Upload of folders not supported for job input files.",
-	// null);
-	// } else {
-	// uploadInputFile(file, job);
-	// }
-	//
-	// }
 
 	private final void uploadInputFile(final String job, final File file,
 			final String targetPath) throws FileTransactionException {

@@ -2,7 +2,6 @@ package org.vpac.grisu.frontend.view.swing;
 
 import java.awt.Color;
 import java.awt.EventQueue;
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -36,7 +35,7 @@ public class GrisuMenu extends JMenuBar {
 		});
 	}
 
-	private final Frame parent;
+	private final GrisuApplicationWindow parent;
 
 	private ServiceInterface si;
 
@@ -57,10 +56,10 @@ public class GrisuMenu extends JMenuBar {
 	/**
 	 * Create the frame.
 	 */
-	public GrisuMenu(Frame parent) {
+	public GrisuMenu(GrisuApplicationWindow parent) {
 		this.parent = parent;
 
-		dialog = new SettingsDialog(parent);
+		dialog = new SettingsDialog(parent.getFrame());
 
 		add(getFileMenu());
 		add(getToolsMenu());
@@ -111,6 +110,7 @@ public class GrisuMenu extends JMenuBar {
 			exitItem.addActionListener(new ActionListener() {
 
 				public void actionPerformed(ActionEvent arg0) {
+					parent.exit();
 					System.exit(0);
 				}
 			});
@@ -170,7 +170,7 @@ public class GrisuMenu extends JMenuBar {
 					String message = "Version: " + clientVersion + "\n\n"
 							+ "Grisu client lib version: " + grisuclientversion;
 
-					JOptionPane.showMessageDialog(parent, message);
+					JOptionPane.showMessageDialog(parent.getFrame(), message);
 
 				}
 			});

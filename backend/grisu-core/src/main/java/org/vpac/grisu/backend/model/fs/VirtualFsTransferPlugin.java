@@ -16,8 +16,12 @@ public class VirtualFsTransferPlugin implements FileTransferPlugin {
 	public RemoteFileTransferObject copySingleFile(String source,
 			String target, boolean overwrite) throws RemoteFileSystemException {
 
-		GridFile sourceFile = user.getGridFile(source);
-		GridFile targetFile = user.getGridFile(target);
+		GridFile sourceFile;
+		sourceFile = user.getFileSystemManager().getFolderListing(source, 0);
+
+		GridFile targetFile;
+
+		targetFile = user.getFileSystemManager().getFolderListing(source, 0);
 
 		if (sourceFile.getUrls().size() > 1) {
 			throw new RemoteFileSystemException("Source file not unique: "

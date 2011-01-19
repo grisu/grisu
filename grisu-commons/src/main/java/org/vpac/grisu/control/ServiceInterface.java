@@ -486,26 +486,27 @@ public interface ServiceInterface {
 	@Path("user/bookmarks")
 	DtoProperties getBookmarks();
 
-	/**
-	 * Finds all children files for the specified folder. Useful if you want to
-	 * download a whole foldertree. Use with caution because that can be very
-	 * slow for big folders.
-	 * 
-	 * @param folder
-	 *            the folder in question
-	 * @param onlyFiles
-	 *            whether only files should be returned (true) or folders too
-	 *            (false).
-	 * @return all filenames of the folders' children
-	 * @throws RemoteFileSystemException
-	 *             if the folder can't be accessed/read
-	 */
-	@RolesAllowed("User")
-	@POST
-	@Path("user/files/childrenfilenames")
-	DtoStringList getChildrenFileNames(@QueryParam("url") String url,
-			@QueryParam("onlyFiles") boolean onlyFiles)
-			throws RemoteFileSystemException;
+	// /**
+	// * Finds all children files for the specified folder. Useful if you want
+	// to
+	// * download a whole foldertree. Use with caution because that can be very
+	// * slow for big folders.
+	// *
+	// * @param folder
+	// * the folder in question
+	// * @param onlyFiles
+	// * whether only files should be returned (true) or folders too
+	// * (false).
+	// * @return all filenames of the folders' children
+	// * @throws RemoteFileSystemException
+	// * if the folder can't be accessed/read
+	// */
+	// @RolesAllowed("User")
+	// @POST
+	// @Path("user/files/childrenfilenames")
+	// DtoStringList getChildrenFileNames(@QueryParam("url") String url,
+	// @QueryParam("onlyFiles") boolean onlyFiles)
+	// throws RemoteFileSystemException;
 
 	/**
 	 * Returns the end time of the credential used.

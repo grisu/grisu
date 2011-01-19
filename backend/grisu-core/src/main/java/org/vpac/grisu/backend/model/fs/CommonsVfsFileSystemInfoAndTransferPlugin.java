@@ -1,17 +1,40 @@
 package org.vpac.grisu.backend.model.fs;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+
+import org.apache.commons.vfs.AllFileSelector;
+import org.apache.commons.vfs.FileContent;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystem;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileType;
 import org.apache.log4j.Logger;
+import org.vpac.grisu.backend.model.FileSystemCache;
+import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.backend.model.RemoteFileTransferObject;
 import org.vpac.grisu.backend.model.User;
+import org.vpac.grisu.backend.utils.FileContentDataSourceConnector;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.model.MountPoint;
+import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.dto.GridFile;
+import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.security.light.vomsProxy.VomsException;
 
 public class CommonsVfsFileSystemInfoAndTransferPlugin implements
@@ -23,12 +46,20 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 
 	private final User user;
 
-	private final ThreadLocalCommonsVfsManager threadLocalFsManager;
+	private final FileSystemCache globalFileSystemCache;
+
+	// private final Map<Thread, FileSystemCache> filesystems = Collections
+	// .synchronizedMap(new HashMap<Thread, FileSystemCache>());
 
 	public CommonsVfsFileSystemInfoAndTransferPlugin(User user) {
 		this.user = user;
-		threadLocalFsManager = new ThreadLocalCommonsVfsManager(this.user);
+		globalFileSystemCache = new FileSystemCache(user);
 
+	}
+
+	public FileObject aquireFile(FileSystemCache fsCache, String url)
+			throws RemoteFileSystemException {
+		return aquireFile(fsCache, url, null);
 	}
 
 	/**
@@ -48,8 +79,8 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 	 *             if the (possible) required voms credential could not be
 	 *             created
 	 */
-	public FileObject aquireFile(String url, final String fqan)
-			throws RemoteFileSystemException {
+	public FileObject aquireFile(FileSystemCache fsCache, String url,
+			final String fqan) throws RemoteFileSystemException {
 
 		if (Thread.interrupted()) {
 			Thread.currentThread().interrupt();
@@ -58,7 +89,7 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 
 		if (url.startsWith("tmp:") || url.startsWith("ram:")) {
 			try {
-				return threadLocalFsManager.getFsManager().resolveFile(url);
+				return fsCache.getFileSystem(url, null).resolveFile(url);
 			} catch (final FileSystemException e) {
 				throw new RemoteFileSystemException(
 						"Could not access file on local temp filesystem: "
@@ -71,7 +102,7 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 			FileSystem root = null;
 
 			// root = this.createFilesystem(mp.getRootUrl(), mp.getFqan());
-			root = threadLocalFsManager.getFileSystem(url, fqan);
+			root = fsCache.getFileSystem(url, fqan);
 
 			final String fileUri = root.getRootName().getURI();
 
@@ -99,7 +130,8 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 	}
 
 	public void closeFileSystems() {
-		threadLocalFsManager.remove();
+
+		globalFileSystemCache.close();
 	}
 
 	public RemoteFileTransferObject copySingleFile(String source,
@@ -108,22 +140,13 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 		final FileObject source_file;
 		final FileObject target_file;
 
-		source_file = aquireFile(source, null);
-		target_file = aquireFile(target, null);
+		FileSystemCache fsCache = new FileSystemCache(user);
 
-		// String targetFileString;
-		// try {
-		// targetFileString = target_file.getURL().toString();
-		// } catch (final FileSystemException e1) {
-		// myLogger.error("Could not retrieve targetfile url: "
-		// + e1.getLocalizedMessage());
-		// throw new RemoteFileSystemException(
-		// "Could not retrive targetfile url: "
-		// + e1.getLocalizedMessage());
-		// }
+		source_file = aquireFile(fsCache, source, null);
+		target_file = aquireFile(fsCache, target, null);
 
-		final RemoteFileTransferObject fileTransfer = new RemoteFileTransferObject(
-				source_file, target_file, overwrite);
+		final RemoteFileTransferObject fileTransfer = new CommonsVfsRemoteFileTransferObject(
+				fsCache, source_file, target_file, overwrite);
 
 		myLogger.info("Creating fileTransfer object for source: "
 				+ source_file.getName() + " and target: "
@@ -131,6 +154,160 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 
 		return fileTransfer;
 
+	}
+
+	public boolean createFolder(FileObject folder)
+			throws RemoteFileSystemException {
+
+		try {
+
+			ArrayList<FileObject> temp = new ArrayList<FileObject>();
+			FileObject last = folder;
+			while (!last.getParent().exists()) {
+				temp.add(last);
+				last = last.getParent();
+			}
+
+			Collections.reverse(temp);
+			for (FileObject f : temp) {
+				f.createFolder();
+			}
+
+			if (folder.exists()) {
+				return true;
+			} else {
+				return false;
+			}
+
+		} catch (FileSystemException e) {
+			throw new RemoteFileSystemException(e);
+		}
+
+	}
+
+	public boolean createFolder(String url) throws RemoteFileSystemException {
+		FileSystemCache fsCache = new FileSystemCache(user);
+		try {
+			FileObject folder = aquireFile(fsCache, url, null);
+			return createFolder(folder);
+		} finally {
+			fsCache.close();
+		}
+	}
+
+	public void deleteFile(final String file) throws RemoteFileSystemException {
+
+		FileSystemCache fsCache = new FileSystemCache(user);
+
+		final FileObject fileObject = aquireFile(fsCache, file);
+		try {
+			if (fileObject.exists()) {
+				fileObject.delete(new AllFileSelector());
+			}
+		} catch (final FileSystemException e) {
+			// TODO Auto-generated catch block
+			// e.printStackTrace();
+			throw new RemoteFileSystemException("Could not delete file: "
+					+ e.getLocalizedMessage());
+		} finally {
+			fsCache.close();
+		}
+
+	}
+
+	public DataHandler download(String filename)
+			throws RemoteFileSystemException {
+
+		// just in case we want to enable multiple downloads later
+		String[] filenames = new String[] { filename };
+
+		final DataSource[] datasources = new DataSource[filenames.length];
+		final DataHandler[] datahandlers = new DataHandler[filenames.length];
+
+		FileSystemCache fsCache = new FileSystemCache(user);
+
+		for (int i = 0; i < filenames.length; i++) {
+
+			FileObject source = null;
+			DataSource datasource = null;
+			source = aquireFile(fsCache, filenames[i]);
+			myLogger.debug("Preparing data for file transmission for file "
+					+ source.getName().toString());
+			try {
+				if (!source.exists()) {
+					fsCache.close();
+					throw new RemoteFileSystemException(
+							"Could not provide file: "
+									+ filenames[i]
+									+ " for download: InputFile does not exist.");
+				}
+
+				datasource = new FileContentDataSourceConnector(
+						source.getContent());
+			} catch (final FileSystemException e) {
+				fsCache.close();
+				throw new RemoteFileSystemException(
+						"Could not find or read file: " + filenames[i] + ": "
+								+ e.getMessage());
+			}
+			datasources[i] = datasource;
+			datahandlers[i] = new DataHandler(datasources[i]);
+		}
+
+		fsCache.close();
+
+		return datahandlers[0];
+
+	}
+
+	public boolean fileExists(String file) throws RemoteFileSystemException {
+
+		boolean exists;
+		FileSystemCache fsCache = new FileSystemCache(user);
+
+		try {
+			exists = aquireFile(fsCache, file).exists();
+			return exists;
+		} catch (final FileSystemException e) {
+
+			throw new RemoteFileSystemException(
+					"Could not connect to filesystem to aquire file: " + file);
+
+		} finally {
+			fsCache.close();
+		}
+
+	}
+
+	// private FileSystemCache getFileSystemCache() {
+	//
+	// Thread current = Thread.currentThread();
+	// if (filesystems.get(current) == null) {
+	// FileSystemCache fs = new FileSystemCache(user);
+	// filesystems.put(current, fs);
+	// X.p("Filesystemcache size: " + filesystems.size());
+	// }
+	//
+	// return filesystems.get(current);
+	//
+	// }
+
+	public long getFileSize(final String file) throws RemoteFileSystemException {
+
+		long size;
+		FileSystemCache fsCache = new FileSystemCache(user);
+		try {
+
+			final FileObject file_object = aquireFile(fsCache, file);
+			size = file_object.getContent().getSize();
+		} catch (final FileSystemException e) {
+			throw new RemoteFileSystemException("Could not get size of file: "
+					+ file + ": " + e.getMessage());
+		} finally {
+			fsCache.close();
+		}
+
+		return size;
 	}
 
 	public GridFile getFolderListing(String url, int recursiveLevels)
@@ -141,7 +318,9 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 					"Recursion > 1 not implemented for commonsvfsfilesystemplugin");
 		}
 
-		final FileObject fo = aquireFile(url, null);
+		FileSystemCache fsCache = new FileSystemCache(user);
+
+		final FileObject fo = aquireFile(fsCache, url, null);
 
 		try {
 
@@ -215,7 +394,510 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 			return folder;
 		} catch (FileSystemException fse) {
 			throw new RemoteFileSystemException(fse);
+		} finally {
+			fsCache.close();
 		}
+
+	}
+
+	public InputStream getInputStream(String file)
+			throws RemoteFileSystemException {
+
+		try {
+			FileObject f = aquireFile(globalFileSystemCache, file);
+			return f.getContent().getInputStream();
+		} catch (FileSystemException e) {
+			throw new RemoteFileSystemException(e);
+		}
+	}
+
+	public OutputStream getOutputStream(String file)
+			throws RemoteFileSystemException {
+
+		FileObject fileO = aquireFile(globalFileSystemCache, file);
+
+		try {
+			return fileO.getContent().getOutputStream();
+		} catch (FileSystemException e) {
+			throw new RemoteFileSystemException(e);
+		}
+
+	}
+
+	public boolean isFolder(final String file) throws RemoteFileSystemException {
+
+		boolean isFolder;
+		FileSystemCache fsCache = new FileSystemCache(user);
+		try {
+			isFolder = (aquireFile(fsCache, file).getType() == FileType.FOLDER);
+		} catch (final Exception e) {
+			myLogger.error("Couldn't access file: " + file
+					+ " to check whether it is a folder."
+					+ e.getLocalizedMessage());
+			// e.printStackTrace();
+			// try again. sometimes it works the second time...
+			try {
+				myLogger.debug("trying a second time...");
+				isFolder = (aquireFile(fsCache, file).getType() == FileType.FOLDER);
+			} catch (final Exception e2) {
+				// e2.printStackTrace();
+				myLogger.error("Again couldn't access file: " + file
+						+ " to check whether it is a folder."
+						+ e.getLocalizedMessage());
+				throw new RemoteFileSystemException("Could not aquire file: "
+						+ file);
+			}
+		} finally {
+			fsCache.close();
+		}
+
+		return isFolder;
+
+	}
+
+	public long lastModified(final String url) throws RemoteFileSystemException {
+
+		FileSystemCache fsCache = new FileSystemCache(user);
+		try {
+			final FileObject file = aquireFile(fsCache, url);
+			return file.getContent().getLastModifiedTime();
+		} catch (final FileSystemException e) {
+			throw new RemoteFileSystemException("Could not access file " + url
+					+ ": " + e.getMessage());
+		} finally {
+			fsCache.close();
+		}
+	}
+
+	/**
+	 * Adds a filesystem to the mountpoints of this user. The mountpoint is just
+	 * an alias to make the urls shorter and easier to read/remember. You only
+	 * need to mount a filesystem once. After you persisted the user (with
+	 * hibernate) the alias and rootUrl of the filesystem are persisted as well.
+	 * 
+	 * A mountpoint always has to be in the root directory (for example: /local
+	 * or /remote -- never /remote/ng2.vpac.org )
+	 * 
+	 * @param uri
+	 *            the filesystem to mount (something like:
+	 *            gsiftp://ngdata.vapc.org/home/san04/markus)
+	 * @param mountPointName
+	 *            the name of the mountpoint (something like: /remote or
+	 *            /remote.vpac)
+	 * @param cred
+	 *            the credential that is used to contact the filesystem (can be
+	 *            null for local filesystems)
+	 * @return the root FileObject of the newly mounted FileSystem
+	 * @throws VomsException
+	 * @throws FileSystemException
+	 *             if the filesystem could not be mounted
+	 */
+	public MountPoint mountFileSystem(String uri, final String mountPointName,
+			final ProxyCredential cred, final boolean useHomeDirectory,
+			final String site) throws RemoteFileSystemException {
+
+		// if (!mountPointName.startsWith("/")) {
+		// mountPointName = "/" + mountPointName;
+		// }
+
+		myLogger.debug("Checking mountpoints for duplicates.");
+		for (final MountPoint mp : user.getAllMountPoints()) {
+			if (mountPointName.equals(mp.getAlias())) {
+				throw new RemoteFileSystemException(
+						"There is already a filesystem mounted on:"
+								+ mountPointName);
+			}
+		}
+
+		MountPoint new_mp = new MountPoint(cred.getDn(), cred.getFqan(), uri,
+				mountPointName, site);
+		try {
+			// FileSystem fileSystem = createFilesystem(new_mp.getRootUrl(),
+			// new_mp.getFqan());
+
+			FileSystemCache fsCache = new FileSystemCache(user);
+
+			final FileSystem fileSystem = fsCache.getFileSystem(new_mp);
+			// final FileSystem fileSystem = threadLocalFsManager.getFileSystem(
+			// new_mp.getRootUrl(), new_mp.getFqan());
+			myLogger.debug("Connected to file system.");
+			if (useHomeDirectory) {
+				myLogger.debug("Using home directory: "
+						+ ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
+								.substring(1));
+				uri = fileSystem.getRoot().getName().getRootURI()
+						+ ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
+								.substring(1);
+				// if vo user, use $VOHOME/<DN> as homedirectory
+				if (cred.getFqan() != null) {
+					uri = uri + File.separator
+							+ User.get_vo_dn_path(cred.getDn());
+					fileSystem.resolveFile(
+							((String) fileSystem.getAttribute("HOME_DIRECTORY")
+									+ File.separator + cred.getDn()
+									.replace("=", "_").replace(",", "_")
+									.replace(" ", "_"))).createFolder();
+				}
+				new_mp = new MountPoint(cred.getDn(), cred.getFqan(), uri,
+						mountPointName, site);
+			}
+
+			fsCache.close();
+
+			return new_mp;
+		} catch (final FileSystemException e) {
+			throw new RemoteFileSystemException("Error while trying to mount: "
+					+ mountPointName);
+		}
+
+	}
+
+	public String resolveFileSystemHomeDirectory(String filesystemRoot,
+			String fqan) throws RemoteFileSystemException {
+
+		FileSystem fileSystem;
+		FileSystemCache fsCache = new FileSystemCache(user);
+
+		try {
+			fileSystem = fsCache.getFileSystem(filesystemRoot, fqan);
+
+			// final FileSystem fileSystem = threadLocalFsManager
+			// .getFileSystem(filesystemRoot, fqan);
+			myLogger.debug("Connected to file system.");
+
+			myLogger.debug("Using home directory: "
+					+ ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
+							.substring(1));
+
+			final String home = (String) fileSystem
+					.getAttribute("HOME_DIRECTORY");
+			final String uri = fileSystem.getRoot().getName().getRootURI()
+					+ home.substring(1);
+
+			return uri;
+		} catch (FileSystemException e) {
+			throw new RemoteFileSystemException(e);
+		} finally {
+			fsCache.close();
+		}
+
+	}
+
+	public String upload(final DataHandler source, final String filename)
+			throws RemoteFileSystemException {
+
+		myLogger.debug("Receiving file: " + filename);
+		FileObject target = null;
+
+		OutputStream fout = null;
+		FileSystemCache fsCache = new FileSystemCache(user);
+
+		try {
+			final String parent = filename.substring(0,
+					filename.lastIndexOf(File.separator));
+
+			createFolder(parent);
+
+			target = aquireFile(fsCache, filename);
+			// just to be sure that the folder exists.
+
+			myLogger.debug("Calculated target: " + target.getName().toString());
+
+			final FileContent content = target.getContent();
+			fout = content.getOutputStream();
+		} catch (final FileSystemException e) {
+
+			try {
+				if (fout != null) {
+					fout.close();
+				}
+				source.getInputStream().close();
+			} catch (final Exception e1) {
+				myLogger.error(e1);
+			}
+
+			fsCache.close();
+			// e.printStackTrace();
+			throw new RemoteFileSystemException("Could not open file: "
+					+ filename + ":" + e.getMessage());
+		}
+
+		myLogger.debug("Receiving data for file: " + filename);
+
+		BufferedInputStream buf;
+		try {
+			buf = new BufferedInputStream(source.getInputStream());
+
+			final byte[] buffer = new byte[1024]; // byte buffer
+			int bytesRead = 0;
+			while (true) {
+				if (Thread.interrupted()) {
+					Thread.currentThread().interrupt();
+					buf.close();
+					fout.close();
+					throw new RemoteFileSystemException(
+							"File transfer interrupted.");
+				}
+				bytesRead = buf.read(buffer, 0, 1024);
+				// bytesRead returns the actual number of bytes read from
+				// the stream. returns -1 when end of stream is detected
+				if (bytesRead == -1) {
+					break;
+				}
+				fout.write(buffer, 0, bytesRead);
+			}
+
+			if (buf != null) {
+				buf.close();
+			}
+			if (fout != null) {
+				fout.close();
+			}
+		} catch (final IOException e) {
+			try {
+				fout.close();
+				source.getInputStream().close();
+			} catch (final Exception e1) {
+				myLogger.error(e1);
+			}
+
+			throw new RemoteFileSystemException("Could not write to file: "
+					+ filename + ": " + e.getMessage());
+		} finally {
+			fsCache.close();
+		}
+
+		myLogger.debug("Data transmission for file " + filename + " finished.");
+
+		buf = null;
+		fout = null;
+		return target.getName().getURI();
+
+	}
+
+	public void uploadFileToMultipleLocations(Set<String> parents,
+			final DataHandler source, final String targetFilename,
+			final DtoActionStatus status) throws RemoteFileSystemException {
+
+		myLogger.debug("Receiving datahandler for multiple file copy...");
+
+		BufferedInputStream buf;
+		try {
+			buf = new BufferedInputStream(source.getInputStream());
+		} catch (final IOException e1) {
+			throw new RuntimeException(
+					"Could not get input stream from datahandler...");
+		}
+
+		final FileSystemCache fsCache = new FileSystemCache(user);
+		final FileObject tempFile = aquireFile(fsCache, "tmp://"
+				+ UUID.randomUUID().toString());
+		OutputStream fout;
+		try {
+			fout = tempFile.getContent().getOutputStream();
+		} catch (final FileSystemException e1) {
+			fsCache.close();
+			throw new RemoteFileSystemException("Could not create temp file.");
+		}
+		myLogger.debug("Receiving data for file: " + targetFilename);
+
+		if (Thread.interrupted()) {
+			Thread.currentThread().interrupt();
+			return;
+		}
+
+		try {
+
+			final byte[] buffer = new byte[1024]; // byte buffer
+			int bytesRead = 0;
+			while (true) {
+
+				if (Thread.interrupted()) {
+					Thread.currentThread().interrupt();
+					fout.close();
+					buf.close();
+					return;
+				}
+
+				bytesRead = buf.read(buffer, 0, 1024);
+				// bytesRead returns the actual number of bytes read from
+				// the stream. returns -1 when end of stream is detected
+				if (bytesRead == -1) {
+					break;
+				}
+				fout.write(buffer, 0, bytesRead);
+			}
+
+			if (buf != null) {
+				buf.close();
+			}
+			if (fout != null) {
+				fout.close();
+			}
+		} catch (final IOException e) {
+			fsCache.close();
+			throw new RemoteFileSystemException("Could not write to file: "
+					+ targetFilename + ": " + e.getMessage());
+		}
+		fout = null;
+
+		final ExecutorService executor = Executors.newFixedThreadPool(parents
+				.size());
+
+		for (final String parent : parents) {
+
+			if (Thread.interrupted()) {
+				executor.shutdownNow();
+				Thread.currentThread().interrupt();
+				status.setFinished(true);
+				status.setFailed(true);
+				return;
+			}
+
+			final Thread thread = new Thread() {
+				@Override
+				public void run() {
+
+					try {
+						FileObject target = null;
+
+						RemoteFileTransferObject fileTransfer;
+
+						for (int tryNo = 0; tryNo <= ServerPropertiesManager
+								.getFileTransferRetries(); tryNo++) {
+
+							myLogger.debug(tryNo + 1
+									+ ". try to transfer file to " + parent);
+
+							if (Thread.interrupted()) {
+								Thread.currentThread().interrupt();
+								executor.shutdownNow();
+								return;
+							}
+
+							try {
+								final FileObject parentObject = aquireFile(
+										fsCache, parent);
+								// FileObject tempObject = parentObject;
+
+								createFolder(parentObject);
+								// parentObject.createFolder();
+
+								target = aquireFile(fsCache, parent + "/"
+										+ targetFilename);
+								// just to be sure that the folder exists.
+
+								myLogger.debug("Calculated target for multipartjob input file: "
+										+ target.getName().toString());
+								break;
+							} catch (final Exception e) {
+
+								if (Thread.interrupted()) {
+									Thread.currentThread().interrupt();
+									executor.shutdownNow();
+									return;
+								}
+								e.printStackTrace();
+								if (tryNo >= ServerPropertiesManager
+										.getFileTransferRetries() - 1) {
+									status.addElement("Upload to folder "
+											+ parent
+											+ " failed: Could not open file: "
+											+ targetFilename + ":"
+											+ e.getMessage());
+									status.setFailed(true);
+									executor.shutdownNow();
+								} else {
+									// wait for a bit, maybe the gridftp server
+									// needs some time
+									try {
+										Thread.sleep(3000);
+									} catch (final InterruptedException e1) {
+										e1.printStackTrace();
+										Thread.currentThread().interrupt();
+									}
+								}
+							}
+						}
+
+						if (Thread.interrupted()) {
+							Thread.currentThread().interrupt();
+							executor.shutdownNow();
+							status.setFinished(true);
+							status.setFailed(true);
+							return;
+						}
+						fileTransfer = new CommonsVfsRemoteFileTransferObject(
+								fsCache, tempFile, target, true);
+						myLogger.info("Creating fileTransfer object for source: "
+								+ tempFile.getName()
+								+ " and target: "
+								+ target.toString());
+						// fileTransfers.put(targetFileString, fileTransfer);
+
+						fileTransfer.startTransfer(true);
+
+						if (Thread.interrupted()) {
+							Thread.currentThread().interrupt();
+							executor.shutdownNow();
+							status.setFinished(true);
+							status.setFailed(true);
+							return;
+						}
+
+						if (fileTransfer.isFailed()) {
+							status.addElement("File transfer failed: "
+									+ fileTransfer
+											.getPossibleExceptionMessage());
+							status.setFailed(true);
+							executor.shutdownNow();
+						} else {
+							status.addElement("Upload to folder " + parent
+									+ " successful.");
+						}
+
+						// if (status.getTotalElements() <= status
+						// .getCurrentElements()) {
+						// status.setFinished(true);
+						// multiJob.setStatus(JobConstants.READY_TO_SUBMIT);
+						// batchJobDao.saveOrUpdate(multiJob);
+						// }
+
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			};
+			executor.execute(thread);
+
+		}
+
+		executor.shutdown();
+
+		myLogger.debug("All data transmissions for multiple copy of "
+				+ targetFilename + " started.");
+
+		// cleanup
+
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					executor.awaitTermination(1, TimeUnit.DAYS);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+
+				try {
+					tempFile.delete();
+				} catch (FileSystemException e) {
+					e.printStackTrace();
+				} finally {
+					fsCache.close();
+				}
+
+			}
+		}.start();
 
 	}
 }
