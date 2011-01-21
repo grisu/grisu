@@ -147,7 +147,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				.getMatchMakerConf());
 	}
 
-	private final Map<String, List<Job>> archivedJobs = new HashMap<String, List<Job>>();
+	// private final Map<String, List<Job>> archivedJobs = new HashMap<String,
+	// List<Job>>();
 
 	private final boolean checkFileSystemsBeforeUse = false;
 	// protected final UserDAO userdao = new UserDAO();
@@ -604,26 +605,26 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				status.addElement("Killing job.");
 				kill(job, true, false);
 
-				if (optionalBatchJobStatus == null) {
-					new Thread() {
-						@Override
-						public void run() {
-							Job job = null;
-							;
-							try {
-								job = loadJobFromFilesystem(grisuJobFileUrl);
-								DtoJob j = DtoJob.createJob(job.getStatus(),
-										job.getJobProperties(),
-										job.getInputFiles(),
-										job.getLogMessages(), job.isArchived());
-
-								getArchivedJobs(null).addJob(j);
-							} catch (NoSuchJobException e) {
-								e.printStackTrace();
-							}
-						}
-					}.start();
-				}
+				// if (optionalBatchJobStatus == null) {
+				// new Thread() {
+				// @Override
+				// public void run() {
+				// Job job = null;
+				// ;
+				// try {
+				// job = loadJobFromFilesystem(grisuJobFileUrl);
+				// DtoJob j = DtoJob.createJob(job.getStatus(),
+				// job.getJobProperties(),
+				// job.getInputFiles(),
+				// job.getLogMessages(), job.isArchived());
+				//
+				// getArchivedJobs(null).addJob(j);
+				// } catch (NoSuchJobException e) {
+				// e.printStackTrace();
+				// }
+				// }
+				// }.start();
+				// }
 
 				status.addElement("Job archived successfully.");
 				status.setFinished(true);
@@ -1698,31 +1699,31 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			fs = getDefaultArchiveLocation();
 		}
 
-		synchronized (fs) {
+		// synchronized (fs) {
 
-			List<Job> jobs = Collections
-					.synchronizedList(new LinkedList<Job>());
+		List<Job> jobs = Collections.synchronizedList(new LinkedList<Job>());
 
-			if (archivedJobs.get(fs) == null) {
-				GridFile file = ls(fs, 1);
+		// if (archivedJobs.get(fs) == null) {
+		GridFile file = ls(fs, 1);
 
-				for (GridFile f : file.getChildren()) {
-					try {
-						Job job = loadJobFromFilesystem(f.getUrl());
-						jobs.add(job);
+		for (GridFile f : file.getChildren()) {
+			try {
+				Job job = loadJobFromFilesystem(f.getUrl());
+				jobs.add(job);
 
-					} catch (NoSuchJobException e) {
-						myLogger.debug("No job for url: " + f.getUrl());
-					}
-				}
-
-				archivedJobs.put(fs, jobs);
-
+			} catch (NoSuchJobException e) {
+				myLogger.debug("No job for url: " + f.getUrl());
 			}
-
-			return archivedJobs.get(fs);
-
 		}
+
+		// archivedJobs.put(fs, jobs);
+
+		// }
+
+		// return archivedJobs.get(fs);
+		return jobs;
+
+		// }
 
 	}
 
