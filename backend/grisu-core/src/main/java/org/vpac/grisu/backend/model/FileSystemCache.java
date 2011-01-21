@@ -38,7 +38,7 @@ public class FileSystemCache {
 	}
 
 	public void close() {
-		cachedFilesystems = null;
+		cachedFilesystems = new HashMap<MountPoint, FileSystem>();
 		fsm.close();
 	}
 

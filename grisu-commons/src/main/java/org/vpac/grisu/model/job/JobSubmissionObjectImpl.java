@@ -135,143 +135,20 @@ public class JobSubmissionObjectImpl {
 
 	public JobSubmissionObjectImpl(final Document jsdl) {
 
-		jobname = JsdlHelpers.getJobname(jsdl);
-		application = JsdlHelpers.getApplicationName(jsdl);
-		applicationVersion = JsdlHelpers.getApplicationVersion(jsdl);
-		email_address = JsdlHelpers.getEmail(jsdl);
-		email_on_job_start = JsdlHelpers.getSendEmailOnJobStart(jsdl);
-		email_on_job_finish = JsdlHelpers.getSendEmailOnJobFinish(jsdl);
-		cpus = JsdlHelpers.getProcessorCount(jsdl);
-		hostcount = JsdlHelpers.getResourceCount(jsdl);
-		final String jobTypeString = JsdlHelpers.getArcsJobType(jsdl);
-		if (jobTypeString != null) {
-			if (jobTypeString.toLowerCase().equals(
-					JobSubmissionProperty.FORCE_SINGLE.defaultValue())) {
-				force_single = true;
-				force_mpi = false;
-			} else if (jobTypeString.toLowerCase().equals(
-					JobSubmissionProperty.FORCE_SINGLE.defaultValue())) {
-				force_single = false;
-				force_mpi = true;
-			} else {
-				force_single = false;
-				force_mpi = false;
-			}
-		} else {
-			force_single = false;
-			force_mpi = false;
-		}
-		memory_in_bytes = JsdlHelpers.getTotalMemoryRequirement(jsdl);
-		walltime_in_seconds = JsdlHelpers.getWalltime(jsdl);
-
-		String[] temp = JsdlHelpers.getInputFileUrls(jsdl);
-		if (temp != null) {
-			Map<String, String> inf = new LinkedHashMap<String, String>();
-			for (String s : temp) {
-				inf.put(s, "");
-			}
-			setInputFiles(inf);
-		}
-
-		setModules(JsdlHelpers.getModules(jsdl));
-		final String[] candidateHosts = JsdlHelpers.getCandidateHosts(jsdl);
-		if ((candidateHosts != null) && (candidateHosts.length > 0)) {
-			submissionLocation = candidateHosts[0];
-		}
-		final String executable = JsdlHelpers
-				.getPosixApplicationExecutable(jsdl);
-		final String[] arguments = JsdlHelpers
-				.getPosixApplicationArguments(jsdl);
-		final StringBuffer tempBuffer = new StringBuffer(executable);
-		if (arguments != null) {
-			for (final String arg : arguments) {
-				tempBuffer.append(" " + arg);
-			}
-		}
-		commandline = tempBuffer.toString();
-		stderr = JsdlHelpers.getPosixStandardError(jsdl);
-		stdout = JsdlHelpers.getPosixStandardOutput(jsdl);
-		stdin = JsdlHelpers.getPosixStandardInput(jsdl);
-		pbsDebug = JsdlHelpers.getPbsDebugElement(jsdl);
+		initWithDocument(jsdl);
 
 	}
 
 	public JobSubmissionObjectImpl(final Map<String, String> jobProperties) {
+		initWithMap(jobProperties);
+	}
 
-		this.jobname = jobProperties.get(JobSubmissionProperty.JOBNAME
-				.toString());
-		this.application = jobProperties
-				.get(JobSubmissionProperty.APPLICATIONNAME.toString());
-		this.applicationVersion = jobProperties
-				.get(JobSubmissionProperty.APPLICATIONVERSION.toString());
-		this.email_address = jobProperties
-				.get(JobSubmissionProperty.EMAIL_ADDRESS.toString());
-		this.email_on_job_start = checkForBoolean(jobProperties
-				.get(JobSubmissionProperty.EMAIL_ON_START.toString()));
-		this.email_on_job_finish = checkForBoolean(jobProperties
-				.get(JobSubmissionProperty.EMAIL_ON_FINISH.toString()));
-		try {
-			this.cpus = Integer.parseInt(jobProperties
-					.get(JobSubmissionProperty.NO_CPUS.toString()));
-		} catch (final NumberFormatException e) {
-			this.cpus = 1;
+	public JobSubmissionObjectImpl(final Object o) {
+		if (o instanceof Document) {
+			initWithDocument((Document) o);
+		} else if (o instanceof Map<?, ?>) {
+			initWithMap((Map<String, String>) o);
 		}
-		try {
-			this.hostcount = Integer.parseInt(jobProperties
-					.get(JobSubmissionProperty.HOSTCOUNT.toString()));
-		} catch (final Exception e) {
-			this.hostcount = 1;
-		}
-		try {
-			this.force_single = checkForBoolean(jobProperties
-					.get(JobSubmissionProperty.FORCE_SINGLE.toString()));
-		} catch (final Exception e) {
-			this.force_single = false;
-		}
-		try {
-			this.force_mpi = checkForBoolean(jobProperties
-					.get(JobSubmissionProperty.FORCE_MPI.toString()));
-		} catch (final Exception e) {
-			this.force_mpi = false;
-		}
-		try {
-			this.memory_in_bytes = Integer.parseInt(jobProperties
-					.get(JobSubmissionProperty.MEMORY_IN_B.toString()));
-		} catch (final NumberFormatException e) {
-			this.memory_in_bytes = 0;
-		}
-		try {
-			this.walltime_in_seconds = Integer.parseInt(jobProperties
-					.get(JobSubmissionProperty.WALLTIME_IN_MINUTES.toString())) * 60;
-		} catch (final NumberFormatException e) {
-			this.walltime_in_seconds = 0;
-		}
-
-		String temp = jobProperties.get(JobSubmissionProperty.INPUT_FILE_URLS
-				.toString());
-		if (StringUtils.isNotBlank(temp)) {
-			setInputFiles(StringHelpers.StringToMap(temp));
-			// setInputFileUrls(temp.split(","));
-		}
-
-		temp = jobProperties.get(JobSubmissionProperty.MODULES.toString());
-		if ((temp != null) && (temp.length() > 0)) {
-			setModules(temp.split(","));
-		}
-
-		this.submissionLocation = jobProperties
-				.get(JobSubmissionProperty.SUBMISSIONLOCATION.toString());
-		this.commandline = jobProperties.get(JobSubmissionProperty.COMMANDLINE
-				.toString());
-		this.stderr = jobProperties
-				.get(JobSubmissionProperty.STDERR.toString());
-		this.stdout = jobProperties
-				.get(JobSubmissionProperty.STDOUT.toString());
-		this.stdin = jobProperties.get(JobSubmissionProperty.STDIN.toString());
-
-		this.pbsDebug = jobProperties.get(JobSubmissionProperty.PBSDEBUG
-				.toString());
-
 	}
 
 	public void addInputFileUrl(String url) {
@@ -382,19 +259,6 @@ public class JobSubmissionObjectImpl {
 		return this.inputFiles;
 	}
 
-	// public String[] getInputFileUrls() {
-	// return inputFileUrls.toArray(new String[] {});
-	// }
-
-	// @Transient
-	// public String getInputFileUrlsAsString() {
-	// if ((inputFileUrls != null) && (inputFileUrls.size() != 0)) {
-	// return StringUtils.join(inputFileUrls, ",");
-	// } else {
-	// return new String();
-	// }
-	// }
-
 	@Transient
 	public final Document getJobDescriptionDocument()
 			throws JobPropertiesException {
@@ -418,6 +282,19 @@ public class JobSubmissionObjectImpl {
 
 		return jsdlString;
 	}
+
+	// public String[] getInputFileUrls() {
+	// return inputFileUrls.toArray(new String[] {});
+	// }
+
+	// @Transient
+	// public String getInputFileUrlsAsString() {
+	// if ((inputFileUrls != null) && (inputFileUrls.size() != 0)) {
+	// return StringUtils.join(inputFileUrls, ",");
+	// } else {
+	// return new String();
+	// }
+	// }
 
 	public String getJobname() {
 		return jobname;
@@ -532,6 +409,149 @@ public class JobSubmissionObjectImpl {
 	@Override
 	public int hashCode() {
 		return 73 * getJobname().hashCode();
+	}
+
+	private void initWithDocument(Document jsdl) {
+		jobname = JsdlHelpers.getJobname(jsdl);
+		application = JsdlHelpers.getApplicationName(jsdl);
+		applicationVersion = JsdlHelpers.getApplicationVersion(jsdl);
+		email_address = JsdlHelpers.getEmail(jsdl);
+		email_on_job_start = JsdlHelpers.getSendEmailOnJobStart(jsdl);
+		email_on_job_finish = JsdlHelpers.getSendEmailOnJobFinish(jsdl);
+		cpus = JsdlHelpers.getProcessorCount(jsdl);
+		hostcount = JsdlHelpers.getResourceCount(jsdl);
+		final String jobTypeString = JsdlHelpers.getArcsJobType(jsdl);
+		if (jobTypeString != null) {
+			if (jobTypeString.toLowerCase().equals(
+					JobSubmissionProperty.FORCE_SINGLE.defaultValue())) {
+				force_single = true;
+				force_mpi = false;
+			} else if (jobTypeString.toLowerCase().equals(
+					JobSubmissionProperty.FORCE_SINGLE.defaultValue())) {
+				force_single = false;
+				force_mpi = true;
+			} else {
+				force_single = false;
+				force_mpi = false;
+			}
+		} else {
+			force_single = false;
+			force_mpi = false;
+		}
+		memory_in_bytes = JsdlHelpers.getTotalMemoryRequirement(jsdl);
+		walltime_in_seconds = JsdlHelpers.getWalltime(jsdl);
+
+		String[] temp = JsdlHelpers.getInputFileUrls(jsdl);
+		if (temp != null) {
+			Map<String, String> inf = new LinkedHashMap<String, String>();
+			for (String s : temp) {
+				inf.put(s, "");
+			}
+			setInputFiles(inf);
+		}
+
+		setModules(JsdlHelpers.getModules(jsdl));
+		final String[] candidateHosts = JsdlHelpers.getCandidateHosts(jsdl);
+		if ((candidateHosts != null) && (candidateHosts.length > 0)) {
+			submissionLocation = candidateHosts[0];
+		}
+		final String executable = JsdlHelpers
+				.getPosixApplicationExecutable(jsdl);
+		final String[] arguments = JsdlHelpers
+				.getPosixApplicationArguments(jsdl);
+		final StringBuffer tempBuffer = new StringBuffer(executable);
+		if (arguments != null) {
+			for (final String arg : arguments) {
+				tempBuffer.append(" " + arg);
+			}
+		}
+		commandline = tempBuffer.toString();
+		stderr = JsdlHelpers.getPosixStandardError(jsdl);
+		stdout = JsdlHelpers.getPosixStandardOutput(jsdl);
+		stdin = JsdlHelpers.getPosixStandardInput(jsdl);
+		pbsDebug = JsdlHelpers.getPbsDebugElement(jsdl);
+	}
+
+	public void initWithMap(Map<String, String> jobProperties) {
+		this.jobname = jobProperties.get(JobSubmissionProperty.JOBNAME
+				.toString());
+		this.application = jobProperties
+				.get(JobSubmissionProperty.APPLICATIONNAME.toString());
+		this.applicationVersion = jobProperties
+				.get(JobSubmissionProperty.APPLICATIONVERSION.toString());
+		this.email_address = jobProperties
+				.get(JobSubmissionProperty.EMAIL_ADDRESS.toString());
+		this.email_on_job_start = checkForBoolean(jobProperties
+				.get(JobSubmissionProperty.EMAIL_ON_START.toString()));
+		this.email_on_job_finish = checkForBoolean(jobProperties
+				.get(JobSubmissionProperty.EMAIL_ON_FINISH.toString()));
+		try {
+			this.cpus = Integer.parseInt(jobProperties
+					.get(JobSubmissionProperty.NO_CPUS.toString()));
+		} catch (final NumberFormatException e) {
+			this.cpus = 1;
+		}
+		try {
+			this.hostcount = Integer.parseInt(jobProperties
+					.get(JobSubmissionProperty.HOSTCOUNT.toString()));
+		} catch (final Exception e) {
+			this.hostcount = 1;
+		}
+		try {
+			this.force_single = checkForBoolean(jobProperties
+					.get(JobSubmissionProperty.FORCE_SINGLE.toString()));
+		} catch (final Exception e) {
+			this.force_single = false;
+		}
+		try {
+			this.force_mpi = checkForBoolean(jobProperties
+					.get(JobSubmissionProperty.FORCE_MPI.toString()));
+		} catch (final Exception e) {
+			this.force_mpi = false;
+		}
+		try {
+			this.memory_in_bytes = Integer.parseInt(jobProperties
+					.get(JobSubmissionProperty.MEMORY_IN_B.toString()));
+		} catch (final NumberFormatException e) {
+			this.memory_in_bytes = 0;
+		}
+		try {
+			this.walltime_in_seconds = Integer.parseInt(jobProperties
+					.get(JobSubmissionProperty.WALLTIME_IN_MINUTES.toString())) * 60;
+		} catch (final NumberFormatException e) {
+			this.walltime_in_seconds = 0;
+		}
+
+		String temp = jobProperties.get(JobSubmissionProperty.INPUT_FILE_URLS
+				.toString());
+
+		if (StringUtils.isNotBlank(temp)) {
+			String[] files = temp.split(",");
+			Map<String, String> m = new HashMap<String, String>();
+			for (String f : files) {
+				m.put(f, "");
+			}
+			setInputFiles(m);
+			// setInputFileUrls(temp.split(","));
+		}
+
+		temp = jobProperties.get(JobSubmissionProperty.MODULES.toString());
+		if ((temp != null) && (temp.length() > 0)) {
+			setModules(temp.split(","));
+		}
+
+		this.submissionLocation = jobProperties
+				.get(JobSubmissionProperty.SUBMISSIONLOCATION.toString());
+		this.commandline = jobProperties.get(JobSubmissionProperty.COMMANDLINE
+				.toString());
+		this.stderr = jobProperties
+				.get(JobSubmissionProperty.STDERR.toString());
+		this.stdout = jobProperties
+				.get(JobSubmissionProperty.STDOUT.toString());
+		this.stdin = jobProperties.get(JobSubmissionProperty.STDIN.toString());
+
+		this.pbsDebug = jobProperties.get(JobSubmissionProperty.PBSDEBUG
+				.toString());
 	}
 
 	public Boolean isEmail_on_job_finish() {

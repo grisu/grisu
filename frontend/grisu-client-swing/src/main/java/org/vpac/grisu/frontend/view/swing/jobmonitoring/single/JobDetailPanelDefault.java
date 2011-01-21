@@ -1,6 +1,8 @@
 package org.vpac.grisu.frontend.view.swing.jobmonitoring.single;
 
 import java.awt.Cursor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
@@ -8,8 +10,10 @@ import java.beans.PropertyChangeListener;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -18,11 +22,15 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import org.apache.log4j.Logger;
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.frontend.model.job.JobException;
 import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.view.swing.files.preview.FileListWithPreviewPanel;
 import org.vpac.grisu.frontend.view.swing.jobmonitoring.single.appSpecific.AppSpecificViewerPanel;
+import org.vpac.grisu.frontend.view.swing.utils.BackgroundActionProgressDialogSmall;
 
 import au.org.arcs.jcommons.constants.Constants;
 
@@ -31,6 +39,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import com.jidesoft.swing.JideTabbedPane;
+import javax.swing.JSeparator;
 
 public class JobDetailPanelDefault extends JPanel implements
 		PropertyChangeListener, JobDetailPanel {
@@ -112,6 +121,10 @@ public class JobDetailPanelDefault extends JPanel implements
 	// "dd.MM.yyyy - HH.mm.SS");
 
 	private JEditorPane propertiesPane;
+	private JButton archiveButton;
+	private JButton killButton;
+	private JButton cleanButton;
+	private JSeparator separator;
 
 	/**
 	 * Create the panel.
@@ -126,7 +139,9 @@ public class JobDetailPanelDefault extends JPanel implements
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(30dlu;default)"),
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("default:grow"),
+				ColumnSpec.decode("max(93dlu;default):grow"),
+				FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("max(24dlu;default)"),
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(42dlu;default)"),
 				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
@@ -139,13 +154,17 @@ public class JobDetailPanelDefault extends JPanel implements
 				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getLblJobname(), "2, 2, right, default");
 		add(getJobnameTextField(), "4, 2, fill, default");
+		add(getSeparator(), "6, 2, 1, 7, right, default");
+		add(getArchiveButton(), "8, 2");
 		add(getLblSubmitted(), "2, 4, right, default");
 		add(getSubmittedTextField(), "4, 4, fill, default");
+		add(getKillButton(), "8, 4");
 		add(getStatusRefreshButton(), "2, 6, right, default");
 		add(getTxtNa(), "4, 6, fill, default");
+		add(getCleanButton(), "8, 6");
 		add(getLblApplication(), "2, 8, right, default");
 		add(getApplicationTextField(), "4, 8, fill, default");
-		add(getJideTabbedPane(), "2, 10, 5, 1, fill, fill");
+		add(getJideTabbedPane(), "2, 10, 7, 1, fill, fill");
 
 	}
 
@@ -163,6 +182,94 @@ public class JobDetailPanelDefault extends JPanel implements
 			applicationTextField.setColumns(10);
 		}
 		return applicationTextField;
+	}
+
+	private JButton getArchiveButton() {
+		if (archiveButton == null) {
+			archiveButton = new JButton("Archive");
+			archiveButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+
+					if (job == null) {
+						return;
+					}
+
+					new Thread() {
+						@Override
+						public void run() {
+							BackgroundActionProgressDialogSmall d = new BackgroundActionProgressDialogSmall(
+									"Archiving job:", job.getJobname());
+							try {
+								job.archive(null, true);
+								d.close();
+							} catch (Exception e) {
+								d.close();
+								ErrorInfo info = new ErrorInfo(
+										"Job archiving error",
+										"Can't archive job:\n\n"
+												+ e.getLocalizedMessage(),
+										null, "Error", e, Level.SEVERE, null);
+
+								JXErrorPane pane = new JXErrorPane();
+								pane.setErrorInfo(info);
+
+								JXErrorPane.showDialog(
+										JobDetailPanelDefault.this
+												.getRootPane(), pane);
+
+							}
+
+						}
+					}.start();
+
+				}
+			});
+		}
+		return archiveButton;
+	}
+
+	private JButton getCleanButton() {
+		if (cleanButton == null) {
+			cleanButton = new JButton("Clean");
+			cleanButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+
+					if (job == null) {
+						return;
+					}
+
+					new Thread() {
+						@Override
+						public void run() {
+							BackgroundActionProgressDialogSmall d = new BackgroundActionProgressDialogSmall(
+									"Cleaning job:", job.getJobname());
+							try {
+								job.kill(true);
+								d.close();
+							} catch (Exception e) {
+								d.close();
+								ErrorInfo info = new ErrorInfo(
+										"Job cleaning error",
+										"Can't clean job:\n\n"
+												+ e.getLocalizedMessage(),
+										null, "Error", e, Level.SEVERE, null);
+
+								JXErrorPane pane = new JXErrorPane();
+								pane.setErrorInfo(info);
+
+								JXErrorPane.showDialog(
+										JobDetailPanelDefault.this
+												.getRootPane(), pane);
+
+							}
+
+						}
+					}.start();
+
+				}
+			});
+		}
+		return cleanButton;
 	}
 
 	private FileListWithPreviewPanel getFileListWithPreviewPanel() {
@@ -197,12 +304,62 @@ public class JobDetailPanelDefault extends JPanel implements
 		return jobnameTextField;
 	}
 
+	private JButton getKillButton() {
+		if (killButton == null) {
+			killButton = new JButton("Kill");
+			killButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+
+					if (job == null) {
+						return;
+					}
+
+					new Thread() {
+						@Override
+						public void run() {
+							BackgroundActionProgressDialogSmall d = new BackgroundActionProgressDialogSmall(
+									"Killing job:", job.getJobname());
+							try {
+								job.kill(false);
+								d.close();
+							} catch (JobException e) {
+								d.close();
+								ErrorInfo info = new ErrorInfo(
+										"Job kill error", "Can't kill job:\n\n"
+												+ e.getLocalizedMessage(),
+										null, "Error", e, Level.SEVERE, null);
+
+								JXErrorPane pane = new JXErrorPane();
+								pane.setErrorInfo(info);
+
+								JXErrorPane.showDialog(
+										JobDetailPanelDefault.this
+												.getRootPane(), pane);
+
+							}
+
+						}
+					}.start();
+
+				}
+			});
+		}
+		return killButton;
+	}
+
 	private JLabel getLblApplication() {
 		if (lblApplication == null) {
 			lblApplication = new JLabel("Application");
 		}
 		return lblApplication;
 	}
+
+	// private JTextArea getPropertiesTextArea() {
+	// if (propertiesTextArea == null) {
+	// propertiesTextArea = new JTextArea();
+	// }
+	// return propertiesTextArea;
+	// }
 
 	private JLabel getLblJobname() {
 		if (lblJobname == null) {
@@ -226,13 +383,6 @@ public class JobDetailPanelDefault extends JPanel implements
 		}
 		return logTextArea;
 	}
-
-	// private JTextArea getPropertiesTextArea() {
-	// if (propertiesTextArea == null) {
-	// propertiesTextArea = new JTextArea();
-	// }
-	// return propertiesTextArea;
-	// }
 
 	public JPanel getPanel() {
 		return this;
@@ -261,6 +411,14 @@ public class JobDetailPanelDefault extends JPanel implements
 			scrollPane_1.setViewportView(getLogTextArea());
 		}
 		return scrollPane_1;
+	}
+
+	private JSeparator getSeparator() {
+		if (separator == null) {
+			separator = new JSeparator();
+			separator.setOrientation(SwingConstants.VERTICAL);
+		}
+		return separator;
 	}
 
 	private JLabel getStatusRefreshButton() {
@@ -337,6 +495,15 @@ public class JobDetailPanelDefault extends JPanel implements
 			if ((status >= JobConstants.ACTIVE)
 					&& (status != JobConstants.NO_SUCH_JOB)) {
 				getFileListWithPreviewPanel().refresh();
+
+				if (status >= JobConstants.FINISHED_EITHER_WAY) {
+
+					getKillButton().setEnabled(false);
+					getCleanButton().setEnabled(true);
+					getArchiveButton().setEnabled(true);
+
+				}
+
 			}
 		}
 	}
@@ -366,6 +533,17 @@ public class JobDetailPanelDefault extends JPanel implements
 		getFileListWithPreviewPanel().setRootUrl(job.getJobDirectoryUrl());
 		getFileListWithPreviewPanel().setCurrentUrl(job.getJobDirectoryUrl());
 		getTxtNa().setText(JobConstants.translateStatus(job.getStatus(false)));
+
+		int status = job.getStatus(false);
+		if (status <= JobConstants.ACTIVE) {
+			getKillButton().setEnabled(true);
+			getCleanButton().setEnabled(true);
+			getArchiveButton().setEnabled(false);
+		} else {
+			getKillButton().setEnabled(false);
+			getCleanButton().setEnabled(true);
+			getArchiveButton().setEnabled(true);
+		}
 
 		setProperties();
 		setLog();

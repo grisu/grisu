@@ -484,8 +484,10 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 			try {
 				updateThread.join();
 			} catch (final InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
+				updateThread.interrupt();
+				return;
+
 			}
 		}
 

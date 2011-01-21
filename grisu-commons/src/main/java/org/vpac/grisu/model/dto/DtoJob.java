@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -31,7 +32,7 @@ public class DtoJob implements Comparable<DtoJob> {
 
 	public static DtoJob createJob(int status,
 			Map<String, String> jobProperties, Set<String> inputFiles,
-			Map<Long, String> logMessages) {
+			Map<Long, String> logMessages, boolean isArchived) {
 
 		final DtoJob result = new DtoJob();
 
@@ -61,6 +62,20 @@ public class DtoJob implements Comparable<DtoJob> {
 		return result;
 	}
 
+	public static String getProperty(DtoJob job, String key) {
+
+		if (StringUtils.isBlank(key)) {
+			return null;
+		}
+
+		for (DtoProperty p : job.getProperties()) {
+			if (key.equals(p.getKey())) {
+				return p.getValue();
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * The list of job properties.
 	 */
@@ -76,6 +91,8 @@ public class DtoJob implements Comparable<DtoJob> {
 	 * this job, this can be stale information.
 	 */
 	private int status;
+
+	private boolean isArchived = false;
 
 	public void addJobProperty(String key, String value) {
 		properties.add(new DtoProperty(key, value));
@@ -153,6 +170,11 @@ public class DtoJob implements Comparable<DtoJob> {
 		return 253 * jobname().hashCode();
 	}
 
+	@XmlAttribute(name = "archived")
+	public boolean isArchived() {
+		return isArchived;
+	}
+
 	public String jobname() {
 		return propertiesAsMap().get(Constants.JOBNAME_KEY);
 	}
@@ -204,6 +226,10 @@ public class DtoJob implements Comparable<DtoJob> {
 		return propertiesAsMap().get(key);
 	}
 
+	public void setArchived(boolean isArchived) {
+		this.isArchived = isArchived;
+	}
+
 	public void setLogMessages(DtoLogMessages msgs) {
 		this.logMessages = msgs;
 	}
@@ -219,5 +245,4 @@ public class DtoJob implements Comparable<DtoJob> {
 	public String statusAsString() {
 		return JobConstants.translateStatus(status);
 	}
-
 }

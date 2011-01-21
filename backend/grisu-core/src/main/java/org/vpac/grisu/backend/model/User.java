@@ -150,6 +150,7 @@ public class User {
 	private Map<String, String> userProperties = new HashMap<String, String>();
 
 	private Map<String, String> bookmarks = new HashMap<String, String>();
+	private Map<String, String> archiveLocations = new TreeMap<String, String>();
 	private Map<String, JobSubmissionObjectImpl> jobTemplates = new HashMap<String, JobSubmissionObjectImpl>();
 
 	private FileSystemManager fsm;
@@ -179,6 +180,12 @@ public class User {
 	 */
 	public User(final String dn) {
 		this.dn = dn;
+	}
+
+	public void addArchiveLocation(String alias, String value) {
+
+		getArchiveLocations().put(alias, value);
+
 	}
 
 	public void addBookmark(String alias, String url) {
@@ -411,7 +418,6 @@ public class User {
 							getMountPointCache().put(key, "Does not exist");
 						} finally {
 							try {
-								closeFileSystems();
 								userdao.saveOrUpdate(User.this);
 							} catch (Exception e) {
 								myLogger.debug("Could not save filesystem state for fs "
@@ -499,11 +505,6 @@ public class User {
 
 		executor.shutdown();
 
-		// TODO check whether that makes sense
-		closeFileSystems();
-
-		// }
-
 		return mps;
 	}
 
@@ -588,8 +589,8 @@ public class User {
 	 * @return the users' properties
 	 */
 	@ElementCollection(fetch = FetchType.EAGER)
-	public Map<String, String> getBookmarks() {
-		return bookmarks;
+	public Map<String, String> getArchiveLocations() {
+		return archiveLocations;
 	}
 
 	// private List<FileReservation> getFileReservations() {
@@ -608,6 +609,16 @@ public class User {
 	// private void setFileTransfers(List<FileTransfer> fileTransfers) {
 	// this.fileTransfers = fileTransfers;
 	// }
+
+	/**
+	 * Gets a map of this users bookmarks.
+	 * 
+	 * @return the users' properties
+	 */
+	@ElementCollection(fetch = FetchType.EAGER)
+	public Map<String, String> getBookmarks() {
+		return bookmarks;
+	}
 
 	/**
 	 * Returns the default credential of the user (if any).
@@ -702,14 +713,6 @@ public class User {
 		}
 	}
 
-	@Transient
-	public FileSystemManager getFileSystemManager() {
-		if (fsm == null) {
-			this.fsm = new FileSystemManager(this);
-		}
-		return fsm;
-	}
-
 	// public GridFile getFolderListing(final String url, int recursionLevel)
 	// throws RemoteFileSystemException, FileSystemException {
 	//
@@ -721,6 +724,14 @@ public class User {
 	// return null;
 	// }
 	// }
+
+	@Transient
+	public FileSystemManager getFileSystemManager() {
+		if (fsm == null) {
+			this.fsm = new FileSystemManager(this);
+		}
+		return fsm;
+	}
 
 	/**
 	 * Getter for the users' fqans.
@@ -986,10 +997,6 @@ public class User {
 		userProperties.remove(key);
 	}
 
-	public void resetMountPoints() {
-		allMountPoints = null;
-	}
-
 	// public void addProperty(String key, String value) {
 	// List<String> list = userProperties.get(key);
 	// if ( list == null ) {
@@ -997,6 +1004,10 @@ public class User {
 	// }
 	// list.add(value);
 	// }
+
+	public void resetMountPoints() {
+		allMountPoints = null;
+	}
 
 	/**
 	 * Translates an absolute file url into an "user-space" one.
@@ -1009,6 +1020,10 @@ public class User {
 	public String returnUserSpaceUrl(final String file) {
 		final MountPoint mp = getResponsibleMountpointForAbsoluteFile(file);
 		return mp.replaceAbsoluteRootUrlWithMountPoint(file);
+	}
+
+	private void setArchiveLocations(final Map<String, String> al) {
+		this.archiveLocations = al;
 	}
 
 	/**
@@ -1108,5 +1123,4 @@ public class User {
 		}
 		userdao.saveOrUpdate(this);
 	}
-
 }

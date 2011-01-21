@@ -208,6 +208,13 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 					+ e.getLocalizedMessage());
 		}
 
+		new Thread() {
+			@Override
+			public void run() {
+				getArchivedJobs(null);
+			}
+		}.start();
+
 	}
 
 	public final String logout() {

@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
+import org.vpac.grisu.X;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.jobMonitoring.RunningJobManager;
 import org.vpac.grisu.frontend.control.utils.ApplicationsManager;
@@ -114,7 +115,9 @@ public class SingleJobTabbedPane extends JPanel implements
 		// System.out.println("Removing panel...");
 		JobObject bj = arg0.getJob();
 		JobDetailPanel temp = panels.get(bj.getJobname());
+		X.p("Cleaned: " + arg0.getJob().getJobname());
 		if (panels.get(bj.getJobname()) != null) {
+			getJideTabbedPane().setSelectedIndex(0);
 			panels.remove(bj.getJobname());
 			getJideTabbedPane().remove(temp.getPanel());
 		}

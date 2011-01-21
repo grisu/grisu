@@ -108,7 +108,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
 				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null,
-						null), fqan, false)
+						null, false), fqan, false)
 				.wrapGridResourcesIntoInterfaceType();
 	}
 
@@ -310,7 +310,8 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
 				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null,
-						null), fqan, true).wrapGridResourcesIntoInterfaceType();
+						null, false), fqan, true)
+				.wrapGridResourcesIntoInterfaceType();
 	}
 
 	/*

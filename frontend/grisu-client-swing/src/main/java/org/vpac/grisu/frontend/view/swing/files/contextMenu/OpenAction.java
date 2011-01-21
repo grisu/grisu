@@ -11,6 +11,7 @@ import javax.swing.AbstractAction;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
 import org.vpac.grisu.frontend.control.fileTransfers.FileTransactionManager;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListPanel;
+import org.vpac.grisu.frontend.view.swing.utils.BackgroundActionProgressDialogSmall;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.GridFile;
@@ -58,10 +59,11 @@ public class OpenAction extends AbstractAction {
 				public void run() {
 
 					File file;
-					FileDownloadDialogSmall d = null;
+					BackgroundActionProgressDialogSmall d = null;
 
 					try {
-						d = new FileDownloadDialogSmall(f);
+						d = new BackgroundActionProgressDialogSmall(
+								"Downloading:", f.getName());
 						file = fm.downloadFile(f.getUrl());
 					} catch (FileTransactionException e1) {
 						e1.printStackTrace();

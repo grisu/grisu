@@ -269,7 +269,7 @@ public class DummyServiceInterface extends AbstractServiceInterface implements
 		myLogger.info("Submitting job: " + jobname + " for user " + getDN());
 		Job job;
 		try {
-			job = getJobFromDatabase(jobname);
+			job = getJobFromDatabaseOrFileSystem(jobname);
 		} catch (final NoSuchJobException e1) {
 			throw new JobSubmissionException("Job: " + jobname
 					+ " could not be found in the grisu job database.");

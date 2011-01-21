@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.vpac.grisu.X;
 
 public class StringHelpers {
 
@@ -57,6 +58,7 @@ public class StringHelpers {
 				strings[strings.length - 1].length() - 1);
 
 		for (String s : strings) {
+			X.p("Stringhelpers: " + s);
 			String key = s.substring(0, s.indexOf("="));
 			String value = s.substring(s.indexOf("=") + 1);
 			result.put(key, value);

@@ -56,6 +56,8 @@ public interface ServiceInterface {
 	String INTERFACE_VERSION = GrisuVersion.get("grisu-commons");
 
 	public static final String VIRTUAL_GRID_PROTOCOL_NAME = "grid";
+	public static final String ARCHIVE_STATUS_PREFIX = "ARCHIVE_";
+	public static String GRISU_JOB_FILE_NAME = ".grisujob";
 
 	/**
 	 * Adds multiple job propeties in one go.
@@ -112,7 +114,7 @@ public interface ServiceInterface {
 	 * Archives this job to the specified url and deletes it from the database.
 	 * 
 	 * If target is null, the user property
-	 * {@link Constants#DEFAULT_ARCHIVE_LOCATION} is used.
+	 * {@link Constants#DEFAULT_JOB_ARCHIVE_LOCATION} is used.
 	 * 
 	 * @param jobname
 	 *            the jobname
@@ -464,6 +466,21 @@ public interface ServiceInterface {
 	String[] getApplicationPackagesForExecutable(String executable);
 
 	/**
+	 * Returns a xml document that contains all the jobs of the user with
+	 * information about the jobs.
+	 * 
+	 * 
+	 * @param application
+	 *            filter by application or null (for all jobs)
+	 * 
+	 * @return xml formated information about all the users jobs
+	 */
+	@GET
+	@Path("user/archivedjobs/{application}")
+	@RolesAllowed("User")
+	DtoJobs getArchivedJobs(@PathParam("application") String application);
+
+	/**
 	 * Returns the {@link DtoBatchJob} with the specified name.
 	 * 
 	 * This method doesn't refresh the jobs that belong to this batchjob. Call
@@ -475,16 +492,6 @@ public interface ServiceInterface {
 	 */
 	@RolesAllowed("User")
 	DtoBatchJob getBatchJob(String batchJobname) throws NoSuchJobException;
-
-	/**
-	 * Gets the users bookmarks
-	 * 
-	 * @param alias
-	 */
-	@RolesAllowed("User")
-	@GET
-	@Path("user/bookmarks")
-	DtoProperties getBookmarks();
 
 	// /**
 	// * Finds all children files for the specified folder. Useful if you want
@@ -509,6 +516,16 @@ public interface ServiceInterface {
 	// throws RemoteFileSystemException;
 
 	/**
+	 * Gets the users bookmarks
+	 * 
+	 * @param alias
+	 */
+	@RolesAllowed("User")
+	@GET
+	@Path("user/bookmarks")
+	DtoProperties getBookmarks();
+
+	/**
 	 * Returns the end time of the credential used.
 	 * 
 	 * @return the end time or -1 if the endtime couldn't be determined
@@ -517,6 +534,24 @@ public interface ServiceInterface {
 	@GET
 	@Path("user/session/credentialendtime")
 	long getCredentialEndTime();
+
+	/**
+	 * Returns a xml document that contains all the current (non-archived) jobs
+	 * of the user with information about the jobs.
+	 * 
+	 * @param application
+	 *            filter by application or null (for all jobs)
+	 * @param refreshJobStatus
+	 *            whether to refresh the status of all the jobs. This can take
+	 *            quite some time.
+	 * 
+	 * @return xml formated information about all the users jobs
+	 */
+	@GET
+	@Path("user/currentjobs/{application}/{refresh}")
+	@RolesAllowed("User")
+	DtoJobs getCurrentJobs(@PathParam("application") String application,
+			@PathParam("refresh") boolean refreshJobStatus);
 
 	/**
 	 * Checks the available data locations for the specified site and VO.
@@ -543,24 +578,6 @@ public interface ServiceInterface {
 	@Produces("text/plain")
 	String getDN();
 
-	/**
-	 * Returns the size of the file in bytes. This will probably replaced in a
-	 * future version with a more generic method to get file properties.
-	 * Something like public Map<String, String> getFileSize(String[]
-	 * propertyNames)...
-	 * 
-	 * @param file
-	 *            the url of the file
-	 * @return the size of the file in bytes
-	 * @throws RemoteFileSystemException
-	 *             if the file can't be accessed
-	 */
-	@RolesAllowed("User")
-	@POST
-	@Path("user/files/filesize")
-	long getFileSize(@QueryParam("url") String url)
-			throws RemoteFileSystemException;
-
 	// ---------------------------------------------------------------------------------------------------
 	//
 	// Filesystem methods
@@ -580,6 +597,24 @@ public interface ServiceInterface {
 	// @GET
 	// @Path("interfaceVersion")
 	// String getInterfaceVersion();
+
+	/**
+	 * Returns the size of the file in bytes. This will probably replaced in a
+	 * future version with a more generic method to get file properties.
+	 * Something like public Map<String, String> getFileSize(String[]
+	 * propertyNames)...
+	 * 
+	 * @param file
+	 *            the url of the file
+	 * @return the size of the file in bytes
+	 * @throws RemoteFileSystemException
+	 *             if the file can't be accessed
+	 */
+	@RolesAllowed("User")
+	@POST
+	@Path("user/files/filesize")
+	long getFileSize(@QueryParam("url") String url)
+			throws RemoteFileSystemException;
 
 	/**
 	 * Returns all fqans of the user for the vo's that are configured on the
@@ -825,6 +860,12 @@ public interface ServiceInterface {
 	@Path("user/allproperties")
 	DtoProperties getUserProperties();
 
+	// ---------------------------------------------------------------------------------------------------
+	//
+	// Job management methods
+	//
+	// ---------------------------------------------------------------------------------------------------
+
 	/**
 	 * Returns an array of strings that are associated with this key. The
 	 * developer can store all kinds of stuff he wants to associate with the
@@ -841,12 +882,6 @@ public interface ServiceInterface {
 	@Path("user/properties/{key}")
 	@Produces("text/plain")
 	String getUserProperty(@PathParam("key") String key);
-
-	// ---------------------------------------------------------------------------------------------------
-	//
-	// Job management methods
-	//
-	// ---------------------------------------------------------------------------------------------------
 
 	/**
 	 * Returns an array of the versions of the specified application that a
@@ -903,6 +938,9 @@ public interface ServiceInterface {
 			throws RemoteFileSystemException, NoSuchJobException,
 			BatchJobException;
 
+	// void createAndSubmitJob(@PathParam("jobname") String jobname) throws
+	// JobSubmissionException, JobPropertiesException;
+
 	/**
 	 * Deletes the whole jobdirectory (if specified) and if successful, the job
 	 * from the database.
@@ -919,9 +957,6 @@ public interface ServiceInterface {
 	@RolesAllowed("User")
 	void killJobs(@QueryParam("jobnames") DtoStringList jobnames,
 			@QueryParam("clean") boolean clean);
-
-	// void createAndSubmitJob(@PathParam("jobname") String jobname) throws
-	// JobSubmissionException, JobPropertiesException;
 
 	/**
 	 * Returns the date when the file was last modified.
@@ -1072,23 +1107,6 @@ public interface ServiceInterface {
 			@QueryParam("alias") String alias,
 			@QueryParam("useHomeDir") boolean useHomeDirectoryOnThisFileSystemIfPossible)
 			throws RemoteFileSystemException;
-
-	/**
-	 * Returns a xml document that contains all the jobs of the user with
-	 * information about the jobs.
-	 * 
-	 * 
-	 * @param refreshJobStatus
-	 *            whether to refresh the status of all the jobs. This can take
-	 *            quite some time.
-	 * 
-	 * @return xml formated information about all the users jobs
-	 */
-	@GET
-	@Path("user/alljobs/{application}/{refresh}")
-	@RolesAllowed("User")
-	DtoJobs ps(@PathParam("application") String application,
-			@PathParam("refresh") boolean refreshJobStatus);
 
 	/**
 	 * Tries to figure out the best submission locations for all the jobs that

@@ -17,6 +17,8 @@ import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.control.ServiceInterface;
+import org.vpac.grisu.control.events.FileDeletedEvent;
+import org.vpac.grisu.control.events.FolderCreatedEvent;
 import org.vpac.grisu.control.exceptions.JobPropertiesException;
 import org.vpac.grisu.control.exceptions.JobSubmissionException;
 import org.vpac.grisu.control.exceptions.NoSuchJobException;
@@ -34,6 +36,7 @@ import org.vpac.grisu.model.dto.DtoJob;
 import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.model.job.JobCreatedProperty;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
+import org.vpac.grisu.model.status.StatusObject;
 import org.vpac.grisu.utils.FileHelpers;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
 import org.w3c.dom.Document;
@@ -82,6 +85,8 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	private Map<Date, String> logMessages;
 
 	private boolean isBeingCleaned = false;
+
+	private boolean isArchived = false;
 
 	private final List<String> submissionLog = Collections
 			.synchronizedList(new LinkedList<String>());
@@ -137,10 +142,17 @@ public class JobObject extends JobSubmissionObjectImpl implements
 
 	public JobObject(final ServiceInterface si, final DtoJob job,
 			final boolean refreshJobStatusOnBackend) throws NoSuchJobException {
+		// need to use either jobname or jobdirectory to get remote job,
+		// depending on whether
+		// job is archived or not
+		super((job.isArchived()) ? SeveralXMLHelpers.fromString(si
+				.getJsdlDocument(job.jobname())) : job.propertiesAsMap());
 
-		super(SeveralXMLHelpers.fromString(si.getJsdlDocument(job.jobname())));
 		this.setJobname(jobname);
+
 		this.serviceInterface = si;
+
+		this.isArchived = job.isArchived();
 
 		updateWithDtoJob(job);
 		addJobLogMessage("Job retrieved from backend.");
@@ -228,24 +240,118 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	}
 
 	/**
+	 * Archives the job in the background, using the default archive location.
+	 * 
+	 * @return the url of the target archived jobdirectory
+	 * @throws JobPropertiesException
+	 *             if the job can't be archived
+	 * @throws RemoteFileSystemException
+	 *             if the job can't be archived because the target url can't be
+	 *             accessed
+	 */
+	public final String archive() throws JobPropertiesException,
+			RemoteFileSystemException {
+		return archive(null, false);
+	}
+
+	/**
+	 * Archives the job in the background, using a specified target location
+	 * 
+	 * @param target
+	 *            the target url to archive the job or null to use the default
+	 *            target
+	 * @return the url of the target archived jobdirectory
+	 * @throws JobPropertiesException
+	 *             if the job can't be archived
+	 * @throws RemoteFileSystemException
+	 *             if the job can't be archived because the target url can't be
+	 *             accessed
+	 */
+	public final String archive(String target) throws JobPropertiesException,
+			RemoteFileSystemException {
+		return archive(target, false);
+	}
+
+	/**
 	 * Archives the job.
 	 * 
 	 * @param target
 	 *            the url (of the parent dir) to archive the job to or null to
 	 *            use the (previously set) default archive location
+	 * @param waitForArchivingToFinish
+	 *            whether to wait until archiving is finished
 	 * @throws JobPropertiesException
 	 *             if the job is not finished yet
 	 * @throws RemoteFileSystemException
 	 *             if the archive location is not specified or there is some
 	 *             other kind of file related exception
 	 */
-	public final void archive(String target) throws JobPropertiesException,
-			RemoteFileSystemException {
+	public final String archive(String target, boolean waitForArchivingToFinish)
+			throws JobPropertiesException, RemoteFileSystemException {
 		try {
-			getServiceInterface().archiveJob(getJobname(), target);
+			final String targetUrl = getServiceInterface().archiveJob(
+					getJobname(), target);
+
+			if (waitForArchivingToFinish) {
+				try {
+					StatusObject.waitForActionToFinish(getServiceInterface(),
+							ServiceInterface.ARCHIVE_STATUS_PREFIX
+									+ getJobname(), 5, true, false);
+
+					isArchived = true;
+					pcs.firePropertyChange("archived", false, true);
+
+					final String oldUrl = jobDirectory;
+					jobDirectory = targetUrl;
+					pcs.firePropertyChange("jobDirectory", oldUrl, jobDirectory);
+
+					EventBus.publish(new JobCleanedEvent(this));
+					EventBus.publish(new FileDeletedEvent(oldUrl));
+					EventBus.publish(new FolderCreatedEvent(jobDirectory));
+				} catch (Exception e) {
+					throw new JobPropertiesException("Can't archive job: "
+							+ e.getLocalizedMessage());
+				}
+
+			} else {
+				new Thread() {
+
+					@Override
+					public void run() {
+
+						try {
+							StatusObject.waitForActionToFinish(
+									getServiceInterface(),
+									ServiceInterface.ARCHIVE_STATUS_PREFIX
+											+ getJobname(), 5, true, false);
+
+							isArchived = true;
+							pcs.firePropertyChange("archived", false, true);
+
+							final String oldUrl = jobDirectory;
+							jobDirectory = targetUrl;
+							pcs.firePropertyChange("jobDirectory", oldUrl,
+									jobDirectory);
+
+							EventBus.publish(new JobCleanedEvent(JobObject.this));
+							EventBus.publish(new FileDeletedEvent(oldUrl));
+							EventBus.publish(new FolderCreatedEvent(
+									jobDirectory));
+
+						} catch (Exception e) {
+							myLogger.error("Job archiving error.", e);
+						}
+
+					}
+				}.start();
+
+			}
+
+			return targetUrl;
 		} catch (NoSuchJobException e) {
 			// should never happen
 			myLogger.error(e);
+			throw new JobPropertiesException(e.getLocalizedMessage());
 		}
 	}
 
@@ -660,7 +766,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 * @return the job status
 	 */
 	public final int getStatus(final boolean forceRefresh) {
-		if (forceRefresh) {
+		if (forceRefresh && !isArchived) {
 			final int oldStatus = this.status;
 			// addJobLogMessage("Getting new job status. Old status: "
 			// + JobConstants.translateStatus(oldStatus));
@@ -819,6 +925,10 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		return 73 * getJobname().hashCode();
 	}
 
+	public boolean isArchived() {
+		return isArchived;
+	}
+
 	public boolean isBeingCleaned() {
 		return isBeingCleaned;
 	}
@@ -905,6 +1015,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 
 			if (clean) {
 				EventBus.publish(new JobCleanedEvent(this));
+				EventBus.publish(new FileDeletedEvent(getJobDirectoryUrl()));
 			}
 
 		} catch (final Exception e) {
@@ -1138,7 +1249,8 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			addJobLogMessage("Setting additional job properties...");
 			try {
 				serviceInterface.addJobProperties(getJobname(), DtoJob
-						.createJob(-1, additionalJobProperties, null, null));
+						.createJob(-1, additionalJobProperties, null, null,
+								false));
 			} catch (final NoSuchJobException e) {
 				addJobLogMessage("Submission failed: "
 						+ e.getLocalizedMessage());
@@ -1179,10 +1291,10 @@ public class JobObject extends JobSubmissionObjectImpl implements
 
 	public void updateWithDtoJob(DtoJob job) {
 
-		if (!job.jobname().equals(getJobname())) {
-			throw new IllegalArgumentException(
-					"Jobname differs. Can't update job");
-		}
+		// if (!isArchived && !job.jobname().equals(getJobname())) {
+		// throw new IllegalArgumentException(
+		// "Jobname differs. Can't update job");
+		// }
 		allJobProperties = job.propertiesAsMap();
 		status = job.getStatus();
 		logMessages = job.getLogMessages().asMap();

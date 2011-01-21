@@ -142,7 +142,7 @@ public class BatchJob {
 
 					dtoJob = DtoJob.createJob(job.getStatus(),
 							job.getJobProperties(), job.getInputFiles(),
-							job.getLogMessages());
+							job.getLogMessages(), job.isArchived());
 					result.addJob(dtoJob);
 				}
 			};

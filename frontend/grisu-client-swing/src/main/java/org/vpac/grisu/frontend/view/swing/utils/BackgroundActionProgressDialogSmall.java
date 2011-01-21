@@ -1,4 +1,4 @@
-package org.vpac.grisu.frontend.view.swing.files.contextMenu;
+package org.vpac.grisu.frontend.view.swing.utils;
 
 import java.awt.EventQueue;
 
@@ -7,15 +7,13 @@ import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 
-import org.vpac.grisu.model.dto.GridFile;
-
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import javax.swing.SwingConstants;
 
-public class FileDownloadDialogSmall extends JDialog {
+public class BackgroundActionProgressDialogSmall extends JDialog {
 	/**
 	 * Launch the application.
 	 */
@@ -23,8 +21,8 @@ public class FileDownloadDialogSmall extends JDialog {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					FileDownloadDialogSmall dialog = new FileDownloadDialogSmall(
-							null);
+					BackgroundActionProgressDialogSmall dialog = new BackgroundActionProgressDialogSmall(
+							null, null);
 					dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 					dialog.setVisible(true);
 				} catch (Exception e) {
@@ -38,14 +36,16 @@ public class FileDownloadDialogSmall extends JDialog {
 	private JLabel lblDownloading;
 	private JTextField fileTextField;
 
-	private final GridFile file;
+	private final String label;
+	private final String item;
 
 	/**
 	 * Create the dialog.
 	 */
-	public FileDownloadDialogSmall(GridFile file) {
+	public BackgroundActionProgressDialogSmall(String label, String item) {
 		setModal(false);
-		this.file = file;
+		this.label = label;
+		this.item = item;
 		setBounds(100, 100, 221, 121);
 		getContentPane().setLayout(
 				new FormLayout(new ColumnSpec[] {
@@ -62,7 +62,7 @@ public class FileDownloadDialogSmall extends JDialog {
 		getContentPane().add(getProgressBar(), "2, 2");
 		getContentPane().add(getLblDownloading(), "2, 4");
 		getContentPane().add(getFileTextField(), "2, 6, fill, default");
-		getFileTextField().setText(file.getName());
+		getFileTextField().setText(item);
 		setVisible(true);
 	}
 
@@ -82,7 +82,7 @@ public class FileDownloadDialogSmall extends JDialog {
 
 	private JLabel getLblDownloading() {
 		if (lblDownloading == null) {
-			lblDownloading = new JLabel("Downloading:");
+			lblDownloading = new JLabel(label);
 		}
 		return lblDownloading;
 	}
