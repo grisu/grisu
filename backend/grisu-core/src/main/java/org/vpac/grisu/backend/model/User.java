@@ -593,6 +593,16 @@ public class User {
 		return archiveLocations;
 	}
 
+	/**
+	 * Gets a map of this users bookmarks.
+	 * 
+	 * @return the users' properties
+	 */
+	@ElementCollection(fetch = FetchType.EAGER)
+	public Map<String, String> getBookmarks() {
+		return bookmarks;
+	}
+
 	// private List<FileReservation> getFileReservations() {
 	// return fileReservations;
 	// }
@@ -609,16 +619,6 @@ public class User {
 	// private void setFileTransfers(List<FileTransfer> fileTransfers) {
 	// this.fileTransfers = fileTransfers;
 	// }
-
-	/**
-	 * Gets a map of this users bookmarks.
-	 * 
-	 * @return the users' properties
-	 */
-	@ElementCollection(fetch = FetchType.EAGER)
-	public Map<String, String> getBookmarks() {
-		return bookmarks;
-	}
 
 	/**
 	 * Returns the default credential of the user (if any).
@@ -713,6 +713,14 @@ public class User {
 		}
 	}
 
+	@Transient
+	public FileSystemManager getFileSystemManager() {
+		if (fsm == null) {
+			this.fsm = new FileSystemManager(this);
+		}
+		return fsm;
+	}
+
 	// public GridFile getFolderListing(final String url, int recursionLevel)
 	// throws RemoteFileSystemException, FileSystemException {
 	//
@@ -724,14 +732,6 @@ public class User {
 	// return null;
 	// }
 	// }
-
-	@Transient
-	public FileSystemManager getFileSystemManager() {
-		if (fsm == null) {
-			this.fsm = new FileSystemManager(this);
-		}
-		return fsm;
-	}
 
 	/**
 	 * Getter for the users' fqans.
@@ -977,6 +977,12 @@ public class User {
 			return mountFileSystem(root, name, vomsProxyCred, useHomeDirectory,
 					site);
 		}
+	}
+
+	public void removeArchiveLocation(String alias) {
+
+		getArchiveLocations().remove(alias);
+
 	}
 
 	public void removeBookmark(String alias) {

@@ -784,7 +784,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 
 	public synchronized FileSystemItem setBookmark(String alias, String url) {
 
-		serviceInterface.setBookmark(alias, url);
+		serviceInterface.addBookmark(alias, url);
 
 		if (StringUtils.isBlank(url)) {
 			final FileSystemItem temp = new FileSystemItem(alias,

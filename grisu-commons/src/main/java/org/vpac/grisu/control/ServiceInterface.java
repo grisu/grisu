@@ -60,6 +60,37 @@ public interface ServiceInterface {
 	public static String GRISU_JOB_FILE_NAME = ".grisujob";
 
 	/**
+	 * Adds an archive location.
+	 * 
+	 * @param alias
+	 *            the alias of the archive location
+	 * 
+	 * @param value
+	 *            the url of the archive location (or null to delete an existing
+	 *            one)
+	 */
+	@RolesAllowed("User")
+	@POST
+	@Path("/user/setbookmark/{alias}")
+	void addArchiveLocation(@PathParam("alias") String alias,
+			@QueryParam("value") String value);
+
+	/**
+	 * Adds a bookmarks.
+	 * 
+	 * @param alias
+	 *            the alias of the bookmark
+	 * 
+	 * @param value
+	 *            the url of the bookmark (or null to delete an existing one)
+	 */
+	@RolesAllowed("User")
+	@POST
+	@Path("/user/setbookmark/{alias}")
+	void addBookmark(@PathParam("alias") String alias,
+			@QueryParam("value") String value);
+
+	/**
 	 * Adds multiple job propeties in one go.
 	 * 
 	 * @param jobname
@@ -265,6 +296,12 @@ public interface ServiceInterface {
 	@RolesAllowed("User")
 	DtoMountPoints df();
 
+	// ---------------------------------------------------------------------------------------------------
+	//
+	// Grid environment information methods
+	//
+	// ---------------------------------------------------------------------------------------------------
+
 	/**
 	 * Download a file to the client.
 	 * 
@@ -296,12 +333,6 @@ public interface ServiceInterface {
 	@Path("user/files/fileExists")
 	@RolesAllowed("User")
 	boolean fileExists(String file) throws RemoteFileSystemException;
-
-	// ---------------------------------------------------------------------------------------------------
-	//
-	// Grid environment information methods
-	//
-	// ---------------------------------------------------------------------------------------------------
 
 	/**
 	 * Takes a jsdl template and returns a list of submission locations that
@@ -465,34 +496,6 @@ public interface ServiceInterface {
 	 */
 	String[] getApplicationPackagesForExecutable(String executable);
 
-	/**
-	 * Returns a xml document that contains all the jobs of the user with
-	 * information about the jobs.
-	 * 
-	 * 
-	 * @param application
-	 *            filter by application or null (for all jobs)
-	 * 
-	 * @return xml formated information about all the users jobs
-	 */
-	@GET
-	@Path("user/archivedjobs/{application}")
-	@RolesAllowed("User")
-	DtoJobs getArchivedJobs(@PathParam("application") String application);
-
-	/**
-	 * Returns the {@link DtoBatchJob} with the specified name.
-	 * 
-	 * This method doesn't refresh the jobs that belong to this batchjob. Call
-	 * {@link #refreshBatchJobStatus(String)} and monitor the action status for
-	 * this until it finishes before you retrieve the batchjob if you want an
-	 * up-to-date version of the batchjob.
-	 * 
-	 * @return the batchjob
-	 */
-	@RolesAllowed("User")
-	DtoBatchJob getBatchJob(String batchJobname) throws NoSuchJobException;
-
 	// /**
 	// * Finds all children files for the specified folder. Useful if you want
 	// to
@@ -514,6 +517,47 @@ public interface ServiceInterface {
 	// DtoStringList getChildrenFileNames(@QueryParam("url") String url,
 	// @QueryParam("onlyFiles") boolean onlyFiles)
 	// throws RemoteFileSystemException;
+
+	/**
+	 * Returns a xml document that contains all the jobs of the user with
+	 * information about the jobs.
+	 * 
+	 * 
+	 * @param application
+	 *            filter by application or null (for all jobs)
+	 * 
+	 * @return xml formated information about all the users jobs
+	 */
+	@GET
+	@Path("user/archivedjobs/{application}")
+	@RolesAllowed("User")
+	DtoJobs getArchivedJobs(@PathParam("application") String application);
+
+	/**
+	 * Returns the users archive locations.
+	 * 
+	 * An archive location is an url (along with an alias as the key) where the
+	 * user archived jobs.
+	 * 
+	 * @return the archive locations of the current user
+	 */
+	@RolesAllowed("User")
+	@GET
+	@Path("user/archiveLocations")
+	DtoProperties getArchiveLocations();
+
+	/**
+	 * Returns the {@link DtoBatchJob} with the specified name.
+	 * 
+	 * This method doesn't refresh the jobs that belong to this batchjob. Call
+	 * {@link #refreshBatchJobStatus(String)} and monitor the action status for
+	 * this until it finishes before you retrieve the batchjob if you want an
+	 * up-to-date version of the batchjob.
+	 * 
+	 * @return the batchjob
+	 */
+	@RolesAllowed("User")
+	DtoBatchJob getBatchJob(String batchJobname) throws NoSuchJobException;
 
 	/**
 	 * Gets the users bookmarks
@@ -553,6 +597,26 @@ public interface ServiceInterface {
 	DtoJobs getCurrentJobs(@PathParam("application") String application,
 			@PathParam("refresh") boolean refreshJobStatus);
 
+	// ---------------------------------------------------------------------------------------------------
+	//
+	// Filesystem methods
+	//
+	// ---------------------------------------------------------------------------------------------------
+
+	// ---------------------------------------------------------------------------------------------------
+	//
+	// General grisu specific methods
+	//
+	// ---------------------------------------------------------------------------------------------------
+	/**
+	 * The version of the serviceInterface for this backend.
+	 * 
+	 * @return the version
+	 */
+	// @GET
+	// @Path("interfaceVersion")
+	// String getInterfaceVersion();
+
 	/**
 	 * Checks the available data locations for the specified site and VO.
 	 * 
@@ -577,26 +641,6 @@ public interface ServiceInterface {
 	@Path("user/dn")
 	@Produces("text/plain")
 	String getDN();
-
-	// ---------------------------------------------------------------------------------------------------
-	//
-	// Filesystem methods
-	//
-	// ---------------------------------------------------------------------------------------------------
-
-	// ---------------------------------------------------------------------------------------------------
-	//
-	// General grisu specific methods
-	//
-	// ---------------------------------------------------------------------------------------------------
-	/**
-	 * The version of the serviceInterface for this backend.
-	 * 
-	 * @return the version
-	 */
-	// @GET
-	// @Path("interfaceVersion")
-	// String getInterfaceVersion();
 
 	/**
 	 * Returns the size of the file in bytes. This will probably replaced in a
@@ -841,6 +885,12 @@ public interface ServiceInterface {
 	@Path("user/allUsedApplications")
 	DtoStringList getUsedApplications();
 
+	// ---------------------------------------------------------------------------------------------------
+	//
+	// Job management methods
+	//
+	// ---------------------------------------------------------------------------------------------------
+
 	/**
 	 * Returns a list of all applications that are currently used for batchjobs.
 	 * 
@@ -859,12 +909,6 @@ public interface ServiceInterface {
 	@GET
 	@Path("user/allproperties")
 	DtoProperties getUserProperties();
-
-	// ---------------------------------------------------------------------------------------------------
-	//
-	// Job management methods
-	//
-	// ---------------------------------------------------------------------------------------------------
 
 	/**
 	 * Returns an array of strings that are associated with this key. The
@@ -898,6 +942,9 @@ public interface ServiceInterface {
 	DtoStringList getVersionsOfApplicationOnSubmissionLocation(
 			@PathParam("application") String application,
 			@PathParam("submissionLocation") String submissionLocation);
+
+	// void createAndSubmitJob(@PathParam("jobname") String jobname) throws
+	// JobSubmissionException, JobPropertiesException;
 
 	/**
 	 * Checks whether the specified file is a folder or not.
@@ -937,9 +984,6 @@ public interface ServiceInterface {
 			@QueryParam("clean") boolean clean)
 			throws RemoteFileSystemException, NoSuchJobException,
 			BatchJobException;
-
-	// void createAndSubmitJob(@PathParam("jobname") String jobname) throws
-	// JobSubmissionException, JobPropertiesException;
 
 	/**
 	 * Deletes the whole jobdirectory (if specified) and if successful, the job
@@ -1204,12 +1248,6 @@ public interface ServiceInterface {
 	@RolesAllowed("User")
 	void restartJob(final String jobname, String changedJsdl)
 			throws JobSubmissionException, NoSuchJobException;
-
-	@RolesAllowed("User")
-	@POST
-	@Path("/user/setbookmark/{alias}")
-	void setBookmark(@PathParam("alias") String alias,
-			@QueryParam("value") String value);
 
 	/**
 	 * Sets a user property.

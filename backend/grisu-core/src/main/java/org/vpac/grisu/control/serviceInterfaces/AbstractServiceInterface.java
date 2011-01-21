@@ -155,6 +155,29 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	protected final BatchJobDAO batchJobDao = new BatchJobDAO();
 
+	public void addArchiveLocation(String alias, String value) {
+
+		if (StringUtils.isBlank(value)) {
+			getUser().removeArchiveLocation(alias);
+		} else {
+			getUser().addArchiveLocation(alias, value);
+		}
+
+	}
+
+	// private Map<String, RemoteFileTransferObject> fileTransfers = new
+	// HashMap<String, RemoteFileTransferObject>();
+
+	public void addBookmark(String alias, String value) {
+
+		if (StringUtils.isBlank(value)) {
+			getUser().removeBookmark(alias);
+		} else {
+			getUser().addBookmark(alias, value);
+		}
+
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -181,9 +204,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		myLogger.debug("Added " + properties.getProperties().size()
 				+ " job properties.");
 	}
-
-	// private Map<String, RemoteFileTransferObject> fileTransfers = new
-	// HashMap<String, RemoteFileTransferObject>();
 
 	/*
 	 * (non-Javadoc)
@@ -1706,6 +1726,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
+	public DtoProperties getArchiveLocations() {
+
+		return DtoProperties.createProperties(getUser().getArchiveLocations());
+
+	}
+
 	/**
 	 * Returns all multipart jobs for this user.
 	 * 
@@ -2070,6 +2096,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return status;
 	}
 
+	// public String getStagingFileSystem(String site) {
+	// return MountPointManager.getDefaultFileSystem(site);
+	// }
+
+	// abstract protected DtoStringList getSessionFqans();
+
 	public String getJsdlDocument(final String jobname)
 			throws NoSuchJobException {
 
@@ -2093,12 +2125,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// TODO
 		return null;
 	}
-
-	// public String getStagingFileSystem(String site) {
-	// return MountPointManager.getDefaultFileSystem(site);
-	// }
-
-	// abstract protected DtoStringList getSessionFqans();
 
 	/*
 	 * (non-Javadoc)
@@ -2187,6 +2213,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						.getAllSubmissionLocationsForApplication(application));
 	}
 
+	// public UserDAO getUserDao() {
+	// return userdao;
+	// }
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -2211,10 +2241,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				.createSubmissionLocationsInfo(informationManager
 						.getAllSubmissionLocations(application, version));
 	}
-
-	// public UserDAO getUserDao() {
-	// return userdao;
-	// }
 
 	public DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
 			final String application) {
@@ -3816,16 +3842,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		final Job job = getJobFromDatabaseOrFileSystem(jobname);
 
 		restartJob(job, changedJsdl);
-	}
-
-	public void setBookmark(String alias, String value) {
-
-		if (StringUtils.isBlank(value)) {
-			getUser().removeBookmark(alias);
-		} else {
-			getUser().addBookmark(alias, value);
-		}
-
 	}
 
 	// /*
