@@ -1,7 +1,5 @@
 package org.vpac.grisu.control.serviceInterfaces;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,6 +34,8 @@ import org.vpac.grisu.backend.info.InformationManagerManager;
 import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.backend.model.RemoteFileTransferObject;
 import org.vpac.grisu.backend.model.User;
+import org.vpac.grisu.backend.model.fs.GrisuInputStream;
+import org.vpac.grisu.backend.model.fs.GrisuOutputStream;
 import org.vpac.grisu.backend.model.job.BatchJob;
 import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.backend.model.job.ServerJobSubmissionException;
@@ -557,7 +557,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				final String grisuJobFileUrl = targetDirUrl + "/"
 						+ GRISU_JOB_FILE_NAME;
-				OutputStream fout = null;
+				GrisuOutputStream fout = null;
 
 				try {
 					fout = getUser().getFileSystemManager().getOutputStream(
@@ -570,6 +570,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 										+ job.getJobname() + ": "
 										+ e1.getLocalizedMessage());
 					}
+					try {
+						fout.close();
+					} catch (Exception e) {
+					}
 					status.setFailed(true);
 					final String message = rftp.getPossibleExceptionMessage();
 					status.addElement("Could not access grisufile url when archiving job: "
@@ -580,7 +584,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				final Serializer serializer = new Persister();
 
 				try {
-					serializer.write(job, fout);
+					serializer.write(job, fout.getStream());
 				} catch (final Exception e) {
 					if (optionalBatchJobStatus != null) {
 						optionalBatchJobStatus.setFailed(true);
@@ -595,11 +599,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					status.setFinished(true);
 					return;
 				} finally {
-					try {
-						fout.close();
-					} catch (final Exception e) {
-						e.printStackTrace();
-					}
+					fout.close();
 				}
 
 				status.addElement("Killing job.");
@@ -2629,11 +2629,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				final Serializer serializer = new Persister();
 
-				InputStream fin = null;
+				GrisuInputStream fin = null;
 				try {
 					fin = getUser().getFileSystemManager().getInputStream(
 							grisuJobPropertiesFile);
-					job = serializer.read(Job.class, fin);
+					job = serializer.read(Job.class, fin.getStream());
+					fin.close();
 					return job;
 				} catch (final Exception e) {
 					e.printStackTrace();

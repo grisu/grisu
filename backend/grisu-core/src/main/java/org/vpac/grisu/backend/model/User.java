@@ -227,13 +227,6 @@ public class User {
 		userdao.saveOrUpdate(this);
 	}
 
-	public void closeFileSystems() {
-
-		myLogger.debug("Closing all filesystems for user " + getDn());
-
-		getFileSystemManager().closeFileSystems();
-	}
-
 	private MountPoint createMountPoint(String server, String path,
 			final String fqan, Executor executor) {
 

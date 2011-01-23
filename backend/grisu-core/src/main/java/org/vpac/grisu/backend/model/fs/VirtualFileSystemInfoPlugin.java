@@ -1,7 +1,5 @@
 package org.vpac.grisu.backend.model.fs;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -92,14 +90,14 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 		}
 	}
 
-	public InputStream getInputStream(String file)
+	public GrisuInputStream getInputStream(String file)
 			throws RemoteFileSystemException {
 		throw new RemoteFileSystemException(
 				"get input stream not supported for virtual file system.");
 
 	}
 
-	public OutputStream getOutputStream(String file)
+	public GrisuOutputStream getOutputStream(String file)
 			throws RemoteFileSystemException {
 		throw new RemoteFileSystemException(
 				"Get outputstream not supported for virtual file system.");

@@ -1,7 +1,5 @@
 package org.vpac.grisu.backend.model.fs;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Set;
 
 import javax.activation.DataHandler;
@@ -29,10 +27,10 @@ public interface FileSystemInfoPlugin {
 	public GridFile getFolderListing(String url, int recursiveLevels)
 			throws RemoteFileSystemException;
 
-	public InputStream getInputStream(String file)
+	public GrisuInputStream getInputStream(String file)
 			throws RemoteFileSystemException;
 
-	public OutputStream getOutputStream(String file)
+	public GrisuOutputStream getOutputStream(String file)
 			throws RemoteFileSystemException;
 
 	public boolean isFolder(final String file) throws RemoteFileSystemException;

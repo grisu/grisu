@@ -46,15 +46,11 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 
 	private final User user;
 
-	private final FileSystemCache globalFileSystemCache;
-
 	// private final Map<Thread, FileSystemCache> filesystems = Collections
 	// .synchronizedMap(new HashMap<Thread, FileSystemCache>());
 
 	public CommonsVfsFileSystemInfoAndTransferPlugin(User user) {
 		this.user = user;
-		globalFileSystemCache = new FileSystemCache(user);
-
 	}
 
 	public FileObject aquireFile(FileSystemCache fsCache, String url)
@@ -129,9 +125,12 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 
 	}
 
-	public void closeFileSystems() {
+	public void closeInputStream(String file) {
 
-		globalFileSystemCache.close();
+	}
+
+	public void closeOutputStream(String file) {
+
 	}
 
 	public RemoteFileTransferObject copySingleFile(String source,
@@ -215,6 +214,19 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 
 	}
 
+	// private FileSystemCache getFileSystemCache() {
+	//
+	// Thread current = Thread.currentThread();
+	// if (filesystems.get(current) == null) {
+	// FileSystemCache fs = new FileSystemCache(user);
+	// filesystems.put(current, fs);
+	// X.p("Filesystemcache size: " + filesystems.size());
+	// }
+	//
+	// return filesystems.get(current);
+	//
+	// }
+
 	public DataHandler download(String filename)
 			throws RemoteFileSystemException {
 
@@ -278,19 +290,6 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 		}
 
 	}
-
-	// private FileSystemCache getFileSystemCache() {
-	//
-	// Thread current = Thread.currentThread();
-	// if (filesystems.get(current) == null) {
-	// FileSystemCache fs = new FileSystemCache(user);
-	// filesystems.put(current, fs);
-	// X.p("Filesystemcache size: " + filesystems.size());
-	// }
-	//
-	// return filesystems.get(current);
-	//
-	// }
 
 	public long getFileSize(final String file) throws RemoteFileSystemException {
 
@@ -400,24 +399,36 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 
 	}
 
-	public InputStream getInputStream(String file)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.vpac.grisu.backend.model.fs.FileSystemInfoPlugin#getInputStream(java
+	 * .lang.String)
+	 */
+	public GrisuInputStream getInputStream(String file)
 			throws RemoteFileSystemException {
 
+		FileSystemCache fsCache = new FileSystemCache(user);
+
 		try {
-			FileObject f = aquireFile(globalFileSystemCache, file);
-			return f.getContent().getInputStream();
+			FileObject f = aquireFile(fsCache, file);
+			return new GrisuInputStreamImpl(fsCache, f.getContent()
+					.getInputStream());
 		} catch (FileSystemException e) {
 			throw new RemoteFileSystemException(e);
 		}
 	}
 
-	public OutputStream getOutputStream(String file)
+	public GrisuOutputStream getOutputStream(String file)
 			throws RemoteFileSystemException {
 
-		FileObject fileO = aquireFile(globalFileSystemCache, file);
+		FileSystemCache fsCache = new FileSystemCache(user);
 
 		try {
-			return fileO.getContent().getOutputStream();
+			FileObject fileO = aquireFile(fsCache, file);
+			return new GrisuOutputStreamImpl(fsCache, fileO.getContent()
+					.getOutputStream());
 		} catch (FileSystemException e) {
 			throw new RemoteFileSystemException(e);
 		}

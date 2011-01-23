@@ -1,7 +1,5 @@
 package org.vpac.grisu.backend.model.fs;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -59,10 +57,6 @@ public class FileSystemManager {
 			path = ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + ":/" + path;
 		}
 		return path;
-	}
-
-	public void closeFileSystems() {
-		commonsVfsInfo.closeFileSystems();
 	}
 
 	public RemoteFileTransferObject copy(String source, String target,
@@ -136,12 +130,12 @@ public class FileSystemManager {
 
 	}
 
-	public InputStream getInputStream(String file)
+	public GrisuInputStream getInputStream(String file)
 			throws RemoteFileSystemException {
 		return getFileSystemInfoPlugin(file).getInputStream(file);
 	}
 
-	public OutputStream getOutputStream(String file)
+	public GrisuOutputStream getOutputStream(String file)
 			throws RemoteFileSystemException {
 		return getFileSystemInfoPlugin(file).getOutputStream(file);
 	}
