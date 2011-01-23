@@ -18,6 +18,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
@@ -31,6 +32,8 @@ import org.vpac.grisu.frontend.model.job.JobObject;
 import org.vpac.grisu.frontend.view.swing.files.preview.FileListWithPreviewPanel;
 import org.vpac.grisu.frontend.view.swing.jobmonitoring.single.appSpecific.AppSpecificViewerPanel;
 import org.vpac.grisu.frontend.view.swing.utils.BackgroundActionProgressDialogSmall;
+import org.vpac.grisu.model.dto.DtoActionStatus;
+import org.vpac.grisu.model.status.StatusObject;
 
 import au.org.arcs.jcommons.constants.Constants;
 
@@ -39,7 +42,6 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import com.jidesoft.swing.JideTabbedPane;
-import javax.swing.JSeparator;
 
 public class JobDetailPanelDefault extends JPanel implements
 		PropertyChangeListener, JobDetailPanel {
@@ -200,8 +202,35 @@ public class JobDetailPanelDefault extends JPanel implements
 							BackgroundActionProgressDialogSmall d = new BackgroundActionProgressDialogSmall(
 									"Archiving job:", job.getJobname());
 							try {
-								job.archive(null, true);
+								job.archive(null, false);
+
+								StatusObject so = StatusObject
+										.waitForActionToFinish(
+												si,
+												ServiceInterface.ARCHIVE_STATUS_PREFIX
+														+ job.getJobname(), 5,
+												true, false);
+
 								d.close();
+
+								if (so.getStatus().isFailed()) {
+
+									String msg = "Can't archive job: "
+											+ DtoActionStatus.getLastMessage(so
+													.getStatus());
+									ErrorInfo info = new ErrorInfo(
+											"Job archiving error", msg, null,
+											"Error", null, Level.SEVERE, null);
+
+									JXErrorPane pane = new JXErrorPane();
+									pane.setErrorInfo(info);
+
+									JXErrorPane.showDialog(
+											JobDetailPanelDefault.this
+													.getRootPane(), pane);
+
+								}
+
 							} catch (Exception e) {
 								d.close();
 								ErrorInfo info = new ErrorInfo(

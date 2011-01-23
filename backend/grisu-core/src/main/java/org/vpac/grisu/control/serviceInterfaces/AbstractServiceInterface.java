@@ -530,9 +530,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 										+ e1.getLocalizedMessage());
 					}
 					status.setFailed(true);
+					status.setFinished(true);
 					status.addElement("Transfer failed: "
 							+ e1.getLocalizedMessage());
-					status.setFinished(true);
 					return;
 				}
 
@@ -544,9 +544,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 										+ job.getJobname());
 					}
 					status.setFailed(true);
+					status.setFinished(true);
 					final String message = rftp.getPossibleExceptionMessage();
 					status.addElement("Transfer failed: " + message);
-					status.setFinished(true);
 					return;
 				}
 
@@ -575,10 +575,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					} catch (Exception e) {
 					}
 					status.setFailed(true);
+					status.setFinished(true);
 					final String message = rftp.getPossibleExceptionMessage();
 					status.addElement("Could not access grisufile url when archiving job: "
 							+ message);
-					status.setFinished(true);
 					return;
 				}
 				final Serializer serializer = new Persister();
@@ -594,9 +594,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 										+ e.getLocalizedMessage());
 					}
 					status.setFailed(true);
+					status.setFinished(true);
 					final String message = rftp.getPossibleExceptionMessage();
 					status.addElement("Could not serialize job object.");
-					status.setFinished(true);
 					return;
 				} finally {
 					fout.close();
@@ -626,8 +626,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				// }.start();
 				// }
 
-				status.addElement("Job archived successfully.");
 				status.setFinished(true);
+				status.addElement("Job archived successfully.");
 				if (optionalBatchJobStatus != null) {
 					optionalBatchJobStatus
 							.addElement("Successfully archived job: "
