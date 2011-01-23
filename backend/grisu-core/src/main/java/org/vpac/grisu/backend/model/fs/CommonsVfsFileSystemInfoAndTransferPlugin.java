@@ -3,7 +3,6 @@ package org.vpac.grisu.backend.model.fs;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -238,35 +237,37 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 
 		FileSystemCache fsCache = new FileSystemCache(user);
 
-		for (int i = 0; i < filenames.length; i++) {
+		try {
 
-			FileObject source = null;
-			DataSource datasource = null;
-			source = aquireFile(fsCache, filenames[i]);
-			myLogger.debug("Preparing data for file transmission for file "
-					+ source.getName().toString());
-			try {
-				if (!source.exists()) {
-					fsCache.close();
+			for (int i = 0; i < filenames.length; i++) {
+
+				FileObject source = null;
+				DataSource datasource = null;
+				source = aquireFile(fsCache, filenames[i]);
+				myLogger.debug("Preparing data for file transmission for file "
+						+ source.getName().toString());
+				try {
+					if (!source.exists()) {
+						throw new RemoteFileSystemException(
+								"Could not provide file: "
+										+ filenames[i]
+										+ " for download: InputFile does not exist.");
+					}
+
+					datasource = new FileContentDataSourceConnector(
+							source.getContent());
+				} catch (final FileSystemException e) {
 					throw new RemoteFileSystemException(
-							"Could not provide file: "
-									+ filenames[i]
-									+ " for download: InputFile does not exist.");
+							"Could not find or read file: " + filenames[i]
+									+ ": " + e.getMessage());
 				}
-
-				datasource = new FileContentDataSourceConnector(
-						source.getContent());
-			} catch (final FileSystemException e) {
-				fsCache.close();
-				throw new RemoteFileSystemException(
-						"Could not find or read file: " + filenames[i] + ": "
-								+ e.getMessage());
+				datasources[i] = datasource;
+				datahandlers[i] = new DataHandler(datasources[i]);
 			}
-			datasources[i] = datasource;
-			datahandlers[i] = new DataHandler(datasources[i]);
-		}
 
-		fsCache.close();
+		} finally {
+			fsCache.close();
+		}
 
 		return datahandlers[0];
 
@@ -522,11 +523,12 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 
 		MountPoint new_mp = new MountPoint(cred.getDn(), cred.getFqan(), uri,
 				mountPointName, site);
+
+		FileSystemCache fsCache = new FileSystemCache(user);
+
 		try {
 			// FileSystem fileSystem = createFilesystem(new_mp.getRootUrl(),
 			// new_mp.getFqan());
-
-			FileSystemCache fsCache = new FileSystemCache(user);
 
 			final FileSystem fileSystem = fsCache.getFileSystem(new_mp);
 			// final FileSystem fileSystem = threadLocalFsManager.getFileSystem(
@@ -553,12 +555,12 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 						mountPointName, site);
 			}
 
-			fsCache.close();
-
 			return new_mp;
 		} catch (final FileSystemException e) {
 			throw new RemoteFileSystemException("Error while trying to mount: "
 					+ mountPointName);
+		} finally {
+			fsCache.close();
 		}
 
 	}
@@ -598,18 +600,21 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 			throws RemoteFileSystemException {
 
 		myLogger.debug("Receiving file: " + filename);
-		FileObject target = null;
 
 		OutputStream fout = null;
 		FileSystemCache fsCache = new FileSystemCache(user);
 
+		String result = null;
+
 		try {
+			FileObject target = null;
 			final String parent = filename.substring(0,
 					filename.lastIndexOf(File.separator));
 
 			createFolder(parent);
 
 			target = aquireFile(fsCache, filename);
+			result = target.getName().getURI();
 			// just to be sure that the folder exists.
 
 			myLogger.debug("Calculated target: " + target.getName().toString());
@@ -682,7 +687,7 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 
 		buf = null;
 		fout = null;
-		return target.getName().getURI();
+		return result;
 
 	}
 
@@ -695,9 +700,9 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 		BufferedInputStream buf;
 		try {
 			buf = new BufferedInputStream(source.getInputStream());
-		} catch (final IOException e1) {
+		} catch (final Exception e1) {
 			throw new RuntimeException(
-					"Could not get input stream from datahandler...");
+					"Could not get input stream from datahandler...", e1);
 		}
 
 		final FileSystemCache fsCache = new FileSystemCache(user);
@@ -706,9 +711,10 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 		OutputStream fout;
 		try {
 			fout = tempFile.getContent().getOutputStream();
-		} catch (final FileSystemException e1) {
+		} catch (final Exception e1) {
 			fsCache.close();
-			throw new RemoteFileSystemException("Could not create temp file.");
+			throw new RemoteFileSystemException("Could not create temp file: "
+					+ e1.getLocalizedMessage());
 		}
 		myLogger.debug("Receiving data for file: " + targetFilename);
 
@@ -745,7 +751,7 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 			if (fout != null) {
 				fout.close();
 			}
-		} catch (final IOException e) {
+		} catch (final Exception e) {
 			fsCache.close();
 			throw new RemoteFileSystemException("Could not write to file: "
 					+ targetFilename + ": " + e.getMessage());
