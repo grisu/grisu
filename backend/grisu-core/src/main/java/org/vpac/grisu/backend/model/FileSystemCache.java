@@ -2,6 +2,7 @@ package org.vpac.grisu.backend.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystem;
@@ -10,11 +11,14 @@ import org.apache.commons.vfs.FileSystemOptions;
 import org.apache.commons.vfs.impl.DefaultFileSystemManager;
 import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileSystemConfigBuilder;
 import org.apache.log4j.Logger;
+import org.vpac.grisu.X;
 import org.vpac.grisu.model.MountPoint;
 
 import uk.ac.dl.escience.vfs.util.VFSUtil;
 
 public class FileSystemCache {
+
+	private static AtomicInteger COUNTER = new AtomicInteger();
 
 	private static Logger myLogger = Logger.getLogger(FileSystemCache.class
 			.getName());
@@ -24,6 +28,8 @@ public class FileSystemCache {
 	private final User user;
 
 	public FileSystemCache(User user) {
+		int i = COUNTER.addAndGet(1);
+		X.p("Opening filesystemmanager: " + i);
 		this.user = user;
 		try {
 			fsm = VFSUtil.createNewFsManager(false, false, true, true, true,
@@ -40,6 +46,8 @@ public class FileSystemCache {
 	public void close() {
 		cachedFilesystems = new HashMap<MountPoint, FileSystem>();
 		fsm.close();
+		int i = COUNTER.decrementAndGet();
+		X.p("Closing filesystemmanager: " + i);
 	}
 
 	private FileSystem createFileSystem(String rootUrl,
