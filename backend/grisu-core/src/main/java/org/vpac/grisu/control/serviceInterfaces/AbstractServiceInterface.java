@@ -1,5 +1,10 @@
 package org.vpac.grisu.control.serviceInterfaces;
 
+import grith.jgrith.control.CertificateFiles;
+import grith.jgrith.control.VomsesFiles;
+import grith.jgrith.voms.VO;
+import grith.jgrith.voms.VOManagement.VOManagement;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -70,10 +75,6 @@ import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.utils.FileHelpers;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
-import org.vpac.security.light.control.CertificateFiles;
-import org.vpac.security.light.control.VomsesFiles;
-import org.vpac.security.light.voms.VO;
-import org.vpac.security.light.voms.VOManagement.VOManagement;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

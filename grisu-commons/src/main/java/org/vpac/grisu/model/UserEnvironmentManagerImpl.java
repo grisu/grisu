@@ -417,8 +417,8 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 
 	public SortedSet<DtoJob> getCurrentJobs(boolean refreshJobStatus) {
 		if (cachedJobList == null) {
-			cachedJobList = serviceInterface.getCurrentJobs(null, refreshJobStatus)
-					.getAllJobs();
+			cachedJobList = serviceInterface.getCurrentJobs(null,
+					refreshJobStatus).getAllJobs();
 		}
 		return cachedJobList;
 	}

@@ -1,5 +1,10 @@
 package org.vpac.grisu.control.serviceInterfaces;
 
+import grith.jgrith.myProxy.MyProxy_light;
+import grith.jgrith.plainProxy.LocalProxy;
+import grith.jgrith.voms.VO;
+import grith.jgrith.voms.VOManagement.VOManagement;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -30,10 +35,6 @@ import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.settings.MyProxyServerParams;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.settings.ServiceTemplateManagement;
-import org.vpac.security.light.myProxy.MyProxy_light;
-import org.vpac.security.light.plainProxy.LocalProxy;
-import org.vpac.security.light.voms.VO;
-import org.vpac.security.light.voms.VOManagement.VOManagement;
 
 public class DummyServiceInterface extends AbstractServiceInterface implements
 		ServiceInterface {

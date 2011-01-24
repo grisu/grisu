@@ -1,5 +1,7 @@
 package org.vpac.grisu.backend.model.job.gt4;
 
+import grith.jgrith.plainProxy.LocalProxy;
+
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -26,7 +28,6 @@ import org.oasis.wsrf.faults.BaseFaultType;
 import org.oasis.wsrf.faults.BaseFaultTypeDescription;
 import org.vpac.grisu.control.serviceInterfaces.AbstractServiceInterface;
 import org.vpac.grisu.settings.Environment;
-import org.vpac.security.light.plainProxy.LocalProxy;
 
 /**
  * A Custom GRAM Client. For GT4 Based on the GlobusRun command from Globus

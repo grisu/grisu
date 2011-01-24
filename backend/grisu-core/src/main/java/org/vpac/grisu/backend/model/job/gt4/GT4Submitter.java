@@ -1,5 +1,7 @@
 package org.vpac.grisu.backend.model.job.gt4;
 
+import grith.jgrith.CredentialHelpers;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.StringWriter;
@@ -40,7 +42,6 @@ import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.utils.DebugUtils;
 import org.vpac.grisu.utils.SeveralXMLHelpers;
-import org.vpac.security.light.CredentialHelpers;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

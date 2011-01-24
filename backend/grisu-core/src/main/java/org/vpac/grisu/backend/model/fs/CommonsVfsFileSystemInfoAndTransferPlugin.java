@@ -1,5 +1,7 @@
 package org.vpac.grisu.backend.model.fs;
 
+import grith.jgrith.vomsProxy.VomsException;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +36,6 @@ import org.vpac.grisu.model.MountPoint;
 import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.dto.GridFile;
 import org.vpac.grisu.settings.ServerPropertiesManager;
-import org.vpac.security.light.vomsProxy.VomsException;
 
 public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 		FileSystemInfoPlugin, FileTransferPlugin {

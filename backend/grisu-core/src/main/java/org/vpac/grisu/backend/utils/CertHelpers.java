@@ -1,5 +1,10 @@
 package org.vpac.grisu.backend.utils;
 
+import grith.jgrith.CredentialHelpers;
+import grith.jgrith.voms.VO;
+import grith.jgrith.vomsProxy.VomsException;
+import grith.jgrith.vomsProxy.VomsProxyCredential;
+
 import org.apache.log4j.Logger;
 import org.globus.gsi.GlobusCredential;
 import org.globus.gsi.ptls.PureTLSUtil;
@@ -7,10 +12,6 @@ import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.vpac.grisu.backend.model.ProxyCredential;
 import org.vpac.grisu.utils.FqanHelpers;
-import org.vpac.security.light.CredentialHelpers;
-import org.vpac.security.light.voms.VO;
-import org.vpac.security.light.vomsProxy.VomsException;
-import org.vpac.security.light.vomsProxy.VomsProxyCredential;
 
 /**
  * Helper class that does stuff with certificates.

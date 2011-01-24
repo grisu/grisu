@@ -1,6 +1,10 @@
 package org.vpac.grisu.frontend.control.login;
 
 import grith.gsindl.SLCS;
+import grith.jgrith.CredentialHelpers;
+import grith.jgrith.Init;
+import grith.jgrith.control.CertificateFiles;
+import grith.jgrith.plainProxy.LocalProxy;
 
 import java.io.IOException;
 import java.net.URL;
@@ -27,10 +31,6 @@ import org.vpac.grisu.frontend.control.UncaughtExceptionHandler;
 import org.vpac.grisu.settings.ClientPropertiesManager;
 import org.vpac.grisu.settings.Environment;
 import org.vpac.grisu.utils.GrisuPluginFilenameFilter;
-import org.vpac.security.light.CredentialHelpers;
-import org.vpac.security.light.Init;
-import org.vpac.security.light.control.CertificateFiles;
-import org.vpac.security.light.plainProxy.LocalProxy;
 
 import au.org.arcs.auth.shibboleth.CredentialManager;
 import au.org.arcs.auth.shibboleth.DummyCredentialManager;
