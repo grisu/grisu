@@ -42,7 +42,7 @@ public final class ServerPropertiesManager {
 	/**
 	 * Default directory name used as parent for the jobdirectories.
 	 */
-	public static final String DEFAULT_JOB_DIR_NAME = "grisu-dir";
+	public static final String DEFAULT_JOB_DIR_NAME = "grisu-jobs";
 	public static final int DEFAULT_TIME_INBETWEEN_STATUS_CHECKS_FOR_THE_SAME_JOB_IN_SECONDS = 60;
 
 	private static HierarchicalINIConfiguration config = null;

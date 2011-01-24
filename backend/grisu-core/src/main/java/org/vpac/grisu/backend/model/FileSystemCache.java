@@ -11,7 +11,6 @@ import org.apache.commons.vfs.FileSystemOptions;
 import org.apache.commons.vfs.impl.DefaultFileSystemManager;
 import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileSystemConfigBuilder;
 import org.apache.log4j.Logger;
-import org.vpac.grisu.X;
 import org.vpac.grisu.model.MountPoint;
 
 import uk.ac.dl.escience.vfs.util.VFSUtil;
@@ -29,7 +28,7 @@ public class FileSystemCache {
 
 	public FileSystemCache(User user) {
 		int i = COUNTER.addAndGet(1);
-		X.p("Opening filesystemmanager: " + i);
+		// X.p("Opening filesystemmanager: " + i);
 		this.user = user;
 		try {
 			fsm = VFSUtil.createNewFsManager(false, false, true, true, true,
@@ -47,7 +46,7 @@ public class FileSystemCache {
 		cachedFilesystems = new HashMap<MountPoint, FileSystem>();
 		fsm.close();
 		int i = COUNTER.decrementAndGet();
-		X.p("Closing filesystemmanager: " + i);
+		// X.p("Closing filesystemmanager: " + i);
 	}
 
 	private FileSystem createFileSystem(String rootUrl,
