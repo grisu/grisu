@@ -18,6 +18,8 @@
 
 package org.vpac.grisu.backend.model;
 
+import grith.jgrith.CredentialHelpers;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,7 +28,6 @@ import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.vpac.grisu.backend.model.job.Job;
 import org.vpac.grisu.backend.utils.CertHelpers;
-import org.vpac.security.light.CredentialHelpers;
 
 /**
  * This extends the {@link Credential} abstract class. It uses a normal GSSCredential as credential. Most likely you

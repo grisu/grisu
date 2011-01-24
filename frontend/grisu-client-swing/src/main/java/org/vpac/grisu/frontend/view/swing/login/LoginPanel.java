@@ -1,5 +1,7 @@
 package org.vpac.grisu.frontend.view.swing.login;
 
+import grith.jgrith.plainProxy.LocalProxy;
+
 import java.awt.CardLayout;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,7 +13,6 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.frontend.control.login.LoginException;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.settings.ClientPropertiesManager;
-import org.vpac.security.light.plainProxy.LocalProxy;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;

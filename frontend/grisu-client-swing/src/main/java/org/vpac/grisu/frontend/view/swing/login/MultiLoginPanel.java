@@ -1,5 +1,9 @@
 package org.vpac.grisu.frontend.view.swing.login;
 
+import grith.jgrith.Init;
+import grith.jgrith.certificate.CertificateHelper;
+import grith.jgrith.plainProxy.LocalProxy;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -28,9 +32,6 @@ import org.vpac.grisu.control.events.ClientPropertiesEvent;
 import org.vpac.grisu.frontend.control.login.LoginManager;
 import org.vpac.grisu.frontend.control.login.LoginParams;
 import org.vpac.grisu.settings.ClientPropertiesManager;
-import org.vpac.security.light.Init;
-import org.vpac.security.light.certificate.CertificateHelper;
-import org.vpac.security.light.plainProxy.LocalProxy;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;

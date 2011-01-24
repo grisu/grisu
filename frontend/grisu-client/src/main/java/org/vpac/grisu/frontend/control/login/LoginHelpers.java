@@ -1,5 +1,7 @@
 package org.vpac.grisu.frontend.control.login;
 
+import grith.jgrith.plainProxy.LocalProxy;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
@@ -13,7 +15,6 @@ import org.ietf.jgss.GSSCredential;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.ServiceInterfaceException;
 import org.vpac.grisu.settings.MyProxyServerParams;
-import org.vpac.security.light.plainProxy.LocalProxy;
 
 /**
  * Some easy-to-use methods to login to a Grisu web service.
@@ -97,7 +98,7 @@ public final class LoginHelpers {
 		Class directMyProxyUploadClass = null;
 		try {
 			directMyProxyUploadClass = Class
-					.forName("org.vpac.security.light.control.DirectMyProxyUpload");
+					.forName("grith.jgrith.control.DirectMyProxyUpload");
 		} catch (final ClassNotFoundException e1) {
 			throw new RuntimeException(
 					"Proxy_light library not in path. Can't create proxy.");
@@ -185,7 +186,7 @@ public final class LoginHelpers {
 		Class directMyProxyUploadClass = null;
 		try {
 			directMyProxyUploadClass = Class
-					.forName("org.vpac.security.light.control.DirectMyProxyUpload");
+					.forName("grith.jgrith.control.DirectMyProxyUpload");
 		} catch (final ClassNotFoundException e1) {
 			throw new RuntimeException(
 					"Proxy_light library not in path. Can't create proxy.");
@@ -275,7 +276,7 @@ public final class LoginHelpers {
 		Class directMyProxyUploadClass = null;
 		try {
 			directMyProxyUploadClass = Class
-					.forName("org.vpac.security.light.control.DirectMyProxyUpload");
+					.forName("grith.jgrith.control.DirectMyProxyUpload");
 		} catch (final ClassNotFoundException e1) {
 			throw new RuntimeException(
 					"Proxy_light library not in path. Can't create proxy.");

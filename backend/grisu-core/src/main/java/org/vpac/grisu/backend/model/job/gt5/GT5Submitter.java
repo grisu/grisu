@@ -1,5 +1,7 @@
 package org.vpac.grisu.backend.model.job.gt5;
 
+import grith.jgrith.CredentialHelpers;
+
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -16,7 +18,6 @@ import org.vpac.grisu.backend.model.job.ServerJobSubmissionException;
 import org.vpac.grisu.control.JobConstants;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.utils.DebugUtils;
-import org.vpac.security.light.CredentialHelpers;
 import org.w3c.dom.Document;
 
 import au.org.arcs.jcommons.constants.Constants;

@@ -1,15 +1,16 @@
 package org.vpac.grisu.frontend.control.login;
 
+import grith.gsindl.SLCS;
+import grith.jgrith.plainProxy.PlainProxy;
+
 import org.apache.commons.lang.StringUtils;
 import org.ietf.jgss.GSSCredential;
-import org.vpac.security.light.plainProxy.PlainProxy;
 
 import au.org.arcs.auth.shibboleth.CredentialManager;
 import au.org.arcs.auth.shibboleth.IdpObject;
 import au.org.arcs.auth.shibboleth.Shibboleth;
 import au.org.arcs.auth.shibboleth.StaticCredentialManager;
 import au.org.arcs.auth.shibboleth.StaticIdpObject;
-import au.org.arcs.auth.slcs.SLCS;
 import au.org.arcs.jcommons.configuration.CommonArcsProperties;
 
 public class SlcsLoginWrapper {

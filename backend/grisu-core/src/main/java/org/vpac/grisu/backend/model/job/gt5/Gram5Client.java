@@ -1,5 +1,7 @@
 package org.vpac.grisu.backend.model.job.gt5;
 
+import grith.jgrith.plainProxy.LocalProxy;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -15,7 +17,6 @@ import org.globus.gram.internal.GRAMProtocolErrorConstants;
 import org.globus.gsi.GlobusCredentialException;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
-import org.vpac.security.light.plainProxy.LocalProxy;
 
 public class Gram5Client implements GramJobListener {
 

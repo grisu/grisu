@@ -1,5 +1,8 @@
 package org.vpac.grisu.control.serviceInterfaces;
 
+import grith.jgrith.myProxy.MyProxy_light;
+import grith.jgrith.plainProxy.LocalProxy;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -18,8 +21,6 @@ import org.vpac.grisu.control.exceptions.NoValidCredentialException;
 import org.vpac.grisu.settings.MyProxyServerParams;
 import org.vpac.grisu.settings.ServerPropertiesManager;
 import org.vpac.grisu.settings.ServiceTemplateManagement;
-import org.vpac.security.light.myProxy.MyProxy_light;
-import org.vpac.security.light.plainProxy.LocalProxy;
 
 public class LocalServiceInterface extends AbstractServiceInterface implements
 		ServiceInterface {

@@ -1,5 +1,7 @@
 package org.vpac.grisu.backend.utils;
 
+import grith.jgrith.Init;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,7 +14,6 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.log4j.Logger;
 import org.vpac.grisu.settings.Environment;
-import org.vpac.security.light.Init;
 
 public final class LocalTemplatesHelper {
 

@@ -1,5 +1,9 @@
 package org.vpac.grisu.backend.model;
 
+import grith.jgrith.voms.VO;
+import grith.jgrith.voms.VOManagement.VOManagement;
+import grith.jgrith.vomsProxy.VomsException;
+
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -46,9 +50,6 @@ import org.vpac.grisu.model.dto.DtoActionStatus;
 import org.vpac.grisu.model.job.JobSubmissionObjectImpl;
 import org.vpac.grisu.utils.FqanHelpers;
 import org.vpac.grisu.utils.MountPointHelpers;
-import org.vpac.security.light.voms.VO;
-import org.vpac.security.light.voms.VOManagement.VOManagement;
-import org.vpac.security.light.vomsProxy.VomsException;
 
 import au.org.arcs.jcommons.constants.Constants;
 

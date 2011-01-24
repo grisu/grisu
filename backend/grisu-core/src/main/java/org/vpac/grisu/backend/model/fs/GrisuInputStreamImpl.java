@@ -10,8 +10,7 @@ public class GrisuInputStreamImpl implements GrisuInputStream {
 	private final FileSystemCache fsCache;
 	private final InputStream inputStream;
 
-	public GrisuInputStreamImpl(FileSystemCache fsCache,
-			InputStream inputStream) {
+	public GrisuInputStreamImpl(FileSystemCache fsCache, InputStream inputStream) {
 
 		this.fsCache = fsCache;
 		this.inputStream = inputStream;
