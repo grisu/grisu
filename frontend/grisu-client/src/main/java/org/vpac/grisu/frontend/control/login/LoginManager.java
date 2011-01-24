@@ -1,5 +1,7 @@
 package org.vpac.grisu.frontend.control.login;
 
+import grith.gsindl.SLCS;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
@@ -35,7 +37,6 @@ import au.org.arcs.auth.shibboleth.DummyCredentialManager;
 import au.org.arcs.auth.shibboleth.DummyIdpObject;
 import au.org.arcs.auth.shibboleth.IdpObject;
 import au.org.arcs.auth.shibboleth.Shibboleth;
-import au.org.arcs.auth.slcs.SLCS;
 import au.org.arcs.jcommons.configuration.CommonArcsProperties;
 import au.org.arcs.jcommons.constants.ArcsEnvironment;
 import au.org.arcs.jcommons.constants.Enums.LoginType;
