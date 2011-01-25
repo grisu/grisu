@@ -106,7 +106,7 @@ public class StatusObject {
 
 	public void waitForActionToFinish(int recheckIntervalInSeconds,
 			boolean exitIfFailed, boolean sendStatusEvent)
-			throws InterruptedException, StatusException {
+	throws InterruptedException, StatusException {
 		waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed,
 				sendStatusEvent, null);
 	}
@@ -123,6 +123,7 @@ public class StatusObject {
 					+ this.handle);
 		}
 		while (!lastStatus.isFinished()) {
+
 			if (sendStatusEvent) {
 				final ActionStatusEvent ev = new ActionStatusEvent(lastStatus,
 						statusMessagePrefix);
@@ -139,7 +140,7 @@ public class StatusObject {
 			if (Thread.currentThread().isInterrupted()) {
 				throw new InterruptedException(
 						"Interrupted while waiting for action " + handle
-								+ " to finish on backend.");
+						+ " to finish on backend.");
 			}
 
 			try {

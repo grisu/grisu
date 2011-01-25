@@ -18,7 +18,7 @@ import org.vpac.grisu.settings.ServerPropertiesManager;
 import uk.ac.dl.escience.vfs.util.VFSUtil;
 
 public class CommonsVfsRemoteFileTransferObject implements
-		RemoteFileTransferObject {
+RemoteFileTransferObject {
 
 	private final Thread fileTransferThread;
 
@@ -39,7 +39,7 @@ public class CommonsVfsRemoteFileTransferObject implements
 	private final FileSystemCache fsCache;
 
 	static final Logger myLogger = Logger
-			.getLogger(CommonsVfsRemoteFileTransferObject.class.getName());
+	.getLogger(CommonsVfsRemoteFileTransferObject.class.getName());
 
 	public CommonsVfsRemoteFileTransferObject(final FileSystemCache fsCache,
 			final FileObject sourceF, final FileObject targetF,
@@ -56,7 +56,7 @@ public class CommonsVfsRemoteFileTransferObject implements
 
 				try {
 					for (int tryNo = 0; tryNo <= ServerPropertiesManager
-							.getFileTransferRetries(); tryNo++) {
+					.getFileTransferRetries(); tryNo++) {
 
 						myLogger.debug(tryNo + 1 + ". try to transfer file: "
 								+ source.getName().getURI()
@@ -86,6 +86,8 @@ public class CommonsVfsRemoteFileTransferObject implements
 						}
 					}
 				} finally {
+
+					fsCache.close();
 					// try {
 					// sourceF.getFileSystem().getFileSystemManager().closeFileSystem(sourceF.getFileSystem());
 					// } catch (Exception e) {
@@ -161,7 +163,7 @@ public class CommonsVfsRemoteFileTransferObject implements
 
 	protected void transferFile(final FileObject source_file,
 			final FileObject target_file, final boolean overwrite)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 
 		try {
 
@@ -193,8 +195,8 @@ public class CommonsVfsRemoteFileTransferObject implements
 					addMessage("Target file exists and can not be deleted. Cancelling transfer");
 					throw new RemoteFileSystemException(
 							"Could not copy to file: "
-									+ target_file.getURL().toString() + ": "
-									+ "Could not delete target file.");
+							+ target_file.getURL().toString() + ": "
+							+ "Could not delete target file.");
 				}
 			}
 			myLogger.debug("Copying: " + source_file.getName().toString()
@@ -231,8 +233,6 @@ public class CommonsVfsRemoteFileTransferObject implements
 				throw new RemoteFileSystemException("Could not copy files: "
 						+ e1.getLocalizedMessage());
 			}
-		} finally {
-			fsCache.close();
 		}
 
 	}
