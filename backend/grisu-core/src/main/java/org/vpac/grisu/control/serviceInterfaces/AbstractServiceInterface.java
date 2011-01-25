@@ -4127,12 +4127,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} catch (final NoSuchJobException e) {
 			// maybe it's a multipartjob
 			final BatchJob multiJob = getMultiPartJobFromDatabase(jobname);
-			submitMultiPartJob(multiJob);
+			submitBatchJob(multiJob);
 		}
 
 	}
 
-	private void submitMultiPartJob(final BatchJob multiJob)
+	private void submitBatchJob(final BatchJob multiJob)
 			throws JobSubmissionException, NoSuchJobException {
 
 		final DtoActionStatus newActionStatus = new DtoActionStatus(
