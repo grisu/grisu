@@ -55,11 +55,11 @@ public class FileSystemCache {
 		final FileSystemOptions opts = new FileSystemOptions();
 
 		if (rootUrl.startsWith("gsiftp")) {
-			myLogger.debug("Url \"" + rootUrl
-					+ "\" is gsiftp url, using gridftpfilesystembuilder...");
+			// myLogger.debug("Url \"" + rootUrl
+			// + "\" is gsiftp url, using gridftpfilesystembuilder...");
 
 			final GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
-					.getInstance();
+			.getInstance();
 			builder.setGSSCredential(opts, credToUse.getGssCredential());
 			// builder.setUserDirIsRoot(opts, true);
 		}
@@ -86,7 +86,7 @@ public class FileSystemCache {
 	}
 
 	public FileSystem getFileSystem(final String rootUrl, String fqan)
-			throws FileSystemException {
+	throws FileSystemException {
 
 		synchronized (rootUrl) {
 			ProxyCredential credToUse = null;
@@ -95,7 +95,7 @@ public class FileSystemCache {
 			try {
 				temp = user.getResponsibleMountpointForAbsoluteFile(rootUrl);
 			} catch (final IllegalStateException e) {
-				myLogger.info(e);
+				// myLogger.info(e);
 			}
 			if ((fqan == null) && (temp != null) && (temp.getFqan() != null)) {
 				fqan = temp.getFqan();

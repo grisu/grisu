@@ -23,7 +23,7 @@ public class JobDAO extends BaseHibernateDAO {
 	private static Logger myLogger = Logger.getLogger(JobDAO.class.getName());
 
 	public final synchronized void delete(final Job persistentInstance) {
-		myLogger.debug("deleting Job instance");
+		// myLogger.debug("deleting Job instance");
 
 		try {
 			getCurrentSession().beginTransaction();
@@ -32,7 +32,7 @@ public class JobDAO extends BaseHibernateDAO {
 
 			getCurrentSession().getTransaction().commit();
 
-			myLogger.debug("delete successful");
+			// myLogger.debug("delete successful");
 
 		} catch (final RuntimeException e) {
 			myLogger.error("delete failed", e);
@@ -58,7 +58,7 @@ public class JobDAO extends BaseHibernateDAO {
 	public final List<Job> findJobByDN(final String dn,
 			final boolean includeMultiPartJobs) {
 
-		myLogger.debug("Loading jobs with dn: " + dn + " from db.");
+		// myLogger.debug("Loading jobs with dn: " + dn + " from db.");
 		String queryString;
 
 		if (includeMultiPartJobs) {
@@ -107,9 +107,9 @@ public class JobDAO extends BaseHibernateDAO {
 	 *             there are several jobs with this dn and jobname. this is bad.
 	 */
 	public final Job findJobByDN(final String dn, final String jobname)
-			throws NoSuchJobException {
-		myLogger.debug("Loading job with dn: " + dn + " and jobname: "
-				+ jobname + " from dn.");
+	throws NoSuchJobException {
+		// myLogger.debug("Loading job with dn: " + dn + " and jobname: "
+		// + jobname + " from dn.");
 		final String queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.jobname = ?";
 
 		try {
@@ -127,7 +127,7 @@ public class JobDAO extends BaseHibernateDAO {
 			if (job == null) {
 				throw new NoSuchJobException(
 						"Could not find a job for the dn: " + dn
-								+ " and the jobname: " + jobname);
+						+ " and the jobname: " + jobname);
 			}
 			return job;
 
@@ -159,16 +159,16 @@ public class JobDAO extends BaseHibernateDAO {
 			return findJobByDN(dn, includeMultiPartJobs);
 		}
 
-		myLogger.debug("Loading jobs with dn: " + dn + " from db.");
+		// myLogger.debug("Loading jobs with dn: " + dn + " from db.");
 
 		String queryString;
 		if (includeMultiPartJobs) {
 			queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
-					+ Constants.APPLICATIONNAME_KEY + "']) = ?";
+				+ Constants.APPLICATIONNAME_KEY + "']) = ?";
 		} else {
 			queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
-					+ Constants.APPLICATIONNAME_KEY
-					+ "']) = ? and job.multiPartJob = false";
+				+ Constants.APPLICATIONNAME_KEY
+				+ "']) = ? and job.multiPartJob = false";
 		}
 
 		try {
@@ -200,7 +200,7 @@ public class JobDAO extends BaseHibernateDAO {
 	public final List<String> findJobNamesByDn(final String dn,
 			final boolean includeMultiPartJobs) {
 
-		myLogger.debug("Loading jobs with dn: " + dn + " from db.");
+		// myLogger.debug("Loading jobs with dn: " + dn + " from db.");
 
 		String queryString;
 		if (includeMultiPartJobs) {
@@ -238,16 +238,16 @@ public class JobDAO extends BaseHibernateDAO {
 	public final List<String> findJobNamesPerApplicationByDn(final String dn,
 			final String application, final boolean includeMultiPartJob) {
 
-		myLogger.debug("Loading jobs with dn: " + dn + " from db.");
+		// myLogger.debug("Loading jobs with dn: " + dn + " from db.");
 
 		String queryString;
 		if (includeMultiPartJob) {
 			queryString = "select jobname from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
-					+ Constants.APPLICATIONNAME_KEY + "']) = ?";
+				+ Constants.APPLICATIONNAME_KEY + "']) = ?";
 		} else {
 			queryString = "select jobname from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
-					+ Constants.APPLICATIONNAME_KEY
-					+ "']) = ? and job.batchJob = false";
+				+ Constants.APPLICATIONNAME_KEY
+				+ "']) = ? and job.batchJob = false";
 		}
 
 		try {
@@ -291,8 +291,8 @@ public class JobDAO extends BaseHibernateDAO {
 	 */
 	public final List<Job> getSimilarJobNamesByDN(final String dn,
 			final String jobname) throws NoSuchJobException {
-		myLogger.debug("Loading job with dn: " + dn + " and jobname: "
-				+ jobname + " from dn.");
+		// myLogger.debug("Loading job with dn: " + dn + " and jobname: "
+		// + jobname + " from dn.");
 		final String queryString = "from org.vpac.grisu.backend.model.job.Job as job where job.dn = ? and job.jobname like ?";
 
 		try {
@@ -310,7 +310,7 @@ public class JobDAO extends BaseHibernateDAO {
 			if (jobs.size() == 0) {
 				throw new NoSuchJobException(
 						"Could not find a job for the dn: " + dn
-								+ " and the jobname: " + jobname);
+						+ " and the jobname: " + jobname);
 			}
 			return jobs;
 
@@ -336,7 +336,7 @@ public class JobDAO extends BaseHibernateDAO {
 
 			getCurrentSession().getTransaction().commit();
 
-			myLogger.debug("saveOrUpdate of job successful");
+			// myLogger.debug("saveOrUpdate of job successful");
 
 		} catch (final RuntimeException e) {
 			myLogger.error("saveOrUpdate failed", e);

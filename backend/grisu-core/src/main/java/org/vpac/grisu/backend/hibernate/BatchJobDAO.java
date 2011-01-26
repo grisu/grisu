@@ -24,7 +24,7 @@ public class BatchJobDAO extends BaseHibernateDAO {
 			.getName());
 
 	public final void delete(final BatchJob persistentInstance) {
-		myLogger.debug("deleting Job instance");
+		// myLogger.debug("deleting Job instance");
 
 		try {
 			getCurrentSession().beginTransaction();
@@ -33,7 +33,7 @@ public class BatchJobDAO extends BaseHibernateDAO {
 
 			getCurrentSession().getTransaction().commit();
 
-			myLogger.debug("delete successful");
+			// myLogger.debug("delete successful");
 
 		} catch (final RuntimeException e) {
 			myLogger.error("delete failed", e);
@@ -63,9 +63,9 @@ public class BatchJobDAO extends BaseHibernateDAO {
 	 *             there are several jobs with this dn and jobname. this is bad.
 	 */
 	public final BatchJob findJobByDN(final String dn, final String batchJobname)
-			throws NoSuchJobException {
-		myLogger.debug("Loading batchJob with dn: " + dn
-				+ " and batchJobname: " + batchJobname + " from dn.");
+	throws NoSuchJobException {
+		// myLogger.debug("Loading batchJob with dn: " + dn
+		// + " and batchJobname: " + batchJobname + " from dn.");
 		final String queryString = "from org.vpac.grisu.backend.model.job.BatchJob as job where job.dn = ? and job.batchJobname = ?";
 
 		try {
@@ -83,7 +83,7 @@ public class BatchJobDAO extends BaseHibernateDAO {
 			if (job == null) {
 				throw new NoSuchJobException(
 						"Could not find a multiPartJob for the dn: " + dn
-								+ " and the batchJobname: " + batchJobname);
+						+ " and the batchJobname: " + batchJobname);
 			}
 			return job;
 
@@ -102,7 +102,7 @@ public class BatchJobDAO extends BaseHibernateDAO {
 
 	public final List<String> findJobNamesByDn(final String dn) {
 
-		myLogger.debug("Loading multipartjob with dn: " + dn + " from db.");
+		// myLogger.debug("Loading multipartjob with dn: " + dn + " from db.");
 		final String queryString = "select batchJobname from org.vpac.grisu.backend.model.job.BatchJob as job where job.dn = ?";
 
 		try {
@@ -130,9 +130,9 @@ public class BatchJobDAO extends BaseHibernateDAO {
 	public final List<String> findJobNamesPerApplicationByDn(final String dn,
 			final String application) {
 
-		myLogger.debug("Loading multipartjob with dn: " + dn + " from db.");
+		// myLogger.debug("Loading multipartjob with dn: " + dn + " from db.");
 		final String queryString = "select batchJobname from org.vpac.grisu.backend.model.job.BatchJob as job where job.dn = ? and lower(job.jobProperties['"
-				+ Constants.APPLICATIONNAME_KEY + "']) = ?";
+			+ Constants.APPLICATIONNAME_KEY + "']) = ?";
 
 		try {
 			getCurrentSession().beginTransaction();
@@ -171,7 +171,7 @@ public class BatchJobDAO extends BaseHibernateDAO {
 	 */
 	public final List<BatchJob> findMultiPartJobByDN(final String dn) {
 
-		myLogger.debug("Loading multipart with dn: " + dn + " from db.");
+		// myLogger.debug("Loading multipart with dn: " + dn + " from db.");
 		final String queryString = "from org.vpac.grisu.backend.model.job.BatchJob as job where job.dn = ?";
 
 		try {
@@ -258,7 +258,7 @@ public class BatchJobDAO extends BaseHibernateDAO {
 
 			getCurrentSession().getTransaction().commit();
 
-			myLogger.debug("saveOrUpdate of multiPartjob successful");
+			// myLogger.debug("saveOrUpdate of multiPartjob successful");
 
 		} catch (final RuntimeException e) {
 			myLogger.error("saveOrUpdate failed", e);

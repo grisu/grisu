@@ -24,7 +24,7 @@ public class UserDAO extends BaseHibernateDAO {
 	// }
 
 	public final synchronized void delete(final User persistentInstance) {
-		myLogger.debug("deleting Job instance");
+		// myLogger.debug("deleting Job instance");
 
 		try {
 			getCurrentSession().beginTransaction();
@@ -33,7 +33,7 @@ public class UserDAO extends BaseHibernateDAO {
 
 			getCurrentSession().getTransaction().commit();
 
-			myLogger.debug("delete successful");
+			// myLogger.debug("delete successful");
 		} catch (final RuntimeException e) {
 			myLogger.error("delete failed", e);
 			try {
@@ -56,7 +56,7 @@ public class UserDAO extends BaseHibernateDAO {
 	 * @return the {@link User} or null if not found
 	 */
 	public final User findUserByDN(final String dn) {
-		myLogger.debug("Loading user with dn: " + dn + " from db.");
+		// myLogger.debug("Loading user with dn: " + dn + " from db.");
 		final String queryString = "from org.vpac.grisu.backend.model.User as user where user.dn = ?";
 
 		try {
@@ -77,7 +77,7 @@ public class UserDAO extends BaseHibernateDAO {
 			}
 
 		} catch (final RuntimeException e) {
-			e.printStackTrace();
+			// e.printStackTrace();
 			try {
 				getCurrentSession().getTransaction().rollback();
 			} catch (final Exception er) {
@@ -91,7 +91,7 @@ public class UserDAO extends BaseHibernateDAO {
 	}
 
 	public final synchronized void saveOrUpdate(final User instance) {
-		myLogger.debug("attaching dirty Job instance");
+		// myLogger.debug("attaching dirty Job instance");
 
 		try {
 			getCurrentSession().beginTransaction();
@@ -100,7 +100,7 @@ public class UserDAO extends BaseHibernateDAO {
 
 			getCurrentSession().getTransaction().commit();
 
-			myLogger.debug("saveOrUpdate successful");
+			// myLogger.debug("saveOrUpdate successful");
 		} catch (final RuntimeException e) {
 			myLogger.error("saveOrUpdate failed", e);
 			try {

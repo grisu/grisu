@@ -5,7 +5,6 @@ import grith.jgrith.voms.VOManagement.VOManagement;
 import grith.jgrith.vomsProxy.VomsException;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -79,7 +78,7 @@ public class User {
 		// make sure there is a valid credential
 		if ((cred == null) || !cred.isValid()) {
 			throw new NoValidCredentialException(
-					"No valid credential exists in this session");
+			"No valid credential exists in this session");
 		}
 
 		myLogger.debug("CREATING USER SESSION: " + cred.getDn());
@@ -134,7 +133,7 @@ public class User {
 	private Set<MountPoint> mountPoints = new HashSet<MountPoint>();
 
 	private Map<String, String> mountPointCache = Collections
-			.synchronizedMap(new HashMap<String, String>());
+	.synchronizedMap(new HashMap<String, String>());
 	private final Map<String, Set<MountPoint>> mountPointsPerFqanCache = new TreeMap<String, Set<MountPoint>>();
 
 	private Set<MountPoint> mountPointsAutoMounted = new HashSet<MountPoint>();
@@ -223,7 +222,7 @@ public class User {
 	public void clearMountPointCache(String keypattern) {
 		if (StringUtils.isBlank(keypattern)) {
 			this.mountPointCache = Collections
-					.synchronizedMap(new HashMap<String, String>());
+			.synchronizedMap(new HashMap<String, String>());
 		}
 		userdao.saveOrUpdate(this);
 	}
@@ -320,7 +319,7 @@ public class User {
 				String additionalUrl = null;
 				try {
 					additionalUrl = tempPath
-							.substring(1, tempPath.length() - 1);
+					.substring(1, tempPath.length() - 1);
 				} catch (final Exception e) {
 					additionalUrl = "";
 				}
@@ -393,7 +392,7 @@ public class User {
 									+ urlTemp
 									+ "in cache, trying to access/create folder...");
 							final boolean exists = getFileSystemManager()
-									.fileExists(urlTemp);
+							.fileExists(urlTemp);
 							if (!exists) {
 								myLogger.debug("Mountpoint does not exist. Trying to create non-exitent folder: "
 										+ urlTemp);
@@ -428,7 +427,7 @@ public class User {
 		}
 
 		final String site = AbstractServiceInterface.informationManager
-				.getSiteForHostOrUrl(url);
+		.getSiteForHostOrUrl(url);
 
 		MountPoint mp = null;
 
@@ -472,13 +471,13 @@ public class User {
 		// for ( String site : sites ) {
 
 		for (final String fqan : getFqans().keySet()) {
-			final Date start = new Date();
+			// final Date start = new Date();
 			final Map<String, String[]> mpUrl = AbstractServiceInterface.informationManager
-					.getDataLocationsForVO(fqan);
-			final Date end = new Date();
-			myLogger.debug("Querying for data locations for all sites and+ "
-					+ fqan + " took: " + (end.getTime() - start.getTime())
-					+ " ms.");
+			.getDataLocationsForVO(fqan);
+			// final Date end = new Date();
+			// myLogger.debug("Querying for data locations for all sites and+ "
+			// + fqan + " took: " + (end.getTime() - start.getTime())
+			// + " ms.");
 			for (final String server : mpUrl.keySet()) {
 				try {
 					for (final String path : mpUrl.get(server)) {
@@ -492,7 +491,7 @@ public class User {
 				} catch (final Exception e) {
 					myLogger.error(
 							"Can't use mountpoint " + server + ": "
-									+ e.getLocalizedMessage(), e);
+							+ e.getLocalizedMessage(), e);
 				}
 			}
 		}
@@ -531,7 +530,7 @@ public class User {
 		synchronized (dn) {
 
 			Map<String, DtoActionStatus> actionStatusesForUser = actionStatuses
-					.get(dn);
+			.get(dn);
 			if (actionStatusesForUser == null) {
 				actionStatusesForUser = new HashMap<String, DtoActionStatus>();
 				actionStatuses.put(dn, actionStatusesForUser);
@@ -651,7 +650,7 @@ public class User {
 	}
 
 	public String getFileSystemHomeDirectory(String filesystemRoot, String fqan)
-			throws FileSystemException {
+	throws FileSystemException {
 
 		final String key = filesystemRoot + fqan;
 		if (StringUtils.isNotBlank(getMountPointCache().get(key))) {
@@ -659,8 +658,8 @@ public class User {
 
 				throw new FileSystemException(
 						"Cached entry indicates filesystem "
-								+ filesystemRoot
-								+ " is not accessible. Clear cache if you think that has changed.");
+						+ filesystemRoot
+						+ " is not accessible. Clear cache if you think that has changed.");
 			}
 
 			return getMountPointCache().get(key);
@@ -670,7 +669,7 @@ public class User {
 				// fqan);
 
 				String uri = getFileSystemManager()
-						.resolveFileSystemHomeDirectory(filesystemRoot, fqan);
+				.resolveFileSystemHomeDirectory(filesystemRoot, fqan);
 				if (StringUtils.isNotBlank(uri)) {
 					getMountPointCache().put(key, uri);
 					userdao.saveOrUpdate(this);
@@ -736,7 +735,7 @@ public class User {
 	public Map<String, String> getFqans() {
 		if (fqans == null) {
 
-			myLogger.debug("Checking credential");
+			// myLogger.debug("Checking credential");
 			if (cred.isValid()) {
 				fqans = VOManagement.getAllFqans(cred.getGssCredential());
 			}
@@ -820,7 +819,7 @@ public class User {
 	public MountPoint getResponsibleMountpointForAbsoluteFile(final String file) {
 
 		final String new_file = null;
-		myLogger.debug("Finding mountpoint for file: " + file);
+		// myLogger.debug("Finding mountpoint for file: " + file);
 
 		for (final MountPoint mountpoint : getAllMountPoints()) {
 			if (mountpoint.isResponsibleForAbsoluteFile(file)) {
@@ -908,7 +907,7 @@ public class User {
 	 */
 	public MountPoint mountFileSystem(final String root, final String name,
 			final boolean useHomeDirectory, String site)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 
 		return mountFileSystem(root, name, getCred(), useHomeDirectory, site);
 	}
@@ -956,7 +955,7 @@ public class User {
 
 	public MountPoint mountFileSystem(final String root, final String name,
 			final String fqan, final boolean useHomeDirectory, final String site)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 
 		if ((fqan == null) || Constants.NON_VO_FQAN.equals(fqan)) {
 			return mountFileSystem(root, name, useHomeDirectory, site);
@@ -966,7 +965,7 @@ public class User {
 			final VO vo = VOManagement.getVO(temp.get(fqan));
 
 			final ProxyCredential vomsProxyCred = CertHelpers
-					.getVOProxyCredential(vo, fqan, getCred());
+			.getVOProxyCredential(vo, fqan, getCred());
 
 			return mountFileSystem(root, name, vomsProxyCred, useHomeDirectory,
 					site);
