@@ -8,6 +8,12 @@ Grisu-core
 
 This is the main package of the Grisu framework. It is written entirely in Java and contains the backend compoent (**/backend/grisu-core**), a frontend library (**/frontend/grisu-client** and **/frontend/grisu-client-swing**) and a **grisu-common** which contains shared code of both components.
 
+Documentation
+------------------------
+
+[Wiki](https://github.com/grisu/grisu/wiki)
+[Javadoc](https://code.arcs.org.au/hudson/me/my-views/view/My%20stuff/job/Grisu-SNAPSHOT/javadoc)
+
 Prerequisites
 --------------------
 
