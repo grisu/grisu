@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.vpac.grisu.X;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -361,7 +360,6 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 							GridFile f = new GridFile(urlToQuery, false, rfse);
 							f.addSite(mp.getSite());
 							result.add(f);
-							X.p("Added.");
 						}
 					} catch (Exception ex) {
 						GridFile f = new GridFile(urlToQuery, true, ex);
