@@ -383,9 +383,10 @@ public class User {
 							// checking whether subfolder exists
 							if (StringUtils.isNotBlank(getMountPointCache()
 									.get(key))) {
-								myLogger.debug("Found "
-										+ urlTemp
-										+ "in cache, not trying to access/create folder...");
+								// myLogger.debug("Found "
+								// + urlTemp
+								// +
+								// "in cache, not trying to access/create folder...");
 								return;
 							}
 							myLogger.debug("Did not find "

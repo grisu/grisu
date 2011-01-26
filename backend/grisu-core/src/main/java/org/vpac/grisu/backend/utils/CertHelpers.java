@@ -5,7 +5,6 @@ import grith.jgrith.voms.VO;
 import grith.jgrith.vomsProxy.VomsException;
 import grith.jgrith.vomsProxy.VomsProxyCredential;
 
-import org.apache.log4j.Logger;
 import org.globus.gsi.GlobusCredential;
 import org.globus.gsi.ptls.PureTLSUtil;
 import org.ietf.jgss.GSSCredential;
@@ -21,8 +20,8 @@ import org.vpac.grisu.utils.FqanHelpers;
  */
 public final class CertHelpers {
 
-	static final Logger myLogger = Logger
-			.getLogger(CertHelpers.class.getName());
+	// static final Logger myLogger = Logger
+	// .getLogger(CertHelpers.class.getName());
 
 	/**
 	 * Converts the dn from the /C=AU/O=... to the C=AU,O=.. format
@@ -35,7 +34,7 @@ public final class CertHelpers {
 		String dn = null;
 		try {
 			dn = PureTLSUtil.getX509Name(cred.getName().toString())
-					.getNameString();
+			.getNameString();
 		} catch (final GSSException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -89,7 +88,7 @@ public final class CertHelpers {
 		try {
 			final String group = FqanHelpers.getGroupPart(fqan);
 			final String role = FqanHelpers.getRolePart(fqan);
-			if (role == null || "NULL".equals(role)) {
+			if ((role == null) || "NULL".equals(role)) {
 				vomsGssCred = new VomsProxyCredential(
 						CredentialHelpers.unwrapGlobusCredential(credToConnect
 								.getGssCredential()), vo, "G" + group, null);
@@ -99,14 +98,14 @@ public final class CertHelpers {
 								.getGssCredential()), vo, "B" + group + ":"
 								+ role, null);
 			}
-			myLogger.debug("Created voms proxy for fqan: " + fqan
-					+ " with lifetime: "
-					+ vomsGssCred.getVomsProxy().getTimeLeft());
+			// myLogger.debug("Created voms proxy for fqan: " + fqan
+			// + " with lifetime: "
+			// + vomsGssCred.getVomsProxy().getTimeLeft());
 
 		} catch (final Exception e) {
 			throw new RuntimeException(
 					"Could not retrieve VomsProxyCredential for fqan \"" + fqan
-							+ "\": " + e.getMessage());
+					+ "\": " + e.getMessage());
 		}
 
 		ProxyCredential vomsProxyCred = null;
@@ -117,7 +116,7 @@ public final class CertHelpers {
 		} catch (final Exception e) {
 			throw new RuntimeException(
 					"Could not retrieve VomsProxyCredential for fqan \"" + fqan
-							+ "\": " + e.getMessage());
+					+ "\": " + e.getMessage());
 		}
 
 		return vomsProxyCred;

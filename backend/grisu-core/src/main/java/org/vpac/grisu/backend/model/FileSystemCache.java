@@ -50,7 +50,7 @@ public class FileSystemCache {
 	}
 
 	private FileSystem createFileSystem(String rootUrl,
-			ProxyCredential credToUse) {
+			ProxyCredential credToUse) throws FileSystemException {
 
 		final FileSystemOptions opts = new FileSystemOptions();
 
@@ -70,7 +70,8 @@ public class FileSystemCache {
 		} catch (final FileSystemException e) {
 			myLogger.error("Can't connect to filesystem: " + rootUrl
 					+ " using VO: " + credToUse.getFqan());
-			throw new RuntimeException("Can't connect to filesystem " + rootUrl
+			throw new FileSystemException("Can't connect to filesystem "
+					+ rootUrl
 					+ ": " + e.getLocalizedMessage(), e);
 		}
 
