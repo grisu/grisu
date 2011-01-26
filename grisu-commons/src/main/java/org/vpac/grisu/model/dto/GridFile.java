@@ -485,6 +485,10 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		this.fqans.addAll(fqans);
 	}
 
+	public void setIsInaccessible(boolean isInaccessible) {
+		this.inaccessable = isInaccessible;
+	}
+
 	public void setIsVirtual(boolean isVirtual) {
 		this.isVirtual = isVirtual;
 	}
