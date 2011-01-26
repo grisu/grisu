@@ -790,9 +790,6 @@ FileSystemInfoPlugin, FileTransferPlugin {
 							for (int tryNo = 0; tryNo <= ServerPropertiesManager
 							.getFileTransferRetries(); tryNo++) {
 
-								myLogger.debug(tryNo + 1
-										+ ". try to transfer file to " + parent);
-
 								if (Thread.interrupted()) {
 									Thread.currentThread().interrupt();
 									executor.shutdownNow();
@@ -816,13 +813,16 @@ FileSystemInfoPlugin, FileTransferPlugin {
 											+ target.getName().toString());
 									break;
 								} catch (final Exception e) {
+									myLogger.debug(tryNo + 1
+											+ ". try to transfer file to "
+											+ parent + " failed.");
 
 									if (Thread.interrupted()) {
 										Thread.currentThread().interrupt();
 										executor.shutdownNow();
 										return;
 									}
-									e.printStackTrace();
+									myLogger.error(e);
 									if (tryNo >= ServerPropertiesManager
 											.getFileTransferRetries() - 1) {
 										status.addElement("Upload to folder "

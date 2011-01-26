@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -17,17 +18,18 @@ import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
 import org.vpac.grisu.frontend.control.clientexceptions.FileTransactionException;
 import org.vpac.grisu.frontend.view.swing.files.GridFileListListener;
+import org.vpac.grisu.frontend.view.swing.files.preview.fileViewers.GridFilePropertiesViewer;
 import org.vpac.grisu.model.FileManager;
 import org.vpac.grisu.model.GrisuRegistryManager;
 import org.vpac.grisu.model.dto.GridFile;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.RowSpec;
+
 import com.jgoodies.forms.factories.FormFactory;
-import javax.swing.JLabel;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.RowSpec;
 
 public class GenericGridFileViewer extends JPanel implements GridFileViewer,
-		GridFileListListener {
+GridFileListListener {
 
 	private static Set<String> viewers = null;
 
@@ -143,7 +145,7 @@ public class GenericGridFileViewer extends JPanel implements GridFileViewer,
 
 	private File currentLocalCacheFile = null;
 
-	private GridFile currentGlazedFile = null;
+	private GridFile currentGridFile = null;
 
 	private final JPanel emptyPanel = new JPanel();
 	private final String EMPTY_PANEL = "__empty__";
@@ -225,7 +227,30 @@ public class GenericGridFileViewer extends JPanel implements GridFileViewer,
 
 	public void setFile(GridFile file, File localCacheFile) {
 
-		currentGlazedFile = file;
+		currentGridFile = file;
+
+		if (currentGridFile.isInaccessable()) {
+			final GridFileViewer viewer = new GridFilePropertiesViewer();
+			SwingUtilities.invokeLater(new Thread() {
+
+				@Override
+				public void run() {
+					viewer.setFile(currentGridFile, null);
+					add(viewer.getPanel(), currentGridFile.getUrl());
+
+					final CardLayout cl = (CardLayout) (getLayout());
+					cl.show(GenericGridFileViewer.this,
+							currentGridFile.getUrl());
+
+					revalidate();
+				}
+
+			});
+
+			showsValidViewerAtTheMoment = true;
+			return;
+		}
+
 		if ((localCacheFile != null) && localCacheFile.exists()) {
 			currentLocalCacheFile = localCacheFile;
 		} else {
@@ -236,14 +261,14 @@ public class GenericGridFileViewer extends JPanel implements GridFileViewer,
 					if (fm.isBiggerThanThreshold(file.getUrl())) {
 
 						int n = JOptionPane
-								.showConfirmDialog(
-										getRootPane(),
-										"The file you selected is bigger than the default threshold\n"
-												+ FileManager
-														.calculateSizeString(FileManager
-																.getDownloadFileSizeThreshold())
-												+ "bytes. It may take a long time to load.\n"
-												+ "Do you still want to preview that file?",
+						.showConfirmDialog(
+								getRootPane(),
+								"The file you selected is bigger than the default threshold\n"
+								+ FileManager
+								.calculateSizeString(FileManager
+										.getDownloadFileSizeThreshold())
+										+ "bytes. It may take a long time to load.\n"
+										+ "Do you still want to preview that file?",
 										"Warning: big file",
 										JOptionPane.YES_NO_OPTION);
 
@@ -282,7 +307,7 @@ public class GenericGridFileViewer extends JPanel implements GridFileViewer,
 
 				@Override
 				public void run() {
-					viewer.setFile(currentGlazedFile, currentLocalCacheFile);
+					viewer.setFile(currentGridFile, currentLocalCacheFile);
 					add(viewer.getPanel(), currentLocalCacheFile.toString());
 
 					final CardLayout cl = (CardLayout) (getLayout());

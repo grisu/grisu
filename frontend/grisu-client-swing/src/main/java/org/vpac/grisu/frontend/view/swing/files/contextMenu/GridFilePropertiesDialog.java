@@ -19,35 +19,42 @@ import org.vpac.grisu.model.dto.GridFile;
 
 public class GridFilePropertiesDialog extends JDialog {
 
-	private static String generateHtml(GridFile file) {
+	public static String generateHtml(GridFile file) {
 
 		final StringBuffer html = new StringBuffer(
-				"<html><table width=\"100%\">");
+		"<html><table width=\"100%\">");
 
 		boolean alternate = true;
 
 		Map<String, String> fileProperties = new LinkedHashMap<String, String>();
-		fileProperties.put("Name", file.getName());
-		String bytes = null;
-		if (file.getSize() <= 0) {
-			bytes = "";
-		} else {
-			bytes = " (" + file.getSize() + " b)";
-		}
-		fileProperties.put("Size",
-				FileManager.calculateSizeString(file.getSize()) + bytes);
-		fileProperties.put("Last modified",
-				FileManager.getLastModifiedString(file.getLastModified()));
-		fileProperties.put("URL", file.getUrl());
-		Set<String> add = DtoProperty.mapFromDtoPropertiesList(file.getUrls())
-				.keySet();
-		add.remove(file.getUrl());
-		fileProperties.put("Additional urls", StringUtils.join(add, "<br>"));
-		fileProperties.put("Path", file.getPath());
-		fileProperties.put("Sites", StringUtils.join(file.getSites(), "<br>"));
-		fileProperties.put("Groups", StringUtils.join(file.getFqans(), "<br>"));
-		fileProperties.put("Virtual", Boolean.toString(file.isVirtual()));
 
+		if (file.isInaccessable()) {
+			fileProperties.put("Access error", "");
+			fileProperties.put("Site", StringUtils.join(file.getSites(), ", "));
+			fileProperties.put("URL", file.getUrl());
+			fileProperties.put("Reason", file.getComment());
+		} else {
+			fileProperties.put("Name", file.getName());
+			String bytes = null;
+			if (file.getSize() <= 0) {
+				bytes = "";
+			} else {
+				bytes = " (" + file.getSize() + " b)";
+			}
+			fileProperties.put("Size",
+					FileManager.calculateSizeString(file.getSize()) + bytes);
+			fileProperties.put("Last modified",
+					FileManager.getLastModifiedString(file.getLastModified()));
+			fileProperties.put("URL", file.getUrl());
+			Set<String> add = DtoProperty.mapFromDtoPropertiesList(file.getUrls())
+			.keySet();
+			add.remove(file.getUrl());
+			fileProperties.put("Additional urls", StringUtils.join(add, "<br>"));
+			fileProperties.put("Path", file.getPath());
+			fileProperties.put("Sites", StringUtils.join(file.getSites(), "<br>"));
+			fileProperties.put("Groups", StringUtils.join(file.getFqans(), "<br>"));
+			fileProperties.put("Virtual", Boolean.toString(file.isVirtual()));
+		}
 		for (final String key : fileProperties.keySet()) {
 			if (alternate) {
 				html.append("<tr bgcolor=\"#FFFFFF\"><td>");

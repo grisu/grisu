@@ -81,7 +81,7 @@ public class User {
 			"No valid credential exists in this session");
 		}
 
-		myLogger.debug("CREATING USER SESSION: " + cred.getDn());
+		// myLogger.debug("CREATING USER SESSION: " + cred.getDn());
 
 		// if ( getCredential())
 
@@ -248,7 +248,7 @@ public class User {
 			propString = path.substring(startProperties + 1, endProperties);
 		} catch (final Exception e) {
 			// that's ok
-			myLogger.debug("No extra properties for path: " + path);
+			// myLogger.debug("No extra properties for path: " + path);
 		}
 
 		final Map<String, String> properties = new HashMap<String, String>();
@@ -377,8 +377,8 @@ public class User {
 						final String key = urlTemp + fqan;
 						try {
 							// try to create the dir if it doesn't exist
-							myLogger.debug("Checking whether mountpoint "
-									+ urlTemp + " exists...");
+							// myLogger.debug("Checking whether mountpoint "
+							// + urlTemp + " exists...");
 
 							// checking whether subfolder exists
 							if (StringUtils.isNotBlank(getMountPointCache()
@@ -389,18 +389,18 @@ public class User {
 								// "in cache, not trying to access/create folder...");
 								return;
 							}
-							myLogger.debug("Did not find "
-									+ urlTemp
-									+ "in cache, trying to access/create folder...");
+							// myLogger.debug("Did not find "
+							// + urlTemp
+							// + "in cache, trying to access/create folder...");
 							final boolean exists = getFileSystemManager()
 							.fileExists(urlTemp);
 							if (!exists) {
 								myLogger.debug("Mountpoint does not exist. Trying to create non-exitent folder: "
 										+ urlTemp);
 								getFileSystemManager().createFolder(urlTemp);
-							} else {
-								myLogger.debug("MountPoint " + urlTemp
-										+ " exists.");
+								// } else {
+								// myLogger.debug("MountPoint " + urlTemp
+								// + " exists.");
 							}
 
 							getMountPointCache().put(key, "Exists");

@@ -1505,7 +1505,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		final DtoActionStatus result = getSessionActionStatus().get(
 				actionHandle);
 
-		// System.out.println("Elements before: "+result.getLog().size());
+		// System.out.println("Elements before: " + result.getLog().size());
 
 		return result;
 

@@ -25,7 +25,7 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 
 	private static SpinningDial LOADING_ICON = new SpinningDial(16, 16);
 	private static URL imgURL = GridFileTreeTableRenderer.class
-			.getResource("/group.gif");
+	.getResource("/group.gif");
 
 	private static Icon groupIcon = new ImageIcon(imgURL);
 	private static FileSystemView fsView = FileSystemView.getFileSystemView();
@@ -34,9 +34,13 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 	// TODO think of something better?
 	private static Icon fileIcon = fsView.getSystemIcon(findFile());
 
+	private static Icon errorIcon = new ImageIcon(
+			GridFileTreeTableRenderer.class
+.getResource("/error.gif"));
+
 	private static File findFile() {
 		for (final File file : new File(System.getProperty("user.home"))
-				.listFiles()) {
+		.listFiles()) {
 			if (file.isFile()) {
 				return file;
 			}
@@ -47,10 +51,13 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 	private final ServiceInterface si;
 	private final UserEnvironmentManager uem;
 
+	/**
+	 * @wbp.parser.entryPoint
+	 */
 	public GridFileTreeTableRenderer(ServiceInterface si) {
 		this.si = si;
 		this.uem = GrisuRegistryManager.getDefault(si)
-				.getUserEnvironmentManager();
+		.getUserEnvironmentManager();
 	}
 
 	public Color getBackground(Object arg0) {
@@ -66,14 +73,26 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 		} else if (userObject instanceof GridFile) {
 
 			GridFile f = (GridFile) userObject;
-			return f.getName();
+			if (f.isInaccessable()) {
+				return ("Connection error : " + f.getUrl());
+			} else {
+				return f.getName();
+			}
 		} else {
 			return arg0.getClass().getName();
 		}
 	}
 
 	public Color getForeground(Object arg0) {
+		Object userObject = ((DefaultMutableTreeNode) arg0).getUserObject();
+		if (userObject instanceof GridFile) {
+			GridFile f = (GridFile) userObject;
+			if (f.isInaccessable()) {
+				return Color.red;
+			}
+		}
 		return null;
+
 	}
 
 	public Icon getIcon(Object arg0) {
@@ -87,19 +106,24 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 				return LOADING_ICON;
 			}
 		} else if (userObject instanceof GridFile) {
-			GridFile f = (GridFile) userObject;
-			// if (f.isVirtual()) {
-			if (f.isVirtual() && StringUtils.isNotBlank(f.getPath())
-					&& f.getPath().contains("group")) {
 
-				// if (f.isVirtual()) {
-				return groupIcon;
-				// }
-				// return null;
-			} else if (f.isFolder()) {
-				return folderIcon;
+			GridFile f = (GridFile) userObject;
+			if (f.isInaccessable()) {
+				return errorIcon;
 			} else {
-				return fileIcon;
+				// if (f.isVirtual()) {
+				if (f.isVirtual() && StringUtils.isNotBlank(f.getPath())
+						&& f.getPath().contains("group")) {
+
+					// if (f.isVirtual()) {
+					return groupIcon;
+					// }
+					// return null;
+				} else if (f.isFolder()) {
+					return folderIcon;
+				} else {
+					return fileIcon;
+				}
 			}
 		}
 
@@ -125,7 +149,7 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 				break;
 			default:
 				siteString = "Sites: "
-						+ StringUtils.join(file.getSites(), ", ");
+					+ StringUtils.join(file.getSites(), ", ");
 				break;
 
 			}
@@ -138,8 +162,8 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 				break;
 			case 1:
 				fqanString = "Group: "
-						+ uem.getUniqueGroupname(file.getFqans().iterator()
-								.next());
+					+ uem.getUniqueGroupname(file.getFqans().iterator()
+							.next());
 				break;
 			default:
 				Set<String> tmp = new TreeSet<String>();

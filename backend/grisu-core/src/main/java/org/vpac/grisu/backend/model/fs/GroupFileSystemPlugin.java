@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.vpac.grisu.X;
 import org.vpac.grisu.backend.model.User;
 import org.vpac.grisu.control.ServiceInterface;
 import org.vpac.grisu.control.exceptions.RemoteFileSystemException;
@@ -36,12 +37,12 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 	}
 
 	public GridFile createGridFile(final String path, int recursiveLevels)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 
 		// Thread.dumpStack();
 		if (recursiveLevels > 1) {
 			throw new RuntimeException(
-					"Recursion levels greater than 1 not supported yet");
+			"Recursion levels greater than 1 not supported yet");
 		}
 
 		String rightPart = path.substring(BASE.length());
@@ -80,7 +81,13 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			Set<GridFile> childs = listGroup(fqanT, restPath);
 
 			for (GridFile file : childs) {
-				result.addChildren(file.getChildren());
+
+				if (file.isInaccessable()) {
+					result.addChild(file);
+				} else {
+					result.addChildren(file.getChildren());
+				}
+
 			}
 
 			Map<String, Set<String>> temp = findDirectChildFqans(fqanT);
@@ -92,18 +99,18 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					GridFile file = new GridFile(mps.iterator().next());
 					file.setName(FileManager.getFilename(fqan));
 					file.setPath((path + "/" + file.getName()).replace("///",
-							"/").replace("//", "/")
-							+ "//");
+					"/").replace("//", "/")
+					+ "//");
 					file.setIsVirtual(true);
 					file.addSites(temp.get(fqan));
 					result.addChild(file);
 				} else {
 					GridFile file = new GridFile((BASE + fqan).replace("///",
-							"/").replace("//", "/")
-							+ "//", fqan);
+					"/").replace("//", "/")
+					+ "//", fqan);
 					file.setPath((path + "/" + file.getName()).replace("///",
-							"/").replace("//", "/")
-							+ "//");
+					"/").replace("//", "/")
+					+ "//");
 					for (MountPoint mp : mps) {
 						// X.p("Add" + mp.getRootUrl());
 						file.addUrl(mp.getRootUrl(),
@@ -204,7 +211,11 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 			Set<GridFile> files = listGroup("/" + tokens[0], "");
 			for (GridFile file : files) {
-				result.addChildren(file.getChildren());
+				if (file.isInaccessable()) {
+					result.addChild(file);
+				} else {
+					result.addChildren(file.getChildren());
+				}
 			}
 
 		} else {
@@ -233,7 +244,12 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 					Set<GridFile> files = listGroup(potentialFqan, rest);
 					for (GridFile file : files) {
-						children.addAll(file.getChildren());
+
+						if (file.isInaccessable()) {
+							children.add(file);
+						} else {
+							children.addAll(file.getChildren());
+						}
 					}
 
 				}
@@ -303,7 +319,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 			if ((fqanTokenLength == tokens.length + 1)
 					&& fqanTokens[tokens.length - 1]
-							.equals(tokens[tokens.length - 1])) {
+					              .equals(tokens[tokens.length - 1])) {
 
 				Set<String> sites = new TreeSet<String>();
 				for (MountPoint mp : user.getMountPoints(fqan)) {
@@ -317,12 +333,12 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 	}
 
 	private Set<GridFile> listGroup(String fqan, String path)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 
 		Set<MountPoint> mps = user.getMountPoints(fqan);
 
 		final Set<GridFile> result = Collections
-				.synchronizedSet(new TreeSet<GridFile>());
+		.synchronizedSet(new TreeSet<GridFile>());
 
 		final ExecutorService pool = Executors.newFixedThreadPool(20);
 
@@ -336,17 +352,20 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 					try {
 						GridFile file = user.getFileSystemManager()
-								.getFolderListing(urlToQuery, 1);
+						.getFolderListing(urlToQuery, 1);
 						file.addSite(mp.getSite());
 						result.add(file);
 					} catch (RemoteFileSystemException rfse) {
 						String msg = rfse.getLocalizedMessage();
 						if (!msg.contains("not a folder")) {
-							GridFile f = new GridFile(urlToQuery, true, rfse);
+							GridFile f = new GridFile(urlToQuery, false, rfse);
+							f.addSite(mp.getSite());
 							result.add(f);
+							X.p("Added.");
 						}
 					} catch (Exception ex) {
 						GridFile f = new GridFile(urlToQuery, true, ex);
+						f.addSite(mp.getSite());
 						result.add(f);
 					}
 				}
