@@ -4,10 +4,11 @@
 	<url>http://projects.arcs.org.au/trac/grisu/wiki/GrisuCommons</url>
 	<parent>
 		<artifactId>grisu</artifactId>
-		<groupId>org.vpac.grisu</groupId>
-		<version>0.3-beta4-SNAPSHOT</version>
+		<groupId>grisu</groupId>
+		<version>0.3-beta5-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
+	<groupId>grisu</groupId>
 	<artifactId>grisu-commons</artifactId>
 	<name>grisu-commons</name>
 	<description>The most important thing about the grisu-commons is that

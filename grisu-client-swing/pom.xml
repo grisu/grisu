@@ -2,18 +2,19 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>frontend</artifactId>
-		<groupId>org.vpac.grisu</groupId>
-		<version>0.3-beta4-SNAPSHOT</version>
+		<artifactId>grisu</artifactId>
+		<groupId>grisu</groupId>
+		<version>0.3-beta5-SNAPSHOT</version>
 	</parent>
+	<groupId>grisu.frontend</groupId>
 	<artifactId>grisu-client-swing</artifactId>
 	<name>Grisu client library (Swing)</name>
 	<description>A client library that provides commonly used UI functionality using Java Swing</description>
 	<dependencies>
 		<dependency>
-			<groupId>org.vpac.grisu</groupId>
+			<groupId>grisu.frontend</groupId>
 			<artifactId>grisu-client</artifactId>
-			<version>0.3-beta4-SNAPSHOT</version>
+			<version>${grisu.version}</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -69,9 +70,9 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.vpac.grisu</groupId>
+			<groupId>grisu.backend</groupId>
 			<artifactId>grisu-core</artifactId>
-			<version>0.3-beta4-SNAPSHOT</version>
+			<version>${grisu.version}</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

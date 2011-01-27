@@ -1,16 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>frontend</artifactId>
+		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.3-beta4-SNAPSHOT</version>
+		<version>0.3-beta5-SNAPSHOT</version>
 	</parent>
 	<artifactId>client-side-mds</artifactId>
+	<groupId>grisu.frontend</groupId>
 	<dependencies>
 		<dependency>
-			<groupId>org.vpac.grisu</groupId>
+			<groupId>grisu</groupId>
 			<artifactId>grisu-commons</artifactId>
-			<version>0.3-beta4-SNAPSHOT</version>
+			<version>${grisu.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

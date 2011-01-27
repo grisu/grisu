@@ -3,11 +3,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<url>http://projects.arcs.org.au/trac/grisu/wiki/GrisuCore</url>
 	<parent>
-		<artifactId>backend</artifactId>
-		<groupId>org.vpac.grisu</groupId>
-		<version>0.3-beta4-SNAPSHOT</version>
+		<artifactId>grisu</artifactId>
+		<groupId>grisu</groupId>
+		<version>0.3-beta5-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
+	<groupId>grisu.backend</groupId>
 	<artifactId>grisu-core</artifactId>
 	<name>grisu-core</name>
 	<description>grisu-core is the main module of the Grisu framework. It
@@ -41,9 +42,9 @@
 
 
 		<dependency>
-			<groupId>org.vpac.grisu</groupId>
+			<groupId>grisu</groupId>
 			<artifactId>grisu-commons</artifactId>
-			<version>0.3-beta4-SNAPSHOT</version>
+			<version>${grisu.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>cryptix32</artifactId>
