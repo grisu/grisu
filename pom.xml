@@ -6,7 +6,7 @@
 	<packaging>pom</packaging>
 	<version>${grisu.version}</version>
 	<name>Grisu</name>
-	<description>Grisu is an open source framework to help grid admins and developers to support end users in a grid environment. Grisu publishes an easy-to-use service interface which by default sits behind a web service. This service interface contains a set of methods that are usually needed to submit jobs to the grid, including providing information about the grid and the staging of input/output files from/to the users desktop. </description>
+	<description>Grisu is an open source framework to help grid admins and developers to support end users in a grid environment. Grisu publishes an easy-to-use service interface which can be deployed in different ways by implementing different backend modules. This service interface contains a set of methods that are usually needed to submit jobs to the grid, including providing information about the grid and the staging of input/output files from/to the users desktop. </description>
 	<url>http://maven.apache.org</url>
 
 	<repositories>
@@ -64,8 +64,8 @@
 	</distributionManagement>
 
 	<issueManagement>
-		<system>Trac</system>
-		<url>http://projects.arcs.org.au/trac/grisu/</url>
+		<system>Github</system>
+		<url>https://github.com/grisu/grisu/issues</url>
 	</issueManagement>
 	<ciManagement>
 		<system>Hudson</system>
@@ -75,41 +75,40 @@
 		<developer>
 			<id>markus</id>
 			<name>Markus Binsteiner</name>
-			<email>markus.binsteiner@arcs.org.au</email>
-			<organization>ARCS</organization>
-			<organizationUrl>http://www.arcs.org.au</organizationUrl>
-			<timezone>Australia/Melbourne</timezone>
+			<email>makkus@gmail.com</email>
+			<organization>The University of Auckland / Centre for eResearch / BeSTGRID</organization>
+			<organizationUrl>http://bestgrid.org</organizationUrl>
+			<timezone>New Zealand/Auckland</timezone>
 			<roles>
 			</roles>
-		</developer>
-		<developer>
-			<id>gerson</id>
-			<name>Gerson Galang</name>
-			<email>gerson.galang@arcs.org.au</email>
-			<organization>VPAC</organization>
-			<organizationUrl>http://www.vpac.org</organizationUrl>
-			<timezone>Australia/Melbourne</timezone>
 		</developer>
 		<developer>
 			<id>yuriy</id>
 			<name>Yuriy Halytskyy</name>
 			<email>y.halytskyy@auckland.ac.nz</email>
+			<organization>The University of Auckland / Centre for eResearch / BeSTGRID</organization>
+			<organizationUrl>http://bestgrid.org</organizationUrl>
+			<timezone>New Zealand/Auckland</timezone>
 		</developer>
 	</developers>
 	<contributors>
 		<contributor>
 			<name>Vladimir Mencl</name>
 			<email>vladimir.mencl@canterbury.ac.nz</email>
+			<organization>The University of Canterbury / BeSTGRID</organization>
+			<organizationUrl>http://bestgrid.org</organizationUrl>
+			<timezone>New Zealand/Auckland</timezone>
+			
 		</contributor>
 	</contributors>
 	<scm>
-		<connection>scm:git:git://code.arcs.org.au/grisu/grisu.git</connection>
-		<developerConnection>scm:git:git@code.arcs.org.au:grisu/grisu.git</developerConnection>
+		<connection>scm:git:git://github.com/grisu/grisu.git</connection>
+		<developerConnection>scm:git:git@github.com:grisu/grisu.git</developerConnection>
 		<url>http://projects.arcs.org.au/trac/grisu/browser</url>
 	</scm>
 	<organization>
-		<name>ARCS</name>
-		<url>http://www.arcs.org.au</url>
+		<name>Grisu open source project</name>
+		<url>https://github.com/grisu/grisu/tree/master</url>
 	</organization>
 
 	<build>
@@ -176,7 +175,7 @@
 		<module>grisu-core</module>
 		<module>grisu-client</module>
 		<module>grisu-client-swing</module>
-		<module>client-side-mds</module>
+<!--		<module>client-side-mds</module> -->
 	</modules>
 	<reporting>
 		<plugins>
