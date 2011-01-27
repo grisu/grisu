@@ -17,7 +17,7 @@ Documentation
 Prerequisites
 --------------------
 
-In order to build Grisu from the svn sources, you need: 
+In order to build Grisu from the git sources, you need: 
 
 - Sun Java Development Kit (version ≥ 6)
 - [git](http://git-scm.com) 

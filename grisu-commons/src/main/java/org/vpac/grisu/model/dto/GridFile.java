@@ -196,7 +196,11 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 
 	public GridFile(String url, boolean isFile, Exception e) {
 		this.mainUrl = url;
-		this.type = FILETYPE_FILE;
+		if (isFile) {
+			this.type = FILETYPE_FILE;
+		} else {
+			this.type = FILETYPE_FOLDER;
+		}
 		addUrl(this.mainUrl, FILETYPE_EXCEPTION_PRIORITY);
 
 		this.inaccessable = true;
