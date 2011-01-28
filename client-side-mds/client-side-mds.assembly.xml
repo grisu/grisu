@@ -12,12 +12,12 @@
 			<useProjectArtifact>true</useProjectArtifact>
 			<outputDirectory>/</outputDirectory>
 			<includes>
-				<include>org.vpac.grisu:client-side-mds</include>
+				<include>grisu:client-side-mds</include>
 			</includes>
 			<excludes>
 				<exclude>junit:junit</exclude>
 				<exclude>bouncycastle:bcprov-jdk15</exclude>
-				<exclude>org.vpac.grisu:grisu-commons</exclude>
+				<exclude>grisu:grisu-commons</exclude>
 				<exclude>au.org.arcs.commons:arcs-jcommons</exclude>
 			</excludes>
 			<unpackOptions>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd" >
 <hibernate-mapping>
-	<class name="org.vpac.grisu.js.model.Job" table="jobs">
+	<class name="grisu.js.model.Job" table="jobs">
 		<id name="id" column="id">
 			<generator class="native"/>
 		</id>
@@ -21,9 +21,9 @@
 		
 <!--		<property name="credential_id"/>-->
 		
-<!--		<many-to-one name="credential" column="credential_id" class="org.vpac.grisu.credential.model.ProxyCredential" unique="true"></many-to-one> -->
+<!--		<many-to-one name="credential" column="credential_id" class="grisu.credential.model.ProxyCredential" unique="true"></many-to-one> -->
         
-<!--  		<many-to-one name="credential" column="credential_id" class="org.vpac.grisu.credential.model.ProxyCredential" cascade="all" not-null="false" unique="true"></many-to-one> -->
+<!--  		<many-to-one name="credential" column="credential_id" class="grisu.credential.model.ProxyCredential" cascade="all" not-null="false" unique="true"></many-to-one> -->
 		<property name="application"/>
 		<property name="stdout"/>
 		<property name="stderr"/>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd" >
 <hibernate-mapping>
-	<class name="org.vpac.grisu.fs.model.User" table="file_user" lazy="false">
+	<class name="grisu.fs.model.User" table="file_user" lazy="false">
 		<id name="id" column="user_id">
 			<generator class="native"/>
 		</id>
@@ -16,7 +16,7 @@
 
 		<set name="mountPoints" cascade="all-delete-orphan" table="mountpoints" lazy="false">
 			<key column="user_id" not-null="true"/>
-			<one-to-many class="org.vpac.grisu.fs.model.MountPoint"/>
+			<one-to-many class="grisu.fs.model.MountPoint"/>
 		</set>	
 		
 <!--		<map name="fqans">-->
@@ -28,13 +28,13 @@
 		<list name="fileTransfers" cascade="all-delete-orphan" inverse="true">
 			<key column="user_id" not-null="true"/>
 			<list-index column="user_index"/>
-			<one-to-many class="org.vpac.grisu.fs.model.FileTransfer"/>
+			<one-to-many class="grisu.fs.model.FileTransfer"/>
 		</list>		
 
 		<list name="fileReservations" cascade="all-delete-orphan" inverse="true">
 			<key column="user_id" not-null="true"/>
 			<list-index column="user_index"/>
-			<one-to-many class="org.vpac.grisu.fs.model.FileReservation"/>
+			<one-to-many class="grisu.fs.model.FileReservation"/>
 		</list>		
 
 		
