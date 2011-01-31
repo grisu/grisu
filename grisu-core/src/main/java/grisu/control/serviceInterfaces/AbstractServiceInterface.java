@@ -2673,14 +2673,22 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 
+			if (recursion_level == 0) {
+				final GridFile file = getUser().getFileSystemManager()
+						.getFolderListing(directory, 0);
+				return file;
+			}
+
 			final GridFile rootfolder = getUser().getFileSystemManager()
-			.getFolderListing(directory, recursion_level);
-			recursion_level = recursion_level - 1;
-			if (recursion_level <= 0) {
+					.getFolderListing(directory, 1);
+			if (recursion_level == 1) {
 				return rootfolder;
-			} else if (recursion_level < 0) {
+			} else if (recursion_level <= 0) {
 				recursion_level = Integer.MAX_VALUE;
 			}
+
+			recursion_level = recursion_level - 1;
+
 			fillFolder(rootfolder, recursion_level);
 			return rootfolder;
 

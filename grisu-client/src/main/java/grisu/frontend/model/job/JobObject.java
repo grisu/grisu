@@ -55,13 +55,13 @@ import au.org.arcs.jcommons.constants.JobSubmissionProperty;
  * @author Markus Binsteiner
  */
 public class JobObject extends JobSubmissionObjectImpl implements
-		Comparable<JobObject> {
+Comparable<JobObject> {
 
 	static final Logger myLogger = Logger.getLogger(JobObject.class.getName());
 
 	public static JobObject createJobObject(ServiceInterface si,
 			JobSubmissionObjectImpl jobsubmissionObject)
-			throws JobPropertiesException {
+	throws JobPropertiesException {
 
 		final JobObject job = new JobObject(si,
 				jobsubmissionObject.getJobDescriptionDocument());
@@ -90,7 +90,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	private boolean isArchived = false;
 
 	private final List<String> submissionLog = Collections
-			.synchronizedList(new LinkedList<String>());
+	.synchronizedList(new LinkedList<String>());
 
 	/**
 	 * Use this constructor if you want to create a new job.
@@ -136,7 +136,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 *             if no such job exists on the backend
 	 */
 	public JobObject(final ServiceInterface si, final DtoJob job)
-			throws NoSuchJobException {
+	throws NoSuchJobException {
 
 		this(si, job, false);
 	}
@@ -197,7 +197,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 *             connected to the specified serviceInterface
 	 */
 	public JobObject(final ServiceInterface si, final String jobname)
-			throws NoSuchJobException {
+	throws NoSuchJobException {
 
 		this(si, jobname, true);
 
@@ -251,7 +251,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 *             accessed
 	 */
 	public final String archive() throws JobPropertiesException,
-			RemoteFileSystemException {
+	RemoteFileSystemException {
 		return archive(null, false);
 	}
 
@@ -269,7 +269,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 *             accessed
 	 */
 	public final String archive(String target) throws JobPropertiesException,
-			RemoteFileSystemException {
+	RemoteFileSystemException {
 		return archive(target, false);
 	}
 
@@ -288,7 +288,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 *             other kind of file related exception
 	 */
 	public final String archive(String target, boolean waitForArchivingToFinish)
-			throws JobPropertiesException, RemoteFileSystemException {
+	throws JobPropertiesException, RemoteFileSystemException {
 		try {
 			final String targetUrl = getServiceInterface().archiveJob(
 					getJobname(), target);
@@ -297,7 +297,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 				try {
 					StatusObject.waitForActionToFinish(getServiceInterface(),
 							ServiceInterface.ARCHIVE_STATUS_PREFIX
-									+ getJobname(), 5, true, false);
+							+ getJobname(), 5, true, false);
 
 					isArchived = true;
 					pcs.firePropertyChange("archived", false, true);
@@ -324,7 +324,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 							StatusObject.waitForActionToFinish(
 									getServiceInterface(),
 									ServiceInterface.ARCHIVE_STATUS_PREFIX
-											+ getJobname(), 5, true, false);
+									+ getJobname(), 5, true, false);
 
 							isArchived = true;
 							pcs.firePropertyChange("archived", false, true);
@@ -384,7 +384,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	public final String createJob() throws JobPropertiesException {
 
 		final String fqan = GrisuRegistryManager.getDefault(serviceInterface)
-				.getUserEnvironmentManager().getCurrentFqan();
+		.getUserEnvironmentManager().getCurrentFqan();
 
 		return createJob(fqan);
 
@@ -411,7 +411,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 *             created on the backend
 	 */
 	public final String createJob(final String fqan)
-			throws JobPropertiesException {
+	throws JobPropertiesException {
 
 		return createJob(fqan, Constants.FORCE_NAME_METHOD);
 	}
@@ -515,7 +515,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 									JobObject.this.getJobname(),
 									new JobStatusEvent(JobObject.this,
 											oldStatus, JobObject.this
-													.getStatus(false)));
+											.getStatus(false)));
 						}
 					}
 					try {
@@ -548,7 +548,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 			if (getStatus(true) < JobConstants.ACTIVE) {
 				addJobLogMessage("Can't download output: job not started yet.");
 				throw new IllegalStateException(
-						"Job not started yet. No stdout file exists.");
+				"Job not started yet. No stdout file exists.");
 			}
 		}
 		//
@@ -558,7 +558,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		File file = null;
 		try {
 			file = GrisuRegistryManager.getDefault(serviceInterface)
-					.getFileManager().downloadFile(url);
+			.getFileManager().downloadFile(url);
 			addJobLogMessage("Downloaded output file: " + url);
 		} catch (final Exception e) {
 			addJobLogMessage("Could not download file " + url + ": "
@@ -620,7 +620,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		if ((allJobProperties == null) || forceRefresh) {
 			try {
 				allJobProperties = serviceInterface.getJob(getJobname())
-						.propertiesAsMap();
+				.propertiesAsMap();
 			} catch (final Exception e) {
 				throw new JobException(this, "Could not get jobproperties.", e);
 			}
@@ -641,7 +641,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		String result;
 		try {
 			result = FileHelpers
-					.readFromFileWithException(downloadAndCacheOutputFile(relativePathToWorkingDir));
+			.readFromFileWithException(downloadAndCacheOutputFile(relativePathToWorkingDir));
 		} catch (final Exception e) {
 			throw new JobException(this, "Could not read stdout file.", e);
 		}
@@ -663,7 +663,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 
 		try {
 			return GrisuRegistryManager.getDefault(serviceInterface)
-					.getFileManager().getFileSize(url);
+			.getFileManager().getFileSize(url);
 		} catch (final RemoteFileSystemException e) {
 			return -1;
 		}
@@ -1004,8 +1004,8 @@ public class JobObject extends JobSubmissionObjectImpl implements
 						myLogger.debug("Deleting local cached dir for job "
 								+ getJobname() + ": " + getJobDirectoryUrl());
 						File dir = GrisuRegistryManager
-								.getDefault(serviceInterface).getFileManager()
-								.getLocalCacheFile(getJobDirectoryUrl());
+						.getDefault(serviceInterface).getFileManager()
+						.getLocalCacheFile(getJobDirectoryUrl());
 						FileUtils.deleteQuietly(dir);
 					}
 				}.start();
@@ -1030,7 +1030,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 * 
 	 * Specify a recursion level of 1 if you only are interested in the
 	 * jobdirectory itself. Or the appropriate level if you want to look deeper.
-	 * Use 0 to find all files on all levels.
+	 * Use a value <= -1 to find all files on all levels.
 	 * 
 	 * @param recursionLevel
 	 *            the recursion level
@@ -1038,7 +1038,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 * @throws RemoteFileSystemException
 	 */
 	public List<String> listJobDirectory(int recursionLevel)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 
 		final GridFile folder = serviceInterface.ls(getJobDirectoryUrl(),
 				recursionLevel);
@@ -1056,7 +1056,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 * @throws JobPropertiesException
 	 */
 	public final void restartJob() throws JobSubmissionException,
-			JobPropertiesException {
+	JobPropertiesException {
 
 		addJobLogMessage("Restarting job...");
 
@@ -1099,7 +1099,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 * @throws InterruptedException
 	 */
 	public final void stageFiles() throws FileTransactionException,
-			InterruptedException {
+	InterruptedException {
 
 		addJobLogMessage("Staging in files...");
 
@@ -1126,7 +1126,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		}
 
 		final FileTransactionManager ftm = FileTransactionManager
-				.getDefault(serviceInterface);
+		.getDefault(serviceInterface);
 
 		for (String target : targets.keySet()) {
 
@@ -1191,7 +1191,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 * @throws InterruptedException
 	 */
 	public final void submitJob() throws JobSubmissionException,
-			InterruptedException {
+	InterruptedException {
 		submitJob(null);
 	}
 
@@ -1211,7 +1211,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 * @throws InterruptedException
 	 */
 	public final void submitJob(Map<String, String> additionalJobProperties)
-			throws JobSubmissionException, InterruptedException {
+	throws JobSubmissionException, InterruptedException {
 
 		addJobLogMessage("Starting job submission...");
 
@@ -1232,7 +1232,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 		if (Thread.interrupted()) {
 			addJobLogMessage("Job submission interrupted.");
 			throw new InterruptedException(
-					"Interrupted after staging in input files.");
+			"Interrupted after staging in input files.");
 		}
 
 		try {
