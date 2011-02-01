@@ -161,9 +161,10 @@
 					</execution>
 				</executions>
 			</plugin>
+			
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-
+				<version>2.2</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -172,13 +173,9 @@
 							<descriptors>
 								<descriptor>grisu-client-dependencies.assembly.xml</descriptor>
 							</descriptors>
-							<finalName>grisu-client</finalName>
+							<finalName>grisu-client-lib</finalName>
 							<archive>
 								<index>true</index>
-								<!-- <manifest> -->
-								<!-- <mainClass>grisu.frontend.view.swing.GrisuTemplateApp -->
-								<!-- </mainClass> -->
-								<!-- </manifest> -->
 								<manifestEntries>
 									<Class-Path>bcprov.jar bcprov-jdk15-143.jar local-backend.jar
 									</Class-Path>
@@ -186,7 +183,7 @@
 							</archive>
 						</configuration>
 						<goals>
-							<goal>attached</goal>
+							<goal>single</goal>
 						</goals>
 					</execution>
 				</executions>

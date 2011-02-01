@@ -132,7 +132,7 @@
 
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-
+				<version>2.2</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -155,7 +155,7 @@
 							</archive>
 						</configuration>
 						<goals>
-							<goal>attached</goal>
+							<goal>single</goal>
 						</goals>
 					</execution>
 				</executions>
