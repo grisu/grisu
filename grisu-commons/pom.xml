@@ -142,7 +142,7 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.bestgrid</groupId>
+			<groupId>grisu</groupId>
 			<artifactId>grid-jcommons</artifactId>
 			<version>1.2.3-SNAPSHOT</version>
 			<scope>compile</scope>
