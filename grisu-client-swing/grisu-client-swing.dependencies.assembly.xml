@@ -1,5 +1,5 @@
 <assembly>
-	<id>client-swing-library</id>
+	<id>lib</id>
 	<formats>
 		<format>jar</format>
 	</formats>

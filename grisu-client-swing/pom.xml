@@ -141,8 +141,7 @@
 							<descriptors>
 								<descriptor>grisu-client-swing.dependencies.assembly.xml</descriptor>
 							</descriptors>
-							<finalName>grisu-client-swing-lib</finalName>
-							<appendAssemblyId>false</appendAssemblyId>
+							<finalName>grisu-client-swing</finalName>
 							<archive>
 								<index>true</index>
 								<!-- <manifest> -->

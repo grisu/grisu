@@ -179,13 +179,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>grith</groupId>
-			<artifactId>simpleProxyLib</artifactId>
-			<version>0.5.5-SNAPSHOT</version>
-			<type>jar</type>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils-bean-collections</artifactId>
 			<version>1.8.0</version>

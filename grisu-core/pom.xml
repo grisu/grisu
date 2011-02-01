@@ -377,6 +377,18 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>grith</groupId>
+			<artifactId>jgrith</artifactId>
+			<version>0.5.6-SNAPSHOT</version>
+			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>gsindl</artifactId>
+					<groupId>grith</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	</dependencies>
 
 
