@@ -166,7 +166,8 @@
 							<descriptors>
 								<descriptor>grisu-client-dependencies.assembly.xml</descriptor>
 							</descriptors>
-							<finalName>grisu</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+							<finalName>grisu-client-library</finalName>
 							<archive>
 								<index>true</index>
 								<!-- <manifest> -->
