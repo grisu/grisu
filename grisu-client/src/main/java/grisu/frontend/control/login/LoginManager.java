@@ -150,7 +150,7 @@ public class LoginManager {
 				dependencies.put(Dependency.BOUNCYCASTLE, "jdk15-145");
 
 				DependencyManager.addDependencies(dependencies,
-						GridEnvironment.getArcsCommonJavaLibDirectory(), true);
+						GridEnvironment.getGridCommonJavaLibDirectory(), true);
 			}
 
 			environmentInitialized = true;
