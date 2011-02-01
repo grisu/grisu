@@ -935,6 +935,31 @@ Comparable<JobObject> {
 	}
 
 	/**
+	 * Returns whether a job finished successful (Exit code: 0) or not.
+	 * 
+	 * @param forceRefresh
+	 *            whether to refresh the status of the job on the backend or not
+	 * 
+	 * @return true if the job is finished but has got another exit code than 0,
+	 *         false otherwise
+	 */
+	public final boolean isFailed(final boolean forceRefresh) {
+
+		int status = getStatus(forceRefresh);
+
+		if ( status < JobConstants.FINISHED_EITHER_WAY ) {
+			return false;
+		}
+
+		if ( status == JobConstants.DONE ) {
+			return false;
+		} else {
+			return true;
+		}
+
+	}
+
+	/**
 	 * Tells you whether the job is finished (either sucessfully or not).
 	 * 
 	 * @return finished: true / still running/not started: false
@@ -972,6 +997,30 @@ Comparable<JobObject> {
 			return false;
 		}
 
+	}
+
+	/**
+	 * Returns whether a job finished successful (Exit code: 0) or not.
+	 * 
+	 * @param forceRefresh
+	 *            whether to refresh the status of the job on the backend or not
+	 * 
+	 * @return true if the job is finished and has got an exit code of 0, false
+	 *         otherwise
+	 */
+	public final boolean isSuccessful(final boolean forceRefresh) {
+
+		int status = getStatus(forceRefresh);
+
+		if ( status < JobConstants.FINISHED_EITHER_WAY ) {
+			return false;
+		}
+
+		if ( status == JobConstants.DONE ) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**

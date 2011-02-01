@@ -429,7 +429,10 @@
 							<descriptors>
 								<descriptor>grisu-local-backend.assembly.xml</descriptor>
 							</descriptors>
-							<finalName>local</finalName>
+							<finalName>local-backend</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+							
+							
 						</configuration>
 						<goals>
 							<goal>attached</goal>
