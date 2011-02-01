@@ -34,7 +34,7 @@ public class DtoActionStatus {
 	}
 
 	private Map<Date, String> log = Collections
-			.synchronizedSortedMap(new TreeMap<Date, String>());
+	.synchronizedSortedMap(new TreeMap<Date, String>());
 
 	private int totalElements;
 	private boolean finished = false;
@@ -46,6 +46,8 @@ public class DtoActionStatus {
 	private int currentElements = 0;
 
 	private String handle;
+
+	private String errorCause = null;
 
 	public DtoActionStatus() {
 	}
@@ -87,6 +89,11 @@ public class DtoActionStatus {
 		return currentElements;
 	}
 
+	@XmlElement(name = "errorCause")
+	public String getErrorCause() {
+		return this.errorCause;
+	}
+
 	@XmlAttribute(name = "handle")
 	public String getHandle() {
 		return handle;
@@ -125,6 +132,10 @@ public class DtoActionStatus {
 
 	public void setCurrentElements(int currentElements) {
 		this.currentElements = currentElements;
+	}
+
+	public void setErrorCause(String cause) {
+		this.errorCause = cause;
 	}
 
 	public void setFailed(boolean failed) {

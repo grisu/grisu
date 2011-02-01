@@ -1,6 +1,9 @@
 package grisu.control.serviceInterfaces;
 
 import grisu.backend.model.job.Job;
+import grisu.jcommons.interfaces.GridResource;
+import grisu.jcommons.utils.JsdlHelpers;
+import grisu.jcommons.utils.SubmissionLocationHelpers;
 
 import java.util.Map;
 import java.util.Set;
@@ -8,9 +11,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 
 
-import au.org.arcs.jcommons.interfaces.GridResource;
-import au.org.arcs.jcommons.utils.JsdlHelpers;
-import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
 
 public class EqualJobDistributor implements JobDistributor {
 

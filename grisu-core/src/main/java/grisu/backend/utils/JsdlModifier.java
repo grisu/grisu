@@ -1,12 +1,13 @@
 package grisu.backend.utils;
 
+import grisu.jcommons.utils.JsdlHelpers;
+
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import au.org.arcs.jcommons.utils.JsdlHelpers;
 
 /**
  * Just some helper methods to calculate/modify jsdl files.

@@ -1,6 +1,7 @@
 package grisu.model.dto;
 
 import grisu.control.JobConstants;
+import grisu.jcommons.constants.Constants;
 
 import java.util.Date;
 import java.util.LinkedList;
@@ -15,7 +16,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang.StringUtils;
 
-import au.org.arcs.jcommons.constants.Constants;
 
 /**
  * This one holds information about a job that was created (and maybe already

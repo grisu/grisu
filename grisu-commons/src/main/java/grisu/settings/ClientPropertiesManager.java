@@ -1,6 +1,7 @@
 package grisu.settings;
 
 import grisu.control.events.ClientPropertiesEvent;
+import grisu.jcommons.constants.Enums.LoginType;
 
 import java.io.File;
 
@@ -10,7 +11,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 
-import au.org.arcs.jcommons.constants.Enums.LoginType;
 
 /**
  * Manages the $HOME/.grisu/grisu.config file.

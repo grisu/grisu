@@ -3,6 +3,7 @@ package grisu.model;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.StatusException;
+import grisu.jcommons.constants.Constants;
 import grisu.model.dto.DtoBatchJob;
 import grisu.model.dto.DtoJob;
 import grisu.model.files.FileSystemItem;
@@ -35,7 +36,6 @@ import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 
-import au.org.arcs.jcommons.constants.Constants;
 
 /**
  * The implemenation of {@link UserEnvironmentManager}.

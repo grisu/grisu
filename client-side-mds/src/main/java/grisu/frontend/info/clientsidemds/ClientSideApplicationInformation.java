@@ -1,5 +1,10 @@
 package grisu.frontend.info.clientsidemds;
 
+import grisu.jcommons.constants.Constants;
+import grisu.jcommons.constants.JobSubmissionProperty;
+import grisu.jcommons.interfaces.GridResource;
+import grisu.jcommons.interfaces.InformationManager;
+import grisu.jcommons.interfaces.MatchMaker;
 import grisu.model.GrisuRegistry;
 import grisu.model.info.ApplicationInformation;
 
@@ -11,11 +16,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 
-import au.org.arcs.jcommons.constants.Constants;
-import au.org.arcs.jcommons.constants.JobSubmissionProperty;
-import au.org.arcs.jcommons.interfaces.GridResource;
-import au.org.arcs.jcommons.interfaces.InformationManager;
-import au.org.arcs.jcommons.interfaces.MatchMaker;
 
 public class ClientSideApplicationInformation implements ApplicationInformation {
 

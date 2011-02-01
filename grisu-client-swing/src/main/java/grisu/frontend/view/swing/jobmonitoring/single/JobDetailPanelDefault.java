@@ -7,6 +7,7 @@ import grisu.frontend.model.job.JobObject;
 import grisu.frontend.view.swing.files.preview.FileListWithPreviewPanel;
 import grisu.frontend.view.swing.jobmonitoring.single.appSpecific.AppSpecificViewerPanel;
 import grisu.frontend.view.swing.utils.BackgroundActionProgressDialogSmall;
+import grisu.jcommons.constants.Constants;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.status.StatusObject;
 
@@ -36,7 +37,6 @@ import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 
-import au.org.arcs.jcommons.constants.Constants;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;

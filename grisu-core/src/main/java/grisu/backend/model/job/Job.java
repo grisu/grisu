@@ -1,6 +1,8 @@
 package grisu.backend.model.job;
 
 import grisu.backend.model.ProxyCredential;
+import grisu.jcommons.constants.Constants;
+import grisu.jcommons.utils.JsdlHelpers;
 import grisu.utils.SeveralXMLHelpers;
 
 import java.io.IOException;
@@ -36,8 +38,6 @@ import org.simpleframework.xml.Root;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import au.org.arcs.jcommons.constants.Constants;
-import au.org.arcs.jcommons.utils.JsdlHelpers;
 
 /**
  * This class holds all the relevant information about a job.

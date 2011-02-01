@@ -1,6 +1,10 @@
 package grisu.control.serviceInterfaces;
 
 import grisu.backend.model.job.Job;
+import grisu.jcommons.constants.Constants;
+import grisu.jcommons.interfaces.GridResource;
+import grisu.jcommons.utils.JsdlHelpers;
+import grisu.jcommons.utils.SubmissionLocationHelpers;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -11,10 +15,6 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
-import au.org.arcs.jcommons.constants.Constants;
-import au.org.arcs.jcommons.interfaces.GridResource;
-import au.org.arcs.jcommons.utils.JsdlHelpers;
-import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
 
 public class PercentageJobDistributor implements JobDistributor {
 

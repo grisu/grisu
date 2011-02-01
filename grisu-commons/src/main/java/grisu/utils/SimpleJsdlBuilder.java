@@ -1,5 +1,6 @@
 package grisu.utils;
 
+import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.model.FileManager;
 
 import java.io.InputStream;
@@ -8,7 +9,6 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 
-import au.org.arcs.jcommons.constants.JobSubmissionProperty;
 
 /**
  * This class creats a job description document out of the job properties using

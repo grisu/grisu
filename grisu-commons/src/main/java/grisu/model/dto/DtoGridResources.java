@@ -1,5 +1,7 @@
 package grisu.model.dto;
 
+import grisu.jcommons.interfaces.GridResource;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedSet;
@@ -8,7 +10,6 @@ import java.util.TreeSet;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import au.org.arcs.jcommons.interfaces.GridResource;
 
 /**
  * A wrapper that holds a list of {@link DtoGridResource} objects.

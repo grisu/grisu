@@ -1,13 +1,13 @@
 package grisu.frontend.view.swing.jobmonitoring.single;
 
 import grisu.frontend.model.job.JobObject;
+import grisu.jcommons.constants.Constants;
 
 import java.util.Comparator;
 import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
 
-import au.org.arcs.jcommons.constants.Constants;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 
 public class SingleJobTableFormat implements AdvancedTableFormat<JobObject> {

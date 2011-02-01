@@ -1,6 +1,7 @@
 package grisu.model.dto;
 
 import grisu.control.JobConstants;
+import grisu.jcommons.constants.Constants;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -18,7 +19,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 
-import au.org.arcs.jcommons.constants.Constants;
 
 @XmlRootElement(name = "multiPartJob")
 public class DtoBatchJob implements Comparable<DtoBatchJob> {

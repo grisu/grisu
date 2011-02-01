@@ -2,6 +2,9 @@ package grisu.control.serviceInterfaces;
 
 import grisu.backend.model.job.Job;
 import grisu.control.DefaultResubmitPolicy;
+import grisu.jcommons.constants.Constants;
+import grisu.jcommons.interfaces.GridResource;
+import grisu.jcommons.utils.SubmissionLocationHelpers;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,9 +14,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 
-import au.org.arcs.jcommons.constants.Constants;
-import au.org.arcs.jcommons.interfaces.GridResource;
-import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
 
 public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 

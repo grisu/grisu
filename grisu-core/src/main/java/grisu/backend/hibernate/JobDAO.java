@@ -3,6 +3,7 @@ package grisu.backend.hibernate;
 import grisu.backend.model.User;
 import grisu.backend.model.job.Job;
 import grisu.control.exceptions.NoSuchJobException;
+import grisu.jcommons.constants.Constants;
 
 import java.util.List;
 
@@ -10,7 +11,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 
-import au.org.arcs.jcommons.constants.Constants;
 
 /**
  * Class to make it easier to persist (and find {@link Job} objects to/from the

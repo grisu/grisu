@@ -4,6 +4,7 @@ import grisu.control.JobConstants;
 import grisu.control.ServiceInterface;
 import grisu.frontend.model.job.JobObject;
 import grisu.frontend.view.swing.jobmonitoring.single.JobDetailPanel;
+import grisu.jcommons.constants.Constants;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 
@@ -17,7 +18,6 @@ import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
 
-import au.org.arcs.jcommons.constants.Constants;
 
 public abstract class AppSpecificViewerPanel extends JPanel implements
 		JobDetailPanel, PropertyChangeListener {

@@ -14,6 +14,8 @@ import grisu.frontend.control.fileTransfers.FileTransactionManager;
 import grisu.frontend.model.events.JobCleanedEvent;
 import grisu.frontend.model.events.JobStatusEvent;
 import grisu.frontend.model.events.NewJobEvent;
+import grisu.jcommons.constants.Constants;
+import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.UserEnvironmentManager;
@@ -42,8 +44,6 @@ import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.w3c.dom.Document;
 
-import au.org.arcs.jcommons.constants.Constants;
-import au.org.arcs.jcommons.constants.JobSubmissionProperty;
 
 /**
  * A model class that hides all the complexity of creating and submitting a job.

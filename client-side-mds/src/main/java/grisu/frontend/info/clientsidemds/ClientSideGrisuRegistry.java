@@ -3,6 +3,8 @@ package grisu.frontend.info.clientsidemds;
 import grisu.backend.info.InformationManagerManager;
 import grisu.control.ServiceInterface;
 import grisu.control.TemplateManager;
+import grisu.jcommons.interfaces.InformationManager;
+import grisu.jcommons.interfaces.MatchMaker;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistry;
 import grisu.model.UserEnvironmentManager;
@@ -23,8 +25,6 @@ import org.vpac.historyRepeater.DummyHistoryManager;
 import org.vpac.historyRepeater.HistoryManager;
 import org.vpac.historyRepeater.SimpleHistoryManager;
 
-import au.org.arcs.jcommons.interfaces.InformationManager;
-import au.org.arcs.jcommons.interfaces.MatchMaker;
 
 public class ClientSideGrisuRegistry implements GrisuRegistry {
 

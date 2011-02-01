@@ -1,13 +1,13 @@
 package grisu.control.serviceInterfaces;
 
 import grisu.backend.model.job.Job;
+import grisu.jcommons.interfaces.GridResource;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
 
-import au.org.arcs.jcommons.interfaces.GridResource;
 
 public interface JobDistributor {
 

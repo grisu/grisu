@@ -1,5 +1,7 @@
 package grisu.backend.info;
 
+import grisu.jcommons.interfaces.InformationManager;
+import grisu.jcommons.interfaces.MatchMaker;
 import grisu.settings.Environment;
 
 import java.lang.reflect.Constructor;
@@ -10,8 +12,6 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import au.org.arcs.jcommons.interfaces.InformationManager;
-import au.org.arcs.jcommons.interfaces.MatchMaker;
 
 public class InformationManagerManager {
 

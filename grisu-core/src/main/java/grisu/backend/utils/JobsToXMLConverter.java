@@ -1,6 +1,7 @@
 package grisu.backend.utils;
 
 import grisu.backend.model.job.Job;
+import grisu.jcommons.constants.Constants;
 import grisu.utils.SeveralXMLHelpers;
 
 import java.util.List;
@@ -13,7 +14,6 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import au.org.arcs.jcommons.constants.Constants;
 
 /**
  * This one gathers all information of a job and converts it into a xml

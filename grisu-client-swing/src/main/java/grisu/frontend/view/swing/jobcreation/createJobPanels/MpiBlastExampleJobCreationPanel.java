@@ -8,6 +8,7 @@ import grisu.frontend.model.job.JobObject;
 import grisu.frontend.view.swing.JobSubmissionLogPanel;
 import grisu.frontend.view.swing.files.GrisuFileDialog;
 import grisu.frontend.view.swing.jobcreation.JobCreationPanel;
+import grisu.jcommons.constants.Constants;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.UserEnvironmentManager;
@@ -46,7 +47,6 @@ import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXErrorPane;
 import org.vpac.historyRepeater.HistoryManager;
 
-import au.org.arcs.jcommons.constants.Constants;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;

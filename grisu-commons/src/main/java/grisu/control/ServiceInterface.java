@@ -8,6 +8,7 @@ import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.NoSuchTemplateException;
 import grisu.control.exceptions.NoValidCredentialException;
 import grisu.control.exceptions.RemoteFileSystemException;
+import grisu.jcommons.constants.Constants;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.DtoApplicationDetails;
@@ -39,7 +40,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.xml.bind.annotation.XmlMimeType;
 
-import au.org.arcs.jcommons.constants.Constants;
 
 /**
  * This is the central interface of grisu. These are the methods the web service

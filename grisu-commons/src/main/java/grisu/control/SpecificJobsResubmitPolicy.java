@@ -1,5 +1,6 @@
 package grisu.control;
 
+import grisu.jcommons.constants.Constants;
 import grisu.model.dto.DtoProperties;
 
 import java.util.HashMap;
@@ -8,7 +9,6 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
-import au.org.arcs.jcommons.constants.Constants;
 
 public class SpecificJobsResubmitPolicy implements ResubmitPolicy {
 

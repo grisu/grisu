@@ -13,6 +13,7 @@ import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoValidCredentialException;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
+import grisu.jcommons.constants.Constants;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.job.JobSubmissionObjectImpl;
@@ -50,7 +51,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.log4j.Logger;
 
-import au.org.arcs.jcommons.constants.Constants;
 
 /**
  * The User class holds all the relevant data a job could want to know from the

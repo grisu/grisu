@@ -2,13 +2,13 @@ package grisu.control.serviceInterfaces;
 
 import grisu.backend.model.job.Job;
 import grisu.control.JobConstants;
+import grisu.jcommons.constants.Constants;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 
-import au.org.arcs.jcommons.constants.Constants;
 
 public class BatchJobStatus {
 

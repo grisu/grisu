@@ -4,6 +4,7 @@ import grisu.control.ServiceInterface;
 import grisu.frontend.control.jobMonitoring.RunningJobManager;
 import grisu.frontend.control.utils.ApplicationsManager;
 import grisu.frontend.model.events.NewBatchJobEvent;
+import grisu.jcommons.constants.Constants;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.UserEnvironmentManager;
 
@@ -18,7 +19,6 @@ import javax.swing.Action;
 import org.bushe.swing.event.EventSubscriber;
 import org.jdesktop.swingx.JXTaskPane;
 
-import au.org.arcs.jcommons.constants.Constants;
 
 public class GrisuMonitorNavigationTaskPaneBatch extends JXTaskPane implements
 		EventSubscriber<NewBatchJobEvent> {

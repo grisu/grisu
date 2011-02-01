@@ -16,6 +16,7 @@ import grisu.frontend.control.jobMonitoring.RunningJobManager;
 import grisu.frontend.model.events.BatchJobEvent;
 import grisu.frontend.model.events.BatchJobKilledEvent;
 import grisu.frontend.model.events.NewBatchJobEvent;
+import grisu.jcommons.constants.Constants;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.dto.DtoActionStatus;
@@ -53,7 +54,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 
-import au.org.arcs.jcommons.constants.Constants;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
@@ -2137,7 +2137,9 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * Tells the backend to submit this batchjob.
+	 * Tells the backend to submit this batchjob. Waits for the submission to
+	 * finish.
+	 * 
 	 * 
 	 * @throws JobSubmissionException
 	 *             if the jobsubmission fails
@@ -2148,10 +2150,25 @@ Comparable<BatchJobObject>, Listener {
 	public void submit() throws JobSubmissionException, NoSuchJobException,
 	InterruptedException {
 
-		submit(false);
+		submit(true);
 	}
 
-	public void submit(boolean waitForSubmissionToFinish)
+	/**
+	 * Tells the backend to submit this batchjob.
+	 * 
+	 * @param waitForSubmissionToFinish
+	 *            whether to wait for the submission to finish or not
+	 * 
+	 * @return an {@link DtoActionStatus} object that can be used to monitor the
+	 *         submission progress
+	 * 
+	 * @throws JobSubmissionException
+	 *             if the jobsubmission fails
+	 * @throws NoSuchJobException
+	 *             if no such job exists on the backend
+	 * @throws InterruptedException
+	 */
+	public StatusObject submit(boolean waitForSubmissionToFinish)
 	throws JobSubmissionException, NoSuchJobException,
 	InterruptedException {
 
@@ -2191,11 +2208,12 @@ Comparable<BatchJobObject>, Listener {
 			throw nsje;
 		}
 
+		final StatusObject status = new StatusObject(serviceInterface,
+				BatchJobObject.this.batchJobname);
+
 		final Thread waitThread = new Thread() {
 			@Override
 			public void run() {
-				final StatusObject status = new StatusObject(serviceInterface,
-						BatchJobObject.this.batchJobname);
 				status.addListener(BatchJobObject.this);
 				try {
 					status.waitForActionToFinish(4, false, true,
@@ -2246,6 +2264,15 @@ Comparable<BatchJobObject>, Listener {
 				isSubmitting = false;
 				pcs.firePropertyChange(SUBMITTING, !isSubmitting, isSubmitting);
 				EventBus.publish(new NewBatchJobEvent(this));
+
+				if (status.getStatus().isFailed()) {
+					throw new JobSubmissionException(
+							"BatchJob submission failed for job "
+							+ getJobname()
+							+ ": "
+									+ status.getStatus().getErrorCause());
+				}
+
 			} catch (final InterruptedException e) {
 				isSubmitting = false;
 				pcs.firePropertyChange(SUBMITTING, !isSubmitting, isSubmitting);
@@ -2254,6 +2281,8 @@ Comparable<BatchJobObject>, Listener {
 
 		}
 		refresh(false);
+
+		return status;
 
 	}
 

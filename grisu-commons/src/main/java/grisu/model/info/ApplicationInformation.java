@@ -1,11 +1,12 @@
 package grisu.model.info;
 
+import grisu.jcommons.constants.JobSubmissionProperty;
+import grisu.jcommons.interfaces.GridResource;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
-import au.org.arcs.jcommons.constants.JobSubmissionProperty;
-import au.org.arcs.jcommons.interfaces.GridResource;
 
 /**
  * Interface which describes the stuff that needs to be known from an

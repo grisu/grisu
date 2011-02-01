@@ -11,6 +11,7 @@ import grisu.frontend.model.events.NewBatchJobEvent;
 import grisu.frontend.model.events.NewJobEvent;
 import grisu.frontend.model.job.BatchJobObject;
 import grisu.frontend.model.job.JobObject;
+import grisu.jcommons.constants.Constants;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.UserEnvironmentManager;
@@ -36,7 +37,6 @@ import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 
-import au.org.arcs.jcommons.constants.Constants;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 

@@ -6,6 +6,9 @@ import grisu.backend.model.job.Job;
 import grisu.backend.model.job.JobSubmitter;
 import grisu.backend.model.job.ServerJobSubmissionException;
 import grisu.control.JobConstants;
+import grisu.jcommons.constants.Constants;
+import grisu.jcommons.interfaces.InformationManager;
+import grisu.jcommons.utils.JsdlHelpers;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.DebugUtils;
 import grith.jgrith.CredentialHelpers;
@@ -20,9 +23,6 @@ import org.globus.rsl.RslNode;
 import org.ietf.jgss.GSSCredential;
 import org.w3c.dom.Document;
 
-import au.org.arcs.jcommons.constants.Constants;
-import au.org.arcs.jcommons.interfaces.InformationManager;
-import au.org.arcs.jcommons.utils.JsdlHelpers;
 
 public class GT5Submitter extends JobSubmitter {
 

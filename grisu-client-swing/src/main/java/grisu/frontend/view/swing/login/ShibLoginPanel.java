@@ -4,7 +4,13 @@ import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginException;
 import grisu.frontend.control.login.LoginManager;
 import grisu.frontend.control.login.LoginParams;
+import grisu.jcommons.configuration.CommonGridProperties;
 import grisu.settings.ClientPropertiesManager;
+import grith.sibboleth.CredentialManager;
+import grith.sibboleth.DummyCredentialManager;
+import grith.sibboleth.DummyIdpObject;
+import grith.sibboleth.IdpObject;
+import grith.sibboleth.Shibboleth;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
@@ -16,12 +22,6 @@ import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang.StringUtils;
 
-import au.org.arcs.auth.shibboleth.CredentialManager;
-import au.org.arcs.auth.shibboleth.DummyCredentialManager;
-import au.org.arcs.auth.shibboleth.DummyIdpObject;
-import au.org.arcs.auth.shibboleth.IdpObject;
-import au.org.arcs.auth.shibboleth.Shibboleth;
-import au.org.arcs.jcommons.configuration.CommonArcsProperties;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -124,7 +124,7 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 	private JTextField getTextField_1() {
 		if (textField_1 == null) {
 			textField_1 = new JTextField();
-			final String lastUsername = CommonArcsProperties.getDefault()
+			final String lastUsername = CommonGridProperties.getDefault()
 					.getLastShibUsername();
 			if (StringUtils.isNotBlank(lastUsername)) {
 				textField_1.setText(lastUsername);
@@ -167,7 +167,7 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 						}
 
 						if (StringUtils.isBlank(lastIdp)) {
-							lastIdp = CommonArcsProperties.getDefault()
+							lastIdp = CommonGridProperties.getDefault()
 									.getLastShibIdp();
 						}
 

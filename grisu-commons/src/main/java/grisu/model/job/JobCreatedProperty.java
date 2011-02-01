@@ -1,9 +1,10 @@
 package grisu.model.job;
 
+import grisu.jcommons.constants.Constants;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import au.org.arcs.jcommons.constants.Constants;
 
 /**
  * Job properties that are available after a job is created on the backend.

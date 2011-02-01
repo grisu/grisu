@@ -2,6 +2,9 @@ package grisu.model.info;
 
 import grisu.control.JobConstants;
 import grisu.control.ServiceInterface;
+import grisu.jcommons.constants.Constants;
+import grisu.jcommons.constants.JobSubmissionProperty;
+import grisu.jcommons.interfaces.GridResource;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.dto.DtoJob;
 
@@ -16,9 +19,6 @@ import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
 
-import au.org.arcs.jcommons.constants.Constants;
-import au.org.arcs.jcommons.constants.JobSubmissionProperty;
-import au.org.arcs.jcommons.interfaces.GridResource;
 
 /**
  * Default implementation for {@link ApplicationInformation}.

@@ -1,8 +1,8 @@
 package grisu.backend.model.job;
 
 import grisu.backend.model.ProxyCredential;
+import grisu.jcommons.interfaces.InformationManager;
 
-import au.org.arcs.jcommons.interfaces.InformationManager;
 
 /**
  * Extend this abstract class if you want to write a connector to a new

@@ -1,5 +1,7 @@
 package grisu.frontend.info.clientsidemds;
 
+import grisu.jcommons.interfaces.InformationManager;
+import grisu.jcommons.interfaces.MatchMaker;
 import grisu.model.GrisuRegistry;
 import grisu.model.UserEnvironmentManager;
 import grisu.model.info.UserApplicationInformation;
@@ -9,8 +11,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 
-import au.org.arcs.jcommons.interfaces.InformationManager;
-import au.org.arcs.jcommons.interfaces.MatchMaker;
 
 public class ClientSideUserApplicationInformation extends
 		ClientSideApplicationInformation implements UserApplicationInformation {

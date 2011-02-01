@@ -1,12 +1,12 @@
 package grisu.control;
 
+import grisu.jcommons.constants.Constants;
 import grisu.model.dto.DtoProperties;
 
 import java.util.HashMap;
 import java.util.Map;
 
 
-import au.org.arcs.jcommons.constants.Constants;
 
 public class DefaultResubmitPolicy implements ResubmitPolicy {
 

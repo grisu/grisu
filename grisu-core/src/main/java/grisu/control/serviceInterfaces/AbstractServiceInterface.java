@@ -21,6 +21,13 @@ import grisu.control.exceptions.JobSubmissionException;
 import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.NoValidCredentialException;
 import grisu.control.exceptions.RemoteFileSystemException;
+import grisu.jcommons.constants.Constants;
+import grisu.jcommons.constants.JobSubmissionProperty;
+import grisu.jcommons.interfaces.GridResource;
+import grisu.jcommons.interfaces.InformationManager;
+import grisu.jcommons.interfaces.MatchMaker;
+import grisu.jcommons.utils.JsdlHelpers;
+import grisu.jcommons.utils.SubmissionLocationHelpers;
 import grisu.model.FileManager;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
@@ -77,13 +84,6 @@ import org.simpleframework.xml.core.Persister;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import au.org.arcs.jcommons.constants.Constants;
-import au.org.arcs.jcommons.constants.JobSubmissionProperty;
-import au.org.arcs.jcommons.interfaces.GridResource;
-import au.org.arcs.jcommons.interfaces.InformationManager;
-import au.org.arcs.jcommons.interfaces.MatchMaker;
-import au.org.arcs.jcommons.utils.JsdlHelpers;
-import au.org.arcs.jcommons.utils.SubmissionLocationHelpers;
 
 /**
  * This abstract class implements most of the methods of the
@@ -380,6 +380,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				} catch (final InterruptedException e) {
 					e.printStackTrace();
 					status.setFailed(true);
+					status.setErrorCause(e.getLocalizedMessage());
 					status.setFinished(true);
 					status.addElement("Killing of sub-jobs interrupted: "
 							+ e.getLocalizedMessage());
@@ -395,6 +396,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					status.addElement("Batchjob killed.");
 				} catch (final InterruptedException e) {
 					status.setFailed(true);
+					status.setErrorCause("Archiving interrupted.");
 					status.setFinished(true);
 					e.printStackTrace();
 					return;
@@ -501,6 +503,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					if (optionalBatchJobStatus != null) {
 						optionalBatchJobStatus.setFailed(true);
 						optionalBatchJobStatus
+						.setErrorCause("Cancelling archiving of job because it seems to be still submitting.");
+						optionalBatchJobStatus
 						.addElement("Cancelling archiving of job "
 								+ job.getJobname()
 								+ " because it seems to be still submitting.");
@@ -524,12 +528,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				} catch (final RemoteFileSystemException e1) {
 					if (optionalBatchJobStatus != null) {
 						optionalBatchJobStatus.setFailed(true);
+						optionalBatchJobStatus.setErrorCause(e1
+								.getLocalizedMessage());
 						optionalBatchJobStatus
 						.addElement("Failed archiving job "
 								+ job.getJobname() + ": "
 								+ e1.getLocalizedMessage());
 					}
 					status.setFailed(true);
+					status.setErrorCause(e1.getLocalizedMessage());
 					status.setFinished(true);
 					status.addElement("Transfer failed: "
 							+ e1.getLocalizedMessage());
@@ -539,11 +546,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				if ((rftp != null) && rftp.isFailed()) {
 					if (optionalBatchJobStatus != null) {
 						optionalBatchJobStatus.setFailed(true);
+						optionalBatchJobStatus.setErrorCause(rftp
+								.getPossibleExceptionMessage());
 						optionalBatchJobStatus
 						.addElement("Failed archiving job "
 								+ job.getJobname());
 					}
 					status.setFailed(true);
+					status.setErrorCause(rftp.getPossibleExceptionMessage());
 					status.setFinished(true);
 					final String message = rftp.getPossibleExceptionMessage();
 					status.addElement("Transfer failed: " + message);
@@ -565,6 +575,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				} catch (final RemoteFileSystemException e1) {
 					if (optionalBatchJobStatus != null) {
 						optionalBatchJobStatus.setFailed(true);
+						optionalBatchJobStatus.setErrorCause(e1
+								.getLocalizedMessage());
 						optionalBatchJobStatus
 						.addElement("Failed archiving job "
 								+ job.getJobname() + ": "
@@ -575,6 +587,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					} catch (Exception e) {
 					}
 					status.setFailed(true);
+					status.setErrorCause(e1.getLocalizedMessage());
 					status.setFinished(true);
 					final String message = rftp.getPossibleExceptionMessage();
 					status.addElement("Could not access grisufile url when archiving job: "
@@ -588,12 +601,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				} catch (final Exception e) {
 					if (optionalBatchJobStatus != null) {
 						optionalBatchJobStatus.setFailed(true);
+						optionalBatchJobStatus.setErrorCause(e
+								.getLocalizedMessage());
 						optionalBatchJobStatus
 						.addElement("Failed archiving job "
 								+ job.getJobname() + ": "
 								+ e.getLocalizedMessage());
 					}
 					status.setFailed(true);
+					status.setErrorCause(e.getLocalizedMessage());
 					status.setFinished(true);
 					final String message = rftp.getPossibleExceptionMessage();
 					status.addElement("Could not serialize job object.");
@@ -934,6 +950,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 						if (rto.isFailed()) {
 							actionStat.setFailed(true);
+							actionStat.setErrorCause(rto
+									.getPossibleExceptionMessage());
 							actionStat.setFinished(true);
 							actionStat.addElement("Transfer failed: "
 									+ rto.getPossibleException()
@@ -950,6 +968,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				} catch (final Exception e) {
 					e.printStackTrace();
 					actionStat.setFailed(true);
+					actionStat.setErrorCause(e.getLocalizedMessage());
 					actionStat.setFinished(true);
 					actionStat.addElement("Transfer failed: "
 							+ e.getLocalizedMessage());
@@ -1180,6 +1199,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			} catch (final Exception e) {
 				status.addElement("Failed: " + e.getLocalizedMessage());
 				status.setFailed(true);
+				status.setErrorCause(e.getLocalizedMessage());
 				myLogger.error("Could not delete file: " + file);
 				// filesNotDeleted.add(file);
 			}
@@ -1243,6 +1263,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								+ job.getJobname() + ": "
 								+ e.getLocalizedMessage());
 						newActionStatus.setFailed(true);
+						newActionStatus.setErrorCause(e.getLocalizedMessage());
 						e.printStackTrace();
 					}
 					if (newActionStatus.getTotalElements() <= newActionStatus
@@ -1291,6 +1312,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								.addElement("Couldn't delete common dir for mountpoint: "
 										+ mpRoot);
 								newActionStatus.setFailed(true);
+								newActionStatus.setErrorCause(e
+										.getLocalizedMessage());
 								myLogger.error("Couldn't delete multijobDir: "
 										+ url);
 							}
@@ -2594,6 +2617,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			} catch (final Exception e) {
 				status.addElement("Failed: " + e.getLocalizedMessage());
 				status.setFailed(true);
+				status.setErrorCause(e.getLocalizedMessage());
 				myLogger.error("Could not kill job: " + jobname);
 			}
 		}
@@ -2675,12 +2699,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			if (recursion_level == 0) {
 				final GridFile file = getUser().getFileSystemManager()
-						.getFolderListing(directory, 0);
+				.getFolderListing(directory, 0);
 				return file;
 			}
 
 			final GridFile rootfolder = getUser().getFileSystemManager()
-					.getFolderListing(directory, 1);
+			.getFolderListing(directory, 1);
 			if (recursion_level == 1) {
 				return rootfolder;
 			} else if (recursion_level <= 0) {
@@ -3490,6 +3514,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				} catch (final Exception e) {
 					status.setFailed(true);
+					status.setErrorCause(e.getLocalizedMessage());
 					status.setFinished(true);
 					status.addElement("Failed: " + e.getLocalizedMessage());
 				}
@@ -3552,6 +3577,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						statusfinal.setFinished(true);
 						if (multiPartJob.getFailedJobs().size() > 0) {
 							statusfinal.setFailed(true);
+							statusfinal
+							.setErrorCause("Undefined error: not all subjobs accessed.");
 							multiPartJob.setStatus(JobConstants.FAILED);
 						} else {
 							multiPartJob.setStatus(JobConstants.DONE);
@@ -3698,6 +3725,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								+ jobToRestart.getJobname() + " failed: "
 								+ e.getLocalizedMessage());
 						status.setFailed(true);
+						status.setErrorCause(e.getLocalizedMessage());
 						myLogger.debug(e);
 					} catch (final NoSuchJobException e1) {
 						status.addElement("Resubmission of job "
@@ -3844,6 +3872,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			status.addLogMessage("Job submission failed: "
 					+ e.getLocalizedMessage());
 			status.setFailed(true);
+			status.setErrorCause(e.getLocalizedMessage());
 			throw e;
 		}
 
@@ -4029,11 +4058,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 									+ e.getLocalizedMessage()
 									+ ". Trying again...");
 							exc = e;
+							executor.shutdownNow();
 						}
 					}
 
 					if (exc != null) {
 						newActionStatus.setFailed(true);
+						newActionStatus.setErrorCause("Tried to resubmit job "
+								+ job.getJobname() + " "
+								+ DEFAULT_JOB_SUBMISSION_RETRIES
+								+ " times. Never worked. Giving up...");
 						myLogger.error("Tried to resubmit job "
 								+ job.getJobname() + " "
 								+ DEFAULT_JOB_SUBMISSION_RETRIES
@@ -4044,6 +4078,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								+ job.getJobname() + " "
 								+ DEFAULT_JOB_SUBMISSION_RETRIES
 								+ " times. Never worked. Giving up...");
+						executor.shutdownNow();
+
 					}
 
 					if (newActionStatus.getCurrentElements() >= newActionStatus
@@ -4095,6 +4131,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 		} catch (final Exception e) {
 			status.setFailed(true);
+			status.setErrorCause(e.getLocalizedMessage());
 			status.setFinished(true);
 			e.printStackTrace();
 			throw new JobSubmissionException(
@@ -4308,6 +4345,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						+ " failed: " + e.getLocalizedMessage());
 				status.setFinished(true);
 				status.setFailed(true);
+				status.setErrorCause(e.getLocalizedMessage());
 				// } finally {
 				// getUser().closeFileSystems();
 			}

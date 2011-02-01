@@ -4,6 +4,7 @@ import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginException;
 import grisu.frontend.control.login.LoginManager;
 import grisu.frontend.control.login.LoginParams;
+import grisu.jcommons.configuration.CommonGridProperties;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -13,7 +14,6 @@ import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang.StringUtils;
 
-import au.org.arcs.jcommons.configuration.CommonArcsProperties;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -84,7 +84,7 @@ public class MyProxyLoginPanel extends JPanel implements LoginMethodPanel {
 	private JTextField getTextField() {
 		if (textField == null) {
 			textField = new JTextField();
-			final String lastUsername = CommonArcsProperties.getDefault()
+			final String lastUsername = CommonGridProperties.getDefault()
 					.getLastMyProxyUsername();
 			if (StringUtils.isNotBlank(lastUsername)) {
 				textField.setText(lastUsername);

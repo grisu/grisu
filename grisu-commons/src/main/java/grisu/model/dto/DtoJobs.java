@@ -1,5 +1,7 @@
 package grisu.model.dto;
 
+import grisu.jcommons.constants.Constants;
+
 import java.util.Collections;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -7,7 +9,6 @@ import java.util.TreeSet;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import au.org.arcs.jcommons.constants.Constants;
 
 /**
  * A wrapper object that holds a list of {@link DtoJob} objects.

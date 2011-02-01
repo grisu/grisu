@@ -4,6 +4,7 @@ import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoSuchJobException;
 import grisu.frontend.control.utils.ApplicationsManager;
 import grisu.frontend.model.job.BatchJobObject;
+import grisu.jcommons.constants.Constants;
 
 import java.awt.BorderLayout;
 import java.util.HashMap;
@@ -13,7 +14,6 @@ import javax.swing.JPanel;
 
 import org.apache.commons.lang.StringUtils;
 
-import au.org.arcs.jcommons.constants.Constants;
 
 import com.jidesoft.swing.JideTabbedPane;
 

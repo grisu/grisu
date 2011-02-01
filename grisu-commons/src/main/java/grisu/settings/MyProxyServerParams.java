@@ -1,12 +1,13 @@
 package grisu.settings;
 
+import grisu.jcommons.constants.GridEnvironment;
+
 import java.io.File;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.Logger;
 
-import au.org.arcs.jcommons.constants.ArcsEnvironment;
 
 /**
  * Class to help with the myproxy server parameters.
@@ -24,13 +25,13 @@ public final class MyProxyServerParams {
 	/**
 	 * Default myproxy server url. Points to myproxy2.arcs.org.au.
 	 */
-	public static final String DEFAULT_MYPROXY_SERVER = ArcsEnvironment
+	public static final String DEFAULT_MYPROXY_SERVER = GridEnvironment
 			.getDefaultMyProxyServer();
 
 	/**
 	 * Default myproxy server port. Default is 443.
 	 */
-	public static final int DEFAULT_MYPROXY_PORT = ArcsEnvironment
+	public static final int DEFAULT_MYPROXY_PORT = GridEnvironment
 			.getDefaultMyProxyPort();
 
 	/**

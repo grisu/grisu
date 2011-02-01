@@ -9,6 +9,7 @@ import grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import grisu.frontend.view.swing.login.LoginPanel;
 import grisu.frontend.view.swing.login.ServiceInterfaceHolder;
 import grisu.frontend.view.swing.utils.AdvancedSettingsPanel;
+import grisu.jcommons.utils.HttpProxyPanel;
 import grisu.model.dto.GridFile;
 
 import java.awt.AWTEvent;
@@ -28,7 +29,6 @@ import javax.swing.UIManager;
 import org.apache.commons.lang.StringUtils;
 import org.jdesktop.swingx.JXFrame;
 
-import au.org.arcs.jcommons.utils.HttpProxyPanel;
 
 import com.google.common.collect.ImmutableList;
 

@@ -2,6 +2,9 @@ package grisu.model.job;
 
 import grisu.control.JobnameHelpers;
 import grisu.control.exceptions.JobPropertiesException;
+import grisu.jcommons.constants.Constants;
+import grisu.jcommons.constants.JobSubmissionProperty;
+import grisu.jcommons.utils.JsdlHelpers;
 import grisu.model.FileManager;
 import grisu.utils.SeveralXMLHelpers;
 import grisu.utils.SimpleJsdlBuilder;
@@ -30,9 +33,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
-import au.org.arcs.jcommons.constants.Constants;
-import au.org.arcs.jcommons.constants.JobSubmissionProperty;
-import au.org.arcs.jcommons.utils.JsdlHelpers;
 
 /**
  * A class that helps creating a job.

@@ -4,6 +4,9 @@ import grisu.backend.model.ProxyCredential;
 import grisu.backend.model.job.Job;
 import grisu.backend.model.job.JobSubmitter;
 import grisu.control.JobConstants;
+import grisu.jcommons.constants.Constants;
+import grisu.jcommons.interfaces.InformationManager;
+import grisu.jcommons.utils.JsdlHelpers;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.DebugUtils;
 import grisu.utils.SeveralXMLHelpers;
@@ -43,9 +46,6 @@ import org.globus.wsrf.impl.security.authorization.HostAuthorization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import au.org.arcs.jcommons.constants.Constants;
-import au.org.arcs.jcommons.interfaces.InformationManager;
-import au.org.arcs.jcommons.utils.JsdlHelpers;
 
 /**
  * This class is the connector class between grisu and our GT4 gateways. It

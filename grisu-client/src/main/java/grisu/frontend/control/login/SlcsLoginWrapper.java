@@ -1,17 +1,17 @@
 package grisu.frontend.control.login;
 
+import grisu.jcommons.configuration.CommonGridProperties;
 import grith.gsindl.SLCS;
 import grith.jgrith.plainProxy.PlainProxy;
+import grith.sibboleth.CredentialManager;
+import grith.sibboleth.IdpObject;
+import grith.sibboleth.Shibboleth;
+import grith.sibboleth.StaticCredentialManager;
+import grith.sibboleth.StaticIdpObject;
 
 import org.apache.commons.lang.StringUtils;
 import org.ietf.jgss.GSSCredential;
 
-import au.org.arcs.auth.shibboleth.CredentialManager;
-import au.org.arcs.auth.shibboleth.IdpObject;
-import au.org.arcs.auth.shibboleth.Shibboleth;
-import au.org.arcs.auth.shibboleth.StaticCredentialManager;
-import au.org.arcs.auth.shibboleth.StaticIdpObject;
-import au.org.arcs.jcommons.configuration.CommonArcsProperties;
 
 public class SlcsLoginWrapper {
 
@@ -39,8 +39,8 @@ public class SlcsLoginWrapper {
 			final GSSCredential cred = PlainProxy.init(slcs.getCertificate(),
 					slcs.getPrivateKey(), 24 * 10);
 
-			CommonArcsProperties.getDefault().setLastShibUsername(username);
-			CommonArcsProperties.getDefault().setLastShibIdp(idp);
+			CommonGridProperties.getDefault().setLastShibUsername(username);
+			CommonGridProperties.getDefault().setLastShibIdp(idp);
 			return cred;
 
 		} catch (final Exception e) {

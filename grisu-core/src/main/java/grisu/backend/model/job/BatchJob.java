@@ -3,6 +3,7 @@ package grisu.backend.model.job;
 import grisu.backend.hibernate.JobDAO;
 import grisu.control.JobConstants;
 import grisu.control.exceptions.NoSuchJobException;
+import grisu.jcommons.constants.Constants;
 import grisu.model.dto.DtoBatchJob;
 import grisu.model.dto.DtoJob;
 import grisu.model.dto.DtoJobs;
@@ -31,7 +32,6 @@ import javax.persistence.Transient;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.CollectionOfElements;
 
-import au.org.arcs.jcommons.constants.Constants;
 
 @Entity
 public class BatchJob {

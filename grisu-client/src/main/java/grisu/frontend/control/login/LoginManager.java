@@ -3,6 +3,16 @@ package grisu.frontend.control.login;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.ServiceInterfaceException;
 import grisu.frontend.control.UncaughtExceptionHandler;
+import grisu.jcommons.configuration.CommonGridProperties;
+import grisu.jcommons.constants.GridEnvironment;
+import grisu.jcommons.constants.Enums.LoginType;
+import grisu.jcommons.constants.Enums.UI;
+import grisu.jcommons.dependencies.ClasspathHacker;
+import grisu.jcommons.dependencies.Dependency;
+import grisu.jcommons.dependencies.DependencyManager;
+import grisu.jcommons.utils.DefaultGridSecurityProvider;
+import grisu.jcommons.utils.HttpProxyManager;
+import grisu.jcommons.utils.JythonHelpers;
 import grisu.settings.ClientPropertiesManager;
 import grisu.settings.Environment;
 import grisu.utils.GrisuPluginFilenameFilter;
@@ -11,6 +21,11 @@ import grith.jgrith.CredentialHelpers;
 import grith.jgrith.Init;
 import grith.jgrith.control.CertificateFiles;
 import grith.jgrith.plainProxy.LocalProxy;
+import grith.sibboleth.CredentialManager;
+import grith.sibboleth.DummyCredentialManager;
+import grith.sibboleth.DummyIdpObject;
+import grith.sibboleth.IdpObject;
+import grith.sibboleth.Shibboleth;
 
 import java.io.IOException;
 import java.net.URL;
@@ -32,21 +47,6 @@ import org.apache.log4j.Logger;
 import org.globus.gsi.GlobusCredential;
 import org.ietf.jgss.GSSCredential;
 
-import au.org.arcs.auth.shibboleth.CredentialManager;
-import au.org.arcs.auth.shibboleth.DummyCredentialManager;
-import au.org.arcs.auth.shibboleth.DummyIdpObject;
-import au.org.arcs.auth.shibboleth.IdpObject;
-import au.org.arcs.auth.shibboleth.Shibboleth;
-import au.org.arcs.jcommons.configuration.CommonArcsProperties;
-import au.org.arcs.jcommons.constants.ArcsEnvironment;
-import au.org.arcs.jcommons.constants.Enums.LoginType;
-import au.org.arcs.jcommons.constants.Enums.UI;
-import au.org.arcs.jcommons.dependencies.ClasspathHacker;
-import au.org.arcs.jcommons.dependencies.Dependency;
-import au.org.arcs.jcommons.dependencies.DependencyManager;
-import au.org.arcs.jcommons.utils.ArcsSecurityProvider;
-import au.org.arcs.jcommons.utils.HttpProxyManager;
-import au.org.arcs.jcommons.utils.JythonHelpers;
 
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
@@ -116,16 +116,16 @@ public class LoginManager {
 
 			JythonHelpers.setJythonCachedir();
 
-			final String debug = CommonArcsProperties
+			final String debug = CommonGridProperties
 					.getDefault()
 					.getArcsProperty(
-							CommonArcsProperties.Property.DEBUG_UNCAUGHT_EXCEPTIONS);
+							CommonGridProperties.Property.DEBUG_UNCAUGHT_EXCEPTIONS);
 
 			if ("true".equalsIgnoreCase(debug)) {
 				Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler());
 			}
 
-			java.security.Security.addProvider(new ArcsSecurityProvider());
+			java.security.Security.addProvider(new DefaultGridSecurityProvider());
 
 			java.security.Security
 					.setProperty("ssl.TrustManagerFactory.algorithm",
@@ -150,7 +150,7 @@ public class LoginManager {
 				dependencies.put(Dependency.BOUNCYCASTLE, "jdk15-145");
 
 				DependencyManager.addDependencies(dependencies,
-						ArcsEnvironment.getArcsCommonJavaLibDirectory(), true);
+						GridEnvironment.getArcsCommonJavaLibDirectory(), true);
 			}
 
 			environmentInitialized = true;
@@ -408,7 +408,7 @@ public class LoginManager {
 					si = LoginHelpers.myProxyLogin(loginParams);
 					ClientPropertiesManager
 							.saveLastLoginType(LoginType.MYPROXY);
-					CommonArcsProperties.getDefault().setLastMyProxyUsername(
+					CommonGridProperties.getDefault().setLastMyProxyUsername(
 							loginParams.getMyProxyUsername());
 				} catch (final ServiceInterfaceException e) {
 					throw new LoginException("Could not login: "
@@ -614,7 +614,7 @@ public class LoginManager {
 
 				final StringBuffer prompt = new StringBuffer(
 						"Please enter your myproxy username");
-				final String lastMyProxyUsername = CommonArcsProperties
+				final String lastMyProxyUsername = CommonGridProperties
 						.getDefault().getLastMyProxyUsername();
 
 				if (StringUtils.isNotBlank(lastMyProxyUsername)) {
@@ -638,7 +638,7 @@ public class LoginManager {
 					}
 				}
 
-				CommonArcsProperties.getDefault().setLastMyProxyUsername(
+				CommonGridProperties.getDefault().setLastMyProxyUsername(
 						username);
 
 				String password = null;
@@ -673,7 +673,7 @@ public class LoginManager {
 
 				StringBuffer prompt = new StringBuffer(
 						"Please select your institution");
-				final String lastIdp = CommonArcsProperties.getDefault()
+				final String lastIdp = CommonGridProperties.getDefault()
 						.getLastShibIdp();
 
 				final IdpObject idpObj = new DummyIdpObject();
@@ -729,11 +729,11 @@ public class LoginManager {
 
 				idpchoice = idps.get(choice - 1);
 
-				CommonArcsProperties.getDefault().setLastShibIdp(idpchoice);
+				CommonGridProperties.getDefault().setLastShibIdp(idpchoice);
 
 				prompt = new StringBuffer(
 						"Please enter your institution username");
-				final String lastShibUsername = CommonArcsProperties
+				final String lastShibUsername = CommonGridProperties
 						.getDefault().getLastShibUsername();
 
 				if (StringUtils.isNotBlank(lastShibUsername)) {
@@ -757,7 +757,7 @@ public class LoginManager {
 					}
 				}
 
-				CommonArcsProperties.getDefault().setLastShibUsername(username);
+				CommonGridProperties.getDefault().setLastShibUsername(username);
 
 				String password = null;
 				while (StringUtils.isBlank(password)) {

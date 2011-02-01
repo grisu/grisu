@@ -1,5 +1,6 @@
 package grisu.frontend.info.clientsidemds;
 
+import grisu.jcommons.interfaces.InformationManager;
 import grisu.model.GrisuRegistry;
 import grisu.model.info.ResourceInformation;
 
@@ -10,7 +11,6 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
-import au.org.arcs.jcommons.interfaces.InformationManager;
 
 public class ClientSideResourceInformation implements ResourceInformation {
 

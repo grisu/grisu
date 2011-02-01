@@ -2,6 +2,7 @@ package grisu.frontend.view.swing.jobcreation.widgets;
 
 import grisu.frontend.model.job.BatchJobObject;
 import grisu.frontend.model.job.JobObject;
+import grisu.jcommons.constants.Constants;
 
 import java.awt.BorderLayout;
 import java.awt.Insets;
@@ -17,7 +18,6 @@ import javax.swing.border.TitledBorder;
 
 import org.apache.commons.lang.StringUtils;
 
-import au.org.arcs.jcommons.constants.Constants;
 
 public class SubmissionLogPanel extends JPanel implements
 		PropertyChangeListener {

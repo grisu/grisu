@@ -1,6 +1,9 @@
 package grisu.backend.model.job;
 
 import grisu.control.JobConstants;
+import grisu.jcommons.constants.Constants;
+import grisu.jcommons.interfaces.InformationManager;
+import grisu.jcommons.utils.JsdlHelpers;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,9 +12,6 @@ import org.apache.log4j.Logger;
 import org.globus.exec.utils.ManagedJobFactoryConstants;
 import org.w3c.dom.Document;
 
-import au.org.arcs.jcommons.constants.Constants;
-import au.org.arcs.jcommons.interfaces.InformationManager;
-import au.org.arcs.jcommons.utils.JsdlHelpers;
 
 /**
  * The JobSubmissionManager class provides an interface between grisu and the
