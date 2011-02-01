@@ -47,7 +47,6 @@
 		</pluginRepository>
 	</pluginRepositories>
 
-
 	<distributionManagement>
 		<repository>
 			<id>arcs.release</id>

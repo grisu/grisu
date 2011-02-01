@@ -551,6 +551,52 @@ Comparable<BatchJobObject>, Listener {
 
 	}
 
+	/**
+	 * Downloads all the required results for this batch job.
+	 * 
+	 * @param onlyDownloadWhenFinished
+	 *            only download results if the (single) job is finished.
+	 * @param parentFolder
+	 *            the folder to download all the results to
+	 * @param patterns
+	 *            a list of patterns that specify which files to download
+	 * @param createSeperateFoldersForEveryJob
+	 *            whether to create a seperete folder for every job (true) or
+	 *            download everything into the same folder (false)
+	 * @param prefixWithJobname
+	 *            whether to prefix downloaded results with the jobname it
+	 *            belongs to (true) or not (false)
+	 * @throws RemoteFileSystemException
+	 *             if a remote filetransfer fails
+	 * @throws FileTransactionException
+	 *             if a filetransfer fails
+	 * @throws IOException
+	 *             if a file can't be saved
+	 */
+	public void downloadResults(boolean onlyDownloadWhenFinished,
+			String parentFolder, String[] patterns,
+			boolean createSeperateFoldersForEveryJob, boolean prefixWithJobname)
+	throws RemoteFileSystemException, FileTransactionException,
+	IOException {
+
+		File parent = new File(parentFolder);
+
+		if (!parent.exists() ) {
+			boolean worked = parent.mkdir();
+
+			if ( ! worked){
+				throw new FileTransactionException(null, parentFolder, "Can't create parent folder directory: "+parentFolder, null);
+			}
+		}
+
+		if ( !parent.isDirectory() ) {
+			throw new FileTransactionException(null, parentFolder, "Parent folder not a directory: "+parentFolder, null);
+		}
+
+		downloadResults(onlyDownloadWhenFinished, parent, patterns,
+				createSeperateFoldersForEveryJob, prefixWithJobname);
+	}
+
 	@Override
 	public boolean equals(Object o) {
 
@@ -1407,7 +1453,7 @@ Comparable<BatchJobObject>, Listener {
 			if (Thread.interrupted()) {
 				executor.shutdownNow();
 				throw new InterruptedException(
-						"Interrupted while creating jobs...");
+				"Interrupted while creating jobs...");
 			}
 
 			final Thread createThread = new Thread() {
