@@ -161,33 +161,33 @@
 					</execution>
 				</executions>
 			</plugin>
-			
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.2</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<id>lib</id>
-						<configuration>
-							<descriptors>
-								<descriptor>grisu-client-dependencies.assembly.xml</descriptor>
-							</descriptors>
-							<finalName>grisu-client-lib</finalName>
-							<archive>
-								<index>true</index>
-								<manifestEntries>
-									<Class-Path>bcprov.jar bcprov-jdk15-143.jar local-backend.jar
-									</Class-Path>
-								</manifestEntries>
-							</archive>
-						</configuration>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+<!--			-->
+<!--			<plugin>-->
+<!--				<artifactId>maven-assembly-plugin</artifactId>-->
+<!--				<version>2.2</version>-->
+<!--				<executions>-->
+<!--					<execution>-->
+<!--						<phase>package</phase>-->
+<!--						<id>lib</id>-->
+<!--						<configuration>-->
+<!--							<descriptors>-->
+<!--								<descriptor>grisu-client-dependencies.assembly.xml</descriptor>-->
+<!--							</descriptors>-->
+<!--							<finalName>grisu-client-lib</finalName>-->
+<!--							<archive>-->
+<!--								<index>true</index>-->
+<!--								<manifestEntries>-->
+<!--									<Class-Path>bcprov.jar bcprov-jdk15-143.jar local-backend.jar-->
+<!--									</Class-Path>-->
+<!--								</manifestEntries>-->
+<!--							</archive>-->
+<!--						</configuration>-->
+<!--						<goals>-->
+<!--							<goal>single</goal>-->
+<!--						</goals>-->
+<!--					</execution>-->
+<!--				</executions>-->
+<!--			</plugin>-->
 			
 		</plugins>
 	</build>

@@ -7,12 +7,14 @@
 	<dependencySets>
 		<dependencySet>
 			<unpack>true</unpack>
-			<scope>runtime</scope>
+<!--			<scope>runtime</scope>-->
 			<useTransitiveDependencies>true</useTransitiveDependencies>
 			<useTransitiveFiltering>true</useTransitiveFiltering>
 			<useProjectArtifact>true</useProjectArtifact>
 			<outputDirectory>/</outputDirectory>
-
+			<includes>
+				<include>grisu.frontend:grisu-client</include>
+			</includes>
 			<excludes>
 				<exclude>junit:junit</exclude>
 				<exclude>bouncycastle:bcprov-jdk15</exclude>

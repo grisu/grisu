@@ -434,6 +434,7 @@
 
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.2</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -442,12 +443,12 @@
 								<descriptor>grisu-local-backend.assembly.xml</descriptor>
 							</descriptors>
 							<finalName>local-backend</finalName>
-							<appendAssemblyId>false</appendAssemblyId>
+<!--							<appendAssemblyId>false</appendAssemblyId>-->
 							
 							
 						</configuration>
 						<goals>
-							<goal>attached</goal>
+							<goal>single</goal>
 						</goals>
 					</execution>
 				</executions>
