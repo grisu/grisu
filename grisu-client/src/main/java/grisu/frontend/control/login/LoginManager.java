@@ -118,7 +118,7 @@ public class LoginManager {
 
 			final String debug = CommonGridProperties
 					.getDefault()
-					.getArcsProperty(
+					.getGridProperty(
 							CommonGridProperties.Property.DEBUG_UNCAUGHT_EXCEPTIONS);
 
 			if ("true".equalsIgnoreCase(debug)) {
