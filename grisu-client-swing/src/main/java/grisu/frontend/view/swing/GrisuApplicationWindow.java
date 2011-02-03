@@ -29,11 +29,10 @@ import javax.swing.UIManager;
 import org.apache.commons.lang.StringUtils;
 import org.jdesktop.swingx.JXFrame;
 
-
 import com.google.common.collect.ImmutableList;
 
 public abstract class GrisuApplicationWindow implements WindowListener,
-		ServiceInterfaceHolder {
+ServiceInterfaceHolder {
 
 	private ServiceInterface si;
 
@@ -71,7 +70,7 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 				addSettingsPanel(p.getPanelTitle(), p.getPanel());
 			}
 		}
-
+		addSettingsPanel("Http proxy settings", httpProxyPanel);
 	}
 
 	/**
@@ -203,7 +202,7 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 		}
 
 		final List<ServiceInterfaceHolder> siHolders = ImmutableList
-				.of((ServiceInterfaceHolder) this);
+		.of((ServiceInterfaceHolder) this);
 		final LoginPanel lp = new LoginPanel(mainPanel, siHolders);
 		frame.getContentPane().add(lp, BorderLayout.CENTER);
 	}
