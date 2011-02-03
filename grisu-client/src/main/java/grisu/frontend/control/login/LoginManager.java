@@ -4,9 +4,9 @@ import grisu.control.ServiceInterface;
 import grisu.control.exceptions.ServiceInterfaceException;
 import grisu.frontend.control.UncaughtExceptionHandler;
 import grisu.jcommons.configuration.CommonGridProperties;
-import grisu.jcommons.constants.GridEnvironment;
 import grisu.jcommons.constants.Enums.LoginType;
 import grisu.jcommons.constants.Enums.UI;
+import grisu.jcommons.constants.GridEnvironment;
 import grisu.jcommons.dependencies.ClasspathHacker;
 import grisu.jcommons.dependencies.Dependency;
 import grisu.jcommons.dependencies.DependencyManager;
@@ -47,7 +47,6 @@ import org.apache.log4j.Logger;
 import org.globus.gsi.GlobusCredential;
 import org.ietf.jgss.GSSCredential;
 
-
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -62,20 +61,20 @@ public class LoginManager {
 			.getName());
 
 	static final public ImmutableBiMap<String, String> SERVICEALIASES = new ImmutableBiMap.Builder<String, String>()
-			.put("LOCAL", "Local")
-			.put("ARCS",
-					"https://grisu-vpac.arcs.org.au/grisu-ws/soap/GrisuService")
-			.put("ARCS_DEV",
-					"https://ngportal.vpac.org/grisu-ws/soap/GrisuService")
-			.put("BeSTGRID_OLD",
-					"https://globus.ceres.auckland.ac.nz:8443/grisu-ws/soap/GrisuService")
-			.put("BeSTGRID",
-					"https://grisu.ceres.auckland.ac.nz/soap/GrisuService")
-			.put("BeSTGRID-DEV",
-					"https://compute-dev.services.bestgrid.org/soap/GrisuService")
-			.put("LOCAL_WS", "http://localhost:8080/soap/GrisuService")
-			.put("LOCAL_WS_TOMCAT",
-					"http://localhost:8080/grisu-ws/soap/GrisuService").build();
+	.put("LOCAL", "Local")
+	.put("ARCS",
+	"https://grisu-vpac.arcs.org.au/grisu-ws/soap/GrisuService")
+	.put("ARCS_DEV",
+	"https://ngportal.vpac.org/grisu-ws/soap/GrisuService")
+	.put("BeSTGRID_OLD",
+	"https://globus.ceres.auckland.ac.nz:8443/grisu-ws/soap/GrisuService")
+	.put("BeSTGRID",
+	"https://grisu.ceres.auckland.ac.nz/soap/GrisuService")
+	.put("BeSTGRID-DEV",
+	"https://compute-dev.services.bestgrid.org/soap/GrisuService")
+	.put("LOCAL_WS", "http://localhost:8080/soap/GrisuService")
+	.put("LOCAL_WS_TOMCAT",
+	"http://localhost:8080/grisu-ws/soap/GrisuService").build();
 
 	public static String httpProxyHost = null;
 
@@ -117,9 +116,9 @@ public class LoginManager {
 			JythonHelpers.setJythonCachedir();
 
 			final String debug = CommonGridProperties
-					.getDefault()
-					.getGridProperty(
-							CommonGridProperties.Property.DEBUG_UNCAUGHT_EXCEPTIONS);
+			.getDefault()
+			.getGridProperty(
+					CommonGridProperties.Property.DEBUG_UNCAUGHT_EXCEPTIONS);
 
 			if ("true".equalsIgnoreCase(debug)) {
 				Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler());
@@ -128,20 +127,20 @@ public class LoginManager {
 			java.security.Security.addProvider(new DefaultGridSecurityProvider());
 
 			java.security.Security
-					.setProperty("ssl.TrustManagerFactory.algorithm",
-							"TrustAllCertificates");
+			.setProperty("ssl.TrustManagerFactory.algorithm",
+			"TrustAllCertificates");
 
 			boolean bcpresent = false;
 			try {
 				final Class bcExampleClass = Class
-						.forName("org.bouncycastle.LICENSE");
+				.forName("org.bouncycastle.LICENSE");
 				bcpresent = true;
 			} catch (final Exception e) {
 				myLogger.debug("BouncyCastle library not loaded....");
 			}
 
 			final String disableLoadBouncyCastle = System
-					.getProperty("disableLoadBouncyCastle");
+			.getProperty("disableLoadBouncyCastle");
 
 			if (!bcpresent && !"true".equalsIgnoreCase(disableLoadBouncyCastle)) {
 				myLogger.debug("Loading bouncy castle...");
@@ -257,14 +256,14 @@ public class LoginManager {
 	public static ServiceInterface login(GlobusCredential cred,
 			char[] password, String username, String idp,
 			LoginParams loginParams, boolean saveCredentialAsLocalProxy)
-			throws LoginException {
+	throws LoginException {
 
 		initEnvironment();
 
 		if (loginParams == null) {
 
 			final String defaultUrl = ClientPropertiesManager
-					.getDefaultServiceInterfaceUrl();
+			.getDefaultServiceInterfaceUrl();
 			if (StringUtils.isNotBlank(defaultUrl)) {
 				loginParams = new LoginParams(defaultUrl, null, null);
 			} else {
@@ -374,7 +373,7 @@ public class LoginManager {
 						// means try to load local proxy
 						si = LoginHelpers.defaultLocalProxyLogin(loginParams);
 						ClientPropertiesManager
-								.saveLastLoginType(LoginType.LOCAL_PROXY);
+						.saveLastLoginType(LoginType.LOCAL_PROXY);
 
 					} catch (final Exception e) {
 						throw new LoginException("Could not login: "
@@ -393,9 +392,9 @@ public class LoginManager {
 							}
 						}
 						si = LoginHelpers
-								.localProxyLogin(password, loginParams);
+						.localProxyLogin(password, loginParams);
 						ClientPropertiesManager
-								.saveLastLoginType(LoginType.X509_CERTIFICATE);
+						.saveLastLoginType(LoginType.X509_CERTIFICATE);
 					} catch (final ServiceInterfaceException e) {
 						throw new LoginException("Could not login: "
 								+ e.getLocalizedMessage(), e);
@@ -407,7 +406,7 @@ public class LoginManager {
 				try {
 					si = LoginHelpers.myProxyLogin(loginParams);
 					ClientPropertiesManager
-							.saveLastLoginType(LoginType.MYPROXY);
+					.saveLastLoginType(LoginType.MYPROXY);
 					CommonGridProperties.getDefault().setLastMyProxyUsername(
 							loginParams.getMyProxyUsername());
 				} catch (final ServiceInterfaceException e) {
@@ -508,7 +507,7 @@ public class LoginManager {
 	}
 
 	public static ServiceInterface login(UI ui, Set<LoginType> types, String url)
-			throws LoginException {
+	throws LoginException {
 
 		switch (ui) {
 		case COMMANDLINE:
@@ -526,7 +525,7 @@ public class LoginManager {
 	}
 
 	public static ServiceInterface loginCommandline(LoginType type, String url)
-			throws LoginException {
+	throws LoginException {
 
 		switch (type) {
 		case SHIBBOLETH:
@@ -557,7 +556,7 @@ public class LoginManager {
 		final ImmutableList<LoginType> temp = ImmutableList.copyOf(types);
 
 		final StringBuffer message = new StringBuffer(
-				"Please select your preferred login method:\n\n");
+		"Please select your preferred login method:\n\n");
 
 		for (int i = 0; i < temp.size(); i++) {
 			message.append("[" + (i + 1) + "]\t" + temp.get(i).getPrettyName()
@@ -568,7 +567,7 @@ public class LoginManager {
 		System.out.println(message.toString());
 
 		int choice = -1;
-		while ((choice < 0) || (choice >= temp.size())) {
+		while ((choice < 0) || (choice > temp.size())) {
 			String input;
 			try {
 				input = getConsoleReader().readLine("Login method: ");
@@ -592,7 +591,7 @@ public class LoginManager {
 	}
 
 	public static ServiceInterface loginCommandline(String url)
-			throws LoginException {
+	throws LoginException {
 
 		initEnvironment();
 
@@ -613,9 +612,9 @@ public class LoginManager {
 			try {
 
 				final StringBuffer prompt = new StringBuffer(
-						"Please enter your myproxy username");
+				"Please enter your myproxy username");
 				final String lastMyProxyUsername = CommonGridProperties
-						.getDefault().getLastMyProxyUsername();
+				.getDefault().getLastMyProxyUsername();
 
 				if (StringUtils.isNotBlank(lastMyProxyUsername)) {
 					prompt.append(" [" + lastMyProxyUsername + "]: ");
@@ -672,9 +671,9 @@ public class LoginManager {
 				System.out.println("Loading list of institutions...");
 
 				StringBuffer prompt = new StringBuffer(
-						"Please select your institution");
+				"Please select your institution");
 				final String lastIdp = CommonGridProperties.getDefault()
-						.getLastShibIdp();
+				.getLastShibIdp();
 
 				final IdpObject idpObj = new DummyIdpObject();
 				final CredentialManager cm = new DummyCredentialManager();
@@ -732,9 +731,9 @@ public class LoginManager {
 				CommonGridProperties.getDefault().setLastShibIdp(idpchoice);
 
 				prompt = new StringBuffer(
-						"Please enter your institution username");
+				"Please enter your institution username");
 				final String lastShibUsername = CommonGridProperties
-						.getDefault().getLastShibUsername();
+				.getDefault().getLastShibUsername();
 
 				if (StringUtils.isNotBlank(lastShibUsername)) {
 					prompt.append(" [" + lastShibUsername + "]: ");
@@ -788,9 +787,9 @@ public class LoginManager {
 				while (StringUtils.isBlank(password)) {
 					try {
 						password = getConsoleReader()
-								.readLine(
-										"Please enter your x509 certificate passphrase: ",
-										new Character('*'));
+						.readLine(
+								"Please enter your x509 certificate passphrase: ",
+								new Character('*'));
 					} catch (final IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -855,7 +854,7 @@ public class LoginManager {
 	 */
 	public static ServiceInterface shiblogin(String username, char[] password,
 			String idp, boolean saveCredendentialsToLocalProxy)
-			throws LoginException {
+	throws LoginException {
 		return login((GlobusCredential) null, password, username, idp, "Local",
 				saveCredendentialsToLocalProxy);
 	}
@@ -882,7 +881,7 @@ public class LoginManager {
 	 */
 	public static ServiceInterface shiblogin(String username, char[] password,
 			String idp, String url, boolean saveCredendentialsToLocalProxy)
-			throws LoginException {
+	throws LoginException {
 		return login((GlobusCredential) null, password, username, idp, url,
 				saveCredendentialsToLocalProxy);
 	}
@@ -891,7 +890,7 @@ public class LoginManager {
 			char[] password, String idp, LoginParams params) throws Exception {
 
 		return SlcsLoginWrapper
-				.slcsMyProxyInit(username, password, idp, params);
+		.slcsMyProxyInit(username, password, idp, params);
 
 	}
 
