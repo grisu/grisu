@@ -157,9 +157,7 @@
 
 		</plugins>
 	</build>
-	<properties>
-		<grisu.version>0.3.1-SNAPSHOT</grisu.version>
-	</properties>
+
 	<modules>
 		<module>grisu-commons</module>
 		<module>grisu-core</module>

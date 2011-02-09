@@ -43,7 +43,7 @@
 		<dependency>
 			<groupId>grisu</groupId>
 			<artifactId>grisu-commons</artifactId>
-			<version>${grisu.version}</version>
+			<version>0.3.1-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>cryptix32</artifactId>
