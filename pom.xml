@@ -150,7 +150,7 @@
 				  <artifactId>maven-release-plugin</artifactId>
 				  <version>2.1</version>
 				  <configuration>
-					    <autoversionsubmodules>true</autoversionsubmodules>
+					    <autoVersionSubmodules>true</autoVersionSubmodules>
 					    <pushChanges>false</pushChanges>
 				  </configuration>
 			</plugin>
