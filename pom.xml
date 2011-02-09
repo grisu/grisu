@@ -11,54 +11,65 @@
 
 	<repositories>
 		<repository>
-			<id>ARCS</id>
-			<url>http://code.arcs.org.au/nexus/content/groups/public</url>
-		</repository>
-		<repository>
-			<id>ARCS Snapshots</id>
-			<url>http://code.arcs.org.au/nexus/content/groups/public-snapshots</url>
-		</repository>
-
-		<repository>
-			<id>JBoss</id>
-			<name>JBoss Repsitory</name>
-			<layout>default</layout>
-			<url>http://repository.jboss.org/maven2</url>
-		</repository>
-
-	</repositories>
-
-	<pluginRepositories>
-		<pluginRepository>
-			<id>ARCS plugin</id>
-			<url>http://code.arcs.org.au/nexus/content/groups/public</url>
-			<layout>default</layout>
+			<id>bestgrid.public.release</id>
+			<url>http://dev.ceres.auckland.ac.nz/nexus/content/groups/public/</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>daily</updatePolicy>
+				<checksumPolicy>warn</checksumPolicy>
+			</releases>
 			<snapshots>
 				<enabled>false</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
 			</snapshots>
-		</pluginRepository>
-	    <pluginRepository>
-			<id>ARCS plugin Snapshots</id>
-			<url>http://code.arcs.org.au/nexus/content/groups/public-snapshots</url>
-			<layout>default</layout>
+		</repository>
+		<repository>
+			<id>bestgrid.public.snapshot</id>
+			<url>http://dev.ceres.auckland.ac.nz/nexus/content/groups/public-snapshots/
+			</url>
+			<releases>
+				<enabled>false</enabled>
+				<updatePolicy>never</updatePolicy>
+				<checksumPolicy>warn</checksumPolicy>
+			</releases>
 			<snapshots>
 				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>warn</checksumPolicy>
 			</snapshots>
-		</pluginRepository>
-	</pluginRepositories>
+		</repository>
+	</repositories>
+
+<!--	<pluginRepositories>-->
+<!--		<pluginRepository>-->
+<!--			<id>ARCS plugin</id>-->
+<!--			<url>http://code.arcs.org.au/nexus/content/groups/public</url>-->
+<!--			<layout>default</layout>-->
+<!--			<snapshots>-->
+<!--				<enabled>false</enabled>-->
+<!--			</snapshots>-->
+<!--		</pluginRepository>-->
+<!--	    <pluginRepository>-->
+<!--			<id>ARCS plugin Snapshots</id>-->
+<!--			<url>http://code.arcs.org.au/nexus/content/groups/public-snapshots</url>-->
+<!--			<layout>default</layout>-->
+<!--			<snapshots>-->
+<!--				<enabled>true</enabled>-->
+<!--			</snapshots>-->
+<!--		</pluginRepository>-->
+<!--	</pluginRepositories>-->
 
 	<distributionManagement>
 		<repository>
-			<id>arcs.release</id>
-			<name>ARCS Release Repository</name>
-			<url>http://code.arcs.org.au/nexus/content/repositories/releases</url>
-			<uniqueVersion>false</uniqueVersion>
+			<name>BeSTGRID Releases Repository</name>
+			<id>bestgrid.release</id>
+			<url>http://dev.ceres.auckland.ac.nz/nexus/content/repositories/releases</url>
 		</repository>
 		<snapshotRepository>
-			<id>arcs.snapshot</id>
-			<name>ARCS SNAPSHOT Repository</name>
-			<url>http://code.arcs.org.au/nexus/content/repositories/snapshots</url>
-			<uniqueVersion>false</uniqueVersion>
+			<id>bestgrid.snapshot</id>
+			<name>BeSTGRID Snapshots Repository</name>
+			<url>http://dev.ceres.auckland.ac.nz/nexus/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -68,7 +79,7 @@
 	</issueManagement>
 	<ciManagement>
 		<system>Hudson</system>
-		<url>https://code.arcs.org.au/hudson</url>
+		<url>http://dev.ceres.auckland.ac.nz/hudson/job/Grisu-SNAPSHOT</url>
 	</ciManagement>
 	<developers>
 		<developer>
@@ -97,17 +108,16 @@
 			<organization>The University of Canterbury / BeSTGRID</organization>
 			<organizationUrl>http://bestgrid.org</organizationUrl>
 			<timezone>New Zealand/Auckland</timezone>
-			
 		</contributor>
 	</contributors>
 	<scm>
 		<connection>scm:git:git://github.com/grisu/grisu.git</connection>
 		<developerConnection>scm:git:git@github.com:grisu/grisu.git</developerConnection>
-		<url>http://projects.arcs.org.au/trac/grisu/browser</url>
+		<url>https://github.com/grisu/grisu</url>
 	</scm>
 	<organization>
 		<name>Grisu open source project</name>
-		<url>https://github.com/grisu/grisu/tree/master</url>
+		<url>https://grisu.github.com/grisu/</url>
 	</organization>
 
 	<build>
