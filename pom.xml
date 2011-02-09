@@ -1,107 +1,104 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.vpac.grisu</groupId>
+	<groupId>grisu</groupId>
 	<artifactId>grisu</artifactId>
 	<packaging>pom</packaging>
-	<version>0.3-beta4-SNAPSHOT</version>
+	<version>0.4.0-SNAPSHOT</version>
 	<name>Grisu</name>
-	<description>Grisu is an open source framework to help grid admins and developers to support end users in a grid environment. Grisu publishes an easy-to-use service interface which by default sits behind a web service. This service interface contains a set of methods that are usually needed to submit jobs to the grid, including providing information about the grid and the staging of input/output files from/to the users desktop. </description>
+	<description>Grisu is an open source framework to help grid admins and developers to support end users in a grid environment. Grisu publishes an easy-to-use service interface which can be deployed in different ways by implementing different backend modules. This service interface contains a set of methods that are usually needed to submit jobs to the grid, including providing information about the grid and the staging of input/output files from/to the users desktop. </description>
 	<url>http://maven.apache.org</url>
 
 	<repositories>
 		<repository>
-			<id>ARCS</id>
-			<url>http://code.arcs.org.au/nexus/content/groups/public</url>
+			<id>bestgrid.public.release</id>
+			<url>http://dev.ceres.auckland.ac.nz/nexus/content/groups/public/</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>daily</updatePolicy>
+				<checksumPolicy>warn</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</snapshots>
 		</repository>
 		<repository>
-			<id>ARCS Snapshots</id>
-			<url>http://code.arcs.org.au/nexus/content/groups/public-snapshots</url>
+			<id>bestgrid.public.snapshot</id>
+			<url>http://dev.ceres.auckland.ac.nz/nexus/content/groups/public-snapshots/
+			</url>
+			<releases>
+				<enabled>false</enabled>
+				<updatePolicy>never</updatePolicy>
+				<checksumPolicy>warn</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>warn</checksumPolicy>
+			</snapshots>
 		</repository>
 	</repositories>
 
-	<pluginRepositories>
-		<pluginRepository>
-			<id>ARCS plugin</id>
-			<url>http://code.arcs.org.au/nexus/content/groups/public</url>
-			<layout>default</layout>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</pluginRepository>
-	    <pluginRepository>
-			<id>ARCS plugin Snapshots</id>
-			<url>http://code.arcs.org.au/nexus/content/groups/public-snapshots</url>
-			<layout>default</layout>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</pluginRepository>
-	</pluginRepositories>
-
-
 	<distributionManagement>
 		<repository>
-			<id>arcs.release</id>
-			<name>ARCS Release Repository</name>
-			<url>http://code.arcs.org.au/nexus/content/repositories/releases</url>
-			<uniqueVersion>false</uniqueVersion>
+			<name>BeSTGRID Releases Repository</name>
+			<id>bestgrid.release</id>
+			<url>http://dev.ceres.auckland.ac.nz/nexus/content/repositories/releases</url>
 		</repository>
 		<snapshotRepository>
-			<id>arcs.snapshot</id>
-			<name>ARCS SNAPSHOT Repository</name>
-			<url>http://code.arcs.org.au/nexus/content/repositories/snapshots</url>
-			<uniqueVersion>false</uniqueVersion>
+			<id>bestgrid.snapshot</id>
+			<name>BeSTGRID Snapshots Repository</name>
+			<url>http://dev.ceres.auckland.ac.nz/nexus/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 
 	<issueManagement>
-		<system>Trac</system>
-		<url>http://projects.arcs.org.au/trac/grisu/</url>
+		<system>Github</system>
+		<url>https://github.com/grisu/grisu/issues</url>
 	</issueManagement>
 	<ciManagement>
 		<system>Hudson</system>
-		<url>https://code.arcs.org.au/hudson</url>
+		<url>http://dev.ceres.auckland.ac.nz/hudson/job/Grisu-SNAPSHOT</url>
 	</ciManagement>
 	<developers>
 		<developer>
 			<id>markus</id>
 			<name>Markus Binsteiner</name>
-			<email>markus.binsteiner@arcs.org.au</email>
-			<organization>ARCS</organization>
-			<organizationUrl>http://www.arcs.org.au</organizationUrl>
-			<timezone>Australia/Melbourne</timezone>
+			<email>makkus@gmail.com</email>
+			<organization>The University of Auckland / Centre for eResearch / BeSTGRID</organization>
+			<organizationUrl>http://bestgrid.org</organizationUrl>
+			<timezone>New Zealand/Auckland</timezone>
 			<roles>
 			</roles>
-		</developer>
-		<developer>
-			<id>gerson</id>
-			<name>Gerson Galang</name>
-			<email>gerson.galang@arcs.org.au</email>
-			<organization>VPAC</organization>
-			<organizationUrl>http://www.vpac.org</organizationUrl>
-			<timezone>Australia/Melbourne</timezone>
 		</developer>
 		<developer>
 			<id>yuriy</id>
 			<name>Yuriy Halytskyy</name>
 			<email>y.halytskyy@auckland.ac.nz</email>
+			<organization>The University of Auckland / Centre for eResearch / BeSTGRID</organization>
+			<organizationUrl>http://bestgrid.org</organizationUrl>
+			<timezone>New Zealand/Auckland</timezone>
 		</developer>
 	</developers>
 	<contributors>
 		<contributor>
 			<name>Vladimir Mencl</name>
 			<email>vladimir.mencl@canterbury.ac.nz</email>
+			<organization>The University of Canterbury / BeSTGRID</organization>
+			<organizationUrl>http://bestgrid.org</organizationUrl>
+			<timezone>New Zealand/Auckland</timezone>
 		</contributor>
 	</contributors>
 	<scm>
-		<connection>scm:git:git://code.arcs.org.au/grisu/grisu.git</connection>
-		<developerConnection>scm:git:git@code.arcs.org.au:grisu/grisu.git</developerConnection>
-		<url>http://projects.arcs.org.au/trac/grisu/browser</url>
+		<connection>scm:git:git://github.com/grisu/grisu.git</connection>
+		<developerConnection>scm:git:git@github.com:grisu/grisu.git</developerConnection>
+		<url>https://github.com/grisu/grisu</url>
 	</scm>
 	<organization>
-		<name>ARCS</name>
-		<url>http://www.arcs.org.au</url>
+		<name>Grisu open source project</name>
+		<url>https://grisu.github.com/grisu/</url>
 	</organization>
 
 	<build>
@@ -160,10 +157,14 @@
 
 		</plugins>
 	</build>
+	<properties>
+	</properties>
 	<modules>
-		<module>backend</module>
 		<module>grisu-commons</module>
-		<module>frontend</module>
+		<module>grisu-core</module>
+		<module>grisu-client</module>
+		<module>grisu-client-swing</module>
+<!--		<module>client-side-mds</module> -->
 	</modules>
 	<reporting>
 		<plugins>

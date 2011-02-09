@@ -1,0 +1,53 @@
+package grisu.frontend.control.login;
+
+import grisu.jcommons.configuration.CommonGridProperties;
+import grith.gsindl.SLCS;
+import grith.jgrith.plainProxy.PlainProxy;
+import grith.sibboleth.CredentialManager;
+import grith.sibboleth.IdpObject;
+import grith.sibboleth.Shibboleth;
+import grith.sibboleth.StaticCredentialManager;
+import grith.sibboleth.StaticIdpObject;
+
+import org.apache.commons.lang.StringUtils;
+import org.ietf.jgss.GSSCredential;
+
+
+public class SlcsLoginWrapper {
+
+	public static GSSCredential slcsMyProxyInit(String username,
+			char[] password, String idp, LoginParams params) throws Exception {
+
+		try {
+
+			if (params != null) {
+				final String httproxy = params.getHttpProxy();
+				final int httpProxyPort = params.getHttpProxyPort();
+
+				if (StringUtils.isNotBlank(httproxy)) {
+					Shibboleth.setHttpProxy(httproxy, httpProxyPort,
+							params.getHttpProxyUsername(),
+							params.getMyProxyPassphrase());
+				}
+			}
+
+			final IdpObject idpO = new StaticIdpObject(idp);
+			final CredentialManager cm = new StaticCredentialManager(username,
+					password);
+			final SLCS slcs = new SLCS(SLCS.DEFAULT_SLCS_URL, idpO, cm);
+
+			final GSSCredential cred = PlainProxy.init(slcs.getCertificate(),
+					slcs.getPrivateKey(), 24 * 10);
+
+			CommonGridProperties.getDefault().setLastShibUsername(username);
+			CommonGridProperties.getDefault().setLastShibIdp(idp);
+			return cred;
+
+		} catch (final Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+
+	}
+
+}

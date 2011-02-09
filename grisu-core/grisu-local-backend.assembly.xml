@@ -1,0 +1,56 @@
+<assembly>
+	<id>backend</id>
+	<formats>
+		<format>jar</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<dependencySets>
+		<dependencySet>
+			<unpack>true</unpack>
+			<useTransitiveDependencies>true</useTransitiveDependencies>
+			<useTransitiveFiltering>true</useTransitiveFiltering>
+			<useProjectArtifact>true</useProjectArtifact>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>grisu.backend:grisu-core</include>
+			</includes>
+			<excludes>
+				<exclude>junit:junit</exclude>
+				<exclude>bouncycastle:bcprov-jdk15</exclude>
+				<exclude>grisu:grisu-commons</exclude>
+			</excludes>
+			<unpackOptions>
+				<excludes>
+					<exclude>**/INDEX.LIST</exclude>
+					<exclude>**/MANIFEST.MF</exclude>
+					<exclude>**/LICENSE.txt</exclude>
+					<exclude>**/LICENSE</exclude>
+					<exclude>**/NOTICE.txt</exclude>
+					<exclude>**/NOTICE</exclude>
+					<exclude>**/log4j.properties</exclude>
+					<exclude>META-INF/services/java.sql.Driver</exclude>
+					<exclude>overview.html</exclude>
+					<exclude>client-config.wsdd</exclude>
+					<exclude>gluev12r2-ext-class-map.properties</exclude>
+					<exclude>ARCS.SF</exclude>
+					<exclude>ARCS.RSA</exclude>
+					<exclude>log4j.properties</exclude>
+					<exclude>log4j.xml</exclude>
+					
+				</excludes>
+			</unpackOptions>
+		</dependencySet>
+	</dependencySets>
+
+	<files>
+		<file>
+			<source>src/main/resources/gluev12r2-ext-class-map.properties</source>
+			<outputDirectory>/</outputDirectory>
+		</file>
+		<file>
+			<source>src/main/resources/client-config.wsdd</source>
+			<outputDirectory>/</outputDirectory>
+		</file>
+	</files>
+
+</assembly>

@@ -3,10 +3,11 @@
 	<url>http://projects.arcs.org.au/trac/grisu/wiki/GrisuCommons</url>
 	<parent>
 		<artifactId>grisu</artifactId>
-		<groupId>org.vpac.grisu</groupId>
-		<version>0.3-beta4-SNAPSHOT</version>
+		<groupId>grisu</groupId>
+		<version>0.4.0-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
+	<groupId>grisu</groupId>
 	<artifactId>grisu-commons</artifactId>
 	<name>grisu-commons</name>
 	<description>The most important thing about the grisu-commons is that
@@ -17,10 +18,11 @@
 		classes
 		and interfaces.</description>
 
-	<properties>
+<!--	<properties>-->
 		<!-- <enunciate.version>1.16-RC2</enunciate.version> -->
-		<enunciate.version>1.20</enunciate.version>
-	</properties>
+<!--		<enunciate.version>1.20</enunciate.version>-->
+<!--	</properties>-->
+
 
 	<dependencies>
 
@@ -69,6 +71,10 @@
 					<groupId>commons-beanutils</groupId>
 					<artifactId>commons-beanutils</artifactId>
 				</exclusion>
+				<exclusion>
+					<artifactId>commons-beanutils-core</artifactId>
+					<groupId>commons-beanutils</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -101,7 +107,7 @@
 					<artifactId>jmxri</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>org.vpac.historyRepeater</groupId>
 			<artifactId>historyRepeater</artifactId>
@@ -112,18 +118,6 @@
 					<groupId>log4j</groupId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>commons-beanutils</groupId>
-			<artifactId>commons-beanutils</artifactId>
-			<version>1.8.0</version>
-			<type>jar</type>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>ejb3-persistence</artifactId>
-			<version>1.0.1.GA</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.xml.ws</groupId>
@@ -147,34 +141,34 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.bestgrid</groupId>
+			<groupId>grisu</groupId>
 			<artifactId>grid-jcommons</artifactId>
-			<version>1.2.2</version>
+			<version>1.2.3</version>
 			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate.javax.persistence</groupId>
+			<artifactId>hibernate-jpa-2.0-api</artifactId>
+			<version>1.0.0.Final</version>
 		</dependency>
 
 
 		<!-- enunciate dependencies for annotations -->
-		<dependency>
+<!--		<dependency>
 			<groupId>org.codehaus.enunciate</groupId>
 			<artifactId>enunciate-core-annotations</artifactId>
 			<version>${enunciate.version}</version>
 			<type>jar</type>
 			<scope>compile</scope>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>jsr311-api</artifactId>
-			<version>1.0</version>
+			<version>1.1.1</version>
 			<type>jar</type>
 			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>xfire</groupId>
-			<artifactId>xfire-jsr181-api</artifactId>
-			<version>1.0-M1</version>
-			<scope>compile</scope>
-		</dependency>
+		</dependency> 
 		<dependency>
 			<groupId>com.google.collections</groupId>
 			<artifactId>google-collections</artifactId>
@@ -184,9 +178,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>au.org.arcs.auth</groupId>
-			<artifactId>simpleProxyLib</artifactId>
-			<version>0.5.4</version>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils-bean-collections</artifactId>
+			<version>1.8.0</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -244,6 +238,62 @@
 					</execution>
 				</executions>
 			</plugin>
+
+<!--			<plugin>-->
+<!--				<groupId>org.apache.maven.plugins</groupId>-->
+<!--				<artifactId>maven-jarsigner-plugin</artifactId>-->
+<!--				<version>1.2</version>-->
+<!--				<executions>-->
+<!--					<execution>-->
+<!--						<id>sign</id>-->
+<!--						<goals>-->
+<!--							<goal>sign</goal>-->
+<!--						</goals>-->
+<!--					</execution>-->
+<!--				</executions>-->
+<!--				<configuration>-->
+<!--					<alias>grisu</alias>-->
+<!--					<storepass>FxAKs3p6</storepass>-->
+<!--					<keypass>FxAKs3p6</keypass>-->
+<!--				</configuration>-->
+<!--			</plugin>-->
+
 		</plugins>
 	</build>
+	
+	<profiles>
+		<profile>
+			<id>sign</id>
+<!--			<activation>-->
+<!--				<property>-->
+<!--					<name>BUILD_NUMBER</name>-->
+<!--				</property>-->
+<!--			</activation>-->
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-jarsigner-plugin</artifactId>
+						<version>1.2</version>
+						<executions>
+							<execution>
+								<id>sign</id>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<alias>grisu</alias>
+							<storepass>FxAKs3p6</storepass>
+							<keypass>FxAKs3p6</keypass>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+
+		</profile>
+	</profiles>	
+	
 </project>
