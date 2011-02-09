@@ -69,7 +69,7 @@ public class LoginManager {
 	.put("BeSTGRID_OLD",
 	"https://globus.ceres.auckland.ac.nz:8443/grisu-ws/soap/GrisuService")
 	.put("BeSTGRID",
-	"https://grisu.ceres.auckland.ac.nz/soap/GrisuService")
+					"https://compute.services.bestgrid.org/soap/GrisuService")
 	.put("BeSTGRID-DEV",
 	"https://compute-dev.services.bestgrid.org/soap/GrisuService")
 	.put("LOCAL_WS", "http://localhost:8080/soap/GrisuService")
