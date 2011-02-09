@@ -14,7 +14,7 @@
 		<dependency>
 			<groupId>grisu.frontend</groupId>
 			<artifactId>grisu-client</artifactId>
-			<version>${grisu.version}</version>
+			<version>0.3-beta5-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -65,7 +65,7 @@
 		<dependency>
 			<groupId>grisu.backend</groupId>
 			<artifactId>grisu-core</artifactId>
-			<version>${grisu.version}</version>
+			<version>0.3-beta5-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

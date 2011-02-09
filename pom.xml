@@ -158,7 +158,6 @@
 		</plugins>
 	</build>
 	<properties>
-		<grisu.version>0.3-beta5-SNAPSHOT</grisu.version>
 	</properties>
 	<modules>
 		<module>grisu-commons</module>
