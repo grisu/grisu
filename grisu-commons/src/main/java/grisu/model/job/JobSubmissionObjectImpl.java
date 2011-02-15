@@ -47,8 +47,15 @@ import org.w3c.dom.Document;
 public class JobSubmissionObjectImpl {
 
 	static final Logger myLogger = Logger
-			.getLogger(JobSubmissionObjectImpl.class.getName());
+	.getLogger(JobSubmissionObjectImpl.class.getName());
 
+	/**
+	 * Extracts the executable (first string) from a commandline.
+	 * 
+	 * @param commandline
+	 *            the commandline
+	 * @return the executable
+	 */
 	public static String extractExecutable(String commandline) {
 
 		if ((commandline == null) || (commandline.length() == 0)) {
@@ -131,19 +138,46 @@ public class JobSubmissionObjectImpl {
 
 	private String pbsDebug;
 
+	/**
+	 * Default constructor.
+	 * 
+	 */
 	public JobSubmissionObjectImpl() {
 	}
 
+	/**
+	 * Constructor to clone a JobSubmissionObjectImpl from an existing jsdl
+	 * document.
+	 * 
+	 * @param jsdl
+	 *            a (valid) jsdl document
+	 */
 	public JobSubmissionObjectImpl(final Document jsdl) {
 
 		initWithDocument(jsdl);
 
 	}
 
+	/**
+	 * Constructor to clone a JobSubmissionObjectImpl from a set of job
+	 * properties.
+	 * 
+	 * @param jobProperties
+	 *            the properties
+	 */
 	public JobSubmissionObjectImpl(final Map<String, String> jobProperties) {
 		initWithMap(jobProperties);
 	}
 
+	/**
+	 * Wrapper constructor that calls either
+	 * {@link JobSubmissionObjectImpl#JobSubmissionObjectImpl(Document)} or
+	 * {@link JobSubmissionObjectImpl#JobSubmissionObjectImpl(Map)}, depending
+	 * on the type of Object you provide.
+	 * 
+	 * @param o
+	 *            either a jsdl document or a Map of job properties
+	 */
 	public JobSubmissionObjectImpl(final Object o) {
 		if (o instanceof Document) {
 			initWithDocument((Document) o);
@@ -152,12 +186,37 @@ public class JobSubmissionObjectImpl {
 		}
 	}
 
+	/**
+	 * Adds an input file to this job.
+	 * 
+	 * You can provide a url
+	 * (gsiftp://ng2.ceres.auckland.ac.nz/home/markus/test.txt), a local path
+	 * (/home/markus/test.txt) or a local url (file:///home/markus/test.txt)
+	 * here. The file will be attached to the job and either uploaded or copied
+	 * across into the root of the job directory with the original name.
+	 * 
+	 * @param url
+	 *            a remote url, local path or local url
+	 */
 	public void addInputFileUrl(String url) {
 
 		addInputFileUrl(url, "");
 
 	}
 
+	/**
+	 * Adds an input file to this job.
+	 * 
+	 * Works like {@link #addInputFileUrl(String)} except that you can specify
+	 * the new name/path the file will have in the job directory. If you, for
+	 * example, upload a file "test.txt" and specify "/inputFiles/file1.txt" the
+	 * file will be in a folder "inputFiles" and named file1.txt".
+	 * 
+	 * @param url
+	 *            a remote or local url or a local path
+	 * @param targetPath
+	 *            the remote path under the jobdirectory of the file
+	 */
 	public void addInputFileUrl(String url, String targetPath) {
 		if (StringUtils.isBlank(url)) {
 			return;
@@ -169,10 +228,33 @@ public class JobSubmissionObjectImpl {
 		pcs.firePropertyChange("inputFiles", null, this.inputFiles);
 	}
 
+	/**
+	 * Adds a module to the modules you want to load for this job (on the
+	 * compute resource).
+	 * 
+	 * For that, generally, you need to specify a fixed submissionLocation and
+	 * you also need to know the exact name of the module you want to load (the
+	 * names of a module to load for the same application can differ from site
+	 * to site). Usually you would only specify application name and version and
+	 * let Grisu figure out the name of the module...
+	 * 
+	 * @param module
+	 */
 	public void addModule(final String module) {
 		this.modules.add(module);
+		pcs.firePropertyChange("modules", null, this.modules);
 	}
 
+	/**
+	 * Adds a property change listener.
+	 * 
+	 * Usually used in GUIs to re-validate a jobsubmission object for certain
+	 * applications, i.e. whether the provided input parameters for a job make
+	 * sense for this application.
+	 * 
+	 * @param listener
+	 *            the property change listener
+	 */
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
 		this.pcs.addPropertyChangeListener(listener);
 	}
@@ -195,7 +277,7 @@ public class JobSubmissionObjectImpl {
 		if ((commandline == null) || (commandline.length() == 0)) {
 			throw new JobPropertiesException(
 					JobSubmissionProperty.COMMANDLINE.toString() + ": "
-							+ "Commandline not specified.");
+					+ "Commandline not specified.");
 		}
 
 	}
@@ -212,14 +294,29 @@ public class JobSubmissionObjectImpl {
 
 	}
 
+	/**
+	 * This method parses the currently set commandline and extracts the name of the executable.
+	 * 
+	 * @return the name of the currently set executable
+	 */
 	public String extractExecutable() {
 		return extractExecutable(commandline);
 	}
 
+	/**
+	 * Returns the name of the currently set application.
+	 * 
+	 * @return the applicationname
+	 */
 	public String getApplication() {
 		return application;
 	}
 
+	/**
+	 * Returns the currently set application version.
+	 * 
+	 * @return the application version
+	 */
 	public String getApplicationVersion() {
 		if (StringUtils.isBlank(applicationVersion)) {
 			return Constants.NO_VERSION_INDICATOR_STRING;
@@ -227,24 +324,53 @@ public class JobSubmissionObjectImpl {
 		return applicationVersion;
 	}
 
+	/**
+	 * Returns the currently set commandline of the job.
+	 * 
+	 * @return the commandline
+	 */
 	@Column(nullable = false)
 	public String getCommandline() {
 		return commandline;
 	}
 
+	/**
+	 * Returns the currently set number of cpus.
+	 * 
+	 * @return the number of cpus to be used for this job
+	 */
 	public Integer getCpus() {
 		return cpus;
 	}
 
+	/**
+	 * Gets the email address to be used if this job is configured to send emails when starting/finished.
+	 * 
+	 * @return the email address or null
+	 */
 	public String getEmail_address() {
 		return email_address;
 	}
 
+	/**
+	 * Extracts the executable from the commandline.
+	 * 
+	 * @return the executable
+	 */
 	@Transient
 	public String getExecutable() {
 		return extractExecutable();
 	}
 
+	/**
+	 * Returns the currently set hostcount.
+	 * 
+	 * You can use this to force the job to be run on only 1 node (to use the
+	 * shared memory). Often used in combination with {@link #force_single} and
+	 * {@link #force_mpi}.
+	 * 
+	 * @return the host count
+	 */
 	public Integer getHostCount() {
 		return hostcount;
 	}
@@ -255,14 +381,29 @@ public class JobSubmissionObjectImpl {
 		return this.id;
 	}
 
+	/**
+	 * Returns all input files associated with this job, with they keys being
+	 * the source urls and values are the remote paths for the files (or null
+	 * for default remote path).
+	 * 
+	 * @return the input files
+	 */
 	@ElementCollection(fetch = FetchType.EAGER)
 	public Map<String, String> getInputFiles() {
 		return this.inputFiles;
 	}
 
+	/**
+	 * Creates a jsdl document for the currently set job properties.
+	 * 
+	 * @return a jsdl document.
+	 * @throws JobPropertiesException
+	 *             if the jsdl document can't be created because of incorrect
+	 *             settings
+	 */
 	@Transient
 	public final Document getJobDescriptionDocument()
-			throws JobPropertiesException {
+	throws JobPropertiesException {
 
 		checkValidity();
 
@@ -274,9 +415,18 @@ public class JobSubmissionObjectImpl {
 
 	}
 
+	/**
+	 * Convenience method to get the output of
+	 * {@link #getJobDescriptionDocument()} as a string.
+	 * 
+	 * @return the jsdl document as a string
+	 * @throws JobPropertiesException
+	 *             if the jsdl document can't be created because of incorrect
+	 *             settings
+	 */
 	@Transient
 	public final String getJobDescriptionDocumentAsString()
-			throws JobPropertiesException {
+	throws JobPropertiesException {
 
 		String jsdlString = null;
 		jsdlString = SeveralXMLHelpers.toString(getJobDescriptionDocument());
@@ -284,23 +434,20 @@ public class JobSubmissionObjectImpl {
 		return jsdlString;
 	}
 
-	// public String[] getInputFileUrls() {
-	// return inputFileUrls.toArray(new String[] {});
-	// }
-
-	// @Transient
-	// public String getInputFileUrlsAsString() {
-	// if ((inputFileUrls != null) && (inputFileUrls.size() != 0)) {
-	// return StringUtils.join(inputFileUrls, ",");
-	// } else {
-	// return new String();
-	// }
-	// }
-
+	/**
+	 * Returns the currently set name of the job.
+	 * 
+	 * @return the jobname
+	 */
 	public String getJobname() {
 		return jobname;
 	}
 
+	/**
+	 * Creates a map for the currently set job properties.
+	 * 
+	 * @return a map of job properties
+	 */
 	@Transient
 	public final Map<JobSubmissionProperty, String> getJobSubmissionPropertyMap() {
 
@@ -348,14 +495,30 @@ public class JobSubmissionObjectImpl {
 		return jobProperties;
 	}
 
+	/**
+	 * Returns the currently set amount of memory for the job (in bytes).
+	 * 
+	 * @return the memory
+	 */
 	public Long getMemory() {
 		return memory_in_bytes;
 	}
 
+	/**
+	 * Returns all currently set modules for this job.
+	 * 
+	 * @return the modules
+	 */
 	public String[] getModules() {
 		return modules.toArray(new String[] {});
 	}
 
+	/**
+	 * Convenience method that returns the output of {@link #getModules()} as a
+	 * comma seperated string.
+	 * 
+	 * @return the modules as a string
+	 */
 	@Transient
 	public String getModulesAsString() {
 		if ((modules != null) && (modules.size() != 0)) {
@@ -365,22 +528,49 @@ public class JobSubmissionObjectImpl {
 		}
 	}
 
+	/**
+	 * Returns whether the pbsDebug value is set or not.
+	 * 
+	 * @return the pbsDebug value
+	 */
 	public String getPbsDebug() {
 		return pbsDebug;
 	}
 
+	/**
+	 * Returns the name of the currently set name of the stderr file.
+	 * 
+	 * @return the stderr file
+	 */
 	public String getStderr() {
 		return stderr;
 	}
 
+	/**
+	 * Returns the name of the currently set name of the stdin file.
+	 * 
+	 * @return the stdin file
+	 */
 	public String getStdin() {
 		return this.stdin;
 	}
 
+	/**
+	 * Returns the name of the currently set name of the stdout file.
+	 * 
+	 * @return the stdout file
+	 */
 	public String getStdout() {
 		return stdout;
 	}
 
+	/**
+	 * Convenience method to return the result of the
+	 * {@link #getJobSubmissionPropertyMap()} as a map with the keys being
+	 * stings.
+	 * 
+	 * @return the job properties
+	 */
 	@Transient
 	public final Map<String, String> getStringJobSubmissionPropertyMap() {
 
@@ -395,14 +585,31 @@ public class JobSubmissionObjectImpl {
 		return stringPropertyMap;
 	}
 
+	/**
+	 * Returns the currently set submission location.
+	 * 
+	 * @return the submission location
+	 */
 	public String getSubmissionLocation() {
 		return submissionLocation;
 	}
 
+	/**
+	 * Returns the walltime in seconds.
+	 * 
+	 * @return the walltime in seconds
+	 * @deprecated use {@link #getWalltimeInSeconds()} instead
+	 */
+	@Deprecated
 	public int getWalltime() {
 		return getWalltimeInSeconds();
 	}
 
+	/**
+	 * Returns the walltime in seconds.
+	 * 
+	 * @return the walltime in seconds
+	 */
 	public int getWalltimeInSeconds() {
 		return walltime_in_seconds;
 	}
@@ -457,9 +664,9 @@ public class JobSubmissionObjectImpl {
 			submissionLocation = candidateHosts[0];
 		}
 		final String executable = JsdlHelpers
-				.getPosixApplicationExecutable(jsdl);
+		.getPosixApplicationExecutable(jsdl);
 		final String[] arguments = JsdlHelpers
-				.getPosixApplicationArguments(jsdl);
+		.getPosixApplicationArguments(jsdl);
 		final StringBuffer tempBuffer = new StringBuffer(executable);
 		if (arguments != null) {
 			for (final String arg : arguments) {
@@ -473,15 +680,15 @@ public class JobSubmissionObjectImpl {
 		pbsDebug = JsdlHelpers.getPbsDebugElement(jsdl);
 	}
 
-	public void initWithMap(Map<String, String> jobProperties) {
+	private void initWithMap(Map<String, String> jobProperties) {
 		this.jobname = jobProperties.get(JobSubmissionProperty.JOBNAME
 				.toString());
 		this.application = jobProperties
-				.get(JobSubmissionProperty.APPLICATIONNAME.toString());
+		.get(JobSubmissionProperty.APPLICATIONNAME.toString());
 		this.applicationVersion = jobProperties
-				.get(JobSubmissionProperty.APPLICATIONVERSION.toString());
+		.get(JobSubmissionProperty.APPLICATIONVERSION.toString());
 		this.email_address = jobProperties
-				.get(JobSubmissionProperty.EMAIL_ADDRESS.toString());
+		.get(JobSubmissionProperty.EMAIL_ADDRESS.toString());
 		this.email_on_job_start = checkForBoolean(jobProperties
 				.get(JobSubmissionProperty.EMAIL_ON_START.toString()));
 		this.email_on_job_finish = checkForBoolean(jobProperties
@@ -542,35 +749,69 @@ public class JobSubmissionObjectImpl {
 		}
 
 		this.submissionLocation = jobProperties
-				.get(JobSubmissionProperty.SUBMISSIONLOCATION.toString());
+		.get(JobSubmissionProperty.SUBMISSIONLOCATION.toString());
 		this.commandline = jobProperties.get(JobSubmissionProperty.COMMANDLINE
 				.toString());
 		this.stderr = jobProperties
-				.get(JobSubmissionProperty.STDERR.toString());
+		.get(JobSubmissionProperty.STDERR.toString());
 		this.stdout = jobProperties
-				.get(JobSubmissionProperty.STDOUT.toString());
+		.get(JobSubmissionProperty.STDOUT.toString());
 		this.stdin = jobProperties.get(JobSubmissionProperty.STDIN.toString());
 
 		this.pbsDebug = jobProperties.get(JobSubmissionProperty.PBSDEBUG
 				.toString());
 	}
 
+	/**
+	 * Returns whether this job is configured to send an email when it finishes.
+	 * 
+	 * @return whether to send an email when job is finished (true) or not
+	 *         (false)
+	 */
 	public Boolean isEmail_on_job_finish() {
 		return email_on_job_finish;
 	}
 
+	/**
+	 * Returns whether this job is configured to send an email when it starts on
+	 * the compute resource.
+	 * 
+	 * @return whether to send an email when job starts (true) or not (false)
+	 */
 	public Boolean isEmail_on_job_start() {
 		return email_on_job_start;
 	}
 
+	/**
+	 * Whether this job is forced to be an mpi job or not.
+	 * 
+	 * This overrides Grisus' auto-jobtype determination which selects "single"
+	 * for 1 cpu and "mpi" for >1 cpu jobs.
+	 * 
+	 * @return the force mpi value
+	 */
 	public Boolean isForce_mpi() {
 		return force_mpi;
 	}
 
+	/**
+	 * Whether this job is forced to be of the "single" jobtype or not.
+	 * 
+	 * This overrides Grisus' auto-jobtype determination which selects "single"
+	 * for 1 cpu and "mpi" for >1 cpu jobs.
+	 * 
+	 * @return the force single value
+	 */
 	public Boolean isForce_single() {
 		return force_single;
 	}
 
+	/**
+	 * Removes the specified url/path from the input values.
+	 * 
+	 * @param selectedFile
+	 *            the url/path to remove
+	 */
 	public void removeInputFileUrl(String selectedFile) {
 
 		if (StringUtils.isBlank(selectedFile)) {
@@ -580,10 +821,25 @@ public class JobSubmissionObjectImpl {
 		pcs.firePropertyChange("inputFileUrls", null, this.inputFiles);
 	}
 
+	/**
+	 * Removes a property change listener.
+	 * 
+	 * @param listener
+	 *            the listener
+	 */
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		this.pcs.removePropertyChangeListener(listener);
 	}
 
+	/**
+	 * Sets the name of the application to use for this job.
+	 * 
+	 * You need to specify the exact same name that is used to publish this
+	 * application in mds/bdii.
+	 * 
+	 * @param app
+	 *            the application name
+	 */
 	public void setApplication(final String app) {
 		final String oldValue = this.application;
 		this.application = app;
@@ -591,6 +847,15 @@ public class JobSubmissionObjectImpl {
 				JobSubmissionObjectImpl.this.application);
 	}
 
+	/**
+	 * Sets the version of the application to use for this job.
+	 * 
+	 * You need to specify the exact same name that is used to publish this
+	 * applicationversion in mds/bdii.
+	 * 
+	 * @param appVersion
+	 *            the version of the application
+	 */
 	public void setApplicationVersion(final String appVersion) {
 		final String oldValue = this.applicationVersion;
 		this.applicationVersion = appVersion;
@@ -598,6 +863,16 @@ public class JobSubmissionObjectImpl {
 				this.applicationVersion);
 	}
 
+	/**
+	 * Sets the commandline to be used for this job.
+	 * 
+	 * Set the commandline like you would when running the application on your
+	 * local machine. For example: "cat test.txt". Don't specify any possible
+	 * mpi commands, that is done automatically for you.
+	 * 
+	 * @param commandline
+	 *            the commandline
+	 */
 	public synchronized void setCommandline(final String commandline) {
 		final String oldValue = this.commandline;
 		final String oldExe = extractExecutable(this.commandline);
@@ -609,18 +884,46 @@ public class JobSubmissionObjectImpl {
 		pcs.firePropertyChange("executable", oldExe, newExe);
 	}
 
+	/**
+	 * Sets the number of cpus to use for this job.
+	 * 
+	 * This also determines the job type (if not force by {@link #force_single}
+	 * or {@link #force_mpi}): single for 1 and mpi for >1.
+	 * 
+	 * @param cpus
+	 *            the number of cpus
+	 */
 	public void setCpus(final Integer cpus) {
 		final int oldValue = this.cpus;
 		this.cpus = cpus;
 		pcs.firePropertyChange("cpus", oldValue, this.cpus);
 	}
 
+	/**
+	 * Sets the email address to send emails to when job is started/finished.
+	 * 
+	 * Only useful in combination with {@link #setEmail_on_job_start(Boolean)}
+	 * and/or {@link #setEmail_on_job_finish(Boolean)}.
+	 * 
+	 * @param email_address
+	 *            the email address
+	 */
 	public void setEmail_address(final String email_address) {
 		final String oldValue = this.email_address;
 		this.email_address = email_address;
 		pcs.firePropertyChange("email_address", oldValue, this.email_address);
 	}
 
+	/**
+	 * Sets whether to send an email once the job finished.
+	 * 
+	 * Sends an email to the address configured in
+	 * {@link #setEmail_address(String)}.
+	 * 
+	 * @param email_on_job_finish
+	 *            whether to send an email when job is finished (true) or not
+	 *            (false)
+	 */
 	public void setEmail_on_job_finish(final Boolean email_on_job_finish) {
 		final boolean oldValue = this.email_on_job_finish;
 		this.email_on_job_finish = email_on_job_finish;
@@ -628,6 +931,17 @@ public class JobSubmissionObjectImpl {
 				this.email_on_job_finish);
 	}
 
+	/**
+	 * Sets whether to send an email once the job is started on the compute
+	 * resource.
+	 * 
+	 * Sends an email to the address configured in
+	 * {@link #setEmail_address(String)}.
+	 * 
+	 * @param email_on_job_start
+	 *            whether to send an email when job is started (true) or not
+	 *            (false)
+	 */
 	public void setEmail_on_job_start(final Boolean email_on_job_start) {
 		final boolean oldValue = this.email_on_job_start;
 		this.email_on_job_start = email_on_job_start;
@@ -635,6 +949,13 @@ public class JobSubmissionObjectImpl {
 				this.email_on_job_start);
 	}
 
+	/**
+	 * Sets whether to force the jobtype to be "mpi" even if the cpu count is
+	 * configured to be 1.
+	 * 
+	 * @param force_mpi
+	 *            whether to force the jobtype to be "mpi"
+	 */
 	public void setForce_mpi(final Boolean force_mpi) {
 		final boolean oldValue = this.force_mpi;
 		final boolean oldValue1 = this.force_single;
@@ -647,6 +968,16 @@ public class JobSubmissionObjectImpl {
 		pcs.firePropertyChange("hostCount", oldHostCount, this.hostcount);
 	}
 
+	/**
+	 * Sets whether to force the jobtype to be "single" even if the cpu count is
+	 * configured to be >1.
+	 * 
+	 * Mostly used in combination with setting the hostcount to 1 so that the
+	 * job is run "threaded".
+	 * 
+	 * @param force_single
+	 *            whether to force the jobtype to be "single"
+	 */
 	public void setForce_single(final Boolean force_single) {
 		final boolean oldValue = this.force_mpi;
 		final boolean oldValue1 = this.force_single;
@@ -656,6 +987,15 @@ public class JobSubmissionObjectImpl {
 		pcs.firePropertyChange("force_single", oldValue1, this.force_single);
 	}
 
+	/**
+	 * Sets the amount of nodes the job is allowed to run on.
+	 * 
+	 * Mostly used to run a "threaded" job (a job that is run on 1 host but
+	 * multiple cpus).
+	 * 
+	 * @param hc
+	 *            the host count
+	 */
 	public void setHostCount(Integer hc) {
 		final int oldHostCount = this.hostcount;
 		this.hostcount = hc;
@@ -666,6 +1006,15 @@ public class JobSubmissionObjectImpl {
 		this.id = id;
 	}
 
+	/**
+	 * Sets all input files in one go.
+	 * 
+	 * Keys are the source urls/paths, values are the target paths. You can also
+	 * use the {@link JobSubmissionObjectImpl#addInputFileUrl(String)} or
+	 * {@link #addInputFileUrl(String, String)} methods.
+	 * 
+	 * @param inputfiles
+	 */
 	public void setInputFiles(final Map<String, String> inputfiles) {
 		this.inputFiles = inputfiles;
 
@@ -683,18 +1032,41 @@ public class JobSubmissionObjectImpl {
 	// pcs.firePropertyChange("inputFileUrls", oldValue, this.inputFiles);
 	// }
 
+	/**
+	 * Sets the name of the job.
+	 * 
+	 * @param jobname
+	 *            the jobname
+	 */
 	public void setJobname(final String jobname) {
 		final String oldValue = this.jobname;
 		this.jobname = jobname;
 		pcs.firePropertyChange("jobname", oldValue, this.jobname);
 	}
 
+	/**
+	 * Sets the memory to be used for this job (in bytes).
+	 * 
+	 * @param memory
+	 *            the memory
+	 */
 	public void setMemory(final Long memory) {
 		final long oldValue = this.memory_in_bytes;
 		this.memory_in_bytes = memory;
 		pcs.firePropertyChange("memory", oldValue, this.memory_in_bytes);
 	}
 
+	/**
+	 * Sets the modules to be used for this job.
+	 * 
+	 * Usually, when setting this you need to have a fixed submission location
+	 * and you also have to know the exact name of the modules on this
+	 * submission location. It is recommended that you only set application name
+	 * and version and let Grisu figure out the module names automaticatlly.
+	 * 
+	 * @param modules
+	 *            the module names
+	 */
 	public void setModules(final String[] modules) {
 		final Set<String> oldValue = this.modules;
 		if (modules != null) {
@@ -705,30 +1077,68 @@ public class JobSubmissionObjectImpl {
 		pcs.firePropertyChange("modules", oldValue, this.modules);
 	}
 
+	/**
+	 * Whether to enable the pbsdebug option for this job.
+	 * 
+	 * This is only useful for jobs to submission location which support the pbs
+	 * debug option. Basically, the generated pbs script is written into the job
+	 * directory.
+	 * 
+	 * @param pbsDebug
+	 */
 	public void setPbsDebug(String pbsDebug) {
 		final String oldValue = this.pbsDebug;
 		this.pbsDebug = pbsDebug;
 		pcs.firePropertyChange("pbsDebug", oldValue, this.pbsDebug);
 	}
 
+	/**
+	 * Sets the name of the stderr file for this job.
+	 * 
+	 * @param stderr
+	 *            the stderr file
+	 */
 	public void setStderr(final String stderr) {
 		final String oldValue = this.stderr;
 		this.stderr = stderr;
 		pcs.firePropertyChange("stderr", oldValue, this.stderr);
 	}
 
+	/**
+	 * Sets the name of the stdin file for this job.
+	 * 
+	 * @param stdin
+	 *            the stdin file
+	 */
 	public void setStdin(final String stdin) {
 		final String oldValue = this.stdin;
 		this.stdin = stdin;
 		pcs.firePropertyChange("stdin", oldValue, this.stdout);
 	}
 
+	/**
+	 * Sets the name of the stdout file for this job.
+	 * 
+	 * @param stdout
+	 *            the stdout file.
+	 */
 	public void setStdout(final String stdout) {
 		final String oldValue = this.stdout;
 		this.stdout = stdout;
 		pcs.firePropertyChange("stdout", oldValue, this.stdout);
 	}
 
+	/**
+	 * Sets a fixed submission location for this job.
+	 * 
+	 * This is optional, if not set, Grisu auto-calculates the
+	 * submissionlocation using the VO that is used to submit it along with the
+	 * application name and version. If no application version is set Grisu
+	 * tries to figure it out parsing the executable from the commandline.
+	 * 
+	 * @param submissionLocation
+	 *            the submissionlocation in the format queue:host[#factorytype]
+	 */
 	public void setSubmissionLocation(final String submissionLocation) {
 		final String oldValue = this.submissionLocation;
 		this.submissionLocation = submissionLocation;
@@ -736,11 +1146,27 @@ public class JobSubmissionObjectImpl {
 				this.submissionLocation);
 	}
 
+	/**
+	 * Convenience method to create a unique jobname by appending a timestamp to
+	 * the jobname.
+	 * 
+	 * @param jobname
+	 *            the base-jobname
+	 */
 	@Transient
 	public void setTimestampJobname(final String jobname) {
 		setJobname(JobnameHelpers.calculateTimestampedJobname(jobname));
 	}
 
+	/**
+	 * Convenience method to create a unique jobname by appending a timestamp
+	 * with configurable format to the jobname.
+	 * 
+	 * @param jobname
+	 *            the base-jobname
+	 * @param format
+	 *            the format of the timestamp
+	 */
 	@Transient
 	public void setTimestampJobname(final String jobname,
 			SimpleDateFormat format) {
@@ -749,6 +1175,13 @@ public class JobSubmissionObjectImpl {
 
 	}
 
+	/**
+	 * Convenience method to create a unique jobname by appending a number
+	 * (counting upwards until a free jobname is found) to the jobname.
+	 * 
+	 * @param jobname
+	 *            the base jobname
+	 */
 	@Transient
 	public void setUniqueJobname(final String jobname) {
 		if (StringUtils.isBlank(jobname)) {
@@ -758,11 +1191,25 @@ public class JobSubmissionObjectImpl {
 		}
 	}
 
+	/**
+	 * Sets the walltime for the job (in seconds).
+	 * 
+	 * @param walltimeInSeconds
+	 *            the walltime in seconds
+	 * @deprecated use {@link #setWalltimeInSeconds(Integer)} instead
+	 */
+	@Deprecated
 	@Transient
 	public void setWalltime(final Integer walltimeInSeconds) {
 		setWalltimeInSeconds(walltimeInSeconds);
 	}
 
+	/**
+	 * Sets the walltime for the job (in seconds).
+	 * 
+	 * @param walltime
+	 *            the walltime in seconds
+	 */
 	public void setWalltimeInSeconds(final Integer walltime) {
 		final int oldValue = this.walltime_in_seconds;
 		this.walltime_in_seconds = walltime;

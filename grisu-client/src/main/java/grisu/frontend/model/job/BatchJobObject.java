@@ -1624,7 +1624,8 @@ Comparable<BatchJobObject>, Listener {
 			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 					message3));
 			addJobLogMessage(message3);
-			throw new BackendException("Could not upload input files...", e);
+			throw new BackendException("Could not upload input files: "
+					+ e.getLocalizedMessage(), e);
 		}
 		getNewlyAddedJobs().clear();
 	}
@@ -2270,7 +2271,7 @@ Comparable<BatchJobObject>, Listener {
 							"BatchJob submission failed for job "
 							+ getJobname()
 							+ ": "
-									+ status.getStatus().getErrorCause());
+							+ status.getStatus().getErrorCause());
 				}
 
 			} catch (final InterruptedException e) {
