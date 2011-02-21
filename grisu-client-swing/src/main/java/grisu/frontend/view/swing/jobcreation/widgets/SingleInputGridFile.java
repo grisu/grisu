@@ -216,7 +216,7 @@ public class SingleInputGridFile extends AbstractWidget {
 
 		if (getServiceInterface() == null) {
 			getMylogger().error(
-					"ServiceInterface not set. Can't open dialog...");
+			"ServiceInterface not set. Can't open dialog...");
 			return null;
 		}
 
