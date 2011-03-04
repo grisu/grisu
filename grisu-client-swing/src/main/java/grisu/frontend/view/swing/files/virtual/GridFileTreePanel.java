@@ -24,6 +24,7 @@ import java.awt.event.MouseEvent;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -50,6 +51,9 @@ import com.jgoodies.forms.layout.RowSpec;
 
 public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 EventSubscriber {
+
+	public static final String EXTENSIONS_KEY = "extensions";
+	public static final String FOLDERS_SELECTABLE_KEY = "folders_selectable";
 
 	private static void addPopup(Component component, final JPopupMenu popup) {
 		component.addMouseListener(new MouseAdapter() {
@@ -86,8 +90,8 @@ EventSubscriber {
 	private Vector<GridFileListListener> listeners;
 	private GridFileListPanelContextMenu popupMenu;
 
-	private final boolean displayHiddenFiles;
-	private final String[] extensionsToDisplay;
+	private boolean displayHiddenFiles;
+	private String[] extensionsToDisplay;
 
 	private DefaultTreeModel model;
 
@@ -165,11 +169,6 @@ EventSubscriber {
 			listeners = new Vector<GridFileListListener>();
 		}
 		listeners.addElement(l);
-	}
-
-	public void displayHiddenFiles(boolean display) {
-		// TODO Auto-generated method stub
-
 	}
 
 	private void fileClickOccured() {
@@ -506,6 +505,10 @@ EventSubscriber {
 		listeners.removeElement(l);
 	}
 
+	public void setConfig(Map<String, String> config) {
+
+	}
+
 	public void setContextMenu(GridFileListPanelContextMenu menu) {
 
 		if (this.popupMenu != null) {
@@ -523,9 +526,15 @@ EventSubscriber {
 
 	}
 
-	public void setExtensionsToDisplay(String[] extensions) {
-		// TODO Auto-generated method stub
+	public void setDisplayHiddenFiles(boolean display) {
 
+		this.displayHiddenFiles = display;
+
+	}
+
+	public void setExtensionsToDisplay(String[] extensions) {
+
+		this.extensionsToDisplay = extensions;
 	}
 
 	private void setLoading(final boolean loading) {

@@ -13,7 +13,7 @@ public interface GridFileListPanel {
 
 	public void addGridFileListListener(GridFileListListener l);
 
-	public void displayHiddenFiles(boolean display);
+	public void setDisplayHiddenFiles(boolean display);
 
 	public GridFile getCurrentDirectory();
 
