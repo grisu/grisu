@@ -71,7 +71,8 @@ public abstract class AbstractWidget extends JPanel {
 
 	public static GridFileTreeDialog createGridFileDialog(ServiceInterface si,
 			List<GridFile> roots, String historyKey, String[] extensions,
-			boolean displayHiddenFiles, Window owner) {
+			boolean displayHiddenFiles, boolean foldersSelectable,
+			boolean displayLocalFileSystems, Window owner) {
 
 		if (si == null) {
 			return null;
@@ -97,7 +98,8 @@ public abstract class AbstractWidget extends JPanel {
 		}
 
 		final GridFileTreeDialog fileDialog = new GridFileTreeDialog(owner, si,
-				roots, displayHiddenFiles, extensions, true, startUrl);
+				roots, displayHiddenFiles, extensions, foldersSelectable,
+				displayLocalFileSystems, startUrl);
 		fileDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		fileDialog.centerOnOwner();
@@ -122,8 +124,7 @@ public abstract class AbstractWidget extends JPanel {
 		super();
 	}
 
-	@Override
-	public void addPropertyChangeListener(PropertyChangeListener l) {
+	public void addWidgetListener(PropertyChangeListener l) {
 		getPropertyChangeSupport().addPropertyChangeListener(l);
 	}
 
@@ -192,8 +193,7 @@ public abstract class AbstractWidget extends JPanel {
 
 	}
 
-	@Override
-	public void removePropertyChangeListener(PropertyChangeListener l) {
+	public void removeWidgetListener(PropertyChangeListener l) {
 		getPropertyChangeSupport().removePropertyChangeListener(l);
 	}
 

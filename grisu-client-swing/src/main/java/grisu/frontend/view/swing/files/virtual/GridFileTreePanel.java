@@ -171,11 +171,11 @@ EventSubscriber {
 		listeners.addElement(l);
 	}
 
-	private void fileClickOccured() {
-
-		fireFilesSelected(getSelectedFiles());
-
-	}
+	// private void fileClickOccured() {
+	//
+	// fireFilesSelected(getSelectedFiles());
+	//
+	// }
 
 	private void fileDoubleClickOccured() {
 

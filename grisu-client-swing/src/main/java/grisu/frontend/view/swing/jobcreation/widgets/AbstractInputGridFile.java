@@ -1,6 +1,5 @@
 package grisu.frontend.view.swing.jobcreation.widgets;
 
-import grisu.X;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.view.swing.files.virtual.GridFileTreeDialog;
 import grisu.model.dto.GridFile;
@@ -8,12 +7,18 @@ import grisu.model.dto.GridFile;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
 abstract public class AbstractInputGridFile extends AbstractWidget {
+
+	public static final String FOLDER_SELECTABLE = "folder_selectable";
+	public static final String EXTENSIONS_TO_DISPLAY = "extensions_to_display";
+	public static final String DISPLAY_HIDDEN_FILES = "display_hidden_files";
 
 	private GridFileTreeDialog fileDialog = null;
 
@@ -29,6 +34,9 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 
 	private JComboBox comboBox;
 	protected final DefaultComboBoxModel fileModel = new DefaultComboBoxModel();
+	private int selectionMode = ListSelectionModel.SINGLE_SELECTION;
+	private boolean foldersSelectable = true;
+	private final boolean displayLocalFilesystems = true;
 
 	public AbstractInputGridFile() {
 		super();
@@ -37,7 +45,9 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 	public void askForFile() {
 		GridFile f = popupFileDialogAndAskForFile();
 
-		setInputFile(f);
+		if (f != null) {
+			setInputFile(f);
+		}
 	}
 
 	protected GridFileTreeDialog getFileDialog() {
@@ -46,7 +56,9 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 
 			fileDialog = createGridFileDialog(getServiceInterface(), roots,
 					getHistoryKey() + "_last_dir", extensions,
-					displayHiddenFiles, SwingUtilities.getWindowAncestor(this));
+					displayHiddenFiles, foldersSelectable,
+					displayLocalFilesystems,
+					SwingUtilities.getWindowAncestor(this));
 		}
 
 		return fileDialog;
@@ -75,17 +87,20 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 
 					Object sel = fileModel.getSelectedItem();
 					if (!(sel instanceof GridFile)) {
-						X.p("Selection: " + sel.toString());
 						return;
 					}
 
-					if (((GridFile) fileModel.getSelectedItem()) != null) {
+					GridFile f = (GridFile) fileModel.getSelectedItem();
+					if ((f != null) && !f.getUrl().equals(currentUrl)) {
 
 						setInputFile((GridFile) fileModel.getSelectedItem());
-						getPropertyChangeSupport().firePropertyChange(
-								"inputFileUrl", currentUrl, getValue());
+						// getPropertyChangeSupport().firePropertyChange(
+						// "inputFileUrl", currentUrl, getValue());
+						currentUrl = getValue();
+
 					}
-					currentUrl = getValue();
+
+
 				}
 
 			});
@@ -133,18 +148,51 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 		return file;
 	}
 
+	public void setConfiguration(Map<String, String> config) {
+
+		if (config == null) {
+			return;
+		}
+
+		for ( String key : config.keySet() ) {
+
+			if ( FOLDER_SELECTABLE.equals(key) ) {
+				System.out.println("TODO");
+			} else if ( EXTENSIONS_TO_DISPLAY.equals(key) ) {
+				setExtensionsToDisplay(config.get(key).split(","));
+			} else if ( DISPLAY_HIDDEN_FILES.equals(key) ) {
+				try {
+					boolean display = Boolean.parseBoolean(config.get(key));
+					setDisplayHiddenFiles(display);
+				} catch (Exception e) {
+					myLogger.warn("Can't parse value of " + key + ": "
+							+ config.get(key));
+					continue;
+				}
+			}
+
+		}
+	}
+
 	public void setDisplayHiddenFiles(boolean display) {
 		this.displayHiddenFiles = display;
-		//		if (fileDialog != null) {
-		//			fileDialog.displayHiddenFiles(display);
-		//		}
+		if (fileDialog != null) {
+			fileDialog.displayHiddenFiles(display);
+		}
 	}
 
 	public void setExtensionsToDisplay(String[] extensions) {
 		this.extensions = extensions;
-		// if (fileDialog != null) {
-		// fileDialog.setExtensionsToDisplay(extensions);
-		// }
+		if (fileDialog != null) {
+			fileDialog.setExtensionsToDisplay(extensions);
+		}
+	}
+
+	public void setFoldersSelectable(boolean foldersSelectable) {
+		this.foldersSelectable = foldersSelectable;
+		if (fileDialog != null) {
+			fileDialog.setFoldersSelectable(foldersSelectable);
+		}
 	}
 
 	public void setInputFile(GridFile file) {
@@ -168,6 +216,14 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 
 	}
 
+
+	public void setInputFileUrl(String fileUrl)
+	throws RemoteFileSystemException {
+
+		setInputFile(getFileManager().createGridFile(fileUrl));
+
+	}
+
 	@Override
 	protected boolean setLastValue() {
 		return false;
@@ -175,6 +231,13 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 
 	public void setRoots(List<GridFile> roots) {
 		this.roots = roots;
+	}
+
+	public void setSelectionMode(int selectionMode) {
+		this.selectionMode  = selectionMode;
+		if (fileDialog != null) {
+			fileDialog.setSelectionMode(selectionMode);
+		}
 	}
 
 	@Override

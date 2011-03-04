@@ -1,7 +1,9 @@
 package grisu.frontend.view.swing.files.virtual;
 
+import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginManager;
+import grisu.frontend.view.swing.files.GridFileListListener;
 import grisu.model.dto.GridFile;
 
 import java.awt.BorderLayout;
@@ -14,7 +16,6 @@ import java.awt.event.WindowListener;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
@@ -22,17 +23,18 @@ import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 
 
-public class GridFileTreeDialog extends JDialog implements WindowListener {
+public class GridFileTreeDialog extends JDialog implements WindowListener,
+GridFileListListener {
 
-	private class SwingAction extends AbstractAction {
-		public SwingAction() {
-			putValue(NAME, "SwingAction");
-			putValue(SHORT_DESCRIPTION, "Some short description");
-		}
-
-		public void actionPerformed(ActionEvent e) {
-		}
-	}
+	// private class SwingAction extends AbstractAction {
+	// public SwingAction() {
+	// putValue(NAME, "SwingAction");
+	// putValue(SHORT_DESCRIPTION, "Some short description");
+	// }
+	//
+	// public void actionPerformed(ActionEvent e) {
+	// }
+	// }
 
 	/**
 	 * Launch the application.
@@ -58,6 +60,9 @@ public class GridFileTreeDialog extends JDialog implements WindowListener {
 	private final GridFileTreePanel virtualFileSystemTreeTablePanel;
 	private final Window owner;
 	private final String startupUrl;
+	private boolean foldersSelectable = false;
+
+	private final JButton okButton = new JButton("OK");
 
 	/**
 	 * @wbp.parser.constructor
@@ -73,12 +78,13 @@ public class GridFileTreeDialog extends JDialog implements WindowListener {
 			boolean displayHiddenFiles, String[] extensionsToDisplay,
 			boolean displayLocalFilesystems) {
 		this(null, si, roots, displayHiddenFiles, extensionsToDisplay,
-				displayLocalFilesystems, null);
+				displayLocalFilesystems, true, null);
 	}
 
 	public GridFileTreeDialog(Window owner, ServiceInterface si,
 			List<GridFile> roots, boolean displayHiddenFiles,
-			String[] extensionsToDisplay, boolean displayLocalFilesystems,
+			String[] extensionsToDisplay, boolean foldersSelectable,
+			boolean displayLocalFilesystems,
 			String startupUrl) {
 		setModal(true);
 		setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
@@ -86,6 +92,7 @@ public class GridFileTreeDialog extends JDialog implements WindowListener {
 		this.si = si;
 		this.owner = owner;
 		this.startupUrl = startupUrl;
+		this.foldersSelectable = foldersSelectable;
 		centerOnOwner();
 		setSize(650, 450);
 		getContentPane().setLayout(new BorderLayout());
@@ -95,6 +102,7 @@ public class GridFileTreeDialog extends JDialog implements WindowListener {
 		{
 			virtualFileSystemTreeTablePanel = new GridFileTreePanel(si, roots,
 					false, displayHiddenFiles, extensionsToDisplay);
+			virtualFileSystemTreeTablePanel.addGridFileListListener(this);
 			contentPanel.add(virtualFileSystemTreeTablePanel,
 					BorderLayout.CENTER);
 		}
@@ -103,7 +111,7 @@ public class GridFileTreeDialog extends JDialog implements WindowListener {
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
-				JButton okButton = new JButton("OK");
+				okButton.setEnabled(false);
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						userCanceled = false;
@@ -131,17 +139,57 @@ public class GridFileTreeDialog extends JDialog implements WindowListener {
 	public GridFileTreeDialog(Window owner, ServiceInterface si,
 			List<GridFile> roots, String startUpUrl) {
 
-		this(owner, si, roots, false, null, true, startUpUrl);
+		this(owner, si, roots, false, null, true, true, startUpUrl);
 	}
 
 	public void centerOnOwner() {
 		setLocationRelativeTo(owner);
 	}
 
+	public void directoryChanged(GridFile newDirectory) {
+		// nothing to do, right?
+	}
+
 	public void displayHiddenFiles(boolean display) {
 
 		throw new RuntimeException(
-				"Changing display of hidden files not implemented yet.");
+		"Changing display of hidden files not implemented yet.");
+
+	}
+
+	public void fileDoubleClicked(GridFile file) {
+
+		if (file.isFolder()) {
+			return;
+		}
+
+		userCanceled = false;
+		setVisible(false);
+
+
+	}
+
+	public void filesSelected(Set<GridFile> files) {
+
+		X.p("Print: " + foldersSelectable);
+		if ( foldersSelectable ) {
+			okButton.setEnabled(true);
+			return;
+		}
+
+		if (files == null) {
+			return;
+		}
+
+		for ( GridFile f : files ) {
+			if ( f.isFolder() ) {
+				okButton.setEnabled(false);
+				return;
+			}
+		}
+
+
+		okButton.setEnabled(true);
 
 	}
 
@@ -165,9 +213,19 @@ public class GridFileTreeDialog extends JDialog implements WindowListener {
 		}
 	}
 
+	public void isLoading(boolean loading) {
+
+		// do nothing
+
+	}
+
 	public void setExtensionsToDisplay(String[] extensions) {
 		throw new RuntimeException(
-				"Changing extensions to display not implemented yet.");
+		"Changing extensions to display not implemented yet.");
+	}
+
+	public void setFoldersSelectable(boolean foldersSelectable) {
+		this.foldersSelectable = foldersSelectable;
 	}
 
 	public void setSelectionMode(int mode) {
