@@ -162,6 +162,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 			ArrayList<FileObject> temp = new ArrayList<FileObject>();
 			FileObject last = folder;
+			temp.add(last);
 			while (!last.getParent().exists()) {
 				temp.add(last);
 				last = last.getParent();
