@@ -162,8 +162,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 			ArrayList<FileObject> temp = new ArrayList<FileObject>();
 			FileObject last = folder;
-			temp.add(last);
-			while (!last.getParent().exists()) {
+			while (!last.exists()) {
 				temp.add(last);
 				last = last.getParent();
 			}
@@ -832,7 +831,6 @@ FileSystemInfoPlugin, FileTransferPlugin {
 												+ targetFilename + ":"
 												+ e.getMessage());
 										status.setFailed(true);
-										status.setErrorCause(e.getMessage());
 										executor.shutdownNow();
 									} else {
 										// wait for a bit, maybe the gridftp server
@@ -853,7 +851,6 @@ FileSystemInfoPlugin, FileTransferPlugin {
 								executor.shutdownNow();
 								status.setFinished(true);
 								status.setFailed(true);
-								status.setErrorCause("Upload interrupted.");
 
 								return;
 							}
@@ -872,7 +869,6 @@ FileSystemInfoPlugin, FileTransferPlugin {
 								executor.shutdownNow();
 								status.setFinished(true);
 								status.setFailed(true);
-								status.setErrorCause("Upload interrupted.");
 								return;
 							}
 
@@ -881,8 +877,6 @@ FileSystemInfoPlugin, FileTransferPlugin {
 										+ fileTransfer
 										.getPossibleExceptionMessage());
 								status.setFailed(true);
-								status.setErrorCause(fileTransfer
-										.getPossibleExceptionMessage());
 								executor.shutdownNow();
 							} else {
 								status.addElement("Upload to folder " + parent
