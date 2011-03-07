@@ -3412,17 +3412,25 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		final String queue = SubmissionLocationHelpers
 		.extractQueue(submissionLocation);
 		job.addJobProperty(Constants.QUEUE_KEY, queue);
-		// job.setJob_directory(stagingFilesystemToUse + workingDirectory);
-		job.addJobProperty(Constants.JOBDIRECTORY_KEY, stagingFilesystemToUse
-				+ workingDirectory);
+		String newJobdir = stagingFilesystemToUse + workingDirectory;
+
+		try {
+			mkdir(newJobdir);
+		} catch (RemoteFileSystemException e1) {
+			throw new JobPropertiesException(
+					"Could not create new jobdirectory " + newJobdir + ": "
+							+ e1);
+		}
+
+		job.addJobProperty(Constants.JOBDIRECTORY_KEY, newJobdir);
 		myLogger.debug("Calculated jobdirectory: " + stagingFilesystemToUse
 				+ workingDirectory);
+
 
 		if (StringUtils.isNotBlank(oldJobDir)) {
 			try {
 				// if old jobdir exists, try to move it here
-				cpSingleFile(oldJobDir, stagingFilesystemToUse
-						+ workingDirectory, true, true, true);
+				cpSingleFile(oldJobDir, newJobdir, true, true, true);
 
 				deleteFile(oldJobDir);
 			} catch (final Exception e) {
