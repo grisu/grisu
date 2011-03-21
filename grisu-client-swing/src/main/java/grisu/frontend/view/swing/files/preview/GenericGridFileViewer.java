@@ -23,7 +23,6 @@ import javax.swing.SwingUtilities;
 import net.sf.jmimemagic.Magic;
 import net.sf.jmimemagic.MagicMatch;
 
-
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -148,11 +147,12 @@ GridFileListListener {
 
 	private GridFile currentGridFile = null;
 
-	private final JPanel emptyPanel = new JPanel();
+	private JPanel emptyPanel = null;
 	private final String EMPTY_PANEL = "__empty__";
 	private JPanel loadingPane;
 	private final String LOADING_PANEL = "__loading__";
 	private JLabel lblLoading;
+	private JLabel lblMsg;
 
 	/**
 	 * Create the panel.
@@ -161,9 +161,10 @@ GridFileListListener {
 
 		setLayout(new CardLayout());
 
-		add(emptyPanel, EMPTY_PANEL);
+		add(getEmptyPanel(), EMPTY_PANEL);
 		add(getPanel_1(), LOADING_PANEL);
 	}
+
 
 	public void directoryChanged(GridFile newDirectory) {
 		// TODO
@@ -178,11 +179,33 @@ GridFileListListener {
 
 	}
 
+	private JPanel getEmptyPanel() {
+		if (emptyPanel == null) {
+			emptyPanel = new JPanel();
+			emptyPanel.setLayout(new FormLayout(new ColumnSpec[] {
+					FormFactory.RELATED_GAP_COLSPEC,
+					ColumnSpec.decode("center:default:grow"),
+					FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+					FormFactory.RELATED_GAP_ROWSPEC,
+					RowSpec.decode("default:grow"),
+					FormFactory.RELATED_GAP_ROWSPEC, }));
+			emptyPanel.add(getLblMsg(), "2, 2");
+		}
+		return emptyPanel;
+	}
+
 	private JLabel getLblLoading() {
 		if (lblLoading == null) {
 			lblLoading = new JLabel("Loading...");
 		}
 		return lblLoading;
+	}
+
+	private JLabel getLblMsg() {
+		if (lblMsg == null) {
+			lblMsg = new JLabel("Double click file to display...");
+		}
+		return lblMsg;
 	}
 
 	public JPanel getPanel() {

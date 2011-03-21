@@ -15,10 +15,10 @@ import javax.swing.JPopupMenu;
 import org.apache.log4j.Logger;
 
 public class DefaultGridFileContextMenu extends JPopupMenu implements
-		GridFileListPanelContextMenu {
+GridFileListPanelContextMenu {
 
 	static final Logger myLogger = Logger
-			.getLogger(DefaultGridFileContextMenu.class.getName());
+	.getLogger(DefaultGridFileContextMenu.class.getName());
 
 	private JMenuItem downloadMenuItem;
 	private GridFileListPanel fileList;
@@ -104,6 +104,7 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 				if (folder) {
 					getDownloadMenuItem().setEnabled(false);
 					getOpenMenuItem().setEnabled(false);
+					getCreateFolderMenuItem().setEnabled(true);
 				} else {
 					if (file.getUrls().size() == 1) {
 						getDownloadMenuItem().setEnabled(true);
@@ -112,9 +113,9 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 						getDownloadMenuItem().setEnabled(false);
 						getOpenMenuItem().setEnabled(false);
 					}
+					getCreateFolderMenuItem().setEnabled(false);
 				}
 
-				getCreateFolderMenuItem().setEnabled(false);
 				getDeleteMenuItem().setEnabled(false);
 				getCopyMenuItem().setEnabled(false);
 				return;

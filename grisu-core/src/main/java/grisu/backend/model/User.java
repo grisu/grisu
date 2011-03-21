@@ -17,6 +17,7 @@ import grisu.jcommons.constants.Constants;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.job.JobSubmissionObjectImpl;
+import grisu.settings.ServerPropertiesManager;
 import grisu.utils.FqanHelpers;
 import grisu.utils.MountPointHelpers;
 import grith.jgrith.voms.VO;
@@ -34,6 +35,7 @@ import java.util.TreeSet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -67,6 +69,8 @@ import org.apache.log4j.Logger;
 @Entity
 @Table(name = "users")
 public class User {
+
+	public static final boolean ENABLE_FILESYSTEM_CACHE = false;
 
 	public static UserDAO userdao = new UserDAO();
 
@@ -463,41 +467,68 @@ public class User {
 
 		myLogger.debug("Getting mds mountpoints for user: " + getDn());
 
-		final Set<MountPoint> mps = new TreeSet<MountPoint>();
+		final Set<MountPoint> mps = Collections
+		.synchronizedSet(new TreeSet<MountPoint>());
 
 		// to check whether dn_subdirs are created already and create them if
 		// not (in background)
-		final ExecutorService executor = Executors.newFixedThreadPool(1);
+		int df_p = ServerPropertiesManager.getConcurrentMountPointLookups();
+
+		final ExecutorService backgroundExecutorForFilesystemCache = Executors
+		.newFixedThreadPool(2);
+
+		final ExecutorService executor = Executors.newFixedThreadPool(df_p);
 
 		// for ( String site : sites ) {
 
-		for (final String fqan : getFqans().keySet()) {
-			// final Date start = new Date();
-			final Map<String, String[]> mpUrl = AbstractServiceInterface.informationManager
-			.getDataLocationsForVO(fqan);
-			// final Date end = new Date();
-			// myLogger.debug("Querying for data locations for all sites and+ "
-			// + fqan + " took: " + (end.getTime() - start.getTime())
-			// + " ms.");
-			for (final String server : mpUrl.keySet()) {
-				try {
-					for (final String path : mpUrl.get(server)) {
 
-						final MountPoint mp = createMountPoint(server, path,
-								fqan, executor);
-						if (mp != null) {
-							mps.add(mp);
+
+		for (final String fqan : getFqans().keySet()) {
+
+			Thread t = new Thread() {
+				@Override
+				public void run() {
+
+					// final Date start = new Date();
+					final Map<String, String[]> mpUrl = AbstractServiceInterface.informationManager
+					.getDataLocationsForVO(fqan);
+					// final Date end = new Date();
+					// myLogger.debug("Querying for data locations for all sites and+ "
+					// + fqan + " took: " + (end.getTime() - start.getTime())
+					// + " ms.");
+					for (final String server : mpUrl.keySet()) {
+						try {
+							for (final String path : mpUrl.get(server)) {
+
+								final MountPoint mp = createMountPoint(server, path,
+										fqan,
+										(ENABLE_FILESYSTEM_CACHE) ? backgroundExecutorForFilesystemCache
+												: null);
+								if (mp != null) {
+									mps.add(mp);
+								}
+							}
+						} catch (final Exception e) {
+							myLogger.error(
+									"Can't use mountpoint " + server + ": "
+									+ e.getLocalizedMessage(), e);
 						}
 					}
-				} catch (final Exception e) {
-					myLogger.error(
-							"Can't use mountpoint " + server + ": "
-							+ e.getLocalizedMessage(), e);
 				}
-			}
+
+			};
+			executor.execute(t);
 		}
 
 		executor.shutdown();
+
+		try {
+			executor.awaitTermination(2, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		backgroundExecutorForFilesystemCache.shutdown();
 
 		return mps;
 	}
@@ -654,7 +685,8 @@ public class User {
 	throws FileSystemException {
 
 		final String key = filesystemRoot + fqan;
-		if (StringUtils.isNotBlank(getMountPointCache().get(key))) {
+		if (ENABLE_FILESYSTEM_CACHE
+				&& StringUtils.isNotBlank(getMountPointCache().get(key))) {
 			if (NOT_ACCESSIBLE.equals(getMountPointCache().get(key))) {
 
 				throw new FileSystemException(

@@ -41,10 +41,10 @@ import org.oasis.wsrf.faults.BaseFaultTypeDescription;
  */
 public class GramClient
 // Listen for job status messages
-		implements GramJobListener {
+implements GramJobListener {
 
 	static final Logger logger = Logger
-			.getLogger(AbstractServiceInterface.class.getName());
+	.getLogger(AbstractServiceInterface.class.getName());
 
 	// Amount of time to wait for job status changes
 	private static final long STATE_CHANGE_BASE_TIMEOUT_MILLIS = 60000;
@@ -114,7 +114,7 @@ public class GramClient
 			final FaultType myFaultType = job.getFault();
 			if (myFaultType != null) {
 				final BaseFaultTypeDescription[] myFaultArray = job.getFault()
-						.getDescription();
+				.getDescription();
 				for (final BaseFaultTypeDescription currFault : myFaultArray) {
 					logger.error(currFault.get_value());
 					condition += "\nReason: " + currFault.get_value();
@@ -147,11 +147,13 @@ public class GramClient
 			job = retrieveGramJob(gramJobHandle, cred);
 			job.refreshStatus();
 
-			final int error = job.getError();
+			// final int error = job.getError();
 
 		} catch (final NoSuchGT4JobException e) {
+			logger.error(e);
 			return "NoSuchJob";
 		} catch (final Exception e) {
+			logger.error(e);
 			return "NoSuchJob";
 		}
 
@@ -182,9 +184,9 @@ public class GramClient
 		final File rslFile = new File("/tmp/simple.xml");
 
 		System.setProperty("GLOBUS_LOCATION",
-				"/home/markus/workspace/grisu-core/globus");
+		"/home/markus/workspace/grisu-core/globus");
 		System.setProperty("axis.ClientConfigFile",
-				"/home/markus/workspace/grisu-core/globus/client-config.wsdd");
+		"/home/markus/workspace/grisu-core/globus/client-config.wsdd");
 
 		// Deafult Security: Host authorization + XML encryption
 		final Authorization authz = HostAuthorization.getInstance();
@@ -334,7 +336,7 @@ public class GramClient
 	 */
 	private String processJob(final GramJob job,
 			final EndpointReferenceType factoryEndpoint, final boolean batch)
-			throws Exception {
+	throws Exception {
 		// load custom proxy (if any)
 		// if (proxyPath != null) {
 		// try {
@@ -503,7 +505,7 @@ public class GramClient
 				this.job = new GramJob(rslFile);
 			} catch (final Exception e) {
 				final String errorMessage = "Unable to parse RSL from file "
-						+ rslFile;
+					+ rslFile;
 				logger.debug(errorMessage, e);
 				throw new IOException(errorMessage + " - " + e.getMessage());
 			}

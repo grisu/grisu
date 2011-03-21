@@ -1,5 +1,6 @@
 package grisu.model;
 
+import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.control.events.FolderCreatedEvent;
 import grisu.control.exceptions.RemoteFileSystemException;
@@ -304,6 +305,27 @@ public class FileManager {
 
 		return url.split(":")[0];
 
+	}
+
+	/**
+	 * Convenience method to check whether a local file exists.
+	 * 
+	 * Beware, this method also returns true if the url is not local. That is
+	 * because it is used to only check local file, sometimes it takes to long
+	 * to check remote files for existence.
+	 * 
+	 * @param url
+	 *            the url
+	 * @return true if the url is local and file exists or url is not local,
+	 *         false if url is local file but file doesn't exist.
+	 */
+	public static boolean localFileExists(String url) {
+
+		if (!isLocal(url)) {
+			return true;
+		}
+
+		return getFileFromUriOrPath(url).exists();
 	}
 
 	/**
@@ -734,8 +756,10 @@ public class FileManager {
 	 * @param s
 	 *            the new folder name
 	 * @return whether the new folder could be created or not
+	 * @throws RemoteFileSystemException
 	 */
-	public boolean createFolder(GridFile parent, String s) {
+	public boolean createFolder(GridFile parent, String s)
+	throws RemoteFileSystemException {
 
 		if (!GridFile.FILETYPE_FOLDER.equals(parent.getType())) {
 			return false;
@@ -761,16 +785,22 @@ public class FileManager {
 		} else {
 			url = parent.getUrl() + "/" + s;
 
-			try {
-				final boolean result = serviceInterface.mkdir(url);
-				if (result) {
-					EventBus.publish(new FolderCreatedEvent(url));
-				}
-				return result;
-			} catch (final RemoteFileSystemException e) {
-				return false;
+			X.p("URL " + url);
+
+			final boolean result = serviceInterface.mkdir(url);
+			if (result) {
+				EventBus.publish(new FolderCreatedEvent(url));
 			}
+			return result;
+
 		}
+
+	}
+
+	public void createFolder(String parentUrl, String s)
+			throws RemoteFileSystemException {
+
+		createFolder(createGridFile(parentUrl), s);
 
 	}
 
@@ -824,6 +854,11 @@ public class FileManager {
 	 *             if the file does not exist or can't be accessed
 	 */
 	public GridFile createGridFile(String url) throws RemoteFileSystemException {
+
+		if (StringUtils.isBlank(url)) {
+			// throw new RuntimeException("AAAA");
+			return null;
+		}
 
 		if (FileManager.isLocal(url)) {
 			final File file = getFileFromUriOrPath(url);
@@ -1036,6 +1071,20 @@ public class FileManager {
 		}
 
 		return targetFile;
+	}
+
+	/**
+	 * Checks whether a file exists or not.
+	 * 
+	 * @param file
+	 *            the file url or path
+	 * @return whether the file exists (true) or not (false)
+	 * @throws RemoteFileSystemException
+	 *             if the file is remote and can't be accessed
+	 */
+	public boolean fileExists(GridFile f) throws RemoteFileSystemException {
+
+		return fileExists(f.getUrl());
 	}
 
 	/**

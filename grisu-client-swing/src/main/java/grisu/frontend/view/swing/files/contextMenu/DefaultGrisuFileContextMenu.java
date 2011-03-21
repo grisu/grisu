@@ -1,8 +1,12 @@
-package grisu.frontend.view.swing.files;
+package grisu.frontend.view.swing.files.contextMenu;
 
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.fileTransfers.FileTransaction;
 import grisu.frontend.control.fileTransfers.FileTransactionManager;
+import grisu.frontend.view.swing.files.FileListListener;
+import grisu.frontend.view.swing.files.FileListPanel;
+import grisu.frontend.view.swing.files.FileListPanelContextMenu;
+import grisu.frontend.view.swing.files.FileTransactionStatusDialog;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.files.GlazedFile;

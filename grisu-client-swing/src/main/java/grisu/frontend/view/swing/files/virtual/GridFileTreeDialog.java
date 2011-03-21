@@ -220,8 +220,7 @@ GridFileListListener {
 	}
 
 	public void setExtensionsToDisplay(String[] extensions) {
-		throw new RuntimeException(
-		"Changing extensions to display not implemented yet.");
+		virtualFileSystemTreeTablePanel.setExtensionsToDisplay(extensions);
 	}
 
 	public void setFoldersSelectable(boolean foldersSelectable) {

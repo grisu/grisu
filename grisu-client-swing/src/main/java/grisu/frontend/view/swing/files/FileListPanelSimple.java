@@ -5,6 +5,7 @@ import grisu.control.events.FolderCreatedEvent;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.control.fileTransfers.FileTransaction;
 import grisu.frontend.control.fileTransfers.FileTransferEvent;
+import grisu.frontend.view.swing.files.contextMenu.DefaultGrisuFileContextMenu;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.MountPoint;

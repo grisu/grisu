@@ -20,6 +20,7 @@ public class SingleInputGridFile extends AbstractInputGridFile {
 	 */
 	public SingleInputGridFile() {
 		super();
+
 		setBorder(new TitledBorder(null, "Input file", TitledBorder.LEADING,
 				TitledBorder.TOP, null, null));
 		setLayout(new FormLayout(new ColumnSpec[] {

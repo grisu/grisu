@@ -1,6 +1,7 @@
 package grisu.backend.model;
 
 import grisu.model.MountPoint;
+import grisu.settings.ServerPropertiesManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -62,6 +63,8 @@ public class FileSystemCache {
 			final GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
 			.getInstance();
 			builder.setGSSCredential(opts, credToUse.getGssCredential());
+			builder.setTimeout(opts,
+					ServerPropertiesManager.getFileSystemConnectTimeout());
 			// builder.setUserDirIsRoot(opts, true);
 		}
 
