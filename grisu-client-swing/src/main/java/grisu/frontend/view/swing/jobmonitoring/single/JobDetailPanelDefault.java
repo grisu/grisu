@@ -37,7 +37,6 @@ import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 
-
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -45,7 +44,7 @@ import com.jgoodies.forms.layout.RowSpec;
 import com.jidesoft.swing.JideTabbedPane;
 
 public class JobDetailPanelDefault extends JPanel implements
-		PropertyChangeListener, JobDetailPanel {
+PropertyChangeListener, JobDetailPanel {
 
 	static final Logger myLogger = Logger.getLogger(JobDetailPanelDefault.class
 			.getName());
@@ -76,7 +75,7 @@ public class JobDetailPanelDefault extends JPanel implements
 	private static String generateLogHtml(Map<Date, String> jobProperties) {
 
 		final StringBuffer html = new StringBuffer(
-				"<html><table width=\"100%\">");
+		"<html><table width=\"100%\">");
 
 		boolean alternate = true;
 		for (final Date key : jobProperties.keySet()) {
@@ -98,7 +97,7 @@ public class JobDetailPanelDefault extends JPanel implements
 
 	private final ImageIcon REFRESH_ICON = new ImageIcon(
 			JobDetailPanelDefault.class.getClassLoader().getResource(
-					"refresh.png"));
+			"refresh.png"));
 
 	private JTextField txtNa;
 	private JobObject job;
@@ -206,19 +205,19 @@ public class JobDetailPanelDefault extends JPanel implements
 								job.archive(null, false);
 
 								StatusObject so = StatusObject
-										.waitForActionToFinish(
-												si,
-												ServiceInterface.ARCHIVE_STATUS_PREFIX
-														+ job.getJobname(), 5,
-												true, false);
+								.waitForActionToFinish(
+										si,
+										ServiceInterface.ARCHIVE_STATUS_PREFIX
+										+ job.getJobname(), 5,
+										true, false);
 
 								d.close();
 
 								if (so.getStatus().isFailed()) {
 
 									String msg = "Can't archive job: "
-											+ DtoActionStatus.getLastMessage(so
-													.getStatus());
+										+ DtoActionStatus.getLastMessage(so
+												.getStatus());
 									ErrorInfo info = new ErrorInfo(
 											"Job archiving error", msg, null,
 											"Error", null, Level.SEVERE, null);
@@ -228,7 +227,7 @@ public class JobDetailPanelDefault extends JPanel implements
 
 									JXErrorPane.showDialog(
 											JobDetailPanelDefault.this
-													.getRootPane(), pane);
+											.getRootPane(), pane);
 
 								}
 
@@ -237,7 +236,7 @@ public class JobDetailPanelDefault extends JPanel implements
 								ErrorInfo info = new ErrorInfo(
 										"Job archiving error",
 										"Can't archive job:\n\n"
-												+ e.getLocalizedMessage(),
+										+ e.getLocalizedMessage(),
 										null, "Error", e, Level.SEVERE, null);
 
 								JXErrorPane pane = new JXErrorPane();
@@ -245,7 +244,7 @@ public class JobDetailPanelDefault extends JPanel implements
 
 								JXErrorPane.showDialog(
 										JobDetailPanelDefault.this
-												.getRootPane(), pane);
+										.getRootPane(), pane);
 
 							}
 
@@ -281,7 +280,7 @@ public class JobDetailPanelDefault extends JPanel implements
 								ErrorInfo info = new ErrorInfo(
 										"Job cleaning error",
 										"Can't clean job:\n\n"
-												+ e.getLocalizedMessage(),
+										+ e.getLocalizedMessage(),
 										null, "Error", e, Level.SEVERE, null);
 
 								JXErrorPane pane = new JXErrorPane();
@@ -289,7 +288,7 @@ public class JobDetailPanelDefault extends JPanel implements
 
 								JXErrorPane.showDialog(
 										JobDetailPanelDefault.this
-												.getRootPane(), pane);
+										.getRootPane(), pane);
 
 							}
 
@@ -356,7 +355,7 @@ public class JobDetailPanelDefault extends JPanel implements
 								d.close();
 								ErrorInfo info = new ErrorInfo(
 										"Job kill error", "Can't kill job:\n\n"
-												+ e.getLocalizedMessage(),
+										+ e.getLocalizedMessage(),
 										null, "Error", e, Level.SEVERE, null);
 
 								JXErrorPane pane = new JXErrorPane();
@@ -364,7 +363,7 @@ public class JobDetailPanelDefault extends JPanel implements
 
 								JXErrorPane.showDialog(
 										JobDetailPanelDefault.this
-												.getRootPane(), pane);
+										.getRootPane(), pane);
 
 							}
 
@@ -515,15 +514,14 @@ public class JobDetailPanelDefault extends JPanel implements
 		if (evt.getPropertyName().equals("status")) {
 
 			getTxtNa()
-					.setText(
-							JobConstants.translateStatus((Integer) (evt
-									.getNewValue())));
+			.setText(
+					JobConstants.translateStatus((Integer) (evt
+							.getNewValue())));
 			setLog();
 			setProperties();
 
 			int status = (Integer) evt.getNewValue();
-			if ((status >= JobConstants.ACTIVE)
-					&& (status != JobConstants.NO_SUCH_JOB)) {
+			if ((status >= JobConstants.ACTIVE)) {
 				getFileListWithPreviewPanel().refresh();
 
 				if (status >= JobConstants.FINISHED_EITHER_WAY) {

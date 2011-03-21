@@ -186,6 +186,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 	public boolean createFolder(String url) throws RemoteFileSystemException {
 		FileSystemCache fsCache = new FileSystemCache(user);
+
 		try {
 			FileObject folder = aquireFile(fsCache, url, null);
 			return createFolder(folder);

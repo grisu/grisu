@@ -67,7 +67,7 @@ public class PasteAction extends AbstractAction {
 			if (t.isDataFlavorSupported(DataFlavor.stringFlavor)) {
 				// return text content
 				filesString = (String) t
-						.getTransferData(DataFlavor.stringFlavor);
+				.getTransferData(DataFlavor.stringFlavor);
 
 			}
 		} catch (UnsupportedFlavorException ufe) {
@@ -102,7 +102,7 @@ public class PasteAction extends AbstractAction {
 
 		String targetUrl = target.getUrl();
 		if (target.getUrls().size() > 1) {
-			DropVirtualGridFileDialog d = new DropVirtualGridFileDialog();
+			DropVirtualGridFileDialog d = new DropVirtualGridFileDialog("Copy");
 			d.setTargetGridFile(target);
 			d.setVisible(true);
 

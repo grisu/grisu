@@ -16,6 +16,7 @@ import java.io.File;
 import java.util.List;
 
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.TitledBorder;
 
@@ -38,21 +39,21 @@ public abstract class AbstractWidget extends JPanel {
 		}
 
 		String startUrl = GrisuRegistryManager.getDefault(si)
-				.getHistoryManager().getLastEntry(historyKey);
+		.getHistoryManager().getLastEntry(historyKey);
 
 		if (StringUtils.isBlank(startUrl)) {
 			startUrl = new File(System.getProperty("user.home")).toURI()
-					.toString();
+			.toString();
 		} else if (!FileManager.isLocal(startUrl)) {
 			try {
 				if (!si.isFolder(startUrl)) {
 					startUrl = new File(System.getProperty("user.home"))
-							.toURI().toString();
+					.toURI().toString();
 				}
 			} catch (final RemoteFileSystemException e) {
 				myLogger.debug(e);
 				startUrl = new File(System.getProperty("user.home")).toURI()
-						.toString();
+				.toString();
 			}
 		}
 		final GrisuFileDialog fileDialog = new GrisuFileDialog(owner, si,
@@ -67,35 +68,38 @@ public abstract class AbstractWidget extends JPanel {
 		return fileDialog;
 	}
 
+
 	public static GridFileTreeDialog createGridFileDialog(ServiceInterface si,
 			List<GridFile> roots, String historyKey, String[] extensions,
-			boolean displayHiddenFiles, Window owner) {
+			boolean displayHiddenFiles, boolean foldersSelectable,
+			boolean displayLocalFileSystems, Window owner) {
 
 		if (si == null) {
 			return null;
 		}
 
 		String startUrl = GrisuRegistryManager.getDefault(si)
-				.getHistoryManager().getLastEntry(historyKey);
+		.getHistoryManager().getLastEntry(historyKey);
 
 		if (StringUtils.isBlank(startUrl)) {
 			startUrl = new File(System.getProperty("user.home")).toURI()
-					.toString();
+			.toString();
 		} else if (!FileManager.isLocal(startUrl)) {
 			try {
 				if (!si.isFolder(startUrl)) {
 					startUrl = new File(System.getProperty("user.home"))
-							.toURI().toString();
+					.toURI().toString();
 				}
 			} catch (final RemoteFileSystemException e) {
 				myLogger.debug(e);
 				startUrl = new File(System.getProperty("user.home")).toURI()
-						.toString();
+				.toString();
 			}
 		}
 
 		final GridFileTreeDialog fileDialog = new GridFileTreeDialog(owner, si,
-				roots, displayHiddenFiles, extensions, true, startUrl);
+				roots, displayHiddenFiles, extensions, foldersSelectable,
+				displayLocalFileSystems, startUrl);
 		fileDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		fileDialog.centerOnOwner();
@@ -120,8 +124,7 @@ public abstract class AbstractWidget extends JPanel {
 		super();
 	}
 
-	@Override
-	public void addPropertyChangeListener(PropertyChangeListener l) {
+	public void addWidgetListener(PropertyChangeListener l) {
 		getPropertyChangeSupport().addPropertyChangeListener(l);
 	}
 
@@ -180,13 +183,17 @@ public abstract class AbstractWidget extends JPanel {
 
 		final Component[] comps = getComponents();
 		for (final Component comp : comps) {
-			comp.setEnabled(!lock);
+			SwingUtilities.invokeLater(new Thread() {
+				@Override
+				public void run() {
+					comp.setEnabled(!lock);
+				}
+			});
 		}
 
 	}
 
-	@Override
-	public void removePropertyChangeListener(PropertyChangeListener l) {
+	public void removeWidgetListener(PropertyChangeListener l) {
 		getPropertyChangeSupport().removePropertyChangeListener(l);
 	}
 

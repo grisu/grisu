@@ -50,7 +50,7 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 	}
 
 	static final Logger myLogger = Logger
-			.getLogger(GridFileTreeDropTarget.class.getName());
+	.getLogger(GridFileTreeDropTarget.class.getName());
 
 	public static int WAIT_DRAG_UNTIL_OPEN_FOLDER = 2000;
 
@@ -236,7 +236,7 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 
 		String targetUrl = target.getUrl();
 		if (target.getUrls().size() > 1) {
-			DropVirtualGridFileDialog d = new DropVirtualGridFileDialog();
+			DropVirtualGridFileDialog d = new DropVirtualGridFileDialog("Copy");
 			d.setTargetGridFile(target);
 			d.setVisible(true);
 
@@ -262,11 +262,11 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 		Set<String> sourceUrls = new LinkedHashSet<String>();
 		for (GridFile f : files) {
 			Set<String> urls = DtoProperty
-					.mapFromDtoPropertiesList(f.getUrls()).keySet();
+			.mapFromDtoPropertiesList(f.getUrls()).keySet();
 			for (String u : urls) {
 				if (FileManager.removeTrailingSlash(
 						FileManager.calculateParentUrl(u)).equals(
-						FileManager.removeTrailingSlash(targetUrl))) {
+								FileManager.removeTrailingSlash(targetUrl))) {
 					continue;
 				} else {
 					sourceUrls.add(u);
@@ -348,7 +348,7 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 		} else {
 			TreePath parentPath = path.getParentPath();
 			GridFileTreeNode parentNode = (GridFileTreeNode) parentPath
-					.getLastPathComponent();
+			.getLastPathComponent();
 
 			GridFile file = (GridFile) parentNode.getUserObject();
 

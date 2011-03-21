@@ -37,7 +37,12 @@ public final class ServerPropertiesManager {
 	 * Default concurrent threads when submitting the parts of a multipartjob: 2
 	 */
 	public static final int DEFAULT_CONCURRENT_JOB_SUBMISSION_THREADS_PER_USER = 2;
-	public static final int DEFAULT_CONCURRENT_FILE_TRANSFER_THREADS_PER_USER = 5;
+	public static final int DEFAULT_CONCURRENT_FILE_TRANSFER_THREADS_PER_USER = 10;
+
+	/**
+	 * Default concurrent threads when building mountpoint cache.
+	 */
+	public static final int DEFAULT_CONCURRENT_MOUNTPOINT_LOOKUPS = 8;
 
 	/**
 	 * Default directory name used as parent for the jobdirectories.
@@ -51,7 +56,7 @@ public final class ServerPropertiesManager {
 	// "grisu-multijob-dir";
 
 	static final Logger myLogger = Logger
-			.getLogger(ServerPropertiesManager.class.getName());
+	.getLogger(ServerPropertiesManager.class.getName());
 
 	private static final int DEFAULT_CONCURRENT_JOB_SUBMISSION_RETRIES = 5;
 
@@ -59,6 +64,10 @@ public final class ServerPropertiesManager {
 
 	private static final int DEFAULT_FILE_TRANSFER_RETRIES = 3;
 	private static final int DEFAULT_TIME_BETWEEN_FILE_TRANSFER_RETRIES_IN_SECONDS = 1;
+
+	private static final Integer DEFAULT_FILESYSTEM_TIMEOUT_IN_MILLISECONDS = 4000;
+
+	private static final int DEFAULT_FILE_LISTING_TIMEOUT_IN_SECONDS = 20;
 
 	// public static boolean getCheckConnectionToMountPoint() {
 	//
@@ -85,7 +94,7 @@ public final class ServerPropertiesManager {
 		int retries = -1;
 		try {
 			retries = Integer.parseInt(getServerConfiguration().getString(
-					"ConcurrentThreadSettings.fileTransfersPerUser"));
+			"ConcurrentThreadSettings.fileTransfersPerUser"));
 
 		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -121,6 +130,29 @@ public final class ServerPropertiesManager {
 	}
 
 	/**
+	 * Returns the number of concurrent threads that are used to build the
+	 * mountpoint cache when a user first logs in.
+	 * 
+	 * @return the number of concurrent threads
+	 */
+	public static int getConcurrentMountPointLookups() {
+		int concurrentThreads = -1;
+		try {
+			concurrentThreads = Integer
+			.parseInt(getServerConfiguration().getString(
+			"ConcurrentThreadSettings.mountPointLookupThreads"));
+
+		} catch (final Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_CONCURRENT_MOUNTPOINT_LOOKUPS;
+		}
+		if (concurrentThreads == -1) {
+			return DEFAULT_CONCURRENT_MOUNTPOINT_LOOKUPS;
+		}
+		return concurrentThreads;
+	}
+
+	/**
 	 * Returns the number of concurrent threads that are submitting (multi-)jobs
 	 * status per user.
 	 * 
@@ -130,8 +162,8 @@ public final class ServerPropertiesManager {
 		int concurrentThreads = -1;
 		try {
 			concurrentThreads = Integer
-					.parseInt(getServerConfiguration().getString(
-							"ConcurrentThreadSettings.batchJobSubmitThreads"));
+			.parseInt(getServerConfiguration().getString(
+			"ConcurrentThreadSettings.batchJobSubmitThreads"));
 
 		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -141,22 +173,6 @@ public final class ServerPropertiesManager {
 			return DEFAULT_CONCURRENT_JOB_SUBMISSION_THREADS_PER_USER;
 		}
 		return concurrentThreads;
-	}
-
-	/**
-	 * The url to connect to the database.
-	 * 
-	 * @return the url
-	 */
-	public static String getDatabaseConnectionUrl() {
-		String dbUrl;
-		try {
-			dbUrl = getServerConfiguration().getString(
-					"Database.databaseConnectionUrl");
-			return dbUrl;
-		} catch (final Exception e) {
-			return null;
-		}
 	}
 
 	// /**
@@ -189,6 +205,22 @@ public final class ServerPropertiesManager {
 	// }
 
 	/**
+	 * The url to connect to the database.
+	 * 
+	 * @return the url
+	 */
+	public static String getDatabaseConnectionUrl() {
+		String dbUrl;
+		try {
+			dbUrl = getServerConfiguration().getString(
+			"Database.databaseConnectionUrl");
+			return dbUrl;
+		} catch (final Exception e) {
+			return null;
+		}
+	}
+
+	/**
 	 * The database password.
 	 * 
 	 * @return the password
@@ -197,7 +229,7 @@ public final class ServerPropertiesManager {
 		String dbPassword;
 		try {
 			dbPassword = getServerConfiguration().getString(
-					"Database.databasePassword");
+			"Database.databasePassword");
 			return dbPassword;
 		} catch (final Exception e) {
 			return null;
@@ -215,7 +247,7 @@ public final class ServerPropertiesManager {
 		String dbType;
 		try {
 			dbType = getServerConfiguration()
-					.getString("Database.databaseType");
+			.getString("Database.databaseType");
 			return dbType;
 		} catch (final Exception e) {
 			return null;
@@ -231,7 +263,7 @@ public final class ServerPropertiesManager {
 		String dbUsername;
 		try {
 			dbUsername = getServerConfiguration().getString(
-					"Database.databaseUsername");
+			"Database.databaseUsername");
 			return dbUsername;
 		} catch (final Exception e) {
 			return null;
@@ -285,12 +317,45 @@ public final class ServerPropertiesManager {
 		return debug;
 	}
 
+	public static int getFileListingTimeOut() {
+
+		int waitTimeInSeconds = -1;
+		try {
+			waitTimeInSeconds = Integer.parseInt(getServerConfiguration()
+					.getString("General.fileListingTimeOut"));
+
+		} catch (final Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_FILE_LISTING_TIMEOUT_IN_SECONDS;
+		}
+		if (waitTimeInSeconds == -1) {
+			return DEFAULT_FILE_LISTING_TIMEOUT_IN_SECONDS;
+		}
+		return waitTimeInSeconds;
+	}
+
+	public static Integer getFileSystemConnectTimeout() {
+		int timeoutInMilliseconds = -1;
+		try {
+			timeoutInMilliseconds = Integer.parseInt(getServerConfiguration()
+					.getString("General.filesystemTimeout"));
+
+		} catch (final Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_FILESYSTEM_TIMEOUT_IN_MILLISECONDS;
+		}
+		if (timeoutInMilliseconds == -1) {
+			return DEFAULT_FILESYSTEM_TIMEOUT_IN_MILLISECONDS;
+		}
+		return timeoutInMilliseconds;
+	}
+
 	public static int getFileTransferRetries() {
 		// TODO Auto-generated method stub
 		int retries = -1;
 		try {
 			retries = Integer.parseInt(getServerConfiguration().getString(
-					"RetrySettings.fileTransfers"));
+			"RetrySettings.fileTransfers"));
 
 		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -315,7 +380,7 @@ public final class ServerPropertiesManager {
 		String jobDirName = null;
 		try {
 			jobDirName = getServerConfiguration().getString(
-					"General.jobDirName");
+			"General.jobDirName");
 
 			if (StringUtils.isNotBlank(jobDirName)
 					&& "none".equals(jobDirName.toLowerCase())) {
@@ -363,7 +428,7 @@ public final class ServerPropertiesManager {
 		int retries = -1;
 		try {
 			retries = Integer.parseInt(getServerConfiguration().getString(
-					"RetrySettings.jobSubmissions"));
+			"RetrySettings.jobSubmissions"));
 
 		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -450,11 +515,11 @@ public final class ServerPropertiesManager {
 	 *             if the file could not be read/parsed
 	 */
 	public static HierarchicalINIConfiguration getServerConfiguration()
-			throws ConfigurationException {
+	throws ConfigurationException {
 		if (config == null) {
 			final File grisuDir = Environment.getGrisuDirectory();
 			config = new HierarchicalINIConfiguration(new File(grisuDir,
-					"grisu-backend.config"));
+			"grisu-backend.config"));
 		}
 		return config;
 	}

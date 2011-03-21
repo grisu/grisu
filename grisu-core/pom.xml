@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.3.2.3-SNAPSHOT</version>
+		<version>0.3.3</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>grisu.backend</groupId>
@@ -43,7 +43,7 @@
 		<dependency>
 			<groupId>grisu</groupId>
 			<artifactId>grisu-commons</artifactId>
-			<version>0.3.3-SNAPSHOT</version>
+			<version>0.3.3</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>cryptix32</artifactId>
@@ -227,7 +227,7 @@
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>mysql-mds</artifactId>
-			<version>0.8.3</version>
+			<version>0.8.4</version>
 			<type>jar</type>
 			<scope>compile</scope>
 			<exclusions>
@@ -452,6 +452,8 @@
 					</execution>
 				</executions>
 			</plugin>
+
+
 
 		</plugins>
 	</build>

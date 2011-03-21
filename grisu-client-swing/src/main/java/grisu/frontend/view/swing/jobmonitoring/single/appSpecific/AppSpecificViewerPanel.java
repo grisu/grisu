@@ -20,7 +20,7 @@ import org.apache.log4j.Logger;
 
 
 public abstract class AppSpecificViewerPanel extends JPanel implements
-		JobDetailPanel, PropertyChangeListener {
+JobDetailPanel, PropertyChangeListener {
 
 	class UpdateProgressTask extends TimerTask {
 
@@ -36,7 +36,7 @@ public abstract class AppSpecificViewerPanel extends JPanel implements
 	}
 
 	static final Logger myLogger = Logger
-			.getLogger(AppSpecificViewerPanel.class.getName());
+	.getLogger(AppSpecificViewerPanel.class.getName());
 
 	public static AppSpecificViewerPanel create(ServiceInterface si,
 			JobObject job) {
@@ -46,11 +46,11 @@ public abstract class AppSpecificViewerPanel extends JPanel implements
 					Constants.APPLICATIONNAME_KEY, false);
 
 			final String className = "grisu.frontend.view.swing.jobmonitoring.single.appSpecific."
-					+ appName;
+				+ appName;
 			final Class classO = Class.forName(className);
 
 			final Constructor<AppSpecificViewerPanel> constO = classO
-					.getConstructor(ServiceInterface.class);
+			.getConstructor(ServiceInterface.class);
 
 			final AppSpecificViewerPanel asvp = constO.newInstance(si);
 
@@ -195,8 +195,6 @@ public abstract class AppSpecificViewerPanel extends JPanel implements
 					DEFAULT_PROGRESS_CHECK_INTERVALL * 1000,
 					DEFAULT_PROGRESS_CHECK_INTERVALL * 1000);
 
-		} else if (status != JobConstants.NO_SUCH_JOB) {
-			jobFinished();
 		}
 
 	}

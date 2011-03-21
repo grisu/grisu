@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.3.2.3-SNAPSHOT</version>
+		<version>0.3.3</version>
 	</parent>
 	<groupId>grisu.frontend</groupId>
 	<artifactId>grisu-client-swing</artifactId>
@@ -13,7 +13,7 @@
 		<dependency>
 			<groupId>grisu.frontend</groupId>
 			<artifactId>grisu-client</artifactId>
-			<version>0.3.2.3-SNAPSHOT</version>
+			<version>0.3.3</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -64,7 +64,7 @@
 		<dependency>
 			<groupId>grisu.backend</groupId>
 			<artifactId>grisu-core</artifactId>
-			<version>0.3.2.3-SNAPSHOT</version>
+			<version>0.3.3</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
@@ -107,20 +107,20 @@
 				</configuration>
 			</plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>2.1.2</version>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<phase>package</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+<!--			<plugin>-->
+<!--				<groupId>org.apache.maven.plugins</groupId>-->
+<!--				<artifactId>maven-source-plugin</artifactId>-->
+<!--				<version>2.1.2</version>-->
+<!--				<executions>-->
+<!--					<execution>-->
+<!--						<id>attach-sources</id>-->
+<!--						<phase>package</phase>-->
+<!--						<goals>-->
+<!--							<goal>jar</goal>-->
+<!--						</goals>-->
+<!--					</execution>-->
+<!--				</executions>-->
+<!--			</plugin>-->
 
 <!--			<plugin>-->
 <!--				<artifactId>maven-assembly-plugin</artifactId>-->

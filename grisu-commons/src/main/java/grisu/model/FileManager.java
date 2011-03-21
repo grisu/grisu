@@ -1,5 +1,6 @@
 package grisu.model;
 
+import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.control.events.FolderCreatedEvent;
 import grisu.control.exceptions.RemoteFileSystemException;
@@ -20,7 +21,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
@@ -58,7 +58,9 @@ import org.bushe.swing.event.EventBus;
 public class FileManager {
 
 	public static Clipboard FILE_TRANSFER_CLIPBOARD = new Clipboard(
-			"File transfers");
+	"File transfers");
+
+	public final static String[] FILESYSTEM_PLUGIN_TOKENS = new String[] { "groups" };
 
 	private static FileSystemView VIEW = FileSystemView.getFileSystemView();
 
@@ -67,8 +69,16 @@ public class FileManager {
 	private static long downloadTreshold = -1L;
 
 	public static final SimpleDateFormat dateformat = new SimpleDateFormat(
-			"dd.MM.yyyy HH:mm:SSS");
+	"dd.MM.yyyy HH:mm:SSS");
 
+	/**
+	 * Conveninec method to calculate a human readable String to indicate file
+	 * size from the bytesize of a file.
+	 * 
+	 * @param size
+	 *            the size in bytes
+	 * @return a human readable String that indicates filesize
+	 */
 	public static String calculateSizeString(Long size) {
 
 		String sizeString;
@@ -118,6 +128,17 @@ public class FileManager {
 
 	}
 
+	/**
+	 * Convenience method that basically converts normal local paths to files
+	 * into a url format. It also supports virtual filesystems, so if your path
+	 * for example starts with "/groups", it'll prepend "grid://" to it.
+	 * 
+	 * For already vaild urls it does nothing.
+	 * 
+	 * @param inputFile
+	 *            the input file path or url
+	 * @return a valid url to the file, be it local or remote
+	 */
 	public static String ensureUriFormat(String inputFile) {
 
 		try {
@@ -125,11 +146,11 @@ public class FileManager {
 				return inputFile;
 			}
 
-			String[] supportedTokens = new String[] { "groups" };
+			String[] supportedTokens = FILESYSTEM_PLUGIN_TOKENS;
 			for (String token : supportedTokens) {
 				if (inputFile.startsWith("/" + token)) {
 					return ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + ":/"
-							+ inputFile;
+					+ inputFile;
 				}
 			}
 
@@ -142,17 +163,34 @@ public class FileManager {
 
 	}
 
-	private static String get_url_strin_path(final String url) {
+	/**
+	 * Replaces all special charactes in a url with "_" in order to be able to
+	 * store it in the local cache (in .grisu/cache).
+	 * 
+	 * @param url
+	 *            the url
+	 * @return the "clean" string
+	 */
+	private static String get_url_string_path(final String url) {
 		return url.replace("=", "_").replace(",", "_").replace(" ", "_")
-				.replace(":", "").replace("//", File.separator)
-				.replace("/", File.separator);
+		.replace(":", "").replace("//", File.separator)
+		.replace("/", File.separator);
 	}
 
+	/**
+	 * Returns the configured size up to which Grisu downloads remote files for
+	 * preview without asking the user.
+	 * 
+	 * That is implemented so a user doesn't accidently double clicks a 2 GB
+	 * file and downloads it into the local cache.
+	 * 
+	 * @return the treshhold in bytes
+	 */
 	public static long getDownloadFileSizeThreshold() {
 
 		if (downloadTreshold <= 0L) {
 			final long treshold = ClientPropertiesManager
-					.getDownloadFileSizeTresholdInBytes();
+			.getDownloadFileSizeTresholdInBytes();
 
 			return treshold;
 		} else {
@@ -160,6 +198,13 @@ public class FileManager {
 		}
 	}
 
+	/**
+	 * Convenience method to get a {@link File} object form a local path or url.
+	 * 
+	 * @param uriOrPath
+	 *            the path or url
+	 * @return the file object
+	 */
 	public static File getFileFromUriOrPath(String uriOrPath) {
 
 		try {
@@ -188,13 +233,9 @@ public class FileManager {
 			if ("local://".equals(url)) {
 				return "Local";
 			}
-			url = ensureUriFormat(url);
-			File file = null;
-			try {
-				file = new File(new URI(url));
-			} catch (URISyntaxException e) {
-				throw new RuntimeException(e);
-			}
+
+			File file = getFileFromUriOrPath(url);
+
 			String name = file.getName();
 			return name;
 		} else {
@@ -213,6 +254,14 @@ public class FileManager {
 
 	}
 
+	/**
+	 * Returns a human readable String that indicates the last modified date of
+	 * a file (out of a unix time long).
+	 * 
+	 * @param date
+	 *            the date in unix time
+	 * @return the human readable date string
+	 */
 	public static String getLastModifiedString(Long date) {
 
 		if (date <= 0) {
@@ -223,6 +272,12 @@ public class FileManager {
 
 	}
 
+	/**
+	 * Returns all local filesystems (mainly for windows, returns drive names:
+	 * C:\, D:\, etc...)
+	 * 
+	 * @return the local filesytem roots
+	 */
 	public static Set<GridFile> getLocalFileSystems() {
 
 		File[] roots = File.listRoots();
@@ -239,12 +294,48 @@ public class FileManager {
 
 	}
 
-	public static String getProtocol(String parent) {
+	/**
+	 * Convenience method to extract the protocol out of a url.
+	 * 
+	 * @param parent
+	 *            the url;
+	 * @return the protocol
+	 */
+	public static String getProtocol(String url) {
 
-		return parent.split(":")[0];
+		return url.split(":")[0];
 
 	}
 
+	/**
+	 * Convenience method to check whether a local file exists.
+	 * 
+	 * Beware, this method also returns true if the url is not local. That is
+	 * because it is used to only check local file, sometimes it takes to long
+	 * to check remote files for existence.
+	 * 
+	 * @param url
+	 *            the url
+	 * @return true if the url is local and file exists or url is not local,
+	 *         false if url is local file but file doesn't exist.
+	 */
+	public static boolean localFileExists(String url) {
+
+		if (!isLocal(url)) {
+			return true;
+		}
+
+		return getFileFromUriOrPath(url).exists();
+	}
+
+	/**
+	 * Convenience method to ensure that the specified url doesn't end with a
+	 * slash.
+	 * 
+	 * @param url
+	 *            the url
+	 * @return the url without a trailing slash
+	 */
 	public static String removeTrailingSlash(String url) {
 
 		if (StringUtils.isBlank(url)) {
@@ -258,6 +349,17 @@ public class FileManager {
 		}
 	}
 
+	/**
+	 * Sets the treshhold up to which Grisu doesn't complain when downloading a
+	 * file into the local cache.
+	 * 
+	 * That is implemented so that a used doesn't accidently double-clicks a 2
+	 * GB file which gets automatically downloaded in the local cache for
+	 * preview purposes.
+	 * 
+	 * @param t
+	 *            the threshold size in bytes
+	 */
 	public static void setDownloadFileSizeTreshold(long t) {
 		downloadTreshold = t;
 	}
@@ -265,8 +367,15 @@ public class FileManager {
 	private final ServiceInterface serviceInterface;
 
 	static final Logger myLogger = Logger
-			.getLogger(FileManager.class.getName());
+	.getLogger(FileManager.class.getName());
 
+	/**
+	 * Convenience method to calculate the parent of a url.
+	 * 
+	 * @param rootUrl
+	 *            the url
+	 * @return the parent url
+	 */
 	public static String calculateParentUrl(String rootUrl) {
 
 		if (isLocal(rootUrl)) {
@@ -274,7 +383,7 @@ public class FileManager {
 			return file.getParentFile().toURI().toASCIIString();
 		} else {
 			final String result = rootUrl
-					.substring(0, rootUrl.lastIndexOf("/"));
+			.substring(0, rootUrl.lastIndexOf("/"));
 			return result;
 		}
 
@@ -319,6 +428,20 @@ public class FileManager {
 		this.serviceInterface = si;
 	}
 
+	/**
+	 * Copies local files.
+	 * 
+	 * @param sourceFile
+	 *            the source
+	 * @param targetFile
+	 *            the target
+	 * @param overwrite
+	 *            whether to overwrite the target if it already exists.
+	 * 
+	 * @throws FileTransactionException
+	 *             if the copying fails (for example because overwrite is false
+	 *             and target exists).
+	 */
 	public void copyLocalFiles(File sourceFile, File targetFile,
 			boolean overwrite) throws FileTransactionException {
 		if (!sourceFile.exists()) {
@@ -360,6 +483,19 @@ public class FileManager {
 		}
 	}
 
+	/**
+	 * Copies local files.
+	 * 
+	 * @param sourceUrl
+	 *            the path or url of the source file
+	 * @param targetDirUrl
+	 *            the path or url of the target file
+	 * @param overwrite
+	 *            whether to overwrite the target file if it exists
+	 * @throws FileTransactionException
+	 *             if the copying fails (for example because overwrite is false
+	 *             and target exists).
+	 */
 	public void copyLocalFiles(String sourceUrl, String targetDirUrl,
 			boolean overwrite) throws FileTransactionException {
 
@@ -370,6 +506,19 @@ public class FileManager {
 
 	}
 
+	/**
+	 * Copies remote files.
+	 * 
+	 * @param sourceUrl
+	 *            the source url
+	 * @param targetDirUrl
+	 *            the target url
+	 * @param overwrite
+	 *            whether to overwrite the target file if it exists
+	 * @throws FileTransactionException
+	 *             if the copying fails (for example because overwrite is false
+	 *             and target exists).
+	 */
 	private void copyRemoteFiles(String sourceUrl, String targetDirUrl,
 			boolean overwrite) throws FileTransactionException {
 
@@ -383,8 +532,21 @@ public class FileManager {
 
 	}
 
+	/**
+	 * Copies or uploads a local file.
+	 * 
+	 * @param sourceFile
+	 *            the source file
+	 * @param targetDirUrl
+	 *            the target path or url
+	 * @param overwrite
+	 *            whether to overwrite the target file if it exists
+	 * @throws FileTransactionException
+	 *             if the copying fails (for example because overwrite is false
+	 *             and target exists).
+	 */
 	public void cp(File sourceFile, String targetDirUrl, boolean overwrite)
-			throws FileTransactionException {
+	throws FileTransactionException {
 
 		if (isLocal(targetDirUrl)) {
 			final File targetFile = getFileFromUriOrPath(targetDirUrl);
@@ -396,17 +558,52 @@ public class FileManager {
 
 	}
 
+	/**
+	 * @param source
+	 * @param target
+	 * @param overwrite
+	 * @throws FileTransactionException
+	 * @Deprecated don't use {@link GlazedFiles} anymore (if you can help it)
+	 */
 	public void cp(GlazedFile source, GlazedFile target, boolean overwrite)
-			throws FileTransactionException {
+	throws FileTransactionException {
 		cp(source.getUrl(), target.getUrl(), overwrite);
 	}
 
+	/**
+	 * Copies {@link GridFile} grid files (remote or local).
+	 * 
+	 * @param source
+	 *            the source file
+	 * @param targetDir
+	 *            the target file
+	 * @param overwrite
+	 *            whether to overwrite the target file if it exists
+	 * @throws FileTransactionException
+	 *             if the copying fails (for example because overwrite is false
+	 *             and target exists
+	 */
 	public void cp(GridFile source, GridFile targetDir, boolean overwrite)
-			throws FileTransactionException {
+	throws FileTransactionException {
 
 		cp(source.getUrl(), targetDir.getUrl(), overwrite);
 	}
 
+	/**
+	 * Copies a set of {@link GridFile}s to a target directory.
+	 * 
+	 * @param sources
+	 *            the source files
+	 * @param targetDirectory
+	 *            the target directory
+	 * @param overwrite
+	 *            whether to overwrite the target file if it exists
+	 * @throws FileTransactionException
+	 *             if the copying fails (for example because overwrite is false
+	 *             and target exists
+	 * @deprecated don't use {@link GlazedFile anymore}
+	 */
+	@Deprecated
 	public void cp(Set<GlazedFile> sources, GlazedFile targetDirectory,
 			boolean overwrite) throws FileTransactionException {
 
@@ -416,6 +613,19 @@ public class FileManager {
 
 	}
 
+	/**
+	 * Copies a set of {@link GridFile}s to a target directory.
+	 * 
+	 * @param sources
+	 *            the source files
+	 * @param targetDirectory
+	 *            the target directory
+	 * @param overwrite
+	 *            whether to overwrite the target file if it exists
+	 * @throws FileTransactionException
+	 *             if the copying fails (for example because overwrite is false
+	 *             and target exists
+	 */
 	public void cp(Set<GridFile> sources, GridFile targetDirectory,
 			boolean overwrite) throws FileTransactionException {
 
@@ -424,8 +634,41 @@ public class FileManager {
 		}
 	}
 
+	/**
+	 * Copies a set of urls or paths to a target directory.
+	 * 
+	 * @param sources
+	 *            the source files
+	 * @param targetDirectory
+	 *            the target directory
+	 * @param overwrite
+	 *            whether to overwrite the target file if it exists
+	 * @throws FileTransactionException
+	 *             if the copying fails (for example because overwrite is false
+	 *             and target exists
+	 */
+	public void cp(Set<String> sourceUrls, String targeteDirUrl,
+			boolean overwrite) throws FileTransactionException {
+		for (final String url : sourceUrls) {
+			cp(url, targeteDirUrl, overwrite);
+		}
+	}
+
+	/**
+	 * Copies a url or path to a target directory.
+	 * 
+	 * @param sources
+	 *            the source file
+	 * @param targetDirectory
+	 *            the target directory
+	 * @param overwrite
+	 *            whether to overwrite the target file if it exists
+	 * @throws FileTransactionException
+	 *             if the copying fails (for example because overwrite is false
+	 *             and target exists
+	 */
 	public void cp(String sourceUrl, String targetDirUrl, boolean overwrite)
-			throws FileTransactionException {
+	throws FileTransactionException {
 
 		if (isLocal(sourceUrl) && isLocal(targetDirUrl)) {
 
@@ -456,9 +699,16 @@ public class FileManager {
 
 		throw new IllegalArgumentException(
 				"Can't determine location of files for " + sourceUrl + "and "
-						+ targetDirUrl + ".");
+				+ targetDirUrl + ".");
 	}
 
+	/**
+	 * @param currentDirectory
+	 * @param s
+	 * @return
+	 * @deprecated don't use {@link GlazedFile} anymore
+	 */
+	@Deprecated
 	public boolean createFolder(GlazedFile currentDirectory, String s) {
 
 		if (!GlazedFile.Type.FILETYPE_FOLDER.equals(currentDirectory.getType())) {
@@ -498,16 +748,27 @@ public class FileManager {
 
 	}
 
-	public boolean createFolder(GridFile currentDirectory, String s) {
+	/**
+	 * Create a new folder in a parent directory
+	 * 
+	 * @param parent
+	 *            the parent directory
+	 * @param s
+	 *            the new folder name
+	 * @return whether the new folder could be created or not
+	 * @throws RemoteFileSystemException
+	 */
+	public boolean createFolder(GridFile parent, String s)
+	throws RemoteFileSystemException {
 
-		if (!GridFile.FILETYPE_FOLDER.equals(currentDirectory.getType())) {
+		if (!GridFile.FILETYPE_FOLDER.equals(parent.getType())) {
 			return false;
 		}
 
 		String url = null;
-		if (isLocal(currentDirectory.getUrl())) {
+		if (isLocal(parent.getUrl())) {
 
-			url = currentDirectory.getUrl() + File.separator + s;
+			url = parent.getUrl() + File.separator + s;
 			final File newFolder = getFileFromUriOrPath(url);
 
 			if (newFolder.exists()) {
@@ -522,30 +783,38 @@ public class FileManager {
 				return result;
 			}
 		} else {
-			url = currentDirectory.getUrl() + "/" + s;
+			url = parent.getUrl() + "/" + s;
 
-			try {
-				final boolean result = serviceInterface.mkdir(url);
-				if (result) {
-					EventBus.publish(new FolderCreatedEvent(url));
-				}
-				return result;
-			} catch (final RemoteFileSystemException e) {
-				return false;
+			X.p("URL " + url);
+
+			final boolean result = serviceInterface.mkdir(url);
+			if (result) {
+				EventBus.publish(new FolderCreatedEvent(url));
 			}
+			return result;
+
 		}
 
 	}
 
+	public void createFolder(String parentUrl, String s)
+			throws RemoteFileSystemException {
+
+		createFolder(createGridFile(parentUrl), s);
+
+	}
+
+	/**
+	 * @param url
+	 * @return
+	 * @deprecated don't use {@link GlazedFile} anymore
+	 */
+	@Deprecated
 	public GlazedFile createGlazedFileFromUrl(String url) {
 
 		if (FileManager.isLocal(url)) {
-			try {
-				final File file = new File(new URI(ensureUriFormat(url)));
-				return new GlazedFile(file);
-			} catch (final URISyntaxException e) {
-				throw new RuntimeException(e);
-			}
+			final File file = getFileFromUriOrPath(url);
+			return new GlazedFile(file);
 		} else {
 			return new GlazedFile(url, serviceInterface);
 		}
@@ -572,15 +841,28 @@ public class FileManager {
 
 	}
 
+	/**
+	 * Creates a {@link GridFile} object from a url.
+	 * 
+	 * This might involve contacting the backend and can therefor be a bit
+	 * timeconsuming, so don't use that if you have 1000s of files...
+	 * 
+	 * @param url
+	 *            the url
+	 * @return the GridFile object
+	 * @throws RemoteFileSystemException
+	 *             if the file does not exist or can't be accessed
+	 */
 	public GridFile createGridFile(String url) throws RemoteFileSystemException {
 
+		if (StringUtils.isBlank(url)) {
+			// throw new RuntimeException("AAAA");
+			return null;
+		}
+
 		if (FileManager.isLocal(url)) {
-			try {
-				final File file = new File(new URI(ensureUriFormat(url)));
-				return new GridFile(file);
-			} catch (final URISyntaxException e) {
-				throw new RuntimeException(e);
-			}
+			final File file = getFileFromUriOrPath(url);
+			return new GridFile(file);
 		} else {
 			return serviceInterface.ls(url, 0);
 		}
@@ -620,7 +902,7 @@ public class FileManager {
 	 *             if the transfer fails
 	 */
 	public final File downloadFile(final String url)
-			throws FileTransactionException {
+	throws FileTransactionException {
 
 		if (isLocal(url)) {
 			return getFileFromUriOrPath(url);
@@ -673,7 +955,7 @@ public class FileManager {
 	}
 
 	private File downloadFolder(final String url)
-			throws FileTransactionException {
+	throws FileTransactionException {
 
 		GridFile source = null;
 		try {
@@ -685,11 +967,11 @@ public class FileManager {
 
 		final List<String> files = source.listOfAllFilesUnderThisFolder();
 		final Map<String, Exception> exceptions = Collections
-				.synchronizedMap(new HashMap<String, Exception>());
+		.synchronizedMap(new HashMap<String, Exception>());
 
 		final ExecutorService executor1 = Executors
-				.newFixedThreadPool(ClientPropertiesManager
-						.getConcurrentUploadThreads());
+		.newFixedThreadPool(ClientPropertiesManager
+				.getConcurrentUploadThreads());
 
 		for (final String file : files) {
 
@@ -719,7 +1001,7 @@ public class FileManager {
 		if (exceptions.size() > 0) {
 			throw new FileTransactionException(url, null,
 					"Error transfering the following files: "
-							+ StringUtils.join(exceptions.keySet(), ", "), null);
+					+ StringUtils.join(exceptions.keySet(), ", "), null);
 		}
 
 		myLogger.debug("File download for folder " + url + " successful.");
@@ -748,7 +1030,7 @@ public class FileManager {
 	 *             if the file can't be downloaded for some reason
 	 */
 	public File downloadUrl(String url, String target, boolean overwrite)
-			throws IOException, FileTransactionException {
+	throws IOException, FileTransactionException {
 
 		final File targetFile = getFileFromUriOrPath(target + "/"
 				+ getFilename(url));
@@ -791,28 +1073,81 @@ public class FileManager {
 		return targetFile;
 	}
 
+	/**
+	 * Checks whether a file exists or not.
+	 * 
+	 * @param file
+	 *            the file url or path
+	 * @return whether the file exists (true) or not (false)
+	 * @throws RemoteFileSystemException
+	 *             if the file is remote and can't be accessed
+	 */
+	public boolean fileExists(GridFile f) throws RemoteFileSystemException {
+
+		return fileExists(f.getUrl());
+	}
+
+	/**
+	 * Checks whether a file exists or not.
+	 * 
+	 * @param file
+	 *            the file url or path
+	 * @return whether the file exists (true) or not (false)
+	 * @throws RemoteFileSystemException
+	 *             if the file is remote and can't be accessed
+	 */
 	public boolean fileExists(String file) throws RemoteFileSystemException {
 
 		if (isLocal(file)) {
-			return new File(file).exists();
+			return getFileFromUriOrPath(file).exists();
 		} else {
 			return serviceInterface.fileExists(file);
 		}
 
 	}
 
+	/**
+	 * Returns the size of the file in bytes.
+	 * 
+	 * @param url
+	 *            the url or path
+	 * @return the filesize in bytes
+	 * @throws RemoteFileSystemException
+	 *             if the file is remote and can't be accessed
+	 */
 	public long getFileSize(String url) throws RemoteFileSystemException {
 
-		final Long fs = serviceInterface.getFileSize(url);
-		return fs;
+		if (isLocal(url)) {
+			return getFileFromUriOrPath(url).length();
+		} else {
+			return serviceInterface.getFileSize(url);
+		}
+
 	}
 
+	/**
+	 * Returns a parent file for all virtual remote filesystems.
+	 * 
+	 * @return a virtual grid root file
+	 */
 	public GridFile getGridRoot() {
 		return new GridFile(
 				ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://", -1L);
 	}
 
-	public File getLocalCacheFile(final String url) {
+	/**
+	 * Returns a {@link File} object that denotes the location of the specified
+	 * (remote) file in the local cache folder. Or the file directly in case the
+	 * url is local.
+	 * 
+	 * Be aware that this method doesn't download the file into the cache, you
+	 * need to do that using {@link FileManager#downloadFile(String)}.
+	 * 
+	 * @param url
+	 *            the url or path of the file
+	 * @return a {@link File} object
+	 */
+	public File getLocalCacheFile(String url) {
 
 		if (isLocal(url)) {
 
@@ -822,13 +1157,18 @@ public class FileManager {
 
 			String rootPath = null;
 			rootPath = Environment.getGrisuLocalCacheRoot() + File.separator
-					+ get_url_strin_path(url);
+			+ get_url_string_path(url);
 
 			return new File(rootPath);
 		}
 
 	}
 
+	/**
+	 * Returns a virtual file that has got all local roots as children.
+	 * 
+	 * @return the virtual local root file
+	 */
 	public GridFile getLocalRoot() {
 
 		GridFile localRoot = new GridFile("local://", -1);
@@ -849,8 +1189,23 @@ public class FileManager {
 		return localRoot;
 	}
 
+	/**
+	 * Checks whether the actual file a specified url points to is bigger than
+	 * the specified download treshhold.
+	 * 
+	 * The download treshhold is a value up to which Grisu automatically
+	 * downloads files into the local cache (for file preview purposes), without
+	 * asking the user.
+	 * 
+	 * @param url
+	 *            the url
+	 * @return whether the file associated with the specified url is bigger than
+	 *         the download treshhold
+	 * @throws RemoteFileSystemException
+	 *             if the remote file can't be accessed
+	 */
 	public boolean isBiggerThanThreshold(String url)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 
 		final long remoteFileSize = serviceInterface.getFileSize(url);
 
@@ -862,9 +1217,17 @@ public class FileManager {
 
 	}
 
+	/**
+	 * Checks whether the specified url or path is a file or folder.
+	 * 
+	 * @param file
+	 *            the file url or path
+	 * @return whether url is file (true)
+	 */
 	public boolean isFile(String file) {
+
 		if (isLocal(file)) {
-			return new File(file).isFile();
+			return getFileFromUriOrPath(file).isFile();
 		} else {
 			try {
 				if (serviceInterface.fileExists(file)) {
@@ -878,10 +1241,17 @@ public class FileManager {
 		}
 	}
 
+	/**
+	 * Checks whether the specified url or path is a folder.
+	 * 
+	 * @param file
+	 *            the file url or path
+	 * @return whether url is folder (true)
+	 */
 	public boolean isFolder(String file) {
 
 		if (isLocal(file)) {
-			return new File(file).isDirectory();
+			return getFileFromUriOrPath(file).isDirectory();
 		} else {
 			try {
 				if (serviceInterface.fileExists(file)) {
@@ -895,8 +1265,22 @@ public class FileManager {
 		}
 	}
 
+	/**
+	 * Returns a list of urls of all files that sit under the folder specified,
+	 * including all sub-folders.
+	 * 
+	 * This method can take quite a while to execute, depending how many
+	 * sub-folder the folder has.
+	 * 
+	 * @param folderUrl
+	 *            the url of the folder
+	 * @return a list of children file urls
+	 * @throws RemoteFileSystemException
+	 *             if the folder or one of its child-folders/files can't be
+	 *             accessed
+	 */
 	public List<String> listAllChildrenFilesOfRemoteFolder(String folderUrl)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 
 		if (!serviceInterface.isFolder(folderUrl)) {
 			throw new IllegalArgumentException("Specified url " + folderUrl
@@ -908,8 +1292,14 @@ public class FileManager {
 		return folder.listOfAllFilesUnderThisFolder();
 	}
 
+	/**
+	 * @param parent
+	 * @return
+	 * @throws RemoteFileSystemException
+	 * @Deprecated don't use {@link GlazedFile} anymore
+	 */
 	public synchronized List<GlazedFile> ls(GlazedFile parent)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 
 		List<GlazedFile> result = new ArrayList<GlazedFile>();
 
@@ -922,6 +1312,15 @@ public class FileManager {
 		return result;
 	}
 
+	/**
+	 * Returns the children of the specified folder.
+	 * 
+	 * @param parent
+	 *            the folder to list
+	 * @return the children of the folder
+	 * @throws RemoteFileSystemException
+	 *             if the folder can't be accessed
+	 */
 	public Set<GridFile> ls(GridFile parent) throws RemoteFileSystemException {
 
 		GridFile folder = null;
@@ -939,12 +1338,37 @@ public class FileManager {
 
 	}
 
+	/**
+	 * Returns the children of the specified folder.
+	 * 
+	 * @param url
+	 *            the url of the folder to list
+	 * @return the children of the folder
+	 * @throws RemoteFileSystemException
+	 *             if the folder can't be accessed
+	 */
 	public GridFile ls(String url) throws RemoteFileSystemException {
 		return ls(url, 1);
 	}
 
+	/**
+	 * Returns a filesystem structure of a configurable level below a specified
+	 * root folder url.
+	 * 
+	 * Be aware, values of more than 1 recursion levels are probably not
+	 * supported by most filesystem plugins yet.
+	 * 
+	 * @param url
+	 *            the url of the root folder
+	 * @param recursionLevel
+	 *            the recursion level
+	 * @return a structure of {@link GridFile}s that mirrors the remote
+	 *         filesytem structure
+	 * @throws RemoteFileSystemException
+	 *             if one of the child files/folders can't be accessed
+	 */
 	public GridFile ls(String url, int recursionLevel)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 
 		if (isLocal(url)) {
 
@@ -969,6 +1393,14 @@ public class FileManager {
 		}
 	}
 
+	/**
+	 * Checks whether the specified url is in the local cache and up to date.
+	 * 
+	 * @param url
+	 *            the url
+	 * @return whether the local cache file exists and is up to date (false) or
+	 *         not (true)
+	 */
 	public boolean needsDownloading(String url) {
 
 		final File cacheTargetFile = getLocalCacheFile(url);
@@ -1004,6 +1436,19 @@ public class FileManager {
 
 	}
 
+	/**
+	 * Uploads a file to the specified target url.
+	 * 
+	 * @param file
+	 *            the source file object
+	 * @param targetFile
+	 *            the target file url (not target directory)
+	 * @param overwrite
+	 *            whether to overwrite the target file if it already exists
+	 * @throws FileTransactionException
+	 *             if the remote filesystem can't be accessed or the file exists
+	 *             and overwrite is set to false
+	 */
 	public final void uploadFile(final File file, final String targetFile,
 			boolean overwrite) throws FileTransactionException {
 
@@ -1016,7 +1461,7 @@ public class FileManager {
 				if (!file.exists()) {
 					throw new FileTransactionException(file.toString(),
 							targetFile, "File does not exist: "
-									+ file.toString(), null);
+							+ file.toString(), null);
 				}
 
 				if (!file.canRead()) {
@@ -1111,7 +1556,7 @@ public class FileManager {
 	 */
 	private final void uploadFileToDirectory(final File file,
 			final String targetDirectory, final boolean overwrite)
-			throws FileTransactionException {
+	throws FileTransactionException {
 
 		if (file.isDirectory()) {
 			throw new FileTransactionException(file.toString(),
@@ -1126,25 +1571,23 @@ public class FileManager {
 
 	}
 
-	// private final void uploadInputFile(final String job, final String
-	// uriOrPath)
-	// throws FileTransactionException {
-	//
-	// final File file = getFileFromUriOrPath(uriOrPath);
-	//
-	// if (file.isDirectory()) {
-	// throw new FileTransactionException(uriOrPath, null,
-	// "Upload of folders not supported for job input files.",
-	// null);
-	// } else {
-	// uploadInputFile(file, job);
-	// }
-	//
-	// }
-
+	/**
+	 * Uploads a folder recursively into a target directory.
+	 * 
+	 * @param folder
+	 *            the source folder
+	 * @param targetDirectory
+	 *            the target directory
+	 * @param overwrite
+	 *            whether to overwrite the target if a file/folder with the same
+	 *            name already exists
+	 * @throws FileTransactionException
+	 *             if remote filesytem can't be accessed or target file/folder
+	 *             exists and overwrite is set to false
+	 */
 	public final void uploadFolderToDirectory(final File folder,
 			final String targetDirectory, final boolean overwrite)
-			throws FileTransactionException {
+	throws FileTransactionException {
 
 		if (!folder.isDirectory()) {
 			throw new FileTransactionException(folder.toString(),
@@ -1154,11 +1597,11 @@ public class FileManager {
 		final Collection<File> allFiles = FileUtils.listFiles(folder, null,
 				true);
 		final Map<String, Exception> errors = Collections
-				.synchronizedMap(new HashMap<String, Exception>());
+		.synchronizedMap(new HashMap<String, Exception>());
 
 		final ExecutorService executor1 = Executors
-				.newFixedThreadPool(ClientPropertiesManager
-						.getConcurrentUploadThreads());
+		.newFixedThreadPool(ClientPropertiesManager
+				.getConcurrentUploadThreads());
 
 		final String basePath = folder.getParentFile().getPath();
 		for (final File file : allFiles) {
@@ -1214,7 +1657,7 @@ public class FileManager {
 		if (errors.size() > 0) {
 			throw new FileTransactionException(folder.toString(),
 					targetDirectory, "Error transfering the following files: "
-							+ StringUtils.join(errors.keySet(), ", "), null);
+					+ StringUtils.join(errors.keySet(), ", "), null);
 		}
 
 		myLogger.debug("File upload for folder " + folder.toString()
@@ -1303,11 +1746,11 @@ public class FileManager {
 		final Collection<File> allFiles = FileUtils.listFiles(folder, null,
 				true);
 		final Map<String, Exception> errors = Collections
-				.synchronizedMap(new HashMap<String, Exception>());
+		.synchronizedMap(new HashMap<String, Exception>());
 
 		final ExecutorService executor1 = Executors
-				.newFixedThreadPool(ClientPropertiesManager
-						.getConcurrentUploadThreads());
+		.newFixedThreadPool(ClientPropertiesManager
+				.getConcurrentUploadThreads());
 
 		// final String basePath = folder.getParentFile().getPath();
 		final String basePath = folder.getPath();
@@ -1315,7 +1758,7 @@ public class FileManager {
 
 			final String filePath = file.getPath();
 			final String deltaPathTemp = path + "/"
-					+ filePath.substring(basePath.length());
+			+ filePath.substring(basePath.length());
 
 			String deltaPath;
 			if (deltaPathTemp.startsWith("/") || deltaPathTemp.startsWith("\\")) {
@@ -1361,12 +1804,12 @@ public class FileManager {
 										file.toString(),
 										null,
 										"Could not upload input file "
-												+ file.toString()
-												+ ": "
-												+ DtoActionStatus
-														.getLogMessagesAsString(so
-																.getStatus()),
-										null);
+										+ file.toString()
+										+ ": "
+										+ DtoActionStatus
+										.getLogMessagesAsString(so
+												.getStatus()),
+												null);
 							}
 
 							myLogger.info("Upload of input file "
@@ -1431,13 +1874,26 @@ public class FileManager {
 		if (errors.size() > 0) {
 			throw new FileTransactionException(folder.toString(), null,
 					"Error transfering the following files: "
-							+ StringUtils.join(errors.keySet(), ", "), null);
+					+ StringUtils.join(errors.keySet(), ", "), null);
 		}
 
 		myLogger.debug("File upload for folder " + folder.toString()
 				+ " successful.");
 	}
 
+	/**
+	 * Uploads input file for an already created (but not submitted) job on the
+	 * backend.
+	 * 
+	 * @param job
+	 *            the name of the job
+	 * @param uriOrPath
+	 *            the source file url or path
+	 * @param targetPath
+	 *            the (relative to the job directory) target path
+	 * @throws FileTransactionException
+	 *             if the remote directory can't be accessed
+	 */
 	public final void uploadJobInput(String job, String uriOrPath,
 			String targetPath) throws FileTransactionException {
 
@@ -1485,7 +1941,7 @@ public class FileManager {
 	 */
 	public final void uploadUrlToDirectory(final String uriOrPath,
 			final String targetDirectory, boolean overwrite)
-			throws FileTransactionException {
+	throws FileTransactionException {
 
 		final File file = getFileFromUriOrPath(uriOrPath);
 
@@ -1506,7 +1962,7 @@ public class FileManager {
 			if (!serviceInterface.fileExists(targetDirectory)) {
 				try {
 					final boolean success = serviceInterface
-							.mkdir(targetDirectory);
+					.mkdir(targetDirectory);
 
 					if (!success) {
 						throw new FileTransactionException(file.toURL()
@@ -1548,6 +2004,15 @@ public class FileManager {
 
 	}
 
+	/**
+	 * Checks whether an up to date replica of a remote file exists in the local
+	 * cache or not.
+	 * 
+	 * @param url
+	 *            the remote file url (for local files this will always return
+	 *            true)
+	 * @return whether a valid replica exists or not
+	 */
 	public boolean upToDateLocalCacheFileExists(String url) {
 
 		if (isLocal(url)) {
@@ -1564,7 +2029,7 @@ public class FileManager {
 					if (!cacheTargetParentFile.exists()) {
 						throw new RuntimeException(
 								"Could not create parent folder for cache file "
-										+ cacheTargetFile);
+								+ cacheTargetFile);
 					}
 				}
 			}

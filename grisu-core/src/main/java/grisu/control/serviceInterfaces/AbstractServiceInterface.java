@@ -2040,9 +2040,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return old_status;
 		}
 
-		// TODO check whether the no_such_job check is necessary
-		if ((old_status >= JobConstants.FINISHED_EITHER_WAY)
-				&& (old_status != JobConstants.NO_SUCH_JOB)) {
+		// check whether the no_such_job check is necessary
+		if (old_status >= JobConstants.FINISHED_EITHER_WAY) {
 			return old_status;
 		}
 
@@ -3419,7 +3418,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} catch (RemoteFileSystemException e1) {
 			throw new JobPropertiesException(
 					"Could not create new jobdirectory " + newJobdir + ": "
-							+ e1);
+					+ e1);
 		}
 
 		job.addJobProperty(Constants.JOBDIRECTORY_KEY, newJobdir);

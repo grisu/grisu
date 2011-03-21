@@ -94,7 +94,7 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 		listeners.addElement(l);
 	}
 
-	public void displayHiddenFiles(boolean display) {
+	public void setDisplayHiddenFiles(boolean display) {
 		// TODO Auto-generated method stub
 
 	}

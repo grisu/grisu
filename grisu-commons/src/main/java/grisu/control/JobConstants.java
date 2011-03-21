@@ -43,10 +43,10 @@ public final class JobConstants {
 	public static final int UNSUBMITTED = -1;
 	public static final int PENDING = 0;
 	public static final int ACTIVE = 1;
+	public static final int NO_SUCH_JOB = 99;
 	public static final int CLEAN_UP = 101;
 	public static final int BATCH_JOB_FINISHED = 100;
 	public static final int FINISHED_EITHER_WAY = 900;
-	public static final int NO_SUCH_JOB = 997;
 	public static final int KILLED = 998;
 	public static final int FAILED = 999;
 	public static final int DONE = 1000;

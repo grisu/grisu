@@ -6,8 +6,10 @@ import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.model.FileManager;
 import grisu.model.MountPoint;
 import grisu.model.dto.GridFile;
+import grisu.settings.ServerPropertiesManager;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -98,9 +100,11 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				if (mps.size() == 1) {
 					GridFile file = new GridFile(mps.iterator().next());
 					file.setName(FileManager.getFilename(fqan));
-					file.setPath((path + "/" + file.getName()).replace("///",
+					String pathNew = (path + "/" + file.getName()).replace(
+							"///",
 					"/").replace("//", "/")
-					+ "//");
+					+ "//";
+					file.setPath(pathNew);
 					file.setIsVirtual(true);
 					file.addSites(temp.get(fqan));
 					result.addChild(file);
@@ -108,9 +112,11 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					GridFile file = new GridFile((BASE + fqan).replace("///",
 					"/").replace("//", "/")
 					+ "//", fqan);
-					file.setPath((path + "/" + file.getName()).replace("///",
+					String pathNew = (path + "/" + file.getName()).replace(
+							"///",
 					"/").replace("//", "/")
-					+ "//");
+					+ "//";
+					file.setPath(pathNew);
 					for (MountPoint mp : mps) {
 						// X.p("Add" + mp.getRootUrl());
 						file.addUrl(mp.getRootUrl(),
@@ -268,13 +274,13 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					if (mps.size() == 1) {
 						GridFile file = new GridFile(mps.iterator().next());
 						file.setName(FileManager.getFilename(fqan));
-						file.setPath(path + "/" + file.getName());
+						file.setPath(path + "/" + file.getName() + "//");
 						file.setIsVirtual(true);
 						file.addSites(temp.get(fqan));
 						children.add(file);
 					} else {
 						GridFile file = new GridFile(BASE + fqan, fqan);
-						file.setPath(path + "/" + file.getName());
+						file.setPath(path + "/" + file.getName() + "//");
 						file.setIsVirtual(true);
 						file.addSites(temp.get(fqan));
 						children.add(file);
@@ -336,11 +342,15 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 	throws RemoteFileSystemException {
 
 		Set<MountPoint> mps = user.getMountPoints(fqan);
+		if (mps.size() == 0) {
+			return new TreeSet<GridFile>();
+		}
 
-		final Set<GridFile> result = Collections
-		.synchronizedSet(new TreeSet<GridFile>());
+		final Map<String, GridFile> result = Collections
+		.synchronizedMap(new HashMap<String, GridFile>());
 
-		final ExecutorService pool = Executors.newFixedThreadPool(20);
+
+		final ExecutorService pool = Executors.newFixedThreadPool(mps.size());
 
 		for (final MountPoint mp : mps) {
 
@@ -350,23 +360,33 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				@Override
 				public void run() {
 
+					myLogger.debug("Groupfilesystem list group started: "
+							+ mp.getAlias() + " / " + urlToQuery);
+
+					result.put(urlToQuery, null);
+
 					try {
 						GridFile file = user.getFileSystemManager()
 						.getFolderListing(urlToQuery, 1);
 						file.addSite(mp.getSite());
-						result.add(file);
+						result.put(urlToQuery, file);
+
 					} catch (RemoteFileSystemException rfse) {
 						String msg = rfse.getLocalizedMessage();
 						if (!msg.contains("not a folder")) {
 							GridFile f = new GridFile(urlToQuery, false, rfse);
 							f.addSite(mp.getSite());
-							result.add(f);
+							result.put(urlToQuery, f);
 						}
 					} catch (Exception ex) {
-						GridFile f = new GridFile(urlToQuery, true, ex);
+						GridFile f = new GridFile(urlToQuery, false, ex);
 						f.addSite(mp.getSite());
-						result.add(f);
+						result.put(urlToQuery, f);
 					}
+
+					myLogger.debug("Groupfilesystem list group finished: "
+							+ mp.getAlias() + " / " + urlToQuery);
+
 				}
 			};
 
@@ -375,13 +395,33 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 		pool.shutdown();
 
+
+		int timeout = ServerPropertiesManager.getFileListingTimeOut();
 		try {
-			pool.awaitTermination(5, TimeUnit.MINUTES);
+			boolean timedOut = !pool
+			.awaitTermination(timeout, TimeUnit.SECONDS);
+			if (timedOut) {
+				myLogger.debug("GroupfilePlugin list group timed out....");
+
+				// filling missing files
+				for (String url : result.keySet()) {
+					if ( result.get(url) == null ) {
+						GridFile temp = new GridFile(
+								url,
+								false,
+								new Exception(
+										"Timeout ("
+										+ timeout
+										+ " seconds) while trying to list children."));
+						result.put(url, temp);
+					}
+				}
+			}
 		} catch (InterruptedException e) {
 			throw new RemoteFileSystemException(e);
 		}
 
-		return result;
+		return new TreeSet<GridFile>(result.values());
 
 	}
 

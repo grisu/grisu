@@ -20,7 +20,8 @@ public class DropVirtualGridFileDialog extends JDialog {
 	 */
 	public static void main(String[] args) {
 		try {
-			DropVirtualGridFileDialog dialog = new DropVirtualGridFileDialog();
+			DropVirtualGridFileDialog dialog = new DropVirtualGridFileDialog(
+					"TEST");
 			dialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 			dialog.setVisible(true);
 		} catch (Exception e) {
@@ -35,7 +36,7 @@ public class DropVirtualGridFileDialog extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public DropVirtualGridFileDialog() {
+	public DropVirtualGridFileDialog(String buttonText) {
 		setModal(true);
 		setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -57,7 +58,7 @@ public class DropVirtualGridFileDialog extends JDialog {
 				buttonPane.add(cancelButton);
 			}
 			{
-				JButton okButton = new JButton("Copy");
+				JButton okButton = new JButton(buttonText);
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						selUrl = contentPanel.getSelectedTarget();

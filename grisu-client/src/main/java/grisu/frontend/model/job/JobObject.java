@@ -454,7 +454,11 @@ Comparable<JobObject> {
 				addJobLogMessage("Job created. Jobname: " + getJobname());
 				EventBus.publish(this.getJobname(), new JobStatusEvent(this,
 						this.status, JobConstants.JOB_CREATED));
+			} else {
+				addJobLogMessage("Job created.");
 			}
+
+			addJobLogMessage("Command to execute: " + getCommandline());
 			// populate new job properties in background
 			new Thread() {
 				@Override

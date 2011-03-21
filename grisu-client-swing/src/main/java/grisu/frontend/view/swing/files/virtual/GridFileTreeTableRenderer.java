@@ -36,7 +36,7 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 
 	private static Icon errorIcon = new ImageIcon(
 			GridFileTreeTableRenderer.class
-.getResource("/error.gif"));
+			.getResource("/error.gif"));
 
 	private static File findFile() {
 		for (final File file : new File(System.getProperty("user.home"))
@@ -74,7 +74,11 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 
 			GridFile f = (GridFile) userObject;
 			if (f.isInaccessable()) {
-				return ("Connection error : " + f.getUrl());
+				if (StringUtils.containsIgnoreCase(f.getComment(), "timeout")) {
+					return ("Timeout error : " + f.getUrl());
+				} else {
+					return ("Connection error : " + f.getUrl());
+				}
 			} else {
 				return f.getName();
 			}

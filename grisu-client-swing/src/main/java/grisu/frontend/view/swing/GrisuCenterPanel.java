@@ -14,13 +14,12 @@ import grisu.settings.ClientPropertiesManager;
 import java.awt.CardLayout;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -44,7 +43,7 @@ public class GrisuCenterPanel extends JPanel {
 	private FileListWithPreviewPanel fileListWithPreviewPanel;
 	private GridFileManagementPanel groupFileListPanel;
 
-	private final Map<String, JobCreationPanel> availableJobCreationPanels = new HashMap<String, JobCreationPanel>();
+	private final Map<String, JobCreationPanel> availableJobCreationPanels = new LinkedHashMap<String, JobCreationPanel>();
 
 	private final JPanel wrapperPanel;
 
@@ -85,7 +84,7 @@ public class GrisuCenterPanel extends JPanel {
 				GROUP_FILE_MANAGEMENT_PANEL);
 	}
 
-	public void addJobCreationPanel(JobCreationPanel panel) {
+	public synchronized void addJobCreationPanel(JobCreationPanel panel) {
 		availableJobCreationPanels.put(
 				ApplicationsManager.getPrettyName(panel.getPanelName()), panel);
 		wrapperPanel.add(panel.getPanel(), panel.getPanelName());
@@ -170,7 +169,7 @@ public class GrisuCenterPanel extends JPanel {
 		});
 
 		getMultiSingleJobMonitoringGrid()
-				.displayGridForApplication(application);
+		.displayGridForApplication(application);
 
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
@@ -273,7 +272,7 @@ public class GrisuCenterPanel extends JPanel {
 			displayGroupFileManagement();
 		} else {
 			final JobCreationPanel panel = availableJobCreationPanels
-					.get(command[0]);
+			.get(command[0]);
 			if (panel != null) {
 				displayJobCreationPanel(panel);
 			}
