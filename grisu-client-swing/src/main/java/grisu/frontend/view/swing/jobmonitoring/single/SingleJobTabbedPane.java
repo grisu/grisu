@@ -10,6 +10,7 @@ import grisu.frontend.model.job.JobObject;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,12 +24,13 @@ import org.bushe.swing.event.EventSubscriber;
 import com.jidesoft.swing.JideTabbedPane;
 
 public class SingleJobTabbedPane extends JPanel implements
-		SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
+SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
 
 	private JideTabbedPane jideTabbedPane;
 	private SimpleSingleJobsGrid grid;
 
-	private final Map<String, JobDetailPanel> panels = new HashMap<String, JobDetailPanel>();
+	private final Map<String, JobDetailPanel> panels = Collections
+	.synchronizedMap(new HashMap<String, JobDetailPanel>());
 
 	private final ServiceInterface si;
 	private final String application;
@@ -71,7 +73,7 @@ public class SingleJobTabbedPane extends JPanel implements
 				title = "All jobs";
 			} else {
 				title = ApplicationsManager.getPrettyName(application)
-						+ " jobs";
+				+ " jobs";
 			}
 			jideTabbedPane.addTab(title, getGrid());
 
@@ -94,20 +96,27 @@ public class SingleJobTabbedPane extends JPanel implements
 		return updateButton;
 	}
 
-	public void jobSelected(JobObject bj) {
+	public void jobSelected(final JobObject bj) {
 
-		JobDetailPanel temp = panels.get(bj.getJobname());
-		if (panels.get(bj.getJobname()) == null) {
-			temp = new JobDetailPanelDefault(si, bj);
-			panels.put(bj.getJobname(), temp);
-		}
+		new Thread() {
+			@Override
+			public void run() {
 
-		try {
-			getJideTabbedPane().setSelectedComponent(temp.getPanel());
-		} catch (final IllegalArgumentException e) {
-			getJideTabbedPane().addTab(bj.getJobname(), temp.getPanel());
-			getJideTabbedPane().setSelectedComponent(temp.getPanel());
-		}
+				JobDetailPanel temp = panels.get(bj.getJobname());
+				if (panels.get(bj.getJobname()) == null) {
+					temp = new JobDetailPanelDefault(si, bj);
+					panels.put(bj.getJobname(), temp);
+				}
+
+				try {
+					getJideTabbedPane().setSelectedComponent(temp.getPanel());
+				} catch (final IllegalArgumentException e) {
+					getJideTabbedPane().addTab(bj.getJobname(), temp.getPanel());
+					getJideTabbedPane().setSelectedComponent(temp.getPanel());
+				}
+			}
+		}.start();
+
 
 	}
 

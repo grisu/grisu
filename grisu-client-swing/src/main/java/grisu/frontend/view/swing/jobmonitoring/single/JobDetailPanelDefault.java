@@ -52,7 +52,7 @@ PropertyChangeListener, JobDetailPanel {
 	private static String generateHtml(Map<String, String> jobProperties) {
 
 		final StringBuffer html = new StringBuffer(
-				"<html><table width=\"100%\">");
+		"<html><table width=\"100%\">");
 
 		boolean alternate = true;
 		for (final String key : jobProperties.keySet()) {
@@ -458,11 +458,18 @@ PropertyChangeListener, JobDetailPanel {
 				public void mouseClicked(MouseEvent e) {
 
 					if (job != null) {
-						final Cursor old = statusRefreshButton.getCursor();
-						statusRefreshButton.setCursor(Cursor
-								.getPredefinedCursor(Cursor.WAIT_CURSOR));
-						job.getStatus(true);
-						statusRefreshButton.setCursor(old);
+						new Thread() {
+							@Override
+							public void run() {
+								final Cursor old = statusRefreshButton
+										.getCursor();
+								statusRefreshButton.setCursor(Cursor
+										.getPredefinedCursor(Cursor.WAIT_CURSOR));
+								job.getStatus(true);
+								statusRefreshButton.setCursor(old);
+							}
+						}.start();
+
 					}
 
 				}
