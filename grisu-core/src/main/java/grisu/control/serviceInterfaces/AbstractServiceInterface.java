@@ -103,7 +103,7 @@ import org.w3c.dom.Element;
  * 
  * @author Markus Binsteiner
  */
-public abstract class AbstractServiceInterface implements ServiceInterface {
+public abstract class l implements ServiceInterface {
 
 	static final Logger myLogger = Logger
 	.getLogger(AbstractServiceInterface.class.getName());

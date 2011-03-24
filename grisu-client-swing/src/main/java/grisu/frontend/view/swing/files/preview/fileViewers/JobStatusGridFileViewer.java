@@ -7,6 +7,7 @@ import grisu.model.FileManager;
 import grisu.model.dto.GridFile;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -158,7 +159,7 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 		add(getBtnRefresh(), "4, 8, right, default");
 	}
 
-	private void generateGraph() {
+	private synchronized void generateGraph() {
 
 		cpusSeries.clear();
 		licensesSeries.clear();
@@ -245,7 +246,18 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 					} else {
 						showMinutes = false;
 					}
-					generateGraph();
+
+					new Thread() {
+						@Override
+						public void run() {
+							chckbxShowMinutes.setEnabled(false);
+							setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+							generateGraph();
+							setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+							chckbxShowMinutes.setEnabled(true);
+						}
+					}.start();
+
 				}
 			});
 		}

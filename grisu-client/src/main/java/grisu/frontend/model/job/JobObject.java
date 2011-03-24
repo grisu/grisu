@@ -1077,7 +1077,11 @@ Comparable<JobObject> {
 
 			}
 			this.serviceInterface.kill(this.getJobname(), clean);
-			getStatus(true);
+			try {
+				getStatus(true);
+			} catch (Exception nsje) {
+				// that's ok
+			}
 
 			if (clean) {
 				EventBus.publish(new JobCleanedEvent(this));

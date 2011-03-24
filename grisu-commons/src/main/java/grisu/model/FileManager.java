@@ -670,6 +670,7 @@ public class FileManager {
 	public void cp(String sourceUrl, String targetDirUrl, boolean overwrite)
 	throws FileTransactionException {
 
+
 		if (isLocal(sourceUrl) && isLocal(targetDirUrl)) {
 
 			copyLocalFiles(sourceUrl, targetDirUrl, overwrite);
@@ -798,7 +799,7 @@ public class FileManager {
 	}
 
 	public void createFolder(String parentUrl, String s)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 
 		createFolder(createGridFile(parentUrl), s);
 
@@ -957,15 +958,17 @@ public class FileManager {
 	private File downloadFolder(final String url)
 	throws FileTransactionException {
 
+
 		GridFile source = null;
 		try {
-			source = serviceInterface.ls(url, 0);
+			source = serviceInterface.ls(url, Integer.MAX_VALUE);
 		} catch (final RemoteFileSystemException e) {
 			throw new FileTransactionException(url, null,
 					"Can't list source folder.", e);
 		}
 
 		final List<String> files = source.listOfAllFilesUnderThisFolder();
+
 		final Map<String, Exception> exceptions = Collections
 		.synchronizedMap(new HashMap<String, Exception>());
 
@@ -1133,6 +1136,10 @@ public class FileManager {
 	public GridFile getGridRoot() {
 		return new GridFile(
 				ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://", -1L);
+	}
+
+	public Long getLastModified(String url) throws RemoteFileSystemException {
+		return serviceInterface.lastModified(url);
 	}
 
 	/**

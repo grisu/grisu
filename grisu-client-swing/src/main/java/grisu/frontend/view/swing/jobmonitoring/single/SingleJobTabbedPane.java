@@ -8,6 +8,7 @@ import grisu.frontend.model.events.JobCleanedEvent;
 import grisu.frontend.model.job.JobObject;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collections;
@@ -102,6 +103,8 @@ SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
 			@Override
 			public void run() {
 
+				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
 				JobDetailPanel temp = panels.get(bj.getJobname());
 				if (panels.get(bj.getJobname()) == null) {
 					temp = new JobDetailPanelDefault(si, bj);
@@ -113,6 +116,8 @@ SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
 				} catch (final IllegalArgumentException e) {
 					getJideTabbedPane().addTab(bj.getJobname(), temp.getPanel());
 					getJideTabbedPane().setSelectedComponent(temp.getPanel());
+				} finally {
+					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				}
 			}
 		}.start();

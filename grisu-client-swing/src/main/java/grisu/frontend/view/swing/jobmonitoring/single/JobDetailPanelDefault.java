@@ -27,6 +27,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -270,6 +271,19 @@ PropertyChangeListener, JobDetailPanel {
 					new Thread() {
 						@Override
 						public void run() {
+
+							int n = JOptionPane.showConfirmDialog(
+									JobDetailPanelDefault.this,
+									"Cleaning job "
+									+ JobDetailPanelDefault.this.job
+													.getJobname() + ".",
+									"Confirmation",
+									JOptionPane.OK_CANCEL_OPTION);
+
+							if (n == JOptionPane.CANCEL_OPTION) {
+								return;
+							}
+
 							BackgroundActionProgressDialogSmall d = new BackgroundActionProgressDialogSmall(
 									"Cleaning job:", job.getJobname());
 							try {
@@ -346,6 +360,19 @@ PropertyChangeListener, JobDetailPanel {
 					new Thread() {
 						@Override
 						public void run() {
+
+							int n = JOptionPane.showConfirmDialog(
+									JobDetailPanelDefault.this,
+									"Killing job "
+									+ JobDetailPanelDefault.this.job
+									.getJobname() + ".",
+									"Confirmation",
+									JOptionPane.OK_CANCEL_OPTION);
+
+							if (n == JOptionPane.CANCEL_OPTION) {
+								return;
+							}
+
 							BackgroundActionProgressDialogSmall d = new BackgroundActionProgressDialogSmall(
 									"Killing job:", job.getJobname());
 							try {
@@ -462,7 +489,7 @@ PropertyChangeListener, JobDetailPanel {
 							@Override
 							public void run() {
 								final Cursor old = statusRefreshButton
-										.getCursor();
+								.getCursor();
 								statusRefreshButton.setCursor(Cursor
 										.getPredefinedCursor(Cursor.WAIT_CURSOR));
 								job.getStatus(true);
