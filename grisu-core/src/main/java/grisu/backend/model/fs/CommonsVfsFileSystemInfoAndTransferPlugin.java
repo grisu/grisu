@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.AllFileSelector;
 import org.apache.commons.vfs.FileContent;
 import org.apache.commons.vfs.FileObject;
@@ -155,6 +156,14 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 	}
 
+	private String createCacheKey(MountPoint mp) {
+		return user.getDn()+"_"+mp.getRootUrl()+"_"+mp.getFqan();
+	}
+
+	private String createCacheKey(String rootUrl, String fqan) {
+		return user.getDn() + "_" + rootUrl + "_" + fqan;
+	}
+
 	public boolean createFolder(FileObject folder)
 	throws RemoteFileSystemException {
 
@@ -195,6 +204,19 @@ FileSystemInfoPlugin, FileTransferPlugin {
 		}
 	}
 
+	// private FileSystemCache getFileSystemCache() {
+	//
+	// Thread current = Thread.currentThread();
+	// if (filesystems.get(current) == null) {
+	// FileSystemCache fs = new FileSystemCache(user);
+	// filesystems.put(current, fs);
+	// X.p("Filesystemcache size: " + filesystems.size());
+	// }
+	//
+	// return filesystems.get(current);
+	//
+	// }
+
 	public void deleteFile(final String file) throws RemoteFileSystemException {
 
 		FileSystemCache fsCache = new FileSystemCache(user);
@@ -214,19 +236,6 @@ FileSystemInfoPlugin, FileTransferPlugin {
 		}
 
 	}
-
-	// private FileSystemCache getFileSystemCache() {
-	//
-	// Thread current = Thread.currentThread();
-	// if (filesystems.get(current) == null) {
-	// FileSystemCache fs = new FileSystemCache(user);
-	// filesystems.put(current, fs);
-	// X.p("Filesystemcache size: " + filesystems.size());
-	// }
-	//
-	// return filesystems.get(current);
-	//
-	// }
 
 	public DataHandler download(String filename)
 	throws RemoteFileSystemException {
@@ -537,12 +546,23 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			// new_mp.getRootUrl(), new_mp.getFqan());
 			myLogger.debug("Connected to file system.");
 			if (useHomeDirectory) {
-				myLogger.debug("Using home directory: "
-						+ ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
-						.substring(1));
-				uri = fileSystem.getRoot().getName().getRootURI()
-				+ ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
-				.substring(1);
+				// String key = createCacheKey(new_mp);
+				// synchronized (key) {
+				// uri = (String) AbstractServiceInterface
+				// .getFromSessionCache(key);
+
+				if (StringUtils.isBlank(uri)) {
+
+
+					myLogger.debug("Using home directory: "
+							+ ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
+							.substring(1));
+					uri = fileSystem.getRoot().getName().getRootURI()
+					+ ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
+					.substring(1);
+					// AbstractServiceInterface.putIntoSessionCache(key, uri);
+					// }
+				}
 				// if vo user, use $VOHOME/<DN> as homedirectory
 				if (cred.getFqan() != null) {
 					uri = uri + File.separator
@@ -570,6 +590,13 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	public String resolveFileSystemHomeDirectory(String filesystemRoot,
 			String fqan) throws RemoteFileSystemException {
 
+		// String key = createCacheKey(filesystemRoot, fqan);
+		// synchronized (key) {
+		// String uri = (String)
+		// AbstractServiceInterface.getFromSessionCache(key);
+		//
+		// if (StringUtils.isBlank(uri)) {
+		String uri = null;
 		FileSystem fileSystem;
 		FileSystemCache fsCache = new FileSystemCache(user);
 
@@ -586,15 +613,22 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 			final String home = (String) fileSystem
 			.getAttribute("HOME_DIRECTORY");
-			final String uri = fileSystem.getRoot().getName().getRootURI()
+			uri = fileSystem.getRoot().getName().getRootURI()
 			+ home.substring(1);
 
-			return uri;
+			// X.p("XXXXXXXXXXXXXXXX: " + key + " / " + uri);
+
+			// AbstractServiceInterface.putIntoSessionCache(key, uri);
 		} catch (FileSystemException e) {
 			throw new RemoteFileSystemException(e);
 		} finally {
 			fsCache.close();
 		}
+		// } else {
+		// X.p("OOOOOOOOOOOOOOOOOOOOO: " + key + " / " + uri);
+		// }
+		return uri;
+		// }
 
 	}
 

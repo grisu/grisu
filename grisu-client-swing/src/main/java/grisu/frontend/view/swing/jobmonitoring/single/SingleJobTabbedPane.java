@@ -8,6 +8,7 @@ import grisu.frontend.model.events.JobCleanedEvent;
 import grisu.frontend.model.job.JobObject;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -102,8 +103,9 @@ SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
 		new Thread() {
 			@Override
 			public void run() {
-
-				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				Component c = getJideTabbedPane().getSelectedComponent();
+				c.setCursor(
+						Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 				JobDetailPanel temp = panels.get(bj.getJobname());
 				if (panels.get(bj.getJobname()) == null) {
@@ -117,7 +119,8 @@ SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
 					getJideTabbedPane().addTab(bj.getJobname(), temp.getPanel());
 					getJideTabbedPane().setSelectedComponent(temp.getPanel());
 				} finally {
-					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+					c.setCursor(
+							Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				}
 			}
 		}.start();

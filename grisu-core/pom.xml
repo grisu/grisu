@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<url>http://projects.arcs.org.au/trac/grisu/wiki/GrisuCore</url>
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.3.4-SNAPSHOT</version>
+		<version>0.3.3.1-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>grisu.backend</groupId>
@@ -43,7 +44,7 @@
 		<dependency>
 			<groupId>grisu</groupId>
 			<artifactId>grisu-commons</artifactId>
-			<version>0.3.4-SNAPSHOT</version>
+			<version>0.3.3.1-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>cryptix32</artifactId>
@@ -306,24 +307,18 @@
 			<artifactId>globus-dependencies</artifactId>
 			<version>0.3</version>
 			<!-- consists of those dependencies: -->
-			<!-- 					<artifactId>xmlbeans</artifactId>
-					<groupId>org.apache.xmlbeans</groupId>
-					
-					
-									<artifactId>jython</artifactId>
-					<groupId>jython</groupId>	
-			
-			<dependency> <groupId>external.globus</groupId> <artifactId>addressing-1</artifactId> 
+			<!-- <artifactId>xmlbeans</artifactId> <groupId>org.apache.xmlbeans</groupId> 
+				<artifactId>jython</artifactId> <groupId>jython</groupId> <dependency> <groupId>external.globus</groupId> 
+				<artifactId>addressing-1</artifactId> <version>0.1</version> </dependency> 
+				<dependency> <groupId>external.globus</groupId> <artifactId>axis</artifactId> 
 				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>axis</artifactId> <version>0.1</version> </dependency> <dependency> 
-				<groupId>external.globus</groupId> <artifactId>axis-url</artifactId> <version>0.1</version> 
-				</dependency> <dependency> <groupId>external.globus</groupId> <artifactId>cog-axis</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>cog-trap-1</artifactId> <version>0.1</version> </dependency> 
-				<dependency> <groupId>external.jglobus</groupId> <artifactId>cog-url</artifactId> 
-				<version>1.6.0</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>commonj</artifactId> <version>0.1</version> </dependency> <dependency> 
-				<groupId>external.globus</groupId> <artifactId>commons-beanutils</artifactId> 
+				<artifactId>axis-url</artifactId> <version>0.1</version> </dependency> <dependency> 
+				<groupId>external.globus</groupId> <artifactId>cog-axis</artifactId> <version>0.1</version> 
+				</dependency> <dependency> <groupId>external.globus</groupId> <artifactId>cog-trap-1</artifactId> 
+				<version>0.1</version> </dependency> <dependency> <groupId>external.jglobus</groupId> 
+				<artifactId>cog-url</artifactId> <version>1.6.0</version> </dependency> <dependency> 
+				<groupId>external.globus</groupId> <artifactId>commonj</artifactId> <version>0.1</version> 
+				</dependency> <dependency> <groupId>external.globus</groupId> <artifactId>commons-beanutils</artifactId> 
 				<version>0.1</version> </dependency> <dependency> <groupId>commons-collections</groupId> 
 				<artifactId>commons-collections</artifactId> <version>3.2</version> </dependency> 
 				<dependency> <groupId>external.globus</groupId> <artifactId>commons-digester</artifactId> 
@@ -368,6 +363,13 @@
 				<version>0.1</version> </dependency> -->
 		</dependency>
 
+
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
+			<version>2.3.1</version>
+			<type>pom</type>
+		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -442,9 +444,9 @@
 								<descriptor>grisu-local-backend.assembly.xml</descriptor>
 							</descriptors>
 							<finalName>local-backend</finalName>
-<!--							<appendAssemblyId>false</appendAssemblyId>-->
-							
-							
+							<!-- <appendAssemblyId>false</appendAssemblyId> -->
+
+
 						</configuration>
 						<goals>
 							<goal>single</goal>
@@ -461,11 +463,11 @@
 	<profiles>
 		<profile>
 			<id>sign</id>
-<!--			<activation>-->
-<!--				<property>-->
-<!--					<name>BUILD_NUMBER</name>-->
-<!--				</property>-->
-<!--			</activation>-->
+			<!-- <activation> -->
+			<!-- <property> -->
+			<!-- <name>BUILD_NUMBER</name> -->
+			<!-- </property> -->
+			<!-- </activation> -->
 
 			<build>
 				<plugins>

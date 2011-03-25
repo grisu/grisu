@@ -817,7 +817,7 @@ public class User {
 			if (mountPointsPerFqanCache.get(fqan) == null) {
 
 				final Set<MountPoint> mps = new HashSet<MountPoint>();
-				for (final MountPoint mp : allMountPoints) {
+				for (final MountPoint mp : getAllMountPoints()) {
 					if ((mp.getFqan() == null)
 							|| mp.getFqan().equals(Constants.NON_VO_FQAN)) {
 						if ((fqan == null)
@@ -976,8 +976,8 @@ public class User {
 				mountPointName, cred, useHomeDirectory, site);
 
 		if (!mountPoints.contains(new_mp)) {
-			allMountPoints = null;
 			mountPoints.add(new_mp);
+			getAllMountPoints().add(new_mp);
 		}
 
 		userdao.saveOrUpdate(this);
@@ -1038,7 +1038,7 @@ public class User {
 	// }
 
 	public void resetMountPoints() {
-		allMountPoints = null;
+		// allMountPoints = null;
 	}
 
 	/**
@@ -1149,7 +1149,7 @@ public class User {
 		for (final MountPoint mp : mountPoints) {
 			if (mp.getAlias().equals(mountPointName)) {
 				mountPoints.remove(mp);
-				allMountPoints = null;
+				getAllMountPoints().remove(mp);
 				return;
 			}
 		}

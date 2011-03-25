@@ -56,14 +56,14 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 			"refresh.png", "Refresh");
 
 	private static ChartPanel createChart(String title, String y_axis,
-			XYDataset dataset) {
+			XYDataset dataset, boolean createLegend) {
 
 		JFreeChart chart = ChartFactory.createTimeSeriesChart(
 				title, // title
-				"Time", // x-axis label
+				"Date", // x-axis label
 				y_axis, // y-axis label
 				dataset,            // data
-				false, // create legend?
+				createLegend, // create legend?
 				true,               // generate tooltips?
 				false               // generate URLs?
 		);
@@ -115,7 +115,10 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 	private final TimeSeriesCollection licensesDataset = new TimeSeriesCollection();
 	private final TimeSeriesCollection ligandsDataset = new TimeSeriesCollection();
 	private final TimeSeries cpusSeries = new TimeSeries("Cpus used");
-	private final TimeSeries licensesSeries = new TimeSeries("Licenses used");
+	private final TimeSeries licensesUserSeries = new TimeSeries(
+	"Licenses used (for job)");
+	private final TimeSeries licensesAllSeries = new TimeSeries(
+	"Licenses used (overall)");
 	private final TimeSeries ligandsSeries = new TimeSeries(
 	"Lingands processed");
 
@@ -150,11 +153,12 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC, }));
 		cpusDataset.addSeries(cpusSeries);
-		licensesDataset.addSeries(licensesSeries);
+		licensesDataset.addSeries(licensesUserSeries);
+		licensesDataset.addSeries(licensesAllSeries);
 		ligandsDataset.addSeries(ligandsSeries);
-		add(getCpusChart(), "2, 2, 3, 1");
-		add(getLicensesChart(), "2, 4, 3, 1");
-		add(getLigandsChart(), "2, 6, 3, 1");
+		add(getCpusChart(), "2, 4, 3, 1");
+		add(getLicensesChart(), "2, 6, 3, 1");
+		add(getLigandsChart(), "2, 2, 3, 1");
 		add(getChckbxShowMinutes(), "2, 8, left, default");
 		add(getBtnRefresh(), "4, 8, right, default");
 	}
@@ -162,7 +166,8 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 	private synchronized void generateGraph() {
 
 		cpusSeries.clear();
-		licensesSeries.clear();
+		licensesUserSeries.clear();
+		licensesAllSeries.clear();
 		ligandsSeries.clear();
 
 		List<String> lines;
@@ -178,8 +183,18 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 			String[] tokens = lines.get(i).split(",");
 			Date date = new Date(Long.parseLong(tokens[0]) * 1000);
 			int cpus = Integer.parseInt(tokens[1]);
-			int licenses = Integer.parseInt(tokens[2]);
-			int ligands = Integer.parseInt(tokens[3]);
+			if (cpus < 0) {
+				cpus = 0;
+			}
+			int licensesUser = Integer.parseInt(tokens[2]);
+			if (licensesUser < 0) {
+				licensesUser = 0;
+			}
+			int licensesAll = Integer.parseInt(tokens[3]);
+			if (licensesAll < 0) {
+				licensesAll = 0;
+			}
+			int ligands = Integer.parseInt(tokens[4]);
 
 			RegularTimePeriod p = null;
 			if (showMinutes) {
@@ -189,7 +204,8 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 			}
 
 			cpusSeries.addOrUpdate(p, cpus);
-			licensesSeries.addOrUpdate(p, licenses);
+			licensesUserSeries.addOrUpdate(p, licensesUser);
+			licensesAllSeries.addOrUpdate(p, licensesAll);
 			ligandsSeries.addOrUpdate(p, ligands);
 
 		}
@@ -266,7 +282,7 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 
 	public ChartPanel getCpusChart() {
 		if (cpusChart == null) {
-			cpusChart = createChart("Cpus in use", "# cpus", cpusDataset);
+			cpusChart = createChart("Cpus in use", "# cpus", cpusDataset, false);
 		}
 		return cpusChart;
 	}
@@ -288,7 +304,7 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 	public ChartPanel getLicensesChart() {
 		if (licensesChart == null) {
 			licensesChart = createChart("Licenses in use", "# licenses",
-					licensesDataset);
+					licensesDataset, true);
 		}
 		return licensesChart;
 	}
@@ -296,7 +312,7 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 	public ChartPanel getLigandsChart() {
 		if (ligandsChart == null) {
 			ligandsChart = createChart("Ligands processed", "# lignads",
-					ligandsDataset);
+					ligandsDataset, false);
 		}
 		return ligandsChart;
 	}

@@ -47,7 +47,7 @@ public class JobStatusFileDialog extends JDialog {
 	}
 
 	public void setFile(GridFile file, File localCacheFile) {
-		setTitle("Job status");
+		setTitle("Job status history");
 		getCsvFileViewer().setFile(file, localCacheFile);
 	}
 

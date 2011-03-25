@@ -87,7 +87,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 		this.jobList = jobList;
 
 		final ObservableElementList.Connector<JobObject> joConnector = GlazedLists
-				.beanConnector(JobObject.class);
+		.beanConnector(JobObject.class);
 		observedJobs = new ObservableElementList<JobObject>(jobList,
 				joConnector);
 
@@ -128,7 +128,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 			Vector<SingleJobSelectionListener> targets;
 			synchronized (this) {
 				targets = (Vector<SingleJobSelectionListener>) listeners
-						.clone();
+				.clone();
 			}
 
 			// walk through the listener list and
@@ -316,7 +316,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 	protected void killSelectedJobs(final boolean clean) {
 
 		final StringBuffer message = new StringBuffer(
-				"Do you really want to kill ");
+		"Do you really want to kill ");
 		if (clean) {
 			message.append("and clean ");
 		}
@@ -376,6 +376,12 @@ public class SimpleSingleJobsGrid extends JPanel {
 			listeners = new Vector<SingleJobSelectionListener>();
 		}
 		listeners.removeElement(l);
+	}
+
+	@Override
+	public void setCursor(Cursor c) {
+		super.setCursor(c);
+		getTable().setCursor(c);
 	}
 
 	protected void setDefaultColumns() {
