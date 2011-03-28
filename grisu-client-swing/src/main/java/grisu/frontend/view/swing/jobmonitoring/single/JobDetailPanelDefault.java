@@ -27,6 +27,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -52,7 +53,7 @@ PropertyChangeListener, JobDetailPanel {
 	private static String generateHtml(Map<String, String> jobProperties) {
 
 		final StringBuffer html = new StringBuffer(
-				"<html><table width=\"100%\">");
+		"<html><table width=\"100%\">");
 
 		boolean alternate = true;
 		for (final String key : jobProperties.keySet()) {
@@ -270,6 +271,19 @@ PropertyChangeListener, JobDetailPanel {
 					new Thread() {
 						@Override
 						public void run() {
+
+							int n = JOptionPane.showConfirmDialog(
+									JobDetailPanelDefault.this,
+									"Cleaning job "
+									+ JobDetailPanelDefault.this.job
+													.getJobname() + ".",
+									"Confirmation",
+									JOptionPane.OK_CANCEL_OPTION);
+
+							if (n == JOptionPane.CANCEL_OPTION) {
+								return;
+							}
+
 							BackgroundActionProgressDialogSmall d = new BackgroundActionProgressDialogSmall(
 									"Cleaning job:", job.getJobname());
 							try {
@@ -346,6 +360,19 @@ PropertyChangeListener, JobDetailPanel {
 					new Thread() {
 						@Override
 						public void run() {
+
+							int n = JOptionPane.showConfirmDialog(
+									JobDetailPanelDefault.this,
+									"Killing job "
+									+ JobDetailPanelDefault.this.job
+									.getJobname() + ".",
+									"Confirmation",
+									JOptionPane.OK_CANCEL_OPTION);
+
+							if (n == JOptionPane.CANCEL_OPTION) {
+								return;
+							}
+
 							BackgroundActionProgressDialogSmall d = new BackgroundActionProgressDialogSmall(
 									"Killing job:", job.getJobname());
 							try {
@@ -458,11 +485,18 @@ PropertyChangeListener, JobDetailPanel {
 				public void mouseClicked(MouseEvent e) {
 
 					if (job != null) {
-						final Cursor old = statusRefreshButton.getCursor();
-						statusRefreshButton.setCursor(Cursor
-								.getPredefinedCursor(Cursor.WAIT_CURSOR));
-						job.getStatus(true);
-						statusRefreshButton.setCursor(old);
+						new Thread() {
+							@Override
+							public void run() {
+								final Cursor old = statusRefreshButton
+								.getCursor();
+								statusRefreshButton.setCursor(Cursor
+										.getPredefinedCursor(Cursor.WAIT_CURSOR));
+								job.getStatus(true);
+								statusRefreshButton.setCursor(old);
+							}
+						}.start();
+
 					}
 
 				}

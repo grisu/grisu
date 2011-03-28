@@ -39,13 +39,13 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class MultiLoginPanel extends JPanel implements EventSubscriber,
-		LoginMethodPanel {
+LoginMethodPanel {
 
 	private class QuickLoginAction extends AbstractAction {
 		public QuickLoginAction() {
 			putValue(NAME, "Quick-login");
 			putValue(SHORT_DESCRIPTION,
-					"Use existing local credentials to login.");
+			"Use existing local credentials to login.");
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -295,7 +295,7 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 
 				try {
 					final String url = getAdvancedLoginPanelOptions()
-							.getServiceInterfaceUrl();
+					.getServiceInterfaceUrl();
 
 					final LoginParams params = new LoginParams(url, null, null);
 
@@ -327,8 +327,8 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 
 							info = new ErrorInfo("Login error",
 									"Error while trying to login.", temp
-											.getPossibleException()
-											.getLocalizedMessage(),
+									.getPossibleException()
+									.getLocalizedMessage(),
 									(String) null, temp.getPossibleException(),
 									Level.SEVERE, (Map) null);
 						}
@@ -364,6 +364,7 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 					if (e instanceof Exception) {
 						possibleException = (Exception) e;
 					} else {
+						e.printStackTrace();
 						possibleException = new Exception(e);
 					}
 				}

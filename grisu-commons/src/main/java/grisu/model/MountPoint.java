@@ -294,7 +294,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	 */
 	public boolean isResponsibleForAbsoluteFile(final String file) {
 
-		if (file.startsWith(getRootUrl())) {
+		if (FileManager.removeTrailingSlash(file).startsWith(getRootUrl())) {
 			return true;
 		} else {
 			if (file.startsWith(getRootUrl().replace(":2811", ""))) {
@@ -317,7 +317,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	public boolean isResponsibleForUserSpaceFile(final String file) {
 
 		if (file.startsWith("gsiftp")) {
-			if (file.startsWith(getRootUrl())) {
+			if (FileManager.removeTrailingSlash(file).startsWith(getRootUrl())) {
 				return true;
 			} else {
 				return false;

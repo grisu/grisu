@@ -45,6 +45,7 @@ public class GridFilePreviewDialog extends JDialog {
 		getContentPane().add(getGenericFileViewer(), BorderLayout.CENTER);
 	}
 
+
 	private GenericGridFileViewer getGenericFileViewer() {
 		if (genericFileViewer == null) {
 			genericFileViewer = new GenericGridFileViewer();

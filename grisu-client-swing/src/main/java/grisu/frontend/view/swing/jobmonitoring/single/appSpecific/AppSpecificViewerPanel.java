@@ -147,6 +147,7 @@ JobDetailPanel, PropertyChangeListener {
 
 	public void propertyChange(PropertyChangeEvent evt) {
 
+
 		if ("status".equals(evt.getPropertyName())) {
 
 			int status = checkJobStatus();
@@ -195,6 +196,8 @@ JobDetailPanel, PropertyChangeListener {
 					DEFAULT_PROGRESS_CHECK_INTERVALL * 1000,
 					DEFAULT_PROGRESS_CHECK_INTERVALL * 1000);
 
+		} else {
+			jobFinished();
 		}
 
 	}

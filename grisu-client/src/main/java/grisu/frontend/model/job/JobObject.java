@@ -92,6 +92,8 @@ Comparable<JobObject> {
 	private final List<String> submissionLog = Collections
 	.synchronizedList(new LinkedList<String>());
 
+	private Date lastStatusUpdate = new Date();
+
 	/**
 	 * Use this constructor if you want to create a new job.
 	 * 
@@ -771,6 +773,14 @@ Comparable<JobObject> {
 	 * @return the job status
 	 */
 	public final int getStatus(final boolean forceRefresh) {
+
+		// Date now = new Date();
+		// if ((this.status >= JobConstants.ACTIVE)
+		// && (lastStatusUpdate.getTime() + 5000 >= now.getTime())) {
+		// myLogger.debug("Less than 5 seconds between status updates. Returning old status...");
+		// return this.status;
+		// }
+
 		if (forceRefresh && !isArchived) {
 			final int oldStatus = this.status;
 			// addJobLogMessage("Getting new job status. Old status: "
@@ -793,6 +803,8 @@ Comparable<JobObject> {
 							this, oldStatus, this.status));
 				}
 			}
+
+			lastStatusUpdate = new Date();
 
 		}
 		return this.status;
@@ -1065,7 +1077,11 @@ Comparable<JobObject> {
 
 			}
 			this.serviceInterface.kill(this.getJobname(), clean);
-			getStatus(true);
+			try {
+				getStatus(true);
+			} catch (Exception nsje) {
+				// that's ok
+			}
 
 			if (clean) {
 				EventBus.publish(new JobCleanedEvent(this));

@@ -76,6 +76,9 @@ import java.util.concurrent.TimeUnit;
 import javax.activation.DataHandler;
 import javax.annotation.security.RolesAllowed;
 
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.globus.common.CoGProperties;
@@ -123,7 +126,55 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			// RuntimeException("Could not initiate local backend: "+e.getLocalizedMessage());
 		}
 
+		// create ehcache manager singleton
+		try {
+			CacheManager.create();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
+
+	public static final CacheManager cache = CacheManager.getInstance();
+
+	public static Cache eternalCache() {
+		return cache.getCache("eternal");
+	}
+
+	public static Object getFromEternalCache(Object key) {
+		return eternalCache().get(key);
+	}
+
+	public static Object getFromSessionCache(Object key) {
+		return sessionCache().get(key);
+	}
+
+	public static Object getFromShortCache(Object key) {
+		return shortCache().get(key);
+	}
+
+	public static void putIntoEternalCache(Object key, Object value) {
+		net.sf.ehcache.Element e = new net.sf.ehcache.Element(key, value);
+		eternalCache().put(e);
+	}
+
+	public static void putIntoSessionCache(Object key, Object value) {
+		net.sf.ehcache.Element e = new net.sf.ehcache.Element(key, value);
+		sessionCache().put(e);
+	}
+
+	public static void putIntoShortCache(Object key, Object value) {
+		net.sf.ehcache.Element e = new net.sf.ehcache.Element(key, value);
+		shortCache().put(e);
+	}
+
+	public static Cache sessionCache() {
+		return cache.getCache("session");
+	}
+
+	public static Cache shortCache() {
+		return cache.getCache("short");
+	}
+
 
 	private final boolean INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND = false;
 	public static final String REFRESH_STATUS_PREFIX = "REFRESH_";
