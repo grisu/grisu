@@ -137,7 +137,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		// create ehcache manager singleton
 		try {
-			CacheManager.create();
+			CacheManager.create("grisu-ehcache.xml");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

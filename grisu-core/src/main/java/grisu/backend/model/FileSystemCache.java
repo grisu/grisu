@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystem;
 import org.apache.commons.vfs.FileSystemException;
@@ -33,8 +34,12 @@ public class FileSystemCache {
 		// X.p("Opening filesystemmanager: " + i);
 		this.user = user;
 		try {
+			String tmp = System.getProperty("java.io.tmpdir");
+			if (StringUtils.isBlank(tmp)) {
+				tmp = "/tmp";
+			}
 			fsm = VFSUtil.createNewFsManager(false, false, true, true, true,
-					true, true, null);
+					true, true, tmp);
 		} catch (final FileSystemException e) {
 			throw new RuntimeException(e);
 		}
