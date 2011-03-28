@@ -54,6 +54,7 @@ import grith.jgrith.control.VomsesFiles;
 import grith.jgrith.voms.VO;
 import grith.jgrith.voms.VOManagement.VOManagement;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -81,6 +82,7 @@ import net.sf.ehcache.CacheManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.log4j.xml.DOMConfigurator;
 import org.globus.common.CoGProperties;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -108,10 +110,17 @@ import org.w3c.dom.Element;
  */
 public abstract class AbstractServiceInterface implements ServiceInterface {
 
-	static final Logger myLogger = Logger
-	.getLogger(AbstractServiceInterface.class.getName());
-
+	static Logger myLogger = null;
 	static {
+
+		String log4jPath = "/etc/grisu/grisu-log4j.xml";
+		if(new File(log4jPath).exists() && (new File(log4jPath).length() > 0) ) {
+			DOMConfigurator.configure(log4jPath);
+		}
+
+		myLogger = Logger.getLogger(AbstractServiceInterface.class.getName());
+
+
 		CoGProperties.getDefault().setProperty(
 				CoGProperties.ENFORCE_SIGNING_POLICY, "false");
 

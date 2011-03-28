@@ -186,11 +186,12 @@ JobDetailPanel, PropertyChangeListener {
 		}
 
 		int status = checkJobStatus();
+		// first time around we do it manually
+		if (checkJobStatus() >= JobConstants.ACTIVE) {
+			jobStarted();
+		}
 		if (status < JobConstants.FINISHED_EITHER_WAY) {
-			// first time around we do it manually
-			if (checkJobStatus() == JobConstants.ACTIVE) {
-				jobStarted();
-			}
+
 			timer = new Timer();
 			timer.scheduleAtFixedRate(new UpdateProgressTask(),
 					DEFAULT_PROGRESS_CHECK_INTERVALL * 1000,
