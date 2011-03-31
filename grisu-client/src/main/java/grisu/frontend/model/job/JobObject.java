@@ -72,6 +72,7 @@ Comparable<JobObject> {
 	}
 
 	private final ServiceInterface serviceInterface;
+	private final FileManager fm;
 
 	private int status = JobConstants.UNDEFINED;
 
@@ -103,6 +104,7 @@ Comparable<JobObject> {
 	public JobObject(final ServiceInterface si) {
 		super();
 		this.serviceInterface = si;
+		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		addJobLogMessage("Empty job created.");
 	}
 
@@ -121,6 +123,7 @@ Comparable<JobObject> {
 	public JobObject(final ServiceInterface si, final Document jsdl) {
 		super(jsdl);
 		this.serviceInterface = si;
+		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		addJobLogMessage("Job created from jsdl description.");
 	}
 
@@ -154,6 +157,7 @@ Comparable<JobObject> {
 		this.setJobname(jobname);
 
 		this.serviceInterface = si;
+		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 
 		this.isArchived = job.isArchived();
 
@@ -182,6 +186,7 @@ Comparable<JobObject> {
 			final Map<String, String> jobProperties) {
 		super(jobProperties);
 		this.serviceInterface = si;
+		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		addJobLogMessage("Job created from job properties.");
 	}
 
@@ -226,6 +231,7 @@ Comparable<JobObject> {
 		super(SeveralXMLHelpers.fromString(si.getJsdlDocument(jobname)));
 		this.setJobname(jobname);
 		this.serviceInterface = si;
+		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 
 		updateWithDtoJob(serviceInterface.getJob(jobname));
 
@@ -563,8 +569,7 @@ Comparable<JobObject> {
 
 		File file = null;
 		try {
-			file = GrisuRegistryManager.getDefault(serviceInterface)
-			.getFileManager().downloadFile(url);
+			file = fm.downloadFile(url);
 			addJobLogMessage("Downloaded output file: " + url);
 		} catch (final Exception e) {
 			addJobLogMessage("Could not download file " + url + ": "
@@ -1091,6 +1096,15 @@ Comparable<JobObject> {
 		} catch (final Exception e) {
 			throw new JobException(this, "Could not kill/clean job.", e);
 		}
+
+	}
+
+	public final GridFile listJobDirectory() throws RemoteFileSystemException {
+
+		String jobDir = getJobDirectoryUrl();
+		GridFile result = fm.ls(jobDir);
+
+		return result;
 
 	}
 

@@ -14,7 +14,6 @@ import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.DtoApplicationDetails;
 import grisu.model.dto.DtoApplicationInfo;
 import grisu.model.dto.DtoBatchJob;
-import grisu.model.dto.DtoDataLocations;
 import grisu.model.dto.DtoGridResources;
 import grisu.model.dto.DtoHostsInfo;
 import grisu.model.dto.DtoJob;
@@ -617,19 +616,19 @@ public interface ServiceInterface {
 	// @Path("interfaceVersion")
 	// String getInterfaceVersion();
 
-	/**
-	 * Checks the available data locations for the specified site and VO.
-	 * 
-	 * @param fqan
-	 *            the VO
-	 * @return a map of datalocations for this vo with the root url of the
-	 *         location as key (e.g. gsiftp://brecca.vpac.monash.edu.au:2811 and
-	 *         the paths that are accessible for this VO there as values (e.g.
-	 *         /home/grid-admin)
-	 */
-	@GET
-	@Path("info/{fqan}/datalocations")
-	DtoDataLocations getDataLocationsForVO(@PathParam("fqan") String fqan);
+	// /**
+	// * Checks the available data locations for the specified site and VO.
+	// *
+	// * @param fqan
+	// * the VO
+	// * @return a map of datalocations for this vo with the root url of the
+	// * location as key (e.g. gsiftp://brecca.vpac.monash.edu.au:2811 and
+	// * the paths that are accessible for this VO there as values (e.g.
+	// * /home/grid-admin)
+	// */
+	// @GET
+	// @Path("info/{fqan}/datalocations")
+	// DtoDataLocations getDataLocationsForVO(@PathParam("fqan") String fqan);
 
 	/**
 	 * Checks the current certificate and returns its' dn.

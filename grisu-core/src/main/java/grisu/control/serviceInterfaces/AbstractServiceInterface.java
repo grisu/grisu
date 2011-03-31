@@ -34,7 +34,6 @@ import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.DtoApplicationDetails;
 import grisu.model.dto.DtoApplicationInfo;
 import grisu.model.dto.DtoBatchJob;
-import grisu.model.dto.DtoDataLocations;
 import grisu.model.dto.DtoGridResources;
 import grisu.model.dto.DtoHostsInfo;
 import grisu.model.dto.DtoJob;
@@ -55,6 +54,7 @@ import grith.jgrith.voms.VO;
 import grith.jgrith.voms.VOManagement.VOManagement;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -115,7 +115,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		String log4jPath = "/etc/grisu/grisu-log4j.xml";
 		if(new File(log4jPath).exists() && (new File(log4jPath).length() > 0) ) {
-			DOMConfigurator.configure(log4jPath);
+			try {
+				DOMConfigurator.configure(log4jPath);
+			} catch (Exception e) {
+				myLogger.error(e);
+			}
 		}
 
 		myLogger = Logger.getLogger(AbstractServiceInterface.class.getName());
@@ -137,7 +141,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		// create ehcache manager singleton
 		try {
-			CacheManager.create("grisu-ehcache.xml");
+			URL url = ClassLoader.getSystemResource("/grisu-ehcache.xml");
+			CacheManager.create(url);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1890,12 +1895,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public DtoDataLocations getDataLocationsForVO(final String fqan) {
-
-		return DtoDataLocations.createDataLocations(fqan,
-				informationManager.getDataLocationsForVO(fqan));
-
-	}
+	// public DtoDataLocations getDataLocationsForVO(final String fqan) {
+	//
+	// return DtoDataLocations.createDataLocations(fqan,
+	// informationManager.getDataLocationsForVO(fqan));
+	//
+	// }
 
 	private String getDefaultArchiveLocation() {
 
