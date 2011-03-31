@@ -11,6 +11,7 @@ import grisu.settings.ServerPropertiesManager;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -97,6 +98,16 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			for (String fqan : childFqans) {
 
 				Set<MountPoint> mps = user.getMountPoints(fqan);
+				// we need to remove all volatile mountpoints first, users are
+				// not interested in those
+				Iterator<MountPoint> it = mps.iterator();
+				while (it.hasNext()) {
+					MountPoint mp = it.next();
+					if (mp.isVolatile()) {
+						it.remove();
+					}
+				}
+
 				if (mps.size() == 1) {
 					GridFile file = new GridFile(mps.iterator().next());
 					file.setName(FileManager.getFilename(fqan));
@@ -193,6 +204,16 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			for (String fqan : childFqans) {
 
 				Set<MountPoint> mps = user.getMountPoints(fqan);
+
+				// we need to remove volatile mountpoints
+				Iterator<MountPoint> it = mps.iterator();
+				while (it.hasNext()) {
+					MountPoint mp = it.next();
+					if (mp.isVolatile()) {
+						it.remove();
+					}
+				}
+
 				if (mps.size() == 1) {
 					GridFile file = new GridFile(mps.iterator().next());
 					file.setName(FileManager.getFilename(fqan));
@@ -268,6 +289,15 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				Set<String> childFqans = temp.keySet();
 				for (String fqan : childFqans) {
 					Set<MountPoint> mps = user.getMountPoints(fqan);
+
+					// we need to remove volatile mountpoints
+					Iterator<MountPoint> it = mps.iterator();
+					while (it.hasNext()) {
+						MountPoint mp = it.next();
+						if (mp.isVolatile()) {
+							it.remove();
+						}
+					}
 					if (mps.size() == 0) {
 						continue;
 					}
@@ -328,7 +358,17 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					              .equals(tokens[tokens.length - 1])) {
 
 				Set<String> sites = new TreeSet<String>();
-				for (MountPoint mp : user.getMountPoints(fqan)) {
+				Set<MountPoint> mps = user.getMountPoints(fqan);
+				// removing volatile mountpoints
+				Iterator<MountPoint> it = mps.iterator();
+				while (it.hasNext()) {
+					MountPoint mp = it.next();
+					if (mp.isVolatile()) {
+						it.remove();
+					}
+				}
+
+				for (MountPoint mp : mps) {
 					sites.add(mp.getSite());
 				}
 
@@ -342,6 +382,16 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 	throws RemoteFileSystemException {
 
 		Set<MountPoint> mps = user.getMountPoints(fqan);
+
+		// removing volatile mountpoints
+		Iterator<MountPoint> it = mps.iterator();
+		while (it.hasNext()) {
+			MountPoint mp = it.next();
+			if (mp.isVolatile()) {
+				it.remove();
+			}
+		}
+
 		if (mps.size() == 0) {
 			return new TreeSet<GridFile>();
 		}
@@ -428,6 +478,16 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 	private Set<String> resolveUrls(String path, String fqan) {
 
 		Set<MountPoint> mps = user.getMountPoints(fqan);
+
+		// remove volatile mountpoints
+		Iterator<MountPoint> it = mps.iterator();
+		while (it.hasNext()) {
+			MountPoint mp = it.next();
+			if (mp.isVolatile()) {
+				it.remove();
+			}
+		}
+
 		Set<String> urls = new HashSet<String>();
 
 		for (final MountPoint mp : mps) {

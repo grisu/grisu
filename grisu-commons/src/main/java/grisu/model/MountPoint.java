@@ -333,7 +333,7 @@ public class MountPoint implements Comparable<MountPoint> {
 		}
 	}
 
-	@Column(nullable = false)
+	@Column(nullable = true)
 	@XmlElement(name = "volatile")
 	public boolean isVolatile() {
 		return isVolatile;
