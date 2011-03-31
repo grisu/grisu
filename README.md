@@ -13,6 +13,7 @@ Documentation
 
 - [Wiki](https://github.com/grisu/grisu/wiki)
 - [Javadoc](http://grisu.github.com/grisu/javadoc/)
+- [SOAP/REST API documentaion](https://compute.services.bestgrid.org/)
 
 Prerequisites
 --------------------
