@@ -78,7 +78,7 @@ public class UserDAO extends BaseHibernateDAO {
 			}
 
 		} catch (final RuntimeException e) {
-			// e.printStackTrace();
+			myLogger.error(e);
 			try {
 				getCurrentSession().getTransaction().rollback();
 			} catch (final Exception er) {

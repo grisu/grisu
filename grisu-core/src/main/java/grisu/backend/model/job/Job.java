@@ -30,7 +30,6 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.hibernate.search.annotations.Indexed;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
@@ -49,7 +48,7 @@ import org.xml.sax.SAXException;
 @Entity
 @Table(name = "jobs")
 @Root
-@Indexed
+
 public class Job implements Comparable<Job> {
 
 	static final Logger myLogger = Logger.getLogger(Job.class.getName());

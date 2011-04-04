@@ -63,7 +63,6 @@ import javax.persistence.Transient;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.log4j.Logger;
-import org.hibernate.search.annotations.Indexed;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
@@ -82,7 +81,7 @@ import org.simpleframework.xml.core.Persister;
  */
 @Entity
 @Table(name = "users")
-@Indexed
+
 public class User {
 
 	public static final boolean ENABLE_FILESYSTEM_CACHE = false;
