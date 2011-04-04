@@ -334,6 +334,19 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		return false;
 	}
 
+	public GridFile getChild(String filename) {
+		if (filename == null) {
+			return null;
+		}
+
+		for (GridFile f : getChildren()) {
+			if (f.getName().equals(filename)) {
+				return f;
+			}
+		}
+		return null;
+	}
+
 	@XmlElement(name = "child")
 	public Set<GridFile> getChildren() {
 		return children;

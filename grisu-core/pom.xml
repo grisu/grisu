@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<url>http://projects.arcs.org.au/trac/grisu/wiki/GrisuCore</url>
 	<parent>
 		<artifactId>grisu</artifactId>
@@ -34,6 +35,10 @@
 		<repository>
 			<id>commons-vfs-grid</id>
 			<url>http://commonsvfsgrid.sourceforge.net/maven/</url>
+		</repository>
+		<repository>
+			<id>jboss</id>
+			<url>https://repository.jboss.org/nexus/content/groups/public/</url>
 		</repository>
 	</repositories>
 
@@ -107,6 +112,12 @@
 					<groupId>org.slf4j</groupId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-search</artifactId>
+			<version>3.2.0.Final</version>
 		</dependency>
 
 		<dependency>

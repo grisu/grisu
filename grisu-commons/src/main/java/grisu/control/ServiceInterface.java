@@ -593,7 +593,7 @@ public interface ServiceInterface {
 	@GET
 	@Path("user/currentjobs/{application}/{refresh}")
 	@RolesAllowed("User")
-	DtoJobs getCurrentJobs(@PathParam("application") String application,
+	DtoJobs getActiveJobs(@PathParam("application") String application,
 			@PathParam("refresh") boolean refreshJobStatus);
 
 	// ---------------------------------------------------------------------------------------------------

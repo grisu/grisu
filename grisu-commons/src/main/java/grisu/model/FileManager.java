@@ -1331,7 +1331,8 @@ public class FileManager {
 	public Set<GridFile> ls(GridFile parent) throws RemoteFileSystemException {
 
 		GridFile folder = null;
-		if (StringUtils.isNotBlank(parent.getPath())) {
+		if (StringUtils.isNotBlank(parent.getPath())
+				&& (parent.getUrls().size() != 1)) {
 			folder = ls(parent.getPath());
 		} else {
 			folder = ls(parent.getUrl());

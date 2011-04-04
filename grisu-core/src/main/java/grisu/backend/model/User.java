@@ -1,7 +1,11 @@
 package grisu.backend.model;
 
+import grisu.backend.hibernate.BatchJobDAO;
+import grisu.backend.hibernate.JobDAO;
 import grisu.backend.hibernate.UserDAO;
 import grisu.backend.model.fs.FileSystemManager;
+import grisu.backend.model.fs.GrisuInputStream;
+import grisu.backend.model.job.BatchJob;
 import grisu.backend.model.job.Job;
 import grisu.backend.model.job.JobSubmissionManager;
 import grisu.backend.model.job.JobSubmitter;
@@ -9,13 +13,16 @@ import grisu.backend.model.job.gt4.GT4DummySubmitter;
 import grisu.backend.model.job.gt4.GT4Submitter;
 import grisu.backend.model.job.gt5.GT5Submitter;
 import grisu.backend.utils.CertHelpers;
+import grisu.control.JobConstants;
 import grisu.control.ServiceInterface;
+import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.NoValidCredentialException;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
 import grisu.jcommons.constants.Constants;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
+import grisu.model.dto.GridFile;
 import grisu.model.job.JobSubmissionObjectImpl;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.FqanHelpers;
@@ -24,10 +31,14 @@ import grith.jgrith.voms.VO;
 import grith.jgrith.voms.VOManagement.VOManagement;
 import grith.jgrith.vomsProxy.VomsException;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -52,6 +63,9 @@ import javax.persistence.Transient;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.log4j.Logger;
+import org.hibernate.search.annotations.Indexed;
+import org.simpleframework.xml.Serializer;
+import org.simpleframework.xml.core.Persister;
 
 
 /**
@@ -68,11 +82,14 @@ import org.apache.log4j.Logger;
  */
 @Entity
 @Table(name = "users")
+@Indexed
 public class User {
 
 	public static final boolean ENABLE_FILESYSTEM_CACHE = false;
 
-	public static UserDAO userdao = new UserDAO();
+	protected static UserDAO userdao = new UserDAO();
+	protected static final JobDAO jobdao = new JobDAO();
+	protected final BatchJobDAO batchJobDao = new BatchJobDAO();
 
 	private static Logger myLogger = Logger.getLogger(User.class.getName());
 
@@ -108,6 +125,17 @@ public class User {
 					"Can't aquire filesystems for user. Possibly because of misconfigured grisu backend",
 					e);
 		}
+
+		final User temp = user;
+
+		// caching users archived jobs since those take a while to load...
+		new Thread() {
+			@Override
+			public void run() {
+				temp.getDefaultArchiveLocation();
+				temp.getArchivedJobs(null);
+			}
+		}.start();
 
 		return user;
 
@@ -154,7 +182,7 @@ public class User {
 	private Map<String, String> userProperties = new HashMap<String, String>();
 
 	private Map<String, String> bookmarks = new HashMap<String, String>();
-	private Map<String, String> archiveLocations = new TreeMap<String, String>();
+	private Map<String, String> archiveLocations = null;
 	private Map<String, JobSubmissionObjectImpl> jobTemplates = new HashMap<String, JobSubmissionObjectImpl>();
 
 	private FileSystemManager fsm;
@@ -186,12 +214,14 @@ public class User {
 		this.dn = dn;
 	}
 
+	@Transient
 	public void addArchiveLocation(String alias, String value) {
 
 		getArchiveLocations().put(alias, value);
 
 	}
 
+	@Transient
 	public void addBookmark(String alias, String url) {
 		this.bookmarks.put(alias, url);
 		userdao.saveOrUpdate(this);
@@ -202,10 +232,31 @@ public class User {
 	 * 
 	 * @param vo
 	 */
+	@Transient
 	public void addFqan(final String fqan, final String vo) {
 		fqans.put(fqan, vo);
 	}
 
+	@Transient
+	public synchronized void addLogMessageToPossibleMultiPartJobParent(
+			Job job, String message) {
+
+		final String mpjName = job.getJobProperty(Constants.BATCHJOB_NAME);
+
+		if (mpjName != null) {
+			BatchJob mpj = null;
+			try {
+				mpj = getMultiPartJobFromDatabase(mpjName);
+			} catch (final NoSuchJobException e) {
+				myLogger.error(e);
+				return;
+			}
+			mpj.addLogMessage(message);
+			batchJobDao.saveOrUpdate(mpj);
+		}
+	}
+
+	@Transient
 	public void addProperty(String key, String value) {
 
 		getUserProperties().put(key, value);
@@ -223,6 +274,7 @@ public class User {
 		cachedCredentials = new HashMap<String, ProxyCredential>();
 	}
 
+	@Transient
 	public void clearMountPointCache(String keypattern) {
 		if (StringUtils.isBlank(keypattern)) {
 			this.mountPointCache = Collections
@@ -231,10 +283,12 @@ public class User {
 		userdao.saveOrUpdate(this);
 	}
 
+	@Transient
 	private MountPoint createMountPoint(String server, String path,
 			final String fqan, Executor executor) {
 
 		String url = null;
+
 
 		final int startProperties = path.indexOf("[");
 		final int endProperties = path.indexOf("]");
@@ -434,6 +488,7 @@ public class User {
 		final String site = AbstractServiceInterface.informationManager
 		.getSiteForHostOrUrl(url);
 
+
 		MountPoint mp = null;
 
 		if (StringUtils.isBlank(alias)) {
@@ -445,6 +500,10 @@ public class User {
 			mp.addProperty(key, properties.get(key));
 		}
 
+		final boolean isVolatile = AbstractServiceInterface.informationManager
+		.isVolatileDataLocation(server, tempPath, fqan);
+		mp.setVolatile(isVolatile);
+
 		return mp;
 
 		// + "." + fqan + "." + path);
@@ -452,6 +511,26 @@ public class User {
 		// cachedGridFtpHomeDirs.put(keyMP, mp);
 		//
 		// return cachedGridFtpHomeDirs.get(keyMP);
+	}
+
+	/**
+	 * Gets all mountpoints for this fqan.
+	 * 
+	 * @param fqan
+	 *            the fqan
+	 * @return the mountpoints
+	 */
+	@Transient
+	public Set<MountPoint> df(String fqan) {
+
+		final Set<MountPoint> result = new HashSet<MountPoint>();
+		for (final MountPoint mp : getAllMountPoints()) {
+			if (StringUtils.isNotBlank(mp.getFqan())
+					&& mp.getFqan().equals(fqan)) {
+				result.add(mp);
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -463,6 +542,7 @@ public class User {
 	 *            the sites that should be used
 	 * @return all MountPoints
 	 */
+	@Transient
 	protected Set<MountPoint> df_auto_mds(final String[] sites) {
 
 		myLogger.debug("Getting mds mountpoints for user: " + getDn());
@@ -557,6 +637,43 @@ public class User {
 	}
 
 	@Transient
+	public GridFile fillFolder(GridFile folder, int recursionLevel)
+	throws RemoteFileSystemException {
+
+		GridFile tempFolder = null;
+
+		try {
+			tempFolder = getFileSystemManager().getFolderListing(
+					folder.getUrl(), 1);
+		} catch (final Exception e) {
+			// myLogger.error(e);
+			myLogger.error(
+					"Error getting folder listing. I suspect this to be a bug in the commons-vfs-grid library. Sleeping for 1 seconds and then trying again...",
+					e);
+			try {
+				Thread.sleep(1000);
+			} catch (final InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			tempFolder = getFileSystemManager().getFolderListing(
+					folder.getUrl(), 1);
+
+		}
+		folder.setChildren(tempFolder.getChildren());
+
+		if (recursionLevel > 0) {
+			for (final GridFile childFolder : tempFolder.getChildren()) {
+				if (childFolder.isFolder()) {
+					folder.addChild(fillFolder(childFolder, recursionLevel - 1));
+				}
+			}
+
+		}
+		return folder;
+	}
+
+	@Transient
 	public Map<String, DtoActionStatus> getActionStatuses() {
 
 		synchronized (dn) {
@@ -571,6 +688,38 @@ public class User {
 			return actionStatusesForUser;
 
 		}
+	}
+
+	@Transient
+	public List<Job> getActiveJobs(String application, boolean refresh) {
+
+		try {
+
+			List<Job> jobs = null;
+			if (StringUtils.isBlank(application)) {
+				jobs = jobdao
+				.findJobByDN(
+						getDn(),
+						AbstractServiceInterface.INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND);
+			} else {
+				jobs = jobdao
+				.findJobByDNPerApplication(
+						getDn(),
+						application,
+						AbstractServiceInterface.INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND);
+			}
+
+			if (refresh) {
+				refreshJobStatus(jobs);
+			}
+
+			return jobs;
+
+		} catch (final Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+
 	}
 
 	@Transient
@@ -608,6 +757,121 @@ public class User {
 		return allMountPoints;
 	}
 
+	@Transient
+	public List<Job> getArchivedJobs(final String application) {
+
+		try {
+
+			final List<Job> archivedJobs = Collections
+			.synchronizedList(new LinkedList<Job>());
+
+			final ExecutorService executor = Executors
+			.newFixedThreadPool(getArchiveLocations().size());
+
+			for (final String archiveLocation : getArchiveLocations().values()) {
+
+				Thread t = new Thread() {
+					@Override
+					public void run() {
+
+						myLogger.debug(getDn() + ":\tGetting archived job on: "
+								+ archiveLocations);
+						List<Job> jobObjects = null;
+						try {
+							jobObjects = getArchivedJobsFromFileSystem(archiveLocation);
+							if (application == null) {
+								for (Job job : jobObjects) {
+									archivedJobs.add(job);
+								}
+							} else {
+
+								for (Job job : jobObjects) {
+
+									String app = job.getJobProperties().get(
+											Constants.APPLICATIONNAME_KEY);
+
+									if (application.equals(app)) {
+										archivedJobs.add(job);
+									}
+								}
+							}
+						} catch (RemoteFileSystemException e) {
+							myLogger.error(e);
+						}
+
+					}
+				};
+				executor.execute(t);
+			}
+
+			executor.shutdown();
+
+			executor.awaitTermination(3, TimeUnit.MINUTES);
+
+			return archivedJobs;
+
+		} catch (final Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+	}
+
+
+	@Transient
+	private List<Job> getArchivedJobsFromFileSystem(String fs)
+	throws RemoteFileSystemException {
+
+		if (StringUtils.isBlank(fs)) {
+			fs = getDefaultArchiveLocation();
+		}
+
+		if ( fs == null ) {
+			return new LinkedList<Job>();
+		}
+
+		synchronized (fs) {
+
+			final List<Job> jobs = Collections
+			.synchronizedList(new LinkedList<Job>());
+
+			GridFile file = ls(fs, 1);
+
+			final ExecutorService executor = Executors
+			.newFixedThreadPool(ServerPropertiesManager
+					.getConcurrentArchivedJobLookupsPerFilesystem());
+
+			for (final GridFile f : file.getChildren()) {
+				Thread t = new Thread() {
+					@Override
+					public void run() {
+
+						try {
+							Job job = loadJobFromFilesystem(f.getUrl());
+							jobs.add(job);
+
+						} catch (NoSuchJobException e) {
+							myLogger.debug("No job for url: " + f.getUrl());
+						}
+					}
+				};
+				executor.execute(t);
+			}
+
+			executor.shutdown();
+
+			try {
+				executor.awaitTermination(2, TimeUnit.MINUTES);
+			} catch (InterruptedException e) {
+				myLogger.error(e);
+			}
+
+
+			return jobs;
+
+		}
+
+	}
+
 	/**
 	 * Gets a map of this users bookmarks.
 	 * 
@@ -615,6 +879,10 @@ public class User {
 	 */
 	@ElementCollection(fetch = FetchType.EAGER)
 	public Map<String, String> getArchiveLocations() {
+		if (archiveLocations == null) {
+			archiveLocations = new TreeMap<String, String>();
+		}
+
 		return archiveLocations;
 	}
 
@@ -627,23 +895,6 @@ public class User {
 	public Map<String, String> getBookmarks() {
 		return bookmarks;
 	}
-
-	// private List<FileReservation> getFileReservations() {
-	// return fileReservations;
-	// }
-	//
-	// private void setFileReservations(List<FileReservation> fileReservations)
-	// {
-	// this.fileReservations = fileReservations;
-	// }
-	//
-	// private List<FileTransfer> getFileTransfers() {
-	// return fileTransfers;
-	// }
-	//
-	// private void setFileTransfers(List<FileTransfer> fileTransfers) {
-	// this.fileTransfers = fileTransfers;
-	// }
 
 	/**
 	 * Returns the default credential of the user (if any).
@@ -671,6 +922,85 @@ public class User {
 		return credToUse;
 	}
 
+	@Transient
+	private synchronized String getDefaultArchiveLocation() {
+
+		String defArcLoc = getUserProperties().get(
+				Constants.DEFAULT_JOB_ARCHIVE_LOCATION);
+
+		if (StringUtils.isBlank(defArcLoc)) {
+
+			Set<MountPoint> mps = df(ServerPropertiesManager
+					.getDefaultFqanForArchivedJobDirectory());
+			if (mps.size() > 0) {
+				defArcLoc = mps.iterator().next().getRootUrl()
+				+ "/"
+				+ ServerPropertiesManager
+				.getArchivedJobsDirectoryName();
+
+				addArchiveLocation(
+						Constants.DEFAULT_JOB_ARCHIVE_LOCATION, defArcLoc);
+				setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+						defArcLoc);
+
+			} else {
+				// to be removed once we switch to new backend
+
+				mps = df("/ARCS/BeSTGRID/Drug_discovery/Local");
+				if (mps.size() > 0) {
+					defArcLoc = mps.iterator().next().getRootUrl()
+					+ "/"
+					+ ServerPropertiesManager
+					.getArchivedJobsDirectoryName();
+
+					addArchiveLocation(
+							Constants.DEFAULT_JOB_ARCHIVE_LOCATION, defArcLoc);
+					setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+							defArcLoc);
+				} else {
+					mps = df("/ARCS/BeSTGRID");
+					if (mps.size() > 0) {
+						defArcLoc = mps.iterator().next().getRootUrl()
+						+ "/"
+						+ ServerPropertiesManager
+						.getArchivedJobsDirectoryName();
+
+						addArchiveLocation(
+								Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+								defArcLoc);
+						setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+								defArcLoc);
+					} else {
+						mps = getAllMountPoints();
+						if (mps.size() == 0) {
+							return null;
+						}
+						defArcLoc = mps.iterator().next()
+						+ "/"
+						+ ServerPropertiesManager
+						.getArchivedJobsDirectoryName();
+
+						addArchiveLocation(
+								Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+								defArcLoc);
+						setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+								defArcLoc);
+					}
+
+				}
+
+			}
+
+			userdao.saveOrUpdate(this);
+
+		}
+
+		myLogger.info("Setting default archive location for user " + getDn()
+				+ ": " + defArcLoc);
+
+		return defArcLoc;
+	}
+
 	/**
 	 * Returns the users dn.
 	 * 
@@ -680,6 +1010,23 @@ public class User {
 	public String getDn() {
 		return dn;
 	}
+
+	// private List<FileReservation> getFileReservations() {
+	// return fileReservations;
+	// }
+	//
+	// private void setFileReservations(List<FileReservation> fileReservations)
+	// {
+	// this.fileReservations = fileReservations;
+	// }
+	//
+	// private List<FileTransfer> getFileTransfers() {
+	// return fileTransfers;
+	// }
+	//
+	// private void setFileTransfers(List<FileTransfer> fileTransfers) {
+	// this.fileTransfers = fileTransfers;
+	// }
 
 	public String getFileSystemHomeDirectory(String filesystemRoot, String fqan)
 	throws FileSystemException {
@@ -747,18 +1094,6 @@ public class User {
 		return fsm;
 	}
 
-	// public GridFile getFolderListing(final String url, int recursionLevel)
-	// throws RemoteFileSystemException, FileSystemException {
-	//
-	// try {
-	// return getFileSystemManager().getFolderListing(url, recursionLevel);
-	// } catch (InvalidPathException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// return null;
-	// }
-	// }
-
 	/**
 	 * Getter for the users' fqans.
 	 * 
@@ -787,6 +1122,155 @@ public class User {
 	private Long getId() {
 		return id;
 	}
+
+	/**
+	 * Searches for the job with the specified jobname for the current user.
+	 * 
+	 * @param jobname
+	 *            the name of the job (which is unique within one user)
+	 * @return the job
+	 */
+	@Transient
+	public Job getJobFromDatabaseOrFileSystem(String jobnameOrUrl)
+	throws NoSuchJobException {
+
+		Job job = null;
+		try {
+			job = jobdao.findJobByDN(getDn(), jobnameOrUrl);
+			return job;
+		} catch (final NoSuchJobException nsje) {
+
+			if (jobnameOrUrl.startsWith("gridftp://")) {
+
+				for (Job archivedJob : getArchivedJobs(null)) {
+					if (job.getJobProperty(Constants.JOBDIRECTORY_KEY).equals(
+							jobnameOrUrl)) {
+						return job;
+					}
+				}
+			}
+
+		}
+		throw new NoSuchJobException("Job with name " + jobnameOrUrl
+				+ "does not exist.");
+	}
+
+	@Transient
+	public int getJobStatus(final String jobname) {
+
+		// myLogger.debug("Start getting status for job: " + jobname);
+		Job job;
+		try {
+			job = getJobFromDatabaseOrFileSystem(jobname);
+		} catch (final NoSuchJobException e) {
+			return JobConstants.NO_SUCH_JOB;
+		}
+
+		int status = Integer.MIN_VALUE;
+		final int old_status = job.getStatus();
+
+		// System.out.println("OLDSTAUS "+jobname+": "+JobConstants.translateStatus(old_status));
+		if (old_status <= JobConstants.READY_TO_SUBMIT) {
+			// this couldn't have changed without manual intervention
+			return old_status;
+		}
+
+		// check whether the no_such_job check is necessary
+		if (old_status >= JobConstants.FINISHED_EITHER_WAY) {
+			return old_status;
+		}
+
+		final Date lastCheck = job.getLastStatusCheck();
+		final Date now = new Date();
+
+		if ((old_status != JobConstants.EXTERNAL_HANDLE_READY)
+				&& (old_status != JobConstants.UNSUBMITTED)
+				&& (now.getTime() < lastCheck.getTime()
+						+ (ServerPropertiesManager
+								.getWaitTimeBetweenJobStatusChecks() * 1000))) {
+			myLogger.debug("Last check for job "
+					+ jobname
+					+ " was: "
+					+ lastCheck.toString()
+					+ ". Too early to check job status again. Returning old status...");
+			return job.getStatus();
+		}
+
+		final ProxyCredential cred = job.getCredential();
+		boolean changedCred = false;
+		// TODO check whether cred is stored in the database in that case? also,
+		// is a voms credential needed? -- apparently not - only dn must match
+		if ((cred == null) || !cred.isValid()) {
+
+			final VO vo = VOManagement.getVO(getFqans().get(
+					job.getFqan()));
+
+			job.setCredential(CertHelpers.getVOProxyCredential(vo,
+					job.getFqan(), getCred()));
+			changedCred = true;
+		}
+
+		// myLogger.debug("Getting status for job from submission manager: "
+		// + jobname);
+
+		status = getSubmissionManager().getJobStatus(job);
+		// myLogger.debug("Status for job" + jobname
+		// + " from submission manager: " + status);
+		if (changedCred) {
+			job.setCredential(null);
+		}
+		if (old_status != status) {
+			job.setStatus(status);
+			final String message = "Job status for job: " + job.getJobname()
+			+ " changed since last check ("
+			+ job.getLastStatusCheck().toString() + ") from: \""
+			+ JobConstants.translateStatus(old_status) + "\" to: \""
+			+ JobConstants.translateStatus(status) + "\"";
+			job.addLogMessage(message);
+			addLogMessageToPossibleMultiPartJobParent(job, message);
+			if ((status >= JobConstants.FINISHED_EITHER_WAY)
+					&& (status != JobConstants.DONE)) {
+				// job.addJobProperty(Constants.ERROR_REASON,
+				// "Job finished with status: "
+				// + JobConstants.translateStatus(status));
+				job.addLogMessage("Job failed. Status: "
+						+ JobConstants.translateStatus(status));
+				final String multiPartJobParent = job
+				.getJobProperty(Constants.BATCHJOB_NAME);
+				if (multiPartJobParent != null) {
+					try {
+						final BatchJob mpj = getMultiPartJobFromDatabase(multiPartJobParent);
+						mpj.addFailedJob(job.getJobname());
+						addLogMessageToPossibleMultiPartJobParent(job, "Job: "
+								+ job.getJobname() + " failed. Status: "
+								+ JobConstants.translateStatus(job.getStatus()));
+						batchJobDao.saveOrUpdate(mpj);
+					} catch (final NoSuchJobException e) {
+						// well
+						myLogger.error(e);
+					}
+				}
+			}
+		}
+		job.setLastStatusCheck(new Date());
+		jobdao.saveOrUpdate(job);
+
+		// myLogger.debug("Status of job: " + job.getJobname() + " is: " +
+		// status);
+		return status;
+	}
+
+	// public GridFile getFolderListing(final String url, int recursionLevel)
+	// throws RemoteFileSystemException, FileSystemException {
+	//
+	// try {
+	// return getFileSystemManager().getFolderListing(url, recursionLevel);
+	// } catch (InvalidPathException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// return null;
+	// }
+	// }
 
 	@ElementCollection
 	public Map<String, JobSubmissionObjectImpl> getJobTemplates() {
@@ -838,6 +1322,17 @@ public class User {
 			}
 			return mountPointsPerFqanCache.get(fqan);
 		}
+	}
+
+	@Transient
+	public BatchJob getMultiPartJobFromDatabase(final String batchJobname)
+	throws NoSuchJobException {
+
+		final BatchJob job = batchJobDao.findJobByDN(getCred()
+				.getDn(), batchJobname);
+
+		return job;
+
 	}
 
 	/**
@@ -920,8 +1415,108 @@ public class User {
 		return 29 * dn.hashCode();
 	}
 
+	private Job loadJobFromFilesystem(String url) throws NoSuchJobException {
+		String grisuJobPropertiesFile = null;
+
+		if (url.endsWith(ServiceInterface.GRISU_JOB_FILE_NAME)) {
+			grisuJobPropertiesFile = url;
+		} else {
+			if (url.endsWith("/")) {
+				grisuJobPropertiesFile = url
+				+ ServiceInterface.GRISU_JOB_FILE_NAME;
+			} else {
+				grisuJobPropertiesFile = url + "/"
+				+ ServiceInterface.GRISU_JOB_FILE_NAME;
+			}
+
+		}
+
+		Job job = null;
+
+		synchronized (grisuJobPropertiesFile) {
+
+			try {
+
+				if (getFileSystemManager().fileExists(grisuJobPropertiesFile)) {
+
+					Object cacheJob = AbstractServiceInterface
+					.getFromSessionCache(grisuJobPropertiesFile);
+
+					if (cacheJob != null) {
+						return (Job) cacheJob;
+					}
+
+					final Serializer serializer = new Persister();
+
+					GrisuInputStream fin = null;
+					try {
+						fin = getFileSystemManager().getInputStream(
+								grisuJobPropertiesFile);
+						job = serializer.read(Job.class, fin.getStream());
+						fin.close();
+
+						AbstractServiceInterface.putIntoSessionCache(
+								grisuJobPropertiesFile, job);
+
+						return job;
+					} catch (final Exception e) {
+						e.printStackTrace();
+						throw new NoSuchJobException("Can't find job at location: "
+								+ url);
+					} finally {
+						try {
+							fin.close();
+						} catch (final Exception e) {
+							e.printStackTrace();
+							throw new NoSuchJobException(
+									"Can't find job at location: " + url);
+						}
+					}
+
+				} else {
+					throw new NoSuchJobException("Can't find job at location: "
+							+ url);
+				}
+			} catch (final RemoteFileSystemException e) {
+				throw new NoSuchJobException("Can't find job at location: " + url);
+			}
+		}
+	}
+
 	public void logout() {
 		actionStatuses.remove(dn);
+	}
+
+	public GridFile ls(final String directory, int recursion_level)
+	throws RemoteFileSystemException {
+
+		try {
+
+			if (recursion_level == 0) {
+				final GridFile file = getFileSystemManager()
+				.getFolderListing(directory, 0);
+				return file;
+			}
+
+			final GridFile rootfolder = getFileSystemManager()
+			.getFolderListing(directory, 1);
+			if (recursion_level == 1) {
+
+				return rootfolder;
+			} else if (recursion_level <= 0) {
+				recursion_level = Integer.MAX_VALUE;
+			}
+
+			recursion_level = recursion_level - 1;
+
+			fillFolder(rootfolder, recursion_level);
+			return rootfolder;
+
+		} catch (final Exception e) {
+			// e.printStackTrace();
+			throw new RemoteFileSystemException("Could not list directory "
+					+ directory + ": " + e.getLocalizedMessage());
+		}
 	}
 
 	/**
@@ -1002,6 +1597,19 @@ public class User {
 
 			return mountFileSystem(root, name, vomsProxyCred, useHomeDirectory,
 					site);
+		}
+	}
+
+	/**
+	 * Just a method to refresh the status of all jobs. Could be used by
+	 * something like a cronjob as well. TODO: maybe change to public?
+	 * 
+	 * @param jobs
+	 *            a list of jobs you want to have refreshed
+	 */
+	protected void refreshJobStatus(final Collection<Job> jobs) {
+		for (final Job job : jobs) {
+			getJobStatus(job.getJobname());
 		}
 	}
 
@@ -1133,6 +1741,30 @@ public class User {
 
 	private void setUserProperties(final Map<String, String> userProperties) {
 		this.userProperties = userProperties;
+	}
+
+	public void setUserProperty(String key, String value) {
+
+		if (StringUtils.isBlank(key)) {
+			return;
+		}
+
+		if (Constants.CLEAR_MOUNTPOINT_CACHE.equals(key)) {
+			clearMountPointCache(value);
+			return;
+		} else if (Constants.JOB_ARCHIVE_LOCATION.equals(key)) {
+			String[] temp = value.split(";");
+			String alias = temp[0];
+			String url = temp[0];
+			if (temp.length == 2) {
+				url = temp[1];
+			}
+			addArchiveLocation(alias, url);
+			return;
+		}
+
+		addProperty(key, value);
+
 	}
 
 	/**

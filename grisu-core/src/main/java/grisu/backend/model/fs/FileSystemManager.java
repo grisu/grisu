@@ -83,7 +83,7 @@ public class FileSystemManager {
 	}
 
 	public DataHandler download(String filename)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 		return getFileSystemInfoPlugin(filename).download(filename);
 	}
 
@@ -123,21 +123,25 @@ public class FileSystemManager {
 	}
 
 	public GridFile getFolderListing(String pathOrUrl, int recursiveLevels)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 
 		pathOrUrl = cleanPath(pathOrUrl);
-		return getFileSystemInfoPlugin(pathOrUrl).getFolderListing(pathOrUrl,
+
+		GridFile result = getFileSystemInfoPlugin(pathOrUrl).getFolderListing(
+				pathOrUrl,
 				recursiveLevels);
+
+		return result;
 
 	}
 
 	public GrisuInputStream getInputStream(String file)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 		return getFileSystemInfoPlugin(file).getInputStream(file);
 	}
 
 	public GrisuOutputStream getOutputStream(String file)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 		return getFileSystemInfoPlugin(file).getOutputStream(file);
 	}
 
@@ -159,11 +163,11 @@ public class FileSystemManager {
 	public String resolveFileSystemHomeDirectory(String filesystemRoot,
 			String fqan) throws RemoteFileSystemException {
 		return getFileSystemInfoPlugin(filesystemRoot)
-				.resolveFileSystemHomeDirectory(filesystemRoot, fqan);
+		.resolveFileSystemHomeDirectory(filesystemRoot, fqan);
 	}
 
 	public String upload(final DataHandler source, final String filename)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 		return getFileSystemInfoPlugin(filename).upload(source, filename);
 	}
 
@@ -176,7 +180,7 @@ public class FileSystemManager {
 			String protNew = FileManager.getProtocol(parent);
 			if ((prot != null) && !prot.equals(protNew)) {
 				throw new RemoteFileSystemException(
-						"Multiple remote protocols not supported (yet).");
+				"Multiple remote protocols not supported (yet).");
 			}
 			prot = protNew;
 		}

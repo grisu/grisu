@@ -23,6 +23,28 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+/**
+ * A plugin that lists (non-volatile) filesystems in a tree-like group
+ * structure.
+ * 
+ * The base url for this plugin is grid://groups . The next token will be the
+ * name of the VO and beneath that this plugin will populate folders with both
+ * sub-vos and files (provided the VO/Sub-VO inquestion is associated with a
+ * filesystem).
+ * 
+ * Groups and "real" files will be merged in the child files of a url.
+ * 
+ * Since the way the filelisting is done can be a bit slow at times, if you only
+ * want to know the child files for a certain VO, seperate the VO-part of the
+ * url and the path-part using //, e.g. grid://groups/nz/NeSI//folder1/folder2 .
+ * This will make sure to only query all mountpoints associated with the
+ * /nz/NeSI VO, but it will not list filesystems possibly associated to the /nz
+ * VO for a (real) folder called /NeSI.
+ * 
+ * 
+ * @author Markus Binsteiner
+ * 
+ */
 public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 	static final Logger myLogger = Logger.getLogger(GroupFileSystemPlugin.class
@@ -366,6 +388,10 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					if (mp.isVolatile()) {
 						it.remove();
 					}
+				}
+
+				if (mps.size() == 0) {
+					continue;
 				}
 
 				for (MountPoint mp : mps) {

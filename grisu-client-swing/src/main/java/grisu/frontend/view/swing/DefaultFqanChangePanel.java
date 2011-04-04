@@ -23,7 +23,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class DefaultFqanChangePanel extends JPanel implements
-		EventSubscriber<FqanEvent> {
+EventSubscriber<FqanEvent> {
 
 	private final DefaultComboBoxModel voModel = new DefaultComboBoxModel();
 	private ServiceInterface si = null;
@@ -61,7 +61,7 @@ public class DefaultFqanChangePanel extends JPanel implements
 
 					final String newVO = (String) voModel.getSelectedItem();
 					GrisuRegistryManager.getDefault(si)
-							.getUserEnvironmentManager().setCurrentFqan(newVO);
+					.getUserEnvironmentManager().setCurrentFqan(newVO);
 
 				}
 
@@ -86,7 +86,7 @@ public class DefaultFqanChangePanel extends JPanel implements
 			public void run() {
 
 				final UserEnvironmentManager uem = GrisuRegistryManager
-						.getDefault(si).getUserEnvironmentManager();
+				.getDefault(si).getUserEnvironmentManager();
 				String old = (String) voModel.getSelectedItem();
 				if (StringUtils.isBlank(old)) {
 					old = uem.getCurrentFqan();
@@ -94,7 +94,7 @@ public class DefaultFqanChangePanel extends JPanel implements
 
 				externalChange = true;
 
-				final String[] allVOs = uem.getAllAvailableFqans();
+				final String[] allVOs = uem.getAllAvailableFqans(true);
 
 				voModel.removeAllElements();
 
@@ -136,7 +136,7 @@ public class DefaultFqanChangePanel extends JPanel implements
 	}
 
 	public void setServiceInterface(ServiceInterface si)
-			throws InterruptedException {
+	throws InterruptedException {
 		this.si = si;
 		fillComboBox();
 	}

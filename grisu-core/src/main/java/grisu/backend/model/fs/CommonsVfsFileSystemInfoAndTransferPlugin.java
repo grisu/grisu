@@ -357,6 +357,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			}
 
 			MountPoint mp = user.getResponsibleMountpointForAbsoluteFile(url);
+
 			final GridFile folder = new GridFile(url, lastModified);
 
 			folder.addSite(mp.getSite());
@@ -402,6 +403,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 					folder.addChild(childFile);
 				}
 			}
+
 			return folder;
 		} catch (FileSystemException fse) {
 			throw new RemoteFileSystemException(fse);

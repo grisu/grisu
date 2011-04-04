@@ -7,22 +7,22 @@
 
 	<session-factory>
 		<property name="hibernate.current_session_context_class">thread</property>
-<!--		<property name="hibernate.transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</property>-->
+		<!-- <property name="hibernate.transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</property> -->
 
-<!--		<property name="hibernate.connection.pool_size">0</property>-->
+		<!-- <property name="hibernate.connection.pool_size">0</property> -->
 
 		<property name="hibernate.connection.username">grisu</property>
 		<property name="hibernate.connection.password">password</property>
 		<property name="hibernate.connection.driver_class">org.apache.derby.jdbc.ClientDriver</property>
 		<property name="hibernate.dialect">org.hibernate.dialect.DerbyDialect</property>
-		
-<!--		<property name="hibernate.connection.writedelay">0</property>-->
+
+		<!-- <property name="hibernate.connection.writedelay">0</property> -->
 
 		<property name="hibernate.hbm2ddl.auto">update</property>
-		<property name="hibernate.show_sql">false</property>  
+		<property name="hibernate.show_sql">false</property>
 		<property name="hibernate.generate_statistics">false</property>
 		<property name="hibernate.use_sql_comments">false</property>
-		
+
 	</session-factory>
 
 </hibernate-configuration>

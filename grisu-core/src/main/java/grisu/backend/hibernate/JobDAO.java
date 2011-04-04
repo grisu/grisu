@@ -75,6 +75,7 @@ public class JobDAO extends BaseHibernateDAO {
 					queryString);
 			queryObject.setParameter(0, dn);
 
+
 			final List<Job> jobs = (queryObject.list());
 
 			getCurrentSession().getTransaction().commit();

@@ -45,9 +45,16 @@ public final class ServerPropertiesManager {
 	public static final int DEFAULT_CONCURRENT_MOUNTPOINT_LOOKUPS = 8;
 
 	/**
+	 * Default concurrent threads when getting job properties of archived jobs.
+	 */
+	public static final int DEFAULT_CONCURRENT_ARCHIVED_JOB_LOOKUPS_PER_FILESYSTEM = 8;
+
+	/**
 	 * Default directory name used as parent for the jobdirectories.
 	 */
-	public static final String DEFAULT_JOB_DIR_NAME = "grisu-jobs";
+	public static final String DEFAULT_JOB_DIR_NAME = "active-jobs";
+	public static final String DEFAULT_ARCHIVED_JOB_DIR_NAME = "archived-jobs";
+	public static final String DEFAULT_FQAN_TO_USE_FOR_ARCHIVING_JOBS = "/nz/NeSI";
 	public static final int DEFAULT_TIME_INBETWEEN_STATUS_CHECKS_FOR_THE_SAME_JOB_IN_SECONDS = 60;
 
 	private static HierarchicalINIConfiguration config = null;
@@ -88,6 +95,55 @@ public final class ServerPropertiesManager {
 	// }
 	// return check;
 	// }
+
+	/**
+	 * Returns the name of the directory in which grisu jobs are located
+	 * remotely.
+	 * 
+	 * @return the name of the direcotory in which grisu stores jobs or null if
+	 *         the jobs should be stored in the root home directory.
+	 */
+	public static String getArchivedJobsDirectoryName() {
+
+		String jobDirName = null;
+		try {
+			jobDirName = getServerConfiguration().getString(
+			"General.archivedJobDirName");
+
+			if (StringUtils.isNotBlank(jobDirName)
+					&& "none".equals(jobDirName.toLowerCase())) {
+				jobDirName = null;
+			}
+
+		} catch (final Exception e) {
+			jobDirName = null;
+		}
+
+		if (jobDirName == null) {
+			jobDirName = DEFAULT_ARCHIVED_JOB_DIR_NAME;
+		}
+
+		return jobDirName;
+	}
+
+	public static int getConcurrentArchivedJobLookupsPerFilesystem() {
+
+		int concurrentThreads = -1;
+		try {
+			concurrentThreads = Integer
+			.parseInt(getServerConfiguration().getString(
+									"ConcurrentThreadSettings.archivedJobsLookupThreadsPerFilesystem"));
+
+		} catch (final Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_CONCURRENT_ARCHIVED_JOB_LOOKUPS_PER_FILESYSTEM;
+		}
+		if (concurrentThreads == -1) {
+			return DEFAULT_CONCURRENT_ARCHIVED_JOB_LOOKUPS_PER_FILESYSTEM;
+		}
+		return concurrentThreads;
+
+	}
 
 	public static int getConcurrentFileTransfersPerUser() {
 
@@ -152,29 +208,6 @@ public final class ServerPropertiesManager {
 		return concurrentThreads;
 	}
 
-	/**
-	 * Returns the number of concurrent threads that are submitting (multi-)jobs
-	 * status per user.
-	 * 
-	 * @return the number of concurrent threads
-	 */
-	public static int getConcurrentMultiPartJobSubmitThreadsPerUser() {
-		int concurrentThreads = -1;
-		try {
-			concurrentThreads = Integer
-			.parseInt(getServerConfiguration().getString(
-			"ConcurrentThreadSettings.batchJobSubmitThreads"));
-
-		} catch (final Exception e) {
-			// myLogger.error("Problem with config file: " + e.getMessage());
-			return DEFAULT_CONCURRENT_JOB_SUBMISSION_THREADS_PER_USER;
-		}
-		if (concurrentThreads == -1) {
-			return DEFAULT_CONCURRENT_JOB_SUBMISSION_THREADS_PER_USER;
-		}
-		return concurrentThreads;
-	}
-
 	// /**
 	// * Returns the name of the directory in which grisu jobs are located
 	// * remotely.
@@ -203,6 +236,29 @@ public final class ServerPropertiesManager {
 	//
 	// return jobDirName;
 	// }
+
+	/**
+	 * Returns the number of concurrent threads that are submitting (multi-)jobs
+	 * status per user.
+	 * 
+	 * @return the number of concurrent threads
+	 */
+	public static int getConcurrentMultiPartJobSubmitThreadsPerUser() {
+		int concurrentThreads = -1;
+		try {
+			concurrentThreads = Integer
+			.parseInt(getServerConfiguration().getString(
+			"ConcurrentThreadSettings.batchJobSubmitThreads"));
+
+		} catch (final Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_CONCURRENT_JOB_SUBMISSION_THREADS_PER_USER;
+		}
+		if (concurrentThreads == -1) {
+			return DEFAULT_CONCURRENT_JOB_SUBMISSION_THREADS_PER_USER;
+		}
+		return concurrentThreads;
+	}
 
 	/**
 	 * The url to connect to the database.
@@ -317,6 +373,28 @@ public final class ServerPropertiesManager {
 		return debug;
 	}
 
+	public static String getDefaultFqanForArchivedJobDirectory() {
+		String fqan = null;
+		try {
+			fqan = getServerConfiguration().getString(
+			"General.archivedJobDefaultVO");
+
+			if (StringUtils.isNotBlank(fqan)
+					&& "none".equals(fqan.toLowerCase())) {
+				fqan = null;
+			}
+
+		} catch (final Exception e) {
+			fqan = null;
+		}
+
+		if (fqan == null) {
+			fqan = DEFAULT_FQAN_TO_USE_FOR_ARCHIVING_JOBS;
+		}
+
+		return fqan;
+	}
+
 	public static int getFileListingTimeOut() {
 
 		int waitTimeInSeconds = -1;
@@ -366,36 +444,6 @@ public final class ServerPropertiesManager {
 		}
 		return retries;
 
-	}
-
-	/**
-	 * Returns the name of the directory in which grisu jobs are located
-	 * remotely.
-	 * 
-	 * @return the name of the direcotory in which grisu stores jobs or null if
-	 *         the jobs should be stored in the root home directory.
-	 */
-	public static String getGrisuJobDirectoryName() {
-
-		String jobDirName = null;
-		try {
-			jobDirName = getServerConfiguration().getString(
-			"General.jobDirName");
-
-			if (StringUtils.isNotBlank(jobDirName)
-					&& "none".equals(jobDirName.toLowerCase())) {
-				jobDirName = null;
-			}
-
-		} catch (final Exception e) {
-			jobDirName = null;
-		}
-
-		if (jobDirName == null) {
-			jobDirName = DEFAULT_JOB_DIR_NAME;
-		}
-
-		return jobDirName;
 	}
 
 	public static Map<String, String> getInformationManagerConf() {
@@ -508,6 +556,36 @@ public final class ServerPropertiesManager {
 	}
 
 	/**
+	 * Returns the name of the directory in which grisu jobs are located
+	 * remotely.
+	 * 
+	 * @return the name of the direcotory in which grisu stores jobs or null if
+	 *         the jobs should be stored in the root home directory.
+	 */
+	public static String getRunningJobsDirectoryName() {
+
+		String jobDirName = null;
+		try {
+			jobDirName = getServerConfiguration().getString(
+			"General.jobDirName");
+
+			if (StringUtils.isNotBlank(jobDirName)
+					&& "none".equals(jobDirName.toLowerCase())) {
+				jobDirName = null;
+			}
+
+		} catch (final Exception e) {
+			jobDirName = null;
+		}
+
+		if (jobDirName == null) {
+			jobDirName = DEFAULT_JOB_DIR_NAME;
+		}
+
+		return jobDirName;
+	}
+
+	/**
 	 * Retrieves the configuration parameters from the properties file.
 	 * 
 	 * @return the configuration
@@ -574,7 +652,7 @@ public final class ServerPropertiesManager {
 
 		try {
 			final String dbtype = getServerConfiguration().getString(
-					"Database.databaseType");
+			"Database.databaseType");
 
 			if ((dbtype == null) || (dbtype.length() == 0)) {
 				return true;
