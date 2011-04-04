@@ -125,7 +125,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				Iterator<MountPoint> it = mps.iterator();
 				while (it.hasNext()) {
 					MountPoint mp = it.next();
-					if (mp.isVolatile()) {
+					if (mp.isVolatileFileSystem()) {
 						it.remove();
 					}
 				}
@@ -231,7 +231,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				Iterator<MountPoint> it = mps.iterator();
 				while (it.hasNext()) {
 					MountPoint mp = it.next();
-					if (mp.isVolatile()) {
+					if (mp.isVolatileFileSystem()) {
 						it.remove();
 					}
 				}
@@ -316,7 +316,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					Iterator<MountPoint> it = mps.iterator();
 					while (it.hasNext()) {
 						MountPoint mp = it.next();
-						if (mp.isVolatile()) {
+						if (mp.isVolatileFileSystem()) {
 							it.remove();
 						}
 					}
@@ -385,7 +385,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				Iterator<MountPoint> it = mps.iterator();
 				while (it.hasNext()) {
 					MountPoint mp = it.next();
-					if (mp.isVolatile()) {
+					if (mp.isVolatileFileSystem()) {
 						it.remove();
 					}
 				}
@@ -413,7 +413,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 		Iterator<MountPoint> it = mps.iterator();
 		while (it.hasNext()) {
 			MountPoint mp = it.next();
-			if (mp.isVolatile()) {
+			if (mp.isVolatileFileSystem()) {
 				it.remove();
 			}
 		}
@@ -509,7 +509,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 		Iterator<MountPoint> it = mps.iterator();
 		while (it.hasNext()) {
 			MountPoint mp = it.next();
-			if (mp.isVolatile()) {
+			if (mp.isVolatileFileSystem()) {
 				it.remove();
 			}
 		}

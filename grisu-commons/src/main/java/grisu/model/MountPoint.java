@@ -71,7 +71,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	private boolean automaticallyMounted = false;
 	private boolean disabled = false;
 
-	private boolean isVolatile = false;
+	private boolean isVolatileFileSystem = false;
 
 	// for hibernate
 	public MountPoint() {
@@ -334,9 +334,9 @@ public class MountPoint implements Comparable<MountPoint> {
 	}
 
 	@Column(nullable = true)
-	@XmlElement(name = "volatile")
-	public boolean isVolatile() {
-		return isVolatile;
+	@XmlElement(name = "volatileFileSystem")
+	public boolean isVolatileFileSystem() {
+		return isVolatileFileSystem;
 	}
 
 	// public boolean equals(Object otherMountPoint) {
@@ -412,8 +412,8 @@ public class MountPoint implements Comparable<MountPoint> {
 		this.rootUrl = url;
 	}
 
-	public void setVolatile(final boolean isVolatile) {
-		this.isVolatile = isVolatile;
+	public void setVolatileFileSystem(final boolean isVolatile) {
+		this.isVolatileFileSystem = isVolatile;
 	}
 
 	/*

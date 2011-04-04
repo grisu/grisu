@@ -48,11 +48,11 @@ public class GT5Submitter extends JobSubmitter {
 					&& StringUtils.isNotBlank(subLoc)) {
 				// if we know application, version and submissionLocation
 				final Map<String, String> appDetails = infoManager
-						.getApplicationDetails(application, version, subLoc);
+				.getApplicationDetails(application, version, subLoc);
 
 				try {
 					modules_string = appDetails.get(Constants.MDS_MODULES_KEY)
-							.split(",");
+					.split(",");
 
 					if ((modules_string == null) || "".equals(modules_string)) {
 						return null;
@@ -65,12 +65,12 @@ public class GT5Submitter extends JobSubmitter {
 					&& (subLoc != null)) {
 
 				final Map<String, String> appDetails = infoManager
-						.getApplicationDetails(application,
-								Constants.NO_VERSION_INDICATOR_STRING, subLoc);
+				.getApplicationDetails(application,
+						Constants.NO_VERSION_INDICATOR_STRING, subLoc);
 
 				try {
 					modules_string = appDetails.get(Constants.MDS_MODULES_KEY)
-							.split(",");
+					.split(",");
 
 					if ((modules_string == null) || "".equals(modules_string)) {
 						return null;
@@ -84,7 +84,7 @@ public class GT5Submitter extends JobSubmitter {
 
 			} else {
 				throw new RuntimeException(
-						"Can't determine module because either/or application, version submissionLocation are missing.");
+				"Can't determine module because either/or application, version submissionLocation are missing.");
 			}
 		} else {
 			myLogger.info("No submission location specified. If this happens when trying to submit a job, it's probably a bug...");
@@ -96,8 +96,8 @@ public class GT5Submitter extends JobSubmitter {
 	private Gram5Client gram5 = null;
 
 	public static final InformationManager informationManager = InformationManagerManager
-			.getInformationManager(ServerPropertiesManager
-					.getInformationManagerConf());
+	.getInformationManager(ServerPropertiesManager
+			.getInformationManagerConf());
 
 	private static void addNotNull(RslNode node, NameOpValue value) {
 		if (value != null) {
@@ -113,7 +113,7 @@ public class GT5Submitter extends JobSubmitter {
 				NameOpValue.EQ, JsdlHelpers.getPosixApplicationExecutable(jsdl));
 
 		final String[] argumentsVal = JsdlHelpers
-				.getPosixApplicationArguments(jsdl);
+		.getPosixApplicationArguments(jsdl);
 		NameOpValue arguments = null;
 		if ((argumentsVal != null) && (argumentsVal.length > 0)) {
 			arguments = new NameOpValue("arguments", NameOpValue.EQ,
@@ -127,7 +127,8 @@ public class GT5Submitter extends JobSubmitter {
 
 		final String inputVal = JsdlHelpers.getPosixStandardInput(jsdl);
 		NameOpValue stdin = null;
-		if (inputVal != null) {
+
+		if (StringUtils.isNotBlank(inputVal)) {
 			stdin = new NameOpValue("stdin", NameOpValue.EQ,
 					JsdlHelpers.getPosixStandardInput(jsdl));
 		}
@@ -228,7 +229,7 @@ public class GT5Submitter extends JobSubmitter {
 			}
 			if (onFinish) {
 				emailAbort = new NameOpValue("email_on_abort", NameOpValue.EQ,
-						"yes");
+				"yes");
 				emailTermination = new NameOpValue("email_on_termination",
 						NameOpValue.EQ, "yes");
 			}
@@ -305,8 +306,8 @@ public class GT5Submitter extends JobSubmitter {
 
 		try {
 			final GSSCredential credential = CredentialHelpers
-					.convertByteArrayToGSSCredential(job.getCredential()
-							.getCredentialData());
+			.convertByteArrayToGSSCredential(job.getCredential()
+					.getCredentialData());
 			final String handle = gram5.submit(rsl, host, credential);
 			return handle;
 		} catch (final Exception ex) {

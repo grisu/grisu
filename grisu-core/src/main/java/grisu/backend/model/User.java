@@ -502,7 +502,7 @@ public class User {
 
 		final boolean isVolatile = AbstractServiceInterface.informationManager
 		.isVolatileDataLocation(server, tempPath, fqan);
-		mp.setVolatile(isVolatile);
+		mp.setVolatileFileSystem(isVolatile);
 
 		return mp;
 
