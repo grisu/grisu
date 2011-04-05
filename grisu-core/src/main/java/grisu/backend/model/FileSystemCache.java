@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystem;
 import org.apache.commons.vfs.FileSystemException;
@@ -34,12 +33,19 @@ public class FileSystemCache {
 		// X.p("Opening filesystemmanager: " + i);
 		this.user = user;
 		try {
-			String tmp = System.getProperty("java.io.tmpdir");
-			if (StringUtils.isBlank(tmp)) {
-				tmp = "/tmp";
-			}
+			// String tmp = System.getProperty("java.io.tmpdir");
+			// if (StringUtils.isBlank(tmp)) {
+			// tmp = "/tmp/grisu-fs-tmp";
+			// } else {
+			// myLogger.debug("Using " + tmp
+			// + "/grisu-fs-tmp for temporary directory...");
+			//
+			// }
+
+			myLogger.debug(user.getDn() + ": Creating FS manager for user...");
+
 			fsm = VFSUtil.createNewFsManager(false, false, true, true, true,
-					true, true, tmp);
+					true, true, "/tmp");
 		} catch (final FileSystemException e) {
 			throw new RuntimeException(e);
 		}

@@ -1,7 +1,7 @@
 <ehcache maxBytesOnHeap="100m" maxBytesOffHeap="400m"
 	maxBytesOnDisk="1g">
 
-	<diskStore path="/tmp"/>
+	<diskStore path="/tmp/grisu-ehcache/"/>
 
     <defaultCache
             maxElementsInMemory="10000"

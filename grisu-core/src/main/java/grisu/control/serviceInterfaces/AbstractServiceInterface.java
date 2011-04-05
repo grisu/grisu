@@ -1,5 +1,6 @@
 package grisu.control.serviceInterfaces;
 
+import grisu.X;
 import grisu.backend.hibernate.BatchJobDAO;
 import grisu.backend.hibernate.JobDAO;
 import grisu.backend.info.InformationManagerManager;
@@ -109,6 +110,7 @@ import org.w3c.dom.Element;
 public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	static Logger myLogger = null;
+	public static CacheManager cache;
 	static {
 
 		String log4jPath = "/etc/grisu/grisu-log4j.xml";
@@ -140,13 +142,24 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// create ehcache manager singleton
 		try {
 			URL url = ClassLoader.getSystemResource("/grisu-ehcache.xml");
+			if (url == null) {
+				url = myLogger.getClass().getResource("/grisu-ehcache.xml");
+			}
+
 			CacheManager.create(url);
+			cache = CacheManager.getInstance();
+
+			System.out.println(StringUtils.join(cache.getCacheNames()));
+
+			Cache session = cache.getCache("session");
+			if (session == null) {
+				X.p("Session cache is null");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static final CacheManager cache = CacheManager.getInstance();
 
 	public final static boolean INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND = false;
 
@@ -177,14 +190,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 
 	public static Object getFromEternalCache(Object key) {
-		if (eternalCache().get(key) != null) {
+		if ((key != null) && (eternalCache().get(key) != null)) {
 			return eternalCache().get(key).getObjectValue();
 		} else {
 			return null;
 		}
 	}
 	public static Object getFromSessionCache(Object key) {
-		if (sessionCache().get(key) != null) {
+		if ((key != null) && (sessionCache().get(key) != null)) {
 			return sessionCache().get(key).getObjectValue();
 		} else {
 			return null;
@@ -192,7 +205,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	}
 
 	public static Object getFromShortCache(Object key) {
-		if (shortCache().get(key) != null) {
+		if ((key != null) && (shortCache().get(key) != null)) {
 			return shortCache().get(key).getObjectValue();
 		} else {
 			return null;
@@ -215,6 +228,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	}
 
 	public static Cache sessionCache() {
+
 		return cache.getCache("session");
 	}
 
@@ -1585,7 +1599,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see grisu.control.ServiceInterface#ps()
 	 */
-	public DtoJobs getActiveJobs(String application, boolean refresh) {
+	public DtoJobs getCurrentJobs(String application, boolean refresh) {
 
 		try {
 

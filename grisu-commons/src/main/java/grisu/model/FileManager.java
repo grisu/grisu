@@ -1328,7 +1328,8 @@ public class FileManager {
 	 * @throws RemoteFileSystemException
 	 *             if the folder can't be accessed
 	 */
-	public Set<GridFile> ls(GridFile parent) throws RemoteFileSystemException {
+	public GridFile ls(GridFile parent) throws RemoteFileSystemException {
+
 
 		GridFile folder = null;
 		if (StringUtils.isNotBlank(parent.getPath())
@@ -1342,7 +1343,7 @@ public class FileManager {
 			return null;
 		}
 
-		return folder.getChildren();
+		return folder;
 
 	}
 
@@ -1391,7 +1392,6 @@ public class FileManager {
 		} else {
 
 			try {
-
 				GridFile result = serviceInterface.ls(url, recursionLevel);
 				return result;
 			} catch (final RemoteFileSystemException e) {
