@@ -36,10 +36,7 @@
 			<id>commons-vfs-grid</id>
 			<url>http://commonsvfsgrid.sourceforge.net/maven/</url>
 		</repository>
-		<repository>
-			<id>jboss</id>
-			<url>https://repository.jboss.org/nexus/content/groups/public/</url>
-		</repository>
+
 	</repositories>
 
 	<dependencies>
