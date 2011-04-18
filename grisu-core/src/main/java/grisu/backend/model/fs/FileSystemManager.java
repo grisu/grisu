@@ -18,8 +18,12 @@ import javax.activation.DataHandler;
 
 import org.apache.axis.utils.StringUtils;
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.log4j.Logger;
 
 public class FileSystemManager {
+
+	private static Logger myLogger = Logger.getLogger(FileSystemManager.class
+			.getName());
 
 	private final Map<String, FileTransferPlugin> filetransferPlugins = new HashMap<String, FileTransferPlugin>();
 	private final Map<String, FileSystemInfoPlugin> fileSystemInfoPlugins = new HashMap<String, FileSystemInfoPlugin>();
@@ -28,8 +32,11 @@ public class FileSystemManager {
 	private final VirtualFileSystemInfoPlugin virtualFsInfo;
 	private final VirtualFsTransferPlugin virtualFsTransfer;
 
+	private final User user;
+
 	public FileSystemManager(User user) {
 
+		this.user = user;
 		commonsVfsInfo = new CommonsVfsFileSystemInfoAndTransferPlugin(user);
 		virtualFsInfo = new VirtualFileSystemInfoPlugin(user);
 		virtualFsTransfer = new VirtualFsTransferPlugin(user);
@@ -127,9 +134,15 @@ public class FileSystemManager {
 
 		pathOrUrl = cleanPath(pathOrUrl);
 
+		myLogger.debug(user.getDn() + ": Listing folder (" + recursiveLevels
+				+ " levels): " + pathOrUrl);
+
 		GridFile result = getFileSystemInfoPlugin(pathOrUrl).getFolderListing(
 				pathOrUrl,
 				recursiveLevels);
+
+		myLogger.debug(user.getDn() + ": Listed: "
+				+ GridFile.getChildrenNames(result));
 
 		return result;
 

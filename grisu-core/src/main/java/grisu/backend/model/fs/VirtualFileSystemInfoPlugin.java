@@ -30,6 +30,8 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 				new GroupFileSystemPlugin(user));
 		plugins.put(JobsFileSystemPlugin.IDENTIFIER, new JobsFileSystemPlugin(
 				user));
+		plugins.put(SiteFileSystemPlugin.IDENTIFIER, new SiteFileSystemPlugin(
+				user));
 	}
 
 	public FileObject aquireFile(String url, String fqan)

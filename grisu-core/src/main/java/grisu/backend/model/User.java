@@ -213,14 +213,14 @@ public class User {
 		this.dn = dn;
 	}
 
-	@Transient
+
 	public void addArchiveLocation(String alias, String value) {
 
 		getArchiveLocations().put(alias, value);
+		userdao.saveOrUpdate(this);
 
 	}
 
-	@Transient
 	public void addBookmark(String alias, String url) {
 		this.bookmarks.put(alias, url);
 		userdao.saveOrUpdate(this);
@@ -231,12 +231,10 @@ public class User {
 	 * 
 	 * @param vo
 	 */
-	@Transient
 	public void addFqan(final String fqan, final String vo) {
 		fqans.put(fqan, vo);
 	}
 
-	@Transient
 	public synchronized void addLogMessageToPossibleMultiPartJobParent(
 			Job job, String message) {
 
@@ -255,7 +253,7 @@ public class User {
 		}
 	}
 
-	@Transient
+
 	public void addProperty(String key, String value) {
 
 		getUserProperties().put(key, value);
@@ -273,7 +271,7 @@ public class User {
 		cachedCredentials = new HashMap<String, ProxyCredential>();
 	}
 
-	@Transient
+
 	public void clearMountPointCache(String keypattern) {
 		if (StringUtils.isBlank(keypattern)) {
 			this.mountPointCache = Collections
@@ -282,7 +280,6 @@ public class User {
 		userdao.saveOrUpdate(this);
 	}
 
-	@Transient
 	private MountPoint createMountPoint(String server, String path,
 			final String fqan, Executor executor) {
 
@@ -519,7 +516,6 @@ public class User {
 	 *            the fqan
 	 * @return the mountpoints
 	 */
-	@Transient
 	public Set<MountPoint> df(String fqan) {
 
 		final Set<MountPoint> result = new HashSet<MountPoint>();
@@ -541,7 +537,6 @@ public class User {
 	 *            the sites that should be used
 	 * @return all MountPoints
 	 */
-	@Transient
 	protected Set<MountPoint> df_auto_mds(final String[] sites) {
 
 		myLogger.debug("Getting mds mountpoints for user: " + getDn());
@@ -635,7 +630,6 @@ public class User {
 		}
 	}
 
-	@Transient
 	public GridFile fillFolder(GridFile folder, int recursionLevel)
 	throws RemoteFileSystemException {
 
@@ -922,7 +916,7 @@ public class User {
 	}
 
 	@Transient
-	private synchronized String getDefaultArchiveLocation() {
+	public synchronized String getDefaultArchiveLocation() {
 
 		String defArcLoc = getUserProperties().get(
 				Constants.DEFAULT_JOB_ARCHIVE_LOCATION);
@@ -931,6 +925,23 @@ public class User {
 
 			Set<MountPoint> mps = df(ServerPropertiesManager
 					.getDefaultFqanForArchivedJobDirectory());
+			for (MountPoint mp : mps) {
+				if (!mp.isVolatileFileSystem()) {
+					defArcLoc = mp.getRootUrl()
+					+ "/"
+					+ ServerPropertiesManager
+					.getArchivedJobsDirectoryName();
+					addArchiveLocation(Constants.JOB_ARCHIVE_LOCATION,
+							defArcLoc);
+					setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+							defArcLoc);
+					return defArcLoc;
+				}
+			}
+
+			// to be removed once we switch to new backend
+
+			mps = df("/ARCS/BeSTGRID/Drug_discovery/Local");
 			if (mps.size() > 0) {
 				defArcLoc = mps.iterator().next().getRootUrl()
 				+ "/"
@@ -941,11 +952,8 @@ public class User {
 						Constants.DEFAULT_JOB_ARCHIVE_LOCATION, defArcLoc);
 				setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
 						defArcLoc);
-
 			} else {
-				// to be removed once we switch to new backend
-
-				mps = df("/ARCS/BeSTGRID/Drug_discovery/Local");
+				mps = df("/ARCS/BeSTGRID");
 				if (mps.size() > 0) {
 					defArcLoc = mps.iterator().next().getRootUrl()
 					+ "/"
@@ -953,40 +961,27 @@ public class User {
 					.getArchivedJobsDirectoryName();
 
 					addArchiveLocation(
-							Constants.DEFAULT_JOB_ARCHIVE_LOCATION, defArcLoc);
+							Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+							defArcLoc);
 					setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
 							defArcLoc);
 				} else {
-					mps = df("/ARCS/BeSTGRID");
-					if (mps.size() > 0) {
-						defArcLoc = mps.iterator().next().getRootUrl()
-						+ "/"
-						+ ServerPropertiesManager
-						.getArchivedJobsDirectoryName();
-
-						addArchiveLocation(
-								Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
-								defArcLoc);
-						setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
-								defArcLoc);
-					} else {
-						mps = getAllMountPoints();
-						if (mps.size() == 0) {
-							return null;
-						}
-						defArcLoc = mps.iterator().next()
-						+ "/"
-						+ ServerPropertiesManager
-						.getArchivedJobsDirectoryName();
-
-						addArchiveLocation(
-								Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
-								defArcLoc);
-						setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
-								defArcLoc);
+					mps = getAllMountPoints();
+					if (mps.size() == 0) {
+						return null;
 					}
+					defArcLoc = mps.iterator().next()
+					+ "/"
+					+ ServerPropertiesManager
+					.getArchivedJobsDirectoryName();
 
+					addArchiveLocation(
+							Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+							defArcLoc);
+					setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+							defArcLoc);
 				}
+
 
 			}
 
@@ -1615,6 +1610,7 @@ public class User {
 	public void removeArchiveLocation(String alias) {
 
 		getArchiveLocations().remove(alias);
+		userdao.saveOrUpdate(this);
 
 	}
 
@@ -1634,6 +1630,7 @@ public class User {
 
 	public void removeProperty(final String key) {
 		userProperties.remove(key);
+		userdao.saveOrUpdate(this);
 	}
 
 	// public void addProperty(String key, String value) {

@@ -26,7 +26,7 @@ import grisu.model.UserEnvironmentManager;
 import grisu.model.dto.GridFile;
 
 public class VirtualFileSystemBrowserTreeRenderer extends
-		DefaultTreeCellRenderer implements TreeCellRenderer {
+DefaultTreeCellRenderer implements TreeCellRenderer {
 
 	public static final String LOADING_STRING = "Loading...";
 
@@ -38,13 +38,13 @@ public class VirtualFileSystemBrowserTreeRenderer extends
 	// TODO think of something better?
 	private static Icon fileIcon = fsView.getSystemIcon(findFile());
 	private static URL imgURL = VirtualFileSystemBrowserTreeRenderer.class
-			.getResource("/group.gif");
+	.getResource("/icons/group.png");
 
 	private static Icon groupIcon = new ImageIcon(imgURL);
 
 	private static File findFile() {
 		for (final File file : new File(System.getProperty("user.home"))
-				.listFiles()) {
+		.listFiles()) {
 			if (file.isFile()) {
 				return file;
 			}
@@ -64,7 +64,7 @@ public class VirtualFileSystemBrowserTreeRenderer extends
 			boolean displayFullFqan) {
 		this.si = si;
 		this.uem = GrisuRegistryManager.getDefault(si)
-				.getUserEnvironmentManager();
+		.getUserEnvironmentManager();
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 	}
 
@@ -120,7 +120,7 @@ public class VirtualFileSystemBrowserTreeRenderer extends
 				break;
 			default:
 				siteString = "Sites: "
-						+ StringUtils.join(file.getSites(), ", ");
+					+ StringUtils.join(file.getSites(), ", ");
 				break;
 
 			}
@@ -133,8 +133,8 @@ public class VirtualFileSystemBrowserTreeRenderer extends
 				break;
 			case 1:
 				fqanString = "Group: "
-						+ uem.getUniqueGroupname(file.getFqans().iterator()
-								.next());
+					+ uem.getUniqueGroupname(file.getFqans().iterator()
+							.next());
 				break;
 			default:
 				Set<String> tmp = new TreeSet<String>();

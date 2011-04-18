@@ -36,6 +36,8 @@ import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -71,6 +73,9 @@ public class FileManager {
 	public static final SimpleDateFormat dateformat = new SimpleDateFormat(
 	"dd.MM.yyyy HH:mm:SSS");
 
+	private static final String URL_PATTERN_STRING = "^(?:[^/]+://)?([^/:]+)";
+	private static final Pattern URL_PATTERN = Pattern
+	.compile(URL_PATTERN_STRING);
 	/**
 	 * Conveninec method to calculate a human readable String to indicate file
 	 * size from the bytesize of a file.
@@ -252,6 +257,26 @@ public class FileManager {
 			return filename;
 		}
 
+	}
+
+	/**
+	 * Convenience method to extract hostname from an url.
+	 * 
+	 * @param url
+	 *            the url
+	 * @return the hostname or null if hostname couldn't be found
+	 */
+	public static String getHost(String url) {
+
+		Matcher matcher = URL_PATTERN.matcher(url);
+		if (matcher.find()) {
+			int start = matcher.start(1);
+			int end = matcher.end(1);
+
+			return (url.substring(start, end));
+		} else {
+			return null;
+		}
 	}
 
 	/**
@@ -1332,8 +1357,7 @@ public class FileManager {
 
 
 		GridFile folder = null;
-		if (StringUtils.isNotBlank(parent.getPath())
-				&& (parent.getUrls().size() != 1)) {
+		if (StringUtils.isNotBlank(parent.getPath())) {
 			folder = ls(parent.getPath());
 		} else {
 			folder = ls(parent.getUrl());

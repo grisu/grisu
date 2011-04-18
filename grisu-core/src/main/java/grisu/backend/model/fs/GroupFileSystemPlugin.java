@@ -182,7 +182,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				return result;
 			}
 
-			for (String vo : user.getFqans().values()) {
+			for (String vo : new TreeSet<String>(user.getFqans().values())) {
 				GridFile f = new GridFile(BASE + "/" + vo, -1L);
 				f.setIsVirtual(true);
 				f.setPath(path + "/" + vo);
@@ -390,9 +390,9 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					}
 				}
 
-				if (mps.size() == 0) {
-					continue;
-				}
+				// if (mps.size() == 0) {
+				// continue;
+				// }
 
 				for (MountPoint mp : mps) {
 					sites.add(mp.getSite());

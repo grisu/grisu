@@ -40,6 +40,10 @@ public class GridFileTreeTableRowModel implements RowModel {
 
 		Object userObject = ((DefaultMutableTreeNode) arg0).getUserObject();
 
+		if (userObject == null) {
+			return "ERROR";
+		}
+
 		if (userObject instanceof GridFile) {
 			GridFile f = (GridFile) userObject;
 			switch (col) {
@@ -70,7 +74,8 @@ public class GridFileTreeTableRowModel implements RowModel {
 			}
 
 		} else {
-			throw new RuntimeException("Don't know userObject for table");
+			throw new RuntimeException("Don't know userObject of type: "
+					+ userObject.getClass().toString());
 		}
 	}
 

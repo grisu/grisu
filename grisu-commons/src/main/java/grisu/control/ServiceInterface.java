@@ -144,7 +144,16 @@ public interface ServiceInterface {
 	 * Archives this job to the specified url and deletes it from the database.
 	 * 
 	 * If target is null, the user property
-	 * {@link Constants#DEFAULT_JOB_ARCHIVE_LOCATION} is used.
+	 * {@link Constants#DEFAULT_JOB_ARCHIVE_LOCATION} is used. This operation
+	 * will be executed in the background, you can query its status using the
+	 * {@link #getActionStatus(String)} using the {#link
+	 * {@link #ARCHIVE_STATUS_PREFIX} (ARCHIVE_) plus the jobname as handle.
+	 * 
+	 * The default {@link Constants#DEFAULT_JOB_ARCHIVE_LOCATION} can be set via
+	 * the {@link #setUserProperty(String, String)} method, you can use the same
+	 * method to add more filesystems that should be used to query archived jobs
+	 * by using {@link Constants#JOB_ARCHIVE_LOCATION} as the key. That'll add
+	 * the specified value (format: alias;url) to the list of archive locations.
 	 * 
 	 * @param jobname
 	 *            the jobname
@@ -1247,8 +1256,21 @@ public interface ServiceInterface {
 	void restartJob(final String jobname, String changedJsdl)
 	throws JobSubmissionException, NoSuchJobException;
 
-	/**
+/**
 	 * Sets a user property.
+	 * 
+	 * <p>
+	 * There are special user properties that can be set by using one of the
+	 * following strings as key:
+	 * </p>
+	 * <p>
+	 * {@link Constants#CLEAR_MOUNTPOINT_CACHE}(clearMountPointCache): prompts
+	 * Grisu to delete the cached filesystems for the user. Next startup will be
+	 * slower but with up-to-date mountpoints. This caching can be disabled on
+	 * the backend, so setting this property might not have any effect.
+	 * </p>
+	 * <p>
+	 * {@link Constants#JOB_ARCHIVE_LOCATION}(archiveLocation): as described in {@link #archiveJob(String, String), this allows to tell Grisu about locations where archived Grisu jobs are located. Use this string as key and a ;-separated alias;url string as value to add such a location.
 	 * 
 	 * @param key
 	 *            the key

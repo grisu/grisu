@@ -25,7 +25,7 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 
 	private static SpinningDial LOADING_ICON = new SpinningDial(16, 16);
 	private static URL imgURL = GridFileTreeTableRenderer.class
-	.getResource("/group.gif");
+			.getResource("/icons/group.png");
 
 	private static Icon groupIcon = new ImageIcon(imgURL);
 	private static FileSystemView fsView = FileSystemView.getFileSystemView();

@@ -312,7 +312,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		Integer otherPriority = Integer.parseInt(o.getUrls().get(0).getValue());
 
 		if (otherPriority.equals(thisPriority)) {
-			result = getName().compareTo(o.getName());
+			result = getName().compareToIgnoreCase(o.getName());
 
 			if (result == 0) {
 				result = getUrl().compareTo(o.getUrl());

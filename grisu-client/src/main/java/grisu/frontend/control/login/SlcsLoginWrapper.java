@@ -1,6 +1,7 @@
 package grisu.frontend.control.login;
 
 import grisu.jcommons.configuration.CommonGridProperties;
+import grisu.settings.ClientPropertiesManager;
 import grith.gsindl.SLCS;
 import grith.jgrith.plainProxy.PlainProxy;
 import grith.sibboleth.CredentialManager;
@@ -34,7 +35,10 @@ public class SlcsLoginWrapper {
 			final IdpObject idpO = new StaticIdpObject(idp);
 			final CredentialManager cm = new StaticCredentialManager(username,
 					password);
-			final SLCS slcs = new SLCS(SLCS.DEFAULT_SLCS_URL, idpO, cm);
+
+			String url = ClientPropertiesManager.getShibbolethUrl();
+
+			final SLCS slcs = new SLCS(url, idpO, cm);
 
 			final GSSCredential cred = PlainProxy.init(slcs.getCertificate(),
 					slcs.getPrivateKey(), 24 * 10);

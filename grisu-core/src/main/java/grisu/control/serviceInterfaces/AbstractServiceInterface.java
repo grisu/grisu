@@ -498,7 +498,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		if (StringUtils.isBlank(target)) {
 
-			String defArcLoc = getDefaultArchiveLocation();
+			String defArcLoc = getUser().getDefaultArchiveLocation();
 
 			if (StringUtils.isBlank(defArcLoc)) {
 				throw new RemoteFileSystemException(
@@ -1597,36 +1597,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see grisu.control.ServiceInterface#ps()
-	 */
-	public DtoJobs getCurrentJobs(String application, boolean refresh) {
-
-		try {
-
-			List<Job> jobs = getUser().getActiveJobs(application, refresh);
-
-			final DtoJobs dtoJobs = new DtoJobs();
-			for (final Job job : jobs) {
-
-				final DtoJob dtojob = DtoJob.createJob(job.getStatus(),
-						job.getJobProperties(), job.getInputFiles(),
-						job.getLogMessages(), false);
-
-				// just to make sure
-				dtojob.addJobProperty(Constants.JOBNAME_KEY, job.getJobname());
-				dtoJobs.addJob(dtojob);
-			}
-
-			return dtoJobs;
-		} catch (final Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see
 	 * grisu.control.ServiceInterface#getAllAvailableApplications(java
 	 * .lang.String[])
@@ -1782,13 +1752,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return dtoJobs;
 	}
 
-
-
 	public DtoProperties getArchiveLocations() {
 
 		return DtoProperties.createProperties(getUser().getArchiveLocations());
 
 	}
+
+
 
 	/**
 	 * Returns all multipart jobs for this user.
@@ -1821,6 +1791,36 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	protected abstract ProxyCredential getCredential();
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see grisu.control.ServiceInterface#ps()
+	 */
+	public DtoJobs getCurrentJobs(String application, boolean refresh) {
+
+		try {
+
+			List<Job> jobs = getUser().getActiveJobs(application, refresh);
+
+			final DtoJobs dtoJobs = new DtoJobs();
+			for (final Job job : jobs) {
+
+				final DtoJob dtojob = DtoJob.createJob(job.getStatus(),
+						job.getJobProperties(), job.getInputFiles(),
+						job.getLogMessages(), false);
+
+				// just to make sure
+				dtojob.addJobProperty(Constants.JOBNAME_KEY, job.getJobname());
+				dtoJobs.addJob(dtojob);
+			}
+
+			return dtoJobs;
+		} catch (final Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+	}
+
 	// public DtoDataLocations getDataLocationsForVO(final String fqan) {
 	//
 	// return DtoDataLocations.createDataLocations(fqan,
@@ -1828,43 +1828,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	//
 	// }
 
-	private String getDefaultArchiveLocation() {
-
-		String defArcLoc = getUser().getUserProperties().get(
-				Constants.DEFAULT_JOB_ARCHIVE_LOCATION);
-
-		if (StringUtils.isBlank(defArcLoc)) {
-
-			Set<MountPoint> mps = getUser().df(
-			"/ARCS/BeSTGRID/Drug_discovery/Local");
-			if (mps.size() == 1) {
-				defArcLoc = mps.iterator().next().getRootUrl()
-				+ "/archived_jobs";
-
-				getUser().addArchiveLocation(
-						Constants.DEFAULT_JOB_ARCHIVE_LOCATION, defArcLoc);
-				setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
-						defArcLoc);
-
-			} else {
-
-				Set<MountPoint> mps2 = getUser().df("/ARCS/BeSTGRID");
-				if (mps2.size() > 0) {
-					defArcLoc = mps.iterator().next().getRootUrl()
-					+ "/archived_jobs";
-
-					getUser().addArchiveLocation(
-							Constants.DEFAULT_JOB_ARCHIVE_LOCATION, defArcLoc);
-					setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
-							defArcLoc);
-				}
-
-			}
-
-		}
-
-		return defArcLoc;
-	}
 
 	/**
 	 * Calculates the default version of an application on a site. This is
