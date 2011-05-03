@@ -2795,7 +2795,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					throw new JobPropertiesException(
 							JobSubmissionProperty.APPLICATIONNAME.toString()
 							+ ": "
-							+ "No application specified and could not find one in the grid that matches the executable.");
+							+ "No application specified and could not find one in the grid that matches the executable "
+							+ JsdlHelpers
+							.getPosixApplicationExecutable(jsdl)
+							+ ".");
 				}
 
 				applicationCalculated = true;
@@ -2837,7 +2840,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							JobSubmissionProperty.SUBMISSIONLOCATION.toString()
 							+ ": "
 							+ "Could not find staging filesystem for submissionlocation "
-							+ submissionLocation);
+							+ submissionLocation + " (using VO: "
+							+ jobFqan + ")");
 				}
 
 				boolean submissionLocationIsValid = false;
@@ -2877,7 +2881,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 										+ jobSubmissionObject
 										.getApplicationVersion()
 										+ " not installed on "
-										+ submissionLocation);
+										+ submissionLocation
+										+ " (using VO: "
+										+ jobFqan
+										+ ")");
 							}
 							myLogger.debug("Version available or not specified.");
 							// if no application version is specified, auto-set
@@ -2918,7 +2925,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 											+ jobSubmissionObject
 											.getApplication()
 											+ " on "
-											+ submissionLocation);
+											+ submissionLocation
+											+ " (using VO: "
+											+ jobFqan
+											+ ")");
 								}
 							}
 							myLogger.debug("Successfully validated submissionlocation "
@@ -2937,7 +2947,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							JobSubmissionProperty.SUBMISSIONLOCATION.toString()
 							+ ": " + "Submissionlocation "
 							+ submissionLocation
-							+ " not available for this kind of job");
+							+ " not available for this kind of job (using VO: "
+							+ jobFqan + ")");
 				}
 			} else {
 				myLogger.debug("No submission location specified in jsdl document. Trying to auto-find one...");
@@ -2947,7 +2958,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					throw new JobPropertiesException(
 							JobSubmissionProperty.SUBMISSIONLOCATION.toString()
 							+ ": "
-							+ "Could not find any matching resource to run this kind of job on");
+							+ "Could not find any matching resource to run this kind of job on. Using VO: "
+							+ jobFqan);
 				}
 				// find the best submissionlocation and set it.
 
@@ -3002,7 +3014,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								JobSubmissionProperty.APPLICATIONVERSION
 								.toString()
 								+ ": "
-								+ "Could not find any version for this application grid-wide. That is probably an error in the mds info.");
+								+ "Could not find any version for this application grid-wide. That is probably an error in the mds info (VO used: "
+								+ jobFqan + ".");
 					}
 				} else {
 					myLogger.debug("Version: "
@@ -3042,7 +3055,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								.getApplicationVersion()
 								+ " for application "
 								+ jobSubmissionObject.getApplication()
-								+ " grid-wide.");
+								+ " grid-wide. VO used: " + jobFqan);
 					}
 				}
 
@@ -3074,7 +3087,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					JobSubmissionProperty.SUBMISSIONLOCATION.toString()
 					+ ": "
 					+ "Could not find staging filesystem for submissionlocation "
-					+ submissionLocation);
+					+ submissionLocation + " (using VO: " + jobFqan
+					+ ")");
 		}
 
 		myLogger.debug("Trying to find mountpoint for stagingfilesystem...");
@@ -3111,7 +3125,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					JobSubmissionProperty.SUBMISSIONLOCATION.toString()
 					+ ": "
 					+ "Could not find stagingfilesystem for submission location: "
-					+ submissionLocation);
+					+ submissionLocation + " (using VO: " + jobFqan
+					+ ")");
 		}
 
 		JsdlHelpers.addOrRetrieveExistingFileSystemElement(jsdl,
@@ -3158,7 +3173,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			mkdir(newJobdir);
 		} catch (RemoteFileSystemException e1) {
 			throw new JobPropertiesException(
-					"Could not create new jobdirectory " + newJobdir + ": "
+					"Could not create new jobdirectory " + newJobdir
+							+ " (using VO: " + jobFqan + "): "
 					+ e1);
 		}
 
