@@ -124,7 +124,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 		if (cachedAllApps == null) {
 			cachedAllApps = serviceInterface.getAllAvailableApplications(null)
-					.asSortedSet();
+			.asSortedSet();
 		}
 		return cachedAllApps;
 
@@ -150,8 +150,8 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 			if (cachedAllSubmissionLocationsPerFqan.get(fqan) == null) {
 				final String[] temp = serviceInterface
-						.getAllSubmissionLocationsForFqan(fqan)
-						.asSubmissionLocationStrings();
+				.getAllSubmissionLocationsForFqan(fqan)
+				.asSubmissionLocationStrings();
 				cachedAllSubmissionLocationsPerFqan.put(fqan, temp);
 			}
 		}
@@ -173,7 +173,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 		if (cachedAllSubmissionLocations == null) {
 			cachedAllSubmissionLocations = serviceInterface
-					.getAllSubmissionLocations().asSubmissionLocationStrings();
+			.getAllSubmissionLocations().asSubmissionLocationStrings();
 		}
 		return cachedAllSubmissionLocations;
 	}
@@ -206,7 +206,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 			if (cachedApplicationPackagesForExecutables.get(executable) == null) {
 				String[] result = serviceInterface
-						.getApplicationPackagesForExecutable(executable);
+				.getApplicationPackagesForExecutable(executable);
 				cachedApplicationPackagesForExecutables.put(executable, result);
 			}
 
@@ -250,8 +250,8 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 			if (cachedStagingFilesystemsPerSubLoc.get(subLoc) == null) {
 				final List<String> temp = serviceInterface
-						.getStagingFileSystemForSubmissionLocation(subLoc)
-						.getStringList();
+				.getStagingFileSystemForSubmissionLocation(subLoc)
+				.getStringList();
 				cachedStagingFilesystemsPerSubLoc.put(subLoc, temp);
 			}
 		}

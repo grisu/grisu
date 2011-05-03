@@ -281,7 +281,7 @@ public class User {
 	}
 
 	private MountPoint createMountPoint(String server, String path,
-			final String fqan, Executor executor) {
+			final String fqan, Executor executor) throws Exception {
 
 		String url = null;
 
@@ -312,29 +312,34 @@ public class User {
 			final String[] parts = propString.split(";");
 			for (final String part : parts) {
 				if (part.indexOf("=") <= 0) {
-					myLogger.error("Invalid path spec: " + path
+					// myLogger.error("Invalid path spec: " + path
+					// + ".  No \"=\" found. Ignoring this mountpoint...");
+					throw new Exception("Invalid path spec: " + path
 							+ ".  No \"=\" found. Ignoring this mountpoint...");
-					return null;
 				}
 				final String key = part.substring(0, part.indexOf("="));
 				if (StringUtils.isBlank(key)) {
-					myLogger.error("Invalid path spec: " + path
+					//					myLogger.error("Invalid path spec: " + path
+					//							+ ".  No key found. Ignoring this mountpoint...");
+					throw new Exception("Invalid path spec: " + path
 							+ ".  No key found. Ignoring this mountpoint...");
-					return null;
 				}
 				String value = null;
 				try {
 					value = part.substring(part.indexOf("=") + 1);
 					if (StringUtils.isBlank(value)) {
-						myLogger.error("Invalid path spec: "
+						// myLogger.error("Invalid path spec: "
+						// + path
+						// + ".  No key found. Ignoring this mountpoint...");
+						throw new Exception("Invalid path spec: "
 								+ path
 								+ ".  No key found. Ignoring this mountpoint...");
-						return null;
 					}
 				} catch (final Exception e) {
-					myLogger.error("Invalid path spec: " + path
+					// myLogger.error("Invalid path spec: " + path
+					// + ".  No key found. Ignoring this mountpoint...");
+					throw new Exception("Invalid path spec: " + path
 							+ ".  No key found. Ignoring this mountpoint...");
-					return null;
 				}
 
 				properties.put(key, value);
@@ -381,10 +386,29 @@ public class User {
 				url = url + additionalUrl;
 
 			} catch (final Exception e) {
-				// TODO Auto-generated catch block
-				myLogger.error(e);
+				// myLogger.error(e);
+				throw e;
 			}
 
+		} else if (tempPath.startsWith("/~/")) {
+			try {
+				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
+						fqan);
+
+				String additionalUrl = null;
+				try {
+					additionalUrl = tempPath
+					.substring(1, tempPath.length() - 3);
+				} catch (final Exception e) {
+					additionalUrl = "";
+				}
+
+				url = url + additionalUrl;
+
+			} catch (final Exception e) {
+				// myLogger.error(e);
+				throw e;
+			}
 		} else if (path.contains("${GLOBUS_USER_HOME}")) {
 			try {
 				myLogger.warn("Using ${GLOBUS_USER_HOME} is deprecated. Please use . instead.");
@@ -392,7 +416,8 @@ public class User {
 						fqan);
 				userDnPath = false;
 			} catch (final Exception e) {
-				myLogger.error(e);
+				// myLogger.error(e);
+				throw e;
 			}
 
 		} else if (path.contains("${GLOBUS_SCRATCH_DIR")) {
@@ -401,7 +426,8 @@ public class User {
 						fqan) + "/.globus/scratch";
 				userDnPath = false;
 			} catch (final Exception e) {
-				myLogger.error(e);
+				// myLogger.error(e);
+				throw e;
 			}
 		} else {
 
@@ -412,8 +438,8 @@ public class User {
 		}
 
 		if (StringUtils.isBlank(url)) {
-			myLogger.error("Url is blank for " + server + " and " + path);
-			return null;
+			// myLogger.error("Url is blank for " + server + " and " + path);
+			throw new Exception("Url is blank for " + server + " and " + path);
 		}
 
 		// add dn dir if necessary
@@ -555,6 +581,12 @@ public class User {
 
 		// for ( String site : sites ) {
 
+		// X.p("Start creating mountpoints...");
+
+		final Map<String, MountPoint> successfullMountPoints = Collections
+		.synchronizedMap(new HashMap<String, MountPoint>());
+		final Map<String, Exception> unsuccessfullMountPoints = Collections
+		.synchronizedMap(new HashMap<String, Exception>());
 
 
 		for (final String fqan : getFqans().keySet()) {
@@ -571,21 +603,50 @@ public class User {
 					// + fqan + " took: " + (end.getTime() - start.getTime())
 					// + " ms.");
 					for (final String server : mpUrl.keySet()) {
-						try {
-							for (final String path : mpUrl.get(server)) {
+
+						String uniqueString = null;
+						for (final String path : mpUrl.get(server)) {
+							try {
+
+								uniqueString = server + " - " + path
+								+ " - " + fqan;
+
+								// X.p("\t" + uniqueString
+								// + ": creating....");
+
+								successfullMountPoints.put(uniqueString, null);
 
 								final MountPoint mp = createMountPoint(server, path,
 										fqan,
 										(ENABLE_FILESYSTEM_CACHE) ? backgroundExecutorForFilesystemCache
 												: null);
+
+								successfullMountPoints.put(server + "_" + path
+										+ "_" + fqan, mp);
+
+								// X.p("\t" + server + "/" + path + "/" + fqan
+								// + ": created");
+
 								if (mp != null) {
 									mps.add(mp);
+									successfullMountPoints
+									.put(uniqueString, mp);
+								} else {
+									successfullMountPoints.remove(uniqueString);
+									unsuccessfullMountPoints
+									.put(uniqueString,
+											new Exception(
+											"MountPoint not created, unknown reason."));
 								}
+							} catch (final Exception e) {
+								// X.p(server + "/" + "/" + fqan + ": failed : "
+								// + e.getLocalizedMessage());
+								// e.printStackTrace();
+								successfullMountPoints.remove(uniqueString);
+								unsuccessfullMountPoints.put(uniqueString, e);
+								myLogger.error("Can't use mountpoint " + server
+										+ ": " + e.getLocalizedMessage(), e);
 							}
-						} catch (final Exception e) {
-							myLogger.error(
-									"Can't use mountpoint " + server + ": "
-									+ e.getLocalizedMessage(), e);
 						}
 					}
 				}
@@ -596,11 +657,30 @@ public class User {
 
 		executor.shutdown();
 
+		// X.p("Waiting...");
+
 		try {
 			executor.awaitTermination(2, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+
+		for (String us : successfullMountPoints.keySet()) {
+			if (successfullMountPoints.get(us) == null) {
+				unsuccessfullMountPoints.put(us, new Exception(
+				"MountPoint not created. Probably timed out."));
+			}
+		}
+		for (String us : unsuccessfullMountPoints.keySet()) {
+			successfullMountPoints.remove(us);
+
+			myLogger.error(getDn() + ": Can't connect to mountpoint " + us
+					+ ":\n\t"
+					+ unsuccessfullMountPoints.get(us).getLocalizedMessage());
+		}
+
+
+		// X.p("Finished creating mountpoints...");
 
 		backgroundExecutorForFilesystemCache.shutdown();
 

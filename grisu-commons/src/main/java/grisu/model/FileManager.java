@@ -365,6 +365,9 @@ public class FileManager {
 
 		if (StringUtils.isBlank(url)) {
 			return "";
+		} else if (url.equals(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
+				+ "://")) {
+			return url;
 		} else {
 			if (url.endsWith("/")) {
 				return url.substring(0, url.lastIndexOf("/"));
