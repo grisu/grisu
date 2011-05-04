@@ -106,7 +106,7 @@ public class GT5Submitter extends JobSubmitter {
 	}
 
 	public static String createJobSubmissionDescription(
-			final InformationManager infoManager, final Document jsdl) {
+			final InformationManager infoManager, final Document jsdl, final String fqan) {
 
 		final RslNode result = new RslNode();
 		final NameOpValue executable = new NameOpValue("executable",
@@ -251,6 +251,7 @@ public class GT5Submitter extends JobSubmitter {
 		}
 
 		result.add(new NameOpValue("save_state", NameOpValue.EQ, "yes"));
+		result.add(new NameOpValue("vo",NameOpValue.EQ,fqan));
 		addNotNull(result, executable);
 		addNotNull(result, jobname);
 		addNotNull(result, arguments);
@@ -301,7 +302,7 @@ public class GT5Submitter extends JobSubmitter {
 	protected String submit(InformationManager infoManager, String host,
 			String factoryType, Job job) throws ServerJobSubmissionException {
 		final String rsl = createJobSubmissionDescription(infoManager,
-				job.getJobDescription());
+				job.getJobDescription(),job.getFqan());		
 		myLogger.debug("RSL is ... " + rsl);
 
 		try {
