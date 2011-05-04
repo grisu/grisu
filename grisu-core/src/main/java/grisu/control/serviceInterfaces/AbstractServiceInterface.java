@@ -2744,28 +2744,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						+ "Could not find staging filesystem for submissionlocation "
 						+ submissionLocation);
 			}
-			//
-			// // check whether submissionlocation is valid
-			// String[] allSubLocs = informationManager
-			// .getAllSubmissionLocationsForVO(job.getFqan());
-			// Arrays.sort(allSubLocs);
-			// int i = Arrays.binarySearch(allSubLocs, submissionLocation);
-			// if (i < 0) {
-			// throw new JobPropertiesException(
-			// JobSubmissionProperty.SUBMISSIONLOCATION.toString()
-			// + ": " + "Specified submissionlocation "
-			// + submissionLocation + " not valid for VO "
-			// + job.getFqan());
-			// }
-			//
-			// String[] modules = JsdlHelpers.getModules(jsdl);
-			// if ((modules == null) || (modules.length == 0)) {
-			// myLogger
-			// .warn("No modules specified for generic application. That might be ok but probably not...");
-			// } else {
-			// job.addJobProperty(Constants.MODULES_KEY, StringUtils.join(
-			// modules, ","));
-			// }
 
 			// if not "generic" application...
 		} else {
@@ -3099,13 +3077,31 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			for (final MountPoint mp : getUser().getAllMountPoints()) {
 				if (mp.getRootUrl().startsWith(stagingFs.replace(":2811", ""))
-						&& jobFqan.equals(mp.getFqan())) {
+						&& jobFqan.equals(mp.getFqan())
+						&& mp.isVolatileFileSystem()) {
 					mountPointToUse = mp;
 					stagingFilesystemToUse = stagingFs.replace(":2811", "");
 					myLogger.debug("Found mountpoint " + mp.getAlias()
 							+ " for stagingfilesystem "
 							+ stagingFilesystemToUse);
 					break;
+				}
+			}
+
+			// in case we didn't find a volatile filesystem, we try again
+			// considering all of them...
+			if (mountPointToUse == null) {
+				for (final MountPoint mp : getUser().getAllMountPoints()) {
+					if (mp.getRootUrl().startsWith(
+							stagingFs.replace(":2811", ""))
+							&& jobFqan.equals(mp.getFqan())) {
+						mountPointToUse = mp;
+						stagingFilesystemToUse = stagingFs.replace(":2811", "");
+						myLogger.debug("Found mountpoint " + mp.getAlias()
+								+ " for stagingfilesystem "
+								+ stagingFilesystemToUse);
+						break;
+					}
 				}
 			}
 
@@ -3174,7 +3170,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} catch (RemoteFileSystemException e1) {
 			throw new JobPropertiesException(
 					"Could not create new jobdirectory " + newJobdir
-							+ " (using VO: " + jobFqan + "): "
+					+ " (using VO: " + jobFqan + "): "
 					+ e1);
 		}
 
