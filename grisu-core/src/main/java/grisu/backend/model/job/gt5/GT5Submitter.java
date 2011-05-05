@@ -174,14 +174,14 @@ public class GT5Submitter extends JobSubmitter {
 
 		if (processorCount > 1) {
 
-			if (StringUtils.isNotBlank(jobTypeString)) {
+			if (!StringUtils.isNotBlank(jobTypeString)) {
 				jobType = new NameOpValue("job_type", NameOpValue.EQ, "mpi");
 			} else {
 				jobType = new NameOpValue("job_type", NameOpValue.EQ,
 						jobTypeString);
 			}
 		} else {
-			if (StringUtils.isNotBlank(jobTypeString)) {
+			if (!StringUtils.isNotBlank(jobTypeString)) {
 				jobType = new NameOpValue("job_type", NameOpValue.EQ, "single");
 			} else {
 				jobType = new NameOpValue("job_type", NameOpValue.EQ,
