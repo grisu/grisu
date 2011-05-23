@@ -78,6 +78,8 @@ public class Gram5Client implements GramJobListener {
 	private String getContactString(String handle) {
 		try {
 			final URL url = new URL(handle);
+			myLogger.debug("job handle is " + handle);	
+			myLogger.debug("returned handle is " + url.getHost());
 			return url.getHost();
 		} catch (final MalformedURLException ex1) {
 			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
@@ -92,7 +94,9 @@ public class Gram5Client implements GramJobListener {
 
 		// we need this to catch quick failure
 		Integer status = statuses.get(handle);
+		myLogger.debug("status is " + status);
 		if ((status != null) && (status == GRAMConstants.STATUS_FAILED)) {
+			myLogger.debug("job failed : " + errors.get(handle));
 			results[0] = status;
 			results[1] = errors.get(handle);
 			return results;
@@ -104,11 +108,11 @@ public class Gram5Client implements GramJobListener {
 			// lets try to see if gateway is working first...
 			Gram.ping(contact);
 		} catch (final GramException ex) {
+			myLogger.debug(ex);
 			// have no idea what the status is, gateway is down:
 			return new int[] { GRAMConstants.STATUS_UNSUBMITTED, 0 };
 		} catch (final GSSException ex) {
-			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
-					.log(Level.SEVERE, null, ex);
+			myLogger.error(ex);
 		}
 
 		try {
