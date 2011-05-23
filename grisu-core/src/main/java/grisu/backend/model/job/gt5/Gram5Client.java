@@ -123,6 +123,7 @@ public class Gram5Client implements GramJobListener {
 			myLogger.debug("job status is " + job.getStatusAsString());
 			myLogger.debug("job error is " + job.getError());
 		} catch (final GramException ex) {
+			myLogger.debug("ok, normal method of getting exit status is not working. need to restart job.");
 			if (ex.getErrorCode() == 156 /* job contact not found*/) {
 				// maybe the job finished, but maybe we need to kick job manager
 
@@ -144,7 +145,7 @@ public class Gram5Client implements GramJobListener {
 				// nope, not done yet.
 				return getJobStatus(handle, cred);
 			} else {
-				myLogger.error("error code is " + ex.getErrorCode());
+				myLogger.error("something else is wrong. error code is " + ex.getErrorCode());
 				myLogger.error(ex);
 			}
 			
