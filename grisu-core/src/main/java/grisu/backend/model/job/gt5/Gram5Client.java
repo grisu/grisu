@@ -108,7 +108,7 @@ public class Gram5Client implements GramJobListener {
 			// lets try to see if gateway is working first...
 			Gram.ping(cred,contact);
 		} catch (final GramException ex) {
-			myLogger.debug(ex);
+			myLogger.info(ex);
 			// have no idea what the status is, gateway is down:
 			return new int[] { GRAMConstants.STATUS_UNSUBMITTED, 0 };
 		} catch (final GSSException ex) {
@@ -143,13 +143,15 @@ public class Gram5Client implements GramJobListener {
 
 				// nope, not done yet.
 				return getJobStatus(handle, cred);
+			} else {
+				myLogger.error("error code is " + ex.getErrorCode());
+				myLogger.error(ex);
 			}
+			
 		} catch (final GSSException ex) {
-			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
-					.log(Level.SEVERE, null, ex);
+			myLogger.error(ex);
 		} catch (final MalformedURLException ex) {
-			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
-					.log(Level.SEVERE, null, ex);
+			myLogger.error(ex);
 
 		}
 		status = job.getStatus();
