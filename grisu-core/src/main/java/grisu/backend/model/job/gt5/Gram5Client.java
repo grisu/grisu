@@ -106,7 +106,7 @@ public class Gram5Client implements GramJobListener {
 		final GramJob job = new GramJob(null);
 		try {
 			// lets try to see if gateway is working first...
-			Gram.ping(contact);
+			Gram.ping(cred,contact);
 		} catch (final GramException ex) {
 			myLogger.debug(ex);
 			// have no idea what the status is, gateway is down:
