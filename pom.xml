@@ -11,8 +11,8 @@
 
 	<repositories>
 		<repository>
-			<id>bestgrid.public.release</id>
-			<url>http://dev.ceres.auckland.ac.nz/nexus/content/groups/public/</url>
+			<id>releases</id>
+			<url>http://code.ceres.auckland.ac.nz/nexus/content/groups/public/</url>
 			<releases>
 				<enabled>true</enabled>
 				<updatePolicy>daily</updatePolicy>
@@ -25,8 +25,8 @@
 			</snapshots>
 		</repository>
 		<repository>
-			<id>bestgrid.public.snapshot</id>
-			<url>http://dev.ceres.auckland.ac.nz/nexus/content/groups/public-snapshots/
+			<id>snapshots</id>
+			<url>http://code.ceres.auckland.ac.nz/nexus/content/groups/public-snapshots/
 			</url>
 			<releases>
 				<enabled>false</enabled>
@@ -39,32 +39,32 @@
 				<checksumPolicy>warn</checksumPolicy>
 			</snapshots>
 		</repository>
-		<repository>
+<!--		<repository>
 			<id>jboss</id>
 			<url>https://repository.jboss.org/nexus/content/groups/public/</url>
-		</repository>
+		</repository>-->
 	</repositories>
 
 	<distributionManagement>
 		<repository>
 			<name>BeSTGRID Releases Repository</name>
-			<id>bestgrid.release2</id>
-			<url>http://er77.ceres.auckland.ac.nz/nexus/content/repositories/releases</url>
+			<id>bestgrid.release</id>
+			<url>http://code.ceres.auckland.ac.nz/nexus/content/repositories/releases</url>
 		</repository>
 		<snapshotRepository>
-			<id>bestgrid.snapshot2</id>
+			<id>bestgrid.snapshot</id>
 			<name>BeSTGRID Snapshots Repository</name>
-			<url>http://er77.ceres.auckland.ac.nz/nexus/content/repositories/snapshots</url>
+			<url>http://code.ceres.auckland.ac.nz/nexus/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 
 	<issueManagement>
 		<system>Github</system>
-		<url>https://github.com/grisu/grisu/issues</url>
+		<url>http://github.com/grisu/grisu/issues</url>
 	</issueManagement>
 	<ciManagement>
 		<system>Hudson</system>
-		<url>http://dev.ceres.auckland.ac.nz/hudson/job/Grisu-SNAPSHOT</url>
+		<url>https://code.ceres.auckland.ac.nz/hudson/job/Grisu-SNAPSHOT</url>
 	</ciManagement>
 	<developers>
 		<developer>

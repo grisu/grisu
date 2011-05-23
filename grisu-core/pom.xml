@@ -31,13 +31,13 @@
 		connect to
 		it.</description>
 
-	<repositories>
+<!--	<repositories>
 		<repository>
 			<id>commons-vfs-grid</id>
 			<url>http://commonsvfsgrid.sourceforge.net/maven/</url>
 		</repository>
 
-	</repositories>
+	</repositories>-->
 
 	<dependencies>
 
@@ -235,7 +235,7 @@
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>mysql-mds</artifactId>
-			<version>0.8.5</version>
+			<version>0.8.6-SNAPSHOT</version>
 			<type>jar</type>
 			<scope>compile</scope>
 			<exclusions>
