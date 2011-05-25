@@ -133,7 +133,7 @@ public class User {
 			@Override
 			public void run() {
 				temp.getDefaultArchiveLocation();
-				temp.getArchivedJobs(null);
+				// temp.getArchivedJobs(null);
 			}
 		}.start();
 
