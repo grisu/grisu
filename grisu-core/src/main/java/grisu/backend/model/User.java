@@ -84,7 +84,8 @@ import org.simpleframework.xml.core.Persister;
 
 public class User {
 
-	public static final boolean ENABLE_FILESYSTEM_CACHE = false;
+	private final static boolean ENABLE_FILESYSTEM_CACHE = ServerPropertiesManager
+			.useFileSystemCache();
 
 	protected static UserDAO userdao = new UserDAO();
 	protected static final JobDAO jobdao = new JobDAO();

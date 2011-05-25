@@ -54,7 +54,7 @@ public final class ServerPropertiesManager {
 	 */
 	public static final String DEFAULT_JOB_DIR_NAME = "active-jobs";
 	public static final String DEFAULT_ARCHIVED_JOB_DIR_NAME = "archived-jobs";
-	public static final String DEFAULT_FQAN_TO_USE_FOR_ARCHIVING_JOBS = "/nz/NeSI";
+	public static final String DEFAULT_FQAN_TO_USE_FOR_ARCHIVING_JOBS = "/nz/nesi";
 	public static final int DEFAULT_TIME_INBETWEEN_STATUS_CHECKS_FOR_THE_SAME_JOB_IN_SECONDS = 60;
 
 	private static HierarchicalINIConfiguration config = null;
@@ -132,7 +132,7 @@ public final class ServerPropertiesManager {
 		try {
 			concurrentThreads = Integer
 			.parseInt(getServerConfiguration().getString(
-									"ConcurrentThreadSettings.archivedJobsLookupThreadsPerFilesystem"));
+			"ConcurrentThreadSettings.archivedJobsLookupThreadsPerFilesystem"));
 
 		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -377,7 +377,7 @@ public final class ServerPropertiesManager {
 		String fqan = null;
 		try {
 			fqan = getServerConfiguration().getString(
-			"General.archivedJobDefaultVO");
+					"General.archivedJobDefaultVO");
 
 			if (StringUtils.isNotBlank(fqan)
 					&& "none".equals(fqan.toLowerCase())) {
@@ -664,6 +664,40 @@ public final class ServerPropertiesManager {
 			return true;
 		}
 
+	}
+
+	/**
+	 * Checks whether the debug mode is enabled or not.
+	 * 
+	 * @return true if debug is enabled, false if not
+	 */
+	public static boolean useFileSystemCache() {
+		boolean useFScache = false;
+
+		try {
+			try {
+				useFScache = getServerConfiguration().getBoolean("General.fsCache");
+			} catch (final NoSuchElementException e) {
+				// doesn't matter
+				myLogger.debug(e);
+			}
+			if (useFScache) {
+				// try to create debug directory
+				final File debugDir = new File(getDebugDirectory());
+				if (!debugDir.exists()) {
+					debugDir.mkdir();
+				}
+
+				if (!debugDir.exists()) {
+					myLogger.error("Can't create debug directory. Turning debug mode off.");
+					useFScache = false;
+				}
+			}
+		} catch (final ConfigurationException e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			myLogger.debug(e);
+		}
+		return useFScache;
 	}
 
 }
