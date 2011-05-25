@@ -106,20 +106,41 @@ public class User {
 
 		// if ( getCredential())
 
+		Date time1 = new Date();
+
 		User user;
 		// try to look up user in the database
 		user = userdao.findUserByDN(cred.getDn());
+		Date time2 = new Date();
+
+		myLogger.debug("Login benchmark : db lookup"
+				+ new Long(time2.getTime() - time1.getTime() / 1000).toString()
+				+ " ms");
 
 		if (user == null) {
 			user = new User(cred);
+			time1 = new Date();
+			myLogger.debug("Login benchmark : constructor"
+					+ new Long(time1.getTime() - time2.getTime() / 1000)
+							.toString() + " ms");
+
 			userdao.saveOrUpdate(user);
 		} else {
 			user.setCred(cred);
+			time1 = new Date();
+			myLogger.debug("Login benchmark : setting credential"
+					+ new Long(time1.getTime() - time2.getTime() / 1000)
+							.toString() + " ms");
+
 		}
 
 		try {
 			user.setAutoMountedMountPoints(user.df_auto_mds(si.getAllSites()
 					.asArray()));
+			time2 = new Date();
+			myLogger.debug("Login benchmark : mountpoints"
+					+ new Long(time2.getTime() - time1.getTime() / 1000)
+							.toString() + " ms");
 		} catch (Exception e) {
 			throw new RuntimeException(
 					"Can't aquire filesystems for user. Possibly because of misconfigured grisu backend",
