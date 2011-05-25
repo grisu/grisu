@@ -85,7 +85,7 @@ import org.simpleframework.xml.core.Persister;
 public class User {
 
 	private final static boolean ENABLE_FILESYSTEM_CACHE = ServerPropertiesManager
-			.useFileSystemCache();
+	.useFileSystemCache();
 
 	protected static UserDAO userdao = new UserDAO();
 	protected static final JobDAO jobdao = new JobDAO();
@@ -157,6 +157,7 @@ public class User {
 	private static final Map<String, Map<String, DtoActionStatus>> actionStatuses = new HashMap<String, Map<String, DtoActionStatus>>();
 
 	private static final String NOT_ACCESSIBLE = "Not accessible";
+	private static final String ACCESSIBLE = "Accessible";
 
 	// the (default) credentials dn
 	private String dn = null;
@@ -458,16 +459,12 @@ public class User {
 						final String key = urlTemp + fqan;
 						try {
 							// try to create the dir if it doesn't exist
-							// myLogger.debug("Checking whether mountpoint "
-							// + urlTemp + " exists...");
 
 							// checking whether subfolder exists
 							if (StringUtils.isNotBlank(getMountPointCache()
-									.get(key))) {
-								// myLogger.debug("Found "
-								// + urlTemp
-								// +
-								// "in cache, not trying to access/create folder...");
+									.get(key)) && !NOT_ACCESSIBLE.equals(key)) {
+								// exists apparently, don't need to create
+								// folder...
 								return;
 							}
 							// myLogger.debug("Did not find "
@@ -484,13 +481,13 @@ public class User {
 								// + " exists.");
 							}
 
-							getMountPointCache().put(key, "Exists");
+							getMountPointCache().put(key, ACCESSIBLE);
 
 						} catch (final Exception e) {
 							myLogger.error("Could not create folder: "
 									+ urlTemp, e);
 
-							getMountPointCache().put(key, "Does not exist");
+							getMountPointCache().put(key, NOT_ACCESSIBLE);
 						} finally {
 							try {
 								userdao.saveOrUpdate(User.this);
@@ -1109,53 +1106,43 @@ public class User {
 		final String key = filesystemRoot + fqan;
 		if (ENABLE_FILESYSTEM_CACHE
 				&& StringUtils.isNotBlank(getMountPointCache().get(key))) {
+
 			if (NOT_ACCESSIBLE.equals(getMountPointCache().get(key))) {
 
 				throw new FileSystemException(
 						"Cached entry indicates filesystem "
 						+ filesystemRoot
 						+ " is not accessible. Clear cache if you think that has changed.");
+			} else {
+				return getMountPointCache().get(key);
 			}
-
-			return getMountPointCache().get(key);
 		} else {
 			try {
-				// FileSystem fileSystem = createFilesystem(filesystemRoot,
-				// fqan);
 
-				String uri = getFileSystemManager()
+				String uri = null;
+
+				uri = getFileSystemManager()
 				.resolveFileSystemHomeDirectory(filesystemRoot, fqan);
-				if (StringUtils.isNotBlank(uri)) {
+				myLogger.debug("Found filesystem home dir for: "
+						+ filesystemRoot + " / " + fqan + ": " + uri);
+
+				if (ENABLE_FILESYSTEM_CACHE && StringUtils.isNotBlank(uri)) {
+					myLogger.debug("Saving in fs cache...");
 					getMountPointCache().put(key, uri);
 					userdao.saveOrUpdate(this);
 				}
-				// final FileSystem fileSystem = getFileSystemCache()
-				// .getFileSystem(filesystemRoot, fqan);
-				//
-				// // final FileSystem fileSystem = threadLocalFsManager
-				// // .getFileSystem(filesystemRoot, fqan);
-				// myLogger.debug("Connected to file system.");
-				//
-				// myLogger.debug("Using home directory: "
-				// + ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
-				// .substring(1));
-				//
-				// final String home = (String) fileSystem
-				// .getAttribute("HOME_DIRECTORY");
-				// final String uri =
-				// fileSystem.getRoot().getName().getRootURI()
-				// + home.substring(1);
-				//
-				// if (StringUtils.isNotBlank(uri)) {
-				// mountPointCache.put(key, uri);
-				// userdao.saveOrUpdate(this);
-				// }
 
 				return uri;
 			} catch (final Exception e) {
 
-				getMountPointCache().put(key, NOT_ACCESSIBLE);
-				userdao.saveOrUpdate(this);
+				if (ENABLE_FILESYSTEM_CACHE) {
+					myLogger.error(getDn() + ": Can't access filesystem "
+							+ filesystemRoot + " / " + fqan
+							+ ", saving in fs cache...");
+					getMountPointCache().put(key, NOT_ACCESSIBLE);
+					userdao.saveOrUpdate(this);
+				}
+
 				throw new FileSystemException(e);
 			}
 		}
