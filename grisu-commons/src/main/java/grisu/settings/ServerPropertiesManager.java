@@ -377,7 +377,7 @@ public final class ServerPropertiesManager {
 		String fqan = null;
 		try {
 			fqan = getServerConfiguration().getString(
-					"General.archivedJobDefaultVO");
+			"General.archivedJobDefaultVO");
 
 			if (StringUtils.isNotBlank(fqan)
 					&& "none".equals(fqan.toLowerCase())) {
@@ -672,7 +672,7 @@ public final class ServerPropertiesManager {
 	 * @return true if debug is enabled, false if not
 	 */
 	public static boolean useFileSystemCache() {
-		boolean useFScache = false;
+		boolean useFScache = true;
 
 		try {
 			try {
@@ -681,18 +681,7 @@ public final class ServerPropertiesManager {
 				// doesn't matter
 				myLogger.debug(e);
 			}
-			if (useFScache) {
-				// try to create debug directory
-				final File debugDir = new File(getDebugDirectory());
-				if (!debugDir.exists()) {
-					debugDir.mkdir();
-				}
 
-				if (!debugDir.exists()) {
-					myLogger.error("Can't create debug directory. Turning debug mode off.");
-					useFScache = false;
-				}
-			}
 		} catch (final ConfigurationException e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
 			myLogger.debug(e);
