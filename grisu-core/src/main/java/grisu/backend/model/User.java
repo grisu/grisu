@@ -467,6 +467,16 @@ public class User {
 								// folder...
 								return;
 							}
+
+							if (NOT_ACCESSIBLE.equals(key)) {
+								myLogger.debug(getDn()
+										+ ": FS cache indicates that url "
+										+ urlTemp
+										+ " / "
+										+ fqan
+										+ "is not accessible. Clear FS cache if you think that has changed.");
+								return;
+							}
 							// myLogger.debug("Did not find "
 							// + urlTemp
 							// + "in cache, trying to access/create folder...");
@@ -487,15 +497,20 @@ public class User {
 							myLogger.error("Could not create folder: "
 									+ urlTemp, e);
 
-							getMountPointCache().put(key, NOT_ACCESSIBLE);
+							if (ENABLE_FILESYSTEM_CACHE) {
+								getMountPointCache().put(key, NOT_ACCESSIBLE);
+							}
+
 						} finally {
-							try {
-								userdao.saveOrUpdate(User.this);
-							} catch (Exception e) {
-								myLogger.debug("Could not save filesystem state for fs "
-										+ urlTemp
-										+ ": "
-										+ e.getLocalizedMessage());
+							if (ENABLE_FILESYSTEM_CACHE) {
+								try {
+									userdao.saveOrUpdate(User.this);
+								} catch (Exception e) {
+									myLogger.debug("Could not save filesystem state for fs "
+											+ urlTemp
+											+ ": "
+											+ e.getLocalizedMessage());
+								}
 							}
 						}
 					}
@@ -1114,6 +1129,8 @@ public class User {
 						+ filesystemRoot
 						+ " is not accessible. Clear cache if you think that has changed.");
 			} else {
+				myLogger.debug(getDn() + ": found cached filesystem for "
+						+ filesystemRoot + " / " + fqan);
 				return getMountPointCache().get(key);
 			}
 		} else {
