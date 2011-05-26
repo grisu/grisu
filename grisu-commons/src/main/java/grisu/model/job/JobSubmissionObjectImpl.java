@@ -1,11 +1,13 @@
 package grisu.model.job;
 
 import grisu.control.JobnameHelpers;
+import grisu.control.ServiceInterface;
 import grisu.control.exceptions.JobPropertiesException;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.jcommons.utils.JsdlHelpers;
 import grisu.model.FileManager;
+import grisu.model.GrisuRegistryManager;
 import grisu.utils.SeveralXMLHelpers;
 import grisu.utils.SimpleJsdlBuilder;
 import grisu.utils.StringHelpers;
@@ -1176,14 +1178,33 @@ public class JobSubmissionObjectImpl {
 	}
 
 	/**
-	 * Convenience method to create a unique jobname by appending a number
-	 * (counting upwards until a free jobname is found) to the jobname.
+	 * Convenience method to create a unique jobname by appending a uuid to the
+	 * jobname.
 	 * 
 	 * @param jobname
 	 *            the base jobname
 	 */
 	@Transient
-	public void setUniqueJobname(final String jobname) {
+	public void setUniqueJobname(final String jobname, final ServiceInterface si) {
+
+		if (StringUtils.isBlank(jobname)) {
+			setJobname(jobname);
+		} else {
+			String newname = GrisuRegistryManager.getDefault(si).getUserEnvironmentManager().calculateUniqueJobname(jobname);
+			setJobname(newname);
+		}
+	}
+
+	/**
+	 * Convenience method to create a unique jobname by appending a uuid to the
+	 * jobname.
+	 * 
+	 * @param jobname
+	 *            the base jobname
+	 */
+	@Transient
+	public void setUUIDJobname(final String jobname) {
+
 		if (StringUtils.isBlank(jobname)) {
 			setJobname(jobname);
 		} else {
