@@ -1,5 +1,6 @@
 package grisu.model;
 
+import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.StatusException;
@@ -44,10 +45,10 @@ import org.bushe.swing.event.EventSubscriber;
  * 
  */
 public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
-		EventSubscriber<FqanEvent> {
+EventSubscriber<FqanEvent> {
 
 	static final Logger myLogger = Logger
-			.getLogger(UserEnvironmentManagerImpl.class.getName());
+	.getLogger(UserEnvironmentManagerImpl.class.getName());
 
 	private final ServiceInterface serviceInterface;
 
@@ -81,6 +82,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 
 	private SortedSet<String> cachedJobNames = null;
 	private SortedSet<String> cachedBatchJobNames = null;
+	private SortedSet<String> allJobnames = null;
 
 	private TreeModel groupFileTreemodel = null;
 
@@ -98,7 +100,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 	public UserEnvironmentManagerImpl(final ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
 		this.resourceInfo = GrisuRegistryManager.getDefault(serviceInterface)
-				.getResourceInformation();
+		.getResourceInformation();
 
 		EventBus.subscribe(FqanEvent.class, this);
 
@@ -107,7 +109,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 	public void addFqanListener(final FqanListener listener) {
 
 		throw new RuntimeException(
-				"Adding of fqan listener not implemented yet.");
+		"Adding of fqan listener not implemented yet.");
 
 	}
 
@@ -116,9 +118,9 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 		String temp = name;
 		int i = 1;
 
-		while (getCurrentJobnames(false).contains(temp)
-				|| getCurrentBatchJobnames(false).contains(temp)) {
+		while (getReallyAllJobnames(false).contains(temp)) {
 			temp = name + "_" + i;
+			X.p(temp);
 			i = i + 1;
 		}
 
@@ -164,7 +166,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 			for (final String vo : getAllAvailableFqans()) {
 
 				final Set<String> temp = ai
-						.getAvailableSubmissionLocationsForFqan(vo);
+				.getAvailableSubmissionLocationsForFqan(vo);
 				if (temp.size() > 0) {
 					result.add(vo);
 				}
@@ -232,7 +234,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 	}
 
 	public DtoBatchJob getBatchJob(String jobname, boolean refresh)
-			throws NoSuchJobException {
+	throws NoSuchJobException {
 
 		DtoBatchJob result = null;
 
@@ -299,7 +301,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 				final String url = getBookmarks().get(bookmark);
 				cachedBookmarkFilesystemList.add(new FileSystemItem(bookmark,
 						FileSystemItem.Type.BOOKMARK, getFileManager()
-								.createGlazedFileFromUrl(url)));
+						.createGlazedFileFromUrl(url)));
 			}
 		}
 		return cachedBookmarkFilesystemList;
@@ -361,7 +363,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 
 		if ((result == null) || refreshBatchJobnames) {
 			result = serviceInterface.getAllBatchJobnames(application)
-					.asSortedSet();
+			.asSortedSet();
 			cachedBatchJobnamesPerApplication.put(application, result);
 		}
 		return result;
@@ -427,7 +429,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 	private FileManager getFileManager() {
 		if (this.fm == null) {
 			this.fm = GrisuRegistryManager.getDefault(serviceInterface)
-					.getFileManager();
+			.getFileManager();
 		}
 		return this.fm;
 	}
@@ -549,7 +551,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 	public final synchronized MountPoint[] getMountPoints() {
 		if (cachedMountPoints == null) {
 			cachedMountPoints = serviceInterface.df().getMountpoints()
-					.toArray(new MountPoint[] {});
+			.toArray(new MountPoint[] {});
 		}
 		return cachedMountPoints;
 	}
@@ -628,7 +630,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 			// String[] urls = serviceInterface
 			// .getStagingFileSystemForSubmissionLocation(submissionLocation);
 			final List<String> urls = resourceInfo
-					.getStagingFilesystemsForSubmissionLocation(submissionLocation);
+			.getStagingFilesystemsForSubmissionLocation(submissionLocation);
 
 			final Set<MountPoint> result = new TreeSet<MountPoint>();
 			for (final String url : urls) {
@@ -657,7 +659,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 					submissionLocation, result);
 		}
 		return alreadyQueriedMountPointsPerSubmissionLocation
-				.get(submissionLocation);
+		.get(submissionLocation);
 	}
 
 	public synchronized final Set<MountPoint> getMountPointsForSubmissionLocationAndFqan(
@@ -666,7 +668,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 		// String[] urls = serviceInterface
 		// .getStagingFileSystemForSubmissionLocation(submissionLocation);
 		final List<String> urls = resourceInfo
-				.getStagingFilesystemsForSubmissionLocation(submissionLocation);
+		.getStagingFilesystemsForSubmissionLocation(submissionLocation);
 
 		final Set<MountPoint> result = new TreeSet<MountPoint>();
 
@@ -707,6 +709,24 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 			}
 		}
 		return cachedUserProperties.get(key);
+
+	}
+
+	public synchronized SortedSet<String> getReallyAllJobnames(boolean refresh) {
+
+		if (allJobnames == null) {
+			allJobnames = new TreeSet<String>(serviceInterface
+					.getAllJobnames(Constants.ALLJOBS_KEY).getStringList());
+			allJobnames.addAll(serviceInterface.getAllBatchJobnames(null).getStringList());
+		} else if (refresh) {
+			allJobnames.clear();
+			allJobnames.addAll(serviceInterface.getAllJobnames(
+					Constants.ALLJOBS_KEY)
+					.getStringList());
+			allJobnames.addAll(serviceInterface.getAllBatchJobnames(null)
+					.getStringList());
+		}
+		return allJobnames;
 
 	}
 
@@ -780,7 +800,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 	public void removeFqanListener(final FqanListener listener) {
 
 		throw new RuntimeException(
-				"Removal of fqan listener not implemented yet.");
+		"Removal of fqan listener not implemented yet.");
 	}
 
 	public synchronized FileSystemItem setBookmark(String alias, String url) {
@@ -797,7 +817,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 		} else {
 			final FileSystemItem temp = new FileSystemItem(alias,
 					FileSystemItem.Type.BOOKMARK, getFileManager()
-							.createGlazedFileFromUrl(url));
+					.createGlazedFileFromUrl(url));
 			getBookmarks().put(alias, url);
 			getBookmarksFilesystems().add(temp);
 			getFileSystems().add(temp);
@@ -828,7 +848,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 	}
 
 	public StatusObject waitForActionToFinish(String handle)
-			throws InterruptedException, StatusException {
+	throws InterruptedException, StatusException {
 
 		final StatusObject status = new StatusObject(serviceInterface, handle);
 

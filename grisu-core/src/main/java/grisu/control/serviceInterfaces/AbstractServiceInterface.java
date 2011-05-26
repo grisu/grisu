@@ -1659,15 +1659,21 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public DtoStringList getAllJobnames(String application) {
 
+		boolean alljobs = false;
+		if (Constants.ALLJOBS_KEY.equals(application)) {
+			alljobs = true;
+		}
+
 		List<String> jobnames = null;
 
 		if (StringUtils.isBlank(application)
 				|| Constants.ALLJOBS_KEY.equals(application)) {
 			jobnames = jobdao.findJobNamesByDn(getUser().getDn(),
-					INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND);
+					(alljobs || INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND));
 		} else {
 			jobnames = jobdao.findJobNamesPerApplicationByDn(getUser().getDn(),
-					application, INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND);
+					application,
+					(alljobs || INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND));
 		}
 
 		return DtoStringList.fromStringList(jobnames);
