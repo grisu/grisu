@@ -792,7 +792,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			String temp = jobname;
 			int i = 1;
 
-			while (getAllJobnames(null).asSortedSet().contains(temp)
+			while (getAllJobnames(Constants.ALLJOBS_KEY).asSortedSet()
+					.contains(temp)
 					|| getAllBatchJobnames(null).asSortedSet().contains(temp)) {
 				temp = jobname + "_" + i;
 				i = i + 1;
