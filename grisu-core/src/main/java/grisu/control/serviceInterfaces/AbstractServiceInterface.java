@@ -787,6 +787,20 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			jobname = temp;
 
+		} else if (Constants.UNIQUE_NUMBER_METHOD.equals(jobnameCreationMethod)) {
+
+			String temp = jobname;
+			int i = 1;
+
+			while (getAllJobnames(null).asSortedSet().contains(temp)
+					|| getAllBatchJobnames(null).asSortedSet().contains(temp)) {
+				temp = jobname + "_" + i;
+				i = i + 1;
+			}
+
+			jobname = temp;
+
+
 		} else {
 			throw new JobPropertiesException(
 					JobSubmissionProperty.JOBNAME.toString() + ": "
@@ -1235,8 +1249,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			myLogger.error(e3);
 			throw new RuntimeException("Invalid jsdl/xml format.", e3);
 		}
-
-		// X.p("XXX");
 
 		return createJob(jsdl, fqan, jobnameCreationMethod, null);
 	}
