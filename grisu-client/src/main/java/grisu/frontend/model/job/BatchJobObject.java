@@ -2321,6 +2321,8 @@ Comparable<BatchJobObject>, Listener {
 	private void uploadInputFiles(boolean uploadCommonFiles)
 	throws InterruptedException, FileUploadException {
 
+		myLogger.debug("Uploading batch job input files...");
+
 		final List<Exception> exceptions = Collections
 		.synchronizedList(new LinkedList<Exception>());
 
@@ -2346,6 +2348,7 @@ Comparable<BatchJobObject>, Listener {
 				EventBus.publish(getJobname(), new BatchJobEvent(
 						BatchJobObject.this, message));
 				addJobLogMessage(message);
+				myLogger.debug("Uploading files for job " + job.getJobname());
 
 				final Future<?> f = executor.submit(new Thread() {
 					@Override
@@ -2372,6 +2375,9 @@ Comparable<BatchJobObject>, Listener {
 		final int all = inputFiles.keySet().size();
 
 		if (all > 0) {
+
+			myLogger.debug("Uploading " + all + " common input files...");
+
 			final String message = "Uploading " + all + " input files ("
 			+ getConcurrentInputFileUploadThreads()
 			+ " concurrent upload threads.)";
@@ -2384,6 +2390,8 @@ Comparable<BatchJobObject>, Listener {
 				for (final String inputFile : inputFiles.keySet()) {
 
 					checkInterruptedStatus(executor, tasks);
+
+					myLogger.debug("Uploading common input file: " + inputFile);
 
 					i = i + 1;
 					final Thread thread = new BatchJobFileUploadThread(
@@ -2410,6 +2418,7 @@ Comparable<BatchJobObject>, Listener {
 		executor.shutdown();
 
 		try {
+			myLogger.debug("Waiting for input files to be uploaded...");
 			executor.awaitTermination(10 * 3600, TimeUnit.SECONDS);
 		} catch (final InterruptedException e) {
 			myLogger.debug("Interrupted....");
@@ -2423,6 +2432,12 @@ Comparable<BatchJobObject>, Listener {
 		}
 
 		if ((exceptions.size() > 0) && (exceptions.get(0) != null)) {
+			myLogger.debug(exceptions.size()
+					+ " exceptions while uploading. not continuing submission...");
+			for (Exception e : exceptions) {
+				myLogger.error(e);
+				e.printStackTrace();
+			}
 			throw new FileUploadException(exceptions.get(0));
 		}
 

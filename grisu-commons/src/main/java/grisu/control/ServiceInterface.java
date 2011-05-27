@@ -432,8 +432,14 @@ public interface ServiceInterface {
 	/**
 	 * Returns a list of all jobnames that are currently stored on this backend.
 	 * 
-	 * Doesn't include batchjobs.
+	 * By default it doesn't include batchjobs, but if you specify
+	 * {@link Constants#ALLJOBS_KEY} as parameter, it will return all
+	 * (single-)jobnames. If you specify null, it will return all single jobs
+	 * excuding childs of batchjobs.
 	 * 
+	 * @param application
+	 *            the name of the application of the jobs you are interested or
+	 *            {@link Constants#ALLJOBS_KEY} or null
 	 * @return all jobnames
 	 */
 	@GET
@@ -1256,7 +1262,7 @@ public interface ServiceInterface {
 	void restartJob(final String jobname, String changedJsdl)
 	throws JobSubmissionException, NoSuchJobException;
 
-/**
+	/**
 	 * Sets a user property.
 	 * 
 	 * <p>

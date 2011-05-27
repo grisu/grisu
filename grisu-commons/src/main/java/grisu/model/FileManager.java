@@ -6,7 +6,6 @@ import grisu.control.events.FolderCreatedEvent;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.control.clientexceptions.FileTransactionException;
 import grisu.model.dto.DtoActionStatus;
-import grisu.model.dto.DtoJob;
 import grisu.model.dto.DtoStringList;
 import grisu.model.dto.GridFile;
 import grisu.model.files.GlazedFile;
@@ -1718,15 +1717,16 @@ public class FileManager {
 					"Transfer of folders not supported yet.", null);
 		}
 
-		// checking whether folder exists and is folder
-		try {
-
-			final DtoJob jobdir = serviceInterface.getJob(job);
-
-		} catch (final Exception e) {
-			throw new FileTransactionException(file.toString(), job,
-					"Job does not exists on the backend.: ", e);
-		}
+		// // checking whether folder exists and is folder
+		// try {
+		//
+		// serviceInterface.getJob(job);
+		//
+		// } catch (final Exception e) {
+		//
+		// throw new FileTransactionException(file.toString(), job,
+		// "Job does not exists on the backend.: ", e);
+		// }
 
 		myLogger.debug("Uploading input file: " + file.toString()
 				+ " for job: " + job);

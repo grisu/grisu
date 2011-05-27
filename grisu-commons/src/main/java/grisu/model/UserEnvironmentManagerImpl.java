@@ -1,6 +1,5 @@
 package grisu.model;
 
-import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.StatusException;
@@ -120,7 +119,6 @@ EventSubscriber<FqanEvent> {
 
 		while (getReallyAllJobnames(false).contains(temp)) {
 			temp = name + "_" + i;
-			X.p(temp);
 			i = i + 1;
 		}
 
