@@ -6,7 +6,6 @@ import grith.jgrith.plainProxy.LocalProxy;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.net.URL;
 import java.util.Date;
 
@@ -386,21 +385,21 @@ implements GramJobListener {
 		}
 		// }
 
-		if (batch) {
-			printMessage("CREATED MANAGED JOB SERVICE WITH HANDLE:");
-			printMessage(job.getHandle());
-		}
+		// if (batch) {
+		// printMessage("CREATED MANAGED JOB SERVICE WITH HANDLE:");
+		// printMessage(job.getHandle());
+		// }
 
-		if (logger.isDebugEnabled()) {
-			final long millis = System.currentTimeMillis();
-			BigDecimal seconds = new BigDecimal(((double) millis) / 1000);
-			seconds = seconds.setScale(3, BigDecimal.ROUND_HALF_DOWN);
-			logger.debug("Submission time (secs) after: " + seconds.toString());
-			logger.debug("Submission time in milliseconds: " + millis);
-		}
+		// if (logger.isDebugEnabled()) {
+		// final long millis = System.currentTimeMillis();
+		// BigDecimal seconds = new BigDecimal(((double) millis) / 1000);
+		// seconds = seconds.setScale(3, BigDecimal.ROUND_HALF_DOWN);
+		// logger.debug("Submission time (secs) after: " + seconds.toString());
+		// logger.debug("Submission time in milliseconds: " + millis);
+		// }
 
 		if (!batch) {
-			printMessage("WAITING FOR JOB TO FINISH");
+			// printMessage("WAITING FOR JOB TO FINISH");
 
 			waitForJobCompletion(STATE_CHANGE_BASE_TIMEOUT_MILLIS);
 
@@ -519,17 +518,18 @@ implements GramJobListener {
 		job.setMessageProtectionType(xmlSecurity);
 		job.setDelegationEnabled(this.delegationEnabled);
 		final long now = new Date().getTime();
-		// long future = 3600 * 1000 * 24 * 45;
-		// long future = 3888000000l;
+
 		final long future = 31536000000L;
 		final long newTime = now + future;
-		logger.debug("Add time: " + future + " ms.");
-		logger.debug("Old time: " + now + " ms since 1970. (Now)");
-		logger.debug("New time: " + newTime + " ms since 1970 (Termination).");
+		// logger.debug("Add time: " + future + " ms.");
+		// logger.debug("Old time: " + now + " ms since 1970. (Now)");
+		// logger.debug("New time: " + newTime +
+		// " ms since 1970 (Termination).");
 		final Date newDate = new Date(newTime);
-		logger.debug("Old date: " + new Date(now).toString());
-		logger.debug("New date: " + newDate.toString());
+		// logger.debug("Old date: " + new Date(now).toString());
+		// logger.debug("New date: " + newDate.toString());
 		// job.setDuration(newDate);
+		logger.debug("Setting termination date: " + newDate.toGMTString());
 		job.setTerminationTime(newDate);
 		// job.setDuration(new Date(ts));
 		// job.setTerminationTime(terminationDate);
