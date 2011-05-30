@@ -340,6 +340,14 @@ Comparable<BatchJobObject>, Listener {
 	 */
 	public void addJob(JobObject job) throws IllegalArgumentException {
 
+		if (StringUtils.isBlank(job.getJobname())) {
+			String singleJobname = GrisuRegistryManager
+			.getDefault(serviceInterface)
+			.getUserEnvironmentManager()
+			.calculateUniqueJobname(getJobname() + "_job_1");
+			job.setJobname(singleJobname);
+		}
+
 		if (getJobs().contains(job)) {
 			throw new IllegalArgumentException("Job: " + job.getJobname()
 					+ " already part of this BatchJob.");
@@ -361,6 +369,8 @@ Comparable<BatchJobObject>, Listener {
 				maxWalltimeInSecondsAcrossJobs = job.getWalltimeInSeconds();
 			}
 		}
+
+
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 				"Adding job " + job.getJobname()));
 		final int oldNo = this.getJobs().size();
