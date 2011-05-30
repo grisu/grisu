@@ -114,14 +114,15 @@ public class User {
 		Date time2 = new Date();
 
 		myLogger.debug("Login benchmark : db lookup"
-				+ new Long(time2.getTime() - time1.getTime() / 1000).toString()
+				+ new Long((time2.getTime() - time1.getTime()) / 1000)
+						.toString()
 				+ " ms");
 
 		if (user == null) {
 			user = new User(cred);
 			time1 = new Date();
 			myLogger.debug("Login benchmark : constructor"
-					+ new Long(time1.getTime() - time2.getTime() / 1000)
+					+ new Long((time1.getTime() - time2.getTime()) / 1000)
 					.toString() + " ms");
 
 			userdao.saveOrUpdate(user);
@@ -129,7 +130,7 @@ public class User {
 			user.setCred(cred);
 			time1 = new Date();
 			myLogger.debug("Login benchmark : setting credential"
-					+ new Long(time1.getTime() - time2.getTime() / 1000)
+					+ new Long((time1.getTime() - time2.getTime()) / 1000)
 					.toString() + " ms");
 
 		}
@@ -139,7 +140,7 @@ public class User {
 					.asArray()));
 			time2 = new Date();
 			myLogger.debug("Login benchmark : mountpoints"
-					+ new Long(time2.getTime() - time1.getTime() / 1000)
+					+ new Long((time2.getTime() - time1.getTime()) / 1000)
 					.toString() + " ms");
 		} catch (Exception e) {
 			throw new RuntimeException(
@@ -997,6 +998,17 @@ public class User {
 		return archiveLocations;
 	}
 
+	@Transient
+	public BatchJob getBatchJobFromDatabase(final String batchJobname)
+	throws NoSuchJobException {
+
+		final BatchJob job = batchJobDao.findJobByDN(getCred()
+				.getDn(), batchJobname);
+
+		return job;
+
+	}
+
 	/**
 	 * Gets a map of this users bookmarks.
 	 * 
@@ -1113,16 +1125,6 @@ public class User {
 		return defArcLoc;
 	}
 
-	/**
-	 * Returns the users dn.
-	 * 
-	 * @return the dn
-	 */
-	@Column(nullable = false)
-	public String getDn() {
-		return dn;
-	}
-
 	// private List<FileReservation> getFileReservations() {
 	// return fileReservations;
 	// }
@@ -1139,6 +1141,16 @@ public class User {
 	// private void setFileTransfers(List<FileTransfer> fileTransfers) {
 	// this.fileTransfers = fileTransfers;
 	// }
+
+	/**
+	 * Returns the users dn.
+	 * 
+	 * @return the dn
+	 */
+	@Column(nullable = false)
+	public String getDn() {
+		return dn;
+	}
 
 	public String getFileSystemHomeDirectory(String filesystemRoot, String fqan)
 	throws FileSystemException {
@@ -1259,6 +1271,18 @@ public class User {
 				+ "does not exist.");
 	}
 
+	// public GridFile getFolderListing(final String url, int recursionLevel)
+	// throws RemoteFileSystemException, FileSystemException {
+	//
+	// try {
+	// return getFileSystemManager().getFolderListing(url, recursionLevel);
+	// } catch (InvalidPathException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// return null;
+	// }
+	// }
+
 	@Transient
 	public int getJobStatus(final String jobname) {
 
@@ -1364,18 +1388,6 @@ public class User {
 		return status;
 	}
 
-	// public GridFile getFolderListing(final String url, int recursionLevel)
-	// throws RemoteFileSystemException, FileSystemException {
-	//
-	// try {
-	// return getFileSystemManager().getFolderListing(url, recursionLevel);
-	// } catch (InvalidPathException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// return null;
-	// }
-	// }
-
 	@ElementCollection
 	public Map<String, JobSubmissionObjectImpl> getJobTemplates() {
 		return jobTemplates;
@@ -1426,17 +1438,6 @@ public class User {
 			}
 			return mountPointsPerFqanCache.get(fqan);
 		}
-	}
-
-	@Transient
-	public BatchJob getBatchJobFromDatabase(final String batchJobname)
-	throws NoSuchJobException {
-
-		final BatchJob job = batchJobDao.findJobByDN(getCred()
-				.getDn(), batchJobname);
-
-		return job;
-
 	}
 
 	/**
