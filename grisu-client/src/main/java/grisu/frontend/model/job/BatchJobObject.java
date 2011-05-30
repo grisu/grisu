@@ -344,8 +344,8 @@ Comparable<BatchJobObject>, Listener {
 			String singleJobname = GrisuRegistryManager
 			.getDefault(serviceInterface)
 			.getUserEnvironmentManager()
-					.calculateUniqueJobname(
-							getJobname() + "_job_" + getJobs().size() + 1);
+			.calculateUniqueJobname(
+					getJobname() + "_job_" + (getJobs().size() + 1));
 			job.setJobname(singleJobname);
 		}
 
