@@ -18,4 +18,8 @@ public class BatchJobException extends Exception {
 		super(message);
 	}
 
+	public BatchJobException(String message, Exception e) {
+		super (message, e);
+	}
+
 }

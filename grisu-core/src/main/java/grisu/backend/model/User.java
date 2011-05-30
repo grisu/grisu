@@ -266,7 +266,7 @@ public class User {
 		if (mpjName != null) {
 			BatchJob mpj = null;
 			try {
-				mpj = getMultiPartJobFromDatabase(mpjName);
+				mpj = getBatchJobFromDatabase(mpjName);
 			} catch (final NoSuchJobException e) {
 				myLogger.error(e);
 				return;
@@ -1343,7 +1343,7 @@ public class User {
 				.getJobProperty(Constants.BATCHJOB_NAME);
 				if (multiPartJobParent != null) {
 					try {
-						final BatchJob mpj = getMultiPartJobFromDatabase(multiPartJobParent);
+						final BatchJob mpj = getBatchJobFromDatabase(multiPartJobParent);
 						mpj.addFailedJob(job.getJobname());
 						addLogMessageToPossibleMultiPartJobParent(job, "Job: "
 								+ job.getJobname() + " failed. Status: "
@@ -1429,7 +1429,7 @@ public class User {
 	}
 
 	@Transient
-	public BatchJob getMultiPartJobFromDatabase(final String batchJobname)
+	public BatchJob getBatchJobFromDatabase(final String batchJobname)
 	throws NoSuchJobException {
 
 		final BatchJob job = batchJobDao.findJobByDN(getCred()

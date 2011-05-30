@@ -233,10 +233,16 @@ public interface ServiceInterface {
 	 *            the id (name) of the batchjob
 	 * @param fqan
 	 *            the vo to use
+	 * @param jobnameCreationMethod
+	 *            the method to use to (possibly) auto-calculate the jobname (if
+	 *            one with the specfied jobname in the jobProperties already
+	 *            exists). This defaults to "force-name" if you specify null.
+	 * @return the name of the job (auto-calculated or not) which is used as a
 	 * @throws JobPropertiesException
 	 */
 	@RolesAllowed("User")
-	DtoBatchJob createBatchJob(String batchJobname, String fqan)
+	DtoBatchJob createBatchJob(String batchJobname, String fqan,
+			String jobnameCreationMethod)
 	throws BatchJobException;
 
 	/**
