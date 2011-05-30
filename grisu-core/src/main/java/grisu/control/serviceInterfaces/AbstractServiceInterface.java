@@ -1796,7 +1796,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see grisu.control.ServiceInterface#ps()
 	 */
-	public DtoJobs getCurrentJobs(String application, boolean refresh) {
+	public DtoJobs getActiveJobs(String application, boolean refresh) {
 
 		try {
 

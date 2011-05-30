@@ -401,6 +401,24 @@ public interface ServiceInterface {
 	DtoActionStatus getActionStatus(@PathParam("handle") String actionHandle);
 
 	/**
+	 * Returns a xml document that contains all the current (non-archived) jobs
+	 * of the user with information about the jobs.
+	 * 
+	 * @param application
+	 *            filter by application or null (for all jobs)
+	 * @param refreshJobStatus
+	 *            whether to refresh the status of all the jobs. This can take
+	 *            quite some time.
+	 * 
+	 * @return xml formated information about all the users jobs
+	 */
+	@GET
+	@Path("user/activejobs/{application}/{refresh}")
+	@RolesAllowed("User")
+	DtoJobs getActiveJobs(@PathParam("application") String application,
+			@PathParam("refresh") boolean refreshJobStatus);
+
+	/**
 	 * Returns all applications that are available grid-wide or at certain
 	 * sites.
 	 * 
@@ -506,16 +524,6 @@ public interface ServiceInterface {
 			@PathParam("application") String application,
 			@PathParam("version") String version, @PathParam("site") String site);
 
-	/**
-	 * Returns a list of all application packages that provide the specified
-	 * executable.
-	 * 
-	 * @param executable
-	 *            the executable
-	 * @return the application package(s)
-	 */
-	String[] getApplicationPackagesForExecutable(String executable);
-
 	// /**
 	// * Finds all children files for the specified folder. Useful if you want
 	// to
@@ -537,6 +545,16 @@ public interface ServiceInterface {
 	// DtoStringList getChildrenFileNames(@QueryParam("url") String url,
 	// @QueryParam("onlyFiles") boolean onlyFiles)
 	// throws RemoteFileSystemException;
+
+	/**
+	 * Returns a list of all application packages that provide the specified
+	 * executable.
+	 * 
+	 * @param executable
+	 *            the executable
+	 * @return the application package(s)
+	 */
+	String[] getApplicationPackagesForExecutable(String executable);
 
 	/**
 	 * Returns a xml document that contains all the jobs of the user with
@@ -598,24 +616,6 @@ public interface ServiceInterface {
 	@GET
 	@Path("user/session/credentialendtime")
 	long getCredentialEndTime();
-
-	/**
-	 * Returns a xml document that contains all the current (non-archived) jobs
-	 * of the user with information about the jobs.
-	 * 
-	 * @param application
-	 *            filter by application or null (for all jobs)
-	 * @param refreshJobStatus
-	 *            whether to refresh the status of all the jobs. This can take
-	 *            quite some time.
-	 * 
-	 * @return xml formated information about all the users jobs
-	 */
-	@GET
-	@Path("user/currentjobs/{application}/{refresh}")
-	@RolesAllowed("User")
-	DtoJobs getCurrentJobs(@PathParam("application") String application,
-			@PathParam("refresh") boolean refreshJobStatus);
 
 	// ---------------------------------------------------------------------------------------------------
 	//
