@@ -360,39 +360,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			jobnameCreationMethod = "force-name";
 		}
 
-		// String[] candHosts = JsdlHelpers.getCandidateHosts(jsdl);
-		//
-		// if (candHosts == null || candHosts.length == 0) {
-		// SortedSet<GridResource> resources =
-		// calculateResourcesToUse(multiJob);
-		// Map<String, Integer> distribution = new HashMap<String, Integer>();
-		//
-		// for ( Job job : multiJob.getJobs() ) {
-		//
-		// String subLoc = job.getJobProperty(Constants.SUBMISSIONLOCATION_KEY);
-		// if ( distribution.get(subLoc) == null ) {
-		// distribution.put(subLoc, 1);
-		// } else {
-		// distribution.put(subLoc, distribution.get(subLoc)+1);
-		// }
-		//
-		// }
-		//
-		// // now find least used subloc
-		// String subLoc = null;
-		// int leastJobs = Integer.MAX_VALUE;
-		// for ( String sl : distribution.keySet() ) {
-		// if ( distribution.get(sl) < leastJobs ) {
-		// subLoc = sl;
-		// leastJobs = distribution.get(sl);
-		// }
-		// }
-		// JsdlHelpers.setCandidateHosts(jsdl, new String[] { subLoc });
-		//
-		// myLogger.debug("Using "+subLoc+" for new sub-job or: "+multiJob.getBatchJobname());
-		//
-		// }
-
 		final String jobname = createJob(jsdl, multiJob.getFqan(),
 				"force-name", multiJob);
 		multiJob.addJob(jobname);
@@ -2654,7 +2621,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @throws JobPropertiesException
 	 */
 	private void processJobDescription(final Job job,
-			final BatchJob multiPartJob) throws NoSuchJobException,
+ final BatchJob parentJob)
+			throws NoSuchJobException,
 			JobPropertiesException {
 
 		// TODO check whether fqan is set
@@ -3150,7 +3118,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		// now calculate and set the proper paths
 		String workingDirectory;
-		if (multiPartJob == null) {
+		if (parentJob == null) {
 			workingDirectory = mountPointToUse.getRootUrl().substring(
 					stagingFilesystemToUse.length())
 					+ "/"
@@ -3160,7 +3128,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			workingDirectory = mountPointToUse.getRootUrl().substring(
 					stagingFilesystemToUse.length())
 					+ "/"
-					+ multiPartJob
+					+ parentJob
 					.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY)
 					+ "/" + job.getJobname();
 		}
