@@ -124,6 +124,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		myLogger = Logger.getLogger(AbstractServiceInterface.class.getName());
 
+		myLogger.info("============================================");
+		myLogger.info("Starting up backend...");
+		myLogger.info("============================================");
 
 		CoGProperties.getDefault().setProperty(
 				CoGProperties.ENFORCE_SIGNING_POLICY, "false");
