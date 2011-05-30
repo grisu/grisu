@@ -1564,7 +1564,7 @@ Comparable<BatchJobObject>, Listener {
 					final String handle = serviceInterface
 					.redistributeBatchJob(this.batchJobname);
 
-					System.out.println("Handle: " + handle);
+					// System.out.println("Handle: " + handle);
 					final StatusObject status = new StatusObject(
 							serviceInterface, handle);
 

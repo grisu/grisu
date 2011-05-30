@@ -170,7 +170,7 @@ public class JobDAO extends BaseHibernateDAO {
 		} else {
 			queryString = "from grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
 				+ Constants.APPLICATIONNAME_KEY
-				+ "']) = ? and job.multiPartJob = false";
+					+ "']) = ? and batchJob = false";
 		}
 
 		try {
