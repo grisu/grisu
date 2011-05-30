@@ -433,9 +433,9 @@ public interface ServiceInterface {
 	 * Returns a list of all jobnames that are currently stored on this backend.
 	 * 
 	 * By default it doesn't include batchjobs, but if you specify
-	 * {@link Constants#ALLJOBS_KEY} as parameter, it will return all
-	 * (single-)jobnames. If you specify null, it will return all single jobs
-	 * excuding childs of batchjobs.
+	 * {@link Constants#ALLJOBS_INCL_BATCH_KEY} as parameter, it will return all
+	 * (single-)jobnames. If you specify null or {@link Constants#ALLJOBS_KEY},
+	 * it will return all single jobs excuding childs of batchjobs.
 	 * 
 	 * @param application
 	 *            the name of the application of the jobs you are interested or

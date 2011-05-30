@@ -759,7 +759,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			String temp = jobname;
 			int i = 1;
 
-			while (getAllJobnames(Constants.ALLJOBS_KEY).asSortedSet()
+			while (getAllJobnames(Constants.ALLJOBS_INCL_BATCH_KEY)
+					.asSortedSet()
 					.contains(temp)
 					|| getAllBatchJobnames(null).asSortedSet().contains(temp)) {
 				temp = jobname + "_" + i;
@@ -1627,8 +1628,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public DtoStringList getAllJobnames(String application) {
 
-		boolean alljobs = false;
-		if (Constants.ALLJOBS_KEY.equals(application)) {
+		boolean alljobs = INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND;
+		if (Constants.ALLJOBS_INCL_BATCH_KEY.equals(application)) {
 			alljobs = true;
 		}
 
@@ -1636,12 +1637,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		if (StringUtils.isBlank(application)
 				|| Constants.ALLJOBS_KEY.equals(application)) {
-			jobnames = jobdao.findJobNamesByDn(getUser().getDn(),
-					(alljobs || INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND));
+			jobnames = jobdao.findJobNamesByDn(getUser().getDn(), alljobs);
 		} else {
 			jobnames = jobdao.findJobNamesPerApplicationByDn(getUser().getDn(),
-					application,
-					(alljobs || INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND));
+					application, alljobs);
 		}
 
 		return DtoStringList.fromStringList(jobnames);
@@ -2621,9 +2620,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @throws JobPropertiesException
 	 */
 	private void processJobDescription(final Job job,
- final BatchJob parentJob)
-			throws NoSuchJobException,
-			JobPropertiesException {
+			final BatchJob parentJob)
+	throws NoSuchJobException,
+	JobPropertiesException {
 
 		// TODO check whether fqan is set
 		final String jobFqan = job.getFqan();

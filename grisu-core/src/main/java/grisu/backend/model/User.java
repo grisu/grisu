@@ -122,7 +122,7 @@ public class User {
 			time1 = new Date();
 			myLogger.debug("Login benchmark : constructor"
 					+ new Long(time1.getTime() - time2.getTime() / 1000)
-							.toString() + " ms");
+					.toString() + " ms");
 
 			userdao.saveOrUpdate(user);
 		} else {
@@ -130,7 +130,7 @@ public class User {
 			time1 = new Date();
 			myLogger.debug("Login benchmark : setting credential"
 					+ new Long(time1.getTime() - time2.getTime() / 1000)
-							.toString() + " ms");
+					.toString() + " ms");
 
 		}
 
@@ -140,7 +140,7 @@ public class User {
 			time2 = new Date();
 			myLogger.debug("Login benchmark : mountpoints"
 					+ new Long(time2.getTime() - time1.getTime() / 1000)
-							.toString() + " ms");
+					.toString() + " ms");
 		} catch (Exception e) {
 			throw new RuntimeException(
 					"Can't aquire filesystems for user. Possibly because of misconfigured grisu backend",
@@ -800,20 +800,24 @@ public class User {
 	@Transient
 	public List<Job> getActiveJobs(String application, boolean refresh) {
 
+		boolean inclBatchJobs = AbstractServiceInterface.INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND;
+		if (Constants.ALLJOBS_INCL_BATCH_KEY.equals(application)) {
+			inclBatchJobs = true;
+		}
+
 		try {
 
 			List<Job> jobs = null;
-			if (StringUtils.isBlank(application)) {
-				jobs = jobdao
-				.findJobByDN(
-						getDn(),
-						AbstractServiceInterface.INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND);
+			if (StringUtils.isBlank(application)
+					|| Constants.ALLJOBS_KEY.equals(application)
+					|| Constants.ALLJOBS_INCL_BATCH_KEY.equals(application)) {
+				jobs = jobdao.findJobByDN(getDn(), inclBatchJobs);
 			} else {
 				jobs = jobdao
 				.findJobByDNPerApplication(
 						getDn(),
 						application,
-						AbstractServiceInterface.INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND);
+						inclBatchJobs);
 			}
 
 			if (refresh) {

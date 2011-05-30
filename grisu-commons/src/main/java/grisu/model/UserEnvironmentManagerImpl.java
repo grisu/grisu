@@ -713,13 +713,13 @@ EventSubscriber<FqanEvent> {
 	public synchronized SortedSet<String> getReallyAllJobnames(boolean refresh) {
 
 		if (allJobnames == null) {
-			allJobnames = new TreeSet<String>(serviceInterface
-					.getAllJobnames(Constants.ALLJOBS_KEY).getStringList());
+			allJobnames = new TreeSet<String>(serviceInterface.getAllJobnames(
+					Constants.ALLJOBS_INCL_BATCH_KEY).getStringList());
 			allJobnames.addAll(serviceInterface.getAllBatchJobnames(null).getStringList());
 		} else if (refresh) {
 			allJobnames.clear();
 			allJobnames.addAll(serviceInterface.getAllJobnames(
-					Constants.ALLJOBS_KEY)
+					Constants.ALLJOBS_INCL_BATCH_KEY)
 					.getStringList());
 			allJobnames.addAll(serviceInterface.getAllBatchJobnames(null)
 					.getStringList());
