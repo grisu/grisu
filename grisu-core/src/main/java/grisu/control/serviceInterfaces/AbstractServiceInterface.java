@@ -1096,6 +1096,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					+ e2.getLocalizedMessage(), e2);
 		}
 
+		if (Constants.NO_JOBNAME_INDICATOR_STRING.equals(batchJobname)) {
+			throw new BatchJobException("BatchJobname can't be "
+					+ Constants.NO_JOBNAME_INDICATOR_STRING);
+		}
+
 		try {
 			final Job possibleJob = getUser().getJobFromDatabaseOrFileSystem(
 					batchJobname);
@@ -1152,6 +1157,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		String jobname = JsdlHelpers.getJobname(jsdl);
 
 		jobname = calculateJobname(jobname, jobnameCreationMethod);
+
+		if (Constants.NO_JOBNAME_INDICATOR_STRING.equals(jobname)) {
+			throw new JobPropertiesException("Jobname can't be "
+					+ Constants.NO_JOBNAME_INDICATOR_STRING);
+		}
 
 		try {
 			final BatchJob mpj = getUser().getBatchJobFromDatabase(jobname);
@@ -1593,6 +1603,36 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see grisu.control.ServiceInterface#ps()
+	 */
+	public DtoJobs getActiveJobs(String application, boolean refresh) {
+
+		try {
+
+			List<Job> jobs = getUser().getActiveJobs(application, refresh);
+
+			final DtoJobs dtoJobs = new DtoJobs();
+			for (final Job job : jobs) {
+
+				final DtoJob dtojob = DtoJob.createJob(job.getStatus(),
+						job.getJobProperties(), job.getInputFiles(),
+						job.getLogMessages(), false);
+
+				// just to make sure
+				dtojob.addJobProperty(Constants.JOBNAME_KEY, job.getJobname());
+				dtoJobs.addJob(dtojob);
+			}
+
+			return dtoJobs;
+		} catch (final Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see
 	 * grisu.control.ServiceInterface#getAllAvailableApplications(java
 	 * .lang.String[])
@@ -1752,13 +1792,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return dtoJobs;
 	}
 
+
+
 	public DtoProperties getArchiveLocations() {
 
 		return DtoProperties.createProperties(getUser().getArchiveLocations());
 
 	}
-
-
 
 	/**
 	 * Returns all multipart jobs for this user.
@@ -1790,36 +1830,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @return the proxy credential that is used to contact the grid
 	 */
 	protected abstract ProxyCredential getCredential();
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see grisu.control.ServiceInterface#ps()
-	 */
-	public DtoJobs getActiveJobs(String application, boolean refresh) {
-
-		try {
-
-			List<Job> jobs = getUser().getActiveJobs(application, refresh);
-
-			final DtoJobs dtoJobs = new DtoJobs();
-			for (final Job job : jobs) {
-
-				final DtoJob dtojob = DtoJob.createJob(job.getStatus(),
-						job.getJobProperties(), job.getInputFiles(),
-						job.getLogMessages(), false);
-
-				// just to make sure
-				dtojob.addJobProperty(Constants.JOBNAME_KEY, job.getJobname());
-				dtoJobs.addJob(dtojob);
-			}
-
-			return dtoJobs;
-		} catch (final Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		}
-	}
 
 	// public DtoDataLocations getDataLocationsForVO(final String fqan) {
 	//

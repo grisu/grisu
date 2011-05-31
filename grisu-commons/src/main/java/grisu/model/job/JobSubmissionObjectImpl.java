@@ -442,6 +442,9 @@ public class JobSubmissionObjectImpl {
 	 * @return the jobname
 	 */
 	public String getJobname() {
+		if (StringUtils.isBlank(jobname)) {
+			return Constants.NO_JOBNAME_INDICATOR_STRING;
+		}
 		return jobname;
 	}
 
@@ -879,7 +882,7 @@ public class JobSubmissionObjectImpl {
 		final String oldValue = this.commandline;
 		final String oldExe = extractExecutable(this.commandline);
 		this.commandline = commandline;
-		myLogger.debug("Commandline for job: " + getJobname() + "changed: "
+		myLogger.debug("Commandline for job: " + getJobname() + " changed: "
 				+ commandline);
 		pcs.firePropertyChange("commandline", oldValue, this.commandline);
 		final String newExe = extractExecutable();

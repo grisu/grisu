@@ -113,24 +113,24 @@ public class User {
 		user = userdao.findUserByDN(cred.getDn());
 		Date time2 = new Date();
 
-		myLogger.debug("Login benchmark : db lookup"
-				+ new Long((time2.getTime() - time1.getTime()) / 1000)
-						.toString()
+		myLogger.debug("Login benchmark - db lookup: "
+				+ new Long((time2.getTime() - time1.getTime()))
+				.toString()
 				+ " ms");
 
 		if (user == null) {
 			user = new User(cred);
 			time1 = new Date();
-			myLogger.debug("Login benchmark : constructor"
-					+ new Long((time1.getTime() - time2.getTime()) / 1000)
+			myLogger.debug("Login benchmark - constructor: "
+					+ new Long((time1.getTime() - time2.getTime()))
 					.toString() + " ms");
 
 			userdao.saveOrUpdate(user);
 		} else {
 			user.setCred(cred);
 			time1 = new Date();
-			myLogger.debug("Login benchmark : setting credential"
-					+ new Long((time1.getTime() - time2.getTime()) / 1000)
+			myLogger.debug("Login benchmark - setting credential: "
+					+ new Long((time1.getTime() - time2.getTime()))
 					.toString() + " ms");
 
 		}
@@ -139,8 +139,8 @@ public class User {
 			user.setAutoMountedMountPoints(user.df_auto_mds(si.getAllSites()
 					.asArray()));
 			time2 = new Date();
-			myLogger.debug("Login benchmark : mountpoints"
-					+ new Long((time2.getTime() - time1.getTime()) / 1000)
+			myLogger.debug("Login benchmark - mountpoints: "
+					+ new Long((time2.getTime() - time1.getTime()))
 					.toString() + " ms");
 		} catch (Exception e) {
 			throw new RuntimeException(
