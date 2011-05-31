@@ -134,7 +134,7 @@ public class FileSystemCache {
 				// "Could not find mountpoint for url " + rootUrl);
 
 				// creating a filesystem...
-				myLogger.info("Creating filesystem without mountpoint...");
+				myLogger.debug("Creating filesystem without mountpoint...");
 				return createFileSystem(rootUrl, credToUse);
 
 			} else {

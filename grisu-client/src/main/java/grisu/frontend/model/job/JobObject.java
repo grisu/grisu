@@ -654,7 +654,8 @@ Comparable<JobObject> {
 			result = FileHelpers
 			.readFromFileWithException(downloadAndCacheOutputFile(relativePathToWorkingDir));
 		} catch (final Exception e) {
-			throw new JobException(this, "Could not read stdout file.", e);
+			throw new JobException(this, "Could not read file: "
+					+ relativePathToWorkingDir, e);
 		}
 
 		return result;
@@ -842,7 +843,7 @@ Comparable<JobObject> {
 		try {
 			result = FileHelpers.readFromFileWithException(getStdErrFile());
 		} catch (final Exception e) {
-			throw new JobException(this, "Could not read stdout file.", e);
+			throw new JobException(this, "Could not read stderr file.", e);
 		}
 
 		return result;

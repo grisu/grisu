@@ -59,14 +59,7 @@ import ca.odell.glazedlists.EventList;
 
 import com.google.common.collect.ImmutableList;
 
-/**
- * @author markus
- *
- */
-/**
- * @author markus
- * 
- */
+
 public class BatchJobObject implements JobMonitoringObject,
 Comparable<BatchJobObject>, Listener {
 

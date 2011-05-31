@@ -72,6 +72,8 @@ public class LoginManager {
 	"https://compute.services.bestgrid.org/soap/GrisuService")
 	.put("BeSTGRID-DEV",
 	"https://compute-dev.services.bestgrid.org/soap/GrisuService")
+			.put("BeSTGRID-TEST",
+					"https://compute-test.services.bestgrid.org/grisu-ws/soap/GrisuService")
 	.put("LOCAL_WS", "http://localhost:8080/soap/GrisuService")
 	.put("LOCAL_WS_TOMCAT",
 	"http://localhost:8080/grisu-ws/soap/GrisuService").build();

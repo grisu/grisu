@@ -435,7 +435,8 @@ public class User {
 			}
 		} else if (path.contains("${GLOBUS_USER_HOME}")) {
 			try {
-				myLogger.warn("Using ${GLOBUS_USER_HOME} is deprecated. Please use . instead.");
+				myLogger.warn("Using ${GLOBUS_USER_HOME} is deprecated. Please use . instead for: "
+						+ server + " / " + fqan);
 				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
 						fqan);
 				userDnPath = false;
@@ -1048,30 +1049,35 @@ public class User {
 	@Transient
 	public synchronized String getDefaultArchiveLocation() {
 
-		String defArcLoc = getUserProperties().get(
-				Constants.DEFAULT_JOB_ARCHIVE_LOCATION);
+		String defArcLoc = null;
 
-		if (StringUtils.isBlank(defArcLoc)) {
+		String defFqan = ServerPropertiesManager
+		.getDefaultFqanForArchivedJobDirectory();
 
-			Set<MountPoint> mps = df(ServerPropertiesManager
-					.getDefaultFqanForArchivedJobDirectory());
+		if (StringUtils.isNotBlank(defFqan)) {
+			Set<MountPoint> mps = df(defFqan);
 			for (MountPoint mp : mps) {
 				if (!mp.isVolatileFileSystem()) {
 					defArcLoc = mp.getRootUrl()
 					+ "/"
 					+ ServerPropertiesManager
 					.getArchivedJobsDirectoryName();
-					addArchiveLocation(Constants.JOB_ARCHIVE_LOCATION,
-							defArcLoc);
+					addArchiveLocation(Constants.JOB_ARCHIVE_LOCATION, defArcLoc);
 					setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
 							defArcLoc);
 					return defArcLoc;
 				}
 			}
+		}
+
+		defArcLoc = getUserProperties().get(
+				Constants.DEFAULT_JOB_ARCHIVE_LOCATION);
+
+		if (StringUtils.isBlank(defArcLoc)) {
 
 			// to be removed once we switch to new backend
 
-			mps = df("/ARCS/BeSTGRID/Drug_discovery/Local");
+			Set<MountPoint> mps = df("/nz/nesi");
 			if (mps.size() > 0) {
 				defArcLoc = mps.iterator().next().getRootUrl()
 				+ "/"
@@ -1083,35 +1089,47 @@ public class User {
 				setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
 						defArcLoc);
 			} else {
-				mps = df("/ARCS/BeSTGRID");
+				mps = df("/ARCS/BeSTGRID/Drug_discovery/Local");
 				if (mps.size() > 0) {
 					defArcLoc = mps.iterator().next().getRootUrl()
 					+ "/"
 					+ ServerPropertiesManager
 					.getArchivedJobsDirectoryName();
 
-					addArchiveLocation(
-							Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+					addArchiveLocation(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
 							defArcLoc);
 					setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
 							defArcLoc);
 				} else {
-					mps = getAllMountPoints();
-					if (mps.size() == 0) {
-						return null;
+					mps = df("/ARCS/BeSTGRID");
+					if (mps.size() > 0) {
+						defArcLoc = mps.iterator().next().getRootUrl()
+						+ "/"
+						+ ServerPropertiesManager
+						.getArchivedJobsDirectoryName();
+
+						addArchiveLocation(
+								Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+								defArcLoc);
+						setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+								defArcLoc);
+					} else {
+						mps = getAllMountPoints();
+						if (mps.size() == 0) {
+							return null;
+						}
+						defArcLoc = mps.iterator().next()
+						+ "/"
+						+ ServerPropertiesManager
+						.getArchivedJobsDirectoryName();
+
+						addArchiveLocation(
+								Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+								defArcLoc);
+						setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+								defArcLoc);
 					}
-					defArcLoc = mps.iterator().next()
-					+ "/"
-					+ ServerPropertiesManager
-					.getArchivedJobsDirectoryName();
-
-					addArchiveLocation(
-							Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
-							defArcLoc);
-					setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
-							defArcLoc);
 				}
-
 
 			}
 
