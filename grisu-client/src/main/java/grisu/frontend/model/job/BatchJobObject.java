@@ -340,7 +340,9 @@ Comparable<BatchJobObject>, Listener {
 	 */
 	public void addJob(JobObject job) throws IllegalArgumentException {
 
-		if (StringUtils.isBlank(job.getJobname())) {
+		if (StringUtils.isBlank(job.getJobname())
+				|| Constants.NO_JOBNAME_INDICATOR_STRING.equals(job
+						.getJobname())) {
 			String singleJobname = GrisuRegistryManager
 			.getDefault(serviceInterface)
 			.getUserEnvironmentManager()
