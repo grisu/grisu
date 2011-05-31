@@ -394,7 +394,8 @@ public class User {
 		properties.put(MountPoint.PATH_KEY, tempPath);
 
 		if (tempPath.startsWith(".")) {
-
+			myLogger.warn("Using '.' is deprecated. Please use /~/ instead for: "
+					+ server + " / " + fqan);
 			try {
 				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
 						fqan);
@@ -435,7 +436,7 @@ public class User {
 			}
 		} else if (path.contains("${GLOBUS_USER_HOME}")) {
 			try {
-				myLogger.warn("Using ${GLOBUS_USER_HOME} is deprecated. Please use . instead for: "
+				myLogger.warn("Using ${GLOBUS_USER_HOME} is deprecated. Please use /~/ instead for: "
 						+ server + " / " + fqan);
 				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
 						fqan);

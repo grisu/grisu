@@ -152,8 +152,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			CacheManager.create(url);
 			cache = CacheManager.getInstance();
 
-			System.out.println(StringUtils.join(cache.getCacheNames()));
-
 			Cache session = cache.getCache("session");
 			if (session == null) {
 				X.p("Session cache is null");

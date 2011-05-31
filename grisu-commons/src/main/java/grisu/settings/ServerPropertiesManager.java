@@ -54,7 +54,8 @@ public final class ServerPropertiesManager {
 	 */
 	public static final String DEFAULT_JOB_DIR_NAME = "active-jobs";
 	public static final String DEFAULT_ARCHIVED_JOB_DIR_NAME = "archived-jobs";
-	public static final String DEFAULT_FQAN_TO_USE_FOR_ARCHIVING_JOBS = "/nz/nesi";
+	// public static final String DEFAULT_FQAN_TO_USE_FOR_ARCHIVING_JOBS =
+	// "/nz/nesi";
 	public static final int DEFAULT_TIME_INBETWEEN_STATUS_CHECKS_FOR_THE_SAME_JOB_IN_SECONDS = 60;
 
 	private static HierarchicalINIConfiguration config = null;
@@ -388,9 +389,9 @@ public final class ServerPropertiesManager {
 			fqan = null;
 		}
 
-		if (fqan == null) {
-			fqan = DEFAULT_FQAN_TO_USE_FOR_ARCHIVING_JOBS;
-		}
+		// if (fqan == null) {
+		// fqan = DEFAULT_FQAN_TO_USE_FOR_ARCHIVING_JOBS;
+		// }
 
 		return fqan;
 	}
