@@ -285,15 +285,21 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	}
 
 	public void addFqans(Set<String> fqans) {
-		this.fqans.addAll(fqans);
+		if (fqans != null) {
+			this.fqans.addAll(fqans);
+		}
 	}
 
 	public void addSite(String site) {
-		getSites().add(site);
+		if (site != null) {
+			getSites().add(site);
+		}
 	}
 
 	public void addSites(Set<String> sites) {
-		getSites().addAll(sites);
+		if (sites != null) {
+			getSites().addAll(sites);
+		}
 	}
 
 	public void addUrl(String url, Integer priority) {
