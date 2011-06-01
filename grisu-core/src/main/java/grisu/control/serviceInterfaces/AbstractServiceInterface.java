@@ -239,7 +239,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	// private final Map<String, List<Job>> archivedJobs = new HashMap<String,
 	// List<Job>>();
-
+	private String backendInfo = null;
 	private final boolean checkFileSystemsBeforeUse = false;
 	// protected final UserDAO userdao = new UserDAO();
 	protected final JobDAO jobdao = new JobDAO();
@@ -370,8 +370,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return jobname;
 	}
 
-
-
 	private void archiveBatchJob(final BatchJob batchJob, final String target)
 	throws NoSuchJobException {
 
@@ -451,6 +449,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		archiveThread.start();
 
 	}
+
+
 
 	public String archiveJob(String jobname, String target)
 	throws JobPropertiesException, NoSuchJobException,
@@ -1428,8 +1428,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return DtoMountPoints.createMountpoints(getUser().getAllMountPoints());
 	}
 
-
-
 	public DataHandler download(final String filename)
 	throws RemoteFileSystemException {
 
@@ -1437,6 +1435,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		return getUser().getFileSystemManager().download(filename);
 	}
+
+
 
 	public boolean fileExists(final String file)
 	throws RemoteFileSystemException {
@@ -1790,12 +1790,33 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return dtoJobs;
 	}
 
-
-
 	public DtoProperties getArchiveLocations() {
 
 		return DtoProperties.createProperties(getUser().getArchiveLocations());
 
+	}
+
+
+
+	private String getBackendInfo() {
+
+		if ( StringUtils.isBlank(backendInfo)) {
+			String host = getInterfaceInfo("HOSTNAME");
+			if ( StringUtils.isBlank(host)) {
+				host = "Host unknown";
+			}
+			String version = getInterfaceInfo("VERSION");
+			if ( StringUtils.isBlank(version)) {
+				version = "Version unknown";
+			}
+			String name = getInterfaceInfo("NAME");
+			if ( StringUtils.isBlank(name)) {
+				name = "Backend name unknown";
+			}
+
+			backendInfo = name + " / " + host + " / version:" + version;
+		}
+		return backendInfo;
 	}
 
 	/**
@@ -3188,6 +3209,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		myLogger.debug("Calculated jobdirectory: " + stagingFilesystemToUse
 				+ workingDirectory);
 
+		job.addJobProperty(Constants.SUBMISSIONBACKEND_KEY, getBackendInfo());
 
 		if (StringUtils.isNotBlank(oldJobDir)) {
 			try {
@@ -3225,6 +3247,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		job.setJobDescription(jsdl);
+
 		// jobdao.attachDirty(job);
 		myLogger.debug("Preparing job done.");
 	}

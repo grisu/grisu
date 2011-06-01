@@ -152,6 +152,10 @@ public class JobsFileSystemPlugin implements VirtualFileSystemPlugin {
 					.getJobProperty(Constants.SUBMISSION_SITE_KEY));
 
 			String url = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+
+			if (StringUtils.isBlank(url)) {
+				continue;
+			}
 			GridFile jobDir = new GridFile(url, -1L);
 			jobDir.setPath(BASE + "/" + ACTIVE_IDENTIFIER + "/"
 					+ FileManager.getFilename(url));
