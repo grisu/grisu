@@ -219,7 +219,7 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 			return folderVirtualIcon;
 		}
 
-		X.p("Path: " + path);
+//		X.p("Path: " + path);
 
 		if (path.equals(
 				ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://")) {

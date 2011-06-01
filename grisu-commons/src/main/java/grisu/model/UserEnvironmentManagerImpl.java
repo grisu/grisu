@@ -1,5 +1,6 @@
 package grisu.model;
 
+import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.StatusException;
@@ -117,7 +118,7 @@ EventSubscriber<FqanEvent> {
 		String temp = name;
 		int i = 1;
 
-		while (getReallyAllJobnames(false).contains(temp)) {
+		while (getReallyAllJobnames(true).contains(temp)) {
 			temp = name + "_" + i;
 			i = i + 1;
 		}
@@ -721,8 +722,10 @@ EventSubscriber<FqanEvent> {
 			allJobnames.addAll(serviceInterface.getAllJobnames(
 					Constants.ALLJOBS_INCL_BATCH_KEY)
 					.getStringList());
+			X.p("ALL: " + StringUtils.join(allJobnames, "\n"));
 			allJobnames.addAll(serviceInterface.getAllBatchJobnames(null)
 					.getStringList());
+
 		}
 		return allJobnames;
 

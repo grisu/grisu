@@ -1689,7 +1689,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		List<String> jobnames = null;
 
 		if (StringUtils.isBlank(application)
-				|| Constants.ALLJOBS_KEY.equals(application)) {
+				|| Constants.ALLJOBS_KEY.equals(application)
+				|| Constants.ALLJOBS_INCL_BATCH_KEY.equals(application)) {
 			jobnames = jobdao.findJobNamesByDn(getUser().getDn(), alljobs);
 		} else {
 			jobnames = jobdao.findJobNamesPerApplicationByDn(getUser().getDn(),
