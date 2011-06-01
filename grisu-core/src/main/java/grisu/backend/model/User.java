@@ -1094,7 +1094,7 @@ public class User {
 		for (MountPoint mp : mps) {
 			if (!mp.isVolatileFileSystem()) {
 
-				defArcLoc = mps.iterator().next().getRootUrl()
+				defArcLoc = mp.getRootUrl()
 				+ "/"
 				+ ServerPropertiesManager
 				.getArchivedJobsDirectoryName();
