@@ -879,6 +879,12 @@ public class User {
 			final List<Job> archivedJobs = Collections
 			.synchronizedList(new LinkedList<Job>());
 
+			int noArchiveLocations = getArchiveLocations().size();
+
+			if (noArchiveLocations <= 0) {
+				return archivedJobs;
+			}
+
 			final ExecutorService executor = Executors
 			.newFixedThreadPool(getArchiveLocations().size());
 
