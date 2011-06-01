@@ -2805,7 +2805,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				removeResourcesWithUnaccessableFilesystems(matchingResources);
 				if (matchingResources != null) {
 					myLogger.debug("Found: " + matchingResources.size()
-							+ " of them...");
+							+ " of them: "
+							+ StringUtils.join(matchingResources, " / "));
 				}
 			}
 

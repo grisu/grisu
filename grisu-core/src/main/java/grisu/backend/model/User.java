@@ -148,16 +148,16 @@ public class User {
 					e);
 		}
 
-		final User temp = user;
+		// final User temp = user;
 
 		// caching users archived jobs since those take a while to load...
-		new Thread() {
-			@Override
-			public void run() {
-				temp.getDefaultArchiveLocation();
-				// temp.getArchivedJobs(null);
-			}
-		}.start();
+		// new Thread() {
+		// @Override
+		// public void run() {
+		// // temp.getDefaultArchiveLocation();
+		// // temp.getArchivedJobs(null);
+		// }
+		// }.start();
 
 		return user;
 
