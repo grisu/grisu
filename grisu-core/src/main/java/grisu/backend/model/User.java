@@ -1057,7 +1057,7 @@ public class User {
 				Constants.DEFAULT_JOB_ARCHIVE_LOCATION);
 
 		if (!StringUtils.isBlank(defArcLoc)) {
-			myLogger.info("Setting default archive location for user "
+			myLogger.info("Using default archive location for user "
 					+ getDn() + ": " + defArcLoc);
 
 			return defArcLoc;
@@ -1080,7 +1080,7 @@ public class User {
 							defArcLoc);
 					// setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
 					// defArcLoc);
-					myLogger.debug("Forcing default archive location to be: "
+					myLogger.debug("Using backend default archive location: "
 							+ defArcLoc);
 					return defArcLoc;
 				}
@@ -1102,10 +1102,6 @@ public class User {
 						Constants.JOB_ARCHIVE_LOCATION_AUTO + mp.getAlias(),
 						defArcLoc);
 
-				addArchiveLocation(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
-						defArcLoc);
-				// setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
-				// defArcLoc);
 			}
 		}
 
@@ -1168,7 +1164,8 @@ public class User {
 		userdao.saveOrUpdate(this);
 
 
-		myLogger.info("Setting default archive location for user " + getDn()
+		myLogger.info("Using temporary default archive location for user "
+				+ getDn()
 				+ ": " + defArcLoc);
 
 		return defArcLoc;
