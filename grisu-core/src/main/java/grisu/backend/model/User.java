@@ -1101,6 +1101,7 @@ public class User {
 				addArchiveLocation(
 						Constants.JOB_ARCHIVE_LOCATION_AUTO + mp.getAlias(),
 						defArcLoc);
+				return defArcLoc;
 
 			}
 		}
