@@ -23,13 +23,15 @@ import org.globus.myproxy.MyProxyException;
 import org.ietf.jgss.GSSException;
 
 public class LocalServiceInterface extends AbstractServiceInterface implements
-		ServiceInterface {
+ServiceInterface {
 
 	private ProxyCredential credential = null;
 	private String myproxy_username = null;
 	private char[] passphrase = null;
 
 	private User user;
+
+	private static String hostname = null;
 
 	@Override
 	protected final ProxyCredential getCredential() {
@@ -38,7 +40,7 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 		try {
 			if (credential != null) {
 				oldLifetime = credential.getGssCredential()
-						.getRemainingLifetime();
+				.getRemainingLifetime();
 			}
 		} catch (final GSSException e2) {
 			myLogger.debug("Problem getting lifetime of old certificate: " + e2);
@@ -62,11 +64,11 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 								LocalProxy.loadGSSCredential());
 					} catch (final Exception e) {
 						throw new NoValidCredentialException(
-								"Could not load credential/no valid login data.");
+						"Could not load credential/no valid login data.");
 					}
 					if (!credential.isValid()) {
 						throw new NoValidCredentialException(
-								"Local proxy is not valid anymore.");
+						"Local proxy is not valid anymore.");
 					}
 				}
 			} else {
@@ -78,13 +80,13 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 					// this is needed because of a possible round-robin myproxy
 					// server
 					myProxyServer = InetAddress.getByName(myProxyServer)
-							.getHostAddress();
+					.getHostAddress();
 				} catch (final UnknownHostException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 					throw new NoValidCredentialException(
 							"Could not download myproxy credential: "
-									+ e1.getLocalizedMessage());
+							+ e1.getLocalizedMessage());
 				}
 
 				try {
@@ -102,11 +104,11 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 					e.printStackTrace();
 					throw new NoValidCredentialException(
 							"Could not get myproxy credential: "
-									+ e.getLocalizedMessage());
+							+ e.getLocalizedMessage());
 				}
 				if (!credential.isValid()) {
 					throw new NoValidCredentialException(
-							"MyProxy credential is not valid.");
+					"MyProxy credential is not valid.");
 				}
 			}
 		}
@@ -123,13 +125,13 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 		try {
 			// this is needed because of a possible round-robin myproxy server
 			myProxyServer = InetAddress.getByName(myProxyServer)
-					.getHostAddress();
+			.getHostAddress();
 		} catch (final UnknownHostException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 			throw new NoValidCredentialException(
 					"Could not download myproxy credential: "
-							+ e1.getLocalizedMessage());
+					+ e1.getLocalizedMessage());
 		}
 
 		final MyProxy myproxy = new MyProxy(myProxyServer, myProxyPort);
@@ -148,8 +150,14 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 
 	@Override
 	public String getInterfaceInfo(String key) {
-		if ("HOSTNAME".equalsIgnoreCase(key)) {
-			return "localhost";
+		if (hostname == null) {
+			try {
+				final InetAddress addr = InetAddress.getLocalHost();
+				final byte[] ipAddr = addr.getAddress();
+				hostname = addr.getHostName();
+			} catch (final UnknownHostException e) {
+				hostname = "Unavailable";
+			}
 		} else if ("VERSION".equalsIgnoreCase(key)) {
 			return ServiceInterface.INTERFACE_VERSION;
 		} else if ("NAME".equalsIgnoreCase(key)) {
@@ -160,13 +168,13 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 	}
 
 	public final String getTemplate(final String application)
-			throws NoSuchTemplateException {
+	throws NoSuchTemplateException {
 		final String temp = ServiceTemplateManagement.getTemplate(application);
 
 		if (StringUtils.isBlank(temp)) {
 			throw new NoSuchTemplateException(
 					"Could not find template for application: " + application
-							+ ".");
+					+ ".");
 		}
 		return temp;
 	}
