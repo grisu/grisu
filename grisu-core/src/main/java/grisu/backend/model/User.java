@@ -1052,9 +1052,21 @@ public class User {
 
 		String defArcLoc = null;
 
+		// if user configured default, use that.
+		defArcLoc = getUserProperties().get(
+				Constants.DEFAULT_JOB_ARCHIVE_LOCATION);
+
+		if (!StringUtils.isBlank(defArcLoc)) {
+			myLogger.info("Setting default archive location for user "
+					+ getDn() + ": " + defArcLoc);
+
+			return defArcLoc;
+		}
+
 		String defFqan = ServerPropertiesManager
 		.getDefaultFqanForArchivedJobDirectory();
 
+		// using backend default fqan if configured
 		if (StringUtils.isNotBlank(defFqan)) {
 			Set<MountPoint> mps = df(defFqan);
 			for (MountPoint mp : mps) {
@@ -1063,80 +1075,98 @@ public class User {
 					+ "/"
 					+ ServerPropertiesManager
 					.getArchivedJobsDirectoryName();
-					addArchiveLocation(Constants.JOB_ARCHIVE_LOCATION, defArcLoc);
-					setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+					addArchiveLocation(
+							Constants.JOB_ARCHIVE_LOCATION_AUTO + mp.getAlias(),
 							defArcLoc);
+					// setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+					// defArcLoc);
+					myLogger.debug("Forcing default archive location to be: "
+							+ defArcLoc);
 					return defArcLoc;
 				}
 			}
 		}
 
-		defArcLoc = getUserProperties().get(
-				Constants.DEFAULT_JOB_ARCHIVE_LOCATION);
 
-		if (StringUtils.isBlank(defArcLoc)) {
 
-			// to be removed once we switch to new backend
+		// to be removed once we switch to new backend
+		Set<MountPoint> mps = df("/nz/nesi");
+		for (MountPoint mp : mps) {
+			if (!mp.isVolatileFileSystem()) {
 
-			Set<MountPoint> mps = df("/nz/nesi");
-			if (mps.size() > 0) {
 				defArcLoc = mps.iterator().next().getRootUrl()
+				+ "/"
+				+ ServerPropertiesManager
+				.getArchivedJobsDirectoryName();
+				addArchiveLocation(
+						Constants.JOB_ARCHIVE_LOCATION_AUTO + mp.getAlias(),
+						defArcLoc);
+
+				addArchiveLocation(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+						defArcLoc);
+				// setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+				// defArcLoc);
+			}
+		}
+
+		if (mps.size() > 0) {
+			MountPoint mp = mps.iterator().next();
+			defArcLoc = mp.getRootUrl()
+			+ "/"
+			+ ServerPropertiesManager
+			.getArchivedJobsDirectoryName();
+
+			addArchiveLocation(
+					Constants.JOB_ARCHIVE_LOCATION_AUTO + mp.getAlias(),
+					defArcLoc);
+
+		} else {
+			mps = df("/ARCS/BeSTGRID/Drug_discovery/Local");
+			if (mps.size() > 0) {
+				MountPoint mp = mps.iterator().next();
+				defArcLoc = mp.getRootUrl()
 				+ "/"
 				+ ServerPropertiesManager
 				.getArchivedJobsDirectoryName();
 
 				addArchiveLocation(
-						Constants.DEFAULT_JOB_ARCHIVE_LOCATION, defArcLoc);
-				setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+						Constants.JOB_ARCHIVE_LOCATION_AUTO + mp.getAlias(),
 						defArcLoc);
 			} else {
-				mps = df("/ARCS/BeSTGRID/Drug_discovery/Local");
+				mps = df("/ARCS/BeSTGRID");
 				if (mps.size() > 0) {
-					defArcLoc = mps.iterator().next().getRootUrl()
+					MountPoint mp = mps.iterator().next();
+					defArcLoc = mp.getRootUrl()
 					+ "/"
 					+ ServerPropertiesManager
 					.getArchivedJobsDirectoryName();
 
-					addArchiveLocation(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
+					addArchiveLocation(
+							Constants.JOB_ARCHIVE_LOCATION_AUTO + mp.getAlias(),
 							defArcLoc);
-					setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
-							defArcLoc);
+
 				} else {
-					mps = df("/ARCS/BeSTGRID");
-					if (mps.size() > 0) {
-						defArcLoc = mps.iterator().next().getRootUrl()
-						+ "/"
-						+ ServerPropertiesManager
-						.getArchivedJobsDirectoryName();
-
-						addArchiveLocation(
-								Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
-								defArcLoc);
-						setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
-								defArcLoc);
-					} else {
-						mps = getAllMountPoints();
-						if (mps.size() == 0) {
-							return null;
-						}
-						defArcLoc = mps.iterator().next()
-						+ "/"
-						+ ServerPropertiesManager
-						.getArchivedJobsDirectoryName();
-
-						addArchiveLocation(
-								Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
-								defArcLoc);
-						setUserProperty(Constants.DEFAULT_JOB_ARCHIVE_LOCATION,
-								defArcLoc);
+					mps = getAllMountPoints();
+					if (mps.size() == 0) {
+						return null;
 					}
-				}
+					MountPoint mp = mps.iterator().next();
+					defArcLoc = mp.getRootUrl()
+					+ "/"
+					+ ServerPropertiesManager
+					.getArchivedJobsDirectoryName();
 
+					addArchiveLocation(
+							Constants.JOB_ARCHIVE_LOCATION_AUTO + mp.getAlias(),
+							defArcLoc);
+
+				}
 			}
 
-			userdao.saveOrUpdate(this);
-
 		}
+
+		userdao.saveOrUpdate(this);
+
 
 		myLogger.info("Setting default archive location for user " + getDn()
 				+ ": " + defArcLoc);
