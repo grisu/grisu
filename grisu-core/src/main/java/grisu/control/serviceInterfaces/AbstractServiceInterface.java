@@ -520,10 +520,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			final String targetDir = url + "/"
 			+ FileManager.getFilename(jobdirUrl);
 
-			final Thread archiveThread = archiveSingleJob(job, targetDir, null);
+			String tmp = targetDir;
+			int i = 1;
+				while (fileExists(tmp)) {
+					i = i + 1;
+					tmp = targetDir + "_" + i;
+				}
+
+			final Thread archiveThread = archiveSingleJob(job, tmp, null);
 			archiveThread.start();
 
-			return targetDir;
+			return tmp;
 		}
 	}
 
@@ -2896,7 +2903,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 											versionsAvail.get(0));
 									job.addJobProperty(
 											Constants.APPLICATIONVERSION_CALCULATED_KEY,
-											"true");
+									"true");
 									myLogger.debug("Set version to be: "
 											+ resource
 											.getAvailableApplicationVersion()
@@ -2982,7 +2989,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 									.get(0));
 							job.addJobProperty(
 									Constants.APPLICATIONVERSION_CALCULATED_KEY,
-									"true");
+							"true");
 
 							// jobSubmissionObject.setApplicationVersion(resource.getAvailableApplicationVersion().get(0));
 							submissionLocation = SubmissionLocationHelpers
