@@ -123,9 +123,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		myLogger = Logger.getLogger(AbstractServiceInterface.class.getName());
 
+		myLogger.debug("Logging initiated...");
+
 		myLogger.info("============================================");
 		myLogger.info("Starting up backend...");
 		myLogger.info("============================================");
+
 
 		CoGProperties.getDefault().setProperty(
 				CoGProperties.ENFORCE_SIGNING_POLICY, "false");
@@ -522,10 +525,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			String tmp = targetDir;
 			int i = 1;
-				while (fileExists(tmp)) {
-					i = i + 1;
-					tmp = targetDir + "_" + i;
-				}
+			while (fileExists(tmp)) {
+				i = i + 1;
+				tmp = targetDir + "_no_" + i + "_";
+			}
 
 			final Thread archiveThread = archiveSingleJob(job, tmp, null);
 			archiveThread.start();
