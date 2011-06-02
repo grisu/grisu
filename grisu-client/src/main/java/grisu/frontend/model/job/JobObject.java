@@ -243,7 +243,7 @@ Comparable<JobObject> {
 
 	}
 
-	private synchronized void addJobLogMessage(String message) {
+	private void addJobLogMessage(String message) {
 		this.submissionLog.add(message);
 		pcs.firePropertyChange("submissionLog", null, getSubmissionLog());
 	}
@@ -603,7 +603,7 @@ Comparable<JobObject> {
 	 * 
 	 * @return the job properties
 	 */
-	public synchronized final Map<String, String> getAllJobProperties() {
+	public final Map<String, String> getAllJobProperties() {
 
 		return getAllJobProperties(false);
 	}
@@ -619,7 +619,7 @@ Comparable<JobObject> {
 	 *            whether to forcefully refresh the job properties
 	 * @return the job properties
 	 */
-	public synchronized final Map<String, String> getAllJobProperties(
+	public final Map<String, String> getAllJobProperties(
 			boolean forceRefresh) {
 
 		// if (getStatus(false) == JobConstants.UNDEFINED) {
@@ -629,12 +629,17 @@ Comparable<JobObject> {
 		// }
 
 		if ((allJobProperties == null) || forceRefresh) {
-			try {
-				allJobProperties = serviceInterface.getJob(getJobname())
-				.propertiesAsMap();
-			} catch (final Exception e) {
-				throw new JobException(this, "Could not get jobproperties.", e);
+
+			synchronized (this) {
+				try {
+					allJobProperties = serviceInterface.getJob(getJobname())
+					.propertiesAsMap();
+				} catch (final Exception e) {
+					throw new JobException(this,
+							"Could not get jobproperties.", e);
+				}
 			}
+
 		}
 		return allJobProperties;
 
@@ -752,13 +757,15 @@ Comparable<JobObject> {
 	 *            whether to forcefully refresh the log messages
 	 * @return the job log
 	 */
-	public synchronized Map<Date, String> getLogMessages(boolean forceRefresh) {
+	public Map<Date, String> getLogMessages(boolean forceRefresh) {
 
 		if ((logMessages == null) || forceRefresh) {
-			try {
-				updateWithDtoJob(serviceInterface.getJob(jobname));
-			} catch (final NoSuchJobException e) {
-				e.printStackTrace();
+			synchronized (this) {
+				try {
+					updateWithDtoJob(serviceInterface.getJob(jobname));
+				} catch (final NoSuchJobException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		return logMessages;
@@ -788,29 +795,40 @@ Comparable<JobObject> {
 		// }
 
 		if (forceRefresh && !isArchived) {
-			final int oldStatus = this.status;
-			// addJobLogMessage("Getting new job status. Old status: "
-			// + JobConstants.translateStatus(oldStatus));
-			final boolean oldFinished = isFinished(false);
-			this.status = serviceInterface.getJobStatus(getJobname());
 
-			pcs.firePropertyChange("status", oldStatus, this.status);
-			pcs.firePropertyChange("statusString",
-					JobConstants.translateStatus(oldStatus),
-					getStatusString(false));
-			pcs.firePropertyChange("finished", oldFinished, isFinished(false));
-			// addJobLogMessage("Status refreshed. Status is: "
-			// + JobConstants.translateStatus(this.status));
-			if (this.status != oldStatus) {
-				EventBus.publish(new JobStatusEvent(this, oldStatus,
-						this.status));
-				if (StringUtils.isNotBlank(getJobname())) {
-					EventBus.publish(this.getJobname(), new JobStatusEvent(
-							this, oldStatus, this.status));
+			synchronized (this) {
+
+				Date now = new Date();
+				if ((this.status >= JobConstants.ACTIVE)
+						&& (lastStatusUpdate.getTime() + 2000 >= now.getTime())) {
+					myLogger.debug("Less than 2 seconds between status updates. Returning old status...");
+					return this.status;
 				}
-			}
 
-			lastStatusUpdate = new Date();
+				final int oldStatus = this.status;
+				// addJobLogMessage("Getting new job status. Old status: "
+				// + JobConstants.translateStatus(oldStatus));
+				final boolean oldFinished = isFinished(false);
+				this.status = serviceInterface.getJobStatus(getJobname());
+
+				pcs.firePropertyChange("status", oldStatus, this.status);
+				pcs.firePropertyChange("statusString",
+						JobConstants.translateStatus(oldStatus),
+						getStatusString(false));
+				pcs.firePropertyChange("finished", oldFinished, isFinished(false));
+				// addJobLogMessage("Status refreshed. Status is: "
+				// + JobConstants.translateStatus(this.status));
+				if (this.status != oldStatus) {
+					EventBus.publish(new JobStatusEvent(this, oldStatus,
+							this.status));
+					if (StringUtils.isNotBlank(getJobname())) {
+						EventBus.publish(this.getJobname(), new JobStatusEvent(
+								this, oldStatus, this.status));
+					}
+				}
+
+				lastStatusUpdate = new Date();
+			}
 
 		}
 		return this.status;
@@ -1374,7 +1392,7 @@ Comparable<JobObject> {
 
 	}
 
-	public void updateWithDtoJob(DtoJob job) {
+	public synchronized void updateWithDtoJob(DtoJob job) {
 
 		// if (!isArchived && !job.jobname().equals(getJobname())) {
 		// throw new IllegalArgumentException(

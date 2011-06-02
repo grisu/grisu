@@ -43,7 +43,7 @@ LoginMethodPanel {
 
 	private class QuickLoginAction extends AbstractAction {
 		public QuickLoginAction() {
-			putValue(NAME, "Quick-login");
+			putValue(NAME, "Auto-Login");
 			putValue(SHORT_DESCRIPTION,
 			"Use existing local credentials to login.");
 		}
@@ -159,7 +159,7 @@ LoginMethodPanel {
 
 	private JCheckBox getAutoLoginCheckbox() {
 		if (autoLoginCheckbox == null) {
-			autoLoginCheckbox = new JCheckBox("Quick-login (whenever possible)");
+			autoLoginCheckbox = new JCheckBox("Always auto-login using existing credential (if available)");
 
 			if (ClientPropertiesManager.getAutoLogin()) {
 				autoLoginCheckbox.setSelected(true);

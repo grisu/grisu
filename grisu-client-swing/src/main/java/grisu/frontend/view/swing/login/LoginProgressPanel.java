@@ -60,7 +60,7 @@ public class LoginProgressPanel extends JPanel implements EventSubscriber {
 	private JCheckBox getChckbxAutologinwheneverPossible() {
 		if (chckbxAutologinwheneverPossible == null) {
 			chckbxAutologinwheneverPossible = new JCheckBox(
-					"Quick-login (whenever possible)");
+					"Always auto-login using existing credential (if available)");
 
 			if (ClientPropertiesManager.getAutoLogin()) {
 				chckbxAutologinwheneverPossible.setSelected(true);

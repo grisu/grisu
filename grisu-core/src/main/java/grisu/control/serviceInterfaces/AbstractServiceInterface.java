@@ -88,7 +88,6 @@ import org.simpleframework.xml.core.Persister;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-
 /**
  * This abstract class implements most of the methods of the
  * {@link ServiceInterface} interface. This way developers don't have to waste
@@ -114,7 +113,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	static {
 
 		String log4jPath = "/etc/grisu/grisu-log4j.xml";
-		if(new File(log4jPath).exists() && (new File(log4jPath).length() > 0) ) {
+		if (new File(log4jPath).exists() && (new File(log4jPath).length() > 0)) {
 			try {
 				DOMConfigurator.configure(log4jPath);
 			} catch (Exception e) {
@@ -161,7 +160,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 	}
 
-
 	public final static boolean INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND = false;
 
 	public static final String REFRESH_STATUS_PREFIX = "REFRESH_";
@@ -189,7 +187,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return cache.getCache("eternal");
 	}
 
-
 	public static Object getFromEternalCache(Object key) {
 		if ((key != null) && (eternalCache().get(key) != null)) {
 			return eternalCache().get(key).getObjectValue();
@@ -197,6 +194,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return null;
 		}
 	}
+
 	public static Object getFromSessionCache(Object key) {
 		if ((key != null) && (sessionCache().get(key) != null)) {
 			return sessionCache().get(key).getObjectValue();
@@ -272,9 +270,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.control.ServiceInterface#addJobProperties(java.lang.String
-	 * , java.util.Map)
+	 * @see grisu.control.ServiceInterface#addJobProperties(java.lang.String ,
+	 * java.util.Map)
 	 */
 	public void addJobProperties(final String jobname, final DtoJob properties)
 	throws NoSuchJobException {
@@ -299,8 +296,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.control.ServiceInterface#addJobProperty(java.lang.String,
+	 * @see grisu.control.ServiceInterface#addJobProperty(java.lang.String,
 	 * java.lang.String, java.lang.String)
 	 */
 	public void addJobProperty(final String jobname, final String key,
@@ -408,8 +404,21 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					final String targetDir = target + "/"
 					+ FileManager.getFilename(jobdirUrl);
 
-					final Thread archiveThread = archiveSingleJob(job,
-							targetDir, status);
+					String tmp = targetDir;
+					int i = 1;
+					try {
+						while (fileExists(tmp)) {
+							i = i + 1;
+							tmp = targetDir + "_" + i;
+						}
+					} catch (RemoteFileSystemException e2) {
+						e2.printStackTrace();
+						// TODO
+						return;
+					}
+
+					final Thread archiveThread = archiveSingleJob(job, tmp,
+							status);
 					executor.execute(archiveThread);
 				}
 
@@ -449,8 +458,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		archiveThread.start();
 
 	}
-
-
 
 	public String archiveJob(String jobname, String target)
 	throws JobPropertiesException, NoSuchJobException,
@@ -702,7 +709,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private String calculateJobname(String jobname, String jobnameCreationMethod)
 	throws JobPropertiesException {
 
-
 		if ((jobnameCreationMethod == null)
 				|| Constants.FORCE_NAME_METHOD.equals(jobnameCreationMethod)) {
 
@@ -760,15 +766,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			int i = 1;
 
 			while (getAllJobnames(Constants.ALLJOBS_INCL_BATCH_KEY)
-					.asSortedSet()
-					.contains(temp)
+					.asSortedSet().contains(temp)
 					|| getAllBatchJobnames(null).asSortedSet().contains(temp)) {
 				temp = jobname + "_" + i;
 				i = i + 1;
 			}
 
 			jobname = temp;
-
 
 		} else {
 			throw new JobPropertiesException(
@@ -1082,8 +1086,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @throws JobPropertiesException
 	 */
 	public DtoBatchJob createBatchJob(String batchJobnameBase, String fqan,
-			String jobnameCreationMethod)
-	throws BatchJobException {
+			String jobnameCreationMethod) throws BatchJobException {
 
 		String batchJobname = null;
 		try {
@@ -1150,7 +1153,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			final String jobnameCreationMethod,
 			final BatchJob optionalParentBatchJob)
 	throws JobPropertiesException {
-
 
 		String jobname = JsdlHelpers.getJobname(jsdl);
 
@@ -1259,8 +1261,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.control.ServiceInterface#deleteFiles(java.lang.String[])
+	 * @see grisu.control.ServiceInterface#deleteFiles(java.lang.String[])
 	 */
 	public void deleteFiles(final DtoStringList files) {
 
@@ -1435,8 +1436,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		return getUser().getFileSystemManager().download(filename);
 	}
-
-
 
 	public boolean fileExists(final String file)
 	throws RemoteFileSystemException {
@@ -1631,8 +1630,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.control.ServiceInterface#getAllAvailableApplications(java
+	 * @see grisu.control.ServiceInterface#getAllAvailableApplications(java
 	 * .lang.String[])
 	 */
 	public DtoStringList getAllAvailableApplications(final DtoStringList sites) {
@@ -1724,8 +1722,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.control.ServiceInterface#getAllSubmissionLocations(java
+	 * @see grisu.control.ServiceInterface#getAllSubmissionLocations(java
 	 * .lang.String)
 	 */
 	public DtoSubmissionLocations getAllSubmissionLocationsForFqan(
@@ -1744,8 +1741,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.control.ServiceInterface#getApplicationDetails(java.lang
+	 * @see grisu.control.ServiceInterface#getApplicationDetails(java.lang
 	 * .String, java.lang.String, java.lang.String)
 	 */
 	public DtoApplicationDetails getApplicationDetailsForVersionAndSubmissionLocation(
@@ -1797,21 +1793,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-
-
 	private String getBackendInfo() {
 
-		if ( StringUtils.isBlank(backendInfo)) {
+		if (StringUtils.isBlank(backendInfo)) {
 			String host = getInterfaceInfo("HOSTNAME");
-			if ( StringUtils.isBlank(host)) {
+			if (StringUtils.isBlank(host)) {
 				host = "Host unknown";
 			}
 			String version = getInterfaceInfo("VERSION");
-			if ( StringUtils.isBlank(version)) {
+			if (StringUtils.isBlank(version)) {
 				version = "Version unknown";
 			}
 			String name = getInterfaceInfo("NAME");
-			if ( StringUtils.isBlank(name)) {
+			if (StringUtils.isBlank(name)) {
 				name = "Backend name unknown";
 			}
 
@@ -1858,7 +1852,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	//
 	// }
 
-
 	/**
 	 * Calculates the default version of an application on a site. This is
 	 * pretty hard to do, so, if you call this method, don't expect anything
@@ -1903,8 +1896,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.control.ServiceInterface#getFileSize(java.lang.String)
+	 * @see grisu.control.ServiceInterface#getFileSize(java.lang.String)
 	 */
 	public long getFileSize(final String file) throws RemoteFileSystemException {
 
@@ -1929,8 +1921,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.control.ServiceInterface#getAllJobProperties(java.lang
+	 * @see grisu.control.ServiceInterface#getAllJobProperties(java.lang
 	 * .String)
 	 */
 	public DtoJob getJob(final String jobnameOrUrl) throws NoSuchJobException {
@@ -1944,12 +1935,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				job.getInputFiles(), job.getLogMessages(), job.isArchived());
 	}
 
-
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.control.ServiceInterface#getJobProperty(java.lang.String,
+	 * @see grisu.control.ServiceInterface#getJobProperty(java.lang.String,
 	 * java.lang.String)
 	 */
 	public String getJobProperty(final String jobname, final String key)
@@ -1972,8 +1961,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.control.ServiceInterface#getJobStatus(java.lang.String)
+	 * @see grisu.control.ServiceInterface#getJobStatus(java.lang.String)
 	 */
 	public int getJobStatus(final String jobname) {
 
@@ -2001,8 +1989,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.control.ServiceInterface#getMessagesSince(java.util.Date)
+	 * @see grisu.control.ServiceInterface#getMessagesSince(java.util.Date)
 	 */
 	public Document getMessagesSince(final Date date) {
 
@@ -2013,8 +2000,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.control.ServiceInterface#getMountPointForUri(java.lang
+	 * @see grisu.control.ServiceInterface#getMountPointForUri(java.lang
 	 * .String)
 	 */
 	public MountPoint getMountPointForUri(final String uri) {
@@ -2075,8 +2061,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.control.ServiceInterface#getSubmissionLocationsForApplication
+	 * @see grisu.control.ServiceInterface#getSubmissionLocationsForApplication
 	 * (java.lang.String)
 	 */
 	public DtoSubmissionLocations getSubmissionLocationsForApplication(
@@ -2094,8 +2079,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.control.ServiceInterface#getSubmissionLocationsForApplication
+	 * @see grisu.control.ServiceInterface#getSubmissionLocationsForApplication
 	 * (java.lang.String, java.lang.String)
 	 */
 	public DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersion(
@@ -2220,8 +2204,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.control.ServiceInterface#getUserProperty(java.lang.String)
+	 * @see grisu.control.ServiceInterface#getUserProperty(java.lang.String)
 	 */
 	public String getUserProperty(final String key) {
 
@@ -2233,8 +2216,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.control.ServiceInterface#getVersionsOfApplicationOnSite
+	 * @see grisu.control.ServiceInterface#getVersionsOfApplicationOnSite
 	 * (java.lang.String, java.lang.String)
 	 */
 	public String[] getVersionsOfApplicationOnSite(final String application,
@@ -2378,8 +2360,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				try {
 					final BatchJob mpj = getUser().getBatchJobFromDatabase(
-							job
-							.getJobProperty(Constants.BATCHJOB_NAME));
+							job.getJobProperty(Constants.BATCHJOB_NAME));
 					mpj.removeJob(job);
 					batchJobDao.saveOrUpdate(mpj);
 				} catch (final Exception e) {
@@ -2474,15 +2455,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.control.ServiceInterface#lastModified(java.lang.String)
+	 * @see grisu.control.ServiceInterface#lastModified(java.lang.String)
 	 */
 	public long lastModified(final String url) throws RemoteFileSystemException {
 
 		return getUser().getFileSystemManager().lastModified(url);
 	}
-
-
 
 	public GridFile ls(final String directory, int recursion_level)
 	throws RemoteFileSystemException {
@@ -2664,10 +2642,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @throws NoSuchJobException
 	 * @throws JobPropertiesException
 	 */
-	private void processJobDescription(final Job job,
-			final BatchJob parentJob)
-	throws NoSuchJobException,
-	JobPropertiesException {
+	private void processJobDescription(final Job job, final BatchJob parentJob)
+	throws NoSuchJobException, JobPropertiesException {
 
 		// TODO check whether fqan is set
 		final String jobFqan = job.getFqan();
@@ -2920,7 +2896,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 											versionsAvail.get(0));
 									job.addJobProperty(
 											Constants.APPLICATIONVERSION_CALCULATED_KEY,
-									"true");
+											"true");
 									myLogger.debug("Set version to be: "
 											+ resource
 											.getAvailableApplicationVersion()
@@ -2955,7 +2931,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							+ submissionLocation);
 					throw new JobPropertiesException(
 							JobSubmissionProperty.SUBMISSIONLOCATION.toString()
-							+ ": " + "Submissionlocation "
+							+ ": "
+							+ "Submissionlocation "
 							+ submissionLocation
 							+ " not available for this kind of job (using VO: "
 							+ jobFqan + ")");
@@ -3005,7 +2982,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 									.get(0));
 							job.addJobProperty(
 									Constants.APPLICATIONVERSION_CALCULATED_KEY,
-							"true");
+									"true");
 
 							// jobSubmissionObject.setApplicationVersion(resource.getAvailableApplicationVersion().get(0));
 							submissionLocation = SubmissionLocationHelpers
@@ -3202,8 +3179,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} catch (RemoteFileSystemException e1) {
 			throw new JobPropertiesException(
 					"Could not create new jobdirectory " + newJobdir
-					+ " (using VO: " + jobFqan + "): "
-					+ e1);
+					+ " (using VO: " + jobFqan + "): " + e1);
 		}
 
 		job.addJobProperty(Constants.JOBDIRECTORY_KEY, newJobdir);
@@ -3256,8 +3232,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public String redistributeBatchJob(String batchJobname)
 	throws NoSuchJobException, JobPropertiesException {
 
-		final BatchJob job = getUser()
-		.getBatchJobFromDatabase(batchJobname);
+		final BatchJob job = getUser().getBatchJobFromDatabase(batchJobname);
 
 		if ((getSessionActionStatus().get(batchJobname) != null)
 				&& !getSessionActionStatus().get(batchJobname).isFinished()) {
@@ -3391,8 +3366,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-
-
 	/**
 	 * Removes the specified job from the mulitpartJob.
 	 * 
@@ -3428,8 +3401,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			String restartPolicy, DtoProperties properties)
 	throws NoSuchJobException, JobPropertiesException {
 
-		final BatchJob job = getUser()
-		.getBatchJobFromDatabase(batchJobname);
+		final BatchJob job = getUser().getBatchJobFromDatabase(batchJobname);
 
 		if ((getSessionActionStatus().get(batchJobname) != null)
 				&& !getSessionActionStatus().get(batchJobname).isFinished()) {
@@ -3563,8 +3535,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		if (StringUtils.isNotBlank(possibleMultiPartJob)) {
 			mpj = getUser().getBatchJobFromDatabase(possibleMultiPartJob);
 			getUser().addLogMessageToPossibleMultiPartJobParent(job,
-					"Re-submitting job "
-					+ job.getJobname());
+					"Re-submitting job " + job.getJobname());
 			mpj.removeFailedJob(job.getJobname());
 			batchJobDao.saveOrUpdate(mpj);
 		}
@@ -4038,8 +4009,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		} catch (final NoSuchJobException e) {
 			// maybe it's a multipartjob
-			final BatchJob multiJob = getUser().getBatchJobFromDatabase(
-					jobname);
+			final BatchJob multiJob = getUser()
+			.getBatchJobFromDatabase(jobname);
 			submitBatchJob(multiJob);
 		}
 
@@ -4048,8 +4019,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.control.ServiceInterface#submitSupportRequest(java.lang
+	 * @see grisu.control.ServiceInterface#submitSupportRequest(java.lang
 	 * .String, java.lang.String)
 	 */
 	public void submitSupportRequest(final String subject,
@@ -4074,9 +4044,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.control.ServiceInterface#upload(javax.activation.DataSource
-	 * , java.lang.String)
+	 * @see grisu.control.ServiceInterface#upload(javax.activation.DataSource ,
+	 * java.lang.String)
 	 */
 	public String upload(final DataHandler source, final String filename)
 	throws RemoteFileSystemException {
@@ -4133,8 +4102,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			// no single job, let's try a multijob
 		}
 
-		final BatchJob multiJob = getUser()
-		.getBatchJobFromDatabase(jobname);
+		final BatchJob multiJob = getUser().getBatchJobFromDatabase(jobname);
 
 		multiJob.setStatus(JobConstants.INPUT_FILES_UPLOADING);
 		batchJobDao.saveOrUpdate(multiJob);
