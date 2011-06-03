@@ -602,10 +602,6 @@ public class User {
 	 */
 	protected Set<MountPoint> df_auto_mds(final String[] sites) {
 
-		Date start = new Date();
-
-		myLogger.debug("Getting mds mountpoints for user: " + getDn());
-
 		final Set<MountPoint> mps = Collections
 		.synchronizedSet(new TreeSet<MountPoint>());
 
@@ -613,6 +609,10 @@ public class User {
 		.synchronizedMap(new HashMap<String, MountPoint>());
 		final Map<String, Exception> unsuccessfullMountPoints = Collections
 		.synchronizedMap(new HashMap<String, Exception>());
+
+		Date start = new Date();
+
+		myLogger.debug("Getting mds mountpoints for user: " + getDn());
 
 		Date end;
 
