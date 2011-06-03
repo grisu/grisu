@@ -1,6 +1,5 @@
 package grisu.control.serviceInterfaces;
 
-import grisu.X;
 import grisu.backend.hibernate.BatchJobDAO;
 import grisu.backend.hibernate.JobDAO;
 import grisu.backend.info.InformationManagerManager;
@@ -156,7 +155,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			Cache session = cache.getCache("session");
 			if (session == null) {
-				X.p("Session cache is null");
+				myLogger.debug("Session cache is null");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1710,7 +1709,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public DtoStringList getAllSites() {
 
-		return DtoStringList.fromStringArray(informationManager.getAllSites());
+		Date now = new Date();
+		DtoStringList result = DtoStringList.fromStringArray(informationManager
+				.getAllSites());
+		myLogger.debug("Login benchmark - getting all sites: "
+				+ (new Date().getTime() - now.getTime()) + " ms");
+		return result;
 	}
 
 	/*

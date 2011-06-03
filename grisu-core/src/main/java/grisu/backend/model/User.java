@@ -602,6 +602,8 @@ public class User {
 	 */
 	protected Set<MountPoint> df_auto_mds(final String[] sites) {
 
+		Date start = new Date();
+
 		myLogger.debug("Getting mds mountpoints for user: " + getDn());
 
 		final Set<MountPoint> mps = Collections
@@ -613,6 +615,7 @@ public class User {
 
 		final ExecutorService backgroundExecutorForFilesystemCache = Executors
 		.newFixedThreadPool(2);
+		// final ExecutorService backgroundExecutorForFilesystemCache = null;
 
 		final ExecutorService executor = Executors.newFixedThreadPool(df_p);
 
@@ -627,14 +630,16 @@ public class User {
 
 
 		for (final String fqan : getFqans().keySet()) {
-
 			Thread t = new Thread() {
 				@Override
 				public void run() {
-
+					myLogger.debug("Getting datalocations for vo " + fqan
+							+ "....");
 					// final Date start = new Date();
 					final Map<String, String[]> mpUrl = AbstractServiceInterface.informationManager
 					.getDataLocationsForVO(fqan);
+					myLogger.debug("Getting datalocations for vo " + fqan
+							+ " finished.");
 					// final Date end = new Date();
 					// myLogger.debug("Querying for data locations for all sites and+ "
 					// + fqan + " took: " + (end.getTime() - start.getTime())
@@ -653,10 +658,18 @@ public class User {
 
 								successfullMountPoints.put(uniqueString, null);
 
+								myLogger.debug("Creating mountpoint for: "
+										+ server + " / " + path + " / " + fqan
+										+ "....");
+
 								final MountPoint mp = createMountPoint(server, path,
 										fqan,
 										(ENABLE_FILESYSTEM_CACHE) ? backgroundExecutorForFilesystemCache
 												: null);
+
+								myLogger.debug("Creating mountpoint for: "
+										+ server + " / " + path + " / " + fqan
+										+ " finished.");
 
 								successfullMountPoints.put(server + "_" + path
 										+ "_" + fqan, mp);
@@ -681,8 +694,11 @@ public class User {
 								// e.printStackTrace();
 								successfullMountPoints.remove(uniqueString);
 								unsuccessfullMountPoints.put(uniqueString, e);
-								myLogger.error("Can't use mountpoint " + server
-										+ ": " + e.getLocalizedMessage(), e);
+								myLogger.error(
+										"Can't use mountpoint " + server
+										+ " / " + fqan
+										+ ": "
+										+ e.getLocalizedMessage());
 							}
 						}
 					}
@@ -691,6 +707,10 @@ public class User {
 			};
 			executor.execute(t);
 		}
+
+		Date end = new Date();
+		myLogger.debug("Login benchmark: All mountpoint lookup threads started: "
+				+ (end.getTime() - start.getTime()) + " ms");
 
 		executor.shutdown();
 
@@ -701,6 +721,9 @@ public class User {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+
+		myLogger.debug("Login benchmark: All mountpoint lookup threads finished: "
+				+ (new Date().getTime() - end.getTime()) + " ms");
 
 		for (String us : successfullMountPoints.keySet()) {
 			if (successfullMountPoints.get(us) == null) {
@@ -718,8 +741,9 @@ public class User {
 
 
 		// X.p("Finished creating mountpoints...");
-
-		backgroundExecutorForFilesystemCache.shutdown();
+		if (backgroundExecutorForFilesystemCache != null) {
+			backgroundExecutorForFilesystemCache.shutdown();
+		}
 
 		return mps;
 	}
@@ -1834,6 +1858,7 @@ public class User {
 	 *            the mountpoints to add (for this session)
 	 */
 	public void setAutoMountedMountPoints(final Set<MountPoint> amps) {
+
 		// allMountPoints = null;
 		this.mountPointsAutoMounted = amps;
 
@@ -1841,6 +1866,7 @@ public class User {
 		// first the automounted ones because the manually ones are more
 		// important
 		allMountPoints.addAll(mountPointsAutoMounted);
+
 		allMountPoints.addAll(getMountPoints());
 
 	}

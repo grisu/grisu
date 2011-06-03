@@ -1,6 +1,5 @@
 package grisu.backend.model.fs;
 
-import grisu.X;
 import grisu.backend.model.User;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.RemoteFileSystemException;
@@ -143,10 +142,8 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 		String host = pathTokens[1];
 
 		String path = StringUtils.join(pathTokens, "/", 2, pathTokens.length);
-		X.p("path: " + path);
 
 		String requestedFileWithoutProtocol = host + "/" + path;
-		X.p("Requested File: " + requestedFileWithoutProtocol);
 
 		Set<MountPoint> mountPointsFound = new TreeSet<MountPoint>();
 

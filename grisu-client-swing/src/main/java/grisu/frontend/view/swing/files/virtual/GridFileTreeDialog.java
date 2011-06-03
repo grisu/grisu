@@ -1,6 +1,5 @@
 package grisu.frontend.view.swing.files.virtual;
 
-import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginManager;
 import grisu.frontend.view.swing.files.GridFileListListener;
@@ -171,7 +170,6 @@ GridFileListListener {
 
 	public void filesSelected(Set<GridFile> files) {
 
-		X.p("Print: " + foldersSelectable);
 		if ( foldersSelectable ) {
 			okButton.setEnabled(true);
 			return;

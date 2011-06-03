@@ -1,6 +1,5 @@
 package grisu.frontend.view.swing.jobcreation.widgets;
 
-import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.view.swing.files.virtual.GridFileTreeDialog;
@@ -135,8 +134,6 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 										+ " does not exist.");
 							}
 						} catch (Exception ex) {
-							X.p("Display error message: "
-									+ ex.getLocalizedMessage());
 							return;
 						}
 
@@ -146,7 +143,6 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 					}
 
 					if (file == null) {
-						X.p("Display error message2");
 						return;
 					}
 

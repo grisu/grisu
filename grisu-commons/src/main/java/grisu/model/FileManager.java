@@ -1,6 +1,5 @@
 package grisu.model;
 
-import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.control.events.FolderCreatedEvent;
 import grisu.control.exceptions.RemoteFileSystemException;
@@ -812,8 +811,6 @@ public class FileManager {
 			}
 		} else {
 			url = parent.getUrl() + "/" + s;
-
-			X.p("URL " + url);
 
 			final boolean result = serviceInterface.mkdir(url);
 			if (result) {

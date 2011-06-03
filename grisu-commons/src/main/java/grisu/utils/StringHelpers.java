@@ -1,7 +1,5 @@
 package grisu.utils;
 
-import grisu.X;
-
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,7 +57,6 @@ public class StringHelpers {
 				strings[strings.length - 1].length() - 1);
 
 		for (String s : strings) {
-			X.p("Stringhelpers: " + s);
 			String key = s.substring(0, s.indexOf("="));
 			String value = s.substring(s.indexOf("=") + 1);
 			result.put(key, value);

@@ -1,6 +1,5 @@
 package grisu.frontend.view.swing.files;
 
-import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.control.events.FolderCreatedEvent;
 import grisu.frontend.control.fileTransfers.FileTransaction;
@@ -813,7 +812,6 @@ EventSubscriber {
 		} catch (Exception e) {
 			// TODO dialog?
 			e.printStackTrace();
-			X.p("After...");
 			setCurrent(old);
 		}
 
