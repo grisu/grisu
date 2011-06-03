@@ -619,6 +619,11 @@ public class User {
 
 		final ExecutorService executor = Executors.newFixedThreadPool(df_p);
 
+		Date intermediate = new Date();
+
+		myLogger.debug("Login benchmark intermediate: All executors created: "
+				+ (intermediate.getTime() - start.getTime()) + " ms");
+
 		// for ( String site : sites ) {
 
 		// X.p("Start creating mountpoints...");
