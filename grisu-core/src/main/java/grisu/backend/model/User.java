@@ -616,196 +616,198 @@ public class User {
 
 		Date end;
 
-		boolean lookupMountPointsConcurrently = false;
-		if (lookupMountPointsConcurrently) {
+		// boolean lookupMountPointsConcurrently = false;
+		// if (lookupMountPointsConcurrently) {
+		//
+		// // to check whether dn_subdirs are created already and create them if
+		// // not (in background)
+		// int df_p = ServerPropertiesManager.getConcurrentMountPointLookups();
+		//
+		// final ExecutorService backgroundExecutorForFilesystemCache =
+		// Executors
+		// .newFixedThreadPool(2);
+		// // final ExecutorService backgroundExecutorForFilesystemCache = null;
+		//
+		// final ExecutorService executor = Executors.newFixedThreadPool(df_p);
+		//
+		// Date intermediate = new Date();
+		//
+		// myLogger.debug("Login benchmark intermediate: All executors created: "
+		// + (intermediate.getTime() - start.getTime()) + " ms");
+		//
+		//
+		// for (final String fqan : getFqans().keySet()) {
+		// Thread t = new Thread() {
+		// @Override
+		// public void run() {
+		// myLogger.debug("Getting datalocations for vo " + fqan
+		// + "....");
+		// // final Date start = new Date();
+		// final Map<String, String[]> mpUrl =
+		// AbstractServiceInterface.informationManager
+		// .getDataLocationsForVO(fqan);
+		// myLogger.debug("Getting datalocations for vo " + fqan
+		// + " finished.");
+		// // final Date end = new Date();
+		// // myLogger.debug("Querying for data locations for all sites and+ "
+		// // + fqan + " took: " + (end.getTime() - start.getTime())
+		// // + " ms.");
+		// for (final String server : mpUrl.keySet()) {
+		//
+		// String uniqueString = null;
+		// for (final String path : mpUrl.get(server)) {
+		// try {
+		//
+		// uniqueString = server + " - " + path
+		// + " - " + fqan;
+		//
+		// // X.p("\t" + uniqueString
+		// // + ": creating....");
+		//
+		// successfullMountPoints.put(uniqueString, null);
+		//
+		// myLogger.debug("Creating mountpoint for: "
+		// + server + " / " + path + " / " + fqan
+		// + "....");
+		//
+		// final MountPoint mp = createMountPoint(server, path,
+		// fqan,
+		// (ENABLE_FILESYSTEM_CACHE) ? backgroundExecutorForFilesystemCache
+		// : null);
+		//
+		// myLogger.debug("Creating mountpoint for: "
+		// + server + " / " + path + " / " + fqan
+		// + " finished.");
+		//
+		// successfullMountPoints.put(server + "_" + path
+		// + "_" + fqan, mp);
+		//
+		// // X.p("\t" + server + "/" + path + "/" + fqan
+		// // + ": created");
+		//
+		// if (mp != null) {
+		// mps.add(mp);
+		// successfullMountPoints
+		// .put(uniqueString, mp);
+		// } else {
+		// successfullMountPoints.remove(uniqueString);
+		// unsuccessfullMountPoints
+		// .put(uniqueString,
+		// new Exception(
+		// "MountPoint not created, unknown reason."));
+		// }
+		// } catch (final Exception e) {
+		// // X.p(server + "/" + "/" + fqan + ": failed : "
+		// // + e.getLocalizedMessage());
+		// // e.printStackTrace();
+		// successfullMountPoints.remove(uniqueString);
+		// unsuccessfullMountPoints.put(uniqueString, e);
+		// myLogger.error(
+		// "Can't use mountpoint " + server
+		// + " / " + fqan
+		// + ": "
+		// + e.getLocalizedMessage());
+		// }
+		// }
+		// }
+		// }
+		//
+		// };
+		// executor.execute(t);
+		// }
+		//
+		//
+		// end = new Date();
+		// myLogger.debug("Login benchmark: All mountpoint lookup threads started: "
+		// + (end.getTime() - start.getTime()) + " ms");
+		//
+		// executor.shutdown();
+		//
+		// // X.p("Waiting...");
+		//
+		// try {
+		// executor.awaitTermination(2, TimeUnit.MINUTES);
+		// } catch (InterruptedException e) {
+		// e.printStackTrace();
+		// }
+		//
+		// // X.p("Finished creating mountpoints...");
+		// if (backgroundExecutorForFilesystemCache != null) {
+		// backgroundExecutorForFilesystemCache.shutdown();
+		// }
+		//
+		// return mps;
+		//
+		// } else {
+		for (final String fqan : getFqans().keySet()) {
 
-			// to check whether dn_subdirs are created already and create them if
-			// not (in background)
-			int df_p = ServerPropertiesManager.getConcurrentMountPointLookups();
+			myLogger.debug("Time for fqan " + fqan + ": "
+					+ (new Date().getTime() - start.getTime()) + " ms");
 
-			final ExecutorService backgroundExecutorForFilesystemCache = Executors
-			.newFixedThreadPool(2);
-			// final ExecutorService backgroundExecutorForFilesystemCache = null;
+			myLogger.debug("Getting datalocations for vo " + fqan + "....");
+			// final Date start = new Date();
+			final Map<String, String[]> mpUrl = AbstractServiceInterface.informationManager
+			.getDataLocationsForVO(fqan);
+			myLogger.debug("Getting datalocations for vo " + fqan
+					+ " finished.");
+			// final Date end = new Date();
+			// myLogger.debug("Querying for data locations for all sites and+ "
+			// + fqan + " took: " + (end.getTime() - start.getTime())
+			// + " ms.");
+			for (final String server : mpUrl.keySet()) {
 
-			final ExecutorService executor = Executors.newFixedThreadPool(df_p);
+				String uniqueString = null;
+				for (final String path : mpUrl.get(server)) {
+					try {
 
-			Date intermediate = new Date();
+						uniqueString = server + " - " + path + " - " + fqan;
 
-			myLogger.debug("Login benchmark intermediate: All executors created: "
-					+ (intermediate.getTime() - start.getTime()) + " ms");
+						// X.p("\t" + uniqueString
+						// + ": creating....");
 
+						successfullMountPoints.put(uniqueString, null);
 
-			for (final String fqan : getFqans().keySet()) {
-				Thread t = new Thread() {
-					@Override
-					public void run() {
-						myLogger.debug("Getting datalocations for vo " + fqan
-								+ "....");
-						// final Date start = new Date();
-						final Map<String, String[]> mpUrl = AbstractServiceInterface.informationManager
-						.getDataLocationsForVO(fqan);
-						myLogger.debug("Getting datalocations for vo " + fqan
+						myLogger.debug("Creating mountpoint for: " + server
+								+ " / " + path + " / " + fqan + "....");
+
+						final MountPoint mp = createMountPoint(server,
+								path, fqan, null);
+
+						myLogger.debug("Creating mountpoint for: " + server
+								+ " / " + path + " / " + fqan
 								+ " finished.");
-						// final Date end = new Date();
-						// myLogger.debug("Querying for data locations for all sites and+ "
-						// + fqan + " took: " + (end.getTime() - start.getTime())
-						// + " ms.");
-						for (final String server : mpUrl.keySet()) {
 
-							String uniqueString = null;
-							for (final String path : mpUrl.get(server)) {
-								try {
+						successfullMountPoints.put(server + "_" + path
+								+ "_" + fqan, mp);
 
-									uniqueString = server + " - " + path
-									+ " - " + fqan;
+						// X.p("\t" + server + "/" + path + "/" + fqan
+						// + ": created");
 
-									// X.p("\t" + uniqueString
-									// + ": creating....");
-
-									successfullMountPoints.put(uniqueString, null);
-
-									myLogger.debug("Creating mountpoint for: "
-											+ server + " / " + path + " / " + fqan
-											+ "....");
-
-									final MountPoint mp = createMountPoint(server, path,
-											fqan,
-											(ENABLE_FILESYSTEM_CACHE) ? backgroundExecutorForFilesystemCache
-													: null);
-
-									myLogger.debug("Creating mountpoint for: "
-											+ server + " / " + path + " / " + fqan
-											+ " finished.");
-
-									successfullMountPoints.put(server + "_" + path
-											+ "_" + fqan, mp);
-
-									// X.p("\t" + server + "/" + path + "/" + fqan
-									// + ": created");
-
-									if (mp != null) {
-										mps.add(mp);
-										successfullMountPoints
-										.put(uniqueString, mp);
-									} else {
-										successfullMountPoints.remove(uniqueString);
-										unsuccessfullMountPoints
-										.put(uniqueString,
-												new Exception(
-												"MountPoint not created, unknown reason."));
-									}
-								} catch (final Exception e) {
-									// X.p(server + "/" + "/" + fqan + ": failed : "
-									// + e.getLocalizedMessage());
-									// e.printStackTrace();
-									successfullMountPoints.remove(uniqueString);
-									unsuccessfullMountPoints.put(uniqueString, e);
-									myLogger.error(
-											"Can't use mountpoint " + server
-											+ " / " + fqan
-											+ ": "
-											+ e.getLocalizedMessage());
-								}
-							}
-						}
-					}
-
-				};
-				executor.execute(t);
-			}
-
-
-			end = new Date();
-			myLogger.debug("Login benchmark: All mountpoint lookup threads started: "
-					+ (end.getTime() - start.getTime()) + " ms");
-
-			executor.shutdown();
-
-			// X.p("Waiting...");
-
-			try {
-				executor.awaitTermination(2, TimeUnit.MINUTES);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-
-			// X.p("Finished creating mountpoints...");
-			if (backgroundExecutorForFilesystemCache != null) {
-				backgroundExecutorForFilesystemCache.shutdown();
-			}
-
-			return mps;
-
-		} else {
-			for (final String fqan : getFqans().keySet()) {
-
-				myLogger.debug("Time for fqan " + fqan + ": "
-						+ (new Date().getTime() - start.getTime()) + " ms");
-
-				myLogger.debug("Getting datalocations for vo " + fqan + "....");
-				// final Date start = new Date();
-				final Map<String, String[]> mpUrl = AbstractServiceInterface.informationManager
-				.getDataLocationsForVO(fqan);
-				myLogger.debug("Getting datalocations for vo " + fqan
-						+ " finished.");
-				// final Date end = new Date();
-				// myLogger.debug("Querying for data locations for all sites and+ "
-				// + fqan + " took: " + (end.getTime() - start.getTime())
-				// + " ms.");
-				for (final String server : mpUrl.keySet()) {
-
-					String uniqueString = null;
-					for (final String path : mpUrl.get(server)) {
-						try {
-
-							uniqueString = server + " - " + path + " - " + fqan;
-
-							// X.p("\t" + uniqueString
-							// + ": creating....");
-
-							successfullMountPoints.put(uniqueString, null);
-
-							myLogger.debug("Creating mountpoint for: " + server
-									+ " / " + path + " / " + fqan + "....");
-
-							final MountPoint mp = createMountPoint(server,
-									path, fqan, null);
-
-							myLogger.debug("Creating mountpoint for: " + server
-									+ " / " + path + " / " + fqan
-									+ " finished.");
-
-							successfullMountPoints.put(server + "_" + path
-									+ "_" + fqan, mp);
-
-							// X.p("\t" + server + "/" + path + "/" + fqan
-							// + ": created");
-
-							if (mp != null) {
-								mps.add(mp);
-								successfullMountPoints.put(uniqueString, mp);
-							} else {
-								successfullMountPoints.remove(uniqueString);
-								unsuccessfullMountPoints
-								.put(uniqueString,
-										new Exception(
-										"MountPoint not created, unknown reason."));
-							}
-						} catch (final Exception e) {
-							// X.p(server + "/" + "/" + fqan + ": failed : "
-							// + e.getLocalizedMessage());
-							// e.printStackTrace();
+						if (mp != null) {
+							mps.add(mp);
+							successfullMountPoints.put(uniqueString, mp);
+						} else {
 							successfullMountPoints.remove(uniqueString);
-							unsuccessfullMountPoints.put(uniqueString, e);
-							myLogger.error("Can't use mountpoint " + server
-									+ " / " + fqan + ": "
-									+ e.getLocalizedMessage());
+							unsuccessfullMountPoints
+							.put(uniqueString,
+									new Exception(
+											"MountPoint not created, unknown reason."));
 						}
+					} catch (final Exception e) {
+						// X.p(server + "/" + "/" + fqan + ": failed : "
+						// + e.getLocalizedMessage());
+						// e.printStackTrace();
+						successfullMountPoints.remove(uniqueString);
+						unsuccessfullMountPoints.put(uniqueString, e);
+						myLogger.error("Can't use mountpoint " + server
+								+ " / " + fqan + ": "
+								+ e.getLocalizedMessage());
 					}
 				}
 			}
-			end = new Date();
 		}
+		end = new Date();
+		// }
 		myLogger.debug("Login benchmark: All mountpoint lookup threads finished: "
 				+ (new Date().getTime() - end.getTime()) + " ms");
 
