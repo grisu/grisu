@@ -610,9 +610,9 @@ public class User {
 		.synchronizedSet(new TreeSet<MountPoint>());
 
 		final Map<String, MountPoint> successfullMountPoints = Collections
-				.synchronizedMap(new HashMap<String, MountPoint>());
+		.synchronizedMap(new HashMap<String, MountPoint>());
 		final Map<String, Exception> unsuccessfullMountPoints = Collections
-				.synchronizedMap(new HashMap<String, Exception>());
+		.synchronizedMap(new HashMap<String, Exception>());
 
 		Date end;
 
@@ -739,6 +739,9 @@ public class User {
 		} else {
 			for (final String fqan : getFqans().keySet()) {
 
+				myLogger.debug("Time for fqan " + fqan + ": "
+						+ (new Date().getTime() - start.getTime()) + " ms");
+
 				myLogger.debug("Getting datalocations for vo " + fqan + "....");
 				// final Date start = new Date();
 				final Map<String, String[]> mpUrl = AbstractServiceInterface.informationManager
@@ -786,7 +789,7 @@ public class User {
 								unsuccessfullMountPoints
 								.put(uniqueString,
 										new Exception(
-														"MountPoint not created, unknown reason."));
+										"MountPoint not created, unknown reason."));
 							}
 						} catch (final Exception e) {
 							// X.p(server + "/" + "/" + fqan + ": failed : "
