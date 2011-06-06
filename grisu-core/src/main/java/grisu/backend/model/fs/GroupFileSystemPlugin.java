@@ -390,9 +390,19 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					}
 				}
 
-				// if (mps.size() == 0) {
-				// continue;
-				// }
+				Map<String, Set<String>> childFqans = findDirectChildFqans(fqan);
+				boolean hasInterestingChilds = false;
+
+				for (String fqanTemp : childFqans.keySet()) {
+					if (childFqans.get(fqanTemp).size() > 0) {
+						hasInterestingChilds = true;
+						break;
+					}
+				}
+
+				if ((mps.size() == 0) && !hasInterestingChilds) {
+					continue;
+				}
 
 				for (MountPoint mp : mps) {
 					sites.add(mp.getSite());
