@@ -45,6 +45,13 @@ public interface UserEnvironmentManager {
 	String calculateUniqueJobname(String name);
 
 	/**
+	 * All applications grid-wide that are available for the user.
+	 * 
+	 * @return all applications
+	 */
+	String[] getAllAvailableApplications();
+
+	/**
 	 * All of the users fqans, regardless of whether there is a filesystem
 	 * attached to it or not.
 	 * 
@@ -109,7 +116,7 @@ public interface UserEnvironmentManager {
 	 *             if no such job exists
 	 */
 	DtoBatchJob getBatchJob(String jobname, boolean refreshBatchJob)
-			throws NoSuchJobException;
+	throws NoSuchJobException;
 
 	SortedSet<DtoBatchJob> getBatchJobs(String application, boolean refresh);
 
@@ -430,6 +437,6 @@ public interface UserEnvironmentManager {
 	 * @throws StatusException
 	 */
 	StatusObject waitForActionToFinish(String handle)
-			throws InterruptedException, StatusException;
+	throws InterruptedException, StatusException;
 
 }

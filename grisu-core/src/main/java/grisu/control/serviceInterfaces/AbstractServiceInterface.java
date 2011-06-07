@@ -1642,19 +1642,21 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see grisu.control.ServiceInterface#getAllAvailableApplications(java
 	 * .lang.String[])
 	 */
-	public DtoStringList getAllAvailableApplications(final DtoStringList sites) {
-		final Set<String> siteList = new TreeSet<String>();
+	public DtoStringList getAllAvailableApplications(final DtoStringList fqans) {
+		final Set<String> fqanList = new TreeSet<String>();
 
-		if (sites == null) {
+		if (fqans == null) {
 			return DtoStringList.fromStringArray(informationManager
 					.getAllApplicationsOnGrid());
 		}
-		for (final String site : sites.getStringList()) {
-			siteList.addAll(Arrays.asList(informationManager
-					.getAllApplicationsAtSite(site)));
+
+		for (final String fqan : fqans.getStringList()) {
+			fqanList.addAll(Arrays.asList(informationManager
+					.getAllApplicationsOnGridForVO(fqan)));
+
 		}
 
-		return DtoStringList.fromStringArray(siteList.toArray(new String[] {}));
+		return DtoStringList.fromStringArray(fqanList.toArray(new String[] {}));
 
 	}
 

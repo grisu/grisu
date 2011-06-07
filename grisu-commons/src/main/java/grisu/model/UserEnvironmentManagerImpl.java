@@ -6,6 +6,7 @@ import grisu.control.exceptions.StatusException;
 import grisu.jcommons.constants.Constants;
 import grisu.model.dto.DtoBatchJob;
 import grisu.model.dto.DtoJob;
+import grisu.model.dto.DtoStringList;
 import grisu.model.files.FileSystemItem;
 import grisu.model.files.GlazedFile;
 import grisu.model.info.ApplicationInformation;
@@ -55,6 +56,7 @@ EventSubscriber<FqanEvent> {
 	private FileManager fm;
 
 	private String[] cachedFqans = null;
+	private String[] cachedApplications = null;
 	private String[] cachedFqansUsable = null;
 	private String[] cachedUniqueGroupnames = null;
 	private String[] cachedUniqueGroupnamesUsable = null;
@@ -123,6 +125,18 @@ EventSubscriber<FqanEvent> {
 		}
 
 		return temp;
+	}
+
+	public String[] getAllAvailableApplications() {
+
+		if ( cachedApplications == null ) {
+
+			cachedApplications = serviceInterface.getAllAvailableApplications(
+					DtoStringList.fromStringArray(getAllAvailableFqans(true)))
+					.asArray();
+		}
+
+		return cachedApplications;
 	}
 
 	public final String[] getAllAvailableFqans() {

@@ -419,17 +419,18 @@ public interface ServiceInterface {
 			@PathParam("refresh") boolean refreshJobStatus);
 
 	/**
-	 * Returns all applications that are available grid-wide or at certain
-	 * sites.
+	 * Returns all applications that are available grid-wide or for a certain
+	 * vo.
 	 * 
-	 * @param sites
-	 *            all the sites you want to query or null for a grid-wide search
+	 * @param fqans
+	 *            all the fqans you want to query or null for a grid-wide search
+	 *            (fqan-independent).
 	 * @return all applications
 	 */
 	@POST
 	@Path("info/applications")
 	DtoStringList getAllAvailableApplications(
-			@QueryParam("sites") DtoStringList sites);
+			@QueryParam("sites") DtoStringList fqans);
 
 	/**
 	 * Returns a list of all batch jobnames that are currently stored on this

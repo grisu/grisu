@@ -1,6 +1,7 @@
 package grisu.model.info;
 
 import grisu.control.ServiceInterface;
+import grisu.model.dto.DtoStringList;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -85,6 +87,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 	private final Map<String, List<String>> cachedStagingFilesystemsPerSubLoc = new HashMap<String, List<String>>();
 	private Set<String> cachedAllApps;
+	private final Map<String, Set<String>> cachedAppsPerVO = new HashMap<String, Set<String>>();
 
 	public ResourceInformationImpl(final ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
@@ -128,6 +131,25 @@ public class ResourceInformationImpl implements ResourceInformation {
 		}
 		return cachedAllApps;
 
+	}
+
+	public SortedSet<String> getAllApplicationsForFqans(Set<String> fqans) {
+
+		SortedSet<String> result = new TreeSet<String>();
+		for (String fqan : fqans) {
+
+			if (cachedAppsPerVO.get(fqan) == null) {
+				Set<String> temp = serviceInterface.getAllAvailableApplications(
+						DtoStringList.fromSingleString(fqan)).asSortedSet();
+				if (temp == null) {
+					temp = new TreeSet<String>();
+				}
+				cachedAppsPerVO.put(fqan, temp);
+			}
+			result.addAll(cachedAppsPerVO.get(fqan));
+		}
+
+		return result;
 	}
 
 	public final Set<String> getAllAvailableSites(final String fqan) {
