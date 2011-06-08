@@ -239,7 +239,7 @@
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>mysql-mds</artifactId>
-			<version>0.8.7-SNAPSHOT</version>
+			<version>0.8.6.1</version>
 			<type>jar</type>
 			<scope>compile</scope>
 			<exclusions>
