@@ -44,6 +44,15 @@ public interface ResourceInformation {
 	Set<String> getAllApplications();
 
 	/**
+	 * A list of all applications that are available for a particular vo.
+	 * 
+	 * @param fqan
+	 *            the vo
+	 * @return the applications
+	 */
+	Set<String> getAllApplicationsForFqans(Set<String> fqan);
+
+	/**
 	 * Returns a list of all sites a user that is member of the specified fqan
 	 * can access.
 	 * 

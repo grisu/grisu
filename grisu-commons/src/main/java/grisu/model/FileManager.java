@@ -1,12 +1,10 @@
 package grisu.model;
 
-import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.control.events.FolderCreatedEvent;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.control.clientexceptions.FileTransactionException;
 import grisu.model.dto.DtoActionStatus;
-import grisu.model.dto.DtoJob;
 import grisu.model.dto.DtoStringList;
 import grisu.model.dto.GridFile;
 import grisu.model.files.GlazedFile;
@@ -36,6 +34,8 @@ import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -71,6 +71,9 @@ public class FileManager {
 	public static final SimpleDateFormat dateformat = new SimpleDateFormat(
 	"dd.MM.yyyy HH:mm:SSS");
 
+	private static final String URL_PATTERN_STRING = "^(?:[^/]+://)?([^/:]+)";
+	private static final Pattern URL_PATTERN = Pattern
+	.compile(URL_PATTERN_STRING);
 	/**
 	 * Conveninec method to calculate a human readable String to indicate file
 	 * size from the bytesize of a file.
@@ -255,6 +258,26 @@ public class FileManager {
 	}
 
 	/**
+	 * Convenience method to extract hostname from an url.
+	 * 
+	 * @param url
+	 *            the url
+	 * @return the hostname or null if hostname couldn't be found
+	 */
+	public static String getHost(String url) {
+
+		Matcher matcher = URL_PATTERN.matcher(url);
+		if (matcher.find()) {
+			int start = matcher.start(1);
+			int end = matcher.end(1);
+
+			return (url.substring(start, end));
+		} else {
+			return null;
+		}
+	}
+
+	/**
 	 * Returns a human readable String that indicates the last modified date of
 	 * a file (out of a unix time long).
 	 * 
@@ -340,6 +363,9 @@ public class FileManager {
 
 		if (StringUtils.isBlank(url)) {
 			return "";
+		} else if (url.equals(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
+				+ "://")) {
+			return url;
 		} else {
 			if (url.endsWith("/")) {
 				return url.substring(0, url.lastIndexOf("/"));
@@ -785,8 +811,6 @@ public class FileManager {
 			}
 		} else {
 			url = parent.getUrl() + "/" + s;
-
-			X.p("URL " + url);
 
 			final boolean result = serviceInterface.mkdir(url);
 			if (result) {
@@ -1328,7 +1352,8 @@ public class FileManager {
 	 * @throws RemoteFileSystemException
 	 *             if the folder can't be accessed
 	 */
-	public Set<GridFile> ls(GridFile parent) throws RemoteFileSystemException {
+	public GridFile ls(GridFile parent) throws RemoteFileSystemException {
+
 
 		GridFile folder = null;
 		if (StringUtils.isNotBlank(parent.getPath())) {
@@ -1341,7 +1366,7 @@ public class FileManager {
 			return null;
 		}
 
-		return folder.getChildren();
+		return folder;
 
 	}
 
@@ -1390,7 +1415,6 @@ public class FileManager {
 		} else {
 
 			try {
-
 				GridFile result = serviceInterface.ls(url, recursionLevel);
 				return result;
 			} catch (final RemoteFileSystemException e) {
@@ -1690,15 +1714,16 @@ public class FileManager {
 					"Transfer of folders not supported yet.", null);
 		}
 
-		// checking whether folder exists and is folder
-		try {
-
-			final DtoJob jobdir = serviceInterface.getJob(job);
-
-		} catch (final Exception e) {
-			throw new FileTransactionException(file.toString(), job,
-					"Job does not exists on the backend.: ", e);
-		}
+		// // checking whether folder exists and is folder
+		// try {
+		//
+		// serviceInterface.getJob(job);
+		//
+		// } catch (final Exception e) {
+		//
+		// throw new FileTransactionException(file.toString(), job,
+		// "Job does not exists on the backend.: ", e);
+		// }
 
 		myLogger.debug("Uploading input file: " + file.toString()
 				+ " for job: " + job);

@@ -7,7 +7,6 @@ import grisu.jcommons.constants.Constants;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 
@@ -74,6 +73,7 @@ public class JobDAO extends BaseHibernateDAO {
 			final Query queryObject = getCurrentSession().createQuery(
 					queryString);
 			queryObject.setParameter(0, dn);
+
 
 			final List<Job> jobs = (queryObject.list());
 
@@ -156,9 +156,11 @@ public class JobDAO extends BaseHibernateDAO {
 	public final List<Job> findJobByDNPerApplication(final String dn,
 			final String application, final boolean includeMultiPartJobs) {
 
-		if (StringUtils.isBlank(application)) {
-			return findJobByDN(dn, includeMultiPartJobs);
-		}
+		// if (StringUtils.isBlank(application)
+		// || Constants.ALLJOBS_KEY.equals(application)
+		// || Constants.ALLJOBS_INCL_BATCH_KEY.equals(application)) {
+		// return findJobByDN(dn, includeMultiPartJobs);
+		// }
 
 		// myLogger.debug("Loading jobs with dn: " + dn + " from db.");
 
@@ -169,7 +171,7 @@ public class JobDAO extends BaseHibernateDAO {
 		} else {
 			queryString = "from grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
 				+ Constants.APPLICATIONNAME_KEY
-				+ "']) = ? and job.multiPartJob = false";
+				+ "']) = ? and batchJob = false";
 		}
 
 		try {
@@ -239,6 +241,9 @@ public class JobDAO extends BaseHibernateDAO {
 	public final List<String> findJobNamesPerApplicationByDn(final String dn,
 			final String application, final boolean includeMultiPartJob) {
 
+		//		if (StringUtils.isBlank(application)) {
+		//			return findJobNamesByDn(dn, includeMultiPartJob);
+		// }
 		// myLogger.debug("Loading jobs with dn: " + dn + " from db.");
 
 		String queryString;

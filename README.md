@@ -11,8 +11,9 @@ This is the main package of the Grisu framework. It is written entirely in Java 
 Documentation
 ------------------------
 
-[Wiki](https://github.com/grisu/grisu/wiki)
-[Javadoc](https://code.arcs.org.au/hudson/me/my-views/view/My%20stuff/job/Grisu-SNAPSHOT/javadoc)
+- [Wiki](https://github.com/grisu/grisu/wiki)
+- [Javadoc](http://grisu.github.com/grisu/javadoc/)
+- [SOAP/REST API documentaion](https://compute.services.bestgrid.org/)
 
 Prerequisites
 --------------------

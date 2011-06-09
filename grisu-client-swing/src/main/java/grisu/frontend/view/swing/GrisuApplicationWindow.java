@@ -118,7 +118,6 @@ ServiceInterfaceHolder {
 
 	public void exit() {
 		try {
-			X.p("Exiting...");
 
 			if (si != null) {
 				String temp = si.logout();

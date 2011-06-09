@@ -59,14 +59,7 @@ import ca.odell.glazedlists.EventList;
 
 import com.google.common.collect.ImmutableList;
 
-/**
- * @author markus
- *
- */
-/**
- * @author markus
- * 
- */
+
 public class BatchJobObject implements JobMonitoringObject,
 Comparable<BatchJobObject>, Listener {
 
@@ -116,7 +109,7 @@ Comparable<BatchJobObject>, Listener {
 
 	private final Map<String, String> inputFiles = new HashMap<String, String>();
 
-	private DtoBatchJob dtoMultiPartJob = null;
+	private DtoBatchJob dtoBatchJob = null;
 	private String[] submissionLocationsToInclude;
 
 	private String[] submissionLocationsToExclude;
@@ -144,22 +137,22 @@ Comparable<BatchJobObject>, Listener {
 	private boolean isSubmitting = false;
 
 	/**
-	 * Use this constructor to create a MultiPartJobObject for a multipartjob
-	 * that already exists on the backend.
+	 * Use this constructor to create a BatchJobObject for a batchjob that
+	 * already exists on the backend.
 	 * 
 	 * @param serviceInterface
 	 *            the serviceinterface
 	 * @param batchJobname
-	 *            the id of the multipartjob
+	 *            the id of the batchjob
 	 * @param refreshJobStatusOnBackend
 	 *            whether to refresh the status of the jobs on the backend.
 	 *            might take quite a while...
 	 * 
 	 * @throws BatchJobException
-	 *             if one of the jobs of the multipartjob doesn't exist on the
+	 *             if one of the jobs of the batchjob doesn't exist on the
 	 *             backend
 	 * @throws NoSuchJobException
-	 *             if there is no such multipartjob on the backend
+	 *             if there is no such batchjob on the backend
 	 */
 	public BatchJobObject(ServiceInterface serviceInterface,
 			String batchJobname, boolean refreshJobStatusOnBackend)
@@ -169,14 +162,14 @@ Comparable<BatchJobObject>, Listener {
 		this.batchJobname = batchJobname;
 		try {
 
-			dtoMultiPartJob = getWrappedDtoBatchJob(refreshJobStatusOnBackend);
+			dtoBatchJob = getWrappedDtoBatchJob(refreshJobStatusOnBackend);
 
-			if (dtoMultiPartJob == null) {
+			if (dtoBatchJob == null) {
 				throw new NoSuchJobException("Could not access batchjob "
 						+ batchJobname + " on the backend.");
 			}
 
-			this.submissionFqan = dtoMultiPartJob.getSubmissionFqan();
+			this.submissionFqan = dtoBatchJob.getSubmissionFqan();
 
 			setDefaultApplication(serviceInterface.getJobProperty(
 					this.batchJobname, Constants.APPLICATIONNAME_KEY));
@@ -192,27 +185,32 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * Use this constructor if you want to create a new multipartjob.
+	 * Use this constructor if you want to create a new batchjob.
+	 * 
+	 * This constructor creates a batchjob using the
+	 * {@link Constants#UNIQUE_NUMBER_METHOD} to calculate the batchjob name.
 	 * 
 	 * @param serviceInterface
 	 *            the serviceinterface
 	 * @param batchJobname
-	 *            the id of the multipartjob
+	 *            the id of the batchjob
 	 * @param submissionFqan
-	 *            the VO to use to submit the jobs of this multipartjob
+	 *            the VO to use to submit the jobs of this batchjob
 	 * @throws BatchJobException
-	 *             if the multipartjob can't be created
+	 *             if the batchjob can't be created, most likely because the
+	 *             jobname already exists on the backend.
 	 */
 	public BatchJobObject(ServiceInterface serviceInterface,
 			String batchJobname, String submissionFqan,
 			String defaultApplication, String defaultVersion)
 	throws BatchJobException {
 		this.serviceInterface = serviceInterface;
-		this.batchJobname = batchJobname;
 		this.submissionFqan = submissionFqan;
 
-		dtoMultiPartJob = serviceInterface.createBatchJob(this.batchJobname,
-				this.submissionFqan);
+		dtoBatchJob = serviceInterface.createBatchJob(batchJobname,
+				this.submissionFqan, Constants.UNIQUE_NUMBER_METHOD);
+
+		this.batchJobname = dtoBatchJob.getBatchJobname();
 
 		if (StringUtils.isBlank(defaultApplication)) {
 			defaultApplication = Constants.GENERIC_APPLICATION_NAME;
@@ -227,11 +225,53 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * Adds an input file to the pool of shared input files for this multipart
-	 * job.
+	 * Use this constructor if you want to create a new batchjob and specify the
+	 * way the batchjobname is created.
+	 * 
+	 * Look up the {@link Constants} class to see available jobname creation
+	 * methods.
+	 * 
+	 * @param serviceInterface
+	 *            the serviceinterface
+	 * @param batchJobnameBase
+	 *            the base of the batchjob-name
+	 * @param jobnameCreationMethod
+	 *            the jobname creation method
+	 * @param submissionFqan
+	 *            the VO to use to submit the jobs of this batchjob
+	 * @throws BatchJobException
+	 *             if the batchjob can't be created
+	 */
+	public BatchJobObject(ServiceInterface serviceInterface,
+			String batchJobnameBase, String jobnameCreationMethod,
+			String submissionFqan,
+			String defaultApplication, String defaultVersion)
+	throws BatchJobException {
+		this.serviceInterface = serviceInterface;
+		this.submissionFqan = submissionFqan;
+
+		dtoBatchJob = serviceInterface.createBatchJob(batchJobnameBase,
+				this.submissionFqan, jobnameCreationMethod);
+
+		this.batchJobname = dtoBatchJob.getBatchJobname();
+
+		if (StringUtils.isBlank(defaultApplication)) {
+			defaultApplication = Constants.GENERIC_APPLICATION_NAME;
+		}
+		if (StringUtils.isBlank(defaultVersion)) {
+			defaultVersion = Constants.NO_VERSION_INDICATOR_STRING;
+		}
+		setDefaultApplication(defaultApplication);
+		setDefaultVersion(defaultVersion);
+
+		addJobLogMessage("Empty job created.");
+	}
+
+	/**
+	 * Adds an input file to the pool of shared input files for this batchjob.
 	 * 
 	 * Those get staged in to the common directory on every site that runs parts
-	 * of this multipartjob. You can access the relative path from each job
+	 * of this batchjob. You can access the relative path from each job
 	 * directory via the {@link #pathToInputFiles()} method. The original
 	 * filename is used.
 	 * 
@@ -260,11 +300,10 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * Adds an input file to the pool of shared input files for this multipart
-	 * job.
+	 * Adds an input file to the pool of shared input files for this batchjob.
 	 * 
 	 * Those get staged in to the common directory on every site that runs parts
-	 * of this multipartjob. You can access the relative path from each job
+	 * of this batchjob. You can access the relative path from each job
 	 * directory via the {@link #pathToInputFiles()} method.
 	 * 
 	 * Be aware that, if you are specifying a folder here, the containing files
@@ -287,16 +326,27 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * Adds a new job object to this multipart job.
+	 * Adds a new job object to this batchjob.
 	 * 
 	 * @param job
 	 *            the new job object
 	 */
 	public void addJob(JobObject job) throws IllegalArgumentException {
 
+		if (StringUtils.isBlank(job.getJobname())
+				|| Constants.NO_JOBNAME_INDICATOR_STRING.equals(job
+						.getJobname())) {
+			String singleJobname = GrisuRegistryManager
+			.getDefault(serviceInterface)
+			.getUserEnvironmentManager()
+			.calculateUniqueJobname(
+					getJobname() + "_job_" + (getJobs().size() + 1));
+			job.setJobname(singleJobname);
+		}
+
 		if (getJobs().contains(job)) {
 			throw new IllegalArgumentException("Job: " + job.getJobname()
-					+ " already part of this multiPartJob.");
+					+ " already part of this BatchJob.");
 		}
 
 		if (Arrays.binarySearch(getAllRemoteJobnames(), job.getJobname()) >= 0) {
@@ -315,6 +365,8 @@ Comparable<BatchJobObject>, Listener {
 				maxWalltimeInSecondsAcrossJobs = job.getWalltimeInSeconds();
 			}
 		}
+
+
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 				"Adding job " + job.getJobname()));
 		final int oldNo = this.getJobs().size();
@@ -689,7 +741,7 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * Returns the default application for this multipart job.
+	 * Returns the default application for this batchjob.
 	 * 
 	 * @return the default application
 	 */
@@ -710,7 +762,7 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * Gets the default version for this multipart job.
+	 * Gets the default version for this batchjob.
 	 * 
 	 * This is used internally to use mds to calculate job distribution.
 	 * 
@@ -796,7 +848,7 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * Returns the fqan that is used for this multipartjob.
+	 * Returns the fqan that is used for this batchjob.
 	 * 
 	 * @return the fqan
 	 */
@@ -806,7 +858,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Returns all the input files that are shared among the jobs of this
-	 * multipart job.
+	 * batchjob.
 	 * 
 	 * @return the urls of all the input files (local & remote)
 	 */
@@ -824,7 +876,7 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * Retrieves a list of all jobs that are part of this multipart job.
+	 * Retrieves a list of all jobs that are part of this batchjob.
 	 * 
 	 * @return all jobs
 	 */
@@ -878,7 +930,7 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * Gets the maximum walltime for this multipartjob.
+	 * Gets the maximum walltime for this batchjob.
 	 * 
 	 * This is used internally to calculate the job distribution. If it is not
 	 * set manually the largest single job walltime is used.
@@ -896,7 +948,7 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * The number of failed jobs for this multipart job.
+	 * The number of failed jobs for this batchjob.
 	 * 
 	 * @return the number of failed jobs
 	 */
@@ -909,7 +961,7 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * The number of finished jobs for this multipart job.
+	 * The number of finished jobs for this batchjob.
 	 * 
 	 * @return the number of finished jobs
 	 */
@@ -922,7 +974,7 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * The number of running jobs for this multipart job.
+	 * The number of running jobs for this batchjob.
 	 * 
 	 * @return the number of running jobs
 	 */
@@ -935,7 +987,7 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * The number of successful jobs for this multipart job.
+	 * The number of successful jobs for this batchjob.
 	 * 
 	 * @return the number of successful jobs
 	 */
@@ -948,7 +1000,7 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * The number of unsubmitted jobs for this multipart job.
+	 * The number of unsubmitted jobs for this batchjob.
 	 * 
 	 * @return the number of unsubmitted jobs
 	 */
@@ -961,7 +1013,7 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * The number of waiting jobs for this multipart job.
+	 * The number of waiting jobs for this batchjob.
 	 * 
 	 * @return the number of waiting jobs
 	 */
@@ -1029,7 +1081,7 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * Returns all the properties for this multipartjob.
+	 * Returns all the properties for this batchjob.
 	 * 
 	 * This method doesn't refresh the underlying object, you might want to do
 	 * that yourself in some cases.
@@ -1100,14 +1152,14 @@ Comparable<BatchJobObject>, Listener {
 
 		if (isKilled || isBeingKilled) {
 			myLogger.debug("Job is or is being killed. Not updating dtoobject...");
-			return dtoMultiPartJob;
+			return dtoBatchJob;
 		}
 
-		if (((dtoMultiPartJob == null) || (!isRefreshing() && refresh))
+		if (((dtoBatchJob == null) || (!isRefreshing() && refresh))
 				|| (refreshThread == null)
 				|| ((refreshThread != null) && !refreshThread.isAlive())) {
 
-			if ((dtoMultiPartJob == null) || refresh) {
+			if ((dtoBatchJob == null) || refresh) {
 
 				refreshThread = new Thread() {
 					@Override
@@ -1115,7 +1167,7 @@ Comparable<BatchJobObject>, Listener {
 						try {
 							if (refresh) {
 								try {
-									refreshMultiPartJobStatus(true);
+									refreshBatchJobStatus(true);
 								} catch (final InterruptedException e) {
 									return;
 								}
@@ -1133,59 +1185,59 @@ Comparable<BatchJobObject>, Listener {
 							boolean oldFailed = false;
 							boolean oldFinished = false;
 
-							if (dtoMultiPartJob != null) {
-								oldTotalJobs = dtoMultiPartJob
+							if (dtoBatchJob != null) {
+								oldTotalJobs = dtoBatchJob
 								.totalNumberOfJobs();
-								oldRunningJobs = dtoMultiPartJob
+								oldRunningJobs = dtoBatchJob
 								.numberOfRunningJobs();
-								oldWaitingJobs = dtoMultiPartJob
+								oldWaitingJobs = dtoBatchJob
 								.numberOfWaitingJobs();
-								oldFinishedJobs = dtoMultiPartJob
+								oldFinishedJobs = dtoBatchJob
 								.numberOfFinishedJobs();
-								oldFailedJobs = dtoMultiPartJob
+								oldFailedJobs = dtoBatchJob
 								.numberOfFailedJobs();
-								oldSuccessJobs = dtoMultiPartJob
+								oldSuccessJobs = dtoBatchJob
 								.numberOfSuccessfulJobs();
-								oldUnsubmittedJobs = dtoMultiPartJob
+								oldUnsubmittedJobs = dtoBatchJob
 								.numberOfUnsubmittedJobs();
-								oldStatus = dtoMultiPartJob.getStatus();
-								oldFailed = dtoMultiPartJob.failed();
-								oldFinished = dtoMultiPartJob.isFinished();
+								oldStatus = dtoBatchJob.getStatus();
+								oldFailed = dtoBatchJob.failed();
+								oldFinished = dtoBatchJob.isFinished();
 							}
 
-							dtoMultiPartJob = serviceInterface
+							dtoBatchJob = serviceInterface
 							.getBatchJob(batchJobname);
 
 							pcs.firePropertyChange(TOTAL_NUMBER_OF_JOBS,
 									oldTotalJobs,
-									dtoMultiPartJob.totalNumberOfJobs());
+									dtoBatchJob.totalNumberOfJobs());
 							pcs.firePropertyChange(STATUS, oldStatus,
-									dtoMultiPartJob.getStatus());
+									dtoBatchJob.getStatus());
 							pcs.firePropertyChange(FAILED, oldFailed,
-									dtoMultiPartJob.failed());
+									dtoBatchJob.failed());
 							pcs.firePropertyChange(FINISHED, oldFinished,
-									dtoMultiPartJob.isFinished());
+									dtoBatchJob.isFinished());
 							pcs.firePropertyChange(NUMBER_OF_RUNNING_JOBS,
 									oldRunningJobs,
-									dtoMultiPartJob.numberOfRunningJobs());
+									dtoBatchJob.numberOfRunningJobs());
 							pcs.firePropertyChange(NUMBER_OF_WAITING_JOBS,
 									oldWaitingJobs,
-									dtoMultiPartJob.numberOfWaitingJobs());
+									dtoBatchJob.numberOfWaitingJobs());
 							pcs.firePropertyChange(NUMBER_OF_FINISHED_JOBS,
 									oldFinishedJobs,
-									dtoMultiPartJob.numberOfFinishedJobs());
+									dtoBatchJob.numberOfFinishedJobs());
 							pcs.firePropertyChange(NUMBER_OF_FAILED_JOBS,
 									oldFailedJobs,
-									dtoMultiPartJob.numberOfFailedJobs());
+									dtoBatchJob.numberOfFailedJobs());
 							pcs.firePropertyChange(NUMBER_OF_SUCCESSFULL_JOBS,
 									oldSuccessJobs,
-									dtoMultiPartJob.numberOfSuccessfulJobs());
+									dtoBatchJob.numberOfSuccessfulJobs());
 							pcs.firePropertyChange(NUMBER_OF_UNSUBMITTED_JOBS,
 									oldUnsubmittedJobs,
-									dtoMultiPartJob.numberOfUnsubmittedJobs());
+									dtoBatchJob.numberOfUnsubmittedJobs());
 
 							RunningJobManager.updateJobList(serviceInterface,
-									getJobs(), dtoMultiPartJob.getJobs());
+									getJobs(), dtoBatchJob.getJobs());
 
 						} catch (final NoSuchJobException e) {
 							e.printStackTrace();
@@ -1201,7 +1253,7 @@ Comparable<BatchJobObject>, Listener {
 			}
 
 			if ((refreshThread != null)
-					&& ((dtoMultiPartJob == null) || waitForRefresh)) {
+					&& ((dtoBatchJob == null) || waitForRefresh)) {
 				try {
 					refreshThread.join();
 				} catch (final InterruptedException e) {
@@ -1209,7 +1261,7 @@ Comparable<BatchJobObject>, Listener {
 				}
 			}
 		}
-		return dtoMultiPartJob;
+		return dtoBatchJob;
 	}
 
 	public boolean isBatchJob() {
@@ -1221,8 +1273,8 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * Returns whether all jobs within this multipart job are finished (failed
-	 * or not).
+	 * Returns whether all jobs within this batchjob are finished (failed or
+	 * not).
 	 * 
 	 * @param refresh
 	 *            whether to refresh all jobs on the backend
@@ -1258,7 +1310,7 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * Returns whether all jobs within this multipart job finished successfully.
+	 * Returns whether all jobs within this batchjob finished successfully.
 	 * 
 	 * @param refresh
 	 *            whether to refresh all jobs on the backend
@@ -1303,7 +1355,7 @@ Comparable<BatchJobObject>, Listener {
 					e.printStackTrace();
 				}
 
-				dtoMultiPartJob = null;
+				dtoBatchJob = null;
 				setIsBeingKilled(false);
 				isKilled = true;
 				pcs.firePropertyChange("killed", false, true);
@@ -1328,7 +1380,7 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * Monitors the status of all jobs of this multipartjob.
+	 * Monitors the status of all jobs of this batchjob.
 	 * 
 	 * If you want to restart failed jobs while this is running, provide a
 	 * {@link FailedJobRestarter}. Prints out a lot of verbose information.
@@ -1391,7 +1443,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Calculates the relative path from each of the job directories to the
-	 * common input file directory for this multipart job.
+	 * common input file directory for this batchjob.
 	 * 
 	 * This can be used to create the commandline for each of the part jobs.
 	 * 
@@ -1564,7 +1616,7 @@ Comparable<BatchJobObject>, Listener {
 					final String handle = serviceInterface
 					.redistributeBatchJob(this.batchJobname);
 
-					System.out.println("Handle: " + handle);
+					// System.out.println("Handle: " + handle);
 					final StatusObject status = new StatusObject(
 							serviceInterface, handle);
 
@@ -1693,7 +1745,7 @@ Comparable<BatchJobObject>, Listener {
 		getWrappedDtoBatchJob(true, wait);
 	}
 
-	private void refreshMultiPartJobStatus(boolean waitForRefreshToFinish)
+	private void refreshBatchJobStatus(boolean waitForRefreshToFinish)
 	throws InterruptedException {
 
 		String handle;
@@ -1937,7 +1989,7 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * Sets the default application for this multipart job.
+	 * Sets the default application for this batchjob.
 	 * 
 	 * This is used internally to use mds to calculate the job distribution.
 	 * 
@@ -1990,7 +2042,7 @@ Comparable<BatchJobObject>, Listener {
 	}
 
 	/**
-	 * Sets the default version for this multipart job.
+	 * Sets the default version for this batchjob.
 	 * 
 	 * @param defaultVersion
 	 */
@@ -2321,6 +2373,8 @@ Comparable<BatchJobObject>, Listener {
 	private void uploadInputFiles(boolean uploadCommonFiles)
 	throws InterruptedException, FileUploadException {
 
+		myLogger.debug("Uploading batch job input files...");
+
 		final List<Exception> exceptions = Collections
 		.synchronizedList(new LinkedList<Exception>());
 
@@ -2346,6 +2400,7 @@ Comparable<BatchJobObject>, Listener {
 				EventBus.publish(getJobname(), new BatchJobEvent(
 						BatchJobObject.this, message));
 				addJobLogMessage(message);
+				myLogger.debug("Uploading files for job " + job.getJobname());
 
 				final Future<?> f = executor.submit(new Thread() {
 					@Override
@@ -2372,6 +2427,9 @@ Comparable<BatchJobObject>, Listener {
 		final int all = inputFiles.keySet().size();
 
 		if (all > 0) {
+
+			myLogger.debug("Uploading " + all + " common input files...");
+
 			final String message = "Uploading " + all + " input files ("
 			+ getConcurrentInputFileUploadThreads()
 			+ " concurrent upload threads.)";
@@ -2384,6 +2442,8 @@ Comparable<BatchJobObject>, Listener {
 				for (final String inputFile : inputFiles.keySet()) {
 
 					checkInterruptedStatus(executor, tasks);
+
+					myLogger.debug("Uploading common input file: " + inputFile);
 
 					i = i + 1;
 					final Thread thread = new BatchJobFileUploadThread(
@@ -2410,6 +2470,7 @@ Comparable<BatchJobObject>, Listener {
 		executor.shutdown();
 
 		try {
+			myLogger.debug("Waiting for input files to be uploaded...");
 			executor.awaitTermination(10 * 3600, TimeUnit.SECONDS);
 		} catch (final InterruptedException e) {
 			myLogger.debug("Interrupted....");
@@ -2423,6 +2484,12 @@ Comparable<BatchJobObject>, Listener {
 		}
 
 		if ((exceptions.size() > 0) && (exceptions.get(0) != null)) {
+			myLogger.debug(exceptions.size()
+					+ " exceptions while uploading. not continuing submission...");
+			for (Exception e : exceptions) {
+				myLogger.error(e);
+				e.printStackTrace();
+			}
 			throw new FileUploadException(exceptions.get(0));
 		}
 

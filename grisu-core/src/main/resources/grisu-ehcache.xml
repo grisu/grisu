@@ -1,10 +1,25 @@
 <ehcache maxBytesOnHeap="100m" maxBytesOffHeap="400m"
 	maxBytesOnDisk="1g">
 
-	<defaultCache maxElementsInMemory="10000" eternal="false"
-		timeToIdleSeconds="120" timeToLiveSeconds="120" overflowToDisk="true"
-		maxElementsOnDisk="10000000" diskPersistent="false"
-		diskExpiryThreadIntervalSeconds="120" memoryStoreEvictionPolicy="LRU" />
+	<diskStore path="/tmp/grisu-ehcache/"/>
+
+    <defaultCache
+            maxElementsInMemory="10000"
+            eternal="false"
+            timeToIdleSeconds="14400"
+            timeToLiveSeconds="14400"
+            overflowToDisk="true"
+            maxElementsOnDisk="10000000"
+            diskPersistent="false"
+            diskExpiryThreadIntervalSeconds="14400"
+            memoryStoreEvictionPolicy="LRU"
+            />
+            
+    <cache name="userCache" maxElementsInMemory="10000" eternal="false"
+		timeToIdleSeconds="1800" timeToLiveSeconds="3600" overflowToDisk="false"
+		diskSpoolBufferSizeMB="0" maxElementsOnDisk="0" diskPersistent="false"
+		diskExpiryThreadIntervalSeconds="0" memoryStoreEvictionPolicy="LRU"
+            />       
 
 	<cache name="short" maxElementsInMemory="10000" eternal="false"
 		timeToIdleSeconds="30" timeToLiveSeconds="120" overflowToDisk="false"

@@ -18,8 +18,12 @@ import javax.activation.DataHandler;
 
 import org.apache.axis.utils.StringUtils;
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.log4j.Logger;
 
 public class FileSystemManager {
+
+	private static Logger myLogger = Logger.getLogger(FileSystemManager.class
+			.getName());
 
 	private final Map<String, FileTransferPlugin> filetransferPlugins = new HashMap<String, FileTransferPlugin>();
 	private final Map<String, FileSystemInfoPlugin> fileSystemInfoPlugins = new HashMap<String, FileSystemInfoPlugin>();
@@ -28,8 +32,11 @@ public class FileSystemManager {
 	private final VirtualFileSystemInfoPlugin virtualFsInfo;
 	private final VirtualFsTransferPlugin virtualFsTransfer;
 
+	private final User user;
+
 	public FileSystemManager(User user) {
 
+		this.user = user;
 		commonsVfsInfo = new CommonsVfsFileSystemInfoAndTransferPlugin(user);
 		virtualFsInfo = new VirtualFileSystemInfoPlugin(user);
 		virtualFsTransfer = new VirtualFsTransferPlugin(user);
@@ -83,7 +90,7 @@ public class FileSystemManager {
 	}
 
 	public DataHandler download(String filename)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 		return getFileSystemInfoPlugin(filename).download(filename);
 	}
 
@@ -123,21 +130,31 @@ public class FileSystemManager {
 	}
 
 	public GridFile getFolderListing(String pathOrUrl, int recursiveLevels)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 
 		pathOrUrl = cleanPath(pathOrUrl);
-		return getFileSystemInfoPlugin(pathOrUrl).getFolderListing(pathOrUrl,
+
+		myLogger.debug(user.getDn() + ": Listing folder (" + recursiveLevels
+				+ " levels): " + pathOrUrl);
+
+		GridFile result = getFileSystemInfoPlugin(pathOrUrl).getFolderListing(
+				pathOrUrl,
 				recursiveLevels);
+
+		myLogger.debug(user.getDn() + ": Listed: "
+				+ GridFile.getChildrenNames(result));
+
+		return result;
 
 	}
 
 	public GrisuInputStream getInputStream(String file)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 		return getFileSystemInfoPlugin(file).getInputStream(file);
 	}
 
 	public GrisuOutputStream getOutputStream(String file)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 		return getFileSystemInfoPlugin(file).getOutputStream(file);
 	}
 
@@ -159,11 +176,11 @@ public class FileSystemManager {
 	public String resolveFileSystemHomeDirectory(String filesystemRoot,
 			String fqan) throws RemoteFileSystemException {
 		return getFileSystemInfoPlugin(filesystemRoot)
-				.resolveFileSystemHomeDirectory(filesystemRoot, fqan);
+		.resolveFileSystemHomeDirectory(filesystemRoot, fqan);
 	}
 
 	public String upload(final DataHandler source, final String filename)
-			throws RemoteFileSystemException {
+	throws RemoteFileSystemException {
 		return getFileSystemInfoPlugin(filename).upload(source, filename);
 	}
 
@@ -176,7 +193,7 @@ public class FileSystemManager {
 			String protNew = FileManager.getProtocol(parent);
 			if ((prot != null) && !prot.equals(protNew)) {
 				throw new RemoteFileSystemException(
-						"Multiple remote protocols not supported (yet).");
+				"Multiple remote protocols not supported (yet).");
 			}
 			prot = protNew;
 		}

@@ -285,15 +285,21 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	}
 
 	public void addFqans(Set<String> fqans) {
-		this.fqans.addAll(fqans);
+		if (fqans != null) {
+			this.fqans.addAll(fqans);
+		}
 	}
 
 	public void addSite(String site) {
-		getSites().add(site);
+		if (site != null) {
+			getSites().add(site);
+		}
 	}
 
 	public void addSites(Set<String> sites) {
-		getSites().addAll(sites);
+		if (sites != null) {
+			getSites().addAll(sites);
+		}
 	}
 
 	public void addUrl(String url, Integer priority) {
@@ -312,7 +318,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		Integer otherPriority = Integer.parseInt(o.getUrls().get(0).getValue());
 
 		if (otherPriority.equals(thisPriority)) {
-			result = getName().compareTo(o.getName());
+			result = getName().compareToIgnoreCase(o.getName());
 
 			if (result == 0) {
 				result = getUrl().compareTo(o.getUrl());
@@ -332,6 +338,19 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 			return eq;
 		}
 		return false;
+	}
+
+	public GridFile getChild(String filename) {
+		if (filename == null) {
+			return null;
+		}
+
+		for (GridFile f : getChildren()) {
+			if (f.getName().equals(filename)) {
+				return f;
+			}
+		}
+		return null;
 	}
 
 	@XmlElement(name = "child")

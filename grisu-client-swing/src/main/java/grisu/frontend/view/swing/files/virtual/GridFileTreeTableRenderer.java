@@ -8,15 +8,16 @@ import java.util.TreeSet;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.apache.commons.lang.StringUtils;
 import org.netbeans.swing.outline.RenderDataProvider;
 
 import furbelow.SpinningDial;
+import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.frontend.view.swing.files.virtual.utils.VirtualFileSystemBrowserTreeRenderer;
+import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.UserEnvironmentManager;
 import grisu.model.dto.GridFile;
@@ -24,15 +25,37 @@ import grisu.model.dto.GridFile;
 public class GridFileTreeTableRenderer implements RenderDataProvider {
 
 	private static SpinningDial LOADING_ICON = new SpinningDial(16, 16);
-	private static URL imgURL = GridFileTreeTableRenderer.class
-	.getResource("/group.gif");
+	private static URL remoteImgUrl = GridFileTreeTableRenderer.class
+	.getResource("/icons/remote.png");
+	private static URL groupImgURL = GridFileTreeTableRenderer.class
+	.getResource("/icons/group.png");
+	private static URL jobsImgURL = GridFileTreeTableRenderer.class
+	.getResource("/icons/jobs.png");
+	private static URL folderImgURL = GridFileTreeTableRenderer.class
+	.getResource("/icons/folder.png");
+	private static URL folderVirtualImgURL = GridFileTreeTableRenderer.class
+	.getResource("/icons/folder_virtual.png");
+	private static URL fileImgURL = GridFileTreeTableRenderer.class
+	.getResource("/icons/file.png");
+	private static URL userImgURL = GridFileTreeTableRenderer.class
+	.getResource("/icons/user.png");
+	private static URL serverImgURL = GridFileTreeTableRenderer.class
+	.getResource("/icons/server.png");
+	private static URL sitesImgURL = GridFileTreeTableRenderer.class
+	.getResource("/icons/sites.png");
+	private static URL siteImgURL = GridFileTreeTableRenderer.class
+	.getResource("/icons/site.png");
 
-	private static Icon groupIcon = new ImageIcon(imgURL);
-	private static FileSystemView fsView = FileSystemView.getFileSystemView();
-	private static Icon folderIcon = fsView.getSystemIcon(new File(System
-			.getProperty("user.home")));
-	// TODO think of something better?
-	private static Icon fileIcon = fsView.getSystemIcon(findFile());
+	private static Icon remoteIcon = new ImageIcon(remoteImgUrl);
+	private static Icon groupIcon = new ImageIcon(groupImgURL);
+	private static Icon jobsIcon = new ImageIcon(jobsImgURL);
+	private static Icon folderIcon = new ImageIcon(folderImgURL);
+	private static Icon folderVirtualIcon = new ImageIcon(folderVirtualImgURL);
+	private static Icon fileIcon = new ImageIcon(fileImgURL);
+	private static Icon userIcon = new ImageIcon(userImgURL);
+	private static Icon serverIcon = new ImageIcon(serverImgURL);
+	private static Icon siteIcon = new ImageIcon(siteImgURL);
+	private static Icon sitesIcon = new ImageIcon(sitesImgURL);
 
 	private static Icon errorIcon = new ImageIcon(
 			GridFileTreeTableRenderer.class
@@ -115,14 +138,8 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 			if (f.isInaccessable()) {
 				return errorIcon;
 			} else {
-				// if (f.isVirtual()) {
-				if (f.isVirtual() && StringUtils.isNotBlank(f.getPath())
-						&& f.getPath().contains("group")) {
-
-					// if (f.isVirtual()) {
-					return groupIcon;
-					// }
-					// return null;
+				if (f.isVirtual()) {
+					return getVirtualIcon(f);
 				} else if (f.isFolder()) {
 					return folderIcon;
 				} else {
@@ -188,6 +205,43 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 		} else {
 			return null;
 		}
+	}
+
+	private Icon getVirtualIcon(GridFile f) {
+
+		if (!f.isFolder()) {
+			return fileIcon;
+		}
+
+		String path = FileManager.removeTrailingSlash(f.getPath());
+
+		if ( StringUtils.isBlank(path) ) {
+			return folderVirtualIcon;
+		}
+
+//		X.p("Path: " + path);
+
+		if (path.equals(
+				ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://")) {
+			return remoteIcon;
+		} else if (path.startsWith(
+				ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
+				+ "://groups")) {
+			return groupIcon;
+		} else if (path.equals(
+				ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
+				+ "://jobs")) {
+			return jobsIcon;
+		} else if (path.equals(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
+				+ "://sites")) {
+			return sitesIcon;
+		} else if (path.startsWith(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
+				+ "://sites/")) {
+			return siteIcon;
+		} else {
+			return folderVirtualIcon;
+		}
+
 	}
 
 	public boolean isHtmlDisplayName(Object arg0) {

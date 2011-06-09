@@ -33,8 +33,19 @@ public class FileSystemCache {
 		// X.p("Opening filesystemmanager: " + i);
 		this.user = user;
 		try {
+			// String tmp = System.getProperty("java.io.tmpdir");
+			// if (StringUtils.isBlank(tmp)) {
+			// tmp = "/tmp/grisu-fs-tmp";
+			// } else {
+			// myLogger.debug("Using " + tmp
+			// + "/grisu-fs-tmp for temporary directory...");
+			//
+			// }
+
+			myLogger.debug(user.getDn() + ": Creating FS manager for user...");
+
 			fsm = VFSUtil.createNewFsManager(false, false, true, true, true,
-					true, true, null);
+					true, true, "/tmp");
 		} catch (final FileSystemException e) {
 			throw new RuntimeException(e);
 		}
@@ -123,7 +134,7 @@ public class FileSystemCache {
 				// "Could not find mountpoint for url " + rootUrl);
 
 				// creating a filesystem...
-				myLogger.info("Creating filesystem without mountpoint...");
+				myLogger.debug("Creating filesystem without mountpoint...");
 				return createFileSystem(rootUrl, credToUse);
 
 			} else {

@@ -48,6 +48,7 @@ import org.xml.sax.SAXException;
 @Entity
 @Table(name = "jobs")
 @Root
+
 public class Job implements Comparable<Job> {
 
 	static final Logger myLogger = Logger.getLogger(Job.class.getName());
@@ -98,18 +99,18 @@ public class Job implements Comparable<Job> {
 
 	@ElementMap(entry = "property", key = "key", attribute = true, inline = true)
 	private Map<String, String> jobProperties = Collections
-			.synchronizedMap(new HashMap<String, String>());
+	.synchronizedMap(new HashMap<String, String>());
 
-	@ElementList(entry = "inputFiles", inline = true)
+	@ElementList(entry = "inputFiles", inline = true, required = false)
 	private Set<String> inputFiles = Collections
-			.synchronizedSet(new HashSet<String>());
+	.synchronizedSet(new HashSet<String>());
 
 	@Attribute
 	private boolean isBatchJob = false;
 
 	@ElementMap(entry = "jobProperty", key = "key", attribute = true, inline = true)
 	private Map<Long, String> logMessages = Collections
-			.synchronizedMap(new TreeMap<Long, String>());
+	.synchronizedMap(new TreeMap<Long, String>());
 
 	// for hibernate
 	public Job() {
@@ -134,7 +135,7 @@ public class Job implements Comparable<Job> {
 	 *             if the job description does not contain a jobname
 	 */
 	public Job(final String dn, final Document jsdl) throws SAXException,
-			XPathExpressionException {
+	XPathExpressionException {
 		this.dn = dn;
 		// if ( ! JsdlHelpers.validateJSDL(jobDescription) ) throw new
 		// SAXException("Job description not a valid jsdl document");
@@ -286,7 +287,7 @@ public class Job implements Comparable<Job> {
 		if ((this.jobDescription == null)
 				&& StringUtils.isNotBlank(serializedJobDescription)) {
 			this.jobDescription = SeveralXMLHelpers
-					.fromString(serializedJobDescription);
+			.fromString(serializedJobDescription);
 		}
 		return this.jobDescription;
 	}
@@ -470,7 +471,7 @@ public class Job implements Comparable<Job> {
 	private synchronized void setInputFiles(Set<String> inputfiles) {
 		if (inputFiles == null) {
 			this.inputFiles = Collections
-					.synchronizedSet(new HashSet<String>());
+			.synchronizedSet(new HashSet<String>());
 		} else {
 			this.inputFiles = inputfiles;
 		}
@@ -486,7 +487,7 @@ public class Job implements Comparable<Job> {
 	public void setJobDescription(final Document jobDescription) {
 		this.jobDescription = jobDescription;
 		this.serializedJobDescription = SeveralXMLHelpers
-				.toString(jobDescription);
+		.toString(jobDescription);
 	}
 
 	// ---------------------
@@ -579,7 +580,7 @@ public class Job implements Comparable<Job> {
 	private void setJsdl(final String jsdl_string) throws Exception {
 		if ((jsdl_string == null)
 				|| jsdl_string
-						.equals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")) {
+				.equals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")) {
 			return;
 		}
 

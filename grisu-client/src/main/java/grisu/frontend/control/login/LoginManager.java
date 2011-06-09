@@ -69,9 +69,11 @@ public class LoginManager {
 	.put("BeSTGRID_OLD",
 	"https://globus.ceres.auckland.ac.nz:8443/grisu-ws/soap/GrisuService")
 	.put("BeSTGRID",
-					"https://compute.services.bestgrid.org/soap/GrisuService")
+	"https://compute.services.bestgrid.org/soap/GrisuService")
 	.put("BeSTGRID-DEV",
 	"https://compute-dev.services.bestgrid.org/soap/GrisuService")
+			.put("BeSTGRID-TEST",
+					"https://compute-test.services.bestgrid.org/grisu-ws/soap/GrisuService")
 	.put("LOCAL_WS", "http://localhost:8080/soap/GrisuService")
 	.put("LOCAL_WS_TOMCAT",
 	"http://localhost:8080/grisu-ws/soap/GrisuService").build();
@@ -417,12 +419,12 @@ public class LoginManager {
 		} else {
 			try {
 				// means shib login
-				dependencies = new HashMap<Dependency, String>();
-
-				dependencies.put(Dependency.ARCSGSI, "1.2-SNAPSHOT");
-
-				DependencyManager.addDependencies(dependencies,
-						Environment.getGrisuPluginDirectory());
+				// dependencies = new HashMap<Dependency, String>();
+				//
+				// dependencies.put(Dependency.ARCSGSI, "1.2-SNAPSHOT");
+				//
+				// DependencyManager.addDependencies(dependencies,
+				// Environment.getGrisuPluginDirectory());
 
 				final GSSCredential slcsproxy = slcsMyProxyInit(username,
 						password, idp, loginParams);

@@ -72,6 +72,7 @@ Comparable<JobObject> {
 	}
 
 	private final ServiceInterface serviceInterface;
+	private final FileManager fm;
 
 	private int status = JobConstants.UNDEFINED;
 
@@ -103,6 +104,7 @@ Comparable<JobObject> {
 	public JobObject(final ServiceInterface si) {
 		super();
 		this.serviceInterface = si;
+		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		addJobLogMessage("Empty job created.");
 	}
 
@@ -121,6 +123,7 @@ Comparable<JobObject> {
 	public JobObject(final ServiceInterface si, final Document jsdl) {
 		super(jsdl);
 		this.serviceInterface = si;
+		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		addJobLogMessage("Job created from jsdl description.");
 	}
 
@@ -154,6 +157,7 @@ Comparable<JobObject> {
 		this.setJobname(jobname);
 
 		this.serviceInterface = si;
+		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 
 		this.isArchived = job.isArchived();
 
@@ -182,6 +186,7 @@ Comparable<JobObject> {
 			final Map<String, String> jobProperties) {
 		super(jobProperties);
 		this.serviceInterface = si;
+		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		addJobLogMessage("Job created from job properties.");
 	}
 
@@ -226,6 +231,7 @@ Comparable<JobObject> {
 		super(SeveralXMLHelpers.fromString(si.getJsdlDocument(jobname)));
 		this.setJobname(jobname);
 		this.serviceInterface = si;
+		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 
 		updateWithDtoJob(serviceInterface.getJob(jobname));
 
@@ -237,7 +243,7 @@ Comparable<JobObject> {
 
 	}
 
-	private synchronized void addJobLogMessage(String message) {
+	private void addJobLogMessage(String message) {
 		this.submissionLog.add(message);
 		pcs.firePropertyChange("submissionLog", null, getSubmissionLog());
 	}
@@ -563,8 +569,7 @@ Comparable<JobObject> {
 
 		File file = null;
 		try {
-			file = GrisuRegistryManager.getDefault(serviceInterface)
-			.getFileManager().downloadFile(url);
+			file = fm.downloadFile(url);
 			addJobLogMessage("Downloaded output file: " + url);
 		} catch (final Exception e) {
 			addJobLogMessage("Could not download file " + url + ": "
@@ -598,7 +603,7 @@ Comparable<JobObject> {
 	 * 
 	 * @return the job properties
 	 */
-	public synchronized final Map<String, String> getAllJobProperties() {
+	public final Map<String, String> getAllJobProperties() {
 
 		return getAllJobProperties(false);
 	}
@@ -614,7 +619,7 @@ Comparable<JobObject> {
 	 *            whether to forcefully refresh the job properties
 	 * @return the job properties
 	 */
-	public synchronized final Map<String, String> getAllJobProperties(
+	public final Map<String, String> getAllJobProperties(
 			boolean forceRefresh) {
 
 		// if (getStatus(false) == JobConstants.UNDEFINED) {
@@ -624,12 +629,17 @@ Comparable<JobObject> {
 		// }
 
 		if ((allJobProperties == null) || forceRefresh) {
-			try {
-				allJobProperties = serviceInterface.getJob(getJobname())
-				.propertiesAsMap();
-			} catch (final Exception e) {
-				throw new JobException(this, "Could not get jobproperties.", e);
+
+			synchronized (this) {
+				try {
+					allJobProperties = serviceInterface.getJob(getJobname())
+					.propertiesAsMap();
+				} catch (final Exception e) {
+					throw new JobException(this,
+							"Could not get jobproperties.", e);
+				}
 			}
+
 		}
 		return allJobProperties;
 
@@ -649,7 +659,8 @@ Comparable<JobObject> {
 			result = FileHelpers
 			.readFromFileWithException(downloadAndCacheOutputFile(relativePathToWorkingDir));
 		} catch (final Exception e) {
-			throw new JobException(this, "Could not read stdout file.", e);
+			throw new JobException(this, "Could not read file: "
+					+ relativePathToWorkingDir, e);
 		}
 
 		return result;
@@ -746,13 +757,15 @@ Comparable<JobObject> {
 	 *            whether to forcefully refresh the log messages
 	 * @return the job log
 	 */
-	public synchronized Map<Date, String> getLogMessages(boolean forceRefresh) {
+	public Map<Date, String> getLogMessages(boolean forceRefresh) {
 
 		if ((logMessages == null) || forceRefresh) {
-			try {
-				updateWithDtoJob(serviceInterface.getJob(jobname));
-			} catch (final NoSuchJobException e) {
-				e.printStackTrace();
+			synchronized (this) {
+				try {
+					updateWithDtoJob(serviceInterface.getJob(jobname));
+				} catch (final NoSuchJobException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		return logMessages;
@@ -782,29 +795,40 @@ Comparable<JobObject> {
 		// }
 
 		if (forceRefresh && !isArchived) {
-			final int oldStatus = this.status;
-			// addJobLogMessage("Getting new job status. Old status: "
-			// + JobConstants.translateStatus(oldStatus));
-			final boolean oldFinished = isFinished(false);
-			this.status = serviceInterface.getJobStatus(getJobname());
 
-			pcs.firePropertyChange("status", oldStatus, this.status);
-			pcs.firePropertyChange("statusString",
-					JobConstants.translateStatus(oldStatus),
-					getStatusString(false));
-			pcs.firePropertyChange("finished", oldFinished, isFinished(false));
-			// addJobLogMessage("Status refreshed. Status is: "
-			// + JobConstants.translateStatus(this.status));
-			if (this.status != oldStatus) {
-				EventBus.publish(new JobStatusEvent(this, oldStatus,
-						this.status));
-				if (StringUtils.isNotBlank(getJobname())) {
-					EventBus.publish(this.getJobname(), new JobStatusEvent(
-							this, oldStatus, this.status));
+			synchronized (this) {
+
+				Date now = new Date();
+				if ((this.status >= JobConstants.ACTIVE)
+						&& (lastStatusUpdate.getTime() + 2000 >= now.getTime())) {
+					myLogger.debug("Less than 2 seconds between status updates. Returning old status...");
+					return this.status;
 				}
-			}
 
-			lastStatusUpdate = new Date();
+				final int oldStatus = this.status;
+				// addJobLogMessage("Getting new job status. Old status: "
+				// + JobConstants.translateStatus(oldStatus));
+				final boolean oldFinished = isFinished(false);
+				this.status = serviceInterface.getJobStatus(getJobname());
+
+				pcs.firePropertyChange("status", oldStatus, this.status);
+				pcs.firePropertyChange("statusString",
+						JobConstants.translateStatus(oldStatus),
+						getStatusString(false));
+				pcs.firePropertyChange("finished", oldFinished, isFinished(false));
+				// addJobLogMessage("Status refreshed. Status is: "
+				// + JobConstants.translateStatus(this.status));
+				if (this.status != oldStatus) {
+					EventBus.publish(new JobStatusEvent(this, oldStatus,
+							this.status));
+					if (StringUtils.isNotBlank(getJobname())) {
+						EventBus.publish(this.getJobname(), new JobStatusEvent(
+								this, oldStatus, this.status));
+					}
+				}
+
+				lastStatusUpdate = new Date();
+			}
 
 		}
 		return this.status;
@@ -837,7 +861,7 @@ Comparable<JobObject> {
 		try {
 			result = FileHelpers.readFromFileWithException(getStdErrFile());
 		} catch (final Exception e) {
-			throw new JobException(this, "Could not read stdout file.", e);
+			throw new JobException(this, "Could not read stderr file.", e);
 		}
 
 		return result;
@@ -1091,6 +1115,15 @@ Comparable<JobObject> {
 		} catch (final Exception e) {
 			throw new JobException(this, "Could not kill/clean job.", e);
 		}
+
+	}
+
+	public final GridFile listJobDirectory() throws RemoteFileSystemException {
+
+		String jobDir = getJobDirectoryUrl();
+		GridFile result = fm.ls(jobDir);
+
+		return result;
 
 	}
 
@@ -1359,7 +1392,7 @@ Comparable<JobObject> {
 
 	}
 
-	public void updateWithDtoJob(DtoJob job) {
+	public synchronized void updateWithDtoJob(DtoJob job) {
 
 		// if (!isArchived && !job.jobname().equals(getJobname())) {
 		// throw new IllegalArgumentException(

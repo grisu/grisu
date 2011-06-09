@@ -1,6 +1,5 @@
 package grisu.frontend.view.swing.jobmonitoring.single;
 
-import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.jobMonitoring.RunningJobManager;
 import grisu.frontend.control.utils.ApplicationsManager;
@@ -133,7 +132,6 @@ SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
 		// System.out.println("Removing panel...");
 		JobObject bj = arg0.getJob();
 		JobDetailPanel temp = panels.get(bj.getJobname());
-		X.p("Cleaned: " + arg0.getJob().getJobname());
 		if (panels.get(bj.getJobname()) != null) {
 			getJideTabbedPane().setSelectedIndex(0);
 			panels.remove(bj.getJobname());

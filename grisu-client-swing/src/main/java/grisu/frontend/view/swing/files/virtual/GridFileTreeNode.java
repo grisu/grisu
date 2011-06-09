@@ -88,7 +88,7 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 		GridFile temp = ((GridFile) getUserObject());
 		temp.setChildren(null);
 		try {
-			Set<GridFile> dfo = fm.ls((GridFile) getUserObject());
+			Set<GridFile> dfo = fm.ls((GridFile) getUserObject()).getChildren();
 			if (dfo == null) {
 				return new MutableTreeNode[0];
 			}

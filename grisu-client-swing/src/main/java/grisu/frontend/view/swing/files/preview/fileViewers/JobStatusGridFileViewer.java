@@ -80,6 +80,7 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 
 		NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
 		rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+		rangeAxis.setAutoRangeIncludesZero(true);
 
 		XYItemRenderer r = plot.getRenderer();
 		if (r instanceof XYLineAndShapeRenderer) {

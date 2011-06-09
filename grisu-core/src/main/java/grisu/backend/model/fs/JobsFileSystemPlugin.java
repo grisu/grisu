@@ -1,28 +1,38 @@
 package grisu.backend.model.fs;
 
 import grisu.backend.model.User;
+import grisu.backend.model.job.Job;
 import grisu.control.ServiceInterface;
-import grisu.model.MountPoint;
+import grisu.control.exceptions.RemoteFileSystemException;
+import grisu.jcommons.constants.Constants;
+import grisu.model.FileManager;
 import grisu.model.dto.GridFile;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+/**
+ * A plugin to list archived and running jobs in a tree-like structure.
+ * 
+ * The base url for this plugin is grid://jobs . The next token is either
+ * "active" or "archived" and then comes the name of the job followed by this
+ * job directories content.
+ * 
+ * @author Markus Binsteiner
+ * 
+ */
 public class JobsFileSystemPlugin implements VirtualFileSystemPlugin {
 
 	static final Logger myLogger = Logger.getLogger(JobsFileSystemPlugin.class
 			.getName());
 
 	public static final String IDENTIFIER = "jobs";
+	public static final String ACTIVE_IDENTIFIER = "active";
+	public static final String ARCHIVED_IDENTIFIER = "archived";
+	private final static String BASE = (ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
+			+ "://" + IDENTIFIER);
 
 	private final User user;
 
@@ -31,144 +41,157 @@ public class JobsFileSystemPlugin implements VirtualFileSystemPlugin {
 	}
 
 	public GridFile createGridFile(final String path, int recursiveLevels)
-			throws InvalidPathException {
+	throws InvalidPathException {
 
 		if (recursiveLevels != 1) {
 			throw new RuntimeException(
-					"Recursion levels other than 1 not supported yet");
+			"Recursion levels other than 1 not supported yet");
 		}
 
-		String[] tokens = StringUtils.split(path, '/');
+		int index = BASE.length();
+		String importantUrlPart = path.substring(index);
+		String[] tokens = StringUtils.split(importantUrlPart, '/');
 
-		if (tokens.length == 2) {
+		if (tokens.length == 0) {
+			// means root of job virtual filesystem
 
-			GridFile result = new GridFile(
-					ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://jobs",
-					-1L);
+			GridFile result = null;
+			result = new GridFile(path, -1L);
 			result.setIsVirtual(true);
+			result.setPath(path);
 
-			for (String group : user.getAllAvailableUniqueGroupnames()) {
-
-				String fqan = user.getFullFqan(group);
-				result.addFqan(fqan);
-				if (user.getMountPoints(fqan).size() == 0) {
-					// DtoFileObject child = new DtoFileObject("grid://"
-					// + IDENTIFIER + "/" + group, -1L);
-					// child.addFqan(fqan);
-					// result.addChild(child);
-					continue;
-				} else if (user.getMountPoints(fqan).size() == 1) {
-
-					MountPoint mp = user.getMountPoints(fqan).iterator().next();
-					GridFile child = null;
-					// try {
-					// child = new DtoFileObject(mp.getRootUrl(), user
-					// .aquireFile(mp.getRootUrl(), fqan).getContent()
-					// .getLastModifiedTime());
-					// } catch (Exception e) {
-					// myLogger.error(e);
-					child = new GridFile(mp.getRootUrl(), -1L);
-					child.setName(group);
-					// }
-					child.setIsVirtual(false);
-					child.addFqan(fqan);
-					child.addSite(mp.getSite());
-					result.addChild(child);
-					result.addSite(mp.getSite());
-				} else {
-					GridFile child = new GridFile(
-							ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://"
-									+ IDENTIFIER + "/" + group, -1L);
-					child.setIsVirtual(true);
-					child.addFqan(fqan);
-
-					for (MountPoint mp : user.getMountPoints(fqan)) {
-						child.addSite(mp.getSite());
-						result.addSite(mp.getSite());
-						child.addUrl(mp.getRootUrl(), 0);
-					}
-					result.addChild(child);
-				}
+			if (recursiveLevels == 0) {
+				return result;
 			}
+
+			GridFile active = new GridFile(BASE + "/" + ACTIVE_IDENTIFIER, -1L);
+			active.setVirtual(true);
+			active.setPath(path + "/" + ACTIVE_IDENTIFIER);
+
+			List<Job> jobs = user.getActiveJobs(null, false);
+			for (Job job : jobs) {
+				active.addSite(job
+						.getJobProperty(Constants.SUBMISSION_SITE_KEY));
+			}
+
+			result.addChild(active);
+
+			GridFile archived = new GridFile(BASE + "/" + ARCHIVED_IDENTIFIER,
+					-1L);
+			archived.setVirtual(true);
+			archived.setPath(path + "/" + ARCHIVED_IDENTIFIER);
+
+			result.addChild(archived);
 
 			return result;
 
+		} else if (tokens.length == 1) {
+			// means either archived or active
+
+			if (ACTIVE_IDENTIFIER.equals(tokens[0])) {
+				return getAllActiveJobsListing();
+			} else if (ARCHIVED_IDENTIFIER.equals(tokens[0])) {
+				return getAllArchivedJobsListing();
+			} else {
+				throw new InvalidPathException("Job state not recognized: "
+						+ tokens[0] + ". Needs to be either "
+						+ ARCHIVED_IDENTIFIER + " or " + ACTIVE_IDENTIFIER);
+			}
 		} else {
 
-			String uniqueGroup = tokens[2];
-
-			if (!user.getAllAvailableUniqueGroupnames().contains(uniqueGroup)) {
-				throw new InvalidPathException("Group \"" + tokens[2]
-						+ "\" not available.");
-			}
-			String fullFqan = user.getFullFqan(uniqueGroup);
-
-			Set<MountPoint> mps = new HashSet<MountPoint>();
-			for (MountPoint mp : user.getAllMountPoints()) {
-				if (mp.getFqan().equals(fullFqan)) {
-					mps.add(mp);
-				}
+			GridFile parent = null;
+			if (ACTIVE_IDENTIFIER.equals(tokens[0])) {
+				parent = getAllActiveJobsListing();
+			} else if (ARCHIVED_IDENTIFIER.equals(tokens[0])) {
+				parent = getAllArchivedJobsListing();
+			} else {
+				throw new InvalidPathException("Job state not recognized: "
+						+ tokens[0] + ". Needs to be either "
+						+ ARCHIVED_IDENTIFIER + " or " + ACTIVE_IDENTIFIER);
 			}
 
-			final String restUrl = StringUtils.join(tokens, "/", 3,
-					tokens.length);
+			String jobname = tokens[1];
 
-			final Map<String, GridFile> lsMap = Collections
-					.synchronizedMap(new HashMap<String, GridFile>());
-
-			final ExecutorService pool = Executors.newFixedThreadPool(10);
-
-			for (final MountPoint mp : mps) {
-				Thread t = new Thread() {
-					@Override
-					public void run() {
-
-						String urlToLs = mp.getRootUrl() + "/" + restUrl;
-						try {
-							GridFile result = user.getFileSystemManager()
-									.getFolderListing(urlToLs, 1);
-							myLogger.debug("retrieved results from: "
-									+ mp.getAlias());
-							result.setPath(path);
-							for (GridFile c : result.getChildren()) {
-								if (path.endsWith("/")) {
-									c.setPath(path + c.getName());
-								} else {
-									c.setPath(path + "/" + c.getName());
-								}
-							}
-							result.addSite(mp.getSite());
-							result.addFqan(mp.getFqan());
-							lsMap.put(urlToLs, result);
-						} catch (Exception e) {
-							myLogger.error(e);
-						}
-					}
-				};
-				pool.execute(t);
+			if (!GridFile.getChildrenNames(parent).contains(jobname)) {
+				throw new InvalidPathException("Job not available: "
+						+ tokens[0] + "/" + jobname);
 			}
 
-			pool.shutdown();
+			GridFile jobDir = parent.getChild(jobname);
+
+			StringBuffer url = new StringBuffer(jobDir.getUrl());
+			for (int i = 2; i < tokens.length; i++) {
+				url.append("/" + tokens[i]);
+			}
 
 			try {
-				pool.awaitTermination(5, TimeUnit.MINUTES);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+				GridFile result = user.ls(url.toString(), 1);
+				result.setPath(path);
+				for (GridFile f : result.getChildren()) {
+					f.setPath(result.getPath() + "/" + f.getName());
+				}
+				return result;
+			} catch (RemoteFileSystemException e) {
+				throw new InvalidPathException(e);
 			}
 
-			switch (lsMap.size()) {
-			case 0:
-				return null;
-
-			case 1:
-				return lsMap.values().iterator().next();
-			default:
-				// return assembleFileObject(path, lsMap);
-				return null;
-
-			}
 		}
 
+
+	}
+
+	private GridFile getAllActiveJobsListing() {
+
+		GridFile active = new GridFile(BASE + "/" + ACTIVE_IDENTIFIER, -1L);
+		active.setVirtual(true);
+		active.setPath(BASE + "/" + ACTIVE_IDENTIFIER);
+
+		List<Job> jobs = user.getActiveJobs(null, false);
+		for (Job job : jobs) {
+			active.addSite(job
+					.getJobProperty(Constants.SUBMISSION_SITE_KEY));
+
+			String url = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+
+			if (StringUtils.isBlank(url)) {
+				continue;
+			}
+			GridFile jobDir = new GridFile(url, -1L);
+			jobDir.setPath(BASE + "/" + ACTIVE_IDENTIFIER + "/"
+					+ FileManager.getFilename(url));
+			jobDir.addFqan(job.getFqan());
+			jobDir.addSite(job.getJobProperty(Constants.SUBMISSION_SITE_KEY));
+			jobDir.setIsVirtual(false);
+
+			active.addChild(jobDir);
+		}
+
+		return active;
+	}
+
+	private GridFile getAllArchivedJobsListing() {
+
+		GridFile result = null;
+		result = new GridFile(BASE + "/" + ARCHIVED_IDENTIFIER, -1L);
+		result.setIsVirtual(true);
+		result.setPath(BASE + "/" + ARCHIVED_IDENTIFIER);
+
+		List<Job> jobs = user.getArchivedJobs(null);
+		for (Job job : jobs) {
+
+			String url = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+			GridFile jobDir = new GridFile(url, -1L);
+			jobDir.setPath(BASE + "/" + ARCHIVED_IDENTIFIER + "/"
+					+ FileManager.getFilename(url));
+
+			// jobDir.addFqan(job.getFqan());
+			// jobDir.addSite(job.getJobProperty(Constants.SUBMISSION_SITE_KEY));
+			jobDir.setIsVirtual(false);
+
+			result.addChild(jobDir);
+		}
+
+		return result;
 	}
 
 }

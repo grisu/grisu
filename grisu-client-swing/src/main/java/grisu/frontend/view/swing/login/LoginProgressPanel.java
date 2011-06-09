@@ -60,7 +60,7 @@ public class LoginProgressPanel extends JPanel implements EventSubscriber {
 	private JCheckBox getChckbxAutologinwheneverPossible() {
 		if (chckbxAutologinwheneverPossible == null) {
 			chckbxAutologinwheneverPossible = new JCheckBox(
-					"Quick-login (whenever possible)");
+			"Always auto-login using existing credential (if available)");
 
 			if (ClientPropertiesManager.getAutoLogin()) {
 				chckbxAutologinwheneverPossible.setSelected(true);
@@ -70,8 +70,8 @@ public class LoginProgressPanel extends JPanel implements EventSubscriber {
 				public void itemStateChanged(ItemEvent arg0) {
 
 					ClientPropertiesManager
-							.setAutoLogin(chckbxAutologinwheneverPossible
-									.isSelected());
+					.setAutoLogin(chckbxAutologinwheneverPossible
+							.isSelected());
 
 				}
 			});
@@ -123,7 +123,9 @@ public class LoginProgressPanel extends JPanel implements EventSubscriber {
 			@Override
 			public void run() {
 				getProgressBar().setIndeterminate(true);
-				getLabel().setText("Logging in...");
+				getLabel()
+				.setText(
+				"Logging in...(if this is your first login, it will take a while. Subsequent logins are faster...)");
 				getMessageLabel().setText("Using existing local proxy...");
 			}
 		});
@@ -138,11 +140,13 @@ public class LoginProgressPanel extends JPanel implements EventSubscriber {
 			public void run() {
 				getProgressBar().setIndeterminate(true);
 
-				getLabel().setText("Logging in...");
+				getLabel()
+						.setText(
+								"Logging in...(if this is your first login, it will take a while. Subsequent logins are faster...)");
 				getMessageLabel().setText(
 						"Connecting to: "
-								+ ClientPropertiesManager
-										.getDefaultServiceInterfaceUrl());
+						+ ClientPropertiesManager
+						.getDefaultServiceInterfaceUrl());
 			}
 
 		});

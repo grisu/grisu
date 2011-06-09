@@ -24,7 +24,6 @@ import javax.swing.JTree;
 import javax.swing.ToolTipManager;
 import javax.swing.tree.DefaultTreeModel;
 
-
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -94,11 +93,6 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 		listeners.addElement(l);
 	}
 
-	public void setDisplayHiddenFiles(boolean display) {
-		// TODO Auto-generated method stub
-
-	}
-
 	@Override
 	public void finalize() {
 		// ToolTipManager.sharedInstance().unregisterComponent(tree);
@@ -129,6 +123,10 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 		return null;
 	}
 
+	public ServiceInterface getServiceInterface() {
+		return si;
+	}
+
 	// private void fileDoubleClickOccured() {
 	//
 	// final int selRow = table.getSelectedRow();
@@ -145,19 +143,6 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 	//
 	// }
 	//
-	// }
-
-	public ServiceInterface getServiceInterface() {
-		return si;
-	}
-
-	// private JXTreeTable getTreeTable() {
-	// if (treeTable == null) {
-	// // TreeTableModel m = new UserspaceFileTreeTableModel(si,
-	// // "/ARCS/BeSTGRID");
-	// treeTable = new JXTreeTable();
-	// }
-	// return treeTable;
 	// }
 
 	private JTree getTree() {
@@ -182,6 +167,15 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 		return tree;
 	}
 
+	// private JXTreeTable getTreeTable() {
+	// if (treeTable == null) {
+	// // TreeTableModel m = new UserspaceFileTreeTableModel(si,
+	// // "/ARCS/BeSTGRID");
+	// treeTable = new JXTreeTable();
+	// }
+	// return treeTable;
+	// }
+
 	private void initialize() {
 
 		GridFile root = new GridFile(
@@ -195,7 +189,7 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 				getTree());
 
 		try {
-			for (GridFile f : fm.ls(root)) {
+			for (GridFile f : fm.ls(root).getChildren()) {
 				rootNode.add(new GridFileTreeNode(fm, f, controller,
 						displayHiddenFiles, extensionsToDisplay));
 			}
@@ -238,6 +232,11 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 	}
 
 	public void setCurrentUrl(String url) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void setDisplayHiddenFiles(boolean display) {
 		// TODO Auto-generated method stub
 
 	}

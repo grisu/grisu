@@ -2,7 +2,6 @@ package grisu.frontend.view.swing.files;
 
 import grisu.control.ServiceInterface;
 import grisu.control.events.FolderCreatedEvent;
-import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.control.fileTransfers.FileTransaction;
 import grisu.frontend.control.fileTransfers.FileTransferEvent;
 import grisu.frontend.view.swing.files.contextMenu.DefaultGrisuFileContextMenu;
@@ -45,7 +44,7 @@ import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 public class FileListPanelSimple extends JPanel implements FileListPanel,
-		EventSubscriber {
+EventSubscriber {
 
 	static final Logger myLogger = Logger.getLogger(FileListPanelSimple.class
 			.getName());
@@ -126,7 +125,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 		this.si = si;
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		this.em = GrisuRegistryManager.getDefault(si)
-				.getUserEnvironmentManager();
+		.getUserEnvironmentManager();
 		setLayout(new BorderLayout(0, 0));
 
 		fileModel = new EventTableModel<GlazedFile>(filteredList,
@@ -204,7 +203,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 						Vector<FileListListener> targets;
 						synchronized (this) {
 							targets = (Vector<FileListListener>) listeners
-									.clone();
+							.clone();
 						}
 
 						// walk through the listener list and
@@ -403,7 +402,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 
 			if (!displayTimestamp) {
 				final TableColumnExt colext = table
-						.getColumnExt("Date modified");
+				.getColumnExt("Date modified");
 				colext.setVisible(false);
 			}
 
@@ -488,7 +487,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 			} catch (final InterruptedException e) {
 				e.printStackTrace();
 				updateThread.interrupt();
-				return;
+				// return;
 
 			}
 		}
@@ -531,7 +530,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 							setCurrentDirToSite(url);
 						} else if (em.isMountPointAlias(url)) {
 							final String rootUrl = em
-									.getMountPointForAlias(url).getRootUrl();
+							.getMountPointForAlias(url).getRootUrl();
 							setUrl(rootUrl);
 						} else {
 							setUrl(url);
@@ -545,7 +544,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 					}
 
 				} catch (final Exception e) {
-
+					e.printStackTrace();
 				} finally {
 
 					SwingUtilities.invokeLater(new Thread() {
@@ -598,7 +597,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 				if (!currentUrlIsStartUrl()) {
 					try {
 						final File parent = new File(new URI(folder.getUrl()))
-								.getParentFile();
+						.getParentFile();
 
 						GlazedFile tempFile;
 						if (parent == null) {
@@ -717,10 +716,10 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 				@Override
 				public void run() {
 					currentDirectoryContent.getReadWriteLock().writeLock()
-							.lock();
+					.lock();
 					currentDirectoryContent.clear();
 					currentDirectoryContent.getReadWriteLock().writeLock()
-							.unlock();
+					.unlock();
 					getTable().revalidate();
 				}
 
@@ -802,7 +801,7 @@ public class FileListPanelSimple extends JPanel implements FileListPanel,
 		}
 	}
 
-	private void setUrl(String url) throws RemoteFileSystemException {
+	private void setUrl(String url) {
 
 		GlazedFile old = getCurrentDirectory();
 		setEmptyList();

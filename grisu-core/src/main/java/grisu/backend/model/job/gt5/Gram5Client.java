@@ -78,6 +78,8 @@ public class Gram5Client implements GramJobListener {
 	private String getContactString(String handle) {
 		try {
 			final URL url = new URL(handle);
+			myLogger.debug("job handle is " + handle);	
+			myLogger.debug("returned handle is " + url.getHost());
 			return url.getHost();
 		} catch (final MalformedURLException ex1) {
 			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
@@ -92,7 +94,9 @@ public class Gram5Client implements GramJobListener {
 
 		// we need this to catch quick failure
 		Integer status = statuses.get(handle);
+		myLogger.debug("status is " + status);
 		if ((status != null) && (status == GRAMConstants.STATUS_FAILED)) {
+			myLogger.debug("job failed : " + errors.get(handle));
 			results[0] = status;
 			results[1] = errors.get(handle);
 			return results;
@@ -102,13 +106,13 @@ public class Gram5Client implements GramJobListener {
 		final GramJob job = new GramJob(null);
 		try {
 			// lets try to see if gateway is working first...
-			Gram.ping(contact);
+			Gram.ping(cred,contact);
 		} catch (final GramException ex) {
+			myLogger.info(ex);
 			// have no idea what the status is, gateway is down:
 			return new int[] { GRAMConstants.STATUS_UNSUBMITTED, 0 };
 		} catch (final GSSException ex) {
-			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
-					.log(Level.SEVERE, null, ex);
+			myLogger.error(ex);
 		}
 
 		try {
@@ -119,7 +123,8 @@ public class Gram5Client implements GramJobListener {
 			myLogger.debug("job status is " + job.getStatusAsString());
 			myLogger.debug("job error is " + job.getError());
 		} catch (final GramException ex) {
-			if (ex.getErrorCode() == GRAMProtocolErrorConstants.CONNECTION_FAILED) {
+			myLogger.debug("ok, normal method of getting exit status is not working. need to restart job.");
+			if (ex.getErrorCode() == 156 /* job contact not found*/) {
 				// maybe the job finished, but maybe we need to kick job manager
 
 				myLogger.debug("restarting job");
@@ -139,13 +144,15 @@ public class Gram5Client implements GramJobListener {
 
 				// nope, not done yet.
 				return getJobStatus(handle, cred);
+			} else {
+				myLogger.error("something else is wrong. error code is " + ex.getErrorCode());
+				myLogger.error(ex);
 			}
+			
 		} catch (final GSSException ex) {
-			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
-					.log(Level.SEVERE, null, ex);
+			myLogger.error(ex);
 		} catch (final MalformedURLException ex) {
-			java.util.logging.Logger.getLogger(Gram5Client.class.getName())
-					.log(Level.SEVERE, null, ex);
+			myLogger.error(ex);
 
 		}
 		status = job.getStatus();

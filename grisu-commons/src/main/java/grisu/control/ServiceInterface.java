@@ -14,7 +14,6 @@ import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.DtoApplicationDetails;
 import grisu.model.dto.DtoApplicationInfo;
 import grisu.model.dto.DtoBatchJob;
-import grisu.model.dto.DtoDataLocations;
 import grisu.model.dto.DtoGridResources;
 import grisu.model.dto.DtoHostsInfo;
 import grisu.model.dto.DtoJob;
@@ -71,7 +70,7 @@ public interface ServiceInterface {
 	 */
 	@RolesAllowed("User")
 	@POST
-	@Path("/user/setbookmark/{alias}")
+	@Path("/user/archive/add/{alias}")
 	void addArchiveLocation(@PathParam("alias") String alias,
 			@QueryParam("value") String value);
 
@@ -86,7 +85,7 @@ public interface ServiceInterface {
 	 */
 	@RolesAllowed("User")
 	@POST
-	@Path("/user/setbookmark/{alias}")
+	@Path("/user/bookmarks/add/{alias}")
 	void addBookmark(@PathParam("alias") String alias,
 			@QueryParam("value") String value);
 
@@ -145,7 +144,16 @@ public interface ServiceInterface {
 	 * Archives this job to the specified url and deletes it from the database.
 	 * 
 	 * If target is null, the user property
-	 * {@link Constants#DEFAULT_JOB_ARCHIVE_LOCATION} is used.
+	 * {@link Constants#DEFAULT_JOB_ARCHIVE_LOCATION} is used. This operation
+	 * will be executed in the background, you can query its status using the
+	 * {@link #getActionStatus(String)} using the {#link
+	 * {@link #ARCHIVE_STATUS_PREFIX} (ARCHIVE_) plus the jobname as handle.
+	 * 
+	 * The default {@link Constants#DEFAULT_JOB_ARCHIVE_LOCATION} can be set via
+	 * the {@link #setUserProperty(String, String)} method, you can use the same
+	 * method to add more filesystems that should be used to query archived jobs
+	 * by using {@link Constants#JOB_ARCHIVE_LOCATION} as the key. That'll add
+	 * the specified value (format: alias;url) to the list of archive locations.
 	 * 
 	 * @param jobname
 	 *            the jobname
@@ -225,10 +233,16 @@ public interface ServiceInterface {
 	 *            the id (name) of the batchjob
 	 * @param fqan
 	 *            the vo to use
+	 * @param jobnameCreationMethod
+	 *            the method to use to (possibly) auto-calculate the jobname (if
+	 *            one with the specfied jobname in the jobProperties already
+	 *            exists). This defaults to "force-name" if you specify null.
+	 * @return the name of the job (auto-calculated or not) which is used as a
 	 * @throws JobPropertiesException
 	 */
 	@RolesAllowed("User")
-	DtoBatchJob createBatchJob(String batchJobname, String fqan)
+	DtoBatchJob createBatchJob(String batchJobname, String fqan,
+			String jobnameCreationMethod)
 	throws BatchJobException;
 
 	/**
@@ -280,11 +294,12 @@ public interface ServiceInterface {
 	 * 
 	 * @param files
 	 *            the files to delete
+	 * @return a handle for the file deletion actionstatus
 	 */
 	@RolesAllowed("User")
 	@POST
 	@Path("actions/deleteFiles")
-	void deleteFiles(@QueryParam("urls") DtoStringList files);
+	String deleteFiles(@QueryParam("urls") DtoStringList files);
 
 	/**
 	 * Lists all the mountpoints of the user's virtual filesystem.
@@ -387,17 +402,36 @@ public interface ServiceInterface {
 	DtoActionStatus getActionStatus(@PathParam("handle") String actionHandle);
 
 	/**
-	 * Returns all applications that are available grid-wide or at certain
-	 * sites.
+	 * Returns a xml document that contains all the current (non-archived) jobs
+	 * of the user with information about the jobs.
 	 * 
-	 * @param sites
-	 *            all the sites you want to query or null for a grid-wide search
+	 * @param application
+	 *            filter by application or null (for all jobs)
+	 * @param refreshJobStatus
+	 *            whether to refresh the status of all the jobs. This can take
+	 *            quite some time.
+	 * 
+	 * @return xml formated information about all the users jobs
+	 */
+	@GET
+	@Path("user/activejobs/{application}/{refresh}")
+	@RolesAllowed("User")
+	DtoJobs getActiveJobs(@PathParam("application") String application,
+			@PathParam("refresh") boolean refreshJobStatus);
+
+	/**
+	 * Returns all applications that are available grid-wide or for a certain
+	 * vo.
+	 * 
+	 * @param fqans
+	 *            all the fqans you want to query or null for a grid-wide search
+	 *            (fqan-independent).
 	 * @return all applications
 	 */
 	@POST
 	@Path("info/applications")
 	DtoStringList getAllAvailableApplications(
-			@QueryParam("sites") DtoStringList sites);
+			@QueryParam("sites") DtoStringList fqans);
 
 	/**
 	 * Returns a list of all batch jobnames that are currently stored on this
@@ -424,8 +458,14 @@ public interface ServiceInterface {
 	/**
 	 * Returns a list of all jobnames that are currently stored on this backend.
 	 * 
-	 * Doesn't include batchjobs.
+	 * By default it doesn't include batchjobs, but if you specify
+	 * {@link Constants#ALLJOBS_INCL_BATCH_KEY} as parameter, it will return all
+	 * (single-)jobnames. If you specify null or {@link Constants#ALLJOBS_KEY},
+	 * it will return all single jobs excuding childs of batchjobs.
 	 * 
+	 * @param application
+	 *            the name of the application of the jobs you are interested or
+	 *            {@link Constants#ALLJOBS_KEY} or null
 	 * @return all jobnames
 	 */
 	@GET
@@ -486,16 +526,6 @@ public interface ServiceInterface {
 			@PathParam("application") String application,
 			@PathParam("version") String version, @PathParam("site") String site);
 
-	/**
-	 * Returns a list of all application packages that provide the specified
-	 * executable.
-	 * 
-	 * @param executable
-	 *            the executable
-	 * @return the application package(s)
-	 */
-	String[] getApplicationPackagesForExecutable(String executable);
-
 	// /**
 	// * Finds all children files for the specified folder. Useful if you want
 	// to
@@ -517,6 +547,16 @@ public interface ServiceInterface {
 	// DtoStringList getChildrenFileNames(@QueryParam("url") String url,
 	// @QueryParam("onlyFiles") boolean onlyFiles)
 	// throws RemoteFileSystemException;
+
+	/**
+	 * Returns a list of all application packages that provide the specified
+	 * executable.
+	 * 
+	 * @param executable
+	 *            the executable
+	 * @return the application package(s)
+	 */
+	String[] getApplicationPackagesForExecutable(String executable);
 
 	/**
 	 * Returns a xml document that contains all the jobs of the user with
@@ -579,24 +619,6 @@ public interface ServiceInterface {
 	@Path("user/session/credentialendtime")
 	long getCredentialEndTime();
 
-	/**
-	 * Returns a xml document that contains all the current (non-archived) jobs
-	 * of the user with information about the jobs.
-	 * 
-	 * @param application
-	 *            filter by application or null (for all jobs)
-	 * @param refreshJobStatus
-	 *            whether to refresh the status of all the jobs. This can take
-	 *            quite some time.
-	 * 
-	 * @return xml formated information about all the users jobs
-	 */
-	@GET
-	@Path("user/currentjobs/{application}/{refresh}")
-	@RolesAllowed("User")
-	DtoJobs getCurrentJobs(@PathParam("application") String application,
-			@PathParam("refresh") boolean refreshJobStatus);
-
 	// ---------------------------------------------------------------------------------------------------
 	//
 	// Filesystem methods
@@ -617,19 +639,19 @@ public interface ServiceInterface {
 	// @Path("interfaceVersion")
 	// String getInterfaceVersion();
 
-	/**
-	 * Checks the available data locations for the specified site and VO.
-	 * 
-	 * @param fqan
-	 *            the VO
-	 * @return a map of datalocations for this vo with the root url of the
-	 *         location as key (e.g. gsiftp://brecca.vpac.monash.edu.au:2811 and
-	 *         the paths that are accessible for this VO there as values (e.g.
-	 *         /home/grid-admin)
-	 */
-	@GET
-	@Path("info/{fqan}/datalocations")
-	DtoDataLocations getDataLocationsForVO(@PathParam("fqan") String fqan);
+	// /**
+	// * Checks the available data locations for the specified site and VO.
+	// *
+	// * @param fqan
+	// * the VO
+	// * @return a map of datalocations for this vo with the root url of the
+	// * location as key (e.g. gsiftp://brecca.vpac.monash.edu.au:2811 and
+	// * the paths that are accessible for this VO there as values (e.g.
+	// * /home/grid-admin)
+	// */
+	// @GET
+	// @Path("info/{fqan}/datalocations")
+	// DtoDataLocations getDataLocationsForVO(@PathParam("fqan") String fqan);
 
 	/**
 	 * Checks the current certificate and returns its' dn.
@@ -1250,6 +1272,19 @@ public interface ServiceInterface {
 
 	/**
 	 * Sets a user property.
+	 * 
+	 * <p>
+	 * There are special user properties that can be set by using one of the
+	 * following strings as key:
+	 * </p>
+	 * <p>
+	 * {@link Constants#CLEAR_MOUNTPOINT_CACHE}(clearMountPointCache): prompts
+	 * Grisu to delete the cached filesystems for the user. Next startup will be
+	 * slower but with up-to-date mountpoints. This caching can be disabled on
+	 * the backend, so setting this property might not have any effect.
+	 * </p>
+	 * <p>
+	 * {@link Constants#JOB_ARCHIVE_LOCATION}(archiveLocation): as described in {@link #archiveJob(String, String), this allows to tell Grisu about locations where archived Grisu jobs are located. Use this string as key and a ;-separated alias;url string as value to add such a location.
 	 * 
 	 * @param key
 	 *            the key
