@@ -43,7 +43,7 @@ public class JobsFileSystemPlugin implements VirtualFileSystemPlugin {
 	public GridFile createGridFile(final String path, int recursiveLevels)
 	throws InvalidPathException {
 
-		if (recursiveLevels != 1) {
+		if (recursiveLevels > 1) {
 			throw new RuntimeException(
 			"Recursion levels other than 1 not supported yet");
 		}
