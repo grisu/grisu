@@ -398,7 +398,7 @@
 		<dependency>
 			<groupId>grith</groupId>
 			<artifactId>jgrith</artifactId>
-			<version>0.5.8-SNAPSHOT</version>
+			<version>0.5.7.1</version>
 			<scope>compile</scope>
 			<exclusions>
 				<exclusion>
