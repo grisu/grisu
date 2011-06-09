@@ -70,7 +70,7 @@ public interface ServiceInterface {
 	 */
 	@RolesAllowed("User")
 	@POST
-	@Path("/user/setbookmark/{alias}")
+	@Path("/user/archive/add/{alias}")
 	void addArchiveLocation(@PathParam("alias") String alias,
 			@QueryParam("value") String value);
 
@@ -85,7 +85,7 @@ public interface ServiceInterface {
 	 */
 	@RolesAllowed("User")
 	@POST
-	@Path("/user/setbookmark/{alias}")
+	@Path("/user/bookmarks/add/{alias}")
 	void addBookmark(@PathParam("alias") String alias,
 			@QueryParam("value") String value);
 
@@ -294,11 +294,12 @@ public interface ServiceInterface {
 	 * 
 	 * @param files
 	 *            the files to delete
+	 * @return a handle for the file deletion actionstatus
 	 */
 	@RolesAllowed("User")
 	@POST
 	@Path("actions/deleteFiles")
-	void deleteFiles(@QueryParam("urls") DtoStringList files);
+	String deleteFiles(@QueryParam("urls") DtoStringList files);
 
 	/**
 	 * Lists all the mountpoints of the user's virtual filesystem.

@@ -128,9 +128,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		myLogger.info("Starting up backend...");
 		myLogger.info("============================================");
 
+		myLogger.info("Setting networkaddress.cache.ttl java security property to -1...");
+		java.security.Security.setProperty("networkaddress.cache.ttl", "" + -1);
 
 		CoGProperties.getDefault().setProperty(
 				CoGProperties.ENFORCE_SIGNING_POLICY, "false");
+
 
 		try {
 			LocalTemplatesHelper.copyTemplatesAndMaybeGlobusFolder();
@@ -1272,10 +1275,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see grisu.control.ServiceInterface#deleteFiles(java.lang.String[])
 	 */
-	public void deleteFiles(final DtoStringList files) {
+	public String deleteFiles(final DtoStringList files) {
+
+		// TODO implement that as background task
 
 		if ((files == null) || (files.asArray().length == 0)) {
-			return;
+			return null;
 		}
 
 		final DtoActionStatus status = new DtoActionStatus(files.asArray()[0],
@@ -1297,6 +1302,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		status.setFinished(true);
+
+		return null;
 
 	}
 
