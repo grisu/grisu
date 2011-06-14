@@ -84,7 +84,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				fqanT = "/" + fqanT;
 			}
 
-			Set<String> urls = resolveUrls(restPath, fqanT);
+			Set<String> urls = resolveUrls(restPath, fqanT, true);
 
 			if (urls.size() == 0) {
 				// TODO not sure what to do
@@ -201,7 +201,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			// sites that support this vo
 			// and also all child vos
 			String parentfqan = "/" + tokens[0];
-			Set<String> urls = resolveUrls(path, parentfqan);
+			Set<String> urls = resolveUrls(path, parentfqan, true);
 
 			if (urls.size() == 1) {
 				result = new GridFile(urls.iterator().next(), -1L);
@@ -286,7 +286,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 				String rest = path.substring(currentUrl.length());
 
-				Set<String> urls = resolveUrls(rest, potentialFqan);
+				Set<String> urls = resolveUrls(rest, potentialFqan, true);
 				parentUrls.addAll(urls);
 
 				if (recursiveLevels == 1) {
@@ -511,7 +511,8 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 	}
 
-	private Set<String> resolveUrls(String path, String fqan) {
+	private Set<String> resolveUrls(String path, String fqan,
+			boolean excludeVolatileFilesystems) {
 
 		Set<MountPoint> mps = user.getMountPoints(fqan);
 
@@ -519,7 +520,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 		Iterator<MountPoint> it = mps.iterator();
 		while (it.hasNext()) {
 			MountPoint mp = it.next();
-			if (mp.isVolatileFileSystem()) {
+			if (excludeVolatileFilesystems && mp.isVolatileFileSystem()) {
 				it.remove();
 			}
 		}
