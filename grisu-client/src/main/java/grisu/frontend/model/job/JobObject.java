@@ -38,6 +38,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import javax.persistence.Transient;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -1188,6 +1190,26 @@ Comparable<JobObject> {
 			}
 		}
 
+	}
+
+	/**
+	 * Convenience method to create a unique jobname by appending a number to
+	 * the jobname (if necessary).
+	 * 
+	 * @param jobname
+	 *            the base jobname
+	 */
+	@Transient
+	public void setUniqueJobname(final String jobname) {
+
+		if (StringUtils.isBlank(jobname)) {
+			setJobname(jobname);
+		} else {
+			String newname = GrisuRegistryManager.getDefault(serviceInterface)
+					.getUserEnvironmentManager()
+					.calculateUniqueJobname(jobname);
+			setJobname(newname);
+		}
 	}
 
 	/**
