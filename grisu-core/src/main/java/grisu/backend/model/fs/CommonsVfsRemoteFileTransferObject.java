@@ -89,17 +89,16 @@ RemoteFileTransferObject {
 				} finally {
 
 					fsCache.close();
-					// try {
-					// sourceF.getFileSystem().getFileSystemManager().closeFileSystem(sourceF.getFileSystem());
-					// } catch (Exception e) {
-					// e.printStackTrace();
-					// }
-					// try {
-					// targetF.getFileSystem().getFileSystemManager().closeFileSystem(sourceF.getFileSystem());
-					// } catch (Exception e) {
-					// e.printStackTrace();
-					// }
-
+					try {
+						source.close();
+					} catch (FileSystemException ex){
+						myLogger.warn(ex.getLocalizedMessage());
+					}
+					try {
+						target.close();
+					} catch (FileSystemException ex){
+						myLogger.warn(ex.getLocalizedMessage());
+					}
 				}
 
 			}
