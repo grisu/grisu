@@ -72,8 +72,8 @@ public class LoginManager {
 	"https://compute.services.bestgrid.org/soap/GrisuService")
 	.put("BeSTGRID-DEV",
 	"https://compute-dev.services.bestgrid.org/soap/GrisuService")
-			.put("BeSTGRID-TEST",
-					"https://compute-test.services.bestgrid.org/grisu-ws/soap/GrisuService")
+	.put("BeSTGRID-TEST",
+	"https://compute-test.services.bestgrid.org/grisu-ws/soap/GrisuService")
 	.put("LOCAL_WS", "http://localhost:8080/soap/GrisuService")
 	.put("LOCAL_WS_TOMCAT",
 	"http://localhost:8080/grisu-ws/soap/GrisuService").build();
@@ -322,33 +322,33 @@ public class LoginManager {
 		Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
 		final String serviceInterfaceUrl = loginParams.getServiceInterfaceUrl();
 
-		if ("Local".equals(serviceInterfaceUrl)
-				|| "Dummy".equals(serviceInterfaceUrl)) {
+		// if ("Local".equals(serviceInterfaceUrl)
+		// || "Dummy".equals(serviceInterfaceUrl)) {
+		//
+		// dependencies = new HashMap<Dependency, String>();
+		//
+		// dependencies.put(Dependency.GRISU_LOCAL_BACKEND,
+		// ServiceInterface.INTERFACE_VERSION);
+		//
+		// DependencyManager.addDependencies(dependencies,
+		// Environment.getGrisuPluginDirectory());
+		//
+		// } else if (serviceInterfaceUrl.startsWith("http")) {
 
-			dependencies = new HashMap<Dependency, String>();
+		// assume xfire -- that needs to get smarter later on
 
-			dependencies.put(Dependency.GRISU_LOCAL_BACKEND,
-					ServiceInterface.INTERFACE_VERSION);
+		// dependencies = new HashMap<Dependency, String>();
+		//
+		// dependencies.put(Dependency.GRISU_XFIRE_CLIENT_LIBS,
+		// ServiceInterface.INTERFACE_VERSION);
+		// // also try to use client side mds
+		// dependencies.put(Dependency.CLIENT_SIDE_MDS,
+		// ServiceInterface.INTERFACE_VERSION);
+		//
+		// DependencyManager.addDependencies(dependencies,
+		// Environment.getGrisuPluginDirectory());
 
-			DependencyManager.addDependencies(dependencies,
-					Environment.getGrisuPluginDirectory());
-
-		} else if (serviceInterfaceUrl.startsWith("http")) {
-
-			// assume xfire -- that needs to get smarter later on
-
-			// dependencies = new HashMap<Dependency, String>();
-			//
-			// dependencies.put(Dependency.GRISU_XFIRE_CLIENT_LIBS,
-			// ServiceInterface.INTERFACE_VERSION);
-			// // also try to use client side mds
-			// dependencies.put(Dependency.CLIENT_SIDE_MDS,
-			// ServiceInterface.INTERFACE_VERSION);
-			//
-			// DependencyManager.addDependencies(dependencies,
-			// Environment.getGrisuPluginDirectory());
-
-		}
+		// }
 
 		ServiceInterface si = null;
 
@@ -797,8 +797,10 @@ public class LoginManager {
 					}
 				}
 
+				final LoginParams params = new LoginParams(url, null, null);
+
 				return LoginManager.login(null, password.toCharArray(), null,
-						null, true);
+						null, params, true);
 			} catch (final LoginException e) {
 				System.out.println("Login exception: "
 						+ e.getLocalizedMessage());
