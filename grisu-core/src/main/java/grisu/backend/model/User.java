@@ -1493,11 +1493,7 @@ public class User {
 		// is a voms credential needed? -- apparently not - only dn must match
 		if ((cred == null) || !cred.isValid()) {
 
-			final VO vo = VOManagement.getVO(getFqans().get(
-					job.getFqan()));
-
-			job.setCredential(CertHelpers.getVOProxyCredential(vo,
-					job.getFqan(), getCred()));
+			job.setCredential(getCred(job.getFqan()));
 			changedCred = true;
 		}
 
@@ -1858,10 +1854,8 @@ public class User {
 		} else {
 
 			final Map<String, String> temp = getFqans();
-			final VO vo = VOManagement.getVO(temp.get(fqan));
 
-			final ProxyCredential vomsProxyCred = CertHelpers
-			.getVOProxyCredential(vo, fqan, getCred());
+			final ProxyCredential vomsProxyCred =getCred(fqan);
 
 			return mountFileSystem(root, name, vomsProxyCred, useHomeDirectory,
 					site);
