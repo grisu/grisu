@@ -195,11 +195,13 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 	public boolean createFolder(String url) throws RemoteFileSystemException {
 		FileSystemCache fsCache = new FileSystemCache(user);
+		FileObject folder = null;
 
 		try {
-			FileObject folder = aquireFile(fsCache, url, null);
+			folder = aquireFile(fsCache, url, null);
 			return createFolder(folder);
 		} finally {
+			closeFile(folder);
 			fsCache.close();
 		}
 	}
@@ -233,6 +235,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 					+ e.getLocalizedMessage());
 		} finally {
 			fsCache.close();
+			closeFile(fileObject);
 		}
 
 	}
@@ -246,13 +249,13 @@ FileSystemInfoPlugin, FileTransferPlugin {
 		final DataSource[] datasources = new DataSource[filenames.length];
 		final DataHandler[] datahandlers = new DataHandler[filenames.length];
 
-		FileSystemCache fsCache = new FileSystemCache(user);
-
+		FileSystemCache fsCache = new FileSystemCache(user);		
+		FileObject source = null;
+		
 		try {
 
 			for (int i = 0; i < filenames.length; i++) {
 
-				FileObject source = null;
 				DataSource datasource = null;
 				source = aquireFile(fsCache, filenames[i]);
 				myLogger.debug("Preparing data for file transmission for file "
@@ -278,6 +281,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 		} finally {
 			fsCache.close();
+			closeFile(source);
 		}
 
 		return datahandlers[0];
@@ -288,9 +292,11 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 		boolean exists;
 		FileSystemCache fsCache = new FileSystemCache(user);
+		FileObject fo = null;
 
 		try {
-			exists = aquireFile(fsCache, file).exists();
+			fo = aquireFile(fsCache, file);
+			exists = fo.exists();
 			return exists;
 		} catch (final FileSystemException e) {
 
@@ -299,6 +305,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 		} finally {
 			fsCache.close();
+			closeFile(fo);
 		}
 
 	}
@@ -307,15 +314,16 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 		long size;
 		FileSystemCache fsCache = new FileSystemCache(user);
+		FileObject file_object = null;
 		try {
-
-			final FileObject file_object = aquireFile(fsCache, file);
+			file_object = aquireFile(fsCache, file);
 			size = file_object.getContent().getSize();
 		} catch (final FileSystemException e) {
 			throw new RemoteFileSystemException("Could not get size of file: "
 					+ file + ": " + e.getMessage());
 		} finally {
 			fsCache.close();
+			closeFile(file_object);
 		}
 
 		return size;
@@ -409,6 +417,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			throw new RemoteFileSystemException(fse);
 		} finally {
 			fsCache.close();
+			closeFile(fo);
 		}
 
 	}
@@ -453,8 +462,10 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 		boolean isFolder;
 		FileSystemCache fsCache = new FileSystemCache(user);
+		FileObject folder = null;
 		try {
-			isFolder = (aquireFile(fsCache, file).getType() == FileType.FOLDER);
+			folder = aquireFile(fsCache, file);
+			isFolder = (folder.getType() == FileType.FOLDER);
 		} catch (final Exception e) {
 			myLogger.error("Couldn't access file: " + file
 					+ " to check whether it is a folder."
@@ -474,6 +485,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			}
 		} finally {
 			fsCache.close();
+			closeFile(folder);
 		}
 
 		return isFolder;
@@ -483,14 +495,16 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	public long lastModified(final String url) throws RemoteFileSystemException {
 
 		FileSystemCache fsCache = new FileSystemCache(user);
+		FileObject file = null;
 		try {
-			final FileObject file = aquireFile(fsCache, url);
+			file = aquireFile(fsCache, url);
 			return file.getContent().getLastModifiedTime();
 		} catch (final FileSystemException e) {
 			throw new RemoteFileSystemException("Could not access file " + url
 					+ ": " + e.getMessage());
 		} finally {
 			fsCache.close();
+			closeFile(file);
 		}
 	}
 
@@ -643,9 +657,9 @@ FileSystemInfoPlugin, FileTransferPlugin {
 		FileSystemCache fsCache = new FileSystemCache(user);
 
 		String result = null;
+		FileObject target = null;
 
 		try {
-			FileObject target = null;
 			final String parent = filename.substring(0,
 					filename.lastIndexOf(File.separator));
 
@@ -671,6 +685,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			}
 
 			fsCache.close();
+			closeFile(target);
 			// e.printStackTrace();
 			throw new RemoteFileSystemException("Could not open file: "
 					+ filename + ":" + e.getMessage());
@@ -719,6 +734,10 @@ FileSystemInfoPlugin, FileTransferPlugin {
 					+ filename + ": " + e.getMessage());
 		} finally {
 			fsCache.close();
+			try {
+				source.getInputStream().close();
+			} catch (IOException ex) {}
+			closeFile(target);
 		}
 
 		myLogger.debug("Data transmission for file " + filename + " finished.");
@@ -970,5 +989,13 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			}
 		}.start();
 
+	}
+	
+	private void closeFile(FileObject f){
+		try {
+			f.close();
+		} catch (FileSystemException ex){
+			myLogger.warn(ex.getLocalizedMessage());
+		}
 	}
 }
