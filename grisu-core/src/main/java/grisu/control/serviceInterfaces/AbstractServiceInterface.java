@@ -3905,11 +3905,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		status.addElement("Setting credential...");
 		if (job.getFqan() != null) {
-			final VO vo = VOManagement.getVO(getUser().getFqans().get(
-					job.getFqan()));
+
 			try {
-				job.setCredential(CertHelpers.getVOProxyCredential(vo,
-						job.getFqan(), getCredential()));
+				job.setCredential(getUser().getCred(job.getFqan()));
 			} catch (final Exception e) {
 				throw new JobSubmissionException(
 						"Could not create credential to use to submit the job: "
