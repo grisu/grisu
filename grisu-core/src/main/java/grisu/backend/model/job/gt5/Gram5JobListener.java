@@ -5,7 +5,12 @@ import java.util.HashMap;
 import org.globus.gram.GramJob;
 import org.globus.gram.GramJobListener;
 
+import org.apache.log4j.Logger;
+
 public class Gram5JobListener implements GramJobListener{
+
+	static final Logger myLogger = Logger.getLogger(GT5Submitter.class
+			.getName());
 	
 	private static Gram5JobListener l;
 	private HashMap<String,Integer> statuses; 
@@ -25,6 +30,7 @@ public class Gram5JobListener implements GramJobListener{
 
 
 	public void statusChanged(GramJob job) {
+        myLogger.debug("job status changed to " + job.getStatus());
 		statuses.put( job.getIDAsString(),job.getStatus());
 		errors.put(job.getIDAsString(), job.getError());
 	}

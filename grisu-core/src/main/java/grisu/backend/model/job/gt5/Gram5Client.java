@@ -37,9 +37,10 @@ public class Gram5Client {
 		final Gram5JobListener l = Gram5JobListener.getJobListener();
 
 		// we need this to catch quick failure
-		Integer status = l.getStatus(handle); 
+		//Integer status = l.getStatus(handle);
+		Integer status = null;
 		
-		myLogger.debug("status is " + status);
+		myLogger.debug("job status is " + status);
 		if (status != null) {
 			results[0] = status;
 			results[1] = l.getError(handle);
