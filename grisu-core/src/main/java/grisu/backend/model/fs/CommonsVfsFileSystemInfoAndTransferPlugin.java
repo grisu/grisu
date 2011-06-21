@@ -281,7 +281,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 		} finally {
 			fsCache.close();
-			closeFile(source);
+			/* closeFile(source); */
 		}
 
 		return datahandlers[0];
@@ -737,7 +737,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			try {
 				source.getInputStream().close();
 			} catch (IOException ex) {}
-			closeFile(target);
+			closeFile(target); 
 		}
 
 		myLogger.debug("Data transmission for file " + filename + " finished.");
