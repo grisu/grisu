@@ -2118,8 +2118,8 @@ Comparable<BatchJobObject>, Listener {
 	 * used.
 	 * 
 	 * @param sites
-	 *            a list of simple patterns that specify on which sites to
-	 *            exclude to run jobs
+	 *            a list of simple patterns that specify on which
+	 *            submissionlocations to exclude to run jobs
 	 */
 	public void setLocationsToExclude(String[] locationPatterns) {
 		if (locationPatterns == null) {

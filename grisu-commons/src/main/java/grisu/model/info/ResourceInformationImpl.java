@@ -1,6 +1,7 @@
 package grisu.model.info;
 
 import grisu.control.ServiceInterface;
+import grisu.jcommons.constants.Constants;
 import grisu.model.dto.DtoStringList;
 
 import java.net.URI;
@@ -264,7 +265,10 @@ public class ResourceInformationImpl implements ResourceInformation {
 	public final List<String> getStagingFilesystemsForSubmissionLocation(
 			final String subLoc) {
 
-		if ((subLoc == null) || "".equals(subLoc)) {
+		if ((subLoc == null)
+				|| "".equals(subLoc)
+				|| Constants.NO_SUBMISSION_LOCATION_INDICATOR_STRING
+						.equals(subLoc)) {
 			return null;
 		}
 
