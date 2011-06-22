@@ -268,9 +268,13 @@ FileSystemInfoPlugin, FileTransferPlugin {
 								            + " for download: InputFile does not exist.");
 					}
 
-					datasource = new FileContentDataSourceConnector(
-							source.getContent());
+					datasource = new FileContentDataSourceConnector(source);
 				} catch (final FileSystemException e) {
+					try {
+						source.close();
+					} catch (FileSystemException ex){
+						myLogger.warn("could not close file: " + ex.getLocalizedMessage());
+					}
 					throw new RemoteFileSystemException(
 							"Could not find or read file: " + filenames[i]
 							                                            + ": " + e.getMessage());
@@ -281,7 +285,6 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 		} finally {
 			fsCache.close();
-			/* closeFile(source); */
 		}
 
 		return datahandlers[0];
