@@ -2,13 +2,17 @@ package grisu.backend.utils;
 
 import grisu.backend.model.fs.CommonsVfsRemoteFileTransferObject;
 
+import java.io.FilterInputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.activation.DataSource;
 
 import org.apache.commons.vfs.FileContent;
+import org.apache.commons.vfs.FileObject;
 import org.apache.log4j.Logger;
 
 /**
@@ -20,34 +24,22 @@ import org.apache.log4j.Logger;
  */
 public class FileContentDataSourceConnector implements DataSource {
 	
-	private InputStream in;
-	private OutputStream out;
-	private IOException inIO  = null;
-	private IOException outIO = null;
 	private String name ;
 	
-	private FileContent content;
+	private static AtomicInteger inNumber = new AtomicInteger(0);
+	private static AtomicInteger outNumber = new AtomicInteger(0);
+	
+	
+	private FileObject f;
 	
 	static final Logger myLogger = Logger
 	.getLogger(CommonsVfsRemoteFileTransferObject.class.getName());
 
-	public FileContentDataSourceConnector(final FileContent content) {
+	public FileContentDataSourceConnector(final FileObject f) {
 		
-		this.content = content;
+		this.f = f;
+		this.name = f.getName().getBaseName();	
 		
-		try {
-			this.in = content.getInputStream();
-		} catch (IOException ex){
-			this.inIO = ex;
-		}
-		
-		try {
-			this.out = content.getOutputStream();
-		} catch (IOException ex){
-			this.outIO = ex;
-		}
-		
-		this.name = content.getFile().getName().getBaseName();
 	}
 
 	public final String getContentType() {
@@ -55,10 +47,7 @@ public class FileContentDataSourceConnector implements DataSource {
 	}
 
 	public final InputStream getInputStream() throws IOException {
-		if (this.inIO != null){
-			throw this.inIO;
-		}
-		return this.in;
+		return new ContentInputStream(f, f.getContent().getInputStream());
 	}
 
 	public final String getName() {
@@ -66,24 +55,79 @@ public class FileContentDataSourceConnector implements DataSource {
 	}
 
 	public final OutputStream getOutputStream() throws IOException {
-		if (this.outIO != null){
-			throw this.outIO;
-		}
-		return this.out;
+		return new ContentOutputStream(f,f.getContent().getOutputStream());
 	}
 	
 	protected void finalize() throws Throwable{
+		myLogger.debug("now closing all streams");
 		try {
-			myLogger.warn("now closing all streams");
-			content.close();
-		} finally {
+			f.close();
+		} catch (Exception ex) {
+			myLogger.warn(ex.getMessage());
+		}
+	} 
+	
+	private class ContentInputStream extends FilterInputStream {
+		
+		private FileObject f;
+
+		public ContentInputStream(FileObject f, InputStream in){
+			super(in);
+			myLogger.debug("creating input stream: " + inNumber.incrementAndGet());
+			this.f = f;
+		}
+		
+		@Override
+		public void close() throws IOException {
+			myLogger.debug("content input stream is closed " + inNumber.get());
 			try {
-				getInputStream().close();
+				f.close();
+			} catch (Exception ex) {
+				myLogger.warn(ex.getMessage());
 			}
-			finally {
-				getOutputStream().close();
-			}
+				in.close();		
+		}
+		
+		@Override
+		protected void finalize() throws Throwable {
+			this.close();
 		}
 	}
+	
+	
+private class ContentOutputStream extends FilterOutputStream {
+		
+		private FileObject f;
+		
+		 
 
+		public ContentOutputStream(FileObject f, OutputStream out){
+			super(out);
+			myLogger.debug("creating output stream: " + outNumber.incrementAndGet());
+			this.f = f;
+		}
+		
+		@Override
+		public void close() throws IOException {
+			myLogger.debug("content output stream is closed " + outNumber.get());
+			try {
+				f.getContent().close();
+			} catch (Exception ex){
+				myLogger.warn(ex.getMessage());
+			}
+			try {
+				f.close();
+			} catch (Exception ex) {
+				myLogger.warn(ex.getMessage());
+			}
+				out.close();
+			
+		}
+		
+		@Override
+		protected void finalize() throws Throwable {
+			this.close();
+		}
+	}
+	
 }
