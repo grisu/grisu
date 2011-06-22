@@ -73,7 +73,7 @@ public class LoginManager {
 	.put("BeSTGRID-DEV",
 	"https://compute-dev.services.bestgrid.org/soap/GrisuService")
 	.put("BeSTGRID-TEST",
-	"https://compute-test.services.bestgrid.org/grisu-ws/soap/GrisuService")
+	"https://compute-test.services.bestgrid.org/soap/GrisuService")
 	.put("LOCAL_WS", "http://localhost:8080/soap/GrisuService")
 	.put("LOCAL_WS_TOMCAT",
 	"http://localhost:8080/grisu-ws/soap/GrisuService").build();
@@ -126,7 +126,8 @@ public class LoginManager {
 				Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler());
 			}
 
-			java.security.Security.addProvider(new DefaultGridSecurityProvider());
+			java.security.Security
+			.addProvider(new DefaultGridSecurityProvider());
 
 			java.security.Security
 			.setProperty("ssl.TrustManagerFactory.algorithm",
