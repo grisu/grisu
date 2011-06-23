@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<url>http://projects.arcs.org.au/trac/grisu/wiki/GrisuCore</url>
 	<parent>
 		<artifactId>grisu</artifactId>
@@ -30,13 +31,8 @@
 		connect to
 		it.</description>
 
-<!--	<repositories>
-		<repository>
-			<id>commons-vfs-grid</id>
-			<url>http://commonsvfsgrid.sourceforge.net/maven/</url>
-		</repository>
-
-	</repositories>-->
+	<!-- <repositories> <repository> <id>commons-vfs-grid</id> <url>http://commonsvfsgrid.sourceforge.net/maven/</url> 
+		</repository> </repositories> -->
 
 	<dependencies>
 
@@ -114,11 +110,11 @@
 			</exclusions>
 		</dependency>
 
-<!--		<dependency>-->
-<!--			<groupId>org.hibernate</groupId>-->
-<!--			<artifactId>hibernate-search</artifactId>-->
-<!--			<version>3.2.0.Final</version>-->
-<!--		</dependency>-->
+		<!-- <dependency> -->
+		<!-- <groupId>org.hibernate</groupId> -->
+		<!-- <artifactId>hibernate-search</artifactId> -->
+		<!-- <version>3.2.0.Final</version> -->
+		<!-- </dependency> -->
 
 		<dependency>
 			<groupId>cglib</groupId>
@@ -397,8 +393,7 @@
 		<dependency>
 			<groupId>grith</groupId>
 			<artifactId>jgrith</artifactId>
-			<version>0.5.7.1</version>
-			<scope>compile</scope>
+			<version>0.5.8-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>gsindl</artifactId>
@@ -410,23 +405,28 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-<dependency>
-  <groupId>log4j</groupId>
-  <artifactId>apache-log4j-extras</artifactId>
-  <version>1.1</version>
-  <type>pom</type>
-</dependency>
-<dependency>
-	<groupId>au.org.arcs.infosystems</groupId>
-	<artifactId>mds4-client</artifactId>
-	<version>0.8.7-SNAPSHOT</version>
-	<type>jar</type>
-	<scope>compile</scope>
-</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>apache-log4j-extras</artifactId>
+			<version>1.1</version>
+			<type>pom</type>
+		</dependency>
+		<dependency>
+			<groupId>au.org.arcs.infosystems</groupId>
+			<artifactId>mds4-client</artifactId>
+			<version>0.8.7-SNAPSHOT</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>matchmaker</artifactId>
 			<version>0.8.7-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>grisu.frontend</groupId>
+			<artifactId>gridftp-tests</artifactId>
+			<version>0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 

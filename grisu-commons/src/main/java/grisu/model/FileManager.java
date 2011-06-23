@@ -1045,8 +1045,8 @@ public class FileManager {
 	 * 
 	 * @param url
 	 *            the url of the source file
-	 * @param target
-	 *            the target directory of file
+	 * @param targetDir
+	 *            the target directory
 	 * @param overwrite
 	 *            whether to overwrite a possibly existing file
 	 * @return the handle to the downloaded file
@@ -1055,11 +1055,10 @@ public class FileManager {
 	 * @throws FileTransactionException
 	 *             if the file can't be downloaded for some reason
 	 */
-	public File downloadUrl(String url, String target, boolean overwrite)
+	public File downloadUrl(String url, File targetDir, boolean overwrite)
 			throws IOException, FileTransactionException {
 
-		final File targetFile = getFileFromUriOrPath(target + "/"
-				+ getFilename(url));
+		final File targetFile = new File(targetDir, getFilename(url));
 		if (targetFile.exists() && targetFile.isDirectory()) {
 			if (!targetFile.canWrite()) {
 				throw new IOException("Can't write to target: "
@@ -1078,7 +1077,7 @@ public class FileManager {
 		try {
 			isFolder = serviceInterface.isFolder(url);
 		} catch (final RemoteFileSystemException e) {
-			throw new FileTransactionException(url, target,
+			throw new FileTransactionException(url, targetDir.toString(),
 					"Can't determine whether source is file or folder.", e);
 		}
 
@@ -1097,6 +1096,33 @@ public class FileManager {
 		}
 
 		return targetFile;
+	}
+
+	/**
+	 * Downloads a remote file to the specified target.
+	 * 
+	 * If the target is an existing directory, the file will be put in there, if
+	 * not, a file with that name will be created (along with all intermediate
+	 * directories). If the target file already exists then you need to specify
+	 * overwrite=true.
+	 * 
+	 * @param url
+	 *            the url of the source file
+	 * @param target
+	 *            the target directory of file
+	 * @param overwrite
+	 *            whether to overwrite a possibly existing file
+	 * @return the handle to the downloaded file
+	 * @throws IOException
+	 *             if the target isn't writable
+	 * @throws FileTransactionException
+	 *             if the file can't be downloaded for some reason
+	 */
+	public File downloadUrl(String url, String target, boolean overwrite)
+			throws IOException, FileTransactionException {
+
+		final File targetDir = getFileFromUriOrPath(target);
+		return downloadUrl(url, targetDir, overwrite);
 	}
 
 	/**

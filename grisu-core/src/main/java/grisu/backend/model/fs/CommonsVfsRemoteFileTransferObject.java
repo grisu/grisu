@@ -40,7 +40,7 @@ RemoteFileTransferObject {
 	private final FileSystemCache fsCache;
 
 	static final Logger myLogger = Logger
-	.getLogger(CommonsVfsRemoteFileTransferObject.class.getName());
+			.getLogger(CommonsVfsRemoteFileTransferObject.class.getName());
 
 	public CommonsVfsRemoteFileTransferObject(final FileSystemCache fsCache,
 			final FileObject sourceF, final FileObject targetF,
@@ -57,7 +57,7 @@ RemoteFileTransferObject {
 
 				try {
 					for (int tryNo = 0; tryNo <= ServerPropertiesManager
-					.getFileTransferRetries(); tryNo++) {
+							.getFileTransferRetries(); tryNo++) {
 
 						myLogger.debug(tryNo + 1 + ". try to transfer file: "
 								+ source.getName().getURI()
@@ -70,8 +70,8 @@ RemoteFileTransferObject {
 							break;
 						} catch (final RemoteFileSystemException e) {
 							e.printStackTrace();
-							if (tryNo >= ServerPropertiesManager
-									.getFileTransferRetries() - 1) {
+							if (tryNo >= (ServerPropertiesManager
+									.getFileTransferRetries() - 1)) {
 								finished = true;
 								failed = true;
 								possibleException = e;
@@ -163,7 +163,7 @@ RemoteFileTransferObject {
 
 	protected void transferFile(final FileObject source_file,
 			final FileObject target_file, final boolean overwrite)
-	throws RemoteFileSystemException {
+					throws RemoteFileSystemException {
 
 		try {
 
@@ -195,8 +195,8 @@ RemoteFileTransferObject {
 					addMessage("Target file exists and can not be deleted. Cancelling transfer");
 					throw new RemoteFileSystemException(
 							"Could not copy to file: "
-							+ target_file.getURL().toString() + ": "
-							+ "Could not delete target file.");
+									+ target_file.getURL().toString() + ": "
+									+ "Could not delete target file.");
 				}
 			}
 			myLogger.debug("Copying: " + source_file.getName().toString()
@@ -211,7 +211,8 @@ RemoteFileTransferObject {
 
 			try {
 				addMessage("Starting file transfer...");
-				VFSUtil.copy(source_file, target_file, dummyMarker, true);
+				VFSUtil.copy(source_file, target_file, dummyMarker,
+						true);
 				addMessage("Transfer finished...");
 			} catch (final IOException e) {
 				addMessage("File transfer failed (io problem): "
