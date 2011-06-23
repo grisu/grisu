@@ -67,14 +67,14 @@ public class SimpleJsdlBuilder {
 
 			} else if (jp.equals(JobSubmissionProperty.SUBMISSIONLOCATION)) {
 
-				if (jobProperties.get(jp) == null
-						|| jobProperties.get(jp).length() == 0) {
+				if ((jobProperties.get(jp) == null)
+						|| (jobProperties.get(jp).length() == 0)) {
 					jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"
 							+ jp.toString() + "_XXX", "");
 				} else {
 					jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"
 							+ jp.toString() + "_XXX", "<HostName>"
-							+ jobProperties.get(jp) + "</HostName>");
+									+ jobProperties.get(jp) + "</HostName>");
 				}
 
 			} else if (jp.equals(JobSubmissionProperty.WALLTIME_IN_MINUTES)) {
@@ -120,8 +120,8 @@ public class SimpleJsdlBuilder {
 				final StringBuffer modulesElements = new StringBuffer();
 				for (final String module : modulesString.split(",")) {
 					modulesElements
-							.append("<Module xmlns=\"http://arcs.org.au/jsdl/jsdl-grisu\">"
-									+ module + "</Module>");
+					.append("<Module xmlns=\"http://arcs.org.au/jsdl/jsdl-grisu\">"
+							+ module + "</Module>");
 				}
 				jsdlTemplateString = jsdlTemplateString.replaceAll(
 						"XXX_" + jp.toString() + "_XXX",
@@ -129,22 +129,26 @@ public class SimpleJsdlBuilder {
 
 			} else if (jp.equals(JobSubmissionProperty.INPUT_FILE_URLS)) {
 
-				final String inputFileUrls = jobProperties.get(jp);
-				if (inputFileUrls == null || "".equals(inputFileUrls)) {
+				final Map<String, String> inputFileUrls = StringHelpers
+						.StringToMap(jobProperties.get(jp));
+				if ((inputFileUrls == null) || (inputFileUrls.size() == 0)) {
 					jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"
 							+ jp.toString() + "_XXX", "");
 					continue;
 				}
 
 				final StringBuffer dataStagingElements = new StringBuffer();
-				for (final String inputFileUrl : inputFileUrls.split(",")) {
+				for (final String inputFileUrl : inputFileUrls.keySet()) {
 					if (!FileManager.isLocal(inputFileUrl)) {
+						dataStagingElements.append("<DataStaging>\n<FileName>"
+								+ inputFileUrls.get(inputFileUrl)
+								+ "</FileName>\n");
 						dataStagingElements
-								.append("<DataStaging>\n<FileName />\n<FileSystemName></FileSystemName>\n"
-										+ "<Source>\n<URI>");
+						.append("\n<FileSystemName></FileSystemName>\n"
+								+ "<Source>\n<URI>");
 						dataStagingElements.append(inputFileUrl);
 						dataStagingElements
-								.append("</URI>\n</Source>\n</DataStaging>\n");
+						.append("</URI>\n</Source>\n</DataStaging>\n");
 					}
 				}
 

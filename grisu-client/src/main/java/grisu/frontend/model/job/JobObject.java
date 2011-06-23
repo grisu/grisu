@@ -63,7 +63,7 @@ Comparable<JobObject> {
 
 	public static JobObject createJobObject(ServiceInterface si,
 			JobSubmissionObjectImpl jobsubmissionObject)
-	throws JobPropertiesException {
+					throws JobPropertiesException {
 
 		final JobObject job = new JobObject(si,
 				jobsubmissionObject.getJobDescriptionDocument());
@@ -93,7 +93,7 @@ Comparable<JobObject> {
 	private boolean isArchived = false;
 
 	private final List<String> submissionLog = Collections
-	.synchronizedList(new LinkedList<String>());
+			.synchronizedList(new LinkedList<String>());
 
 	private Date lastStatusUpdate = new Date();
 
@@ -143,7 +143,7 @@ Comparable<JobObject> {
 	 *             if no such job exists on the backend
 	 */
 	public JobObject(final ServiceInterface si, final DtoJob job)
-	throws NoSuchJobException {
+			throws NoSuchJobException {
 
 		this(si, job, false);
 	}
@@ -206,7 +206,7 @@ Comparable<JobObject> {
 	 *             connected to the specified serviceInterface
 	 */
 	public JobObject(final ServiceInterface si, final String jobname)
-	throws NoSuchJobException {
+			throws NoSuchJobException {
 
 		this(si, jobname, true);
 
@@ -298,7 +298,7 @@ Comparable<JobObject> {
 	 *             other kind of file related exception
 	 */
 	public final String archive(String target, boolean waitForArchivingToFinish)
-	throws JobPropertiesException, RemoteFileSystemException {
+			throws JobPropertiesException, RemoteFileSystemException {
 		try {
 			final String targetUrl = getServiceInterface().archiveJob(
 					getJobname(), target);
@@ -394,16 +394,16 @@ Comparable<JobObject> {
 	public final String createJob() throws JobPropertiesException {
 
 		final String fqan = GrisuRegistryManager.getDefault(serviceInterface)
-		.getUserEnvironmentManager().getCurrentFqan();
+				.getUserEnvironmentManager().getCurrentFqan();
 
 		return createJob(fqan);
 
 	}
 
 	/**
-	 * Creates the job on the grisu backend using the "force-name" method (which
-	 * means the backend will not change the jobname you specified -- if there
-	 * is a job with that jobname already the backend will throw an exception).
+	 * Creates the job on the grisu backend using the "uniqueJobname" method
+	 * (which means the backend will append a number to the jobname is a job
+	 * with the same name already exists).
 	 * 
 	 * Be aware, that once that is done, you can't change any of the basic job
 	 * parameters anymore. The backend calculates all the (possibly) missing job
@@ -421,9 +421,9 @@ Comparable<JobObject> {
 	 *             created on the backend
 	 */
 	public final String createJob(final String fqan)
-	throws JobPropertiesException {
+			throws JobPropertiesException {
 
-		return createJob(fqan, Constants.FORCE_NAME_METHOD);
+		return createJob(fqan, Constants.UNIQUE_NUMBER_METHOD);
 	}
 
 	/**
@@ -562,7 +562,7 @@ Comparable<JobObject> {
 			if (getStatus(true) < JobConstants.ACTIVE) {
 				addJobLogMessage("Can't download output: job not started yet.");
 				throw new IllegalStateException(
-				"Job not started yet. No stdout file exists.");
+						"Job not started yet. No stdout file exists.");
 			}
 		}
 		//
@@ -635,7 +635,7 @@ Comparable<JobObject> {
 			synchronized (this) {
 				try {
 					allJobProperties = serviceInterface.getJob(getJobname())
-					.propertiesAsMap();
+							.propertiesAsMap();
 				} catch (final Exception e) {
 					throw new JobException(this,
 							"Could not get jobproperties.", e);
@@ -659,7 +659,7 @@ Comparable<JobObject> {
 		String result;
 		try {
 			result = FileHelpers
-			.readFromFileWithException(downloadAndCacheOutputFile(relativePathToWorkingDir));
+					.readFromFileWithException(downloadAndCacheOutputFile(relativePathToWorkingDir));
 		} catch (final Exception e) {
 			throw new JobException(this, "Could not read file: "
 					+ relativePathToWorkingDir, e);
@@ -682,7 +682,7 @@ Comparable<JobObject> {
 
 		try {
 			return GrisuRegistryManager.getDefault(serviceInterface)
-			.getFileManager().getFileSize(url);
+					.getFileManager().getFileSize(url);
 		} catch (final RemoteFileSystemException e) {
 			return -1;
 		}
@@ -802,7 +802,7 @@ Comparable<JobObject> {
 
 				Date now = new Date();
 				if ((this.status >= JobConstants.ACTIVE)
-						&& (lastStatusUpdate.getTime() + 2000 >= now.getTime())) {
+						&& ((lastStatusUpdate.getTime() + 2000) >= now.getTime())) {
 					myLogger.debug("Less than 2 seconds between status updates. Returning old status...");
 					return this.status;
 				}
@@ -1095,8 +1095,8 @@ Comparable<JobObject> {
 						myLogger.debug("Deleting local cached dir for job "
 								+ getJobname() + ": " + getJobDirectoryUrl());
 						File dir = GrisuRegistryManager
-						.getDefault(serviceInterface).getFileManager()
-						.getLocalCacheFile(getJobDirectoryUrl());
+								.getDefault(serviceInterface).getFileManager()
+								.getLocalCacheFile(getJobDirectoryUrl());
 						FileUtils.deleteQuietly(dir);
 					}
 				}.start();
@@ -1142,7 +1142,7 @@ Comparable<JobObject> {
 	 * @throws RemoteFileSystemException
 	 */
 	public List<String> listJobDirectory(int recursionLevel)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		final GridFile folder = serviceInterface.ls(getJobDirectoryUrl(),
 				recursionLevel);
@@ -1250,7 +1250,7 @@ Comparable<JobObject> {
 		}
 
 		final FileTransactionManager ftm = FileTransactionManager
-		.getDefault(serviceInterface);
+				.getDefault(serviceInterface);
 
 		for (String target : targets.keySet()) {
 
@@ -1335,7 +1335,7 @@ Comparable<JobObject> {
 	 * @throws InterruptedException
 	 */
 	public final void submitJob(Map<String, String> additionalJobProperties)
-	throws JobSubmissionException, InterruptedException {
+			throws JobSubmissionException, InterruptedException {
 
 		addJobLogMessage("Starting job submission...");
 
@@ -1356,7 +1356,7 @@ Comparable<JobObject> {
 		if (Thread.interrupted()) {
 			addJobLogMessage("Job submission interrupted.");
 			throw new InterruptedException(
-			"Interrupted after staging in input files.");
+					"Interrupted after staging in input files.");
 		}
 
 		try {

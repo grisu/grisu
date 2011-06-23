@@ -424,10 +424,9 @@
 	<scope>compile</scope>
 </dependency>
 		<dependency>
-			<groupId>grisu.frontend</groupId>
-			<artifactId>gridftp-tests</artifactId>
-			<version>0.1-SNAPSHOT</version>
-			<scope>test</scope>
+			<groupId>au.org.arcs.infosystems</groupId>
+			<artifactId>matchmaker</artifactId>
+			<version>0.8.7-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 

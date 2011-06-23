@@ -58,7 +58,7 @@ import org.bushe.swing.event.EventBus;
 public class FileManager {
 
 	public static Clipboard FILE_TRANSFER_CLIPBOARD = new Clipboard(
-	"File transfers");
+			"File transfers");
 
 	public final static String[] FILESYSTEM_PLUGIN_TOKENS = new String[] { "groups" };
 
@@ -69,11 +69,12 @@ public class FileManager {
 	private static long downloadTreshold = -1L;
 
 	public static final SimpleDateFormat dateformat = new SimpleDateFormat(
-	"dd.MM.yyyy HH:mm:SSS");
+			"dd.MM.yyyy HH:mm:SSS");
 
 	private static final String URL_PATTERN_STRING = "^(?:[^/]+://)?([^/:]+)";
 	private static final Pattern URL_PATTERN = Pattern
-	.compile(URL_PATTERN_STRING);
+			.compile(URL_PATTERN_STRING);
+
 	/**
 	 * Conveninec method to calculate a human readable String to indicate file
 	 * size from the bytesize of a file.
@@ -92,10 +93,10 @@ public class FileManager {
 			sizeString = "0";
 		} else {
 
-			if (size > 1024 * 1024) {
-				sizeString = size / (1024 * 1024) + " MB";
+			if (size > (1024 * 1024)) {
+				sizeString = (size / (1024 * 1024)) + " MB";
 			} else if (size > 1024) {
-				sizeString = size / 1024 + " KB";
+				sizeString = (size / 1024) + " KB";
 			} else {
 				sizeString = size + " B";
 			}
@@ -145,7 +146,7 @@ public class FileManager {
 	public static String ensureUriFormat(String inputFile) {
 
 		try {
-			if ((inputFile != null) && (inputFile.startsWith("gsiftp:"))) {
+			if ((inputFile != null) && !isLocal(inputFile)) {
 				return inputFile;
 			}
 
@@ -153,7 +154,7 @@ public class FileManager {
 			for (String token : supportedTokens) {
 				if (inputFile.startsWith("/" + token)) {
 					return ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + ":/"
-					+ inputFile;
+							+ inputFile;
 				}
 			}
 
@@ -176,8 +177,8 @@ public class FileManager {
 	 */
 	private static String get_url_string_path(final String url) {
 		return url.replace("=", "_").replace(",", "_").replace(" ", "_")
-		.replace(":", "").replace("//", File.separator)
-		.replace("/", File.separator);
+				.replace(":", "").replace("//", File.separator)
+				.replace("/", File.separator);
 	}
 
 	/**
@@ -193,7 +194,7 @@ public class FileManager {
 
 		if (downloadTreshold <= 0L) {
 			final long treshold = ClientPropertiesManager
-			.getDownloadFileSizeTresholdInBytes();
+					.getDownloadFileSizeTresholdInBytes();
 
 			return treshold;
 		} else {
@@ -393,7 +394,7 @@ public class FileManager {
 	private final ServiceInterface serviceInterface;
 
 	static final Logger myLogger = Logger
-	.getLogger(FileManager.class.getName());
+			.getLogger(FileManager.class.getName());
 
 	/**
 	 * Convenience method to calculate the parent of a url.
@@ -409,7 +410,7 @@ public class FileManager {
 			return file.getParentFile().toURI().toASCIIString();
 		} else {
 			final String result = rootUrl
-			.substring(0, rootUrl.lastIndexOf("/"));
+					.substring(0, rootUrl.lastIndexOf("/"));
 			return result;
 		}
 
@@ -572,7 +573,7 @@ public class FileManager {
 	 *             and target exists).
 	 */
 	public void cp(File sourceFile, String targetDirUrl, boolean overwrite)
-	throws FileTransactionException {
+			throws FileTransactionException {
 
 		if (isLocal(targetDirUrl)) {
 			final File targetFile = getFileFromUriOrPath(targetDirUrl);
@@ -592,7 +593,7 @@ public class FileManager {
 	 * @Deprecated don't use {@link GlazedFiles} anymore (if you can help it)
 	 */
 	public void cp(GlazedFile source, GlazedFile target, boolean overwrite)
-	throws FileTransactionException {
+			throws FileTransactionException {
 		cp(source.getUrl(), target.getUrl(), overwrite);
 	}
 
@@ -610,7 +611,7 @@ public class FileManager {
 	 *             and target exists
 	 */
 	public void cp(GridFile source, GridFile targetDir, boolean overwrite)
-	throws FileTransactionException {
+			throws FileTransactionException {
 
 		cp(source.getUrl(), targetDir.getUrl(), overwrite);
 	}
@@ -694,8 +695,7 @@ public class FileManager {
 	 *             and target exists
 	 */
 	public void cp(String sourceUrl, String targetDirUrl, boolean overwrite)
-	throws FileTransactionException {
-
+			throws FileTransactionException {
 
 		if (isLocal(sourceUrl) && isLocal(targetDirUrl)) {
 
@@ -726,7 +726,7 @@ public class FileManager {
 
 		throw new IllegalArgumentException(
 				"Can't determine location of files for " + sourceUrl + "and "
-				+ targetDirUrl + ".");
+						+ targetDirUrl + ".");
 	}
 
 	/**
@@ -786,7 +786,7 @@ public class FileManager {
 	 * @throws RemoteFileSystemException
 	 */
 	public boolean createFolder(GridFile parent, String s)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		if (!GridFile.FILETYPE_FOLDER.equals(parent.getType())) {
 			return false;
@@ -823,7 +823,7 @@ public class FileManager {
 	}
 
 	public void createFolder(String parentUrl, String s)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		createFolder(createGridFile(parentUrl), s);
 
@@ -927,7 +927,7 @@ public class FileManager {
 	 *             if the transfer fails
 	 */
 	public final File downloadFile(final String url)
-	throws FileTransactionException {
+			throws FileTransactionException {
 
 		if (isLocal(url)) {
 			return getFileFromUriOrPath(url);
@@ -980,8 +980,7 @@ public class FileManager {
 	}
 
 	private File downloadFolder(final String url)
-	throws FileTransactionException {
-
+			throws FileTransactionException {
 
 		GridFile source = null;
 		try {
@@ -994,11 +993,11 @@ public class FileManager {
 		final List<String> files = source.listOfAllFilesUnderThisFolder();
 
 		final Map<String, Exception> exceptions = Collections
-		.synchronizedMap(new HashMap<String, Exception>());
+				.synchronizedMap(new HashMap<String, Exception>());
 
 		final ExecutorService executor1 = Executors
-		.newFixedThreadPool(ClientPropertiesManager
-				.getConcurrentUploadThreads());
+				.newFixedThreadPool(ClientPropertiesManager
+						.getConcurrentUploadThreads());
 
 		for (final String file : files) {
 
@@ -1028,7 +1027,7 @@ public class FileManager {
 		if (exceptions.size() > 0) {
 			throw new FileTransactionException(url, null,
 					"Error transfering the following files: "
-					+ StringUtils.join(exceptions.keySet(), ", "), null);
+							+ StringUtils.join(exceptions.keySet(), ", "), null);
 		}
 
 		myLogger.debug("File download for folder " + url + " successful.");
@@ -1057,7 +1056,7 @@ public class FileManager {
 	 *             if the file can't be downloaded for some reason
 	 */
 	public File downloadUrl(String url, String target, boolean overwrite)
-	throws IOException, FileTransactionException {
+			throws IOException, FileTransactionException {
 
 		final File targetFile = getFileFromUriOrPath(target + "/"
 				+ getFilename(url));
@@ -1188,7 +1187,7 @@ public class FileManager {
 
 			String rootPath = null;
 			rootPath = Environment.getGrisuLocalCacheRoot() + File.separator
-			+ get_url_string_path(url);
+					+ get_url_string_path(url);
 
 			return new File(rootPath);
 		}
@@ -1236,7 +1235,7 @@ public class FileManager {
 	 *             if the remote file can't be accessed
 	 */
 	public boolean isBiggerThanThreshold(String url)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		final long remoteFileSize = serviceInterface.getFileSize(url);
 
@@ -1311,7 +1310,7 @@ public class FileManager {
 	 *             accessed
 	 */
 	public List<String> listAllChildrenFilesOfRemoteFolder(String folderUrl)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		if (!serviceInterface.isFolder(folderUrl)) {
 			throw new IllegalArgumentException("Specified url " + folderUrl
@@ -1330,7 +1329,7 @@ public class FileManager {
 	 * @Deprecated don't use {@link GlazedFile} anymore
 	 */
 	public synchronized List<GlazedFile> ls(GlazedFile parent)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		List<GlazedFile> result = new ArrayList<GlazedFile>();
 
@@ -1353,7 +1352,6 @@ public class FileManager {
 	 *             if the folder can't be accessed
 	 */
 	public GridFile ls(GridFile parent) throws RemoteFileSystemException {
-
 
 		GridFile folder = null;
 		if (StringUtils.isNotBlank(parent.getPath())) {
@@ -1400,7 +1398,7 @@ public class FileManager {
 	 *             if one of the child files/folders can't be accessed
 	 */
 	public GridFile ls(String url, int recursionLevel)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		if (isLocal(url)) {
 
@@ -1492,7 +1490,7 @@ public class FileManager {
 				if (!file.exists()) {
 					throw new FileTransactionException(file.toString(),
 							targetFile, "File does not exist: "
-							+ file.toString(), null);
+									+ file.toString(), null);
 				}
 
 				if (!file.canRead()) {
@@ -1587,7 +1585,7 @@ public class FileManager {
 	 */
 	private final void uploadFileToDirectory(final File file,
 			final String targetDirectory, final boolean overwrite)
-	throws FileTransactionException {
+					throws FileTransactionException {
 
 		if (file.isDirectory()) {
 			throw new FileTransactionException(file.toString(),
@@ -1618,7 +1616,7 @@ public class FileManager {
 	 */
 	public final void uploadFolderToDirectory(final File folder,
 			final String targetDirectory, final boolean overwrite)
-	throws FileTransactionException {
+					throws FileTransactionException {
 
 		if (!folder.isDirectory()) {
 			throw new FileTransactionException(folder.toString(),
@@ -1628,11 +1626,11 @@ public class FileManager {
 		final Collection<File> allFiles = FileUtils.listFiles(folder, null,
 				true);
 		final Map<String, Exception> errors = Collections
-		.synchronizedMap(new HashMap<String, Exception>());
+				.synchronizedMap(new HashMap<String, Exception>());
 
 		final ExecutorService executor1 = Executors
-		.newFixedThreadPool(ClientPropertiesManager
-				.getConcurrentUploadThreads());
+				.newFixedThreadPool(ClientPropertiesManager
+						.getConcurrentUploadThreads());
 
 		final String basePath = folder.getParentFile().getPath();
 		for (final File file : allFiles) {
@@ -1688,7 +1686,7 @@ public class FileManager {
 		if (errors.size() > 0) {
 			throw new FileTransactionException(folder.toString(),
 					targetDirectory, "Error transfering the following files: "
-					+ StringUtils.join(errors.keySet(), ", "), null);
+							+ StringUtils.join(errors.keySet(), ", "), null);
 		}
 
 		myLogger.debug("File upload for folder " + folder.toString()
@@ -1778,11 +1776,11 @@ public class FileManager {
 		final Collection<File> allFiles = FileUtils.listFiles(folder, null,
 				true);
 		final Map<String, Exception> errors = Collections
-		.synchronizedMap(new HashMap<String, Exception>());
+				.synchronizedMap(new HashMap<String, Exception>());
 
 		final ExecutorService executor1 = Executors
-		.newFixedThreadPool(ClientPropertiesManager
-				.getConcurrentUploadThreads());
+				.newFixedThreadPool(ClientPropertiesManager
+						.getConcurrentUploadThreads());
 
 		// final String basePath = folder.getParentFile().getPath();
 		final String basePath = folder.getPath();
@@ -1790,7 +1788,7 @@ public class FileManager {
 
 			final String filePath = file.getPath();
 			final String deltaPathTemp = path + "/"
-			+ filePath.substring(basePath.length());
+					+ filePath.substring(basePath.length());
 
 			String deltaPath;
 			if (deltaPathTemp.startsWith("/") || deltaPathTemp.startsWith("\\")) {
@@ -1836,12 +1834,12 @@ public class FileManager {
 										file.toString(),
 										null,
 										"Could not upload input file "
-										+ file.toString()
-										+ ": "
-										+ DtoActionStatus
-										.getLogMessagesAsString(so
-												.getStatus()),
-												null);
+												+ file.toString()
+												+ ": "
+												+ DtoActionStatus
+												.getLogMessagesAsString(so
+														.getStatus()),
+														null);
 							}
 
 							myLogger.info("Upload of input file "
@@ -1906,7 +1904,7 @@ public class FileManager {
 		if (errors.size() > 0) {
 			throw new FileTransactionException(folder.toString(), null,
 					"Error transfering the following files: "
-					+ StringUtils.join(errors.keySet(), ", "), null);
+							+ StringUtils.join(errors.keySet(), ", "), null);
 		}
 
 		myLogger.debug("File upload for folder " + folder.toString()
@@ -1973,7 +1971,7 @@ public class FileManager {
 	 */
 	public final void uploadUrlToDirectory(final String uriOrPath,
 			final String targetDirectory, boolean overwrite)
-	throws FileTransactionException {
+					throws FileTransactionException {
 
 		final File file = getFileFromUriOrPath(uriOrPath);
 
@@ -1994,7 +1992,7 @@ public class FileManager {
 			if (!serviceInterface.fileExists(targetDirectory)) {
 				try {
 					final boolean success = serviceInterface
-					.mkdir(targetDirectory);
+							.mkdir(targetDirectory);
 
 					if (!success) {
 						throw new FileTransactionException(file.toURL()
@@ -2061,7 +2059,7 @@ public class FileManager {
 					if (!cacheTargetParentFile.exists()) {
 						throw new RuntimeException(
 								"Could not create parent folder for cache file "
-								+ cacheTargetFile);
+										+ cacheTargetFile);
 					}
 				}
 			}
