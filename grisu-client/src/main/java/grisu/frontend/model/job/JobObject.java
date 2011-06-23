@@ -92,6 +92,8 @@ Comparable<JobObject> {
 
 	private boolean isArchived = false;
 
+	private String description = null;
+
 	private final List<String> submissionLog = Collections
 			.synchronizedList(new LinkedList<String>());
 
@@ -647,6 +649,17 @@ Comparable<JobObject> {
 
 	}
 
+	public String getDescription() {
+		if ( this.description == null ) {
+			try {
+				this.description = serviceInterface.getJobProperty(getJobname(), Constants.JOB_DESCRIPTION_KEY);
+			} catch (NoSuchJobException e) {
+				// that's ok.
+			}
+		}
+		return this.description;
+	}
+
 	/**
 	 * Returns the current content of the file for this job as a string.
 	 * 
@@ -1177,6 +1190,17 @@ Comparable<JobObject> {
 
 	}
 
+	/**
+	 * Adds an (optional) description to the job.
+	 * 
+	 * Be aware, this will only work if the job was not yet submitted.
+	 * 
+	 * @param desc the description of the job (not the jdsl, mind)
+	 */
+	public void setDescription(String desc) {
+		this.description = desc;
+	}
+
 	private void setStatus(final int newStatus) {
 
 		final int oldstatus = this.status;
@@ -1367,6 +1391,14 @@ Comparable<JobObject> {
 			addJobLogMessage("Submission failed: " + e.getLocalizedMessage());
 			throw new JobSubmissionException("Could not find job on backend.",
 					e);
+		}
+
+		if (StringUtils.isNotBlank(description)) {
+			if (additionalJobProperties == null) {
+				additionalJobProperties = new HashMap<String, String>();
+			}
+			additionalJobProperties.put(Constants.JOB_DESCRIPTION_KEY,
+					description);
 		}
 
 		if ((additionalJobProperties != null)
