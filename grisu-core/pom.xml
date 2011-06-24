@@ -480,7 +480,7 @@
 			    <includes>
 			      <include>**/AllTests.java</include>
 			    </includes>
-			    <forkMode>once</forkMode>
+<!-- 			    <forkMode>once</forkMode> -->
 <!-- 			    <skipTests>true</skipTests> -->
 			  </configuration>
 			</plugin>

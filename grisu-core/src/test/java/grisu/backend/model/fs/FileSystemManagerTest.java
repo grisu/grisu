@@ -172,7 +172,6 @@ public class FileSystemManagerTest {
 				false, true);
 
 		downloadAndAssert(target + "/" + TEST_FILE_0_NAME);
-
 		System.out.println("Deleting file: " + target);
 		AllTests.getFileManager().deleteFile(target);
 
@@ -188,7 +187,7 @@ public class FileSystemManagerTest {
 		AllTests.getServiceInterface().mkdir(folderUrl);
 
 		assertTrue("Asserting whether " + folderUrl + " is folder",
- AllTests
+				AllTests
 				.getFileManager().isFolder(folderUrl));
 
 		System.out.println("Deleting folder: " + folderUrl);
@@ -225,7 +224,7 @@ public class FileSystemManagerTest {
 	public void testFileExists() throws RemoteFileSystemException {
 
 		assertTrue("Checking whether " + targetFileUrl + " exists",
- AllTests
+				AllTests
 				.getServiceInterface().fileExists(targetFileUrl));
 
 	}
@@ -261,7 +260,7 @@ public class FileSystemManagerTest {
 	public void testIsFolder() throws RemoteFileSystemException {
 
 		assertTrue("Checking whether " + targetDirUrl + " is folder",
- AllTests
+				AllTests
 				.getServiceInterface().isFolder(targetDirUrl));
 	}
 
@@ -286,14 +285,14 @@ public class FileSystemManagerTest {
 		downloadAndAssert(target);
 
 		assertTrue("Checking whether " + target + " exists",
- AllTests
+				AllTests
 				.getFileManager().fileExists(target));
 
 		System.out.println("Deleting " + target);
 		AllTests.getServiceInterface().deleteFile(target);
 
 		assertFalse("Checking whether " + target + " is deleted",
- AllTests
+				AllTests
 				.getFileManager().fileExists(target));
 
 
