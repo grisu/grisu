@@ -1,6 +1,5 @@
 package grisu.backend.model.fs;
 
-import grisu.X;
 import grisu.backend.model.ProxyCredential;
 import grisu.backend.model.RemoteFileTransferObject;
 import grisu.backend.model.User;
@@ -70,9 +69,6 @@ public class FileSystemManager {
 
 	public RemoteFileTransferObject copy(String source, String target,
 			boolean overwrite) throws RemoteFileSystemException {
-
-		X.p("SOURCE: " + source);
-		X.p("TARGET: " + target);
 
 		String protSource = StringUtils.split(source, ':')[0];
 		String protTarget = StringUtils.split(target, ':')[0];

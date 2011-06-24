@@ -1,22 +1,21 @@
 package grisu.backend.model.fs;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import grisu.control.ServiceInterface;
+import grisu.backend.AllTests;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.control.clientexceptions.FileTransactionException;
-import grisu.frontend.control.login.LoginManager;
 import grisu.model.FileManager;
-import grisu.model.GrisuRegistryManager;
 import grisu.model.MountPoint;
-import grisu.model.UserEnvironmentManager;
 import grisu.model.dto.DtoStringList;
-import grith.jgrith.plainProxy.LocalProxy;
+import grisu.model.dto.GridFile;
+import grisu.utils.FileHelpers;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 
 import javax.activation.DataHandler;
 
@@ -44,14 +43,7 @@ public class FileSystemManagerTest {
 	public static final File OUTPUT_TEST_FILE_0 = new File(TEST_DIR_OUTPUT,
 			TEST_FILE_0_NAME);
 
-	private static final String alias = "BeSTGRID";
-	// private static final String alias = "Local";
-	private static final String vo = "/nz/nesi";
 
-	private static ServiceInterface si = null;
-
-	private static FileManager fm = null;
-	private static UserEnvironmentManager uem = null;
 
 	private static MountPoint mp = null;
 	private static MountPoint mp2 = null;
@@ -63,17 +55,18 @@ public class FileSystemManagerTest {
 	private static String targetFileUrl2 = null;
 
 	public static void deleteTestFiles() throws RemoteFileSystemException {
-		fm.deleteFile(targetFileUrl);
-		fm.deleteFile(targetFileUrl2);
 	}
 
 	public static void downloadAndAssert(String url) {
 
 		try {
-			fm.downloadUrl(url, TEST_DIR_OUTPUT, true);
+			System.out.println("Downloading and asserting file: " + url);
+			AllTests.getFileManager().downloadUrl(url, TEST_DIR_OUTPUT, true);
 
-			assertTrue(FileUtils.contentEquals(INPUT_TEST_FILE_0,
-					OUTPUT_TEST_FILE_0));
+			File file = new File(TEST_DIR_OUTPUT, FileManager.getFilename(url));
+			System.out.println("Asserting whether "+INPUT_TEST_FILE_0+" equals "+file);
+			assertTrue(FileUtils.contentEquals(INPUT_TEST_FILE_0, file));
+
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -94,41 +87,61 @@ public class FileSystemManagerTest {
 						FileSystemManagerTest.INPUT_TEST_FILE_0));
 		in.close();
 
-		System.out.println("Creating proxy...");
+		// System.out.println("Creating proxy...");
+		// String dir = System.getProperty("user.home") + File.separator
+		// + ".globus" + File.separator;
+		// LocalProxy.gridProxyInit(dir + "testcert.pem", dir + "testkey.pem",
+		// "".toCharArray(),
+		// 12);
 
-		String dir = System.getProperty("user.home") + File.separator
-				+ ".globus" + File.separator;
-		LocalProxy.gridProxyInit(dir + "testcert.pem", dir + "testkey.pem",
-				"".toCharArray(),
-				12);
 
-		System.out.println("Logging in...");
-		si = LoginManager.login(alias);
 
-		fm = GrisuRegistryManager.getDefault(si).getFileManager();
-		uem = GrisuRegistryManager.getDefault(si).getUserEnvironmentManager();
+		MountPoint[] mps = AllTests.getUserEnvironmentManager()
+				.getMountPoints();
+		int i = 0;
+		do {
+			mp = mps[i];
+			i = i + 1;
+		} while (mp.getRootUrl().contains("grid-vs")
+				|| mp.getRootUrl().contains("acsrc")
+				|| mp.getRootUrl().contains("sbs")
+				|| mp.getRootUrl().contains("mech"));
 
-		MountPoint[] mps = uem.getMountPoints();
+		do {
+			mp2 = mps[i];
+			i = i + 1;
+		} while (mp2.getRootUrl().contains("grid-vs")
+				|| mp2.getRootUrl().contains("acsrc")
+				|| mp2.getRootUrl().contains("sbs")
+				|| mp2.getRootUrl().contains("mech"));
 
-		mp = mps[0];
-		mp2 = mps[1];
+		System.out.println("Mountpoint1: " + mp.getRootUrl());
+		System.out.println("Mountpoint2: " + mp2.getRootUrl());
 
 		targetDirUrl = mp.getRootUrl() + "/" + TEST_TARGET_DIR;
+		System.out.println("TargetDirUrl: " + targetDirUrl);
 		targetFileUrl = targetDirUrl + "/" + TEST_FILE_0_NAME;
-
-		targetDirUrl2 = mp2.getRootUrl() + "/" + TEST_TARGET_DIR;
+		System.out.println("TargetFileUrl: " + targetFileUrl);
+		targetDirUrl2 = mp2.getRootUrl() + "/" + TEST_TARGET_DIR + "_2";
+		System.out.println("TargetDirUrl2: " + targetDirUrl2);
 		targetFileUrl2 = targetDirUrl2 + "/" + TEST_FILE_0_NAME;
+		System.out.println("TargetFileUrl2: " + targetFileUrl2);
+
+		System.out.println("Uploading file: " + targetFileUrl);
+		uploadTo(targetFileUrl);
+
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 
-		System.out.println("Delete files...");
-		deleteTestFiles();
+		System.out.println("Delete files: ");
+		System.out.println("\t" + targetFileUrl);
+		AllTests.getFileManager().deleteFile(targetFileUrl);
+		System.out.println("\t" + targetFileUrl2);
+		AllTests.getFileManager().deleteFile(targetFileUrl2);
+		System.out.println("\t" + OUTPUT_TEST_FILE_0);
 		FileUtils.deleteQuietly(OUTPUT_TEST_FILE_0);
-
-		System.out.println("Logging out...");
-		System.out.println(si.logout());
 
 		System.out.println("Deleting input files...");
 		FileUtils.deleteDirectory(TEST_DIR_INPUT);
@@ -136,13 +149,15 @@ public class FileSystemManagerTest {
 	}
 
 	public static void uploadTo(String targetFileUrl) throws RemoteFileSystemException {
+		System.out.println("Uploading to: " + targetFileUrl);
 		DataHandler dh = FileManager.createDataHandler(INPUT_TEST_FILE_0);
-		si.upload(dh, targetFileUrl);
+		AllTests.getServiceInterface().upload(dh, targetFileUrl);
 	}
 
 	@Before
 	public void setUp() throws Exception {
-		deleteTestFiles();
+
+		System.out.println("Deleting: " + OUTPUT_TEST_FILE_0);
 		FileUtils.deleteQuietly(OUTPUT_TEST_FILE_0);
 	}
 
@@ -150,89 +165,138 @@ public class FileSystemManagerTest {
 	public void testCopyFile() throws RemoteFileSystemException,
 	FileTransactionException {
 
-		uploadTo(targetFileUrl);
-
-		si.cp(DtoStringList.fromSingleString(targetFileUrl), targetDirUrl2,
+		String target = targetDirUrl2 + "_" + UUID.randomUUID().toString();
+		System.out.println("Copying: " + targetFileUrl + " -> " + target);
+		AllTests.getServiceInterface().cp(
+				DtoStringList.fromSingleString(targetFileUrl), target,
 				false, true);
 
-		downloadAndAssert(targetFileUrl2);
+		downloadAndAssert(target + "/" + TEST_FILE_0_NAME);
+
+		System.out.println("Deleting file: " + target);
+		AllTests.getFileManager().deleteFile(target);
 
 	}
 
 	@Test
-	public void testCreateFolder() {
-		fail("Not yet implemented");
+	public void testCreateFolderAndDeleteFolder()
+			throws RemoteFileSystemException {
+
+		String folderUrl = targetDirUrl + "/" + "folder" + UUID.randomUUID();
+
+		System.out.println("Creating folder: " + folderUrl);
+		AllTests.getServiceInterface().mkdir(folderUrl);
+
+		assertTrue("Asserting whether " + folderUrl + " is folder",
+ AllTests
+				.getFileManager().isFolder(folderUrl));
+
+		System.out.println("Deleting folder: " + folderUrl);
+		AllTests.getServiceInterface().deleteFile(folderUrl);
+
+		assertFalse("Asserting whether folder " + folderUrl + " still exists",
+				AllTests.getFileManager().fileExists(folderUrl));
+
 	}
 
 	@Test
-	public void testDeleteFile() {
-		fail("Not yet implemented");
+	public void testDownload() throws Exception {
+
+		System.out.println("Deleting " + OUTPUT_TEST_FILE_0);
+		FileUtils.deleteQuietly(OUTPUT_TEST_FILE_0);
+
+		System.out.println("Downloading " + targetFileUrl);
+		DataHandler dh = AllTests.getServiceInterface().download(targetFileUrl);
+
+		System.out.println("Saving to disk...");
+		FileHelpers.saveToDisk(dh.getDataSource(), OUTPUT_TEST_FILE_0);
+
+		assertTrue("Checking whether " + INPUT_TEST_FILE_0 + " equals "
+				+ OUTPUT_TEST_FILE_0,
+				FileUtils.contentEquals(INPUT_TEST_FILE_0,
+						OUTPUT_TEST_FILE_0));
+
+		System.out.println("Deleting " + OUTPUT_TEST_FILE_0);
+		FileUtils.deleteQuietly(OUTPUT_TEST_FILE_0);
+
 	}
 
 	@Test
-	public void testDownload() {
-		fail("Not yet implemented");
+	public void testFileExists() throws RemoteFileSystemException {
+
+		assertTrue("Checking whether " + targetFileUrl + " exists",
+ AllTests
+				.getServiceInterface().fileExists(targetFileUrl));
+
 	}
 
 	@Test
-	public void testFileExists() {
-		fail("Not yet implemented");
+	public void testGetFileSize() throws RemoteFileSystemException {
+
+		System.out.println("Checking filesize of " + targetFileUrl);
+		long size = AllTests.getServiceInterface().getFileSize(targetFileUrl);
+
+		assertTrue("Checking whether filesize > 0", size > 0);
 	}
 
 	@Test
-	public void testGetFileSize() {
-		fail("Not yet implemented");
+	public void testGetFolderListing() throws RemoteFileSystemException {
+
+		System.out.println("Listing " + targetDirUrl);
+		GridFile f = AllTests.getServiceInterface().ls(targetDirUrl, 1);
+
+		System.out.println("Checking whether " + TEST_FILE_0_NAME
+				+ " is amongst result");
+		for (GridFile c : f.getChildren()) {
+			if (c.getName().equals(TEST_FILE_0_NAME)) {
+				System.out.println(TEST_FILE_0_NAME + " found.");
+				return;
+			}
+		}
+		System.out.println(TEST_FILE_0_NAME + " not found.");
+		fail("Folder listing not containing test file.");
 	}
 
 	@Test
-	public void testGetFolderListing() {
-		fail("Not yet implemented");
+	public void testIsFolder() throws RemoteFileSystemException {
+
+		assertTrue("Checking whether " + targetDirUrl + " is folder",
+ AllTests
+				.getServiceInterface().isFolder(targetDirUrl));
 	}
 
 	@Test
-	public void testGetInputStream() {
-		fail("Not yet implemented");
+	public void testLastModified() throws RemoteFileSystemException {
+		System.out.println("Checking last modified time for " + targetFileUrl);
+		long l = AllTests.getServiceInterface().lastModified(targetFileUrl);
+		// TODO make that better
+		assertTrue("Checking whether last modified time > 0", l > 0);
 	}
 
-	@Test
-	public void testGetOutputStream() {
-		fail("Not yet implemented");
-	}
 
 	@Test
-	public void testIsFolder() {
-		fail("Not yet implemented");
-	}
+	public void testUploadAndDeleteFile() throws RemoteFileSystemException {
 
-	@Test
-	public void testLastModified() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testMountFileSystem() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testResolveFileSystemHomeDirectory() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testUpload() throws RemoteFileSystemException, IOException,
-	FileTransactionException {
-
+		String target = targetDirUrl2 + "/" + TEST_FILE_0_NAME + "_"
+				+ UUID.randomUUID().toString();
+		System.out.println("Uploading " + target);
 		DataHandler dh = FileManager.createDataHandler(INPUT_TEST_FILE_0);
-		si.upload(dh, targetFileUrl);
+		AllTests.getServiceInterface().upload(dh, target);
 
-		downloadAndAssert(targetFileUrl);
+		downloadAndAssert(target);
 
-	}
+		assertTrue("Checking whether " + target + " exists",
+ AllTests
+				.getFileManager().fileExists(target));
 
-	@Test
-	public void testUploadFileToMultipleLocations() {
-		fail("Not yet implemented");
+		System.out.println("Deleting " + target);
+		AllTests.getServiceInterface().deleteFile(target);
+
+		assertFalse("Checking whether " + target + " is deleted",
+ AllTests
+				.getFileManager().fileExists(target));
+
+
 	}
 
 }
