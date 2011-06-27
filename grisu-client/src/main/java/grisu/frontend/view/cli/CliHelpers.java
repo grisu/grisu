@@ -12,15 +12,18 @@ import com.google.common.collect.ImmutableList;
 
 public class CliHelpers {
 
-	public static final boolean ENABLE_PROGRESS = true;
+	private static boolean ENABLE_PROGRESS = true;
 
 	public static final Terminal terminal = Terminal.setupTerminal();
 	private static ConsoleReader consoleReader = null;
 
 	private static Thread indeterminateProgress = null;
 	public static String[] indeterminateProgressStrings = new String[] { "-",
-		// "\\", "|", "/" };
-		"*", ".", "d" };
+		"\\", "|", "/" };
+
+	public static void enableProgressDisplay(boolean enable) {
+		ENABLE_PROGRESS = enable;
+	}
 
 	public static synchronized ConsoleReader getConsoleReader() {
 		if ( consoleReader == null ) {
@@ -39,11 +42,12 @@ public class CliHelpers {
 	private static int getTermwidth() {
 		return getConsoleReader().getTermwidth();
 	}
-
 	public static String getUserChoice(Collection<String> collection,
 			String nonSelectionText) {
 		return getUserChoice(collection, null, null, nonSelectionText);
 	}
+
+
 	public static String getUserChoice(Collection<String> collection,
 			String prompt, String defaultValue, String nonSelectionText) {
 
@@ -106,7 +110,6 @@ public class CliHelpers {
 
 	}
 
-
 	public static void main(String[] args) throws InterruptedException {
 
 
@@ -139,6 +142,11 @@ public class CliHelpers {
 			boolean start) {
 
 		if (terminal == null) {
+			return;
+		}
+
+		if ( ! ENABLE_PROGRESS ) {
+			System.out.println(start);
 			return;
 		}
 
@@ -182,6 +190,14 @@ public class CliHelpers {
 			indeterminateProgress.start();
 
 		} else if (!start) {
+
+			if ( ! ENABLE_PROGRESS ) {
+				if (StringUtils.isNotBlank(message)) {
+					System.out.println(message);
+					return;
+				}
+			}
+
 			if ((indeterminateProgress != null)
 					&& indeterminateProgress.isAlive()) {
 				indeterminateProgress.interrupt();
@@ -200,7 +216,7 @@ public class CliHelpers {
 	}
 
 	public static void setProgress(int completed, int total) {
-		if (terminal == null) {
+		if ((terminal == null) || !ENABLE_PROGRESS) {
 			return;
 		}
 
