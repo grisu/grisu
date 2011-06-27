@@ -566,6 +566,7 @@ public class LoginManager {
 			try {
 				input = CliHelpers.getConsoleReader()
 						.readLine("Login method: ");
+
 			} catch (final IOException e) {
 				throw new RuntimeException(e);
 			}

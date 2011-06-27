@@ -19,14 +19,15 @@ public class CliHelpers {
 
 	private static Thread indeterminateProgress = null;
 	public static String[] indeterminateProgressStrings = new String[] { "-",
-		"\\", "|", "/" };
+		// "\\", "|", "/" };
+		"*", ".", "d" };
 
 	public static synchronized ConsoleReader getConsoleReader() {
 		if ( consoleReader == null ) {
 			try {
 				consoleReader = new ConsoleReader();
 				terminal.beforeReadLine(consoleReader, "", (char) 0);
-				// terminal.afterReadLine(consoleReader, "", (char) 0);
+				terminal.afterReadLine(consoleReader, "", (char) 0);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -141,6 +142,8 @@ public class CliHelpers {
 			return;
 		}
 
+		getConsoleReader().setDefaultPrompt("");
+
 		if (start) {
 			if ((indeterminateProgress != null)
 					&& indeterminateProgress.isAlive()) {
@@ -200,6 +203,8 @@ public class CliHelpers {
 		if (terminal == null) {
 			return;
 		}
+
+		getConsoleReader().setDefaultPrompt("");
 
 		int progress = (completed * 20) / total;
 		String totalStr = String.valueOf(total);
