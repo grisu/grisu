@@ -481,7 +481,7 @@
 			      <include>**/AllTests.java</include>
 			    </includes>
 <!-- 			    <forkMode>once</forkMode> -->
-<!-- 			    <skipTests>true</skipTests> -->
+			    <skipTests>true</skipTests>
 			  </configuration>
 			</plugin>
 
