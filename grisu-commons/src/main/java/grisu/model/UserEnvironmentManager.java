@@ -116,7 +116,7 @@ public interface UserEnvironmentManager {
 	 *             if no such job exists
 	 */
 	DtoBatchJob getBatchJob(String jobname, boolean refreshBatchJob)
-	throws NoSuchJobException;
+			throws NoSuchJobException;
 
 	SortedSet<DtoBatchJob> getBatchJobs(String application, boolean refresh);
 
@@ -322,6 +322,13 @@ public interface UserEnvironmentManager {
 			String submissionLocation, String fqan);
 
 	/**
+	 * Gets all the users' mountpoints that are non-volatile.
+	 * 
+	 * @return the mountpoints
+	 */
+	Set<MountPoint> getNonVolatileMountPoints();
+
+	/**
 	 * Retrieves a user property from the backend.
 	 * 
 	 * @param key
@@ -437,6 +444,6 @@ public interface UserEnvironmentManager {
 	 * @throws StatusException
 	 */
 	StatusObject waitForActionToFinish(String handle)
-	throws InterruptedException, StatusException;
+			throws InterruptedException, StatusException;
 
 }

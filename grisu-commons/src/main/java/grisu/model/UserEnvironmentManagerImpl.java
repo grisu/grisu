@@ -48,7 +48,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 EventSubscriber<FqanEvent> {
 
 	static final Logger myLogger = Logger
-	.getLogger(UserEnvironmentManagerImpl.class.getName());
+			.getLogger(UserEnvironmentManagerImpl.class.getName());
 
 	private final ServiceInterface serviceInterface;
 
@@ -101,7 +101,7 @@ EventSubscriber<FqanEvent> {
 	public UserEnvironmentManagerImpl(final ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
 		this.resourceInfo = GrisuRegistryManager.getDefault(serviceInterface)
-		.getResourceInformation();
+				.getResourceInformation();
 
 		EventBus.subscribe(FqanEvent.class, this);
 
@@ -110,7 +110,7 @@ EventSubscriber<FqanEvent> {
 	public void addFqanListener(final FqanListener listener) {
 
 		throw new RuntimeException(
-		"Adding of fqan listener not implemented yet.");
+				"Adding of fqan listener not implemented yet.");
 
 	}
 
@@ -178,7 +178,7 @@ EventSubscriber<FqanEvent> {
 			for (final String vo : getAllAvailableFqans()) {
 
 				final Set<String> temp = ai
-				.getAvailableSubmissionLocationsForFqan(vo);
+						.getAvailableSubmissionLocationsForFqan(vo);
 				if (temp.size() > 0) {
 					result.add(vo);
 				}
@@ -246,7 +246,7 @@ EventSubscriber<FqanEvent> {
 	}
 
 	public DtoBatchJob getBatchJob(String jobname, boolean refresh)
-	throws NoSuchJobException {
+			throws NoSuchJobException {
 
 		DtoBatchJob result = null;
 
@@ -375,7 +375,7 @@ EventSubscriber<FqanEvent> {
 
 		if ((result == null) || refreshBatchJobnames) {
 			result = serviceInterface.getAllBatchJobnames(application)
-			.asSortedSet();
+					.asSortedSet();
 			cachedBatchJobnamesPerApplication.put(application, result);
 		}
 		return result;
@@ -441,7 +441,7 @@ EventSubscriber<FqanEvent> {
 	private FileManager getFileManager() {
 		if (this.fm == null) {
 			this.fm = GrisuRegistryManager.getDefault(serviceInterface)
-			.getFileManager();
+					.getFileManager();
 		}
 		return this.fm;
 	}
@@ -563,7 +563,7 @@ EventSubscriber<FqanEvent> {
 	public final synchronized MountPoint[] getMountPoints() {
 		if (cachedMountPoints == null) {
 			cachedMountPoints = serviceInterface.df().getMountpoints()
-			.toArray(new MountPoint[] {});
+					.toArray(new MountPoint[] {});
 		}
 		return cachedMountPoints;
 	}
@@ -642,7 +642,7 @@ EventSubscriber<FqanEvent> {
 			// String[] urls = serviceInterface
 			// .getStagingFileSystemForSubmissionLocation(submissionLocation);
 			final List<String> urls = resourceInfo
-			.getStagingFilesystemsForSubmissionLocation(submissionLocation);
+					.getStagingFilesystemsForSubmissionLocation(submissionLocation);
 
 			final Set<MountPoint> result = new TreeSet<MountPoint>();
 			for (final String url : urls) {
@@ -671,7 +671,7 @@ EventSubscriber<FqanEvent> {
 					submissionLocation, result);
 		}
 		return alreadyQueriedMountPointsPerSubmissionLocation
-		.get(submissionLocation);
+				.get(submissionLocation);
 	}
 
 	public synchronized final Set<MountPoint> getMountPointsForSubmissionLocationAndFqan(
@@ -680,7 +680,7 @@ EventSubscriber<FqanEvent> {
 		// String[] urls = serviceInterface
 		// .getStagingFileSystemForSubmissionLocation(submissionLocation);
 		final List<String> urls = resourceInfo
-		.getStagingFilesystemsForSubmissionLocation(submissionLocation);
+				.getStagingFilesystemsForSubmissionLocation(submissionLocation);
 
 		final Set<MountPoint> result = new TreeSet<MountPoint>();
 
@@ -708,6 +708,20 @@ EventSubscriber<FqanEvent> {
 
 		return result;
 
+	}
+
+	public Set<MountPoint> getNonVolatileMountPoints() {
+
+		Set<MountPoint> result = new TreeSet<MountPoint>();
+
+		for (MountPoint m : getMountPoints()) {
+			if (m.isVolatileFileSystem()) {
+				continue;
+			}
+			result.add(m);
+		}
+
+		return result;
 	}
 
 	public synchronized String getProperty(String key) {
@@ -813,7 +827,7 @@ EventSubscriber<FqanEvent> {
 	public void removeFqanListener(final FqanListener listener) {
 
 		throw new RuntimeException(
-		"Removal of fqan listener not implemented yet.");
+				"Removal of fqan listener not implemented yet.");
 	}
 
 	public synchronized FileSystemItem setBookmark(String alias, String url) {
@@ -861,7 +875,7 @@ EventSubscriber<FqanEvent> {
 	}
 
 	public StatusObject waitForActionToFinish(String handle)
-	throws InterruptedException, StatusException {
+			throws InterruptedException, StatusException {
 
 		final StatusObject status = new StatusObject(serviceInterface, handle);
 
