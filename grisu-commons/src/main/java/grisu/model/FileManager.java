@@ -1088,11 +1088,25 @@ public class FileManager {
 			// boolean canWritePar = targetFile.canWrite();
 			// boolean canWrite = newDir.canWrite();
 			// boolean created = newDir.mkdirs();
-			FileUtils.copyDirectory(cacheFile, targetFile);
+			long size = ClientPropertiesManager
+					.getFolderSizeThresholdForCache();
+
+			long dir = FileUtils.sizeOfDirectory(cacheFile);
+			if (dir <= size) {
+				FileUtils.copyDirectory(cacheFile, targetFile);
+			} else {
+				FileUtils.moveDirectory(cacheFile, targetFile);
+			}
+
 		} else {
 			cacheFile = downloadFile(url);
 			final File newFile = targetFile;
-			FileUtils.copyFile(cacheFile, newFile);
+			long size = ClientPropertiesManager.getFileSizeThresholdForCache();
+			if (newFile.length() <= size) {
+				FileUtils.copyFile(cacheFile, newFile);
+			} else {
+				FileUtils.moveFile(cacheFile, newFile);
+			}
 		}
 
 		return targetFile;
