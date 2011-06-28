@@ -22,6 +22,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.sun.xml.ws.developer.JAXWSProperties;
+
 public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 	static final Logger myLogger = Logger
@@ -71,7 +73,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			final QName serviceName = new QName(
 					"http://api.grisu.arcs.org.au/", "GrisuService");
 			final QName portName = new QName("http://api.grisu.arcs.org.au/",
-			// "ServiceInterfaceSOAPPort");
+					// "ServiceInterfaceSOAPPort");
 					"ServiceInterfacePort");
 
 			Service s;
@@ -96,9 +98,13 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 					javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
 					interfaceUrl);
 
+			bp.getRequestContext().put(
+					JAXWSProperties.HTTP_CLIENT_STREAMING_CHUNK_SIZE, 4096);
+
+			// just to be sure, I'll keep that in there as well...
 			bp.getRequestContext()
 					.put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size",
-							new Integer(4096));
+					new Integer(4096));
 
 			bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY,
 					username);
