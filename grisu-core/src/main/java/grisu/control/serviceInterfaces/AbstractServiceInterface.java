@@ -43,6 +43,7 @@ import grisu.model.dto.DtoStringList;
 import grisu.model.dto.DtoSubmissionLocations;
 import grisu.model.dto.GridFile;
 import grisu.model.job.JobSubmissionObjectImpl;
+import grisu.model.utils.InformationUtils;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.FileHelpers;
 import grisu.utils.SeveralXMLHelpers;
@@ -2909,8 +2910,23 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 									final List<String> versionsAvail = resource
 											.getAvailableApplicationVersion();
 
-									JsdlHelpers.setApplicationVersion(jsdl,
-											versionsAvail.get(0));
+									String latest = null;
+									try {
+										latest = InformationUtils
+												.guessLatestVersion(versionsAvail);
+									} catch (Exception e) {
+										myLogger.debug("Could not guess latest version: "
+												+ e.getLocalizedMessage());
+										// using random version
+									}
+
+									if (StringUtils.isNotBlank(latest)) {
+										JsdlHelpers.setApplicationVersion(jsdl,
+												latest);
+									} else {
+										JsdlHelpers.setApplicationVersion(jsdl,
+												versionsAvail.get(0));
+									}
 
 									job.addJobProperty(
 											Constants.APPLICATIONVERSION_KEY,
