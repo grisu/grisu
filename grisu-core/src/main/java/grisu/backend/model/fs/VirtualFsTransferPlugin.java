@@ -25,6 +25,11 @@ public class VirtualFsTransferPlugin implements FileTransferPlugin {
 		targetFile = user.getFileSystemManager().getFolderListing(source, 0);
 
 		if (sourceFile.getUrls().size() > 1) {
+
+			// for (DtoProperty u : sourceFile.getUrls()) {
+			// X.p(u.getKey() + " = " + u.getValue());
+			// }
+
 			throw new RemoteFileSystemException("Source file not unique: "
 					+ sourceFile.getUrl());
 		}
