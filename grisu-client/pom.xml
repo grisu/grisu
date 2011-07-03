@@ -81,6 +81,10 @@
 					<artifactId>xmlParserAPIs</artifactId>
 					<groupId>xml-apis</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -107,6 +111,10 @@
 				<exclusion>
 					<artifactId>grid-jcommons</artifactId>
 					<groupId>grisu</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
 				</exclusion>
 			</exclusions>	
 		</dependency>

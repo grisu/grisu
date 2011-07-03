@@ -64,7 +64,7 @@ public final class ServerPropertiesManager {
 	// "grisu-multijob-dir";
 
 	static final Logger myLogger = Logger
-	.getLogger(ServerPropertiesManager.class.getName());
+			.getLogger(ServerPropertiesManager.class.getName());
 
 	private static final int DEFAULT_CONCURRENT_JOB_SUBMISSION_RETRIES = 5;
 
@@ -109,7 +109,7 @@ public final class ServerPropertiesManager {
 		String jobDirName = null;
 		try {
 			jobDirName = getServerConfiguration().getString(
-			"General.archivedJobDirName");
+					"General.archivedJobDirName");
 
 			if (StringUtils.isNotBlank(jobDirName)
 					&& "none".equals(jobDirName.toLowerCase())) {
@@ -132,8 +132,8 @@ public final class ServerPropertiesManager {
 		int concurrentThreads = -1;
 		try {
 			concurrentThreads = Integer
-			.parseInt(getServerConfiguration().getString(
-			"ConcurrentThreadSettings.archivedJobsLookupThreadsPerFilesystem"));
+					.parseInt(getServerConfiguration().getString(
+							"ConcurrentThreadSettings.archivedJobsLookupThreadsPerFilesystem"));
 
 		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -151,7 +151,7 @@ public final class ServerPropertiesManager {
 		int retries = -1;
 		try {
 			retries = Integer.parseInt(getServerConfiguration().getString(
-			"ConcurrentThreadSettings.fileTransfersPerUser"));
+					"ConcurrentThreadSettings.fileTransfersPerUser"));
 
 		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -196,8 +196,8 @@ public final class ServerPropertiesManager {
 		int concurrentThreads = -1;
 		try {
 			concurrentThreads = Integer
-			.parseInt(getServerConfiguration().getString(
-			"ConcurrentThreadSettings.mountPointLookupThreads"));
+					.parseInt(getServerConfiguration().getString(
+							"ConcurrentThreadSettings.mountPointLookupThreads"));
 
 		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -248,8 +248,8 @@ public final class ServerPropertiesManager {
 		int concurrentThreads = -1;
 		try {
 			concurrentThreads = Integer
-			.parseInt(getServerConfiguration().getString(
-			"ConcurrentThreadSettings.batchJobSubmitThreads"));
+					.parseInt(getServerConfiguration().getString(
+							"ConcurrentThreadSettings.batchJobSubmitThreads"));
 
 		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -270,7 +270,7 @@ public final class ServerPropertiesManager {
 		String dbUrl;
 		try {
 			dbUrl = getServerConfiguration().getString(
-			"Database.databaseConnectionUrl");
+					"Database.databaseConnectionUrl");
 			return dbUrl;
 		} catch (final Exception e) {
 			return null;
@@ -286,7 +286,7 @@ public final class ServerPropertiesManager {
 		String dbPassword;
 		try {
 			dbPassword = getServerConfiguration().getString(
-			"Database.databasePassword");
+					"Database.databasePassword");
 			return dbPassword;
 		} catch (final Exception e) {
 			return null;
@@ -304,7 +304,7 @@ public final class ServerPropertiesManager {
 		String dbType;
 		try {
 			dbType = getServerConfiguration()
-			.getString("Database.databaseType");
+					.getString("Database.databaseType");
 			return dbType;
 		} catch (final Exception e) {
 			return null;
@@ -320,7 +320,7 @@ public final class ServerPropertiesManager {
 		String dbUsername;
 		try {
 			dbUsername = getServerConfiguration().getString(
-			"Database.databaseUsername");
+					"Database.databaseUsername");
 			return dbUsername;
 		} catch (final Exception e) {
 			return null;
@@ -378,7 +378,7 @@ public final class ServerPropertiesManager {
 		String fqan = null;
 		try {
 			fqan = getServerConfiguration().getString(
-			"General.archivedJobDefaultVO");
+					"General.archivedJobDefaultVO");
 
 			if (StringUtils.isNotBlank(fqan)
 					&& "none".equals(fqan.toLowerCase())) {
@@ -434,7 +434,7 @@ public final class ServerPropertiesManager {
 		int retries = -1;
 		try {
 			retries = Integer.parseInt(getServerConfiguration().getString(
-			"RetrySettings.fileTransfers"));
+					"RetrySettings.fileTransfers"));
 
 		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -477,7 +477,7 @@ public final class ServerPropertiesManager {
 		int retries = -1;
 		try {
 			retries = Integer.parseInt(getServerConfiguration().getString(
-			"RetrySettings.jobSubmissions"));
+					"RetrySettings.jobSubmissions"));
 
 		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -568,7 +568,7 @@ public final class ServerPropertiesManager {
 		String jobDirName = null;
 		try {
 			jobDirName = getServerConfiguration().getString(
-			"General.jobDirName");
+					"General.jobDirName");
 
 			if (StringUtils.isNotBlank(jobDirName)
 					&& "none".equals(jobDirName.toLowerCase())) {
@@ -594,11 +594,11 @@ public final class ServerPropertiesManager {
 	 *             if the file could not be read/parsed
 	 */
 	public static HierarchicalINIConfiguration getServerConfiguration()
-	throws ConfigurationException {
+			throws ConfigurationException {
 		if (config == null) {
 			final File grisuDir = Environment.getGrisuDirectory();
 			config = new HierarchicalINIConfiguration(new File(grisuDir,
-			"grisu-backend.config"));
+					"grisu-backend.config"));
 		}
 		return config;
 	}
@@ -653,7 +653,7 @@ public final class ServerPropertiesManager {
 
 		try {
 			final String dbtype = getServerConfiguration().getString(
-			"Database.databaseType");
+					"Database.databaseType");
 
 			if ((dbtype == null) || (dbtype.length() == 0)) {
 				return true;
@@ -680,7 +680,7 @@ public final class ServerPropertiesManager {
 				useFScache = getServerConfiguration().getBoolean("General.fsCache");
 			} catch (final NoSuchElementException e) {
 				// doesn't matter
-				myLogger.debug(e);
+				// myLogger.debug(e);
 			}
 
 		} catch (final ConfigurationException e) {

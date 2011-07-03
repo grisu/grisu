@@ -2754,11 +2754,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				.getApplication())) {
 
 			submissionLocation = jobSubmissionObject.getSubmissionLocation();
-			if (StringUtils.isBlank(submissionLocation)) {
+			if (StringUtils.isBlank(submissionLocation)
+					|| Constants.NO_SUBMISSION_LOCATION_INDICATOR_STRING
+					.equals(submissionLocation)) {
 				throw new JobPropertiesException(
 						JobSubmissionProperty.SUBMISSIONLOCATION.toString()
 						+ ": "
-						+ "No submission location specified. Since application is of type \"generic\" Grisu can't auto-calculate one.");
+						+ "No submission location specified. Since application is of type \"generic\" Grisu can't auto-calculate one. Please either specify package or submissionn location.");
 			}
 			stagingFileSystems = informationManager
 					.getStagingFileSystemForSubmissionLocation(submissionLocation);
@@ -2833,7 +2835,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			submissionLocation = jobSubmissionObject.getSubmissionLocation();
 			// GridResource selectedSubmissionResource = null;
 
-			if (StringUtils.isNotBlank(submissionLocation)) {
+			if (StringUtils.isNotBlank(submissionLocation)
+					&& !Constants.NO_SUBMISSION_LOCATION_INDICATOR_STRING
+					.equals(submissionLocation)) {
 				myLogger.debug("Submission location specified in jsdl: "
 						+ submissionLocation
 						+ ". Checking whether this is valid using mds information.");
