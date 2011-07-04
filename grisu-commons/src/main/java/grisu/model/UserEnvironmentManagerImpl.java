@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -29,6 +30,9 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.tree.TreeModel;
 
@@ -212,11 +216,30 @@ EventSubscriber<FqanEvent> {
 	public synchronized final Set<String> getAllAvailableSubmissionLocations() {
 
 		if (cachedAllSubmissionLocations == null) {
-			cachedAllSubmissionLocations = new HashSet<String>();
+			cachedAllSubmissionLocations = Collections
+					.synchronizedSet(new TreeSet<String>());
 			cachedAllSites = new TreeSet<String>();
+
+			final ExecutorService executor = Executors
+					.newFixedThreadPool(getAllAvailableFqans().length);
 			for (final String fqan : getAllAvailableFqans()) {
-				cachedAllSubmissionLocations.addAll(Arrays.asList(resourceInfo
-						.getAllAvailableSubmissionLocations(fqan)));
+
+				Thread t = new Thread() {
+					@Override
+					public void run() {
+						cachedAllSubmissionLocations
+						.addAll(Arrays.asList(resourceInfo
+								.getAllAvailableSubmissionLocations(fqan)));
+					}
+				};
+				executor.execute(t);
+			}
+			executor.shutdown();
+
+			try {
+				executor.awaitTermination(60, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				myLogger.error(e);
 			}
 
 		}
