@@ -338,6 +338,14 @@ public interface UserEnvironmentManager {
 	String getProperty(String key);
 
 	/**
+	 * Returns a list of all jobnames (batch & single) of a user.
+	 * 
+	 * @param refresh whether to refresh the list or used the cached version.
+	 * @return all jobnames
+	 */
+	public SortedSet<String> getReallyAllJobnames(boolean refresh);
+
+	/**
 	 * Returns a recommended mountpoint for the specified combination of
 	 * submission location and fqan.
 	 * 
