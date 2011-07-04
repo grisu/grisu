@@ -2801,13 +2801,24 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				if ((jobSubmissionObject.getApplication() == null)
 						|| (jobSubmissionObject.getApplication().length() == 0)) {
-					throw new JobPropertiesException(
-							JobSubmissionProperty.APPLICATIONNAME.toString()
-							+ ": "
-							+ "No application specified and could not find one in the grid that matches the executable "
-							+ JsdlHelpers
-							.getPosixApplicationExecutable(jsdl)
-							+ ".");
+
+					String version = jobSubmissionObject
+							.getApplicationVersion();
+					if (StringUtils.isNotBlank(version)
+							&& !Constants.NO_VERSION_INDICATOR_STRING
+							.equals(version)) {
+						throw new JobPropertiesException(
+								JobSubmissionProperty.APPLICATIONNAME
+								.toString()
+								+ ": "
+								+ "No application specified (but application version) and could not find one in the grid that matches the executable "
+								+ JsdlHelpers
+								.getPosixApplicationExecutable(jsdl)
+								+ ".");
+					} else {
+						jobSubmissionObject
+						.setApplication(Constants.GENERIC_APPLICATION_NAME);
+					}
 				}
 
 				applicationCalculated = true;
