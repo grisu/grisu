@@ -699,7 +699,7 @@ public class LoginManager {
 				if (defaultChoice < 0) {
 					prompt.append(": ");
 				} else {
-					prompt.append(" [" + defaultChoice + "] ");
+					prompt.append(" [" + defaultChoice + "]: ");
 				}
 
 				String idpchoice = null;

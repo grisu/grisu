@@ -247,6 +247,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	protected final BatchJobDAO batchJobDao = new BatchJobDAO();
 
+	private int SUBMIT_PROXY_LIFETIME = -1;
+
+	// private Map<String, RemoteFileTransferObject> fileTransfers = new
+	// HashMap<String, RemoteFileTransferObject>();
+
 	public void addArchiveLocation(String alias, String value) {
 
 		if (StringUtils.isBlank(value)) {
@@ -256,9 +261,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 	}
-
-	// private Map<String, RemoteFileTransferObject> fileTransfers = new
-	// HashMap<String, RemoteFileTransferObject>();
 
 	public void addBookmark(String alias, String value) {
 
@@ -1867,6 +1869,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	protected abstract ProxyCredential getCredential();
 
+	/**
+	 * This is mainly for testing, to enable credentials with specified
+	 * lifetimes.
+	 * 
+	 * @param fqan the vo
+	 * @param lifetime
+	 *            the lifetime in seconds
+	 * @return the credential
+	 */
+	protected abstract ProxyCredential getCredential(String fqan, int lifetime);
+
 	// public DtoDataLocations getDataLocationsForVO(final String fqan) {
 	//
 	// return DtoDataLocations.createDataLocations(fqan,
@@ -1990,12 +2003,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return getUser().getJobStatus(jobname);
 	}
 
-	// public String getStagingFileSystem(String site) {
-	// return MountPointManager.getDefaultFileSystem(site);
-	// }
-
-	// abstract protected DtoStringList getSessionFqans();
-
 	public String getJsdlDocument(final String jobname)
 			throws NoSuchJobException {
 
@@ -2007,6 +2014,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return jsdlString;
 
 	}
+
+	// public String getStagingFileSystem(String site) {
+	// return MountPointManager.getDefaultFileSystem(site);
+	// }
+
+	// abstract protected DtoStringList getSessionFqans();
 
 	/*
 	 * (non-Javadoc)
@@ -2094,10 +2107,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						.getAllSubmissionLocationsForApplication(application));
 	}
 
-	// public UserDAO getUserDao() {
-	// return userdao;
-	// }
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -2112,6 +2121,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		return DtoSubmissionLocations.createSubmissionLocationsInfo(sls);
 	}
+
+	// public UserDAO getUserDao() {
+	// return userdao;
+	// }
 
 	public DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersionAndFqan(
 			final String application, final String version, final String fqan) {
@@ -3713,6 +3726,24 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		restartJob(job, changedJsdl);
 	}
 
+	public void setDebugProperties(Map<String, String> props) {
+
+		for ( String key : props.keySet() ) {
+
+			if ( "submitProxyLifetime".equals(key) ) {
+				int lt = -1;
+				try {
+					lt = Integer.parseInt(props.get(key));
+					SUBMIT_PROXY_LIFETIME = lt;
+				} catch (NumberFormatException e) {
+					SUBMIT_PROXY_LIFETIME = -1;
+				}
+			}
+
+		}
+
+	}
+
 	// /*
 	// * (non-Javadoc)
 	// *
@@ -3949,7 +3980,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		if (job.getFqan() != null) {
 
 			try {
-				job.setCredential(getUser().getCred(job.getFqan()));
+				if (SUBMIT_PROXY_LIFETIME >= 0) {
+					job.setCredential(getUser().getCred(job.getFqan()));
+				} else {
+					job.setCredential(getCredential(job.getFqan(),
+							SUBMIT_PROXY_LIFETIME));
+				}
 			} catch (final Exception e) {
 				throw new JobSubmissionException(
 						"Could not create credential to use to submit the job: "

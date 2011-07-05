@@ -3,6 +3,7 @@ package grisu.control.serviceInterfaces;
 import grisu.backend.hibernate.HibernateSessionFactory;
 import grisu.backend.model.ProxyCredential;
 import grisu.backend.model.User;
+import grisu.backend.utils.CertHelpers;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoSuchTemplateException;
 import grisu.control.exceptions.NoValidCredentialException;
@@ -11,6 +12,8 @@ import grisu.settings.ServerPropertiesManager;
 import grisu.settings.ServiceTemplateManagement;
 import grith.jgrith.myProxy.MyProxy_light;
 import grith.jgrith.plainProxy.LocalProxy;
+import grith.jgrith.voms.VO;
+import grith.jgrith.voms.VOManagement.VOManagement;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -40,7 +43,7 @@ ServiceInterface {
 		try {
 			if (credential != null) {
 				oldLifetime = credential.getGssCredential()
-				.getRemainingLifetime();
+						.getRemainingLifetime();
 			}
 		} catch (final GSSException e2) {
 			myLogger.debug("Problem getting lifetime of old certificate: " + e2);
@@ -64,11 +67,11 @@ ServiceInterface {
 								LocalProxy.loadGSSCredential());
 					} catch (final Exception e) {
 						throw new NoValidCredentialException(
-						"Could not load credential/no valid login data.");
+								"Could not load credential/no valid login data.");
 					}
 					if (!credential.isValid()) {
 						throw new NoValidCredentialException(
-						"Local proxy is not valid anymore.");
+								"Local proxy is not valid anymore.");
 					}
 				}
 			} else {
@@ -80,13 +83,13 @@ ServiceInterface {
 					// this is needed because of a possible round-robin myproxy
 					// server
 					myProxyServer = InetAddress.getByName(myProxyServer)
-					.getHostAddress();
+							.getHostAddress();
 				} catch (final UnknownHostException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 					throw new NoValidCredentialException(
 							"Could not download myproxy credential: "
-							+ e1.getLocalizedMessage());
+									+ e1.getLocalizedMessage());
 				}
 
 				try {
@@ -104,17 +107,44 @@ ServiceInterface {
 					e.printStackTrace();
 					throw new NoValidCredentialException(
 							"Could not get myproxy credential: "
-							+ e.getLocalizedMessage());
+									+ e.getLocalizedMessage());
 				}
 				if (!credential.isValid()) {
 					throw new NoValidCredentialException(
-					"MyProxy credential is not valid.");
+							"MyProxy credential is not valid.");
 				}
 			}
 		}
 
 		return credential;
 
+	}
+
+	@Override
+	protected final ProxyCredential getCredential(String fqan,
+			int lifetimeInSeconds) {
+
+		String myProxyServer = MyProxyServerParams.getMyProxyServer();
+		final int myProxyPort = MyProxyServerParams.getMyProxyPort();
+
+		ProxyCredential temp;
+		try {
+			temp = new ProxyCredential(MyProxy_light.getDelegation(
+					myProxyServer, myProxyPort, myproxy_username, passphrase,
+					lifetimeInSeconds));
+			if (StringUtils.isNotBlank(fqan)) {
+
+				final VO vo = VOManagement
+						.getVO(getUser().getFqans().get(fqan));
+				ProxyCredential credToUse = CertHelpers.getVOProxyCredential(
+						vo, fqan, temp);
+				return credToUse;
+			} else {
+				return temp;
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public final long getCredentialEndTime() {
@@ -125,13 +155,13 @@ ServiceInterface {
 		try {
 			// this is needed because of a possible round-robin myproxy server
 			myProxyServer = InetAddress.getByName(myProxyServer)
-			.getHostAddress();
+					.getHostAddress();
 		} catch (final UnknownHostException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 			throw new NoValidCredentialException(
 					"Could not download myproxy credential: "
-					+ e1.getLocalizedMessage());
+							+ e1.getLocalizedMessage());
 		}
 
 		final MyProxy myproxy = new MyProxy(myProxyServer, myProxyPort);
@@ -168,7 +198,7 @@ ServiceInterface {
 	}
 
 	public final String getTemplate(final String application)
-	throws NoSuchTemplateException {
+			throws NoSuchTemplateException {
 		final String temp = ServiceTemplateManagement.getTemplate(application);
 
 		if (StringUtils.isBlank(temp)) {

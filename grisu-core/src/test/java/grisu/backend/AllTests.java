@@ -23,8 +23,8 @@ public class AllTests {
 	private static FileManager fm = null;
 	private static UserEnvironmentManager uem = null;
 
-	// private final static alias = "Local";
-	private final static String alias = "BeSTGRID";
+	private final static String alias = "Local";
+	//	private final static String alias = "BeSTGRID";
 
 	public static FileManager getFileManager() {
 		if (fm == null) {
