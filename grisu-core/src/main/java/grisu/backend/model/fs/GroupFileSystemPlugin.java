@@ -362,7 +362,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 										.lastModified(url);
 
 								temp.put(ts, url);
-
+								myLogger.debug("File exists: " + url);
 								// boolean exists = user.getFileSystemManager()
 								// .fileExists(url);
 								// if (exists) {
@@ -402,6 +402,8 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 						i = i + 1;
 					}
 				}
+
+				return result;
 
 			}
 
