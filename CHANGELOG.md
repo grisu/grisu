@@ -1,8 +1,19 @@
 Changelog
 =========
 
+0.3.4.3
+-------
+
+* fix for file upload problem with bigger files
+
+0.3.4.2
+-------
+
+* disabled gt5 lookup again because of some regression on prod backend
+* another fix for open connections issue
+
 0.3.4.1
------
+-------
 
 * fix for open connections issue
 * fix for gt5 job status lookup after GT5 upgrade
