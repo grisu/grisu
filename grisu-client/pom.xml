@@ -3,6 +3,7 @@
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
 		<version>0.3.5-SNAPSHOT</version>
+
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>grisu.frontend</groupId>
@@ -51,6 +52,7 @@
 			<groupId>grisu</groupId>
 			<artifactId>grisu-commons</artifactId>
 			<version>0.3.5-SNAPSHOT</version>
+
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
