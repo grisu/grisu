@@ -138,8 +138,13 @@ ServiceInterface {
 						.getVO(getUser().getFqans().get(fqan));
 				ProxyCredential credToUse = CertHelpers.getVOProxyCredential(
 						vo, fqan, temp);
+
+				myLogger.debug("Created proxy with lifetime: "
+						+ credToUse.getExpiryDate().toString());
 				return credToUse;
 			} else {
+				myLogger.debug("Created proxy with lifetime: "
+						+ temp.getExpiryDate().toString());
 				return temp;
 			}
 		} catch (Exception e) {

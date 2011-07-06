@@ -25,10 +25,11 @@ public class JobSubmissionTest {
 		asi.setDebugProperties(props);
 
 		JobObject job = new JobObject(asi);
-		job.setCommandline("sleep 200");
+		job.setCommandline("sleep 400");
 		job.setApplication(Constants.GENERIC_APPLICATION_NAME);
-		job.setSubmissionLocation("route@er171.ceres.auckland.ac.nz:ng2.auckland.ac.nz");
-		job.createJob("/nz/uoa");
+		// job.setSubmissionLocation("route@er171.ceres.auckland.ac.nz:ng2.auckland.ac.nz");
+		job.setSubmissionLocation("default:gram5.ceres.auckland.ac.nz");
+		job.createJob("/nz/nesi");
 		job.submitJob();
 
 		job.waitForJobToFinish(5);

@@ -3980,7 +3980,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		if (job.getFqan() != null) {
 
 			try {
-				if (SUBMIT_PROXY_LIFETIME >= 0) {
+				if (SUBMIT_PROXY_LIFETIME <= 0) {
 					job.setCredential(getUser().getCred(job.getFqan()));
 				} else {
 					job.setCredential(getCredential(job.getFqan(),
