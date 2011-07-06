@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.3.4.2</version>
+		<version>0.3.4.3</version>
 	</parent>
 	<groupId>grisu.frontend</groupId>
 	<artifactId>grisu-client-swing</artifactId>
@@ -13,7 +13,7 @@
 		<dependency>
 			<groupId>grisu.frontend</groupId>
 			<artifactId>grisu-client</artifactId>
-			<version>0.3.4.2</version>
+			<version>0.3.4.3</version>
 			<scope>compile</scope>
 		</dependency>
 
