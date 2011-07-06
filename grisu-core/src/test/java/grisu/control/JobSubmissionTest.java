@@ -25,16 +25,17 @@ public class JobSubmissionTest {
 		asi.setDebugProperties(props);
 
 		JobObject job = new JobObject(asi);
-		job.setCommandline("sleep 400");
+		job.setCommandline("sleep 10000000");
 		job.setApplication(Constants.GENERIC_APPLICATION_NAME);
-		// job.setSubmissionLocation("route@er171.ceres.auckland.ac.nz:ng2.auckland.ac.nz");
-		job.setSubmissionLocation("default:gram5.ceres.auckland.ac.nz");
-		job.createJob("/nz/nesi");
+		job.setSubmissionLocation("route@er171.ceres.auckland.ac.nz:ng2.auckland.ac.nz");
+		job.setWalltimeInSeconds(360);
+		// job.setSubmissionLocation("default:gram5.ceres.auckland.ac.nz");
+		job.createJob("/ARCS/BeSTGRID");
 		job.submitJob();
 
 		job.waitForJobToFinish(5);
 
-		System.out.println("Status: " + job.getStatus(true));
+		System.out.println("Status: " + job.getStatusString(true));
 
 		props.put("submitProxyLifetime", "");
 		asi.setDebugProperties(props);

@@ -524,6 +524,8 @@ Comparable<JobObject> {
 						return;
 					}
 					if (oldStatus != getStatus(false)) {
+						myLogger.debug("Status of job " + getJobname()
+								+ " changed to: " + getStatusString(false));
 						EventBus.publish(new JobStatusEvent(JobObject.this,
 								oldStatus, JobObject.this.getStatus(false)));
 						if (StringUtils.isNotBlank(getJobname())) {

@@ -62,12 +62,12 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 	}
 
 	public GridFile createGridFile(final String path, int recursiveLevels)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		// Thread.dumpStack();
 		if (recursiveLevels > 1) {
 			throw new RuntimeException(
-			"Recursion levels greater than 1 not supported yet");
+					"Recursion levels greater than 1 not supported yet");
 		}
 
 		String rightPart = path.substring(BASE.length());
@@ -135,20 +135,20 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					file.setName(FileManager.getFilename(fqan));
 					String pathNew = (path + "/" + file.getName()).replace(
 							"///",
-					"/").replace("//", "/")
-					+ "//";
+							"/").replace("//", "/")
+							+ "//";
 					file.setPath(pathNew);
 					file.setIsVirtual(true);
 					file.addSites(temp.get(fqan));
 					result.addChild(file);
 				} else {
 					GridFile file = new GridFile((BASE + fqan).replace("///",
-					"/").replace("//", "/")
-					+ "//", fqan);
+							"/").replace("//", "/")
+							+ "//", fqan);
 					String pathNew = (path + "/" + file.getName()).replace(
 							"///",
-					"/").replace("//", "/")
-					+ "//";
+							"/").replace("//", "/")
+							+ "//";
 					file.setPath(pathNew);
 					for (MountPoint mp : mps) {
 						// X.p("Add" + mp.getRootUrl());
@@ -340,6 +340,73 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				}
 			}
 
+			if (recursiveLevels == 0) {
+
+				myLogger.debug("Checking whether any of the possible real urls for virtual url "
+						+ path + " exist...");
+				// test whether files actually exist
+				final ExecutorService executor = Executors
+						.newFixedThreadPool(parentUrls.size());
+
+				// let's sort using last modified date, so that we can give the
+				// last file the highest priority
+				final Map<Long, String> temp = Collections
+						.synchronizedMap(new TreeMap<Long, String>());
+
+				for ( final String url : parentUrls ) {
+					Thread t = new Thread() {
+						@Override
+						public void run() {
+							try {
+								long ts = user.getFileSystemManager()
+										.lastModified(url);
+
+								temp.put(ts, url);
+
+								// boolean exists = user.getFileSystemManager()
+								// .fileExists(url);
+								// if (exists) {
+								// myLogger.debug("File exists: " + url);
+								// temp.add(url);
+								// } else {
+								// myLogger.debug("File does not exit: " + url);
+								// }
+							} catch (Exception e) {
+								myLogger.debug("File does not exit: " + url
+										+ " - " + e.getLocalizedMessage());
+							}
+
+						}
+					};
+					executor.execute(t);
+				}
+
+				executor.shutdown();
+				try {
+					executor.awaitTermination(60, TimeUnit.SECONDS);
+				} catch (InterruptedException e) {
+				}
+
+				if (temp.size() == 1) {
+					result = new GridFile(temp.values().iterator().next(), -1L);
+					result.setIsVirtual(false);
+					result.setPath(path);
+				} else {
+					result = new GridFile(path, -1L);
+					result.setIsVirtual(true);
+					result.setPath(path);
+					int i = 0;
+					for (Long lm : temp.keySet()) {
+						result.addUrl(temp.get(lm),
+								GridFile.FILETYPE_FOLDER_PRIORITY + i);
+						i = i + 1;
+					}
+				}
+
+			}
+
+			// xxx
+
 			if (parentUrls.size() == 1) {
 				result = new GridFile(parentUrls.iterator().next(), -1L);
 				result.setIsVirtual(false);
@@ -375,9 +442,9 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			String[] fqanTokens = fqan.substring(1).split("/");
 			int fqanTokenLength = fqanTokens.length;
 
-			if ((fqanTokenLength == tokens.length + 1)
+			if ((fqanTokenLength == (tokens.length + 1))
 					&& fqanTokens[tokens.length - 1]
-					              .equals(tokens[tokens.length - 1])) {
+							.equals(tokens[tokens.length - 1])) {
 
 				Set<String> sites = new TreeSet<String>();
 				Set<MountPoint> mps = user.getMountPoints(fqan);
@@ -415,7 +482,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 	}
 
 	private Set<GridFile> listGroup(String fqan, String path)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		Set<MountPoint> mps = user.getMountPoints(fqan);
 
@@ -433,7 +500,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 		}
 
 		final Map<String, GridFile> result = Collections
-		.synchronizedMap(new HashMap<String, GridFile>());
+				.synchronizedMap(new HashMap<String, GridFile>());
 
 
 		final ExecutorService pool = Executors.newFixedThreadPool(mps.size());
@@ -453,7 +520,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 					try {
 						GridFile file = user.getFileSystemManager()
-						.getFolderListing(urlToQuery, 1);
+								.getFolderListing(urlToQuery, 1);
 						file.addSite(mp.getSite());
 						result.put(urlToQuery, file);
 
@@ -485,7 +552,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 		int timeout = ServerPropertiesManager.getFileListingTimeOut();
 		try {
 			boolean timedOut = !pool
-			.awaitTermination(timeout, TimeUnit.SECONDS);
+					.awaitTermination(timeout, TimeUnit.SECONDS);
 			if (timedOut) {
 				myLogger.debug("GroupfilePlugin list group timed out....");
 
@@ -497,8 +564,8 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 								false,
 								new Exception(
 										"Timeout ("
-										+ timeout
-										+ " seconds) while trying to list children."));
+												+ timeout
+												+ " seconds) while trying to list children."));
 						result.put(url, temp);
 					}
 				}
