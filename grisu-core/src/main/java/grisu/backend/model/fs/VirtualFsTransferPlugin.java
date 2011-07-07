@@ -20,10 +20,6 @@ public class VirtualFsTransferPlugin implements FileTransferPlugin {
 		GridFile sourceFile;
 		sourceFile = user.getFileSystemManager().getFolderListing(source, 0);
 
-		GridFile targetFile;
-
-		targetFile = user.getFileSystemManager().getFolderListing(source, 0);
-
 		if (sourceFile.getUrls().size() > 1) {
 
 			// for (DtoProperty u : sourceFile.getUrls()) {
@@ -34,13 +30,22 @@ public class VirtualFsTransferPlugin implements FileTransferPlugin {
 					+ sourceFile.getUrl());
 		}
 
-		if (targetFile.getUrls().size() > 1) {
-			throw new RemoteFileSystemException("Target url not unique: "
-					+ targetFile.getUrl());
-		}
+		// GridFile targetFile = null;
+		//
+		// try {
+		// targetFile = user.getFileSystemManager()
+		// .getFolderListing(target, 0);
+		// if (targetFile.getUrls().size() > 1) {
+		// throw new RemoteFileSystemException("Target url not unique: "
+		// + targetFile.getUrl());
+		// }
+		// } catch (Exception e) {
+		// // good
+		// }
 
-		return user.getFileSystemManager().copy(sourceFile.getUrl(),
-				targetFile.getUrl(), overwrite);
+
+		return user.getFileSystemManager().copy(sourceFile.getUrl(), target,
+				overwrite);
 	}
 
 }

@@ -60,7 +60,7 @@ RemoteFileTransferObject {
 							.getFileTransferRetries(); tryNo++) {
 
 						myLogger.debug(tryNo + 1 + ". try to transfer file: "
-								+ source.getName().getURI()
+								+ source.getName().getURI() + " => "
 								+ target.getName().getURI());
 						try {
 							myLogger.info("Copy thread started for target: "

@@ -3818,17 +3818,18 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			if (StringUtils.isNotBlank(sourceUrl)) {
 
-				try {
-					getUser().getFileSystemManager().createFolder(targetUrl);
-
-				} catch (final RemoteFileSystemException e) {
-					if (optionalStatus != null) {
-						optionalStatus
-						.addLogMessage("Error while staging in files: "
-								+ e.getLocalizedMessage());
-					}
-					throw e;
-				}
+				// try {
+				// getUser().getFileSystemManager().createFolder(
+				// FileManager.calculateParentUrl(targetUrl));
+				//
+				// } catch (final RemoteFileSystemException e) {
+				// if (optionalStatus != null) {
+				// optionalStatus
+				// .addLogMessage("Error while staging in files: "
+				// + e.getLocalizedMessage());
+				// }
+				// throw e;
+				// }
 				myLogger.debug("Staging file: " + sourceUrl + " to: "
 						+ targetUrl);
 				job.addInputFile(sourceUrl);
