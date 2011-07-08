@@ -592,7 +592,10 @@ public class LoginManager {
 		initEnvironment();
 
 		if (LocalProxy.validGridProxyExists()) {
-			return LoginManager.login(url);
+			CliHelpers.setIndeterminateProgress("Logging in...", true);
+			ServiceInterface tmp = LoginManager.login(url);
+			CliHelpers.setIndeterminateProgress(false);
+			return tmp;
 		} else {
 			final ImmutableSet<LoginType> temp = ImmutableSet.of(
 					LoginType.SHIBBOLETH, LoginType.MYPROXY,
