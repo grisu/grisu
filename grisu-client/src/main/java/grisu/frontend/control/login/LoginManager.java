@@ -647,10 +647,14 @@ public class LoginManager {
 					}
 				}
 
-				return LoginManager.myProxyLogin(url, username,
+				CliHelpers.setIndeterminateProgress("Logging in...", true);
+				ServiceInterface tmp = LoginManager.myProxyLogin(url, username,
 						password.toCharArray());
+				CliHelpers.setIndeterminateProgress(false);
+				return tmp;
 
 			} catch (final LoginException e) {
+				CliHelpers.setIndeterminateProgress(false);
 				System.out.println("Login failed: " + e.getLocalizedMessage());
 			}
 		}
@@ -770,9 +774,15 @@ public class LoginManager {
 					}
 				}
 
-				return LoginManager.shiblogin(username, password.toCharArray(),
+				CliHelpers.setIndeterminateProgress("Logging in...", true);
+				ServiceInterface tmp = LoginManager.shiblogin(username,
+						password.toCharArray(),
 						idpchoice, url, true);
+				CliHelpers.setIndeterminateProgress(false);
+
+				return tmp;
 			} catch (final LoginException e) {
+				CliHelpers.setIndeterminateProgress(false);
 				System.out.println("Login failed: " + e.getLocalizedMessage());
 			}
 		}
@@ -799,9 +809,14 @@ public class LoginManager {
 
 				final LoginParams params = new LoginParams(url, null, null);
 
-				return LoginManager.login(null, password.toCharArray(), null,
+				CliHelpers.setIndeterminateProgress("Logging in...", true);
+				ServiceInterface tmp = LoginManager.login(null,
+						password.toCharArray(), null,
 						null, params, true);
+				CliHelpers.setIndeterminateProgress(false);
+				return tmp;
 			} catch (final LoginException e) {
+				CliHelpers.setIndeterminateProgress(false);
 				System.out.println("Login exception: "
 						+ e.getLocalizedMessage());
 			}
