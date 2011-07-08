@@ -124,6 +124,9 @@ public class CliHelpers {
 		Thread.sleep(4000);
 
 		setIndeterminateProgress("Success.", false);
+		// setIndeterminateProgress(false);
+
+		System.out.println(" xx ");
 	}
 
 	private static String repetition(String string, int progress) {
@@ -184,16 +187,19 @@ public class CliHelpers {
 						}
 					} while (!Thread.interrupted());
 
-					writeToTerminal(" ");
+					writeToTerminal("");
 				}
 			};
 			indeterminateProgress.start();
 
-		} else if (!start) {
+		} else {
 
 			if ( ! ENABLE_PROGRESS ) {
 				if (StringUtils.isNotBlank(message)) {
-					System.out.println(message);
+					writeToTerminal(message);
+					return;
+				} else {
+					// writeToTerminal("");
 					return;
 				}
 			}

@@ -594,7 +594,8 @@ public class LoginManager {
 		if (LocalProxy.validGridProxyExists()) {
 			CliHelpers.setIndeterminateProgress("Logging in...", true);
 			ServiceInterface tmp = LoginManager.login(url);
-			CliHelpers.setIndeterminateProgress(false);
+			CliHelpers.setIndeterminateProgress("Logged in to backend: " + url,
+					false);
 			return tmp;
 		} else {
 			final ImmutableSet<LoginType> temp = ImmutableSet.of(
@@ -653,7 +654,8 @@ public class LoginManager {
 				CliHelpers.setIndeterminateProgress("Logging in...", true);
 				ServiceInterface tmp = LoginManager.myProxyLogin(url, username,
 						password.toCharArray());
-				CliHelpers.setIndeterminateProgress(false);
+				CliHelpers.setIndeterminateProgress("Logged in to backend: "
+						+ url, false);
 				return tmp;
 
 			} catch (final LoginException e) {
@@ -673,8 +675,7 @@ public class LoginManager {
 
 				// System.out.println("Loading list of institutions...");
 
-				CliHelpers.setIndeterminateProgress(
-						"Loading list of Institutions...", true);
+				CliHelpers.setIndeterminateProgress("Loading idps...", true);
 
 				StringBuffer prompt = new StringBuffer(
 						"Please select your institution");
@@ -689,6 +690,10 @@ public class LoginManager {
 
 				final ImmutableList<String> idps = ImmutableList.copyOf(idpObj
 						.getIdps());
+
+				CliHelpers.setIndeterminateProgress("Available Institutions:",
+						false);
+
 				int defaultChoice = -1;
 
 				for (int i = 0; i < idps.size(); i++) {
@@ -700,8 +705,6 @@ public class LoginManager {
 					}
 				}
 				System.out.println("\n[0]\tExit");
-
-				CliHelpers.setIndeterminateProgress(false);
 
 				if (defaultChoice < 0) {
 					prompt.append(": ");
@@ -781,7 +784,8 @@ public class LoginManager {
 				ServiceInterface tmp = LoginManager.shiblogin(username,
 						password.toCharArray(),
 						idpchoice, url, true);
-				CliHelpers.setIndeterminateProgress(false);
+				CliHelpers.setIndeterminateProgress("Logged in to backend: "
+						+ url, false);
 
 				return tmp;
 			} catch (final LoginException e) {
@@ -816,7 +820,8 @@ public class LoginManager {
 				ServiceInterface tmp = LoginManager.login(null,
 						password.toCharArray(), null,
 						null, params, true);
-				CliHelpers.setIndeterminateProgress(false);
+				CliHelpers.setIndeterminateProgress("Logged in to backend: "
+						+ url, false);
 				return tmp;
 			} catch (final LoginException e) {
 				CliHelpers.setIndeterminateProgress(false);
