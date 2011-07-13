@@ -161,6 +161,10 @@ public class FileManager {
 			new URL(inputFile);
 			return inputFile;
 		} catch (final MalformedURLException e) {
+			if (inputFile.startsWith("~")) {
+				inputFile = System.getProperty("user.home")
+						+ inputFile.substring(1);
+			}
 			final File newFile = new File(inputFile);
 			return newFile.toURI().toString();
 		}
@@ -437,6 +441,8 @@ public class FileManager {
 			return true;
 		} else if (file.startsWith("http:")) {
 			return false;
+		} else if (file.startsWith("~")) {
+			return true;
 		} else {
 			return true;
 			// throw new IllegalArgumentException(
@@ -1439,6 +1445,8 @@ public class FileManager {
 	 */
 	public GridFile ls(String url, int recursionLevel)
 			throws RemoteFileSystemException {
+
+		url = ensureUriFormat(url);
 
 		if (isLocal(url)) {
 
