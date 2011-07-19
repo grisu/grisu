@@ -675,7 +675,7 @@ public class LoginManager {
 
 				// System.out.println("Loading list of institutions...");
 
-				CliHelpers.setIndeterminateProgress("Loading idps...", true);
+				CliHelpers.setIndeterminateProgress("Loading...", true);
 
 				StringBuffer prompt = new StringBuffer(
 						"Please select your institution");
