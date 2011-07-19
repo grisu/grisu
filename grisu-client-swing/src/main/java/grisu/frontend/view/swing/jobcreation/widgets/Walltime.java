@@ -6,7 +6,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.border.TitledBorder;
 
-
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -15,10 +14,10 @@ import com.jgoodies.forms.layout.RowSpec;
 public class Walltime extends AbstractWidget {
 
 	private final static String[] units = new String[] { "minutes", "hours",
-			"days", "weeks" };
+		"days", "weeks" };
 	private final static String[] amounts = new String[] { "1", "2", "3", "4",
-			"5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "30",
-			"45" };
+		"5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "30",
+	"45" };
 
 	private final DefaultComboBoxModel unitModel = new DefaultComboBoxModel(
 			units);

@@ -40,20 +40,30 @@ public class WalltimeUtils {
 			// fuck the minutes
 			return new String[] { new Integer(days).toString(), "days" };
 		} else if ((days > 0) && (hours > 0)) {
-			return new String[] { new Integer(days * 24 + hours).toString(),
-					"hours" };
+			return new String[] { new Integer((days * 24) + hours).toString(),
+			"hours" };
 		} else if ((days == 0) && (hours > 0) && (minutes == 0)) {
 			return new String[] { new Integer(hours).toString(), "hours" };
 		} else if ((days == 0) && (hours > 0) && (minutes > 0)) {
 			if (hours > 6) {
 				// fuck the minutes
-				return new String[] { new Integer(hours).toString(), "hours" };
+				if (hours == 1) {
+					return new String[] { "1", "hour" };
+				} else {
+					return new String[] { new Integer(hours).toString(),
+							"hours" };
+				}
 			} else {
 				return new String[] {
-						new Integer(hours * 60 + minutes).toString(), "minutes" };
+						new Integer((hours * 60) + minutes).toString(), "minutes" };
 			}
 		} else {
-			return new String[] { new Integer(minutes).toString(), "minutes" };
+			if (minutes == 1) {
+				return new String[] { "1", "minute" };
+			} else {
+				return new String[] { new Integer(minutes).toString(),
+						"minutes" };
+			}
 		}
 
 	}
