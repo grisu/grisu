@@ -10,8 +10,12 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 public class FirstItemPromptItemRenderer extends DefaultListCellRenderer
-		implements ListCellRenderer {
+implements ListCellRenderer {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private final String selectionPrompt;
 
 	public FirstItemPromptItemRenderer(String selPrompt) {
