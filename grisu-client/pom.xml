@@ -108,7 +108,7 @@
 		<dependency>
 			<groupId>grith</groupId>
 			<artifactId>jgrith</artifactId>
-			<version>0.5.8-SNAPSHOT</version>
+			<version>0.5.8</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>grid-jcommons</artifactId>
