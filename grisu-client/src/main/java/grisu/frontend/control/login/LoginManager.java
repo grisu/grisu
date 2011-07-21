@@ -152,7 +152,7 @@ public class LoginManager {
 		try {
 			Init.initBouncyCastle();
 		} catch (final Exception e) {
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 
 	}
@@ -308,7 +308,7 @@ public class LoginManager {
 					(ProtocolSocketFactory) protocolSocketFactory, 443);
 			Protocol.registerProtocol("https", protocol);
 		} catch (final Exception e) {
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 
 		Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
@@ -428,7 +428,7 @@ public class LoginManager {
 				si = LoginHelpers.gssCredentialLogin(loginParams, slcsproxy);
 				ClientPropertiesManager.saveLastLoginType(LoginType.SHIBBOLETH);
 			} catch (final Exception e) {
-				e.printStackTrace();
+				myLogger.error(e);
 				throw new LoginException("Could not do slcs login: "
 						+ e.getLocalizedMessage(), e);
 			}
