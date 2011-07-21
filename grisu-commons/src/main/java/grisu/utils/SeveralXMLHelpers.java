@@ -17,6 +17,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -33,6 +34,9 @@ import org.xml.sax.SAXException;
  * 
  */
 public final class SeveralXMLHelpers {
+	
+	static final Logger myLogger = Logger.getLogger(SeveralXMLHelpers.class
+			.getName());
 
 	/**
 	 * Converts a xml element to a string.
@@ -154,7 +158,7 @@ public final class SeveralXMLHelpers {
 			return doc;
 
 		} catch (final Exception e) {
-			e.printStackTrace();
+			myLogger.error(e);
 			throw e;
 		}
 
@@ -200,7 +204,6 @@ public final class SeveralXMLHelpers {
 					.newDocumentBuilder();
 			return docBuilder.parse(input);
 		} catch (final Exception e) {
-			// e.printStackTrace();
 			throw e;
 		}
 	}
@@ -253,7 +256,6 @@ public final class SeveralXMLHelpers {
 
 			return result;
 		} catch (final Exception e) {
-			// e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 	}
@@ -301,13 +303,13 @@ public final class SeveralXMLHelpers {
 
 		} catch (final ParserConfigurationException e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			myLogger.error(e1);
 		} catch (final SAXException e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			myLogger.error(e1);
 		} catch (final IOException e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			myLogger.error(e1);
 		}
 
 		return jsdl;
@@ -358,7 +360,7 @@ public final class SeveralXMLHelpers {
 			result = toString(xml);
 		} catch (final Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 			result = e.getLocalizedMessage();
 		}
 
