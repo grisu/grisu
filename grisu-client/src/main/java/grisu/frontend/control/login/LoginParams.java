@@ -324,7 +324,7 @@ public class LoginParams {
 	public final void setServiceInterfaceUrl(final String serviceInterfaceUrl) {
 
 		final String possibleAlias = LoginManager.SERVICEALIASES
-				.get(serviceInterfaceUrl);
+				.get(serviceInterfaceUrl.toLowerCase());
 		if (StringUtils.isNotBlank(possibleAlias)) {
 			this.serviceInterfaceUrl = possibleAlias;
 		} else {
