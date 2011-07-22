@@ -684,8 +684,7 @@ EventSubscriber<FqanEvent> {
 
 					}
 				} catch (final URISyntaxException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					myLogger.error(e);
 					return null;
 				}
 			}
@@ -723,8 +722,7 @@ EventSubscriber<FqanEvent> {
 
 				}
 			} catch (final URISyntaxException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				myLogger.error(e);
 				return null;
 			}
 		}

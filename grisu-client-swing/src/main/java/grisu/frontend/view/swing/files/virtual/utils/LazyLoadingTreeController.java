@@ -12,10 +12,12 @@ import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 
+import org.apache.log4j.Logger;
+
 public class LazyLoadingTreeController implements TreeWillExpandListener {
 
 	public static class DefaultWorkerFactory implements
-			SwingWorkerFactory<MutableTreeNode[], Object> {
+	SwingWorkerFactory<MutableTreeNode[], Object> {
 
 		public SwingWorker<MutableTreeNode[], Object> getInstance(
 				final IWorker<MutableTreeNode[]> worker) {
@@ -31,11 +33,9 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 					try {
 						worker.done(get());
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						myLogger.error(e);
 					} catch (ExecutionException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						myLogger.error(e);
 					}
 
 				}
@@ -44,6 +44,9 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 		}
 
 	}
+
+	static final Logger myLogger = Logger.getLogger(TreeWillExpandListener.class
+			.getName());
 
 	private SwingWorkerFactory<MutableTreeNode[], ?> workerFactory = new DefaultWorkerFactory();
 	/** Tree Model */
@@ -146,7 +149,7 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 
 						model.nodeChanged(node);
 					} catch (Exception e) {
-						e.printStackTrace();
+						myLogger.error(e);
 					}
 
 				} else {

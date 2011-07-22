@@ -25,6 +25,9 @@ import org.netbeans.swing.outline.Outline;
 
 public class GridFileTransferHandler extends TransferHandler {
 
+	static final Logger myLogger = Logger
+			.getLogger(GridFileTransferHandler.class.getName());
+
 	public static final String LOCAL_SET_TYPE = DataFlavor.javaJVMLocalObjectMimeType
 			+ ";class=java.util.Set";
 	{
@@ -138,9 +141,9 @@ public class GridFileTransferHandler extends TransferHandler {
 						.getTransferData(SET_DATA_FLAVOR));
 				return true;
 			} catch (final UnsupportedFlavorException ufe) {
-				ufe.printStackTrace();
+				myLogger.error(ufe);
 			} catch (final IOException ioe) {
-				ioe.printStackTrace();
+				myLogger.error(ioe);
 			}
 		}
 

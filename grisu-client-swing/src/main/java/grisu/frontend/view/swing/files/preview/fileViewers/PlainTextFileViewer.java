@@ -54,7 +54,6 @@ public class PlainTextFileViewer extends JPanel implements FileViewer {
 		try {
 			text = FileUtils.readFileToString(localCacheFile);
 		} catch (final IOException e) {
-			e.printStackTrace();
 			text = "Could not read file:\n\n" + e.getLocalizedMessage();
 		}
 

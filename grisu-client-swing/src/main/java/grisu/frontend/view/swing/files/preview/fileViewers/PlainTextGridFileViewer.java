@@ -54,7 +54,6 @@ public class PlainTextGridFileViewer extends JPanel implements GridFileViewer {
 		try {
 			text = FileUtils.readFileToString(localCacheFile);
 		} catch (final IOException e) {
-			e.printStackTrace();
 			text = "Could not read file:\n\n" + e.getLocalizedMessage();
 		}
 

@@ -16,8 +16,12 @@ import java.util.Set;
 
 import javax.swing.AbstractAction;
 
+import org.apache.log4j.Logger;
+
 
 public class OpenAction extends AbstractAction {
+
+	static final Logger myLogger = Logger.getLogger(OpenAction.class.getName());
 
 	private final GridFileListPanel fileList;
 	private final FileManager fm;
@@ -29,7 +33,6 @@ public class OpenAction extends AbstractAction {
 		try {
 			desktop = Desktop.getDesktop();
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 		this.fileList = fileList;
@@ -67,7 +70,7 @@ public class OpenAction extends AbstractAction {
 								"Downloading:", f.getName());
 						file = fm.downloadFile(f.getUrl());
 					} catch (FileTransactionException e1) {
-						e1.printStackTrace();
+						myLogger.error(e1);
 						return;
 					} finally {
 						d.close();
@@ -76,7 +79,7 @@ public class OpenAction extends AbstractAction {
 					try {
 						desktop.open(file);
 					} catch (IOException e) {
-						e.printStackTrace();
+						myLogger.error(e);
 					}
 
 				}

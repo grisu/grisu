@@ -15,12 +15,18 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.TreeWillExpandListener;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 
 public class SubmissionLogPanel extends JPanel implements
-		PropertyChangeListener {
+PropertyChangeListener {
+
+	static final Logger myLogger = Logger
+			.getLogger(TreeWillExpandListener.class.getName());
+
 	private JScrollPane scrollPane;
 	private JTextArea textArea;
 
@@ -117,7 +123,7 @@ public class SubmissionLogPanel extends JPanel implements
 				appendText(text);
 			}
 		} catch (final Exception e) {
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 	}
 
@@ -159,7 +165,7 @@ public class SubmissionLogPanel extends JPanel implements
 			public void run() {
 				getTextArea().setText(string);
 				getTextArea()
-						.setCaretPosition(getTextArea().getText().length());
+				.setCaretPosition(getTextArea().getText().length());
 			}
 		});
 	}

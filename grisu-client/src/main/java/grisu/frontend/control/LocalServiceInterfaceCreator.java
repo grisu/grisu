@@ -38,7 +38,6 @@ public class LocalServiceInterfaceCreator implements ServiceInterfaceCreator {
 					.forName("grisu.control.serviceInterfaces.LocalServiceInterface");
 		} catch (final ClassNotFoundException e) {
 			myLogger.warn("Could not find local service interface class.");
-			e.printStackTrace();
 			throw new ServiceInterfaceException(
 					"Could not find LocalServiceInterface class. Probably local-backend.jar is not in the classpath.",
 					e);
@@ -49,8 +48,6 @@ public class LocalServiceInterfaceCreator implements ServiceInterfaceCreator {
 			localServiceInterface = (ServiceInterface) localServiceInterfaceClass
 					.newInstance();
 		} catch (final Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			throw new ServiceInterfaceException(
 					"Could not create LocalServiceInterface: "
 							+ e.getLocalizedMessage(), e);

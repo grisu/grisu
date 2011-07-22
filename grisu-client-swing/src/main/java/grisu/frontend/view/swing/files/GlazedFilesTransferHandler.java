@@ -21,8 +21,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.WindowConstants;
 
+import org.apache.log4j.Logger;
+
 
 public class GlazedFilesTransferHandler extends TransferHandler {
+
+	static final Logger myLogger = Logger
+			.getLogger(GlazedFilesTransferHandler.class.getName());
 
 	public static final String LOCAL_SET_TYPE = DataFlavor.javaJVMLocalObjectMimeType
 			+ ";class=java.util.Set";
@@ -120,9 +125,9 @@ public class GlazedFilesTransferHandler extends TransferHandler {
 						.getTransferData(SET_DATA_FLAVOR));
 				return true;
 			} catch (final UnsupportedFlavorException ufe) {
-				ufe.printStackTrace();
+				myLogger.error(ufe);
 			} catch (final IOException ioe) {
-				ioe.printStackTrace();
+				myLogger.error(ioe);
 			}
 		}
 

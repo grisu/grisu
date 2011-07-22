@@ -15,9 +15,13 @@ import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
+import org.apache.log4j.Logger;
 
 public class GlazedFileRenderer extends DefaultTableCellRenderer implements
-		TableCellRenderer {
+TableCellRenderer {
+
+	static final Logger myLogger = Logger.getLogger(GlazedFileRenderer.class
+			.getName());
 
 	private static FileSystemView fsView = FileSystemView.getFileSystemView();
 	private static Icon folderIcon = fsView.getSystemIcon(new File(System
@@ -27,7 +31,7 @@ public class GlazedFileRenderer extends DefaultTableCellRenderer implements
 
 	private static File findFile() {
 		for (final File file : new File(System.getProperty("user.home"))
-				.listFiles()) {
+		.listFiles()) {
 			if (file.isFile()) {
 				return file;
 			}
@@ -61,7 +65,7 @@ public class GlazedFileRenderer extends DefaultTableCellRenderer implements
 			try {
 				this.setText(URLDecoder.decode(file.getName(), "UTF-8"));
 			} catch (final UnsupportedEncodingException e) {
-				e.printStackTrace();
+				myLogger.error(e);
 				this.setText(file.getName());
 			}
 

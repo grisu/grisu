@@ -38,6 +38,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultTreeModel;
 
+import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.netbeans.swing.outline.DefaultOutlineModel;
@@ -51,6 +52,9 @@ import com.jgoodies.forms.layout.RowSpec;
 
 public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 EventSubscriber {
+
+	static final Logger myLogger = Logger.getLogger(GridFileTreePanel.class
+			.getName());
 
 	public static final String EXTENSIONS_KEY = "extensions";
 	public static final String FOLDERS_SELECTABLE_KEY = "folders_selectable";
@@ -131,9 +135,9 @@ EventSubscriber {
 			// p.setName("Personal files");
 			// p.setPath("grid://groups/ARCS/BeSTGRID/Drug_discovery/Local//");
 			GridFile gridRoot = GrisuRegistryManager.getDefault(si)
-			.getFileManager().getGridRoot();
+					.getFileManager().getGridRoot();
 			GridFile localRoot = GrisuRegistryManager.getDefault(si)
-			.getFileManager().getLocalRoot();
+					.getFileManager().getLocalRoot();
 			this.roots = new LinkedList<GridFile>();
 			this.roots.add(gridRoot);
 			this.roots.add(localRoot);
@@ -144,7 +148,7 @@ EventSubscriber {
 		this.useAsDropTarget = useAsDropTarget;
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		this.uem = GrisuRegistryManager.getDefault(si)
-		.getUserEnvironmentManager();
+				.getUserEnvironmentManager();
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -214,7 +218,7 @@ EventSubscriber {
 						Vector<GridFileListListener> targets;
 						synchronized (this) {
 							targets = (Vector<GridFileListListener>) listeners
-							.clone();
+									.clone();
 						}
 
 						// walk through the listener list and
@@ -223,7 +227,7 @@ EventSubscriber {
 							try {
 								l.fileDoubleClicked(file);
 							} catch (final Exception e1) {
-								e1.printStackTrace();
+								myLogger.error(e1);
 							}
 						}
 					} finally {
@@ -258,7 +262,7 @@ EventSubscriber {
 					try {
 						l.filesSelected(files);
 					} catch (final Exception e1) {
-						e1.printStackTrace();
+						myLogger.error(e1);
 					}
 				}
 			} finally {
@@ -285,7 +289,7 @@ EventSubscriber {
 				try {
 					l.isLoading(loading);
 				} catch (final Exception e1) {
-					e1.printStackTrace();
+					myLogger.error(e1);
 				}
 			}
 		}
@@ -308,7 +312,7 @@ EventSubscriber {
 				try {
 					l.directoryChanged(getCurrentDirectory());
 				} catch (final Exception e1) {
-					e1.printStackTrace();
+					myLogger.error(e1);
 				}
 			}
 		}

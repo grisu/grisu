@@ -52,7 +52,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
-		PropertyChangeListener {
+PropertyChangeListener {
 	private JScrollPane scrollPane;
 	private JXTable table;
 
@@ -182,7 +182,7 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 							try {
 								l.fileDoubleClicked(file);
 							} catch (final Exception e1) {
-								e1.printStackTrace();
+								myLogger.error(e1);
 							}
 						}
 					} finally {
@@ -217,7 +217,7 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 					try {
 						l.filesSelected(files);
 					} catch (final Exception e1) {
-						e1.printStackTrace();
+						myLogger.error(e1);
 					}
 				}
 			} finally {
@@ -244,7 +244,7 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 				try {
 					l.isLoading(loading);
 				} catch (final Exception e1) {
-					e1.printStackTrace();
+					myLogger.error(e1);
 				}
 			}
 		}
@@ -353,7 +353,7 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 			try {
 				rebuildFileList();
 			} catch (final RemoteFileSystemException e) {
-				e.printStackTrace();
+				myLogger.error(e);
 			}
 		}
 	}
@@ -403,12 +403,12 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 													GlazedFile.Type.FILETYPE_FILE);
 									if (!currentDirectoryContent.contains(gf)) {
 										currentDirectoryContent
-												.getReadWriteLock().writeLock()
-												.lock();
+										.getReadWriteLock().writeLock()
+										.lock();
 										currentDirectoryContent.add(gf);
 										currentDirectoryContent
-												.getReadWriteLock().writeLock()
-												.unlock();
+										.getReadWriteLock().writeLock()
+										.unlock();
 									}
 									break;
 								}
@@ -418,7 +418,7 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 					}
 
 				} catch (final RemoteFileSystemException e) {
-					e.printStackTrace();
+					myLogger.error(e);
 				}
 
 			}
@@ -432,7 +432,7 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 		try {
 			rebuildFileList();
 		} catch (final RemoteFileSystemException e) {
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 
 	}
@@ -456,7 +456,7 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 		try {
 			rebuildFileList();
 		} catch (final RemoteFileSystemException e) {
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 	}
 
@@ -472,7 +472,7 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 		try {
 			rebuildFileList();
 		} catch (final RemoteFileSystemException e) {
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 
 	}
@@ -532,7 +532,7 @@ public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
 		try {
 			rebuildFileList();
 		} catch (final RemoteFileSystemException e) {
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 	}
 

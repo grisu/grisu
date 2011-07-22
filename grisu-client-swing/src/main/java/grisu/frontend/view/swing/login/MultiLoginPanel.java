@@ -28,6 +28,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 
+import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.jdesktop.swingx.JXErrorPane;
@@ -45,7 +46,7 @@ LoginMethodPanel {
 		public QuickLoginAction() {
 			putValue(NAME, "Auto-Login");
 			putValue(SHORT_DESCRIPTION,
-			"Use existing local credentials to login.");
+					"Use existing local credentials to login.");
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -58,6 +59,9 @@ LoginMethodPanel {
 
 		}
 	}
+
+	static final Logger myLogger = Logger.getLogger(MultiLoginPanel.class
+			.getName());
 
 	private JTabbedPane tabbedPane;
 	private ShibLoginPanel shibLoginPanel;
@@ -78,8 +82,7 @@ LoginMethodPanel {
 						.getSelectedComponent());
 				login(temp);
 			} catch (final InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				myLogger.error(e);
 			}
 		}
 
@@ -143,7 +146,7 @@ LoginMethodPanel {
 				getQuickLoginAction().setEnabled(false);
 			}
 		} catch (final Exception e) {
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 
 	}
@@ -188,7 +191,7 @@ LoginMethodPanel {
 								.getSelectedComponent());
 						login(temp);
 					} catch (final InterruptedException e) {
-						e.printStackTrace();
+						myLogger.error(e);
 					}
 
 				}
@@ -295,7 +298,7 @@ LoginMethodPanel {
 
 				try {
 					final String url = getAdvancedLoginPanelOptions()
-					.getServiceInterfaceUrl();
+							.getServiceInterfaceUrl();
 
 					final LoginParams params = new LoginParams(url, null, null);
 
@@ -306,7 +309,7 @@ LoginMethodPanel {
 					try {
 						loginThread.join();
 					} catch (final InterruptedException e) {
-						e.printStackTrace();
+						myLogger.error(e);
 						return;
 					} finally {
 						loginThread = null;
@@ -364,7 +367,7 @@ LoginMethodPanel {
 					if (e instanceof Exception) {
 						possibleException = (Exception) e;
 					} else {
-						e.printStackTrace();
+						myLogger.error(e);
 						possibleException = new Exception(e);
 					}
 				}

@@ -31,7 +31,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class FileListPanelPlus extends JPanel implements FileListPanel,
-		FileListListener {
+FileListListener {
 
 	static final Logger myLogger = Logger.getLogger(FileListPanelPlus.class
 			.getName());
@@ -220,7 +220,7 @@ public class FileListPanelPlus extends JPanel implements FileListPanel,
 								// }
 								getFileListPanel().setRootAndCurrentUrl(sel);
 							} catch (final NullPointerException e) {
-								e.printStackTrace();
+								myLogger.error(e);
 								// that's ok.
 							}
 

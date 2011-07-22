@@ -27,12 +27,17 @@ import javax.swing.JPanel;
 import javax.swing.UIManager;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXFrame;
 
 import com.google.common.collect.ImmutableList;
 
 public abstract class GrisuApplicationWindow implements WindowListener,
 ServiceInterfaceHolder {
+
+	static final Logger myLogger = Logger
+			.getLogger(GrisuApplicationWindow.class.getName());
+
 
 	private ServiceInterface si;
 
@@ -167,7 +172,7 @@ ServiceInterfaceHolder {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (final Exception e) {
-			e.printStackTrace();
+			myLoggger.error(e);
 		}
 
 		frame = new JXFrame();
@@ -201,7 +206,7 @@ ServiceInterfaceHolder {
 		}
 
 		final List<ServiceInterfaceHolder> siHolders = ImmutableList
-		.of((ServiceInterfaceHolder) this);
+				.of((ServiceInterfaceHolder) this);
 		final LoginPanel lp = new LoginPanel(mainPanel, siHolders);
 		frame.getContentPane().add(lp, BorderLayout.CENTER);
 	}

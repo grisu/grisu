@@ -718,7 +718,6 @@ public class FileManager {
 			try {
 				downloadUrl(sourceUrl, targetDirUrl, overwrite);
 			} catch (final IOException e) {
-				e.printStackTrace();
 				throw new FileTransactionException(sourceUrl, targetDirUrl,
 						"Could not write target file.", e);
 			}
@@ -1491,7 +1490,6 @@ public class FileManager {
 		try {
 			lastModified = serviceInterface.lastModified(url);
 		} catch (final Exception e) {
-			e.printStackTrace();
 			throw new RuntimeException(
 					"Could not get last modified time of file: " + url, e);
 		}
@@ -1584,7 +1582,6 @@ public class FileManager {
 							+ " successful.");
 				} catch (final Exception e1) {
 					try {
-						e1.printStackTrace();
 						// try again
 						myLogger.info("Uploading file " + file.getName()
 								+ "...");
@@ -1792,7 +1789,7 @@ public class FileManager {
 					+ " successful.");
 		} catch (final Exception e1) {
 			try {
-				e1.printStackTrace();
+				myLogger.error(e1);
 				// try again
 				myLogger.info("Uploading file " + file.getName() + "...");
 				myLogger.error("FAILED. SLEEPING 1 SECONDS");
@@ -1894,7 +1891,7 @@ public class FileManager {
 									+ file.getName() + " successful.");
 						} catch (final Exception e1) {
 							try {
-								e1.printStackTrace();
+								myLogger.error(e1);
 								// try again
 								myLogger.info("Uploading file "
 										+ file.getName() + "...");

@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 
 /**
@@ -30,6 +31,8 @@ import org.apache.commons.lang.StringUtils;
  */
 @XmlRootElement(name = "job")
 public class DtoJob implements Comparable<DtoJob> {
+
+	static final Logger myLogger = Logger.getLogger(DtoJob.class.getName());
 
 	public static DtoJob createJob(int status,
 			Map<String, String> jobProperties, Set<String> inputFiles,
@@ -135,7 +138,7 @@ public class DtoJob implements Comparable<DtoJob> {
 				return thisJobname.compareTo(otherJobname);
 			}
 		} catch (final Exception e) {
-			e.printStackTrace();
+			myLogger.error(e);
 			return 0;
 		}
 	}

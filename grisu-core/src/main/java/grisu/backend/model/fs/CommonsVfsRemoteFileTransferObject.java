@@ -69,7 +69,7 @@ RemoteFileTransferObject {
 							finished = true;
 							break;
 						} catch (final RemoteFileSystemException e) {
-							e.printStackTrace();
+							myLogger.error(e);
 							if (tryNo >= (ServerPropertiesManager
 									.getFileTransferRetries() - 1)) {
 								finished = true;

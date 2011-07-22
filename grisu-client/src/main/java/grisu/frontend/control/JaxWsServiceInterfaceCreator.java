@@ -82,7 +82,6 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 						new URL(interfaceUrl.replace("soap/GrisuService",
 								"api.wsdl")), serviceName);
 			} catch (final MalformedURLException e) {
-				e.printStackTrace();
 				throw new RuntimeException(e);
 			}
 

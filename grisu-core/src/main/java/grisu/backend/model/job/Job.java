@@ -144,8 +144,6 @@ public class Job implements Comparable<Job> {
 		try {
 			JsdlHelpers.setJobname(jsdl, this.jobname);
 		} catch (final XPathExpressionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			throw e;
 		}
 		// TODO change the jobname in the jobDescription

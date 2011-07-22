@@ -17,8 +17,12 @@ import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
+import org.apache.log4j.Logger;
 
 public class SingleJobResubmitDialog extends JDialog {
+
+	static final Logger myLogger = Logger
+			.getLogger(SingleJobResubmitDialog.class.getName());
 
 	/**
 	 * Launch the application.
@@ -82,14 +86,11 @@ public class SingleJobResubmitDialog extends JDialog {
 									bj.restart(jobnames, singleJobResubmitPanel
 											.getSubmissionLocations(), false);
 								} catch (final JobsException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
+									myLogger.error(e);
 								} catch (final BackendException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
+									myLogger.error(e);
 								} catch (final InterruptedException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
+									myLogger.error(e);
 								}
 								dispose();
 							}

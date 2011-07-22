@@ -781,7 +781,7 @@ Comparable<JobObject> {
 				try {
 					updateWithDtoJob(serviceInterface.getJob(jobname));
 				} catch (final NoSuchJobException e) {
-					e.printStackTrace();
+					myLogger.error(e);
 				}
 			}
 		}

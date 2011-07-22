@@ -39,7 +39,7 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 		String httpProxyUsername = null;
 		char[] httpProxyPassword = null;
 
-		if (otherOptions == null && otherOptions.length == 4) {
+		if ((otherOptions == null) && (otherOptions.length == 4)) {
 			try {
 				httpProxy = (String) otherOptions[0];
 				httpProxyPort = (Integer) otherOptions[1];
@@ -67,7 +67,7 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 			URL cacertURL = null;
 
 			try {
-				if (cacertFilename != null && !"".equals(cacertFilename)) {
+				if ((cacertFilename != null) && !"".equals(cacertFilename)) {
 					cacertURL = XfireServiceInterfaceCreator.class
 							.getResource("/" + cacertFilename);
 					if (cacertURL != null) {
@@ -83,8 +83,8 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 			if (cacertURL == null) {
 
 				cacertFilename = new CaCertManager()
-						.getCaCertNameForServiceInterfaceUrl(interfaceUrl);
-				if (cacertFilename != null && cacertFilename.length() > 0) {
+				.getCaCertNameForServiceInterfaceUrl(interfaceUrl);
+				if ((cacertFilename != null) && (cacertFilename.length() > 0)) {
 					myLogger.debug("Found url in map. Trying to use this cacert file: "
 							+ cacertFilename);
 					cacertURL = XfireServiceInterfaceCreator.class
@@ -182,7 +182,7 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 		} catch (final Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 			throw new ServiceInterfaceException(
 					"Could not create XfireServiceInterface: "
 							+ e.getLocalizedMessage(), e);

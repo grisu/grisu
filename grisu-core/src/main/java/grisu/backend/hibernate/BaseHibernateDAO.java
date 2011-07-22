@@ -18,6 +18,7 @@
 
 package grisu.backend.hibernate;
 
+import org.apache.log4j.Logger;
 import org.hibernate.Session;
 
 /**
@@ -26,6 +27,8 @@ import org.hibernate.Session;
  * @author MyEclipse - Hibernate Tools
  */
 public class BaseHibernateDAO implements IBaseHibernateDAO {
+
+	static Logger myLogger = Logger.getLogger(BaseHibernateDAO.class.getName());
 
 	public final Session getCurrentSession() {
 		try {
@@ -36,7 +39,7 @@ public class BaseHibernateDAO implements IBaseHibernateDAO {
 			return HibernateSessionFactory.getSessionFactory()
 					.getCurrentSession();
 		} catch (final Exception e) {
-			e.printStackTrace();
+			myLogger.error(e);
 			return null;
 		}
 	}
