@@ -6,7 +6,9 @@ import grisu.model.FileManager;
 import java.io.InputStream;
 import java.util.Map;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 
@@ -35,6 +37,11 @@ public class SimpleJsdlBuilder {
 	 *            the job properties
 	 * @return the jsdl document
 	 */
+	
+	static final Logger myLogger = Logger.getLogger(SimpleJsdlBuilder.class
+			.getName());
+
+	
 	public static Document buildJsdl(
 			final Map<JobSubmissionProperty, String> jobProperties) {
 
@@ -95,13 +102,13 @@ public class SimpleJsdlBuilder {
 						.extractExecutable(jobProperties.get(jp));
 				final StringBuffer exeAndArgsElements = new StringBuffer();
 				exeAndArgsElements.append("<Executable>");
-				exeAndArgsElements.append(executable);
+				exeAndArgsElements.append(StringEscapeUtils.escapeXml(executable));
 				exeAndArgsElements.append("</Executable>");
 
 				for (final String arg : CommandlineHelpers
 						.extractArgumentsFromCommandline(jobProperties.get(jp))) {
 					exeAndArgsElements.append("<Argument>");
-					exeAndArgsElements.append(arg);
+					exeAndArgsElements.append(StringEscapeUtils.escapeXml(arg));
 					exeAndArgsElements.append("</Argument>");
 				}
 
@@ -175,7 +182,7 @@ public class SimpleJsdlBuilder {
 			result = SeveralXMLHelpers.fromString(jsdlTemplateString);
 		} catch (final Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 			throw new RuntimeException("Couldn't create jsdl document");
 		}
 		return result;
