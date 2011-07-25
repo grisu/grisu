@@ -21,6 +21,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.WindowConstants;
 
+import org.apache.log4j.Logger;
 import org.netbeans.swing.outline.Outline;
 
 public class GridFileTransferHandler extends TransferHandler {
