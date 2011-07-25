@@ -172,7 +172,7 @@ ServiceInterfaceHolder {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (final Exception e) {
-			myLoggger.error(e);
+			myLogger.error(e);
 		}
 
 		frame = new JXFrame();
