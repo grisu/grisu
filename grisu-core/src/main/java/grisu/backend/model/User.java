@@ -1280,7 +1280,7 @@ public class User {
 		userdao.saveOrUpdate(this);
 
 
-		myLogger.info("Using temporary default archive location for user "
+		myLogger.debug("Using temporary default archive location for user "
 				+ getDn()
 				+ ": " + defArcLoc);
 
