@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.3.5
+-----
+
+* virtual urls now supported as job input files
+* progress indicator for commandline clients
+* filemanager supports ~ now
+
 0.3.4.3
 -------
 
