@@ -233,7 +233,7 @@
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>mysql-mds</artifactId>
-			<version>0.8.7.1</version>
+			<version>0.8.7.2</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>cog-jglobus</artifactId>
@@ -407,12 +407,12 @@
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>mds4-client</artifactId>
-			<version>0.8.7.1</version>
+			<version>0.8.7.2</version>
 		</dependency>
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>matchmaker</artifactId>
-			<version>0.8.7.1</version>
+			<version>0.8.7.2</version>
 		</dependency>
 <!--		<dependency>
 			<groupId>grisu.frontend</groupId>
