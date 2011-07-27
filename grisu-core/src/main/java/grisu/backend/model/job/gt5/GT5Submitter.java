@@ -189,6 +189,13 @@ public class GT5Submitter extends JobSubmitter {
 			}
 
 		}
+		
+		// add host count
+		final int hostCountInt = JsdlHelpers.getResourceCount(jsdl);
+		NameOpValue hostCount = null;
+		if (hostCountInt >= 1){
+			hostCount = new NameOpValue("hostCount",NameOpValue.EQ,"" + hostCountInt);
+		}
 
 		// total memory
 		Long memory = JsdlHelpers.getTotalMemoryRequirement(jsdl);
@@ -262,6 +269,7 @@ public class GT5Submitter extends JobSubmitter {
 		addNotNull(result, queue);
 		addNotNull(result, jobType);
 		addNotNull(result, count);
+		addNotNull(result,hostCount);
 		addNotNull(result, maxMemory);
 		addNotNull(result, maxWalltime);
 		addNotNull(result, emailAddress);
