@@ -132,6 +132,23 @@ public class FileManager {
 
 	}
 
+	public static String ensureTrailingSlash(String url) {
+		if (StringUtils.isBlank(url)) {
+			return "";
+		} else if (url.equals(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
+				+ "://")
+				|| url.equals(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
+						+ ":/")) {
+			return ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://";
+		} else {
+			if (!url.endsWith("/")) {
+				return url +"/";
+			} else {
+				return url;
+			}
+		}
+	}
+
 	/**
 	 * Convenience method that basically converts normal local paths to files
 	 * into a url format. It also supports virtual filesystems, so if your path
@@ -369,8 +386,10 @@ public class FileManager {
 		if (StringUtils.isBlank(url)) {
 			return "";
 		} else if (url.equals(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
-				+ "://")) {
-			return url;
+				+ "://")
+				|| url.equals(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
+						+ ":/")) {
+			return ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://";
 		} else {
 			if (url.endsWith("/")) {
 				return url.substring(0, url.lastIndexOf("/"));
