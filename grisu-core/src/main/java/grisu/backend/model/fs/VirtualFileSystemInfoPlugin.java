@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
 public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 
 	static final Logger myLogger = Logger
-	.getLogger(VirtualFileSystemInfoPlugin.class.getName());
+			.getLogger(VirtualFileSystemInfoPlugin.class.getName());
 
 	private final Map<String, VirtualFileSystemPlugin> plugins = new TreeMap<String, VirtualFileSystemPlugin>();
 
@@ -35,39 +35,39 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 	}
 
 	public FileObject aquireFile(String url, String fqan)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 		throw new RuntimeException("Not implemented yet.");
 	}
 
 	public boolean createFolder(String url) throws RemoteFileSystemException {
 		throw new RemoteFileSystemException(
-		"Folder creation not supported for virtual file system.");
+				"Folder creation not supported for virtual file system.");
 	}
 
 	public void deleteFile(String file) throws RemoteFileSystemException {
 		throw new RemoteFileSystemException(
-		"File deletion not supported for virtual file system.");
+				"File deletion not supported for virtual file system.");
 
 	}
 
 	public DataHandler download(String filename)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 		throw new RemoteFileSystemException(
-		"File download not supported for virtual file system.");
+				"File download not supported for virtual file system.");
 	}
 
 	public boolean fileExists(String file) throws RemoteFileSystemException {
 		throw new RemoteFileSystemException(
-		"File exists not supported for virtual file system.");
+				"File exists not supported for virtual file system.");
 	}
 
 	public long getFileSize(String file) throws RemoteFileSystemException {
 		throw new RemoteFileSystemException(
-		"Get filesize not supported for virtual file system.");
+				"Get filesize not supported for virtual file system.");
 	}
 
 	public GridFile getFolderListing(String url, int recursiveLevels)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		if (url.equals(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://")) {
 			GridFile root = new GridFile(url, -1L);
@@ -79,10 +79,11 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 			for (String key : plugins.keySet()) {
 				GridFile vfs = new GridFile(
 						ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://"
-						+ key, -1L);
+								+ key, -1L);
 				vfs.setIsVirtual(true);
 				vfs.setPath(url + vfs.getName());
-				vfs.setName(StringUtils.capitalize(key));
+				// vfs.setName(StringUtils.capitalize(key));
+				vfs.setName(key);
 				root.addChild(vfs);
 			}
 			return root;
@@ -96,16 +97,16 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 	}
 
 	public GrisuInputStream getInputStream(String file)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 		throw new RemoteFileSystemException(
-		"get input stream not supported for virtual file system.");
+				"get input stream not supported for virtual file system.");
 
 	}
 
 	public GrisuOutputStream getOutputStream(String file)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 		throw new RemoteFileSystemException(
-		"Get outputstream not supported for virtual file system.");
+				"Get outputstream not supported for virtual file system.");
 	}
 
 	private VirtualFileSystemPlugin getPlugin(String url) {
@@ -115,40 +116,40 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 
 	public boolean isFolder(String file) throws RemoteFileSystemException {
 		throw new RemoteFileSystemException(
-		"Is folder not supported for virtual file system.");
+				"Is folder not supported for virtual file system.");
 	}
 
 	public long lastModified(String url) throws RemoteFileSystemException {
 		throw new RemoteFileSystemException(
-		"Last modified not supported for virtual file system.");
+				"Last modified not supported for virtual file system.");
 
 	}
 
 	public MountPoint mountFileSystem(String uri, String mountPointName,
 			ProxyCredential cred, boolean useHomeDirectory, String site)
-	throws RemoteFileSystemException {
+					throws RemoteFileSystemException {
 		throw new RemoteFileSystemException(
-		"Mounting not supported for virtual file system.");
+				"Mounting not supported for virtual file system.");
 	}
 
 	public String resolveFileSystemHomeDirectory(String filesystemRoot,
 			String fqan) throws RemoteFileSystemException {
 		throw new RemoteFileSystemException(
-		"Resolving file system home not supported for virtual file system.");
+				"Resolving file system home not supported for virtual file system.");
 	}
 
 	public String upload(DataHandler source, String filename)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		throw new RemoteFileSystemException(
-		"File upload not supported for virtual file system.");
+				"File upload not supported for virtual file system.");
 	}
 
 	public void uploadFileToMultipleLocations(Set<String> parents,
 			DataHandler source, String targetFilename,
 			DtoActionStatus optionalstatus) throws RemoteFileSystemException {
 		throw new RemoteFileSystemException(
-		"Multi file upload not supported for virtual file system.");
+				"Multi file upload not supported for virtual file system.");
 
 	}
 }
