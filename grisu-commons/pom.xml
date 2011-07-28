@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.3.6-SNAPSHOT</version>
+		<version>0.3.5-rc4-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>grisu</groupId>
@@ -17,6 +17,12 @@
 		other globally used
 		classes
 		and interfaces.</description>
+
+<!--	<properties>-->
+		<!-- <enunciate.version>1.16-RC2</enunciate.version> -->
+<!--		<enunciate.version>1.20</enunciate.version>-->
+<!--	</properties>-->
+
 
 	<dependencies>
 
@@ -113,7 +119,7 @@
 		<dependency>
 			<groupId>grisu</groupId>
 			<artifactId>grid-jcommons</artifactId>
-			<version>1.2.9-SNAPSHOT</version>
+			<version>1.2.8</version>
 		</dependency>
 
 		<dependency>
