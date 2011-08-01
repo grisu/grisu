@@ -163,7 +163,8 @@ public class FileManager {
 	public static String ensureUriFormat(String inputFile) {
 
 		try {
-			if ((inputFile != null) && !isLocal(inputFile)) {
+			if ((inputFile != null)
+					&& (inputFile.startsWith("local:") || !isLocal(inputFile))) {
 				return inputFile;
 			}
 
@@ -173,6 +174,10 @@ public class FileManager {
 					return ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + ":/"
 							+ inputFile;
 				}
+			}
+
+			if (inputFile.startsWith("local:")) {
+				return inputFile;
 			}
 
 			new URL(inputFile);
