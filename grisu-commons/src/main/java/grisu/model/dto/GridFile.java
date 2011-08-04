@@ -74,19 +74,26 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		return result;
 	}
 
-	public static GridFile listLocalFolder(File folder,
+	public static GridFile listLocal(File file_or_folder,
 			boolean includeParentInFileListing) {
 
-		String url = folder.toURI().toString();
-		final GridFile result = new GridFile(url, folder.lastModified());
+		if (!file_or_folder.isDirectory()) {
+			final GridFile file = new GridFile(file_or_folder.toURI()
+					.toString(),
+					file_or_folder.length(), file_or_folder.lastModified());
+			return file;
+		}
+
+		String url = file_or_folder.toURI().toString();
+		final GridFile result = new GridFile(url, file_or_folder.lastModified());
 
 		if (includeParentInFileListing) {
 			final GridFile childFolder = new GridFile(
-					folder.toURI().toString(), folder.lastModified());
+					file_or_folder.toURI().toString(), file_or_folder.lastModified());
 			result.addChild(childFolder);
 		}
 
-		for (final File child : folder.listFiles()) {
+		for (final File child : file_or_folder.listFiles()) {
 
 			if (child.isDirectory()) {
 
@@ -120,12 +127,12 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	private String optionalPath;
 	private String comment;
 	private final Set<String> sites = Collections
-	.synchronizedSet(new TreeSet<String>());
+			.synchronizedSet(new TreeSet<String>());
 
 	private final Set<String> fqans = Collections
-	.synchronizedSet(new TreeSet<String>());
+			.synchronizedSet(new TreeSet<String>());
 	private final List<DtoProperty> urls = Collections
-	.synchronizedList(new LinkedList<DtoProperty>());
+			.synchronizedList(new LinkedList<DtoProperty>());
 	private long size = -2L;
 	private long lastModified;
 	private boolean isVirtual = false;
@@ -133,7 +140,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	private boolean inaccessable = false;
 
 	private Set<GridFile> children = Collections
-	.synchronizedSet(new TreeSet<GridFile>());
+			.synchronizedSet(new TreeSet<GridFile>());
 
 	public GridFile() {
 		// this(null, -1L, -1L, FILETYPE_ROOT);
@@ -246,7 +253,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 			this.isVirtual = false;
 		} else if (FILETYPE_MOUNTPOINT.equals(type)) {
 			throw new RuntimeException(
-			"Constructor not usable for mountpoints...");
+					"Constructor not usable for mountpoints...");
 		} else if (FILETYPE_ROOT.equals(type)) {
 			this.type = FILETYPE_ROOT;
 			this.mainUrl = ROOT;
@@ -400,7 +407,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	}
 
 	public Object getTransferData(DataFlavor flavor)
-	throws UnsupportedFlavorException, IOException {
+			throws UnsupportedFlavorException, IOException {
 		if (DataFlavor.stringFlavor.equals(flavor)) {
 			return getName();
 		}

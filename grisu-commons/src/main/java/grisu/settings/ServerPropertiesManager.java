@@ -75,7 +75,7 @@ public final class ServerPropertiesManager {
 
 	private static final Integer DEFAULT_FILESYSTEM_TIMEOUT_IN_MILLISECONDS = 4000;
 
-	private static final int DEFAULT_FILE_LISTING_TIMEOUT_IN_SECONDS = 20;
+	private static final int DEFAULT_FILE_LISTING_TIMEOUT_IN_SECONDS = 60;
 
 	// public static boolean getCheckConnectionToMountPoint() {
 	//

@@ -1479,7 +1479,7 @@ public class FileManager {
 			File temp;
 			temp = getFileFromUriOrPath(url);
 
-			return GridFile.listLocalFolder(temp, false);
+			return GridFile.listLocal(temp, false);
 
 		} else {
 
