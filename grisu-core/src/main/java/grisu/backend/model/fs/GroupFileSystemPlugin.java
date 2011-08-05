@@ -135,8 +135,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				if (mps.size() == 1) {
 					GridFile file = new GridFile(mps.iterator().next());
 					file.setName(FileManager.getFilename(fqan));
-					String pathNew = (FileManager.ensureTrailingSlash(path) + file
-							.getName()).replace(
+					String pathNew = (path + "/" + file.getName()).replace(
 							"///",
 							"/").replace("//", "/")
 							+ "//";
@@ -148,12 +147,11 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					GridFile file = new GridFile((BASE + fqan).replace("///",
 							"/").replace("//", "/")
 							+ "//", fqan);
-					String pathNew = (FileManager.ensureTrailingSlash(path) + file
-							.getName()).replace(
+					String pathNew = (path + "/" + file.getName()).replace(
 							"///",
 							"/").replace("//", "/")
 							+ "//";
-					// String pathNew = file.getUrl();
+					//					String pathNew = file.getUrl();
 					file.setPath(pathNew);
 					for (MountPoint mp : mps) {
 						// X.p("Add" + mp.getRootUrl());
