@@ -378,6 +378,18 @@ public class FileManager {
 		return getFileFromUriOrPath(url).exists();
 	}
 
+	public static final String removeDoubleSlashes(String url) {
+		int protIndex = url.indexOf("://");
+		if ( protIndex < 0 ) {
+			return url.replace("//", "/");
+		} else {
+			String prot = url.substring(0, protIndex + 3);
+			String other = url.substring(protIndex + 3);
+			other = other.replace("//", "/");
+			return prot+other;
+		}
+	}
+
 	/**
 	 * Convenience method to ensure that the specified url doesn't end with a
 	 * slash.
