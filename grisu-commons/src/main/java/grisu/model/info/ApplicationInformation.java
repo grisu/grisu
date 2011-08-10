@@ -155,4 +155,33 @@ public interface ApplicationInformation {
 	 */
 	String[] getExecutables(String subLoc, String version);
 
+	/**
+	 * All available executables for the application and the provided VO.
+	 * 
+	 * This method can take quite a while to complete, depending on how many
+	 * versions of the application exist on the grid.
+	 * 
+	 * @param fqan
+	 *            the fqan
+	 * @return the executables
+	 */
+	Set<String> getExecutablesForVo(final String fqan);
+
+	/**
+	 * All available executables for the application and the provided VO for a
+	 * certain version of the application.
+	 * 
+	 * This method can take quite a while to complete, depending on how many
+	 * submissionlocations provide the application grid-wide.
+	 * 
+	 * @param fqan
+	 *            the fqan
+	 * @param version
+	 *            the version
+	 * @return the executables
+	 */
+	Set<String> getExecutablesForVo(final String fqan, String version);
+
+
 }
+
