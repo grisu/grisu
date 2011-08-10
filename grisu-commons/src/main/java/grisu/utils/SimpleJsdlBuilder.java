@@ -5,6 +5,7 @@ import grisu.model.FileManager;
 
 import java.io.InputStream;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
@@ -37,11 +38,11 @@ public class SimpleJsdlBuilder {
 	 *            the job properties
 	 * @return the jsdl document
 	 */
-	
+
 	static final Logger myLogger = Logger.getLogger(SimpleJsdlBuilder.class
 			.getName());
 
-	
+
 	public static Document buildJsdl(
 			final Map<JobSubmissionProperty, String> jobProperties) {
 
@@ -111,10 +112,10 @@ public class SimpleJsdlBuilder {
 					exeAndArgsElements.append(StringEscapeUtils.escapeXml(arg));
 					exeAndArgsElements.append("</Argument>");
 				}
-
+				String replacement = Matcher
+						.quoteReplacement(exeAndArgsElements.toString());
 				jsdlTemplateString = jsdlTemplateString.replaceAll(
-						"XXX_" + jp.toString() + "_XXX",
-						exeAndArgsElements.toString());
+						"XXX_" + jp.toString() + "_XXX", replacement);
 
 			} else if (jp.equals(JobSubmissionProperty.MODULES)) {
 
