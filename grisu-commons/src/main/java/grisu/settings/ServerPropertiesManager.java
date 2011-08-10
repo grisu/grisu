@@ -26,9 +26,9 @@ public final class ServerPropertiesManager {
 	public static final int DEFAULT_MYPROXY_LIFETIME_IN_SECONDS = 3600;
 
 	/**
-	 * Default minimum myproxy lifetime before it gets refreshed: 600 seconds.
+	 * Default minimum myproxy lifetime before it gets refreshed: 1800 seconds.
 	 */
-	public static final int DEFAULT_MIN_PROXY_LIFETIME_BEFORE_REFRESH = 600;
+	public static final int DEFAULT_MIN_PROXY_LIFETIME_BEFORE_REFRESH = 1800;
 	/**
 	 * Default concurrent threads to query job status per user: 2
 	 */

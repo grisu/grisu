@@ -1,5 +1,6 @@
 package grisu.model;
 
+import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.StatusException;
@@ -41,6 +42,7 @@ import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 
+import com.google.common.collect.Sets;
 
 /**
  * The implemenation of {@link UserEnvironmentManager}.
@@ -141,6 +143,62 @@ EventSubscriber<FqanEvent> {
 		}
 
 		return cachedApplications;
+	}
+
+	public Map<String, Set<String>> getAllAvailableExecutables() {
+
+		final Map<String, Set<String>> allExes = Collections
+				.synchronizedMap(new TreeMap<String, Set<String>>());
+
+		final ExecutorService executor = Executors.newFixedThreadPool(50);
+
+		for (final String application : getAllAvailableApplications()) {
+			allExes.put(application,
+					Collections.synchronizedSet(new TreeSet<String>()));
+		}
+
+		for (final String application : getAllAvailableApplications()) {
+
+			final ApplicationInformation ai = GrisuRegistryManager.getDefault(
+					serviceInterface).getApplicationInformation(application);
+
+			Set<String> sublocs = ai.getAvailableAllSubmissionLocations();
+
+			Set<String> sublocsUser = getAllAvailableSubmissionLocations();
+
+			for (final String subLoc : Sets.intersection(sublocs, sublocsUser)) {
+
+				Set<String> versions = ai.getAvailableVersions(subLoc);
+
+				for (final String version : versions) {
+
+					Thread t = new Thread() {
+						@Override
+						public void run() {
+							String[] exes = ai.getExecutables(subLoc,
+									version);
+							X.p("Exes for: " + application + " " + subLoc + " "
+									+ version);
+							allExes.get(application).addAll(
+									Arrays.asList(exes));
+						}
+					};
+					executor.execute(t);
+				}
+			}
+
+
+		}
+
+		executor.shutdown();
+
+		try {
+			executor.awaitTermination(120, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		return allExes;
 	}
 
 	public final String[] getAllAvailableFqans() {

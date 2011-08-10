@@ -969,6 +969,27 @@ public class FileManager {
 	 */
 	public final File downloadFile(final String url)
 			throws FileTransactionException {
+		return downloadFile(url, true);
+	}
+
+	/**
+	 * Downloads the file with the specified url into the local cache and
+	 * returns a file object for it.
+	 * 
+	 * This one throws an exception if forceDownload is false and file is bigger
+	 * than filesize download threshold (@link
+	 * {@link #getDownloadFileSizeThreshold()}.
+	 * 
+	 * @param url
+	 *            the source url
+	 * @param forceDownload
+	 *            whether to download file even if size bigger than threshold.
+	 * @return the file object for the cached file
+	 * @throws FileTransactionException
+	 *             if the transfer fails
+	 */
+	public final File downloadFile(final String url, final boolean forceDownload)
+			throws FileTransactionException {
 
 		if (isLocal(url)) {
 			return getFileFromUriOrPath(url);
@@ -994,6 +1015,24 @@ public class FileManager {
 		// return cacheTargetFile;
 		// }
 		// }
+
+		if (!forceDownload) {
+			long size;
+			try {
+				size = serviceInterface.getFileSize(url);
+				if (size > getDownloadFileSizeThreshold()) {
+					myLogger.info("Not downloading - file bigger than download threshold: "
+							+ url);
+					throw new FileTransactionException(url,
+							cacheTargetFile.toString(),
+							"File bigger than threshold.", null);
+				}
+			} catch (RemoteFileSystemException e2) {
+				myLogger.error("Could not get size of file: " + url);
+				throw new FileTransactionException(url,
+						cacheTargetFile.toString(), "Could not get size.", e2);
+			}
+		}
 
 		myLogger.debug("Remote file newer than local cache file or not cached yet, downloading new copy.");
 		final DataSource source = null;

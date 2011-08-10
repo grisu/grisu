@@ -77,7 +77,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 					final List<String> temp = serviceInterface
 							.getVersionsOfApplicationOnSubmissionLocation(
 									getApplicationName(), subLoc)
-							.getStringList();
+									.getStringList();
 					result.addAll(temp);
 				}
 				cachedVersionsForUserPerFqan.put(fqan, result);
@@ -110,7 +110,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
 				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null,
 						null, false), fqan, false)
-				.wrapGridResourcesIntoInterfaceType();
+						.wrapGridResourcesIntoInterfaceType();
 	}
 
 	/*
@@ -133,7 +133,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 					final Map<String, String> details = serviceInterface
 							.getApplicationDetailsForVersionAndSubmissionLocation(
 									application, version, subLoc)
-							.getDetailsAsMap();
+									.getDetailsAsMap();
 					cachedApplicationDetails.put(KEY, details);
 				}
 			}
@@ -170,7 +170,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 						Arrays.asList(serviceInterface
 								.getSubmissionLocationsForApplication(
 										application)
-								.asSubmissionLocationStrings()));
+										.asSubmissionLocationStrings()));
 			}
 		}
 		return cachedAllSubmissionLocations;
@@ -222,7 +222,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 					final List<String> temp = Arrays.asList(serviceInterface
 							.getSubmissionLocationsForApplicationAndVersion(
 									application, version)
-							.asSubmissionLocationStrings());
+									.asSubmissionLocationStrings());
 					cachedSubmissionLocationsPerVersion.put(version,
 							new HashSet(temp));
 				}
@@ -255,7 +255,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 					}
 				}
 				cachedSubmissionLocationsForUserPerVersionAndFqan
-						.put(KEY, temp);
+				.put(KEY, temp);
 			}
 		}
 		return cachedSubmissionLocationsForUserPerVersionAndFqan.get(KEY);
@@ -312,7 +312,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
 				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null,
 						null, false), fqan, true)
-				.wrapGridResourcesIntoInterfaceType();
+						.wrapGridResourcesIntoInterfaceType();
 	}
 
 	/*
@@ -337,5 +337,6 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	public final ServiceInterface getServiceInterface() {
 		return serviceInterface;
 	}
+
 
 }

@@ -77,6 +77,14 @@ public interface ApplicationInformation {
 	 */
 	Set<String> getAvailableAllSubmissionLocations();
 
+	// /**
+	// * Returns a set of all executable names that are associated with this
+	// * application on the grid.
+	// *
+	// * @return the executables
+	// */
+	// Set<String> getAvailableExecutables();
+
 	/**
 	 * Calculates all the submissionlocations that are available to the user for
 	 * the provided fqan and application. It returns all submissionlocations,
