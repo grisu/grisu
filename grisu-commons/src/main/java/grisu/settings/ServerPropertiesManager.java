@@ -396,6 +396,25 @@ public final class ServerPropertiesManager {
 		return fqan;
 	}
 
+	public static boolean getDisableFinishedJobStatusCaching() {
+
+		boolean disableFinishedJobStatusCaching = false;
+
+		try {
+			try {
+				disableFinishedJobStatusCaching = getServerConfiguration().getBoolean("Debug.disableFinishedJobStatusCaching");
+			} catch (final NoSuchElementException e) {
+				// doesn't matter
+				// myLogger.debug(e);
+			}
+
+		} catch (final ConfigurationException e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			// myLogger.debug(e);
+		}
+		return disableFinishedJobStatusCaching;
+	}
+
 	public static int getFileListingTimeOut() {
 
 		int waitTimeInSeconds = -1;
@@ -677,7 +696,8 @@ public final class ServerPropertiesManager {
 
 		try {
 			try {
-				useFScache = getServerConfiguration().getBoolean("General.fsCache");
+				useFScache = getServerConfiguration().getBoolean(
+						"General.fsCache");
 			} catch (final NoSuchElementException e) {
 				// doesn't matter
 				// myLogger.debug(e);
