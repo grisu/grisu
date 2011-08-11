@@ -90,7 +90,7 @@ public class FileManager {
 		if (size < 0) {
 			sizeString = "";
 		} else if (size.equals(0L)) {
-			sizeString = "0";
+			sizeString = "0 B";
 		} else {
 
 			if (size > (1024 * 1024)) {

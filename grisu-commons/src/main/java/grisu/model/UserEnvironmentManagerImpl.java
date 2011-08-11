@@ -120,7 +120,7 @@ EventSubscriber<FqanEvent> {
 
 	}
 
-	public String calculateUniqueJobname(String name) {
+	public synchronized String calculateUniqueJobname(String name) {
 
 		String temp = name;
 		int i = 1;
@@ -133,7 +133,7 @@ EventSubscriber<FqanEvent> {
 		return temp;
 	}
 
-	public String[] getAllAvailableApplications() {
+	public synchronized String[] getAllAvailableApplications() {
 
 		if ( cachedApplications == null ) {
 
@@ -145,7 +145,7 @@ EventSubscriber<FqanEvent> {
 		return cachedApplications;
 	}
 
-	public Map<String, Set<String>> getAllAvailableExecutables() {
+	public synchronized Map<String, Set<String>> getAllAvailableExecutables() {
 
 		final Map<String, Set<String>> allExes = Collections
 				.synchronizedMap(new TreeMap<String, Set<String>>());
@@ -229,7 +229,7 @@ EventSubscriber<FqanEvent> {
 		}
 	}
 
-	public Set<String> getAllAvailableFqansForApplication(String application) {
+	public synchronized Set<String> getAllAvailableFqansForApplication(String application) {
 
 		if (cachedFqansPerApplication.get(application) == null) {
 

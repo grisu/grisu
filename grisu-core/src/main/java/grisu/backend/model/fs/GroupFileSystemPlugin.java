@@ -413,7 +413,13 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			// xxx
 
 			if (parentUrls.size() == 1) {
-				result = new GridFile(parentUrls.iterator().next(), -1L);
+				String url = parentUrls.iterator().next();
+				boolean isFolder = user.getFileSystemManager().isFolder(url);
+				if ( isFolder ) {
+					result = new GridFile(url, -1L);
+				} else {
+					result = user.ls(url, 0);
+				}
 				result.setIsVirtual(false);
 				result.setPath(path);
 			} else {
