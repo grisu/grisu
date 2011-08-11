@@ -94,6 +94,18 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 	}
 
 	public boolean fileExists(String file) throws RemoteFileSystemException {
+
+		GridFile f = createGsiftpGridFile(file);
+
+		Map<String, String> urls = DtoProperty.mapFromDtoPropertiesList(f
+				.getUrls());
+
+		for (String key : urls.keySet()) {
+			if (key.startsWith("gsiftp")) {
+				return user.getFileSystemManager().fileExists(key);
+			}
+		}
+
 		throw new RemoteFileSystemException(
 				"File exists not supported for virtual file system.");
 	}
@@ -164,8 +176,19 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 	}
 
 	public boolean isFolder(String file) throws RemoteFileSystemException {
+		GridFile f = createGsiftpGridFile(file);
+
+		Map<String, String> urls = DtoProperty.mapFromDtoPropertiesList(f
+				.getUrls());
+
+		for (String key : urls.keySet()) {
+			if (key.startsWith("gsiftp")) {
+				return user.getFileSystemManager().isFolder(key);
+			}
+		}
+
 		throw new RemoteFileSystemException(
-				"Is folder not supported for virtual file system.");
+				"IsFolder not supported for virtual file system.");
 	}
 
 	public long lastModified(String url) throws RemoteFileSystemException {
@@ -203,8 +226,19 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 	public String upload(DataHandler source, String filename)
 			throws RemoteFileSystemException {
 
+		GridFile f = createGsiftpGridFile(filename);
+
+		Map<String, String> urls = DtoProperty.mapFromDtoPropertiesList(f
+				.getUrls());
+
+		for (String key : urls.keySet()) {
+			if (key.startsWith("gsiftp")) {
+				return user.getFileSystemManager().upload(source, key);
+			}
+		}
+
 		throw new RemoteFileSystemException(
-				"File upload not supported for virtual file system.");
+				"Upload not supported for virtual file system.");
 	}
 
 	public void uploadFileToMultipleLocations(Set<String> parents,
