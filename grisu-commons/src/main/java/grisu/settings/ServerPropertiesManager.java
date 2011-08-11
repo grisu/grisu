@@ -26,9 +26,9 @@ public final class ServerPropertiesManager {
 	public static final int DEFAULT_MYPROXY_LIFETIME_IN_SECONDS = 3600;
 
 	/**
-	 * Default minimum myproxy lifetime before it gets refreshed: 600 seconds.
+	 * Default minimum myproxy lifetime before it gets refreshed: 1800 seconds.
 	 */
-	public static final int DEFAULT_MIN_PROXY_LIFETIME_BEFORE_REFRESH = 600;
+	public static final int DEFAULT_MIN_PROXY_LIFETIME_BEFORE_REFRESH = 1800;
 	/**
 	 * Default concurrent threads to query job status per user: 2
 	 */
@@ -75,7 +75,7 @@ public final class ServerPropertiesManager {
 
 	private static final Integer DEFAULT_FILESYSTEM_TIMEOUT_IN_MILLISECONDS = 4000;
 
-	private static final int DEFAULT_FILE_LISTING_TIMEOUT_IN_SECONDS = 20;
+	private static final int DEFAULT_FILE_LISTING_TIMEOUT_IN_SECONDS = 60;
 
 	// public static boolean getCheckConnectionToMountPoint() {
 	//
@@ -396,6 +396,25 @@ public final class ServerPropertiesManager {
 		return fqan;
 	}
 
+	public static boolean getDisableFinishedJobStatusCaching() {
+
+		boolean disableFinishedJobStatusCaching = false;
+
+		try {
+			try {
+				disableFinishedJobStatusCaching = getServerConfiguration().getBoolean("Debug.disableFinishedJobStatusCaching");
+			} catch (final NoSuchElementException e) {
+				// doesn't matter
+				// myLogger.debug(e);
+			}
+
+		} catch (final ConfigurationException e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			// myLogger.debug(e);
+		}
+		return disableFinishedJobStatusCaching;
+	}
+
 	public static int getFileListingTimeOut() {
 
 		int waitTimeInSeconds = -1;
@@ -677,7 +696,8 @@ public final class ServerPropertiesManager {
 
 		try {
 			try {
-				useFScache = getServerConfiguration().getBoolean("General.fsCache");
+				useFScache = getServerConfiguration().getBoolean(
+						"General.fsCache");
 			} catch (final NoSuchElementException e) {
 				// doesn't matter
 				// myLogger.debug(e);

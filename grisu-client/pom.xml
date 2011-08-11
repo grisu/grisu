@@ -53,7 +53,6 @@
 			<artifactId>grisu-commons</artifactId>
 			<version>0.3.6-SNAPSHOT</version>
 
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-httpclient</groupId>
@@ -108,7 +107,7 @@
 		<dependency>
 			<groupId>grith</groupId>
 			<artifactId>jgrith</artifactId>
-			<version>0.5.9-SNAPSHOT</version>
+			<version>0.5.8</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>grid-jcommons</artifactId>

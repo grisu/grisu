@@ -14,7 +14,6 @@
 			<groupId>grisu.frontend</groupId>
 			<artifactId>grisu-client</artifactId>
 			<version>0.3.6-SNAPSHOT</version>
-			<scope>compile</scope>
 		</dependency>
 
 		<dependency>

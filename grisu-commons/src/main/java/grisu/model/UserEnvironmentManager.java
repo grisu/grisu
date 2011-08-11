@@ -52,6 +52,20 @@ public interface UserEnvironmentManager {
 	String[] getAllAvailableApplications();
 
 	/**
+	 * All executables that are available for this user.
+	 * 
+	 * Internally, this method looks up all available submission locations for
+	 * the users VOs, then it retrieves the published applications on those
+	 * submission locations and gets the executables that are published for
+	 * those on each submission location.
+	 * 
+	 * Beware, this method can take very long to finish.
+	 * 
+	 * @return the executables
+	 */
+	Map<String, Set<String>> getAllAvailableExecutables();
+
+	/**
 	 * All of the users fqans, regardless of whether there is a filesystem
 	 * attached to it or not.
 	 * 

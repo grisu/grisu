@@ -27,12 +27,12 @@ public final class ServiceInterfaceFactory {
 	public static final String DEFAULT_SERVICE_INTERFACE = "ARCS";
 
 	public static final String[] KNOWN_SERVICE_INTERFACE_CREATORS = new String[] {
-			"LocalServiceInterfaceCreator",
-			// "DummyServiceInterfaceCreator",
-			"JaxWsServiceInterfaceCreator",
-	// "XfireServiceInterfaceCreator",
-	// the old xfire client...
-	// "XFireServiceInterfaceCreator"
+		"LocalServiceInterfaceCreator",
+		// "DummyServiceInterfaceCreator",
+		"JaxWsServiceInterfaceCreator",
+		// "XfireServiceInterfaceCreator",
+		// the old xfire client...
+		// "XFireServiceInterfaceCreator"
 	};
 
 	/**
@@ -90,7 +90,7 @@ public final class ServiceInterfaceFactory {
 			final String myProxyServer, final String myProxyPort,
 			final String httpProxy, final int httpProxyPort,
 			final String httpProxyUsername, final char[] httpProxyPassword)
-			throws ServiceInterfaceException {
+					throws ServiceInterfaceException {
 
 		final Object[] otherOptions = new Object[4];
 		otherOptions[0] = httpProxy;
@@ -184,8 +184,9 @@ public final class ServiceInterfaceFactory {
 					.getLocalizedMessage(), failedCreators.get(key));
 		} else if (failedCreators.size() == 0) {
 			throw new ServiceInterfaceException(
-					"Could not find a ServiceInterfaceCreator for this kind of URL.",
-					null);
+					"Could not establish how to connect to backend \""
+							+ interfaceUrl + "\". Maybe a typo?",
+							null);
 		} else {
 			throw new ServiceInterfaceException(
 					"Could not find a single ServiceInterfaceCreator that worked. Tried these:\n"

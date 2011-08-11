@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<url>http://projects.arcs.org.au/trac/grisu/wiki/GrisuCommons</url>
 	<parent>
 		<artifactId>grisu</artifactId>
@@ -17,6 +18,12 @@
 		other globally used
 		classes
 		and interfaces.</description>
+
+	<!-- <properties> -->
+	<!-- <enunciate.version>1.16-RC2</enunciate.version> -->
+	<!-- <enunciate.version>1.20</enunciate.version> -->
+	<!-- </properties> -->
+
 
 	<dependencies>
 
@@ -124,13 +131,9 @@
 
 
 		<!-- enunciate dependencies for annotations -->
-<!--		<dependency>
-			<groupId>org.codehaus.enunciate</groupId>
-			<artifactId>enunciate-core-annotations</artifactId>
-			<version>${enunciate.version}</version>
-			<type>jar</type>
-			<scope>compile</scope>
-		</dependency> -->
+		<!-- <dependency> <groupId>org.codehaus.enunciate</groupId> <artifactId>enunciate-core-annotations</artifactId> 
+			<version>${enunciate.version}</version> <type>jar</type> <scope>compile</scope> 
+			</dependency> -->
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>jsr311-api</artifactId>
@@ -138,13 +141,6 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency> 
-		<dependency>
-			<groupId>com.google.collections</groupId>
-			<artifactId>google-collections</artifactId>
-			<version>1.0</version>
-			<type>jar</type>
-			<scope>compile</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>commons-beanutils</groupId>
@@ -153,6 +149,14 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
+		
+		
+		<dependency>
+    		<groupId>com.google.guava</groupId>
+    		<artifactId>guava</artifactId>
+    		<version>r09</version>
+		</dependency>
+		
 	</dependencies>
 	<build>
 		<plugins>

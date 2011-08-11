@@ -44,6 +44,8 @@ public final class ClientPropertiesManager {
 
 	public static final LoginType DEFAULT_LOGIN_TYPE = LoginType.SHIBBOLETH;
 
+	public static final long DEFAULT_GRICLI_LS_COMPLETION_TIMEOUT = 500;
+
 	// keys
 	public static final String JOBSTATUS_RECHECK_INTERVAL_KEY = "statusRecheck";
 
@@ -393,6 +395,23 @@ public final class ClientPropertiesManager {
 
 		return treshold;
 
+	}
+
+	public static long getGricliCompletionSleepTimeInMS() {
+
+		long timeout = -1;
+		try {
+			timeout = Long.parseLong(getClientConfiguration().getString(
+					"gricliLsCompletionTimeout"));
+
+		} catch (final Exception e) {
+			return DEFAULT_GRICLI_LS_COMPLETION_TIMEOUT;
+		}
+		if (timeout == -1) {
+			return DEFAULT_GRICLI_LS_COMPLETION_TIMEOUT;
+		}
+
+		return timeout;
 	}
 
 	public static String getHelpDeskConfig() {
