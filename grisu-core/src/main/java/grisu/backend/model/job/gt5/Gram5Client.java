@@ -84,6 +84,10 @@ public class Gram5Client {
 
 					restartJob.request(contact, false);
 				} catch (final GramException ex1) {
+					if (ex1.getErrorCode() == 131) {
+						// job is still running but proxy expired
+						return new int[] { GRAMConstants.STATUS_ACTIVE, 0 };
+					}
 					// ok, now we are really done
 					return new int[] { GRAMConstants.STATUS_DONE, 0 };
 				} catch (final GSSException ex1) {
