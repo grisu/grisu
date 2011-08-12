@@ -6,6 +6,7 @@ import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
 import grisu.model.FileManager;
 import grisu.model.MountPoint;
+import grisu.model.dto.DtoProperty;
 import grisu.model.dto.GridFile;
 
 import java.util.Map;
@@ -42,11 +43,11 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 	}
 
 	public GridFile createGridFile(final String path, int recursiveLevels)
-	throws InvalidPathException {
+			throws InvalidPathException {
 
-		if (recursiveLevels != 1) {
+		if (recursiveLevels > 1) {
 			throw new RuntimeException(
-			"Recursion levels other than 1 not supported yet");
+					"Recursion levels other than 1 not supported yet");
 		}
 
 		int index = BASE.length();
@@ -242,7 +243,7 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 				if (requestedFileWithoutProtocol.contains(mpPath)) {
 
 					String restPath = requestedFileWithoutProtocol
-					.substring(mpPath.length());
+							.substring(mpPath.length());
 
 					String url = FileManager.removeTrailingSlash(mp
 							.getRootUrl()) + "/" + restPath;
@@ -269,6 +270,12 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 				}
 				result.addChildren(child.getChildren());
 				result.addFqans(child.getFqans());
+				Map<String, String> urls = DtoProperty
+						.mapFromDtoPropertiesList(child.getUrls());
+				for (String u : urls.keySet()) {
+					result.addUrl(url, Integer.parseInt(urls.get(u)));
+				}
+				result.setUrl(child.getUrl());
 
 				for (GridFile c : result.getChildren()) {
 					c.addFqans(child.getFqans());
@@ -286,10 +293,10 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 		Map<String, Set<String>> sites = new TreeMap<String, Set<String>>();
 		for (String vo : user.getFqans().keySet()) {
 			Map<String, String[]> dataLocations = AbstractServiceInterface.informationManager
-			.getDataLocationsForVO(vo);
+					.getDataLocationsForVO(vo);
 			for (String host : dataLocations.keySet()) {
 				String site = AbstractServiceInterface.informationManager
-				.getSiteForHostOrUrl(host);
+						.getSiteForHostOrUrl(host);
 				if (!sites.keySet().contains(site)) {
 					Set<String> tempVOs = new TreeSet<String>();
 					tempVOs.add(vo);

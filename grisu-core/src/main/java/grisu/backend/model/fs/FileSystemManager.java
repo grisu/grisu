@@ -39,7 +39,7 @@ public class FileSystemManager {
 		this.user = user;
 		commonsVfsInfo = new CommonsVfsFileSystemInfoAndTransferPlugin(user);
 		virtualFsInfo = new VirtualFileSystemInfoPlugin(user);
-		virtualFsTransfer = new VirtualFsTransferPlugin(user);
+		virtualFsTransfer = new VirtualFsTransferPlugin(user, virtualFsInfo);
 		fileSystemInfoPlugins.put("gsiftp", commonsVfsInfo);
 		fileSystemInfoPlugins.put("ram", commonsVfsInfo);
 		fileSystemInfoPlugins.put("tmp", commonsVfsInfo);
@@ -48,6 +48,7 @@ public class FileSystemManager {
 		filetransferPlugins.put("gsiftp-gsiftp", commonsVfsInfo);
 		filetransferPlugins.put("grid-gsiftp", virtualFsTransfer);
 		filetransferPlugins.put("gsiftp-grid", virtualFsTransfer);
+		filetransferPlugins.put("grid-grid", virtualFsTransfer);
 
 	}
 

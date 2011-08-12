@@ -48,7 +48,8 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 				"Folder creation not supported for virtual file system.");
 	}
 
-	private GridFile createGsiftpGridFile(String url) throws RemoteFileSystemException {
+	public GridFile createGsiftpGridFile(String url)
+			throws RemoteFileSystemException {
 
 		GridFile f = null;
 

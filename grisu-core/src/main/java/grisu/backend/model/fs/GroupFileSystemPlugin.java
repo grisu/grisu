@@ -348,65 +348,68 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				myLogger.debug("Checking whether any of the possible real urls for virtual url "
 						+ path + " exist...");
 				// test whether files actually exist
-				final ExecutorService executor = Executors
-						.newFixedThreadPool(parentUrls.size());
 
-				// let's sort using last modified date, so that we can give the
-				// last file the highest priority
-				final Map<Long, String> temp = Collections
-						.synchronizedMap(new TreeMap<Long, String>());
+				if (parentUrls.size() > 0) {
+					final ExecutorService executor = Executors
+							.newFixedThreadPool(parentUrls.size());
 
-				for ( final String url : parentUrls ) {
-					Thread t = new Thread() {
-						@Override
-						public void run() {
-							try {
-								long ts = user.getFileSystemManager()
-										.lastModified(url);
+					// let's sort using last modified date, so that we can give the
+					// last file the highest priority
+					final Map<Long, String> temp = Collections
+							.synchronizedMap(new TreeMap<Long, String>());
 
-								temp.put(ts, url);
-								myLogger.debug("File exists: " + url);
-								// boolean exists = user.getFileSystemManager()
-								// .fileExists(url);
-								// if (exists) {
-								// myLogger.debug("File exists: " + url);
-								// temp.add(url);
-								// } else {
-								// myLogger.debug("File does not exit: " + url);
-								// }
-							} catch (Exception e) {
-								myLogger.debug("File does not exit: " + url
-										+ " - " + e.getLocalizedMessage());
+					for ( final String url : parentUrls ) {
+						Thread t = new Thread() {
+							@Override
+							public void run() {
+								try {
+									long ts = user.getFileSystemManager()
+											.lastModified(url);
+
+									temp.put(ts, url);
+									myLogger.debug("File exists: " + url);
+									// boolean exists = user.getFileSystemManager()
+									// .fileExists(url);
+									// if (exists) {
+									// myLogger.debug("File exists: " + url);
+									// temp.add(url);
+									// } else {
+									// myLogger.debug("File does not exit: " + url);
+									// }
+								} catch (Exception e) {
+									myLogger.debug("File does not exit: " + url
+											+ " - " + e.getLocalizedMessage());
+								}
+
 							}
-
-						}
-					};
-					executor.execute(t);
-				}
-
-				executor.shutdown();
-				try {
-					executor.awaitTermination(60, TimeUnit.SECONDS);
-				} catch (InterruptedException e) {
-				}
-
-				if (temp.size() == 1) {
-					result = new GridFile(temp.values().iterator().next(), -1L);
-					result.setIsVirtual(false);
-					result.setPath(path);
-				} else {
-					result = new GridFile(path, -1L);
-					result.setIsVirtual(true);
-					result.setPath(path);
-					int i = 0;
-					for (Long lm : temp.keySet()) {
-						result.addUrl(temp.get(lm),
-								GridFile.FILETYPE_FOLDER_PRIORITY + i);
-						i = i + 1;
+						};
+						executor.execute(t);
 					}
-				}
 
-				return result;
+					executor.shutdown();
+					try {
+						executor.awaitTermination(60, TimeUnit.SECONDS);
+					} catch (InterruptedException e) {
+					}
+
+					if (temp.size() == 1) {
+						result = new GridFile(temp.values().iterator().next(), -1L);
+						result.setIsVirtual(false);
+						result.setPath(path);
+					} else {
+						result = new GridFile(path, -1L);
+						result.setIsVirtual(true);
+						result.setPath(path);
+						int i = 0;
+						for (Long lm : temp.keySet()) {
+							result.addUrl(temp.get(lm),
+									GridFile.FILETYPE_FOLDER_PRIORITY + i);
+							i = i + 1;
+						}
+					}
+
+					return result;
+				}
 
 			}
 

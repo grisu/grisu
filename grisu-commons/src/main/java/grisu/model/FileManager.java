@@ -449,6 +449,10 @@ public class FileManager {
 			final File file = getFileFromUriOrPath(rootUrl);
 			return file.getParentFile().toURI().toASCIIString();
 		} else {
+			String url = rootUrl.trim();
+			if (rootUrl.endsWith("/")) {
+				url = url.substring(0, url.length() - 2);
+			}
 			final String result = rootUrl
 					.substring(0, rootUrl.lastIndexOf("/"));
 			return result;
