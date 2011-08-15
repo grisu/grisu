@@ -1,5 +1,6 @@
 package grisu.control.serviceInterfaces;
 
+import grisu.GrisuVersion;
 import grisu.backend.hibernate.BatchJobDAO;
 import grisu.backend.hibernate.JobDAO;
 import grisu.backend.info.InformationManagerManager;
@@ -162,6 +163,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			myLogger.error(e);
 		}
 	}
+
+	public static final String BACKEND_VERSION = GrisuVersion.get("grisu-core");
 
 	public final static boolean INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND = false;
 
@@ -1828,6 +1831,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 
 			backendInfo = name + " / " + host + " / version:" + version;
+
 		}
 		return backendInfo;
 	}
@@ -1943,8 +1947,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	abstract public String getInterfaceInfo(String key);
 
-	public String getInterfaceVersion() {
-		return ServiceInterface.INTERFACE_VERSION;
+	public int getInterfaceVersion() {
+		return API_VERSION;
 	}
 
 	/*
@@ -3116,7 +3120,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					throw new JobPropertiesException(
 							JobSubmissionProperty.SUBMISSIONLOCATION.toString()
 							+ ": "
-									+ "Jsdl document malformed. No candidate hosts element.",
+							+ "Jsdl document malformed. No candidate hosts element.",
 							e);
 				}
 			}

@@ -160,6 +160,15 @@ public final class ServiceInterfaceFactory {
 
 			try {
 				serviceInterface.login(username, new String(password));
+				int backend_version = serviceInterface.getInterfaceVersion();
+
+				if (backend_version > LoginManager.REQUIRED_BACKEND_API_VERSION) {
+					throw new LoginException(
+							"Grisu backend version too new for this client. Please download new client from: http://code.ceres.auckland.ac.nz/stable-downloads");
+				} else if (backend_version < LoginManager.REQUIRED_BACKEND_API_VERSION) {
+					throw new LoginException(
+							"Grisu backend version too old for this client. Please contact administrator of backed and ask to update.");
+				}
 			} catch (final Exception e) {
 				// e.printStackTrace();
 				myLogger.debug("Couldn't login to grisu service on: "
@@ -180,8 +189,13 @@ public final class ServiceInterfaceFactory {
 
 		if (failedCreators.size() == 1) {
 			final String key = failedCreators.keySet().iterator().next();
-			throw new ServiceInterfaceException(failedCreators.get(key)
-					.getLocalizedMessage(), failedCreators.get(key));
+
+			Throwable rootCause = failedCreators.get(key);
+			while (rootCause.getCause() != null) {
+				rootCause = rootCause.getCause();
+			}
+
+			throw new ServiceInterfaceException(rootCause);
 		} else if (failedCreators.size() == 0) {
 			throw new ServiceInterfaceException(
 					"Could not establish how to connect to backend \""

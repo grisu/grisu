@@ -47,7 +47,7 @@ import org.w3c.dom.Document;
 public class JobSubmissionObjectImpl {
 
 	static final Logger myLogger = Logger
-	.getLogger(JobSubmissionObjectImpl.class.getName());
+			.getLogger(JobSubmissionObjectImpl.class.getName());
 
 	/**
 	 * Extracts the executable (first string) from a commandline.
@@ -123,6 +123,8 @@ public class JobSubmissionObjectImpl {
 	private int walltime_in_seconds = 0;
 
 	private Map<String, String> inputFiles = new HashMap<String, String>();
+
+	private final Map<String, String> envVariables = new HashMap<String, String>();
 
 	private Set<String> modules = new HashSet<String>();
 
@@ -277,7 +279,7 @@ public class JobSubmissionObjectImpl {
 		if ((commandline == null) || (commandline.length() == 0)) {
 			throw new JobPropertiesException(
 					JobSubmissionProperty.COMMANDLINE.toString() + ": "
-					+ "Commandline not specified.");
+							+ "Commandline not specified.");
 		}
 
 	}
@@ -403,7 +405,7 @@ public class JobSubmissionObjectImpl {
 	 */
 	@Transient
 	public final Document getJobDescriptionDocument()
-	throws JobPropertiesException {
+			throws JobPropertiesException {
 
 		checkValidity();
 
@@ -426,7 +428,7 @@ public class JobSubmissionObjectImpl {
 	 */
 	@Transient
 	public final String getJobDescriptionDocumentAsString()
-	throws JobPropertiesException {
+			throws JobPropertiesException {
 
 		String jsdlString = null;
 		jsdlString = SeveralXMLHelpers.toString(getJobDescriptionDocument());
@@ -667,9 +669,9 @@ public class JobSubmissionObjectImpl {
 			submissionLocation = candidateHosts[0];
 		}
 		final String executable = JsdlHelpers
-		.getPosixApplicationExecutable(jsdl);
+				.getPosixApplicationExecutable(jsdl);
 		final String[] arguments = JsdlHelpers
-		.getPosixApplicationArguments(jsdl);
+				.getPosixApplicationArguments(jsdl);
 		final StringBuffer tempBuffer = new StringBuffer(executable);
 		if (arguments != null) {
 			for (final String arg : arguments) {
@@ -687,11 +689,11 @@ public class JobSubmissionObjectImpl {
 		this.jobname = jobProperties.get(JobSubmissionProperty.JOBNAME
 				.toString());
 		this.application = jobProperties
-		.get(JobSubmissionProperty.APPLICATIONNAME.toString());
+				.get(JobSubmissionProperty.APPLICATIONNAME.toString());
 		this.applicationVersion = jobProperties
-		.get(JobSubmissionProperty.APPLICATIONVERSION.toString());
+				.get(JobSubmissionProperty.APPLICATIONVERSION.toString());
 		this.email_address = jobProperties
-		.get(JobSubmissionProperty.EMAIL_ADDRESS.toString());
+				.get(JobSubmissionProperty.EMAIL_ADDRESS.toString());
 		this.email_on_job_start = checkForBoolean(jobProperties
 				.get(JobSubmissionProperty.EMAIL_ON_START.toString()));
 		this.email_on_job_finish = checkForBoolean(jobProperties
@@ -752,13 +754,13 @@ public class JobSubmissionObjectImpl {
 		}
 
 		this.submissionLocation = jobProperties
-		.get(JobSubmissionProperty.SUBMISSIONLOCATION.toString());
+				.get(JobSubmissionProperty.SUBMISSIONLOCATION.toString());
 		this.commandline = jobProperties.get(JobSubmissionProperty.COMMANDLINE
 				.toString());
 		this.stderr = jobProperties
-		.get(JobSubmissionProperty.STDERR.toString());
+				.get(JobSubmissionProperty.STDERR.toString());
 		this.stdout = jobProperties
-		.get(JobSubmissionProperty.STDOUT.toString());
+				.get(JobSubmissionProperty.STDOUT.toString());
 		this.stdin = jobProperties.get(JobSubmissionProperty.STDIN.toString());
 
 		this.pbsDebug = jobProperties.get(JobSubmissionProperty.PBSDEBUG

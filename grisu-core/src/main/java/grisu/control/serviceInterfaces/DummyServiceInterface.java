@@ -187,10 +187,12 @@ ServiceInterface {
 		if ("HOSTNAME".equalsIgnoreCase(key)) {
 			return "localhost";
 		} else if ("VERSION".equalsIgnoreCase(key)) {
-			return ServiceInterface.INTERFACE_VERSION;
+			return Integer.toString(ServiceInterface.API_VERSION);
 
 		} else if ("NAME".equalsIgnoreCase(key)) {
 			return "Local serviceinterface";
+		} else if ("BACKEND_VERSION".equalsIgnoreCase(key)) {
+			return BACKEND_VERSION;
 		}
 
 		return null;
