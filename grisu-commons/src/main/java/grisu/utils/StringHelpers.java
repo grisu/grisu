@@ -21,7 +21,7 @@ public class StringHelpers {
 
 		System.out.println("String: " + string);
 
-		Map<String, String> map2 = StringToMap(string);
+		Map<String, String> map2 = stringToMap(string);
 
 		System.out.println("Map:");
 		for (String key : map2.keySet()) {
@@ -39,7 +39,7 @@ public class StringHelpers {
 		return StringUtils.join(values, "");
 	}
 
-	public static Map<String, String> StringToMap(String string) {
+	public static Map<String, String> stringToMap(String string) {
 
 		Map<String, String> result = new LinkedHashMap<String, String>();
 

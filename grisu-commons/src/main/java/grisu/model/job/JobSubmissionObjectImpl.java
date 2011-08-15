@@ -124,7 +124,7 @@ public class JobSubmissionObjectImpl {
 
 	private Map<String, String> inputFiles = new HashMap<String, String>();
 
-	private final Map<String, String> envVariables = new HashMap<String, String>();
+	private Map<String, String> envVariables = new HashMap<String, String>();
 
 	private Set<String> modules = new HashSet<String>();
 
@@ -189,6 +189,18 @@ public class JobSubmissionObjectImpl {
 	}
 
 	/**
+	 * Adds an environment variable for the job environment.
+	 * 
+	 * @param key the key of the variable
+	 * @param value the value
+	 */
+	public void addEnvironmentVariable(String key, String value) {
+
+		envVariables.put(key, value);
+		pcs.firePropertyChange("environmentVariables", null, this.envVariables);
+	}
+
+	/**
 	 * Adds an input file to this job.
 	 * 
 	 * You can provide a url
@@ -203,7 +215,6 @@ public class JobSubmissionObjectImpl {
 	public void addInputFileUrl(String url) {
 
 		addInputFileUrl(url, "");
-
 	}
 
 	/**
@@ -354,6 +365,11 @@ public class JobSubmissionObjectImpl {
 		return email_address;
 	}
 
+	@ElementCollection(fetch = FetchType.EAGER)
+	public Map<String, String> getEnvironmentVariables() {
+		return envVariables;
+	}
+
 	/**
 	 * Extracts the executable from the commandline.
 	 * 
@@ -482,6 +498,8 @@ public class JobSubmissionObjectImpl {
 		}
 		jobProperties.put(JobSubmissionProperty.INPUT_FILE_URLS,
 				StringHelpers.mapToString(getInputFiles()));
+		jobProperties.put(JobSubmissionProperty.ENVIRONMENT_VARIABLES,
+				StringHelpers.mapToString(getEnvironmentVariables()));
 		jobProperties.put(JobSubmissionProperty.MODULES, getModulesAsString());
 		jobProperties.put(JobSubmissionProperty.MEMORY_IN_B, new Long(
 				memory_in_bytes).toString());
@@ -748,6 +766,15 @@ public class JobSubmissionObjectImpl {
 			// setInputFileUrls(temp.split(","));
 		}
 
+		temp = jobProperties.get(JobSubmissionProperty.ENVIRONMENT_VARIABLES
+				.toString());
+		if (StringUtils.isNotBlank(temp)) {
+			Map<String, String> envVariables = StringHelpers.stringToMap(temp);
+			if (envVariables.size() > 0) {
+				setEnvironmentVariables(envVariables);
+			}
+		}
+
 		temp = jobProperties.get(JobSubmissionProperty.MODULES.toString());
 		if ((temp != null) && (temp.length() > 0)) {
 			setModules(temp.split(","));
@@ -809,6 +836,21 @@ public class JobSubmissionObjectImpl {
 	 */
 	public Boolean isForce_single() {
 		return force_single;
+	}
+
+	/**
+	 * Removes the specified environment variable from the job.
+	 * 
+	 * @param var
+	 *            the key of the variable to remove
+	 */
+	public void removeEnvironmentVariable(String var) {
+
+		if (StringUtils.isBlank(var)) {
+			return;
+		}
+		this.envVariables.remove(var);
+		pcs.firePropertyChange("environmentVariables", null, this.envVariables);
 	}
 
 	/**
@@ -952,6 +994,11 @@ public class JobSubmissionObjectImpl {
 		this.email_on_job_start = email_on_job_start;
 		pcs.firePropertyChange("email_on_job_start", oldValue,
 				this.email_on_job_start);
+	}
+
+	public void setEnvironmentVariables(Map<String, String> vars) {
+		this.envVariables = vars;
+		pcs.firePropertyChange("environmentVariables", null, this.envVariables);
 	}
 
 	/**
