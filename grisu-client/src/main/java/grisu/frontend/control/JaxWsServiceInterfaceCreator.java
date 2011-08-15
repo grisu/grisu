@@ -86,7 +86,14 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			}
 
 			final MTOMFeature mtom = new MTOMFeature();
-			s.getPort(portName, ServiceInterface.class, mtom);
+			try {
+				s.getPort(portName, ServiceInterface.class, mtom);
+			} catch (Error e) {
+				throw new ServiceInterfaceException(
+						"Could not connect to backend, probably because of frontend/backend incompatibility (Underlying cause: \""
+								+ e.getLocalizedMessage()
+								+ "\"). Before reporting a bug, please try latest client from: http://code.ceres.auckland.ac.nz/stable-downloads.");
+			}
 
 			final ServiceInterface service = s.getPort(portName,
 					ServiceInterface.class);
@@ -102,7 +109,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 			// just to be sure, I'll keep that in there as well...
 			bp.getRequestContext()
-					.put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size",
+			.put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size",
 					new Integer(4096));
 
 			bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY,

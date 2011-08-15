@@ -81,6 +81,8 @@ public class LoginManager {
 
 	public static char[] httpProxyPassphrase = null;
 
+	public static int REQUIRED_BACKEND_API_VERSION = 14;
+
 	public static void addPluginsToClasspath() throws IOException {
 
 		ClasspathHacker.initFolder(Environment.getGrisuPluginDirectory(),

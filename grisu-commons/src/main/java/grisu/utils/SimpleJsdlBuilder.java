@@ -138,7 +138,7 @@ public class SimpleJsdlBuilder {
 			} else if (jp.equals(JobSubmissionProperty.INPUT_FILE_URLS)) {
 
 				final Map<String, String> inputFileUrls = StringHelpers
-						.StringToMap(jobProperties.get(jp));
+						.stringToMap(jobProperties.get(jp));
 				if ((inputFileUrls == null) || (inputFileUrls.size() == 0)) {
 					jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"
 							+ jp.toString() + "_XXX", "");
@@ -164,6 +164,29 @@ public class SimpleJsdlBuilder {
 						"XXX_" + jp.toString() + "_XXX",
 						dataStagingElements.toString());
 
+			} else if (jp.equals(JobSubmissionProperty.ENVIRONMENT_VARIABLES)) {
+				final Map<String, String> envVariables = StringHelpers
+						.stringToMap(jobProperties.get(jp));
+				if ((envVariables == null) || (envVariables.size() == 0)) {
+					jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"
+							+ jp.toString() + "_XXX", "");
+					continue;
+				}
+
+				final StringBuffer envElements = new StringBuffer();
+				for (final String envKey : envVariables.keySet()) {
+
+					envElements.append("<Environment name=\"");
+					envElements.append(envKey);
+					envElements.append("\">");
+					envElements.append(envVariables.get(envKey));
+					envElements.append("</Environment>");
+
+				}
+
+				jsdlTemplateString = jsdlTemplateString.replaceAll(
+						"XXX_" + jp.toString() + "_XXX",
+						envElements.toString());
 			} else {
 				if (jobProperties.get(jp) == null) {
 					jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"
