@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
 import org.globus.rsl.NameOpValue;
 import org.globus.rsl.RslNode;
+import org.globus.rsl.Binding;
+import org.globus.rsl.Bindings;
 import org.w3c.dom.Document;
 
 import grisu.backend.info.InformationManagerManager;
@@ -126,6 +128,7 @@ public class RSLFactory {
 		if (memory != null && memory >= 0) {
 			result.add(new NameOpValue("max_memory", NameOpValue.EQ, "" + memory / (1024 * 1024)));
 		}
+		
 
 		// Add "maxWallTime" node
 		final int walltime = JsdlHelpers.getWalltime(jsdl);
@@ -133,6 +136,16 @@ public class RSLFactory {
 			result.add(new NameOpValue("max_wall_time", NameOpValue.EQ, "" + walltime / 60));
 		}
 
+		// environment variables
+
+		Map<String,String> env = JsdlHelpers.getPosixApplicationEnvironment(jsdl);
+		if ((env != null) && env.size() > 0){
+			Bindings b = new Bindings("environment");
+			for (String var: env.keySet()){
+				b.add(new Binding(var, env.get(var)));
+			}
+			result.add(b);
+		}
 			
 		result.add(new NameOpValue("save_state", NameOpValue.EQ, "yes"));
 		result.add(new NameOpValue("two_phase", NameOpValue.EQ, this.commitTimeout + ""));
