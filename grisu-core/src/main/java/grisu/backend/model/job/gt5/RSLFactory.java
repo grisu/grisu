@@ -1,41 +1,42 @@
 package grisu.backend.model.job.gt5;
 
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang.StringUtils;
-import org.globus.rsl.NameOpValue;
-import org.globus.rsl.RslNode;
-import org.globus.rsl.Binding;
-import org.globus.rsl.Bindings;
-import org.w3c.dom.Document;
-
 import grisu.backend.info.InformationManagerManager;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.interfaces.InformationManager;
 import grisu.jcommons.utils.JsdlHelpers;
 import grisu.settings.ServerPropertiesManager;
 
+import java.util.Map;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
+import org.globus.rsl.Binding;
+import org.globus.rsl.Bindings;
+import org.globus.rsl.NameOpValue;
+import org.globus.rsl.RslNode;
+import org.w3c.dom.Document;
+
 public class RSLFactory {
 
 	private static RSLFactory singleton = null;
-	
-	private int commitTimeout = 5;
-	
-	public void setCommitTimeout(int commitTimeout){
-		this.commitTimeout = commitTimeout;
-	}
-	
-	private InformationManager informationManager = InformationManagerManager
-	.getInformationManager(ServerPropertiesManager
-			.getInformationManagerConf());
 	
 	public static  RSLFactory getRSLFactory(){
 		if (singleton == null){
 			singleton = new RSLFactory();
 		}
 		return singleton;
+	}
+	
+	private int commitTimeout = 5;
+	
+	private final InformationManager informationManager = InformationManagerManager
+	.getInformationManager(ServerPropertiesManager
+			.getInformationManagerConf());
+	
+	private void addWhenNotBlank(RslNode rsl, String attribute, String value){
+		if (StringUtils.isNotBlank(value)){
+			rsl.add(new NameOpValue(attribute, NameOpValue.EQ,value));
+		}
 	}
 	
 	public RslNode create(final Document jsdl, final String fqan) throws RSLCreationException{
@@ -125,21 +126,21 @@ public class RSLFactory {
 		
 		// total memory
 		Long memory = JsdlHelpers.getTotalMemoryRequirement(jsdl);
-		if (memory != null && memory >= 0) {
-			result.add(new NameOpValue("max_memory", NameOpValue.EQ, "" + memory / (1024 * 1024)));
+		if ((memory != null) && (memory >= 0)) {
+			result.add(new NameOpValue("max_memory", NameOpValue.EQ, "" + (memory / (1024 * 1024))));
 		}
 		
 
 		// Add "maxWallTime" node
 		final int walltime = JsdlHelpers.getWalltime(jsdl);
 		if (walltime > 0) {
-			result.add(new NameOpValue("max_wall_time", NameOpValue.EQ, "" + walltime / 60));
+			result.add(new NameOpValue("max_wall_time", NameOpValue.EQ, "" + (walltime / 60)));
 		}
 
 		// environment variables
 
 		Map<String,String> env = JsdlHelpers.getPosixApplicationEnvironment(jsdl);
-		if ((env != null) && env.size() > 0){
+		if ((env != null) && (env.size() > 0)){
 			Bindings b = new Bindings("environment");
 			for (String var: env.keySet()){
 				b.add(new Binding(var, env.get(var)));
@@ -152,12 +153,6 @@ public class RSLFactory {
 		result.add(new NameOpValue("vo",NameOpValue.EQ,fqan));
 		
 		return result;
-	}
-	
-	private void addWhenNotBlank(RslNode rsl, String attribute, String value){
-		if (StringUtils.isNotBlank(value)){
-			rsl.add(new NameOpValue(attribute, NameOpValue.EQ,value));
-		}
 	}
 	
 	private String[] getModulesFromMDS(final Document jsdl) {
@@ -189,6 +184,10 @@ public class RSLFactory {
 
 		final Map<String, String> appDetails = this.informationManager
 				.getApplicationDetails(application, version, subLoc);
+		String m = appDetails.get(Constants.MDS_MODULES_KEY);
+		if ( StringUtils.isBlank(m) ) {
+			return new String[]{};
+		}
 		modules_string = appDetails.get(Constants.MDS_MODULES_KEY).split(",");
 		if (modules_string != null) {
 			return modules_string;
@@ -196,5 +195,9 @@ public class RSLFactory {
 			return new String[] {};
 		}
 
+	}
+	
+	public void setCommitTimeout(int commitTimeout){
+		this.commitTimeout = commitTimeout;
 	}
 }

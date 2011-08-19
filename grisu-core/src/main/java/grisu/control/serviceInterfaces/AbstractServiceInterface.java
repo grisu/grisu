@@ -4038,6 +4038,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			job.addLogMessage("Submission finished.");
 		} catch (final RuntimeException e) {
+			// e.printStackTrace();
 			status.addLogMessage("Job submission failed.");
 			status.setFailed(true);
 			status.setFinished(true);

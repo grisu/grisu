@@ -512,7 +512,7 @@ EventSubscriber<FqanEvent> {
 	}
 
 	public SortedSet<DtoJob> getCurrentJobs(boolean refreshJobStatus) {
-		if (cachedJobList == null) {
+		if ((cachedJobList == null) || refreshJobStatus) {
 			cachedJobList = serviceInterface.getActiveJobs(null,
 					refreshJobStatus).getAllJobs();
 		}

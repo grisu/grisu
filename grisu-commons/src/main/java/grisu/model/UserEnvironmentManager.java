@@ -3,6 +3,7 @@ package grisu.model;
 import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.StatusException;
 import grisu.model.dto.DtoBatchJob;
+import grisu.model.dto.DtoJob;
 import grisu.model.files.FileSystemItem;
 import grisu.model.files.GlazedFile;
 import grisu.model.status.StatusObject;
@@ -139,9 +140,7 @@ public interface UserEnvironmentManager {
 	 * 
 	 * @return the users bookmarks.
 	 */
-	Map<String, String> getBookmarks();
-
-	List<FileSystemItem> getBookmarksFilesystems();
+	Map<String, String> getBookmarks();	List<FileSystemItem> getBookmarksFilesystems();
 
 	/**
 	 * Returns a list of all currently used applications for a user.
@@ -220,6 +219,15 @@ public interface UserEnvironmentManager {
 	 * @return the jobnames
 	 */
 	SortedSet<String> getCurrentJobnames(String application, boolean refresh);
+
+	/**
+	 * Returns all current jobs (not archived) of the user.
+	 * 
+	 * @param refreshJobStatus whether to refresh job list on backend
+	 * 
+	 * @return the list of jobs
+	 */
+	SortedSet<DtoJob> getCurrentJobs(boolean refreshJobStatus);
 
 	/**
 	 * Returns the filesystem which is associated with the specified url.

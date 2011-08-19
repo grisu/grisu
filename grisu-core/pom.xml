@@ -390,7 +390,7 @@
 		<dependency>
 			<groupId>grith</groupId>
 			<artifactId>jgrith</artifactId>
-			<version>0.5.8</version>
+			<version>0.5.9-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>log4j</artifactId>
