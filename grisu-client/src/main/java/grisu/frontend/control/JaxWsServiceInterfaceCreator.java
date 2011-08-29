@@ -99,7 +99,8 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 								+ "Please download the latest version from:\nhttp://code.ceres.auckland.ac.nz/stable-downloads\n"
 								+ "If you have the latest version and are still experiencing this problem please contact\n"
 								+ "eresearch-admin@list.auckland.ac.nz\n"
-								+ "with a description of the issue.", e);
+								+ "with a description of the issue.\n\nUnderlying cause: "
+								+ e.getLocalizedMessage());
 			}
 
 			final ServiceInterface service = s.getPort(portName,
