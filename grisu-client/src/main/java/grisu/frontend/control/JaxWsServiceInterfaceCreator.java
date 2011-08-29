@@ -89,10 +89,17 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			try {
 				s.getPort(portName, ServiceInterface.class, mtom);
 			} catch (Error e) {
+				// throw new ServiceInterfaceException(
+				// "Could not connect to backend, probably because of frontend/backend incompatibility (Underlying cause: \""
+				// + e.getLocalizedMessage()
+				// +
+				// "\"). Before reporting a bug, please try latest client from: http://code.ceres.auckland.ac.nz/stable-downloads.");
 				throw new ServiceInterfaceException(
-						"Could not connect to backend, probably because of frontend/backend incompatibility (Underlying cause: \""
-								+ e.getLocalizedMessage()
-								+ "\"). Before reporting a bug, please try latest client from: http://code.ceres.auckland.ac.nz/stable-downloads.");
+						"Sorry, could not login. Most likely your client version is incompatible with the server.\n"
+								+ "Please download the latest version from:\nhttp://code.ceres.auckland.ac.nz/stable-downloads\n"
+								+ "If you have the latest version and are still experiencing this problem please contact\n"
+								+ "eresearch-admin@list.auckland.ac.nz\n"
+								+ "with a description of the issue.", e);
 			}
 
 			final ServiceInterface service = s.getPort(portName,
