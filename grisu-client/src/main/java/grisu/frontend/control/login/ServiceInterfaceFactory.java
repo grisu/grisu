@@ -164,10 +164,18 @@ public final class ServiceInterfaceFactory {
 
 				if (backend_version > LoginManager.REQUIRED_BACKEND_API_VERSION) {
 					throw new LoginException(
-							"Grisu backend version too new for this client. Please download new client from: http://code.ceres.auckland.ac.nz/stable-downloads");
+							"Sorry, could not login. Your client version is no longer supported by the server.\n"
+									+ "Please download the latest version from:\nhttp://code.ceres.auckland.ac.nz/stable-downloads\n"
+									+ "If you have the latest version and are still experiencing this problem please contact\n"
+									+ "eresearch-admin@list.auckland.ac.nz\n"
+									+ "with a description of the issue.");
 				} else if (backend_version < LoginManager.REQUIRED_BACKEND_API_VERSION) {
 					throw new LoginException(
-							"Grisu backend version too old for this client. Please contact administrator of backed and ask to update.");
+							"Sorry, could not login. Your client version is incompatible with the server.\n"
+									+ "Please download the latest version from:\nhttp://code.ceres.auckland.ac.nz/stable-downloads\n"
+									+ "If you have the latest version and are still experiencing this problem please contact\n"
+									+ "eresearch-admin@list.auckland.ac.nz\n"
+									+ "with a description of the issue.");
 				}
 			} catch (final Exception e) {
 				// e.printStackTrace();
@@ -199,8 +207,7 @@ public final class ServiceInterfaceFactory {
 		} else if (failedCreators.size() == 0) {
 			throw new ServiceInterfaceException(
 					"Could not establish how to connect to backend \""
-							+ interfaceUrl + "\". Maybe a typo?",
-							null);
+							+ interfaceUrl + "\". Maybe a typo?", null);
 		} else {
 			throw new ServiceInterfaceException(
 					"Could not find a single ServiceInterfaceCreator that worked. Tried these:\n"
