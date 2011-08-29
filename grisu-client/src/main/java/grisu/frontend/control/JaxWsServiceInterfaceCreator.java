@@ -95,10 +95,10 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 				// +
 				// "\"). Before reporting a bug, please try latest client from: http://code.ceres.auckland.ac.nz/stable-downloads.");
 				throw new ServiceInterfaceException(
-						"Sorry, could not login. Most likely your client version is incompatible with the server.\n"
-								+ "Please download the latest version from:\nhttp://code.ceres.auckland.ac.nz/stable-downloads\n"
-								+ "If you have the latest version and are still experiencing this problem please contact\n"
-								+ "eresearch-admin@list.auckland.ac.nz\n"
+						"Sorry, could not login. Most likely your client version is incompatible with the server.\n\n"
+								+ "Please download the latest version from:\n\nhttp://code.ceres.auckland.ac.nz/stable-downloads\n\n"
+								+ "If you have the latest version and are still experiencing this problem please contact\n\n"
+								+ "eresearch-admin@list.auckland.ac.nz\n\n"
 								+ "with a description of the issue.\n\nUnderlying cause: "
 								+ e.getLocalizedMessage());
 			}
