@@ -73,7 +73,9 @@ public class GT5Submitter extends JobSubmitter {
 			
 		} catch (final GramException ex) {
 			myLogger.debug("ok, normal method of getting exit status is not working. need to restart job.");
-			if ((ex.getErrorCode() == 156  || ex.getErrorCode() == GramException.CONNECTION_FAILED) &&
+			if ((ex.getErrorCode() == 156  || 
+					ex.getErrorCode() == GramException.CONNECTION_FAILED || 
+					ex.getErrorCode() == 79) &&
 					restart) {
 				// maybe the job finished, but maybe we need to kick job manager
 
@@ -97,6 +99,11 @@ public class GT5Submitter extends JobSubmitter {
 
 				// nope, not done yet.
 				return getJobStatus(handle, credential, false);
+			} else if (ex.getErrorCode() == 156){
+				// second restart didn't work - assume the job is done 
+				// this bit is only needed during transition between releases
+				return translateToGrisuStatus(GRAMConstants.STATUS_DONE, 0 , 0);
+				
 			} else {
 				myLogger.error("something else is wrong. error code is " + ex.getErrorCode());
 				myLogger.error(ex);
@@ -209,7 +216,12 @@ public class GT5Submitter extends JobSubmitter {
 		} else if (status == GRAMConstants.STATUS_SUSPENDED) {
 			grisu_status = JobConstants.ACTIVE;
 		} else {
-			grisu_status = status;
+			// needed for transition period to deal with jobs submitted without two-phase commit
+			if (failureCode == 156){
+				grisu_status = JobConstants.DONE;
+			} else {
+				grisu_status = JobConstants.UNSUBMITTED;
+			}
 		}
 		return grisu_status;
 
