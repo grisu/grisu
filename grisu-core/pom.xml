@@ -233,7 +233,7 @@
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>mysql-mds</artifactId>
-			<version>0.8.8-SNAPSHOT</version>
+			<version>0.8.8</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>cog-jglobus</artifactId>
@@ -411,7 +411,7 @@
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>mds4-client</artifactId>
-			<version>0.8.8-SNAPSHOT</version>
+			<version>0.8.8</version>
 		</dependency>
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
