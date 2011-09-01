@@ -426,7 +426,7 @@
 		<dependency>
 			<groupId>grisu.frontend</groupId>
 			<artifactId>grisu-client</artifactId>
-			<version>0.3.6-rc2-SNAPSHOT</version>
+			<version>0.3.7-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
