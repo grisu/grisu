@@ -1650,7 +1650,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public DtoStringList getAllAvailableApplications(final DtoStringList fqans) {
 		final Set<String> fqanList = new TreeSet<String>();
 
-		if (fqans == null) {
+		if ((fqans == null) || (fqans.asSortedSet().size() == 0)) {
 			return DtoStringList.fromStringArray(informationManager
 					.getAllApplicationsOnGrid());
 		}
@@ -3716,6 +3716,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public void restartJob(final String jobname, String changedJsdl)
 			throws JobSubmissionException, NoSuchJobException {
+
+		if (StringUtils.isBlank(changedJsdl)) {
+			changedJsdl = null;
+		}
 
 		final Job job = getUser().getJobFromDatabaseOrFileSystem(jobname);
 

@@ -70,9 +70,9 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 		try {
 
-			final QName serviceName = new QName(
-					"http://api.grisu.arcs.org.au/", "GrisuService");
-			final QName portName = new QName("http://api.grisu.arcs.org.au/",
+			final QName serviceName = new QName("http://api.grisu",
+					"GrisuService");
+			final QName portName = new QName("http://api.grisu",
 					// "ServiceInterfaceSOAPPort");
 					"ServiceInterfacePort");
 
@@ -81,6 +81,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 				s = Service.create(
 						new URL(interfaceUrl.replace("soap/GrisuService",
 								"api.wsdl")), serviceName);
+				// "ns1.wsdl")), serviceName);
 			} catch (final MalformedURLException e) {
 				throw new RuntimeException(e);
 			}

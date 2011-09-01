@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Markus Binsteiner
  * 
  */
-@XmlRootElement(name = "userproperties")
+@XmlRootElement(name = "properties")
 public class DtoProperties {
 
 	public static DtoProperties createProperties(
@@ -58,6 +58,10 @@ public class DtoProperties {
 		result.setProperties(list);
 
 		return result;
+	}
+
+	public static DtoProperties fromString(String dummy) {
+		return new DtoProperties();
 	}
 
 	/**

@@ -1008,7 +1008,7 @@ public class User {
 						List<Job> jobObjects = null;
 						try {
 							jobObjects = getArchivedJobsFromFileSystem(archiveLocation);
-							if (application == null) {
+							if (StringUtils.isBlank(application)) {
 								for (Job job : jobObjects) {
 									archivedJobs.add(job);
 								}

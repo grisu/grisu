@@ -27,17 +27,19 @@ import java.util.Map;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.jws.WebService;
-import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.xml.bind.annotation.XmlMimeType;
-
 
 /**
  * This is the central interface of grisu. These are the methods the web service
@@ -48,7 +50,7 @@ import javax.xml.bind.annotation.XmlMimeType;
  * 
  */
 
-@WebService(targetNamespace = "http://api.grisu.arcs.org.au/", serviceName = "GrisuService")
+@WebService(targetNamespace = "http://api.grisu", serviceName = "GrisuService")
 public interface ServiceInterface {
 
 	public static final int API_VERSION = 14;
@@ -68,8 +70,8 @@ public interface ServiceInterface {
 	 *            one)
 	 */
 	@RolesAllowed("User")
-	@POST
-	@Path("/user/archive/add/{alias}")
+	@PUT
+	@Path("/user/archive/{alias}")
 	void addArchiveLocation(@PathParam("alias") String alias,
 			@QueryParam("value") String value);
 
@@ -83,8 +85,8 @@ public interface ServiceInterface {
 	 *            the url of the bookmark (or null to delete an existing one)
 	 */
 	@RolesAllowed("User")
-	@POST
-	@Path("/user/bookmarks/add/{alias}")
+	@PUT
+	@Path("/user/bookmarks/{alias}")
 	void addBookmark(@PathParam("alias") String alias,
 			@QueryParam("value") String value);
 
@@ -98,8 +100,8 @@ public interface ServiceInterface {
 	 * @throws NoSuchJobException
 	 *             if there is no job with this jobname in the database
 	 */
-	@POST
-	@Path("actions/addJobProperties/{jobname}")
+	@PUT
+	@Path("/job/{jobname}/property/")
 	@RolesAllowed("User")
 	void addJobProperties(@PathParam("jobname") String jobname,
 			@QueryParam("properties") DtoJob properties)
@@ -120,11 +122,11 @@ public interface ServiceInterface {
 	 * @throws NoSuchJobException
 	 *             if there is no job with this jobname in the database
 	 */
-	@POST
-	@Path("actions/addJobProperty/{jobname}")
+	@PUT
+	@Path("/job/{jobname}/property/{key}")
 	@RolesAllowed("User")
 	void addJobProperty(@PathParam("jobname") String jobname,
-			@QueryParam("key") String key, @QueryParam("value") String value)
+			@PathParam("key") String key, @QueryParam("value") String value)
 					throws NoSuchJobException;
 
 	/**
@@ -135,9 +137,12 @@ public interface ServiceInterface {
 	 * @param jobdescription
 	 *            the jsdl string
 	 */
+	@POST
+	@Path("/batchjob/{batchjobname}/add")
 	@RolesAllowed("User")
-	String addJobToBatchJob(String batchjobname, String jobdescription)
-			throws NoSuchJobException, JobPropertiesException;
+	String addJobToBatchJob(@PathParam("batchjobname") String batchjobname,
+			@QueryParam("jsdl") String jobdescription)
+					throws NoSuchJobException, JobPropertiesException;
 
 	/**
 	 * Archives this job to the specified url and deletes it from the database.
@@ -169,7 +174,7 @@ public interface ServiceInterface {
 	 *             other kind of file related exception
 	 */
 	@POST
-	@Path("actions/archiveJob/{jobname}")
+	@Path("/job/{jobname}/archive")
 	@RolesAllowed("User")
 	String archiveJob(@PathParam("jobname") String jobname,
 			@QueryParam("target") String target) throws NoSuchJobException,
@@ -193,9 +198,12 @@ public interface ServiceInterface {
 	 *             if the specified batchjob doesn't exist
 	 */
 	@RolesAllowed("User")
-	void copyBatchJobInputFile(String batchJobname, String inputFile,
-			String filename) throws RemoteFileSystemException,
-			NoSuchJobException;
+	@POST
+	@Path("/batchjob/{batchjobname}/distribute_remote_inputfile")
+	void copyBatchJobInputFile(@PathParam("batchjobname") String batchJobname,
+			@QueryParam("inputFile") String inputFile,
+			@QueryParam("filename") String filename)
+					throws RemoteFileSystemException, NoSuchJobException;
 
 	/**
 	 * Copies one file to another location (recursively if it's a directory).
@@ -215,12 +223,13 @@ public interface ServiceInterface {
 	 *             the remote target file system could not be written to
 	 */
 	@POST
-	@Path("actions/cp")
+	@Path("/files/cp")
 	@RolesAllowed("User")
 	String cp(@QueryParam("sources") DtoStringList sources,
 			@QueryParam("target") String target,
-			@QueryParam("overwrite") boolean overwrite,
-			@QueryParam("wait") boolean wait) throws RemoteFileSystemException;
+			@DefaultValue("false") @QueryParam("overwrite") boolean overwrite,
+			@DefaultValue("false") @QueryParam("wait") boolean wait)
+					throws RemoteFileSystemException;
 
 	/**
 	 * Creates a batchjob on the server.
@@ -240,8 +249,12 @@ public interface ServiceInterface {
 	 * @throws JobPropertiesException
 	 */
 	@RolesAllowed("User")
-	DtoBatchJob createBatchJob(String batchJobname, String fqan,
-			String jobnameCreationMethod)
+	@PUT
+	@Path("/batchjob/{batchjobname}")
+	DtoBatchJob createBatchJob(
+			@PathParam("batchjobname") String batchJobname,
+			@QueryParam("group") String fqan,
+			@DefaultValue(Constants.UNIQUE_NUMBER_METHOD) @QueryParam("jobname_creation_method") String jobnameCreationMethod)
 					throws BatchJobException;
 
 	/**
@@ -264,12 +277,13 @@ public interface ServiceInterface {
 	 *             already exists and force-jobname is specified as jobname
 	 *             creation method).
 	 */
-	@POST
-	@Path("actions/createJobUsingJsdl")
+	@PUT
+	@Path("/job/{jobname}")
 	@RolesAllowed("User")
-	String createJob(@QueryParam("jsdl") String jsdl,
-			@QueryParam("fqan") String fqan,
-			@QueryParam("method") String jobnameCreationMethod)
+	String createJob(
+			@QueryParam("jsdl") String jsdl,
+			@QueryParam("group") String fqan,
+			@DefaultValue(Constants.UNIQUE_NUMBER_METHOD) @QueryParam("jobname-creation-method") String jobnameCreationMethod)
 					throws JobPropertiesException;
 
 	/**
@@ -281,9 +295,9 @@ public interface ServiceInterface {
 	 *             if the filesystem could not be accessed
 	 */
 	@RolesAllowed("User")
-	@POST
-	@Path("actions/delete")
-	void deleteFile(@QueryParam("url") String url)
+	@DELETE
+	@Path("/files/{url}/delete")
+	void deleteFile(@PathParam("url") String url)
 			throws RemoteFileSystemException;
 
 	/**
@@ -296,8 +310,8 @@ public interface ServiceInterface {
 	 * @return a handle for the file deletion actionstatus
 	 */
 	@RolesAllowed("User")
-	@POST
-	@Path("actions/deleteFiles")
+	@DELETE
+	@Path("/files/delete")
 	String deleteFiles(@QueryParam("urls") DtoStringList files);
 
 	/**
@@ -306,20 +320,14 @@ public interface ServiceInterface {
 	 * @return all the MountPoints
 	 */
 	@GET
-	@Path("user/allMountpoints")
+	@Path("/user/mountpoints")
 	@RolesAllowed("User")
 	DtoMountPoints df();
-
-	// ---------------------------------------------------------------------------------------------------
-	//
-	// Grid environment information methods
-	//
-	// ---------------------------------------------------------------------------------------------------
 
 	/**
 	 * Download a file to the client.
 	 * 
-	 * @param filename
+	 * @param url
 	 *            the filename of the file either absolute or "user-space" url
 	 * @return the data
 	 * @throws RemoteFileSystemException
@@ -327,26 +335,27 @@ public interface ServiceInterface {
 	 *             /mounted / is not readable
 	 */
 	@XmlMimeType("application/octet-stream")
-	@POST
+	@GET
 	@RolesAllowed("User")
-	@Path("actions/download")
-	DataHandler download(@QueryParam("filename") String filename)
+	@Path("/files/{url}/download")
+	DataHandler download(@PathParam("url") String url)
 			throws RemoteFileSystemException;
 
 	/**
 	 * Checks whether the specified file/folder exists.
 	 * 
-	 * @param file
+	 * @param url
 	 *            the file or folder
 	 * @return true - exists, false - doesn't exist
 	 * @throws RemoteFileSystemException
 	 *             if the file system can't be accessed to determine whether the
 	 *             file exists
 	 */
-	@POST
-	@Path("user/files/fileExists")
+	@GET
+	@Path("/files/{url}/exists")
 	@RolesAllowed("User")
-	boolean fileExists(String file) throws RemoteFileSystemException;
+	boolean fileExists(@PathParam("url") String url)
+			throws RemoteFileSystemException;
 
 	/**
 	 * Takes a jsdl template and returns a list of submission locations that
@@ -357,13 +366,18 @@ public interface ServiceInterface {
 	 *            the jdsl file
 	 * @param fqan
 	 *            the fqan to use to submit the job
+	 * @param exclude
+	 *            whether to exclude locations that don't have free job slots
+	 *            available at the moment in the result list
+	 * 
 	 * @return a list of matching submissionLoctations
 	 */
-	@POST
-	@Path("info/submissionlocations/forJsdlAndFqan")
+	@GET
+	@Path("/info/queues/matching/jsdl")
+	@PermitAll
 	DtoGridResources findMatchingSubmissionLocationsUsingJsdl(
 			@QueryParam("jsdl") String jsdl, @QueryParam("fqan") String fqan,
-			@QueryParam("exclude") boolean exclude);
+			@DefaultValue("false") @QueryParam("exclude") boolean exclude);
 
 	/**
 	 * Takes a jsdl template and returns a list of submission locations that
@@ -378,12 +392,13 @@ public interface ServiceInterface {
 	 *            the fqan to use to submit the job
 	 * @return a list of matching submissionLoctations
 	 */
-	@POST
-	@Path("info/submissionlocations/forJobPropertiesAndFqan")
+	@GET
+	@Path("/info/queues/matching/properties")
+	@PermitAll
 	DtoGridResources findMatchingSubmissionLocationsUsingMap(
 			@QueryParam("jobProperties") DtoJob jobProperties,
 			@QueryParam("fqan") String fqan,
-			@QueryParam("exclude") boolean exclude);
+			@DefaultValue("false") @QueryParam("exclude") boolean exclude);
 
 	/**
 	 * Returns the current status of an ongoing action.
@@ -397,15 +412,17 @@ public interface ServiceInterface {
 	 * @return the status object
 	 */
 	@RolesAllowed("User")
-	@Path("user/status/{handle}")
+	@Path("/user/status/{handle}")
+	@GET
 	DtoActionStatus getActionStatus(@PathParam("handle") String actionHandle);
 
 	/**
-	 * Returns a xml document that contains all the current (non-archived) jobs
-	 * of the user with information about the jobs.
+	 * Returns a list of all the current (non-archived) jobs of the user with
+	 * details about the jobs.
 	 * 
 	 * @param application
-	 *            filter by application or null (for all jobs)
+	 *            filter by application or {@link Constants#ALLJOBS_KEY}/null
+	 *            (for all jobs)
 	 * @param refreshJobStatus
 	 *            whether to refresh the status of all the jobs. This can take
 	 *            quite some time.
@@ -413,10 +430,11 @@ public interface ServiceInterface {
 	 * @return xml formated information about all the users jobs
 	 */
 	@GET
-	@Path("user/activejobs/{application}/{refresh}")
+	@Path("/jobs")
 	@RolesAllowed("User")
-	DtoJobs getActiveJobs(@PathParam("application") String application,
-			@PathParam("refresh") boolean refreshJobStatus);
+	DtoJobs getActiveJobs(
+			@DefaultValue(Constants.ALLJOBS_KEY) @QueryParam("application") String application,
+			@DefaultValue("false") @QueryParam("refresh") boolean refreshJobStatus);
 
 	/**
 	 * Returns all applications that are available grid-wide or for a certain
@@ -427,10 +445,11 @@ public interface ServiceInterface {
 	 *            (fqan-independent).
 	 * @return all applications
 	 */
-	@POST
-	@Path("info/applications")
+	@GET
+	@Path("/info/applications")
+	@PermitAll
 	DtoStringList getAllAvailableApplications(
-			@QueryParam("sites") DtoStringList fqans);
+			@DefaultValue("") @QueryParam("groups") DtoStringList fqans);
 
 	/**
 	 * Returns a list of all batch jobnames that are currently stored on this
@@ -439,7 +458,10 @@ public interface ServiceInterface {
 	 * @return all batchjobnames
 	 */
 	@RolesAllowed("User")
-	DtoStringList getAllBatchJobnames(String application);
+	@GET
+	@Path("/batchjobs/names")
+	DtoStringList getAllBatchJobnames(
+			@DefaultValue(Constants.ALLJOBS_KEY) @QueryParam("application") String application);
 
 	/**
 	 * This returns a map of all hosts that the information provider has listed
@@ -451,7 +473,8 @@ public interface ServiceInterface {
 	 *         belong to
 	 */
 	@GET
-	@Path("info/hosts/allHosts")
+	@Path("/info/hosts")
+	@PermitAll
 	DtoHostsInfo getAllHosts();
 
 	/**
@@ -468,8 +491,10 @@ public interface ServiceInterface {
 	 * @return all jobnames
 	 */
 	@GET
-	@Path("user/alljobnames/{application}")
-	DtoStringList getAllJobnames(@PathParam("application") String application);
+	@Path("/jobs/names/")
+	@RolesAllowed("User")
+	DtoStringList getAllJobnames(
+			@DefaultValue(Constants.ALLJOBS_KEY) @QueryParam("application") String application);
 
 	/**
 	 * I don't know whether this one should sit on the web service side or the
@@ -479,7 +504,8 @@ public interface ServiceInterface {
 	 * @return all sites
 	 */
 	@GET
-	@Path("info/allSites")
+	@Path("/info/sites")
+	@PermitAll
 	DtoStringList getAllSites();
 
 	/**
@@ -490,7 +516,8 @@ public interface ServiceInterface {
 	 * @return all queues grid-wide
 	 */
 	@GET
-	@Path("info/submissionlocations")
+	@Path("/info/queues")
+	@PermitAll
 	DtoSubmissionLocations getAllSubmissionLocations();
 
 	/**
@@ -502,9 +529,10 @@ public interface ServiceInterface {
 	 * @return all submission locations
 	 */
 	@GET
-	@Path("vo/{fqan}/submissionlocations")
+	@Path("/info/queues/{group}")
+	@PermitAll
 	DtoSubmissionLocations getAllSubmissionLocationsForFqan(
-			@PathParam("fqan") String fqan);
+			@PathParam("group") String fqan);
 
 	/**
 	 * Returns all the details that are know about this version of the
@@ -515,37 +543,17 @@ public interface ServiceInterface {
 	 *            the name of the application
 	 * @param version
 	 *            the version of the application
-	 * @param site
-	 *            the site where you want to run the application
+	 * @param subloc
+	 *            the submission location where you want to run the application
 	 * @return details about the applications
 	 */
 	@GET
-	@Path("info/application/{application}/{version}/{site}")
+	@Path("/info/application/{application}/{version}/{queue}")
+	@PermitAll
 	DtoApplicationDetails getApplicationDetailsForVersionAndSubmissionLocation(
 			@PathParam("application") String application,
-			@PathParam("version") String version, @PathParam("site") String site);
-
-	// /**
-	// * Finds all children files for the specified folder. Useful if you want
-	// to
-	// * download a whole foldertree. Use with caution because that can be very
-	// * slow for big folders.
-	// *
-	// * @param folder
-	// * the folder in question
-	// * @param onlyFiles
-	// * whether only files should be returned (true) or folders too
-	// * (false).
-	// * @return all filenames of the folders' children
-	// * @throws RemoteFileSystemException
-	// * if the folder can't be accessed/read
-	// */
-	// @RolesAllowed("User")
-	// @POST
-	// @Path("user/files/childrenfilenames")
-	// DtoStringList getChildrenFileNames(@QueryParam("url") String url,
-	// @QueryParam("onlyFiles") boolean onlyFiles)
-	// throws RemoteFileSystemException;
+			@DefaultValue(Constants.NO_VERSION_INDICATOR_STRING) @PathParam("version") String version,
+			@DefaultValue("") @PathParam("queue") String subloc);
 
 	/**
 	 * Returns a list of all application packages that provide the specified
@@ -555,7 +563,11 @@ public interface ServiceInterface {
 	 *            the executable
 	 * @return the application package(s)
 	 */
-	String[] getApplicationPackagesForExecutable(String executable);
+	@GET
+	@Path("/info/applications/{executable}")
+	@PermitAll
+	String[] getApplicationPackagesForExecutable(
+			@PathParam("executable") String executable);
 
 	/**
 	 * Returns a xml document that contains all the jobs of the user with
@@ -568,9 +580,10 @@ public interface ServiceInterface {
 	 * @return xml formated information about all the users jobs
 	 */
 	@GET
-	@Path("user/archivedjobs/{application}")
+	@Path("/jobs/archived")
 	@RolesAllowed("User")
-	DtoJobs getArchivedJobs(@PathParam("application") String application);
+	DtoJobs getArchivedJobs(
+			@DefaultValue("") @QueryParam("application") String application);
 
 	/**
 	 * Returns the users archive locations.
@@ -582,7 +595,7 @@ public interface ServiceInterface {
 	 */
 	@RolesAllowed("User")
 	@GET
-	@Path("user/archiveLocations")
+	@Path("/user/archives")
 	DtoProperties getArchiveLocations();
 
 	/**
@@ -596,7 +609,10 @@ public interface ServiceInterface {
 	 * @return the batchjob
 	 */
 	@RolesAllowed("User")
-	DtoBatchJob getBatchJob(String batchJobname) throws NoSuchJobException;
+	@GET
+	@Path("/batchjob/{batchjobname}")
+	DtoBatchJob getBatchJob(@PathParam("batchjobname") String batchJobname)
+			throws NoSuchJobException;
 
 	/**
 	 * Gets the users bookmarks
@@ -605,7 +621,7 @@ public interface ServiceInterface {
 	 */
 	@RolesAllowed("User")
 	@GET
-	@Path("user/bookmarks")
+	@Path("/user/bookmarks")
 	DtoProperties getBookmarks();
 
 	/**
@@ -615,7 +631,7 @@ public interface ServiceInterface {
 	 */
 	@RolesAllowed("User")
 	@GET
-	@Path("user/session/credentialendtime")
+	@Path("/user/session/credential_endtime")
 	long getCredentialEndTime();
 
 	// ---------------------------------------------------------------------------------------------------
@@ -631,23 +647,8 @@ public interface ServiceInterface {
 	 */
 	@GET
 	@RolesAllowed("User")
-	@Path("user/dn")
-	@Produces("text/plain")
+	@Path("/user/dn")
 	String getDN();
-
-	// /**
-	// * Checks the available data locations for the specified site and VO.
-	// *
-	// * @param fqan
-	// * the VO
-	// * @return a map of datalocations for this vo with the root url of the
-	// * location as key (e.g. gsiftp://brecca.vpac.monash.edu.au:2811 and
-	// * the paths that are accessible for this VO there as values (e.g.
-	// * /home/grid-admin)
-	// */
-	// @GET
-	// @Path("info/{fqan}/datalocations")
-	// DtoDataLocations getDataLocationsForVO(@PathParam("fqan") String fqan);
 
 	/**
 	 * Returns the size of the file in bytes. This will probably replaced in a
@@ -663,8 +664,8 @@ public interface ServiceInterface {
 	 */
 	@RolesAllowed("User")
 	@POST
-	@Path("user/files/filesize")
-	long getFileSize(@QueryParam("url") String url)
+	@Path("/files/{url}/size")
+	long getFileSize(@PathParam("url") String url)
 			throws RemoteFileSystemException;
 
 	/**
@@ -674,7 +675,7 @@ public interface ServiceInterface {
 	 * @return all fqans of the user
 	 */
 	@GET
-	@Path("user/fqans")
+	@Path("/user/groups")
 	@RolesAllowed("User")
 	DtoStringList getFqans();
 
@@ -690,21 +691,18 @@ public interface ServiceInterface {
 	 * @return the value
 	 */
 	@GET
-	@Path("interfaceInfo/{key}")
+	@Path("/info/backend/{key}")
+	@PermitAll
 	String getInterfaceInfo(@PathParam("key") String key);
 
-	// ---------------------------------------------------------------------------------------------------
-	//
-	// General grisu specific methods
-	//
-	// ---------------------------------------------------------------------------------------------------
 	/**
 	 * The version of the serviceInterface for this backend.
 	 * 
 	 * @return the version
 	 */
 	@GET
-	@Path("interfaceVersion")
+	@Path("/info/backend/version")
+	@PermitAll
 	int getInterfaceVersion();
 
 	/**
@@ -718,14 +716,16 @@ public interface ServiceInterface {
 	 * @throws NoSuchJobException
 	 *             if no such job exists
 	 */
-	@POST
-	@Path("user/getJobDetails/{jobname}")
+	@GET
+	@Path("/job/{jobname}")
 	@RolesAllowed("User")
 	DtoJob getJob(@PathParam("jobname") String jobname)
 			throws NoSuchJobException;
 
 	/**
 	 * Return the value of a property that is stored along with a job.
+	 * 
+	 * The name of the job property keys can be looked up in {@link Constants}.
 	 * 
 	 * @param jobname
 	 *            the name of the job
@@ -736,7 +736,7 @@ public interface ServiceInterface {
 	 *             if no such job exists
 	 */
 	@POST
-	@Path("user/getJobProperty/{jobname}/{key}")
+	@Path("/job/{jobname}/property/{key}")
 	@RolesAllowed("User")
 	String getJobProperty(@PathParam("jobname") String jobname,
 			@PathParam("key") String key) throws NoSuchJobException;
@@ -753,7 +753,7 @@ public interface ServiceInterface {
 	 *             if no job with the specified jobname exists
 	 */
 	@POST
-	@Path("user/jobs/status/{jobname}")
+	@Path("/job/{jobname}/status")
 	@RolesAllowed("User")
 	int getJobStatus(@PathParam("jobname") String jobname);
 
@@ -767,7 +767,7 @@ public interface ServiceInterface {
 	 *             if no such job exists
 	 */
 	@GET
-	@Path("user/getJsdl/{jobname}")
+	@Path("/job/{jobname}/jsdl")
 	@RolesAllowed("User")
 	@Produces("text/xml")
 	String getJsdlDocument(@PathParam("jobname") String jobname)
@@ -782,8 +782,8 @@ public interface ServiceInterface {
 	 */
 	@POST
 	@RolesAllowed("User")
-	@Path("user/mountpointForUrl")
-	MountPoint getMountPointForUri(@QueryParam("url") String url);
+	@Path("/files/{url}/mountpoint")
+	MountPoint getMountPointForUri(@PathParam("url") String url);
 
 	/**
 	 * Returns the name of the site this host belongs to.
@@ -793,8 +793,8 @@ public interface ServiceInterface {
 	 * @return the site
 	 */
 	@GET
-	@Path("info/hosts/{host}/site")
-	@Produces("text/plain")
+	@Path("/info/{host}/site")
+	@PermitAll
 	String getSite(@PathParam("host") String host);
 
 	/**
@@ -807,7 +807,8 @@ public interface ServiceInterface {
 	 * @return the gridftp servers
 	 */
 	@GET
-	@Path("info/stagingfilesystems/{subloc}")
+	@Path("/info/{subloc}/staging_areas")
+	@PermitAll
 	DtoStringList getStagingFileSystemForSubmissionLocation(
 			@PathParam("subloc") String subLoc);
 
@@ -824,7 +825,8 @@ public interface ServiceInterface {
 	 * @return all sites that support this application.
 	 */
 	@GET
-	@Path("info/{application}/allversions/submissionlocations")
+	@Path("/info/application/{application}/queues")
+	@PermitAll
 	DtoSubmissionLocations getSubmissionLocationsForApplication(
 			@PathParam("application") String application);
 
@@ -842,7 +844,8 @@ public interface ServiceInterface {
 	 * @return all sites that support this application.
 	 */
 	@GET
-	@Path("info/{application}/version/{version}/submissionlocations")
+	@Path("info/application/{application}/{version}/queues")
+	@PermitAll
 	DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersion(
 			@PathParam("application") String application,
 			@PathParam("version") String version);
@@ -864,10 +867,12 @@ public interface ServiceInterface {
 	 * @return all sites that support this application.
 	 */
 	@GET
-	@Path("info/{application}/version/{version}/fqan/{fqan}/submissionlocations")
+	@Path("/info/application/{application}/{version}/{group}/queues")
+	@PermitAll
 	DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersionAndFqan(
 			@PathParam("application") String application,
-			@PathParam("version") String version, @PathParam("fqan") String fqan);
+			@PathParam("version") String version,
+			@PathParam("group") String fqan);
 
 	/**
 	 * Returns a map of all versions and all submission locations of this
@@ -881,7 +886,8 @@ public interface ServiceInterface {
 	 *         submissionLocations as comma
 	 */
 	@GET
-	@Path("info/{application}/submissionlocations")
+	@Path("/info/application/{application}/queues")
+	@PermitAll
 	DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
 			@PathParam("application") String application);
 
@@ -894,7 +900,11 @@ public interface ServiceInterface {
 	 * @throws NoSuchTemplateException
 	 *             if a template for that particular application does not exist
 	 */
-	String getTemplate(String application) throws NoSuchTemplateException;
+	@PermitAll
+	@GET
+	@Path("/info/template/{template_name}")
+	String getTemplate(@PathParam("template_name") String application)
+			throws NoSuchTemplateException;
 
 	/**
 	 * Returns a list of all applications that are currently used for
@@ -903,7 +913,8 @@ public interface ServiceInterface {
 	 * @return the list of applications
 	 */
 	@GET
-	@Path("user/allUsedApplications")
+	@Path("/user/all_used_applications")
+	@RolesAllowed("User")
 	DtoStringList getUsedApplications();
 
 	// ---------------------------------------------------------------------------------------------------
@@ -918,7 +929,8 @@ public interface ServiceInterface {
 	 * @return the list of applications
 	 */
 	@GET
-	@Path("user/allUsedApplicationsBatch")
+	@Path("/user/all_used_applications_batch")
+	@RolesAllowed("User")
 	DtoStringList getUsedApplicationsBatch();
 
 	/**
@@ -928,7 +940,7 @@ public interface ServiceInterface {
 	 */
 	@RolesAllowed("User")
 	@GET
-	@Path("user/allproperties")
+	@Path("/user/properties")
 	DtoProperties getUserProperties();
 
 	/**
@@ -944,8 +956,7 @@ public interface ServiceInterface {
 	 */
 	@RolesAllowed("User")
 	@GET
-	@Path("user/properties/{key}")
-	@Produces("text/plain")
+	@Path("/user/properties/{key}")
 	String getUserProperty(@PathParam("key") String key);
 
 	/**
@@ -959,27 +970,25 @@ public interface ServiceInterface {
 	 * @return the supported versions
 	 */
 	@GET
-	@Path("info/application/{application}/{submissionLocation}/versions")
+	@Path("/info/application/{application}/{queue}/versions")
 	DtoStringList getVersionsOfApplicationOnSubmissionLocation(
 			@PathParam("application") String application,
-			@PathParam("submissionLocation") String submissionLocation);
-
-	// void createAndSubmitJob(@PathParam("jobname") String jobname) throws
-	// JobSubmissionException, JobPropertiesException;
+			@PathParam("queue") String submissionLocation);
 
 	/**
 	 * Checks whether the specified file is a folder or not.
 	 * 
-	 * @param file
+	 * @param url
 	 *            the file
 	 * @return true - if folder; false - if not
 	 * @throws RemoteFileSystemException
 	 *             if the files can't be accessed
 	 */
 	@RolesAllowed("User")
-	@POST
-	@Path("user/files/isFolder")
-	boolean isFolder(String file) throws RemoteFileSystemException;
+	@GET
+	@Path("/files/{url}/isFolder")
+	boolean isFolder(@QueryParam("url") String url)
+			throws RemoteFileSystemException;
 
 	/**
 	 * Deletes the whole jobdirectory (if specified) and if successful, the job
@@ -999,10 +1008,10 @@ public interface ServiceInterface {
 	 *             if the job is part of a batchjob
 	 */
 	@POST
-	@Path("actions/killJob/{jobname}")
+	@Path("job/{jobname}/kill")
 	@RolesAllowed("User")
 	void kill(@PathParam("jobname") String jobname,
-			@QueryParam("clean") boolean clean)
+			@DefaultValue("false") @QueryParam("clean") boolean clean)
 					throws RemoteFileSystemException, NoSuchJobException,
 					BatchJobException;
 
@@ -1018,10 +1027,10 @@ public interface ServiceInterface {
 	 *            whether to clean/delete the jobdirectory if possible
 	 */
 	@POST
-	@Path("actions/killJobs")
+	@Path("/jobs/kill")
 	@RolesAllowed("User")
 	void killJobs(@QueryParam("jobnames") DtoStringList jobnames,
-			@QueryParam("clean") boolean clean);
+			@DefaultValue("false") @QueryParam("clean") boolean clean);
 
 	/**
 	 * Returns the date when the file was last modified.
@@ -1033,9 +1042,9 @@ public interface ServiceInterface {
 	 *             if the file could not be accessed
 	 */
 	@RolesAllowed("User")
-	@POST
-	@Path("user/files/lastModified")
-	long lastModified(@QueryParam("url") String url)
+	@GET
+	@Path("/files/{url}/last_modified")
+	long lastModified(@PathParam("url") String url)
 			throws RemoteFileSystemException;
 
 	/**
@@ -1045,6 +1054,9 @@ public interface ServiceInterface {
 	 * 
 	 * @return a list of all applications
 	 */
+	@PermitAll
+	@GET
+	@Path("/info/templates")
 	String[] listHostedApplicationTemplates();
 
 	/**
@@ -1060,8 +1072,7 @@ public interface ServiceInterface {
 	 *             if the login was not successful
 	 */
 	@POST
-	@Path("login")
-	@Consumes("text/plain")
+	@Path("/user/login")
 	void login(@QueryParam("username") String username,
 			@QueryParam("password") String password);
 
@@ -1072,8 +1083,7 @@ public interface ServiceInterface {
 	 * @return a logout message
 	 */
 	@POST
-	@Path("logout")
-	@Produces("text/plain")
+	@Path("/user/logout")
 	String logout();
 
 	/**
@@ -1096,11 +1106,11 @@ public interface ServiceInterface {
 	 * @throws RemoteFileSystemException
 	 *             if the remote directory could not be read/mounted
 	 */
-	@POST
-	@Path("user/listDirectory")
+	@GET
+	@Path("/files/{url}")
 	@RolesAllowed("User")
-	GridFile ls(@QueryParam("url") String url,
-			@QueryParam("recursionLevel") int recursionLevel)
+	GridFile ls(@PathParam("url") String url,
+			@DefaultValue("1") @QueryParam("recursionLevel") int recursionLevel)
 					throws RemoteFileSystemException;
 
 	/**
@@ -1115,8 +1125,8 @@ public interface ServiceInterface {
 	 *             if the filesystem could not be accessed
 	 */
 	@RolesAllowed("User")
-	@POST
-	@Path("actions/mkdir")
+	@PUT
+	@Path("/files/{url}/mkdir")
 	boolean mkdir(@QueryParam("url") String url)
 			throws RemoteFileSystemException;
 
@@ -1140,12 +1150,13 @@ public interface ServiceInterface {
 	 *             if the remote filesystem could not be mounted/connected to
 	 */
 	@POST
-	@Path("actions/mount")
+	@Path("/user/mountpoint/{alias}/mount")
+	@RolesAllowed("User")
 	MountPoint mount(
 			@QueryParam("url") String url,
-			@QueryParam("alias") String alias,
-			@QueryParam("fqan") String fqan,
-			@QueryParam("useHomeDir") boolean useHomeDirectoryOnThisFileSystemIfPossible)
+			@PathParam("alias") String alias,
+			@QueryParam("group") String fqan,
+			@DefaultValue("true") @QueryParam("useHomeDir") boolean useHomeDirectoryOnThisFileSystemIfPossible)
 					throws RemoteFileSystemException;
 
 	/**
@@ -1165,11 +1176,11 @@ public interface ServiceInterface {
 	 *             if the remote filesystem could not be mounted/connected to
 	 */
 	@POST
-	@Path("actions/mountWithoutFqan")
+	@Path("/user/mountpoint/{alias}/mount_without_group")
 	MountPoint mountWithoutFqan(
 			@QueryParam("url") String url,
-			@QueryParam("alias") String alias,
-			@QueryParam("useHomeDir") boolean useHomeDirectoryOnThisFileSystemIfPossible)
+			@PathParam("alias") String alias,
+			@DefaultValue("true") @QueryParam("useHomeDir") boolean useHomeDirectoryOnThisFileSystemIfPossible)
 					throws RemoteFileSystemException;
 
 	/**
@@ -1188,8 +1199,11 @@ public interface ServiceInterface {
 	 *             if one of the jobs can't be re-created
 	 */
 	@RolesAllowed("User")
-	String redistributeBatchJob(String batchjobname) throws NoSuchJobException,
-	JobPropertiesException;
+	@POST
+	@Path("/batchjob/{batchjobname}/redistribute")
+	String redistributeBatchJob(@PathParam("batchjobname") String batchjobname)
+			throws NoSuchJobException,
+			JobPropertiesException;
 
 	/**
 	 * Refreshes the status of all jobs that belong to this batchjob.
@@ -1205,6 +1219,9 @@ public interface ServiceInterface {
 	 * @throws NoSuchJobException
 	 *             if there is no batchjob with the specified id
 	 */
+	@RolesAllowed("User")
+	@POST
+	@Path("/batchjob/{batchjobname}/refresh")
 	String refreshBatchJobStatus(String batchJobname) throws NoSuchJobException;
 
 	/**
@@ -1216,8 +1233,11 @@ public interface ServiceInterface {
 	 *            the jobname
 	 */
 	@RolesAllowed("User")
-	void removeJobFromBatchJob(String batchJobname, String jobname)
-			throws NoSuchJobException;
+	@POST
+	@Path("/batchjob/{batchjobname}/{jobname}/remove")
+	void removeJobFromBatchJob(@PathParam("batchjobname") String batchJobname,
+			@PathParam("jobname") String jobname)
+					throws NoSuchJobException;
 
 	/**
 	 * Restarts a batch job.
@@ -1225,7 +1245,7 @@ public interface ServiceInterface {
 	 * Depending on the restart policy and the supplied properties, the backend
 	 * will calculate which jobs to restart and how.
 	 * 
-	 * @param jobname
+	 * @param batchjobname
 	 *            the batchjobname
 	 * @param restartPolicy
 	 *            the restart policy //TODO not implemented yet, only default
@@ -1242,9 +1262,14 @@ public interface ServiceInterface {
 	 *             background
 	 */
 	@RolesAllowed("User")
-	DtoProperties restartBatchJob(final String jobname, String restartPolicy,
-			DtoProperties properties) throws NoSuchJobException,
-			JobPropertiesException;
+	@POST
+	@Path("/batchjob/{batchjobname}/restart")
+	DtoProperties restartBatchJob(
+			@PathParam("batchjobname") final String batchjobname,
+			@DefaultValue(Constants.SUBMIT_POLICY_RESTART_DEFAULT) @QueryParam("restartPolicy") String restartPolicy,
+			@DefaultValue("") DtoProperties properties)
+					throws NoSuchJobException,
+					JobPropertiesException;
 
 	/**
 	 * Resubmit a job. Kills the old one if it's still running.
@@ -1266,8 +1291,11 @@ public interface ServiceInterface {
 	 *             if no job with the specified jobname exists
 	 */
 	@RolesAllowed("User")
-	void restartJob(final String jobname, String changedJsdl)
-			throws JobSubmissionException, NoSuchJobException;
+	@POST
+	@Path("/job/{jobname}/restart")
+	void restartJob(@PathParam("jobname") final String jobname,
+			@DefaultValue("") @QueryParam("jsdl") String changedJsdl)
+					throws JobSubmissionException, NoSuchJobException;
 
 	/**
 	 * Sets a user property.
@@ -1291,8 +1319,8 @@ public interface ServiceInterface {
 	 *            the value
 	 */
 	@RolesAllowed("User")
-	@POST
-	@Path("/user/setproperty/{key}")
+	@PUT
+	@Path("/user/property/{key}")
 	void setUserProperty(@PathParam("key") String key,
 			@QueryParam("value") String value);
 
@@ -1310,7 +1338,7 @@ public interface ServiceInterface {
 	 *             if no such job exists
 	 */
 	@POST
-	@Path("actions/submitJob/{jobname}")
+	@Path("/job/{jobname}/submit")
 	@RolesAllowed("User")
 	void submitJob(@PathParam("jobname") String jobname)
 			throws JobSubmissionException, NoSuchJobException;
@@ -1333,8 +1361,9 @@ public interface ServiceInterface {
 	 * @return whether it worked or not
 	 */
 	@POST
-	@Path("actions/umount")
-	void umount(@QueryParam("alias") String alias);
+	@Path("/user/mountpoint/{alias}/unmount")
+	@RolesAllowed("User")
+	void umount(@PathParam("alias") String alias);
 
 	/**
 	 * Upload a {@link DataSource} to the users' virtual filesystem.
@@ -1348,12 +1377,12 @@ public interface ServiceInterface {
 	 *             if the remote (target) filesystem could not be connected /
 	 *             mounted / is not writeable
 	 */
-	@POST
+	@PUT
 	@RolesAllowed("User")
-	@Path("actions/upload")
+	@Path("/files/{url}/upload")
 	@Produces("text/plain")
 	String upload(@XmlMimeType("application/octet-stream") DataHandler file,
-			@QueryParam("filename") String filename)
+			@PathParam("filename") String filename)
 					throws RemoteFileSystemException;
 
 	/**
@@ -1375,10 +1404,12 @@ public interface ServiceInterface {
 	 *            the jobname
 	 * @param inputFile
 	 *            the inputfile
+	 * @param relativePath
+	 *            the path relative to the jobdirectory
 	 */
 	@POST
 	@RolesAllowed("User")
-	@Path("actions/uploadInputFile")
+	@Path("/job/{jobname}/upload_input_file")
 	void uploadInputFile(@QueryParam("jobname") String jobname,
 			@XmlMimeType("application/octet-stream") DataHandler inputFile,
 			@QueryParam("relativePath") String relativePath)

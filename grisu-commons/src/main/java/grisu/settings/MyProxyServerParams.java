@@ -63,7 +63,7 @@ public final class MyProxyServerParams {
 					"myProxyPort"));
 
 		} catch (final Exception e) {
-			myLogger.debug("Problem with config file: " + e.getMessage());
+			// myLogger.debug("Problem with config file: " + e.getMessage());
 			return DEFAULT_MYPROXY_PORT;
 		}
 		if (myProxyPort == -1) {
@@ -84,7 +84,7 @@ public final class MyProxyServerParams {
 			myProxyServer = getClientConfiguration().getString("myProxyServer");
 
 		} catch (final ConfigurationException e) {
-			myLogger.debug("Problem with config file: " + e.getMessage());
+			// myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 		if ((myProxyServer == null) || "".equals(myProxyServer)) {
 			myProxyServer = DEFAULT_MYPROXY_SERVER;
@@ -104,7 +104,7 @@ public final class MyProxyServerParams {
 			username = (String) (getClientConfiguration()
 					.getProperty("myProxyUsername"));
 		} catch (final ConfigurationException e) {
-			myLogger.debug("Problem with config file: " + e.getMessage());
+			// myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 		return username;
 	}
