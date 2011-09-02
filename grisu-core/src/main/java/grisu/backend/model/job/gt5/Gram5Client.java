@@ -31,7 +31,12 @@ public class Gram5Client {
 		}
 	}
 
-	public int[] getJobStatus(String handle, GSSCredential cred) {
+
+       public int[] getJobStatus(String handle, GSSCredential cred){
+	   return getJobStatus(handle,cred,false);
+       }
+
+        private int[] getJobStatus(String handle, GSSCredential cred, boolean restart) {
 
 		final int[] results = new int[2];
 		final Gram5JobListener l = Gram5JobListener.getJobListener();
@@ -72,7 +77,7 @@ public class Gram5Client {
 			myLogger.debug("job error is " + job.getError());
 		} catch (final GramException ex) {
 			myLogger.debug("ok, normal method of getting exit status is not working. need to restart job.");
-			if (ex.getErrorCode() == 156  || ex.getErrorCode() == 12/* job contact not found*/) {
+			if ((ex.getErrorCode() == 156  || ex.getErrorCode() == 12) && restart/* job contact not found*/) {
 				// maybe the job finished, but maybe we need to kick job manager
 
 				myLogger.debug("restarting job");
@@ -91,7 +96,7 @@ public class Gram5Client {
 				}
 
 				// nope, not done yet.
-				return getJobStatus(handle, cred);
+				return getJobStatus(handle, cred,false);
 			} else {
 				myLogger.error("something else is wrong. error code is " + ex.getErrorCode());
 				myLogger.error(ex);
