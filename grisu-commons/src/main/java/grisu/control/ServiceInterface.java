@@ -136,10 +136,13 @@ public interface ServiceInterface {
 	 *            the batchjobname
 	 * @param jobdescription
 	 *            the jsdl string
+	 * 
+	 * @return the new child-job name
 	 */
 	@POST
 	@Path("/batchjob/{batchjobname}/add")
 	@RolesAllowed("User")
+	@Produces("text/plain")
 	String addJobToBatchJob(@PathParam("batchjobname") String batchjobname,
 			@QueryParam("jsdl") String jobdescription)
 					throws NoSuchJobException, JobPropertiesException;
@@ -176,6 +179,7 @@ public interface ServiceInterface {
 	@POST
 	@Path("/job/{jobname}/archive")
 	@RolesAllowed("User")
+	@Produces("text/plain")
 	String archiveJob(@PathParam("jobname") String jobname,
 			@QueryParam("target") String target) throws NoSuchJobException,
 			JobPropertiesException, RemoteFileSystemException;
@@ -225,6 +229,7 @@ public interface ServiceInterface {
 	@POST
 	@Path("/files/cp")
 	@RolesAllowed("User")
+	@Produces("text/plain")
 	String cp(@QueryParam("sources") DtoStringList sources,
 			@QueryParam("target") String target,
 			@DefaultValue("false") @QueryParam("overwrite") boolean overwrite,
@@ -280,6 +285,7 @@ public interface ServiceInterface {
 	@PUT
 	@Path("/job/{jobname}")
 	@RolesAllowed("User")
+	@Produces("text/plain")
 	String createJob(
 			@QueryParam("jsdl") String jsdl,
 			@QueryParam("group") String fqan,
@@ -312,6 +318,7 @@ public interface ServiceInterface {
 	@RolesAllowed("User")
 	@DELETE
 	@Path("/files/delete")
+	@Produces("text/plain")
 	String deleteFiles(@QueryParam("urls") DtoStringList files);
 
 	/**
@@ -354,6 +361,7 @@ public interface ServiceInterface {
 	@GET
 	@Path("/files/{url}/exists")
 	@RolesAllowed("User")
+	@Produces("text/plain")
 	boolean fileExists(@PathParam("url") String url)
 			throws RemoteFileSystemException;
 
