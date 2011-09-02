@@ -181,7 +181,6 @@ JobDetailPanel, PropertyChangeListener {
 		try {
 			initialize();
 		} catch (final Exception e) {
-			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 

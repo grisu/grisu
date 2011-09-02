@@ -61,8 +61,10 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 		this.user = user;
 	}
 
-	public GridFile createGridFile(final String path, int recursiveLevels)
+	public GridFile createGridFile(String path, int recursiveLevels)
 			throws RemoteFileSystemException {
+
+		path = FileManager.removeTrailingSlash(path);
 
 		// Thread.dumpStack();
 		if (recursiveLevels > 1) {

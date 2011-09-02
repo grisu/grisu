@@ -78,12 +78,11 @@ public class GT4Submitter extends JobSubmitter {
 		Document output = null;
 		try {
 			final DocumentBuilderFactory docFactory = DocumentBuilderFactory
-			.newInstance();
+					.newInstance();
 			final DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 			output = docBuilder.newDocument();
 		} catch (final ParserConfigurationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			myLogger.error(e1);
 		}
 
 		// Add root element
@@ -98,7 +97,7 @@ public class GT4Submitter extends JobSubmitter {
 
 		// Add "argument"s
 		final String[] arguments = JsdlHelpers
-		.getPosixApplicationArguments(jsdl);
+				.getPosixApplicationArguments(jsdl);
 		for (final String argument : arguments) {
 			if ((argument != null) && !"".equals(argument.trim())) {
 				final Element argument_node = output.createElement("argument");
@@ -284,7 +283,7 @@ public class GT4Submitter extends JobSubmitter {
 
 					// if we know application, version and submissionLocation
 					final Map<String, String> appDetails = infoManager
-					.getApplicationDetails(application, version, subLoc);
+							.getApplicationDetails(application, version, subLoc);
 
 					try {
 						modules_string = appDetails.get(
@@ -307,9 +306,9 @@ public class GT4Submitter extends JobSubmitter {
 						&& (subLoc != null)) {
 
 					final Map<String, String> appDetails = infoManager
-					.getApplicationDetails(application,
-							Constants.NO_VERSION_INDICATOR_STRING,
-							subLoc);
+							.getApplicationDetails(application,
+									Constants.NO_VERSION_INDICATOR_STRING,
+									subLoc);
 
 					try {
 						modules_string = appDetails.get(
@@ -328,7 +327,7 @@ public class GT4Submitter extends JobSubmitter {
 
 				} else {
 					throw new RuntimeException(
-					"Can't determine module because either/or application, version submissionLocation are missing.");
+							"Can't determine module because either/or application, version submissionLocation are missing.");
 				}
 			} else {
 				myLogger.info("No submission location specified. If this happens when trying to submit a job, it's probably a bug...");
@@ -376,17 +375,17 @@ public class GT4Submitter extends JobSubmitter {
 
 			if (JsdlHelpers.getSendEmailOnJobStart(jsdl)) {
 				final Element emailonexecution = output
-				.createElement("emailonexecution");
+						.createElement("emailonexecution");
 				emailonexecution.setTextContent("yes");
 				extensions.appendChild(emailonexecution);
 			}
 
 			if (JsdlHelpers.getSendEmailOnJobFinish(jsdl)) {
 				final Element emailonabort = output
-				.createElement("emailonabort");
+						.createElement("emailonabort");
 				emailonabort.setTextContent("yes");
 				final Element emailontermination = output
-				.createElement("emailontermination");
+						.createElement("emailontermination");
 				emailontermination.setTextContent("yes");
 				extensions.appendChild(emailonabort);
 				extensions.appendChild(emailontermination);
@@ -407,7 +406,7 @@ public class GT4Submitter extends JobSubmitter {
 		StreamResult result = null;
 		try {
 			final Transformer transformer = TransformerFactory.newInstance()
-			.newTransformer();
+					.newTransformer();
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
 			result = new StreamResult(new StringWriter());
@@ -415,17 +414,13 @@ public class GT4Submitter extends JobSubmitter {
 
 			transformer.transform(source, result);
 		} catch (final TransformerConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 		} catch (final IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 		} catch (final TransformerFactoryConfigurationError e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 		} catch (final TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 
 		return result.getWriter().toString();
@@ -512,8 +507,8 @@ public class GT4Submitter extends JobSubmitter {
 	// }
 
 	private final InformationManager informationManager = InformationManagerManager
-	.getInformationManager(ServerPropertiesManager
-			.getInformationManagerConf());
+			.getInformationManager(ServerPropertiesManager
+					.getInformationManagerConf());
 
 	/*
 	 * (non-Javadoc)
@@ -539,7 +534,7 @@ public class GT4Submitter extends JobSubmitter {
 	@Override
 	public final String getServerEndpoint(final String server) {
 		return "https://" + server
-		+ ":8443/wsrf/services/ManagedJobFactoryService";
+				+ ":8443/wsrf/services/ManagedJobFactoryService";
 
 	}
 
@@ -582,7 +577,7 @@ public class GT4Submitter extends JobSubmitter {
 	@Override
 	protected final String submit(final InformationManager infoManager,
 			final String host, final String factoryType, final Job job)
-	throws ServerJobSubmissionException {
+					throws ServerJobSubmissionException {
 
 		final int retries = ServerPropertiesManager.getJobSubmissionRetries();
 
@@ -603,8 +598,7 @@ public class GT4Submitter extends JobSubmitter {
 				jobDesc = RSLHelper.readRSL(submittedJobDesc);
 
 			} catch (final RSLParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				myLogger.error(e);
 				throw new RuntimeException(e);
 			}
 
@@ -635,8 +629,8 @@ public class GT4Submitter extends JobSubmitter {
 			try {
 
 				credential = CredentialHelpers
-				.convertByteArrayToGSSCredential(job.getCredential()
-						.getCredentialData());
+						.convertByteArrayToGSSCredential(job.getCredential()
+								.getCredentialData());
 
 				if ((credential == null)
 						|| (credential.getRemainingLifetime() < 1)) {
@@ -698,14 +692,14 @@ public class GT4Submitter extends JobSubmitter {
 			final String hostname = host.substring(0, host
 					.indexOf(":8443/wsrf/services/ManagedJobFactoryService"));
 			final String eprString = "<ns00:EndpointReferenceType xmlns:ns00=\"http://schemas.xmlsoap.org/ws/2004/03/addressing\">\n"
-				+ "<ns00:Address>"
-				+ hostname
-				+ ":8443/wsrf/services/ManagedExecutableJobService</ns00:Address>\n"
-				+ "<ns00:ReferenceProperties><ResourceID xmlns=\"http://www.globus.org/namespaces/2004/10/gram/job\">"
-				+ uid
-				+ "</ResourceID></ns00:ReferenceProperties>\n"
-				+ "<wsa:ReferenceParameters xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/03/addressing\"/>\n"
-				+ "</ns00:EndpointReferenceType>";
+					+ "<ns00:Address>"
+					+ hostname
+					+ ":8443/wsrf/services/ManagedExecutableJobService</ns00:Address>\n"
+					+ "<ns00:ReferenceProperties><ResourceID xmlns=\"http://www.globus.org/namespaces/2004/10/gram/job\">"
+					+ uid
+					+ "</ResourceID></ns00:ReferenceProperties>\n"
+					+ "<wsa:ReferenceParameters xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/03/addressing\"/>\n"
+					+ "</ns00:EndpointReferenceType>";
 			try {
 				myLogger.debug("Writing out epr file.");
 				String vo = job.getFqan();
@@ -716,13 +710,13 @@ public class GT4Submitter extends JobSubmitter {
 				}
 
 				final String uFileName = ServerPropertiesManager
-				.getDebugDirectory()
-				+ "/"
-				+ job.getDn().replace("=", "_").replace(",", "_")
-				.replace(" ", "_")
-				+ "_"
-				+ job.getJobname()
-				+ "_" + vo + "_" + job.hashCode();
+						.getDebugDirectory()
+						+ "/"
+						+ job.getDn().replace("=", "_").replace(",", "_")
+						.replace(" ", "_")
+						+ "_"
+						+ job.getJobname()
+						+ "_" + vo + "_" + job.hashCode();
 				final FileWriter fileWriter = new FileWriter(uFileName + ".epr");
 				BufferedWriter buffWriter = new BufferedWriter(fileWriter);
 				buffWriter.write(eprString);
@@ -745,8 +739,8 @@ public class GT4Submitter extends JobSubmitter {
 
 			} catch (final Exception e) {
 				myLogger.error("Gt4 job submission error: "
-						+ e.getLocalizedMessage());
-				e.printStackTrace();
+ + e.getLocalizedMessage(),
+						e);
 			}
 
 		}

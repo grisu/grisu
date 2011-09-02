@@ -13,6 +13,7 @@ import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import org.apache.log4j.Logger;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -20,6 +21,9 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class LoginPanel extends JPanel {
+
+	static final Logger myLogger = Logger.getLogger(LoginPanel.class.getName());
+
 	private JPanel loginPanel;
 
 	private final String SWING_CLIENT_PANEL = "ROOT";
@@ -122,7 +126,7 @@ public class LoginPanel extends JPanel {
 
 			switchToClientPanel();
 		} catch (final InterruptedException ie) {
-			ie.printStackTrace();
+			myLogger.error(ie);
 			switchToLoginPanel();
 		}
 	}

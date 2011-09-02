@@ -47,14 +47,13 @@ import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXErrorPane;
 import org.vpac.historyRepeater.HistoryManager;
 
-
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class MpiBlastExampleJobCreationPanel extends JPanel implements
-		JobCreationPanel, PropertyChangeListener {
+JobCreationPanel, PropertyChangeListener {
 
 	static final Logger myLogger = Logger
 			.getLogger(MpiBlastExampleJobCreationPanel.class.getName());
@@ -357,7 +356,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 									submitJob();
 								} catch (final BatchJobException e) {
 
-									e.printStackTrace();
+									myLogger.error(e);
 									cleanUpUI();
 								}
 							}
@@ -366,7 +365,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 						submitButton.setText("Cancel");
 						hm.addHistoryEntry(MPIBLAST_BATCH_INPUT_FILES,
 								(String) getInputFileComboBox()
-										.getSelectedItem());
+								.getSelectedItem());
 					} else if ("Cancel".equals(submitButton.getText())) {
 						subThread.interrupt();
 						submitButton.setText("Ok");
@@ -396,8 +395,6 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 				currentFastaInput = FileUtils.readLines(fm
 						.downloadFile(currentFile.getUrl()));
 			} catch (final FileTransactionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 				throw e;
 			}
 
@@ -429,7 +426,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 			currentParsedFastaInput.add(currentPart);
 
 		} catch (final IOException e) {
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 
 	}
@@ -514,10 +511,10 @@ public class MpiBlastExampleJobCreationPanel extends JPanel implements
 		final int noJobs = getSlider().getValue();
 
 		final Double linesPerJobD = new Double(currentParsedFastaInput.size())
-				/ new Double(noJobs);
+		/ new Double(noJobs);
 
 		final int linesPerJob = new Long(Math.round(linesPerJobD + 0.499999))
-				.intValue();
+		.intValue();
 
 		for (int i = 0; i < currentParsedFastaInput.size(); i = i + linesPerJob) {
 			int end = i + linesPerJob;

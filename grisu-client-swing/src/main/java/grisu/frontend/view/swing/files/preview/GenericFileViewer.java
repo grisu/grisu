@@ -24,7 +24,7 @@ import net.sf.jmimemagic.MagicMatch;
 import org.apache.log4j.Logger;
 
 public class GenericFileViewer extends JPanel implements FileViewer,
-		FileListListener {
+FileListListener {
 
 	static final Logger myLogger = Logger.getLogger(GenericFileViewer.class
 			.getName());
@@ -40,7 +40,7 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 		try {
 			match = Magic.getMagicMatch(currentLocalCacheFile, true);
 		} catch (final Exception e) {
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 
 		final Set<String> viewers = findViewers();
@@ -56,7 +56,7 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 					}
 				}
 			} catch (final Exception e) {
-				e.printStackTrace();
+				myLogger.error(e);
 			}
 
 		}
@@ -213,12 +213,12 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 										getRootPane(),
 										"The file you selected is bigger than the default threshold\n"
 												+ FileManager
-														.calculateSizeString(FileManager
-																.getDownloadFileSizeThreshold())
-												+ "bytes. It may take a long time to load.\n"
-												+ "Do you still want to preview that file?",
-										"Warning: big file",
-										JOptionPane.YES_NO_OPTION);
+												.calculateSizeString(FileManager
+														.getDownloadFileSizeThreshold())
+														+ "bytes. It may take a long time to load.\n"
+														+ "Do you still want to preview that file?",
+														"Warning: big file",
+														JOptionPane.YES_NO_OPTION);
 
 						if (n == JOptionPane.NO_OPTION) {
 							showsValidViewerAtTheMoment = false;
@@ -230,9 +230,9 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 				}
 
 			} catch (final RemoteFileSystemException e) {
-				e.printStackTrace();
+				myLogger.error(e);
 			} catch (final FileTransactionException e) {
-				e.printStackTrace();
+				myLogger.error(e);
 			}
 
 		}

@@ -7,10 +7,14 @@ import jline.ConsoleReader;
 import jline.Terminal;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 import com.google.common.collect.ImmutableList;
 
 public class CliHelpers {
+
+	static final Logger myLogger = Logger.getLogger(CliHelpers.class.getName());
+
 
 	private static boolean ENABLE_PROGRESS = true;
 
@@ -32,7 +36,7 @@ public class CliHelpers {
 				terminal.beforeReadLine(consoleReader, "", (char) 0);
 				terminal.afterReadLine(consoleReader, "", (char) 0);
 			} catch (IOException e) {
-				e.printStackTrace();
+				myLogger.error(e);
 			}
 
 		}
@@ -245,7 +249,7 @@ public class CliHelpers {
 			getConsoleReader().setCursorPosition(getTermwidth());
 			getConsoleReader().redrawLine();
 		} catch (IOException e) {
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 
 	}

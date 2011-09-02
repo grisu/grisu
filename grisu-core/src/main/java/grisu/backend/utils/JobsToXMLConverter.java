@@ -10,6 +10,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -26,6 +27,9 @@ import org.w3c.dom.Element;
  */
 public final class JobsToXMLConverter {
 
+	static final Logger myLogger = Logger.getLogger(JobsToXMLConverter.class
+			.getName());
+
 	private static DocumentBuilder docBuilder = null;
 
 	public static Element createJobElement(final Document doc, final Job job) {
@@ -41,21 +45,21 @@ public final class JobsToXMLConverter {
 		jobElement.setAttributeNode(status);
 
 		final String host = job.getJobProperty(Constants.SUBMISSION_HOST_KEY);
-		if (host != null && !"".equals(host)) {
+		if ((host != null) && !"".equals(host)) {
 			final Attr host_attr = doc.createAttribute("host");
 			host_attr.setValue(host);
 			jobElement.setAttributeNode(host_attr);
 		}
 
 		final String fqan = job.getFqan();
-		if (fqan != null && !"".equals(fqan)) {
+		if ((fqan != null) && !"".equals(fqan)) {
 			final Attr fqan_attr = doc.createAttribute("fqan");
 			fqan_attr.setValue(fqan);
 			jobElement.setAttributeNode(fqan_attr);
 		}
 
 		final String submissionTime = job.getJobProperty("submissionTime");
-		if (submissionTime != null && !"".equals(submissionTime)) {
+		if ((submissionTime != null) && !"".equals(submissionTime)) {
 			final Attr submissionTime_attr = doc
 					.createAttribute("submissionTime");
 			submissionTime_attr.setValue(submissionTime);
@@ -78,21 +82,21 @@ public final class JobsToXMLConverter {
 		jobElement.appendChild(status);
 
 		final String host = job.getJobProperty(Constants.SUBMISSION_HOST_KEY);
-		if (host != null && !"".equals(host)) {
+		if ((host != null) && !"".equals(host)) {
 			final Element hostElement = doc.createElement("host");
 			hostElement.setTextContent(host);
 			jobElement.appendChild(hostElement);
 		}
 
 		final String fqan = job.getFqan();
-		if (fqan != null && !"".equals(fqan)) {
+		if ((fqan != null) && !"".equals(fqan)) {
 			final Element fqanElement = doc.createElement("fqan");
 			fqanElement.setTextContent(fqan);
 			jobElement.appendChild(fqanElement);
 		}
 
 		final String submissionTime = job.getJobProperty("submissionTime");
-		if (submissionTime != null && !"".equals(submissionTime)) {
+		if ((submissionTime != null) && !"".equals(submissionTime)) {
 			final Element submissionTimeElement = doc
 					.createElement("submissionTime");
 			submissionTimeElement.setTextContent(submissionTime);
@@ -113,8 +117,7 @@ public final class JobsToXMLConverter {
 			final DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 			doc = docBuilder.newDocument();
 		} catch (final ParserConfigurationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			myLogger.error(e1);
 			return null;
 		}
 
@@ -138,14 +141,14 @@ public final class JobsToXMLConverter {
 		jobElement.setAttributeNode(status);
 
 		final String host = job.getJobProperty(Constants.SUBMISSION_HOST_KEY);
-		if (host != null && !"".equals(host)) {
+		if ((host != null) && !"".equals(host)) {
 			final Attr host_attr = doc.createAttribute("host");
 			host_attr.setValue(host);
 			jobElement.setAttributeNode(host_attr);
 		}
 
 		final String fqan = job.getFqan();
-		if (fqan != null && !"".equals(fqan)) {
+		if ((fqan != null) && !"".equals(fqan)) {
 			final Attr fqan_attr = doc.createAttribute("fqan");
 			fqan_attr.setValue(fqan);
 			jobElement.setAttributeNode(fqan_attr);
@@ -175,8 +178,7 @@ public final class JobsToXMLConverter {
 			jsdl.setTextContent(SeveralXMLHelpers.toString(job
 					.getJobDescription()));
 		} catch (final Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 		descriptions.appendChild(jsdl);
 
@@ -196,8 +198,7 @@ public final class JobsToXMLConverter {
 						.newInstance();
 				docBuilder = docFactory.newDocumentBuilder();
 			} catch (final ParserConfigurationException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				myLogger.error(e1);
 				return null;
 			}
 		}

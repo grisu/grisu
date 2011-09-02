@@ -13,6 +13,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
+import org.apache.log4j.Logger;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -20,7 +21,10 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class BatchJobRestartPanel extends JPanel implements
-		PropertyChangeListener {
+PropertyChangeListener {
+
+	static final Logger myLogger = Logger.getLogger(BatchJobRestartPanel.class
+			.getName());
 
 	private final BatchJobObject bj;
 	private JButton failedJobsButton;
@@ -67,7 +71,7 @@ public class BatchJobRestartPanel extends JPanel implements
 								bj.restart(true, false, false, false);
 								bj.refresh(false);
 							} catch (final Throwable ex) {
-								ex.printStackTrace();
+								myLogger.error(ex);
 							}
 						}
 					}.start();
@@ -89,14 +93,11 @@ public class BatchJobRestartPanel extends JPanel implements
 							try {
 								bj.restart(false, true, true, false);
 							} catch (final JobsException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								myLogger.error(e);
 							} catch (final BackendException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								myLogger.error(e);
 							} catch (final InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								myLogger.error(e);
 							}
 							bj.refresh(false);
 						}
@@ -119,14 +120,11 @@ public class BatchJobRestartPanel extends JPanel implements
 							try {
 								bj.restart(true, true, true, false);
 							} catch (final JobsException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								myLogger.error(e);
 							} catch (final BackendException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								myLogger.error(e);
 							} catch (final InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								myLogger.error(e);
 							}
 							bj.refresh(false);
 						}

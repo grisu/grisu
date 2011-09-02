@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
@@ -27,11 +28,14 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 		FILETYPE_ROOT, FILETYPE_SITE, FILETYPE_MOUNTPOINT, FILETYPE_FOLDER, FILETYPE_FILE
 	}
 
+	static final Logger myLogger = Logger
+			.getLogger(GlazedFile.class.getName());
+
 	public static final DataFlavor GLAZED_FILE_FLAVOR = new DataFlavor(
 			GlazedFile.class, "Grisu file");
 
 	public static final DataFlavor[] DATA_FLAVORS = new DataFlavor[] {
-			GLAZED_FILE_FLAVOR, DataFlavor.stringFlavor };
+		GLAZED_FILE_FLAVOR, DataFlavor.stringFlavor };
 
 	public static final String LOCAL_FILESYSTEM = "Local";
 
@@ -77,6 +81,24 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 		this.si = null;
 	}
 
+	public GlazedFile(File localFile) {
+
+		if (localFile.isDirectory()) {
+			this.type = Type.FILETYPE_FOLDER;
+			this.size = -1L;
+		} else {
+			this.type = Type.FILETYPE_FILE;
+			this.size = localFile.length();
+		}
+
+		this.url = localFile.toURI().toString();
+
+		this.lastModified = localFile.lastModified();
+		this.name = localFile.getName();
+		this.si = null;
+
+	}
+
 	public GlazedFile(GridFile obj) {
 		if (obj.isFolder()) {
 			type = Type.FILETYPE_FOLDER;
@@ -95,24 +117,6 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 			name = "/";
 		}
 		this.si = null;
-	}
-
-	public GlazedFile(File localFile) {
-
-		if (localFile.isDirectory()) {
-			this.type = Type.FILETYPE_FOLDER;
-			this.size = -1L;
-		} else {
-			this.type = Type.FILETYPE_FILE;
-			this.size = localFile.length();
-		}
-
-		this.url = localFile.toURI().toString();
-
-		this.lastModified = localFile.lastModified();
-		this.name = localFile.getName();
-		this.si = null;
-
 	}
 
 	public GlazedFile(MountPoint mp) {
@@ -203,7 +207,7 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 		try {
 			lastModified = si.lastModified(url);
 		} catch (final RemoteFileSystemException e) {
-			e.printStackTrace();
+			myLogger.error(e);
 			lastModified = -1L;
 		}
 
@@ -239,7 +243,7 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 				try {
 					size = si.getFileSize(getUrl());
 				} catch (final RemoteFileSystemException e) {
-					e.printStackTrace();
+					myLogger.error(e);
 					size = -1;
 				}
 			}
@@ -289,12 +293,10 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 									type = Type.FILETYPE_FILE;
 								}
 							} catch (final RemoteFileSystemException e) {
-								e.printStackTrace();
 								throw new RuntimeException(e);
 							}
 						}
 					} catch (final RemoteFileSystemException e) {
-						e.printStackTrace();
 						throw new RuntimeException(e);
 					}
 				}

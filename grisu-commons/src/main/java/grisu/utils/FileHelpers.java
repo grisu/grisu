@@ -68,8 +68,7 @@ public final class FileHelpers {
 							out.close();
 						}
 					} catch (final IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						myLogger.error(e);
 					}
 				}
 			}
@@ -206,7 +205,6 @@ public final class FileHelpers {
 				outputStream.write(buffer, 0, n);
 			}
 		} catch (final Exception e) {
-			e.printStackTrace();
 			throw e;
 		} finally {
 			outputStream.close();
@@ -225,7 +223,6 @@ public final class FileHelpers {
 				outputStream.write(buffer, 0, n);
 			}
 		} catch (final Exception e) {
-			e.printStackTrace();
 			throw e;
 		} finally {
 			outputStream.close();

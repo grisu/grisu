@@ -453,7 +453,7 @@ public final class ServerPropertiesManager {
 		try {
 			conf = getServerConfiguration().getSection("InformationManager");
 		} catch (final ConfigurationException e) {
-			e.printStackTrace();
+			myLogger.error(e);
 			return null;
 		}
 
@@ -494,7 +494,7 @@ public final class ServerPropertiesManager {
 		try {
 			conf = getServerConfiguration().getSection("MatchMaker");
 		} catch (final ConfigurationException e) {
-			e.printStackTrace();
+			myLogger.error(e);
 			return null;
 		}
 
@@ -661,7 +661,7 @@ public final class ServerPropertiesManager {
 				return false;
 			}
 		} catch (final Exception e) {
-			e.printStackTrace();
+			myLogger.error(e);
 			return true;
 		}
 

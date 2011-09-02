@@ -97,7 +97,7 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 
 	public GridFile getInputFile() {
 		final GridFile temp = (GridFile) getInputFileComboBox()
-		.getSelectedItem();
+				.getSelectedItem();
 		return temp;
 	}
 
@@ -167,7 +167,7 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 	public String getInputFileUrl() {
 		try {
 			final GridFile temp = (GridFile) getInputFileComboBox()
-			.getSelectedItem();
+					.getSelectedItem();
 
 			return temp.getUrl();
 		} catch (Exception e) {
@@ -208,7 +208,7 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 
 		if (getServiceInterface() == null) {
 			getMylogger().error(
-			"ServiceInterface not set. Can't open dialog...");
+					"ServiceInterface not set. Can't open dialog...");
 			return null;
 		}
 
@@ -255,7 +255,7 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 						setRoots(roots);
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					myLogger.error(e);
 				}
 			}
 
@@ -311,7 +311,7 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 	}
 
 	public void setInputFileUrl(String fileUrl)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		setInputFile(getFileManager().createGridFile(fileUrl));
 

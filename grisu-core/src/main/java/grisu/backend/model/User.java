@@ -731,7 +731,7 @@ public class User {
 			try {
 				executor.awaitTermination(2, TimeUnit.MINUTES);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				myLogger.error(e);
 			}
 
 			// X.p("Finished creating mountpoints...");
@@ -873,8 +873,7 @@ public class User {
 			try {
 				Thread.sleep(1000);
 			} catch (final InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				myLogger.error(e);
 			}
 			tempFolder = getFileSystemManager().getFolderListing(
 					folder.getUrl(), 1);
@@ -940,7 +939,7 @@ public class User {
 			return jobs;
 
 		} catch (final Exception e) {
-			e.printStackTrace();
+			myLogger.error(e);
 			throw new RuntimeException(e);
 		}
 
@@ -1041,7 +1040,7 @@ public class User {
 			return archivedJobs;
 
 		} catch (final Exception e) {
-			e.printStackTrace();
+			myLogger.error(e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -1724,14 +1723,14 @@ public class User {
 
 						return job;
 					} catch (final Exception e) {
-						e.printStackTrace();
+						myLogger.error(e);
 						throw new NoSuchJobException("Can't find job at location: "
 								+ url);
 					} finally {
 						try {
 							fin.close();
 						} catch (final Exception e) {
-							e.printStackTrace();
+							myLogger.error(e);
 							throw new NoSuchJobException(
 									"Can't find job at location: " + url);
 						}

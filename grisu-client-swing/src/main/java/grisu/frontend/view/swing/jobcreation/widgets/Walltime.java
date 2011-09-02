@@ -78,7 +78,7 @@ public class Walltime extends AbstractWidget {
 					.convertHumanReadableStringIntoSeconds(new String[] {
 							amount, unit });
 		} catch (final Exception e) {
-			e.printStackTrace();
+			myLogger.error(e);
 			return -1;
 		}
 		return secs;

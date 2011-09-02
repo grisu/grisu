@@ -221,7 +221,7 @@ public class AllGroupsFileSystemPlugin implements VirtualFileSystemPlugin {
 			try {
 				pool.awaitTermination(5, TimeUnit.MINUTES);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				myLogger.error(e);
 			}
 
 			switch (lsMap.size()) {

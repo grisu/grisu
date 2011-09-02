@@ -62,22 +62,16 @@ public class LoginManager {
 			.getName());
 
 	static final public ImmutableBiMap<String, String> SERVICEALIASES = new ImmutableBiMap.Builder<String, String>()
-			.put("LOCAL", "Local")
-			.put("ARCS",
-					"https://grisu-vpac.arcs.org.au/grisu-ws/soap/GrisuService")
-					.put("ARCS_DEV",
-							"https://ngportal.vpac.org/grisu-ws/soap/GrisuService")
-							.put("BeSTGRID_OLD",
-									"https://globus.ceres.auckland.ac.nz:8443/grisu-ws/soap/GrisuService")
-									.put("BeSTGRID",
-											"https://compute.services.bestgrid.org/soap/GrisuService")
-											.put("BeSTGRID-DEV",
-													"https://compute-dev.services.bestgrid.org/soap/GrisuService")
-													.put("BeSTGRID-TEST",
-															"https://compute-test.services.bestgrid.org/soap/GrisuService")
-															.put("LOCAL_WS", "http://localhost:8080/soap/GrisuService")
-															.put("LOCAL_WS_TOMCAT",
-																	"http://localhost:8080/grisu-ws/soap/GrisuService").build();
+			.put("local", "Local")
+			.put("bestgrid",
+					"https://compute.services.bestgrid.org/soap/GrisuService")
+					.put("dev",
+							"https://compute-dev.services.bestgrid.org/soap/GrisuService")
+			.put("bestgrid-test",
+									"https://compute-test.services.bestgrid.org/soap/GrisuService")
+									.put("local_ws", "http://localhost:8080/soap/GrisuService")
+									.put("local_ws_tomcat",
+											"http://localhost:8080/grisu-ws/soap/GrisuService").build();
 
 	public static String httpProxyHost = null;
 
@@ -152,7 +146,7 @@ public class LoginManager {
 		try {
 			Init.initBouncyCastle();
 		} catch (final Exception e) {
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 
 	}
@@ -308,7 +302,7 @@ public class LoginManager {
 					(ProtocolSocketFactory) protocolSocketFactory, 443);
 			Protocol.registerProtocol("https", protocol);
 		} catch (final Exception e) {
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 
 		Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
@@ -428,7 +422,7 @@ public class LoginManager {
 				si = LoginHelpers.gssCredentialLogin(loginParams, slcsproxy);
 				ClientPropertiesManager.saveLastLoginType(LoginType.SHIBBOLETH);
 			} catch (final Exception e) {
-				e.printStackTrace();
+				myLogger.error(e);
 				throw new LoginException("Could not do slcs login: "
 						+ e.getLocalizedMessage(), e);
 			}
@@ -515,7 +509,7 @@ public class LoginManager {
 	}
 
 	public static ServiceInterface loginCommandline() throws LoginException {
-		return loginCommandline(SERVICEALIASES.get("LOCAL"));
+		return loginCommandline(SERVICEALIASES.get("local"));
 	}
 
 	public static ServiceInterface loginCommandline(LoginType type, String url)

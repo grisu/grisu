@@ -7,6 +7,7 @@ import grith.jgrith.voms.VO;
 import grith.jgrith.vomsProxy.VomsException;
 import grith.jgrith.vomsProxy.VomsProxyCredential;
 
+import org.apache.log4j.Logger;
 import org.globus.gsi.GlobusCredential;
 import org.globus.gsi.ptls.PureTLSUtil;
 import org.ietf.jgss.GSSCredential;
@@ -19,6 +20,10 @@ import org.ietf.jgss.GSSException;
  * 
  */
 public final class CertHelpers {
+
+	static final Logger myLogger = Logger
+			.getLogger(CertHelpers.class.getName());
+
 
 	// static final Logger myLogger = Logger
 	// .getLogger(CertHelpers.class.getName());
@@ -34,13 +39,11 @@ public final class CertHelpers {
 		String dn = null;
 		try {
 			dn = PureTLSUtil.getX509Name(cred.getName().toString())
-			.getNameString();
+					.getNameString();
 		} catch (final GSSException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 		} catch (final Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 		return dn;
 	}
@@ -58,8 +61,7 @@ public final class CertHelpers {
 		try {
 			dn = PureTLSUtil.getX509Name(cred.getSubject()).getNameString();
 		} catch (final Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 
 		return dn;
@@ -96,7 +98,7 @@ public final class CertHelpers {
 				vomsGssCred = new VomsProxyCredential(
 						CredentialHelpers.unwrapGlobusCredential(credToConnect
 								.getGssCredential()), vo, "B" + group + ":"
-								+ role, null);
+										+ role, null);
 			}
 			// myLogger.debug("Created voms proxy for fqan: " + fqan
 			// + " with lifetime: "

@@ -125,7 +125,7 @@ EventSubscriber {
 		this.si = si;
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		this.em = GrisuRegistryManager.getDefault(si)
-		.getUserEnvironmentManager();
+				.getUserEnvironmentManager();
 		setLayout(new BorderLayout(0, 0));
 
 		fileModel = new EventTableModel<GlazedFile>(filteredList,
@@ -203,7 +203,7 @@ EventSubscriber {
 						Vector<FileListListener> targets;
 						synchronized (this) {
 							targets = (Vector<FileListListener>) listeners
-							.clone();
+									.clone();
 						}
 
 						// walk through the listener list and
@@ -212,7 +212,7 @@ EventSubscriber {
 							try {
 								l.fileDoubleClicked(file);
 							} catch (final Exception e1) {
-								e1.printStackTrace();
+								myLogger.error(e1);
 							}
 						}
 					} finally {
@@ -247,7 +247,7 @@ EventSubscriber {
 					try {
 						l.filesSelected(files);
 					} catch (final Exception e1) {
-						e1.printStackTrace();
+						myLogger.error(e1);
 					}
 				}
 			} finally {
@@ -274,7 +274,7 @@ EventSubscriber {
 				try {
 					l.isLoading(loading);
 				} catch (final Exception e1) {
-					e1.printStackTrace();
+					myLogger.error(e1);
 				}
 			}
 		}
@@ -297,7 +297,7 @@ EventSubscriber {
 				try {
 					l.directoryChanged(getCurrentDirectory());
 				} catch (final Exception e1) {
-					e1.printStackTrace();
+					myLogger.error(e1);
 				}
 			}
 		}
@@ -402,7 +402,7 @@ EventSubscriber {
 
 			if (!displayTimestamp) {
 				final TableColumnExt colext = table
-				.getColumnExt("Date modified");
+						.getColumnExt("Date modified");
 				colext.setVisible(false);
 			}
 
@@ -485,7 +485,7 @@ EventSubscriber {
 			try {
 				updateThread.join();
 			} catch (final InterruptedException e) {
-				e.printStackTrace();
+				myLogger.error(e);
 				updateThread.interrupt();
 				// return;
 
@@ -530,7 +530,7 @@ EventSubscriber {
 							setCurrentDirToSite(url);
 						} else if (em.isMountPointAlias(url)) {
 							final String rootUrl = em
-							.getMountPointForAlias(url).getRootUrl();
+									.getMountPointForAlias(url).getRootUrl();
 							setUrl(rootUrl);
 						} else {
 							setUrl(url);
@@ -609,7 +609,7 @@ EventSubscriber {
 						tempFile.setParent();
 						currentDirectoryContent.add(tempFile);
 					} catch (final URISyntaxException e) {
-						e.printStackTrace();
+						myLogger.error(e);
 						throw new RuntimeException(e);
 					}
 				}
@@ -811,7 +811,7 @@ EventSubscriber {
 			setCurrentDirToFolder(folder);
 		} catch (Exception e) {
 			// TODO dialog?
-			e.printStackTrace();
+			myLogger.error(e);
 			setCurrent(old);
 		}
 

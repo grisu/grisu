@@ -23,6 +23,8 @@ import javax.swing.SwingUtilities;
 import net.sf.jmimemagic.Magic;
 import net.sf.jmimemagic.MagicMatch;
 
+import org.apache.log4j.Logger;
+
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -30,6 +32,9 @@ import com.jgoodies.forms.layout.RowSpec;
 
 public class GenericGridFileViewer extends JPanel implements GridFileViewer,
 GridFileListListener {
+
+	static final Logger myLogger = Logger.getLogger(GenericGridFileViewer.class
+			.getName());
 
 	private static Set<String> viewers = null;
 
@@ -43,7 +48,7 @@ GridFileListListener {
 			match = Magic.getMagicMatch(currentLocalCacheFile, true);
 			System.out.println(match.getMimeType());
 		} catch (final Exception e) {
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 
 		final Set<String> viewers = findViewers();
@@ -59,7 +64,7 @@ GridFileListListener {
 					}
 				}
 			} catch (final Exception e) {
-				e.printStackTrace();
+				myLogger.error(e);
 			}
 
 		}
@@ -285,16 +290,16 @@ GridFileListListener {
 					if (fm.isBiggerThanThreshold(file.getUrl())) {
 
 						int n = JOptionPane
-						.showConfirmDialog(
-								getRootPane(),
-								"The file you selected is bigger than the default threshold\n"
-								+ FileManager
-								.calculateSizeString(FileManager
-										.getDownloadFileSizeThreshold())
-										+ "bytes. It may take a long time to load.\n"
-										+ "Do you still want to preview that file?",
-										"Warning: big file",
-										JOptionPane.YES_NO_OPTION);
+								.showConfirmDialog(
+										getRootPane(),
+										"The file you selected is bigger than the default threshold\n"
+												+ FileManager
+												.calculateSizeString(FileManager
+														.getDownloadFileSizeThreshold())
+														+ "bytes. It may take a long time to load.\n"
+														+ "Do you still want to preview that file?",
+														"Warning: big file",
+														JOptionPane.YES_NO_OPTION);
 
 						if (n == JOptionPane.NO_OPTION) {
 							showsValidViewerAtTheMoment = false;
@@ -307,9 +312,9 @@ GridFileListListener {
 				}
 
 			} catch (final RemoteFileSystemException e) {
-				e.printStackTrace();
+				myLogger.error(e);
 			} catch (final FileTransactionException e) {
-				e.printStackTrace();
+				myLogger.error(e);
 			}
 
 		}

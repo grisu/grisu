@@ -67,19 +67,19 @@ public class PasteAction extends AbstractAction {
 			if (t.isDataFlavorSupported(DataFlavor.stringFlavor)) {
 				// return text content
 				filesString = (String) t
-				.getTransferData(DataFlavor.stringFlavor);
+						.getTransferData(DataFlavor.stringFlavor);
 
 			}
 		} catch (UnsupportedFlavorException ufe) {
-			ufe.printStackTrace();
+			myLogger.error(ufe);
 			return;
 		} catch (IOException ioe) {
-			ioe.printStackTrace();
+			myLogger.error(ioe);
 			return;
 		}
 
 		if (StringUtils.isBlank(filesString)) {
-			X.p("String empty");
+			myLogger.debug("String empty");
 			return;
 		}
 

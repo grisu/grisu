@@ -95,8 +95,7 @@ ServiceInterface {
 					myProxyServer = InetAddress.getByName(myProxyServer)
 							.getHostAddress();
 				} catch (final UnknownHostException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					myLogger.error(e1);
 					throw new NoValidCredentialException(
 							"Could not download myproxy credential: "
 									+ e1.getLocalizedMessage());
@@ -111,8 +110,7 @@ ServiceInterface {
 						getUser().cleanCache();
 					}
 				} catch (final Throwable e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					myLogger.error(e);
 					throw new NoValidCredentialException(
 							"Could not get myproxy credential: "
 									+ e.getLocalizedMessage());
@@ -165,8 +163,7 @@ ServiceInterface {
 			myProxyServer = InetAddress.getByName(myProxyServer)
 					.getHostAddress();
 		} catch (final UnknownHostException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			myLogger.error(e1);
 			throw new NoValidCredentialException(
 					"Could not download myproxy credential: "
 							+ e1.getLocalizedMessage());
@@ -178,8 +175,7 @@ ServiceInterface {
 			info = myproxy.info(getCredential().getGssCredential(),
 					myproxy_username, new String(passphrase));
 		} catch (final MyProxyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 
 		return info.getEndTime();
@@ -337,17 +333,14 @@ ServiceInterface {
 				handle = getUser().getSubmissionManager().submit("GT4Dummy",
 						job);
 			} catch (ServerJobSubmissionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 				throw new JobSubmissionException(
 						"Job submission to endpoint failed: "
-								+ e.getLocalizedMessage());
+								+ e.getLocalizedMessage(), e);
 			}
 		} catch (final RuntimeException e) {
-			e.printStackTrace();
 			throw new JobSubmissionException(
 					"Job submission to endpoint failed: "
-							+ e.getLocalizedMessage());
+							+ e.getLocalizedMessage(), e);
 		}
 
 		if (handle == null) {

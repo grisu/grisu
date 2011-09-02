@@ -159,8 +159,7 @@ public class GT4DummySubmitter extends JobSubmitter {
 			final DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 			output = docBuilder.newDocument();
 		} catch (final ParserConfigurationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			myLogger.error(e1);
 		}
 
 		// Add root element
@@ -177,7 +176,7 @@ public class GT4DummySubmitter extends JobSubmitter {
 		final String[] arguments = JsdlHelpers
 				.getPosixApplicationArguments(jsdl);
 		for (final String argument : arguments) {
-			if (argument != null && !"".equals(argument.trim())) {
+			if ((argument != null) && !"".equals(argument.trim())) {
 				final Element argument_node = output.createElement("argument");
 				argument_node.setTextContent(argument);
 				job.appendChild(argument_node);
@@ -191,7 +190,7 @@ public class GT4DummySubmitter extends JobSubmitter {
 
 		// "stdin" element if available
 		final String stdinValue = JsdlHelpers.getPosixStandardInput(jsdl);
-		if (stdinValue != null && !"".equals(stdinValue)) {
+		if ((stdinValue != null) && !"".equals(stdinValue)) {
 			final Element stdin = output.createElement("stdin");
 			stdin.setTextContent(stdinValue);
 			job.appendChild(stdin);
@@ -250,7 +249,7 @@ public class GT4DummySubmitter extends JobSubmitter {
 		// total memory
 		Long memory = JsdlHelpers.getTotalMemoryRequirement(jsdl);
 
-		if (memory != null && memory >= 0) {
+		if ((memory != null) && (memory >= 0)) {
 			final Element totalMemory = output.createElement("maxMemory");
 			// convert from bytes to mb
 			memory = memory / 1024;
@@ -312,7 +311,7 @@ public class GT4DummySubmitter extends JobSubmitter {
 			// doesn't matter
 			myLogger.debug(e);
 		}
-		if (modules_string != null && modules_string.length > 0) {
+		if ((modules_string != null) && (modules_string.length > 0)) {
 			for (final String module_string : modules_string) {
 				if (!"".equals(module_string)) {
 					final Element module = output.createElement("module");
@@ -345,7 +344,7 @@ public class GT4DummySubmitter extends JobSubmitter {
 					modules_string = appDetails.get(Constants.MDS_MODULES_KEY)
 							.split(",");
 
-					if (modules_string == null || "".equals(modules_string)) {
+					if ((modules_string == null) || "".equals(modules_string)) {
 						myLogger.warn("No module for this application/version/submissionLocation found. Submitting nonetheless...");
 					}
 
@@ -357,7 +356,7 @@ public class GT4DummySubmitter extends JobSubmitter {
 
 				// if we know application and submissionlocation but version
 				// doesn't matter
-			} else if (application != null && version == null && subLoc != null) {
+			} else if ((application != null) && (version == null) && (subLoc != null)) {
 
 				final Map<String, String> appDetails = infoManager
 						.getApplicationDetails(application, version, subLoc);
@@ -366,7 +365,7 @@ public class GT4DummySubmitter extends JobSubmitter {
 					modules_string = appDetails.get(Constants.MDS_MODULES_KEY)
 							.split(",");
 
-					if (modules_string == null || "".equals(modules_string)) {
+					if ((modules_string == null) || "".equals(modules_string)) {
 						myLogger.warn("No module for this application/submissionLocation found. Submitting nonetheless...");
 					}
 
@@ -381,7 +380,7 @@ public class GT4DummySubmitter extends JobSubmitter {
 						"Can't determine module because either/or application, version submissionLocation are missing.");
 			}
 
-			if (modules_string != null && modules_string.length > 0) {
+			if ((modules_string != null) && (modules_string.length > 0)) {
 
 				for (final String module_string : modules_string) {
 					if (!"".equals(module_string)) {
@@ -397,7 +396,7 @@ public class GT4DummySubmitter extends JobSubmitter {
 		// email
 		final String email = JsdlHelpers.getEmail(jsdl);
 
-		if (email != null && !"".equals(email)) {
+		if ((email != null) && !"".equals(email)) {
 			final Element email_address = output.createElement("email_address");
 			email_address.setTextContent(email);
 			extensions.appendChild(email_address);
@@ -443,17 +442,13 @@ public class GT4DummySubmitter extends JobSubmitter {
 
 			transformer.transform(source, result);
 		} catch (final TransformerConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 		} catch (final IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 		} catch (final TransformerFactoryConfigurationError e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 		} catch (final TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 
 		return result.getWriter().toString();
@@ -531,8 +526,7 @@ public class GT4DummySubmitter extends JobSubmitter {
 			jobDesc = RSLHelper.readRSL(submittedJobDesc);
 
 		} catch (final RSLParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 			return null;
 		}
 
@@ -609,7 +603,7 @@ public class GT4DummySubmitter extends JobSubmitter {
 		try {
 			myLogger.debug("Writing out epr file.");
 			String vo = job.getFqan();
-			if (vo == null || "".equals(vo)) {
+			if ((vo == null) || "".equals(vo)) {
 				vo = "non_vo";
 			} else {
 				vo = vo.replace("/", "_");
@@ -625,7 +619,7 @@ public class GT4DummySubmitter extends JobSubmitter {
 					.getDebugDirectory()
 					+ "/"
 					+ job.getDn().replace("=", "_").replace(",", "_")
-							.replace(" ", "_")
+					.replace(" ", "_")
 					+ "_"
 					+ job.getJobname()
 					+ "_"
@@ -644,15 +638,14 @@ public class GT4DummySubmitter extends JobSubmitter {
 			final FileWriter fileWriter3 = new FileWriter(uFileName + ".jsdl");
 			buffWriter = new BufferedWriter(fileWriter3);
 			buffWriter
-					.write(SeveralXMLHelpers
-							.toStringWithoutAnnoyingExceptions(job
-									.getJobDescription()));
+			.write(SeveralXMLHelpers
+					.toStringWithoutAnnoyingExceptions(job
+							.getJobDescription()));
 			buffWriter.close();
 
 		} catch (final Exception e) {
 			myLogger.error("Gt4 job submission error: "
-					+ e.getLocalizedMessage());
-			e.printStackTrace();
+ + e.getLocalizedMessage(), e);
 		}
 
 		myLogger.debug("Submitted rsl job description:\n--------------------------------");
@@ -682,7 +675,7 @@ public class GT4DummySubmitter extends JobSubmitter {
 			grisu_status = JobConstants.CLEAN_UP;
 		} else if ("NoSuchJob".equals(status)) {
 			grisu_status = JobConstants.NO_SUCH_JOB;
-		} else if (status != null && status.startsWith("Failed")) {
+		} else if ((status != null) && status.startsWith("Failed")) {
 			grisu_status = JobConstants.FAILED;
 		} else {
 			grisu_status = Integer.MAX_VALUE;

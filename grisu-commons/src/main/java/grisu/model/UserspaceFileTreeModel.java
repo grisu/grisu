@@ -10,9 +10,14 @@ import java.util.List;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+import org.apache.log4j.Logger;
+
 
 public class UserspaceFileTreeModel extends TreeModelSupport implements
-		TreeModel {
+TreeModel {
+
+	static final Logger myLogger = Logger
+			.getLogger(UserspaceFileTreeModel.class.getName());
 
 	// protected Object dirIcon;
 	// protected Object fileIcon;
@@ -42,7 +47,7 @@ public class UserspaceFileTreeModel extends TreeModelSupport implements
 			List<GlazedFile> childs = fm.ls((GlazedFile) parent);
 			return childs.get(index);
 		} catch (RemoteFileSystemException e) {
-			e.printStackTrace();
+			myLogger.error(e);
 			return null;
 		}
 	}
@@ -52,7 +57,7 @@ public class UserspaceFileTreeModel extends TreeModelSupport implements
 			List<GlazedFile> childs = fm.ls((GlazedFile) parent);
 			return childs.size();
 		} catch (RemoteFileSystemException e) {
-			e.printStackTrace();
+			myLogger.error(e);
 			return -1;
 		}
 	}
@@ -62,7 +67,7 @@ public class UserspaceFileTreeModel extends TreeModelSupport implements
 			List<GlazedFile> childs = fm.ls((GlazedFile) parent);
 			return childs.indexOf(childs);
 		} catch (RemoteFileSystemException e) {
-			e.printStackTrace();
+			myLogger.error(e);
 			return -1;
 		}
 

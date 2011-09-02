@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 
@@ -41,6 +42,8 @@ import org.ietf.jgss.GSSException;
  * 
  */
 public class ProxyCredential {
+
+	static Logger myLogger = Logger.getLogger(ProxyCredential.class.getName());
 
 	// the internal "non-raw" credential data
 	private GSSCredential gsscredential = null;
@@ -131,8 +134,7 @@ public class ProxyCredential {
 		try {
 			data = CredentialHelpers.convertGSSCredentialToByteArray(proxy);
 		} catch (final GSSException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 			return null;
 		}
 		return data;
@@ -153,7 +155,7 @@ public class ProxyCredential {
 			cred = CredentialHelpers.convertByteArrayToGSSCredential(data);
 		} catch (final GSSException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 			return null;
 		}
 		return cred;
@@ -206,11 +208,11 @@ public class ProxyCredential {
 				fromNow = getGssCredential().getRemainingLifetime();
 			} catch (final GSSException e) {
 				// return null in that case
-				e.printStackTrace();
+				myLogger.error(e);
 				return null;
 			}
 
-			expiryDate = new Date(new Date().getTime() + fromNow * 1000);
+			expiryDate = new Date(new Date().getTime() + (fromNow * 1000));
 		}
 		return expiryDate;
 
@@ -287,7 +289,7 @@ public class ProxyCredential {
 				return true;
 			}
 		} catch (final GSSException e) {
-			e.printStackTrace();
+			myLogger.error(e);
 			return false;
 		}
 	}

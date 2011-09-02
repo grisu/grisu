@@ -13,9 +13,14 @@ import java.io.IOException;
 
 import javax.swing.JPanel;
 
+import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXImageView;
 
 public class ImageFileViewer extends JPanel implements FileViewer {
+
+	static final Logger myLogger = Logger.getLogger(ImageFileViewer.class
+			.getName());
+
 	private JXImageView imagePanel;
 
 	private double currentScale = 1;
@@ -47,9 +52,9 @@ public class ImageFileViewer extends JPanel implements FileViewer {
 				public void mouseWheelMoved(final MouseWheelEvent e) {
 					final double amount = e.getWheelRotation();
 					if (amount < 0) {
-						currentScale = currentScale + currentScale * 0.10;
+						currentScale = currentScale + (currentScale * 0.10);
 					} else if (amount > 0) {
-						currentScale = currentScale - currentScale / 10;
+						currentScale = currentScale - (currentScale / 10);
 					}
 					imagePanel.setScale(currentScale);
 				}
@@ -74,7 +79,7 @@ public class ImageFileViewer extends JPanel implements FileViewer {
 			try {
 				getImagePanel().setImage(imageFile);
 			} catch (final IOException e) {
-				e.printStackTrace();
+				myLogger.error(e);
 			}
 		}
 

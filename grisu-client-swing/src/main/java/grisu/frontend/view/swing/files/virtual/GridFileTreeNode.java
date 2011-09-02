@@ -15,8 +15,12 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 public class GridFileTreeNode extends LazyLoadingTreeNode {
+
+	static final Logger myLogger = Logger.getLogger(GridFileTreeNode.class
+			.getName());
 
 	private static final long serialVersionUID = 1L;
 	private final FileManager fm;
@@ -126,7 +130,7 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 				temp.addChild(f);
 			}
 		} catch (RemoteFileSystemException e) {
-			e.printStackTrace();
+			myLogger.error(e);
 			return null;
 		}
 

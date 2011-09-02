@@ -42,8 +42,8 @@ public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 FileSystemInfoPlugin, FileTransferPlugin {
 
 	private static Logger myLogger = Logger
-	.getLogger(CommonsVfsFileSystemInfoAndTransferPlugin.class
-			.getName());
+			.getLogger(CommonsVfsFileSystemInfoAndTransferPlugin.class
+					.getName());
 
 	private final User user;
 
@@ -55,7 +55,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	}
 
 	public FileObject aquireFile(FileSystemCache fsCache, String url)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 		return aquireFile(fsCache, url, null);
 	}
 
@@ -90,7 +90,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			} catch (final FileSystemException e) {
 				throw new RemoteFileSystemException(
 						"Could not access file on local temp filesystem: "
-						+ e.getLocalizedMessage());
+								+ e.getLocalizedMessage());
 			}
 		}
 
@@ -124,6 +124,14 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 		return fileObject;
 
+	}
+
+	private void closeFile(FileObject f){
+		try {
+			f.close();
+		} catch (FileSystemException ex){
+			myLogger.warn(ex.getLocalizedMessage());
+		}
 	}
 
 	public void closeInputStream(String file) {
@@ -165,7 +173,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	}
 
 	public boolean createFolder(FileObject folder)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		try {
 
@@ -193,19 +201,6 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 	}
 
-	public boolean createFolder(String url) throws RemoteFileSystemException {
-		FileSystemCache fsCache = new FileSystemCache(user);
-		FileObject folder = null;
-
-		try {
-			folder = aquireFile(fsCache, url, null);
-			return createFolder(folder);
-		} finally {
-			closeFile(folder);
-			fsCache.close();
-		}
-	}
-
 	// private FileSystemCache getFileSystemCache() {
 	//
 	// Thread current = Thread.currentThread();
@@ -218,6 +213,19 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	// return filesystems.get(current);
 	//
 	// }
+
+	public boolean createFolder(String url) throws RemoteFileSystemException {
+		FileSystemCache fsCache = new FileSystemCache(user);
+		FileObject folder = null;
+
+		try {
+			folder = aquireFile(fsCache, url, null);
+			return createFolder(folder);
+		} finally {
+			closeFile(folder);
+			fsCache.close();
+		}
+	}
 
 	public void deleteFile(final String file) throws RemoteFileSystemException {
 
@@ -241,7 +249,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	}
 
 	public DataHandler download(String filename)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		// just in case we want to enable multiple downloads later
 		String[] filenames = new String[] { filename };
@@ -249,9 +257,9 @@ FileSystemInfoPlugin, FileTransferPlugin {
 		final DataSource[] datasources = new DataSource[filenames.length];
 		final DataHandler[] datahandlers = new DataHandler[filenames.length];
 
-		FileSystemCache fsCache = new FileSystemCache(user);		
+		FileSystemCache fsCache = new FileSystemCache(user);
 		FileObject source = null;
-		
+
 		try {
 
 			for (int i = 0; i < filenames.length; i++) {
@@ -264,8 +272,8 @@ FileSystemInfoPlugin, FileTransferPlugin {
 					if (!source.exists()) {
 						throw new RemoteFileSystemException(
 								"Could not provide file: "
-								+ filenames[i]
-								            + " for download: InputFile does not exist.");
+										+ filenames[i]
+												+ " for download: InputFile does not exist.");
 					}
 
 					datasource = new FileContentDataSourceConnector(source);
@@ -277,7 +285,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 					}
 					throw new RemoteFileSystemException(
 							"Could not find or read file: " + filenames[i]
-							                                            + ": " + e.getMessage());
+									+ ": " + e.getMessage());
 				}
 				datasources[i] = datasource;
 				datahandlers[i] = new DataHandler(datasources[i]);
@@ -333,11 +341,11 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	}
 
 	public GridFile getFolderListing(String url, int recursiveLevels)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		if (recursiveLevels > 1) {
 			throw new RuntimeException(
-			"Recursion > 1 not implemented for commonsvfsfilesystemplugin");
+					"Recursion > 1 not implemented for commonsvfsfilesystemplugin");
 		}
 
 		FileSystemCache fsCache = new FileSystemCache(user);
@@ -383,9 +391,8 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			try {
 				children = fo.getChildren();
 			} catch (final Exception e) {
-				e.printStackTrace();
 				myLogger.error("Couldn't get children of :"
-						+ fo.getName().toString() + ". Trying one more time...");
+						+ fo.getName().toString() + ". Trying one more time...", e);
 				children = fo.getChildren();
 			}
 
@@ -433,7 +440,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	 * .lang.String)
 	 */
 	public GrisuInputStream getInputStream(String file)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		FileSystemCache fsCache = new FileSystemCache(user);
 
@@ -447,7 +454,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	}
 
 	public GrisuOutputStream getOutputStream(String file)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		FileSystemCache fsCache = new FileSystemCache(user);
 
@@ -547,7 +554,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			if (mountPointName.equals(mp.getAlias())) {
 				throw new RemoteFileSystemException(
 						"There is already a filesystem mounted on:"
-						+ mountPointName);
+								+ mountPointName);
 			}
 		}
 
@@ -577,15 +584,15 @@ FileSystemInfoPlugin, FileTransferPlugin {
 							+ ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
 							.substring(1));
 					uri = fileSystem.getRoot().getName().getRootURI()
-					+ ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
-					.substring(1);
+							+ ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
+							.substring(1);
 					// AbstractServiceInterface.putIntoSessionCache(key, uri);
 					// }
 				}
 				// if vo user, use $VOHOME/<DN> as homedirectory
 				if (cred.getFqan() != null) {
 					uri = uri + File.separator
-					+ User.get_vo_dn_path(cred.getDn());
+							+ User.get_vo_dn_path(cred.getDn());
 					fileSystem.resolveFile(
 							((String) fileSystem.getAttribute("HOME_DIRECTORY")
 									+ File.separator + cred.getDn()
@@ -631,9 +638,9 @@ FileSystemInfoPlugin, FileTransferPlugin {
 					.substring(1));
 
 			final String home = (String) fileSystem
-			.getAttribute("HOME_DIRECTORY");
+					.getAttribute("HOME_DIRECTORY");
 			uri = fileSystem.getRoot().getName().getRootURI()
-			+ home.substring(1);
+					+ home.substring(1);
 
 			// X.p("XXXXXXXXXXXXXXXX: " + key + " / " + uri);
 
@@ -652,7 +659,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	}
 
 	public String upload(final DataHandler source, final String filename)
-	throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		myLogger.debug("Receiving file: " + filename);
 
@@ -708,7 +715,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 					buf.close();
 					fout.close();
 					throw new RemoteFileSystemException(
-					"File transfer interrupted.");
+							"File transfer interrupted.");
 				}
 				bytesRead = buf.read(buffer, 0, 1024);
 				// bytesRead returns the actual number of bytes read from
@@ -740,7 +747,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			try {
 				source.getInputStream().close();
 			} catch (IOException ex) {}
-			closeFile(target); 
+			closeFile(target);
 		}
 
 		myLogger.debug("Data transmission for file " + filename + " finished.");
@@ -847,7 +854,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 							RemoteFileTransferObject fileTransfer;
 
 							for (int tryNo = 0; tryNo <= ServerPropertiesManager
-							.getFileTransferRetries(); tryNo++) {
+									.getFileTransferRetries(); tryNo++) {
 
 								if (Thread.interrupted()) {
 									Thread.currentThread().interrupt();
@@ -882,8 +889,8 @@ FileSystemInfoPlugin, FileTransferPlugin {
 										return;
 									}
 									myLogger.error(e);
-									if (tryNo >= ServerPropertiesManager
-											.getFileTransferRetries() - 1) {
+									if (tryNo >= (ServerPropertiesManager
+											.getFileTransferRetries() - 1)) {
 										status.addElement("Upload to folder "
 												+ parent
 												+ " failed: Could not open file: "
@@ -897,8 +904,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 										try {
 											Thread.sleep(3000);
 										} catch (final InterruptedException e1) {
-											e1.printStackTrace();
-
+											myLogger.error(e);
 											Thread.currentThread().interrupt();
 										}
 									}
@@ -950,7 +956,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 							// }
 
 						} catch (Exception e) {
-							e.printStackTrace();
+							myLogger.error(e);
 						}
 					} finally {
 						fsCache.close();
@@ -974,7 +980,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 				try {
 					executor.awaitTermination(1, TimeUnit.DAYS);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					myLogger.error(e);
 				}
 
 				if (!status.isFinished()) {
@@ -984,7 +990,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 				try {
 					tempFile.delete();
 				} catch (FileSystemException e) {
-					e.printStackTrace();
+					myLogger.error(e);
 				} finally {
 					fsCacheIn.close();
 				}
@@ -992,13 +998,5 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			}
 		}.start();
 
-	}
-	
-	private void closeFile(FileObject f){
-		try {
-			f.close();
-		} catch (FileSystemException ex){
-			myLogger.warn(ex.getLocalizedMessage());
-		}
 	}
 }

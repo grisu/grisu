@@ -48,7 +48,6 @@ public class SlcsLoginWrapper {
 			return cred;
 
 		} catch (final Exception e) {
-			e.printStackTrace();
 			throw e;
 		}
 

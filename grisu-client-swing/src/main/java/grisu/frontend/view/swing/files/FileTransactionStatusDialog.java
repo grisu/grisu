@@ -16,9 +16,13 @@ import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
+import org.apache.log4j.Logger;
 
 public class FileTransactionStatusDialog extends JDialog implements
-		PropertyChangeListener {
+PropertyChangeListener {
+
+	static final Logger myLogger = Logger
+			.getLogger(FileTransactionStatusDialog.class.getName());
 
 	/**
 	 * Launch the application.
@@ -75,7 +79,7 @@ public class FileTransactionStatusDialog extends JDialog implements
 						ft.removePropertyChangeListener(fileTransferStatusPanel);
 						dispose();
 					} catch (final Exception e1) {
-						e1.printStackTrace();
+						myLogger.error(e1);
 					}
 				}
 			});

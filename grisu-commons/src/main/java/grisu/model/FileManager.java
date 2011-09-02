@@ -132,6 +132,23 @@ public class FileManager {
 
 	}
 
+	public static String ensureTrailingSlash(String url) {
+		if (StringUtils.isBlank(url)) {
+			return "";
+		} else if (url.equals(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
+				+ "://")
+				|| url.equals(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
+						+ ":/")) {
+			return ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://";
+		} else {
+			if (!url.endsWith("/")) {
+				return url +"/";
+			} else {
+				return url;
+			}
+		}
+	}
+
 	/**
 	 * Convenience method that basically converts normal local paths to files
 	 * into a url format. It also supports virtual filesystems, so if your path
@@ -146,7 +163,8 @@ public class FileManager {
 	public static String ensureUriFormat(String inputFile) {
 
 		try {
-			if ((inputFile != null) && !isLocal(inputFile)) {
+			if ((inputFile != null)
+					&& (inputFile.startsWith("local:") || !isLocal(inputFile))) {
 				return inputFile;
 			}
 
@@ -156,6 +174,10 @@ public class FileManager {
 					return ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + ":/"
 							+ inputFile;
 				}
+			}
+
+			if (inputFile.startsWith("local:")) {
+				return inputFile;
 			}
 
 			new URL(inputFile);
@@ -369,8 +391,10 @@ public class FileManager {
 		if (StringUtils.isBlank(url)) {
 			return "";
 		} else if (url.equals(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
-				+ "://")) {
-			return url;
+				+ "://")
+				|| url.equals(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
+						+ ":/")) {
+			return ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://";
 		} else {
 			if (url.endsWith("/")) {
 				return url.substring(0, url.lastIndexOf("/"));
@@ -718,7 +742,6 @@ public class FileManager {
 			try {
 				downloadUrl(sourceUrl, targetDirUrl, overwrite);
 			} catch (final IOException e) {
-				e.printStackTrace();
 				throw new FileTransactionException(sourceUrl, targetDirUrl,
 						"Could not write target file.", e);
 			}
@@ -1491,7 +1514,6 @@ public class FileManager {
 		try {
 			lastModified = serviceInterface.lastModified(url);
 		} catch (final Exception e) {
-			e.printStackTrace();
 			throw new RuntimeException(
 					"Could not get last modified time of file: " + url, e);
 		}
@@ -1584,7 +1606,6 @@ public class FileManager {
 							+ " successful.");
 				} catch (final Exception e1) {
 					try {
-						e1.printStackTrace();
 						// try again
 						myLogger.info("Uploading file " + file.getName()
 								+ "...");
@@ -1792,7 +1813,7 @@ public class FileManager {
 					+ " successful.");
 		} catch (final Exception e1) {
 			try {
-				e1.printStackTrace();
+				myLogger.error(e1);
 				// try again
 				myLogger.info("Uploading file " + file.getName() + "...");
 				myLogger.error("FAILED. SLEEPING 1 SECONDS");
@@ -1894,7 +1915,7 @@ public class FileManager {
 									+ file.getName() + " successful.");
 						} catch (final Exception e1) {
 							try {
-								e1.printStackTrace();
+								myLogger.error(e1);
 								// try again
 								myLogger.info("Uploading file "
 										+ file.getName() + "...");

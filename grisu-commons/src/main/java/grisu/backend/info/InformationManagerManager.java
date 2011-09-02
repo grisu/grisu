@@ -54,23 +54,15 @@ public class InformationManagerManager {
 			im = constructor.newInstance(parameters);
 			return im;
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 			throw new RuntimeException(e);
 		} catch (RuntimeException e) {
-			e.printStackTrace();
+			myLogger.error(e);
 			throw e;
 		} catch (Exception e) {
-			e.printStackTrace();
+			myLogger.error(e);
 			throw new RuntimeException(e);
 		}
-
-		// } catch (RuntimeException re) {
-		// throw re;
-		// } catch (final Exception e) {
-		// myLogger.debug(e);
-		// throw new RuntimeException(e);
-		// }
 
 	}
 
@@ -112,8 +104,7 @@ public class InformationManagerManager {
 			return im;
 
 		} catch (final Exception e) {
-			e.printStackTrace();
-			myLogger.debug(e);
+			myLogger.error(e);
 			return null;
 		}
 

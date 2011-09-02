@@ -24,13 +24,18 @@ import javax.swing.JTree;
 import javax.swing.ToolTipManager;
 import javax.swing.tree.DefaultTreeModel;
 
+import org.apache.log4j.Logger;
+
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class VirtualFileSystemTreePanel extends JPanel implements
-		GridFileListPanel {
+GridFileListPanel {
+
+	static final Logger myLogger = Logger
+			.getLogger(VirtualFileSystemTreePanel.class.getName());
 
 	private static void addPopup(Component component, final JPopupMenu popup) {
 		component.addMouseListener(new MouseAdapter() {
@@ -194,8 +199,7 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 						displayHiddenFiles, extensionsToDisplay));
 			}
 		} catch (RemoteFileSystemException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			myLogger.error(e);
 			return;
 		}
 

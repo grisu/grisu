@@ -77,7 +77,7 @@ public class RunningJobManager implements EventSubscriber {
 					updateTimer.cancel();
 				}
 			} catch (final Exception e) {
-				e.printStackTrace();
+				myLogger.error(e);
 			}
 		}
 
@@ -116,8 +116,7 @@ public class RunningJobManager implements EventSubscriber {
 				final JobObject jo = new JobObject(si, newJob);
 				jobObjectList.add(jo);
 			} catch (final NoSuchJobException e) {
-				// probably not that important
-				e.printStackTrace();
+				myLogger.error(e);
 			}
 		}
 
@@ -299,7 +298,7 @@ public class RunningJobManager implements EventSubscriber {
 
 	public List<GlazedFile> getFinishedOutputFilesForBatchJob(
 			BatchJobObject batchJob, String[] patterns)
-			throws RemoteFileSystemException {
+					throws RemoteFileSystemException {
 
 		final List<GlazedFile> files = new LinkedList<GlazedFile>();
 
@@ -395,7 +394,7 @@ public class RunningJobManager implements EventSubscriber {
 		if (event instanceof NewBatchJobEvent) {
 			final NewBatchJobEvent ev = (NewBatchJobEvent) event;
 			GrisuRegistryManager.getDefault(si).getUserEnvironmentManager()
-					.getCurrentBatchJobnames(true);
+			.getCurrentBatchJobnames(true);
 
 			new Thread() {
 				@Override
@@ -418,7 +417,7 @@ public class RunningJobManager implements EventSubscriber {
 			final NewJobEvent ev = (NewJobEvent) event;
 
 			GrisuRegistryManager.getDefault(si).getUserEnvironmentManager()
-					.getCurrentJobnames(true);
+			.getCurrentJobnames(true);
 			new Thread() {
 				@Override
 				public void run() {

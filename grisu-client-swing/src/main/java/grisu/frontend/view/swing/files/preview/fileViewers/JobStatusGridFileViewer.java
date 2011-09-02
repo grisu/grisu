@@ -27,6 +27,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 import org.jfree.chart.ChartFactory;
@@ -52,6 +53,9 @@ import com.jgoodies.forms.layout.RowSpec;
 
 public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 
+	static final Logger myLogger = Logger
+			.getLogger(JobStatusGridFileViewer.class.getName());
+
 	private final static ImageIcon REFRESH_ICON = createImageIcon(
 			"refresh.png", "Refresh");
 
@@ -66,7 +70,7 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 				createLegend, // create legend?
 				true,               // generate tooltips?
 				false               // generate URLs?
-		);
+				);
 
 		chart.setBackgroundPaint(Color.white);
 
@@ -104,7 +108,7 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 			icon = new ImageIcon(FileListActionPanel.class.getClassLoader()
 					.getResource(path));
 		} catch (final Exception e) {
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 
 		return icon;
@@ -117,11 +121,11 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 	private final TimeSeriesCollection ligandsDataset = new TimeSeriesCollection();
 	private final TimeSeries cpusSeries = new TimeSeries("Cpus used");
 	private final TimeSeries licensesUserSeries = new TimeSeries(
-	"Licenses used (for job)");
+			"Licenses used (for job)");
 	private final TimeSeries licensesAllSeries = new TimeSeries(
-	"Licenses used (overall)");
+			"Licenses used (overall)");
 	private final TimeSeries ligandsSeries = new TimeSeries(
-	"Lingands processed");
+			"Lingands processed");
 
 	private ChartPanel cpusChart;
 	private ChartPanel licensesChart;
@@ -175,7 +179,7 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 		try {
 			lines = FileUtils.readLines(this.csvFile);
 		} catch (IOException e) {
-			e.printStackTrace();
+			myLogger.error(e);
 			return;
 		}
 

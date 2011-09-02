@@ -14,4 +14,8 @@ public class JobPropertiesException extends Exception {
 		super(message);
 	}
 
+	public JobPropertiesException(final String message, Exception cause) {
+		super(message, cause);
+	}
+
 }

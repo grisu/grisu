@@ -159,7 +159,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				myLogger.debug("Session cache is null");
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			myLogger.error(e);
 		}
 	}
 
@@ -417,8 +417,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							tmp = targetDir + "_" + i;
 						}
 					} catch (RemoteFileSystemException e2) {
-						e2.printStackTrace();
-						// TODO
+						myLogger.error(e2);
 						return;
 					}
 
@@ -432,7 +431,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				try {
 					executor.awaitTermination(24, TimeUnit.HOURS);
 				} catch (final InterruptedException e) {
-					e.printStackTrace();
+					myLogger.error(e);
 					status.setFailed(true);
 					status.setErrorCause(e.getLocalizedMessage());
 					status.setFinished(true);
@@ -452,7 +451,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					status.setFailed(true);
 					status.setErrorCause("Archiving interrupted.");
 					status.setFinished(true);
-					e.printStackTrace();
+					myLogger.error(e);
 					return;
 				}
 
@@ -926,8 +925,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			try {
 				executor1.awaitTermination(3600, TimeUnit.SECONDS);
 			} catch (final InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				myLogger.error(e);
 			}
 
 			resourcesToUse.removeAll(failSet);
@@ -1041,7 +1039,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					}
 					actionStat.setFinished(true);
 				} catch (final Exception e) {
-					e.printStackTrace();
+					myLogger.error(e);
 					actionStat.setFailed(true);
 					actionStat.setErrorCause(e.getLocalizedMessage());
 					actionStat.setFinished(true);
@@ -1063,8 +1061,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							DtoActionStatus.getLastMessage(actionStat));
 				}
 			} catch (final InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				myLogger.error(e);
 			}
 		}
 
@@ -1153,8 +1150,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			try {
 				return multiJobCreate.createDtoMultiPartJob();
 			} catch (final NoSuchJobException e1) {
-				// that should never happen
-				e1.printStackTrace();
+				myLogger.error(e1);
 			}
 		}
 
@@ -1363,7 +1359,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								+ e.getLocalizedMessage());
 						newActionStatus.setFailed(true);
 						newActionStatus.setErrorCause(e.getLocalizedMessage());
-						e.printStackTrace();
+						myLogger.error(e);
 					}
 					if (newActionStatus.getTotalElements() <= newActionStatus
 							.getCurrentElements()) {
@@ -1386,7 +1382,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				try {
 					executor.awaitTermination(2, TimeUnit.HOURS);
 				} catch (final InterruptedException e1) {
-					e1.printStackTrace();
+					myLogger.error(e1);
 				}
 
 				try {
@@ -1477,8 +1473,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			try {
 				Thread.sleep(1000);
 			} catch (final InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				myLogger.error(e1);
 			}
 			tempFolder = getUser().getFileSystemManager().getFolderListing(
 					folder.getUrl(), 1);
@@ -1639,7 +1634,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			return dtoJobs;
 		} catch (final Exception e) {
-			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 	}
@@ -3119,12 +3113,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					job.addJobProperty(
 							Constants.SUBMISSIONLOCATION_CALCULATED_KEY, "true");
 				} catch (final RuntimeException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 					throw new JobPropertiesException(
 							JobSubmissionProperty.SUBMISSIONLOCATION.toString()
 							+ ": "
-							+ "Jsdl document malformed. No candidate hosts element.");
+									+ "Jsdl document malformed. No candidate hosts element.",
+							e);
 				}
 			}
 		}
@@ -3260,8 +3253,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				deleteFile(oldJobDir);
 			} catch (final Exception e) {
-				e.printStackTrace();
-				// TODO more
+				myLogger.error(e);
 			}
 		}
 
@@ -3971,7 +3963,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			status.setFailed(true);
 			status.setErrorCause(e.getLocalizedMessage());
 			status.setFinished(true);
-			e.printStackTrace();
+			myLogger.error(e);
 			throw new JobSubmissionException(
 					"Could not access remote filesystem: "
 							+ e.getLocalizedMessage());
@@ -4051,10 +4043,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					job,
 					"Job submission for job: " + job.getJobname() + " failed: "
 							+ e.getLocalizedMessage());
-			e.printStackTrace();
+			myLogger.error(e);
 			throw new JobSubmissionException(
 					"Job submission to endpoint failed: "
-							+ e.getLocalizedMessage());
+							+ e.getLocalizedMessage(), e);
 		}
 
 		if (handle == null) {
@@ -4184,7 +4176,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				status.setFinished(true);
 			} catch (final RemoteFileSystemException e) {
-				e.printStackTrace();
+				myLogger.error(e);
 				status.addElement("Upload to " + jobdir + "/" + targetFilename
 						+ " failed: " + e.getLocalizedMessage());
 				status.setFinished(true);
