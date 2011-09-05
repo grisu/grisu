@@ -519,7 +519,9 @@ public class LoginManager {
 
 		switch (type) {
 		case SHIBBOLETH:
-			return loginCommandlineShibboleth(url);
+			return loginCommandlineShibboleth(url, false);
+		case SHIBBOLETH_LAST_IDP:
+			return loginCommandlineShibboleth(url, true);
 		case MYPROXY:
 			return loginCommandlineMyProxy(url);
 		case LOCAL_PROXY:
@@ -549,8 +551,17 @@ public class LoginManager {
 				"Please select your preferred login method:\n\n");
 
 		for (int i = 0; i < temp.size(); i++) {
-			message.append("[" + (i + 1) + "]\t" + temp.get(i).getPrettyName()
-					+ "\n");
+			if (temp.get(i).equals(LoginType.SHIBBOLETH_LAST_IDP)) {
+				String lastIdp = CommonGridProperties.getDefault()
+						.getLastShibIdp();
+				message.append("[" + (i + 1) + "]\t"
+						+ temp.get(i).getPrettyName() + " (using: " + lastIdp
+						+ ")\n");
+			} else {
+				message.append("[" + (i + 1) + "]\t"
+						+ temp.get(i).getPrettyName()
+						+ "\n");
+			}
 		}
 		message.append("\n[0]\tExit\n\n");
 
@@ -599,9 +610,22 @@ public class LoginManager {
 				throw le;
 			}
 		} else {
-			final ImmutableSet<LoginType> temp = ImmutableSet.of(
-					LoginType.SHIBBOLETH, LoginType.MYPROXY,
-					LoginType.X509_CERTIFICATE);
+
+			String lastIdp = CommonGridProperties.getDefault().getGridProperty(
+					CommonGridProperties.Property.SHIB_IDP);
+
+			final ImmutableSet<LoginType> temp;
+
+			if (StringUtils.isBlank(lastIdp)) {
+				temp = ImmutableSet.of(LoginType.SHIBBOLETH, LoginType.MYPROXY,
+						LoginType.X509_CERTIFICATE);
+
+			} else {
+				temp = ImmutableSet.of(LoginType.SHIBBOLETH,
+						LoginType.SHIBBOLETH_LAST_IDP, LoginType.MYPROXY,
+						LoginType.X509_CERTIFICATE);
+
+			}
 			try {
 				ServiceInterface tmp = loginCommandline(temp, url);
 				return tmp;
@@ -614,34 +638,42 @@ public class LoginManager {
 	}
 
 	public static ServiceInterface loginCommandlineMyProxy(String url) {
+		return loginCommandlineMyProxy(url, null);
+	}
+
+	public static ServiceInterface loginCommandlineMyProxy(String url,
+			String myproxyUsername) {
 
 		while (true) {
 			try {
-
-				final StringBuffer prompt = new StringBuffer(
-						"Please enter your myproxy username");
-				final String lastMyProxyUsername = CommonGridProperties
-						.getDefault().getLastMyProxyUsername();
-
-				if (StringUtils.isNotBlank(lastMyProxyUsername)) {
-					prompt.append(" [" + lastMyProxyUsername + "]: ");
-				} else {
-					prompt.append(": ");
-				}
-
 				String username = null;
-				while (StringUtils.isBlank(username)) {
-					try {
-						username = CliHelpers.getConsoleReader().readLine(
-								prompt.toString());
-					} catch (final IOException e) {
-						throw new RuntimeException(e);
+				if (StringUtils.isBlank(myproxyUsername)) {
+					final StringBuffer prompt = new StringBuffer(
+							"Please enter your myproxy username");
+					final String lastMyProxyUsername = CommonGridProperties
+							.getDefault().getLastMyProxyUsername();
+
+					if (StringUtils.isNotBlank(lastMyProxyUsername)) {
+						prompt.append(" [" + lastMyProxyUsername + "]: ");
+					} else {
+						prompt.append(": ");
 					}
 
-					if (StringUtils.isNotBlank(lastMyProxyUsername)
-							&& StringUtils.isBlank(username)) {
-						username = lastMyProxyUsername;
+					while (StringUtils.isBlank(username)) {
+						try {
+							username = CliHelpers.getConsoleReader().readLine(
+									prompt.toString());
+						} catch (final IOException e) {
+							throw new RuntimeException(e);
+						}
+
+						if (StringUtils.isNotBlank(lastMyProxyUsername)
+								&& StringUtils.isBlank(username)) {
+							username = lastMyProxyUsername;
+						}
 					}
+				} else {
+					username = myproxyUsername;
 				}
 
 				CommonGridProperties.getDefault().setLastMyProxyUsername(
@@ -651,7 +683,7 @@ public class LoginManager {
 				while (StringUtils.isBlank(password)) {
 					try {
 						password = CliHelpers.getConsoleReader().readLine(
-								"Please enter your myproxy password",
+								"Please enter your myproxy password: ",
 								new Character('*'));
 					} catch (final IOException e) {
 						throw new RuntimeException(e);
@@ -673,7 +705,28 @@ public class LoginManager {
 
 	}
 
-	public static ServiceInterface loginCommandlineShibboleth(String url) {
+	public static ServiceInterface loginCommandlineShibboleth(String url,
+			boolean useLastIdp) {
+
+		final String lastIdp = CommonGridProperties.getDefault()
+				.getLastShibIdp();
+
+		if (StringUtils.isBlank(lastIdp)) {
+			if (StringUtils.isBlank(lastIdp)) {
+
+				throw new RuntimeException(
+						"No last used IdP found. Please log in using default shibboleth login.");
+
+			}
+			return loginCommandlineShibboleth(url, null, null);
+		} else {
+			return loginCommandlineShibboleth(url, null, lastIdp);
+		}
+
+	}
+
+	public static ServiceInterface loginCommandlineShibboleth(String url,
+			String username, String idp) {
 
 		while (true) {
 			try {
@@ -682,95 +735,102 @@ public class LoginManager {
 
 				// System.out.println("Loading list of institutions...");
 
-				CliHelpers.setIndeterminateProgress("Loading...", true);
-
-				StringBuffer prompt = new StringBuffer(
-						"Please select your institution");
-				final String lastIdp = CommonGridProperties.getDefault()
-						.getLastShibIdp();
-
-				final IdpObject idpObj = new DummyIdpObject();
-				final CredentialManager cm = new DummyCredentialManager();
-
-				final Shibboleth shib = new Shibboleth(idpObj, cm);
-				shib.openurl(SLCS.DEFAULT_SLCS_URL);
-
-				final ImmutableList<String> idps = ImmutableList.copyOf(idpObj
-						.getIdps());
-
-				CliHelpers.setIndeterminateProgress("Available Institutions:",
-						false);
-
-				int defaultChoice = -1;
-
-				for (int i = 0; i < idps.size(); i++) {
-					System.out.println("[" + (i + 1) + "]\t" + idps.get(i));
-
-					if (StringUtils.isNotBlank(lastIdp)
-							&& idps.get(i).equals(lastIdp)) {
-						defaultChoice = i + 1;
-					}
-				}
-				System.out.println("\n[0]\tExit");
-
-				if (defaultChoice < 0) {
-					prompt.append(": ");
-				} else {
-					prompt.append(" [" + defaultChoice + "]: ");
-				}
 
 				String idpchoice = null;
-				int choice = -1;
-				while (choice < 0) {
-					try {
-						idpchoice = CliHelpers.getConsoleReader().readLine(
-								prompt.toString());
-					} catch (final IOException e) {
-						throw new RuntimeException(e);
-					}
+				StringBuffer prompt = null;
 
-					if ((defaultChoice >= 0) && StringUtils.isBlank(idpchoice)) {
-						idpchoice = new Integer(defaultChoice).toString();
-					}
-
-					try {
-						choice = Integer.parseInt(idpchoice);
-					} catch (final Exception e) {
-						continue;
-					}
-				}
-
-				if (choice == 0) {
-					System.exit(0);
-				}
-
-				idpchoice = idps.get(choice - 1);
-
-				CommonGridProperties.getDefault().setLastShibIdp(idpchoice);
-
-				prompt = new StringBuffer(
-						"Please enter your institution username");
-				final String lastShibUsername = CommonGridProperties
-						.getDefault().getLastShibUsername();
-
-				if (StringUtils.isNotBlank(lastShibUsername)) {
-					prompt.append(" [" + lastShibUsername + "]: ");
+				if (StringUtils.isNotBlank(idp)) {
+					idpchoice = idp;
 				} else {
-					prompt.append(": ");
-				}
 
-				String username = null;
-				while (StringUtils.isBlank(username)) {
-					try {
-						username = CliHelpers.getConsoleReader().readLine(
-								prompt.toString());
-					} catch (final IOException e) {
-						throw new RuntimeException(e);
+					CliHelpers.setIndeterminateProgress("Loading...", true);
+
+					prompt = new StringBuffer(
+							"Please select your institution");
+
+					final IdpObject idpObj = new DummyIdpObject();
+					final CredentialManager cm = new DummyCredentialManager();
+
+					final Shibboleth shib = new Shibboleth(idpObj, cm);
+					shib.openurl(SLCS.DEFAULT_SLCS_URL);
+
+					final ImmutableList<String> idps = ImmutableList.copyOf(idpObj
+							.getIdps());
+
+					CliHelpers.setIndeterminateProgress("Available Institutions:",
+							false);
+
+					int defaultChoice = -1;
+
+					for (int i = 0; i < idps.size(); i++) {
+						System.out.println("[" + (i + 1) + "]\t" + idps.get(i));
+
+						if (StringUtils.isNotBlank(idp)
+								&& idps.get(i).equals(idp)) {
+							defaultChoice = i + 1;
+						}
+					}
+					System.out.println("\n[0]\tExit");
+
+					if (defaultChoice < 0) {
+						prompt.append(": ");
+					} else {
+						prompt.append(" [" + defaultChoice + "]: ");
 					}
 
-					if (StringUtils.isNotBlank(lastShibUsername)
-							&& StringUtils.isBlank(username)) {
-						username = lastShibUsername;
+					int choice = -1;
+					while (choice < 0) {
+						try {
+							idpchoice = CliHelpers.getConsoleReader().readLine(
+									prompt.toString());
+						} catch (final IOException e) {
+							throw new RuntimeException(e);
+						}
+
+						if ((defaultChoice >= 0) && StringUtils.isBlank(idpchoice)) {
+							idpchoice = new Integer(defaultChoice).toString();
+						}
+
+						try {
+							choice = Integer.parseInt(idpchoice);
+						} catch (final Exception e) {
+							continue;
+						}
+					}
+
+					if (choice == 0) {
+						System.exit(0);
+					}
+
+					idpchoice = idps.get(choice - 1);
+
+					CommonGridProperties.getDefault().setLastShibIdp(idpchoice);
+				}
+
+				if (StringUtils.isBlank(username)) {
+					prompt = new StringBuffer(
+							"Please enter your institution username");
+					final String lastShibUsername = CommonGridProperties
+							.getDefault().getLastShibUsername();
+
+					if (StringUtils.isNotBlank(lastShibUsername)) {
+						prompt.append(" [" + lastShibUsername + "]: ");
+					} else {
+						prompt.append(": ");
+					}
+
+					while (StringUtils.isBlank(username)) {
+						try {
+							username = CliHelpers.getConsoleReader().readLine(
+									prompt.toString());
+						} catch (final IOException e) {
+							throw new RuntimeException(e);
+						}
+
+						if (StringUtils.isNotBlank(lastShibUsername)
+								&& StringUtils.isBlank(username)) {
+							username = lastShibUsername;
+						}
 					}
 				}
 
