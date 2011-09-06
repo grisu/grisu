@@ -206,7 +206,7 @@ public final class ServiceInterfaceFactory {
 			throw new ServiceInterfaceException(rootCause);
 		} else if (failedCreators.size() == 0) {
 			throw new ServiceInterfaceException(
-					"Could not establish how to connect to backend \""
+					"Could not establish a connection with backend \""
 							+ interfaceUrl + "\". Maybe a typo?", null);
 		} else {
 			throw new ServiceInterfaceException(
