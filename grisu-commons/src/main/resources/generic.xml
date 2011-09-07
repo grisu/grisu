@@ -21,6 +21,7 @@
 				<Output>XXX_stdout_XXX</Output>
 				<Input>XXX_stdin_XXX</Input>
 				<Error>XXX_stderr_XXX</Error>
+				XXX_environmentVariables_XXX
 			</POSIXApplication>
 			<TotalCPUTime>XXX_walltime_XXX</TotalCPUTime><!-- use this value and divide with no. of cpus to get actual walltime -->
 			<TotalCPUCount><exact>XXX_cpus_XXX</exact></TotalCPUCount>

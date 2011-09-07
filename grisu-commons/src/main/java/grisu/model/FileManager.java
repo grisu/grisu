@@ -90,7 +90,7 @@ public class FileManager {
 		if (size < 0) {
 			sizeString = "";
 		} else if (size.equals(0L)) {
-			sizeString = "0";
+			sizeString = "0 B";
 		} else {
 
 			if (size > (1024 * 1024)) {
@@ -378,6 +378,18 @@ public class FileManager {
 		return getFileFromUriOrPath(url).exists();
 	}
 
+	public static final String removeDoubleSlashes(String url) {
+		int protIndex = url.indexOf("://");
+		if ( protIndex < 0 ) {
+			return url.replace("//", "/");
+		} else {
+			String prot = url.substring(0, protIndex + 3);
+			String other = url.substring(protIndex + 3);
+			other = other.replace("//", "/");
+			return prot+other;
+		}
+	}
+
 	/**
 	 * Convenience method to ensure that the specified url doesn't end with a
 	 * slash.
@@ -437,6 +449,10 @@ public class FileManager {
 			final File file = getFileFromUriOrPath(rootUrl);
 			return file.getParentFile().toURI().toASCIIString();
 		} else {
+			String url = rootUrl.trim();
+			if (rootUrl.endsWith("/")) {
+				url = url.substring(0, url.length() - 2);
+			}
 			final String result = rootUrl
 					.substring(0, rootUrl.lastIndexOf("/"));
 			return result;
@@ -957,6 +973,27 @@ public class FileManager {
 	 */
 	public final File downloadFile(final String url)
 			throws FileTransactionException {
+		return downloadFile(url, true);
+	}
+
+	/**
+	 * Downloads the file with the specified url into the local cache and
+	 * returns a file object for it.
+	 * 
+	 * This one throws an exception if forceDownload is false and file is bigger
+	 * than filesize download threshold (@link
+	 * {@link #getDownloadFileSizeThreshold()}.
+	 * 
+	 * @param url
+	 *            the source url
+	 * @param forceDownload
+	 *            whether to download file even if size bigger than threshold.
+	 * @return the file object for the cached file
+	 * @throws FileTransactionException
+	 *             if the transfer fails
+	 */
+	public final File downloadFile(final String url, final boolean forceDownload)
+			throws FileTransactionException {
 
 		if (isLocal(url)) {
 			return getFileFromUriOrPath(url);
@@ -982,6 +1019,24 @@ public class FileManager {
 		// return cacheTargetFile;
 		// }
 		// }
+
+		if (!forceDownload) {
+			long size;
+			try {
+				size = serviceInterface.getFileSize(url);
+				if (size > getDownloadFileSizeThreshold()) {
+					myLogger.info("Not downloading - file bigger than download threshold: "
+							+ url);
+					throw new FileTransactionException(url,
+							cacheTargetFile.toString(),
+							"File bigger than threshold.", null);
+				}
+			} catch (RemoteFileSystemException e2) {
+				myLogger.error("Could not get size of file: " + url);
+				throw new FileTransactionException(url,
+						cacheTargetFile.toString(), "Could not get size.", e2);
+			}
+		}
 
 		myLogger.debug("Remote file newer than local cache file or not cached yet, downloading new copy.");
 		final DataSource source = null;
@@ -1479,7 +1534,7 @@ public class FileManager {
 			File temp;
 			temp = getFileFromUriOrPath(url);
 
-			return GridFile.listLocalFolder(temp, false);
+			return GridFile.listLocal(temp, false);
 
 		} else {
 

@@ -4,8 +4,10 @@ import grisu.backend.model.ProxyCredential;
 import grisu.backend.model.User;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.RemoteFileSystemException;
+import grisu.control.serviceInterfaces.AbstractServiceInterface;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
+import grisu.model.dto.DtoProperty;
 import grisu.model.dto.GridFile;
 
 import java.util.Map;
@@ -20,12 +22,14 @@ import org.apache.log4j.Logger;
 
 public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 
+	private final User user;
 	static final Logger myLogger = Logger
 			.getLogger(VirtualFileSystemInfoPlugin.class.getName());
 
 	private final Map<String, VirtualFileSystemPlugin> plugins = new TreeMap<String, VirtualFileSystemPlugin>();
 
 	public VirtualFileSystemInfoPlugin(User user) {
+		this.user = user;
 		plugins.put(GroupFileSystemPlugin.IDENTIFIER,
 				new GroupFileSystemPlugin(user));
 		plugins.put(JobsFileSystemPlugin.IDENTIFIER, new JobsFileSystemPlugin(
@@ -44,7 +48,29 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 				"Folder creation not supported for virtual file system.");
 	}
 
+	public GridFile createGsiftpGridFile(String url)
+			throws RemoteFileSystemException {
+
+		GridFile f = null;
+
+		try {
+			f = (GridFile) AbstractServiceInterface.getFromShortCache(url
+					+ "rec0");
+		} catch (Exception e) {
+		}
+
+		if (f == null) {
+			f = getFolderListing(url, 0);
+		}
+
+		AbstractServiceInterface.putIntoShortCache(url + "rec0", f);
+
+		return f;
+
+	}
+
 	public void deleteFile(String file) throws RemoteFileSystemException {
+
 		throw new RemoteFileSystemException(
 				"File deletion not supported for virtual file system.");
 
@@ -52,16 +78,52 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 
 	public DataHandler download(String filename)
 			throws RemoteFileSystemException {
+
+		GridFile f = createGsiftpGridFile(filename);
+
+		Map<String, String> urls = DtoProperty.mapFromDtoPropertiesList(f
+				.getUrls());
+
+		for (String key : urls.keySet()) {
+			if (key.startsWith("gsiftp")) {
+				return user.getFileSystemManager().download(key);
+			}
+		}
+
 		throw new RemoteFileSystemException(
 				"File download not supported for virtual file system.");
 	}
 
 	public boolean fileExists(String file) throws RemoteFileSystemException {
+
+		GridFile f = createGsiftpGridFile(file);
+
+		Map<String, String> urls = DtoProperty.mapFromDtoPropertiesList(f
+				.getUrls());
+
+		for (String key : urls.keySet()) {
+			if (key.startsWith("gsiftp")) {
+				return user.getFileSystemManager().fileExists(key);
+			}
+		}
+
 		throw new RemoteFileSystemException(
 				"File exists not supported for virtual file system.");
 	}
 
 	public long getFileSize(String file) throws RemoteFileSystemException {
+
+		GridFile f = createGsiftpGridFile(file);
+
+		Map<String, String> urls = DtoProperty.mapFromDtoPropertiesList(f
+				.getUrls());
+
+		for (String key : urls.keySet()) {
+			if (key.startsWith("gsiftp")) {
+				return user.getFileSystemManager().getFileSize(key);
+			}
+		}
+
 		throw new RemoteFileSystemException(
 				"Get filesize not supported for virtual file system.");
 	}
@@ -115,11 +177,35 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 	}
 
 	public boolean isFolder(String file) throws RemoteFileSystemException {
+		GridFile f = createGsiftpGridFile(file);
+
+		Map<String, String> urls = DtoProperty.mapFromDtoPropertiesList(f
+				.getUrls());
+
+		for (String key : urls.keySet()) {
+			if (key.startsWith("gsiftp")) {
+				return user.getFileSystemManager().isFolder(key);
+			}
+		}
+
 		throw new RemoteFileSystemException(
-				"Is folder not supported for virtual file system.");
+				"IsFolder not supported for virtual file system.");
 	}
 
 	public long lastModified(String url) throws RemoteFileSystemException {
+
+		GridFile f = createGsiftpGridFile(url);
+
+		Map<String, String> urls = DtoProperty.mapFromDtoPropertiesList(f
+				.getUrls());
+
+		for (String key : urls.keySet()) {
+			if (key.startsWith("gsiftp")) {
+				return user.getFileSystemManager().lastModified(key);
+			}
+		}
+
+
 		throw new RemoteFileSystemException(
 				"Last modified not supported for virtual file system.");
 
@@ -141,8 +227,19 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 	public String upload(DataHandler source, String filename)
 			throws RemoteFileSystemException {
 
+		GridFile f = createGsiftpGridFile(filename);
+
+		Map<String, String> urls = DtoProperty.mapFromDtoPropertiesList(f
+				.getUrls());
+
+		for (String key : urls.keySet()) {
+			if (key.startsWith("gsiftp")) {
+				return user.getFileSystemManager().upload(source, key);
+			}
+		}
+
 		throw new RemoteFileSystemException(
-				"File upload not supported for virtual file system.");
+				"Upload not supported for virtual file system.");
 	}
 
 	public void uploadFileToMultipleLocations(Set<String> parents,

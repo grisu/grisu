@@ -1,6 +1,5 @@
 package grisu.control;
 
-import grisu.GrisuVersion;
 import grisu.control.exceptions.BatchJobException;
 import grisu.control.exceptions.JobPropertiesException;
 import grisu.control.exceptions.JobSubmissionException;
@@ -52,7 +51,7 @@ import javax.xml.bind.annotation.XmlMimeType;
 @WebService(targetNamespace = "http://api.grisu.arcs.org.au/", serviceName = "GrisuService")
 public interface ServiceInterface {
 
-	String INTERFACE_VERSION = GrisuVersion.get("grisu-commons");
+	public static final int API_VERSION = 14;
 
 	public static final String VIRTUAL_GRID_PROTOCOL_NAME = "grid";
 	public static final String ARCHIVE_STATUS_PREFIX = "ARCHIVE_";
@@ -625,19 +624,16 @@ public interface ServiceInterface {
 	//
 	// ---------------------------------------------------------------------------------------------------
 
-	// ---------------------------------------------------------------------------------------------------
-	//
-	// General grisu specific methods
-	//
-	// ---------------------------------------------------------------------------------------------------
 	/**
-	 * The version of the serviceInterface for this backend.
+	 * Checks the current certificate and returns its' dn.
 	 * 
-	 * @return the version
+	 * @return the dn of the users' certificate
 	 */
-	// @GET
-	// @Path("interfaceVersion")
-	// String getInterfaceVersion();
+	@GET
+	@RolesAllowed("User")
+	@Path("user/dn")
+	@Produces("text/plain")
+	String getDN();
 
 	// /**
 	// * Checks the available data locations for the specified site and VO.
@@ -652,17 +648,6 @@ public interface ServiceInterface {
 	// @GET
 	// @Path("info/{fqan}/datalocations")
 	// DtoDataLocations getDataLocationsForVO(@PathParam("fqan") String fqan);
-
-	/**
-	 * Checks the current certificate and returns its' dn.
-	 * 
-	 * @return the dn of the users' certificate
-	 */
-	@GET
-	@RolesAllowed("User")
-	@Path("user/dn")
-	@Produces("text/plain")
-	String getDN();
 
 	/**
 	 * Returns the size of the file in bytes. This will probably replaced in a
@@ -707,6 +692,20 @@ public interface ServiceInterface {
 	@GET
 	@Path("interfaceInfo/{key}")
 	String getInterfaceInfo(@PathParam("key") String key);
+
+	// ---------------------------------------------------------------------------------------------------
+	//
+	// General grisu specific methods
+	//
+	// ---------------------------------------------------------------------------------------------------
+	/**
+	 * The version of the serviceInterface for this backend.
+	 * 
+	 * @return the version
+	 */
+	@GET
+	@Path("interfaceVersion")
+	int getInterfaceVersion();
 
 	/**
 	 * Returns the job details.

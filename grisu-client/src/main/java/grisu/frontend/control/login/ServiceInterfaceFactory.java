@@ -27,12 +27,12 @@ public final class ServiceInterfaceFactory {
 	public static final String DEFAULT_SERVICE_INTERFACE = "ARCS";
 
 	public static final String[] KNOWN_SERVICE_INTERFACE_CREATORS = new String[] {
-			"LocalServiceInterfaceCreator",
-			// "DummyServiceInterfaceCreator",
-			"JaxWsServiceInterfaceCreator",
-	// "XfireServiceInterfaceCreator",
-	// the old xfire client...
-	// "XFireServiceInterfaceCreator"
+		"LocalServiceInterfaceCreator",
+		// "DummyServiceInterfaceCreator",
+		"JaxWsServiceInterfaceCreator",
+		// "XfireServiceInterfaceCreator",
+		// the old xfire client...
+		// "XFireServiceInterfaceCreator"
 	};
 
 	/**
@@ -90,7 +90,7 @@ public final class ServiceInterfaceFactory {
 			final String myProxyServer, final String myProxyPort,
 			final String httpProxy, final int httpProxyPort,
 			final String httpProxyUsername, final char[] httpProxyPassword)
-			throws ServiceInterfaceException {
+					throws ServiceInterfaceException {
 
 		final Object[] otherOptions = new Object[4];
 		otherOptions[0] = httpProxy;
@@ -160,6 +160,23 @@ public final class ServiceInterfaceFactory {
 
 			try {
 				serviceInterface.login(username, new String(password));
+				int backend_version = serviceInterface.getInterfaceVersion();
+
+				if (backend_version > LoginManager.REQUIRED_BACKEND_API_VERSION) {
+					throw new LoginException(
+							"Sorry, could not login. Your client version is no longer supported by the server.\n"
+									+ "Please download the latest version from:\nhttp://code.ceres.auckland.ac.nz/stable-downloads\n"
+									+ "If you have the latest version and are still experiencing this problem please contact\n"
+									+ "eresearch-admin@list.auckland.ac.nz\n"
+									+ "with a description of the issue.");
+				} else if (backend_version < LoginManager.REQUIRED_BACKEND_API_VERSION) {
+					throw new LoginException(
+							"Sorry, could not login. Your client version is incompatible with the server.\n"
+									+ "Please download the latest version from:\nhttp://code.ceres.auckland.ac.nz/stable-downloads\n"
+									+ "If you have the latest version and are still experiencing this problem please contact\n"
+									+ "eresearch-admin@list.auckland.ac.nz\n"
+									+ "with a description of the issue.");
+				}
 			} catch (final Exception e) {
 				// e.printStackTrace();
 				myLogger.debug("Couldn't login to grisu service on: "
@@ -180,12 +197,17 @@ public final class ServiceInterfaceFactory {
 
 		if (failedCreators.size() == 1) {
 			final String key = failedCreators.keySet().iterator().next();
-			throw new ServiceInterfaceException(failedCreators.get(key)
-					.getLocalizedMessage(), failedCreators.get(key));
+
+			Throwable rootCause = failedCreators.get(key);
+			while (rootCause.getCause() != null) {
+				rootCause = rootCause.getCause();
+			}
+
+			throw new ServiceInterfaceException(rootCause);
 		} else if (failedCreators.size() == 0) {
 			throw new ServiceInterfaceException(
-					"Could not find a ServiceInterfaceCreator for this kind of URL.",
-					null);
+					"Could not establish how to connect to backend \""
+							+ interfaceUrl + "\". Maybe a typo?", null);
 		} else {
 			throw new ServiceInterfaceException(
 					"Could not find a single ServiceInterfaceCreator that worked. Tried these:\n"

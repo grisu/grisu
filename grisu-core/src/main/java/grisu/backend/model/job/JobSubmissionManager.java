@@ -4,6 +4,7 @@ import grisu.control.JobConstants;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.interfaces.InformationManager;
 import grisu.jcommons.utils.JsdlHelpers;
+import grisu.settings.ServerPropertiesManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,12 +59,12 @@ public class JobSubmissionManager {
 	public final int getJobStatus(final Job job) {
 
 		JobSubmitter submitter = null;
-		// if ( (//job.getStatus() >= JobConstants.EXTERNAL_HANDLE_READY &&
-		// job.getStatus() < JobConstants.FINISHED_EITHER_WAY) //||
-		// job.getStatus() == JobConstants.NO_SUCH_JOB
-		// || job.getStatus() == Integer.MIN_VALUE || job.getStatus() ==
-		// Integer.MAX_VALUE ) {
-		if (job.getStatus() < JobConstants.FINISHED_EITHER_WAY) {
+
+		boolean disableFinishedJobStatusCaching = ServerPropertiesManager
+				.getDisableFinishedJobStatusCaching();
+
+		if (disableFinishedJobStatusCaching
+				|| (job.getStatus() < JobConstants.FINISHED_EITHER_WAY)) {
 			submitter = submitters.get(job.getSubmissionType());
 
 			if (submitter == null) {

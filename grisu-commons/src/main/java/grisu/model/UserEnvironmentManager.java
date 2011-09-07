@@ -3,6 +3,7 @@ package grisu.model;
 import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.StatusException;
 import grisu.model.dto.DtoBatchJob;
+import grisu.model.dto.DtoJob;
 import grisu.model.files.FileSystemItem;
 import grisu.model.files.GlazedFile;
 import grisu.model.status.StatusObject;
@@ -50,6 +51,20 @@ public interface UserEnvironmentManager {
 	 * @return all applications
 	 */
 	String[] getAllAvailableApplications();
+
+	/**
+	 * All executables that are available for this user.
+	 * 
+	 * Internally, this method looks up all available submission locations for
+	 * the users VOs, then it retrieves the published applications on those
+	 * submission locations and gets the executables that are published for
+	 * those on each submission location.
+	 * 
+	 * Beware, this method can take very long to finish.
+	 * 
+	 * @return the executables
+	 */
+	Map<String, Set<String>> getAllAvailableExecutables();
 
 	/**
 	 * All of the users fqans, regardless of whether there is a filesystem
@@ -125,9 +140,7 @@ public interface UserEnvironmentManager {
 	 * 
 	 * @return the users bookmarks.
 	 */
-	Map<String, String> getBookmarks();
-
-	List<FileSystemItem> getBookmarksFilesystems();
+	Map<String, String> getBookmarks();	List<FileSystemItem> getBookmarksFilesystems();
 
 	/**
 	 * Returns a list of all currently used applications for a user.
@@ -206,6 +219,15 @@ public interface UserEnvironmentManager {
 	 * @return the jobnames
 	 */
 	SortedSet<String> getCurrentJobnames(String application, boolean refresh);
+
+	/**
+	 * Returns all current jobs (not archived) of the user.
+	 * 
+	 * @param refreshJobStatus whether to refresh job list on backend
+	 * 
+	 * @return the list of jobs
+	 */
+	SortedSet<DtoJob> getCurrentJobs(boolean refreshJobStatus);
 
 	/**
 	 * Returns the filesystem which is associated with the specified url.

@@ -1,299 +1,123 @@
 package grisu.backend.model.job.gt5;
 
-import grisu.backend.info.InformationManagerManager;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import grisu.backend.model.ProxyCredential;
 import grisu.backend.model.job.Job;
 import grisu.backend.model.job.JobSubmitter;
 import grisu.backend.model.job.ServerJobSubmissionException;
 import grisu.control.JobConstants;
-import grisu.jcommons.constants.Constants;
 import grisu.jcommons.interfaces.InformationManager;
-import grisu.jcommons.utils.JsdlHelpers;
-import grisu.settings.ServerPropertiesManager;
-import grisu.utils.DebugUtils;
 import grith.jgrith.CredentialHelpers;
 
-import java.util.Map;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.globus.gram.Gram;
+import org.globus.gram.GramException;
+import org.globus.gram.GramJob;
+import org.globus.gram.WaitingForCommitException;
 import org.globus.gram.internal.GRAMConstants;
-import org.globus.rsl.NameOpValue;
-import org.globus.rsl.RslNode;
 import org.ietf.jgss.GSSCredential;
-import org.w3c.dom.Document;
+import org.ietf.jgss.GSSException;
 
 
 public class GT5Submitter extends JobSubmitter {
 
 	static final Logger myLogger = Logger.getLogger(GT5Submitter.class
 			.getName());
-
-	private static String[] getModulesFromMDS(
-			final InformationManager infoManager, final Document jsdl) {
-		String[] modules_string = JsdlHelpers.getModules(jsdl);
-		if (modules_string != null) {
-			return modules_string;
+	
+	private String getContactString(String handle) {
+		try {
+			final URL url = new URL(handle);
+			myLogger.debug("job handle is " + handle);	
+			myLogger.debug("returned handle is " + url.getHost());
+			return url.getHost();
+		} catch (final MalformedURLException ex1) {
+			myLogger.error(ex1.getLocalizedMessage());
+			return null;
 		}
-		// mds based
-		final String application = JsdlHelpers.getApplicationName(jsdl);
-		final String version = JsdlHelpers.getApplicationVersion(jsdl);
-		final String[] subLocs = JsdlHelpers.getCandidateHosts(jsdl);
-		if ((subLocs != null) && (subLocs.length > 0)) {
-			final String subLoc = subLocs[0];
-			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
-				return null;
-			} else if (StringUtils.isNotBlank(application)
-					&& StringUtils.isNotBlank(version)
-					&& StringUtils.isNotBlank(subLoc)) {
-				// if we know application, version and submissionLocation
-				final Map<String, String> appDetails = infoManager
-				.getApplicationDetails(application, version, subLoc);
-
-				try {
-					modules_string = appDetails.get(Constants.MDS_MODULES_KEY)
-					.split(",");
-
-					if ((modules_string == null) || "".equals(modules_string)) {
-						return null;
-					}
-				} catch (final Exception e) {
-					return null;
-				}
-				return modules_string;
-			} else if ((application != null) && (version == null)
-					&& (subLoc != null)) {
-
-				final Map<String, String> appDetails = infoManager
-				.getApplicationDetails(application,
-						Constants.NO_VERSION_INDICATOR_STRING, subLoc);
-
-				try {
-					modules_string = appDetails.get(Constants.MDS_MODULES_KEY)
-					.split(",");
-
-					if ((modules_string == null) || "".equals(modules_string)) {
-						return null;
-					}
-
-				} catch (final Exception e) {
-					return null;
-				}
-
-				return modules_string;
-
-			} else {
-				throw new RuntimeException(
-				"Can't determine module because either/or application, version submissionLocation are missing.");
-			}
-		} else {
-			myLogger.info("No submission location specified. If this happens when trying to submit a job, it's probably a bug...");
-			return new String[] {};
-		}
-
-	}
-
-	private Gram5Client gram5 = null;
-
-	public static final InformationManager informationManager = InformationManagerManager
-	.getInformationManager(ServerPropertiesManager
-			.getInformationManagerConf());
-
-	private static void addNotNull(RslNode node, NameOpValue value) {
-		if (value != null) {
-			node.add(value);
-		}
-	}
-
-	public static String createJobSubmissionDescription(
-			final InformationManager infoManager, final Document jsdl, final String fqan) {
-
-		final RslNode result = new RslNode();
-		final NameOpValue executable = new NameOpValue("executable",
-				NameOpValue.EQ, JsdlHelpers.getPosixApplicationExecutable(jsdl));
-
-		final String[] argumentsVal = JsdlHelpers
-		.getPosixApplicationArguments(jsdl);
-		NameOpValue arguments = null;
-		if ((argumentsVal != null) && (argumentsVal.length > 0)) {
-			arguments = new NameOpValue("arguments", NameOpValue.EQ,
-					argumentsVal);
-		}
-
-		final NameOpValue stdout = new NameOpValue("stdout", NameOpValue.EQ,
-				JsdlHelpers.getPosixStandardOutput(jsdl));
-		final NameOpValue stderr = new NameOpValue("stderr", NameOpValue.EQ,
-				JsdlHelpers.getPosixStandardError(jsdl));
-
-		final String inputVal = JsdlHelpers.getPosixStandardInput(jsdl);
-		NameOpValue stdin = null;
-
-		if (StringUtils.isNotBlank(inputVal)) {
-			stdin = new NameOpValue("stdin", NameOpValue.EQ,
-					JsdlHelpers.getPosixStandardInput(jsdl));
-		}
-
-		final String dirValue = JsdlHelpers.getWorkingDirectory(jsdl);
-		NameOpValue directory = null;
-		if ((dirValue != null) && !"".equals(dirValue.trim())) {
-			directory = new NameOpValue("directory", NameOpValue.EQ,
-					JsdlHelpers.getWorkingDirectory(jsdl));
-		}
-
-		NameOpValue queue = null;
-		NameOpValue jobType = null;
-		NameOpValue count = null;
-		NameOpValue maxMemory = null;
-		NameOpValue maxWalltime = null;
-
-		DebugUtils.jsdlDebugOutput("Before translating into rsl: ", jsdl);
-
-		// Add "queue" node
-		// TODO change that once I know how to specify queues in jsdl
-		final String[] queues = JsdlHelpers.getCandidateHosts(jsdl);
-		if ((queues != null) && (queues.length > 0)) {
-			String queueVal = queues[0];
-			// always uses
-			// the first
-			// candidate
-			// host - not
-			// good
-			if (queueVal.indexOf(":") != -1) {
-				queueVal = queueVal.substring(0, queueVal.indexOf(":"));
-				queue = new NameOpValue("queue", NameOpValue.EQ, queueVal);
-			}
-
-		} else {
-			myLogger.info("Can't parse queues. If that happens when trying to submit a job, it's probably a bug...");
-		}
-		// Add "jobtype" if mpi
-		final int processorCount = JsdlHelpers.getProcessorCount(jsdl);
-
-		final String jobTypeString = JsdlHelpers.getArcsJobType(jsdl);
-		count = new NameOpValue("count", NameOpValue.EQ, "" + processorCount);
-
-		if (processorCount > 1) {
-
-			if (!StringUtils.isNotBlank(jobTypeString)) {
-				jobType = new NameOpValue("job_type", NameOpValue.EQ, "mpi");
-			} else {
-				jobType = new NameOpValue("job_type", NameOpValue.EQ,
-						jobTypeString);
-			}
-		} else {
-			if (!StringUtils.isNotBlank(jobTypeString)) {
-				jobType = new NameOpValue("job_type", NameOpValue.EQ, "single");
-			} else {
-				jobType = new NameOpValue("job_type", NameOpValue.EQ,
-						jobTypeString);
-			}
-
-		}
-		
-		// add host count
-		final int hostCountInt = JsdlHelpers.getResourceCount(jsdl);
-		NameOpValue hostCount = null;
-		if (hostCountInt >= 1){
-			hostCount = new NameOpValue("hostCount",NameOpValue.EQ,"" + hostCountInt);
-		}
-
-		// total memory
-		Long memory = JsdlHelpers.getTotalMemoryRequirement(jsdl);
-
-		if ((memory != null) && (memory >= 0)) {
-			// convert from bytes to mb
-			memory = memory / (1024 * 1024);
-			maxMemory = new NameOpValue("max_memory", NameOpValue.EQ, ""
-					+ memory);
-		}
-
-		// Add "maxWallTime" node
-		final int walltime = JsdlHelpers.getWalltime(jsdl);
-		if (walltime > 0) {
-			int wt = new Integer(JsdlHelpers.getWalltime(jsdl));
-			// convert to minutes
-			wt = wt / 60;
-			maxWalltime = new NameOpValue("max_wall_time", NameOpValue.EQ, ""
-					+ wt);
-		}
-
-		// send email on start/stop
-		final String emailAddressVal = JsdlHelpers.getEmail(jsdl);
-		final boolean onFinish = JsdlHelpers.getSendEmailOnJobFinish(jsdl);
-		final boolean onStart = JsdlHelpers.getSendEmailOnJobStart(jsdl);
-
-		NameOpValue emailAddress = null;
-		NameOpValue emailStart = null;
-		NameOpValue emailAbort = null;
-		NameOpValue emailTermination = null;
-
-		if (emailAddressVal != null) {
-			emailAddress = new NameOpValue("email_address", NameOpValue.EQ,
-					emailAddressVal);
-			if (onStart) {
-				emailStart = new NameOpValue("email_on_execution",
-						NameOpValue.EQ, "yes");
-			}
-			if (onFinish) {
-				emailAbort = new NameOpValue("email_on_abort", NameOpValue.EQ,
-				"yes");
-				emailTermination = new NameOpValue("email_on_termination",
-						NameOpValue.EQ, "yes");
-			}
-		}
-
-		// job name
-		final String jobnameVal = JsdlHelpers.getJobname(jsdl);
-		final NameOpValue jobname = new NameOpValue("jobname", NameOpValue.EQ,
-				jobnameVal.substring(Math.max(0, jobnameVal.length() - 6)));
-
-		// module setup
-		final String[] modulesVal = getModulesFromMDS(infoManager, jsdl);
-		if (modulesVal != null) {
-			for (final String moduleStr : modulesVal) {
-				final NameOpValue module = new NameOpValue("module",
-						NameOpValue.EQ, moduleStr);
-				addNotNull(result, module);
-			}
-		}
-
-		result.add(new NameOpValue("save_state", NameOpValue.EQ, "yes"));
-		result.add(new NameOpValue("vo",NameOpValue.EQ,fqan));
-		addNotNull(result, executable);
-		addNotNull(result, jobname);
-		addNotNull(result, arguments);
-		addNotNull(result, stdout);
-		addNotNull(result, stdin);
-		addNotNull(result, stderr);
-		addNotNull(result, directory);
-		addNotNull(result, queue);
-		addNotNull(result, jobType);
-		addNotNull(result, count);
-		addNotNull(result,hostCount);
-		addNotNull(result, maxMemory);
-		addNotNull(result, maxWalltime);
-		addNotNull(result, emailAddress);
-		addNotNull(result, emailStart);
-		addNotNull(result, emailTermination);
-		addNotNull(result, emailAbort);
-
-		final String resultString = result.toRSL(true);
-		myLogger.debug("Translated jsdl into gt5 rsl: " + resultString);
-		return resultString;
-	}
-
-	public static void main(String[] args) {
-		final Gram5Client gram5 = new Gram5Client();
-	}
-
-	public GT5Submitter() {
-		gram5 = new Gram5Client();
 	}
 
 	@Override
-	public int getJobStatus(String endPointReference, ProxyCredential cred) {
-		return translateToGrisuStatus(gram5.getJobStatus(endPointReference,
-				cred.getGssCredential()));
+	public int getJobStatus(String handle, ProxyCredential credential){
+		return getJobStatus(handle, credential, true);
+	}
+	
+	public int getJobStatus(String handle, ProxyCredential credential, boolean restart) {
+		
+		final Gram5JobListener l = Gram5JobListener.getJobListener();
+
+		final String contact = getContactString(handle);
+		GramJob job = new GramJob(null);
+		GramJob restartJob = new GramJob(null);
+		GSSCredential cred = credential.getGssCredential();
+		
+		try {
+			// lets try to see if gateway is working first...
+			Gram.ping(cred,contact);
+		} catch (final GramException ex) {
+			myLogger.info(ex);
+			// have no idea what the status is, gateway is down:	
+			return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED, ex.getErrorCode(), 0);
+
+		} catch (final GSSException ex) {
+			myLogger.error(ex);
+			return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED, 0 , 0);
+		}
+
+		try {
+			job.setID(handle);
+			job.setCredentials(cred);
+			Gram.jobStatus(job);
+			return translateToGrisuStatus(job.getStatus(),job.getError(),job.getError());
+			
+		} catch (final GramException ex) {
+			myLogger.debug("ok, normal method of getting exit status is not working. need to restart job.");
+			if ((ex.getErrorCode() == 156  || 
+					ex.getErrorCode() == GramException.CONNECTION_FAILED || 
+					ex.getErrorCode() == 79) &&
+					restart) {
+				// maybe the job finished, but maybe we need to kick job manager
+
+				myLogger.debug("restarting job");
+				final String rsl = "&(restart=" + handle + ")";
+				restartJob = new GramJob(rsl);
+				restartJob.setCredentials(cred);
+				try {
+					restartJob.request(contact, false);
+				} catch (final GramException ex1) {
+					if (ex1.getErrorCode() == 131) {
+						// job is still running but proxy expired
+						return translateToGrisuStatus(GRAMConstants.STATUS_ACTIVE,131,0);
+					} 
+					// something is really wrong
+					return translateToGrisuStatus(GRAMConstants.STATUS_FAILED, restartJob.getError(),0);
+				} catch (final GSSException ex1) {
+					myLogger.error(ex1);
+					return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED, 0 , 0);
+				}
+
+				// nope, not done yet.
+				return getJobStatus(handle, credential, false);
+			} else if (ex.getErrorCode() == 156){
+				// second restart didn't work - assume the job is done 
+				// this bit is only needed during transition between releases
+				return translateToGrisuStatus(GRAMConstants.STATUS_DONE, 0 , 0);
+				
+			} else {
+				myLogger.error("something else is wrong. error code is " + ex.getErrorCode());
+				myLogger.error(ex);
+				return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED, 0 , 0);
+			}
+			
+		} catch (final GSSException ex) {
+			myLogger.error(ex);
+			return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED, 0 , 0);
+		} catch (final MalformedURLException ex) {
+			myLogger.error(ex);
+			return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED, 0 , 0);
+		}
+
 	}
 
 	@Override
@@ -303,36 +127,76 @@ public class GT5Submitter extends JobSubmitter {
 
 	@Override
 	public int killJob(String handle, ProxyCredential cred) {
-		return gram5.kill(handle, cred.getGssCredential());
+		
+		final GramJob job = new GramJob(null);
+		try {			
+			job.setID(handle);
+			job.setCredentials(cred.getGssCredential());
+			try {
+				Gram.cancel(job);
+				Gram.jobStatus(job);
+			} catch (final GramException ex) {
+				myLogger.error(ex.getLocalizedMessage());
+			} catch (final GSSException ex) {
+				myLogger.error(ex.getLocalizedMessage());
+			}
+
+			return translateToGrisuStatus(job.getStatus(),GramException.USER_CANCELLED, job.getExitCode());
+		} catch (final MalformedURLException ex) {
+			myLogger.error(ex.getLocalizedMessage());
+			return JobConstants.UNDEFINED;
+		} 
 	}
 
 	@Override
 	protected String submit(InformationManager infoManager, String host,
 			String factoryType, Job job) throws ServerJobSubmissionException {
-		final String rsl = createJobSubmissionDescription(infoManager,
-				job.getJobDescription(),job.getFqan());		
-		myLogger.debug("RSL is ... " + rsl);
+
+		RSLFactory f = RSLFactory.getRSLFactory();
+		String rsl = null;
 
 		try {
-			final GSSCredential credential = CredentialHelpers
-			.convertByteArrayToGSSCredential(job.getCredential()
-					.getCredentialData());
-			final String handle = gram5.submit(rsl, host, credential);
-			return handle;
-		} catch (final Exception ex) {
-			myLogger.error(ex);
-			throw new ServerJobSubmissionException(ex.getLocalizedMessage(), ex);
+			rsl = f.create(job.getJobDescription(), job.getFqan()).toString();
+		} catch (RSLCreationException rex) {
+			throw new ServerJobSubmissionException(rex);
 		}
+
+		myLogger.debug("RSL is ... " + rsl);
+		GSSCredential credential = null;
+
+		try {
+			credential = CredentialHelpers.convertByteArrayToGSSCredential(job
+					.getCredential().getCredentialData());
+
+			GramJob gt5Job = new GramJob(rsl);
+			final Gram5JobListener l = Gram5JobListener.getJobListener();
+			gt5Job.setCredentials(credential);
+			gt5Job.addListener(l);
+
+			try {
+				gt5Job.request(host, false);
+			} catch (WaitingForCommitException cex) {
+				gt5Job.signal(GramJob.SIGNAL_COMMIT_REQUEST);
+			}
+			//gt5Job.bind();
+			//gt5Job.getStatus();
+
+			return gt5Job.getIDAsString();
+
+		} catch (GSSException gss) {
+			myLogger.error(gss);
+			throw new ServerJobSubmissionException("job credential is invalid");
+		} catch (GramException gex){
+			throw new ServerJobSubmissionException(gex.getLocalizedMessage(),gex);
+		}
+		
 	}
 
-	private int translateToGrisuStatus(final int[] statusAndError) {
-
-		final int status = statusAndError[0];
-		final int error = statusAndError[1];
+	private int translateToGrisuStatus(int status,int failureCode ,int exitCode) {
 
 		int grisu_status = Integer.MIN_VALUE;
 		if (status == GRAMConstants.STATUS_DONE) {
-			grisu_status = JobConstants.DONE + error;
+			grisu_status = JobConstants.DONE + exitCode;
 		} else if (status == GRAMConstants.STATUS_STAGE_IN) {
 			grisu_status = JobConstants.STAGE_IN;
 		} else if (status == GRAMConstants.STATUS_STAGE_OUT) {
@@ -344,11 +208,20 @@ public class GT5Submitter extends JobSubmitter {
 		} else if (status == GRAMConstants.STATUS_ACTIVE) {
 			grisu_status = JobConstants.ACTIVE;
 		} else if (status == GRAMConstants.STATUS_FAILED) {
-			grisu_status = JobConstants.FAILED;
+			if (failureCode == GramException.USER_CANCELLED){
+				grisu_status = JobConstants.KILLED;
+			} else {
+				grisu_status = JobConstants.FAILED;
+			}
 		} else if (status == GRAMConstants.STATUS_SUSPENDED) {
 			grisu_status = JobConstants.ACTIVE;
 		} else {
-			grisu_status = status;
+			// needed for transition period to deal with jobs submitted without two-phase commit
+			if (failureCode == 156){
+				grisu_status = JobConstants.DONE;
+			} else {
+				grisu_status = JobConstants.UNSUBMITTED;
+			}
 		}
 		return grisu_status;
 

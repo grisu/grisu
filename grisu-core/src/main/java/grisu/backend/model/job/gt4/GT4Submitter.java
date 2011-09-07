@@ -106,6 +106,22 @@ public class GT4Submitter extends JobSubmitter {
 			}
 		}
 
+		Map<String, String> envVariables = JsdlHelpers
+				.getPosixApplicationEnvironment(jsdl);
+		if (envVariables != null) {
+			for (String key : envVariables.keySet()) {
+				final Element environment = output.createElement("environment");
+				Element keyElement = output.createElement("name");
+				keyElement.setTextContent(key);
+				Element valueElement = output.createElement("value");
+				valueElement.setTextContent(envVariables.get(key));
+
+				environment.appendChild(keyElement);
+				environment.appendChild(valueElement);
+				job.appendChild(environment);
+			}
+		}
+
 		// Add "directory"
 		final Element directory = output.createElement("directory");
 		directory.setTextContent(JsdlHelpers.getWorkingDirectory(jsdl));
@@ -739,7 +755,7 @@ public class GT4Submitter extends JobSubmitter {
 
 			} catch (final Exception e) {
 				myLogger.error("Gt4 job submission error: "
- + e.getLocalizedMessage(),
+						+ e.getLocalizedMessage(),
 						e);
 			}
 

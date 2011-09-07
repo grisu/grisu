@@ -67,7 +67,7 @@ public class LoginManager {
 					"https://compute.services.bestgrid.org/soap/GrisuService")
 					.put("dev",
 							"https://compute-dev.services.bestgrid.org/soap/GrisuService")
-			.put("bestgrid-test",
+							.put("bestgrid-test",
 									"https://compute-test.services.bestgrid.org/soap/GrisuService")
 									.put("local_ws", "http://localhost:8080/soap/GrisuService")
 									.put("local_ws_tomcat",
@@ -80,6 +80,8 @@ public class LoginManager {
 	public static String httpProxyUsername = null;
 
 	public static char[] httpProxyPassphrase = null;
+
+	public static int REQUIRED_BACKEND_API_VERSION = 14;
 
 	public static void addPluginsToClasspath() throws IOException {
 
@@ -587,15 +589,26 @@ public class LoginManager {
 
 		if (LocalProxy.validGridProxyExists()) {
 			CliHelpers.setIndeterminateProgress("Logging in...", true);
-			ServiceInterface tmp = LoginManager.login(url);
-			CliHelpers.setIndeterminateProgress("Logged in to backend: " + url,
-					false);
-			return tmp;
+			try {
+				ServiceInterface tmp = LoginManager.login(url);
+				CliHelpers.setIndeterminateProgress("Logged in to backend: "
+						+ url, false);
+				return tmp;
+			} catch (LoginException le) {
+				CliHelpers.setIndeterminateProgress(false);
+				throw le;
+			}
 		} else {
 			final ImmutableSet<LoginType> temp = ImmutableSet.of(
 					LoginType.SHIBBOLETH, LoginType.MYPROXY,
 					LoginType.X509_CERTIFICATE);
-			return loginCommandline(temp, url);
+			try {
+				ServiceInterface tmp = loginCommandline(temp, url);
+				return tmp;
+			} catch (LoginException le) {
+				CliHelpers.setIndeterminateProgress(false);
+				throw le;
+			}
 		}
 
 	}
