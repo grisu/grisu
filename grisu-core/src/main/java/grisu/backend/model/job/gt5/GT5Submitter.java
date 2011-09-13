@@ -145,7 +145,7 @@ public class GT5Submitter extends JobSubmitter {
 				myLogger.error(ex.getLocalizedMessage());
 			}
 
-			return translateToGrisuStatus(job.getStatus(),GramException.USER_CANCELLED, job.getExitCode());
+			return getJobStatus(handle, cred, true);
 		} catch (final MalformedURLException ex) {
 			myLogger.error(ex.getLocalizedMessage());
 			return JobConstants.UNDEFINED;
