@@ -115,7 +115,7 @@ public class RSLFactory {
 		final int hcount = JsdlHelpers.getResourceCount(jsdl);
 		
 		if (StringUtils.isBlank(jobtype)){
-			jobtype = (pcount > 1)?"mpi":"single";
+			jobtype = "single";
 			
 		}
 		result.add(new NameOpValue("count", NameOpValue.EQ, "" + pcount));

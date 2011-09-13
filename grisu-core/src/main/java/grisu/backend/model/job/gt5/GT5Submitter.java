@@ -69,8 +69,12 @@ public class GT5Submitter extends JobSubmitter {
 			job.setID(handle);
 			job.setCredentials(cred);
 			Gram.jobStatus(job);
-			return translateToGrisuStatus(job.getStatus(),job.getError(),job.getError());
-
+			int jobStatus = job.getStatus();
+			if (jobStatus == GramJob.STATUS_DONE || jobStatus == GramJob.STATUS_FAILED){
+				job.signal(GramJob.SIGNAL_COMMIT_END);
+			}
+			return translateToGrisuStatus(jobStatus,job.getError(),job.getError());
+			
 		} catch (final GramException ex) {
 			myLogger.debug("ok, normal method of getting exit status is not working. need to restart job.");
 			if (((ex.getErrorCode() == 156)  ||
@@ -141,7 +145,7 @@ public class GT5Submitter extends JobSubmitter {
 				myLogger.error(ex.getLocalizedMessage());
 			}
 
-			return translateToGrisuStatus(job.getStatus(),GramException.USER_CANCELLED, job.getExitCode());
+			return getJobStatus(handle, cred, true);
 		} catch (final MalformedURLException ex) {
 			myLogger.error(ex.getLocalizedMessage());
 			return JobConstants.UNDEFINED;
