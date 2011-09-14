@@ -171,6 +171,10 @@ public class DtoJob implements Comparable<DtoJob> {
 
 	@Override
 	public int hashCode() {
+		String jobname = jobname();
+		if (StringUtils.isBlank(jobname)) {
+			return 253*getProperties().hashCode();
+		}
 		return 253 * jobname().hashCode();
 	}
 

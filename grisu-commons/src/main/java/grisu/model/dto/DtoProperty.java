@@ -58,6 +58,17 @@ public class DtoProperty {
 		this.value = value;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if ( o instanceof DtoProperty) {
+			DtoProperty other = (DtoProperty)o;
+			if ( getKey().equals(other.getKey()) && getValue().equals(other.getValue()) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@XmlAttribute
 	public String getKey() {
 		return key;
@@ -66,6 +77,11 @@ public class DtoProperty {
 	@XmlValue
 	public String getValue() {
 		return value;
+	}
+
+	@Override
+	public int hashCode() {
+		return 231 * ( getKey().hashCode() + getValue().hashCode());
 	}
 
 	public void setKey(String key) {
