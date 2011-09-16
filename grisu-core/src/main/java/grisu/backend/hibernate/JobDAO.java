@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
+import org.hibernate.StaleStateException;
 
 
 /**
@@ -34,6 +35,16 @@ public class JobDAO extends BaseHibernateDAO {
 
 			// myLogger.debug("delete successful");
 
+		} catch (StaleStateException sse) {
+			String name = "n/a";
+			try {
+				name = persistentInstance.getJobname();
+			} catch (Exception ee) {
+			}
+			myLogger.warn(
+					"Delete failed because. Job probably already deleted, doing nothing. Jobname: "
+							+ name,
+					sse);
 		} catch (final RuntimeException e) {
 			myLogger.error("delete failed", e);
 			try {
@@ -108,7 +119,7 @@ public class JobDAO extends BaseHibernateDAO {
 	 *             there are several jobs with this dn and jobname. this is bad.
 	 */
 	public final Job findJobByDN(final String dn, final String jobname)
-	throws NoSuchJobException {
+			throws NoSuchJobException {
 		// myLogger.debug("Loading job with dn: " + dn + " and jobname: "
 		// + jobname + " from dn.");
 		final String queryString = "from grisu.backend.model.job.Job as job where job.dn = ? and job.jobname = ?";
@@ -167,11 +178,11 @@ public class JobDAO extends BaseHibernateDAO {
 		String queryString;
 		if (includeMultiPartJobs) {
 			queryString = "from grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
-				+ Constants.APPLICATIONNAME_KEY + "']) = ?";
+					+ Constants.APPLICATIONNAME_KEY + "']) = ?";
 		} else {
 			queryString = "from grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
-				+ Constants.APPLICATIONNAME_KEY
-				+ "']) = ? and batchJob = false";
+					+ Constants.APPLICATIONNAME_KEY
+					+ "']) = ? and batchJob = false";
 		}
 
 		try {
@@ -249,11 +260,11 @@ public class JobDAO extends BaseHibernateDAO {
 		String queryString;
 		if (includeMultiPartJob) {
 			queryString = "select jobname from grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
-				+ Constants.APPLICATIONNAME_KEY + "']) = ?";
+					+ Constants.APPLICATIONNAME_KEY + "']) = ?";
 		} else {
 			queryString = "select jobname from grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
-				+ Constants.APPLICATIONNAME_KEY
-				+ "']) = ? and job.batchJob = false";
+					+ Constants.APPLICATIONNAME_KEY
+					+ "']) = ? and job.batchJob = false";
 		}
 
 		try {
