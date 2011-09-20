@@ -1,6 +1,6 @@
 package grisu.frontend.view.swing.files;
 
-import grisu.model.FileManager;
+import grisu.jcommons.utils.FileAndUrlHelpers;
 import grisu.model.files.GlazedFile;
 
 import java.util.Set;
@@ -8,7 +8,6 @@ import java.util.Set;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -107,12 +106,13 @@ public class FileDetailPanel extends JPanel implements FileListListener {
 					getNameLabel().setText(NAME_PREFIX + file.getName());
 					getSizeLabel().setText(
 							SIZE_PREFIX
-									+ FileManager.calculateSizeString(file
-											.getSize()));
+											+ FileAndUrlHelpers
+													.calculateSizeString(file
+									.getSize()));
 					getTimestampLabel().setText(
 							DATE_PREFIX
-									+ GlazedFile.calculateTimeStampString(file
-											.getLastModified()));
+							+ GlazedFile.calculateTimeStampString(file
+									.getLastModified()));
 				}
 			}
 		});

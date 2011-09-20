@@ -75,36 +75,7 @@ public class FileManager {
 	private static final Pattern URL_PATTERN = Pattern
 			.compile(URL_PATTERN_STRING);
 
-	/**
-	 * Conveninec method to calculate a human readable String to indicate file
-	 * size from the bytesize of a file.
-	 * 
-	 * @param size
-	 *            the size in bytes
-	 * @return a human readable String that indicates filesize
-	 */
-	public static String calculateSizeString(Long size) {
 
-		String sizeString;
-
-		if (size < 0) {
-			sizeString = "";
-		} else if (size.equals(0L)) {
-			sizeString = "0 B";
-		} else {
-
-			if (size > (1024 * 1024)) {
-				sizeString = (size / (1024 * 1024)) + " MB";
-			} else if (size > 1024) {
-				sizeString = (size / 1024) + " KB";
-			} else {
-				sizeString = size + " B";
-			}
-		}
-
-		return sizeString;
-
-	}
 
 	/**
 	 * Convenience method to create a datahandler out of a file.

@@ -1,5 +1,6 @@
 package grisu.frontend.view.swing.files.virtual;
 
+import grisu.jcommons.utils.FileAndUrlHelpers;
 import grisu.model.FileManager;
 import grisu.model.dto.GridFile;
 
@@ -59,7 +60,7 @@ public class GridFileTreeTableRowModel implements RowModel {
 				if (size < 0) {
 					return "";
 				} else {
-					return FileManager.calculateSizeString(size);
+					return FileAndUrlHelpers.calculateSizeString(size);
 				}
 
 			default:
