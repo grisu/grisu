@@ -8,6 +8,7 @@ import grisu.control.exceptions.JobPropertiesException;
 import grisu.control.exceptions.JobSubmissionException;
 import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.RemoteFileSystemException;
+import grisu.control.exceptions.StatusException;
 import grisu.frontend.control.clientexceptions.FileTransactionException;
 import grisu.frontend.control.fileTransfers.FileTransaction;
 import grisu.frontend.control.fileTransfers.FileTransactionManager;
@@ -1362,6 +1363,12 @@ Comparable<JobObject> {
 	 */
 	public final void submitJob(Map<String, String> additionalJobProperties)
 			throws JobSubmissionException, InterruptedException {
+		submitJob(additionalJobProperties, true);
+	}
+
+	public final void submitJob(Map<String, String> additionalJobProperties,
+			boolean waitForSubmissionToFinish) throws JobSubmissionException,
+			InterruptedException {
 
 		addJobLogMessage("Starting job submission...");
 
@@ -1388,6 +1395,22 @@ Comparable<JobObject> {
 		try {
 			addJobLogMessage("Submitting job to endpoint...");
 			serviceInterface.submitJob(getJobname());
+			if (waitForSubmissionToFinish) {
+				try {
+					StatusObject s = StatusObject.waitForActionToFinish(
+							serviceInterface, getJobname(), 3, true, false);
+					if (s.getStatus().isFailed()) {
+						String errorCause = s.getStatus().getErrorCause();
+						if (StringUtils.isBlank(errorCause)) {
+							errorCause = "Unknown";
+						}
+						throw new JobSubmissionException(errorCause);
+					}
+				} catch (StatusException e) {
+					myLogger.error(e);
+					throw new RuntimeException(e);
+				}
+			}
 
 		} catch (final NoSuchJobException e) {
 			addJobLogMessage("Submission failed: " + e.getLocalizedMessage());

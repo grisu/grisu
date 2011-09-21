@@ -2236,6 +2236,23 @@ Comparable<BatchJobObject>, Listener {
 
 		try {
 			serviceInterface.submitJob(batchJobname);
+
+			if (waitForSubmissionToFinish) {
+				try {
+					StatusObject s = StatusObject.waitForActionToFinish(
+							serviceInterface, batchJobname, 5, true, false);
+					if (s.getStatus().isFailed()) {
+						String errorCause = s.getStatus().getErrorCause();
+						if (StringUtils.isBlank(errorCause)) {
+							errorCause = "Unknown";
+						}
+						throw new JobSubmissionException(errorCause);
+					}
+				} catch (StatusException e) {
+					myLogger.error(e);
+					throw new RuntimeException(e);
+				}
+			}
 		} catch (final JobSubmissionException jse) {
 			isSubmitting = false;
 			pcs.firePropertyChange(SUBMITTING, !isSubmitting, isSubmitting);

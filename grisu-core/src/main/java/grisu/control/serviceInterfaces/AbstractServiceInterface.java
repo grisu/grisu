@@ -4094,25 +4094,42 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void submitJob(final String jobname) throws JobSubmissionException,
 	NoSuchJobException {
 
-		// myLogger.info("Submitting job: " + jobname + " for user " + getDN());
-		Job job;
-
-		DtoActionStatus status = null;
-		status = new DtoActionStatus(jobname, 0);
+		final DtoActionStatus status = new DtoActionStatus(jobname, 0);
 		getSessionActionStatus().put(jobname, status);
 
 		try {
-			job = getUser().getJobFromDatabaseOrFileSystem(jobname);
+			final Job job = getUser().getJobFromDatabaseOrFileSystem(jobname);
 			if (job.getStatus() > JobConstants.READY_TO_SUBMIT) {
 				throw new JobSubmissionException("Job already submitted.");
 			}
-			submitJob(job, true, status);
+			new Thread() {
+				@Override
+				public void run() {
+					try {
+						submitJob(job, true, status);
+					} catch (JobSubmissionException e) {
+						myLogger.error(e);
+					}
+				}
+			}.start();
 
 		} catch (final NoSuchJobException e) {
 			// maybe it's a multipartjob
 			final BatchJob multiJob = getUser()
 					.getBatchJobFromDatabase(jobname);
-			submitBatchJob(multiJob);
+
+			new Thread() {
+				@Override
+				public void run() {
+					try {
+						submitBatchJob(multiJob);
+					} catch (JobSubmissionException e) {
+						myLogger.error(e);
+					} catch (NoSuchJobException e) {
+						myLogger.error(e);
+					}
+				}
+			}.start();
 		}
 
 	}
