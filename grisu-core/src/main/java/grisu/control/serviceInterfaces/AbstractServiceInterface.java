@@ -3988,6 +3988,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							SUBMIT_PROXY_LIFETIME));
 				}
 			} catch (final Exception e) {
+				status.setFailed(true);
+				status.setErrorCause(e.getLocalizedMessage());
+				status.setFinished(true);
+				myLogger.error(e);
 				throw new JobSubmissionException(
 						"Could not create credential to use to submit the job: "
 								+ e.getLocalizedMessage());
@@ -4029,6 +4033,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				status.addLogMessage("Job submission failed on server.");
 				status.setFailed(true);
 				status.setFinished(true);
+				status.setErrorCause(e.getLocalizedMessage());
 				job.addLogMessage("Submission to endpoint failed: "
 						+ e.getLocalizedMessage());
 				getUser().addLogMessageToPossibleMultiPartJobParent(
@@ -4061,6 +4066,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		if (handle == null) {
 			status.addLogMessage("Submission finished but no jobhandle...");
 			status.setFailed(true);
+			status.setErrorCause("No jobhandle");
 			status.setFinished(true);
 			job.addLogMessage("Submission finished but jobhandle is null...");
 			getUser().addLogMessageToPossibleMultiPartJobParent(
@@ -4081,11 +4087,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			// TODO or do we want it to be stored?
 			job.setCredential(null);
 			job.addLogMessage("Job submission finished successful.");
+
 			getUser().addLogMessageToPossibleMultiPartJobParent(
 					job,
 					"Job submission for job: " + job.getJobname()
 					+ " finished successful.");
 			jobdao.saveOrUpdate(job);
+
 			myLogger.info("Jobsubmission for job " + job.getJobname()
 					+ " and user " + getDN() + " successful.");
 
@@ -4095,11 +4103,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			status.addLogMessage("Submission finished, error in wrap-up...");
 			status.setFailed(true);
 			status.setFinished(true);
+			status.setErrorCause(e.getLocalizedMessage());
 			job.addLogMessage("Submission finished, error in wrap-up...");
 			getUser().addLogMessageToPossibleMultiPartJobParent(
 					job,
 					"Job submission for job: " + job.getJobname()
-							+ " finished but error in wrap-up...");
+					+ " finished but error in wrap-up...");
 			throw new JobSubmissionException(
 					"Job apparently submitted but error in wrap-up for job: "
 							+ job.getJobname());
