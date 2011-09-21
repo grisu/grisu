@@ -583,7 +583,7 @@ public class RunningJobManager implements EventSubscriber {
 			@Override
 			public void run() {
 
-				final List<JobObject> tempList = new LinkedList<JobObject>(
+				final Set<JobObject> tempList = new HashSet<JobObject>(
 						getAllCurrentlyWatchedSingleJobs());
 				for (final JobObject job : tempList) {
 					myLogger.debug("Refreshing job: " + job.getJobname());
