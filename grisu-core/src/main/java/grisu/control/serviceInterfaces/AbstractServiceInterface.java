@@ -4072,23 +4072,38 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							+ job.getJobname());
 		}
 
-		job.addJobProperty(Constants.SUBMISSION_TIME_KEY,
-				Long.toString(new Date().getTime()));
+		try {
 
-		// we don't want the credential to be stored with the job in this case
-		// TODO or do we want it to be stored?
-		job.setCredential(null);
-		job.addLogMessage("Job submission finished successful.");
-		getUser().addLogMessageToPossibleMultiPartJobParent(
-				job,
-				"Job submission for job: " + job.getJobname()
-				+ " finished successful.");
-		jobdao.saveOrUpdate(job);
-		myLogger.info("Jobsubmission for job " + job.getJobname()
-				+ " and user " + getDN() + " successful.");
+			job.addJobProperty(Constants.SUBMISSION_TIME_KEY,
+					Long.toString(new Date().getTime()));
 
-		status.addElement("Job submission finished...");
-		status.setFinished(true);
+			// we don't want the credential to be stored with the job in this case
+			// TODO or do we want it to be stored?
+			job.setCredential(null);
+			job.addLogMessage("Job submission finished successful.");
+			getUser().addLogMessageToPossibleMultiPartJobParent(
+					job,
+					"Job submission for job: " + job.getJobname()
+					+ " finished successful.");
+			jobdao.saveOrUpdate(job);
+			myLogger.info("Jobsubmission for job " + job.getJobname()
+					+ " and user " + getDN() + " successful.");
+
+			status.addElement("Job submission finished...");
+			status.setFinished(true);
+		} catch (Exception e) {
+			status.addLogMessage("Submission finished, error in wrap-up...");
+			status.setFailed(true);
+			status.setFinished(true);
+			job.addLogMessage("Submission finished, error in wrap-up...");
+			getUser().addLogMessageToPossibleMultiPartJobParent(
+					job,
+					"Job submission for job: " + job.getJobname()
+							+ " finished but error in wrap-up...");
+			throw new JobSubmissionException(
+					"Job apparently submitted but error in wrap-up for job: "
+							+ job.getJobname());
+		}
 	}
 
 	public void submitJob(final String jobname) throws JobSubmissionException,
@@ -4107,7 +4122,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				public void run() {
 					try {
 						submitJob(job, true, status);
-					} catch (JobSubmissionException e) {
+					} catch (Exception e) {
 						myLogger.error(e);
 					}
 				}

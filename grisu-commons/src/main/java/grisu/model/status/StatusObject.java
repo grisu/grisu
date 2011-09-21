@@ -124,6 +124,10 @@ public class StatusObject {
 		myLogger.debug("Checking status for: " + handle);
 
 		lastStatus = si.getActionStatus(handle);
+
+		myLogger.debug("Status for " + handle + ": "
+				+ lastStatus.percentFinished() + " %");
+
 		if (lastStatus == null) {
 
 			throw new StatusException("Can't find status with handle "
@@ -155,8 +159,12 @@ public class StatusObject {
 			} catch (final InterruptedException e) {
 				throw e;
 			}
+			myLogger.debug("Checking status for: " + handle);
 
 			lastStatus = si.getActionStatus(handle);
+
+			myLogger.debug("Status for " + handle + ": "
+					+ lastStatus.percentFinished() + " %");
 			if (lastStatus == null) {
 
 				throw new StatusException("Can't find status with handle "
