@@ -1638,7 +1638,7 @@ public class FileManager {
 						myLogger.error("FAILED. SLEEPING 1 SECONDS");
 						Thread.sleep(1000);
 						filetransferHandle = serviceInterface.upload(handler,
-								targetFile + "/" + file.getName());
+								targetFile);
 						myLogger.info("Upload of file " + file.getName()
 								+ " successful.");
 					} catch (final Exception e) {
@@ -1678,7 +1678,7 @@ public class FileManager {
 	 * @throws FileTransactionException
 	 *             if the transfer fails
 	 */
-	private final void uploadFileToDirectory(final File file,
+	private final String uploadFileToDirectory(final File file,
 			final String targetDirectory, final boolean overwrite)
 					throws FileTransactionException {
 
@@ -1691,7 +1691,9 @@ public class FileManager {
 		myLogger.debug("Uploading local file: " + file.toString() + " to: "
 				+ targetDirectory);
 
+		String target = targetDirectory + "/" + file.getName();
 		uploadFile(file, targetDirectory + "/" + file.getName(), overwrite);
+		return target;
 
 	}
 
