@@ -504,12 +504,14 @@ Comparable<JobObject> {
 		return this.getJobname();
 	}
 
-	private void createWaitThread(final int checkIntervallInSeconds) {
+	private synchronized void createWaitThread(final int checkIntervallInSeconds) {
 
 		try {
 			// just to make sure we don't create 2 or more threads. Should never
 			// happen.
-			waitThread.interrupt();
+			if (waitThread != null) {
+				waitThread.interrupt();
+			}
 		} catch (final Exception e) {
 			myLogger.debug(e);
 		}
@@ -1344,6 +1346,25 @@ Comparable<JobObject> {
 	public final void submitJob() throws JobSubmissionException,
 	InterruptedException {
 		submitJob(null);
+	}
+
+	/**
+	 * After you created the job on the backend using the
+	 * {@link #createJob(String)} or {@link #createJob(String, String)} method
+	 * you can tell the backend to actually submit the job to the endpoint
+	 * resource. Internally, this method also does possible stage-ins from your
+	 * local machine.
+	 * 
+	 * @param waitForSubmissionToFinish
+	 *            whether to wait for submission to finish or not
+	 * 
+	 * @throws JobSubmissionException
+	 *             if the job could not be submitted
+	 * @throws InterruptedException
+	 */
+	public final void submitJob(boolean waitForSubmissionToFinish)
+			throws JobSubmissionException, InterruptedException {
+		submitJob(null, waitForSubmissionToFinish);
 	}
 
 	/**
