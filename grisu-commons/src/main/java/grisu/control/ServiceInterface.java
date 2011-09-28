@@ -1033,11 +1033,12 @@ public interface ServiceInterface {
 	 *            a list of jobs to kill
 	 * @param clean
 	 *            whether to clean/delete the jobdirectory if possible
+	 * @return the handle to the jobkilling task or null if no jobs to kill
 	 */
 	@POST
 	@Path("/jobs/kill")
 	@RolesAllowed("User")
-	void killJobs(@QueryParam("jobnames") DtoStringList jobnames,
+	String killJobs(@QueryParam("jobnames") DtoStringList jobnames,
 			@DefaultValue("false") @QueryParam("clean") boolean clean);
 
 	/**

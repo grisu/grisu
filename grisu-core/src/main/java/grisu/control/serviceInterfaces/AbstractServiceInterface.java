@@ -2459,30 +2459,41 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public void killJobs(final DtoStringList jobnames, final boolean clear) {
+	public String killJobs(final DtoStringList jobnames, final boolean clear) {
 
 		if ((jobnames == null) || (jobnames.asArray().length == 0)) {
-			return;
+			return null;
 		}
 
+		final String handle = UUID.randomUUID().toString();
 		final DtoActionStatus status = new DtoActionStatus(
-				jobnames.asArray()[0], jobnames.asArray().length * 2);
+				handle,
+				jobnames.asArray().length * 2);
 		getSessionActionStatus().put(jobnames.asArray()[0], status);
 
-		for (final String jobname : jobnames.asArray()) {
-			status.addElement("Killing job " + jobname + "...");
-			try {
-				kill(jobname, clear);
-				status.addElement("Success.");
-			} catch (final Exception e) {
-				status.addElement("Failed: " + e.getLocalizedMessage());
-				status.setFailed(true);
-				status.setErrorCause(e.getLocalizedMessage());
-				myLogger.error("Could not kill job: " + jobname);
-			}
-		}
+		Thread killThread = new Thread() {
+			@Override
+			public void run() {
 
-		status.setFinished(true);
+				for (final String jobname : jobnames.asArray()) {
+					status.addElement("Killing job " + jobname + "...");
+					try {
+						kill(jobname, clear);
+						status.addElement("Success.");
+					} catch (final Exception e) {
+						status.addElement("Failed: " + e.getLocalizedMessage());
+						status.setFailed(true);
+						status.setErrorCause(e.getLocalizedMessage());
+						myLogger.error("Could not kill job: " + jobname);
+					}
+				}
+
+				status.setFinished(true);
+			}
+		};
+		killThread.start();
+
+		return handle;
 	}
 
 	/*
