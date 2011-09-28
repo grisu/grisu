@@ -2469,7 +2469,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		final DtoActionStatus status = new DtoActionStatus(
 				handle,
 				jobnames.asArray().length * 2);
-		getSessionActionStatus().put(jobnames.asArray()[0], status);
+		getSessionActionStatus().put(handle, status);
 
 		Thread killThread = new Thread() {
 			@Override
