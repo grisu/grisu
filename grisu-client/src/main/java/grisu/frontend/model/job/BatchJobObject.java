@@ -2233,14 +2233,14 @@ Comparable<BatchJobObject>, Listener {
 			pcs.firePropertyChange(SUBMITTING, !isSubmitting, isSubmitting);
 			throw new InterruptedException("Interrupted before job submission.");
 		}
-
+		String handle = null;
 		try {
-			serviceInterface.submitJob(batchJobname);
+			handle = serviceInterface.submitJob(batchJobname);
 
 			if (waitForSubmissionToFinish) {
 				try {
 					StatusObject s = StatusObject.waitForActionToFinish(
-							serviceInterface, batchJobname, 5, true, false);
+							serviceInterface, handle, 5, true, false);
 					if (s.getStatus().isFailed()) {
 						String errorCause = s.getStatus().getErrorCause();
 						if (StringUtils.isBlank(errorCause)) {
@@ -2273,8 +2273,7 @@ Comparable<BatchJobObject>, Listener {
 			throw nsje;
 		}
 
-		final StatusObject status = new StatusObject(serviceInterface,
-				BatchJobObject.this.batchJobname);
+		final StatusObject status = new StatusObject(serviceInterface, handle);
 
 		final Thread waitThread = new Thread() {
 			@Override

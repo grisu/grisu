@@ -375,23 +375,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	}
 
 	private void archiveBatchJob(final BatchJob batchJob, final String target)
-			throws NoSuchJobException {
+			throws NoSuchJobException, JobPropertiesException {
 
-		if ((getSessionActionStatus().get(batchJob.getBatchJobname()) != null)
-				&& !getSessionActionStatus().get(batchJob.getBatchJobname())
-				.isFinished()) {
+		if (batchJob.getStatus() <= JobConstants.FINISHED_EITHER_WAY) {
 			// this should not really happen
-			myLogger.error("Not archiving job because jobsubmission is still ongoing.");
-			return;
+			myLogger.error("Not archiving job because job is not finished.");
+			throw new JobPropertiesException(
+					"Can't archive batchjob because it is not finished yet.");
 		}
 
-		final DtoActionStatus status = new DtoActionStatus(
-				ServiceInterface.ARCHIVE_STATUS_PREFIX
-				+ batchJob.getBatchJobname(), (batchJob.getJobs()
-						.size() * 3) + 3);
-		getSessionActionStatus().put(
-				ServiceInterface.ARCHIVE_STATUS_PREFIX
-				+ batchJob.getBatchJobname(), status);
+		final DtoActionStatus status = new DtoActionStatus(target, (batchJob
+				.getJobs()
+				.size() * 3) + 3);
+		getSessionActionStatus().put(target, status);
 
 		final Thread archiveThread = new Thread() {
 			@Override
@@ -470,12 +466,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throws JobPropertiesException, NoSuchJobException,
 			RemoteFileSystemException {
 
-		if ((getSessionActionStatus().get(jobname) != null)
-				&& !getSessionActionStatus().get(jobname).isFinished()) {
+		if (getJob(jobname).getStatus() < JobConstants.FINISHED_EITHER_WAY) {
 
-			myLogger.debug("not archiving job because jobsubmission is still ongoing.");
-			throw new JobPropertiesException(
-					"Job (re-)submission is still ongoing in background.");
+			myLogger.debug("not archiving job because job is not finished yet");
+			throw new JobPropertiesException("Job not finished.");
 		}
 
 		if (StringUtils.isBlank(target)) {
@@ -544,8 +538,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private Thread archiveSingleJob(final Job job, final String targetDirUrl,
 			final DtoActionStatus optionalBatchJobStatus) {
 
-		final DtoActionStatus status = new DtoActionStatus(
-				ServiceInterface.ARCHIVE_STATUS_PREFIX + job.getJobname(), 5);
+		final DtoActionStatus status = new DtoActionStatus(targetDirUrl, 5);
 
 		getSessionActionStatus().put(status.getHandle(), status);
 
@@ -994,17 +987,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			final boolean overwrite, final boolean waitForFileTransferToFinish)
 					throws RemoteFileSystemException {
 
-		String handle = null;
-
-		if (getSessionActionStatus().get(target) == null) {
-			handle = target;
-		} else {
-			int counter = 0;
-			do {
-				handle = target + "_" + counter;
-				counter = counter + 1;
-			} while (getSessionActionStatus().get(handle) != null);
-		}
+		String handle = UUID.randomUUID().toString();
 
 		final DtoActionStatus actionStat = new DtoActionStatus(handle,
 				sources.asArray().length * 2);
@@ -4126,11 +4109,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 	}
 
-	public void submitJob(final String jobname) throws JobSubmissionException,
-	NoSuchJobException {
+	public String submitJob(final String jobname)
+			throws JobSubmissionException,
+			NoSuchJobException {
 
-		final DtoActionStatus status = new DtoActionStatus(jobname, 0);
-		getSessionActionStatus().put(jobname, status);
+		String handle = UUID.randomUUID().toString();
+		final DtoActionStatus status = new DtoActionStatus(handle, 0);
+		getSessionActionStatus().put(handle, status);
 
 		try {
 			try {
@@ -4168,10 +4153,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				}.start();
 			}
 		} catch (Exception e) {
-				status.setFailed(true);
-				status.setFinished(true);
-				status.setErrorCause(e.getLocalizedMessage());
-			}
+			status.setFailed(true);
+			status.setFinished(true);
+			status.setErrorCause(e.getLocalizedMessage());
+		}
+
+		return handle;
 
 	}
 

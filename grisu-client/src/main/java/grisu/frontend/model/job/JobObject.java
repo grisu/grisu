@@ -309,8 +309,7 @@ Comparable<JobObject> {
 			if (waitForArchivingToFinish) {
 				try {
 					StatusObject.waitForActionToFinish(getServiceInterface(),
-							ServiceInterface.ARCHIVE_STATUS_PREFIX
-							+ getJobname(), 5, true, false);
+							targetUrl, 5, true, false);
 
 					isArchived = true;
 					pcs.firePropertyChange("archived", false, true);
@@ -335,9 +334,8 @@ Comparable<JobObject> {
 
 						try {
 							StatusObject.waitForActionToFinish(
-									getServiceInterface(),
-									ServiceInterface.ARCHIVE_STATUS_PREFIX
-									+ getJobname(), 5, true, false);
+									getServiceInterface(), targetUrl, 5, true,
+									false);
 
 							isArchived = true;
 							pcs.firePropertyChange("archived", false, true);
@@ -1415,11 +1413,11 @@ Comparable<JobObject> {
 
 		try {
 			addJobLogMessage("Submitting job to endpoint...");
-			serviceInterface.submitJob(getJobname());
+			String handle = serviceInterface.submitJob(getJobname());
 			if (waitForSubmissionToFinish) {
 				try {
 					StatusObject s = StatusObject.waitForActionToFinish(
-							serviceInterface, getJobname(), 3, true, false);
+							serviceInterface, handle, 3, true, false);
 					if (s.getStatus().isFailed()) {
 						String errorCause = s.getStatus().getErrorCause();
 						if (StringUtils.isBlank(errorCause)) {

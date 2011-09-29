@@ -56,7 +56,6 @@ public interface ServiceInterface {
 	public static final int API_VERSION = 14;
 
 	public static final String VIRTUAL_GRID_PROTOCOL_NAME = "grid";
-	public static final String ARCHIVE_STATUS_PREFIX = "ARCHIVE_";
 	public static String GRISU_JOB_FILE_NAME = ".grisujob";
 
 	/**
@@ -153,8 +152,7 @@ public interface ServiceInterface {
 	 * If target is null, the user property
 	 * {@link Constants#DEFAULT_JOB_ARCHIVE_LOCATION} is used. This operation
 	 * will be executed in the background, you can query its status using the
-	 * {@link #getActionStatus(String)} using the {#link
-	 * {@link #ARCHIVE_STATUS_PREFIX} (ARCHIVE_) plus the jobname as handle.
+	 * {@link #getActionStatus(String)} using the return value as handle.
 	 * 
 	 * The default {@link Constants#DEFAULT_JOB_ARCHIVE_LOCATION} can be set via
 	 * the {@link #setUserProperty(String, String)} method, you can use the same
@@ -167,7 +165,8 @@ public interface ServiceInterface {
 	 * @param target
 	 *            the url (of the parent dir) to archive the job to or null to
 	 *            use the (previously set) default archive location
-	 * @return the url of the target directory
+	 * @return the url of the target directory that can also be used as handle
+	 *         to query the status of the archiving process
 	 * @throws NoSuchJobException
 	 *             if no such job exists
 	 * @throws JobPropertiesException
@@ -1341,6 +1340,7 @@ public interface ServiceInterface {
 	 * 
 	 * @param jobname
 	 *            the jobname
+	 * @return the handle to check the status of the job submission
 	 * @throws JobSubmissionException
 	 *             if the job could not submitted
 	 * @throws NoSuchJobException
@@ -1349,7 +1349,7 @@ public interface ServiceInterface {
 	@POST
 	@Path("/job/{jobname}/submit")
 	@RolesAllowed("User")
-	void submitJob(@PathParam("jobname") String jobname)
+	String submitJob(@PathParam("jobname") String jobname)
 			throws JobSubmissionException, NoSuchJobException;
 
 	/**
