@@ -4113,7 +4113,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throws JobSubmissionException,
 			NoSuchJobException {
 
-		String handle = UUID.randomUUID().toString();
+		String handle = "submision_status_" + jobname + "_"
+				+ UUID.randomUUID().toString();
 		final DtoActionStatus status = new DtoActionStatus(handle, 0);
 		getSessionActionStatus().put(handle, status);
 
