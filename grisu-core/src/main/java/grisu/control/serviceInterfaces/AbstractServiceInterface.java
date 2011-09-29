@@ -4133,39 +4133,45 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		getSessionActionStatus().put(jobname, status);
 
 		try {
-			final Job job = getUser().getJobFromDatabaseOrFileSystem(jobname);
-			if (job.getStatus() > JobConstants.READY_TO_SUBMIT) {
-				throw new JobSubmissionException("Job already submitted.");
+			try {
+				final Job job = getUser().getJobFromDatabaseOrFileSystem(jobname);
+				if (job.getStatus() > JobConstants.READY_TO_SUBMIT) {
+					throw new JobSubmissionException("Job already submitted.");
+				}
+				new Thread() {
+					@Override
+					public void run() {
+						try {
+							submitJob(job, true, status);
+						} catch (Exception e) {
+							myLogger.error(e);
+						}
+					}
+				}.start();
+
+			} catch (final NoSuchJobException e) {
+				// maybe it's a multipartjob
+				final BatchJob multiJob = getUser()
+						.getBatchJobFromDatabase(jobname);
+
+				new Thread() {
+					@Override
+					public void run() {
+						try {
+							submitBatchJob(multiJob);
+						} catch (JobSubmissionException e) {
+							myLogger.error(e);
+						} catch (NoSuchJobException e) {
+							myLogger.error(e);
+						}
+					}
+				}.start();
 			}
-			new Thread() {
-				@Override
-				public void run() {
-					try {
-						submitJob(job, true, status);
-					} catch (Exception e) {
-						myLogger.error(e);
-					}
-				}
-			}.start();
-
-		} catch (final NoSuchJobException e) {
-			// maybe it's a multipartjob
-			final BatchJob multiJob = getUser()
-					.getBatchJobFromDatabase(jobname);
-
-			new Thread() {
-				@Override
-				public void run() {
-					try {
-						submitBatchJob(multiJob);
-					} catch (JobSubmissionException e) {
-						myLogger.error(e);
-					} catch (NoSuchJobException e) {
-						myLogger.error(e);
-					}
-				}
-			}.start();
-		}
+		} catch (Exception e) {
+				status.setFailed(true);
+				status.setFinished(true);
+				status.setErrorCause(e.getLocalizedMessage());
+			}
 
 	}
 
