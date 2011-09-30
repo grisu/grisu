@@ -4100,7 +4100,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		if (handle == null) {
-			myLogger.debug(debug_token+"submission finished but no jobhandle.";
+			myLogger.debug(debug_token
+					+ "submission finished but no jobhandle.");
 			status.addLogMessage("Submission finished but no jobhandle...");
 			status.setFailed(true);
 			status.setErrorCause("No jobhandle");
