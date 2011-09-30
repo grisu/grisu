@@ -3964,6 +3964,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private void submitJob(final Job job, boolean stageFiles,
 			DtoActionStatus status) throws JobSubmissionException {
 
+		String debug_token = "SUBMIT_" + job.getJobname() + ": ";
 		try {
 
 			int noStageins = 0;
@@ -3983,29 +3984,33 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			getUser().addLogMessageToPossibleMultiPartJobParent(job,
 					"Starting job submission for job: " + job.getJobname());
+			myLogger.debug(debug_token + "preparing job environment...");
 			prepareJobEnvironment(job);
+			myLogger.debug(debug_token + "preparing job environment finished.");
 			if (stageFiles) {
+				myLogger.debug(debug_token + "staging in files started...");
 				status.addLogMessage("Starting file stage-in.");
 				job.addLogMessage("Staging possible input files.");
 				// myLogger.debug("Staging possible input files...");
 				stageFiles(job, status);
 				job.addLogMessage("File staging finished.");
 				status.addLogMessage("File stage-in finished.");
+				myLogger.debug(debug_token + "staging in files finished.");
 			}
 			status.addElement("Job environment prepared...");
 		} catch (final Throwable e) {
+			myLogger.debug(debug_token + "error: " + e.getLocalizedMessage());
 			status.setFailed(true);
 			status.setErrorCause(e.getLocalizedMessage());
 			status.setFinished(true);
-			myLogger.error(e);
 			throw new JobSubmissionException(
 					"Could not access remote filesystem: "
 							+ e.getLocalizedMessage());
 		}
 
 		status.addElement("Setting credential...");
+		myLogger.debug(debug_token + "setting credential started...");
 		if (job.getFqan() != null) {
-
 			try {
 				if (SUBMIT_PROXY_LIFETIME <= 0) {
 					job.setCredential(getUser().getCred(job.getFqan()));
@@ -4026,9 +4031,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			job.addLogMessage("Setting non-vo credential: " + job.getFqan());
 			job.setCredential(getCredential());
 		}
+		myLogger.debug(debug_token + "setting credential finished.");
 
 		String handle = null;
-		myLogger.debug("Submitting job to endpoint...");
+		myLogger.debug(debug_token+"submitting job to endpoint...");
 
 		try {
 			status.addElement("Starting job submission using GT4...");
@@ -4052,10 +4058,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			}
 			try {
+				myLogger.debug(debug_token + "submitting...");
 				handle = getUser().getSubmissionManager().submit(
 						submissionType, job);
+				myLogger.debug(debug_token + "submittission finished...");
 			} catch (ServerJobSubmissionException e) {
-
+				myLogger.debug(debug_token + "submittission failed: "+e.getLocalizedMessage());
 				status.addLogMessage("Job submission failed on server.");
 				status.setFailed(true);
 				status.setFinished(true);
@@ -4073,6 +4081,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			job.addLogMessage("Submission finished.");
 		} catch (final Throwable e) {
+			myLogger.debug(debug_token + "something failed: "+e.getLocalizedMessage());
+
 			// e.printStackTrace();
 			status.addLogMessage("Job submission failed.");
 			status.setFailed(true);
@@ -4090,6 +4100,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		if (handle == null) {
+			myLogger.debug(debug_token+"submission finished but no jobhandle.";
 			status.addLogMessage("Submission finished but no jobhandle...");
 			status.setFailed(true);
 			status.setErrorCause("No jobhandle");
@@ -4106,6 +4117,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 
+			myLogger.debug(debug_token+"wrapping up started");
 			job.addJobProperty(Constants.SUBMISSION_TIME_KEY,
 					Long.toString(new Date().getTime()));
 
@@ -4119,13 +4131,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					"Job submission for job: " + job.getJobname()
 					+ " finished successful.");
 			jobdao.saveOrUpdate(job);
-
+			myLogger.debug(debug_token+"wrapping up finished");
 			myLogger.info("Jobsubmission for job " + job.getJobname()
 					+ " and user " + getDN() + " successful.");
 
 			status.addElement("Job submission finished...");
 			status.setFinished(true);
 		} catch (Throwable e) {
+			myLogger.debug(debug_token+"wrapping up failed: "+e.getLocalizedMessage());
 			status.addLogMessage("Submission finished, error in wrap-up...");
 			status.setFailed(true);
 			status.setFinished(true);
