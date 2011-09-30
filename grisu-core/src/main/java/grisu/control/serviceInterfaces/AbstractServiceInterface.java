@@ -3992,7 +3992,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				job.addLogMessage("File staging finished.");
 				status.addLogMessage("File stage-in finished.");
 			}
-		} catch (final Exception e) {
+			status.addElement("Job environment prepared...");
+		} catch (final Throwable e) {
 			status.setFailed(true);
 			status.setErrorCause(e.getLocalizedMessage());
 			status.setFinished(true);
@@ -4012,7 +4013,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					job.setCredential(getCredential(job.getFqan(),
 							SUBMIT_PROXY_LIFETIME));
 				}
-			} catch (final Exception e) {
+			} catch (final Throwable e) {
 				status.setFailed(true);
 				status.setErrorCause(e.getLocalizedMessage());
 				status.setFinished(true);
@@ -4071,7 +4072,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 
 			job.addLogMessage("Submission finished.");
-		} catch (final RuntimeException e) {
+		} catch (final Throwable e) {
 			// e.printStackTrace();
 			status.addLogMessage("Job submission failed.");
 			status.setFailed(true);
@@ -4124,7 +4125,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			status.addElement("Job submission finished...");
 			status.setFinished(true);
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			status.addLogMessage("Submission finished, error in wrap-up...");
 			status.setFailed(true);
 			status.setFinished(true);
@@ -4184,10 +4185,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					}
 				}.start();
 			}
+		} catch (NoSuchJobException nsje) {
+			status.setFailed(true);
+			status.setFinished(true);
+			status.setErrorCause(nsje.getLocalizedMessage());
+			throw nsje;
+
 		} catch (Throwable e) {
 			status.setFailed(true);
 			status.setFinished(true);
 			status.setErrorCause(e.getLocalizedMessage());
+			throw new JobSubmissionException("Could not submit job.", e);
 		}
 
 		return handle;

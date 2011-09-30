@@ -130,7 +130,12 @@ public class DtoActionStatus {
 		if (totalElements <= 0) {
 			return 0;
 		}
-		return (currentElements * 100) / totalElements;
+		double result = (currentElements * 100) / totalElements;
+		if (result > 100.0) {
+			return 100.0;
+		} else {
+			return result;
+		}
 	}
 
 	public void setCurrentElements(int currentElements) {
