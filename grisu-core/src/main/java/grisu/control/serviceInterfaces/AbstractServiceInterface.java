@@ -4161,7 +4161,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					public void run() {
 						try {
 							submitJob(job, true, status);
-						} catch (Exception e) {
+						} catch (Throwable e) {
+							status.setFailed(true);
+							status.setFinished(true);
+							status.setErrorCause(e.getLocalizedMessage());
 							myLogger.error(e);
 						}
 					}
@@ -4178,8 +4181,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						try {
 							submitBatchJob(multiJob);
 						} catch (JobSubmissionException e) {
+							status.setFailed(true);
+							status.setFinished(true);
+							status.setErrorCause(e.getLocalizedMessage());
 							myLogger.error(e);
 						} catch (NoSuchJobException e) {
+							status.setFailed(true);
+							status.setFinished(true);
+							status.setErrorCause(e.getLocalizedMessage());
+							myLogger.error(e);
+						} catch (Throwable e) {
+							status.setFailed(true);
+							status.setFinished(true);
+							status.setErrorCause(e.getLocalizedMessage());
 							myLogger.error(e);
 						}
 					}
