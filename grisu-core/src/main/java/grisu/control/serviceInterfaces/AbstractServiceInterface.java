@@ -2328,23 +2328,33 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return old_status;
 		}
 
-		final ProxyCredential cred = job.getCredential();
-		boolean changedCred = false;
-		// TODO check whether cred is stored in the database in that case?
-		if ((cred == null) || !cred.isValid()) {
-			job.setCredential(getUser().getCred());
-			changedCred = true;
+		if (old_status > JobConstants.READY_TO_SUBMIT) {
+
+			final ProxyCredential cred = job.getCredential();
+			boolean changedCred = false;
+			// TODO check whether cred is stored in the database in that case?
+			if ((cred == null) || !cred.isValid()) {
+				job.setCredential(getUser().getCred());
+				changedCred = true;
+			}
+
+			new_status = getUser().getSubmissionManager().killJob(job);
+
+			job.addLogMessage("Job killed.");
+			getUser().addLogMessageToPossibleMultiPartJobParent(job,
+					"Job: " + job.getJobname() + " killed, new status: ");
+
+			if (changedCred) {
+				job.setCredential(null);
+			}
+
+		} else {
+			job.addLogMessage("Job removed from grisu db.");
+			getUser().addLogMessageToPossibleMultiPartJobParent(job,
+					"Job: " + job.getJobname() + "removed from grisu db.");
+			new_status = JobConstants.NO_SUCH_JOB;
 		}
 
-		new_status = getUser().getSubmissionManager().killJob(job);
-
-		job.addLogMessage("Job killed.");
-		getUser().addLogMessageToPossibleMultiPartJobParent(job,
-				"Job: " + job.getJobname() + " killed, new status: ");
-
-		if (changedCred) {
-			job.setCredential(null);
-		}
 		if (old_status != new_status) {
 			job.setStatus(new_status);
 		}
@@ -2458,20 +2468,41 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			@Override
 			public void run() {
 
+				final ExecutorService executor = Executors
+						.newFixedThreadPool(ServerPropertiesManager
+								.getConcurrentJobsToBeKilled());
+
 				for (final String jobname : jobnames.asArray()) {
-					status.addElement("Killing job " + jobname + "...");
-					try {
-						kill(jobname, clear);
-						status.addElement("Success.");
-					} catch (final Exception e) {
-						status.addElement("Failed: " + e.getLocalizedMessage());
-						status.setFailed(true);
-						status.setErrorCause(e.getLocalizedMessage());
-						myLogger.error("Could not kill job: " + jobname);
-					}
+					Thread t = new Thread() {
+						@Override
+						public void run() {
+
+							status.addElement("Killing job " + jobname + "...");
+							try {
+								kill(jobname, clear);
+								status.addElement("Success.");
+							} catch (final Exception e) {
+								status.addElement("Failed: " + e.getLocalizedMessage());
+								status.setFailed(true);
+								status.setErrorCause(e.getLocalizedMessage());
+								myLogger.error("Could not kill job: " + jobname);
+							}
+						}
+
+					};
+					executor.execute(t);
 				}
 
-				status.setFinished(true);
+				executor.shutdown();
+				try {
+					executor.awaitTermination(4, TimeUnit.HOURS);
+				} catch (InterruptedException e) {
+					myLogger.debug(e);
+					status.setFailed(true);
+				} finally {
+					status.setFinished(true);
+				}
+
 			}
 		};
 		killThread.start();
@@ -4153,7 +4184,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					}
 				}.start();
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			status.setFailed(true);
 			status.setFinished(true);
 			status.setErrorCause(e.getLocalizedMessage());

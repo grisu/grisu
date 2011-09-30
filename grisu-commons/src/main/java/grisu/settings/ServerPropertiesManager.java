@@ -1,5 +1,7 @@
 package grisu.settings;
 
+import grisu.control.ServiceInterface;
+
 import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
@@ -48,6 +50,13 @@ public final class ServerPropertiesManager {
 	 * Default concurrent threads when getting job properties of archived jobs.
 	 */
 	public static final int DEFAULT_CONCURRENT_ARCHIVED_JOB_LOOKUPS_PER_FILESYSTEM = 8;
+
+	/**
+	 * Default concurrent threads when killing jobs with the
+	 * {@link ServiceInterface#killJobs(grisu.model.dto.DtoStringList, boolean)
+	 * method.
+	 */
+	public static final int DEFAULT_CONCURRENT_JOBS_TO_BE_KILLED = 8;
 
 	/**
 	 * Default directory name used as parent for the jobdirectories.
@@ -184,6 +193,25 @@ public final class ServerPropertiesManager {
 			return DEFAULT_CONCURRENT_JOB_STATUS_THREADS_PER_USER;
 		}
 		return concurrentThreads;
+	}
+
+	public static int getConcurrentJobsToBeKilled() {
+
+		int concurrentThreads = -1;
+		try {
+			concurrentThreads = Integer
+					.parseInt(getServerConfiguration().getString(
+							"ConcurrentThreadSettings.jobsToBeKilled"));
+
+		} catch (final Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_CONCURRENT_JOBS_TO_BE_KILLED;
+		}
+		if (concurrentThreads == -1) {
+			return DEFAULT_CONCURRENT_JOBS_TO_BE_KILLED;
+		}
+		return concurrentThreads;
+
 	}
 
 	/**
