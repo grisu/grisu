@@ -40,6 +40,12 @@ public class SlcsLoginWrapper {
 
 			final SLCS slcs = new SLCS(url, idpO, cm);
 
+			if ((slcs.getCertificate() == null)
+					|| (slcs.getPrivateKey() == null)) {
+				throw new Exception(
+						"Could not get SLCS certificate and/or SLCS key: reason unknown");
+			}
+
 			final GSSCredential cred = PlainProxy.init(slcs.getCertificate(),
 					slcs.getPrivateKey(), 24 * 10);
 

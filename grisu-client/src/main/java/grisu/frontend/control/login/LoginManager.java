@@ -743,6 +743,9 @@ public class LoginManager {
 					idpchoice = idp;
 				} else {
 
+					final String lastIdp = CommonGridProperties.getDefault()
+							.getLastShibIdp();
+
 					CliHelpers.setIndeterminateProgress("Loading...", true);
 
 					prompt = new StringBuffer(
@@ -765,8 +768,8 @@ public class LoginManager {
 					for (int i = 0; i < idps.size(); i++) {
 						System.out.println("[" + (i + 1) + "]\t" + idps.get(i));
 
-						if (StringUtils.isNotBlank(idp)
-								&& idps.get(i).equals(idp)) {
+						if (StringUtils.isNotBlank(lastIdp)
+								&& idps.get(i).equals(lastIdp)) {
 							defaultChoice = i + 1;
 						}
 					}
@@ -855,8 +858,9 @@ public class LoginManager {
 						+ url, false);
 
 				return tmp;
-			} catch (final LoginException e) {
+			} catch (final Exception e) {
 				CliHelpers.setIndeterminateProgress(false);
+				e.getCause().printStackTrace();
 				System.out.println("Login failed: " + e.getLocalizedMessage());
 			}
 		}
