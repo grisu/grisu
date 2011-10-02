@@ -43,7 +43,7 @@ public class SlcsLoginWrapper {
 			if ((slcs.getCertificate() == null)
 					|| (slcs.getPrivateKey() == null)) {
 				throw new Exception(
-						"Could not get SLCS certificate and/or SLCS key: reason unknown");
+						"Could not get SLCS certificate and/or SLCS key...");
 			}
 
 			final GSSCredential cred = PlainProxy.init(slcs.getCertificate(),

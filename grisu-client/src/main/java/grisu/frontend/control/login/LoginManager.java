@@ -726,11 +726,13 @@ public class LoginManager {
 	}
 
 	public static ServiceInterface loginCommandlineShibboleth(String url,
-			String username, String idp) {
+			String usernameTmp, String idpTmp) {
 
 		while (true) {
 			try {
 
+				String username = usernameTmp;
+				String idp = idpTmp;
 				initEnvironment();
 
 				// System.out.println("Loading list of institutions...");
@@ -860,7 +862,6 @@ public class LoginManager {
 				return tmp;
 			} catch (final Exception e) {
 				CliHelpers.setIndeterminateProgress(false);
-				e.getCause().printStackTrace();
 				System.out.println("Login failed: " + e.getLocalizedMessage());
 			}
 		}
