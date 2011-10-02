@@ -711,7 +711,7 @@ public class LoginManager {
 		final String lastIdp = CommonGridProperties.getDefault()
 				.getLastShibIdp();
 
-		if (StringUtils.isBlank(lastIdp)) {
+		if (useLastIdp) {
 			if (StringUtils.isBlank(lastIdp)) {
 
 				throw new RuntimeException(
