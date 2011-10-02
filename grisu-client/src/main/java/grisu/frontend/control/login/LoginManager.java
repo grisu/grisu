@@ -718,9 +718,9 @@ public class LoginManager {
 						"No last used IdP found. Please log in using default shibboleth login.");
 
 			}
-			return loginCommandlineShibboleth(url, null, null);
-		} else {
 			return loginCommandlineShibboleth(url, null, lastIdp);
+		} else {
+			return loginCommandlineShibboleth(url, null, null);
 		}
 
 	}
