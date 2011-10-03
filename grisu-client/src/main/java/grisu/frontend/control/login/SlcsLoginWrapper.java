@@ -10,6 +10,8 @@ import grith.sibboleth.Shibboleth;
 import grith.sibboleth.StaticCredentialManager;
 import grith.sibboleth.StaticIdpObject;
 
+import java.util.UUID;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.ietf.jgss.GSSCredential;
@@ -24,6 +26,7 @@ public class SlcsLoginWrapper {
 			char[] password, String idp, LoginParams params) throws Exception {
 
 		myLogger.debug("SLCS login: starting slcs/myproxy login...");
+		String id = UUID.randomUUID().toString();
 		try {
 
 			if (params != null) {
@@ -44,16 +47,19 @@ public class SlcsLoginWrapper {
 					password);
 
 			String url = ClientPropertiesManager.getShibbolethUrl();
-			myLogger.debug("SLCS login: starting actual login...");
+
+			myLogger.debug("SLCS login: starting actual login... (id: " + id
+					+ ")");
 			final SLCS slcs = new SLCS(url, idpO, cm);
 			if ((slcs.getCertificate() == null)
 					|| (slcs.getPrivateKey() == null)) {
-				myLogger.debug("SLCS login: Could not get SLCS certificate and/or SLCS key...");
+				myLogger.debug("SLCS login: Could not get SLCS certificate and/or SLCS key... (id: "
+						+ id + ")");
 				throw new Exception(
 						"Could not get SLCS certificate and/or SLCS key...");
 			}
 
-			myLogger.debug("SLCS login: Login finished");
+			myLogger.debug("SLCS login: Login finished (id: " + id + ")");
 			myLogger.debug("SLCS login: Creating local proxy...");
 
 			final GSSCredential cred = PlainProxy.init(slcs.getCertificate(),
@@ -65,7 +71,7 @@ public class SlcsLoginWrapper {
 
 		} catch (final Exception e) {
 			myLogger.debug("SLCS login: login failed: "
-					+ e.getLocalizedMessage());
+					+ e.getLocalizedMessage() + " - (id: " + id + ")");
 
 			throw e;
 		}
