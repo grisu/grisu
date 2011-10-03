@@ -692,8 +692,22 @@ public class LoginManager {
 				final IdpObject idpObj = new DummyIdpObject();
 				final CredentialManager cm = new DummyCredentialManager();
 
-				final Shibboleth shib = new Shibboleth(idpObj, cm);
-				shib.openurl(SLCS.DEFAULT_SLCS_URL);
+				String id = UUID.randomUUID().toString();
+				myLogger.debug("Shib login: getting list of idps... (id: " + id
+						+ ")");
+
+				try {
+					final Shibboleth shib = new Shibboleth(idpObj, cm);
+					shib.openurl(SLCS.DEFAULT_SLCS_URL);
+					myLogger.debug("Shib login: success getting list of idps... (id: "
+							+ id + ")");
+
+				} catch (Exception e) {
+
+					myLogger.debug("Shib login: failed getting list of idps: "
+							+ e.getLocalizedMessage() + " (id: " + id + ")");
+					throw new LoginException(e.getLocalizedMessage());
+				}
 
 				final ImmutableList<String> idps = ImmutableList.copyOf(idpObj
 						.getIdps());
