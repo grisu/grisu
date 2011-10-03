@@ -1155,8 +1155,11 @@ public class User {
 			fqan = Constants.NON_VO_FQAN;
 		}
 
-		if (((credToUse == null) || !credToUse.isValid())
-				&& !Constants.NON_VO_FQAN.equals(fqan)) {
+		if (Constants.NON_VO_FQAN.equals(fqan)) {
+			return getCred();
+		}
+
+		if (((credToUse == null) || !credToUse.isValid())) {
 
 			// put a new credential in the cache
 			final VO vo = VOManagement.getVO(getFqans().get(fqan));
