@@ -756,9 +756,20 @@ public class LoginManager {
 					final IdpObject idpObj = new DummyIdpObject();
 					final CredentialManager cm = new DummyCredentialManager();
 
-					final Shibboleth shib = new Shibboleth(idpObj, cm);
-					shib.openurl(SLCS.DEFAULT_SLCS_URL);
+					String id = UUID.randomUUID().toString();
 
+					myLogger.debug("Login: starting to get list of idps... (id: "
+							+ id + ")");
+					try {
+						final Shibboleth shib = new Shibboleth(idpObj, cm);
+						shib.openurl(SLCS.DEFAULT_SLCS_URL);
+						myLogger.debug("Login: list of idps loaded (id: " + id
+								+ ")");
+					} catch (Throwable e) {
+						myLogger.debug("Login: error loading list of idps (id:"
+								+ id + ")");
+						throw e;
+					}
 					final ImmutableList<String> idps = ImmutableList.copyOf(idpObj
 							.getIdps());
 
@@ -860,7 +871,7 @@ public class LoginManager {
 						+ url, false);
 
 				return tmp;
-			} catch (final Exception e) {
+			} catch (final Throwable e) {
 				CliHelpers.setIndeterminateProgress(false);
 				System.out.println("Login failed: " + e.getLocalizedMessage());
 			}
