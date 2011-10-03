@@ -53,8 +53,8 @@ public class SlcsLoginWrapper {
 			final SLCS slcs = new SLCS(url, idpO, cm);
 			if ((slcs.getCertificate() == null)
 					|| (slcs.getPrivateKey() == null)) {
-				myLogger.debug("SLCS login: Could not get SLCS certificate and/or SLCS key... (id: "
-						+ id + ")");
+				// myLogger.debug("SLCS login: Could not get SLCS certificate and/or SLCS key... (id: "
+				// + id + ")");
 				throw new Exception(
 						"Could not get SLCS certificate and/or SLCS key...");
 			}

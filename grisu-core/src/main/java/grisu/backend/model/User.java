@@ -1151,6 +1151,10 @@ public class User {
 
 		ProxyCredential credToUse = cachedCredentials.get(fqan);
 
+		if (StringUtils.isBlank(fqan)) {
+			fqan = Constants.NON_VO_FQAN;
+		}
+
 		if ((credToUse == null) || !credToUse.isValid()) {
 
 			// put a new credential in the cache
