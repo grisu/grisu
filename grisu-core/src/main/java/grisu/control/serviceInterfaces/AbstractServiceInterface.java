@@ -2441,7 +2441,27 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			job = jobdao.findJobByDN(getUser().getDn(), jobname);
 
 			if (clear) {
-				kill(job, true, true);
+				try {
+					kill(job, true, true);
+				} catch (Exception e) {
+					myLogger.error(e);
+
+					try {
+						// try to delete jobs in case of db corruption
+						List<Job> jobs = jobdao.findRogueJobsByDN(getDN(),
+								jobname);
+						for (Job tmp : jobs) {
+							try {
+								kill(tmp, true, true);
+							} catch (Exception e3) {
+								myLogger.error(e3);
+							}
+						}
+					} catch (Exception e2) {
+						myLogger.error("Backup cleaning of job also failed.",
+								e2);
+					}
+				}
 			} else {
 				kill(job, false, false);
 			}
