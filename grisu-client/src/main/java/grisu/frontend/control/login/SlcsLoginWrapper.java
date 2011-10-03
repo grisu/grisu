@@ -64,6 +64,9 @@ public class SlcsLoginWrapper {
 			return cred;
 
 		} catch (final Exception e) {
+			myLogger.debug("SLCS login: login failed: "
+					+ e.getLocalizedMessage());
+
 			throw e;
 		}
 
