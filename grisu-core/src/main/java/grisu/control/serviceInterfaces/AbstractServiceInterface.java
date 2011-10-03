@@ -2678,14 +2678,29 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	protected void prepareJobEnvironment(final Job job)
 			throws RemoteFileSystemException {
 
-		final String jobDir = JsdlHelpers.getAbsoluteWorkingDirectoryUrl(job
-				.getJobDescription());
+		String debug_token = "SUBMIT_" + job.getJobname() + ": ";
+		try {
 
-		// myLogger.debug("Using calculated jobdirectory: " + jobDir);
+			myLogger.debug(debug_token
+					+ "Getting absolute workingdirectoryurl...");
+			final String jobDir = JsdlHelpers.getAbsoluteWorkingDirectoryUrl(job
+					.getJobDescription());
+			myLogger.debug(debug_token + "Found absolute workingdirectoryurl: "
+					+ jobDir);
+			// myLogger.debug("Using calculated jobdirectory: " + jobDir);
 
-		// job.setJob_directory(jobDir);
-
-		getUser().getFileSystemManager().createFolder(jobDir);
+			// job.setJob_directory(jobDir);
+			myLogger.debug(debug_token + "Creating jobdir...");
+			getUser().getFileSystemManager().createFolder(jobDir);
+			myLogger.debug(debug_token + "Jobdir created.");
+		} catch (Throwable e) {
+			myLogger.error(e);
+			myLogger.debug(debug_token + "Error creating jobdir: "
+					+ e.getLocalizedMessage());
+			throw new RemoteFileSystemException(
+					"Could not prepare job environment: "
+							+ e.getLocalizedMessage());
+		}
 
 		// now after the jsdl is ready, don't forget to fill the required fields
 		// into the database
