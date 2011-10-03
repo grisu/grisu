@@ -2438,10 +2438,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		try {
 			Job job;
 
-			job = jobdao.findJobByDN(getUser().getDn(), jobname);
 
 			if (clear) {
 				try {
+					job = jobdao.findJobByDN(getUser().getDn(), jobname);
 					kill(job, true, true);
 				} catch (Exception e) {
 					myLogger.error(e);
@@ -2463,6 +2463,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					}
 				}
 			} else {
+				job = jobdao.findJobByDN(getUser().getDn(), jobname);
 				kill(job, false, false);
 			}
 
