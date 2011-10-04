@@ -2,6 +2,7 @@ package grisu.frontend.view.cli;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Timer;
 
 import jline.ConsoleReader;
 import jline.Terminal;
@@ -13,10 +14,14 @@ import com.google.common.collect.ImmutableList;
 
 public class CliHelpers {
 
+
+	private static SpinUpdater spinUpdater = null;
+
 	static final Logger myLogger = Logger.getLogger(CliHelpers.class.getName());
 
 
 	private static boolean ENABLE_PROGRESS = true;
+	private static Timer timer = null;
 
 	public static final Terminal terminal = Terminal.setupTerminal();
 	private static ConsoleReader consoleReader = null;
@@ -144,7 +149,8 @@ public class CliHelpers {
 		setIndeterminateProgress(null, start);
 	}
 
-	public static void setIndeterminateProgress(final String message,
+	public static synchronized void setIndeterminateProgress(
+			final String message,
 			boolean start) {
 
 		if (terminal == null) {
@@ -158,94 +164,26 @@ public class CliHelpers {
 
 		getConsoleReader().setDefaultPrompt("");
 
-		if (start) {
-			if ((indeterminateProgress != null)
-					&& indeterminateProgress.isAlive()) {
-				// already running
-				return;
+		if ( start ) {
+			if (spinUpdater != null) {
+				spinUpdater.setMessage(message);
+			} else {
+				spinUpdater = new SpinUpdater(message);
+				timer = new Timer();
+				timer.scheduleAtFixedRate(spinUpdater, 0L, DURATION);
 			}
-
-			indeterminateProgress = new Thread() {
-				@Override
-				public void run() {
-					int i = 0;
-					String msg = message;
-					while (!interrupt_progress) {
-						if (StringUtils.isBlank(message)) {
-							msg = indeterminateProgressStrings[i];
-						} else {
-							msg = message + " "
-									+ indeterminateProgressStrings[i];
-						}
-						writeToTerminal(msg);
-
-						try {
-							Thread.sleep(DURATION);
-						} catch (InterruptedException e) {
-							System.out.println("INTERRUPTED");
-						}
-
-						i = i + 1;
-						if (i >= indeterminateProgressStrings.length) {
-							i = 0;
-						}
-
-					}
-
-					writeToTerminal("");
-				}
-			};
-
-			// I know, I know. But isInterrupted() doesn't work reliably because
-			// of some unspecified jline behaviour
-			interrupt_progress = false;
-
-			indeterminateProgress.start();
-
 		} else {
-
-			if ( ! ENABLE_PROGRESS ) {
-				if (StringUtils.isNotBlank(message)) {
-					writeToTerminal(message);
-					return;
-				} else {
-					// writeToTerminal("");
-					return;
-				}
-			}
-			// System.err.println("interrupting thread "
-			// + indeterminateProgress.getName());
-			// indeterminateProgress.interrupt();
-			interrupt_progress = true;
-			try {
-				// System.err.println("waiting for thread "
-				// + indeterminateProgress.getName() + " to terminate.");
-				indeterminateProgress.join();
-			} catch (InterruptedException e) {
-			}
-			// System.err.println("DONE waiting for thread "
-			// + indeterminateProgress.getName() + " to terminate.");
-
+			timer.cancel();
+			spinUpdater = null;
+			writeToTerminal("");
 			if (!StringUtils.isBlank(message)) {
 				System.out.println(message);
 			}
-
-			// if ((indeterminateProgress != null)
-			// && indeterminateProgress.isAlive()) {
-			// indeterminateProgress.interrupt();
-			// try {
-			// indeterminateProgress.join();
-			// } catch (InterruptedException e) {
-			// }
-			//
-			// if (!StringUtils.isBlank(message)) {
-			// System.out.println(message);
-			// }
-			// }
 		}
 
-
 	}
+
+
 
 	public static void setProgress(int completed, int total) {
 		if ((terminal == null) || !ENABLE_PROGRESS) {
@@ -264,7 +202,7 @@ public class CliHelpers {
 
 	}
 
-	private static void writeToTerminal(String message) {
+	public static void writeToTerminal(String message) {
 		getConsoleReader().getCursorBuffer().clearBuffer();
 		getConsoleReader().getCursorBuffer().write(message);
 		try {
