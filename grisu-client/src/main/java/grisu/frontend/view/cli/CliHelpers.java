@@ -25,6 +25,10 @@ public class CliHelpers {
 	public static String[] indeterminateProgressStrings = new String[] { "-",
 		"\\", "|", "/" };
 
+	public static final int DURATION = 100;
+
+	private static boolean interrupt_progress = false;
+
 	public static void enableProgressDisplay(boolean enable) {
 		ENABLE_PROGRESS = enable;
 	}
@@ -116,21 +120,16 @@ public class CliHelpers {
 
 	public static void main(String[] args) throws InterruptedException {
 
+		while (true) {
 
-		// for (int i = 0; i <= 20; i++) {
-		// setProgress(i, 20);
-		//
-		// Thread.sleep(400);
-		// }
+			setIndeterminateProgress("Testing...", true);
 
-		setIndeterminateProgress("Testing...", true);
+			Thread.sleep(4000);
 
-		Thread.sleep(4000);
+			setIndeterminateProgress("Success.", false);
 
-		setIndeterminateProgress("Success.", false);
-		// setIndeterminateProgress(false);
-
-		System.out.println(" xx ");
+			System.out.println(" xx ");
+		}
 	}
 
 	private static String repetition(String string, int progress) {
@@ -171,7 +170,7 @@ public class CliHelpers {
 				public void run() {
 					int i = 0;
 					String msg = message;
-					do {
+					while (!interrupt_progress) {
 						if (StringUtils.isBlank(message)) {
 							msg = indeterminateProgressStrings[i];
 						} else {
@@ -181,19 +180,26 @@ public class CliHelpers {
 						writeToTerminal(msg);
 
 						try {
-							Thread.sleep(200);
+							Thread.sleep(DURATION);
 						} catch (InterruptedException e) {
-							break;
+							System.out.println("INTERRUPTED");
 						}
+
 						i = i + 1;
 						if (i >= indeterminateProgressStrings.length) {
 							i = 0;
 						}
-					} while (!Thread.interrupted());
+
+					}
 
 					writeToTerminal("");
 				}
 			};
+
+			// I know, I know. But isInterrupted() doesn't work reliably because
+			// of some unspecified jline behaviour
+			interrupt_progress = false;
+
 			indeterminateProgress.start();
 
 		} else {
@@ -207,19 +213,35 @@ public class CliHelpers {
 					return;
 				}
 			}
-
-			if ((indeterminateProgress != null)
-					&& indeterminateProgress.isAlive()) {
-				indeterminateProgress.interrupt();
-				try {
-					indeterminateProgress.join();
-				} catch (InterruptedException e) {
-				}
-
-				if (!StringUtils.isBlank(message)) {
-					System.out.println(message);
-				}
+			// System.err.println("interrupting thread "
+			// + indeterminateProgress.getName());
+			// indeterminateProgress.interrupt();
+			interrupt_progress = true;
+			try {
+				// System.err.println("waiting for thread "
+				// + indeterminateProgress.getName() + " to terminate.");
+				indeterminateProgress.join();
+			} catch (InterruptedException e) {
 			}
+			// System.err.println("DONE waiting for thread "
+			// + indeterminateProgress.getName() + " to terminate.");
+
+			if (!StringUtils.isBlank(message)) {
+				System.out.println(message);
+			}
+
+			// if ((indeterminateProgress != null)
+			// && indeterminateProgress.isAlive()) {
+			// indeterminateProgress.interrupt();
+			// try {
+			// indeterminateProgress.join();
+			// } catch (InterruptedException e) {
+			// }
+			//
+			// if (!StringUtils.isBlank(message)) {
+			// System.out.println(message);
+			// }
+			// }
 		}
 
 
