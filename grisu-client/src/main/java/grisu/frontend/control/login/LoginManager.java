@@ -17,21 +17,16 @@ import grisu.jcommons.utils.JythonHelpers;
 import grisu.settings.ClientPropertiesManager;
 import grisu.settings.Environment;
 import grisu.utils.GrisuPluginFilenameFilter;
-import grith.gsindl.SLCS;
 import grith.jgrith.CredentialHelpers;
 import grith.jgrith.Init;
 import grith.jgrith.control.CertificateFiles;
 import grith.jgrith.plainProxy.LocalProxy;
-import grith.sibboleth.CredentialManager;
-import grith.sibboleth.DummyCredentialManager;
-import grith.sibboleth.DummyIdpObject;
-import grith.sibboleth.IdpObject;
-import grith.sibboleth.Shibboleth;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -753,25 +748,7 @@ public class LoginManager {
 					prompt = new StringBuffer(
 							"Please select your institution");
 
-					final IdpObject idpObj = new DummyIdpObject();
-					final CredentialManager cm = new DummyCredentialManager();
-
-					String id = UUID.randomUUID().toString();
-
-					myLogger.debug("Login: starting to get list of idps... (id: "
-							+ id + ")");
-					try {
-						final Shibboleth shib = new Shibboleth(idpObj, cm);
-						shib.openurl(SLCS.DEFAULT_SLCS_URL);
-						myLogger.debug("Login: list of idps loaded (id: " + id
-								+ ")");
-					} catch (Throwable e) {
-						myLogger.debug("Login: error loading list of idps (id:"
-								+ id + ")");
-						throw e;
-					}
-					final ImmutableList<String> idps = ImmutableList.copyOf(idpObj
-							.getIdps());
+					final List<String> idps = SlcsLoginWrapper.getAllIdps();
 
 					CliHelpers.setIndeterminateProgress("Available Institutions:",
 							false);
