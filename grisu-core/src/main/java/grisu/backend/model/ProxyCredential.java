@@ -184,7 +184,7 @@ public class ProxyCredential {
 			return pc.getGssCredential().equals(getGssCredential());
 
 		} else {
-			return true;
+			return false;
 		}
 
 	}
