@@ -769,18 +769,34 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		} else if (Constants.UNIQUE_NUMBER_METHOD.equals(jobnameCreationMethod)) {
 
-			String temp = jobname;
-			int i = 1;
-
 			SortedSet<String> jobNames = getAllJobnames(Constants.ALLJOBS_INCL_BATCH_KEY).asSortedSet();
 			jobNames.addAll(getAllBatchJobnames(null).asSortedSet());
 
-			while (jobNames.contains(temp)) {
-				temp = jobname + "_" + i;
-				i = i + 1;
+			int max = -1;
+
+			for (String jn : jobNames) {
+				if (jn.equals(jobname)) {
+					if (max < 0) {
+						max = 1;
+					}
+				} else {
+					if (jn.startsWith(jobname)) {
+						int index = jn.lastIndexOf("_");
+						try {
+							String integerString = jn.substring(index + 1);
+							int value = Integer.parseInt(integerString);
+							if (value > max) {
+								max = value;
+							}
+						} catch (Exception e) {
+						}
+					}
+				}
 			}
 
-			jobname = temp;
+			if (max != -1) {
+				jobname = jobname + "_" + (max + 1);
+			}
 
 		} else {
 			throw new JobPropertiesException(

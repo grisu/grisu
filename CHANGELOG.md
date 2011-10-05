@@ -1,6 +1,16 @@
 Changelog
 =========
 
+0.3.5.2
+-------
+
+* fixed potential endless loop when waiting for a task to execute on cli
+
+0.3.5.1
+-------
+
+* added logging statements for shibboleth logins to track down failed shib logins
+
 0.3.5
 -----
 
