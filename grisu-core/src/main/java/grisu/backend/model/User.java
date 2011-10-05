@@ -1969,7 +1969,7 @@ public class User {
 	 * @param cred
 	 *            the credential to use as default
 	 */
-	public void setCred(final ProxyCredential cred) {
+	public synchronized void setCred(final ProxyCredential cred) {
 
 		if (cred.equals(this.cred)) {
 			myLogger.debug("Not setting new credential since it's the same...");
