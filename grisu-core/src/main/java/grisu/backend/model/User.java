@@ -1971,7 +1971,13 @@ public class User {
 	 */
 	public void setCred(final ProxyCredential cred) {
 
+		if (cred.equals(this.cred)) {
+			myLogger.debug("Not setting new credential since it's the same...");
+			return;
+		}
+
 		myLogger.debug(cred.getDn() + ": Setting new credential.");
+
 		this.cred = cred;
 		cachedCredentials.clear();
 	}

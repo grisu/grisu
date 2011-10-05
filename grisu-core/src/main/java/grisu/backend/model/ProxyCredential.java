@@ -25,6 +25,7 @@ import grith.jgrith.CredentialHelpers;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.ietf.jgss.GSSCredential;
@@ -69,6 +70,8 @@ public class ProxyCredential {
 	// whether this certificate is renewable - not used yet but maybe usefull
 	// for MyProxy certificates
 	private final Boolean renewable = false;
+
+	private final UUID uuid = UUID.randomUUID();
 
 	// For hibernate only
 	protected ProxyCredential() {
@@ -172,6 +175,20 @@ public class ProxyCredential {
 
 	}
 
+	@Override
+	public boolean equals(Object o) {
+
+		if ( o instanceof ProxyCredential ) {
+			ProxyCredential pc = (ProxyCredential) o;
+
+			return pc.getGssCredential().equals(getGssCredential());
+
+		} else {
+			return true;
+		}
+
+	}
+
 	/**
 	 * Returns the credential data as byte[]. The format is dependant on the
 	 * type of the credential. (But we are using X509 proxies only - so don't
@@ -261,6 +278,15 @@ public class ProxyCredential {
 	 */
 	public final Set<Job> getJobs() {
 		return jobs;
+	}
+
+	@Override
+	public int hashCode() {
+		if ( getGssCredential() != null ) {
+			return (getGssCredential().hashCode() *41)  ;
+		} else {
+			return uuid.hashCode();
+		}
 	}
 
 	/**
