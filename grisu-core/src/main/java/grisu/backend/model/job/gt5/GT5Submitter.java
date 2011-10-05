@@ -6,7 +6,6 @@ import grisu.backend.model.job.JobSubmitter;
 import grisu.backend.model.job.ServerJobSubmissionException;
 import grisu.control.JobConstants;
 import grisu.jcommons.interfaces.InformationManager;
-import grith.jgrith.CredentialHelpers;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -169,8 +168,10 @@ public class GT5Submitter extends JobSubmitter {
 		GSSCredential credential = null;
 
 		try {
-			credential = CredentialHelpers.convertByteArrayToGSSCredential(job
-					.getCredential().getCredentialData());
+			// credential =
+			// CredentialHelpers.convertByteArrayToGSSCredential(job
+			// .getCredential().getCredentialData());
+			credential = job.getCredential().getGssCredential();
 
 			GramJob gt5Job = new GramJob(rsl);
 			final Gram5JobListener l = Gram5JobListener.getJobListener();
