@@ -36,7 +36,7 @@ ServiceInterface {
 
 	private static String hostname = null;
 
-	@Override
+	// @Override
 	protected final ProxyCredential getCredential() {
 
 		long oldLifetime = -1;
@@ -136,7 +136,7 @@ ServiceInterface {
 
 	}
 
-	@Override
+	// @Override
 	protected final ProxyCredential getCredential(String fqan,
 			int lifetimeInSeconds) {
 

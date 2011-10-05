@@ -1197,9 +1197,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		// creating job
-		getCredential(); // just to be sure that nothing stale get's created in
-		// the db unnecessary
-		job = new Job(getCredential().getDn(), jobname);
+		job = new Job(getUser().getDn(), jobname);
 
 		job.setStatus(JobConstants.JOB_CREATED);
 		job.addLogMessage("Job " + jobname + " created.");
@@ -1856,26 +1854,27 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return DtoProperties.createProperties(getUser().getBookmarks());
 	}
 
-	/**
-	 * This method has to be implemented by the endpoint specific
-	 * ServiceInterface. Since there are a few different ways to get a proxy
-	 * credential (myproxy, just use the one in /tmp/x509..., shibb,...) this
-	 * needs to be implemented differently for every single situation.
-	 * 
-	 * @return the proxy credential that is used to contact the grid
-	 */
-	protected abstract ProxyCredential getCredential();
-
-	/**
-	 * This is mainly for testing, to enable credentials with specified
-	 * lifetimes.
-	 * 
-	 * @param fqan the vo
-	 * @param lifetime
-	 *            the lifetime in seconds
-	 * @return the credential
-	 */
-	protected abstract ProxyCredential getCredential(String fqan, int lifetime);
+	// /**
+	// * This method has to be implemented by the endpoint specific
+	// * ServiceInterface. Since there are a few different ways to get a proxy
+	// * credential (myproxy, just use the one in /tmp/x509..., shibb,...) this
+	// * needs to be implemented differently for every single situation.
+	// *
+	// * @return the proxy credential that is used to contact the grid
+	// */
+	// protected abstract ProxyCredential getCredential();
+	//
+	// /**
+	// * This is mainly for testing, to enable credentials with specified
+	// * lifetimes.
+	// *
+	// * @param fqan the vo
+	// * @param lifetime
+	// * the lifetime in seconds
+	// * @return the credential
+	// */
+	// protected abstract ProxyCredential getCredential(String fqan, int
+	// lifetime);
 
 	// public DtoDataLocations getDataLocationsForVO(final String fqan) {
 	//
@@ -2560,8 +2559,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public GridFile ls(final String directory, int recursion_level)
 			throws RemoteFileSystemException {
 
-		// check whether credential still valid
-		getCredential();
+		// // check whether credential still valid
+		// getCredential();
 
 		return getUser().ls(directory, recursion_level);
 	}
@@ -4064,12 +4063,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		myLogger.debug(debug_token + "setting credential started...");
 		if (job.getFqan() != null) {
 			try {
-				if (SUBMIT_PROXY_LIFETIME <= 0) {
-					job.setCredential(getUser().getCred(job.getFqan()));
-				} else {
-					job.setCredential(getCredential(job.getFqan(),
-							SUBMIT_PROXY_LIFETIME));
-				}
+				job.setCredential(getUser().getCred(job.getFqan()));
+
 			} catch (final Throwable e) {
 				status.setFailed(true);
 				status.setErrorCause(e.getLocalizedMessage());
@@ -4081,7 +4076,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 		} else {
 			job.addLogMessage("Setting non-vo credential: " + job.getFqan());
-			job.setCredential(getCredential());
+			job.setCredential(getUser().getCred());
 		}
 		myLogger.debug(debug_token + "setting credential finished.");
 

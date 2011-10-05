@@ -1149,8 +1149,6 @@ public class User {
 	@Transient
 	public ProxyCredential getCred(String fqan) {
 
-		ProxyCredential credToUse = cachedCredentials.get(fqan);
-
 		if (StringUtils.isBlank(fqan)) {
 			fqan = Constants.NON_VO_FQAN;
 		}
@@ -1158,6 +1156,8 @@ public class User {
 		if (Constants.NON_VO_FQAN.equals(fqan)) {
 			return getCred();
 		}
+
+		ProxyCredential credToUse = cachedCredentials.get(fqan);
 
 		if (((credToUse == null) || !credToUse.isValid())) {
 
@@ -1971,7 +1971,9 @@ public class User {
 	 */
 	public void setCred(final ProxyCredential cred) {
 
+		myLogger.debug(cred.getDn() + ": Setting new credential.");
 		this.cred = cred;
+		cachedCredentials.clear();
 	}
 
 	/**
