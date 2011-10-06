@@ -13,7 +13,6 @@ import grisu.jcommons.utils.JsdlHelpers;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.DebugUtils;
 import grisu.utils.SeveralXMLHelpers;
-import grith.jgrith.CredentialHelpers;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -644,9 +643,11 @@ public class GT4Submitter extends JobSubmitter {
 
 			try {
 
-				credential = CredentialHelpers
-						.convertByteArrayToGSSCredential(job.getCredential()
-								.getCredentialData());
+				// credential = CredentialHelpers
+				// .convertByteArrayToGSSCredential(job.getCredential()
+				// .getCredentialData());
+
+				credential = job.getCredential().getGssCredential();
 
 				if ((credential == null)
 						|| (credential.getRemainingLifetime() < 1)) {
