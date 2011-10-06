@@ -2533,7 +2533,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				deleteMultiPartJob(mpj, clear);
 				return mpj.getBatchJobname();
 			} catch (final NoSuchJobException nsje2) {
-				throw nsje2;
+				throw new NoSuchJobException("No job or batchjob with name: "
+						+ jobname);
 			} catch (final Exception e) {
 				throw new BatchJobException(e);
 			}

@@ -80,6 +80,7 @@ public final class ServerPropertiesManager {
 	private static final boolean DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS = false;
 
 	private static final int DEFAULT_FILE_TRANSFER_RETRIES = 3;
+	private static final int DEFAULT_FILE_DELETE_RETRIES = 3;
 	private static final int DEFAULT_TIME_BETWEEN_FILE_TRANSFER_RETRIES_IN_SECONDS = 1;
 
 	private static final Integer DEFAULT_FILESYSTEM_TIMEOUT_IN_MILLISECONDS = 4000;
@@ -441,6 +442,23 @@ public final class ServerPropertiesManager {
 			// myLogger.debug(e);
 		}
 		return disableFinishedJobStatusCaching;
+	}
+
+	public static int getFileDeleteRetries() {
+
+		int retries = -1;
+		try {
+			retries = Integer.parseInt(getServerConfiguration().getString(
+					"RetrySettings.fileDeletes"));
+
+		} catch (final Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_FILE_DELETE_RETRIES;
+		}
+		if (retries == -1) {
+			return DEFAULT_FILE_DELETE_RETRIES;
+		}
+		return retries;
 	}
 
 	public static int getFileListingTimeOut() {
