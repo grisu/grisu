@@ -234,11 +234,26 @@ FileSystemInfoPlugin, FileTransferPlugin {
 		final FileObject fileObject = aquireFile(fsCache, file);
 		try {
 			if (fileObject.exists()) {
-				fileObject.delete(new AllFileSelector());
+				myLogger.debug("Deleting file/folder:" + file);
+				int retries = ServerPropertiesManager.getFileDeleteRetries();
+				FileSystemException fse = null;
+				for (int i = 0; i < retries; i++) {
+					try {
+						int no = fileObject.delete(new AllFileSelector());
+						myLogger.debug("Deleted " + no
+								+ " files when deleting " + file);
+						fse = null;
+					} catch (FileSystemException e) {
+						fse = e;
+					}
+				}
+
+				if (fse != null) {
+					throw fse;
+				}
 			}
 		} catch (final FileSystemException e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
+
 			throw new RemoteFileSystemException("Could not delete file: "
 					+ e.getLocalizedMessage());
 		} finally {
