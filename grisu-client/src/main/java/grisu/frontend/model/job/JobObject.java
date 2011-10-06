@@ -1118,7 +1118,14 @@ Comparable<JobObject> {
 				}.start();
 
 			}
-			this.serviceInterface.kill(this.getJobname(), clean);
+			String handle = this.serviceInterface
+					.kill(this.getJobname(), clean);
+
+			StatusObject so = StatusObject.waitForActionToFinish(
+					serviceInterface, handle, 2, false, false);
+			if (so.getStatus().isFailed()) {
+				throw new Exception(so.getStatus().getErrorCause());
+			}
 			try {
 				getStatus(true);
 			} catch (Exception nsje) {

@@ -44,6 +44,7 @@ import grisu.model.dto.DtoStringList;
 import grisu.model.dto.DtoSubmissionLocations;
 import grisu.model.dto.GridFile;
 import grisu.model.job.JobSubmissionObjectImpl;
+import grisu.model.status.StatusObject;
 import grisu.model.utils.InformationUtils;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.FileHelpers;
@@ -2386,68 +2387,102 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return new_status;
 	}
 
-	private void kill(final Job job, final boolean removeFromDB,
+	private String kill(final Job job, final boolean removeFromDB,
 			final boolean delteJobDirectory) {
 
-		// Job job;
-		//
-		// job = jobdao.findJobByDN(getUser().getDn(), jobname);
+		final String handle = UUID.randomUUID().toString();
+		int amount = 4;
+		if (!delteJobDirectory) {
+			amount = amount - 1;
+		}
+		if (!removeFromDB) {
+			amount = amount - 1;
+		}
 
-		kill(job);
+		final DtoActionStatus status = new DtoActionStatus(handle, 2);
+		getSessionActionStatus().put(handle, status);
 
-		if (delteJobDirectory) {
-
-			if (job.isBatchJob()) {
+		Thread t = new Thread() {
+			@Override
+			public void run() {
 
 				try {
-					final BatchJob mpj = getUser().getBatchJobFromDatabase(
-							job.getJobProperty(Constants.BATCHJOB_NAME));
-					mpj.removeJob(job);
-					batchJobDao.saveOrUpdate(mpj);
-				} catch (final Exception e) {
-					// e.printStackTrace();
-					// doesn't matter
+
+					myLogger.debug("Killing job " + job.getJobname()
+							+ "through jobsubmitter...");
+					status.addLogMessage("Killing job through jobmanager...");
+					kill(job);
+					status.addElement("Job killed through jobmanager...");
+					myLogger.debug("Killing job " + job.getJobname()
+							+ "through jobsubmitter finished.");
+
+					if (delteJobDirectory) {
+
+						if (job.isBatchJob()) {
+
+							try {
+								status.addLogMessage("Removing job from parent batchjob.");
+								final BatchJob mpj = getUser().getBatchJobFromDatabase(
+										job.getJobProperty(Constants.BATCHJOB_NAME));
+								mpj.removeJob(job);
+								batchJobDao.saveOrUpdate(mpj);
+							} catch (final Exception e) {
+								// e.printStackTrace();
+								// doesn't matter
+							}
+
+						}
+						status.addLogMessage("Removing job directory.");
+						if (job.getJobProperty(Constants.JOBDIRECTORY_KEY) != null) {
+
+							try {
+								myLogger.debug("Deleting jobdir for "
+										+ job.getJobname());
+
+								deleteFile(job.getJobProperty(Constants.JOBDIRECTORY_KEY));
+								myLogger.debug("Deleting success for jobdir for "
+										+ job.getJobname());
+							} catch (final Exception e) {
+								myLogger.error("Could not delete jobdirectory: "
+										+ e.getMessage()
+										+ " Deleting job anyway and don't throw an exception.");
+							}
+						}
+						status.addElement("Job directory deleted.");
+					}
+
+					if (removeFromDB) {
+						status.addLogMessage("Removing job from db...");
+						myLogger.debug("Removing job " + job.getJobname()
+								+ " from db.");
+						jobdao.delete(job);
+						myLogger.debug("Removing job " + job.getJobname()
+								+ " from db finished.");
+						status.addElement("Job removed from db.");
+
+					}
+
+					status.addElement("Job killed.");
+					status.setFinished(true);
+					status.setFailed(false);
+				} catch (Throwable e) {
+					status.addElement("Failed: " + e.getLocalizedMessage());
+					status.setFailed(true);
+					status.setErrorCause(e.getLocalizedMessage());
+					myLogger.error("Could not kill job: " + job.getJobname());
 				}
 
 			}
+		};
 
-			if (job.getJobProperty(Constants.JOBDIRECTORY_KEY) != null) {
+		t.start();
 
-				try {
-					// myLogger.debug("Deleting jobdir for " + job.getJobname()
-					// + " in thread " + Thread.currentThread().getName());
-					deleteFile(job.getJobProperty(Constants.JOBDIRECTORY_KEY));
-					// myLogger.debug("Deleting success for jobdir for "
-					// + job.getJobname() + " in thread "
-					// + Thread.currentThread().getName());
-					// FileObject jobDir = getUser().aquireFile(
-					// job.getJobProperty(Constants.JOBDIRECTORY_KEY));
-					// jobDir.delete(new AllFileSelector());
-					// jobDir.delete();
-				} catch (final Exception e) {
-					// myLogger.debug("Deleting NOT success for jobdir for "
-					// + job.getJobname() + " in thread "
-					// + Thread.currentThread().getName() + ": "
-					// + e.getLocalizedMessage());
-					// throw new RemoteFileSystemException(
-					// "Could not delete jobdirectory: " + e.getMessage());
-					// myLogger.error(Thread.currentThread().getName());
-					myLogger.error("Could not delete jobdirectory: "
-							+ e.getMessage()
-							+ " Deleting job anyway and don't throw an exception.");
-				}
-			}
-		}
-
-		if (removeFromDB) {
-			jobdao.delete(job);
-			// X.p("Deleted from db.");
-		}
+		return handle;
 
 	}
 
-	public void kill(final String jobname, final boolean clear)
-			throws RemoteFileSystemException, NoSuchJobException,
+	public String kill(final String jobname, final boolean clear)
+			throws NoSuchJobException,
 			BatchJobException {
 
 		try {
@@ -2457,34 +2492,49 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			if (clear) {
 				try {
 					job = jobdao.findJobByDN(getUser().getDn(), jobname);
-					kill(job, true, true);
+					String handle = kill(job, true, true);
+					return handle;
+				} catch(NoSuchJobException nsje) {
+					throw nsje;
 				} catch (Exception e) {
-					myLogger.error(e);
+					myLogger.debug("Failed killing job: " + e);
 
 					try {
 						// try to delete jobs in case of db corruption
 						List<Job> jobs = jobdao.findRogueJobsByDN(getDN(),
 								jobname);
+						String handle = null;
 						for (Job tmp : jobs) {
 							try {
-								kill(tmp, true, true);
+								handle = kill(tmp, true, true);
 							} catch (Exception e3) {
-								myLogger.error(e3);
+								myLogger.debug("Can't kill job: "
+										+ e3.getLocalizedMessage());
 							}
 						}
-					} catch (Exception e2) {
-						myLogger.error("Backup cleaning of job also failed.",
-								e2);
+						return handle;
+
+					} catch (NoSuchJobException nsje) {
+						// that's ok
+						throw nsje;
 					}
 				}
 			} else {
 				job = jobdao.findJobByDN(getUser().getDn(), jobname);
-				kill(job, false, false);
+				String handle = kill(job, false, false);
+				return handle;
 			}
 
 		} catch (final NoSuchJobException nsje) {
-			final BatchJob mpj = getUser().getBatchJobFromDatabase(jobname);
-			deleteMultiPartJob(mpj, clear);
+			try {
+				final BatchJob mpj = getUser().getBatchJobFromDatabase(jobname);
+				deleteMultiPartJob(mpj, clear);
+				return mpj.getBatchJobname();
+			} catch (final NoSuchJobException nsje2) {
+				throw nsje2;
+			} catch (final Exception e) {
+				throw new BatchJobException(e);
+			}
 		}
 	}
 
@@ -2515,8 +2565,20 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 							status.addElement("Killing job " + jobname + "...");
 							try {
-								kill(jobname, clear);
-								status.addElement("Success.");
+								String handle = kill(jobname, clear);
+								StatusObject so = StatusObject
+										.waitForActionToFinish(
+												AbstractServiceInterface.this,
+												handle, 2, false, false);
+								if (so.getStatus().isFailed()) {
+									status.addElement("Killing of job "
+											+ jobname + " failed.");
+									throw new Exception(so.getStatus()
+											.getErrorCause());
+								} else {
+									status.addElement("Killing of job "
+											+ jobname + " finished");
+								}
 							} catch (final Exception e) {
 								status.addElement("Failed: " + e.getLocalizedMessage());
 								status.setFailed(true);

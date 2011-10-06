@@ -1332,18 +1332,30 @@ Comparable<BatchJobObject>, Listener {
 		}
 
 		setIsBeingKilled(true);
+		String handle = null;
 		try {
-			serviceInterface.kill(this.getJobname(), clean);
+			handle = serviceInterface.kill(this.getJobname(), clean);
+			StatusObject so = StatusObject.waitForActionToFinish(
+					serviceInterface, handle, 2, false, false);
+			if (so.getStatus().isFailed()) {
+				throw new Exception(so.getStatus().getErrorCause());
+			}
+			try {
+				getStatus(true);
+			} catch (Exception nsje) {
+				// that's ok
+			}
 			addJobLogMessage("Job kill command sent to backend.");
 		} catch (final Exception e) {
 			myLogger.error(e);
 		}
 
+		final String handleTmp = handle;
 		final Thread waitThread = new Thread() {
 			@Override
 			public void run() {
 				final StatusObject statusO = new StatusObject(serviceInterface,
-						getJobname());
+						handleTmp);
 				try {
 					statusO.waitForActionToFinish(3, false, true);
 				} catch (final InterruptedException e) {
@@ -1553,7 +1565,21 @@ Comparable<BatchJobObject>, Listener {
 							addJobLogMessage(message);
 
 							try {
-								serviceInterface.kill(job.getJobname(), true);
+								String handle = serviceInterface.kill(
+										job.getJobname(), true);
+								StatusObject so = StatusObject
+										.waitForActionToFinish(
+												serviceInterface, handle, 2,
+												false, false);
+								if (so.getStatus().isFailed()) {
+									throw new Exception(so.getStatus()
+											.getErrorCause());
+								}
+								try {
+									getStatus(true);
+								} catch (Exception nsje) {
+									// that's ok
+								}
 							} catch (final Exception e1) {
 								// doesn't matter
 							}

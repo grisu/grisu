@@ -1007,8 +1007,8 @@ public interface ServiceInterface {
 	 *            the name of the job
 	 * @param clean
 	 *            whether to clean/delete the jobdirectory if possible
-	 * @throws RemoteFileSystemException
-	 *             if the files can't be deleted
+	 * @return the handle to the kill task
+	 * 
 	 * @throws NoSuchJobException
 	 *             if no such job exists
 	 * @throws BatchJobException
@@ -1017,10 +1017,9 @@ public interface ServiceInterface {
 	@POST
 	@Path("job/{jobname}/kill")
 	@RolesAllowed("User")
-	void kill(@PathParam("jobname") String jobname,
+	String kill(@PathParam("jobname") String jobname,
 			@DefaultValue("false") @QueryParam("clean") boolean clean)
-					throws RemoteFileSystemException, NoSuchJobException,
-					BatchJobException;
+					throws NoSuchJobException, BatchJobException;
 
 	/**
 	 * Deletes the whole jobdirectory (if specified) and if successful, the job
