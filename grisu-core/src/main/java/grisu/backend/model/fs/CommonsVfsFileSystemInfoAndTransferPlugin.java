@@ -232,23 +232,29 @@ FileSystemInfoPlugin, FileTransferPlugin {
 		FileSystemCache fsCache = new FileSystemCache(user);
 
 		final FileObject fileObject = aquireFile(fsCache, file);
+		int retries = ServerPropertiesManager.getFileDeleteRetries();
 		try {
 			if (fileObject.exists()) {
-				myLogger.debug("Deleting file/folder:" + file);
-				int retries = ServerPropertiesManager.getFileDeleteRetries();
 				FileSystemException fse = null;
 				for (int i = 0; i < retries; i++) {
 					try {
+						myLogger.debug("Deleting file/folder (" + i + ". try):"
+								+ file);
 						int no = fileObject.delete(new AllFileSelector());
 						myLogger.debug("Deleted " + no
 								+ " files when deleting " + file);
 						fse = null;
 					} catch (FileSystemException e) {
+						myLogger.debug("Deleting file/folder (" + i + ". try):"
+								+ file + ". Error: " + e.getLocalizedMessage());
+
 						fse = e;
 					}
 				}
 
 				if (fse != null) {
+					myLogger.error("Could not delete file " + file + ". Tried "
+							+ retries + " times.");
 					throw fse;
 				}
 			}
