@@ -2492,8 +2492,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			if (clear) {
 				try {
 					job = jobdao.findJobByDN(getUser().getDn(), jobname);
-					String handle = kill(job, true, true);
-					return handle;
 				} catch(NoSuchJobException nsje) {
 					throw nsje;
 				} catch (Exception e) {
@@ -2519,6 +2517,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						throw nsje;
 					}
 				}
+
+				String handle = kill(job, true, true);
+				return handle;
+
 			} else {
 				job = jobdao.findJobByDN(getUser().getDn(), jobname);
 				String handle = kill(job, false, false);
