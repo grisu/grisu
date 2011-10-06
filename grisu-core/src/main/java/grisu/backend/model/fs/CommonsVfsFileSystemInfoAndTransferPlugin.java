@@ -231,32 +231,37 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 		FileSystemCache fsCache = new FileSystemCache(user);
 
-		final FileObject fileObject = aquireFile(fsCache, file);
 		int retries = ServerPropertiesManager.getFileDeleteRetries();
 		try {
-			if (fileObject.exists()) {
-				FileSystemException fse = null;
-				for (int i = 0; i < retries; i++) {
-					try {
-						myLogger.debug("Deleting file/folder (" + i + ". try):"
+			FileSystemException fse = null;
+			for (int i = 0; i < retries; i++) {
+				FileObject fileObject = null;
+				try {
+					fileObject = aquireFile(fsCache, file);
+					if (fileObject.exists()) {
+						myLogger.debug("Deleting file/folder (" + (i+1) + ". try):"
 								+ file);
 						int no = fileObject.delete(new AllFileSelector());
 						myLogger.debug("Deleted " + no
 								+ " files when deleting " + file);
 						fse = null;
-					} catch (FileSystemException e) {
-						myLogger.debug("Deleting file/folder (" + i + ". try):"
-								+ file + ". Error: " + e.getLocalizedMessage());
+					}
+				} catch (FileSystemException e) {
+					myLogger.debug("Deleting file/folder (" + (i+1) + ". try):"
+							+ file + ". Error: " + e.getLocalizedMessage());
 
-						fse = e;
+					fse = e;
+				} finally {
+					if (fileObject != null) {
+						closeFile(fileObject);
 					}
 				}
+			}
 
-				if (fse != null) {
-					myLogger.error("Could not delete file " + file + ". Tried "
-							+ retries + " times.");
-					throw fse;
-				}
+			if (fse != null) {
+				myLogger.error("Could not delete file " + file + ". Tried "
+						+ retries + " times.");
+				throw fse;
 			}
 		} catch (final FileSystemException e) {
 
@@ -264,7 +269,6 @@ FileSystemInfoPlugin, FileTransferPlugin {
 					+ e.getLocalizedMessage());
 		} finally {
 			fsCache.close();
-			closeFile(fileObject);
 		}
 
 	}
