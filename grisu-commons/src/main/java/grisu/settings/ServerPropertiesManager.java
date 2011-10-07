@@ -80,7 +80,7 @@ public final class ServerPropertiesManager {
 	private static final boolean DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS = false;
 
 	private static final int DEFAULT_FILE_TRANSFER_RETRIES = 3;
-	private static final int DEFAULT_FILE_DELETE_RETRIES = 3;
+	private static final int DEFAULT_FILE_DELETE_RETRIES = 6;
 	private static final int DEFAULT_TIME_BETWEEN_FILE_TRANSFER_RETRIES_IN_SECONDS = 1;
 
 	private static final Integer DEFAULT_FILESYSTEM_TIMEOUT_IN_MILLISECONDS = 4000;
