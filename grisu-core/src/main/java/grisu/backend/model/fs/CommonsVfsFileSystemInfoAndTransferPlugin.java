@@ -245,6 +245,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 						myLogger.debug("Deleted " + no
 								+ " files when deleting " + file);
 						fse = null;
+						break;
 					}
 				} catch (FileSystemException e) {
 					myLogger.debug("Deleting file/folder (" + (i+1) + ". try):"
