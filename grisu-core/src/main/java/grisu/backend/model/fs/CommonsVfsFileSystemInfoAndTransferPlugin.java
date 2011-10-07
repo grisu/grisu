@@ -229,12 +229,12 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 	public void deleteFile(final String file) throws RemoteFileSystemException {
 
-		FileSystemCache fsCache = new FileSystemCache(user);
 
 		int retries = ServerPropertiesManager.getFileDeleteRetries();
 		try {
 			FileSystemException fse = null;
 			for (int i = 0; i < retries; i++) {
+				FileSystemCache fsCache = new FileSystemCache(user);
 				FileObject fileObject = null;
 				try {
 					fileObject = aquireFile(fsCache, file);
@@ -255,6 +255,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 					if (fileObject != null) {
 						closeFile(fileObject);
 					}
+					fsCache.close();
 				}
 			}
 
@@ -267,8 +268,6 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 			throw new RemoteFileSystemException("Could not delete file: "
 					+ e.getLocalizedMessage());
-		} finally {
-			fsCache.close();
 		}
 
 	}
