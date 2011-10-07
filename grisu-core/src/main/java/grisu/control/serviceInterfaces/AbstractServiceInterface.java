@@ -1005,7 +1005,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			final boolean overwrite, final boolean waitForFileTransferToFinish)
 					throws RemoteFileSystemException {
 
-		String handle = UUID.randomUUID().toString();
+		String handle = "cp_"+sources.asSortedSet().size()+"_files_to_"+target+"_"+new Date().getTime();
 
 		final DtoActionStatus actionStat = new DtoActionStatus(handle,
 				sources.asArray().length * 2);
@@ -2433,7 +2433,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private String kill(final Job job, final boolean removeFromDB,
 			final boolean delteJobDirectory) {
 
-		final String handle = UUID.randomUUID().toString();
+		final String handle = "kill_" + job.getJobname() + "_"
+				+ new Date().getTime();
 		int amount = 4;
 		if (!delteJobDirectory) {
 			amount = amount - 1;
@@ -2592,7 +2593,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return null;
 		}
 
-		final String handle = UUID.randomUUID().toString();
+		final String handle = "kill_" + jobnames.asSortedSet().size()
+				+ "_jobs_" + new Date().getTime();
 		final DtoActionStatus status = new DtoActionStatus(
 				handle,
 				jobnames.asArray().length * 2);
@@ -4317,7 +4319,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			NoSuchJobException {
 
 		String handle = "submision_status_" + jobname + "_"
-				+ UUID.randomUUID().toString();
+				+ new Date().getTime();
 		final DtoActionStatus status = new DtoActionStatus(handle, 0);
 		getSessionActionStatus().put(handle, status);
 
