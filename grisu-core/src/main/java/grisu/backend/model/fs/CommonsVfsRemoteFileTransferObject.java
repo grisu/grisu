@@ -66,7 +66,7 @@ RemoteFileTransferObject {
 					for (int tryNo = 0; tryNo <= ServerPropertiesManager
 							.getFileTransferRetries(); tryNo++) {
 
-						myLogger.debug(id + ": " + tryNo + 1
+						myLogger.debug(id + ": " + (tryNo + 1)
 								+ ". try to transfer file: "
 								+ source.getName().getURI() + " => "
 								+ target.getName().getURI());
@@ -123,12 +123,17 @@ RemoteFileTransferObject {
 
 	protected void addMessage(String message) {
 		messages.put(new Date(), message);
+		myLogger.debug(id + ": " + message);
 	}
 
 	public final Thread getFileTransferThread() {
 
 		return this.fileTransferThread;
 
+	}
+
+	public String getId() {
+		return id;
 	}
 
 	public Exception getPossibleException() {
@@ -214,7 +219,8 @@ RemoteFileTransferObject {
 									+ "Could not delete target file.");
 				}
 			}
-			myLogger.debug("Copying: " + source_file.getName().toString()
+			myLogger.debug(id + ": Copying: "
+					+ source_file.getName().toString()
 					+ " to: " + target_file.getName().toString());
 			// target_file.copyFrom(source_file, new AllFileSelector());
 			//
