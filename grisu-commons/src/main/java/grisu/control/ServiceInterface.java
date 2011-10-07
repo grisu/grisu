@@ -296,13 +296,14 @@ public interface ServiceInterface {
 	 * 
 	 * @param file
 	 *            the file to delete
+	 * @return the handle for the file delete
 	 * @throws RemoteFileSystemException
 	 *             if the filesystem could not be accessed
 	 */
 	@RolesAllowed("User")
 	@DELETE
 	@Path("/files/{url}/delete")
-	void deleteFile(@PathParam("url") String url)
+	String deleteFile(@PathParam("url") String url)
 			throws RemoteFileSystemException;
 
 	/**
