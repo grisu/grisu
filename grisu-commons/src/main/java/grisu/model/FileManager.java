@@ -927,7 +927,19 @@ public class FileManager {
 		}
 
 		if (!isLocal(url)) {
-			serviceInterface.deleteFile(url);
+			String handle = serviceInterface.deleteFile(url);
+			StatusObject so;
+			try {
+				so = StatusObject.waitForActionToFinish(serviceInterface,
+						handle, 2, true, false);
+				if (so.getStatus().isFailed()) {
+					throw new RemoteFileSystemException(so.getStatus()
+							.getErrorCause());
+				}
+			} catch (Exception e) {
+				myLogger.error(e);
+			}
+
 		}
 
 	}

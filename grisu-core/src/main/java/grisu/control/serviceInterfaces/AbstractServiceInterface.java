@@ -581,7 +581,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							targetDirUrl, false, true, true);
 					status.addElement("Deleting old jobdirectory: "
 							+ job.getJobProperty(Constants.JOBDIRECTORY_KEY));
-					deleteFile(job.getJobProperty(Constants.JOBDIRECTORY_KEY));
+					deleteFile(job.getJobProperty(Constants.JOBDIRECTORY_KEY),
+							true);
 				} catch (final RemoteFileSystemException e1) {
 					if (optionalBatchJobStatus != null) {
 						optionalBatchJobStatus.setFailed(true);
@@ -1262,7 +1263,39 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see grisu.control.ServiceInterface#deleteFile(java.lang.String)
 	 */
-	public void deleteFile(final String file) throws RemoteFileSystemException {
+	public String deleteFile(final String file) throws RemoteFileSystemException {
+
+		final String handle = "delete_"+file+"_"+new Date().getTime();
+		final DtoActionStatus status = new DtoActionStatus(handle, 2);
+		getSessionActionStatus().put(handle, status);
+
+		Thread t = new Thread() {
+			@Override
+			public void run() {
+				try {
+					status.addElement("Starting to delete file " + file);
+					deleteFile(file, false);
+					status.addElement("Finished deletion.");
+					status.setFinished(true);
+					status.setFailed(false);
+				} catch (Exception e) {
+					status.setFinished(true);
+					status.setFailed(true);
+					status.addElement("Deletion failed: "
+							+ e.getLocalizedMessage());
+					status.setErrorCause(e.getLocalizedMessage());
+				}
+			}
+		};
+
+		t.start();
+
+		return handle;
+
+	}
+
+	private void deleteFile(final String file, boolean wait)
+			throws RemoteFileSystemException {
 
 		getUser().getFileSystemManager().deleteFile(file);
 
@@ -1281,27 +1314,37 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return null;
 		}
 
-		final DtoActionStatus status = new DtoActionStatus(files.asArray()[0],
+		String handle = "Deleting_" + files.getStringList().size() + "_files_"
+				+ new Date().getTime();
+
+		final DtoActionStatus status = new DtoActionStatus(handle,
 				files.asArray().length * 2);
-		getSessionActionStatus().put(files.asArray()[0], status);
+		getSessionActionStatus().put(handle, status);
 
-		for (final String file : files.getStringList()) {
-			try {
-				status.addElement("Deleting file " + file + "...");
-				deleteFile(file);
-				status.addElement("Success.");
-			} catch (final Exception e) {
-				status.addElement("Failed: " + e.getLocalizedMessage());
-				status.setFailed(true);
-				status.setErrorCause(e.getLocalizedMessage());
-				myLogger.error("Could not delete file: " + file);
-				// filesNotDeleted.add(file);
+		Thread t = new Thread() {
+			@Override
+			public void run() {
+
+				for (final String file : files.getStringList()) {
+					try {
+						status.addElement("Deleting file " + file + "...");
+						deleteFile(file, true);
+						status.addElement("Success.");
+					} catch (final Exception e) {
+						status.addElement("Failed: " + e.getLocalizedMessage());
+						status.setFailed(true);
+						status.setErrorCause(e.getLocalizedMessage());
+						myLogger.error("Could not delete file: " + file);
+						// filesNotDeleted.add(file);
+					}
+					status.setFinished(true);
+				}
+
 			}
-		}
+		};
+		t.start();
 
-		status.setFinished(true);
-
-		return null;
+		return handle;
 
 	}
 
@@ -1399,7 +1442,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 									.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY);
 							myLogger.debug("Deleting multijobDir: " + url);
 							try {
-								deleteFile(url);
+								deleteFile(url, true);
 								newActionStatus
 								.addElement("Deleted common dir for mountpoint: "
 										+ mpRoot);
@@ -2439,7 +2482,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								myLogger.debug("Deleting jobdir for "
 										+ job.getJobname());
 
-								deleteFile(job.getJobProperty(Constants.JOBDIRECTORY_KEY));
+								deleteFile(
+										job.getJobProperty(Constants.JOBDIRECTORY_KEY),
+										true);
 								myLogger.debug("Deleting success for jobdir for "
 										+ job.getJobname());
 							} catch (final Exception e) {
@@ -3396,7 +3441,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				// if old jobdir exists, try to move it here
 				cpSingleFile(oldJobDir, newJobdir, true, true, true);
 
-				deleteFile(oldJobDir);
+				deleteFile(oldJobDir, true);
 			} catch (final Exception e) {
 				myLogger.error(e);
 			}
