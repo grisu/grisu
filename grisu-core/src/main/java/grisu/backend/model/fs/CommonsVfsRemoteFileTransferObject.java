@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
 
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemException;
@@ -39,6 +40,8 @@ RemoteFileTransferObject {
 
 	private final FileSystemCache fsCache;
 
+	private final String id = "TRANSFER_" + UUID.randomUUID().toString();
+
 	static final Logger myLogger = Logger
 			.getLogger(CommonsVfsRemoteFileTransferObject.class.getName());
 
@@ -48,6 +51,10 @@ RemoteFileTransferObject {
 		this.fsCache = fsCache;
 		this.source = sourceF;
 		this.target = targetF;
+
+		myLogger.debug("Creating file transfer object for "
+				+ source.getName().getURI() + " -> "
+				+ target.getName().getURI() + ". ID: " + id);
 
 		this.overwrite = overwriteB;
 
@@ -59,22 +66,30 @@ RemoteFileTransferObject {
 					for (int tryNo = 0; tryNo <= ServerPropertiesManager
 							.getFileTransferRetries(); tryNo++) {
 
-						myLogger.debug(tryNo + 1 + ". try to transfer file: "
+						myLogger.debug(id + ": " + tryNo + 1
+								+ ". try to transfer file: "
 								+ source.getName().getURI() + " => "
 								+ target.getName().getURI());
 						try {
-							myLogger.info("Copy thread started for target: "
+							myLogger.info(id + ": "
+									+ "Copy thread started for target: "
 									+ target.getName());
 							transferFile(source, target, overwrite);
+							myLogger.info(id + ": "
+									+ "Copy thread finished for target: "
+									+ target.getName());
+
 							finished = true;
 							break;
 						} catch (final RemoteFileSystemException e) {
-							myLogger.error(e);
+							myLogger.error(id + ": Failed: "
+									+ e.getLocalizedMessage());
 							if (tryNo >= (ServerPropertiesManager
 									.getFileTransferRetries() - 1)) {
 								finished = true;
 								failed = true;
 								possibleException = e;
+								myLogger.debug(id + ": Failed for good...");
 							} else {
 								// sleep for a few seconds, maybe the gridftp
 								// server needs some rest
@@ -92,12 +107,12 @@ RemoteFileTransferObject {
 					try {
 						source.close();
 					} catch (FileSystemException ex){
-						myLogger.warn(ex.getLocalizedMessage());
+						myLogger.warn(id + ex.getLocalizedMessage());
 					}
 					try {
 						target.close();
 					} catch (FileSystemException ex){
-						myLogger.warn(ex.getLocalizedMessage());
+						myLogger.warn(id + ex.getLocalizedMessage());
 					}
 				}
 
