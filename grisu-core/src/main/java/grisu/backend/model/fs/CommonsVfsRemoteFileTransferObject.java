@@ -161,9 +161,11 @@ RemoteFileTransferObject {
 	public final void joinFileTransfer() {
 
 		try {
+			addMessage("Waiting for filetransfer thread to finish...");
 			fileTransferThread.join();
+			addMessage("Filetransfer thread finished...");
 		} catch (final InterruptedException e) {
-			messages.put(new Date(), "File transfer thread interrupted.");
+			addMessage("File transfer thread interrupted.");
 			Thread.currentThread().interrupt();
 		}
 
