@@ -103,16 +103,26 @@ RemoteFileTransferObject {
 					}
 				} finally {
 					myLogger.debug(id + ": finalizing...");
-					fsCache.close();
 					try {
+						myLogger.debug(id + ": closing source...");
 						source.close();
+						myLogger.debug(id + ": closed source.");
 					} catch (FileSystemException ex){
 						myLogger.warn(id + ex.getLocalizedMessage());
 					}
 					try {
+						myLogger.debug(id + ": closing target...");
 						target.close();
+						myLogger.debug(id + ": closed target.");
 					} catch (FileSystemException ex){
 						myLogger.warn(id + ex.getLocalizedMessage());
+					}
+					try {
+						myLogger.debug(id + ": closing filesystem...");
+						fsCache.close();
+						myLogger.debug(id + ": filesytem closed.");
+					} catch (Exception e) {
+						myLogger.warn(id + e.getLocalizedMessage());
 					}
 					myLogger.debug(id+": finalized...");
 				}
