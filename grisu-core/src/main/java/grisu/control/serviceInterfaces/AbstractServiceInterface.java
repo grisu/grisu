@@ -1082,6 +1082,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		final RemoteFileTransferObject fileTransfer = getUser()
 				.getFileSystemManager().copy(source, target, overwrite);
 
+
 		if (startFileTransfer) {
 			fileTransfer.startTransfer(waitForFileTransferToFinish);
 		}
@@ -3983,12 +3984,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// Job job;
 		// job = jobdao.findJobByDN(getUser().getDn(), jobname);
 
+		String debugToken = "SUBMIT_" + job.getJobname() + ": ";
+
 		final List<Element> stageIns = JsdlHelpers.getStageInElements(job
 				.getJobDescription());
 
 		for (final Element stageIn : stageIns) {
 
 			final String sourceUrl = JsdlHelpers.getStageInSource(stageIn);
+
+			myLogger.debug(debugToken + "staging in " + stageIn);
+
 			if (optionalStatus != null) {
 				optionalStatus.addElement("Staging file "
 						+ sourceUrl.substring(sourceUrl.lastIndexOf("/") + 1));
@@ -4006,23 +4012,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			if (StringUtils.isNotBlank(sourceUrl)) {
 
-				// try {
-				// getUser().getFileSystemManager().createFolder(
-				// FileManager.calculateParentUrl(targetUrl));
-				//
-				// } catch (final RemoteFileSystemException e) {
-				// if (optionalStatus != null) {
-				// optionalStatus
-				// .addLogMessage("Error while staging in files: "
-				// + e.getLocalizedMessage());
-				// }
-				// throw e;
-				// }
-				myLogger.debug("Staging file: " + sourceUrl + " to: "
+				myLogger.debug(debugToken + "Start staging of file: "
+						+ sourceUrl + " to: "
 						+ targetUrl);
 				job.addInputFile(sourceUrl);
 				jobdao.saveOrUpdate(job);
 				cpSingleFile(sourceUrl, targetUrl, true, true, true);
+				myLogger.debug(debugToken + "Finished staging of file: "
+						+ sourceUrl + " to: " + targetUrl);
 				// job.addInputFile(targetUrl);
 			}
 			// }
