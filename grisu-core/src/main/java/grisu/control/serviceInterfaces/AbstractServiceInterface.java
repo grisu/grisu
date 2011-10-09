@@ -3993,7 +3993,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			final String sourceUrl = JsdlHelpers.getStageInSource(stageIn);
 
-			myLogger.debug(debugToken + "staging in " + stageIn);
+			myLogger.debug(debugToken + "staging in " + sourceUrl);
 
 			if (optionalStatus != null) {
 				optionalStatus.addElement("Staging file "
