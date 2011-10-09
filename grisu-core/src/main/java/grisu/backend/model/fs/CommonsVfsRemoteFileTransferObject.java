@@ -174,11 +174,16 @@ RemoteFileTransferObject {
 	public final void startTransfer(boolean waitForTransferToFinish) {
 
 		// transferFile(source, target, overwrite);
-		messages.put(new Date(), "Transfer started.");
+		messages.put(new Date(), "Transfer startint...");
+		myLogger.debug("Starting transfer " + id);
 		fileTransferThread.start();
 
 		if (waitForTransferToFinish) {
+			myLogger.debug("Joining transfer " + id);
 			joinFileTransfer();
+			myLogger.debug("Finshed transfer " + id);
+		} else {
+			myLogger.debug("Transfer started in background." + id);
 		}
 
 	}
