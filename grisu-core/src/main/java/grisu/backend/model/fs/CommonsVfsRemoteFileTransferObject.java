@@ -102,7 +102,7 @@ RemoteFileTransferObject {
 						}
 					}
 				} finally {
-
+					myLogger.debug(id + ": finalizing...");
 					fsCache.close();
 					try {
 						source.close();
@@ -114,6 +114,7 @@ RemoteFileTransferObject {
 					} catch (FileSystemException ex){
 						myLogger.warn(id + ex.getLocalizedMessage());
 					}
+					myLogger.debug(id+": finalized...");
 				}
 
 			}
