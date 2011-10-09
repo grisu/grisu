@@ -167,6 +167,8 @@ RemoteFileTransferObject {
 		} catch (final InterruptedException e) {
 			addMessage("File transfer thread interrupted: " + id);
 			Thread.currentThread().interrupt();
+		} catch (Throwable t) {
+			t.printStackTrace();
 		}
 
 	}
