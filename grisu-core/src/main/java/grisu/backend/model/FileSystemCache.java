@@ -63,7 +63,7 @@ public class FileSystemCache {
 	public void close() {
 		cachedFilesystems = new HashMap<MountPoint, FileSystem>();
 
-		if (ServerPropertiesManager.closeFileSystemsInBackground()) {
+		if (!ServerPropertiesManager.closeFileSystemsInBackground()) {
 			myLogger.debug(id
 					+ "Closing filesystem. Currently open filesystems: "
 					+ COUNTER);
