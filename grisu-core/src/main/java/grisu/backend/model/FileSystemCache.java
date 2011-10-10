@@ -62,22 +62,34 @@ public class FileSystemCache {
 
 	public void close() {
 		cachedFilesystems = new HashMap<MountPoint, FileSystem>();
-		Thread t = new Thread() {
-			@Override
-			public void run() {
-				myLogger.debug(id
-						+ "Closing filesystem. Currently open filesystems: "
-						+ COUNTER);
-				fsm.close();
-				int i = COUNTER.decrementAndGet();
-				myLogger.debug(id
-						+ "Filesystemm closed. Remaining open filesystems: "
-						+ i);
-			}
-		};
-		t.setName("FS_CLOSE_" + new Date().getTime());
 
-		t.start();
+		if (ServerPropertiesManager.closeFileSystemsInBackground()) {
+			myLogger.debug(id
+					+ "Closing filesystem. Currently open filesystems: "
+					+ COUNTER);
+			fsm.close();
+			int i = COUNTER.decrementAndGet();
+			myLogger.debug(id
+					+ "Filesystemm closed. Remaining open filesystems: " + i);
+		} else {
+
+			Thread t = new Thread() {
+				@Override
+				public void run() {
+					myLogger.debug(id
+							+ "Closing filesystem. Currently open filesystems: "
+							+ COUNTER);
+					fsm.close();
+					int i = COUNTER.decrementAndGet();
+					myLogger.debug(id
+							+ "Filesystemm closed. Remaining open filesystems: "
+							+ i);
+				}
+			};
+			t.setName("FS_CLOSE_" + new Date().getTime());
+
+			t.start();
+		}
 	}
 
 	private FileSystem createFileSystem(String rootUrl,
