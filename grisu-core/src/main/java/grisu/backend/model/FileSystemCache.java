@@ -3,8 +3,10 @@ package grisu.backend.model;
 import grisu.model.MountPoint;
 import grisu.settings.ServerPropertiesManager;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.vfs.FileObject;
@@ -28,7 +30,10 @@ public class FileSystemCache {
 	private DefaultFileSystemManager fsm = null;
 	private final User user;
 
+	private final String id;
+
 	public FileSystemCache(User user) {
+		id = "FILESYSTEM_CACHE_" + UUID.randomUUID().toString();
 		int i = COUNTER.addAndGet(1);
 		// X.p("Opening filesystemmanager: " + i);
 		this.user = user;
@@ -57,9 +62,22 @@ public class FileSystemCache {
 
 	public void close() {
 		cachedFilesystems = new HashMap<MountPoint, FileSystem>();
-		fsm.close();
-		int i = COUNTER.decrementAndGet();
-		// X.p("Closing filesystemmanager: " + i);
+		Thread t = new Thread() {
+			@Override
+			public void run() {
+				myLogger.debug(id
+						+ "Closing filesystem. Currently open filesystems: "
+						+ COUNTER);
+				fsm.close();
+				int i = COUNTER.decrementAndGet();
+				myLogger.debug(id
+						+ "Filesystemm closed. Remaining open filesystems: "
+						+ i);
+			}
+		};
+		t.setName("FS_CLOSE_" + new Date().getTime());
+
+		t.start();
 	}
 
 	private FileSystem createFileSystem(String rootUrl,
@@ -72,7 +90,7 @@ public class FileSystemCache {
 			// + "\" is gsiftp url, using gridftpfilesystembuilder...");
 
 			final GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
-			.getInstance();
+					.getInstance();
 			builder.setGSSCredential(opts, credToUse.getGssCredential());
 			builder.setTimeout(opts,
 					ServerPropertiesManager.getFileSystemConnectTimeout());
@@ -102,7 +120,7 @@ public class FileSystemCache {
 	}
 
 	public FileSystem getFileSystem(final String rootUrl, String fqan)
-	throws FileSystemException {
+			throws FileSystemException {
 
 		synchronized (rootUrl) {
 			ProxyCredential credToUse = null;
