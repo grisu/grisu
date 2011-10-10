@@ -107,6 +107,25 @@ public final class ServerPropertiesManager {
 	// return check;
 	// }
 
+	public static boolean closeFileSystemsInBackground() {
+		boolean useFScache = false;
+
+		try {
+			try {
+				useFScache = getServerConfiguration().getBoolean(
+						"General.closeFilesystemsInBackground");
+			} catch (final NoSuchElementException e) {
+				// doesn't matter
+				// myLogger.debug(e);
+			}
+
+		} catch (final ConfigurationException e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			myLogger.debug(e);
+		}
+		return useFScache;
+	}
+
 	/**
 	 * Returns the name of the directory in which grisu jobs are located
 	 * remotely.
@@ -215,29 +234,6 @@ public final class ServerPropertiesManager {
 
 	}
 
-	/**
-	 * Returns the number of concurrent threads that are used to build the
-	 * mountpoint cache when a user first logs in.
-	 * 
-	 * @return the number of concurrent threads
-	 */
-	public static int getConcurrentMountPointLookups() {
-		int concurrentThreads = -1;
-		try {
-			concurrentThreads = Integer
-					.parseInt(getServerConfiguration().getString(
-							"ConcurrentThreadSettings.mountPointLookupThreads"));
-
-		} catch (final Exception e) {
-			// myLogger.error("Problem with config file: " + e.getMessage());
-			return DEFAULT_CONCURRENT_MOUNTPOINT_LOOKUPS;
-		}
-		if (concurrentThreads == -1) {
-			return DEFAULT_CONCURRENT_MOUNTPOINT_LOOKUPS;
-		}
-		return concurrentThreads;
-	}
-
 	// /**
 	// * Returns the name of the directory in which grisu jobs are located
 	// * remotely.
@@ -266,6 +262,29 @@ public final class ServerPropertiesManager {
 	//
 	// return jobDirName;
 	// }
+
+	/**
+	 * Returns the number of concurrent threads that are used to build the
+	 * mountpoint cache when a user first logs in.
+	 * 
+	 * @return the number of concurrent threads
+	 */
+	public static int getConcurrentMountPointLookups() {
+		int concurrentThreads = -1;
+		try {
+			concurrentThreads = Integer
+					.parseInt(getServerConfiguration().getString(
+							"ConcurrentThreadSettings.mountPointLookupThreads"));
+
+		} catch (final Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_CONCURRENT_MOUNTPOINT_LOOKUPS;
+		}
+		if (concurrentThreads == -1) {
+			return DEFAULT_CONCURRENT_MOUNTPOINT_LOOKUPS;
+		}
+		return concurrentThreads;
+	}
 
 	/**
 	 * Returns the number of concurrent threads that are submitting (multi-)jobs
