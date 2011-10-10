@@ -180,6 +180,7 @@
 					<artifactId>slf4j-api</artifactId>
 					<groupId>org.slf4j</groupId>
 				</exclusion>
+
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -300,7 +301,7 @@
 		<dependency>
 			<groupId>external.jglobus</groupId>
 			<artifactId>cog-jglobus</artifactId>
-			<version>1.8.1-bestgrid</version>
+			<version>1.8.2-bestgrid</version>
 		</dependency>
 
 
@@ -399,6 +400,10 @@
 					<artifactId>log4j</artifactId>
 					<groupId>log4j</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>puretls</artifactId>
+					<groupId>external.jglobus</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -411,6 +416,12 @@
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>mds4-client</artifactId>
 			<version>0.8.9</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>puretls</artifactId>
+					<groupId>external.jglobus</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
