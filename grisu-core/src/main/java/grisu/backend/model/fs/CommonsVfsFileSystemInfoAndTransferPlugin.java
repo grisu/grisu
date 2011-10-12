@@ -304,7 +304,9 @@ FileSystemInfoPlugin, FileTransferPlugin {
 					datasource = new FileContentDataSourceConnector(source);
 				} catch (final FileSystemException e) {
 					try {
+						myLogger.debug("Closing source file: " + filename);
 						source.close();
+						myLogger.debug("Closed source file: " + filename);
 					} catch (FileSystemException ex){
 						myLogger.warn("could not close file: " + ex.getLocalizedMessage());
 					}
@@ -317,7 +319,10 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			}
 
 		} finally {
+			myLogger.debug("Closing filesystem cache for file download: "
+					+ filename);
 			fsCache.close();
+			myLogger.debug("Closing source file: " + filename);
 		}
 
 		return datahandlers[0];
