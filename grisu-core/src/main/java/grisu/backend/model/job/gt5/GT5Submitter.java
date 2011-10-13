@@ -38,11 +38,14 @@ public class GT5Submitter extends JobSubmitter {
 	}
 
 	@Override
-	public int getJobStatus(String handle, ProxyCredential credential){
-		return getJobStatus(handle, credential, true);
+	public int getJobStatus(Job job, ProxyCredential credential) {
+		return getJobStatus(job, credential, true);
 	}
 
-	public int getJobStatus(String handle, ProxyCredential credential, boolean restart) {
+	public int getJobStatus(Job grisuJob, ProxyCredential credential,
+			boolean restart) {
+
+		final String handle = grisuJob.getJobhandle();
 
 		final Gram5JobListener l = Gram5JobListener.getJobListener();
 
@@ -101,7 +104,7 @@ public class GT5Submitter extends JobSubmitter {
 				}
 
 				// nope, not done yet.
-				return getJobStatus(handle, credential, false);
+				return getJobStatus(grisuJob, credential, false);
 			} else if (ex.getErrorCode() == 156){
 				// second restart didn't work - assume the job is done
 				// this bit is only needed during transition between releases
@@ -129,11 +132,11 @@ public class GT5Submitter extends JobSubmitter {
 	}
 
 	@Override
-	public int killJob(String handle, ProxyCredential cred) {
+	public int killJob(Job grisuJob, ProxyCredential cred) {
 
 		final GramJob job = new GramJob(null);
 		try {
-			job.setID(handle);
+			job.setID(grisuJob.getJobhandle());
 			job.setCredentials(cred.getGssCredential());
 			try {
 				Gram.cancel(job);
@@ -144,7 +147,7 @@ public class GT5Submitter extends JobSubmitter {
 				myLogger.error(ex.getLocalizedMessage());
 			}
 
-			return getJobStatus(handle, cred, true);
+			return getJobStatus(grisuJob, cred, true);
 		} catch (final MalformedURLException ex) {
 			myLogger.error(ex.getLocalizedMessage());
 			return JobConstants.UNDEFINED;
