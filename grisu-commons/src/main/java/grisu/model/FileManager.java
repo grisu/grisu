@@ -567,8 +567,23 @@ public class FileManager {
 			boolean overwrite) throws FileTransactionException {
 
 		try {
-			serviceInterface.cp(DtoStringList.fromSingleString(sourceUrl),
-					targetDirUrl, overwrite, true);
+			String handle = serviceInterface.cp(
+					DtoStringList.fromSingleString(sourceUrl), targetDirUrl,
+					overwrite, false);
+
+			StatusObject so;
+			try {
+				so = StatusObject.waitForActionToFinish(serviceInterface,
+						handle, 2, true, false);
+			} catch (Exception e) {
+				throw new FileTransactionException(sourceUrl, targetDirUrl,
+						e.getLocalizedMessage(), e);
+			}
+			if (so.getStatus().isFailed()) {
+				throw new RemoteFileSystemException(so.getStatus()
+						.getErrorCause());
+			}
+
 		} catch (final RemoteFileSystemException e) {
 			throw new FileTransactionException(sourceUrl, targetDirUrl,
 					e.getLocalizedMessage(), e);
