@@ -9,7 +9,6 @@ import grisu.backend.model.job.BatchJob;
 import grisu.backend.model.job.Job;
 import grisu.backend.model.job.JobSubmissionManager;
 import grisu.backend.model.job.JobSubmitter;
-import grisu.backend.model.job.gt4.GT4DummySubmitter;
 import grisu.backend.model.job.gt4.GT4Submitter;
 import grisu.backend.model.job.gt5.GT5Submitter;
 import grisu.backend.utils.CertHelpers;
@@ -1653,7 +1652,6 @@ public class User {
 			final Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
 			submitters.put("GT4", new GT4Submitter());
 			submitters.put("GT5", new GT5Submitter());
-			submitters.put("GT4Dummy", new GT4DummySubmitter());
 			manager = new JobSubmissionManager(
 					AbstractServiceInterface.informationManager, submitters);
 		}

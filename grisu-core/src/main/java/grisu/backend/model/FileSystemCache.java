@@ -33,7 +33,7 @@ public class FileSystemCache {
 	private final String id;
 
 	public FileSystemCache(User user) {
-		id = "FILESYSTEM_CACHE_" + UUID.randomUUID().toString();
+		id = "FILESYSTEM_CACHE_" + UUID.randomUUID().toString() + ": ";
 		int i = COUNTER.addAndGet(1);
 		// X.p("Opening filesystemmanager: " + i);
 		this.user = user;
