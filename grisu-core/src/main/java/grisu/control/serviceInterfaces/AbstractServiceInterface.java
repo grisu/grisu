@@ -423,6 +423,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 					final Thread archiveThread = archiveSingleJob(job, tmp,
 							status);
+					archiveThread.setName("archive_batchJob_"
+							+ status.getHandle());
 					executor.execute(archiveThread);
 				}
 
@@ -715,8 +717,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	private String calculateJobname(String jobname, String jobnameCreationMethod)
-			throws JobPropertiesException {
+	private synchronized String calculateJobname(String jobname,
+			String jobnameCreationMethod)
+					throws JobPropertiesException {
 
 		if ((jobnameCreationMethod == null)
 				|| Constants.FORCE_NAME_METHOD.equals(jobnameCreationMethod)) {
@@ -928,6 +931,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 									}
 								}
 							};
+
 							executor1.execute(thread);
 						}
 					}
@@ -1053,7 +1057,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			}
 		};
-
+		cpThread.setName(actionStat.getHandle());
 		cpThread.start();
 
 		if (waitForFileTransferToFinish) {
@@ -1289,7 +1293,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				}
 			}
 		};
-
+		t.setName(handle);
 		t.start();
 
 		return handle;
@@ -2640,6 +2644,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						}
 
 					};
+					t.setName(status.getHandle());
 					executor.execute(t);
 				}
 
@@ -4327,7 +4332,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				if (job.getStatus() > JobConstants.READY_TO_SUBMIT) {
 					throw new JobSubmissionException("Job already submitted.");
 				}
-				new Thread() {
+				Thread t = new Thread() {
 					@Override
 					public void run() {
 						try {
@@ -4339,14 +4344,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							myLogger.error(e);
 						}
 					}
-				}.start();
+				};
+				t.setName(status.getHandle());
+				t.start();
 
 			} catch (final NoSuchJobException e) {
 				// maybe it's a multipartjob
 				final BatchJob multiJob = getUser()
 						.getBatchJobFromDatabase(jobname);
 
-				new Thread() {
+				Thread t = new Thread() {
 					@Override
 					public void run() {
 						try {
@@ -4368,7 +4375,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							myLogger.error(e);
 						}
 					}
-				}.start();
+				};
+				t.setName(status.getHandle());
+				t.start();
 			}
 		} catch (NoSuchJobException nsje) {
 			status.setFailed(true);
