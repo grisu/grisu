@@ -66,7 +66,7 @@ public class Gram5Client {
 			job.setID(handle);
 			job.setCredentials(cred);
 			job.bind();
-			job.addListener(l);
+			//job.addListener(l);
 			Gram.jobStatus(job);
 			myLogger.debug("job status is " + job.getStatusAsString());
 			myLogger.debug("job error is " + job.getError());
@@ -105,6 +105,8 @@ public class Gram5Client {
 			myLogger.error(ex);
 		} catch (final MalformedURLException ex) {
 			myLogger.error(ex);
+		} finally {
+		    unbindJob(job);
 		}
 
 		status = job.getStatus();
@@ -115,7 +117,8 @@ public class Gram5Client {
 	
 	private void unbindJob(GramJob job){
 		try {
-			job.unbind();
+		    Gram.deactivateAllCallbackHandlers();
+		    job.unbind();
 		} catch (Exception e) {
 			// don't care
 		}
@@ -159,8 +162,10 @@ public class Gram5Client {
 		try {
 			job.request(endPoint, false);
 			job.bind();
+			String id = job.getIDAsString();
+			unbindJob(job);
 			//Gram.jobStatus(job);
-			return job.getIDAsString();
+			return id;
 		} catch (final GramException ex) {
 			myLogger.error(ex.getLocalizedMessage());
 			return null;

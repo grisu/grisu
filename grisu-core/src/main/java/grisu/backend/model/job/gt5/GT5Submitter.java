@@ -1,5 +1,6 @@
 package grisu.backend.model.job.gt5;
 
+import grisu.backend.hibernate.JobDAO;
 import grisu.backend.model.ProxyCredential;
 import grisu.backend.model.job.Job;
 import grisu.backend.model.job.JobSubmitter;
@@ -103,6 +104,10 @@ public class GT5Submitter extends JobSubmitter {
 					return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED, 0 , 0);
 				}
 
+				grisuJob.setJobhandle(restartJob.getIDAsString());
+				JobDAO jobdao = new JobDAO();
+				jobdao.saveOrUpdate(grisuJob);
+				
 				// nope, not done yet.
 				return getJobStatus(grisuJob, credential, false);
 			} else if (ex.getErrorCode() == 156){
