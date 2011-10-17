@@ -198,7 +198,7 @@ public class User {
 	// we want to make a transaction
 	private Map<String, ProxyCredential> cachedCredentials = new HashMap<String, ProxyCredential>();
 	// All fqans of the user
-	private Map<String, String> fqans = null;
+	private Map<String, VO> fqans = null;
 	private Set<String> cachedUniqueGroupnames = null;
 
 	private Map<String, String> userProperties = new HashMap<String, String>();
@@ -254,7 +254,7 @@ public class User {
 	 * 
 	 * @param vo
 	 */
-	public void addFqan(final String fqan, final String vo) {
+	public void addFqan(final String fqan, final VO vo) {
 		fqans.put(fqan, vo);
 	}
 
@@ -634,7 +634,7 @@ public class User {
 			myLogger.debug("Login benchmark intermediate: All executors created: "
 					+ (intermediate.getTime() - start.getTime()) + " ms");
 
-			Map<String, String> vos = getFqans();
+			Map<String, VO> vos = getFqans();
 
 			myLogger.debug("Login benchmark intermediate : all Fqans retrieved: "
 					+ (new Date().getTime() - start.getTime()) + " ms");
@@ -1162,7 +1162,7 @@ public class User {
 		if (((credToUse == null) || !credToUse.isValid())) {
 
 			// put a new credential in the cache
-			final VO vo = VOManagement.getVO(getFqans().get(fqan));
+			final VO vo = getFqans().get(fqan);
 			credToUse = CertHelpers.getVOProxyCredential(vo, fqan, getCred());
 			cachedCredentials.put(fqan, credToUse);
 		}
@@ -1386,7 +1386,7 @@ public class User {
 	 * @return all fqans as map with the fqan as key and the vo as value
 	 */
 	@Transient
-	public Map<String, String> getFqans() {
+	public Map<String, VO> getFqans() {
 		if (fqans == null) {
 
 			// myLogger.debug("Checking credential");
@@ -1859,7 +1859,7 @@ public class User {
 			return mountFileSystem(root, name, useHomeDirectory, site);
 		} else {
 
-			final Map<String, String> temp = getFqans();
+			final Map<String, VO> temp = getFqans();
 
 			final ProxyCredential vomsProxyCred =getCred(fqan);
 
@@ -1997,7 +1997,7 @@ public class User {
 	 * @param fqans
 	 *            all fqans as map with the fqan as key and the vo as value
 	 */
-	private void setFqans(final Map<String, String> fqans) {
+	private void setFqans(final Map<String, VO> fqans) {
 		this.fqans = fqans;
 	}
 
