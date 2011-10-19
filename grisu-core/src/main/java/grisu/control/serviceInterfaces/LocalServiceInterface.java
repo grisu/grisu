@@ -13,7 +13,6 @@ import grisu.settings.ServiceTemplateManagement;
 import grith.jgrith.myProxy.MyProxy_light;
 import grith.jgrith.plainProxy.LocalProxy;
 import grith.jgrith.voms.VO;
-import grith.jgrith.voms.VOManagement.VOManagement;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -150,8 +149,7 @@ ServiceInterface {
 					lifetimeInSeconds));
 			if (StringUtils.isNotBlank(fqan)) {
 
-				final VO vo = VOManagement
-						.getVO(getUser().getFqans().get(fqan));
+				final VO vo = getUser().getFqans().get(fqan);
 				ProxyCredential credToUse = CertHelpers.getVOProxyCredential(
 						vo, fqan, temp);
 

@@ -125,15 +125,22 @@ public class CliHelpers {
 
 	public static void main(String[] args) throws InterruptedException {
 
-		while (true) {
+		// while (true) {
+		//
+		// setIndeterminateProgress("Testing...", true);
+		//
+		// Thread.sleep(4000);
+		//
+		// setIndeterminateProgress("Success.", false);
+		//
+		// System.out.println(" xx ");
+		// }
 
-			setIndeterminateProgress("Testing...", true);
+		for (int i = 1; i < 100; i = i + 10) {
 
-			Thread.sleep(4000);
+			setProgress(i, 100);
+			Thread.sleep(1000);
 
-			setIndeterminateProgress("Success.", false);
-
-			System.out.println(" xx ");
 		}
 	}
 
@@ -196,7 +203,8 @@ public class CliHelpers {
 
 		int progress = (completed * 20) / total;
 		String totalStr = String.valueOf(total);
-		String percent = String.format("%0"+totalStr.length()+"d/%s [", completed, totalStr);
+		String percent = String.format("%" + totalStr.length() + "d/%s [",
+				completed, totalStr);
 		String result = percent + repetition("-", progress)
 				+ repetition(" ", 20 - progress) + "]";
 

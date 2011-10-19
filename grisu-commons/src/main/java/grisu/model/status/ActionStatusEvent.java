@@ -16,6 +16,10 @@ public class ActionStatusEvent {
 		this.prefix = prefix;
 	}
 
+	public DtoActionStatus getActionStatus() {
+		return this.status;
+	}
+
 	public double getPercentFinished() {
 		return this.status.percentFinished();
 	}
