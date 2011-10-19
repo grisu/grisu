@@ -1,5 +1,6 @@
 package grisu.frontend.view.swing.files.contextMenu;
 
+import grisu.jcommons.utils.FileAndUrlHelpers;
 import grisu.model.FileManager;
 import grisu.model.dto.DtoProperty;
 import grisu.model.dto.GridFile;
@@ -23,7 +24,7 @@ public class GridFilePropertiesDialog extends JDialog {
 	public static String generateHtml(GridFile file) {
 
 		final StringBuffer html = new StringBuffer(
-		"<html><table width=\"100%\">");
+				"<html><table width=\"100%\">");
 
 		boolean alternate = true;
 
@@ -43,12 +44,13 @@ public class GridFilePropertiesDialog extends JDialog {
 				bytes = " (" + file.getSize() + " b)";
 			}
 			fileProperties.put("Size",
-					FileManager.calculateSizeString(file.getSize()) + bytes);
+					FileAndUrlHelpers.calculateSizeString(file.getSize())
+							+ bytes);
 			fileProperties.put("Last modified",
 					FileManager.getLastModifiedString(file.getLastModified()));
 			fileProperties.put("URL", file.getUrl());
 			Set<String> add = DtoProperty.mapFromDtoPropertiesList(file.getUrls())
-			.keySet();
+					.keySet();
 			add.remove(file.getUrl());
 			fileProperties.put("Additional urls", StringUtils.join(add, "<br>"));
 			fileProperties.put("Path", file.getPath());

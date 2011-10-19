@@ -75,36 +75,7 @@ public class FileManager {
 	private static final Pattern URL_PATTERN = Pattern
 			.compile(URL_PATTERN_STRING);
 
-	/**
-	 * Conveninec method to calculate a human readable String to indicate file
-	 * size from the bytesize of a file.
-	 * 
-	 * @param size
-	 *            the size in bytes
-	 * @return a human readable String that indicates filesize
-	 */
-	public static String calculateSizeString(Long size) {
 
-		String sizeString;
-
-		if (size < 0) {
-			sizeString = "";
-		} else if (size.equals(0L)) {
-			sizeString = "0 B";
-		} else {
-
-			if (size > (1024 * 1024)) {
-				sizeString = (size / (1024 * 1024)) + " MB";
-			} else if (size > 1024) {
-				sizeString = (size / 1024) + " KB";
-			} else {
-				sizeString = size + " B";
-			}
-		}
-
-		return sizeString;
-
-	}
 
 	/**
 	 * Convenience method to create a datahandler out of a file.
@@ -596,8 +567,23 @@ public class FileManager {
 			boolean overwrite) throws FileTransactionException {
 
 		try {
-			serviceInterface.cp(DtoStringList.fromSingleString(sourceUrl),
-					targetDirUrl, overwrite, true);
+			String handle = serviceInterface.cp(
+					DtoStringList.fromSingleString(sourceUrl), targetDirUrl,
+					overwrite, false);
+
+			StatusObject so;
+			try {
+				so = StatusObject.waitForActionToFinish(serviceInterface,
+						handle, 2, true, false);
+			} catch (Exception e) {
+				throw new FileTransactionException(sourceUrl, targetDirUrl,
+						e.getLocalizedMessage(), e);
+			}
+			if (so.getStatus().isFailed()) {
+				throw new RemoteFileSystemException(so.getStatus()
+						.getErrorCause());
+			}
+
 		} catch (final RemoteFileSystemException e) {
 			throw new FileTransactionException(sourceUrl, targetDirUrl,
 					e.getLocalizedMessage(), e);
@@ -956,7 +942,19 @@ public class FileManager {
 		}
 
 		if (!isLocal(url)) {
-			serviceInterface.deleteFile(url);
+			String handle = serviceInterface.deleteFile(url);
+			StatusObject so;
+			try {
+				so = StatusObject.waitForActionToFinish(serviceInterface,
+						handle, 2, true, false);
+				if (so.getStatus().isFailed()) {
+					throw new RemoteFileSystemException(so.getStatus()
+							.getErrorCause());
+				}
+			} catch (Exception e) {
+				myLogger.error(e);
+			}
+
 		}
 
 	}
@@ -1667,7 +1665,7 @@ public class FileManager {
 						myLogger.error("FAILED. SLEEPING 1 SECONDS");
 						Thread.sleep(1000);
 						filetransferHandle = serviceInterface.upload(handler,
-								targetFile + "/" + file.getName());
+								targetFile);
 						myLogger.info("Upload of file " + file.getName()
 								+ " successful.");
 					} catch (final Exception e) {
@@ -1707,7 +1705,7 @@ public class FileManager {
 	 * @throws FileTransactionException
 	 *             if the transfer fails
 	 */
-	private final void uploadFileToDirectory(final File file,
+	private final String uploadFileToDirectory(final File file,
 			final String targetDirectory, final boolean overwrite)
 					throws FileTransactionException {
 
@@ -1720,7 +1718,9 @@ public class FileManager {
 		myLogger.debug("Uploading local file: " + file.toString() + " to: "
 				+ targetDirectory);
 
+		String target = targetDirectory + "/" + file.getName();
 		uploadFile(file, targetDirectory + "/" + file.getName(), overwrite);
+		return target;
 
 	}
 

@@ -13,7 +13,6 @@ import grisu.jcommons.utils.JsdlHelpers;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.DebugUtils;
 import grisu.utils.SeveralXMLHelpers;
-import grith.jgrith.CredentialHelpers;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -534,12 +533,12 @@ public class GT4Submitter extends JobSubmitter {
 	 * grisu.credential.model.ProxyCredential)
 	 */
 	@Override
-	public final int getJobStatus(final String endPointReference,
+	public final int getJobStatus(final Job job,
 			final ProxyCredential cred) {
 
 		String status = null;
 		int grisu_status = Integer.MIN_VALUE;
-		status = GramClient.getJobStatus(endPointReference,
+		status = GramClient.getJobStatus(job.getJobhandle(),
 				cred.getGssCredential());
 
 		grisu_status = translateToGrisuStatus(status);
@@ -551,6 +550,20 @@ public class GT4Submitter extends JobSubmitter {
 	public final String getServerEndpoint(final String server) {
 		return "https://" + server
 				+ ":8443/wsrf/services/ManagedJobFactoryService";
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see grisu.js.control.job.JobSubmitter#killJob(java.lang.String,
+	 * grisu.credential.model.ProxyCredential)
+	 */
+	@Override
+	public final int killJob(final Job job,
+			final ProxyCredential cred) {
+
+		return killJob(job.getJobhandle(), cred.getGssCredential());
 
 	}
 
@@ -567,20 +580,6 @@ public class GT4Submitter extends JobSubmitter {
 		}
 
 		return grisu_status;
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see grisu.js.control.job.JobSubmitter#killJob(java.lang.String,
-	 * grisu.credential.model.ProxyCredential)
-	 */
-	@Override
-	public final int killJob(final String endPointReference,
-			final ProxyCredential cred) {
-
-		return killJob(endPointReference, cred.getGssCredential());
 
 	}
 
@@ -644,9 +643,11 @@ public class GT4Submitter extends JobSubmitter {
 
 			try {
 
-				credential = CredentialHelpers
-						.convertByteArrayToGSSCredential(job.getCredential()
-								.getCredentialData());
+				// credential = CredentialHelpers
+				// .convertByteArrayToGSSCredential(job.getCredential()
+				// .getCredentialData());
+
+				credential = job.getCredential().getGssCredential();
 
 				if ((credential == null)
 						|| (credential.getRemainingLifetime() < 1)) {

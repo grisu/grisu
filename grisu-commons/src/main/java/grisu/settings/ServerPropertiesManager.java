@@ -1,5 +1,7 @@
 package grisu.settings;
 
+import grisu.control.ServiceInterface;
+
 import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
@@ -50,6 +52,13 @@ public final class ServerPropertiesManager {
 	public static final int DEFAULT_CONCURRENT_ARCHIVED_JOB_LOOKUPS_PER_FILESYSTEM = 8;
 
 	/**
+	 * Default concurrent threads when killing jobs with the
+	 * {@link ServiceInterface#killJobs(grisu.model.dto.DtoStringList, boolean)
+	 * method.
+	 */
+	public static final int DEFAULT_CONCURRENT_JOBS_TO_BE_KILLED = 8;
+
+	/**
 	 * Default directory name used as parent for the jobdirectories.
 	 */
 	public static final String DEFAULT_JOB_DIR_NAME = "active-jobs";
@@ -71,6 +80,7 @@ public final class ServerPropertiesManager {
 	private static final boolean DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS = false;
 
 	private static final int DEFAULT_FILE_TRANSFER_RETRIES = 3;
+	private static final int DEFAULT_FILE_DELETE_RETRIES = 3;
 	private static final int DEFAULT_TIME_BETWEEN_FILE_TRANSFER_RETRIES_IN_SECONDS = 1;
 
 	private static final Integer DEFAULT_FILESYSTEM_TIMEOUT_IN_MILLISECONDS = 4000;
@@ -96,6 +106,25 @@ public final class ServerPropertiesManager {
 	// }
 	// return check;
 	// }
+
+	public static boolean closeFileSystemsInBackground() {
+		boolean useFScache = false;
+
+		try {
+			try {
+				useFScache = getServerConfiguration().getBoolean(
+						"General.closeFilesystemsInBackground");
+			} catch (final NoSuchElementException e) {
+				// doesn't matter
+				// myLogger.debug(e);
+			}
+
+		} catch (final ConfigurationException e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			myLogger.debug(e);
+		}
+		return useFScache;
+	}
 
 	/**
 	 * Returns the name of the directory in which grisu jobs are located
@@ -186,27 +215,23 @@ public final class ServerPropertiesManager {
 		return concurrentThreads;
 	}
 
-	/**
-	 * Returns the number of concurrent threads that are used to build the
-	 * mountpoint cache when a user first logs in.
-	 * 
-	 * @return the number of concurrent threads
-	 */
-	public static int getConcurrentMountPointLookups() {
+	public static int getConcurrentJobsToBeKilled() {
+
 		int concurrentThreads = -1;
 		try {
 			concurrentThreads = Integer
 					.parseInt(getServerConfiguration().getString(
-							"ConcurrentThreadSettings.mountPointLookupThreads"));
+							"ConcurrentThreadSettings.jobsToBeKilled"));
 
 		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
-			return DEFAULT_CONCURRENT_MOUNTPOINT_LOOKUPS;
+			return DEFAULT_CONCURRENT_JOBS_TO_BE_KILLED;
 		}
 		if (concurrentThreads == -1) {
-			return DEFAULT_CONCURRENT_MOUNTPOINT_LOOKUPS;
+			return DEFAULT_CONCURRENT_JOBS_TO_BE_KILLED;
 		}
 		return concurrentThreads;
+
 	}
 
 	// /**
@@ -237,6 +262,29 @@ public final class ServerPropertiesManager {
 	//
 	// return jobDirName;
 	// }
+
+	/**
+	 * Returns the number of concurrent threads that are used to build the
+	 * mountpoint cache when a user first logs in.
+	 * 
+	 * @return the number of concurrent threads
+	 */
+	public static int getConcurrentMountPointLookups() {
+		int concurrentThreads = -1;
+		try {
+			concurrentThreads = Integer
+					.parseInt(getServerConfiguration().getString(
+							"ConcurrentThreadSettings.mountPointLookupThreads"));
+
+		} catch (final Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_CONCURRENT_MOUNTPOINT_LOOKUPS;
+		}
+		if (concurrentThreads == -1) {
+			return DEFAULT_CONCURRENT_MOUNTPOINT_LOOKUPS;
+		}
+		return concurrentThreads;
+	}
 
 	/**
 	 * Returns the number of concurrent threads that are submitting (multi-)jobs
@@ -413,6 +461,23 @@ public final class ServerPropertiesManager {
 			// myLogger.debug(e);
 		}
 		return disableFinishedJobStatusCaching;
+	}
+
+	public static int getFileDeleteRetries() {
+
+		int retries = -1;
+		try {
+			retries = Integer.parseInt(getServerConfiguration().getString(
+					"RetrySettings.fileDeletes"));
+
+		} catch (final Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_FILE_DELETE_RETRIES;
+		}
+		if (retries == -1) {
+			return DEFAULT_FILE_DELETE_RETRIES;
+		}
+		return retries;
 	}
 
 	public static int getFileListingTimeOut() {

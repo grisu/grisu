@@ -4,6 +4,7 @@ import grisu.control.ServiceInterface;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.control.clientexceptions.FileTransactionException;
 import grisu.frontend.view.swing.files.FileListListener;
+import grisu.jcommons.utils.FileAndUrlHelpers;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.files.GlazedFile;
@@ -212,7 +213,7 @@ FileListListener {
 								.showConfirmDialog(
 										getRootPane(),
 										"The file you selected is bigger than the default threshold\n"
-												+ FileManager
+												+ FileAndUrlHelpers
 												.calculateSizeString(FileManager
 														.getDownloadFileSizeThreshold())
 														+ "bytes. It may take a long time to load.\n"

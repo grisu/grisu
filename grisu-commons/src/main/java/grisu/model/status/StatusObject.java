@@ -7,6 +7,7 @@ import grisu.model.dto.DtoActionStatus;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 
 public class StatusObject {
@@ -14,6 +15,9 @@ public class StatusObject {
 	public interface Listener {
 		public void statusMessage(ActionStatusEvent event);
 	}
+
+	static final Logger myLogger = Logger.getLogger(StatusObject.class
+			.getName());
 
 	public static StatusObject wait(ServiceInterface si, String handle) {
 		try {
@@ -107,7 +111,7 @@ public class StatusObject {
 
 	public void waitForActionToFinish(int recheckIntervalInSeconds,
 			boolean exitIfFailed, boolean sendStatusEvent)
-	throws InterruptedException, StatusException {
+					throws InterruptedException, StatusException {
 		waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed,
 				sendStatusEvent, null);
 	}
@@ -117,7 +121,13 @@ public class StatusObject {
 			String statusMessagePrefix) throws InterruptedException,
 			StatusException {
 
+		myLogger.debug("Checking status for: " + handle);
+
 		lastStatus = si.getActionStatus(handle);
+
+		myLogger.debug("Status for " + handle + ": "
+				+ lastStatus.percentFinished() + " %");
+
 		if (lastStatus == null) {
 
 			throw new StatusException("Can't find status with handle "
@@ -149,8 +159,12 @@ public class StatusObject {
 			} catch (final InterruptedException e) {
 				throw e;
 			}
+			myLogger.debug("Checking status for: " + handle);
 
 			lastStatus = si.getActionStatus(handle);
+
+			myLogger.debug("Status for " + handle + ": "
+					+ lastStatus.percentFinished() + " %");
 			if (lastStatus == null) {
 
 				throw new StatusException("Can't find status with handle "

@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
+import org.hibernate.StaleStateException;
 
 
 /**
@@ -34,6 +35,16 @@ public class JobDAO extends BaseHibernateDAO {
 
 			// myLogger.debug("delete successful");
 
+		} catch (StaleStateException sse) {
+			String name = "n/a";
+			try {
+				name = persistentInstance.getJobname();
+			} catch (Exception ee) {
+			}
+			myLogger.warn(
+					"Delete failed because. Job probably already deleted, doing nothing. Jobname: "
+							+ name,
+							sse);
 		} catch (final RuntimeException e) {
 			myLogger.error("delete failed", e);
 			try {
@@ -108,7 +119,7 @@ public class JobDAO extends BaseHibernateDAO {
 	 *             there are several jobs with this dn and jobname. this is bad.
 	 */
 	public final Job findJobByDN(final String dn, final String jobname)
-	throws NoSuchJobException {
+			throws NoSuchJobException {
 		// myLogger.debug("Loading job with dn: " + dn + " and jobname: "
 		// + jobname + " from dn.");
 		final String queryString = "from grisu.backend.model.job.Job as job where job.dn = ? and job.jobname = ?";
@@ -145,6 +156,7 @@ public class JobDAO extends BaseHibernateDAO {
 
 	}
 
+
 	/**
 	 * Looks up the database whether a user with the specified dn is already
 	 * persisted. Filters with the specified application.
@@ -167,11 +179,11 @@ public class JobDAO extends BaseHibernateDAO {
 		String queryString;
 		if (includeMultiPartJobs) {
 			queryString = "from grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
-				+ Constants.APPLICATIONNAME_KEY + "']) = ?";
+					+ Constants.APPLICATIONNAME_KEY + "']) = ?";
 		} else {
 			queryString = "from grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
-				+ Constants.APPLICATIONNAME_KEY
-				+ "']) = ? and batchJob = false";
+					+ Constants.APPLICATIONNAME_KEY
+					+ "']) = ? and batchJob = false";
 		}
 
 		try {
@@ -249,11 +261,11 @@ public class JobDAO extends BaseHibernateDAO {
 		String queryString;
 		if (includeMultiPartJob) {
 			queryString = "select jobname from grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
-				+ Constants.APPLICATIONNAME_KEY + "']) = ?";
+					+ Constants.APPLICATIONNAME_KEY + "']) = ?";
 		} else {
 			queryString = "select jobname from grisu.backend.model.job.Job as job where job.dn = ? and lower(job.jobProperties['"
-				+ Constants.APPLICATIONNAME_KEY
-				+ "']) = ? and job.batchJob = false";
+					+ Constants.APPLICATIONNAME_KEY
+					+ "']) = ? and job.batchJob = false";
 		}
 
 		try {
@@ -269,6 +281,58 @@ public class JobDAO extends BaseHibernateDAO {
 			getCurrentSession().getTransaction().commit();
 
 			return jobnames;
+
+		} catch (final RuntimeException e) {
+			try {
+				getCurrentSession().getTransaction().rollback();
+			} catch (final Exception er) {
+				myLogger.debug("Rollback failed.", er);
+			}
+			throw e; // or display error message
+		} finally {
+			getCurrentSession().close();
+		}
+
+	}
+
+	/**
+	 * Searches for a job using the user's dn and the name of the job (which
+	 * should be unique). This method is only used in case the db somehow gets corrupted and there are more than one jobs with the same name for a user.
+	 * 
+	 * @param dn
+	 *            the user's dn
+	 * @param jobname
+	 *            the name of the job
+	 * @return the (unique) job
+	 * @throws NoJobFoundException
+	 *             there is no job with this dn and jobname
+	 * @throws DatabaseInconsitencyException
+	 *             there are several jobs with this dn and jobname. this is bad.
+	 */
+	public final List<Job> findRogueJobsByDN(final String dn, final String jobname)
+			throws NoSuchJobException {
+		// myLogger.debug("Loading job with dn: " + dn + " and jobname: "
+		// + jobname + " from dn.");
+		final String queryString = "from grisu.backend.model.job.Job as job where job.dn = ? and job.jobname = ?";
+
+		try {
+			getCurrentSession().beginTransaction();
+
+			final Query queryObject = getCurrentSession().createQuery(
+					queryString);
+			queryObject.setParameter(0, dn);
+			queryObject.setParameter(1, jobname);
+
+			final List<Job> jobs = queryObject.list();
+
+			getCurrentSession().getTransaction().commit();
+
+			if ((jobs == null)||(jobs.size() == 0)) {
+				throw new NoSuchJobException(
+						"Could not find jobs for the dn: " + dn
+						+ " and the jobname: " + jobname);
+			}
+			return jobs;
 
 		} catch (final RuntimeException e) {
 			try {

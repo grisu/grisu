@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
 
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemException;
@@ -39,6 +40,8 @@ RemoteFileTransferObject {
 
 	private final FileSystemCache fsCache;
 
+	private final String id = "TRANSFER_" + UUID.randomUUID().toString();
+
 	static final Logger myLogger = Logger
 			.getLogger(CommonsVfsRemoteFileTransferObject.class.getName());
 
@@ -48,6 +51,10 @@ RemoteFileTransferObject {
 		this.fsCache = fsCache;
 		this.source = sourceF;
 		this.target = targetF;
+
+		myLogger.debug("Creating file transfer object for "
+				+ source.getName().getURI() + " -> "
+				+ target.getName().getURI() + ". ID: " + id);
 
 		this.overwrite = overwriteB;
 
@@ -59,22 +66,30 @@ RemoteFileTransferObject {
 					for (int tryNo = 0; tryNo <= ServerPropertiesManager
 							.getFileTransferRetries(); tryNo++) {
 
-						myLogger.debug(tryNo + 1 + ". try to transfer file: "
+						myLogger.debug(id + ": " + (tryNo + 1)
+								+ ". try to transfer file: "
 								+ source.getName().getURI() + " => "
 								+ target.getName().getURI());
 						try {
-							myLogger.info("Copy thread started for target: "
+							myLogger.info(id + ": "
+									+ "Copy thread started for target: "
 									+ target.getName());
 							transferFile(source, target, overwrite);
+							myLogger.info(id + ": "
+									+ "Copy thread finished for target: "
+									+ target.getName());
+
 							finished = true;
 							break;
 						} catch (final RemoteFileSystemException e) {
-							myLogger.error(e);
+							myLogger.error(id + ": Failed: "
+									+ e.getLocalizedMessage());
 							if (tryNo >= (ServerPropertiesManager
 									.getFileTransferRetries() - 1)) {
 								finished = true;
 								failed = true;
 								possibleException = e;
+								myLogger.debug(id + ": Failed for good...");
 							} else {
 								// sleep for a few seconds, maybe the gridftp
 								// server needs some rest
@@ -87,18 +102,29 @@ RemoteFileTransferObject {
 						}
 					}
 				} finally {
-
-					fsCache.close();
+					myLogger.debug(id + ": finalizing...");
 					try {
+						myLogger.debug(id + ": closing source...");
 						source.close();
+						myLogger.debug(id + ": closed source.");
 					} catch (FileSystemException ex){
-						myLogger.warn(ex.getLocalizedMessage());
+						myLogger.warn(id + ex.getLocalizedMessage());
 					}
 					try {
+						myLogger.debug(id + ": closing target...");
 						target.close();
+						myLogger.debug(id + ": closed target.");
 					} catch (FileSystemException ex){
-						myLogger.warn(ex.getLocalizedMessage());
+						myLogger.warn(id + ex.getLocalizedMessage());
 					}
+					try {
+						myLogger.debug(id + ": closing filesystem...");
+						fsCache.close();
+						myLogger.debug(id + ": filesytem closed.");
+					} catch (Exception e) {
+						myLogger.warn(id + e.getLocalizedMessage());
+					}
+					myLogger.debug(id+": finalized...");
 				}
 
 			}
@@ -108,12 +134,17 @@ RemoteFileTransferObject {
 
 	protected void addMessage(String message) {
 		messages.put(new Date(), message);
+		myLogger.debug(id + ": " + message);
 	}
 
 	public final Thread getFileTransferThread() {
 
 		return this.fileTransferThread;
 
+	}
+
+	public String getId() {
+		return id;
 	}
 
 	public Exception getPossibleException() {
@@ -141,10 +172,15 @@ RemoteFileTransferObject {
 	public final void joinFileTransfer() {
 
 		try {
+			addMessage("Waiting for filetransfer thread to finish: " + id);
 			fileTransferThread.join();
+			addMessage("Filetransfer thread finished: " + id);
 		} catch (final InterruptedException e) {
-			messages.put(new Date(), "File transfer thread interrupted.");
+			addMessage("File transfer thread interrupted: " + id);
 			Thread.currentThread().interrupt();
+		} catch (Throwable t) {
+			addMessage("File transfer exception " + id + ": "
+					+ t.getLocalizedMessage());
 		}
 
 	}
@@ -152,11 +188,16 @@ RemoteFileTransferObject {
 	public final void startTransfer(boolean waitForTransferToFinish) {
 
 		// transferFile(source, target, overwrite);
-		messages.put(new Date(), "Transfer started.");
+		messages.put(new Date(), "Transfer startint...");
+		myLogger.debug("Starting transfer " + id);
 		fileTransferThread.start();
 
 		if (waitForTransferToFinish) {
+			myLogger.debug("Joining transfer " + id);
 			joinFileTransfer();
+			myLogger.debug("Finshed transfer " + id);
+		} else {
+			myLogger.debug("Transfer started in background." + id);
 		}
 
 	}
@@ -199,7 +240,8 @@ RemoteFileTransferObject {
 									+ "Could not delete target file.");
 				}
 			}
-			myLogger.debug("Copying: " + source_file.getName().toString()
+			myLogger.debug(id + ": Copying: "
+					+ source_file.getName().toString()
 					+ " to: " + target_file.getName().toString());
 			// target_file.copyFrom(source_file, new AllFileSelector());
 			//

@@ -14,7 +14,7 @@ public class JobSubmissionException extends Exception {
 		super(message);
 	}
 
-	public JobSubmissionException(final String message, final Exception e) {
+	public JobSubmissionException(final String message, final Throwable e) {
 		super(message, e);
 	}
 

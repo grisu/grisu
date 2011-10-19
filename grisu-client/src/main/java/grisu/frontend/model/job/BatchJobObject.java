@@ -1332,18 +1332,30 @@ Comparable<BatchJobObject>, Listener {
 		}
 
 		setIsBeingKilled(true);
+		String handle = null;
 		try {
-			serviceInterface.kill(this.getJobname(), clean);
+			handle = serviceInterface.kill(this.getJobname(), clean);
+			StatusObject so = StatusObject.waitForActionToFinish(
+					serviceInterface, handle, 2, false, false);
+			if (so.getStatus().isFailed()) {
+				throw new Exception(so.getStatus().getErrorCause());
+			}
+			try {
+				getStatus(true);
+			} catch (Exception nsje) {
+				// that's ok
+			}
 			addJobLogMessage("Job kill command sent to backend.");
 		} catch (final Exception e) {
 			myLogger.error(e);
 		}
 
+		final String handleTmp = handle;
 		final Thread waitThread = new Thread() {
 			@Override
 			public void run() {
 				final StatusObject statusO = new StatusObject(serviceInterface,
-						getJobname());
+						handleTmp);
 				try {
 					statusO.waitForActionToFinish(3, false, true);
 				} catch (final InterruptedException e) {
@@ -1553,7 +1565,21 @@ Comparable<BatchJobObject>, Listener {
 							addJobLogMessage(message);
 
 							try {
-								serviceInterface.kill(job.getJobname(), true);
+								String handle = serviceInterface.kill(
+										job.getJobname(), true);
+								StatusObject so = StatusObject
+										.waitForActionToFinish(
+												serviceInterface, handle, 2,
+												false, false);
+								if (so.getStatus().isFailed()) {
+									throw new Exception(so.getStatus()
+											.getErrorCause());
+								}
+								try {
+									getStatus(true);
+								} catch (Exception nsje) {
+									// that's ok
+								}
 							} catch (final Exception e1) {
 								// doesn't matter
 							}
@@ -2233,9 +2259,26 @@ Comparable<BatchJobObject>, Listener {
 			pcs.firePropertyChange(SUBMITTING, !isSubmitting, isSubmitting);
 			throw new InterruptedException("Interrupted before job submission.");
 		}
-
+		String handle = null;
 		try {
-			serviceInterface.submitJob(batchJobname);
+			handle = serviceInterface.submitJob(batchJobname);
+
+			if (waitForSubmissionToFinish) {
+				try {
+					StatusObject s = StatusObject.waitForActionToFinish(
+							serviceInterface, handle, 5, true, false);
+					if (s.getStatus().isFailed()) {
+						String errorCause = s.getStatus().getErrorCause();
+						if (StringUtils.isBlank(errorCause)) {
+							errorCause = "Unknown";
+						}
+						throw new JobSubmissionException(errorCause);
+					}
+				} catch (StatusException e) {
+					myLogger.error(e);
+					throw new RuntimeException(e);
+				}
+			}
 		} catch (final JobSubmissionException jse) {
 			isSubmitting = false;
 			pcs.firePropertyChange(SUBMITTING, !isSubmitting, isSubmitting);
@@ -2256,8 +2299,7 @@ Comparable<BatchJobObject>, Listener {
 			throw nsje;
 		}
 
-		final StatusObject status = new StatusObject(serviceInterface,
-				BatchJobObject.this.batchJobname);
+		final StatusObject status = new StatusObject(serviceInterface, handle);
 
 		final Thread waitThread = new Thread() {
 			@Override

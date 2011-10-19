@@ -1,6 +1,6 @@
 package grisu.frontend.view.swing.files;
 
-import grisu.model.FileManager;
+import grisu.jcommons.utils.FileAndUrlHelpers;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -13,7 +13,7 @@ import javax.swing.table.TableCellRenderer;
 
 
 public class FileSizeRenderer extends DefaultTableCellRenderer implements
-		TableCellRenderer {
+TableCellRenderer {
 
 	public FileSizeRenderer() {
 		setOpaque(true);
@@ -31,7 +31,7 @@ public class FileSizeRenderer extends DefaultTableCellRenderer implements
 
 		final Long size = (Long) arg1;
 
-		final String sizeString = FileManager.calculateSizeString(size);
+		final String sizeString = FileAndUrlHelpers.calculateSizeString(size);
 
 		this.setText(sizeString);
 		this.setHorizontalAlignment(SwingConstants.RIGHT);

@@ -5,22 +5,54 @@ import grisu.settings.ClientPropertiesManager;
 import grith.gsindl.SLCS;
 import grith.jgrith.plainProxy.PlainProxy;
 import grith.sibboleth.CredentialManager;
+import grith.sibboleth.DummyCredentialManager;
+import grith.sibboleth.DummyIdpObject;
 import grith.sibboleth.IdpObject;
 import grith.sibboleth.Shibboleth;
 import grith.sibboleth.StaticCredentialManager;
 import grith.sibboleth.StaticIdpObject;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.ietf.jgss.GSSCredential;
 
+import com.google.common.collect.ImmutableList;
 
 public class SlcsLoginWrapper {
 
 	static final Logger myLogger = Logger.getLogger(SlcsLoginWrapper.class
 			.getName());
+
+	private static List<String> cachedIdps = null;
+
+	public static List<String> getAllIdps() throws Throwable {
+		if (cachedIdps == null) {
+			String id = UUID.randomUUID().toString();
+			final IdpObject idpObj = new DummyIdpObject();
+			final CredentialManager cm = new DummyCredentialManager();
+
+			myLogger.debug("Login: starting to get list of idps... (id: " + id
+					+ ")");
+
+			try {
+				final Shibboleth shib = new Shibboleth(idpObj, cm);
+				shib.openurl(SLCS.DEFAULT_SLCS_URL);
+				myLogger.debug("Login: list of idps loaded (id: " + id + ")");
+
+				cachedIdps = ImmutableList.copyOf(idpObj.getIdps());
+
+			} catch (Throwable e) {
+				myLogger.debug("Login: error loading list of idps (id:" + id
+						+ ")");
+				throw e;
+			}
+
+		}
+		return cachedIdps;
+	}
 
 	public static GSSCredential slcsMyProxyInit(String username,
 			char[] password, String idp, LoginParams params) throws Exception {

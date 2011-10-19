@@ -44,6 +44,7 @@ import grisu.model.dto.DtoStringList;
 import grisu.model.dto.DtoSubmissionLocations;
 import grisu.model.dto.GridFile;
 import grisu.model.job.JobSubmissionObjectImpl;
+import grisu.model.status.StatusObject;
 import grisu.model.utils.InformationUtils;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.FileHelpers;
@@ -375,23 +376,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	}
 
 	private void archiveBatchJob(final BatchJob batchJob, final String target)
-			throws NoSuchJobException {
+			throws NoSuchJobException, JobPropertiesException {
 
-		if ((getSessionActionStatus().get(batchJob.getBatchJobname()) != null)
-				&& !getSessionActionStatus().get(batchJob.getBatchJobname())
-				.isFinished()) {
+		if (batchJob.getStatus() <= JobConstants.FINISHED_EITHER_WAY) {
 			// this should not really happen
-			myLogger.error("Not archiving job because jobsubmission is still ongoing.");
-			return;
+			myLogger.error("Not archiving job because job is not finished.");
+			throw new JobPropertiesException(
+					"Can't archive batchjob because it is not finished yet.");
 		}
 
-		final DtoActionStatus status = new DtoActionStatus(
-				ServiceInterface.ARCHIVE_STATUS_PREFIX
-				+ batchJob.getBatchJobname(), (batchJob.getJobs()
-						.size() * 3) + 3);
-		getSessionActionStatus().put(
-				ServiceInterface.ARCHIVE_STATUS_PREFIX
-				+ batchJob.getBatchJobname(), status);
+		final DtoActionStatus status = new DtoActionStatus(target, (batchJob
+				.getJobs()
+				.size() * 3) + 3);
+		getSessionActionStatus().put(target, status);
 
 		final Thread archiveThread = new Thread() {
 			@Override
@@ -426,6 +423,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 					final Thread archiveThread = archiveSingleJob(job, tmp,
 							status);
+					archiveThread.setName("archive_batchJob_"
+							+ status.getHandle());
 					executor.execute(archiveThread);
 				}
 
@@ -470,12 +469,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throws JobPropertiesException, NoSuchJobException,
 			RemoteFileSystemException {
 
-		if ((getSessionActionStatus().get(jobname) != null)
-				&& !getSessionActionStatus().get(jobname).isFinished()) {
+		if (getJob(jobname).getStatus() < JobConstants.FINISHED_EITHER_WAY) {
 
-			myLogger.debug("not archiving job because jobsubmission is still ongoing.");
-			throw new JobPropertiesException(
-					"Job (re-)submission is still ongoing in background.");
+			myLogger.debug("not archiving job because job is not finished yet");
+			throw new JobPropertiesException("Job not finished.");
 		}
 
 		if (StringUtils.isBlank(target)) {
@@ -544,8 +541,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private Thread archiveSingleJob(final Job job, final String targetDirUrl,
 			final DtoActionStatus optionalBatchJobStatus) {
 
-		final DtoActionStatus status = new DtoActionStatus(
-				ServiceInterface.ARCHIVE_STATUS_PREFIX + job.getJobname(), 5);
+		final DtoActionStatus status = new DtoActionStatus(targetDirUrl, 5);
 
 		getSessionActionStatus().put(status.getHandle(), status);
 
@@ -587,7 +583,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							targetDirUrl, false, true, true);
 					status.addElement("Deleting old jobdirectory: "
 							+ job.getJobProperty(Constants.JOBDIRECTORY_KEY));
-					deleteFile(job.getJobProperty(Constants.JOBDIRECTORY_KEY));
+					deleteFile(job.getJobProperty(Constants.JOBDIRECTORY_KEY),
+							true);
 				} catch (final RemoteFileSystemException e1) {
 					if (optionalBatchJobStatus != null) {
 						optionalBatchJobStatus.setFailed(true);
@@ -720,8 +717,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	private String calculateJobname(String jobname, String jobnameCreationMethod)
-			throws JobPropertiesException {
+	private synchronized String calculateJobname(String jobname,
+			String jobnameCreationMethod)
+					throws JobPropertiesException {
 
 		if ((jobnameCreationMethod == null)
 				|| Constants.FORCE_NAME_METHOD.equals(jobnameCreationMethod)) {
@@ -776,18 +774,34 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		} else if (Constants.UNIQUE_NUMBER_METHOD.equals(jobnameCreationMethod)) {
 
-			String temp = jobname;
-			int i = 1;
-
 			SortedSet<String> jobNames = getAllJobnames(Constants.ALLJOBS_INCL_BATCH_KEY).asSortedSet();
 			jobNames.addAll(getAllBatchJobnames(null).asSortedSet());
 
-			while (jobNames.contains(temp)) {
-				temp = jobname + "_" + i;
-				i = i + 1;
+			int max = -1;
+
+			for (String jn : jobNames) {
+				if (jn.equals(jobname)) {
+					if (max < 0) {
+						max = 1;
+					}
+				} else {
+					if (jn.startsWith(jobname)) {
+						int index = jn.lastIndexOf("_");
+						try {
+							String integerString = jn.substring(index + 1);
+							int value = Integer.parseInt(integerString);
+							if (value > max) {
+								max = value;
+							}
+						} catch (Exception e) {
+						}
+					}
+				}
 			}
 
-			jobname = temp;
+			if (max != -1) {
+				jobname = jobname + "_" + (max + 1);
+			}
 
 		} else {
 			throw new JobPropertiesException(
@@ -917,6 +931,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 									}
 								}
 							};
+
 							executor1.execute(thread);
 						}
 					}
@@ -994,17 +1009,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			final boolean overwrite, final boolean waitForFileTransferToFinish)
 					throws RemoteFileSystemException {
 
-		String handle = null;
-
-		if (getSessionActionStatus().get(target) == null) {
-			handle = target;
-		} else {
-			int counter = 0;
-			do {
-				handle = target + "_" + counter;
-				counter = counter + 1;
-			} while (getSessionActionStatus().get(handle) != null);
-		}
+		String handle = "cp_"+sources.asSortedSet().size()+"_files_to_"+target+"_"+new Date().getTime();
 
 		final DtoActionStatus actionStat = new DtoActionStatus(handle,
 				sources.asArray().length * 2);
@@ -1052,7 +1057,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			}
 		};
-
+		cpThread.setName(actionStat.getHandle());
 		cpThread.start();
 
 		if (waitForFileTransferToFinish) {
@@ -1080,6 +1085,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		final RemoteFileTransferObject fileTransfer = getUser()
 				.getFileSystemManager().copy(source, target, overwrite);
+
+
 
 		if (startFileTransfer) {
 			fileTransfer.startTransfer(waitForFileTransferToFinish);
@@ -1198,9 +1205,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		// creating job
-		getCredential(); // just to be sure that nothing stale get's created in
-		// the db unnecessary
-		job = new Job(getCredential().getDn(), jobname);
+		job = new Job(getUser().getDn(), jobname);
 
 		job.setStatus(JobConstants.JOB_CREATED);
 		job.addLogMessage("Job " + jobname + " created.");
@@ -1264,7 +1269,39 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see grisu.control.ServiceInterface#deleteFile(java.lang.String)
 	 */
-	public void deleteFile(final String file) throws RemoteFileSystemException {
+	public String deleteFile(final String file) throws RemoteFileSystemException {
+
+		final String handle = "delete_"+file+"_"+new Date().getTime();
+		final DtoActionStatus status = new DtoActionStatus(handle, 2);
+		getSessionActionStatus().put(handle, status);
+
+		Thread t = new Thread() {
+			@Override
+			public void run() {
+				try {
+					status.addElement("Starting to delete file " + file);
+					deleteFile(file, false);
+					status.addElement("Finished deletion.");
+					status.setFinished(true);
+					status.setFailed(false);
+				} catch (Exception e) {
+					status.setFinished(true);
+					status.setFailed(true);
+					status.addElement("Deletion failed: "
+							+ e.getLocalizedMessage());
+					status.setErrorCause(e.getLocalizedMessage());
+				}
+			}
+		};
+		t.setName(handle);
+		t.start();
+
+		return handle;
+
+	}
+
+	private void deleteFile(final String file, boolean wait)
+			throws RemoteFileSystemException {
 
 		getUser().getFileSystemManager().deleteFile(file);
 
@@ -1283,27 +1320,37 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return null;
 		}
 
-		final DtoActionStatus status = new DtoActionStatus(files.asArray()[0],
+		String handle = "Deleting_" + files.getStringList().size() + "_files_"
+				+ new Date().getTime();
+
+		final DtoActionStatus status = new DtoActionStatus(handle,
 				files.asArray().length * 2);
-		getSessionActionStatus().put(files.asArray()[0], status);
+		getSessionActionStatus().put(handle, status);
 
-		for (final String file : files.getStringList()) {
-			try {
-				status.addElement("Deleting file " + file + "...");
-				deleteFile(file);
-				status.addElement("Success.");
-			} catch (final Exception e) {
-				status.addElement("Failed: " + e.getLocalizedMessage());
-				status.setFailed(true);
-				status.setErrorCause(e.getLocalizedMessage());
-				myLogger.error("Could not delete file: " + file);
-				// filesNotDeleted.add(file);
+		Thread t = new Thread() {
+			@Override
+			public void run() {
+
+				for (final String file : files.getStringList()) {
+					try {
+						status.addElement("Deleting file " + file + "...");
+						deleteFile(file, true);
+						status.addElement("Success.");
+					} catch (final Exception e) {
+						status.addElement("Failed: " + e.getLocalizedMessage());
+						status.setFailed(true);
+						status.setErrorCause(e.getLocalizedMessage());
+						myLogger.error("Could not delete file: " + file);
+						// filesNotDeleted.add(file);
+					}
+					status.setFinished(true);
+				}
+
 			}
-		}
+		};
+		t.start();
 
-		status.setFinished(true);
-
-		return null;
+		return handle;
 
 	}
 
@@ -1401,7 +1448,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 									.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY);
 							myLogger.debug("Deleting multijobDir: " + url);
 							try {
-								deleteFile(url);
+								deleteFile(url, true);
 								newActionStatus
 								.addElement("Deleted common dir for mountpoint: "
 										+ mpRoot);
@@ -1650,7 +1697,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public DtoStringList getAllAvailableApplications(final DtoStringList fqans) {
 		final Set<String> fqanList = new TreeSet<String>();
 
-		if (fqans == null) {
+		if ((fqans == null) || (fqans.asSortedSet().size() == 0)) {
 			return DtoStringList.fromStringArray(informationManager
 					.getAllApplicationsOnGrid());
 		}
@@ -1857,26 +1904,27 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return DtoProperties.createProperties(getUser().getBookmarks());
 	}
 
-	/**
-	 * This method has to be implemented by the endpoint specific
-	 * ServiceInterface. Since there are a few different ways to get a proxy
-	 * credential (myproxy, just use the one in /tmp/x509..., shibb,...) this
-	 * needs to be implemented differently for every single situation.
-	 * 
-	 * @return the proxy credential that is used to contact the grid
-	 */
-	protected abstract ProxyCredential getCredential();
-
-	/**
-	 * This is mainly for testing, to enable credentials with specified
-	 * lifetimes.
-	 * 
-	 * @param fqan the vo
-	 * @param lifetime
-	 *            the lifetime in seconds
-	 * @return the credential
-	 */
-	protected abstract ProxyCredential getCredential(String fqan, int lifetime);
+	// /**
+	// * This method has to be implemented by the endpoint specific
+	// * ServiceInterface. Since there are a few different ways to get a proxy
+	// * credential (myproxy, just use the one in /tmp/x509..., shibb,...) this
+	// * needs to be implemented differently for every single situation.
+	// *
+	// * @return the proxy credential that is used to contact the grid
+	// */
+	// protected abstract ProxyCredential getCredential();
+	//
+	// /**
+	// * This is mainly for testing, to enable credentials with specified
+	// * lifetimes.
+	// *
+	// * @param fqan the vo
+	// * @param lifetime
+	// * the lifetime in seconds
+	// * @return the credential
+	// */
+	// protected abstract ProxyCredential getCredential(String fqan, int
+	// lifetime);
 
 	// public DtoDataLocations getDataLocationsForVO(final String fqan) {
 	//
@@ -2345,23 +2393,33 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return old_status;
 		}
 
-		final ProxyCredential cred = job.getCredential();
-		boolean changedCred = false;
-		// TODO check whether cred is stored in the database in that case?
-		if ((cred == null) || !cred.isValid()) {
-			job.setCredential(getUser().getCred());
-			changedCred = true;
+		if (old_status > JobConstants.READY_TO_SUBMIT) {
+
+			final ProxyCredential cred = job.getCredential();
+			boolean changedCred = false;
+			// TODO check whether cred is stored in the database in that case?
+			if ((cred == null) || !cred.isValid()) {
+				job.setCredential(getUser().getCred());
+				changedCred = true;
+			}
+
+			new_status = getUser().getSubmissionManager().killJob(job);
+
+			job.addLogMessage("Job killed.");
+			getUser().addLogMessageToPossibleMultiPartJobParent(job,
+					"Job: " + job.getJobname() + " killed, new status: ");
+
+			if (changedCred) {
+				job.setCredential(null);
+			}
+
+		} else {
+			job.addLogMessage("Job removed from grisu db.");
+			getUser().addLogMessageToPossibleMultiPartJobParent(job,
+					"Job: " + job.getJobname() + "removed from grisu db.");
+			new_status = JobConstants.NO_SUCH_JOB;
 		}
 
-		new_status = getUser().getSubmissionManager().killJob(job);
-
-		job.addLogMessage("Job killed.");
-		getUser().addLogMessageToPossibleMultiPartJobParent(job,
-				"Job: " + job.getJobname() + " killed, new status: ");
-
-		if (changedCred) {
-			job.setCredential(null);
-		}
 		if (old_status != new_status) {
 			job.setStatus(new_status);
 		}
@@ -2378,111 +2436,233 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return new_status;
 	}
 
-	private void kill(final Job job, final boolean removeFromDB,
+	private String kill(final Job job, final boolean removeFromDB,
 			final boolean delteJobDirectory) {
 
-		// Job job;
-		//
-		// job = jobdao.findJobByDN(getUser().getDn(), jobname);
+		final String handle = "kill_" + job.getJobname() + "_"
+				+ new Date().getTime();
+		int amount = 4;
+		if (!delteJobDirectory) {
+			amount = amount - 1;
+		}
+		if (!removeFromDB) {
+			amount = amount - 1;
+		}
 
-		kill(job);
+		final DtoActionStatus status = new DtoActionStatus(handle, 2);
+		getSessionActionStatus().put(handle, status);
 
-		if (delteJobDirectory) {
-
-			if (job.isBatchJob()) {
+		Thread t = new Thread() {
+			@Override
+			public void run() {
 
 				try {
-					final BatchJob mpj = getUser().getBatchJobFromDatabase(
-							job.getJobProperty(Constants.BATCHJOB_NAME));
-					mpj.removeJob(job);
-					batchJobDao.saveOrUpdate(mpj);
-				} catch (final Exception e) {
-					// e.printStackTrace();
-					// doesn't matter
+
+					myLogger.debug("Killing job " + job.getJobname()
+							+ "through jobsubmitter...");
+					status.addLogMessage("Killing job through jobmanager...");
+					kill(job);
+					status.addElement("Job killed through jobmanager...");
+					myLogger.debug("Killing job " + job.getJobname()
+							+ "through jobsubmitter finished.");
+
+					if (delteJobDirectory) {
+
+						if (job.isBatchJob()) {
+
+							try {
+								status.addLogMessage("Removing job from parent batchjob.");
+								final BatchJob mpj = getUser().getBatchJobFromDatabase(
+										job.getJobProperty(Constants.BATCHJOB_NAME));
+								mpj.removeJob(job);
+								batchJobDao.saveOrUpdate(mpj);
+							} catch (final Exception e) {
+								// e.printStackTrace();
+								// doesn't matter
+							}
+
+						}
+						status.addLogMessage("Removing job directory.");
+						if (job.getJobProperty(Constants.JOBDIRECTORY_KEY) != null) {
+
+							try {
+								myLogger.debug("Deleting jobdir for "
+										+ job.getJobname());
+
+								deleteFile(
+										job.getJobProperty(Constants.JOBDIRECTORY_KEY),
+										true);
+								myLogger.debug("Deleting success for jobdir for "
+										+ job.getJobname());
+							} catch (final Exception e) {
+								myLogger.error("Could not delete jobdirectory: "
+										+ e.getMessage()
+										+ " Deleting job anyway and don't throw an exception.");
+							}
+						}
+						status.addElement("Job directory deleted.");
+					}
+
+					if (removeFromDB) {
+						status.addLogMessage("Removing job from db...");
+						myLogger.debug("Removing job " + job.getJobname()
+								+ " from db.");
+						jobdao.delete(job);
+						myLogger.debug("Removing job " + job.getJobname()
+								+ " from db finished.");
+						status.addElement("Job removed from db.");
+
+					}
+
+					status.addElement("Job killed.");
+					status.setFinished(true);
+					status.setFailed(false);
+				} catch (Throwable e) {
+					status.addElement("Failed: " + e.getLocalizedMessage());
+					status.setFailed(true);
+					status.setErrorCause(e.getLocalizedMessage());
+					myLogger.error("Could not kill job: " + job.getJobname());
 				}
 
 			}
+		};
 
-			if (job.getJobProperty(Constants.JOBDIRECTORY_KEY) != null) {
+		t.start();
 
-				try {
-					// myLogger.debug("Deleting jobdir for " + job.getJobname()
-					// + " in thread " + Thread.currentThread().getName());
-					deleteFile(job.getJobProperty(Constants.JOBDIRECTORY_KEY));
-					// myLogger.debug("Deleting success for jobdir for "
-					// + job.getJobname() + " in thread "
-					// + Thread.currentThread().getName());
-					// FileObject jobDir = getUser().aquireFile(
-					// job.getJobProperty(Constants.JOBDIRECTORY_KEY));
-					// jobDir.delete(new AllFileSelector());
-					// jobDir.delete();
-				} catch (final Exception e) {
-					// myLogger.debug("Deleting NOT success for jobdir for "
-					// + job.getJobname() + " in thread "
-					// + Thread.currentThread().getName() + ": "
-					// + e.getLocalizedMessage());
-					// throw new RemoteFileSystemException(
-					// "Could not delete jobdirectory: " + e.getMessage());
-					// myLogger.error(Thread.currentThread().getName());
-					myLogger.error("Could not delete jobdirectory: "
-							+ e.getMessage()
-							+ " Deleting job anyway and don't throw an exception.");
-				}
-			}
-		}
-
-		if (removeFromDB) {
-			jobdao.delete(job);
-			// X.p("Deleted from db.");
-		}
+		return handle;
 
 	}
 
-	public void kill(final String jobname, final boolean clear)
-			throws RemoteFileSystemException, NoSuchJobException,
+	public String kill(final String jobname, final boolean clear)
+			throws NoSuchJobException,
 			BatchJobException {
 
 		try {
 			Job job;
 
-			job = jobdao.findJobByDN(getUser().getDn(), jobname);
 
 			if (clear) {
-				kill(job, true, true);
+				try {
+					job = jobdao.findJobByDN(getUser().getDn(), jobname);
+				} catch(NoSuchJobException nsje) {
+					throw nsje;
+				} catch (Exception e) {
+					myLogger.debug("Failed killing job: " + e);
+
+					try {
+						// try to delete jobs in case of db corruption
+						List<Job> jobs = jobdao.findRogueJobsByDN(getDN(),
+								jobname);
+						String handle = null;
+						for (Job tmp : jobs) {
+							try {
+								handle = kill(tmp, true, true);
+							} catch (Exception e3) {
+								myLogger.debug("Can't kill job: "
+										+ e3.getLocalizedMessage());
+							}
+						}
+						return handle;
+
+					} catch (NoSuchJobException nsje) {
+						// that's ok
+						throw nsje;
+					}
+				}
+
+				String handle = kill(job, true, true);
+				return handle;
+
 			} else {
-				kill(job, false, false);
+				job = jobdao.findJobByDN(getUser().getDn(), jobname);
+				String handle = kill(job, false, false);
+				return handle;
 			}
 
 		} catch (final NoSuchJobException nsje) {
-			final BatchJob mpj = getUser().getBatchJobFromDatabase(jobname);
-			deleteMultiPartJob(mpj, clear);
+			try {
+				final BatchJob mpj = getUser().getBatchJobFromDatabase(jobname);
+				deleteMultiPartJob(mpj, clear);
+				return mpj.getBatchJobname();
+			} catch (final NoSuchJobException nsje2) {
+				throw new NoSuchJobException("No job or batchjob with name: "
+						+ jobname);
+			} catch (final Exception e) {
+				throw new BatchJobException(e);
+			}
 		}
 	}
 
-	public void killJobs(final DtoStringList jobnames, final boolean clear) {
+	public String killJobs(final DtoStringList jobnames, final boolean clear) {
 
 		if ((jobnames == null) || (jobnames.asArray().length == 0)) {
-			return;
+			return null;
 		}
 
+		final String handle = "kill_" + jobnames.asSortedSet().size()
+				+ "_jobs_" + new Date().getTime();
 		final DtoActionStatus status = new DtoActionStatus(
-				jobnames.asArray()[0], jobnames.asArray().length * 2);
-		getSessionActionStatus().put(jobnames.asArray()[0], status);
+				handle,
+				jobnames.asArray().length * 2);
+		getSessionActionStatus().put(handle, status);
 
-		for (final String jobname : jobnames.asArray()) {
-			status.addElement("Killing job " + jobname + "...");
-			try {
-				kill(jobname, clear);
-				status.addElement("Success.");
-			} catch (final Exception e) {
-				status.addElement("Failed: " + e.getLocalizedMessage());
-				status.setFailed(true);
-				status.setErrorCause(e.getLocalizedMessage());
-				myLogger.error("Could not kill job: " + jobname);
+		Thread killThread = new Thread() {
+			@Override
+			public void run() {
+
+				final ExecutorService executor = Executors
+						.newFixedThreadPool(ServerPropertiesManager
+								.getConcurrentJobsToBeKilled());
+
+				for (final String jobname : jobnames.asArray()) {
+					Thread t = new Thread() {
+						@Override
+						public void run() {
+
+							status.addElement("Killing job " + jobname + "...");
+							try {
+								String handle = kill(jobname, clear);
+								StatusObject so = StatusObject
+										.waitForActionToFinish(
+												AbstractServiceInterface.this,
+												handle, 2, false, false);
+								if (so.getStatus().isFailed()) {
+									status.addElement("Killing of job "
+											+ jobname + " failed.");
+									throw new Exception(so.getStatus()
+											.getErrorCause());
+								} else {
+									status.addElement("Killing of job "
+											+ jobname + " finished");
+								}
+							} catch (final Exception e) {
+								status.addElement("Failed: " + e.getLocalizedMessage());
+								status.setFailed(true);
+								status.setErrorCause(e.getLocalizedMessage());
+								myLogger.error("Could not kill job: " + jobname);
+							}
+						}
+
+					};
+					t.setName(status.getHandle());
+					executor.execute(t);
+				}
+
+				executor.shutdown();
+				try {
+					executor.awaitTermination(4, TimeUnit.HOURS);
+				} catch (InterruptedException e) {
+					myLogger.debug(e);
+					status.setFailed(true);
+				} finally {
+					status.setFinished(true);
+				}
+
 			}
-		}
+		};
+		killThread.start();
 
-		status.setFinished(true);
+		return handle;
 	}
 
 	/*
@@ -2498,8 +2678,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public GridFile ls(final String directory, int recursion_level)
 			throws RemoteFileSystemException {
 
-		// check whether credential still valid
-		getCredential();
+		// // check whether credential still valid
+		// getCredential();
 
 		return getUser().ls(directory, recursion_level);
 	}
@@ -2653,14 +2833,29 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	protected void prepareJobEnvironment(final Job job)
 			throws RemoteFileSystemException {
 
-		final String jobDir = JsdlHelpers.getAbsoluteWorkingDirectoryUrl(job
-				.getJobDescription());
+		String debug_token = "SUBMIT_" + job.getJobname() + ": ";
+		try {
 
-		// myLogger.debug("Using calculated jobdirectory: " + jobDir);
+			myLogger.debug(debug_token
+					+ "Getting absolute workingdirectoryurl...");
+			final String jobDir = JsdlHelpers.getAbsoluteWorkingDirectoryUrl(job
+					.getJobDescription());
+			myLogger.debug(debug_token + "Found absolute workingdirectoryurl: "
+					+ jobDir);
+			// myLogger.debug("Using calculated jobdirectory: " + jobDir);
 
-		// job.setJob_directory(jobDir);
-
-		getUser().getFileSystemManager().createFolder(jobDir);
+			// job.setJob_directory(jobDir);
+			myLogger.debug(debug_token + "Creating jobdir...");
+			getUser().getFileSystemManager().createFolder(jobDir);
+			myLogger.debug(debug_token + "Jobdir created.");
+		} catch (Throwable e) {
+			myLogger.error(e);
+			myLogger.debug(debug_token + "Error creating jobdir: "
+					+ e.getLocalizedMessage());
+			throw new RemoteFileSystemException(
+					"Could not prepare job environment: "
+							+ e.getLocalizedMessage());
+		}
 
 		// now after the jsdl is ready, don't forget to fill the required fields
 		// into the database
@@ -3255,7 +3450,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				// if old jobdir exists, try to move it here
 				cpSingleFile(oldJobDir, newJobdir, true, true, true);
 
-				deleteFile(oldJobDir);
+				deleteFile(oldJobDir, true);
 			} catch (final Exception e) {
 				myLogger.error(e);
 			}
@@ -3717,6 +3912,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public void restartJob(final String jobname, String changedJsdl)
 			throws JobSubmissionException, NoSuchJobException {
 
+		if (StringUtils.isBlank(changedJsdl)) {
+			changedJsdl = null;
+		}
+
 		final Job job = getUser().getJobFromDatabaseOrFileSystem(jobname);
 
 		restartJob(job, changedJsdl);
@@ -3791,12 +3990,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// Job job;
 		// job = jobdao.findJobByDN(getUser().getDn(), jobname);
 
+		String debugToken = "SUBMIT_" + job.getJobname() + ": ";
+
 		final List<Element> stageIns = JsdlHelpers.getStageInElements(job
 				.getJobDescription());
 
 		for (final Element stageIn : stageIns) {
 
 			final String sourceUrl = JsdlHelpers.getStageInSource(stageIn);
+
+			myLogger.debug(debugToken + "staging in " + sourceUrl);
+
 			if (optionalStatus != null) {
 				optionalStatus.addElement("Staging file "
 						+ sourceUrl.substring(sourceUrl.lastIndexOf("/") + 1));
@@ -3814,23 +4018,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			if (StringUtils.isNotBlank(sourceUrl)) {
 
-				// try {
-				// getUser().getFileSystemManager().createFolder(
-				// FileManager.calculateParentUrl(targetUrl));
-				//
-				// } catch (final RemoteFileSystemException e) {
-				// if (optionalStatus != null) {
-				// optionalStatus
-				// .addLogMessage("Error while staging in files: "
-				// + e.getLocalizedMessage());
-				// }
-				// throw e;
-				// }
-				myLogger.debug("Staging file: " + sourceUrl + " to: "
+				myLogger.debug(debugToken + "Start staging of file: "
+						+ sourceUrl + " to: "
 						+ targetUrl);
 				job.addInputFile(sourceUrl);
 				jobdao.saveOrUpdate(job);
 				cpSingleFile(sourceUrl, targetUrl, true, true, true);
+				myLogger.debug(debugToken + "Finished staging of file: "
+						+ sourceUrl + " to: " + targetUrl);
 				// job.addInputFile(targetUrl);
 			}
 			// }
@@ -3935,6 +4130,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private void submitJob(final Job job, boolean stageFiles,
 			DtoActionStatus status) throws JobSubmissionException {
 
+		String debug_token = "SUBMIT_" + job.getJobname() + ": ";
 		try {
 
 			int noStageins = 0;
@@ -3954,47 +4150,53 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			getUser().addLogMessageToPossibleMultiPartJobParent(job,
 					"Starting job submission for job: " + job.getJobname());
+			myLogger.debug(debug_token + "preparing job environment...");
 			prepareJobEnvironment(job);
+			myLogger.debug(debug_token + "preparing job environment finished.");
 			if (stageFiles) {
+				myLogger.debug(debug_token + "staging in files started...");
 				status.addLogMessage("Starting file stage-in.");
 				job.addLogMessage("Staging possible input files.");
 				// myLogger.debug("Staging possible input files...");
 				stageFiles(job, status);
 				job.addLogMessage("File staging finished.");
 				status.addLogMessage("File stage-in finished.");
+				myLogger.debug(debug_token + "staging in files finished.");
 			}
-		} catch (final Exception e) {
+			status.addElement("Job environment prepared...");
+		} catch (final Throwable e) {
+			myLogger.debug(debug_token + "error: " + e.getLocalizedMessage());
 			status.setFailed(true);
 			status.setErrorCause(e.getLocalizedMessage());
 			status.setFinished(true);
-			myLogger.error(e);
 			throw new JobSubmissionException(
 					"Could not access remote filesystem: "
 							+ e.getLocalizedMessage());
 		}
 
 		status.addElement("Setting credential...");
+		myLogger.debug(debug_token + "setting credential started...");
 		if (job.getFqan() != null) {
-
 			try {
-				if (SUBMIT_PROXY_LIFETIME <= 0) {
-					job.setCredential(getUser().getCred(job.getFqan()));
-				} else {
-					job.setCredential(getCredential(job.getFqan(),
-							SUBMIT_PROXY_LIFETIME));
-				}
-			} catch (final Exception e) {
+				job.setCredential(getUser().getCred(job.getFqan()));
+
+			} catch (final Throwable e) {
+				status.setFailed(true);
+				status.setErrorCause(e.getLocalizedMessage());
+				status.setFinished(true);
+				myLogger.error(e);
 				throw new JobSubmissionException(
 						"Could not create credential to use to submit the job: "
 								+ e.getLocalizedMessage());
 			}
 		} else {
 			job.addLogMessage("Setting non-vo credential: " + job.getFqan());
-			job.setCredential(getCredential());
+			job.setCredential(getUser().getCred());
 		}
+		myLogger.debug(debug_token + "setting credential finished.");
 
 		String handle = null;
-		myLogger.debug("Submitting job to endpoint...");
+		myLogger.debug(debug_token+"submitting job to endpoint...");
 
 		try {
 			status.addElement("Starting job submission using GT4...");
@@ -4018,13 +4220,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			}
 			try {
+				myLogger.debug(debug_token + "submitting...");
 				handle = getUser().getSubmissionManager().submit(
 						submissionType, job);
+				myLogger.debug(debug_token + "submittission finished...");
 			} catch (ServerJobSubmissionException e) {
-
+				myLogger.debug(debug_token + "submittission failed: "+e.getLocalizedMessage());
 				status.addLogMessage("Job submission failed on server.");
 				status.setFailed(true);
 				status.setFinished(true);
+				status.setErrorCause(e.getLocalizedMessage());
 				job.addLogMessage("Submission to endpoint failed: "
 						+ e.getLocalizedMessage());
 				getUser().addLogMessageToPossibleMultiPartJobParent(
@@ -4037,7 +4242,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 
 			job.addLogMessage("Submission finished.");
-		} catch (final RuntimeException e) {
+		} catch (final Throwable e) {
+			myLogger.debug(debug_token + "something failed: "+e.getLocalizedMessage());
+
 			// e.printStackTrace();
 			status.addLogMessage("Job submission failed.");
 			status.setFailed(true);
@@ -4055,8 +4262,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		if (handle == null) {
+			myLogger.debug(debug_token
+					+ "submission finished but no jobhandle.");
 			status.addLogMessage("Submission finished but no jobhandle...");
 			status.setFailed(true);
+			status.setErrorCause("No jobhandle");
 			status.setFinished(true);
 			job.addLogMessage("Submission finished but jobhandle is null...");
 			getUser().addLogMessageToPossibleMultiPartJobParent(
@@ -4068,48 +4278,121 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							+ job.getJobname());
 		}
 
-		job.addJobProperty(Constants.SUBMISSION_TIME_KEY,
-				Long.toString(new Date().getTime()));
+		try {
 
-		// we don't want the credential to be stored with the job in this case
-		// TODO or do we want it to be stored?
-		job.setCredential(null);
-		job.addLogMessage("Job submission finished successful.");
-		getUser().addLogMessageToPossibleMultiPartJobParent(
-				job,
-				"Job submission for job: " + job.getJobname()
-				+ " finished successful.");
-		jobdao.saveOrUpdate(job);
-		myLogger.info("Jobsubmission for job " + job.getJobname()
-				+ " and user " + getDN() + " successful.");
+			myLogger.debug(debug_token+"wrapping up started");
+			job.addJobProperty(Constants.SUBMISSION_TIME_KEY,
+					Long.toString(new Date().getTime()));
 
-		status.addElement("Job submission finished...");
-		status.setFinished(true);
+			// we don't want the credential to be stored with the job in this case
+			// TODO or do we want it to be stored?
+			job.setCredential(null);
+			job.addLogMessage("Job submission finished successful.");
+
+			getUser().addLogMessageToPossibleMultiPartJobParent(
+					job,
+					"Job submission for job: " + job.getJobname()
+					+ " finished successful.");
+			jobdao.saveOrUpdate(job);
+			myLogger.debug(debug_token+"wrapping up finished");
+			myLogger.info("Jobsubmission for job " + job.getJobname()
+					+ " and user " + getDN() + " successful.");
+
+			status.addElement("Job submission finished...");
+			status.setFinished(true);
+		} catch (Throwable e) {
+			myLogger.debug(debug_token+"wrapping up failed: "+e.getLocalizedMessage());
+			status.addLogMessage("Submission finished, error in wrap-up...");
+			status.setFailed(true);
+			status.setFinished(true);
+			status.setErrorCause(e.getLocalizedMessage());
+			job.addLogMessage("Submission finished, error in wrap-up...");
+			getUser().addLogMessageToPossibleMultiPartJobParent(
+					job,
+					"Job submission for job: " + job.getJobname()
+					+ " finished but error in wrap-up...");
+			throw new JobSubmissionException(
+					"Job apparently submitted but error in wrap-up for job: "
+							+ job.getJobname());
+		}
 	}
 
-	public void submitJob(final String jobname) throws JobSubmissionException,
-	NoSuchJobException {
+	public String submitJob(final String jobname)
+			throws JobSubmissionException,
+			NoSuchJobException {
 
-		// myLogger.info("Submitting job: " + jobname + " for user " + getDN());
-		Job job;
-
-		DtoActionStatus status = null;
-		status = new DtoActionStatus(jobname, 0);
-		getSessionActionStatus().put(jobname, status);
+		String handle = "submision_status_" + jobname + "_"
+				+ new Date().getTime();
+		final DtoActionStatus status = new DtoActionStatus(handle, 0);
+		getSessionActionStatus().put(handle, status);
 
 		try {
-			job = getUser().getJobFromDatabaseOrFileSystem(jobname);
-			if (job.getStatus() > JobConstants.READY_TO_SUBMIT) {
-				throw new JobSubmissionException("Job already submitted.");
-			}
-			submitJob(job, true, status);
+			try {
+				final Job job = getUser().getJobFromDatabaseOrFileSystem(jobname);
+				if (job.getStatus() > JobConstants.READY_TO_SUBMIT) {
+					throw new JobSubmissionException("Job already submitted.");
+				}
+				Thread t = new Thread() {
+					@Override
+					public void run() {
+						try {
+							submitJob(job, true, status);
+						} catch (Throwable e) {
+							status.setFailed(true);
+							status.setFinished(true);
+							status.setErrorCause(e.getLocalizedMessage());
+							myLogger.error(e);
+						}
+					}
+				};
+				t.setName(status.getHandle());
+				t.start();
 
-		} catch (final NoSuchJobException e) {
-			// maybe it's a multipartjob
-			final BatchJob multiJob = getUser()
-					.getBatchJobFromDatabase(jobname);
-			submitBatchJob(multiJob);
+			} catch (final NoSuchJobException e) {
+				// maybe it's a multipartjob
+				final BatchJob multiJob = getUser()
+						.getBatchJobFromDatabase(jobname);
+
+				Thread t = new Thread() {
+					@Override
+					public void run() {
+						try {
+							submitBatchJob(multiJob);
+						} catch (JobSubmissionException e) {
+							status.setFailed(true);
+							status.setFinished(true);
+							status.setErrorCause(e.getLocalizedMessage());
+							myLogger.error(e);
+						} catch (NoSuchJobException e) {
+							status.setFailed(true);
+							status.setFinished(true);
+							status.setErrorCause(e.getLocalizedMessage());
+							myLogger.error(e);
+						} catch (Throwable e) {
+							status.setFailed(true);
+							status.setFinished(true);
+							status.setErrorCause(e.getLocalizedMessage());
+							myLogger.error(e);
+						}
+					}
+				};
+				t.setName(status.getHandle());
+				t.start();
+			}
+		} catch (NoSuchJobException nsje) {
+			status.setFailed(true);
+			status.setFinished(true);
+			status.setErrorCause(nsje.getLocalizedMessage());
+			throw nsje;
+
+		} catch (Throwable e) {
+			status.setFailed(true);
+			status.setFinished(true);
+			status.setErrorCause(e.getLocalizedMessage());
+			throw new JobSubmissionException("Could not submit job.", e);
 		}
+
+		return handle;
 
 	}
 

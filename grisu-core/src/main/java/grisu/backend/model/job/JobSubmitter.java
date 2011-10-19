@@ -25,14 +25,14 @@ public abstract class JobSubmitter {
 	/**
 	 * Monitors the job with the specified (JobSubmitter-specific) jobhandle.
 	 * 
-	 * @param endPointReference
-	 *            the handle for the job
+	 * @param job the job object
+	 * 
 	 * @param cred
 	 *            the credential to authenticate yourself as being authorized to
 	 *            kill the job
 	 * @return the status of the job
 	 */
-	public abstract int getJobStatus(String endPointReference,
+	public abstract int getJobStatus(Job job,
 			ProxyCredential cred);
 
 	// public String convertJobDescription(Job job) {
@@ -56,14 +56,14 @@ public abstract class JobSubmitter {
 	/**
 	 * Kills the job with the specified (JobSubmitter-specific) jobhandle.
 	 * 
-	 * @param endPointReference
-	 *            the handle for the job
+	 * @param job
+	 *            the job
 	 * @param cred
 	 *            the credential to authenticate yourself as being authorized to
 	 *            kill the job
 	 * @return the new status of the job
 	 */
-	public abstract int killJob(String endPointReference, ProxyCredential cred);
+	public abstract int killJob(Job job, ProxyCredential cred);
 
 	/**
 	 * Used to submit the job to the specified host.
@@ -79,6 +79,6 @@ public abstract class JobSubmitter {
 	 */
 	protected abstract String submit(InformationManager infoManager,
 			String host, String factoryType, Job job)
-			throws ServerJobSubmissionException;
+					throws ServerJobSubmissionException;
 
 }

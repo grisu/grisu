@@ -1,15 +1,15 @@
 package grisu.backend.model.job.gt5;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
+import grisu.backend.hibernate.JobDAO;
 import grisu.backend.model.ProxyCredential;
 import grisu.backend.model.job.Job;
 import grisu.backend.model.job.JobSubmitter;
 import grisu.backend.model.job.ServerJobSubmissionException;
 import grisu.control.JobConstants;
 import grisu.jcommons.interfaces.InformationManager;
-import grith.jgrith.CredentialHelpers;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.apache.log4j.Logger;
 import org.globus.gram.Gram;
@@ -25,11 +25,11 @@ public class GT5Submitter extends JobSubmitter {
 
 	static final Logger myLogger = Logger.getLogger(GT5Submitter.class
 			.getName());
-	
+
 	private String getContactString(String handle) {
 		try {
 			final URL url = new URL(handle);
-			myLogger.debug("job handle is " + handle);	
+			myLogger.debug("job handle is " + handle);
 			myLogger.debug("returned handle is " + url.getHost());
 			return url.getHost();
 		} catch (final MalformedURLException ex1) {
@@ -39,25 +39,28 @@ public class GT5Submitter extends JobSubmitter {
 	}
 
 	@Override
-	public int getJobStatus(String handle, ProxyCredential credential){
-		return getJobStatus(handle, credential, true);
+	public int getJobStatus(Job job, ProxyCredential credential) {
+		return getJobStatus(job, credential, true);
 	}
-	
-	public int getJobStatus(String handle, ProxyCredential credential, boolean restart) {
-		
+
+	public int getJobStatus(Job grisuJob, ProxyCredential credential,
+			boolean restart) {
+
+		final String handle = grisuJob.getJobhandle();
+
 		final Gram5JobListener l = Gram5JobListener.getJobListener();
 
 		final String contact = getContactString(handle);
 		GramJob job = new GramJob(null);
 		GramJob restartJob = new GramJob(null);
 		GSSCredential cred = credential.getGssCredential();
-		
+
 		try {
 			// lets try to see if gateway is working first...
 			Gram.ping(cred,contact);
 		} catch (final GramException ex) {
 			myLogger.info(ex);
-			// have no idea what the status is, gateway is down:	
+			// have no idea what the status is, gateway is down:
 			return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED, ex.getErrorCode(), 0);
 
 		} catch (final GSSException ex) {
@@ -70,16 +73,16 @@ public class GT5Submitter extends JobSubmitter {
 			job.setCredentials(cred);
 			Gram.jobStatus(job);
 			int jobStatus = job.getStatus();
-			if (jobStatus == GramJob.STATUS_DONE || jobStatus == GramJob.STATUS_FAILED){
+			if ((jobStatus == GramJob.STATUS_DONE) || (jobStatus == GramJob.STATUS_FAILED)){
 				job.signal(GramJob.SIGNAL_COMMIT_END);
 			}
 			return translateToGrisuStatus(jobStatus,job.getError(),job.getError());
-			
+
 		} catch (final GramException ex) {
 			myLogger.debug("ok, normal method of getting exit status is not working. need to restart job.");
-			if ((ex.getErrorCode() == 156  || 
-					ex.getErrorCode() == GramException.CONNECTION_FAILED || 
-					ex.getErrorCode() == 79) &&
+			if (((ex.getErrorCode() == 156)  ||
+					(ex.getErrorCode() == GramException.CONNECTION_FAILED) ||
+					(ex.getErrorCode() == 79)) &&
 					restart) {
 				// maybe the job finished, but maybe we need to kick job manager
 
@@ -93,7 +96,7 @@ public class GT5Submitter extends JobSubmitter {
 					if (ex1.getErrorCode() == 131) {
 						// job is still running but proxy expired
 						return translateToGrisuStatus(GRAMConstants.STATUS_ACTIVE,131,0);
-					} 
+					}
 					// something is really wrong
 					return translateToGrisuStatus(GRAMConstants.STATUS_FAILED, restartJob.getError(),0);
 				} catch (final GSSException ex1) {
@@ -101,19 +104,23 @@ public class GT5Submitter extends JobSubmitter {
 					return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED, 0 , 0);
 				}
 
+				grisuJob.setJobhandle(restartJob.getIDAsString());
+				JobDAO jobdao = new JobDAO();
+				jobdao.saveOrUpdate(grisuJob);
+				
 				// nope, not done yet.
-				return getJobStatus(handle, credential, false);
+				return getJobStatus(grisuJob, credential, false);
 			} else if (ex.getErrorCode() == 156){
-				// second restart didn't work - assume the job is done 
+				// second restart didn't work - assume the job is done
 				// this bit is only needed during transition between releases
 				return translateToGrisuStatus(GRAMConstants.STATUS_DONE, 0 , 0);
-				
+
 			} else {
 				myLogger.error("something else is wrong. error code is " + ex.getErrorCode());
 				myLogger.error(ex);
 				return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED, 0 , 0);
 			}
-			
+
 		} catch (final GSSException ex) {
 			myLogger.error(ex);
 			return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED, 0 , 0);
@@ -130,11 +137,11 @@ public class GT5Submitter extends JobSubmitter {
 	}
 
 	@Override
-	public int killJob(String handle, ProxyCredential cred) {
-		
+	public int killJob(Job grisuJob, ProxyCredential cred) {
+
 		final GramJob job = new GramJob(null);
-		try {			
-			job.setID(handle);
+		try {
+			job.setID(grisuJob.getJobhandle());
 			job.setCredentials(cred.getGssCredential());
 			try {
 				Gram.cancel(job);
@@ -145,11 +152,11 @@ public class GT5Submitter extends JobSubmitter {
 				myLogger.error(ex.getLocalizedMessage());
 			}
 
-			return getJobStatus(handle, cred, true);
+			return getJobStatus(grisuJob, cred, true);
 		} catch (final MalformedURLException ex) {
 			myLogger.error(ex.getLocalizedMessage());
 			return JobConstants.UNDEFINED;
-		} 
+		}
 	}
 
 	@Override
@@ -169,8 +176,10 @@ public class GT5Submitter extends JobSubmitter {
 		GSSCredential credential = null;
 
 		try {
-			credential = CredentialHelpers.convertByteArrayToGSSCredential(job
-					.getCredential().getCredentialData());
+			// credential =
+			// CredentialHelpers.convertByteArrayToGSSCredential(job
+			// .getCredential().getCredentialData());
+			credential = job.getCredential().getGssCredential();
 
 			GramJob gt5Job = new GramJob(rsl);
 			final Gram5JobListener l = Gram5JobListener.getJobListener();
@@ -185,6 +194,8 @@ public class GT5Submitter extends JobSubmitter {
 			//gt5Job.bind();
 			//gt5Job.getStatus();
 
+			job.setSubmittedJobDescription(rsl);
+
 			return gt5Job.getIDAsString();
 
 		} catch (GSSException gss) {
@@ -193,7 +204,7 @@ public class GT5Submitter extends JobSubmitter {
 		} catch (GramException gex){
 			throw new ServerJobSubmissionException(gex.getLocalizedMessage(),gex);
 		}
-		
+
 	}
 
 	private int translateToGrisuStatus(int status,int failureCode ,int exitCode) {

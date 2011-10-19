@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.3.6.3</version>
+		<version>0.3.7</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>grisu.backend</groupId>
@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>grisu</groupId>
 			<artifactId>grisu-commons</artifactId>
-			<version>0.3.6.3</version>
+			<version>0.3.7</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>cryptix32</artifactId>
@@ -146,8 +146,7 @@
 
 			<groupId>commons-vfs-grid</groupId>
 			<artifactId>commons-vfs-grid</artifactId>
-			<version>1.5.1-beta1</version>
-			<type>jar</type>
+			<version>1.5.2-nz</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>cog-jglobus</artifactId>
@@ -181,6 +180,7 @@
 					<artifactId>slf4j-api</artifactId>
 					<groupId>org.slf4j</groupId>
 				</exclusion>
+
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -233,7 +233,7 @@
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>mysql-mds</artifactId>
-			<version>0.8.8</version>
+			<version>0.8.9</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>cog-jglobus</artifactId>
@@ -301,7 +301,7 @@
 		<dependency>
 			<groupId>external.jglobus</groupId>
 			<artifactId>cog-jglobus</artifactId>
-			<version>1.8.1-bestgrid</version>
+			<version>1.8.2-nesi</version>
 		</dependency>
 
 
@@ -390,7 +390,7 @@
 		<dependency>
 			<groupId>grith</groupId>
 			<artifactId>jgrith</artifactId>
-			<version>0.5.9</version>
+			<version>0.5.10</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>grid-jcommons</artifactId>
@@ -399,6 +399,10 @@
 				<exclusion>
 					<artifactId>log4j</artifactId>
 					<groupId>log4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>puretls</artifactId>
+					<groupId>external.jglobus</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -411,24 +415,24 @@
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>mds4-client</artifactId>
-			<version>0.8.8</version>
+			<version>0.8.9</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>puretls</artifactId>
+					<groupId>external.jglobus</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>matchmaker</artifactId>
-			<version>0.8.8</version>
+			<version>0.8.9</version>
 		</dependency>
 <!--		<dependency>
 			<groupId>grisu.frontend</groupId>
 			<artifactId>gridftp-tests</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>-->
-		<dependency>
-			<groupId>grisu.frontend</groupId>
-			<artifactId>grisu-client</artifactId>
-			<version>0.3.6.1</version>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 
 

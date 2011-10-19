@@ -229,21 +229,46 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 	public void deleteFile(final String file) throws RemoteFileSystemException {
 
-		FileSystemCache fsCache = new FileSystemCache(user);
 
-		final FileObject fileObject = aquireFile(fsCache, file);
+		int retries = ServerPropertiesManager.getFileDeleteRetries();
 		try {
-			if (fileObject.exists()) {
-				fileObject.delete(new AllFileSelector());
+			FileSystemException fse = null;
+			for (int i = 0; i < retries; i++) {
+				FileSystemCache fsCache = new FileSystemCache(user);
+				FileObject fileObject = null;
+				try {
+					fileObject = aquireFile(fsCache, file);
+					if (fileObject.exists()) {
+						myLogger.debug("Deleting file/folder (" + (i+1) + ". try):"
+								+ file);
+						int no = fileObject.delete(new AllFileSelector());
+						myLogger.debug("Deleted " + no
+								+ " files when deleting " + file);
+						fse = null;
+						break;
+					}
+				} catch (FileSystemException e) {
+					myLogger.debug("Deleting file/folder (" + (i+1) + ". try):"
+							+ file + ". Error: " + e.getLocalizedMessage());
+
+					fse = e;
+				} finally {
+					if (fileObject != null) {
+						closeFile(fileObject);
+					}
+					fsCache.close();
+				}
+			}
+
+			if (fse != null) {
+				myLogger.error("Could not delete file " + file + ". Tried "
+						+ retries + " times.");
+				throw fse;
 			}
 		} catch (final FileSystemException e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
+
 			throw new RemoteFileSystemException("Could not delete file: "
 					+ e.getLocalizedMessage());
-		} finally {
-			fsCache.close();
-			closeFile(fileObject);
 		}
 
 	}
@@ -279,7 +304,9 @@ FileSystemInfoPlugin, FileTransferPlugin {
 					datasource = new FileContentDataSourceConnector(source);
 				} catch (final FileSystemException e) {
 					try {
+						myLogger.debug("Closing source file: " + filename);
 						source.close();
+						myLogger.debug("Closed source file: " + filename);
 					} catch (FileSystemException ex){
 						myLogger.warn("could not close file: " + ex.getLocalizedMessage());
 					}
@@ -292,7 +319,10 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			}
 
 		} finally {
+			myLogger.debug("Closing filesystem cache for file download: "
+					+ filename);
 			fsCache.close();
+			myLogger.debug("Closing source file: " + filename);
 		}
 
 		return datahandlers[0];

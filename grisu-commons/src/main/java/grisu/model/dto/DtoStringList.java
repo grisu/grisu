@@ -10,15 +10,26 @@ import java.util.TreeSet;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.commons.lang.StringUtils;
+
 @XmlRootElement(name = "list")
 public class DtoStringList {
 
 	public static DtoStringList fromSingleString(String string) {
+
+		if (StringUtils.isBlank(string)) {
+			return new DtoStringList();
+		}
+
 		final DtoStringList result = new DtoStringList();
 		final List<String> list = new LinkedList<String>();
 		list.add(string);
 		result.setStringList(list);
 		return result;
+	}
+
+	public static DtoStringList fromString(String string) {
+		return fromSingleString(string);
 	}
 
 	public static DtoStringList fromStringArray(String[] array) {

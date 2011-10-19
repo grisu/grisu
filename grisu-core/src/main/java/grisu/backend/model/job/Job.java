@@ -48,7 +48,6 @@ import org.xml.sax.SAXException;
 @Entity
 @Table(name = "jobs")
 @Root
-
 public class Job implements Comparable<Job> {
 
 	static final Logger myLogger = Logger.getLogger(Job.class.getName());

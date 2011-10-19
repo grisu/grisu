@@ -25,17 +25,6 @@ In order to build Grisu from the git sources, you need:
 - [Apache Maven](http://maven.apache.org) (version >=2)
 
 
-Checking out sourcecode
--------------------------------------
 
- `git clone git://github.com/grisu/grisu.git`
-
-Building Grisu using Maven
-------------------------------------------
-
-To build one of the above modules, cd into the module root directory of the module to build and execute: 
-
-    cd grisu
-    mvn clean install
 
 

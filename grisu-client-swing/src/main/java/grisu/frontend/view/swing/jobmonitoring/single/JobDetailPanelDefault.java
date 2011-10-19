@@ -53,7 +53,7 @@ PropertyChangeListener, JobDetailPanel {
 	private static String generateHtml(Map<String, String> jobProperties) {
 
 		final StringBuffer html = new StringBuffer(
-		"<html><table width=\"100%\">");
+				"<html><table width=\"100%\">");
 
 		boolean alternate = true;
 		for (final String key : jobProperties.keySet()) {
@@ -76,7 +76,7 @@ PropertyChangeListener, JobDetailPanel {
 	private static String generateLogHtml(Map<Date, String> jobProperties) {
 
 		final StringBuffer html = new StringBuffer(
-		"<html><table width=\"100%\">");
+				"<html><table width=\"100%\">");
 
 		boolean alternate = true;
 		for (final Date key : jobProperties.keySet()) {
@@ -98,7 +98,7 @@ PropertyChangeListener, JobDetailPanel {
 
 	private final ImageIcon REFRESH_ICON = new ImageIcon(
 			JobDetailPanelDefault.class.getClassLoader().getResource(
-			"refresh.png"));
+					"refresh.png"));
 
 	private JTextField txtNa;
 	private JobObject job;
@@ -203,22 +203,20 @@ PropertyChangeListener, JobDetailPanel {
 							BackgroundActionProgressDialogSmall d = new BackgroundActionProgressDialogSmall(
 									"Archiving job:", job.getJobname());
 							try {
-								job.archive(null, false);
+								String tmp = job.archive(null, false);
 
 								StatusObject so = StatusObject
-								.waitForActionToFinish(
-										si,
-										ServiceInterface.ARCHIVE_STATUS_PREFIX
-										+ job.getJobname(), 5,
-										true, false);
+										.waitForActionToFinish(
+si, tmp, 5,
+												true, false);
 
 								d.close();
 
 								if (so.getStatus().isFailed()) {
 
 									String msg = "Can't archive job: "
-										+ DtoActionStatus.getLastMessage(so
-												.getStatus());
+											+ DtoActionStatus.getLastMessage(so
+													.getStatus());
 									ErrorInfo info = new ErrorInfo(
 											"Job archiving error", msg, null,
 											"Error", null, Level.SEVERE, null);
@@ -237,8 +235,8 @@ PropertyChangeListener, JobDetailPanel {
 								ErrorInfo info = new ErrorInfo(
 										"Job archiving error",
 										"Can't archive job:\n\n"
-										+ e.getLocalizedMessage(),
-										null, "Error", e, Level.SEVERE, null);
+												+ e.getLocalizedMessage(),
+												null, "Error", e, Level.SEVERE, null);
 
 								JXErrorPane pane = new JXErrorPane();
 								pane.setErrorInfo(info);
@@ -275,10 +273,10 @@ PropertyChangeListener, JobDetailPanel {
 							int n = JOptionPane.showConfirmDialog(
 									JobDetailPanelDefault.this,
 									"Cleaning job "
-									+ JobDetailPanelDefault.this.job
-													.getJobname() + ".",
-									"Confirmation",
-									JOptionPane.OK_CANCEL_OPTION);
+											+ JobDetailPanelDefault.this.job
+											.getJobname() + ".",
+											"Confirmation",
+											JOptionPane.OK_CANCEL_OPTION);
 
 							if (n == JOptionPane.CANCEL_OPTION) {
 								return;
@@ -294,8 +292,8 @@ PropertyChangeListener, JobDetailPanel {
 								ErrorInfo info = new ErrorInfo(
 										"Job cleaning error",
 										"Can't clean job:\n\n"
-										+ e.getLocalizedMessage(),
-										null, "Error", e, Level.SEVERE, null);
+												+ e.getLocalizedMessage(),
+												null, "Error", e, Level.SEVERE, null);
 
 								JXErrorPane pane = new JXErrorPane();
 								pane.setErrorInfo(info);
@@ -364,10 +362,10 @@ PropertyChangeListener, JobDetailPanel {
 							int n = JOptionPane.showConfirmDialog(
 									JobDetailPanelDefault.this,
 									"Killing job "
-									+ JobDetailPanelDefault.this.job
-									.getJobname() + ".",
-									"Confirmation",
-									JOptionPane.OK_CANCEL_OPTION);
+											+ JobDetailPanelDefault.this.job
+											.getJobname() + ".",
+											"Confirmation",
+											JOptionPane.OK_CANCEL_OPTION);
 
 							if (n == JOptionPane.CANCEL_OPTION) {
 								return;
@@ -382,8 +380,8 @@ PropertyChangeListener, JobDetailPanel {
 								d.close();
 								ErrorInfo info = new ErrorInfo(
 										"Job kill error", "Can't kill job:\n\n"
-										+ e.getLocalizedMessage(),
-										null, "Error", e, Level.SEVERE, null);
+												+ e.getLocalizedMessage(),
+												null, "Error", e, Level.SEVERE, null);
 
 								JXErrorPane pane = new JXErrorPane();
 								pane.setErrorInfo(info);
@@ -489,7 +487,7 @@ PropertyChangeListener, JobDetailPanel {
 							@Override
 							public void run() {
 								final Cursor old = statusRefreshButton
-								.getCursor();
+										.getCursor();
 								statusRefreshButton.setCursor(Cursor
 										.getPredefinedCursor(Cursor.WAIT_CURSOR));
 								job.getStatus(true);

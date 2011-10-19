@@ -8,6 +8,7 @@ import grisu.control.exceptions.JobPropertiesException;
 import grisu.control.exceptions.JobSubmissionException;
 import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.RemoteFileSystemException;
+import grisu.control.exceptions.StatusException;
 import grisu.frontend.control.clientexceptions.FileTransactionException;
 import grisu.frontend.control.fileTransfers.FileTransaction;
 import grisu.frontend.control.fileTransfers.FileTransactionManager;
@@ -308,8 +309,7 @@ Comparable<JobObject> {
 			if (waitForArchivingToFinish) {
 				try {
 					StatusObject.waitForActionToFinish(getServiceInterface(),
-							ServiceInterface.ARCHIVE_STATUS_PREFIX
-							+ getJobname(), 5, true, false);
+							targetUrl, 5, true, false);
 
 					isArchived = true;
 					pcs.firePropertyChange("archived", false, true);
@@ -334,9 +334,8 @@ Comparable<JobObject> {
 
 						try {
 							StatusObject.waitForActionToFinish(
-									getServiceInterface(),
-									ServiceInterface.ARCHIVE_STATUS_PREFIX
-									+ getJobname(), 5, true, false);
+									getServiceInterface(), targetUrl, 5, true,
+									false);
 
 							isArchived = true;
 							pcs.firePropertyChange("archived", false, true);
@@ -503,12 +502,14 @@ Comparable<JobObject> {
 		return this.getJobname();
 	}
 
-	private void createWaitThread(final int checkIntervallInSeconds) {
+	private synchronized void createWaitThread(final int checkIntervallInSeconds) {
 
 		try {
 			// just to make sure we don't create 2 or more threads. Should never
 			// happen.
-			waitThread.interrupt();
+			if (waitThread != null) {
+				waitThread.interrupt();
+			}
 		} catch (final Exception e) {
 			myLogger.debug(e);
 		}
@@ -1117,7 +1118,14 @@ Comparable<JobObject> {
 				}.start();
 
 			}
-			this.serviceInterface.kill(this.getJobname(), clean);
+			String handle = this.serviceInterface
+					.kill(this.getJobname(), clean);
+
+			StatusObject so = StatusObject.waitForActionToFinish(
+					serviceInterface, handle, 2, false, false);
+			if (so.getStatus().isFailed()) {
+				throw new Exception(so.getStatus().getErrorCause());
+			}
 			try {
 				getStatus(true);
 			} catch (Exception nsje) {
@@ -1352,6 +1360,25 @@ Comparable<JobObject> {
 	 * resource. Internally, this method also does possible stage-ins from your
 	 * local machine.
 	 * 
+	 * @param waitForSubmissionToFinish
+	 *            whether to wait for submission to finish or not
+	 * 
+	 * @throws JobSubmissionException
+	 *             if the job could not be submitted
+	 * @throws InterruptedException
+	 */
+	public final void submitJob(boolean waitForSubmissionToFinish)
+			throws JobSubmissionException, InterruptedException {
+		submitJob(null, waitForSubmissionToFinish);
+	}
+
+	/**
+	 * After you created the job on the backend using the
+	 * {@link #createJob(String)} or {@link #createJob(String, String)} method
+	 * you can tell the backend to actually submit the job to the endpoint
+	 * resource. Internally, this method also does possible stage-ins from your
+	 * local machine.
+	 * 
 	 * @param additionalJobProperties
 	 *            properties you want to store with the job (only get stored if
 	 *            submission was successful)
@@ -1362,6 +1389,12 @@ Comparable<JobObject> {
 	 */
 	public final void submitJob(Map<String, String> additionalJobProperties)
 			throws JobSubmissionException, InterruptedException {
+		submitJob(additionalJobProperties, true);
+	}
+
+	public final void submitJob(Map<String, String> additionalJobProperties,
+			boolean waitForSubmissionToFinish) throws JobSubmissionException,
+			InterruptedException {
 
 		addJobLogMessage("Starting job submission...");
 
@@ -1387,7 +1420,23 @@ Comparable<JobObject> {
 
 		try {
 			addJobLogMessage("Submitting job to endpoint...");
-			serviceInterface.submitJob(getJobname());
+			String handle = serviceInterface.submitJob(getJobname());
+			if (waitForSubmissionToFinish) {
+				try {
+					StatusObject s = StatusObject.waitForActionToFinish(
+							serviceInterface, handle, 3, true, false);
+					if (s.getStatus().isFailed()) {
+						String errorCause = s.getStatus().getErrorCause();
+						if (StringUtils.isBlank(errorCause)) {
+							errorCause = "Unknown";
+						}
+						throw new JobSubmissionException(errorCause);
+					}
+				} catch (StatusException e) {
+					myLogger.error(e);
+					throw new RuntimeException(e);
+				}
+			}
 
 		} catch (final NoSuchJobException e) {
 			addJobLogMessage("Submission failed: " + e.getLocalizedMessage());

@@ -75,7 +75,7 @@ public class JobSubmissionManager {
 			return job.getStatus();
 		}
 
-		return submitter.getJobStatus(job.getJobhandle(), job.getCredential());
+		return submitter.getJobStatus(job, job.getCredential());
 
 	}
 
@@ -101,7 +101,7 @@ public class JobSubmissionManager {
 			return JobConstants.KILLED;
 		}
 
-		return submitter.killJob(job.getJobhandle(), job.getCredential());
+		return submitter.killJob(job, job.getCredential());
 	}
 
 	/**

@@ -7,6 +7,7 @@ import grisu.model.FileManager;
 import grisu.model.MountPoint;
 import grisu.model.dto.GridFile;
 import grisu.settings.ServerPropertiesManager;
+import grith.jgrith.voms.VO;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -185,12 +186,12 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				return result;
 			}
 
-			for (String vo : new TreeSet<String>(user.getFqans().values())) {
-				GridFile f = new GridFile(BASE + "/" + vo, -1L);
+			for (VO vo : new TreeSet<VO>(user.getFqans().values())) {
+				GridFile f = new GridFile(BASE + "/" + vo.getVoName(), -1L);
 				f.setIsVirtual(true);
-				f.setPath(path + "/" + vo);
+				f.setPath(path + "/" + vo.getVoName());
 
-				for (MountPoint mp : user.getMountPoints("/" + vo)) {
+				for (MountPoint mp : user.getMountPoints("/" + vo.getVoName())) {
 					f.addSite(mp.getSite());
 					f.addUrl(mp.getRootUrl(),
 							GridFile.FILETYPE_MOUNTPOINT_PRIORITY);

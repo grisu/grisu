@@ -477,7 +477,9 @@ public class RunningJobManager implements EventSubscriber {
 		}
 		for (final String name : jobnamesNew) {
 			try {
-
+				if (StringUtils.isBlank(name)) {
+					continue;
+				}
 				final BatchJobObject temp = getBatchJob(name);
 				if (temp == null) {
 					continue;
@@ -538,6 +540,9 @@ public class RunningJobManager implements EventSubscriber {
 		}
 		for (final String name : jobnamesNew) {
 			try {
+				if (StringUtils.isBlank(name)) {
+					continue;
+				}
 				final JobObject temp = getJob(name, false);
 				if (temp == null) {
 					continue;
@@ -583,7 +588,7 @@ public class RunningJobManager implements EventSubscriber {
 			@Override
 			public void run() {
 
-				final List<JobObject> tempList = new LinkedList<JobObject>(
+				final Set<JobObject> tempList = new HashSet<JobObject>(
 						getAllCurrentlyWatchedSingleJobs());
 				for (final JobObject job : tempList) {
 					myLogger.debug("Refreshing job: " + job.getJobname());

@@ -34,7 +34,7 @@ public class DtoActionStatus {
 	}
 
 	private Map<Date, String> log = Collections
-	.synchronizedSortedMap(new TreeMap<Date, String>());
+			.synchronizedSortedMap(new TreeMap<Date, String>());
 
 	private int totalElements;
 	private boolean finished = false;
@@ -127,7 +127,15 @@ public class DtoActionStatus {
 	}
 
 	public double percentFinished() {
-		return (currentElements * 100) / totalElements;
+		if (totalElements <= 0) {
+			return 0;
+		}
+		double result = (currentElements * 100) / totalElements;
+		if (result > 100.0) {
+			return 100.0;
+		} else {
+			return result;
+		}
 	}
 
 	public void setCurrentElements(int currentElements) {
