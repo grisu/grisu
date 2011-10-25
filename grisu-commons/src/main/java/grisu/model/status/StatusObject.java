@@ -8,7 +8,6 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-import org.bushe.swing.event.EventBus;
 
 public class StatusObject {
 
@@ -76,6 +75,28 @@ public class StatusObject {
 		listeners.addElement(l);
 	}
 
+	private Thread createWaitThread(final int waitTime) {
+
+		Thread t = new Thread() {
+			@Override
+			public void run() {
+				while (!lastStatus.isFinished()) {
+					try {
+						// myLogger.debug(
+						// "Status of task {} not finished yet. Waiting "
+						// + (waitTime * 1000)
+						// + " seconds, then check again...",
+						// handle);
+						Thread.sleep(waitTime * 1000);
+					} catch (InterruptedException e) {
+						myLogger.error("Status wait interrupted.", e);
+					}
+				}
+			}
+		};
+		return t;
+	}
+
 	public void fireEvent(ActionStatusEvent message) {
 		if ((listeners != null) && !listeners.isEmpty()) {
 
@@ -98,7 +119,12 @@ public class StatusObject {
 
 	public DtoActionStatus getStatus() {
 
+		myLogger.debug("Checking status for: " + handle);
 		lastStatus = si.getActionStatus(handle);
+		myLogger.debug("Status for " + handle + ": "
+				+ lastStatus.percentFinished() + " %" + " / finished: "
+				+ lastStatus.isFinished());
+
 		return lastStatus;
 	}
 
@@ -116,62 +142,62 @@ public class StatusObject {
 				sendStatusEvent, null);
 	}
 
+
 	public void waitForActionToFinish(int recheckIntervalInSeconds,
 			boolean exitIfFailed, boolean sendStatusEvent,
 			String statusMessagePrefix) throws InterruptedException,
 			StatusException {
 
-		myLogger.debug("Checking status for: " + handle);
-
 		lastStatus = si.getActionStatus(handle);
-
-		myLogger.debug("Status for " + handle + ": "
-				+ lastStatus.percentFinished() + " %");
 
 		if (lastStatus == null) {
 
 			throw new StatusException("Can't find status with handle "
 					+ this.handle);
 		}
-		while (!lastStatus.isFinished()) {
 
-			if (sendStatusEvent) {
-				final ActionStatusEvent ev = new ActionStatusEvent(lastStatus,
-						statusMessagePrefix);
-				EventBus.publish(handle, ev);
-				fireEvent(ev);
-			}
 
-			if (exitIfFailed) {
-				if (lastStatus.isFailed()) {
-					return;
-				}
-			}
 
-			if (Thread.currentThread().isInterrupted()) {
-				throw new InterruptedException(
-						"Interrupted while waiting for action " + handle
-						+ " to finish on backend.");
-			}
 
-			try {
-				Thread.sleep(recheckIntervalInSeconds * 1000);
-			} catch (final InterruptedException e) {
-				throw e;
-			}
-			myLogger.debug("Checking status for: " + handle);
-
-			lastStatus = si.getActionStatus(handle);
-
-			myLogger.debug("Status for " + handle + ": "
-					+ lastStatus.percentFinished() + " %");
-			if (lastStatus == null) {
-
-				throw new StatusException("Can't find status with handle "
-						+ this.handle);
-			}
-
-		}
+		//		while (!lastStatus.isFinished()) {
+		//
+		//			if (sendStatusEvent) {
+		//				final ActionStatusEvent ev = new ActionStatusEvent(lastStatus,
+		//						statusMessagePrefix);
+		//				EventBus.publish(handle, ev);
+		//				fireEvent(ev);
+		//			}
+		//
+		//			if (exitIfFailed) {
+		//				if (lastStatus.isFailed()) {
+		//					return;
+		//				}
+		//			}
+		//
+		//			if (Thread.currentThread().isInterrupted()) {
+		//				throw new InterruptedException(
+		//						"Interrupted while waiting for action " + handle
+		//						+ " to finish on backend.");
+		//			}
+		//
+		//			try {
+		//				Thread.sleep(recheckIntervalInSeconds * 1000);
+		//			} catch (final InterruptedException e) {
+		//				throw e;
+		//			}
+		//			myLogger.debug("Checking status for: " + handle);
+		//
+		//			lastStatus = si.getActionStatus(handle);
+		//
+		//			myLogger.debug("Status for " + handle + ": "
+		//					+ lastStatus.percentFinished() + " %");
+		//			if (lastStatus == null) {
+		//
+		//				throw new StatusException("Can't find status with handle "
+		//						+ this.handle);
+		// }
+		//
+		// }
 		return;
 
 	}
