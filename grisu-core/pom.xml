@@ -387,17 +387,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.6.2</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>log4j</artifactId>
-					<groupId>log4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>grith</groupId>
 			<artifactId>jgrith</artifactId>
 			<version>0.6-SNAPSHOT</version>
@@ -424,6 +413,10 @@
 				<exclusion>
 					<artifactId>puretls</artifactId>
 					<groupId>external.jglobus</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
