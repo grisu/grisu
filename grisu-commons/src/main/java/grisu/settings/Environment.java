@@ -14,11 +14,11 @@ import org.apache.commons.lang.StringUtils;
 public final class Environment {
 
 	private static final String GRISU_DEFAULT_DIRECTORY = System
-			.getProperty("user.home") + File.separator + ".grisu.beta";
+			.getProperty("user.home") + File.separator + ".grisu";
 	private static final String GRISU_SYSTEM_WIDE_CONFIG_DIR = "/etc/grisu";
 	private static final String GRISU_SYSTEM_WIDE_VAR_DIR = "/var/lib/grisu/";
 	private static final String GRISU_CLIENT_DIR = System
-			.getProperty("user.home") + File.separator + ".grisu.beta";
+			.getProperty("user.home") + File.separator + ".grisu";
 
 	private static String USER_SET_GRISU_DIRECTORY = null;
 
