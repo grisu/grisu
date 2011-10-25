@@ -22,7 +22,10 @@ import org.bushe.swing.event.EventBus;
 public class FileTransaction implements Comparable<FileTransaction> {
 
 	public enum Status {
-		CREATED, TRANSACTION_RUNNING, FINISHED, FAILED
+		CREATED,
+		TRANSACTION_RUNNING,
+		FINISHED,
+		FAILED
 	}
 
 	public static final String DELETE_STRING = "delete";
@@ -232,7 +235,7 @@ public class FileTransaction implements Comparable<FileTransaction> {
 									try {
 										fm.cp(sourceUrl, targetDirUrl,
 												overwrite);
-									} catch (Exception e3) {
+									} catch (final Exception e3) {
 										throw new FileTransactionException(
 												sourceUrl, targetDirUrl,
 												e3.getLocalizedMessage(), e3);

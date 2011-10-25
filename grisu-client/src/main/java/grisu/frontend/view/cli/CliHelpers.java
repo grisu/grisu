@@ -8,17 +8,17 @@ import jline.ConsoleReader;
 import jline.Terminal;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 
 public class CliHelpers {
 
-
 	private static SpinUpdater spinUpdater = null;
 
-	static final Logger myLogger = Logger.getLogger(CliHelpers.class.getName());
-
+	static final Logger myLogger = LoggerFactory.getLogger(CliHelpers.class
+			.getName());
 
 	private static boolean ENABLE_PROGRESS = true;
 	private static Timer timer = null;
@@ -28,7 +28,7 @@ public class CliHelpers {
 
 	private static Thread indeterminateProgress = null;
 	public static String[] indeterminateProgressStrings = new String[] { "-",
-		"\\", "|", "/" };
+			"\\", "|", "/" };
 
 	public static final int DURATION = 100;
 
@@ -39,13 +39,13 @@ public class CliHelpers {
 	}
 
 	public static synchronized ConsoleReader getConsoleReader() {
-		if ( consoleReader == null ) {
+		if (consoleReader == null) {
 			try {
 				consoleReader = new ConsoleReader();
 				terminal.beforeReadLine(consoleReader, "", (char) 0);
 				terminal.afterReadLine(consoleReader, "", (char) 0);
-			} catch (IOException e) {
-				myLogger.error(e);
+			} catch (final IOException e) {
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 
 		}
@@ -55,11 +55,11 @@ public class CliHelpers {
 	private static int getTermwidth() {
 		return getConsoleReader().getTermwidth();
 	}
+
 	public static String getUserChoice(Collection<String> collection,
 			String nonSelectionText) {
 		return getUserChoice(collection, null, null, nonSelectionText);
 	}
-
 
 	public static String getUserChoice(Collection<String> collection,
 			String prompt, String defaultValue, String nonSelectionText) {
@@ -145,8 +145,8 @@ public class CliHelpers {
 	}
 
 	private static String repetition(String string, int progress) {
-		StringBuffer result = new StringBuffer();
-		for ( int i=0;i<progress;i++) {
+		final StringBuffer result = new StringBuffer();
+		for (int i = 0; i < progress; i++) {
 			result.append(string);
 		}
 		return result.toString();
@@ -157,21 +157,20 @@ public class CliHelpers {
 	}
 
 	public static synchronized void setIndeterminateProgress(
-			final String message,
-			boolean start) {
+			final String message, boolean start) {
 
 		if (terminal == null) {
 			return;
 		}
 
-		if ( ! ENABLE_PROGRESS ) {
+		if (!ENABLE_PROGRESS) {
 			System.out.println(start);
 			return;
 		}
 
 		getConsoleReader().setDefaultPrompt("");
 
-		if ( start ) {
+		if (start) {
 			if (spinUpdater != null) {
 				spinUpdater.setMessage(message);
 			} else {
@@ -187,12 +186,9 @@ public class CliHelpers {
 				System.out.println(message);
 			}
 
-
 		}
 
 	}
-
-
 
 	public static void setProgress(int completed, int total) {
 		if ((terminal == null) || !ENABLE_PROGRESS) {
@@ -201,11 +197,11 @@ public class CliHelpers {
 
 		getConsoleReader().setDefaultPrompt("");
 
-		int progress = (completed * 20) / total;
-		String totalStr = String.valueOf(total);
-		String percent = String.format("%" + totalStr.length() + "d/%s [",
-				completed, totalStr);
-		String result = percent + repetition("-", progress)
+		final int progress = (completed * 20) / total;
+		final String totalStr = String.valueOf(total);
+		final String percent = String.format(
+				"%" + totalStr.length() + "d/%s [", completed, totalStr);
+		final String result = percent + repetition("-", progress)
 				+ repetition(" ", 20 - progress) + "]";
 
 		writeToTerminal(result);
@@ -218,8 +214,8 @@ public class CliHelpers {
 		try {
 			getConsoleReader().setCursorPosition(getTermwidth());
 			getConsoleReader().redrawLine();
-		} catch (IOException e) {
-			myLogger.error(e);
+		} catch (final IOException e) {
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
 	}

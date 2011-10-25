@@ -20,7 +20,6 @@ import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-
 import com.jidesoft.swing.FolderChooser;
 
 public class DownloadAction extends AbstractAction {

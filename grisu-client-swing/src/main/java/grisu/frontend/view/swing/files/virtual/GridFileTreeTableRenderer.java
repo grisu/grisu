@@ -14,7 +14,6 @@ import org.apache.commons.lang.StringUtils;
 import org.netbeans.swing.outline.RenderDataProvider;
 
 import furbelow.SpinningDial;
-import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.frontend.view.swing.files.virtual.utils.VirtualFileSystemBrowserTreeRenderer;
 import grisu.model.FileManager;
@@ -26,25 +25,25 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 
 	private static SpinningDial LOADING_ICON = new SpinningDial(16, 16);
 	private static URL remoteImgUrl = GridFileTreeTableRenderer.class
-	.getResource("/icons/remote.png");
+			.getResource("/icons/remote.png");
 	private static URL groupImgURL = GridFileTreeTableRenderer.class
-	.getResource("/icons/group.png");
+			.getResource("/icons/group.png");
 	private static URL jobsImgURL = GridFileTreeTableRenderer.class
-	.getResource("/icons/jobs.png");
+			.getResource("/icons/jobs.png");
 	private static URL folderImgURL = GridFileTreeTableRenderer.class
-	.getResource("/icons/folder.png");
+			.getResource("/icons/folder.png");
 	private static URL folderVirtualImgURL = GridFileTreeTableRenderer.class
-	.getResource("/icons/folder_virtual.png");
+			.getResource("/icons/folder_virtual.png");
 	private static URL fileImgURL = GridFileTreeTableRenderer.class
-	.getResource("/icons/file.png");
+			.getResource("/icons/file.png");
 	private static URL userImgURL = GridFileTreeTableRenderer.class
-	.getResource("/icons/user.png");
+			.getResource("/icons/user.png");
 	private static URL serverImgURL = GridFileTreeTableRenderer.class
-	.getResource("/icons/server.png");
+			.getResource("/icons/server.png");
 	private static URL sitesImgURL = GridFileTreeTableRenderer.class
-	.getResource("/icons/sites.png");
+			.getResource("/icons/sites.png");
 	private static URL siteImgURL = GridFileTreeTableRenderer.class
-	.getResource("/icons/site.png");
+			.getResource("/icons/site.png");
 
 	private static Icon remoteIcon = new ImageIcon(remoteImgUrl);
 	private static Icon groupIcon = new ImageIcon(groupImgURL);
@@ -58,12 +57,11 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 	private static Icon sitesIcon = new ImageIcon(sitesImgURL);
 
 	private static Icon errorIcon = new ImageIcon(
-			GridFileTreeTableRenderer.class
-			.getResource("/error.gif"));
+			GridFileTreeTableRenderer.class.getResource("/error.gif"));
 
 	private static File findFile() {
 		for (final File file : new File(System.getProperty("user.home"))
-		.listFiles()) {
+				.listFiles()) {
 			if (file.isFile()) {
 				return file;
 			}
@@ -80,7 +78,7 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 	public GridFileTreeTableRenderer(ServiceInterface si) {
 		this.si = si;
 		this.uem = GrisuRegistryManager.getDefault(si)
-		.getUserEnvironmentManager();
+				.getUserEnvironmentManager();
 	}
 
 	public Color getBackground(Object arg0) {
@@ -89,13 +87,14 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 
 	public String getDisplayName(Object arg0) {
 
-		Object userObject = ((DefaultMutableTreeNode) arg0).getUserObject();
+		final Object userObject = ((DefaultMutableTreeNode) arg0)
+				.getUserObject();
 
 		if (userObject instanceof String) {
 			return (String) userObject;
 		} else if (userObject instanceof GridFile) {
 
-			GridFile f = (GridFile) userObject;
+			final GridFile f = (GridFile) userObject;
 			if (f.isInaccessable()) {
 				if (StringUtils.containsIgnoreCase(f.getComment(), "timeout")) {
 					return ("Timeout error : " + f.getUrl());
@@ -111,9 +110,10 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 	}
 
 	public Color getForeground(Object arg0) {
-		Object userObject = ((DefaultMutableTreeNode) arg0).getUserObject();
+		final Object userObject = ((DefaultMutableTreeNode) arg0)
+				.getUserObject();
 		if (userObject instanceof GridFile) {
-			GridFile f = (GridFile) userObject;
+			final GridFile f = (GridFile) userObject;
 			if (f.isInaccessable()) {
 				return Color.red;
 			}
@@ -124,17 +124,18 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 
 	public Icon getIcon(Object arg0) {
 
-		Object userObject = ((DefaultMutableTreeNode) arg0).getUserObject();
+		final Object userObject = ((DefaultMutableTreeNode) arg0)
+				.getUserObject();
 
 		if (userObject instanceof String) {
-			String string = (String) userObject;
+			final String string = (String) userObject;
 			if (VirtualFileSystemBrowserTreeRenderer.LOADING_STRING
 					.equals(string)) {
 				return LOADING_ICON;
 			}
 		} else if (userObject instanceof GridFile) {
 
-			GridFile f = (GridFile) userObject;
+			final GridFile f = (GridFile) userObject;
 			if (f.isInaccessable()) {
 				return errorIcon;
 			} else {
@@ -153,11 +154,12 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 
 	public String getTooltipText(Object arg0) {
 
-		Object userObject = ((DefaultMutableTreeNode) arg0).getUserObject();
+		final Object userObject = ((DefaultMutableTreeNode) arg0)
+				.getUserObject();
 
 		if (userObject instanceof GridFile) {
 
-			GridFile file = (GridFile) userObject;
+			final GridFile file = (GridFile) userObject;
 
 			String siteString = null;
 
@@ -170,7 +172,7 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 				break;
 			default:
 				siteString = "Sites: "
-					+ StringUtils.join(file.getSites(), ", ");
+						+ StringUtils.join(file.getSites(), ", ");
 				break;
 
 			}
@@ -183,12 +185,12 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 				break;
 			case 1:
 				fqanString = "Group: "
-					+ uem.getUniqueGroupname(file.getFqans().iterator()
-							.next());
+						+ uem.getUniqueGroupname(file.getFqans().iterator()
+								.next());
 				break;
 			default:
-				Set<String> tmp = new TreeSet<String>();
-				for (String group : file.getFqans()) {
+				final Set<String> tmp = new TreeSet<String>();
+				for (final String group : file.getFqans()) {
 					tmp.add(group);
 				}
 				fqanString = "Groups: " + StringUtils.join(tmp, ", ");
@@ -200,7 +202,7 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 				virt = " / virtual";
 			}
 
-			String ttt = siteString + " / " + fqanString + virt;
+			final String ttt = siteString + " / " + fqanString + virt;
 			return ttt;
 		} else {
 			return null;
@@ -213,23 +215,20 @@ public class GridFileTreeTableRenderer implements RenderDataProvider {
 			return fileIcon;
 		}
 
-		String path = FileManager.removeTrailingSlash(f.getPath());
+		final String path = FileManager.removeTrailingSlash(f.getPath());
 
-		if ( StringUtils.isBlank(path) ) {
+		if (StringUtils.isBlank(path)) {
 			return folderVirtualIcon;
 		}
 
-//		X.p("Path: " + path);
+		// X.p("Path: " + path);
 
-		if (path.equals(
-				ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://")) {
+		if (path.equals(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://")) {
 			return remoteIcon;
-		} else if (path.startsWith(
-				ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
+		} else if (path.startsWith(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
 				+ "://groups")) {
 			return groupIcon;
-		} else if (path.equals(
-				ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
+		} else if (path.equals(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
 				+ "://jobs")) {
 			return jobsIcon;
 		} else if (path.equals(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME

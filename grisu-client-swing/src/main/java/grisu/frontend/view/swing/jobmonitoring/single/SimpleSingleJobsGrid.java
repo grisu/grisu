@@ -23,9 +23,10 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 
-import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
@@ -35,8 +36,8 @@ import ca.odell.glazedlists.swing.EventTableModel;
 
 public class SimpleSingleJobsGrid extends JPanel {
 
-	static final Logger myLogger = Logger.getLogger(SimpleSingleJobsGrid.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(SimpleSingleJobsGrid.class.getName());
 
 	private static void addPopup(Component component, final JPopupMenu popup) {
 		component.addMouseListener(new MouseAdapter() {
@@ -87,7 +88,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 		this.jobList = jobList;
 
 		final ObservableElementList.Connector<JobObject> joConnector = GlazedLists
-		.beanConnector(JobObject.class);
+				.beanConnector(JobObject.class);
 		observedJobs = new ObservableElementList<JobObject>(jobList,
 				joConnector);
 
@@ -128,7 +129,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 			Vector<SingleJobSelectionListener> targets;
 			synchronized (this) {
 				targets = (Vector<SingleJobSelectionListener>) listeners
-				.clone();
+						.clone();
 			}
 
 			// walk through the listener list and
@@ -137,7 +138,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 				try {
 					bjsl.jobSelected(j);
 				} catch (final Exception e1) {
-					myLogger.error(e1);
+					myLogger.error(e1.getLocalizedMessage(), e1);
 				}
 			}
 			lockUI(false);
@@ -316,7 +317,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 	protected void killSelectedJobs(final boolean clean) {
 
 		final StringBuffer message = new StringBuffer(
-		"Do you really want to kill ");
+				"Do you really want to kill ");
 		if (clean) {
 			message.append("and clean ");
 		}
@@ -338,7 +339,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 				// getTable().getSelectionModel().clearSelection();
 				try {
 					job.kill(clean);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 
 				}
 			}

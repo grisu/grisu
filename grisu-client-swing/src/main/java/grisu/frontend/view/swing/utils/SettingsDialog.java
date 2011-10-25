@@ -17,7 +17,6 @@ import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
-
 public class SettingsDialog extends JDialog {
 
 	/**

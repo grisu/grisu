@@ -33,7 +33,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jidesoft.swing.FolderChooser;
 
@@ -186,7 +187,7 @@ public class DefaultGrisuFileContextMenu extends JPopupMenu implements
 
 	private final List<String> _recentList = new ArrayList<String>();
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(DefaultGrisuFileContextMenu.class.getName());
 	private JMenuItem deleteItem;
 

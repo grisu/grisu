@@ -13,12 +13,13 @@ import java.nio.channels.FileChannel;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class LocalTemplatesHelper {
 
-	static final Logger myLogger = Logger.getLogger(LocalTemplatesHelper.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(LocalTemplatesHelper.class.getName());
 
 	private static boolean globusFolderCopied = false;
 	private static boolean templatesCopied = false;
@@ -54,7 +55,7 @@ public final class LocalTemplatesHelper {
 							Environment.getVarGrisuDirectory());
 				}
 			} catch (final Exception e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 			globusFolderCopied = true;
 		}
@@ -123,7 +124,7 @@ public final class LocalTemplatesHelper {
 						}
 					}
 				} catch (final Exception e) {
-					myLogger.error(e);
+					myLogger.error(e.getLocalizedMessage(), e);
 				}
 			} else {
 				myLogger.debug("Templates folder already contains files. Not copying any into it...");
@@ -221,7 +222,7 @@ public final class LocalTemplatesHelper {
 		} catch (final IOException e) {
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
 	}

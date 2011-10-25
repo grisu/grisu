@@ -28,11 +28,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PasteAction extends AbstractAction {
 
-	static final Logger myLogger = Logger.getLogger(CopyAction.class.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(CopyAction.class
+			.getName());
 
 	private final GridFileListPanel fileList;
 	private final FileManager fm;
@@ -50,9 +52,9 @@ public class PasteAction extends AbstractAction {
 
 	public void actionPerformed(ActionEvent e) {
 
-		Clipboard clipboard = FileManager.FILE_TRANSFER_CLIPBOARD;
+		final Clipboard clipboard = FileManager.FILE_TRANSFER_CLIPBOARD;
 
-		Transferable t = clipboard.getContents(null);
+		final Transferable t = clipboard.getContents(null);
 
 		if (t == null) {
 			X.p("Clipboard empty");
@@ -70,11 +72,11 @@ public class PasteAction extends AbstractAction {
 						.getTransferData(DataFlavor.stringFlavor);
 
 			}
-		} catch (UnsupportedFlavorException ufe) {
-			myLogger.error(ufe);
+		} catch (final UnsupportedFlavorException ufe) {
+			myLogger.error(ufe.getLocalizedMessage(), ufe);
 			return;
-		} catch (IOException ioe) {
-			myLogger.error(ioe);
+		} catch (final IOException ioe) {
+			myLogger.error(ioe.getLocalizedMessage(), ioe);
 			return;
 		}
 
@@ -98,11 +100,12 @@ public class PasteAction extends AbstractAction {
 			return;
 		}
 
-		GridFile target = temp.get(0);
+		final GridFile target = temp.get(0);
 
 		String targetUrl = target.getUrl();
 		if (target.getUrls().size() > 1) {
-			DropVirtualGridFileDialog d = new DropVirtualGridFileDialog("Copy");
+			final DropVirtualGridFileDialog d = new DropVirtualGridFileDialog(
+					"Copy");
 			d.setTargetGridFile(target);
 			d.setVisible(true);
 
@@ -115,8 +118,8 @@ public class PasteAction extends AbstractAction {
 
 		}
 
-		String[] files = filesString.split(" ");
-		Set<String> sourceUrls = new TreeSet<String>(Arrays.asList(files));
+		final String[] files = filesString.split(" ");
+		final Set<String> sourceUrls = new TreeSet<String>(Arrays.asList(files));
 
 		final FileTransaction ft = new FileTransaction(fm, sourceUrls,
 				targetUrl);

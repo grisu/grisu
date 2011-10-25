@@ -13,9 +13,10 @@ import java.net.InetAddress;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.derby.drda.NetworkServerControl;
-import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class HibernateSessionFactory {
 
@@ -25,7 +26,7 @@ public final class HibernateSessionFactory {
 	public static final String DERBY_DBTYPE = "derby";
 	public static String usedDatabase = "unknown";
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(HibernateSessionFactory.class.getName());
 
 	private static boolean startedDerbyNetworkServer = false;
@@ -86,7 +87,7 @@ public final class HibernateSessionFactory {
 					myLogger.debug("Found grisu-hibernate.cfg.xml file in .grisu directory. Using this to configure db connection.");
 					// use the user-provided config file
 					configuration = new AnnotationConfiguration()
-					.configure(grisuHibernateConfigFile);
+							.configure(grisuHibernateConfigFile);
 					if (StringUtils.isBlank(configuration
 							.getProperty("hibernate.connection.url"))) {
 						// setting default path to hsqldb if necessary
@@ -111,7 +112,7 @@ public final class HibernateSessionFactory {
 					myLogger.debug("Found grisu-hibernate.cfg.xml file in .grisu directory. Using this to configure db connection.");
 					// use the user-provided config file
 					configuration = new AnnotationConfiguration()
-					.configure(grisuHibernateConfigFile);
+							.configure(grisuHibernateConfigFile);
 				} else if (!ServerPropertiesManager.useDefaultDatabase()) {
 					// check whether something is specified in the
 					// grisu-backend.config file
@@ -120,7 +121,7 @@ public final class HibernateSessionFactory {
 					if (MYSQL_DBTYPE.equals(dbType)) {
 						usedDatabase = MYSQL_DBTYPE;
 						configuration = new AnnotationConfiguration()
-						.configure("/grisu-hibernate-default-mysql.cfg.xml");
+								.configure("/grisu-hibernate-default-mysql.cfg.xml");
 
 						final String url = ServerPropertiesManager
 								.getDatabaseConnectionUrl();
@@ -152,7 +153,7 @@ public final class HibernateSessionFactory {
 					} else if (HSQLDB_DBTYPE.equals(dbType)) {
 						usedDatabase = HSQLDB_DBTYPE;
 						configuration = new AnnotationConfiguration()
-						.configure("/grisu-hibernate-default-hsqldb.cfg.xml");
+								.configure("/grisu-hibernate-default-hsqldb.cfg.xml");
 
 						String url = ServerPropertiesManager
 								.getDatabaseConnectionUrl();
@@ -164,7 +165,7 @@ public final class HibernateSessionFactory {
 						if ((url == null) || (url.length() == 0)) {
 							url = "jdbc:hsqldb:file:"
 									+ Environment.getVarGrisuDirectory()
-									.getPath() + File.separator
+											.getPath() + File.separator
 									+ "grisulocaldb";
 						}
 						if ((username == null) || (username.length() == 0)) {
@@ -193,7 +194,7 @@ public final class HibernateSessionFactory {
 						tryToStartDerbyServer();
 
 						configuration = new AnnotationConfiguration()
-						.configure("/grisu-hibernate-default-derby.cfg.xml");
+								.configure("/grisu-hibernate-default-derby.cfg.xml");
 
 						String url = ServerPropertiesManager
 								.getDatabaseConnectionUrl();
@@ -237,7 +238,7 @@ public final class HibernateSessionFactory {
 					tryToStartDerbyServer();
 
 					configuration = new AnnotationConfiguration()
-					.configure("/grisu-hibernate-default-derby.cfg.xml");
+							.configure("/grisu-hibernate-default-derby.cfg.xml");
 					// String url = "jdbc:derby:"
 					// + Environment.getGrisuDirectory().getPath()
 					// + File.separator + "grisulocaldb_derby;create=true";
@@ -259,7 +260,7 @@ public final class HibernateSessionFactory {
 
 			sessionFactory = configuration.buildSessionFactory();
 		} catch (final Throwable e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			// System.err.println("%%%% Error Creating SessionFactory %%%%");
 			// e.printStackTrace();
 			throw new RuntimeException(e);
@@ -287,7 +288,7 @@ public final class HibernateSessionFactory {
 				sessionFactory = null;
 			}
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 	}
 

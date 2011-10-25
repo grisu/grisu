@@ -26,7 +26,7 @@ public final class FqanHelpers {
 	 * @return the full fqan or null if no fqan could be found
 	 */
 	public static String getFullFqan(String[] allFqans, String groupname) {
-		for (String fqan : allFqans) {
+		for (final String fqan : allFqans) {
 			if (fqan.endsWith(groupname.replace(".", "/"))) {
 				return fqan;
 			}
@@ -117,7 +117,7 @@ public final class FqanHelpers {
 	 */
 	public static String getUniqueGroupname(String[] allFqans, String fqan) {
 
-		String[] tokens = fqan.split("/");
+		final String[] tokens = fqan.split("/");
 
 		boolean unique = true;
 		String token = "";
@@ -131,7 +131,7 @@ public final class FqanHelpers {
 				token = tokens[i] + "." + token;
 			}
 
-			for (String f : allFqans) {
+			for (final String f : allFqans) {
 				if (f.equals(fqan)) {
 					continue;
 				}
@@ -153,7 +153,7 @@ public final class FqanHelpers {
 
 	public static void main(String[] args) {
 
-		String[] VOS = new String[] { "/ARCS", "/ARCS/BeSTGRID",
+		final String[] VOS = new String[] { "/ARCS", "/ARCS/BeSTGRID",
 				"/ARCS/BeSTGRID/Project", "/ARCS/BeSTGRID/Bio",
 				"/ARCS/BeSTGRID/Bio/Project", "/ARCS/BeSTGRID/Bio/Project2",
 				"/ARCS/BeSTGRID/Drugs", "/ARCS/BeSTGRID/Drugs/Project",

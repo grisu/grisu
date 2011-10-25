@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<url>http://projects.arcs.org.au/trac/grisu/wiki/GrisuCommons</url>
 	<parent>
 		<artifactId>grisu</artifactId>
@@ -25,6 +26,19 @@
 
 
 	<dependencies>
+
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1.1</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>1.6.3</version>
+		</dependency>
 
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -119,7 +133,7 @@
 		<dependency>
 			<groupId>grisu</groupId>
 			<artifactId>grid-jcommons</artifactId>
-			<version>1.4</version>
+			<version>1.5-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -139,7 +153,7 @@
 			<version>1.1.1</version>
 			<type>jar</type>
 			<scope>compile</scope>
-		</dependency> 
+		</dependency>
 
 		<dependency>
 			<groupId>commons-beanutils</groupId>
@@ -148,12 +162,12 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
-		
-		
+
+
 		<dependency>
-    		<groupId>com.google.guava</groupId>
-    		<artifactId>guava</artifactId>
-    		<version>r09</version>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>r09</version>
 		</dependency>
 
 	</dependencies>
@@ -211,36 +225,36 @@
 				</executions>
 			</plugin>
 
-<!--			<plugin>-->
-<!--				<groupId>org.apache.maven.plugins</groupId>-->
-<!--				<artifactId>maven-jarsigner-plugin</artifactId>-->
-<!--				<version>1.2</version>-->
-<!--				<executions>-->
-<!--					<execution>-->
-<!--						<id>sign</id>-->
-<!--						<goals>-->
-<!--							<goal>sign</goal>-->
-<!--						</goals>-->
-<!--					</execution>-->
-<!--				</executions>-->
-<!--				<configuration>-->
-<!--					<alias>grisu</alias>-->
-<!--					<storepass>FxAKs3p6</storepass>-->
-<!--					<keypass>FxAKs3p6</keypass>-->
-<!--				</configuration>-->
-<!--			</plugin>-->
+			<!-- <plugin> -->
+			<!-- <groupId>org.apache.maven.plugins</groupId> -->
+			<!-- <artifactId>maven-jarsigner-plugin</artifactId> -->
+			<!-- <version>1.2</version> -->
+			<!-- <executions> -->
+			<!-- <execution> -->
+			<!-- <id>sign</id> -->
+			<!-- <goals> -->
+			<!-- <goal>sign</goal> -->
+			<!-- </goals> -->
+			<!-- </execution> -->
+			<!-- </executions> -->
+			<!-- <configuration> -->
+			<!-- <alias>grisu</alias> -->
+			<!-- <storepass>FxAKs3p6</storepass> -->
+			<!-- <keypass>FxAKs3p6</keypass> -->
+			<!-- </configuration> -->
+			<!-- </plugin> -->
 
 		</plugins>
 	</build>
-	
+
 	<profiles>
 		<profile>
 			<id>sign</id>
-<!--			<activation>-->
-<!--				<property>-->
-<!--					<name>BUILD_NUMBER</name>-->
-<!--				</property>-->
-<!--			</activation>-->
+			<!-- <activation> -->
+			<!-- <property> -->
+			<!-- <name>BUILD_NUMBER</name> -->
+			<!-- </property> -->
+			<!-- </activation> -->
 
 			<build>
 				<plugins>
@@ -266,6 +280,6 @@
 			</build>
 
 		</profile>
-	</profiles>	
-	
+	</profiles>
+
 </project>

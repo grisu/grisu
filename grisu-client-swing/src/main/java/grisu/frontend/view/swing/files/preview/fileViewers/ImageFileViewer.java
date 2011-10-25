@@ -13,13 +13,14 @@ import java.io.IOException;
 
 import javax.swing.JPanel;
 
-import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXImageView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ImageFileViewer extends JPanel implements FileViewer {
 
-	static final Logger myLogger = Logger.getLogger(ImageFileViewer.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(ImageFileViewer.class.getName());
 
 	private JXImageView imagePanel;
 
@@ -79,7 +80,7 @@ public class ImageFileViewer extends JPanel implements FileViewer {
 			try {
 				getImagePanel().setImage(imageFile);
 			} catch (final IOException e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 		}
 

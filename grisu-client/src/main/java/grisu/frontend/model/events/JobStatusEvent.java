@@ -3,7 +3,6 @@ package grisu.frontend.model.events;
 import grisu.control.JobConstants;
 import grisu.frontend.model.job.JobObject;
 
-
 public class JobStatusEvent {
 
 	private final int oldStatus;

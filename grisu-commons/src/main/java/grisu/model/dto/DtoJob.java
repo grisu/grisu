@@ -15,8 +15,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This one holds information about a job that was created (and maybe already
@@ -32,7 +32,8 @@ import org.apache.log4j.Logger;
 @XmlRootElement(name = "job")
 public class DtoJob implements Comparable<DtoJob> {
 
-	static final Logger myLogger = Logger.getLogger(DtoJob.class.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(DtoJob.class
+			.getName());
 
 	public static DtoJob createJob(int status,
 			Map<String, String> jobProperties, Set<String> inputFiles,
@@ -72,7 +73,7 @@ public class DtoJob implements Comparable<DtoJob> {
 			return null;
 		}
 
-		for (DtoProperty p : job.getProperties()) {
+		for (final DtoProperty p : job.getProperties()) {
 			if (key.equals(p.getKey())) {
 				return p.getValue();
 			}
@@ -138,7 +139,7 @@ public class DtoJob implements Comparable<DtoJob> {
 				return thisJobname.compareTo(otherJobname);
 			}
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			return 0;
 		}
 	}
@@ -171,9 +172,9 @@ public class DtoJob implements Comparable<DtoJob> {
 
 	@Override
 	public int hashCode() {
-		String jobname = jobname();
+		final String jobname = jobname();
 		if (StringUtils.isBlank(jobname)) {
-			return 253*getProperties().hashCode();
+			return 253 * getProperties().hashCode();
 		}
 		return 253 * jobname().hashCode();
 	}

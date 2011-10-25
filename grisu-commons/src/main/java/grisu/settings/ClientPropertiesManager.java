@@ -8,9 +8,9 @@ import java.io.File;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages the $HOME/.grisu/grisu.config file.
@@ -21,8 +21,8 @@ import org.bushe.swing.event.EventBus;
 public final class ClientPropertiesManager {
 
 	public static final String[] DEFAULT_HELPDESK_CLASSES = new String[] {
-		"org.vpac.helpDesk.model.anonymousRT.AnonymousRTHelpDesk",
-	"org.vpac.helpDesk.model.trac.TracHelpDesk" };
+			"org.vpac.helpDesk.model.anonymousRT.AnonymousRTHelpDesk",
+			"org.vpac.helpDesk.model.trac.TracHelpDesk" };
 	public static final String HELPDESK_CONFIG = "support.properties";
 
 	public static final int CONCURRENT_THREADS_DEFAULT = 5;
@@ -55,13 +55,12 @@ public final class ClientPropertiesManager {
 
 	private static PropertiesConfiguration config = null;
 
-	static final Logger myLogger = Logger
-			.getLogger(ClientPropertiesManager.class.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(ClientPropertiesManager.class);
 	private static final int DEFAULT_ACTION_STATUS_RECHECK_INTERVAL_IN_SECONDS = 5;
 	private static final String DEFAULT_SHIBBOLETH_URL = "https://slcs1.arcs.org.au/SLCS/login";
 
 	public static final String AUTO_LOGIN_KEY = "autoLogin";
-
 
 	/**
 	 * Call this if the user wants a new (server-side) template to his personal
@@ -87,7 +86,7 @@ public final class ClientPropertiesManager {
 				config.save();
 			} catch (final ConfigurationException e) {
 				ClientPropertiesManager.myLogger
-				.debug("Could not write config file: " + e.getMessage());
+						.debug("Could not write config file: " + e.getMessage());
 			}
 		}
 	}
@@ -115,7 +114,7 @@ public final class ClientPropertiesManager {
 				config.save();
 			} catch (final ConfigurationException e) {
 				ClientPropertiesManager.myLogger
-				.debug("Could not write config file: " + e.getMessage());
+						.debug("Could not write config file: " + e.getMessage());
 			}
 		}
 	}
@@ -625,7 +624,7 @@ public final class ClientPropertiesManager {
 				config.save();
 			} catch (final ConfigurationException e) {
 				ClientPropertiesManager.myLogger
-				.debug("Could not write config file: " + e.getMessage());
+						.debug("Could not write config file: " + e.getMessage());
 			}
 			return new String[] { DEFAULT_SERVICE_INTERFACE };
 		}
@@ -670,7 +669,7 @@ public final class ClientPropertiesManager {
 			config.save();
 		} catch (final ConfigurationException e) {
 			ClientPropertiesManager.myLogger
-			.debug("Could not write config file: " + e.getMessage());
+					.debug("Could not write config file: " + e.getMessage());
 		}
 	}
 
@@ -806,7 +805,7 @@ public final class ClientPropertiesManager {
 	public static void saveShibbolethUsername(final String username) {
 		try {
 			getClientConfiguration()
-			.setProperty("shibbolethUsername", username);
+					.setProperty("shibbolethUsername", username);
 			getClientConfiguration().save();
 		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());

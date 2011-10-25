@@ -18,8 +18,9 @@
 
 package grisu.backend.hibernate;
 
-import org.apache.log4j.Logger;
 import org.hibernate.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Data access object (DAO) for domain model.
@@ -28,7 +29,8 @@ import org.hibernate.Session;
  */
 public class BaseHibernateDAO implements IBaseHibernateDAO {
 
-	static Logger myLogger = Logger.getLogger(BaseHibernateDAO.class.getName());
+	static Logger myLogger = LoggerFactory.getLogger(BaseHibernateDAO.class
+			.getName());
 
 	public final Session getCurrentSession() {
 		try {
@@ -39,7 +41,7 @@ public class BaseHibernateDAO implements IBaseHibernateDAO {
 			return HibernateSessionFactory.getSessionFactory()
 					.getCurrentSession();
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			return null;
 		}
 	}

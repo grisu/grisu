@@ -22,18 +22,20 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @XmlRootElement(name = "gridfile")
 public class GridFile implements Comparable<GridFile>, Transferable {
 
-	static final Logger myLogger = Logger.getLogger(GridFile.class.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(GridFile.class
+			.getName());
 
 	public static final DataFlavor GRIDFILE_FLAVOR = new DataFlavor(
 			GridFile.class, "Grid file");
 
 	public static final DataFlavor[] DATA_FLAVORS = new DataFlavor[] {
-		GRIDFILE_FLAVOR, DataFlavor.stringFlavor };
+			GRIDFILE_FLAVOR, DataFlavor.stringFlavor };
 
 	public static final String ROOT = "FileRoot";
 
@@ -67,8 +69,8 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 			return null;
 		}
 
-		List<String> result = new LinkedList<String>();
-		for (GridFile f : file.getChildren()) {
+		final List<String> result = new LinkedList<String>();
+		for (final GridFile f : file.getChildren()) {
 			result.add(f.getName());
 		}
 		return result;
@@ -79,17 +81,17 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 
 		if (!file_or_folder.isDirectory()) {
 			final GridFile file = new GridFile(file_or_folder.toURI()
-					.toString(),
-					file_or_folder.length(), file_or_folder.lastModified());
+					.toString(), file_or_folder.length(),
+					file_or_folder.lastModified());
 			return file;
 		}
 
-		String url = file_or_folder.toURI().toString();
+		final String url = file_or_folder.toURI().toString();
 		final GridFile result = new GridFile(url, file_or_folder.lastModified());
 
 		if (includeParentInFileListing) {
-			final GridFile childFolder = new GridFile(
-					file_or_folder.toURI().toString(), file_or_folder.lastModified());
+			final GridFile childFolder = new GridFile(file_or_folder.toURI()
+					.toString(), file_or_folder.lastModified());
 			result.addChild(childFolder);
 		}
 
@@ -310,7 +312,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	}
 
 	public void addUrl(String url, Integer priority) {
-		DtoProperty temp = new DtoProperty(url, priority.toString());
+		final DtoProperty temp = new DtoProperty(url, priority.toString());
 		urls.add(temp);
 		if (urls.size() > 1) {
 			this.isVirtual = true;
@@ -321,8 +323,9 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 
 		int result = Integer.MIN_VALUE;
 
-		Integer thisPriority = Integer.parseInt(urls.get(0).getValue());
-		Integer otherPriority = Integer.parseInt(o.getUrls().get(0).getValue());
+		final Integer thisPriority = Integer.parseInt(urls.get(0).getValue());
+		final Integer otherPriority = Integer.parseInt(o.getUrls().get(0)
+				.getValue());
 
 		if (otherPriority.equals(thisPriority)) {
 			result = getName().compareToIgnoreCase(o.getName());
@@ -341,7 +344,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	@Override
 	public boolean equals(Object other) {
 		if (other instanceof GridFile) {
-			boolean eq = getUrl().equals(((GridFile) other).getUrl());
+			final boolean eq = getUrl().equals(((GridFile) other).getUrl());
 			return eq;
 		}
 		return false;
@@ -352,7 +355,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 			return null;
 		}
 
-		for (GridFile f : getChildren()) {
+		for (final GridFile f : getChildren()) {
 			if (f.getName().equals(filename)) {
 				return f;
 			}

@@ -8,8 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-
-
 public class BatchJobStatus {
 
 	private final Set<Job> allJobs;

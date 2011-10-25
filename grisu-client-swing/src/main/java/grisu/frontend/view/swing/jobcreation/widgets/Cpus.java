@@ -16,7 +16,7 @@ import com.jgoodies.forms.layout.RowSpec;
 public class Cpus extends AbstractWidget {
 
 	private static final String[] DEFAULT_CPUS = new String[] { "1", "2", "3",
-		"4", "5", "6", "7", "8", "12", "16", "24", "32", "64" };
+			"4", "5", "6", "7", "8", "12", "16", "24", "32", "64" };
 	private final DefaultComboBoxModel cpuModel = new DefaultComboBoxModel(
 			DEFAULT_CPUS);
 
@@ -55,7 +55,7 @@ public class Cpus extends AbstractWidget {
 			final Integer result = Integer.parseInt(integerString);
 			return result;
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			return -1;
 		}
 	}

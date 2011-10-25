@@ -10,8 +10,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
-
 
 public class DropVirtualGridFileDialog extends JDialog {
 
@@ -20,11 +20,11 @@ public class DropVirtualGridFileDialog extends JDialog {
 	 */
 	public static void main(String[] args) {
 		try {
-			DropVirtualGridFileDialog dialog = new DropVirtualGridFileDialog(
+			final DropVirtualGridFileDialog dialog = new DropVirtualGridFileDialog(
 					"TEST");
-			dialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+			dialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 			dialog.setVisible(true);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -38,16 +38,16 @@ public class DropVirtualGridFileDialog extends JDialog {
 	 */
 	public DropVirtualGridFileDialog(String buttonText) {
 		setModal(true);
-		setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		{
-			JPanel buttonPane = new JPanel();
+			final JPanel buttonPane = new JPanel();
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
-				JButton cancelButton = new JButton("Cancel");
+				final JButton cancelButton = new JButton("Cancel");
 				cancelButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						selUrl = null;
@@ -58,7 +58,7 @@ public class DropVirtualGridFileDialog extends JDialog {
 				buttonPane.add(cancelButton);
 			}
 			{
-				JButton okButton = new JButton(buttonText);
+				final JButton okButton = new JButton(buttonText);
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						selUrl = contentPanel.getSelectedTarget();

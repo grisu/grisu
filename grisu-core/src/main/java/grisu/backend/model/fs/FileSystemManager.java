@@ -18,12 +18,13 @@ import javax.activation.DataHandler;
 
 import org.apache.axis.utils.StringUtils;
 import org.apache.commons.lang.NotImplementedException;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileSystemManager {
 
-	private static Logger myLogger = Logger.getLogger(FileSystemManager.class
-			.getName());
+	private static Logger myLogger = LoggerFactory
+			.getLogger(FileSystemManager.class.getName());
 
 	private final Map<String, FileTransferPlugin> filetransferPlugins = new HashMap<String, FileTransferPlugin>();
 	private final Map<String, FileSystemInfoPlugin> fileSystemInfoPlugins = new HashMap<String, FileSystemInfoPlugin>();
@@ -71,10 +72,10 @@ public class FileSystemManager {
 	public RemoteFileTransferObject copy(String source, String target,
 			boolean overwrite) throws RemoteFileSystemException {
 
-		String protSource = StringUtils.split(source, ':')[0];
-		String protTarget = StringUtils.split(target, ':')[0];
+		final String protSource = StringUtils.split(source, ':')[0];
+		final String protTarget = StringUtils.split(target, ':')[0];
 
-		FileTransferPlugin pl = getFileTransferPlugin(protSource + "-"
+		final FileTransferPlugin pl = getFileTransferPlugin(protSource + "-"
 				+ protTarget);
 
 		return pl.copySingleFile(source, target, overwrite);
@@ -105,9 +106,9 @@ public class FileSystemManager {
 
 	private FileSystemInfoPlugin getFileSystemInfoPlugin(String url) {
 
-		String protocol = StringUtils.split(url, ':')[0];
+		final String protocol = StringUtils.split(url, ':')[0];
 
-		FileSystemInfoPlugin p = fileSystemInfoPlugins.get(protocol);
+		final FileSystemInfoPlugin p = fileSystemInfoPlugins.get(protocol);
 
 		if (p == null) {
 			throw new RuntimeException("Protocol " + protocol
@@ -120,7 +121,7 @@ public class FileSystemManager {
 
 	private FileTransferPlugin getFileTransferPlugin(String key) {
 
-		FileTransferPlugin pl = filetransferPlugins.get(key);
+		final FileTransferPlugin pl = filetransferPlugins.get(key);
 
 		if (pl == null) {
 			throw new NotImplementedException(
@@ -138,9 +139,8 @@ public class FileSystemManager {
 		myLogger.debug(user.getDn() + ": Listing folder (" + recursiveLevels
 				+ " levels): " + pathOrUrl);
 
-		GridFile result = getFileSystemInfoPlugin(pathOrUrl).getFolderListing(
-				pathOrUrl,
-				recursiveLevels);
+		final GridFile result = getFileSystemInfoPlugin(pathOrUrl)
+				.getFolderListing(pathOrUrl, recursiveLevels);
 
 		myLogger.debug(user.getDn() + ": Listed: "
 				+ GridFile.getChildrenNames(result));
@@ -190,8 +190,8 @@ public class FileSystemManager {
 			DtoActionStatus status) throws RemoteFileSystemException {
 
 		String prot = null;
-		for (String parent : parents) {
-			String protNew = FileManager.getProtocol(parent);
+		for (final String parent : parents) {
+			final String protNew = FileManager.getProtocol(parent);
 			if ((prot != null) && !prot.equals(protNew)) {
 				throw new RemoteFileSystemException(
 						"Multiple remote protocols not supported (yet).");

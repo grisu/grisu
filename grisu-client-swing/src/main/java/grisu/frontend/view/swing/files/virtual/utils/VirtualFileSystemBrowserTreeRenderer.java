@@ -26,7 +26,7 @@ import grisu.model.UserEnvironmentManager;
 import grisu.model.dto.GridFile;
 
 public class VirtualFileSystemBrowserTreeRenderer extends
-DefaultTreeCellRenderer implements TreeCellRenderer {
+		DefaultTreeCellRenderer implements TreeCellRenderer {
 
 	public static final String LOADING_STRING = "Loading...";
 
@@ -38,13 +38,13 @@ DefaultTreeCellRenderer implements TreeCellRenderer {
 	// TODO think of something better?
 	private static Icon fileIcon = fsView.getSystemIcon(findFile());
 	private static URL imgURL = VirtualFileSystemBrowserTreeRenderer.class
-	.getResource("/icons/group.png");
+			.getResource("/icons/group.png");
 
 	private static Icon groupIcon = new ImageIcon(imgURL);
 
 	private static File findFile() {
 		for (final File file : new File(System.getProperty("user.home"))
-		.listFiles()) {
+				.listFiles()) {
 			if (file.isFile()) {
 				return file;
 			}
@@ -64,7 +64,7 @@ DefaultTreeCellRenderer implements TreeCellRenderer {
 			boolean displayFullFqan) {
 		this.si = si;
 		this.uem = GrisuRegistryManager.getDefault(si)
-		.getUserEnvironmentManager();
+				.getUserEnvironmentManager();
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 	}
 
@@ -86,7 +86,7 @@ DefaultTreeCellRenderer implements TreeCellRenderer {
 
 		if (value2 instanceof String) {
 
-			String txt = (String) value2;
+			final String txt = (String) value2;
 			// this.setText((String) value2);
 			this.setText(txt);
 			if (LOADING_STRING.equals(txt)) {
@@ -120,7 +120,7 @@ DefaultTreeCellRenderer implements TreeCellRenderer {
 				break;
 			default:
 				siteString = "Sites: "
-					+ StringUtils.join(file.getSites(), ", ");
+						+ StringUtils.join(file.getSites(), ", ");
 				break;
 
 			}
@@ -133,19 +133,19 @@ DefaultTreeCellRenderer implements TreeCellRenderer {
 				break;
 			case 1:
 				fqanString = "Group: "
-					+ uem.getUniqueGroupname(file.getFqans().iterator()
-							.next());
+						+ uem.getUniqueGroupname(file.getFqans().iterator()
+								.next());
 				break;
 			default:
-				Set<String> tmp = new TreeSet<String>();
-				for (String group : file.getFqans()) {
+				final Set<String> tmp = new TreeSet<String>();
+				for (final String group : file.getFqans()) {
 					tmp.add(group);
 				}
 				fqanString = "Groups: " + StringUtils.join(tmp, ", ");
 				break;
 			}
 
-			String ttt = siteString + ", " + fqanString;
+			final String ttt = siteString + ", " + fqanString;
 
 			this.setToolTipText(ttt);
 			// tree.setToolTipText(ttt);

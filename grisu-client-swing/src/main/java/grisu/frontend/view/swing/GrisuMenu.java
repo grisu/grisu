@@ -68,7 +68,7 @@ public class GrisuMenu extends JMenuBar {
 		getToolsMenu().add(getSettingsItem());
 
 		// check whether development release - if so, use red background color
-		String clientVersion = GrisuVersion.get("this-client");
+		final String clientVersion = GrisuVersion.get("this-client");
 		if (StringUtils.containsIgnoreCase(clientVersion, "snapshot")) {
 			isDevelopmentVersion = true;
 			setOpaque(true);
@@ -163,12 +163,13 @@ public class GrisuMenu extends JMenuBar {
 
 				public void actionPerformed(ActionEvent e) {
 
-					String clientVersion = GrisuVersion.get("this-client");
+					final String clientVersion = GrisuVersion
+							.get("this-client");
 
-					String grisuclientversion = GrisuVersion
+					final String grisuclientversion = GrisuVersion
 							.get("grisu-client");
 
-					String message = "Version: " + clientVersion + "\n\n"
+					final String message = "Version: " + clientVersion + "\n\n"
 							+ "Grisu client lib version: " + grisuclientversion;
 
 					JOptionPane.showMessageDialog(parent.getFrame(), message);

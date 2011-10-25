@@ -13,7 +13,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
-
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -22,7 +21,8 @@ import com.jgoodies.forms.layout.RowSpec;
 public class ListAndPreviewFilePanel extends JPanel {
 
 	public enum STATE {
-		Preview, Files;
+		Preview,
+		Files;
 	}
 
 	private JPanel cardPanel;

@@ -8,9 +8,9 @@ import grisu.jcommons.constants.Constants;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.hibernate.Query;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class to make it easier to persist (and find {@link Job} objects to/from the
@@ -21,7 +21,7 @@ import org.hibernate.Query;
  */
 public class BatchJobDAO extends BaseHibernateDAO {
 
-	private static Logger myLogger = Logger.getLogger(BatchJobDAO.class
+	private static Logger myLogger = LoggerFactory.getLogger(BatchJobDAO.class
 			.getName());
 
 	public final void delete(final BatchJob persistentInstance) {
@@ -64,7 +64,7 @@ public class BatchJobDAO extends BaseHibernateDAO {
 	 *             there are several jobs with this dn and jobname. this is bad.
 	 */
 	public final BatchJob findJobByDN(final String dn, final String batchJobname)
-	throws NoSuchJobException {
+			throws NoSuchJobException {
 		// myLogger.debug("Loading batchJob with dn: " + dn
 		// + " and batchJobname: " + batchJobname + " from dn.");
 		final String queryString = "from grisu.backend.model.job.BatchJob as job where job.dn = ? and job.batchJobname = ?";
@@ -84,7 +84,7 @@ public class BatchJobDAO extends BaseHibernateDAO {
 			if (job == null) {
 				throw new NoSuchJobException(
 						"Could not find a multiPartJob for the dn: " + dn
-						+ " and the batchJobname: " + batchJobname);
+								+ " and the batchJobname: " + batchJobname);
 			}
 			return job;
 
@@ -133,7 +133,7 @@ public class BatchJobDAO extends BaseHibernateDAO {
 
 		// myLogger.debug("Loading multipartjob with dn: " + dn + " from db.");
 		final String queryString = "select batchJobname from grisu.backend.model.job.BatchJob as job where job.dn = ? and lower(job.jobProperties['"
-			+ Constants.APPLICATIONNAME_KEY + "']) = ?";
+				+ Constants.APPLICATIONNAME_KEY + "']) = ?";
 
 		try {
 			getCurrentSession().beginTransaction();

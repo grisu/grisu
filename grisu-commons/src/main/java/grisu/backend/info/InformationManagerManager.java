@@ -10,12 +10,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InformationManagerManager {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(InformationManagerManager.class.getName());
 
 	public static final String IM_CLASS = "type";
@@ -53,14 +53,14 @@ public class InformationManagerManager {
 
 			im = constructor.newInstance(parameters);
 			return im;
-		} catch (InvocationTargetException e) {
-			myLogger.error(e);
+		} catch (final InvocationTargetException e) {
+			myLogger.error(e.getLocalizedMessage(), e);
 			throw new RuntimeException(e);
-		} catch (RuntimeException e) {
-			myLogger.error(e);
+		} catch (final RuntimeException e) {
+			myLogger.error(e.getLocalizedMessage(), e);
 			throw e;
-		} catch (Exception e) {
-			myLogger.error(e);
+		} catch (final Exception e) {
+			myLogger.error(e.getLocalizedMessage(), e);
 			throw new RuntimeException(e);
 		}
 
@@ -104,7 +104,7 @@ public class InformationManagerManager {
 			return im;
 
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			return null;
 		}
 

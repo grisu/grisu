@@ -16,21 +16,22 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.ietf.jgss.GSSCredential;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 
 public class SlcsLoginWrapper {
 
-	static final Logger myLogger = Logger.getLogger(SlcsLoginWrapper.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(SlcsLoginWrapper.class.getName());
 
 	private static List<String> cachedIdps = null;
 
 	public static List<String> getAllIdps() throws Throwable {
 		if (cachedIdps == null) {
-			String id = UUID.randomUUID().toString();
+			final String id = UUID.randomUUID().toString();
 			final IdpObject idpObj = new DummyIdpObject();
 			final CredentialManager cm = new DummyCredentialManager();
 
@@ -44,7 +45,7 @@ public class SlcsLoginWrapper {
 
 				cachedIdps = ImmutableList.copyOf(idpObj.getIdps());
 
-			} catch (Throwable e) {
+			} catch (final Throwable e) {
 				myLogger.debug("Login: error loading list of idps (id:" + id
 						+ ")");
 				throw e;
@@ -58,7 +59,7 @@ public class SlcsLoginWrapper {
 			char[] password, String idp, LoginParams params) throws Exception {
 
 		myLogger.debug("SLCS login: starting slcs/myproxy login...");
-		String id = UUID.randomUUID().toString();
+		final String id = UUID.randomUUID().toString();
 		try {
 
 			if (params != null) {
@@ -78,7 +79,7 @@ public class SlcsLoginWrapper {
 			final CredentialManager cm = new StaticCredentialManager(username,
 					password);
 
-			String url = ClientPropertiesManager.getShibbolethUrl();
+			final String url = ClientPropertiesManager.getShibbolethUrl();
 
 			myLogger.debug("SLCS login: starting actual login... (id: " + id
 					+ ")");

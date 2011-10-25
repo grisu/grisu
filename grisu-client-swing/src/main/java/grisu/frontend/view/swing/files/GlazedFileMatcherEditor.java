@@ -1,7 +1,6 @@
 package grisu.frontend.view.swing.files;
 
 import grisu.model.files.GlazedFile;
-
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 
 public class GlazedFileMatcherEditor extends AbstractMatcherEditor<GlazedFile> {

@@ -12,7 +12,6 @@ import java.util.SortedSet;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-
 public class MultiBatchJobMonitoringGrid extends JPanel {
 
 	private final ServiceInterface si;

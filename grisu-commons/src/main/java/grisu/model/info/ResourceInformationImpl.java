@@ -14,7 +14,8 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of {@link ResourceInformation}.
@@ -24,8 +25,8 @@ import org.apache.log4j.Logger;
  */
 public class ResourceInformationImpl implements ResourceInformation {
 
-	static final Logger myLogger = Logger.getLogger(ResourceInformation.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(ResourceInformation.class.getName());
 
 	public static String getHost(final String urlOrSubmissionLocation) {
 		String hostname = null;
@@ -128,7 +129,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 		if (cachedAllApps == null) {
 			cachedAllApps = serviceInterface.getAllAvailableApplications(null)
-			.asSortedSet();
+					.asSortedSet();
 		}
 		return cachedAllApps;
 
@@ -136,12 +137,14 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 	public SortedSet<String> getAllApplicationsForFqans(Set<String> fqans) {
 
-		SortedSet<String> result = new TreeSet<String>();
-		for (String fqan : fqans) {
+		final SortedSet<String> result = new TreeSet<String>();
+		for (final String fqan : fqans) {
 
 			if (cachedAppsPerVO.get(fqan) == null) {
-				Set<String> temp = serviceInterface.getAllAvailableApplications(
-						DtoStringList.fromSingleString(fqan)).asSortedSet();
+				Set<String> temp = serviceInterface
+						.getAllAvailableApplications(
+								DtoStringList.fromSingleString(fqan))
+						.asSortedSet();
 				if (temp == null) {
 					temp = new TreeSet<String>();
 				}
@@ -173,8 +176,8 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 			if (cachedAllSubmissionLocationsPerFqan.get(fqan) == null) {
 				final String[] temp = serviceInterface
-				.getAllSubmissionLocationsForFqan(fqan)
-				.asSubmissionLocationStrings();
+						.getAllSubmissionLocationsForFqan(fqan)
+						.asSubmissionLocationStrings();
 				cachedAllSubmissionLocationsPerFqan.put(fqan, temp);
 			}
 		}
@@ -196,7 +199,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 		if (cachedAllSubmissionLocations == null) {
 			cachedAllSubmissionLocations = serviceInterface
-			.getAllSubmissionLocations().asSubmissionLocationStrings();
+					.getAllSubmissionLocations().asSubmissionLocationStrings();
 		}
 		return cachedAllSubmissionLocations;
 	}
@@ -228,8 +231,8 @@ public class ResourceInformationImpl implements ResourceInformation {
 		synchronized (executable) {
 
 			if (cachedApplicationPackagesForExecutables.get(executable) == null) {
-				String[] result = serviceInterface
-				.getApplicationPackagesForExecutable(executable);
+				final String[] result = serviceInterface
+						.getApplicationPackagesForExecutable(executable);
 				cachedApplicationPackagesForExecutables.put(executable, result);
 			}
 
@@ -276,8 +279,8 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 			if (cachedStagingFilesystemsPerSubLoc.get(subLoc) == null) {
 				final List<String> temp = serviceInterface
-				.getStagingFileSystemForSubmissionLocation(subLoc)
-				.getStringList();
+						.getStagingFileSystemForSubmissionLocation(subLoc)
+						.getStringList();
 				cachedStagingFilesystemsPerSubLoc.put(subLoc, temp);
 			}
 		}

@@ -6,7 +6,6 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
-
 public interface FileListPanel {
 
 	public void addFileListListener(FileListListener l);

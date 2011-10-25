@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Level;
 
 import jline.ConsoleReader;
 
@@ -39,9 +38,10 @@ import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.ssl.HttpSecureProtocol;
 import org.apache.commons.ssl.TrustMaterial;
-import org.apache.log4j.Logger;
 import org.globus.gsi.GlobusCredential;
 import org.ietf.jgss.GSSCredential;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
@@ -53,20 +53,20 @@ public class LoginManager {
 
 	public static boolean environmentInitialized = false;
 
-	static final Logger myLogger = Logger.getLogger(LoginManager.class
+	static final Logger myLogger = LoggerFactory.getLogger(LoginManager.class
 			.getName());
 
 	static final public ImmutableBiMap<String, String> SERVICEALIASES = new ImmutableBiMap.Builder<String, String>()
 			.put("local", "Local")
 			.put("bestgrid",
 					"https://compute.services.bestgrid.org/soap/GrisuService")
-					.put("dev",
-							"https://compute-dev.services.bestgrid.org/soap/GrisuService")
-							.put("bestgrid-test",
-									"https://compute-test.services.bestgrid.org/soap/GrisuService")
-									.put("local_ws", "http://localhost:8080/soap/GrisuService")
-									.put("local_ws_tomcat",
-											"http://localhost:8080/grisu-ws/soap/GrisuService").build();
+			.put("dev",
+					"https://compute-dev.services.bestgrid.org/soap/GrisuService")
+			.put("bestgrid-test",
+					"https://compute-test.services.bestgrid.org/soap/GrisuService")
+			.put("local_ws", "http://localhost:8080/soap/GrisuService")
+			.put("local_ws_tomcat",
+					"http://localhost:8080/grisu-ws/soap/GrisuService").build();
 
 	public static String httpProxyHost = null;
 
@@ -89,13 +89,12 @@ public class LoginManager {
 		Arrays.fill(httpProxyPassphrase, 'x');
 	}
 
-
 	public static void initEnvironment() {
 
 		if (!environmentInitialized) {
 
 			java.util.logging.LogManager.getLogManager().reset();
-			java.util.logging.Logger.getLogger("root").setLevel(Level.OFF);
+			// LoggerFactory.getLogger("root").setLevel(Level.OFF);
 
 			JythonHelpers.setJythonCachedir();
 
@@ -109,11 +108,11 @@ public class LoginManager {
 			}
 
 			java.security.Security
-			.addProvider(new DefaultGridSecurityProvider());
+					.addProvider(new DefaultGridSecurityProvider());
 
 			java.security.Security
-			.setProperty("ssl.TrustManagerFactory.algorithm",
-					"TrustAllCertificates");
+					.setProperty("ssl.TrustManagerFactory.algorithm",
+							"TrustAllCertificates");
 
 			boolean bcpresent = false;
 			try {
@@ -143,7 +142,7 @@ public class LoginManager {
 		try {
 			Init.initBouncyCastle();
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
 	}
@@ -241,7 +240,7 @@ public class LoginManager {
 	public static ServiceInterface login(GlobusCredential cred,
 			char[] password, String username, String idp,
 			LoginParams loginParams, boolean saveCredentialAsLocalProxy)
-					throws LoginException {
+			throws LoginException {
 
 		initEnvironment();
 
@@ -268,7 +267,7 @@ public class LoginManager {
 			addPluginsToClasspath();
 		} catch (final IOException e2) {
 			// TODO Auto-generated catch block
-			myLogger.warn(e2);
+			myLogger.warn(e2.getLocalizedMessage(), e2);
 			throw new RuntimeException(e2);
 		}
 
@@ -276,7 +275,7 @@ public class LoginManager {
 			CertificateFiles.copyCACerts(true);
 		} catch (final Exception e1) {
 			// e1.printStackTrace();
-			myLogger.warn(e1);
+			myLogger.warn(e1.getLocalizedMessage(), e1);
 		}
 
 		// do the cacert thingy
@@ -299,10 +298,10 @@ public class LoginManager {
 					(ProtocolSocketFactory) protocolSocketFactory, 443);
 			Protocol.registerProtocol("https", protocol);
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
-		Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
+		final Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
 		final String serviceInterfaceUrl = loginParams.getServiceInterfaceUrl();
 
 		// if ("Local".equals(serviceInterfaceUrl)
@@ -358,7 +357,7 @@ public class LoginManager {
 						// means try to load local proxy
 						si = LoginHelpers.defaultLocalProxyLogin(loginParams);
 						ClientPropertiesManager
-						.saveLastLoginType(LoginType.LOCAL_PROXY);
+								.saveLastLoginType(LoginType.LOCAL_PROXY);
 
 					} catch (final Exception e) {
 						throw new LoginException("Could not login: "
@@ -379,7 +378,7 @@ public class LoginManager {
 						si = LoginHelpers
 								.localProxyLogin(password, loginParams);
 						ClientPropertiesManager
-						.saveLastLoginType(LoginType.X509_CERTIFICATE);
+								.saveLastLoginType(LoginType.X509_CERTIFICATE);
 					} catch (final ServiceInterfaceException e) {
 						throw new LoginException("Could not login: "
 								+ e.getLocalizedMessage(), e);
@@ -391,7 +390,7 @@ public class LoginManager {
 				try {
 					si = LoginHelpers.myProxyLogin(loginParams);
 					ClientPropertiesManager
-					.saveLastLoginType(LoginType.MYPROXY);
+							.saveLastLoginType(LoginType.MYPROXY);
 					CommonGridProperties.getDefault().setLastMyProxyUsername(
 							loginParams.getMyProxyUsername());
 				} catch (final ServiceInterfaceException e) {
@@ -419,7 +418,7 @@ public class LoginManager {
 				si = LoginHelpers.gssCredentialLogin(loginParams, slcsproxy);
 				ClientPropertiesManager.saveLastLoginType(LoginType.SHIBBOLETH);
 			} catch (final Exception e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 				throw new LoginException("Could not do slcs login: "
 						+ e.getLocalizedMessage(), e);
 			}
@@ -547,15 +546,14 @@ public class LoginManager {
 
 		for (int i = 0; i < temp.size(); i++) {
 			if (temp.get(i).equals(LoginType.SHIBBOLETH_LAST_IDP)) {
-				String lastIdp = CommonGridProperties.getDefault()
+				final String lastIdp = CommonGridProperties.getDefault()
 						.getLastShibIdp();
 				message.append("[" + (i + 1) + "]\t"
 						+ temp.get(i).getPrettyName() + " (using: " + lastIdp
 						+ ")\n");
 			} else {
 				message.append("[" + (i + 1) + "]\t"
-						+ temp.get(i).getPrettyName()
-						+ "\n");
+						+ temp.get(i).getPrettyName() + "\n");
 			}
 		}
 		message.append("\n[0]\tExit\n\n");
@@ -596,18 +594,18 @@ public class LoginManager {
 		if (LocalProxy.validGridProxyExists()) {
 			CliHelpers.setIndeterminateProgress("Logging in...", true);
 			try {
-				ServiceInterface tmp = LoginManager.login(url);
+				final ServiceInterface tmp = LoginManager.login(url);
 				CliHelpers.setIndeterminateProgress("Logged in to backend: "
 						+ url, false);
 				return tmp;
-			} catch (LoginException le) {
+			} catch (final LoginException le) {
 				CliHelpers.setIndeterminateProgress(false);
 				throw le;
 			}
 		} else {
 
-			String lastIdp = CommonGridProperties.getDefault().getGridProperty(
-					CommonGridProperties.Property.SHIB_IDP);
+			final String lastIdp = CommonGridProperties.getDefault()
+					.getGridProperty(CommonGridProperties.Property.SHIB_IDP);
 
 			final ImmutableSet<LoginType> temp;
 
@@ -622,9 +620,9 @@ public class LoginManager {
 
 			}
 			try {
-				ServiceInterface tmp = loginCommandline(temp, url);
+				final ServiceInterface tmp = loginCommandline(temp, url);
 				return tmp;
-			} catch (LoginException le) {
+			} catch (final LoginException le) {
 				CliHelpers.setIndeterminateProgress(false);
 				throw le;
 			}
@@ -686,8 +684,8 @@ public class LoginManager {
 				}
 
 				CliHelpers.setIndeterminateProgress("Logging in...", true);
-				ServiceInterface tmp = LoginManager.myProxyLogin(url, username,
-						password.toCharArray());
+				final ServiceInterface tmp = LoginManager.myProxyLogin(url,
+						username, password.toCharArray());
 				CliHelpers.setIndeterminateProgress("Logged in to backend: "
 						+ url, false);
 				return tmp;
@@ -727,11 +725,10 @@ public class LoginManager {
 			try {
 
 				String username = usernameTmp;
-				String idp = idpTmp;
+				final String idp = idpTmp;
 				initEnvironment();
 
 				// System.out.println("Loading list of institutions...");
-
 
 				String idpchoice = null;
 				StringBuffer prompt = null;
@@ -745,13 +742,12 @@ public class LoginManager {
 
 					CliHelpers.setIndeterminateProgress("Loading...", true);
 
-					prompt = new StringBuffer(
-							"Please select your institution");
+					prompt = new StringBuffer("Please select your institution");
 
 					final List<String> idps = SlcsLoginWrapper.getAllIdps();
 
-					CliHelpers.setIndeterminateProgress("Available Institutions:",
-							false);
+					CliHelpers.setIndeterminateProgress(
+							"Available Institutions:", false);
 
 					int defaultChoice = -1;
 
@@ -780,7 +776,8 @@ public class LoginManager {
 							throw new RuntimeException(e);
 						}
 
-						if ((defaultChoice >= 0) && StringUtils.isBlank(idpchoice)) {
+						if ((defaultChoice >= 0)
+								&& StringUtils.isBlank(idpchoice)) {
 							idpchoice = new Integer(defaultChoice).toString();
 						}
 
@@ -841,9 +838,8 @@ public class LoginManager {
 				}
 
 				CliHelpers.setIndeterminateProgress("Logging in...", true);
-				ServiceInterface tmp = LoginManager.shiblogin(username,
-						password.toCharArray(),
-						idpchoice, url, true);
+				final ServiceInterface tmp = LoginManager.shiblogin(username,
+						password.toCharArray(), idpchoice, url, true);
 				CliHelpers.setIndeterminateProgress("Logged in to backend: "
 						+ url, false);
 
@@ -877,9 +873,8 @@ public class LoginManager {
 				final LoginParams params = new LoginParams(url, null, null);
 
 				CliHelpers.setIndeterminateProgress("Logging in...", true);
-				ServiceInterface tmp = LoginManager.login(null,
-						password.toCharArray(), null,
-						null, params, true);
+				final ServiceInterface tmp = LoginManager.login(null,
+						password.toCharArray(), null, null, params, true);
 				CliHelpers.setIndeterminateProgress("Logged in to backend: "
 						+ url, false);
 				return tmp;
@@ -941,7 +936,7 @@ public class LoginManager {
 	 */
 	public static ServiceInterface shiblogin(String username, char[] password,
 			String idp, boolean saveCredendentialsToLocalProxy)
-					throws LoginException {
+			throws LoginException {
 		return login((GlobusCredential) null, password, username, idp, "Local",
 				saveCredendentialsToLocalProxy);
 	}
@@ -968,7 +963,7 @@ public class LoginManager {
 	 */
 	public static ServiceInterface shiblogin(String username, char[] password,
 			String idp, String url, boolean saveCredendentialsToLocalProxy)
-					throws LoginException {
+			throws LoginException {
 		return login((GlobusCredential) null, password, username, idp, url,
 				saveCredendentialsToLocalProxy);
 	}

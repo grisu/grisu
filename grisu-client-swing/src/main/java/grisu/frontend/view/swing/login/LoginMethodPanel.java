@@ -3,7 +3,6 @@ package grisu.frontend.view.swing.login;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginParams;
 
-
 public interface LoginMethodPanel {
 
 	public Exception getPossibleException();

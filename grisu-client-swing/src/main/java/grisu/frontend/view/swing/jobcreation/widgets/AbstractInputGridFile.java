@@ -56,7 +56,8 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 			ListCellRenderer lr) {
 
 		if (RENDERERS.get(si) == null) {
-			GridFileComboboxRenderer r = new GridFileComboboxRenderer(si, lr);
+			final GridFileComboboxRenderer r = new GridFileComboboxRenderer(si,
+					lr);
 			RENDERERS.put(si, r);
 		}
 		return RENDERERS.get(si);
@@ -67,7 +68,7 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 	}
 
 	public void askForFile() {
-		GridFile f = popupFileDialogAndAskForFile();
+		final GridFile f = popupFileDialogAndAskForFile();
 
 		if (f != null) {
 			setInputFile(f);
@@ -116,12 +117,11 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 						return;
 					}
 
-
-					Object sel = fileModel.getSelectedItem();
+					final Object sel = fileModel.getSelectedItem();
 
 					GridFile file = null;
 					if (sel instanceof String) {
-						String s = (String)sel;
+						final String s = (String) sel;
 						if (StringUtils.isBlank(s)) {
 							currentUrl = null;
 							return;
@@ -133,19 +133,17 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 								throw new Exception("File " + file.getUrl()
 										+ " does not exist.");
 							}
-						} catch (Exception ex) {
+						} catch (final Exception ex) {
 							return;
 						}
 
-					}
-					else if ((sel instanceof GridFile)) {
+					} else if ((sel instanceof GridFile)) {
 						file = (GridFile) sel;
 					}
 
 					if (file == null) {
 						return;
 					}
-
 
 					if (!file.getUrl().equals(currentUrl)) {
 
@@ -170,8 +168,8 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 					.getSelectedItem();
 
 			return temp.getUrl();
-		} catch (Exception e) {
-			myLogger.error(e);
+		} catch (final Exception e) {
+			myLogger.error(e.getLocalizedMessage(), e);
 			return null;
 		}
 	}
@@ -193,7 +191,7 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 				if (temp.isFolder()) {
 					temp.setIsInaccessible(true);
 				}
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				temp = new GridFile(entry, true, e);
 			}
 
@@ -225,13 +223,13 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 			return;
 		}
 
-		for (String key : config.keySet()) {
+		for (final String key : config.keySet()) {
 
 			if (FOLDER_SELECTABLE.equals(key)) {
 				try {
-					boolean s = Boolean.parseBoolean(config.get(key));
+					final boolean s = Boolean.parseBoolean(config.get(key));
 					setFoldersSelectable(s);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					myLogger.warn("Can't parse value of " + key + ": "
 							+ config.get(key));
 					continue;
@@ -240,22 +238,24 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 				setExtensionsToDisplay(config.get(key).split(","));
 			} else if (DISPLAY_HIDDEN_FILES.equals(key)) {
 				try {
-					boolean display = Boolean.parseBoolean(config.get(key));
+					final boolean display = Boolean.parseBoolean(config
+							.get(key));
 					setDisplayHiddenFiles(display);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					myLogger.warn("Can't parse value of " + key + ": "
 							+ config.get(key));
 					continue;
 				}
 			} else if (ROOTS.equals(key)) {
 				try {
-					List<GridFile> roots = (List<GridFile>) (GrisuRegistryManager
-							.getDefault(getServiceInterface()).get(config.get(key)));
+					final List<GridFile> roots = (List<GridFile>) (GrisuRegistryManager
+							.getDefault(getServiceInterface()).get(config
+							.get(key)));
 					if (roots != null) {
 						setRoots(roots);
 					}
-				} catch (Exception e) {
-					myLogger.error(e);
+				} catch (final Exception e) {
+					myLogger.error(e.getLocalizedMessage(), e);
 				}
 			}
 
@@ -302,7 +302,7 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 
 		getPropertyChangeSupport().firePropertyChange("inputFile", null, file);
 
-		if ( StringUtils.isNotBlank(getHistoryKey()) ) {
+		if (StringUtils.isNotBlank(getHistoryKey())) {
 
 			getHistoryManager().addHistoryEntry(getHistoryKey(), file.getUrl());
 
@@ -348,7 +348,7 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 		GridFile f;
 		try {
 			f = getFileManager().createGridFile(value);
-		} catch (RemoteFileSystemException e) {
+		} catch (final RemoteFileSystemException e) {
 			throw new RuntimeException(e);
 		}
 		setInputFile(f);

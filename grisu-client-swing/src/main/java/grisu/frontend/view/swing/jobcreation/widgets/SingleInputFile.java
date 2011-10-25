@@ -136,7 +136,7 @@ public class SingleInputFile extends AbstractWidget {
 			// .toURI().toString();
 			// }
 			// } catch (RemoteFileSystemException e) {
-			// myLogger.debug(e);
+			// myLogger.debug(e.getLocalizedMessage(), e);
 			// startUrl = new File(System.getProperty("user.home"))
 			// .toURI().toString();
 			// }

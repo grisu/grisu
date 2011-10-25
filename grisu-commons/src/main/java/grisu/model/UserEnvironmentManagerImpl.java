@@ -38,9 +38,10 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.tree.TreeModel;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
@@ -51,10 +52,10 @@ import com.google.common.collect.Sets;
  * 
  */
 public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
-EventSubscriber<FqanEvent> {
+		EventSubscriber<FqanEvent> {
 
-	static final Logger myLogger = Logger
-			.getLogger(UserEnvironmentManagerImpl.class.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(UserEnvironmentManagerImpl.class);
 
 	private final ServiceInterface serviceInterface;
 
@@ -135,7 +136,7 @@ EventSubscriber<FqanEvent> {
 
 	public synchronized String[] getAllAvailableApplications() {
 
-		if ( cachedApplications == null ) {
+		if (cachedApplications == null) {
 
 			cachedApplications = serviceInterface.getAllAvailableApplications(
 					DtoStringList.fromStringArray(getAllAvailableFqans(true)))
@@ -162,31 +163,30 @@ EventSubscriber<FqanEvent> {
 			final ApplicationInformation ai = GrisuRegistryManager.getDefault(
 					serviceInterface).getApplicationInformation(application);
 
-			Set<String> sublocs = ai.getAvailableAllSubmissionLocations();
+			final Set<String> sublocs = ai.getAvailableAllSubmissionLocations();
 
-			Set<String> sublocsUser = getAllAvailableSubmissionLocations();
+			final Set<String> sublocsUser = getAllAvailableSubmissionLocations();
 
 			for (final String subLoc : Sets.intersection(sublocs, sublocsUser)) {
 
-				Set<String> versions = ai.getAvailableVersions(subLoc);
+				final Set<String> versions = ai.getAvailableVersions(subLoc);
 
 				for (final String version : versions) {
 
-					Thread t = new Thread() {
+					final Thread t = new Thread() {
 						@Override
 						public void run() {
-							String[] exes = ai.getExecutables(subLoc,
+							final String[] exes = ai.getExecutables(subLoc,
 									version);
 							X.p("Exes for: " + application + " " + subLoc + " "
 									+ version);
-							allExes.get(application).addAll(
-									Arrays.asList(exes));
+							allExes.get(application)
+									.addAll(Arrays.asList(exes));
 						}
 					};
 					executor.execute(t);
 				}
 			}
-
 
 		}
 
@@ -194,7 +194,7 @@ EventSubscriber<FqanEvent> {
 
 		try {
 			executor.awaitTermination(120, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			e.printStackTrace();
 		}
 
@@ -217,8 +217,8 @@ EventSubscriber<FqanEvent> {
 			return cachedFqans;
 		} else {
 			if (cachedFqansUsable == null) {
-				List<String> result = new ArrayList<String>();
-				for (String fqan : getAllAvailableFqans()) {
+				final List<String> result = new ArrayList<String>();
+				for (final String fqan : getAllAvailableFqans()) {
 					if (getMountPoints(fqan).size() > 0) {
 						result.add(fqan);
 					}
@@ -229,7 +229,8 @@ EventSubscriber<FqanEvent> {
 		}
 	}
 
-	public synchronized Set<String> getAllAvailableFqansForApplication(String application) {
+	public synchronized Set<String> getAllAvailableFqansForApplication(
+			String application) {
 
 		if (cachedFqansPerApplication.get(application) == null) {
 
@@ -282,12 +283,12 @@ EventSubscriber<FqanEvent> {
 					.newFixedThreadPool(getAllAvailableFqans().length);
 			for (final String fqan : getAllAvailableFqans()) {
 
-				Thread t = new Thread() {
+				final Thread t = new Thread() {
 					@Override
 					public void run() {
 						cachedAllSubmissionLocations
-						.addAll(Arrays.asList(resourceInfo
-								.getAllAvailableSubmissionLocations(fqan)));
+								.addAll(Arrays.asList(resourceInfo
+										.getAllAvailableSubmissionLocations(fqan)));
 					}
 				};
 				executor.execute(t);
@@ -296,8 +297,8 @@ EventSubscriber<FqanEvent> {
 
 			try {
 				executor.awaitTermination(60, TimeUnit.SECONDS);
-			} catch (InterruptedException e) {
-				myLogger.error(e);
+			} catch (final InterruptedException e) {
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 
 		}
@@ -394,7 +395,7 @@ EventSubscriber<FqanEvent> {
 				final String url = getBookmarks().get(bookmark);
 				cachedBookmarkFilesystemList.add(new FileSystemItem(bookmark,
 						FileSystemItem.Type.BOOKMARK, getFileManager()
-						.createGlazedFileFromUrl(url)));
+								.createGlazedFileFromUrl(url)));
 			}
 		}
 		return cachedBookmarkFilesystemList;
@@ -742,7 +743,7 @@ EventSubscriber<FqanEvent> {
 
 					}
 				} catch (final URISyntaxException e) {
-					myLogger.error(e);
+					myLogger.error(e.getLocalizedMessage(), e);
 					return null;
 				}
 			}
@@ -780,7 +781,7 @@ EventSubscriber<FqanEvent> {
 
 				}
 			} catch (final URISyntaxException e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 				return null;
 			}
 		}
@@ -791,9 +792,9 @@ EventSubscriber<FqanEvent> {
 
 	public Set<MountPoint> getNonVolatileMountPoints() {
 
-		Set<MountPoint> result = new TreeSet<MountPoint>();
+		final Set<MountPoint> result = new TreeSet<MountPoint>();
 
-		for (MountPoint m : getMountPoints()) {
+		for (final MountPoint m : getMountPoints()) {
 			if (m.isVolatileFileSystem()) {
 				continue;
 			}
@@ -822,12 +823,12 @@ EventSubscriber<FqanEvent> {
 		if (allJobnames == null) {
 			allJobnames = new TreeSet<String>(serviceInterface.getAllJobnames(
 					Constants.ALLJOBS_INCL_BATCH_KEY).getStringList());
-			allJobnames.addAll(serviceInterface.getAllBatchJobnames(null).getStringList());
+			allJobnames.addAll(serviceInterface.getAllBatchJobnames(null)
+					.getStringList());
 		} else if (refresh) {
 			allJobnames.clear();
 			allJobnames.addAll(serviceInterface.getAllJobnames(
-					Constants.ALLJOBS_INCL_BATCH_KEY)
-					.getStringList());
+					Constants.ALLJOBS_INCL_BATCH_KEY).getStringList());
 			allJobnames.addAll(serviceInterface.getAllBatchJobnames(null)
 					.getStringList());
 
@@ -923,7 +924,7 @@ EventSubscriber<FqanEvent> {
 		} else {
 			final FileSystemItem temp = new FileSystemItem(alias,
 					FileSystemItem.Type.BOOKMARK, getFileManager()
-					.createGlazedFileFromUrl(url));
+							.createGlazedFileFromUrl(url));
 			getBookmarks().put(alias, url);
 			getBookmarksFilesystems().add(temp);
 			getFileSystems().add(temp);

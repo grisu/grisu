@@ -8,12 +8,9 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
-
 public interface GridFileListPanel {
 
 	public void addGridFileListListener(GridFileListListener l);
-
-	public void setDisplayHiddenFiles(boolean display);
 
 	public GridFile getCurrentDirectory();
 
@@ -32,6 +29,8 @@ public interface GridFileListPanel {
 	public void setContextMenu(GridFileListPanelContextMenu menu);
 
 	public void setCurrentUrl(String url);
+
+	public void setDisplayHiddenFiles(boolean display);
 
 	/**
 	 * Sets the extensions to display.

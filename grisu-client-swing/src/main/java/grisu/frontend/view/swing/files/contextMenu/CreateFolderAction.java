@@ -32,7 +32,7 @@ public class CreateFolderAction extends AbstractAction {
 				.getServiceInterface());
 		putValue(NAME, "Create folder");
 		putValue(SHORT_DESCRIPTION,
-		"Creates a folder in the selected directory.");
+				"Creates a folder in the selected directory.");
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -45,17 +45,17 @@ public class CreateFolderAction extends AbstractAction {
 			return;
 		}
 
-		GridFile parent = fileList.getCurrentDirectory();
+		final GridFile parent = fileList.getCurrentDirectory();
 
 		String parentUrl = parent.getUrl();
 		try {
 
-			if ( parent.isVirtual() ) {
-				if ( parent.getUrls().size() == 1 ) {
+			if (parent.isVirtual()) {
+				if (parent.getUrls().size() == 1) {
 					parentUrl = parent.getUrl();
 				} else {
 
-					DropVirtualGridFileDialog d = new DropVirtualGridFileDialog(
+					final DropVirtualGridFileDialog d = new DropVirtualGridFileDialog(
 							"Create");
 					d.setTargetGridFile(parent);
 					d.setVisible(true);
@@ -72,14 +72,13 @@ public class CreateFolderAction extends AbstractAction {
 				CreateFolderAction.this.fm.createFolder(parent, s);
 			}
 
+		} catch (final Exception ex) {
 
-		} catch (Exception ex) {
+			final String msg = ex.getLocalizedMessage();
+			final ErrorInfo info = new ErrorInfo("Job archiving error", msg,
+					null, "Error", null, Level.SEVERE, null);
 
-			String msg = ex.getLocalizedMessage();
-			ErrorInfo info = new ErrorInfo("Job archiving error", msg, null,
-					"Error", null, Level.SEVERE, null);
-
-			JXErrorPane pane = new JXErrorPane();
+			final JXErrorPane pane = new JXErrorPane();
 			pane.setErrorInfo(info);
 
 			JXErrorPane.showDialog(fileList.getPanel(), pane);

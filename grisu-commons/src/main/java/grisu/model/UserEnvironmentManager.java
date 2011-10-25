@@ -15,7 +15,6 @@ import java.util.SortedSet;
 
 import javax.swing.tree.TreeModel;
 
-
 /**
  * Wrapps information about the user and the available resources to him
  * grid-wide.
@@ -140,7 +139,9 @@ public interface UserEnvironmentManager {
 	 * 
 	 * @return the users bookmarks.
 	 */
-	Map<String, String> getBookmarks();	List<FileSystemItem> getBookmarksFilesystems();
+	Map<String, String> getBookmarks();
+
+	List<FileSystemItem> getBookmarksFilesystems();
 
 	/**
 	 * Returns a list of all currently used applications for a user.
@@ -223,7 +224,8 @@ public interface UserEnvironmentManager {
 	/**
 	 * Returns all current jobs (not archived) of the user.
 	 * 
-	 * @param refreshJobStatus whether to refresh job list on backend
+	 * @param refreshJobStatus
+	 *            whether to refresh job list on backend
 	 * 
 	 * @return the list of jobs
 	 */
@@ -362,7 +364,8 @@ public interface UserEnvironmentManager {
 	/**
 	 * Returns a list of all jobnames (batch & single) of a user.
 	 * 
-	 * @param refresh whether to refresh the list or used the cached version.
+	 * @param refresh
+	 *            whether to refresh the list or used the cached version.
 	 * @return all jobnames
 	 */
 	public SortedSet<String> getReallyAllJobnames(boolean refresh);

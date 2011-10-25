@@ -13,12 +13,12 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
-import org.apache.log4j.Logger;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PercentageJobDistributor implements JobDistributor {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(PercentageJobDistributor.class.getName());
 
 	public Map<String, Integer> distributeJobs(Set<Job> allJobs,

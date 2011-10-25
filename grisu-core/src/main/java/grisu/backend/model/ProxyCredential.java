@@ -27,9 +27,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This extends the {@link Credential} abstract class. It uses a normal GSSCredential as credential. Most likely you
@@ -44,7 +45,8 @@ import org.ietf.jgss.GSSException;
  */
 public class ProxyCredential {
 
-	static Logger myLogger = Logger.getLogger(ProxyCredential.class.getName());
+	static Logger myLogger = LoggerFactory.getLogger(ProxyCredential.class
+			.getName());
 
 	// the internal "non-raw" credential data
 	private GSSCredential gsscredential = null;
@@ -112,9 +114,7 @@ public class ProxyCredential {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.credential.model.GenericCredential#addJob(grisu
-	 * .js.model.Job)
+	 * @see grisu.credential.model.GenericCredential#addJob(grisu .js.model.Job)
 	 */
 	public final void addJob(final Job job) {
 		job.setCredential(this);
@@ -137,7 +137,7 @@ public class ProxyCredential {
 		try {
 			data = CredentialHelpers.convertGSSCredentialToByteArray(proxy);
 		} catch (final GSSException e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			return null;
 		}
 		return data;
@@ -158,7 +158,7 @@ public class ProxyCredential {
 			cred = CredentialHelpers.convertByteArrayToGSSCredential(data);
 		} catch (final GSSException e) {
 			// TODO Auto-generated catch block
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			return null;
 		}
 		return cred;
@@ -178,8 +178,8 @@ public class ProxyCredential {
 	@Override
 	public boolean equals(Object o) {
 
-		if ( o instanceof ProxyCredential ) {
-			ProxyCredential pc = (ProxyCredential) o;
+		if (o instanceof ProxyCredential) {
+			final ProxyCredential pc = (ProxyCredential) o;
 
 			return pc.getGssCredential().equals(getGssCredential());
 
@@ -225,7 +225,7 @@ public class ProxyCredential {
 				fromNow = getGssCredential().getRemainingLifetime();
 			} catch (final GSSException e) {
 				// return null in that case
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 				return null;
 			}
 
@@ -282,8 +282,8 @@ public class ProxyCredential {
 
 	@Override
 	public int hashCode() {
-		if ( getGssCredential() != null ) {
-			return (getGssCredential().hashCode() *41)  ;
+		if (getGssCredential() != null) {
+			return (getGssCredential().hashCode() * 41);
 		} else {
 			return uuid.hashCode();
 		}
@@ -315,7 +315,7 @@ public class ProxyCredential {
 				return true;
 			}
 		} catch (final GSSException e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			return false;
 		}
 	}
@@ -323,9 +323,7 @@ public class ProxyCredential {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.credential.model.GenericCredential#remove(grisu
-	 * .js.model.Job)
+	 * @see grisu.credential.model.GenericCredential#remove(grisu .js.model.Job)
 	 */
 	public final void remove(final Job job) {
 		jobs.remove(job);

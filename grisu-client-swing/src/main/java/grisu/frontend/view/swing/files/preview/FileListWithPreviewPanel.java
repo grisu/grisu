@@ -27,11 +27,12 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -41,7 +42,7 @@ import com.jgoodies.forms.layout.RowSpec;
 public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
 		FileListListener, EventSubscriber<FileTransactionFailedEvent> {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(FileListWithPreviewPanel.class.getName());
 
 	public static final String PREVIEW = "Preview";
@@ -355,13 +356,13 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
 
 	public void onEvent(FileTransactionFailedEvent arg0) {
 
-		FileTransaction ft = arg0.getFileTransaction();
+		final FileTransaction ft = arg0.getFileTransaction();
 
-		ErrorInfo info = new ErrorInfo("File transfer error",
+		final ErrorInfo info = new ErrorInfo("File transfer error",
 				"Can't transfer file\n\n" + ft.getCurrentSourceFile(), null,
 				"Error", ft.getException(), Level.SEVERE, null);
 
-		JXErrorPane pane = new JXErrorPane();
+		final JXErrorPane pane = new JXErrorPane();
 		pane.setErrorInfo(info);
 		// the following line could be used to show a button to
 		// submit

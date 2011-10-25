@@ -41,7 +41,7 @@ public class WalltimeUtils {
 			return new String[] { new Integer(days).toString(), "days" };
 		} else if ((days > 0) && (hours > 0)) {
 			return new String[] { new Integer((days * 24) + hours).toString(),
-			"hours" };
+					"hours" };
 		} else if ((days == 0) && (hours > 0) && (minutes == 0)) {
 			return new String[] { new Integer(hours).toString(), "hours" };
 		} else if ((days == 0) && (hours > 0) && (minutes > 0)) {
@@ -55,7 +55,8 @@ public class WalltimeUtils {
 				}
 			} else {
 				return new String[] {
-						new Integer((hours * 60) + minutes).toString(), "minutes" };
+						new Integer((hours * 60) + minutes).toString(),
+						"minutes" };
 			}
 		} else {
 			if (minutes == 1) {

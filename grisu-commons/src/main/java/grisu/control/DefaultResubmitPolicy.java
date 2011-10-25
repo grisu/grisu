@@ -6,8 +6,6 @@ import grisu.model.dto.DtoProperties;
 import java.util.HashMap;
 import java.util.Map;
 
-
-
 public class DefaultResubmitPolicy implements ResubmitPolicy {
 
 	/**

@@ -4,7 +4,6 @@ import grisu.frontend.model.job.JobObject;
 
 import java.util.Comparator;
 
-
 public class SingleJobObjectComparator implements Comparator<JobObject> {
 
 	public int compare(JobObject o1, JobObject o2) {

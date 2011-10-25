@@ -104,7 +104,7 @@ public interface ServiceInterface {
 	@RolesAllowed("User")
 	void addJobProperties(@PathParam("jobname") String jobname,
 			@QueryParam("properties") DtoJob properties)
-					throws NoSuchJobException;
+			throws NoSuchJobException;
 
 	/**
 	 * If you want to store certain values along with the job which can be used
@@ -126,7 +126,7 @@ public interface ServiceInterface {
 	@RolesAllowed("User")
 	void addJobProperty(@PathParam("jobname") String jobname,
 			@PathParam("key") String key, @QueryParam("value") String value)
-					throws NoSuchJobException;
+			throws NoSuchJobException;
 
 	/**
 	 * Adds the specified job to the mulitpartJob.
@@ -144,7 +144,7 @@ public interface ServiceInterface {
 	@Produces("text/plain")
 	String addJobToBatchJob(@PathParam("batchjobname") String batchjobname,
 			@QueryParam("jsdl") String jobdescription)
-					throws NoSuchJobException, JobPropertiesException;
+			throws NoSuchJobException, JobPropertiesException;
 
 	/**
 	 * Archives this job to the specified url and deletes it from the database.
@@ -206,7 +206,7 @@ public interface ServiceInterface {
 	void copyBatchJobInputFile(@PathParam("batchjobname") String batchJobname,
 			@QueryParam("inputFile") String inputFile,
 			@QueryParam("filename") String filename)
-					throws RemoteFileSystemException, NoSuchJobException;
+			throws RemoteFileSystemException, NoSuchJobException;
 
 	/**
 	 * Copies one file to another location (recursively if it's a directory).
@@ -233,7 +233,7 @@ public interface ServiceInterface {
 			@QueryParam("target") String target,
 			@DefaultValue("false") @QueryParam("overwrite") boolean overwrite,
 			@DefaultValue("false") @QueryParam("wait") boolean wait)
-					throws RemoteFileSystemException;
+			throws RemoteFileSystemException;
 
 	/**
 	 * Creates a batchjob on the server.
@@ -259,7 +259,7 @@ public interface ServiceInterface {
 			@PathParam("batchjobname") String batchJobname,
 			@QueryParam("group") String fqan,
 			@DefaultValue(Constants.UNIQUE_NUMBER_METHOD) @QueryParam("jobname_creation_method") String jobnameCreationMethod)
-					throws BatchJobException;
+			throws BatchJobException;
 
 	/**
 	 * This method calls {@link #createJobUsingMap(Map, String, String)}
@@ -289,7 +289,7 @@ public interface ServiceInterface {
 			@QueryParam("jsdl") String jsdl,
 			@QueryParam("group") String fqan,
 			@DefaultValue(Constants.UNIQUE_NUMBER_METHOD) @QueryParam("jobname-creation-method") String jobnameCreationMethod)
-					throws JobPropertiesException;
+			throws JobPropertiesException;
 
 	/**
 	 * Deletes a remote file.
@@ -1020,7 +1020,7 @@ public interface ServiceInterface {
 	@RolesAllowed("User")
 	String kill(@PathParam("jobname") String jobname,
 			@DefaultValue("false") @QueryParam("clean") boolean clean)
-					throws NoSuchJobException, BatchJobException;
+			throws NoSuchJobException, BatchJobException;
 
 	/**
 	 * Deletes the whole jobdirectory (if specified) and if successful, the job
@@ -1119,7 +1119,7 @@ public interface ServiceInterface {
 	@RolesAllowed("User")
 	GridFile ls(@PathParam("url") String url,
 			@DefaultValue("1") @QueryParam("recursionLevel") int recursionLevel)
-					throws RemoteFileSystemException;
+			throws RemoteFileSystemException;
 
 	/**
 	 * Creates the specified folder (and it's parent folders if they don't
@@ -1165,7 +1165,7 @@ public interface ServiceInterface {
 			@PathParam("alias") String alias,
 			@QueryParam("group") String fqan,
 			@DefaultValue("true") @QueryParam("useHomeDir") boolean useHomeDirectoryOnThisFileSystemIfPossible)
-					throws RemoteFileSystemException;
+			throws RemoteFileSystemException;
 
 	/**
 	 * Mounts a filesystem so a user can easily move stuff around on the
@@ -1189,7 +1189,7 @@ public interface ServiceInterface {
 			@QueryParam("url") String url,
 			@PathParam("alias") String alias,
 			@DefaultValue("true") @QueryParam("useHomeDir") boolean useHomeDirectoryOnThisFileSystemIfPossible)
-					throws RemoteFileSystemException;
+			throws RemoteFileSystemException;
 
 	/**
 	 * Tries to figure out the best submission locations for all the jobs that
@@ -1210,8 +1210,7 @@ public interface ServiceInterface {
 	@POST
 	@Path("/batchjob/{batchjobname}/redistribute")
 	String redistributeBatchJob(@PathParam("batchjobname") String batchjobname)
-			throws NoSuchJobException,
-			JobPropertiesException;
+			throws NoSuchJobException, JobPropertiesException;
 
 	/**
 	 * Refreshes the status of all jobs that belong to this batchjob.
@@ -1244,8 +1243,7 @@ public interface ServiceInterface {
 	@POST
 	@Path("/batchjob/{batchjobname}/{jobname}/remove")
 	void removeJobFromBatchJob(@PathParam("batchjobname") String batchJobname,
-			@PathParam("jobname") String jobname)
-					throws NoSuchJobException;
+			@PathParam("jobname") String jobname) throws NoSuchJobException;
 
 	/**
 	 * Restarts a batch job.
@@ -1276,8 +1274,7 @@ public interface ServiceInterface {
 			@PathParam("batchjobname") final String batchjobname,
 			@DefaultValue(Constants.SUBMIT_POLICY_RESTART_DEFAULT) @QueryParam("restartPolicy") String restartPolicy,
 			@DefaultValue("") DtoProperties properties)
-					throws NoSuchJobException,
-					JobPropertiesException;
+			throws NoSuchJobException, JobPropertiesException;
 
 	/**
 	 * Resubmit a job. Kills the old one if it's still running.
@@ -1303,9 +1300,9 @@ public interface ServiceInterface {
 	@Path("/job/{jobname}/restart")
 	void restartJob(@PathParam("jobname") final String jobname,
 			@DefaultValue("") @QueryParam("jsdl") String changedJsdl)
-					throws JobSubmissionException, NoSuchJobException;
+			throws JobSubmissionException, NoSuchJobException;
 
-	/**
+/**
 	 * Sets a user property.
 	 * 
 	 * <p>
@@ -1392,7 +1389,7 @@ public interface ServiceInterface {
 	@Produces("text/plain")
 	String upload(@XmlMimeType("application/octet-stream") DataHandler file,
 			@PathParam("filename") String filename)
-					throws RemoteFileSystemException;
+			throws RemoteFileSystemException;
 
 	/**
 	 * Uploads input file for job or distributes an input file to all the
@@ -1422,6 +1419,6 @@ public interface ServiceInterface {
 	void uploadInputFile(@QueryParam("jobname") String jobname,
 			@XmlMimeType("application/octet-stream") DataHandler inputFile,
 			@QueryParam("relativePath") String relativePath)
-					throws RemoteFileSystemException, NoSuchJobException;
+			throws RemoteFileSystemException, NoSuchJobException;
 
 }

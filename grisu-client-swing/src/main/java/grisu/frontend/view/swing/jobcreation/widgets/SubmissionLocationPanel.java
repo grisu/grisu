@@ -25,9 +25,8 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-
 public class SubmissionLocationPanel extends AbstractWidget implements
-EventSubscriber<FqanEvent> {
+		EventSubscriber<FqanEvent> {
 
 	public static final String NOT_READY_STRING = "Loading...";
 
@@ -74,23 +73,23 @@ EventSubscriber<FqanEvent> {
 			return;
 		}
 
-		appInfo = GrisuRegistryManager.getDefault(getServiceInterface()).getUserApplicationInformation(this.application);
+		appInfo = GrisuRegistryManager.getDefault(getServiceInterface())
+				.getUserApplicationInformation(this.application);
 
 		new Thread() {
 			@Override
 			public void run() {
 
-				Map<JobSubmissionProperty, String> additional = new HashMap<JobSubmissionProperty, String>();
+				final Map<JobSubmissionProperty, String> additional = new HashMap<JobSubmissionProperty, String>();
 				additional.put(JobSubmissionProperty.APPLICATIONVERSION,
 						version);
-				Set<GridResource> subLocs = appInfo
-				.getAllSubmissionLocationsAsGridResources(
-						additional,
-						currentVO);
+				final Set<GridResource> subLocs = appInfo
+						.getAllSubmissionLocationsAsGridResources(additional,
+								currentVO);
 
 				subLocModel.removeAllElements();
 
-				for (GridResource gr : subLocs ) {
+				for (final GridResource gr : subLocs) {
 					subLocModel.addElement(gr);
 				}
 
@@ -103,9 +102,7 @@ EventSubscriber<FqanEvent> {
 			}
 		}.start();
 
-
 	}
-
 
 	private JComboBox getComboBox() {
 		if (comboBox == null) {
@@ -124,7 +121,7 @@ EventSubscriber<FqanEvent> {
 
 	public void onEvent(FqanEvent event) {
 
-		String oldVo = currentVO;
+		final String oldVo = currentVO;
 		currentVO = event.getFqan();
 
 		if (!StringUtils.equals(oldVo, currentVO)) {
@@ -133,7 +130,7 @@ EventSubscriber<FqanEvent> {
 	}
 
 	public void setApplication(String application) {
-		String old = this.application;
+		final String old = this.application;
 		this.application = application;
 
 		if (!StringUtils.equals(old, this.application) || !subLocsFilled) {
@@ -145,7 +142,8 @@ EventSubscriber<FqanEvent> {
 	public void setServiceInterface(ServiceInterface si) {
 		super.setServiceInterface(si);
 
-		this.currentVO = GrisuRegistryManager.getDefault(si).getUserEnvironmentManager().getCurrentFqan();
+		this.currentVO = GrisuRegistryManager.getDefault(si)
+				.getUserEnvironmentManager().getCurrentFqan();
 
 		fillSubmissionLocations();
 	}
@@ -157,7 +155,7 @@ EventSubscriber<FqanEvent> {
 	}
 
 	public void setVersion(String version) {
-		String old = this.version;
+		final String old = this.version;
 		this.version = version;
 
 		if (!StringUtils.equals(old, this.version) || !subLocsFilled) {

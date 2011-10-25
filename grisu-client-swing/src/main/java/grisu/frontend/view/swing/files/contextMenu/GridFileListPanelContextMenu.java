@@ -5,7 +5,6 @@ import grisu.frontend.view.swing.files.GridFileListPanel;
 
 import javax.swing.JPopupMenu;
 
-
 public interface GridFileListPanelContextMenu extends GridFileListListener {
 
 	public JPopupMenu getJPopupMenu();

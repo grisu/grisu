@@ -13,7 +13,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
-
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -77,7 +76,7 @@ public class FileTransferStatusPanel extends JPanel implements
 					.getNewValue();
 
 			if (FileTransaction.Status.FAILED.equals(status)) {
-				String msg = "Failed: "
+				final String msg = "Failed: "
 						+ fileTransfer.getException().getLocalizedMessage();
 				getTextField().setText(msg);
 			} else {

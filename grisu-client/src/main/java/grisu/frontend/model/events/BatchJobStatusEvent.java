@@ -3,7 +3,6 @@ package grisu.frontend.model.events;
 import grisu.control.JobConstants;
 import grisu.frontend.model.job.BatchJobObject;
 
-
 public class BatchJobStatusEvent {
 
 	private final int oldStatus;

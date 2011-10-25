@@ -10,7 +10,6 @@ import java.util.TreeSet;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-
 /**
  * A wrapper that holds a list of {@link DtoGridResource} objects.
  * 

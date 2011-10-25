@@ -24,7 +24,8 @@ import javax.swing.SwingUtilities;
 import net.sf.jmimemagic.Magic;
 import net.sf.jmimemagic.MagicMatch;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -32,10 +33,10 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class GenericGridFileViewer extends JPanel implements GridFileViewer,
-GridFileListListener {
+		GridFileListListener {
 
-	static final Logger myLogger = Logger.getLogger(GenericGridFileViewer.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(GenericGridFileViewer.class.getName());
 
 	private static Set<String> viewers = null;
 
@@ -49,7 +50,7 @@ GridFileListListener {
 			match = Magic.getMagicMatch(currentLocalCacheFile, true);
 			System.out.println(match.getMimeType());
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
 		final Set<String> viewers = findViewers();
@@ -65,7 +66,7 @@ GridFileListListener {
 					}
 				}
 			} catch (final Exception e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 
 		}
@@ -170,7 +171,6 @@ GridFileListListener {
 		add(getEmptyPanel(), EMPTY_PANEL);
 		add(getPanel_1(), LOADING_PANEL);
 	}
-
 
 	public void directoryChanged(GridFile newDirectory) {
 		// TODO
@@ -290,17 +290,17 @@ GridFileListListener {
 				} else {
 					if (fm.isBiggerThanThreshold(file.getUrl())) {
 
-						int n = JOptionPane
+						final int n = JOptionPane
 								.showConfirmDialog(
 										getRootPane(),
 										"The file you selected is bigger than the default threshold\n"
 												+ FileAndUrlHelpers
-												.calculateSizeString(FileManager
-														.getDownloadFileSizeThreshold())
-														+ "bytes. It may take a long time to load.\n"
-														+ "Do you still want to preview that file?",
-														"Warning: big file",
-														JOptionPane.YES_NO_OPTION);
+														.calculateSizeString(FileManager
+																.getDownloadFileSizeThreshold())
+												+ "bytes. It may take a long time to load.\n"
+												+ "Do you still want to preview that file?",
+										"Warning: big file",
+										JOptionPane.YES_NO_OPTION);
 
 						if (n == JOptionPane.NO_OPTION) {
 							showsValidViewerAtTheMoment = false;
@@ -313,9 +313,9 @@ GridFileListListener {
 				}
 
 			} catch (final RemoteFileSystemException e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			} catch (final FileTransactionException e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 
 		}

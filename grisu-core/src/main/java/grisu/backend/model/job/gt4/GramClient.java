@@ -12,7 +12,6 @@ import java.util.Date;
 import org.apache.axis.components.uuid.UUIDGen;
 import org.apache.axis.components.uuid.UUIDGenFactory;
 import org.apache.axis.message.addressing.EndpointReferenceType;
-import org.apache.log4j.Logger;
 import org.globus.exec.client.GramJob;
 import org.globus.exec.client.GramJobListener;
 import org.globus.exec.generated.FaultType;
@@ -27,6 +26,8 @@ import org.globus.wsrf.impl.security.authorization.HostAuthorization;
 import org.ietf.jgss.GSSCredential;
 import org.oasis.wsrf.faults.BaseFaultType;
 import org.oasis.wsrf.faults.BaseFaultTypeDescription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A Custom GRAM Client. For GT4 Based on the GlobusRun command from Globus
@@ -40,10 +41,10 @@ import org.oasis.wsrf.faults.BaseFaultTypeDescription;
  */
 public class GramClient
 // Listen for job status messages
-implements GramJobListener {
+		implements GramJobListener {
 
-	static final Logger logger = Logger
-	.getLogger(AbstractServiceInterface.class.getName());
+	static final Logger logger = LoggerFactory
+			.getLogger(AbstractServiceInterface.class);
 
 	// Amount of time to wait for job status changes
 	private static final long STATE_CHANGE_BASE_TIMEOUT_MILLIS = 60000;
@@ -54,7 +55,7 @@ implements GramJobListener {
 			job.destroy();
 		} catch (final Exception e) {
 			// TODO Auto-generated catch block
-			logger.error(e);
+			logger.error(e.getLocalizedMessage(), e);
 		}
 
 		return getJobStatus(job);
@@ -113,7 +114,7 @@ implements GramJobListener {
 			final FaultType myFaultType = job.getFault();
 			if (myFaultType != null) {
 				final BaseFaultTypeDescription[] myFaultArray = job.getFault()
-				.getDescription();
+						.getDescription();
 				for (final BaseFaultTypeDescription currFault : myFaultArray) {
 					logger.error(currFault.get_value());
 					condition += "\nReason: " + currFault.get_value();
@@ -122,7 +123,7 @@ implements GramJobListener {
 
 		} catch (final Exception e) {
 			// TODO do something here
-			logger.error(e);
+			logger.error(e.getLocalizedMessage(), e);
 			error = true;
 			errorMessage = e.getMessage();
 		}
@@ -149,10 +150,10 @@ implements GramJobListener {
 			// final int error = job.getError();
 
 		} catch (final NoSuchGT4JobException e) {
-			logger.error(e);
+			logger.error(e.getLocalizedMessage(), e);
 			return "NoSuchJob";
 		} catch (final Exception e) {
-			logger.error(e);
+			logger.error(e.getLocalizedMessage(), e);
 			return "NoSuchJob";
 		}
 
@@ -183,9 +184,9 @@ implements GramJobListener {
 		final File rslFile = new File("/tmp/simple.xml");
 
 		System.setProperty("GLOBUS_LOCATION",
-		"/home/markus/workspace/grisu-core/globus");
+				"/home/markus/workspace/grisu-core/globus");
 		System.setProperty("axis.ClientConfigFile",
-		"/home/markus/workspace/grisu-core/globus/client-config.wsdd");
+				"/home/markus/workspace/grisu-core/globus/client-config.wsdd");
 
 		// Deafult Security: Host authorization + XML encryption
 		final Authorization authz = HostAuthorization.getInstance();
@@ -212,7 +213,7 @@ implements GramJobListener {
 			// , serviceDuration, serviceTermination, timeout );
 
 		} catch (final Exception e) {
-			logger.error(e);
+			logger.error(e.getLocalizedMessage(), e);
 		}
 	}
 
@@ -335,7 +336,7 @@ implements GramJobListener {
 	 */
 	private String processJob(final GramJob job,
 			final EndpointReferenceType factoryEndpoint, final boolean batch)
-	throws Exception {
+			throws Exception {
 		// load custom proxy (if any)
 		// if (proxyPath != null) {
 		// try {
@@ -504,7 +505,7 @@ implements GramJobListener {
 				this.job = new GramJob(rslFile);
 			} catch (final Exception e) {
 				final String errorMessage = "Unable to parse RSL from file "
-					+ rslFile;
+						+ rslFile;
 				logger.debug(errorMessage, e);
 				throw new IOException(errorMessage + " - " + e.getMessage());
 			}

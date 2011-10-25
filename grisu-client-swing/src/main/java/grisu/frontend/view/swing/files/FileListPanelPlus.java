@@ -19,7 +19,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
@@ -31,10 +32,10 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class FileListPanelPlus extends JPanel implements FileListPanel,
-FileListListener {
+		FileListListener {
 
-	static final Logger myLogger = Logger.getLogger(FileListPanelPlus.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(FileListPanelPlus.class.getName());
 
 	private JComboBox comboBox;
 	private FileListPanelSimple fileListPanel;
@@ -220,7 +221,7 @@ FileListListener {
 								// }
 								getFileListPanel().setRootAndCurrentUrl(sel);
 							} catch (final NullPointerException e) {
-								myLogger.error(e);
+								myLogger.error(e.getLocalizedMessage(), e);
 								// that's ok.
 							}
 

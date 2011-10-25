@@ -5,12 +5,13 @@ import grisu.backend.model.FileSystemCache;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GrisuInputStreamImpl implements GrisuInputStream {
 
-	static final Logger myLogger = Logger.getLogger(GrisuInputStreamImpl.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(GrisuInputStreamImpl.class.getName());
 
 	private final FileSystemCache fsCache;
 	private final InputStream inputStream;
@@ -25,8 +26,8 @@ public class GrisuInputStreamImpl implements GrisuInputStream {
 	public void close() {
 		try {
 			this.inputStream.close();
-		} catch (IOException e) {
-			myLogger.error(e);
+		} catch (final IOException e) {
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 		this.fsCache.close();
 	}

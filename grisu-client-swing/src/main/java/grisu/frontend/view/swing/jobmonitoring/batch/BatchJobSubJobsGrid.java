@@ -16,7 +16,6 @@ import javax.swing.JMenuItem;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-
 public class BatchJobSubJobsGrid extends SimpleSingleJobsGrid implements
 		PropertyChangeListener {
 

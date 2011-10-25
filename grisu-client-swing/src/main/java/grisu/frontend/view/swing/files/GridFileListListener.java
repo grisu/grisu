@@ -4,7 +4,6 @@ import grisu.model.dto.GridFile;
 
 import java.util.Set;
 
-
 public interface GridFileListListener {
 
 	public void directoryChanged(GridFile newDirectory);

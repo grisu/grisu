@@ -61,10 +61,10 @@ import javax.persistence.Transient;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.FileSystemException;
-import org.apache.log4j.Logger;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The User class holds all the relevant data a job could want to know from the
@@ -80,7 +80,6 @@ import org.simpleframework.xml.core.Persister;
  */
 @Entity
 @Table(name = "users")
-
 public class User {
 
 	private final static boolean ENABLE_FILESYSTEM_CACHE = ServerPropertiesManager
@@ -90,7 +89,8 @@ public class User {
 	protected static final JobDAO jobdao = new JobDAO();
 	protected final BatchJobDAO batchJobDao = new BatchJobDAO();
 
-	private static Logger myLogger = Logger.getLogger(User.class.getName());
+	private static Logger myLogger = LoggerFactory.getLogger(User.class
+			.getName());
 
 	public static User createUser(ProxyCredential cred,
 			AbstractServiceInterface si) {
@@ -113,24 +113,23 @@ public class User {
 		Date time2 = new Date();
 
 		myLogger.debug("Login benchmark - db lookup: "
-				+ new Long((time2.getTime() - time1.getTime()))
-				.toString()
+				+ new Long((time2.getTime() - time1.getTime())).toString()
 				+ " ms");
 
 		if (user == null) {
 			user = new User(cred);
 			time1 = new Date();
 			myLogger.debug("Login benchmark - constructor: "
-					+ new Long((time1.getTime() - time2.getTime()))
-					.toString() + " ms");
+					+ new Long((time1.getTime() - time2.getTime())).toString()
+					+ " ms");
 
 			userdao.saveOrUpdate(user);
 		} else {
 			user.setCred(cred);
 			time1 = new Date();
 			myLogger.debug("Login benchmark - setting credential: "
-					+ new Long((time1.getTime() - time2.getTime()))
-					.toString() + " ms");
+					+ new Long((time1.getTime() - time2.getTime())).toString()
+					+ " ms");
 
 		}
 
@@ -139,9 +138,9 @@ public class User {
 					.asArray()));
 			time2 = new Date();
 			myLogger.debug("Login benchmark - mountpoints: "
-					+ new Long((time2.getTime() - time1.getTime()))
-					.toString() + " ms");
-		} catch (Exception e) {
+					+ new Long((time2.getTime() - time1.getTime())).toString()
+					+ " ms");
+		} catch (final Exception e) {
 			throw new RuntimeException(
 					"Can't aquire filesystems for user. Possibly because of misconfigured grisu backend",
 					e);
@@ -236,7 +235,6 @@ public class User {
 		this.dn = dn;
 	}
 
-
 	public void addArchiveLocation(String alias, String value) {
 
 		getArchiveLocations().put(alias, value);
@@ -258,8 +256,8 @@ public class User {
 		fqans.put(fqan, vo);
 	}
 
-	public synchronized void addLogMessageToPossibleMultiPartJobParent(
-			Job job, String message) {
+	public synchronized void addLogMessageToPossibleMultiPartJobParent(Job job,
+			String message) {
 
 		final String mpjName = job.getJobProperty(Constants.BATCHJOB_NAME);
 
@@ -268,14 +266,13 @@ public class User {
 			try {
 				mpj = getBatchJobFromDatabase(mpjName);
 			} catch (final NoSuchJobException e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 				return;
 			}
 			mpj.addLogMessage(message);
 			batchJobDao.saveOrUpdate(mpj);
 		}
 	}
-
 
 	public void addProperty(String key, String value) {
 
@@ -294,7 +291,6 @@ public class User {
 		cachedCredentials = new HashMap<String, ProxyCredential>();
 	}
 
-
 	public void clearMountPointCache(String keypattern) {
 		if (StringUtils.isBlank(keypattern)) {
 			this.mountPointCache = Collections
@@ -307,7 +303,6 @@ public class User {
 			final String fqan, Executor executor) throws Exception {
 
 		String url = null;
-
 
 		final int startProperties = path.indexOf("[");
 		final int endProperties = path.indexOf("]");
@@ -342,8 +337,8 @@ public class User {
 				}
 				final String key = part.substring(0, part.indexOf("="));
 				if (StringUtils.isBlank(key)) {
-					//					myLogger.error("Invalid path spec: " + path
-					//							+ ".  No key found. Ignoring this mountpoint...");
+					// myLogger.error("Invalid path spec: " + path
+					// + ".  No key found. Ignoring this mountpoint...");
 					throw new Exception("Invalid path spec: " + path
 							+ ".  No key found. Ignoring this mountpoint...");
 				}
@@ -354,9 +349,10 @@ public class User {
 						// myLogger.error("Invalid path spec: "
 						// + path
 						// + ".  No key found. Ignoring this mountpoint...");
-						throw new Exception("Invalid path spec: "
-								+ path
-								+ ".  No key found. Ignoring this mountpoint...");
+						throw new Exception(
+								"Invalid path spec: "
+										+ path
+										+ ".  No key found. Ignoring this mountpoint...");
 					}
 				} catch (final Exception e) {
 					// myLogger.error("Invalid path spec: " + path
@@ -410,7 +406,7 @@ public class User {
 				url = url + additionalUrl;
 
 			} catch (final Exception e) {
-				// myLogger.error(e);
+				// myLogger.error(e.getLocalizedMessage(), e);
 				throw e;
 			}
 
@@ -430,7 +426,7 @@ public class User {
 				url = url + additionalUrl;
 
 			} catch (final Exception e) {
-				// myLogger.error(e);
+				// myLogger.error(e.getLocalizedMessage(), e);
 				throw e;
 			}
 		} else if (path.contains("${GLOBUS_USER_HOME}")) {
@@ -441,7 +437,7 @@ public class User {
 						fqan);
 				userDnPath = false;
 			} catch (final Exception e) {
-				// myLogger.error(e);
+				// myLogger.error(e.getLocalizedMessage(), e);
 				throw e;
 			}
 
@@ -451,7 +447,7 @@ public class User {
 						fqan) + "/.globus/scratch";
 				userDnPath = false;
 			} catch (final Exception e) {
-				// myLogger.error(e);
+				// myLogger.error(e.getLocalizedMessage(), e);
 				throw e;
 			}
 		} else {
@@ -528,7 +524,7 @@ public class User {
 							if (ENABLE_FILESYSTEM_CACHE) {
 								try {
 									userdao.saveOrUpdate(User.this);
-								} catch (Exception e) {
+								} catch (final Exception e) {
 									myLogger.debug("Could not save filesystem state for fs "
 											+ urlTemp
 											+ ": "
@@ -546,7 +542,6 @@ public class User {
 
 		final String site = AbstractServiceInterface.informationManager
 				.getSiteForHostOrUrl(url);
-
 
 		MountPoint mp = null;
 
@@ -607,41 +602,43 @@ public class User {
 
 		final Map<String, MountPoint> successfullMountPoints = Collections
 				.synchronizedMap(new HashMap<String, MountPoint>());
-		final Map<String, Exception> unsuccessfullMountPoints =
-				Collections
+		final Map<String, Exception> unsuccessfullMountPoints = Collections
 				.synchronizedMap(new HashMap<String, Exception>());
-		Date start = new Date();
+		final Date start = new Date();
 
 		myLogger.debug("Getting mds mountpoints for user: " + getDn());
 
 		Date end;
 
-		boolean lookupMountPointsConcurrently = true;
+		final boolean lookupMountPointsConcurrently = true;
 		if (lookupMountPointsConcurrently) {
 
-			// to check whether dn_subdirs are created already and create them if
+			// to check whether dn_subdirs are created already and create them
+			// if
 			// not (in background)
-			int df_p = ServerPropertiesManager.getConcurrentMountPointLookups();
+			final int df_p = ServerPropertiesManager
+					.getConcurrentMountPointLookups();
 
 			final ExecutorService backgroundExecutorForFilesystemCache = Executors
 					.newFixedThreadPool(2);
-			// final ExecutorService backgroundExecutorForFilesystemCache = null;
+			// final ExecutorService backgroundExecutorForFilesystemCache =
+			// null;
 
 			final ExecutorService executor = Executors.newFixedThreadPool(df_p);
 
-			Date intermediate = new Date();
+			final Date intermediate = new Date();
 
 			myLogger.debug("Login benchmark intermediate: All executors created: "
 					+ (intermediate.getTime() - start.getTime()) + " ms");
 
-			Map<String, VO> vos = getFqans();
+			final Map<String, VO> vos = getFqans();
 
 			myLogger.debug("Login benchmark intermediate : all Fqans retrieved: "
 					+ (new Date().getTime() - start.getTime()) + " ms");
 
 			for (final String fqan : vos.keySet()) {
 
-				Thread t = new Thread() {
+				final Thread t = new Thread() {
 					@Override
 					public void run() {
 						myLogger.debug("Getting datalocations for vo " + fqan
@@ -653,7 +650,8 @@ public class User {
 								+ " finished.");
 						// final Date end = new Date();
 						// myLogger.debug("Querying for data locations for all sites and+ "
-						// + fqan + " took: " + (end.getTime() - start.getTime())
+						// + fqan + " took: " + (end.getTime() -
+						// start.getTime())
 						// + " ms.");
 						for (final String server : mpUrl.keySet()) {
 
@@ -667,48 +665,53 @@ public class User {
 									// X.p("\t" + uniqueString
 									// + ": creating....");
 
-									successfullMountPoints.put(uniqueString, null);
+									successfullMountPoints.put(uniqueString,
+											null);
 
 									myLogger.debug("Creating mountpoint for: "
-											+ server + " / " + path + " / " + fqan
-											+ "....");
+											+ server + " / " + path + " / "
+											+ fqan + "....");
 
-									final MountPoint mp = createMountPoint(server, path,
+									final MountPoint mp = createMountPoint(
+											server,
+											path,
 											fqan,
 											(ENABLE_FILESYSTEM_CACHE) ? backgroundExecutorForFilesystemCache
 													: null);
 
 									myLogger.debug("Creating mountpoint for: "
-											+ server + " / " + path + " / " + fqan
-											+ " finished.");
+											+ server + " / " + path + " / "
+											+ fqan + " finished.");
 
-									successfullMountPoints.put(server + "_" + path
-											+ "_" + fqan, mp);
+									successfullMountPoints.put(server + "_"
+											+ path + "_" + fqan, mp);
 
-									// X.p("\t" + server + "/" + path + "/" + fqan
+									// X.p("\t" + server + "/" + path + "/" +
+									// fqan
 									// + ": created");
 
 									if (mp != null) {
 										mps.add(mp);
-										successfullMountPoints
-										.put(uniqueString, mp);
+										successfullMountPoints.put(
+												uniqueString, mp);
 									} else {
-										successfullMountPoints.remove(uniqueString);
+										successfullMountPoints
+												.remove(uniqueString);
 										unsuccessfullMountPoints
-										.put(uniqueString,
-												new Exception(
-														"MountPoint not created, unknown reason."));
+												.put(uniqueString,
+														new Exception(
+																"MountPoint not created, unknown reason."));
 									}
 								} catch (final Exception e) {
-									// X.p(server + "/" + "/" + fqan + ": failed : "
+									// X.p(server + "/" + "/" + fqan +
+									// ": failed : "
 									// + e.getLocalizedMessage());
 									// e.printStackTrace();
 									successfullMountPoints.remove(uniqueString);
-									unsuccessfullMountPoints.put(uniqueString, e);
-									myLogger.error(
-											"Can't use mountpoint " + server
-											+ " / " + fqan
-											+ ": "
+									unsuccessfullMountPoints.put(uniqueString,
+											e);
+									myLogger.error("Can't use mountpoint "
+											+ server + " / " + fqan + ": "
 											+ e.getLocalizedMessage());
 								}
 							}
@@ -718,7 +721,6 @@ public class User {
 				};
 				executor.execute(t);
 			}
-
 
 			end = new Date();
 			myLogger.debug("Login benchmark: All mountpoint lookup threads started: "
@@ -730,8 +732,8 @@ public class User {
 
 			try {
 				executor.awaitTermination(2, TimeUnit.MINUTES);
-			} catch (InterruptedException e) {
-				myLogger.error(e);
+			} catch (final InterruptedException e) {
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 
 			// X.p("Finished creating mountpoints...");
@@ -792,9 +794,9 @@ public class User {
 							} else {
 								successfullMountPoints.remove(uniqueString);
 								unsuccessfullMountPoints
-								.put(uniqueString,
-										new Exception(
-												"MountPoint not created, unknown reason."));
+										.put(uniqueString,
+												new Exception(
+														"MountPoint not created, unknown reason."));
 							}
 						} catch (final Exception e) {
 							// X.p(server + "/" + "/" + fqan + ": failed : "
@@ -814,22 +816,19 @@ public class User {
 		myLogger.debug("Login benchmark: All mountpoint lookup threads finished: "
 				+ (new Date().getTime() - end.getTime()) + " ms");
 
-		for (String us : successfullMountPoints.keySet()) {
+		for (final String us : successfullMountPoints.keySet()) {
 			if (successfullMountPoints.get(us) == null) {
 				unsuccessfullMountPoints.put(us, new Exception(
 						"MountPoint not created. Probably timed out."));
 			}
 		}
-		for (String us : unsuccessfullMountPoints.keySet()) {
+		for (final String us : unsuccessfullMountPoints.keySet()) {
 			successfullMountPoints.remove(us);
 
 			myLogger.error(getDn() + ": Can't connect to mountpoint " + us
 					+ ":\n\t"
 					+ unsuccessfullMountPoints.get(us).getLocalizedMessage());
 		}
-
-
-
 
 		return mps;
 	}
@@ -866,14 +865,14 @@ public class User {
 			tempFolder = getFileSystemManager().getFolderListing(
 					folder.getUrl(), 1);
 		} catch (final Exception e) {
-			// myLogger.error(e);
+			// myLogger.error(e.getLocalizedMessage(), e);
 			myLogger.error(
 					"Error getting folder listing. I suspect this to be a bug in the commons-vfs-grid library. Sleeping for 1 seconds and then trying again...",
 					e);
 			try {
 				Thread.sleep(1000);
 			} catch (final InterruptedException e1) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 			tempFolder = getFileSystemManager().getFolderListing(
 					folder.getUrl(), 1);
@@ -925,11 +924,8 @@ public class User {
 					|| Constants.ALLJOBS_INCL_BATCH_KEY.equals(application)) {
 				jobs = jobdao.findJobByDN(getDn(), inclBatchJobs);
 			} else {
-				jobs = jobdao
-						.findJobByDNPerApplication(
-								getDn(),
-								application,
-								inclBatchJobs);
+				jobs = jobdao.findJobByDNPerApplication(getDn(), application,
+						inclBatchJobs);
 			}
 
 			if (refresh) {
@@ -939,7 +935,7 @@ public class User {
 			return jobs;
 
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			throw new RuntimeException(e);
 		}
 
@@ -951,10 +947,10 @@ public class User {
 		if (cachedUniqueGroupnames == null) {
 
 			cachedUniqueGroupnames = new TreeSet<String>();
-			Iterator<String> it = getFqans().keySet().iterator();
+			final Iterator<String> it = getFqans().keySet().iterator();
 
 			while (it.hasNext()) {
-				String fqan = it.next();
+				final String fqan = it.next();
 				cachedUniqueGroupnames.add(getUniqueGroupname(fqan));
 			}
 		}
@@ -988,7 +984,7 @@ public class User {
 			final List<Job> archivedJobs = Collections
 					.synchronizedList(new LinkedList<Job>());
 
-			int noArchiveLocations = getArchiveLocations().size();
+			final int noArchiveLocations = getArchiveLocations().size();
 
 			if (noArchiveLocations <= 0) {
 				return archivedJobs;
@@ -999,7 +995,7 @@ public class User {
 
 			for (final String archiveLocation : getArchiveLocations().values()) {
 
-				Thread t = new Thread() {
+				final Thread t = new Thread() {
 					@Override
 					public void run() {
 
@@ -1009,23 +1005,23 @@ public class User {
 						try {
 							jobObjects = getArchivedJobsFromFileSystem(archiveLocation);
 							if (StringUtils.isBlank(application)) {
-								for (Job job : jobObjects) {
+								for (final Job job : jobObjects) {
 									archivedJobs.add(job);
 								}
 							} else {
 
-								for (Job job : jobObjects) {
+								for (final Job job : jobObjects) {
 
-									String app = job.getJobProperties().get(
-											Constants.APPLICATIONNAME_KEY);
+									final String app = job.getJobProperties()
+											.get(Constants.APPLICATIONNAME_KEY);
 
 									if (application.equals(app)) {
 										archivedJobs.add(job);
 									}
 								}
 							}
-						} catch (RemoteFileSystemException e) {
-							myLogger.error(e);
+						} catch (final RemoteFileSystemException e) {
+							myLogger.error(e.getLocalizedMessage(), e);
 						}
 
 					}
@@ -1040,11 +1036,10 @@ public class User {
 			return archivedJobs;
 
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
-
 
 	@Transient
 	private List<Job> getArchivedJobsFromFileSystem(String fs)
@@ -1054,7 +1049,7 @@ public class User {
 			fs = getDefaultArchiveLocation();
 		}
 
-		if ( fs == null ) {
+		if (fs == null) {
 			return new LinkedList<Job>();
 		}
 
@@ -1063,22 +1058,22 @@ public class User {
 			final List<Job> jobs = Collections
 					.synchronizedList(new LinkedList<Job>());
 
-			GridFile file = ls(fs, 1);
+			final GridFile file = ls(fs, 1);
 
 			final ExecutorService executor = Executors
 					.newFixedThreadPool(ServerPropertiesManager
 							.getConcurrentArchivedJobLookupsPerFilesystem());
 
 			for (final GridFile f : file.getChildren()) {
-				Thread t = new Thread() {
+				final Thread t = new Thread() {
 					@Override
 					public void run() {
 
 						try {
-							Job job = loadJobFromFilesystem(f.getUrl());
+							final Job job = loadJobFromFilesystem(f.getUrl());
 							jobs.add(job);
 
-						} catch (NoSuchJobException e) {
+						} catch (final NoSuchJobException e) {
 							myLogger.debug("No job for url: " + f.getUrl());
 						}
 					}
@@ -1090,10 +1085,9 @@ public class User {
 
 			try {
 				executor.awaitTermination(2, TimeUnit.MINUTES);
-			} catch (InterruptedException e) {
-				myLogger.error(e);
+			} catch (final InterruptedException e) {
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
-
 
 			return jobs;
 
@@ -1119,8 +1113,8 @@ public class User {
 	public BatchJob getBatchJobFromDatabase(final String batchJobname)
 			throws NoSuchJobException {
 
-		final BatchJob job = batchJobDao.findJobByDN(getCred()
-				.getDn(), batchJobname);
+		final BatchJob job = batchJobDao.findJobByDN(getCred().getDn(),
+				batchJobname);
 
 		return job;
 
@@ -1180,24 +1174,24 @@ public class User {
 				Constants.DEFAULT_JOB_ARCHIVE_LOCATION);
 
 		if (!StringUtils.isBlank(defArcLoc)) {
-			myLogger.info("Using default archive location for user "
-					+ getDn() + ": " + defArcLoc);
+			myLogger.info("Using default archive location for user " + getDn()
+					+ ": " + defArcLoc);
 
 			return defArcLoc;
 		}
 
-		String defFqan = ServerPropertiesManager
+		final String defFqan = ServerPropertiesManager
 				.getDefaultFqanForArchivedJobDirectory();
 
 		// using backend default fqan if configured
 		if (StringUtils.isNotBlank(defFqan)) {
-			Set<MountPoint> mps = df(defFqan);
-			for (MountPoint mp : mps) {
+			final Set<MountPoint> mps = df(defFqan);
+			for (final MountPoint mp : mps) {
 				if (!mp.isVolatileFileSystem()) {
 					defArcLoc = mp.getRootUrl()
 							+ "/"
 							+ ServerPropertiesManager
-							.getArchivedJobsDirectoryName();
+									.getArchivedJobsDirectoryName();
 					addArchiveLocation(
 							Constants.JOB_ARCHIVE_LOCATION_AUTO + mp.getAlias(),
 							defArcLoc);
@@ -1210,17 +1204,15 @@ public class User {
 			}
 		}
 
-
-
 		// to be removed once we switch to new backend
 		Set<MountPoint> mps = df("/nz/nesi");
-		for (MountPoint mp : mps) {
+		for (final MountPoint mp : mps) {
 			if (!mp.isVolatileFileSystem()) {
 
 				defArcLoc = mp.getRootUrl()
 						+ "/"
 						+ ServerPropertiesManager
-						.getArchivedJobsDirectoryName();
+								.getArchivedJobsDirectoryName();
 				addArchiveLocation(
 						Constants.JOB_ARCHIVE_LOCATION_AUTO + mp.getAlias(),
 						defArcLoc);
@@ -1230,11 +1222,9 @@ public class User {
 		}
 
 		if (mps.size() > 0) {
-			MountPoint mp = mps.iterator().next();
-			defArcLoc = mp.getRootUrl()
-					+ "/"
-					+ ServerPropertiesManager
-					.getArchivedJobsDirectoryName();
+			final MountPoint mp = mps.iterator().next();
+			defArcLoc = mp.getRootUrl() + "/"
+					+ ServerPropertiesManager.getArchivedJobsDirectoryName();
 
 			addArchiveLocation(
 					Constants.JOB_ARCHIVE_LOCATION_AUTO + mp.getAlias(),
@@ -1243,11 +1233,11 @@ public class User {
 		} else {
 			mps = df("/ARCS/BeSTGRID/Drug_discovery/Local");
 			if (mps.size() > 0) {
-				MountPoint mp = mps.iterator().next();
+				final MountPoint mp = mps.iterator().next();
 				defArcLoc = mp.getRootUrl()
 						+ "/"
 						+ ServerPropertiesManager
-						.getArchivedJobsDirectoryName();
+								.getArchivedJobsDirectoryName();
 
 				addArchiveLocation(
 						Constants.JOB_ARCHIVE_LOCATION_AUTO + mp.getAlias(),
@@ -1255,11 +1245,11 @@ public class User {
 			} else {
 				mps = df("/ARCS/BeSTGRID");
 				if (mps.size() > 0) {
-					MountPoint mp = mps.iterator().next();
+					final MountPoint mp = mps.iterator().next();
 					defArcLoc = mp.getRootUrl()
 							+ "/"
 							+ ServerPropertiesManager
-							.getArchivedJobsDirectoryName();
+									.getArchivedJobsDirectoryName();
 
 					addArchiveLocation(
 							Constants.JOB_ARCHIVE_LOCATION_AUTO + mp.getAlias(),
@@ -1270,11 +1260,11 @@ public class User {
 					if (mps.size() == 0) {
 						return null;
 					}
-					MountPoint mp = mps.iterator().next();
+					final MountPoint mp = mps.iterator().next();
 					defArcLoc = mp.getRootUrl()
 							+ "/"
 							+ ServerPropertiesManager
-							.getArchivedJobsDirectoryName();
+									.getArchivedJobsDirectoryName();
 
 					addArchiveLocation(
 							Constants.JOB_ARCHIVE_LOCATION_AUTO + mp.getAlias(),
@@ -1287,10 +1277,8 @@ public class User {
 
 		userdao.saveOrUpdate(this);
 
-
 		myLogger.debug("Using temporary default archive location for user "
-				+ getDn()
-				+ ": " + defArcLoc);
+				+ getDn() + ": " + defArcLoc);
 
 		return defArcLoc;
 	}
@@ -1345,8 +1333,8 @@ public class User {
 
 				String uri = null;
 
-				uri = getFileSystemManager()
-						.resolveFileSystemHomeDirectory(filesystemRoot, fqan);
+				uri = getFileSystemManager().resolveFileSystemHomeDirectory(
+						filesystemRoot, fqan);
 				myLogger.debug("Found filesystem home dir for: "
 						+ filesystemRoot + " / " + fqan + ": " + uri);
 
@@ -1428,7 +1416,7 @@ public class User {
 
 			if (jobnameOrUrl.startsWith("gridftp://")) {
 
-				for (Job archivedJob : getArchivedJobs(null)) {
+				for (final Job archivedJob : getArchivedJobs(null)) {
 					if (job.getJobProperty(Constants.JOBDIRECTORY_KEY).equals(
 							jobnameOrUrl)) {
 						return job;
@@ -1483,9 +1471,8 @@ public class User {
 
 		if ((old_status != JobConstants.EXTERNAL_HANDLE_READY)
 				&& (old_status != JobConstants.UNSUBMITTED)
-				&& (now.getTime() < (lastCheck.getTime()
-						+ (ServerPropertiesManager
-								.getWaitTimeBetweenJobStatusChecks() * 1000)))) {
+				&& (now.getTime() < (lastCheck.getTime() + (ServerPropertiesManager
+						.getWaitTimeBetweenJobStatusChecks() * 1000)))) {
 			myLogger.debug("Last check for job "
 					+ jobname
 					+ " was: "
@@ -1541,7 +1528,7 @@ public class User {
 						batchJobDao.saveOrUpdate(mpj);
 					} catch (final NoSuchJobException e) {
 						// well
-						myLogger.error(e);
+						myLogger.error(e.getLocalizedMessage(), e);
 					}
 				}
 			}
@@ -1709,7 +1696,7 @@ public class User {
 
 				if (getFileSystemManager().fileExists(grisuJobPropertiesFile)) {
 
-					Object cacheJob = AbstractServiceInterface
+					final Object cacheJob = AbstractServiceInterface
 							.getFromSessionCache(grisuJobPropertiesFile);
 
 					if (cacheJob != null) {
@@ -1730,14 +1717,14 @@ public class User {
 
 						return job;
 					} catch (final Exception e) {
-						myLogger.error(e);
-						throw new NoSuchJobException("Can't find job at location: "
-								+ url);
+						myLogger.error(e.getLocalizedMessage(), e);
+						throw new NoSuchJobException(
+								"Can't find job at location: " + url);
 					} finally {
 						try {
 							fin.close();
 						} catch (final Exception e) {
-							myLogger.error(e);
+							myLogger.error(e.getLocalizedMessage(), e);
 							throw new NoSuchJobException(
 									"Can't find job at location: " + url);
 						}
@@ -1748,7 +1735,8 @@ public class User {
 							+ url);
 				}
 			} catch (final RemoteFileSystemException e) {
-				throw new NoSuchJobException("Can't find job at location: " + url);
+				throw new NoSuchJobException("Can't find job at location: "
+						+ url);
 			}
 		}
 	}
@@ -1763,8 +1751,8 @@ public class User {
 		try {
 
 			if (recursion_level == 0) {
-				final GridFile file = getFileSystemManager()
-						.getFolderListing(directory, 0);
+				final GridFile file = getFileSystemManager().getFolderListing(
+						directory, 0);
 				return file;
 			}
 
@@ -1805,7 +1793,7 @@ public class User {
 	 */
 	public MountPoint mountFileSystem(final String root, final String name,
 			final boolean useHomeDirectory, String site)
-					throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		return mountFileSystem(root, name, getCred(), useHomeDirectory, site);
 	}
@@ -1837,7 +1825,7 @@ public class User {
 			final ProxyCredential cred, final boolean useHomeDirectory,
 			final String site) throws RemoteFileSystemException {
 
-		MountPoint new_mp = getFileSystemManager().mountFileSystem(uri,
+		final MountPoint new_mp = getFileSystemManager().mountFileSystem(uri,
 				mountPointName, cred, useHomeDirectory, site);
 
 		if (!mountPoints.contains(new_mp)) {
@@ -1853,7 +1841,7 @@ public class User {
 
 	public MountPoint mountFileSystem(final String root, final String name,
 			final String fqan, final boolean useHomeDirectory, final String site)
-					throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		if ((fqan == null) || Constants.NON_VO_FQAN.equals(fqan)) {
 			return mountFileSystem(root, name, useHomeDirectory, site);
@@ -1861,7 +1849,7 @@ public class User {
 
 			final Map<String, VO> temp = getFqans();
 
-			final ProxyCredential vomsProxyCred =getCred(fqan);
+			final ProxyCredential vomsProxyCred = getCred(fqan);
 
 			return mountFileSystem(root, name, vomsProxyCred, useHomeDirectory,
 					site);
@@ -2033,8 +2021,8 @@ public class User {
 			clearMountPointCache(value);
 			return;
 		} else if (Constants.JOB_ARCHIVE_LOCATION.equals(key)) {
-			String[] temp = value.split(";");
-			String alias = temp[0];
+			final String[] temp = value.split(";");
+			final String alias = temp[0];
 			String url = temp[0];
 			if (temp.length == 2) {
 				url = temp[1];

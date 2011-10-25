@@ -11,20 +11,20 @@ public class StringHelpers {
 
 	public static void main(String[] args) {
 
-		Map<String, String> map = new LinkedHashMap<String, String>();
+		final Map<String, String> map = new LinkedHashMap<String, String>();
 		map.put("file://whatever1", "path/whatever1");
 		map.put("file://whatever2", "path/whatever2");
 		map.put("file://whatever3", "path/whatever2");
 		map.put("file://whatever4", "path/whatever2");
 
-		String string = mapToString(map);
+		final String string = mapToString(map);
 
 		System.out.println("String: " + string);
 
-		Map<String, String> map2 = stringToMap(string);
+		final Map<String, String> map2 = stringToMap(string);
 
 		System.out.println("Map:");
-		for (String key : map2.keySet()) {
+		for (final String key : map2.keySet()) {
 			System.out.println(key + " / " + map2.get(key));
 		}
 
@@ -32,8 +32,8 @@ public class StringHelpers {
 
 	public static String mapToString(Map<String, String> map) {
 
-		List<String> values = new LinkedList<String>();
-		for (String key : map.keySet()) {
+		final List<String> values = new LinkedList<String>();
+		for (final String key : map.keySet()) {
 			values.add("[" + key + "=" + map.get(key) + "]");
 		}
 		return StringUtils.join(values, "");
@@ -41,12 +41,12 @@ public class StringHelpers {
 
 	public static Map<String, String> stringToMap(String string) {
 
-		Map<String, String> result = new LinkedHashMap<String, String>();
+		final Map<String, String> result = new LinkedHashMap<String, String>();
 
 		if (StringUtils.isBlank(string)) {
 			return result;
 		}
-		String[] strings = string.split("\\]\\[");
+		final String[] strings = string.split("\\]\\[");
 		if (strings.length == 0) {
 			return result;
 		}
@@ -56,9 +56,9 @@ public class StringHelpers {
 		strings[strings.length - 1] = strings[strings.length - 1].substring(0,
 				strings[strings.length - 1].length() - 1);
 
-		for (String s : strings) {
-			String key = s.substring(0, s.indexOf("="));
-			String value = s.substring(s.indexOf("=") + 1);
+		for (final String s : strings) {
+			final String key = s.substring(0, s.indexOf("="));
+			final String value = s.substring(s.indexOf("=") + 1);
 			result.put(key, value);
 		}
 		return result;

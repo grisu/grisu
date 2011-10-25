@@ -33,9 +33,10 @@ import java.util.TimerTask;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -77,14 +78,14 @@ public class RunningJobManager implements EventSubscriber {
 					updateTimer.cancel();
 				}
 			} catch (final Exception e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 		}
 
 	}
 
-	static final Logger myLogger = Logger.getLogger(RunningJobManager.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(RunningJobManager.class.getName());
 
 	public static void updateJobList(ServiceInterface si,
 			EventList<JobObject> jobObjectList, DtoJobs newJobs) {
@@ -116,7 +117,7 @@ public class RunningJobManager implements EventSubscriber {
 				final JobObject jo = new JobObject(si, newJob);
 				jobObjectList.add(jo);
 			} catch (final NoSuchJobException e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 		}
 
@@ -298,7 +299,7 @@ public class RunningJobManager implements EventSubscriber {
 
 	public List<GlazedFile> getFinishedOutputFilesForBatchJob(
 			BatchJobObject batchJob, String[] patterns)
-					throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		final List<GlazedFile> files = new LinkedList<GlazedFile>();
 
@@ -326,7 +327,7 @@ public class RunningJobManager implements EventSubscriber {
 							refreshOnBackend);
 					cachedAllSingleJobs.put(jobname, temp);
 				} catch (final RuntimeException e) {
-					myLogger.error(e);
+					myLogger.error(e.getLocalizedMessage(), e);
 					return null;
 				}
 
@@ -394,7 +395,7 @@ public class RunningJobManager implements EventSubscriber {
 		if (event instanceof NewBatchJobEvent) {
 			final NewBatchJobEvent ev = (NewBatchJobEvent) event;
 			GrisuRegistryManager.getDefault(si).getUserEnvironmentManager()
-			.getCurrentBatchJobnames(true);
+					.getCurrentBatchJobnames(true);
 
 			new Thread() {
 				@Override
@@ -417,7 +418,7 @@ public class RunningJobManager implements EventSubscriber {
 			final NewJobEvent ev = (NewJobEvent) event;
 
 			GrisuRegistryManager.getDefault(si).getUserEnvironmentManager()
-			.getCurrentJobnames(true);
+					.getCurrentJobnames(true);
 			new Thread() {
 				@Override
 				public void run() {

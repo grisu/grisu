@@ -19,23 +19,27 @@ import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 
 	public enum Type implements Comparable<Type> {
 
-		FILETYPE_ROOT, FILETYPE_SITE, FILETYPE_MOUNTPOINT, FILETYPE_FOLDER, FILETYPE_FILE
+		FILETYPE_ROOT,
+		FILETYPE_SITE,
+		FILETYPE_MOUNTPOINT,
+		FILETYPE_FOLDER,
+		FILETYPE_FILE
 	}
 
-	static final Logger myLogger = Logger
-			.getLogger(GlazedFile.class.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(GlazedFile.class);
 
 	public static final DataFlavor GLAZED_FILE_FLAVOR = new DataFlavor(
 			GlazedFile.class, "Grisu file");
 
 	public static final DataFlavor[] DATA_FLAVORS = new DataFlavor[] {
-		GLAZED_FILE_FLAVOR, DataFlavor.stringFlavor };
+			GLAZED_FILE_FLAVOR, DataFlavor.stringFlavor };
 
 	public static final String LOCAL_FILESYSTEM = "Local";
 
@@ -207,7 +211,7 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 		try {
 			lastModified = si.lastModified(url);
 		} catch (final RemoteFileSystemException e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			lastModified = -1L;
 		}
 
@@ -243,7 +247,7 @@ public class GlazedFile implements Comparable<GlazedFile>, Transferable {
 				try {
 					size = si.getFileSize(getUrl());
 				} catch (final RemoteFileSystemException e) {
-					myLogger.error(e);
+					myLogger.error(e.getLocalizedMessage(), e);
 					size = -1;
 				}
 			}

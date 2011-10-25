@@ -19,7 +19,6 @@ import javax.swing.Action;
 import org.bushe.swing.event.EventSubscriber;
 import org.jdesktop.swingx.JXTaskPane;
 
-
 public class GrisuMonitorNavigationTaskPaneBatch extends JXTaskPane implements
 		EventSubscriber<NewBatchJobEvent> {
 

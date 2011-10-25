@@ -9,9 +9,9 @@ import java.util.regex.Matcher;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-
 
 /**
  * This class creats a job description document out of the job properties using
@@ -39,9 +39,8 @@ public class SimpleJsdlBuilder {
 	 * @return the jsdl document
 	 */
 
-	static final Logger myLogger = Logger.getLogger(SimpleJsdlBuilder.class
-			.getName());
-
+	static final Logger myLogger = LoggerFactory
+			.getLogger(SimpleJsdlBuilder.class.getName());
 
 	public static Document buildJsdl(
 			final Map<JobSubmissionProperty, String> jobProperties) {
@@ -82,7 +81,7 @@ public class SimpleJsdlBuilder {
 				} else {
 					jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"
 							+ jp.toString() + "_XXX", "<HostName>"
-									+ jobProperties.get(jp) + "</HostName>");
+							+ jobProperties.get(jp) + "</HostName>");
 				}
 
 			} else if (jp.equals(JobSubmissionProperty.WALLTIME_IN_MINUTES)) {
@@ -103,7 +102,8 @@ public class SimpleJsdlBuilder {
 						.extractExecutable(jobProperties.get(jp));
 				final StringBuffer exeAndArgsElements = new StringBuffer();
 				exeAndArgsElements.append("<Executable>");
-				exeAndArgsElements.append(StringEscapeUtils.escapeXml(executable));
+				exeAndArgsElements.append(StringEscapeUtils
+						.escapeXml(executable));
 				exeAndArgsElements.append("</Executable>");
 
 				for (final String arg : CommandlineHelpers
@@ -112,7 +112,7 @@ public class SimpleJsdlBuilder {
 					exeAndArgsElements.append(StringEscapeUtils.escapeXml(arg));
 					exeAndArgsElements.append("</Argument>");
 				}
-				String replacement = Matcher
+				final String replacement = Matcher
 						.quoteReplacement(exeAndArgsElements.toString());
 				jsdlTemplateString = jsdlTemplateString.replaceAll(
 						"XXX_" + jp.toString() + "_XXX", replacement);
@@ -128,8 +128,8 @@ public class SimpleJsdlBuilder {
 				final StringBuffer modulesElements = new StringBuffer();
 				for (final String module : modulesString.split(",")) {
 					modulesElements
-					.append("<Module xmlns=\"http://arcs.org.au/jsdl/jsdl-grisu\">"
-							+ module + "</Module>");
+							.append("<Module xmlns=\"http://arcs.org.au/jsdl/jsdl-grisu\">"
+									+ module + "</Module>");
 				}
 				jsdlTemplateString = jsdlTemplateString.replaceAll(
 						"XXX_" + jp.toString() + "_XXX",
@@ -152,11 +152,11 @@ public class SimpleJsdlBuilder {
 								+ inputFileUrls.get(inputFileUrl)
 								+ "</FileName>\n");
 						dataStagingElements
-						.append("\n<FileSystemName></FileSystemName>\n"
-								+ "<Source>\n<URI>");
+								.append("\n<FileSystemName></FileSystemName>\n"
+										+ "<Source>\n<URI>");
 						dataStagingElements.append(inputFileUrl);
 						dataStagingElements
-						.append("</URI>\n</Source>\n</DataStaging>\n");
+								.append("</URI>\n</Source>\n</DataStaging>\n");
 					}
 				}
 
@@ -184,9 +184,9 @@ public class SimpleJsdlBuilder {
 
 				}
 
-				jsdlTemplateString = jsdlTemplateString.replaceAll(
-						"XXX_" + jp.toString() + "_XXX",
-						envElements.toString());
+				jsdlTemplateString = jsdlTemplateString
+						.replaceAll("XXX_" + jp.toString() + "_XXX",
+								envElements.toString());
 			} else {
 				if (jobProperties.get(jp) == null) {
 					jsdlTemplateString = jsdlTemplateString.replaceAll("XXX_"
@@ -206,7 +206,7 @@ public class SimpleJsdlBuilder {
 			result = SeveralXMLHelpers.fromString(jsdlTemplateString);
 		} catch (final Exception e) {
 			// TODO Auto-generated catch block
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			throw new RuntimeException("Couldn't create jsdl document");
 		}
 		return result;

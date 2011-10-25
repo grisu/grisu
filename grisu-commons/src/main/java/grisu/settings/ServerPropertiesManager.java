@@ -12,7 +12,8 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalINIConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages the $HOME/.grisu/grisu-backend.config file.
@@ -72,8 +73,8 @@ public final class ServerPropertiesManager {
 	// public static final String DEFAULT_MULTIPARTJOB_DIR_NAME =
 	// "grisu-multijob-dir";
 
-	static final Logger myLogger = Logger
-			.getLogger(ServerPropertiesManager.class.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(ServerPropertiesManager.class);
 
 	private static final int DEFAULT_CONCURRENT_JOB_SUBMISSION_RETRIES = 5;
 
@@ -97,7 +98,7 @@ public final class ServerPropertiesManager {
 	// "checkConnectionToMountPoints");
 	// } catch (NoSuchElementException e) {
 	// // doesn't matter
-	// myLogger.debug(e);
+	// myLogger.debug(e.getLocalizedMessage(), e);
 	// return DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS;
 	// }
 	//
@@ -116,12 +117,12 @@ public final class ServerPropertiesManager {
 						"General.closeFilesystemsInBackground");
 			} catch (final NoSuchElementException e) {
 				// doesn't matter
-				// myLogger.debug(e);
+				// myLogger.debug(e.getLocalizedMessage(), e);
 			}
 
 		} catch (final ConfigurationException e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
-			myLogger.debug(e);
+			myLogger.debug(e.getLocalizedMessage());
 		}
 		return useFScache;
 	}
@@ -161,8 +162,9 @@ public final class ServerPropertiesManager {
 		int concurrentThreads = -1;
 		try {
 			concurrentThreads = Integer
-					.parseInt(getServerConfiguration().getString(
-							"ConcurrentThreadSettings.archivedJobsLookupThreadsPerFilesystem"));
+					.parseInt(getServerConfiguration()
+							.getString(
+									"ConcurrentThreadSettings.archivedJobsLookupThreadsPerFilesystem"));
 
 		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -219,9 +221,8 @@ public final class ServerPropertiesManager {
 
 		int concurrentThreads = -1;
 		try {
-			concurrentThreads = Integer
-					.parseInt(getServerConfiguration().getString(
-							"ConcurrentThreadSettings.jobsToBeKilled"));
+			concurrentThreads = Integer.parseInt(getServerConfiguration()
+					.getString("ConcurrentThreadSettings.jobsToBeKilled"));
 
 		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -401,7 +402,7 @@ public final class ServerPropertiesManager {
 				debug = getServerConfiguration().getBoolean("Debug.enabled");
 			} catch (final NoSuchElementException e) {
 				// doesn't matter
-				myLogger.debug(e);
+				myLogger.debug(e.getLocalizedMessage());
 			}
 			if (debug) {
 				// try to create debug directory
@@ -417,7 +418,7 @@ public final class ServerPropertiesManager {
 			}
 		} catch (final ConfigurationException e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
-			myLogger.debug(e);
+			myLogger.debug(e.getLocalizedMessage());
 		}
 		return debug;
 	}
@@ -450,15 +451,16 @@ public final class ServerPropertiesManager {
 
 		try {
 			try {
-				disableFinishedJobStatusCaching = getServerConfiguration().getBoolean("Debug.disableFinishedJobStatusCaching");
+				disableFinishedJobStatusCaching = getServerConfiguration()
+						.getBoolean("Debug.disableFinishedJobStatusCaching");
 			} catch (final NoSuchElementException e) {
 				// doesn't matter
-				// myLogger.debug(e);
+				// myLogger.debug(e.getLocalizedMessage(), e);
 			}
 
 		} catch (final ConfigurationException e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
-			// myLogger.debug(e);
+			// myLogger.debug(e.getLocalizedMessage(), e);
 		}
 		return disableFinishedJobStatusCaching;
 	}
@@ -537,7 +539,7 @@ public final class ServerPropertiesManager {
 		try {
 			conf = getServerConfiguration().getSection("InformationManager");
 		} catch (final ConfigurationException e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage());
 			return null;
 		}
 
@@ -578,7 +580,7 @@ public final class ServerPropertiesManager {
 		try {
 			conf = getServerConfiguration().getSection("MatchMaker");
 		} catch (final ConfigurationException e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage());
 			return null;
 		}
 
@@ -745,7 +747,7 @@ public final class ServerPropertiesManager {
 				return false;
 			}
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage());
 			return true;
 		}
 
@@ -765,12 +767,12 @@ public final class ServerPropertiesManager {
 						"General.fsCache");
 			} catch (final NoSuchElementException e) {
 				// doesn't matter
-				// myLogger.debug(e);
+				// myLogger.debug(e.getLocalizedMessage(), e);
 			}
 
 		} catch (final ConfigurationException e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
-			myLogger.debug(e);
+			myLogger.debug(e.getLocalizedMessage());
 		}
 		return useFScache;
 	}

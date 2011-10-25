@@ -2,9 +2,10 @@ package grisu.backend.hibernate;
 
 import grisu.backend.model.User;
 
-import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.QueryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class takes care of storing users and their properties into the a
@@ -15,7 +16,8 @@ import org.hibernate.QueryException;
  */
 public class UserDAO extends BaseHibernateDAO {
 
-	private static Logger myLogger = Logger.getLogger(UserDAO.class.getName());
+	private static Logger myLogger = LoggerFactory.getLogger(UserDAO.class
+			.getName());
 
 	// TODO improve this (check:
 	// http://www.hibernate.org/hib_docs/v3/reference/en/html/objectstate.html#objectstate-modifying)
@@ -78,7 +80,7 @@ public class UserDAO extends BaseHibernateDAO {
 			}
 
 		} catch (final RuntimeException e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			try {
 				getCurrentSession().getTransaction().rollback();
 			} catch (final Exception er) {

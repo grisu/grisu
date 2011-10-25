@@ -7,7 +7,6 @@ import grisu.control.exceptions.NoSuchJobException;
 
 import java.util.List;
 
-
 /**
  * The JobNameManager takes care that a user does not submit a job with the same
  * name twice. Before you create a Job, take the jobname you want to give your

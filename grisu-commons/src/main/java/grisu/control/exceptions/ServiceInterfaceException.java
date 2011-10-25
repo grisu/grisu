@@ -22,5 +22,4 @@ public class ServiceInterfaceException extends Exception {
 		super(e);
 	}
 
-
 }

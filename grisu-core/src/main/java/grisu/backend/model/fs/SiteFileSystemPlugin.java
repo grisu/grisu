@@ -15,7 +15,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A plugin to list archived and running jobs in a tree-like structure.
@@ -29,8 +30,8 @@ import org.apache.log4j.Logger;
  */
 public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 
-	static final Logger myLogger = Logger.getLogger(SiteFileSystemPlugin.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(SiteFileSystemPlugin.class.getName());
 
 	public static final String IDENTIFIER = "sites";
 	private final static String BASE = (ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
@@ -50,9 +51,9 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 					"Recursion levels other than 1 not supported yet");
 		}
 
-		int index = BASE.length();
-		String importantUrlPart = path.substring(index);
-		String[] tokens = StringUtils.split(importantUrlPart, '/');
+		final int index = BASE.length();
+		final String importantUrlPart = path.substring(index);
+		final String[] tokens = StringUtils.split(importantUrlPart, '/');
 
 		if (tokens.length == 0) {
 			// means root of virtual filesystem, list sites...
@@ -65,7 +66,7 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 				return result;
 			}
 
-			for (GridFile s : getSites()) {
+			for (final GridFile s : getSites()) {
 				result.addChild(s);
 				result.addSites(s.getSites());
 				result.addFqans(s.getFqans());
@@ -84,7 +85,7 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 				return result;
 			}
 
-			for (GridFile mp : getHosts(tokens[0])) {
+			for (final GridFile mp : getHosts(tokens[0])) {
 				result.addChild(mp);
 				result.addSites(mp.getSites());
 				result.addFqans(mp.getFqans());
@@ -104,30 +105,30 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 
 	private Set<GridFile> getHosts(String site) {
 
-		Set<GridFile> result = new TreeSet<GridFile>();
-		Map<String, Set<MountPoint>> hosts = new TreeMap<String, Set<MountPoint>>();
+		final Set<GridFile> result = new TreeSet<GridFile>();
+		final Map<String, Set<MountPoint>> hosts = new TreeMap<String, Set<MountPoint>>();
 
-		for (MountPoint mp : user.getAllMountPoints()) {
+		for (final MountPoint mp : user.getAllMountPoints()) {
 
 			if (mp.getSite().equals(site)) {
-				String host = FileManager.getHost(mp.getRootUrl());
+				final String host = FileManager.getHost(mp.getRootUrl());
 				if (hosts.get(host) == null) {
-					Set<MountPoint> mps = new TreeSet<MountPoint>();
+					final Set<MountPoint> mps = new TreeSet<MountPoint>();
 					mps.add(mp);
 					hosts.put(host, mps);
 				} else {
-					Set<MountPoint> mps = hosts.get(host);
+					final Set<MountPoint> mps = hosts.get(host);
 					mps.add(mp);
 				}
 			}
 		}
 
-		for (String host : hosts.keySet()) {
-			String path = BASE + "/" + site + "/" + host;
-			GridFile file = new GridFile(path, -1L);
+		for (final String host : hosts.keySet()) {
+			final String path = BASE + "/" + site + "/" + host;
+			final GridFile file = new GridFile(path, -1L);
 			file.setIsVirtual(true);
 			file.addSite(site);
-			for (MountPoint mp : hosts.get(host)) {
+			for (final MountPoint mp : hosts.get(host)) {
 				file.addFqan(mp.getFqan());
 			}
 			result.add(file);
@@ -139,16 +140,17 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 
 	private GridFile getPath(String[] pathTokens) {
 
-		String site = pathTokens[0];
-		String host = pathTokens[1];
+		final String site = pathTokens[0];
+		final String host = pathTokens[1];
 
-		String path = StringUtils.join(pathTokens, "/", 2, pathTokens.length);
+		final String path = StringUtils.join(pathTokens, "/", 2,
+				pathTokens.length);
 
-		String requestedFileWithoutProtocol = host + "/" + path;
+		final String requestedFileWithoutProtocol = host + "/" + path;
 
-		Set<MountPoint> mountPointsFound = new TreeSet<MountPoint>();
+		final Set<MountPoint> mountPointsFound = new TreeSet<MountPoint>();
 
-		for (MountPoint mp : user.getAllMountPoints()) {
+		for (final MountPoint mp : user.getAllMountPoints()) {
 			if (!mp.getSite().equals(site) || !mp.getRootUrl().contains(host)) {
 				continue;
 			}
@@ -161,22 +163,21 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 		}
 
 		if (mountPointsFound.size() > 0) {
-			String gridPath = BASE + "/" + site + "/" + host + "/" + path;
+			final String gridPath = BASE + "/" + site + "/" + host + "/" + path;
 			// will always be directory since it's below mountpoint level
-			GridFile result = new GridFile(gridPath, -1L);
+			final GridFile result = new GridFile(gridPath, -1L);
 			// is virtual because can't be accessed directly
 			result.setIsVirtual(true);
 			result.setPath(gridPath);
 			result.addSite(site);
-			Map<String, Set<MountPoint>> childs = new TreeMap<String, Set<MountPoint>>();
-			for (MountPoint mp : mountPointsFound) {
+			final Map<String, Set<MountPoint>> childs = new TreeMap<String, Set<MountPoint>>();
+			for (final MountPoint mp : mountPointsFound) {
 				result.addSite(mp.getSite());
 				result.addFqan(mp.getFqan());
 
 				String mpRestPath = FileManager.removeTrailingSlash(mp
 						.getRootUrl());
-				mpRestPath = mpRestPath.substring(
-						mpRestPath
+				mpRestPath = mpRestPath.substring(mpRestPath
 						.indexOf(requestedFileWithoutProtocol)
 						+ requestedFileWithoutProtocol.length());
 				mpRestPath = StringUtils.removeStart(mpRestPath, "/");
@@ -184,12 +185,11 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 				if (StringUtils.isBlank(mpRestPath)) {
 
 					return listFiles(BASE + "/" + site + "/" + host + "/"
-							+ path,
-							mp.getRootUrl());
+							+ path, mp.getRootUrl());
 				}
 
 				String child = null;
-				int index = mpRestPath.indexOf("/");
+				final int index = mpRestPath.indexOf("/");
 				if (index < 0) {
 					child = mpRestPath;
 				} else {
@@ -197,20 +197,20 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 				}
 
 				if (childs.get(child) == null) {
-					Set<MountPoint> tempMPs = new TreeSet<MountPoint>();
+					final Set<MountPoint> tempMPs = new TreeSet<MountPoint>();
 					tempMPs.add(mp);
 					childs.put(child, tempMPs);
 				} else {
-					Set<MountPoint> tempMPs = childs.get(child);
+					final Set<MountPoint> tempMPs = childs.get(child);
 					tempMPs.add(mp);
 				}
 			}
 
-			for (String child : childs.keySet()) {
-				GridFile childFile = new GridFile(gridPath + "/" + child);
+			for (final String child : childs.keySet()) {
+				final GridFile childFile = new GridFile(gridPath + "/" + child);
 				childFile.setIsVirtual(true);
 				childFile.setPath(gridPath + "/" + child);
-				for (MountPoint mp : childs.get(child)) {
+				for (final MountPoint mp : childs.get(child)) {
 					childFile.addFqan(mp.getFqan());
 					childFile.addSite(mp.getSite());
 					result.addFqan(mp.getFqan());
@@ -221,38 +221,39 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 			return result;
 		} else {
 
-			String gridPath = BASE + "/" + site + "/" + host + "/" + path;
+			final String gridPath = BASE + "/" + site + "/" + host + "/" + path;
 			// will always be directory since it's below mountpoint level
-			GridFile result = new GridFile(gridPath, -1L);
+			final GridFile result = new GridFile(gridPath, -1L);
 			// is virtual because can't be accessed directly
 			result.setIsVirtual(true);
 			result.setPath(gridPath);
 			result.addSite(site);
 
-			Map<String, Set<MountPoint>> mountPointsResponsible = new TreeMap<String, Set<MountPoint>>();
-			for (MountPoint mp : user.getAllMountPoints()) {
+			final Map<String, Set<MountPoint>> mountPointsResponsible = new TreeMap<String, Set<MountPoint>>();
+			for (final MountPoint mp : user.getAllMountPoints()) {
 				if (!mp.getSite().equals(site)
 						|| !mp.getRootUrl().contains(host)) {
 					continue;
 				}
 
-				String mpPath = mp.getRootUrl().substring(
+				final String mpPath = mp.getRootUrl().substring(
 						mp.getRootUrl().indexOf(host));
 				// X.p("PATH: " + mpPath);
 
 				if (requestedFileWithoutProtocol.contains(mpPath)) {
 
-					String restPath = requestedFileWithoutProtocol
+					final String restPath = requestedFileWithoutProtocol
 							.substring(mpPath.length());
 
-					String url = FileManager.removeTrailingSlash(mp
+					final String url = FileManager.removeTrailingSlash(mp
 							.getRootUrl()) + "/" + restPath;
 					if (mountPointsResponsible.get(url) == null) {
-						Set<MountPoint> temp = new TreeSet<MountPoint>();
+						final Set<MountPoint> temp = new TreeSet<MountPoint>();
 						temp.add(mp);
 						mountPointsResponsible.put(url, temp);
 					} else {
-						Set<MountPoint> temp = mountPointsResponsible.get(url);
+						final Set<MountPoint> temp = mountPointsResponsible
+								.get(url);
 						temp.add(mp);
 					}
 				}
@@ -262,22 +263,22 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 				return result;
 			}
 
-			for (String url : mountPointsResponsible.keySet()) {
+			for (final String url : mountPointsResponsible.keySet()) {
 
-				GridFile child = listFiles(gridPath, url);
-				for (MountPoint mp : mountPointsResponsible.get(url)) {
+				final GridFile child = listFiles(gridPath, url);
+				for (final MountPoint mp : mountPointsResponsible.get(url)) {
 					child.addFqan(mp.getFqan());
 				}
 				result.addChildren(child.getChildren());
 				result.addFqans(child.getFqans());
-				Map<String, String> urls = DtoProperty
+				final Map<String, String> urls = DtoProperty
 						.mapFromDtoPropertiesList(child.getUrls());
-				for (String u : urls.keySet()) {
+				for (final String u : urls.keySet()) {
 					result.addUrl(url, Integer.parseInt(urls.get(u)));
 				}
 				result.setUrl(child.getUrl());
 
-				for (GridFile c : result.getChildren()) {
+				for (final GridFile c : result.getChildren()) {
 					c.addFqans(child.getFqans());
 					c.setIsVirtual(false);
 				}
@@ -290,33 +291,33 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 
 	private Set<GridFile> getSites() {
 
-		Map<String, Set<String>> sites = new TreeMap<String, Set<String>>();
-		for (String vo : user.getFqans().keySet()) {
-			Map<String, String[]> dataLocations = AbstractServiceInterface.informationManager
+		final Map<String, Set<String>> sites = new TreeMap<String, Set<String>>();
+		for (final String vo : user.getFqans().keySet()) {
+			final Map<String, String[]> dataLocations = AbstractServiceInterface.informationManager
 					.getDataLocationsForVO(vo);
-			for (String host : dataLocations.keySet()) {
-				String site = AbstractServiceInterface.informationManager
+			for (final String host : dataLocations.keySet()) {
+				final String site = AbstractServiceInterface.informationManager
 						.getSiteForHostOrUrl(host);
 				if (!sites.keySet().contains(site)) {
-					Set<String> tempVOs = new TreeSet<String>();
+					final Set<String> tempVOs = new TreeSet<String>();
 					tempVOs.add(vo);
 					sites.put(site, tempVOs);
 				} else {
-					Set<String> tempVos = sites.get(site);
+					final Set<String> tempVos = sites.get(site);
 					tempVos.add(vo);
 				}
 
 			}
 		}
 
-		Set<GridFile> result = new TreeSet<GridFile>();
-		for (String site : sites.keySet()) {
-			String path = BASE + "/" + site;
-			GridFile s = new GridFile(path, -1L);
+		final Set<GridFile> result = new TreeSet<GridFile>();
+		for (final String site : sites.keySet()) {
+			final String path = BASE + "/" + site;
+			final GridFile s = new GridFile(path, -1L);
 			s.setIsVirtual(true);
 			s.setPath(path);
 			s.addSite(site);
-			for (String vo : sites.get(site)) {
+			for (final String vo : sites.get(site)) {
 				s.addFqan(vo);
 			}
 			result.add(s);
@@ -329,23 +330,21 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 	private GridFile listFiles(String path, String url) {
 
 		try {
-			GridFile f = user.ls(url, 1);
+			final GridFile f = user.ls(url, 1);
 			f.setPath(path);
 			f.setIsVirtual(false);
-			for (GridFile c : f.getChildren()) {
+			for (final GridFile c : f.getChildren()) {
 				c.setPath(path + "/" + c.getName());
 				c.setIsVirtual(false);
 			}
 
 			return f;
 
-		} catch (RemoteFileSystemException e) {
-			myLogger.error(e);
+		} catch (final RemoteFileSystemException e) {
+			myLogger.error(e.getLocalizedMessage(), e);
 			return new GridFile(url, false, e);
 		}
 
 	}
-
-
 
 }

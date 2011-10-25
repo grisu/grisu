@@ -10,13 +10,13 @@ import java.util.List;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
-import org.apache.log4j.Logger;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UserspaceFileTreeModel extends TreeModelSupport implements
-TreeModel {
+		TreeModel {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(UserspaceFileTreeModel.class.getName());
 
 	// protected Object dirIcon;
@@ -44,30 +44,30 @@ TreeModel {
 	public GlazedFile getChild(Object parent, int index) {
 
 		try {
-			List<GlazedFile> childs = fm.ls((GlazedFile) parent);
+			final List<GlazedFile> childs = fm.ls((GlazedFile) parent);
 			return childs.get(index);
-		} catch (RemoteFileSystemException e) {
-			myLogger.error(e);
+		} catch (final RemoteFileSystemException e) {
+			myLogger.error(e.getLocalizedMessage(), e);
 			return null;
 		}
 	}
 
 	public int getChildCount(Object parent) {
 		try {
-			List<GlazedFile> childs = fm.ls((GlazedFile) parent);
+			final List<GlazedFile> childs = fm.ls((GlazedFile) parent);
 			return childs.size();
-		} catch (RemoteFileSystemException e) {
-			myLogger.error(e);
+		} catch (final RemoteFileSystemException e) {
+			myLogger.error(e.getLocalizedMessage(), e);
 			return -1;
 		}
 	}
 
 	public int getIndexOfChild(Object parent, Object child) {
 		try {
-			List<GlazedFile> childs = fm.ls((GlazedFile) parent);
+			final List<GlazedFile> childs = fm.ls((GlazedFile) parent);
 			return childs.indexOf(childs);
-		} catch (RemoteFileSystemException e) {
-			myLogger.error(e);
+		} catch (final RemoteFileSystemException e) {
+			myLogger.error(e.getLocalizedMessage(), e);
 			return -1;
 		}
 

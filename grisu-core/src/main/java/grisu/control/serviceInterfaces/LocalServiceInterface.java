@@ -25,7 +25,7 @@ import org.globus.myproxy.MyProxyException;
 import org.ietf.jgss.GSSException;
 
 public class LocalServiceInterface extends AbstractServiceInterface implements
-ServiceInterface {
+		ServiceInterface {
 
 	private ProxyCredential credential = null;
 	private String myproxy_username = null;
@@ -65,7 +65,7 @@ ServiceInterface {
 						credential = new ProxyCredential(
 								LocalProxy.loadGSSCredential());
 
-						long newLifeTime = credential.getGssCredential()
+						final long newLifeTime = credential.getGssCredential()
 								.getRemainingLifetime();
 						if (oldLifetime < ServerPropertiesManager
 								.getMinProxyLifetimeBeforeGettingNewProxy()) {
@@ -93,7 +93,7 @@ ServiceInterface {
 					myProxyServer = InetAddress.getByName(myProxyServer)
 							.getHostAddress();
 				} catch (final UnknownHostException e1) {
-					myLogger.error(e1);
+					myLogger.error(e1.getLocalizedMessage(), e1);
 					throw new NoValidCredentialException(
 							"Could not download myproxy credential: "
 									+ e1.getLocalizedMessage());
@@ -103,9 +103,10 @@ ServiceInterface {
 					credential = new ProxyCredential(
 							MyProxy_light.getDelegation(myProxyServer,
 									myProxyPort, myproxy_username, passphrase,
-									ServerPropertiesManager.getMyProxyLifetime()));
+									ServerPropertiesManager
+											.getMyProxyLifetime()));
 
-					long newLifeTime = credential.getGssCredential()
+					final long newLifeTime = credential.getGssCredential()
 							.getRemainingLifetime();
 					if (newLifeTime < ServerPropertiesManager
 							.getMinProxyLifetimeBeforeGettingNewProxy()) {
@@ -116,10 +117,10 @@ ServiceInterface {
 					if (getUser() != null) {
 						getUser().cleanCache();
 					}
-				} catch (RuntimeException re) {
+				} catch (final RuntimeException re) {
 					throw re;
 				} catch (final Throwable e) {
-					myLogger.error(e);
+					myLogger.error(e.getLocalizedMessage(), e);
 					throw new NoValidCredentialException(
 							"Could not get myproxy credential: "
 									+ e.getLocalizedMessage());
@@ -139,7 +140,7 @@ ServiceInterface {
 	protected final ProxyCredential getCredential(String fqan,
 			int lifetimeInSeconds) {
 
-		String myProxyServer = MyProxyServerParams.getMyProxyServer();
+		final String myProxyServer = MyProxyServerParams.getMyProxyServer();
 		final int myProxyPort = MyProxyServerParams.getMyProxyPort();
 
 		ProxyCredential temp;
@@ -150,8 +151,8 @@ ServiceInterface {
 			if (StringUtils.isNotBlank(fqan)) {
 
 				final VO vo = getUser().getFqans().get(fqan);
-				ProxyCredential credToUse = CertHelpers.getVOProxyCredential(
-						vo, fqan, temp);
+				final ProxyCredential credToUse = CertHelpers
+						.getVOProxyCredential(vo, fqan, temp);
 
 				myLogger.debug("Created proxy with lifetime: "
 						+ credToUse.getExpiryDate().toString());
@@ -161,7 +162,7 @@ ServiceInterface {
 						+ temp.getExpiryDate().toString());
 				return temp;
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -176,7 +177,7 @@ ServiceInterface {
 			myProxyServer = InetAddress.getByName(myProxyServer)
 					.getHostAddress();
 		} catch (final UnknownHostException e1) {
-			myLogger.error(e1);
+			myLogger.error(e1.getLocalizedMessage(), e1);
 			throw new NoValidCredentialException(
 					"Could not download myproxy credential: "
 							+ e1.getLocalizedMessage());
@@ -188,7 +189,7 @@ ServiceInterface {
 			info = myproxy.info(getCredential().getGssCredential(),
 					myproxy_username, new String(passphrase));
 		} catch (final MyProxyException e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
 		return info.getEndTime();
@@ -223,7 +224,7 @@ ServiceInterface {
 		if (StringUtils.isBlank(temp)) {
 			throw new NoSuchTemplateException(
 					"Could not find template for application: " + application
-					+ ".");
+							+ ".");
 		}
 		return temp;
 	}

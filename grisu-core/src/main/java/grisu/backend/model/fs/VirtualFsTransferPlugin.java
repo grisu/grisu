@@ -12,7 +12,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
-
 public class VirtualFsTransferPlugin implements FileTransferPlugin {
 
 	private final User user;
@@ -30,12 +29,13 @@ public class VirtualFsTransferPlugin implements FileTransferPlugin {
 		String realSource = null;
 		if (source.startsWith(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME)) {
 
-			GridFile sourceFile = infoPlugin.createGsiftpGridFile(FileManager
-					.calculateParentUrl(source));
-			Map<String, String> urls = DtoProperty
+			final GridFile sourceFile = infoPlugin
+					.createGsiftpGridFile(FileManager
+							.calculateParentUrl(source));
+			final Map<String, String> urls = DtoProperty
 					.mapFromDtoPropertiesList(sourceFile.getUrls());
 
-			for (String key : urls.keySet()) {
+			for (final String key : urls.keySet()) {
 				if (key.startsWith("gsiftp")) {
 					realSource = key + "/" + FileManager.getFilename(source);
 					break;
@@ -51,13 +51,14 @@ public class VirtualFsTransferPlugin implements FileTransferPlugin {
 
 		String realTarget = null;
 		if (target.startsWith(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME)) {
-			GridFile targetFile = infoPlugin.createGsiftpGridFile(FileManager
-					.calculateParentUrl(target));
+			final GridFile targetFile = infoPlugin
+					.createGsiftpGridFile(FileManager
+							.calculateParentUrl(target));
 
-			Map<String, String> urls = DtoProperty
+			final Map<String, String> urls = DtoProperty
 					.mapFromDtoPropertiesList(targetFile.getUrls());
 
-			for (String key : urls.keySet()) {
+			for (final String key : urls.keySet()) {
 				if (key.startsWith("gsiftp")) {
 					realTarget = key + FileManager.getFilename(target);
 					break;

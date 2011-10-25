@@ -9,7 +9,6 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
-
 public class SpecificJobsResubmitPolicy implements ResubmitPolicy {
 
 	private final Set<String> jobnames;

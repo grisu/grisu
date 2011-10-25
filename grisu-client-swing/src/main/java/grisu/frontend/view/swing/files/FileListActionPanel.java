@@ -12,7 +12,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -25,8 +26,8 @@ import grisu.model.files.GlazedFile;
 
 public class FileListActionPanel extends JPanel implements FileListListener {
 
-	static final Logger myLogger = Logger.getLogger(FileListActionPanel.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(FileListActionPanel.class.getName());
 
 	// private static final ImageIcon REFRESH_ICON = new ImageIcon(
 	// FileListActionPanel.class.getClassLoader().getResource(
@@ -58,7 +59,7 @@ public class FileListActionPanel extends JPanel implements FileListListener {
 			icon = new ImageIcon(FileListActionPanel.class.getClassLoader()
 					.getResource(path));
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
 		return icon;

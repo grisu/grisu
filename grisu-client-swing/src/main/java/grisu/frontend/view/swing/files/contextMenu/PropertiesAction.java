@@ -14,7 +14,6 @@ import javax.swing.AbstractAction;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-
 public class PropertiesAction extends AbstractAction {
 	private final GridFileListPanel fileList;
 	private final FileManager fm;
@@ -45,9 +44,9 @@ public class PropertiesAction extends AbstractAction {
 				public void run() {
 					JFrame parent = null;
 					try {
-						Component c = (Component) e.getSource();
+						final Component c = (Component) e.getSource();
 						parent = (JFrame) SwingUtilities.getRoot(c);
-					} catch (Exception eee) {
+					} catch (final Exception eee) {
 					}
 
 					final GridFilePropertiesDialog dialog = new GridFilePropertiesDialog(

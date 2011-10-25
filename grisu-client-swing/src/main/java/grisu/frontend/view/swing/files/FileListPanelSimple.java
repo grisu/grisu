@@ -31,11 +31,12 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 
-import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -46,8 +47,8 @@ import ca.odell.glazedlists.swing.EventTableModel;
 public class FileListPanelSimple extends JPanel implements FileListPanel,
 EventSubscriber {
 
-	static final Logger myLogger = Logger.getLogger(FileListPanelSimple.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(FileListPanelSimple.class.getName());
 
 	public static final String UNDETERMINED = "undetermined";
 
@@ -212,7 +213,7 @@ EventSubscriber {
 							try {
 								l.fileDoubleClicked(file);
 							} catch (final Exception e1) {
-								myLogger.error(e1);
+								myLogger.error(e1.getLocalizedMessage(), e1);
 							}
 						}
 					} finally {
@@ -247,7 +248,7 @@ EventSubscriber {
 					try {
 						l.filesSelected(files);
 					} catch (final Exception e1) {
-						myLogger.error(e1);
+						myLogger.error(e1.getLocalizedMessage(), e1);
 					}
 				}
 			} finally {
@@ -274,7 +275,7 @@ EventSubscriber {
 				try {
 					l.isLoading(loading);
 				} catch (final Exception e1) {
-					myLogger.error(e1);
+					myLogger.error(e1.getLocalizedMessage(), e1);
 				}
 			}
 		}
@@ -297,7 +298,7 @@ EventSubscriber {
 				try {
 					l.directoryChanged(getCurrentDirectory());
 				} catch (final Exception e1) {
-					myLogger.error(e1);
+					myLogger.error(e1.getLocalizedMessage(), e1);
 				}
 			}
 		}
@@ -485,7 +486,7 @@ EventSubscriber {
 			try {
 				updateThread.join();
 			} catch (final InterruptedException e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 				updateThread.interrupt();
 				// return;
 
@@ -609,7 +610,7 @@ EventSubscriber {
 						tempFile.setParent();
 						currentDirectoryContent.add(tempFile);
 					} catch (final URISyntaxException e) {
-						myLogger.error(e);
+						myLogger.error(e.getLocalizedMessage(), e);
 						throw new RuntimeException(e);
 					}
 				}
@@ -725,7 +726,7 @@ EventSubscriber {
 
 			});
 		} catch (final Exception e) {
-			myLogger.warn(e);
+			myLogger.warn(e.getLocalizedMessage(), e);
 		}
 
 	}
@@ -803,15 +804,15 @@ EventSubscriber {
 
 	private void setUrl(String url) {
 
-		GlazedFile old = getCurrentDirectory();
+		final GlazedFile old = getCurrentDirectory();
 		setEmptyList();
 		try {
 			final GridFile folder = fm.ls(url);
 
 			setCurrentDirToFolder(folder);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// TODO dialog?
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			setCurrent(old);
 		}
 

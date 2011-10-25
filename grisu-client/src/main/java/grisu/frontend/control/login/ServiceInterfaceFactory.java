@@ -7,7 +7,8 @@ import grisu.control.exceptions.ServiceInterfaceException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Creates {@link ServiceInterface}s using the url of a ServiceInterface.
@@ -21,18 +22,18 @@ import org.apache.log4j.Logger;
  */
 public final class ServiceInterfaceFactory {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(ServiceInterfaceFactory.class.getName());
 
 	public static final String DEFAULT_SERVICE_INTERFACE = "ARCS";
 
 	public static final String[] KNOWN_SERVICE_INTERFACE_CREATORS = new String[] {
-		"LocalServiceInterfaceCreator",
-		// "DummyServiceInterfaceCreator",
-		"JaxWsServiceInterfaceCreator",
-		// "XfireServiceInterfaceCreator",
-		// the old xfire client...
-		// "XFireServiceInterfaceCreator"
+			"LocalServiceInterfaceCreator",
+			// "DummyServiceInterfaceCreator",
+			"JaxWsServiceInterfaceCreator",
+	// "XfireServiceInterfaceCreator",
+	// the old xfire client...
+	// "XFireServiceInterfaceCreator"
 	};
 
 	/**
@@ -90,7 +91,7 @@ public final class ServiceInterfaceFactory {
 			final String myProxyServer, final String myProxyPort,
 			final String httpProxy, final int httpProxyPort,
 			final String httpProxyUsername, final char[] httpProxyPassword)
-					throws ServiceInterfaceException {
+			throws ServiceInterfaceException {
 
 		final Object[] otherOptions = new Object[4];
 		otherOptions[0] = httpProxy;
@@ -160,7 +161,8 @@ public final class ServiceInterfaceFactory {
 
 			try {
 				serviceInterface.login(username, new String(password));
-				int backend_version = serviceInterface.getInterfaceVersion();
+				final int backend_version = serviceInterface
+						.getInterfaceVersion();
 
 				if (backend_version > LoginManager.REQUIRED_BACKEND_API_VERSION) {
 					throw new LoginException(

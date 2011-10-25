@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
-
-
 public class DefaultSubmitPolicy implements SubmitPolicy {
 
 	private final Set<Job> allJobs;

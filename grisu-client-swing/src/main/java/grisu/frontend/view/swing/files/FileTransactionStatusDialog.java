@@ -16,12 +16,13 @@ import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileTransactionStatusDialog extends JDialog implements
-PropertyChangeListener {
+		PropertyChangeListener {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(FileTransactionStatusDialog.class.getName());
 
 	/**
@@ -79,7 +80,7 @@ PropertyChangeListener {
 						ft.removePropertyChangeListener(fileTransferStatusPanel);
 						dispose();
 					} catch (final Exception e1) {
-						myLogger.error(e1);
+						myLogger.error(e1.getLocalizedMessage(), e1);
 					}
 				}
 			});

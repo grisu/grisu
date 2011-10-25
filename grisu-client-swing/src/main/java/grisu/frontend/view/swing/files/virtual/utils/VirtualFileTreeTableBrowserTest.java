@@ -7,8 +7,8 @@ import grisu.frontend.view.swing.files.virtual.GridFileManagementPanel;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import javax.swing.JFrame;
 
+import javax.swing.JFrame;
 
 public class VirtualFileTreeTableBrowserTest {
 
@@ -28,10 +28,10 @@ public class VirtualFileTreeTableBrowserTest {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					VirtualFileTreeTableBrowserTest window = new VirtualFileTreeTableBrowserTest(
+					final VirtualFileTreeTableBrowserTest window = new VirtualFileTreeTableBrowserTest(
 							si);
 					window.frame.setVisible(true);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					e.printStackTrace();
 				}
 			}

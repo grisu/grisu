@@ -11,7 +11,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
  * A wrapper that holds a list of mountpoints.
  * 

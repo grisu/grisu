@@ -22,13 +22,14 @@ import javax.swing.SwingUtilities;
 import net.sf.jmimemagic.Magic;
 import net.sf.jmimemagic.MagicMatch;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GenericFileViewer extends JPanel implements FileViewer,
-FileListListener {
+		FileListListener {
 
-	static final Logger myLogger = Logger.getLogger(GenericFileViewer.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(GenericFileViewer.class.getName());
 
 	private static Set<String> viewers = null;
 
@@ -41,7 +42,7 @@ FileListListener {
 		try {
 			match = Magic.getMagicMatch(currentLocalCacheFile, true);
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
 		final Set<String> viewers = findViewers();
@@ -57,7 +58,7 @@ FileListListener {
 					}
 				}
 			} catch (final Exception e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 
 		}
@@ -115,7 +116,7 @@ FileListListener {
 								viewers.add(pckgname + "." + classname);
 							}
 						} catch (final ClassNotFoundException cnfex) {
-							myLogger.debug(cnfex);
+							myLogger.debug(cnfex.getLocalizedMessage(), cnfex);
 						} catch (final InstantiationException iex) {
 							// We try to instantiate an interface
 							// or an object that does not have a
@@ -209,17 +210,17 @@ FileListListener {
 				} else {
 					if (fm.isBiggerThanThreshold(file.getUrl())) {
 
-						int n = JOptionPane
+						final int n = JOptionPane
 								.showConfirmDialog(
 										getRootPane(),
 										"The file you selected is bigger than the default threshold\n"
 												+ FileAndUrlHelpers
-												.calculateSizeString(FileManager
-														.getDownloadFileSizeThreshold())
-														+ "bytes. It may take a long time to load.\n"
-														+ "Do you still want to preview that file?",
-														"Warning: big file",
-														JOptionPane.YES_NO_OPTION);
+														.calculateSizeString(FileManager
+																.getDownloadFileSizeThreshold())
+												+ "bytes. It may take a long time to load.\n"
+												+ "Do you still want to preview that file?",
+										"Warning: big file",
+										JOptionPane.YES_NO_OPTION);
 
 						if (n == JOptionPane.NO_OPTION) {
 							showsValidViewerAtTheMoment = false;
@@ -231,9 +232,9 @@ FileListListener {
 				}
 
 			} catch (final RemoteFileSystemException e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			} catch (final FileTransactionException e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 
 		}

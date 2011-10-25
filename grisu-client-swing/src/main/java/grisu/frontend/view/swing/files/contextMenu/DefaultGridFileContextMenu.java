@@ -12,13 +12,14 @@ import java.util.Set;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultGridFileContextMenu extends JPopupMenu implements
-GridFileListPanelContextMenu {
+		GridFileListPanelContextMenu {
 
-	static final Logger myLogger = Logger
-	.getLogger(DefaultGridFileContextMenu.class.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(DefaultGridFileContextMenu.class.getName());
 
 	private JMenuItem downloadMenuItem;
 	private GridFileListPanel fileList;
@@ -61,11 +62,11 @@ GridFileListPanelContextMenu {
 			if (files.iterator().next().isFolder()) {
 				getRefreshMenuItem().setEnabled(true);
 
-				Clipboard cb = FileManager.FILE_TRANSFER_CLIPBOARD;
-				Transferable t = cb.getContents(null);
+				final Clipboard cb = FileManager.FILE_TRANSFER_CLIPBOARD;
+				final Transferable t = cb.getContents(null);
 				if (t != null) {
 
-					GridFile target = files.iterator().next();
+					final GridFile target = files.iterator().next();
 					if (target.isVirtual()) {
 						if (target.getUrls().size() == 1) {
 							if (target
@@ -95,7 +96,7 @@ GridFileListPanelContextMenu {
 		}
 
 		boolean folder = false;
-		for (GridFile file : files) {
+		for (final GridFile file : files) {
 			if (file.isFolder()) {
 				folder = true;
 			}

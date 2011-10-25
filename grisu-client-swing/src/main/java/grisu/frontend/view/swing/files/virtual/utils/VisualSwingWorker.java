@@ -19,6 +19,7 @@ import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
+import javax.swing.WindowConstants;
 
 public abstract class VisualSwingWorker<T, V> extends SwingWorker<T, V> {
 
@@ -36,13 +37,14 @@ public abstract class VisualSwingWorker<T, V> extends SwingWorker<T, V> {
 		private WaitingDialog(Component father, String title, String message,
 				boolean allowCancel) {
 			super(JOptionPane.getFrameForComponent(father), title, true);
-			setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+			setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 			progressBar.setIndeterminate(true);
 			setLayout(new BorderLayout());
-			JPanel messagePanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+			final JPanel messagePanel = new JPanel(new FlowLayout(
+					FlowLayout.LEADING));
 			messagePanel.add(new JLabel(message));
 			add(messagePanel, BorderLayout.NORTH);
-			JPanel progressPanel = new JPanel();
+			final JPanel progressPanel = new JPanel();
 			progressPanel.add(progressBar);
 			add(progressPanel, BorderLayout.CENTER);
 			if (allowCancel) {
@@ -52,14 +54,14 @@ public abstract class VisualSwingWorker<T, V> extends SwingWorker<T, V> {
 						cancel(true);
 					}
 				});
-				JButton cancelButton = new JButton(
+				final JButton cancelButton = new JButton(
 						UIManager.getString("FileChooser.cancelButtonText"));
 				cancelButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						cancel(true);
 					}
 				});
-				JPanel southPanel = new JPanel();
+				final JPanel southPanel = new JPanel();
 				southPanel.add(cancelButton);
 				add(southPanel, BorderLayout.SOUTH);
 			}

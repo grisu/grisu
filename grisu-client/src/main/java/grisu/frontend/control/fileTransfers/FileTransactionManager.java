@@ -20,15 +20,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
 public class FileTransactionManager implements PropertyChangeListener {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(FileTransactionManager.class.getName());
 
 	private static Map<ServiceInterface, FileTransactionManager> cachedFileTransferManagers = new HashMap<ServiceInterface, FileTransactionManager>();
@@ -87,11 +88,11 @@ public class FileTransactionManager implements PropertyChangeListener {
 			public void run() {
 				try {
 					ft.join();
-				} catch (InterruptedException e) {
-					myLogger.error(e);
+				} catch (final InterruptedException e) {
+					myLogger.error(e.getLocalizedMessage(), e);
 					EventBus.publish(new FileTransactionFailedEvent(ft));
-				} catch (ExecutionException e) {
-					myLogger.error(e);
+				} catch (final ExecutionException e) {
+					myLogger.error(e.getLocalizedMessage(), e);
 					EventBus.publish(new FileTransactionFailedEvent(ft));
 				}
 			}

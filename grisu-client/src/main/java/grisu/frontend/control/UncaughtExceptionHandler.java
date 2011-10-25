@@ -2,12 +2,13 @@ package grisu.frontend.control;
 
 import javax.swing.JOptionPane;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UncaughtExceptionHandler implements
-Thread.UncaughtExceptionHandler {
+		Thread.UncaughtExceptionHandler {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(UncaughtExceptionHandler.class.getName());
 
 	private void logException(Thread t, Throwable e) {
@@ -31,7 +32,7 @@ Thread.UncaughtExceptionHandler {
 	public void uncaughtException(final Thread t, final Throwable e) {
 
 		// e.printStackTrace();
-		myLogger.error(e);
+		myLogger.error(e.getLocalizedMessage(), e);
 
 		// if (SwingUtilities.isEventDispatchThread()) {
 		// showException(t, e);

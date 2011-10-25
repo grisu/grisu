@@ -6,12 +6,13 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GrisuRegistryManager {
 
-	static final Logger myLogger = Logger.getLogger(GrisuRegistryManager.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(GrisuRegistryManager.class.getName());
 
 	private static Map<ServiceInterface, GrisuRegistry> cachedRegistries = new HashMap<ServiceInterface, GrisuRegistry>();
 

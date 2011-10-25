@@ -9,10 +9,10 @@ import grisu.settings.ServerPropertiesManager;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.globus.exec.utils.ManagedJobFactoryConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-
 
 /**
  * The JobSubmissionManager class provides an interface between grisu and the
@@ -25,8 +25,8 @@ import org.w3c.dom.Document;
  */
 public class JobSubmissionManager {
 
-	static final Logger myLogger = Logger.getLogger(JobSubmissionManager.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(JobSubmissionManager.class.getName());
 
 	private Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
 
@@ -60,7 +60,7 @@ public class JobSubmissionManager {
 
 		JobSubmitter submitter = null;
 
-		boolean disableFinishedJobStatusCaching = ServerPropertiesManager
+		final boolean disableFinishedJobStatusCaching = ServerPropertiesManager
 				.getDisableFinishedJobStatusCaching();
 
 		if (disableFinishedJobStatusCaching

@@ -20,7 +20,6 @@ import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
 
-
 /**
  * Default implementation for {@link ApplicationInformation}.
  * 
@@ -78,7 +77,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 					final List<String> temp = serviceInterface
 							.getVersionsOfApplicationOnSubmissionLocation(
 									getApplicationName(), subLoc)
-									.getStringList();
+							.getStringList();
 					result.addAll(temp);
 				}
 				cachedVersionsForUserPerFqan.put(fqan, result);
@@ -111,14 +110,13 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
 				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null,
 						null, false), fqan, false)
-						.wrapGridResourcesIntoInterfaceType();
+				.wrapGridResourcesIntoInterfaceType();
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.model.info.ApplicationInformation#getApplicationDetails
+	 * @see grisu.model.info.ApplicationInformation#getApplicationDetails
 	 * (java.lang.String, java.lang.String)
 	 */
 	public final Map<String, String> getApplicationDetails(final String subLoc,
@@ -134,7 +132,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 					final Map<String, String> details = serviceInterface
 							.getApplicationDetailsForVersionAndSubmissionLocation(
 									application, version, subLoc)
-									.getDetailsAsMap();
+							.getDetailsAsMap();
 					cachedApplicationDetailsPerSubLoc.put(KEY, details);
 				}
 			}
@@ -146,8 +144,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.model.info.ApplicationInformation#getApplicationName()
+	 * @see grisu.model.info.ApplicationInformation#getApplicationName()
 	 */
 	public final String getApplicationName() {
 		return application;
@@ -171,7 +168,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 						Arrays.asList(serviceInterface
 								.getSubmissionLocationsForApplication(
 										application)
-										.asSubmissionLocationStrings()));
+								.asSubmissionLocationStrings()));
 			}
 		}
 		return cachedAllSubmissionLocations;
@@ -223,7 +220,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 					final List<String> temp = Arrays.asList(serviceInterface
 							.getSubmissionLocationsForApplicationAndVersion(
 									application, version)
-									.asSubmissionLocationStrings());
+							.asSubmissionLocationStrings());
 					cachedSubmissionLocationsPerVersion.put(version,
 							new HashSet(temp));
 				}
@@ -256,7 +253,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 					}
 				}
 				cachedSubmissionLocationsForUserPerVersionAndFqan
-				.put(KEY, temp);
+						.put(KEY, temp);
 			}
 		}
 		return cachedSubmissionLocationsForUserPerVersionAndFqan.get(KEY);
@@ -265,8 +262,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.model.info.ApplicationInformation#getAvailableVersions
+	 * @see grisu.model.info.ApplicationInformation#getAvailableVersions
 	 * (java.lang.String)
 	 */
 	public final Set<String> getAvailableVersions(final String subLoc) {
@@ -313,14 +309,13 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
 				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null,
 						null, false), fqan, true)
-						.wrapGridResourcesIntoInterfaceType();
+				.wrapGridResourcesIntoInterfaceType();
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.model.info.ApplicationInformation#getExecutables(java.
+	 * @see grisu.model.info.ApplicationInformation#getExecutables(java.
 	 * lang.String, java.lang.String)
 	 */
 	public final String[] getExecutables(final String subLoc,
@@ -338,11 +333,13 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	public final Set<String> getExecutablesForVo(final String fqan,
 			String version) {
 
-		ResourceInformation ri = GrisuRegistryManager.getDefault(serviceInterface).getResourceInformation();
-		String[] subLocs = ri.getAllAvailableSubmissionLocations(fqan);
-		Set<String> result = Collections.synchronizedSet(new HashSet<String>());
-		for (String subLoc : subLocs) {
-			String[] exes = getExecutables(subLoc, version);
+		final ResourceInformation ri = GrisuRegistryManager.getDefault(
+				serviceInterface).getResourceInformation();
+		final String[] subLocs = ri.getAllAvailableSubmissionLocations(fqan);
+		final Set<String> result = Collections
+				.synchronizedSet(new HashSet<String>());
+		for (final String subLoc : subLocs) {
+			final String[] exes = getExecutables(subLoc, version);
 			result.addAll(Arrays.asList(exes));
 		}
 
@@ -356,6 +353,5 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	public final ServiceInterface getServiceInterface() {
 		return serviceInterface;
 	}
-
 
 }

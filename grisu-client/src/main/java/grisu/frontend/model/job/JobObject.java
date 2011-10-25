@@ -43,10 +43,10 @@ import javax.persistence.Transient;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-
 
 /**
  * A model class that hides all the complexity of creating and submitting a job.
@@ -58,13 +58,14 @@ import org.w3c.dom.Document;
  * @author Markus Binsteiner
  */
 public class JobObject extends JobSubmissionObjectImpl implements
-Comparable<JobObject> {
+		Comparable<JobObject> {
 
-	static final Logger myLogger = Logger.getLogger(JobObject.class.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(JobObject.class
+			.getName());
 
 	public static JobObject createJobObject(ServiceInterface si,
 			JobSubmissionObjectImpl jobsubmissionObject)
-					throws JobPropertiesException {
+			throws JobPropertiesException {
 
 		final JobObject job = new JobObject(si,
 				jobsubmissionObject.getJobDescriptionDocument());
@@ -264,7 +265,7 @@ Comparable<JobObject> {
 	 *             accessed
 	 */
 	public final String archive() throws JobPropertiesException,
-	RemoteFileSystemException {
+			RemoteFileSystemException {
 		return archive(null, false);
 	}
 
@@ -282,7 +283,7 @@ Comparable<JobObject> {
 	 *             accessed
 	 */
 	public final String archive(String target) throws JobPropertiesException,
-	RemoteFileSystemException {
+			RemoteFileSystemException {
 		return archive(target, false);
 	}
 
@@ -321,7 +322,7 @@ Comparable<JobObject> {
 					EventBus.publish(new JobCleanedEvent(this));
 					EventBus.publish(new FileDeletedEvent(oldUrl));
 					EventBus.publish(new FolderCreatedEvent(jobDirectory));
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					throw new JobPropertiesException("Can't archive job: "
 							+ e.getLocalizedMessage());
 				}
@@ -350,7 +351,7 @@ Comparable<JobObject> {
 							EventBus.publish(new FolderCreatedEvent(
 									jobDirectory));
 
-						} catch (Exception e) {
+						} catch (final Exception e) {
 							myLogger.error("Job archiving error.", e);
 						}
 
@@ -360,9 +361,9 @@ Comparable<JobObject> {
 			}
 
 			return targetUrl;
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			// should never happen
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			throw new JobPropertiesException(e.getLocalizedMessage());
 		}
 	}
@@ -511,7 +512,7 @@ Comparable<JobObject> {
 				waitThread.interrupt();
 			}
 		} catch (final Exception e) {
-			myLogger.debug(e);
+			myLogger.debug(e.getLocalizedMessage(), e);
 		}
 
 		waitThread = new Thread() {
@@ -534,7 +535,7 @@ Comparable<JobObject> {
 									JobObject.this.getJobname(),
 									new JobStatusEvent(JobObject.this,
 											oldStatus, JobObject.this
-											.getStatus(false)));
+													.getStatus(false)));
 						}
 					}
 					try {
@@ -626,8 +627,7 @@ Comparable<JobObject> {
 	 *            whether to forcefully refresh the job properties
 	 * @return the job properties
 	 */
-	public final Map<String, String> getAllJobProperties(
-			boolean forceRefresh) {
+	public final Map<String, String> getAllJobProperties(boolean forceRefresh) {
 
 		// if (getStatus(false) == JobConstants.UNDEFINED) {
 		// throw new IllegalStateException("Job status "
@@ -653,10 +653,11 @@ Comparable<JobObject> {
 	}
 
 	public String getDescription() {
-		if ( this.description == null ) {
+		if (this.description == null) {
 			try {
-				this.description = serviceInterface.getJobProperty(getJobname(), Constants.JOB_DESCRIPTION_KEY);
-			} catch (NoSuchJobException e) {
+				this.description = serviceInterface.getJobProperty(
+						getJobname(), Constants.JOB_DESCRIPTION_KEY);
+			} catch (final NoSuchJobException e) {
 				// that's ok.
 			}
 		}
@@ -782,7 +783,7 @@ Comparable<JobObject> {
 				try {
 					updateWithDtoJob(serviceInterface.getJob(jobname));
 				} catch (final NoSuchJobException e) {
-					myLogger.error(e);
+					myLogger.error(e.getLocalizedMessage(), e);
 				}
 			}
 		}
@@ -816,9 +817,10 @@ Comparable<JobObject> {
 
 			synchronized (this) {
 
-				Date now = new Date();
+				final Date now = new Date();
 				if ((this.status >= JobConstants.ACTIVE)
-						&& ((lastStatusUpdate.getTime() + 2000) >= now.getTime())) {
+						&& ((lastStatusUpdate.getTime() + 2000) >= now
+								.getTime())) {
 					myLogger.debug("Less than 2 seconds between status updates. Returning old status...");
 					return this.status;
 				}
@@ -833,7 +835,8 @@ Comparable<JobObject> {
 				pcs.firePropertyChange("statusString",
 						JobConstants.translateStatus(oldStatus),
 						getStatusString(false));
-				pcs.firePropertyChange("finished", oldFinished, isFinished(false));
+				pcs.firePropertyChange("finished", oldFinished,
+						isFinished(false));
 				// addJobLogMessage("Status refreshed. Status is: "
 				// + JobConstants.translateStatus(this.status));
 				if (this.status != oldStatus) {
@@ -1003,13 +1006,13 @@ Comparable<JobObject> {
 	 */
 	public final boolean isFailed(final boolean forceRefresh) {
 
-		int status = getStatus(forceRefresh);
+		final int status = getStatus(forceRefresh);
 
-		if ( status < JobConstants.FINISHED_EITHER_WAY ) {
+		if (status < JobConstants.FINISHED_EITHER_WAY) {
 			return false;
 		}
 
-		if ( status == JobConstants.DONE ) {
+		if (status == JobConstants.DONE) {
 			return false;
 		} else {
 			return true;
@@ -1068,13 +1071,13 @@ Comparable<JobObject> {
 	 */
 	public final boolean isSuccessful(final boolean forceRefresh) {
 
-		int status = getStatus(forceRefresh);
+		final int status = getStatus(forceRefresh);
 
-		if ( status < JobConstants.FINISHED_EITHER_WAY ) {
+		if (status < JobConstants.FINISHED_EITHER_WAY) {
 			return false;
 		}
 
-		if ( status == JobConstants.DONE ) {
+		if (status == JobConstants.DONE) {
 			return true;
 		} else {
 			return false;
@@ -1110,7 +1113,7 @@ Comparable<JobObject> {
 					public void run() {
 						myLogger.debug("Deleting local cached dir for job "
 								+ getJobname() + ": " + getJobDirectoryUrl());
-						File dir = GrisuRegistryManager
+						final File dir = GrisuRegistryManager
 								.getDefault(serviceInterface).getFileManager()
 								.getLocalCacheFile(getJobDirectoryUrl());
 						FileUtils.deleteQuietly(dir);
@@ -1118,17 +1121,17 @@ Comparable<JobObject> {
 				}.start();
 
 			}
-			String handle = this.serviceInterface
-					.kill(this.getJobname(), clean);
+			final String handle = this.serviceInterface.kill(this.getJobname(),
+					clean);
 
-			StatusObject so = StatusObject.waitForActionToFinish(
+			final StatusObject so = StatusObject.waitForActionToFinish(
 					serviceInterface, handle, 2, false, false);
 			if (so.getStatus().isFailed()) {
 				throw new Exception(so.getStatus().getErrorCause());
 			}
 			try {
 				getStatus(true);
-			} catch (Exception nsje) {
+			} catch (final Exception nsje) {
 				// that's ok
 			}
 
@@ -1145,8 +1148,8 @@ Comparable<JobObject> {
 
 	public final GridFile listJobDirectory() throws RemoteFileSystemException {
 
-		String jobDir = getJobDirectoryUrl();
-		GridFile result = fm.ls(jobDir);
+		final String jobDir = getJobDirectoryUrl();
+		final GridFile result = fm.ls(jobDir);
 
 		return result;
 
@@ -1183,7 +1186,7 @@ Comparable<JobObject> {
 	 * @throws JobPropertiesException
 	 */
 	public final void restartJob() throws JobSubmissionException,
-	JobPropertiesException {
+			JobPropertiesException {
 
 		addJobLogMessage("Restarting job...");
 
@@ -1205,7 +1208,8 @@ Comparable<JobObject> {
 	 * 
 	 * Be aware, this will only work if the job was not yet submitted.
 	 * 
-	 * @param desc the description of the job (not the jdsl, mind)
+	 * @param desc
+	 *            the description of the job (not the jdsl, mind)
 	 */
 	public void setDescription(String desc) {
 		this.description = desc;
@@ -1239,8 +1243,8 @@ Comparable<JobObject> {
 		if (StringUtils.isBlank(jobname)) {
 			setJobname(jobname);
 		} else {
-			String newname = GrisuRegistryManager.getDefault(serviceInterface)
-					.getUserEnvironmentManager()
+			final String newname = GrisuRegistryManager
+					.getDefault(serviceInterface).getUserEnvironmentManager()
 					.calculateUniqueJobname(jobname);
 			setJobname(newname);
 		}
@@ -1257,7 +1261,7 @@ Comparable<JobObject> {
 	 * @throws InterruptedException
 	 */
 	public final void stageFiles() throws FileTransactionException,
-	InterruptedException {
+			InterruptedException {
 
 		addJobLogMessage("Staging in files...");
 
@@ -1274,9 +1278,9 @@ Comparable<JobObject> {
 			}
 		}
 
-		Map<String, Set<String>> targets = new HashMap<String, Set<String>>();
-		for (String f : localFiles) {
-			String path = getInputFiles().get(f);
+		final Map<String, Set<String>> targets = new HashMap<String, Set<String>>();
+		for (final String f : localFiles) {
+			final String path = getInputFiles().get(f);
 			if (targets.get(path) == null) {
 				targets.put(path, new HashSet<String>());
 			}
@@ -1286,7 +1290,7 @@ Comparable<JobObject> {
 		final FileTransactionManager ftm = FileTransactionManager
 				.getDefault(serviceInterface);
 
-		for (String target : targets.keySet()) {
+		for (final String target : targets.keySet()) {
 
 			final FileTransaction fileTransfer = ftm.addJobInputFileTransfer(
 					targets.get(target), this, target);
@@ -1349,7 +1353,7 @@ Comparable<JobObject> {
 	 * @throws InterruptedException
 	 */
 	public final void submitJob() throws JobSubmissionException,
-	InterruptedException {
+			InterruptedException {
 		submitJob(null);
 	}
 
@@ -1420,10 +1424,10 @@ Comparable<JobObject> {
 
 		try {
 			addJobLogMessage("Submitting job to endpoint...");
-			String handle = serviceInterface.submitJob(getJobname());
+			final String handle = serviceInterface.submitJob(getJobname());
 			if (waitForSubmissionToFinish) {
 				try {
-					StatusObject s = StatusObject.waitForActionToFinish(
+					final StatusObject s = StatusObject.waitForActionToFinish(
 							serviceInterface, handle, 3, true, false);
 					if (s.getStatus().isFailed()) {
 						String errorCause = s.getStatus().getErrorCause();
@@ -1432,8 +1436,8 @@ Comparable<JobObject> {
 						}
 						throw new JobSubmissionException(errorCause);
 					}
-				} catch (StatusException e) {
-					myLogger.error(e);
+				} catch (final StatusException e) {
+					myLogger.error(e.getLocalizedMessage(), e);
 					throw new RuntimeException(e);
 				}
 			}

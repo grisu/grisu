@@ -36,14 +36,14 @@ import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystem;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileType;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CommonsVfsFileSystemInfoAndTransferPlugin implements
 FileSystemInfoPlugin, FileTransferPlugin {
 
-	private static Logger myLogger = Logger
-			.getLogger(CommonsVfsFileSystemInfoAndTransferPlugin.class
-					.getName());
+	private static Logger myLogger = LoggerFactory
+			.getLogger(CommonsVfsFileSystemInfoAndTransferPlugin.class);
 
 	private final User user;
 
@@ -107,7 +107,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 				final URI uri = new URI(url);
 				url = uri.toString();
 			} catch (final URISyntaxException e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 				throw new RemoteFileSystemException(
 						"Could not get uri for file " + url);
 			}
@@ -126,10 +126,10 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 	}
 
-	private void closeFile(FileObject f){
+	private void closeFile(FileObject f) {
 		try {
 			f.close();
-		} catch (FileSystemException ex){
+		} catch (final FileSystemException ex) {
 			myLogger.warn(ex.getLocalizedMessage());
 		}
 	}
@@ -148,7 +148,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 		final FileObject source_file;
 		final FileObject target_file;
 
-		FileSystemCache fsCache = new FileSystemCache(user);
+		final FileSystemCache fsCache = new FileSystemCache(user);
 
 		source_file = aquireFile(fsCache, source, null);
 		target_file = aquireFile(fsCache, target, null);
@@ -165,7 +165,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	}
 
 	private String createCacheKey(MountPoint mp) {
-		return user.getDn()+"_"+mp.getRootUrl()+"_"+mp.getFqan();
+		return user.getDn() + "_" + mp.getRootUrl() + "_" + mp.getFqan();
 	}
 
 	private String createCacheKey(String rootUrl, String fqan) {
@@ -177,7 +177,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 		try {
 
-			ArrayList<FileObject> temp = new ArrayList<FileObject>();
+			final ArrayList<FileObject> temp = new ArrayList<FileObject>();
 			FileObject last = folder;
 			while (!last.exists()) {
 				temp.add(last);
@@ -185,7 +185,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			}
 
 			Collections.reverse(temp);
-			for (FileObject f : temp) {
+			for (final FileObject f : temp) {
 				f.createFolder();
 			}
 
@@ -195,7 +195,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 				return false;
 			}
 
-		} catch (FileSystemException e) {
+		} catch (final FileSystemException e) {
 			throw new RemoteFileSystemException(e);
 		}
 
@@ -215,7 +215,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	// }
 
 	public boolean createFolder(String url) throws RemoteFileSystemException {
-		FileSystemCache fsCache = new FileSystemCache(user);
+		final FileSystemCache fsCache = new FileSystemCache(user);
 		FileObject folder = null;
 
 		try {
@@ -229,27 +229,27 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 	public void deleteFile(final String file) throws RemoteFileSystemException {
 
-
-		int retries = ServerPropertiesManager.getFileDeleteRetries();
+		final int retries = ServerPropertiesManager.getFileDeleteRetries();
 		try {
 			FileSystemException fse = null;
 			for (int i = 0; i < retries; i++) {
-				FileSystemCache fsCache = new FileSystemCache(user);
+				final FileSystemCache fsCache = new FileSystemCache(user);
 				FileObject fileObject = null;
 				try {
 					fileObject = aquireFile(fsCache, file);
 					if (fileObject.exists()) {
-						myLogger.debug("Deleting file/folder (" + (i+1) + ". try):"
-								+ file);
-						int no = fileObject.delete(new AllFileSelector());
+						myLogger.debug("Deleting file/folder (" + (i + 1)
+								+ ". try):" + file);
+						final int no = fileObject.delete(new AllFileSelector());
 						myLogger.debug("Deleted " + no
 								+ " files when deleting " + file);
 						fse = null;
 						break;
 					}
-				} catch (FileSystemException e) {
-					myLogger.debug("Deleting file/folder (" + (i+1) + ". try):"
-							+ file + ". Error: " + e.getLocalizedMessage());
+				} catch (final FileSystemException e) {
+					myLogger.debug("Deleting file/folder (" + (i + 1)
+							+ ". try):" + file + ". Error: "
+							+ e.getLocalizedMessage());
 
 					fse = e;
 				} finally {
@@ -277,12 +277,12 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			throws RemoteFileSystemException {
 
 		// just in case we want to enable multiple downloads later
-		String[] filenames = new String[] { filename };
+		final String[] filenames = new String[] { filename };
 
 		final DataSource[] datasources = new DataSource[filenames.length];
 		final DataHandler[] datahandlers = new DataHandler[filenames.length];
 
-		FileSystemCache fsCache = new FileSystemCache(user);
+		final FileSystemCache fsCache = new FileSystemCache(user);
 		FileObject source = null;
 
 		try {
@@ -307,8 +307,9 @@ FileSystemInfoPlugin, FileTransferPlugin {
 						myLogger.debug("Closing source file: " + filename);
 						source.close();
 						myLogger.debug("Closed source file: " + filename);
-					} catch (FileSystemException ex){
-						myLogger.warn("could not close file: " + ex.getLocalizedMessage());
+					} catch (final FileSystemException ex) {
+						myLogger.warn("could not close file: "
+								+ ex.getLocalizedMessage());
 					}
 					throw new RemoteFileSystemException(
 							"Could not find or read file: " + filenames[i]
@@ -332,7 +333,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	public boolean fileExists(String file) throws RemoteFileSystemException {
 
 		boolean exists;
-		FileSystemCache fsCache = new FileSystemCache(user);
+		final FileSystemCache fsCache = new FileSystemCache(user);
 		FileObject fo = null;
 
 		try {
@@ -354,7 +355,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	public long getFileSize(final String file) throws RemoteFileSystemException {
 
 		long size;
-		FileSystemCache fsCache = new FileSystemCache(user);
+		final FileSystemCache fsCache = new FileSystemCache(user);
 		FileObject file_object = null;
 		try {
 			file_object = aquireFile(fsCache, file);
@@ -378,7 +379,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 					"Recursion > 1 not implemented for commonsvfsfilesystemplugin");
 		}
 
-		FileSystemCache fsCache = new FileSystemCache(user);
+		final FileSystemCache fsCache = new FileSystemCache(user);
 
 		final FileObject fo = aquireFile(fsCache, url, null);
 
@@ -393,19 +394,20 @@ FileSystemInfoPlugin, FileTransferPlugin {
 							+ " does not exist.");
 				}
 
-				GridFile result = new GridFile(url, fo.getContent().getSize(),
-						fo.getContent().getLastModifiedTime());
+				final GridFile result = new GridFile(url, fo.getContent()
+						.getSize(), fo.getContent().getLastModifiedTime());
 				return result;
 
 			}
-			long lastModified = fo.getContent().getLastModifiedTime();
+			final long lastModified = fo.getContent().getLastModifiedTime();
 
 			if (recursiveLevels == 0) {
-				GridFile result = new GridFile(url, lastModified);
+				final GridFile result = new GridFile(url, lastModified);
 				return result;
 			}
 
-			MountPoint mp = user.getResponsibleMountpointForAbsoluteFile(url);
+			final MountPoint mp = user
+					.getResponsibleMountpointForAbsoluteFile(url);
 
 			final GridFile folder = new GridFile(url, lastModified);
 
@@ -421,14 +423,15 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			try {
 				children = fo.getChildren();
 			} catch (final Exception e) {
-				myLogger.error("Couldn't get children of :"
-						+ fo.getName().toString() + ". Trying one more time...", e);
+				myLogger.error(
+						"Couldn't get children of :" + fo.getName().toString()
+						+ ". Trying one more time...", e);
 				children = fo.getChildren();
 			}
 
 			for (final FileObject child : children) {
 				if (FileType.FOLDER.equals(child.getType())) {
-					GridFile childfolder = new GridFile(child.getURL()
+					final GridFile childfolder = new GridFile(child.getURL()
 							.toString());
 					// GridFile childfolder = child.getURL().get
 					// try {
@@ -453,7 +456,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			}
 
 			return folder;
-		} catch (FileSystemException fse) {
+		} catch (final FileSystemException fse) {
 			throw new RemoteFileSystemException(fse);
 		} finally {
 			fsCache.close();
@@ -465,20 +468,19 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.backend.model.fs.FileSystemInfoPlugin#getInputStream(java
+	 * @see grisu.backend.model.fs.FileSystemInfoPlugin#getInputStream(java
 	 * .lang.String)
 	 */
 	public GrisuInputStream getInputStream(String file)
 			throws RemoteFileSystemException {
 
-		FileSystemCache fsCache = new FileSystemCache(user);
+		final FileSystemCache fsCache = new FileSystemCache(user);
 
 		try {
-			FileObject f = aquireFile(fsCache, file);
+			final FileObject f = aquireFile(fsCache, file);
 			return new GrisuInputStreamImpl(fsCache, f.getContent()
 					.getInputStream());
-		} catch (FileSystemException e) {
+		} catch (final FileSystemException e) {
 			throw new RemoteFileSystemException(e);
 		}
 	}
@@ -486,13 +488,13 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	public GrisuOutputStream getOutputStream(String file)
 			throws RemoteFileSystemException {
 
-		FileSystemCache fsCache = new FileSystemCache(user);
+		final FileSystemCache fsCache = new FileSystemCache(user);
 
 		try {
-			FileObject fileO = aquireFile(fsCache, file);
+			final FileObject fileO = aquireFile(fsCache, file);
 			return new GrisuOutputStreamImpl(fsCache, fileO.getContent()
 					.getOutputStream());
-		} catch (FileSystemException e) {
+		} catch (final FileSystemException e) {
 			throw new RemoteFileSystemException(e);
 		}
 
@@ -501,7 +503,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	public boolean isFolder(final String file) throws RemoteFileSystemException {
 
 		boolean isFolder;
-		FileSystemCache fsCache = new FileSystemCache(user);
+		final FileSystemCache fsCache = new FileSystemCache(user);
 		FileObject folder = null;
 		try {
 			folder = aquireFile(fsCache, file);
@@ -534,7 +536,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 	public long lastModified(final String url) throws RemoteFileSystemException {
 
-		FileSystemCache fsCache = new FileSystemCache(user);
+		final FileSystemCache fsCache = new FileSystemCache(user);
 		FileObject file = null;
 		try {
 			file = aquireFile(fsCache, url);
@@ -591,7 +593,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 		MountPoint new_mp = new MountPoint(cred.getDn(), cred.getFqan(), uri,
 				mountPointName, site);
 
-		FileSystemCache fsCache = new FileSystemCache(user);
+		final FileSystemCache fsCache = new FileSystemCache(user);
 
 		try {
 			// FileSystem fileSystem = createFilesystem(new_mp.getRootUrl(),
@@ -609,13 +611,14 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 				if (StringUtils.isBlank(uri)) {
 
-
 					myLogger.debug("Using home directory: "
-							+ ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
-							.substring(1));
+							+ ((String) fileSystem
+									.getAttribute("HOME_DIRECTORY"))
+									.substring(1));
 					uri = fileSystem.getRoot().getName().getRootURI()
-							+ ((String) fileSystem.getAttribute("HOME_DIRECTORY"))
-							.substring(1);
+							+ ((String) fileSystem
+									.getAttribute("HOME_DIRECTORY"))
+									.substring(1);
 					// AbstractServiceInterface.putIntoSessionCache(key, uri);
 					// }
 				}
@@ -654,7 +657,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 		// if (StringUtils.isBlank(uri)) {
 		String uri = null;
 		FileSystem fileSystem;
-		FileSystemCache fsCache = new FileSystemCache(user);
+		final FileSystemCache fsCache = new FileSystemCache(user);
 
 		try {
 			fileSystem = fsCache.getFileSystem(filesystemRoot, fqan);
@@ -675,7 +678,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			// X.p("XXXXXXXXXXXXXXXX: " + key + " / " + uri);
 
 			// AbstractServiceInterface.putIntoSessionCache(key, uri);
-		} catch (FileSystemException e) {
+		} catch (final FileSystemException e) {
 			throw new RemoteFileSystemException(e);
 		} finally {
 			fsCache.close();
@@ -694,7 +697,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 		myLogger.debug("Receiving file: " + filename);
 
 		OutputStream fout = null;
-		FileSystemCache fsCache = new FileSystemCache(user);
+		final FileSystemCache fsCache = new FileSystemCache(user);
 
 		String result = null;
 		FileObject target = null;
@@ -721,7 +724,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 				}
 				source.getInputStream().close();
 			} catch (final Exception e1) {
-				myLogger.error(e1);
+				myLogger.error(e1.getLocalizedMessage(), e1);
 			}
 
 			fsCache.close();
@@ -767,7 +770,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 				fout.close();
 				source.getInputStream().close();
 			} catch (final Exception e1) {
-				myLogger.error(e1);
+				myLogger.error(e1.getLocalizedMessage(), e1);
 			}
 
 			throw new RemoteFileSystemException("Could not write to file: "
@@ -776,7 +779,8 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			fsCache.close();
 			try {
 				source.getInputStream().close();
-			} catch (IOException ex) {}
+			} catch (final IOException ex) {
+			}
 			closeFile(target);
 		}
 
@@ -880,7 +884,6 @@ FileSystemInfoPlugin, FileTransferPlugin {
 							fsCache = new FileSystemCache(user);
 							FileObject target = null;
 
-
 							RemoteFileTransferObject fileTransfer;
 
 							for (int tryNo = 0; tryNo <= ServerPropertiesManager
@@ -918,7 +921,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 										executor.shutdownNow();
 										return;
 									}
-									myLogger.error(e);
+									myLogger.error(e.getLocalizedMessage(), e);
 									if (tryNo >= (ServerPropertiesManager
 											.getFileTransferRetries() - 1)) {
 										status.addElement("Upload to folder "
@@ -929,12 +932,14 @@ FileSystemInfoPlugin, FileTransferPlugin {
 										status.setFailed(true);
 										executor.shutdownNow();
 									} else {
-										// wait for a bit, maybe the gridftp server
+										// wait for a bit, maybe the gridftp
+										// server
 										// needs some time
 										try {
 											Thread.sleep(3000);
 										} catch (final InterruptedException e1) {
-											myLogger.error(e);
+											myLogger.error(
+													e.getLocalizedMessage(), e);
 											Thread.currentThread().interrupt();
 										}
 									}
@@ -955,7 +960,8 @@ FileSystemInfoPlugin, FileTransferPlugin {
 									+ tempFile.getName()
 									+ " and target: "
 									+ target.toString());
-							// fileTransfers.put(targetFileString, fileTransfer);
+							// fileTransfers.put(targetFileString,
+							// fileTransfer);
 
 							fileTransfer.startTransfer(true);
 
@@ -985,8 +991,8 @@ FileSystemInfoPlugin, FileTransferPlugin {
 							// batchJobDao.saveOrUpdate(multiJob);
 							// }
 
-						} catch (Exception e) {
-							myLogger.error(e);
+						} catch (final Exception e) {
+							myLogger.error(e.getLocalizedMessage(), e);
 						}
 					} finally {
 						fsCache.close();
@@ -1009,8 +1015,8 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			public void run() {
 				try {
 					executor.awaitTermination(1, TimeUnit.DAYS);
-				} catch (InterruptedException e) {
-					myLogger.error(e);
+				} catch (final InterruptedException e) {
+					myLogger.error(e.getLocalizedMessage(), e);
 				}
 
 				if (!status.isFinished()) {
@@ -1019,8 +1025,8 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 				try {
 					tempFile.delete();
-				} catch (FileSystemException e) {
-					myLogger.error(e);
+				} catch (final FileSystemException e) {
+					myLogger.error(e.getLocalizedMessage(), e);
 				} finally {
 					fsCacheIn.close();
 				}

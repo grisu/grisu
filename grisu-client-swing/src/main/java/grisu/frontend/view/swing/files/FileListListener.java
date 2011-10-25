@@ -4,7 +4,6 @@ import grisu.model.files.GlazedFile;
 
 import java.util.Set;
 
-
 public interface FileListListener {
 
 	public void directoryChanged(GlazedFile newDirectory);

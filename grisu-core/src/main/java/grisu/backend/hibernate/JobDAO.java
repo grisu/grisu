@@ -7,10 +7,10 @@ import grisu.jcommons.constants.Constants;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.StaleStateException;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class to make it easier to persist (and find {@link Job} objects to/from the
@@ -21,7 +21,8 @@ import org.hibernate.StaleStateException;
  */
 public class JobDAO extends BaseHibernateDAO {
 
-	private static Logger myLogger = Logger.getLogger(JobDAO.class.getName());
+	private static Logger myLogger = LoggerFactory.getLogger(JobDAO.class
+			.getName());
 
 	public final synchronized void delete(final Job persistentInstance) {
 		// myLogger.debug("deleting Job instance");
@@ -35,16 +36,15 @@ public class JobDAO extends BaseHibernateDAO {
 
 			// myLogger.debug("delete successful");
 
-		} catch (StaleStateException sse) {
+		} catch (final StaleStateException sse) {
 			String name = "n/a";
 			try {
 				name = persistentInstance.getJobname();
-			} catch (Exception ee) {
+			} catch (final Exception ee) {
 			}
 			myLogger.warn(
 					"Delete failed because. Job probably already deleted, doing nothing. Jobname: "
-							+ name,
-							sse);
+							+ name, sse);
 		} catch (final RuntimeException e) {
 			myLogger.error("delete failed", e);
 			try {
@@ -84,7 +84,6 @@ public class JobDAO extends BaseHibernateDAO {
 			final Query queryObject = getCurrentSession().createQuery(
 					queryString);
 			queryObject.setParameter(0, dn);
-
 
 			final List<Job> jobs = (queryObject.list());
 
@@ -139,7 +138,7 @@ public class JobDAO extends BaseHibernateDAO {
 			if (job == null) {
 				throw new NoSuchJobException(
 						"Could not find a job for the dn: " + dn
-						+ " and the jobname: " + jobname);
+								+ " and the jobname: " + jobname);
 			}
 			return job;
 
@@ -155,7 +154,6 @@ public class JobDAO extends BaseHibernateDAO {
 		}
 
 	}
-
 
 	/**
 	 * Looks up the database whether a user with the specified dn is already
@@ -253,8 +251,8 @@ public class JobDAO extends BaseHibernateDAO {
 	public final List<String> findJobNamesPerApplicationByDn(final String dn,
 			final String application, final boolean includeMultiPartJob) {
 
-		//		if (StringUtils.isBlank(application)) {
-		//			return findJobNamesByDn(dn, includeMultiPartJob);
+		// if (StringUtils.isBlank(application)) {
+		// return findJobNamesByDn(dn, includeMultiPartJob);
 		// }
 		// myLogger.debug("Loading jobs with dn: " + dn + " from db.");
 
@@ -297,7 +295,8 @@ public class JobDAO extends BaseHibernateDAO {
 
 	/**
 	 * Searches for a job using the user's dn and the name of the job (which
-	 * should be unique). This method is only used in case the db somehow gets corrupted and there are more than one jobs with the same name for a user.
+	 * should be unique). This method is only used in case the db somehow gets
+	 * corrupted and there are more than one jobs with the same name for a user.
 	 * 
 	 * @param dn
 	 *            the user's dn
@@ -309,8 +308,8 @@ public class JobDAO extends BaseHibernateDAO {
 	 * @throws DatabaseInconsitencyException
 	 *             there are several jobs with this dn and jobname. this is bad.
 	 */
-	public final List<Job> findRogueJobsByDN(final String dn, final String jobname)
-			throws NoSuchJobException {
+	public final List<Job> findRogueJobsByDN(final String dn,
+			final String jobname) throws NoSuchJobException {
 		// myLogger.debug("Loading job with dn: " + dn + " and jobname: "
 		// + jobname + " from dn.");
 		final String queryString = "from grisu.backend.model.job.Job as job where job.dn = ? and job.jobname = ?";
@@ -327,10 +326,9 @@ public class JobDAO extends BaseHibernateDAO {
 
 			getCurrentSession().getTransaction().commit();
 
-			if ((jobs == null)||(jobs.size() == 0)) {
-				throw new NoSuchJobException(
-						"Could not find jobs for the dn: " + dn
-						+ " and the jobname: " + jobname);
+			if ((jobs == null) || (jobs.size() == 0)) {
+				throw new NoSuchJobException("Could not find jobs for the dn: "
+						+ dn + " and the jobname: " + jobname);
 			}
 			return jobs;
 
@@ -380,7 +378,7 @@ public class JobDAO extends BaseHibernateDAO {
 			if (jobs.size() == 0) {
 				throw new NoSuchJobException(
 						"Could not find a job for the dn: " + dn
-						+ " and the jobname: " + jobname);
+								+ " and the jobname: " + jobname);
 			}
 			return jobs;
 

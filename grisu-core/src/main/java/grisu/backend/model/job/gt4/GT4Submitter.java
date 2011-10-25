@@ -35,18 +35,19 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.apache.axis.message.addressing.EndpointReferenceType;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.globus.exec.client.GramJob;
 import org.globus.exec.generated.JobDescriptionType;
 import org.globus.exec.utils.client.ManagedJobFactoryClientHelper;
 import org.globus.exec.utils.rsl.RSLHelper;
 import org.globus.exec.utils.rsl.RSLParseException;
+import org.globus.gsi.GSIConstants;
 import org.globus.wsrf.impl.security.authorization.Authorization;
 import org.globus.wsrf.impl.security.authorization.HostAuthorization;
 import org.ietf.jgss.GSSCredential;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 
 /**
  * This class is the connector class between grisu and our GT4 gateways. It
@@ -58,14 +59,13 @@ import org.w3c.dom.Element;
  */
 public class GT4Submitter extends JobSubmitter {
 
-	static final Logger myLogger = Logger.getLogger(GT4Submitter.class
+	static final Logger myLogger = LoggerFactory.getLogger(GT4Submitter.class
 			.getName());
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.js.control.job.JobSubmitter#createJobSubmissionDescription
+	 * @see grisu.js.control.job.JobSubmitter#createJobSubmissionDescription
 	 * (org.w3c.dom.Document)
 	 */
 	public static String createJobSubmissionDescription(
@@ -81,7 +81,7 @@ public class GT4Submitter extends JobSubmitter {
 			final DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 			output = docBuilder.newDocument();
 		} catch (final ParserConfigurationException e1) {
-			myLogger.error(e1);
+			myLogger.error(e1.getLocalizedMessage(), e1);
 		}
 
 		// Add root element
@@ -105,14 +105,14 @@ public class GT4Submitter extends JobSubmitter {
 			}
 		}
 
-		Map<String, String> envVariables = JsdlHelpers
+		final Map<String, String> envVariables = JsdlHelpers
 				.getPosixApplicationEnvironment(jsdl);
 		if (envVariables != null) {
-			for (String key : envVariables.keySet()) {
+			for (final String key : envVariables.keySet()) {
 				final Element environment = output.createElement("environment");
-				Element keyElement = output.createElement("name");
+				final Element keyElement = output.createElement("name");
 				keyElement.setTextContent(key);
-				Element valueElement = output.createElement("value");
+				final Element valueElement = output.createElement("value");
 				valueElement.setTextContent(envVariables.get(key));
 
 				environment.appendChild(keyElement);
@@ -193,7 +193,7 @@ public class GT4Submitter extends JobSubmitter {
 			if (hostCountValue >= 1) {
 				final Element hostCount = output.createElement("hostCount");
 				hostCount
-				.setTextContent(new Integer(hostCountValue).toString());
+						.setTextContent(new Integer(hostCountValue).toString());
 				job.appendChild(hostCount);
 			}
 		}
@@ -264,7 +264,7 @@ public class GT4Submitter extends JobSubmitter {
 			modules_string = JsdlHelpers.getModules(jsdl);
 		} catch (final Exception e) {
 			// doesn't matter
-			myLogger.debug(e);
+			myLogger.debug(e.getLocalizedMessage(), e);
 		}
 		if ((modules_string != null) && (modules_string.length > 0)) {
 			for (final String module_string : modules_string) {
@@ -289,7 +289,7 @@ public class GT4Submitter extends JobSubmitter {
 
 				if (StringUtils.isBlank(application)
 						|| Constants.GENERIC_APPLICATION_NAME
-						.equals(application)) {
+								.equals(application)) {
 					myLogger.debug("\"generic\" application. Not trying to calculate modules...");
 
 				} else if (StringUtils.isNotBlank(application)
@@ -429,13 +429,13 @@ public class GT4Submitter extends JobSubmitter {
 
 			transformer.transform(source, result);
 		} catch (final TransformerConfigurationException e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		} catch (final IllegalArgumentException e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		} catch (final TransformerFactoryConfigurationError e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		} catch (final TransformerException e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
 		return result.getWriter().toString();
@@ -528,13 +528,11 @@ public class GT4Submitter extends JobSubmitter {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.js.control.job.JobSubmitter#getJobStatus(java.lang.String,
+	 * @see grisu.js.control.job.JobSubmitter#getJobStatus(java.lang.String,
 	 * grisu.credential.model.ProxyCredential)
 	 */
 	@Override
-	public final int getJobStatus(final Job job,
-			final ProxyCredential cred) {
+	public final int getJobStatus(final Job job, final ProxyCredential cred) {
 
 		String status = null;
 		int grisu_status = Integer.MIN_VALUE;
@@ -560,8 +558,7 @@ public class GT4Submitter extends JobSubmitter {
 	 * grisu.credential.model.ProxyCredential)
 	 */
 	@Override
-	public final int killJob(final Job job,
-			final ProxyCredential cred) {
+	public final int killJob(final Job job, final ProxyCredential cred) {
 
 		return killJob(job.getJobhandle(), cred.getGssCredential());
 
@@ -592,7 +589,7 @@ public class GT4Submitter extends JobSubmitter {
 	@Override
 	protected final String submit(final InformationManager infoManager,
 			final String host, final String factoryType, final Job job)
-					throws ServerJobSubmissionException {
+			throws ServerJobSubmissionException {
 
 		final int retries = ServerPropertiesManager.getJobSubmissionRetries();
 
@@ -613,7 +610,7 @@ public class GT4Submitter extends JobSubmitter {
 				jobDesc = RSLHelper.readRSL(submittedJobDesc);
 
 			} catch (final RSLParseException e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 				throw new RuntimeException(e);
 			}
 
@@ -628,7 +625,7 @@ public class GT4Submitter extends JobSubmitter {
 			// String factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
 			// Deafult Security: Host authorization + XML encryption
 			final Authorization authz = HostAuthorization.getInstance();
-			final Integer xmlSecurity = org.globus.wsrf.impl.security.authentication.Constants.ENCRYPTION;
+			final Integer xmlSecurity = GSIConstants.ENCRYPTION;
 
 			// Submission mode: batch = will not wait
 			final boolean batchMode = true;
@@ -653,8 +650,8 @@ public class GT4Submitter extends JobSubmitter {
 						|| (credential.getRemainingLifetime() < 1)) {
 					throw new NoValidCredentialException(
 							"Credential associated with job: " + job.getDn()
-							+ " / " + job.getJobname()
-							+ " is not valid.");
+									+ " / " + job.getJobname()
+									+ " is not valid.");
 				}
 
 				final GramClient gram = new GramClient(credential);
@@ -674,7 +671,7 @@ public class GT4Submitter extends JobSubmitter {
 
 				// TODO handle that
 				lastException = e;
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 				if (handle == null) {
 					myLogger.error("Jobhandle is null....");
 					// TODO
@@ -682,7 +679,7 @@ public class GT4Submitter extends JobSubmitter {
 					try {
 						killJob(handle, credential);
 					} catch (final Exception e3) {
-						myLogger.debug(e3);
+						myLogger.debug(e3.getLocalizedMessage(), e3);
 					}
 
 				}
@@ -730,7 +727,7 @@ public class GT4Submitter extends JobSubmitter {
 						.getDebugDirectory()
 						+ "/"
 						+ job.getDn().replace("=", "_").replace(",", "_")
-						.replace(" ", "_")
+								.replace(" ", "_")
 						+ "_"
 						+ job.getJobname()
 						+ "_" + vo + "_" + job.hashCode();
@@ -755,8 +752,8 @@ public class GT4Submitter extends JobSubmitter {
 				buffWriter.close();
 
 			} catch (final Exception e) {
-				myLogger.error("Gt4 job submission error: "
-						+ e.getLocalizedMessage(),
+				myLogger.error(
+						"Gt4 job submission error: " + e.getLocalizedMessage(),
 						e);
 			}
 

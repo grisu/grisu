@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-
 /**
  * A wrapper object that is created when the grid is queried for resources that
  * are able to run a certain type of job.

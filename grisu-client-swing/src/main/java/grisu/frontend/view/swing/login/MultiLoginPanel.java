@@ -28,11 +28,12 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 
-import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -40,7 +41,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class MultiLoginPanel extends JPanel implements EventSubscriber,
-LoginMethodPanel {
+		LoginMethodPanel {
 
 	private class QuickLoginAction extends AbstractAction {
 		public QuickLoginAction() {
@@ -60,8 +61,8 @@ LoginMethodPanel {
 		}
 	}
 
-	static final Logger myLogger = Logger.getLogger(MultiLoginPanel.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(MultiLoginPanel.class.getName());
 
 	private JTabbedPane tabbedPane;
 	private ShibLoginPanel shibLoginPanel;
@@ -82,7 +83,7 @@ LoginMethodPanel {
 						.getSelectedComponent());
 				login(temp);
 			} catch (final InterruptedException e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 		}
 
@@ -146,7 +147,7 @@ LoginMethodPanel {
 				getQuickLoginAction().setEnabled(false);
 			}
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
 	}
@@ -162,7 +163,8 @@ LoginMethodPanel {
 
 	private JCheckBox getAutoLoginCheckbox() {
 		if (autoLoginCheckbox == null) {
-			autoLoginCheckbox = new JCheckBox("Always auto-login using existing credential (if available)");
+			autoLoginCheckbox = new JCheckBox(
+					"Always auto-login using existing credential (if available)");
 
 			if (ClientPropertiesManager.getAutoLogin()) {
 				autoLoginCheckbox.setSelected(true);
@@ -191,7 +193,7 @@ LoginMethodPanel {
 								.getSelectedComponent());
 						login(temp);
 					} catch (final InterruptedException e) {
-						myLogger.error(e);
+						myLogger.error(e.getLocalizedMessage(), e);
 					}
 
 				}
@@ -309,7 +311,7 @@ LoginMethodPanel {
 					try {
 						loginThread.join();
 					} catch (final InterruptedException e) {
-						myLogger.error(e);
+						myLogger.error(e.getLocalizedMessage(), e);
 						return;
 					} finally {
 						loginThread = null;
@@ -319,7 +321,7 @@ LoginMethodPanel {
 						loginPanel.setServiceInterface(temp
 								.getServiceInterface());
 					} else {
-						Exception e = temp.getPossibleException();
+						final Exception e = temp.getPossibleException();
 						ErrorInfo info = null;
 						if (e == null) {
 							info = new ErrorInfo("Login error",
@@ -330,8 +332,8 @@ LoginMethodPanel {
 
 							info = new ErrorInfo("Login error",
 									"Error while trying to login.", temp
-									.getPossibleException()
-									.getLocalizedMessage(),
+											.getPossibleException()
+											.getLocalizedMessage(),
 									(String) null, temp.getPossibleException(),
 									Level.SEVERE, (Map) null);
 						}
@@ -367,7 +369,7 @@ LoginMethodPanel {
 					if (e instanceof Exception) {
 						possibleException = (Exception) e;
 					} else {
-						myLogger.error(e);
+						myLogger.error(e.getLocalizedMessage(), e);
 						possibleException = new Exception(e);
 					}
 				}

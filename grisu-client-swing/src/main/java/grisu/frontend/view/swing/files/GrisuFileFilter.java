@@ -4,7 +4,6 @@ import grisu.model.files.GlazedFile;
 
 import java.util.List;
 
-
 import ca.odell.glazedlists.TextFilterator;
 
 public class GrisuFileFilter implements TextFilterator<GlazedFile> {

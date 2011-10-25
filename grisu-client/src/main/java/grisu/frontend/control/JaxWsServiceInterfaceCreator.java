@@ -20,13 +20,14 @@ import javax.xml.ws.soap.SOAPBinding;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sun.xml.ws.developer.JAXWSProperties;
 
 public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(JaxWsServiceInterfaceCreator.class.getName());
 
 	public static String TRUST_FILE_NAME = Environment
@@ -73,7 +74,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			final QName serviceName = new QName("http://api.grisu",
 					"GrisuService");
 			final QName portName = new QName("http://api.grisu",
-					// "ServiceInterfaceSOAPPort");
+			// "ServiceInterfaceSOAPPort");
 					"ServiceInterfacePort");
 
 			Service s;
@@ -89,7 +90,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			final MTOMFeature mtom = new MTOMFeature();
 			try {
 				s.getPort(portName, ServiceInterface.class, mtom);
-			} catch (Error e) {
+			} catch (final Error e) {
 				// throw new ServiceInterfaceException(
 				// "Could not connect to backend, probably because of frontend/backend incompatibility (Underlying cause: \""
 				// + e.getLocalizedMessage()
@@ -118,8 +119,8 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 			// just to be sure, I'll keep that in there as well...
 			bp.getRequestContext()
-			.put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size",
-					new Integer(4096));
+					.put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size",
+							new Integer(4096));
 
 			bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY,
 					username);

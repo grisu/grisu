@@ -9,7 +9,6 @@ import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
-
 public class NavPanelDialog extends JDialog {
 
 	/**

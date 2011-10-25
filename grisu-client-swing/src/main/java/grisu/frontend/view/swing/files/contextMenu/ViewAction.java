@@ -14,7 +14,6 @@ import javax.swing.AbstractAction;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-
 public class ViewAction extends AbstractAction {
 
 	private final GridFileListPanel fileList;

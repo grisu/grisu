@@ -16,11 +16,11 @@ import java.util.TimerTask;
 
 import javax.swing.JPanel;
 
-import org.apache.log4j.Logger;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AppSpecificViewerPanel extends JPanel implements
-JobDetailPanel, PropertyChangeListener {
+		JobDetailPanel, PropertyChangeListener {
 
 	class UpdateProgressTask extends TimerTask {
 
@@ -35,8 +35,8 @@ JobDetailPanel, PropertyChangeListener {
 
 	}
 
-	static final Logger myLogger = Logger
-	.getLogger(AppSpecificViewerPanel.class.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(AppSpecificViewerPanel.class.getName());
 
 	public static AppSpecificViewerPanel create(ServiceInterface si,
 			JobObject job) {
@@ -46,18 +46,18 @@ JobDetailPanel, PropertyChangeListener {
 					Constants.APPLICATIONNAME_KEY, false);
 
 			final String className = "grisu.frontend.view.swing.jobmonitoring.single.appSpecific."
-				+ appName;
+					+ appName;
 			final Class classO = Class.forName(className);
 
 			final Constructor<AppSpecificViewerPanel> constO = classO
-			.getConstructor(ServiceInterface.class);
+					.getConstructor(ServiceInterface.class);
 
 			final AppSpecificViewerPanel asvp = constO.newInstance(si);
 
 			return asvp;
 
 		} catch (final Exception e) {
-			myLogger.info(e);
+			myLogger.info(e.getLocalizedMessage(), e);
 			return null;
 		}
 
@@ -87,7 +87,7 @@ JobDetailPanel, PropertyChangeListener {
 
 	protected synchronized int checkJobStatus() {
 
-		int status = getJob().getStatus(false);
+		final int status = getJob().getStatus(false);
 		// System.out.println("PANEL: " + JobConstants.translateStatus(status));
 		if (status >= JobConstants.FINISHED_EITHER_WAY) {
 
@@ -147,10 +147,9 @@ JobDetailPanel, PropertyChangeListener {
 
 	public void propertyChange(PropertyChangeEvent evt) {
 
-
 		if ("status".equals(evt.getPropertyName())) {
 
-			int status = checkJobStatus();
+			final int status = checkJobStatus();
 			System.out.println("After check");
 
 			if (status == JobConstants.NO_SUCH_JOB) {
@@ -184,7 +183,7 @@ JobDetailPanel, PropertyChangeListener {
 			throw new RuntimeException(e);
 		}
 
-		int status = checkJobStatus();
+		final int status = checkJobStatus();
 		// first time around we do it manually
 		if (checkJobStatus() >= JobConstants.ACTIVE) {
 			jobStarted();

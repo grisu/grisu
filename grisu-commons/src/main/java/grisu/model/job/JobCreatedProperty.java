@@ -5,7 +5,6 @@ import grisu.jcommons.constants.Constants;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
  * Job properties that are available after a job is created on the backend.
  * 

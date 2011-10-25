@@ -6,12 +6,13 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-import javax.swing.SwingConstants;
 
 public class BackgroundActionProgressDialogSmall extends JDialog {
 	/**
@@ -21,11 +22,11 @@ public class BackgroundActionProgressDialogSmall extends JDialog {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					BackgroundActionProgressDialogSmall dialog = new BackgroundActionProgressDialogSmall(
+					final BackgroundActionProgressDialogSmall dialog = new BackgroundActionProgressDialogSmall(
 							null, null);
-					dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+					dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 					dialog.setVisible(true);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					e.printStackTrace();
 				}
 			}

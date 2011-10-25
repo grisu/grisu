@@ -17,11 +17,12 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DeleteAction extends AbstractAction {
 
-	static final Logger myLogger = Logger.getLogger(DeleteAction.class
+	static final Logger myLogger = LoggerFactory.getLogger(DeleteAction.class
 			.getName());
 
 	private final GridFileListPanel fileList;

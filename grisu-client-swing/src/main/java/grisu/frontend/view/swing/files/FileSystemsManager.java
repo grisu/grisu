@@ -9,15 +9,16 @@ import grisu.model.files.GlazedFile;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
 public class FileSystemsManager {
 
-	static final Logger myLogger = Logger.getLogger(FileSystemsManager.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(FileSystemsManager.class.getName());
 
 	private static Map<ServiceInterface, FileSystemsManager> cachedRegistries = new HashMap<ServiceInterface, FileSystemsManager>();
 

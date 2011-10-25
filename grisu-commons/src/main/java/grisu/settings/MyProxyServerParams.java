@@ -6,8 +6,8 @@ import java.io.File;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.log4j.Logger;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class to help with the myproxy server parameters.
@@ -19,8 +19,8 @@ public final class MyProxyServerParams {
 
 	private static PropertiesConfiguration config = null;
 
-	static final Logger myLogger = Logger.getLogger(MyProxyServerParams.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(MyProxyServerParams.class.getName());
 
 	/**
 	 * Default myproxy server url. Points to myproxy2.arcs.org.au.

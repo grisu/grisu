@@ -12,12 +12,13 @@ import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LazyLoadingTreeController implements TreeWillExpandListener {
 
 	public static class DefaultWorkerFactory implements
-	SwingWorkerFactory<MutableTreeNode[], Object> {
+			SwingWorkerFactory<MutableTreeNode[], Object> {
 
 		public SwingWorker<MutableTreeNode[], Object> getInstance(
 				final IWorker<MutableTreeNode[]> worker) {
@@ -32,10 +33,10 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 				protected void done() {
 					try {
 						worker.done(get());
-					} catch (InterruptedException e) {
-						myLogger.error(e);
-					} catch (ExecutionException e) {
-						myLogger.error(e);
+					} catch (final InterruptedException e) {
+						myLogger.error(e.getLocalizedMessage(), e);
+					} catch (final ExecutionException e) {
+						myLogger.error(e.getLocalizedMessage(), e);
 					}
 
 				}
@@ -45,8 +46,8 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 
 	}
 
-	static final Logger myLogger = Logger.getLogger(TreeWillExpandListener.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(TreeWillExpandListener.class.getName());
 
 	private SwingWorkerFactory<MutableTreeNode[], ?> workerFactory = new DefaultWorkerFactory();
 	/** Tree Model */
@@ -102,7 +103,7 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 			return;
 		}
 		node.setChildren(createLoadingNode());
-		SwingWorker<MutableTreeNode[], ?> worker = createSwingWorker(node);
+		final SwingWorker<MutableTreeNode[], ?> worker = createSwingWorker(node);
 		worker.execute();
 	}
 
@@ -132,7 +133,7 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 			public void done(MutableTreeNode[] nodes) {
 
 				if (nodes == null) {
-					DefaultMutableTreeNode temp = (DefaultMutableTreeNode) node
+					final DefaultMutableTreeNode temp = (DefaultMutableTreeNode) node
 							.getChildAt(0);
 					temp.setUserObject("Exception/Can't access...");
 					model.nodeChanged(temp);
@@ -142,14 +143,14 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 				if (nodes.length == 0) {
 					try {
 						if (node.getChildCount() > 0) {
-							DefaultMutableTreeNode temp = (DefaultMutableTreeNode) node
+							final DefaultMutableTreeNode temp = (DefaultMutableTreeNode) node
 									.getChildAt(0);
 							model.removeNodeFromParent(temp);
 						}
 
 						model.nodeChanged(node);
-					} catch (Exception e) {
-						myLogger.error(e);
+					} catch (final Exception e) {
+						myLogger.error(e.getLocalizedMessage(), e);
 					}
 
 				} else {
@@ -190,10 +191,10 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 	 */
 	public void treeWillExpand(TreeExpansionEvent event)
 			throws ExpandVetoException {
-		TreePath path = event.getPath();
-		Object lastPathComponent = path.getLastPathComponent();
+		final TreePath path = event.getPath();
+		final Object lastPathComponent = path.getLastPathComponent();
 		if (lastPathComponent instanceof LazyLoadingTreeNode) {
-			LazyLoadingTreeNode lazyNode = (LazyLoadingTreeNode) lastPathComponent;
+			final LazyLoadingTreeNode lazyNode = (LazyLoadingTreeNode) lastPathComponent;
 			expandNode(lazyNode, model);
 		}
 	}

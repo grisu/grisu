@@ -4,7 +4,6 @@ import grisu.control.ServiceInterface;
 
 import javax.swing.JPanel;
 
-
 public interface JobCreationPanel {
 
 	public boolean createsBatchJob();

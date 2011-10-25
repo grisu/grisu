@@ -17,7 +17,6 @@ public class Jobname extends AbstractWidget {
 
 	public static String JOBNAME_CALC_METHOD_KEY = "jobnameCalcMethod";
 
-
 	private JTextField textField;
 
 	/**

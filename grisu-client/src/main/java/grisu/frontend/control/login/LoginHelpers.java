@@ -13,10 +13,11 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.globus.gsi.GlobusCredential;
 import org.globus.gsi.GlobusCredentialException;
 import org.ietf.jgss.GSSCredential;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Some easy-to-use methods to login to a Grisu web service.
@@ -26,7 +27,7 @@ import org.ietf.jgss.GSSCredential;
  */
 public final class LoginHelpers {
 
-	static final Logger myLogger = Logger.getLogger(LoginHelpers.class
+	static final Logger myLogger = LoggerFactory.getLogger(LoginHelpers.class
 			.getName());
 
 	/**
@@ -121,7 +122,7 @@ public final class LoginHelpers {
 						.getHostAddress();
 			} catch (final UnknownHostException e1) {
 				// TODO Auto-generated catch block
-				myLogger.error(e1);
+				myLogger.error(e1.getLocalizedMessage(), e1);
 			}
 
 			myLogger.debug(" MyProxy to use: " + myProxyServer + " / "
@@ -148,14 +149,14 @@ public final class LoginHelpers {
 			serviceInterface.login(myproxyusername,
 					new String(myproxyDetails.get(myproxyusername)));
 		} catch (final InvocationTargetException re) {
-			myLogger.error(re);
+			myLogger.error(re.getLocalizedMessage(), re);
 			throw new LoginException(
 					"Could not create & upload proxy to the myproxy server. Probably because of a wrong private key passphrase or network problems.",
 					re);
 		} catch (final ServiceInterfaceException e) {
 			throw e;
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			throw new LoginException("Can't login to web service: "
 					+ e.getMessage(), e);
 		}
@@ -182,8 +183,8 @@ public final class LoginHelpers {
 			throws LoginException, ServiceInterfaceException {
 
 		myLogger.debug("gssCredential login...");
-		PrintStream err = System.err;
-		
+		final PrintStream err = System.err;
+
 		ServiceInterface serviceInterface = null;
 
 		Class directMyProxyUploadClass = null;
@@ -210,15 +211,15 @@ public final class LoginHelpers {
 						.getHostAddress();
 			} catch (final UnknownHostException e1) {
 				// TODO Auto-generated catch block
-				myLogger.error(e1);
+				myLogger.error(e1.getLocalizedMessage(), e1);
 			}
 
 			myLogger.debug("Using myProxyServer: " + myProxyServer + " / "
 					+ myProxyPort);
 
 			Map<String, char[]> myproxyDetails = null;
-			
-			System.setErr( new PrintStream(new ByteArrayOutputStream(1024)));
+
+			System.setErr(new PrintStream(new ByteArrayOutputStream(1024)));
 			myproxyDetails = (Map<String, char[]>) myProxyUploadMethod.invoke(
 					null,
 					new Object[] { cred, myProxyServer, myProxyPort,
@@ -239,18 +240,18 @@ public final class LoginHelpers {
 			serviceInterface.login(myproxyusername,
 					new String(myproxyDetails.get(myproxyusername)));
 		} catch (final InvocationTargetException re) {
-			myLogger.error(re);
+			myLogger.error(re.getLocalizedMessage(), re);
 			throw new LoginException(
 					"Could not create & upload proxy to the myproxy server. Probably because of a wrong private key passphrase or network problems.",
 					re);
 		} catch (final ServiceInterfaceException e) {
 			throw e;
-		} catch (final RuntimeException e){
-			myLogger.error(e);
+		} catch (final RuntimeException e) {
+			myLogger.error(e.getLocalizedMessage(), e);
 			throw new LoginException("Can't login to web service: "
 					+ e.getMessage(), e);
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			throw new LoginException("Can't login to web service: "
 					+ e.getMessage(), e);
 		} finally {
@@ -309,7 +310,7 @@ public final class LoginHelpers {
 						.getHostAddress();
 			} catch (final UnknownHostException e1) {
 				// TODO Auto-generated catch block
-				myLogger.error(e1);
+				myLogger.error(e1.getLocalizedMessage(), e1);
 			}
 
 			myLogger.debug("Using myProxyServer: " + myProxyServer + " / "

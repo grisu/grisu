@@ -7,7 +7,8 @@ import grisu.model.dto.DtoActionStatus;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StatusObject {
 
@@ -15,13 +16,13 @@ public class StatusObject {
 		public void statusMessage(ActionStatusEvent event);
 	}
 
-	static final Logger myLogger = Logger.getLogger(StatusObject.class
+	static final Logger myLogger = LoggerFactory.getLogger(StatusObject.class
 			.getName());
 
 	public static StatusObject wait(ServiceInterface si, String handle) {
 		try {
 			return waitForActionToFinish(si, handle, 10, true, false);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// TODO logging
 			return null;
 		}
@@ -77,7 +78,7 @@ public class StatusObject {
 
 	private Thread createWaitThread(final int waitTime) {
 
-		Thread t = new Thread() {
+		final Thread t = new Thread() {
 			@Override
 			public void run() {
 				while (!lastStatus.isFinished()) {
@@ -88,7 +89,7 @@ public class StatusObject {
 						// + " seconds, then check again...",
 						// handle);
 						Thread.sleep(waitTime * 1000);
-					} catch (InterruptedException e) {
+					} catch (final InterruptedException e) {
 						myLogger.error("Status wait interrupted.", e);
 					}
 				}
@@ -137,11 +138,10 @@ public class StatusObject {
 
 	public void waitForActionToFinish(int recheckIntervalInSeconds,
 			boolean exitIfFailed, boolean sendStatusEvent)
-					throws InterruptedException, StatusException {
+			throws InterruptedException, StatusException {
 		waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed,
 				sendStatusEvent, null);
 	}
-
 
 	public void waitForActionToFinish(int recheckIntervalInSeconds,
 			boolean exitIfFailed, boolean sendStatusEvent,
@@ -156,45 +156,42 @@ public class StatusObject {
 					+ this.handle);
 		}
 
-
-
-
-		//		while (!lastStatus.isFinished()) {
+		// while (!lastStatus.isFinished()) {
 		//
-		//			if (sendStatusEvent) {
-		//				final ActionStatusEvent ev = new ActionStatusEvent(lastStatus,
-		//						statusMessagePrefix);
-		//				EventBus.publish(handle, ev);
-		//				fireEvent(ev);
-		//			}
+		// if (sendStatusEvent) {
+		// final ActionStatusEvent ev = new ActionStatusEvent(lastStatus,
+		// statusMessagePrefix);
+		// EventBus.publish(handle, ev);
+		// fireEvent(ev);
+		// }
 		//
-		//			if (exitIfFailed) {
-		//				if (lastStatus.isFailed()) {
-		//					return;
-		//				}
-		//			}
+		// if (exitIfFailed) {
+		// if (lastStatus.isFailed()) {
+		// return;
+		// }
+		// }
 		//
-		//			if (Thread.currentThread().isInterrupted()) {
-		//				throw new InterruptedException(
-		//						"Interrupted while waiting for action " + handle
-		//						+ " to finish on backend.");
-		//			}
+		// if (Thread.currentThread().isInterrupted()) {
+		// throw new InterruptedException(
+		// "Interrupted while waiting for action " + handle
+		// + " to finish on backend.");
+		// }
 		//
-		//			try {
-		//				Thread.sleep(recheckIntervalInSeconds * 1000);
-		//			} catch (final InterruptedException e) {
-		//				throw e;
-		//			}
-		//			myLogger.debug("Checking status for: " + handle);
+		// try {
+		// Thread.sleep(recheckIntervalInSeconds * 1000);
+		// } catch (final InterruptedException e) {
+		// throw e;
+		// }
+		// myLogger.debug("Checking status for: " + handle);
 		//
-		//			lastStatus = si.getActionStatus(handle);
+		// lastStatus = si.getActionStatus(handle);
 		//
-		//			myLogger.debug("Status for " + handle + ": "
-		//					+ lastStatus.percentFinished() + " %");
-		//			if (lastStatus == null) {
+		// myLogger.debug("Status for " + handle + ": "
+		// + lastStatus.percentFinished() + " %");
+		// if (lastStatus == null) {
 		//
-		//				throw new StatusException("Can't find status with handle "
-		//						+ this.handle);
+		// throw new StatusException("Can't find status with handle "
+		// + this.handle);
 		// }
 		//
 		// }
