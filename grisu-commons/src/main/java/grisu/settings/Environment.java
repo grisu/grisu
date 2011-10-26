@@ -1,8 +1,12 @@
 package grisu.settings;
 
 import java.io.File;
+import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class manages the location/values of some required files/environment
@@ -13,13 +17,16 @@ import org.apache.commons.lang.StringUtils;
  */
 public final class Environment {
 
+	private final static Logger myLogger = LoggerFactory
+			.getLogger(Environment.class);
+
 	private static final String GRISU_DEFAULT_DIRECTORY = System
 			.getProperty("user.home") + File.separator + ".grisu";
+
 	private static final String GRISU_SYSTEM_WIDE_CONFIG_DIR = "/etc/grisu";
 	private static final String GRISU_SYSTEM_WIDE_VAR_DIR = "/var/lib/grisu/";
 	private static final String GRISU_CLIENT_DIR = System
 			.getProperty("user.home") + File.separator + ".grisu";
-
 	private static String USER_SET_GRISU_DIRECTORY = null;
 
 	private static boolean grisuDirectoryAccessed = false;
@@ -192,6 +199,53 @@ public final class Environment {
 		}
 
 		USER_SET_GRISU_DIRECTORY = path;
+	}
+
+	// transition from .grisu.beta to .grisu
+	public static void transitionGrisuConfigDirs() {
+		File oldDir = new File(System.getProperty("user.home"), ".grisu.beta");
+		File newDir = new File(System.getProperty("user.home"), ".grisu");
+
+		// delete cache dir
+		File cache = new File(oldDir, "cache");
+		FileUtils.deleteQuietly(cache);
+
+		if ( oldDir.exists() && ! newDir.exists() ) {
+			try {
+				FileUtils.moveDirectory(oldDir, newDir);
+			} catch (IOException e) {
+				myLogger.info("Trying to transition grisu config dir...");
+				myLogger.info("Could not move "
+						+ oldDir.toString()
+						+ " to "
+						+ newDir.toString()
+						+ ". Please move that directory manually and restart your client.");
+			}
+		} else if (oldDir.exists() && newDir.exists()) {
+
+			File grisuConfig = new File(newDir, "grisu.config");
+			if (grisuConfig.exists()) {
+				try {
+					FileUtils.copyFile(grisuConfig, new File(newDir,
+							"grisu.config.bak"));
+					grisuConfig.delete();
+				} catch (IOException e) {
+					myLogger.info("Could not backup old config file.");
+				}
+			}
+			try {
+				FileUtils.copyDirectory(oldDir, newDir);
+				FileUtils.deleteQuietly(oldDir);
+			} catch (IOException e) {
+				myLogger.info("Trying to transition grisu config dir...");
+				myLogger.info("Could not move "
+						+ oldDir.toString()
+						+ " to "
+						+ newDir.toString()
+						+ ". Please move that directory manually and restart your client.");
+
+			}
+		}
 	}
 
 	private Environment() {
