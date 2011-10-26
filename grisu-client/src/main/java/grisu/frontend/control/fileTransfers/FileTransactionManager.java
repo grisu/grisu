@@ -20,6 +20,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import net.sf.ehcache.util.NamedThreadFactory;
+
 import org.bushe.swing.event.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,9 +56,11 @@ public class FileTransactionManager implements PropertyChangeListener {
 	private final ServiceInterface si;
 	private final FileManager fm;
 
+	final NamedThreadFactory tf = new NamedThreadFactory(
+			"clientFileTransaction");
 	final ExecutorService executor1 = Executors
 			.newFixedThreadPool(ClientPropertiesManager
-					.getConcurrentUploadThreads());
+					.getConcurrentUploadThreads(), tf);
 
 	final EventList<FileTransaction> fileTransfers = new BasicEventList<FileTransaction>();
 
@@ -83,7 +87,7 @@ public class FileTransactionManager implements PropertyChangeListener {
 		ft.setFuture(future);
 
 		// someone has to watch the transfer thread
-		new Thread() {
+		Thread t = new Thread() {
 			@Override
 			public void run() {
 				try {
@@ -96,7 +100,9 @@ public class FileTransactionManager implements PropertyChangeListener {
 					EventBus.publish(new FileTransactionFailedEvent(ft));
 				}
 			}
-		}.start();
+		};
+		t.setName("clientBackgroundFileTransaction " + ft.getId());
+		t.start();
 
 		return ft;
 	}

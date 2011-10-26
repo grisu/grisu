@@ -58,14 +58,14 @@ import org.w3c.dom.Document;
  * @author Markus Binsteiner
  */
 public class JobObject extends JobSubmissionObjectImpl implements
-		Comparable<JobObject> {
+Comparable<JobObject> {
 
 	static final Logger myLogger = LoggerFactory.getLogger(JobObject.class
 			.getName());
 
 	public static JobObject createJobObject(ServiceInterface si,
 			JobSubmissionObjectImpl jobsubmissionObject)
-			throws JobPropertiesException {
+					throws JobPropertiesException {
 
 		final JobObject job = new JobObject(si,
 				jobsubmissionObject.getJobDescriptionDocument());
@@ -265,7 +265,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 *             accessed
 	 */
 	public final String archive() throws JobPropertiesException,
-			RemoteFileSystemException {
+	RemoteFileSystemException {
 		return archive(null, false);
 	}
 
@@ -283,7 +283,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 *             accessed
 	 */
 	public final String archive(String target) throws JobPropertiesException,
-			RemoteFileSystemException {
+	RemoteFileSystemException {
 		return archive(target, false);
 	}
 
@@ -328,7 +328,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 				}
 
 			} else {
-				new Thread() {
+				Thread t = new Thread() {
 
 					@Override
 					public void run() {
@@ -356,7 +356,9 @@ public class JobObject extends JobSubmissionObjectImpl implements
 						}
 
 					}
-				}.start();
+				};
+				t.setName("Wait thread for archive job " + getJobname());
+				t.start();
 
 			}
 
@@ -472,7 +474,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 
 			addJobLogMessage("Command to execute: " + getCommandline());
 			// populate new job properties in background
-			new Thread() {
+			Thread t = new Thread() {
 				@Override
 				public void run() {
 					getAllJobProperties(true);
@@ -484,7 +486,9 @@ public class JobObject extends JobSubmissionObjectImpl implements
 					addJobLogMessage("Job directory url is: "
 							+ getJobProperty(Constants.JOBDIRECTORY_KEY, false));
 				}
-			}.start();
+			};
+			t.setName("job properties update thread for job " + getJobname());
+			t.start();
 
 		} catch (final JobPropertiesException e) {
 			addJobLogMessage("Could not create job on backend: "
@@ -535,7 +539,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 									JobObject.this.getJobname(),
 									new JobStatusEvent(JobObject.this,
 											oldStatus, JobObject.this
-													.getStatus(false)));
+											.getStatus(false)));
 						}
 					}
 					try {
@@ -820,7 +824,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 				final Date now = new Date();
 				if ((this.status >= JobConstants.ACTIVE)
 						&& ((lastStatusUpdate.getTime() + 2000) >= now
-								.getTime())) {
+						.getTime())) {
 					myLogger.debug("Less than 2 seconds between status updates. Returning old status...");
 					return this.status;
 				}
@@ -1108,7 +1112,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 				pcs.firePropertyChange("beingCleaned", false, true);
 
 				// delete local cache for this job
-				new Thread() {
+				Thread t = new Thread() {
 					@Override
 					public void run() {
 						myLogger.debug("Deleting local cached dir for job "
@@ -1118,7 +1122,9 @@ public class JobObject extends JobSubmissionObjectImpl implements
 								.getLocalCacheFile(getJobDirectoryUrl());
 						FileUtils.deleteQuietly(dir);
 					}
-				}.start();
+				};
+				t.setName("Cleanup thread for job " + getJobname());
+				t.start();
 
 			}
 			final String handle = this.serviceInterface.kill(this.getJobname(),
@@ -1186,7 +1192,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 * @throws JobPropertiesException
 	 */
 	public final void restartJob() throws JobSubmissionException,
-			JobPropertiesException {
+	JobPropertiesException {
 
 		addJobLogMessage("Restarting job...");
 
@@ -1261,7 +1267,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 * @throws InterruptedException
 	 */
 	public final void stageFiles() throws FileTransactionException,
-			InterruptedException {
+	InterruptedException {
 
 		addJobLogMessage("Staging in files...");
 
@@ -1353,7 +1359,7 @@ public class JobObject extends JobSubmissionObjectImpl implements
 	 * @throws InterruptedException
 	 */
 	public final void submitJob() throws JobSubmissionException,
-			InterruptedException {
+	InterruptedException {
 		submitJob(null);
 	}
 

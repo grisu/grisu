@@ -26,7 +26,6 @@ public class CliHelpers {
 	public static final Terminal terminal = Terminal.setupTerminal();
 	private static ConsoleReader consoleReader = null;
 
-	private static Thread indeterminateProgress = null;
 	public static String[] indeterminateProgressStrings = new String[] { "-",
 			"\\", "|", "/" };
 

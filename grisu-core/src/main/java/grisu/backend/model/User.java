@@ -59,6 +59,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import net.sf.ehcache.util.NamedThreadFactory;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.FileSystemException;
 import org.simpleframework.xml.Serializer;
@@ -471,6 +473,7 @@ public class User {
 			// try to connect to filesystem in background and store in database
 			// if not successful, so next time won't be tried again...
 			if (executor != null) {
+
 				final String urlTemp = url;
 				final Thread t = new Thread() {
 					@Override
@@ -618,13 +621,18 @@ public class User {
 			// not (in background)
 			final int df_p = ServerPropertiesManager
 					.getConcurrentMountPointLookups();
+			final NamedThreadFactory fscacheTF = new NamedThreadFactory(
+					"backgroundFScache");
 
 			final ExecutorService backgroundExecutorForFilesystemCache = Executors
-					.newFixedThreadPool(2);
+					.newFixedThreadPool(2, fscacheTF);
 			// final ExecutorService backgroundExecutorForFilesystemCache =
 			// null;
 
-			final ExecutorService executor = Executors.newFixedThreadPool(df_p);
+			final NamedThreadFactory homedirlookup = new NamedThreadFactory(
+					"homeDirLookup");
+			final ExecutorService executor = Executors.newFixedThreadPool(df_p,
+					homedirlookup);
 
 			final Date intermediate = new Date();
 
@@ -696,11 +704,11 @@ public class User {
 												uniqueString, mp);
 									} else {
 										successfullMountPoints
-												.remove(uniqueString);
+										.remove(uniqueString);
 										unsuccessfullMountPoints
-												.put(uniqueString,
-														new Exception(
-																"MountPoint not created, unknown reason."));
+										.put(uniqueString,
+												new Exception(
+														"MountPoint not created, unknown reason."));
 									}
 								} catch (final Exception e) {
 									// X.p(server + "/" + "/" + fqan +
@@ -794,9 +802,9 @@ public class User {
 							} else {
 								successfullMountPoints.remove(uniqueString);
 								unsuccessfullMountPoints
-										.put(uniqueString,
-												new Exception(
-														"MountPoint not created, unknown reason."));
+								.put(uniqueString,
+										new Exception(
+												"MountPoint not created, unknown reason."));
 							}
 						} catch (final Exception e) {
 							// X.p(server + "/" + "/" + fqan + ": failed : "
@@ -990,8 +998,10 @@ public class User {
 				return archivedJobs;
 			}
 
-			final ExecutorService executor = Executors
-					.newFixedThreadPool(getArchiveLocations().size());
+			final NamedThreadFactory tf = new NamedThreadFactory(
+					"getArchivedJobs");
+			final ExecutorService executor = Executors.newFixedThreadPool(
+					getArchiveLocations().size(), tf);
 
 			for (final String archiveLocation : getArchiveLocations().values()) {
 
@@ -1060,9 +1070,12 @@ public class User {
 
 			final GridFile file = ls(fs, 1);
 
+			final NamedThreadFactory tf = new NamedThreadFactory(
+					"getArchivedJobsFromFS");
+
 			final ExecutorService executor = Executors
 					.newFixedThreadPool(ServerPropertiesManager
-							.getConcurrentArchivedJobLookupsPerFilesystem());
+							.getConcurrentArchivedJobLookupsPerFilesystem(), tf);
 
 			for (final GridFile f : file.getChildren()) {
 				final Thread t = new Thread() {
@@ -1191,7 +1204,7 @@ public class User {
 					defArcLoc = mp.getRootUrl()
 							+ "/"
 							+ ServerPropertiesManager
-									.getArchivedJobsDirectoryName();
+							.getArchivedJobsDirectoryName();
 					addArchiveLocation(
 							Constants.JOB_ARCHIVE_LOCATION_AUTO + mp.getAlias(),
 							defArcLoc);
@@ -1212,7 +1225,7 @@ public class User {
 				defArcLoc = mp.getRootUrl()
 						+ "/"
 						+ ServerPropertiesManager
-								.getArchivedJobsDirectoryName();
+						.getArchivedJobsDirectoryName();
 				addArchiveLocation(
 						Constants.JOB_ARCHIVE_LOCATION_AUTO + mp.getAlias(),
 						defArcLoc);
@@ -1237,7 +1250,7 @@ public class User {
 				defArcLoc = mp.getRootUrl()
 						+ "/"
 						+ ServerPropertiesManager
-								.getArchivedJobsDirectoryName();
+						.getArchivedJobsDirectoryName();
 
 				addArchiveLocation(
 						Constants.JOB_ARCHIVE_LOCATION_AUTO + mp.getAlias(),
@@ -1249,7 +1262,7 @@ public class User {
 					defArcLoc = mp.getRootUrl()
 							+ "/"
 							+ ServerPropertiesManager
-									.getArchivedJobsDirectoryName();
+							.getArchivedJobsDirectoryName();
 
 					addArchiveLocation(
 							Constants.JOB_ARCHIVE_LOCATION_AUTO + mp.getAlias(),
@@ -1264,7 +1277,7 @@ public class User {
 					defArcLoc = mp.getRootUrl()
 							+ "/"
 							+ ServerPropertiesManager
-									.getArchivedJobsDirectoryName();
+							.getArchivedJobsDirectoryName();
 
 					addArchiveLocation(
 							Constants.JOB_ARCHIVE_LOCATION_AUTO + mp.getAlias(),
@@ -1793,7 +1806,7 @@ public class User {
 	 */
 	public MountPoint mountFileSystem(final String root, final String name,
 			final boolean useHomeDirectory, String site)
-			throws RemoteFileSystemException {
+					throws RemoteFileSystemException {
 
 		return mountFileSystem(root, name, getCred(), useHomeDirectory, site);
 	}
@@ -1841,7 +1854,7 @@ public class User {
 
 	public MountPoint mountFileSystem(final String root, final String name,
 			final String fqan, final boolean useHomeDirectory, final String site)
-			throws RemoteFileSystemException {
+					throws RemoteFileSystemException {
 
 		if ((fqan == null) || Constants.NON_VO_FQAN.equals(fqan)) {
 			return mountFileSystem(root, name, useHomeDirectory, site);

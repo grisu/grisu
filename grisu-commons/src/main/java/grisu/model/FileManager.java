@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,6 +42,8 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.swing.filechooser.FileSystemView;
+
+import net.sf.ehcache.util.NamedThreadFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -1075,9 +1078,10 @@ public class FileManager {
 		final Map<String, Exception> exceptions = Collections
 				.synchronizedMap(new HashMap<String, Exception>());
 
+		ThreadFactory tf = new NamedThreadFactory("clientFolderDownload");
 		final ExecutorService executor1 = Executors
-				.newFixedThreadPool(ClientPropertiesManager
-						.getConcurrentUploadThreads());
+				.newFixedThreadPool(
+						ClientPropertiesManager.getConcurrentUploadThreads(), tf);
 
 		for (final String file : files) {
 
@@ -1707,7 +1711,7 @@ public class FileManager {
 	 */
 	private final String uploadFileToDirectory(final File file,
 			final String targetDirectory, final boolean overwrite)
-			throws FileTransactionException {
+					throws FileTransactionException {
 
 		if (file.isDirectory()) {
 			throw new FileTransactionException(file.toString(),
@@ -1740,7 +1744,7 @@ public class FileManager {
 	 */
 	public final void uploadFolderToDirectory(final File folder,
 			final String targetDirectory, final boolean overwrite)
-			throws FileTransactionException {
+					throws FileTransactionException {
 
 		if (!folder.isDirectory()) {
 			throw new FileTransactionException(folder.toString(),
@@ -1752,9 +1756,11 @@ public class FileManager {
 		final Map<String, Exception> errors = Collections
 				.synchronizedMap(new HashMap<String, Exception>());
 
+		final ThreadFactory tf = new NamedThreadFactory(
+				"clientUploadFolderToDir");
 		final ExecutorService executor1 = Executors
 				.newFixedThreadPool(ClientPropertiesManager
-						.getConcurrentUploadThreads());
+						.getConcurrentUploadThreads(), tf);
 
 		final String basePath = folder.getParentFile().getPath();
 		for (final File file : allFiles) {
@@ -1902,9 +1908,11 @@ public class FileManager {
 		final Map<String, Exception> errors = Collections
 				.synchronizedMap(new HashMap<String, Exception>());
 
+		final ThreadFactory tf = new NamedThreadFactory(
+				"clientUploadInputFolder");
 		final ExecutorService executor1 = Executors
 				.newFixedThreadPool(ClientPropertiesManager
-						.getConcurrentUploadThreads());
+.getConcurrentUploadThreads(), tf);
 
 		// final String basePath = folder.getParentFile().getPath();
 		final String basePath = folder.getPath();
@@ -1961,9 +1969,9 @@ public class FileManager {
 												+ file.toString()
 												+ ": "
 												+ DtoActionStatus
-														.getLogMessagesAsString(so
-																.getStatus()),
-										null);
+												.getLogMessagesAsString(so
+														.getStatus()),
+														null);
 							}
 
 							myLogger.info("Upload of input file "
@@ -2095,7 +2103,7 @@ public class FileManager {
 	 */
 	public final void uploadUrlToDirectory(final String uriOrPath,
 			final String targetDirectory, boolean overwrite)
-			throws FileTransactionException {
+					throws FileTransactionException {
 
 		final File file = getFileFromUriOrPath(uriOrPath);
 

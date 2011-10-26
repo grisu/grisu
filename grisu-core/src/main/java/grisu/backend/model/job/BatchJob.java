@@ -29,6 +29,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 
+import net.sf.ehcache.util.NamedThreadFactory;
+
 import org.hibernate.annotations.CollectionOfElements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,10 +131,12 @@ public class BatchJob {
 
 		result.setMessages(DtoLogMessages.createLogMessages(this
 				.getLogMessages()));
-
+		final NamedThreadFactory tf = new NamedThreadFactory(
+				"createDtoBatchJob");
 		final ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
-						.getConcurrentJobStatusThreadsPerUser());
+.getConcurrentJobStatusThreadsPerUser(),
+				tf);
 
 		for (final Job job : getJobs()) {
 

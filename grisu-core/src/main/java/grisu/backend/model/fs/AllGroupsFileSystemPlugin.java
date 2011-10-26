@@ -15,6 +15,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import net.sf.ehcache.util.NamedThreadFactory;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -186,7 +188,9 @@ public class AllGroupsFileSystemPlugin implements VirtualFileSystemPlugin {
 			final Map<String, GridFile> lsMap = Collections
 					.synchronizedMap(new HashMap<String, GridFile>());
 
-			final ExecutorService pool = Executors.newFixedThreadPool(10);
+			final NamedThreadFactory tf = new NamedThreadFactory(
+					"groupFSfolderList");
+			final ExecutorService pool = Executors.newFixedThreadPool(10, tf);
 
 			for (final MountPoint mp : mps) {
 				final Thread t = new Thread() {

@@ -142,7 +142,12 @@
 			<version>1.0.0.Final</version>
 		</dependency>
 
-
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
+			<version>2.3.1</version>
+			<type>pom</type>
+		</dependency>
 		<!-- enunciate dependencies for annotations -->
 		<!-- <dependency> <groupId>org.codehaus.enunciate</groupId> <artifactId>enunciate-core-annotations</artifactId> 
 			<version>${enunciate.version}</version> <type>jar</type> <scope>compile</scope> 

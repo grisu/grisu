@@ -12,6 +12,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Date;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -53,6 +54,8 @@ public class FileTransaction implements Comparable<FileTransaction> {
 	private Status status = Status.CREATED;
 
 	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+
+	private final String id = UUID.randomUUID().toString();
 
 	public FileTransaction(FileManager fm, Set<GlazedFile> sources,
 			GlazedFile target, boolean overwrite) {
@@ -146,6 +149,10 @@ public class FileTransaction implements Comparable<FileTransaction> {
 
 	public Date getFinished() {
 		return finished;
+	}
+
+	public String getId() {
+		return id;
 	}
 
 	public Set<String> getSourceUrl() {
@@ -274,8 +281,8 @@ public class FileTransaction implements Comparable<FileTransaction> {
 
 	@Override
 	public int hashCode() {
-		return 21 * getSourceUrl().hashCode() + 3
-				* getTargetDirUrl().hashCode() + 8 * getStatus().hashCode();
+		return (21 * getSourceUrl().hashCode()) + (3
+				* getTargetDirUrl().hashCode()) + (8 * getStatus().hashCode());
 	}
 
 	public boolean isFinished() {

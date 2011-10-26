@@ -47,7 +47,10 @@ import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+
+import net.sf.ehcache.util.NamedThreadFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -61,7 +64,7 @@ import ca.odell.glazedlists.EventList;
 import com.google.common.collect.ImmutableList;
 
 public class BatchJobObject implements JobMonitoringObject,
-		Comparable<BatchJobObject>, Listener {
+Comparable<BatchJobObject>, Listener {
 
 	static final Logger myLogger = LoggerFactory.getLogger(BatchJobObject.class
 			.getName());
@@ -156,7 +159,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	 */
 	public BatchJobObject(ServiceInterface serviceInterface,
 			String batchJobname, boolean refreshJobStatusOnBackend)
-			throws BatchJobException, NoSuchJobException {
+					throws BatchJobException, NoSuchJobException {
 
 		this.serviceInterface = serviceInterface;
 		this.batchJobname = batchJobname;
@@ -202,7 +205,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	public BatchJobObject(ServiceInterface serviceInterface,
 			String batchJobname, String submissionFqan,
 			String defaultApplication, String defaultVersion)
-			throws BatchJobException {
+					throws BatchJobException {
 		this.serviceInterface = serviceInterface;
 		this.submissionFqan = submissionFqan;
 
@@ -355,7 +358,7 @@ public class BatchJobObject implements JobMonitoringObject,
 		if (job.getWalltimeInSeconds() <= 0) {
 			EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 					"Setting walltime for job " + job.getJobname()
-							+ " to default walltime: " + defaultWalltime));
+					+ " to default walltime: " + defaultWalltime));
 			job.setWalltimeInSeconds(defaultWalltime);
 		} else {
 
@@ -475,6 +478,7 @@ public class BatchJobObject implements JobMonitoringObject,
 				myLogger.debug("BatchJob finished. Exit monitoring...");
 			}
 		};
+		waitThread.setName("Wait thread for batchjob " + getJobname());
 
 	}
 
@@ -512,8 +516,8 @@ public class BatchJobObject implements JobMonitoringObject,
 	public void downloadResults(boolean onlyDownloadWhenFinished,
 			File parentFolder, String[] patterns,
 			boolean createSeperateFoldersForEveryJob, boolean prefixWithJobname)
-			throws RemoteFileSystemException, FileTransactionException,
-			IOException {
+					throws RemoteFileSystemException, FileTransactionException,
+					IOException {
 
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 				"Checking and possibly downloading output files for batchjob: "
@@ -568,8 +572,8 @@ public class BatchJobObject implements JobMonitoringObject,
 									this.batchJobname,
 									new BatchJobEvent(this,
 											"Could not download file " + child
-													+ ": "
-													+ e.getLocalizedMessage()));
+											+ ": "
+											+ e.getLocalizedMessage()));
 							continue;
 						}
 					} else {
@@ -625,8 +629,8 @@ public class BatchJobObject implements JobMonitoringObject,
 	public void downloadResults(boolean onlyDownloadWhenFinished,
 			String parentFolder, String[] patterns,
 			boolean createSeperateFoldersForEveryJob, boolean prefixWithJobname)
-			throws RemoteFileSystemException, FileTransactionException,
-			IOException {
+					throws RemoteFileSystemException, FileTransactionException,
+					IOException {
 
 		final File parent = new File(parentFolder);
 
@@ -1247,8 +1251,10 @@ public class BatchJobObject implements JobMonitoringObject,
 							throw new RuntimeException(e);
 						}
 					}
-				};
 
+				};
+				refreshThread.setName("refresh thread for batchjob "
+						+ getJobname());
 				refreshThread.start();
 			}
 
@@ -1377,7 +1383,7 @@ public class BatchJobObject implements JobMonitoringObject,
 
 			}
 		};
-
+		waitThread.setName("Wait thread for batchjob kill " + getJobname());
 		waitThread.start();
 
 		if (waitForCompletion) {
@@ -1444,7 +1450,7 @@ public class BatchJobObject implements JobMonitoringObject,
 			try {
 				EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 						"Pausing monitoring for " + sleeptimeinseconds
-								+ " seconds..."));
+						+ " seconds..."));
 				Thread.sleep(sleeptimeinseconds * 1000);
 			} catch (final InterruptedException e) {
 				myLogger.error(e.getLocalizedMessage(), e);
@@ -1489,7 +1495,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	 * @throws InterruptedException
 	 */
 	public void prepareAndCreateJobs(boolean optimize) throws JobsException,
-			BackendException, InterruptedException {
+	BackendException, InterruptedException {
 		prepareAndCreateJobs(optimize, true);
 	}
 
@@ -1505,8 +1511,11 @@ public class BatchJobObject implements JobMonitoringObject,
 				+ " jobs.";
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this, message));
 		addJobLogMessage(message);
+		ThreadFactory tf = new NamedThreadFactory(
+				"clientPrepareAndCreateBatchJob");
 		final ExecutorService executor = Executors
-				.newFixedThreadPool(getConcurrentJobCreationThreads());
+				.newFixedThreadPool(
+						getConcurrentJobCreationThreads(), tf);
 
 		final Map<JobObject, Exception> failedSubmissions = Collections
 				.synchronizedMap(new HashMap<JobObject, Exception>());
@@ -1968,7 +1977,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	 */
 	public boolean restart(Set<String> jobnamesToRestart,
 			Set<String> submissionLocationsToUse, boolean waitForRestartToFinish)
-			throws JobsException, BackendException, InterruptedException {
+					throws JobsException, BackendException, InterruptedException {
 
 		final ResubmitPolicy policy = new SpecificJobsResubmitPolicy(
 				jobnamesToRestart, submissionLocationsToUse);
@@ -2224,7 +2233,7 @@ public class BatchJobObject implements JobMonitoringObject,
 	 * @throws InterruptedException
 	 */
 	public void submit() throws JobSubmissionException, NoSuchJobException,
-			InterruptedException {
+	InterruptedException {
 
 		submit(true);
 	}
@@ -2415,9 +2424,9 @@ public class BatchJobObject implements JobMonitoringObject,
 
 		final List<Exception> exceptions = Collections
 				.synchronizedList(new LinkedList<Exception>());
-
+		ThreadFactory tf = new NamedThreadFactory("clientBatchJobFileUpload");
 		final ExecutorService executor = Executors
-				.newFixedThreadPool(getConcurrentInputFileUploadThreads());
+				.newFixedThreadPool(getConcurrentInputFileUploadThreads(),tf);
 
 		final List<Future<?>> tasks = new LinkedList<Future<?>>();
 

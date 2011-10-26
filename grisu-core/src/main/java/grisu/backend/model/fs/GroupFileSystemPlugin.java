@@ -21,6 +21,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import net.sf.ehcache.util.NamedThreadFactory;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -351,8 +353,10 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				// test whether files actually exist
 
 				if (parentUrls.size() > 0) {
+					final NamedThreadFactory tf = new NamedThreadFactory(
+							"realUrlCheckForVfs");
 					final ExecutorService executor = Executors
-							.newFixedThreadPool(parentUrls.size());
+							.newFixedThreadPool(parentUrls.size(), tf);
 
 					// let's sort using last modified date, so that we can give
 					// the
@@ -522,7 +526,9 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 		final Map<String, GridFile> result = Collections
 				.synchronizedMap(new HashMap<String, GridFile>());
 
-		final ExecutorService pool = Executors.newFixedThreadPool(mps.size());
+		final NamedThreadFactory tf = new NamedThreadFactory("listGroup");
+		final ExecutorService pool = Executors.newFixedThreadPool(mps.size(),
+				tf);
 
 		for (final MountPoint mp : mps) {
 

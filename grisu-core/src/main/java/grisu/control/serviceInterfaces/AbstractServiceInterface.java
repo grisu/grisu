@@ -76,6 +76,7 @@ import javax.annotation.security.RolesAllowed;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.util.NamedThreadFactory;
 
 import org.apache.commons.lang.StringUtils;
 import org.globus.common.CoGProperties;
@@ -396,10 +397,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				status.addElement("Starting to archive batchjob "
 						+ batchJob.getBatchJobname());
-
+				final NamedThreadFactory tf = new NamedThreadFactory(
+						"archiveBatchJob " + batchJob.getBatchJobname() + " / "
+								+ getUserhandle());
 				final ExecutorService executor = Executors
 						.newFixedThreadPool(ServerPropertiesManager
-								.getConcurrentFileTransfersPerUser());
+								.getConcurrentFileTransfersPerUser(), tf);
 
 				for (final Job job : batchJob.getJobs()) {
 					status.addElement("Creating job archive thread for job "
@@ -423,7 +426,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 					final Thread archiveThread = archiveSingleJob(job, tmp,
 							status);
-					archiveThread.setName("archive_batchJob_"
+					archiveThread.setName("archive_batchJob "
+							+ batchJob.getBatchJobname() + " / "
+							+ getUserhandle() + " / "
 							+ status.getHandle());
 					executor.execute(archiveThread);
 				}
@@ -460,7 +465,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				status.setFinished(true);
 			}
 		};
-
+		archiveThread.setName("archive batchjob " + batchJob.getBatchJobname()
+				+ " / " + getDN());
 		archiveThread.start();
 
 	}
@@ -551,22 +557,22 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 				if (optionalBatchJobStatus != null) {
 					optionalBatchJobStatus
-							.addElement("Starting archiving of job: "
-									+ job.getJobname());
+					.addElement("Starting archiving of job: "
+							+ job.getJobname());
 				}
 
 				if ((getSessionActionStatus().get(job.getJobname()) != null)
 						&& !getSessionActionStatus().get(job.getJobname())
-								.isFinished()) {
+						.isFinished()) {
 
 					if (optionalBatchJobStatus != null) {
 						optionalBatchJobStatus.setFailed(true);
 						optionalBatchJobStatus
-								.setErrorCause("Cancelling archiving of job because it seems to be still submitting.");
+						.setErrorCause("Cancelling archiving of job because it seems to be still submitting.");
 						optionalBatchJobStatus
-								.addElement("Cancelling archiving of job "
-										+ job.getJobname()
-										+ " because it seems to be still submitting.");
+						.addElement("Cancelling archiving of job "
+								+ job.getJobname()
+								+ " because it seems to be still submitting.");
 					}
 
 					// this should not really happen
@@ -591,9 +597,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						optionalBatchJobStatus.setErrorCause(e1
 								.getLocalizedMessage());
 						optionalBatchJobStatus
-								.addElement("Failed archiving job "
-										+ job.getJobname() + ": "
-										+ e1.getLocalizedMessage());
+						.addElement("Failed archiving job "
+								+ job.getJobname() + ": "
+								+ e1.getLocalizedMessage());
 					}
 					status.setFailed(true);
 					status.setErrorCause(e1.getLocalizedMessage());
@@ -609,8 +615,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						optionalBatchJobStatus.setErrorCause(rftp
 								.getPossibleExceptionMessage());
 						optionalBatchJobStatus
-								.addElement("Failed archiving job "
-										+ job.getJobname());
+						.addElement("Failed archiving job "
+								+ job.getJobname());
 					}
 					status.setFailed(true);
 					status.setErrorCause(rftp.getPossibleExceptionMessage());
@@ -638,9 +644,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						optionalBatchJobStatus.setErrorCause(e1
 								.getLocalizedMessage());
 						optionalBatchJobStatus
-								.addElement("Failed archiving job "
-										+ job.getJobname() + ": "
-										+ e1.getLocalizedMessage());
+						.addElement("Failed archiving job "
+								+ job.getJobname() + ": "
+								+ e1.getLocalizedMessage());
 					}
 					try {
 						fout.close();
@@ -664,9 +670,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						optionalBatchJobStatus.setErrorCause(e
 								.getLocalizedMessage());
 						optionalBatchJobStatus
-								.addElement("Failed archiving job "
-										+ job.getJobname() + ": "
-										+ e.getLocalizedMessage());
+						.addElement("Failed archiving job "
+								+ job.getJobname() + ": "
+								+ e.getLocalizedMessage());
 					}
 					status.setFailed(true);
 					status.setErrorCause(e.getLocalizedMessage());
@@ -706,12 +712,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				status.addElement("Job archived successfully.");
 				if (optionalBatchJobStatus != null) {
 					optionalBatchJobStatus
-							.addElement("Successfully archived job: "
-									+ job.getJobname());
+					.addElement("Successfully archived job: "
+							+ job.getJobname());
 				}
 
 			}
 		};
+
+		archiveThread.setName("archive job " + job.getJobname() + " / "
+				+ getDN());
 
 		return archiveThread;
 
@@ -726,8 +735,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			if (jobname == null) {
 				throw new JobPropertiesException(
 						JobSubmissionProperty.JOBNAME.toString()
-								+ ": "
-								+ "Jobname not specified and job creation method is force-name.");
+						+ ": "
+						+ "Jobname not specified and job creation method is force-name.");
 			}
 
 			final String[] allJobnames = getAllJobnames(null).asArray();
@@ -735,10 +744,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			if (Arrays.binarySearch(allJobnames, jobname) >= 0) {
 				throw new JobPropertiesException(
 						JobSubmissionProperty.JOBNAME.toString()
-								+ ": "
-								+ "Jobname "
-								+ jobname
-								+ " already exists and job creation method is force-name.");
+						+ ": "
+						+ "Jobname "
+						+ jobname
+						+ " already exists and job creation method is force-name.");
 			}
 		} else if (Constants.UUID_NAME_METHOD.equals(jobnameCreationMethod)) {
 			if (jobname != null) {
@@ -754,7 +763,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			String temp;
 			do {
 				final String timestamp = new Long(new Date().getTime())
-						.toString();
+				.toString();
 				try {
 					Thread.sleep(1);
 				} catch (final InterruptedException e) {
@@ -894,10 +903,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		if (checkFileSystemsBeforeUse) {
 
 			// myLogger.debug("Checking filesystems to use...");
-
+			final NamedThreadFactory tf = new NamedThreadFactory(
+					"batchJobResourceCalculation");
 			final ExecutorService executor1 = Executors
 					.newFixedThreadPool(ServerPropertiesManager
-							.getConcurrentFileTransfersPerUser());
+							.getConcurrentFileTransfersPerUser(), tf);
 
 			final Set<GridResource> failSet = Collections
 					.synchronizedSet(new HashSet<GridResource>());
@@ -1008,10 +1018,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public String cp(final DtoStringList sources, final String target,
 			final boolean overwrite, final boolean waitForFileTransferToFinish)
-			throws RemoteFileSystemException {
+					throws RemoteFileSystemException {
 
 		final String handle = "cp_" + sources.asSortedSet().size()
-				+ "_files_to_" + target + "_" + new Date().getTime();
+				+ "_files_to_" + target + "_" + new Date().getTime() + " / "
+				+ getUserhandle();
 
 		final DtoActionStatus actionStat = new DtoActionStatus(handle,
 				sources.asArray().length * 2);
@@ -1038,7 +1049,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							actionStat.setFinished(true);
 							actionStat.addElement("Transfer failed: "
 									+ rto.getPossibleException()
-											.getLocalizedMessage());
+									.getLocalizedMessage());
 							throw new RemoteFileSystemException(rto
 									.getPossibleException()
 									.getLocalizedMessage());
@@ -1083,7 +1094,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			final String target, final boolean overwrite,
 			final boolean startFileTransfer,
 			final boolean waitForFileTransferToFinish)
-			throws RemoteFileSystemException {
+					throws RemoteFileSystemException {
 
 		final RemoteFileTransferObject fileTransfer = getUser()
 				.getFileSystemManager().copy(source, target, overwrite);
@@ -1171,7 +1182,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private String createJob(Document jsdl, final String fqan,
 			final String jobnameCreationMethod,
 			final BatchJob optionalParentBatchJob)
-			throws JobPropertiesException {
+					throws JobPropertiesException {
 
 		String jobname = JsdlHelpers.getJobname(jsdl);
 
@@ -1186,7 +1197,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			final BatchJob mpj = getUser().getBatchJobFromDatabase(jobname);
 			throw new JobPropertiesException(
 					"Could not create job with jobname " + jobname
-							+ ". Multipart job with this id already exists...");
+					+ ". Multipart job with this id already exists...");
 		} catch (final NoSuchJobException e) {
 			// that's good
 		}
@@ -1349,6 +1360,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			}
 		};
+		t.setName(handle);
 		t.start();
 
 		return handle;
@@ -1376,10 +1388,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				multiJob.getBatchJobname(), size);
 		this.getSessionActionStatus().put(multiJob.getBatchJobname(),
 				newActionStatus);
-
+		final NamedThreadFactory tf = new NamedThreadFactory("deleteBatchJob");
 		final ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
-						.getConcurrentMultiPartJobSubmitThreadsPerUser());
+						.getConcurrentMultiPartJobSubmitThreadsPerUser(), tf);
 
 		final Job[] jobs = multiJob.getJobs().toArray(new Job[] {});
 
@@ -1442,21 +1454,21 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								.getAllUsedMountPoints()) {
 
 							newActionStatus
-									.addElement("Deleting common dir for mountpoint: "
-											+ mpRoot);
+							.addElement("Deleting common dir for mountpoint: "
+									+ mpRoot);
 							final String url = mpRoot
 									+ multiJob
-											.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY);
+									.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY);
 							myLogger.debug("Deleting multijobDir: " + url);
 							try {
 								deleteFile(url, true);
 								newActionStatus
-										.addElement("Deleted common dir for mountpoint: "
-												+ mpRoot);
+								.addElement("Deleted common dir for mountpoint: "
+										+ mpRoot);
 							} catch (final RemoteFileSystemException e) {
 								newActionStatus
-										.addElement("Couldn't delete common dir for mountpoint: "
-												+ mpRoot);
+								.addElement("Couldn't delete common dir for mountpoint: "
+										+ mpRoot);
 								newActionStatus.setFailed(true);
 								newActionStatus.setErrorCause(e
 										.getLocalizedMessage());
@@ -1469,7 +1481,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 					batchJobDao.delete(multiJob);
 					newActionStatus
-							.addElement("Deleted multipartjob from database.");
+					.addElement("Deleted multipartjob from database.");
 
 				} finally {
 					newActionStatus.setFinished(true);
@@ -1478,6 +1490,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 		};
 
+		cleanupThread.setName("deleteBatchJob " + multiJob.getBatchJobname()
+				+ " / " + getUserhandle());
 		cleanupThread.start();
 
 		return cleanupThread;
@@ -1569,7 +1583,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			defaultVersion = Constants.NO_VERSION_INDICATOR_STRING;
 		}
 		properties
-				.put(JobSubmissionProperty.APPLICATIONVERSION, defaultVersion);
+		.put(JobSubmissionProperty.APPLICATIONVERSION, defaultVersion);
 
 		String maxWalltime = mpj
 				.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY);
@@ -1906,35 +1920,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return DtoProperties.createProperties(getUser().getBookmarks());
 	}
 
-	// /**
-	// * This method has to be implemented by the endpoint specific
-	// * ServiceInterface. Since there are a few different ways to get a proxy
-	// * credential (myproxy, just use the one in /tmp/x509..., shibb,...) this
-	// * needs to be implemented differently for every single situation.
-	// *
-	// * @return the proxy credential that is used to contact the grid
-	// */
-	// protected abstract ProxyCredential getCredential();
-	//
-	// /**
-	// * This is mainly for testing, to enable credentials with specified
-	// * lifetimes.
-	// *
-	// * @param fqan the vo
-	// * @param lifetime
-	// * the lifetime in seconds
-	// * @return the credential
-	// */
-	// protected abstract ProxyCredential getCredential(String fqan, int
-	// lifetime);
-
-	// public DtoDataLocations getDataLocationsForVO(final String fqan) {
-	//
-	// return DtoDataLocations.createDataLocations(fqan,
-	// informationManager.getDataLocationsForVO(fqan));
-	//
-	// }
-
 	/**
 	 * Calculates the default version of an application on a site. This is
 	 * pretty hard to do, so, if you call this method, don't expect anything
@@ -1965,6 +1950,35 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return versions[0];
 		}
 	}
+
+	// /**
+	// * This method has to be implemented by the endpoint specific
+	// * ServiceInterface. Since there are a few different ways to get a proxy
+	// * credential (myproxy, just use the one in /tmp/x509..., shibb,...) this
+	// * needs to be implemented differently for every single situation.
+	// *
+	// * @return the proxy credential that is used to contact the grid
+	// */
+	// protected abstract ProxyCredential getCredential();
+	//
+	// /**
+	// * This is mainly for testing, to enable credentials with specified
+	// * lifetimes.
+	// *
+	// * @param fqan the vo
+	// * @param lifetime
+	// * the lifetime in seconds
+	// * @return the credential
+	// */
+	// protected abstract ProxyCredential getCredential(String fqan, int
+	// lifetime);
+
+	// public DtoDataLocations getDataLocationsForVO(final String fqan) {
+	//
+	// return DtoDataLocations.createDataLocations(fqan,
+	// informationManager.getDataLocationsForVO(fqan));
+	//
+	// }
 
 	/*
 	 * (non-Javadoc)
@@ -2063,12 +2077,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	// public String getStagingFileSystem(String site) {
-	// return MountPointManager.getDefaultFileSystem(site);
-	// }
-
-	// abstract protected DtoStringList getSessionFqans();
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -2079,6 +2087,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// TODO
 		return null;
 	}
+
+	// public String getStagingFileSystem(String site) {
+	// return MountPointManager.getDefaultFileSystem(site);
+	// }
+
+	// abstract protected DtoStringList getSessionFqans();
 
 	/*
 	 * (non-Javadoc)
@@ -2170,10 +2184,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return DtoSubmissionLocations.createSubmissionLocationsInfo(sls);
 	}
 
-	// public UserDAO getUserDao() {
-	// return userdao;
-	// }
-
 	public DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersionAndFqan(
 			final String application, final String version, final String fqan) {
 		// TODO implement a method which takes in fqan later on
@@ -2182,6 +2192,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				.createSubmissionLocationsInfo(informationManager
 						.getAllSubmissionLocations(application, version));
 	}
+
+	// public UserDAO getUserDao() {
+	// return userdao;
+	// }
 
 	public DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
 			final String application) {
@@ -2202,7 +2216,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							+ "\""
 							+ ", version \""
 							+ versions[i]
-							+ "\". Most likely the mds is not published correctly.");
+									+ "\". Most likely the mds is not published correctly.");
 					continue;
 				}
 			} catch (final Exception e) {
@@ -2211,7 +2225,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						+ "\""
 						+ ", version \""
 						+ versions[i]
-						+ "\". Most likely the mds is not published correctly.");
+								+ "\". Most likely the mds is not published correctly.");
 				continue;
 			}
 			final StringBuffer submitLoc = new StringBuffer();
@@ -2278,6 +2292,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 
 	abstract protected User getUser();
+
+	private String getUserhandle() {
+		return getDN();
+	}
 
 	public DtoProperties getUserProperties() {
 
@@ -2529,7 +2547,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			}
 		};
-
+		t.setName(handle);
 		t.start();
 
 		return handle;
@@ -2610,9 +2628,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			@Override
 			public void run() {
 
+				final NamedThreadFactory tf = new NamedThreadFactory("killJobs");
 				final ExecutorService executor = Executors
 						.newFixedThreadPool(ServerPropertiesManager
-								.getConcurrentJobsToBeKilled());
+								.getConcurrentJobsToBeKilled(),
+								tf);
 
 				for (final String jobname : jobnames.asArray()) {
 					final Thread t = new Thread() {
@@ -2661,6 +2681,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			}
 		};
+
+		killThread.setName(handle);
 		killThread.start();
 
 		return handle;
@@ -2699,7 +2721,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public MountPoint mount(final String url, final String mountpoint,
 			String fqan, final boolean useHomeDirectory)
-			throws RemoteFileSystemException {
+					throws RemoteFileSystemException {
 		// myLogger.debug("Mounting: " + url + " to: " + mountpoint
 		// + " with fqan: " + fqan);
 		if (fqan == null) {
@@ -2719,7 +2741,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public MountPoint mountWithoutFqan(final String url,
 			final String mountpoint, final boolean useHomeDirectory)
-			throws RemoteFileSystemException {
+					throws RemoteFileSystemException {
 
 		final MountPoint mp = getUser().mountFileSystem(url, mountpoint,
 				useHomeDirectory, informationManager.getSiteForHostOrUrl(url));
@@ -2751,9 +2773,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		myLogger.debug(message.toString());
 
+		final NamedThreadFactory tf = new NamedThreadFactory("optimizeBatchJob");
 		final ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
-						.getConcurrentMultiPartJobSubmitThreadsPerUser());
+						.getConcurrentMultiPartJobSubmitThreadsPerUser(), tf);
 
 		final List<Exception> ex = Collections
 				.synchronizedList(new ArrayList<Exception>());
@@ -2941,7 +2964,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			if ((apps == null) || (apps.length == 0)) {
 				jobSubmissionObject
-						.setApplication(Constants.GENERIC_APPLICATION_NAME);
+				.setApplication(Constants.GENERIC_APPLICATION_NAME);
 			} else if (apps.length > 1) {
 				throw new JobPropertiesException(
 						"More than one application names for executable "
@@ -2963,11 +2986,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			submissionLocation = jobSubmissionObject.getSubmissionLocation();
 			if (StringUtils.isBlank(submissionLocation)
 					|| Constants.NO_SUBMISSION_LOCATION_INDICATOR_STRING
-							.equals(submissionLocation)) {
+					.equals(submissionLocation)) {
 				throw new JobPropertiesException(
 						JobSubmissionProperty.SUBMISSIONLOCATION.toString()
-								+ ": "
-								+ "No submission location specified. Since application is of type \"generic\" Grisu can't auto-calculate one. Please either specify package or submissionn location.");
+						+ ": "
+						+ "No submission location specified. Since application is of type \"generic\" Grisu can't auto-calculate one. Please either specify package or submissionn location.");
 			}
 			stagingFileSystems = informationManager
 					.getStagingFileSystemForSubmissionLocation(submissionLocation);
@@ -2978,9 +3001,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						+ submissionLocation);
 				throw new JobPropertiesException(
 						JobSubmissionProperty.SUBMISSIONLOCATION.toString()
-								+ ": "
-								+ "Could not find staging filesystem for submissionlocation "
-								+ submissionLocation);
+						+ ": "
+						+ "Could not find staging filesystem for submissionlocation "
+						+ submissionLocation);
 			}
 
 			// if not "generic" application...
@@ -3013,18 +3036,18 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							.getApplicationVersion();
 					if (StringUtils.isNotBlank(version)
 							&& !Constants.NO_VERSION_INDICATOR_STRING
-									.equals(version)) {
+							.equals(version)) {
 						throw new JobPropertiesException(
 								JobSubmissionProperty.APPLICATIONNAME
-										.toString()
-										+ ": "
-										+ "No application specified (but application version) and could not find one in the grid that matches the executable "
-										+ JsdlHelpers
-												.getPosixApplicationExecutable(jsdl)
-										+ ".");
+								.toString()
+								+ ": "
+								+ "No application specified (but application version) and could not find one in the grid that matches the executable "
+								+ JsdlHelpers
+								.getPosixApplicationExecutable(jsdl)
+								+ ".");
 					} else {
 						jobSubmissionObject
-								.setApplication(Constants.GENERIC_APPLICATION_NAME);
+						.setApplication(Constants.GENERIC_APPLICATION_NAME);
 					}
 				}
 
@@ -3055,7 +3078,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			if (StringUtils.isNotBlank(submissionLocation)
 					&& !Constants.NO_SUBMISSION_LOCATION_INDICATOR_STRING
-							.equals(submissionLocation)) {
+					.equals(submissionLocation)) {
 				myLogger.debug("Submission location specified in jsdl: "
 						+ submissionLocation
 						+ ". Checking whether this is valid using mds information.");
@@ -3068,10 +3091,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							+ submissionLocation);
 					throw new JobPropertiesException(
 							JobSubmissionProperty.SUBMISSIONLOCATION.toString()
-									+ ": "
-									+ "Could not find staging filesystem for submissionlocation "
-									+ submissionLocation + " (using VO: "
-									+ jobFqan + ")");
+							+ ": "
+							+ "Could not find staging filesystem for submissionlocation "
+							+ submissionLocation + " (using VO: "
+							+ jobFqan + ")");
 				}
 
 				boolean submissionLocationIsValid = false;
@@ -3094,27 +3117,27 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							if (StringUtils.isNotBlank(jobSubmissionObject
 									.getApplicationVersion())
 									&& !Constants.NO_VERSION_INDICATOR_STRING
-											.equals(jobSubmissionObject
-													.getApplicationVersion())
-									&& !resource
+									.equals(jobSubmissionObject
+											.getApplicationVersion())
+											&& !resource
 											.getAvailableApplicationVersion()
 											.contains(
 													jobSubmissionObject
-															.getApplicationVersion())) {
+													.getApplicationVersion())) {
 								myLogger.debug("Specified version is not available on this grid resource: "
 										+ submissionLocation);
 								throw new JobPropertiesException(
 										JobSubmissionProperty.APPLICATIONVERSION
-												.toString()
-												+ ": "
-												+ "Version: "
-												+ jobSubmissionObject
-														.getApplicationVersion()
-												+ " not installed on "
-												+ submissionLocation
-												+ " (using VO: "
-												+ jobFqan
-												+ ")");
+										.toString()
+										+ ": "
+										+ "Version: "
+										+ jobSubmissionObject
+										.getApplicationVersion()
+										+ " not installed on "
+										+ submissionLocation
+										+ " (using VO: "
+										+ jobFqan
+										+ ")");
 							}
 							myLogger.debug("Version available or not specified.");
 							// if no application version is specified, auto-set
@@ -3122,8 +3145,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							if (StringUtils.isBlank(jobSubmissionObject
 									.getApplicationVersion())
 									|| Constants.NO_VERSION_INDICATOR_STRING
-											.equals(jobSubmissionObject
-													.getApplicationVersion())) {
+									.equals(jobSubmissionObject
+											.getApplicationVersion())) {
 								myLogger.debug("version was not specified. Auto setting the first one for the selected resource.");
 								if ((resource.getAvailableApplicationVersion() != null)
 										&& (resource
@@ -3158,22 +3181,22 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 											"true");
 									myLogger.debug("Set version to be: "
 											+ resource
-													.getAvailableApplicationVersion()
-													.get(0));
+											.getAvailableApplicationVersion()
+											.get(0));
 									// jobSubmissionObject.setApplicationVersion(resource.getAvailableApplicationVersion().get(0));
 								} else {
 									throw new JobPropertiesException(
 											JobSubmissionProperty.APPLICATIONVERSION
-													.toString()
-													+ ": "
-													+ "Could not find any installed version for application "
-													+ jobSubmissionObject
-															.getApplication()
-													+ " on "
-													+ submissionLocation
-													+ " (using VO: "
-													+ jobFqan
-													+ ")");
+											.toString()
+											+ ": "
+											+ "Could not find any installed version for application "
+											+ jobSubmissionObject
+											.getApplication()
+											+ " on "
+											+ submissionLocation
+											+ " (using VO: "
+											+ jobFqan
+											+ ")");
 								}
 							}
 							myLogger.debug("Successfully validated submissionlocation "
@@ -3190,11 +3213,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							+ submissionLocation);
 					throw new JobPropertiesException(
 							JobSubmissionProperty.SUBMISSIONLOCATION.toString()
-									+ ": "
-									+ "Submissionlocation "
-									+ submissionLocation
-									+ " not available for this kind of job (using VO: "
-									+ jobFqan + ")");
+							+ ": "
+							+ "Submissionlocation "
+							+ submissionLocation
+							+ " not available for this kind of job (using VO: "
+							+ jobFqan + ")");
 				}
 			} else {
 				myLogger.debug("No submission location specified in jsdl document. Trying to auto-find one...");
@@ -3203,9 +3226,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					myLogger.error("No matching grid resources found.");
 					throw new JobPropertiesException(
 							JobSubmissionProperty.SUBMISSIONLOCATION.toString()
-									+ ": "
-									+ "Could not find any matching resource to run this kind of job on. Using VO: "
-									+ jobFqan);
+							+ ": "
+							+ "Could not find any matching resource to run this kind of job on. Using VO: "
+							+ jobFqan);
 				}
 				// find the best submissionlocation and set it.
 
@@ -3213,8 +3236,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				if (StringUtils.isBlank(jobSubmissionObject
 						.getApplicationVersion())
 						|| Constants.NO_VERSION_INDICATOR_STRING
-								.equals(jobSubmissionObject
-										.getApplicationVersion())) {
+						.equals(jobSubmissionObject
+								.getApplicationVersion())) {
 					myLogger.debug("No version specified in jsdl document. Will use the first one for the best grid resource.");
 					for (final GridResource resource : matchingResources) {
 
@@ -3237,8 +3260,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 									.getAvailableApplicationVersion().get(0));
 							job.addJobProperty(
 									Constants.APPLICATIONVERSION_KEY, resource
-											.getAvailableApplicationVersion()
-											.get(0));
+									.getAvailableApplicationVersion()
+									.get(0));
 							job.addJobProperty(
 									Constants.APPLICATIONVERSION_CALCULATED_KEY,
 									"true");
@@ -3250,7 +3273,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 									+ submissionLocation
 									+ " and application version: "
 									+ resource.getAvailableApplicationVersion()
-											.get(0));
+									.get(0));
 							break;
 						}
 					}
@@ -3258,10 +3281,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						myLogger.error("Could not find any version of the specified application grid-wide.");
 						throw new JobPropertiesException(
 								JobSubmissionProperty.APPLICATIONVERSION
-										.toString()
-										+ ": "
-										+ "Could not find any version for this application grid-wide. That is probably an error in the mds info (VO used: "
-										+ jobFqan + ".");
+								.toString()
+								+ ": "
+								+ "Could not find any version for this application grid-wide. That is probably an error in the mds info (VO used: "
+								+ jobFqan + ".");
 					}
 				} else {
 					myLogger.debug("Version: "
@@ -3294,14 +3317,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						myLogger.error("Could not find a grid resource with the specified version...");
 						throw new JobPropertiesException(
 								JobSubmissionProperty.APPLICATIONVERSION
-										.toString()
-										+ ": "
-										+ "Could not find desired version: "
-										+ jobSubmissionObject
-												.getApplicationVersion()
-										+ " for application "
-										+ jobSubmissionObject.getApplication()
-										+ " grid-wide. VO used: " + jobFqan);
+								.toString()
+								+ ": "
+								+ "Could not find desired version: "
+								+ jobSubmissionObject
+								.getApplicationVersion()
+								+ " for application "
+								+ jobSubmissionObject.getApplication()
+								+ " grid-wide. VO used: " + jobFqan);
 					}
 				}
 
@@ -3315,8 +3338,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				} catch (final RuntimeException e) {
 					throw new JobPropertiesException(
 							JobSubmissionProperty.SUBMISSIONLOCATION.toString()
-									+ ": "
-									+ "Jsdl document malformed. No candidate hosts element.",
+							+ ": "
+							+ "Jsdl document malformed. No candidate hosts element.",
 							e);
 				}
 			}
@@ -3330,10 +3353,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					+ submissionLocation);
 			throw new JobPropertiesException(
 					JobSubmissionProperty.SUBMISSIONLOCATION.toString()
-							+ ": "
-							+ "Could not find staging filesystem for submissionlocation "
-							+ submissionLocation + " (using VO: " + jobFqan
-							+ ")");
+					+ ": "
+					+ "Could not find staging filesystem for submissionlocation "
+					+ submissionLocation + " (using VO: " + jobFqan
+					+ ")");
 		}
 
 		myLogger.debug("Trying to find mountpoint for stagingfilesystem...");
@@ -3386,10 +3409,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					+ submissionLocation);
 			throw new JobPropertiesException(
 					JobSubmissionProperty.SUBMISSIONLOCATION.toString()
-							+ ": "
-							+ "Could not find stagingfilesystem for submission location: "
-							+ submissionLocation + " (using VO: " + jobFqan
-							+ ")");
+					+ ": "
+					+ "Could not find stagingfilesystem for submission location: "
+					+ submissionLocation + " (using VO: " + jobFqan
+					+ ")");
 		}
 
 		JsdlHelpers.addOrRetrieveExistingFileSystemElement(jsdl,
@@ -3409,7 +3432,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					stagingFilesystemToUse.length())
 					+ "/"
 					+ parentJob
-							.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY)
+					.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY)
 					+ "/" + job.getJobname();
 		}
 		myLogger.debug("Calculated workingdirectory: " + workingDirectory);
@@ -3437,7 +3460,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} catch (final RemoteFileSystemException e1) {
 			throw new JobPropertiesException(
 					"Could not create new jobdirectory " + newJobdir
-							+ " (using VO: " + jobFqan + "): " + e1);
+					+ " (using VO: " + jobFqan + "): " + e1);
 		}
 
 		job.addJobProperty(Constants.JOBDIRECTORY_KEY, newJobdir);
@@ -3524,7 +3547,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		final DtoActionStatus status = new DtoActionStatus(handleName, 2);
 		getSessionActionStatus().put(handleName, status);
 
-		new Thread() {
+		Thread t =
+				new Thread() {
 			@Override
 			public void run() {
 
@@ -3560,7 +3584,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				}
 
 			}
-		}.start();
+		};
+		t.setName(handleName);
+		t.start();
 
 		return handleName;
 
@@ -3586,9 +3612,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		getSessionActionStatus().put(handle, statusfinal);
 
+		final NamedThreadFactory tf = new NamedThreadFactory(
+				"refreshBatchJobStatus");
 		final ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
-						.getConcurrentJobStatusThreadsPerUser());
+						.getConcurrentJobStatusThreadsPerUser(),
+						tf);
 
 		final Job[] currentJobs = multiPartJob.getJobs().toArray(new Job[] {});
 
@@ -3619,7 +3648,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 						if (multiPartJob.getFailedJobs().size() > 0) {
 							statusfinal.setFailed(true);
 							statusfinal
-									.setErrorCause("Undefined error: not all subjobs accessed.");
+							.setErrorCause("Undefined error: not all subjobs accessed.");
 							multiPartJob.setStatus(JobConstants.FAILED);
 						} else {
 							multiPartJob.setStatus(JobConstants.DONE);
@@ -3669,7 +3698,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public DtoProperties restartBatchJob(final String batchJobname,
 			String restartPolicy, DtoProperties properties)
-			throws NoSuchJobException, JobPropertiesException {
+					throws NoSuchJobException, JobPropertiesException {
 
 		final BatchJob job = getUser().getBatchJobFromDatabase(batchJobname);
 
@@ -3734,9 +3763,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		batchJobDao.saveOrUpdate(job);
 
+		final NamedThreadFactory tf = new NamedThreadFactory("restartBatchJob");
 		final ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
-						.getConcurrentMultiPartJobSubmitThreadsPerUser());
+						.getConcurrentMultiPartJobSubmitThreadsPerUser(), tf);
 
 		for (final Job jobToRestart : sp.getCalculatedJobs()) {
 
@@ -3970,7 +4000,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	}
 
 	private void setVO(final Job job, String fqan) throws NoSuchJobException,
-			JobPropertiesException {
+	JobPropertiesException {
 
 		if (fqan == null) {
 			fqan = Constants.NON_VO_FQAN;
@@ -4040,6 +4070,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		this.getSessionActionStatus().put(multiJob.getBatchJobname(),
 				newActionStatus);
 
+		final NamedThreadFactory tf = new NamedThreadFactory("submitBatchJob");
 		final ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
 						.getConcurrentMultiPartJobSubmitThreadsPerUser());
@@ -4082,10 +4113,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 									+ e.getLocalizedMessage());
 							myLogger.error("Trying again...");
 							newActionStatus
-									.addLogMessage("Failed to submit job "
-											+ job.getJobname() + ": "
-											+ e.getLocalizedMessage()
-											+ ". Trying again...");
+							.addLogMessage("Failed to submit job "
+									+ job.getJobname() + ": "
+									+ e.getLocalizedMessage()
+									+ ". Trying again...");
 							exc = e;
 							executor.shutdownNow();
 						}
@@ -4236,7 +4267,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				getUser().addLogMessageToPossibleMultiPartJobParent(
 						job,
 						"Job submission for job: " + job.getJobname()
-								+ " failed: " + e.getLocalizedMessage());
+						+ " failed: " + e.getLocalizedMessage());
 				throw new JobSubmissionException(
 						"Submission to endpoint failed: "
 								+ e.getLocalizedMessage());
@@ -4274,7 +4305,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			getUser().addLogMessageToPossibleMultiPartJobParent(
 					job,
 					"Job submission for job: " + job.getJobname()
-							+ " finished but jobhandle is null...");
+					+ " finished but jobhandle is null...");
 			throw new JobSubmissionException(
 					"Job apparently submitted but jobhandle is null for job: "
 							+ job.getJobname());
@@ -4295,7 +4326,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			getUser().addLogMessageToPossibleMultiPartJobParent(
 					job,
 					"Job submission for job: " + job.getJobname()
-							+ " finished successful.");
+					+ " finished successful.");
 			jobdao.saveOrUpdate(job);
 			myLogger.debug(debug_token + "wrapping up finished");
 			myLogger.info("Jobsubmission for job " + job.getJobname()
@@ -4314,7 +4345,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			getUser().addLogMessageToPossibleMultiPartJobParent(
 					job,
 					"Job submission for job: " + job.getJobname()
-							+ " finished but error in wrap-up...");
+					+ " finished but error in wrap-up...");
 			throw new JobSubmissionException(
 					"Job apparently submitted but error in wrap-up for job: "
 							+ job.getJobname());

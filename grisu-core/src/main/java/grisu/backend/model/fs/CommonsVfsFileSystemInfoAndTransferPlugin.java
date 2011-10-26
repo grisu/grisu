@@ -29,6 +29,8 @@ import java.util.concurrent.TimeUnit;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 
+import net.sf.ehcache.util.NamedThreadFactory;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.AllFileSelector;
 import org.apache.commons.vfs.FileContent;
@@ -860,9 +862,10 @@ FileSystemInfoPlugin, FileTransferPlugin {
 		fout = null;
 
 		// fsCacheIn.close();
-
+		final NamedThreadFactory tf = new NamedThreadFactory(
+				"multiLocationFileUpload");
 		final ExecutorService executor = Executors.newFixedThreadPool(parents
-				.size());
+				.size(), tf);
 
 		for (final String parent : parents) {
 
@@ -1010,7 +1013,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 		// cleanup
 
-		new Thread() {
+		Thread t = new Thread() {
 			@Override
 			public void run() {
 				try {
@@ -1032,7 +1035,9 @@ FileSystemInfoPlugin, FileTransferPlugin {
 				}
 
 			}
-		}.start();
+		};
+		t.setName("multiUploadCleanup");
+		t.start();
 
 	}
 }

@@ -33,9 +33,12 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.tree.TreeModel;
+
+import net.sf.ehcache.util.NamedThreadFactory;
 
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
@@ -52,7 +55,7 @@ import com.google.common.collect.Sets;
  * 
  */
 public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
-		EventSubscriber<FqanEvent> {
+EventSubscriber<FqanEvent> {
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(UserEnvironmentManagerImpl.class);
@@ -151,7 +154,9 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 		final Map<String, Set<String>> allExes = Collections
 				.synchronizedMap(new TreeMap<String, Set<String>>());
 
-		final ExecutorService executor = Executors.newFixedThreadPool(50);
+		final ThreadFactory tf = new NamedThreadFactory(
+				"infoGetAllAvailableExecutables");
+		final ExecutorService executor = Executors.newFixedThreadPool(50, tf);
 
 		for (final String application : getAllAvailableApplications()) {
 			allExes.put(application,
@@ -181,7 +186,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 							X.p("Exes for: " + application + " " + subLoc + " "
 									+ version);
 							allExes.get(application)
-									.addAll(Arrays.asList(exes));
+							.addAll(Arrays.asList(exes));
 						}
 					};
 					executor.execute(t);
@@ -279,16 +284,19 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 					.synchronizedSet(new TreeSet<String>());
 			cachedAllSites = new TreeSet<String>();
 
+			final ThreadFactory tf = new NamedThreadFactory(
+					"infoGetAllAvailableSubLocs");
 			final ExecutorService executor = Executors
-					.newFixedThreadPool(getAllAvailableFqans().length);
+.newFixedThreadPool(
+					getAllAvailableFqans().length, tf);
 			for (final String fqan : getAllAvailableFqans()) {
 
 				final Thread t = new Thread() {
 					@Override
 					public void run() {
 						cachedAllSubmissionLocations
-								.addAll(Arrays.asList(resourceInfo
-										.getAllAvailableSubmissionLocations(fqan)));
+						.addAll(Arrays.asList(resourceInfo
+								.getAllAvailableSubmissionLocations(fqan)));
 					}
 				};
 				executor.execute(t);
@@ -395,7 +403,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 				final String url = getBookmarks().get(bookmark);
 				cachedBookmarkFilesystemList.add(new FileSystemItem(bookmark,
 						FileSystemItem.Type.BOOKMARK, getFileManager()
-								.createGlazedFileFromUrl(url)));
+						.createGlazedFileFromUrl(url)));
 			}
 		}
 		return cachedBookmarkFilesystemList;
@@ -924,7 +932,7 @@ public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 		} else {
 			final FileSystemItem temp = new FileSystemItem(alias,
 					FileSystemItem.Type.BOOKMARK, getFileManager()
-							.createGlazedFileFromUrl(url));
+					.createGlazedFileFromUrl(url));
 			getBookmarks().put(alias, url);
 			getBookmarksFilesystems().add(temp);
 			getFileSystems().add(temp);
