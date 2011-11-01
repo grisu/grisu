@@ -37,6 +37,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 
 import javax.persistence.Transient;
@@ -98,6 +99,9 @@ Comparable<JobObject> {
 
 	private final List<String> submissionLog = Collections
 			.synchronizedList(new LinkedList<String>());
+
+	private final Map<String, String> properties = Collections
+			.synchronizedMap(new TreeMap<String, String>());
 
 	private Date lastStatusUpdate = new Date();
 
@@ -252,6 +256,10 @@ Comparable<JobObject> {
 	private void addJobLogMessage(String message) {
 		this.submissionLog.add(message);
 		pcs.firePropertyChange("submissionLog", null, getSubmissionLog());
+	}
+
+	public void addJobProperty(String key, String value) {
+		properties.put(key, value);
 	}
 
 	/**
@@ -1183,6 +1191,10 @@ Comparable<JobObject> {
 
 	}
 
+	public void removeJobProperty(String key) {
+		properties.remove(key);
+	}
+
 	/**
 	 * Restarts the job.
 	 * 
@@ -1428,6 +1440,33 @@ Comparable<JobObject> {
 					"Interrupted after staging in input files.");
 		}
 
+		if (StringUtils.isNotBlank(description)) {
+			if (additionalJobProperties == null) {
+				additionalJobProperties = new HashMap<String, String>();
+			}
+			additionalJobProperties.put(Constants.JOB_DESCRIPTION_KEY,
+					description);
+		}
+
+		if (additionalJobProperties != null) {
+			properties.putAll(additionalJobProperties);
+		}
+
+		if (properties.size() > 0) {
+			addJobLogMessage("Setting additional job properties...");
+			try {
+				serviceInterface.addJobProperties(getJobname(),
+						DtoJob.createJob(-1, properties, null, null,
+						false));
+			} catch (final NoSuchJobException e) {
+				addJobLogMessage("Submission failed: "
+						+ e.getLocalizedMessage());
+				throw new JobSubmissionException(
+						"Could not find job on backend.", e);
+			}
+		}
+		allJobProperties = null;
+
 		try {
 			addJobLogMessage("Submitting job to endpoint...");
 			final String handle = serviceInterface.submitJob(getJobname());
@@ -1454,29 +1493,6 @@ Comparable<JobObject> {
 					e);
 		}
 
-		if (StringUtils.isNotBlank(description)) {
-			if (additionalJobProperties == null) {
-				additionalJobProperties = new HashMap<String, String>();
-			}
-			additionalJobProperties.put(Constants.JOB_DESCRIPTION_KEY,
-					description);
-		}
-
-		if ((additionalJobProperties != null)
-				&& (additionalJobProperties.size() > 0)) {
-			addJobLogMessage("Setting additional job properties...");
-			try {
-				serviceInterface.addJobProperties(getJobname(), DtoJob
-						.createJob(-1, additionalJobProperties, null, null,
-								false));
-			} catch (final NoSuchJobException e) {
-				addJobLogMessage("Submission failed: "
-						+ e.getLocalizedMessage());
-				throw new JobSubmissionException(
-						"Could not find job on backend.", e);
-			}
-		}
-		allJobProperties = null;
 		getStatus(true);
 
 		EventBus.publish(new NewJobEvent(this));

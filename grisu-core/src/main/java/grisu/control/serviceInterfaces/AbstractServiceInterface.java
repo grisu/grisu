@@ -4226,6 +4226,21 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 		myLogger.debug(debug_token + "setting credential finished.");
 
+		myLogger.debug(debug_token
+				+ "adding job properties as env variables to jsdl..");
+		Document oldJsdl = job.getJobDescription();
+		for (String key : job.getJobProperties().keySet()) {
+			String value = job.getJobProperty(key);
+			if (StringUtils.isNotBlank(value)) {
+				Element e = JsdlHelpers
+						.addOrRetrieveExistingApplicationEnvironmentElement(
+								oldJsdl, key);
+				e.setTextContent(value);
+			}
+		}
+
+		job.setJobDescription(oldJsdl);
+
 		String handle = null;
 		myLogger.debug(debug_token + "submitting job to endpoint...");
 

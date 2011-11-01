@@ -425,11 +425,6 @@
 			<artifactId>gridftp-tests</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>-->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>log4j-over-slf4j</artifactId>
-			<version>1.6.3</version>
-		</dependency>
 	</dependencies>
 
 
