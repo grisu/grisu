@@ -52,6 +52,7 @@ import grisu.utils.SeveralXMLHelpers;
 import grith.jgrith.control.CertificateFiles;
 import grith.jgrith.control.VomsesFiles;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,6 +88,11 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
+import ch.qos.logback.core.util.StatusPrinter;
+
 /**
  * This abstract class implements most of the methods of the
  * {@link ServiceInterface} interface. This way developers don't have to waste
@@ -110,6 +116,30 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	static Logger myLogger = null;
 	public static CacheManager cache;
 	static {
+
+		String logbackPath = "/etc/grisu/logback.xml";
+		if (new File(logbackPath).exists()
+				&& (new File(logbackPath).length() > 0)) {
+			// configure loback from external logback.xml config file
+			// assume SLF4J is bound to logback in the current environment
+			LoggerContext context = (LoggerContext) LoggerFactory
+					.getILoggerFactory();
+
+			try {
+				JoranConfigurator configurator = new JoranConfigurator();
+				configurator.setContext(context);
+				// Call context.reset() to clear any previous configuration, e.g.
+				// default
+				// configuration. For multi-step configuration, omit calling
+				// context.reset().
+				context.reset();
+				configurator.doConfigure(logbackPath);
+			} catch (JoranException je) {
+				// StatusPrinter will handle this
+			}
+			StatusPrinter.printInCaseOfErrorsOrWarnings(context);
+		}
+
 
 		// TODO change to logback
 		// String log4jPath = "/etc/grisu/grisu-log4j.xml";
