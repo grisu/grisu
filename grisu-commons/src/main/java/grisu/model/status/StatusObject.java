@@ -6,6 +6,7 @@ import grisu.model.dto.DtoActionStatus;
 
 import java.util.Enumeration;
 import java.util.Vector;
+import java.util.concurrent.CountDownLatch;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,9 +44,15 @@ public class StatusObject {
 	private final ServiceInterface si;
 	private final String handle;
 
+	private volatile Thread t = null;
+
 	private Vector<Listener> listeners;
 
 	private DtoActionStatus lastStatus;
+	private double lastPercentage = 0;
+	private boolean taskFinished = false;
+
+	private final CountDownLatch finished = new CountDownLatch(1);
 
 	public StatusObject(ServiceInterface si, String handle) {
 		this(si, handle, (Vector) null);
@@ -76,29 +83,31 @@ public class StatusObject {
 		listeners.addElement(l);
 	}
 
-	private Thread createWaitThread(final int waitTime) {
+	private synchronized void createWaitThread(final int waitTime) {
 
-		final Thread t = new Thread() {
-			@Override
-			public void run() {
-				while (!lastStatus.isFinished()) {
-					try {
-						// myLogger.debug(
-						// "Status of task {} not finished yet. Waiting "
-						// + (waitTime * 1000)
-						// + " seconds, then check again...",
-						// handle);
-						Thread.sleep(waitTime * 1000);
-					} catch (final InterruptedException e) {
-						myLogger.error("Status wait interrupted.", e);
+		if (t != null) {
+			t = new Thread() {
+				@Override
+				public void run() {
+					while (!getStatus().isFinished()) {
+						try {
+							myLogger.debug("Waiting for task {} to finish...",
+									handle);
+							Thread.sleep(waitTime * 1000);
+						} catch (final InterruptedException e) {
+							myLogger.error("Status wait interrupted.", e);
+							break;
+						}
 					}
+					finished.countDown();
 				}
-			}
-		};
-		return t;
+			};
+			t.setName("Wait thread for status: " + handle);
+			t.start();
+		}
 	}
 
-	public void fireEvent(ActionStatusEvent message) {
+	private void fireEvent(ActionStatusEvent message) {
 		if ((listeners != null) && !listeners.isEmpty()) {
 
 			// make a copy of the listener list in case
@@ -118,10 +127,19 @@ public class StatusObject {
 		}
 	}
 
-	public DtoActionStatus getStatus() {
+	public synchronized DtoActionStatus getStatus() {
 
+		if (taskFinished) {
+			return lastStatus;
+		}
 		myLogger.debug("Checking status for: " + handle);
 		lastStatus = si.getActionStatus(handle);
+		if ((taskFinished != lastStatus.isFinished())
+				|| (lastPercentage != lastStatus.percentFinished())) {
+			lastPercentage = lastStatus.percentFinished();
+			taskFinished = lastStatus.isFinished();
+			fireEvent(new ActionStatusEvent(lastStatus));
+		}
 		myLogger.debug("Status for " + handle + ": "
 				+ lastStatus.percentFinished() + " %" + " / finished: "
 				+ lastStatus.isFinished());
@@ -138,7 +156,7 @@ public class StatusObject {
 
 	public void waitForActionToFinish(int recheckIntervalInSeconds,
 			boolean exitIfFailed, boolean sendStatusEvent)
-			throws InterruptedException, StatusException {
+					throws InterruptedException, StatusException {
 		waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed,
 				sendStatusEvent, null);
 	}
@@ -156,45 +174,22 @@ public class StatusObject {
 					+ this.handle);
 		}
 
-		// while (!lastStatus.isFinished()) {
-		//
-		// if (sendStatusEvent) {
-		// final ActionStatusEvent ev = new ActionStatusEvent(lastStatus,
-		// statusMessagePrefix);
-		// EventBus.publish(handle, ev);
-		// fireEvent(ev);
-		// }
-		//
-		// if (exitIfFailed) {
-		// if (lastStatus.isFailed()) {
-		// return;
-		// }
-		// }
-		//
-		// if (Thread.currentThread().isInterrupted()) {
-		// throw new InterruptedException(
-		// "Interrupted while waiting for action " + handle
-		// + " to finish on backend.");
-		// }
-		//
-		// try {
-		// Thread.sleep(recheckIntervalInSeconds * 1000);
-		// } catch (final InterruptedException e) {
-		// throw e;
-		// }
-		// myLogger.debug("Checking status for: " + handle);
-		//
-		// lastStatus = si.getActionStatus(handle);
-		//
-		// myLogger.debug("Status for " + handle + ": "
-		// + lastStatus.percentFinished() + " %");
-		// if (lastStatus == null) {
-		//
-		// throw new StatusException("Can't find status with handle "
-		// + this.handle);
-		// }
-		//
-		// }
+		if (lastStatus.isFinished()) {
+			return;
+		}
+
+		createWaitThread(recheckIntervalInSeconds);
+
+		try {
+			finished.await();
+		} catch (InterruptedException e) {
+			myLogger.error("Waiting for status " + handle
+					+ " to finish interrupted.", e);
+		}
+
+
+
+
 		return;
 
 	}
