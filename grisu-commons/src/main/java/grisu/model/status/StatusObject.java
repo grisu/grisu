@@ -85,7 +85,7 @@ public class StatusObject {
 
 	private synchronized void createWaitThread(final int waitTime) {
 
-		if (t != null) {
+		if (t == null) {
 			t = new Thread() {
 				@Override
 				public void run() {
