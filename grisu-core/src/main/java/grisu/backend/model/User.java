@@ -63,6 +63,7 @@ import net.sf.ehcache.util.NamedThreadFactory;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.FileSystemException;
+import org.python.google.common.collect.Maps;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 import org.slf4j.Logger;
@@ -1392,7 +1393,12 @@ public class User {
 
 			// myLogger.debug("Checking credential");
 			if (cred.isValid()) {
-				fqans = VOManagement.getAllFqans(cred.getGssCredential());
+				try {
+					fqans = VOManagement.getAllFqans(cred.getGssCredential());
+				} catch (Exception e) {
+					myLogger.error("Can't get fqans.", e);
+					fqans = Maps.newHashMap();
+				}
 			}
 
 		}

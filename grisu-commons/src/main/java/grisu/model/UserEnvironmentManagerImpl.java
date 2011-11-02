@@ -284,6 +284,11 @@ EventSubscriber<FqanEvent> {
 					.synchronizedSet(new TreeSet<String>());
 			cachedAllSites = new TreeSet<String>();
 
+			if ((getAllAvailableFqans() == null)
+					|| (getAllAvailableFqans().length == 0)) {
+				return cachedAllSubmissionLocations;
+			}
+
 			final ThreadFactory tf = new NamedThreadFactory(
 					"infoGetAllAvailableSubLocs");
 			final ExecutorService executor = Executors
