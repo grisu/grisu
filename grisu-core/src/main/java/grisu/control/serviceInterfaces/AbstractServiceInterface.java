@@ -2673,14 +2673,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 							status.addElement("Killing job " + jobname + "...");
 							try {
 								final String handle = kill(jobname, clear);
-								final StatusObject so = StatusObject
-										.waitForActionToFinish(
-												AbstractServiceInterface.this,
-												handle,
-												2,
-												false,
-												ServerPropertiesManager
-														.getJobCleanThresholdInSeconds());
+								final StatusObject so = new StatusObject(
+										AbstractServiceInterface.this, handle);
+
+								so.waitForActionToFinish(
+										2,
+										false,
+										ServerPropertiesManager
+												.getJobCleanThresholdInSeconds());
+
 								if (so.getStatus().isFailed()) {
 									status.addElement("Killing of job "
 											+ jobname + " failed.");

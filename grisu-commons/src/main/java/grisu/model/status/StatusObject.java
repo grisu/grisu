@@ -39,13 +39,9 @@ public class StatusObject {
 			int treshold_in_secs) throws StatusException {
 
 		final StatusObject temp = new StatusObject(si, handle);
-		boolean success = temp.waitForActionToFinish(recheckIntervalInSeconds,
+		temp.waitForActionToFinish(recheckIntervalInSeconds,
 				exitIfFailed, treshold_in_secs);
 
-		if (!success) {
-			throw new StatusException(
-					"Waiting for thread to be finished was interrupted, either via threshold or thread interrupt.");
-		}
 		return temp;
 	}
 
@@ -179,10 +175,10 @@ public class StatusObject {
 		listeners.removeElement(l);
 	}
 
-	public boolean waitForActionToFinish(int recheckIntervalInSeconds,
+	public void waitForActionToFinish(int recheckIntervalInSeconds,
 			boolean exitIfFailed)
 					throws StatusException {
-		return waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed,
+		waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed,
 				-1);
 	}
 
@@ -202,7 +198,7 @@ public class StatusObject {
 	 * @throws StatusException
 	 *             if the handle can't be found
 	 */
-	public boolean waitForActionToFinish(int recheckIntervalInSeconds,
+	public void waitForActionToFinish(int recheckIntervalInSeconds,
 			boolean exitIfFailed, int threshholdInSeconds)
 					throws StatusException {
 
@@ -215,7 +211,7 @@ public class StatusObject {
 		}
 
 		if (lastStatus.isFinished()) {
-			return true;
+			return;
 		}
 
 		createWaitThread(recheckIntervalInSeconds, threshholdInSeconds);
@@ -226,14 +222,10 @@ public class StatusObject {
 			myLogger.error("Waiting for status " + handle
 					+ " to finish interrupted.", e);
 			waitWasInterrupted = true;
+			throw new StatusException(e.getLocalizedMessage(), e);
 		}
 
-		if (waitWasInterrupted) {
-			return false;
-		}
-
-
-		return true;
+		return;
 
 	}
 
