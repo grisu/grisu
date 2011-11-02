@@ -287,8 +287,8 @@ EventSubscriber<FqanEvent> {
 			final ThreadFactory tf = new NamedThreadFactory(
 					"infoGetAllAvailableSubLocs");
 			final ExecutorService executor = Executors
-.newFixedThreadPool(
-					getAllAvailableFqans().length, tf);
+					.newFixedThreadPool(
+							getAllAvailableFqans().length, tf);
 			for (final String fqan : getAllAvailableFqans()) {
 
 				final Thread t = new Thread() {
@@ -969,7 +969,7 @@ EventSubscriber<FqanEvent> {
 
 		status.waitForActionToFinish(
 				ClientPropertiesManager.getDefaultActionStatusRecheckInterval(),
-				false, false);
+				false);
 
 		return status;
 	}

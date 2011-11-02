@@ -46,7 +46,7 @@ import com.jgoodies.forms.layout.RowSpec;
 import com.jidesoft.swing.JideTabbedPane;
 
 public class JobDetailPanelDefault extends JPanel implements
-		PropertyChangeListener, JobDetailPanel {
+PropertyChangeListener, JobDetailPanel {
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(JobDetailPanelDefault.class.getName());
@@ -208,7 +208,7 @@ public class JobDetailPanelDefault extends JPanel implements
 
 								final StatusObject so = StatusObject
 										.waitForActionToFinish(si, tmp, 5,
-												true, false);
+ true);
 
 								d.close();
 
@@ -226,7 +226,7 @@ public class JobDetailPanelDefault extends JPanel implements
 
 									JXErrorPane.showDialog(
 											JobDetailPanelDefault.this
-													.getRootPane(), pane);
+											.getRootPane(), pane);
 
 								}
 
@@ -236,14 +236,14 @@ public class JobDetailPanelDefault extends JPanel implements
 										"Job archiving error",
 										"Can't archive job:\n\n"
 												+ e.getLocalizedMessage(),
-										null, "Error", e, Level.SEVERE, null);
+												null, "Error", e, Level.SEVERE, null);
 
 								final JXErrorPane pane = new JXErrorPane();
 								pane.setErrorInfo(info);
 
 								JXErrorPane.showDialog(
 										JobDetailPanelDefault.this
-												.getRootPane(), pane);
+										.getRootPane(), pane);
 
 							}
 
@@ -274,9 +274,9 @@ public class JobDetailPanelDefault extends JPanel implements
 									JobDetailPanelDefault.this,
 									"Cleaning job "
 											+ JobDetailPanelDefault.this.job
-													.getJobname() + ".",
-									"Confirmation",
-									JOptionPane.OK_CANCEL_OPTION);
+											.getJobname() + ".",
+											"Confirmation",
+											JOptionPane.OK_CANCEL_OPTION);
 
 							if (n == JOptionPane.CANCEL_OPTION) {
 								return;
@@ -293,14 +293,14 @@ public class JobDetailPanelDefault extends JPanel implements
 										"Job cleaning error",
 										"Can't clean job:\n\n"
 												+ e.getLocalizedMessage(),
-										null, "Error", e, Level.SEVERE, null);
+												null, "Error", e, Level.SEVERE, null);
 
 								final JXErrorPane pane = new JXErrorPane();
 								pane.setErrorInfo(info);
 
 								JXErrorPane.showDialog(
 										JobDetailPanelDefault.this
-												.getRootPane(), pane);
+										.getRootPane(), pane);
 
 							}
 
@@ -363,9 +363,9 @@ public class JobDetailPanelDefault extends JPanel implements
 									JobDetailPanelDefault.this,
 									"Killing job "
 											+ JobDetailPanelDefault.this.job
-													.getJobname() + ".",
-									"Confirmation",
-									JOptionPane.OK_CANCEL_OPTION);
+											.getJobname() + ".",
+											"Confirmation",
+											JOptionPane.OK_CANCEL_OPTION);
 
 							if (n == JOptionPane.CANCEL_OPTION) {
 								return;
@@ -381,14 +381,14 @@ public class JobDetailPanelDefault extends JPanel implements
 								final ErrorInfo info = new ErrorInfo(
 										"Job kill error", "Can't kill job:\n\n"
 												+ e.getLocalizedMessage(),
-										null, "Error", e, Level.SEVERE, null);
+												null, "Error", e, Level.SEVERE, null);
 
 								final JXErrorPane pane = new JXErrorPane();
 								pane.setErrorInfo(info);
 
 								JXErrorPane.showDialog(
 										JobDetailPanelDefault.this
-												.getRootPane(), pane);
+										.getRootPane(), pane);
 
 							}
 
@@ -546,9 +546,9 @@ public class JobDetailPanelDefault extends JPanel implements
 		if (evt.getPropertyName().equals("status")) {
 
 			getTxtNa()
-					.setText(
-							JobConstants.translateStatus((Integer) (evt
-									.getNewValue())));
+			.setText(
+					JobConstants.translateStatus((Integer) (evt
+							.getNewValue())));
 			setLog();
 			setProperties();
 

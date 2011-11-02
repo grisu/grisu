@@ -1344,7 +1344,7 @@ Comparable<BatchJobObject>, Listener {
 		try {
 			handle = serviceInterface.kill(this.getJobname(), clean);
 			final StatusObject so = StatusObject.waitForActionToFinish(
-					serviceInterface, handle, 2, false, false);
+					serviceInterface, handle, 2, false);
 			if (so.getStatus().isFailed()) {
 				throw new Exception(so.getStatus().getErrorCause());
 			}
@@ -1365,9 +1365,10 @@ Comparable<BatchJobObject>, Listener {
 				final StatusObject statusO = new StatusObject(serviceInterface,
 						handleTmp);
 				try {
-					statusO.waitForActionToFinish(3, false, true);
-				} catch (final InterruptedException e) {
-					e.printStackTrace();
+					if (!statusO.waitForActionToFinish(3, false)) {
+						myLogger.error("Wait for task " + handleTmp
+								+ " interrupted.");
+					}
 				} catch (final StatusException e) {
 					e.printStackTrace();
 				}
@@ -1581,7 +1582,7 @@ Comparable<BatchJobObject>, Listener {
 								final StatusObject so = StatusObject
 										.waitForActionToFinish(
 												serviceInterface, handle, 2,
-												false, false);
+												false);
 								if (so.getStatus().isFailed()) {
 									throw new Exception(so.getStatus()
 											.getErrorCause());
@@ -1655,11 +1656,10 @@ Comparable<BatchJobObject>, Listener {
 							serviceInterface, handle);
 
 					try {
-						status.waitForActionToFinish(4, false, true,
-								"Redistribution: ");
-					} catch (final InterruptedException e) {
-						myLogger.error(e.getLocalizedMessage(), e);
-						throw e;
+						if (!status.waitForActionToFinish(4, false) ) {
+							myLogger.error("Wait for status interrupted.");
+							throw new InterruptedException("Wait for task "+handle+" interrupted.");
+						}
 					} catch (final StatusException e) {
 						myLogger.error(e.getLocalizedMessage(), e);
 					}
@@ -2277,7 +2277,7 @@ Comparable<BatchJobObject>, Listener {
 			if (waitForSubmissionToFinish) {
 				try {
 					final StatusObject s = StatusObject.waitForActionToFinish(
-							serviceInterface, handle, 5, true, false);
+							serviceInterface, handle, 5, true);
 					if (s.getStatus().isFailed()) {
 						String errorCause = s.getStatus().getErrorCause();
 						if (StringUtils.isBlank(errorCause)) {
@@ -2317,10 +2317,11 @@ Comparable<BatchJobObject>, Listener {
 			public void run() {
 				status.addListener(BatchJobObject.this);
 				try {
-					status.waitForActionToFinish(4, false, true,
-							"Submission status: ");
-				} catch (final InterruptedException e) {
-					myLogger.error(e.getLocalizedMessage(), e);
+					if (!status.waitForActionToFinish(4, false)) {
+						throw new StatusException("Wait for task "
+								+ status.getHandle() + " interrupted");
+					}
+
 				} catch (final StatusException e) {
 					myLogger.error(e.getLocalizedMessage(), e);
 				} finally {

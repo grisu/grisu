@@ -318,7 +318,7 @@ Comparable<JobObject> {
 			if (waitForArchivingToFinish) {
 				try {
 					StatusObject.waitForActionToFinish(getServiceInterface(),
-							targetUrl, 5, true, false);
+							targetUrl, 5, true);
 
 					isArchived = true;
 					pcs.firePropertyChange("archived", false, true);
@@ -343,8 +343,7 @@ Comparable<JobObject> {
 
 						try {
 							StatusObject.waitForActionToFinish(
-									getServiceInterface(), targetUrl, 5, true,
-									false);
+									getServiceInterface(), targetUrl, 5, true);
 
 							isArchived = true;
 							pcs.firePropertyChange("archived", false, true);
@@ -1139,7 +1138,7 @@ Comparable<JobObject> {
 					clean);
 
 			final StatusObject so = StatusObject.waitForActionToFinish(
-					serviceInterface, handle, 2, false, false);
+					serviceInterface, handle, 2, false);
 			if (so.getStatus().isFailed()) {
 				throw new Exception(so.getStatus().getErrorCause());
 			}
@@ -1457,7 +1456,7 @@ Comparable<JobObject> {
 			try {
 				serviceInterface.addJobProperties(getJobname(),
 						DtoJob.createJob(-1, properties, null, null,
-						false));
+								false));
 			} catch (final NoSuchJobException e) {
 				addJobLogMessage("Submission failed: "
 						+ e.getLocalizedMessage());
@@ -1473,7 +1472,7 @@ Comparable<JobObject> {
 			if (waitForSubmissionToFinish) {
 				try {
 					final StatusObject s = StatusObject.waitForActionToFinish(
-							serviceInterface, handle, 3, true, false);
+							serviceInterface, handle, 3, true);
 					if (s.getStatus().isFailed()) {
 						String errorCause = s.getStatus().getErrorCause();
 						if (StringUtils.isBlank(errorCause)) {

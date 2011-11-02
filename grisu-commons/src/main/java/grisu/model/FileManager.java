@@ -575,7 +575,7 @@ public class FileManager {
 			StatusObject so;
 			try {
 				so = StatusObject.waitForActionToFinish(serviceInterface,
-						handle, 2, true, false);
+						handle, 2, true);
 			} catch (final Exception e) {
 				throw new FileTransactionException(sourceUrl, targetDirUrl,
 						e.getLocalizedMessage(), e);
@@ -947,7 +947,7 @@ public class FileManager {
 			StatusObject so;
 			try {
 				so = StatusObject.waitForActionToFinish(serviceInterface,
-						handle, 2, true, false);
+						handle, 2, true);
 				if (so.getStatus().isFailed()) {
 					throw new RemoteFileSystemException(so.getStatus()
 							.getErrorCause());
@@ -1863,7 +1863,7 @@ public class FileManager {
 
 			final StatusObject so = new StatusObject(serviceInterface,
 					targetPath);
-			so.waitForActionToFinish(4, true, false);
+			so.waitForActionToFinish(4, true);
 
 			if (so.getStatus().isFailed()) {
 				throw new FileTransactionException(file.toString(), null,
@@ -1912,7 +1912,7 @@ public class FileManager {
 				"clientUploadInputFolder");
 		final ExecutorService executor1 = Executors
 				.newFixedThreadPool(ClientPropertiesManager
-.getConcurrentUploadThreads(), tf);
+						.getConcurrentUploadThreads(), tf);
 
 		// final String basePath = folder.getParentFile().getPath();
 		final String basePath = folder.getPath();
@@ -1959,7 +1959,7 @@ public class FileManager {
 
 							final StatusObject so = new StatusObject(
 									serviceInterface, finalDeltaPath);
-							so.waitForActionToFinish(4, true, false);
+							so.waitForActionToFinish(4, true);
 
 							if (so.getStatus().isFailed()) {
 								throw new FileTransactionException(
@@ -1989,7 +1989,7 @@ public class FileManager {
 
 								final StatusObject so = new StatusObject(
 										serviceInterface, finalDeltaPath);
-								so.waitForActionToFinish(4, true, false);
+								so.waitForActionToFinish(4, true);
 
 								if (so.getStatus().isFailed()) {
 									throw new FileTransactionException(

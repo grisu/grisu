@@ -2664,6 +2664,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								.getConcurrentJobsToBeKilled(),
 								tf);
 
+
 				for (final String jobname : jobnames.asArray()) {
 					final Thread t = new Thread() {
 						@Override
@@ -2675,7 +2676,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 								final StatusObject so = StatusObject
 										.waitForActionToFinish(
 												AbstractServiceInterface.this,
-												handle, 2, false, false);
+												handle, 2, false);
 								if (so.getStatus().isFailed()) {
 									status.addElement("Killing of job "
 											+ jobname + " failed.");

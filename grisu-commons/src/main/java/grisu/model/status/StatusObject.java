@@ -4,6 +4,7 @@ import grisu.control.ServiceInterface;
 import grisu.control.exceptions.StatusException;
 import grisu.model.dto.DtoActionStatus;
 
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
@@ -20,24 +21,24 @@ public class StatusObject {
 	static final Logger myLogger = LoggerFactory.getLogger(StatusObject.class
 			.getName());
 
-	public static StatusObject wait(ServiceInterface si, String handle) {
-		try {
-			return waitForActionToFinish(si, handle, 10, true, false);
-		} catch (final Exception e) {
-			// TODO logging
-			return null;
-		}
+	public static StatusObject waitForActionToFinish(ServiceInterface si, String handle)
+			throws StatusException {
+		return waitForActionToFinish(si, handle, 10, false);
+
 	}
 
 	public static StatusObject waitForActionToFinish(ServiceInterface si,
-			String handle, int recheckIntervalInSeconds, boolean exitIfFailed,
-			boolean sendStatusEvent) throws InterruptedException,
-			StatusException {
+			String handle, int recheckIntervalInSeconds, boolean exitIfFailed)
+					throws StatusException {
 
 		final StatusObject temp = new StatusObject(si, handle);
-		temp.waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed,
-				sendStatusEvent);
+		boolean success = temp.waitForActionToFinish(recheckIntervalInSeconds,
+				exitIfFailed);
 
+		if (!success) {
+			throw new StatusException(
+					"Waiting for thread to be finished was interrupted, either via threshold or thread interrupt.");
+		}
 		return temp;
 	}
 
@@ -51,6 +52,11 @@ public class StatusObject {
 	private DtoActionStatus lastStatus;
 	private double lastPercentage = 0;
 	private boolean taskFinished = false;
+
+	private long startMonitoringTime = -1;
+	private long finishedMonitoringTime = -1;
+
+	private volatile boolean waitWasInterrupted = false;
 
 	private final CountDownLatch finished = new CountDownLatch(1);
 
@@ -83,7 +89,8 @@ public class StatusObject {
 		listeners.addElement(l);
 	}
 
-	private synchronized void createWaitThread(final int waitTime) {
+	private synchronized void createWaitThread(final int waitTime,
+			final int thresholdInSeconds) {
 
 		if (t == null) {
 			t = new Thread() {
@@ -91,18 +98,25 @@ public class StatusObject {
 				public void run() {
 					while (!getStatus().isFinished()) {
 						try {
+							if (((new Date().getTime() - startMonitoringTime) * 1000) < thresholdInSeconds) {
+								throw new InterruptedException(
+										"Threshold for task monitoring exceeded. Not waiting any longer...");
+							}
 							myLogger.debug("Waiting for task {} to finish...",
 									handle);
 							Thread.sleep(waitTime * 1000);
 						} catch (final InterruptedException e) {
-							myLogger.error("Status wait interrupted.", e);
+							myLogger.error(e.getLocalizedMessage(), e);
+							waitWasInterrupted = true;
 							break;
 						}
 					}
+					finishedMonitoringTime = new Date().getTime();
 					finished.countDown();
 				}
 			};
 			t.setName("Wait thread for status: " + handle);
+			startMonitoringTime = new Date().getTime();
 			t.start();
 		}
 	}
@@ -125,6 +139,10 @@ public class StatusObject {
 				l.statusMessage(message);
 			}
 		}
+	}
+
+	public String getHandle() {
+		return this.handle;
 	}
 
 	public synchronized DtoActionStatus getStatus() {
@@ -154,17 +172,32 @@ public class StatusObject {
 		listeners.removeElement(l);
 	}
 
-	public void waitForActionToFinish(int recheckIntervalInSeconds,
-			boolean exitIfFailed, boolean sendStatusEvent)
-					throws InterruptedException, StatusException {
-		waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed,
-				sendStatusEvent, null);
+	public boolean waitForActionToFinish(int recheckIntervalInSeconds,
+			boolean exitIfFailed)
+					throws StatusException {
+		return waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed,
+				-1);
 	}
 
-	public void waitForActionToFinish(int recheckIntervalInSeconds,
-			boolean exitIfFailed, boolean sendStatusEvent,
-			String statusMessagePrefix) throws InterruptedException,
-			StatusException {
+	/**
+	 * Waits for the remote task to be finshed.
+	 * 
+	 * @param recheckIntervalInSeconds
+	 *            how long to wait inbetween status checks
+	 * @param exitIfFailed
+	 *            whether to return from wait if task not finished yet but
+	 *            failed already (maybe because at least one sub-task failed).
+	 * @param threshholdInSeconds
+	 *            after how long to stop monitoring (in seconds) or -1 for never
+	 *            stop monitoring until task finished
+	 * @return true if the task is finished, false if monitoring was interrupted
+	 *         either by thread interrupt or threshold
+	 * @throws StatusException
+	 *             if the handle can't be found
+	 */
+	public boolean waitForActionToFinish(int recheckIntervalInSeconds,
+			boolean exitIfFailed, int threshholdInSeconds)
+					throws StatusException {
 
 		lastStatus = si.getActionStatus(handle);
 
@@ -175,22 +208,25 @@ public class StatusObject {
 		}
 
 		if (lastStatus.isFinished()) {
-			return;
+			return true;
 		}
 
-		createWaitThread(recheckIntervalInSeconds);
+		createWaitThread(recheckIntervalInSeconds, threshholdInSeconds);
 
 		try {
 			finished.await();
 		} catch (InterruptedException e) {
 			myLogger.error("Waiting for status " + handle
 					+ " to finish interrupted.", e);
+			waitWasInterrupted = true;
+		}
+
+		if (waitWasInterrupted) {
+			return false;
 		}
 
 
-
-
-		return;
+		return true;
 
 	}
 
