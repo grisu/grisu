@@ -30,10 +30,17 @@ public class StatusObject {
 	public static StatusObject waitForActionToFinish(ServiceInterface si,
 			String handle, int recheckIntervalInSeconds, boolean exitIfFailed)
 					throws StatusException {
+		return waitForActionToFinish(si, handle, recheckIntervalInSeconds,
+				exitIfFailed, -1);
+	}
+
+	public static StatusObject waitForActionToFinish(ServiceInterface si,
+			String handle, int recheckIntervalInSeconds, boolean exitIfFailed,
+			int treshold_in_secs) throws StatusException {
 
 		final StatusObject temp = new StatusObject(si, handle);
 		boolean success = temp.waitForActionToFinish(recheckIntervalInSeconds,
-				exitIfFailed);
+				exitIfFailed, treshold_in_secs);
 
 		if (!success) {
 			throw new StatusException(

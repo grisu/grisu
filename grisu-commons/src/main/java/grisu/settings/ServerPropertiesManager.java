@@ -88,6 +88,8 @@ public final class ServerPropertiesManager {
 
 	private static final int DEFAULT_FILE_LISTING_TIMEOUT_IN_SECONDS = 60;
 
+	private static final int DEFAULT_JOB_CLEAN_THRESHOLD_IN_SECONDS = 1800;
+
 	// public static boolean getCheckConnectionToMountPoint() {
 	//
 	// boolean check = false;
@@ -556,6 +558,22 @@ public final class ServerPropertiesManager {
 		}
 
 		return result;
+	}
+
+	public static int getJobCleanThresholdInSeconds() {
+		int waitTimeInSeconds = -1;
+		try {
+			waitTimeInSeconds = Integer.parseInt(getServerConfiguration()
+					.getString("General.jobCleanThreshold"));
+
+		} catch (final Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_JOB_CLEAN_THRESHOLD_IN_SECONDS;
+		}
+		if (waitTimeInSeconds == -1) {
+			return DEFAULT_JOB_CLEAN_THRESHOLD_IN_SECONDS;
+		}
+		return waitTimeInSeconds;
 	}
 
 	public static int getJobSubmissionRetries() {
