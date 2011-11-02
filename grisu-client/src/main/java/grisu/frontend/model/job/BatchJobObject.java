@@ -1365,10 +1365,8 @@ Comparable<BatchJobObject>, Listener {
 				final StatusObject statusO = new StatusObject(serviceInterface,
 						handleTmp);
 				try {
-					if (!statusO.waitForActionToFinish(3, false)) {
-						myLogger.error("Wait for task " + handleTmp
-								+ " interrupted.");
-					}
+					statusO.waitForActionToFinish(3, false);
+
 				} catch (final StatusException e) {
 					e.printStackTrace();
 				}
@@ -1656,12 +1654,13 @@ Comparable<BatchJobObject>, Listener {
 							serviceInterface, handle);
 
 					try {
-						if (!status.waitForActionToFinish(4, false) ) {
-							myLogger.error("Wait for status interrupted.");
-							throw new InterruptedException("Wait for task "+handle+" interrupted.");
-						}
+						status.waitForActionToFinish(4, false);
 					} catch (final StatusException e) {
 						myLogger.error(e.getLocalizedMessage(), e);
+						throw new BackendException(
+								"Error while waiting for job distribution to finish.",
+								e);
+
 					}
 
 					EventBus.publish(this.batchJobname, new BatchJobEvent(this,
@@ -2317,10 +2316,7 @@ Comparable<BatchJobObject>, Listener {
 			public void run() {
 				status.addListener(BatchJobObject.this);
 				try {
-					if (!status.waitForActionToFinish(4, false)) {
-						throw new StatusException("Wait for task "
-								+ status.getHandle() + " interrupted");
-					}
+					status.waitForActionToFinish(4, false);
 
 				} catch (final StatusException e) {
 					myLogger.error(e.getLocalizedMessage(), e);
