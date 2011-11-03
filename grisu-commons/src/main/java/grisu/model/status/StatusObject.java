@@ -101,7 +101,8 @@ public class StatusObject {
 				public void run() {
 					while (!getStatus().isFinished()) {
 						try {
-							if ((new Date().getTime() - startMonitoringTime) > (thresholdInSeconds * 1000)) {
+							if ((thresholdInSeconds >= 0)
+									&& ((new Date().getTime() - startMonitoringTime) > (thresholdInSeconds * 1000))) {
 								throw new InterruptedException(
 										"Threshold for task monitoring exceeded. Not waiting any longer...");
 							}
