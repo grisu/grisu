@@ -64,7 +64,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -2704,13 +2703,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					};
 					t.setName(status.getHandle());
 					executor.execute(t);
-					// wait a bit in order to distribute filesystem access a bit
-					// more...
-					int waitAbit = new Random().nextInt(2000);
-					try {
-						Thread.sleep(new Long(waitAbit));
-					} catch (InterruptedException e) {
-					}
+					// // wait a bit in order to distribute filesystem access a
+					// bit
+					// // more...
+					// int waitAbit = new Random().nextInt(2000);
+					// try {
+					// Thread.sleep(new Long(waitAbit));
+					// } catch (InterruptedException e) {
+					// }
 				}
 
 				executor.shutdown();
