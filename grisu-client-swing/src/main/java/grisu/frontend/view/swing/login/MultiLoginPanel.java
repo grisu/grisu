@@ -3,10 +3,10 @@ package grisu.frontend.view.swing.login;
 import grisu.control.ServiceInterface;
 import grisu.control.events.ClientPropertiesEvent;
 import grisu.frontend.control.login.LoginManager;
-import grisu.frontend.control.login.LoginParams;
+import grisu.jcommons.dependencies.BouncyCastleTool;
 import grisu.settings.ClientPropertiesManager;
-import grith.jgrith.Init;
 import grith.jgrith.certificate.CertificateHelper;
+import grith.jgrith.control.LoginParams;
 import grith.jgrith.plainProxy.LocalProxy;
 
 import java.awt.event.ActionEvent;
@@ -41,7 +41,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class MultiLoginPanel extends JPanel implements EventSubscriber,
-		LoginMethodPanel {
+LoginMethodPanel {
 
 	private class QuickLoginAction extends AbstractAction {
 		public QuickLoginAction() {
@@ -140,7 +140,7 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 		// component.getActionMap().put(keyStrokeAndKey, action);
 
 		try {
-			Init.initBouncyCastle();
+			BouncyCastleTool.initBouncyCastle();
 			if (LocalProxy.validGridProxyExists(120)) {
 				getQuickLoginAction().setEnabled(true);
 			} else {
@@ -332,8 +332,8 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 
 							info = new ErrorInfo("Login error",
 									"Error while trying to login.", temp
-											.getPossibleException()
-											.getLocalizedMessage(),
+									.getPossibleException()
+									.getLocalizedMessage(),
 									(String) null, temp.getPossibleException(),
 									Level.SEVERE, (Map) null);
 						}
@@ -363,7 +363,7 @@ public class MultiLoginPanel extends JPanel implements EventSubscriber,
 
 				loginSuccessful = false;
 				try {
-					si = LoginManager.login(params.getServiceInterfaceUrl());
+					si = LoginManager.login(params.getLoginUrl());
 					loginSuccessful = true;
 				} catch (final Throwable e) {
 					if (e instanceof Exception) {

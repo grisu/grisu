@@ -7,7 +7,7 @@ import grisu.backend.utils.CertHelpers;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoSuchTemplateException;
 import grisu.control.exceptions.NoValidCredentialException;
-import grisu.settings.MyProxyServerParams;
+import grisu.jcommons.utils.MyProxyServerParams;
 import grisu.settings.ServerPropertiesManager;
 import grisu.settings.ServiceTemplateManagement;
 import grith.jgrith.myProxy.MyProxy_light;

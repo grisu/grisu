@@ -1,7 +1,7 @@
 package grisu.frontend.view.swing.login;
 
 import grisu.control.ServiceInterface;
-import grisu.frontend.control.login.LoginParams;
+import grith.jgrith.control.LoginParams;
 
 public interface LoginMethodPanel {
 

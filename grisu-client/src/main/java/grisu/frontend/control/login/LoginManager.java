@@ -7,10 +7,8 @@ import grisu.frontend.view.cli.CliHelpers;
 import grisu.jcommons.configuration.CommonGridProperties;
 import grisu.jcommons.constants.Enums.LoginType;
 import grisu.jcommons.constants.Enums.UI;
-import grisu.jcommons.constants.GridEnvironment;
+import grisu.jcommons.dependencies.BouncyCastleTool;
 import grisu.jcommons.dependencies.ClasspathHacker;
-import grisu.jcommons.dependencies.Dependency;
-import grisu.jcommons.dependencies.DependencyManager;
 import grisu.jcommons.utils.DefaultGridSecurityProvider;
 import grisu.jcommons.utils.HttpProxyManager;
 import grisu.jcommons.utils.JythonHelpers;
@@ -18,16 +16,15 @@ import grisu.settings.ClientPropertiesManager;
 import grisu.settings.Environment;
 import grisu.utils.GrisuPluginFilenameFilter;
 import grith.jgrith.CredentialHelpers;
-import grith.jgrith.Init;
 import grith.jgrith.control.CertificateFiles;
+import grith.jgrith.control.LoginParams;
+import grith.jgrith.control.SlcsLoginWrapper;
 import grith.jgrith.plainProxy.LocalProxy;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -60,13 +57,13 @@ public class LoginManager {
 			.put("local", "Local")
 			.put("bestgrid",
 					"https://compute.services.bestgrid.org/soap/GrisuService")
-			.put("dev",
-					"https://compute-dev.services.bestgrid.org/soap/GrisuService")
-			.put("bestgrid-test",
-					"https://compute-test.services.bestgrid.org/soap/GrisuService")
-			.put("local_ws", "http://localhost:8080/soap/GrisuService")
-			.put("local_ws_tomcat",
-					"http://localhost:8080/grisu-ws/soap/GrisuService").build();
+					.put("dev",
+							"https://compute-dev.services.bestgrid.org/soap/GrisuService")
+							.put("bestgrid-test",
+									"https://compute-test.services.bestgrid.org/soap/GrisuService")
+									.put("local_ws", "http://localhost:8080/soap/GrisuService")
+									.put("local_ws_tomcat",
+											"http://localhost:8080/grisu-ws/soap/GrisuService").build();
 
 	public static String httpProxyHost = null;
 
@@ -108,42 +105,45 @@ public class LoginManager {
 			}
 
 			java.security.Security
-					.addProvider(new DefaultGridSecurityProvider());
+			.addProvider(new DefaultGridSecurityProvider());
 
 			java.security.Security
-					.setProperty("ssl.TrustManagerFactory.algorithm",
-							"TrustAllCertificates");
+			.setProperty("ssl.TrustManagerFactory.algorithm",
+					"TrustAllCertificates");
 
-			boolean bcpresent = false;
+			// boolean bcpresent = false;
+			// try {
+			// final Class bcExampleClass = Class
+			// .forName("org.bouncycastle.LICENSE");
+			// bcpresent = true;
+			// } catch (final Exception e) {
+			// myLogger.debug("BouncyCastle library not loaded....");
+			// }
+			//
+			// final String disableLoadBouncyCastle = System
+			// .getProperty("disableLoadBouncyCastle");
+			//
+			// if (!bcpresent &&
+			// !"true".equalsIgnoreCase(disableLoadBouncyCastle)) {
+			// myLogger.debug("Loading bouncy castle...");
+			// final Map<Dependency, String> dependencies = new
+			// HashMap<Dependency, String>();
+			//
+			// dependencies.put(Dependency.BOUNCYCASTLE, "jdk15-145");
+			//
+			// DependencyManager.addDependencies(dependencies,
+			// GridEnvironment.getGridCommonJavaLibDirectory(), true);
+			// }
+
 			try {
-				final Class bcExampleClass = Class
-						.forName("org.bouncycastle.LICENSE");
-				bcpresent = true;
+				BouncyCastleTool.initBouncyCastle();
 			} catch (final Exception e) {
-				myLogger.debug("BouncyCastle library not loaded....");
-			}
-
-			final String disableLoadBouncyCastle = System
-					.getProperty("disableLoadBouncyCastle");
-
-			if (!bcpresent && !"true".equalsIgnoreCase(disableLoadBouncyCastle)) {
-				myLogger.debug("Loading bouncy castle...");
-				final Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
-
-				dependencies.put(Dependency.BOUNCYCASTLE, "jdk15-145");
-
-				DependencyManager.addDependencies(dependencies,
-						GridEnvironment.getGridCommonJavaLibDirectory(), true);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 
 			environmentInitialized = true;
 		}
 
-		try {
-			Init.initBouncyCastle();
-		} catch (final Exception e) {
-			myLogger.error(e.getLocalizedMessage(), e);
-		}
 
 	}
 
@@ -240,7 +240,7 @@ public class LoginManager {
 	public static ServiceInterface login(GlobusCredential cred,
 			char[] password, String username, String idp,
 			LoginParams loginParams, boolean saveCredentialAsLocalProxy)
-			throws LoginException {
+					throws LoginException {
 
 		initEnvironment();
 
@@ -255,6 +255,8 @@ public class LoginManager {
 			}
 
 		}
+
+		loginParams.setAliasMap(SERVICEALIASES);
 
 		if (StringUtils.isNotBlank(httpProxyHost)) {
 			loginParams.setHttpProxy(httpProxyHost);
@@ -301,36 +303,6 @@ public class LoginManager {
 			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
-		final Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
-		final String serviceInterfaceUrl = loginParams.getServiceInterfaceUrl();
-
-		// if ("Local".equals(serviceInterfaceUrl)
-		// || "Dummy".equals(serviceInterfaceUrl)) {
-		//
-		// dependencies = new HashMap<Dependency, String>();
-		//
-		// dependencies.put(Dependency.GRISU_LOCAL_BACKEND,
-		// ServiceInterface.INTERFACE_VERSION);
-		//
-		// DependencyManager.addDependencies(dependencies,
-		// Environment.getGrisuPluginDirectory());
-		//
-		// } else if (serviceInterfaceUrl.startsWith("http")) {
-
-		// assume xfire -- that needs to get smarter later on
-
-		// dependencies = new HashMap<Dependency, String>();
-		//
-		// dependencies.put(Dependency.GRISU_XFIRE_CLIENT_LIBS,
-		// ServiceInterface.INTERFACE_VERSION);
-		// // also try to use client side mds
-		// dependencies.put(Dependency.CLIENT_SIDE_MDS,
-		// ServiceInterface.INTERFACE_VERSION);
-		//
-		// DependencyManager.addDependencies(dependencies,
-		// Environment.getGrisuPluginDirectory());
-
-		// }
 
 		ServiceInterface si = null;
 
@@ -357,7 +329,7 @@ public class LoginManager {
 						// means try to load local proxy
 						si = LoginHelpers.defaultLocalProxyLogin(loginParams);
 						ClientPropertiesManager
-								.saveLastLoginType(LoginType.LOCAL_PROXY);
+						.saveLastLoginType(LoginType.LOCAL_PROXY);
 
 					} catch (final Exception e) {
 						throw new LoginException("Could not login: "
@@ -378,7 +350,7 @@ public class LoginManager {
 						si = LoginHelpers
 								.localProxyLogin(password, loginParams);
 						ClientPropertiesManager
-								.saveLastLoginType(LoginType.X509_CERTIFICATE);
+						.saveLastLoginType(LoginType.X509_CERTIFICATE);
 					} catch (final ServiceInterfaceException e) {
 						throw new LoginException("Could not login: "
 								+ e.getLocalizedMessage(), e);
@@ -390,7 +362,7 @@ public class LoginManager {
 				try {
 					si = LoginHelpers.myProxyLogin(loginParams);
 					ClientPropertiesManager
-							.saveLastLoginType(LoginType.MYPROXY);
+					.saveLastLoginType(LoginType.MYPROXY);
 					CommonGridProperties.getDefault().setLastMyProxyUsername(
 							loginParams.getMyProxyUsername());
 				} catch (final ServiceInterfaceException e) {
@@ -426,7 +398,7 @@ public class LoginManager {
 		}
 
 		ClientPropertiesManager.setDefaultServiceInterfaceUrl(loginParams
-				.getServiceInterfaceUrl());
+				.getLoginUrl());
 
 		return si;
 	}
@@ -936,7 +908,7 @@ public class LoginManager {
 	 */
 	public static ServiceInterface shiblogin(String username, char[] password,
 			String idp, boolean saveCredendentialsToLocalProxy)
-			throws LoginException {
+					throws LoginException {
 		return login((GlobusCredential) null, password, username, idp, "Local",
 				saveCredendentialsToLocalProxy);
 	}
@@ -963,7 +935,7 @@ public class LoginManager {
 	 */
 	public static ServiceInterface shiblogin(String username, char[] password,
 			String idp, String url, boolean saveCredendentialsToLocalProxy)
-			throws LoginException {
+					throws LoginException {
 		return login((GlobusCredential) null, password, username, idp, url,
 				saveCredendentialsToLocalProxy);
 	}
@@ -972,7 +944,8 @@ public class LoginManager {
 			char[] password, String idp, LoginParams params) throws Exception {
 
 		return SlcsLoginWrapper
-				.slcsMyProxyInit(username, password, idp, params);
+				.slcsMyProxyInit(username, password, idp,
+						params, ClientPropertiesManager.getShibbolethUrl());
 
 	}
 

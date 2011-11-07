@@ -3,6 +3,7 @@ package grisu.frontend.control.login;
 import grisu.control.ServiceInterface;
 import grisu.control.ServiceInterfaceCreator;
 import grisu.control.exceptions.ServiceInterfaceException;
+import grith.jgrith.control.LoginParams;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +48,7 @@ public final class ServiceInterfaceFactory {
 	 */
 	public static ServiceInterface createInterface(final LoginParams params)
 			throws ServiceInterfaceException {
-		return createInterface(params.getServiceInterfaceUrl(),
+		return createInterface(params.getLoginUrl(),
 				params.getMyProxyUsername(), params.getMyProxyPassphrase(),
 				params.getMyProxyServer(), params.getMyProxyPort(),
 				params.getHttpProxy(), params.getHttpProxyPort(),

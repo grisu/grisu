@@ -3,8 +3,8 @@ package grisu.frontend.view.swing.login;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginException;
 import grisu.frontend.control.login.LoginManager;
-import grisu.frontend.control.login.LoginParams;
 import grisu.jcommons.configuration.CommonGridProperties;
+import grith.jgrith.control.LoginParams;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;

@@ -2,8 +2,8 @@ package grisu.frontend.view.swing.files;
 
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginManager;
-import grisu.frontend.control.login.LoginParams;
 import grisu.frontend.view.swing.files.preview.FileListWithPreviewPanel;
+import grith.jgrith.control.LoginParams;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;

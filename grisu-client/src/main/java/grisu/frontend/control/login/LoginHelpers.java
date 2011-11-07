@@ -2,7 +2,8 @@ package grisu.frontend.control.login;
 
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.ServiceInterfaceException;
-import grisu.settings.MyProxyServerParams;
+import grisu.jcommons.utils.MyProxyServerParams;
+import grith.jgrith.control.LoginParams;
 import grith.jgrith.plainProxy.LocalProxy;
 
 import java.io.ByteArrayOutputStream;
@@ -363,7 +364,7 @@ public final class LoginHelpers {
 			throws LoginException, ServiceInterfaceException {
 
 		final ServiceInterface si = ServiceInterfaceFactory.createInterface(
-				loginParams.getServiceInterfaceUrl(),
+				loginParams.getLoginUrl(),
 				loginParams.getMyProxyUsername(),
 				loginParams.getMyProxyPassphrase(),
 				loginParams.getMyProxyServer(), loginParams.getMyProxyPort(),
