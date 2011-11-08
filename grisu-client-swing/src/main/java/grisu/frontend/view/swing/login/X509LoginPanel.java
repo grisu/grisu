@@ -3,6 +3,9 @@ package grisu.frontend.view.swing.login;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginException;
 import grisu.frontend.control.login.LoginManager;
+import grisu.jcommons.exceptions.CredentialException;
+import grith.jgrith.Credential;
+import grith.jgrith.CredentialFactory;
 import grith.jgrith.control.LoginParams;
 
 import javax.swing.JLabel;
@@ -90,8 +93,17 @@ public class X509LoginPanel extends JPanel implements LoginMethodPanel {
 
 				loginSuccessful = false;
 				try {
-					si = LoginManager.login(null, passphrase, null, null,
-							params, saveCredendentialsToLocalProxy);
+					try {
+						Credential c = CredentialFactory
+								.createFromLocalCert(passphrase);
+						si = LoginManager.login(c, params);
+						if (saveCredendentialsToLocalProxy) {
+							c.saveCredential();
+						}
+					} catch (CredentialException e) {
+						throw new LoginException("Can't create credential.", e);
+					}
+
 					loginSuccessful = true;
 				} catch (final LoginException e) {
 					possibleException = e;

@@ -4,7 +4,10 @@ import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginException;
 import grisu.frontend.control.login.LoginManager;
 import grisu.jcommons.configuration.CommonGridProperties;
+import grisu.jcommons.exceptions.CredentialException;
 import grisu.settings.ClientPropertiesManager;
+import grith.jgrith.Credential;
+import grith.jgrith.CredentialFactory;
 import grith.jgrith.control.LoginParams;
 import grith.sibboleth.CredentialManager;
 import grith.sibboleth.DummyCredentialManager;
@@ -218,8 +221,17 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 
 				loginSuccessful = false;
 				try {
-					si = LoginManager.login(null, password, username, idp,
-							params, saveCredendentialsToLocalProxy);
+					try {
+						Credential c = CredentialFactory.createFromSlcs(null, idp,
+								username, password);
+						si = LoginManager.login(c, params);
+						if (saveCredendentialsToLocalProxy) {
+							c.saveCredential();
+						}
+					} catch (CredentialException e) {
+						throw new LoginException("Can't create credential.", e);
+					}
+
 					loginSuccessful = true;
 				} catch (final LoginException e) {
 					possibleException = e;

@@ -126,8 +126,10 @@ public class MyProxyLoginPanel extends JPanel implements LoginMethodPanel {
 
 				loginSuccessful = false;
 				try {
-					si = LoginManager.login(null, null, null, null, params,
-							saveCredendentialsToLocalProxy);
+
+					si = LoginManager.myProxyLogin(username, password,
+							params.getLoginUrl());
+
 					loginSuccessful = true;
 				} catch (final LoginException e) {
 					possibleException = e;
