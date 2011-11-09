@@ -224,12 +224,12 @@ public class LoginManager {
 	}
 
 	public static ServiceInterface loginCommandline() throws LoginException {
-		return loginCommandline("Local", false);
+		return loginCommandline("Local");
 	}
 
 	public static ServiceInterface loginCommandline(String backend)
 			throws LoginException {
-		return loginCommandline(backend, false);
+		return loginCommandline(backend, true);
 	}
 
 	public static ServiceInterface loginCommandline(String backend,
@@ -238,7 +238,15 @@ public class LoginManager {
 
 		Credential c;
 		if (LocalProxy.validGridProxyExists()) {
-			c = CredentialFactory.loadFromLocalProxy();
+			CliHelpers.setIndeterminateProgress(
+					"Local credential found, logging in...", true);
+			try {
+				c = CredentialFactory.loadFromLocalProxy();
+				c.uploadMyProxy();
+			} finally {
+				CliHelpers.setIndeterminateProgress(false);
+			}
+
 		} else {
 			c = CredentialFactory.createFromCommandline();
 			if (saveCredToDisk) {
