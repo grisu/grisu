@@ -63,11 +63,12 @@ import net.sf.ehcache.util.NamedThreadFactory;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.FileSystemException;
-import org.python.google.common.collect.Maps;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Maps;
 
 /**
  * The User class holds all the relevant data a job could want to know from the

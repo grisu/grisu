@@ -9,6 +9,7 @@ import grisu.jcommons.dependencies.ClasspathHacker;
 import grisu.jcommons.utils.CliHelpers;
 import grisu.jcommons.utils.DefaultGridSecurityProvider;
 import grisu.jcommons.utils.JythonHelpers;
+import grisu.model.GrisuRegistryManager;
 import grisu.settings.ClientPropertiesManager;
 import grisu.settings.Environment;
 import grisu.utils.GrisuPluginFilenameFilter;
@@ -196,6 +197,8 @@ public class LoginManager {
 			}
 
 			loginParams.clearPasswords();
+
+			GrisuRegistryManager.registerServiceInterface(si, cred);
 
 			return si;
 		} finally {

@@ -1,7 +1,6 @@
 package grisu.backend.utils;
 
 import grisu.settings.Environment;
-import grith.jgrith.Init;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -89,7 +88,7 @@ public final class LocalTemplatesHelper {
 				int count;
 				final byte[] data = new byte[BUFFER_SIZE];
 
-				final InputStream in = Init.class
+				final InputStream in = LocalTemplatesHelper.class
 						.getResourceAsStream("/templates_available.zip");
 				final ZipInputStream zipStream = new ZipInputStream(in);
 
@@ -106,7 +105,7 @@ public final class LocalTemplatesHelper {
 							myLogger.debug("Template name: " + entry.getName());
 							final File vomses_file = new File(
 									Environment
-											.getAvailableTemplatesDirectory(),
+									.getAvailableTemplatesDirectory(),
 									entry.getName());
 
 							// Write the file to the file system and overwrite
@@ -156,7 +155,7 @@ public final class LocalTemplatesHelper {
 
 		if (!new File(Environment.getAvailableTemplatesDirectory()).exists()) {
 			if (!new File(Environment.getAvailableTemplatesDirectory())
-					.mkdirs()) {
+			.mkdirs()) {
 				myLogger.error("Could not create available_vomses directory.");
 				throw new Exception(
 						"Could not create templates_available directory. Please set permissions for "
@@ -183,7 +182,7 @@ public final class LocalTemplatesHelper {
 		int count;
 		final byte[] data = new byte[BUFFER_SIZE];
 
-		final InputStream in = Init.class
+		final InputStream in = LocalTemplatesHelper.class
 				.getResourceAsStream(zipFileResourcePath);
 		final ZipInputStream zipstream = new ZipInputStream(in);
 

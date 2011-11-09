@@ -4,6 +4,7 @@ import grisu.control.TemplateManager;
 import grisu.model.info.ApplicationInformation;
 import grisu.model.info.ResourceInformation;
 import grisu.model.info.UserApplicationInformation;
+import grith.jgrith.Credential;
 
 import org.vpac.historyRepeater.HistoryManager;
 import org.vpac.historyRepeater.SimpleHistoryManager;
@@ -34,6 +35,8 @@ public interface GrisuRegistry {
 	 */
 	public abstract ApplicationInformation getApplicationInformation(
 			final String applicationName);
+
+	public abstract Credential getCredential();
 
 	/**
 	 * Returns an object to help with file(-transfer) related things.
