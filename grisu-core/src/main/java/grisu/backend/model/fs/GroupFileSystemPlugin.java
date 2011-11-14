@@ -369,7 +369,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 							@Override
 							public void run() {
 								try {
-									final long ts = user.getFileSystemManager()
+									final long ts = user.getFileManager()
 											.lastModified(url);
 
 									temp.put(ts, url);
@@ -426,7 +426,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 			if (parentUrls.size() == 1) {
 				final String url = parentUrls.iterator().next();
-				final boolean isFolder = user.getFileSystemManager().isFolder(
+				final boolean isFolder = user.getFileManager().isFolder(
 						url);
 				if (isFolder) {
 					result = new GridFile(url, -1L);
@@ -544,7 +544,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					result.put(urlToQuery, null);
 
 					try {
-						final GridFile file = user.getFileSystemManager()
+						final GridFile file = user.getFileManager()
 								.getFolderListing(urlToQuery, 1);
 						file.addSite(mp.getSite());
 						result.put(urlToQuery, file);

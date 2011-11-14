@@ -25,10 +25,10 @@ import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FileSystemManager {
+public class UserFileManager {
 
 	private static Logger myLogger = LoggerFactory
-			.getLogger(FileSystemManager.class.getName());
+			.getLogger(UserFileManager.class.getName());
 
 	private final Map<String, FileTransferPlugin> filetransferPlugins = new HashMap<String, FileTransferPlugin>();
 	private final Map<String, FileSystemInfoPlugin> fileSystemInfoPlugins = new HashMap<String, FileSystemInfoPlugin>();
@@ -39,7 +39,7 @@ public class FileSystemManager {
 
 	private final User user;
 
-	public FileSystemManager(User user) {
+	public UserFileManager(User user) {
 
 		this.user = user;
 		commonsVfsInfo = new CommonsVfsFileSystemInfoAndTransferPlugin(user);

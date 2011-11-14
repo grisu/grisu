@@ -81,10 +81,10 @@ import org.w3c.dom.Element;
  * @author Markus Binsteiner
  * 
  */
-public class JobManager {
+public class UserJobManager {
 
 	static final Logger myLogger = LoggerFactory
-			.getLogger(JobManager.class.getName());
+			.getLogger(UserJobManager.class.getName());
 
 	public static final int DEFAULT_JOB_SUBMISSION_RETRIES = 5;
 
@@ -119,7 +119,7 @@ public class JobManager {
 	 * @param submitters
 	 *            the supported JobSubmitters
 	 */
-	public JobManager(User user,
+	public UserJobManager(User user,
 			final Map<String, JobSubmitter> submitters) {
 		this.user = user;
 		this.submitters = submitters;
@@ -268,7 +268,7 @@ public class JobManager {
 					String tmp = targetDir;
 					int i = 1;
 					try {
-						while (getUser().getFileSystemManager().fileExists(tmp)) {
+						while (getUser().getFileManager().fileExists(tmp)) {
 							i = i + 1;
 							tmp = targetDir + "_" + i;
 						}
@@ -384,7 +384,7 @@ public class JobManager {
 
 			String tmp = targetDir;
 			int i = 1;
-			while (getUser().getFileSystemManager().fileExists(tmp)) {
+			while (getUser().getFileManager().fileExists(tmp)) {
 				i = i + 1;
 				tmp = targetDir + "_no_" + i + "_";
 			}
@@ -436,12 +436,12 @@ public class JobManager {
 						+ targetDirUrl);
 				RemoteFileTransferObject rftp = null;
 				try {
-					rftp = getUser().getFileSystemManager().cpSingleFile(
+					rftp = getUser().getFileManager().cpSingleFile(
 							job.getJobProperty(Constants.JOBDIRECTORY_KEY),
 							targetDirUrl, false, true, true);
 					status.addElement("Deleting old jobdirectory: "
 							+ job.getJobProperty(Constants.JOBDIRECTORY_KEY));
-					getUser().getFileSystemManager().deleteFile(
+					getUser().getFileManager().deleteFile(
 							job.getJobProperty(Constants.JOBDIRECTORY_KEY),
 							true);
 				} catch (final RemoteFileSystemException e1) {
@@ -490,7 +490,7 @@ public class JobManager {
 				GrisuOutputStream fout = null;
 
 				try {
-					fout = getUser().getFileSystemManager().getOutputStream(
+					fout = getUser().getFileManager().getOutputStream(
 							grisuJobFileUrl);
 				} catch (final RemoteFileSystemException e1) {
 					if (optionalBatchJobStatus != null) {
@@ -680,7 +680,7 @@ public class JobManager {
 								@Override
 								public void run() {
 									try {
-										if (!getUser().getFileSystemManager()
+										if (!getUser().getFileManager()
 												.fileExists(mp.getRootUrl())) {
 											myLogger.error("Removing sub loc "
 													+ subLoc);
@@ -917,7 +917,7 @@ public class JobManager {
 									.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY);
 							myLogger.debug("Deleting multijobDir: " + url);
 							try {
-								getUser().getFileSystemManager().deleteFile(
+								getUser().getFileManager().deleteFile(
 										url, true);
 								newActionStatus
 								.addElement("Deleted common dir for mountpoint: "
@@ -1017,7 +1017,7 @@ public class JobManager {
 	@Transient
 	public List<Job> getActiveJobs(String application, boolean refresh) {
 
-		boolean inclBatchJobs = JobManager.INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND;
+		boolean inclBatchJobs = UserJobManager.INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND;
 		if (Constants.ALLJOBS_INCL_BATCH_KEY.equals(application)) {
 			inclBatchJobs = true;
 		}
@@ -1575,7 +1575,7 @@ public class JobManager {
 										+ job.getJobname());
 
 								getUser()
-								.getFileSystemManager()
+								.getFileManager()
 								.deleteFile(
 										job.getJobProperty(Constants.JOBDIRECTORY_KEY),
 										true);
@@ -1819,7 +1819,7 @@ public class JobManager {
 
 			try {
 
-				if (getUser().getFileSystemManager().fileExists(
+				if (getUser().getFileManager().fileExists(
 						grisuJobPropertiesFile)) {
 
 					final Object cacheJob = AbstractServiceInterface
@@ -1833,7 +1833,7 @@ public class JobManager {
 
 					GrisuInputStream fin = null;
 					try {
-						fin = getUser().getFileSystemManager().getInputStream(
+						fin = getUser().getFileManager().getInputStream(
 								grisuJobPropertiesFile);
 						job = serializer.read(Job.class, fin.getStream());
 						fin.close();
@@ -1988,7 +1988,7 @@ public class JobManager {
 
 			// job.setJob_directory(jobDir);
 			myLogger.debug(debug_token + "Creating jobdir...");
-			getUser().getFileSystemManager().createFolder(jobDir);
+			getUser().getFileManager().createFolder(jobDir);
 			myLogger.debug(debug_token + "Jobdir created.");
 		} catch (final Throwable e) {
 			myLogger.error(e.getLocalizedMessage(), e);
@@ -2024,7 +2024,7 @@ public class JobManager {
 		try {
 			if (StringUtils.isNotBlank(oldJobDir)) {
 
-				if (getUser().getFileSystemManager().fileExists(oldJobDir)) {
+				if (getUser().getFileManager().fileExists(oldJobDir)) {
 
 					final GridFile fol = getUser().ls(oldJobDir, 1);
 					if (fol.getChildren().size() > 0) {
@@ -2577,7 +2577,7 @@ public class JobManager {
 		final String newJobdir = stagingFilesystemToUse + workingDirectory;
 
 		try {
-			getUser().getFileSystemManager().createFolder(newJobdir);
+			getUser().getFileManager().createFolder(newJobdir);
 		} catch (final RemoteFileSystemException e1) {
 			throw new JobPropertiesException(
 					"Could not create new jobdirectory " + newJobdir
@@ -2594,10 +2594,10 @@ public class JobManager {
 		if (StringUtils.isNotBlank(oldJobDir)) {
 			try {
 				// if old jobdir exists, try to move it here
-				getUser().getFileSystemManager().cpSingleFile(oldJobDir,
+				getUser().getFileManager().cpSingleFile(oldJobDir,
 						newJobdir, true, true, true);
 
-				getUser().getFileSystemManager().deleteFile(oldJobDir);
+				getUser().getFileManager().deleteFile(oldJobDir);
 			} catch (final Exception e) {
 				myLogger.error(e.getLocalizedMessage(), e);
 			}
@@ -3140,7 +3140,7 @@ public class JobManager {
 						+ sourceUrl + " to: " + targetUrl);
 				job.addInputFile(sourceUrl);
 				jobdao.saveOrUpdate(job);
-				getUser().getFileSystemManager().cpSingleFile(sourceUrl, targetUrl, true, true, true);
+				getUser().getFileManager().cpSingleFile(sourceUrl, targetUrl, true, true, true);
 				myLogger.debug(debugToken + "Finished staging of file: "
 						+ sourceUrl + " to: " + targetUrl);
 				// job.addInputFile(targetUrl);
@@ -3626,7 +3626,7 @@ public class JobManager {
 
 			try {
 				final String tarFileName = jobdir + "/" + targetFilename;
-				getUser().getFileSystemManager().upload(source, tarFileName);
+				getUser().getFileManager().upload(source, tarFileName);
 				status.addElement("Upload to " + tarFileName + " successful.");
 				job.addInputFile(tarFileName);
 				saveOrUpdate(job);
@@ -3673,7 +3673,7 @@ public class JobManager {
 				multiJob.getAllUsedMountPoints().size());
 		getUser().getActionStatuses().put(targetFilename, status);
 
-		getUser().getFileSystemManager().uploadFileToMultipleLocations(urls,
+		getUser().getFileManager().uploadFileToMultipleLocations(urls,
 				source, targetFilename, status);
 
 		// TODO monitor status and set jobstatus to ready_to_submit?

@@ -199,7 +199,7 @@ public class AllGroupsFileSystemPlugin implements VirtualFileSystemPlugin {
 
 						final String urlToLs = mp.getRootUrl() + "/" + restUrl;
 						try {
-							final GridFile result = user.getFileSystemManager()
+							final GridFile result = user.getFileManager()
 									.getFolderListing(urlToLs, 1);
 							myLogger.debug("retrieved results from: "
 									+ mp.getAlias());

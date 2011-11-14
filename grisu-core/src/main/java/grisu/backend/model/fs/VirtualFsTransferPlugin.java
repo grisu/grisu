@@ -72,7 +72,7 @@ public class VirtualFsTransferPlugin implements FileTransferPlugin {
 			realTarget = target;
 		}
 
-		return user.getFileSystemManager().copy(realSource, realTarget,
+		return user.getFileManager().copy(realSource, realTarget,
 				overwrite);
 
 	}

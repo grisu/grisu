@@ -396,11 +396,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>au.org.arcs.infosystems</groupId>
-			<artifactId>matchmaker</artifactId>
-			<version>0.9-SNAPSHOT</version>
-		</dependency>
 <!--		<dependency>
 			<groupId>grisu.frontend</groupId>
 			<artifactId>gridftp-tests</artifactId>

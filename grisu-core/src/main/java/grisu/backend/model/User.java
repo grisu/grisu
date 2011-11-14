@@ -3,9 +3,9 @@ package grisu.backend.model;
 import grisu.backend.hibernate.BatchJobDAO;
 import grisu.backend.hibernate.JobDAO;
 import grisu.backend.hibernate.UserDAO;
-import grisu.backend.model.fs.FileSystemManager;
+import grisu.backend.model.fs.UserFileManager;
 import grisu.backend.model.job.Job;
-import grisu.backend.model.job.JobManager;
+import grisu.backend.model.job.UserJobManager;
 import grisu.backend.model.job.JobSubmitter;
 import grisu.backend.model.job.gt4.GT4Submitter;
 import grisu.backend.model.job.gt5.GT5Submitter;
@@ -170,14 +170,14 @@ public class User {
 	private static Logger myLogger = LoggerFactory.getLogger(User.class
 			.getName());
 
-	private final JobManager jobSubmissionmanager = null;
+	private final UserJobManager jobSubmissionmanager = null;
 
 	private Long id = null;
 
 	// the (default) credential to contact gridftp file shares
 	private ProxyCredential cred = null;
 
-	private JobManager manager;
+	private UserJobManager manager;
 	// the (default) credentials dn
 	private String dn = null;
 
@@ -205,7 +205,7 @@ public class User {
 
 	private Map<String, String> archiveLocations = null;
 	private Map<String, JobSubmissionObjectImpl> jobTemplates = new HashMap<String, JobSubmissionObjectImpl>();
-	private FileSystemManager fsm;
+	private UserFileManager fsm;
 
 	private final InformationManager infoManager;
 	private final MatchMaker matchmaker;
@@ -493,12 +493,12 @@ public class User {
 							// myLogger.debug("Did not find "
 							// + urlTemp
 							// + "in cache, trying to access/create folder...");
-							final boolean exists = getFileSystemManager()
+							final boolean exists = getFileManager()
 									.fileExists(urlTemp);
 							if (!exists) {
 								myLogger.debug("Mountpoint does not exist. Trying to create non-exitent folder: "
 										+ urlTemp);
-								getFileSystemManager().createFolder(urlTemp);
+								getFileManager().createFolder(urlTemp);
 								// } else {
 								// myLogger.debug("MountPoint " + urlTemp
 								// + " exists.");
@@ -861,7 +861,7 @@ public class User {
 		GridFile tempFolder = null;
 
 		try {
-			tempFolder = getFileSystemManager().getFolderListing(
+			tempFolder = getFileManager().getFolderListing(
 					folder.getUrl(), 1);
 		} catch (final Exception e) {
 			// myLogger.error(e.getLocalizedMessage(), e);
@@ -873,7 +873,7 @@ public class User {
 			} catch (final InterruptedException e1) {
 				myLogger.error(e.getLocalizedMessage(), e);
 			}
-			tempFolder = getFileSystemManager().getFolderListing(
+			tempFolder = getFileManager().getFolderListing(
 					folder.getUrl(), 1);
 
 		}
@@ -1135,6 +1135,14 @@ public class User {
 		return dn;
 	}
 
+	@Transient
+	public UserFileManager getFileManager() {
+		if (fsm == null) {
+			this.fsm = new UserFileManager(this);
+		}
+		return fsm;
+	}
+
 	// private List<FileReservation> getFileReservations() {
 	// return fileReservations;
 	// }
@@ -1151,7 +1159,7 @@ public class User {
 	// private void setFileTransfers(List<FileTransfer> fileTransfers) {
 	// this.fileTransfers = fileTransfers;
 	// }
-
+	@Transient
 	public String getFileSystemHomeDirectory(String filesystemRoot, String fqan)
 			throws FileSystemException {
 
@@ -1175,7 +1183,7 @@ public class User {
 
 				String uri = null;
 
-				uri = getFileSystemManager().resolveFileSystemHomeDirectory(
+				uri = getFileManager().resolveFileSystemHomeDirectory(
 						filesystemRoot, fqan);
 				myLogger.debug("Found filesystem home dir for: "
 						+ filesystemRoot + " / " + fqan + ": " + uri);
@@ -1200,14 +1208,6 @@ public class User {
 				throw new FileSystemException(e);
 			}
 		}
-	}
-
-	@Transient
-	public FileSystemManager getFileSystemManager() {
-		if (fsm == null) {
-			this.fsm = new FileSystemManager(this);
-		}
-		return fsm;
 	}
 
 	/**
@@ -1244,6 +1244,7 @@ public class User {
 		return id;
 	}
 
+	@Transient
 	public InformationManager getInfoManager() {
 		return this.infoManager;
 	}
@@ -1265,11 +1266,23 @@ public class User {
 
 
 
+	@Transient
+	public UserJobManager getJobManager() {
+		if (manager == null) {
+			final Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
+			submitters.put("GT4", new GT4Submitter());
+			submitters.put("GT5", new GT5Submitter());
+			manager = new UserJobManager(this, submitters);
+		}
+		return manager;
+	}
+
 	@ElementCollection
 	public Map<String, JobSubmissionObjectImpl> getJobTemplates() {
 		return jobTemplates;
 	}
 
+	@Transient
 	public MatchMaker getMatchMaker() {
 		return this.matchmaker;
 	}
@@ -1363,17 +1376,6 @@ public class User {
 	}
 
 	@Transient
-	public JobManager getJobManager() {
-		if (manager == null) {
-			final Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
-			submitters.put("GT4", new GT4Submitter());
-			submitters.put("GT5", new GT5Submitter());
-			manager = new JobManager(this, submitters);
-		}
-		return manager;
-	}
-
-	@Transient
 	public String getUniqueGroupname(String fqan) {
 		return FqanHelpers.getUniqueGroupname(getFqans().keySet(), fqan);
 	}
@@ -1410,12 +1412,12 @@ public class User {
 		try {
 
 			if (recursion_level == 0) {
-				final GridFile file = getFileSystemManager().getFolderListing(
+				final GridFile file = getFileManager().getFolderListing(
 						directory, 0);
 				return file;
 			}
 
-			final GridFile rootfolder = getFileSystemManager()
+			final GridFile rootfolder = getFileManager()
 					.getFolderListing(directory, 1);
 			if (recursion_level == 1) {
 
@@ -1484,7 +1486,7 @@ public class User {
 			final ProxyCredential cred, final boolean useHomeDirectory,
 			final String site) throws RemoteFileSystemException {
 
-		final MountPoint new_mp = getFileSystemManager().mountFileSystem(uri,
+		final MountPoint new_mp = getFileManager().mountFileSystem(uri,
 				mountPointName, cred, useHomeDirectory, site);
 
 		if (!mountPoints.contains(new_mp)) {

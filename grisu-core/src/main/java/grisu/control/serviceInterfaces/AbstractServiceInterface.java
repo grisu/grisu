@@ -4,10 +4,10 @@ import grisu.GrisuVersion;
 import grisu.backend.info.InformationManagerManager;
 import grisu.backend.model.RemoteFileTransferObject;
 import grisu.backend.model.User;
-import grisu.backend.model.fs.FileSystemManager;
+import grisu.backend.model.fs.UserFileManager;
 import grisu.backend.model.job.BatchJob;
 import grisu.backend.model.job.Job;
-import grisu.backend.model.job.JobManager;
+import grisu.backend.model.job.UserJobManager;
 import grisu.backend.model.job.Jobhelper;
 import grisu.backend.utils.LocalTemplatesHelper;
 import grisu.control.JobConstants;
@@ -613,13 +613,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		// myLogger.debug("Downloading: " + filename);
 
-		return getUser().getFileSystemManager().download(filename);
+		return getUser().getFileManager().download(filename);
 	}
 
 	public boolean fileExists(final String file)
 			throws RemoteFileSystemException {
 
-		return getUser().getFileSystemManager().fileExists(file);
+		return getUser().getFileManager().fileExists(file);
 
 	}
 
@@ -985,8 +985,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	//
 	// }
 
-	private FileSystemManager getFileManager() {
-		return getUser().getFileSystemManager();
+	private UserFileManager getFileManager() {
+		return getUser().getFileManager();
 	}
 
 	/*
@@ -996,7 +996,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public long getFileSize(final String file) throws RemoteFileSystemException {
 
-		return getUser().getFileSystemManager().getFileSize(file);
+		return getUser().getFileManager().getFileSize(file);
 	}
 
 	/*
@@ -1032,7 +1032,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				job.getInputFiles(), job.getLogMessages(), job.isArchived());
 	}
 
-	private JobManager getJobManager() {
+	private UserJobManager getJobManager() {
 		return getUser().getJobManager();
 	}
 
@@ -1322,7 +1322,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public boolean isFolder(final String file) throws RemoteFileSystemException {
 
-		return getUser().getFileSystemManager().isFolder(file);
+		return getUser().getFileManager().isFolder(file);
 
 	}
 
@@ -1369,7 +1369,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public long lastModified(final String url) throws RemoteFileSystemException {
 
-		return getUser().getFileSystemManager().lastModified(url);
+		return getUser().getFileManager().lastModified(url);
 	}
 
 	public GridFile ls(final String directory, int recursion_level)
@@ -1389,7 +1389,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public boolean mkdir(final String url) throws RemoteFileSystemException {
 
 		// myLogger.debug("Creating folder: " + url + "...");
-		return getUser().getFileSystemManager().createFolder(url);
+		return getUser().getFileManager().createFolder(url);
 
 	}
 
@@ -1561,7 +1561,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public String upload(final DataHandler source, final String filename)
 			throws RemoteFileSystemException {
 
-		return getUser().getFileSystemManager().upload(source, filename);
+		return getUser().getFileManager().upload(source, filename);
 
 	}
 
