@@ -56,12 +56,20 @@ public class StatusObject {
 	private double lastPercentage = 0;
 	private boolean taskFinished = false;
 
+	private final DtoActionStatus origStatus;
+
 	private long startMonitoringTime = -1;
 	private long finishedMonitoringTime = -1;
 
 	private volatile boolean waitWasInterrupted = false;
 
 	private final CountDownLatch finished = new CountDownLatch(1);
+
+	public StatusObject(DtoActionStatus s) {
+		this.origStatus = s;
+		this.si = null;
+		this.handle = s.getHandle();
+	}
 
 	public StatusObject(ServiceInterface si, String handle) {
 		this(si, handle, (Vector) null);
@@ -75,6 +83,7 @@ public class StatusObject {
 	public StatusObject(ServiceInterface si, String handle,
 			Vector<Listener> listeners) {
 		this.si = si;
+		this.origStatus = null;
 		this.handle = handle;
 		this.listeners = listeners;
 
@@ -155,7 +164,11 @@ public class StatusObject {
 			return lastStatus;
 		}
 		myLogger.debug("Checking status for: " + handle);
-		lastStatus = si.getActionStatus(handle);
+		if (si != null) {
+			lastStatus = si.getActionStatus(handle);
+		} else {
+			lastStatus = origStatus;
+		}
 		if ((taskFinished != lastStatus.isFinished())
 				|| (lastPercentage != lastStatus.percentFinished())) {
 			lastPercentage = lastStatus.percentFinished();
@@ -229,5 +242,6 @@ public class StatusObject {
 		return;
 
 	}
+
 
 }
