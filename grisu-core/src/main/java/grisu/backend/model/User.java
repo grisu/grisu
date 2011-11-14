@@ -5,8 +5,9 @@ import grisu.backend.hibernate.JobDAO;
 import grisu.backend.hibernate.UserDAO;
 import grisu.backend.model.fs.UserFileManager;
 import grisu.backend.model.job.Job;
-import grisu.backend.model.job.UserJobManager;
 import grisu.backend.model.job.JobSubmitter;
+import grisu.backend.model.job.UserBatchJobManager;
+import grisu.backend.model.job.UserJobManager;
 import grisu.backend.model.job.gt4.GT4Submitter;
 import grisu.backend.model.job.gt5.GT5Submitter;
 import grisu.backend.utils.CertHelpers;
@@ -81,6 +82,9 @@ public class User {
 
 	private final static boolean ENABLE_FILESYSTEM_CACHE = ServerPropertiesManager
 			.useFileSystemCache();
+
+	public final boolean checkFileSystemsBeforeUse = false;
+	public static final int DEFAULT_JOB_SUBMISSION_RETRIES = 5;
 
 	protected static UserDAO userdao = new UserDAO();
 	protected static final JobDAO jobdao = new JobDAO();
@@ -177,7 +181,7 @@ public class User {
 	// the (default) credential to contact gridftp file shares
 	private ProxyCredential cred = null;
 
-	private UserJobManager manager;
+	private UserJobManager jobmanager;
 	// the (default) credentials dn
 	private String dn = null;
 
@@ -209,6 +213,8 @@ public class User {
 
 	private final InformationManager infoManager;
 	private final MatchMaker matchmaker;
+
+	private UserBatchJobManager batchjobmanager = null;
 
 	// for hibernate
 	public User() {
@@ -256,6 +262,8 @@ public class User {
 		userdao.saveOrUpdate(this);
 	}
 
+
+
 	/**
 	 * Not used yet.
 	 * 
@@ -264,8 +272,6 @@ public class User {
 	public void addFqan(final String fqan, final VO vo) {
 		fqans.put(fqan, vo);
 	}
-
-
 
 	public void addProperty(String key, String value) {
 
@@ -890,6 +896,8 @@ public class User {
 		return folder;
 	}
 
+
+
 	@Transient
 	public Map<String, DtoActionStatus> getActionStatuses() {
 
@@ -907,8 +915,6 @@ public class User {
 		}
 	}
 
-
-
 	@Transient
 	public Set<String> getAllAvailableUniqueGroupnames() {
 
@@ -924,6 +930,8 @@ public class User {
 		}
 		return cachedUniqueGroupnames;
 	}
+
+
 
 	/**
 	 * Returns all mountpoints (including automounted ones for this session.
@@ -960,7 +968,13 @@ public class User {
 		return archiveLocations;
 	}
 
-
+	@Transient
+	public UserBatchJobManager getBatchJobManager() {
+		if ( batchjobmanager == null ) {
+			batchjobmanager = new UserBatchJobManager(this);
+		}
+		return batchjobmanager;
+	}
 
 	/**
 	 * Gets a map of this users bookmarks.
@@ -1238,17 +1252,6 @@ public class User {
 		return FqanHelpers.getFullFqan(getFqans().keySet(), uniqueGroupname);
 	}
 
-	@Id
-	@GeneratedValue
-	private Long getId() {
-		return id;
-	}
-
-	@Transient
-	public InformationManager getInfoManager() {
-		return this.infoManager;
-	}
-
 
 
 	// public GridFile getFolderListing(final String url, int recursionLevel)
@@ -1264,17 +1267,26 @@ public class User {
 	// }
 
 
+	@Id
+	@GeneratedValue
+	private Long getId() {
+		return id;
+	}
 
+	@Transient
+	public InformationManager getInfoManager() {
+		return this.infoManager;
+	}
 
 	@Transient
 	public UserJobManager getJobManager() {
-		if (manager == null) {
+		if (jobmanager == null) {
 			final Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
 			submitters.put("GT4", new GT4Submitter());
 			submitters.put("GT5", new GT5Submitter());
-			manager = new UserJobManager(this, submitters);
+			jobmanager = new UserJobManager(this, submitters);
 		}
-		return manager;
+		return jobmanager;
 	}
 
 	@ElementCollection
@@ -1399,6 +1411,27 @@ public class User {
 	@Override
 	public int hashCode() {
 		return 29 * dn.hashCode();
+	}
+
+	public boolean isValidSubmissionLocation(String subLoc, String fqan) {
+
+		// TODO i'm sure this can be made much more quicker
+		final String[] fs = getInfoManager()
+				.getStagingFileSystemForSubmissionLocation(subLoc);
+
+		for (final MountPoint mp : df(fqan)) {
+
+			for (final String f : fs) {
+				if (mp.getRootUrl().startsWith(f.replace(":2811", ""))) {
+
+					return true;
+				}
+			}
+
+		}
+
+		return false;
+
 	}
 
 

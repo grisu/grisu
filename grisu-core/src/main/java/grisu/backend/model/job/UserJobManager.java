@@ -1,6 +1,5 @@
 package grisu.backend.model.job;
 
-import grisu.backend.hibernate.BatchJobDAO;
 import grisu.backend.hibernate.JobDAO;
 import grisu.backend.model.ProxyCredential;
 import grisu.backend.model.RemoteFileTransferObject;
@@ -15,13 +14,6 @@ import grisu.control.exceptions.JobSubmissionException;
 import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
-import grisu.control.serviceInterfaces.DefaultResubmitSubmitPolicy;
-import grisu.control.serviceInterfaces.DefaultSubmitPolicy;
-import grisu.control.serviceInterfaces.EqualJobDistributor;
-import grisu.control.serviceInterfaces.JobDistributor;
-import grisu.control.serviceInterfaces.PercentageJobDistributor;
-import grisu.control.serviceInterfaces.RestartSpecificJobsRestartPolicy;
-import grisu.control.serviceInterfaces.SubmitPolicy;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.jcommons.interfaces.GridResource;
@@ -31,7 +23,6 @@ import grisu.model.FileManager;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.DtoJob;
-import grisu.model.dto.DtoProperties;
 import grisu.model.dto.DtoStringList;
 import grisu.model.dto.GridFile;
 import grisu.model.job.JobSubmissionObjectImpl;
@@ -40,19 +31,15 @@ import grisu.model.utils.InformationUtils;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.SeveralXMLHelpers;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -86,8 +73,6 @@ public class UserJobManager {
 	static final Logger myLogger = LoggerFactory
 			.getLogger(UserJobManager.class.getName());
 
-	public static final int DEFAULT_JOB_SUBMISSION_RETRIES = 5;
-
 	private static void setVO(final Job job, String fqan) throws NoSuchJobException,
 	JobPropertiesException {
 
@@ -99,15 +84,11 @@ public class UserJobManager {
 
 	}
 
-	private final boolean checkFileSystemsBeforeUse = false;
-
 	private Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
 
 	private final User user;
 
 	protected final JobDAO jobdao = new JobDAO();
-
-	protected final BatchJobDAO batchJobDao = new BatchJobDAO();
 
 
 	public final static boolean INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND = false;
@@ -164,53 +145,11 @@ public class UserJobManager {
 				// myLogger.debug("Added job property: " + key);
 			}
 		} catch (final NoSuchJobException e) {
-			final BatchJob job = getBatchJobFromDatabase(jobname);
-			job.addJobProperty(key, value);
-			saveOrUpdate(job);
-			myLogger.debug("Added multijob property: " + key);
+			getUser().getBatchJobManager().addJobProperty(jobname, key, value);
 		}
 
 	}
 
-	/**
-	 * Adds the specified job to the mulitpartJob.
-	 * 
-	 * @param batchJobname
-	 *            the batchJobname
-	 * @param jobname
-	 *            the jobname
-	 * @throws NoSuchJobException
-	 * @throws JobPropertiesException
-	 * @throws NoSuchJobException
-	 */
-	public String addJobToBatchJob(String batchJobname, String jsdlString)
-			throws JobPropertiesException, NoSuchJobException {
-
-		final BatchJob multiJob = getBatchJobFromDatabase(
-				batchJobname);
-
-		Document jsdl;
-
-		try {
-			jsdl = SeveralXMLHelpers.fromString(jsdlString);
-		} catch (final Exception e3) {
-			throw new RuntimeException("Invalid jsdl/xml format.", e3);
-		}
-
-		String jobnameCreationMethod = multiJob
-				.getJobProperty(Constants.JOBNAME_CREATION_METHOD_KEY);
-		if (StringUtils.isBlank(jobnameCreationMethod)) {
-			jobnameCreationMethod = "force-name";
-		}
-
-		final String jobname = createJob(jsdl, multiJob.getFqan(),
-				"force-name", multiJob);
-		multiJob.addJob(jobname);
-		multiJob.setStatus(JobConstants.READY_TO_SUBMIT);
-		saveOrUpdate(multiJob);
-
-		return jobname;
-	}
 
 	public synchronized void addLogMessageToPossibleMultiPartJobParent(Job job,
 			String message) {
@@ -220,108 +159,18 @@ public class UserJobManager {
 		if (mpjName != null) {
 			BatchJob mpj = null;
 			try {
-				mpj = getBatchJobFromDatabase(mpjName);
+				mpj = getUser().getBatchJobManager().getBatchJobFromDatabase(
+						mpjName);
 			} catch (final NoSuchJobException e) {
 				myLogger.error(e.getLocalizedMessage(), e);
 				return;
 			}
 			mpj.addLogMessage(message);
-			batchJobDao.saveOrUpdate(mpj);
+			getUser().getBatchJobManager().saveOrUpdate(mpj);
 		}
 	}
 
-	private void archiveBatchJob(final BatchJob batchJob, final String target)
-			throws NoSuchJobException, JobPropertiesException {
 
-		if (batchJob.getStatus() <= JobConstants.FINISHED_EITHER_WAY) {
-			// this should not really happen
-			myLogger.error("Not archiving job because job is not finished.");
-			throw new JobPropertiesException(
-					"Can't archive batchjob because it is not finished yet.");
-		}
-
-		final DtoActionStatus status = new DtoActionStatus(target, (batchJob
-				.getJobs().size() * 3) + 3);
-		getUser().getActionStatuses().put(target, status);
-
-		final Thread archiveThread = new Thread() {
-			@Override
-			public void run() {
-
-				status.addElement("Starting to archive batchjob "
-						+ batchJob.getBatchJobname());
-				final NamedThreadFactory tf = new NamedThreadFactory(
-						"archiveBatchJob " + batchJob.getBatchJobname() + " / "
-								+ getUser().getDn());
-				final ExecutorService executor = Executors.newFixedThreadPool(
-						ServerPropertiesManager
-						.getConcurrentFileTransfersPerUser(), tf);
-
-				for (final Job job : batchJob.getJobs()) {
-					status.addElement("Creating job archive thread for job "
-							+ job.getJobname());
-					final String jobdirUrl = job
-							.getJobProperty(Constants.JOBDIRECTORY_KEY);
-					final String targetDir = target + "/"
-							+ FileManager.getFilename(jobdirUrl);
-
-					String tmp = targetDir;
-					int i = 1;
-					try {
-						while (getUser().getFileManager().fileExists(tmp)) {
-							i = i + 1;
-							tmp = targetDir + "_" + i;
-						}
-					} catch (final RemoteFileSystemException e2) {
-						myLogger.error(e2.getLocalizedMessage(), e2);
-						return;
-					}
-
-					final Thread archiveThread = archiveSingleJob(job, tmp,
-							status);
-					archiveThread.setName("archive_batchJob "
-							+ batchJob.getBatchJobname() + " / "
-							+ getUser().getDn() + " / " + status.getHandle());
-					executor.execute(archiveThread);
-				}
-
-				executor.shutdown();
-
-				try {
-					executor.awaitTermination(24, TimeUnit.HOURS);
-				} catch (final InterruptedException e) {
-					myLogger.error(e.getLocalizedMessage(), e);
-					status.setFailed(true);
-					status.setErrorCause(e.getLocalizedMessage());
-					status.setFinished(true);
-					status.addElement("Killing of sub-jobs interrupted: "
-							+ e.getLocalizedMessage());
-					return;
-				}
-
-				status.addElement("Killing batchjob.");
-				// now kill batchjob
-				final Thread deleteThread = deleteMultiPartJob(batchJob, true);
-
-				try {
-					deleteThread.join();
-					status.addElement("Batchjob killed.");
-				} catch (final InterruptedException e) {
-					status.setFailed(true);
-					status.setErrorCause("Archiving interrupted.");
-					status.setFinished(true);
-					myLogger.error(e.getLocalizedMessage(), e);
-					return;
-				}
-
-				status.setFinished(true);
-			}
-		};
-		archiveThread.setName("archive batchjob " + batchJob.getBatchJobname()
-				+ " / " + getUser().getDn());
-		archiveThread.start();
-
-	}
 
 	public String archiveJob(String jobname, String target)
 			throws JobPropertiesException, NoSuchJobException,
@@ -365,15 +214,7 @@ public class UserJobManager {
 		}
 
 		try {
-			final BatchJob job = getBatchJobFromDatabase(jobname);
-			final String jobdirUrl = job
-					.getJobProperty(Constants.JOBDIRECTORY_KEY);
-
-			final String targetDir = url + "/"
-					+ FileManager.getFilename(jobdirUrl);
-
-			archiveBatchJob(job, targetDir);
-			return targetDir;
+			return getUser().getBatchJobManager().archiveBatchJob(jobname, url);
 		} catch (final NoSuchJobException e) {
 			final Job job = getJobFromDatabaseOrFileSystem(jobname);
 
@@ -396,7 +237,7 @@ public class UserJobManager {
 		}
 	}
 
-	private Thread archiveSingleJob(final Job job, final String targetDirUrl,
+	public Thread archiveSingleJob(final Job job, final String targetDirUrl,
 			final DtoActionStatus optionalBatchJobStatus) {
 
 		final DtoActionStatus status = new DtoActionStatus(targetDirUrl, 5);
@@ -580,144 +421,7 @@ public class UserJobManager {
 
 	}
 
-	private SortedSet<GridResource> calculateResourcesToUse(BatchJob mpj) {
 
-		final String locationsToIncludeString = mpj
-				.getJobProperty(Constants.LOCATIONS_TO_INCLUDE_KEY);
-		String[] locationsToInclude = null;
-		if (StringUtils.isNotBlank(locationsToIncludeString)) {
-			locationsToInclude = locationsToIncludeString.split(",");
-		}
-
-		final String locationsToExcludeString = mpj
-				.getJobProperty(Constants.LOCATIONS_TO_EXCLUDE_KEY);
-		String[] locationsToExclude = null;
-		if (StringUtils.isNotBlank(locationsToExcludeString)) {
-			locationsToExclude = locationsToExcludeString.split(",");
-		}
-
-		final SortedSet<GridResource> resourcesToUse = new TreeSet<GridResource>();
-
-		for (final GridResource resource : findBestResourcesForMultipartJob(mpj)) {
-
-			final String tempSubLocString = SubmissionLocationHelpers
-					.createSubmissionLocationString(resource);
-
-			// check whether subloc is available for vo
-			final String[] allSubLocs = getUser().getInfoManager()
-					.getAllSubmissionLocationsForVO(mpj.getFqan());
-			Arrays.sort(allSubLocs);
-			final int i = Arrays.binarySearch(allSubLocs, tempSubLocString);
-			if (i < 0) {
-				continue;
-			}
-
-			if ((locationsToInclude != null) && (locationsToInclude.length > 0)) {
-
-				for (final String subLoc : locationsToInclude) {
-					if (tempSubLocString.toLowerCase().contains(
-							subLoc.toLowerCase())) {
-						if (isValidSubmissionLocation(tempSubLocString,
-								mpj.getFqan())) {
-							resourcesToUse.add(resource);
-						}
-						break;
-					}
-				}
-
-			} else if ((locationsToExclude != null)
-					&& (locationsToExclude.length > 0)) {
-
-				boolean useSubLoc = true;
-				for (final String subLoc : locationsToExclude) {
-					if (tempSubLocString.toLowerCase().contains(
-							subLoc.toLowerCase())) {
-						useSubLoc = false;
-						break;
-					}
-				}
-				if (useSubLoc) {
-					if (isValidSubmissionLocation(tempSubLocString,
-							mpj.getFqan())) {
-						resourcesToUse.add(resource);
-					}
-				}
-
-			} else {
-
-				if (isValidSubmissionLocation(tempSubLocString, mpj.getFqan())) {
-					resourcesToUse.add(resource);
-				}
-			}
-		}
-
-		if (checkFileSystemsBeforeUse) {
-
-			// myLogger.debug("Checking filesystems to use...");
-			final NamedThreadFactory tf = new NamedThreadFactory(
-					"batchJobResourceCalculation");
-			final ExecutorService executor1 = Executors
-					.newFixedThreadPool(ServerPropertiesManager
-							.getConcurrentFileTransfersPerUser(), tf);
-
-			final Set<GridResource> failSet = Collections
-					.synchronizedSet(new HashSet<GridResource>());
-
-			for (final GridResource gr : resourcesToUse) {
-
-				final String subLoc = SubmissionLocationHelpers
-						.createSubmissionLocationString(gr);
-
-				final String[] fs = getUser().getInfoManager()
-						.getStagingFileSystemForSubmissionLocation(subLoc);
-
-				for (final MountPoint mp : getUser().df(mpj.getFqan())) {
-
-					for (final String f : fs) {
-						if (mp.getRootUrl().startsWith(f.replace(":2811", ""))) {
-
-							final Thread thread = new Thread() {
-								@Override
-								public void run() {
-									try {
-										if (!getUser().getFileManager()
-												.fileExists(mp.getRootUrl())) {
-											myLogger.error("Removing sub loc "
-													+ subLoc);
-											failSet.add(gr);
-										}
-									} catch (final RemoteFileSystemException e) {
-										myLogger.error("Removing sub loc "
-												+ subLoc + ": "
-												+ e.getLocalizedMessage());
-										failSet.add(gr);
-									}
-								}
-							};
-
-							executor1.execute(thread);
-						}
-					}
-				}
-			}
-
-			executor1.shutdown();
-
-			try {
-				executor1.awaitTermination(3600, TimeUnit.SECONDS);
-			} catch (final InterruptedException e) {
-				myLogger.error(e.getLocalizedMessage(), e);
-			}
-
-			resourcesToUse.removeAll(failSet);
-			// myLogger.debug("Checking filesystems to use: finished");
-			myLogger.debug("Removed filesystems for batchjob: "
-					+ StringUtils.join(failSet, ","));
-		}
-
-		return resourcesToUse;
-
-	}
 
 	private boolean checkWhetherGridResourceIsActuallyAvailable(
 			GridResource resource) {
@@ -755,7 +459,8 @@ public class UserJobManager {
 		}
 
 		try {
-			final BatchJob mpj = getBatchJobFromDatabase(jobname);
+			final BatchJob mpj = getUser().getBatchJobManager()
+					.getBatchJobFromDatabase(jobname);
 			throw new JobPropertiesException(
 					"Could not create job with jobname " + jobname
 					+ ". Multipart job with this id already exists...");
@@ -819,200 +524,10 @@ public class UserJobManager {
 		return jobname;
 	}
 
-	public void delete(BatchJob batchJob) {
-		batchJobDao.delete(batchJob);
-	}
 
-	/**
-	 * Removes the multipartJob from the server.
-	 * 
-	 * @param batchJobname
-	 *            the name of the multipartJob
-	 * @param deleteChildJobsAsWell
-	 *            whether to delete the child jobs of this multipartjob as well.
-	 */
-	private Thread deleteMultiPartJob(final BatchJob multiJob,
-			final boolean clean) {
 
-		int size = (multiJob.getJobs().size() * 2) + 1;
 
-		if (clean) {
-			size = size + (multiJob.getAllUsedMountPoints().size() * 2);
-		}
 
-		final DtoActionStatus newActionStatus = new DtoActionStatus(
-				multiJob.getBatchJobname(), size);
-		getUser().getActionStatuses().put(multiJob.getBatchJobname(),
-				newActionStatus);
-		final NamedThreadFactory tf = new NamedThreadFactory("deleteBatchJob");
-		final ExecutorService executor = Executors.newFixedThreadPool(
-				ServerPropertiesManager
-				.getConcurrentMultiPartJobSubmitThreadsPerUser(), tf);
-
-		final Job[] jobs = multiJob.getJobs().toArray(new Job[] {});
-
-		for (final Job job : jobs) {
-			multiJob.removeJob(job);
-		}
-		saveOrUpdate(multiJob);
-		for (final Job job : jobs) {
-			final Thread thread = new Thread("killing_" + job.getJobname()) {
-				@Override
-				public void run() {
-					try {
-						myLogger.debug("Killing job " + job.getJobname()
-								+ " in thread "
-								+ Thread.currentThread().getName());
-
-						newActionStatus.addElement("Killing job: "
-								+ job.getJobname());
-						kill(job, clean, clean);
-						myLogger.debug("Killed job " + job.getJobname()
-								+ " in thread "
-								+ Thread.currentThread().getName());
-						newActionStatus.addElement("Killed job: "
-								+ job.getJobname());
-					} catch (final Exception e) {
-						newActionStatus.addElement("Failed killing job "
-								+ job.getJobname() + ": "
-								+ e.getLocalizedMessage());
-						newActionStatus.setFailed(true);
-						newActionStatus.setErrorCause(e.getLocalizedMessage());
-						myLogger.error(e.getLocalizedMessage(), e);
-					}
-					if (newActionStatus.getTotalElements() <= newActionStatus
-							.getCurrentElements()) {
-						newActionStatus.setFinished(true);
-					}
-
-				}
-			};
-
-			executor.execute(thread);
-		}
-
-		executor.shutdown();
-
-		final Thread cleanupThread = new Thread() {
-
-			@Override
-			public void run() {
-
-				try {
-					executor.awaitTermination(2, TimeUnit.HOURS);
-				} catch (final InterruptedException e1) {
-					myLogger.error(e1.getLocalizedMessage(), e1);
-				}
-
-				try {
-					if (clean) {
-						for (final String mpRoot : multiJob
-								.getAllUsedMountPoints()) {
-
-							newActionStatus
-							.addElement("Deleting common dir for mountpoint: "
-									+ mpRoot);
-							final String url = mpRoot
-									+ multiJob
-									.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY);
-							myLogger.debug("Deleting multijobDir: " + url);
-							try {
-								getUser().getFileManager().deleteFile(
-										url, true);
-								newActionStatus
-								.addElement("Deleted common dir for mountpoint: "
-										+ mpRoot);
-							} catch (final RemoteFileSystemException e) {
-								newActionStatus
-								.addElement("Couldn't delete common dir for mountpoint: "
-										+ mpRoot);
-								newActionStatus.setFailed(true);
-								newActionStatus.setErrorCause(e
-										.getLocalizedMessage());
-								myLogger.error("Couldn't delete multijobDir: "
-										+ url);
-							}
-
-						}
-					}
-
-					delete(multiJob);
-					newActionStatus
-					.addElement("Deleted multipartjob from database.");
-
-				} finally {
-					newActionStatus.setFinished(true);
-				}
-
-			}
-		};
-
-		cleanupThread.setName("deleteBatchJob " + multiJob.getBatchJobname()
-				+ " / " + getUser().getDn());
-		cleanupThread.start();
-
-		return cleanupThread;
-	}
-
-	private SortedSet<GridResource> findBestResourcesForMultipartJob(
-			BatchJob mpj) {
-
-		final Map<JobSubmissionProperty, String> properties = new HashMap<JobSubmissionProperty, String>();
-
-		String defaultApplication = mpj
-				.getJobProperty(Constants.APPLICATIONNAME_KEY);
-		if (StringUtils.isBlank(defaultApplication)) {
-			defaultApplication = Constants.GENERIC_APPLICATION_NAME;
-		}
-		properties.put(JobSubmissionProperty.APPLICATIONNAME,
-				defaultApplication);
-
-		String defaultCpus = mpj.getJobProperty(Constants.NO_CPUS_KEY);
-		if (StringUtils.isBlank(defaultCpus)) {
-			defaultCpus = "1";
-		}
-		properties.put(JobSubmissionProperty.NO_CPUS,
-				mpj.getJobProperty(Constants.NO_CPUS_KEY));
-
-		String defaultVersion = mpj
-				.getJobProperty(Constants.APPLICATIONVERSION_KEY);
-		if (StringUtils.isBlank(defaultVersion)) {
-			defaultVersion = Constants.NO_VERSION_INDICATOR_STRING;
-		}
-		properties
-		.put(JobSubmissionProperty.APPLICATIONVERSION, defaultVersion);
-
-		String maxWalltime = mpj
-				.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY);
-		if (StringUtils.isBlank(maxWalltime)) {
-			int mwt = 0;
-			for (final Job job : mpj.getJobs()) {
-				final int wt = new Integer(
-						job.getJobProperty(Constants.WALLTIME_IN_MINUTES_KEY));
-				if (mwt < wt) {
-					mwt = wt;
-				}
-			}
-			maxWalltime = new Integer(mwt).toString();
-		}
-
-		properties.put(JobSubmissionProperty.WALLTIME_IN_MINUTES, maxWalltime);
-
-		final SortedSet<GridResource> result = new TreeSet<GridResource>(
-				getUser().getMatchMaker().findAvailableResources(properties, mpj.getFqan()));
-
-		// StringBuffer message = new StringBuffer(
-		// "Finding best resources for mulipartjob " + batchJobname
-		// + " using:\n");
-		// message.append("Version: " + defaultVersion + "\n");
-		// message.append("Walltime in minutes: " +
-		// maxWalltimeInSecondsAcrossJobs
-		// / 60 + "\n");
-		// message.append("No cpus: " + defaultNoCpus + "\n");
-
-		return result;
-
-	}
 
 	@Transient
 	public List<Job> getActiveJobs(String application, boolean refresh) {
@@ -1048,20 +563,6 @@ public class UserJobManager {
 
 	}
 
-	public DtoStringList getAllBatchJobnames(String application) {
-
-		List<String> jobnames = null;
-
-		if (StringUtils.isBlank(application)
-				|| Constants.ALLJOBS_KEY.equals(application)) {
-			jobnames = batchJobDao.findJobNamesByDn(getUser().getDn());
-		} else {
-			jobnames = batchJobDao.findJobNamesPerApplicationByDn(getUser()
-					.getDn(), application);
-		}
-
-		return DtoStringList.fromStringList(jobnames);
-	}
 
 	public DtoStringList getAllJobnames(String application) {
 
@@ -1211,16 +712,7 @@ public class UserJobManager {
 
 	}
 
-	@Transient
-	public BatchJob getBatchJobFromDatabase(final String batchJobname)
-			throws NoSuchJobException {
 
-		final BatchJob job = batchJobDao.findJobByDN(getUser().getCred().getDn(),
-				batchJobname);
-
-		return job;
-
-	}
 
 	/**
 	 * Searches for the job with the specified jobname for the current user.
@@ -1367,12 +859,13 @@ public class UserJobManager {
 						.getJobProperty(Constants.BATCHJOB_NAME);
 				if (multiPartJobParent != null) {
 					try {
-						final BatchJob mpj = getBatchJobFromDatabase(multiPartJobParent);
+						final BatchJob mpj = getUser().getBatchJobManager()
+								.getBatchJobFromDatabase(multiPartJobParent);
 						mpj.addFailedJob(job.getJobname());
 						addLogMessageToPossibleMultiPartJobParent(job, "Job: "
 								+ job.getJobname() + " failed. Status: "
 								+ JobConstants.translateStatus(job.getStatus()));
-						batchJobDao.saveOrUpdate(mpj);
+						getUser().getBatchJobManager().saveOrUpdate(mpj);
 					} catch (final NoSuchJobException e) {
 						// well
 						myLogger.error(e.getLocalizedMessage(), e);
@@ -1407,49 +900,13 @@ public class UserJobManager {
 
 	}
 
-	public Set<String> getUsedApplicationsBatch() {
 
-		List<BatchJob> jobs = null;
-		jobs = batchJobDao.findMultiPartJobByDN(getUser().getDn());
-
-		final Set<String> apps = new TreeSet<String>();
-
-		for (final BatchJob job : jobs) {
-			final String app = job
-					.getJobProperty(Constants.APPLICATIONNAME_KEY);
-			if (StringUtils.isNotBlank(app)) {
-				apps.add(app);
-			}
-		}
-
-		return apps;
-
-	}
 
 	private User getUser() {
 		return this.user;
 	}
 
-	private boolean isValidSubmissionLocation(String subLoc, String fqan) {
 
-		// TODO i'm sure this can be made much more quicker
-		final String[] fs = getUser().getInfoManager()
-				.getStagingFileSystemForSubmissionLocation(subLoc);
-
-		for (final MountPoint mp : getUser().df(fqan)) {
-
-			for (final String f : fs) {
-				if (mp.getRootUrl().startsWith(f.replace(":2811", ""))) {
-
-					return true;
-				}
-			}
-
-		}
-
-		return false;
-
-	}
 
 	/**
 	 * Kills the job with the specified jobname. Before it does that it checks
@@ -1460,7 +917,7 @@ public class UserJobManager {
 	 *            the name of the job
 	 * @return the new status of the job
 	 */
-	private int kill(final Job job) {
+	int kill(final Job job) {
 
 		// Job job;
 		// try {
@@ -1521,7 +978,7 @@ public class UserJobManager {
 		return new_status;
 	}
 
-	private String kill(final Job job, final boolean removeFromDB,
+	public String kill(final Job job, final boolean removeFromDB,
 			final boolean delteJobDirectory) {
 
 		final String handle = "kill_" + job.getJobname() + "_"
@@ -1557,10 +1014,13 @@ public class UserJobManager {
 
 							try {
 								status.addLogMessage("Removing job from parent batchjob.");
-								final BatchJob mpj = getBatchJobFromDatabase(
-										job.getJobProperty(Constants.BATCHJOB_NAME));
+								final BatchJob mpj = getUser()
+										.getBatchJobManager()
+										.getBatchJobFromDatabase(
+												job.getJobProperty(Constants.BATCHJOB_NAME));
 								mpj.removeJob(job);
-								batchJobDao.saveOrUpdate(mpj);
+								getUser().getBatchJobManager()
+								.saveOrUpdate(mpj);
 							} catch (final Exception e) {
 								// e.printStackTrace();
 								// doesn't matter
@@ -1665,16 +1125,7 @@ public class UserJobManager {
 			}
 
 		} catch (final NoSuchJobException nsje) {
-			try {
-				final BatchJob mpj = getBatchJobFromDatabase(jobname);
-				deleteMultiPartJob(mpj, clear);
-				return mpj.getBatchJobname();
-			} catch (final NoSuchJobException nsje2) {
-				throw new NoSuchJobException("No job or batchjob with name: "
-						+ jobname);
-			} catch (final Exception e) {
-				throw new BatchJobException(e);
-			}
+			return getUser().getBatchJobManager().kill(jobname, clear);
 		}
 	}
 
@@ -1744,7 +1195,7 @@ public class UserJobManager {
 										2,
 										false,
 										ServerPropertiesManager
-												.getJobCleanThresholdInSeconds());
+										.getJobCleanThresholdInSeconds());
 
 
 								if (as.isFailed()) {
@@ -1867,101 +1318,7 @@ public class UserJobManager {
 		}
 	}
 
-	private Map<String, Integer> optimizeMultiPartJob(final SubmitPolicy sp,
-			final String distributionMethod,
-			final BatchJob possibleParentBatchJob) throws NoSuchJobException,
-			JobPropertiesException {
 
-		JobDistributor jd;
-
-		if (Constants.DISTRIBUTION_METHOD_PERCENTAGE.equals(distributionMethod)) {
-			jd = new PercentageJobDistributor();
-		} else {
-			jd = new EqualJobDistributor();
-		}
-
-		final Map<String, Integer> results = jd.distributeJobs(
-				sp.getCalculatedJobs(), sp.getCalculatedGridResources());
-		final StringBuffer message = new StringBuffer(
-				"Filled submissionlocations for "
-						+ sp.getCalculatedJobs().size() + " jobs: " + "\n");
-		message.append("Submitted jobs to:\t\t\tAmount\n");
-		for (final String sl : results.keySet()) {
-			message.append(sl + "\t\t\t\t" + results.get(sl) + "\n");
-		}
-		myLogger.debug(message.toString());
-
-		final NamedThreadFactory tf = new NamedThreadFactory("optimizeBatchJob");
-		final ExecutorService executor = Executors.newFixedThreadPool(
-				ServerPropertiesManager
-				.getConcurrentMultiPartJobSubmitThreadsPerUser(), tf);
-
-		final List<Exception> ex = Collections
-				.synchronizedList(new ArrayList<Exception>());
-
-		for (final Job job : sp.getCalculatedJobs()) {
-
-			final Thread thread = new Thread() {
-				@Override
-				public void run() {
-					try {
-						if (job.getStatus() > JobConstants.READY_TO_SUBMIT) {
-							try {
-								kill(job);
-							} catch (final Exception e) {
-								myLogger.error(e.getLocalizedMessage(), e);
-							}
-							job.setStatus(JobConstants.READY_TO_SUBMIT);
-						}
-
-						if (Constants.NO_VERSION_INDICATOR_STRING
-								.equals(possibleParentBatchJob
-										.getJobProperty(Constants.APPLICATIONVERSION_KEY))) {
-							JsdlHelpers.setApplicationVersion(
-									job.getJobDescription(),
-									Constants.NO_VERSION_INDICATOR_STRING);
-						}
-
-						processJobDescription(job, possibleParentBatchJob);
-						jobdao.saveOrUpdate(job);
-					} catch (final JobPropertiesException e) {
-						ex.add(e);
-						executor.shutdownNow();
-						jobdao.saveOrUpdate(job);
-					} catch (final NoSuchJobException e) {
-						ex.add(e);
-						executor.shutdownNow();
-						jobdao.saveOrUpdate(job);
-					}
-				}
-			};
-
-			executor.execute(thread);
-		}
-
-		executor.shutdown();
-
-		try {
-			executor.awaitTermination(10 * 3600, TimeUnit.SECONDS);
-		} catch (final InterruptedException e) {
-			executor.shutdownNow();
-			Thread.currentThread().interrupt();
-			return null;
-		}
-
-		if (ex.size() > 0) {
-			throw new JobPropertiesException(
-					"Couldn't prepare at least one job: "
-							+ ex.get(0).getLocalizedMessage());
-		}
-
-		if (possibleParentBatchJob != null) {
-			possibleParentBatchJob.recalculateAllUsedMountPoints();
-			batchJobDao.saveOrUpdate(possibleParentBatchJob);
-		}
-
-		return results;
-	}
 
 	/**
 	 * Prepares the environment for the job. Mainly it creates the job directory
@@ -2012,7 +1369,7 @@ public class UserJobManager {
 	 * @throws NoSuchJobException
 	 * @throws JobPropertiesException
 	 */
-	private void processJobDescription(final Job job, final BatchJob parentJob)
+	void processJobDescription(final Job job, final BatchJob parentJob)
 			throws NoSuchJobException, JobPropertiesException {
 
 		// TODO check whether fqan is set
@@ -2645,149 +2002,8 @@ public class UserJobManager {
 		myLogger.debug("Preparing job done.");
 	}
 
-	public String redistributeBatchJob(String batchJobname)
-			throws NoSuchJobException, JobPropertiesException {
 
-		final BatchJob job = getBatchJobFromDatabase(batchJobname);
 
-		if ((getUser().getActionStatuses().get(batchJobname) != null)
-				&& !getUser().getActionStatuses().get(batchJobname)
-				.isFinished()) {
-
-			// System.out
-			// .println("Submission: "
-			// + actionStatus.get(batchJobname)
-			// .getCurrentElements() + " / "
-			// + actionStatus.get(batchJobname).getTotalElements());
-
-			// we don't want to interfere with a possible ongoing jobsubmission
-			// myLogger.debug("not redistributing job because jobsubmission is still ongoing.");
-			throw new JobPropertiesException(
-					"Job submission is still ongoing in background.");
-		}
-
-		final String handleName = Constants.REDISTRIBUTE + batchJobname;
-
-		final DtoActionStatus status = new DtoActionStatus(handleName, 2);
-		getUser().getActionStatuses().put(handleName, status);
-
-		Thread t =
-				new Thread() {
-			@Override
-			public void run() {
-
-				status.addElement("Calculating redistribution...");
-				try {
-					final SortedSet<GridResource> resourcesToUse = calculateResourcesToUse(job);
-
-					final SubmitPolicy sp = new DefaultSubmitPolicy(
-							job.getJobs(), resourcesToUse, null);
-
-					final Map<String, Integer> results = optimizeMultiPartJob(
-							sp,
-							job.getJobProperty(Constants.DISTRIBUTION_METHOD),
-							job);
-
-					final StringBuffer optimizationResult = new StringBuffer();
-					for (final String subLoc : results.keySet()) {
-						optimizationResult.append(subLoc + " : "
-								+ results.get(subLoc) + "\n");
-					}
-					status.addLogMessage(optimizationResult.toString());
-					job.addJobProperty(Constants.BATCHJOB_OPTIMIZATION_RESULT,
-							optimizationResult.toString());
-					batchJobDao.saveOrUpdate(job);
-					status.addElement("Finished.");
-					status.setFinished(true);
-
-				} catch (final Exception e) {
-					status.setFailed(true);
-					status.setErrorCause(e.getLocalizedMessage());
-					status.setFinished(true);
-					status.addElement("Failed: " + e.getLocalizedMessage());
-				}
-
-			}
-		};
-		t.setName(handleName);
-		t.start();
-
-		return handleName;
-
-	}
-
-	public String refreshBatchJobStatus(String batchJobname)
-			throws NoSuchJobException {
-
-		final String handle = AbstractServiceInterface.REFRESH_STATUS_PREFIX
-				+ batchJobname;
-
-		final DtoActionStatus status = getUser().getActionStatuses()
-				.get(handle);
-
-		if ((status != null) && !status.isFinished()) {
-			// refresh in progress. Just give back the handle
-			return handle;
-		}
-
-		final BatchJob multiPartJob = getBatchJobFromDatabase(batchJobname);
-
-		final DtoActionStatus statusfinal = new DtoActionStatus(handle,
-				multiPartJob.getJobs().size());
-
-		getUser().getActionStatuses().put(handle, statusfinal);
-
-		final NamedThreadFactory tf = new NamedThreadFactory(
-				"refreshBatchJobStatus");
-		final ExecutorService executor = Executors.newFixedThreadPool(
-				ServerPropertiesManager.getConcurrentJobStatusThreadsPerUser(),
-				tf);
-
-		final Job[] currentJobs = multiPartJob.getJobs().toArray(new Job[] {});
-
-		if (currentJobs.length == 0) {
-			multiPartJob.setStatus(JobConstants.JOB_CREATED);
-			batchJobDao.saveOrUpdate(multiPartJob);
-			statusfinal.addLogMessage("No jobs. Returning.");
-			statusfinal.setFailed(false);
-			statusfinal.setFinished(true);
-			return handle;
-		}
-
-		Arrays.sort(currentJobs);
-
-		for (final Job job : currentJobs) {
-			final Thread thread = new Thread() {
-				@Override
-				public void run() {
-					statusfinal.addLogMessage("Refreshing job "
-							+ job.getJobname());
-					getJobStatus(job.getJobname());
-					statusfinal.addElement("Job status for job "
-							+ job.getJobname() + " refreshed.");
-
-					if (statusfinal.getTotalElements() <= statusfinal
-							.getCurrentElements()) {
-						statusfinal.setFinished(true);
-						if (multiPartJob.getFailedJobs().size() > 0) {
-							statusfinal.setFailed(true);
-							statusfinal
-							.setErrorCause("Undefined error: not all subjobs accessed.");
-							multiPartJob.setStatus(JobConstants.FAILED);
-						} else {
-							multiPartJob.setStatus(JobConstants.DONE);
-						}
-						batchJobDao.saveOrUpdate(multiPartJob);
-					}
-				}
-			};
-			executor.execute(thread);
-		}
-		executor.shutdown();
-
-		return handle;
-
-	}
 
 	/**
 	 * Just a method to refresh the status of all jobs. Could be used by
@@ -2802,23 +2018,7 @@ public class UserJobManager {
 		}
 	}
 
-	/**
-	 * Removes the specified job from the mulitpartJob.
-	 * 
-	 * @param batchJobname
-	 *            the batchJobname
-	 * @param jobname
-	 *            the jobname
-	 */
-	public void removeJobFromBatchJob(String batchJobname, String jobname)
-			throws NoSuchJobException {
 
-		final Job job = getJobFromDatabaseOrFileSystem(jobname);
-		final BatchJob multiJob = getBatchJobFromDatabase(batchJobname);
-		multiJob.removeJob(job);
-
-		batchJobDao.saveOrUpdate(multiJob);
-	}
 
 	private void removeResourcesWithUnaccessableFilesystems(
 			List<GridResource> resources) {
@@ -2832,121 +2032,8 @@ public class UserJobManager {
 
 	}
 
-	public DtoProperties restartBatchJob(final String batchJobname,
-			String restartPolicy, DtoProperties properties)
-					throws NoSuchJobException, JobPropertiesException {
 
-		final BatchJob job = getBatchJobFromDatabase(batchJobname);
-
-		if ((getUser().getActionStatuses().get(batchJobname) != null)
-				&& !getUser().getActionStatuses().get(batchJobname)
-				.isFinished()) {
-
-			// System.out
-			// .println("Submission: "
-			// + actionStatus.get(batchJobname)
-			// .getCurrentElements() + " / "
-			// + actionStatus.get(batchJobname).getTotalElements());
-
-			// we don't want to interfere with a possible ongoing jobsubmission
-			// myLogger.debug("not restarting job because jobsubmission is still ongoing.");
-			throw new JobPropertiesException(
-					"Job submission is still ongoing in background.");
-		}
-
-		final DtoActionStatus status = new DtoActionStatus(batchJobname, 3);
-		getUser().getActionStatuses().put(batchJobname, status);
-
-		status.addElement("Finding resources to use...");
-		final SortedSet resourcesToUse = calculateResourcesToUse(job);
-
-		status.addElement("Investigating batchjob...");
-		if (properties == null) {
-			properties = DtoProperties
-					.createProperties(new HashMap<String, String>());
-		}
-
-		SubmitPolicy sp = null;
-
-		if (Constants.SUBMIT_POLICY_RESTART_DEFAULT.equals(restartPolicy)) {
-			sp = new DefaultResubmitSubmitPolicy(job.getJobs(), resourcesToUse,
-					properties.propertiesAsMap());
-		} else if (Constants.SUBMIT_POLICY_RESTART_SPECIFIC_JOBS
-				.equals(restartPolicy)) {
-			sp = new RestartSpecificJobsRestartPolicy(job.getJobs(),
-					resourcesToUse, properties.propertiesAsMap());
-		} else {
-			throw new JobPropertiesException("Restart policy \""
-					+ restartPolicy + "\" not supported.");
-		}
-
-		if ((sp.getCalculatedGridResources().size() == 0)
-				|| (sp.getCalculatedJobs().size() == 0)) {
-
-			status.addElement("No locations or no jobs to submit found. Doing nothing...");
-			status.setFinished(true);
-			// nothing we can do...
-			return DtoProperties
-					.createProperties(new HashMap<String, String>());
-		} else {
-			status.setTotalElements(3 + (sp.getCalculatedJobs().size() * 2));
-			status.addLogMessage("Found " + sp.getCalculatedJobs().size()
-					+ " jobs to resubmit.");
-		}
-
-		status.addElement("Optimizing job distribution...");
-		final Map<String, Integer> results = optimizeMultiPartJob(sp,
-				job.getJobProperty(Constants.DISTRIBUTION_METHOD), job);
-
-		batchJobDao.saveOrUpdate(job);
-
-		final NamedThreadFactory tf = new NamedThreadFactory("restartBatchJob");
-		final ExecutorService executor = Executors.newFixedThreadPool(
-				ServerPropertiesManager
-				.getConcurrentMultiPartJobSubmitThreadsPerUser(), tf);
-
-		for (final Job jobToRestart : sp.getCalculatedJobs()) {
-
-			final Thread thread = new Thread() {
-				@Override
-				public void run() {
-					try {
-						status.addElement("Starting resubmission of job: "
-								+ jobToRestart.getJobname());
-						restartJob(jobToRestart, null);
-						status.addElement("Resubmission of job "
-								+ jobToRestart.getJobname() + " successful.");
-					} catch (final JobSubmissionException e) {
-						status.addElement("Resubmission of job "
-								+ jobToRestart.getJobname() + " failed: "
-								+ e.getLocalizedMessage());
-						status.setFailed(true);
-						status.setErrorCause(e.getLocalizedMessage());
-						myLogger.debug(e.getLocalizedMessage(), e);
-					} catch (final NoSuchJobException e1) {
-						status.addElement("Resubmission of job "
-								+ jobToRestart.getJobname() + " failed: "
-								+ e1.getLocalizedMessage());
-						status.setFailed(true);
-						myLogger.debug(e1.getLocalizedMessage(), e1);
-					}
-
-					if (status.getTotalElements() <= status
-							.getCurrentElements()) {
-						status.setFinished(true);
-					}
-				}
-			};
-			executor.execute(thread);
-		}
-
-		executor.shutdown();
-
-		return DtoProperties.createUserPropertiesIntegerValue(results);
-
-	}
-
-	private void restartJob(final Job job, String changedJsdl)
+	public void restartJob(final Job job, String changedJsdl)
 			throws JobSubmissionException, NoSuchJobException {
 
 		DtoActionStatus status = null;
@@ -2970,11 +2057,12 @@ public class UserJobManager {
 
 		BatchJob mpj = null;
 		if (StringUtils.isNotBlank(possibleMultiPartJob)) {
-			mpj = getBatchJobFromDatabase(possibleMultiPartJob);
+			mpj = getUser().getBatchJobManager().getBatchJobFromDatabase(
+					possibleMultiPartJob);
 			addLogMessageToPossibleMultiPartJobParent(job,
 					"Re-submitting job " + job.getJobname());
 			mpj.removeFailedJob(job.getJobname());
-			batchJobDao.saveOrUpdate(mpj);
+			getUser().getBatchJobManager().saveOrUpdate(mpj);
 		}
 
 		if (StringUtils.isNotBlank(changedJsdl)) {
@@ -3089,9 +2177,7 @@ public class UserJobManager {
 		restartJob(job, changedJsdl);
 	}
 
-	public void saveOrUpdate(BatchJob instance) {
-		batchJobDao.saveOrUpdate(instance);
-	}
+
 
 	public void saveOrUpdate(Job instance) {
 		jobdao.saveOrUpdate(instance);
@@ -3219,103 +2305,9 @@ public class UserJobManager {
 
 	}
 
-	private void submitBatchJob(final BatchJob multiJob)
-			throws JobSubmissionException, NoSuchJobException {
 
-		final DtoActionStatus newActionStatus = new DtoActionStatus(
-				multiJob.getBatchJobname(), 100);
-		getUser().getActionStatuses().put(multiJob.getBatchJobname(),
-				newActionStatus);
 
-		final NamedThreadFactory tf = new NamedThreadFactory("submitBatchJob");
-		final ExecutorService executor = Executors
-				.newFixedThreadPool(ServerPropertiesManager
-						.getConcurrentMultiPartJobSubmitThreadsPerUser());
-
-		final Job[] currentlyCreatedJobs = multiJob.getJobs().toArray(
-				new Job[] {});
-		Arrays.sort(currentlyCreatedJobs);
-
-		final int totalNumberOfJobs = currentlyCreatedJobs.length;
-		newActionStatus.setTotalElements(totalNumberOfJobs);
-
-		for (final Job job : currentlyCreatedJobs) {
-
-			if (job.getStatus() != JobConstants.READY_TO_SUBMIT) {
-				continue;
-			}
-			final Thread thread = new Thread() {
-				@Override
-				public void run() {
-
-					Exception exc = null;
-					for (int i = 0; i < DEFAULT_JOB_SUBMISSION_RETRIES; i++) {
-						try {
-							exc = null;
-
-							DtoActionStatus status = null;
-							status = new DtoActionStatus(job.getJobname(), 0);
-							getUser().getActionStatuses().put(job.getJobname(),
-									status);
-
-							submitJob(job, true, status);
-							newActionStatus.addElement("Added job: "
-									+ job.getJobname());
-
-							break;
-						} catch (final Exception e) {
-							myLogger.error("Job submission for multipartjob: "
-									+ multiJob.getBatchJobname() + ", "
-									+ job.getJobname() + " failed: "
-									+ e.getLocalizedMessage());
-							myLogger.error("Trying again...");
-							newActionStatus
-							.addLogMessage("Failed to submit job "
-									+ job.getJobname() + ": "
-									+ e.getLocalizedMessage()
-									+ ". Trying again...");
-							exc = e;
-							executor.shutdownNow();
-						}
-					}
-
-					if (exc != null) {
-						newActionStatus.setFailed(true);
-						newActionStatus.setErrorCause("Tried to resubmit job "
-								+ job.getJobname() + " "
-								+ DEFAULT_JOB_SUBMISSION_RETRIES
-								+ " times. Never worked. Giving up...");
-						myLogger.error("Tried to resubmit job "
-								+ job.getJobname() + " "
-								+ DEFAULT_JOB_SUBMISSION_RETRIES
-								+ " times. Never worked. Giving up...");
-						multiJob.addFailedJob(job.getJobname());
-						batchJobDao.saveOrUpdate(multiJob);
-						newActionStatus.addElement("Tried to resubmit job "
-								+ job.getJobname() + " "
-								+ DEFAULT_JOB_SUBMISSION_RETRIES
-								+ " times. Never worked. Giving up...");
-						executor.shutdownNow();
-
-					}
-
-					if (newActionStatus.getCurrentElements() >= newActionStatus
-							.getTotalElements()) {
-						newActionStatus.setFinished(true);
-						multiJob.setStatus(JobConstants.ACTIVE);
-						batchJobDao.saveOrUpdate(multiJob);
-					}
-
-				}
-			};
-
-			executor.execute(thread);
-		}
-		executor.shutdown();
-
-	}
-
-	private void submitJob(final Job job, boolean stageFiles,
+	public void submitJob(final Job job, boolean stageFiles,
 			DtoActionStatus status) throws JobSubmissionException {
 
 		final String debug_token = "SUBMIT_" + job.getJobname() + ": ";
@@ -3528,14 +2520,18 @@ public class UserJobManager {
 	public String submitJob(final String jobname)
 			throws JobSubmissionException, NoSuchJobException {
 
-		final String handle = "submision_status_" + jobname + "_"
-				+ new Date().getTime();
-		final DtoActionStatus status = new DtoActionStatus(handle, 0);
-		getUser().getActionStatuses().put(handle, status);
+
 
 		try {
+			final Job job = getJobFromDatabaseOrFileSystem(jobname);
+
+			final String handle = "submision_status_" + jobname + "_"
+					+ new Date().getTime();
+			final DtoActionStatus status = new DtoActionStatus(handle, 0);
+			getUser().getActionStatuses().put(handle, status);
+
 			try {
-				final Job job = getJobFromDatabaseOrFileSystem(jobname);
+
 				if (job.getStatus() > JobConstants.READY_TO_SUBMIT) {
 					throw new JobSubmissionException("Job already submitted.");
 				}
@@ -3555,50 +2551,22 @@ public class UserJobManager {
 				t.setName(status.getHandle());
 				t.start();
 
-			} catch (final NoSuchJobException e) {
-				// maybe it's a multipartjob
-				final BatchJob multiJob = getBatchJobFromDatabase(jobname);
+				return handle;
 
-				final Thread t = new Thread() {
-					@Override
-					public void run() {
-						try {
-							submitBatchJob(multiJob);
-						} catch (final JobSubmissionException e) {
-							status.setFailed(true);
-							status.setFinished(true);
-							status.setErrorCause(e.getLocalizedMessage());
-							myLogger.error(e.getLocalizedMessage(), e);
-						} catch (final NoSuchJobException e) {
-							status.setFailed(true);
-							status.setFinished(true);
-							status.setErrorCause(e.getLocalizedMessage());
-							myLogger.error(e.getLocalizedMessage(), e);
-						} catch (final Throwable e) {
-							status.setFailed(true);
-							status.setFinished(true);
-							status.setErrorCause(e.getLocalizedMessage());
-							myLogger.error(e.getLocalizedMessage(), e);
-						}
-					}
-				};
-				t.setName(status.getHandle());
-				t.start();
+			} catch (Throwable e) {
+				status.setFailed(true);
+				status.setFinished(true);
+				status.setErrorCause(e.getLocalizedMessage());
+				myLogger.error(e.getLocalizedMessage(), e);
+				throw new JobSubmissionException("Could not submit job.", e);
 			}
-		} catch (final NoSuchJobException nsje) {
-			status.setFailed(true);
-			status.setFinished(true);
-			status.setErrorCause(nsje.getLocalizedMessage());
-			throw nsje;
 
-		} catch (final Throwable e) {
-			status.setFailed(true);
-			status.setFinished(true);
-			status.setErrorCause(e.getLocalizedMessage());
-			throw new JobSubmissionException("Could not submit job.", e);
+		} catch (final NoSuchJobException e) {
+			// maybe it's a multipartjob
+			return getUser().getBatchJobManager().submitBatchJob(jobname);
 		}
 
-		return handle;
+
 
 	}
 
@@ -3649,32 +2617,11 @@ public class UserJobManager {
 
 		} catch (final NoSuchJobException e) {
 			// no single job, let's try a multijob
+			getUser().getBatchJobManager().uploadInputFile(jobname, source,
+					targetFilename);
 		}
 
-		final BatchJob multiJob = getBatchJobFromDatabase(
-				jobname);
 
-		multiJob.setStatus(JobConstants.INPUT_FILES_UPLOADING);
-		saveOrUpdate(multiJob);
-
-		final String relpathFromMountPointRoot = multiJob
-				.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY);
-
-		final Set<String> urls = new HashSet<String>();
-
-		for (final String mountPointRoot : multiJob.getAllUsedMountPoints()) {
-
-			final String parent = mountPointRoot + "/"
-					+ relpathFromMountPointRoot;
-			urls.add(parent);
-		}
-
-		final DtoActionStatus status = new DtoActionStatus(targetFilename,
-				multiJob.getAllUsedMountPoints().size());
-		getUser().getActionStatuses().put(targetFilename, status);
-
-		getUser().getFileManager().uploadFileToMultipleLocations(urls,
-				source, targetFilename, status);
 
 		// TODO monitor status and set jobstatus to ready_to_submit?
 
