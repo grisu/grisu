@@ -201,7 +201,7 @@ public class UserBatchJobManager {
 
 				status.addElement("Killing batchjob.");
 				// now kill batchjob
-				final Thread deleteThread = deleteMultiPartJob(batchJob, true);
+				final Thread deleteThread = deleteBatchJob(batchJob, true);
 
 				try {
 					deleteThread.join();
@@ -241,7 +241,7 @@ public class UserBatchJobManager {
 
 		final SortedSet<GridResource> resourcesToUse = new TreeSet<GridResource>();
 
-		for (final GridResource resource : findBestResourcesForMultipartJob(mpj)) {
+		for (final GridResource resource : findBestResourcesForBatchJob(mpj)) {
 
 			final String tempSubLocString = SubmissionLocationHelpers
 					.createSubmissionLocationString(resource);
@@ -375,7 +375,7 @@ public class UserBatchJobManager {
 	 * @param deleteChildJobsAsWell
 	 *            whether to delete the child jobs of this multipartjob as well.
 	 */
-	private Thread deleteMultiPartJob(final BatchJob multiJob,
+	private Thread deleteBatchJob(final BatchJob multiJob,
 			final boolean clean) {
 
 		int size = (multiJob.getJobs().size() * 2) + 1;
@@ -498,7 +498,7 @@ public class UserBatchJobManager {
 		return cleanupThread;
 	}
 
-	private SortedSet<GridResource> findBestResourcesForMultipartJob(
+	private SortedSet<GridResource> findBestResourcesForBatchJob(
 			BatchJob mpj) {
 
 		final Map<JobSubmissionProperty, String> properties = new HashMap<JobSubmissionProperty, String>();
@@ -587,7 +587,7 @@ public class UserBatchJobManager {
 	public Set<String> getUsedApplicationsBatch() {
 
 		List<BatchJob> jobs = null;
-		jobs = batchJobDao.findMultiPartJobByDN(getUser().getDn());
+		jobs = batchJobDao.findBatchJobByDN(getUser().getDn());
 
 		final Set<String> apps = new TreeSet<String>();
 
@@ -611,7 +611,7 @@ public class UserBatchJobManager {
 			throws BatchJobException, NoSuchJobException {
 		try {
 			final BatchJob mpj = getBatchJobFromDatabase(jobname);
-			deleteMultiPartJob(mpj, clear);
+			deleteBatchJob(mpj, clear);
 			return mpj.getBatchJobname();
 		} catch (final NoSuchJobException nsje2) {
 			throw new NoSuchJobException("No job or batchjob with name: "
@@ -621,7 +621,7 @@ public class UserBatchJobManager {
 		}
 	}
 
-	private Map<String, Integer> optimizeMultiPartJob(final SubmitPolicy sp,
+	private Map<String, Integer> optimizeBatchJob(final SubmitPolicy sp,
 			final String distributionMethod,
 			final BatchJob possibleParentBatchJob) throws NoSuchJobException,
 			JobPropertiesException {
@@ -756,7 +756,7 @@ public class UserBatchJobManager {
 					final SubmitPolicy sp = new DefaultSubmitPolicy(
 							job.getJobs(), resourcesToUse, null);
 
-					final Map<String, Integer> results = optimizeMultiPartJob(
+					final Map<String, Integer> results = optimizeBatchJob(
 							sp,
 							job.getJobProperty(Constants.DISTRIBUTION_METHOD),
 							job);
@@ -943,7 +943,7 @@ public class UserBatchJobManager {
 		}
 
 		status.addElement("Optimizing job distribution...");
-		final Map<String, Integer> results = optimizeMultiPartJob(sp,
+		final Map<String, Integer> results = optimizeBatchJob(sp,
 				job.getJobProperty(Constants.DISTRIBUTION_METHOD), job);
 
 		batchJobDao.saveOrUpdate(job);
@@ -1045,7 +1045,7 @@ public class UserBatchJobManager {
 
 							break;
 						} catch (final Exception e) {
-							myLogger.error("Job submission for multipartjob: "
+							myLogger.error("Job submission for batchjob: "
 									+ multiJob.getBatchJobname() + ", "
 									+ job.getJobname() + " failed: "
 									+ e.getLocalizedMessage());

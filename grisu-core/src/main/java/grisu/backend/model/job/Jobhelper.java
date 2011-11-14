@@ -81,7 +81,7 @@ public class Jobhelper {
 				final SortedSet<String> jobNames = user.getJobManager()
 						.getAllJobnames(
 								Constants.ALLJOBS_INCL_BATCH_KEY).asSortedSet();
-				jobNames.addAll(user.getJobManager()
+				jobNames.addAll(user.getBatchJobManager()
 						.getAllBatchJobnames(null).asSortedSet());
 
 				int max = -1;

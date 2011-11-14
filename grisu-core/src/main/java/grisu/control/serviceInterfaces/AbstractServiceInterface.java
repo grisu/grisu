@@ -7,8 +7,9 @@ import grisu.backend.model.User;
 import grisu.backend.model.fs.UserFileManager;
 import grisu.backend.model.job.BatchJob;
 import grisu.backend.model.job.Job;
-import grisu.backend.model.job.UserJobManager;
 import grisu.backend.model.job.Jobhelper;
+import grisu.backend.model.job.UserBatchJobManager;
+import grisu.backend.model.job.UserJobManager;
 import grisu.backend.utils.LocalTemplatesHelper;
 import grisu.control.JobConstants;
 import grisu.control.ServiceInterface;
@@ -330,7 +331,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public String addJobToBatchJob(String batchjobname, String jobdescription)
 			throws NoSuchJobException, JobPropertiesException {
-		return getJobManager().addJobToBatchJob(batchjobname, jobdescription);
+		return getBatchJobManager().addJobToBatchJob(batchjobname,
+				jobdescription);
 	}
 
 
@@ -371,7 +373,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			String filename) throws RemoteFileSystemException,
 			NoSuchJobException {
 
-		final BatchJob multiJob = getJobManager().getBatchJobFromDatabase(
+		final BatchJob multiJob = getBatchJobManager().getBatchJobFromDatabase(
 				batchJobname);
 
 		final String relpathFromMountPointRoot = multiJob
@@ -511,7 +513,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		try {
-			final BatchJob multiJob = getJobManager().getBatchJobFromDatabase(
+			final BatchJob multiJob = getBatchJobManager()
+					.getBatchJobFromDatabase(
 					batchJobname);
 		} catch (final NoSuchJobException e) {
 			// that's good
@@ -533,7 +536,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			multiJobCreate.setStatus(JobConstants.JOB_CREATED);
 
-			getJobManager().saveOrUpdate(multiJobCreate);
+			getBatchJobManager().saveOrUpdate(multiJobCreate);
 
 			try {
 				return multiJobCreate.createDtoMultiPartJob();
@@ -773,7 +776,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public DtoStringList getAllBatchJobnames(String application) {
 
-		return getJobManager().getAllBatchJobnames(application);
+		return getBatchJobManager().getAllBatchJobnames(application);
 	}
 
 	/*
@@ -902,12 +905,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public DtoBatchJob getBatchJob(String batchJobname)
 			throws NoSuchJobException {
 
-		final BatchJob multiPartJob = getJobManager().getBatchJobFromDatabase(
+		final BatchJob multiPartJob = getBatchJobManager()
+				.getBatchJobFromDatabase(
 				batchJobname);
 
 		// TODO enable loading of batchjob from jobdirectory url
 
 		return multiPartJob.createDtoMultiPartJob();
+	}
+
+	private UserBatchJobManager getBatchJobManager() {
+		return getUser().getBatchJobManager();
 	}
 
 	public DtoProperties getBookmarks() {
@@ -946,16 +954,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see grisu.control.ServiceInterface#getDN()
-	 */
-	@RolesAllowed("User")
-	public String getDN() {
-		return getUser().getDn();
-	}
-
 	// /**
 	// * This method has to be implemented by the endpoint specific
 	// * ServiceInterface. Since there are a few different ways to get a proxy
@@ -984,6 +982,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	// informationManager.getDataLocationsForVO(fqan));
 	//
 	// }
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see grisu.control.ServiceInterface#getDN()
+	 */
+	@RolesAllowed("User")
+	public String getDN() {
+		return getUser().getDn();
+	}
 
 	private UserFileManager getFileManager() {
 		return getUser().getFileManager();
@@ -1055,7 +1063,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 			return job.getJobProperty(key);
 		} catch (final NoSuchJobException e) {
-			final BatchJob mpj = getJobManager().getBatchJobFromDatabase(
+			final BatchJob mpj = getBatchJobManager().getBatchJobFromDatabase(
 					jobname);
 			return mpj.getJobProperty(key);
 		}
@@ -1260,7 +1268,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public DtoStringList getUsedApplicationsBatch() {
 
-		return DtoStringList.fromStringColletion(getJobManager()
+		return DtoStringList.fromStringColletion(getBatchJobManager()
 				.getUsedApplicationsBatch());
 
 	}
@@ -1469,18 +1477,18 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public String redistributeBatchJob(String batchjobname)
 			throws NoSuchJobException, JobPropertiesException {
-		return getJobManager().redistributeBatchJob(batchjobname);
+		return getBatchJobManager().redistributeBatchJob(batchjobname);
 
 	}
 
 	public String refreshBatchJobStatus(String batchJobname)
 			throws NoSuchJobException {
-		return getJobManager().refreshBatchJobStatus(batchJobname);
+		return getBatchJobManager().refreshBatchJobStatus(batchJobname);
 	}
 
 	public void removeJobFromBatchJob(String batchJobname, String jobname)
 			throws NoSuchJobException {
-		getJobManager().removeJobFromBatchJob(batchJobname, jobname);
+		getBatchJobManager().removeJobFromBatchJob(batchJobname, jobname);
 
 	}
 
@@ -1488,7 +1496,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			String restartPolicy, DtoProperties properties)
 					throws NoSuchJobException, JobPropertiesException {
 
-		return getJobManager().restartBatchJob(batchjobname, restartPolicy,
+		return getBatchJobManager().restartBatchJob(batchjobname,
+				restartPolicy,
 				properties);
 	}
 
