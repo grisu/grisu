@@ -1456,17 +1456,12 @@ public class UserJobManager {
 
 		// if "generic" app, submission location needs to be specified.
 		if (Constants.GENERIC_APPLICATION_NAME.equals(jobSubmissionObject
-				.getApplication())) {
+				.getApplication())
+				&& StringUtils.isNotBlank(jobSubmissionObject
+						.getSubmissionLocation())) {
 
 			submissionLocation = jobSubmissionObject.getSubmissionLocation();
-			if (StringUtils.isBlank(submissionLocation)
-					|| Constants.NO_SUBMISSION_LOCATION_INDICATOR_STRING
-					.equals(submissionLocation)) {
-				throw new JobPropertiesException(
-						JobSubmissionProperty.SUBMISSIONLOCATION.toString()
-						+ ": "
-						+ "No submission location specified. Since application is of type \"generic\" Grisu can't auto-calculate one. Please either specify package or submissionn location.");
-			}
+
 			stagingFileSystems = user.getInfoManager()
 					.getStagingFileSystemForSubmissionLocation(submissionLocation);
 
@@ -1484,7 +1479,13 @@ public class UserJobManager {
 			// if not "generic" application...
 		} else {
 			// ...either try to find a suitable one...
-			if (StringUtils.isBlank(jobSubmissionObject.getApplication())) {
+			if (StringUtils.isBlank(jobSubmissionObject.getApplication())
+					|| (StringUtils.equals(Constants.GENERIC_APPLICATION_NAME,
+							jobSubmissionObject.getApplication()) && StringUtils
+							.isBlank(jobSubmissionObject
+									.getSubmissionLocation()))
+
+			) {
 				myLogger.debug("No application specified. Trying to calculate it...");
 
 				final String[] calculatedApps = user
