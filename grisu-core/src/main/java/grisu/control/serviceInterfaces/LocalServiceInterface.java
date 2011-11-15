@@ -25,7 +25,7 @@ import org.globus.myproxy.MyProxyException;
 import org.ietf.jgss.GSSException;
 
 public class LocalServiceInterface extends AbstractServiceInterface implements
-		ServiceInterface {
+ServiceInterface {
 
 	private ProxyCredential credential = null;
 	private String myproxy_username = null;
@@ -104,7 +104,7 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 							MyProxy_light.getDelegation(myProxyServer,
 									myProxyPort, myproxy_username, passphrase,
 									ServerPropertiesManager
-											.getMyProxyLifetime()));
+									.getMyProxyLifetime()));
 
 					final long newLifeTime = credential.getGssCredential()
 							.getRemainingLifetime();
@@ -224,7 +224,7 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 		if (StringUtils.isBlank(temp)) {
 			throw new NoSuchTemplateException(
 					"Could not find template for application: " + application
-							+ ".");
+					+ ".");
 		}
 		return temp;
 	}
@@ -273,5 +273,6 @@ public class LocalServiceInterface extends AbstractServiceInterface implements
 		Arrays.fill(passphrase, 'x');
 		return null;
 	}
+
 
 }

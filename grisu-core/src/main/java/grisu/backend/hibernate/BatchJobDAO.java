@@ -170,7 +170,7 @@ public class BatchJobDAO extends BaseHibernateDAO {
 	 *            the dn of the user
 	 * @return the {@link User} or null if not found
 	 */
-	public final List<BatchJob> findMultiPartJobByDN(final String dn) {
+	public final List<BatchJob> findBatchJobByDN(final String dn) {
 
 		// myLogger.debug("Loading multipart with dn: " + dn + " from db.");
 		final String queryString = "from grisu.backend.model.job.BatchJob as job where job.dn = ?";

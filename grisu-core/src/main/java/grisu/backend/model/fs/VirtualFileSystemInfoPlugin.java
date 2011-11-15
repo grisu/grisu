@@ -87,7 +87,7 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 
 		for (final String key : urls.keySet()) {
 			if (key.startsWith("gsiftp")) {
-				return user.getFileSystemManager().download(key);
+				return user.getFileManager().download(key);
 			}
 		}
 
@@ -104,7 +104,7 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 
 		for (final String key : urls.keySet()) {
 			if (key.startsWith("gsiftp")) {
-				return user.getFileSystemManager().fileExists(key);
+				return user.getFileManager().fileExists(key);
 			}
 		}
 
@@ -121,7 +121,7 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 
 		for (final String key : urls.keySet()) {
 			if (key.startsWith("gsiftp")) {
-				return user.getFileSystemManager().getFileSize(key);
+				return user.getFileManager().getFileSize(key);
 			}
 		}
 
@@ -185,7 +185,7 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 
 		for (final String key : urls.keySet()) {
 			if (key.startsWith("gsiftp")) {
-				return user.getFileSystemManager().isFolder(key);
+				return user.getFileManager().isFolder(key);
 			}
 		}
 
@@ -202,7 +202,7 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 
 		for (final String key : urls.keySet()) {
 			if (key.startsWith("gsiftp")) {
-				return user.getFileSystemManager().lastModified(key);
+				return user.getFileManager().lastModified(key);
 			}
 		}
 
@@ -234,7 +234,7 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 
 		for (final String key : urls.keySet()) {
 			if (key.startsWith("gsiftp")) {
-				return user.getFileSystemManager().upload(source, key);
+				return user.getFileManager().upload(source, key);
 			}
 		}
 

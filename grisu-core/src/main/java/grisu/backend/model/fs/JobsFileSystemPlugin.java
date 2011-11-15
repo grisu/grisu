@@ -70,7 +70,8 @@ public class JobsFileSystemPlugin implements VirtualFileSystemPlugin {
 			active.setVirtual(true);
 			active.setPath(path + "/" + ACTIVE_IDENTIFIER);
 
-			final List<Job> jobs = user.getActiveJobs(null, false);
+			final List<Job> jobs = user.getJobManager().getActiveJobs(
+					null, false);
 			for (final Job job : jobs) {
 				active.addSite(job
 						.getJobProperty(Constants.SUBMISSION_SITE_KEY));
@@ -148,7 +149,8 @@ public class JobsFileSystemPlugin implements VirtualFileSystemPlugin {
 		active.setVirtual(true);
 		active.setPath(BASE + "/" + ACTIVE_IDENTIFIER);
 
-		final List<Job> jobs = user.getActiveJobs(null, false);
+		final List<Job> jobs = user.getJobManager().getActiveJobs(null,
+				false);
 		for (final Job job : jobs) {
 			active.addSite(job.getJobProperty(Constants.SUBMISSION_SITE_KEY));
 
@@ -177,7 +179,8 @@ public class JobsFileSystemPlugin implements VirtualFileSystemPlugin {
 		result.setIsVirtual(true);
 		result.setPath(BASE + "/" + ARCHIVED_IDENTIFIER);
 
-		final List<Job> jobs = user.getArchivedJobs(null);
+		final List<Job> jobs = user.getJobManager()
+				.getArchivedJobs(null);
 		for (final Job job : jobs) {
 
 			final String url = job.getJobProperty(Constants.JOBDIRECTORY_KEY);

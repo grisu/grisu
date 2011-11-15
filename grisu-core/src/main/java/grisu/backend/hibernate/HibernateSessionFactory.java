@@ -87,7 +87,7 @@ public final class HibernateSessionFactory {
 					myLogger.debug("Found grisu-hibernate.cfg.xml file in .grisu directory. Using this to configure db connection.");
 					// use the user-provided config file
 					configuration = new AnnotationConfiguration()
-							.configure(grisuHibernateConfigFile);
+					.configure(grisuHibernateConfigFile);
 					if (StringUtils.isBlank(configuration
 							.getProperty("hibernate.connection.url"))) {
 						// setting default path to hsqldb if necessary
@@ -112,7 +112,7 @@ public final class HibernateSessionFactory {
 					myLogger.debug("Found grisu-hibernate.cfg.xml file in .grisu directory. Using this to configure db connection.");
 					// use the user-provided config file
 					configuration = new AnnotationConfiguration()
-							.configure(grisuHibernateConfigFile);
+					.configure(grisuHibernateConfigFile);
 				} else if (!ServerPropertiesManager.useDefaultDatabase()) {
 					// check whether something is specified in the
 					// grisu-backend.config file
@@ -121,7 +121,7 @@ public final class HibernateSessionFactory {
 					if (MYSQL_DBTYPE.equals(dbType)) {
 						usedDatabase = MYSQL_DBTYPE;
 						configuration = new AnnotationConfiguration()
-								.configure("/grisu-hibernate-default-mysql.cfg.xml");
+						.configure("/grisu-hibernate-default-mysql.cfg.xml");
 
 						final String url = ServerPropertiesManager
 								.getDatabaseConnectionUrl();
@@ -153,7 +153,7 @@ public final class HibernateSessionFactory {
 					} else if (HSQLDB_DBTYPE.equals(dbType)) {
 						usedDatabase = HSQLDB_DBTYPE;
 						configuration = new AnnotationConfiguration()
-								.configure("/grisu-hibernate-default-hsqldb.cfg.xml");
+						.configure("/grisu-hibernate-default-hsqldb.cfg.xml");
 
 						String url = ServerPropertiesManager
 								.getDatabaseConnectionUrl();
@@ -165,7 +165,7 @@ public final class HibernateSessionFactory {
 						if ((url == null) || (url.length() == 0)) {
 							url = "jdbc:hsqldb:file:"
 									+ Environment.getVarGrisuDirectory()
-											.getPath() + File.separator
+									.getPath() + File.separator
 									+ "grisulocaldb";
 						}
 						if ((username == null) || (username.length() == 0)) {
@@ -194,7 +194,7 @@ public final class HibernateSessionFactory {
 						tryToStartDerbyServer();
 
 						configuration = new AnnotationConfiguration()
-								.configure("/grisu-hibernate-default-derby.cfg.xml");
+						.configure("/grisu-hibernate-default-derby.cfg.xml");
 
 						String url = ServerPropertiesManager
 								.getDatabaseConnectionUrl();
@@ -228,17 +228,16 @@ public final class HibernateSessionFactory {
 					}
 				} else {
 					// use default derby database
-					System.setProperty("derby.system.home", Environment
-							.getVarGrisuDirectory().getPath()
-							+ File.separator
-							+ "derby");
+					String derby_home = Environment.getVarGrisuDirectory()
+							.getPath() + File.separator + "derby";
+					System.setProperty("derby.system.home", derby_home);
 
 					usedDatabase = DERBY_DBTYPE;
 
 					tryToStartDerbyServer();
 
 					configuration = new AnnotationConfiguration()
-							.configure("/grisu-hibernate-default-derby.cfg.xml");
+					.configure("/grisu-hibernate-default-derby.cfg.xml");
 					// String url = "jdbc:derby:"
 					// + Environment.getGrisuDirectory().getPath()
 					// + File.separator + "grisulocaldb_derby;create=true";
