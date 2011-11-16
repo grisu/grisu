@@ -216,7 +216,7 @@ public class StatusObject {
 			boolean exitIfFailed, int threshholdInSeconds)
 					throws StatusException {
 
-		lastStatus = si.getActionStatus(handle);
+		getStatus();
 
 		if (lastStatus == null) {
 
