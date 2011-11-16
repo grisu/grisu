@@ -1163,8 +1163,6 @@ public class UserJobManager {
 			return null;
 		}
 
-		getUser().getJobManager().getAllJobnames(null);
-
 		final Set<String> alljobnames = getAllJobnames(null).asSortedSet();
 		final Set<String> allbatchJobnames = getUser().getBatchJobManager()
 				.getAllBatchJobnames(null).asSortedSet();
