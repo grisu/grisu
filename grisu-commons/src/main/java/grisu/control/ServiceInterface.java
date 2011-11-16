@@ -1027,7 +1027,10 @@ public interface ServiceInterface {
 	 * Deletes the whole jobdirectory (if specified) and if successful, the job
 	 * from the database.
 	 * 
-	 * This one doesn't throw an exception if something goes wrong.
+	 * This one doesn't throw an exception if something goes wrong. Contrary to
+	 * {@link #kill(String, boolean)} this method also accepts bash-style globs
+	 * as a jobname and it'll match that against all existing jobs and
+	 * batchjobs.
 	 * 
 	 * @param jobnames
 	 *            a list of jobs to kill

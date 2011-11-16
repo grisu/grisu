@@ -7,6 +7,7 @@ import grisu.backend.model.User;
 import grisu.backend.model.fs.GrisuInputStream;
 import grisu.backend.model.fs.GrisuOutputStream;
 import grisu.control.JobConstants;
+import grisu.control.JobnameHelpers;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.BatchJobException;
 import grisu.control.exceptions.JobPropertiesException;
@@ -58,6 +59,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.google.common.collect.Sets;
 
 /**
  * The JobSubmissionManager class provides an interface between grisu and the
@@ -1160,7 +1163,23 @@ public class UserJobManager {
 			return null;
 		}
 
-		final String handle = "kill_" + jobnames.asSortedSet().size()
+		getUser().getJobManager().getAllJobnames(null);
+
+		final Set<String> alljobnames = getAllJobnames(null).asSortedSet();
+		final Set<String> allbatchJobnames = getUser().getBatchJobManager()
+				.getAllBatchJobnames(null).asSortedSet();
+
+		alljobnames.addAll(allbatchJobnames);
+
+		// process globs
+		final Set<String> alljobnamestoKill = Sets.newTreeSet();
+		for (String name : jobnames.asArray()) {
+			Set<String> matches = JobnameHelpers.filterJobnamesUsingGlob(
+					alljobnames, name);
+			alljobnamestoKill.addAll(matches);
+		}
+
+		final String handle = "kill_" + alljobnamestoKill.size()
 				+ "_jobs_" + new Date().getTime();
 		final DtoActionStatus status = new DtoActionStatus(handle,
 				jobnames.asArray().length * 2);
@@ -1177,7 +1196,7 @@ public class UserJobManager {
 								tf);
 
 
-				for (final String jobname : jobnames.asArray()) {
+				for (final String jobname : alljobnamestoKill) {
 					final Thread t = new Thread() {
 						@Override
 						public void run() {
@@ -1485,7 +1504,7 @@ public class UserJobManager {
 							.isBlank(jobSubmissionObject
 									.getSubmissionLocation()))
 
-			) {
+					) {
 				myLogger.debug("No application specified. Trying to calculate it...");
 
 				final String[] calculatedApps = user
