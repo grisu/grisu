@@ -193,7 +193,7 @@ public class GT4Submitter extends JobSubmitter {
 			if (hostCountValue >= 1) {
 				final Element hostCount = output.createElement("hostCount");
 				hostCount
-						.setTextContent(new Integer(hostCountValue).toString());
+				.setTextContent(new Integer(hostCountValue).toString());
 				job.appendChild(hostCount);
 			}
 		}
@@ -289,7 +289,7 @@ public class GT4Submitter extends JobSubmitter {
 
 				if (StringUtils.isBlank(application)
 						|| Constants.GENERIC_APPLICATION_NAME
-								.equals(application)) {
+						.equals(application)) {
 					myLogger.debug("\"generic\" application. Not trying to calculate modules...");
 
 				} else if (StringUtils.isNotBlank(application)
@@ -406,6 +406,17 @@ public class GT4Submitter extends JobSubmitter {
 				extensions.appendChild(emailontermination);
 			}
 
+		}
+
+		// virtual memory
+		Long virtual_memory = JsdlHelpers.getTotalMemoryRequirement(jsdl);
+
+		if ((memory != null) && (memory >= 0)) {
+			final Element virtMemmory = output.createElement("maxMemory");
+			// convert from bytes to mb
+			memory = memory / (1024 * 1024);
+			virtMemmory.setTextContent(memory.toString());
+			extensions.appendChild(virtMemmory);
 		}
 
 		final String pbsDebug = JsdlHelpers.getPbsDebugElement(jsdl);
@@ -589,7 +600,7 @@ public class GT4Submitter extends JobSubmitter {
 	@Override
 	protected final String submit(final InformationManager infoManager,
 			final String host, final String factoryType, final Job job)
-			throws ServerJobSubmissionException {
+					throws ServerJobSubmissionException {
 
 		final int retries = ServerPropertiesManager.getJobSubmissionRetries();
 
@@ -650,8 +661,8 @@ public class GT4Submitter extends JobSubmitter {
 						|| (credential.getRemainingLifetime() < 1)) {
 					throw new NoValidCredentialException(
 							"Credential associated with job: " + job.getDn()
-									+ " / " + job.getJobname()
-									+ " is not valid.");
+							+ " / " + job.getJobname()
+							+ " is not valid.");
 				}
 
 				final GramClient gram = new GramClient(credential);
@@ -727,7 +738,7 @@ public class GT4Submitter extends JobSubmitter {
 						.getDebugDirectory()
 						+ "/"
 						+ job.getDn().replace("=", "_").replace(",", "_")
-								.replace(" ", "_")
+						.replace(" ", "_")
 						+ "_"
 						+ job.getJobname()
 						+ "_" + vo + "_" + job.hashCode();

@@ -140,6 +140,8 @@ public class JobSubmissionObjectImpl {
 
 	private String pbsDebug;
 
+	private long virtual_memory_in_bytes = 0;
+
 	/**
 	 * Default constructor.
 	 * 
@@ -622,6 +624,15 @@ public class JobSubmissionObjectImpl {
 	}
 
 	/**
+	 * The virtal memory for the job in bytes.
+	 * 
+	 * @return the virtual memory
+	 */
+	public Long getVirtualMemory() {
+		return virtual_memory_in_bytes;
+	}
+
+	/**
 	 * Returns the walltime in seconds.
 	 * 
 	 * @return the walltime in seconds
@@ -1063,6 +1074,16 @@ public class JobSubmissionObjectImpl {
 		this.id = id;
 	}
 
+	// public void setInputFileUrls(final String[] inputFileUrls) {
+	// final Set<String> oldValue = this.inputFiles;
+	// if (inputFileUrls != null) {
+	// this.inputFiles = new HashSet<String>(Arrays.asList(inputFileUrls));
+	// } else {
+	// this.inputFiles = new HashSet<String>();
+	// }
+	// pcs.firePropertyChange("inputFileUrls", oldValue, this.inputFiles);
+	// }
+
 	/**
 	 * Sets all input files in one go.
 	 * 
@@ -1078,16 +1099,6 @@ public class JobSubmissionObjectImpl {
 		pcs.firePropertyChange("inputFiles", null, this.inputFiles);
 
 	}
-
-	// public void setInputFileUrls(final String[] inputFileUrls) {
-	// final Set<String> oldValue = this.inputFiles;
-	// if (inputFileUrls != null) {
-	// this.inputFiles = new HashSet<String>(Arrays.asList(inputFileUrls));
-	// } else {
-	// this.inputFiles = new HashSet<String>();
-	// }
-	// pcs.firePropertyChange("inputFileUrls", oldValue, this.inputFiles);
-	// }
 
 	/**
 	 * Sets the name of the job.
@@ -1247,6 +1258,12 @@ public class JobSubmissionObjectImpl {
 		} else {
 			setJobname(jobname + "_" + UUID.randomUUID().toString());
 		}
+	}
+
+	public void setVirtualMemory(final Long memory) {
+		final long oldValue = this.virtual_memory_in_bytes;
+		this.virtual_memory_in_bytes = memory;
+		pcs.firePropertyChange("virtualMemory", oldValue, this.virtual_memory_in_bytes);
 	}
 
 	/**
