@@ -1476,8 +1476,9 @@ public class UserJobManager {
 		// if "generic" app, submission location needs to be specified.
 		if (Constants.GENERIC_APPLICATION_NAME.equals(jobSubmissionObject
 				.getApplication())
-				&& StringUtils.isNotBlank(jobSubmissionObject
-						.getSubmissionLocation())) {
+				&& (StringUtils.isNotBlank(jobSubmissionObject
+						.getSubmissionLocation()) && !(Constants.NO_SUBMISSION_LOCATION_INDICATOR_STRING
+						.equals(jobSubmissionObject.getSubmissionLocation())))) {
 
 			submissionLocation = jobSubmissionObject.getSubmissionLocation();
 
