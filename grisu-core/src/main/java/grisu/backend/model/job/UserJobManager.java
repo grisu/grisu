@@ -1182,7 +1182,7 @@ public class UserJobManager {
 		final String handle = "kill_" + alljobnamestoKill.size()
 				+ "_jobs_" + new Date().getTime();
 		final DtoActionStatus status = new DtoActionStatus(handle,
-				jobnames.asArray().length * 2);
+				alljobnamestoKill.size() * 2);
 		getUser().getActionStatuses().put(handle, status);
 
 		final Thread killThread = new Thread() {
@@ -1478,7 +1478,7 @@ public class UserJobManager {
 				.getApplication())
 				&& (StringUtils.isNotBlank(jobSubmissionObject
 						.getSubmissionLocation()) && !(Constants.NO_SUBMISSION_LOCATION_INDICATOR_STRING
-						.equals(jobSubmissionObject.getSubmissionLocation())))) {
+								.equals(jobSubmissionObject.getSubmissionLocation())))) {
 
 			submissionLocation = jobSubmissionObject.getSubmissionLocation();
 
