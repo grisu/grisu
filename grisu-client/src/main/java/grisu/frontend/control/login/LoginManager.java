@@ -236,11 +236,25 @@ public class LoginManager {
 	}
 
 	public static ServiceInterface loginCommandline(String backend,
-			boolean saveCredToDisk)
+			boolean saveCredToDisk) throws LoginException {
+		return loginCommandline(backend, saveCredToDisk, -1);
+	}
+
+	public static ServiceInterface loginCommandline(String backend,
+			boolean saveCredToDisk, int minProxyLifetimeInSeconds)
 					throws LoginException {
 
 		Credential c;
-		if (LocalProxy.validGridProxyExists()) {
+
+		boolean validLocalProxy = false;
+		if (minProxyLifetimeInSeconds <= 0) {
+			validLocalProxy = LocalProxy.validGridProxyExists();
+		} else {
+			validLocalProxy = LocalProxy
+					.validGridProxyExists(minProxyLifetimeInSeconds / 60);
+		}
+
+		if (validLocalProxy) {
 			CliHelpers.setIndeterminateProgress(
 					"Local credential found, logging in...", true);
 			try {
