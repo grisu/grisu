@@ -244,7 +244,7 @@ public class FileManager {
 		} else {
 
 			while (url.endsWith("/")) {
-				url = url.substring(0, url.length() - 2);
+				url = url.substring(0, url.length() - 1);
 			}
 			final int lastIndex = url.lastIndexOf("/") + 1;
 			if (lastIndex <= 0) {
