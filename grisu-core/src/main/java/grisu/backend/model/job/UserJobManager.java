@@ -7,7 +7,6 @@ import grisu.backend.model.User;
 import grisu.backend.model.fs.GrisuInputStream;
 import grisu.backend.model.fs.GrisuOutputStream;
 import grisu.control.JobConstants;
-import grisu.control.JobnameHelpers;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.BatchJobException;
 import grisu.control.exceptions.JobPropertiesException;
@@ -30,6 +29,7 @@ import grisu.model.job.JobSubmissionObjectImpl;
 import grisu.model.status.StatusObject;
 import grisu.model.utils.InformationUtils;
 import grisu.settings.ServerPropertiesManager;
+import grisu.utils.ServiceInterfaceUtils;
 import grisu.utils.SeveralXMLHelpers;
 
 import java.util.Collection;
@@ -1172,8 +1172,12 @@ public class UserJobManager {
 		// process globs
 		final Set<String> alljobnamestoKill = Sets.newTreeSet();
 		for (String name : jobnames.asArray()) {
-			Set<String> matches = JobnameHelpers.filterJobnamesUsingGlob(
+
+			// ServiceInterfaceUtils.filterJobNames(, name);
+
+			List<String> matches = ServiceInterfaceUtils.filterJobNames(
 					alljobnames, name);
+
 			alljobnamestoKill.addAll(matches);
 		}
 
