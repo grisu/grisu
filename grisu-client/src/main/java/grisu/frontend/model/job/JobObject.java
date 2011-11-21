@@ -1366,6 +1366,8 @@ Comparable<JobObject> {
 	 * resource. Internally, this method also does possible stage-ins from your
 	 * local machine.
 	 * 
+	 * @return the handle to the job submission task on the backend
+	 * 
 	 * @throws JobSubmissionException
 	 *             if the job could not be submitted
 	 * @throws InterruptedException
@@ -1384,6 +1386,7 @@ Comparable<JobObject> {
 	 * 
 	 * @param waitForSubmissionToFinish
 	 *            whether to wait for submission to finish or not
+	 * @return the handle to the job submission task on the backend
 	 * 
 	 * @throws JobSubmissionException
 	 *             if the job could not be submitted
@@ -1404,7 +1407,7 @@ Comparable<JobObject> {
 	 * @param additionalJobProperties
 	 *            properties you want to store with the job (only get stored if
 	 *            submission was successful)
-	 * 
+	 * @return the handle to the job submission task on the backend
 	 * @throws JobSubmissionException
 	 *             if the job could not be submitted
 	 * @throws InterruptedException
@@ -1414,6 +1417,24 @@ Comparable<JobObject> {
 		return submitJob(additionalJobProperties, true);
 	}
 
+	/**
+	 * After you created the job on the backend using the
+	 * {@link #createJob(String)} or {@link #createJob(String, String)} method
+	 * you can tell the backend to actually submit the job to the endpoint
+	 * resource. Internally, this method also does possible stage-ins from your
+	 * local machine.
+	 * 
+	 * @param additionalJobProperties
+	 *            properties you want to store with the job (only get stored if
+	 *            submission was successful)
+	 * @param waitForSubmissionToFinish
+	 *            whether to wait for submission task to finish on backend
+	 *            before returning out of this method
+	 * @return the handle to the job submission task on the backend
+	 * @throws JobSubmissionException
+	 *             if the job could not be submitted
+	 * @throws InterruptedException
+	 */
 	public final String submitJob(Map<String, String> additionalJobProperties,
 			boolean waitForSubmissionToFinish) throws JobSubmissionException,
 			InterruptedException {
