@@ -530,7 +530,7 @@ Comparable<JobObject> {
 			@Override
 			public void run() {
 
-				final int oldStatus = getStatus(false);
+				int oldStatus = getStatus(false);
 				while (!isFinished()) {
 
 					if (isInterrupted()) {
@@ -556,6 +556,7 @@ Comparable<JobObject> {
 								+ " interrupted.");
 						return;
 					}
+					oldStatus = getStatus(false);
 				}
 			}
 		};
@@ -1369,9 +1370,9 @@ Comparable<JobObject> {
 	 *             if the job could not be submitted
 	 * @throws InterruptedException
 	 */
-	public final void submitJob() throws JobSubmissionException,
+	public final String submitJob() throws JobSubmissionException,
 	InterruptedException {
-		submitJob(null);
+		return submitJob(null);
 	}
 
 	/**
@@ -1388,9 +1389,9 @@ Comparable<JobObject> {
 	 *             if the job could not be submitted
 	 * @throws InterruptedException
 	 */
-	public final void submitJob(boolean waitForSubmissionToFinish)
+	public final String submitJob(boolean waitForSubmissionToFinish)
 			throws JobSubmissionException, InterruptedException {
-		submitJob(null, waitForSubmissionToFinish);
+		return submitJob(null, waitForSubmissionToFinish);
 	}
 
 	/**
@@ -1408,12 +1409,12 @@ Comparable<JobObject> {
 	 *             if the job could not be submitted
 	 * @throws InterruptedException
 	 */
-	public final void submitJob(Map<String, String> additionalJobProperties)
+	public final String submitJob(Map<String, String> additionalJobProperties)
 			throws JobSubmissionException, InterruptedException {
-		submitJob(additionalJobProperties, true);
+		return submitJob(additionalJobProperties, true);
 	}
 
-	public final void submitJob(Map<String, String> additionalJobProperties,
+	public final String submitJob(Map<String, String> additionalJobProperties,
 			boolean waitForSubmissionToFinish) throws JobSubmissionException,
 			InterruptedException {
 
@@ -1466,9 +1467,10 @@ Comparable<JobObject> {
 		}
 		allJobProperties = null;
 
+		String handle = null;
 		try {
 			addJobLogMessage("Submitting job to endpoint...");
-			final String handle = serviceInterface.submitJob(getJobname());
+			handle = serviceInterface.submitJob(getJobname());
 			if (waitForSubmissionToFinish) {
 				try {
 					final StatusObject s = StatusObject.waitForActionToFinish(
@@ -1497,6 +1499,8 @@ Comparable<JobObject> {
 		EventBus.publish(new NewJobEvent(this));
 
 		addJobLogMessage("Job submission finished successfully.");
+
+		return handle;
 	}
 
 	/**

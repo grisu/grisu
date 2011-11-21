@@ -419,7 +419,11 @@ public class FileManager {
 
 		if (isLocal(rootUrl)) {
 			final File file = getFileFromUriOrPath(rootUrl);
-			return file.getParentFile().toURI().toASCIIString();
+			File parent = file.getParentFile();
+			if (parent == null) {
+				return null;
+			}
+			return parent.toURI().toASCIIString();
 		} else {
 			String url = rootUrl.trim();
 			if (rootUrl.endsWith("/")) {
