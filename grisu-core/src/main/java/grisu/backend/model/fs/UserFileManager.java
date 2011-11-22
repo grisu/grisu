@@ -37,6 +37,8 @@ public class UserFileManager {
 	private final VirtualFileSystemInfoPlugin virtualFsInfo;
 	private final VirtualFsTransferPlugin virtualFsTransfer;
 
+	private final GlobusOnlineFileTransferPlugin goFileTransfer;
+
 	private final User user;
 
 	public UserFileManager(User user) {
@@ -45,12 +47,14 @@ public class UserFileManager {
 		commonsVfsInfo = new CommonsVfsFileSystemInfoAndTransferPlugin(user);
 		virtualFsInfo = new VirtualFileSystemInfoPlugin(user);
 		virtualFsTransfer = new VirtualFsTransferPlugin(user, virtualFsInfo);
+		goFileTransfer = new GlobusOnlineFileTransferPlugin();
 		fileSystemInfoPlugins.put("gsiftp", commonsVfsInfo);
 		fileSystemInfoPlugins.put("ram", commonsVfsInfo);
 		fileSystemInfoPlugins.put("tmp", commonsVfsInfo);
 		fileSystemInfoPlugins.put("grid", virtualFsInfo);
 
-		filetransferPlugins.put("gsiftp-gsiftp", commonsVfsInfo);
+		// filetransferPlugins.put("gsiftp-gsiftp", commonsVfsInfo);
+		filetransferPlugins.put("gsiftp-gsiftp", goFileTransfer);
 		filetransferPlugins.put("grid-gsiftp", virtualFsTransfer);
 		filetransferPlugins.put("gsiftp-grid", virtualFsTransfer);
 		filetransferPlugins.put("grid-grid", virtualFsTransfer);
