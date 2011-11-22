@@ -1,5 +1,6 @@
 package grisu.model;
 
+import grisu.jcommons.utils.FileSystemHelpers;
 import grisu.model.dto.DtoProperty;
 
 import java.util.LinkedList;
@@ -114,6 +115,7 @@ public class MountPoint implements Comparable<MountPoint> {
 		this.site = site;
 	}
 
+
 	/**
 	 * Creates a Mountpoint.
 	 * 
@@ -203,6 +205,11 @@ public class MountPoint implements Comparable<MountPoint> {
 	@GeneratedValue
 	public Long getMountPointId() {
 		return mountPointId;
+	}
+
+	@Transient
+	public String getPath() {
+		return FileSystemHelpers.getPath(getRootUrl());
 	}
 
 	@Transient

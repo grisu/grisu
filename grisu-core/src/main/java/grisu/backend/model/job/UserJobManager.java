@@ -429,7 +429,7 @@ public class UserJobManager {
 	private boolean checkWhetherGridResourceIsActuallyAvailable(
 			GridResource resource) {
 
-		final String[] filesystems = user.getInfoManager()
+		final String[] filesystems = user.getInformationManager()
 				.getStagingFileSystemForSubmissionLocation(SubmissionLocationHelpers
 						.createSubmissionLocationString(resource));
 
@@ -1454,7 +1454,7 @@ public class UserJobManager {
 
 			final String commandline = jobSubmissionObject.getCommandline();
 
-			final String[] apps = user.getInfoManager()
+			final String[] apps = user.getInformationManager()
 					.getApplicationsThatProvideExecutable(jobSubmissionObject
 							.extractExecutable());
 
@@ -1484,7 +1484,7 @@ public class UserJobManager {
 
 			submissionLocation = jobSubmissionObject.getSubmissionLocation();
 
-			stagingFileSystems = user.getInfoManager()
+			stagingFileSystems = user.getInformationManager()
 					.getStagingFileSystemForSubmissionLocation(submissionLocation);
 
 			if ((stagingFileSystems == null)
@@ -1511,7 +1511,7 @@ public class UserJobManager {
 				myLogger.debug("No application specified. Trying to calculate it...");
 
 				final String[] calculatedApps = user
-						.getInfoManager()
+						.getInformationManager()
 						.getApplicationsThatProvideExecutable(JsdlHelpers
 								.getPosixApplicationExecutable(jsdl));
 				for (final String app : calculatedApps) {
@@ -1582,7 +1582,7 @@ public class UserJobManager {
 						+ submissionLocation
 						+ ". Checking whether this is valid using mds information.");
 
-				stagingFileSystems = user.getInfoManager()
+				stagingFileSystems = user.getInformationManager()
 						.getStagingFileSystemForSubmissionLocation(submissionLocation);
 				if ((stagingFileSystems == null)
 						|| (stagingFileSystems.length == 0)) {
@@ -1743,7 +1743,7 @@ public class UserJobManager {
 						final String temp = SubmissionLocationHelpers
 								.createSubmissionLocationString(resource);
 						stagingFileSystems = user
-								.getInfoManager()
+								.getInformationManager()
 								.getStagingFileSystemForSubmissionLocation(temp);
 						if ((stagingFileSystems == null)
 								|| (stagingFileSystems.length == 0)) {
@@ -1795,7 +1795,7 @@ public class UserJobManager {
 						final String temp = SubmissionLocationHelpers
 								.createSubmissionLocationString(resource);
 						stagingFileSystems = user
-								.getInfoManager()
+								.getInformationManager()
 								.getStagingFileSystemForSubmissionLocation(temp);
 						if ((stagingFileSystems == null)
 								|| (stagingFileSystems.length == 0)) {
@@ -1946,7 +1946,7 @@ public class UserJobManager {
 				stagingFilesystemToUse);
 
 		job.addJobProperty(Constants.WORKINGDIRECTORY_KEY, workingDirectory);
-		final String submissionSite = user.getInfoManager()
+		final String submissionSite = user.getInformationManager()
 				.getSiteForHostOrUrl(SubmissionLocationHelpers
 						.extractHost(submissionLocation));
 		myLogger.debug("Calculated submissionSite: " + submissionSite);
@@ -2312,7 +2312,7 @@ public class UserJobManager {
 		final String submitHostEndpoint = submitter.getServerEndpoint(host);
 
 		String handle = null;
-		handle = submitter.submit(user.getInfoManager(), submitHostEndpoint,
+		handle = submitter.submit(user.getInformationManager(), submitHostEndpoint,
 				factoryType, job);
 
 		job.setJobhandle(handle);
@@ -2421,7 +2421,7 @@ public class UserJobManager {
 			job.addLogMessage("Submitting job to endpoint...");
 			final String candidate = JsdlHelpers.getCandidateHosts(job
 					.getJobDescription())[0];
-			final GridResource resource = getUser().getInfoManager()
+			final GridResource resource = getUser().getInformationManager()
 					.getGridResource(candidate);
 			String version = resource.getGRAMVersion();
 

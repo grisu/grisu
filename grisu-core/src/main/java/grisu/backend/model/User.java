@@ -16,6 +16,7 @@ import grisu.control.exceptions.NoValidCredentialException;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
 import grisu.jcommons.constants.Constants;
+import grisu.jcommons.interfaces.InfoManager;
 import grisu.jcommons.interfaces.InformationManager;
 import grisu.jcommons.interfaces.MatchMaker;
 import grisu.model.MountPoint;
@@ -168,6 +169,8 @@ public class User {
 	public static String get_vo_dn_path(final String dn) {
 		return dn.replace("=", "_").replace(",", "_").replace(" ", "_");
 	}
+
+	private InfoManager im;
 
 	protected final BatchJobDAO batchJobDao = new BatchJobDAO();
 
@@ -1274,7 +1277,7 @@ public class User {
 	}
 
 	@Transient
-	public InformationManager getInfoManager() {
+	public InformationManager getInformationManager() {
 		return this.infoManager;
 	}
 
@@ -1393,6 +1396,24 @@ public class User {
 	}
 
 	/**
+	 * This is needed because of the url home directory/absolute path info that
+	 * is contained in the user object.
+	 * 
+	 * We can't use /~/ dirs directly, since they are not unique. E.g.
+	 * gsiftp://ng2.auckland.ac.nz/~/ could point to 2 different directories for
+	 * two different vos.
+	 * 
+	 * @return the info manager
+	 */
+	@Transient
+	public InfoManager getUserInfoManager() {
+		if ( this.im == null ) {
+			im = new UserInfoManager(this);
+		}
+		return this.im;
+	}
+
+	/**
 	 * Gets a map of this users properties. These properties can be used to
 	 * store anything you can think of. Usful for history and such.
 	 * 
@@ -1416,7 +1437,7 @@ public class User {
 	public boolean isValidSubmissionLocation(String subLoc, String fqan) {
 
 		// TODO i'm sure this can be made much more quicker
-		final String[] fs = getInfoManager()
+		final String[] fs = getInformationManager()
 				.getStagingFileSystemForSubmissionLocation(subLoc);
 
 		for (final MountPoint mp : df(fqan)) {

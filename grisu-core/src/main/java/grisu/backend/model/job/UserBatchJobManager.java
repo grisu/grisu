@@ -247,7 +247,7 @@ public class UserBatchJobManager {
 					.createSubmissionLocationString(resource);
 
 			// check whether subloc is available for vo
-			final String[] allSubLocs = getUser().getInfoManager()
+			final String[] allSubLocs = getUser().getInformationManager()
 					.getAllSubmissionLocationsForVO(mpj.getFqan());
 			Arrays.sort(allSubLocs);
 			final int i = Arrays.binarySearch(allSubLocs, tempSubLocString);
@@ -312,7 +312,7 @@ public class UserBatchJobManager {
 				final String subLoc = SubmissionLocationHelpers
 						.createSubmissionLocationString(gr);
 
-				final String[] fs = getUser().getInfoManager()
+				final String[] fs = getUser().getInformationManager()
 						.getStagingFileSystemForSubmissionLocation(subLoc);
 
 				for (final MountPoint mp : getUser().df(mpj.getFqan())) {
