@@ -15,9 +15,9 @@ import grisu.settings.Environment;
 import grisu.utils.GrisuPluginFilenameFilter;
 import grith.jgrith.Credential;
 import grith.jgrith.CredentialFactory;
-import grith.jgrith.control.CertificateFiles;
 import grith.jgrith.control.LoginParams;
 import grith.jgrith.plainProxy.LocalProxy;
+import grith.jgrith.utils.CertificateFiles;
 
 import java.io.IOException;
 import java.net.URL;
@@ -61,7 +61,7 @@ public class LoginManager {
 
 	public static char[] httpProxyPassphrase = null;
 
-	public static int REQUIRED_BACKEND_API_VERSION = 14;
+	public static int REQUIRED_BACKEND_API_VERSION = 15;
 
 	public static void addPluginsToClasspath() throws IOException {
 

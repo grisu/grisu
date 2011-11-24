@@ -90,6 +90,8 @@ public final class ServerPropertiesManager {
 
 	private static final int DEFAULT_JOB_CLEAN_THRESHOLD_IN_SECONDS = 1800;
 
+	private static final String DEFAULT_VOS_TO_SUPPORT = "nz";
+
 	// public static boolean getCheckConnectionToMountPoint() {
 	//
 	// boolean check = false;
@@ -707,6 +709,26 @@ public final class ServerPropertiesManager {
 		return config;
 	}
 
+	/**
+	 * The vos to use (in addition to manually added ones).
+	 * 
+	 * @return the vos
+	 */
+	public static String[] getVOsToUse() {
+		String vos;
+		try {
+			vos = getServerConfiguration().getString(
+					"General.supportedVOs");
+
+			if ( StringUtils.isBlank(vos)) {
+				vos = DEFAULT_VOS_TO_SUPPORT;
+			}
+			return vos.split(",");
+		} catch (final Exception e) {
+			return null;
+		}
+	}
+
 	public static int getWaitTimeBetweenFailedFileTransferAndNextTryInSeconds() {
 
 		int waitTimeInSeconds = -1;
@@ -745,6 +767,10 @@ public final class ServerPropertiesManager {
 			return DEFAULT_TIME_INBETWEEN_STATUS_CHECKS_FOR_THE_SAME_JOB_IN_SECONDS;
 		}
 		return waitTimeInSeconds;
+	}
+
+	public static void refreshConfig() {
+		config = null;
 	}
 
 	/**

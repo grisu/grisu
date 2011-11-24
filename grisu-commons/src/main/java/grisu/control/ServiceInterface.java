@@ -53,7 +53,7 @@ import javax.xml.bind.annotation.XmlMimeType;
 @WebService(targetNamespace = "http://api.grisu", serviceName = "GrisuService")
 public interface ServiceInterface {
 
-	public static final int API_VERSION = 14;
+	public static final int API_VERSION = 15;
 
 	public static final String VIRTUAL_GRID_PROTOCOL_NAME = "grid";
 	public static String GRISU_JOB_FILE_NAME = ".grisujob";
@@ -146,6 +146,15 @@ public interface ServiceInterface {
 	String addJobToBatchJob(@PathParam("batchjobname") String batchjobname,
 			@QueryParam("jsdl") String jobdescription)
 					throws NoSuchJobException, JobPropertiesException;
+
+	/**
+	 * Admin method for stuff like reloading config, vos and such...
+	 * 
+	 * @param command the command
+	 * @param config the config for the command
+	 * @return the command output
+	 */
+	String admin(String command, DtoProperties config);
 
 	/**
 	 * Archives this job to the specified url and deletes it from the database.

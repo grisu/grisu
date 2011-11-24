@@ -26,7 +26,7 @@ public final class ServiceInterfaceFactory {
 	static final Logger myLogger = LoggerFactory
 			.getLogger(ServiceInterfaceFactory.class.getName());
 
-	public static final String DEFAULT_SERVICE_INTERFACE = "ARCS";
+	public static final String DEFAULT_SERVICE_INTERFACE = "BeSTGRID";
 
 	public static final String[] KNOWN_SERVICE_INTERFACE_CREATORS = new String[] {
 		"LocalServiceInterfaceCreator",

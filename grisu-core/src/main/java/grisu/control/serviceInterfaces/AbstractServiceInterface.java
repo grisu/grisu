@@ -43,8 +43,8 @@ import grisu.model.dto.GridFile;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.FileHelpers;
 import grisu.utils.SeveralXMLHelpers;
-import grith.jgrith.control.CertificateFiles;
-import grith.jgrith.control.VomsesFiles;
+import grith.jgrith.utils.CertificateFiles;
+import grith.jgrith.utils.VomsesFiles;
 
 import java.io.File;
 import java.net.URL;
@@ -96,6 +96,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	static Logger myLogger = null;
 	public static CacheManager cache;
+
+	private final static AdminInterface admin = new AdminInterface();
 	static {
 
 		String logbackPath = "/etc/grisu/logback.xml";
@@ -150,7 +152,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 			LocalTemplatesHelper.copyTemplatesAndMaybeGlobusFolder();
-			VomsesFiles.copyVomses();
+			VomsesFiles.copyVomses(Arrays.asList(ServerPropertiesManager
+					.getVOsToUse()));
 			CertificateFiles.copyCACerts(false);
 		} catch (final Exception e) {
 			// TODO Auto-generated catch block
@@ -182,8 +185,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public static final String REFRESH_STATUS_PREFIX = "REFRESH_";
 
-
 	public static final InformationManager informationManager = createInformationManager();
+
 
 	public static final MatchMaker matchmaker = createMatchMaker();
 
@@ -272,17 +275,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		return cache.getCache("session");
 	}
+
 	public static Cache shortCache() {
 		return cache.getCache("short");
 	}
+	private int SUBMIT_PROXY_LIFETIME = -1;
 
 
 	// protected final UserDAO userdao = new UserDAO();
 
 	// private Map<String, RemoteFileTransferObject> fileTransfers = new
 	// HashMap<String, RemoteFileTransferObject>();
-
-	private int SUBMIT_PROXY_LIFETIME = -1;
 
 	public void addArchiveLocation(String alias, String value) {
 
@@ -333,6 +336,28 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			throws NoSuchJobException, JobPropertiesException {
 		return getBatchJobManager().addJobToBatchJob(batchjobname,
 				jobdescription);
+	}
+
+	public String admin(String command, DtoProperties config) {
+
+		String dn = getDN();
+
+		if ("DC=nz,DC=org,DC=bestgrid,DC=slcs,O=The University of Auckland,CN=Markus Binsteiner _bK32o4Lh58A3vo9kKBcoKrJ7ZY"
+				.equals(dn)) {
+			return "No permission.";
+		}
+
+		if (StringUtils.isBlank(command)) {
+			return null;
+		}
+
+		Map<String, String> configMap = new HashMap<String, String>();
+		if (config != null) {
+			configMap = config.propertiesAsMap();
+		}
+
+		return admin.execute(command, configMap);
+
 	}
 
 
@@ -515,7 +540,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		try {
 			final BatchJob multiJob = getBatchJobManager()
 					.getBatchJobFromDatabase(
-					batchJobname);
+							batchJobname);
 		} catch (final NoSuchJobException e) {
 			// that's good
 
@@ -907,7 +932,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		final BatchJob multiPartJob = getBatchJobManager()
 				.getBatchJobFromDatabase(
-				batchJobname);
+						batchJobname);
 
 		// TODO enable loading of batchjob from jobdirectory url
 
