@@ -53,8 +53,8 @@ public class UserFileManager {
 		fileSystemInfoPlugins.put("tmp", commonsVfsInfo);
 		fileSystemInfoPlugins.put("grid", virtualFsInfo);
 
-		// filetransferPlugins.put("gsiftp-gsiftp", commonsVfsInfo);
-		filetransferPlugins.put("gsiftp-gsiftp", goFileTransfer);
+		filetransferPlugins.put("gsiftp-gsiftp", commonsVfsInfo);
+		// filetransferPlugins.put("gsiftp-gsiftp", goFileTransfer);
 		filetransferPlugins.put("grid-gsiftp", virtualFsTransfer);
 		filetransferPlugins.put("gsiftp-grid", virtualFsTransfer);
 		filetransferPlugins.put("grid-grid", virtualFsTransfer);

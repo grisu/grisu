@@ -150,8 +150,10 @@ public interface ServiceInterface {
 	/**
 	 * Admin method for stuff like reloading config, vos and such...
 	 * 
-	 * @param command the command
-	 * @param config the config for the command
+	 * @param command
+	 *            the command
+	 * @param config
+	 *            the config for the command
 	 * @return the command output
 	 */
 	String admin(String command, DtoProperties config);

@@ -64,6 +64,13 @@ public class TextCombo extends AbstractWidget {
 
 	}
 
+	public void setSelectionValues(String[] values) {
+		textModel.removeAllElements();
+		for (String v : values) {
+			textModel.addElement(v);
+		}
+	}
+
 	public void setText(String text) {
 		if (textModel.getIndexOf(text) < 0) {
 			getComboBox().addItem(text);
