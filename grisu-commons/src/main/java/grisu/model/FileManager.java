@@ -558,6 +558,8 @@ public class FileManager {
 	/**
 	 * Copies remote files.
 	 * 
+	 * Waits for transfer to finsh before returning.
+	 * 
 	 * @param sourceUrl
 	 *            the source url
 	 * @param targetDirUrl
@@ -570,23 +572,49 @@ public class FileManager {
 	 */
 	private void copyRemoteFiles(String sourceUrl, String targetDirUrl,
 			boolean overwrite) throws FileTransactionException {
+		cp_remote(sourceUrl, targetDirUrl, overwrite, true);
+	}
+
+	/**
+	 * Copies remote files.
+	 * 
+	 * @param sourceUrl
+	 *            the source url
+	 * @param targetDirUrl
+	 *            the target url
+	 * @param overwrite
+	 *            whether to overwrite the target file if it exists
+	 * @param waitForTransferToFinish
+	 *            whether to wait until the transfer is finished or not...
+	 * @throws FileTransactionException
+	 *             if the copying fails (for example because overwrite is false
+	 *             and target exists).
+	 */
+	public String cp_remote(String sourceUrl, String targetDirUrl,
+			boolean overwrite, boolean waitForTransferToFinish)
+					throws FileTransactionException {
 
 		try {
 			final String handle = serviceInterface.cp(
 					DtoStringList.fromSingleString(sourceUrl), targetDirUrl,
 					overwrite, false);
 
-			StatusObject so;
-			try {
-				so = StatusObject.waitForActionToFinish(serviceInterface,
-						handle, 2, true);
-			} catch (final Exception e) {
-				throw new FileTransactionException(sourceUrl, targetDirUrl,
-						e.getLocalizedMessage(), e);
-			}
-			if (so.getStatus().isFailed()) {
-				throw new RemoteFileSystemException(so.getStatus()
-						.getErrorCause());
+			if ( waitForTransferToFinish ) {
+				StatusObject so;
+				try {
+					so = StatusObject.waitForActionToFinish(serviceInterface,
+							handle, 2, true);
+				} catch (final Exception e) {
+					throw new FileTransactionException(sourceUrl, targetDirUrl,
+							e.getLocalizedMessage(), e);
+				}
+				if (so.getStatus().isFailed()) {
+					throw new RemoteFileSystemException(so.getStatus()
+							.getErrorCause());
+				}
+				return handle;
+			} else {
+				return handle;
 			}
 
 		} catch (final RemoteFileSystemException e) {

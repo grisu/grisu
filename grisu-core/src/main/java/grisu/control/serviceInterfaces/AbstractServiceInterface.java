@@ -24,7 +24,6 @@ import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.jcommons.interfaces.GridResource;
 import grisu.jcommons.interfaces.InformationManager;
 import grisu.jcommons.interfaces.MatchMaker;
-import grisu.jcommons.utils.SubmissionLocationHelpers;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.DtoApplicationDetails;
@@ -342,13 +341,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		String dn = getDN();
 
+		// yes yes yes, this is not a proper way to authenticate admin commands
+		// for now, until admin commands are only refreshing the config files,
+		// I'll not worry about it...
 		if ("DC=nz,DC=org,DC=bestgrid,DC=slcs,O=The University of Auckland,CN=Markus Binsteiner _bK32o4Lh58A3vo9kKBcoKrJ7ZY"
 				.equals(dn)) {
-			return "No permission.";
+			return "Nice try, no permission mate.";
 		}
 
 		if (StringUtils.isBlank(command)) {
-			return null;
+			return "No command specified.";
 		}
 
 		Map<String, String> configMap = new HashMap<String, String>();
@@ -357,14 +359,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		return admin.execute(command, configMap);
-
 	}
-
-
-
-
-
-
 
 	public String archiveJob(String jobname, String target)
 			throws JobPropertiesException, NoSuchJobException,
@@ -373,26 +368,26 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return getJobManager().archiveJob(jobname, target);
 	}
 
-	private boolean checkWhetherGridResourceIsActuallyAvailable(
-			GridResource resource) {
-
-		final String[] filesystems = informationManager
-				.getStagingFileSystemForSubmissionLocation(SubmissionLocationHelpers
-						.createSubmissionLocationString(resource));
-
-		for (final MountPoint mp : df().getMountpoints()) {
-
-			for (final String fs : filesystems) {
-				if (mp.getRootUrl().startsWith(fs.replace(":2811", ""))) {
-					return true;
-				}
-			}
-
-		}
-
-		return false;
-
-	}
+	// private boolean checkWhetherGridResourceIsActuallyAvailable(
+	// GridResource resource) {
+	//
+	// final String[] filesystems = informationManager
+	// .getStagingFileSystemForSubmissionLocation(SubmissionLocationHelpers
+	// .createSubmissionLocationString(resource));
+	//
+	// for (final MountPoint mp : df().getMountpoints()) {
+	//
+	// for (final String fs : filesystems) {
+	// if (mp.getRootUrl().startsWith(fs.replace(":2811", ""))) {
+	// return true;
+	// }
+	// }
+	//
+	// }
+	//
+	// return false;
+	//
+	// }
 
 	public void copyBatchJobInputFile(String batchJobname, String inputFile,
 			String filename) throws RemoteFileSystemException,

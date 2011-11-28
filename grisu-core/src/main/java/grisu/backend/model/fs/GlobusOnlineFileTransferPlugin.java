@@ -5,7 +5,10 @@ import grisu.backend.model.User;
 import grisu.backend.model.UserInfoManager;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.jcommons.interfaces.InfoManager;
+import grith.jgrith.Credential;
 import nz.org.nesi.goji.control.GlobusOnlineUserSession;
+
+import org.ietf.jgss.GSSCredential;
 
 public class GlobusOnlineFileTransferPlugin implements FileTransferPlugin {
 
@@ -17,7 +20,10 @@ public class GlobusOnlineFileTransferPlugin implements FileTransferPlugin {
 	public GlobusOnlineFileTransferPlugin(User user) {
 
 		im = new UserInfoManager(user);
-		go = new GlobusOnlineUserSession(go_user, im);
+
+		GSSCredential gssCred = user.getCred().getGssCredential();
+		Credential cred = new Credential(gssCred);
+		go = new GlobusOnlineUserSession(go_user, cred, im);
 
 	}
 
