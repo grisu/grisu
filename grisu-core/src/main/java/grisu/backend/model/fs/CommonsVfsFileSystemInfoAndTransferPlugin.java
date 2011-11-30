@@ -129,6 +129,9 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	}
 
 	private void closeFile(FileObject f) {
+		if (f == null) {
+			return;
+		}
 		try {
 			f.close();
 		} catch (final FileSystemException ex) {
@@ -524,8 +527,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 				myLogger.error("Again couldn't access file: " + file
 						+ " to check whether it is a folder."
 						+ e.getLocalizedMessage());
-				throw new RemoteFileSystemException("Could not aquire file: "
-						+ file);
+				throw new RemoteFileSystemException(e.getLocalizedMessage());
 			}
 		} finally {
 			fsCache.close();

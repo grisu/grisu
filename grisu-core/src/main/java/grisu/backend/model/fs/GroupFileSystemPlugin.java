@@ -297,7 +297,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				if (recursiveLevels == 1) {
 
 					final Set<GridFile> files = listGroup(potentialFqan, rest,
-							true);
+							false);
 					for (final GridFile file : files) {
 
 						if (file.isInaccessable()) {
@@ -424,18 +424,25 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			}
 
 			// xxx
-
 			if (parentUrls.size() == 1) {
 				final String url = parentUrls.iterator().next();
-				final boolean isFolder = user.getFileManager().isFolder(
-						url);
-				if (isFolder) {
+				try {
+					final boolean isFolder = user.getFileManager().isFolder(
+							url);
+					if (isFolder) {
+						result = new GridFile(url, -1L);
+					} else {
+						result = user.ls(url, 0);
+					}
+					result.setIsVirtual(false);
+					result.setPath(path);
+				} catch (Exception e) {
+					e.printStackTrace();
 					result = new GridFile(url, -1L);
-				} else {
-					result = user.ls(url, 0);
+					GridFile error = new GridFile(url, false, e);
+					result.addChild(error);
 				}
-				result.setIsVirtual(false);
-				result.setPath(path);
+
 			} else {
 				result = new GridFile(path, -1L);
 				result.setIsVirtual(true);
@@ -540,12 +547,12 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				@Override
 				public void run() {
 
-					myLogger.debug("Groupfilesystem list group started: "
-							+ mp.getAlias() + " / " + urlToQuery);
-
-					result.put(urlToQuery, null);
-
 					try {
+						myLogger.debug("Groupfilesystem list group started: "
+								+ mp.getAlias() + " / " + urlToQuery);
+
+						result.put(urlToQuery, null);
+
 						final GridFile file = user.getFileManager()
 								.getFolderListing(urlToQuery, 1);
 						file.addSite(mp.getSite());
@@ -564,6 +571,10 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 						final GridFile f = new GridFile(urlToQuery, false, ex);
 						f.addSite(mp.getSite());
 						result.put(urlToQuery, f);
+					}
+
+					if (result.get(urlToQuery) == null) {
+						result.remove(urlToQuery);
 					}
 
 					myLogger.debug("Groupfilesystem list group finished: "
