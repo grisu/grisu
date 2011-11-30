@@ -297,7 +297,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				if (recursiveLevels == 1) {
 
 					final Set<GridFile> files = listGroup(potentialFqan, rest,
-							false);
+							true);
 					for (final GridFile file : files) {
 
 						if (file.isInaccessable()) {
