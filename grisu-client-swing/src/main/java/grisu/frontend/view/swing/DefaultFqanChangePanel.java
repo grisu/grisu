@@ -23,7 +23,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class DefaultFqanChangePanel extends JPanel implements
-		EventSubscriber<FqanEvent> {
+EventSubscriber<FqanEvent> {
 
 	private final DefaultComboBoxModel voModel = new DefaultComboBoxModel();
 	private ServiceInterface si = null;
@@ -36,7 +36,7 @@ public class DefaultFqanChangePanel extends JPanel implements
 	 * Create the panel.
 	 */
 	public DefaultFqanChangePanel() {
-		setLayout(new FormLayout(new ColumnSpec[] { ColumnSpec.decode("107px"),
+		setLayout(new FormLayout(new ColumnSpec[] { ColumnSpec.decode("147px"),
 				ColumnSpec.decode("218px"), },
 				new RowSpec[] { RowSpec.decode("40px"), }));
 
@@ -61,7 +61,7 @@ public class DefaultFqanChangePanel extends JPanel implements
 
 					final String newVO = (String) voModel.getSelectedItem();
 					GrisuRegistryManager.getDefault(si)
-							.getUserEnvironmentManager().setCurrentFqan(newVO);
+					.getUserEnvironmentManager().setCurrentFqan(newVO);
 
 				}
 
@@ -118,6 +118,15 @@ public class DefaultFqanChangePanel extends JPanel implements
 		};
 		fillThread.start();
 
+	}
+
+	public void lockUI(final boolean lock) {
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				comboBox.setEnabled(!lock);
+			}
+		});
 	}
 
 	public synchronized void onEvent(final FqanEvent arg0) {

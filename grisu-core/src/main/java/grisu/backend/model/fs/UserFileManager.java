@@ -37,7 +37,7 @@ public class UserFileManager {
 	private final VirtualFileSystemInfoPlugin virtualFsInfo;
 	private final VirtualFsTransferPlugin virtualFsTransfer;
 
-	private final GlobusOnlineFileTransferPlugin goFileTransfer;
+	// private final GlobusOnlineFileTransferPlugin goFileTransfer;
 
 	private final User user;
 
@@ -47,7 +47,7 @@ public class UserFileManager {
 		commonsVfsInfo = new CommonsVfsFileSystemInfoAndTransferPlugin(user);
 		virtualFsInfo = new VirtualFileSystemInfoPlugin(user);
 		virtualFsTransfer = new VirtualFsTransferPlugin(user, virtualFsInfo);
-		goFileTransfer = new GlobusOnlineFileTransferPlugin(user);
+		// goFileTransfer = new GlobusOnlineFileTransferPlugin(user);
 		fileSystemInfoPlugins.put("gsiftp", commonsVfsInfo);
 		fileSystemInfoPlugins.put("ram", commonsVfsInfo);
 		fileSystemInfoPlugins.put("tmp", commonsVfsInfo);

@@ -2,6 +2,9 @@ package grisu.frontend.view.swing.jobcreation.widgets;
 
 import grisu.control.ServiceInterface;
 
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.border.TitledBorder;
@@ -16,7 +19,7 @@ import com.jgoodies.forms.layout.RowSpec;
 public class Cpus extends AbstractWidget {
 
 	private static final String[] DEFAULT_CPUS = new String[] { "1", "2", "3",
-			"4", "5", "6", "7", "8", "12", "16", "24", "32", "64" };
+		"4", "5", "6", "7", "8", "12", "16", "24", "32", "64" };
 	private final DefaultComboBoxModel cpuModel = new DefaultComboBoxModel(
 			DEFAULT_CPUS);
 
@@ -45,6 +48,16 @@ public class Cpus extends AbstractWidget {
 	private JComboBox getComboBox() {
 		if (comboBox == null) {
 			comboBox = new JComboBox(cpuModel);
+			comboBox.addItemListener(new ItemListener() {
+
+				public void itemStateChanged(ItemEvent itemevent) {
+					if (itemevent.getStateChange() == ItemEvent.SELECTED) {
+						getPropertyChangeSupport().firePropertyChange("cpus",
+								-1, getValue());
+
+					}
+				}
+			});
 		}
 		return comboBox;
 	}

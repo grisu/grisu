@@ -1,5 +1,8 @@
 package grisu.frontend.view.swing.jobcreation.widgets;
 
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+
 import javax.swing.JTextField;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -24,6 +27,20 @@ public class TextField extends AbstractWidget {
 		if (textField == null) {
 			textField = new JTextField();
 			textField.setColumns(10);
+			textField.addKeyListener(new KeyListener() {
+
+				public void keyPressed(KeyEvent keyevent) {
+
+				}
+
+				public void keyReleased(KeyEvent keyevent) {
+					getPropertyChangeSupport().firePropertyChange(getTitle(),
+							null, getValue());
+				}
+
+				public void keyTyped(KeyEvent keyevent) {
+				}
+			});
 		}
 		return textField;
 	}

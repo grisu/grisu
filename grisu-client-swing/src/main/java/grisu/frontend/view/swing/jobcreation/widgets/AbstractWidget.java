@@ -49,7 +49,7 @@ public abstract class AbstractWidget extends JPanel {
 			try {
 				if (!si.isFolder(startUrl)) {
 					startUrl = new File(System.getProperty("user.home"))
-							.toURI().toString();
+					.toURI().toString();
 				}
 			} catch (final RemoteFileSystemException e) {
 				myLogger.debug(e.getLocalizedMessage(), e);
@@ -88,7 +88,7 @@ public abstract class AbstractWidget extends JPanel {
 			try {
 				if (!si.isFolder(startUrl)) {
 					startUrl = new File(System.getProperty("user.home"))
-							.toURI().toString();
+					.toURI().toString();
 				}
 			} catch (final RemoteFileSystemException e) {
 				myLogger.debug(e.getLocalizedMessage(), e);
@@ -120,6 +120,8 @@ public abstract class AbstractWidget extends JPanel {
 
 	private String historyKey = null;
 
+	private String title = null;
+
 	public AbstractWidget() {
 		super();
 	}
@@ -149,6 +151,10 @@ public abstract class AbstractWidget extends JPanel {
 
 	public ServiceInterface getServiceInterface() {
 		return si;
+	}
+
+	public String getTitle() {
+		return this.title;
 	}
 
 	abstract public String getValue();
@@ -236,8 +242,8 @@ public abstract class AbstractWidget extends JPanel {
 			initHistory();
 		}
 	}
-
 	public void setTitle(String title) {
+		this.title = title;
 		setBorder(new TitledBorder(null, title, TitledBorder.LEADING,
 				TitledBorder.TOP, null, null));
 	}

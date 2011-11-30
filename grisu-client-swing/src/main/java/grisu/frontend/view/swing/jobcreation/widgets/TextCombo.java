@@ -1,5 +1,8 @@
 package grisu.frontend.view.swing.jobcreation.widgets;
 
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 
@@ -33,6 +36,17 @@ public class TextCombo extends AbstractWidget {
 			comboBox = new JComboBox(textModel);
 			comboBox.setPrototypeDisplayValue("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 			comboBox.setEditable(true);
+			comboBox.addItemListener(new ItemListener() {
+
+				public void itemStateChanged(ItemEvent itemevent) {
+					if (itemevent.getStateChange() == ItemEvent.SELECTED) {
+						getPropertyChangeSupport().firePropertyChange(
+								getTitle(), -1, getValue());
+
+					}
+				}
+			});
+
 		}
 		return comboBox;
 	}

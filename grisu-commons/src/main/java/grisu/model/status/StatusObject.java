@@ -118,7 +118,7 @@ public class StatusObject {
 							myLogger.debug("Waiting for task {} to finish...",
 									handle);
 							Thread.sleep(waitTime * 1000);
-						} catch (final InterruptedException e) {
+						} catch (final Throwable e) {
 							myLogger.error(e.getLocalizedMessage(), e);
 							waitWasInterrupted = true;
 							break;

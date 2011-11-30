@@ -1144,20 +1144,23 @@ public class UserJobManager {
 	 */
 	public final int killJob(final Job job) {
 
-		JobSubmitter submitter = null;
-		submitter = submitters.get(job.getSubmissionType());
+		synchronized (job.getJobname()) {
+			JobSubmitter submitter = null;
+			submitter = submitters.get(job.getSubmissionType());
 
-		if (submitter == null) {
-			// throw new NoSuchJobSubmitterException(
-			// "Can't find JobSubmitter: " + job.getSubmissionType());
-			myLogger.error("Can't find jobsubitter: " + job.getSubmissionType());
-			return JobConstants.KILLED;
+			if (submitter == null) {
+				// throw new NoSuchJobSubmitterException(
+				// "Can't find JobSubmitter: " + job.getSubmissionType());
+				myLogger.error("Can't find jobsubitter: " + job.getSubmissionType());
+				return JobConstants.KILLED;
+			}
+
+			return submitter.killJob(job, job.getCredential());
 		}
-
-		return submitter.killJob(job, job.getCredential());
 	}
 
-	public String killJobs(final DtoStringList jobnames, final boolean clear) {
+	public synchronized String killJobs(final DtoStringList jobnames,
+			final boolean clear) {
 
 		if ((jobnames == null) || (jobnames.asArray().length == 0)) {
 			return null;
