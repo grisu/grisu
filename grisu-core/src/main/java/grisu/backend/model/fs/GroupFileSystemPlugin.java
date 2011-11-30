@@ -109,7 +109,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				return result;
 			}
 
-			final Set<GridFile> childs = listGroup(fqanT, restPath);
+			final Set<GridFile> childs = listGroup(fqanT, restPath, true);
 
 			for (final GridFile file : childs) {
 
@@ -263,7 +263,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				}
 			}
 
-			final Set<GridFile> files = listGroup("/" + tokens[0], "");
+			final Set<GridFile> files = listGroup("/" + tokens[0], "", true);
 			for (final GridFile file : files) {
 				if (file.isInaccessable()) {
 					result.addChild(file);
@@ -296,7 +296,8 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 				if (recursiveLevels == 1) {
 
-					final Set<GridFile> files = listGroup(potentialFqan, rest);
+					final Set<GridFile> files = listGroup(potentialFqan, rest,
+							false);
 					for (final GridFile file : files) {
 
 						if (file.isInaccessable()) {
@@ -505,8 +506,9 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 		return result;
 	}
 
-	private Set<GridFile> listGroup(String fqan, String path)
-			throws RemoteFileSystemException {
+	private Set<GridFile> listGroup(String fqan, String path,
+			final boolean includeFailedChilds)
+					throws RemoteFileSystemException {
 
 		final Set<MountPoint> mps = user.getMountPoints(fqan);
 
@@ -551,7 +553,8 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 					} catch (final RemoteFileSystemException rfse) {
 						final String msg = rfse.getLocalizedMessage();
-						if (!msg.contains("not a folder")) {
+						if (includeFailedChilds
+								&& !msg.contains("not a folder")) {
 							final GridFile f = new GridFile(urlToQuery, false,
 									rfse);
 							f.addSite(mp.getSite());
