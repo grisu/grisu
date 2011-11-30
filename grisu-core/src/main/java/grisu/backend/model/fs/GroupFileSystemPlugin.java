@@ -437,7 +437,6 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					result.setIsVirtual(false);
 					result.setPath(path);
 				} catch (Exception e) {
-					e.printStackTrace();
 					result = new GridFile(url, -1L);
 					GridFile error = new GridFile(url, false, e);
 					result.addChild(error);
