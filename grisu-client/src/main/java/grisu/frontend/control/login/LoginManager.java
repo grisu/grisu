@@ -119,97 +119,103 @@ public class LoginManager {
 			LoginParams loginParams, boolean displayCliProgress)
 					throws LoginException {
 
+		try {
+			if (displayCliProgress) {
+				CliHelpers.setIndeterminateProgress(
+						"Setting up environment...", true);
+			}
+			initEnvironment();
 
-		if (displayCliProgress) {
-			CliHelpers.setIndeterminateProgress(
-					"Setting up environment...", true);
-		}
-		initEnvironment();
+			if (loginParams == null) {
 
-		if (loginParams == null) {
+				final String defaultUrl = ClientPropertiesManager
+						.getDefaultServiceInterfaceUrl();
+				if (StringUtils.isNotBlank(defaultUrl)) {
+					loginParams = new LoginParams(defaultUrl, null, null);
+				} else {
+					loginParams = new LoginParams("Local", null, null);
+				}
 
-			final String defaultUrl = ClientPropertiesManager
-					.getDefaultServiceInterfaceUrl();
-			if (StringUtils.isNotBlank(defaultUrl)) {
-				loginParams = new LoginParams(defaultUrl, null, null);
-			} else {
-				loginParams = new LoginParams("Local", null, null);
 			}
 
+			loginParams.setAliasMap(SERVICEALIASES);
+
+			try {
+				addPluginsToClasspath();
+			} catch (final IOException e2) {
+				// TODO Auto-generated catch block
+				myLogger.warn(e2.getLocalizedMessage(), e2);
+				throw new RuntimeException(e2);
+			}
+
+			try {
+				CertificateFiles.copyCACerts(true);
+			} catch (final Exception e1) {
+				// e1.printStackTrace();
+				myLogger.warn(e1.getLocalizedMessage(), e1);
+			}
+
+			// do the cacert thingy
+			try {
+				final URL cacertURL = LoginManager.class
+						.getResource("/ipsca.pem");
+				final HttpSecureProtocol protocolSocketFactory = new HttpSecureProtocol();
+
+				TrustMaterial trustMaterial = null;
+				trustMaterial = new TrustMaterial(cacertURL);
+
+				// We can use setTrustMaterial() instead of addTrustMaterial()
+				// if we want to remove
+				// HttpSecureProtocol's default trust of TrustMaterial.CACERTS.
+				protocolSocketFactory.addTrustMaterial(trustMaterial);
+
+				// Maybe we want to turn off CN validation (not recommended!):
+				protocolSocketFactory.setCheckHostname(false);
+
+				final Protocol protocol = new Protocol("https",
+						(ProtocolSocketFactory) protocolSocketFactory, 443);
+				Protocol.registerProtocol("https", protocol);
+			} catch (final Exception e) {
+				myLogger.error(e.getLocalizedMessage(), e);
+			}
+
+			if (displayCliProgress) {
+				CliHelpers.setIndeterminateProgress("Uploading credential...", true);
+			}
+			try {
+				cred.uploadMyProxy();
+			} catch (Exception e) {
+				throw new LoginException("Could not upload myproxy credential.", e);
+			}
+
+			ServiceInterface si;
+			if (displayCliProgress) {
+				CliHelpers.setIndeterminateProgress("Logging in to backend...",
+						true);
+			}
+			try {
+				si = ServiceInterfaceFactory.createInterface(
+						loginParams.getLoginUrl(), cred.getMyProxyUsername(),
+						cred.getMyProxyPassword(), cred.getMyProxyServer(),
+						new Integer(cred.getMyProxyPort()).toString(),
+						loginParams.getHttpProxy(), loginParams.getHttpProxyPort(),
+						loginParams.getHttpProxyUsername(),
+						loginParams.getHttpProxyPassphrase());
+			} catch (ServiceInterfaceException e) {
+				throw new LoginException("Coult not login to backend.", e);
+			}
+
+			loginParams.clearPasswords();
+
+			GrisuRegistryManager.registerServiceInterface(si, cred);
+
+			return si;
+		} finally {
+			if (displayCliProgress) {
+				CliHelpers.setIndeterminateProgress(false);
+
+			}
 		}
-
-		loginParams.setAliasMap(SERVICEALIASES);
-
-		try {
-			addPluginsToClasspath();
-		} catch (final IOException e2) {
-			// TODO Auto-generated catch block
-			myLogger.warn(e2.getLocalizedMessage(), e2);
-			throw new RuntimeException(e2);
-		}
-
-		try {
-			CertificateFiles.copyCACerts(true);
-		} catch (final Exception e1) {
-			// e1.printStackTrace();
-			myLogger.warn(e1.getLocalizedMessage(), e1);
-		}
-
-		// do the cacert thingy
-		try {
-			final URL cacertURL = LoginManager.class
-					.getResource("/ipsca.pem");
-			final HttpSecureProtocol protocolSocketFactory = new HttpSecureProtocol();
-
-			TrustMaterial trustMaterial = null;
-			trustMaterial = new TrustMaterial(cacertURL);
-
-			// We can use setTrustMaterial() instead of addTrustMaterial()
-			// if we want to remove
-			// HttpSecureProtocol's default trust of TrustMaterial.CACERTS.
-			protocolSocketFactory.addTrustMaterial(trustMaterial);
-
-			// Maybe we want to turn off CN validation (not recommended!):
-			protocolSocketFactory.setCheckHostname(false);
-
-			final Protocol protocol = new Protocol("https",
-					(ProtocolSocketFactory) protocolSocketFactory, 443);
-			Protocol.registerProtocol("https", protocol);
-		} catch (final Exception e) {
-			myLogger.error(e.getLocalizedMessage(), e);
-		}
-
-		if (displayCliProgress) {
-			CliHelpers.setIndeterminateProgress("Uploading credential...", true);
-		}
-		try {
-			cred.uploadMyProxy();
-		} catch (Exception e) {
-			throw new LoginException("Could not upload myproxy credential.", e);
-		}
-
-		ServiceInterface si;
-		if (displayCliProgress) {
-			CliHelpers.setIndeterminateProgress("Logging in to backend...",
-					true);
-		}
-		try {
-			si = ServiceInterfaceFactory.createInterface(
-					loginParams.getLoginUrl(), cred.getMyProxyUsername(),
-					cred.getMyProxyPassword(), cred.getMyProxyServer(),
-					new Integer(cred.getMyProxyPort()).toString(),
-					loginParams.getHttpProxy(), loginParams.getHttpProxyPort(),
-					loginParams.getHttpProxyUsername(),
-					loginParams.getHttpProxyPassphrase());
-		} catch (ServiceInterfaceException e) {
-			throw new LoginException("Coult not login to backend.", e);
-		}
-
-		loginParams.clearPasswords();
-
-		GrisuRegistryManager.registerServiceInterface(si, cred);
-
-		return si;
 
 
 	}
