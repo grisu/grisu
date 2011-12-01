@@ -114,104 +114,112 @@ public class LoginManager {
 		return login("Local");
 	}
 
+
 	public static ServiceInterface login(Credential cred,
-			LoginParams loginParams) throws LoginException {
+			LoginParams loginParams, boolean displayCliProgress)
+					throws LoginException {
+
+
+		if (displayCliProgress) {
+			CliHelpers.setIndeterminateProgress(
+					"Setting up environment...", true);
+		}
+		initEnvironment();
+
+		if (loginParams == null) {
+
+			final String defaultUrl = ClientPropertiesManager
+					.getDefaultServiceInterfaceUrl();
+			if (StringUtils.isNotBlank(defaultUrl)) {
+				loginParams = new LoginParams(defaultUrl, null, null);
+			} else {
+				loginParams = new LoginParams("Local", null, null);
+			}
+
+		}
+
+		loginParams.setAliasMap(SERVICEALIASES);
 
 		try {
-			CliHelpers.setIndeterminateProgress("Setting up environment...", true);
-			initEnvironment();
+			addPluginsToClasspath();
+		} catch (final IOException e2) {
+			// TODO Auto-generated catch block
+			myLogger.warn(e2.getLocalizedMessage(), e2);
+			throw new RuntimeException(e2);
+		}
 
-			if (loginParams == null) {
+		try {
+			CertificateFiles.copyCACerts(true);
+		} catch (final Exception e1) {
+			// e1.printStackTrace();
+			myLogger.warn(e1.getLocalizedMessage(), e1);
+		}
 
-				final String defaultUrl = ClientPropertiesManager
-						.getDefaultServiceInterfaceUrl();
-				if (StringUtils.isNotBlank(defaultUrl)) {
-					loginParams = new LoginParams(defaultUrl, null, null);
-				} else {
-					loginParams = new LoginParams("Local", null, null);
-				}
+		// do the cacert thingy
+		try {
+			final URL cacertURL = LoginManager.class
+					.getResource("/ipsca.pem");
+			final HttpSecureProtocol protocolSocketFactory = new HttpSecureProtocol();
 
-			}
+			TrustMaterial trustMaterial = null;
+			trustMaterial = new TrustMaterial(cacertURL);
 
-			loginParams.setAliasMap(SERVICEALIASES);
+			// We can use setTrustMaterial() instead of addTrustMaterial()
+			// if we want to remove
+			// HttpSecureProtocol's default trust of TrustMaterial.CACERTS.
+			protocolSocketFactory.addTrustMaterial(trustMaterial);
 
-			try {
-				addPluginsToClasspath();
-			} catch (final IOException e2) {
-				// TODO Auto-generated catch block
-				myLogger.warn(e2.getLocalizedMessage(), e2);
-				throw new RuntimeException(e2);
-			}
+			// Maybe we want to turn off CN validation (not recommended!):
+			protocolSocketFactory.setCheckHostname(false);
 
-			try {
-				CertificateFiles.copyCACerts(true);
-			} catch (final Exception e1) {
-				// e1.printStackTrace();
-				myLogger.warn(e1.getLocalizedMessage(), e1);
-			}
+			final Protocol protocol = new Protocol("https",
+					(ProtocolSocketFactory) protocolSocketFactory, 443);
+			Protocol.registerProtocol("https", protocol);
+		} catch (final Exception e) {
+			myLogger.error(e.getLocalizedMessage(), e);
+		}
 
-			// do the cacert thingy
-			try {
-				final URL cacertURL = LoginManager.class
-						.getResource("/ipsca.pem");
-				final HttpSecureProtocol protocolSocketFactory = new HttpSecureProtocol();
-
-				TrustMaterial trustMaterial = null;
-				trustMaterial = new TrustMaterial(cacertURL);
-
-				// We can use setTrustMaterial() instead of addTrustMaterial()
-				// if we want to remove
-				// HttpSecureProtocol's default trust of TrustMaterial.CACERTS.
-				protocolSocketFactory.addTrustMaterial(trustMaterial);
-
-				// Maybe we want to turn off CN validation (not recommended!):
-				protocolSocketFactory.setCheckHostname(false);
-
-				final Protocol protocol = new Protocol("https",
-						(ProtocolSocketFactory) protocolSocketFactory, 443);
-				Protocol.registerProtocol("https", protocol);
-			} catch (final Exception e) {
-				myLogger.error(e.getLocalizedMessage(), e);
-			}
-
+		if (displayCliProgress) {
 			CliHelpers.setIndeterminateProgress("Uploading credential...", true);
-			try {
-				cred.uploadMyProxy();
-			} catch (Exception e) {
-				throw new LoginException("Could not upload myproxy credential.", e);
-			}
+		}
+		try {
+			cred.uploadMyProxy();
+		} catch (Exception e) {
+			throw new LoginException("Could not upload myproxy credential.", e);
+		}
 
-			ServiceInterface si;
+		ServiceInterface si;
+		if (displayCliProgress) {
 			CliHelpers.setIndeterminateProgress("Logging in to backend...",
 					true);
-			try {
-				si = ServiceInterfaceFactory.createInterface(
-						loginParams.getLoginUrl(), cred.getMyProxyUsername(),
-						cred.getMyProxyPassword(), cred.getMyProxyServer(),
-						new Integer(cred.getMyProxyPort()).toString(),
-						loginParams.getHttpProxy(), loginParams.getHttpProxyPort(),
-						loginParams.getHttpProxyUsername(),
-						loginParams.getHttpProxyPassphrase());
-			} catch (ServiceInterfaceException e) {
-				throw new LoginException("Coult not login to backend.", e);
-			}
-
-			loginParams.clearPasswords();
-
-			GrisuRegistryManager.registerServiceInterface(si, cred);
-
-			return si;
-		} finally {
-			CliHelpers.setIndeterminateProgress(false);
 		}
+		try {
+			si = ServiceInterfaceFactory.createInterface(
+					loginParams.getLoginUrl(), cred.getMyProxyUsername(),
+					cred.getMyProxyPassword(), cred.getMyProxyServer(),
+					new Integer(cred.getMyProxyPort()).toString(),
+					loginParams.getHttpProxy(), loginParams.getHttpProxyPort(),
+					loginParams.getHttpProxyUsername(),
+					loginParams.getHttpProxyPassphrase());
+		} catch (ServiceInterfaceException e) {
+			throw new LoginException("Coult not login to backend.", e);
+		}
+
+		loginParams.clearPasswords();
+
+		GrisuRegistryManager.registerServiceInterface(si, cred);
+
+		return si;
+
 
 	}
 
 	public static ServiceInterface login(Credential cred,
-			String backend)
+			String backend,
+			boolean displayCliProgress)
 					throws LoginException {
 		LoginParams params = new LoginParams(backend, null, null);
-		return login(cred, params);
+		return login(cred, params, displayCliProgress);
 	}
 
 	public static ServiceInterface login(String backend)
@@ -222,7 +230,7 @@ public class LoginManager {
 		} catch (Exception e) {
 			throw new LoginException("Could not load default credential.", e);
 		}
-		return login(cred, backend);
+		return login(cred, backend, false);
 
 	}
 
@@ -271,7 +279,7 @@ public class LoginManager {
 			}
 		}
 
-		return login(c, backend);
+		return login(c, backend, true);
 
 	}
 
@@ -290,7 +298,7 @@ public class LoginManager {
 			throw new LoginException("Can't get credential from MyProxy.", e);
 		}
 
-		return login(c, backend);
+		return login(c, backend, true);
 	}
 
 	public static ServiceInterface loginCommandlineShibboleth(String backend,
@@ -307,7 +315,7 @@ public class LoginManager {
 			throw new LoginException("Can't get credential from MyProxy.", e);
 		}
 
-		return login(c, backend);
+		return login(c, backend, true);
 
 	}
 
@@ -318,7 +326,7 @@ public class LoginManager {
 		if (saveCredToDisk) {
 			c.saveCredential();
 		}
-		return login(c, backend);
+		return login(c, backend, true);
 	}
 
 
@@ -332,10 +340,11 @@ public class LoginManager {
 	}
 
 	public static ServiceInterface myProxyLogin(String username,
-			char[] password, String backend) throws LoginException {
+			char[] password, String backend, boolean displayCliProgress)
+					throws LoginException {
 
 		Credential c = CredentialFactory.createFromMyProxy(username, password);
-		return login(c, backend);
+		return login(c, backend, displayCliProgress);
 	}
 
 }

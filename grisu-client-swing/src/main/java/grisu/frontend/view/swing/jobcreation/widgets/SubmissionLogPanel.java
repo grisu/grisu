@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SubmissionLogPanel extends JPanel implements
-		PropertyChangeListener {
+PropertyChangeListener {
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(TreeWillExpandListener.class.getName());
@@ -77,7 +77,7 @@ public class SubmissionLogPanel extends JPanel implements
 		return textArea;
 	}
 
-	public void propertyChange(PropertyChangeEvent evt) {
+	public synchronized void propertyChange(PropertyChangeEvent evt) {
 		try {
 
 			String oldValue = null;
@@ -165,7 +165,7 @@ public class SubmissionLogPanel extends JPanel implements
 			public void run() {
 				getTextArea().setText(string);
 				getTextArea()
-						.setCaretPosition(getTextArea().getText().length());
+				.setCaretPosition(getTextArea().getText().length());
 			}
 		});
 	}
