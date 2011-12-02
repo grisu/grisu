@@ -296,7 +296,8 @@ public class LoginManager {
 
 		Credential c;
 		try {
-			c = CredentialFactory.createFromMyProxyCommandline(p);
+			c = CredentialFactory.createFromMyProxyCommandline(p,
+					Credential.DEFAULT_PROXY_LIFETIME_IN_HOURS * 3600);
 			if (saveCredToDisk) {
 				c.saveCredential();
 			}
@@ -349,7 +350,8 @@ public class LoginManager {
 			char[] password, String backend, boolean displayCliProgress)
 					throws LoginException {
 
-		Credential c = CredentialFactory.createFromMyProxy(username, password);
+		Credential c = CredentialFactory.createFromMyProxy(username, password,
+				Credential.DEFAULT_PROXY_LIFETIME_IN_HOURS * 3600);
 		return login(c, backend, displayCliProgress);
 	}
 
