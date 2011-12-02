@@ -1,7 +1,7 @@
 package grisu.backend.model.job;
 
-import grisu.backend.model.ProxyCredential;
 import grisu.jcommons.interfaces.InformationManager;
+import grith.jgrith.Credential;
 
 /**
  * Extend this abstract class if you want to write a connector to a new
@@ -32,7 +32,7 @@ public abstract class JobSubmitter {
 	 *            kill the job
 	 * @return the status of the job
 	 */
-	public abstract int getJobStatus(Job job, ProxyCredential cred);
+	public abstract int getJobStatus(Job job, Credential cred);
 
 	// public String convertJobDescription(Job job) {
 	//
@@ -62,7 +62,7 @@ public abstract class JobSubmitter {
 	 *            kill the job
 	 * @return the new status of the job
 	 */
-	public abstract int killJob(Job job, ProxyCredential cred);
+	public abstract int killJob(Job job, Credential cred);
 
 	/**
 	 * Used to submit the job to the specified host.
@@ -78,6 +78,6 @@ public abstract class JobSubmitter {
 	 */
 	protected abstract String submit(InformationManager infoManager,
 			String host, String factoryType, Job job)
-			throws ServerJobSubmissionException;
+					throws ServerJobSubmissionException;
 
 }

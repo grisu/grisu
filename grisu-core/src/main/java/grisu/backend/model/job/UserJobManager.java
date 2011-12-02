@@ -1,7 +1,6 @@
 package grisu.backend.model.job;
 
 import grisu.backend.hibernate.JobDAO;
-import grisu.backend.model.ProxyCredential;
 import grisu.backend.model.RemoteFileTransferObject;
 import grisu.backend.model.User;
 import grisu.backend.model.fs.GrisuInputStream;
@@ -31,6 +30,7 @@ import grisu.model.utils.InformationUtils;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.ServiceInterfaceUtils;
 import grisu.utils.SeveralXMLHelpers;
+import grith.jgrith.Credential;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -823,13 +823,13 @@ public class UserJobManager {
 			return job.getStatus();
 		}
 
-		final ProxyCredential cred = job.getCredential();
+		final Credential cred = job.getCredential();
 		boolean changedCred = false;
 		// TODO check whether cred is stored in the database in that case? also,
 		// is a voms credential needed? -- apparently not - only dn must match
 		if ((cred == null) || !cred.isValid()) {
 
-			job.setCredential(getUser().getCred(job.getFqan()));
+			job.setCredential(getUser().getCredential(job.getFqan()));
 			changedCred = true;
 		}
 
@@ -940,11 +940,11 @@ public class UserJobManager {
 
 		if (old_status > JobConstants.READY_TO_SUBMIT) {
 
-			final ProxyCredential cred = job.getCredential();
+			final Credential cred = job.getCredential();
 			boolean changedCred = false;
 			// TODO check whether cred is stored in the database in that case?
 			if ((cred == null) || !cred.isValid()) {
-				job.setCredential(getUser().getCred());
+				job.setCredential(getUser().getCredential());
 				changedCred = true;
 			}
 
@@ -2384,7 +2384,7 @@ public class UserJobManager {
 		myLogger.debug(debug_token + "setting credential started...");
 		if (job.getFqan() != null) {
 			try {
-				job.setCredential(getUser().getCred(job.getFqan()));
+				job.setCredential(getUser().getCredential(job.getFqan()));
 
 			} catch (final Throwable e) {
 				status.setFailed(true);
@@ -2397,7 +2397,7 @@ public class UserJobManager {
 			}
 		} else {
 			job.addLogMessage("Setting non-vo credential: " + job.getFqan());
-			job.setCredential(getUser().getCred());
+			job.setCredential(getUser().getCredential());
 		}
 		myLogger.debug(debug_token + "setting credential finished.");
 

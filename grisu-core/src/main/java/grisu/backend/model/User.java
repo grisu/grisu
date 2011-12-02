@@ -10,7 +10,6 @@ import grisu.backend.model.job.UserBatchJobManager;
 import grisu.backend.model.job.UserJobManager;
 import grisu.backend.model.job.gt4.GT4Submitter;
 import grisu.backend.model.job.gt5.GT5Submitter;
-import grisu.backend.utils.CertHelpers;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoValidCredentialException;
 import grisu.control.exceptions.RemoteFileSystemException;
@@ -24,8 +23,10 @@ import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.GridFile;
 import grisu.model.job.JobSubmissionObjectImpl;
 import grisu.settings.ServerPropertiesManager;
-import grisu.utils.FqanHelpers;
 import grisu.utils.MountPointHelpers;
+import grith.jgrith.Credential;
+import grith.jgrith.certificate.ProxyCredential;
+import grith.jgrith.utils.FqanHelpers;
 import grith.jgrith.voms.VO;
 import grith.jgrith.voms.VOManagement.VOManagement;
 import grith.jgrith.vomsProxy.VomsException;
@@ -97,7 +98,7 @@ public class User {
 
 	private static final String ACCESSIBLE = "Accessible";
 
-	public static User createUser(ProxyCredential cred,
+	public static User createUser(Credential cred,
 			AbstractServiceInterface si) {
 
 		// make sure there is a valid credential
@@ -130,7 +131,7 @@ public class User {
 
 			userdao.saveOrUpdate(user);
 		} else {
-			user.setCred(cred);
+			user.setCredential(cred);
 			time1 = new Date();
 			myLogger.debug("Login benchmark - setting credential: "
 					+ new Long((time1.getTime() - time2.getTime())).toString()
@@ -182,7 +183,9 @@ public class User {
 	private Long id = null;
 
 	// the (default) credential to contact gridftp file shares
-	private ProxyCredential cred = null;
+	// private ProxyCredential cred = null;
+
+	private Credential credential;
 
 	private UserJobManager jobmanager;
 	// the (default) credentials dn
@@ -233,13 +236,14 @@ public class User {
 	 * @throws FileSystemException
 	 *             if the users default filesystems can't be mounted
 	 */
-	private User(final ProxyCredential cred) {
+	private User(final Credential cred) {
 		this.dn = cred.getDn();
-		this.cred = cred;
+		this.credential = cred;
 		this.infoManager = AbstractServiceInterface.informationManager;
 		this.matchmaker = AbstractServiceInterface.matchmaker;
 
 	}
+
 
 	/**
 	 * Constructs a User object not using an associated credential.
@@ -468,7 +472,7 @@ public class User {
 		// add dn dir if necessary
 
 		if (userDnPath) {
-			url = url + "/" + User.get_vo_dn_path(getCred().getDn());
+			url = url + "/" + User.get_vo_dn_path(getCredential().getDn());
 
 			// try to connect to filesystem in background and store in database
 			// if not successful, so next time won't be tried again...
@@ -995,32 +999,16 @@ public class User {
 	 * @return the default credential or null if there is none
 	 */
 	@Transient
-	public ProxyCredential getCred() {
-		return cred;
+	public Credential getCredential() {
+		return credential;
 	}
 
 	@Transient
-	public ProxyCredential getCred(String fqan) {
+	public Credential getCredential(String fqan) {
 
-		if (StringUtils.isBlank(fqan)) {
-			fqan = Constants.NON_VO_FQAN;
-		}
+		Credential cred = getCredential().getVomsCredential(fqan);
 
-		if (Constants.NON_VO_FQAN.equals(fqan)) {
-			return getCred();
-		}
-
-		ProxyCredential credToUse = cachedCredentials.get(fqan);
-
-		if (((credToUse == null) || !credToUse.isValid())) {
-
-			// put a new credential in the cache
-			final VO vo = getFqans().get(fqan);
-			credToUse = CertHelpers.getVOProxyCredential(vo, fqan, getCred());
-			cachedCredentials.put(fqan, credToUse);
-		}
-
-		return credToUse;
+		return cred;
 	}
 
 	@Transient
@@ -1237,9 +1225,10 @@ public class User {
 		if (fqans == null) {
 
 			// myLogger.debug("Checking credential");
-			if (cred.isValid()) {
+			if (credential.isValid()) {
 				try {
-					fqans = VOManagement.getAllFqans(cred.getGssCredential());
+					fqans = VOManagement
+							.getAllFqans(credential.getCredential());
 				} catch (Exception e) {
 					myLogger.error("Can't get fqans.", e);
 					fqans = Maps.newHashMap();
@@ -1510,7 +1499,8 @@ public class User {
 			final boolean useHomeDirectory, String site)
 					throws RemoteFileSystemException {
 
-		return mountFileSystem(root, name, getCred(), useHomeDirectory, site);
+		return mountFileSystem(root, name, getCredential(), useHomeDirectory,
+				site);
 	}
 
 	/**
@@ -1537,7 +1527,7 @@ public class User {
 	 *             if the filesystem could not be mounted
 	 */
 	public MountPoint mountFileSystem(String uri, final String mountPointName,
-			final ProxyCredential cred, final boolean useHomeDirectory,
+			final Credential cred, final boolean useHomeDirectory,
 			final String site) throws RemoteFileSystemException {
 
 		final MountPoint new_mp = getFileManager().mountFileSystem(uri,
@@ -1564,7 +1554,7 @@ public class User {
 
 			final Map<String, VO> temp = getFqans();
 
-			final ProxyCredential vomsProxyCred = getCred(fqan);
+			final Credential vomsProxyCred = getCredential(fqan);
 
 			return mountFileSystem(root, name, vomsProxyCred, useHomeDirectory,
 					site);
@@ -1660,16 +1650,16 @@ public class User {
 	 * @param cred
 	 *            the credential to use as default
 	 */
-	public synchronized void setCred(final ProxyCredential cred) {
+	public synchronized void setCredential(final Credential cred) {
 
-		if (cred.equals(this.cred)) {
+		if (cred.equals(this.credential)) {
 			myLogger.debug("Not setting new credential since it's the same...");
 			return;
 		}
 
 		myLogger.debug(cred.getDn() + ": Setting new credential.");
 
-		this.cred = cred;
+		this.credential = cred;
 		cachedCredentials.clear();
 	}
 

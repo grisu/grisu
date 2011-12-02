@@ -1,6 +1,5 @@
 package grisu.backend.model.fs;
 
-import grisu.backend.model.ProxyCredential;
 import grisu.backend.model.RemoteFileTransferObject;
 import grisu.backend.model.User;
 import grisu.control.ServiceInterface;
@@ -12,6 +11,7 @@ import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.DtoStringList;
 import grisu.model.dto.GridFile;
 import grisu.model.status.StatusObject;
+import grith.jgrith.Credential;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -292,7 +292,7 @@ public class UserFileManager {
 	}
 
 	public MountPoint mountFileSystem(String uri, final String mountPointName,
-			final ProxyCredential cred, final boolean useHomeDirectory,
+			final Credential cred, final boolean useHomeDirectory,
 			final String site) throws RemoteFileSystemException {
 		return getFileSystemInfoPlugin(uri).mountFileSystem(uri,
 				mountPointName, cred, useHomeDirectory, site);

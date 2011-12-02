@@ -2,6 +2,7 @@ package grisu.backend.model;
 
 import grisu.model.MountPoint;
 import grisu.settings.ServerPropertiesManager;
+import grith.jgrith.Credential;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -94,7 +95,8 @@ public class FileSystemCache {
 	}
 
 	private FileSystem createFileSystem(String rootUrl,
-			ProxyCredential credToUse) throws FileSystemException {
+ Credential credToUse)
+			throws FileSystemException {
 
 		final FileSystemOptions opts = new FileSystemOptions();
 
@@ -104,7 +106,7 @@ public class FileSystemCache {
 
 			final GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
 					.getInstance();
-			builder.setGSSCredential(opts, credToUse.getGssCredential());
+			builder.setGSSCredential(opts, credToUse.getCredential());
 			builder.setTimeout(opts,
 					ServerPropertiesManager.getFileSystemConnectTimeout());
 			// builder.setUserDirIsRoot(opts, true);
@@ -135,7 +137,7 @@ public class FileSystemCache {
 			throws FileSystemException {
 
 		synchronized (rootUrl) {
-			ProxyCredential credToUse = null;
+			Credential credToUse = null;
 
 			MountPoint temp = null;
 			try {
@@ -149,10 +151,10 @@ public class FileSystemCache {
 			// get the right credential for this mountpoint
 			if (fqan != null) {
 
-				credToUse = user.getCred(fqan);
+				credToUse = user.getCredential(fqan);
 
 			} else {
-				credToUse = user.getCred();
+				credToUse = user.getCredential();
 			}
 
 			FileSystem fileBase = null;

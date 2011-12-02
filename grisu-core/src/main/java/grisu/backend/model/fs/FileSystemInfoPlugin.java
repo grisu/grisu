@@ -1,10 +1,10 @@
 package grisu.backend.model.fs;
 
-import grisu.backend.model.ProxyCredential;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.GridFile;
+import grith.jgrith.Credential;
 
 import java.util.Set;
 
@@ -38,8 +38,8 @@ public interface FileSystemInfoPlugin {
 	public long lastModified(final String url) throws RemoteFileSystemException;
 
 	public MountPoint mountFileSystem(String uri, String mountPointName,
-			ProxyCredential cred, boolean useHomeDirectory, String site)
-			throws RemoteFileSystemException;
+			Credential cred, boolean useHomeDirectory, String site)
+					throws RemoteFileSystemException;
 
 	public String resolveFileSystemHomeDirectory(String filesystemRoot,
 			String fqan) throws RemoteFileSystemException;

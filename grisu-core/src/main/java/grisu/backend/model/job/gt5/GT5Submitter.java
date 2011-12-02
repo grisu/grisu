@@ -1,12 +1,12 @@
 package grisu.backend.model.job.gt5;
 
 import grisu.backend.hibernate.JobDAO;
-import grisu.backend.model.ProxyCredential;
 import grisu.backend.model.job.Job;
 import grisu.backend.model.job.JobSubmitter;
 import grisu.backend.model.job.ServerJobSubmissionException;
 import grisu.control.JobConstants;
 import grisu.jcommons.interfaces.InformationManager;
+import grith.jgrith.Credential;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -40,11 +40,11 @@ public class GT5Submitter extends JobSubmitter {
 	}
 
 	@Override
-	public int getJobStatus(Job job, ProxyCredential credential) {
+	public int getJobStatus(Job job, Credential credential) {
 		return getJobStatus(job, credential, true);
 	}
 
-	public int getJobStatus(Job grisuJob, ProxyCredential credential,
+	public int getJobStatus(Job grisuJob, Credential credential,
 			boolean restart) {
 
 		final String handle = grisuJob.getJobhandle();
@@ -54,7 +54,7 @@ public class GT5Submitter extends JobSubmitter {
 		final String contact = getContactString(handle);
 		final GramJob job = new GramJob(null);
 		GramJob restartJob = new GramJob(null);
-		final GSSCredential cred = credential.getGssCredential();
+		final GSSCredential cred = credential.getCredential();
 
 		try {
 			// lets try to see if gateway is working first...
@@ -87,7 +87,7 @@ public class GT5Submitter extends JobSubmitter {
 			myLogger.debug("ok, normal method of getting exit status is not working. need to restart job.");
 			if (((ex.getErrorCode() == 156)
 					|| (ex.getErrorCode() == GRAMProtocolErrorConstants.CONNECTION_FAILED) || (ex
-					.getErrorCode() == 79)) && restart) {
+							.getErrorCode() == 79)) && restart) {
 				// maybe the job finished, but maybe we need to kick job manager
 
 				myLogger.debug("restarting job");
@@ -148,12 +148,12 @@ public class GT5Submitter extends JobSubmitter {
 	}
 
 	@Override
-	public int killJob(Job grisuJob, ProxyCredential cred) {
+	public int killJob(Job grisuJob, Credential cred) {
 
 		final GramJob job = new GramJob(null);
 		try {
 			job.setID(grisuJob.getJobhandle());
-			job.setCredentials(cred.getGssCredential());
+			job.setCredentials(cred.getCredential());
 			try {
 				Gram.cancel(job);
 				Gram.jobStatus(job);
@@ -190,7 +190,7 @@ public class GT5Submitter extends JobSubmitter {
 			// credential =
 			// CredentialHelpers.convertByteArrayToGSSCredential(job
 			// .getCredential().getCredentialData());
-			credential = job.getCredential().getGssCredential();
+			credential = job.getCredential().getCredential();
 
 			final GramJob gt5Job = new GramJob(rsl);
 			final Gram5JobListener l = Gram5JobListener.getJobListener();

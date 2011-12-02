@@ -1,18 +1,15 @@
 package grisu.control.serviceInterfaces;
 
 import grisu.backend.hibernate.HibernateSessionFactory;
-import grisu.backend.model.ProxyCredential;
 import grisu.backend.model.User;
-import grisu.backend.utils.CertHelpers;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoSuchTemplateException;
 import grisu.control.exceptions.NoValidCredentialException;
 import grisu.jcommons.utils.MyProxyServerParams;
 import grisu.settings.ServerPropertiesManager;
 import grisu.settings.ServiceTemplateManagement;
-import grith.jgrith.myProxy.MyProxy_light;
+import grith.jgrith.Credential;
 import grith.jgrith.plainProxy.LocalProxy;
-import grith.jgrith.voms.VO;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -27,7 +24,7 @@ import org.ietf.jgss.GSSException;
 public class LocalServiceInterface extends AbstractServiceInterface implements
 ServiceInterface {
 
-	private ProxyCredential credential = null;
+	private Credential credential = null;
 	private String myproxy_username = null;
 	private char[] passphrase = null;
 
@@ -36,12 +33,12 @@ ServiceInterface {
 	private static String hostname = null;
 
 	// @Override
-	protected final ProxyCredential getCredential() {
+	protected final Credential getCredential() {
 
 		long oldLifetime = -1;
 		try {
 			if (credential != null) {
-				oldLifetime = credential.getGssCredential()
+				oldLifetime = credential.getCredential()
 						.getRemainingLifetime();
 			}
 		} catch (final GSSException e2) {
@@ -62,10 +59,10 @@ ServiceInterface {
 				if ((passphrase == null) || (passphrase.length == 0)) {
 					// try local proxy
 					try {
-						credential = new ProxyCredential(
+						credential = new Credential(
 								LocalProxy.loadGSSCredential());
 
-						final long newLifeTime = credential.getGssCredential()
+						final long newLifeTime = credential.getCredential()
 								.getRemainingLifetime();
 						if (oldLifetime < ServerPropertiesManager
 								.getMinProxyLifetimeBeforeGettingNewProxy()) {
@@ -100,13 +97,12 @@ ServiceInterface {
 				}
 
 				try {
-					credential = new ProxyCredential(
-							MyProxy_light.getDelegation(myProxyServer,
-									myProxyPort, myproxy_username, passphrase,
-									ServerPropertiesManager
-									.getMyProxyLifetime()));
 
-					final long newLifeTime = credential.getGssCredential()
+					credential = new Credential(myproxy_username, passphrase,
+							myProxyServer, myProxyPort,
+							ServerPropertiesManager.getMyProxyLifetime() / 3600);
+
+					final long newLifeTime = credential.getCredential()
 							.getRemainingLifetime();
 					if (newLifeTime < ServerPropertiesManager
 							.getMinProxyLifetimeBeforeGettingNewProxy()) {
@@ -136,36 +132,36 @@ ServiceInterface {
 
 	}
 
-	// @Override
-	protected final ProxyCredential getCredential(String fqan,
-			int lifetimeInSeconds) {
-
-		final String myProxyServer = MyProxyServerParams.getMyProxyServer();
-		final int myProxyPort = MyProxyServerParams.getMyProxyPort();
-
-		ProxyCredential temp;
-		try {
-			temp = new ProxyCredential(MyProxy_light.getDelegation(
-					myProxyServer, myProxyPort, myproxy_username, passphrase,
-					lifetimeInSeconds));
-			if (StringUtils.isNotBlank(fqan)) {
-
-				final VO vo = getUser().getFqans().get(fqan);
-				final ProxyCredential credToUse = CertHelpers
-						.getVOProxyCredential(vo, fqan, temp);
-
-				myLogger.debug("Created proxy with lifetime: "
-						+ credToUse.getExpiryDate().toString());
-				return credToUse;
-			} else {
-				myLogger.debug("Created proxy with lifetime: "
-						+ temp.getExpiryDate().toString());
-				return temp;
-			}
-		} catch (final Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+	// // @Override
+	// protected final ProxyCredential getCredential(String fqan,
+	// int lifetimeInSeconds) {
+	//
+	// final String myProxyServer = MyProxyServerParams.getMyProxyServer();
+	// final int myProxyPort = MyProxyServerParams.getMyProxyPort();
+	//
+	// ProxyCredential temp;
+	// try {
+	// temp = new ProxyCredential(MyProxy_light.getDelegation(
+	// myProxyServer, myProxyPort, myproxy_username, passphrase,
+	// lifetimeInSeconds));
+	// if (StringUtils.isNotBlank(fqan)) {
+	//
+	// final VO vo = getUser().getFqans().get(fqan);
+	// final ProxyCredential credToUse = CertHelpers
+	// .getVOProxyCredential(vo, fqan, temp);
+	//
+	// myLogger.debug("Created proxy with lifetime: "
+	// + credToUse.getExpiryDate().toString());
+	// return credToUse;
+	// } else {
+	// myLogger.debug("Created proxy with lifetime: "
+	// + temp.getExpiryDate().toString());
+	// return temp;
+	// }
+	// } catch (final Exception e) {
+	// throw new RuntimeException(e);
+	// }
+	// }
 
 	public final long getCredentialEndTime() {
 
@@ -186,7 +182,7 @@ ServiceInterface {
 		final MyProxy myproxy = new MyProxy(myProxyServer, myProxyPort);
 		CredentialInfo info = null;
 		try {
-			info = myproxy.info(getCredential().getGssCredential(),
+			info = myproxy.info(getCredential().getCredential(),
 					myproxy_username, new String(passphrase));
 		} catch (final MyProxyException e) {
 			myLogger.error(e.getLocalizedMessage(), e);
@@ -236,7 +232,7 @@ ServiceInterface {
 			this.user = User.createUser(getCredential(), this);
 		}
 
-		user.setCred(getCredential());
+		user.setCredential(getCredential());
 
 		return user;
 	}

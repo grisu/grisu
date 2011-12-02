@@ -577,8 +577,8 @@ public class UserBatchJobManager {
 	public BatchJob getBatchJobFromDatabase(final String batchJobname)
 			throws NoSuchJobException {
 
-		final BatchJob job = batchJobDao.findJobByDN(getUser().getCred()
-				.getDn(), batchJobname);
+		final BatchJob job = batchJobDao.findJobByDN(getUser().getDn(),
+				batchJobname);
 
 		return job;
 

@@ -21,7 +21,7 @@ public class GlobusOnlineFileTransferPlugin implements FileTransferPlugin {
 
 		im = new UserInfoManager(user);
 
-		GSSCredential gssCred = user.getCred().getGssCredential();
+		GSSCredential gssCred = user.getCredential().getCredential();
 		Credential cred = new Credential(gssCred);
 		go = new GlobusOnlineUserSession(go_user, cred, im);
 

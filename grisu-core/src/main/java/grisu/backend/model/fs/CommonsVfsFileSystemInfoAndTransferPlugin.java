@@ -1,7 +1,6 @@
 package grisu.backend.model.fs;
 
 import grisu.backend.model.FileSystemCache;
-import grisu.backend.model.ProxyCredential;
 import grisu.backend.model.RemoteFileTransferObject;
 import grisu.backend.model.User;
 import grisu.backend.utils.FileContentDataSourceConnector;
@@ -10,6 +9,7 @@ import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.GridFile;
 import grisu.settings.ServerPropertiesManager;
+import grith.jgrith.Credential;
 import grith.jgrith.vomsProxy.VomsException;
 
 import java.io.BufferedInputStream;
@@ -578,7 +578,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	 *             if the filesystem could not be mounted
 	 */
 	public MountPoint mountFileSystem(String uri, final String mountPointName,
-			final ProxyCredential cred, final boolean useHomeDirectory,
+			final Credential cred, final boolean useHomeDirectory,
 			final String site) throws RemoteFileSystemException {
 
 		// if (!mountPointName.startsWith("/")) {

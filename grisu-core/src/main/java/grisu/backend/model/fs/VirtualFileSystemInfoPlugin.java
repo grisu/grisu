@@ -1,6 +1,5 @@
 package grisu.backend.model.fs;
 
-import grisu.backend.model.ProxyCredential;
 import grisu.backend.model.User;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.RemoteFileSystemException;
@@ -9,6 +8,7 @@ import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.DtoProperty;
 import grisu.model.dto.GridFile;
+import grith.jgrith.Credential;
 
 import java.util.Map;
 import java.util.Set;
@@ -212,8 +212,8 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 	}
 
 	public MountPoint mountFileSystem(String uri, String mountPointName,
-			ProxyCredential cred, boolean useHomeDirectory, String site)
-			throws RemoteFileSystemException {
+			Credential cred, boolean useHomeDirectory, String site)
+					throws RemoteFileSystemException {
 		throw new RemoteFileSystemException(
 				"Mounting not supported for virtual file system.");
 	}

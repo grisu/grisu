@@ -14,7 +14,7 @@ import grisu.model.info.ApplicationInformation;
 import grisu.model.info.ResourceInformation;
 import grisu.model.status.StatusObject;
 import grisu.settings.ClientPropertiesManager;
-import grisu.utils.FqanHelpers;
+import grith.jgrith.utils.FqanHelpers;
 
 import java.io.File;
 import java.net.URI;

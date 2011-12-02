@@ -1,9 +1,9 @@
 package grisu.backend.model.job;
 
-import grisu.backend.model.ProxyCredential;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.utils.JsdlHelpers;
 import grisu.utils.SeveralXMLHelpers;
+import grith.jgrith.Credential;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -86,7 +86,7 @@ public class Job implements Comparable<Job> {
 	private int status = -1000;
 
 	// the credential that is/was used to submit the job
-	private ProxyCredential credential = null;
+	private Credential credential = null;
 
 	@Element
 	private String submissionType = null;
@@ -98,18 +98,18 @@ public class Job implements Comparable<Job> {
 
 	@ElementMap(entry = "property", key = "key", attribute = true, inline = true)
 	private Map<String, String> jobProperties = Collections
-			.synchronizedMap(new HashMap<String, String>());
+	.synchronizedMap(new HashMap<String, String>());
 
 	@ElementList(entry = "inputFiles", inline = true, required = false)
 	private Set<String> inputFiles = Collections
-			.synchronizedSet(new HashSet<String>());
+	.synchronizedSet(new HashSet<String>());
 
 	@Attribute
 	private boolean isBatchJob = false;
 
 	@ElementMap(entry = "jobProperty", key = "key", attribute = true, inline = true)
 	private Map<Long, String> logMessages = Collections
-			.synchronizedMap(new TreeMap<Long, String>());
+	.synchronizedMap(new TreeMap<Long, String>());
 
 	// for hibernate
 	public Job() {
@@ -134,7 +134,7 @@ public class Job implements Comparable<Job> {
 	 *             if the job description does not contain a jobname
 	 */
 	public Job(final String dn, final Document jsdl) throws SAXException,
-			XPathExpressionException {
+	XPathExpressionException {
 		this.dn = dn;
 		// if ( ! JsdlHelpers.validateJSDL(jobDescription) ) throw new
 		// SAXException("Job description not a valid jsdl document");
@@ -237,7 +237,7 @@ public class Job implements Comparable<Job> {
 	 * @return the credential
 	 */
 	@Transient
-	public ProxyCredential getCredential() {
+	public Credential getCredential() {
 		return this.credential;
 	}
 
@@ -435,7 +435,7 @@ public class Job implements Comparable<Job> {
 	 * @param credential
 	 *            the credential
 	 */
-	public void setCredential(final ProxyCredential credential) {
+	public void setCredential(final Credential credential) {
 		this.credential = credential;
 	}
 
@@ -577,7 +577,7 @@ public class Job implements Comparable<Job> {
 	private void setJsdl(final String jsdl_string) throws Exception {
 		if ((jsdl_string == null)
 				|| jsdl_string
-						.equals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")) {
+				.equals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")) {
 			return;
 		}
 
