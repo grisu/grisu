@@ -100,7 +100,7 @@ ServiceInterface {
 
 					credential = new Credential(myproxy_username, passphrase,
 							myProxyServer, myProxyPort,
-							ServerPropertiesManager.getMyProxyLifetime() / 3600);
+							ServerPropertiesManager.getMyProxyLifetime());
 
 					final long newLifeTime = credential.getCredential()
 							.getRemainingLifetime();
