@@ -9,6 +9,8 @@ import grisu.jcommons.utils.MyProxyServerParams;
 import grisu.settings.ServerPropertiesManager;
 import grisu.settings.ServiceTemplateManagement;
 import grith.jgrith.Credential;
+import grith.jgrith.MyProxyCredential;
+import grith.jgrith.WrappedGssCredential;
 import grith.jgrith.plainProxy.LocalProxy;
 
 import java.net.InetAddress;
@@ -59,7 +61,7 @@ ServiceInterface {
 				if ((passphrase == null) || (passphrase.length == 0)) {
 					// try local proxy
 					try {
-						credential = new Credential(
+						credential = new WrappedGssCredential(
 								LocalProxy.loadGSSCredential());
 
 						final long newLifeTime = credential.getCredential()
@@ -98,7 +100,7 @@ ServiceInterface {
 
 				try {
 
-					credential = new Credential(myproxy_username, passphrase,
+					credential = new MyProxyCredential(myproxy_username, passphrase,
 							myProxyServer, myProxyPort,
 							ServerPropertiesManager.getMyProxyLifetime());
 

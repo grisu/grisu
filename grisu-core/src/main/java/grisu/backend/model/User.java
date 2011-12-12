@@ -25,7 +25,6 @@ import grisu.model.job.JobSubmissionObjectImpl;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.MountPointHelpers;
 import grith.jgrith.Credential;
-import grith.jgrith.certificate.ProxyCredential;
 import grith.jgrith.utils.FqanHelpers;
 import grith.jgrith.voms.VO;
 import grith.jgrith.voms.VOManagement.VOManagement;
@@ -204,7 +203,7 @@ public class User {
 
 	// credentials are chache so we don't have to contact myproxy/voms anytime
 	// we want to make a transaction
-	private Map<String, ProxyCredential> cachedCredentials = new HashMap<String, ProxyCredential>();
+//	private Map<String, ProxyCredential> cachedCredentials = new HashMap<String, ProxyCredential>();
 
 	// All fqans of the user
 	private Map<String, VO> fqans = null;
@@ -294,7 +293,7 @@ public class User {
 		// for ( ProxyCredential proxy : cachedCredentials.values() ) {
 		// proxy.destroy();
 		// }
-		cachedCredentials = new HashMap<String, ProxyCredential>();
+//		cachedCredentials = new HashMap<String, ProxyCredential>();
 	}
 
 	public void clearMountPointCache(String keypattern) {
@@ -1660,7 +1659,6 @@ public class User {
 		myLogger.debug(cred.getDn() + ": Setting new credential.");
 
 		this.credential = cred;
-		cachedCredentials.clear();
 	}
 
 	/**

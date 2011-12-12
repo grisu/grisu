@@ -92,6 +92,8 @@ public final class ServerPropertiesManager {
 
 	private static final String DEFAULT_VOS_TO_SUPPORT = "nz";
 
+	private static final long DEFAULT_PROXY_RETRIEVAL_WAIT_TIME = 300;
+
 	// public static boolean getCheckConnectionToMountPoint() {
 	//
 	// boolean check = false;
@@ -767,6 +769,22 @@ public final class ServerPropertiesManager {
 			return DEFAULT_TIME_INBETWEEN_STATUS_CHECKS_FOR_THE_SAME_JOB_IN_SECONDS;
 		}
 		return waitTimeInSeconds;
+	}
+
+	public static long getWaitTimeBetweenProxyRetrievals() {
+
+		long waittime_in_seconds = -1;
+		try {
+			waittime_in_seconds = Long.parseLong(getServerConfiguration()
+					.getString("General.proxyRetrievalWaitTime"));
+
+		} catch (final Exception e) {
+			return DEFAULT_PROXY_RETRIEVAL_WAIT_TIME;
+		}
+		if (waittime_in_seconds <= -1) {
+			return DEFAULT_PROXY_RETRIEVAL_WAIT_TIME;
+		}
+		return waittime_in_seconds;
 	}
 
 	public static void refreshConfig() {
