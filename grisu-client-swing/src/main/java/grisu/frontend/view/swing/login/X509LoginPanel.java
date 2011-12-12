@@ -94,8 +94,9 @@ public class X509LoginPanel extends JPanel implements LoginMethodPanel {
 				loginSuccessful = false;
 				try {
 					try {
-						Credential c = CredentialFactory
-								.createFromLocalCert(passphrase);
+						Credential c = CredentialFactory.createFromLocalCert(
+								passphrase,
+								LoginManager.DEFAULT_PROXY_LIFETIME_IN_HOURS);
 						si = LoginManager.login(c, params, false);
 						if (saveCredendentialsToLocalProxy) {
 							c.saveCredential();

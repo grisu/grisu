@@ -63,6 +63,8 @@ public class LoginManager {
 
 	public static int REQUIRED_BACKEND_API_VERSION = 15;
 
+	public static final int DEFAULT_PROXY_LIFETIME_IN_HOURS = 240;
+
 	public static void addPluginsToClasspath() throws IOException {
 
 		ClasspathHacker.initFolder(Environment.getGrisuPluginDirectory(),
@@ -290,14 +292,15 @@ public class LoginManager {
 	}
 
 	public static ServiceInterface loginCommandlineMyProxy(String backend,
-			String username, boolean saveCredToDisk) throws LoginException {
+			String username, int proxy_lifetime_in_hours, boolean saveCredToDisk)
+					throws LoginException {
 
 		LoginParams p = new LoginParams(backend, username, null);
 
 		Credential c;
 		try {
 			c = CredentialFactory.createFromMyProxyCommandline(p,
-					Credential.DEFAULT_PROXY_LIFETIME_IN_HOURS * 3600);
+					proxy_lifetime_in_hours * 3600);
 			if (saveCredToDisk) {
 				c.saveCredential();
 			}
@@ -327,9 +330,11 @@ public class LoginManager {
 	}
 
 	public static ServiceInterface loginCommandlineX509cert(String backend,
+			int proxy_lifetime_in_hours,
 			boolean saveCredToDisk)
 					throws LoginException {
-		Credential c = CredentialFactory.createFromLocalCertCommandline();
+		Credential c = CredentialFactory
+				.createFromLocalCertCommandline(proxy_lifetime_in_hours);
 		if (saveCredToDisk) {
 			c.saveCredential();
 		}
@@ -351,7 +356,7 @@ public class LoginManager {
 					throws LoginException {
 
 		Credential c = CredentialFactory.createFromMyProxy(username, password,
-				Credential.DEFAULT_PROXY_LIFETIME_IN_HOURS * 3600);
+				DEFAULT_PROXY_LIFETIME_IN_HOURS * 3600);
 		return login(c, backend, displayCliProgress);
 	}
 
