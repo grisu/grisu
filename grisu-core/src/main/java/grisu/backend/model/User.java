@@ -27,7 +27,6 @@ import grisu.utils.MountPointHelpers;
 import grith.jgrith.Credential;
 import grith.jgrith.utils.FqanHelpers;
 import grith.jgrith.voms.VO;
-import grith.jgrith.voms.VOManagement.VOManagement;
 import grith.jgrith.vomsProxy.VomsException;
 
 import java.util.Collections;
@@ -62,8 +61,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.FileSystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Maps;
 
 /**
  * The User class holds all the relevant data a job could want to know from the
@@ -203,7 +200,7 @@ public class User {
 
 	// credentials are chache so we don't have to contact myproxy/voms anytime
 	// we want to make a transaction
-//	private Map<String, ProxyCredential> cachedCredentials = new HashMap<String, ProxyCredential>();
+	//	private Map<String, ProxyCredential> cachedCredentials = new HashMap<String, ProxyCredential>();
 
 	// All fqans of the user
 	private Map<String, VO> fqans = null;
@@ -293,7 +290,7 @@ public class User {
 		// for ( ProxyCredential proxy : cachedCredentials.values() ) {
 		// proxy.destroy();
 		// }
-//		cachedCredentials = new HashMap<String, ProxyCredential>();
+		//		cachedCredentials = new HashMap<String, ProxyCredential>();
 	}
 
 	public void clearMountPointCache(String keypattern) {
@@ -1221,21 +1218,8 @@ public class User {
 	 */
 	@Transient
 	public Map<String, VO> getFqans() {
-		if (fqans == null) {
 
-			// myLogger.debug("Checking credential");
-			if (credential.isValid()) {
-				try {
-					fqans = VOManagement
-							.getAllFqans(credential.getCredential());
-				} catch (Exception e) {
-					myLogger.error("Can't get fqans.", e);
-					fqans = Maps.newHashMap();
-				}
-			}
-
-		}
-		return fqans;
+		return credential.getAvailableFqans();
 	}
 
 	@Transient
