@@ -243,21 +243,27 @@ public class LoginManager {
 	}
 
 	public static ServiceInterface loginCommandline() throws LoginException {
-		return loginCommandline("Local");
+		return loginCommandline(LoginManager.DEFAULT_PROXY_LIFETIME_IN_HOURS);
+	}
+
+	public static ServiceInterface loginCommandline(int proxy_lifetime_in_hours)
+			throws LoginException {
+		return loginCommandline("Local", proxy_lifetime_in_hours);
 	}
 
 	public static ServiceInterface loginCommandline(String backend)
 			throws LoginException {
-		return loginCommandline(backend, true);
+		return loginCommandline(backend,
+				LoginManager.DEFAULT_PROXY_LIFETIME_IN_HOURS);
 	}
 
 	public static ServiceInterface loginCommandline(String backend,
-			boolean saveCredToDisk) throws LoginException {
-		return loginCommandline(backend, saveCredToDisk, -1);
+			boolean saveCredToDisk, int proxy_lifetime_in_hours) throws LoginException {
+		return loginCommandline(backend, saveCredToDisk, proxy_lifetime_in_hours, -1);
 	}
 
 	public static ServiceInterface loginCommandline(String backend,
-			boolean saveCredToDisk, int minProxyLifetimeInSeconds)
+			boolean saveCredToDisk, int proxyLifetimeInHours, int minProxyLifetimeInSeconds)
 					throws LoginException {
 
 		Credential c;
@@ -281,7 +287,7 @@ public class LoginManager {
 			}
 
 		} else {
-			c = CredentialFactory.createFromCommandline();
+			c = CredentialFactory.createFromCommandline(proxyLifetimeInHours);
 			if (saveCredToDisk) {
 				c.saveCredential();
 			}
@@ -289,6 +295,11 @@ public class LoginManager {
 
 		return login(c, backend, true);
 
+	}
+
+	public static ServiceInterface loginCommandline(String backend, int proxy_lifetime_in_hours)
+			throws LoginException {
+		return loginCommandline(backend, true, proxy_lifetime_in_hours);
 	}
 
 	public static ServiceInterface loginCommandlineMyProxy(String backend,
@@ -346,7 +357,7 @@ public class LoginManager {
 
 		// Credential c = CredentialFactory.createFromCommandline();
 
-		ServiceInterface si = loginCommandline("dev");
+		ServiceInterface si = loginCommandline("dev", 12);
 		System.out.println("");
 		System.out.println(si.getDN());
 	}
