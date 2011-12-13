@@ -30,7 +30,7 @@ import grisu.model.utils.InformationUtils;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.ServiceInterfaceUtils;
 import grisu.utils.SeveralXMLHelpers;
-import grith.jgrith.Credential;
+import grith.jgrith.credential.Credential;
 
 import java.util.Collection;
 import java.util.Collections;

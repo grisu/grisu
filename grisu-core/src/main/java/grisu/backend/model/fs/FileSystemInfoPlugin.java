@@ -4,7 +4,7 @@ import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.GridFile;
-import grith.jgrith.Credential;
+import grith.jgrith.credential.Credential;
 
 import java.util.Set;
 

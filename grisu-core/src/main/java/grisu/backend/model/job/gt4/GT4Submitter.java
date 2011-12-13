@@ -12,7 +12,7 @@ import grisu.jcommons.utils.JsdlHelpers;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.DebugUtils;
 import grisu.utils.SeveralXMLHelpers;
-import grith.jgrith.Credential;
+import grith.jgrith.credential.Credential;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;

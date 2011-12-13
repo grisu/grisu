@@ -1,7 +1,7 @@
 package grisu.backend.model.job;
 
 import grisu.jcommons.interfaces.InformationManager;
-import grith.jgrith.Credential;
+import grith.jgrith.credential.Credential;
 
 /**
  * Extend this abstract class if you want to write a connector to a new

@@ -3,7 +3,7 @@ package grisu.backend.model.job;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.utils.JsdlHelpers;
 import grisu.utils.SeveralXMLHelpers;
-import grith.jgrith.Credential;
+import grith.jgrith.credential.Credential;
 
 import java.io.IOException;
 import java.util.Collection;

@@ -5,8 +5,8 @@ import grisu.backend.model.User;
 import grisu.backend.model.UserInfoManager;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.jcommons.interfaces.InfoManager;
-import grith.jgrith.Credential;
-import grith.jgrith.WrappedGssCredential;
+import grith.jgrith.credential.Credential;
+import grith.jgrith.credential.WrappedGssCredential;
 import nz.org.nesi.goji.control.GlobusOnlineUserSession;
 
 import org.ietf.jgss.GSSCredential;

@@ -9,7 +9,7 @@ import grisu.model.info.ResourceInformationImpl;
 import grisu.model.info.UserApplicationInformation;
 import grisu.model.info.UserApplicationInformationImpl;
 import grisu.settings.Environment;
-import grith.jgrith.Credential;
+import grith.jgrith.credential.Credential;
 
 import java.io.File;
 import java.io.IOException;

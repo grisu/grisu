@@ -8,9 +8,9 @@ import grisu.control.exceptions.NoValidCredentialException;
 import grisu.jcommons.utils.MyProxyServerParams;
 import grisu.settings.ServerPropertiesManager;
 import grisu.settings.ServiceTemplateManagement;
-import grith.jgrith.Credential;
-import grith.jgrith.MyProxyCredential;
-import grith.jgrith.WrappedGssCredential;
+import grith.jgrith.credential.Credential;
+import grith.jgrith.credential.MyProxyCredential;
+import grith.jgrith.credential.WrappedGssCredential;
 import grith.jgrith.plainProxy.LocalProxy;
 
 import java.net.InetAddress;

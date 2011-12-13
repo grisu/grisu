@@ -4,9 +4,9 @@ import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginException;
 import grisu.frontend.control.login.LoginManager;
 import grisu.jcommons.exceptions.CredentialException;
-import grith.jgrith.Credential;
-import grith.jgrith.CredentialFactory;
 import grith.jgrith.control.LoginParams;
+import grith.jgrith.credential.Credential;
+import grith.jgrith.credential.CredentialFactory;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;

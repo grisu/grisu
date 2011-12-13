@@ -9,7 +9,7 @@ import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.GridFile;
 import grisu.settings.ServerPropertiesManager;
-import grith.jgrith.Credential;
+import grith.jgrith.credential.Credential;
 import grith.jgrith.vomsProxy.VomsException;
 
 import java.io.BufferedInputStream;

@@ -11,7 +11,7 @@ import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.DtoStringList;
 import grisu.model.dto.GridFile;
 import grisu.model.status.StatusObject;
-import grith.jgrith.Credential;
+import grith.jgrith.credential.Credential;
 
 import java.util.Date;
 import java.util.HashMap;

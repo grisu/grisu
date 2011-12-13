@@ -13,9 +13,9 @@ import grisu.model.GrisuRegistryManager;
 import grisu.settings.ClientPropertiesManager;
 import grisu.settings.Environment;
 import grisu.utils.GrisuPluginFilenameFilter;
-import grith.jgrith.Credential;
-import grith.jgrith.CredentialFactory;
 import grith.jgrith.control.LoginParams;
+import grith.jgrith.credential.Credential;
+import grith.jgrith.credential.CredentialFactory;
 import grith.jgrith.plainProxy.LocalProxy;
 import grith.jgrith.utils.CertificateFiles;
 

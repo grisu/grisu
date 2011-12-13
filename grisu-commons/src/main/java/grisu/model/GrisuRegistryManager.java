@@ -4,7 +4,7 @@ import grisu.control.ServiceInterface;
 import grisu.model.info.ApplicationInformation;
 import grisu.model.info.ResourceInformation;
 import grisu.model.info.UserApplicationInformation;
-import grith.jgrith.Credential;
+import grith.jgrith.credential.Credential;
 
 import java.util.HashMap;
 import java.util.Map;

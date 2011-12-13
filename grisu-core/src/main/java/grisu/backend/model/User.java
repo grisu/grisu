@@ -24,7 +24,7 @@ import grisu.model.dto.GridFile;
 import grisu.model.job.JobSubmissionObjectImpl;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.MountPointHelpers;
-import grith.jgrith.Credential;
+import grith.jgrith.credential.Credential;
 import grith.jgrith.utils.FqanHelpers;
 import grith.jgrith.voms.VO;
 import grith.jgrith.vomsProxy.VomsException;
