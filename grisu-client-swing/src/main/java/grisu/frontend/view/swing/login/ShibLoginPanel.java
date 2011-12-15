@@ -223,7 +223,9 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 				try {
 					try {
 						Credential c = CredentialFactory.createFromSlcs(null, idp,
-								username, password);
+										username,
+										password,
+										LoginManager.DEFAULT_PROXY_LIFETIME_IN_HOURS * 3600);
 						si = LoginManager.login(c, params, false);
 						if (saveCredendentialsToLocalProxy) {
 							c.saveCredential();

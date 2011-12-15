@@ -328,7 +328,8 @@ public class LoginManager {
 
 		Credential c;
 		try {
-			c = CredentialFactory.createFromSlcsCommandline(username, idp);
+			c = CredentialFactory.createFromSlcsCommandline(username, idp,
+					DEFAULT_PROXY_LIFETIME_IN_HOURS * 3600);
 			if (saveCredToDisk) {
 				c.saveCredential();
 			}
