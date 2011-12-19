@@ -6,6 +6,7 @@ import grisu.frontend.control.UncaughtExceptionHandler;
 import grisu.jcommons.configuration.CommonGridProperties;
 import grisu.jcommons.dependencies.BouncyCastleTool;
 import grisu.jcommons.dependencies.ClasspathHacker;
+import grisu.jcommons.exceptions.CredentialException;
 import grisu.jcommons.utils.DefaultGridSecurityProvider;
 import grisu.jcommons.utils.JythonHelpers;
 import grisu.jcommons.view.cli.CliHelpers;
@@ -16,7 +17,6 @@ import grisu.utils.GrisuPluginFilenameFilter;
 import grith.jgrith.control.LoginParams;
 import grith.jgrith.credential.Credential;
 import grith.jgrith.credential.CredentialFactory;
-import grith.jgrith.plainProxy.LocalProxy;
 import grith.jgrith.utils.CertificateFiles;
 
 import java.io.IOException;
@@ -266,21 +266,27 @@ public class LoginManager {
 			boolean saveCredToDisk, int proxyLifetimeInHours, int minProxyLifetimeInSeconds)
 					throws LoginException {
 
-		Credential c;
+		Credential c = null;
 
 		boolean validLocalProxy = false;
-		if (minProxyLifetimeInSeconds <= 0) {
-			validLocalProxy = LocalProxy.validGridProxyExists();
-		} else {
-			validLocalProxy = LocalProxy
-					.validGridProxyExists(minProxyLifetimeInSeconds / 60);
+
+		try {
+			c = Credential.load();
+			int lifetime = c.getRemainingLifetime();
+			if (lifetime >= minProxyLifetimeInSeconds) {
+				validLocalProxy = true;
+			} else {
+				validLocalProxy = false;
+			}
+		} catch (CredentialException ce) {
+			validLocalProxy = false;
 		}
+
 
 		if (validLocalProxy) {
 			CliHelpers.setIndeterminateProgress(
 					"Local credential found, logging in...", true);
 			try {
-				c = CredentialFactory.loadFromLocalProxy();
 				c.uploadMyProxy();
 			} finally {
 				CliHelpers.setIndeterminateProgress(false);
