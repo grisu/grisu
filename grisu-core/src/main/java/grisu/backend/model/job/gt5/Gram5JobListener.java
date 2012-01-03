@@ -38,9 +38,19 @@ public class Gram5JobListener implements GramJobListener {
 	}
 
 	public void statusChanged(GramJob job) {
-		myLogger.debug("job status changed to " + job.getStatus());
-		statuses.put(job.getIDAsString(), job.getStatus());
-		errors.put(job.getIDAsString(), job.getError());
+                int jobStatus = job.getStatus();
+                String jobId = job.getIDAsString();
+                myLogger.debug("job status changed to " + jobStatus);
+                statuses.put(jobId, jobStatus);
+                errors.put(jobId, job.getError());
+                try {
+                    if ((jobStatus == GramJob.STATUS_DONE) || (jobStatus == GramJob.STATUS_FAILED)){
+                        job.signal(GramJob.SIGNAL_COMMIT_END);
+                    }
+                } catch (Exception e) {
+                    String state = job.getStatusAsString();
+                    myLogger.error("Failed to send COMMIT_END to job " + jobId + " in state " + state, e);
+                }
 	}
 
 }
