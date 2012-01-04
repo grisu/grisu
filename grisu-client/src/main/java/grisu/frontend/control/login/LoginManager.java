@@ -4,6 +4,7 @@ import grisu.control.ServiceInterface;
 import grisu.control.exceptions.ServiceInterfaceException;
 import grisu.frontend.control.UncaughtExceptionHandler;
 import grisu.jcommons.configuration.CommonGridProperties;
+import grisu.jcommons.constants.Constants;
 import grisu.jcommons.dependencies.BouncyCastleTool;
 import grisu.jcommons.dependencies.ClasspathHacker;
 import grisu.jcommons.exceptions.CredentialException;
@@ -121,6 +122,9 @@ public class LoginManager {
 			LoginParams loginParams, boolean displayCliProgress)
 					throws LoginException {
 
+		String defaultUrl = ClientPropertiesManager
+				.getDefaultServiceInterfaceUrl();
+
 		try {
 			if (displayCliProgress) {
 				CliHelpers.setIndeterminateProgress(
@@ -130,13 +134,10 @@ public class LoginManager {
 
 			if (loginParams == null) {
 
-				final String defaultUrl = ClientPropertiesManager
-						.getDefaultServiceInterfaceUrl();
-				if (StringUtils.isNotBlank(defaultUrl)) {
-					loginParams = new LoginParams(defaultUrl, null, null);
-				} else {
-					loginParams = new LoginParams("Local", null, null);
+				if (StringUtils.isBlank(defaultUrl)) {
+					defaultUrl = "Local";
 				}
+				loginParams = new LoginParams(defaultUrl, null, null);
 
 			}
 
@@ -210,6 +211,8 @@ public class LoginManager {
 			loginParams.clearPasswords();
 
 			GrisuRegistryManager.registerServiceInterface(si, cred);
+			GrisuRegistryManager.getDefault(si).set(Constants.BACKEND,
+					loginParams.getLoginUrl());
 
 			return si;
 		} finally {
