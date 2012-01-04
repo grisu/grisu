@@ -46,7 +46,9 @@ import grith.jgrith.utils.CertificateFiles;
 import grith.jgrith.utils.VomsesFiles;
 
 import java.io.File;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -193,6 +195,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	// List<Job>>();
 	private static String backendInfo = null;
 
+	private static String hostname = null;
+
 	public static InformationManager createInformationManager() {
 		return InformationManagerManager
 				.getInformationManager(ServerPropertiesManager
@@ -274,17 +278,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		return cache.getCache("session");
 	}
-
 	public static Cache shortCache() {
 		return cache.getCache("short");
 	}
-	private int SUBMIT_PROXY_LIFETIME = -1;
 
 
 	// protected final UserDAO userdao = new UserDAO();
 
 	// private Map<String, RemoteFileTransferObject> fileTransfers = new
 	// HashMap<String, RemoteFileTransferObject>();
+
+	private int SUBMIT_PROXY_LIFETIME = -1;
 
 	public void addArchiveLocation(String alias, String value) {
 
@@ -361,13 +365,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return admin.execute(command, configMap);
 	}
 
-	public String archiveJob(String jobname, String target)
-			throws JobPropertiesException, NoSuchJobException,
-			RemoteFileSystemException {
-
-		return getJobManager().archiveJob(jobname, target);
-	}
-
 	// private boolean checkWhetherGridResourceIsActuallyAvailable(
 	// GridResource resource) {
 	//
@@ -388,6 +385,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	// return false;
 	//
 	// }
+
+	public String archiveJob(String jobname, String target)
+			throws JobPropertiesException, NoSuchJobException,
+			RemoteFileSystemException {
+
+		return getJobManager().archiveJob(jobname, target);
+	}
 
 	public void copyBatchJobInputFile(String batchJobname, String inputFile,
 			String filename) throws RemoteFileSystemException,
@@ -411,6 +415,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 	}
+
+
 
 	/*
 	 * (non-Javadoc)
@@ -492,7 +498,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-
+	// private String createJob(Document jsdl, final String fqan,
+	// final String jobnameCreationMethod,
+	// final BatchJob optionalParentBatchJob)
+	// throws JobPropertiesException {
+	//
+	// return getJobManager().createJob(jsdl, fqan, jobnameCreationMethod,
+	// optionalParentBatchJob);
+	//
+	// }
 
 	/**
 	 * Creates a multipartjob on the server.
@@ -569,15 +583,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				+ " already exists.");
 	}
 
-	// private String createJob(Document jsdl, final String fqan,
-	// final String jobnameCreationMethod,
-	// final BatchJob optionalParentBatchJob)
-	// throws JobPropertiesException {
-	//
-	// return getJobManager().createJob(jsdl, fqan, jobnameCreationMethod,
-	// optionalParentBatchJob);
-	//
-	// }
 
 	public String createJob(String jsdlString, final String fqan,
 			final String jobnameCreationMethod) throws JobPropertiesException {
@@ -609,7 +614,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -637,13 +641,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// myLogger.debug("Downloading: " + filename);
 
 		return getUser().getFileManager().download(filename);
-	}
-
-	public boolean fileExists(final String file)
-			throws RemoteFileSystemException {
-
-		return getUser().getFileManager().fileExists(file);
-
 	}
 
 
@@ -682,6 +679,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	// }
 	// return folder;
 	// }
+
+	public boolean fileExists(final String file)
+			throws RemoteFileSystemException {
+
+		return getUser().getFileManager().fileExists(file);
+
+	}
 
 	public DtoGridResources findMatchingSubmissionLocationsUsingJsdl(
 			String jsdlString, final String fqan,
@@ -943,6 +947,35 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return DtoProperties.createProperties(getUser().getBookmarks());
 	}
 
+	// /**
+	// * This method has to be implemented by the endpoint specific
+	// * ServiceInterface. Since there are a few different ways to get a proxy
+	// * credential (myproxy, just use the one in /tmp/x509..., shibb,...) this
+	// * needs to be implemented differently for every single situation.
+	// *
+	// * @return the proxy credential that is used to contact the grid
+	// */
+	// protected abstract ProxyCredential getCredential();
+	//
+	// /**
+	// * This is mainly for testing, to enable credentials with specified
+	// * lifetimes.
+	// *
+	// * @param fqan the vo
+	// * @param lifetime
+	// * the lifetime in seconds
+	// * @return the credential
+	// */
+	// protected abstract ProxyCredential getCredential(String fqan, int
+	// lifetime);
+
+	// public DtoDataLocations getDataLocationsForVO(final String fqan) {
+	//
+	// return DtoDataLocations.createDataLocations(fqan,
+	// informationManager.getDataLocationsForVO(fqan));
+	//
+	// }
+
 	/**
 	 * Calculates the default version of an application on a site. This is
 	 * pretty hard to do, so, if you call this method, don't expect anything
@@ -973,35 +1006,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return versions[0];
 		}
 	}
-
-	// /**
-	// * This method has to be implemented by the endpoint specific
-	// * ServiceInterface. Since there are a few different ways to get a proxy
-	// * credential (myproxy, just use the one in /tmp/x509..., shibb,...) this
-	// * needs to be implemented differently for every single situation.
-	// *
-	// * @return the proxy credential that is used to contact the grid
-	// */
-	// protected abstract ProxyCredential getCredential();
-	//
-	// /**
-	// * This is mainly for testing, to enable credentials with specified
-	// * lifetimes.
-	// *
-	// * @param fqan the vo
-	// * @param lifetime
-	// * the lifetime in seconds
-	// * @return the credential
-	// */
-	// protected abstract ProxyCredential getCredential(String fqan, int
-	// lifetime);
-
-	// public DtoDataLocations getDataLocationsForVO(final String fqan) {
-	//
-	// return DtoDataLocations.createDataLocations(fqan,
-	// informationManager.getDataLocationsForVO(fqan));
-	//
-	// }
 
 	/*
 	 * (non-Javadoc)
@@ -1036,7 +1040,38 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return DtoStringList.fromStringColletion(getUser().getFqans().keySet());
 	}
 
-	abstract public String getInterfaceInfo(String key);
+	public String getInterfaceInfo(String key) {
+		if ("HOSTNAME".equalsIgnoreCase(key)) {
+			if (hostname == null) {
+				try {
+					final InetAddress addr = InetAddress.getLocalHost();
+					final byte[] ipAddr = addr.getAddress();
+					hostname = addr.getHostName();
+					if (StringUtils.isBlank(hostname)) {
+						hostname = "";
+					} else {
+						hostname = hostname + " / ";
+					}
+					hostname = hostname + addr.getHostAddress();
+				} catch (final UnknownHostException e) {
+					hostname = "Unavailable";
+				}
+			}
+			return hostname;
+		} else if ("VERSION".equalsIgnoreCase(key)) {
+			return grisu.jcommons.utils.Version.get("grisu-core");
+		} else if ("API_VERSION".equalsIgnoreCase(key)) {
+			return Integer.toString(ServiceInterface.API_VERSION);
+		} else if ("TYPE".equalsIgnoreCase(key)) {
+			return "Webservice (REST/SOAP) interface";
+		} else if ("BACKEND_VERSION".equalsIgnoreCase(key)) {
+			return BACKEND_VERSION;
+		}
+
+		return null;
+	}
+
+	abstract public String getInterfaceType();
 
 	public int getInterfaceVersion() {
 		return API_VERSION;

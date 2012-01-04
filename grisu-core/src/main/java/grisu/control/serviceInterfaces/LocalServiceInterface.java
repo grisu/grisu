@@ -195,33 +195,9 @@ ServiceInterface {
 	}
 
 	@Override
-	public String getInterfaceInfo(String key) {
-		if ("HOSTNAME".equalsIgnoreCase(key)) {
-			if (hostname == null) {
-				try {
-					final InetAddress addr = InetAddress.getLocalHost();
-					final byte[] ipAddr = addr.getAddress();
-					hostname = addr.getHostName();
-					if (StringUtils.isBlank(hostname)) {
-						hostname = "";
-					} else {
-						hostname = hostname + " / ";
-					}
-					hostname = hostname + addr.getHostAddress();
-				} catch (final UnknownHostException e) {
-					hostname = "Unavailable";
-				}
-			}
-			return hostname;
-		} else if ("VERSION".equalsIgnoreCase(key)) {
-			return Integer.toString(ServiceInterface.API_VERSION);
-		} else if ("NAME".equalsIgnoreCase(key)) {
-			return "Local serviceinterface";
-		} else if ("BACKEND_VERSION".equalsIgnoreCase(key)) {
-			return BACKEND_VERSION;
-		}
+	public String getInterfaceType() {
 
-		return null;
+		return "Local";
 	}
 
 	public final String getTemplate(final String application)
