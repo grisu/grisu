@@ -3,6 +3,7 @@ package grisu.frontend.control;
 import grisu.control.ServiceInterface;
 import grisu.control.ServiceInterfaceCreator;
 import grisu.control.exceptions.ServiceInterfaceException;
+import grisu.frontend.control.login.LoginManager;
 import grisu.settings.Environment;
 
 import java.io.File;
@@ -11,15 +12,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Service;
+import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.soap.MTOMFeature;
 import javax.xml.ws.soap.SOAPBinding;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.python.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,6 +138,25 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			final SOAPBinding binding = (SOAPBinding) bp.getBinding();
 			binding.setMTOMEnabled(true);
 
+			String clientstring = LoginManager.getClientName()
+					+ " "
+					+ LoginManager.getClientVersion()
+					+ " / "
+					+ "frontend "
+					+ grisu.jcommons.utils.Version
+					.get("grisu-client");
+
+			Map map = Maps.newHashMap();
+			map.put("X-grisu-client", Collections.singletonList(clientstring));
+
+			String session_id = LoginManager.USER_SESSION;
+			if (StringUtils.isNotBlank(session_id)) {
+				map.put("X-user-Session", Collections.singletonList(session_id));
+			}
+
+			bp.getRequestContext()
+			.put(MessageContext.HTTP_REQUEST_HEADERS, map);
+
 			return service;
 
 		} catch (final Exception e) {
@@ -144,6 +168,5 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 		}
 
 	}
-
 
 }
