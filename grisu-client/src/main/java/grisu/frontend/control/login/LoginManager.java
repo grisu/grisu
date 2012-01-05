@@ -23,6 +23,7 @@ import grith.jgrith.utils.CertificateFiles;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Date;
 
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
@@ -31,6 +32,7 @@ import org.apache.commons.ssl.HttpSecureProtocol;
 import org.apache.commons.ssl.TrustMaterial;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import com.google.common.collect.ImmutableBiMap;
 
@@ -40,8 +42,13 @@ public class LoginManager {
 			.getLogger(LoginManager.class
 					.getName());
 
-	public static volatile boolean environmentInitialized = false;
+	private static String CLIENT_NAME = setClientName(null);
 
+	private static String CLIENT_VERSION = setClientVersion(null);
+
+	public static String USER_SESSION = setUserSessionId(null);
+
+	public static volatile boolean environmentInitialized = false;
 	static final public ImmutableBiMap<String, String> SERVICEALIASES = new ImmutableBiMap.Builder<String, String>()
 			.put("local", "Local")
 			.put("bestgrid",
@@ -53,7 +60,6 @@ public class LoginManager {
 									.put("local_ws", "http://localhost:8080/soap/GrisuService")
 									.put("local_ws_tomcat",
 											"http://localhost:8080/grisu-ws/soap/GrisuService").build();
-
 	public static String httpProxyHost = null;
 
 	public static int httpProxyPort = 80;
@@ -75,6 +81,14 @@ public class LoginManager {
 
 	public static void clearHttpProxyPassword() {
 		Arrays.fill(httpProxyPassphrase, 'x');
+	}
+
+	public static String getClientName() {
+		return CLIENT_NAME;
+	}
+
+	public static String getClientVersion() {
+		return CLIENT_VERSION;
 	}
 
 	public static synchronized void initEnvironment() {
@@ -116,7 +130,6 @@ public class LoginManager {
 	public static ServiceInterface login() throws LoginException {
 		return login("Local");
 	}
-
 
 	public static ServiceInterface login(Credential cred,
 			LoginParams loginParams, boolean displayCliProgress)
@@ -232,6 +245,7 @@ public class LoginManager {
 		LoginParams params = new LoginParams(backend, null, null);
 		return login(cred, params, displayCliProgress);
 	}
+
 
 	public static ServiceInterface login(String backend)
 			throws LoginException {
@@ -362,7 +376,6 @@ public class LoginManager {
 		return login(c, backend, true);
 	}
 
-
 	public static void main(String[] args) throws LoginException {
 
 		// Credential c = CredentialFactory.createFromCommandline();
@@ -379,6 +392,39 @@ public class LoginManager {
 		Credential c = CredentialFactory.createFromMyProxy(username, password,
 				DEFAULT_PROXY_LIFETIME_IN_HOURS * 3600);
 		return login(c, backend, displayCliProgress);
+	}
+
+
+	public static String setClientName(String name) {
+
+		if (StringUtils.isBlank(name)) {
+			name = "Unknown";
+		}
+		CLIENT_NAME = name;
+		MDC.put("client", name);
+
+		return name;
+
+	}
+
+	public static String setClientVersion(String version ) {
+		if (StringUtils.isBlank(version)) {
+			version = "n/a";
+		}
+		CLIENT_VERSION = version;
+		MDC.put("client", version);
+
+		return version;
+	}
+
+	public static String setUserSessionId(String id) {
+		if (StringUtils.isBlank(id)) {
+			id = System.getProperty("user.name") + "_" + new Date().getTime();
+		}
+		USER_SESSION = id;
+		MDC.put("session", id);
+
+		return id;
 	}
 
 }
