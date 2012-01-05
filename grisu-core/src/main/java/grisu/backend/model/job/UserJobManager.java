@@ -2405,6 +2405,7 @@ public class UserJobManager {
 				+ "adding job properties as env variables to jsdl..");
 		Document oldJsdl = job.getJobDescription();
 		for (String key : job.getJobProperties().keySet()) {
+			key = "GRISU_" + key.toUpperCase();
 			String value = job.getJobProperty(key);
 			if (StringUtils.isNotBlank(value)) {
 				Element e = JsdlHelpers
