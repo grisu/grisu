@@ -49,7 +49,7 @@ public class Gram5JobListener implements GramJobListener {
                     }
                 } catch (Exception e) {
                     String state = job.getStatusAsString();
-                    myLogger.error("Failed to send COMMIT_END to job " + jobId + " in state " + state, e);
+                    myLogger.warn("Failed to send COMMIT_END to job " + jobId + " in state " + state, e);
                 }
 	}
 
