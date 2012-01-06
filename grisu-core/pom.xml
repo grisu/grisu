@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<url>http://projects.arcs.org.au/trac/grisu/wiki/GrisuCore</url>
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.4-SNAPSHOT</version>
+		<version>0.4-rc1</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>grisu.backend</groupId>
@@ -51,7 +50,7 @@
 		<dependency>
 			<groupId>grisu</groupId>
 			<artifactId>grisu-commons</artifactId>
-			<version>0.4-SNAPSHOT</version>
+			<version>0.4-rc1</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>cryptix32</artifactId>
@@ -245,7 +244,7 @@
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>mysql-mds</artifactId>
-			<version>0.9.1-SNAPSHOT</version>
+			<version>0.9.1</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>cog-jglobus</artifactId>
@@ -384,7 +383,7 @@
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>mds4-client</artifactId>
-			<version>0.9.1-SNAPSHOT</version>
+			<version>0.9.1</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>puretls</artifactId>
