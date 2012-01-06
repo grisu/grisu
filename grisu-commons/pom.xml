@@ -8,7 +8,6 @@
 		<version>0.4-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>grisu</groupId>
 	<artifactId>grisu-commons</artifactId>
 	<name>grisu-commons</name>
 	<description>The most important thing about the grisu-commons is that
@@ -133,7 +132,7 @@
 		<dependency>
 			<groupId>grisu</groupId>
 			<artifactId>grid-jcommons</artifactId>
-			<version>1.5.1-SNAPSHOT</version>
+			<version>1.5.1</version>
 		</dependency>
 
 		<dependency>
@@ -183,7 +182,7 @@
 		<dependency>
 			<groupId>grith</groupId>
 			<artifactId>jgrith</artifactId>
-			<version>0.6.1-SNAPSHOT</version>
+			<version>0.6.1-rc1</version>
 		</dependency>
 	</dependencies>
 	<build>
