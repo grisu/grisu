@@ -1,6 +1,8 @@
 package grisu.settings;
 
 import grisu.control.ServiceInterface;
+import grisu.jcommons.utils.tid.SecureRandomTid;
+import grisu.jcommons.utils.tid.TidGenerator;
 
 import java.io.File;
 import java.util.Iterator;
@@ -709,6 +711,12 @@ public final class ServerPropertiesManager {
 					"grisu-backend.config"));
 		}
 		return config;
+	}
+
+	public static TidGenerator getTidGenerator() {
+
+		return new SecureRandomTid();
+
 	}
 
 	/**
