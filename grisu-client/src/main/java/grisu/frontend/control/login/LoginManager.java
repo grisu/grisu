@@ -57,8 +57,8 @@ public class LoginManager {
 							"https://compute-dev.services.bestgrid.org/soap/GrisuService")
 							.put("bestgrid-test",
 									"https://compute-test.services.bestgrid.org/soap/GrisuService")
-									.put("local_ws", "http://localhost:8080/soap/GrisuService")
-									.put("local_ws_tomcat",
+			.put("local_ws_jetty", "http://localhost:8080/soap/GrisuService")
+			.put("local_ws",
 											"http://localhost:8080/grisu-ws/soap/GrisuService").build();
 	public static String httpProxyHost = null;
 
