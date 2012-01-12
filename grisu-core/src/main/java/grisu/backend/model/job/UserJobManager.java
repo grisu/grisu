@@ -2336,7 +2336,12 @@ public class UserJobManager {
 	public void submitJob(final Job job, boolean stageFiles,
 			DtoActionStatus status) throws JobSubmissionException {
 
-		final String debug_token = "SUBMIT_" + job.getJobname() + ": ";
+		final String debug_token = status.getHandle();
+
+		myLogger.info(
+				"Job submission started: jobname=[{}] task=[{}] dn=[{}]",
+				new String[] { job.getJobname(), debug_token, getUser().getDn() });
+
 		try {
 
 			int noStageins = 0;
@@ -2445,7 +2450,7 @@ public class UserJobManager {
 				myLogger.debug(debug_token + "submitting...");
 				handle = getUser().getJobManager().submit(
 						submissionType, job);
-				myLogger.debug(debug_token + "submittission finished...");
+				myLogger.debug(debug_token + "submission finished...");
 			} catch (final ServerJobSubmissionException e) {
 				myLogger.debug(debug_token + "submittission failed: "
 						+ e.getLocalizedMessage());
@@ -2525,6 +2530,12 @@ public class UserJobManager {
 
 			status.addElement("Job submission finished...");
 			status.setFinished(true);
+
+			myLogger.info(
+					"Job submission finished: jobname=[{}] task=[{}] jobhandle=[{}] dn=[{}]",
+					new String[] { job.getJobname(), debug_token, handle,
+							getUser().getDn() });
+
 		} catch (final Throwable e) {
 			myLogger.debug(debug_token + "wrapping up failed: "
 					+ e.getLocalizedMessage());
@@ -2552,7 +2563,7 @@ public class UserJobManager {
 		try {
 			final Job job = getJobFromDatabaseOrFileSystem(jobname);
 
-			final String handle = "submision_status_" + jobname + "_"
+			final String handle = "submission_task_" + jobname + "_"
 					+ new Date().getTime();
 			final DtoActionStatus status = new DtoActionStatus(handle, 0);
 			getUser().getActionStatuses().put(handle, status);
