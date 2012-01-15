@@ -24,7 +24,6 @@ import ch.qos.logback.classic.spi.StackTraceElementProxy;
 import ch.qos.logback.classic.util.LevelToSyslogSeverity;
 import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.Layout;
-import ch.qos.logback.core.net.SyslogAppenderBase;
 
 /**
  * This appender can be used to send messages to a remote syslog daemon. <p> For
@@ -41,7 +40,7 @@ public class SyslogAppender extends SyslogAppenderBase<ILoggingEvent> {
 
 	@Override
 	public Layout<ILoggingEvent> buildLayout(String facilityStr) {
-		String prefixPattern = "%syslogStart{" + facilityStr + "}%nopex ";
+		String prefixPattern = "%syslogStart{" + facilityStr + "}";
 
 		prefixLayout.getInstanceConverterMap().put("syslogStart",
 				SyslogStartConverter.class.getName());
