@@ -57,8 +57,8 @@ public class LoginManager {
 							"https://compute-dev.services.bestgrid.org/soap/GrisuService")
 							.put("bestgrid-test",
 									"https://compute-test.services.bestgrid.org/soap/GrisuService")
-			.put("local_ws_jetty", "http://localhost:8080/soap/GrisuService")
-			.put("local_ws",
+									.put("local_ws_jetty", "http://localhost:8080/soap/GrisuService")
+									.put("local_ws",
 											"http://localhost:8080/grisu-ws/soap/GrisuService").build();
 	public static String httpProxyHost = null;
 
@@ -412,7 +412,7 @@ public class LoginManager {
 			version = "n/a";
 		}
 		CLIENT_VERSION = version;
-		MDC.put("client", version);
+		MDC.put("client_version", version);
 
 		return version;
 	}
