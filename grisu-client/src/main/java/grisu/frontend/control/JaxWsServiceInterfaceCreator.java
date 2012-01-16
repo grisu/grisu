@@ -3,6 +3,7 @@ package grisu.frontend.control;
 import grisu.control.ServiceInterface;
 import grisu.control.ServiceInterfaceCreator;
 import grisu.control.exceptions.ServiceInterfaceException;
+import grisu.frontend.control.jaxws.CommandLogHandler;
 import grisu.frontend.control.login.LoginManager;
 import grisu.settings.Environment;
 
@@ -13,11 +14,13 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Service;
+import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.soap.MTOMFeature;
 import javax.xml.ws.soap.SOAPBinding;
@@ -136,6 +139,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 					BindingProvider.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
 
 			final SOAPBinding binding = (SOAPBinding) bp.getBinding();
+
 			binding.setMTOMEnabled(true);
 
 			String clientstring = LoginManager.getClientName()
@@ -151,11 +155,19 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 			String session_id = LoginManager.USER_SESSION;
 			if (StringUtils.isNotBlank(session_id)) {
-				map.put("X-user-Session", Collections.singletonList(session_id));
+				map.put("X-client-session-id",
+						Collections.singletonList(session_id));
 			}
 
 			bp.getRequestContext()
 			.put(MessageContext.HTTP_REQUEST_HEADERS, map);
+
+			CommandLogHandler authnHandler = new CommandLogHandler(bp);
+			List<Handler> hc = binding.getHandlerChain();
+			hc.add(authnHandler);
+
+			binding.setHandlerChain(hc);
+
 
 			return service;
 
