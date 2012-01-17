@@ -108,7 +108,7 @@ public class Jobhelper {
 				}
 
 				if (max != -1) {
-					jobname = jobname + "_" + (max + 1);
+					jobname = jobname + "_" + String.format("%03d", (max + 1));
 				}
 
 			} else {

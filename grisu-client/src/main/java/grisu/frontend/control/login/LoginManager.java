@@ -325,6 +325,17 @@ public class LoginManager {
 		return loginCommandline(backend, true, proxy_lifetime_in_hours);
 	}
 
+	public static ServiceInterface loginCommandlineLocalProxy(String backend)
+			throws LoginException {
+		Credential c = Credential.load();
+
+		if ((c == null) || !c.isValid()) {
+			throw new CredentialException("No valid proxy found.");
+		}
+
+		return login(c, backend, true);
+	}
+
 	public static ServiceInterface loginCommandlineMyProxy(String backend,
 			String username, int proxy_lifetime_in_hours, boolean saveCredToDisk)
 					throws LoginException {
