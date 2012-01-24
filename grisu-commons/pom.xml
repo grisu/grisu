@@ -131,7 +131,7 @@
 		<dependency>
 			<groupId>grisu</groupId>
 			<artifactId>grid-jcommons</artifactId>
-			<version>1.5.9-SNAPSHOT</version>
+			<version>1.5.9</version>
 		</dependency>
 
 		<dependency>
