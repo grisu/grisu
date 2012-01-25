@@ -126,25 +126,16 @@
 						<link>http://java.sun.com/j2ee/1.4/docs/api/</link>
 						<link>http://java.sun.com/j2ee/sdk_1.3/techdocs/api/</link>
 
-						<!-- grisu stuff -->
-						<link>https://code.arcs.org.au/hudson/job/ARCS-JCommons/au.org.arcs.commons$arcs-jcommons/javadoc</link>
-						<link>https://code.arcs.org.au/hudson/job/Infosystems-SNAPSHOT/javadoc</link>
+<!-- 						grisu stuff -->
+<!-- 						<link>https://code.arcs.org.au/hudson/job/ARCS-JCommons/au.org.arcs.commons$arcs-jcommons/javadoc</link> -->
+<!-- 						<link>https://code.arcs.org.au/hudson/job/Infosystems-SNAPSHOT/javadoc</link> -->
 
 						<!-- Libraries -->
 
 						<link>http://jakarta.apache.org/commons/collections/apidocs</link>
 						<link>http://jakarta.apache.org/commons/logging/apidocs/</link>
-						<link>http://www.junit.org/junit/javadoc/</link>
-						<link>http://www-unix.globus.org/cog/distribution/1.7.0/api/</link>
 						<link>http://jline.sourceforge.net/apidocs/</link>
 						<link>http://commons.apache.org/vfs/apidocs/</link>
-						<link>http://logging.apache.org/log4j/docs/api/</link>
-						<link>http://jakarta.apache.org/regexp/apidocs/</link>
-						<link>http://jakarta.apache.org/velocity/api/</link>
-
-						<link>http://google-web-toolkit.googlecode.com/svn/javadoc/1.6/</link>
-
-						<link>http://code.arcs.org.au/builds/job/Infosystems-SNAPSHOT/javadoc</link>
 					</links>
 				</configuration>
 			</plugin>
