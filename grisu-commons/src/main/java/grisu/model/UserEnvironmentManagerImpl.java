@@ -43,6 +43,7 @@ import net.sf.ehcache.util.NamedThreadFactory;
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
+import org.python.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,7 +131,7 @@ EventSubscriber<FqanEvent> {
 		int i = 1;
 
 		while (getReallyAllJobnames(true).contains(temp)) {
-			temp = name + "_" + i;
+			temp = name + "_" + Strings.padStart(Integer.toString(i), 3, '0');
 			i = i + 1;
 		}
 

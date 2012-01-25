@@ -26,9 +26,15 @@ public class DtoActionStatus {
 
 	public static String getLogMessagesAsString(DtoActionStatus status) {
 
+		return getLogMessagesAsString(status, ", ");
+	}
+
+	public static String getLogMessagesAsString(DtoActionStatus status,
+			String seperator) {
+
 		final StringBuffer temp = new StringBuffer();
 		for (final DtoLogItem li : status.getLog()) {
-			temp.append(li.getLogMessage() + ", ");
+			temp.append(li.getLogMessage() + seperator);
 		}
 		return temp.toString();
 	}
@@ -48,6 +54,8 @@ public class DtoActionStatus {
 	private String handle;
 
 	private String errorCause = null;
+
+	private String description = "";
 
 	public DtoActionStatus() {
 	}
@@ -87,6 +95,11 @@ public class DtoActionStatus {
 	@XmlElement(name = "currentElements")
 	public int getCurrentElements() {
 		return currentElements;
+	}
+
+	@XmlElement(name = "description")
+	public String getDescription() {
+		return description;
 	}
 
 	@XmlElement(name = "errorCause")
@@ -140,6 +153,10 @@ public class DtoActionStatus {
 
 	public void setCurrentElements(int currentElements) {
 		this.currentElements = currentElements;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public void setErrorCause(String cause) {

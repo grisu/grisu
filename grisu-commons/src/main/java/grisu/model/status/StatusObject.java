@@ -6,13 +6,18 @@ import grisu.model.dto.DtoActionStatus;
 
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 
+import org.apache.commons.lang.StringUtils;
+import org.python.google.common.base.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StatusObject {
+import com.google.common.collect.ComparisonChain;
+
+public class StatusObject implements Comparable<StatusObject> {
 
 	public interface Listener {
 		public void statusMessage(ActionStatusEvent event);
@@ -63,7 +68,11 @@ public class StatusObject {
 
 	private volatile boolean waitWasInterrupted = false;
 
+	private String shortDesc = "";
+
 	private final CountDownLatch finished = new CountDownLatch(1);
+
+	private final String id = UUID.randomUUID().toString();
 
 	public StatusObject(DtoActionStatus s) {
 		this.origStatus = s;
@@ -101,6 +110,12 @@ public class StatusObject {
 		listeners.addElement(l);
 	}
 
+	public int compareTo(StatusObject o) {
+		return ComparisonChain.start()
+				.compare(getStartTime(), o.getStartTime())
+				.compare(getHandle(), o.getHandle()).result();
+	}
+
 	private synchronized void createWaitThread(final int waitTime,
 			final int thresholdInSeconds) {
 
@@ -134,6 +149,20 @@ public class StatusObject {
 		}
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final StatusObject other = (StatusObject) obj;
+		return Objects.equal(getId(), other.getId());
+
+	}
+
 	private void fireEvent(ActionStatusEvent message) {
 		if ((listeners != null) && !listeners.isEmpty()) {
 
@@ -154,8 +183,33 @@ public class StatusObject {
 		}
 	}
 
+	public String getDescription() {
+		return getStatus().getDescription();
+	}
+
+	public long getEndTime() {
+		return finishedMonitoringTime;
+	}
+
 	public String getHandle() {
 		return this.handle;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+
+	public String getShortDesc() {
+		if ( StringUtils.isBlank(shortDesc) ) {
+			return getHandle();
+		} else {
+			return shortDesc;
+		}
+	}
+
+	public long getStartTime() {
+		return startMonitoringTime;
 	}
 
 	public synchronized DtoActionStatus getStatus() {
@@ -182,6 +236,11 @@ public class StatusObject {
 		return lastStatus;
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(getId());
+	}
+
 	synchronized public void removeListener(Listener l) {
 		if (listeners == null) {
 			listeners = new Vector<Listener>();
@@ -189,11 +248,13 @@ public class StatusObject {
 		listeners.removeElement(l);
 	}
 
+	public void setShortDesc(String short_description) {
+		this.shortDesc = short_description;
+	}
+
 	public void waitForActionToFinish(int recheckIntervalInSeconds,
-			boolean exitIfFailed)
-					throws StatusException {
-		waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed,
-				-1);
+			boolean exitIfFailed) throws StatusException {
+		waitForActionToFinish(recheckIntervalInSeconds, exitIfFailed, -1);
 	}
 
 	/**
@@ -242,6 +303,5 @@ public class StatusObject {
 		return;
 
 	}
-
 
 }
