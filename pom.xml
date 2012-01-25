@@ -181,7 +181,4 @@
 	</reporting>
 
 
-	<properties>
-		<grisu.version>0.4-rc11-SNAPSHOT</grisu.version>
-	</properties>
 </project>
