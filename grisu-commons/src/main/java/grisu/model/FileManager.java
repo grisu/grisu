@@ -576,55 +576,6 @@ public class FileManager {
 	}
 
 	/**
-	 * Copies remote files.
-	 * 
-	 * @param sourceUrl
-	 *            the source url
-	 * @param targetDirUrl
-	 *            the target url
-	 * @param overwrite
-	 *            whether to overwrite the target file if it exists
-	 * @param waitForTransferToFinish
-	 *            whether to wait until the transfer is finished or not...
-	 * @throws FileTransactionException
-	 *             if the copying fails (for example because overwrite is false
-	 *             and target exists).
-	 */
-	public String cp_remote(String sourceUrl, String targetDirUrl,
-			boolean overwrite, boolean waitForTransferToFinish)
-					throws FileTransactionException {
-
-		try {
-			final String handle = serviceInterface.cp(
-					DtoStringList.fromSingleString(sourceUrl), targetDirUrl,
-					overwrite, false);
-
-			if ( waitForTransferToFinish ) {
-				StatusObject so;
-				try {
-					so = StatusObject.waitForActionToFinish(serviceInterface,
-							handle, 2, true);
-				} catch (final Exception e) {
-					throw new FileTransactionException(sourceUrl, targetDirUrl,
-							e.getLocalizedMessage(), e);
-				}
-				if (so.getStatus().isFailed()) {
-					throw new RemoteFileSystemException(so.getStatus()
-							.getErrorCause());
-				}
-				return handle;
-			} else {
-				return handle;
-			}
-
-		} catch (final RemoteFileSystemException e) {
-			throw new FileTransactionException(sourceUrl, targetDirUrl,
-					e.getLocalizedMessage(), e);
-		}
-
-	}
-
-	/**
 	 * Copies or uploads a local file.
 	 * 
 	 * @param sourceFile
@@ -791,6 +742,55 @@ public class FileManager {
 		throw new IllegalArgumentException(
 				"Can't determine location of files for " + sourceUrl + "and "
 						+ targetDirUrl + ".");
+	}
+
+	/**
+	 * Copies remote files.
+	 * 
+	 * @param sourceUrl
+	 *            the source url
+	 * @param targetDirUrl
+	 *            the target url
+	 * @param overwrite
+	 *            whether to overwrite the target file if it exists
+	 * @param waitForTransferToFinish
+	 *            whether to wait until the transfer is finished or not...
+	 * @throws FileTransactionException
+	 *             if the copying fails (for example because overwrite is false
+	 *             and target exists).
+	 */
+	public String cp_remote(String sourceUrl, String targetDirUrl,
+			boolean overwrite, boolean waitForTransferToFinish)
+					throws FileTransactionException {
+
+		try {
+			final String handle = serviceInterface.cp(
+					DtoStringList.fromSingleString(sourceUrl), targetDirUrl,
+					overwrite, false);
+
+			if ( waitForTransferToFinish ) {
+				StatusObject so;
+				try {
+					so = StatusObject.waitForActionToFinish(serviceInterface,
+							handle, 2, true);
+				} catch (final Exception e) {
+					throw new FileTransactionException(sourceUrl, targetDirUrl,
+							e.getLocalizedMessage(), e);
+				}
+				if (so.getStatus().isFailed()) {
+					throw new RemoteFileSystemException(so.getStatus()
+							.getErrorCause());
+				}
+				return handle;
+			} else {
+				return handle;
+			}
+
+		} catch (final RemoteFileSystemException e) {
+			throw new FileTransactionException(sourceUrl, targetDirUrl,
+					e.getLocalizedMessage(), e);
+		}
+
 	}
 
 	/**
@@ -1566,6 +1566,11 @@ public class FileManager {
 			}
 			File temp;
 			temp = getFileFromUriOrPath(url);
+
+			if (!temp.exists()) {
+				throw new RemoteFileSystemException("File '" + url
+						+ "' does not exist.");
+			}
 
 			return GridFile.listLocal(temp, false);
 
