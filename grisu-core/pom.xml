@@ -597,7 +597,7 @@
 								<configuration>
 									<changesIn>CHANGES.txt</changesIn>
 									<deb>[[buildDir]]/grisu-backend-local-${project.version}.deb</deb>
-									<controlDir>target/deb/control</controlDir>
+									<controlDir>${project.basedir}/target/deb/control</controlDir>
 									<dataSet>
 										<data>
 											<src>${project.build.directory}/local-backend.jar</src>
