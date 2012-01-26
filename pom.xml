@@ -149,6 +149,7 @@
 					    <pushChanges>true</pushChanges>
 					    <localCheckout>true</localCheckout>
 					    <tagNameFormat>@{project.version}</tagNameFormat>
+					    <releaseProfiles>deb,rpm</releaseProfiles>
 				  </configuration>
 			</plugin>
 
