@@ -132,6 +132,7 @@ public class JobsFileSystemPlugin implements VirtualFileSystemPlugin {
 				result.setPath(path);
 				for (final GridFile f : result.getChildren()) {
 					f.setPath(result.getPath() + "/" + f.getName());
+					f.setIsVirtual(false);
 				}
 				return result;
 			} catch (final RemoteFileSystemException e) {
