@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>grisu</groupId>
 	<artifactId>grisu</artifactId>
@@ -8,6 +9,23 @@
 	<name>Grisu</name>
 	<description>Grisu is an open source framework to help grid admins and developers to support end users in a grid environment. Grisu publishes an easy-to-use service interface which can be deployed in different ways by implementing different backend modules. This service interface contains a set of methods that are usually needed to submit jobs to the grid, including providing information about the grid and the staging of input/output files from/to the users desktop. </description>
 	<url>http://maven.apache.org</url>
+
+	<repositories>
+		<repository>
+			<id>releases</id>
+			<url>http://code.ceres.auckland.ac.nz/nexus/content/groups/public/</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>daily</updatePolicy>
+				<checksumPolicy>warn</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</snapshots>
+		</repository>
+	</repositories>
 
 	<issueManagement>
 		<system>Github</system>
@@ -77,9 +95,9 @@
 						<link>http://java.sun.com/j2ee/1.4/docs/api/</link>
 						<link>http://java.sun.com/j2ee/sdk_1.3/techdocs/api/</link>
 
-<!-- 						grisu stuff -->
-<!-- 						<link>https://code.arcs.org.au/hudson/job/ARCS-JCommons/au.org.arcs.commons$arcs-jcommons/javadoc</link> -->
-<!-- 						<link>https://code.arcs.org.au/hudson/job/Infosystems-SNAPSHOT/javadoc</link> -->
+						<!-- grisu stuff -->
+						<!-- <link>https://code.arcs.org.au/hudson/job/ARCS-JCommons/au.org.arcs.commons$arcs-jcommons/javadoc</link> -->
+						<!-- <link>https://code.arcs.org.au/hudson/job/Infosystems-SNAPSHOT/javadoc</link> -->
 
 						<!-- Libraries -->
 
@@ -101,7 +119,7 @@
 		<module>grisu-core</module>
 		<module>grisu-client</module>
 		<module>grisu-client-swing</module>
-<!--		<module>client-side-mds</module> -->
+		<!-- <module>client-side-mds</module> -->
 	</modules>
 	<reporting>
 		<plugins>
