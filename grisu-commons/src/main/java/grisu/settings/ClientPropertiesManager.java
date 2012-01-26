@@ -21,8 +21,8 @@ import org.slf4j.LoggerFactory;
 public final class ClientPropertiesManager {
 
 	public static final String[] DEFAULT_HELPDESK_CLASSES = new String[] {
-			"org.vpac.helpDesk.model.anonymousRT.AnonymousRTHelpDesk",
-			"org.vpac.helpDesk.model.trac.TracHelpDesk" };
+		"org.vpac.helpDesk.model.anonymousRT.AnonymousRTHelpDesk",
+	"org.vpac.helpDesk.model.trac.TracHelpDesk" };
 	public static final String HELPDESK_CONFIG = "support.properties";
 
 	public static final int CONCURRENT_THREADS_DEFAULT = 5;
@@ -51,7 +51,7 @@ public final class ClientPropertiesManager {
 
 	public static final int DEFAULT_TIMEOUT = 0;
 
-	public static final String DEFAULT_SERVICE_INTERFACE = "ARCS";
+	public static final String DEFAULT_SERVICE_INTERFACE = "BeSTGRID";
 
 	private static PropertiesConfiguration config = null;
 
@@ -86,7 +86,7 @@ public final class ClientPropertiesManager {
 				config.save();
 			} catch (final ConfigurationException e) {
 				ClientPropertiesManager.myLogger
-						.debug("Could not write config file: " + e.getMessage());
+				.debug("Could not write config file: " + e.getMessage());
 			}
 		}
 	}
@@ -114,7 +114,7 @@ public final class ClientPropertiesManager {
 				config.save();
 			} catch (final ConfigurationException e) {
 				ClientPropertiesManager.myLogger
-						.debug("Could not write config file: " + e.getMessage());
+				.debug("Could not write config file: " + e.getMessage());
 			}
 		}
 	}
@@ -297,7 +297,7 @@ public final class ClientPropertiesManager {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
-		if (StringUtils.isBlank(defaultUrl)) {
+		if (StringUtils.isBlank(defaultUrl) || "ARCS".equals(defaultUrl)) {
 			defaultUrl = DEFAULT_SERVICE_INTERFACE;
 		}
 		return defaultUrl;
@@ -624,7 +624,7 @@ public final class ClientPropertiesManager {
 				config.save();
 			} catch (final ConfigurationException e) {
 				ClientPropertiesManager.myLogger
-						.debug("Could not write config file: " + e.getMessage());
+				.debug("Could not write config file: " + e.getMessage());
 			}
 			return new String[] { DEFAULT_SERVICE_INTERFACE };
 		}
@@ -669,7 +669,7 @@ public final class ClientPropertiesManager {
 			config.save();
 		} catch (final ConfigurationException e) {
 			ClientPropertiesManager.myLogger
-					.debug("Could not write config file: " + e.getMessage());
+			.debug("Could not write config file: " + e.getMessage());
 		}
 	}
 
@@ -805,7 +805,7 @@ public final class ClientPropertiesManager {
 	public static void saveShibbolethUsername(final String username) {
 		try {
 			getClientConfiguration()
-					.setProperty("shibbolethUsername", username);
+			.setProperty("shibbolethUsername", username);
 			getClientConfiguration().save();
 		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());

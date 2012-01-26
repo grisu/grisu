@@ -302,6 +302,7 @@ LoginMethodPanel {
 					final String url = getAdvancedLoginPanelOptions()
 							.getServiceInterfaceUrl();
 
+					ClientPropertiesManager.setDefaultServiceInterfaceUrl(url);
 					final LoginParams params = new LoginParams(url, null, null);
 
 					loginThread = temp.login(params);

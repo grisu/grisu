@@ -167,7 +167,7 @@ public class GrisuMenu extends JMenuBar {
 							.get("this-client");
 
 					final String grisuclientversion = GrisuVersion
-							.get("grisu-client");
+							.get("grisu-client-lib");
 
 					final String message = "Version: " + clientVersion + "\n\n"
 							+ "Grisu client lib version: " + grisuclientversion;

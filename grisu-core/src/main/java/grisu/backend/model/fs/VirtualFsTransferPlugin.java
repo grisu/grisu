@@ -66,7 +66,7 @@ public class VirtualFsTransferPlugin implements FileTransferPlugin {
 			}
 			if (StringUtils.isBlank(realTarget)) {
 				throw new RemoteFileSystemException(
-						"No real file found for target: " + source);
+						"No real file found for target: " + target);
 			}
 		} else {
 			realTarget = target;
