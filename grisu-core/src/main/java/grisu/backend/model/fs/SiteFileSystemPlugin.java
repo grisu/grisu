@@ -59,7 +59,7 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 			// means root of virtual filesystem, list sites...
 			GridFile result = null;
 			result = new GridFile(path, -1L);
-			result.setIsVirtual(true);
+			result.setVirtual(true);
 			result.setPath(path);
 
 			if (recursiveLevels == 0) {
@@ -78,7 +78,7 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 
 			GridFile result = null;
 			result = new GridFile(path, -1L);
-			result.setIsVirtual(true);
+			result.setVirtual(true);
 			result.setPath(path);
 
 			if (recursiveLevels == 0) {
@@ -126,7 +126,7 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 		for (final String host : hosts.keySet()) {
 			final String path = BASE + "/" + site + "/" + host;
 			final GridFile file = new GridFile(path, -1L);
-			file.setIsVirtual(true);
+			file.setVirtual(true);
 			file.addSite(site);
 			for (final MountPoint mp : hosts.get(host)) {
 				file.addFqan(mp.getFqan());
@@ -167,7 +167,7 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 			// will always be directory since it's below mountpoint level
 			final GridFile result = new GridFile(gridPath, -1L);
 			// is virtual because can't be accessed directly
-			result.setIsVirtual(true);
+			result.setVirtual(true);
 			result.setPath(gridPath);
 			result.addSite(site);
 			final Map<String, Set<MountPoint>> childs = new TreeMap<String, Set<MountPoint>>();
@@ -208,7 +208,7 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 
 			for (final String child : childs.keySet()) {
 				final GridFile childFile = new GridFile(gridPath + "/" + child);
-				childFile.setIsVirtual(true);
+				childFile.setVirtual(true);
 				childFile.setPath(gridPath + "/" + child);
 				for (final MountPoint mp : childs.get(child)) {
 					childFile.addFqan(mp.getFqan());
@@ -225,7 +225,7 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 			// will always be directory since it's below mountpoint level
 			final GridFile result = new GridFile(gridPath, -1L);
 			// is virtual because can't be accessed directly
-			result.setIsVirtual(true);
+			result.setVirtual(true);
 			result.setPath(gridPath);
 			result.addSite(site);
 
@@ -280,7 +280,7 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 
 				for (final GridFile c : result.getChildren()) {
 					c.addFqans(child.getFqans());
-					c.setIsVirtual(false);
+					c.setVirtual(false);
 				}
 			}
 
@@ -314,7 +314,7 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 		for (final String site : sites.keySet()) {
 			final String path = BASE + "/" + site;
 			final GridFile s = new GridFile(path, -1L);
-			s.setIsVirtual(true);
+			s.setVirtual(true);
 			s.setPath(path);
 			s.addSite(site);
 			for (final String vo : sites.get(site)) {
@@ -332,10 +332,10 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 		try {
 			final GridFile f = user.ls(url, 1);
 			f.setPath(path);
-			f.setIsVirtual(false);
+			f.setVirtual(false);
 			for (final GridFile c : f.getChildren()) {
 				c.setPath(path + "/" + c.getName());
-				c.setIsVirtual(false);
+				c.setVirtual(false);
 			}
 
 			return f;

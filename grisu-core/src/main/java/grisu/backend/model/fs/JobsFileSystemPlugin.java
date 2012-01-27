@@ -58,7 +58,7 @@ public class JobsFileSystemPlugin implements VirtualFileSystemPlugin {
 
 			GridFile result = null;
 			result = new GridFile(path, -1L);
-			result.setIsVirtual(true);
+			result.setVirtual(true);
 			result.setPath(path);
 
 			if (recursiveLevels == 0) {
@@ -132,7 +132,7 @@ public class JobsFileSystemPlugin implements VirtualFileSystemPlugin {
 				result.setPath(path);
 				for (final GridFile f : result.getChildren()) {
 					f.setPath(result.getPath() + "/" + f.getName());
-					f.setIsVirtual(false);
+					f.setVirtual(false);
 				}
 				return result;
 			} catch (final RemoteFileSystemException e) {
@@ -165,7 +165,7 @@ public class JobsFileSystemPlugin implements VirtualFileSystemPlugin {
 					+ FileManager.getFilename(url));
 			jobDir.addFqan(job.getFqan());
 			jobDir.addSite(job.getJobProperty(Constants.SUBMISSION_SITE_KEY));
-			jobDir.setIsVirtual(false);
+			jobDir.setVirtual(false);
 
 			active.addChild(jobDir);
 		}
@@ -177,7 +177,7 @@ public class JobsFileSystemPlugin implements VirtualFileSystemPlugin {
 
 		GridFile result = null;
 		result = new GridFile(BASE + "/" + ARCHIVED_IDENTIFIER, -1L);
-		result.setIsVirtual(true);
+		result.setVirtual(true);
 		result.setPath(BASE + "/" + ARCHIVED_IDENTIFIER);
 
 		final List<Job> jobs = user.getJobManager()
@@ -191,7 +191,7 @@ public class JobsFileSystemPlugin implements VirtualFileSystemPlugin {
 
 			// jobDir.addFqan(job.getFqan());
 			// jobDir.addSite(job.getJobProperty(Constants.SUBMISSION_SITE_KEY));
-			jobDir.setIsVirtual(false);
+			jobDir.setVirtual(false);
 
 			result.addChild(jobDir);
 		}

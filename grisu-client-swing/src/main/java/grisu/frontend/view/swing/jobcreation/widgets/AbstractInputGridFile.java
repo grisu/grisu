@@ -189,7 +189,7 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 			try {
 				temp = getFileManager().createGridFile(entry);
 				if (temp.isFolder()) {
-					temp.setIsInaccessible(true);
+					temp.setInaccessible(true);
 				}
 			} catch (final Exception e) {
 				temp = new GridFile(entry, true, e);
@@ -250,7 +250,7 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 				try {
 					final List<GridFile> roots = (List<GridFile>) (GrisuRegistryManager
 							.getDefault(getServiceInterface()).get(config
-							.get(key)));
+									.get(key)));
 					if (roots != null) {
 						setRoots(roots);
 					}

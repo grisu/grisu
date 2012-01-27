@@ -37,7 +37,7 @@ public class AllGroupsFileSystemPlugin implements VirtualFileSystemPlugin {
 	private GridFile assembleFileObject(String path, Map<String, GridFile> lsMap) {
 
 		final GridFile result = new GridFile(path, -1L);
-		result.setIsVirtual(true);
+		result.setVirtual(true);
 
 		for (final String url : lsMap.keySet()) {
 			result.addUrl(url, 0);
@@ -50,7 +50,7 @@ public class AllGroupsFileSystemPlugin implements VirtualFileSystemPlugin {
 					if (resultChild.getName().equals(child.getName())) {
 						resultChild.addUrl(child.getUrl(), 0);
 						resultChild.setUrl(child.getPath());
-						resultChild.setIsVirtual(true);
+						resultChild.setVirtual(true);
 						resultChild.setLastModified(-1L);
 						resultChild.setSize(-1L);
 						resultChild.addSites(child.getSites());
@@ -80,7 +80,7 @@ public class AllGroupsFileSystemPlugin implements VirtualFileSystemPlugin {
 						if (resultChild.getName().equals(c.getName())) {
 							resultChild.addUrl(c.getUrl(), 0);
 							resultChild.setUrl(c.getPath());
-							resultChild.setIsVirtual(true);
+							resultChild.setVirtual(true);
 							resultChild.addSites(child.getSites());
 							resultChild.setLastModified(-1L);
 							result.addSites(child.getSites());
@@ -117,7 +117,7 @@ public class AllGroupsFileSystemPlugin implements VirtualFileSystemPlugin {
 					ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://"
 							+ IDENTIFIER, -1L);
 
-			result.setIsVirtual(true);
+			result.setVirtual(true);
 
 			for (final String group : user.getAllAvailableUniqueGroupnames()) {
 
@@ -143,7 +143,7 @@ public class AllGroupsFileSystemPlugin implements VirtualFileSystemPlugin {
 					child = new GridFile(mp.getRootUrl(), -1L);
 					child.setName(group);
 					// }
-					child.setIsVirtual(false);
+					child.setVirtual(false);
 					child.addFqan(fqan);
 					child.addSite(mp.getSite());
 					result.addChild(child);
@@ -151,7 +151,7 @@ public class AllGroupsFileSystemPlugin implements VirtualFileSystemPlugin {
 				} else {
 					final GridFile child = new GridFile("grid://" + IDENTIFIER
 							+ "/" + group, -1L);
-					child.setIsVirtual(true);
+					child.setVirtual(true);
 					child.addFqan(fqan);
 
 					for (final MountPoint mp : user.getMountPoints(fqan)) {

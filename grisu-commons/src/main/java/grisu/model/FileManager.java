@@ -1359,7 +1359,7 @@ public class FileManager {
 	public GridFile getLocalRoot() {
 
 		final GridFile localRoot = new GridFile("local://", -1);
-		localRoot.setIsVirtual(true);
+		localRoot.setVirtual(true);
 		localRoot.setName("Local files");
 		localRoot.addSite("Local");
 

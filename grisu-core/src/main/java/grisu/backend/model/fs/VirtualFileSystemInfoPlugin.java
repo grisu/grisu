@@ -134,7 +134,7 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 
 		if (url.equals(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://")) {
 			final GridFile root = new GridFile(url, -1L);
-			root.setIsVirtual(true);
+			root.setVirtual(true);
 			root.setPath(url);
 			if (recursiveLevels == 0) {
 				return root;
@@ -143,7 +143,7 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 				final GridFile vfs = new GridFile(
 						ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://"
 								+ key, -1L);
-				vfs.setIsVirtual(true);
+				vfs.setVirtual(true);
 				vfs.setPath(url + vfs.getName());
 				// vfs.setName(StringUtils.capitalize(key));
 				vfs.setName(key);

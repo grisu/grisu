@@ -97,11 +97,11 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 				throw new RuntimeException("No real url found for virtual url.");
 			} else if (urls.size() == 1) {
 				result = new GridFile(urls.iterator().next(), -1L);
-				result.setIsVirtual(false);
+				result.setVirtual(false);
 				result.setPath(path);
 			} else {
 				result = new GridFile(path, -1L);
-				result.setIsVirtual(true);
+				result.setVirtual(true);
 				result.setPath(path);
 			}
 
@@ -142,7 +142,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					final String pathNew = (path + "/" + file.getName())
 							.replace("///", "/").replace("//", "/") + "//";
 					file.setPath(pathNew);
-					file.setIsVirtual(true);
+					file.setVirtual(true);
 					file.addSites(temp.get(fqan));
 					result.addChild(file);
 				} else {
@@ -158,7 +158,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 						file.addUrl(mp.getRootUrl(),
 								GridFile.FILETYPE_MOUNTPOINT_PRIORITY);
 					}
-					file.setIsVirtual(true);
+					file.setVirtual(true);
 					file.addSites(temp.get(fqan));
 					result.addChild(file);
 				}
@@ -178,7 +178,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			// means root of the groupfilesystem
 
 			result = new GridFile(path, -1L);
-			result.setIsVirtual(true);
+			result.setVirtual(true);
 			result.setPath(path);
 
 			if (recursiveLevels == 0) {
@@ -188,7 +188,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			for (final VO vo : new TreeSet<VO>(user.getFqans().values())) {
 				final GridFile f = new GridFile(BASE + "/" + vo.getVoName(),
 						-1L);
-				f.setIsVirtual(true);
+				f.setVirtual(true);
 				f.setPath(path + "/" + vo.getVoName());
 
 				for (final MountPoint mp : user.getMountPoints("/"
@@ -210,11 +210,11 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 			if (urls.size() == 1) {
 				result = new GridFile(urls.iterator().next(), -1L);
-				result.setIsVirtual(false);
+				result.setVirtual(false);
 				result.setPath(path);
 			} else {
 				result = new GridFile(path, -1L);
-				result.setIsVirtual(true);
+				result.setVirtual(true);
 				result.setPath(path);
 				for (final String u : urls) {
 					result.addUrl(u, GridFile.FILETYPE_MOUNTPOINT_PRIORITY);
@@ -245,13 +245,13 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					final GridFile file = new GridFile(mps.iterator().next());
 					file.setName(FileManager.getFilename(fqan));
 					file.setPath(path + "/" + file.getName());
-					file.setIsVirtual(true);
+					file.setVirtual(true);
 					file.addSites(temp.get(fqan));
 					result.addChild(file);
 				} else {
 					final GridFile file = new GridFile(BASE + fqan, fqan);
 					file.setPath(path + "/" + file.getName());
-					file.setIsVirtual(true);
+					file.setVirtual(true);
 					file.addSites(temp.get(fqan));
 					for (final MountPoint mp : mps) {
 						file.addUrl(mp.getRootUrl(),
@@ -334,13 +334,13 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 								.next());
 						file.setName(FileManager.getFilename(fqan));
 						file.setPath(path + "/" + file.getName() + "//");
-						file.setIsVirtual(true);
+						file.setVirtual(true);
 						file.addSites(temp.get(fqan));
 						children.add(file);
 					} else {
 						final GridFile file = new GridFile(BASE + fqan, fqan);
 						file.setPath(path + "/" + file.getName() + "//");
-						file.setIsVirtual(true);
+						file.setVirtual(true);
 						file.addSites(temp.get(fqan));
 						children.add(file);
 					}
@@ -404,11 +404,11 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					if (temp.size() == 1) {
 						result = new GridFile(temp.values().iterator().next(),
 								-1L);
-						result.setIsVirtual(false);
+						result.setVirtual(false);
 						result.setPath(path);
 					} else {
 						result = new GridFile(path, -1L);
-						result.setIsVirtual(true);
+						result.setVirtual(true);
 						result.setPath(path);
 						int i = 0;
 						for (final Long lm : temp.keySet()) {
@@ -434,7 +434,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 					} else {
 						result = user.ls(url, 0);
 					}
-					result.setIsVirtual(false);
+					result.setVirtual(false);
 					result.setPath(path);
 				} catch (Exception e) {
 					result = new GridFile(url, -1L);
@@ -444,7 +444,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 			} else {
 				result = new GridFile(path, -1L);
-				result.setIsVirtual(true);
+				result.setVirtual(true);
 				result.setPath(path);
 				for (final String u : parentUrls) {
 					result.addUrl(u, GridFile.FILETYPE_FOLDER_PRIORITY);

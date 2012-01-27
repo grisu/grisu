@@ -35,7 +35,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 			GridFile.class, "Grid file");
 
 	public static final DataFlavor[] DATA_FLAVORS = new DataFlavor[] {
-			GRIDFILE_FLAVOR, DataFlavor.stringFlavor };
+		GRIDFILE_FLAVOR, DataFlavor.stringFlavor };
 
 	public static final String ROOT = "FileRoot";
 
@@ -137,9 +137,9 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 			.synchronizedList(new LinkedList<DtoProperty>());
 	private long size = -2L;
 	private long lastModified;
-	private boolean isVirtual = false;
+	private Boolean isVirtual = false;
 
-	private boolean inaccessable = false;
+	private Boolean inaccessable = false;
 
 	private Set<GridFile> children = Collections
 			.synchronizedSet(new TreeSet<GridFile>());
@@ -380,7 +380,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 
 	// for jaxb marshalling
 	@XmlAttribute(name = "isInaccessable")
-	public boolean getInaccessable() {
+	public Boolean getInaccessable() {
 		return this.inaccessable;
 	}
 
@@ -438,7 +438,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 
 	// for jaxb marshalling
 	@XmlAttribute(name = "isVirtual")
-	public boolean getVirtual() {
+	public Boolean getVirtual() {
 		return isVirtual;
 	}
 
@@ -519,17 +519,17 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		this.fqans.addAll(fqans);
 	}
 
-	public void setInaccessible(boolean isInaccessible) {
+	public void setInaccessible(Boolean isInaccessible) {
 		this.inaccessable = isInaccessible;
 	}
 
-	public void setIsInaccessible(boolean isInaccessible) {
-		this.inaccessable = isInaccessible;
-	}
+	// public void setIsInaccessible(Boolean isInaccessible) {
+	// this.inaccessable = isInaccessible;
+	// }
 
-	public void setIsVirtual(boolean isVirtual) {
-		this.isVirtual = isVirtual;
-	}
+	// public void setIsVirtual(boolean isVirtual) {
+	// this.isVirtual = isVirtual;
+	// }
 
 	public void setLastModified(long lastModified) {
 		this.lastModified = lastModified;
@@ -575,7 +575,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		}
 	}
 
-	public void setVirtual(boolean isVirtual) {
+	public void setVirtual(Boolean isVirtual) {
 		this.isVirtual = isVirtual;
 	}
 
