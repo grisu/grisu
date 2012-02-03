@@ -4,11 +4,14 @@ import grisu.backend.model.User;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
+import grisu.grin.model.resources.Directory;
+import grisu.grin.model.resources.Site;
 import grisu.model.FileManager;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoProperty;
 import grisu.model.dto.GridFile;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -293,17 +296,17 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 
 		final Map<String, Set<String>> sites = new TreeMap<String, Set<String>>();
 		for (final String vo : user.getFqans().keySet()) {
-			final Map<String, String[]> dataLocations = AbstractServiceInterface.informationManager
+			final Collection<Directory> dataLocations = AbstractServiceInterface.informationManager
 					.getDataLocationsForVO(vo);
-			for (final String host : dataLocations.keySet()) {
-				final String site = AbstractServiceInterface.informationManager
-						.getSiteForHostOrUrl(host);
-				if (!sites.keySet().contains(site)) {
+
+			for (final Directory dir : dataLocations) {
+				final Site site = dir.getSite();
+				if (!sites.keySet().contains(site.getName())) {
 					final Set<String> tempVOs = new TreeSet<String>();
 					tempVOs.add(vo);
-					sites.put(site, tempVOs);
+					sites.put(site.getName(), tempVOs);
 				} else {
-					final Set<String> tempVos = sites.get(site);
+					final Set<String> tempVos = sites.get(site.getName());
 					tempVos.add(vo);
 				}
 

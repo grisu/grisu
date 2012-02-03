@@ -78,14 +78,6 @@ public interface ResourceInformation {
 	 */
 	String[] getAllSubmissionLocations();
 
-	/**
-	 * Checks which application packages provide the provided executable.
-	 * 
-	 * @param executable
-	 *            the executable
-	 * @return the application package(s) or null if no package could be found
-	 */
-	String[] getApplicationPackageForExecutable(String executable);
 
 	/**
 	 * Calculates the best staging filesystem for this submissionLocation.

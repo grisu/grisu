@@ -14,10 +14,9 @@ import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoValidCredentialException;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
+import grisu.grin.model.Grid;
+import grisu.grin.model.resources.Directory;
 import grisu.jcommons.constants.Constants;
-import grisu.jcommons.interfaces.InfoManager;
-import grisu.jcommons.interfaces.InformationManager;
-import grisu.jcommons.interfaces.MatchMaker;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.GridFile;
@@ -29,6 +28,7 @@ import grith.jgrith.utils.FqanHelpers;
 import grith.jgrith.voms.VO;
 import grith.jgrith.vomsProxy.VomsException;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -167,7 +167,6 @@ public class User {
 		return dn.replace("=", "_").replace(",", "_").replace(" ", "_");
 	}
 
-	private InfoManager im;
 
 	protected final BatchJobDAO batchJobDao = new BatchJobDAO();
 
@@ -213,15 +212,17 @@ public class User {
 	private Map<String, JobSubmissionObjectImpl> jobTemplates = new HashMap<String, JobSubmissionObjectImpl>();
 	private UserFileManager fsm;
 
-	private final InformationManager infoManager;
-	private final MatchMaker matchmaker;
+	// private final InformationManager infoManager;
+	private final Grid grid = new Grid();
+
+	// private final MatchMaker matchmaker;
 
 	private UserBatchJobManager batchjobmanager = null;
 
 	// for hibernate
 	public User() {
-		this.infoManager = AbstractServiceInterface.informationManager;
-		this.matchmaker = AbstractServiceInterface.matchmaker;
+		// this.infoManager = AbstractServiceInterface.informationManager;
+		// this.matchmaker = AbstractServiceInterface.matchmaker;
 	}
 
 	/**
@@ -235,8 +236,8 @@ public class User {
 	private User(final Credential cred) {
 		this.dn = cred.getDn();
 		this.credential = cred;
-		this.infoManager = AbstractServiceInterface.informationManager;
-		this.matchmaker = AbstractServiceInterface.matchmaker;
+		// this.infoManager = AbstractServiceInterface.informationManager;
+		// this.matchmaker = AbstractServiceInterface.matchmaker;
 
 	}
 
@@ -249,8 +250,8 @@ public class User {
 	 */
 	public User(final String dn) {
 		this.dn = dn;
-		this.infoManager = AbstractServiceInterface.informationManager;
-		this.matchmaker = AbstractServiceInterface.matchmaker;
+		// this.infoManager = AbstractServiceInterface.informationManager;
+		// this.matchmaker = AbstractServiceInterface.matchmaker;
 	}
 
 	public void addArchiveLocation(String alias, String value) {
@@ -301,8 +302,11 @@ public class User {
 		userdao.saveOrUpdate(this);
 	}
 
-	private MountPoint createMountPoint(String server, String path,
-			final String fqan, Executor executor) throws Exception {
+	private MountPoint createMountPoint(final Directory dir, final String fqan,
+			Executor executor) throws Exception {
+
+		final String server = dir.getHost();
+		final String path = dir.getPath();
 
 		String url = null;
 
@@ -543,22 +547,19 @@ public class User {
 
 		}
 
-		final String site = AbstractServiceInterface.informationManager
-				.getSiteForHostOrUrl(url);
-
 		MountPoint mp = null;
 
 		if (StringUtils.isBlank(alias)) {
 			alias = MountPointHelpers.calculateMountPointName(server, fqan);
 		}
-		mp = new MountPoint(getDn(), fqan, url, alias, site, true);
+		mp = new MountPoint(getDn(), fqan, url, alias,
+				dir.getSite().toString(), true);
 
 		for (final String key : properties.keySet()) {
 			mp.addProperty(key, properties.get(key));
 		}
 
-		final boolean isVolatile = AbstractServiceInterface.informationManager
-				.isVolatileDataLocation(server, tempPath, fqan);
+		final boolean isVolatile = dir.isVolatile();
 		mp.setVolatileFileSystem(isVolatile);
 
 		return mp;
@@ -652,76 +653,77 @@ public class User {
 						myLogger.debug("Getting datalocations for vo " + fqan
 								+ "....");
 						// final Date start = new Date();
-						final Map<String, String[]> mpUrl = AbstractServiceInterface.informationManager
+
+						Collection<Directory> dirs = AbstractServiceInterface.informationManager
 								.getDataLocationsForVO(fqan);
+
+						// final Map<String, String[]> mpUrl =
+						// AbstractServiceInterface.informationManager
+						// .getDataLocationsForVO(fqan);
 						myLogger.debug("Getting datalocations for vo " + fqan
 								+ " finished.");
-						// final Date end = new Date();
-						// myLogger.debug("Querying for data locations for all sites and+ "
-						// + fqan + " took: " + (end.getTime() -
-						// start.getTime())
-						// + " ms.");
-						for (final String server : mpUrl.keySet()) {
+
+						for (final Directory dir : dirs) {
 
 							String uniqueString = null;
-							for (final String path : mpUrl.get(server)) {
-								try {
+							try {
 
-									uniqueString = server + " - " + path
-											+ " - " + fqan;
+								String server = dir.getHost();
+								String path = dir.getPath();
 
-									// X.p("\t" + uniqueString
-									// + ": creating....");
+								uniqueString = server + " - " + path
+										+ " - " + fqan;
 
-									successfullMountPoints.put(uniqueString,
-											null);
+								// X.p("\t" + uniqueString
+								// + ": creating....");
 
-									myLogger.debug("Creating mountpoint for: "
-											+ server + " / " + path + " / "
-											+ fqan + "....");
+								successfullMountPoints.put(uniqueString,
+										null);
 
-									final MountPoint mp = createMountPoint(
-											server,
-											path,
-											fqan,
-											(ENABLE_FILESYSTEM_CACHE) ? backgroundExecutorForFilesystemCache
-													: null);
+								myLogger.debug("Creating mountpoint for: "
+										+ server + " / " + path + " / "
+										+ fqan + "....");
 
-									myLogger.debug("Creating mountpoint for: "
-											+ server + " / " + path + " / "
-											+ fqan + " finished.");
+								final MountPoint mp = createMountPoint(
+										dir,
+										fqan,
+										(ENABLE_FILESYSTEM_CACHE) ? backgroundExecutorForFilesystemCache
+												: null);
 
-									successfullMountPoints.put(server + "_"
-											+ path + "_" + fqan, mp);
+								myLogger.debug("Creating mountpoint for: "
+										+ server + " / " + path + " / "
+										+ fqan + " finished.");
 
-									// X.p("\t" + server + "/" + path + "/" +
-									// fqan
-									// + ": created");
+								successfullMountPoints.put(server + "_"
+										+ path + "_" + fqan, mp);
 
-									if (mp != null) {
-										mps.add(mp);
-										successfullMountPoints.put(
-												uniqueString, mp);
-									} else {
-										successfullMountPoints
-										.remove(uniqueString);
-										unsuccessfullMountPoints
-										.put(uniqueString,
-												new Exception(
-														"MountPoint not created, unknown reason."));
-									}
-								} catch (final Exception e) {
-									// X.p(server + "/" + "/" + fqan +
-									// ": failed : "
-									// + e.getLocalizedMessage());
-									// e.printStackTrace();
-									successfullMountPoints.remove(uniqueString);
-									unsuccessfullMountPoints.put(uniqueString,
-											e);
-									myLogger.error("Can't use mountpoint "
-											+ server + " / " + fqan + ": "
-											+ e.getLocalizedMessage());
+								// X.p("\t" + server + "/" + path + "/" +
+								// fqan
+								// + ": created");
+
+								if (mp != null) {
+									mps.add(mp);
+									successfullMountPoints.put(
+											uniqueString, mp);
+								} else {
+									successfullMountPoints
+									.remove(uniqueString);
+									unsuccessfullMountPoints
+									.put(uniqueString,
+											new Exception(
+													"MountPoint not created, unknown reason."));
 								}
+							} catch (final Exception e) {
+								// X.p(server + "/" + "/" + fqan +
+								// ": failed : "
+								// + e.getLocalizedMessage());
+								// e.printStackTrace();
+								successfullMountPoints.remove(uniqueString);
+								unsuccessfullMountPoints.put(uniqueString,
+										e);
+								myLogger.error("Can't use mountpoint "
+										+ dir.getHost() + " / " + fqan + ": "
+										+ e.getLocalizedMessage());
 							}
 						}
 					}
@@ -759,7 +761,7 @@ public class User {
 
 				myLogger.debug("Getting datalocations for vo " + fqan + "....");
 				// final Date start = new Date();
-				final Map<String, String[]> mpUrl = AbstractServiceInterface.informationManager
+				final Collection<Directory> dirs = AbstractServiceInterface.informationManager
 						.getDataLocationsForVO(fqan);
 				myLogger.debug("Getting datalocations for vo " + fqan
 						+ " finished.");
@@ -767,55 +769,54 @@ public class User {
 				// myLogger.debug("Querying for data locations for all sites and+ "
 				// + fqan + " took: " + (end.getTime() - start.getTime())
 				// + " ms.");
-				for (final String server : mpUrl.keySet()) {
+				for (final Directory dir : dirs) {
 
 					String uniqueString = null;
-					for (final String path : mpUrl.get(server)) {
-						try {
+					try {
 
-							uniqueString = server + " - " + path + " - " + fqan;
+						String server = dir.getHost();
+						String path = dir.getPath();
+						uniqueString = server + " - " + path + " - " + fqan;
 
-							// X.p("\t" + uniqueString
-							// + ": creating....");
+						// X.p("\t" + uniqueString
+						// + ": creating....");
 
-							successfullMountPoints.put(uniqueString, null);
+						successfullMountPoints.put(uniqueString, null);
 
-							myLogger.debug("Creating mountpoint for: " + server
-									+ " / " + path + " / " + fqan + "....");
+						myLogger.debug("Creating mountpoint for: " + server
+								+ " / " + path + " / " + fqan + "....");
 
-							final MountPoint mp = createMountPoint(server,
-									path, fqan, null);
+						final MountPoint mp = createMountPoint(dir, fqan, null);
 
-							myLogger.debug("Creating mountpoint for: " + server
-									+ " / " + path + " / " + fqan
-									+ " finished.");
+						myLogger.debug("Creating mountpoint for: " + server
+								+ " / " + path + " / " + fqan
+								+ " finished.");
 
-							successfullMountPoints.put(server + "_" + path
-									+ "_" + fqan, mp);
+						successfullMountPoints.put(server + "_" + path
+								+ "_" + fqan, mp);
 
-							// X.p("\t" + server + "/" + path + "/" + fqan
-							// + ": created");
+						// X.p("\t" + server + "/" + path + "/" + fqan
+						// + ": created");
 
-							if (mp != null) {
-								mps.add(mp);
-								successfullMountPoints.put(uniqueString, mp);
-							} else {
-								successfullMountPoints.remove(uniqueString);
-								unsuccessfullMountPoints
-								.put(uniqueString,
-										new Exception(
-												"MountPoint not created, unknown reason."));
-							}
-						} catch (final Exception e) {
-							// X.p(server + "/" + "/" + fqan + ": failed : "
-							// + e.getLocalizedMessage());
-							// e.printStackTrace();
+						if (mp != null) {
+							mps.add(mp);
+							successfullMountPoints.put(uniqueString, mp);
+						} else {
 							successfullMountPoints.remove(uniqueString);
-							unsuccessfullMountPoints.put(uniqueString, e);
-							myLogger.error("Can't use mountpoint " + server
-									+ " / " + fqan + ": "
-									+ e.getLocalizedMessage());
+							unsuccessfullMountPoints
+							.put(uniqueString,
+									new Exception(
+											"MountPoint not created, unknown reason."));
 						}
+					} catch (final Exception e) {
+						// X.p(server + "/" + "/" + fqan + ": failed : "
+						// + e.getLocalizedMessage());
+						// e.printStackTrace();
+						successfullMountPoints.remove(uniqueString);
+						unsuccessfullMountPoints.put(uniqueString, e);
+						myLogger.error("Can't use mountpoint " + dir.getHost()
+								+ " / " + fqan + ": "
+								+ e.getLocalizedMessage());
 					}
 				}
 			}
@@ -1249,11 +1250,6 @@ public class User {
 	}
 
 	@Transient
-	public InformationManager getInformationManager() {
-		return this.infoManager;
-	}
-
-	@Transient
 	public UserJobManager getJobManager() {
 		if (jobmanager == null) {
 			final Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
@@ -1267,11 +1263,6 @@ public class User {
 	@ElementCollection
 	public Map<String, JobSubmissionObjectImpl> getJobTemplates() {
 		return jobTemplates;
-	}
-
-	@Transient
-	public MatchMaker getMatchMaker() {
-		return this.matchmaker;
 	}
 
 	@ElementCollection(fetch = FetchType.EAGER)
@@ -1367,23 +1358,25 @@ public class User {
 		return FqanHelpers.getUniqueGroupname(getFqans().keySet(), fqan);
 	}
 
-	/**
-	 * This is needed because of the url home directory/absolute path info that
-	 * is contained in the user object.
-	 * 
-	 * We can't use /~/ dirs directly, since they are not unique. E.g.
-	 * gsiftp://ng2.auckland.ac.nz/~/ could point to 2 different directories for
-	 * two different vos.
-	 * 
-	 * @return the info manager
-	 */
-	@Transient
-	public InfoManager getUserInfoManager() {
-		if ( this.im == null ) {
-			im = new UserInfoManager(this);
-		}
-		return this.im;
-	}
+	// /**
+	// * This is needed because of the url home directory/absolute path info
+	// that
+	// * is contained in the user object.
+	// *
+	// * We can't use /~/ dirs directly, since they are not unique. E.g.
+	// * gsiftp://ng2.auckland.ac.nz/~/ could point to 2 different directories
+	// for
+	// * two different vos.
+	// *
+	// * @return the info manager
+	// */
+	// @Transient
+	// public InfoManager getUserInfoManager() {
+	// if ( this.im == null ) {
+	// im = new UserInfoManager(this);
+	// }
+	// return this.im;
+	// }
 
 	/**
 	 * Gets a map of this users properties. These properties can be used to
@@ -1404,27 +1397,6 @@ public class User {
 	@Override
 	public int hashCode() {
 		return 29 * dn.hashCode();
-	}
-
-	public boolean isValidSubmissionLocation(String subLoc, String fqan) {
-
-		// TODO i'm sure this can be made much more quicker
-		final String[] fs = getInformationManager()
-				.getStagingFileSystemForSubmissionLocation(subLoc);
-
-		for (final MountPoint mp : df(fqan)) {
-
-			for (final String f : fs) {
-				if (mp.getRootUrl().startsWith(f.replace(":2811", ""))) {
-
-					return true;
-				}
-			}
-
-		}
-
-		return false;
-
 	}
 
 

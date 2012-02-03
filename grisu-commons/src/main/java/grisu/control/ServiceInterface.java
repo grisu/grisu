@@ -13,8 +13,6 @@ import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.DtoApplicationDetails;
 import grisu.model.dto.DtoApplicationInfo;
 import grisu.model.dto.DtoBatchJob;
-import grisu.model.dto.DtoGridResources;
-import grisu.model.dto.DtoHostsInfo;
 import grisu.model.dto.DtoJob;
 import grisu.model.dto.DtoJobs;
 import grisu.model.dto.DtoMountPoints;
@@ -377,48 +375,28 @@ public interface ServiceInterface {
 	boolean fileExists(@PathParam("url") String url)
 			throws RemoteFileSystemException;
 
-	/**
-	 * Takes a jsdl template and returns a list of submission locations that
-	 * match the requirements. The order of the list is determined by the
-	 * underlying ranking algorithm.
-	 * 
-	 * @param jsdl
-	 *            the jdsl file
-	 * @param fqan
-	 *            the fqan to use to submit the job
-	 * @param exclude
-	 *            whether to exclude locations that don't have free job slots
-	 *            available at the moment in the result list
-	 * 
-	 * @return a list of matching submissionLoctations
-	 */
-	@GET
-	@Path("/info/queues/matching/jsdl")
-	@PermitAll
-	DtoGridResources findMatchingSubmissionLocationsUsingJsdl(
-			@QueryParam("jsdl") String jsdl, @QueryParam("fqan") String fqan,
-			@DefaultValue("false") @QueryParam("exclude") boolean exclude);
 
-	/**
-	 * Takes a jsdl template and returns a list of submission locations that
-	 * match the requirements. The order of the list is determined by the
-	 * underlying ranking algorithm.
-	 * 
-	 * @param jobProperties
-	 *            the job Properties (have alook at the
-	 *            {@link EnunciateServiceInterface} interface for supported
-	 *            keys)
-	 * @param fqan
-	 *            the fqan to use to submit the job
-	 * @return a list of matching submissionLoctations
-	 */
-	@GET
-	@Path("/info/queues/matching/properties")
-	@PermitAll
-	DtoGridResources findMatchingSubmissionLocationsUsingMap(
-			@QueryParam("jobProperties") DtoJob jobProperties,
-			@QueryParam("fqan") String fqan,
-			@DefaultValue("false") @QueryParam("exclude") boolean exclude);
+
+	// /**
+	// * Takes a jsdl template and returns a list of submission locations that
+	// * match the requirements. The order of the list is determined by the
+	// * underlying ranking algorithm.
+	// *
+	// * @param jobProperties
+	// * the job Properties (have alook at the
+	// * {@link EnunciateServiceInterface} interface for supported
+	// * keys)
+	// * @param fqan
+	// * the fqan to use to submit the job
+	// * @return a list of matching submissionLoctations
+	// */
+	// @GET
+	// @Path("/info/queues/matching/properties")
+	// @PermitAll
+	// DtoGridResources findMatchingSubmissionLocationsUsingMap(
+	// @QueryParam("jobProperties") DtoJob jobProperties,
+	// @QueryParam("fqan") String fqan,
+	// @DefaultValue("false") @QueryParam("exclude") boolean exclude);
 
 	/**
 	 * Returns the current status of an ongoing action.
@@ -483,19 +461,7 @@ public interface ServiceInterface {
 	DtoStringList getAllBatchJobnames(
 			@DefaultValue(Constants.ALLJOBS_KEY) @QueryParam("application") String application);
 
-	/**
-	 * This returns a map of all hosts that the information provider has listed
-	 * and the site that they belong to as value. This method is mainly there
-	 * because of performance reasons so clients can calculate possible
-	 * submission locations easier.
-	 * 
-	 * @return a map with all possible hostnames and the respective sites they
-	 *         belong to
-	 */
-	@GET
-	@Path("/info/hosts")
-	@PermitAll
-	DtoHostsInfo getAllHosts();
+
 
 	/**
 	 * Returns a list of all jobnames that are currently stored on this backend.
@@ -575,19 +541,6 @@ public interface ServiceInterface {
 			@DefaultValue(Constants.NO_VERSION_INDICATOR_STRING) @PathParam("version") String version,
 			@DefaultValue("") @PathParam("queue") String subloc);
 
-	/**
-	 * Returns a list of all application packages that provide the specified
-	 * executable.
-	 * 
-	 * @param executable
-	 *            the executable
-	 * @return the application package(s)
-	 */
-	@GET
-	@Path("/info/applications/{executable}")
-	@PermitAll
-	String[] getApplicationPackagesForExecutable(
-			@PathParam("executable") String executable);
 
 	/**
 	 * Returns a xml document that contains all the jobs of the user with
@@ -1152,59 +1105,6 @@ public interface ServiceInterface {
 	@Path("/files/{url}/mkdir")
 	boolean mkdir(@QueryParam("url") String url)
 			throws RemoteFileSystemException;
-
-	/**
-	 * Mounts a filesystem so a user can easily move stuff around on the
-	 * ServiceInterface.
-	 * 
-	 * @param url
-	 *            the url of the filesystem to mount (e.g.
-	 *            gsiftp://ngdata.vpac.org/home/san04/markus)
-	 * @param mountpoint
-	 *            the mountpoint (has to be in the root directory: /ngdata.vpac
-	 *            is ok, /vpac/ngdata is not
-	 * @param fqan
-	 *            use a vomsproxy with this fqan to connect to the mounted
-	 *            filesystem
-	 * @param useHomeDirectoryOnThisFileSystemIfPossible
-	 *            use the users' home directory on this file system if possible
-	 * @return the new MountPoint
-	 * @throws RemoteFileSystemException
-	 *             if the remote filesystem could not be mounted/connected to
-	 */
-	@POST
-	@Path("/user/mountpoint/{alias}/mount")
-	@RolesAllowed("User")
-	MountPoint mount(
-			@QueryParam("url") String url,
-			@PathParam("alias") String alias,
-			@QueryParam("group") String fqan,
-			@DefaultValue("true") @QueryParam("useHomeDir") boolean useHomeDirectoryOnThisFileSystemIfPossible)
-					throws RemoteFileSystemException;
-
-	/**
-	 * Mounts a filesystem so a user can easily move stuff around on the
-	 * ServiceInterface.
-	 * 
-	 * @param url
-	 *            the url of the filesystem to mount (e.g.
-	 *            gsiftp://ngdata.vpac.org/home/san04/markus)
-	 * @param mountpoint
-	 *            the mountpoint (has to be in the root directory: /ngdata.vpac
-	 *            is ok, /vpac/ngdata is not
-	 * @param useHomeDirectoryOnThisFileSystemIfPossible
-	 *            use the users' home directory on this file system if possible
-	 * @return the new mountpoint
-	 * @throws RemoteFileSystemException
-	 *             if the remote filesystem could not be mounted/connected to
-	 */
-	@POST
-	@Path("/user/mountpoint/{alias}/mount_without_group")
-	MountPoint mountWithoutFqan(
-			@QueryParam("url") String url,
-			@PathParam("alias") String alias,
-			@DefaultValue("true") @QueryParam("useHomeDir") boolean useHomeDirectoryOnThisFileSystemIfPossible)
-					throws RemoteFileSystemException;
 
 	/**
 	 * Tries to figure out the best submission locations for all the jobs that

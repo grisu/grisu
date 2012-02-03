@@ -1,14 +1,17 @@
 package grisu.model.utils;
 
 import grisu.X;
+import grisu.grin.model.resources.Package;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.python.google.common.collect.Sets;
 
 public class InformationUtils {
 
@@ -67,6 +70,16 @@ public class InformationUtils {
 
 	}
 
+	public static String guessLatestVersionOfPackages(Collection<Package> packages) {
+
+		Set<String> versions = Sets.newTreeSet();
+		for (Package p : packages) {
+			versions.add(p.getVersion().toString());
+		}
+
+		return guessLatestVersion(versions, 0);
+	}
+
 	/**
 	 * @param args
 	 */
@@ -95,7 +108,7 @@ public class InformationUtils {
 			if (token.matches(".*\\d.*")) {
 				try {
 					tokenList
-							.add(Integer.parseInt(token.replaceAll("\\D", "")));
+					.add(Integer.parseInt(token.replaceAll("\\D", "")));
 				} catch (final Exception e) {
 					// don't worry for now
 				}

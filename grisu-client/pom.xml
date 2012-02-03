@@ -2,7 +2,7 @@
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.4-rc18-SNAPSHOT</version>
+		<version>0.5-SNAPSHOT</version>
 
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
@@ -51,7 +51,7 @@
 		<dependency>
 			<groupId>grisu</groupId>
 			<artifactId>grisu-commons</artifactId>
-			<version>0.4-rc18-SNAPSHOT</version>
+			<version>${grisu.version}</version>
 
 		</dependency>
 		<dependency>

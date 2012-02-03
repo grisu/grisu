@@ -1,6 +1,5 @@
 package grisu.model;
 
-import grisu.jcommons.utils.FileSystemHelpers;
 import grisu.model.dto.DtoProperty;
 
 import java.util.LinkedList;
@@ -17,6 +16,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.bestgrid.goji.utils.FileSystemHelpers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

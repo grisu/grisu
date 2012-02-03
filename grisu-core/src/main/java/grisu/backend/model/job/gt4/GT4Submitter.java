@@ -6,6 +6,8 @@ import grisu.backend.model.job.JobSubmitter;
 import grisu.backend.model.job.ServerJobSubmissionException;
 import grisu.control.JobConstants;
 import grisu.control.exceptions.NoValidCredentialException;
+import grisu.grin.model.resources.Module;
+import grisu.grin.model.resources.Package;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.interfaces.InformationManager;
 import grisu.jcommons.utils.JsdlHelpers;
@@ -297,12 +299,14 @@ public class GT4Submitter extends JobSubmitter {
 						&& StringUtils.isNotBlank(subLoc)) {
 
 					// if we know application, version and submissionLocation
-					final Map<String, String> appDetails = infoManager
+					final Package pkg = infoManager
 							.getApplicationDetails(application, version, subLoc);
 
 					try {
-						modules_string = appDetails.get(
-								Constants.MDS_MODULES_KEY).split(",");
+						Module m = pkg.getModule();
+						if (m != null) {
+							modules_string = new String[] { m.getModule() };
+						}
 
 						if ((modules_string == null)
 								|| "".equals(modules_string)) {
@@ -320,14 +324,15 @@ public class GT4Submitter extends JobSubmitter {
 				} else if ((application != null) && (version == null)
 						&& (subLoc != null)) {
 
-					final Map<String, String> appDetails = infoManager
-							.getApplicationDetails(application,
-									Constants.NO_VERSION_INDICATOR_STRING,
-									subLoc);
+					final Package pkg = infoManager.getApplicationDetails(
+							application, Constants.NO_VERSION_INDICATOR_STRING,
+							subLoc);
 
 					try {
-						modules_string = appDetails.get(
-								Constants.MDS_MODULES_KEY).split(",");
+						Module m = pkg.getModule();
+						if (m != null) {
+							modules_string = new String[] { m.getModule() };
+						}
 
 						if ((modules_string == null)
 								|| "".equals(modules_string)) {

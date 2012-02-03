@@ -1,14 +1,14 @@
 package grisu.control.serviceInterfaces;
 
 import grisu.backend.model.job.Job;
-import grisu.jcommons.interfaces.GridResource;
+import grisu.grin.model.resources.Queue;
 
 import java.util.Set;
 import java.util.SortedSet;
 
 public interface SubmitPolicy {
 
-	public SortedSet<GridResource> getCalculatedGridResources();
+	public SortedSet<Queue> getCalculatedGridResources();
 
 	public Set<Job> getCalculatedJobs();
 

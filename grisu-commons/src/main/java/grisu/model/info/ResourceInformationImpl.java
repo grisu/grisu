@@ -144,7 +144,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 				Set<String> temp = serviceInterface
 						.getAllAvailableApplications(
 								DtoStringList.fromSingleString(fqan))
-						.asSortedSet();
+								.asSortedSet();
 				if (temp == null) {
 					temp = new TreeSet<String>();
 				}
@@ -226,20 +226,20 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 	}
 
-	public String[] getApplicationPackageForExecutable(String executable) {
-
-		synchronized (executable) {
-
-			if (cachedApplicationPackagesForExecutables.get(executable) == null) {
-				final String[] result = serviceInterface
-						.getApplicationPackagesForExecutable(executable);
-				cachedApplicationPackagesForExecutables.put(executable, result);
-			}
-
-		}
-
-		return cachedApplicationPackagesForExecutables.get(executable);
-	}
+	// public String[] getApplicationPackageForExecutable(String executable) {
+	//
+	// synchronized (executable) {
+	//
+	// if (cachedApplicationPackagesForExecutables.get(executable) == null) {
+	// final String[] result = serviceInterface
+	// .getApplicationPackagesForExecutable(executable);
+	// cachedApplicationPackagesForExecutables.put(executable, result);
+	// }
+	//
+	// }
+	//
+	// return cachedApplicationPackagesForExecutables.get(executable);
+	// }
 
 	public final String getRecommendedStagingFileSystemForSubmissionLocation(
 			final String subLoc) {
@@ -271,7 +271,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 		if ((subLoc == null)
 				|| "".equals(subLoc)
 				|| Constants.NO_SUBMISSION_LOCATION_INDICATOR_STRING
-						.equals(subLoc)) {
+				.equals(subLoc)) {
 			return null;
 		}
 

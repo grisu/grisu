@@ -1,6 +1,8 @@
 package grisu.backend.model.job.gt5;
 
 import grisu.backend.info.InformationManagerManager;
+import grisu.grin.model.resources.Module;
+import grisu.grin.model.resources.Package;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.interfaces.InformationManager;
 import grisu.jcommons.utils.JsdlHelpers;
@@ -182,7 +184,7 @@ public class RSLFactory {
 				&& (subLocs.length > 0)
 				&& (StringUtils.isNotBlank(subLocs[0]) && (StringUtils
 						.isNotBlank(application)))
-				&& (!Constants.GENERIC_APPLICATION_NAME.equals(application))) {
+						&& (!Constants.GENERIC_APPLICATION_NAME.equals(application))) {
 
 			subLoc = subLocs[0];
 
@@ -194,13 +196,13 @@ public class RSLFactory {
 			version = Constants.NO_VERSION_INDICATOR_STRING;
 		}
 
-		final Map<String, String> appDetails = this.informationManager
+		final Package pkg = this.informationManager
 				.getApplicationDetails(application, version, subLoc);
-		final String m = appDetails.get(Constants.MDS_MODULES_KEY);
-		if (StringUtils.isBlank(m)) {
+		final Module m = pkg.getModule();
+		if (m == null) {
 			return new String[] {};
 		}
-		modules_string = appDetails.get(Constants.MDS_MODULES_KEY).split(",");
+		modules_string = new String[] { m.getModule() };
 		if (modules_string != null) {
 			return modules_string;
 		} else {
