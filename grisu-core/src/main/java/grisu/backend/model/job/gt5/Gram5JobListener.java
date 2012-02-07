@@ -39,12 +39,14 @@ public class Gram5JobListener implements GramJobListener {
                 int jobStatus = job.getStatus();
                 String jobId = job.getIDAsString();
                 myLogger.debug("job status changed to " + jobStatus);
-                statuses.put(jobId, jobStatus);
-                errors.put(jobId, job.getError());
                 try {
                     if ((jobStatus == GramJob.STATUS_DONE) || (jobStatus == GramJob.STATUS_FAILED)){
                         job.signal(GramJob.SIGNAL_COMMIT_END);
                     }
+                    // Only set status if signal sending succeeded to have grisu
+                    // so that GT5Submitter goes to Gram in an attempt to get job status
+                    statuses.put(jobId, jobStatus);
+                    errors.put(jobId, job.getError());
                 } catch (Exception e) {
                     String state = job.getStatusAsString();
                     myLogger.warn("Failed to send COMMIT_END to job " + jobId + " in state " + state, e);
