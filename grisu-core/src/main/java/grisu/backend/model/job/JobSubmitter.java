@@ -1,6 +1,5 @@
 package grisu.backend.model.job;
 
-import grisu.jcommons.interfaces.InformationManager;
 import grith.jgrith.credential.Credential;
 
 /**
@@ -76,7 +75,7 @@ public abstract class JobSubmitter {
 	 * @return the (JobSubmitter-specific) handle to the job
 	 * @throws ServerJobSubmissionException
 	 */
-	protected abstract String submit(InformationManager infoManager,
+	protected abstract String submit(
 			String host, String factoryType, Job job)
 					throws ServerJobSubmissionException;
 

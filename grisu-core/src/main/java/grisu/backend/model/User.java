@@ -14,9 +14,9 @@ import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoValidCredentialException;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
-import grisu.grin.model.Grid;
-import grisu.grin.model.resources.Directory;
 import grisu.jcommons.constants.Constants;
+import grisu.jcommons.model.info.Directory;
+import grisu.jcommons.model.info.VO;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.GridFile;
@@ -25,7 +25,6 @@ import grisu.settings.ServerPropertiesManager;
 import grisu.utils.MountPointHelpers;
 import grith.jgrith.credential.Credential;
 import grith.jgrith.utils.FqanHelpers;
-import grith.jgrith.voms.VO;
 import grith.jgrith.vomsProxy.VomsException;
 
 import java.util.Collection;
@@ -61,6 +60,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.FileSystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Maps;
 
 /**
  * The User class holds all the relevant data a job could want to know from the
@@ -213,7 +214,6 @@ public class User {
 	private UserFileManager fsm;
 
 	// private final InformationManager infoManager;
-	private final Grid grid = new Grid();
 
 	// private final MatchMaker matchmaker;
 
@@ -305,7 +305,7 @@ public class User {
 	private MountPoint createMountPoint(final Directory dir, final String fqan,
 			Executor executor) throws Exception {
 
-		final String server = dir.getHost();
+		final String server = dir.getFilesystem().getUrl();
 		final String path = dir.getPath();
 
 		String url = null;
@@ -330,7 +330,7 @@ public class User {
 		}
 
 		final Map<String, String> properties = new HashMap<String, String>();
-		boolean userDnPath = true;
+		boolean userDnPath = dir.isShared();
 		if (StringUtils.isNotBlank(propString)) {
 
 			final String[] parts = propString.split(";");
@@ -398,7 +398,7 @@ public class User {
 			myLogger.warn("Using '.' is deprecated. Please use /~/ instead for: "
 					+ server + " / " + fqan);
 			try {
-				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
+				url = getFileSystemHomeDirectory(server,
 						fqan);
 
 				String additionalUrl = null;
@@ -418,7 +418,7 @@ public class User {
 
 		} else if (tempPath.startsWith("/~/")) {
 			try {
-				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
+				url = getFileSystemHomeDirectory(server,
 						fqan);
 
 				String additionalUrl = null;
@@ -439,7 +439,7 @@ public class User {
 			try {
 				myLogger.warn("Using ${GLOBUS_USER_HOME} is deprecated. Please use /~/ instead for: "
 						+ server + " / " + fqan);
-				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
+				url = getFileSystemHomeDirectory(server,
 						fqan);
 				userDnPath = false;
 			} catch (final Exception e) {
@@ -449,7 +449,7 @@ public class User {
 
 		} else if (path.contains("${GLOBUS_SCRATCH_DIR")) {
 			try {
-				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
+				url = getFileSystemHomeDirectory(server,
 						fqan) + "/.globus/scratch";
 				userDnPath = false;
 			} catch (final Exception e) {
@@ -460,7 +460,7 @@ public class User {
 
 			// url = server.replace(":2811", "") + path + "/"
 			// + User.get_vo_dn_path(getCred().getDn());
-			url = server.replace(":2811", "") + tempPath;
+			url = server + tempPath;
 
 		}
 
@@ -559,7 +559,7 @@ public class User {
 			mp.addProperty(key, properties.get(key));
 		}
 
-		final boolean isVolatile = dir.isVolatile();
+		final boolean isVolatile = dir.isVolatileDirectory();
 		mp.setVolatileFileSystem(isVolatile);
 
 		return mp;
@@ -1220,7 +1220,10 @@ public class User {
 	@Transient
 	public Map<String, VO> getFqans() {
 
-		return credential.getAvailableFqans();
+		Map<String, VO> fqans =  Maps.newTreeMap();
+		fqans.putAll(credential.getAvailableFqans());
+		fqans.put(Constants.NON_VO_FQAN, VO.NON_VO);
+		return fqans;
 	}
 
 	@Transient
@@ -1506,8 +1509,6 @@ public class User {
 		if ((fqan == null) || Constants.NON_VO_FQAN.equals(fqan)) {
 			return mountFileSystem(root, name, useHomeDirectory, site);
 		} else {
-
-			final Map<String, VO> temp = getFqans();
 
 			final Credential vomsProxyCred = getCredential(fqan);
 

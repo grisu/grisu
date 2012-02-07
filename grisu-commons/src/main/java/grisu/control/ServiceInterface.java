@@ -377,26 +377,26 @@ public interface ServiceInterface {
 
 
 
-	// /**
-	// * Takes a jsdl template and returns a list of submission locations that
-	// * match the requirements. The order of the list is determined by the
-	// * underlying ranking algorithm.
-	// *
-	// * @param jobProperties
-	// * the job Properties (have alook at the
-	// * {@link EnunciateServiceInterface} interface for supported
-	// * keys)
-	// * @param fqan
-	// * the fqan to use to submit the job
-	// * @return a list of matching submissionLoctations
-	// */
-	// @GET
-	// @Path("/info/queues/matching/properties")
-	// @PermitAll
-	// DtoGridResources findMatchingSubmissionLocationsUsingMap(
-	// @QueryParam("jobProperties") DtoJob jobProperties,
-	// @QueryParam("fqan") String fqan,
-	// @DefaultValue("false") @QueryParam("exclude") boolean exclude);
+	/**
+	 * Takes a jsdl template and returns a list of submission locations that
+	 * match the requirements. The order of the list is determined by the
+	 * underlying ranking algorithm.
+	 * 
+	 * @param jobProperties
+	 *            the job Properties (have alook at the
+	 *            {@link EnunciateServiceInterface} interface for supported
+	 *            keys)
+	 * @param fqan
+	 *            the fqan to use to submit the job
+	 * @return a list of matching submissionLoctations
+	 */
+	@GET
+	@Path("/info/queues/matching/properties")
+	@PermitAll
+	DtoStringList findMatchingSubmissionLocationsUsingMap(
+			@QueryParam("jobProperties") DtoJob jobProperties,
+			@QueryParam("fqan") String fqan,
+			@DefaultValue("false") @QueryParam("exclude") boolean exclude);
 
 	/**
 	 * Returns the current status of an ongoing action.

@@ -1,7 +1,7 @@
 package grisu.control.serviceInterfaces;
 
 import grisu.backend.model.job.Job;
-import grisu.grin.model.resources.Queue;
+import grisu.jcommons.model.info.Queue;
 
 import java.util.Map;
 import java.util.Set;

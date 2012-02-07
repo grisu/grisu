@@ -1,8 +1,11 @@
 package grisu.model.info;
 
+import grisu.control.JobConstants;
 import grisu.control.ServiceInterface;
 import grisu.jcommons.constants.Constants;
+import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.model.GrisuRegistryManager;
+import grisu.model.dto.DtoJob;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,7 +14,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Default implementation for {@link ApplicationInformation}.
@@ -106,6 +112,32 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	// null, false), fqan, false)
 	// .wrapGridResourcesIntoInterfaceType();
 	// }
+
+	public SortedSet<String> getAllSubmissionLocations(
+			Map<JobSubmissionProperty, String> additionalJobProperties,
+			String fqan) {
+
+		if (Thread.currentThread().isInterrupted()) {
+			return null;
+		}
+
+		final Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
+		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
+				getApplicationName());
+
+		basicJobProperties.putAll(additionalJobProperties);
+
+		final Map<String, String> converterMap = new HashMap<String, String>();
+		for (final JobSubmissionProperty key : basicJobProperties.keySet()) {
+			if (StringUtils.isNotBlank(basicJobProperties.get(key))) {
+				converterMap.put(key.toString(), basicJobProperties.get(key));
+			}
+		}
+
+		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
+				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null,
+						null, false), fqan, false).asSortedSet();
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -253,6 +285,30 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		return cachedSubmissionLocationsForUserPerVersionAndFqan.get(KEY);
 	}
 
+	// public final SortedSet<GridResource> getBestSubmissionLocations(
+	// final Map<JobSubmissionProperty, String> additionalJobProperties,
+	// final String fqan) {
+	//
+	// final Map<JobSubmissionProperty, String> basicJobProperties = new
+	// HashMap<JobSubmissionProperty, String>();
+	// basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
+	// getApplicationName());
+	//
+	// if (additionalJobProperties != null) {
+	// basicJobProperties.putAll(additionalJobProperties);
+	// }
+	//
+	// final Map<String, String> converterMap = new HashMap<String, String>();
+	// for (final JobSubmissionProperty key : basicJobProperties.keySet()) {
+	// converterMap.put(key.toString(), basicJobProperties.get(key));
+	// }
+	//
+	// return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
+	// DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null,
+	// null, false), fqan, true)
+	// .wrapGridResourcesIntoInterfaceType();
+	// }
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -282,30 +338,6 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		return cachedVersionsPerSubmissionLocations.get(KEY);
 
 	}
-
-	// public final SortedSet<GridResource> getBestSubmissionLocations(
-	// final Map<JobSubmissionProperty, String> additionalJobProperties,
-	// final String fqan) {
-	//
-	// final Map<JobSubmissionProperty, String> basicJobProperties = new
-	// HashMap<JobSubmissionProperty, String>();
-	// basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
-	// getApplicationName());
-	//
-	// if (additionalJobProperties != null) {
-	// basicJobProperties.putAll(additionalJobProperties);
-	// }
-	//
-	// final Map<String, String> converterMap = new HashMap<String, String>();
-	// for (final JobSubmissionProperty key : basicJobProperties.keySet()) {
-	// converterMap.put(key.toString(), basicJobProperties.get(key));
-	// }
-	//
-	// return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
-	// DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null,
-	// null, false), fqan, true)
-	// .wrapGridResourcesIntoInterfaceType();
-	// }
 
 	/*
 	 * (non-Javadoc)

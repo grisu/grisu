@@ -1,7 +1,10 @@
 package grisu.model.info;
 
+import grisu.jcommons.constants.JobSubmissionProperty;
+
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * Interface which describes the stuff that needs to be known from an
@@ -23,26 +26,26 @@ public interface ApplicationInformation {
 	 */
 	Set<String> getAllAvailableVersionsForFqan(String fqan);
 
-	// /**
-	// * Calculates all submissionlocations for this kind of job.
-	// *
-	// * Basically, this returns the same info as
-	// * {@link #getAllAvailableVersionsForFqan(String)}, but it returns fully
-	// * populated GridResources as a SortedList. It also takes into account
-	// * jobproperties. As a result, it might take a bit longer to get a result
-	// * from this method.
-	// *
-	// * If the current thread is interrupted this will return null
-	// *
-	// * @param additionalJobProperties
-	// * the jobProperties
-	// * @param fqan
-	// * the fqan to submit the job
-	// * @return a sorted list of the best resources to submit this job to.
-	// */
-	// SortedSet<GridResource> getAllSubmissionLocationsAsGridResources(
-	// Map<JobSubmissionProperty, String> additionalJobProperties,
-	// String fqan);
+	/**
+	 * Calculates all submissionlocations for this kind of job.
+	 * 
+	 * Basically, this returns the same info as
+	 * {@link #getAllAvailableVersionsForFqan(String)}, but it returns fully
+	 * populated GridResources as a SortedList. It also takes into account
+	 * jobproperties. As a result, it might take a bit longer to get a result
+	 * from this method.
+	 * 
+	 * If the current thread is interrupted this will return null
+	 * 
+	 * @param additionalJobProperties
+	 *            the jobProperties
+	 * @param fqan
+	 *            the fqan to submit the job
+	 * @return a sorted list of the best resources to submit this job to.
+	 */
+	SortedSet<String> getAllSubmissionLocations(
+			Map<JobSubmissionProperty, String> additionalJobProperties,
+			String fqan);
 
 	/**
 	 * Retrieves a map of all available details (executables, modules, ...)

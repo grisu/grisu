@@ -9,6 +9,8 @@ import java.util.Collection;
 
 import javax.activation.DataHandler;
 
+import com.google.common.collect.Sets;
+
 public class UserBatchJobManager {
 
 	public UserBatchJobManager(User user) {
@@ -41,8 +43,7 @@ public class UserBatchJobManager {
 	}
 
 	public Collection<String> getUsedApplicationsBatch() {
-		// TODO Auto-generated method stub
-		return null;
+		return Sets.newTreeSet();
 	}
 
 	public String kill(String jobname, boolean clear) {

@@ -1,12 +1,7 @@
 package grisu.backend.model.job.gt5;
 
-import grisu.backend.info.InformationManagerManager;
-import grisu.grin.model.resources.Module;
-import grisu.grin.model.resources.Package;
-import grisu.jcommons.constants.Constants;
-import grisu.jcommons.interfaces.InformationManager;
 import grisu.jcommons.utils.JsdlHelpers;
-import grisu.settings.ServerPropertiesManager;
+import grisu.model.FileManager;
 
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -31,9 +26,10 @@ public class RSLFactory {
 
 	private int commitTimeout = 5;
 
-	private final InformationManager informationManager = InformationManagerManager
-			.getInformationManager(ServerPropertiesManager
-					.getInformationManagerConf());
+	// private final InformationManager informationManager =
+	// InformationManagerManager
+	// .getInformationManager(ServerPropertiesManager
+	// .getInformationManagerConf());
 
 	private void addWhenNotBlank(RslNode rsl, String attribute, String value) {
 		if (StringUtils.isNotBlank(value)) {
@@ -79,17 +75,26 @@ public class RSLFactory {
 		String jobname = JsdlHelpers.getJobname(jsdl);
 		jobname = (jobname == null) ? "" : jobname.substring(Math.max(0,
 				jobname.length() - 6));
+
 		addWhenNotBlank(result, "jobname", jobname);
 
-		addWhenNotBlank(result, "stdout",
-				JsdlHelpers.getPosixStandardOutput(jsdl));
-		addWhenNotBlank(result, "stderr",
-				JsdlHelpers.getPosixStandardError(jsdl));
-		addWhenNotBlank(result, "stdin",
-				JsdlHelpers.getPosixStandardInput(jsdl));
+		String workingDirectory = JsdlHelpers.getWorkingDirectory(jsdl);
 
-		addWhenNotBlank(result, "directory",
-				JsdlHelpers.getWorkingDirectory(jsdl));
+		if (StringUtils.isBlank(workingDirectory)) {
+			throw new RSLCreationException("No working directory specified.");
+		}
+
+		workingDirectory = FileManager.ensureTrailingSlash(workingDirectory);
+
+		addWhenNotBlank(result, "directory", workingDirectory);
+
+		addWhenNotBlank(result, "stdout",
+				workingDirectory + JsdlHelpers.getPosixStandardOutput(jsdl));
+		addWhenNotBlank(result, "stderr",
+				workingDirectory + JsdlHelpers.getPosixStandardError(jsdl));
+		addWhenNotBlank(result, "stdin",
+				workingDirectory + JsdlHelpers.getPosixStandardInput(jsdl));
+
 
 		addWhenNotBlank(result, "email_address", JsdlHelpers.getEmail(jsdl));
 		if (JsdlHelpers.getSendEmailOnJobFinish(jsdl)) {
@@ -170,44 +175,45 @@ public class RSLFactory {
 	}
 
 	private String[] getModulesFromMDS(final Document jsdl) {
-		String[] modules_string = JsdlHelpers.getModules(jsdl);
-		if (modules_string != null) {
-			return modules_string;
-		}
-		// mds based
-		final String application = JsdlHelpers.getApplicationName(jsdl);
-		String version = JsdlHelpers.getApplicationVersion(jsdl);
-		final String[] subLocs = JsdlHelpers.getCandidateHosts(jsdl);
-		String subLoc = null;
-
-		if ((subLocs != null)
-				&& (subLocs.length > 0)
-				&& (StringUtils.isNotBlank(subLocs[0]) && (StringUtils
-						.isNotBlank(application)))
-						&& (!Constants.GENERIC_APPLICATION_NAME.equals(application))) {
-
-			subLoc = subLocs[0];
-
-		} else {
-			return new String[] {};
-		}
-
-		if (StringUtils.isBlank(version)) {
-			version = Constants.NO_VERSION_INDICATOR_STRING;
-		}
-
-		final Package pkg = this.informationManager
-				.getApplicationDetails(application, version, subLoc);
-		final Module m = pkg.getModule();
-		if (m == null) {
-			return new String[] {};
-		}
-		modules_string = new String[] { m.getModule() };
-		if (modules_string != null) {
-			return modules_string;
-		} else {
-			return new String[] {};
-		}
+		return new String[] {};
+		// String[] modules_string = JsdlHelpers.getModules(jsdl);
+		// if (modules_string != null) {
+		// return modules_string;
+		// }
+		// // mds based
+		// final String application = JsdlHelpers.getApplicationName(jsdl);
+		// String version = JsdlHelpers.getApplicationVersion(jsdl);
+		// final String[] subLocs = JsdlHelpers.getCandidateHosts(jsdl);
+		// String subLoc = null;
+		//
+		// if ((subLocs != null)
+		// && (subLocs.length > 0)
+		// && (StringUtils.isNotBlank(subLocs[0]) && (StringUtils
+		// .isNotBlank(application)))
+		// && (!Constants.GENERIC_APPLICATION_NAME.equals(application))) {
+		//
+		// subLoc = subLocs[0];
+		//
+		// } else {
+		// return new String[] {};
+		// }
+		//
+		// if (StringUtils.isBlank(version)) {
+		// version = Constants.NO_VERSION_INDICATOR_STRING;
+		// }
+		//
+		// final Package pkg = this.informationManager
+		// .getApplicationDetails(application, version, subLoc);
+		// final Module m = pkg.getModule();
+		// if (m == null) {
+		// return new String[] {};
+		// }
+		// modules_string = new String[] { m.getModule() };
+		// if (modules_string != null) {
+		// return modules_string;
+		// } else {
+		// return new String[] {};
+		// }
 
 	}
 

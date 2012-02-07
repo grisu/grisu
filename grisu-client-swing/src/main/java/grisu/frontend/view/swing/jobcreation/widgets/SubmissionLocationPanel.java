@@ -1,9 +1,9 @@
 package grisu.frontend.view.swing.jobcreation.widgets;
 
 import grisu.control.ServiceInterface;
-import grisu.grin.model.resources.Queue;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
+import grisu.jcommons.model.info.Queue;
 import grisu.model.FqanEvent;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.info.UserApplicationInformation;

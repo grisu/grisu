@@ -19,11 +19,16 @@ import grisu.control.exceptions.JobSubmissionException;
 import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.NoValidCredentialException;
 import grisu.control.exceptions.RemoteFileSystemException;
-import grisu.grin.model.resources.Directory;
-import grisu.grin.model.resources.Site;
-import grisu.grin.model.resources.Version;
+import grisu.grin.YnfoManager;
+import grisu.grin.model.Grid;
 import grisu.jcommons.constants.Constants;
+import grisu.jcommons.constants.JobSubmissionProperty;
+import grisu.jcommons.interfaces.GrinformationManager;
 import grisu.jcommons.interfaces.InformationManager;
+import grisu.jcommons.model.info.Directory;
+import grisu.jcommons.model.info.Queue;
+import grisu.jcommons.model.info.Site;
+import grisu.jcommons.model.info.Version;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.DtoApplicationDetails;
@@ -33,6 +38,7 @@ import grisu.model.dto.DtoJob;
 import grisu.model.dto.DtoJobs;
 import grisu.model.dto.DtoMountPoints;
 import grisu.model.dto.DtoProperties;
+import grisu.model.dto.DtoProperty;
 import grisu.model.dto.DtoStringList;
 import grisu.model.dto.DtoSubmissionLocations;
 import grisu.model.dto.GridFile;
@@ -187,7 +193,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	public static final String REFRESH_STATUS_PREFIX = "REFRESH_";
 
-	public static final InformationManager informationManager = createInformationManager();
+	// public static final InformationManager informationManager =
+	// createInformationManager();
 
 
 	// public static final MatchMaker matchmaker = createMatchMaker();
@@ -198,12 +205,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	private static String hostname = null;
 
+	public static final YnfoManager ym = new YnfoManager(
+			"/home/markus/Workspaces/Goji/grin/src/main/resources/default_config.groovy");
+
+
+	public final static Grid grid = ym.getGrid();
+	public static final InformationManager informationManager = new GrinformationManager(
+			grid);
+
 	public static InformationManager createInformationManager() {
 		return InformationManagerManager
 				.getInformationManager(ServerPropertiesManager
 						.getInformationManagerConf());
 	}
-
 
 	public static Cache eternalCache() {
 		return cache.getCache("eternal");
@@ -265,7 +279,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		final net.sf.ehcache.Element e = new net.sf.ehcache.Element(key, value);
 		sessionCache().put(e);
 	}
-
 	public static void putIntoShortCache(Object key, Object value) {
 		final net.sf.ehcache.Element e = new net.sf.ehcache.Element(key, value);
 		shortCache().put(e);
@@ -275,6 +288,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		return cache.getCache("session");
 	}
+
 	public static Cache shortCache() {
 		return cache.getCache("short");
 	}
@@ -685,31 +699,34 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	}
 
 
-	// public DtoGridResources findMatchingSubmissionLocationsUsingMap(
-	// final DtoJob jobProperties, final String fqan,
-	// boolean excludeResourcesWithLessCPUslotsFreeThanRequested) {
-	//
-	// final LinkedList<String> result = new LinkedList<String>();
-	//
-	// final Map<JobSubmissionProperty, String> converterMap = new
-	// HashMap<JobSubmissionProperty, String>();
-	// for (final DtoProperty jp : jobProperties.getProperties()) {
-	// converterMap.put(JobSubmissionProperty.fromString(jp.getKey()),
-	// jp.getValue());
-	// }
-	//
-	// Collection<Queue> resources = null;
-	// if (excludeResourcesWithLessCPUslotsFreeThanRequested) {
-	//
-	// resources = informationManager.findQueues(converterMap, fqan);
-	//
-	// // TODO exclude queues
-	// } else {
-	// resources = informationManager.findQueues(converterMap, fqan);
-	// }
-	//
-	// return DtoGridResources.createGridResources(resources);
-	// }
+	public DtoStringList findMatchingSubmissionLocationsUsingMap(
+			final DtoJob jobProperties, final String fqan,
+			boolean excludeResourcesWithLessCPUslotsFreeThanRequested) {
+
+		final LinkedList<String> result = new LinkedList<String>();
+
+		final Map<JobSubmissionProperty, String> converterMap = new HashMap<JobSubmissionProperty, String>();
+		for (final DtoProperty jp : jobProperties.getProperties()) {
+			converterMap.put(JobSubmissionProperty.fromString(jp.getKey()),
+					jp.getValue());
+		}
+
+		Collection<Queue> resources = null;
+		if (excludeResourcesWithLessCPUslotsFreeThanRequested) {
+
+			resources = grid.findQueues(converterMap, fqan);
+
+			// TODO exclude queues
+		} else {
+			resources = grid.findQueues(converterMap, fqan);
+		}
+
+		Collection<String> subLocs = Collections2.transform(resources,
+				Functions.toStringFunction());
+
+		return DtoStringList.fromStringColletion(subLocs);
+
+	}
 
 	public DtoActionStatus getActionStatus(String actionHandle) {
 

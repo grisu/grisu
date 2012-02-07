@@ -1,7 +1,7 @@
 package grisu.model.dto;
 
-import grisu.grin.model.resources.Package;
 import grisu.jcommons.constants.Constants;
+import grisu.jcommons.model.info.Package;
 
 import java.util.Collection;
 import java.util.HashMap;

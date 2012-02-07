@@ -1,8 +1,8 @@
 package grisu.model.dto;
 
-import grisu.grin.model.resources.Directory;
-import grisu.grin.model.resources.Queue;
 import grisu.jcommons.interfaces.InformationManager;
+import grisu.jcommons.model.info.Directory;
+import grisu.jcommons.model.info.Queue;
 import grisu.model.MountPoint;
 
 import java.util.Collection;

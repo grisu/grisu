@@ -105,6 +105,18 @@ public class FileManager {
 
 	}
 
+	public static String ensurePrependingSlash(String path) {
+		if (StringUtils.isBlank(path)) {
+			return "/";
+		}
+
+		if (path.startsWith("/")) {
+			return path;
+		} else {
+			return "/" + path;
+		}
+	}
+
 	public static String ensureTrailingSlash(String url) {
 		if (StringUtils.isBlank(url)) {
 			return "";

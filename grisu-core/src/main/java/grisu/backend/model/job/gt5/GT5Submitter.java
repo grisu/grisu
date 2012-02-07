@@ -5,7 +5,6 @@ import grisu.backend.model.job.Job;
 import grisu.backend.model.job.JobSubmitter;
 import grisu.backend.model.job.ServerJobSubmissionException;
 import grisu.control.JobConstants;
-import grisu.jcommons.interfaces.InformationManager;
 import grith.jgrith.credential.Credential;
 
 import java.net.MalformedURLException;
@@ -171,7 +170,7 @@ public class GT5Submitter extends JobSubmitter {
 	}
 
 	@Override
-	protected String submit(InformationManager infoManager, String host,
+	protected String submit(String host,
 			String factoryType, Job job) throws ServerJobSubmissionException {
 
 		final RSLFactory f = RSLFactory.getRSLFactory();

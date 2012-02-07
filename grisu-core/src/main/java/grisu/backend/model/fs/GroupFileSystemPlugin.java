@@ -3,11 +3,11 @@ package grisu.backend.model.fs;
 import grisu.backend.model.User;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.RemoteFileSystemException;
+import grisu.jcommons.model.info.VO;
 import grisu.model.FileManager;
 import grisu.model.MountPoint;
 import grisu.model.dto.GridFile;
 import grisu.settings.ServerPropertiesManager;
-import grith.jgrith.voms.VO;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -205,6 +205,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			// means is root of VO so we need to list potential files on all
 			// sites that support this vo
 			// and also all child vos
+
 			final String parentfqan = "/" + tokens[0];
 			final Set<String> urls = resolveUrls(path, parentfqan, true);
 
