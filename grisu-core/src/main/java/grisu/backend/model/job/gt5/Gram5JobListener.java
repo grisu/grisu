@@ -1,9 +1,7 @@
 package grisu.backend.model.job.gt5;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
-
+import java.util.concurrent.ConcurrentHashMap;
 import org.globus.gram.GramJob;
 import org.globus.gram.GramJobListener;
 import org.slf4j.Logger;
@@ -25,8 +23,8 @@ public class Gram5JobListener implements GramJobListener {
 	private final Map<String, Integer> errors;
 
 	private Gram5JobListener() {
-		statuses = Collections.synchronizedMap(new HashMap<String, Integer>());
-		errors = Collections.synchronizedMap(new HashMap<String, Integer>());
+		statuses = new ConcurrentHashMap<String, Integer>();
+		errors = new ConcurrentHashMap<String, Integer>();
 	}
 
 	public Integer getError(String handle) {
@@ -41,12 +39,14 @@ public class Gram5JobListener implements GramJobListener {
                 int jobStatus = job.getStatus();
                 String jobId = job.getIDAsString();
                 myLogger.debug("job status changed to " + jobStatus);
-                statuses.put(jobId, jobStatus);
-                errors.put(jobId, job.getError());
                 try {
                     if ((jobStatus == GramJob.STATUS_DONE) || (jobStatus == GramJob.STATUS_FAILED)){
                         job.signal(GramJob.SIGNAL_COMMIT_END);
                     }
+                    // Only set status if signal sending succeeded to have grisu
+                    // so that GT5Submitter goes to Gram in an attempt to get job status
+                    statuses.put(jobId, jobStatus);
+                    errors.put(jobId, job.getError());
                 } catch (Exception e) {
                     String state = job.getStatusAsString();
                     myLogger.warn("Failed to send COMMIT_END to job " + jobId + " in state " + state, e);
