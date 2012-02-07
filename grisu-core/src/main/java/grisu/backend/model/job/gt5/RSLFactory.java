@@ -4,6 +4,7 @@ import grisu.backend.info.InformationManagerManager;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.interfaces.InformationManager;
 import grisu.jcommons.utils.JsdlHelpers;
+import grisu.model.FileManager;
 import grisu.settings.ServerPropertiesManager;
 
 import java.util.Map;
@@ -79,15 +80,22 @@ public class RSLFactory {
 				jobname.length() - 6));
 		addWhenNotBlank(result, "jobname", jobname);
 
-		addWhenNotBlank(result, "stdout",
-				JsdlHelpers.getPosixStandardOutput(jsdl));
-		addWhenNotBlank(result, "stderr",
-				JsdlHelpers.getPosixStandardError(jsdl));
-		addWhenNotBlank(result, "stdin",
-				JsdlHelpers.getPosixStandardInput(jsdl));
+		String workingDirectory = JsdlHelpers.getWorkingDirectory(jsdl);
+		if (StringUtils.isBlank(workingDirectory)) {
+			throw new RSLCreationException("No working directory specified.");
+		}
 
-		addWhenNotBlank(result, "directory",
-				JsdlHelpers.getWorkingDirectory(jsdl));
+		workingDirectory = FileManager.ensureTrailingSlash(workingDirectory);
+
+		addWhenNotBlank(result, "directory", workingDirectory);
+
+		addWhenNotBlank(result, "stdout",
+				workingDirectory + JsdlHelpers.getPosixStandardOutput(jsdl));
+		addWhenNotBlank(result, "stderr",
+				workingDirectory + JsdlHelpers.getPosixStandardError(jsdl));
+		addWhenNotBlank(result, "stdin",
+				workingDirectory + JsdlHelpers.getPosixStandardInput(jsdl));
+
 
 		addWhenNotBlank(result, "email_address", JsdlHelpers.getEmail(jsdl));
 		if (JsdlHelpers.getSendEmailOnJobFinish(jsdl)) {
@@ -182,7 +190,7 @@ public class RSLFactory {
 				&& (subLocs.length > 0)
 				&& (StringUtils.isNotBlank(subLocs[0]) && (StringUtils
 						.isNotBlank(application)))
-				&& (!Constants.GENERIC_APPLICATION_NAME.equals(application))) {
+						&& (!Constants.GENERIC_APPLICATION_NAME.equals(application))) {
 
 			subLoc = subLocs[0];
 
