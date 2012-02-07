@@ -1,9 +1,7 @@
 package grisu.backend.model.job.gt5;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
-
+import java.util.concurrent.ConcurrentHashMap;
 import org.globus.gram.GramJob;
 import org.globus.gram.GramJobListener;
 import org.slf4j.Logger;
@@ -25,8 +23,8 @@ public class Gram5JobListener implements GramJobListener {
 	private final Map<String, Integer> errors;
 
 	private Gram5JobListener() {
-		statuses = Collections.synchronizedMap(new HashMap<String, Integer>());
-		errors = Collections.synchronizedMap(new HashMap<String, Integer>());
+		statuses = new ConcurrentHashMap<String, Integer>();
+		errors = new ConcurrentHashMap<String, Integer>();
 	}
 
 	public Integer getError(String handle) {

@@ -56,6 +56,15 @@ public class GT5Submitter extends JobSubmitter {
 		GramJob restartJob = new GramJob(null);
 		final GSSCredential cred = credential.getCredential();
 
+        // try to get the state from the notification listener cache
+        Integer jobStatus = l.getStatus(handle);
+        Integer error = l.getError(handle);
+        if (jobStatus != null &&
+              (jobStatus == GRAMConstants.STATUS_DONE ||
+               jobStatus == GRAMConstants.STATUS_FAILED)) {
+              return translateToGrisuStatus(jobStatus, error, error);			
+        }
+		
 		try {
 			// lets try to see if gateway is working first...
 			Gram.ping(cred, contact);
@@ -75,7 +84,7 @@ public class GT5Submitter extends JobSubmitter {
 			job.setID(handle);
 			job.setCredentials(cred);
 			Gram.jobStatus(job);
-			final int jobStatus = job.getStatus();
+			jobStatus = job.getStatus();
 			if ((jobStatus == GRAMConstants.STATUS_DONE)
 					|| (jobStatus == GRAMConstants.STATUS_FAILED)) {
 				job.signal(GRAMConstants.SIGNAL_COMMIT_END);
