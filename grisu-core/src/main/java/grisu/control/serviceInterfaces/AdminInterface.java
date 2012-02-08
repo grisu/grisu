@@ -29,25 +29,15 @@ public class AdminInterface {
 
 	private List<String> admin_dns;
 
+	final private String adminUserFile;
+
 	public AdminInterface(String adminUserFile, UserDAO userdao) {
 
 		this.userdao = userdao;
+		this.adminUserFile = adminUserFile;
 
-		if (StringUtils.isBlank(adminUserFile)) {
-			adminUserFile = Environment.getGrisuDirectory() + File.separator
-					+ "grisu-admins.config";
-		}
+		readAdminConfigFile();
 
-		File adminConfig = new File(adminUserFile);
-		if (!adminConfig.exists() || !adminConfig.canRead()) {
-			admin_dns = null;
-		} else {
-			try {
-				admin_dns = FileUtils.readLines(adminConfig);
-			} catch (IOException e) {
-				admin_dns = null;
-			}
-		}
 	}
 
 	private DtoStringList clearUserCache(Map<String, String> config) {
@@ -123,7 +113,31 @@ public class AdminInterface {
 		return DtoStringList.fromStringColletion(dns);
 	}
 
+	private void readAdminConfigFile() {
+
+		String temp;
+		if (StringUtils.isBlank(adminUserFile)) {
+			temp = Environment.getGrisuDirectory() + File.separator
+					+ "grisu-admins.config";
+		} else {
+			temp = adminUserFile;
+		}
+
+		File adminConfig = new File(temp);
+		if (!adminConfig.exists() || !adminConfig.canRead()) {
+			admin_dns = null;
+		} else {
+			try {
+				admin_dns = FileUtils.readLines(adminConfig);
+			} catch (IOException e) {
+				admin_dns = null;
+			}
+		}
+
+	}
+
 	private DtoStringList refreshConfig() {
+		readAdminConfigFile();
 		ServerPropertiesManager.refreshConfig();
 		return DtoStringList.fromSingleString("Config refreshed.");
 	}

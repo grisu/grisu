@@ -486,38 +486,6 @@
 	</build>
 
 	<profiles>
-		<profile>
-			<id>sign</id>
-			<!-- <activation> -->
-			<!-- <property> -->
-			<!-- <name>BUILD_NUMBER</name> -->
-			<!-- </property> -->
-			<!-- </activation> -->
-
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-jarsigner-plugin</artifactId>
-						<version>1.2</version>
-						<executions>
-							<execution>
-								<id>sign</id>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<alias>grisu</alias>
-							<storepass>FxAKs3p6</storepass>
-							<keypass>FxAKs3p6</keypass>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-
-		</profile>
 		
 		
 		<profile>
@@ -609,31 +577,7 @@
 												<group>root</group>
 											</mapper>
 										</data>
-
-										
-										<data>
-											<src>${project.basedir}/src/deb/data/nesi-repo.key.dpkg-new6</src>
-											<type>file</type>
-											<mapper>
-												<type>perm</type>
-												<prefix>/usr/share/keyrings/</prefix>
-												<user>root</user>
-												<group>root</group>
-												<filemode>755</filemode>
-											</mapper>
-										</data>
-										
-										<data>
-											<src>${project.basedir}/src/deb/data/nesi-repo.list.dpkg-new6</src>
-											<type>file</type>
-											<mapper>
-												<type>perm</type>
-												<prefix>/etc/apt/sources.list.d/</prefix>
-												<user>root</user>
-												<group>root</group>
-												<filemode>755</filemode>
-											</mapper>
-										</data>																		
+															
 
 									</dataSet>
 
@@ -681,9 +625,6 @@
 									<sources>
 										<source>
 											<location>target/local-backend.jar</location>
-										</source>
-										<source>
-											<location>src/deb/data/bcprov.jar</location>
 										</source>
 									</sources>
 								</mapping>
