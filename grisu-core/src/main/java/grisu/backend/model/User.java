@@ -84,7 +84,7 @@ public class User {
 	public final boolean checkFileSystemsBeforeUse = false;
 	public static final int DEFAULT_JOB_SUBMISSION_RETRIES = 5;
 
-	protected static UserDAO userdao = new UserDAO();
+	public static UserDAO userdao = new UserDAO();
 	protected static final JobDAO jobdao = new JobDAO();
 	// this needs to be static because otherwise the session be lost and the
 	// action status can't be found anymore by the client

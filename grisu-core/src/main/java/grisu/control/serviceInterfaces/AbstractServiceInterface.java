@@ -98,7 +98,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	static Logger myLogger = null;
 	public static CacheManager cache;
 
-	private final static AdminInterface admin = new AdminInterface();
+	private final static AdminInterface admin = new AdminInterface(null,
+			User.userdao);
 	static {
 
 		String logbackPath = "/etc/grisu/logback.xml";
@@ -341,20 +342,19 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				jobdescription);
 	}
 
-	public String admin(String command, DtoProperties config) {
+	public DtoStringList admin(String command, DtoProperties config) {
 
 		String dn = getDN();
 
 		// yes yes yes, this is not a proper way to authenticate admin commands
 		// for now, until admin commands are only refreshing the config files,
 		// I'll not worry about it...
-		if ("DC=nz,DC=org,DC=bestgrid,DC=slcs,O=The University of Auckland,CN=Markus Binsteiner _bK32o4Lh58A3vo9kKBcoKrJ7ZY"
-				.equals(dn)) {
-			return "Nice try, no permission mate.";
+		if (!admin.isAdmin(dn)) {
+			return DtoStringList.fromSingleString("No admin.");
 		}
 
 		if (StringUtils.isBlank(command)) {
-			return "No command specified.";
+			return DtoStringList.fromSingleString("No command specified.");
 		}
 
 		Map<String, String> configMap = new HashMap<String, String>();
