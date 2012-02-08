@@ -218,7 +218,7 @@ public class LoginManager {
 						loginParams.getHttpProxyUsername(),
 						loginParams.getHttpProxyPassphrase());
 			} catch (ServiceInterfaceException e) {
-				throw new LoginException("Coult not login to backend.", e);
+				throw new LoginException("Could not login to backend.", e);
 			}
 
 			loginParams.clearPasswords();
@@ -330,7 +330,7 @@ public class LoginManager {
 		Credential c = Credential.load();
 
 		if ((c == null) || !c.isValid()) {
-			throw new CredentialException("No valid proxy found.");
+			throw new CredentialException("Your session has expired. Please login and try again.");
 		}
 
 		return login(c, backend, true);
