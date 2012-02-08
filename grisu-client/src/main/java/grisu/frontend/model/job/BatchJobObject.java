@@ -47,23 +47,26 @@ import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+
+import net.sf.ehcache.util.NamedThreadFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
 import com.google.common.collect.ImmutableList;
 
-
 public class BatchJobObject implements JobMonitoringObject,
 Comparable<BatchJobObject>, Listener {
 
-	static final Logger myLogger = Logger.getLogger(BatchJobObject.class
+	static final Logger myLogger = LoggerFactory.getLogger(BatchJobObject.class
 			.getName());
 
 	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
@@ -243,9 +246,8 @@ Comparable<BatchJobObject>, Listener {
 	 */
 	public BatchJobObject(ServiceInterface serviceInterface,
 			String batchJobnameBase, String jobnameCreationMethod,
-			String submissionFqan,
-			String defaultApplication, String defaultVersion)
-					throws BatchJobException {
+			String submissionFqan, String defaultApplication,
+			String defaultVersion) throws BatchJobException {
 		this.serviceInterface = serviceInterface;
 		this.submissionFqan = submissionFqan;
 
@@ -335,7 +337,7 @@ Comparable<BatchJobObject>, Listener {
 		if (StringUtils.isBlank(job.getJobname())
 				|| Constants.NO_JOBNAME_INDICATOR_STRING.equals(job
 						.getJobname())) {
-			String singleJobname = GrisuRegistryManager
+			final String singleJobname = GrisuRegistryManager
 					.getDefault(serviceInterface)
 					.getUserEnvironmentManager()
 					.calculateUniqueJobname(
@@ -364,7 +366,6 @@ Comparable<BatchJobObject>, Listener {
 				maxWalltimeInSecondsAcrossJobs = job.getWalltimeInSeconds();
 			}
 		}
-
 
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 				"Adding job " + job.getJobname()));
@@ -433,7 +434,7 @@ Comparable<BatchJobObject>, Listener {
 			// happen.
 			waitThread.interrupt();
 		} catch (final Exception e) {
-			myLogger.debug(e);
+			myLogger.debug(e.getLocalizedMessage(), e);
 		}
 
 		waitThread = new Thread() {
@@ -477,6 +478,7 @@ Comparable<BatchJobObject>, Listener {
 				myLogger.debug("BatchJob finished. Exit monitoring...");
 			}
 		};
+		waitThread.setName("Wait thread for batchjob " + getJobname());
 
 	}
 
@@ -630,18 +632,23 @@ Comparable<BatchJobObject>, Listener {
 					throws RemoteFileSystemException, FileTransactionException,
 					IOException {
 
-		File parent = new File(parentFolder);
+		final File parent = new File(parentFolder);
 
-		if (!parent.exists() ) {
-			boolean worked = parent.mkdir();
+		if (!parent.exists()) {
+			final boolean worked = parent.mkdir();
 
-			if ( ! worked){
-				throw new FileTransactionException(null, parentFolder, "Can't create parent folder directory: "+parentFolder, null);
+			if (!worked) {
+				throw new FileTransactionException(
+						null,
+						parentFolder,
+						"Can't create parent folder directory: " + parentFolder,
+						null);
 			}
 		}
 
-		if ( !parent.isDirectory() ) {
-			throw new FileTransactionException(null, parentFolder, "Parent folder not a directory: "+parentFolder, null);
+		if (!parent.isDirectory()) {
+			throw new FileTransactionException(null, parentFolder,
+					"Parent folder not a directory: " + parentFolder, null);
 		}
 
 		downloadResults(onlyDownloadWhenFinished, parent, patterns,
@@ -1185,8 +1192,7 @@ Comparable<BatchJobObject>, Listener {
 							boolean oldFinished = false;
 
 							if (dtoBatchJob != null) {
-								oldTotalJobs = dtoBatchJob
-										.totalNumberOfJobs();
+								oldTotalJobs = dtoBatchJob.totalNumberOfJobs();
 								oldRunningJobs = dtoBatchJob
 										.numberOfRunningJobs();
 								oldWaitingJobs = dtoBatchJob
@@ -1245,8 +1251,10 @@ Comparable<BatchJobObject>, Listener {
 							throw new RuntimeException(e);
 						}
 					}
-				};
 
+				};
+				refreshThread.setName("refresh thread for batchjob "
+						+ getJobname());
 				refreshThread.start();
 			}
 
@@ -1327,7 +1335,7 @@ Comparable<BatchJobObject>, Listener {
 			try {
 				refreshThread.interrupt();
 			} catch (final Exception e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 		}
 
@@ -1335,19 +1343,19 @@ Comparable<BatchJobObject>, Listener {
 		String handle = null;
 		try {
 			handle = serviceInterface.kill(this.getJobname(), clean);
-			StatusObject so = StatusObject.waitForActionToFinish(
-					serviceInterface, handle, 2, false, false);
+			final StatusObject so = StatusObject.waitForActionToFinish(
+					serviceInterface, handle, 2, false);
 			if (so.getStatus().isFailed()) {
 				throw new Exception(so.getStatus().getErrorCause());
 			}
 			try {
 				getStatus(true);
-			} catch (Exception nsje) {
+			} catch (final Exception nsje) {
 				// that's ok
 			}
 			addJobLogMessage("Job kill command sent to backend.");
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
 		final String handleTmp = handle;
@@ -1357,9 +1365,8 @@ Comparable<BatchJobObject>, Listener {
 				final StatusObject statusO = new StatusObject(serviceInterface,
 						handleTmp);
 				try {
-					statusO.waitForActionToFinish(3, false, true);
-				} catch (final InterruptedException e) {
-					e.printStackTrace();
+					statusO.waitForActionToFinish(3, false);
+
 				} catch (final StatusException e) {
 					e.printStackTrace();
 				}
@@ -1375,14 +1382,14 @@ Comparable<BatchJobObject>, Listener {
 
 			}
 		};
-
+		waitThread.setName("Wait thread for batchjob kill " + getJobname());
 		waitThread.start();
 
 		if (waitForCompletion) {
 			try {
 				waitThread.join();
 			} catch (final InterruptedException e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 		}
 
@@ -1445,7 +1452,7 @@ Comparable<BatchJobObject>, Listener {
 						+ " seconds..."));
 				Thread.sleep(sleeptimeinseconds * 1000);
 			} catch (final InterruptedException e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 		} while (!finished);
 	}
@@ -1503,8 +1510,11 @@ Comparable<BatchJobObject>, Listener {
 				+ " jobs.";
 		EventBus.publish(this.batchJobname, new BatchJobEvent(this, message));
 		addJobLogMessage(message);
+		ThreadFactory tf = new NamedThreadFactory(
+				"clientPrepareAndCreateBatchJob");
 		final ExecutorService executor = Executors
-				.newFixedThreadPool(getConcurrentJobCreationThreads());
+				.newFixedThreadPool(
+						getConcurrentJobCreationThreads(), tf);
 
 		final Map<JobObject, Exception> failedSubmissions = Collections
 				.synchronizedMap(new HashMap<JobObject, Exception>());
@@ -1565,19 +1575,19 @@ Comparable<BatchJobObject>, Listener {
 							addJobLogMessage(message);
 
 							try {
-								String handle = serviceInterface.kill(
+								final String handle = serviceInterface.kill(
 										job.getJobname(), true);
-								StatusObject so = StatusObject
+								final StatusObject so = StatusObject
 										.waitForActionToFinish(
 												serviceInterface, handle, 2,
-												false, false);
+												false);
 								if (so.getStatus().isFailed()) {
 									throw new Exception(so.getStatus()
 											.getErrorCause());
 								}
 								try {
 									getStatus(true);
-								} catch (Exception nsje) {
+								} catch (final Exception nsje) {
 									// that's ok
 								}
 							} catch (final Exception e1) {
@@ -1644,13 +1654,13 @@ Comparable<BatchJobObject>, Listener {
 							serviceInterface, handle);
 
 					try {
-						status.waitForActionToFinish(4, false, true,
-								"Redistribution: ");
-					} catch (final InterruptedException e) {
-						myLogger.error(e);
-						throw e;
+						status.waitForActionToFinish(4, false);
 					} catch (final StatusException e) {
-						myLogger.error(e);
+						myLogger.error(e.getLocalizedMessage(), e);
+						throw new BackendException(
+								"Error while waiting for job distribution to finish.",
+								e);
+
 					}
 
 					EventBus.publish(this.batchJobname, new BatchJobEvent(this,
@@ -1776,7 +1786,7 @@ Comparable<BatchJobObject>, Listener {
 
 			this.isRefreshing = false;
 			pcs.firePropertyChange(REFRESHING, true, false);
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			return;
 		}
 
@@ -1942,7 +1952,7 @@ Comparable<BatchJobObject>, Listener {
 			try {
 				waitThread.join();
 			} catch (final InterruptedException e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 		}
 
@@ -2265,8 +2275,8 @@ Comparable<BatchJobObject>, Listener {
 
 			if (waitForSubmissionToFinish) {
 				try {
-					StatusObject s = StatusObject.waitForActionToFinish(
-							serviceInterface, handle, 5, true, false);
+					final StatusObject s = StatusObject.waitForActionToFinish(
+							serviceInterface, handle, 5, true);
 					if (s.getStatus().isFailed()) {
 						String errorCause = s.getStatus().getErrorCause();
 						if (StringUtils.isBlank(errorCause)) {
@@ -2274,8 +2284,8 @@ Comparable<BatchJobObject>, Listener {
 						}
 						throw new JobSubmissionException(errorCause);
 					}
-				} catch (StatusException e) {
-					myLogger.error(e);
+				} catch (final StatusException e) {
+					myLogger.error(e.getLocalizedMessage(), e);
 					throw new RuntimeException(e);
 				}
 			}
@@ -2306,12 +2316,10 @@ Comparable<BatchJobObject>, Listener {
 			public void run() {
 				status.addListener(BatchJobObject.this);
 				try {
-					status.waitForActionToFinish(4, false, true,
-							"Submission status: ");
-				} catch (final InterruptedException e) {
-					myLogger.error(e);
+					status.waitForActionToFinish(4, false);
+
 				} catch (final StatusException e) {
-					myLogger.error(e);
+					myLogger.error(e.getLocalizedMessage(), e);
 				} finally {
 					status.removeListener(BatchJobObject.this);
 				}
@@ -2358,8 +2366,7 @@ Comparable<BatchJobObject>, Listener {
 				if (status.getStatus().isFailed()) {
 					throw new JobSubmissionException(
 							"BatchJob submission failed for job "
-									+ getJobname()
-									+ ": "
+									+ getJobname() + ": "
 									+ status.getStatus().getErrorCause());
 				}
 
@@ -2414,9 +2421,9 @@ Comparable<BatchJobObject>, Listener {
 
 		final List<Exception> exceptions = Collections
 				.synchronizedList(new LinkedList<Exception>());
-
+		ThreadFactory tf = new NamedThreadFactory("clientBatchJobFileUpload");
 		final ExecutorService executor = Executors
-				.newFixedThreadPool(getConcurrentInputFileUploadThreads());
+				.newFixedThreadPool(getConcurrentInputFileUploadThreads(),tf);
 
 		final List<Future<?>> tasks = new LinkedList<Future<?>>();
 
@@ -2523,8 +2530,8 @@ Comparable<BatchJobObject>, Listener {
 		if ((exceptions.size() > 0) && (exceptions.get(0) != null)) {
 			myLogger.debug(exceptions.size()
 					+ " exceptions while uploading. not continuing submission...");
-			for (Exception e : exceptions) {
-				myLogger.error(e);
+			for (final Exception e : exceptions) {
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 			throw new FileUploadException(exceptions.get(0));
 		}

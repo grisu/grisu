@@ -9,7 +9,6 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
-
 public class BatchJobWrapperPanel extends JPanel {
 	private JTabbedPane tabbedPane;
 	private BatchJobResultPreviewPanel batchJobResultPreviewPanel;

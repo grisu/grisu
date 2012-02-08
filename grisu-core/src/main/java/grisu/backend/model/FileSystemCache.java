@@ -2,6 +2,7 @@ package grisu.backend.model;
 
 import grisu.model.MountPoint;
 import grisu.settings.ServerPropertiesManager;
+import grith.jgrith.credential.Credential;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -15,7 +16,8 @@ import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemOptions;
 import org.apache.commons.vfs.impl.DefaultFileSystemManager;
 import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileSystemConfigBuilder;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.dl.escience.vfs.util.VFSUtil;
 
@@ -23,8 +25,8 @@ public class FileSystemCache {
 
 	private static AtomicInteger COUNTER = new AtomicInteger();
 
-	private static Logger myLogger = Logger.getLogger(FileSystemCache.class
-			.getName());
+	private static Logger myLogger = LoggerFactory
+			.getLogger(FileSystemCache.class.getName());
 
 	private Map<MountPoint, FileSystem> cachedFilesystems = new HashMap<MountPoint, FileSystem>();
 	private DefaultFileSystemManager fsm = null;
@@ -34,7 +36,7 @@ public class FileSystemCache {
 
 	public FileSystemCache(User user) {
 		id = "FILESYSTEM_CACHE_" + UUID.randomUUID().toString() + ": ";
-		int i = COUNTER.addAndGet(1);
+		final int i = COUNTER.addAndGet(1);
 		// X.p("Opening filesystemmanager: " + i);
 		this.user = user;
 		try {
@@ -68,19 +70,19 @@ public class FileSystemCache {
 					+ "Closing filesystem. Currently open filesystems: "
 					+ COUNTER);
 			fsm.close();
-			int i = COUNTER.decrementAndGet();
+			final int i = COUNTER.decrementAndGet();
 			myLogger.debug(id
 					+ "Filesystemm closed. Remaining open filesystems: " + i);
 		} else {
 
-			Thread t = new Thread() {
+			final Thread t = new Thread() {
 				@Override
 				public void run() {
 					myLogger.debug(id
 							+ "Closing filesystem. Currently open filesystems: "
 							+ COUNTER);
 					fsm.close();
-					int i = COUNTER.decrementAndGet();
+					final int i = COUNTER.decrementAndGet();
 					myLogger.debug(id
 							+ "Filesystemm closed. Remaining open filesystems: "
 							+ i);
@@ -93,7 +95,8 @@ public class FileSystemCache {
 	}
 
 	private FileSystem createFileSystem(String rootUrl,
-			ProxyCredential credToUse) throws FileSystemException {
+ Credential credToUse)
+			throws FileSystemException {
 
 		final FileSystemOptions opts = new FileSystemOptions();
 
@@ -103,7 +106,7 @@ public class FileSystemCache {
 
 			final GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
 					.getInstance();
-			builder.setGSSCredential(opts, credToUse.getGssCredential());
+			builder.setGSSCredential(opts, credToUse.getCredential());
 			builder.setTimeout(opts,
 					ServerPropertiesManager.getFileSystemConnectTimeout());
 			// builder.setUserDirIsRoot(opts, true);
@@ -116,8 +119,7 @@ public class FileSystemCache {
 			myLogger.error("Can't connect to filesystem: " + rootUrl
 					+ " using VO: " + credToUse.getFqan());
 			throw new FileSystemException("Can't connect to filesystem "
-					+ rootUrl
-					+ ": " + e.getLocalizedMessage(), e);
+					+ rootUrl + ": " + e.getLocalizedMessage(), e);
 		}
 
 		FileSystem fileBase = null;
@@ -135,7 +137,7 @@ public class FileSystemCache {
 			throws FileSystemException {
 
 		synchronized (rootUrl) {
-			ProxyCredential credToUse = null;
+			Credential credToUse = null;
 
 			MountPoint temp = null;
 			try {
@@ -149,10 +151,10 @@ public class FileSystemCache {
 			// get the right credential for this mountpoint
 			if (fqan != null) {
 
-				credToUse = user.getCred(fqan);
+				credToUse = user.getCredential(fqan);
 
 			} else {
-				credToUse = user.getCred();
+				credToUse = user.getCredential();
 			}
 
 			FileSystem fileBase = null;

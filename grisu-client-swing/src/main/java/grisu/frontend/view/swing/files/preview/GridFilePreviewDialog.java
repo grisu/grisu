@@ -9,7 +9,6 @@ import java.io.File;
 import javax.swing.JDialog;
 import javax.swing.WindowConstants;
 
-
 public class GridFilePreviewDialog extends JDialog {
 
 	/**
@@ -44,7 +43,6 @@ public class GridFilePreviewDialog extends JDialog {
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(getGenericFileViewer(), BorderLayout.CENTER);
 	}
-
 
 	private GenericGridFileViewer getGenericFileViewer() {
 		if (genericFileViewer == null) {

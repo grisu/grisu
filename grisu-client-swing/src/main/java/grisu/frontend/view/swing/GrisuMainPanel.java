@@ -13,7 +13,6 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
-
 public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 
 	private ServiceInterface si;

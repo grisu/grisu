@@ -29,7 +29,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jidesoft.swing.FolderChooser;
 
@@ -107,7 +108,7 @@ public class BatchResultContextMenu extends JPopupMenu implements
 	private File _currentFolder = null;
 	private final List<String> _recentList = new ArrayList<String>();
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(BatchResultContextMenu.class.getName());
 
 	private JMenuItem deleteItem;

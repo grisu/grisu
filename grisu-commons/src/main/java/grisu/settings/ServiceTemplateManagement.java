@@ -6,7 +6,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helps to manage all available jsdl templates that are stored in
@@ -18,8 +19,8 @@ import org.apache.log4j.Logger;
  */
 public final class ServiceTemplateManagement {
 
-	static final Logger myLogger = Logger
-			.getLogger(ServiceTemplateManagement.class.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(ServiceTemplateManagement.class);
 
 	/**
 	 * Checks the $HOME_OF_TOMCAT_USER/.grisu/templates_available directories

@@ -125,6 +125,17 @@ public class CliHelpers {
 
 	public static void main(String[] args) throws InterruptedException {
 
+<<<<<<< HEAD
+		while (true) {
+
+			setIndeterminateProgress("Testing...", true);
+
+			Thread.sleep(4000);
+
+			setIndeterminateProgress("Success.", false);
+
+			System.out.println(" xx ");
+=======
 		// while (true) {
 		//
 		// setIndeterminateProgress("Testing...", true);
@@ -141,6 +152,7 @@ public class CliHelpers {
 			setProgress(i, 100);
 			Thread.sleep(1000);
 
+>>>>>>> 0.3.7
 		}
 	}
 
@@ -179,7 +191,47 @@ public class CliHelpers {
 				timer = new Timer();
 				timer.scheduleAtFixedRate(spinUpdater, 0L, DURATION);
 			}
+<<<<<<< HEAD
 
+			indeterminateProgress = new Thread() {
+				@Override
+				public void run() {
+					int i = 0;
+					String msg = message;
+					while (!interrupt_progress) {
+						if (StringUtils.isBlank(message)) {
+							msg = indeterminateProgressStrings[i];
+						} else {
+							msg = message + " "
+									+ indeterminateProgressStrings[i];
+						}
+						writeToTerminal(msg);
+
+						try {
+							Thread.sleep(DURATION);
+						} catch (InterruptedException e) {
+							System.out.println("INTERRUPTED");
+						}
+
+						i = i + 1;
+						if (i >= indeterminateProgressStrings.length) {
+							i = 0;
+						}
+
+					}
+
+					writeToTerminal("");
+				}
+			};
+
+			// I know, I know. But isInterrupted() doesn't work reliably because
+			// of some unspecified jline behaviour
+			interrupt_progress = false;
+
+			indeterminateProgress.start();
+
+=======
+>>>>>>> 0.3.7
 		} else {
 			timer.cancel();
 			spinUpdater = null;
@@ -200,7 +252,26 @@ public class CliHelpers {
 			// System.err.println("DONE waiting for thread "
 			// + indeterminateProgress.getName() + " to terminate.");
 
+<<<<<<< HEAD
+			if (!StringUtils.isBlank(message)) {
+				System.out.println(message);
+			}
 
+			// if ((indeterminateProgress != null)
+			// && indeterminateProgress.isAlive()) {
+			// indeterminateProgress.interrupt();
+			// try {
+			// indeterminateProgress.join();
+			// } catch (InterruptedException e) {
+			// }
+			//
+			// if (!StringUtils.isBlank(message)) {
+			// System.out.println(message);
+			// }
+			// }
+=======
+
+>>>>>>> 0.3.7
 		}
 
 	}

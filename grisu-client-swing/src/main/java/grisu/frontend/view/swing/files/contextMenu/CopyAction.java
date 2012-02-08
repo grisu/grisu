@@ -15,11 +15,13 @@ import java.util.List;
 import javax.swing.AbstractAction;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CopyAction extends AbstractAction {
 
-	static final Logger myLogger = Logger.getLogger(CopyAction.class.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(CopyAction.class
+			.getName());
 
 	private final GridFileListPanel fileList;
 	private final FileManager fm;

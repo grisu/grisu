@@ -15,6 +15,7 @@ import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
 import org.apache.commons.lang.StringUtils;
@@ -28,7 +29,7 @@ public class GridFilePropertiesDialog extends JDialog {
 
 		boolean alternate = true;
 
-		Map<String, String> fileProperties = new LinkedHashMap<String, String>();
+		final Map<String, String> fileProperties = new LinkedHashMap<String, String>();
 
 		if (file.isInaccessable()) {
 			fileProperties.put("Access error", "");
@@ -49,13 +50,16 @@ public class GridFilePropertiesDialog extends JDialog {
 			fileProperties.put("Last modified",
 					FileManager.getLastModifiedString(file.getLastModified()));
 			fileProperties.put("URL", file.getUrl());
-			Set<String> add = DtoProperty.mapFromDtoPropertiesList(file.getUrls())
-					.keySet();
+			final Set<String> add = DtoProperty.mapFromDtoPropertiesList(
+					file.getUrls()).keySet();
 			add.remove(file.getUrl());
-			fileProperties.put("Additional urls", StringUtils.join(add, "<br>"));
+			fileProperties
+					.put("Additional urls", StringUtils.join(add, "<br>"));
 			fileProperties.put("Path", file.getPath());
-			fileProperties.put("Sites", StringUtils.join(file.getSites(), "<br>"));
-			fileProperties.put("Groups", StringUtils.join(file.getFqans(), "<br>"));
+			fileProperties.put("Sites",
+					StringUtils.join(file.getSites(), "<br>"));
+			fileProperties.put("Groups",
+					StringUtils.join(file.getFqans(), "<br>"));
 			fileProperties.put("Virtual", Boolean.toString(file.isVirtual()));
 		}
 		for (final String key : fileProperties.keySet()) {
@@ -80,10 +84,11 @@ public class GridFilePropertiesDialog extends JDialog {
 	 */
 	public static void main(String[] args) {
 		try {
-			GridFilePropertiesDialog dialog = new GridFilePropertiesDialog(null);
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			final GridFilePropertiesDialog dialog = new GridFilePropertiesDialog(
+					null);
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -99,13 +104,13 @@ public class GridFilePropertiesDialog extends JDialog {
 		editorPane.setContentType("text/html");
 		editorPane.setEditable(false);
 		setBounds(100, 100, 450, 300);
-		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new BorderLayout(0, 0));
 		{
-			JScrollPane scrollPane = new JScrollPane();
+			final JScrollPane scrollPane = new JScrollPane();
 			contentPanel.add(scrollPane, BorderLayout.CENTER);
 			{
 				scrollPane.setViewportView(editorPane);
@@ -126,7 +131,7 @@ public class GridFilePropertiesDialog extends JDialog {
 
 	public void setGridFile(GridFile f) {
 
-		String text = generateHtml(f);
+		final String text = generateHtml(f);
 		editorPane.setText(text);
 		setVisible(true);
 	}

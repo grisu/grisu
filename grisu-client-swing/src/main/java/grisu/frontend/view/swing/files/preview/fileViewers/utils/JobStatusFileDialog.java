@@ -9,6 +9,7 @@ import java.io.File;
 
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 
 public class JobStatusFileDialog extends JDialog {
 
@@ -17,10 +18,10 @@ public class JobStatusFileDialog extends JDialog {
 	 */
 	public static void main(String[] args) {
 		try {
-			JobStatusFileDialog dialog = new JobStatusFileDialog();
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			final JobStatusFileDialog dialog = new JobStatusFileDialog();
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}

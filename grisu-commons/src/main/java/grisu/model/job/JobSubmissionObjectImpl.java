@@ -30,9 +30,9 @@ import javax.persistence.Id;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-
 
 /**
  * A class that helps creating a job.
@@ -46,8 +46,8 @@ import org.w3c.dom.Document;
 @Entity
 public class JobSubmissionObjectImpl {
 
-	static final Logger myLogger = Logger
-			.getLogger(JobSubmissionObjectImpl.class.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(JobSubmissionObjectImpl.class);
 
 	/**
 	 * Extracts the executable (first string) from a commandline.
@@ -66,7 +66,7 @@ public class JobSubmissionObjectImpl {
 		if (i <= 0) {
 			return commandline;
 		} else {
-			String result = commandline.substring(0, i);
+			final String result = commandline.substring(0, i);
 			return result;
 		}
 	}
@@ -140,6 +140,8 @@ public class JobSubmissionObjectImpl {
 
 	private String pbsDebug;
 
+	private long virtual_memory_in_bytes = 0;
+
 	/**
 	 * Default constructor.
 	 * 
@@ -191,8 +193,10 @@ public class JobSubmissionObjectImpl {
 	/**
 	 * Adds an environment variable for the job environment.
 	 * 
-	 * @param key the key of the variable
-	 * @param value the value
+	 * @param key
+	 *            the key of the variable
+	 * @param value
+	 *            the value
 	 */
 	public void addEnvironmentVariable(String key, String value) {
 
@@ -308,7 +312,8 @@ public class JobSubmissionObjectImpl {
 	}
 
 	/**
-	 * This method parses the currently set commandline and extracts the name of the executable.
+	 * This method parses the currently set commandline and extracts the name of
+	 * the executable.
 	 * 
 	 * @return the name of the currently set executable
 	 */
@@ -357,7 +362,8 @@ public class JobSubmissionObjectImpl {
 	}
 
 	/**
-	 * Gets the email address to be used if this job is configured to send emails when starting/finished.
+	 * Gets the email address to be used if this job is configured to send
+	 * emails when starting/finished.
 	 * 
 	 * @return the email address or null
 	 */
@@ -618,6 +624,15 @@ public class JobSubmissionObjectImpl {
 	}
 
 	/**
+	 * The virtal memory for the job in bytes.
+	 * 
+	 * @return the virtual memory
+	 */
+	public Long getVirtualMemory() {
+		return virtual_memory_in_bytes;
+	}
+
+	/**
 	 * Returns the walltime in seconds.
 	 * 
 	 * @return the walltime in seconds
@@ -672,10 +687,10 @@ public class JobSubmissionObjectImpl {
 		memory_in_bytes = JsdlHelpers.getTotalMemoryRequirement(jsdl);
 		walltime_in_seconds = JsdlHelpers.getWalltime(jsdl);
 
-		String[] temp = JsdlHelpers.getInputFileUrls(jsdl);
+		final String[] temp = JsdlHelpers.getInputFileUrls(jsdl);
 		if (temp != null) {
-			Map<String, String> inf = new LinkedHashMap<String, String>();
-			for (String s : temp) {
+			final Map<String, String> inf = new LinkedHashMap<String, String>();
+			for (final String s : temp) {
 				inf.put(s, "");
 			}
 			setInputFiles(inf);
@@ -757,9 +772,9 @@ public class JobSubmissionObjectImpl {
 				.toString());
 
 		if (StringUtils.isNotBlank(temp)) {
-			String[] files = temp.split(",");
-			Map<String, String> m = new HashMap<String, String>();
-			for (String f : files) {
+			final String[] files = temp.split(",");
+			final Map<String, String> m = new HashMap<String, String>();
+			for (final String f : files) {
 				m.put(f, "");
 			}
 			setInputFiles(m);
@@ -769,7 +784,8 @@ public class JobSubmissionObjectImpl {
 		temp = jobProperties.get(JobSubmissionProperty.ENVIRONMENT_VARIABLES
 				.toString());
 		if (StringUtils.isNotBlank(temp)) {
-			Map<String, String> envVariables = StringHelpers.stringToMap(temp);
+			final Map<String, String> envVariables = StringHelpers
+					.stringToMap(temp);
 			if (envVariables.size() > 0) {
 				setEnvironmentVariables(envVariables);
 			}
@@ -1058,6 +1074,16 @@ public class JobSubmissionObjectImpl {
 		this.id = id;
 	}
 
+	// public void setInputFileUrls(final String[] inputFileUrls) {
+	// final Set<String> oldValue = this.inputFiles;
+	// if (inputFileUrls != null) {
+	// this.inputFiles = new HashSet<String>(Arrays.asList(inputFileUrls));
+	// } else {
+	// this.inputFiles = new HashSet<String>();
+	// }
+	// pcs.firePropertyChange("inputFileUrls", oldValue, this.inputFiles);
+	// }
+
 	/**
 	 * Sets all input files in one go.
 	 * 
@@ -1073,16 +1099,6 @@ public class JobSubmissionObjectImpl {
 		pcs.firePropertyChange("inputFiles", null, this.inputFiles);
 
 	}
-
-	// public void setInputFileUrls(final String[] inputFileUrls) {
-	// final Set<String> oldValue = this.inputFiles;
-	// if (inputFileUrls != null) {
-	// this.inputFiles = new HashSet<String>(Arrays.asList(inputFileUrls));
-	// } else {
-	// this.inputFiles = new HashSet<String>();
-	// }
-	// pcs.firePropertyChange("inputFileUrls", oldValue, this.inputFiles);
-	// }
 
 	/**
 	 * Sets the name of the job.
@@ -1242,6 +1258,12 @@ public class JobSubmissionObjectImpl {
 		} else {
 			setJobname(jobname + "_" + UUID.randomUUID().toString());
 		}
+	}
+
+	public void setVirtualMemory(final Long memory) {
+		final long oldValue = this.virtual_memory_in_bytes;
+		this.virtual_memory_in_bytes = memory;
+		pcs.firePropertyChange("virtualMemory", oldValue, this.virtual_memory_in_bytes);
 	}
 
 	/**

@@ -104,15 +104,16 @@ public class FileDetailPanel extends JPanel implements FileListListener {
 					getTimestampLabel().setText(null);
 				} else {
 					getNameLabel().setText(NAME_PREFIX + file.getName());
-					getSizeLabel().setText(
-							SIZE_PREFIX
+					getSizeLabel()
+							.setText(
+									SIZE_PREFIX
 											+ FileAndUrlHelpers
 													.calculateSizeString(file
-									.getSize()));
+															.getSize()));
 					getTimestampLabel().setText(
 							DATE_PREFIX
-							+ GlazedFile.calculateTimeStampString(file
-									.getLastModified()));
+									+ GlazedFile.calculateTimeStampString(file
+											.getLastModified()));
 				}
 			}
 		});

@@ -53,10 +53,11 @@ import javax.xml.bind.annotation.XmlMimeType;
 @WebService(targetNamespace = "http://api.grisu", serviceName = "GrisuService")
 public interface ServiceInterface {
 
-	public static final int API_VERSION = 14;
+	public static final int API_VERSION = 15;
 
 	public static final String VIRTUAL_GRID_PROTOCOL_NAME = "grid";
 	public static String GRISU_JOB_FILE_NAME = ".grisujob";
+	public static String GRISU_BATCH_JOB_FILE_NAME = ".grisubatchjob";
 
 	/**
 	 * Adds an archive location.
@@ -145,6 +146,17 @@ public interface ServiceInterface {
 	String addJobToBatchJob(@PathParam("batchjobname") String batchjobname,
 			@QueryParam("jsdl") String jobdescription)
 					throws NoSuchJobException, JobPropertiesException;
+
+	/**
+	 * Admin method for stuff like reloading config, vos and such...
+	 * 
+	 * @param command
+	 *            the command
+	 * @param config
+	 *            the config for the command
+	 * @return the command output
+	 */
+	DtoStringList admin(String command, DtoProperties config);
 
 	/**
 	 * Archives this job to the specified url and deletes it from the database.
@@ -1026,7 +1038,10 @@ public interface ServiceInterface {
 	 * Deletes the whole jobdirectory (if specified) and if successful, the job
 	 * from the database.
 	 * 
-	 * This one doesn't throw an exception if something goes wrong.
+	 * This one doesn't throw an exception if something goes wrong. Contrary to
+	 * {@link #kill(String, boolean)} this method also accepts bash-style globs
+	 * as a jobname and it'll match that against all existing jobs and
+	 * batchjobs.
 	 * 
 	 * @param jobnames
 	 *            a list of jobs to kill
@@ -1210,8 +1225,7 @@ public interface ServiceInterface {
 	@POST
 	@Path("/batchjob/{batchjobname}/redistribute")
 	String redistributeBatchJob(@PathParam("batchjobname") String batchjobname)
-			throws NoSuchJobException,
-			JobPropertiesException;
+			throws NoSuchJobException, JobPropertiesException;
 
 	/**
 	 * Refreshes the status of all jobs that belong to this batchjob.
@@ -1244,8 +1258,7 @@ public interface ServiceInterface {
 	@POST
 	@Path("/batchjob/{batchjobname}/{jobname}/remove")
 	void removeJobFromBatchJob(@PathParam("batchjobname") String batchJobname,
-			@PathParam("jobname") String jobname)
-					throws NoSuchJobException;
+			@PathParam("jobname") String jobname) throws NoSuchJobException;
 
 	/**
 	 * Restarts a batch job.
@@ -1276,8 +1289,7 @@ public interface ServiceInterface {
 			@PathParam("batchjobname") final String batchjobname,
 			@DefaultValue(Constants.SUBMIT_POLICY_RESTART_DEFAULT) @QueryParam("restartPolicy") String restartPolicy,
 			@DefaultValue("") DtoProperties properties)
-					throws NoSuchJobException,
-					JobPropertiesException;
+					throws NoSuchJobException, JobPropertiesException;
 
 	/**
 	 * Resubmit a job. Kills the old one if it's still running.

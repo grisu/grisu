@@ -14,7 +14,6 @@ import javax.swing.JPanel;
 
 import org.apache.commons.lang.StringUtils;
 
-
 import com.jidesoft.swing.JideTabbedPane;
 
 public class BatchJobTabbedPane extends JPanel implements

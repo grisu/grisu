@@ -18,15 +18,16 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.SwingUtilities;
 
-import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GrisuNavigationPanel extends JXTaskPaneContainer implements
 		PropertyChangeListener {
 
-	static final Logger myLogger = Logger.getLogger(GrisuNavigationPanel.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(GrisuNavigationPanel.class.getName());
 
 	private final ServiceInterface si;
 

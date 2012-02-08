@@ -13,7 +13,8 @@ import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -22,7 +23,8 @@ import com.jgoodies.forms.layout.RowSpec;
 
 public class LoginPanel extends JPanel {
 
-	static final Logger myLogger = Logger.getLogger(LoginPanel.class.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(LoginPanel.class
+			.getName());
 
 	private JPanel loginPanel;
 
@@ -126,7 +128,7 @@ public class LoginPanel extends JPanel {
 
 			switchToClientPanel();
 		} catch (final InterruptedException ie) {
-			myLogger.error(ie);
+			myLogger.error(ie.getLocalizedMessage(), ie);
 			switchToLoginPanel();
 		}
 	}

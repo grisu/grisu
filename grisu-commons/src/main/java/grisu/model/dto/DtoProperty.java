@@ -33,8 +33,8 @@ public class DtoProperty {
 	public static Map<String, String> mapFromDtoPropertiesList(
 			List<DtoProperty> props) {
 
-		Map<String, String> result = new LinkedHashMap<String, String>();
-		for (DtoProperty p : props) {
+		final Map<String, String> result = new LinkedHashMap<String, String>();
+		for (final DtoProperty p : props) {
 			result.put(p.getKey(), p.getValue());
 		}
 		return result;
@@ -60,9 +60,10 @@ public class DtoProperty {
 
 	@Override
 	public boolean equals(Object o) {
-		if ( o instanceof DtoProperty) {
-			DtoProperty other = (DtoProperty)o;
-			if ( getKey().equals(other.getKey()) && getValue().equals(other.getValue()) ) {
+		if (o instanceof DtoProperty) {
+			final DtoProperty other = (DtoProperty) o;
+			if (getKey().equals(other.getKey())
+					&& getValue().equals(other.getValue())) {
 				return true;
 			}
 		}
@@ -81,7 +82,7 @@ public class DtoProperty {
 
 	@Override
 	public int hashCode() {
-		return 231 * ( getKey().hashCode() + getValue().hashCode());
+		return 231 * (getKey().hashCode() + getValue().hashCode());
 	}
 
 	public void setKey(String key) {

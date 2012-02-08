@@ -13,7 +13,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
-
 public class JobListDialog extends JDialog {
 
 	/**

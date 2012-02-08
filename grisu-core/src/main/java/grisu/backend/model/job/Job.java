@@ -1,9 +1,9 @@
 package grisu.backend.model.job;
 
-import grisu.backend.model.ProxyCredential;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.utils.JsdlHelpers;
 import grisu.utils.SeveralXMLHelpers;
+import grith.jgrith.credential.Credential;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -29,15 +29,15 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.Root;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-
 
 /**
  * This class holds all the relevant information about a job.
@@ -50,7 +50,7 @@ import org.xml.sax.SAXException;
 @Root
 public class Job implements Comparable<Job> {
 
-	static final Logger myLogger = Logger.getLogger(Job.class.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(Job.class.getName());
 
 	// for hibernate
 	private Long id;
@@ -86,7 +86,7 @@ public class Job implements Comparable<Job> {
 	private int status = -1000;
 
 	// the credential that is/was used to submit the job
-	private ProxyCredential credential = null;
+	private Credential credential = null;
 
 	@Element
 	private String submissionType = null;
@@ -237,7 +237,7 @@ public class Job implements Comparable<Job> {
 	 * @return the credential
 	 */
 	@Transient
-	public ProxyCredential getCredential() {
+	public Credential getCredential() {
 		return this.credential;
 	}
 
@@ -284,7 +284,7 @@ public class Job implements Comparable<Job> {
 		if ((this.jobDescription == null)
 				&& StringUtils.isNotBlank(serializedJobDescription)) {
 			this.jobDescription = SeveralXMLHelpers
-			.fromString(serializedJobDescription);
+					.fromString(serializedJobDescription);
 		}
 		return this.jobDescription;
 	}
@@ -435,7 +435,7 @@ public class Job implements Comparable<Job> {
 	 * @param credential
 	 *            the credential
 	 */
-	public void setCredential(final ProxyCredential credential) {
+	public void setCredential(final Credential credential) {
 		this.credential = credential;
 	}
 
@@ -468,7 +468,7 @@ public class Job implements Comparable<Job> {
 	private synchronized void setInputFiles(Set<String> inputfiles) {
 		if (inputFiles == null) {
 			this.inputFiles = Collections
-			.synchronizedSet(new HashSet<String>());
+					.synchronizedSet(new HashSet<String>());
 		} else {
 			this.inputFiles = inputfiles;
 		}
@@ -484,7 +484,7 @@ public class Job implements Comparable<Job> {
 	public void setJobDescription(final Document jobDescription) {
 		this.jobDescription = jobDescription;
 		this.serializedJobDescription = SeveralXMLHelpers
-		.toString(jobDescription);
+				.toString(jobDescription);
 	}
 
 	// ---------------------

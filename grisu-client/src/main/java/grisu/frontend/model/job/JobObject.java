@@ -37,16 +37,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 
 import javax.persistence.Transient;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-
 
 /**
  * A model class that hides all the complexity of creating and submitting a job.
@@ -60,7 +61,8 @@ import org.w3c.dom.Document;
 public class JobObject extends JobSubmissionObjectImpl implements
 Comparable<JobObject> {
 
-	static final Logger myLogger = Logger.getLogger(JobObject.class.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(JobObject.class
+			.getName());
 
 	public static JobObject createJobObject(ServiceInterface si,
 			JobSubmissionObjectImpl jobsubmissionObject)
@@ -97,6 +99,9 @@ Comparable<JobObject> {
 
 	private final List<String> submissionLog = Collections
 			.synchronizedList(new LinkedList<String>());
+
+	private final Map<String, String> properties = Collections
+			.synchronizedMap(new TreeMap<String, String>());
 
 	private Date lastStatusUpdate = new Date();
 
@@ -253,6 +258,10 @@ Comparable<JobObject> {
 		pcs.firePropertyChange("submissionLog", null, getSubmissionLog());
 	}
 
+	public void addJobProperty(String key, String value) {
+		properties.put(key, value);
+	}
+
 	/**
 	 * Archives the job in the background, using the default archive location.
 	 * 
@@ -309,7 +318,7 @@ Comparable<JobObject> {
 			if (waitForArchivingToFinish) {
 				try {
 					StatusObject.waitForActionToFinish(getServiceInterface(),
-							targetUrl, 5, true, false);
+							targetUrl, 5, true);
 
 					isArchived = true;
 					pcs.firePropertyChange("archived", false, true);
@@ -321,21 +330,20 @@ Comparable<JobObject> {
 					EventBus.publish(new JobCleanedEvent(this));
 					EventBus.publish(new FileDeletedEvent(oldUrl));
 					EventBus.publish(new FolderCreatedEvent(jobDirectory));
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					throw new JobPropertiesException("Can't archive job: "
 							+ e.getLocalizedMessage());
 				}
 
 			} else {
-				new Thread() {
+				Thread t = new Thread() {
 
 					@Override
 					public void run() {
 
 						try {
 							StatusObject.waitForActionToFinish(
-									getServiceInterface(), targetUrl, 5, true,
-									false);
+									getServiceInterface(), targetUrl, 5, true);
 
 							isArchived = true;
 							pcs.firePropertyChange("archived", false, true);
@@ -350,19 +358,21 @@ Comparable<JobObject> {
 							EventBus.publish(new FolderCreatedEvent(
 									jobDirectory));
 
-						} catch (Exception e) {
+						} catch (final Exception e) {
 							myLogger.error("Job archiving error.", e);
 						}
 
 					}
-				}.start();
+				};
+				t.setName("Wait thread for archive job " + getJobname());
+				t.start();
 
 			}
 
 			return targetUrl;
-		} catch (NoSuchJobException e) {
+		} catch (final NoSuchJobException e) {
 			// should never happen
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			throw new JobPropertiesException(e.getLocalizedMessage());
 		}
 	}
@@ -471,7 +481,7 @@ Comparable<JobObject> {
 
 			addJobLogMessage("Command to execute: " + getCommandline());
 			// populate new job properties in background
-			new Thread() {
+			Thread t = new Thread() {
 				@Override
 				public void run() {
 					getAllJobProperties(true);
@@ -483,7 +493,9 @@ Comparable<JobObject> {
 					addJobLogMessage("Job directory url is: "
 							+ getJobProperty(Constants.JOBDIRECTORY_KEY, false));
 				}
-			}.start();
+			};
+			t.setName("job properties update thread for job " + getJobname());
+			t.start();
 
 		} catch (final JobPropertiesException e) {
 			addJobLogMessage("Could not create job on backend: "
@@ -511,14 +523,14 @@ Comparable<JobObject> {
 				waitThread.interrupt();
 			}
 		} catch (final Exception e) {
-			myLogger.debug(e);
+			myLogger.debug(e.getLocalizedMessage(), e);
 		}
 
 		waitThread = new Thread() {
 			@Override
 			public void run() {
 
-				final int oldStatus = getStatus(false);
+				int oldStatus = getStatus(false);
 				while (!isFinished()) {
 
 					if (isInterrupted()) {
@@ -544,6 +556,7 @@ Comparable<JobObject> {
 								+ " interrupted.");
 						return;
 					}
+					oldStatus = getStatus(false);
 				}
 			}
 		};
@@ -626,8 +639,7 @@ Comparable<JobObject> {
 	 *            whether to forcefully refresh the job properties
 	 * @return the job properties
 	 */
-	public final Map<String, String> getAllJobProperties(
-			boolean forceRefresh) {
+	public final Map<String, String> getAllJobProperties(boolean forceRefresh) {
 
 		// if (getStatus(false) == JobConstants.UNDEFINED) {
 		// throw new IllegalStateException("Job status "
@@ -653,10 +665,11 @@ Comparable<JobObject> {
 	}
 
 	public String getDescription() {
-		if ( this.description == null ) {
+		if (this.description == null) {
 			try {
-				this.description = serviceInterface.getJobProperty(getJobname(), Constants.JOB_DESCRIPTION_KEY);
-			} catch (NoSuchJobException e) {
+				this.description = serviceInterface.getJobProperty(
+						getJobname(), Constants.JOB_DESCRIPTION_KEY);
+			} catch (final NoSuchJobException e) {
 				// that's ok.
 			}
 		}
@@ -782,7 +795,7 @@ Comparable<JobObject> {
 				try {
 					updateWithDtoJob(serviceInterface.getJob(jobname));
 				} catch (final NoSuchJobException e) {
-					myLogger.error(e);
+					myLogger.error(e.getLocalizedMessage(), e);
 				}
 			}
 		}
@@ -816,9 +829,10 @@ Comparable<JobObject> {
 
 			synchronized (this) {
 
-				Date now = new Date();
+				final Date now = new Date();
 				if ((this.status >= JobConstants.ACTIVE)
-						&& ((lastStatusUpdate.getTime() + 2000) >= now.getTime())) {
+						&& ((lastStatusUpdate.getTime() + 2000) >= now
+						.getTime())) {
 					myLogger.debug("Less than 2 seconds between status updates. Returning old status...");
 					return this.status;
 				}
@@ -833,7 +847,8 @@ Comparable<JobObject> {
 				pcs.firePropertyChange("statusString",
 						JobConstants.translateStatus(oldStatus),
 						getStatusString(false));
-				pcs.firePropertyChange("finished", oldFinished, isFinished(false));
+				pcs.firePropertyChange("finished", oldFinished,
+						isFinished(false));
 				// addJobLogMessage("Status refreshed. Status is: "
 				// + JobConstants.translateStatus(this.status));
 				if (this.status != oldStatus) {
@@ -1003,13 +1018,13 @@ Comparable<JobObject> {
 	 */
 	public final boolean isFailed(final boolean forceRefresh) {
 
-		int status = getStatus(forceRefresh);
+		final int status = getStatus(forceRefresh);
 
-		if ( status < JobConstants.FINISHED_EITHER_WAY ) {
+		if (status < JobConstants.FINISHED_EITHER_WAY) {
 			return false;
 		}
 
-		if ( status == JobConstants.DONE ) {
+		if (status == JobConstants.DONE) {
 			return false;
 		} else {
 			return true;
@@ -1068,13 +1083,13 @@ Comparable<JobObject> {
 	 */
 	public final boolean isSuccessful(final boolean forceRefresh) {
 
-		int status = getStatus(forceRefresh);
+		final int status = getStatus(forceRefresh);
 
-		if ( status < JobConstants.FINISHED_EITHER_WAY ) {
+		if (status < JobConstants.FINISHED_EITHER_WAY) {
 			return false;
 		}
 
-		if ( status == JobConstants.DONE ) {
+		if (status == JobConstants.DONE) {
 			return true;
 		} else {
 			return false;
@@ -1105,30 +1120,32 @@ Comparable<JobObject> {
 				pcs.firePropertyChange("beingCleaned", false, true);
 
 				// delete local cache for this job
-				new Thread() {
+				Thread t = new Thread() {
 					@Override
 					public void run() {
 						myLogger.debug("Deleting local cached dir for job "
 								+ getJobname() + ": " + getJobDirectoryUrl());
-						File dir = GrisuRegistryManager
+						final File dir = GrisuRegistryManager
 								.getDefault(serviceInterface).getFileManager()
 								.getLocalCacheFile(getJobDirectoryUrl());
 						FileUtils.deleteQuietly(dir);
 					}
-				}.start();
+				};
+				t.setName("Cleanup thread for job " + getJobname());
+				t.start();
 
 			}
-			String handle = this.serviceInterface
-					.kill(this.getJobname(), clean);
+			final String handle = this.serviceInterface.kill(this.getJobname(),
+					clean);
 
-			StatusObject so = StatusObject.waitForActionToFinish(
-					serviceInterface, handle, 2, false, false);
+			final StatusObject so = StatusObject.waitForActionToFinish(
+					serviceInterface, handle, 2, false);
 			if (so.getStatus().isFailed()) {
 				throw new Exception(so.getStatus().getErrorCause());
 			}
 			try {
 				getStatus(true);
-			} catch (Exception nsje) {
+			} catch (final Exception nsje) {
 				// that's ok
 			}
 
@@ -1145,8 +1162,8 @@ Comparable<JobObject> {
 
 	public final GridFile listJobDirectory() throws RemoteFileSystemException {
 
-		String jobDir = getJobDirectoryUrl();
-		GridFile result = fm.ls(jobDir);
+		final String jobDir = getJobDirectoryUrl();
+		final GridFile result = fm.ls(jobDir);
 
 		return result;
 
@@ -1172,6 +1189,10 @@ Comparable<JobObject> {
 
 		return folder.listOfAllFilesUnderThisFolder();
 
+	}
+
+	public void removeJobProperty(String key) {
+		properties.remove(key);
 	}
 
 	/**
@@ -1205,7 +1226,8 @@ Comparable<JobObject> {
 	 * 
 	 * Be aware, this will only work if the job was not yet submitted.
 	 * 
-	 * @param desc the description of the job (not the jdsl, mind)
+	 * @param desc
+	 *            the description of the job (not the jdsl, mind)
 	 */
 	public void setDescription(String desc) {
 		this.description = desc;
@@ -1239,8 +1261,8 @@ Comparable<JobObject> {
 		if (StringUtils.isBlank(jobname)) {
 			setJobname(jobname);
 		} else {
-			String newname = GrisuRegistryManager.getDefault(serviceInterface)
-					.getUserEnvironmentManager()
+			final String newname = GrisuRegistryManager
+					.getDefault(serviceInterface).getUserEnvironmentManager()
 					.calculateUniqueJobname(jobname);
 			setJobname(newname);
 		}
@@ -1274,9 +1296,9 @@ Comparable<JobObject> {
 			}
 		}
 
-		Map<String, Set<String>> targets = new HashMap<String, Set<String>>();
-		for (String f : localFiles) {
-			String path = getInputFiles().get(f);
+		final Map<String, Set<String>> targets = new HashMap<String, Set<String>>();
+		for (final String f : localFiles) {
+			final String path = getInputFiles().get(f);
 			if (targets.get(path) == null) {
 				targets.put(path, new HashSet<String>());
 			}
@@ -1286,7 +1308,7 @@ Comparable<JobObject> {
 		final FileTransactionManager ftm = FileTransactionManager
 				.getDefault(serviceInterface);
 
-		for (String target : targets.keySet()) {
+		for (final String target : targets.keySet()) {
 
 			final FileTransaction fileTransfer = ftm.addJobInputFileTransfer(
 					targets.get(target), this, target);
@@ -1344,13 +1366,15 @@ Comparable<JobObject> {
 	 * resource. Internally, this method also does possible stage-ins from your
 	 * local machine.
 	 * 
+	 * @return the handle to the job submission task on the backend
+	 * 
 	 * @throws JobSubmissionException
 	 *             if the job could not be submitted
 	 * @throws InterruptedException
 	 */
-	public final void submitJob() throws JobSubmissionException,
+	public final String submitJob() throws JobSubmissionException,
 	InterruptedException {
-		submitJob(null);
+		return submitJob(null);
 	}
 
 	/**
@@ -1362,14 +1386,15 @@ Comparable<JobObject> {
 	 * 
 	 * @param waitForSubmissionToFinish
 	 *            whether to wait for submission to finish or not
+	 * @return the handle to the job submission task on the backend
 	 * 
 	 * @throws JobSubmissionException
 	 *             if the job could not be submitted
 	 * @throws InterruptedException
 	 */
-	public final void submitJob(boolean waitForSubmissionToFinish)
+	public final String submitJob(boolean waitForSubmissionToFinish)
 			throws JobSubmissionException, InterruptedException {
-		submitJob(null, waitForSubmissionToFinish);
+		return submitJob(null, waitForSubmissionToFinish);
 	}
 
 	/**
@@ -1382,17 +1407,35 @@ Comparable<JobObject> {
 	 * @param additionalJobProperties
 	 *            properties you want to store with the job (only get stored if
 	 *            submission was successful)
-	 * 
+	 * @return the handle to the job submission task on the backend
 	 * @throws JobSubmissionException
 	 *             if the job could not be submitted
 	 * @throws InterruptedException
 	 */
-	public final void submitJob(Map<String, String> additionalJobProperties)
+	public final String submitJob(Map<String, String> additionalJobProperties)
 			throws JobSubmissionException, InterruptedException {
-		submitJob(additionalJobProperties, true);
+		return submitJob(additionalJobProperties, true);
 	}
 
-	public final void submitJob(Map<String, String> additionalJobProperties,
+	/**
+	 * After you created the job on the backend using the
+	 * {@link #createJob(String)} or {@link #createJob(String, String)} method
+	 * you can tell the backend to actually submit the job to the endpoint
+	 * resource. Internally, this method also does possible stage-ins from your
+	 * local machine.
+	 * 
+	 * @param additionalJobProperties
+	 *            properties you want to store with the job (only get stored if
+	 *            submission was successful)
+	 * @param waitForSubmissionToFinish
+	 *            whether to wait for submission task to finish on backend
+	 *            before returning out of this method
+	 * @return the handle to the job submission task on the backend
+	 * @throws JobSubmissionException
+	 *             if the job could not be submitted
+	 * @throws InterruptedException
+	 */
+	public final String submitJob(Map<String, String> additionalJobProperties,
 			boolean waitForSubmissionToFinish) throws JobSubmissionException,
 			InterruptedException {
 
@@ -1418,13 +1461,41 @@ Comparable<JobObject> {
 					"Interrupted after staging in input files.");
 		}
 
+		if (StringUtils.isNotBlank(description)) {
+			if (additionalJobProperties == null) {
+				additionalJobProperties = new HashMap<String, String>();
+			}
+			additionalJobProperties.put(Constants.JOB_DESCRIPTION_KEY,
+					description);
+		}
+
+		if (additionalJobProperties != null) {
+			properties.putAll(additionalJobProperties);
+		}
+
+		if (properties.size() > 0) {
+			addJobLogMessage("Setting additional job properties...");
+			try {
+				serviceInterface.addJobProperties(getJobname(),
+						DtoJob.createJob(-1, properties, null, null,
+								false));
+			} catch (final NoSuchJobException e) {
+				addJobLogMessage("Submission failed: "
+						+ e.getLocalizedMessage());
+				throw new JobSubmissionException(
+						"Could not find job on backend.", e);
+			}
+		}
+		allJobProperties = null;
+
+		String handle = null;
 		try {
 			addJobLogMessage("Submitting job to endpoint...");
-			String handle = serviceInterface.submitJob(getJobname());
+			handle = serviceInterface.submitJob(getJobname());
 			if (waitForSubmissionToFinish) {
 				try {
-					StatusObject s = StatusObject.waitForActionToFinish(
-							serviceInterface, handle, 3, true, false);
+					final StatusObject s = StatusObject.waitForActionToFinish(
+							serviceInterface, handle, 3, true);
 					if (s.getStatus().isFailed()) {
 						String errorCause = s.getStatus().getErrorCause();
 						if (StringUtils.isBlank(errorCause)) {
@@ -1432,8 +1503,8 @@ Comparable<JobObject> {
 						}
 						throw new JobSubmissionException(errorCause);
 					}
-				} catch (StatusException e) {
-					myLogger.error(e);
+				} catch (final StatusException e) {
+					myLogger.error(e.getLocalizedMessage(), e);
 					throw new RuntimeException(e);
 				}
 			}
@@ -1444,34 +1515,13 @@ Comparable<JobObject> {
 					e);
 		}
 
-		if (StringUtils.isNotBlank(description)) {
-			if (additionalJobProperties == null) {
-				additionalJobProperties = new HashMap<String, String>();
-			}
-			additionalJobProperties.put(Constants.JOB_DESCRIPTION_KEY,
-					description);
-		}
-
-		if ((additionalJobProperties != null)
-				&& (additionalJobProperties.size() > 0)) {
-			addJobLogMessage("Setting additional job properties...");
-			try {
-				serviceInterface.addJobProperties(getJobname(), DtoJob
-						.createJob(-1, additionalJobProperties, null, null,
-								false));
-			} catch (final NoSuchJobException e) {
-				addJobLogMessage("Submission failed: "
-						+ e.getLocalizedMessage());
-				throw new JobSubmissionException(
-						"Could not find job on backend.", e);
-			}
-		}
-		allJobProperties = null;
 		getStatus(true);
 
 		EventBus.publish(new NewJobEvent(this));
 
 		addJobLogMessage("Job submission finished successfully.");
+
+		return handle;
 	}
 
 	/**

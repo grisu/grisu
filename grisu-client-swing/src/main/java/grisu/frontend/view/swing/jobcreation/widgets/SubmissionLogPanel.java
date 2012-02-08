@@ -18,13 +18,13 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.TreeWillExpandListener;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SubmissionLogPanel extends JPanel implements
 PropertyChangeListener {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(TreeWillExpandListener.class.getName());
 
 	private JScrollPane scrollPane;
@@ -77,7 +77,7 @@ PropertyChangeListener {
 		return textArea;
 	}
 
-	public void propertyChange(PropertyChangeEvent evt) {
+	public synchronized void propertyChange(PropertyChangeEvent evt) {
 		try {
 
 			String oldValue = null;
@@ -123,7 +123,7 @@ PropertyChangeListener {
 				appendText(text);
 			}
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 	}
 

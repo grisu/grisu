@@ -4,7 +4,6 @@ import grisu.model.files.GlazedFile;
 
 import java.util.Comparator;
 
-
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 
 public class GlazedFileTableFormat implements AdvancedTableFormat<GlazedFile> {

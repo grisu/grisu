@@ -8,9 +8,9 @@ import java.io.File;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages the $HOME/.grisu/grisu.config file.
@@ -51,17 +51,16 @@ public final class ClientPropertiesManager {
 
 	public static final int DEFAULT_TIMEOUT = 0;
 
-	public static final String DEFAULT_SERVICE_INTERFACE = "ARCS";
+	public static final String DEFAULT_SERVICE_INTERFACE = "BeSTGRID";
 
 	private static PropertiesConfiguration config = null;
 
-	static final Logger myLogger = Logger
-			.getLogger(ClientPropertiesManager.class.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(ClientPropertiesManager.class);
 	private static final int DEFAULT_ACTION_STATUS_RECHECK_INTERVAL_IN_SECONDS = 5;
 	private static final String DEFAULT_SHIBBOLETH_URL = "https://slcs1.arcs.org.au/SLCS/login";
 
 	public static final String AUTO_LOGIN_KEY = "autoLogin";
-
 
 	/**
 	 * Call this if the user wants a new (server-side) template to his personal
@@ -298,7 +297,7 @@ public final class ClientPropertiesManager {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
-		if (StringUtils.isBlank(defaultUrl)) {
+		if (StringUtils.isBlank(defaultUrl) || "ARCS".equals(defaultUrl)) {
 			defaultUrl = DEFAULT_SERVICE_INTERFACE;
 		}
 		return defaultUrl;

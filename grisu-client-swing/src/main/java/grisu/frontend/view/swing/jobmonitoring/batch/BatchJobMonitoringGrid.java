@@ -23,9 +23,10 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableColumn;
 
-import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
@@ -35,7 +36,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
 
 public class BatchJobMonitoringGrid extends JPanel {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(BatchJobMonitoringGrid.class.getName());
 
 	private static void addPopup(Component component, final JPopupMenu popup) {
@@ -144,7 +145,7 @@ public class BatchJobMonitoringGrid extends JPanel {
 				try {
 					bjsl.batchJobSelected(bj);
 				} catch (final Exception e1) {
-					myLogger.error(e1);
+					myLogger.error(e1.getLocalizedMessage(), e1);
 				}
 			}
 		}

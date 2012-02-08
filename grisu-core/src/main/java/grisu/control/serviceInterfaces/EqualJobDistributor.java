@@ -10,8 +10,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
-
-
 public class EqualJobDistributor implements JobDistributor {
 
 	public Map<String, Integer> distributeJobs(Set<Job> allJobs,

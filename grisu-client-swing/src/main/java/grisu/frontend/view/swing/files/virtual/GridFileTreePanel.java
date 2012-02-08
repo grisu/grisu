@@ -38,12 +38,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultTreeModel;
 
-import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.netbeans.swing.outline.DefaultOutlineModel;
 import org.netbeans.swing.outline.Outline;
 import org.netbeans.swing.outline.OutlineModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -51,10 +52,10 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class GridFileTreePanel extends JPanel implements GridFileListPanel,
-EventSubscriber {
+		EventSubscriber {
 
-	static final Logger myLogger = Logger.getLogger(GridFileTreePanel.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(GridFileTreePanel.class.getName());
 
 	public static final String EXTENSIONS_KEY = "extensions";
 	public static final String FOLDERS_SELECTABLE_KEY = "folders_selectable";
@@ -134,9 +135,9 @@ EventSubscriber {
 			// p.setIsVirtual(false);
 			// p.setName("Personal files");
 			// p.setPath("grid://groups/ARCS/BeSTGRID/Drug_discovery/Local//");
-			GridFile gridRoot = GrisuRegistryManager.getDefault(si)
+			final GridFile gridRoot = GrisuRegistryManager.getDefault(si)
 					.getFileManager().getGridRoot();
-			GridFile localRoot = GrisuRegistryManager.getDefault(si)
+			final GridFile localRoot = GrisuRegistryManager.getDefault(si)
 					.getFileManager().getLocalRoot();
 			this.roots = new LinkedList<GridFile>();
 			this.roots.add(gridRoot);
@@ -158,7 +159,7 @@ EventSubscriber {
 				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getScrollPane(), "2, 2, fill, fill");
 
-		GridFileListPanelContextMenu contextMenu = new DefaultGridFileContextMenu();
+		final GridFileListPanelContextMenu contextMenu = new DefaultGridFileContextMenu();
 		setContextMenu(contextMenu);
 
 		EventBus.subscribe(FileTransferEvent.class, this);
@@ -183,10 +184,10 @@ EventSubscriber {
 
 	private void fileDoubleClickOccured() {
 
-		Set<GridFile> selFiles = getSelectedFiles();
+		final Set<GridFile> selFiles = getSelectedFiles();
 		if (selFiles.size() == 1) {
 
-			GridFile f = selFiles.iterator().next();
+			final GridFile f = selFiles.iterator().next();
 			if (f.isInaccessable()) {
 				fireFileDoubleClicked(f);
 			}
@@ -227,7 +228,7 @@ EventSubscriber {
 							try {
 								l.fileDoubleClicked(file);
 							} catch (final Exception e1) {
-								myLogger.error(e1);
+								myLogger.error(e1.getLocalizedMessage(), e1);
 							}
 						}
 					} finally {
@@ -262,7 +263,7 @@ EventSubscriber {
 					try {
 						l.filesSelected(files);
 					} catch (final Exception e1) {
-						myLogger.error(e1);
+						myLogger.error(e1.getLocalizedMessage(), e1);
 					}
 				}
 			} finally {
@@ -289,7 +290,7 @@ EventSubscriber {
 				try {
 					l.isLoading(loading);
 				} catch (final Exception e1) {
-					myLogger.error(e1);
+					myLogger.error(e1.getLocalizedMessage(), e1);
 				}
 			}
 		}
@@ -312,7 +313,7 @@ EventSubscriber {
 				try {
 					l.directoryChanged(getCurrentDirectory());
 				} catch (final Exception e1) {
-					myLogger.error(e1);
+					myLogger.error(e1.getLocalizedMessage(), e1);
 				}
 			}
 		}
@@ -320,12 +321,12 @@ EventSubscriber {
 
 	public GridFile getCurrentDirectory() {
 
-		Set<GridFile> selFiles = getSelectedFiles();
+		final Set<GridFile> selFiles = getSelectedFiles();
 		if (selFiles == null) {
 			return null;
 		}
 		if (selFiles.size() == 1) {
-			GridFile f = selFiles.iterator().next();
+			final GridFile f = selFiles.iterator().next();
 			if (f.isFolder()) {
 				return f;
 			}
@@ -350,8 +351,8 @@ EventSubscriber {
 			// VirtualFileSystemDragSource ds = new VirtualFileSystemDragSource(
 			// tree, DnDConstants.ACTION_COPY);
 			if (useAsDropTarget) {
-				GridFileTreeDropTarget dt = new GridFileTreeDropTarget(si,
-						outline);
+				final GridFileTreeDropTarget dt = new GridFileTreeDropTarget(
+						si, outline);
 			}
 
 			outline.addMouseListener(new MouseAdapter() {
@@ -363,7 +364,7 @@ EventSubscriber {
 
 					} else if (arg0.getClickCount() == 1) {
 
-						GridFile sel = getCurrentDirectory();
+						final GridFile sel = getCurrentDirectory();
 						if ((sel != null) && !sel.equals(oldDir)) {
 							fireNewDirectory();
 							fireFilesSelected(getSelectedFiles());
@@ -387,7 +388,7 @@ EventSubscriber {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
 			scrollPane
-			.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+					.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 			scrollPane.setViewportView(getOutline());
 
 		}
@@ -395,14 +396,14 @@ EventSubscriber {
 	}
 
 	public Set<GridFile> getSelectedFiles() {
-		int[] rows = getOutline().getSelectedRows();
-		Set<GridFile> result = new HashSet<GridFile>();
-		for (int row : rows) {
+		final int[] rows = getOutline().getSelectedRows();
+		final Set<GridFile> result = new HashSet<GridFile>();
+		for (final int row : rows) {
 			try {
-				GridFile file = (GridFile) ((GridFileTreeNode) (getOutline()
+				final GridFile file = (GridFile) ((GridFileTreeNode) (getOutline()
 						.getValueAt(row, 0))).getUserObject();
 				result.add(file);
-			} catch (ClassCastException cce) {
+			} catch (final ClassCastException cce) {
 				return null;
 			}
 		}
@@ -416,18 +417,18 @@ EventSubscriber {
 
 	private void initialize(List<GridFile> roots) {
 
-		GridFileTreeNode rootNode = new GridFileTreeNode(fm, "virtual");
+		final GridFileTreeNode rootNode = new GridFileTreeNode(fm, "virtual");
 
 		model = new DefaultTreeModel(rootNode);
 		rootNode.setModel(model);
 		controller = new LazyLoadingTreeController(model);
 
-		for (GridFile f : roots) {
+		for (final GridFile f : roots) {
 			rootNode.add(new GridFileTreeNode(fm, f, controller,
 					displayHiddenFiles, extensionsToDisplay));
 		}
 
-		OutlineModel m = DefaultOutlineModel.createOutlineModel(model,
+		final OutlineModel m = DefaultOutlineModel.createOutlineModel(model,
 				new GridFileTreeTableRowModel(), false, "File");
 
 		m.getTreePathSupport().addTreeWillExpandListener(controller);
@@ -438,7 +439,7 @@ EventSubscriber {
 	public synchronized void onEvent(Object event) {
 
 		if (event instanceof FileTransferEvent) {
-			FileTransferEvent ev = (FileTransferEvent) event;
+			final FileTransferEvent ev = (FileTransferEvent) event;
 
 			// X.p("---------------------------------");
 			// X.p("Status: " + ev.getFileTransfer().getStatus());
@@ -457,11 +458,11 @@ EventSubscriber {
 			}
 
 		} else if (event instanceof FolderCreatedEvent) {
-			FolderCreatedEvent ev = (FolderCreatedEvent) event;
+			final FolderCreatedEvent ev = (FolderCreatedEvent) event;
 
 			refreshFolder(FileManager.calculateParentUrl(ev.getUrl()));
 		} else if (event instanceof FileDeletedEvent) {
-			FileDeletedEvent ev = (FileDeletedEvent) event;
+			final FileDeletedEvent ev = (FileDeletedEvent) event;
 			// X.p("CCC: " + FileManager.calculateParentUrl(ev.getUrl()));
 
 			refreshFolder(FileManager.calculateParentUrl(ev.getUrl()));
@@ -475,24 +476,25 @@ EventSubscriber {
 
 	public void refreshFolder(String url) {
 
-		String tempUrl = FileManager.removeTrailingSlash(url);
-		TableModel m = getOutline().getModel();
+		final String tempUrl = FileManager.removeTrailingSlash(url);
+		final TableModel m = getOutline().getModel();
 
 		for (int i = 0; i < m.getRowCount(); i++) {
 
-			Object n = m.getValueAt(i, 0);
+			final Object n = m.getValueAt(i, 0);
 
 			if (n instanceof GridFileTreeNode) {
 
 				final GridFileTreeNode node = (GridFileTreeNode) n;
 
 				final GridFile f = (GridFile) node.getUserObject();
-				for (String urlTemp : DtoProperty.mapFromDtoPropertiesList(
-						f.getUrls()).keySet()) {
+				for (final String urlTemp : DtoProperty
+						.mapFromDtoPropertiesList(f.getUrls()).keySet()) {
 
 					// X.p(f.getUrl());
 					// X.p(url);
-					String temp = FileManager.removeTrailingSlash(urlTemp);
+					final String temp = FileManager
+							.removeTrailingSlash(urlTemp);
 					if (temp.equals(tempUrl)) {
 
 						node.refresh();

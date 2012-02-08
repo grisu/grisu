@@ -19,7 +19,7 @@ public class BatchJobException extends Exception {
 	}
 
 	public BatchJobException(String message, Exception e) {
-		super (message, e);
+		super(message, e);
 	}
 
 }

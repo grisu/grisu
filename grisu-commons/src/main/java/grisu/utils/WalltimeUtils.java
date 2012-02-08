@@ -51,18 +51,19 @@ public class WalltimeUtils {
 					return new String[] { "1", "hour" };
 				} else {
 					return new String[] { new Integer(hours).toString(),
-							"hours" };
+					"hours" };
 				}
 			} else {
 				return new String[] {
-						new Integer((hours * 60) + minutes).toString(), "minutes" };
+						new Integer((hours * 60) + minutes).toString(),
+				"minutes" };
 			}
 		} else {
 			if (minutes == 1) {
 				return new String[] { "1", "minute" };
 			} else {
 				return new String[] { new Integer(minutes).toString(),
-						"minutes" };
+				"minutes" };
 			}
 		}
 

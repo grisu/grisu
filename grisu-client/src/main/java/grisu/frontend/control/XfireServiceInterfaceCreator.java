@@ -15,11 +15,12 @@ import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.ssl.HttpSecureProtocol;
 import org.apache.commons.ssl.TrustMaterial;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(XfireServiceInterfaceCreator.class.getName());
 
 	public boolean canHandleUrl(String url) {
@@ -83,7 +84,7 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 			if (cacertURL == null) {
 
 				cacertFilename = new CaCertManager()
-				.getCaCertNameForServiceInterfaceUrl(interfaceUrl);
+						.getCaCertNameForServiceInterfaceUrl(interfaceUrl);
 				if ((cacertFilename != null) && (cacertFilename.length() > 0)) {
 					myLogger.debug("Found url in map. Trying to use this cacert file: "
 							+ cacertFilename);
@@ -182,7 +183,7 @@ public class XfireServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 		} catch (final Exception e) {
 			// TODO Auto-generated catch block
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			throw new ServiceInterfaceException(
 					"Could not create XfireServiceInterface: "
 							+ e.getLocalizedMessage(), e);

@@ -14,7 +14,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 
-
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -60,7 +59,7 @@ public class DropVirtualGridFilePanel extends JPanel implements ActionListener {
 			return;
 		}
 
-		JRadioButton b = new JRadioButton(url);
+		final JRadioButton b = new JRadioButton(url);
 		b.setToolTipText(url);
 		b.setActionCommand(url);
 		b.addActionListener(this);
@@ -100,7 +99,7 @@ public class DropVirtualGridFilePanel extends JPanel implements ActionListener {
 	public void setTargetGridFile(GridFile f) {
 
 		this.gridFile = f;
-		for (String u : DtoProperty.mapFromDtoPropertiesList(
+		for (final String u : DtoProperty.mapFromDtoPropertiesList(
 				this.gridFile.getUrls()).keySet()) {
 			addTargetUrl(u);
 		}

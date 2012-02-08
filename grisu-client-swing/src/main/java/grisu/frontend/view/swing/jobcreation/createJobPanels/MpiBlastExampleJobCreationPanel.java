@@ -43,8 +43,9 @@ import javax.swing.event.ChangeListener;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXErrorPane;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vpac.historyRepeater.HistoryManager;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -53,9 +54,9 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class MpiBlastExampleJobCreationPanel extends JPanel implements
-JobCreationPanel, PropertyChangeListener {
+		JobCreationPanel, PropertyChangeListener {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(MpiBlastExampleJobCreationPanel.class.getName());
 
 	public static final String MPIBLAST_EXAMPLE_LAST_INPUT_FILE_DIR = "mpiblast_batch_last_input_file_dir";
@@ -356,7 +357,7 @@ JobCreationPanel, PropertyChangeListener {
 									submitJob();
 								} catch (final BatchJobException e) {
 
-									myLogger.error(e);
+									myLogger.error(e.getLocalizedMessage(), e);
 									cleanUpUI();
 								}
 							}
@@ -365,7 +366,7 @@ JobCreationPanel, PropertyChangeListener {
 						submitButton.setText("Cancel");
 						hm.addHistoryEntry(MPIBLAST_BATCH_INPUT_FILES,
 								(String) getInputFileComboBox()
-								.getSelectedItem());
+										.getSelectedItem());
 					} else if ("Cancel".equals(submitButton.getText())) {
 						subThread.interrupt();
 						submitButton.setText("Ok");
@@ -426,7 +427,7 @@ JobCreationPanel, PropertyChangeListener {
 			currentParsedFastaInput.add(currentPart);
 
 		} catch (final IOException e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
 	}
@@ -511,10 +512,10 @@ JobCreationPanel, PropertyChangeListener {
 		final int noJobs = getSlider().getValue();
 
 		final Double linesPerJobD = new Double(currentParsedFastaInput.size())
-		/ new Double(noJobs);
+				/ new Double(noJobs);
 
 		final int linesPerJob = new Long(Math.round(linesPerJobD + 0.499999))
-		.intValue();
+				.intValue();
 
 		for (int i = 0; i < currentParsedFastaInput.size(); i = i + linesPerJob) {
 			int end = i + linesPerJob;

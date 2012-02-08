@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
-
 /**
  * Interface which describes the stuff that needs to be known from an
  * application grid-wide in order to be able to submit a job for the application
@@ -182,6 +181,4 @@ public interface ApplicationInformation {
 	 */
 	Set<String> getExecutablesForVo(final String fqan, String version);
 
-
 }
-

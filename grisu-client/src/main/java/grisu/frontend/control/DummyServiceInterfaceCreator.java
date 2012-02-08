@@ -4,7 +4,8 @@ import grisu.control.ServiceInterface;
 import grisu.control.ServiceInterfaceCreator;
 import grisu.control.exceptions.ServiceInterfaceException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A serviceInterfaceCreator that creates a serviceinterface that uses a plain
@@ -16,7 +17,7 @@ import org.apache.log4j.Logger;
  */
 public class DummyServiceInterfaceCreator implements ServiceInterfaceCreator {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(DummyServiceInterfaceCreator.class.getName());
 
 	static final String DEFAULT_LOCAL_URL = "Dummy";

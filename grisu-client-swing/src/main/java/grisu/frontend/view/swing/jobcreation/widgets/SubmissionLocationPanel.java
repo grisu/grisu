@@ -4,6 +4,7 @@ import grisu.control.ServiceInterface;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.jcommons.interfaces.GridResource;
+import grisu.jcommons.utils.SubmissionLocationHelpers;
 import grisu.model.FqanEvent;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.info.UserApplicationInformation;
@@ -24,7 +25,6 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-
 
 public class SubmissionLocationPanel extends AbstractWidget implements
 EventSubscriber<FqanEvent> {
@@ -74,23 +74,23 @@ EventSubscriber<FqanEvent> {
 			return;
 		}
 
-		appInfo = GrisuRegistryManager.getDefault(getServiceInterface()).getUserApplicationInformation(this.application);
+		appInfo = GrisuRegistryManager.getDefault(getServiceInterface())
+				.getUserApplicationInformation(this.application);
 
 		new Thread() {
 			@Override
 			public void run() {
 
-				Map<JobSubmissionProperty, String> additional = new HashMap<JobSubmissionProperty, String>();
+				final Map<JobSubmissionProperty, String> additional = new HashMap<JobSubmissionProperty, String>();
 				additional.put(JobSubmissionProperty.APPLICATIONVERSION,
 						version);
-				Set<GridResource> subLocs = appInfo
-				.getAllSubmissionLocationsAsGridResources(
-						additional,
-						currentVO);
+				final Set<GridResource> subLocs = appInfo
+						.getAllSubmissionLocationsAsGridResources(additional,
+								currentVO);
 
 				subLocModel.removeAllElements();
 
-				for (GridResource gr : subLocs ) {
+				for (final GridResource gr : subLocs) {
 					subLocModel.addElement(gr);
 				}
 
@@ -103,9 +103,7 @@ EventSubscriber<FqanEvent> {
 			}
 		}.start();
 
-
 	}
-
 
 	private JComboBox getComboBox() {
 		if (comboBox == null) {
@@ -115,28 +113,37 @@ EventSubscriber<FqanEvent> {
 		return comboBox;
 	}
 
+	public GridResource getSelectedResource() {
+		return (GridResource) subLocModel.getSelectedItem();
+	}
+
 	@Override
 	public String getValue() {
 
-		// TODO
-		return null;
+		return SubmissionLocationHelpers
+				.createSubmissionLocationString(getSelectedResource());
 	}
 
 	public void onEvent(FqanEvent event) {
 
-		String oldVo = currentVO;
-		currentVO = event.getFqan();
+		String fqan = event.getFqan();
+		setFqan(fqan);
 
-		if (!StringUtils.equals(oldVo, currentVO)) {
+	}
+
+	public void setApplication(String application) {
+		final String old = this.application;
+		this.application = application;
+
+		if (!StringUtils.equals(old, this.application) || !subLocsFilled) {
 			fillSubmissionLocations();
 		}
 	}
 
-	public void setApplication(String application) {
-		String old = this.application;
-		this.application = application;
-
-		if (!StringUtils.equals(old, this.application) || !subLocsFilled) {
+	public void setFqan(String fqan) {
+		final String oldVo = currentVO;
+		currentVO = fqan;
+		if (!StringUtils.equals(oldVo, currentVO)) {
 			fillSubmissionLocations();
 		}
 	}
@@ -145,7 +152,8 @@ EventSubscriber<FqanEvent> {
 	public void setServiceInterface(ServiceInterface si) {
 		super.setServiceInterface(si);
 
-		this.currentVO = GrisuRegistryManager.getDefault(si).getUserEnvironmentManager().getCurrentFqan();
+		this.currentVO = GrisuRegistryManager.getDefault(si)
+				.getUserEnvironmentManager().getCurrentFqan();
 
 		fillSubmissionLocations();
 	}
@@ -157,7 +165,7 @@ EventSubscriber<FqanEvent> {
 	}
 
 	public void setVersion(String version) {
-		String old = this.version;
+		final String old = this.version;
 		this.version = version;
 
 		if (!StringUtils.equals(old, this.version) || !subLocsFilled) {

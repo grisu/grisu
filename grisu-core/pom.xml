@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.3.7</version>
+		<version>0.5-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>grisu.backend</groupId>
@@ -34,12 +34,18 @@
 		</repository> </repositories> -->
 
 	<dependencies>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1.1</version>
+			<scope>provided</scope>
+		</dependency>
 
 
 		<dependency>
 			<groupId>grisu</groupId>
 			<artifactId>grisu-commons</artifactId>
-			<version>0.3.7</version>
+			<version>0.5-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>cryptix32</artifactId>
@@ -92,6 +98,10 @@
 				<exclusion>
 					<artifactId>cglib</artifactId>
 					<groupId>cglib</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-api</artifactId>
+					<groupId>org.slf4j</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -233,7 +243,7 @@
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>mysql-mds</artifactId>
-			<version>0.8.9</version>
+			<version>0.9.1</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>cog-jglobus</artifactId>
@@ -295,6 +305,10 @@
 				<exclusion>
 					<artifactId>xmlbeans</artifactId>
 					<groupId>org.apache.xmlbeans</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-api</artifactId>
+					<groupId>org.slf4j</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -367,66 +381,22 @@
 		</dependency>
 
 
-		<dependency>
-			<groupId>net.sf.ehcache</groupId>
-			<artifactId>ehcache</artifactId>
-			<version>2.3.1</version>
-			<type>pom</type>
-		</dependency>
 
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.5.8</version>
-			<type>jar</type>
-			<scope>compile</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>log4j</artifactId>
-					<groupId>log4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>grith</groupId>
-			<artifactId>jgrith</artifactId>
-			<version>0.5.10</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>grid-jcommons</artifactId>
-					<groupId>grisu</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>log4j</artifactId>
-					<groupId>log4j</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>puretls</artifactId>
-					<groupId>external.jglobus</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>apache-log4j-extras</artifactId>
-			<version>1.1</version>
-			<type>pom</type>
-		</dependency>
+
 		<dependency>
 			<groupId>au.org.arcs.infosystems</groupId>
 			<artifactId>mds4-client</artifactId>
-			<version>0.8.9</version>
+			<version>0.9.1</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>puretls</artifactId>
 					<groupId>external.jglobus</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>au.org.arcs.infosystems</groupId>
-			<artifactId>matchmaker</artifactId>
-			<version>0.8.9</version>
 		</dependency>
 <!--		<dependency>
 			<groupId>grisu.frontend</groupId>
@@ -516,8 +486,10 @@
 	</build>
 
 	<profiles>
+		
+		
 		<profile>
-			<id>sign</id>
+			<id>deb</id>
 			<!-- <activation> -->
 			<!-- <property> -->
 			<!-- <name>BUILD_NUMBER</name> -->
@@ -526,28 +498,166 @@
 
 			<build>
 				<plugins>
+
 					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-jarsigner-plugin</artifactId>
-						<version>1.2</version>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>2.5</version>
 						<executions>
 							<execution>
-								<id>sign</id>
+								<id>copy-deb-control</id>
+								<!-- here the phase you need -->
+								<phase>prepare-package</phase>
 								<goals>
-									<goal>sign</goal>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${basedir}/target/deb/control</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${basedir}/src/deb/control</directory>
+											<filtering>false</filtering>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>com.google.code.maven-replacer-plugin</groupId>
+						<artifactId>maven-replacer-plugin</artifactId>
+						<version>1.4.0</version>
+						<executions>
+							<execution>
+								<id>fix_deb_version</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>replace</goal>
 								</goals>
 							</execution>
 						</executions>
 						<configuration>
-							<alias>grisu</alias>
-							<storepass>FxAKs3p6</storepass>
-							<keypass>FxAKs3p6</keypass>
+							<includes>
+								<include>target/classes/grisu-core.version</include>
+								<include>target/deb/control/control</include>
+							</includes>
+							<ignoreMissingFile>false</ignoreMissingFile>
+
+							<replacements>
+								<replacement>
+									<token>VERSION_TOKEN</token>
+									<value>${project.version}</value>
+								</replacement>
+							</replacements>
 						</configuration>
+					</plugin>
+
+					<plugin>
+						<artifactId>jdeb</artifactId>
+						<groupId>org.vafer</groupId>
+						<version>0.9</version>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>jdeb</goal>
+								</goals>
+								<configuration>
+									<changesIn>CHANGES.txt</changesIn>
+									<deb>[[buildDir]]/grisu-backend-local-${project.version}.deb</deb>
+									<controlDir>${project.basedir}/target/deb/control</controlDir>
+									<dataSet>
+										<data>
+											<src>${project.build.directory}/local-backend.jar</src>
+											<type>file</type>
+											<mapper>
+												<type>perm</type>
+												<prefix>/usr/local/lib/grisu/</prefix>
+												<user>root</user>
+												<group>root</group>
+											</mapper>
+										</data>
+															
+
+									</dataSet>
+
+								</configuration>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>
 
 		</profile>
+		<profile>
+			<id>rpm</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>rpm-maven-plugin</artifactId>
+						<version>2.1-alpha-1</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>attached-rpm</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<copyright>2011, University of Auckland</copyright>
+							<distribution>Grisu</distribution>
+							<group>Application/Other</group>
+							<!-- <icon>src/main/resources/icon.gif</icon> -->
+							<packager>Markus Binsteiner</packager>
+<!-- 							<prefix>/usr/local</prefix> -->
+							<version>${project.version}</version>
+							<!-- <changelogFile>src/changelog</changelogFile> -->
+							<!-- <defineStatements> -->
+							<!-- <defineStatement>_unpackaged_files_terminate_build 0</defineStatement> -->
+							<!-- </defineStatements> -->
+							<mappings>
+								<mapping>
+									<directory>/usr/local/lib/grisu</directory>
+									<filemode>755</filemode>
+									<username>root</username>
+									<groupname>root</groupname>
+									<sources>
+										<source>
+											<location>target/local-backend.jar</location>
+										</source>
+									</sources>
+								</mapping>
+
+							</mappings>
+							<requires>
+								<require>java-1.6.0-openjdk</require>
+<!-- 								<require>bouncycastle</require> -->
+							</requires>
+							<preinstallScriptlet>
+								<script>echo "Installing Gricli..."</script>
+							</preinstallScriptlet>
+							<!-- <postinstallScriptlet> <scriptFile>src/main/scripts/postinstall</scriptFile> 
+								<fileEncoding>utf-8</fileEncoding> </postinstallScriptlet> <preremoveScriptlet> 
+								<scriptFile>src/main/scripts/preremove</scriptFile> <fileEncoding>utf-8</fileEncoding> 
+								</preremoveScriptlet> -->
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+
+
+		</profile>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 	</profiles>
 	<properties>
 	</properties>

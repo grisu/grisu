@@ -11,7 +11,6 @@ import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-
 public class TimestampRenderer extends DefaultTableCellRenderer implements
 		TableCellRenderer {
 

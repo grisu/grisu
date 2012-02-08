@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,10 +43,13 @@ import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.swing.filechooser.FileSystemView;
 
+import net.sf.ehcache.util.NamedThreadFactory;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A class to make file-related stuff like transfers from/to the backend easier.
@@ -74,8 +78,6 @@ public class FileManager {
 	private static final String URL_PATTERN_STRING = "^(?:[^/]+://)?([^/:]+)";
 	private static final Pattern URL_PATTERN = Pattern
 			.compile(URL_PATTERN_STRING);
-
-
 
 	/**
 	 * Convenience method to create a datahandler out of a file.
@@ -113,7 +115,7 @@ public class FileManager {
 			return ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://";
 		} else {
 			if (!url.endsWith("/")) {
-				return url +"/";
+				return url + "/";
 			} else {
 				return url;
 			}
@@ -139,8 +141,8 @@ public class FileManager {
 				return inputFile;
 			}
 
-			String[] supportedTokens = FILESYSTEM_PLUGIN_TOKENS;
-			for (String token : supportedTokens) {
+			final String[] supportedTokens = FILESYSTEM_PLUGIN_TOKENS;
+			for (final String token : supportedTokens) {
 				if (inputFile.startsWith("/" + token)) {
 					return ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + ":/"
 							+ inputFile;
@@ -235,20 +237,20 @@ public class FileManager {
 				return "Local";
 			}
 
-			File file = getFileFromUriOrPath(url);
+			final File file = getFileFromUriOrPath(url);
 
-			String name = file.getName();
+			final String name = file.getName();
 			return name;
 		} else {
 
 			while (url.endsWith("/")) {
-				url = url.substring(0, url.length() - 2);
+				url = url.substring(0, url.length() - 1);
 			}
-			int lastIndex = url.lastIndexOf("/") + 1;
+			final int lastIndex = url.lastIndexOf("/") + 1;
 			if (lastIndex <= 0) {
 				return "n/a";
 			}
-			String filename = url.substring(lastIndex);
+			final String filename = url.substring(lastIndex);
 
 			return filename;
 		}
@@ -264,10 +266,10 @@ public class FileManager {
 	 */
 	public static String getHost(String url) {
 
-		Matcher matcher = URL_PATTERN.matcher(url);
+		final Matcher matcher = URL_PATTERN.matcher(url);
 		if (matcher.find()) {
-			int start = matcher.start(1);
-			int end = matcher.end(1);
+			final int start = matcher.start(1);
+			final int end = matcher.end(1);
 
 			return (url.substring(start, end));
 		} else {
@@ -288,7 +290,7 @@ public class FileManager {
 		if (date <= 0) {
 			return "";
 		}
-		String dateString = dateformat.format(new Date(date));
+		final String dateString = dateformat.format(new Date(date));
 		return dateString;
 
 	}
@@ -301,11 +303,11 @@ public class FileManager {
 	 */
 	public static Set<GridFile> getLocalFileSystems() {
 
-		File[] roots = File.listRoots();
-		Set<GridFile> result = new TreeSet<GridFile>();
-		for (File root : roots) {
-			GridFile f = new GridFile(root);
-			String name = VIEW.getSystemDisplayName(root);
+		final File[] roots = File.listRoots();
+		final Set<GridFile> result = new TreeSet<GridFile>();
+		for (final File root : roots) {
+			final GridFile f = new GridFile(root);
+			final String name = VIEW.getSystemDisplayName(root);
 			if (StringUtils.isNotBlank(name)) {
 				f.setName(name);
 			}
@@ -350,14 +352,14 @@ public class FileManager {
 	}
 
 	public static final String removeDoubleSlashes(String url) {
-		int protIndex = url.indexOf("://");
-		if ( protIndex < 0 ) {
+		final int protIndex = url.indexOf("://");
+		if (protIndex < 0) {
 			return url.replace("//", "/");
 		} else {
-			String prot = url.substring(0, protIndex + 3);
+			final String prot = url.substring(0, protIndex + 3);
 			String other = url.substring(protIndex + 3);
 			other = other.replace("//", "/");
-			return prot+other;
+			return prot + other;
 		}
 	}
 
@@ -404,8 +406,7 @@ public class FileManager {
 
 	private final ServiceInterface serviceInterface;
 
-	static final Logger myLogger = Logger
-			.getLogger(FileManager.class.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(FileManager.class);
 
 	/**
 	 * Convenience method to calculate the parent of a url.
@@ -418,7 +419,11 @@ public class FileManager {
 
 		if (isLocal(rootUrl)) {
 			final File file = getFileFromUriOrPath(rootUrl);
-			return file.getParentFile().toURI().toASCIIString();
+			File parent = file.getParentFile();
+			if (parent == null) {
+				return null;
+			}
+			return parent.toURI().toASCIIString();
 		} else {
 			String url = rootUrl.trim();
 			if (rootUrl.endsWith("/")) {
@@ -553,6 +558,8 @@ public class FileManager {
 	/**
 	 * Copies remote files.
 	 * 
+	 * Waits for transfer to finsh before returning.
+	 * 
 	 * @param sourceUrl
 	 *            the source url
 	 * @param targetDirUrl
@@ -565,30 +572,7 @@ public class FileManager {
 	 */
 	private void copyRemoteFiles(String sourceUrl, String targetDirUrl,
 			boolean overwrite) throws FileTransactionException {
-
-		try {
-			String handle = serviceInterface.cp(
-					DtoStringList.fromSingleString(sourceUrl), targetDirUrl,
-					overwrite, false);
-
-			StatusObject so;
-			try {
-				so = StatusObject.waitForActionToFinish(serviceInterface,
-						handle, 2, true, false);
-			} catch (Exception e) {
-				throw new FileTransactionException(sourceUrl, targetDirUrl,
-						e.getLocalizedMessage(), e);
-			}
-			if (so.getStatus().isFailed()) {
-				throw new RemoteFileSystemException(so.getStatus()
-						.getErrorCause());
-			}
-
-		} catch (final RemoteFileSystemException e) {
-			throw new FileTransactionException(sourceUrl, targetDirUrl,
-					e.getLocalizedMessage(), e);
-		}
-
+		cp_remote(sourceUrl, targetDirUrl, overwrite, true);
 	}
 
 	/**
@@ -758,6 +742,55 @@ public class FileManager {
 		throw new IllegalArgumentException(
 				"Can't determine location of files for " + sourceUrl + "and "
 						+ targetDirUrl + ".");
+	}
+
+	/**
+	 * Copies remote files.
+	 * 
+	 * @param sourceUrl
+	 *            the source url
+	 * @param targetDirUrl
+	 *            the target url
+	 * @param overwrite
+	 *            whether to overwrite the target file if it exists
+	 * @param waitForTransferToFinish
+	 *            whether to wait until the transfer is finished or not...
+	 * @throws FileTransactionException
+	 *             if the copying fails (for example because overwrite is false
+	 *             and target exists).
+	 */
+	public String cp_remote(String sourceUrl, String targetDirUrl,
+			boolean overwrite, boolean waitForTransferToFinish)
+					throws FileTransactionException {
+
+		try {
+			final String handle = serviceInterface.cp(
+					DtoStringList.fromSingleString(sourceUrl), targetDirUrl,
+					overwrite, false);
+
+			if ( waitForTransferToFinish ) {
+				StatusObject so;
+				try {
+					so = StatusObject.waitForActionToFinish(serviceInterface,
+							handle, 2, true);
+				} catch (final Exception e) {
+					throw new FileTransactionException(sourceUrl, targetDirUrl,
+							e.getLocalizedMessage(), e);
+				}
+				if (so.getStatus().isFailed()) {
+					throw new RemoteFileSystemException(so.getStatus()
+							.getErrorCause());
+				}
+				return handle;
+			} else {
+				return handle;
+			}
+
+		} catch (final RemoteFileSystemException e) {
+			throw new FileTransactionException(sourceUrl, targetDirUrl,
+					e.getLocalizedMessage(), e);
+		}
+
 	}
 
 	/**
@@ -942,17 +975,17 @@ public class FileManager {
 		}
 
 		if (!isLocal(url)) {
-			String handle = serviceInterface.deleteFile(url);
+			final String handle = serviceInterface.deleteFile(url);
 			StatusObject so;
 			try {
 				so = StatusObject.waitForActionToFinish(serviceInterface,
-						handle, 2, true, false);
+						handle, 2, true);
 				if (so.getStatus().isFailed()) {
 					throw new RemoteFileSystemException(so.getStatus()
 							.getErrorCause());
 				}
-			} catch (Exception e) {
-				myLogger.error(e);
+			} catch (final Exception e) {
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 
 		}
@@ -1006,7 +1039,7 @@ public class FileManager {
 		long lastModified;
 		try {
 			lastModified = serviceInterface.lastModified(url);
-		} catch (RemoteFileSystemException e1) {
+		} catch (final RemoteFileSystemException e1) {
 			myLogger.error("Could not get last modified time of file: " + url);
 			throw new FileTransactionException(url, cacheTargetFile.toString(),
 					"Could not get lastModified time.", e1);
@@ -1029,7 +1062,7 @@ public class FileManager {
 							cacheTargetFile.toString(),
 							"File bigger than threshold.", null);
 				}
-			} catch (RemoteFileSystemException e2) {
+			} catch (final RemoteFileSystemException e2) {
 				myLogger.error("Could not get size of file: " + url);
 				throw new FileTransactionException(url,
 						cacheTargetFile.toString(), "Could not get size.", e2);
@@ -1077,9 +1110,10 @@ public class FileManager {
 		final Map<String, Exception> exceptions = Collections
 				.synchronizedMap(new HashMap<String, Exception>());
 
+		ThreadFactory tf = new NamedThreadFactory("clientFolderDownload");
 		final ExecutorService executor1 = Executors
-				.newFixedThreadPool(ClientPropertiesManager
-						.getConcurrentUploadThreads());
+				.newFixedThreadPool(
+						ClientPropertiesManager.getConcurrentUploadThreads(), tf);
 
 		for (final String file : files) {
 
@@ -1170,10 +1204,10 @@ public class FileManager {
 			// boolean canWritePar = targetFile.canWrite();
 			// boolean canWrite = newDir.canWrite();
 			// boolean created = newDir.mkdirs();
-			long size = ClientPropertiesManager
+			final long size = ClientPropertiesManager
 					.getFolderSizeThresholdForCache();
 
-			long dir = FileUtils.sizeOfDirectory(cacheFile);
+			final long dir = FileUtils.sizeOfDirectory(cacheFile);
 			if (dir <= size) {
 				FileUtils.copyDirectory(cacheFile, targetFile);
 			} else {
@@ -1183,7 +1217,8 @@ public class FileManager {
 		} else {
 			cacheFile = downloadFile(url);
 			final File newFile = targetFile;
-			long size = ClientPropertiesManager.getFileSizeThresholdForCache();
+			final long size = ClientPropertiesManager
+					.getFileSizeThresholdForCache();
 			if (newFile.length() <= size) {
 				FileUtils.copyFile(cacheFile, newFile);
 			} else {
@@ -1323,18 +1358,18 @@ public class FileManager {
 	 */
 	public GridFile getLocalRoot() {
 
-		GridFile localRoot = new GridFile("local://", -1);
-		localRoot.setIsVirtual(true);
+		final GridFile localRoot = new GridFile("local://", -1);
+		localRoot.setVirtual(true);
 		localRoot.setName("Local files");
 		localRoot.addSite("Local");
 
-		String homeDir = System.getProperty("user.home");
-		File h = new File(homeDir);
-		GridFile home = new GridFile(h, -100);
+		final String homeDir = System.getProperty("user.home");
+		final File h = new File(homeDir);
+		final GridFile home = new GridFile(h, -100);
 
 		localRoot.addChild(home);
 
-		for (GridFile f : getLocalFileSystems()) {
+		for (final GridFile f : getLocalFileSystems()) {
 			localRoot.addChild(f);
 		}
 
@@ -1453,11 +1488,11 @@ public class FileManager {
 	public synchronized List<GlazedFile> ls(GlazedFile parent)
 			throws RemoteFileSystemException {
 
-		List<GlazedFile> result = new ArrayList<GlazedFile>();
+		final List<GlazedFile> result = new ArrayList<GlazedFile>();
 
-		GridFile folder = ls(parent.getUrl());
+		final GridFile folder = ls(parent.getUrl());
 
-		for (GridFile f : folder.getChildren()) {
+		for (final GridFile f : folder.getChildren()) {
 			result.add(new GlazedFile(f));
 		}
 
@@ -1532,12 +1567,18 @@ public class FileManager {
 			File temp;
 			temp = getFileFromUriOrPath(url);
 
+			if (!temp.exists()) {
+				throw new RemoteFileSystemException("File '" + url
+						+ "' does not exist.");
+			}
+
 			return GridFile.listLocal(temp, false);
 
 		} else {
 
 			try {
-				GridFile result = serviceInterface.ls(url, recursionLevel);
+				final GridFile result = serviceInterface
+						.ls(url, recursionLevel);
 				return result;
 			} catch (final RemoteFileSystemException e) {
 
@@ -1718,7 +1759,7 @@ public class FileManager {
 		myLogger.debug("Uploading local file: " + file.toString() + " to: "
 				+ targetDirectory);
 
-		String target = targetDirectory + "/" + file.getName();
+		final String target = targetDirectory + "/" + file.getName();
 		uploadFile(file, targetDirectory + "/" + file.getName(), overwrite);
 		return target;
 
@@ -1752,9 +1793,11 @@ public class FileManager {
 		final Map<String, Exception> errors = Collections
 				.synchronizedMap(new HashMap<String, Exception>());
 
+		final ThreadFactory tf = new NamedThreadFactory(
+				"clientUploadFolderToDir");
 		final ExecutorService executor1 = Executors
 				.newFixedThreadPool(ClientPropertiesManager
-						.getConcurrentUploadThreads());
+						.getConcurrentUploadThreads(), tf);
 
 		final String basePath = folder.getParentFile().getPath();
 		for (final File file : allFiles) {
@@ -1774,7 +1817,7 @@ public class FileManager {
 
 			try {
 				deltaPath = URLEncoder.encode(deltaPath, "UTF-8");
-			} catch (UnsupportedEncodingException e2) {
+			} catch (final UnsupportedEncodingException e2) {
 				// shouldn't happen
 			}
 
@@ -1857,7 +1900,7 @@ public class FileManager {
 
 			final StatusObject so = new StatusObject(serviceInterface,
 					targetPath);
-			so.waitForActionToFinish(4, true, false);
+			so.waitForActionToFinish(4, true);
 
 			if (so.getStatus().isFailed()) {
 				throw new FileTransactionException(file.toString(), null,
@@ -1868,7 +1911,7 @@ public class FileManager {
 					+ " successful.");
 		} catch (final Exception e1) {
 			try {
-				myLogger.error(e1);
+				myLogger.error(e1.getLocalizedMessage(), e1);
 				// try again
 				myLogger.info("Uploading file " + file.getName() + "...");
 				myLogger.error("FAILED. SLEEPING 1 SECONDS");
@@ -1902,9 +1945,11 @@ public class FileManager {
 		final Map<String, Exception> errors = Collections
 				.synchronizedMap(new HashMap<String, Exception>());
 
+		final ThreadFactory tf = new NamedThreadFactory(
+				"clientUploadInputFolder");
 		final ExecutorService executor1 = Executors
 				.newFixedThreadPool(ClientPropertiesManager
-						.getConcurrentUploadThreads());
+						.getConcurrentUploadThreads(), tf);
 
 		// final String basePath = folder.getParentFile().getPath();
 		final String basePath = folder.getPath();
@@ -1951,7 +1996,7 @@ public class FileManager {
 
 							final StatusObject so = new StatusObject(
 									serviceInterface, finalDeltaPath);
-							so.waitForActionToFinish(4, true, false);
+							so.waitForActionToFinish(4, true);
 
 							if (so.getStatus().isFailed()) {
 								throw new FileTransactionException(
@@ -1970,7 +2015,7 @@ public class FileManager {
 									+ file.getName() + " successful.");
 						} catch (final Exception e1) {
 							try {
-								myLogger.error(e1);
+								myLogger.error(e1.getLocalizedMessage(), e1);
 								// try again
 								myLogger.info("Uploading file "
 										+ file.getName() + "...");
@@ -1981,7 +2026,7 @@ public class FileManager {
 
 								final StatusObject so = new StatusObject(
 										serviceInterface, finalDeltaPath);
-								so.waitForActionToFinish(4, true, false);
+								so.waitForActionToFinish(4, true);
 
 								if (so.getStatus().isFailed()) {
 									throw new FileTransactionException(

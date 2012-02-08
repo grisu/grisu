@@ -13,7 +13,8 @@ import java.nio.channels.FileChannel;
 
 import javax.activation.DataSource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Several methods to ease the handling of files.
@@ -23,8 +24,7 @@ import org.apache.log4j.Logger;
  */
 public final class FileHelpers {
 
-	static final Logger myLogger = Logger
-			.getLogger(FileHelpers.class.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(FileHelpers.class);
 
 	public static final int BUFFER_SIZE = 1024;
 
@@ -58,7 +58,7 @@ public final class FileHelpers {
 					out.write(buf);
 
 				} catch (final Exception e) {
-					myLogger.debug(e);
+					myLogger.debug(e.getLocalizedMessage(), e);
 				} finally {
 					try {
 						if (in != null) {
@@ -68,7 +68,7 @@ public final class FileHelpers {
 							out.close();
 						}
 					} catch (final IOException e) {
-						myLogger.error(e);
+						myLogger.error(e.getLocalizedMessage(), e);
 					}
 				}
 			}

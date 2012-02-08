@@ -9,7 +9,6 @@ import java.awt.BorderLayout;
 
 import javax.swing.JPanel;
 
-
 public class GrisuTestSwingClientPanel extends JPanel implements
 		GrisuSwingClient {
 

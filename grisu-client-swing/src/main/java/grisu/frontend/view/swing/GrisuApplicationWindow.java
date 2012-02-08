@@ -27,17 +27,17 @@ import javax.swing.JPanel;
 import javax.swing.UIManager;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 
 public abstract class GrisuApplicationWindow implements WindowListener,
-ServiceInterfaceHolder {
+		ServiceInterfaceHolder {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(GrisuApplicationWindow.class.getName());
-
 
 	private ServiceInterface si;
 
@@ -71,7 +71,7 @@ ServiceInterfaceHolder {
 		} else {
 			this.configPanels = new HashSet<ServiceInterfacePanel>();
 			this.configPanels.add(panel);
-			for (ServiceInterfacePanel p : configPanels) {
+			for (final ServiceInterfacePanel p : configPanels) {
 				addSettingsPanel(p.getPanelTitle(), p.getPanel());
 			}
 		}
@@ -95,7 +95,7 @@ ServiceInterfaceHolder {
 					.getPanel());
 		} else {
 			this.configPanels = configpanels;
-			for (ServiceInterfacePanel panel : configPanels) {
+			for (final ServiceInterfacePanel panel : configPanels) {
 				addSettingsPanel(panel.getPanelTitle(), panel.getPanel());
 			}
 		}
@@ -125,7 +125,7 @@ ServiceInterfaceHolder {
 		try {
 
 			if (si != null) {
-				String temp = si.logout();
+				final String temp = si.logout();
 				X.p(temp);
 			}
 
@@ -137,8 +137,8 @@ ServiceInterfaceHolder {
 
 	public Set<String> getApplicationsToMonitor() {
 
-		Set<String> result = new TreeSet<String>();
-		for (JobCreationPanel panel : getJobCreationPanels()) {
+		final Set<String> result = new TreeSet<String>();
+		for (final JobCreationPanel panel : getJobCreationPanels()) {
 			result.add(panel.getSupportedApplication());
 		}
 		return result;
@@ -172,12 +172,12 @@ ServiceInterfaceHolder {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
 		frame = new JXFrame();
 		String title = null;
-		String clientVersion = GrisuVersion.get("this-client");
+		final String clientVersion = GrisuVersion.get("this-client");
 		if (StringUtils.containsIgnoreCase(clientVersion, "snapshot")) {
 			title = getName() + "  (DEVELOPMENT VERSION)";
 		} else {
@@ -229,7 +229,7 @@ ServiceInterfaceHolder {
 		initOptionalStuff(si);
 		refreshJobCreationPanels();
 
-		for (ServiceInterfacePanel panel : configPanels) {
+		for (final ServiceInterfacePanel panel : configPanels) {
 			panel.setServiceInterface(si);
 		}
 

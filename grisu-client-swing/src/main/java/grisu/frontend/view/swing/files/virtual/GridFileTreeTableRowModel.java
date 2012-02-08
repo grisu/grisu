@@ -39,24 +39,25 @@ public class GridFileTreeTableRowModel implements RowModel {
 
 	public Object getValueFor(Object arg0, int col) {
 
-		Object userObject = ((DefaultMutableTreeNode) arg0).getUserObject();
+		final Object userObject = ((DefaultMutableTreeNode) arg0)
+				.getUserObject();
 
 		if (userObject == null) {
 			return "ERROR";
 		}
 
 		if (userObject instanceof GridFile) {
-			GridFile f = (GridFile) userObject;
+			final GridFile f = (GridFile) userObject;
 			switch (col) {
 			case 0:
-				Long date = f.getLastModified();
+				final Long date = f.getLastModified();
 				if (date <= 0) {
 					return "";
 				} else {
 					return FileManager.getLastModifiedString(date);
 				}
 			case 1:
-				Long size = f.getSize();
+				final Long size = f.getSize();
 				if (size < 0) {
 					return "";
 				} else {
@@ -68,7 +69,7 @@ public class GridFileTreeTableRowModel implements RowModel {
 			}
 		} else if (userObject instanceof String) {
 
-			String s = (String) userObject;
+			final String s = (String) userObject;
 			switch (col) {
 			default:
 				return "";

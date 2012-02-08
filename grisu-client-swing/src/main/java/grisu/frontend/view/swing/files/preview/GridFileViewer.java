@@ -6,7 +6,6 @@ import java.io.File;
 
 import javax.swing.JPanel;
 
-
 public interface GridFileViewer {
 
 	public JPanel getPanel();

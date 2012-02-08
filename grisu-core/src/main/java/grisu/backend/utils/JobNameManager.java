@@ -7,7 +7,6 @@ import grisu.control.exceptions.NoSuchJobException;
 
 import java.util.List;
 
-
 /**
  * The JobNameManager takes care that a user does not submit a job with the same
  * name twice. Before you create a Job, take the jobname you want to give your
@@ -59,11 +58,11 @@ public final class JobNameManager {
 				return proposedJobname + "_0";
 			}
 			return proposedJobname + "_"
-					+ (highestJobnameNumber(jobs, proposedJobname) + 1);
+			+ (highestJobnameNumber(jobs, proposedJobname) + 1);
 
 		case JobConstants.DONT_ACCEPT_NEW_JOB_WITH_EXISTING_JOBNAME:
 
-			if (proposedJobname == null || "".equals(proposedJobname)
+			if ((proposedJobname == null) || "".equals(proposedJobname)
 					|| "null".equals(proposedJobname)) {
 				throw new RuntimeException(
 						"Could not create job: no valid jobname specified.");
@@ -107,7 +106,7 @@ public final class JobNameManager {
 	 *            the jobname in question
 	 * @return the "highest" jobname
 	 */
-	private static int highestJobnameNumber(final List<Job> jobs,
+	private static String highestJobnameNumber(final List<Job> jobs,
 			final String jobname) {
 
 		int max = 0;
@@ -126,8 +125,8 @@ public final class JobNameManager {
 				max = value;
 			}
 		}
+		return String.format("%03d", max);
 
-		return max;
 	}
 
 	private JobNameManager() {

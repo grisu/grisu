@@ -27,6 +27,7 @@
 			<TotalCPUCount><exact>XXX_cpus_XXX</exact></TotalCPUCount>
 			<TotalResourceCount><exact>XXX_hostCount_XXX</exact></TotalResourceCount>
 			<TotalPhysicalMemory><LowerBoundedRange>XXX_memory_XXX</LowerBoundedRange></TotalPhysicalMemory>
+			<TotalVirtualMemory><LowerBoundedRange>XXX_virtualMemory_XXX</LowerBoundedRange></TotalVirtualMemory>
 		</Application>
 		<Resources>
 			<CandidateHosts>

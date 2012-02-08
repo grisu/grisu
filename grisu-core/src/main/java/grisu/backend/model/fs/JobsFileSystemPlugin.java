@@ -11,7 +11,8 @@ import grisu.model.dto.GridFile;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A plugin to list archived and running jobs in a tree-like structure.
@@ -25,8 +26,8 @@ import org.apache.log4j.Logger;
  */
 public class JobsFileSystemPlugin implements VirtualFileSystemPlugin {
 
-	static final Logger myLogger = Logger.getLogger(JobsFileSystemPlugin.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(JobsFileSystemPlugin.class.getName());
 
 	public static final String IDENTIFIER = "jobs";
 	public static final String ACTIVE_IDENTIFIER = "active";
@@ -41,43 +42,45 @@ public class JobsFileSystemPlugin implements VirtualFileSystemPlugin {
 	}
 
 	public GridFile createGridFile(final String path, int recursiveLevels)
-	throws InvalidPathException {
+			throws InvalidPathException {
 
 		if (recursiveLevels > 1) {
 			throw new RuntimeException(
-			"Recursion levels other than 1 not supported yet");
+					"Recursion levels other than 1 not supported yet");
 		}
 
-		int index = BASE.length();
-		String importantUrlPart = path.substring(index);
-		String[] tokens = StringUtils.split(importantUrlPart, '/');
+		final int index = BASE.length();
+		final String importantUrlPart = path.substring(index);
+		final String[] tokens = StringUtils.split(importantUrlPart, '/');
 
 		if (tokens.length == 0) {
 			// means root of job virtual filesystem
 
 			GridFile result = null;
 			result = new GridFile(path, -1L);
-			result.setIsVirtual(true);
+			result.setVirtual(true);
 			result.setPath(path);
 
 			if (recursiveLevels == 0) {
 				return result;
 			}
 
-			GridFile active = new GridFile(BASE + "/" + ACTIVE_IDENTIFIER, -1L);
+			final GridFile active = new GridFile(
+					BASE + "/" + ACTIVE_IDENTIFIER, -1L);
 			active.setVirtual(true);
 			active.setPath(path + "/" + ACTIVE_IDENTIFIER);
 
-			List<Job> jobs = user.getActiveJobs(null, false);
-			for (Job job : jobs) {
+			final List<Job> jobs = user.getJobManager().getActiveJobs(
+					null, false);
+			for (final Job job : jobs) {
 				active.addSite(job
 						.getJobProperty(Constants.SUBMISSION_SITE_KEY));
 			}
 
 			result.addChild(active);
 
-			GridFile archived = new GridFile(BASE + "/" + ARCHIVED_IDENTIFIER,
-					-1L);
+			final GridFile archived = new GridFile(BASE + "/"
+					+ ARCHIVED_IDENTIFIER, -1L);
 			archived.setVirtual(true);
 			archived.setPath(path + "/" + ARCHIVED_IDENTIFIER);
 
@@ -110,58 +113,59 @@ public class JobsFileSystemPlugin implements VirtualFileSystemPlugin {
 						+ ARCHIVED_IDENTIFIER + " or " + ACTIVE_IDENTIFIER);
 			}
 
-			String jobname = tokens[1];
+			final String jobname = tokens[1];
 
 			if (!GridFile.getChildrenNames(parent).contains(jobname)) {
 				throw new InvalidPathException("Job not available: "
 						+ tokens[0] + "/" + jobname);
 			}
 
-			GridFile jobDir = parent.getChild(jobname);
+			final GridFile jobDir = parent.getChild(jobname);
 
-			StringBuffer url = new StringBuffer(jobDir.getUrl());
+			final StringBuffer url = new StringBuffer(jobDir.getUrl());
 			for (int i = 2; i < tokens.length; i++) {
 				url.append("/" + tokens[i]);
 			}
 
 			try {
-				GridFile result = user.ls(url.toString(), 1);
+				final GridFile result = user.ls(url.toString(), 1);
 				result.setPath(path);
-				for (GridFile f : result.getChildren()) {
+				for (final GridFile f : result.getChildren()) {
 					f.setPath(result.getPath() + "/" + f.getName());
+					f.setVirtual(false);
 				}
 				return result;
-			} catch (RemoteFileSystemException e) {
+			} catch (final RemoteFileSystemException e) {
 				throw new InvalidPathException(e);
 			}
 
 		}
 
-
 	}
 
 	private GridFile getAllActiveJobsListing() {
 
-		GridFile active = new GridFile(BASE + "/" + ACTIVE_IDENTIFIER, -1L);
+		final GridFile active = new GridFile(BASE + "/" + ACTIVE_IDENTIFIER,
+				-1L);
 		active.setVirtual(true);
 		active.setPath(BASE + "/" + ACTIVE_IDENTIFIER);
 
-		List<Job> jobs = user.getActiveJobs(null, false);
-		for (Job job : jobs) {
-			active.addSite(job
-					.getJobProperty(Constants.SUBMISSION_SITE_KEY));
+		final List<Job> jobs = user.getJobManager().getActiveJobs(null,
+				false);
+		for (final Job job : jobs) {
+			active.addSite(job.getJobProperty(Constants.SUBMISSION_SITE_KEY));
 
-			String url = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+			final String url = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
 
 			if (StringUtils.isBlank(url)) {
 				continue;
 			}
-			GridFile jobDir = new GridFile(url, -1L);
+			final GridFile jobDir = new GridFile(url, -1L);
 			jobDir.setPath(BASE + "/" + ACTIVE_IDENTIFIER + "/"
 					+ FileManager.getFilename(url));
 			jobDir.addFqan(job.getFqan());
 			jobDir.addSite(job.getJobProperty(Constants.SUBMISSION_SITE_KEY));
-			jobDir.setIsVirtual(false);
+			jobDir.setVirtual(false);
 
 			active.addChild(jobDir);
 		}
@@ -173,20 +177,21 @@ public class JobsFileSystemPlugin implements VirtualFileSystemPlugin {
 
 		GridFile result = null;
 		result = new GridFile(BASE + "/" + ARCHIVED_IDENTIFIER, -1L);
-		result.setIsVirtual(true);
+		result.setVirtual(true);
 		result.setPath(BASE + "/" + ARCHIVED_IDENTIFIER);
 
-		List<Job> jobs = user.getArchivedJobs(null);
-		for (Job job : jobs) {
+		final List<Job> jobs = user.getJobManager()
+				.getArchivedJobs(null);
+		for (final Job job : jobs) {
 
-			String url = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
-			GridFile jobDir = new GridFile(url, -1L);
+			final String url = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+			final GridFile jobDir = new GridFile(url, -1L);
 			jobDir.setPath(BASE + "/" + ARCHIVED_IDENTIFIER + "/"
 					+ FileManager.getFilename(url));
 
 			// jobDir.addFqan(job.getFqan());
 			// jobDir.addSite(job.getJobProperty(Constants.SUBMISSION_SITE_KEY));
-			jobDir.setIsVirtual(false);
+			jobDir.setVirtual(false);
 
 			result.addChild(jobDir);
 		}

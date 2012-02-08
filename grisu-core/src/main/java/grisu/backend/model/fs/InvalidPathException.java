@@ -11,13 +11,13 @@ public class InvalidPathException extends Exception {
 		// TODO Auto-generated constructor stub
 	}
 
-	public InvalidPathException(Throwable cause) {
-		super(cause);
+	public InvalidPathException(String message, Throwable cause) {
+		super(message, cause);
 		// TODO Auto-generated constructor stub
 	}
 
-	public InvalidPathException(String message, Throwable cause) {
-		super(message, cause);
+	public InvalidPathException(Throwable cause) {
+		super(cause);
 		// TODO Auto-generated constructor stub
 	}
 

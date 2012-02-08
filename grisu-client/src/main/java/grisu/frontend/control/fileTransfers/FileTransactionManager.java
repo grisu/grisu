@@ -20,15 +20,18 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.apache.log4j.Logger;
+import net.sf.ehcache.util.NamedThreadFactory;
+
 import org.bushe.swing.event.EventBus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
 public class FileTransactionManager implements PropertyChangeListener {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(FileTransactionManager.class.getName());
 
 	private static Map<ServiceInterface, FileTransactionManager> cachedFileTransferManagers = new HashMap<ServiceInterface, FileTransactionManager>();
@@ -53,9 +56,11 @@ public class FileTransactionManager implements PropertyChangeListener {
 	private final ServiceInterface si;
 	private final FileManager fm;
 
+	final NamedThreadFactory tf = new NamedThreadFactory(
+			"clientFileTransaction");
 	final ExecutorService executor1 = Executors
 			.newFixedThreadPool(ClientPropertiesManager
-					.getConcurrentUploadThreads());
+					.getConcurrentUploadThreads(), tf);
 
 	final EventList<FileTransaction> fileTransfers = new BasicEventList<FileTransaction>();
 
@@ -82,20 +87,22 @@ public class FileTransactionManager implements PropertyChangeListener {
 		ft.setFuture(future);
 
 		// someone has to watch the transfer thread
-		new Thread() {
+		Thread t = new Thread() {
 			@Override
 			public void run() {
 				try {
 					ft.join();
-				} catch (InterruptedException e) {
-					myLogger.error(e);
+				} catch (final InterruptedException e) {
+					myLogger.error(e.getLocalizedMessage(), e);
 					EventBus.publish(new FileTransactionFailedEvent(ft));
-				} catch (ExecutionException e) {
-					myLogger.error(e);
+				} catch (final ExecutionException e) {
+					myLogger.error(e.getLocalizedMessage(), e);
 					EventBus.publish(new FileTransactionFailedEvent(ft));
 				}
 			}
-		}.start();
+		};
+		t.setName("clientBackgroundFileTransaction " + ft.getId());
+		t.start();
 
 		return ft;
 	}

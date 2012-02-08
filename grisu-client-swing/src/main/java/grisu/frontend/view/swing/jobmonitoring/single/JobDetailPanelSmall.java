@@ -18,7 +18,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
-
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -171,7 +170,7 @@ public class JobDetailPanelSmall extends JPanel implements
 	private void setLog() {
 		final StringBuffer temp = new StringBuffer();
 
-		Map<Date, String> log = job.getLogMessages(true);
+		final Map<Date, String> log = job.getLogMessages(true);
 		for (final Date date : log.keySet()) {
 			temp.append(date.toString() + ":\t" + log.get(date) + "\n");
 		}
@@ -183,7 +182,7 @@ public class JobDetailPanelSmall extends JPanel implements
 
 		final StringBuffer temp = new StringBuffer();
 
-		Map<String, String> prop = job.getAllJobProperties(true);
+		final Map<String, String> prop = job.getAllJobProperties(true);
 		for (final String key : prop.keySet()) {
 			temp.append(key + "\t\t" + prop.get(key) + "\n");
 		}

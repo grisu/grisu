@@ -11,7 +11,6 @@ import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-
 public class GridFilePropertiesViewer extends JPanel implements GridFileViewer {
 	private JEditorPane editorPane;
 	private JScrollPane scrollPane;
@@ -53,7 +52,7 @@ public class GridFilePropertiesViewer extends JPanel implements GridFileViewer {
 		if (file == null) {
 			return;
 		}
-		String text = GridFilePropertiesDialog.generateHtml(file);
+		final String text = GridFilePropertiesDialog.generateHtml(file);
 		editorPane.setText(text);
 		setVisible(true);
 	}

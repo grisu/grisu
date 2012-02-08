@@ -10,7 +10,6 @@ import grisu.frontend.view.swing.jobmonitoring.single.SingleJobSelectionListener
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
-
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;

@@ -4,10 +4,10 @@ import grisu.jcommons.utils.JsdlHelpers;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 
 /**
  * Just some helper methods to calculate/modify jsdl files.
@@ -17,7 +17,7 @@ import org.w3c.dom.Element;
  */
 public final class JsdlModifier {
 
-	static final Logger myLogger = Logger.getLogger(JsdlModifier.class
+	static final Logger myLogger = LoggerFactory.getLogger(JsdlModifier.class
 			.getName());
 
 	/**

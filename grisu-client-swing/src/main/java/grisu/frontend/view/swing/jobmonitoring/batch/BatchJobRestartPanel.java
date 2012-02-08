@@ -13,7 +13,8 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -21,10 +22,10 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class BatchJobRestartPanel extends JPanel implements
-PropertyChangeListener {
+		PropertyChangeListener {
 
-	static final Logger myLogger = Logger.getLogger(BatchJobRestartPanel.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(BatchJobRestartPanel.class.getName());
 
 	private final BatchJobObject bj;
 	private JButton failedJobsButton;
@@ -71,7 +72,7 @@ PropertyChangeListener {
 								bj.restart(true, false, false, false);
 								bj.refresh(false);
 							} catch (final Throwable ex) {
-								myLogger.error(ex);
+								myLogger.error(ex.getLocalizedMessage(), ex);
 							}
 						}
 					}.start();
@@ -93,11 +94,11 @@ PropertyChangeListener {
 							try {
 								bj.restart(false, true, true, false);
 							} catch (final JobsException e) {
-								myLogger.error(e);
+								myLogger.error(e.getLocalizedMessage(), e);
 							} catch (final BackendException e) {
-								myLogger.error(e);
+								myLogger.error(e.getLocalizedMessage(), e);
 							} catch (final InterruptedException e) {
-								myLogger.error(e);
+								myLogger.error(e.getLocalizedMessage(), e);
 							}
 							bj.refresh(false);
 						}
@@ -120,11 +121,11 @@ PropertyChangeListener {
 							try {
 								bj.restart(true, true, true, false);
 							} catch (final JobsException e) {
-								myLogger.error(e);
+								myLogger.error(e.getLocalizedMessage(), e);
 							} catch (final BackendException e) {
-								myLogger.error(e);
+								myLogger.error(e.getLocalizedMessage(), e);
 							} catch (final InterruptedException e) {
-								myLogger.error(e);
+								myLogger.error(e.getLocalizedMessage(), e);
 							}
 							bj.refresh(false);
 						}

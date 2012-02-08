@@ -169,7 +169,7 @@ public class GrisuCenterPanel extends JPanel {
 		});
 
 		getMultiSingleJobMonitoringGrid()
-		.displayGridForApplication(application);
+				.displayGridForApplication(application);
 
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
@@ -272,7 +272,7 @@ public class GrisuCenterPanel extends JPanel {
 			displayGroupFileManagement();
 		} else {
 			final JobCreationPanel panel = availableJobCreationPanels
-			.get(command[0]);
+					.get(command[0]);
 			if (panel != null) {
 				displayJobCreationPanel(panel);
 			}

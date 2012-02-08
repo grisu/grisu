@@ -3,10 +3,10 @@ package grisu.frontend.view.swing.login;
 import grisu.control.ServiceInterface;
 import grisu.control.events.ClientPropertiesEvent;
 import grisu.frontend.control.login.LoginManager;
-import grisu.frontend.control.login.LoginParams;
+import grisu.jcommons.dependencies.BouncyCastleTool;
 import grisu.settings.ClientPropertiesManager;
-import grith.jgrith.Init;
 import grith.jgrith.certificate.CertificateHelper;
+import grith.jgrith.control.LoginParams;
 import grith.jgrith.plainProxy.LocalProxy;
 
 import java.awt.event.ActionEvent;
@@ -28,11 +28,12 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 
-import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -60,8 +61,8 @@ LoginMethodPanel {
 		}
 	}
 
-	static final Logger myLogger = Logger.getLogger(MultiLoginPanel.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(MultiLoginPanel.class.getName());
 
 	private JTabbedPane tabbedPane;
 	private ShibLoginPanel shibLoginPanel;
@@ -82,7 +83,7 @@ LoginMethodPanel {
 						.getSelectedComponent());
 				login(temp);
 			} catch (final InterruptedException e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 		}
 
@@ -139,14 +140,14 @@ LoginMethodPanel {
 		// component.getActionMap().put(keyStrokeAndKey, action);
 
 		try {
-			Init.initBouncyCastle();
+			BouncyCastleTool.initBouncyCastle();
 			if (LocalProxy.validGridProxyExists(120)) {
 				getQuickLoginAction().setEnabled(true);
 			} else {
 				getQuickLoginAction().setEnabled(false);
 			}
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
 	}
@@ -162,7 +163,8 @@ LoginMethodPanel {
 
 	private JCheckBox getAutoLoginCheckbox() {
 		if (autoLoginCheckbox == null) {
-			autoLoginCheckbox = new JCheckBox("Always auto-login using existing credential (if available)");
+			autoLoginCheckbox = new JCheckBox(
+					"Always auto-login using existing credential (if available)");
 
 			if (ClientPropertiesManager.getAutoLogin()) {
 				autoLoginCheckbox.setSelected(true);
@@ -191,7 +193,7 @@ LoginMethodPanel {
 								.getSelectedComponent());
 						login(temp);
 					} catch (final InterruptedException e) {
-						myLogger.error(e);
+						myLogger.error(e.getLocalizedMessage(), e);
 					}
 
 				}
@@ -300,6 +302,7 @@ LoginMethodPanel {
 					final String url = getAdvancedLoginPanelOptions()
 							.getServiceInterfaceUrl();
 
+					ClientPropertiesManager.setDefaultServiceInterfaceUrl(url);
 					final LoginParams params = new LoginParams(url, null, null);
 
 					loginThread = temp.login(params);
@@ -309,7 +312,7 @@ LoginMethodPanel {
 					try {
 						loginThread.join();
 					} catch (final InterruptedException e) {
-						myLogger.error(e);
+						myLogger.error(e.getLocalizedMessage(), e);
 						return;
 					} finally {
 						loginThread = null;
@@ -319,7 +322,7 @@ LoginMethodPanel {
 						loginPanel.setServiceInterface(temp
 								.getServiceInterface());
 					} else {
-						Exception e = temp.getPossibleException();
+						final Exception e = temp.getPossibleException();
 						ErrorInfo info = null;
 						if (e == null) {
 							info = new ErrorInfo("Login error",
@@ -361,13 +364,13 @@ LoginMethodPanel {
 
 				loginSuccessful = false;
 				try {
-					si = LoginManager.login(params.getServiceInterfaceUrl());
+					si = LoginManager.login(params.getLoginUrl());
 					loginSuccessful = true;
 				} catch (final Throwable e) {
 					if (e instanceof Exception) {
 						possibleException = (Exception) e;
 					} else {
-						myLogger.error(e);
+						myLogger.error(e.getLocalizedMessage(), e);
 						possibleException = new Exception(e);
 					}
 				}

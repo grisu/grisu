@@ -12,7 +12,6 @@ import java.util.Set;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
-
 public class BatchJobResultPreviewPanel extends JPanel implements
 		FileListListener {
 

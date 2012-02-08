@@ -3,6 +3,8 @@ package grisu.frontend.control;
 import grisu.control.ServiceInterface;
 import grisu.control.ServiceInterfaceCreator;
 import grisu.control.exceptions.ServiceInterfaceException;
+import grisu.frontend.control.jaxws.CommandLogHandler;
+import grisu.frontend.control.login.LoginManager;
 import grisu.settings.Environment;
 
 import java.io.File;
@@ -11,22 +13,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Service;
+import javax.xml.ws.handler.Handler;
+import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.soap.MTOMFeature;
 import javax.xml.ws.soap.SOAPBinding;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.python.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sun.xml.ws.developer.JAXWSProperties;
 
 public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(JaxWsServiceInterfaceCreator.class.getName());
 
 	public static String TRUST_FILE_NAME = Environment
@@ -89,7 +98,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			final MTOMFeature mtom = new MTOMFeature();
 			try {
 				s.getPort(portName, ServiceInterface.class, mtom);
-			} catch (Error e) {
+			} catch (final Error e) {
 				// throw new ServiceInterfaceException(
 				// "Could not connect to backend, probably because of frontend/backend incompatibility (Underlying cause: \""
 				// + e.getLocalizedMessage()
@@ -130,7 +139,35 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 					BindingProvider.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
 
 			final SOAPBinding binding = (SOAPBinding) bp.getBinding();
+
 			binding.setMTOMEnabled(true);
+
+			String clientstring = LoginManager.getClientName()
+					+ " "
+					+ LoginManager.getClientVersion()
+					+ " / "
+					+ "frontend "
+					+ grisu.jcommons.utils.Version
+					.get("grisu-client");
+
+			Map map = Maps.newHashMap();
+			map.put("X-grisu-client", Collections.singletonList(clientstring));
+
+			String session_id = LoginManager.USER_SESSION;
+			if (StringUtils.isNotBlank(session_id)) {
+				map.put("X-client-session-id",
+						Collections.singletonList(session_id));
+			}
+
+			bp.getRequestContext()
+			.put(MessageContext.HTTP_REQUEST_HEADERS, map);
+
+			CommandLogHandler authnHandler = new CommandLogHandler(bp);
+			List<Handler> hc = binding.getHandlerChain();
+			hc.add(authnHandler);
+
+			binding.setHandlerChain(hc);
+
 
 			return service;
 
@@ -143,89 +180,5 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 		}
 
 	}
-
-	// private SSLSocketFactory createSocketFactory(String interfaceUrl)
-	// throws ServiceInterfaceException {
-	// // Technique similar to
-	// // http://juliusdavies.ca/commons-ssl/TrustExample.java.html
-	// HttpSecureProtocol protocolSocketFactory;
-	// try {
-	// protocolSocketFactory = new HttpSecureProtocol();
-	//
-	// TrustMaterial trustMaterial = null;
-	//
-	// // "/thecertificate.cer" can be PEM or DER (raw ASN.1). Can even
-	// // be several PEM certificates in one file.
-	//
-	// String cacertFilename = System.getProperty("grisu.cacert");
-	// URL cacertURL = null;
-	//
-	// try {
-	// if (cacertFilename != null && !"".equals(cacertFilename)) {
-	// cacertURL = JaxWsServiceInterfaceCreator.class
-	// .getResource("/" + cacertFilename);
-	// if (cacertURL != null) {
-	// myLogger.debug("Using cacert " + cacertFilename
-	// + " as configured in the -D option.");
-	// }
-	// }
-	// } catch (Exception e) {
-	// // doesn't matter
-	// myLogger
-	// .debug("Couldn't find specified cacert. Using default one.");
-	// }
-	//
-	// if (cacertURL == null) {
-	//
-	// cacertFilename = new CaCertManager()
-	// .getCaCertNameForServiceInterfaceUrl(interfaceUrl);
-	// if (cacertFilename != null && cacertFilename.length() > 0) {
-	// myLogger
-	// .debug("Found url in map. Trying to use this cacert file: "
-	// + cacertFilename);
-	// cacertURL = JaxWsServiceInterfaceCreator.class
-	// .getResource("/" + cacertFilename);
-	// if (cacertURL == null) {
-	// myLogger
-	// .debug("Didn't find cacert. Using the default one.");
-	// // use the default one
-	// cacertURL = JaxWsServiceInterfaceCreator.class
-	// .getResource("/cacert.pem");
-	// } else {
-	// myLogger.debug("Found cacert. Using it. Good.");
-	// }
-	// } else {
-	// myLogger
-	// .debug("Didn't find any configuration for a special cacert. Using the default one.");
-	// // use the default one
-	// cacertURL = JaxWsServiceInterfaceCreator.class
-	// .getResource("/cacert.pem");
-	// }
-	//
-	// }
-	//
-	// trustMaterial = new TrustMaterial(cacertURL);
-	//
-	// // We can use setTrustMaterial() instead of addTrustMaterial()
-	// // if we want to remove
-	// // HttpSecureProtocol's default trust of TrustMaterial.CACERTS.
-	// protocolSocketFactory.addTrustMaterial(trustMaterial);
-	//
-	// // Maybe we want to turn off CN validation (not recommended!):
-	// protocolSocketFactory.setCheckHostname(false);
-	//
-	// Protocol protocol = new Protocol("https",
-	// (ProtocolSocketFactory) protocolSocketFactory, 443);
-	// Protocol.registerProtocol("https", protocol);
-	//
-	// return protocolSocketFactory;
-	// } catch (Exception e1) {
-	// // TODO Auto-generated catch block
-	// // e1.printStackTrace();
-	// throw new ServiceInterfaceException(
-	// "Unspecified error while trying to establish secure connection.",
-	// e1);
-	// }
-	// }
 
 }

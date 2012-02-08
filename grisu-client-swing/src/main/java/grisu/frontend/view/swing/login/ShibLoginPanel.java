@@ -3,9 +3,12 @@ package grisu.frontend.view.swing.login;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginException;
 import grisu.frontend.control.login.LoginManager;
-import grisu.frontend.control.login.LoginParams;
 import grisu.jcommons.configuration.CommonGridProperties;
+import grisu.jcommons.exceptions.CredentialException;
 import grisu.settings.ClientPropertiesManager;
+import grith.jgrith.control.LoginParams;
+import grith.jgrith.credential.Credential;
+import grith.jgrith.credential.CredentialFactory;
 import grith.sibboleth.CredentialManager;
 import grith.sibboleth.DummyCredentialManager;
 import grith.sibboleth.DummyIdpObject;
@@ -21,7 +24,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang.StringUtils;
-
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -219,8 +221,19 @@ public class ShibLoginPanel extends JPanel implements LoginMethodPanel {
 
 				loginSuccessful = false;
 				try {
-					si = LoginManager.login(null, password, username, idp,
-							params, saveCredendentialsToLocalProxy);
+					try {
+						Credential c = CredentialFactory.createFromSlcs(null, idp,
+										username,
+										password,
+										LoginManager.DEFAULT_PROXY_LIFETIME_IN_HOURS * 3600);
+						si = LoginManager.login(c, params, false);
+						if (saveCredendentialsToLocalProxy) {
+							c.saveCredential();
+						}
+					} catch (CredentialException e) {
+						throw new LoginException("Can't create credential.", e);
+					}
+
 					loginSuccessful = true;
 				} catch (final LoginException e) {
 					possibleException = e;

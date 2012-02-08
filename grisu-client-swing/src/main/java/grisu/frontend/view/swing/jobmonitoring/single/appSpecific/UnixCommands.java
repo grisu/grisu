@@ -12,7 +12,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
-
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -171,8 +170,8 @@ public class UnixCommands extends AppSpecificViewerPanel {
 							getTextArea_1().setText(text);
 						}
 					});
-				} catch (Exception e) {
-					myLogger.error(e);
+				} catch (final Exception e) {
+					myLogger.error(e.getLocalizedMessage(), e);
 				}
 			}
 		}.start();
@@ -196,8 +195,8 @@ public class UnixCommands extends AppSpecificViewerPanel {
 							getTextArea().setText(text);
 						}
 					});
-				} catch (Exception e) {
-					myLogger.error(e);
+				} catch (final Exception e) {
+					myLogger.error(e.getLocalizedMessage(), e);
 				}
 			}
 		}.start();

@@ -21,14 +21,15 @@ import javax.swing.WindowConstants;
 import javax.swing.border.TitledBorder;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.netbeans.validation.api.ui.ValidationGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vpac.historyRepeater.HistoryManager;
 
 public abstract class AbstractWidget extends JPanel {
 
-	static final Logger myLogger = Logger.getLogger(SingleInputFile.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(SingleInputFile.class.getName());
 
 	public static GrisuFileDialog createFileDialog(ServiceInterface si,
 			String historyKey, String[] extensions, boolean displayHiddenFiles,
@@ -39,11 +40,11 @@ public abstract class AbstractWidget extends JPanel {
 		}
 
 		String startUrl = GrisuRegistryManager.getDefault(si)
-		.getHistoryManager().getLastEntry(historyKey);
+				.getHistoryManager().getLastEntry(historyKey);
 
 		if (StringUtils.isBlank(startUrl)) {
 			startUrl = new File(System.getProperty("user.home")).toURI()
-			.toString();
+					.toString();
 		} else if (!FileManager.isLocal(startUrl)) {
 			try {
 				if (!si.isFolder(startUrl)) {
@@ -51,9 +52,9 @@ public abstract class AbstractWidget extends JPanel {
 					.toURI().toString();
 				}
 			} catch (final RemoteFileSystemException e) {
-				myLogger.debug(e);
+				myLogger.debug(e.getLocalizedMessage(), e);
 				startUrl = new File(System.getProperty("user.home")).toURI()
-				.toString();
+						.toString();
 			}
 		}
 		final GrisuFileDialog fileDialog = new GrisuFileDialog(owner, si,
@@ -68,7 +69,6 @@ public abstract class AbstractWidget extends JPanel {
 		return fileDialog;
 	}
 
-
 	public static GridFileTreeDialog createGridFileDialog(ServiceInterface si,
 			List<GridFile> roots, String historyKey, String[] extensions,
 			boolean displayHiddenFiles, boolean foldersSelectable,
@@ -79,11 +79,11 @@ public abstract class AbstractWidget extends JPanel {
 		}
 
 		String startUrl = GrisuRegistryManager.getDefault(si)
-		.getHistoryManager().getLastEntry(historyKey);
+				.getHistoryManager().getLastEntry(historyKey);
 
 		if (StringUtils.isBlank(startUrl)) {
 			startUrl = new File(System.getProperty("user.home")).toURI()
-			.toString();
+					.toString();
 		} else if (!FileManager.isLocal(startUrl)) {
 			try {
 				if (!si.isFolder(startUrl)) {
@@ -91,9 +91,9 @@ public abstract class AbstractWidget extends JPanel {
 					.toURI().toString();
 				}
 			} catch (final RemoteFileSystemException e) {
-				myLogger.debug(e);
+				myLogger.debug(e.getLocalizedMessage(), e);
 				startUrl = new File(System.getProperty("user.home")).toURI()
-				.toString();
+						.toString();
 			}
 		}
 
@@ -119,6 +119,8 @@ public abstract class AbstractWidget extends JPanel {
 	private HistoryManager hm;
 
 	private String historyKey = null;
+
+	private String title = null;
 
 	public AbstractWidget() {
 		super();
@@ -149,6 +151,10 @@ public abstract class AbstractWidget extends JPanel {
 
 	public ServiceInterface getServiceInterface() {
 		return si;
+	}
+
+	public String getTitle() {
+		return this.title;
 	}
 
 	abstract public String getValue();
@@ -236,8 +242,8 @@ public abstract class AbstractWidget extends JPanel {
 			initHistory();
 		}
 	}
-
 	public void setTitle(String title) {
+		this.title = title;
 		setBorder(new TitledBorder(null, title, TitledBorder.LEADING,
 				TitledBorder.TOP, null, null));
 	}

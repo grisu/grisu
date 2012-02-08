@@ -35,7 +35,6 @@ public class SingleInputGridFile extends AbstractInputGridFile {
 
 	}
 
-
 	protected JButton getBtnBrowse() {
 		if (btnBrowse == null) {
 			btnBrowse = new JButton("Browse");

@@ -15,12 +15,13 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GridFileTreeNode extends LazyLoadingTreeNode {
 
-	static final Logger myLogger = Logger.getLogger(GridFileTreeNode.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(GridFileTreeNode.class.getName());
 
 	private static final long serialVersionUID = 1L;
 	private final FileManager fm;
@@ -57,7 +58,7 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 	public boolean getAllowsChildren() {
 
 		if (getUserObject() instanceof GridFile) {
-			GridFile f = (GridFile) getUserObject();
+			final GridFile f = (GridFile) getUserObject();
 			if (f.isInaccessable()) {
 				return false;
 			}
@@ -73,7 +74,7 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 
 	public GridFile getGridFile() {
 
-		Object o = getUserObject();
+		final Object o = getUserObject();
 		if (o instanceof GridFile) {
 			return (GridFile) o;
 		} else {
@@ -85,21 +86,22 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 	@Override
 	public MutableTreeNode[] loadChildren(DefaultTreeModel model) {
 
-		ArrayList<MutableTreeNode> list = new ArrayList<MutableTreeNode>();
-		Set<String> names = new HashSet<String>();
-		Set<String> duplicateNames = new HashSet<String>();
+		final ArrayList<MutableTreeNode> list = new ArrayList<MutableTreeNode>();
+		final Set<String> names = new HashSet<String>();
+		final Set<String> duplicateNames = new HashSet<String>();
 
-		GridFile temp = ((GridFile) getUserObject());
+		final GridFile temp = ((GridFile) getUserObject());
 		temp.setChildren(null);
 		try {
-			Set<GridFile> dfo = fm.ls((GridFile) getUserObject()).getChildren();
+			final Set<GridFile> dfo = fm.ls((GridFile) getUserObject())
+					.getChildren();
 			if (dfo == null) {
 				return new MutableTreeNode[0];
 			}
-			for (GridFile f : dfo) {
+			for (final GridFile f : dfo) {
 
 				if (names.contains(f.getName())) {
-					String oldName = f.getName();
+					final String oldName = f.getName();
 					duplicateNames.add(oldName);
 				}
 
@@ -110,7 +112,7 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 				if ((extensionsToDisplay != null)
 						&& GridFile.FILETYPE_FILE.equals(f.getType())) {
 					boolean display = false;
-					for (String ext : extensionsToDisplay) {
+					for (final String ext : extensionsToDisplay) {
 						if (f.getName().endsWith(ext)) {
 							display = true;
 							break;
@@ -121,25 +123,25 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 					}
 				}
 
-				GridFileTreeNode gftn = new GridFileTreeNode(fm, f, controller,
-						displayHiddenFiles, extensionsToDisplay);
+				final GridFileTreeNode gftn = new GridFileTreeNode(fm, f,
+						controller, displayHiddenFiles, extensionsToDisplay);
 
 				list.add(gftn);
 				names.add(f.getName());
 
 				temp.addChild(f);
 			}
-		} catch (RemoteFileSystemException e) {
-			myLogger.error(e);
+		} catch (final RemoteFileSystemException e) {
+			myLogger.error(e.getLocalizedMessage(), e);
 			return null;
 		}
 
 		// replace duplicate names with sites appended to name
-		for (MutableTreeNode node : list) {
-			GridFile f = ((GridFileTreeNode) node).getGridFile();
-			String oldName = f.getName();
+		for (final MutableTreeNode node : list) {
+			final GridFile f = ((GridFileTreeNode) node).getGridFile();
+			final String oldName = f.getName();
 			if (duplicateNames.contains(oldName)) {
-				String sites = StringUtils.join(f.getSites(), ",");
+				final String sites = StringUtils.join(f.getSites(), ",");
 				f.setName(oldName + " (" + sites + ")");
 			}
 		}
@@ -159,9 +161,9 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 
 				// X.p("Updating: " + f.getUrl());
 
-				Set<MutableTreeNode> children = new HashSet<MutableTreeNode>();
+				final Set<MutableTreeNode> children = new HashSet<MutableTreeNode>();
 				for (int j = 0; j < getChildCount(); j++) {
-					MutableTreeNode childnode = (MutableTreeNode) getChildAt(j);
+					final MutableTreeNode childnode = (MutableTreeNode) getChildAt(j);
 					children.add(childnode);
 					// model.removeNodeFromParent(childnode);
 					// GridFile f = (GridFile) childnode
@@ -169,7 +171,7 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 					// X.p("Removing: " + f.getName());
 				}
 
-				for (MutableTreeNode n : children) {
+				for (final MutableTreeNode n : children) {
 					getModel().removeNodeFromParent(n);
 
 				}

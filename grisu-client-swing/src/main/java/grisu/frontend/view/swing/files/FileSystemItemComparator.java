@@ -5,7 +5,6 @@ import grisu.model.files.FileSystemItem;
 import java.io.File;
 import java.util.Comparator;
 
-
 public class FileSystemItemComparator implements Comparator<FileSystemItem> {
 
 	private static final String homeDirName = new File(

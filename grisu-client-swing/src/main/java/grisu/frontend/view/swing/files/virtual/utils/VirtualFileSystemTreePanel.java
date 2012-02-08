@@ -24,7 +24,8 @@ import javax.swing.JTree;
 import javax.swing.ToolTipManager;
 import javax.swing.tree.DefaultTreeModel;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -32,9 +33,9 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class VirtualFileSystemTreePanel extends JPanel implements
-GridFileListPanel {
+		GridFileListPanel {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(VirtualFileSystemTreePanel.class.getName());
 
 	private static void addPopup(Component component, final JPopupMenu popup) {
@@ -183,23 +184,23 @@ GridFileListPanel {
 
 	private void initialize() {
 
-		GridFile root = new GridFile(
+		final GridFile root = new GridFile(
 				ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://groups", -1L);
-		GridFileTreeNode rootNode = new GridFileTreeNode(fm, root);
+		final GridFileTreeNode rootNode = new GridFileTreeNode(fm, root);
 
-		DefaultTreeModel model = new DefaultTreeModel(rootNode);
+		final DefaultTreeModel model = new DefaultTreeModel(rootNode);
 		rootNode.setModel(model);
 
 		final LazyLoadingTreeController controller = new LazyLoadingTreeController(
 				getTree());
 
 		try {
-			for (GridFile f : fm.ls(root).getChildren()) {
+			for (final GridFile f : fm.ls(root).getChildren()) {
 				rootNode.add(new GridFileTreeNode(fm, f, controller,
 						displayHiddenFiles, extensionsToDisplay));
 			}
-		} catch (RemoteFileSystemException e) {
-			myLogger.error(e);
+		} catch (final RemoteFileSystemException e) {
+			myLogger.error(e.getLocalizedMessage(), e);
 			return;
 		}
 

@@ -37,9 +37,10 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 
-import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -52,7 +53,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class BatchDownloadResultPanel extends JPanel implements FileListPanel,
-PropertyChangeListener {
+		PropertyChangeListener {
 	private JScrollPane scrollPane;
 	private JXTable table;
 
@@ -74,8 +75,8 @@ PropertyChangeListener {
 
 	private boolean displaySize = true;
 
-	static final Logger myLogger = Logger.getLogger(FileListPanelSimple.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(FileListPanelSimple.class.getName());
 
 	private static void addPopup(Component component, final JPopupMenu popup) {
 		component.addMouseListener(new MouseAdapter() {
@@ -182,7 +183,7 @@ PropertyChangeListener {
 							try {
 								l.fileDoubleClicked(file);
 							} catch (final Exception e1) {
-								myLogger.error(e1);
+								myLogger.error(e1.getLocalizedMessage(), e1);
 							}
 						}
 					} finally {
@@ -217,7 +218,7 @@ PropertyChangeListener {
 					try {
 						l.filesSelected(files);
 					} catch (final Exception e1) {
-						myLogger.error(e1);
+						myLogger.error(e1.getLocalizedMessage(), e1);
 					}
 				}
 			} finally {
@@ -244,7 +245,7 @@ PropertyChangeListener {
 				try {
 					l.isLoading(loading);
 				} catch (final Exception e1) {
-					myLogger.error(e1);
+					myLogger.error(e1.getLocalizedMessage(), e1);
 				}
 			}
 		}
@@ -353,7 +354,7 @@ PropertyChangeListener {
 			try {
 				rebuildFileList();
 			} catch (final RemoteFileSystemException e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 		}
 	}
@@ -403,12 +404,12 @@ PropertyChangeListener {
 													GlazedFile.Type.FILETYPE_FILE);
 									if (!currentDirectoryContent.contains(gf)) {
 										currentDirectoryContent
-										.getReadWriteLock().writeLock()
-										.lock();
+												.getReadWriteLock().writeLock()
+												.lock();
 										currentDirectoryContent.add(gf);
 										currentDirectoryContent
-										.getReadWriteLock().writeLock()
-										.unlock();
+												.getReadWriteLock().writeLock()
+												.unlock();
 									}
 									break;
 								}
@@ -418,7 +419,7 @@ PropertyChangeListener {
 					}
 
 				} catch (final RemoteFileSystemException e) {
-					myLogger.error(e);
+					myLogger.error(e.getLocalizedMessage(), e);
 				}
 
 			}
@@ -432,7 +433,7 @@ PropertyChangeListener {
 		try {
 			rebuildFileList();
 		} catch (final RemoteFileSystemException e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
 	}
@@ -456,7 +457,7 @@ PropertyChangeListener {
 		try {
 			rebuildFileList();
 		} catch (final RemoteFileSystemException e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 	}
 
@@ -472,7 +473,7 @@ PropertyChangeListener {
 		try {
 			rebuildFileList();
 		} catch (final RemoteFileSystemException e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
 	}
@@ -532,7 +533,7 @@ PropertyChangeListener {
 		try {
 			rebuildFileList();
 		} catch (final RemoteFileSystemException e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 	}
 

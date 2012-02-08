@@ -9,13 +9,15 @@ import grisu.model.info.ResourceInformationImpl;
 import grisu.model.info.UserApplicationInformation;
 import grisu.model.info.UserApplicationInformationImpl;
 import grisu.settings.Environment;
+import grith.jgrith.credential.Credential;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vpac.historyRepeater.DummyHistoryManager;
 import org.vpac.historyRepeater.HistoryManager;
 import org.vpac.historyRepeater.SimpleHistoryManager;
@@ -27,21 +29,24 @@ import org.vpac.historyRepeater.SimpleHistoryManager;
  * You can access the following information objects via the registry:
  * 
  * {@link UserEnvironmentManager}: to find out what resources the current user
- * can access <br/> {@link UserApplicationInformation}: information about the
+ * can access <br/>
+ * {@link UserApplicationInformation}: information about the
  * applications/versions of applications this user has got access to<br/>
  * {@link ApplicationInformation}: information about the applications that are
- * provided grid-wide<br/> {@link ResourceInformation}: general information about the
- * available resources like queues, submissionlocations, stagingfilesystems<br/>
+ * provided grid-wide<br/>
+ * {@link ResourceInformation}: general information about the available
+ * resources like queues, submissionlocations, stagingfilesystems<br/>
  * {@link HistoryManager}: can be used to store / retrieve data that the user
- * used in past jobs<br/> {@link FileManager}: to do file transfer and such<br/>
+ * used in past jobs<br/>
+ * {@link FileManager}: to do file transfer and such<br/>
  * 
  * @author Markus Binsteiner
  * 
  */
 public class GrisuRegistryImpl implements GrisuRegistry {
 
-	static final Logger myLogger = Logger.getLogger(GrisuRegistryImpl.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(GrisuRegistryImpl.class.getName());
 
 	// caching the registries for different serviceinterfaces. for a desktop
 	// application this most
@@ -62,9 +67,12 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	private ResourceInformation cachedResourceInformation;
 	private FileManager cachedFileHelper;
 	private TemplateManager templateManager;
+	private final Credential credential;
 
-	public GrisuRegistryImpl(final ServiceInterface serviceInterface) {
+	public GrisuRegistryImpl(final ServiceInterface serviceInterface,
+			final Credential credential) {
 		this.serviceInterface = serviceInterface;
+		this.credential = credential;
 	}
 
 	public Object get(String key) {
@@ -74,8 +82,7 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.model.GrisuRegistryInterface#getApplicationInformation
+	 * @see grisu.model.GrisuRegistryInterface#getApplicationInformation
 	 * (java.lang.String)
 	 */
 	public final ApplicationInformation getApplicationInformation(
@@ -90,6 +97,10 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 			}
 		}
 		return cachedApplicationInformationObjects.get(applicationName);
+	}
+
+	public Credential getCredential() {
+		return this.credential;
 	}
 
 	/*
@@ -119,7 +130,7 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 					historyFile.createNewFile();
 
 				} catch (final IOException e) {
-					myLogger.debug(e);
+					myLogger.debug(e.getLocalizedMessage(), e);
 				}
 			}
 			if (!historyFile.exists()) {
@@ -155,8 +166,7 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.model.GrisuRegistryInterface#getUserApplicationInformation
+	 * @see grisu.model.GrisuRegistryInterface#getUserApplicationInformation
 	 * (java.lang.String)
 	 */
 	public final UserApplicationInformation getUserApplicationInformation(
@@ -177,8 +187,7 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.model.GrisuRegistryInterface#getUserEnvironmentManager()
+	 * @see grisu.model.GrisuRegistryInterface#getUserEnvironmentManager()
 	 */
 	public final synchronized UserEnvironmentManager getUserEnvironmentManager() {
 
@@ -196,8 +205,7 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * grisu.model.GrisuRegistryInterface#setUserEnvironmentManager
+	 * @see grisu.model.GrisuRegistryInterface#setUserEnvironmentManager
 	 * (grisu.model.UserEnvironmentManager)
 	 */
 	public final synchronized void setUserEnvironmentManager(

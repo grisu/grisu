@@ -14,13 +14,14 @@ import java.util.UUID;
 
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemException;
-import org.apache.log4j.Logger;
 import org.globus.ftp.MarkerListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.dl.escience.vfs.util.VFSUtil;
 
 public class CommonsVfsRemoteFileTransferObject implements
-RemoteFileTransferObject {
+		RemoteFileTransferObject {
 
 	private final Thread fileTransferThread;
 
@@ -42,7 +43,7 @@ RemoteFileTransferObject {
 
 	private final String id = "TRANSFER_" + UUID.randomUUID().toString();
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(CommonsVfsRemoteFileTransferObject.class.getName());
 
 	public CommonsVfsRemoteFileTransferObject(final FileSystemCache fsCache,
@@ -107,24 +108,24 @@ RemoteFileTransferObject {
 						myLogger.debug(id + ": closing source...");
 						source.close();
 						myLogger.debug(id + ": closed source.");
-					} catch (FileSystemException ex){
+					} catch (final FileSystemException ex) {
 						myLogger.warn(id + ex.getLocalizedMessage());
 					}
 					try {
 						myLogger.debug(id + ": closing target...");
 						target.close();
 						myLogger.debug(id + ": closed target.");
-					} catch (FileSystemException ex){
+					} catch (final FileSystemException ex) {
 						myLogger.warn(id + ex.getLocalizedMessage());
 					}
 					try {
 						myLogger.debug(id + ": closing filesystem...");
 						fsCache.close();
 						myLogger.debug(id + ": filesytem closed.");
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						myLogger.warn(id + e.getLocalizedMessage());
 					}
-					myLogger.debug(id+": finalized...");
+					myLogger.debug(id + ": finalized...");
 				}
 
 			}
@@ -178,7 +179,7 @@ RemoteFileTransferObject {
 		} catch (final InterruptedException e) {
 			addMessage("File transfer thread interrupted: " + id);
 			Thread.currentThread().interrupt();
-		} catch (Throwable t) {
+		} catch (final Throwable t) {
 			addMessage("File transfer exception " + id + ": "
 					+ t.getLocalizedMessage());
 		}
@@ -204,7 +205,7 @@ RemoteFileTransferObject {
 
 	protected void transferFile(final FileObject source_file,
 			final FileObject target_file, final boolean overwrite)
-					throws RemoteFileSystemException {
+			throws RemoteFileSystemException {
 
 		try {
 
@@ -241,8 +242,8 @@ RemoteFileTransferObject {
 				}
 			}
 			myLogger.debug(id + ": Copying: "
-					+ source_file.getName().toString()
-					+ " to: " + target_file.getName().toString());
+					+ source_file.getName().toString() + " to: "
+					+ target_file.getName().toString());
 			// target_file.copyFrom(source_file, new AllFileSelector());
 			//
 			// if (!target_file.exists()) {
@@ -253,8 +254,7 @@ RemoteFileTransferObject {
 
 			try {
 				addMessage("Starting file transfer...");
-				VFSUtil.copy(source_file, target_file, dummyMarker,
-						true);
+				VFSUtil.copy(source_file, target_file, dummyMarker, true);
 				addMessage("Transfer finished...");
 			} catch (final IOException e) {
 				addMessage("File transfer failed (io problem): "

@@ -13,8 +13,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-
-
 public class DefaultResubmitSubmitPolicy implements SubmitPolicy {
 
 	private SortedSet<GridResource> calculatedResources;

@@ -1,7 +1,6 @@
 package grisu.backend.utils;
 
 import grisu.settings.Environment;
-import grith.jgrith.Init;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -13,12 +12,13 @@ import java.nio.channels.FileChannel;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class LocalTemplatesHelper {
 
-	static final Logger myLogger = Logger.getLogger(LocalTemplatesHelper.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(LocalTemplatesHelper.class.getName());
 
 	private static boolean globusFolderCopied = false;
 	private static boolean templatesCopied = false;
@@ -54,7 +54,7 @@ public final class LocalTemplatesHelper {
 							Environment.getVarGrisuDirectory());
 				}
 			} catch (final Exception e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 			globusFolderCopied = true;
 		}
@@ -88,7 +88,7 @@ public final class LocalTemplatesHelper {
 				int count;
 				final byte[] data = new byte[BUFFER_SIZE];
 
-				final InputStream in = Init.class
+				final InputStream in = LocalTemplatesHelper.class
 						.getResourceAsStream("/templates_available.zip");
 				final ZipInputStream zipStream = new ZipInputStream(in);
 
@@ -105,7 +105,7 @@ public final class LocalTemplatesHelper {
 							myLogger.debug("Template name: " + entry.getName());
 							final File vomses_file = new File(
 									Environment
-											.getAvailableTemplatesDirectory(),
+									.getAvailableTemplatesDirectory(),
 									entry.getName());
 
 							// Write the file to the file system and overwrite
@@ -123,7 +123,7 @@ public final class LocalTemplatesHelper {
 						}
 					}
 				} catch (final Exception e) {
-					myLogger.error(e);
+					myLogger.error(e.getLocalizedMessage(), e);
 				}
 			} else {
 				myLogger.debug("Templates folder already contains files. Not copying any into it...");
@@ -155,7 +155,7 @@ public final class LocalTemplatesHelper {
 
 		if (!new File(Environment.getAvailableTemplatesDirectory()).exists()) {
 			if (!new File(Environment.getAvailableTemplatesDirectory())
-					.mkdirs()) {
+			.mkdirs()) {
 				myLogger.error("Could not create available_vomses directory.");
 				throw new Exception(
 						"Could not create templates_available directory. Please set permissions for "
@@ -182,7 +182,7 @@ public final class LocalTemplatesHelper {
 		int count;
 		final byte[] data = new byte[BUFFER_SIZE];
 
-		final InputStream in = Init.class
+		final InputStream in = LocalTemplatesHelper.class
 				.getResourceAsStream(zipFileResourcePath);
 		final ZipInputStream zipstream = new ZipInputStream(in);
 
@@ -221,7 +221,7 @@ public final class LocalTemplatesHelper {
 		} catch (final IOException e) {
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
 	}

@@ -12,7 +12,6 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
-
 import com.jidesoft.swing.JideBoxLayout;
 import com.jidesoft.swing.JideSplitPane;
 
@@ -38,9 +37,9 @@ public class GridFileManagementPanel extends JPanel implements
 		super();
 		this.si = si;
 		if (leftRoots == null) {
-			GridFile gridRoot = GrisuRegistryManager.getDefault(si)
+			final GridFile gridRoot = GrisuRegistryManager.getDefault(si)
 					.getFileManager().getGridRoot();
-			GridFile localRoot = GrisuRegistryManager.getDefault(si)
+			final GridFile localRoot = GrisuRegistryManager.getDefault(si)
 					.getFileManager().getLocalRoot();
 			this.leftRoots = new LinkedList<GridFile>();
 			this.leftRoots.add(gridRoot);
@@ -50,9 +49,9 @@ public class GridFileManagementPanel extends JPanel implements
 		}
 
 		if (rightRoots == null) {
-			GridFile gridRoot = GrisuRegistryManager.getDefault(si)
+			final GridFile gridRoot = GrisuRegistryManager.getDefault(si)
 					.getFileManager().getGridRoot();
-			GridFile localRoot = GrisuRegistryManager.getDefault(si)
+			final GridFile localRoot = GrisuRegistryManager.getDefault(si)
 					.getFileManager().getLocalRoot();
 			this.rightRoots = new LinkedList<GridFile>();
 			this.rightRoots.add(gridRoot);

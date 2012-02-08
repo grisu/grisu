@@ -41,7 +41,6 @@ public class GridFileComboboxRenderer extends DefaultListCellRenderer {
 					isSelected, cellHasFocus);
 		}
 
-
 		// Font theFont = null;
 		// Color theForeground = null;
 		// Icon theIcon = null;
@@ -50,7 +49,7 @@ public class GridFileComboboxRenderer extends DefaultListCellRenderer {
 
 		if (value instanceof GridFile) {
 
-			GridFile f = (GridFile) value;
+			final GridFile f = (GridFile) value;
 
 			// try {
 			if (f.isInaccessable()

@@ -22,12 +22,14 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @XmlRootElement(name = "gridfile")
 public class GridFile implements Comparable<GridFile>, Transferable {
 
-	static final Logger myLogger = Logger.getLogger(GridFile.class.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(GridFile.class
+			.getName());
 
 	public static final DataFlavor GRIDFILE_FLAVOR = new DataFlavor(
 			GridFile.class, "Grid file");
@@ -67,8 +69,8 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 			return null;
 		}
 
-		List<String> result = new LinkedList<String>();
-		for (GridFile f : file.getChildren()) {
+		final List<String> result = new LinkedList<String>();
+		for (final GridFile f : file.getChildren()) {
 			result.add(f.getName());
 		}
 		return result;
@@ -79,17 +81,17 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 
 		if (!file_or_folder.isDirectory()) {
 			final GridFile file = new GridFile(file_or_folder.toURI()
-					.toString(),
-					file_or_folder.length(), file_or_folder.lastModified());
+					.toString(), file_or_folder.length(),
+					file_or_folder.lastModified());
 			return file;
 		}
 
-		String url = file_or_folder.toURI().toString();
+		final String url = file_or_folder.toURI().toString();
 		final GridFile result = new GridFile(url, file_or_folder.lastModified());
 
 		if (includeParentInFileListing) {
-			final GridFile childFolder = new GridFile(
-					file_or_folder.toURI().toString(), file_or_folder.lastModified());
+			final GridFile childFolder = new GridFile(file_or_folder.toURI()
+					.toString(), file_or_folder.lastModified());
 			result.addChild(childFolder);
 		}
 
@@ -135,9 +137,9 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 			.synchronizedList(new LinkedList<DtoProperty>());
 	private long size = -2L;
 	private long lastModified;
-	private boolean isVirtual = false;
+	private Boolean isVirtual = false;
 
-	private boolean inaccessable = false;
+	private Boolean inaccessable = false;
 
 	private Set<GridFile> children = Collections
 			.synchronizedSet(new TreeSet<GridFile>());
@@ -164,7 +166,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 			this.type = FILETYPE_FILE;
 			this.size = f.length();
 		}
-		this.isVirtual = false;
+		setVirtual(false);
 		if (StringUtils.isBlank(f.getName())) {
 			this.name = "/";
 		} else {
@@ -186,7 +188,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		this.name = mp.getAlias();
 		this.addSite(mp.getSite());
 		this.addFqan(mp.getFqan());
-		this.isVirtual = false;
+		setVirtual(false);
 	}
 
 	// public DtoFileObject(String group) {
@@ -212,7 +214,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		addUrl(this.mainUrl, FILETYPE_EXCEPTION_PRIORITY);
 
 		this.inaccessable = true;
-		this.isVirtual = true;
+		setVirtual(true);
 		this.name = FileManager.getFilename(url) + " (Error)";
 		this.lastModified = -1L;
 		this.size = -1L;
@@ -237,10 +239,10 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 			if ((ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://")
 					.equals(url)) {
 				this.name = "Remote files";
-				this.isVirtual = true;
+				setVirtual(true);
 			} else {
 				this.name = FileManager.getFilename(url);
-				this.isVirtual = false;
+				setVirtual(false);
 			}
 
 		} else if (FILETYPE_FILE.equals(type)) {
@@ -250,7 +252,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 			this.size = size;
 			this.lastModified = lastModified;
 			this.name = FileManager.getFilename(url);
-			this.isVirtual = false;
+			setVirtual(false);
 		} else if (FILETYPE_MOUNTPOINT.equals(type)) {
 			throw new RuntimeException(
 					"Constructor not usable for mountpoints...");
@@ -261,7 +263,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 			this.size = -1L;
 			this.lastModified = -1L;
 			this.name = ROOT;
-			this.isVirtual = true;
+			setVirtual(true);
 		} else {
 			throw new RuntimeException("Type: " + type + " not supported...");
 		}
@@ -269,7 +271,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 
 	public GridFile(String url, String fqan) {
 		this.type = FILETYPE_FOLDER;
-		this.isVirtual = true;
+		setVirtual(true);
 		this.mainUrl = url;
 		addUrl(this.mainUrl, FILETYPE_VIRTUAL_PRIORITY);
 		this.size = -1L;
@@ -310,10 +312,10 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	}
 
 	public void addUrl(String url, Integer priority) {
-		DtoProperty temp = new DtoProperty(url, priority.toString());
+		final DtoProperty temp = new DtoProperty(url, priority.toString());
 		urls.add(temp);
 		if (urls.size() > 1) {
-			this.isVirtual = true;
+			setVirtual(true);
 		}
 	}
 
@@ -321,8 +323,9 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 
 		int result = Integer.MIN_VALUE;
 
-		Integer thisPriority = Integer.parseInt(urls.get(0).getValue());
-		Integer otherPriority = Integer.parseInt(o.getUrls().get(0).getValue());
+		final Integer thisPriority = Integer.parseInt(urls.get(0).getValue());
+		final Integer otherPriority = Integer.parseInt(o.getUrls().get(0)
+				.getValue());
 
 		if (otherPriority.equals(thisPriority)) {
 			result = getName().compareToIgnoreCase(o.getName());
@@ -341,7 +344,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 	@Override
 	public boolean equals(Object other) {
 		if (other instanceof GridFile) {
-			boolean eq = getUrl().equals(((GridFile) other).getUrl());
+			final boolean eq = getUrl().equals(((GridFile) other).getUrl());
 			return eq;
 		}
 		return false;
@@ -352,7 +355,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 			return null;
 		}
 
-		for (GridFile f : getChildren()) {
+		for (final GridFile f : getChildren()) {
 			if (f.getName().equals(filename)) {
 				return f;
 			}
@@ -377,7 +380,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 
 	// for jaxb marshalling
 	@XmlAttribute(name = "isInaccessable")
-	public boolean getInaccessable() {
+	public Boolean getInaccessable() {
 		return this.inaccessable;
 	}
 
@@ -435,7 +438,7 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 
 	// for jaxb marshalling
 	@XmlAttribute(name = "isVirtual")
-	public boolean getVirtual() {
+	public Boolean getVirtual() {
 		return isVirtual;
 	}
 
@@ -516,17 +519,17 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		this.fqans.addAll(fqans);
 	}
 
-	public void setInaccessible(boolean isInaccessible) {
+	public void setInaccessible(Boolean isInaccessible) {
 		this.inaccessable = isInaccessible;
 	}
 
-	public void setIsInaccessible(boolean isInaccessible) {
-		this.inaccessable = isInaccessible;
-	}
+	// public void setIsInaccessible(Boolean isInaccessible) {
+	// this.inaccessable = isInaccessible;
+	// }
 
-	public void setIsVirtual(boolean isVirtual) {
-		this.isVirtual = isVirtual;
-	}
+	// public void setIsVirtual(boolean isVirtual) {
+	// this.isVirtual = isVirtual;
+	// }
 
 	public void setLastModified(long lastModified) {
 		this.lastModified = lastModified;
@@ -538,16 +541,16 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 
 	public void setPath(String path) {
 		this.optionalPath = path;
-		if (StringUtils.isNotBlank(path)) {
-			this.isVirtual = true;
-		}
+		// if (StringUtils.isNotBlank(path)) {
+		// setVirtual(true);
+		// }
 	}
 
 	private void setSites(Set<String> sites) {
 		this.sites.clear();
 		this.sites.addAll(sites);
 		if ((sites != null) && (sites.size() > 1)) {
-			this.isVirtual = true;
+			setVirtual(true);
 		}
 	}
 
@@ -568,11 +571,11 @@ public class GridFile implements Comparable<GridFile>, Transferable {
 		this.urls.clear();
 		this.urls.addAll(urls);
 		if ((urls != null) && (urls.size() > 1)) {
-			this.isVirtual = true;
+			setVirtual(true);
 		}
 	}
 
-	public void setVirtual(boolean isVirtual) {
+	public void setVirtual(Boolean isVirtual) {
 		this.isVirtual = isVirtual;
 	}
 

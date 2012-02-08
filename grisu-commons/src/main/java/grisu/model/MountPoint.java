@@ -1,5 +1,6 @@
 package grisu.model;
 
+import grisu.jcommons.utils.FileSystemHelpers;
 import grisu.model.dto.DtoProperty;
 
 import java.util.LinkedList;
@@ -16,7 +17,8 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The concept of MountPoints is pretty important within grisu. A MountPoint is
@@ -33,7 +35,8 @@ import org.apache.log4j.Logger;
 @XmlAccessorType(XmlAccessType.NONE)
 public class MountPoint implements Comparable<MountPoint> {
 
-	static final Logger myLogger = Logger.getLogger(MountPoint.class.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(MountPoint.class
+			.getName());
 
 	public static final String ALIAS_KEY = "label";
 	public static final String PATH_KEY = "path";
@@ -111,6 +114,7 @@ public class MountPoint implements Comparable<MountPoint> {
 		this.alias = mountpoint;
 		this.site = site;
 	}
+
 
 	/**
 	 * Creates a Mountpoint.
@@ -201,6 +205,11 @@ public class MountPoint implements Comparable<MountPoint> {
 	@GeneratedValue
 	public Long getMountPointId() {
 		return mountPointId;
+	}
+
+	@Transient
+	public String getPath() {
+		return FileSystemHelpers.getPath(getRootUrl());
 	}
 
 	@Transient

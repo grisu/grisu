@@ -16,36 +16,36 @@ public class TreeModelSupport {
 	}
 
 	public void fireTreeNodesChanged(TreeModelEvent e) {
-		Enumeration listeners = vector.elements();
+		final Enumeration listeners = vector.elements();
 		while (listeners.hasMoreElements()) {
-			TreeModelListener listener = (TreeModelListener) listeners
+			final TreeModelListener listener = (TreeModelListener) listeners
 					.nextElement();
 			listener.treeNodesChanged(e);
 		}
 	}
 
 	public void fireTreeNodesInserted(TreeModelEvent e) {
-		Enumeration listeners = vector.elements();
+		final Enumeration listeners = vector.elements();
 		while (listeners.hasMoreElements()) {
-			TreeModelListener listener = (TreeModelListener) listeners
+			final TreeModelListener listener = (TreeModelListener) listeners
 					.nextElement();
 			listener.treeNodesInserted(e);
 		}
 	}
 
 	public void fireTreeNodesRemoved(TreeModelEvent e) {
-		Enumeration listeners = vector.elements();
+		final Enumeration listeners = vector.elements();
 		while (listeners.hasMoreElements()) {
-			TreeModelListener listener = (TreeModelListener) listeners
+			final TreeModelListener listener = (TreeModelListener) listeners
 					.nextElement();
 			listener.treeNodesRemoved(e);
 		}
 	}
 
 	public void fireTreeStructureChanged(TreeModelEvent e) {
-		Enumeration listeners = vector.elements();
+		final Enumeration listeners = vector.elements();
 		while (listeners.hasMoreElements()) {
-			TreeModelListener listener = (TreeModelListener) listeners
+			final TreeModelListener listener = (TreeModelListener) listeners
 					.nextElement();
 			listener.treeStructureChanged(e);
 		}

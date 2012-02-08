@@ -3,59 +3,52 @@ package grisu.frontend.control.login;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.ServiceInterfaceException;
 import grisu.frontend.control.UncaughtExceptionHandler;
-import grisu.frontend.view.cli.CliHelpers;
 import grisu.jcommons.configuration.CommonGridProperties;
-import grisu.jcommons.constants.Enums.LoginType;
-import grisu.jcommons.constants.Enums.UI;
-import grisu.jcommons.constants.GridEnvironment;
+import grisu.jcommons.constants.Constants;
+import grisu.jcommons.dependencies.BouncyCastleTool;
 import grisu.jcommons.dependencies.ClasspathHacker;
-import grisu.jcommons.dependencies.Dependency;
-import grisu.jcommons.dependencies.DependencyManager;
+import grisu.jcommons.exceptions.CredentialException;
 import grisu.jcommons.utils.DefaultGridSecurityProvider;
-import grisu.jcommons.utils.HttpProxyManager;
 import grisu.jcommons.utils.JythonHelpers;
+import grisu.jcommons.view.cli.CliHelpers;
+import grisu.model.GrisuRegistryManager;
 import grisu.settings.ClientPropertiesManager;
 import grisu.settings.Environment;
 import grisu.utils.GrisuPluginFilenameFilter;
-import grith.jgrith.CredentialHelpers;
-import grith.jgrith.Init;
-import grith.jgrith.control.CertificateFiles;
-import grith.jgrith.plainProxy.LocalProxy;
+import grith.jgrith.control.LoginParams;
+import grith.jgrith.credential.Credential;
+import grith.jgrith.credential.CredentialFactory;
+import grith.jgrith.utils.CertificateFiles;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.logging.Level;
-
-import jline.ConsoleReader;
+import java.util.Date;
 
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.ssl.HttpSecureProtocol;
 import org.apache.commons.ssl.TrustMaterial;
-import org.apache.log4j.Logger;
-import org.globus.gsi.GlobusCredential;
-import org.ietf.jgss.GSSCredential;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 
 public class LoginManager {
 
-	private static ConsoleReader consoleReader;
+	static final Logger myLogger = LoggerFactory
+			.getLogger(LoginManager.class
+					.getName());
 
-	public static boolean environmentInitialized = false;
+	private static String CLIENT_NAME = setClientName(null);
 
-	static final Logger myLogger = Logger.getLogger(LoginManager.class
-			.getName());
+	private static String CLIENT_VERSION = setClientVersion(null);
 
+	public static String USER_SESSION = setUserSessionId(null);
+
+	public static volatile boolean environmentInitialized = false;
 	static final public ImmutableBiMap<String, String> SERVICEALIASES = new ImmutableBiMap.Builder<String, String>()
 			.put("local", "Local")
 			.put("bestgrid",
@@ -64,10 +57,9 @@ public class LoginManager {
 							"https://compute-dev.services.bestgrid.org/soap/GrisuService")
 							.put("bestgrid-test",
 									"https://compute-test.services.bestgrid.org/soap/GrisuService")
-									.put("local_ws", "http://localhost:8080/soap/GrisuService")
-									.put("local_ws_tomcat",
+									.put("local_ws_jetty", "http://localhost:8080/soap/GrisuService")
+									.put("local_ws",
 											"http://localhost:8080/grisu-ws/soap/GrisuService").build();
-
 	public static String httpProxyHost = null;
 
 	public static int httpProxyPort = 80;
@@ -76,7 +68,9 @@ public class LoginManager {
 
 	public static char[] httpProxyPassphrase = null;
 
-	public static int REQUIRED_BACKEND_API_VERSION = 14;
+	public static int REQUIRED_BACKEND_API_VERSION = 15;
+
+	public static final int DEFAULT_PROXY_LIFETIME_IN_HOURS = 240;
 
 	public static void addPluginsToClasspath() throws IOException {
 
@@ -89,13 +83,20 @@ public class LoginManager {
 		Arrays.fill(httpProxyPassphrase, 'x');
 	}
 
+	public static String getClientName() {
+		return CLIENT_NAME;
+	}
 
-	public static void initEnvironment() {
+	public static String getClientVersion() {
+		return CLIENT_VERSION;
+	}
+
+	public static synchronized void initEnvironment() {
 
 		if (!environmentInitialized) {
 
 			java.util.logging.LogManager.getLogManager().reset();
-			java.util.logging.Logger.getLogger("root").setLevel(Level.OFF);
+			// LoggerFactory.getLogger("root").setLevel(Level.OFF);
 
 			JythonHelpers.setJythonCachedir();
 
@@ -115,884 +116,326 @@ public class LoginManager {
 			.setProperty("ssl.TrustManagerFactory.algorithm",
 					"TrustAllCertificates");
 
-			boolean bcpresent = false;
 			try {
-				final Class bcExampleClass = Class
-						.forName("org.bouncycastle.LICENSE");
-				bcpresent = true;
+				BouncyCastleTool.initBouncyCastle();
 			} catch (final Exception e) {
-				myLogger.debug("BouncyCastle library not loaded....");
-			}
-
-			final String disableLoadBouncyCastle = System
-					.getProperty("disableLoadBouncyCastle");
-
-			if (!bcpresent && !"true".equalsIgnoreCase(disableLoadBouncyCastle)) {
-				myLogger.debug("Loading bouncy castle...");
-				final Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
-
-				dependencies.put(Dependency.BOUNCYCASTLE, "jdk15-145");
-
-				DependencyManager.addDependencies(dependencies,
-						GridEnvironment.getGridCommonJavaLibDirectory(), true);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 
 			environmentInitialized = true;
 		}
 
-		try {
-			Init.initBouncyCastle();
-		} catch (final Exception e) {
-			myLogger.error(e);
-		}
-
 	}
 
-	/**
-	 * Simplest way to login.
-	 * 
-	 * Logs into a local backend using an already existing local proxy.
-	 * 
-	 * @return the serviceinterface
-	 * @throws LoginException
-	 *             if the login doesn't succeed
-	 */
 	public static ServiceInterface login() throws LoginException {
-		return login((GlobusCredential) null, (char[]) null, (String) null,
-				(String) null, (LoginParams) null, false);
+		return login("Local");
 	}
 
-	/**
-	 * One-for-all method to login to a local Grisu backend.
-	 * 
-	 * Specify nothing in order to use a local proxy. If you specify the
-	 * password in addition to that the local x509 cert will be used to create a
-	 * proxy from your local cert which in turn will be used to login to the
-	 * Grisu backend.
-	 * 
-	 * 
-	 * In order to use shibboleth login, you need to specify the password, the
-	 * idp-username and the name of the idp.
-	 * 
-	 * @param password
-	 *            the password or null
-	 * @param username
-	 *            the shib-username or null
-	 * @param idp
-	 *            the name of the idp or null
-	 * @param saveCredentialAsLocalProxy
-	 *            whether to save the credential as a local proxy after
-	 *            successful login or not
-	 * @return the serviceinterface
-	 * @throws LoginException
-	 *             if the login doesn't succeed
-	 * @throws IOException
-	 *             if necessary plugins couldn't be downloaded/stored in the
-	 *             .grisu/plugins folder
-	 */
-	public static ServiceInterface login(GlobusCredential cred,
-			char[] password, String username, String idp,
-			boolean saveCredentialAsLocalProxy) throws LoginException {
-
-		final LoginParams params = new LoginParams("Local", null, null);
-		return login(cred, password, username, idp, params,
-				saveCredentialAsLocalProxy);
-
-	}
-
-	public static ServiceInterface login(GlobusCredential cred,
-			char[] password, String username, String idp,
-			LoginParams loginParams) throws LoginException {
-		return login(cred, password, username, idp, loginParams, false);
-	}
-
-	/**
-	 * One-for-all method to login to a Grisu backend.
-	 * 
-	 * Specify nothing except the loginParams (without the myproxy username &
-	 * password) in order to use a local proxy. If you specify the password in
-	 * addition to that the local x509 cert will be used to create a local proxy
-	 * which in turn will be used to login to the Grisu backend.
-	 * 
-	 * If you specify the myproxy username & password in the login params those
-	 * will be used for a simple myproxy login to the backend.
-	 * 
-	 * In order to use shibboleth login, you need to specify the password, the
-	 * idp-username and the name of the idp.
-	 * 
-	 * @param password
-	 *            the password or null
-	 * @param username
-	 *            the shib-username or null
-	 * @param idp
-	 *            the name of the idp or null
-	 * @param loginParams
-	 *            the login parameters
-	 * @param saveCredentialAsLocalProxy
-	 *            whether to save the credential as a local proxy after
-	 *            successful login or not
-	 * @return the serviceinterface
-	 * @throws LoginException
-	 *             if the login doesn't succeed
-	 * @throws IOException
-	 *             if necessary plugins couldn't be downloaded/stored in the
-	 *             .grisu/plugins folder
-	 */
-	public static ServiceInterface login(GlobusCredential cred,
-			char[] password, String username, String idp,
-			LoginParams loginParams, boolean saveCredentialAsLocalProxy)
+	public static ServiceInterface login(Credential cred,
+			LoginParams loginParams, boolean displayCliProgress)
 					throws LoginException {
 
-		initEnvironment();
+		String defaultUrl = ClientPropertiesManager
+				.getDefaultServiceInterfaceUrl();
 
-		if (loginParams == null) {
+		try {
+			if (displayCliProgress) {
+				CliHelpers.setIndeterminateProgress(
+						"Setting up environment...", true);
+			}
+			initEnvironment();
 
-			final String defaultUrl = ClientPropertiesManager
-					.getDefaultServiceInterfaceUrl();
-			if (StringUtils.isNotBlank(defaultUrl)) {
+			if (loginParams == null) {
+
+				if (StringUtils.isBlank(defaultUrl)) {
+					defaultUrl = "Local";
+				}
 				loginParams = new LoginParams(defaultUrl, null, null);
-			} else {
-				loginParams = new LoginParams("Local", null, null);
+
 			}
 
-		}
+			loginParams.setAliasMap(SERVICEALIASES);
 
-		if (StringUtils.isNotBlank(httpProxyHost)) {
-			loginParams.setHttpProxy(httpProxyHost);
-			loginParams.setHttpProxyPort(httpProxyPort);
-			loginParams.setHttpProxyUsername(httpProxyUsername);
-			loginParams.setHttpProxyPassphrase(httpProxyPassphrase);
-		}
-
-		try {
-			addPluginsToClasspath();
-		} catch (final IOException e2) {
-			// TODO Auto-generated catch block
-			myLogger.warn(e2);
-			throw new RuntimeException(e2);
-		}
-
-		try {
-			CertificateFiles.copyCACerts(true);
-		} catch (final Exception e1) {
-			// e1.printStackTrace();
-			myLogger.warn(e1);
-		}
-
-		// do the cacert thingy
-		try {
-			final URL cacertURL = LoginManager.class.getResource("/ipsca.pem");
-			final HttpSecureProtocol protocolSocketFactory = new HttpSecureProtocol();
-
-			TrustMaterial trustMaterial = null;
-			trustMaterial = new TrustMaterial(cacertURL);
-
-			// We can use setTrustMaterial() instead of addTrustMaterial()
-			// if we want to remove
-			// HttpSecureProtocol's default trust of TrustMaterial.CACERTS.
-			protocolSocketFactory.addTrustMaterial(trustMaterial);
-
-			// Maybe we want to turn off CN validation (not recommended!):
-			protocolSocketFactory.setCheckHostname(false);
-
-			final Protocol protocol = new Protocol("https",
-					(ProtocolSocketFactory) protocolSocketFactory, 443);
-			Protocol.registerProtocol("https", protocol);
-		} catch (final Exception e) {
-			myLogger.error(e);
-		}
-
-		Map<Dependency, String> dependencies = new HashMap<Dependency, String>();
-		final String serviceInterfaceUrl = loginParams.getServiceInterfaceUrl();
-
-		// if ("Local".equals(serviceInterfaceUrl)
-		// || "Dummy".equals(serviceInterfaceUrl)) {
-		//
-		// dependencies = new HashMap<Dependency, String>();
-		//
-		// dependencies.put(Dependency.GRISU_LOCAL_BACKEND,
-		// ServiceInterface.INTERFACE_VERSION);
-		//
-		// DependencyManager.addDependencies(dependencies,
-		// Environment.getGrisuPluginDirectory());
-		//
-		// } else if (serviceInterfaceUrl.startsWith("http")) {
-
-		// assume xfire -- that needs to get smarter later on
-
-		// dependencies = new HashMap<Dependency, String>();
-		//
-		// dependencies.put(Dependency.GRISU_XFIRE_CLIENT_LIBS,
-		// ServiceInterface.INTERFACE_VERSION);
-		// // also try to use client side mds
-		// dependencies.put(Dependency.CLIENT_SIDE_MDS,
-		// ServiceInterface.INTERFACE_VERSION);
-		//
-		// DependencyManager.addDependencies(dependencies,
-		// Environment.getGrisuPluginDirectory());
-
-		// }
-
-		ServiceInterface si = null;
-
-		if (StringUtils.isBlank(username)) {
-
-			if (StringUtils.isBlank(loginParams.getMyProxyUsername())) {
-
-				// set random myproxy username, not dn, because otherwise
-				// parallel sessions
-				// wouldn't be possible
-				loginParams.setMyProxyUsername(UUID.randomUUID().toString());
-
-				if (cred != null) {
-					try {
-						si = LoginHelpers.globusCredentialLogin(loginParams,
-								cred);
-					} catch (final Exception e) {
-						throw new LoginException("Could not login: "
-								+ e.getLocalizedMessage(), e);
-					}
-				} else if ((password == null) || (password.length == 0)) {
-					// means certificate auth
-					try {
-						// means try to load local proxy
-						si = LoginHelpers.defaultLocalProxyLogin(loginParams);
-						ClientPropertiesManager
-						.saveLastLoginType(LoginType.LOCAL_PROXY);
-
-					} catch (final Exception e) {
-						throw new LoginException("Could not login: "
-								+ e.getLocalizedMessage(), e);
-					}
-				} else {
-					// means to create local proxy
-					try {
-						// TODO should put that one somewhere else
-						if (saveCredentialAsLocalProxy) {
-							try {
-								LocalProxy.gridProxyInit(password, 240);
-							} catch (final Exception e) {
-								throw new ServiceInterfaceException(
-										"Could not create local proxy.", e);
-							}
-						}
-						si = LoginHelpers
-								.localProxyLogin(password, loginParams);
-						ClientPropertiesManager
-						.saveLastLoginType(LoginType.X509_CERTIFICATE);
-					} catch (final ServiceInterfaceException e) {
-						throw new LoginException("Could not login: "
-								+ e.getLocalizedMessage(), e);
-					}
-				}
-
-			} else {
-				// means myproxy login
-				try {
-					si = LoginHelpers.myProxyLogin(loginParams);
-					ClientPropertiesManager
-					.saveLastLoginType(LoginType.MYPROXY);
-					CommonGridProperties.getDefault().setLastMyProxyUsername(
-							loginParams.getMyProxyUsername());
-				} catch (final ServiceInterfaceException e) {
-					throw new LoginException("Could not login: "
-							+ e.getLocalizedMessage(), e);
-				}
-			}
-		} else {
 			try {
-				// means shib login
-				// dependencies = new HashMap<Dependency, String>();
-				//
-				// dependencies.put(Dependency.ARCSGSI, "1.2-SNAPSHOT");
-				//
-				// DependencyManager.addDependencies(dependencies,
-				// Environment.getGrisuPluginDirectory());
-
-				final GSSCredential slcsproxy = slcsMyProxyInit(username,
-						password, idp, loginParams);
-
-				if (saveCredentialAsLocalProxy) {
-					CredentialHelpers.writeToDisk(slcsproxy);
-				}
-
-				si = LoginHelpers.gssCredentialLogin(loginParams, slcsproxy);
-				ClientPropertiesManager.saveLastLoginType(LoginType.SHIBBOLETH);
-			} catch (final Exception e) {
-				myLogger.error(e);
-				throw new LoginException("Could not do slcs login: "
-						+ e.getLocalizedMessage(), e);
+				addPluginsToClasspath();
+			} catch (final IOException e2) {
+				// TODO Auto-generated catch block
+				myLogger.warn(e2.getLocalizedMessage(), e2);
+				throw new RuntimeException(e2);
 			}
 
+			try {
+				CertificateFiles.copyCACerts(true);
+			} catch (final Exception e1) {
+				// e1.printStackTrace();
+				myLogger.warn(e1.getLocalizedMessage(), e1);
+			}
+
+			// do the cacert thingy
+			try {
+				final URL cacertURL = LoginManager.class
+						.getResource("/ipsca.pem");
+				final HttpSecureProtocol protocolSocketFactory = new HttpSecureProtocol();
+
+				TrustMaterial trustMaterial = null;
+				trustMaterial = new TrustMaterial(cacertURL);
+
+				// We can use setTrustMaterial() instead of addTrustMaterial()
+				// if we want to remove
+				// HttpSecureProtocol's default trust of TrustMaterial.CACERTS.
+				protocolSocketFactory.addTrustMaterial(trustMaterial);
+
+				// Maybe we want to turn off CN validation (not recommended!):
+				protocolSocketFactory.setCheckHostname(false);
+
+				final Protocol protocol = new Protocol("https",
+						(ProtocolSocketFactory) protocolSocketFactory, 443);
+				Protocol.registerProtocol("https", protocol);
+			} catch (final Exception e) {
+				myLogger.error(e.getLocalizedMessage(), e);
+			}
+
+			if (displayCliProgress) {
+				CliHelpers.setIndeterminateProgress("Uploading credential...", true);
+			}
+			try {
+				cred.uploadMyProxy();
+			} catch (Exception e) {
+				throw new LoginException("Could not upload myproxy credential.", e);
+			}
+
+			ServiceInterface si;
+			if (displayCliProgress) {
+				CliHelpers.setIndeterminateProgress("Logging in to backend...",
+						true);
+			}
+			try {
+				si = ServiceInterfaceFactory.createInterface(
+						loginParams.getLoginUrl(), cred.getMyProxyUsername(),
+						cred.getMyProxyPassword(), cred.getMyProxyServer(),
+						new Integer(cred.getMyProxyPort()).toString(),
+						loginParams.getHttpProxy(), loginParams.getHttpProxyPort(),
+						loginParams.getHttpProxyUsername(),
+						loginParams.getHttpProxyPassphrase());
+			} catch (ServiceInterfaceException e) {
+				throw new LoginException("Could not login to backend.", e);
+			}
+
+			loginParams.clearPasswords();
+
+			GrisuRegistryManager.registerServiceInterface(si, cred);
+			GrisuRegistryManager.getDefault(si).set(Constants.BACKEND,
+					loginParams.getLoginUrl());
+
+			return si;
+		} finally {
+			if (displayCliProgress) {
+				CliHelpers.setIndeterminateProgress(false);
+
+			}
 		}
 
-		ClientPropertiesManager.setDefaultServiceInterfaceUrl(loginParams
-				.getServiceInterfaceUrl());
-
-		return si;
-	}
-
-	/**
-	 * One-for-all method to login to a Grisu backend.
-	 * 
-	 * Specify nothing except the loginParams (without the myproxy username &
-	 * password) in order to use a local proxy. If you specify the password in
-	 * addition to that the local x509 cert will be used to create a local proxy
-	 * which in turn will be used to login to the Grisu backend.
-	 * 
-	 * If you specify the myproxy username & password in the login params those
-	 * will be used for a simple myproxy login to the backend.
-	 * 
-	 * In order to use shibboleth login, you need to specify the password, the
-	 * idp-username and the name of the idp.
-	 * 
-	 * @param password
-	 *            the password or null
-	 * @param username
-	 *            the shib-username or null
-	 * @param idp
-	 *            the name of the idp or null
-	 * @param url
-	 *            the serviceInterfaceUrl to connect to
-	 * @param saveCredentialAsLocalProxy
-	 *            whether to save the credential as a local proxy after
-	 *            successful login or not
-	 * @return the serviceinterface
-	 * @throws LoginException
-	 *             if the login doesn't succeed
-	 * @throws IOException
-	 *             if necessary plugins couldn't be downloaded/stored in the
-	 *             .grisu/plugins folder
-	 */
-	public static ServiceInterface login(GlobusCredential cred,
-			char[] password, String username, String idp, String url,
-			boolean saveCredentialAsLocalProxy) throws LoginException {
-
-		final LoginParams params = new LoginParams(url, null, null);
-		return login(cred, password, username, idp, params,
-				saveCredentialAsLocalProxy);
 
 	}
 
-	/**
-	 * 2nd simplest way to login.
-	 * 
-	 * Logs into a backend using an already existing local proxy.
-	 * 
-	 * @param url
-	 *            the url of the serviceinterface
-	 * 
-	 * @return the serviceinterface
-	 * @throws LoginException
-	 *             if the login doesn't succeed
-	 */
-	public static ServiceInterface login(String url) throws LoginException {
-		return login((GlobusCredential) null, (char[]) null, (String) null,
-				(String) null, url, false);
+	public static ServiceInterface login(Credential cred,
+			String backend,
+			boolean displayCliProgress)
+					throws LoginException {
+		LoginParams params = new LoginParams(backend, null, null);
+		return login(cred, params, displayCliProgress);
 	}
 
-	public static ServiceInterface login(UI ui, Set<LoginType> types, String url)
+
+	public static ServiceInterface login(String backend)
 			throws LoginException {
-
-		switch (ui) {
-		case COMMANDLINE:
-			return loginCommandline(types, url);
-		case SWING:
-			return loginSwing(types, url);
+		Credential cred = null;
+		try {
+			cred = CredentialFactory.loadFromLocalProxy();
+		} catch (Exception e) {
+			throw new LoginException("Could not load default credential.", e);
 		}
+		return login(cred, backend, false);
 
-		throw new IllegalArgumentException("Login type " + ui.toString()
-				+ " not supported.");
 	}
 
 	public static ServiceInterface loginCommandline() throws LoginException {
-		return loginCommandline(SERVICEALIASES.get("local"));
+		return loginCommandline(LoginManager.DEFAULT_PROXY_LIFETIME_IN_HOURS);
 	}
 
-	public static ServiceInterface loginCommandline(LoginType type, String url)
+	public static ServiceInterface loginCommandline(int proxy_lifetime_in_hours)
 			throws LoginException {
-
-		switch (type) {
-		case SHIBBOLETH:
-			return loginCommandlineShibboleth(url, false);
-		case SHIBBOLETH_LAST_IDP:
-			return loginCommandlineShibboleth(url, true);
-		case MYPROXY:
-			return loginCommandlineMyProxy(url);
-		case LOCAL_PROXY:
-			return LoginManager.login(url);
-		case X509_CERTIFICATE:
-			return loginCommandlineX509cert(url);
-		}
-		throw new IllegalArgumentException("Login type not supported.");
-
+		return loginCommandline("Local", proxy_lifetime_in_hours);
 	}
 
-	public static ServiceInterface loginCommandline(Set<LoginType> types,
-			String url) throws LoginException {
-
-		if ((types == null) || (types.size() == 0)) {
-
-			throw new IllegalArgumentException("No login type specified.");
-		}
-
-		if (types.size() == 1) {
-			return loginCommandline(types.iterator().next(), url);
-		}
-
-		final ImmutableList<LoginType> temp = ImmutableList.copyOf(types);
-
-		final StringBuffer message = new StringBuffer(
-				"Please select your preferred login method:\n\n");
-
-		for (int i = 0; i < temp.size(); i++) {
-			if (temp.get(i).equals(LoginType.SHIBBOLETH_LAST_IDP)) {
-				String lastIdp = CommonGridProperties.getDefault()
-						.getLastShibIdp();
-				message.append("[" + (i + 1) + "]\t"
-						+ temp.get(i).getPrettyName() + " (using: " + lastIdp
-						+ ")\n");
-			} else {
-				message.append("[" + (i + 1) + "]\t"
-						+ temp.get(i).getPrettyName()
-						+ "\n");
-			}
-		}
-		message.append("\n[0]\tExit\n\n");
-
-		System.out.println(message.toString());
-
-		int choice = -1;
-		while ((choice < 0) || (choice > temp.size())) {
-			String input;
-			try {
-				input = CliHelpers.getConsoleReader()
-						.readLine("Login method: ");
-
-			} catch (final IOException e) {
-				throw new RuntimeException(e);
-			}
-
-			try {
-				choice = Integer.parseInt(input);
-			} catch (final Exception e) {
-				continue;
-			}
-		}
-
-		if (choice == 0) {
-			System.exit(0);
-		}
-
-		return loginCommandline(temp.get(choice - 1), url);
-
-	}
-
-	public static ServiceInterface loginCommandline(String url)
+	public static ServiceInterface loginCommandline(String backend)
 			throws LoginException {
+		return loginCommandline(backend,
+				LoginManager.DEFAULT_PROXY_LIFETIME_IN_HOURS);
+	}
 
-		initEnvironment();
+	public static ServiceInterface loginCommandline(String backend,
+			boolean saveCredToDisk, int proxy_lifetime_in_hours) throws LoginException {
+		return loginCommandline(backend, saveCredToDisk, proxy_lifetime_in_hours, -1);
+	}
 
-		if (LocalProxy.validGridProxyExists()) {
-			CliHelpers.setIndeterminateProgress("Logging in...", true);
-			try {
-				ServiceInterface tmp = LoginManager.login(url);
-				CliHelpers.setIndeterminateProgress("Logged in to backend: "
-						+ url, false);
-				return tmp;
-			} catch (LoginException le) {
-				CliHelpers.setIndeterminateProgress(false);
-				throw le;
-			}
-		} else {
+	public static ServiceInterface loginCommandline(String backend,
+			boolean saveCredToDisk, int proxyLifetimeInHours, int minProxyLifetimeInSeconds)
+					throws LoginException {
 
-			String lastIdp = CommonGridProperties.getDefault().getGridProperty(
-					CommonGridProperties.Property.SHIB_IDP);
+		Credential c = null;
 
-			final ImmutableSet<LoginType> temp;
+		boolean validLocalProxy = false;
 
-			if (StringUtils.isBlank(lastIdp)) {
-				temp = ImmutableSet.of(LoginType.SHIBBOLETH, LoginType.MYPROXY,
-						LoginType.X509_CERTIFICATE);
-
+		try {
+			c = Credential.load();
+			int lifetime = c.getRemainingLifetime();
+			if (lifetime >= minProxyLifetimeInSeconds) {
+				validLocalProxy = true;
 			} else {
-				temp = ImmutableSet.of(LoginType.SHIBBOLETH,
-						LoginType.SHIBBOLETH_LAST_IDP, LoginType.MYPROXY,
-						LoginType.X509_CERTIFICATE);
-
+				validLocalProxy = false;
 			}
-			try {
-				ServiceInterface tmp = loginCommandline(temp, url);
-				return tmp;
-			} catch (LoginException le) {
-				CliHelpers.setIndeterminateProgress(false);
-				throw le;
-			}
+		} catch (CredentialException ce) {
+			validLocalProxy = false;
 		}
 
-	}
 
-	public static ServiceInterface loginCommandlineMyProxy(String url) {
-		return loginCommandlineMyProxy(url, null);
-	}
-
-	public static ServiceInterface loginCommandlineMyProxy(String url,
-			String myproxyUsername) {
-
-		while (true) {
+		if (validLocalProxy) {
+			CliHelpers.setIndeterminateProgress(
+					"Local credential found, logging in...", true);
 			try {
-				String username = null;
-				if (StringUtils.isBlank(myproxyUsername)) {
-					final StringBuffer prompt = new StringBuffer(
-							"Please enter your myproxy username");
-					final String lastMyProxyUsername = CommonGridProperties
-							.getDefault().getLastMyProxyUsername();
-
-					if (StringUtils.isNotBlank(lastMyProxyUsername)) {
-						prompt.append(" [" + lastMyProxyUsername + "]: ");
-					} else {
-						prompt.append(": ");
-					}
-
-					while (StringUtils.isBlank(username)) {
-						try {
-							username = CliHelpers.getConsoleReader().readLine(
-									prompt.toString());
-						} catch (final IOException e) {
-							throw new RuntimeException(e);
-						}
-
-						if (StringUtils.isNotBlank(lastMyProxyUsername)
-								&& StringUtils.isBlank(username)) {
-							username = lastMyProxyUsername;
-						}
-					}
-				} else {
-					username = myproxyUsername;
-				}
-
-				CommonGridProperties.getDefault().setLastMyProxyUsername(
-						username);
-
-				String password = null;
-				while (StringUtils.isBlank(password)) {
-					try {
-						password = CliHelpers.getConsoleReader().readLine(
-								"Please enter your myproxy password: ",
-								new Character('*'));
-					} catch (final IOException e) {
-						throw new RuntimeException(e);
-					}
-				}
-
-				CliHelpers.setIndeterminateProgress("Logging in...", true);
-				ServiceInterface tmp = LoginManager.myProxyLogin(url, username,
-						password.toCharArray());
-				CliHelpers.setIndeterminateProgress("Logged in to backend: "
-						+ url, false);
-				return tmp;
-
-			} catch (final LoginException e) {
+				c.uploadMyProxy();
+			} finally {
 				CliHelpers.setIndeterminateProgress(false);
-				System.out.println("Login failed: " + e.getLocalizedMessage());
 			}
-		}
 
-	}
-
-	public static ServiceInterface loginCommandlineShibboleth(String url,
-			boolean useLastIdp) {
-
-		final String lastIdp = CommonGridProperties.getDefault()
-				.getLastShibIdp();
-
-		if (useLastIdp) {
-			if (StringUtils.isBlank(lastIdp)) {
-
-				throw new RuntimeException(
-						"No last used IdP found. Please log in using default shibboleth login.");
-
-			}
-			return loginCommandlineShibboleth(url, null, lastIdp);
 		} else {
-			return loginCommandlineShibboleth(url, null, null);
-		}
-
-	}
-
-	public static ServiceInterface loginCommandlineShibboleth(String url,
-			String usernameTmp, String idpTmp) {
-
-		while (true) {
-			try {
-
-				String username = usernameTmp;
-				String idp = idpTmp;
-				initEnvironment();
-
-				// System.out.println("Loading list of institutions...");
-
-
-				String idpchoice = null;
-				StringBuffer prompt = null;
-
-				if (StringUtils.isNotBlank(idp)) {
-					idpchoice = idp;
-				} else {
-
-				String id = UUID.randomUUID().toString();
-				myLogger.debug("Shib login: getting list of idps... (id: " + id
-						+ ")");
-
-				try {
-					final Shibboleth shib = new Shibboleth(idpObj, cm);
-					shib.openurl(SLCS.DEFAULT_SLCS_URL);
-					myLogger.debug("Shib login: success getting list of idps... (id: "
-							+ id + ")");
-
-				} catch (Exception e) {
-
-					myLogger.debug("Shib login: failed getting list of idps: "
-							+ e.getLocalizedMessage() + " (id: " + id + ")");
-					throw new LoginException(e.getLocalizedMessage());
-				}
-
-					CliHelpers.setIndeterminateProgress("Loading...", true);
-
-					prompt = new StringBuffer(
-							"Please select your institution");
-
-					final List<String> idps = SlcsLoginWrapper.getAllIdps();
-
-					CliHelpers.setIndeterminateProgress("Available Institutions:",
-							false);
-
-					int defaultChoice = -1;
-
-					for (int i = 0; i < idps.size(); i++) {
-						System.out.println("[" + (i + 1) + "]\t" + idps.get(i));
-
-						if (StringUtils.isNotBlank(lastIdp)
-								&& idps.get(i).equals(lastIdp)) {
-							defaultChoice = i + 1;
-						}
-					}
-					System.out.println("\n[0]\tExit");
-
-					if (defaultChoice < 0) {
-						prompt.append(": ");
-					} else {
-						prompt.append(" [" + defaultChoice + "]: ");
-					}
-
-					int choice = -1;
-					while (choice < 0) {
-						try {
-							idpchoice = CliHelpers.getConsoleReader().readLine(
-									prompt.toString());
-						} catch (final IOException e) {
-							throw new RuntimeException(e);
-						}
-
-						if ((defaultChoice >= 0) && StringUtils.isBlank(idpchoice)) {
-							idpchoice = new Integer(defaultChoice).toString();
-						}
-
-						try {
-							choice = Integer.parseInt(idpchoice);
-						} catch (final Exception e) {
-							continue;
-						}
-					}
-
-					if (choice == 0) {
-						System.exit(0);
-					}
-
-					idpchoice = idps.get(choice - 1);
-
-					CommonGridProperties.getDefault().setLastShibIdp(idpchoice);
-				}
-
-				if (StringUtils.isBlank(username)) {
-					prompt = new StringBuffer(
-							"Please enter your institution username");
-					final String lastShibUsername = CommonGridProperties
-							.getDefault().getLastShibUsername();
-
-					if (StringUtils.isNotBlank(lastShibUsername)) {
-						prompt.append(" [" + lastShibUsername + "]: ");
-					} else {
-						prompt.append(": ");
-					}
-
-					while (StringUtils.isBlank(username)) {
-						try {
-							username = CliHelpers.getConsoleReader().readLine(
-									prompt.toString());
-						} catch (final IOException e) {
-							throw new RuntimeException(e);
-						}
-
-						if (StringUtils.isNotBlank(lastShibUsername)
-								&& StringUtils.isBlank(username)) {
-							username = lastShibUsername;
-						}
-					}
-				}
-
-				CommonGridProperties.getDefault().setLastShibUsername(username);
-
-				String password = null;
-				while (StringUtils.isBlank(password)) {
-					try {
-						password = CliHelpers.getConsoleReader().readLine(
-								"Please enter your institution password: ",
-								new Character('*'));
-					} catch (final IOException e) {
-						throw new RuntimeException(e);
-					}
-				}
-
-				CliHelpers.setIndeterminateProgress("Logging in...", true);
-				ServiceInterface tmp = LoginManager.shiblogin(username,
-						password.toCharArray(),
-						idpchoice, url, true);
-				CliHelpers.setIndeterminateProgress("Logged in to backend: "
-						+ url, false);
-
-				return tmp;
-			} catch (final Throwable e) {
-				CliHelpers.setIndeterminateProgress(false);
-				System.out.println("Login failed: " + e.getLocalizedMessage());
+			c = CredentialFactory.createFromCommandline(proxyLifetimeInHours);
+			if (saveCredToDisk) {
+				c.saveCredential();
 			}
 		}
 
+		return login(c, backend, true);
+
 	}
 
-	public static ServiceInterface loginCommandlineX509cert(String url) {
+	public static ServiceInterface loginCommandline(String backend, int proxy_lifetime_in_hours)
+			throws LoginException {
+		return loginCommandline(backend, true, proxy_lifetime_in_hours);
+	}
 
-		while (true) {
-			try {
+	public static ServiceInterface loginCommandlineLocalProxy(String backend)
+			throws LoginException {
+		Credential c = Credential.load();
 
-				String password = null;
-				while (StringUtils.isBlank(password)) {
-					try {
-						password = CliHelpers
-								.getConsoleReader()
-								.readLine(
-										"Please enter your x509 certificate passphrase: ",
-										new Character('*'));
-					} catch (final IOException e) {
-						throw new RuntimeException(e);
-					}
-				}
-
-				final LoginParams params = new LoginParams(url, null, null);
-
-				CliHelpers.setIndeterminateProgress("Logging in...", true);
-				ServiceInterface tmp = LoginManager.login(null,
-						password.toCharArray(), null,
-						null, params, true);
-				CliHelpers.setIndeterminateProgress("Logged in to backend: "
-						+ url, false);
-				return tmp;
-			} catch (final LoginException e) {
-				CliHelpers.setIndeterminateProgress(false);
-				System.out.println("Login exception: "
-						+ e.getLocalizedMessage());
-			}
+		if ((c == null) || !c.isValid()) {
+			throw new CredentialException("Your session has expired. Please login and try again.");
 		}
 
+		return login(c, backend, true);
 	}
 
-	public static ServiceInterface loginSwing(Set<LoginType> types, String url) {
-		throw new RuntimeException("Not supported yet.");
+	public static ServiceInterface loginCommandlineMyProxy(String backend,
+			String username, int proxy_lifetime_in_hours, boolean saveCredToDisk)
+					throws LoginException {
+
+		LoginParams p = new LoginParams(backend, username, null);
+
+		Credential c;
+		try {
+			c = CredentialFactory.createFromMyProxyCommandline(p,
+					proxy_lifetime_in_hours * 3600);
+			if (saveCredToDisk) {
+				c.saveCredential();
+			}
+		} catch (Exception e) {
+			throw new LoginException("Can't get credential from MyProxy.", e);
+		}
+
+		return login(c, backend, true);
+	}
+
+	public static ServiceInterface loginCommandlineShibboleth(String backend,
+			String username, String idp, boolean saveCredToDisk)
+					throws LoginException {
+
+		Credential c;
+		try {
+			c = CredentialFactory.createFromSlcsCommandline(username, idp,
+					DEFAULT_PROXY_LIFETIME_IN_HOURS * 3600);
+			if (saveCredToDisk) {
+				c.saveCredential();
+			}
+		} catch (Exception e) {
+			throw new LoginException("Can't get credential from MyProxy.", e);
+		}
+
+		return login(c, backend, true);
+
+	}
+
+	public static ServiceInterface loginCommandlineX509cert(String backend,
+			int proxy_lifetime_in_hours,
+			boolean saveCredToDisk)
+					throws LoginException {
+		Credential c = CredentialFactory
+				.createFromLocalCertCommandline(proxy_lifetime_in_hours);
+		if (saveCredToDisk) {
+			c.saveCredential();
+		}
+		return login(c, backend, true);
 	}
 
 	public static void main(String[] args) throws LoginException {
 
-		final ServiceInterface si = LoginManager.shiblogin("markus",
-				args[0].toCharArray(), "VPAC", true);
+		// Credential c = CredentialFactory.createFromCommandline();
 
+		ServiceInterface si = loginCommandline("dev", 12);
+		System.out.println("");
+		System.out.println(si.getDN());
 	}
 
-	public static ServiceInterface myProxyLogin(String url, String username,
-			char[] password) throws LoginException {
-		final LoginParams loginParams = new LoginParams(url, username, password);
-		return login(null, null, null, null, loginParams, false);
-	}
-
-	public static void setHttpProxy(String host, int port, String username,
-			char[] password) {
-		httpProxyHost = host;
-		httpProxyPort = port;
-		httpProxyUsername = username;
-		httpProxyPassphrase = password;
-		HttpProxyManager.setHttpProxy(httpProxyHost, httpProxyPort,
-				httpProxyUsername, httpProxyPassphrase);
-	}
-
-	/**
-	 * Standard shib login to local backend.
-	 * 
-	 * Logs into a backend using an already existing local proxy.
-	 * 
-	 * @param username
-	 *            the idp username
-	 * @param password
-	 *            the idp password
-	 * @param idp
-	 *            the idp name
-	 * @param url
-	 *            the url of the serviceinterface
-	 * @param saveCredendentialsToLocalProxy
-	 *            whether to save the credentials to a local proxy afterwards
-	 * 
-	 * @return the serviceinterface
-	 * @throws LoginException
-	 *             if the login doesn't succeed
-	 */
-	public static ServiceInterface shiblogin(String username, char[] password,
-			String idp, boolean saveCredendentialsToLocalProxy)
+	public static ServiceInterface myProxyLogin(String username,
+			char[] password, String backend, boolean displayCliProgress)
 					throws LoginException {
-		return login((GlobusCredential) null, password, username, idp, "Local",
-				saveCredendentialsToLocalProxy);
+
+		Credential c = CredentialFactory.createFromMyProxy(username, password,
+				DEFAULT_PROXY_LIFETIME_IN_HOURS * 3600);
+		return login(c, backend, displayCliProgress);
 	}
 
-	/**
-	 * Standard shib login.
-	 * 
-	 * Logs into a backend using an already existing local proxy.
-	 * 
-	 * @param username
-	 *            the idp username
-	 * @param password
-	 *            the idp password
-	 * @param idp
-	 *            the idp name
-	 * @param url
-	 *            the url of the serviceinterface
-	 * @param saveCredendentialsToLocalProxy
-	 *            whether to save the credentials to a local proxy afterwards
-	 * 
-	 * @return the serviceinterface
-	 * @throws LoginException
-	 *             if the login doesn't succeed
-	 */
-	public static ServiceInterface shiblogin(String username, char[] password,
-			String idp, String url, boolean saveCredendentialsToLocalProxy)
-					throws LoginException {
-		return login((GlobusCredential) null, password, username, idp, url,
-				saveCredendentialsToLocalProxy);
+
+	public static String setClientName(String name) {
+
+		if (StringUtils.isBlank(name)) {
+			name = "Unknown";
+		}
+		CLIENT_NAME = name;
+		MDC.put("client", name);
+
+		return name;
+
 	}
 
-	public static GSSCredential slcsMyProxyInit(String username,
-			char[] password, String idp, LoginParams params) throws Exception {
+	public static String setClientVersion(String version ) {
+		if (StringUtils.isBlank(version)) {
+			version = "n/a";
+		}
+		CLIENT_VERSION = version;
+		MDC.put("client_version", version);
 
-		return SlcsLoginWrapper
-				.slcsMyProxyInit(username, password, idp, params);
+		return version;
+	}
 
+	public static String setUserSessionId(String id) {
+		if (StringUtils.isBlank(id)) {
+			id = System.getProperty("user.name") + "_" + new Date().getTime();
+		}
+		USER_SESSION = id;
+		MDC.put("session", id);
+
+		return id;
 	}
 
 }

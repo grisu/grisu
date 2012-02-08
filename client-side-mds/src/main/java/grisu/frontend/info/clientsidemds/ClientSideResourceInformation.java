@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class ClientSideResourceInformation implements ResourceInformation {

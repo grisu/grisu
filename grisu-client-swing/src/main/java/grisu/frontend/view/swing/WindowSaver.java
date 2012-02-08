@@ -16,12 +16,13 @@ import javax.swing.JFrame;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WindowSaver implements AWTEventListener {
 
-	static final Logger myLogger = Logger
-			.getLogger(WindowSaver.class.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(WindowSaver.class
+			.getName());
 
 	static PropertiesConfiguration propertiesConfig;
 

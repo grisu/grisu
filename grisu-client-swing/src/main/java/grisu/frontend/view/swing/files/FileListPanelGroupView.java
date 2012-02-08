@@ -6,7 +6,6 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
-
 import com.jgoodies.forms.layout.FormLayout;
 
 public class FileListPanelGroupView extends JPanel implements FileListPanel {

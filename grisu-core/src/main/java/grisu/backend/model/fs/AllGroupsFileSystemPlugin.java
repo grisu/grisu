@@ -15,12 +15,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import net.sf.ehcache.util.NamedThreadFactory;
+
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AllGroupsFileSystemPlugin implements VirtualFileSystemPlugin {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(AllGroupsFileSystemPlugin.class.getName());
 
 	public static final String IDENTIFIER = "allgroups";
@@ -33,21 +36,21 @@ public class AllGroupsFileSystemPlugin implements VirtualFileSystemPlugin {
 
 	private GridFile assembleFileObject(String path, Map<String, GridFile> lsMap) {
 
-		GridFile result = new GridFile(path, -1L);
-		result.setIsVirtual(true);
+		final GridFile result = new GridFile(path, -1L);
+		result.setVirtual(true);
 
-		for (String url : lsMap.keySet()) {
+		for (final String url : lsMap.keySet()) {
 			result.addUrl(url, 0);
 
-			GridFile child = lsMap.get(url);
+			final GridFile child = lsMap.get(url);
 
 			if (!child.isFolder()) {
 				boolean alreadyInChildren = false;
-				for (GridFile resultChild : result.getChildren()) {
+				for (final GridFile resultChild : result.getChildren()) {
 					if (resultChild.getName().equals(child.getName())) {
 						resultChild.addUrl(child.getUrl(), 0);
 						resultChild.setUrl(child.getPath());
-						resultChild.setIsVirtual(true);
+						resultChild.setVirtual(true);
 						resultChild.setLastModified(-1L);
 						resultChild.setSize(-1L);
 						resultChild.addSites(child.getSites());
@@ -71,13 +74,13 @@ public class AllGroupsFileSystemPlugin implements VirtualFileSystemPlugin {
 				// now we add the children
 				// but me need to make sure that it's not already in there
 
-				for (GridFile c : child.getChildren()) {
+				for (final GridFile c : child.getChildren()) {
 					boolean alreadyInChildren = false;
-					for (GridFile resultChild : result.getChildren()) {
+					for (final GridFile resultChild : result.getChildren()) {
 						if (resultChild.getName().equals(c.getName())) {
 							resultChild.addUrl(c.getUrl(), 0);
 							resultChild.setUrl(c.getPath());
-							resultChild.setIsVirtual(true);
+							resultChild.setVirtual(true);
 							resultChild.addSites(child.getSites());
 							resultChild.setLastModified(-1L);
 							result.addSites(child.getSites());
@@ -105,20 +108,20 @@ public class AllGroupsFileSystemPlugin implements VirtualFileSystemPlugin {
 					"Recursion levels other than 1 not supported yet");
 		}
 
-		String[] tokens = StringUtils.split(path, '/');
+		final String[] tokens = StringUtils.split(path, '/');
 
 		if (tokens.length == 2) {
 			// only display groups
 
-			GridFile result = new GridFile(
+			final GridFile result = new GridFile(
 					ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME + "://"
 							+ IDENTIFIER, -1L);
 
-			result.setIsVirtual(true);
+			result.setVirtual(true);
 
-			for (String group : user.getAllAvailableUniqueGroupnames()) {
+			for (final String group : user.getAllAvailableUniqueGroupnames()) {
 
-				String fqan = user.getFullFqan(group);
+				final String fqan = user.getFullFqan(group);
 				result.addFqan(fqan);
 				if (user.getMountPoints(fqan).size() == 0) {
 					// DtoFileObject child = new DtoFileObject("grid://"
@@ -128,29 +131,30 @@ public class AllGroupsFileSystemPlugin implements VirtualFileSystemPlugin {
 					continue;
 				} else if (user.getMountPoints(fqan).size() == 1) {
 
-					MountPoint mp = user.getMountPoints(fqan).iterator().next();
+					final MountPoint mp = user.getMountPoints(fqan).iterator()
+							.next();
 					GridFile child = null;
 					// try {
 					// child = new DtoFileObject(mp.getRootUrl(), user
 					// .aquireFile(mp.getRootUrl(), fqan).getContent()
 					// .getLastModifiedTime());
 					// } catch (Exception e) {
-					// myLogger.error(e);
+					// myLogger.error(e.getLocalizedMessage(), e);
 					child = new GridFile(mp.getRootUrl(), -1L);
 					child.setName(group);
 					// }
-					child.setIsVirtual(false);
+					child.setVirtual(false);
 					child.addFqan(fqan);
 					child.addSite(mp.getSite());
 					result.addChild(child);
 					result.addSite(mp.getSite());
 				} else {
-					GridFile child = new GridFile("grid://" + IDENTIFIER + "/"
-							+ group, -1L);
-					child.setIsVirtual(true);
+					final GridFile child = new GridFile("grid://" + IDENTIFIER
+							+ "/" + group, -1L);
+					child.setVirtual(true);
 					child.addFqan(fqan);
 
-					for (MountPoint mp : user.getMountPoints(fqan)) {
+					for (final MountPoint mp : user.getMountPoints(fqan)) {
 						child.addSite(mp.getSite());
 						result.addSite(mp.getSite());
 						child.addUrl(mp.getRootUrl(), 0);
@@ -163,16 +167,16 @@ public class AllGroupsFileSystemPlugin implements VirtualFileSystemPlugin {
 
 		} else {
 
-			String uniqueGroup = tokens[2];
+			final String uniqueGroup = tokens[2];
 
 			if (!user.getAllAvailableUniqueGroupnames().contains(uniqueGroup)) {
 				throw new InvalidPathException("Group \"" + tokens[2]
 						+ "\" not available.");
 			}
-			String fullFqan = user.getFullFqan(uniqueGroup);
+			final String fullFqan = user.getFullFqan(uniqueGroup);
 
-			Set<MountPoint> mps = new HashSet<MountPoint>();
-			for (MountPoint mp : user.getAllMountPoints()) {
+			final Set<MountPoint> mps = new HashSet<MountPoint>();
+			for (final MountPoint mp : user.getAllMountPoints()) {
 				if (mp.getFqan().equals(fullFqan)) {
 					mps.add(mp);
 				}
@@ -184,21 +188,23 @@ public class AllGroupsFileSystemPlugin implements VirtualFileSystemPlugin {
 			final Map<String, GridFile> lsMap = Collections
 					.synchronizedMap(new HashMap<String, GridFile>());
 
-			final ExecutorService pool = Executors.newFixedThreadPool(10);
+			final NamedThreadFactory tf = new NamedThreadFactory(
+					"groupFSfolderList");
+			final ExecutorService pool = Executors.newFixedThreadPool(10, tf);
 
 			for (final MountPoint mp : mps) {
-				Thread t = new Thread() {
+				final Thread t = new Thread() {
 					@Override
 					public void run() {
 
-						String urlToLs = mp.getRootUrl() + "/" + restUrl;
+						final String urlToLs = mp.getRootUrl() + "/" + restUrl;
 						try {
-							GridFile result = user.getFileSystemManager()
+							final GridFile result = user.getFileManager()
 									.getFolderListing(urlToLs, 1);
 							myLogger.debug("retrieved results from: "
 									+ mp.getAlias());
 							result.setPath(path);
-							for (GridFile c : result.getChildren()) {
+							for (final GridFile c : result.getChildren()) {
 								if (path.endsWith("/")) {
 									c.setPath(path + c.getName());
 								} else {
@@ -208,8 +214,8 @@ public class AllGroupsFileSystemPlugin implements VirtualFileSystemPlugin {
 							result.addSite(mp.getSite());
 							result.addFqan(mp.getFqan());
 							lsMap.put(urlToLs, result);
-						} catch (Exception e) {
-							myLogger.error(e);
+						} catch (final Exception e) {
+							myLogger.error(e.getLocalizedMessage(), e);
 						}
 					}
 				};
@@ -220,8 +226,8 @@ public class AllGroupsFileSystemPlugin implements VirtualFileSystemPlugin {
 
 			try {
 				pool.awaitTermination(5, TimeUnit.MINUTES);
-			} catch (InterruptedException e) {
-				myLogger.error(e);
+			} catch (final InterruptedException e) {
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 
 			switch (lsMap.size()) {

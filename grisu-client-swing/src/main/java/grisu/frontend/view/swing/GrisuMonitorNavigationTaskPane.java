@@ -17,16 +17,16 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.jdesktop.swingx.JXTaskPane;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements
 		EventSubscriber<NewJobEvent> {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(GrisuMonitorNavigationTaskPane.class.getName());
 
 	public static final String SINGLE_JOB_LIST = "single_list";
@@ -135,7 +135,7 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements
 							event.getJob().getJobname(),
 							Constants.APPLICATIONNAME_KEY);
 				} catch (final Exception e) {
-					myLogger.error(e);
+					myLogger.error(e.getLocalizedMessage(), e);
 					return;
 				}
 			}

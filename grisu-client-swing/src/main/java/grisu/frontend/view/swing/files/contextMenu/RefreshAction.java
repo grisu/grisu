@@ -10,11 +10,12 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RefreshAction extends AbstractAction {
 
-	static final Logger myLogger = Logger.getLogger(RefreshAction.class
+	static final Logger myLogger = LoggerFactory.getLogger(RefreshAction.class
 			.getName());
 
 	private final GridFileListPanel fileList;
@@ -37,7 +38,7 @@ public class RefreshAction extends AbstractAction {
 			return;
 		}
 
-		GridFile f = fileList.getSelectedFiles().iterator().next();
+		final GridFile f = fileList.getSelectedFiles().iterator().next();
 
 		if (f.isFolder()) {
 			fileList.refreshFolder(f.getUrl());

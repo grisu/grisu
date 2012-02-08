@@ -1,7 +1,6 @@
 package grisu.frontend.view.swing.files;
 
 import grisu.model.files.GlazedFile;
-
 import ca.odell.glazedlists.matchers.Matcher;
 
 public class GlazedFileMatcher implements Matcher<GlazedFile> {

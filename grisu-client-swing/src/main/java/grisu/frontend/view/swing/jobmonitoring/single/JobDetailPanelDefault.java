@@ -34,9 +34,10 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -47,8 +48,8 @@ import com.jidesoft.swing.JideTabbedPane;
 public class JobDetailPanelDefault extends JPanel implements
 PropertyChangeListener, JobDetailPanel {
 
-	static final Logger myLogger = Logger.getLogger(JobDetailPanelDefault.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(JobDetailPanelDefault.class.getName());
 
 	private static String generateHtml(Map<String, String> jobProperties) {
 
@@ -200,28 +201,27 @@ PropertyChangeListener, JobDetailPanel {
 					new Thread() {
 						@Override
 						public void run() {
-							BackgroundActionProgressDialogSmall d = new BackgroundActionProgressDialogSmall(
+							final BackgroundActionProgressDialogSmall d = new BackgroundActionProgressDialogSmall(
 									"Archiving job:", job.getJobname());
 							try {
-								String tmp = job.archive(null, false);
+								final String tmp = job.archive(null, false);
 
-								StatusObject so = StatusObject
-										.waitForActionToFinish(
-si, tmp, 5,
-												true, false);
+								final StatusObject so = StatusObject
+										.waitForActionToFinish(si, tmp, 5,
+ true);
 
 								d.close();
 
 								if (so.getStatus().isFailed()) {
 
-									String msg = "Can't archive job: "
+									final String msg = "Can't archive job: "
 											+ DtoActionStatus.getLastMessage(so
 													.getStatus());
-									ErrorInfo info = new ErrorInfo(
+									final ErrorInfo info = new ErrorInfo(
 											"Job archiving error", msg, null,
 											"Error", null, Level.SEVERE, null);
 
-									JXErrorPane pane = new JXErrorPane();
+									final JXErrorPane pane = new JXErrorPane();
 									pane.setErrorInfo(info);
 
 									JXErrorPane.showDialog(
@@ -230,15 +230,15 @@ si, tmp, 5,
 
 								}
 
-							} catch (Exception e) {
+							} catch (final Exception e) {
 								d.close();
-								ErrorInfo info = new ErrorInfo(
+								final ErrorInfo info = new ErrorInfo(
 										"Job archiving error",
 										"Can't archive job:\n\n"
 												+ e.getLocalizedMessage(),
 												null, "Error", e, Level.SEVERE, null);
 
-								JXErrorPane pane = new JXErrorPane();
+								final JXErrorPane pane = new JXErrorPane();
 								pane.setErrorInfo(info);
 
 								JXErrorPane.showDialog(
@@ -270,7 +270,7 @@ si, tmp, 5,
 						@Override
 						public void run() {
 
-							int n = JOptionPane.showConfirmDialog(
+							final int n = JOptionPane.showConfirmDialog(
 									JobDetailPanelDefault.this,
 									"Cleaning job "
 											+ JobDetailPanelDefault.this.job
@@ -282,20 +282,20 @@ si, tmp, 5,
 								return;
 							}
 
-							BackgroundActionProgressDialogSmall d = new BackgroundActionProgressDialogSmall(
+							final BackgroundActionProgressDialogSmall d = new BackgroundActionProgressDialogSmall(
 									"Cleaning job:", job.getJobname());
 							try {
 								job.kill(true);
 								d.close();
-							} catch (Exception e) {
+							} catch (final Exception e) {
 								d.close();
-								ErrorInfo info = new ErrorInfo(
+								final ErrorInfo info = new ErrorInfo(
 										"Job cleaning error",
 										"Can't clean job:\n\n"
 												+ e.getLocalizedMessage(),
 												null, "Error", e, Level.SEVERE, null);
 
-								JXErrorPane pane = new JXErrorPane();
+								final JXErrorPane pane = new JXErrorPane();
 								pane.setErrorInfo(info);
 
 								JXErrorPane.showDialog(
@@ -359,7 +359,7 @@ si, tmp, 5,
 						@Override
 						public void run() {
 
-							int n = JOptionPane.showConfirmDialog(
+							final int n = JOptionPane.showConfirmDialog(
 									JobDetailPanelDefault.this,
 									"Killing job "
 											+ JobDetailPanelDefault.this.job
@@ -371,19 +371,19 @@ si, tmp, 5,
 								return;
 							}
 
-							BackgroundActionProgressDialogSmall d = new BackgroundActionProgressDialogSmall(
+							final BackgroundActionProgressDialogSmall d = new BackgroundActionProgressDialogSmall(
 									"Killing job:", job.getJobname());
 							try {
 								job.kill(false);
 								d.close();
-							} catch (JobException e) {
+							} catch (final JobException e) {
 								d.close();
-								ErrorInfo info = new ErrorInfo(
+								final ErrorInfo info = new ErrorInfo(
 										"Job kill error", "Can't kill job:\n\n"
 												+ e.getLocalizedMessage(),
 												null, "Error", e, Level.SEVERE, null);
 
-								JXErrorPane pane = new JXErrorPane();
+								final JXErrorPane pane = new JXErrorPane();
 								pane.setErrorInfo(info);
 
 								JXErrorPane.showDialog(
@@ -552,7 +552,7 @@ si, tmp, 5,
 			setLog();
 			setProperties();
 
-			int status = (Integer) evt.getNewValue();
+			final int status = (Integer) evt.getNewValue();
 			if ((status >= JobConstants.ACTIVE)) {
 				getFileListWithPreviewPanel().refresh();
 
@@ -581,8 +581,8 @@ si, tmp, 5,
 				asvp.setJob(job);
 				getJideTabbedPane().insertTab(
 						job.getApplication() + " details", null, asvp, null, 0);
-			} catch (Exception e) {
-				myLogger.error(e);
+			} catch (final Exception e) {
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 		}
 
@@ -594,7 +594,7 @@ si, tmp, 5,
 		getFileListWithPreviewPanel().setCurrentUrl(job.getJobDirectoryUrl());
 		getTxtNa().setText(JobConstants.translateStatus(job.getStatus(false)));
 
-		int status = job.getStatus(false);
+		final int status = job.getStatus(false);
 		if (status <= JobConstants.ACTIVE) {
 			getKillButton().setEnabled(true);
 			getCleanButton().setEnabled(true);
@@ -612,13 +612,13 @@ si, tmp, 5,
 
 	private void setLog() {
 
-		String html = generateLogHtml(job.getLogMessages(true));
+		final String html = generateLogHtml(job.getLogMessages(true));
 
 		getLogTextArea().setText(html);
 	}
 
 	private void setProperties() {
-		String propText = generateHtml(job.getAllJobProperties(true));
+		final String propText = generateHtml(job.getAllJobProperties(true));
 		getPropertiesPane().setText(propText);
 
 		String subTime = null;

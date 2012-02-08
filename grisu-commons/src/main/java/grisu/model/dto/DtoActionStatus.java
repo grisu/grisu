@@ -19,16 +19,22 @@ public class DtoActionStatus {
 
 	public static String getLastMessage(DtoActionStatus status) {
 
-		DtoLogItem li = status.getLog().get(status.getLog().size() - 1);
+		final DtoLogItem li = status.getLog().get(status.getLog().size() - 1);
 		return li.getLogMessage();
 
 	}
 
 	public static String getLogMessagesAsString(DtoActionStatus status) {
 
-		StringBuffer temp = new StringBuffer();
-		for (DtoLogItem li : status.getLog()) {
-			temp.append(li.getLogMessage() + ", ");
+		return getLogMessagesAsString(status, ", ");
+	}
+
+	public static String getLogMessagesAsString(DtoActionStatus status,
+			String seperator) {
+
+		final StringBuffer temp = new StringBuffer();
+		for (final DtoLogItem li : status.getLog()) {
+			temp.append(li.getLogMessage() + seperator);
 		}
 		return temp.toString();
 	}
@@ -48,6 +54,8 @@ public class DtoActionStatus {
 	private String handle;
 
 	private String errorCause = null;
+
+	private String description = "";
 
 	public DtoActionStatus() {
 	}
@@ -87,6 +95,11 @@ public class DtoActionStatus {
 	@XmlElement(name = "currentElements")
 	public int getCurrentElements() {
 		return currentElements;
+	}
+
+	@XmlElement(name = "description")
+	public String getDescription() {
+		return description;
 	}
 
 	@XmlElement(name = "errorCause")
@@ -130,7 +143,7 @@ public class DtoActionStatus {
 		if (totalElements <= 0) {
 			return 0;
 		}
-		double result = (currentElements * 100) / totalElements;
+		final double result = (currentElements * 100) / totalElements;
 		if (result > 100.0) {
 			return 100.0;
 		} else {
@@ -140,6 +153,10 @@ public class DtoActionStatus {
 
 	public void setCurrentElements(int currentElements) {
 		this.currentElements = currentElements;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public void setErrorCause(String cause) {

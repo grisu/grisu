@@ -9,7 +9,6 @@ import java.io.File;
 import javax.swing.JDialog;
 import javax.swing.WindowConstants;
 
-
 public class FilePreviewDialog extends JDialog {
 
 	/**

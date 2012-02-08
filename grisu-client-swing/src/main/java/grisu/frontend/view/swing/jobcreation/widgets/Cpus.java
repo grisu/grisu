@@ -2,6 +2,9 @@ package grisu.frontend.view.swing.jobcreation.widgets;
 
 import grisu.control.ServiceInterface;
 
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.border.TitledBorder;
@@ -45,6 +48,16 @@ public class Cpus extends AbstractWidget {
 	private JComboBox getComboBox() {
 		if (comboBox == null) {
 			comboBox = new JComboBox(cpuModel);
+			comboBox.addItemListener(new ItemListener() {
+
+				public void itemStateChanged(ItemEvent itemevent) {
+					if (itemevent.getStateChange() == ItemEvent.SELECTED) {
+						getPropertyChangeSupport().firePropertyChange("cpus",
+								-1, getValue());
+
+					}
+				}
+			});
 		}
 		return comboBox;
 	}
@@ -55,7 +68,7 @@ public class Cpus extends AbstractWidget {
 			final Integer result = Integer.parseInt(integerString);
 			return result;
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			return -1;
 		}
 	}

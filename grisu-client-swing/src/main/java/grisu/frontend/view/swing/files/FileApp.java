@@ -1,55 +1,15 @@
 package grisu.frontend.view.swing.files;
 
 import grisu.control.ServiceInterface;
-import grisu.frontend.control.login.LoginManager;
-import grisu.frontend.control.login.LoginParams;
 import grisu.frontend.view.swing.files.preview.FileListWithPreviewPanel;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.io.File;
 
 import javax.swing.JFrame;
 
-
 public class FileApp {
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(final String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
 
-					final String username = args[0];
-					final char[] password = args[1].toCharArray();
-
-					final LoginParams loginParams = new LoginParams(
-					// "http://localhost:8080/grisu-ws/services/grisu",
-					// "https://ngportaldev.vpac.org/grisu-ws/services/grisu",
-					// "http://localhost:8080/enunciate-backend/soap/GrisuService",
-							"Local",
-							// "LOCAL_WS",
-							username, password);
-
-					ServiceInterface si = null;
-					// si = LoginManager.login(null, password, username, "VPAC",
-					// loginParams);
-					si = LoginManager
-							.login(null, null, null, null, loginParams);
-
-					final File home = new File(System.getProperty("user.home"));
-
-					final FileApp window = new FileApp(si, home.toURI()
-							.toString());
-					window.frame.setVisible(true);
-				} catch (final Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
 
 	private JFrame frame;
 

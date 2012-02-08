@@ -1,6 +1,7 @@
 package grisu.utils;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 /**
@@ -11,7 +12,8 @@ import org.w3c.dom.Document;
  */
 public final class DebugUtils {
 
-	static final Logger myLogger = Logger.getLogger(DebugUtils.class.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(DebugUtils.class
+			.getName());
 
 	public static void jsdlDebugOutput(final String stage, final Document jsdl) {
 

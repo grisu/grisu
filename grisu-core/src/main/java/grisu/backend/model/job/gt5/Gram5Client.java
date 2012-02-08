@@ -3,18 +3,18 @@ package grisu.backend.model.job.gt5;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.apache.log4j.Logger;
 import org.globus.gram.Gram;
 import org.globus.gram.GramException;
 import org.globus.gram.GramJob;
 import org.globus.gram.internal.GRAMConstants;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class Gram5Client { 
+public class Gram5Client {
 
-	static final Logger myLogger = Logger
-			.getLogger(Gram5Client.class.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(Gram5Client.class);
 
 	public Gram5Client() {
 	}
@@ -22,7 +22,7 @@ public class Gram5Client {
 	private String getContactString(String handle) {
 		try {
 			final URL url = new URL(handle);
-			myLogger.debug("job handle is " + handle);	
+			myLogger.debug("job handle is " + handle);
 			myLogger.debug("returned handle is " + url.getHost());
 			return url.getHost();
 		} catch (final MalformedURLException ex1) {
@@ -42,49 +42,53 @@ public class Gram5Client {
 		final Gram5JobListener l = Gram5JobListener.getJobListener();
 
 		// we need this to catch quick failure
-		//Integer status = l.getStatus(handle);
+		// Integer status = l.getStatus(handle);
 		Integer status = null;
-		
+
 		myLogger.debug("job status is " + status);
 		if (status != null) {
 			results[0] = status;
 			results[1] = l.getError(handle);
 			return results;
-		} 
+		}
 
 		final String contact = getContactString(handle);
-		GramJob job = new GramJob(null);
+		final GramJob job = new GramJob(null);
 		GramJob restartJob = new GramJob(null);
-		
+
 		try {
 			// lets try to see if gateway is working first...
-			Gram.ping(cred,contact);
+			Gram.ping(cred, contact);
 		} catch (final GramException ex) {
-			myLogger.info(ex);
+			myLogger.info(ex.getLocalizedMessage(), ex);
 			// have no idea what the status is, gateway is down:
 			return new int[] { GRAMConstants.STATUS_UNSUBMITTED, 0 };
 		} catch (final GSSException ex) {
-			myLogger.error(ex);
+			myLogger.error(ex.getLocalizedMessage(), ex);
 		}
 
 		try {
 			job.setID(handle);
 			job.setCredentials(cred);
 			job.bind();
-			//job.addListener(l);
+			// job.addListener(l);
 			Gram.jobStatus(job);
 			myLogger.debug("job status is " + job.getStatusAsString());
 			myLogger.debug("job error is " + job.getError());
 		} catch (final GramException ex) {
 			myLogger.debug("ok, normal method of getting exit status is not working. need to restart job.");
-			if ((ex.getErrorCode() == 156  || ex.getErrorCode() == 12) && restart/* job contact not found*/) {
+			if ((ex.getErrorCode() == 156) || (ex.getErrorCode() == 12/*
+																	 * job
+																	 * contact
+																	 * not found
+																	 */)) {
 				// maybe the job finished, but maybe we need to kick job manager
 
 				myLogger.debug("restarting job");
 				final String rsl = "&(restart=" + handle + ")";
 				restartJob = new GramJob(rsl);
 				restartJob.setCredentials(cred);
-				//restartJob.addListener(this);
+				// restartJob.addListener(this);
 				try {
 
 					restartJob.request(contact, false);
@@ -102,16 +106,17 @@ public class Gram5Client {
 				// nope, not done yet.
 				return getJobStatus(handle, cred,false);
 			} else {
-				myLogger.error("something else is wrong. error code is " + ex.getErrorCode());
-				myLogger.error(ex);
+				myLogger.error("something else is wrong. error code is "
+						+ ex.getErrorCode());
+				myLogger.error(ex.getLocalizedMessage(), ex);
 			}
-			
+
 		} catch (final GSSException ex) {
-			myLogger.error(ex);
+			myLogger.error(ex.getLocalizedMessage(), ex);
 		} catch (final MalformedURLException ex) {
-			myLogger.error(ex);
+			myLogger.error(ex.getLocalizedMessage(), ex);
 		} finally {
-		    unbindJob(job);
+			unbindJob(job);
 		}
 
 		status = job.getStatus();
@@ -119,19 +124,10 @@ public class Gram5Client {
 		final int error = job.getError();
 		return new int[] { status, error };
 	}
-	
-	private void unbindJob(GramJob job){
-		try {
-		    Gram.deactivateAllCallbackHandlers();
-		    job.unbind();
-		} catch (Exception e) {
-			// don't care
-		}
-	}
 
 	public int kill(String handle, GSSCredential cred) {
 		final GramJob job = new GramJob(null);
-		try {			
+		try {
 			job.setID(handle);
 			job.setCredentials(cred);
 			try {
@@ -152,24 +148,25 @@ public class Gram5Client {
 		}
 	}
 
-	/** public void statusChanged(GramJob job) {
-		myLogger.debug("job status changed  " + job.getStatusAsString());
-		statuses.put(job.getIDAsString(), job.getStatus());
-		errors.put(job.getIDAsString(), job.getError());
-		myLogger.debug("the job is : " + job.toString());
-	} **/
+	/**
+	 * public void statusChanged(GramJob job) {
+	 * myLogger.debug("job status changed  " + job.getStatusAsString());
+	 * statuses.put(job.getIDAsString(), job.getStatus());
+	 * errors.put(job.getIDAsString(), job.getError());
+	 * myLogger.debug("the job is : " + job.toString()); }
+	 **/
 
 	public String submit(String rsl, String endPoint, GSSCredential cred) {
 		final GramJob job = new GramJob(rsl);
-		final Gram5JobListener l = Gram5JobListener.getJobListener();	
+		final Gram5JobListener l = Gram5JobListener.getJobListener();
 		job.setCredentials(cred);
 		job.addListener(l);
 		try {
 			job.request(endPoint, false);
 			job.bind();
-			String id = job.getIDAsString();
+			final String id = job.getIDAsString();
 			unbindJob(job);
-			//Gram.jobStatus(job);
+			// Gram.jobStatus(job);
 			return id;
 		} catch (final GramException ex) {
 			myLogger.error(ex.getLocalizedMessage());
@@ -177,6 +174,15 @@ public class Gram5Client {
 		} catch (final GSSException ex) {
 			myLogger.error(ex.getLocalizedMessage());
 			return null;
-		} 
+		}
+	}
+
+	private void unbindJob(GramJob job) {
+		try {
+			Gram.deactivateAllCallbackHandlers();
+			job.unbind();
+		} catch (final Exception e) {
+			// don't care
+		}
 	}
 }

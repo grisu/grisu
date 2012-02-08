@@ -36,7 +36,7 @@ EventSubscriber<FqanEvent> {
 	 * Create the panel.
 	 */
 	public DefaultFqanChangePanel() {
-		setLayout(new FormLayout(new ColumnSpec[] { ColumnSpec.decode("107px"),
+		setLayout(new FormLayout(new ColumnSpec[] { ColumnSpec.decode("147px"),
 				ColumnSpec.decode("218px"), },
 				new RowSpec[] { RowSpec.decode("40px"), }));
 
@@ -86,7 +86,7 @@ EventSubscriber<FqanEvent> {
 			public void run() {
 
 				final UserEnvironmentManager uem = GrisuRegistryManager
-				.getDefault(si).getUserEnvironmentManager();
+						.getDefault(si).getUserEnvironmentManager();
 				String old = (String) voModel.getSelectedItem();
 				if (StringUtils.isBlank(old)) {
 					old = uem.getCurrentFqan();
@@ -120,6 +120,15 @@ EventSubscriber<FqanEvent> {
 
 	}
 
+	public void lockUI(final boolean lock) {
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				comboBox.setEnabled(!lock);
+			}
+		});
+	}
+
 	public synchronized void onEvent(final FqanEvent arg0) {
 
 		if (FqanEvent.DEFAULT_FQAN_CHANGED == arg0.getEvent_type()) {
@@ -136,7 +145,7 @@ EventSubscriber<FqanEvent> {
 	}
 
 	public void setServiceInterface(ServiceInterface si)
-	throws InterruptedException {
+			throws InterruptedException {
 		this.si = si;
 		fillComboBox();
 	}

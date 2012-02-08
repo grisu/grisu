@@ -67,7 +67,7 @@ public abstract class LazyLoadingTreeNode extends DefaultMutableTreeNode {
 	 * state if the worker if canceled
 	 */
 	protected void reset() {
-		int childCount = getChildCount();
+		final int childCount = getChildCount();
 		if (childCount > 0) {
 			for (int i = 0; i < childCount; i++) {
 				model.removeNodeFromParent((MutableTreeNode) getChildAt(0));
@@ -83,7 +83,7 @@ public abstract class LazyLoadingTreeNode extends DefaultMutableTreeNode {
 	 *            new nodes
 	 */
 	protected void setChildren(MutableTreeNode... nodes) {
-		int childCount = getChildCount();
+		final int childCount = getChildCount();
 		if (childCount > 0) {
 			for (int i = 0; i < childCount; i++) {
 				model.removeNodeFromParent((MutableTreeNode) getChildAt(0));

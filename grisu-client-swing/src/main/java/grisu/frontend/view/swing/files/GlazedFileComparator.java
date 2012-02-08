@@ -4,7 +4,6 @@ import grisu.model.files.GlazedFile;
 
 import java.util.Comparator;
 
-
 public class GlazedFileComparator implements Comparator<GlazedFile> {
 
 	public int compare(GlazedFile arg0, GlazedFile arg1) {

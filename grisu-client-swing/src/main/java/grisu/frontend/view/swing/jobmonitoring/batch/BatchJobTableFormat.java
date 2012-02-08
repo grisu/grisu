@@ -4,7 +4,6 @@ import grisu.frontend.model.job.BatchJobObject;
 
 import java.util.Comparator;
 
-
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 
 public class BatchJobTableFormat implements AdvancedTableFormat<BatchJobObject> {

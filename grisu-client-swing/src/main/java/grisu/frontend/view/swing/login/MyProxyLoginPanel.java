@@ -3,8 +3,8 @@ package grisu.frontend.view.swing.login;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginException;
 import grisu.frontend.control.login.LoginManager;
-import grisu.frontend.control.login.LoginParams;
 import grisu.jcommons.configuration.CommonGridProperties;
+import grith.jgrith.control.LoginParams;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -13,7 +13,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang.StringUtils;
-
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -127,8 +126,10 @@ public class MyProxyLoginPanel extends JPanel implements LoginMethodPanel {
 
 				loginSuccessful = false;
 				try {
-					si = LoginManager.login(null, null, null, null, params,
-							saveCredendentialsToLocalProxy);
+
+					si = LoginManager.myProxyLogin(username, password,
+							params.getLoginUrl(), false);
+
 					loginSuccessful = true;
 				} catch (final LoginException e) {
 					possibleException = e;

@@ -1,6 +1,8 @@
 package grisu.settings;
 
 import grisu.control.ServiceInterface;
+import grisu.jcommons.utils.tid.SecureRandomTid;
+import grisu.jcommons.utils.tid.TidGenerator;
 
 import java.io.File;
 import java.util.Iterator;
@@ -12,7 +14,8 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalINIConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages the $HOME/.grisu/grisu-backend.config file.
@@ -72,20 +75,26 @@ public final class ServerPropertiesManager {
 	// public static final String DEFAULT_MULTIPARTJOB_DIR_NAME =
 	// "grisu-multijob-dir";
 
-	static final Logger myLogger = Logger
-			.getLogger(ServerPropertiesManager.class.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(ServerPropertiesManager.class);
 
 	private static final int DEFAULT_CONCURRENT_JOB_SUBMISSION_RETRIES = 5;
 
 	private static final boolean DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS = false;
 
 	private static final int DEFAULT_FILE_TRANSFER_RETRIES = 3;
-	private static final int DEFAULT_FILE_DELETE_RETRIES = 3;
+	private static final int DEFAULT_FILE_DELETE_RETRIES = 6;
 	private static final int DEFAULT_TIME_BETWEEN_FILE_TRANSFER_RETRIES_IN_SECONDS = 1;
 
 	private static final Integer DEFAULT_FILESYSTEM_TIMEOUT_IN_MILLISECONDS = 4000;
 
 	private static final int DEFAULT_FILE_LISTING_TIMEOUT_IN_SECONDS = 60;
+
+	private static final int DEFAULT_JOB_CLEAN_THRESHOLD_IN_SECONDS = 1800;
+
+	private static final String DEFAULT_VOS_TO_SUPPORT = "nz";
+
+	private static final long DEFAULT_PROXY_RETRIEVAL_WAIT_TIME = 300;
 
 	// public static boolean getCheckConnectionToMountPoint() {
 	//
@@ -97,7 +106,7 @@ public final class ServerPropertiesManager {
 	// "checkConnectionToMountPoints");
 	// } catch (NoSuchElementException e) {
 	// // doesn't matter
-	// myLogger.debug(e);
+	// myLogger.debug(e.getLocalizedMessage(), e);
 	// return DEFAULT_CHECK_CONNECTION_TO_MOUNTPOINTS;
 	// }
 	//
@@ -116,12 +125,12 @@ public final class ServerPropertiesManager {
 						"General.closeFilesystemsInBackground");
 			} catch (final NoSuchElementException e) {
 				// doesn't matter
-				// myLogger.debug(e);
+				// myLogger.debug(e.getLocalizedMessage(), e);
 			}
 
 		} catch (final ConfigurationException e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
-			myLogger.debug(e);
+			myLogger.debug(e.getLocalizedMessage());
 		}
 		return useFScache;
 	}
@@ -161,8 +170,9 @@ public final class ServerPropertiesManager {
 		int concurrentThreads = -1;
 		try {
 			concurrentThreads = Integer
-					.parseInt(getServerConfiguration().getString(
-							"ConcurrentThreadSettings.archivedJobsLookupThreadsPerFilesystem"));
+					.parseInt(getServerConfiguration()
+							.getString(
+									"ConcurrentThreadSettings.archivedJobsLookupThreadsPerFilesystem"));
 
 		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -219,9 +229,8 @@ public final class ServerPropertiesManager {
 
 		int concurrentThreads = -1;
 		try {
-			concurrentThreads = Integer
-					.parseInt(getServerConfiguration().getString(
-							"ConcurrentThreadSettings.jobsToBeKilled"));
+			concurrentThreads = Integer.parseInt(getServerConfiguration()
+					.getString("ConcurrentThreadSettings.jobsToBeKilled"));
 
 		} catch (final Exception e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
@@ -401,7 +410,7 @@ public final class ServerPropertiesManager {
 				debug = getServerConfiguration().getBoolean("Debug.enabled");
 			} catch (final NoSuchElementException e) {
 				// doesn't matter
-				myLogger.debug(e);
+				myLogger.debug(e.getLocalizedMessage());
 			}
 			if (debug) {
 				// try to create debug directory
@@ -417,7 +426,7 @@ public final class ServerPropertiesManager {
 			}
 		} catch (final ConfigurationException e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
-			myLogger.debug(e);
+			myLogger.debug(e.getLocalizedMessage());
 		}
 		return debug;
 	}
@@ -450,15 +459,16 @@ public final class ServerPropertiesManager {
 
 		try {
 			try {
-				disableFinishedJobStatusCaching = getServerConfiguration().getBoolean("Debug.disableFinishedJobStatusCaching");
+				disableFinishedJobStatusCaching = getServerConfiguration()
+						.getBoolean("Debug.disableFinishedJobStatusCaching");
 			} catch (final NoSuchElementException e) {
 				// doesn't matter
-				// myLogger.debug(e);
+				// myLogger.debug(e.getLocalizedMessage(), e);
 			}
 
 		} catch (final ConfigurationException e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
-			// myLogger.debug(e);
+			// myLogger.debug(e.getLocalizedMessage(), e);
 		}
 		return disableFinishedJobStatusCaching;
 	}
@@ -537,7 +547,7 @@ public final class ServerPropertiesManager {
 		try {
 			conf = getServerConfiguration().getSection("InformationManager");
 		} catch (final ConfigurationException e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage());
 			return null;
 		}
 
@@ -554,6 +564,22 @@ public final class ServerPropertiesManager {
 		}
 
 		return result;
+	}
+
+	public static int getJobCleanThresholdInSeconds() {
+		int waitTimeInSeconds = -1;
+		try {
+			waitTimeInSeconds = Integer.parseInt(getServerConfiguration()
+					.getString("General.jobCleanThreshold"));
+
+		} catch (final Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_JOB_CLEAN_THRESHOLD_IN_SECONDS;
+		}
+		if (waitTimeInSeconds == -1) {
+			return DEFAULT_JOB_CLEAN_THRESHOLD_IN_SECONDS;
+		}
+		return waitTimeInSeconds;
 	}
 
 	public static int getJobSubmissionRetries() {
@@ -578,7 +604,7 @@ public final class ServerPropertiesManager {
 		try {
 			conf = getServerConfiguration().getSection("MatchMaker");
 		} catch (final ConfigurationException e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage());
 			return null;
 		}
 
@@ -687,6 +713,32 @@ public final class ServerPropertiesManager {
 		return config;
 	}
 
+	public static TidGenerator getTidGenerator() {
+
+		return new SecureRandomTid();
+
+	}
+
+	/**
+	 * The vos to use (in addition to manually added ones).
+	 * 
+	 * @return the vos
+	 */
+	public static String[] getVOsToUse() {
+		String vos;
+		try {
+			vos = getServerConfiguration().getString(
+					"General.supportedVOs");
+
+			if ( StringUtils.isBlank(vos)) {
+				vos = DEFAULT_VOS_TO_SUPPORT;
+			}
+			return vos.split(",");
+		} catch (final Exception e) {
+			return null;
+		}
+	}
+
 	public static int getWaitTimeBetweenFailedFileTransferAndNextTryInSeconds() {
 
 		int waitTimeInSeconds = -1;
@@ -727,6 +779,26 @@ public final class ServerPropertiesManager {
 		return waitTimeInSeconds;
 	}
 
+	public static long getWaitTimeBetweenProxyRetrievals() {
+
+		long waittime_in_seconds = -1;
+		try {
+			waittime_in_seconds = Long.parseLong(getServerConfiguration()
+					.getString("General.proxyRetrievalWaitTime"));
+
+		} catch (final Exception e) {
+			return DEFAULT_PROXY_RETRIEVAL_WAIT_TIME;
+		}
+		if (waittime_in_seconds <= -1) {
+			return DEFAULT_PROXY_RETRIEVAL_WAIT_TIME;
+		}
+		return waittime_in_seconds;
+	}
+
+	public static void refreshConfig() {
+		config = null;
+	}
+
 	/**
 	 * Checks whether the default (hsqldb) database configuration should be
 	 * used.
@@ -745,7 +817,7 @@ public final class ServerPropertiesManager {
 				return false;
 			}
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage());
 			return true;
 		}
 
@@ -765,12 +837,12 @@ public final class ServerPropertiesManager {
 						"General.fsCache");
 			} catch (final NoSuchElementException e) {
 				// doesn't matter
-				// myLogger.debug(e);
+				// myLogger.debug(e.getLocalizedMessage(), e);
 			}
 
 		} catch (final ConfigurationException e) {
 			// myLogger.error("Problem with config file: " + e.getMessage());
-			myLogger.debug(e);
+			myLogger.debug(e.getLocalizedMessage());
 		}
 		return useFScache;
 	}

@@ -3,11 +3,12 @@ package grisu.frontend.model.job;
 import grisu.control.exceptions.JobPropertiesException;
 import grisu.control.exceptions.JobSubmissionException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DoubleWalltimeJobRestarter implements FailedJobRestarter {
 
-	static final Logger myLogger = Logger.getLogger(BatchJobObject.class
+	static final Logger myLogger = LoggerFactory.getLogger(BatchJobObject.class
 			.getName());
 
 	public void restartJob(JobObject failedJob) throws JobSubmissionException {

@@ -9,7 +9,6 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 
-
 public class VirtualFileBrowserTest {
 
 	/**
@@ -25,10 +24,10 @@ public class VirtualFileBrowserTest {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					VirtualFileBrowserTest window = new VirtualFileBrowserTest(
+					final VirtualFileBrowserTest window = new VirtualFileBrowserTest(
 							si);
 					window.frame.setVisible(true);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					e.printStackTrace();
 				}
 			}

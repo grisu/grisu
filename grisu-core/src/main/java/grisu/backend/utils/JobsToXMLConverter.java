@@ -10,11 +10,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 
 /**
  * This one gathers all information of a job and converts it into a xml
@@ -27,8 +27,8 @@ import org.w3c.dom.Element;
  */
 public final class JobsToXMLConverter {
 
-	static final Logger myLogger = Logger.getLogger(JobsToXMLConverter.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(JobsToXMLConverter.class.getName());
 
 	private static DocumentBuilder docBuilder = null;
 
@@ -117,7 +117,7 @@ public final class JobsToXMLConverter {
 			final DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 			doc = docBuilder.newDocument();
 		} catch (final ParserConfigurationException e1) {
-			myLogger.error(e1);
+			myLogger.error(e1.getLocalizedMessage(), e1);
 			return null;
 		}
 
@@ -178,7 +178,7 @@ public final class JobsToXMLConverter {
 			jsdl.setTextContent(SeveralXMLHelpers.toString(job
 					.getJobDescription()));
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 		descriptions.appendChild(jsdl);
 
@@ -198,7 +198,7 @@ public final class JobsToXMLConverter {
 						.newInstance();
 				docBuilder = docFactory.newDocumentBuilder();
 			} catch (final ParserConfigurationException e1) {
-				myLogger.error(e1);
+				myLogger.error(e1.getLocalizedMessage(), e1);
 				return null;
 			}
 		}

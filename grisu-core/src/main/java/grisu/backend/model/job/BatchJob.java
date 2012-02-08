@@ -29,9 +29,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.CollectionOfElements;
+import net.sf.ehcache.util.NamedThreadFactory;
 
+import org.hibernate.annotations.CollectionOfElements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Entity
 public class BatchJob {
@@ -48,7 +50,8 @@ public class BatchJob {
 
 	private Map<String, String> jobProperties = new HashMap<String, String>();
 
-	static final Logger myLogger = Logger.getLogger(BatchJob.class.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(BatchJob.class
+			.getName());
 
 	// the user's dn
 	private String dn = null;
@@ -128,10 +131,12 @@ public class BatchJob {
 
 		result.setMessages(DtoLogMessages.createLogMessages(this
 				.getLogMessages()));
-
+		final NamedThreadFactory tf = new NamedThreadFactory(
+				"createDtoBatchJob");
 		final ExecutorService executor = Executors
 				.newFixedThreadPool(ServerPropertiesManager
-						.getConcurrentJobStatusThreadsPerUser());
+.getConcurrentJobStatusThreadsPerUser(),
+				tf);
 
 		for (final Job job : getJobs()) {
 
@@ -166,7 +171,7 @@ public class BatchJob {
 		result.setFailedJobs(dtoJobs);
 
 		// result.setStatus(this.getStatus());
-		int s = result.getPercentFinished().intValue();
+		final int s = result.getPercentFinished().intValue();
 		if (s >= 100) {
 			if (dtoJobs.getAllJobs().size() > 0) {
 				result.setStatus(JobConstants.FAILED);

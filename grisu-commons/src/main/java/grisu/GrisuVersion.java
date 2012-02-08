@@ -9,17 +9,20 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GrisuVersion {
 
-	static Logger myLogger = Logger.getLogger(GrisuVersion.class.getName());
+	static Logger myLogger = LoggerFactory.getLogger(GrisuVersion.class
+			.getName());
 
 	public static String get(String module) {
 
 		try {
 
-			List<String> result = readTextFromJar("/" + module + ".version");
+			final List<String> result = readTextFromJar("/" + module
+					+ ".version");
 
 			if ((result == null) || (result.size() == 0)
 					|| StringUtils.isEmpty(result.get(0))) {
@@ -31,8 +34,8 @@ public class GrisuVersion {
 			}
 
 			return result.get(0);
-		} catch (Exception e) {
-			myLogger.error(e);
+		} catch (final Exception e) {
+			myLogger.error(e.getLocalizedMessage(), e);
 			return "N/A";
 		}
 
@@ -42,7 +45,7 @@ public class GrisuVersion {
 		InputStream is = null;
 		BufferedReader br = null;
 		String line;
-		ArrayList<String> list = new ArrayList<String>();
+		final ArrayList<String> list = new ArrayList<String>();
 
 		try {
 			is = FileUtils.class.getResourceAsStream(s);
@@ -50,8 +53,8 @@ public class GrisuVersion {
 			while (null != (line = br.readLine())) {
 				list.add(line);
 			}
-		} catch (Exception e) {
-			myLogger.error(e);
+		} catch (final Exception e) {
+			myLogger.error(e.getLocalizedMessage(), e);
 		} finally {
 			try {
 				if (br != null) {
@@ -60,8 +63,8 @@ public class GrisuVersion {
 				if (is != null) {
 					is.close();
 				}
-			} catch (IOException e) {
-				myLogger.error(e);
+			} catch (final IOException e) {
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 		}
 		return list;

@@ -16,12 +16,13 @@ import java.util.Set;
 
 import javax.swing.AbstractAction;
 
-import org.apache.log4j.Logger;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OpenAction extends AbstractAction {
 
-	static final Logger myLogger = Logger.getLogger(OpenAction.class.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(OpenAction.class
+			.getName());
 
 	private final GridFileListPanel fileList;
 	private final FileManager fm;
@@ -32,7 +33,7 @@ public class OpenAction extends AbstractAction {
 	public OpenAction(GridFileListPanel fileList) {
 		try {
 			desktop = Desktop.getDesktop();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 		this.fileList = fileList;
@@ -69,8 +70,8 @@ public class OpenAction extends AbstractAction {
 						d = new BackgroundActionProgressDialogSmall(
 								"Downloading:", f.getName());
 						file = fm.downloadFile(f.getUrl());
-					} catch (FileTransactionException e1) {
-						myLogger.error(e1);
+					} catch (final FileTransactionException e1) {
+						myLogger.error(e1.getLocalizedMessage(), e1);
 						return;
 					} finally {
 						d.close();
@@ -78,8 +79,8 @@ public class OpenAction extends AbstractAction {
 
 					try {
 						desktop.open(file);
-					} catch (IOException e) {
-						myLogger.error(e);
+					} catch (final IOException e) {
+						myLogger.error(e.getLocalizedMessage(), e);
 					}
 
 				}

@@ -4,7 +4,6 @@ import grisu.model.UserEnvironmentManager;
 
 import java.util.Set;
 
-
 /**
  * This class contains information from {@link ApplicationInformation} and
  * {@link UserEnvironmentManager} objects in order to be able to give

@@ -27,7 +27,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 import org.jfree.chart.ChartFactory;
@@ -45,6 +44,8 @@ import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.RectangleInsets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -53,7 +54,7 @@ import com.jgoodies.forms.layout.RowSpec;
 
 public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(JobStatusGridFileViewer.class.getName());
 
 	private final static ImageIcon REFRESH_ICON = createImageIcon(
@@ -62,19 +63,18 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 	private static ChartPanel createChart(String title, String y_axis,
 			XYDataset dataset, boolean createLegend) {
 
-		JFreeChart chart = ChartFactory.createTimeSeriesChart(
-				title, // title
+		final JFreeChart chart = ChartFactory.createTimeSeriesChart(title, // title
 				"Date", // x-axis label
 				y_axis, // y-axis label
-				dataset,            // data
+				dataset, // data
 				createLegend, // create legend?
-				true,               // generate tooltips?
-				false               // generate URLs?
+				true, // generate tooltips?
+				false // generate URLs?
 				);
 
 		chart.setBackgroundPaint(Color.white);
 
-		XYPlot plot = (XYPlot) chart.getPlot();
+		final XYPlot plot = (XYPlot) chart.getPlot();
 		plot.setBackgroundPaint(Color.lightGray);
 		plot.setDomainGridlinePaint(Color.white);
 		plot.setRangeGridlinePaint(Color.white);
@@ -82,19 +82,19 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 		plot.setDomainCrosshairVisible(true);
 		plot.setRangeCrosshairVisible(true);
 
-		NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+		final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
 		rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 		rangeAxis.setAutoRangeIncludesZero(true);
 
-		XYItemRenderer r = plot.getRenderer();
+		final XYItemRenderer r = plot.getRenderer();
 		if (r instanceof XYLineAndShapeRenderer) {
-			XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) r;
+			final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) r;
 			renderer.setBaseShapesVisible(true);
 			renderer.setBaseShapesFilled(true);
 			renderer.setDrawSeriesLineAsPath(true);
 		}
 
-		DateAxis axis = (DateAxis) plot.getDomainAxis();
+		final DateAxis axis = (DateAxis) plot.getDomainAxis();
 		axis.setDateFormatOverride(new SimpleDateFormat("dd.MM. HH:mm"));
 
 		return new ChartPanel(chart);
@@ -108,12 +108,13 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 			icon = new ImageIcon(FileListActionPanel.class.getClassLoader()
 					.getResource(path));
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
 		return icon;
 
 	}
+
 	private File csvFile = null;
 
 	private final TimeSeriesCollection cpusDataset = new TimeSeriesCollection();
@@ -178,15 +179,15 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 		List<String> lines;
 		try {
 			lines = FileUtils.readLines(this.csvFile);
-		} catch (IOException e) {
-			myLogger.error(e);
+		} catch (final IOException e) {
+			myLogger.error(e.getLocalizedMessage(), e);
 			return;
 		}
 
 		for (int i = 0; i < lines.size(); i++) {
 
-			String[] tokens = lines.get(i).split(",");
-			Date date = new Date(Long.parseLong(tokens[0]) * 1000);
+			final String[] tokens = lines.get(i).split(",");
+			final Date date = new Date(Long.parseLong(tokens[0]) * 1000);
 			int cpus = Integer.parseInt(tokens[1]);
 			if (cpus < 0) {
 				cpus = 0;
@@ -199,7 +200,7 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 			if (licensesAll < 0) {
 				licensesAll = 0;
 			}
-			int ligands = Integer.parseInt(tokens[4]);
+			final int ligands = Integer.parseInt(tokens[4]);
 
 			RegularTimePeriod p = null;
 			if (showMinutes) {
@@ -214,7 +215,6 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 			ligandsSeries.addOrUpdate(p, ligands);
 
 		}
-
 
 	}
 
@@ -235,14 +235,15 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 							File temp;
 							try {
 								temp = fm.downloadFile(url);
-							} catch (FileTransactionException e1) {
-								ErrorInfo ei = new ErrorInfo(
+							} catch (final FileTransactionException e1) {
+								final ErrorInfo ei = new ErrorInfo(
 										"Download error",
 										"Error while trying to download job status file.",
-										e1.getLocalizedMessage(), (String) null, e1,
-										Level.SEVERE, (Map) null);
-								JXErrorPane
-								.showDialog(JobStatusGridFileViewer.this, ei);
+										e1.getLocalizedMessage(),
+										(String) null, e1, Level.SEVERE,
+										(Map) null);
+								JXErrorPane.showDialog(
+										JobStatusGridFileViewer.this, ei);
 								return;
 							}
 
@@ -262,7 +263,7 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 			chckbxShowMinutes = new JCheckBox("Display minutes");
 			chckbxShowMinutes.addItemListener(new ItemListener() {
 				public void itemStateChanged(ItemEvent e) {
-					if ( chckbxShowMinutes.isSelected() ) {
+					if (chckbxShowMinutes.isSelected()) {
 						showMinutes = true;
 					} else {
 						showMinutes = false;
@@ -272,9 +273,11 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 						@Override
 						public void run() {
 							chckbxShowMinutes.setEnabled(false);
-							setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+							setCursor(Cursor
+									.getPredefinedCursor(Cursor.WAIT_CURSOR));
 							generateGraph();
-							setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+							setCursor(Cursor
+									.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 							chckbxShowMinutes.setEnabled(true);
 						}
 					}.start();

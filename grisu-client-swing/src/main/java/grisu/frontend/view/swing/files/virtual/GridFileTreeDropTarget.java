@@ -28,8 +28,9 @@ import javax.swing.WindowConstants;
 import javax.swing.tree.TreePath;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.netbeans.swing.outline.Outline;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GridFileTreeDropTarget implements DropTargetListener {
 
@@ -49,8 +50,8 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 		}
 	}
 
-	static final Logger myLogger = Logger
-	.getLogger(GridFileTreeDropTarget.class.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(GridFileTreeDropTarget.class.getName());
 
 	public static int WAIT_DRAG_UNTIL_OPEN_FOLDER = 2000;
 
@@ -77,7 +78,7 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 
 	public void dragEnter(DropTargetDragEvent dtde) {
 
-		Outline outline = (Outline) ((dtde.getDropTargetContext()
+		final Outline outline = (Outline) ((dtde.getDropTargetContext()
 				.getComponent()));
 
 		lastSelectedRows = outline.getSelectedRows();
@@ -98,7 +99,8 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 			openFolderTask.cancel();
 		}
 
-		Outline outline = (Outline) ((dte.getDropTargetContext().getComponent()));
+		final Outline outline = (Outline) ((dte.getDropTargetContext()
+				.getComponent()));
 
 		selectLastSelectedItems(outline);
 	}
@@ -107,18 +109,18 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 
 		// X.p("Over");
 
-		Outline outline = (Outline) ((dtde.getDropTargetContext()
+		final Outline outline = (Outline) ((dtde.getDropTargetContext()
 				.getComponent()));
 
-		int x = new Double(dtde.getLocation().getX()).intValue();
-		int y = new Double(dtde.getLocation().getY()).intValue();
-		TreePath p = outline.getClosestPathForLocation(x, y);
+		final int x = new Double(dtde.getLocation().getX()).intValue();
+		final int y = new Double(dtde.getLocation().getY()).intValue();
+		final TreePath p = outline.getClosestPathForLocation(x, y);
 
 		if (p.getLastPathComponent() instanceof GridFileTreeNode) {
-			GridFile dropTargetFile = ((GridFileTreeNode) p
+			final GridFile dropTargetFile = ((GridFileTreeNode) p
 					.getLastPathComponent()).getGridFile();
 
-			Point point = new Point(x, y);
+			final Point point = new Point(x, y);
 			selectFolderAndChildren(outline, p, point);
 
 			if (dropTargetFile.isFolder()) {
@@ -175,7 +177,7 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 				if (openFolderTask != null) {
 					openFolderTask.cancel();
 				}
-				GridFile parent = ((GridFileTreeNode) p.getParentPath()
+				final GridFile parent = ((GridFileTreeNode) p.getParentPath()
 						.getLastPathComponent()).getGridFile();
 
 				if (parent.isVirtual()) {
@@ -198,15 +200,15 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 		final Outline outline = (Outline) ((dtde.getDropTargetContext()
 				.getComponent()));
 
-		int x = new Double(dtde.getLocation().getX()).intValue();
-		int y = new Double(dtde.getLocation().getY()).intValue();
-		TreePath p = outline.getClosestPathForLocation(x, y);
+		final int x = new Double(dtde.getLocation().getX()).intValue();
+		final int y = new Double(dtde.getLocation().getY()).intValue();
+		final TreePath p = outline.getClosestPathForLocation(x, y);
 
 		GridFile target = null;
 
 		if (p.getLastPathComponent() instanceof GridFileTreeNode) {
 
-			GridFile dropTargetFile = ((GridFileTreeNode) p
+			final GridFile dropTargetFile = ((GridFileTreeNode) p
 					.getLastPathComponent()).getGridFile();
 
 			if (dropTargetFile.isFolder()) {
@@ -216,7 +218,7 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 			} else {
 				// get parent folder of selected file
 				openFolderTask.cancel();
-				GridFile parent = ((GridFileTreeNode) p.getParentPath()
+				final GridFile parent = ((GridFileTreeNode) p.getParentPath()
 						.getLastPathComponent()).getGridFile();
 
 				if (parent.isVirtual()) {
@@ -236,7 +238,8 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 
 		String targetUrl = target.getUrl();
 		if (target.getUrls().size() > 1) {
-			DropVirtualGridFileDialog d = new DropVirtualGridFileDialog("Copy");
+			final DropVirtualGridFileDialog d = new DropVirtualGridFileDialog(
+					"Copy");
 			d.setTargetGridFile(target);
 			d.setVisible(true);
 
@@ -253,20 +256,20 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 		try {
 			files = (Set<GridFile>) dtde.getTransferable().getTransferData(
 					GridFileTransferHandler.SET_DATA_FLAVOR);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			myLogger.equals(e);
 			dtde.dropComplete(false);
 			return;
 		}
 
-		Set<String> sourceUrls = new LinkedHashSet<String>();
-		for (GridFile f : files) {
-			Set<String> urls = DtoProperty
-			.mapFromDtoPropertiesList(f.getUrls()).keySet();
-			for (String u : urls) {
+		final Set<String> sourceUrls = new LinkedHashSet<String>();
+		for (final GridFile f : files) {
+			final Set<String> urls = DtoProperty.mapFromDtoPropertiesList(
+					f.getUrls()).keySet();
+			for (final String u : urls) {
 				if (FileManager.removeTrailingSlash(
 						FileManager.calculateParentUrl(u)).equals(
-								FileManager.removeTrailingSlash(targetUrl))) {
+						FileManager.removeTrailingSlash(targetUrl))) {
 					continue;
 				} else {
 					sourceUrls.add(u);
@@ -340,17 +343,17 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 	}
 
 	private GridFile getSelectedTargetFolder(TreePath path) {
-		GridFile dropTargetFile = ((GridFileTreeNode) path
+		final GridFile dropTargetFile = ((GridFileTreeNode) path
 				.getLastPathComponent()).getGridFile();
 
 		if (dropTargetFile.isFolder()) {
 			return dropTargetFile;
 		} else {
-			TreePath parentPath = path.getParentPath();
-			GridFileTreeNode parentNode = (GridFileTreeNode) parentPath
-			.getLastPathComponent();
+			final TreePath parentPath = path.getParentPath();
+			final GridFileTreeNode parentNode = (GridFileTreeNode) parentPath
+					.getLastPathComponent();
 
-			GridFile file = (GridFile) parentNode.getUserObject();
+			final GridFile file = (GridFile) parentNode.getUserObject();
 
 			return file;
 		}
@@ -361,27 +364,27 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 
 		outline.getSelectionModel().clearSelection();
 
-		GridFile folder = getSelectedTargetFolder(path);
+		final GridFile folder = getSelectedTargetFolder(path);
 		// if (dropTargetFile.isFolder()) {
 
-		int row = outline.rowAtPoint(point);
+		final int row = outline.rowAtPoint(point);
 
 		if (outline.getOutlineModel().getTreePathSupport()
 				.hasBeenExpanded(path)) {
-			int childs = folder.getChildren().size();
+			final int childs = folder.getChildren().size();
 
 			for (int i = 0; i < outline.getRowCount(); i++) {
 				try {
-					GridFileTreeNode node = ((GridFileTreeNode) (outline
+					final GridFileTreeNode node = ((GridFileTreeNode) (outline
 							.getOutlineModel().getValueAt(i, 0)));
 
-					GridFile gf = (GridFile) (node.getUserObject());
+					final GridFile gf = (GridFile) (node.getUserObject());
 
 					if (gf.getUrl().startsWith(folder.getUrl())) {
 						outline.addRowSelectionInterval(i, i);
 					}
-				} catch (Exception e) {
-					myLogger.error(e);
+				} catch (final Exception e) {
+					myLogger.error(e.getLocalizedMessage(), e);
 				}
 			}
 
@@ -432,7 +435,7 @@ public class GridFileTreeDropTarget implements DropTargetListener {
 			return;
 		}
 
-		for (int lastSelectedRow : lastSelectedRows) {
+		for (final int lastSelectedRow : lastSelectedRows) {
 			outline.addRowSelectionInterval(lastSelectedRow, lastSelectedRow);
 		}
 		lastSelectedRows = null;

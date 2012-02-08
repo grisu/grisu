@@ -2,7 +2,7 @@
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.3.7</version>
+		<version>0.5-SNAPSHOT</version>
 
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
@@ -51,7 +51,7 @@
 		<dependency>
 			<groupId>grisu</groupId>
 			<artifactId>grisu-commons</artifactId>
-			<version>0.3.7</version>
+			<version>0.5-SNAPSHOT</version>
 
 		</dependency>
 		<dependency>
@@ -104,11 +104,7 @@
 		</dependency>
 
 
-		<dependency>
-			<groupId>grith</groupId>
-			<artifactId>jgrith</artifactId>
-			<version>0.5.10</version>
-		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -139,7 +135,7 @@
 				<configuration>
 					<includes>
 						<!-- replace the token in this file -->
-						<include>target/classes/grisu-client.version</include>
+						<include>target/classes/grisu-client-lib.version</include>
 					</includes>
 					<regex>false</regex>
 					<!-- the name of the token to replace -->
@@ -151,59 +147,59 @@
 
 
 
-<!--			<plugin>-->
-<!--				<groupId>org.apache.maven.plugins</groupId>-->
-<!--				<artifactId>maven-source-plugin</artifactId>-->
-<!--				<version>2.1.2</version>-->
-<!--				<executions>-->
-<!--					<execution>-->
-<!--						<id>attach-sources</id>-->
-<!--						<phase>package</phase>-->
-<!--						<goals>-->
-<!--							<goal>jar</goal>-->
-<!--						</goals>-->
-<!--					</execution>-->
-<!--				</executions>-->
-<!--			</plugin>-->
-<!--			-->
-<!--			<plugin>-->
-<!--				<artifactId>maven-assembly-plugin</artifactId>-->
-<!--				<version>2.2</version>-->
-<!--				<executions>-->
-<!--					<execution>-->
-<!--						<phase>package</phase>-->
-<!--						<id>lib</id>-->
-<!--						<configuration>-->
-<!--							<descriptors>-->
-<!--								<descriptor>grisu-client-dependencies.assembly.xml</descriptor>-->
-<!--							</descriptors>-->
-<!--							<finalName>grisu-client-lib</finalName>-->
-<!--							<archive>-->
-<!--								<index>true</index>-->
-<!--								<manifestEntries>-->
-<!--									<Class-Path>bcprov.jar bcprov-jdk15-143.jar local-backend.jar-->
-<!--									</Class-Path>-->
-<!--								</manifestEntries>-->
-<!--							</archive>-->
-<!--						</configuration>-->
-<!--						<goals>-->
-<!--							<goal>single</goal>-->
-<!--						</goals>-->
-<!--					</execution>-->
-<!--				</executions>-->
-<!--			</plugin>-->
-			
+			<!-- <plugin> -->
+			<!-- <groupId>org.apache.maven.plugins</groupId> -->
+			<!-- <artifactId>maven-source-plugin</artifactId> -->
+			<!-- <version>2.1.2</version> -->
+			<!-- <executions> -->
+			<!-- <execution> -->
+			<!-- <id>attach-sources</id> -->
+			<!-- <phase>package</phase> -->
+			<!-- <goals> -->
+			<!-- <goal>jar</goal> -->
+			<!-- </goals> -->
+			<!-- </execution> -->
+			<!-- </executions> -->
+			<!-- </plugin> -->
+			<!-- -->
+			<!-- <plugin> -->
+			<!-- <artifactId>maven-assembly-plugin</artifactId> -->
+			<!-- <version>2.2</version> -->
+			<!-- <executions> -->
+			<!-- <execution> -->
+			<!-- <phase>package</phase> -->
+			<!-- <id>lib</id> -->
+			<!-- <configuration> -->
+			<!-- <descriptors> -->
+			<!-- <descriptor>grisu-client-dependencies.assembly.xml</descriptor> -->
+			<!-- </descriptors> -->
+			<!-- <finalName>grisu-client-lib</finalName> -->
+			<!-- <archive> -->
+			<!-- <index>true</index> -->
+			<!-- <manifestEntries> -->
+			<!-- <Class-Path>bcprov.jar bcprov-jdk15-143.jar local-backend.jar -->
+			<!-- </Class-Path> -->
+			<!-- </manifestEntries> -->
+			<!-- </archive> -->
+			<!-- </configuration> -->
+			<!-- <goals> -->
+			<!-- <goal>single</goal> -->
+			<!-- </goals> -->
+			<!-- </execution> -->
+			<!-- </executions> -->
+			<!-- </plugin> -->
+
 		</plugins>
 	</build>
 
 	<profiles>
 		<profile>
 			<id>sign</id>
-<!--			<activation>-->
-<!--				<property>-->
-<!--					<name>BUILD_NUMBER</name>-->
-<!--				</property>-->
-<!--			</activation>-->
+			<!-- <activation> -->
+			<!-- <property> -->
+			<!-- <name>BUILD_NUMBER</name> -->
+			<!-- </property> -->
+			<!-- </activation> -->
 
 			<build>
 				<plugins>

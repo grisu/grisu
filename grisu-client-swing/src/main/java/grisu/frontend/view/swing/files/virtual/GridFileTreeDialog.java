@@ -19,11 +19,11 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
-
 public class GridFileTreeDialog extends JDialog implements WindowListener,
-GridFileListListener {
+		GridFileListListener {
 
 	// private class SwingAction extends AbstractAction {
 	// public SwingAction() {
@@ -40,14 +40,14 @@ GridFileListListener {
 	 */
 	public static void main(String[] args) {
 		try {
-			ServiceInterface si = LoginManager.loginCommandline("Local");
-			GridFileTreeDialog dialog = new GridFileTreeDialog(si, null, false,
-					new String[] { ".txt" }, true);
+			final ServiceInterface si = LoginManager.loginCommandline("Local");
+			final GridFileTreeDialog dialog = new GridFileTreeDialog(si, null,
+					false, new String[] { ".txt" }, true);
 			dialog.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			dialog.setVisible(true);
 
 			dialog.setVisible(true);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -83,10 +83,9 @@ GridFileListListener {
 	public GridFileTreeDialog(Window owner, ServiceInterface si,
 			List<GridFile> roots, boolean displayHiddenFiles,
 			String[] extensionsToDisplay, boolean foldersSelectable,
-			boolean displayLocalFilesystems,
-			String startupUrl) {
+			boolean displayLocalFilesystems, String startupUrl) {
 		setModal(true);
-		setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		addWindowListener(this);
 		this.si = si;
 		this.owner = owner;
@@ -106,7 +105,7 @@ GridFileListListener {
 					BorderLayout.CENTER);
 		}
 		{
-			JPanel buttonPane = new JPanel();
+			final JPanel buttonPane = new JPanel();
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
@@ -122,7 +121,7 @@ GridFileListListener {
 				getRootPane().setDefaultButton(okButton);
 			}
 			{
-				JButton cancelButton = new JButton("Cancel");
+				final JButton cancelButton = new JButton("Cancel");
 				cancelButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						userCanceled = true;
@@ -152,7 +151,7 @@ GridFileListListener {
 	public void displayHiddenFiles(boolean display) {
 
 		throw new RuntimeException(
-		"Changing display of hidden files not implemented yet.");
+				"Changing display of hidden files not implemented yet.");
 
 	}
 
@@ -165,12 +164,11 @@ GridFileListListener {
 		userCanceled = false;
 		setVisible(false);
 
-
 	}
 
 	public void filesSelected(Set<GridFile> files) {
 
-		if ( foldersSelectable ) {
+		if (foldersSelectable) {
 			okButton.setEnabled(true);
 			return;
 		}
@@ -179,13 +177,12 @@ GridFileListListener {
 			return;
 		}
 
-		for ( GridFile f : files ) {
-			if ( f.isFolder() ) {
+		for (final GridFile f : files) {
+			if (f.isFolder()) {
 				okButton.setEnabled(false);
 				return;
 			}
 		}
-
 
 		okButton.setEnabled(true);
 

@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helper methods for String handling.
@@ -15,8 +16,8 @@ import org.apache.log4j.Logger;
  */
 public final class SeveralStringHelpers {
 
-	static final Logger myLogger = Logger.getLogger(SeveralStringHelpers.class
-			.getName());
+	static final Logger myLogger = LoggerFactory
+			.getLogger(SeveralStringHelpers.class.getName());
 
 	/**
 	 * Converts an inputstream to a string.
@@ -37,12 +38,12 @@ public final class SeveralStringHelpers {
 				sb.append(line + "\n");
 			}
 		} catch (final IOException e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		} finally {
 			try {
 				is.close();
 			} catch (final IOException e) {
-				myLogger.error(e);
+				myLogger.error(e.getLocalizedMessage(), e);
 			}
 		}
 

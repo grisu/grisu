@@ -13,9 +13,10 @@ import java.net.InetAddress;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.derby.drda.NetworkServerControl;
-import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class HibernateSessionFactory {
 
@@ -25,7 +26,7 @@ public final class HibernateSessionFactory {
 	public static final String DERBY_DBTYPE = "derby";
 	public static String usedDatabase = "unknown";
 
-	static final Logger myLogger = Logger
+	static final Logger myLogger = LoggerFactory
 			.getLogger(HibernateSessionFactory.class.getName());
 
 	private static boolean startedDerbyNetworkServer = false;
@@ -227,10 +228,9 @@ public final class HibernateSessionFactory {
 					}
 				} else {
 					// use default derby database
-					System.setProperty("derby.system.home", Environment
-							.getVarGrisuDirectory().getPath()
-							+ File.separator
-							+ "derby");
+					String derby_home = Environment.getVarGrisuDirectory()
+							.getPath() + File.separator + "derby";
+					System.setProperty("derby.system.home", derby_home);
 
 					usedDatabase = DERBY_DBTYPE;
 
@@ -259,7 +259,7 @@ public final class HibernateSessionFactory {
 
 			sessionFactory = configuration.buildSessionFactory();
 		} catch (final Throwable e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 			// System.err.println("%%%% Error Creating SessionFactory %%%%");
 			// e.printStackTrace();
 			throw new RuntimeException(e);
@@ -287,7 +287,7 @@ public final class HibernateSessionFactory {
 				sessionFactory = null;
 			}
 		} catch (final Exception e) {
-			myLogger.error(e);
+			myLogger.error(e.getLocalizedMessage(), e);
 		}
 	}
 

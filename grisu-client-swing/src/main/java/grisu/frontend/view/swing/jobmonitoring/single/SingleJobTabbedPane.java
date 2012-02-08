@@ -25,13 +25,13 @@ import org.bushe.swing.event.EventSubscriber;
 import com.jidesoft.swing.JideTabbedPane;
 
 public class SingleJobTabbedPane extends JPanel implements
-SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
+		SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
 
 	private JideTabbedPane jideTabbedPane;
 	private SimpleSingleJobsGrid grid;
 
 	private final Map<String, JobDetailPanel> panels = Collections
-	.synchronizedMap(new HashMap<String, JobDetailPanel>());
+			.synchronizedMap(new HashMap<String, JobDetailPanel>());
 
 	private final ServiceInterface si;
 	private final String application;
@@ -74,7 +74,7 @@ SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
 				title = "All jobs";
 			} else {
 				title = ApplicationsManager.getPrettyName(application)
-				+ " jobs";
+						+ " jobs";
 			}
 			jideTabbedPane.addTab(title, getGrid());
 
@@ -102,9 +102,8 @@ SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
 		new Thread() {
 			@Override
 			public void run() {
-				Component c = getJideTabbedPane().getSelectedComponent();
-				c.setCursor(
-						Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				final Component c = getJideTabbedPane().getSelectedComponent();
+				c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 				JobDetailPanel temp = panels.get(bj.getJobname());
 				if (panels.get(bj.getJobname()) == null) {
@@ -115,23 +114,23 @@ SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
 				try {
 					getJideTabbedPane().setSelectedComponent(temp.getPanel());
 				} catch (final IllegalArgumentException e) {
-					getJideTabbedPane().addTab(bj.getJobname(), temp.getPanel());
+					getJideTabbedPane()
+							.addTab(bj.getJobname(), temp.getPanel());
 					getJideTabbedPane().setSelectedComponent(temp.getPanel());
 				} finally {
-					c.setCursor(
-							Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+					c.setCursor(Cursor
+							.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				}
 			}
 		}.start();
-
 
 	}
 
 	public void onEvent(JobCleanedEvent arg0) {
 
 		// System.out.println("Removing panel...");
-		JobObject bj = arg0.getJob();
-		JobDetailPanel temp = panels.get(bj.getJobname());
+		final JobObject bj = arg0.getJob();
+		final JobDetailPanel temp = panels.get(bj.getJobname());
 		if (panels.get(bj.getJobname()) != null) {
 			getJideTabbedPane().setSelectedIndex(0);
 			panels.remove(bj.getJobname());
