@@ -28,11 +28,11 @@ public class Gram5JobListener implements GramJobListener {
 	}
 
 	public Integer getError(String handle) {
-		return errors.get(handle);
+		return errors.remove(handle);
 	}
 
 	public Integer getStatus(String handle) {
-		return statuses.get(handle);
+		return statuses.remove(handle);
 	}
 
 	public void statusChanged(GramJob job) {
