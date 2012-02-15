@@ -154,7 +154,7 @@ public interface ServiceInterface {
 	 *            the config for the command
 	 * @return the command output
 	 */
-	String admin(String command, DtoProperties config);
+	DtoStringList admin(String command, DtoProperties config);
 
 	/**
 	 * Archives this job to the specified url and deletes it from the database.

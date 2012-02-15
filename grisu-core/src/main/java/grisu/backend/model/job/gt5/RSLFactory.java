@@ -175,6 +175,7 @@ public class RSLFactory {
 	}
 
 	private String[] getModulesFromMDS(final Document jsdl) {
+
 		return new String[] {};
 		// String[] modules_string = JsdlHelpers.getModules(jsdl);
 		// if (modules_string != null) {
@@ -213,7 +214,7 @@ public class RSLFactory {
 		// return modules_string;
 		// } else {
 		// return new String[] {};
-		// }
+
 
 	}
 

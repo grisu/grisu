@@ -2549,7 +2549,14 @@ public class UserJobManager {
 						+ sourceUrl + " to: " + targetUrl);
 				job.addInputFile(sourceUrl);
 				jobdao.saveOrUpdate(job);
-				getUser().getFileManager().cpSingleFile(sourceUrl, targetUrl, true, true, true);
+				RemoteFileTransferObject rfto = getUser().getFileManager()
+						.cpSingleFile(sourceUrl, targetUrl, true, true, true);
+
+				if (rfto.isFailed()) {
+					throw new RemoteFileSystemException(
+							rfto.getPossibleException());
+				}
+
 				myLogger.debug(debugToken + "Finished staging of file: "
 						+ sourceUrl + " to: " + targetUrl);
 				// job.addInputFile(targetUrl);

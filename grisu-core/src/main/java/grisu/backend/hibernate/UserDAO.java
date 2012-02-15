@@ -2,6 +2,8 @@ package grisu.backend.hibernate;
 
 import grisu.backend.model.User;
 
+import java.util.List;
+
 import org.hibernate.Query;
 import org.hibernate.QueryException;
 import org.slf4j.Logger;
@@ -48,6 +50,49 @@ public class UserDAO extends BaseHibernateDAO {
 		} finally {
 			getCurrentSession().close();
 		}
+	}
+
+	/**
+	 * Looks up the database whether a user with the specified dn is already
+	 * persisted.
+	 * 
+	 * @param dn
+	 *            the dn of the user
+	 * @return the {@link User} or null if not found
+	 */
+	public final List<User> findAllUsers() {
+		// myLogger.debug("Loading user with dn: " + dn + " from db.");
+		final String queryString = "from grisu.backend.model.User as user";
+
+		try {
+			getCurrentSession().beginTransaction();
+
+			final Query queryObject = getCurrentSession().createQuery(
+					queryString);
+
+			try {
+				final List<User> users = (queryObject.list());
+				getCurrentSession().getTransaction().commit();
+				return users;
+
+			} catch (final QueryException qe) {
+				// means user not in db yet.
+				myLogger.debug(qe.getLocalizedMessage());
+				return null;
+			}
+
+		} catch (final RuntimeException e) {
+			myLogger.error(e.getLocalizedMessage(), e);
+			try {
+				getCurrentSession().getTransaction().rollback();
+			} catch (final Exception er) {
+				myLogger.debug("Rollback failed.", er);
+			}
+			throw e; // or display error message
+		} finally {
+			getCurrentSession().close();
+		}
+
 	}
 
 	/**

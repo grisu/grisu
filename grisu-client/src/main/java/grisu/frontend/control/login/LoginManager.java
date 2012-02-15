@@ -18,12 +18,15 @@ import grisu.utils.GrisuPluginFilenameFilter;
 import grith.jgrith.control.LoginParams;
 import grith.jgrith.credential.Credential;
 import grith.jgrith.credential.CredentialFactory;
+import grith.jgrith.credential.CredentialLoader;
 import grith.jgrith.utils.CertificateFiles;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Map;
 
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
@@ -218,7 +221,7 @@ public class LoginManager {
 						loginParams.getHttpProxyUsername(),
 						loginParams.getHttpProxyPassphrase());
 			} catch (ServiceInterfaceException e) {
-				throw new LoginException("Coult not login to backend.", e);
+				throw new LoginException("Could not login to backend.", e);
 			}
 
 			loginParams.clearPasswords();
@@ -246,7 +249,6 @@ public class LoginManager {
 		return login(cred, params, displayCliProgress);
 	}
 
-
 	public static ServiceInterface login(String backend)
 			throws LoginException {
 		Credential cred = null;
@@ -256,6 +258,42 @@ public class LoginManager {
 			throw new LoginException("Could not load default credential.", e);
 		}
 		return login(cred, backend, false);
+
+	}
+
+	public static ServiceInterface login(String backend, String credConfigFile,
+			String nameOfCredentialToUse, boolean displayCliProgress)
+					throws LoginException {
+
+		if ( StringUtils.isBlank(credConfigFile) ) {
+			throw new LoginException("Credential config file not specified.");
+		}
+
+		File configFile = new File(credConfigFile);
+		if ( !configFile.exists() || ! configFile.canRead() ) {
+			throw new LoginException("Can't read credential config file: "+credConfigFile);
+		}
+
+		Map<String, Credential> creds = CredentialLoader.loadCredentials(credConfigFile);
+
+		if ( (creds == null) || (creds.size() == 0) ) {
+			throw new LoginException("Can't load any credentials using config file: "+credConfigFile);
+		}
+
+		Credential cred = null;
+		if ( StringUtils.isNotBlank(nameOfCredentialToUse) ) {
+			cred = creds.get(nameOfCredentialToUse);
+
+			if (cred == null) {
+				throw new LoginException("Can't load credential with alias "
+						+ nameOfCredentialToUse + " using config file: "
+						+ credConfigFile);
+			}
+		} else {
+			cred = creds.values().iterator().next();
+		}
+
+		return login(cred, backend, displayCliProgress);
 
 	}
 
@@ -330,7 +368,7 @@ public class LoginManager {
 		Credential c = Credential.load();
 
 		if ((c == null) || !c.isValid()) {
-			throw new CredentialException("No valid proxy found.");
+			throw new CredentialException("Your session has expired. Please login and try again.");
 		}
 
 		return login(c, backend, true);
