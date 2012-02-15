@@ -54,6 +54,8 @@ public class LoginManager {
 	public static volatile boolean environmentInitialized = false;
 	static final public ImmutableBiMap<String, String> SERVICEALIASES = new ImmutableBiMap.Builder<String, String>()
 			.put("local", "Local")
+			.put("testbed",
+					"https://compute.test.nesi.org.nz/soap/GrisuService")
 			.put("bestgrid",
 					"https://compute.services.bestgrid.org/soap/GrisuService")
 					.put("dev",
