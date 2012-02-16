@@ -5,6 +5,7 @@ import grisu.control.ServiceInterfaceCreator;
 import grisu.control.exceptions.ServiceInterfaceException;
 import grisu.frontend.control.jaxws.CommandLogHandler;
 import grisu.frontend.control.login.LoginManager;
+import grisu.jcommons.utils.MyProxyServerParams;
 import grisu.settings.Environment;
 
 import java.io.File;
@@ -130,8 +131,18 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			.put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size",
 					new Integer(4096));
 
-			bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY,
-					username);
+			if (StringUtils.isNotBlank(myProxyServer)) {
+				String myproxycontact = username + "@" + myProxyServer;
+				int p = Integer.parseInt(myProxyPort);
+				if ((p > 0) && (p != MyProxyServerParams.DEFAULT_MYPROXY_PORT)) {
+					myproxycontact = myproxycontact + ":" + myProxyPort;
+				}
+				bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY,
+						myproxycontact);
+			} else {
+				bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY,
+						username);
+			}
 			bp.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY,
 					new String(password));
 
