@@ -1050,7 +1050,8 @@ public interface ServiceInterface {
 	@POST
 	@Path("/user/login")
 	void login(@QueryParam("username") String username,
-			@QueryParam("password") String password);
+			@QueryParam("password") String password,
+			@QueryParam("host") String host, @QueryParam("port") int port);
 
 	/**
 	 * Logout of the service. Performs housekeeping tasks and usually deletes

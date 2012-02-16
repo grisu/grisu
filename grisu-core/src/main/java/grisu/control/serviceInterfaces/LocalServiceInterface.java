@@ -28,11 +28,14 @@ ServiceInterface {
 
 	private Credential credential = null;
 	private String myproxy_username = null;
+
+	private String host = null;
+	private int port = -1;
+
 	private char[] passphrase = null;
 
 	private User user;
 
-	private static String hostname = null;
 
 	// @Override
 	protected final Credential getCredential() {
@@ -83,13 +86,12 @@ ServiceInterface {
 				}
 			} else {
 				// get credential from myproxy
-				String myProxyServer = MyProxyServerParams.getMyProxyServer();
-				final int myProxyPort = MyProxyServerParams.getMyProxyPort();
+
 
 				try {
 					// this is needed because of a possible round-robin myproxy
 					// server
-					myProxyServer = InetAddress.getByName(myProxyServer)
+					host = InetAddress.getByName(host)
 							.getHostAddress();
 				} catch (final UnknownHostException e1) {
 					myLogger.error(e1.getLocalizedMessage(), e1);
@@ -100,8 +102,8 @@ ServiceInterface {
 
 				try {
 
-					credential = new MyProxyCredential(myproxy_username, passphrase,
-							myProxyServer, myProxyPort,
+					credential = new MyProxyCredential(myproxy_username,
+							passphrase, host, port,
 							ServerPropertiesManager.getMyProxyLifetime());
 
 					final long newLifeTime = credential.getCredential()
@@ -228,10 +230,19 @@ ServiceInterface {
 		return ServiceTemplateManagement.getAllAvailableApplications();
 	}
 
-	public final void login(final String username, final String password) {
+	public final void login(final String username, final String password,
+			final String loginhost, final int loginport) {
 
 		this.myproxy_username = username;
 		this.passphrase = password.toCharArray();
+
+		this.host = loginhost;
+		this.port = loginport;
+
+		if (StringUtils.isBlank(this.host)) {
+			host = MyProxyServerParams.getMyProxyServer();
+			port = MyProxyServerParams.getMyProxyPort();
+		}
 
 		try {
 			// init database and make sure everything is all right
