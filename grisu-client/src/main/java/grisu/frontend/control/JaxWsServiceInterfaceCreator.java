@@ -151,6 +151,10 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 					.get("grisu-client");
 
 			Map map = Maps.newHashMap();
+
+			map.put("X-login-host", myProxyServer);
+			map.put("X-login-port", myProxyPort);
+
 			map.put("X-grisu-client", Collections.singletonList(clientstring));
 
 			String session_id = LoginManager.USER_SESSION;

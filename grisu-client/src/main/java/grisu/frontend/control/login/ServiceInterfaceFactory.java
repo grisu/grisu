@@ -161,7 +161,8 @@ public final class ServiceInterfaceFactory {
 					+ className);
 
 			try {
-				serviceInterface.login(username, new String(password));
+				serviceInterface.login(username, new String(password),
+						myProxyServer, Integer.parseInt(myProxyPort));
 				final int backend_version = serviceInterface
 						.getInterfaceVersion();
 

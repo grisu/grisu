@@ -10,6 +10,7 @@ import grisu.jcommons.dependencies.ClasspathHacker;
 import grisu.jcommons.exceptions.CredentialException;
 import grisu.jcommons.utils.DefaultGridSecurityProvider;
 import grisu.jcommons.utils.JythonHelpers;
+import grisu.jcommons.utils.MyProxyServerParams;
 import grisu.jcommons.view.cli.CliHelpers;
 import grisu.model.GrisuRegistryManager;
 import grisu.settings.ClientPropertiesManager;
@@ -56,15 +57,15 @@ public class LoginManager {
 			.put("local", "Local")
 			.put("testbed",
 					"https://compute.test.nesi.org.nz/soap/GrisuService")
-			.put("bestgrid",
-					"https://compute.services.bestgrid.org/soap/GrisuService")
-					.put("dev",
-							"https://compute-dev.services.bestgrid.org/soap/GrisuService")
-							.put("bestgrid-test",
-									"https://compute-test.services.bestgrid.org/soap/GrisuService")
-									.put("local_ws_jetty", "http://localhost:8080/soap/GrisuService")
-									.put("local_ws",
-											"http://localhost:8080/grisu-ws/soap/GrisuService").build();
+					.put("bestgrid",
+							"https://compute.services.bestgrid.org/soap/GrisuService")
+							.put("dev",
+									"https://compute-dev.services.bestgrid.org/soap/GrisuService")
+									.put("bestgrid-test",
+											"https://compute-test.services.bestgrid.org/soap/GrisuService")
+											.put("local_ws_jetty", "http://localhost:8080/soap/GrisuService")
+											.put("local_ws",
+													"http://localhost:8080/grisu-ws/soap/GrisuService").build();
 	public static String httpProxyHost = null;
 
 	public static int httpProxyPort = 80;
@@ -76,6 +77,9 @@ public class LoginManager {
 	public static int REQUIRED_BACKEND_API_VERSION = 15;
 
 	public static final int DEFAULT_PROXY_LIFETIME_IN_HOURS = 240;
+
+	public static String myProxyHost = null;
+	public static int myProxyPort = -1;
 
 	public static void addPluginsToClasspath() throws IOException {
 
@@ -125,6 +129,12 @@ public class LoginManager {
 				BouncyCastleTool.initBouncyCastle();
 			} catch (final Exception e) {
 				myLogger.error(e.getLocalizedMessage(), e);
+			}
+
+			try {
+				CertificateFiles.copyCACerts(false);
+			} catch (Exception e) {
+				myLogger.error("Problem copying root certificates.", e);
 			}
 
 			environmentInitialized = true;
@@ -344,13 +354,34 @@ public class LoginManager {
 			CliHelpers.setIndeterminateProgress(
 					"Local credential found, logging in...", true);
 			try {
-				c.uploadMyProxy();
+
+				if (StringUtils.isNotBlank(myProxyHost)) {
+					if (myProxyPort <= 0) {
+						myProxyPort = MyProxyServerParams.DEFAULT_MYPROXY_PORT;
+					}
+					c.uploadMyProxy(myProxyHost, myProxyPort, false);
+				} else {
+					c.uploadMyProxy();
+				}
 			} finally {
 				CliHelpers.setIndeterminateProgress(false);
 			}
 
 		} else {
-			c = CredentialFactory.createFromCommandline(proxyLifetimeInHours);
+
+			LoginParams p = new LoginParams(backend, null, null);
+			if (StringUtils.isNotBlank(myProxyHost)) {
+				p.setMyProxyServer(myProxyHost);
+				if (myProxyPort <= 0) {
+					p.setMyProxyPort(Integer
+							.toString(MyProxyServerParams.DEFAULT_MYPROXY_PORT));
+				} else {
+					p.setMyProxyPort(Integer.toString(myProxyPort));
+				}
+			}
+			c = CredentialFactory
+					.createFromCommandline(p,
+							proxyLifetimeInHours);
 			if (saveCredToDisk) {
 				c.saveCredential();
 			}
@@ -381,6 +412,16 @@ public class LoginManager {
 					throws LoginException {
 
 		LoginParams p = new LoginParams(backend, username, null);
+
+		if (StringUtils.isNotBlank(myProxyHost)) {
+			p.setMyProxyServer(myProxyHost);
+			if (myProxyPort <= 0) {
+				p.setMyProxyPort(Integer
+						.toString(MyProxyServerParams.DEFAULT_MYPROXY_PORT));
+			} else {
+				p.setMyProxyPort(Integer.toString(myProxyPort));
+			}
+		}
 
 		Credential c;
 		try {
