@@ -152,8 +152,8 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 			Map map = Maps.newHashMap();
 
-			map.put("X-login-host", myProxyServer);
-			map.put("X-login-port", myProxyPort);
+			map.put("X-login-host", Collections.singletonList(myProxyServer));
+			map.put("X-login-port", Collections.singletonList(myProxyPort));
 
 			map.put("X-grisu-client", Collections.singletonList(clientstring));
 
