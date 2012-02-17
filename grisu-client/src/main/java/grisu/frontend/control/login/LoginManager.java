@@ -349,6 +349,10 @@ public class LoginManager {
 			validLocalProxy = false;
 		}
 
+		if (myProxyPort <= 0) {
+			myProxyPort = MyProxyServerParams.DEFAULT_MYPROXY_PORT;
+		}
+
 
 		if (validLocalProxy) {
 			CliHelpers.setIndeterminateProgress(
@@ -356,9 +360,6 @@ public class LoginManager {
 			try {
 
 				if (StringUtils.isNotBlank(myProxyHost)) {
-					if (myProxyPort <= 0) {
-						myProxyPort = MyProxyServerParams.DEFAULT_MYPROXY_PORT;
-					}
 					c.uploadMyProxy(myProxyHost, myProxyPort, false);
 				} else {
 					c.uploadMyProxy();
@@ -372,16 +373,16 @@ public class LoginManager {
 			LoginParams p = new LoginParams(backend, null, null);
 			if (StringUtils.isNotBlank(myProxyHost)) {
 				p.setMyProxyServer(myProxyHost);
-				if (myProxyPort <= 0) {
-					p.setMyProxyPort(Integer
-							.toString(MyProxyServerParams.DEFAULT_MYPROXY_PORT));
-				} else {
-					p.setMyProxyPort(Integer.toString(myProxyPort));
-				}
+				p.setMyProxyPort(Integer.toString(myProxyPort));
 			}
 			c = CredentialFactory
 					.createFromCommandline(p,
 							proxyLifetimeInHours);
+			if (StringUtils.isNotBlank(myProxyHost)) {
+				c.uploadMyProxy(myProxyHost, myProxyPort, false);
+			} else {
+				c.uploadMyProxy();
+			}
 			if (saveCredToDisk) {
 				c.saveCredential();
 			}

@@ -75,14 +75,6 @@ public interface ApplicationInformation {
 	 */
 	Set<String> getAvailableAllSubmissionLocations();
 
-	// /**
-	// * Returns a set of all executable names that are associated with this
-	// * application on the grid.
-	// *
-	// * @return the executables
-	// */
-	// Set<String> getAvailableExecutables();
-
 	/**
 	 * Calculates all the submissionlocations that are available to the user for
 	 * the provided fqan and application. It returns all submissionlocations,
@@ -93,6 +85,14 @@ public interface ApplicationInformation {
 	 * @return the submissionlocations
 	 */
 	Set<String> getAvailableSubmissionLocationsForFqan(String fqan);
+
+	// /**
+	// * Returns a set of all executable names that are associated with this
+	// * application on the grid.
+	// *
+	// * @return the executables
+	// */
+	// Set<String> getAvailableExecutables();
 
 	/**
 	 * Returns a set of all available submissionLocations for one version of
@@ -127,6 +127,18 @@ public interface ApplicationInformation {
 	 */
 	Set<String> getAvailableVersions(String subLoc);
 
+	/**
+	 * The available executables for this application on this
+	 * submissionlocation.
+	 * 
+	 * @param subLoc
+	 *            the submissionlocation
+	 * @param version
+	 *            the version of the application
+	 * @return a list of all executables
+	 */
+	String[] getExecutables(String subLoc, String version);
+
 	// /**
 	// * Calculates the best {@link GridResource}s to submit this job to.
 	// *
@@ -140,18 +152,6 @@ public interface ApplicationInformation {
 	// SortedSet<GridResource> getBestSubmissionLocations(
 	// Map<JobSubmissionProperty, String> additionalJobProperties,
 	// String fqan);
-
-	/**
-	 * The available executables for this application on this
-	 * submissionlocation.
-	 * 
-	 * @param subLoc
-	 *            the submissionlocation
-	 * @param version
-	 *            the version of the application
-	 * @return a list of all executables
-	 */
-	String[] getExecutables(String subLoc, String version);
 
 	/**
 	 * All available executables for the application and the provided VO.
@@ -179,5 +179,16 @@ public interface ApplicationInformation {
 	 * @return the executables
 	 */
 	Set<String> getExecutablesForVo(final String fqan, String version);
+
+	/**
+	 * Finds all queues that match the specified job properties.
+	 * 
+	 * @param additionalJobProperties job properties like cpus, memory,...
+	 * @param fqan the group to use to submit the job
+	 * @return all queues that run the specified job
+	 */
+	public SortedSet<String> getQueues(
+			Map<JobSubmissionProperty, String> additionalJobProperties,
+			String fqan);
 
 }

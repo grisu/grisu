@@ -207,7 +207,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private static String hostname = null;
 
 	public static final YnfoManager ym = new YnfoManager(
-			"/home/markus/Workspaces/Goji/grin/src/main/resources/default_config.groovy");
+			"/home/markus/Workspaces/Goji/grin/src/main/resources/nesi.groovy");
 
 
 	public final static Grid grid = ym.getGrid();
@@ -837,8 +837,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				.createSubmissionLocationsInfo(informationManager
 						.getAllSubmissionLocations());
 
-		locs.removeUnuseableSubmissionLocations(informationManager, df()
-				.getMountpoints());
+		// locs.removeUnuseableSubmissionLocations(informationManager, df()
+		// .getMountpoints());
 		return locs;
 	}
 
@@ -855,8 +855,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				.createSubmissionLocationsInfoFromQueues(informationManager
 						.getAllSubmissionLocationsForVO(fqan));
 
-		locs.removeUnuseableSubmissionLocations(informationManager, df()
-				.getMountpoints());
+		// locs.removeUnuseableSubmissionLocations(informationManager, df()
+		// .getMountpoints());
 		return locs;
 
 	}
