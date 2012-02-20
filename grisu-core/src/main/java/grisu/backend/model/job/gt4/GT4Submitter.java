@@ -1,13 +1,11 @@
 package grisu.backend.model.job.gt4;
 
-import grisu.backend.info.InformationManagerManager;
 import grisu.backend.model.job.Job;
 import grisu.backend.model.job.JobSubmitter;
 import grisu.backend.model.job.ServerJobSubmissionException;
 import grisu.control.JobConstants;
 import grisu.control.exceptions.NoValidCredentialException;
 import grisu.jcommons.constants.Constants;
-import grisu.jcommons.interfaces.InformationManager;
 import grisu.jcommons.utils.JsdlHelpers;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.DebugUtils;
@@ -537,9 +535,10 @@ public class GT4Submitter extends JobSubmitter {
 	// return handle;
 	// }
 
-	private final InformationManager informationManager = InformationManagerManager
-			.getInformationManager(ServerPropertiesManager
-					.getInformationManagerConf());
+	// private final InformationManager informationManager =
+	// InformationManagerManager
+	// .getInformationManager(ServerPropertiesManager
+	// .getInformationManagerConf());
 
 	/*
 	 * (non-Javadoc)

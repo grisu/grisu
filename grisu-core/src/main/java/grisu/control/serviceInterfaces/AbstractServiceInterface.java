@@ -1,7 +1,6 @@
 package grisu.control.serviceInterfaces;
 
 import grisu.GrisuVersion;
-import grisu.backend.info.InformationManagerManager;
 import grisu.backend.model.RemoteFileTransferObject;
 import grisu.backend.model.User;
 import grisu.backend.model.fs.UserFileManager;
@@ -207,18 +206,18 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private static String hostname = null;
 
 	public static final YnfoManager ym = new YnfoManager(
-			"/home/markus/Workspaces/Goji/grin/src/main/resources/nesi.groovy");
+			"/home/markus/Workspaces/Goji/grin/src/main/resources/testbed.groovy");
 
 
 	public final static Grid grid = ym.getGrid();
 	public static final InformationManager informationManager = new GrinformationManager(
 			grid);
 
-	public static InformationManager createInformationManager() {
-		return InformationManagerManager
-				.getInformationManager(ServerPropertiesManager
-						.getInformationManagerConf());
-	}
+	// public static InformationManager createInformationManager() {
+	// return InformationManagerManager
+	// .getInformationManager(ServerPropertiesManager
+	// .getInformationManagerConf());
+	// }
 
 	public static Cache eternalCache() {
 		return cache.getCache("eternal");
