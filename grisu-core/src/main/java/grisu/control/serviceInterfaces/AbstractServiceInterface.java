@@ -18,8 +18,6 @@ import grisu.control.exceptions.JobSubmissionException;
 import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.NoValidCredentialException;
 import grisu.control.exceptions.RemoteFileSystemException;
-import grisu.grin.YnfoManager;
-import grisu.grin.model.Grid;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.jcommons.interfaces.GrinformationManager;
@@ -205,13 +203,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	private static String hostname = null;
 
-	public static final YnfoManager ym = new YnfoManager(
-			"/home/markus/Workspaces/Goji/grin/src/main/resources/testbed.groovy");
-
-
-	public final static Grid grid = ym.getGrid();
 	public static final InformationManager informationManager = new GrinformationManager(
-			grid);
+			ServerPropertiesManager.getInformationManagerConf());
+
 
 	// public static InformationManager createInformationManager() {
 	// return InformationManagerManager
@@ -713,11 +707,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		Collection<Queue> resources = null;
 		if (excludeResourcesWithLessCPUslotsFreeThanRequested) {
 
-			resources = grid.findQueues(converterMap, fqan);
+			resources = informationManager.findQueues(converterMap, fqan);
 
 			// TODO exclude queues
 		} else {
-			resources = grid.findQueues(converterMap, fqan);
+			resources = informationManager.findQueues(converterMap, fqan);
 		}
 
 		Collection<String> subLocs = Collections2.transform(resources,

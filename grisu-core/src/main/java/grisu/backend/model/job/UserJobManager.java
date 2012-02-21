@@ -2088,16 +2088,17 @@ public class UserJobManager {
 		}
 
 		// preparing all necessary objects
-		Application app = AbstractServiceInterface.grid
-				.getApplication(applicationName);
-		Executable exe = AbstractServiceInterface.grid
-				.getExecutable(executable);
+		Application app = AbstractServiceInterface.informationManager
+				.getResource(Application.class, applicationName);
+
+		Executable exe = AbstractServiceInterface.informationManager
+				.getResource(Executable.class, executable);
 
 		// check whether application is specified as generic. if so, try to find
 		// the proper one using the executable
 		if (Application.GENERIC_APPLICATION.equals(app) && (exe != null)) {
 
-			Collection<Application> apps = AbstractServiceInterface.grid
+			Collection<Application> apps = AbstractServiceInterface.informationManager
 					.getResources(Application.class,
 							exe);
 			if (apps.size() != 0) {
@@ -2121,8 +2122,8 @@ public class UserJobManager {
 			}
 		}
 
-		Version version = AbstractServiceInterface.grid
-				.getVersion(applicationVersion);
+		Version version = AbstractServiceInterface.informationManager.getResource(Version.class, applicationVersion);
+
 		// check whether version is specified or not. if not, try to find latest
 		// one...
 		if (Version.ANY_VERSION.equals(version)) {
@@ -2130,7 +2131,7 @@ public class UserJobManager {
 			myLogger.debug("Not implemented yet, but usually this would find the latest version on the grid since the user didn't specify it.");
 		}
 
-		Collection<Queue> availableQueues = AbstractServiceInterface.grid
+		Collection<Queue> availableQueues = AbstractServiceInterface.informationManager
 				.findQueues(jobSubmissionObject.getJobSubmissionPropertyMap(),
 						jobFqan);
 
@@ -2734,8 +2735,8 @@ public class UserJobManager {
 			job.addLogMessage("Submitting job to endpoint...");
 			final String candidate = JsdlHelpers.getCandidateHosts(job
 					.getJobDescription())[0];
-			final Queue resource = AbstractServiceInterface.grid
-					.getQueue(candidate);
+			final Queue resource = AbstractServiceInterface.informationManager
+					.getResource(Queue.class, candidate);
 
 			String version = resource.getGateway().getMiddleware().getVersion();
 

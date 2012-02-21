@@ -559,10 +559,6 @@ public final class ServerPropertiesManager {
 			result.put(key.toString(), value);
 		}
 
-		if (result.size() == 0) {
-			return null;
-		}
-
 		return result;
 	}
 
