@@ -5,7 +5,7 @@ import grisu.control.ServiceInterfaceCreator;
 import grisu.control.exceptions.ServiceInterfaceException;
 import grisu.frontend.control.jaxws.CommandLogHandler;
 import grisu.frontend.control.login.LoginManager;
-import grisu.jcommons.utils.MyProxyServerParams;
+import grisu.jcommons.constants.GridEnvironment;
 import grisu.settings.Environment;
 
 import java.io.File;
@@ -134,7 +134,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			if (StringUtils.isNotBlank(myProxyServer)) {
 				String myproxycontact = username + "@" + myProxyServer;
 				int p = Integer.parseInt(myProxyPort);
-				if ((p > 0) && (p != MyProxyServerParams.DEFAULT_MYPROXY_PORT)) {
+				if ((p > 0) && (p != GridEnvironment.getDefaultMyProxyPort())) {
 					myproxycontact = myproxycontact + ":" + myProxyPort;
 				}
 				bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY,

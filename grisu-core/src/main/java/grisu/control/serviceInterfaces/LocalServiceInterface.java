@@ -5,7 +5,6 @@ import grisu.backend.model.User;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoSuchTemplateException;
 import grisu.control.exceptions.NoValidCredentialException;
-import grisu.jcommons.utils.MyProxyServerParams;
 import grisu.settings.ServerPropertiesManager;
 import grisu.settings.ServiceTemplateManagement;
 import grith.jgrith.credential.Credential;
@@ -169,8 +168,8 @@ ServiceInterface {
 
 	public final long getCredentialEndTime() {
 
-		String myProxyServer = MyProxyServerParams.getMyProxyServer();
-		final int myProxyPort = MyProxyServerParams.getMyProxyPort();
+		String myProxyServer = ServerPropertiesManager.getMyProxyHost();
+		final int myProxyPort = ServerPropertiesManager.getMyProxyPort();
 
 		try {
 			// this is needed because of a possible round-robin myproxy server
@@ -193,7 +192,6 @@ ServiceInterface {
 		}
 
 		return info.getEndTime();
-
 	}
 
 	@Override
@@ -240,8 +238,8 @@ ServiceInterface {
 		this.port = loginport;
 
 		if (StringUtils.isBlank(this.host)) {
-			host = MyProxyServerParams.getMyProxyServer();
-			port = MyProxyServerParams.getMyProxyPort();
+			host = ServerPropertiesManager.getMyProxyHost();
+			port = ServerPropertiesManager.getMyProxyPort();
 		}
 
 		try {

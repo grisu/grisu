@@ -5,12 +5,12 @@ import grisu.control.exceptions.ServiceInterfaceException;
 import grisu.frontend.control.UncaughtExceptionHandler;
 import grisu.jcommons.configuration.CommonGridProperties;
 import grisu.jcommons.constants.Constants;
+import grisu.jcommons.constants.GridEnvironment;
 import grisu.jcommons.dependencies.BouncyCastleTool;
 import grisu.jcommons.dependencies.ClasspathHacker;
 import grisu.jcommons.exceptions.CredentialException;
 import grisu.jcommons.utils.DefaultGridSecurityProvider;
 import grisu.jcommons.utils.JythonHelpers;
-import grisu.jcommons.utils.MyProxyServerParams;
 import grisu.jcommons.view.cli.CliHelpers;
 import grisu.model.GrisuRegistryManager;
 import grisu.settings.ClientPropertiesManager;
@@ -350,7 +350,7 @@ public class LoginManager {
 		}
 
 		if (myProxyPort <= 0) {
-			myProxyPort = MyProxyServerParams.DEFAULT_MYPROXY_PORT;
+			myProxyPort = GridEnvironment.getDefaultMyProxyPort();
 		}
 
 
@@ -418,7 +418,8 @@ public class LoginManager {
 			p.setMyProxyServer(myProxyHost);
 			if (myProxyPort <= 0) {
 				p.setMyProxyPort(Integer
-						.toString(MyProxyServerParams.DEFAULT_MYPROXY_PORT));
+.toString(GridEnvironment
+						.getDefaultMyProxyPort()));
 			} else {
 				p.setMyProxyPort(Integer.toString(myProxyPort));
 			}

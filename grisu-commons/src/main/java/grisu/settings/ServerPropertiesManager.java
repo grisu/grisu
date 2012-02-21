@@ -1,6 +1,7 @@
 package grisu.settings;
 
 import grisu.control.ServiceInterface;
+import grisu.jcommons.constants.GridEnvironment;
 import grisu.jcommons.utils.tid.SecureRandomTid;
 import grisu.jcommons.utils.tid.TidGenerator;
 
@@ -642,6 +643,29 @@ public final class ServerPropertiesManager {
 	}
 
 	/**
+	 * Returns the default myproxy server that is used (if no custom myproxy
+	 * host is specified in login/authentication process of a backend).
+	 * 
+	 * @return the host
+	 */
+	public static String getMyProxyHost() {
+
+		String host = null;
+		try {
+			host = getServerConfiguration().getString("General.myProxyHost");
+
+		} catch (final Exception e) {
+			host = null;
+		}
+
+		if (host == null) {
+			host = GridEnvironment.getDefaultMyProxyServer();
+		}
+
+		return host;
+	}
+
+	/**
 	 * Returns the lifetime of a delegated proxy that is retrieved from myproxy.
 	 * 
 	 * @return the lifetime in seconds
@@ -660,6 +684,27 @@ public final class ServerPropertiesManager {
 			return DEFAULT_MYPROXY_LIFETIME_IN_SECONDS;
 		}
 		return lifetime_in_seconds;
+	}
+
+	/**
+	 * The MyProxy port to use.
+	 * 
+	 * @return the port
+	 */
+	public static int getMyProxyPort() {
+		int port = -1;
+		try {
+			port = Integer.parseInt(getServerConfiguration()
+					.getString("General.myProxyPort"));
+
+		} catch (final Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return GridEnvironment.getDefaultMyProxyPort();
+		}
+		if (port == -1) {
+			return GridEnvironment.getDefaultMyProxyPort();
+		}
+		return port;
 	}
 
 	/**
