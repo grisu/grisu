@@ -25,6 +25,7 @@ import grisu.jcommons.interfaces.InformationManager;
 import grisu.jcommons.model.info.Directory;
 import grisu.jcommons.model.info.Queue;
 import grisu.jcommons.model.info.Site;
+import grisu.jcommons.model.info.VO;
 import grisu.jcommons.model.info.Version;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
@@ -43,7 +44,7 @@ import grisu.settings.ServerPropertiesManager;
 import grisu.utils.FileHelpers;
 import grisu.utils.SeveralXMLHelpers;
 import grith.jgrith.utils.CertificateFiles;
-import grith.jgrith.utils.VomsesFiles;
+import grith.jgrith.voms.VOManagement.VOManagement;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -102,8 +103,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	static Logger myLogger = null;
 	public static CacheManager cache;
 
+	public static final InformationManager informationManager = new GrinformationManager(
+			ServerPropertiesManager.getInformationManagerConf());
+
 	private final static AdminInterface admin = new AdminInterface(null,
+			informationManager,
 			User.userdao);
+
+
 	static {
 
 		String logbackPath = "/etc/grisu/logback.xml";
@@ -158,8 +165,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 			LocalTemplatesHelper.copyTemplatesAndMaybeGlobusFolder();
-			VomsesFiles.copyVomses(Arrays.asList(ServerPropertiesManager
-					.getVOsToUse()));
+
+			//String[] vos = ServerPropertiesManager.getVOsToUse();
+
+			Set<VO> vos = informationManager.getAllVOs();
+
+			VOManagement.setVOsToUse(vos);
+
+			//			VomsesFiles.copyVomses(Arrays.asList(ServerPropertiesManager
+			//					.getVOsToUse()));
 			CertificateFiles.copyCACerts(false);
 		} catch (final Exception e) {
 			// TODO Auto-generated catch block
@@ -202,9 +216,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private static String backendInfo = null;
 
 	private static String hostname = null;
-
-	public static final InformationManager informationManager = new GrinformationManager(
-			ServerPropertiesManager.getInformationManagerConf());
 
 
 	// public static InformationManager createInformationManager() {

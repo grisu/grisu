@@ -34,7 +34,7 @@ public final class ServerPropertiesManager {
 	/**
 	 * Default minimum myproxy lifetime before it gets refreshed: 1800 seconds.
 	 */
-	public static final int DEFAULT_MIN_PROXY_LIFETIME_BEFORE_REFRESH = 1800;
+	public static final int DEFAULT_MIN_PROXY_LIFETIME_BEFORE_REFRESH = 600;
 	/**
 	 * Default concurrent threads to query job status per user: 2
 	 */
@@ -93,7 +93,7 @@ public final class ServerPropertiesManager {
 
 	private static final int DEFAULT_JOB_CLEAN_THRESHOLD_IN_SECONDS = 1800;
 
-	private static final String DEFAULT_VOS_TO_SUPPORT = "nz";
+	private static final String DEFAULT_VOS_TO_SUPPORT = "test";
 
 	private static final long DEFAULT_PROXY_RETRIEVAL_WAIT_TIME = 300;
 
@@ -760,25 +760,6 @@ public final class ServerPropertiesManager {
 
 	}
 
-	/**
-	 * The vos to use (in addition to manually added ones).
-	 * 
-	 * @return the vos
-	 */
-	public static String[] getVOsToUse() {
-		String vos;
-		try {
-			vos = getServerConfiguration().getString(
-					"General.supportedVOs");
-
-			if ( StringUtils.isBlank(vos)) {
-				vos = DEFAULT_VOS_TO_SUPPORT;
-			}
-			return vos.split(",");
-		} catch (final Exception e) {
-			return null;
-		}
-	}
 
 	public static int getWaitTimeBetweenFailedFileTransferAndNextTryInSeconds() {
 

@@ -3,6 +3,8 @@ package grisu.control.serviceInterfaces;
 import grisu.backend.hibernate.UserDAO;
 import grisu.backend.model.User;
 import grisu.jcommons.constants.Constants;
+import grisu.jcommons.interfaces.InformationManager;
+import grisu.jcommons.model.info.VO;
 import grisu.model.dto.DtoStringList;
 import grisu.settings.Environment;
 import grisu.settings.ServerPropertiesManager;
@@ -12,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -31,10 +34,14 @@ public class AdminInterface {
 
 	final private String adminUserFile;
 
-	public AdminInterface(String adminUserFile, UserDAO userdao) {
+	private final InformationManager im;
+
+	public AdminInterface(String adminUserFile, InformationManager im,
+			UserDAO userdao) {
 
 		this.userdao = userdao;
 		this.adminUserFile = adminUserFile;
+		this.im = im;
 
 		readAdminConfigFile();
 
@@ -145,7 +152,9 @@ public class AdminInterface {
 	private DtoStringList refreshVos() {
 
 		refreshConfig();
-		VOManagement.refreshAllVOs();
+		im.refresh();
+		Set<VO> vos = im.getAllVOs();
+		VOManagement.setVOsToUse(vos);
 
 		return DtoStringList.fromSingleString("VOs refreshed.");
 
