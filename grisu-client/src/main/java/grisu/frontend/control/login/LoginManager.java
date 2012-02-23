@@ -179,13 +179,6 @@ public class LoginManager {
 				throw new RuntimeException(e2);
 			}
 
-			try {
-				CertificateFiles.copyCACerts(true);
-			} catch (final Exception e1) {
-				// e1.printStackTrace();
-				myLogger.warn(e1.getLocalizedMessage(), e1);
-			}
-
 			// do the cacert thingy
 			try {
 				final URL cacertURL = LoginManager.class
@@ -418,8 +411,8 @@ public class LoginManager {
 			p.setMyProxyServer(myProxyHost);
 			if (myProxyPort <= 0) {
 				p.setMyProxyPort(Integer
-.toString(GridEnvironment
-						.getDefaultMyProxyPort()));
+						.toString(GridEnvironment
+								.getDefaultMyProxyPort()));
 			} else {
 				p.setMyProxyPort(Integer.toString(myProxyPort));
 			}
