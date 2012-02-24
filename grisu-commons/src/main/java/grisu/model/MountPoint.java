@@ -283,8 +283,7 @@ public class MountPoint implements Comparable<MountPoint> {
 		return disabled;
 	}
 
-	@Column(nullable = false)
-	@XmlElement(name = "isHomeDir")
+	@Transient
 	public boolean isHomeDir() {
 		return isHomeDir;
 	}
