@@ -17,6 +17,7 @@ import grisu.control.serviceInterfaces.AbstractServiceInterface;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.model.info.Directory;
 import grisu.jcommons.model.info.VO;
+import grisu.model.FileManager;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.GridFile;
@@ -62,6 +63,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * The User class holds all the relevant data a job could want to know from the
@@ -392,31 +394,11 @@ public class User {
 			tempPath = path.substring(0, startProperties);
 		}
 
+		boolean isHomeDir = false;
+
 		properties.put(MountPoint.PATH_KEY, tempPath);
 
-		if (tempPath.startsWith(".")) {
-			myLogger.warn("Using '.' is deprecated. Please use /~/ instead for: "
-					+ server + " / " + fqan);
-			try {
-				url = getFileSystemHomeDirectory(server,
-						fqan);
-
-				String additionalUrl = null;
-				try {
-					additionalUrl = tempPath
-							.substring(1, tempPath.length() - 1);
-				} catch (final Exception e) {
-					additionalUrl = "";
-				}
-
-				url = url + additionalUrl;
-
-			} catch (final Exception e) {
-				// myLogger.error(e.getLocalizedMessage(), e);
-				throw e;
-			}
-
-		} else if (tempPath.startsWith("/~/")) {
+		if (tempPath.startsWith("/~/")) {
 			try {
 				url = getFileSystemHomeDirectory(server,
 						fqan);
@@ -431,17 +413,8 @@ public class User {
 
 				url = url + additionalUrl;
 
-			} catch (final Exception e) {
-				// myLogger.error(e.getLocalizedMessage(), e);
-				throw e;
-			}
-		} else if (path.contains("${GLOBUS_USER_HOME}")) {
-			try {
-				myLogger.warn("Using ${GLOBUS_USER_HOME} is deprecated. Please use /~/ instead for: "
-						+ server + " / " + fqan);
-				url = getFileSystemHomeDirectory(server,
-						fqan);
-				userDnPath = false;
+				isHomeDir = true;
+
 			} catch (final Exception e) {
 				// myLogger.error(e.getLocalizedMessage(), e);
 				throw e;
@@ -553,7 +526,7 @@ public class User {
 			alias = MountPointHelpers.calculateMountPointName(server, fqan);
 		}
 		mp = new MountPoint(getDn(), fqan, url, alias,
-				dir.getSite().toString(), true);
+				dir.getSite().toString(), true, isHomeDir);
 
 		for (final String key : properties.keySet()) {
 			mp.addProperty(key, properties.get(key));
@@ -1334,6 +1307,36 @@ public class User {
 				return mountpoint;
 			}
 		}
+
+		if (file.contains("/~/")) {
+			String host = FileManager.getHost(file);
+			Set<MountPoint> mps = Sets.newTreeSet();
+			for (final MountPoint mp : getAllMountPoints()) {
+				if (mp.isHomeDir()) {
+					String mpHost = FileManager.getHost(mp.getRootUrl());
+					if (mpHost.equals(host)) {
+						mps.add(mp);
+					}
+				}
+			}
+
+			// if unique result, we can return it...
+			if (mps.size() == 1) {
+				return mps.iterator().next();
+			} else if (mps.size() > 1) {
+				// check whether all of those have the same absolute url, if
+				// that is the case, we can return either of those
+				// mountpoints...
+				Set<String> urls = Sets.newTreeSet();
+				for (MountPoint mp : mps) {
+					urls.add(mp.getRootUrl());
+				}
+				if (urls.size() == 1) {
+					return mps.iterator().next();
+				}
+			}
+		}
+
 		return null;
 	}
 
@@ -1353,6 +1356,7 @@ public class User {
 				return mountpoint;
 			}
 		}
+
 		return null;
 	}
 

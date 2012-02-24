@@ -95,25 +95,25 @@ public class FileSystemCache {
 	}
 
 	private FileSystem createFileSystem(String rootUrl,
- Credential credToUse)
-			throws FileSystemException {
+			Credential credToUse)
+					throws FileSystemException {
 
 		final FileSystemOptions opts = new FileSystemOptions();
-
-		if (rootUrl.startsWith("gsiftp")) {
-			// myLogger.debug("Url \"" + rootUrl
-			// + "\" is gsiftp url, using gridftpfilesystembuilder...");
-
-			final GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
-					.getInstance();
-			builder.setGSSCredential(opts, credToUse.getCredential());
-			builder.setTimeout(opts,
-					ServerPropertiesManager.getFileSystemConnectTimeout());
-			// builder.setUserDirIsRoot(opts, true);
-		}
-
 		FileObject fileRoot;
 		try {
+
+			if (rootUrl.startsWith("gsiftp")) {
+				// myLogger.debug("Url \"" + rootUrl
+				// + "\" is gsiftp url, using gridftpfilesystembuilder...");
+
+				final GridFtpFileSystemConfigBuilder builder = GridFtpFileSystemConfigBuilder
+						.getInstance();
+				builder.setGSSCredential(opts, credToUse.getCredential());
+				builder.setTimeout(opts,
+						ServerPropertiesManager.getFileSystemConnectTimeout());
+				// builder.setUserDirIsRoot(opts, true);
+			}
+
 			fileRoot = fsm.resolveFile(rootUrl, opts);
 		} catch (final FileSystemException e) {
 			myLogger.error("Can't connect to filesystem: " + rootUrl

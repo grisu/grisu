@@ -77,6 +77,8 @@ public class MountPoint implements Comparable<MountPoint> {
 	private boolean automaticallyMounted = false;
 	private boolean disabled = false;
 
+	private boolean isHomeDir = false;
+
 	private boolean isVolatileFileSystem = false;
 
 	// for hibernate
@@ -136,9 +138,10 @@ public class MountPoint implements Comparable<MountPoint> {
 	 */
 	public MountPoint(final String dn, final String fqan, final String url,
 			final String mountpoint, final String site,
-			final boolean automaticallyMounted) {
+			final boolean automaticallyMounted, boolean homedir) {
 		this(dn, fqan, url, mountpoint, site);
 		this.automaticallyMounted = automaticallyMounted;
+		this.isHomeDir = homedir;
 	}
 
 	public void addProperty(String key, String value) {
@@ -280,6 +283,12 @@ public class MountPoint implements Comparable<MountPoint> {
 		return disabled;
 	}
 
+	@Column(nullable = false)
+	@XmlElement(name = "isHomeDir")
+	public boolean isHomeDir() {
+		return isHomeDir;
+	}
+
 	/**
 	 * Checks whether the "userspace" url (/ngdata.vpac/file.txt) contains the
 	 * file.
@@ -379,6 +388,10 @@ public class MountPoint implements Comparable<MountPoint> {
 
 	public void setFqan(final String fqan) {
 		this.fqan = fqan;
+	}
+
+	private void setHomeDir(final boolean homedir) {
+		this.isHomeDir = homedir;
 	}
 
 	public void setMountPointId(final Long id) {
