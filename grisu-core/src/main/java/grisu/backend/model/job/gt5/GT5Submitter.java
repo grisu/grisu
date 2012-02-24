@@ -68,13 +68,12 @@ public class GT5Submitter extends JobSubmitter {
 			// lets try to see if gateway is working first...
 			Gram.ping(cred, contact);
 		} catch (final GramException ex) {
-			myLogger.info(ex.getLocalizedMessage(), ex);
+			myLogger.info("pinging " + contact + " failed. Returning status 'Unsubmitted'.", ex);
 			// have no idea what the status is, gateway is down:
 			return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED,
 					ex.getErrorCode(), 0);
-
 		} catch (final GSSException ex) {
-			myLogger.error(ex.getLocalizedMessage(), ex);
+			myLogger.info("pinging " + contact + " failed. Returning status 'Unsubmitted'.", ex);
 			return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED, 0,
 					0);
 		}
@@ -111,10 +110,11 @@ public class GT5Submitter extends JobSubmitter {
 								GRAMConstants.STATUS_ACTIVE, 131, 0);
 					}
 					// something is really wrong
+					myLogger.error("restarting job " + handle + " failed. returning status 'Failed'.", ex1);
 					return translateToGrisuStatus(GRAMConstants.STATUS_FAILED,
 							restartJob.getError(), 0);
 				} catch (final GSSException ex1) {
-					myLogger.error(ex1.getLocalizedMessage(), ex1);
+					myLogger.error("restarting job " + handle + " failed. returning status 'Unsubmitted'.", ex1);
 					return translateToGrisuStatus(
 							GRAMConstants.STATUS_UNSUBMITTED, 0, 0);
 				}
