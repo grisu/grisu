@@ -1,5 +1,6 @@
 package grisu.model.job;
 
+import grisu.X;
 import grisu.control.JobnameHelpers;
 import grisu.control.exceptions.JobPropertiesException;
 import grisu.jcommons.constants.Constants;
@@ -431,6 +432,10 @@ public class JobSubmissionObjectImpl {
 
 		checkValidity();
 
+		X.p("PROP OUTSIDE: " + isForce_mpi());
+		X.p("PROP OUTSIDE: " + isForce_single());
+
+
 		final Map<JobSubmissionProperty, String> jobProperties = getJobSubmissionPropertyMap();
 
 		final Document jsdl = SimpleJsdlBuilder.buildJsdl(jobProperties);
@@ -495,6 +500,9 @@ public class JobSubmissionObjectImpl {
 		} else {
 			jobProperties.put(JobSubmissionProperty.EMAIL_ON_FINISH, "false");
 		}
+		X.p("INSIDE PROP: " + force_single);
+		X.p("INSIDE PROP: " + force_mpi);
+
 		if (force_single) {
 			jobProperties.put(JobSubmissionProperty.FORCE_SINGLE, "true");
 			jobProperties.put(JobSubmissionProperty.FORCE_MPI, "false");
@@ -667,13 +675,16 @@ public class JobSubmissionObjectImpl {
 		cpus = JsdlHelpers.getProcessorCount(jsdl);
 		hostcount = JsdlHelpers.getResourceCount(jsdl);
 		final String jobTypeString = JsdlHelpers.getArcsJobType(jsdl);
+
+		X.p("JOBTYPE: " + jobTypeString);
+
 		if (jobTypeString != null) {
 			if (jobTypeString.toLowerCase().equals(
-					JobSubmissionProperty.FORCE_SINGLE.defaultValue())) {
+					JobSubmissionProperty.FORCE_SINGLE.toString())) {
 				force_single = true;
 				force_mpi = false;
 			} else if (jobTypeString.toLowerCase().equals(
-					JobSubmissionProperty.FORCE_SINGLE.defaultValue())) {
+					JobSubmissionProperty.FORCE_MPI.toString())) {
 				force_single = false;
 				force_mpi = true;
 			} else {

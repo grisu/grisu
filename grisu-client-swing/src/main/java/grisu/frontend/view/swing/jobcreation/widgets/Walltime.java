@@ -1,6 +1,6 @@
 package grisu.frontend.view.swing.jobcreation.widgets;
 
-import grisu.utils.WalltimeUtils;
+import grisu.jcommons.utils.WalltimeUtils;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
