@@ -2204,7 +2204,8 @@ public class FileManager {
 		} catch (final Exception e) {
 			throw new FileTransactionException(file.toString(),
 					targetDirectory,
-					"Could not determine whether target directory exists: ", e);
+					"Could not determine whether target directory exists: "
+							+ e.getLocalizedMessage(), e);
 		}
 
 		if (file.isDirectory()) {

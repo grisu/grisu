@@ -432,10 +432,6 @@ public class JobSubmissionObjectImpl {
 
 		checkValidity();
 
-		X.p("PROP OUTSIDE: " + isForce_mpi());
-		X.p("PROP OUTSIDE: " + isForce_single());
-
-
 		final Map<JobSubmissionProperty, String> jobProperties = getJobSubmissionPropertyMap();
 
 		final Document jsdl = SimpleJsdlBuilder.buildJsdl(jobProperties);
@@ -500,8 +496,6 @@ public class JobSubmissionObjectImpl {
 		} else {
 			jobProperties.put(JobSubmissionProperty.EMAIL_ON_FINISH, "false");
 		}
-		X.p("INSIDE PROP: " + force_single);
-		X.p("INSIDE PROP: " + force_mpi);
 
 		if (force_single) {
 			jobProperties.put(JobSubmissionProperty.FORCE_SINGLE, "true");
@@ -675,8 +669,6 @@ public class JobSubmissionObjectImpl {
 		cpus = JsdlHelpers.getProcessorCount(jsdl);
 		hostcount = JsdlHelpers.getResourceCount(jsdl);
 		final String jobTypeString = JsdlHelpers.getArcsJobType(jsdl);
-
-		X.p("JOBTYPE: " + jobTypeString);
 
 		if (jobTypeString != null) {
 			if (jobTypeString.toLowerCase().equals(
