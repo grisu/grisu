@@ -93,8 +93,11 @@ public class RSLFactory {
 				workingDirectory + JsdlHelpers.getPosixStandardOutput(jsdl));
 		addWhenNotBlank(result, "stderr",
 				workingDirectory + JsdlHelpers.getPosixStandardError(jsdl));
-		addWhenNotBlank(result, "stdin",
-				workingDirectory + JsdlHelpers.getPosixStandardInput(jsdl));
+
+		String stdin = JsdlHelpers.getPosixStandardInput(jsdl);
+		if (StringUtils.isNotBlank(stdin)) {
+			addWhenNotBlank(result, "stdin", workingDirectory + stdin);
+		}
 
 
 		addWhenNotBlank(result, "email_address", JsdlHelpers.getEmail(jsdl));
