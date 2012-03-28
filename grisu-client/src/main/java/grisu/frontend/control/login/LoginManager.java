@@ -18,6 +18,7 @@ import grisu.settings.Environment;
 import grisu.utils.GrisuPluginFilenameFilter;
 import grith.jgrith.control.LoginParams;
 import grith.jgrith.credential.Credential;
+import grith.jgrith.credential.Credential.PROPERTY;
 import grith.jgrith.credential.CredentialFactory;
 import grith.jgrith.credential.CredentialLoader;
 import grith.jgrith.utils.CertificateFiles;
@@ -39,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
 
 public class LoginManager {
 
@@ -53,7 +55,7 @@ public class LoginManager {
 	public static String USER_SESSION = setUserSessionId(null);
 
 	public static volatile boolean environmentInitialized = false;
-	static final public ImmutableBiMap<String, String> SERVICEALIASES = new ImmutableBiMap.Builder<String, String>()
+	public static final ImmutableBiMap<String, String> SERVICEALIASES = new ImmutableBiMap.Builder<String, String>()
 			.put("local", "Local")
 			.put("testbed",
 					"https://compute.test.nesi.org.nz/soap/GrisuService")
@@ -66,6 +68,26 @@ public class LoginManager {
 											.put("local_ws_jetty", "http://localhost:8080/soap/GrisuService")
 											.put("local_ws",
 													"http://localhost:8080/grisu-ws/soap/GrisuService").build();
+
+	public static final ImmutableMap<String, String> MYPROXY_SERVERS = new ImmutableMap.Builder<String, String>()
+			.put("Local",
+					GridEnvironment.getDefaultMyProxyServer() + ":"
+							+ GridEnvironment.getDefaultMyProxyPort())
+							.put("https://compute.test.nesi.org.nz/soap/GrisuService",
+									"myproxy.test.nesi.org.nz:7512")
+									.put("https://compute.services.bestgrid.org/soap/GrisuService",
+											"myproxy.arcs.org.au:7512")
+											.put("https://compute-dev.services.bestgrid.org/soap/GrisuService",
+													"myproxy.arcs.org.au:7512")
+													.put("https://compute-test.services.bestgrid.org/soap/GrisuService",
+															"myproxy.arcs.org.au:7512")
+															.put("http://localhost:8080/grisu-ws/soap/GrisuService",
+																	GridEnvironment.getDefaultMyProxyServer() + ":"
+																			+ GridEnvironment.getDefaultMyProxyPort())
+																			.put("http://localhost:8080/soap/GrisuService",
+																					GridEnvironment.getDefaultMyProxyServer() + ":"
+																							+ GridEnvironment.getDefaultMyProxyPort()).build();
+
 	public static String httpProxyHost = null;
 
 	public static int httpProxyPort = 80;
@@ -170,6 +192,7 @@ public class LoginManager {
 			}
 
 			loginParams.setAliasMap(SERVICEALIASES);
+			loginParams.setMyProxyMap(MYPROXY_SERVERS);
 
 			try {
 				addPluginsToClasspath();
@@ -206,6 +229,13 @@ public class LoginManager {
 			if (displayCliProgress) {
 				CliHelpers.setIndeterminateProgress("Uploading credential...", true);
 			}
+
+			// making sure that the right myproxy server is used for upload
+			cred.setProperty(PROPERTY.MyProxyHost,
+					loginParams.getMyProxyServer());
+			cred.setProperty(PROPERTY.MyProxyPort,
+					Integer.parseInt(loginParams.getMyProxyPort()));
+
 			try {
 				cred.uploadMyProxy();
 			} catch (Exception e) {
