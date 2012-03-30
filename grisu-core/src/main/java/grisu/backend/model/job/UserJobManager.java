@@ -15,9 +15,7 @@ import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
-import grisu.jcommons.model.info.Application;
 import grisu.jcommons.model.info.Directory;
-import grisu.jcommons.model.info.Executable;
 import grisu.jcommons.model.info.Queue;
 import grisu.jcommons.model.info.Version;
 import grisu.jcommons.utils.JsdlHelpers;
@@ -2087,40 +2085,42 @@ public class UserJobManager {
 			subLoc = Constants.NO_SUBMISSION_LOCATION_INDICATOR_STRING;
 		}
 
-		// preparing all necessary objects
-		Application app = AbstractServiceInterface.informationManager
-				.getResource(Application.class, applicationName);
-
-		Executable exe = AbstractServiceInterface.informationManager
-				.getResource(Executable.class, executable);
-
-		// check whether application is specified as generic. if so, try to find
-		// the proper one using the executable
-		if (Application.GENERIC_APPLICATION.equals(app) && (exe != null)) {
-
-			Collection<Application> apps = AbstractServiceInterface.informationManager
-					.getResources(Application.class,
-							exe);
-			if (apps.size() != 0) {
-				applicationName = apps.iterator().next().toString();
-				jobSubmissionObject.setApplication(applicationName);
-				myLogger.debug(
-						"Found {} applications for executable: {}, using: {}",
-						new Object[] { apps.size(), exe, applicationName });
-				applicationCalculated = true;
-				// setting version to ANY_VERSION, just to make sure
-				applicationVersion = Constants.NO_VERSION_INDICATOR_STRING;
-				jobSubmissionObject.setApplicationVersion(applicationVersion);
-
-			} else {
-				myLogger.debug(
-						"Could not find application for executable: {}. Keep using generic.",
-						exe);
-				// setting version to ANY_VERSION, just to make sure
-				applicationVersion = Constants.NO_VERSION_INDICATOR_STRING;
-				jobSubmissionObject.setApplicationVersion(applicationVersion);
-			}
-		}
+		// // preparing all necessary objects
+		// Application app = AbstractServiceInterface.informationManager
+		// .getResource(Application.class, applicationName);
+		//
+		// Executable exe = AbstractServiceInterface.informationManager
+		// .getResource(Executable.class, executable);
+		//
+		// // check whether application is specified as generic. if so, try to
+		// find
+		// // the proper one using the executable
+		// if (Application.GENERIC_APPLICATION.equals(app) && (exe != null)) {
+		//
+		// Collection<Application> apps =
+		// AbstractServiceInterface.informationManager
+		// .getResources(Application.class,
+		// exe);
+		// if (apps.size() != 0) {
+		// applicationName = apps.iterator().next().toString();
+		// jobSubmissionObject.setApplication(applicationName);
+		// myLogger.debug(
+		// "Found {} applications for executable: {}, using: {}",
+		// new Object[] { apps.size(), exe, applicationName });
+		// applicationCalculated = true;
+		// // setting version to ANY_VERSION, just to make sure
+		// applicationVersion = Constants.NO_VERSION_INDICATOR_STRING;
+		// jobSubmissionObject.setApplicationVersion(applicationVersion);
+		//
+		// } else {
+		// myLogger.debug(
+		// "Could not find application for executable: {}. Keep using generic.",
+		// exe);
+		// // setting version to ANY_VERSION, just to make sure
+		// applicationVersion = Constants.NO_VERSION_INDICATOR_STRING;
+		// jobSubmissionObject.setApplicationVersion(applicationVersion);
+		// }
+		// }
 
 		Version version = AbstractServiceInterface.informationManager.getResource(Version.class, applicationVersion);
 
