@@ -365,7 +365,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// for now, until admin commands are only refreshing the config files,
 		// I'll not worry about it...
 		if (!admin.isAdmin(dn)) {
-			return DtoStringList.fromSingleString("No admin.");
+			return DtoStringList.fromSingleString("No admin: " + dn);
 		}
 
 		if (StringUtils.isBlank(command)) {

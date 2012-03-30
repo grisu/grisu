@@ -49,7 +49,7 @@ public class AdminInterface {
 
 	private DtoStringList clearUserCache(Map<String, String> config) {
 
-		AbstractServiceInterface.cache.getCache("eternal").removeAll();
+		AbstractServiceInterface.cache.getCache("userCache").removeAll();
 
 		String userdn = config.get(Constants.USER);
 
