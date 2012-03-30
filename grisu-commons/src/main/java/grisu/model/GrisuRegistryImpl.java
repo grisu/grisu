@@ -2,6 +2,7 @@ package grisu.model;
 
 import grisu.control.ServiceInterface;
 import grisu.control.TemplateManager;
+import grisu.jcommons.constants.Constants;
 import grisu.model.info.ApplicationInformation;
 import grisu.model.info.ApplicationInformationImpl;
 import grisu.model.info.ResourceInformation;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vpac.historyRepeater.DummyHistoryManager;
@@ -86,7 +88,11 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	 * (java.lang.String)
 	 */
 	public final ApplicationInformation getApplicationInformation(
-			final String applicationName) {
+			String applicationName) {
+
+		if (StringUtils.isBlank(applicationName)) {
+			applicationName = Constants.GENERIC_APPLICATION_NAME;
+		}
 
 		synchronized (applicationName) {
 
