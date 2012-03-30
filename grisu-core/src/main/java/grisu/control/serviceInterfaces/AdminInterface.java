@@ -49,6 +49,8 @@ public class AdminInterface {
 
 	private DtoStringList clearUserCache(Map<String, String> config) {
 
+		AbstractServiceInterface.cache.getCache("eternal").removeAll();
+
 		String userdn = config.get(Constants.USER);
 
 		if (StringUtils.isNotBlank(userdn)) {
