@@ -34,7 +34,7 @@ public class UserBatchJobManager {
 	}
 
 	public DtoStringList getAllBatchJobnames(Object object) {
-		return DtoStringList.fromString("dummy");
+		return new DtoStringList();
 	}
 
 	public BatchJob getBatchJobFromDatabase(String mpjName)

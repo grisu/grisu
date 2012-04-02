@@ -715,10 +715,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 
 	public DtoStringList findMatchingSubmissionLocationsUsingMap(
-			final DtoJob jobProperties, final String fqan,
+			final DtoJob jobProperties, String fqan,
 			boolean excludeResourcesWithLessCPUslotsFreeThanRequested) {
 
 		final LinkedList<String> result = new LinkedList<String>();
+
+		if (fqan == null) {
+			fqan = Constants.NON_VO_FQAN;
+		}
 
 		final Map<JobSubmissionProperty, String> converterMap = new HashMap<JobSubmissionProperty, String>();
 		for (final DtoProperty jp : jobProperties.getProperties()) {

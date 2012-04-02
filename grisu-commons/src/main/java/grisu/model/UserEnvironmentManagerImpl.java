@@ -217,7 +217,8 @@ EventSubscriber<FqanEvent> {
 		if (!excludeUnusableFqans) {
 
 			if (cachedFqans == null) {
-				this.cachedFqans = serviceInterface.getFqans().asArray();
+				DtoStringList temp = serviceInterface.getFqans();
+				this.cachedFqans = temp.asArray();
 			}
 
 			return cachedFqans;
