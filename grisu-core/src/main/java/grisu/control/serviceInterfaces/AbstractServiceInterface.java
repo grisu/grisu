@@ -184,13 +184,24 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		// create ehcache manager singleton
 		try {
-			URL url = ClassLoader.getSystemResource("/grisu-ehcache.xml");
-			if (url == null) {
-				url = myLogger.getClass().getResource("/grisu-ehcache.xml");
+
+			// CacheManager.getInstance();
+			for (CacheManager cm : CacheManager.ALL_CACHE_MANAGERS) {
+				if (cm.getName().equals("grisu")) {
+					cache = cm;
+					break;
+				}
+			}
+			if (cache == null) {
+				URL url = ClassLoader.getSystemResource("/grisu-ehcache.xml");
+				if (url == null) {
+					url = myLogger.getClass().getResource("/grisu-ehcache.xml");
+				}
+				cache = CacheManager.create(url);
+				cache.setName("grisu");
 			}
 
-			CacheManager.create(url);
-			cache = CacheManager.getInstance();
+			// cache = CacheManager.getInstance();
 
 			final Cache session = cache.getCache("session");
 			if (session == null) {

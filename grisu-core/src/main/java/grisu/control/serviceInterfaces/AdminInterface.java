@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -49,13 +52,27 @@ public class AdminInterface {
 
 	private DtoStringList clearUserCache(Map<String, String> config) {
 
-		AbstractServiceInterface.cache.getCache("userCache").removeAll();
-
 		String userdn = config.get(Constants.USER);
 
 		if (StringUtils.isNotBlank(userdn)) {
 
 			if (Constants.ALL_USERS.equals(userdn)) {
+
+				// CacheManager.getInstance();
+				for (CacheManager cm : CacheManager.ALL_CACHE_MANAGERS) {
+					if (cm.getName().equals("grisu")) {
+						Cache usercache = cm.getCache("userCache");
+						if (usercache != null) {
+							// for (Object key : usercache.getKeys()) {
+							// System.out.println("KEY: " + key);
+							// }
+							// keys are myproxyUsername[@<myproxyHost>]
+							usercache.removeAll();
+						}
+						break;
+					}
+				}
+
 
 				List<User> allUsers = userdao.findAllUsers();
 
