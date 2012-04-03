@@ -4,6 +4,7 @@ import grisu.control.ServiceInterface;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.control.clientexceptions.FileTransactionException;
 import grisu.frontend.view.swing.files.FileListListener;
+import grisu.frontend.view.swing.files.preview.fileViewers.PlainTextFileViewer;
 import grisu.jcommons.utils.FileAndUrlHelpers;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
@@ -25,8 +26,12 @@ import net.sf.jmimemagic.MagicMatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
+
 public class GenericFileViewer extends JPanel implements FileViewer,
-		FileListListener {
+FileListListener {
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(GenericFileViewer.class.getName());
@@ -45,20 +50,38 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
-		final Set<String> viewers = findViewers();
-		for (final String f : viewers) {
+		if (match != null) {
 
-			try {
-				final FileViewer viewerClass = (FileViewer) (Class.forName(f)
-						.newInstance());
+			final Set<String> viewers = findViewers();
+			for (final String f : viewers) {
 
-				for (final String t : viewerClass.getSupportedMimeTypes()) {
-					if (match.getMimeType().contains(t)) {
-						return viewerClass;
+				try {
+					final FileViewer viewerClass = (FileViewer) (Class.forName(f)
+							.newInstance());
+
+					for (final String t : viewerClass.getSupportedMimeTypes()) {
+						if (match.getMimeType().contains(t)) {
+							return viewerClass;
+						}
 					}
+				} catch (final Exception e) {
+					myLogger.error(e.getLocalizedMessage(), e);
 				}
-			} catch (final Exception e) {
-				myLogger.error(e.getLocalizedMessage(), e);
+
+			}
+
+		} else {
+			// try to find standard ones
+			final String filename = currentLocalCacheFile.getName();
+			Iterable<String> textExtensions = Sets.newHashSet(".txt", ".log");
+			Predicate<String> p = new Predicate<String>() {
+
+				public boolean apply(String arg0) {
+					return filename.endsWith(arg0);
+				}
+			};
+			if (Iterables.any(textExtensions, p)) {
+				return new PlainTextFileViewer();
 			}
 
 		}
@@ -215,12 +238,12 @@ public class GenericFileViewer extends JPanel implements FileViewer,
 										getRootPane(),
 										"The file you selected is bigger than the default threshold\n"
 												+ FileAndUrlHelpers
-														.calculateSizeString(FileManager
-																.getDownloadFileSizeThreshold())
-												+ "bytes. It may take a long time to load.\n"
-												+ "Do you still want to preview that file?",
-										"Warning: big file",
-										JOptionPane.YES_NO_OPTION);
+												.calculateSizeString(FileManager
+														.getDownloadFileSizeThreshold())
+														+ "bytes. It may take a long time to load.\n"
+														+ "Do you still want to preview that file?",
+														"Warning: big file",
+														JOptionPane.YES_NO_OPTION);
 
 						if (n == JOptionPane.NO_OPTION) {
 							showsValidViewerAtTheMoment = false;
