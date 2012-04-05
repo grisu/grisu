@@ -86,21 +86,6 @@ FileListListener {
 
 		}
 
-		// // if null, try known ones
-		// FileViewer viewer = new PlainTextFileViewer();
-		// for (String t : viewer.getSupportedMimeTypes()) {
-		// if (match.getMimeType().contains(t)) {
-		// return viewer;
-		// }
-		// }
-
-		// viewer = new ImageFileViewer();
-		// for (String t : viewer.getSupportedMimeTypes()) {
-		// if (match.getMimeType().contains(t)) {
-		// return viewer;
-		// }
-		// }
-
 		return null;
 	}
 

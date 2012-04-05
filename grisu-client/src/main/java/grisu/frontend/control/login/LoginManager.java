@@ -10,6 +10,7 @@ import grisu.jcommons.dependencies.BouncyCastleTool;
 import grisu.jcommons.dependencies.ClasspathHacker;
 import grisu.jcommons.exceptions.CredentialException;
 import grisu.jcommons.utils.DefaultGridSecurityProvider;
+import grisu.jcommons.utils.EnvironmentVariableHelpers;
 import grisu.jcommons.utils.JythonHelpers;
 import grisu.jcommons.view.cli.CliHelpers;
 import grisu.model.GrisuRegistryManager;
@@ -126,6 +127,7 @@ public class LoginManager {
 
 		if (!environmentInitialized) {
 
+
 			java.util.logging.LogManager.getLogManager().reset();
 			// LoggerFactory.getLogger("root").setLevel(Level.OFF);
 
@@ -161,6 +163,21 @@ public class LoginManager {
 
 			environmentInitialized = true;
 		}
+
+	}
+
+	public static synchronized void initGrisuClient(String clientname) {
+
+		Thread.currentThread().setName("main");
+
+		LoginManager.setClientName(clientname);
+
+		LoginManager.setClientVersion(grisu.jcommons.utils.Version
+				.get(clientname));
+
+		EnvironmentVariableHelpers.loadEnvironmentVariablesToSystemProperties();
+
+		LoginManager.initEnvironment();
 
 	}
 
@@ -231,10 +248,12 @@ public class LoginManager {
 			}
 
 			// making sure that the right myproxy server is used for upload
-			cred.setProperty(PROPERTY.MyProxyHost,
-					loginParams.getMyProxyServer());
-			cred.setProperty(PROPERTY.MyProxyPort,
-					Integer.parseInt(loginParams.getMyProxyPort()));
+			if (StringUtils.isBlank(loginParams.getMyProxyServer())) {
+				cred.setProperty(PROPERTY.MyProxyHost,
+						loginParams.getMyProxyServer());
+				cred.setProperty(PROPERTY.MyProxyPort,
+						Integer.parseInt(loginParams.getMyProxyPort()));
+			}
 
 			try {
 				cred.uploadMyProxy();
