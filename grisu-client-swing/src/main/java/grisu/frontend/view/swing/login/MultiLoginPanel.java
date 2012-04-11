@@ -305,6 +305,9 @@ LoginMethodPanel {
 					ClientPropertiesManager.setDefaultServiceInterfaceUrl(url);
 					final LoginParams params = new LoginParams(url, null, null);
 
+					params.setAliasMap(LoginManager.SERVICEALIASES);
+					params.setMyProxyMap(LoginManager.MYPROXY_SERVERS);
+
 					loginThread = temp.login(params);
 
 					loginThread.start();

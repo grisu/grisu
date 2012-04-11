@@ -1562,6 +1562,23 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
+	public void setUserProperties(DtoProperties properties) {
+
+		if (properties == null) {
+			return;
+		}
+
+		for (DtoProperty p : properties.getProperties()) {
+
+			String key = p.getKey();
+			String value = p.getValue();
+
+			setUserProperty(key, value);
+
+		}
+
+	}
+
 	public void setUserProperty(String key, String value) {
 
 		getUser().setUserProperty(key, value);

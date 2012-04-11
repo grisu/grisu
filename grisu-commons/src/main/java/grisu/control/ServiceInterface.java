@@ -1219,6 +1219,14 @@ public interface ServiceInterface {
 					throws JobSubmissionException, NoSuchJobException;
 
 	/**
+	 * Sets a batch of user properties.
+	 * 
+	 * @param properties
+	 *            the properties
+	 */
+	void setUserProperties(DtoProperties properties);
+
+/**
 	 * Sets a user property.
 	 * 
 	 * <p>
