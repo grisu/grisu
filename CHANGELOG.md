@@ -1,10 +1,10 @@
 Changelog
 =========
 
-0.4
----
+0.4.3
+-----
 
-*
+* Fix for archiving job bug where jobdirectory is deleted even though the filetransfer failed
 
 0.3.7
 -----
