@@ -283,11 +283,6 @@ public class UserJobManager {
 					rftp = getUser().getFileManager().cpSingleFile(
 							job.getJobProperty(Constants.JOBDIRECTORY_KEY),
 							targetDirUrl, false, true, true);
-					status.addElement("Deleting old jobdirectory: "
-							+ job.getJobProperty(Constants.JOBDIRECTORY_KEY));
-					getUser().getFileManager().deleteFile(
-							job.getJobProperty(Constants.JOBDIRECTORY_KEY),
-							true);
 				} catch (final RemoteFileSystemException e1) {
 					if (optionalBatchJobStatus != null) {
 						optionalBatchJobStatus.setFailed(true);
@@ -321,6 +316,54 @@ public class UserJobManager {
 					final String message = rftp.getPossibleExceptionMessage();
 					status.addElement("Transfer failed: " + message);
 					return;
+				} else {
+
+					// maybe double check whether transfer was really
+					// successful?
+					boolean success = rftp.verifyTransferSuccess();
+
+					if (success) {
+
+						status.addElement("Deleting old jobdirectory: "
+								+ job.getJobProperty(Constants.JOBDIRECTORY_KEY));
+						try {
+							getUser().getFileManager().deleteFile(
+									job.getJobProperty(Constants.JOBDIRECTORY_KEY),
+									true);
+						} catch (RemoteFileSystemException e) {
+							if (optionalBatchJobStatus != null) {
+								optionalBatchJobStatus.setFailed(true);
+								optionalBatchJobStatus.setErrorCause(e
+										.getLocalizedMessage());
+								optionalBatchJobStatus
+								.addElement("Failed archiving job "
+										+ job.getJobname());
+							}
+							status.setFailed(true);
+							status.setErrorCause(e.getLocalizedMessage());
+							status.setFinished(true);
+							final String message = e.getLocalizedMessage();
+							status.addElement("Transfer failed: " + message);
+							return;
+						}
+					} else {
+						// transfer not successful
+						if (optionalBatchJobStatus != null) {
+							optionalBatchJobStatus.setFailed(true);
+							optionalBatchJobStatus
+									.setErrorCause("Verifying of transfer failed.");
+							optionalBatchJobStatus
+							.addElement("Failed archiving job "
+									+ job.getJobname());
+						}
+						status.setFailed(true);
+						status.setErrorCause("Verifying of transfer failed.");
+						status.setFinished(true);
+						final String message = "Verifying of transfer failed.";
+						status.addElement("Transfer failed: " + message);
+						return;
+
+					}
 				}
 
 				job.setArchived(true);
@@ -382,32 +425,15 @@ public class UserJobManager {
 					fout.close();
 				}
 
+				// check whether all the files are actually there and the same
+				// size (at least for the root folder)
+
 				status.addElement("Killing job.");
 				kill(job, true, false);
-
-				// if (optionalBatchJobStatus == null) {
-				// new Thread() {
-				// @Override
-				// public void run() {
-				// Job job = null;
-				// ;
-				// try {
-				// job = loadJobFromFilesystem(grisuJobFileUrl);
-				// DtoJob j = DtoJob.createJob(job.getStatus(),
-				// job.getJobProperties(),
-				// job.getInputFiles(),
-				// job.getLogMessages(), job.isArchived());
-				//
-				// getArchivedJobs(null).addJob(j);
-				// } catch (NoSuchJobException e) {
-				// e.printStackTrace();
-				// }
-				// }
-				// }.start();
-				// }
-
 				status.setFinished(true);
 				status.addElement("Job archived successfully.");
+
+
 				if (optionalBatchJobStatus != null) {
 					optionalBatchJobStatus
 					.addElement("Successfully archived job: "

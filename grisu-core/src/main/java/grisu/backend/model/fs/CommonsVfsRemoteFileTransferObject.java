@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import org.apache.commons.vfs.AllFileSelector;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemException;
 import org.globus.ftp.MarkerListener;
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.dl.escience.vfs.util.VFSUtil;
 
 public class CommonsVfsRemoteFileTransferObject implements
-		RemoteFileTransferObject {
+RemoteFileTransferObject {
 
 	private final Thread fileTransferThread;
 
@@ -29,9 +30,9 @@ public class CommonsVfsRemoteFileTransferObject implements
 	private final FileObject target;
 	private final boolean overwrite;
 
-	private boolean failed = false;
+	private volatile boolean failed = false;
 
-	private boolean finished = false;
+	private volatile boolean finished = false;
 
 	private Exception possibleException;
 
@@ -82,7 +83,7 @@ public class CommonsVfsRemoteFileTransferObject implements
 
 							finished = true;
 							break;
-						} catch (final RemoteFileSystemException e) {
+						} catch (final Exception e) {
 							myLogger.error(id + ": Failed: "
 									+ e.getLocalizedMessage());
 							if (tryNo >= (ServerPropertiesManager
@@ -205,7 +206,7 @@ public class CommonsVfsRemoteFileTransferObject implements
 
 	protected void transferFile(final FileObject source_file,
 			final FileObject target_file, final boolean overwrite)
-			throws RemoteFileSystemException {
+					throws RemoteFileSystemException {
 
 		try {
 
@@ -276,6 +277,59 @@ public class CommonsVfsRemoteFileTransferObject implements
 				throw new RemoteFileSystemException("Could not copy files: "
 						+ e1.getLocalizedMessage());
 			}
+		}
+
+	}
+
+	public boolean verifyTransferSuccess() {
+
+		try {
+			FileObject[] sourceFiles = source.findFiles(new AllFileSelector());
+			FileObject[] targetFiles = target.findFiles(new AllFileSelector());
+
+			myLogger.debug("Verifying that all source files are available on the target and have the same sizes.");
+			for (FileObject s : sourceFiles) {
+				String name = s.getName().getBaseName();
+
+				if (name.equals(source.getName().getBaseName())) {
+					// means that is the source folder itself
+					continue;
+				}
+				myLogger.debug("Checking: " + name);
+				boolean matched = false;
+				for (FileObject t : targetFiles) {
+					String tname = t.getName().getBaseName();
+					if (name.equals(tname)) {
+						// compare sizes
+						myLogger.debug("Found matching filename.");
+						matched = true;
+						long ssize = s.getContent().getSize();
+						long tsize = t.getContent().getSize();
+
+						myLogger.debug("Orig/target sizes: {} / {}", ssize,
+								tsize);
+
+						if (ssize != tsize) {
+							myLogger.debug(
+									"Target size differs for source file: {}",
+									name);
+							matched = false;
+						} else {
+							myLogger.debug("Filesizes match for file: {}", name);
+							break;
+						}
+
+					}
+				}
+				if (!matched) {
+					myLogger.debug("Verify of transfer failed: can't find target match for file: "
+							+ name);
+					return false;
+				}
+			}
+			return true;
+		} catch (Exception e) {
+			return false;
 		}
 
 	}
