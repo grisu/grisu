@@ -319,7 +319,14 @@ public class UserJobManager {
 
 					// maybe double check whether transfer was really
 					// successful?
-					boolean success = rftp.verifyTransferSuccess();
+					boolean verify = ServerPropertiesManager
+							.getVerifyAfterArchive();
+					boolean success = false;
+					if (verify) {
+						success = rftp.verifyTransferSuccess();
+					} else {
+						success = true;
+					}
 
 					if (success) {
 
@@ -350,7 +357,7 @@ public class UserJobManager {
 						if (optionalBatchJobStatus != null) {
 							optionalBatchJobStatus.setFailed(true);
 							optionalBatchJobStatus
-									.setErrorCause("Verifying of transfer failed.");
+							.setErrorCause("Verifying of transfer failed.");
 							optionalBatchJobStatus
 							.addElement("Failed archiving job "
 									+ job.getJobname());

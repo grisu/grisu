@@ -761,6 +761,26 @@ public final class ServerPropertiesManager {
 	}
 
 
+	public static boolean getVerifyAfterArchive() {
+		boolean verify = false;
+
+		try {
+			try {
+				verify = getServerConfiguration().getBoolean(
+						"General.verifyBeforeDeleteJobdir");
+			} catch (final NoSuchElementException e) {
+				// doesn't matter
+				// myLogger.debug(e.getLocalizedMessage(), e);
+			}
+
+		} catch (final ConfigurationException e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			myLogger.debug(e.getLocalizedMessage());
+		}
+		return verify;
+
+	}
+
 	public static int getWaitTimeBetweenFailedFileTransferAndNextTryInSeconds() {
 
 		int waitTimeInSeconds = -1;
