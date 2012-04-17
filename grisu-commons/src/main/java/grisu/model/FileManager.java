@@ -1037,6 +1037,11 @@ public class FileManager {
 	 */
 	public final File downloadFile(final String url, final boolean forceDownload)
 			throws FileTransactionException {
+		return downloadFile(url, getLocalCacheFile(url), forceDownload);
+	}
+
+	public final File downloadFile(final String url, File target,
+			final boolean forceDownload) throws FileTransactionException {
 
 		if (isLocal(url)) {
 			return getFileFromUriOrPath(url);
@@ -1046,7 +1051,12 @@ public class FileManager {
 			return getLocalCacheFile(url);
 		}
 
-		final File cacheTargetFile = getLocalCacheFile(url);
+		File cacheTargetFile = null;
+		if (target != null) {
+			cacheTargetFile = target;
+		} else {
+			cacheTargetFile = getLocalCacheFile(url);
+		}
 
 		long lastModified;
 		try {
@@ -1207,36 +1217,43 @@ public class FileManager {
 			isFolder = serviceInterface.isFolder(url);
 		} catch (final RemoteFileSystemException e) {
 			throw new FileTransactionException(url, targetDir.toString(),
-					"Can't determine whether source is file or folder.", e);
+					"Can't determine whether source is file or folder: " + url,
+					e);
 		}
 
 		File cacheFile = null;
+		final long sizethreshold = ClientPropertiesManager
+				.getFileSizeThresholdForCache();
+
 		if (isFolder) {
 			cacheFile = downloadFolder(url);
 			// File newDir = new File(targetFile, getFilename(url));
 			// boolean canWritePar = targetFile.canWrite();
 			// boolean canWrite = newDir.canWrite();
 			// boolean created = newDir.mkdirs();
-			final long size = ClientPropertiesManager
-					.getFolderSizeThresholdForCache();
 
 			final long dir = FileUtils.sizeOfDirectory(cacheFile);
-			if (dir <= size) {
+			if (dir <= sizethreshold) {
 				FileUtils.copyDirectory(cacheFile, targetFile);
 			} else {
 				FileUtils.moveDirectory(cacheFile, targetFile);
 			}
 
 		} else {
-			cacheFile = downloadFile(url);
-			final File newFile = targetFile;
-			final long size = ClientPropertiesManager
-					.getFileSizeThresholdForCache();
-			if (newFile.length() <= size) {
-				FileUtils.copyFile(cacheFile, newFile);
-			} else {
-				FileUtils.moveFile(cacheFile, newFile);
+			long filesize;
+			try {
+				filesize = getFileSize(url);
+			} catch (RemoteFileSystemException e) {
+				throw new FileTransactionException(url, targetDir.toString(),
+						"Can't determine size of source file: " + url, e);
 			}
+			if (filesize >= sizethreshold) {
+				cacheFile = downloadFile(url, targetFile, true);
+			} else {
+				cacheFile = downloadFile(url);
+				FileUtils.copyFile(cacheFile, targetFile);
+			}
+
 		}
 
 		return targetFile;
@@ -2285,14 +2302,22 @@ public class FileManager {
 					long size = cacheTargetFile.length();
 					if (remote_size != size) {
 						myLogger.debug("Local cache file has different size to remote file, needs re-downloading...");
+						myLogger.debug("Deleting wrong sized cache file: "
+								+ cacheTargetFile.getAbsolutePath());
+						FileUtils.deleteQuietly(cacheTargetFile);
 						return false;
 					} else {
 						return true;
 					}
+				} else {
+					myLogger.debug("Deleting out of date cache file: "
+							+ cacheTargetFile.getAbsolutePath());
+					FileUtils.deleteQuietly(cacheTargetFile);
+					return false;
 				}
+			} else {
+				return false;
 			}
-
-			return false;
 		}
 	}
 }
