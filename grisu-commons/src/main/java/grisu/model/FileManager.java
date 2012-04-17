@@ -1081,14 +1081,15 @@ public class FileManager {
 			}
 		}
 
-		myLogger.debug("Remote file newer than local cache file or not cached yet, downloading new copy.");
+		myLogger.debug("Remote file newer than local cache file, different size or not cached yet, downloading new copy.");
 		final DataSource source = null;
 		DataHandler handler = null;
 		try {
 
 			handler = serviceInterface.download(url);
 		} catch (final Exception e) {
-			myLogger.error("Could not download file: " + url);
+			myLogger.error("Could not download file {}: {}", url,
+					e.getLocalizedMessage());
 			throw new FileTransactionException(url, cacheTargetFile.toString(),
 					"Could not download file.", e);
 		}
@@ -1630,8 +1631,22 @@ public class FileManager {
 			myLogger.debug("local file timestamp:\t" + local_last_modified);
 			myLogger.debug("remote file timestamp:\t" + lastModified);
 			if (local_last_modified >= lastModified) {
-				myLogger.debug("Local cache file is not older than remote file. No download necessary...");
-				return false;
+				myLogger.debug("Local cache file is not older than remote file. Checking size...");
+				long remote_size;
+				try {
+					remote_size = serviceInterface.getFileSize(url);
+				} catch (RemoteFileSystemException e) {
+					throw new RuntimeException(
+							"Could not get filesize for file: " + url, e);
+				}
+				long size = cacheTargetFile.length();
+				if (remote_size != size) {
+					myLogger.debug("Remote file differes in size from local cache file. Download needed.");
+					return true;
+				} else {
+					myLogger.debug("Remote file has same size than local cache file, no download necessary.");
+					return false;
+				}
 			} else {
 				return true;
 			}
@@ -2259,8 +2274,21 @@ public class FileManager {
 				myLogger.debug("local file timestamp:\t" + local_last_modified);
 				myLogger.debug("remote file timestamp:\t" + lastModified);
 				if (local_last_modified >= lastModified) {
-					myLogger.debug("Local cache file is not older than remote file. Doing nothing...");
-					return true;
+					myLogger.debug("Local cache file is not older than remote file. Checking filesize...");
+					long remote_size;
+					try {
+						remote_size = serviceInterface.getFileSize(url);
+					} catch (RemoteFileSystemException e) {
+						myLogger.debug("Can't get filesize for {}: {}", url, e);
+						return false;
+					}
+					long size = cacheTargetFile.length();
+					if (remote_size != size) {
+						myLogger.debug("Local cache file has different size to remote file, needs re-downloading...");
+						return false;
+					} else {
+						return true;
+					}
 				}
 			}
 
