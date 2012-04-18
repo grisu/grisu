@@ -62,6 +62,7 @@ public class LoginManager {
 					"https://compute.test.nesi.org.nz/soap/GrisuService")
 					.put("bestgrid",
 							"https://compute.services.bestgrid.org/soap/GrisuService")
+							.put("nesi", "https://compute.nesi.org.nz/soap/GrisuService")
 							.put("dev",
 									"https://compute-dev.services.bestgrid.org/soap/GrisuService")
 									.put("bestgrid-test",
@@ -76,18 +77,20 @@ public class LoginManager {
 							+ GridEnvironment.getDefaultMyProxyPort())
 							.put("https://compute.test.nesi.org.nz/soap/GrisuService",
 									"myproxy.test.nesi.org.nz:7512")
-									.put("https://compute.services.bestgrid.org/soap/GrisuService",
+									.put("https://compute.nesi.org.nz/soap/GrisuService",
 											"myproxy.arcs.org.au:7512")
-											.put("https://compute-dev.services.bestgrid.org/soap/GrisuService",
+											.put("https://compute.services.bestgrid.org/soap/GrisuService",
 													"myproxy.arcs.org.au:7512")
-													.put("https://compute-test.services.bestgrid.org/soap/GrisuService",
+													.put("https://compute-dev.services.bestgrid.org/soap/GrisuService",
 															"myproxy.arcs.org.au:7512")
-															.put("http://localhost:8080/grisu-ws/soap/GrisuService",
-																	GridEnvironment.getDefaultMyProxyServer() + ":"
-																			+ GridEnvironment.getDefaultMyProxyPort())
-																			.put("http://localhost:8080/soap/GrisuService",
-																					GridEnvironment.getDefaultMyProxyServer() + ":"
-																							+ GridEnvironment.getDefaultMyProxyPort()).build();
+															.put("https://compute-test.services.bestgrid.org/soap/GrisuService",
+																	"myproxy.arcs.org.au:7512")
+																	.put("http://localhost:8080/grisu-ws/soap/GrisuService",
+																			GridEnvironment.getDefaultMyProxyServer() + ":"
+																					+ GridEnvironment.getDefaultMyProxyPort())
+																					.put("http://localhost:8080/soap/GrisuService",
+																							GridEnvironment.getDefaultMyProxyServer() + ":"
+																									+ GridEnvironment.getDefaultMyProxyPort()).build();
 
 	public static String httpProxyHost = null;
 
@@ -248,7 +251,7 @@ public class LoginManager {
 			}
 
 			// making sure that the right myproxy server is used for upload
-			if (StringUtils.isBlank(loginParams.getMyProxyServer())) {
+			if (StringUtils.isNotBlank(loginParams.getMyProxyServer())) {
 				cred.setProperty(PROPERTY.MyProxyHost,
 						loginParams.getMyProxyServer());
 				cred.setProperty(PROPERTY.MyProxyPort,
