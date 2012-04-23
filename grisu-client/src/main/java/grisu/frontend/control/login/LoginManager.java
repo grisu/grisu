@@ -130,6 +130,16 @@ public class LoginManager {
 
 		if (!environmentInitialized) {
 
+			// make sure tmp dir exists
+			String tmpdir = System.getProperty("java.io.tmpdir");
+			File tmp = new File(tmpdir);
+			if (!tmp.exists()) {
+				myLogger.debug("Creating tmpdir: {}", tmpdir);
+				tmp.mkdirs();
+				if (!tmp.exists()) {
+					myLogger.error("Could not create tmp dir {}.", tmpdir);
+				}
+			}
 
 			java.util.logging.LogManager.getLogManager().reset();
 			// LoggerFactory.getLogger("root").setLevel(Level.OFF);

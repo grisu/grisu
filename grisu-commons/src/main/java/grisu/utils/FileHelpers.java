@@ -197,7 +197,8 @@ public final class FileHelpers {
 			throws Exception {
 
 		final FileOutputStream outputStream = new FileOutputStream(file);
-		final InputStream inputStream = source.getInputStream();
+		final InputStream inputStream = source
+				.getInputStream();
 
 		try {
 			final byte[] buffer = new byte[BUFFER_SIZE * 4];
@@ -209,6 +210,18 @@ public final class FileHelpers {
 		} finally {
 			outputStream.close();
 			inputStream.close();
+			String tempfile = "n/a";
+			try {
+				tempfile = source.getName();
+				myLogger.debug("Deleting temp file: {}", tempfile);
+
+				if (!new File(tempfile).delete()) {
+					myLogger.error("Could not delete tempfile: {}", tempfile);
+				}
+			} catch (Exception e) {
+				myLogger.error("Could not delete temp file {}: {}", tempfile,
+						e.getLocalizedMessage());
+			}
 		}
 
 	}
