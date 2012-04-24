@@ -1073,8 +1073,8 @@ public class FileManager {
 		// }
 		// }
 
+		Long size = null;
 		if (!forceDownload) {
-			long size;
 			try {
 				size = serviceInterface.getFileSize(url);
 				if (size > getDownloadFileSizeThreshold()) {
@@ -1091,12 +1091,29 @@ public class FileManager {
 			}
 		}
 
+		if (size == null) {
+			try {
+				size = serviceInterface.getFileSize(url);
+				if ((size > getDownloadFileSizeThreshold()) && (target != null)) {
+					myLogger.info("File bigger than download threshold, not using cache: "
+							+ url);
+					cacheTargetFile = target;
+				}
+			} catch (final RemoteFileSystemException e2) {
+				myLogger.error("Could not get size of file: " + url);
+				throw new FileTransactionException(url,
+						cacheTargetFile.toString(), "Could not get size.", e2);
+
+			}
+		}
+
 		myLogger.debug("Remote file newer than local cache file, different size or not cached yet, downloading new copy.");
 		final DataSource source = null;
 		DataHandler handler = null;
 		try {
 
 			handler = serviceInterface.download(url);
+
 		} catch (final Exception e) {
 			myLogger.error("Could not download file {}: {}", url,
 					e.getLocalizedMessage());
