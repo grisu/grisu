@@ -1,15 +1,10 @@
 package grisu.model.dto;
 
-import grisu.jcommons.interfaces.InformationManager;
-import grisu.model.MountPoint;
-import grisu.model.info.dto.Directory;
 import grisu.model.info.dto.Queue;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -23,25 +18,25 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "submissionlocations")
 public class DtoSubmissionLocations {
 
-	private static boolean checkWhetherSubLocIsActuallyAvailable(
-			InformationManager im, Collection<MountPoint> mps, String subLoc) {
-
-		final Set<Directory> filesystems = im
-				.getStagingFileSystemForSubmissionLocation(subLoc);
-
-		for (final MountPoint mp : mps) {
-
-			for (final Directory fs : filesystems) {
-				if (mp.getRootUrl().startsWith(fs.toUrl().replace(":2811", ""))) {
-					return true;
-				}
-			}
-
-		}
-
-		return false;
-
-	}
+	// private static boolean checkWhetherSubLocIsActuallyAvailable(
+	// InformationManager im, Collection<MountPoint> mps, String subLoc) {
+	//
+	// final Set<Directory> filesystems = im
+	// .getStagingFileSystemForSubmissionLocation(subLoc);
+	//
+	// for (final MountPoint mp : mps) {
+	//
+	// for (final Directory fs : filesystems) {
+	// if (mp.getRootUrl().startsWith(fs.toUrl().replace(":2811", ""))) {
+	// return true;
+	// }
+	// }
+	//
+	// }
+	//
+	// return false;
+	//
+	// }
 
 	public static DtoSubmissionLocations createSubmissionLocationsInfo(
 			Collection<String> submissionLocations) {
@@ -116,19 +111,19 @@ public class DtoSubmissionLocations {
 		return allSubmissionLocations;
 	}
 
-	public void removeUnuseableSubmissionLocations(InformationManager im,
-			Collection<MountPoint> mps) {
-
-		final Iterator<DtoSubmissionLocationInfo> i = allSubmissionLocations
-				.iterator();
-		while (i.hasNext()) {
-			if (!checkWhetherSubLocIsActuallyAvailable(im, mps, i.next()
-					.getSubmissionLocation())) {
-				i.remove();
-			}
-		}
-
-	}
+	// public void removeUnuseableSubmissionLocations(InformationManager im,
+	// Collection<MountPoint> mps) {
+	//
+	// final Iterator<DtoSubmissionLocationInfo> i = allSubmissionLocations
+	// .iterator();
+	// while (i.hasNext()) {
+	// if (!checkWhetherSubLocIsActuallyAvailable(im, mps, i.next()
+	// .getSubmissionLocation())) {
+	// i.remove();
+	// }
+	// }
+	//
+	// }
 
 	public void setAllSubmissionLocations(
 			List<DtoSubmissionLocationInfo> allSubmissionLocations) {
