@@ -2,6 +2,7 @@ package grisu.utils;
 
 import grisu.control.ServiceInterface;
 import grisu.model.GrisuRegistryManager;
+import grisu.model.info.dto.Application;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -14,12 +15,13 @@ import org.apache.commons.io.IOCase;
 
 public class ServiceInterfaceUtils {
 
-	public static List<String> filterApplicationNames(ServiceInterface si,
+	public static List<Application> filterApplicationNames(ServiceInterface si,
 			String filter) {
-		final LinkedList<String> result = new LinkedList<String>();
-		for (final String app : GrisuRegistryManager.getDefault(si)
+		final LinkedList<Application> result = new LinkedList<Application>();
+		for (final Application app : GrisuRegistryManager.getDefault(si)
 				.getUserEnvironmentManager().getAllAvailableApplications()) {
-			if (FilenameUtils.wildcardMatch(app, filter, IOCase.INSENSITIVE)) {
+			if (FilenameUtils.wildcardMatch(app.getName(), filter,
+					IOCase.INSENSITIVE)) {
 				result.add(app);
 			}
 		}

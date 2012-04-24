@@ -22,15 +22,8 @@ import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.jcommons.interfaces.GrinformationManager;
 import grisu.jcommons.interfaces.InformationManager;
-import grisu.jcommons.model.info.Directory;
-import grisu.jcommons.model.info.Queue;
-import grisu.jcommons.model.info.Site;
-import grisu.jcommons.model.info.VO;
-import grisu.jcommons.model.info.Version;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
-import grisu.model.dto.DtoApplicationDetails;
-import grisu.model.dto.DtoApplicationInfo;
 import grisu.model.dto.DtoBatchJob;
 import grisu.model.dto.DtoJob;
 import grisu.model.dto.DtoJobs;
@@ -38,8 +31,14 @@ import grisu.model.dto.DtoMountPoints;
 import grisu.model.dto.DtoProperties;
 import grisu.model.dto.DtoProperty;
 import grisu.model.dto.DtoStringList;
-import grisu.model.dto.DtoSubmissionLocations;
 import grisu.model.dto.GridFile;
+import grisu.model.info.dto.Application;
+import grisu.model.info.dto.Directory;
+import grisu.model.info.dto.Package;
+import grisu.model.info.dto.Queue;
+import grisu.model.info.dto.Site;
+import grisu.model.info.dto.VO;
+import grisu.model.info.dto.Version;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.FileHelpers;
 import grisu.utils.SeveralXMLHelpers;
@@ -50,7 +49,6 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -58,7 +56,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.activation.DataHandler;
 import javax.annotation.security.RolesAllowed;
@@ -79,6 +76,7 @@ import ch.qos.logback.core.util.StatusPrinter;
 
 import com.google.common.base.Functions;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Sets;
 
 /**
  * This abstract class implements most of the methods of the
@@ -794,21 +792,22 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see grisu.control.ServiceInterface#getAllAvailableApplications(java
 	 * .lang.String[])
 	 */
-	public DtoStringList getAllAvailableApplications(final DtoStringList fqans) {
-		final Set<String> fqanList = new TreeSet<String>();
+	public Application[] getAllAvailableApplications(final DtoStringList fqans) {
 
 		if ((fqans == null) || (fqans.asSortedSet().size() == 0)) {
-			return DtoStringList.fromStringArray(informationManager
-					.getAllApplicationsOnGrid());
+			return informationManager.getAllApplicationsOnGrid().toArray(
+					new Application[] {});
+
 		}
 
+		final Set<Application> fqanList = Sets.newHashSet();
 		for (final String fqan : fqans.getStringList()) {
-			fqanList.addAll(Arrays.asList(informationManager
-					.getAllApplicationsOnGridForVO(fqan)));
+			fqanList.addAll(informationManager
+					.getAllApplicationsOnGridForVO(fqan));
 
 		}
 
-		return DtoStringList.fromStringArray(fqanList.toArray(new String[] {}));
+		return fqanList.toArray(new Application[] {});
 
 	}
 
@@ -835,14 +834,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return getJobManager().getAllJobnames(application);
 	}
 
-	public DtoStringList getAllSites() {
+	public Site[] getAllSites() {
 
 		final Date now = new Date();
-		final DtoStringList result = DtoStringList
-				.fromStringArray(informationManager.getAllSites());
+		List<Site> sites = informationManager.getAllSites();
 		myLogger.debug("Login benchmark - getting all sites: "
 				+ (new Date().getTime() - now.getTime()) + " ms");
-		return result;
+		return sites.toArray(new Site[] {});
 	}
 
 	/*
@@ -850,15 +848,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see grisu.control.ServiceInterface#getAllSubmissionLocations()
 	 */
-	public synchronized DtoSubmissionLocations getAllSubmissionLocations() {
+	public synchronized Queue[] getAllSubmissionLocations() {
 
-		final DtoSubmissionLocations locs = DtoSubmissionLocations
-				.createSubmissionLocationsInfo(informationManager
-						.getAllSubmissionLocations());
+		// final DtoSubmissionLocations locs = DtoSubmissionLocations
+		// .createSubmissionLocationsInfo(informationManager
+		// .getAllQueues());
+
+		List<Queue> q = informationManager.getAllQueues();
 
 		// locs.removeUnuseableSubmissionLocations(informationManager, df()
 		// .getMountpoints());
-		return locs;
+		return q.toArray(new Queue[] {});
 	}
 
 	/*
@@ -867,16 +867,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see grisu.control.ServiceInterface#getAllSubmissionLocations(java
 	 * .lang.String)
 	 */
-	public DtoSubmissionLocations getAllSubmissionLocationsForFqan(
+	public Queue[] getAllSubmissionLocationsForFqan(
 			final String fqan) {
 
-		final DtoSubmissionLocations locs = DtoSubmissionLocations
-				.createSubmissionLocationsInfoFromQueues(informationManager
-						.getAllSubmissionLocationsForVO(fqan));
-
+		// final DtoSubmissionLocations locs = DtoSubmissionLocations
+		// .createSubmissionLocationsInfoFromQueues(informationManager
+		// .getAllSubmissionLocationsForVO(fqan));
+		Collection<Queue> q = informationManager.getAllQueuesForVO(fqan);
 		// locs.removeUnuseableSubmissionLocations(informationManager, df()
 		// .getMountpoints());
-		return locs;
+		return q.toArray(new Queue[] {});
 
 	}
 
@@ -886,7 +886,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see grisu.control.ServiceInterface#getApplicationDetails(java.lang
 	 * .String, java.lang.String, java.lang.String)
 	 */
-	public DtoApplicationDetails getApplicationDetailsForVersionAndSubmissionLocation(
+	public Package getApplicationDetailsForVersionAndSubmissionLocation(
 			final String application, final String version,
 			final String submissionLocation) {
 
@@ -898,10 +898,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// myLogger.debug("Site is: " + site);
 		// }
 
-		return DtoApplicationDetails
-				.createDetails(
-						informationManager.getApplicationDetails(application, version,
-								submissionLocation));
+		return informationManager.getPackage(application, version,
+				submissionLocation);
+		// return DtoApplicationDetails
+		// .createDetails(
+		// informationManager.getApplicationDetails(application, version,
+		// submissionLocation));
 	}
 
 	// public String[] getApplicationPackagesForExecutable(String executable) {
@@ -1262,12 +1264,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see grisu.control.ServiceInterface#getSubmissionLocationsForApplication
 	 * (java.lang.String)
 	 */
-	public DtoSubmissionLocations getSubmissionLocationsForApplication(
+	public Queue[] getSubmissionLocationsForApplication(
 			final String application) {
 
-		return DtoSubmissionLocations
-				.createSubmissionLocationsInfo(informationManager
-						.getAllSubmissionLocationsForApplication(application));
+		// return DtoSubmissionLocations
+		// .createSubmissionLocationsInfo(informationManager
+		// .getAllSubmissionLocationsForApplication(application));
+
+		List<Queue> q = informationManager
+				.getAllQueuesForApplication(application);
+		return q.toArray(new Queue[] {});
 	}
 
 	// public UserDAO getUserDao() {
@@ -1280,78 +1286,83 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see grisu.control.ServiceInterface#getSubmissionLocationsForApplication
 	 * (java.lang.String, java.lang.String)
 	 */
-	public DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersion(
+	public Queue[] getSubmissionLocationsForApplicationAndVersion(
 			final String application, final String version) {
 
-		final Collection<String> sls = informationManager
-				.getAllSubmissionLocations(
+		final Collection<Queue> sls = informationManager
+				.getAllQueues(
 						application, version);
 
-		return DtoSubmissionLocations.createSubmissionLocationsInfo(sls);
+		return sls.toArray(new Queue[] {});
+		// return DtoSubmissionLocations.createSubmissionLocationsInfo(sls);
 	}
 
-	public DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersionAndFqan(
+	public Queue[] getSubmissionLocationsForApplicationAndVersionAndFqan(
 			final String application, final String version, final String fqan) {
 		// TODO implement a method which takes in fqan later on
 
-		return DtoSubmissionLocations
-				.createSubmissionLocationsInfo(informationManager
-						.getAllSubmissionLocations(application, version));
+		Collection<Queue> q = informationManager.getAllQueues(application,
+				version);
+		return q.toArray(new Queue[] {});
+		// return DtoSubmissionLocations
+		// .createSubmissionLocationsInfo(informationManager
+		// .getAllQueues(application, version));
 	}
 
-	public DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
-			final String application) {
-		// if (ServerPropertiesManager.getMDSenabled()) {
-		// myLogger.debug("Getting map of submissionlocations per version of application for: "
-		// + application);
-		final Map<String, String> appVersionMap = new HashMap<String, String>();
-		final Collection<String> temp = informationManager
-				.getAllVersionsOfApplicationOnGrid(application);
-		String[] versions;
-		if (temp == null) {
-			versions = new String[] {};
-		} else {
-			versions = temp.toArray(new String[] {});
-		}
-		for (int i = 0; (versions != null) && (i < versions.length); i++) {
-			Collection<String> submitLocations = null;
-			try {
-				submitLocations = informationManager.getAllSubmissionLocations(
-						application, versions[i]);
-				if (submitLocations == null) {
-					myLogger.error("Couldn't find submission locations for application: \""
-							+ application
-							+ "\""
-							+ ", version \""
-							+ versions[i]
-									+ "\". Most likely the mds is not published correctly.");
-					continue;
-				}
-			} catch (final Exception e) {
-				myLogger.error("Couldn't find submission locations for application: \""
-						+ application
-						+ "\""
-						+ ", version \""
-						+ versions[i]
-								+ "\". Most likely the mds is not published correctly.");
-				continue;
-			}
-			final StringBuffer submitLoc = new StringBuffer();
-
-			if (submitLocations != null) {
-				List<String> list = new LinkedList<String>(submitLocations);
-				for (int j = 0; j < list.size(); j++) {
-					submitLoc.append(list.get(j));
-					if (j < (list.size() - 1)) {
-						submitLoc.append(",");
-					}
-				}
-			}
-			appVersionMap.put(versions[i], submitLoc.toString());
-		}
-		return DtoApplicationInfo.createApplicationInfo(application,
-				appVersionMap);
-	}
+	// public DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
+	// final String application) {
+	// // if (ServerPropertiesManager.getMDSenabled()) {
+	// //
+	// myLogger.debug("Getting map of submissionlocations per version of application for: "
+	// // + application);
+	// final Map<String, String> appVersionMap = new HashMap<String, String>();
+	// final List<Version> temp = informationManager
+	// .getAllVersionsOfApplicationOnGrid(application);
+	// Version[] versions;
+	// if (temp == null) {
+	// versions = new Version[] {};
+	// } else {
+	// versions = temp.toArray(new Version[] {});
+	// }
+	// for (int i = 0; (versions != null) && (i < versions.length); i++) {
+	// Collection<Queue> submitLocations = null;
+	// try {
+	// submitLocations = informationManager.getAllQueues(application,
+	// versions[i].getVersion());
+	// if (submitLocations == null) {
+	// myLogger.error("Couldn't find submission locations for application: \""
+	// + application
+	// + "\""
+	// + ", version \""
+	// + versions[i]
+	// + "\". Most likely the mds is not published correctly.");
+	// continue;
+	// }
+	// } catch (final Exception e) {
+	// myLogger.error("Couldn't find submission locations for application: \""
+	// + application
+	// + "\""
+	// + ", version \""
+	// + versions[i]
+	// + "\". Most likely the mds is not published correctly.");
+	// continue;
+	// }
+	// final StringBuffer submitLoc = new StringBuffer();
+	//
+	// if (submitLocations != null) {
+	// List<String> list = new LinkedList<String>(submitLocations);
+	// for (int j = 0; j < list.size(); j++) {
+	// submitLoc.append(list.get(j));
+	// if (j < (list.size() - 1)) {
+	// submitLoc.append(",");
+	// }
+	// }
+	// }
+	// appVersionMap.put(versions[i], submitLoc.toString());
+	// }
+	// return DtoApplicationInfo.createApplicationInfo(application,
+	// appVersionMap);
+	// }
 
 	public DtoStringList getUsedApplications() {
 

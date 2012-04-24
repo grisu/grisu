@@ -130,7 +130,6 @@ public class LoginManager {
 
 		if (!environmentInitialized) {
 
-
 			java.util.logging.LogManager.getLogManager().reset();
 			// LoggerFactory.getLogger("root").setLevel(Level.OFF);
 
@@ -279,6 +278,10 @@ public class LoginManager {
 						loginParams.getHttpProxyPassphrase());
 			} catch (ServiceInterfaceException e) {
 				throw new LoginException("Could not login to backend.", e);
+			} catch (Throwable t) {
+				t.printStackTrace();
+				throw new LoginException("Error while loggin in: "
+						+ t.getLocalizedMessage());
 			}
 
 			loginParams.clearPasswords();

@@ -10,16 +10,17 @@ import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.jcommons.constants.Constants;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
-import grisu.model.dto.DtoApplicationDetails;
-import grisu.model.dto.DtoApplicationInfo;
 import grisu.model.dto.DtoBatchJob;
 import grisu.model.dto.DtoJob;
 import grisu.model.dto.DtoJobs;
 import grisu.model.dto.DtoMountPoints;
 import grisu.model.dto.DtoProperties;
 import grisu.model.dto.DtoStringList;
-import grisu.model.dto.DtoSubmissionLocations;
 import grisu.model.dto.GridFile;
+import grisu.model.info.dto.Application;
+import grisu.model.info.dto.Package;
+import grisu.model.info.dto.Queue;
+import grisu.model.info.dto.Site;
 
 import java.util.Map;
 
@@ -446,7 +447,7 @@ public interface ServiceInterface {
 	@GET
 	@Path("/info/applications")
 	@PermitAll
-	DtoStringList getAllAvailableApplications(
+	Application[] getAllAvailableApplications(
 			@DefaultValue("") @QueryParam("groups") DtoStringList fqans);
 
 	/**
@@ -492,7 +493,7 @@ public interface ServiceInterface {
 	@GET
 	@Path("/info/sites")
 	@PermitAll
-	DtoStringList getAllSites();
+	Site[] getAllSites();
 
 	/**
 	 * Queries for all submission locations on the grid. Returns an array of
@@ -504,7 +505,7 @@ public interface ServiceInterface {
 	@GET
 	@Path("/info/queues")
 	@PermitAll
-	DtoSubmissionLocations getAllSubmissionLocations();
+	Queue[] getAllSubmissionLocations();
 
 	/**
 	 * Returns all submission locations for this VO. Needed for better
@@ -517,7 +518,7 @@ public interface ServiceInterface {
 	@GET
 	@Path("/info/queues/{group}")
 	@PermitAll
-	DtoSubmissionLocations getAllSubmissionLocationsForFqan(
+	Queue[] getAllSubmissionLocationsForFqan(
 			@PathParam("group") String fqan);
 
 	/**
@@ -536,7 +537,7 @@ public interface ServiceInterface {
 	@GET
 	@Path("/info/application/{application}/{version}/{queue}")
 	@PermitAll
-	DtoApplicationDetails getApplicationDetailsForVersionAndSubmissionLocation(
+	Package getApplicationDetailsForVersionAndSubmissionLocation(
 			@PathParam("application") String application,
 			@DefaultValue(Constants.NO_VERSION_INDICATOR_STRING) @PathParam("version") String version,
 			@DefaultValue("") @PathParam("queue") String subloc);
@@ -800,7 +801,7 @@ public interface ServiceInterface {
 	@GET
 	@Path("/info/application/{application}/queues")
 	@PermitAll
-	DtoSubmissionLocations getSubmissionLocationsForApplication(
+	Queue[] getSubmissionLocationsForApplication(
 			@PathParam("application") String application);
 
 	/**
@@ -819,7 +820,7 @@ public interface ServiceInterface {
 	@GET
 	@Path("info/application/{application}/{version}/queues")
 	@PermitAll
-	DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersion(
+	Queue[] getSubmissionLocationsForApplicationAndVersion(
 			@PathParam("application") String application,
 			@PathParam("version") String version);
 
@@ -842,27 +843,27 @@ public interface ServiceInterface {
 	@GET
 	@Path("/info/application/{application}/{version}/{group}/queues")
 	@PermitAll
-	DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersionAndFqan(
+	Queue[] getSubmissionLocationsForApplicationAndVersionAndFqan(
 			@PathParam("application") String application,
 			@PathParam("version") String version,
 			@PathParam("group") String fqan);
 
-	/**
-	 * Returns a map of all versions and all submission locations of this
-	 * application. The key of the map is the version, and the
-	 * submissionlocations are the values. If there is more than one
-	 * submissionLocation for a version, then they are seperated via commas.
-	 * 
-	 * @param application
-	 *            the name of the application
-	 * @return a map with all versions of the application as key and the
-	 *         submissionLocations as comma
-	 */
-	@GET
-	@Path("/info/application/{application}/queues")
-	@PermitAll
-	DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
-			@PathParam("application") String application);
+	// /**
+	// * Returns a map of all versions and all submission locations of this
+	// * application. The key of the map is the version, and the
+	// * submissionlocations are the values. If there is more than one
+	// * submissionLocation for a version, then they are seperated via commas.
+	// *
+	// * @param application
+	// * the name of the application
+	// * @return a map with all versions of the application as key and the
+	// * submissionLocations as comma
+	// */
+	// @GET
+	// @Path("/info/application/{application}/queues")
+	// @PermitAll
+	// DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
+	// @PathParam("application") String application);
 
 	/**
 	 * Gets the template Document for this application.
@@ -1226,7 +1227,7 @@ public interface ServiceInterface {
 	 */
 	void setUserProperties(DtoProperties properties);
 
-/**
+	/**
 	 * Sets a user property.
 	 * 
 	 * <p>

@@ -4,14 +4,14 @@ import grisu.backend.model.User;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
-import grisu.jcommons.model.info.Directory;
-import grisu.jcommons.model.info.Site;
 import grisu.model.FileManager;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoProperty;
 import grisu.model.dto.GridFile;
+import grisu.model.info.dto.Directory;
+import grisu.model.info.dto.Site;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -296,8 +296,8 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 
 		final Map<String, Set<String>> sites = new TreeMap<String, Set<String>>();
 		for (final String vo : user.getFqans().keySet()) {
-			final Collection<Directory> dataLocations = AbstractServiceInterface.informationManager
-					.getDataLocationsForVO(vo);
+			final List<Directory> dataLocations = AbstractServiceInterface.informationManager
+					.getDirectoriesForVO(vo);
 
 			for (final Directory dir : dataLocations) {
 				final Site site = dir.getSite();

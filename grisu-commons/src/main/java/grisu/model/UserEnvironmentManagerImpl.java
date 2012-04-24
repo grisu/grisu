@@ -1,6 +1,5 @@
 package grisu.model;
 
-import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.StatusException;
@@ -12,6 +11,8 @@ import grisu.model.files.FileSystemItem;
 import grisu.model.files.GlazedFile;
 import grisu.model.info.ApplicationInformation;
 import grisu.model.info.ResourceInformation;
+import grisu.model.info.dto.Application;
+import grisu.model.info.dto.Queue;
 import grisu.model.status.StatusObject;
 import grisu.settings.ClientPropertiesManager;
 import grith.jgrith.utils.FqanHelpers;
@@ -47,8 +48,6 @@ import org.python.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Sets;
-
 /**
  * The implemenation of {@link UserEnvironmentManager}.
  * 
@@ -67,12 +66,12 @@ EventSubscriber<FqanEvent> {
 	private FileManager fm;
 
 	private String[] cachedFqans = null;
-	private String[] cachedApplications = null;
+	private Application[] cachedApplications = null;
 	private String[] cachedFqansUsable = null;
 	private String[] cachedUniqueGroupnames = null;
 	private String[] cachedUniqueGroupnamesUsable = null;
 	private final Map<String, Set<String>> cachedFqansPerApplication = new HashMap<String, Set<String>>();
-	private Set<String> cachedAllSubmissionLocations = null;
+	private Set<Queue> cachedAllSubmissionLocations = null;
 	private SortedSet<String> cachedAllSites = null;
 	private final Map<String, Set<MountPoint>> alreadyQueriedMountPointsPerSubmissionLocation = new TreeMap<String, Set<MountPoint>>();
 	private final Map<String, Set<MountPoint>> alreadyQueriedMountPointsPerFqan = new TreeMap<String, Set<MountPoint>>();
@@ -138,74 +137,75 @@ EventSubscriber<FqanEvent> {
 		return temp;
 	}
 
-	public synchronized String[] getAllAvailableApplications() {
+	public synchronized Application[] getAllAvailableApplications() {
 
 		if (cachedApplications == null) {
 
-			cachedApplications = serviceInterface.getAllAvailableApplications(
-					DtoStringList.fromStringArray(getAllAvailableFqans(true)))
-					.asArray();
+			cachedApplications = serviceInterface
+					.getAllAvailableApplications(DtoStringList
+							.fromStringArray(getAllAvailableFqans(true)));
 		}
 
 		return cachedApplications;
 	}
 
-	public synchronized Map<String, Set<String>> getAllAvailableExecutables() {
-
-		final Map<String, Set<String>> allExes = Collections
-				.synchronizedMap(new TreeMap<String, Set<String>>());
-
-		final ThreadFactory tf = new NamedThreadFactory(
-				"infoGetAllAvailableExecutables");
-		final ExecutorService executor = Executors.newFixedThreadPool(50, tf);
-
-		for (final String application : getAllAvailableApplications()) {
-			allExes.put(application,
-					Collections.synchronizedSet(new TreeSet<String>()));
-		}
-
-		for (final String application : getAllAvailableApplications()) {
-
-			final ApplicationInformation ai = GrisuRegistryManager.getDefault(
-					serviceInterface).getApplicationInformation(application);
-
-			final Set<String> sublocs = ai.getAvailableAllSubmissionLocations();
-
-			final Set<String> sublocsUser = getAllAvailableSubmissionLocations();
-
-			for (final String subLoc : Sets.intersection(sublocs, sublocsUser)) {
-
-				final Set<String> versions = ai.getAvailableVersions(subLoc);
-
-				for (final String version : versions) {
-
-					final Thread t = new Thread() {
-						@Override
-						public void run() {
-							final String[] exes = ai.getExecutables(subLoc,
-									version);
-							X.p("Exes for: " + application + " " + subLoc + " "
-									+ version);
-							allExes.get(application)
-							.addAll(Arrays.asList(exes));
-						}
-					};
-					executor.execute(t);
-				}
-			}
-
-		}
-
-		executor.shutdown();
-
-		try {
-			executor.awaitTermination(120, TimeUnit.SECONDS);
-		} catch (final InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		return allExes;
-	}
+	// public synchronized Map<String, Set<String>> getAllAvailableExecutables()
+	// {
+	//
+	// final Map<String, Set<String>> allExes = Collections
+	// .synchronizedMap(new TreeMap<String, Set<String>>());
+	//
+	// final ThreadFactory tf = new NamedThreadFactory(
+	// "infoGetAllAvailableExecutables");
+	// final ExecutorService executor = Executors.newFixedThreadPool(50, tf);
+	//
+	// for (final String application : getAllAvailableApplications()) {
+	// allExes.put(application,
+	// Collections.synchronizedSet(new TreeSet<String>()));
+	// }
+	//
+	// for (final String application : getAllAvailableApplications()) {
+	//
+	// final ApplicationInformation ai = GrisuRegistryManager.getDefault(
+	// serviceInterface).getApplicationInformation(application);
+	//
+	// final Set<String> sublocs = ai.getAvailableAllSubmissionLocations();
+	//
+	// final Set<String> sublocsUser = getAllAvailableSubmissionLocations();
+	//
+	// for (final String subLoc : Sets.intersection(sublocs, sublocsUser)) {
+	//
+	// final Set<String> versions = ai.getAvailableVersions(subLoc);
+	//
+	// for (final String version : versions) {
+	//
+	// final Thread t = new Thread() {
+	// @Override
+	// public void run() {
+	// final String[] exes = ai.getExecutables(subLoc,
+	// version);
+	// X.p("Exes for: " + application + " " + subLoc + " "
+	// + version);
+	// allExes.get(application)
+	// .addAll(Arrays.asList(exes));
+	// }
+	// };
+	// executor.execute(t);
+	// }
+	// }
+	//
+	// }
+	//
+	// executor.shutdown();
+	//
+	// try {
+	// executor.awaitTermination(120, TimeUnit.SECONDS);
+	// } catch (final InterruptedException e) {
+	// e.printStackTrace();
+	// }
+	//
+	// return allExes;
+	// }
 
 	public final String[] getAllAvailableFqans() {
 		return getAllAvailableFqans(false);
@@ -247,7 +247,7 @@ EventSubscriber<FqanEvent> {
 
 			for (final String vo : getAllAvailableFqans()) {
 
-				final Set<String> temp = ai
+				final Set<Queue> temp = ai
 						.getAvailableSubmissionLocationsForFqan(vo);
 				if (temp.size() > 0) {
 					result.add(vo);
@@ -279,11 +279,11 @@ EventSubscriber<FqanEvent> {
 		return cachedAllSites;
 	}
 
-	public synchronized final Set<String> getAllAvailableSubmissionLocations() {
+	public synchronized final Set<Queue> getAllAvailableSubmissionLocations() {
 
 		if (cachedAllSubmissionLocations == null) {
 			cachedAllSubmissionLocations = Collections
-					.synchronizedSet(new TreeSet<String>());
+					.synchronizedSet(new TreeSet<Queue>());
 			cachedAllSites = new TreeSet<String>();
 
 			if ((getAllAvailableFqans() == null)

@@ -15,9 +15,6 @@ import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
-import grisu.jcommons.model.info.Directory;
-import grisu.jcommons.model.info.Queue;
-import grisu.jcommons.model.info.Version;
 import grisu.jcommons.utils.JsdlHelpers;
 import grisu.model.FileManager;
 import grisu.model.MountPoint;
@@ -25,6 +22,9 @@ import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.DtoJob;
 import grisu.model.dto.DtoStringList;
 import grisu.model.dto.GridFile;
+import grisu.model.info.dto.Directory;
+import grisu.model.info.dto.Queue;
+import grisu.model.info.dto.Version;
 import grisu.model.job.JobSubmissionObjectImpl;
 import grisu.model.status.StatusObject;
 import grisu.settings.ServerPropertiesManager;
@@ -512,6 +512,7 @@ public class UserJobManager {
 			myLogger.error("Somehow the job was not created although it certainly should have. Must be a bug..");
 			throw new RuntimeException("Job was not created. Internal error.");
 		} catch (final Exception e) {
+			e.printStackTrace();
 			myLogger.error("Error when processing job description: "
 					+ e.getLocalizedMessage());
 			try {
@@ -2155,7 +2156,8 @@ public class UserJobManager {
 		// }
 		// }
 
-		Version version = AbstractServiceInterface.informationManager.getResource(Version.class, applicationVersion);
+		Version version = AbstractServiceInterface.informationManager
+				.getResource(Version.class, applicationVersion);
 
 		// check whether version is specified or not. if not, try to find latest
 		// one...
@@ -2197,7 +2199,8 @@ public class UserJobManager {
 		JsdlHelpers.setCandidateHosts(jsdl, new String[] { queue.toString() });
 
 		// figuring out which filesystem to use
-		Set<Directory> stagingFileSystems = queue.getDirectories(job.getFqan());
+		Set<Directory> stagingFileSystems = queue
+				.findDirectories(job.getFqan());
 
 		MountPoint mountPointToUse = null;
 		MountPoint mountPointToUseNonVolatile = null;
@@ -2351,7 +2354,8 @@ public class UserJobManager {
 		job.addJobProperty(Constants.EXECUTABLE_KEY, executable);
 		job.addJobProperty(Constants.SUBMISSION_HOST_KEY, queue.getGateway()
 				.getHost());
-		job.addJobProperty(Constants.SUBMISSION_SITE_KEY, queue.getSite()
+		job.addJobProperty(Constants.SUBMISSION_SITE_KEY, queue.getGateway()
+				.getSite()
 				.toString());
 		job.addJobProperty(Constants.SUBMISSIONLOCATION_KEY, queue.toString());
 		job.addJobProperty(Constants.SUBMISSIONLOCATION_CALCULATED_KEY,
@@ -2362,7 +2366,8 @@ public class UserJobManager {
 				mountPointToUse.getRootUrl());
 		job.addJobProperty(Constants.STAGING_FILE_SYSTEM_KEY, stagingFileSystem);
 		job.addJobProperty(Constants.WORKINGDIRECTORY_KEY, workingDirectory);
-		job.addJobProperty(Constants.SUBMISSION_SITE_KEY, queue.getSite()
+		job.addJobProperty(Constants.SUBMISSION_SITE_KEY, queue.getGateway()
+				.getSite()
 				.getName());
 		job.addJobProperty(Constants.QUEUE_KEY, queue.getName());
 		job.addJobProperty(Constants.JOBDIRECTORY_KEY, newJobdir);

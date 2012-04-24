@@ -3,10 +3,13 @@ package grisu.model.info;
 import grisu.control.ServiceInterface;
 import grisu.jcommons.constants.Constants;
 import grisu.model.dto.DtoStringList;
+import grisu.model.info.dto.Application;
+import grisu.model.info.dto.Queue;
+import grisu.model.info.dto.Site;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -79,17 +82,17 @@ public class ResourceInformationImpl implements ResourceInformation {
 	}
 
 	private final ServiceInterface serviceInterface;
-	private String[] cachedAllSubmissionLocations = null;
-	private final Map<String, Set<String>> cachedSiteAllSubmissionLocationsMap = new TreeMap<String, Set<String>>();
-	private String[] cachedAllSites = null;
+	private Queue[] cachedAllSubmissionLocations = null;
+	private final Map<Site, Set<Queue>> cachedSiteAllSubmissionLocationsMap = new TreeMap<Site, Set<Queue>>();
+	private Site[] cachedAllSites = null;
 	private final Map<String, String> cachedHosts = new HashMap<String, String>();
-	private final Map<String, String[]> cachedAllSubmissionLocationsPerFqan = new HashMap<String, String[]>();
-	private final Map<String, Set<String>> cachedAllSitesPerFqan = new HashMap<String, Set<String>>();
+	private final Map<String, Queue[]> cachedAllSubmissionLocationsPerFqan = new HashMap<String, Queue[]>();
+	private final Map<String, Set<Site>> cachedAllSitesPerFqan = new HashMap<String, Set<Site>>();
 	private final Map<String, String[]> cachedApplicationPackagesForExecutables = new HashMap<String, String[]>();
 
 	private final Map<String, List<String>> cachedStagingFilesystemsPerSubLoc = new HashMap<String, List<String>>();
-	private Set<String> cachedAllApps;
-	private final Map<String, Set<String>> cachedAppsPerVO = new HashMap<String, Set<String>>();
+	private Application[] cachedAllApps;
+	private final Map<String, Application[]> cachedAppsPerVO = new HashMap<String, Application[]>();
 
 	public ResourceInformationImpl(final ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
@@ -125,106 +128,106 @@ public class ResourceInformationImpl implements ResourceInformation {
 		return temp;
 	}
 
-	public synchronized Set<String> getAllApplications() {
+	public synchronized Application[] getAllApplications() {
 
 		if (cachedAllApps == null) {
-			cachedAllApps = serviceInterface.getAllAvailableApplications(null)
-					.asSortedSet();
+			cachedAllApps = serviceInterface.getAllAvailableApplications(null);
+
 		}
 		return cachedAllApps;
 
 	}
 
-	public SortedSet<String> getAllApplicationsForFqans(Set<String> fqans) {
+	public Application[] getAllApplicationsForFqans(Set<String> fqans) {
 
-		final SortedSet<String> result = new TreeSet<String>();
+		final SortedSet<Application> result = new TreeSet<Application>();
 		for (final String fqan : fqans) {
 
 			if (cachedAppsPerVO.get(fqan) == null) {
-				Set<String> temp = serviceInterface
-						.getAllAvailableApplications(
-								DtoStringList.fromSingleString(fqan))
-								.asSortedSet();
+				Application[] temp = serviceInterface
+						.getAllAvailableApplications(DtoStringList
+								.fromSingleString(fqan));
+
 				if (temp == null) {
-					temp = new TreeSet<String>();
+					temp = new Application[] {};
 				}
 				cachedAppsPerVO.put(fqan, temp);
 			}
-			result.addAll(cachedAppsPerVO.get(fqan));
+			result.addAll(Arrays.asList(cachedAppsPerVO.get(fqan)));
 		}
 
-		return result;
+		return result.toArray(new Application[] {});
 	}
 
-	public final Set<String> getAllAvailableSites(final String fqan) {
+	public final Set<Site> getAllAvailableSites(final String fqan) {
 
 		synchronized (fqan) {
 
 			if (cachedAllSitesPerFqan.get(fqan) == null) {
-				final Set<String> temp = new TreeSet<String>();
-				for (final String subLoc : getAllAvailableSubmissionLocations(fqan)) {
-					temp.add(getSite(subLoc));
+				final Set<Site> temp = new TreeSet<Site>();
+				for (final Queue q : getAllAvailableSubmissionLocations(fqan)) {
+					temp.add(q.getGateway().getSite());
 				}
+				cachedAllSitesPerFqan.put(fqan, temp);
 			}
 		}
 		return cachedAllSitesPerFqan.get(fqan);
 	}
 
-	public final String[] getAllAvailableSubmissionLocations(final String fqan) {
+	public final Queue[] getAllAvailableSubmissionLocations(final String fqan) {
 
 		synchronized (fqan) {
 
 			if (cachedAllSubmissionLocationsPerFqan.get(fqan) == null) {
-				final String[] temp = serviceInterface
-						.getAllSubmissionLocationsForFqan(fqan)
-						.asSubmissionLocationStrings();
+				final Queue[] temp = serviceInterface
+						.getAllSubmissionLocationsForFqan(fqan);
+
 				cachedAllSubmissionLocationsPerFqan.put(fqan, temp);
 			}
 		}
 		return cachedAllSubmissionLocationsPerFqan.get(fqan);
 	}
 
-	public synchronized final String[] getAllSites() {
+	public synchronized final Site[] getAllSites() {
 
 		if (cachedAllSites == null) {
 
-			for (final String subLoc : getAllSubmissionLocations()) {
-				cachedAllSites = serviceInterface.getAllSites().asArray();
-			}
+			cachedAllSites = serviceInterface.getAllSites();
 		}
 		return cachedAllSites;
 	}
 
-	public synchronized final String[] getAllSubmissionLocations() {
+	public synchronized final Queue[] getAllSubmissionLocations() {
 
 		if (cachedAllSubmissionLocations == null) {
 			cachedAllSubmissionLocations = serviceInterface
-					.getAllSubmissionLocations().asSubmissionLocationStrings();
+					.getAllSubmissionLocations();
 		}
 		return cachedAllSubmissionLocations;
 	}
 
-	public final Set<String> getAllSubmissionLocationsForSite(final String site) {
-
-		synchronized (site) {
-
-			if (cachedSiteAllSubmissionLocationsMap.get(site) == null) {
-				// now we are building the complete map, not only for this one
-				// site
-				for (final String subLoc : getAllSubmissionLocations()) {
-					final String sitetemp = getSite(subLoc);
-					if (cachedSiteAllSubmissionLocationsMap.get(sitetemp) == null) {
-						cachedSiteAllSubmissionLocationsMap.put(sitetemp,
-								new HashSet<String>());
-					}
-					cachedSiteAllSubmissionLocationsMap.get(sitetemp).add(
-							subLoc);
-				}
-			}
-		}
-		return cachedSiteAllSubmissionLocationsMap.get(site);
-
-	}
+	// public final Set<Queue> getAllSubmissionLocationsForSite(final String
+	// site) {
+	//
+	// synchronized (site) {
+	//
+	// if (cachedSiteAllSubmissionLocationsMap.get(site) == null) {
+	// // now we are building the complete map, not only for this one
+	// // site
+	// for (final Queue subLoc : getAllSubmissionLocations()) {
+	// final Site sitetemp = subLoc.getGateway().getSite();
+	// if (cachedSiteAllSubmissionLocationsMap.get(sitetemp) == null) {
+	// cachedSiteAllSubmissionLocationsMap.put(sitetemp,
+	// new HashSet<String>());
+	// }
+	// cachedSiteAllSubmissionLocationsMap.get(sitetemp).add(
+	// subLoc);
+	// }
+	// }
+	// }
+	// return cachedSiteAllSubmissionLocationsMap.get(site);
+	//
+	// }
 
 	// public String[] getApplicationPackageForExecutable(String executable) {
 	//

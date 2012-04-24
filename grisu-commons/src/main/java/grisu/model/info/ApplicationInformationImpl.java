@@ -6,6 +6,9 @@ import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.dto.DtoJob;
+import grisu.model.info.dto.Executable;
+import grisu.model.info.dto.Package;
+import grisu.model.info.dto.Queue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,6 +21,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
+import org.python.google.common.collect.Sets;
 
 /**
  * Default implementation for {@link ApplicationInformation}.
@@ -31,16 +35,16 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 	private final ResourceInformation resourceInfo;
 
-	private final Map<String, Map<String, String>> cachedApplicationDetailsPerSubLoc = new HashMap<String, Map<String, String>>();
+	private final Map<String, Package> cachedApplicationDetailsPerSubLoc = new HashMap<String, Package>();
 
-	private Set<String> cachedAllSubmissionLocations = null;
+	private Queue[] cachedAllSubmissionLocations = null;
 
 	private final Map<String, Set<String>> cachedVersionsPerSubmissionLocations = new HashMap<String, Set<String>>();
-	private final Map<String, Set<String>> cachedSubmissionLocationsPerVersion = new HashMap<String, Set<String>>();
+	private final Map<String, Queue[]> cachedSubmissionLocationsPerVersion = new HashMap<String, Queue[]>();
 	// private Map<String, Set<String>> cachedVersionsForSubmissionLocation =
 	// new HashMap<String, Set<String>>();
-	private final Map<String, Set<String>> cachedSubmissionLocationsForUserPerFqan = new HashMap<String, Set<String>>();
-	private final Map<String, Set<String>> cachedSubmissionLocationsForUserPerVersionAndFqan = new HashMap<String, Set<String>>();
+	private final Map<String, Set<Queue>> cachedSubmissionLocationsForUserPerFqan = new HashMap<String, Set<Queue>>();
+	private final Map<String, Set<Queue>> cachedSubmissionLocationsForUserPerVersionAndFqan = new HashMap<String, Set<Queue>>();
 
 	private final Map<String, Set<String>> cachedVersionsForUserPerFqan = new HashMap<String, Set<String>>();
 
@@ -72,10 +76,10 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 			if (cachedVersionsForUserPerFqan.get(fqan) == null) {
 				final Set<String> result = new TreeSet<String>();
-				for (final String subLoc : getAvailableSubmissionLocationsForFqan(fqan)) {
+				for (final Queue subLoc : getAvailableSubmissionLocationsForFqan(fqan)) {
 					final List<String> temp = serviceInterface
 							.getVersionsOfApplicationOnSubmissionLocation(
-									getApplicationName(), subLoc)
+									getApplicationName(), subLoc.toString())
 									.getStringList();
 					result.addAll(temp);
 				}
@@ -145,7 +149,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	 * @see grisu.model.info.ApplicationInformation#getApplicationDetails
 	 * (java.lang.String, java.lang.String)
 	 */
-	public final Map<String, String> getApplicationDetails(final String subLoc,
+	public final Package getApplicationDetails(final String subLoc,
 			final String version) {
 		final String KEY = version + "_subLoc:" + subLoc;
 
@@ -153,12 +157,12 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 			if (cachedApplicationDetailsPerSubLoc.get(KEY) == null) {
 				if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
 					cachedApplicationDetailsPerSubLoc.put(KEY,
-							new HashMap<String, String>());
+							Package.GENERIC_PACKAGE);
 				} else {
-					final Map<String, String> details = serviceInterface
+					final Package details = serviceInterface
 							.getApplicationDetailsForVersionAndSubmissionLocation(
-									application, version, subLoc)
-									.getDetailsAsMap();
+									application, version, subLoc);
+
 					cachedApplicationDetailsPerSubLoc.put(KEY, details);
 				}
 			}
@@ -182,19 +186,21 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
 	 * getAvailableAllSubmissionLocations()
 	 */
-	public synchronized final Set<String> getAvailableAllSubmissionLocations() {
+	public synchronized final Queue[] getAvailableAllSubmissionLocations() {
 
 		if (cachedAllSubmissionLocations == null) {
 			if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
-				cachedAllSubmissionLocations = new HashSet(
-						Arrays.asList(resourceInfo.getAllSubmissionLocations()));
+				cachedAllSubmissionLocations = serviceInterface
+						.getAllSubmissionLocations();
 			} else {
 
-				cachedAllSubmissionLocations = new HashSet(
-						Arrays.asList(serviceInterface
-								.getSubmissionLocationsForApplication(
-										application)
-										.asSubmissionLocationStrings()));
+				cachedAllSubmissionLocations = serviceInterface
+						.getSubmissionLocationsForApplication(application);
+				// cachedAllSubmissionLocations = new HashSet(
+				// Arrays.asList(serviceInterface
+				// .getSubmissionLocationsForApplication(
+				// application)
+				// .asSubmissionLocationStrings()));
 			}
 		}
 		return cachedAllSubmissionLocations;
@@ -207,16 +213,17 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
 	 * getAvailableSubmissionLocationsForFqan(java.lang.String)
 	 */
-	public final Set<String> getAvailableSubmissionLocationsForFqan(
+	public final Set<Queue> getAvailableSubmissionLocationsForFqan(
 			final String fqan) {
 
 		synchronized (fqan) {
 
 			if (cachedSubmissionLocationsForUserPerFqan.get(fqan) == null) {
-				final Set<String> temp = new HashSet<String>();
-				for (final String subLoc : resourceInfo
+				final Set<Queue> temp = Sets.newHashSet();
+				for (final Queue subLoc : resourceInfo
 						.getAllAvailableSubmissionLocations(fqan)) {
-					if (getAvailableAllSubmissionLocations().contains(subLoc)) {
+					if (Arrays.asList(getAvailableAllSubmissionLocations())
+							.contains(subLoc)) {
 						temp.add(subLoc);
 					}
 				}
@@ -232,7 +239,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
 	 * getAvailableSubmissionLocationsForVersion(java.lang.String)
 	 */
-	public final Set<String> getAvailableSubmissionLocationsForVersion(
+	public final Queue[] getAvailableSubmissionLocationsForVersion(
 			final String version) {
 
 		synchronized (version) {
@@ -243,26 +250,25 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 							getAvailableAllSubmissionLocations());
 				} else {
 
-					final List<String> temp = Arrays.asList(serviceInterface
+					final Queue[] temp = serviceInterface
 							.getSubmissionLocationsForApplicationAndVersion(
-									application, version)
-									.asSubmissionLocationStrings());
-					cachedSubmissionLocationsPerVersion.put(version,
-							new HashSet(temp));
+									application, version);
+					// .asSubmissionLocationStrings());
+					cachedSubmissionLocationsPerVersion.put(version, temp);
 				}
 			}
 		}
 		return cachedSubmissionLocationsPerVersion.get(version);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
-	 * getAvailableSubmissionLocationsForVersionAndFqan(java.lang.String,
-	 * java.lang.String)
-	 */
-	public final Set<String> getAvailableSubmissionLocationsForVersionAndFqan(
+	// /*
+	// * (non-Javadoc)
+	// *
+	// * @seeorg.vpac.grisu.model.info.ApplicationInformation#
+	// * getAvailableSubmissionLocationsForVersionAndFqan(java.lang.String,
+	// * java.lang.String)
+	// */
+	public final Set<Queue> getAvailableSubmissionLocationsForVersionAndFqan(
 			final String version, final String fqan) {
 
 		final String KEY = version + "_" + fqan;
@@ -270,10 +276,11 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		synchronized (KEY) {
 
 			if (cachedSubmissionLocationsForUserPerVersionAndFqan.get(KEY) == null) {
-				final Set<String> temp = new HashSet<String>();
-				for (final String subLoc : resourceInfo
+				final Set<Queue> temp = new HashSet<Queue>();
+				for (final Queue subLoc : resourceInfo
 						.getAllAvailableSubmissionLocations(fqan)) {
-					if (getAvailableSubmissionLocationsForVersion(version)
+					if (Arrays.asList(
+							getAvailableSubmissionLocationsForVersion(version))
 							.contains(subLoc)) {
 						temp.add(subLoc);
 					}
@@ -345,29 +352,31 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	 * @see grisu.model.info.ApplicationInformation#getExecutables(java.
 	 * lang.String, java.lang.String)
 	 */
-	public final String[] getExecutables(final String subLoc,
+	public final Set<Executable> getExecutables(final String subLoc,
 			final String version) {
 
-		return getApplicationDetails(subLoc, version).get(
-				Constants.MDS_EXECUTABLES_KEY).split(",");
+		Package pkg = getApplicationDetails(subLoc, version);
+
+		return pkg.getExecutables();
 	}
 
-	public final Set<String> getExecutablesForVo(final String fqan) {
+	public final Set<Executable> getExecutablesForVo(final String fqan) {
 
 		return getExecutablesForVo(fqan, Constants.NO_VERSION_INDICATOR_STRING);
 	}
 
-	public final Set<String> getExecutablesForVo(final String fqan,
+	public final Set<Executable> getExecutablesForVo(final String fqan,
 			String version) {
 
 		final ResourceInformation ri = GrisuRegistryManager.getDefault(
 				serviceInterface).getResourceInformation();
-		final String[] subLocs = ri.getAllAvailableSubmissionLocations(fqan);
-		final Set<String> result = Collections
-				.synchronizedSet(new HashSet<String>());
-		for (final String subLoc : subLocs) {
-			final String[] exes = getExecutables(subLoc, version);
-			result.addAll(Arrays.asList(exes));
+		final Queue[] subLocs = ri.getAllAvailableSubmissionLocations(fqan);
+		final Set<Executable> result = Collections
+				.synchronizedSet(new HashSet<Executable>());
+		for (final Queue subLoc : subLocs) {
+			final Set<Executable> exes = getExecutables(subLoc.toString(),
+					version);
+			result.addAll(exes);
 		}
 
 		return result;

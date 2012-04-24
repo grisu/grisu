@@ -3,10 +3,10 @@ package grisu.backend.model.fs;
 import grisu.backend.model.User;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.RemoteFileSystemException;
-import grisu.jcommons.model.info.VO;
 import grisu.model.FileManager;
 import grisu.model.MountPoint;
 import grisu.model.dto.GridFile;
+import grisu.model.info.dto.VO;
 import grisu.settings.ServerPropertiesManager;
 
 import java.util.Collections;

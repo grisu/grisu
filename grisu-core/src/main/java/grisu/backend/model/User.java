@@ -15,12 +15,12 @@ import grisu.control.exceptions.NoValidCredentialException;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
 import grisu.jcommons.constants.Constants;
-import grisu.jcommons.model.info.Directory;
-import grisu.jcommons.model.info.VO;
 import grisu.model.FileManager;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.GridFile;
+import grisu.model.info.dto.Directory;
+import grisu.model.info.dto.VO;
 import grisu.model.job.JobSubmissionObjectImpl;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.MountPointHelpers;
@@ -138,9 +138,9 @@ public class User {
 
 		}
 
+
 		try {
-			user.setAutoMountedMountPoints(user.df_auto_mds(si.getAllSites()
-					.asArray()));
+			user.setAutoMountedMountPoints(user.df_auto_mds());
 			time2 = new Date();
 			myLogger.debug("Login benchmark - mountpoints: "
 					+ new Long((time2.getTime() - time1.getTime())).toString()
@@ -572,7 +572,7 @@ public class User {
 	 *            the sites that should be used
 	 * @return all MountPoints
 	 */
-	protected Set<MountPoint> df_auto_mds(final String[] sites) {
+	protected Set<MountPoint> df_auto_mds() {
 
 		final Set<MountPoint> mps = Collections
 				.synchronizedSet(new TreeSet<MountPoint>());
@@ -628,7 +628,7 @@ public class User {
 						// final Date start = new Date();
 
 						Collection<Directory> dirs = AbstractServiceInterface.informationManager
-								.getDataLocationsForVO(fqan);
+								.getDirectoriesForVO(fqan);
 
 						// final Map<String, String[]> mpUrl =
 						// AbstractServiceInterface.informationManager
@@ -735,7 +735,7 @@ public class User {
 				myLogger.debug("Getting datalocations for vo " + fqan + "....");
 				// final Date start = new Date();
 				final Collection<Directory> dirs = AbstractServiceInterface.informationManager
-						.getDataLocationsForVO(fqan);
+						.getDirectoriesForVO(fqan);
 				myLogger.debug("Getting datalocations for vo " + fqan
 						+ " finished.");
 				// final Date end = new Date();

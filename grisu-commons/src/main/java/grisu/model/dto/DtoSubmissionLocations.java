@@ -1,9 +1,9 @@
 package grisu.model.dto;
 
 import grisu.jcommons.interfaces.InformationManager;
-import grisu.jcommons.model.info.Directory;
-import grisu.jcommons.model.info.Queue;
 import grisu.model.MountPoint;
+import grisu.model.info.dto.Directory;
+import grisu.model.info.dto.Queue;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -32,8 +32,7 @@ public class DtoSubmissionLocations {
 		for (final MountPoint mp : mps) {
 
 			for (final Directory fs : filesystems) {
-				if (mp.getRootUrl()
-						.startsWith(fs.getUrl().replace(":2811", ""))) {
+				if (mp.getRootUrl().startsWith(fs.toUrl().replace(":2811", ""))) {
 					return true;
 				}
 			}

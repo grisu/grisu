@@ -1,6 +1,9 @@
 package grisu.model.info;
 
 import grisu.jcommons.constants.JobSubmissionProperty;
+import grisu.model.info.dto.Executable;
+import grisu.model.info.dto.Package;
+import grisu.model.info.dto.Queue;
 
 import java.util.Map;
 import java.util.Set;
@@ -58,7 +61,7 @@ public interface ApplicationInformation {
 	 *            the version
 	 * @return the details
 	 */
-	Map<String, String> getApplicationDetails(String subLoc, String version);
+	Package getApplicationDetails(String subLoc, String version);
 
 	/**
 	 * The name of the application this object is all about.
@@ -73,7 +76,7 @@ public interface ApplicationInformation {
 	 * 
 	 * @return the submissionLocations
 	 */
-	Set<String> getAvailableAllSubmissionLocations();
+	Queue[] getAvailableAllSubmissionLocations();
 
 	/**
 	 * Calculates all the submissionlocations that are available to the user for
@@ -84,7 +87,7 @@ public interface ApplicationInformation {
 	 *            the fqan
 	 * @return the submissionlocations
 	 */
-	Set<String> getAvailableSubmissionLocationsForFqan(String fqan);
+	Set<Queue> getAvailableSubmissionLocationsForFqan(String fqan);
 
 	// /**
 	// * Returns a set of all executable names that are associated with this
@@ -102,7 +105,7 @@ public interface ApplicationInformation {
 	 *            the version in question
 	 * @return the submissionLocations
 	 */
-	Set<String> getAvailableSubmissionLocationsForVersion(String version);
+	Queue[] getAvailableSubmissionLocationsForVersion(String version);
 
 	/**
 	 * This calculates all the submissionlocations that are available to the
@@ -114,7 +117,7 @@ public interface ApplicationInformation {
 	 *            the fqan
 	 * @return the submissionLocations
 	 */
-	Set<String> getAvailableSubmissionLocationsForVersionAndFqan(
+	Set<Queue> getAvailableSubmissionLocationsForVersionAndFqan(
 			String version, String fqan);
 
 	/**
@@ -137,7 +140,7 @@ public interface ApplicationInformation {
 	 *            the version of the application
 	 * @return a list of all executables
 	 */
-	String[] getExecutables(String subLoc, String version);
+	Set<Executable> getExecutables(String subLoc, String version);
 
 	// /**
 	// * Calculates the best {@link GridResource}s to submit this job to.
@@ -163,7 +166,7 @@ public interface ApplicationInformation {
 	 *            the fqan
 	 * @return the executables
 	 */
-	Set<String> getExecutablesForVo(final String fqan);
+	Set<Executable> getExecutablesForVo(final String fqan);
 
 	/**
 	 * All available executables for the application and the provided VO for a
@@ -178,7 +181,7 @@ public interface ApplicationInformation {
 	 *            the version
 	 * @return the executables
 	 */
-	Set<String> getExecutablesForVo(final String fqan, String version);
+	Set<Executable> getExecutablesForVo(final String fqan, String version);
 
 	/**
 	 * Finds all queues that match the specified job properties.
