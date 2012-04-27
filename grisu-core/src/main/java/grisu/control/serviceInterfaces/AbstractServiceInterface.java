@@ -712,7 +712,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	}
 
 
-	public DtoStringList findMatchingSubmissionLocationsUsingMap(
+	public List<Queue> findMatchingSubmissionLocationsUsingMap(
 			final DtoJob jobProperties, String fqan,
 			boolean excludeResourcesWithLessCPUslotsFreeThanRequested) {
 
@@ -728,7 +728,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					jp.getValue());
 		}
 
-		Collection<Queue> resources = null;
+		List<Queue> resources = null;
 		if (excludeResourcesWithLessCPUslotsFreeThanRequested) {
 
 			resources = informationManager.findQueues(converterMap, fqan);
@@ -738,10 +738,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			resources = informationManager.findQueues(converterMap, fqan);
 		}
 
-		Collection<String> subLocs = Collections2.transform(resources,
-				Functions.toStringFunction());
-
-		return DtoStringList.fromStringColletion(subLocs);
+		return resources;
 
 	}
 

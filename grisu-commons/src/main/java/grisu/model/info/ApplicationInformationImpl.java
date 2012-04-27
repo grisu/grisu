@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
@@ -89,7 +88,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		return cachedVersionsForUserPerFqan.get(fqan);
 	}
 
-	public SortedSet<String> getAllSubmissionLocations(
+	public List<Queue> getAllSubmissionLocations(
 			Map<JobSubmissionProperty, String> additionalJobProperties,
 			String fqan) {
 
@@ -112,7 +111,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
 				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null,
-						null, false), fqan, false).asSortedSet();
+						null, false), fqan, false);
 	}
 
 	// public SortedSet<GridResource> getAllSubmissionLocationsAsGridResources(
@@ -382,7 +381,9 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		return result;
 	}
 
-	public SortedSet<String> getQueues(Map<JobSubmissionProperty, String> additionalJobProperties, String fqan) {
+	public List<Queue> getQueues(
+			Map<JobSubmissionProperty, String> additionalJobProperties,
+			String fqan) {
 
 
 		if (Thread.currentThread().isInterrupted()) {
@@ -405,7 +406,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
 				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null,
-						null, false), fqan, false).asSortedSet();
+						null, false), fqan, false);
 
 	}
 

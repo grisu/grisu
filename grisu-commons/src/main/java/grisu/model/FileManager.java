@@ -1107,7 +1107,9 @@ public class FileManager {
 			}
 		}
 
-		myLogger.debug("Remote file newer than local cache file, different size or not cached yet, downloading new copy.");
+		myLogger.debug(
+				"Remote file newer than local cache file, different size or not cached yet, downloading new copy (filesize: {}): {}",
+				size, url);
 		final DataSource source = null;
 		DataHandler handler = null;
 		try {

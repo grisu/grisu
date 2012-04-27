@@ -22,6 +22,7 @@ import grisu.model.info.dto.Package;
 import grisu.model.info.dto.Queue;
 import grisu.model.info.dto.Site;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.activation.DataHandler;
@@ -394,7 +395,7 @@ public interface ServiceInterface {
 	@GET
 	@Path("/info/queues/matching/properties")
 	@PermitAll
-	DtoStringList findMatchingSubmissionLocationsUsingMap(
+	List<Queue> findMatchingSubmissionLocationsUsingMap(
 			@QueryParam("jobProperties") DtoJob jobProperties,
 			@QueryParam("fqan") String fqan,
 			@DefaultValue("false") @QueryParam("exclude") boolean exclude);

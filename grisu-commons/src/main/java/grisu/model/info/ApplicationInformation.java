@@ -5,9 +5,9 @@ import grisu.model.info.dto.Executable;
 import grisu.model.info.dto.Package;
 import grisu.model.info.dto.Queue;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 
 /**
  * Interface which describes the stuff that needs to be known from an
@@ -46,7 +46,7 @@ public interface ApplicationInformation {
 	 *            the fqan to submit the job
 	 * @return a sorted list of the best resources to submit this job to.
 	 */
-	SortedSet<String> getAllSubmissionLocations(
+	List<Queue> getAllSubmissionLocations(
 			Map<JobSubmissionProperty, String> additionalJobProperties,
 			String fqan);
 
@@ -190,7 +190,7 @@ public interface ApplicationInformation {
 	 * @param fqan the group to use to submit the job
 	 * @return all queues that run the specified job
 	 */
-	public SortedSet<String> getQueues(
+	public List<Queue> getQueues(
 			Map<JobSubmissionProperty, String> additionalJobProperties,
 			String fqan);
 
