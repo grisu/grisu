@@ -139,7 +139,7 @@ public class RSLFactory {
 		}
 		result.add(new NameOpValue("count", NameOpValue.EQ, "" + pcount));
 		result.add(new NameOpValue("jobtype", NameOpValue.EQ, jobtype));
-		if (hcount >= 0) {
+		if (hcount > 0) {
 			result.add(new NameOpValue("hostCount", NameOpValue.EQ, "" + hcount));
 		}
 
