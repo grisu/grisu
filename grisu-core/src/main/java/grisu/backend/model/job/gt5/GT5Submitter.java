@@ -55,15 +55,15 @@ public class GT5Submitter extends JobSubmitter {
 		GramJob restartJob = new GramJob(null);
 		final GSSCredential cred = credential.getCredential();
 
-        // try to get the state from the notification listener cache
-        Integer jobStatus = l.getStatus(handle);
-        Integer error = l.getError(handle);
-        if (jobStatus != null &&
-              (jobStatus == GRAMConstants.STATUS_DONE ||
-               jobStatus == GRAMConstants.STATUS_FAILED)) {
-              return translateToGrisuStatus(jobStatus, error, error);			
-        }
-		
+		// try to get the state from the notification listener cache
+		Integer jobStatus = l.getStatus(handle);
+		Integer error = l.getError(handle);
+		if ((jobStatus != null) &&
+				((jobStatus == GRAMConstants.STATUS_DONE) ||
+						(jobStatus == GRAMConstants.STATUS_FAILED))) {
+			return translateToGrisuStatus(jobStatus, error, error);
+		}
+
 		try {
 			// lets try to see if gateway is working first...
 			Gram.ping(cred, contact);
@@ -103,6 +103,15 @@ public class GT5Submitter extends JobSubmitter {
 				restartJob.setCredentials(cred);
 				try {
 					restartJob.request(contact, false);
+				} catch (final WaitingForCommitException cex) {
+					try {
+						myLogger.debug("Signaling gram after restart request failed.");
+						restartJob.signal(GRAMConstants.SIGNAL_COMMIT_REQUEST);
+					} catch (Exception e) {
+						myLogger.error("Restart of job '{}' failed: {}",
+								handle, e.getLocalizedMessage());
+						return JobConstants.UNDEFINED;
+					}
 				} catch (final GramException ex1) {
 					if (ex1.getErrorCode() == 131) {
 						// job is still running but proxy expired
@@ -158,6 +167,7 @@ public class GT5Submitter extends JobSubmitter {
 	@Override
 	public int killJob(Job grisuJob, Credential cred) {
 
+		getJobStatus(grisuJob, cred);
 		final GramJob job = new GramJob(null);
 		try {
 			job.setID(grisuJob.getJobhandle());
