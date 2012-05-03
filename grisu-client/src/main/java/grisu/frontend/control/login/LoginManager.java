@@ -435,17 +435,21 @@ public class LoginManager {
 		} else {
 
 			LoginParams p = new LoginParams(backend, null, null);
+			p.setMyProxyMap(MYPROXY_SERVERS);
+			p.setAliasMap(SERVICEALIASES);
 			if (StringUtils.isNotBlank(myProxyHost)) {
 				p.setMyProxyServer(myProxyHost);
 				p.setMyProxyPort(Integer.toString(myProxyPort));
 			}
+
 			c = CredentialFactory
 					.createFromCommandline(p,
 							proxyLifetimeInHours);
 			if (StringUtils.isNotBlank(myProxyHost)) {
 				c.uploadMyProxy(myProxyHost, myProxyPort, false);
 			} else {
-				c.uploadMyProxy();
+				c.uploadMyProxy(p.getMyProxyServer(),
+						Integer.parseInt(p.getMyProxyPort()), false);
 			}
 			if (saveCredToDisk) {
 				c.saveCredential();
