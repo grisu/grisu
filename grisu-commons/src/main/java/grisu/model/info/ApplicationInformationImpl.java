@@ -404,9 +404,13 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 			}
 		}
 
-		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
-				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null,
-						null, false), fqan, false);
+
+		List<Queue> qs = getServiceInterface()
+				.findMatchingSubmissionLocationsUsingMap(
+						DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null,
+								null, false), fqan, false);
+
+		return qs;
 
 	}
 
