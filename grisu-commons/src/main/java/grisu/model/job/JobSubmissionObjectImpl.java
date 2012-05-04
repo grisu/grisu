@@ -1,6 +1,5 @@
 package grisu.model.job;
 
-import grisu.X;
 import grisu.control.JobnameHelpers;
 import grisu.control.exceptions.JobPropertiesException;
 import grisu.jcommons.constants.Constants;
@@ -496,7 +495,6 @@ public class JobSubmissionObjectImpl {
 		} else {
 			jobProperties.put(JobSubmissionProperty.EMAIL_ON_FINISH, "false");
 		}
-
 		if (force_single) {
 			jobProperties.put(JobSubmissionProperty.FORCE_SINGLE, "true");
 			jobProperties.put(JobSubmissionProperty.FORCE_MPI, "false");
@@ -669,14 +667,17 @@ public class JobSubmissionObjectImpl {
 		cpus = JsdlHelpers.getProcessorCount(jsdl);
 		hostcount = JsdlHelpers.getResourceCount(jsdl);
 		final String jobTypeString = JsdlHelpers.getArcsJobType(jsdl);
-
 		if (jobTypeString != null) {
 			if (jobTypeString.toLowerCase().equals(
-					JobSubmissionProperty.FORCE_SINGLE.toString())) {
+					JobSubmissionProperty
+					.getPrettyName(JobSubmissionProperty.FORCE_SINGLE
+							.toString()))) {
 				force_single = true;
 				force_mpi = false;
 			} else if (jobTypeString.toLowerCase().equals(
-					JobSubmissionProperty.FORCE_MPI.toString())) {
+					JobSubmissionProperty
+					.getPrettyName(JobSubmissionProperty.FORCE_MPI
+							.toString()))) {
 				force_single = false;
 				force_mpi = true;
 			} else {
