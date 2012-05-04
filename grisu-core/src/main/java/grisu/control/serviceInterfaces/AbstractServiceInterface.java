@@ -1420,16 +1420,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return value;
 	}
 
-	public DtoStringList getVersionsOfApplicationOnSubmissionLocation(
+	public List<Version> getVersionsOfApplicationOnSubmissionLocation(
 			final String application, final String submissionLocation) {
-		Collection<Version> v = informationManager
+		List<Version> v = informationManager
 				.getVersionsOfApplicationOnSubmissionLocation(application,
 						submissionLocation);
 
-		Collection<String> versions = Collections2.transform(v,
-				Functions.toStringFunction());
+		return v;
 
-		return DtoStringList.fromStringColletion(versions);
 	}
 
 

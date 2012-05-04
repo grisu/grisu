@@ -21,6 +21,7 @@ import grisu.model.info.dto.Application;
 import grisu.model.info.dto.Package;
 import grisu.model.info.dto.Queue;
 import grisu.model.info.dto.Site;
+import grisu.model.info.dto.Version;
 
 import java.util.List;
 import java.util.Map;
@@ -946,7 +947,7 @@ public interface ServiceInterface {
 	 */
 	@GET
 	@Path("/info/application/{application}/{queue}/versions")
-	DtoStringList getVersionsOfApplicationOnSubmissionLocation(
+	List<Version> getVersionsOfApplicationOnSubmissionLocation(
 			@PathParam("application") String application,
 			@PathParam("queue") String submissionLocation);
 

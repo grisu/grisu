@@ -9,6 +9,7 @@ import grisu.model.dto.DtoJob;
 import grisu.model.info.dto.Executable;
 import grisu.model.info.dto.Package;
 import grisu.model.info.dto.Queue;
+import grisu.model.info.dto.Version;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,14 +39,14 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 	private Queue[] cachedAllSubmissionLocations = null;
 
-	private final Map<String, Set<String>> cachedVersionsPerSubmissionLocations = new HashMap<String, Set<String>>();
+	private final Map<String, Set<Version>> cachedVersionsPerSubmissionLocations = new HashMap<String, Set<Version>>();
 	private final Map<String, Queue[]> cachedSubmissionLocationsPerVersion = new HashMap<String, Queue[]>();
 	// private Map<String, Set<String>> cachedVersionsForSubmissionLocation =
 	// new HashMap<String, Set<String>>();
 	private final Map<String, Set<Queue>> cachedSubmissionLocationsForUserPerFqan = new HashMap<String, Set<Queue>>();
 	private final Map<String, Set<Queue>> cachedSubmissionLocationsForUserPerVersionAndFqan = new HashMap<String, Set<Queue>>();
 
-	private final Map<String, Set<String>> cachedVersionsForUserPerFqan = new HashMap<String, Set<String>>();
+	private final Map<String, Set<Version>> cachedVersionsForUserPerFqan = new HashMap<String, Set<Version>>();
 
 	/**
 	 * Default constructor for this class.
@@ -69,17 +70,16 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
 	 * getAllAvailableVersionsForFqan(java.lang.String)
 	 */
-	public final Set<String> getAllAvailableVersionsForFqan(final String fqan) {
+	public final Set<Version> getAllAvailableVersionsForFqan(final String fqan) {
 
 		synchronized (fqan) {
 
 			if (cachedVersionsForUserPerFqan.get(fqan) == null) {
-				final Set<String> result = new TreeSet<String>();
+				final Set<Version> result = new TreeSet<Version>();
 				for (final Queue subLoc : getAvailableSubmissionLocationsForFqan(fqan)) {
-					final List<String> temp = serviceInterface
+					final List<Version> temp = serviceInterface
 							.getVersionsOfApplicationOnSubmissionLocation(
-									getApplicationName(), subLoc.toString())
-									.getStringList();
+									getApplicationName(), subLoc.toString());
 					result.addAll(temp);
 				}
 				cachedVersionsForUserPerFqan.put(fqan, result);
@@ -297,7 +297,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 	 * @see grisu.model.info.ApplicationInformation#getAvailableVersions
 	 * (java.lang.String)
 	 */
-	public final Set<String> getAvailableVersions(final String subLoc) {
+	public final Set<Version> getAvailableVersions(final String subLoc) {
 
 		final String KEY = subLoc;
 
@@ -305,15 +305,15 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 			if (cachedVersionsPerSubmissionLocations.get(KEY) == null) {
 				if (Constants.GENERIC_APPLICATION_NAME.equals(application)) {
-					final Set<String> temp = new HashSet<String>();
-					temp.add(Constants.NO_VERSION_INDICATOR_STRING);
+					final Set<Version> temp = new HashSet<Version>();
+					temp.add(Version.ANY_VERSION);
 					cachedVersionsPerSubmissionLocations.put(KEY, temp);
 				} else {
-					final List<String> temp = serviceInterface
+					final List<Version> temp = serviceInterface
 							.getVersionsOfApplicationOnSubmissionLocation(
-									application, subLoc).getStringList();
+									application, subLoc);
 					cachedVersionsPerSubmissionLocations.put(KEY,
-							new HashSet<String>(temp));
+							new HashSet<Version>(temp));
 				}
 			}
 		}

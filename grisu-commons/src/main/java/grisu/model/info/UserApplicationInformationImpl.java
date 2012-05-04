@@ -4,6 +4,7 @@ import grisu.control.ServiceInterface;
 import grisu.model.UserEnvironmentManager;
 import grisu.model.info.dto.Queue;
 import grisu.model.info.dto.Site;
+import grisu.model.info.dto.Version;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,7 +20,7 @@ implements UserApplicationInformation {
 
 	private Set<Queue> cachedSubmissionLocationsForUser = null;
 	private Set<Site> cachedAllSitesForUser = null;
-	private Set<String> cachedAllVersionsForUser = null;
+	private Set<Version> cachedAllVersionsForUser = null;
 	private UserEnvironmentManager userInfo = null;
 
 	public UserApplicationInformationImpl(
@@ -52,10 +53,10 @@ implements UserApplicationInformation {
 		return cachedSubmissionLocationsForUser;
 	}
 
-	public synchronized final Set<String> getAllAvailableVersionsForUser() {
+	public synchronized final Set<Version> getAllAvailableVersionsForUser() {
 
 		if (cachedAllVersionsForUser == null) {
-			cachedAllVersionsForUser = new TreeSet<String>();
+			cachedAllVersionsForUser = new TreeSet<Version>();
 			for (final String fqan : userInfo.getAllAvailableFqans()) {
 				cachedAllVersionsForUser
 				.addAll(getAllAvailableVersionsForFqan(fqan));

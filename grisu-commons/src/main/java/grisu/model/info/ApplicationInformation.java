@@ -4,6 +4,7 @@ import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.model.info.dto.Executable;
 import grisu.model.info.dto.Package;
 import grisu.model.info.dto.Queue;
+import grisu.model.info.dto.Version;
 
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,7 @@ public interface ApplicationInformation {
 	 *            the fqan
 	 * @return all available versions
 	 */
-	Set<String> getAllAvailableVersionsForFqan(String fqan);
+	Set<Version> getAllAvailableVersionsForFqan(String fqan);
 
 	/**
 	 * Calculates all submissionlocations for this kind of job.
@@ -128,7 +129,7 @@ public interface ApplicationInformation {
 	 *            the submissionLocation
 	 * @return a set of all available versions
 	 */
-	Set<String> getAvailableVersions(String subLoc);
+	Set<Version> getAvailableVersions(String subLoc);
 
 	/**
 	 * The available executables for this application on this
