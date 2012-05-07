@@ -15,6 +15,7 @@ import java.util.UUID;
 import org.apache.commons.vfs.AllFileSelector;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemException;
+import org.apache.commons.vfs.FileType;
 import org.globus.ftp.MarkerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -291,7 +292,8 @@ RemoteFileTransferObject {
 			for (FileObject s : sourceFiles) {
 				String name = s.getName().getBaseName();
 
-				if (name.equals(source.getName().getBaseName())) {
+				if (!s.getType().equals(FileType.FILE)
+						|| name.equals(source.getName().getBaseName())) {
 					// means that is the source folder itself
 					continue;
 				}
@@ -302,7 +304,6 @@ RemoteFileTransferObject {
 					if (name.equals(tname)) {
 						// compare sizes
 						myLogger.debug("Found matching filename.");
-						matched = true;
 						long ssize = s.getContent().getSize();
 						long tsize = t.getContent().getSize();
 
@@ -316,9 +317,9 @@ RemoteFileTransferObject {
 							matched = false;
 						} else {
 							myLogger.debug("Filesizes match for file: {}", name);
+							matched = true;
 							break;
 						}
-
 					}
 				}
 				if (!matched) {
@@ -329,6 +330,7 @@ RemoteFileTransferObject {
 			}
 			return true;
 		} catch (Exception e) {
+			myLogger.debug("Verifying of filetransfer failed.");
 			return false;
 		}
 
