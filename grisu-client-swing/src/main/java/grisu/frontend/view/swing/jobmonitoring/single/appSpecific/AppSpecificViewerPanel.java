@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AppSpecificViewerPanel extends JPanel implements
-		JobDetailPanel, PropertyChangeListener {
+JobDetailPanel, PropertyChangeListener {
 
 	class UpdateProgressTask extends TimerTask {
 
@@ -41,8 +41,9 @@ public abstract class AppSpecificViewerPanel extends JPanel implements
 	public static AppSpecificViewerPanel create(ServiceInterface si,
 			JobObject job) {
 
+		String appName = null;
 		try {
-			final String appName = job.getJobProperty(
+			appName = job.getJobProperty(
 					Constants.APPLICATIONNAME_KEY, false);
 
 			final String className = "grisu.frontend.view.swing.jobmonitoring.single.appSpecific."
@@ -57,7 +58,8 @@ public abstract class AppSpecificViewerPanel extends JPanel implements
 			return asvp;
 
 		} catch (final Exception e) {
-			myLogger.info(e.getLocalizedMessage(), e);
+			myLogger.info("No app specific viewer module found for: {}",
+					appName);
 			return null;
 		}
 
