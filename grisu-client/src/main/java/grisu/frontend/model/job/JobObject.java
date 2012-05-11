@@ -45,17 +45,18 @@ import javax.persistence.Transient;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
+import org.python.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 /**
  * A model class that hides all the complexity of creating and submitting a job.
- * 
+ *
  * It extends the {@link JobSubmissionObjectImpl} class which is used to create
  * the job using the basic {@link JobSubmissionProperty}s. It adds methods to
  * create the job on the backend, submit it and also to monitor/control it.
- * 
+ *
  * @author Markus Binsteiner
  */
 public class JobObject extends JobSubmissionObjectImpl implements
@@ -77,8 +78,8 @@ Comparable<JobObject> {
 	}
 
 	private final ServiceInterface serviceInterface;
-	private final FileManager fm;
 
+	private final FileManager fm;
 	private int status = JobConstants.UNDEFINED;
 
 	private Map<String, String> allJobProperties;
@@ -87,7 +88,7 @@ Comparable<JobObject> {
 
 	private boolean isFinished = false;
 
-	private Thread waitThread;
+	private final Map<Integer, Thread> waitThreads = Maps.newConcurrentMap();
 
 	private Map<Date, String> logMessages;
 
@@ -105,9 +106,11 @@ Comparable<JobObject> {
 
 	private Date lastStatusUpdate = new Date();
 
+
+
 	/**
 	 * Use this constructor if you want to create a new job.
-	 * 
+	 *
 	 * @param si
 	 *            the serviceInterface
 	 */
@@ -124,7 +127,7 @@ Comparable<JobObject> {
 	 * example if you want to use an already submitted job by calling the
 	 * {@link ServiceInterface#getJsdlDocument(String)} and using its return
 	 * value in this constructor.
-	 * 
+	 *
 	 * @param si
 	 *            the serviceInterface
 	 * @param jsdl
@@ -140,9 +143,9 @@ Comparable<JobObject> {
 	/**
 	 * This can be also used to create a JobObject when the job is already
 	 * created on the backend.
-	 * 
+	 *
 	 * This one doesn't update the job status on the backend.
-	 * 
+	 *
 	 * @param si
 	 *            the serviceinterface
 	 * @param job
@@ -185,7 +188,7 @@ Comparable<JobObject> {
 	 * values you provide in the jobProperties map. Have a look at the
 	 * {@link JobSubmissionProperty} enum to find out which properties are
 	 * supported and what the names of the keys are for them.
-	 * 
+	 *
 	 * @param si
 	 *            the serviceInterface
 	 * @param jobProperties
@@ -204,7 +207,7 @@ Comparable<JobObject> {
 	 * Use this constructor if the job is already created on the backend. It'll
 	 * fetch all the basic jobproperties from the backend and it'll also get the
 	 * current status of the job.
-	 * 
+	 *
 	 * @param si
 	 *            the serviceInterface
 	 * @param jobname
@@ -224,7 +227,7 @@ Comparable<JobObject> {
 	 * Use this constructor if the job is already created on the backend. It'll
 	 * fetch all the basic jobproperties from the backend and it'll also get the
 	 * current status of the job.
-	 * 
+	 *
 	 * @param si
 	 *            the serviceInterface
 	 * @param jobname
@@ -264,7 +267,7 @@ Comparable<JobObject> {
 
 	/**
 	 * Archives the job in the background, using the default archive location.
-	 * 
+	 *
 	 * @return the url of the target archived jobdirectory
 	 * @throws JobPropertiesException
 	 *             if the job can't be archived
@@ -279,7 +282,7 @@ Comparable<JobObject> {
 
 	/**
 	 * Archives the job in the background, using a specified target location
-	 * 
+	 *
 	 * @param target
 	 *            the target url to archive the job or null to use the default
 	 *            target
@@ -297,7 +300,7 @@ Comparable<JobObject> {
 
 	/**
 	 * Archives the job.
-	 * 
+	 *
 	 * @param target
 	 *            the url (of the parent dir) to archive the job to or null to
 	 *            use the (previously set) default archive location
@@ -385,17 +388,17 @@ Comparable<JobObject> {
 	 * Creates the job on the grisu backend using the "force-name" method (which
 	 * means the backend will not change the jobname you specified -- if there
 	 * is a job with that jobname already the backend will throw an exception).
-	 * 
+	 *
 	 * Also, this method uses the current fqan that the
 	 * {@link UserEnvironmentManager} that is used for this client holds.
-	 * 
+	 *
 	 * Be aware, that once that is done, you can't change any of the basic job
 	 * parameters anymore. The backend calculates all the (possibly) missing job
 	 * parameters and sets values like the final submissionlocation and such.
 	 * After you created a job on the backend, you can query these calculated
 	 * values using the {@link ServiceInterface#getJobProperty(String, String)}
 	 * method.
-	 * 
+	 *
 	 * @return the final jobname (equals the one you specified when creating the
 	 *         JobObject object).
 	 * @throws JobPropertiesException
@@ -415,14 +418,14 @@ Comparable<JobObject> {
 	 * Creates the job on the grisu backend using the "uniqueJobname" method
 	 * (which means the backend will append a number to the jobname is a job
 	 * with the same name already exists).
-	 * 
+	 *
 	 * Be aware, that once that is done, you can't change any of the basic job
 	 * parameters anymore. The backend calculates all the (possibly) missing job
 	 * parameters and sets values like the final submissionlocation and such.
 	 * After you created a job on the backend, you can query these calculated
 	 * values using the {@link ServiceInterface#getJobProperty(String, String)}
 	 * method.
-	 * 
+	 *
 	 * @param fqan
 	 *            the VO to use to submit this job
 	 * @return the final jobname (equals the one you specified when creating the
@@ -442,10 +445,10 @@ Comparable<JobObject> {
 	 * you specified. Have a look at the static Strings in
 	 * {@link ServiceInterface} for a list of supported jobname creation
 	 * methods.
-	 * 
+	 *
 	 * Other than the jobname creation, this does the same as
 	 * {@link #createJob(String)}.
-	 * 
+	 *
 	 * @param fqan
 	 *            the VO to use to submit this job
 	 * @param jobnameCreationMethod
@@ -514,8 +517,10 @@ Comparable<JobObject> {
 		return this.getJobname();
 	}
 
-	private synchronized void createWaitThread(final int checkIntervallInSeconds) {
+	private synchronized void createWaitThread(final int state,
+			final int checkIntervallInSeconds) {
 
+		Thread waitThread = waitThreads.get(state);
 		try {
 			// just to make sure we don't create 2 or more threads. Should never
 			// happen.
@@ -531,7 +536,7 @@ Comparable<JobObject> {
 			public void run() {
 
 				int oldStatus = getStatus(false);
-				while (!isFinished()) {
+				while (state > getStatus(true)) {
 
 					if (isInterrupted()) {
 						return;
@@ -560,13 +565,14 @@ Comparable<JobObject> {
 				}
 			}
 		};
+		waitThreads.put(state, waitThread);
 
 	}
 
 	/**
 	 * Downloads the specified file (relative path to the jobdirectory) and puts
 	 * it into the local cache.
-	 * 
+	 *
 	 * @param relativePathToJobDirectory
 	 *            the path to the file to download
 	 * @return the file handle to the file in the local cache dir
@@ -614,13 +620,13 @@ Comparable<JobObject> {
 
 	/**
 	 * Returns a map of all known job properties.
-	 * 
+	 *
 	 * It only makes sense to call this method if the job was already created on
 	 * the backend using the {@link #createJob(String)} or
 	 * {@link #createJob(String, String)} method.
-	 * 
+	 *
 	 * This method doesn't refresh job properties forcefully.
-	 * 
+	 *
 	 * @return the job properties
 	 */
 	public final Map<String, String> getAllJobProperties() {
@@ -630,11 +636,11 @@ Comparable<JobObject> {
 
 	/**
 	 * Returns a map of all known job properties.
-	 * 
+	 *
 	 * It only makes sense to call this method if the job was already created on
 	 * the backend using the {@link #createJob(String)} or
 	 * {@link #createJob(String, String)} method.
-	 * 
+	 *
 	 * @param forceRefresh
 	 *            whether to forcefully refresh the job properties
 	 * @return the job properties
@@ -678,9 +684,9 @@ Comparable<JobObject> {
 
 	/**
 	 * Returns the current content of the file for this job as a string.
-	 * 
+	 *
 	 * Internally the file is downloaded to the local grisu cache and read.
-	 * 
+	 *
 	 * @return the current content of the stdout file for this job
 	 */
 	public final String getFileContent(String relativePathToWorkingDir) {
@@ -700,7 +706,7 @@ Comparable<JobObject> {
 
 	/**
 	 * Returns the filesize of the specified file
-	 * 
+	 *
 	 * @param relatevePathToJobDir
 	 *            the path to the file relative to the job directory.
 	 * @return the filesize in bytes
@@ -720,10 +726,10 @@ Comparable<JobObject> {
 
 	/**
 	 * Returns the absolute url to the job directory.
-	 * 
+	 *
 	 * It only makes sense to call this method of the job was already created on
 	 * the backend.
-	 * 
+	 *
 	 * @return the url to the job (working-) directory
 	 */
 	public final String getJobDirectoryUrl() {
@@ -745,10 +751,10 @@ Comparable<JobObject> {
 
 	/**
 	 * Returns the specified job property without a refresh.
-	 * 
+	 *
 	 * @param key
 	 *            the key
-	 * 
+	 *
 	 * @return the property
 	 */
 	public final String getJobProperty(String key) {
@@ -758,12 +764,12 @@ Comparable<JobObject> {
 
 	/**
 	 * Returns the specified job property.
-	 * 
+	 *
 	 * @param key
 	 *            the key
 	 * @param forceRefresh
 	 *            whether to refresh the job property forcefully or not
-	 * 
+	 *
 	 * @return the property
 	 */
 	public final String getJobProperty(String key, boolean forceRefresh) {
@@ -773,7 +779,7 @@ Comparable<JobObject> {
 
 	/**
 	 * Returns the job log without a refresh.
-	 * 
+	 *
 	 * @return the job log
 	 */
 	public synchronized Map<Date, String> getLogMessages() {
@@ -783,7 +789,7 @@ Comparable<JobObject> {
 
 	/**
 	 * Returns the job log
-	 * 
+	 *
 	 * @param forceRefresh
 	 *            whether to forcefully refresh the log messages
 	 * @return the job log
@@ -808,9 +814,9 @@ Comparable<JobObject> {
 
 	/**
 	 * Returns the current status of the job.
-	 * 
+	 *
 	 * Have a look at the {@link JobConstants} class for possible values.
-	 * 
+	 *
 	 * @param forceRefresh
 	 *            whether to use the cached status (false) or force a status
 	 *            refresh (true)
@@ -870,7 +876,7 @@ Comparable<JobObject> {
 	/**
 	 * Same as {@link #getStatus(boolean)}. Just auto-translates the status to a
 	 * meaningful string.
-	 * 
+	 *
 	 * @param forceRefresh
 	 *            whether to use the cached status (false) or force a status
 	 *            refresh (true)
@@ -882,10 +888,10 @@ Comparable<JobObject> {
 
 	/**
 	 * Returns the current content of the stderr file for this job as a string.
-	 * 
+	 *
 	 * Internally the stderr file is downloaded to the local grisu cache and
 	 * read.
-	 * 
+	 *
 	 * @return the current content of the stderr file for this job
 	 */
 	public final String getStdErrContent() {
@@ -905,10 +911,10 @@ Comparable<JobObject> {
 	 * This method downloads a current version of the stderr file for this job
 	 * into the local grisu cache and returns the pointer to a locally cached
 	 * version of it.
-	 * 
+	 *
 	 * It only makes sense to call this method of the job was already created on
 	 * the backend.
-	 * 
+	 *
 	 * @return the locally cached stderr file
 	 */
 	public final File getStdErrFile() {
@@ -927,7 +933,7 @@ Comparable<JobObject> {
 
 	/**
 	 * Returns the size of the stderr file.
-	 * 
+	 *
 	 * @return the size in bytes
 	 */
 	public long getStdErrFileSize() {
@@ -937,10 +943,10 @@ Comparable<JobObject> {
 
 	/**
 	 * Returns the current content of the stdout file for this job as a string.
-	 * 
+	 *
 	 * Internally the stdout file is downloaded to the local grisu cache and
 	 * read.
-	 * 
+	 *
 	 * @return the current content of the stdout file for this job
 	 */
 	public final String getStdOutContent() {
@@ -960,10 +966,10 @@ Comparable<JobObject> {
 	 * This method downloads a current version of the stdout file for this job
 	 * into the local grisu cache and returns the pointer to a locally cached
 	 * version of it.
-	 * 
+	 *
 	 * It only makes sense to call this method of the job was already created on
 	 * the backend.
-	 * 
+	 *
 	 * @return the locally cached stdout file
 	 */
 	public final File getStdOutFile() {
@@ -982,7 +988,7 @@ Comparable<JobObject> {
 
 	/**
 	 * Returns the size of the stdout file.
-	 * 
+	 *
 	 * @return the size in bytes
 	 */
 	public long getStdOutFileSize() {
@@ -1009,10 +1015,10 @@ Comparable<JobObject> {
 
 	/**
 	 * Returns whether a job finished successful (Exit code: 0) or not.
-	 * 
+	 *
 	 * @param forceRefresh
 	 *            whether to refresh the status of the job on the backend or not
-	 * 
+	 *
 	 * @return true if the job is finished but has got another exit code than 0,
 	 *         false otherwise
 	 */
@@ -1034,7 +1040,7 @@ Comparable<JobObject> {
 
 	/**
 	 * Tells you whether the job is finished (either sucessfully or not).
-	 * 
+	 *
 	 * @return finished: true / still running/not started: false
 	 */
 	public final boolean isFinished() {
@@ -1043,10 +1049,10 @@ Comparable<JobObject> {
 
 	/**
 	 * Tells you whether the job is finished (either sucessfully or not).
-	 * 
+	 *
 	 * @param refresh
 	 *            whether to refresh the job on the backend or not
-	 * 
+	 *
 	 * @return finished: true / still running/not started: false
 	 */
 	public final boolean isFinished(boolean refresh) {
@@ -1074,10 +1080,10 @@ Comparable<JobObject> {
 
 	/**
 	 * Returns whether a job finished successful (Exit code: 0) or not.
-	 * 
+	 *
 	 * @param forceRefresh
 	 *            whether to refresh the status of the job on the backend or not
-	 * 
+	 *
 	 * @return true if the job is finished and has got an exit code of 0, false
 	 *         otherwise
 	 */
@@ -1100,7 +1106,7 @@ Comparable<JobObject> {
 	 * Tells the backend to kill this job. If you specify true for the clean
 	 * parameter, the job gets deleted from the backend database and the
 	 * jobdirectory on the endpoint resource gets deleted as well.
-	 * 
+	 *
 	 * @param clean
 	 *            whether to clean the job
 	 * @throws JobException
@@ -1171,11 +1177,11 @@ Comparable<JobObject> {
 
 	/**
 	 * Lists all the files that are living under this jobs jobdirectory.
-	 * 
+	 *
 	 * Specify a recursion level of 1 if you only are interested in the
 	 * jobdirectory itself. Or the appropriate level if you want to look deeper.
 	 * Use a value <= -1 to find all files on all levels.
-	 * 
+	 *
 	 * @param recursionLevel
 	 *            the recursion level
 	 * @return the list of files
@@ -1197,9 +1203,9 @@ Comparable<JobObject> {
 
 	/**
 	 * Restarts the job.
-	 * 
+	 *
 	 * Don't use that at the moment, it's not properly implemented yet.
-	 * 
+	 *
 	 * @throws JobSubmissionException
 	 * @throws JobPropertiesException
 	 */
@@ -1223,9 +1229,9 @@ Comparable<JobObject> {
 
 	/**
 	 * Adds an (optional) description to the job.
-	 * 
+	 *
 	 * Be aware, this will only work if the job was not yet submitted.
-	 * 
+	 *
 	 * @param desc
 	 *            the description of the job (not the jdsl, mind)
 	 */
@@ -1251,7 +1257,7 @@ Comparable<JobObject> {
 	/**
 	 * Convenience method to create a unique jobname by appending a number to
 	 * the jobname (if necessary).
-	 * 
+	 *
 	 * @param jobname
 	 *            the base jobname
 	 */
@@ -1270,10 +1276,10 @@ Comparable<JobObject> {
 
 	/**
 	 * Stages in input files.
-	 * 
+	 *
 	 * Normally you don't have to call this method manually, it gets called just
 	 * before job submission automatically.
-	 * 
+	 *
 	 * @throws FileTransactionException
 	 *             if a file can't be staged in
 	 * @throws InterruptedException
@@ -1345,19 +1351,19 @@ Comparable<JobObject> {
 
 	}
 
-	/**
-	 * Interrupts the {@link #waitForJobToFinish(int)} method.
-	 */
-	public final void stopWaitingForJobToFinish() {
-
-		if ((waitThread == null) || !waitThread.isAlive()) {
-			return;
-		}
-
-		waitThread.interrupt();
-		myLogger.debug("Wait thread interrupted.");
-
-	}
+	// /**
+	// * Interrupts the {@link #waitForJobToFinish(int)} method.
+	// */
+	// public final void stopWaitingForJobToFinish() {
+	//
+	// if ((waitThread == null) || !waitThread.isAlive()) {
+	// return;
+	// }
+	//
+	// waitThread.interrupt();
+	// myLogger.debug("Wait thread interrupted.");
+	//
+	// }
 
 	/**
 	 * After you created the job on the backend using the
@@ -1365,9 +1371,9 @@ Comparable<JobObject> {
 	 * you can tell the backend to actually submit the job to the endpoint
 	 * resource. Internally, this method also does possible stage-ins from your
 	 * local machine.
-	 * 
+	 *
 	 * @return the handle to the job submission task on the backend
-	 * 
+	 *
 	 * @throws JobSubmissionException
 	 *             if the job could not be submitted
 	 * @throws InterruptedException
@@ -1383,11 +1389,11 @@ Comparable<JobObject> {
 	 * you can tell the backend to actually submit the job to the endpoint
 	 * resource. Internally, this method also does possible stage-ins from your
 	 * local machine.
-	 * 
+	 *
 	 * @param waitForSubmissionToFinish
 	 *            whether to wait for submission to finish or not
 	 * @return the handle to the job submission task on the backend
-	 * 
+	 *
 	 * @throws JobSubmissionException
 	 *             if the job could not be submitted
 	 * @throws InterruptedException
@@ -1403,7 +1409,7 @@ Comparable<JobObject> {
 	 * you can tell the backend to actually submit the job to the endpoint
 	 * resource. Internally, this method also does possible stage-ins from your
 	 * local machine.
-	 * 
+	 *
 	 * @param additionalJobProperties
 	 *            properties you want to store with the job (only get stored if
 	 *            submission was successful)
@@ -1423,7 +1429,7 @@ Comparable<JobObject> {
 	 * you can tell the backend to actually submit the job to the endpoint
 	 * resource. Internally, this method also does possible stage-ins from your
 	 * local machine.
-	 * 
+	 *
 	 * @param additionalJobProperties
 	 *            properties you want to store with the job (only get stored if
 	 *            submission was successful)
@@ -1562,11 +1568,11 @@ Comparable<JobObject> {
 	/**
 	 * You can use this method to wait for the job to finish (either
 	 * successfully or not) on the endpoint resource.
-	 * 
+	 *
 	 * Use the int parameter to specify the sleep interval inbetween status
 	 * checks. Don't use a low number here please (except for testing) because
 	 * it could possibly cause a high load for the backend.
-	 * 
+	 *
 	 * @param checkIntervallInSeconds
 	 *            the interval inbetween status checks
 	 * @return whether the job is actually finished (true) or the this
@@ -1574,21 +1580,30 @@ Comparable<JobObject> {
 	 */
 	public final boolean waitForJobToFinish(final int checkIntervallInSeconds) {
 
-		addJobLogMessage("Waiting for job to finish...");
+		waitForJobToReachState(JobConstants.FINISHED_EITHER_WAY,
+				checkIntervallInSeconds);
+
+		return isFinished();
+	}
+	public int waitForJobToReachState(int state, int checkIntervalInSeconds) {
+		addJobLogMessage("Waiting for job to reach state "+JobConstants.translateStatus(state) +"...");
+
+		Thread waitThread = waitThreads.get(state);
 
 		if (waitThread != null) {
 			if (waitThread.isAlive()) {
 				try {
 					waitThread.join();
-					return isFinished();
+					return getStatus(true);
 				} catch (final InterruptedException e) {
 					myLogger.debug("Job status wait thread interrupted.");
-					return isFinished();
+					return getStatus(true);
 				}
 			}
 		}
 
-		createWaitThread(checkIntervallInSeconds);
+		createWaitThread(state, checkIntervalInSeconds);
+		waitThread = waitThreads.get(state);
 
 		try {
 			waitThread.start();
@@ -1597,10 +1612,14 @@ Comparable<JobObject> {
 		} catch (final InterruptedException e) {
 			myLogger.debug("Job status wait thread interrupted.");
 			waitThread = null;
-			return isFinished();
+			return getStatus(true);
 		}
 
-		return isFinished();
+		return getStatus(true);
+	}
+
+	public void waitForJobToReachState(String state, int checkIntervalSeconds) {
+		waitForJobToReachState(JobConstants.translateStatusBack(state), checkIntervalSeconds);
 	}
 
 }

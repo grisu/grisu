@@ -1016,7 +1016,7 @@ public class UserJobManager {
 				try {
 
 					myLogger.debug("Killing job " + job.getJobname()
-							+ "through jobsubmitter...");
+							+ " through jobsubmitter...");
 					status.addLogMessage("Killing job through jobmanager...");
 					kill(job);
 					status.addElement("Job killed through jobmanager...");
