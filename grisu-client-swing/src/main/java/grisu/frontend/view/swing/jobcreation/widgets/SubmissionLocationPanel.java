@@ -3,10 +3,10 @@ package grisu.frontend.view.swing.jobcreation.widgets;
 import grisu.control.ServiceInterface;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
-import grisu.jcommons.model.info.Queue;
 import grisu.model.FqanEvent;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.info.UserApplicationInformation;
+import grisu.model.info.dto.Queue;
 
 import java.util.HashMap;
 import java.util.Map;

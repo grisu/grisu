@@ -316,6 +316,17 @@
 			<artifactId>gridftp-tests</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>-->
+		<dependency>
+			<groupId>nz.nesi</groupId>
+			<artifactId>grin</artifactId>
+			<version>0.1-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>orika-core</artifactId>
+					<groupId>ma.glasnost.orika</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	</dependencies>
 
 

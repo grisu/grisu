@@ -1,7 +1,7 @@
 package grisu.model.utils;
 
 import grisu.X;
-import grisu.jcommons.model.info.Package;
+import grisu.model.info.dto.Package;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;

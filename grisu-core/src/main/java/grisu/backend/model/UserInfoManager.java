@@ -1,8 +1,8 @@
 package grisu.backend.model;
 
-import grisu.jcommons.model.info.Directory;
-import grisu.jcommons.model.info.FileSystem;
 import grisu.model.MountPoint;
+import grisu.model.info.dto.Directory;
+import grisu.model.info.dto.FileSystem;
 
 import java.util.Map;
 import java.util.Set;

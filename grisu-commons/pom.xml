@@ -27,6 +27,19 @@
 	<dependencies>
 
 		<dependency>
+			<groupId>ma.glasnost.orika</groupId>
+			<artifactId>orika-core</artifactId>
+			<version>1.1.2</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>slf4j-simple</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+
+		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
 			<version>1.1.1</version>
@@ -52,7 +65,7 @@
 		<!-- </dependency> -->
 
 
-		<!-- <dependency> <groupId>xfire</groupId> <artifactId>xfire-jsr181-api</artifactId> 
+		<!-- <dependency> <groupId>xfire</groupId> <artifactId>xfire-jsr181-api</artifactId>
 			<version>1.0-M1</version> </dependency> -->
 
 		<dependency>
@@ -148,8 +161,8 @@
 			<type>pom</type>
 		</dependency>
 		<!-- enunciate dependencies for annotations -->
-		<!-- <dependency> <groupId>org.codehaus.enunciate</groupId> <artifactId>enunciate-core-annotations</artifactId> 
-			<version>${enunciate.version}</version> <type>jar</type> <scope>compile</scope> 
+		<!-- <dependency> <groupId>org.codehaus.enunciate</groupId> <artifactId>enunciate-core-annotations</artifactId>
+			<version>${enunciate.version}</version> <type>jar</type> <scope>compile</scope>
 			</dependency> -->
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
@@ -183,11 +196,6 @@
 			<groupId>grith</groupId>
 			<artifactId>jgrith</artifactId>
 			<version>0.7-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>nz.nesi</groupId>
-			<artifactId>grin</artifactId>
-			<version>0.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>

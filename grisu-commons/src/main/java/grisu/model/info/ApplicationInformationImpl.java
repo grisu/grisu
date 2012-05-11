@@ -25,7 +25,7 @@ import org.python.google.common.collect.Sets;
 
 /**
  * Default implementation for {@link ApplicationInformation}.
- * 
+ *
  * @author Markus Binsteiner
  */
 public class ApplicationInformationImpl implements ApplicationInformation {
@@ -50,7 +50,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 	/**
 	 * Default constructor for this class.
-	 * 
+	 *
 	 * @param serviceInterface
 	 *            the serviceinterface
 	 * @param app
@@ -66,7 +66,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
 	 * getAllAvailableVersionsForFqan(java.lang.String)
 	 */
@@ -88,31 +88,32 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		return cachedVersionsForUserPerFqan.get(fqan);
 	}
 
-	public List<Queue> getAllSubmissionLocations(
-			Map<JobSubmissionProperty, String> additionalJobProperties,
-			String fqan) {
-
-		if (Thread.currentThread().isInterrupted()) {
-			return null;
-		}
-
-		final Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
-		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
-				getApplicationName());
-
-		basicJobProperties.putAll(additionalJobProperties);
-
-		final Map<String, String> converterMap = new HashMap<String, String>();
-		for (final JobSubmissionProperty key : basicJobProperties.keySet()) {
-			if (StringUtils.isNotBlank(basicJobProperties.get(key))) {
-				converterMap.put(key.toString(), basicJobProperties.get(key));
-			}
-		}
-
-		return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
-				DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null,
-						null, false), fqan, false);
-	}
+	// public List<Queue> getAllSubmissionLocations(
+	// Map<JobSubmissionProperty, String> additionalJobProperties,
+	// String fqan) {
+	//
+	// if (Thread.currentThread().isInterrupted()) {
+	// return null;
+	// }
+	//
+	// final Map<JobSubmissionProperty, String> basicJobProperties = new
+	// HashMap<JobSubmissionProperty, String>();
+	// basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
+	// getApplicationName());
+	//
+	// basicJobProperties.putAll(additionalJobProperties);
+	//
+	// final Map<String, String> converterMap = new HashMap<String, String>();
+	// for (final JobSubmissionProperty key : basicJobProperties.keySet()) {
+	// if (StringUtils.isNotBlank(basicJobProperties.get(key))) {
+	// converterMap.put(key.toString(), basicJobProperties.get(key));
+	// }
+	// }
+	//
+	// return getServiceInterface().findMatchingSubmissionLocationsUsingMap(
+	// DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null,
+	// null, false), fqan, false);
+	// }
 
 	// public SortedSet<GridResource> getAllSubmissionLocationsAsGridResources(
 	// Map<JobSubmissionProperty, String> additionalJobProperties,
@@ -144,7 +145,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.model.info.ApplicationInformation#getApplicationDetails
 	 * (java.lang.String, java.lang.String)
 	 */
@@ -172,7 +173,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.model.info.ApplicationInformation#getApplicationName()
 	 */
 	public final String getApplicationName() {
@@ -181,7 +182,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
 	 * getAvailableAllSubmissionLocations()
 	 */
@@ -208,7 +209,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
 	 * getAvailableSubmissionLocationsForFqan(java.lang.String)
 	 */
@@ -234,7 +235,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @seeorg.vpac.grisu.model.info.ApplicationInformation#
 	 * getAvailableSubmissionLocationsForVersion(java.lang.String)
 	 */
@@ -293,7 +294,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.model.info.ApplicationInformation#getAvailableVersions
 	 * (java.lang.String)
 	 */
@@ -347,7 +348,7 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.model.info.ApplicationInformation#getExecutables(java.
 	 * lang.String, java.lang.String)
 	 */

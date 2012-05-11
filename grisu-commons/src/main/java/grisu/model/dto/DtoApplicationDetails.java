@@ -1,7 +1,7 @@
 package grisu.model.dto;
 
 import grisu.jcommons.constants.Constants;
-import grisu.jcommons.model.info.Package;
+import grisu.model.info.dto.Package;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,6 +30,7 @@ public class DtoApplicationDetails {
 	public static DtoApplicationDetails createDetails(Package pkg) {
 
 		final DtoApplicationDetails result = new DtoApplicationDetails();
+
 		result.setApplicationName(pkg.getApplication().getName());
 
 		final List<DtoApplicationDetail> list = new LinkedList<DtoApplicationDetail>();

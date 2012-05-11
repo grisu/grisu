@@ -30,26 +30,26 @@ public interface ApplicationInformation {
 	 */
 	Set<Version> getAllAvailableVersionsForFqan(String fqan);
 
-	/**
-	 * Calculates all submissionlocations for this kind of job.
-	 * 
-	 * Basically, this returns the same info as
-	 * {@link #getAllAvailableVersionsForFqan(String)}, but it returns fully
-	 * populated GridResources as a SortedList. It also takes into account
-	 * jobproperties. As a result, it might take a bit longer to get a result
-	 * from this method.
-	 * 
-	 * If the current thread is interrupted this will return null
-	 * 
-	 * @param additionalJobProperties
-	 *            the jobProperties
-	 * @param fqan
-	 *            the fqan to submit the job
-	 * @return a sorted list of the best resources to submit this job to.
-	 */
-	List<Queue> getAllSubmissionLocations(
-			Map<JobSubmissionProperty, String> additionalJobProperties,
-			String fqan);
+	// /**
+	// * Calculates all submissionlocations for this kind of job.
+	// *
+	// * Basically, this returns the same info as
+	// * {@link #getAllAvailableVersionsForFqan(String)}, but it returns fully
+	// * populated GridResources as a SortedList. It also takes into account
+	// * jobproperties. As a result, it might take a bit longer to get a result
+	// * from this method.
+	// *
+	// * If the current thread is interrupted this will return null
+	// *
+	// * @param additionalJobProperties
+	// * the jobProperties
+	// * @param fqan
+	// * the fqan to submit the job
+	// * @return a sorted list of the best resources to submit this job to.
+	// */
+	// List<Queue> getAllSubmissionLocations(
+	// Map<JobSubmissionProperty, String> additionalJobProperties,
+	// String fqan);
 
 	/**
 	 * Retrieves a map of all available details (executables, modules, ...)
@@ -187,8 +187,10 @@ public interface ApplicationInformation {
 	/**
 	 * Finds all queues that match the specified job properties.
 	 * 
-	 * @param additionalJobProperties job properties like cpus, memory,...
-	 * @param fqan the group to use to submit the job
+	 * @param additionalJobProperties
+	 *            job properties like cpus, memory,...
+	 * @param fqan
+	 *            the group to use to submit the job
 	 * @return all queues that run the specified job
 	 */
 	public List<Queue> getQueues(
