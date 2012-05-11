@@ -512,7 +512,7 @@ public class UserJobManager {
 			myLogger.error("Somehow the job was not created although it certainly should have. Must be a bug..");
 			throw new RuntimeException("Job was not created. Internal error.");
 		} catch (final Exception e) {
-			e.printStackTrace();
+			// e.printStackTrace();
 			myLogger.error("Error when processing job description: "
 					+ e.getLocalizedMessage());
 			try {
