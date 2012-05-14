@@ -20,7 +20,7 @@ import grisu.control.exceptions.NoValidCredentialException;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
-import grisu.jcommons.interfaces.GrinformationManager;
+import grisu.jcommons.interfaces.GrinformationManagerDozer;
 import grisu.jcommons.interfaces.InformationManager;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
@@ -101,7 +101,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	static Logger myLogger = null;
 	public static CacheManager cache;
 
-	public static final InformationManager informationManager = new GrinformationManager(
+	public static final InformationManager informationManager = new GrinformationManagerDozer(
 			ServerPropertiesManager.getInformationManagerConf());
 
 	private final static AdminInterface admin = new AdminInterface(null,
