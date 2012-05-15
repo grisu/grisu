@@ -14,10 +14,11 @@ import grisu.model.dto.DtoBatchJob;
 import grisu.model.dto.DtoJob;
 import grisu.model.dto.DtoJobs;
 import grisu.model.dto.DtoMountPoints;
-import grisu.model.dto.DtoProperties;
-import grisu.model.dto.DtoStringList;
 import grisu.model.dto.GridFile;
 import grisu.model.info.dto.Application;
+import grisu.model.info.dto.DtoProperties;
+import grisu.model.info.dto.DtoStringList;
+import grisu.model.info.dto.JobQueueMatch;
 import grisu.model.info.dto.Package;
 import grisu.model.info.dto.Queue;
 import grisu.model.info.dto.Site;
@@ -381,9 +382,25 @@ public interface ServiceInterface {
 
 
 	/**
-	 * Takes a jsdl template and returns a list of submission locations that
-	 * match the requirements. The order of the list is determined by the
-	 * underlying ranking algorithm.
+	 * Takes job properties and returns a list of queues along with information
+	 * how well (or if at all) the specified job would run on each queue.
+	 * 
+	 * @param jobProperties
+	 *            the job
+	 * @param fqan
+	 *            the group
+	 * @return the list of queues
+	 */
+	@GET
+	@Path("/info/matches/properties")
+	@PermitAll
+	List<JobQueueMatch> findMatches(
+			@QueryParam("jobProperties") DtoProperties jobProperties,
+			@QueryParam("fqan") String fqan);
+
+	/**
+	 * Takes a job properties and returns a list of submission locations that
+	 * match the requirements.
 	 * 
 	 * @param jobProperties
 	 *            the job Properties (have alook at the
@@ -391,15 +408,18 @@ public interface ServiceInterface {
 	 *            keys)
 	 * @param fqan
 	 *            the fqan to use to submit the job
+	 * @param include
+	 *            whether to include Queues for that fqan but don't fit one or
+	 *            more of the job properties
+	 * 
 	 * @return a list of matching submissionLoctations
 	 */
 	@GET
 	@Path("/info/queues/matching/properties")
 	@PermitAll
-	List<Queue> findMatchingSubmissionLocationsUsingMap(
-			@QueryParam("jobProperties") DtoJob jobProperties,
-			@QueryParam("fqan") String fqan,
-			@DefaultValue("false") @QueryParam("exclude") boolean exclude);
+	List<Queue> findQueues(
+			@QueryParam("jobProperties") DtoProperties jobProperties,
+			@QueryParam("fqan") String fqan);
 
 	/**
 	 * Returns the current status of an ongoing action.
@@ -1231,7 +1251,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Sets a user property.
-	 * 
+	 *
 	 * <p>
 	 * There are special user properties that can be set by using one of the
 	 * following strings as key:
@@ -1244,7 +1264,7 @@ public interface ServiceInterface {
 	 * </p>
 	 * <p>
 	 * {@link Constants#JOB_ARCHIVE_LOCATION}(archiveLocation): as described in {@link #archiveJob(String, String), this allows to tell Grisu about locations where archived Grisu jobs are located. Use this string as key and a ;-separated alias;url string as value to add such a location.
-	 * 
+	 *
 	 * @param key
 	 *            the key
 	 * @param value

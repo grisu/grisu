@@ -1,7 +1,7 @@
 package grisu.model;
 
 import grisu.jcommons.utils.FileSystemHelpers;
-import grisu.model.dto.DtoProperty;
+import grisu.model.info.dto.DtoProperty;
 
 import java.util.LinkedList;
 import java.util.List;

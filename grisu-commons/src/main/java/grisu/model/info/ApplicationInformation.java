@@ -2,6 +2,7 @@ package grisu.model.info;
 
 import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.model.info.dto.Executable;
+import grisu.model.info.dto.JobQueueMatch;
 import grisu.model.info.dto.Package;
 import grisu.model.info.dto.Queue;
 import grisu.model.info.dto.Version;
@@ -183,6 +184,21 @@ public interface ApplicationInformation {
 	 * @return the executables
 	 */
 	Set<Executable> getExecutablesForVo(final String fqan, String version);
+
+	/**
+	 * Finds all queues for the specified group and returns a list of
+	 * {@link JobQueueMatch}es which contain information about whether and how
+	 * well a job will run on each {@link Queue}.
+	 * 
+	 * @param additionalJobProperties
+	 *            job properties
+	 * @param fqan
+	 *            the group
+	 * @return a list of JobQueueMatches
+	 */
+	public List<JobQueueMatch> getMatches(
+			Map<JobSubmissionProperty, String> additionalJobProperties,
+			String fqan);
 
 	/**
 	 * Finds all queues that match the specified job properties.

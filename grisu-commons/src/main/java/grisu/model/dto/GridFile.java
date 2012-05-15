@@ -3,6 +3,7 @@ package grisu.model.dto;
 import grisu.control.ServiceInterface;
 import grisu.model.FileManager;
 import grisu.model.MountPoint;
+import grisu.model.info.dto.DtoProperty;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;

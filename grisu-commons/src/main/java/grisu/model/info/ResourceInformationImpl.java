@@ -2,8 +2,8 @@ package grisu.model.info;
 
 import grisu.control.ServiceInterface;
 import grisu.jcommons.constants.Constants;
-import grisu.model.dto.DtoStringList;
 import grisu.model.info.dto.Application;
+import grisu.model.info.dto.DtoStringList;
 import grisu.model.info.dto.Queue;
 import grisu.model.info.dto.Site;
 
@@ -179,8 +179,12 @@ public class ResourceInformationImpl implements ResourceInformation {
 		synchronized (fqan) {
 
 			if (cachedAllSubmissionLocationsPerFqan.get(fqan) == null) {
-				final Queue[] temp = serviceInterface
+				Queue[] temp = serviceInterface
 						.getAllSubmissionLocationsForFqan(fqan);
+				if (temp == null) {
+					temp = new Queue[] {};
+				}
+				myLogger.debug("Sublocs for {}: " + temp.length);
 
 				cachedAllSubmissionLocationsPerFqan.put(fqan, temp);
 			}

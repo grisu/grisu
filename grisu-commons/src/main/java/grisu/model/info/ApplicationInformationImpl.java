@@ -1,12 +1,12 @@
 package grisu.model.info;
 
-import grisu.control.JobConstants;
 import grisu.control.ServiceInterface;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.model.GrisuRegistryManager;
-import grisu.model.dto.DtoJob;
+import grisu.model.info.dto.DtoProperties;
 import grisu.model.info.dto.Executable;
+import grisu.model.info.dto.JobQueueMatch;
 import grisu.model.info.dto.Package;
 import grisu.model.info.dto.Queue;
 import grisu.model.info.dto.Version;
@@ -382,6 +382,33 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 		return result;
 	}
 
+	public List<JobQueueMatch> getMatches(
+			Map<JobSubmissionProperty, String> additionalJobProperties,
+			String fqan) {
+
+		if (Thread.currentThread().isInterrupted()) {
+			return null;
+		}
+
+		final Map<JobSubmissionProperty, String> basicJobProperties = new HashMap<JobSubmissionProperty, String>();
+		basicJobProperties.put(JobSubmissionProperty.APPLICATIONNAME,
+				getApplicationName());
+
+		basicJobProperties.putAll(additionalJobProperties);
+
+		final Map<String, String> converterMap = new HashMap<String, String>();
+		for (final JobSubmissionProperty key : basicJobProperties.keySet()) {
+			if (StringUtils.isNotBlank(basicJobProperties.get(key))) {
+				converterMap.put(key.toString(), basicJobProperties.get(key));
+			}
+		}
+
+		List<JobQueueMatch> qs = getServiceInterface().findMatches(
+				DtoProperties.createProperties(converterMap), fqan);
+
+		return qs;
+	}
+
 	public List<Queue> getQueues(
 			Map<JobSubmissionProperty, String> additionalJobProperties,
 			String fqan) {
@@ -407,9 +434,8 @@ public class ApplicationInformationImpl implements ApplicationInformation {
 
 
 		List<Queue> qs = getServiceInterface()
-				.findMatchingSubmissionLocationsUsingMap(
-						DtoJob.createJob(JobConstants.UNDEFINED, converterMap, null,
-								null, false), fqan, false);
+				.findQueues(
+						DtoProperties.createProperties(converterMap), fqan);
 
 		return qs;
 

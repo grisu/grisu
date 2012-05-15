@@ -7,8 +7,8 @@ import grisu.frontend.view.swing.files.FileTransactionStatusDialog;
 import grisu.frontend.view.swing.files.GridFileTransferHandler;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
-import grisu.model.dto.DtoProperty;
 import grisu.model.dto.GridFile;
+import grisu.model.info.dto.DtoProperty;
 
 import java.awt.Point;
 import java.awt.dnd.DnDConstants;

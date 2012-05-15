@@ -8,8 +8,8 @@ import grisu.control.exceptions.StatusException;
 import grisu.model.FileManager;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
-import grisu.model.dto.DtoStringList;
 import grisu.model.dto.GridFile;
+import grisu.model.info.dto.DtoStringList;
 import grisu.model.status.StatusObject;
 import grith.jgrith.credential.Credential;
 

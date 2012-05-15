@@ -6,8 +6,8 @@ import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
-import grisu.model.dto.DtoProperty;
 import grisu.model.dto.GridFile;
+import grisu.model.info.dto.DtoProperty;
 import grith.jgrith.credential.Credential;
 
 import java.util.Map;

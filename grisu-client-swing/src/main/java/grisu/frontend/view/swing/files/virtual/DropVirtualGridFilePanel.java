@@ -1,8 +1,8 @@
 package grisu.frontend.view.swing.files.virtual;
 
 import grisu.control.ServiceInterface;
-import grisu.model.dto.DtoProperty;
 import grisu.model.dto.GridFile;
+import grisu.model.info.dto.DtoProperty;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

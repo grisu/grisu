@@ -1,6 +1,6 @@
 package grisu.control;
 
-import grisu.model.dto.DtoProperties;
+import grisu.model.info.dto.DtoProperties;
 
 public interface ResubmitPolicy {
 

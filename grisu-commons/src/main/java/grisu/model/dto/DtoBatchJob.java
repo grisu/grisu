@@ -2,6 +2,7 @@ package grisu.model.dto;
 
 import grisu.control.JobConstants;
 import grisu.jcommons.constants.Constants;
+import grisu.model.info.dto.DtoProperty;
 
 import java.util.Date;
 import java.util.HashMap;

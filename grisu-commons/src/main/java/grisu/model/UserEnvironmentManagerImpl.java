@@ -6,12 +6,12 @@ import grisu.control.exceptions.StatusException;
 import grisu.jcommons.constants.Constants;
 import grisu.model.dto.DtoBatchJob;
 import grisu.model.dto.DtoJob;
-import grisu.model.dto.DtoStringList;
 import grisu.model.files.FileSystemItem;
 import grisu.model.files.GlazedFile;
 import grisu.model.info.ApplicationInformation;
 import grisu.model.info.ResourceInformation;
 import grisu.model.info.dto.Application;
+import grisu.model.info.dto.DtoStringList;
 import grisu.model.info.dto.Queue;
 import grisu.model.status.StatusObject;
 import grisu.settings.ClientPropertiesManager;
@@ -301,6 +301,10 @@ EventSubscriber<FqanEvent> {
 				final Thread t = new Thread() {
 					@Override
 					public void run() {
+						myLogger.debug(
+								"Adding all sublocs to cache for fqan (current size: {}): {}",
+								cachedAllSubmissionLocations.size(),
+								fqan);
 						cachedAllSubmissionLocations
 						.addAll(Arrays.asList(resourceInfo
 								.getAllAvailableSubmissionLocations(fqan)));

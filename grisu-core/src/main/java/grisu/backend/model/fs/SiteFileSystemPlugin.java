@@ -6,9 +6,9 @@ import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
 import grisu.model.FileManager;
 import grisu.model.MountPoint;
-import grisu.model.dto.DtoProperty;
 import grisu.model.dto.GridFile;
 import grisu.model.info.dto.Directory;
+import grisu.model.info.dto.DtoProperty;
 import grisu.model.info.dto.Site;
 
 import java.util.List;

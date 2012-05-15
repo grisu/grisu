@@ -28,12 +28,13 @@ import grisu.model.dto.DtoBatchJob;
 import grisu.model.dto.DtoJob;
 import grisu.model.dto.DtoJobs;
 import grisu.model.dto.DtoMountPoints;
-import grisu.model.dto.DtoProperties;
-import grisu.model.dto.DtoProperty;
-import grisu.model.dto.DtoStringList;
 import grisu.model.dto.GridFile;
 import grisu.model.info.dto.Application;
 import grisu.model.info.dto.Directory;
+import grisu.model.info.dto.DtoProperties;
+import grisu.model.info.dto.DtoProperty;
+import grisu.model.info.dto.DtoStringList;
+import grisu.model.info.dto.JobQueueMatch;
 import grisu.model.info.dto.Package;
 import grisu.model.info.dto.Queue;
 import grisu.model.info.dto.Site;
@@ -52,7 +53,6 @@ import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -712,11 +712,27 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	}
 
 
-	public List<Queue> findMatchingSubmissionLocationsUsingMap(
-			final DtoJob jobProperties, String fqan,
-			boolean excludeResourcesWithLessCPUslotsFreeThanRequested) {
+	public List<JobQueueMatch> findMatches(
+			final DtoProperties jobProperties, String fqan) {
 
-		final LinkedList<String> result = new LinkedList<String>();
+		if (fqan == null) {
+			fqan = Constants.NON_VO_FQAN;
+		}
+
+		final Map<JobSubmissionProperty, String> converterMap = new HashMap<JobSubmissionProperty, String>();
+		for (final DtoProperty jp : jobProperties.getProperties()) {
+			converterMap.put(JobSubmissionProperty.fromString(jp.getKey()),
+					jp.getValue());
+		}
+
+		List<JobQueueMatch> resources = null;
+		resources = informationManager.findMatches(converterMap, fqan);
+
+		return resources;
+
+	}
+
+	public List<Queue> findQueues(final DtoProperties jobProperties, String fqan) {
 
 		if (fqan == null) {
 			fqan = Constants.NON_VO_FQAN;
@@ -729,14 +745,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 		List<Queue> resources = null;
-		if (excludeResourcesWithLessCPUslotsFreeThanRequested) {
-
-			resources = informationManager.findQueues(converterMap, fqan);
-
-			// TODO exclude queues
-		} else {
-			resources = informationManager.findQueues(converterMap, fqan);
-		}
+		resources = informationManager.findQueues(converterMap, fqan);
 
 		return resources;
 

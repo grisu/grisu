@@ -2,8 +2,8 @@ package grisu.backend.model.job;
 
 import grisu.backend.model.User;
 import grisu.control.exceptions.NoSuchJobException;
-import grisu.model.dto.DtoProperties;
-import grisu.model.dto.DtoStringList;
+import grisu.model.info.dto.DtoProperties;
+import grisu.model.info.dto.DtoStringList;
 
 import java.util.Collection;
 

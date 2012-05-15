@@ -4,7 +4,7 @@ import grisu.backend.hibernate.UserDAO;
 import grisu.backend.model.User;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.interfaces.InformationManager;
-import grisu.model.dto.DtoStringList;
+import grisu.model.info.dto.DtoStringList;
 import grisu.model.info.dto.VO;
 import grisu.settings.Environment;
 import grisu.settings.ServerPropertiesManager;

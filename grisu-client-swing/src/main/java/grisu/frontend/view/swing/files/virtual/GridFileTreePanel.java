@@ -13,8 +13,8 @@ import grisu.frontend.view.swing.files.virtual.utils.LazyLoadingTreeController;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.UserEnvironmentManager;
-import grisu.model.dto.DtoProperty;
 import grisu.model.dto.GridFile;
+import grisu.model.info.dto.DtoProperty;
 
 import java.awt.Color;
 import java.awt.Component;

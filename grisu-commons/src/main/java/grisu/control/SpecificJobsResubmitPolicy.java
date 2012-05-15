@@ -1,7 +1,7 @@
 package grisu.control;
 
 import grisu.jcommons.constants.Constants;
-import grisu.model.dto.DtoProperties;
+import grisu.model.info.dto.DtoProperties;
 
 import java.util.HashMap;
 import java.util.Map;
