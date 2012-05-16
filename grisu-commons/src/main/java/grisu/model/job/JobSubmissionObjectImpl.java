@@ -100,9 +100,9 @@ public class JobSubmissionObjectImpl {
 
 	protected String jobname;
 
-	private String application;
+	private String application = Constants.GENERIC_APPLICATION_NAME;
 
-	private String applicationVersion;
+	private String applicationVersion = Constants.NO_VERSION_INDICATOR_STRING;
 
 	private String email_address;
 
