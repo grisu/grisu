@@ -99,7 +99,7 @@ public class LoginManager {
 
 	public static char[] httpProxyPassphrase = null;
 
-	public static int REQUIRED_BACKEND_API_VERSION = 15;
+	public static int REQUIRED_BACKEND_API_VERSION = 16;
 
 	public static final int DEFAULT_PROXY_LIFETIME_IN_HOURS = 240;
 
