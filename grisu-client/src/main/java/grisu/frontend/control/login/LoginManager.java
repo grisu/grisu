@@ -45,9 +45,8 @@ import com.google.common.collect.ImmutableMap;
 
 public class LoginManager {
 
-	static final Logger myLogger = LoggerFactory
-			.getLogger(LoginManager.class
-					.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(LoginManager.class
+			.getName());
 
 	private static String CLIENT_NAME = setClientName(null);
 
@@ -68,8 +67,8 @@ public class LoginManager {
 									.put("bestgrid-test",
 											"https://compute-test.services.bestgrid.org/soap/GrisuService")
 											.put("local_ws_jetty", "http://localhost:8080/soap/GrisuService")
-											.put("local_ws",
-													"http://localhost:8080/grisu-ws/soap/GrisuService").build();
+											.put("local_ws", "http://localhost:8080/grisu-ws/soap/GrisuService")
+											.build();
 
 	public static final ImmutableMap<String, String> MYPROXY_SERVERS = new ImmutableMap.Builder<String, String>()
 			.put("Local",
@@ -78,13 +77,13 @@ public class LoginManager {
 							.put("https://compute.test.nesi.org.nz/soap/GrisuService",
 									"myproxy.test.nesi.org.nz:7512")
 									.put("https://compute.nesi.org.nz/soap/GrisuService",
-											"myproxy.arcs.org.au:7512")
+											"myproxy.nesi.org.nz:7512")
 											.put("https://compute.services.bestgrid.org/soap/GrisuService",
-													"myproxy.arcs.org.au:7512")
+													"myproxy.nesi.org.nz:7512")
 													.put("https://compute-dev.services.bestgrid.org/soap/GrisuService",
-															"myproxy.arcs.org.au:7512")
+															"myproxy.nesi.org.nz:7512")
 															.put("https://compute-test.services.bestgrid.org/soap/GrisuService",
-																	"myproxy.arcs.org.au:7512")
+																	"myproxy.nesi.org.nz:7512")
 																	.put("http://localhost:8080/grisu-ws/soap/GrisuService",
 																			GridEnvironment.getDefaultMyProxyServer() + ":"
 																					+ GridEnvironment.getDefaultMyProxyPort())
@@ -262,7 +261,8 @@ public class LoginManager {
 			}
 
 			if (displayCliProgress) {
-				CliHelpers.setIndeterminateProgress("Uploading credential...", true);
+				CliHelpers.setIndeterminateProgress("Uploading credential...",
+						true);
 			}
 
 			// making sure that the right myproxy server is used for upload
@@ -276,7 +276,8 @@ public class LoginManager {
 			try {
 				cred.uploadMyProxy();
 			} catch (Exception e) {
-				throw new LoginException("Could not upload myproxy credential.", e);
+				throw new LoginException(
+						"Could not upload myproxy credential.", e);
 			}
 
 			ServiceInterface si;
@@ -289,7 +290,8 @@ public class LoginManager {
 						loginParams.getLoginUrl(), cred.getMyProxyUsername(),
 						cred.getMyProxyPassword(), cred.getMyProxyServer(),
 						new Integer(cred.getMyProxyPort()).toString(),
-						loginParams.getHttpProxy(), loginParams.getHttpProxyPort(),
+						loginParams.getHttpProxy(),
+						loginParams.getHttpProxyPort(),
 						loginParams.getHttpProxyUsername(),
 						loginParams.getHttpProxyPassphrase());
 			} catch (ServiceInterfaceException e) {
@@ -314,19 +316,15 @@ public class LoginManager {
 			}
 		}
 
-
 	}
 
-	public static ServiceInterface login(Credential cred,
-			String backend,
-			boolean displayCliProgress)
-					throws LoginException {
+	public static ServiceInterface login(Credential cred, String backend,
+			boolean displayCliProgress) throws LoginException {
 		LoginParams params = new LoginParams(backend, null, null);
 		return login(cred, params, displayCliProgress);
 	}
 
-	public static ServiceInterface login(String backend)
-			throws LoginException {
+	public static ServiceInterface login(String backend) throws LoginException {
 		Credential cred = null;
 		try {
 			cred = CredentialFactory.loadFromLocalProxy();
@@ -341,23 +339,27 @@ public class LoginManager {
 			String nameOfCredentialToUse, boolean displayCliProgress)
 					throws LoginException {
 
-		if ( StringUtils.isBlank(credConfigFile) ) {
+		if (StringUtils.isBlank(credConfigFile)) {
 			throw new LoginException("Credential config file not specified.");
 		}
 
 		File configFile = new File(credConfigFile);
-		if ( !configFile.exists() || ! configFile.canRead() ) {
-			throw new LoginException("Can't read credential config file: "+credConfigFile);
+		if (!configFile.exists() || !configFile.canRead()) {
+			throw new LoginException("Can't read credential config file: "
+					+ credConfigFile);
 		}
 
-		Map<String, Credential> creds = CredentialLoader.loadCredentials(credConfigFile);
+		Map<String, Credential> creds = CredentialLoader
+				.loadCredentials(credConfigFile);
 
-		if ( (creds == null) || (creds.size() == 0) ) {
-			throw new LoginException("Can't load any credentials using config file: "+credConfigFile);
+		if ((creds == null) || (creds.size() == 0)) {
+			throw new LoginException(
+					"Can't load any credentials using config file: "
+							+ credConfigFile);
 		}
 
 		Credential cred = null;
-		if ( StringUtils.isNotBlank(nameOfCredentialToUse) ) {
+		if (StringUtils.isNotBlank(nameOfCredentialToUse)) {
 			cred = creds.get(nameOfCredentialToUse);
 
 			if (cred == null) {
@@ -389,13 +391,15 @@ public class LoginManager {
 	}
 
 	public static ServiceInterface loginCommandline(String backend,
-			boolean saveCredToDisk, int proxy_lifetime_in_hours) throws LoginException {
-		return loginCommandline(backend, saveCredToDisk, proxy_lifetime_in_hours, -1);
+			boolean saveCredToDisk, int proxy_lifetime_in_hours)
+					throws LoginException {
+		return loginCommandline(backend, saveCredToDisk,
+				proxy_lifetime_in_hours, -1);
 	}
 
 	public static ServiceInterface loginCommandline(String backend,
-			boolean saveCredToDisk, int proxyLifetimeInHours, int minProxyLifetimeInSeconds)
-					throws LoginException {
+			boolean saveCredToDisk, int proxyLifetimeInHours,
+			int minProxyLifetimeInSeconds) throws LoginException {
 
 		Credential c = null;
 
@@ -416,7 +420,6 @@ public class LoginManager {
 		if (myProxyPort <= 0) {
 			myProxyPort = GridEnvironment.getDefaultMyProxyPort();
 		}
-
 
 		if (validLocalProxy) {
 			CliHelpers.setIndeterminateProgress(
@@ -443,8 +446,7 @@ public class LoginManager {
 			}
 
 			c = CredentialFactory
-					.createFromCommandline(p,
-							proxyLifetimeInHours);
+					.createFromCommandline(p, proxyLifetimeInHours);
 			if (StringUtils.isNotBlank(myProxyHost)) {
 				c.uploadMyProxy(myProxyHost, myProxyPort, false);
 			} else {
@@ -460,8 +462,8 @@ public class LoginManager {
 
 	}
 
-	public static ServiceInterface loginCommandline(String backend, int proxy_lifetime_in_hours)
-			throws LoginException {
+	public static ServiceInterface loginCommandline(String backend,
+			int proxy_lifetime_in_hours) throws LoginException {
 		return loginCommandline(backend, true, proxy_lifetime_in_hours);
 	}
 
@@ -470,7 +472,8 @@ public class LoginManager {
 		Credential c = Credential.load();
 
 		if ((c == null) || !c.isValid()) {
-			throw new CredentialException("Your session has expired. Please login and try again.");
+			throw new CredentialException(
+					"Your session has expired. Please login and try again.");
 		}
 
 		return login(c, backend, true);
@@ -485,9 +488,8 @@ public class LoginManager {
 		if (StringUtils.isNotBlank(myProxyHost)) {
 			p.setMyProxyServer(myProxyHost);
 			if (myProxyPort <= 0) {
-				p.setMyProxyPort(Integer
-						.toString(GridEnvironment
-								.getDefaultMyProxyPort()));
+				p.setMyProxyPort(Integer.toString(GridEnvironment
+						.getDefaultMyProxyPort()));
 			} else {
 				p.setMyProxyPort(Integer.toString(myProxyPort));
 			}
@@ -527,8 +529,7 @@ public class LoginManager {
 	}
 
 	public static ServiceInterface loginCommandlineX509cert(String backend,
-			int proxy_lifetime_in_hours,
-			boolean saveCredToDisk)
+			int proxy_lifetime_in_hours, boolean saveCredToDisk)
 					throws LoginException {
 		Credential c = CredentialFactory
 				.createFromLocalCertCommandline(proxy_lifetime_in_hours);
@@ -556,7 +557,6 @@ public class LoginManager {
 		return login(c, backend, displayCliProgress);
 	}
 
-
 	public static String setClientName(String name) {
 
 		if (StringUtils.isBlank(name)) {
@@ -569,7 +569,7 @@ public class LoginManager {
 
 	}
 
-	public static String setClientVersion(String version ) {
+	public static String setClientVersion(String version) {
 		if (StringUtils.isBlank(version)) {
 			version = "n/a";
 		}
