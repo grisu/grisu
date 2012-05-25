@@ -103,6 +103,8 @@ public class LoginManager {
 
 	public static final int DEFAULT_PROXY_LIFETIME_IN_HOURS = 240;
 
+	public static final String DEFAULT_BACKEND = "testbed";
+
 	public static String myProxyHost = null;
 	public static int myProxyPort = -1;
 
@@ -506,7 +508,7 @@ public class LoginManager {
 			throw new LoginException("Can't get credential from MyProxy.", e);
 		}
 
-		return login(c, backend, true);
+		return login(c, p, true);
 	}
 
 	public static ServiceInterface loginCommandlineShibboleth(String backend,
